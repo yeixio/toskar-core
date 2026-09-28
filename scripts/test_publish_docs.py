@@ -33,6 +33,12 @@ class PublisherTests(unittest.TestCase):
         self.assertEqual(json.loads((self.dest / 'docs/index.json').read_text())['versions'], ['1.0.0', '1.1.0-beta.2'])
         self.assertEqual(before, (self.dest / 'docs/1.0.0.json').read_bytes())
 
+    def test_same_guide_keeps_the_original_commit(self):
+        self.publish()
+        before = (self.dest / 'docs/1.0.0.json').read_bytes()
+        publisher.publish(self.source, self.dest, '1.0.0', 'b' * 40)
+        self.assertEqual(before, (self.dest / 'docs/1.0.0.json').read_bytes())
+
     def test_retag_cannot_rewrite_snapshot(self):
         self.publish()
         self.source.write_text(self.source.read_text().replace('Install {{version}}', 'Changed'))

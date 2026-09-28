@@ -14,6 +14,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Save the release guide
+        run: cp docs/user-guide/guide.json /tmp/guide.json
       - uses: actions/setup-go@v7
         with:
           go-version: "1.26.x"
@@ -103,6 +105,35 @@ jobs:
           git -C "$workdir" add dists pool
           git -C "$workdir" commit -m "Update the apt repository."
           git -C "$workdir" push origin HEAD:apt
+      - name: Publish versioned documentation
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          version="${GITHUB_REF_NAME#v}"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git fetch origin main
+          # main requires a pull request, so this ref is replaced each release.
+          git checkout -f -B documentation origin/main
+          python3 scripts/publish-docs.py \
+            --source /tmp/guide.json \
+            --destination . \
+            --version "$version" \
+            --commit "$GITHUB_SHA"
+          git add docs/index.json "docs/${version}.json"
+          if git diff --cached --quiet; then
+            echo "Documentation already published for ${version}"
+            exit 0
+          fi
+          git commit -m "docs: publish Yggdrasil ${version}"
+          git push --force origin HEAD:documentation
+          if [ -z "$(gh pr list --head documentation --base main --state open --json number --jq '.[0].number')" ]; then
+            gh pr create --base main --head documentation \
+              --title "Publish the documentation for ${version}" \
+              --body "Freezes docs/${version}.json from the ${GITHUB_REF_NAME} release."
+          fi
+          gh pr merge documentation --squash --admin
 
   start-desktop:
     needs: release

@@ -97,7 +97,7 @@ The web check in CI is `pnpm lint`, `pnpm exec tsc -b --pretty false`, `pnpm tes
 
 [`.github/workflows/security.yml`](../.github/workflows/security.yml) runs `govulncheck ./...` and `pnpm audit --prod` in `web/`. The audit step does not fail the job (`|| true`).
 
-[`.github/workflows/release.yml`](../.github/workflows/release.yml) runs on tags matching `v*`. It builds packages, writes `SHA256SUMS.txt`, and publishes a GitHub Release. It does not sign binaries.
+[`.github/workflows/release.yml`](../.github/workflows/release.yml) runs on tags matching `v*`. It builds packages, writes `SHA256SUMS.txt`, publishes a GitHub Release, and freezes `docs/<version>.json` from `docs/user-guide/guide.json`. It does not sign binaries.
 
 [`.github/workflows/screenshots.yml`](../.github/workflows/screenshots.yml) recaptures `docs/screenshots` on a tag or when started by hand, then holds those stills into `demo.mp4` and `demo.gif`.
 
@@ -111,7 +111,7 @@ Issue labels are defined in [`.github/labels.yml`](../.github/labels.yml). GitHu
 
 Tag `v*` → release workflow → Linux `.deb` and `.rpm` (amd64 and arm64), macOS headless archives (arm64 and amd64), Windows amd64 headless archive, `SHA256SUMS.txt` → GitHub Release.
 
-The same job opens a Homebrew formula pull request and updates the `apt` branch. A failure in the formula step does not fail the release. Signing is not part of this workflow. The checklist is [release-checklist.md](release-checklist.md).
+The same job opens a Homebrew formula pull request, updates the `apt` branch, and merges a documentation snapshot onto `main`. A failure in the formula step does not fail the release. Signing is not part of this workflow. The checklist is [release-checklist.md](release-checklist.md).
 
 ## Conventions
 

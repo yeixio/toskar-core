@@ -10,9 +10,11 @@ The website reads the frozen snapshots in this repository:
 - `docs/<version>.json`: snapshot with version, source tag, and commit provenance.
 - `docs/index.json`: all available documentation versions.
 
-A desktop release still freezes a new snapshot here after its public artifacts
-publish. The publisher refuses to change an existing snapshot. The site polls
-the index with five-minute server-side revalidation.
+A core release freezes a new snapshot from the tagged `guide.json` after the
+packages publish. The release job opens a pull request onto `main` because
+`main` requires one, then merges it. The publisher refuses to change an
+existing snapshot. The site polls the index with five-minute server-side
+revalidation.
 
 Checks:
 

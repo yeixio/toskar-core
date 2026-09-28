@@ -42,8 +42,16 @@ def publish(source, destination, version, commit):
         raise ValueError('Invalid existing documentation version')
     root.mkdir(parents=True, exist_ok=True)
     path = root / (version + '.json')
-    if path.exists() and path.read_text() != encoded:
-        raise ValueError(f'Refusing to overwrite immutable documentation for {version}')
+    if path.exists():
+        current = path.read_text()
+        if current != encoded:
+            published = json.loads(current)
+            proposed = json.loads(encoded)
+            published.pop('sourceCommit', None)
+            proposed.pop('sourceCommit', None)
+            if published != proposed:
+                raise ValueError(f'Refusing to overwrite immutable documentation for {version}')
+            encoded = current
     path.write_text(encoded)
     index['versions'] = sorted(set(index['versions'] + [version]))
     index_path.write_text(json.dumps(index, indent=2) + '\n')
