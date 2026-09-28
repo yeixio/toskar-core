@@ -1,0 +1,15 @@
+Package: yggdrasil
+Version: 1.2.0/home/runnerbeta.3
+Architecture: amd64
+Maintainer: YEIXIO LLC <hello@yeix.io>
+Installed-Size: 23308
+Filename: pool/main/yggdrasil_1.2.0-beta.3_amd64.deb
+Size: 13507410
+MD5sum: 3c052640b7a07ee0148afe71fb29675a
+SHA1: c6465652facb452814221fab6fb7ca68f3e2f06a
+SHA256: e63072c30c54b4df36ca25c344066de6532a89e5025f741f6c50bf5988b19f5c
+Priority: optional
+Homepage: https://yggdrasil.yeix.io
+Description: Local AI daemon and web UI
+License: AGPL-3.0-or-later
+

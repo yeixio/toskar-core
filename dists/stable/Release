@@ -1,0 +1,32 @@
+Origin: Yggdrasil
+Label: Yggdrasil
+Suite: stable
+Codename: stable
+Architectures: amd64 arm64
+Components: main
+Description: Yggdrasil core packages
+Date: Mon, 28 Sep 2026 00:21:53 +0000
+MD5Sum:
+ 728a9ddc22b31e49e74b7e9bd6ac4b8b              185 Release
+ 911fa22fcf2141f524869ffa35ddc6ee              485 main/binary-amd64/Packages
+ 6d13b2c8d98ea0ca982180f514257b73              385 main/binary-amd64/Packages.gz
+ 0fd7f1262170fad8d954c59195978500              485 main/binary-arm64/Packages
+ 6ae7a622f0452fa6472ee81eaf84bb91              385 main/binary-arm64/Packages.gz
+SHA1:
+ e06cefe236bfa8fceb82d72c6e0f3fb94148b210              185 Release
+ 9bea1fe5d36abd72d6e0bb55a50afe494445a25c              485 main/binary-amd64/Packages
+ 65635e33646bf22b5887b18afceb498f5316d3b4              385 main/binary-amd64/Packages.gz
+ 2a10dbc153ea5ad3881577249e09f89ae0c82a63              485 main/binary-arm64/Packages
+ cb025ec21eb54b0eb9a904f2477850315b54abfd              385 main/binary-arm64/Packages.gz
+SHA256:
+ 1730f7b943c49bc4a9dae63334f6214538ad16c37d5beeb70f7c85ce1627f517              185 Release
+ 5b749bdd21ad26598211ed50625b44d64f969911761d658c75109df05e67d932              485 main/binary-amd64/Packages
+ 8c73d9f5cb3fd488b956b292a18ae7f037b12094bddd2fbfa15fab444565a99e              385 main/binary-amd64/Packages.gz
+ cf26be2312e4264525cb70dcfa82ed7284810a4d90fbb4e6789056c3b1718596              485 main/binary-arm64/Packages
+ b590f8b4d53e1ceeaac486b37cc3f2779b5877126f7a3682b2b5e37708641887              385 main/binary-arm64/Packages.gz
+SHA512:
+ 14751cb29984cdae2d103dc64a522d72564525b2e82c4808583e2beca008b889c776a025cd91ab1053534941a52155259738f6f045c3bb9d6ed0658f2f2ff36c              185 Release
+ a087ab71ddd54ce180a4ec851f2a4a88da7e5cfe7fecc141aafe70af010632701ba82aa036f941d3c6c9870d4c349bac3f6ef18c8339aba093bb1bfe4ab268d8              485 main/binary-amd64/Packages
+ 3b7a487ead635f42afdd03f73693dea395ba1e6e880e4ed74a27b28e1fa33d8dd9a1402122a832242fecaec7b2acddab096f24bc9e051f32eff527a14c834a6e              385 main/binary-amd64/Packages.gz
+ 35b6f847289960dd98c9b8cb3497038725c7c7c2a645c2c8374bc43c87e1beec1939d1b0a08657906cd5ae69e3bd7e512fd038992c74e5b999aadee683d41ffa              485 main/binary-arm64/Packages
+ b0220985a28315e125486ba1e4da1b11997004dc11899468e62cdbaf1c573c95da78c24ce2ae1349b172c52096a8a00331262d6751ae0169448672aac657273f              385 main/binary-arm64/Packages.gz
