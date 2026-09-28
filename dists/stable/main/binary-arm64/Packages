@@ -1,13 +1,13 @@
 Package: yggdrasil
-Version: 1.2.0/home/runnerbeta.3
+Version: 1.2.0
 Architecture: arm64
 Maintainer: YEIXIO LLC <hello@yeix.io>
-Installed-Size: 22280
-Filename: pool/main/yggdrasil_1.2.0-beta.3_arm64.deb
-Size: 12716364
-MD5sum: 502252d4a71155088eaa775d6f2c5e34
-SHA1: ee11eb1bc32b8bc36cb83c7d7015640a249ba520
-SHA256: 9aed32a5b682a21e19fba10584b6d973e4a2f355319181dee27b45fdb434a74d
+Installed-Size: 22487
+Filename: pool/main/yggdrasil_1.2.0_arm64.deb
+Size: 12810330
+MD5sum: 5831c1ca14c89383e8f56b4fec4f049e
+SHA1: 42412357891d1d4cf200fa77f7be14e10caaadb6
+SHA256: 55a17016728fd4ae15834b50759b031d977f62ac5f76e58107c613c5a1d9e9a5
 Priority: optional
 Homepage: https://yggdrasil.yeix.io
 Description: Local AI daemon and web UI
