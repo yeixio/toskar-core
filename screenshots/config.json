@@ -3,6 +3,54 @@
   "overlays": false,
   "background": "#121C26",
   "dimensions": ["2880x1800", "2560x1600"],
+  "forms": [
+    {
+      "id": "readme",
+      "readme": true,
+      "viewport": { "width": 1440, "height": 900 },
+      "deviceScaleFactor": 1
+    },
+    {
+      "id": "apple-mac",
+      "viewport": { "width": 1440, "height": 900 },
+      "deviceScaleFactor": 2,
+      "dimensions": ["2880x1800", "2560x1600"]
+    },
+    {
+      "id": "apple-iphone",
+      "hideSidebar": true,
+      "viewport": { "width": 440, "height": 956 },
+      "deviceScaleFactor": 3,
+      "dimensions": ["1320x2868"]
+    },
+    {
+      "id": "apple-ipad",
+      "layout": "tablet",
+      "viewport": { "width": 1032, "height": 1376 },
+      "deviceScaleFactor": 2,
+      "dimensions": ["2064x2752"]
+    },
+    {
+      "id": "play-phone",
+      "hideSidebar": true,
+      "viewport": { "width": 360, "height": 640 },
+      "deviceScaleFactor": 3,
+      "dimensions": ["1080x1920"]
+    },
+    {
+      "id": "play-tablet-7",
+      "hideSidebar": true,
+      "viewport": { "width": 540, "height": 960 },
+      "deviceScaleFactor": 2,
+      "dimensions": ["1080x1920"]
+    },
+    {
+      "id": "play-tablet-10",
+      "viewport": { "width": 810, "height": 1440 },
+      "deviceScaleFactor": 2,
+      "dimensions": ["1620x2880"]
+    }
+  ],
   "screens": [
     {
       "id": "chat",

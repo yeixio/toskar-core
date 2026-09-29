@@ -89,7 +89,7 @@ export function Sidebar() {
   )
 
   return (
-    <aside className="flex h-full min-h-0 w-[15.5rem] shrink-0 flex-col overflow-hidden border-r border-line/60 bg-sidebar">
+    <aside className="app-sidebar flex h-full min-h-0 w-[15.5rem] shrink-0 flex-col overflow-hidden border-r border-line/60 bg-sidebar">
       <div className="px-4 pb-3 pt-4">
         <div className="flex items-center gap-2.5">
           <a href="/" className="brand flex min-w-0 flex-1 items-center gap-2.5 no-underline">

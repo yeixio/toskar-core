@@ -1165,7 +1165,7 @@ export function ChatPage() {
               <div className="relative min-h-0 flex-1">
                 <div
                   ref={scrollerRef}
-                  className="absolute inset-0 overflow-y-auto px-1 pb-2 [overflow-anchor:none]"
+                  className="chat-transcript absolute inset-0 overflow-y-auto px-1 pb-2 [overflow-anchor:none]"
                 >
                   <div ref={contentRef} className="space-y-4">
                 {messagesQuery.isLoading && <LoadingSpinner />}
@@ -1291,7 +1291,7 @@ export function ChatPage() {
                 {showJump ? (
                   <button
                     type="button"
-                    className="absolute bottom-3 left-1/2 z-10 -translate-x-1/2 rounded-full border border-line/80 bg-surface/95 px-3 py-1 text-xs font-medium text-ink-muted shadow-panel backdrop-blur transition hover:text-ink"
+                    className="chat-jump absolute bottom-3 left-1/2 z-10 -translate-x-1/2 rounded-full border border-line/80 bg-surface/95 px-3 py-1 text-xs font-medium text-ink-muted shadow-panel backdrop-blur transition hover:text-ink"
                     onClick={jumpToLatest}
                   >
                     <span aria-hidden>↓ </span>

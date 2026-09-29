@@ -3,7 +3,7 @@
 COMMIT := $(shell git rev-parse --short HEAD 2>/dev/null || echo unknown)
 LDFLAGS := -X github.com/yeixio/yggdrasil-core/internal/version.Commit=$(COMMIT)
 
-.PHONY: help start ui frontend daemon run-daemon run-web all tidy test vet fmt lint ci test-cluster package-headless screenshots
+.PHONY: help start ui frontend daemon run-daemon run-web all tidy test vet fmt lint ci test-cluster package-headless screenshots appstore-screenshots
 
 help: ## Show targets
 	@echo "Yggdrasil Core"
@@ -67,6 +67,10 @@ package-headless: ## Build a headless package for this machine
 	chmod +x scripts/build/package-headless.sh
 	./scripts/build/package-headless.sh
 
-screenshots: ## Recapture docs/screenshots and the demo GIF
+screenshots: ## Recapture README stills and the demo walkthrough from fake data
 	chmod +x scripts/capture-screenshots.sh
 	./scripts/capture-screenshots.sh
+
+appstore-screenshots: ## iPhone, iPad, and Mac App Store PNGs from fake data
+	chmod +x scripts/capture-screenshots.sh
+	STORE_ONLY=1 ./scripts/capture-screenshots.sh

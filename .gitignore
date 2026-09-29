@@ -25,6 +25,7 @@ assets/brand/generated/.tmp-iconset.iconset/
 
 # Letterboxed screenshot canvases (the README copies in docs/screenshots stay)
 screenshots/appstore/
+screenshots/raw/
 docs/screenshots/.video-tmp/
 
 # IDE / OS

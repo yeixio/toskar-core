@@ -6,10 +6,26 @@ import { chromium } from 'playwright'
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 const config = JSON.parse(await readFile(path.join(root, 'screenshots/config.json'), 'utf8'))
-const width = config.window?.width || 1440
-const height = config.window?.height || 900
-const outDir = path.join(root, 'docs/screenshots')
-await mkdir(outDir, { recursive: true })
+const wanted = (process.env.SCREENSHOT_FORMS || '')
+  .split(',')
+  .map((id) => id.trim())
+  .filter(Boolean)
+const forms = (config.forms?.length
+  ? config.forms
+  : [
+      {
+        id: 'desktop',
+        readme: true,
+        viewport: {
+          width: config.window?.width || 1440,
+          height: config.window?.height || 900,
+        },
+        deviceScaleFactor: 1,
+      },
+    ]
+).filter((form) => wanted.length === 0 || wanted.includes(form.id))
+const readmeDir = path.join(root, 'docs/screenshots')
+await mkdir(readmeDir, { recursive: true })
 
 const server = spawn('go', ['run', './cmd/screenshot', '-web', 'web/dist'], {
   cwd: root,
@@ -60,14 +76,35 @@ try {
   const browser = await chromium.launch(
     process.env.SCREENSHOT_CHROME ? { executablePath: process.env.SCREENSHOT_CHROME } : {},
   )
-  const page = await browser.newPage({ viewport: { width, height }, deviceScaleFactor: 1 })
-  for (const screen of config.screens) {
-    console.log(`Capturing ${screen.id}`)
-    await openScreen(page, screen)
-    await page.screenshot({ path: path.join(outDir, screen.filename) })
+  for (const form of forms) {
+    const viewport = form.viewport || { width: 1440, height: 900 }
+    const context = await browser.newContext({
+      viewport,
+      deviceScaleFactor: form.deviceScaleFactor || 1,
+    })
+    const layout = form.layout || (form.hideSidebar ? 'phone' : '')
+    await context.addInitScript((name) => {
+      if (name) document.documentElement.dataset.form = name
+    }, layout)
+    const page = await context.newPage()
+    const outDir = form.readme ? readmeDir : path.join(root, 'screenshots/raw', form.id)
+    await mkdir(outDir, { recursive: true })
+    for (const screen of config.screens) {
+      console.log(`Capturing ${form.id} ${screen.id}`)
+      await openScreen(page, screen)
+      await page.evaluate((name) => {
+        if (name) document.documentElement.dataset.form = name
+        else delete document.documentElement.dataset.form
+        if (name !== 'phone') return
+        const transcript = document.querySelector('.chat-transcript')
+        if (transcript) transcript.scrollTop = 0
+      }, layout)
+      await page.screenshot({ path: path.join(outDir, screen.filename) })
+    }
+    await context.close()
+    console.log(`Screenshots: ${outDir}`)
   }
   await browser.close()
-  console.log(`Screenshots: ${outDir}`)
 } finally {
   try {
     process.kill(-server.pid, 'SIGTERM')

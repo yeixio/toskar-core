@@ -35,9 +35,13 @@ else
   (cd scripts/screenshots && pnpm exec playwright install chromium)
 fi
 
+if [[ "${STORE_ONLY:-}" == "1" ]]; then
+  export SCREENSHOT_FORMS="${SCREENSHOT_FORMS:-apple-iphone,apple-ipad,apple-mac}"
+fi
+
 node scripts/screenshots/capture.mjs
 
-if command -v ffmpeg >/dev/null 2>&1; then
+if [[ "${STORE_ONLY:-}" != "1" ]] && command -v ffmpeg >/dev/null 2>&1; then
   hold="${DEMO_HOLD_SEC:-3.2}"
   concat="$(mktemp)"
   python3 - "$ROOT" "$hold" "$concat" <<'PY'
@@ -68,6 +72,9 @@ if command -v magick >/dev/null 2>&1 || command -v convert >/dev/null 2>&1; then
 fi
 
 echo "README screenshots: docs/screenshots"
+if [[ "${STORE_ONLY:-}" == "1" ]]; then
+  echo "App Store screenshots: screenshots/appstore"
+fi
 if [[ -f docs/screenshots/demo.mp4 ]]; then
   echo "Demo video: docs/screenshots/demo.mp4"
 fi

@@ -148,7 +148,7 @@ Background work today is idle model unload, model health checks, and periodic pe
 | <img src="docs/screenshots/05-diagnostics.png" alt="Diagnostics showing the local service is healthy" width="420"> | <img src="docs/screenshots/06-api-manager.png" alt="Local API access and API keys" width="420"> |
 | Diagnostics | API access |
 
-`make screenshots` recaptures these stills and the walkthrough from demo data. It does not start a model.
+`make screenshots` recaptures these stills and the walkthrough from demo data. It does not start a model. `make appstore-screenshots` writes the App Store sets from the same demo data: iPhone 6.9-inch at 1320×2868, iPad 13-inch at 2064×2752, and Mac at 2880×1800 and 2560×1600.
 
 ## How it works
 

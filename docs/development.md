@@ -99,7 +99,7 @@ The web check in CI is `pnpm lint`, `pnpm exec tsc -b --pretty false`, `pnpm tes
 
 [`.github/workflows/release.yml`](../.github/workflows/release.yml) runs on tags matching `v*`. It builds packages, writes `SHA256SUMS.txt`, publishes a GitHub Release, and freezes `docs/<version>.json` from `docs/user-guide/guide.json`. It does not sign binaries.
 
-[`.github/workflows/screenshots.yml`](../.github/workflows/screenshots.yml) recaptures `docs/screenshots` on a tag or when started by hand, then holds those stills into `demo.mp4` and `demo.gif`.
+[`.github/workflows/screenshots.yml`](../.github/workflows/screenshots.yml) recaptures `docs/screenshots` on a tag or when started by hand, then holds those stills into `demo.mp4` and `demo.gif`. The same run writes iPhone, iPad, and Google Play phone and tablet canvases under `screenshots/appstore/`.
 
 Dependabot is configured for Go modules, the web and screenshot npm trees, and GitHub Actions.
 

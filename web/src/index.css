@@ -503,3 +503,30 @@ html[data-screenshot='1'] *::after {
   transition: none !important;
   caret-color: transparent !important;
 }
+
+/* Phone store captures hide the desktop sidebar so the page fills the frame. */
+html[data-form='phone'] .app-sidebar {
+  display: none;
+}
+
+html[data-form='phone'] .composer {
+  padding: 0.75rem;
+}
+
+html[data-form='phone'] .composer-input {
+  height: 3rem;
+  min-height: 3rem;
+}
+
+html[data-form='phone'] .composer-toolbar > div {
+  flex-wrap: nowrap;
+  overflow: hidden;
+}
+
+html[data-form='phone'] .composer-select select {
+  max-width: 6.5rem;
+}
+
+html[data-form='phone'] .chat-jump {
+  display: none;
+}
