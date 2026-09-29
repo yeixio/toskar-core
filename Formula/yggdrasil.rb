@@ -2,17 +2,17 @@
 class Yggdrasil < Formula
   desc "Local AI daemon and web UI"
   homepage "https://yggdrasil.yeix.io"
-  version "1.2.1"
+  version "1.3.0"
   license "AGPL-3.0-or-later"
 
   on_arm do
-    url "https://github.com/yeixio/yggdrasil-core/releases/download/v1.2.1/yggdrasil-1.2.1-darwin-arm64-headless.tar.gz"
-    sha256 "1c27124326f70dcb35e7de673ad21cb197d05cdfbcbb8b5b869054ca3ab406e2"
+    url "https://github.com/yeixio/yggdrasil-core/releases/download/v1.3.0/yggdrasil-1.3.0-darwin-arm64-headless.tar.gz"
+    sha256 "240f5484381349de4dd9a036a5976d9f5f1ae356b018a8529c259384c2c2e8f3"
   end
 
   on_intel do
-    url "https://github.com/yeixio/yggdrasil-core/releases/download/v1.2.1/yggdrasil-1.2.1-darwin-amd64-headless.tar.gz"
-    sha256 "1a9ac2f4442f2f2fb0622efbf4a1c6dc0cbd0bd5035116c240a2695a0807fd80"
+    url "https://github.com/yeixio/yggdrasil-core/releases/download/v1.3.0/yggdrasil-1.3.0-darwin-amd64-headless.tar.gz"
+    sha256 "ae36103f0527e9d30f33f79ea4e4c26c5fdd437878dd81b2d6e1696f6f1cc30c"
   end
 
   def install
