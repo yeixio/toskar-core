@@ -4,10 +4,10 @@ Architecture: amd64
 Maintainer: YEIXIO LLC <hello@yeix.io>
 Installed-Size: 29985
 Filename: pool/main/yggdrasil_1.3.1_amd64.deb
-Size: 17124642
-MD5sum: 9857c71685fb5ba1ae9b986903eaf31a
-SHA1: fb071f2cf44f259f3bc7346e883d1cbe8c47c40b
-SHA256: 0b4e8ad9a2ebf5234f94a365d89cb1454149aca1cfe3e63a1ada4934c8febeea
+Size: 17124618
+MD5sum: a2589313812706be367b26c663cb6336
+SHA1: 0ee81eb16bace27471d00d8489a4ba667a05bf8c
+SHA256: 2aab51941cc52cf8a4836e8c2fd2c1f603cd9fd43a3be9835b49688ef0f4ddc6
 Priority: optional
 Homepage: https://yggdrasil.yeix.io
 Description: Local AI daemon and web UI
