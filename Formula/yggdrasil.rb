@@ -7,12 +7,12 @@ class Yggdrasil < Formula
 
   on_arm do
     url "https://github.com/yeixio/yggdrasil-core/releases/download/v1.3.1/yggdrasil-1.3.1-darwin-arm64-headless.tar.gz"
-    sha256 "448adb2781cf4c17ac3514e0f8b00a73bd4294c63be12dc19dda9ecf536c9ee4"
+    sha256 "1778d664494af903110e6b53a1cd23910d32fd31ddfd84fe1a1bdaada4a772c3"
   end
 
   on_intel do
     url "https://github.com/yeixio/yggdrasil-core/releases/download/v1.3.1/yggdrasil-1.3.1-darwin-amd64-headless.tar.gz"
-    sha256 "1a6120c74d7483b6d97d0e73ea065c72ae34c5cc3850cb5cb97b7bb1bcd17a5f"
+    sha256 "dfae2545d7599f8ab819cca156f588f83b8f4fa6077c8d9a82c3933a0596c70b"
   end
 
   def install
