@@ -300,6 +300,7 @@ These are specifications. They are not implemented in this repository.
 - [Community model ratings](docs/features/community-model-ratings.md)
 - [Expanded tool platform](docs/features/expanded-tool-platform.md)
 - [One-line node join](docs/features/one-line-node-join.md)
+- [AI experience platform](docs/features/ai-experience-platform.md)
 
 ### Research
 
