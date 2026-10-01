@@ -1,6 +1,9 @@
 package contracts
 
-import "time"
+import (
+	"strings"
+	"time"
+)
 
 // ErrorBody is the standard public API error envelope.
 type ErrorBody struct {
@@ -138,6 +141,38 @@ type Model struct {
 	LastUsedAt   *time.Time        `json:"last_used_at,omitempty"`
 	Fit          *ModelFit         `json:"fit,omitempty"`
 	Dynamic      bool              `json:"dynamic,omitempty"` // installed from browse-all / URL
+	// SupportRole marks a model that serves Yggdrasil instead of chatting:
+	// SupportEmbedding, SupportReranker, or SupportClassifier. Empty for chat models.
+	SupportRole string `json:"support_role,omitempty"`
+}
+
+// Supporting model roles (spec §61).
+const (
+	SupportEmbedding  = "embedding"
+	SupportReranker   = "reranker"
+	SupportClassifier = "classifier"
+)
+
+// SupportRoleOf names a supporting model's job, or "" for a chat model. A
+// catalog entry says so; a model installed by URL or from Hugging Face is
+// recognized by its name, purpose, or tags.
+func SupportRoleOf(m Model) string {
+	if m.SupportRole != "" {
+		return m.SupportRole
+	}
+	text := strings.ToLower(m.ID + " " + m.DisplayName + " " + strings.Join(m.Purpose, " ") + " " + strings.Join(m.Tags, " "))
+	switch {
+	case strings.Contains(text, "rerank"):
+		return SupportReranker
+	case strings.Contains(text, "embed"):
+		return SupportEmbedding
+	}
+	for _, v := range append(append([]string{}, m.Purpose...), m.Tags...) {
+		if strings.EqualFold(v, SupportClassifier) {
+			return SupportClassifier
+		}
+	}
+	return ""
 }
 
 // ModelOnNode records that a model file is present on a computer.

@@ -20,6 +20,8 @@ type CatalogEntry struct {
 	Runtime           []string                    `json:"runtime,omitempty"`
 	RecommendedRoles  []string                    `json:"recommended_roles,omitempty"`
 	Dynamic           bool                        `json:"dynamic,omitempty"`
+	// SupportRole marks an embedding, reranker, or classifier model.
+	SupportRole string `json:"support_role,omitempty"`
 	// Training is set when the model can be specialized with LoRA training.
 	Training *TrainingInfo `json:"training,omitempty"`
 }

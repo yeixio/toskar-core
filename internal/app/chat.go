@@ -67,11 +67,16 @@ func (a *App) RunChat(ctx context.Context, profileID, conversationID, message st
 	// careful answer.
 	routeReason := ""
 	if modelID == huginn.AutoModelID {
-		choice, err := a.chooseAuto(ctx, message, a.turnHasData(ctx, conversationID, profile))
-		if err != nil {
-			return nil, err
+		// A specialized AI trained for exactly this answers first (§61).
+		if id, reason, ok := a.chooseSpecialist(ctx, message); ok {
+			modelID, routeReason = id, reason
+		} else {
+			choice, err := a.chooseAuto(ctx, message, a.turnHasData(ctx, conversationID, profile))
+			if err != nil {
+				return nil, err
+			}
+			modelID, routeReason = choice.Model.ID, choice.Reason
 		}
-		modelID, routeReason = choice.Model.ID, choice.Reason
 	}
 	// OpenAI /v1 and Chat both may hit presets with empty role model_ids.
 	// Chat usually supplies a UI pick; when none is given, fill from an installed model.
@@ -84,6 +89,9 @@ func (a *App) RunChat(ctx context.Context, profileID, conversationID, message st
 			)
 		}
 		modelID = mid
+	}
+	if err := a.refuseSupporting(ctx, modelID); err != nil {
+		return nil, err
 	}
 	special, err := a.resolveSpecialized(ctx, modelID)
 	if err != nil {
@@ -114,10 +122,14 @@ func (a *App) RunChat(ctx context.Context, profileID, conversationID, message st
 		}
 	}
 	if routeReason != "" {
+		routedID, routedName := modelID, a.modelName(modelID)
+		if special != nil {
+			routedID, routedName = special.id, special.name
+		}
 		a.Bus.Publish(events.New(events.ChatModelRouted, map[string]any{
 			"conversation_id": conversationID,
-			"model_id":        modelID,
-			"model_name":      a.modelName(modelID),
+			"model_id":        routedID,
+			"model_name":      routedName,
 			"reason":          routeReason,
 		}))
 	}
@@ -650,7 +662,7 @@ func (a *App) defaultInstalledModelID(ctx context.Context) (string, error) {
 		stub     string
 	)
 	for _, m := range list {
-		if m.Status != "installed" {
+		if m.Status != "installed" || huginn.Supporting(m) {
 			continue
 		}
 		if m.ID == models.StubModelID {

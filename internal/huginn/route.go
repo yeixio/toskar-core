@@ -112,7 +112,7 @@ func Choose(k Kind, installed []contracts.Model, memTotal uint64) (Choice, bool)
 func ChooseFor(k Kind, e Effort, installed []contracts.Model, memTotal uint64) (Choice, bool) {
 	var models []contracts.Model
 	for _, m := range installed {
-		if m.Installed {
+		if m.Installed && !Supporting(m) {
 			models = append(models, m)
 		}
 	}
@@ -161,7 +161,7 @@ func Fallback(failed string, installed []contracts.Model, memTotal uint64) (cont
 	var failedModel contracts.Model
 	var others []contracts.Model
 	for _, m := range installed {
-		if !m.Installed {
+		if !m.Installed || Supporting(m) {
 			continue
 		}
 		if m.ID == failed {
@@ -232,6 +232,6 @@ func Small(m contracts.Model) bool {
 // computer, to suggest instead of a small one.
 func Larger(installed []contracts.Model, memTotal uint64) (contracts.Model, bool) {
 	return best(installed, func(m contracts.Model) bool {
-		return m.Installed && !Small(m) && general(m) && fits(m, memTotal, fullShare)
+		return m.Installed && !Supporting(m) && !Small(m) && general(m) && fits(m, memTotal, fullShare)
 	}, bigger)
 }

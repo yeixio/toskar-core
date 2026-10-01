@@ -97,6 +97,8 @@ export interface Model {
   last_used_at?: string
   fit?: ModelFit
   dynamic?: boolean
+  /** Set for a model that helps Yggdrasil instead of chatting. */
+  support_role?: 'embedding' | 'reranker' | 'classifier'
 }
 
 export type FitLabel = 'excellent' | 'good' | 'tight' | 'heavy' | 'unsupported' | 'too_large'

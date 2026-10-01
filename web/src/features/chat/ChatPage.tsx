@@ -19,7 +19,7 @@ import type {
 } from '@/types/api'
 import { capabilityGap, type CapabilityGap } from '@/features/models/capabilityGap'
 import { activeCapabilityLabels, setCapability } from '@/features/profiles/capabilities'
-import { modelToolAssessment } from '@/features/models/modelPresentation'
+import { canChat, modelToolAssessment } from '@/features/models/modelPresentation'
 import { CapabilityNotice } from './CapabilityNotice'
 import { ChatActivity } from './ChatActivity'
 import { ChatHistoryDrawer, useCanPinChatHistory } from './ChatHistoryDrawer'
@@ -309,8 +309,9 @@ export function ChatPage() {
   const conversations = conversationsQuery.data ?? []
   const selectedConversation =
     conversations.find((c) => c.id === selectedId) ?? null
+  // Embedding, reranker, and classifier models help Yggdrasil but cannot chat.
   const installedModels = (modelsQuery.data ?? []).filter(
-    (m) => m.installed || (m.installed_on?.length ?? 0) > 0,
+    (m) => (m.installed || (m.installed_on?.length ?? 0) > 0) && canChat(m),
   )
   // Deployed specialized AIs answer through their base model, on this computer.
   const specializedModels = (specializedQuery.data ?? []).filter((m) => m.installed)

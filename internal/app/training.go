@@ -127,6 +127,8 @@ func (a *App) generateOnce(ctx context.Context, baseModelID, adapter string, loa
 
 // specializedChat is how a sai: model id changes one chat turn.
 type specializedChat struct {
+	// id and name are the specialized AI's model id and name.
+	id, name     string
 	baseModelID  string
 	adapter      string
 	instructions string
@@ -141,7 +143,7 @@ func (a *App) resolveSpecialized(ctx context.Context, modelID string) (*speciali
 	if err != nil {
 		return nil, err
 	}
-	return &specializedChat{baseModelID: res.BaseModelID, adapter: res.Adapter,
+	return &specializedChat{id: modelID, name: res.AI.Name, baseModelID: res.BaseModelID, adapter: res.Adapter,
 		instructions: res.AI.Instructions, knowledge: res.AI.Knowledge}, nil
 }
 

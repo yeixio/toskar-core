@@ -209,7 +209,21 @@ export function purposeChips(model: Model): string[] {
   return chips.slice(0, 4)
 }
 
+const SUPPORT_LABELS: Record<NonNullable<Model['support_role']>, string> = {
+  embedding: 'Embedding model: helps search knowledge, does not chat',
+  reranker: 'Reranker: orders search results, does not chat',
+  classifier: 'Classifier: sorts requests, does not chat',
+}
+
+/** True for a model that can answer a chat. */
+export function canChat(model: Pick<Model, 'support_role'>): boolean {
+  return !model.support_role
+}
+
 export function bestForLabel(model: Model): string {
+  if (model.support_role) {
+    return SUPPORT_LABELS[model.support_role]
+  }
   if (model.capabilities?.coding || model.tags?.includes('coding')) {
     return 'Best for programming'
   }

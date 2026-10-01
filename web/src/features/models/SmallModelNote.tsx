@@ -15,7 +15,7 @@ export function SmallModelNote({
   alternative?: Model | null
   onInstallAlternative?: (id: string) => void
 }) {
-  if (!isSmallModel(model)) return null
+  if (!isSmallModel(model) || model.support_role) return null
   const other = alternative && alternative.id !== model.id ? alternative : null
   return (
     <div role="note" className="mt-2 rounded-lg bg-warning/10 px-2.5 py-2 text-xs leading-relaxed text-ink">

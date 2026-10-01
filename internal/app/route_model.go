@@ -1,6 +1,7 @@
 package app
 
 import (
+	"github.com/yeixio/yggdrasil-core/internal/huginn"
 	"github.com/yeixio/yggdrasil-core/internal/tools"
 	"github.com/yeixio/yggdrasil-core/pkg/contracts"
 )
@@ -20,7 +21,7 @@ func routeToolCapableModel(execution, message, currentID string, installed []con
 	var best *contracts.Model
 	for i := range installed {
 		model := &installed[i]
-		if !model.Installed || model.ID == currentID {
+		if !model.Installed || model.ID == currentID || huginn.Supporting(*model) {
 			continue
 		}
 		rank := toolCallRank(toolCallSupport(model.Capabilities))

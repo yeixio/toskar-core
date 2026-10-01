@@ -330,7 +330,7 @@ func RecommendWithPresets(catalog *Catalog, presets []PurposePreset, input Recom
 }
 
 func entryToContract(e CatalogEntry, installed bool) contracts.Model {
-	return contracts.Model{
+	m := contracts.Model{
 		ID:           e.ID,
 		DisplayName:  e.DisplayName,
 		Summary:      e.Summary,
@@ -348,5 +348,8 @@ func entryToContract(e CatalogEntry, installed bool) contracts.Model {
 		Roles:        e.RecommendedRoles,
 		Installed:    installed,
 		Dynamic:      e.Dynamic,
+		SupportRole:  e.SupportRole,
 	}
+	m.SupportRole = contracts.SupportRoleOf(m)
+	return m
 }

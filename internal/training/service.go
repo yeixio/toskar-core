@@ -93,7 +93,10 @@ type Service struct {
 	evaluating map[string][]Revision
 	// remote holds runs this computer executes for a paired coordinator.
 	remote map[string]*remoteRun
-	wg     sync.WaitGroup
+	// questions caches each deployed revision's training questions for
+	// routing, keyed by AdapterID.
+	questions map[string][]string
+	wg        sync.WaitGroup
 }
 
 // NewService returns a service. Call Recover once at startup.
@@ -104,7 +107,7 @@ func NewService(d Deps) *Service {
 	if d.Publish == nil {
 		d.Publish = func(string, map[string]any) {}
 	}
-	return &Service{d: d, slot: make(chan struct{}, 1), cancels: map[string]context.CancelFunc{}, evaluating: map[string][]Revision{}, remote: map[string]*remoteRun{}}
+	return &Service{d: d, slot: make(chan struct{}, 1), cancels: map[string]context.CancelFunc{}, evaluating: map[string][]Revision{}, remote: map[string]*remoteRun{}, questions: map[string][]string{}}
 }
 
 // Wait blocks until running jobs and evaluations return. Used in tests and at shutdown.
@@ -1449,6 +1452,9 @@ func (s *Service) Resolve(ctx context.Context, modelID string) (Resolved, error)
 	rev, err := s.d.Repo.GetRevision(ctx, ai.ID, ai.DeployedRevision)
 	if err != nil {
 		return Resolved{}, err
+	}
+	if _, err := os.Stat(rev.adapterPath); err != nil {
+		return Resolved{}, fmt.Errorf("%s's trained adapter is missing on this computer. Train and deploy it again on the Train page", ai.Name)
 	}
 	loaded, err := s.AdaptersFor(ctx, rev.BaseModelID)
 	if err != nil {

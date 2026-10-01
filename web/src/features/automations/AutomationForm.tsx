@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { AIProfile, Automation, AutomationInput, AutomationSchedule, Model, ToolRecord } from '@/types/api'
 import { api } from '@/lib/api'
+import { canChat } from '@/features/models/modelPresentation'
 import type { AutomationPreview } from '@/types/api'
 import { useUIStore } from '@/stores/uiStore'
 import {
@@ -49,7 +50,7 @@ export function AutomationForm({ profiles, models, tools, initial, seedDescripti
   const [preview, setPreview] = useState<AutomationPreview | null>(null)
   const [previewError, setPreviewError] = useState('')
   const [testing, setTesting] = useState(false)
-  const installed = models.filter((model) => model.installed)
+  const installed = models.filter((model) => model.installed && canChat(model))
   const [profileID, setProfileID] = useState(initial?.profile_id || profiles.find((p) => p.id === 'general-assistant')?.id || profiles[0]?.id || '')
   const [modelID, setModelID] = useState(initial?.model_id || installed[0]?.id || '')
   const [schedule, setSchedule] = useState<AutomationSchedule>(initial?.schedule ?? { kind: 'daily', time_zone: zone, hour: 8, minute: 0 })
@@ -86,7 +87,7 @@ export function AutomationForm({ profiles, models, tools, initial, seedDescripti
 
   useEffect(() => {
     if (modelID) return
-    const first = models.find((model) => model.installed)
+    const first = models.find((model) => model.installed && canChat(model))
     if (first) setModelID(first.id)
   }, [models, modelID])
 
