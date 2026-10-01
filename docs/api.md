@@ -65,6 +65,7 @@ Prefix: `/api/v1`
 | GET, POST | `/automations` | Scheduled prompts. Also `POST /automations/preview`, `GET/PATCH/DELETE /automations/{id}`, and `POST /automations/{id}/run|pause|resume` |
 | GET | `/notifications` | The notification center: `{"notifications": [...], "unread": n}`. `?unread=1` lists unread ones. Also `POST /notifications/read` (`{"ids": [...]}`, no ids marks all) and `POST /notifications/{id}/dismiss` |
 | GET | `/connectors` | Connected services and their status. Also `PUT /connectors/{id}` (`{"values": {...}}`), `POST /connectors/{id}/check`, and `DELETE /connectors/{id}` |
+| GET, PUT | `/personalization` | How the person likes answers: `length`, `tone`, `format`, `units`, `about_me`, `instructions` |
 | GET | `/nodes` | This computer and peers |
 | POST | `/nodes/pair` | Start pairing |
 | POST | `/nodes/{id}/pair/approve` | Approve a pairing offer |
@@ -150,6 +151,8 @@ Connected services add tools. Today they are GitHub (`github.search`, `github.is
 - **Selection:** they are offered when a message is about the service. That means it names the service, or uses words like issues or pull requests for GitHub and lights or sensors for Home Assistant. It also counts when the message uses words the service taught: Home Assistant's device names, learned when it connects and whenever all devices are read. Tools that change something are offered only when the message asks for a change ("turn on", "comment").
 - **Fetched first:** a read tool marked `prefetch` (Home Assistant's device list) is called before the model answers a message about its service, when the profile allows it without asking. Its data, written as plain lines, replaces the web look-up for that turn.
 - **Untrusted data:** what they return is treated as untrusted data (§58), and links in results become sources.
+
+Personalization shapes how answers look in every chat, automation, and API request. It has four choices: `length` (`brief`, `balanced`, `detailed`), `tone` (`friendly`, `neutral`, `direct`), `format` (`prose`, `lists`), and `units` (`metric`, `imperial`). It also has two short notes, `about_me` and `instructions`, of up to 1,500 characters each. It is stored as a setting and added to the model's instructions as style guidance, after a specialized AI's own instructions. It is kept apart from permissions: what a tool may do comes only from profiles and Settings. A personalization note or a memory that tries to grant a permission is refused with 400, for example "you can always push without asking" or "don't ask before running commands". The refusal says where permissions are set. A memory that states a preference, such as "I use the terminal a lot", is saved and changes no policy.
 
 Model, node, tool, conversation, and log routes follow the same prefix. The OpenAPI file is the route list to diff when a handler changes.
 

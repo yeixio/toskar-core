@@ -1097,6 +1097,12 @@ func (e *chatExecEnv) TurnInstructions(ctx context.Context, prompt string) strin
 	if s := strings.TrimSpace(e.instructions); s != "" {
 		parts = append(parts, s)
 	}
+	// How the person likes answers (§38): style only, never permission.
+	if e.app != nil {
+		if block := e.app.personalBlock(ctx); block != "" {
+			parts = append(parts, block)
+		}
+	}
 	// Memories come from the person, so they are trusted instructions.
 	if block := muninn.Block(e.memories); block != "" {
 		parts = append(parts, block)

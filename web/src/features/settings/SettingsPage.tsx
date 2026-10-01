@@ -15,6 +15,7 @@ import { useUIStore } from '@/stores/uiStore'
 import type { SettingsPatch } from '@/types/api'
 import { RealmKicker } from '@/components/ui/Realm'
 import { ConnectedServices } from './ConnectedServices'
+import { Personalization } from './Personalization'
 import { YggdrasilMark } from '@/components/ui/YggdrasilMark'
 
 function Toggle({
@@ -285,6 +286,8 @@ export function SettingsPage() {
             ]}
           />
         </section>
+
+        <Personalization />
 
         <section className="card space-y-4">
           <div className="flex items-start justify-between gap-4">

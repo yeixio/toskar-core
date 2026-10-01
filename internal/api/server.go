@@ -128,6 +128,7 @@ type Server struct {
 	artifacts       *artifacts.Store
 	notifications   *gjallarhorn.Hub
 	connectors      *connectors.Manager
+	personal        PersonalStore
 	training        *training.Service
 	trainingCatalog func() []models.CatalogEntry
 }
@@ -228,6 +229,7 @@ func (s *Server) routes() {
 	s.artifactRoutes(api)
 	s.notificationRoutes(api)
 	s.connectorRoutes(api)
+	s.personalRoutes(api)
 	s.trainingRoutes(api)
 
 	if s.deps.OpenAI != nil {
