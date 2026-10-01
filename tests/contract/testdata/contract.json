@@ -1,0 +1,151 @@
+{
+  "version": "1.0",
+  "types": {
+    "ActivityStep": [
+      "kind",
+      "text"
+    ],
+    "Artifact": [
+      "conversation_id",
+      "created_at",
+      "id",
+      "kind",
+      "mime_type",
+      "name",
+      "producer",
+      "size_bytes",
+      "source_task"
+    ],
+    "Citation": [
+      "kind",
+      "snippet",
+      "source",
+      "title",
+      "url"
+    ],
+    "ContractInfo": [
+      "major",
+      "version"
+    ],
+    "Conversation": [
+      "created_at",
+      "id",
+      "memory_off",
+      "model_id",
+      "profile_id",
+      "title",
+      "updated_at"
+    ],
+    "EgressRecord": [
+      "at",
+      "conversation_id",
+      "destination",
+      "detail",
+      "id",
+      "kind",
+      "source",
+      "task_id"
+    ],
+    "Event": [
+      "contract",
+      "id",
+      "node_id",
+      "payload",
+      "task_id",
+      "timestamp",
+      "type"
+    ],
+    "FileRef": [
+      "id",
+      "kind",
+      "mime_type",
+      "name",
+      "producer",
+      "size_bytes"
+    ],
+    "Message": [
+      "content",
+      "conversation_id",
+      "created_at",
+      "id",
+      "meta",
+      "role"
+    ],
+    "MessageMeta": [
+      "contract",
+      "files",
+      "notice",
+      "run_id",
+      "sources",
+      "steps"
+    ],
+    "ModelUse": [
+      "cached_tokens",
+      "calls",
+      "completion_tokens",
+      "first_token_ms",
+      "load_ms",
+      "model_id",
+      "node",
+      "prompt_tokens",
+      "role",
+      "tok_per_sec",
+      "ttft_ms"
+    ],
+    "Notification": [
+      "body",
+      "category",
+      "created_at",
+      "deliveries",
+      "id",
+      "link",
+      "read_at",
+      "severity",
+      "source_id",
+      "source_type",
+      "title"
+    ],
+    "Run": [
+      "cache_hits",
+      "completed_at",
+      "context_limit",
+      "context_tokens",
+      "contract",
+      "conversation_id",
+      "effort",
+      "error",
+      "id",
+      "latency_ms",
+      "models",
+      "nodes",
+      "parallel",
+      "pipeline_ms",
+      "profile_id",
+      "retries",
+      "source",
+      "started_at",
+      "status",
+      "strategy",
+      "tools",
+      "verification_fixed",
+      "verification_issues",
+      "verification_passes",
+      "workers"
+    ],
+    "ToolUse": [
+      "calls",
+      "failures",
+      "tool_id",
+      "total_ms"
+    ],
+    "VersionResponse": [
+      "build_date",
+      "commit",
+      "contract",
+      "license",
+      "product",
+      "source",
+      "version"
+    ]
+  }
+}

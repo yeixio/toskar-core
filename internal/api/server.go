@@ -154,6 +154,7 @@ func NewServer(deps Dependencies) *Server {
 func (s *Server) routes() {
 	s.router.Use(s.recoverMiddleware)
 	s.router.Use(s.corsMiddleware)
+	s.router.Use(s.contractMiddleware)
 	s.router.Use(s.logMiddleware)
 
 	s.router.HandleFunc("/about", s.handleSourceOffer).Methods(http.MethodGet, http.MethodOptions)
@@ -344,11 +345,12 @@ func (s *Server) handleHealth(w http.ResponseWriter, r *http.Request) {
 func (s *Server) handleVersion(w http.ResponseWriter, r *http.Request) {
 	offer := version.CurrentOffer()
 	resp := contracts.VersionResponse{
-		Version: offer.Version,
-		Commit:  offer.Commit,
-		Product: "Yggdrasil",
-		License: offer.License,
-		Source:  offer.Source,
+		Version:  offer.Version,
+		Commit:   offer.Commit,
+		Product:  "Yggdrasil",
+		License:  offer.License,
+		Source:   offer.Source,
+		Contract: contracts.CurrentContract(),
 	}
 	if s.deps.Version != nil {
 		got := s.deps.Version()
@@ -768,12 +770,27 @@ func writeErr(w http.ResponseWriter, status int, code, message string, details m
 func (s *Server) corsMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization, Access-Control-Request-Private-Network")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization, Access-Control-Request-Private-Network, "+contracts.ClientContractHeader)
+		w.Header().Set("Access-Control-Expose-Headers", contracts.ContractHeader)
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS")
 		// Chrome / WebKit Private Network Access: Wails webview → 127.0.0.1 API.
 		w.Header().Set("Access-Control-Allow-Private-Network", "true")
 		if r.Method == http.MethodOptions {
 			w.WriteHeader(http.StatusNoContent)
+			return
+		}
+		next.ServeHTTP(w, r)
+	})
+}
+
+// contractMiddleware says which client contract every response is in, and
+// turns away a client built for another major version with a clear
+// message, instead of letting it misread data (§68).
+func (s *Server) contractMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set(contracts.ContractHeader, contracts.ContractVersion)
+		if err := contracts.CheckClientContract(r.Header.Get(contracts.ClientContractHeader)); err != nil && r.Method != http.MethodOptions {
+			writeErr(w, http.StatusUpgradeRequired, "CONTRACT_MISMATCH", err.Error(), map[string]any{"contract": contracts.ContractVersion})
 			return
 		}
 		next.ServeHTTP(w, r)

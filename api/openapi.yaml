@@ -1012,6 +1012,14 @@ components:
         source:
           type: string
           description: URL of the corresponding source for this build.
+        contract:
+          type: object
+          description: The client contract this build speaks (major.minor). Also in the Yggdrasil-Contract header on every response.
+          properties:
+            version:
+              type: string
+            major:
+              type: integer
     SourceOffer:
       type: object
       properties:

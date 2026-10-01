@@ -242,6 +242,14 @@ Every cache declares its policy: `key`, `ttl`, `invalidation`, `scope`, and `pri
 
 A repeat web search or page read is answered from the cache. The tool does not run, nothing leaves this computer (so no egress record is written), and the run trace counts it in `cache_hits`. In-memory caches are bounded, dropping the least recently used entry first, and can be cleared one at a time. "Delete run records now" also clears every personal in-memory cache.
 
+### Client contract
+
+The desktop app, mobile apps, and other clients read a versioned contract: events, run traces, answers with their citations, steps, and files, artifacts, notifications, and egress records. The version is `major.minor`, now `1.0`.
+- **Where it appears:** every event has `contract`, and so do answer metadata and run traces. Metadata saved before the contract existed has no `contract` and reads as 1.0. Every response carries the `Yggdrasil-Contract` header, and `GET /api/v1/version` has `contract` (`version`, `major`).
+- **Minor versions** add fields or event types. Clients ignore what they do not know, so an older client keeps working.
+- **Major versions** remove something or change its meaning. A client may send `Yggdrasil-Client-Contract: 1.0`. A client built for another major version gets 426 with code `CONTRACT_MISMATCH`, and the message says whether to update the app or Yggdrasil. A client that sends no header is served as before.
+- **Compatibility test:** `tests/contract` records the contract's fields. It fails when one is removed or renamed within a major version, and when one is added without a minor version bump (`UPDATE_CONTRACT=1 go test ./tests/contract` records the new fields).
+
 Model, node, tool, conversation, and log routes follow the same prefix. The OpenAPI file is the route list to diff when a handler changes.
 
 ## OpenAI-compatible API

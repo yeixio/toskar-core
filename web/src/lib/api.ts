@@ -124,6 +124,13 @@ export function normalizePairingSession(raw: Record<string, unknown>): PairingSe
   }
 }
 
+/**
+ * The client contract this app is built for (spec §68). Yggdrasil answers a
+ * different major version with 426 and says which side to update.
+ */
+export const CLIENT_CONTRACT = '1.0'
+export const CLIENT_CONTRACT_HEADER = 'Yggdrasil-Client-Contract'
+
 const storedApiKeyName = 'yggdrasil.apiKey'
 const storedApiKeyIdName = 'yggdrasil.apiKeyId'
 
@@ -176,6 +183,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T | null> {
       ...init,
       headers: {
         Accept: 'application/json',
+        [CLIENT_CONTRACT_HEADER]: CLIENT_CONTRACT,
         ...authHeaders(),
         ...(init?.body ? { 'Content-Type': 'application/json' } : {}),
         ...init?.headers,

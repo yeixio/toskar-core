@@ -32,6 +32,8 @@ type VersionResponse struct {
 	Product   string `json:"product"`
 	License   string `json:"license"`
 	Source    string `json:"source"`
+	// Contract is the client contract this build speaks (§68).
+	Contract ContractInfo `json:"contract"`
 }
 
 // CPUInfo describes the host CPU.
@@ -408,6 +410,9 @@ type MessageMeta struct {
 	// RunID names the run trace behind the answer (§35), at
 	// GET /api/v1/runs/{id}.
 	RunID string `json:"run_id,omitempty"`
+	// Contract is the client contract the metadata was written in (§68).
+	// Metadata saved before the contract existed has none, and reads as 1.0.
+	Contract string `json:"contract,omitempty"`
 }
 
 // FileRef points at a stored file (an artifact). Its bytes are at

@@ -367,11 +367,12 @@ func (t *turnTrace) meta() *contracts.MessageMeta {
 		return nil
 	}
 	return &contracts.MessageMeta{
-		Sources: append([]contracts.Citation(nil), t.sources...),
-		Steps:   append([]contracts.ActivityStep(nil), t.steps...),
-		Notice:  t.notice,
-		Files:   append([]contracts.FileRef(nil), t.files...),
-		RunID:   t.runID,
+		Sources:  append([]contracts.Citation(nil), t.sources...),
+		Steps:    append([]contracts.ActivityStep(nil), t.steps...),
+		Notice:   t.notice,
+		Files:    append([]contracts.FileRef(nil), t.files...),
+		RunID:    t.runID,
+		Contract: contracts.ContractVersion,
 	}
 }
 

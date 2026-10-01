@@ -1,4 +1,4 @@
-import { getApiBase, storedApiKey } from '@/lib/api'
+import { CLIENT_CONTRACT, CLIENT_CONTRACT_HEADER, getApiBase, storedApiKey } from '@/lib/api'
 import type { YggdrasilEvent } from '@/types/api'
 
 export interface EventSubscriptionOptions {
@@ -124,6 +124,7 @@ function subscribeEventsWithBearer(
         headers: {
           Accept: 'text/event-stream',
           Authorization: `Bearer ${key}`,
+          [CLIENT_CONTRACT_HEADER]: CLIENT_CONTRACT,
         },
         signal: controller.signal,
       })

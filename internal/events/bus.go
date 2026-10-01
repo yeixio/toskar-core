@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/yeixio/yggdrasil-core/pkg/contracts"
 )
 
 // Event is a structured Heimdall event.
@@ -15,6 +16,8 @@ type Event struct {
 	TaskID    string         `json:"task_id,omitempty"`
 	NodeID    string         `json:"node_id,omitempty"`
 	Payload   map[string]any `json:"payload,omitempty"`
+	// Contract is the client contract the event is written in (§68).
+	Contract string `json:"contract"`
 }
 
 // Common event type constants.
@@ -118,6 +121,9 @@ func (b *Bus) Publish(evt Event) {
 	}
 	if evt.Timestamp.IsZero() {
 		evt.Timestamp = time.Now().UTC()
+	}
+	if evt.Contract == "" {
+		evt.Contract = contracts.ContractVersion
 	}
 	b.mu.RLock()
 	defer b.mu.RUnlock()

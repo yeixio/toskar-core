@@ -11,6 +11,8 @@ import (
 	"sort"
 	"sync"
 	"time"
+
+	"github.com/yeixio/yggdrasil-core/pkg/contracts"
 )
 
 // Statuses.
@@ -48,7 +50,9 @@ type ToolUse struct {
 
 // Run is a traced request.
 type Run struct {
-	ID             string     `json:"id"`
+	ID string `json:"id"`
+	// Contract is the client contract the trace is written in (§68).
+	Contract       string     `json:"contract"`
 	ConversationID string     `json:"conversation_id,omitempty"`
 	ProfileID      string     `json:"profile_id,omitempty"`
 	Source         string     `json:"source,omitempty"`
@@ -303,6 +307,7 @@ func (c *Collector) Finish(status, errText string) Run {
 	defer c.mu.Unlock()
 	now := c.now().UTC()
 	r := c.run
+	r.Contract = contracts.ContractVersion
 	r.Status, r.Error, r.CompletedAt = status, errText, &now
 	r.LatencyMs = ms(now.Sub(r.StartedAt))
 	r.Models = []ModelUse{}

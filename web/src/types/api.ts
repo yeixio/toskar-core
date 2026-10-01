@@ -296,6 +296,8 @@ export interface MessageMeta {
   files?: FileRef[]
   /** The run trace behind the answer (spec §35), at /api/v1/runs/{id}. */
   run_id?: string
+  /** The client contract the metadata was written in (spec §68); missing means 1.0. */
+  contract?: string
 }
 
 /** A stored file: an attachment or a file the assistant produced. */
@@ -478,6 +480,8 @@ export interface YggdrasilEvent {
   task_id?: string
   node_id?: string
   payload?: Record<string, unknown>
+  /** The client contract the event is written in (spec §68). */
+  contract?: string
 }
 
 export interface ModelDownloadProgressPayload {
@@ -1199,6 +1203,8 @@ export interface RunRecordCounts {
 /** A traced request (spec §35). */
 export interface RunTrace {
   id: string
+  /** The client contract the trace is written in (spec §68). */
+  contract?: string
   conversation_id?: string
   profile_id?: string
   source?: string
