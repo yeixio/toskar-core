@@ -655,7 +655,7 @@ export interface Task {
 }
 
 export type AutomationScheduleKind = 'once' | 'daily' | 'weekly' | 'interval'
-export type AutomationNotifyMode = 'always' | 'condition' | 'change' | 'none'
+export type AutomationNotifyMode = 'always' | 'condition' | 'change' | 'failure' | 'none'
 export type AutomationConditionKind = 'threshold' | 'available' | 'significant'
 export type AutomationThresholdOp = 'below' | 'above'
 export type AutomationRunStatus = 'claimed' | 'running' | 'retrying' | 'succeeded' | 'failed'
@@ -1024,4 +1024,35 @@ export interface SpecializedAIPatch {
   advanced?: TrainingHyper
   clear_advanced?: boolean
   knowledge_sources?: string[]
+}
+
+export type NotificationSeverity = 'info' | 'success' | 'warning' | 'error'
+
+export interface NotificationDelivery {
+  channel: string
+  status: 'delivered' | 'failed' | 'suppressed'
+  attempts: number
+  delivered_at?: string
+  error?: string
+}
+
+/** A Gjallarhorn notification kept in the notification center. */
+export interface AppNotification {
+  id: string
+  created_at: string
+  source_type: string
+  source_id?: string
+  category: 'automation' | 'approval' | 'model' | 'training' | 'health' | 'system'
+  severity: NotificationSeverity
+  title: string
+  body: string
+  /** App path back to the source, such as /automations?id=…. */
+  link?: string
+  read_at?: string
+  deliveries?: NotificationDelivery[]
+}
+
+export interface NotificationList {
+  notifications: AppNotification[]
+  unread: number
 }

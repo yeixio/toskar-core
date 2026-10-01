@@ -365,6 +365,67 @@ paths:
               schema:
                 type: object
                 additionalProperties: true
+  /api/v1/notifications:
+    get:
+      summary: List notifications that were not dismissed, newest first
+      operationId: listNotifications
+      parameters:
+        - name: unread
+          in: query
+          description: "1 lists unread notifications only"
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Notifications and the unread count
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  notifications:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: true
+                  unread:
+                    type: integer
+  /api/v1/notifications/read:
+    post:
+      summary: Mark notifications read; no ids marks all of them
+      operationId: markNotificationsRead
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ids:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        "204":
+          description: Marked read
+  /api/v1/notifications/{id}/dismiss:
+    post:
+      summary: Hide a notification from the notification center
+      operationId: dismissNotification
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Dismissed
+        "404":
+          description: No such notification
   /api/v1/diagnostics:
     get:
       summary: Create a diagnostics bundle

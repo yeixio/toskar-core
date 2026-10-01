@@ -21,6 +21,7 @@ const NOTIFY_CHOICES: { mode: AutomationInput['notification']['mode']; label: st
   { mode: 'condition', label: 'When the condition is true' },
   { mode: 'change', label: 'When the result changes' },
   { mode: 'always', label: 'Every time it runs' },
+  { mode: 'failure', label: 'Only when it fails' },
   { mode: 'none', label: "Don't notify me" },
 ]
 
@@ -93,7 +94,11 @@ export function AutomationForm({ profiles, models, tools, initial, seedDescripti
     if (advancedRef.current) advancedRef.current.open = advanced
   }, [advanced])
 
-  const readTools = tools.filter((tool) => tool.risk === 'read' && tool.enabled)
+  // Tools a scheduled run may use are approved here, because nobody is
+  // watching to answer later (spec §59). Tools that change things are listed
+  // apart, so approving one is a deliberate choice.
+  const lookTools = tools.filter((tool) => tool.enabled && tool.risk !== 'write')
+  const changeTools = tools.filter((tool) => tool.enabled && tool.risk === 'write')
 
   function applyDescription() {
     try {
@@ -225,7 +230,7 @@ export function AutomationForm({ profiles, models, tools, initial, seedDescripti
             {choice.label}
           </label>
         ))}
-        <p className="text-xs text-ink-faint">Notices appear on this computer.</p>
+        <p className="text-xs text-ink-faint">Notices go to the bell in Yggdrasil and, if Settings allow, to this computer's notifications.</p>
       </fieldset>
       {mode === 'condition' && (
         <div className="grid gap-3 sm:grid-cols-2">
@@ -277,6 +282,7 @@ export function AutomationForm({ profiles, models, tools, initial, seedDescripti
           <span className="text-ink-muted">Model</span>
           <select className="field w-full" value={modelID} onChange={(event) => setModelID(event.target.value)} required>
             {installed.length === 0 && <option value="">Install a model first</option>}
+            {installed.length > 0 && <option value="auto">Auto (Yggdrasil picks for each run)</option>}
             {installed.map((model) => (
               <option key={model.id} value={model.id}>
                 {model.display_name || model.id}
@@ -299,12 +305,14 @@ export function AutomationForm({ profiles, models, tools, initial, seedDescripti
           </p>
         )}
         <fieldset className="space-y-2">
-          <legend className="text-sm text-ink-muted">Read-only tools</legend>
+          <legend className="text-sm text-ink-muted">Tools it may use while you're away</legend>
           <p className="text-xs text-ink-faint">
-            Leave these empty to use every read-only tool the profile already allows. Write tools stay off for scheduled runs.
+            Approve what this automation needs now; nobody will be around to answer later. If it reaches a tool you
+            didn't approve, it skips it and you get a notification. Leave everything unchecked to use only the read-only
+            tools the profile allows.
           </p>
           <div className="grid gap-2 sm:grid-cols-2">
-            {readTools.map((tool) => (
+            {lookTools.map((tool) => (
               <label key={tool.id} className="flex items-start gap-2 text-sm text-ink">
                 <input
                   type="checkbox"
@@ -323,6 +331,32 @@ export function AutomationForm({ profiles, models, tools, initial, seedDescripti
               </label>
             ))}
           </div>
+          {changeTools.length > 0 && (
+            <div className="rounded-lg border border-warning/30 bg-warning/5 p-3">
+              <p className="text-xs font-medium text-ink">These change things on this computer</p>
+              <p className="mb-2 text-xs text-ink-faint">Approve one only if this automation needs it. It will run without asking.</p>
+            <div className="grid gap-2 sm:grid-cols-2">
+              {changeTools.map((tool) => (
+                <label key={tool.id} className="flex items-start gap-2 text-sm text-ink">
+                  <input
+                    type="checkbox"
+                    className="mt-1"
+                    checked={selectedTools.includes(tool.id)}
+                    onChange={(event) => {
+                      setSelectedTools((current) =>
+                        event.target.checked ? [...current, tool.id] : current.filter((id) => id !== tool.id),
+                      )
+                    }}
+                  />
+                  <span>
+                    {tool.name}
+                    <span className="block text-xs text-ink-faint">{tool.description}</span>
+                  </span>
+                </label>
+              ))}
+            </div>
+            </div>
+          )}
         </fieldset>
       </details>
       {previewError && <p className="text-sm text-danger">{previewError}</p>}

@@ -143,7 +143,7 @@ func automationBody(args []string, create bool) (any, error) {
 	every := fs.String("every", "", "interval duration, such as 6h")
 	weekday := fs.Int("weekday", 0, "0-6, Sunday is 0")
 	zone := fs.String("zone", "UTC", "IANA time zone")
-	notify := fs.String("notify", "always", "always, condition, change, or none")
+	notify := fs.String("notify", "always", "always, condition, change, failure, or none")
 	kind := fs.String("condition-kind", "", "threshold, available, or significant")
 	op := fs.String("condition-op", "", "below or above")
 	value := fs.Float64("condition-value", 0, "threshold value")

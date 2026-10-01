@@ -6,6 +6,7 @@ import { realms } from '@/lib/realms'
 import { displayVersion } from '@/lib/appVersion'
 import { useUIStore } from '@/stores/uiStore'
 import { YggdrasilMark } from '@/components/ui/YggdrasilMark'
+import { NotificationBell } from './NotificationBell'
 
 const mainNav = [
   { to: '/chat', label: 'Chat' },
@@ -142,6 +143,7 @@ export function Sidebar() {
               </p>
             </div>
           </a>
+          <NotificationBell />
         </div>
       </div>
 

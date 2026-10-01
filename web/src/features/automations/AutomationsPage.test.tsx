@@ -137,4 +137,35 @@ describe('AutomationsPage', () => {
     expect(body.profile_id).toBe('general-assistant')
     expect(body.model_id).toBe('gemma-4-e4b')
   })
+
+  it('lists tools that change things apart, offers Auto, and saves approvals', async () => {
+    vi.mocked(api.listTools).mockResolvedValue([
+      ...((await api.listTools()) ?? []),
+      {
+        id: 'files.write',
+        name: 'Write files',
+        description: 'Create or change files.',
+        capability: 'files',
+        source: 'builtin',
+        schema: '{}',
+        default_policy: 'ask',
+        risk: 'write',
+        enabled: true,
+        profiles: [],
+      },
+    ])
+    renderPage()
+    fireEvent.click(await screen.findByRole('button', { name: 'New automation' }))
+    expect(await screen.findByText('These change things on this computer')).toBeInTheDocument()
+    expect(screen.getByRole('option', { name: /Auto/ })).toBeInTheDocument()
+    expect(screen.getByRole('radio', { name: 'Only when it fails' })).toBeInTheDocument()
+    fireEvent.change(screen.getByPlaceholderText(/Every morning at 8:00 AM/), {
+      target: { value: 'Every morning at 8:00 AM, check this product and tell me if the price is below $500.' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'Set up automation' }))
+    fireEvent.click(screen.getByRole('checkbox', { name: /Write files/ }))
+    fireEvent.click(screen.getByRole('button', { name: 'Create automation' }))
+    await waitFor(() => expect(api.createAutomation).toHaveBeenCalled())
+    expect(vi.mocked(api.createAutomation).mock.calls.at(-1)?.[0].tools).toContain('files.write')
+  })
 })

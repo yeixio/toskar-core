@@ -18,6 +18,7 @@ import type {
   LogContent,
   LogEntry,
   Message,
+  NotificationList,
   ToolActivityRecord,
   ToolRecord,
   Model,
@@ -607,6 +608,18 @@ export const api = {
   /** Stop a conversation's running turn on the computer running it; what was written is kept. */
   stopChat: (conversationId: string) =>
     request<StopChatResponse>('/api/v1/chat/stop', { method: 'POST', body: JSON.stringify({ conversation_id: conversationId }) }),
+
+  listNotifications: async (unreadOnly = false) =>
+    (await request<NotificationList>(`/api/v1/notifications${unreadOnly ? '?unread=1' : ''}`)) ?? {
+      notifications: [],
+      unread: 0,
+    },
+
+  /** Marks notifications read; no ids marks every one read. */
+  markNotificationsRead: (ids: string[] = []) =>
+    request<null>('/api/v1/notifications/read', { method: 'POST', body: JSON.stringify({ ids }) }),
+
+  dismissNotification: (id: string) => request<null>(`/api/v1/notifications/${id}/dismiss`, { method: 'POST' }),
 
   deleteArtifact: (id: string) => request<null>(`/api/v1/artifacts/${id}`, { method: 'DELETE' }),
 

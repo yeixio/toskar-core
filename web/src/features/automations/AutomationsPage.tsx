@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { api, ApiError } from '@/lib/api'
 import { subscribeEvents } from '@/lib/events'
@@ -15,7 +16,8 @@ const screenshotSentence =
 
 export function AutomationsPage() {
   const queryClient = useQueryClient()
-  const [selectedID, setSelectedID] = useState<string | null>(null)
+  const [searchParams, setSearchParams] = useSearchParams()
+  const [selectedID, setSelectedID] = useState<string | null>(() => searchParams.get('id'))
   const [creating, setCreating] = useState(false)
   const [editing, setEditing] = useState(false)
   const [formError, setFormError] = useState('')
@@ -69,6 +71,16 @@ export function AutomationsPage() {
     }
     if (!selectedID && items[0]) setSelectedID(items[0].id)
   }, [items, selectedID])
+
+  // A notification links here with ?id=…; open that automation.
+  const linkedID = searchParams.get('id')
+  useEffect(() => {
+    if (!linkedID) return
+    setSelectedID(linkedID)
+    setCreating(false)
+    setEditing(false)
+    setSearchParams({}, { replace: true })
+  }, [linkedID, setSearchParams])
 
   function refresh() {
     void queryClient.invalidateQueries({ queryKey: ['automations'] })
