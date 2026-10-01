@@ -138,7 +138,7 @@ These exist in this repository today:
 - OpenAI-compatible `GET /v1/models` and `POST /v1/chat/completions`
 - tools for web search, files, shell, and Git, with explicit per-profile permission policies
 - Mimir connected knowledge: files, folders, and pasted content (CSV, JSON, Markdown, text, HTML) searched on every chat turn, and reindexed when the files change
-- Train your own AI: a guided build of a specialized assistant from a base model, LoRA training on your examples (MLX on Apple Silicon), and connected knowledge, with base-versus-specialized testing before deployment. See [docs/features/train-your-own-ai.md](docs/features/train-your-own-ai.md).
+- Train your own AI: a guided build of a specialized assistant from a base model, LoRA training on your examples (MLX on Apple Silicon, PyTorch on NVIDIA GPUs), and connected knowledge, with base-versus-specialized testing before deployment. See [docs/features/train-your-own-ai.md](docs/features/train-your-own-ai.md).
 
 Background work is idle model unload, model health checks, periodic peer refresh, and scheduled automations. A scheduled prompt runs in the daemon, including while the desktop window is closed when the app is set to keep running. How to use it is in the user guide. The v1 specification is [docs/features/completed/scheduler-and-automations.md](docs/features/completed/scheduler-and-automations.md).
 

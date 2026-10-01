@@ -174,3 +174,26 @@ func TestPinnedEnvironmentInstallsWithoutDependencies(t *testing.T) {
 		t.Fatalf("status = %+v", st)
 	}
 }
+
+func TestInstallArgsArePassedAndPartOfTheEnvironment(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("fake uv is a shell script")
+	}
+	srv := uvRelease(t, fakeUV, false)
+	defer srv.Close()
+	m := New(t.TempDir())
+	m.ReleaseBase = srv.URL
+	spec := Spec{Name: "torch", Requirements: []string{"torch==2.14.1"}, InstallArgs: []string{"--torch-backend=auto"}}
+	py, err := m.Ensure(context.Background(), spec, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	b, _ := os.ReadFile(filepath.Join(filepath.Dir(m.uvPath()), "calls.log"))
+	if !strings.Contains(string(b), "pip install --python "+py+" --torch-backend=auto torch==2.14.1") {
+		t.Fatalf("uv calls:\n%s", b)
+	}
+	spec.InstallArgs = nil
+	if st := m.Status(spec); st.Installed || !st.Stale {
+		t.Fatalf("status without the args = %+v", st)
+	}
+}

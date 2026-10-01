@@ -14,6 +14,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/yeixio/yggdrasil-core/internal/models"
 	"github.com/yeixio/yggdrasil-core/internal/pyenv"
 	"github.com/yeixio/yggdrasil-core/pkg/contracts"
 )
@@ -112,28 +113,124 @@ func (MLX) Run(ctx context.Context, spec RunSpec, update func(Update)) (RunResul
 	return runScript(ctx, spec, []string{spec.Python, "-u", script, cfgPath}, update)
 }
 
-// PEFT will train on NVIDIA GPUs with PyTorch and PEFT. It is registered so
-// the UI can say why a CUDA computer is not eligible yet.
+//go:embed scripts/peft_train.py
+var peftScript []byte
+
+// PEFTRequirements pins the PyTorch trainer environment. uv's
+// --torch-backend=auto installs the PyTorch build for the computer's NVIDIA
+// driver; bitsandbytes provides QLoRA's 4-bit weights on CUDA.
+var PEFTRequirements = []string{
+	"torch==2.14.1",
+	"transformers==5.18.0",
+	"peft==0.21.2",
+	"accelerate==1.15.0",
+	"safetensors==0.8.0",
+	"gguf==0.19.0",
+	"huggingface-hub==1.33.0",
+	"bitsandbytes==0.50.2; platform_system != 'Darwin'",
+}
+
+// PEFT trains LoRA and QLoRA adapters with PyTorch and PEFT on NVIDIA GPUs.
 type PEFT struct{}
 
 func (PEFT) ID() string          { return "peft" }
 func (PEFT) DisplayName() string { return "PyTorch PEFT (NVIDIA)" }
 
 func (PEFT) Supports(hw contracts.HardwareInventory) (bool, string) {
+	if hasCUDA(hw) {
+		return true, ""
+	}
+	return false, "Training needs an NVIDIA GPU with CUDA, or a Mac with Apple Silicon."
+}
+
+func hasCUDA(hw contracts.HardwareInventory) bool {
 	for _, a := range hw.Accelerators {
 		for _, b := range a.Backends {
 			if strings.EqualFold(b, "cuda") {
-				return false, "Training on NVIDIA GPUs is planned but not available yet."
+				return true
 			}
 		}
 	}
-	return false, "Training needs a Mac with Apple Silicon. NVIDIA support is planned."
+	return false
 }
 
-func (PEFT) Environment() pyenv.Spec { return pyenv.Spec{Name: "trainer-peft"} }
+func (PEFT) Environment() pyenv.Spec {
+	return pyenv.Spec{Name: "trainer-peft", Requirements: PEFTRequirements, InstallArgs: []string{"--torch-backend=auto"}}
+}
 
-func (PEFT) Run(context.Context, RunSpec, func(Update)) (RunResult, error) {
-	return RunResult{}, fmt.Errorf("the PEFT trainer is not available yet")
+// Weights loads the original weights for both methods; QLoRA quantizes them
+// to 4-bit as it loads them.
+func (PEFT) Weights(info models.TrainingInfo, _ Method) (string, uint64) {
+	return info.BaseRepo, info.BaseBytes
+}
+
+// CanQLoRA is true on CUDA, where bitsandbytes runs.
+func (PEFT) CanQLoRA(hw contracts.HardwareInventory, _ models.TrainingInfo) bool { return hasCUDA(hw) }
+
+// EnvBytes is the download for PyTorch with its CUDA libraries.
+func (PEFT) EnvBytes() uint64 { return 4 << 30 }
+
+func (PEFT) Run(ctx context.Context, spec RunSpec, update func(Update)) (RunResult, error) {
+	if err := os.MkdirAll(spec.WorkDir, 0o755); err != nil {
+		return RunResult{}, err
+	}
+	script := filepath.Join(spec.WorkDir, "peft_train.py")
+	if err := os.WriteFile(script, peftScript, 0o644); err != nil {
+		return RunResult{}, err
+	}
+	cfg := map[string]any{
+		"repo":         spec.Repo,
+		"architecture": spec.Architecture,
+		"data_dir":     spec.DataDir,
+		"adapter_dir":  filepath.Join(spec.WorkDir, "peft-adapter"),
+		"adapter_out":  spec.AdapterOut,
+		"hyper":        spec.Hyper,
+		"device":       "auto",
+	}
+	cfgPath := filepath.Join(spec.WorkDir, "config.json")
+	raw, _ := json.MarshalIndent(cfg, "", "  ")
+	if err := os.WriteFile(cfgPath, raw, 0o644); err != nil {
+		return RunResult{}, err
+	}
+	return runScript(ctx, spec, []string{spec.Python, "-u", script, cfgPath}, update)
+}
+
+// Trainers differ in which base weights they download and whether they can
+// train QLoRA. MLX downloads a separate 4-bit copy for QLoRA; a trainer that
+// does otherwise implements weightsChooser.
+type weightsChooser interface {
+	Weights(info models.TrainingInfo, method Method) (repo string, bytes uint64)
+	CanQLoRA(hw contracts.HardwareInventory, info models.TrainingInfo) bool
+}
+
+// trainingWeights is the repository and size of the weights a run downloads.
+func trainingWeights(t Trainer, info models.TrainingInfo, method Method) (string, uint64) {
+	if w, ok := t.(weightsChooser); ok {
+		return w.Weights(info, method)
+	}
+	if method == MethodQLoRA && info.QuantizedRepo != "" {
+		return info.QuantizedRepo, info.QuantizedBytes
+	}
+	return info.BaseRepo, info.BaseBytes
+}
+
+// canQLoRA reports whether t can train QLoRA for this model on hw.
+func canQLoRA(t Trainer, hw contracts.HardwareInventory, info models.TrainingInfo) bool {
+	if w, ok := t.(weightsChooser); ok {
+		return w.CanQLoRA(hw, info)
+	}
+	return info.QuantizedRepo != ""
+}
+
+// envSizer is implemented by trainers whose environment download differs
+// from the MLX estimate.
+type envSizer interface{ EnvBytes() uint64 }
+
+func envBytes(t Trainer) uint64 {
+	if e, ok := t.(envSizer); ok {
+		return e.EnvBytes()
+	}
+	return trainerEnvBytes
 }
 
 // TrainerFor returns the first backend that supports the hardware.

@@ -41,6 +41,10 @@ type Spec struct {
 	// the list must be complete. It lets an environment swap a dependency,
 	// such as a headless build of a package for the full one.
 	Pinned bool
+	// InstallArgs are extra uv pip install flags, such as
+	// --torch-backend=auto, which picks the PyTorch build for the computer's
+	// GPU driver.
+	InstallArgs []string
 }
 
 // Status reports whether an environment is ready.
@@ -104,6 +108,9 @@ func requirementsKey(spec Spec) string {
 	if spec.Pinned {
 		key += "pinned\n"
 	}
+	if len(spec.InstallArgs) > 0 {
+		key += "args " + strings.Join(spec.InstallArgs, " ") + "\n"
+	}
 	return key + strings.Join(reqs, "\n") + "\n"
 }
 
@@ -157,6 +164,7 @@ func (m *Manager) Ensure(ctx context.Context, spec Spec, progress Progress) (str
 	if spec.Pinned {
 		args = append(args, "--no-deps")
 	}
+	args = append(args, spec.InstallArgs...)
 	args = append(args, spec.Requirements...)
 	if err := m.runUV(ctx, uv, progress, args...); err != nil {
 		_ = os.RemoveAll(dir)

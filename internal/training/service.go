@@ -1190,10 +1190,7 @@ func (s *Service) runJob(ctx context.Context, job Job, ai SpecializedAI, info mo
 			return
 		}
 	}
-	repo := info.BaseRepo
-	if job.Hyper.Method == MethodQLoRA && info.QuantizedRepo != "" {
-		repo = info.QuantizedRepo
-	}
+	repo, _ := trainingWeights(trainer, info, job.Hyper.Method)
 	adapterDir := s.adaptersDir(ai.ID)
 	if err := os.MkdirAll(adapterDir, 0o755); err != nil {
 		finish(StateFailed, err)

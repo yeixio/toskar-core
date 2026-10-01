@@ -78,7 +78,7 @@
       "paragraphs": [
         "Train builds a small assistant that is good at one job. Training teaches your AI how to do its job. Connected knowledge gives it the current information it needs to do that job.",
         "Use examples of good answers, such as chat transcripts or question and answer pairs, to train behavior: the questions it asks, its terminology, its steps, and its tone. Connect data that changes or must stay exact, such as inventory, prices, SKUs, catalogs, and policies, as knowledge. Editing connected knowledge never requires retraining.",
-        "Training runs on this computer. It needs a Mac with Apple Silicon. The first run downloads the trainer (about 450 MB) and the base model's training weights. The base model is not changed, and it stays available on its own."
+        "Training runs on this computer or a paired one. It needs a Mac with Apple Silicon or a computer with an NVIDIA GPU. The first run downloads the trainer (about 450 MB on a Mac, about 4 GB with NVIDIA's libraries) and the base model's training weights. The base model is not changed, and it stays available on its own."
       ],
       "steps": [
         "To see how it works first, choose Try an example. It sets up a sample tire shop assistant with example chats, an inventory, and a policy document, and explains each step. Nothing trains until you press Train.",

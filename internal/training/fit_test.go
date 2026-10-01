@@ -116,13 +116,62 @@ func TestEstimateFitFallsBackToCheaperSettings(t *testing.T) {
 	}
 }
 
-func TestEstimateFitUnsupportedHardware(t *testing.T) {
-	linux := contracts.HardwareInventory{OS: "linux", Arch: "amd64", Memory: contracts.MemoryInfo{TotalBytes: 64 << 30},
-		Accelerators: []contracts.Accelerator{{Kind: "gpu", DedicatedVRAM: 24 << 30, Backends: []string{"cuda"}}}}
+func nvidiaPC(vramGiB uint64) contracts.HardwareInventory {
+	return contracts.HardwareInventory{OS: "linux", Arch: "amd64", Memory: contracts.MemoryInfo{TotalBytes: 64 << 30},
+		Disk:         contracts.DiskInfo{AvailableBytes: 500 << 30},
+		Accelerators: []contracts.Accelerator{{Kind: "gpu", DedicatedVRAM: vramGiB << 30, Backends: []string{"cuda"}}}}
+}
+
+func TestNVIDIAComputersTrainWithPEFT(t *testing.T) {
 	backends := []Trainer{MLX{}, PEFT{}}
-	fit := EstimateFit(FitInput{NodeName: "gpu-box", Hardware: linux, Info: qwen05, Hyper: Hyper{Rank: 8, Layers: 8, BatchSize: 4}, Trainer: TrainerFor(backends, linux)})
-	if fit.Eligible || fit.Label != FitUnsupported || !strings.Contains(fit.Reason, "NVIDIA") {
-		t.Fatalf("cuda: %+v", fit)
+	st := DatasetStats{Usable: 100, P95Tokens: 512, Tokens: 40000}
+	h := PresetSettings(PresetBalanced, qwen7, st)
+
+	big := EstimateFit(FitInput{NodeName: "gpu-box", Hardware: nvidiaPC(48), Info: qwen7, Hyper: h, Stats: st, Trainer: TrainerFor(backends, nvidiaPC(48))})
+	if !big.Eligible || big.Backend != "peft" || big.Hyper.Method != MethodLoRA {
+		t.Fatalf("48 GB GPU: %+v", big)
+	}
+	// PyTorch downloads the original weights and its CUDA environment.
+	if big.DownloadBytes != qwen7.BaseBytes+(PEFT{}).EnvBytes() {
+		t.Fatalf("download = %d", big.DownloadBytes)
+	}
+
+	// A smaller GPU falls back to QLoRA, which still loads the original
+	// weights (bitsandbytes quantizes them), not the MLX 4-bit copy.
+	small := EstimateFit(FitInput{NodeName: "gaming-pc", Hardware: nvidiaPC(12), Info: qwen7, Hyper: h, Stats: st, Trainer: PEFT{}, EnvInstalled: true})
+	if small.Hyper.Method != MethodQLoRA || small.DownloadBytes != qwen7.BaseBytes {
+		t.Fatalf("12 GB GPU: %+v", small)
+	}
+	if repo, _ := trainingWeights(PEFT{}, qwen7, MethodQLoRA); repo != qwen7.BaseRepo {
+		t.Fatalf("PEFT QLoRA repo = %s", repo)
+	}
+	if repo, _ := trainingWeights(MLX{}, qwen7, MethodQLoRA); repo != qwen7.QuantizedRepo {
+		t.Fatalf("MLX QLoRA repo = %s", repo)
+	}
+}
+
+func TestEstimateFitUnsupportedHardware(t *testing.T) {
+	cpuOnly := contracts.HardwareInventory{OS: "linux", Arch: "amd64", Memory: contracts.MemoryInfo{TotalBytes: 64 << 30}}
+	backends := []Trainer{MLX{}, PEFT{}}
+	fit := EstimateFit(FitInput{NodeName: "server", Hardware: cpuOnly, Info: qwen05, Hyper: Hyper{Rank: 8, Layers: 8, BatchSize: 4}, Trainer: TrainerFor(backends, cpuOnly)})
+	if fit.Eligible || fit.Label != FitUnsupported || !strings.Contains(fit.Reason, "NVIDIA GPU with CUDA") {
+		t.Fatalf("no GPU: %+v", fit)
+	}
+}
+
+// noQLoRA is a trainer that cannot train QLoRA on any hardware.
+type noQLoRA struct{ MLX }
+
+func (noQLoRA) Weights(info models.TrainingInfo, _ Method) (string, uint64) {
+	return info.BaseRepo, info.BaseBytes
+}
+func (noQLoRA) CanQLoRA(contracts.HardwareInventory, models.TrainingInfo) bool { return false }
+
+func TestQLoRAIsReplacedWhereItCannotRun(t *testing.T) {
+	h := Hyper{Method: MethodQLoRA, Rank: 8, Layers: 8, BatchSize: 4, MaxSeqLength: 512}
+	fit := EstimateFit(FitInput{NodeName: "x", Hardware: mac(64), Info: qwen7, Hyper: h, Trainer: noQLoRA{}})
+	if fit.Hyper.Method != MethodLoRA || !strings.Contains(strings.Join(fit.Notes, " "), "QLoRA is not available") {
+		t.Fatalf("fit = %+v", fit)
 	}
 }
 

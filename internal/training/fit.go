@@ -166,11 +166,16 @@ func EstimateFit(in FitInput) NodeFit {
 	}
 	capacity := trainingCapacity(in.Hardware)
 	fit.MemoryAvailable = capacity
+	qlora := canQLoRA(in.Trainer, in.Hardware, in.Info)
+	if in.Hyper.Method == MethodQLoRA && !qlora {
+		in.Hyper.Method = MethodLoRA
+		fit.Notes = append(fit.Notes, "Uses LoRA, because QLoRA is not available on this computer.")
+	}
 
 	candidates := []Hyper{in.Hyper}
 	if !in.Pinned {
 		h := in.Hyper
-		if h.Method == MethodLoRA && in.Info.QuantizedRepo != "" {
+		if h.Method == MethodLoRA && qlora {
 			h.Method = MethodQLoRA
 			candidates = append(candidates, h)
 		}
@@ -203,15 +208,12 @@ func EstimateFit(in FitInput) NodeFit {
 		fit.Notes = append(fit.Notes, fmt.Sprintf("Trains the last %d layers instead of %d to save memory.", chosen.Layers, in.Hyper.Layers))
 	}
 
-	repo, weights := in.Info.BaseRepo, in.Info.BaseBytes
-	if chosen.Method == MethodQLoRA && in.Info.QuantizedRepo != "" {
-		repo, weights = in.Info.QuantizedRepo, in.Info.QuantizedBytes
-	}
+	repo, weights := trainingWeights(in.Trainer, in.Info, chosen.Method)
 	if in.Cached == nil || !in.Cached(repo) {
 		fit.DownloadBytes += weights
 	}
 	if !in.EnvInstalled {
-		fit.DownloadBytes += trainerEnvBytes
+		fit.DownloadBytes += envBytes(in.Trainer)
 	}
 	adapter := loraParams(in.Info, chosen) * 4
 	fit.StorageNeeded = fit.DownloadBytes + adapter + uint64(in.Stats.Tokens*8)

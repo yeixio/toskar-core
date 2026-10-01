@@ -3,10 +3,12 @@ package training
 import (
 	"context"
 	"errors"
+	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"slices"
 	"strings"
 	"syscall"
 	"testing"
@@ -166,4 +168,67 @@ func TestRateTrackerWaitsForASteadyRate(t *testing.T) {
 	if got == nil || *got != 89 {
 		t.Fatalf("remaining = %v", got)
 	}
+}
+
+func TestPEFTTrainsOnCUDA(t *testing.T) {
+	if ok, _ := (PEFT{}).Supports(nvidiaPC(24)); !ok {
+		t.Fatal("PEFT should train on a CUDA GPU")
+	}
+	if ok, why := (PEFT{}).Supports(mac(32)); ok || !strings.Contains(why, "NVIDIA") {
+		t.Fatalf("mac: %v %s", ok, why)
+	}
+	// On a Mac, MLX is chosen; on an NVIDIA PC, PEFT.
+	backends := []Trainer{MLX{}, PEFT{}}
+	if TrainerFor(backends, mac(32)).ID() != "mlx" || TrainerFor(backends, nvidiaPC(24)).ID() != "peft" {
+		t.Fatal("wrong trainer chosen")
+	}
+	spec := (PEFT{}).Environment()
+	if spec.Name != "trainer-peft" || len(spec.InstallArgs) != 1 || spec.InstallArgs[0] != "--torch-backend=auto" {
+		t.Fatalf("environment = %+v", spec)
+	}
+	if !strings.Contains(string(peftScript), `event="done"`) {
+		t.Fatal("the PEFT script is not embedded")
+	}
+}
+
+// TestPEFTScriptTrainsAnAdapter runs the PyTorch trainer for a few steps. It
+// is skipped unless YGG_TEST_PEFT_PYTHON is an interpreter with
+// PEFTRequirements installed. It downloads Qwen 2.5 0.5B (about 1 GB) into
+// HF_HOME on first run, and uses CUDA, MPS, or the CPU.
+func TestPEFTScriptTrainsAnAdapter(t *testing.T) {
+	py := os.Getenv("YGG_TEST_PEFT_PYTHON")
+	if py == "" {
+		t.Skip("set YGG_TEST_PEFT_PYTHON to an interpreter with the PEFT packages")
+	}
+	dir := t.TempDir()
+	data := filepath.Join(dir, "data")
+	_ = os.MkdirAll(data, 0o755)
+	var train, valid strings.Builder
+	for i := range 24 {
+		line := fmt.Sprintf(`{"messages":[{"role":"user","content":"Question %d about tires"},{"role":"assistant","content":"Ahoy! What year, make, and model is car %d?"}]}`+"\n", i, i)
+		if i < 20 {
+			train.WriteString(line)
+		} else {
+			valid.WriteString(line)
+		}
+	}
+	_ = os.WriteFile(filepath.Join(data, "train.jsonl"), []byte(train.String()), 0o644)
+	_ = os.WriteFile(filepath.Join(data, "valid.jsonl"), []byte(valid.String()), 0o644)
+	var states []State
+	res, err := (PEFT{}).Run(context.Background(), RunSpec{
+		Python: py, Env: os.Environ(), WorkDir: filepath.Join(dir, "work"), Repo: "Qwen/Qwen2.5-0.5B-Instruct", Architecture: "qwen2",
+		Hyper:   Hyper{Method: MethodLoRA, Rank: 8, Scale: 2, Layers: 4, LearningRate: 2e-4, BatchSize: 2, Iters: 10, MaxSeqLength: 256},
+		DataDir: data, AdapterOut: filepath.Join(dir, "adapter.gguf"), LogPath: filepath.Join(dir, "train.log"),
+	}, func(u Update) { states = append(states, u.State) })
+	if err != nil {
+		t.Fatal(err)
+	}
+	st, err := os.Stat(res.AdapterPath)
+	if err != nil || st.Size() == 0 || res.TrainLoss == nil || res.ValLoss == nil {
+		t.Fatalf("result = %+v, %v", res, err)
+	}
+	if !slices.Contains(states, StateTraining) || !slices.Contains(states, StateExporting) {
+		t.Fatalf("states = %v", states)
+	}
+	t.Logf("train loss %.3f, validation loss %.3f, adapter %d bytes", *res.TrainLoss, *res.ValLoss, st.Size())
 }
