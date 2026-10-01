@@ -224,9 +224,11 @@ func TestToolLoopStopsAtMaxDepth(t *testing.T) {
 	}
 	env := &scriptedEnv{replies: replies}
 	ctx := huginn.WithEffort(context.Background(), huginn.EffortBalanced)
-	events, err := New().Run(ctx, contracts.Task{Prompt: "loop"}, contracts.AIProfile{
+	// Ask keeps the up-front look-up out of the count; the test env runs
+	// every call the model makes.
+	events, err := New().Run(ctx, contracts.Task{Prompt: "search the web in a loop"}, contracts.AIProfile{
 		Roles: []contracts.ModelRole{{Role: "assistant", ModelID: "m"}},
-		Tools: []contracts.ToolPolicy{{ToolID: "internet.search", Policy: "allow"}},
+		Tools: []contracts.ToolPolicy{{ToolID: "internet.search", Policy: "ask"}},
 	}, env)
 	if err != nil {
 		t.Fatal(err)

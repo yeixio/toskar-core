@@ -99,6 +99,9 @@ type App struct {
 	Egress *egress.Log
 	// RunLog keeps each request's run trace (§35).
 	RunLog *runlog.Store
+	// StubReply, when set with stub inference, scripts what the stub model
+	// says, for the quality test set (§64). It sees every prompt.
+	StubReply func(modelID string, messages []pluginapi.ChatMessage) string
 	// MCP runs the MCP tool sources the person added.
 	MCP *mcp.Manager
 	// Artifacts holds chat attachments and files the assistant produced.

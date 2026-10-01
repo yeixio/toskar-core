@@ -106,3 +106,26 @@ func TestWhichComputerCanRunAModel(t *testing.T) {
 		t.Errorf("facts = %q", facts)
 	}
 }
+
+func TestDirectAnswers(t *testing.T) {
+	s := snapshot()
+	for q, want := range map[string]string{
+		"Can you generate an image of a cat?":  "No, I can't generate images right now. No image model",
+		"Can you execute Python?":              "Yes, I can run commands and code, using Terminal.",
+		"Which computer can run Qwen 2.5 14B?": "Qwen 2.5 14B:\n- Studio: can run it now",
+	} {
+		got, ok := Direct(s, q)
+		if !ok || !strings.HasPrefix(got, want) {
+			t.Errorf("%q = %q, %v", q, got, ok)
+		}
+	}
+	for _, q := range []string{
+		"Generate an image of a cat",
+		"Can you search the web and also run Python to chart the results for me?",
+		"Can you explain what a capital city is and why it matters for a country's government?",
+	} {
+		if got, ok := Direct(s, q); ok {
+			t.Errorf("%q answered directly: %q", q, got)
+		}
+	}
+}

@@ -184,9 +184,15 @@ func TestToolsFor(t *testing.T) {
 		}
 		return true
 	}
-	got := ToolsFor(Chat, "What is DNS?", all)
-	if !has(got, "internet.search", "files.create") || has(got, "terminal") || has(got, "filesystem.read") || has(got, "git.push") {
-		t.Fatalf("chat = %v", got)
+	// A plain question is answered directly, without tools (§64).
+	if got := ToolsFor(Chat, "What is DNS?", all); len(got) != 0 {
+		t.Fatalf("plain question offered %v", got)
+	}
+	if got := ToolsFor(Chat, "Search the web for how DNS works", all); !has(got, "internet.search") || has(got, "terminal") {
+		t.Fatalf("web cue = %v", got)
+	}
+	if got := ToolsFor(Chat, "Make a spreadsheet of these prices", all); !has(got, "files.create") || has(got, "internet.search") {
+		t.Fatalf("file cue = %v", got)
 	}
 	if got := ToolsFor(Chat, "What's in notes.md?", all); !has(got, "filesystem.read") || has(got, "filesystem.write") {
 		t.Fatalf("a file name offers reading = %v", got)

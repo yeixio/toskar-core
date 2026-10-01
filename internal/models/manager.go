@@ -287,9 +287,11 @@ func (m *Manager) EnsureStubModel(ctx context.Context) error {
 		SizeBytes:         4,
 		MemoryNeededBytes: 1,
 		Context:           2048,
-		Purpose:           []string{"coding", "general"},
-		Runtime:           []string{"llamacpp"},
-		Dynamic:           true,
+		// The stub says whatever a test scripts, including tool calls.
+		Capabilities: contracts.ModelCapabilities{ToolCalling: true, ToolCallSupport: "compatible"},
+		Purpose:      []string{"coding", "general"},
+		Runtime:      []string{"llamacpp"},
+		Dynamic:      true,
 	}
 	m.catalog.Upsert(entry)
 	if err := m.storage.UpsertCatalogEntry(ctx, entry); err != nil {

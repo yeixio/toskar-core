@@ -173,3 +173,16 @@ func TestToolsForMCPSources(t *testing.T) {
 		t.Errorf("unrelated question offered %v", got)
 	}
 }
+
+func TestClaimsAction(t *testing.T) {
+	for _, a := range []string{"Done! Your Downloads folder is now empty.", "I've deleted the files.", "The email has been sent.", "I successfully pushed the commit."} {
+		if !ClaimsAction(a) {
+			t.Errorf("missed %q", a)
+		}
+	}
+	for _, a := range []string{"I did not delete anything.", "You can delete them with rm.", "Deleted files go to the Trash.", "The capital of France is Paris."} {
+		if ClaimsAction(a) {
+			t.Errorf("false alarm %q", a)
+		}
+	}
+}

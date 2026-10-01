@@ -24,6 +24,7 @@ import (
 	"github.com/yeixio/yggdrasil-core/internal/runlog"
 	"github.com/yeixio/yggdrasil-core/internal/runtimes/llamacpp"
 	"github.com/yeixio/yggdrasil-core/internal/share"
+	"github.com/yeixio/yggdrasil-core/internal/structured"
 	"github.com/yeixio/yggdrasil-core/internal/tools"
 	"github.com/yeixio/yggdrasil-core/internal/turnopts"
 	"github.com/yeixio/yggdrasil-core/pkg/contracts"
@@ -47,6 +48,13 @@ func (a *App) RunChat(ctx context.Context, profileID, conversationID, message st
 	}
 	// Memory requests are answered by Yggdrasil, not the model.
 	opts := turnopts.From(ctx)
+	// A short question about what Yggdrasil can do is answered from its
+	// inventory, not by a model that may claim what it cannot do (§37).
+	if len(structured.SchemaFrom(ctx)) == 0 {
+		if ch, ok := a.answerCapabilityQuestion(ctx, conversationID, message); ok {
+			return ch, nil
+		}
+	}
 	// An API caller changes memories only when it opted into memory (§62).
 	if opts != nil && !opts.Memory {
 		// Fall through: "Remember …" is an ordinary message for this caller.
@@ -1065,6 +1073,8 @@ func (e *chatExecEnv) Emit(eventType string, payload map[string]any) {
 			fixed, _ := payload["fixed"].(int)
 			remaining, _ := payload["remaining"].(string)
 			e.trace.verified(issues, fixed, remaining)
+		case simple.EventUnconfirmedAction:
+			e.trace.unconfirmedAction()
 		}
 	}
 	if e.app.Tools != nil && (eventType == events.ToolParsed || eventType == events.ToolFailed) {

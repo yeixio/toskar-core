@@ -195,7 +195,7 @@ func (a *App) generateOnNode(ctx context.Context, nodeID, modelID, role, adapter
 	}
 	if nodeID == "" || nodeID == cfg.NodeID {
 		if a.stubInference {
-			return a.stubGenerate(modelID), nil
+			return a.stubGenerate(modelID, messages), nil
 		}
 		loadStarted := time.Now()
 		endpoint, err := a.ensureLocalModel(ctx, modelID)
@@ -371,7 +371,7 @@ func (a *App) internalChatStream(ctx context.Context, req nodes.RemoteChatReques
 	var ch <-chan pluginapi.ChatChunk
 	var err error
 	if a.stubInference {
-		ch = a.stubGenerate(req.ModelID)
+		ch = a.stubGenerate(req.ModelID, req.Messages)
 	} else {
 		endpoint, err2 := a.ensureLocalModel(ctx, req.ModelID)
 		if err2 != nil {
@@ -464,12 +464,15 @@ func (a *App) recordClusterServe(req nodes.RemoteChatRequest, metrics *pluginapi
 }
 
 // stubGenerate returns a canned completion that names this node so e2e can verify placement.
-func (a *App) stubGenerate(modelID string) <-chan pluginapi.ChatChunk {
+func (a *App) stubGenerate(modelID string, messages []pluginapi.ChatMessage) <-chan pluginapi.ChatChunk {
 	cfg := a.Config.Get()
 	ch := make(chan pluginapi.ChatChunk, 2)
 	go func() {
 		defer close(ch)
 		content := fmt.Sprintf("stub reply from %s (%s) model=%s", cfg.NodeName, cfg.NodeID, modelID)
+		if a.StubReply != nil {
+			content = a.StubReply(modelID, messages)
+		}
 		ch <- pluginapi.ChatChunk{Content: content}
 		ch <- pluginapi.ChatChunk{
 			Done: true,

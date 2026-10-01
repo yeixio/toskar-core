@@ -8,6 +8,7 @@ import (
 	"github.com/yeixio/yggdrasil-core/internal/inventory"
 	"github.com/yeixio/yggdrasil-core/internal/tools"
 	"github.com/yeixio/yggdrasil-core/pkg/contracts"
+	"github.com/yeixio/yggdrasil-core/pkg/pluginapi"
 )
 
 // Capabilities is the capability inventory right now (§37): what is
@@ -109,4 +110,18 @@ func (a *App) capabilityFacts(ctx context.Context, message string) string {
 		return ""
 	}
 	return inventory.Facts(a.Capabilities(ctx), message)
+}
+
+// answerCapabilityQuestion replies to a short question about what
+// Yggdrasil can do straight from the inventory (§37, §64).
+func (a *App) answerCapabilityQuestion(ctx context.Context, conversationID, message string) (<-chan pluginapi.ChatChunk, bool) {
+	if !inventory.IsQuestion(message) {
+		return nil, false
+	}
+	reply, ok := inventory.Direct(a.Capabilities(ctx), message)
+	if !ok {
+		return nil, false
+	}
+	meta := &contracts.MessageMeta{Steps: []contracts.ActivityStep{{Kind: "share", Text: "Checked what Yggdrasil can do right now"}}}
+	return a.replyDirectly(ctx, conversationID, message, reply, meta), true
 }

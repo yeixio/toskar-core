@@ -89,6 +89,12 @@ func (a *App) handleMemoryCommand(ctx context.Context, conversationID, message s
 	if step != nil {
 		meta = &contracts.MessageMeta{Steps: []contracts.ActivityStep{*step}}
 	}
+	return a.replyDirectly(ctx, conversationID, message, reply, meta), true
+}
+
+// replyDirectly answers without a model: it saves the turn, tells every
+// client, and returns the reply as a finished stream.
+func (a *App) replyDirectly(ctx context.Context, conversationID, message, reply string, meta *contracts.MessageMeta) <-chan pluginapi.ChatChunk {
 	if conversationID != "" {
 		if save, _ := a.Settings.GetBool(ctx, "save_chat_history", true); save {
 			_, _ = a.Conversations.AddMessage(ctx, conversationID, "user", message)
@@ -106,7 +112,7 @@ func (a *App) handleMemoryCommand(ctx context.Context, conversationID, message s
 	ch <- pluginapi.ChatChunk{Content: reply}
 	ch <- pluginapi.ChatChunk{Done: true}
 	close(ch)
-	return ch, true
+	return ch
 }
 
 func (a *App) describeMemories(ctx context.Context, on bool) string {

@@ -417,3 +417,45 @@ func Facts(s Snapshot, message string) string {
 	return "What Yggdrasil can do right now, from its capability inventory. Answer the question from these facts; do not claim abilities that are not listed as yes:\n" +
 		strings.Join(lines, "\n")
 }
+
+// directMaxWords is the longest question answered straight from the
+// inventory; a longer one also asks for something else.
+const directMaxWords = 14
+
+// Direct answers a short question about one ability, or about which
+// computer can run a model, straight from the inventory, without a model:
+// small models ignore the facts and claim abilities they lack (found by the
+// quality set, §64).
+func Direct(s Snapshot, message string) (string, bool) {
+	if !IsQuestion(message) || len(strings.Fields(message)) > directMaxWords {
+		return "", false
+	}
+	if m, ok := ModelIn(s, message); ok {
+		places, _ := NodesFor(s, m.ID)
+		var lines []string
+		for _, p := range places {
+			lines = append(lines, fmt.Sprintf("- %s: %s", p.Node, p.Note))
+		}
+		return m.Name + ":\n" + strings.Join(lines, "\n"), true
+	}
+	asked := Ask(s, message)
+	if len(asked) != 1 {
+		return "", false
+	}
+	a := asked[0]
+	what := strings.ToLower(a.Label[:1]) + a.Label[1:]
+	var b strings.Builder
+	if a.Available {
+		fmt.Fprintf(&b, "Yes, I can %s", what)
+		if len(a.Via) > 0 {
+			fmt.Fprintf(&b, ", using %s", strings.Join(a.Via, ", "))
+		}
+		b.WriteString(".")
+	} else {
+		fmt.Fprintf(&b, "No, I can't %s right now.", what)
+	}
+	if a.Note != "" {
+		b.WriteString(" " + a.Note)
+	}
+	return b.String(), true
+}

@@ -191,6 +191,8 @@ func (o *Orchestrator) Run(
 		}
 		calls := 0
 		malformed := 0
+		// changed records that a tool that changes things ran.
+		changed := false
 		retriedPlain := false
 
 		for {
@@ -225,9 +227,10 @@ func (o *Orchestrator) Run(
 			if parsed.Call != nil {
 				parsed.Call.ID = tools.Canonical(parsed.Call.ID)
 			}
-			if parsed.Call != nil && toolsOn && !toolEnabled(profile, parsed.Call.ID) && malformed < 2 {
+			if parsed.Call != nil && !toolEnabled(profile, parsed.Call.ID) && malformed < 2 {
 				// A tool that was not offered is refused, whatever the profile
 				// allows: the model cannot widen its own tools (spec §17).
+				// That holds when no tools were offered at all.
 				malformed++
 				env.Emit(events.ToolFailed, map[string]any{"tool_id": parsed.Call.ID, "kind": tools.ErrKindNotOffered, "error": tools.ErrNotOffered.Error()})
 				messages = append(messages,
@@ -251,6 +254,11 @@ func (o *Orchestrator) Run(
 					ch <- pluginapi.OrchestrationEvent{Type: "agent.message", Role: role, NodeID: nodeID, Content: parsed.Text}
 				}
 				result, err := env.ExecuteTool(ctx, parsed.Call.ID, parsed.Call.Args)
+				if err == nil {
+					if def, ok := tools.Lookup(parsed.Call.ID); ok && def.Risk != tools.RiskRead {
+						changed = true
+					}
+				}
 				var resultNote string
 				if err != nil {
 					payload, _ := json.Marshal(map[string]any{"ok": false, "error": publicToolError(err)})
@@ -300,6 +308,11 @@ func (o *Orchestrator) Run(
 			answer := parsed.Text
 			if budget.Verify {
 				answer = verifyAnswer(ctx, env, role, messages, parsed.Text, evidence, task.Prompt, budget.Corrections)
+			}
+			// An answer that says it changed something, when nothing that
+			// changes things ran, is called out (§24; found by §64).
+			if !changed && huginn.ClaimsAction(answer) {
+				env.Emit(EventUnconfirmedAction, map[string]any{})
 			}
 			streamText(ch, role, nodeID, answer, metrics, usage)
 			return

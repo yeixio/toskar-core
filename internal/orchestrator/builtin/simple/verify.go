@@ -17,6 +17,8 @@ import (
 const (
 	EventVerifying = "chat.verifying"
 	EventVerified  = "verify.done"
+	// EventUnconfirmedAction says the answer claims a change no tool made.
+	EventUnconfirmedAction = "verify.action"
 )
 
 // verifyAnswer checks an answer's arithmetic and, when the turn used

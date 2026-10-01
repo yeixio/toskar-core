@@ -242,3 +242,13 @@ func HasFigures(answer string) bool {
 	}
 	return calcRe.MatchString(answer)
 }
+
+// actionClaimRe is an answer saying it already did something that changes
+// things: "I deleted…", "is now empty", "has been sent".
+var actionClaimRe = regexp.MustCompile(`(?i)\b(i(?:'ve| have)?\s+(?:just\s+)?(?:deleted|removed|created|written|wrote|saved|sent|pushed|committed|ran|executed|installed|moved|renamed|turned (?:on|off)|posted|emptied|cleared)|(?:is|are) now (?:empty|deleted|removed|gone|on|off|installed)|(?:has|have) been (?:deleted|removed|sent|created|saved|committed|pushed|installed|moved|renamed|emptied|cleared|turned (?:on|off))|successfully (?:deleted|removed|sent|created|saved|committed|pushed|installed|moved|renamed))\b`)
+
+// ClaimsAction reports an answer that says it already changed something,
+// so it can be checked against what actually ran (§24).
+func ClaimsAction(answer string) bool {
+	return actionClaimRe.MatchString(answer)
+}

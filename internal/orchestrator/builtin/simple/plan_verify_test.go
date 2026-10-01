@@ -244,8 +244,8 @@ func TestOnlyRelevantToolsAreOffered(t *testing.T) {
 	env := &planEnv{replies: []string{"DNS turns names into addresses."}}
 	run(t, env, "What is DNS?", all...)
 	sys := env.seen[0][0].Content
-	if !strings.Contains(sys, "internet.search") || strings.Contains(sys, "terminal") || strings.Contains(sys, "git.push") || strings.Contains(sys, "filesystem.read") {
-		t.Fatalf("a quick question offers web and files.create only: %q", sys)
+	if strings.Contains(sys, "tool_call") || strings.Contains(sys, "internet.search") || strings.Contains(sys, "terminal") {
+		t.Fatalf("a quick question is answered without tools: %q", sys)
 	}
 	env = &planEnv{replies: []string{"Done."}}
 	run(t, env, "Run the tests in this repo and commit the fix", all...)

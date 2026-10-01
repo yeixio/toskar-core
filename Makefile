@@ -3,7 +3,7 @@
 COMMIT := $(shell git rev-parse --short HEAD 2>/dev/null || echo unknown)
 LDFLAGS := -X github.com/yeixio/yggdrasil-core/internal/version.Commit=$(COMMIT)
 
-.PHONY: help start ui frontend daemon run-daemon run-web all tidy test vet fmt lint ci test-cluster package-headless screenshots appstore-screenshots icons
+.PHONY: help start ui frontend daemon run-daemon run-web all tidy test vet fmt lint ci quality quality-real test-cluster package-headless screenshots appstore-screenshots icons
 
 help: ## Show targets
 	@echo "Yggdrasil Core"
@@ -58,6 +58,12 @@ test: ## Run Go tests
 	go test ./...
 
 ci: fmt lint vet test frontend ## Run the local CI checks
+
+quality: ## Run the quality test set against the stub model
+	go test ./tests/quality -count=1 -v
+
+quality-real: ## Run the quality test set against a running daemon (YGGDRASIL_QUALITY_URL, default http://127.0.0.1:7331)
+	YGGDRASIL_QUALITY_URL=$${YGGDRASIL_QUALITY_URL:-http://127.0.0.1:7331} go test ./tests/quality -count=1 -v -timeout 60m
 
 test-cluster: ## Run the Docker cluster check
 	chmod +x scripts/cluster-e2e.sh

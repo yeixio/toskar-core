@@ -153,6 +153,15 @@ func (t *turnTrace) verified(issues, fixed int, remaining string) {
 	}
 }
 
+// unconfirmedAction records an answer that says it changed something when
+// nothing that changes things ran. The person is told plainly.
+func (t *turnTrace) unconfirmedAction() {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	t.addStep("verify", "Checked the answer against what actually ran")
+	t.notice = "Nothing was changed: no tool ran to do this, whatever the answer says."
+}
+
 // stopped records that the user stopped the turn. kept says whether part
 // of the answer was written and saved.
 func (t *turnTrace) stopped(kept, timedOut bool) {

@@ -1,0 +1,27 @@
+name: Quality
+
+# The quality test set against real models (spec §64). The same cases run
+# against the stub model in CI on every change; this runs them against a
+# daemon with real models installed, on a self-hosted runner, so defaults
+# are changed with evidence. It runs only when the repository variable
+# QUALITY_DAEMON_URL names that daemon.
+
+on:
+  schedule:
+    - cron: "17 6 * * 1"
+  workflow_dispatch:
+
+jobs:
+  real-models:
+    if: vars.QUALITY_DAEMON_URL != ''
+    runs-on: [self-hosted, yggdrasil-models]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v7
+        with:
+          go-version: "1.26.x"
+      - name: Quality set
+        env:
+          YGGDRASIL_QUALITY_URL: ${{ vars.QUALITY_DAEMON_URL }}
+          YGGDRASIL_QUALITY_KEY: ${{ secrets.QUALITY_API_KEY }}
+        run: go test ./tests/quality -count=1 -v -timeout 60m

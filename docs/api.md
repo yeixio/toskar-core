@@ -212,6 +212,11 @@ The capability inventory lists what exists right now:
 
 A chat question about what Yggdrasil can do, such as "Can you generate an image?", "Do you have access to my email?", or "Which computer can run Qwen 2.5 14B?", gets the matching facts as trusted instructions. The model answers from them instead of guessing, and the answer's steps say so. In the app, Diagnostics shows the same list.
 
+Three behaviors come from the quality test set (`tests/quality`):
+- **Plain questions:** a plain question is answered without tools; the message must ask for a search, a file, a command, and so on.
+- **Capability questions:** a short question about what Yggdrasil can do is answered straight from the capability inventory, without a model.
+- **False claims:** an answer that says it changed something, when no tool that changes things ran, gets the notice "Nothing was changed: no tool ran to do this, whatever the answer says."
+
 Model, node, tool, conversation, and log routes follow the same prefix. The OpenAPI file is the route list to diff when a handler changes.
 
 ## OpenAI-compatible API
