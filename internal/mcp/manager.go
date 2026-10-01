@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"path/filepath"
 	"regexp"
 	"sort"
 	"strings"
@@ -668,7 +669,7 @@ func rootsOf(spec Spec) []Root {
 	var out []Root
 	for _, a := range spec.Args {
 		p := expandHome(a)
-		if !strings.HasPrefix(p, "/") && !(len(p) > 2 && p[1] == ':') {
+		if !filepath.IsAbs(p) {
 			continue
 		}
 		if info, err := os.Stat(p); err == nil && info.IsDir() {

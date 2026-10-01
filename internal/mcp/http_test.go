@@ -132,7 +132,6 @@ func TestStreamableHTTPSource(t *testing.T) {
 // legacyFake is a 2024-11-05 HTTP+SSE server.
 type legacyFake struct {
 	f      *fake
-	mu     sync.Mutex
 	stream chan []byte
 }
 
