@@ -10,12 +10,28 @@ import (
 
 // Hit is one retrieved passage.
 type Hit struct {
-	SourceID   string  `json:"source_id"`
-	SourceName string  `json:"source_name"`
-	Title      string  `json:"title"`
-	Body       string  `json:"body"`
-	Score      float64 `json:"score"`
+	SourceID   string `json:"source_id"`
+	SourceName string `json:"source_name"`
+	Title      string `json:"title"`
+	Body       string `json:"body"`
+	// Score orders the hits; higher is better. It compares hits within one
+	// search only: BM25 for keyword-only search, fused rank for hybrid search,
+	// and the reranker's score when a reranker ordered them.
+	Score float64 `json:"score"`
+	// Match says how the passage was found: MatchKeyword, MatchSemantic, or
+	// MatchBoth.
+	Match string `json:"match,omitempty"`
+
+	// rowid identifies the passage across keyword and semantic results.
+	rowid int64
 }
+
+// How a hit was found.
+const (
+	MatchKeyword  = "keyword"
+	MatchSemantic = "semantic"
+	MatchBoth     = "both"
+)
 
 // SearchInput queries connected knowledge.
 type SearchInput struct {
@@ -60,14 +76,18 @@ func matchQuery(q string) string {
 }
 
 // Search returns the passages that best match the query. Sources whose files
-// changed since they were indexed are refreshed first.
+// changed since they were indexed are refreshed first. With an embedding
+// model installed, passages that match the question's meaning are found too,
+// even when they share no words with it.
 func (s *Store) Search(ctx context.Context, in SearchInput) ([]Hit, error) {
 	limit := in.Limit
 	if limit <= 0 || limit > 50 {
 		limit = 6
 	}
-	match := matchQuery(in.Query)
-	if match == "" {
+	query := strings.TrimSpace(in.Query)
+	match := matchQuery(query)
+	models := s.supportingModels()
+	if match == "" && (models == nil || query == "") {
 		return []Hit{}, nil
 	}
 	ids := in.SourceIDs
@@ -85,37 +105,68 @@ func (s *Store) Search(ctx context.Context, in SearchInput) ([]Hit, error) {
 	}
 	s.refreshIfChanged(ctx, ids)
 
-	args := []any{match}
-	marks := make([]string, len(ids))
-	for i, id := range ids {
-		marks[i] = "?"
-		args = append(args, id)
+	// Fusion and reranking choose from a wider pool than they return.
+	pool := max(limit*4, 24)
+	keyword := []Hit{}
+	if match != "" {
+		var err error
+		if keyword, err = s.keywordSearch(ctx, match, ids, pool); err != nil {
+			return nil, err
+		}
+		keyword = relevant(keyword)
 	}
+	hits := keyword
+	if sem, ok := s.semanticSearch(ctx, models, query, ids, pool); ok {
+		hits = fuse(keyword, sem.alsoRelevant(keyword))
+	}
+	return truncate(s.rerank(ctx, models, query, hits), limit), nil
+}
+
+func truncate(hits []Hit, n int) []Hit {
+	if len(hits) > n {
+		return hits[:n]
+	}
+	return hits
+}
+
+// keywordSearch ranks passages by BM25, best first.
+func (s *Store) keywordSearch(ctx context.Context, match string, ids []string, limit int) ([]Hit, error) {
+	args := []any{match}
+	args = append(args, anySlice(ids)...)
 	args = append(args, limit)
 	rows, err := s.db.QueryContext(ctx, fmt.Sprintf(`
-		SELECT f.source_id, COALESCE(src.name, ''), f.title, f.body, bm25(knowledge_fts, 0.5, 1.0) AS score
+		SELECT f.rowid, f.source_id, COALESCE(src.name, ''), f.title, f.body, bm25(knowledge_fts, 0.5, 1.0) AS score
 		FROM knowledge_fts f
 		LEFT JOIN knowledge_sources src ON src.id = f.source_id
 		WHERE knowledge_fts MATCH ? AND f.source_id IN (%s)
-		ORDER BY score LIMIT ?`, strings.Join(marks, ",")), args...)
+		ORDER BY score LIMIT ?`, marks(len(ids))), args...)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 	out := []Hit{}
 	for rows.Next() {
-		var h Hit
-		if err := rows.Scan(&h.SourceID, &h.SourceName, &h.Title, &h.Body, &h.Score); err != nil {
+		h := Hit{Match: MatchKeyword}
+		if err := rows.Scan(&h.rowid, &h.SourceID, &h.SourceName, &h.Title, &h.Body, &h.Score); err != nil {
 			return nil, err
 		}
 		// bm25 is lower-is-better and negative; report higher-is-better.
 		h.Score = -h.Score
 		out = append(out, h)
 	}
-	if err := rows.Err(); err != nil {
-		return nil, err
+	return out, rows.Err()
+}
+
+func marks(n int) string {
+	return strings.TrimSuffix(strings.Repeat("?,", n), ",")
+}
+
+func anySlice(ids []string) []any {
+	out := make([]any, len(ids))
+	for i, id := range ids {
+		out[i] = id
 	}
-	return relevant(out), nil
+	return out
 }
 
 // relevanceFloor drops passages that score far below the best one. A

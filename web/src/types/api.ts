@@ -754,6 +754,10 @@ export interface KnowledgeSource {
   status: 'ready' | 'failed' | 'indexing'
   error?: string
   chunk_count: number
+  // Passages with a vector for semantic search, and the embedding model that
+  // made them. Zero until an embedding model is installed.
+  embedded_count?: number
+  embedding_model?: string
   created_at: string
   updated_at: string
   refreshed_at?: string
@@ -765,6 +769,7 @@ export interface KnowledgeHit {
   title: string
   body: string
   score: number
+  match?: 'keyword' | 'semantic' | 'both'
 }
 
 // Train Your Own AI.

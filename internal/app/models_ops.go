@@ -61,6 +61,7 @@ func (a *App) localRunningViews(ctx context.Context) ([]contracts.RunningModelVi
 			Endpoint:       r.Endpoint,
 			Accelerator:    accel,
 			UsedByProfiles: profileNames[r.ModelID],
+			Mode:           r.Mode,
 		}
 		if t, ok := runtimeLastUsed.Load(r.ModelID); ok {
 			tt := t.(time.Time)

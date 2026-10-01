@@ -253,6 +253,9 @@ type RunningModelView struct {
 	UsedByProfiles []string   `json:"used_by_profiles,omitempty"`
 	Accelerator    string     `json:"accelerator,omitempty"`
 	LastUsedAt     *time.Time `json:"last_used_at,omitempty"`
+	// Mode is "embedding" or "reranking" for a supporting model serving
+	// knowledge search, and empty for a chat model.
+	Mode string `json:"mode,omitempty"`
 }
 
 // BrowseModel is a Hugging Face browse-all hit (GGUF filtered).

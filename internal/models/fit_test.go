@@ -62,3 +62,42 @@ func TestRecommendWithPresetsPrefersCoding(t *testing.T) {
 		t.Fatalf("unexpected recommendation: %+v", rec.Models[0])
 	}
 }
+
+func TestEmbeddingModelIsNeverRecommendedForChat(t *testing.T) {
+	catalog, err := models.NewCatalogEmbedded()
+	if err != nil {
+		t.Fatal(err)
+	}
+	embed, ok := catalog.Get("nomic-embed-text-v1.5-q8")
+	if !ok || embed.SupportRole != contracts.SupportEmbedding || embed.Source.SHA256 == "" {
+		t.Fatalf("catalog embedding model: %+v", embed)
+	}
+	hw := contracts.HardwareInventory{Memory: contracts.MemoryInfo{TotalBytes: 4 << 30, AvailableBytes: 3 << 30}}
+	presets, _ := models.LoadPresetsEmbedded()
+	resp := models.BuildFitResponse(catalog, hw, "local", "Small PC", presets, models.FitOptions{})
+	for _, w := range resp.Winners {
+		if w.ModelID == embed.ID {
+			t.Fatalf("the embedding model won %q", w.Category)
+		}
+	}
+	for _, purpose := range []string{"general", "coding", "unknown-purpose"} {
+		rec, err := models.RecommendWithPresets(catalog, presets, models.RecommendInput{Purpose: purpose, Hardware: hw})
+		if err != nil {
+			t.Fatal(err)
+		}
+		for _, m := range rec.Models {
+			if m.ID == embed.ID {
+				t.Fatalf("%s recommended the embedding model", purpose)
+			}
+		}
+		rec, err = models.Recommend(catalog, models.RecommendInput{Purpose: purpose, Hardware: hw})
+		if err != nil {
+			t.Fatal(err)
+		}
+		for _, m := range rec.Models {
+			if m.ID == embed.ID {
+				t.Fatalf("%s recommended the embedding model", purpose)
+			}
+		}
+	}
+}

@@ -26,6 +26,21 @@ type CatalogEntry struct {
 	Training *TrainingInfo `json:"training,omitempty"`
 }
 
+// Supporting reports an embedding, reranker, or classifier model. It serves
+// Yggdrasil and never chats, so it is never recommended for chat.
+func (e CatalogEntry) Supporting() bool { return e.SupportRole != "" }
+
+// chatEntries leaves supporting models out.
+func chatEntries(list []CatalogEntry) []CatalogEntry {
+	out := make([]CatalogEntry, 0, len(list))
+	for _, e := range list {
+		if !e.Supporting() {
+			out = append(out, e)
+		}
+	}
+	return out
+}
+
 // TrainingInfo describes the trainable weights behind a catalog GGUF.
 type TrainingInfo struct {
 	// BaseRepo is the Hugging Face repository the GGUF was converted from.

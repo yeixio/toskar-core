@@ -558,6 +558,7 @@ func New(opts Options) (*App, error) {
 	})
 
 	a.Mimir = mimir.NewStore(db.SQL, filepath.Join(cfg.DataDir, "knowledge"))
+	a.Mimir.SetModels(newKnowledgeModels(a))
 	a.Muninn = muninn.NewStore(db.SQL)
 	a.summarizer = &muninn.Summarizer{Store: a.Muninn}
 	a.API.BindMemory(a.Muninn)
@@ -726,6 +727,7 @@ func (a *App) Start(ctx context.Context) error {
 	if a.Lifecycle != nil {
 		a.Lifecycle.Start(ctx)
 	}
+	a.indexKnowledge(ctx)
 	if a.AutomationRunner != nil {
 		a.wg.Add(1)
 		go func() {

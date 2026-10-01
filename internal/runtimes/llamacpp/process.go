@@ -32,6 +32,7 @@ type managedProcess struct {
 	endpoint    string
 	modelID     string
 	adapters    []string
+	mode        string
 	logFile     *os.File
 	logPath     string
 	intentional bool
@@ -82,7 +83,7 @@ func (r *Runtime) StartModel(ctx context.Context, cfg pluginapi.ModelStartConfig
 			if m.ModelID != cfg.ModelID || m.Status != "running" {
 				continue
 			}
-			if sameAdapters(m.Adapters, wantAdapters) {
+			if m.Mode == cfg.Mode && sameAdapters(m.Adapters, wantAdapters) {
 				return m, nil
 			}
 			_ = r.StopModel(ctx, m.ID)
@@ -105,12 +106,7 @@ func (r *Runtime) StartModel(ctx context.Context, cfg pluginapi.ModelStartConfig
 		return pluginapi.RunningModel{}, err
 	}
 
-	args := []string{
-		"-m", cfg.ModelPath,
-		"--host", "127.0.0.1",
-		"--port", fmt.Sprintf("%d", port),
-		"--ctx-size", fmt.Sprintf("%d", defaultContext(cfg.Context)),
-	}
+	args := startArgs(cfg, port)
 	gpuLayers := cfg.GPULayers
 	if gpuLayers == 0 {
 		gpuLayers = defaultGPULayers()
@@ -143,6 +139,7 @@ func (r *Runtime) StartModel(ctx context.Context, cfg pluginapi.ModelStartConfig
 		endpoint: endpoint,
 		modelID:  cfg.ModelID,
 		adapters: wantAdapters,
+		mode:     cfg.Mode,
 		logFile:  logFile,
 		logPath:  logPath,
 		exited:   make(chan struct{}),
@@ -165,8 +162,41 @@ func (r *Runtime) StartModel(ctx context.Context, cfg pluginapi.ModelStartConfig
 		Status:    "running",
 		RuntimeID: runtimeID,
 		Adapters:  wantAdapters,
+		Mode:      cfg.Mode,
 	}, nil
 }
+
+// startArgs are llama-server's model, address, and mode flags.
+func startArgs(cfg pluginapi.ModelStartConfig, port int) []string {
+	args := []string{
+		"-m", cfg.ModelPath,
+		"--host", "127.0.0.1",
+		"--port", fmt.Sprintf("%d", port),
+	}
+	switch cfg.Mode {
+	case pluginapi.ModeEmbedding, pluginapi.ModeReranking:
+		// Embedding and reranking read each input in one batch, so the batch
+		// is as large as the window. Supporting models are small; a short
+		// window keeps them light.
+		n := cfg.Context
+		if n <= 0 || n > supportContext {
+			n = supportContext
+		}
+		flag := "--embedding"
+		if cfg.Mode == pluginapi.ModeReranking {
+			flag = "--reranking"
+		}
+		return append(args, flag,
+			"--ctx-size", fmt.Sprintf("%d", n),
+			"--batch-size", fmt.Sprintf("%d", n),
+			"--ubatch-size", fmt.Sprintf("%d", n))
+	}
+	return append(args, "--ctx-size", fmt.Sprintf("%d", defaultContext(cfg.Context)))
+}
+
+// supportContext is the window for embedding and reranking models. Mimir
+// passages are about 1,200 characters, well within it.
+const supportContext = 2048
 
 func (r *Runtime) StopModel(ctx context.Context, id string) error {
 	r.ensureSupervisor()
@@ -205,6 +235,7 @@ func (r *Runtime) ListRunning(ctx context.Context) ([]pluginapi.RunningModel, er
 			Status:    status,
 			RuntimeID: runtimeID,
 			Adapters:  append([]string(nil), p.adapters...),
+			Mode:      p.mode,
 		})
 	}
 	return out, nil

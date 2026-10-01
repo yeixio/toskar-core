@@ -106,3 +106,21 @@ func TestWaitingWorkEntersWhenTheBlockerEnds(t *testing.T) {
 		t.Fatal("training stayed waiting")
 	}
 }
+
+func TestIndexingWaitsForAutomationsButNotTraining(t *testing.T) {
+	g := New(time.Millisecond)
+	auto := enter(t, g, Automation)
+	if _, reasons, ok := admitted(g, Indexing, 30*time.Millisecond); ok {
+		t.Fatal("indexing ran during an automation")
+	} else if len(reasons) != 1 || reasons[0] != "Waiting for an automation to finish" {
+		t.Fatalf("reasons = %v", reasons)
+	}
+	auto.Done()
+	idx := enter(t, g, Indexing)
+	if _, reasons, ok := admitted(g, Benchmark, 30*time.Millisecond); ok {
+		t.Fatal("a benchmark ran during indexing")
+	} else if len(reasons) != 1 || reasons[0] != "Waiting for knowledge indexing to finish" {
+		t.Fatalf("reasons = %v", reasons)
+	}
+	idx.Done()
+}
