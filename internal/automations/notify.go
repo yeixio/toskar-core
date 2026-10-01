@@ -2,8 +2,8 @@ package automations
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
+	"github.com/yeixio/yggdrasil-core/internal/structured"
 	"strconv"
 	"strings"
 	"unicode/utf8"
@@ -40,12 +40,6 @@ type parsedSignal struct {
 	Significant *bool
 	// prose is the result with the machine-readable object removed.
 	prose string
-}
-
-type signalJSON struct {
-	Price       *float64 `json:"price"`
-	Available   *bool    `json:"available"`
-	Significant *bool    `json:"significant"`
 }
 
 // Decide reports whether a successful result should notify.
@@ -235,71 +229,53 @@ func (s parsedSignal) sentence() string {
 	return strings.Join(parts, " ")
 }
 
+// signalSchema is every field a result's JSON may carry. None is required
+// here; ConditionSchema says what a condition needs.
+var signalSchema = &structured.Schema{Type: "object", Properties: map[string]*structured.Schema{
+	"price": {Type: "number"}, "available": {Type: "boolean"}, "significant": {Type: "boolean"},
+}}
+
+// ConditionSchema is the JSON a condition needs at the end of a result
+// (spec §27), or nil when the text alone is enough.
+func ConditionSchema(n Notification) *structured.Schema {
+	if n.Mode != NotifyOnCondition || n.Condition == nil {
+		return nil
+	}
+	switch n.Condition.Kind {
+	case ConditionThreshold:
+		return structured.Object(map[string]string{"price": "number"})
+	case ConditionSignificant:
+		return structured.Object(map[string]string{"significant": "boolean"})
+	}
+	return nil
+}
+
+// parseSignal reads the machine-readable part of a result, with safe
+// repairs such as "$1,299" for a price (spec §27).
 func parseSignal(result string) (parsedSignal, bool) {
+	f, ok := structured.Extract(result)
+	if !ok {
+		return parsedSignal{}, false
+	}
+	obj, isObj := structured.Coerce(f.Value, signalSchema).(map[string]any)
+	if !isObj {
+		return parsedSignal{}, false
+	}
 	var found parsedSignal
-	var matched bool
-	for i := 0; i < len(result); i++ {
-		if result[i] != '{' {
-			continue
-		}
-		end, ok := matchObject(result, i)
-		if !ok {
-			continue
-		}
-		var body signalJSON
-		if err := json.Unmarshal([]byte(result[i:end]), &body); err != nil {
-			continue
-		}
-		if body.Price == nil && body.Available == nil && body.Significant == nil {
-			continue
-		}
-		found = parsedSignal{Price: body.Price, Available: body.Available, Significant: body.Significant, prose: visibleProse(result, i, end)}
-		matched = true
-		i = end - 1
+	if v, ok := obj["price"].(float64); ok {
+		found.Price = &v
 	}
-	return found, matched
-}
-
-func visibleProse(result string, start, end int) string {
-	prose := result[:start] + result[end:]
-	prose = strings.ReplaceAll(prose, "```json", "")
-	prose = strings.ReplaceAll(prose, "```", "")
-	return strings.TrimSpace(prose)
-}
-
-func matchObject(s string, start int) (int, bool) {
-	depth := 0
-	inString := false
-	escaped := false
-	for i := start; i < len(s); i++ {
-		c := s[i]
-		if inString {
-			if escaped {
-				escaped = false
-				continue
-			}
-			if c == '\\' {
-				escaped = true
-				continue
-			}
-			if c == '"' {
-				inString = false
-			}
-			continue
-		}
-		switch c {
-		case '"':
-			inString = true
-		case '{':
-			depth++
-		case '}':
-			depth--
-			if depth == 0 {
-				return i + 1, true
-			}
-		}
+	if v, ok := obj["available"].(bool); ok {
+		found.Available = &v
 	}
-	return 0, false
+	if v, ok := obj["significant"].(bool); ok {
+		found.Significant = &v
+	}
+	if found.Price == nil && found.Available == nil && found.Significant == nil {
+		return parsedSignal{}, false
+	}
+	found.prose = structured.Prose(result, f)
+	return found, true
 }
 
 func normalizeResult(s string) string {

@@ -123,6 +123,9 @@ func (e automationExecutor) execute(ctx context.Context, automation automations.
 		return env.execution(""), err
 	}
 	text, nodeID, runErr := collectAutomationEvents(stream)
+	if runErr == nil && ctx.Err() == nil {
+		text = e.ensureStructured(ctx, env, automation, text)
+	}
 	out := env.execution(text)
 	if nodeID != "" {
 		out.NodeID = nodeID

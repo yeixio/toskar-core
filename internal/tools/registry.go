@@ -138,6 +138,16 @@ func (r *Registry) Execute(ctx context.Context, toolID string, args map[string]a
 		r.record(Activity{ToolID: toolID, Status: "disabled", Error: err.Error(), At: time.Now()})
 		return nil, err
 	}
+	if def, ok := Lookup(toolID); ok {
+		var argErr error
+		if args, argErr = CheckArgs(def, args); argErr != nil {
+			r.record(Activity{ToolID: toolID, Status: "malformed", Summary: activitySummary(args), Error: argErr.Error(), At: time.Now()})
+			r.bus.Publish(events.New(events.ToolFailed, mergeMeta(meta, map[string]any{
+				"tool_id": toolID, "error": argErr.Error(), "malformed": true, "kind": ErrKindInvalid,
+			})))
+			return nil, argErr
+		}
+	}
 	if err := implausibleCall(toolID, args); err != nil {
 		r.record(Activity{ToolID: toolID, Status: "malformed", Summary: activitySummary(args), Error: err.Error(), At: time.Now()})
 		r.bus.Publish(events.New(events.ToolFailed, mergeMeta(meta, map[string]any{

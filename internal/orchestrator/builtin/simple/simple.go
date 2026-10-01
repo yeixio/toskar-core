@@ -10,6 +10,7 @@ import (
 	"github.com/yeixio/yggdrasil-core/internal/events"
 	"github.com/yeixio/yggdrasil-core/internal/huginn"
 	"github.com/yeixio/yggdrasil-core/internal/mimir"
+	"github.com/yeixio/yggdrasil-core/internal/structured"
 	"github.com/yeixio/yggdrasil-core/internal/tools"
 	"github.com/yeixio/yggdrasil-core/pkg/contracts"
 	"github.com/yeixio/yggdrasil-core/pkg/pluginapi"
@@ -87,6 +88,13 @@ func (o *Orchestrator) Run(
 		}
 		// The profile's own controls apply on top of the effort's budget (§40).
 		budget := huginn.BudgetFor(huginn.EffortFrom(ctx), kind).With(profile.Orchestration)
+		// An answer that must be JSON (§27) is one constrained reply: no
+		// plan, tool calls, file, or figure check, which would each need
+		// output of another shape. A web look-up still runs first.
+		jsonOnly := len(structured.SchemaFrom(ctx)) > 0
+		if jsonOnly {
+			budget.Plan, budget.Verify = false, false
+		}
 		env.Emit(EventEffort, map[string]any{"effort": string(budget.Effort), "chosen": string(huginn.EffortFrom(ctx))})
 		// Offer only the tools this request needs (spec §16). The profile
 		// still decides what is allowed; this decides what is shown.
@@ -135,6 +143,9 @@ func (o *Orchestrator) Run(
 		// evidence is what the answer may draw figures from, for the check.
 		evidence := reference
 		toolPrompt := tools.PromptFor(profile)
+		if jsonOnly {
+			toolPrompt = ""
+		}
 		sys := instructions
 		if toolPrompt != "" {
 			sys += "\n" + toolPrompt
@@ -157,6 +168,19 @@ func (o *Orchestrator) Run(
 		toolsOn := len(tools.Enabled(profile, nil)) > 0
 		nodeID, _ := env.NodeForRole(role)
 
+		if jsonOnly {
+			content, m, err := generateText(ctx, env, role, messages)
+			if err != nil {
+				ch <- pluginapi.OrchestrationEvent{Type: "agent.error", Role: role, Error: err.Error(), Done: true}
+				return
+			}
+			promptTokens := 0
+			if m != nil {
+				promptTokens = m.PromptTokens
+			}
+			streamText(ch, role, nodeID, content, m, contextusage.Measure(instructions, toolPrompt, messages, promptTokens))
+			return
+		}
 		if reply, m, made := makeFileFirst(ctx, env, profile, role, messages, task.Prompt); made {
 			promptTokens := 0
 			if m != nil {

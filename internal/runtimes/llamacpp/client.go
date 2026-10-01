@@ -42,6 +42,11 @@ func (c *Client) Chat(ctx context.Context, req pluginapi.ChatRequest) (<-chan pl
 	if len(req.Tools) > 0 {
 		body["tools"] = req.Tools
 	}
+	if len(req.ResponseSchema) > 0 {
+		// llama-server turns the schema into a grammar, so the reply is
+		// valid JSON of that shape (§27).
+		body["response_format"] = map[string]any{"type": "json_object", "schema": req.ResponseSchema}
+	}
 	lora, err := loraScales(req.ModelEndpoint, req.Adapter)
 	if err != nil {
 		return nil, err

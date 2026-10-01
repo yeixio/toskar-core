@@ -17,6 +17,7 @@ import (
 	"github.com/yeixio/yggdrasil-core/internal/runlog"
 	"github.com/yeixio/yggdrasil-core/internal/scheduler"
 	"github.com/yeixio/yggdrasil-core/internal/share"
+	"github.com/yeixio/yggdrasil-core/internal/structured"
 	"github.com/yeixio/yggdrasil-core/pkg/contracts"
 	"github.com/yeixio/yggdrasil-core/pkg/pluginapi"
 )
@@ -207,10 +208,11 @@ func (a *App) generateOnNode(ctx context.Context, nodeID, modelID, role, adapter
 			runlog.From(ctx).Loaded(modelID, d)
 		}
 		ch, err := a.Runtimes.Chat(ctx, pluginapi.ChatRequest{
-			ModelEndpoint: endpoint,
-			Messages:      messages,
-			Stream:        true,
-			Adapter:       adapter,
+			ModelEndpoint:  endpoint,
+			Messages:       messages,
+			Stream:         true,
+			Adapter:        adapter,
+			ResponseSchema: structured.SchemaFrom(ctx),
 		})
 		if err != nil {
 			return nil, err

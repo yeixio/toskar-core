@@ -14,6 +14,7 @@ import (
 	"github.com/yeixio/yggdrasil-core/internal/huginn"
 	"github.com/yeixio/yggdrasil-core/internal/profiles"
 	"github.com/yeixio/yggdrasil-core/internal/runtimes"
+	"github.com/yeixio/yggdrasil-core/internal/structured"
 	"github.com/yeixio/yggdrasil-core/internal/turnopts"
 	"github.com/yeixio/yggdrasil-core/pkg/contracts"
 	"github.com/yeixio/yggdrasil-core/pkg/pluginapi"
@@ -48,6 +49,16 @@ type chatCompletionRequest struct {
 	ReasoningEffort string `json:"reasoning_effort"`
 	// Yggdrasil holds the assistant's own controls (§62).
 	Yggdrasil *yggdrasilOptions `json:"yggdrasil"`
+	// ResponseFormat asks for JSON: json_object, or json_schema with a schema (§27).
+	ResponseFormat *responseFormat `json:"response_format"`
+}
+
+type responseFormat struct {
+	Type       string `json:"type"`
+	JSONSchema *struct {
+		Name   string          `json:"name"`
+		Schema json.RawMessage `json:"schema"`
+	} `json:"json_schema"`
 }
 
 // yggdrasilOptions are the request's assistant controls. Each one can only
@@ -139,6 +150,14 @@ func (h *Handler) HandleChatCompletions(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 	opts.History, opts.System = history, system
+	schema, wantJSON, err := jsonFormat(req.ResponseFormat)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "INVALID_RESPONSE_FORMAT", err.Error())
+		return
+	}
+	if wantJSON {
+		opts.System = strings.TrimSpace(opts.System + "\n\n" + jsonInstruction(schema))
+	}
 
 	if h.Chat == nil {
 		writeError(w, http.StatusNotImplemented, "NOT_IMPLEMENTED", "chat not configured")
@@ -175,6 +194,34 @@ func (h *Handler) HandleChatCompletions(w http.ResponseWriter, r *http.Request) 
 	ctx := turnopts.With(r.Context(), opts)
 	if effort != "" {
 		ctx = huginn.WithEffort(ctx, huginn.ParseEffort(effort))
+	}
+	if wantJSON {
+		// The model's reply is constrained to the schema where the runtime
+		// supports it.
+		if raw, err := json.Marshal(schema); err == nil {
+			ctx = structured.WithSchema(ctx, raw)
+		}
+		// The answer must be data a program can read: checked, repaired,
+		// and asked for once more if needed, then sent whole (§27).
+		content, err := h.structuredAnswer(ctx, opts, profileID, message, modelID, execution, schema)
+		if err != nil {
+			if req.Stream {
+				sw.data(map[string]any{"error": map[string]any{"message": err.Error()}})
+				sw.done()
+				return
+			}
+			writeError(w, http.StatusUnprocessableEntity, "INVALID_STRUCTURED_OUTPUT", err.Error())
+			return
+		}
+		one := make(chan pluginapi.ChatChunk, 1)
+		one <- pluginapi.ChatChunk{Content: content, Done: true}
+		close(one)
+		if !req.Stream {
+			h.writeNonStream(w, one, profileID, func() map[string]any { return nil })
+			return
+		}
+		h.writeStream(sw, r, one, profileID, func() map[string]any { return nil }, false)
+		return
 	}
 	stream, err := h.Chat.RunChat(ctx, profileID, "", message, req.Stream, modelID, execution)
 	if err != nil {

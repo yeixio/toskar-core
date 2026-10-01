@@ -197,6 +197,10 @@ A profile's `orchestration` object holds its advanced controls. Every field is o
 
 Invalid values are refused with 400. In advanced mode, the profile editor has an Orchestration section, alongside model roles, tools, knowledge, and placement.
 
+Structured results are checked the same way elsewhere:
+- **Tool arguments:** they are checked against each tool's schema before the tool runs. Safe repairs are made, such as `"7"` for a whole number, or JSON data where text is expected. A call with an argument of the wrong type is refused with `kind` `invalid`, naming the argument, so the model can call again.
+- **Automations:** a condition automation's result must end with the JSON its condition reads: `{"price": number}` for a threshold, or `{"significant": boolean}`. That JSON is read with the same repairs. When it is missing or wrong, the model is asked once to supply it from its own answer. Notices show the prose, never the JSON.
+
 Model, node, tool, conversation, and log routes follow the same prefix. The OpenAPI file is the route list to diff when a handler changes.
 
 ## OpenAI-compatible API
@@ -268,6 +272,13 @@ The optional `yggdrasil` object holds the assistant's own controls:
 | `effort` | `auto`, `fast`, `balanced`, or `thorough`; it takes precedence over `reasoning_effort`. |
 | `placement` | `local` or `automatic`. |
 | `progress` | With `"stream": true`, progress and tool activity arrive as chunks with an empty `delta` and a `yggdrasil.event`, such as `{"type": "tool.started", "tool_id": "internet.search"}`. Before `[DONE]`, a last such chunk carries `yggdrasil.sources`, `steps`, `notice`, and `files`. Clients that ignore unknown fields see a plain OpenAI stream. |
+
+`response_format` asks for JSON:
+- **Types:** `{"type": "json_object"}`, or `{"type": "json_schema", "json_schema": {"schema": {...}}}` with a JSON Schema. Yggdrasil checks `type`, `properties`, `required`, `enum`, and `items`.
+- **Constrained output:** the model is told the shape. On this computer, llama.cpp also constrains the reply to the schema with a grammar. Such a turn is one reply: the web look-up still runs first, but there is no plan, tool call, file, or figure check.
+- **Repairs:** the answer's JSON is found (fenced or not) and safely repaired: trailing commas, curly quotes, `"$1,299"` for a number, `"yes"` for a boolean.
+- **Retry:** an answer that still does not fit is asked for once more, with the problems named.
+- **Result:** the response content is compact JSON. When nothing fits, the request fails with 422 and lists the problems. A streamed request gets the JSON as one chunk.
 
 A non-streaming response has a `yggdrasil` object with the answer's `sources`, `steps`, `notice`, and `files` when there are any.
 

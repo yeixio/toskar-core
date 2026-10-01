@@ -1,6 +1,9 @@
 package pluginapi
 
-import "context"
+import (
+	"context"
+	"encoding/json"
+)
 
 // RuntimeDetection reports what a runtime found on the host.
 type RuntimeDetection struct {
@@ -92,6 +95,9 @@ type ChatRequest struct {
 	Tools         []map[string]any `json:"tools,omitempty"`
 	// Adapter applies one loaded LoRA adapter. Empty means the base model.
 	Adapter string `json:"adapter,omitempty"`
+	// ResponseSchema, when set, constrains the reply to JSON matching this
+	// JSON Schema, where the runtime supports it.
+	ResponseSchema json.RawMessage `json:"response_schema,omitempty"`
 }
 
 // ChatMessage is a single chat turn.
