@@ -4,15 +4,32 @@ import (
 	"context"
 	"encoding/json"
 	"io"
+	"net"
 	"net/http"
 	"path/filepath"
+	"strconv"
 	"testing"
 	"time"
 
 	"github.com/yeixio/yggdrasil-core/internal/app"
 )
 
+// freePort returns a port nothing is listening on, so this test never
+// talks to another daemon on the default ports.
+func freePort(t *testing.T) string {
+	t.Helper()
+	l, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer l.Close()
+	return strconv.Itoa(l.Addr().(*net.TCPAddr).Port)
+}
+
 func TestDaemonHealthAndHardware(t *testing.T) {
+	t.Setenv("YGGDRASIL_API_PORT", freePort(t))
+	t.Setenv("YGGDRASIL_INTERNAL_PORT", freePort(t))
+	t.Setenv("YGGDRASIL_DISCOVERY_ENABLED", "false")
 	dir := t.TempDir()
 	application, err := app.New(app.Options{DataDir: dir})
 	if err != nil {
