@@ -75,6 +75,8 @@ type Run struct {
 	Retries       int `json:"retries"`
 	ContextTokens int `json:"context_tokens,omitempty"`
 	ContextLimit  int `json:"context_limit,omitempty"`
+	// CacheHits counts tool calls answered from a cache, by tool (§36).
+	CacheHits map[string]int `json:"cache_hits,omitempty"`
 }
 
 // Collector gathers a run as it happens. Its methods are safe from any
@@ -225,6 +227,19 @@ func (c *Collector) ToolCall(toolID string, d time.Duration, failed bool) {
 	if failed {
 		t.Failures++
 	}
+}
+
+// CacheHit records a tool call answered from a cache.
+func (c *Collector) CacheHit(toolID string) {
+	if c == nil {
+		return
+	}
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	if c.run.CacheHits == nil {
+		c.run.CacheHits = map[string]int{}
+	}
+	c.run.CacheHits[toolID]++
 }
 
 // Plan records a plan's parts.

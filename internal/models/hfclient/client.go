@@ -4,12 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/yeixio/yggdrasil-core/internal/cache"
 	"net/http"
 	"net/url"
 	"regexp"
 	"sort"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/yeixio/yggdrasil-core/pkg/contracts"
@@ -24,13 +24,14 @@ type Client struct {
 	HTTP    *http.Client
 	BaseURL string
 
-	mu    sync.Mutex
-	cache map[string]cacheEntry
+	// Cache keeps recent search results (§36).
+	Cache *cache.Cache[[]contracts.BrowseModel]
 }
 
-type cacheEntry struct {
-	at      time.Time
-	results []contracts.BrowseModel
+// CachePolicy is the Hub search cache's policy.
+var CachePolicy = cache.Policy{
+	Name: "model_search", Label: "Hugging Face model search", Key: "search text and result limit",
+	TTL: 5 * time.Minute, Invalidation: "age", Scope: "this computer", Privacy: cache.Public, MaxEntries: 100,
 }
 
 // New creates a Hub client with a short in-memory cache.
@@ -38,7 +39,7 @@ func New() *Client {
 	return &Client{
 		HTTP:    &http.Client{Timeout: 20 * time.Second},
 		BaseURL: "https://huggingface.co/api",
-		cache:   make(map[string]cacheEntry),
+		Cache:   cache.New[[]contracts.BrowseModel](CachePolicy),
 	}
 }
 
@@ -49,13 +50,9 @@ func (c *Client) Search(ctx context.Context, query string, limit int) ([]contrac
 	}
 	q := strings.TrimSpace(query)
 	cacheKey := strings.ToLower(q) + "|" + fmt.Sprint(limit)
-	c.mu.Lock()
-	if e, ok := c.cache[cacheKey]; ok && time.Since(e.at) < 5*time.Minute {
-		out := append([]contracts.BrowseModel(nil), e.results...)
-		c.mu.Unlock()
-		return out, nil
+	if cached, ok := c.Cache.Get(cacheKey); ok {
+		return append([]contracts.BrowseModel(nil), cached...), nil
 	}
-	c.mu.Unlock()
 
 	u, _ := url.Parse(c.BaseURL + "/models")
 	vals := u.Query()
@@ -101,9 +98,7 @@ func (c *Client) Search(ctx context.Context, query string, limit int) ([]contrac
 		}
 	}
 
-	c.mu.Lock()
-	c.cache[cacheKey] = cacheEntry{at: time.Now(), results: out}
-	c.mu.Unlock()
+	c.Cache.Put(cacheKey, append([]contracts.BrowseModel(nil), out...))
 	return out, nil
 }
 

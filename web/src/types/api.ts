@@ -1193,6 +1193,8 @@ export interface RunTrace {
   retries: number
   context_tokens?: number
   context_limit?: number
+  /** Tool calls answered from a cache, by tool (spec §36). */
+  cache_hits?: Record<string, number>
 }
 
 /** An environment variable or header of a tool source. Secret values show only their last four characters. */
@@ -1378,4 +1380,21 @@ export interface CapabilitySnapshot {
   providers: { id: string; name: string; kind: string; status: string; healthy: boolean }[]
   artifacts: { count: number; bytes: number }
   abilities: CapabilityAbility[]
+}
+
+/** A cache and its policy (spec §36). */
+export interface CacheInfo {
+  name: string
+  label: string
+  key: string
+  ttl: string
+  invalidation?: string
+  scope: string
+  privacy: 'public' | 'personal'
+  persistent?: boolean
+  entries: number
+  hits: number
+  misses: number
+  evictions: number
+  last_cleared?: string
 }

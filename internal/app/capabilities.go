@@ -14,6 +14,16 @@ import (
 // Capabilities is the capability inventory right now (§37): what is
 // installed, online, connected, and healthy, and what that adds up to.
 func (a *App) Capabilities(ctx context.Context) inventory.Snapshot {
+	if snap, ok := a.capCache.Get("snapshot"); ok {
+		return snap
+	}
+	snap := a.buildCapabilities(ctx)
+	a.capCache.Put("snapshot", snap)
+	return snap
+}
+
+// buildCapabilities gathers the inventory from every part of the app.
+func (a *App) buildCapabilities(ctx context.Context) inventory.Snapshot {
 	s := inventory.Snapshot{At: time.Now().UTC(), Models: []inventory.Model{}, Nodes: []inventory.Node{},
 		Tools: []inventory.Tool{}, Connectors: []inventory.Connector{}, Providers: []inventory.Provider{}}
 

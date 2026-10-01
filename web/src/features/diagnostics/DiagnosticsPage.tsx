@@ -9,6 +9,7 @@ import type { LogEntry, Node } from '@/types/api'
 import { useUIStore } from '@/stores/uiStore'
 import { RealmKicker } from '@/components/ui/Realm'
 import { CapabilityPanel } from './CapabilityPanel'
+import { CachePanel } from './CachePanel'
 import { Ratatoskr } from '@/components/ui/Ratatoskr'
 
 function kindLabel(kind: string, advanced: boolean): string {
@@ -566,6 +567,8 @@ export function DiagnosticsPage() {
       <CapabilityPanel />
 
       {advancedMode && <ToolActivityPanel />}
+
+      {advancedMode && <CachePanel />}
 
       {advancedMode && (
         <section className="card space-y-3">

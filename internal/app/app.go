@@ -21,6 +21,7 @@ import (
 	"github.com/yeixio/yggdrasil-core/internal/auth"
 	"github.com/yeixio/yggdrasil-core/internal/automations"
 	"github.com/yeixio/yggdrasil-core/internal/benchmark"
+	"github.com/yeixio/yggdrasil-core/internal/cache"
 	"github.com/yeixio/yggdrasil-core/internal/config"
 	"github.com/yeixio/yggdrasil-core/internal/connectors"
 	"github.com/yeixio/yggdrasil-core/internal/diagnostics"
@@ -29,6 +30,7 @@ import (
 	"github.com/yeixio/yggdrasil-core/internal/events"
 	"github.com/yeixio/yggdrasil-core/internal/gjallarhorn"
 	"github.com/yeixio/yggdrasil-core/internal/hardware"
+	"github.com/yeixio/yggdrasil-core/internal/inventory"
 	"github.com/yeixio/yggdrasil-core/internal/logs"
 	"github.com/yeixio/yggdrasil-core/internal/mcp"
 	"github.com/yeixio/yggdrasil-core/internal/mimir"
@@ -101,6 +103,9 @@ type App struct {
 	Egress *egress.Log
 	// RunLog keeps each request's run trace (§35).
 	RunLog *runlog.Store
+	// Caches lists every cache and its policy (§36).
+	Caches   *cache.Registry
+	capCache *cache.Cache[inventory.Snapshot]
 	// StubReply, when set with stub inference, scripts what the stub model
 	// says, for the quality test set (§64). It sees every prompt.
 	StubReply func(modelID string, messages []pluginapi.ChatMessage) string
@@ -506,6 +511,7 @@ func New(opts Options) (*App, error) {
 	})
 
 	a.HF = hfclient.New()
+	a.setupCaches()
 	a.Lifecycle = &lifecycle.Sweeper{
 		Logger: logger,
 		OnUnload: func(inst lifecycle.Instance) {
@@ -552,6 +558,7 @@ func New(opts Options) (*App, error) {
 	a.API.BindPrivacy(a)
 	a.API.BindRuns(a.RunLog)
 	a.API.BindCapabilities(a)
+	a.API.BindCaches(a)
 
 	autoRepo := repositories.NewAutomationRepo(db.SQL)
 	a.Automations = autoRepo
@@ -710,6 +717,7 @@ func (a *App) requireKeyForRemoteBind(ctx context.Context) error {
 func (a *App) Start(ctx context.Context) error {
 	ctx, a.cancel = context.WithCancel(ctx)
 	a.notifyFromEvents(ctx)
+	a.watchCapabilities(ctx)
 	a.keepRunRecordsTidy(ctx)
 	_ = a.syncInternalBind()
 	cfg := a.Config.Get()

@@ -66,6 +66,7 @@ Prefix: `/api/v1`
 | GET | `/notifications` | The notification center: `{"notifications": [...], "unread": n}`. `?unread=1` lists unread ones. Also `POST /notifications/read` (`{"ids": [...]}`, no ids marks all) and `POST /notifications/{id}/dismiss` |
 | GET | `/connectors` | Connected services and their status. Also `PUT /connectors/{id}` (`{"values": {...}}`), `POST /connectors/{id}/check`, and `DELETE /connectors/{id}` |
 | GET, PUT | `/personalization` | How the person likes answers: `length`, `tone`, `format`, `units`, `about_me`, `instructions` |
+| GET | `/caches` | Every cache with its policy and counts. Also `POST /caches/{name}/clear` |
 | GET | `/capabilities` | The capability inventory. `?ask=` returns the abilities a question is about. Also `GET /capabilities/models/{id}`, which says which computers can run a model |
 | GET | `/runs/{id}` | A run trace. Also `GET /runs` (`?conversation_id=`, `?limit=`), newest first |
 | GET | `/egress` | What left this computer, newest first. `?conversation_id=` narrows to one chat |
@@ -218,6 +219,18 @@ Three behaviors come from the quality test set (`tests/quality`):
 - **Plain questions:** a plain question is answered without tools; the message must ask for a search, a file, a command, and so on.
 - **Capability questions:** a short question about what Yggdrasil can do is answered straight from the capability inventory, without a model.
 - **False claims:** an answer that says it changed something, when no tool that changes things ran, gets the notice "Nothing was changed: no tool ran to do this, whatever the answer says."
+
+Every cache declares its policy: `key`, `ttl`, `invalidation`, `scope`, and `privacy` (`public` or `personal`). Secret data, such as credentials, is never cached; a cache that would hold it is refused when it is created.
+
+| Cache | Key | Kept | Cleared when | Privacy |
+| --- | --- | --- | --- | --- |
+| `web_search` | the query, in lower case | 15 min | age; run records deleted | personal |
+| `web_pages` | the page address | 30 min | age; run records deleted | personal |
+| `capabilities` | one inventory snapshot | 30 s | a model downloads, loads, or unloads; a computer pairs or goes on- or offline; a tool is turned on or off | public |
+| `model_search` | Hugging Face search text and limit | 5 min | age | public |
+| `knowledge_index` | source and passage (on disk) | until invalidated | files change; reindex; source removed | personal |
+
+A repeat web search or page read is answered from the cache. The tool does not run, nothing leaves this computer (so no egress record is written), and the run trace counts it in `cache_hits`. In-memory caches are bounded, dropping the least recently used entry first, and can be cleared one at a time. "Delete run records now" also clears every personal in-memory cache.
 
 Model, node, tool, conversation, and log routes follow the same prefix. The OpenAPI file is the route list to diff when a handler changes.
 

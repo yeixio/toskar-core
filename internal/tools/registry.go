@@ -8,6 +8,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/yeixio/yggdrasil-core/internal/events"
+	"github.com/yeixio/yggdrasil-core/internal/runlog"
 	"time"
 
 	"github.com/yeixio/yggdrasil-core/internal/tools/filesystem"
@@ -42,7 +43,23 @@ type Registry struct {
 	// observe, when set, hears each call just before it runs, such as to
 	// record what leaves this computer (§63).
 	observe func(ctx context.Context, toolID string, args map[string]any)
-	mu      sync.Mutex
+	// cache serves repeats of safe lookups (§36).
+	cache ToolCache
+	mu    sync.Mutex
+}
+
+// ToolCache serves repeat calls of safe lookups, such as a web search made
+// a minute ago (spec §36). It decides which tools and arguments it keeps.
+type ToolCache interface {
+	Lookup(toolID string, args map[string]any) (map[string]any, bool)
+	Store(toolID string, args map[string]any, result map[string]any)
+}
+
+// SetCache sets the cache that serves repeat calls.
+func (r *Registry) SetCache(c ToolCache) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	r.cache = c
 }
 
 // SetObserver sets a function that hears each call just before it runs.
@@ -176,6 +193,21 @@ func (r *Registry) Execute(ctx context.Context, toolID string, args map[string]a
 
 	summary := activitySummary(args)
 	started := time.Now()
+	r.mu.Lock()
+	cache := r.cache
+	r.mu.Unlock()
+	if cache != nil {
+		// A repeat is answered from the cache: the tool does not run, and
+		// nothing leaves this computer.
+		if result, ok := cache.Lookup(toolID, args); ok {
+			r.record(Activity{ToolID: toolID, Status: "cached", Summary: summary, At: started})
+			r.bus.Publish(events.New(events.ToolCompleted, mergeMeta(meta, map[string]any{
+				"tool_id": toolID, "duration_ms": int64(0), "summary": summary, "cached": true,
+			})))
+			runlog.From(ctx).CacheHit(toolID)
+			return result, nil
+		}
+	}
 	r.record(Activity{ToolID: toolID, Status: "started", Summary: summary, At: started})
 	r.bus.Publish(events.New(events.ToolStarted, mergeMeta(meta, map[string]any{"tool_id": toolID, "summary": summary})))
 	// Every call has a time limit; cancelling the turn stops it sooner.
@@ -195,6 +227,9 @@ func (r *Registry) Execute(ctx context.Context, toolID string, args map[string]a
 			"tool_id": toolID, "error": err.Error(), "kind": ErrorKind(err), "duration_ms": elapsed, "summary": summary,
 		})))
 		return nil, err
+	}
+	if cache != nil {
+		cache.Store(toolID, args, result)
 	}
 	r.record(Activity{ToolID: toolID, Status: "completed", Summary: summary, DurationMS: elapsed, At: time.Now()})
 	r.bus.Publish(events.New(events.ToolCompleted, mergeMeta(meta, map[string]any{

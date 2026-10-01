@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/yeixio/yggdrasil-core/internal/api"
+	"github.com/yeixio/yggdrasil-core/internal/cache"
 	"github.com/yeixio/yggdrasil-core/internal/egress"
 	"github.com/yeixio/yggdrasil-core/internal/retention"
 )
@@ -53,6 +54,10 @@ func (a *App) SetRunRetention(ctx context.Context, days int) error {
 // DeleteRunRecords deletes run records now.
 func (a *App) DeleteRunRecords(ctx context.Context) (retention.Counts, error) {
 	c, err := retention.All(ctx, a.DB.SQL)
+	// Personal caches, such as recent web searches, go with run records.
+	if a.Caches != nil {
+		a.Caches.ClearPrivacy(cache.Personal)
+	}
 	if err == nil && a.Logger != nil {
 		a.Logger.Info("run records deleted", "tasks", c.Tasks, "runs", c.Runs, "automation_runs", c.AutomationRuns, "egress", c.Egress)
 	}

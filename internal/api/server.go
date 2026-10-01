@@ -136,6 +136,7 @@ type Server struct {
 	privacy         Privacy
 	runs            RunStore
 	capabilities    CapabilitySource
+	caches          CacheSource
 	training        *training.Service
 	trainingCatalog func() []models.CatalogEntry
 }
@@ -241,6 +242,7 @@ func (s *Server) routes() {
 	s.privacyRoutes(api)
 	s.runRoutes(api)
 	s.capabilityRoutes(api)
+	s.cacheRoutes(api)
 	s.trainingRoutes(api)
 
 	s.mcpRootRoutes(s.router)

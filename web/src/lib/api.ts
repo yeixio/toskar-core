@@ -24,6 +24,7 @@ import type {
   PrivacyOverview,
   RunTrace,
   CapabilitySnapshot,
+  CacheInfo,
   RunRecordCounts,
   MCPAdded,
   MCPAddRequest,
@@ -635,6 +636,10 @@ export const api = {
 
   setPersonalStyle: (style: PersonalStyle) =>
     request<PersonalStyle>('/api/v1/personalization', { method: 'PUT', body: JSON.stringify(style) }),
+
+  listCaches: async () => (await request<CacheInfo[]>('/api/v1/caches')) ?? [],
+
+  clearCache: (name: string) => request<null>(`/api/v1/caches/${encodeURIComponent(name)}/clear`, { method: 'POST' }),
 
   getCapabilities: () => request<CapabilitySnapshot>('/api/v1/capabilities'),
 

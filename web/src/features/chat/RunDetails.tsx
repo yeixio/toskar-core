@@ -73,6 +73,13 @@ export function RunDetails({ runId }: { runId: string }) {
             </Row>
           )}
           {run.nodes.length > 0 && <Row label="Computers">{run.nodes.join(', ')}</Row>}
+          {run.cache_hits && Object.keys(run.cache_hits).length > 0 && (
+            <Row label="Cache hits">
+              {Object.entries(run.cache_hits)
+                .map(([tool, n]) => `${tool} ×${n}`)
+                .join(', ')}
+            </Row>
+          )}
           <Row label="Verification">
             {run.verification_passes === 0
               ? 'none'

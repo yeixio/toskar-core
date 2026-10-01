@@ -57,6 +57,7 @@ func (a *App) setToolEnabled(ctx context.Context, id string, enabled bool) error
 	if err := a.Tools.SetEnabled(id, enabled); err != nil {
 		return err
 	}
+	a.invalidateCapabilities()
 	ids := make([]string, 0)
 	for disabled := range a.Tools.Disabled() {
 		ids = append(ids, disabled)
