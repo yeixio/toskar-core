@@ -42,17 +42,22 @@ var ErrNotFound = errors.New("knowledge source not found")
 
 // Source is one connected knowledge source.
 type Source struct {
-	ID          string     `json:"id"`
-	Name        string     `json:"name"`
-	Kind        Kind       `json:"kind"`
-	Path        string     `json:"path,omitempty"`
-	Filename    string     `json:"filename,omitempty"`
-	Status      string     `json:"status"`
-	Error       string     `json:"error,omitempty"`
-	ChunkCount  int        `json:"chunk_count"`
-	CreatedAt   time.Time  `json:"created_at"`
-	UpdatedAt   time.Time  `json:"updated_at"`
-	RefreshedAt *time.Time `json:"refreshed_at,omitempty"`
+	ID         string `json:"id"`
+	Name       string `json:"name"`
+	Kind       Kind   `json:"kind"`
+	Path       string `json:"path,omitempty"`
+	Filename   string `json:"filename,omitempty"`
+	Status     string `json:"status"`
+	Error      string `json:"error,omitempty"`
+	ChunkCount int    `json:"chunk_count"`
+	// EmbeddedCount is how many passages have a vector for semantic search,
+	// and EmbeddingModel the model that made them. Both are empty until an
+	// embedding model is installed.
+	EmbeddedCount  int        `json:"embedded_count"`
+	EmbeddingModel string     `json:"embedding_model,omitempty"`
+	CreatedAt      time.Time  `json:"created_at"`
+	UpdatedAt      time.Time  `json:"updated_at"`
+	RefreshedAt    *time.Time `json:"refreshed_at,omitempty"`
 
 	// file is where Mimir reads the source. For text sources it is the copy
 	// Mimir keeps, which the API does not expose.
@@ -96,6 +101,11 @@ type Store struct {
 
 	// refreshMu serializes rebuilds so two chats do not index one folder twice.
 	refreshMu sync.Mutex
+
+	// semMu guards the supporting models and the background indexer.
+	semMu  sync.Mutex
+	models Models
+	kick   chan struct{}
 }
 
 // MaxTextBytes limits pasted or uploaded content.
@@ -253,6 +263,9 @@ func (s *Store) Delete(ctx context.Context, id string) error {
 	if _, err := tx.ExecContext(ctx, `DELETE FROM knowledge_fts WHERE source_id = ?`, id); err != nil {
 		return err
 	}
+	if _, err := tx.ExecContext(ctx, `DELETE FROM knowledge_vectors WHERE source_id = ?`, id); err != nil {
+		return err
+	}
 	if _, err := tx.ExecContext(ctx, `DELETE FROM knowledge_sources WHERE id = ?`, id); err != nil {
 		return err
 	}
@@ -268,7 +281,7 @@ func (s *Store) Delete(ctx context.Context, id string) error {
 // Get returns one source.
 func (s *Store) Get(ctx context.Context, id string) (Source, error) {
 	row := s.db.QueryRowContext(ctx, `
-		SELECT id, name, kind, path, status, error, chunk_count, created_at, updated_at, refreshed_at
+		SELECT `+sourceColumns+`
 		FROM knowledge_sources WHERE id = ?`, id)
 	src, err := scanSource(row)
 	if errors.Is(err, sql.ErrNoRows) {
@@ -280,7 +293,7 @@ func (s *Store) Get(ctx context.Context, id string) (Source, error) {
 // List returns every source, newest first.
 func (s *Store) List(ctx context.Context) ([]Source, error) {
 	rows, err := s.db.QueryContext(ctx, `
-		SELECT id, name, kind, path, status, error, chunk_count, created_at, updated_at, refreshed_at
+		SELECT `+sourceColumns+`
 		FROM knowledge_sources ORDER BY created_at DESC`)
 	if err != nil {
 		return nil, err
@@ -324,7 +337,16 @@ func (s *Store) refreshLocked(ctx context.Context, id string) error {
 		return err
 	}
 	defer func() { _ = tx.Rollback() }()
+	// Passages whose text did not change keep their vectors, so editing one
+	// price does not re-embed the whole catalog.
+	kept, err := keepVectors(ctx, tx, id)
+	if err != nil {
+		return err
+	}
 	if _, err := tx.ExecContext(ctx, `DELETE FROM knowledge_fts WHERE source_id = ?`, id); err != nil {
+		return err
+	}
+	if _, err := tx.ExecContext(ctx, `DELETE FROM knowledge_vectors WHERE source_id = ?`, id); err != nil {
 		return err
 	}
 	stmt, err := tx.PrepareContext(ctx, `INSERT INTO knowledge_fts (title, body, source_id, ordinal) VALUES (?, ?, ?, ?)`)
@@ -333,7 +355,24 @@ func (s *Store) refreshLocked(ctx context.Context, id string) error {
 	}
 	defer stmt.Close()
 	for i, c := range chunks {
-		if _, err := stmt.ExecContext(ctx, c.Title, c.Body, id, i); err != nil {
+		res, err := stmt.ExecContext(ctx, c.Title, c.Body, id, i)
+		if err != nil {
+			return err
+		}
+		if len(kept) == 0 {
+			continue
+		}
+		hash := textHash(embedText(c.Title, c.Body))
+		v, ok := kept[hash]
+		if !ok {
+			continue
+		}
+		rowid, err := res.LastInsertId()
+		if err != nil {
+			return err
+		}
+		if _, err := tx.ExecContext(ctx, `INSERT INTO knowledge_vectors (chunk_rowid, source_id, model, hash, vec) VALUES (?, ?, ?, ?, ?)`,
+			rowid, id, v.model, hash, v.vec); err != nil {
 			return err
 		}
 	}
@@ -343,7 +382,11 @@ func (s *Store) refreshLocked(ctx context.Context, id string) error {
 		WHERE id=?`, StatusReady, len(chunks), sig, now, now, id); err != nil {
 		return err
 	}
-	return tx.Commit()
+	if err := tx.Commit(); err != nil {
+		return err
+	}
+	s.Kick()
+	return nil
 }
 
 // refreshIfChanged reindexes sources whose files changed since the last index.
@@ -367,13 +410,22 @@ func (s *Store) refreshIfChanged(ctx context.Context, ids []string) {
 
 type scanner interface{ Scan(...any) error }
 
+// sourceColumns are the columns scanSource reads. The vector count is per
+// source, from the model most of its vectors came from.
+const sourceColumns = `id, name, kind, path, status, error, chunk_count, created_at, updated_at, refreshed_at,
+	(SELECT COUNT(*) FROM knowledge_vectors v WHERE v.source_id = knowledge_sources.id
+	 AND v.model = (SELECT model FROM knowledge_vectors w WHERE w.source_id = knowledge_sources.id GROUP BY model ORDER BY COUNT(*) DESC LIMIT 1)),
+	(SELECT model FROM knowledge_vectors w WHERE w.source_id = knowledge_sources.id GROUP BY model ORDER BY COUNT(*) DESC LIMIT 1)`
+
 func scanSource(row scanner) (Source, error) {
 	var src Source
 	var kind, created, updated string
-	var path, errText, refreshed sql.NullString
-	if err := row.Scan(&src.ID, &src.Name, &kind, &path, &src.Status, &errText, &src.ChunkCount, &created, &updated, &refreshed); err != nil {
+	var path, errText, refreshed, embModel sql.NullString
+	if err := row.Scan(&src.ID, &src.Name, &kind, &path, &src.Status, &errText, &src.ChunkCount, &created, &updated, &refreshed,
+		&src.EmbeddedCount, &embModel); err != nil {
 		return Source{}, err
 	}
+	src.EmbeddingModel = embModel.String
 	src.Kind = Kind(kind)
 	src.Path = path.String
 	src.file = path.String

@@ -455,6 +455,27 @@
         "base_bytes": 65527841856,
         "quantized_bytes": 18431478459
       }
+    },
+    {
+      "id": "nomic-embed-text-v1.5-q8",
+      "display_name": "Nomic Embed Text v1.5",
+      "summary": "Small embedding model. Lets knowledge search find passages by meaning, not only by matching words. It does not chat.",
+      "family": "nomic-bert",
+      "variant": "Q8_0",
+      "parameters": "137M",
+      "size_bytes": 146146432,
+      "memory_needed_bytes": 400000000,
+      "context": 2048,
+      "capabilities": { "tool_calling": false, "vision": false, "coding": false },
+      "source": {
+        "url": "https://huggingface.co/nomic-ai/nomic-embed-text-v1.5-GGUF/resolve/main/nomic-embed-text-v1.5.Q8_0.gguf",
+        "sha256": "3e24342164b3d94991ba9692fdc0dd08e3fd7362e0aacc396a9a5c54a544c3b7",
+        "format": "gguf"
+      },
+      "purpose": ["knowledge"],
+      "tags": ["embedding", "fast"],
+      "runtime": ["llamacpp"],
+      "support_role": "embedding"
     }
   ]
 }

@@ -1,6 +1,6 @@
 // Package share decides who gets this computer when several kinds of work
 // want it at once (spec §60). Interactive chat comes first, then scheduled
-// automations, then benchmarks, then training. Lower-priority work waits for
+// automations, then knowledge indexing, then benchmarks, then training. Lower-priority work waits for
 // higher-priority work to finish instead of competing with it for memory.
 package share
 
@@ -19,6 +19,9 @@ const (
 	Interactive Class = iota
 	// Automation is a scheduled automation run.
 	Automation
+	// Indexing is background embedding of knowledge passages for semantic
+	// search (§61). It runs in small batches, so it yields quickly.
+	Indexing
 	// Benchmark is a performance benchmark.
 	Benchmark
 	// Training is a training run, which frees memory by unloading models.
@@ -32,6 +35,8 @@ func (c Class) String() string {
 		return "chat"
 	case Automation:
 		return "automation"
+	case Indexing:
+		return "knowledge indexing"
 	case Benchmark:
 		return "benchmark"
 	case Training:
@@ -47,6 +52,8 @@ func (c Class) waitingFor() string {
 		return "Waiting for your chat to finish"
 	case Automation:
 		return "Waiting for an automation to finish"
+	case Indexing:
+		return "Waiting for knowledge indexing to finish"
 	case Benchmark:
 		return "Waiting for a benchmark to finish"
 	}

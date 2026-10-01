@@ -6,6 +6,7 @@ import { isBinaryUpload, readUpload, UPLOAD_ACCEPT } from '@/lib/upload'
 import type { KnowledgeSource } from '@/types/api'
 import { errorText } from '@/features/train/display'
 import { RealmKicker } from '@/components/ui/Realm'
+import { meaningNote } from './semantic'
 
 
 export function KnowledgePage() {
@@ -81,6 +82,7 @@ function SourceRow({ source, onChanged }: { source: KnowledgeSource; onChanged: 
           {source.kind === 'path' && (
             <p className="mt-0.5 text-xs text-ink-faint">Reindexes itself when the files change.</p>
           )}
+          {meaningNote(source) && <p className="mt-0.5 text-xs text-ink-faint">{meaningNote(source)}</p>}
           {source.error && <p className="mt-1 text-xs text-danger">{source.error}</p>}
         </div>
         <div className="flex shrink-0 gap-1.5">

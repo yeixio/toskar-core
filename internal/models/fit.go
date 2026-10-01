@@ -70,10 +70,10 @@ func PickWinners(catalog *Catalog, fits []contracts.ModelFit, presets *[]Purpose
 	for _, f := range fits {
 		fitMap[f.ModelID] = f
 	}
-	entries := catalog.List()
+	entries := chatEntries(catalog.List())
 	eligible := func(e CatalogEntry) bool {
 		f, ok := fitMap[e.ID]
-		return ok && runnableFit(f.Label)
+		return ok && runnableFit(f.Label) && !e.Supporting()
 	}
 
 	var winners []contracts.CategoryWinner

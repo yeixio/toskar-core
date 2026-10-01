@@ -33,7 +33,17 @@ type ModelStartConfig struct {
 	// Adapters are LoRA adapters loaded next to the base weights. They are
 	// inactive unless a request names one.
 	Adapters []Adapter `json:"adapters,omitempty"`
+	// Mode is ModeEmbedding or ModeReranking for a supporting model, or
+	// empty to chat.
+	Mode string `json:"mode,omitempty"`
 }
+
+// Supporting model modes (AI experience spec §61). A model started in one of
+// these modes serves only that endpoint and cannot chat.
+const (
+	ModeEmbedding = "embedding"
+	ModeReranking = "reranking"
+)
 
 // Adapter is a LoRA adapter file for a base model.
 type Adapter struct {
@@ -50,6 +60,8 @@ type RunningModel struct {
 	RuntimeID string `json:"runtime_id"`
 	// Adapters are the ids of the loaded LoRA adapters, in load order.
 	Adapters []string `json:"adapters,omitempty"`
+	// Mode is how the instance was started (see ModelStartConfig.Mode).
+	Mode string `json:"mode,omitempty"`
 }
 
 // Runtime is the replaceable inference runtime adapter.

@@ -27,9 +27,10 @@ func Recommend(catalog *Catalog, input RecommendInput) (contracts.Recommendation
 	}
 
 	availableMem := effectiveMemory(input.Hardware)
-	candidates := filterByPurpose(catalog.List(), purpose)
+	chat := chatEntries(catalog.List())
+	candidates := filterByPurpose(chat, purpose)
 	if len(candidates) == 0 {
-		candidates = catalog.List()
+		candidates = chat
 	}
 
 	sort.Slice(candidates, func(i, j int) bool {
@@ -227,9 +228,10 @@ func RecommendWithPresets(catalog *Catalog, presets []PurposePreset, input Recom
 	}
 
 	availableMem := effectiveMemory(input.Hardware)
-	candidates := filterByPurpose(catalog.List(), purpose)
+	chat := chatEntries(catalog.List())
+	candidates := filterByPurpose(chat, purpose)
 	if len(candidates) == 0 {
-		candidates = catalog.List()
+		candidates = chat
 	}
 	candidates = preferPresetOrder(candidates, preferred)
 
