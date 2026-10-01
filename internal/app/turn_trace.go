@@ -155,9 +155,15 @@ func (t *turnTrace) verified(issues, fixed int, remaining string) {
 
 // stopped records that the user stopped the turn. kept says whether part
 // of the answer was written and saved.
-func (t *turnTrace) stopped(kept bool) {
+func (t *turnTrace) stopped(kept, timedOut bool) {
 	t.mu.Lock()
 	defer t.mu.Unlock()
+	if timedOut {
+		// The profile's time limit ran out (§40).
+		t.addStep("stop", "Stopped at this profile's time limit")
+		t.notice = "Stopped at this profile's time limit before the answer was finished."
+		return
+	}
 	t.addStep("stop", "Stopped by you")
 	if kept {
 		t.notice = "Stopped before the answer was finished."

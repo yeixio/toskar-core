@@ -85,7 +85,8 @@ func (o *Orchestrator) Run(
 			// files or knowledge, is not a quick question.
 			kind = huginn.Research
 		}
-		budget := huginn.BudgetFor(huginn.EffortFrom(ctx), kind)
+		// The profile's own controls apply on top of the effort's budget (§40).
+		budget := huginn.BudgetFor(huginn.EffortFrom(ctx), kind).With(profile.Orchestration)
 		env.Emit(EventEffort, map[string]any{"effort": string(budget.Effort), "chosen": string(huginn.EffortFrom(ctx))})
 		// Offer only the tools this request needs (spec §16). The profile
 		// still decides what is allowed; this decides what is shown.
@@ -94,6 +95,12 @@ func (o *Orchestrator) Run(
 		// otherwise a current question is looked up first.
 		planned := false
 		if hasParts && budget.Plan {
+			if budget.Sequential {
+				plan.Parallel = false
+			}
+			if budget.MaxWorkers > 0 && len(plan.Steps) > budget.MaxWorkers {
+				plan.Steps = plan.Steps[:budget.MaxWorkers]
+			}
 			notes := runPlan(ctx, env, profile, role, plan, task.Prompt, reference, budget.Pages)
 			if ctx.Err() != nil {
 				// Stopped while working through the parts: keep what is done (§67).
@@ -140,7 +147,7 @@ func (o *Orchestrator) Run(
 			plainSys = extra + "\n\n" + plainSys
 		}
 		messages := []pluginapi.ChatMessage{{Role: "system", Content: sys}}
-		if prior := priorMessages(ctx, env, task.Prompt, sys); len(prior) > 0 {
+		if prior := priorMessages(ctx, env, task.Prompt, sys, profile.Orchestration.ContextShare); len(prior) > 0 {
 			messages = append(messages, prior...)
 		}
 		messages = append(messages, pluginapi.ChatMessage{Role: "user", Content: withReference(task.Prompt, reference)})
@@ -266,7 +273,10 @@ func (o *Orchestrator) Run(
 				messages[0] = pluginapi.ChatMessage{Role: "system", Content: plainSys}
 				continue
 			}
-			answer := verifyAnswer(ctx, env, role, messages, parsed.Text, evidence, task.Prompt, budget.Corrections)
+			answer := parsed.Text
+			if budget.Verify {
+				answer = verifyAnswer(ctx, env, role, messages, parsed.Text, evidence, task.Prompt, budget.Corrections)
+			}
 			streamText(ch, role, nodeID, answer, metrics, usage)
 			return
 		}
@@ -357,7 +367,10 @@ type conversationMemory interface {
 	ContextLimit() int
 }
 
-func priorMessages(ctx context.Context, env pluginapi.ExecutionEnvironment, prompt, reserved string) []pluginapi.ChatMessage {
+// priorMessages fits earlier messages into the room the model's window
+// leaves. share, when set by the profile (§40), caps earlier messages at
+// that part of the window.
+func priorMessages(ctx context.Context, env pluginapi.ExecutionEnvironment, prompt, reserved string, share float64) []pluginapi.ChatMessage {
 	src, ok := env.(conversationMemory)
 	if !ok {
 		return nil
@@ -366,7 +379,11 @@ func priorMessages(ctx context.Context, env pluginapi.ExecutionEnvironment, prom
 	if limit <= 0 {
 		limit = contextusage.DefaultWindow
 	}
-	return contextusage.FitPrior(src.PriorMessages(ctx), contextusage.RoomRunes(limit, reserved, prompt))
+	room := contextusage.RoomRunes(limit, reserved, prompt)
+	if share > 0 {
+		room = min(room, int(share*float64(limit)*4))
+	}
+	return contextusage.FitPrior(src.PriorMessages(ctx), room)
 }
 
 func publicToolError(err error) string {

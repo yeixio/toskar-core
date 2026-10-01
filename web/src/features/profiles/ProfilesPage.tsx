@@ -6,7 +6,7 @@ import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 import { api } from '@/lib/api'
 import { blankProfileTemplate, profileTemplateFromPurpose } from '@/lib/profilePresets'
 import { useUIStore } from '@/stores/uiStore'
-import type { AIProfile, ModelRole, ToolPolicy } from '@/types/api'
+import type { AIProfile, ModelRole, OrchestrationPolicy, ToolPolicy } from '@/types/api'
 import { KnowledgePicker } from '@/features/knowledge/KnowledgePicker'
 import { CAPABILITIES, capabilityEnabled, setCapability } from './capabilities'
 import {
@@ -26,6 +26,7 @@ import {
   type CreateStartFrom,
   type ProfileFilter,
 } from './profilePresentation'
+import { OrchestrationControls, cleanOrchestration } from './OrchestrationControls'
 import { RealmKicker } from '@/components/ui/Realm'
 
 const TOOL_CATALOG: {
@@ -764,6 +765,7 @@ function AdvancedEditor({
   )
   const [tools, setTools] = useState<ToolPolicy[]>(defaultToolsFrom(profile))
   const [knowledge, setKnowledge] = useState<string[]>(profile.knowledge_sources ?? [])
+  const [orchestration, setOrchestration] = useState<OrchestrationPolicy>(profile.orchestration ?? {})
   const advancedMode = useUIStore((s) => s.advancedMode)
   const profileIdRef = useRef(profile.id)
 
@@ -780,6 +782,7 @@ function AdvancedEditor({
     )
     setTools(defaultToolsFrom(profile))
     setKnowledge(profile.knowledge_sources ?? [])
+    setOrchestration(profile.orchestration ?? {})
   }, [profile])
 
   const updateRole = (index: number, patch: Partial<ModelRole>) => {
@@ -984,6 +987,10 @@ function AdvancedEditor({
       </section>
       )}
 
+      {advancedMode && (
+        <OrchestrationControls value={orchestration} onChange={setOrchestration} disabled={saving} />
+      )}
+
       <div className="flex flex-wrap items-center gap-3">
         <button
           type="button"
@@ -998,6 +1005,7 @@ function AdvancedEditor({
               roles,
               tools,
               knowledge_sources: knowledge,
+              orchestration: cleanOrchestration(orchestration),
             })
           }
         >

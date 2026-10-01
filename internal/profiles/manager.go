@@ -102,7 +102,7 @@ func (m *Manager) mergeBuiltinTools(ctx context.Context) error {
 // on the shared SQLite pool (MaxOpenConns=1), which would deadlock.
 func (m *Manager) List(ctx context.Context) ([]Profile, error) {
 	rows, err := m.db.QueryContext(ctx, `
-		SELECT id, name, purpose, orchestrator_id, node_policy_json, tools_json, COALESCE(knowledge_json, '')
+		SELECT id, name, purpose, orchestrator_id, node_policy_json, tools_json, COALESCE(knowledge_json, ''), COALESCE(orchestration_json, '')
 		FROM profiles ORDER BY name`)
 	if err != nil {
 		return nil, err
@@ -138,7 +138,7 @@ func (m *Manager) List(ctx context.Context) ([]Profile, error) {
 // Get returns a profile by ID.
 func (m *Manager) Get(ctx context.Context, id string) (Profile, error) {
 	row := m.db.QueryRowContext(ctx, `
-		SELECT id, name, purpose, orchestrator_id, node_policy_json, tools_json, COALESCE(knowledge_json, '')
+		SELECT id, name, purpose, orchestrator_id, node_policy_json, tools_json, COALESCE(knowledge_json, ''), COALESCE(orchestration_json, '')
 		FROM profiles WHERE id = ?`, id)
 	p, err := scanProfile(row)
 	if err == sql.ErrNoRows {
@@ -167,9 +167,9 @@ func (m *Manager) Create(ctx context.Context, p Profile) (Profile, error) {
 	}
 	defer func() { _ = tx.Rollback() }()
 	if _, err := tx.ExecContext(ctx, `
-		INSERT INTO profiles (id, name, purpose, orchestrator_id, node_policy_json, tools_json, knowledge_json)
-		VALUES (?, ?, ?, ?, ?, ?, ?)`,
-		p.ID, p.Name, p.Purpose, p.OrchestratorID, string(nodePolicy), string(tools), knowledgeJSON(p.KnowledgeSources)); err != nil {
+		INSERT INTO profiles (id, name, purpose, orchestrator_id, node_policy_json, tools_json, knowledge_json, orchestration_json)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+		p.ID, p.Name, p.Purpose, p.OrchestratorID, string(nodePolicy), string(tools), knowledgeJSON(p.KnowledgeSources), orchestrationJSON(p.Orchestration)); err != nil {
 		return Profile{}, err
 	}
 	if err := m.saveRolesTx(ctx, tx, p.ID, p.Roles); err != nil {
@@ -194,9 +194,9 @@ func (m *Manager) Update(ctx context.Context, p Profile) error {
 	}
 	defer func() { _ = tx.Rollback() }()
 	res, err := tx.ExecContext(ctx, `
-		UPDATE profiles SET name=?, purpose=?, orchestrator_id=?, node_policy_json=?, tools_json=?, knowledge_json=?, updated_at=datetime('now')
+		UPDATE profiles SET name=?, purpose=?, orchestrator_id=?, node_policy_json=?, tools_json=?, knowledge_json=?, orchestration_json=?, updated_at=datetime('now')
 		WHERE id=?`,
-		p.Name, p.Purpose, p.OrchestratorID, string(nodePolicy), string(tools), knowledgeJSON(p.KnowledgeSources), p.ID)
+		p.Name, p.Purpose, p.OrchestratorID, string(nodePolicy), string(tools), knowledgeJSON(p.KnowledgeSources), orchestrationJSON(p.Orchestration), p.ID)
 	if err != nil {
 		return err
 	}
@@ -301,15 +301,28 @@ type scannable interface {
 
 func scanProfile(row scannable) (Profile, error) {
 	var p Profile
-	var nodePolicyJSON, toolsJSON, knowledge string
-	if err := row.Scan(&p.ID, &p.Name, &p.Purpose, &p.OrchestratorID, &nodePolicyJSON, &toolsJSON, &knowledge); err != nil {
+	var nodePolicyJSON, toolsJSON, knowledge, orchestration string
+	if err := row.Scan(&p.ID, &p.Name, &p.Purpose, &p.OrchestratorID, &nodePolicyJSON, &toolsJSON, &knowledge, &orchestration); err != nil {
 		return Profile{}, err
 	}
 	decodeProfileMeta(&p, nodePolicyJSON, toolsJSON)
 	if knowledge != "" {
 		_ = json.Unmarshal([]byte(knowledge), &p.KnowledgeSources)
 	}
+	if orchestration != "" {
+		_ = json.Unmarshal([]byte(orchestration), &p.Orchestration)
+	}
 	return p, nil
+}
+
+// orchestrationJSON stores a profile's advanced controls, or NULL when it
+// keeps every default.
+func orchestrationJSON(o contracts.OrchestrationPolicy) any {
+	if o == (contracts.OrchestrationPolicy{}) {
+		return nil
+	}
+	b, _ := json.Marshal(o)
+	return string(b)
 }
 
 // knowledgeJSON stores connected knowledge source ids, or NULL when there are none.

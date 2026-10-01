@@ -327,6 +327,41 @@ type AIProfile struct {
 	NodePolicy     NodePolicy   `json:"node_policy"`
 	// KnowledgeSources are Mimir source ids searched on every turn.
 	KnowledgeSources []string `json:"knowledge_sources,omitempty"`
+	// Orchestration is how this profile works through a request (§40).
+	// Empty fields keep Yggdrasil's defaults.
+	Orchestration OrchestrationPolicy `json:"orchestration,omitzero"`
+}
+
+// OrchestrationPolicy is a profile's advanced controls (spec §40, §56).
+// Every field is optional; empty keeps the default, which follows the
+// effort a chat chooses.
+type OrchestrationPolicy struct {
+	// Effort is the profile's effort when a chat leaves it on Auto:
+	// fast, balanced, or thorough.
+	Effort string `json:"effort,omitempty"`
+	// Planning is on or off: whether a request with several parts is
+	// worked through in parts.
+	Planning string `json:"planning,omitempty"`
+	// MaxWorkers caps how many parts a plan has (2–8).
+	MaxWorkers int `json:"max_workers,omitempty"`
+	// Parallel is on or off: whether independent parts are looked up side
+	// by side.
+	Parallel string `json:"parallel,omitempty"`
+	// Verification is off (no checks), check (report only), correct (one
+	// correction pass), or thorough (two).
+	Verification string `json:"verification,omitempty"`
+	// MaxToolCalls caps tool calls in one turn (1–50).
+	MaxToolCalls int `json:"max_tool_calls,omitempty"`
+	// Memory is off to keep persistent memory out of this profile's chats.
+	Memory string `json:"memory,omitempty"`
+	// ContextShare is the most of the model's window earlier messages may
+	// use, from 0.1 to 0.9.
+	ContextShare float64 `json:"context_share,omitempty"`
+	// Fallback is off to show a failure instead of quietly answering on
+	// another model.
+	Fallback string `json:"fallback,omitempty"`
+	// TimeoutSeconds stops a turn that runs longer (10–3600).
+	TimeoutSeconds int `json:"timeout_seconds,omitempty"`
 }
 
 // Conversation is a chat thread.

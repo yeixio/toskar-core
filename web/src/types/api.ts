@@ -231,6 +231,21 @@ export interface AIProfile {
   tools?: ToolPolicy[]
   node_policy: NodePolicy
   knowledge_sources?: string[]
+  /** How this profile works through a request (spec §40). Empty keeps defaults. */
+  orchestration?: OrchestrationPolicy
+}
+
+export interface OrchestrationPolicy {
+  effort?: '' | 'fast' | 'balanced' | 'thorough'
+  planning?: '' | 'on' | 'off'
+  max_workers?: number
+  parallel?: '' | 'on' | 'off'
+  verification?: '' | 'off' | 'check' | 'correct' | 'thorough'
+  max_tool_calls?: number
+  memory?: '' | 'off'
+  context_share?: number
+  fallback?: '' | 'off'
+  timeout_seconds?: number
 }
 
 export type NodeStatus = 'online' | 'offline' | 'unknown'

@@ -180,6 +180,23 @@ Every chat turn, API request, and automation run is traced. A chat or API run's 
 
 In advanced mode, an answer has "Run details". Runs are run records, so the retention and delete action above apply to them.
 
+A profile's `orchestration` object holds its advanced controls. Every field is optional; empty keeps the default, which follows the chat's effort.
+
+| Field | Values | Effect |
+| --- | --- | --- |
+| `effort` | `fast`, `balanced`, `thorough` | The profile's effort when a chat leaves effort on Auto |
+| `planning` | `on`, `off` | Work through requests with several parts in parts, whatever the effort |
+| `max_workers` | 2–8 | Most parts in a plan |
+| `parallel` | `on`, `off` | `off` works through parts one at a time |
+| `verification` | `off`, `check`, `correct`, `thorough` | `off` skips the figure check; `check` reports only; `correct` and `thorough` allow one or two correction passes |
+| `max_tool_calls` | 1–50 | Most tool calls in one turn |
+| `memory` | `off` | Keeps persistent memory out of the profile's chats |
+| `context_share` | 0.1–0.9 | Most of the model's window earlier messages may use |
+| `fallback` | `off` | Shows a failure instead of answering on another model |
+| `timeout_seconds` | 10–3600 | Stops a turn that runs longer; the answer so far is kept and says it reached the time limit |
+
+Invalid values are refused with 400. In advanced mode, the profile editor has an Orchestration section, alongside model roles, tools, knowledge, and placement.
+
 Model, node, tool, conversation, and log routes follow the same prefix. The OpenAPI file is the route list to diff when a handler changes.
 
 ## OpenAI-compatible API

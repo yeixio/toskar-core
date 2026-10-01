@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"strings"
@@ -68,6 +69,10 @@ func (a *App) RunChat(ctx context.Context, profileID, conversationID, message st
 			OrchestratorID: "simple",
 			NodePolicy:     contracts.NodePolicy{Mode: "automatic"},
 		}
+	}
+	// A profile's own effort applies when the chat leaves effort on Auto (§40).
+	if pe := profile.Orchestration.Effort; pe != "" && huginn.EffortFrom(ctx) == huginn.EffortAuto {
+		ctx = huginn.WithEffort(ctx, huginn.ParseEffort(pe))
 	}
 	// An API request chooses its connected knowledge (§62).
 	if opts != nil {
@@ -200,6 +205,12 @@ func (a *App) RunChat(ctx context.Context, profileID, conversationID, message st
 		// with it every model call, tool, plan step, and paired computer.
 		ctx, _, endRun := a.startRun(ctx, conversationID)
 		defer endRun()
+		// A profile's time limit stops a turn that runs too long (§40).
+		if secs := profile.Orchestration.TimeoutSeconds; secs > 0 {
+			var cancel context.CancelFunc
+			ctx, cancel = context.WithTimeout(ctx, time.Duration(secs)*time.Second)
+			defer cancel()
+		}
 		// What leaves this computer is recorded against this turn (§63).
 		source := egress.SourceChat
 		if opts != nil {
@@ -252,7 +263,7 @@ func (a *App) RunChat(ctx context.Context, profileID, conversationID, message st
 			env.trace.sharing(busy + ", so this answer may be slower.")
 		}
 		env.opts = opts
-		if a.memoryOn(ctx, conversationID) && (opts == nil || opts.Memory) {
+		if a.memoryOn(ctx, conversationID) && (opts == nil || opts.Memory) && profile.Orchestration.Memory != "off" {
 			if mems, err := a.Muninn.Relevant(ctx, message); err == nil {
 				env.memories = mems
 				env.trace.memories(mems)
@@ -295,7 +306,7 @@ func (a *App) RunChat(ctx context.Context, profileID, conversationID, message st
 						}(eventsCh)
 						return
 					}
-					if attempt == 0 && !teamMode && special == nil && recoverable(ctx, evt.Error, full, env) {
+					if attempt == 0 && !teamMode && special == nil && profile.Orchestration.Fallback != "off" && recoverable(ctx, evt.Error, full, env) {
 						failedID := firstNonEmpty(env.modelID(), modelID)
 						if next, step, notice, ok := a.fallback(ctx, failedID, evt.Error); ok {
 							run.Retried()
@@ -1250,9 +1261,10 @@ func (a *App) modelName(modelID string) string {
 // the turn, marked as stopped, and tells every client the turn ended.
 func (a *App) keepStopped(ctx context.Context, env *chatExecEnv, conversationID, full string) {
 	// ctx is cancelled by now; the save must still happen.
+	timedOut := errors.Is(ctx.Err(), context.DeadlineExceeded)
 	ctx = context.WithoutCancel(ctx)
 	kept := strings.TrimSpace(full) != ""
-	env.trace.stopped(kept)
+	env.trace.stopped(kept, timedOut)
 	// Keep the answer so far; with none, keep a short note, so the stop is
 	// visible and the sources and steps already gathered are not lost.
 	content := full
