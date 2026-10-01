@@ -1,0 +1,176 @@
+{
+  "sections": [
+    {
+      "id": "overview",
+      "title": "What Yggdrasil does",
+      "paragraphs": [
+        "Yggdrasil Desktop is the packaged app. Yggdrasil Core is the open-source engine behind it: a daemon, a local web UI, and an HTTP API. Both run local models on computers you already own. You do not need a hosted model account for local inference.",
+        "This Core release publishes headless archives and Linux deb and rpm packages. Those files are not the Desktop application, and they are not code-signed. Mobile controllers, an MCP marketplace, and custom orchestrator management are not included."
+      ]
+    },
+    {
+      "id": "install",
+      "title": "Install and start your first chat",
+      "paragraphs": [
+        "Yggdrasil Desktop is distributed separately from this Core release. Use the official desktop channels for the packaged app. This page\u2019s release files are Yggdrasil Core. Verify them against SHA256SUMS.txt. Core archives are not code-signed.",
+        "On macOS, Homebrew installs Core from this repository. Linux can use a deb or rpm package. Other systems use the headless archive. The daemon serves a web UI at http://127.0.0.1:7331."
+      ],
+      "steps": [
+        "Open http://127.0.0.1:7331, or open Yggdrasil Desktop if you installed it separately. Follow the hardware and model setup. Allow enough disk space for model files and the managed runtime. The first model and runtime download require internet access.",
+        "Open Models and install a model suitable for this computer. Wait for installation to finish.",
+        "Open Chat, choose General Assistant and the installed model, and send a short prompt. The initial response can take longer while the runtime loads the model.",
+        "Find your app version in the sidebar or Settings and match it to the documentation version above."
+      ]
+    },
+    {
+      "id": "models",
+      "title": "Choose and manage models",
+      "paragraphs": [
+        "Models separates discovery, installed models, and running models. Choose the target computer before installing or managing models. A downloaded model uses disk space; a running model also needs memory.",
+        "In this release, fit labels are Excellent, Good, Tight, May run slowly, and Unsupported. Runtime memory estimates account for the model file, quantization, and configured context. Tight memory is a warning; installation is blocked only for an unsupported machine or backend. Close other applications if free memory is low.",
+        "Model details distinguish Estimated speed from Measured performance. A model card is a planning estimate until that model has actually run on your computer. Start with a smaller model if loading fails or responses are too slow.",
+        "Automatic routing can prefer an installed model with tool support for a question needing current information. Choosing This computer keeps the selected model. A model without tool support cannot browse simply because Internet is enabled."
+      ]
+    },
+    {
+      "id": "chat",
+      "title": "Chat and context",
+      "paragraphs": [
+        "Choose Profile, Run on, and the model in the chat composer. The model choice stays with the conversation. Responses render Markdown, links, lists, and code. Scroll upward to read earlier messages; use Latest to return to the newest response.",
+        "The context ring beside Send estimates how much of the running model\u2019s window is used by instructions, tools, conversation, and tool results. Local models use an 8,192-token window, capped lower when the model supports less. This readout is temporary and clears when switching chats.",
+        "Tool work appears as a short status, such as Searching the web. Expand Used N tools afterward to see tool names, summaries, and timings. Tool errors appear as short messages; use Diagnostics for investigation."
+      ]
+    },
+    {
+      "id": "automations",
+      "title": "Schedule an automation",
+      "paragraphs": [
+        "An automation is a prompt that the daemon runs on a schedule. Price checks, stock checks, release summaries, and one-time research are the same kind of task: a name, a profile, a schedule, a prompt, and a rule for when to notify you. Open Automations in the sidebar. The list shows whether each task is enabled or paused, the schedule, the latest status and result, and the next run. The daemon keeps that schedule. Closing the web page does not stop it. The desktop app stops the daemon when you quit unless Settings keeps Yggdrasil running in the background.",
+        "Create a task by describing it in ordinary language, then choose Set up automation. Yggdrasil fills the name, task, schedule, and notification from that description. These descriptions work: every morning at 8:00 AM with a price below or above an amount; every six hours, and notify only when an item is back in stock; every Friday, with the time defaulting to 8:00 AM when you do not name one; and once tomorrow at 9:00 AM. The task stays in ordinary language. Yggdrasil uses the price, availability, or significance in the result to decide whether to notify you. Adjust any field before you save. The profile, model, time zone, and read-only tools stay under Advanced. Save stays disabled until an installed model is available. Leave the read-only tool list empty to use every read-only tool the profile already allows. A selected tool can only narrow that set. Write tools, including the terminal and git add, commit, and push, stay off while the task is unattended. Ask and allow-for-session stay decisions you make in chat, so a scheduled run does not wait for a closed window.",
+        "Notifications are separate from the run. Every time sends a notice after every success. On change stores the first success as a baseline and notifies only when a later result differs. A condition notifies when the price is below or above the amount you set, when an item becomes available, or when the result is significant. History says why a notice was or was not sent, such as a price that was not below the amount. Don't notify me stores the result. Notices appear on this computer. Turning off task-finish notifications in Settings turns every automation notice off. Failures are recorded without using those success rules. A timeout or a dropped connection retries the same occurrence up to three times, after one minute and then five minutes. A model that cannot start, an out-of-memory failure, a tool failure, or any other error stays failed. You are notified when those retries are used up or the next occurrence fails too.",
+        "Run now starts one occurrence immediately and leaves a paused task paused. If the scheduled time is already due, that occurrence is the one that runs. Otherwise the daemon runs a new occurrence at the current time and still keeps the next scheduled slot, such as tomorrow morning. Pause and Resume turn the task off and on and recompute the next time. Edit changes the stored task. Delete removes the task and its history. History lists each occurrence newest first, with the scheduled time, start, finish, status, result, whether a notice was sent, the model and computer used, and the error when one exists. After a restart, a missed daily or weekly slot runs once for the latest missed time rather than replaying every skipped day. A finished one-time task does not run again.",
+        "yggctl talks to the local daemon for the same actions. The address is http://127.0.0.1:7331 unless YGGDRASIL_URL is set. A daemon that is not limited to this computer needs YGGDRASIL_API_KEY."
+      ],
+      "steps": [
+        "Open Automations and choose New automation.",
+        "Describe when it should run and what it should check. Choose Set up automation and read the task, schedule, and notification. Change the time, day, or threshold if the guess is not the one you want.",
+        "Choose Test run to try it before it is saved. Create automation stores it.",
+        "The list shows the next run in the task\u2019s time zone.",
+        "Use Run now to try it, then open History for the result. Pause stops later scheduled runs until you resume."
+      ],
+      "code": "yggctl automations create --name \"Morning price\" --prompt \"Check the price\" \\\n  --profile general-assistant --model MODEL_ID --schedule daily --at 08:00 --zone America/Los_Angeles\n\nyggctl automations list\nyggctl automations run AUTOMATION_ID\nyggctl automations pause AUTOMATION_ID",
+      "images": [
+        {
+          "src": "docs/user-guide/images/07-automations.png",
+          "alt": "Automations list with a morning price check selected, its next run, and a history entry that was notified",
+          "caption": "The list shows the schedule, last result, and next run. The detail keeps Run now, Pause, Edit, Delete, and the history."
+        },
+        {
+          "src": "docs/user-guide/images/08-automations-create.png",
+          "alt": "New automation form filled from the sentence about checking a price below $500 every morning at 8:00 AM",
+          "caption": "Set up automation turns that sentence into a daily 8:00 AM task and a price notification. The task stays in ordinary language."
+        }
+      ]
+    },
+    {
+      "id": "train",
+      "title": "Train your own AI",
+      "paragraphs": [
+        "Train builds a small assistant that is good at one job. Training teaches your AI how to do its job. Connected knowledge gives it the current information it needs to do that job.",
+        "Use examples of good answers, such as chat transcripts or question and answer pairs, to train behavior: the questions it asks, its terminology, its steps, and its tone. Connect data that changes or must stay exact, such as inventory, prices, SKUs, catalogs, and policies, as knowledge. Editing connected knowledge never requires retraining.",
+        "Training runs on this computer or a paired one. It needs a Mac with Apple Silicon or a computer with an NVIDIA GPU. The first run downloads the trainer (about 450 MB on a Mac, about 4 GB with NVIDIA's libraries) and the base model's training weights. The base model is not changed, and it stays available on its own."
+      ],
+      "steps": [
+        "To see how it works first, choose Try an example. It sets up a sample tire shop assistant with example chats, an inventory, and a policy document, and explains each step. Nothing trains until you press Train.",
+        "Open Train and choose Build a new AI. Describe the job in a sentence or two.",
+        "Choose a base model. Yggdrasil recommends one for the job and shows its license, the memory training needs, and how long it takes.",
+        "Add material. For each file or paste, Yggdrasil recommends Training, Knowledge, or Both and explains why. Review the recommendation before you add it.",
+        "Review the examples. Fix or exclude flagged examples. At least 10 usable examples are required; about 50 teach a workflow reliably.",
+        "Review the plan, pick Quick, Balanced, or Highest quality, and start training. You can cancel at any time.",
+        "Compare base and specialized answers on the test prompts. Evaluation is required before deploying.",
+        "Deploy. The AI appears in the Chat model menu and in the API as sai:<name>. Retraining creates a new revision; the deployed one keeps answering until you deploy the new one."
+      ]
+    },
+    {
+      "id": "capabilities",
+      "title": "Capabilities and permissions",
+      "paragraphs": [
+        "Profiles control which tools a model may use. Enabling a capability permits its tools to run automatically. Existing customized Ask or Deny choices are preserved. In Advanced mode, Allow runs immediately, Ask requests approval in chat, and Deny excludes the tool. A globally disabled tool cannot run.",
+        "Internet searches DuckDuckGo and opens public pages. Current answers depend on reachable sources; weather comes from public forecast pages, not a dedicated weather service. Disabling Internet removes web tools from the model prompt.",
+        "Files searches, reads, and writes within the workspace. Shell runs local commands. Git can inspect status, diffs, logs, and commits, stage changes, commit, and push. Enable these capabilities only when you intend the assistant to perform those actions.",
+        "The Tools screen lists built-in tools and supports inspection and testing. A capability needs a compatible model as well as permission. The simple chat tool loop is limited to 10 calls per turn."
+      ]
+    },
+    {
+      "id": "computers",
+      "title": "Connect your computers",
+      "paragraphs": [
+        "Computers discovers other Yggdrasil instances on the local network. Pairing establishes trust between computers; it is separate from enabling LAN access to the OpenAI-compatible API."
+      ],
+      "steps": [
+        "Run Yggdrasil on both computers on the same LAN. Enable Find other computers in Settings.",
+        "In Computers, find the other machine and choose Add to team. Approve the incoming request on the other computer; use the displayed pairing code when needed.",
+        "Confirm both machines appear paired and online. Install the required model on each computer that will run a role.",
+        "If discovery fails, check network isolation, discovery settings, and firewalls. An offline or revoked computer cannot accept a pinned role."
+      ]
+    },
+    {
+      "id": "team",
+      "title": "Run a Team profile",
+      "paragraphs": [
+        "General Assistant uses a simple chat flow. Programming (Team) runs coordinator, worker, and reviewer roles and returns one final answer. Roles can use different models or different paired computers; automatic placement can also keep work on one computer."
+      ],
+      "steps": [
+        "Install the same model on both paired computers for an easy first run.",
+        "Select Programming (Team) in Chat and choose an installed model to fill any unset role model choices.",
+        "For explicit placement, enable Advanced mode and edit the profile roles to pin a model and computer, such as worker on your second machine.",
+        "Send a short request. The chat timeline identifies the role and computer. Performance \u2192 Chat history shows per-role timing and cross-machine activity."
+      ]
+    },
+    {
+      "id": "api",
+      "title": "Connect another app through the API",
+      "paragraphs": [
+        "Open API Access to copy the endpoint and run Test API. The default base URL is http://127.0.0.1:7331/v1. Use GET /v1/models to find a model ID, then POST /v1/chat/completions. This is an OpenAI-compatible subset, not a promise of support for every hosted API feature.",
+        "With LAN access disabled, the default loopback endpoint needs no API key. Enabling local network access requires a key, including for local API requests. Create a named key in API Access and copy its secret when shown; you can rotate or revoke it there. Send it as Authorization: Bearer YOUR_KEY.",
+        "For another computer, use the LAN endpoint shown in API Access rather than localhost. Keep LAN access on a trusted network; the displayed HTTP endpoint does not itself provide public-internet TLS protection."
+      ],
+      "code": "curl http://127.0.0.1:7331/v1/models\n\ncurl http://127.0.0.1:7331/v1/chat/completions \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"model\":\"MODEL_ID_FROM_LIST\",\"messages\":[{\"role\":\"user\",\"content\":\"Hello\"}],\"stream\":false}'"
+    },
+    {
+      "id": "server",
+      "title": "Run without a desktop",
+      "paragraphs": [
+        "Extract the matching Linux headless archive and run the daemon from the extracted directory. Keep the bundled web directory alongside it. Open http://127.0.0.1:7331 on that computer.",
+        "For a remote server, an SSH tunnel lets you reach the loopback UI: ssh -L 7331:127.0.0.1:7331 user@server. Then open http://127.0.0.1:7331 on your own computer, using a different local port if it is already occupied.",
+        "The daemon accepts --data-dir for a custom data location. Stop it with Ctrl+C when running in a terminal. The headless archive does not install a system service."
+      ],
+      "code": "tar -xzf yggdrasil-1.4.0-beta.1-linux-amd64-headless.tar.gz\ncd yggdrasil-1.4.0-beta.1-linux-amd64-headless\n./yggdrasil-daemon"
+    },
+    {
+      "id": "settings",
+      "title": "Settings, storage, and privacy",
+      "paragraphs": [
+        "Settings controls appearance, default profile, where chats run, model lifecycle, downloads, notifications, history, and maximum model storage. Advanced mode reveals additional controls. Desktop settings also include keeping the app running in the background and launch at login.",
+        "Default data locations are ~/Library/Application Support/Yggdrasil on macOS, %LOCALAPPDATA%\\Yggdrasil on Windows, and ~/.local/share/yggdrasil on Linux. Settings shows the actual data, model, runtime, and log directories. SQLite state, model files, and runtime files live under the data tree.",
+        "Local inference stays on the selected computer, while Team work sends requests to paired computers. Model downloads and Internet tools make network requests; Git push and shell commands can also access external services. Turning off Internet tools alone does not make all capabilities offline.",
+        "Before replacing an installation or resetting the app, stop the app and daemon and back up the data directory if you need its state. Review the reset dialog carefully. Install updates from the matching release archive and restart the app."
+      ]
+    },
+    {
+      "id": "troubleshooting",
+      "title": "Troubleshooting and diagnostics",
+      "paragraphs": [
+        "No reply or model load failure: confirm installation finished, check the selected computer is online, close memory-heavy applications, or try a smaller model. Inspect Models \u2192 Running and Diagnostics for runtime failures.",
+        "No live web answer: verify Internet is enabled for the profile and the selected model supports tools. A failed search or page fetch can be a network or source issue. Diagnostics \u2192 Tool activity shows process-local tool events.",
+        "API connection refused: confirm the daemon is running and copy the current endpoint from API Access. A 401 with LAN access enabled means you need a valid API key. Run Test API after changing settings.",
+        "Slow chat: inspect Performance for response timing and model speed. Team profiles involve multiple role generations and network work, so compare them separately from a single-model chat.",
+        "For a bug report, include the app version, OS and processor, model, profile, steps to reproduce, and relevant diagnostics. Remove secrets and private prompt or file content before posting to the public issue tracker."
+      ]
+    }
+  ],
+  "schemaVersion": 1,
+  "version": "1.4.0-beta.1",
+  "sourceTag": "v1.4.0-beta.1",
+  "sourceCommit": "9680c13b2c6eb8c161feac971bc18b86276f7fbc"
+}
