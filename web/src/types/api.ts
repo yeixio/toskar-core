@@ -1179,3 +1179,167 @@ export interface RunTrace {
   context_tokens?: number
   context_limit?: number
 }
+
+/** An environment variable or header of a tool source. Secret values show only their last four characters. */
+export interface MCPVariable {
+  key: string
+  value: string
+  secret: boolean
+}
+
+/** One tool a tool source provides. */
+export interface MCPTool {
+  id: string
+  name: string
+  remote_name: string
+  description: string
+  risk: string
+  /** allow or ask; changed is true when the person set it. */
+  policy: string
+  changed: boolean
+  enabled: boolean
+}
+
+/** An MCP tool source. Secret values are never returned. */
+export interface MCPServer {
+  id: string
+  name: string
+  description?: string
+  preset?: string
+  where: 'local' | 'remote'
+  command?: string
+  args?: string[]
+  url?: string
+  env: MCPVariable[]
+  headers: MCPVariable[]
+  enabled: boolean
+  allow_sampling: boolean
+  always_offer: boolean
+  keywords: string[]
+  status: 'ready' | 'sign_in' | 'error' | 'off'
+  running: boolean
+  error?: string
+  signed_in?: boolean
+  /** A program it needs that is not installed, such as Node.js. */
+  missing?: string
+  server_name?: string
+  server_version?: string
+  protocol?: string
+  instructions?: string
+  has_resources: boolean
+  has_prompts: boolean
+  tools: MCPTool[]
+  added_at: string
+  checked_at?: string
+  last_used?: string
+}
+
+export interface MCPField {
+  key: string
+  label: string
+  help?: string
+  secret?: boolean
+  optional?: boolean
+  placeholder?: string
+  default?: string
+  kind?: '' | 'text' | 'folder' | 'file' | 'folders'
+}
+
+/** A gallery entry: a well-known server set up with a few plain questions. */
+export interface MCPGalleryEntry {
+  id: string
+  name: string
+  description: string
+  category: string
+  homepage?: string
+  fields: MCPField[]
+  setup?: string
+  sign_in?: boolean
+  remote: boolean
+  missing?: string
+  /** The id of a source already added from this entry. */
+  added?: string
+}
+
+/** How to reach a server: a command on this computer, or a web address. */
+export interface MCPSpec {
+  name: string
+  preset?: string
+  command?: string
+  args?: string[]
+  env?: Record<string, string>
+  dir?: string
+  url?: string
+  headers?: Record<string, string>
+  client_id?: string
+  client_secret?: string
+  keywords?: string[]
+}
+
+/** A value a pasted server still needs, such as a token left as a placeholder. */
+export interface MCPNeed {
+  key: string
+  label: string
+  secret: boolean
+}
+
+export interface MCPParsed {
+  spec: MCPSpec
+  needs: MCPNeed[]
+  missing?: string
+}
+
+/** A server set up in another app on this computer. Secret values are hidden. */
+export interface MCPImportCandidate {
+  app: string
+  app_name: string
+  spec: MCPSpec
+  needs?: MCPNeed[]
+  missing?: string
+  added: boolean
+}
+
+export interface MCPAddRequest {
+  preset?: string
+  spec?: MCPSpec
+  import?: { app: string; name: string }
+  values?: Record<string, string>
+  redirect_base?: string
+}
+
+export interface MCPAdded {
+  server: MCPServer
+  /** Set when the service needs you to sign in: open it in the browser. */
+  sign_in_url?: string
+}
+
+export interface MCPUpdate {
+  name?: string
+  enabled?: boolean
+  allow_sampling?: boolean
+  always_offer?: boolean
+  keywords?: string[]
+  /** Tool name to allow, ask, or default. */
+  policies?: Record<string, string>
+}
+
+export interface MCPLogLine {
+  at: string
+  level: string
+  text: string
+}
+
+export interface MCPPrompt {
+  name: string
+  title?: string
+  description?: string
+  arguments?: { name: string; description?: string; required?: boolean }[]
+}
+
+/** How other apps reach Yggdrasil's own MCP server. */
+export interface MCPShare {
+  url: string
+  command: string
+  args: string[]
+  needs_key: boolean
+}

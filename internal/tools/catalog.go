@@ -16,7 +16,8 @@ const (
 	CapGit      = "git"
 )
 
-// Definition is one registered tool. Future MCP tools use the same shape.
+// Definition is one registered tool: built in, from a connected service,
+// or from an MCP tool source.
 type Definition struct {
 	ID            string `json:"id"`
 	Name          string `json:"name"`
@@ -33,6 +34,9 @@ type Definition struct {
 	// Cues are words that show a message is about this tool's service,
 	// such as a connected home's device names.
 	Cues []string `json:"cues,omitempty"`
+	// Always offers the tool with every request, not only ones about its
+	// service: a tool source the person set to always be available.
+	Always bool `json:"always,omitempty"`
 }
 
 // Risk levels. A create tool only adds a file to Yggdrasil's own store, so it
@@ -91,8 +95,9 @@ func PolicyForProfile(profile contracts.AIProfile, toolID string) string {
 	return PolicyDeny
 }
 
-// Connected tools come from services the user connected (spec §32). They
-// change while the daemon runs, so they live beside the built-in catalog.
+// Connected tools come from services the user connected (spec §32) and
+// from MCP tool sources. They change while the daemon runs, so they live
+// beside the built-in catalog.
 var (
 	connectedMu sync.RWMutex
 	connected   = map[string][]Definition{}

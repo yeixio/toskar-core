@@ -1,0 +1,19 @@
+//go:build windows
+
+package mcp
+
+import (
+	"os/exec"
+	"syscall"
+)
+
+// hideWindow keeps a console window from opening for the server.
+func hideWindow(cmd *exec.Cmd) {
+	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true, CreationFlags: 0x08000000} // CREATE_NO_WINDOW
+}
+
+func terminate(cmd *exec.Cmd) {
+	if cmd.Process != nil {
+		_ = cmd.Process.Kill()
+	}
+}

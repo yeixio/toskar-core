@@ -284,6 +284,7 @@ The control API and the OpenAI-compatible API require a bearer token whenever th
 | [Troubleshooting](docs/troubleshooting.md) | First checks when something fails |
 | [Capabilities](docs/capabilities.md) | Internet, Files, Shell, and Git |
 | [Tools](docs/tools.md) | Tool registry and permissions |
+| [MCP](docs/mcp.md) | Add tools from MCP servers, and use Yggdrasil from other AI apps |
 | [Architecture](docs/architecture.md) | Subsystems and process layout |
 | [API](docs/api.md) | Control plane and OpenAI-compatible routes |
 | [Runtimes](docs/runtimes.md) | llama.cpp and external servers |

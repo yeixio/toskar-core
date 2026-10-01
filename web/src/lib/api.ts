@@ -24,6 +24,17 @@ import type {
   PrivacyOverview,
   RunTrace,
   RunRecordCounts,
+  MCPAdded,
+  MCPAddRequest,
+  MCPGalleryEntry,
+  MCPImportCandidate,
+  MCPLogLine,
+  MCPParsed,
+  MCPPrompt,
+  MCPServer,
+  MCPShare,
+  MCPSpec,
+  MCPUpdate,
   PersonalStyle,
   NotificationList,
   ToolActivityRecord,
@@ -635,6 +646,66 @@ export const api = {
     request<PrivacyOverview>('/api/v1/privacy', { method: 'PUT', body: JSON.stringify({ retention_days: days }) }),
 
   deleteRunRecords: () => request<RunRecordCounts>('/api/v1/privacy/delete-runs', { method: 'POST' }),
+
+  listMCPServers: async () => (await request<MCPServer[]>('/api/v1/mcp/servers')) ?? [],
+
+  /** Checks the source connects and lists its tools, then stores it. The first start of a local one can take a minute. */
+  addMCPServer: async (body: MCPAddRequest) => {
+    const added = await request<MCPAdded>('/api/v1/mcp/servers', {
+      method: 'POST',
+      body: JSON.stringify({ redirect_base: window.location.origin, ...body }),
+    })
+    if (!added) throw new ApiError(404, 'That gallery entry or app setting was not found.')
+    return added
+  },
+
+  updateMCPServer: (id: string, update: MCPUpdate) =>
+    request<MCPServer>(`/api/v1/mcp/servers/${encodeURIComponent(id)}`, { method: 'PATCH', body: JSON.stringify(update) }),
+
+  /** Changes how a source is reached, then checks it. Blank secret values keep the stored ones. */
+  replaceMCPServer: (id: string, spec: MCPSpec, values?: Record<string, string>) =>
+    request<MCPServer>(`/api/v1/mcp/servers/${encodeURIComponent(id)}`, { method: 'PUT', body: JSON.stringify({ spec, values }) }),
+
+  removeMCPServer: (id: string) => request<null>(`/api/v1/mcp/servers/${encodeURIComponent(id)}`, { method: 'DELETE' }),
+
+  checkMCPServer: (id: string) =>
+    request<MCPServer>(`/api/v1/mcp/servers/${encodeURIComponent(id)}/check`, { method: 'POST' }),
+
+  /** Returns the address to open in the browser to sign in. */
+  signInMCPServer: async (id: string) =>
+    (
+      await request<{ url: string }>(`/api/v1/mcp/servers/${encodeURIComponent(id)}/sign-in`, {
+        method: 'POST',
+        body: JSON.stringify({ redirect_base: window.location.origin }),
+      })
+    )?.url ?? '',
+
+  signOutMCPServer: (id: string) =>
+    request<MCPServer>(`/api/v1/mcp/servers/${encodeURIComponent(id)}/sign-out`, { method: 'POST' }),
+
+  mcpServerLogs: async (id: string) =>
+    (await request<MCPLogLine[]>(`/api/v1/mcp/servers/${encodeURIComponent(id)}/logs`)) ?? [],
+
+  mcpServerPrompts: async (id: string) =>
+    (await request<MCPPrompt[]>(`/api/v1/mcp/servers/${encodeURIComponent(id)}/prompts`)) ?? [],
+
+  getMCPPrompt: async (id: string, name: string, args: Record<string, string>) =>
+    (
+      await request<{ text: string }>(
+        `/api/v1/mcp/servers/${encodeURIComponent(id)}/prompts/${encodeURIComponent(name)}`,
+        { method: 'POST', body: JSON.stringify({ arguments: args }) },
+      )
+    )?.text ?? '',
+
+  mcpGallery: async () => (await request<MCPGalleryEntry[]>('/api/v1/mcp/gallery')) ?? [],
+
+  mcpImportCandidates: async () => (await request<MCPImportCandidate[]>('/api/v1/mcp/import')) ?? [],
+
+  /** Reads pasted settings, a web address, or a command line into servers. */
+  parseMCP: async (text: string) =>
+    (await request<MCPParsed[]>('/api/v1/mcp/parse', { method: 'POST', body: JSON.stringify({ text }) })) ?? [],
+
+  mcpShare: () => request<MCPShare>('/api/v1/mcp/share'),
 
   listConnectors: async () => (await request<Connector[]>('/api/v1/connectors')) ?? [],
 

@@ -141,3 +141,35 @@ func TestToolsForConnectedServices(t *testing.T) {
 		t.Errorf("unrelated question offered %v", got)
 	}
 }
+
+func TestToolsForMCPSources(t *testing.T) {
+	available := []string{"internet.search", "linear.list_issues", "linear.create_issue", "time.get_current_time"}
+	tools.SetConnected("mcp:linear", []tools.Definition{
+		{ID: "linear.list_issues", Risk: tools.RiskRead, Cues: []string{"linear", "ticket", "tickets"}},
+		{ID: "linear.create_issue", Risk: tools.RiskWrite, Cues: []string{"linear", "ticket", "tickets"}},
+	})
+	tools.SetConnected("mcp:time", []tools.Definition{{ID: "time.get_current_time", Risk: tools.RiskRead, Always: true}})
+	t.Cleanup(func() {
+		tools.SetConnected("mcp:linear", nil)
+		tools.SetConnected("mcp:time", nil)
+	})
+	has := func(list []string, id string) bool {
+		for _, v := range list {
+			if v == id {
+				return true
+			}
+		}
+		return false
+	}
+	if got := ToolsFor(Chat, "Which tickets are assigned to me?", available); !has(got, "linear.list_issues") || has(got, "linear.create_issue") {
+		t.Errorf("ticket question offered %v", got)
+	}
+	if got := ToolsFor(Chat, "Add a ticket in Linear for the login bug", available); !has(got, "linear.create_issue") {
+		t.Errorf("ticket request offered %v", got)
+	}
+	// A source set to always be offered comes with every request.
+	got := ToolsFor(Chat, "What is the capital of France?", available)
+	if !has(got, "time.get_current_time") || has(got, "linear.list_issues") {
+		t.Errorf("unrelated question offered %v", got)
+	}
+}

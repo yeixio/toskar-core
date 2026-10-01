@@ -28,6 +28,11 @@ func main() {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
 		}
+	case "mcp":
+		if err := mcpCommand(os.Args[2:], os.Stdin, os.Stdout); err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
 	case "completion":
 		if err := completionCommand(os.Args[2:], os.Stdout); err != nil {
 			fmt.Fprintln(os.Stderr, err)
@@ -40,5 +45,5 @@ func main() {
 }
 
 func usage() {
-	fmt.Fprintf(os.Stderr, "usage: yggctl <version|about|paths|automations|completion>\n")
+	fmt.Fprintf(os.Stderr, "usage: yggctl <version|about|paths|automations|mcp|completion>\n")
 }

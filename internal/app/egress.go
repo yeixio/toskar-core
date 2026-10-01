@@ -32,6 +32,14 @@ func (a *App) recordToolEgress(ctx context.Context, toolID string, args map[stri
 		return
 	}
 	def, ok := tools.Lookup(toolID)
+	if ok && strings.HasPrefix(def.Source, "mcp:") && a.MCP != nil {
+		// A tool source on the web is sent the call; one on this computer
+		// is not, by Yggdrasil.
+		if name, host, remote := a.MCP.Destination(strings.TrimPrefix(def.Source, "mcp:")); remote {
+			a.Egress.Add(ctx, egress.Connector, name+" ("+host+")", connectorDetail(def.Name, args))
+		}
+		return
+	}
 	if !ok || !strings.HasPrefix(def.Source, "connector:") {
 		return
 	}

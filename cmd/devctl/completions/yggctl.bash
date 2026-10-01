@@ -6,11 +6,16 @@ _yggctl() {
   prev="${COMP_WORDS[COMP_CWORD-1]}"
 
   if [[ ${COMP_CWORD} -eq 1 ]]; then
-    COMPREPLY=($(compgen -W "version about paths automations completion" -- "$cur"))
+    COMPREPLY=($(compgen -W "version about paths automations mcp completion" -- "$cur"))
     return
   fi
 
   case "${COMP_WORDS[1]}" in
+    mcp)
+      if [[ "$cur" == -* ]]; then
+        COMPREPLY=($(compgen -W "--url" -- "$cur"))
+      fi
+      ;;
     completion)
       if [[ ${COMP_CWORD} -eq 2 ]]; then
         COMPREPLY=($(compgen -W "bash zsh fish" -- "$cur"))

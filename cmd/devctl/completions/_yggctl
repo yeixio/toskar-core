@@ -8,6 +8,7 @@ _yggctl() {
     'about:print the version, license, and source URL'
     'paths:print the data, model, runtime, log, and database directories'
     'automations:manage scheduled automations on the daemon'
+    'mcp:connect an app such as Claude Desktop to Yggdrasil over MCP'
     'completion:print a shell completion script'
   )
 
@@ -17,6 +18,9 @@ _yggctl() {
   fi
 
   case "${words[2]}" in
+    mcp)
+      _arguments '--url[Yggdrasil address]:url:'
+      ;;
     completion)
       (( CURRENT == 3 )) && _values 'shell' bash zsh fish
       ;;

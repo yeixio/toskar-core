@@ -3,8 +3,29 @@ import { useMemo, useState } from 'react'
 import { api } from '@/lib/api'
 import type { ToolRecord } from '@/types/api'
 import { RealmKicker } from '@/components/ui/Realm'
+import { ToolSources } from './ToolSources'
 
-const FILTERS = ['All', 'Built-in', 'Disabled'] as const
+const FILTERS = ['All', 'Built-in', 'Added', 'Disabled'] as const
+
+/** Test arguments for a tool: its required fields, left for you to fill. */
+function exampleArgs(tool: ToolRecord): string {
+  if (tool.id === 'internet.search') return '{"query":"Juneau AK weather"}'
+  try {
+    const schema = JSON.parse(tool.schema) as Record<string, string>
+    const out: Record<string, string> = {}
+    for (const key of Object.keys(schema)) if (!key.endsWith('?')) out[key] = ''
+    return JSON.stringify(out)
+  } catch {
+    return '{}'
+  }
+}
+
+/** Where a tool comes from, in words. */
+function sourceLabel(source: string): string {
+  if (source === 'builtin') return 'built in'
+  const [kind, id] = source.split(':')
+  return kind === 'mcp' ? `tool source ${id}` : kind === 'connector' ? `connected service ${id}` : source
+}
 
 export function ToolsPage() {
   const queryClient = useQueryClient()
@@ -25,6 +46,7 @@ export function ToolsPage() {
     const needle = query.trim().toLowerCase()
     return tools.filter((tool) => {
       if (filter === 'Built-in' && tool.source !== 'builtin') return false
+      if (filter === 'Added' && tool.source === 'builtin') return false
       if (filter === 'Disabled' && tool.enabled) return false
       if (!needle) return true
       return [tool.name, tool.description, tool.capability, tool.source, tool.id]
@@ -54,8 +76,14 @@ export function ToolsPage() {
         <RealmKicker />
         <h1 className="font-display text-2xl font-semibold text-ink">Tools</h1>
         <p className="mt-1 max-w-2xl text-sm text-ink-muted">
-          Built-in tools are grouped into capabilities on each profile. Disable a tool here to keep it out of every chat.
-          MCP servers can register tools in this list later.
+          What the AI can do besides answering: search the web, work with files, and use the apps and services you add.
+        </p>
+      </div>
+      <ToolSources />
+      <div>
+        <h2 className="section-title">All tools</h2>
+        <p className="mt-1 max-w-2xl text-sm text-ink-muted">
+          Every tool, built in or added. Turn one off here to keep it out of every chat.
         </p>
       </div>
       <div className="flex flex-wrap items-center gap-2">
@@ -87,6 +115,7 @@ export function ToolsPage() {
                 onClick={() => {
                   setSelectedId(tool.id)
                   setTestOutput('')
+                  setTestArgs(exampleArgs(tool))
                 }}
               >
                 <div className="flex items-start justify-between gap-3">
@@ -99,7 +128,7 @@ export function ToolsPage() {
                   </span>
                 </div>
                 <p className="mt-2 text-xs text-ink-faint">
-                  {tool.capability} · {tool.source}
+                  {tool.capability} · {sourceLabel(tool.source)}
                 </p>
               </button>
             </li>
@@ -110,7 +139,7 @@ export function ToolsPage() {
             <h2 className="font-display text-lg font-semibold text-ink">{selected.name}</h2>
             <p className="text-sm text-ink-muted">{selected.description}</p>
             <dl className="space-y-1 text-xs text-ink-muted">
-              <Row label="Source" value={selected.source} />
+              <Row label="Source" value={sourceLabel(selected.source)} />
               <Row label="Capability" value={selected.capability} />
               <Row label="Permission default" value={selected.default_policy} />
               <Row label="Risk" value={selected.risk} />

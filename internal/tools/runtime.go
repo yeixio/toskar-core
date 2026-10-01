@@ -46,11 +46,18 @@ var timeouts = map[string]time.Duration{
 
 const defaultTimeout = time.Minute
 
+// mcpTimeout is longer: a tool source on this computer may need to start
+// first, and some, such as a browser, take a while per step.
+const mcpTimeout = 3 * time.Minute
+
 // Timeout is the longest a tool's call may run.
 func Timeout(id string) time.Duration {
 	if def, ok := Lookup(id); ok {
 		if d, ok := timeouts[def.Capability]; ok {
 			return d
+		}
+		if strings.HasPrefix(def.Source, "mcp:") {
+			return mcpTimeout
 		}
 	}
 	return defaultTimeout

@@ -30,6 +30,7 @@ import (
 	"github.com/yeixio/yggdrasil-core/internal/gjallarhorn"
 	"github.com/yeixio/yggdrasil-core/internal/hardware"
 	"github.com/yeixio/yggdrasil-core/internal/logs"
+	"github.com/yeixio/yggdrasil-core/internal/mcp"
 	"github.com/yeixio/yggdrasil-core/internal/mimir"
 	"github.com/yeixio/yggdrasil-core/internal/models"
 	modelhealth "github.com/yeixio/yggdrasil-core/internal/models/health"
@@ -98,6 +99,8 @@ type App struct {
 	Egress *egress.Log
 	// RunLog keeps each request's run trace (§35).
 	RunLog *runlog.Store
+	// MCP runs the MCP tool sources the person added.
+	MCP *mcp.Manager
 	// Artifacts holds chat attachments and files the assistant produced.
 	Artifacts  *artifacts.Store
 	summarizer *muninn.Summarizer
@@ -256,7 +259,6 @@ func New(opts Options) (*App, error) {
 		}
 		logger.Info("stub inference enabled", "model_id", models.StubModelID)
 	}
-	a.loadDisabledTools(context.Background())
 	// Record what leaves this computer: web tools and connected services
 	// as they run, and chats sent to servers elsewhere (§63).
 	a.Egress = egress.New(db.SQL)
@@ -271,6 +273,15 @@ func New(opts Options) (*App, error) {
 	if err := a.Connectors.Load(context.Background()); err != nil {
 		logger.Warn("load connected services", "error", err)
 	}
+	// MCP tool sources add tools the same way. Their tool lists are kept,
+	// so none is started until a tool is needed.
+	a.MCP = mcp.NewManager(db.SQL, secrets, toolReg, version.Version, logger)
+	a.MCP.Sample = a.mcpSample
+	if err := a.MCP.Load(context.Background()); err != nil {
+		logger.Warn("load tool sources", "error", err)
+	}
+	// After connected tools are in the catalog, so turning one off sticks.
+	a.loadDisabledTools(context.Background())
 
 	bench := benchmark.NewRunner()
 	bench.ModelPath = modelMgr.Path
@@ -529,6 +540,7 @@ func New(opts Options) (*App, error) {
 	a.Notifications = gjallarhorn.NewHub(db.SQL, bus, desktopChannel{settings: settingsRepo, send: automations.OSSender{}})
 	a.API.BindNotifications(a.Notifications)
 	a.API.BindConnectors(a.Connectors)
+	a.API.BindMCP(a.MCP, mcp.NewServer(a.mcpBackend()), yggctlPath)
 	a.API.BindPersonal(a)
 	a.API.BindPrivacy(a)
 	a.API.BindRuns(a.RunLog)
@@ -768,6 +780,13 @@ func (a *App) Start(ctx context.Context) error {
 
 	if a.Lifecycle != nil {
 		a.Lifecycle.Start(ctx)
+	}
+	if a.MCP != nil {
+		a.wg.Add(1)
+		go func() {
+			defer a.wg.Done()
+			a.MCP.Run(ctx)
+		}()
 	}
 	a.indexKnowledge(ctx)
 	if a.AutomationRunner != nil {

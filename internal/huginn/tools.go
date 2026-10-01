@@ -72,12 +72,17 @@ func ToolsFor(k Kind, message string, available []string) []string {
 				break
 			}
 		}
-		// Tools outside the built-in groups, such as connected services,
-		// are offered when the message names the service or its subject.
+		// Tools outside the built-in groups, such as connected services
+		// and MCP tool sources, are offered when the message names the
+		// service or its subject, or always when the person said so.
 		// One that changes something also needs the message to ask for a
 		// change, so a question is never offered a way to act.
-		if !grouped(id) && aboutService(strings.SplitN(id, ".", 2)[0], message) {
-			if def, ok := tools.Lookup(id); ok && def.Risk == tools.RiskWrite && !cueAction.MatchString(message) {
+		if grouped(id) {
+			continue
+		}
+		def, known := tools.Lookup(id)
+		if (known && def.Always) || aboutService(strings.SplitN(id, ".", 2)[0], message) {
+			if known && def.Risk == tools.RiskWrite && !cueAction.MatchString(message) {
 				continue
 			}
 			out = append(out, id)

@@ -492,6 +492,308 @@ paths:
       responses:
         "200":
           description: Status
+  /api/v1/mcp/servers:
+    get:
+      summary: List MCP tool sources with status, tools, and masked values. Secret values are never returned.
+      operationId: listMCPServers
+      responses:
+        "200":
+          description: Tool sources
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  additionalProperties: true
+    post:
+      summary: Check a tool source connects and list its tools, then store it and add the tools
+      description: >-
+        Send a gallery entry ({"preset", "values"}), a spec ({"spec", "values"}), or a server from
+        another app ({"import": {"app", "name"}}). redirect_base is the address the browser uses, for a
+        sign-in. When the service needs a sign-in, the source is stored and sign_in_url is returned.
+      operationId: addMCPServer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                preset:
+                  type: string
+                spec:
+                  type: object
+                  additionalProperties: true
+                import:
+                  type: object
+                  properties:
+                    app:
+                      type: string
+                    name:
+                      type: string
+                values:
+                  type: object
+                  additionalProperties:
+                    type: string
+                redirect_base:
+                  type: string
+      responses:
+        "201":
+          description: Added; server, and sign_in_url when a sign-in is needed
+        "400":
+          description: It could not connect, or a value is missing
+        "404":
+          description: Unknown gallery entry
+  /api/v1/mcp/servers/{id}:
+    get:
+      summary: One tool source
+      operationId: getMCPServer
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Tool source
+        "404":
+          description: Unknown tool source
+    patch:
+      summary: Change enabled, allow_sampling, always_offer, keywords, or per-tool policies (allow, ask, default)
+      operationId: updateMCPServer
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        "200":
+          description: Tool source
+    put:
+      summary: Change how a tool source is reached, then check it. Blank secret values keep the stored ones.
+      operationId: replaceMCPServer
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                spec:
+                  type: object
+                  additionalProperties: true
+                values:
+                  type: object
+                  additionalProperties:
+                    type: string
+      responses:
+        "200":
+          description: Tool source
+    delete:
+      summary: Stop a tool source, remove its tools, and delete its stored secrets
+      operationId: removeMCPServer
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Removed
+  /api/v1/mcp/servers/{id}/check:
+    post:
+      summary: Connect again and list the tools
+      operationId: checkMCPServer
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Tool source
+  /api/v1/mcp/servers/{id}/sign-in:
+    post:
+      summary: Start signing in to the tool source's service; returns the address to open
+      operationId: signInMCPServer
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                redirect_base:
+                  type: string
+      responses:
+        "200":
+          description: "{\"url\": \"...\"}"
+  /api/v1/mcp/servers/{id}/sign-out:
+    post:
+      summary: Forget the tool source's sign-in
+      operationId: signOutMCPServer
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Tool source
+  /api/v1/mcp/servers/{id}/logs:
+    get:
+      summary: Recent log lines of a tool source
+      operationId: mcpServerLogs
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Log lines
+  /api/v1/mcp/servers/{id}/prompts:
+    get:
+      summary: The tool source's ready-made prompts
+      operationId: mcpServerPrompts
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Prompts
+  /api/v1/mcp/servers/{id}/prompts/{name}:
+    post:
+      summary: Fill a prompt; returns its text
+      operationId: getMCPPrompt
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                arguments:
+                  type: object
+                  additionalProperties:
+                    type: string
+      responses:
+        "200":
+          description: "{\"text\": \"...\"}"
+  /api/v1/mcp/servers/{id}/resources:
+    get:
+      summary: The tool source's resources
+      operationId: mcpServerResources
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Resources
+  /api/v1/mcp/gallery:
+    get:
+      summary: Gallery entries, with programs that are missing and sources already added
+      operationId: mcpGallery
+      responses:
+        "200":
+          description: Gallery
+  /api/v1/mcp/import:
+    get:
+      summary: MCP servers set up in other apps on this computer, with secret values hidden
+      operationId: mcpImportCandidates
+      responses:
+        "200":
+          description: Servers
+  /api/v1/mcp/parse:
+    post:
+      summary: Read pasted settings, a web address, or a command line into server specs and what each still needs
+      operationId: parseMCP
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                text:
+                  type: string
+      responses:
+        "200":
+          description: Parsed servers
+        "400":
+          description: Nothing could be read
+  /api/v1/mcp/share:
+    get:
+      summary: The address and command other apps use to reach Yggdrasil's MCP server
+      operationId: mcpShare
+      responses:
+        "200":
+          description: Address, command, args, and whether a key is needed
+  /mcp:
+    post:
+      summary: Yggdrasil's MCP server (Streamable HTTP, JSON-RPC). Tools ask_local_ai, list_local_models, search_my_knowledge.
+      description: >-
+        Checked like /v1. A request with an Origin header from another site is refused.
+      operationId: mcpServer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        "200":
+          description: JSON-RPC response
+        "202":
+          description: Notification accepted
+        "401":
+          description: An API key is required
+        "403":
+          description: Origin not allowed
+  /mcp/oauth/callback:
+    get:
+      summary: Where a tool source's sign-in returns; shows a page that says how it went
+      operationId: mcpOAuthCallback
+      responses:
+        "200":
+          description: HTML page
   /api/v1/personalization:
     get:
       summary: How the person likes answers

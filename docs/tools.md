@@ -1,6 +1,6 @@
 # Tools
 
-Yggdrasil has one tool registry. Chat, profiles, and the Tools screen all use it. There is no second execution path.
+Yggdrasil has one tool registry. Chat, profiles, and the Tools screen all use it. Built-in tools, connected services, and MCP tool sources all run through it. There is no second execution path.
 
 ## Architecture
 
@@ -32,9 +32,9 @@ Tool support is one of native, compatible, limited, or unsupported. Catalog mode
 4. If the argument can be nonsense, reject it in `implausibleCall` before any prompt.
 5. Mention it in the capability it belongs to.
 
-## Future MCP
+## MCP tool sources
 
-Tool definitions already have a `source` field (`builtin` today). An MCP server can later append tools to the same registry and the Tools screen will list them. The screen is ready for search, filter, enable, inspect, and test. There is no marketplace in this version.
+MCP servers add tools to the same registry. They are listed on the Tools screen with `source` `mcp:<source>`, and they follow the same policies. See [MCP](mcp.md).
 
 ## Diagnostics
 

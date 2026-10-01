@@ -6,9 +6,11 @@ complete -c yggctl -n __fish_use_subcommand -a version -d 'Print the version, li
 complete -c yggctl -n __fish_use_subcommand -a about -d 'Print the version, license, and source URL'
 complete -c yggctl -n __fish_use_subcommand -a paths -d 'Print the data, model, runtime, log, and database directories'
 complete -c yggctl -n __fish_use_subcommand -a automations -d 'Manage scheduled automations on the daemon'
+complete -c yggctl -n __fish_use_subcommand -a mcp -d 'Connect an app such as Claude Desktop to Yggdrasil over MCP'
 complete -c yggctl -n __fish_use_subcommand -a completion -d 'Print a shell completion script'
 
 complete -c yggctl -n '__fish_seen_subcommand_from completion' -a 'bash zsh fish'
+complete -c yggctl -n '__fish_seen_subcommand_from mcp' -l url -r -d 'Yggdrasil address'
 
 set -l ygg_automation_cmds list get create update delete run pause resume
 complete -c yggctl -n "__fish_seen_subcommand_from automations; and not __fish_seen_subcommand_from $ygg_automation_cmds" -a "$ygg_automation_cmds"

@@ -294,9 +294,9 @@ func (t *turnTrace) tool(toolID string, args, result map[string]any) {
 			t.addStep("git", "Checked the Git repository ("+strings.TrimPrefix(toolID, "git.")+")")
 			return
 		}
-		if def, ok := tools.Lookup(toolID); ok && strings.HasPrefix(def.Source, "connector:") {
-			// What a connected service returns was written by other people,
-			// so it is data, not instructions (§58).
+		if def, ok := tools.Lookup(toolID); ok && (strings.HasPrefix(def.Source, "connector:") || strings.HasPrefix(def.Source, "mcp:")) {
+			// What a connected service or tool source returns was written by
+			// other people, so it is data, not instructions (§58).
 			t.untrusted = true
 			t.addStep("service", def.Name)
 			t.serviceSources(result)

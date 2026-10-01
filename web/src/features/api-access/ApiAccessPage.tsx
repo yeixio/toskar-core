@@ -7,6 +7,7 @@ import { useUIStore } from '@/stores/uiStore'
 import type { APIKeyRecord } from '@/types/api'
 import { KeyPermissions } from './KeyPermissions'
 import { RealmKicker } from '@/components/ui/Realm'
+import { ShareWithApps } from './ShareWithApps'
 
 type ProbeState = 'checking' | 'ok' | 'fail'
 
@@ -364,6 +365,8 @@ export function ApiAccessPage() {
           </div>
         )}
       </section>
+
+      <ShareWithApps />
 
       <section className="card space-y-4">
         <div className="flex items-start justify-between gap-4">

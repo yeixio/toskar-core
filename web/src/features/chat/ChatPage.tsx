@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useMemo, useRef, useState, type MouseEvent } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { Link, useLocation, useSearchParams } from 'react-router-dom'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 import { RealmKicker } from '@/components/ui/Realm'
 import { Ratatoskr } from '@/components/ui/Ratatoskr'
@@ -174,7 +174,10 @@ export function ChatPage() {
   const canPinHistory = useCanPinChatHistory()
 
   const [selectedId, setSelectedId] = useState<string | null>(null)
-  const [draft, setDraft] = useState('')
+  const location = useLocation()
+  // Another page can start a chat with text ready to send, such as a tool
+  // source's ready-made prompt.
+  const [draft, setDraft] = useState(() => (location.state as { draft?: string } | null)?.draft ?? '')
   const [effort, setEffortState] = useState<Effort>(savedEffort)
   const setEffort = (next: Effort) => {
     setEffortState(next)
