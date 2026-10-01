@@ -604,6 +604,7 @@ func New(opts Options) (*App, error) {
 	})
 
 	a.Mimir = mimir.NewStore(db.SQL, filepath.Join(cfg.DataDir, "knowledge"))
+	a.Mimir.SetSecrets(secrets)
 	a.python = pyenv.New(filepath.Join(cfg.RuntimesDir, "python"))
 	a.Mimir.SetRecognizer(&ocr.Recognizer{Python: a.python, WorkDir: filepath.Join(cfg.DataDir, "knowledge", "ocr-jobs")})
 	a.Mimir.SetModels(newKnowledgeModels(a))

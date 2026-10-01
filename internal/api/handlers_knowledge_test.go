@@ -62,3 +62,34 @@ func TestKnowledgeRoutes(t *testing.T) {
 		t.Fatalf("delete: %d", rec.Code)
 	}
 }
+
+func TestKnowledgeDatabaseSourceThroughAPI(t *testing.T) {
+	db, err := store.Open(filepath.Join(t.TempDir(), "test.db"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer db.Close()
+	shop := filepath.Join(t.TempDir(), "shop.db")
+	if _, err := db.SQL.Exec(`ATTACH DATABASE ? AS shop; CREATE TABLE shop.hours (day TEXT, opens TEXT); INSERT INTO shop.hours VALUES ('Monday', '9am'); DETACH DATABASE shop`, shop); err != nil {
+		t.Fatal(err)
+	}
+	srv := NewServer(Dependencies{})
+	srv.BindKnowledge(mimir.NewStore(db.SQL, t.TempDir()))
+	rec := httptest.NewRecorder()
+	body := `{"kind":"database","name":"Hours","remote":{"driver":"sqlite","database":"` + filepath.ToSlash(shop) + `","query":"SELECT day, opens FROM hours"}}`
+	srv.Handler().ServeHTTP(rec, httptest.NewRequest(http.MethodPost, "/api/v1/knowledge/sources", strings.NewReader(body)))
+	if rec.Code != http.StatusCreated {
+		t.Fatalf("create: %d %s", rec.Code, rec.Body)
+	}
+	var src mimir.Source
+	_ = json.Unmarshal(rec.Body.Bytes(), &src)
+	if src.Kind != mimir.KindDatabase || src.ChunkCount != 1 || src.Remote == nil || src.Remote.Query != "SELECT day, opens FROM hours" {
+		t.Fatalf("source = %+v", src)
+	}
+	rec = httptest.NewRecorder()
+	body = `{"kind":"database","remote":{"driver":"sqlite","database":"x.db","query":"DROP TABLE hours"}}`
+	srv.Handler().ServeHTTP(rec, httptest.NewRequest(http.MethodPost, "/api/v1/knowledge/sources", strings.NewReader(body)))
+	if rec.Code != http.StatusBadRequest || !strings.Contains(rec.Body.String(), "only SELECT") {
+		t.Fatalf("write query: %d %s", rec.Code, rec.Body)
+	}
+}

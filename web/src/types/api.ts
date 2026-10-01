@@ -773,10 +773,35 @@ export interface AutomationInput {
 
 
 // Mimir: connected knowledge.
+// How a database or API knowledge source is reached. Credentials are never
+// returned.
+export interface KnowledgeRemote {
+  driver?: 'sqlite' | 'postgres' | 'mysql'
+  database?: string
+  query?: string
+  url?: string
+  items?: string
+  header_names?: string[]
+  refresh_minutes: number
+}
+
+export interface KnowledgeRemoteInput {
+  driver?: 'sqlite' | 'postgres' | 'mysql'
+  database?: string
+  connection_string?: string
+  query?: string
+  url?: string
+  items?: string
+  headers?: Record<string, string>
+  refresh_minutes?: number
+}
+
+export type KnowledgeKind = 'path' | 'text' | 'database' | 'api'
+
 export interface KnowledgeSource {
   id: string
   name: string
-  kind: 'path' | 'text'
+  kind: KnowledgeKind
   path?: string
   filename?: string
   status: 'ready' | 'failed' | 'indexing'
@@ -788,6 +813,7 @@ export interface KnowledgeSource {
   embedding_model?: string
   /** Never sent to a paired computer (spec §63). */
   local_only?: boolean
+  remote?: KnowledgeRemote
   created_at: string
   updated_at: string
   refreshed_at?: string

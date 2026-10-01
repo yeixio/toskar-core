@@ -8,8 +8,10 @@ import (
 	"context"
 	"database/sql"
 	"encoding/base64"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -61,6 +63,9 @@ type Source struct {
 	// LocalOnly keeps the source on this computer: a turn that uses its
 	// passages is never sent to a paired computer (§63).
 	LocalOnly bool `json:"local_only"`
+	// Remote says how a database or API source is reached, without its
+	// credentials.
+	Remote *Remote `json:"remote,omitempty"`
 
 	// file is where Mimir reads the source. For text sources it is the copy
 	// Mimir keeps, which the API does not expose.
@@ -79,6 +84,8 @@ type CreateInput struct {
 	Text     string `json:"text,omitempty"`
 	// ContentBase64 carries binary uploads such as .xlsx, in place of Text.
 	ContentBase64 string `json:"content_base64,omitempty"`
+	// Remote reaches a database or API for KindDatabase and KindAPI.
+	Remote *RemoteInput `json:"remote,omitempty"`
 }
 
 // uploadBytes returns an upload's content, decoding base64 when set.
@@ -110,6 +117,11 @@ type Store struct {
 	models Models
 	kick   chan struct{}
 
+	// secrets keeps database and API credentials.
+	secrets Secrets
+	// fetching holds database and API sources being fetched in the
+	// background, so a busy chat starts one fetch, not one per search.
+	fetching sync.Map
 	// recognizer reads scanned PDF pages, when text recognition is set up.
 	recognizer Recognizer
 }
@@ -157,11 +169,30 @@ func (s *Store) Create(ctx context.Context, in CreateInput) (Source, error) {
 		if in.Name == "" {
 			in.Name = in.Filename
 		}
+	case KindDatabase, KindAPI:
+		if in.Remote == nil {
+			return Source{}, fmt.Errorf("enter the connection settings")
+		}
 	default:
-		return Source{}, fmt.Errorf("kind must be path or text")
+		return Source{}, fmt.Errorf("kind must be path, text, database, or api")
 	}
 
 	id := uuid.NewString()
+	var remoteJSON any
+	if in.Kind == KindDatabase || in.Kind == KindAPI {
+		r, sec, err := buildRemote(in.Kind, *in.Remote, remoteSecret{})
+		if err != nil {
+			return Source{}, err
+		}
+		if in.Name == "" {
+			in.Name = remoteName(in.Kind, r)
+		}
+		if err := s.writeSecret(id, sec); err != nil {
+			return Source{}, err
+		}
+		raw, _ := json.Marshal(r)
+		remoteJSON = string(raw)
+	}
 	now := s.now().UTC()
 	path := in.Path
 	if in.Kind == KindText {
@@ -181,9 +212,12 @@ func (s *Store) Create(ctx context.Context, in CreateInput) (Source, error) {
 		}
 	}
 	if _, err := s.db.ExecContext(ctx, `
-		INSERT INTO knowledge_sources (id, name, kind, path, status, created_at, updated_at)
-		VALUES (?, ?, ?, ?, ?, ?, ?)`,
-		id, in.Name, string(in.Kind), path, StatusIndexing, fmtTime(now), fmtTime(now)); err != nil {
+		INSERT INTO knowledge_sources (id, name, kind, path, status, created_at, updated_at, remote_json)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+		id, in.Name, string(in.Kind), path, StatusIndexing, fmtTime(now), fmtTime(now), remoteJSON); err != nil {
+		if s.secrets != nil {
+			_ = s.secrets.Delete(secretName(id))
+		}
 		return Source{}, err
 	}
 	if err := s.Refresh(ctx, id); err != nil {
@@ -203,6 +237,9 @@ type UpdateInput struct {
 	Text *string `json:"text,omitempty"`
 	// LocalOnly marks the source this computer only.
 	LocalOnly *bool `json:"local_only,omitempty"`
+	// Remote replaces a database or API source's settings. Blank credentials
+	// keep the stored ones.
+	Remote *RemoteInput `json:"remote,omitempty"`
 }
 
 // Update renames a source or replaces a text source's content and reindexes it.
@@ -231,7 +268,34 @@ func (s *Store) Update(ctx context.Context, id string, in UpdateInput) (Source, 
 			return Source{}, err
 		}
 	}
+	if in.Remote != nil {
+		if src.Kind != KindDatabase && src.Kind != KindAPI {
+			return Source{}, fmt.Errorf("only database and API sources have connection settings")
+		}
+		prev, err := s.readSecret(id)
+		if err != nil {
+			return Source{}, err
+		}
+		r, sec, err := buildRemote(src.Kind, *in.Remote, prev)
+		if err != nil {
+			return Source{}, err
+		}
+		if err := s.writeSecret(id, sec); err != nil {
+			return Source{}, err
+		}
+		raw, _ := json.Marshal(r)
+		if _, err := s.db.ExecContext(ctx, `UPDATE knowledge_sources SET remote_json=?, updated_at=? WHERE id=?`,
+			string(raw), fmtTime(s.now().UTC()), id); err != nil {
+			return Source{}, err
+		}
+		if err := s.Refresh(ctx, id); err != nil {
+			return s.Get(ctx, id)
+		}
+	}
 	if in.Text != nil {
+		if src.Remote != nil {
+			return Source{}, fmt.Errorf("this source is fetched from its database or API; change the data there")
+		}
 		if src.Kind != KindText {
 			return Source{}, fmt.Errorf("edit the files on disk; this source refreshes from %s", src.Path)
 		}
@@ -256,6 +320,9 @@ func (s *Store) Content(ctx context.Context, id string) (string, error) {
 	src, err := s.Get(ctx, id)
 	if err != nil {
 		return "", err
+	}
+	if src.Remote != nil {
+		return "", fmt.Errorf("this source is fetched from its database or API; change the data there")
 	}
 	if src.Kind != KindText {
 		return "", fmt.Errorf("this source is read from %s; edit the files there", src.Path)
@@ -292,6 +359,9 @@ func (s *Store) Delete(ctx context.Context, id string) error {
 	}
 	if src.Kind == KindText {
 		_ = os.RemoveAll(filepath.Join(s.dir, id))
+	}
+	if src.Remote != nil && s.secrets != nil {
+		_ = s.secrets.Delete(secretName(id))
 	}
 	return nil
 }
@@ -340,12 +410,25 @@ func (s *Store) refreshLocked(ctx context.Context, id string) error {
 	if err != nil {
 		return err
 	}
-	sig, sigErr := signature(src.file)
-	docs, readErr := readSource(src.file, s.readPDF(ctx))
+	var sig string
+	var docs []document
+	var sigErr, readErr error
+	if src.Remote != nil {
+		// The signature of a database or API source is when it was fetched.
+		sig = fmtTime(s.now().UTC())
+		docs, readErr = s.fetchRemote(ctx, src)
+	} else {
+		sig, sigErr = signature(src.file)
+		docs, readErr = readSource(src.file, s.readPDF(ctx))
+	}
 	if sigErr != nil || readErr != nil {
 		msg := errors.Join(sigErr, readErr).Error()
-		_, _ = s.db.ExecContext(ctx, `UPDATE knowledge_sources SET status=?, error=?, updated_at=? WHERE id=?`,
-			StatusFailed, msg, fmtTime(s.now().UTC()), id)
+		if src.Remote != nil && src.ChunkCount > 0 {
+			// The last fetched data stays searchable until a fetch works.
+			msg += ". Search uses the data from the last successful fetch."
+		}
+		_, _ = s.db.ExecContext(ctx, `UPDATE knowledge_sources SET status=?, error=?, updated_at=?, signature=COALESCE(?, signature) WHERE id=?`,
+			StatusFailed, msg, fmtTime(s.now().UTC()), remoteAttempt(src, sig), id)
 		return errors.Join(sigErr, readErr)
 	}
 	chunks := chunkDocuments(docs)
@@ -407,16 +490,24 @@ func (s *Store) refreshLocked(ctx context.Context, id string) error {
 	return nil
 }
 
-// refreshIfChanged reindexes sources whose files changed since the last index.
+// refreshIfChanged reindexes sources whose files changed since the last
+// index. Database and API sources past their refresh interval are fetched in
+// the background, and this search uses the data already indexed.
 func (s *Store) refreshIfChanged(ctx context.Context, ids []string) {
 	for _, id := range ids {
-		var path string
-		var stored sql.NullString
-		if err := s.db.QueryRowContext(ctx, `SELECT path, signature FROM knowledge_sources WHERE id=?`, id).
-			Scan(&path, &stored); err != nil {
+		var path, stored, remoteJSON sql.NullString
+		if err := s.db.QueryRowContext(ctx, `SELECT path, signature, remote_json FROM knowledge_sources WHERE id=?`, id).
+			Scan(&path, &stored, &remoteJSON); err != nil {
 			continue
 		}
-		current, err := signature(path)
+		if remoteJSON.Valid {
+			var r Remote
+			if json.Unmarshal([]byte(remoteJSON.String), &r) == nil && remoteDue(&r, stored.String, s.now()) {
+				s.fetchInBackground(id)
+			}
+			continue
+		}
+		current, err := signature(path.String)
 		if err != nil || current == stored.String {
 			continue
 		}
@@ -426,11 +517,47 @@ func (s *Store) refreshIfChanged(ctx context.Context, ids []string) {
 	}
 }
 
+// fetchInBackground refreshes a database or API source without making the
+// search that noticed it wait.
+func (s *Store) fetchInBackground(id string) {
+	if _, busy := s.fetching.LoadOrStore(id, true); busy {
+		return
+	}
+	go func() {
+		defer s.fetching.Delete(id)
+		_ = s.Refresh(context.Background(), id)
+	}()
+}
+
+// remoteAttempt is the fetch time to record after a failed refresh of a
+// database or API source, so the next search does not retry at once. File
+// sources keep their signature.
+func remoteAttempt(src Source, sig string) any {
+	if src.Remote == nil {
+		return nil
+	}
+	return sig
+}
+
+// remoteName names a database or API source when the user did not.
+func remoteName(kind Kind, r Remote) string {
+	if kind == KindAPI {
+		if u, err := url.Parse(r.URL); err == nil {
+			return u.Host + u.Path
+		}
+		return r.URL
+	}
+	if r.Driver == DriverSQLite {
+		return filepath.Base(r.Database) + " query"
+	}
+	return r.Driver + " query"
+}
+
 type scanner interface{ Scan(...any) error }
 
 // sourceColumns are the columns scanSource reads. The vector count is per
 // source, from the model most of its vectors came from.
-const sourceColumns = `id, name, kind, path, status, error, chunk_count, created_at, updated_at, refreshed_at, local_only,
+const sourceColumns = `id, name, kind, path, status, error, chunk_count, created_at, updated_at, refreshed_at, local_only, remote_json,
 	(SELECT COUNT(*) FROM knowledge_vectors v WHERE v.source_id = knowledge_sources.id
 	 AND v.model = (SELECT model FROM knowledge_vectors w WHERE w.source_id = knowledge_sources.id GROUP BY model ORDER BY COUNT(*) DESC LIMIT 1)),
 	(SELECT model FROM knowledge_vectors w WHERE w.source_id = knowledge_sources.id GROUP BY model ORDER BY COUNT(*) DESC LIMIT 1)`
@@ -438,11 +565,17 @@ const sourceColumns = `id, name, kind, path, status, error, chunk_count, created
 func scanSource(row scanner) (Source, error) {
 	var src Source
 	var kind, created, updated string
-	var path, errText, refreshed, embModel sql.NullString
+	var path, errText, refreshed, embModel, remoteJSON sql.NullString
 	var localOnly int
 	if err := row.Scan(&src.ID, &src.Name, &kind, &path, &src.Status, &errText, &src.ChunkCount, &created, &updated, &refreshed, &localOnly,
-		&src.EmbeddedCount, &embModel); err != nil {
+		&remoteJSON, &src.EmbeddedCount, &embModel); err != nil {
 		return Source{}, err
+	}
+	if remoteJSON.Valid {
+		var r Remote
+		if err := json.Unmarshal([]byte(remoteJSON.String), &r); err == nil {
+			src.Remote = &r
+		}
 	}
 	src.LocalOnly = localOnly != 0
 	src.EmbeddingModel = embModel.String

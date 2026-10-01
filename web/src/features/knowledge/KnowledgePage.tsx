@@ -7,6 +7,8 @@ import type { KnowledgeSource } from '@/types/api'
 import { errorText } from '@/features/train/display'
 import { RealmKicker } from '@/components/ui/Realm'
 import { meaningNote } from './semantic'
+import { refreshNote, sourceBadge, sourceWhere } from './remote'
+import { RemoteSourceForm } from './RemoteSourceForm'
 
 
 export function KnowledgePage() {
@@ -33,7 +35,7 @@ export function KnowledgePage() {
             <EmptyState
               mascot="idle"
               title="No knowledge connected"
-              description="Connect a file or folder on this computer, or paste content. PDF, Excel, CSV, TSV, JSON, JSONL, Markdown, text, and HTML files work."
+              description="Connect a file or folder on this computer, paste content, or read from a database or web API. PDF, Excel, CSV, TSV, JSON, JSONL, Markdown, text, and HTML files work."
             />
           )}
           <ul className="space-y-2">
@@ -76,16 +78,17 @@ function SourceRow({ source, onChanged }: { source: KnowledgeSource; onChanged: 
         <div className="min-w-[12rem] flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <span className="font-medium text-ink">{source.name}</span>
-            <span className="badge-mimir">{source.kind === 'path' ? 'Linked' : 'Copy'}</span>
+            <span className="badge-mimir">{sourceBadge(source)}</span>
             {source.status === 'failed' && <span className="status-chip bg-danger/15 text-danger">Failed</span>}
           </div>
           <p className="mt-0.5 break-anywhere text-xs text-ink-muted">
-            {source.kind === 'path' ? source.path : source.filename} · {source.chunk_count} passages
+            {sourceWhere(source)} · {source.chunk_count} passages
             {source.refreshed_at && ` · indexed ${new Date(source.refreshed_at).toLocaleString()}`}
           </p>
           {source.kind === 'path' && (
             <p className="mt-0.5 text-xs text-ink-faint">Reindexes itself when the files change.</p>
           )}
+          {refreshNote(source) && <p className="mt-0.5 text-xs text-ink-faint">{refreshNote(source)}</p>}
           {meaningNote(source) && <p className="mt-0.5 text-xs text-ink-faint">{meaningNote(source)}</p>}
           {source.error && <p className="mt-1 text-xs text-danger">{source.error}</p>}
         </div>
@@ -142,7 +145,7 @@ function SourceRow({ source, onChanged }: { source: KnowledgeSource; onChanged: 
 }
 
 function AddSource({ onAdded }: { onAdded: () => void }) {
-  const [mode, setMode] = useState<'path' | 'text'>('path')
+  const [mode, setMode] = useState<'path' | 'text' | 'database' | 'api'>('path')
   const [path, setPath] = useState('')
   const [name, setName] = useState('')
   const [filename, setFilename] = useState('')
@@ -171,56 +174,68 @@ function AddSource({ onAdded }: { onAdded: () => void }) {
   return (
     <div className="card space-y-3">
       <h2 className="section-title">Connect knowledge</h2>
-      <div className="flex gap-1.5">
-        <button type="button" className={mode === 'path' ? 'btn-primary px-3 py-1 text-xs' : 'btn-secondary px-3 py-1 text-xs'} onClick={() => setMode('path')}>
-          File or folder
-        </button>
-        <button type="button" className={mode === 'text' ? 'btn-primary px-3 py-1 text-xs' : 'btn-secondary px-3 py-1 text-xs'} onClick={() => setMode('text')}>
-          Upload or paste
-        </button>
+      <div className="flex flex-wrap gap-1.5">
+        {(
+          [
+            ['path', 'File or folder'],
+            ['text', 'Upload or paste'],
+            ['database', 'Database'],
+            ['api', 'Web API'],
+          ] as const
+        ).map(([m, label]) => (
+          <button key={m} type="button" className={mode === m ? 'btn-primary px-3 py-1 text-xs' : 'btn-secondary px-3 py-1 text-xs'} onClick={() => setMode(m)}>
+            {label}
+          </button>
+        ))}
       </div>
-      {mode === 'path' ? (
-        <label className="block space-y-1">
-          <span className="text-sm text-ink">Path on this computer</span>
-          <input className="field w-full font-mono text-xs" value={path} onChange={(e) => setPath(e.target.value)} placeholder="~/Documents/inventory.csv" />
-          <span className="block text-xs text-ink-faint">Yggdrasil reads it in place and picks up edits automatically.</span>
-        </label>
+      {mode === 'database' || mode === 'api' ? (
+        <RemoteSourceForm key={mode} kind={mode} onAdded={onAdded} />
       ) : (
         <>
-          <label className="btn-secondary inline-block cursor-pointer px-3 py-1.5 text-xs">
-            Choose a file
-            <input
-              type="file"
-              accept={UPLOAD_ACCEPT}
-              className="sr-only"
-              onChange={async (e) => {
-                const f = e.target.files?.[0]
-                if (!f) return
-                const upload = await readUpload(f)
-                setFilename(upload.filename)
-                setText(upload.text ?? '')
-                setBinary(upload.contentBase64 ?? null)
-              }}
-            />
+          {mode === 'path' ? (
+            <label className="block space-y-1">
+              <span className="text-sm text-ink">Path on this computer</span>
+              <input className="field w-full font-mono text-xs" value={path} onChange={(e) => setPath(e.target.value)} placeholder="~/Documents/inventory.csv" />
+              <span className="block text-xs text-ink-faint">Yggdrasil reads it in place and picks up edits automatically.</span>
+            </label>
+          ) : (
+            <>
+              <label className="btn-secondary inline-block cursor-pointer px-3 py-1.5 text-xs">
+                Choose a file
+                <input
+                  type="file"
+                  accept={UPLOAD_ACCEPT}
+                  className="sr-only"
+                  onChange={async (e) => {
+                    const f = e.target.files?.[0]
+                    if (!f) return
+                    const upload = await readUpload(f)
+                    setFilename(upload.filename)
+                    setText(upload.text ?? '')
+                    setBinary(upload.contentBase64 ?? null)
+                  }}
+                />
+              </label>
+              {filename && <span className="ml-2 text-xs text-ink-muted">{filename}</span>}
+              <textarea className="field min-h-32 w-full font-mono text-xs" value={text} onChange={(e) => setText(e.target.value)} placeholder="Paste text, Markdown, or CSV" aria-label="Content" />
+            </>
+          )}
+          <label className="block space-y-1">
+            <span className="text-sm text-ink">Name (optional)</span>
+            <input className="field w-full" value={name} onChange={(e) => setName(e.target.value)} />
           </label>
-          {filename && <span className="ml-2 text-xs text-ink-muted">{filename}</span>}
-          <textarea className="field min-h-32 w-full font-mono text-xs" value={text} onChange={(e) => setText(e.target.value)} placeholder="Paste text, Markdown, or CSV" aria-label="Content" />
+          {add.error && <p className="text-sm text-danger">{errorText(add.error)}</p>}
+          {add.data?.status === 'failed' && <p className="text-sm text-danger">{add.data.error}</p>}
+          <button
+            type="button"
+            className="btn-primary px-3 py-1.5 text-sm"
+            disabled={add.isPending || (mode === 'path' ? !path.trim() : !text.trim() && !binary)}
+            onClick={() => add.mutate()}
+          >
+            {add.isPending ? 'Indexing…' : 'Connect'}
+          </button>
         </>
       )}
-      <label className="block space-y-1">
-        <span className="text-sm text-ink">Name (optional)</span>
-        <input className="field w-full" value={name} onChange={(e) => setName(e.target.value)} />
-      </label>
-      {add.error && <p className="text-sm text-danger">{errorText(add.error)}</p>}
-      {add.data?.status === 'failed' && <p className="text-sm text-danger">{add.data.error}</p>}
-      <button
-        type="button"
-        className="btn-primary px-3 py-1.5 text-sm"
-        disabled={add.isPending || (mode === 'path' ? !path.trim() : !text.trim() && !binary)}
-        onClick={() => add.mutate()}
-      >
-        {add.isPending ? 'Indexing…' : 'Connect'}
-      </button>
     </div>
   )
 }
