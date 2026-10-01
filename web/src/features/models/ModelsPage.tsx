@@ -292,6 +292,8 @@ export function ModelsPage() {
           search={search}
           installingId={installingId}
           tightModelIds={tightModelIds}
+          fits={fits}
+          onInstall={installForPageTarget}
           onInstallElsewhere={(id) => installMutation.mutate({ id, nodeId: 'all' })}
           onStart={(id) => startMutation.mutate(id)}
           onStop={(id, instanceId) => {

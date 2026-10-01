@@ -58,8 +58,9 @@ func fileRefs(list []artifacts.Artifact) []contracts.FileRef {
 }
 
 // attachmentBlock reads the files attached to this message, and the ones
-// attached earlier in the chat, as reference material. It returns "" when
-// the chat has no files.
+// attached or made earlier in the chat, as reference material, so "add a
+// column to that spreadsheet" works on a file the assistant produced. It
+// returns "" when the chat has no files.
 func (e *chatExecEnv) attachmentBlock(ctx context.Context, prompt string) string {
 	if e.app == nil || e.app.Artifacts == nil || e.conversationID == "" {
 		return ""
@@ -74,7 +75,7 @@ func (e *chatExecEnv) attachmentBlock(ctx context.Context, prompt string) string
 	}
 	var earlier []artifacts.Artifact
 	for _, a := range all {
-		if a.Producer == artifacts.ProducerUser && !current[a.ID] {
+		if !current[a.ID] {
 			earlier = append(earlier, a)
 		}
 	}
@@ -93,15 +94,23 @@ func (e *chatExecEnv) attachmentBlock(ctx context.Context, prompt string) string
 		return n
 	}
 	var b strings.Builder
-	read := func(list []artifacts.Artifact, share float64, question, label string, onlyMatching bool) {
+	read := func(list []artifacts.Artifact, share float64, question string, now, onlyMatching bool) {
 		for _, art := range list {
 			_, data, err := e.app.Artifacts.Read(ctx, art.ID)
 			if err != nil {
 				continue
 			}
+			label := "attached to this message by the user"
+			switch {
+			case now:
+			case art.Producer == artifacts.ProducerAssistant:
+				label = "you made earlier in this chat"
+			default:
+				label = "attached earlier in this chat by the user"
+			}
 			passages, err := mimir.FilePassages(art.Name, data)
 			if err != nil {
-				fmt.Fprintf(&b, "\nThe user %s %s, which Yggdrasil could not read: %s\n", label, art.Name, err.Error())
+				fmt.Fprintf(&b, "\nA file %s, %s, could not be read: %s\n", label, art.Name, err.Error())
 				continue
 			}
 			picked := mimir.SelectPassages(passages, question, budget(share, len(list)), onlyMatching)
@@ -111,7 +120,7 @@ func (e *chatExecEnv) attachmentBlock(ctx context.Context, prompt string) string
 			if e.trace != nil {
 				e.trace.attachment(art, len(picked), len(passages))
 			}
-			fmt.Fprintf(&b, "\nFile %s by the user: %s", label, art.Name)
+			fmt.Fprintf(&b, "\nFile %s: %s", label, art.Name)
 			if len(picked) < len(passages) {
 				fmt.Fprintf(&b, " (the %d of %d parts that best match the question)", len(picked), len(passages))
 			}
@@ -123,7 +132,7 @@ func (e *chatExecEnv) attachmentBlock(ctx context.Context, prompt string) string
 	}
 	// A message that only says "summarize this" still gets the whole file,
 	// or its beginning; earlier files only add what matches.
-	read(e.attachments, attachedShare, prompt, "attached to this message", false)
-	read(earlier, earlierShare, prompt, "attached earlier in this chat", true)
+	read(e.attachments, attachedShare, prompt, true, false)
+	read(earlier, earlierShare, prompt, false, true)
 	return strings.TrimSpace(b.String())
 }

@@ -119,3 +119,25 @@ func TestFallback(t *testing.T) {
 		t.Fatal("no other model must report false")
 	}
 }
+
+func TestSmallAndLarger(t *testing.T) {
+	for p, want := range map[string]float64{"1B": 1, "3.8B": 3.8, "500M": 0.5, "14b": 14} {
+		if got, ok := Billions(contracts.Model{Parameters: p}); !ok || got != want {
+			t.Errorf("Billions(%q) = %v %v", p, got, ok)
+		}
+	}
+	if _, ok := Billions(contracts.Model{Parameters: "large"}); ok {
+		t.Error("an unreadable size is unknown")
+	}
+	a, b := tiny, mid
+	a.Parameters, b.Parameters = "1B", "7B"
+	if !Small(a) || Small(b) || Small(contracts.Model{}) {
+		t.Fatal("small")
+	}
+	if got, ok := Larger([]contracts.Model{a, b}, 24*gb); !ok || got.ID != "qwen-7b" {
+		t.Fatalf("larger = %v %v", got.ID, ok)
+	}
+	if _, ok := Larger([]contracts.Model{a}, 24*gb); ok {
+		t.Fatal("nothing larger")
+	}
+}

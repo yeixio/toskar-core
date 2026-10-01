@@ -43,15 +43,6 @@ func (a *App) RunChat(ctx context.Context, profileID, conversationID, message st
 	if ch, ok := a.handleMemoryCommand(ctx, conversationID, message); ok {
 		return ch, nil
 	}
-	// Auto: Huginn picks the installed model that suits this message.
-	routeReason := ""
-	if modelID == huginn.AutoModelID {
-		choice, err := a.chooseAuto(ctx, message)
-		if err != nil {
-			return nil, err
-		}
-		modelID, routeReason = choice.Model.ID, choice.Reason
-	}
 	if profileID == "" {
 		profileID = a.defaultProfileID(ctx)
 	}
@@ -68,6 +59,17 @@ func (a *App) RunChat(ctx context.Context, profileID, conversationID, message st
 			OrchestratorID: "simple",
 			NodePolicy:     contracts.NodePolicy{Mode: "automatic"},
 		}
+	}
+	// Auto: Huginn picks the installed model that suits this message. A
+	// question about files or connected knowledge counts as one that needs a
+	// careful answer.
+	routeReason := ""
+	if modelID == huginn.AutoModelID {
+		choice, err := a.chooseAuto(ctx, message, a.turnHasData(ctx, conversationID, profile))
+		if err != nil {
+			return nil, err
+		}
+		modelID, routeReason = choice.Model.ID, choice.Reason
 	}
 	// OpenAI /v1 and Chat both may hit presets with empty role model_ids.
 	// Chat usually supplies a UI pick; when none is given, fill from an installed model.
@@ -310,6 +312,9 @@ func (a *App) RunChat(ctx context.Context, profileID, conversationID, message st
 			if !retry {
 				break
 			}
+		}
+		if full != "" {
+			env.trace.noticeIfNone(a.smallModelNotice(ctx, env.trace.dataKind(), env.modelID(), routeReason != ""))
 		}
 		if conversationID != "" && full != "" {
 			saveChat, _ := a.Settings.GetBool(ctx, "save_chat_history", true)

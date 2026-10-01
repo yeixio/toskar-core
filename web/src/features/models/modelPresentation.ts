@@ -239,3 +239,37 @@ export function memoryLabel(model: Model): string {
   if (model.memory_needed_bytes) return `~${formatBytes(model.memory_needed_bytes)}`
   return '—'
 }
+
+/** Size in billions of parameters from a label such as "1B", "3.8B", or "500M". */
+export function parameterBillions(model: Pick<Model, 'parameters'>): number | null {
+  const p = model.parameters?.trim().toUpperCase() ?? ''
+  const m = /^(\d+(?:\.\d+)?)\s*([BM])$/.exec(p)
+  if (!m) return null
+  const v = Number(m[1])
+  return m[2] === 'M' ? v / 1000 : v
+}
+
+/** Small models (under 4B) are fast but more likely to mix up facts. Matches Huginn. */
+export function isSmallModel(model: Pick<Model, 'parameters'>): boolean {
+  const b = parameterBillions(model)
+  return b != null && b < 4
+}
+
+export const SMALL_MODEL_NOTE =
+  'Small and fast, but it can mix up facts and numbers, especially from your files and knowledge. For questions about your data, a larger model is more reliable.'
+
+/**
+ * A larger everyday model that fits this computer, to suggest next to a small
+ * one. Installed models come first; otherwise the largest that fits well.
+ */
+export function largerAlternative(models: Model[], fits: Record<string, ModelFit>): Model | null {
+  const everyday = (m: Model) =>
+    !m.tags?.includes('vision') &&
+    (m.purpose?.some((p) => p === 'general' || p === 'assistant') ?? true)
+  const fitsWell = (m: Model) => ['excellent', 'good'].includes(fits[m.id]?.label ?? '')
+  const candidates = models.filter((m) => !isSmallModel(m) && parameterBillions(m) != null && everyday(m))
+  const size = (m: Model) => m.memory_needed_bytes ?? 0
+  const installed = candidates.filter((m) => m.installed).sort((a, b) => size(b) - size(a))
+  if (installed.length > 0) return installed[0]
+  return candidates.filter(fitsWell).sort((a, b) => size(b) - size(a))[0] ?? null
+}

@@ -6,7 +6,7 @@ import type {
   ModelFit,
 } from '@/types/api'
 import { ModelCard } from './ModelCard'
-import { CATEGORY_SECTIONS } from './modelPresentation'
+import { CATEGORY_SECTIONS, largerAlternative } from './modelPresentation'
 
 export function DiscoverTab({
   models,
@@ -50,6 +50,8 @@ export function DiscoverTab({
     winnerByModel.set(w.model_id, w.label)
   }
 
+  const alternative = largerAlternative(models, fits)
+
   const recommended = winners
     .map((w) => filtered.find((m) => m.id === w.model_id))
     .filter(Boolean) as Model[]
@@ -88,6 +90,8 @@ export function DiscoverTab({
                   progress={progress[model.id]}
                   installing={installingId === model.id}
                   onInstall={() => onInstall(model.id)}
+                  alternative={alternative}
+                  onInstallAlternative={onInstall}
                 />
               </li>
             ))}
@@ -113,6 +117,8 @@ export function DiscoverTab({
                     progress={progress[model.id]}
                     installing={installingId === model.id}
                     onInstall={() => onInstall(model.id)}
+                    alternative={alternative}
+                    onInstallAlternative={onInstall}
                   />
                 </li>
               ))}

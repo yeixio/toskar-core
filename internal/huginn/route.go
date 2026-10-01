@@ -3,6 +3,8 @@ package huginn
 import (
 	"fmt"
 	"slices"
+	"strconv"
+	"strings"
 
 	"github.com/yeixio/yggdrasil-core/pkg/contracts"
 )
@@ -181,4 +183,43 @@ func Name(m contracts.Model) string {
 		return m.DisplayName
 	}
 	return m.ID
+}
+
+// smallBelow is the size, in billions of parameters, under which a model is
+// small: fast, but more likely to mix up facts and numbers.
+const smallBelow = 4.0
+
+// Billions reads a model's size from its Parameters label, such as "1B",
+// "3.8B", or "500M". It returns false when the size is unknown.
+func Billions(m contracts.Model) (float64, bool) {
+	p := strings.ToUpper(strings.TrimSpace(m.Parameters))
+	scale := 1.0
+	switch {
+	case strings.HasSuffix(p, "B"):
+		p = strings.TrimSuffix(p, "B")
+	case strings.HasSuffix(p, "M"):
+		p, scale = strings.TrimSuffix(p, "M"), 0.001
+	default:
+		return 0, false
+	}
+	v, err := strconv.ParseFloat(p, 64)
+	if err != nil || v <= 0 {
+		return 0, false
+	}
+	return v * scale, true
+}
+
+// Small reports whether a model is small enough that its answers about
+// files and data deserve a second look. Unknown sizes are not small.
+func Small(m contracts.Model) bool {
+	b, ok := Billions(m)
+	return ok && b < smallBelow
+}
+
+// Larger returns the best installed model that is not small and fits this
+// computer, to suggest instead of a small one.
+func Larger(installed []contracts.Model, memTotal uint64) (contracts.Model, bool) {
+	return best(installed, func(m contracts.Model) bool {
+		return m.Installed && !Small(m) && general(m) && fits(m, memTotal, fullShare)
+	}, bigger)
 }

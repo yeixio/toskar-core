@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { Model, ModelFit, ModelDownloadProgressPayload } from '@/types/api'
 import { formatBytes } from '@/lib/format'
+import { SmallModelNote } from './SmallModelNote'
 import { useUIStore } from '@/stores/uiStore'
 import {
   bestForLabel,
@@ -24,8 +25,13 @@ export function ModelCard({
   progress,
   installing,
   onInstall,
+  alternative,
+  onInstallAlternative,
 }: {
   model: Model
+  /** A larger model to suggest when this one is small. */
+  alternative?: Model | null
+  onInstallAlternative?: (id: string) => void
   fit?: ModelFit
   peerFits?: { nodeName: string; label: ModelFit['label'] }[]
   winnerLabel?: string
@@ -84,6 +90,7 @@ export function ModelCard({
       <p className="mt-2 text-xs text-ink-muted" title={tools.detail}>
         {tools.summary}
       </p>
+      <SmallModelNote model={model} alternative={alternative} onInstallAlternative={onInstallAlternative} />
 
       {isDownloading && progress && (
         <div className="mt-3">

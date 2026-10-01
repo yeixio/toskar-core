@@ -6,6 +6,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/yeixio/yggdrasil-core/internal/artifacts"
+	"github.com/yeixio/yggdrasil-core/internal/mimir"
 	modelhealth "github.com/yeixio/yggdrasil-core/internal/models/health"
 	"github.com/yeixio/yggdrasil-core/pkg/contracts"
 )
@@ -83,5 +85,45 @@ func TestAutoAvoidsAModelThatJustFailed(t *testing.T) {
 	a.failedModels.Store("big", time.Now().Add(-failedFor-time.Second))
 	if a.recentlyFailed("big") {
 		t.Fatal("a model is tried again after a while")
+	}
+}
+
+func TestSmallModelNote(t *testing.T) {
+	tiny := installed("llama-1b", "Llama 3.2 1B", 1.6e9)
+	tiny.Parameters = "1B"
+	big := installed("qwen-7b", "Qwen 2.5 7B", 6.4e9)
+	big.Parameters = "7B"
+
+	note := smallModelNote("file", "llama-1b", []contracts.Model{tiny, big}, 24e9, false)
+	if !strings.Contains(note, "Llama 3.2 1B is a small model") || !strings.Contains(note, "from your files") || !strings.Contains(note, "choose Qwen 2.5 7B or Auto") {
+		t.Fatalf("note = %q", note)
+	}
+	// With nothing larger installed, point to the Models page.
+	if note := smallModelNote("knowledge", "llama-1b", []contracts.Model{tiny}, 24e9, false); !strings.Contains(note, "your knowledge") || !strings.Contains(note, "Models page") {
+		t.Fatalf("note = %q", note)
+	}
+	// No data, or a model that is not small: no note.
+	if smallModelNote("", "llama-1b", []contracts.Model{tiny}, 24e9, false) != "" || smallModelNote("file", "qwen-7b", []contracts.Model{tiny, big}, 24e9, false) != "" {
+		t.Fatal("unexpected note")
+	}
+}
+
+func TestTraceKnowsWhenDataWasUsed(t *testing.T) {
+	tr := &turnTrace{}
+	if tr.dataKind() != "" {
+		t.Fatal("nothing used yet")
+	}
+	tr.knowledge([]mimir.Hit{{Title: "row 1", SourceName: "inventory.csv"}})
+	if tr.dataKind() != "knowledge" {
+		t.Fatal("knowledge")
+	}
+	tr.attachment(artifacts.Artifact{Name: "tires.xlsx", Producer: artifacts.ProducerAssistant}, 1, 1)
+	if tr.dataKind() != "file" {
+		t.Fatal("files outrank knowledge in the note")
+	}
+	tr.noticeIfNone("first")
+	tr.noticeIfNone("second")
+	if tr.meta().Notice != "first" {
+		t.Fatal("an existing notice is kept")
 	}
 }

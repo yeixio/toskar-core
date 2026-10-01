@@ -4,11 +4,13 @@ import type {
   AIProfile,
   Model,
   ModelDownloadProgressPayload,
+  ModelFit,
   Node,
   RunningModelView,
 } from '@/types/api'
 import { formatBytes } from '@/lib/format'
-import { formatLastUsed } from './modelPresentation'
+import { formatLastUsed, largerAlternative } from './modelPresentation'
+import { SmallModelNote } from './SmallModelNote'
 
 export function InstalledTab({
   models,
@@ -19,6 +21,8 @@ export function InstalledTab({
   showManualControls,
   search,
   tightModelIds,
+  fits,
+  onInstall,
   onStart,
   onStop,
   onDelete,
@@ -33,6 +37,9 @@ export function InstalledTab({
   showManualControls: boolean
   search: string
   tightModelIds?: Set<string>
+  /** Fit per model on this computer, to suggest a larger model. */
+  fits?: Record<string, ModelFit>
+  onInstall?: (id: string) => void
   onStart: (id: string) => void
   onStop: (id: string, instanceId: string) => void
   onDelete: (id: string) => void
@@ -52,6 +59,7 @@ export function InstalledTab({
     )
   })
   const runningByModel = new Map(running.map((r) => [r.model_id, r]))
+  const alternative = largerAlternative(models, fits ?? {})
   const paired = nodes.filter((n) => (n.paired || n.is_local) && n.status !== 'offline')
 
   useEffect(() => {
@@ -119,6 +127,7 @@ export function InstalledTab({
                     ? `Used by ${usedBy.join(', ')}`
                     : `Last used ${formatLastUsed(model.last_used_at)}`}
                 </p>
+                <SmallModelNote model={model} alternative={alternative} onInstallAlternative={onInstall} />
               </div>
 
               <div className="flex flex-wrap items-center gap-2">

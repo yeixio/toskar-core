@@ -7,8 +7,10 @@ import (
 	"strings"
 	"time"
 
+	"github.com/yeixio/yggdrasil-core/internal/artifacts"
 	"github.com/yeixio/yggdrasil-core/internal/huginn"
 	modelhealth "github.com/yeixio/yggdrasil-core/internal/models/health"
+	"github.com/yeixio/yggdrasil-core/internal/profiles"
 	"github.com/yeixio/yggdrasil-core/pkg/contracts"
 )
 
@@ -65,7 +67,7 @@ func (a *App) recentlyFailed(modelID string) bool {
 }
 
 // chooseAuto picks the model for a chat set to Auto (spec §12–13).
-func (a *App) chooseAuto(ctx context.Context, message string) (huginn.Choice, error) {
+func (a *App) chooseAuto(ctx context.Context, message string, data bool) (huginn.Choice, error) {
 	all := a.installedModels(ctx)
 	usable := make([]contracts.Model, 0, len(all))
 	for _, m := range all {
@@ -76,7 +78,11 @@ func (a *App) chooseAuto(ctx context.Context, message string) (huginn.Choice, er
 	if len(usable) == 0 {
 		usable = all
 	}
-	choice, ok := huginn.Choose(huginn.Classify(message), usable, a.memoryTotal(ctx))
+	kind := huginn.Classify(message)
+	if data && kind == huginn.Chat {
+		kind = huginn.Research
+	}
+	choice, ok := huginn.Choose(kind, usable, a.memoryTotal(ctx))
 	if !ok {
 		return huginn.Choice{}, errNoModel
 	}
@@ -122,4 +128,54 @@ func fallbackFrom(failedID, errText string, installed []contracts.Model, memTota
 		notice = fmt.Sprintf("%s could not answer, so the smaller %s answered instead. This answer may be less detailed.", huginn.Name(failed), huginn.Name(next))
 	}
 	return next, step, notice, true
+}
+
+// turnHasData reports whether a turn will answer from the user's own data:
+// files attached now or earlier in the chat, or connected knowledge.
+func (a *App) turnHasData(ctx context.Context, conversationID string, profile profiles.Profile) bool {
+	if len(artifacts.AttachmentsFrom(ctx)) > 0 || len(profile.KnowledgeSources) > 0 {
+		return true
+	}
+	if a.Artifacts != nil && conversationID != "" {
+		if list, err := a.Artifacts.List(ctx, conversationID); err == nil && len(list) > 0 {
+			return true
+		}
+	}
+	return false
+}
+
+// smallModelNotice warns that a small model answered from the user's files
+// or knowledge, where it is most likely to mix up details, and suggests a
+// larger model. dataKind is "file", "knowledge", or "" when no data was used.
+func (a *App) smallModelNotice(ctx context.Context, dataKind, modelID string, auto bool) string {
+	if dataKind == "" || modelID == "" {
+		return ""
+	}
+	return smallModelNote(dataKind, modelID, a.installedModels(ctx), a.memoryTotal(ctx), auto)
+}
+
+func smallModelNote(dataKind, modelID string, installed []contracts.Model, memTotal uint64, auto bool) string {
+	if dataKind == "" || modelID == "" {
+		return ""
+	}
+	var answered contracts.Model
+	for _, m := range installed {
+		if m.ID == modelID {
+			answered = m
+		}
+	}
+	if !huginn.Small(answered) {
+		return ""
+	}
+	from := "your files"
+	if dataKind == "knowledge" {
+		from = "your knowledge"
+	}
+	note := fmt.Sprintf("%s is a small model and can mix up numbers and details from %s. Check them against the source.", huginn.Name(answered), from)
+	if larger, ok := huginn.Larger(installed, memTotal); ok && !auto {
+		note += fmt.Sprintf(" For questions like this, choose %s or Auto in Model.", huginn.Name(larger))
+	} else if !ok {
+		note += " A larger model from the Models page will be more reliable."
+	}
+	return note
 }

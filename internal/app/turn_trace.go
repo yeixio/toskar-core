@@ -79,7 +79,47 @@ func (t *turnTrace) attachment(a artifacts.Artifact, picked, total int) {
 		text = fmt.Sprintf("Read the %d parts of %s that match the question", picked, a.Name)
 	}
 	t.addStep("file", text)
-	t.addSource(contracts.Citation{Kind: "file", Title: a.Name, Source: "Attached file"})
+	source := sourceAttached
+	if a.Producer == artifacts.ProducerAssistant {
+		source = sourceMade
+	}
+	t.addSource(contracts.Citation{Kind: "file", Title: a.Name, Source: source})
+}
+
+// Source labels for files in a chat.
+const (
+	sourceAttached = "Attached file"
+	sourceMade     = "Made in this chat"
+)
+
+// dataKind reports whether the answer drew on the user's own data: "file"
+// for attached files, "knowledge" for connected knowledge, or "".
+func (t *turnTrace) dataKind() string {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	kind := ""
+	for _, s := range t.sources {
+		switch {
+		case s.Kind == "file" && (s.Source == sourceAttached || s.Source == sourceMade):
+			return "file"
+		case s.Kind == "knowledge":
+			kind = "knowledge"
+		}
+	}
+	return kind
+}
+
+// noticeIfNone sets the answer's notice unless one is already there, such
+// as a note that a fallback model answered.
+func (t *turnTrace) noticeIfNone(notice string) {
+	if notice == "" {
+		return
+	}
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	if t.notice == "" {
+		t.notice = notice
+	}
 }
 
 // routed records which model Auto chose and why.
