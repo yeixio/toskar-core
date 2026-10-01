@@ -1,5 +1,8 @@
 // Package contextusage splits a prompt into the parts a person can understand:
-// instructions, tool definitions, the conversation, and tool results.
+// instructions, tool definitions, the conversation, and tool results. It
+// also fits earlier messages into a model's window. Both count with the
+// running model's tokenizer when there is one, and estimate otherwise
+// (AI experience spec §66).
 package contextusage
 
 import (
@@ -28,6 +31,25 @@ type Usage struct {
 	Estimated    bool `json:"estimated"`
 }
 
+// Counter counts the tokens in a text with a model's tokenizer. exact is
+// false when no tokenizer was available and n is an estimate.
+type Counter func(text string) (n int, exact bool)
+
+// Estimate is about one token per four characters, for when no tokenizer is
+// running.
+func Estimate(text string) int { return utf8.RuneCountInString(text) / 4 }
+
+// Count counts text with count, or estimates when count is nil.
+func (count Counter) Count(text string) (int, bool) {
+	if text == "" {
+		return 0, true
+	}
+	if count == nil {
+		return Estimate(text), false
+	}
+	return count(text)
+}
+
 // Map is the chat.complete payload field.
 func (u Usage) Map() map[string]any {
 	return map[string]any{
@@ -41,33 +63,41 @@ func (u Usage) Map() map[string]any {
 	}
 }
 
-// Measure sizes a prompt. When the runtime reports prompt tokens, the sections
-// are scaled so they add up to that count. Otherwise each section is about one
-// token per four characters.
-func Measure(instructions, toolPrompt string, messages []pluginapi.ChatMessage, promptTokens int) Usage {
+// Measure sizes a prompt. Each section is counted with count, the model's
+// tokenizer, or estimated when there is none. When the runtime reports
+// prompt tokens, the sections add up to that count: with exact counts, the
+// tokens no section accounts for (the chat template and the model's own
+// system text) count as instructions; with estimates, the sections are
+// scaled.
+func Measure(count Counter, instructions, toolPrompt string, messages []pluginapi.ChatMessage, promptTokens int) Usage {
+	exact := true
+	add := func(n int, ok bool) int {
+		exact = exact && ok
+		return n
+	}
 	parts := [4]int{
-		utf8.RuneCountInString(instructions),
-		utf8.RuneCountInString(toolPrompt),
+		add(count.Count(instructions)),
+		add(count.Count(toolPrompt)),
 	}
 	for _, msg := range messages {
 		if msg.Role == "system" {
 			continue
 		}
-		n := utf8.RuneCountInString(msg.Content)
+		n := add(count.Count(msg.Content))
 		if msg.Role == "user" && isToolFeedback(msg.Content) {
 			parts[3] += n
 			continue
 		}
 		parts[2] += n
 	}
-	scaled, total, estimated := scale(parts, promptTokens)
+	scaled, total := scale(parts, promptTokens, exact)
 	return Usage{
 		PromptTokens: total,
 		Instructions: scaled[0],
 		Tools:        scaled[1],
 		Conversation: scaled[2],
 		ToolResults:  scaled[3],
-		Estimated:    estimated,
+		Estimated:    promptTokens <= 0 && !exact,
 	}
 }
 
@@ -77,18 +107,18 @@ func isToolFeedback(content string) bool {
 		strings.HasPrefix(content, "That tool call was not valid")
 }
 
-func scale(parts [4]int, promptTokens int) (out [4]int, total int, estimated bool) {
+func scale(parts [4]int, promptTokens int, exact bool) (out [4]int, total int) {
 	sum := parts[0] + parts[1] + parts[2] + parts[3]
 	if promptTokens <= 0 {
-		for i, n := range parts {
-			out[i] = n / 4
-			total += out[i]
-		}
-		return out, total, true
+		return parts, sum
+	}
+	if exact && sum <= promptTokens {
+		parts[0] += promptTokens - sum
+		return parts, promptTokens
 	}
 	if sum == 0 {
 		out[2] = promptTokens
-		return out, promptTokens, false
+		return out, promptTokens
 	}
 	used := 0
 	largest := 0
@@ -100,7 +130,7 @@ func scale(parts [4]int, promptTokens int) (out [4]int, total int, estimated boo
 		}
 	}
 	out[largest] += promptTokens - used
-	return out, promptTokens, false
+	return out, promptTokens
 }
 
 // WithoutCurrentTurn drops the user message just saved for this turn.
@@ -124,11 +154,13 @@ func WithoutCurrentTurn(stored []contracts.Message, prompt string) []pluginapi.C
 	return out
 }
 
-// RoomRunes is how much older chat text can still fit beside the reserved pieces.
-func RoomRunes(limitTokens int, reserved ...string) int {
-	room := limitTokens*4 - ReplyReserveTokens*4
+// Room is how many tokens of older chat can still fit in a window of
+// limitTokens beside the reserved pieces and the reply.
+func Room(limitTokens int, count Counter, reserved ...string) int {
+	room := limitTokens - ReplyReserveTokens
 	for _, text := range reserved {
-		room -= utf8.RuneCountInString(text)
+		n, _ := count.Count(text)
+		room -= n
 	}
 	if room < 0 {
 		return 0
@@ -136,19 +168,20 @@ func RoomRunes(limitTokens int, reserved ...string) int {
 	return room
 }
 
-// FitPrior keeps the newest messages that fit in roomRunes, in chronological order.
-func FitPrior(prior []pluginapi.ChatMessage, roomRunes int) []pluginapi.ChatMessage {
-	if roomRunes <= 0 || len(prior) == 0 {
+// FitPrior keeps the newest messages that fit in roomTokens, in
+// chronological order.
+func FitPrior(prior []pluginapi.ChatMessage, roomTokens int, count Counter) []pluginapi.ChatMessage {
+	if roomTokens <= 0 || len(prior) == 0 {
 		return nil
 	}
 	start := len(prior)
 	used := 0
 	for i := len(prior) - 1; i >= 0; i-- {
-		n := utf8.RuneCountInString(prior[i].Content)
-		if n == 0 {
+		if prior[i].Content == "" {
 			continue
 		}
-		if used+n > roomRunes {
+		n, _ := count.Count(prior[i].Content)
+		if used+n > roomTokens {
 			break
 		}
 		used += n

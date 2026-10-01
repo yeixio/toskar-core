@@ -232,8 +232,14 @@ func mergeServerMetrics(
 	}
 
 	if timings != nil {
-		if timings.PromptN > 0 {
-			m.PromptTokens = timings.PromptN
+		// prompt_n counts only the tokens processed for this call; the rest
+		// of the prompt came from llama-server's cache. The prompt's size,
+		// which is what fills the window, is both (§66).
+		if timings.PromptN+timings.CacheN > 0 {
+			m.PromptTokens = timings.PromptN + timings.CacheN
+		}
+		if timings.PromptPerSecond == 0 && timings.PromptMS > 0 && timings.PromptN > 0 {
+			m.PromptTokPerSec = float64(timings.PromptN) / (timings.PromptMS / 1000)
 		}
 		if timings.PredictedN > 0 {
 			m.CompletionTokens = timings.PredictedN

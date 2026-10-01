@@ -32,6 +32,20 @@ func TestMergeServerMetricsFromTimings(t *testing.T) {
 	}
 }
 
+func TestPromptTokensIncludeCachedTokens(t *testing.T) {
+	// A follow-up turn: llama-server reused 44 tokens and processed 1.
+	started := time.Now().Add(-100 * time.Millisecond)
+	m := mergeServerMetrics(nil, &timingsPayload{PromptN: 1, CacheN: 44, PromptMS: 5, PredictedN: 7},
+		started, started.Add(10*time.Millisecond), time.Now(), "hi")
+	if m.PromptTokens != 45 || m.CachedTokens != 44 {
+		t.Fatalf("prompt %d cached %d", m.PromptTokens, m.CachedTokens)
+	}
+	// Speed is for the tokens actually processed.
+	if m.PromptTokPerSec != 200 {
+		t.Fatalf("prompt tok/s %v", m.PromptTokPerSec)
+	}
+}
+
 func TestMergeServerMetricsFallbackEstimate(t *testing.T) {
 	started := time.Now().Add(-100 * time.Millisecond)
 	ended := time.Now()

@@ -88,7 +88,8 @@ func (a *App) setupCaches() {
 	a.Caches = cache.NewRegistry()
 	web := webCache{search: cache.New[map[string]any](webSearchPolicy), pages: cache.New[map[string]any](webPagePolicy)}
 	a.capCache = cache.New[inventory.Snapshot](capabilitiesPolicy)
-	for _, s := range []cache.Store{web.search, web.pages, a.capCache} {
+	a.tokenCounts = cache.New[int](tokenCountPolicy)
+	for _, s := range []cache.Store{web.search, web.pages, a.capCache, a.tokenCounts} {
 		_ = a.Caches.Add(s)
 	}
 	if a.Tools != nil {

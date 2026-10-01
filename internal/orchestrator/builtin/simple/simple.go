@@ -157,11 +157,14 @@ func (o *Orchestrator) Run(
 			sys = extra + "\n\n" + sys
 			plainSys = extra + "\n\n" + plainSys
 		}
+		// count is the answering model's tokenizer, or an estimate (§66).
+		count := tokenCounter(ctx, env, role)
+		userMsg := withReference(task.Prompt, reference)
 		messages := []pluginapi.ChatMessage{{Role: "system", Content: sys}}
-		if prior := priorMessages(ctx, env, task.Prompt, sys, profile.Orchestration.ContextShare); len(prior) > 0 {
+		if prior := priorMessages(ctx, env, count, userMsg, sys, profile.Orchestration.ContextShare); len(prior) > 0 {
 			messages = append(messages, prior...)
 		}
-		messages = append(messages, pluginapi.ChatMessage{Role: "user", Content: withReference(task.Prompt, reference)})
+		messages = append(messages, pluginapi.ChatMessage{Role: "user", Content: userMsg})
 
 		var metrics *pluginapi.GenerationMetrics
 		var usage contextusage.Usage
@@ -178,7 +181,7 @@ func (o *Orchestrator) Run(
 			if m != nil {
 				promptTokens = m.PromptTokens
 			}
-			streamText(ch, role, nodeID, content, m, contextusage.Measure(instructions, toolPrompt, messages, promptTokens))
+			streamText(ch, role, nodeID, content, m, contextusage.Measure(count, instructions, toolPrompt, messages, promptTokens))
 			return
 		}
 		if reply, m, made := makeFileFirst(ctx, env, profile, role, messages, task.Prompt); made {
@@ -186,7 +189,7 @@ func (o *Orchestrator) Run(
 			if m != nil {
 				promptTokens = m.PromptTokens
 			}
-			streamText(ch, role, nodeID, reply, m, contextusage.Measure(instructions, toolPrompt, messages, promptTokens))
+			streamText(ch, role, nodeID, reply, m, contextusage.Measure(count, instructions, toolPrompt, messages, promptTokens))
 			return
 		}
 		calls := 0
@@ -211,7 +214,7 @@ func (o *Orchestrator) Run(
 			if m != nil {
 				promptTokens = m.PromptTokens
 			}
-			usage = contextusage.Measure(instructions, toolPrompt, messages, promptTokens)
+			usage = contextusage.Measure(count, instructions, toolPrompt, messages, promptTokens)
 
 			parsed := tools.ParseModelOutput(content)
 			if parsed.Sanitized {
@@ -404,10 +407,22 @@ type conversationMemory interface {
 	ContextLimit() int
 }
 
+type tokenCounting interface {
+	TokenCounter(ctx context.Context, role string) contextusage.Counter
+}
+
+// tokenCounter is the tokenizer of the model a role uses, or nil to estimate.
+func tokenCounter(ctx context.Context, env pluginapi.ExecutionEnvironment, role string) contextusage.Counter {
+	if src, ok := env.(tokenCounting); ok {
+		return src.TokenCounter(ctx, role)
+	}
+	return nil
+}
+
 // priorMessages fits earlier messages into the room the model's window
-// leaves. share, when set by the profile (§40), caps earlier messages at
-// that part of the window.
-func priorMessages(ctx context.Context, env pluginapi.ExecutionEnvironment, prompt, reserved string, share float64) []pluginapi.ChatMessage {
+// leaves, in tokens. share, when set by the profile (§40), caps earlier
+// messages at that part of the window.
+func priorMessages(ctx context.Context, env pluginapi.ExecutionEnvironment, count contextusage.Counter, prompt, reserved string, share float64) []pluginapi.ChatMessage {
 	src, ok := env.(conversationMemory)
 	if !ok {
 		return nil
@@ -416,11 +431,11 @@ func priorMessages(ctx context.Context, env pluginapi.ExecutionEnvironment, prom
 	if limit <= 0 {
 		limit = contextusage.DefaultWindow
 	}
-	room := contextusage.RoomRunes(limit, reserved, prompt)
+	room := contextusage.Room(limit, count, reserved, prompt)
 	if share > 0 {
-		room = min(room, int(share*float64(limit)*4))
+		room = min(room, int(share*float64(limit)))
 	}
-	return contextusage.FitPrior(src.PriorMessages(ctx), room)
+	return contextusage.FitPrior(src.PriorMessages(ctx), room, count)
 }
 
 func publicToolError(err error) string {

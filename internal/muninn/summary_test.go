@@ -33,26 +33,26 @@ func asChat(stored []contracts.Message) []pluginapi.ChatMessage {
 }
 
 func TestPlanLeavesShortConversationsAlone(t *testing.T) {
-	if _, needed := Plan(history(3, 100), 8192, nil); needed {
+	if _, needed := Plan(history(3, 100), 8192, nil, nil); needed {
 		t.Fatal("a short conversation does not need a summary")
 	}
 }
 
 func TestPlanSummarizesOlderTurnsAndKeepsRecentOnes(t *testing.T) {
-	stored := history(20, 1000) // ~40k chars against a 32k-char window
-	through, needed := Plan(stored, 8192, nil)
+	stored := history(20, 1000) // ~10k estimated tokens against an 8k window
+	through, needed := Plan(stored, 8192, nil, nil)
 	if !needed {
 		t.Fatal("expected a summary")
 	}
 	if stored[through].Role != "assistant" {
 		t.Fatalf("summary should end on an answer, ended on %s", stored[through].Role)
 	}
-	kept := runes(stored[through+1:])
-	if kept > chars(8192, keepRecent) || kept == 0 {
-		t.Fatalf("kept %d chars verbatim", kept)
+	kept := size(nil, stored[through+1:])
+	if kept > tokens(8192, keepRecent) || kept == 0 {
+		t.Fatalf("kept %d tokens verbatim", kept)
 	}
 	// The same plan is not repeated once its summary exists.
-	if _, again := Plan(stored, 8192, &Summary{ThroughMessageID: stored[through].ID}); again {
+	if _, again := Plan(stored, 8192, &Summary{ThroughMessageID: stored[through].ID}, nil); again {
 		t.Fatal("re-planned an existing summary")
 	}
 }
@@ -110,11 +110,11 @@ func TestSummarizerRunsFromSourceAndIsApplied(t *testing.T) {
 
 func TestChunksKeepEveryMessage(t *testing.T) {
 	msgs := history(10, 100)
-	got := chunks(msgs, 500)
+	got := chunks(msgs, 125, nil)
 	total := 0
 	for _, c := range got {
-		if runes(c) > 500+1 {
-			t.Fatalf("chunk of %d runes", runes(c))
+		if size(nil, c) > 125 {
+			t.Fatalf("chunk of %d tokens", size(nil, c))
 		}
 		total += len(c)
 	}
@@ -128,5 +128,32 @@ func TestWithSummaryIgnoresAStaleSummary(t *testing.T) {
 	msgs, n := WithSummary(asChat(stored), stored, &Summary{ThroughMessageID: "gone", Text: "x"})
 	if n != 0 || len(msgs) != len(stored) {
 		t.Fatal("a summary of deleted messages must be ignored")
+	}
+}
+
+// wordCounter counts one token per word, unlike the four-characters
+// estimate, so tests can tell which one was used.
+func wordCounter(text string) (int, bool) { return len(strings.Fields(text)), true }
+
+func TestPlanCountsWithTheModelsTokenizer(t *testing.T) {
+	// About 10k estimated tokens, but each message is only a few words: the
+	// tokenizer's count is what decides.
+	stored := history(20, 1000)
+	if _, needed := Plan(stored, 8192, nil, nil); !needed {
+		t.Fatal("the estimate should call for a summary")
+	}
+	if _, needed := Plan(stored, 8192, nil, wordCounter); needed {
+		t.Fatal("the tokenizer's count fits the window; no summary needed")
+	}
+}
+
+func TestChunksCutLongMessagesByTokens(t *testing.T) {
+	long := contracts.Message{Role: "user", Content: strings.Repeat("word ", 100)}
+	got := chunks([]contracts.Message{long}, 10, wordCounter)
+	if len(got) != 1 {
+		t.Fatalf("%d chunks", len(got))
+	}
+	if n, _ := wordCounter(got[0][0].Content); n > 11 {
+		t.Fatalf("cut to %d words", n)
 	}
 }

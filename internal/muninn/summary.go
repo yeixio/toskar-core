@@ -8,8 +8,8 @@ import (
 	"strings"
 	"sync"
 	"time"
-	"unicode/utf8"
 
+	"github.com/yeixio/yggdrasil-core/internal/contextusage"
 	"github.com/yeixio/yggdrasil-core/pkg/contracts"
 	"github.com/yeixio/yggdrasil-core/pkg/pluginapi"
 )
@@ -59,7 +59,8 @@ func (s *Store) SaveSummary(ctx context.Context, sum Summary) error {
 }
 
 // Window shares for long conversations, as fractions of the model's window
-// measured in characters (about four per token).
+// in tokens. Tokens are counted with the model's tokenizer when it runs
+// here, and estimated otherwise (§66).
 const (
 	// summarizeAt starts summarizing when saved history passes this share.
 	summarizeAt = 0.5
@@ -69,12 +70,13 @@ const (
 	sourceFits = 0.6
 )
 
-func chars(window int, share float64) int { return int(float64(window*4) * share) }
+func tokens(window int, share float64) int { return int(float64(window) * share) }
 
-func runes(msgs []contracts.Message) int {
+func size(count contextusage.Counter, msgs []contracts.Message) int {
 	n := 0
 	for _, m := range msgs {
-		n += utf8.RuneCountInString(m.Content)
+		c, _ := count.Count(m.Content)
+		n += c
 	}
 	return n
 }
@@ -116,17 +118,18 @@ func WithSummary(msgs []pluginapi.ChatMessage, stored []contracts.Message, sum *
 // Plan decides whether a conversation needs a new summary, and through
 // which message. It keeps the newest messages that fill keepRecent of the
 // window verbatim and summarizes everything older.
-func Plan(stored []contracts.Message, windowTokens int, prev *Summary) (through int, needed bool) {
+// count is the model's tokenizer, or nil to estimate.
+func Plan(stored []contracts.Message, windowTokens int, prev *Summary, count contextusage.Counter) (through int, needed bool) {
 	if windowTokens <= 0 || len(stored) < 4 {
 		return 0, false
 	}
-	if runes(stored) <= chars(windowTokens, summarizeAt) {
+	if size(count, stored) <= tokens(windowTokens, summarizeAt) {
 		return 0, false
 	}
 	keep, used := len(stored), 0
 	for i := len(stored) - 1; i >= 0; i-- {
-		n := utf8.RuneCountInString(stored[i].Content)
-		if used+n > chars(windowTokens, keepRecent) {
+		n, _ := count.Count(stored[i].Content)
+		if used+n > tokens(windowTokens, keepRecent) {
 			break
 		}
 		used += n
@@ -178,6 +181,8 @@ type Summarizer struct {
 	Store    *Store
 	Generate Generate
 	ModelID  string
+	// Count is the model's tokenizer, or nil to estimate.
+	Count contextusage.Counter
 
 	running sync.Map
 }
@@ -209,7 +214,7 @@ func (s *Summarizer) run(ctx context.Context, conversationID string, stored []co
 	if ok {
 		prevPtr = &prev
 	}
-	through, needed := Plan(stored, windowTokens, prevPtr)
+	through, needed := Plan(stored, windowTokens, prevPtr, s.Count)
 	if !needed {
 		return false, nil
 	}
@@ -218,14 +223,14 @@ func (s *Summarizer) run(ctx context.Context, conversationID string, stored []co
 	// the source rather than from a summary. A longer history is read in
 	// chunks, each folded into the summary so far; nothing is dropped.
 	start, text := 0, ""
-	if prevPtr != nil && runes(source) > chars(windowTokens, sourceFits) {
+	if prevPtr != nil && size(s.Count, source) > tokens(windowTokens, sourceFits) {
 		for i, m := range source {
 			if m.ID == prev.ThroughMessageID {
 				start, text = i+1, prev.Text
 			}
 		}
 	}
-	for _, chunk := range chunks(source[start:], chars(windowTokens, sourceFits)) {
+	for _, chunk := range chunks(source[start:], tokens(windowTokens, sourceFits), s.Count) {
 		body := "Conversation:\n\n" + transcript(chunk)
 		if text != "" {
 			body = "Earlier summary:\n" + text + "\n\nConversation since then:\n\n" + transcript(chunk)
@@ -247,17 +252,18 @@ func (s *Summarizer) run(ctx context.Context, conversationID string, stored []co
 		ThroughCreatedAt: last.CreatedAt, MessageCount: len(source), Text: text, ModelID: s.ModelID})
 }
 
-// chunks splits messages into runs of at most n runes. A single message
-// longer than n is cut to its first n runes.
-func chunks(msgs []contracts.Message, n int) [][]contracts.Message {
+// chunks splits messages into runs of at most n tokens. A single message
+// longer than n is cut to about its first n tokens.
+func chunks(msgs []contracts.Message, n int, count contextusage.Counter) [][]contracts.Message {
 	var out [][]contracts.Message
 	var cur []contracts.Message
 	used := 0
 	for _, m := range msgs {
-		size := utf8.RuneCountInString(m.Content)
+		size, _ := count.Count(m.Content)
 		if size > n {
+			// Cut in proportion to the message's own characters per token.
 			r := []rune(m.Content)
-			m.Content = string(r[:n]) + "…"
+			m.Content = string(r[:len(r)*n/size]) + "…"
 			size = n
 		}
 		if used+size > n && len(cur) > 0 {

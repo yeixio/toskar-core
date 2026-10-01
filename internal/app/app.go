@@ -106,6 +106,10 @@ type App struct {
 	// Caches lists every cache and its policy (§36).
 	Caches   *cache.Registry
 	capCache *cache.Cache[inventory.Snapshot]
+	// tokenCounts keeps counts from models' tokenizers (§66).
+	tokenCounts *cache.Cache[int]
+	// tokenize counts with a running model; tests replace it.
+	tokenize func(ctx context.Context, endpoint, text string) (int, error)
 	// StubReply, when set with stub inference, scripts what the stub model
 	// says, for the quality test set (§64). It sees every prompt.
 	StubReply func(modelID string, messages []pluginapi.ChatMessage) string

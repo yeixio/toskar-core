@@ -54,10 +54,12 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Thi
 
 ### Changed
 
+- Context budgets count tokens with the running model's own tokenizer. Which earlier messages fit, when a long conversation is summarized, and the context gauge's sections use llama-server's count instead of guessing four characters per token, a guess that is often well off for code and for languages other than English. Counts are cached for an hour and cleared with run records. When the model is not running on this computer, the estimate is used and the gauge still shows "~".
 - Connected knowledge and retrieved content reach the model as labelled data in the user turn, not in the system prompt, and the model is told not to follow instructions inside it. After a turn reads untrusted content, a tool that changes something (write, terminal, Git commit or push) asks first even when the profile allows it. Knowledge search drops passages that score far below the best match, and table columns such as `in_stock` read as "in stock".
 
 ### Fixed
 
+- The context gauge undercounted every turn after the first: it counted only the prompt tokens llama-server processed, not those it reused from its cache. It now shows the whole prompt.
 - A daemon started with `--data-dir` stays in that directory when its `config.json` does not list `data_dir`. Before, it used the default data directory, so a second or test daemon could open your real database.
 - The database refuses to start with two migrations of the same number, instead of silently skipping one.
 - The chat page no longer reopens its event stream on almost every render, which dropped events such as a plan's checklist. The first message of a new chat no longer disappears while the reply is being written.

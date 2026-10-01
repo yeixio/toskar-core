@@ -7,6 +7,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/yeixio/yggdrasil-core/internal/contextusage"
 	"github.com/yeixio/yggdrasil-core/internal/huginn"
 	"github.com/yeixio/yggdrasil-core/pkg/contracts"
 	"github.com/yeixio/yggdrasil-core/pkg/pluginapi"
@@ -419,5 +420,54 @@ func TestLookupQuery(t *testing.T) {
 		if got := lookupQuery(in); got != want {
 			t.Errorf("lookupQuery(%q) = %q, want %q", in, got, want)
 		}
+	}
+}
+
+type tokenizedEnv struct {
+	memoryEnv
+	roles []string
+}
+
+// TokenCounter counts one token per word, so a long single word is cheap.
+func (e *tokenizedEnv) TokenCounter(_ context.Context, role string) contextusage.Counter {
+	e.roles = append(e.roles, role)
+	return func(text string) (int, bool) { return len(strings.Fields(text)), true }
+}
+
+func TestOlderMessagesFitByTheModelsTokenizer(t *testing.T) {
+	// 4000 characters is about 1000 estimated tokens, too many for this
+	// window, but the tokenizer counts it as one.
+	env := &tokenizedEnv{memoryEnv: memoryEnv{
+		scriptedEnv: scriptedEnv{replies: []string{"ok"}},
+		prior: []pluginapi.ChatMessage{
+			{Role: "user", Content: strings.Repeat("a", 4000)},
+			{Role: "assistant", Content: "recent"},
+		},
+		limit: 600,
+	}}
+	events, err := New().Run(context.Background(), contracts.Task{Prompt: "now"}, contracts.AIProfile{
+		Roles: []contracts.ModelRole{{Role: "assistant", ModelID: "m"}},
+	}, env)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var usage map[string]any
+	for evt := range events {
+		if evt.Type == "agent.completed" {
+			usage, _ = evt.Payload["context"].(map[string]any)
+		}
+	}
+	if len(env.roles) == 0 || env.roles[0] != "assistant" {
+		t.Fatalf("counter asked for %v", env.roles)
+	}
+	var joined string
+	for _, msg := range env.seen[0] {
+		joined += msg.Content + "\n"
+	}
+	if !strings.Contains(joined, "aaaa") || !strings.Contains(joined, "recent") {
+		t.Fatalf("prompt=\n%s", joined)
+	}
+	if usage == nil || usage["estimated"] != false {
+		t.Fatalf("context=%v", usage)
 	}
 }

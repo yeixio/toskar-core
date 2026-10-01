@@ -159,7 +159,7 @@ func (a *App) summarizeLater(conversationID, modelID string, windowTokens int) {
 		if err != nil {
 			return
 		}
-		job := &muninn.Summarizer{Store: a.Muninn, ModelID: modelID,
+		job := &muninn.Summarizer{Store: a.Muninn, ModelID: modelID, Count: a.tokenCounter(ctx, modelID),
 			Generate: func(ctx context.Context, msgs []pluginapi.ChatMessage) (string, error) {
 				return a.generateOnce(ctx, modelID, "", a.localAdapters(ctx, modelID), msgs)
 			}}

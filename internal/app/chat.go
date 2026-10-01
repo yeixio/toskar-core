@@ -916,6 +916,15 @@ func (e *chatExecEnv) ContextLimit() int {
 	return llamacpp.ContextWindow(catalog)
 }
 
+// TokenCounter counts with the tokenizer of the model a role uses, while it
+// runs on this computer, and estimates otherwise (§66).
+func (e *chatExecEnv) TokenCounter(ctx context.Context, role string) contextusage.Counter {
+	if e.app == nil {
+		return nil
+	}
+	return e.app.tokenCounter(ctx, e.modelForRole(role))
+}
+
 func (e *chatExecEnv) PriorMessages(ctx context.Context) []pluginapi.ChatMessage {
 	if e.conversationID == "" && e.opts != nil {
 		// An API caller sends the whole conversation each time (§62).
