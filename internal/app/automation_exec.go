@@ -11,6 +11,7 @@ import (
 	"github.com/yeixio/yggdrasil-core/internal/automations"
 	"github.com/yeixio/yggdrasil-core/internal/gjallarhorn"
 	"github.com/yeixio/yggdrasil-core/internal/huginn"
+	"github.com/yeixio/yggdrasil-core/internal/share"
 	"github.com/yeixio/yggdrasil-core/internal/tools"
 	"github.com/yeixio/yggdrasil-core/pkg/contracts"
 	"github.com/yeixio/yggdrasil-core/pkg/pluginapi"
@@ -37,6 +38,13 @@ func (e automationExecutor) Execute(ctx context.Context, automation automations.
 	if err != nil {
 		return automations.Execution{}, err
 	}
+	// A chat on this computer goes first; the run waits for it instead of
+	// loading a model alongside it (§60).
+	work, err := e.app.enterWork(ctx, share.Automation, automation.Name, nil)
+	if err != nil {
+		return automations.Execution{}, err
+	}
+	defer work.Done()
 	// Same stack as chat (spec §30): Auto picks the model, and the run gets
 	// connected knowledge, relevant memories, and Huginn's effort budget.
 	modelID := automation.ModelID

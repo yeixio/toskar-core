@@ -306,7 +306,7 @@ func (s *Service) executeRemote(ctx context.Context, run *remoteRun, req RemoteR
 	}
 	adapter := filepath.Join(dir, "adapter.gguf")
 	res, err := s.execute(ctx, execSpec{
-		trainer: trainer, repo: req.Repo, architecture: req.Architecture, hyper: req.Hyper,
+		name: "a paired computer's AI", trainer: trainer, repo: req.Repo, architecture: req.Architecture, hyper: req.Hyper,
 		workDir: filepath.Join(dir, "work"), dataDir: dataDir, adapterOut: adapter,
 		logPath: filepath.Join(s.d.LogsDir, "training-remote-"+req.ID+".log"),
 	}, func(st State, detail string) {

@@ -763,3 +763,31 @@ func clip(s string, n int) string {
 	}
 	return s[len(s)-n:]
 }
+
+// OutOfMemory reports whether an error says a model ran out of memory: a
+// health failure with memory pressure, or a runtime or system message.
+func OutOfMemory(text string) bool {
+	if f, ok := Parse(text); ok {
+		return f.LikelyMemoryPressure
+	}
+	lower := strings.ToLower(text)
+	for _, needle := range []string{
+		"out of memory", "cannot allocate", "failed to allocate", "insufficient memory",
+		"not enough memory", "oom killed", "(oom)", "kiogpucommandbuffercallbackerroroutofmemory",
+	} {
+		if strings.Contains(lower, needle) {
+			return true
+		}
+	}
+	return false
+}
+
+// WithMessage replaces the sentence shown for an encoded health failure, or
+// returns message alone for any other error.
+func WithMessage(raw, message string) string {
+	if f, ok := Parse(raw); ok {
+		f.Message = message
+		return Encode(f)
+	}
+	return message
+}

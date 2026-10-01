@@ -62,6 +62,7 @@ const KNOWN_EVENT_TYPES = [
   'memory.deleted',
   'chat.summarized',
   'notification.created',
+  'work.waiting',
 ] as const
 
 export function subscribeEvents({

@@ -34,6 +34,10 @@ type Runner struct {
 	StopModel   StopModelFunc
 	ListRunning ListRunningFunc
 	Chat        ChatFunc
+	// Admit, when set, waits until no higher-priority work such as a chat
+	// is using this computer (spec §60). Each model is admitted on its own,
+	// because loading it unloads the others.
+	Admit func(ctx context.Context, waiting func(reason string)) (release func(), err error)
 
 	mu   sync.Mutex
 	jobs map[string]*contracts.BenchmarkJob
@@ -210,6 +214,19 @@ func (r *Runner) benchmarkModel(
 	modelID string,
 	workloads []contracts.BenchmarkWorkload,
 ) error {
+	if r.Admit != nil {
+		release, err := r.Admit(ctx, func(reason string) {
+			r.patch(job.ID, func(j *contracts.BenchmarkJob) {
+				j.Progress.CurrentModel = modelID
+				j.Progress.Phase = "waiting"
+				j.Progress.Message = reason
+			})
+		})
+		if err != nil {
+			return err
+		}
+		defer release()
+	}
 	r.patch(job.ID, func(j *contracts.BenchmarkJob) {
 		j.Progress.CurrentModel = modelID
 		j.Progress.Phase = "loading"

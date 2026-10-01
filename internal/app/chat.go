@@ -20,6 +20,7 @@ import (
 	"github.com/yeixio/yggdrasil-core/internal/orchestrator/builtin/simple"
 	"github.com/yeixio/yggdrasil-core/internal/profiles"
 	"github.com/yeixio/yggdrasil-core/internal/runtimes/llamacpp"
+	"github.com/yeixio/yggdrasil-core/internal/share"
 	"github.com/yeixio/yggdrasil-core/internal/tools"
 	"github.com/yeixio/yggdrasil-core/pkg/contracts"
 	"github.com/yeixio/yggdrasil-core/pkg/pluginapi"
@@ -162,6 +163,10 @@ func (a *App) RunChat(ctx context.Context, profileID, conversationID, message st
 		// with it every model call, tool, plan step, and paired computer.
 		ctx, _, endRun := a.startRun(ctx, conversationID)
 		defer endRun()
+		// Chat comes first: automations, benchmarks, and training wait
+		// for it (§60). Chat itself never waits.
+		work, _ := a.enterWork(ctx, share.Interactive, "chat", nil)
+		defer work.Done()
 		env := &chatExecEnv{
 			app:            a,
 			ctx:            ctx,
@@ -176,6 +181,9 @@ func (a *App) RunChat(ctx context.Context, profileID, conversationID, message st
 		}
 		if routeReason != "" {
 			env.trace.routed(routeReason)
+		}
+		if busy, ok := a.trainingNow(); ok {
+			env.trace.sharing(busy + ", so this answer may be slower.")
 		}
 		if a.memoryOn(ctx, conversationID) {
 			if mems, err := a.Muninn.Relevant(ctx, message); err == nil {
@@ -198,7 +206,7 @@ func (a *App) RunChat(ctx context.Context, profileID, conversationID, message st
 		for attempt := 0; ; attempt++ {
 			eventsCh, err := orch.Run(ctx, task, profile, env)
 			if err != nil {
-				ch <- pluginapi.ChatChunk{Error: err.Error(), Done: true}
+				ch <- pluginapi.ChatChunk{Error: a.explainWhileTraining(err.Error()), Done: true}
 				return
 			}
 			retry := false
@@ -248,7 +256,7 @@ func (a *App) RunChat(ctx context.Context, profileID, conversationID, message st
 							}
 						}
 					}
-					ch <- pluginapi.ChatChunk{Error: evt.Error, Done: true}
+					ch <- pluginapi.ChatChunk{Error: a.explainWhileTraining(evt.Error), Done: true}
 					return
 				}
 				if evt.Type == "agent.completed" && evt.Role != "" {

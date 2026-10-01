@@ -169,6 +169,13 @@ func (t *turnTrace) effort(label string) {
 	t.addStep("effort", "Worked at "+label+" effort, as you chose")
 }
 
+// sharing records that other work, such as training, is using this computer.
+func (t *turnTrace) sharing(text string) {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	t.addStep("share", text)
+}
+
 // routed records which model Auto chose and why.
 func (t *turnTrace) routed(reason string) {
 	t.mu.Lock()

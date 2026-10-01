@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/yeixio/yggdrasil-core/internal/events"
+	modelhealth "github.com/yeixio/yggdrasil-core/internal/models/health"
 )
 
 const (
@@ -48,7 +49,13 @@ type Runner struct {
 	Interval time.Duration
 	Lease    time.Duration
 	Now      func() time.Time
+	// Pause turns an automation off. Runs that keep running out of memory
+	// are paused instead of failing on every schedule (spec §60).
+	Pause func(ctx context.Context, id string) error
 }
+
+// oomPauseAfter is how many out-of-memory failures in a row pause an automation.
+const oomPauseAfter = 2
 
 // Start ticks until ctx is cancelled. The first tick runs immediately.
 func (r *Runner) Start(ctx context.Context) {
@@ -175,7 +182,21 @@ func (r *Runner) execute(ctx context.Context, automation Automation, occurrence 
 		if err != nil {
 			return err
 		}
-		sent, notifyErr := r.notifyRepeated(ctx, updated, run, execErr.Error())
+		message := execErr.Error()
+		if modelhealth.OutOfMemory(message) {
+			message = "This computer ran out of memory for the model."
+			if updated.ConsecutiveFailures >= oomPauseAfter && r.Pause != nil && updated.Enabled {
+				if err := r.Pause(ctx, automation.ID); err != nil {
+					if r.Logger != nil {
+						r.Logger.Warn("pause automation after memory failures", "automation", automation.Name, "error", err)
+					}
+				} else {
+					updated.Enabled = false
+					message = fmt.Sprintf("Paused after running out of memory %d times in a row. Choose a smaller model for this automation, or close other work, then resume it.", updated.ConsecutiveFailures)
+				}
+			}
+		}
+		sent, notifyErr := r.notifyRepeated(ctx, updated, run, message)
 		if err := r.Store.SetNotificationSent(ctx, run.ID, sent); err != nil {
 			return err
 		}

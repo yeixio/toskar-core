@@ -4,9 +4,11 @@ import (
 	"context"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/yeixio/yggdrasil-core/internal/events"
 	"github.com/yeixio/yggdrasil-core/internal/pyenv"
+	"github.com/yeixio/yggdrasil-core/internal/share"
 	"github.com/yeixio/yggdrasil-core/internal/training"
 	"github.com/yeixio/yggdrasil-core/pkg/contracts"
 	"github.com/yeixio/yggdrasil-core/pkg/pluginapi"
@@ -33,6 +35,7 @@ func (a *App) newTrainingService() *training.Service {
 			a.Bus.Publish(events.New(eventType, payload))
 		},
 		UnloadLocalModels: a.unloadLocalModels,
+		Admit:             a.admitTraining,
 		Generate:          a.generateOnce,
 		Conversation:      a.Conversations.ListMessages,
 		Logger:            a.Logger,
@@ -141,3 +144,21 @@ func (a *App) resolveSpecialized(ctx context.Context, modelID string) (*speciali
 	return &specializedChat{baseModelID: res.BaseModelID, adapter: res.Adapter,
 		instructions: res.AI.Instructions, knowledge: res.AI.Knowledge}, nil
 }
+
+// admitTraining waits for chat, automations, and benchmarks to finish with
+// this computer, then holds it for training (§60).
+func (a *App) admitTraining(ctx context.Context, name string, waiting func(string)) (training.Hold, error) {
+	work, err := a.enterWork(ctx, share.Training, name, waiting)
+	if err != nil {
+		return nil, err
+	}
+	if work == nil {
+		return noHold{}, nil
+	}
+	return work, nil
+}
+
+type noHold struct{}
+
+func (noHold) SetRemaining(time.Duration) {}
+func (noHold) Done()                      {}

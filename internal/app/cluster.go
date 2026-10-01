@@ -14,6 +14,7 @@ import (
 	"github.com/yeixio/yggdrasil-core/internal/nodes"
 	"github.com/yeixio/yggdrasil-core/internal/profiles"
 	"github.com/yeixio/yggdrasil-core/internal/scheduler"
+	"github.com/yeixio/yggdrasil-core/internal/share"
 	"github.com/yeixio/yggdrasil-core/pkg/contracts"
 	"github.com/yeixio/yggdrasil-core/pkg/pluginapi"
 )
@@ -333,6 +334,29 @@ func (a *App) ensureLocalModelWith(ctx context.Context, modelID string, adapters
 }
 
 func (a *App) internalChat(ctx context.Context, req nodes.RemoteChatRequest) (<-chan pluginapi.ChatChunk, error) {
+	// A paired computer's request counts as chat until its stream ends, so
+	// training on this computer waits for it (§60).
+	work, _ := a.enterWork(ctx, share.Interactive, "paired computer", nil)
+	ch, err := a.internalChatStream(ctx, req)
+	if err != nil {
+		work.Done()
+		return nil, err
+	}
+	if work == nil {
+		return ch, nil
+	}
+	out := make(chan pluginapi.ChatChunk, 16)
+	go func() {
+		defer close(out)
+		defer work.Done()
+		for chunk := range ch {
+			out <- chunk
+		}
+	}()
+	return out, nil
+}
+
+func (a *App) internalChatStream(ctx context.Context, req nodes.RemoteChatRequest) (<-chan pluginapi.ChatChunk, error) {
 	var ch <-chan pluginapi.ChatChunk
 	var err error
 	if a.stubInference {

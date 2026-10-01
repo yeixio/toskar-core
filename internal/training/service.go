@@ -66,9 +66,13 @@ type Deps struct {
 	Publish func(eventType string, payload map[string]any)
 	// UnloadLocalModels frees memory before training starts.
 	UnloadLocalModels func(ctx context.Context) int
-	Generate          GenerateFunc
-	Conversation      func(ctx context.Context, id string) ([]contracts.Message, error)
-	Logger            *slog.Logger
+	// Admit, when set, waits until chat, automations, and benchmarks are
+	// done with this computer, then holds it for training until Done (§60).
+	// Models are unloaded only after that.
+	Admit        func(ctx context.Context, name string, waiting func(reason string)) (Hold, error)
+	Generate     GenerateFunc
+	Conversation func(ctx context.Context, id string) ([]contracts.Message, error)
+	Logger       *slog.Logger
 	// LocalNodeID identifies this computer among training nodes.
 	LocalNodeID string
 	// Peer returns a client for a paired computer, for remote training.
@@ -1025,7 +1029,16 @@ func (s *Service) publishJob(j Job) {
 
 // runJob carries a job from queued to a terminal state.
 // execSpec is one trainer run on this computer.
+// Hold is this computer, held for a training run. SetRemaining shares the
+// estimate, so a chat that arrives meanwhile can say how long it will be.
+type Hold interface {
+	SetRemaining(d time.Duration)
+	Done()
+}
+
 type execSpec struct {
+	// name is what the run is called in messages, such as the AI's name.
+	name                         string
 	trainer                      Trainer
 	repo, architecture           string
 	hyper                        Hyper
@@ -1053,6 +1066,25 @@ func (s *Service) execute(ctx context.Context, spec execSpec, setState func(Stat
 	}
 	if err != nil {
 		return RunResult{}, fmt.Errorf("install the trainer: %w", err)
+	}
+	if s.d.Admit != nil {
+		hold, err := s.d.Admit(ctx, spec.name, func(reason string) {
+			setState(StatePreparing, reason+" before freeing memory for training")
+		})
+		if ctx.Err() != nil {
+			return RunResult{}, ErrCancelled
+		}
+		if err != nil {
+			return RunResult{}, err
+		}
+		defer hold.Done()
+		inner := progress
+		progress = func(p Progress) {
+			if p.RemainingSec != nil {
+				hold.SetRemaining(time.Duration(*p.RemainingSec) * time.Second)
+			}
+			inner(p)
+		}
 	}
 	if s.d.UnloadLocalModels != nil {
 		if n := s.d.UnloadLocalModels(ctx); n > 0 {
@@ -1097,7 +1129,7 @@ func (s *Service) runJob(ctx context.Context, job Job, ai SpecializedAI, info mo
 		s.publishJob(job)
 	}
 	setState := func(st State, detail string) {
-		changed := job.State != st
+		changed := job.State != st || job.Progress.Detail != detail
 		job.State, job.Progress.Detail = st, detail
 		save(changed)
 	}
@@ -1166,7 +1198,7 @@ func (s *Service) runJob(ctx context.Context, job Job, ai SpecializedAI, info mo
 		job.StartedAt = &now
 		setState(StatePreparing, "Preparing examples")
 		res, err = s.execute(ctx, execSpec{
-			trainer: trainer, repo: repo, architecture: info.Architecture, hyper: job.Hyper,
+			name: ai.Name, trainer: trainer, repo: repo, architecture: info.Architecture, hyper: job.Hyper,
 			workDir: work, dataDir: dataDir, adapterOut: adapterPath,
 			logPath: filepath.Join(s.d.LogsDir, "training-"+job.ID+".log"),
 		}, setState, progress)

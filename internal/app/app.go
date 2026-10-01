@@ -43,6 +43,7 @@ import (
 	"github.com/yeixio/yggdrasil-core/internal/runtimes/external"
 	"github.com/yeixio/yggdrasil-core/internal/runtimes/llamacpp"
 	"github.com/yeixio/yggdrasil-core/internal/scheduler"
+	"github.com/yeixio/yggdrasil-core/internal/share"
 	"github.com/yeixio/yggdrasil-core/internal/store"
 	"github.com/yeixio/yggdrasil-core/internal/store/repositories"
 	"github.com/yeixio/yggdrasil-core/internal/tasks"
@@ -86,6 +87,8 @@ type App struct {
 	Muninn           *muninn.Store
 	// Notifications is Gjallarhorn's notification center and delivery.
 	Notifications *gjallarhorn.Hub
+	// Share admits chat, automations, benchmarks, and training by priority (§60).
+	Share *share.Gate
 	// Artifacts holds chat attachments and files the assistant produced.
 	Artifacts  *artifacts.Store
 	summarizer *muninn.Summarizer
@@ -210,6 +213,7 @@ func New(opts Options) (*App, error) {
 	apiKeyMgr := auth.NewAPIKeyManager(db.SQL, secrets)
 
 	a := &App{
+		Share:         share.New(0),
 		Config:        cfgMgr,
 		DB:            db,
 		Bus:           bus,
@@ -251,6 +255,10 @@ func New(opts Options) (*App, error) {
 		return rtMgr.StartModel(ctx, "llamacpp", pluginapi.ModelStartConfig{
 			ModelID: modelID, ModelPath: modelPath, Adapters: a.localAdapters(ctx, modelID),
 		})
+	}
+	bench.Admit = func(ctx context.Context, waiting func(string)) (func(), error) {
+		work, err := a.enterWork(ctx, share.Benchmark, "benchmark", waiting)
+		return work.Done, err
 	}
 	bench.StopModel = func(ctx context.Context, instanceID string) error {
 		return rtMgr.StopModel(ctx, "llamacpp", instanceID)
@@ -503,6 +511,11 @@ func New(opts Options) (*App, error) {
 		Notify: automationNotifier{settings: settingsRepo, send: automations.OSSender{}, hub: a.Notifications},
 		Bus:    bus,
 		Logger: logger,
+		Pause: func(ctx context.Context, id string) error {
+			enabled := false
+			_, err := a.Automations.Update(ctx, id, automations.Patch{Enabled: &enabled}, time.Now())
+			return err
+		},
 	}
 	a.API.BindAutomations(api.Dependencies{
 		ListAutomations: a.Automations.List,
