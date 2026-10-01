@@ -25,6 +25,7 @@ import (
 	"github.com/yeixio/yggdrasil-core/internal/diagnostics"
 	"github.com/yeixio/yggdrasil-core/internal/discovery"
 	"github.com/yeixio/yggdrasil-core/internal/events"
+	"github.com/yeixio/yggdrasil-core/internal/gjallarhorn"
 	"github.com/yeixio/yggdrasil-core/internal/hardware"
 	"github.com/yeixio/yggdrasil-core/internal/logs"
 	"github.com/yeixio/yggdrasil-core/internal/mimir"
@@ -83,6 +84,8 @@ type App struct {
 	Health           *modelhealth.Monitor
 	Mimir            *mimir.Store
 	Muninn           *muninn.Store
+	// Notifications is Gjallarhorn's notification center and delivery.
+	Notifications *gjallarhorn.Hub
 	// Artifacts holds chat attachments and files the assistant produced.
 	Artifacts  *artifacts.Store
 	summarizer *muninn.Summarizer
@@ -487,12 +490,17 @@ func New(opts Options) (*App, error) {
 		},
 	}
 
+	// Gjallarhorn: every notice is kept in the notification center; the
+	// desktop is one delivery channel.
+	a.Notifications = gjallarhorn.NewHub(db.SQL, bus, desktopChannel{settings: settingsRepo, send: automations.OSSender{}})
+	a.API.BindNotifications(a.Notifications)
+
 	autoRepo := repositories.NewAutomationRepo(db.SQL)
 	a.Automations = autoRepo
 	a.AutomationRunner = &automations.Runner{
 		Store:  autoRepo,
 		Exec:   automationExecutor{app: a},
-		Notify: automationNotifier{settings: settingsRepo, send: automations.OSSender{}},
+		Notify: automationNotifier{settings: settingsRepo, send: automations.OSSender{}, hub: a.Notifications},
 		Bus:    bus,
 		Logger: logger,
 	}
@@ -613,6 +621,7 @@ func (a *App) requireKeyForRemoteBind(ctx context.Context) error {
 // Start runs the API server until context cancellation.
 func (a *App) Start(ctx context.Context) error {
 	ctx, a.cancel = context.WithCancel(ctx)
+	a.notifyFromEvents(ctx)
 	_ = a.syncInternalBind()
 	cfg := a.Config.Get()
 	if err := a.requireKeyForRemoteBind(ctx); err != nil {

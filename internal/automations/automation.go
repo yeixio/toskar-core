@@ -15,6 +15,8 @@ const (
 	NotifyOnCondition NotifyMode = "condition"
 	NotifyOnChange    NotifyMode = "change"
 	NotifyNone        NotifyMode = "none"
+	// NotifyOnFailure notifies only when a run fails.
+	NotifyOnFailure NotifyMode = "failure"
 )
 
 // Condition is the structured rule for NotifyOnCondition.
@@ -50,7 +52,7 @@ func (n *Notification) Normalize() {
 // Validate checks the mode and, for a condition, the rule that will be evaluated later.
 func (n Notification) Validate() error {
 	switch n.Mode {
-	case NotifyAlways, NotifyOnCondition, NotifyOnChange, NotifyNone:
+	case NotifyAlways, NotifyOnCondition, NotifyOnChange, NotifyNone, NotifyOnFailure:
 	default:
 		return fmt.Errorf("unknown notification mode %q", n.Mode)
 	}

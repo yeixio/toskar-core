@@ -7,6 +7,8 @@ import (
 	"testing"
 
 	"github.com/yeixio/yggdrasil-core/internal/automations"
+	"github.com/yeixio/yggdrasil-core/internal/events"
+	"github.com/yeixio/yggdrasil-core/internal/gjallarhorn"
 	"github.com/yeixio/yggdrasil-core/internal/store"
 	"github.com/yeixio/yggdrasil-core/internal/store/repositories"
 )
@@ -50,4 +52,49 @@ type noticeFunc func(context.Context, automations.Notice) error
 
 func (f noticeFunc) Notify(ctx context.Context, notice automations.Notice) error {
 	return f(ctx, notice)
+}
+
+func TestAutomationNoticesGoToTheNotificationCenter(t *testing.T) {
+	db, err := store.Open(filepath.Join(t.TempDir(), "test.db"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer db.Close()
+	settings := repositories.NewSettingsRepo(db.SQL)
+	ctx := context.Background()
+	sent := 0
+	desktop := desktopChannel{settings: settings, send: noticeFunc(func(context.Context, automations.Notice) error { sent++; return nil })}
+	hub := gjallarhorn.NewHub(db.SQL, events.NewBus(8), desktop)
+	n := automationNotifier{settings: settings, hub: hub}
+
+	if err := n.Notify(ctx, automations.Notice{Title: "Morning price", Body: "The laptop is $420.", AutomationID: "a1"}); err != nil {
+		t.Fatal(err)
+	}
+	// Desktop notices off: still kept in the notification center.
+	_ = settings.SetBool(ctx, "notify_task_finish", false)
+	if err := n.Notify(ctx, automations.Notice{Title: "Morning price", Body: "Could not run.", AutomationID: "a1", Failure: true}); err != nil {
+		t.Fatal(err)
+	}
+	if sent != 1 {
+		t.Fatalf("desktop notices sent = %d", sent)
+	}
+	list, unread, _ := hub.List(ctx, false, 0)
+	if len(list) != 2 || unread != 2 || list[0].Severity != gjallarhorn.SeverityError || list[0].Link != "/automations?id=a1" {
+		t.Fatalf("center = %+v", list)
+	}
+	got, _ := hub.Get(ctx, list[0].ID)
+	if len(got.Deliveries) != 1 || got.Deliveries[0].Status != gjallarhorn.DeliverySuppressed {
+		t.Fatalf("deliveries = %+v", got.Deliveries)
+	}
+}
+
+func TestEventsBecomeNotifications(t *testing.T) {
+	a := &App{}
+	req, ok := noticeForEvent(a, events.New(events.ModelDownloadCompleted, map[string]any{"model_id": "llama-1b"}))
+	if !ok || req.Title != "Model ready" || req.Category != gjallarhorn.CategoryModel || req.Link != "/models" {
+		t.Fatalf("download = %+v", req)
+	}
+	if _, ok := noticeForEvent(a, events.New(events.ChatToken, nil)); ok {
+		t.Fatal("chat tokens are not notifications")
+	}
 }

@@ -231,7 +231,7 @@ func (r *Runner) notifyRepeated(ctx context.Context, automation Automation, run 
 	if run.Attempt < MaxAttempts {
 		body = fmt.Sprintf("Could not run (%d failures in a row): %s", automation.ConsecutiveFailures, message)
 	}
-	if err := r.Notify.Notify(ctx, noticeTitle(automation.Name, Notice{Body: body})); err != nil {
+	if err := r.Notify.Notify(ctx, noticeTitle(automation.Name, Notice{Body: body, AutomationID: automation.ID, Failure: true})); err != nil {
 		return false, err
 	}
 	return true, nil
@@ -253,7 +253,9 @@ func (r *Runner) deliver(ctx context.Context, automation Automation, run Run, re
 	if r.Notify == nil {
 		return false, errors.New("notifier is not configured")
 	}
-	if err := r.Notify.Notify(ctx, noticeTitle(automation.Name, decision.Notice)); err != nil {
+	notice := decision.Notice
+	notice.AutomationID = automation.ID
+	if err := r.Notify.Notify(ctx, noticeTitle(automation.Name, notice)); err != nil {
 		return false, err
 	}
 	return true, nil

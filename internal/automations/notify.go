@@ -12,10 +12,14 @@ import (
 // ErrNotifyDisabled means the user turned notifications off. The run still succeeded.
 var ErrNotifyDisabled = errors.New("notifications are disabled")
 
-// Notice is a native notification.
+// Notice is a notification about an automation.
 type Notice struct {
 	Title string
 	Body  string
+	// AutomationID links the notice to its automation.
+	AutomationID string
+	// Failure is true when the notice reports a failed run.
+	Failure bool
 }
 
 // Notifier delivers a notice. The OS sender and tests both implement it.
@@ -54,6 +58,8 @@ func Decide(n Notification, result string, previous *string, previousNotified bo
 	switch n.Mode {
 	case NotifyNone:
 		return Decision{Reason: "notifications are off for this automation"}
+	case NotifyOnFailure:
+		return Decision{Reason: "notifications are only for failures"}
 	case NotifyAlways:
 		return Decision{Notify: true, Notice: noticeFor(n, result), Reason: "always"}
 	case NotifyOnChange:
