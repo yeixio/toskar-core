@@ -48,14 +48,17 @@ var ErrSensitive = errors.New("that looks like a password, key, or token, so Ygg
 
 // Memory is one durable fact or preference.
 type Memory struct {
-	ID         string    `json:"id"`
-	Content    string    `json:"content"`
-	Category   string    `json:"category"`
-	SourceType string    `json:"source_type"`
-	SourceRef  string    `json:"source_ref,omitempty"`
-	Enabled    bool      `json:"enabled"`
-	CreatedAt  time.Time `json:"created_at"`
-	UpdatedAt  time.Time `json:"updated_at"`
+	ID         string `json:"id"`
+	Content    string `json:"content"`
+	Category   string `json:"category"`
+	SourceType string `json:"source_type"`
+	SourceRef  string `json:"source_ref,omitempty"`
+	Enabled    bool   `json:"enabled"`
+	// LocalOnly keeps the memory on this computer: work that uses it is
+	// never sent to a paired computer (§63).
+	LocalOnly bool      `json:"local_only"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 // Store keeps memories in the daemon database.
@@ -162,6 +165,8 @@ type Patch struct {
 	Content  *string `json:"content,omitempty"`
 	Category *string `json:"category,omitempty"`
 	Enabled  *bool   `json:"enabled,omitempty"`
+	// LocalOnly marks the memory this computer only.
+	LocalOnly *bool `json:"local_only,omitempty"`
 }
 
 // Update applies a patch.
@@ -186,13 +191,16 @@ func (s *Store) Update(ctx context.Context, id string, p Patch) (Memory, error) 
 	if p.Enabled != nil {
 		m.Enabled = *p.Enabled
 	}
+	if p.LocalOnly != nil {
+		m.LocalOnly = *p.LocalOnly
+	}
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
 		return Memory{}, err
 	}
 	defer func() { _ = tx.Rollback() }()
-	if _, err := tx.ExecContext(ctx, `UPDATE memories SET content=?, category=?, enabled=?, updated_at=? WHERE id=?`,
-		m.Content, m.Category, boolInt(m.Enabled), ts(s.now()), id); err != nil {
+	if _, err := tx.ExecContext(ctx, `UPDATE memories SET content=?, category=?, enabled=?, local_only=?, updated_at=? WHERE id=?`,
+		m.Content, m.Category, boolInt(m.Enabled), boolInt(m.LocalOnly), ts(s.now()), id); err != nil {
 		return Memory{}, err
 	}
 	if _, err := tx.ExecContext(ctx, `UPDATE memories_fts SET content=? WHERE memory_id=?`, m.Content, id); err != nil {
@@ -224,16 +232,17 @@ func (s *Store) Delete(ctx context.Context, id string) error {
 	return tx.Commit()
 }
 
-const columns = `id, content, category, source_type, COALESCE(source_ref, ''), enabled, created_at, updated_at`
+const columns = `id, content, category, source_type, COALESCE(source_ref, ''), enabled, local_only, created_at, updated_at`
 
 func scan(row interface{ Scan(...any) error }) (Memory, error) {
 	var m Memory
-	var enabled int
+	var enabled, localOnly int
 	var created, updated string
-	if err := row.Scan(&m.ID, &m.Content, &m.Category, &m.SourceType, &m.SourceRef, &enabled, &created, &updated); err != nil {
+	if err := row.Scan(&m.ID, &m.Content, &m.Category, &m.SourceType, &m.SourceRef, &enabled, &localOnly, &created, &updated); err != nil {
 		return Memory{}, err
 	}
 	m.Enabled = enabled != 0
+	m.LocalOnly = localOnly != 0
 	m.CreatedAt, m.UpdatedAt = parseTS(created), parseTS(updated)
 	return m, nil
 }
@@ -318,7 +327,7 @@ func (s *Store) Relevant(ctx context.Context, message string) ([]Memory, error) 
 		return out, nil
 	}
 	rows, err := s.db.QueryContext(ctx, `
-		SELECT m.id, m.content, m.category, m.source_type, COALESCE(m.source_ref, ''), m.enabled, m.created_at, m.updated_at
+		SELECT m.id, m.content, m.category, m.source_type, COALESCE(m.source_ref, ''), m.enabled, m.local_only, m.created_at, m.updated_at
 		FROM memories_fts f JOIN memories m ON m.id = f.memory_id
 		WHERE memories_fts MATCH ? AND m.enabled = 1
 		ORDER BY bm25(memories_fts) LIMIT ?`, strings.Join(terms, " OR "), maxRelevant*2)
@@ -426,7 +435,7 @@ func (s *Store) Find(ctx context.Context, text string) (Memory, bool, error) {
 		return Memory{}, false, nil
 	}
 	rows, err := s.db.QueryContext(ctx, `
-		SELECT m.id, m.content, m.category, m.source_type, COALESCE(m.source_ref, ''), m.enabled, m.created_at, m.updated_at
+		SELECT m.id, m.content, m.category, m.source_type, COALESCE(m.source_ref, ''), m.enabled, m.local_only, m.created_at, m.updated_at
 		FROM memories_fts f JOIN memories m ON m.id = f.memory_id
 		WHERE memories_fts MATCH ? ORDER BY bm25(memories_fts) LIMIT 1`, strings.Join(terms, " AND "))
 	if err != nil {

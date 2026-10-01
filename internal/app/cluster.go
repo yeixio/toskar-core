@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/yeixio/yggdrasil-core/internal/config"
+	"github.com/yeixio/yggdrasil-core/internal/egress"
 	"github.com/yeixio/yggdrasil-core/internal/nodes"
 	"github.com/yeixio/yggdrasil-core/internal/profiles"
 	"github.com/yeixio/yggdrasil-core/internal/scheduler"
@@ -223,6 +224,7 @@ func (a *App) generateOnNode(ctx context.Context, nodeID, modelID, role, adapter
 	if _, err := client.StartModel(ctx, modelID); err != nil && isConnectivityErr(err) {
 		return nil, remoteUnreachableErr(n, err)
 	}
+	a.Egress.Add(ctx, egress.PairedComputer, nodeDisplayName(n), fmt.Sprintf("prompt and context for %s", modelID))
 	ch, err := client.Chat(ctx, nodes.RemoteChatRequest{
 		ModelID:           modelID,
 		Messages:          messages,

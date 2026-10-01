@@ -20,6 +20,9 @@ import type {
   LogEntry,
   Message,
   Connector,
+  EgressRecord,
+  PrivacyOverview,
+  RunRecordCounts,
   PersonalStyle,
   NotificationList,
   ToolActivityRecord,
@@ -594,7 +597,7 @@ export const api = {
   addMemory: (content: string, category?: MemoryCategory) =>
     request<MemoryItem>('/api/v1/memory', { method: 'POST', body: JSON.stringify({ content, category }) }),
 
-  updateMemory: (id: string, body: { content?: string; category?: MemoryCategory; enabled?: boolean }) =>
+  updateMemory: (id: string, body: { content?: string; category?: MemoryCategory; enabled?: boolean; local_only?: boolean }) =>
     request<MemoryItem>(`/api/v1/memory/${id}`, { method: 'PATCH', body: JSON.stringify(body) }),
 
   deleteMemory: (id: string) => request<null>(`/api/v1/memory/${id}`, { method: 'DELETE' }),
@@ -619,6 +622,16 @@ export const api = {
 
   setPersonalStyle: (style: PersonalStyle) =>
     request<PersonalStyle>('/api/v1/personalization', { method: 'PUT', body: JSON.stringify(style) }),
+
+  listEgress: async (conversationId?: string) =>
+    (await request<EgressRecord[]>(`/api/v1/egress${conversationId ? `?conversation_id=${encodeURIComponent(conversationId)}` : ''}`)) ?? [],
+
+  getPrivacy: () => request<PrivacyOverview>('/api/v1/privacy'),
+
+  setRunRetention: (days: number) =>
+    request<PrivacyOverview>('/api/v1/privacy', { method: 'PUT', body: JSON.stringify({ retention_days: days }) }),
+
+  deleteRunRecords: () => request<RunRecordCounts>('/api/v1/privacy/delete-runs', { method: 'POST' }),
 
   listConnectors: async () => (await request<Connector[]>('/api/v1/connectors')) ?? [],
 
@@ -656,7 +669,7 @@ export const api = {
   }) =>
     request<KnowledgeSource>('/api/v1/knowledge/sources', { method: 'POST', body: JSON.stringify(body) }),
 
-  updateKnowledge: (id: string, body: { name?: string; text?: string }) =>
+  updateKnowledge: (id: string, body: { name?: string; text?: string; local_only?: boolean }) =>
     request<KnowledgeSource>(`/api/v1/knowledge/sources/${id}`, { method: 'PATCH', body: JSON.stringify(body) }),
 
   knowledgeContent: (id: string) => request<{ text: string }>(`/api/v1/knowledge/sources/${id}/content`),

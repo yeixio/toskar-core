@@ -11,6 +11,7 @@ import (
 
 	"github.com/yeixio/yggdrasil-core/internal/artifacts"
 	"github.com/yeixio/yggdrasil-core/internal/contextusage"
+	"github.com/yeixio/yggdrasil-core/internal/egress"
 	"github.com/yeixio/yggdrasil-core/internal/events"
 	"github.com/yeixio/yggdrasil-core/internal/huginn"
 	"github.com/yeixio/yggdrasil-core/internal/mimir"
@@ -198,6 +199,12 @@ func (a *App) RunChat(ctx context.Context, profileID, conversationID, message st
 		// with it every model call, tool, plan step, and paired computer.
 		ctx, _, endRun := a.startRun(ctx, conversationID)
 		defer endRun()
+		// What leaves this computer is recorded against this turn (§63).
+		source := egress.SourceChat
+		if opts != nil {
+			source = egress.SourceAPI
+		}
+		ctx = egress.WithRun(ctx, egress.Run{Source: source, ConversationID: conversationID, TaskID: task.ID})
 		// Chat comes first: automations, benchmarks, and training wait
 		// for it (§60). Chat itself never waits.
 		work, _ := a.enterWork(ctx, share.Interactive, "chat", nil)
@@ -225,6 +232,11 @@ func (a *App) RunChat(ctx context.Context, profileID, conversationID, message st
 			if mems, err := a.Muninn.Relevant(ctx, message); err == nil {
 				env.memories = mems
 				env.trace.memories(mems)
+				for _, m := range mems {
+					if m.LocalOnly {
+						env.markLocalOnly()
+					}
+				}
 			}
 		}
 		if special != nil {
@@ -805,6 +817,10 @@ type chatExecEnv struct {
 	memories []muninn.Memory
 	// opts are an API request's choices for this turn, or nil (§62).
 	opts *turnopts.Options
+	// localOnly is set once the turn uses a memory or knowledge source
+	// marked this computer only, so it is never sent elsewhere (§63).
+	localOnly   bool
+	keptLocally bool
 	// attachments are the files attached to this message.
 	attachments []artifacts.Artifact
 	// summarized counts saved messages replaced by a summary this turn.
@@ -919,6 +935,7 @@ func (e *chatExecEnv) Generate(ctx context.Context, role string, messages []plug
 	if err != nil {
 		return nil, err
 	}
+	nodeID = e.keepLocalIfNeeded(role, nodeID)
 	e.app.Bus.Publish(events.New(events.ModelLoadStarted, map[string]any{
 		"model_id": modelID, "node_id": nodeID, "role": role,
 		"node_name": e.app.nodeDisplayName(nodeID),
@@ -1146,6 +1163,7 @@ func (e *chatExecEnv) knowledgeBlock(ctx context.Context, prompt string) string 
 			names = append(names, h.SourceName)
 		}
 	}
+	e.markLocalSources(ctx, hits)
 	e.Emit("knowledge.retrieved", map[string]any{"passages": len(hits), "sources": names})
 	if e.trace != nil {
 		e.trace.knowledge(hits)

@@ -462,3 +462,11 @@ func sanitizeErr(err error, cred Credential) error {
 	}
 	return errors.New(redact(err.Error(), secretValues(cred)))
 }
+
+// ServiceName is how a service is shown, such as "GitHub".
+func (m *Manager) ServiceName(id string) string {
+	if s, ok := m.services[id]; ok {
+		return s.Name()
+	}
+	return id
+}

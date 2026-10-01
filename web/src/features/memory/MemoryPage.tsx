@@ -134,7 +134,7 @@ function AddMemory({ categories, onAdded }: { categories: MemoryCategory[]; onAd
 function MemoryRow({ memory, categories, onChanged }: { memory: MemoryItem; categories: MemoryCategory[]; onChanged: () => void }) {
   const [draft, setDraft] = useState<string | null>(null)
   const update = useMutation({
-    mutationFn: (body: { content?: string; category?: MemoryCategory; enabled?: boolean }) => api.updateMemory(memory.id, body),
+    mutationFn: (body: { content?: string; category?: MemoryCategory; enabled?: boolean; local_only?: boolean }) => api.updateMemory(memory.id, body),
     onSuccess: () => {
       setDraft(null)
       onChanged()
@@ -183,6 +183,16 @@ function MemoryRow({ memory, categories, onChanged }: { memory: MemoryItem; cate
           </button>
           <button type="button" className="btn-secondary px-2 py-0.5 text-xs" disabled={update.isPending} onClick={() => update.mutate({ enabled: !memory.enabled })}>
             {memory.enabled ? 'Pause' : 'Use again'}
+          </button>
+          <button
+            type="button"
+            className="btn-secondary px-2 py-0.5 text-xs"
+            disabled={update.isPending}
+            aria-pressed={!!memory.local_only}
+            title="Never send this memory to a paired computer. Chats that use it run here."
+            onClick={() => update.mutate({ local_only: !memory.local_only })}
+          >
+            {memory.local_only ? 'This computer only ✓' : 'This computer only'}
           </button>
           <button type="button" className="btn-secondary px-2 py-0.5 text-xs" disabled={remove.isPending} onClick={() => remove.mutate()} aria-label={`Delete memory: ${memory.content}`}>
             Delete

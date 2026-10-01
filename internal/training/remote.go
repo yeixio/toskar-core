@@ -417,6 +417,9 @@ func (s *Service) runOnPeer(ctx context.Context, job Job, req RemoteRunRequest, 
 	if err != nil {
 		return RunResult{}, err
 	}
+	if s.d.Sent != nil {
+		s.d.Sent(ctx, name, fmt.Sprintf("training examples and instructions for %s", req.Repo))
+	}
 	bg := context.Background()
 	cleanup := func() {
 		c, cancel := context.WithTimeout(bg, 10*time.Second)

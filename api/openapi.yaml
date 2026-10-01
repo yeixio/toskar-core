@@ -548,6 +548,66 @@ paths:
           description: The key, with its permissions
         "400":
           description: Invalid permissions or unknown key
+  /api/v1/egress:
+    get:
+      summary: What left this computer, newest first
+      operationId: listEgress
+      parameters:
+        - name: conversation_id
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Records
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id: {type: string}
+                    at: {type: string, format: date-time}
+                    kind: {type: string, enum: [web_search, web_page, paired_computer, external_server, connector]}
+                    destination: {type: string}
+                    detail: {type: string}
+                    source: {type: string}
+                    conversation_id: {type: string}
+                    task_id: {type: string}
+  /api/v1/privacy:
+    get:
+      summary: Run record retention and a 30-day summary of what left this computer
+      operationId: getPrivacy
+      responses:
+        "200":
+          description: Overview
+    put:
+      summary: Set how long run records are kept; 0 keeps them
+      operationId: setRunRetention
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                retention_days: {type: integer, minimum: 0, maximum: 3650}
+      responses:
+        "200":
+          description: Overview
+        "400":
+          description: Invalid retention
+  /api/v1/privacy/delete-runs:
+    post:
+      summary: Delete run records now
+      operationId: deleteRunRecords
+      responses:
+        "200":
+          description: How many records were removed
   /api/v1/diagnostics:
     get:
       summary: Create a diagnostics bundle

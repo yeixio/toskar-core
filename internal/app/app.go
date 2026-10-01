@@ -25,6 +25,7 @@ import (
 	"github.com/yeixio/yggdrasil-core/internal/connectors"
 	"github.com/yeixio/yggdrasil-core/internal/diagnostics"
 	"github.com/yeixio/yggdrasil-core/internal/discovery"
+	"github.com/yeixio/yggdrasil-core/internal/egress"
 	"github.com/yeixio/yggdrasil-core/internal/events"
 	"github.com/yeixio/yggdrasil-core/internal/gjallarhorn"
 	"github.com/yeixio/yggdrasil-core/internal/hardware"
@@ -92,6 +93,8 @@ type App struct {
 	Share *share.Gate
 	// Connectors are the connected services, such as GitHub (§32).
 	Connectors *connectors.Manager
+	// Egress records what left this computer (§63).
+	Egress *egress.Log
 	// Artifacts holds chat attachments and files the assistant produced.
 	Artifacts  *artifacts.Store
 	summarizer *muninn.Summarizer
@@ -251,6 +254,13 @@ func New(opts Options) (*App, error) {
 		logger.Info("stub inference enabled", "model_id", models.StubModelID)
 	}
 	a.loadDisabledTools(context.Background())
+	// Record what leaves this computer: web tools and connected services
+	// as they run, and chats sent to servers elsewhere (§63).
+	a.Egress = egress.New(db.SQL)
+	toolReg.SetObserver(a.recordToolEgress)
+	rtMgr.OnRemote = func(ctx context.Context, host string) {
+		a.Egress.Add(ctx, egress.ExternalServer, host, "prompt and conversation")
+	}
 	// Connected services add tools; their credentials stay in the secrets
 	// directory and are added only when a tool runs (§32).
 	a.Connectors = connectors.NewManager(db.SQL, secrets, toolReg, connectors.GitHub{}, connectors.HomeAssistant{})
@@ -516,6 +526,7 @@ func New(opts Options) (*App, error) {
 	a.API.BindNotifications(a.Notifications)
 	a.API.BindConnectors(a.Connectors)
 	a.API.BindPersonal(a)
+	a.API.BindPrivacy(a)
 
 	autoRepo := repositories.NewAutomationRepo(db.SQL)
 	a.Automations = autoRepo
@@ -672,6 +683,7 @@ func (a *App) requireKeyForRemoteBind(ctx context.Context) error {
 func (a *App) Start(ctx context.Context) error {
 	ctx, a.cancel = context.WithCancel(ctx)
 	a.notifyFromEvents(ctx)
+	a.keepRunRecordsTidy(ctx)
 	_ = a.syncInternalBind()
 	cfg := a.Config.Get()
 	if err := a.requireKeyForRemoteBind(ctx); err != nil {

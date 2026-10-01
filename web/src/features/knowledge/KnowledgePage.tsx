@@ -65,6 +65,10 @@ function SourceRow({ source, onChanged }: { source: KnowledgeSource; onChanged: 
     },
   })
   const reindex = useMutation({ mutationFn: () => api.refreshKnowledge(source.id), onSuccess: onChanged })
+  const localOnly = useMutation({
+    mutationFn: () => api.updateKnowledge(source.id, { local_only: !source.local_only }),
+    onSuccess: onChanged,
+  })
   const remove = useMutation({ mutationFn: () => api.deleteKnowledge(source.id), onSuccess: onChanged })
   return (
     <li className="card !p-4">
@@ -93,6 +97,16 @@ function SourceRow({ source, onChanged }: { source: KnowledgeSource; onChanged: 
           )}
           <button type="button" className="btn-secondary px-2 py-1 text-xs" disabled={reindex.isPending} onClick={() => reindex.mutate()}>
             {reindex.isPending ? 'Indexing…' : 'Reindex'}
+          </button>
+          <button
+            type="button"
+            className="btn-secondary px-2 py-1 text-xs"
+            disabled={localOnly.isPending}
+            aria-pressed={!!source.local_only}
+            title="Never send passages from this source to a paired computer. Chats that use it run here."
+            onClick={() => localOnly.mutate()}
+          >
+            {source.local_only ? 'This computer only ✓' : 'This computer only'}
           </button>
           <button
             type="button"

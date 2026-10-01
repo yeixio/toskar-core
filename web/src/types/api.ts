@@ -394,6 +394,8 @@ export interface MemoryItem {
   source_type: 'explicit' | 'manual' | string
   source_ref?: string
   enabled: boolean
+  /** Never sent to a paired computer (spec §63). */
+  local_only?: boolean
   created_at: string
   updated_at: string
 }
@@ -767,6 +769,8 @@ export interface KnowledgeSource {
   // made them. Zero until an embedding model is installed.
   embedded_count?: number
   embedding_model?: string
+  /** Never sent to a paired computer (spec §63). */
+  local_only?: boolean
   created_at: string
   updated_at: string
   refreshed_at?: string
@@ -1107,4 +1111,30 @@ export interface PersonalStyle {
   units?: '' | 'metric' | 'imperial'
   about_me?: string
   instructions?: string
+}
+
+export type EgressKind = 'web_search' | 'web_page' | 'paired_computer' | 'external_server' | 'connector'
+
+/** One time data left this computer (spec §63). */
+export interface EgressRecord {
+  id: string
+  at: string
+  kind: EgressKind
+  destination: string
+  detail?: string
+  source?: 'chat' | 'api' | 'automation' | 'training' | string
+  conversation_id?: string
+  task_id?: string
+}
+
+export interface PrivacyOverview {
+  /** Days run records are kept; 0 keeps them. */
+  retention_days: number
+  last_30_days: Partial<Record<EgressKind, number>>
+}
+
+export interface RunRecordCounts {
+  tasks: number
+  automation_runs: number
+  egress: number
 }

@@ -58,6 +58,9 @@ type Source struct {
 	CreatedAt      time.Time  `json:"created_at"`
 	UpdatedAt      time.Time  `json:"updated_at"`
 	RefreshedAt    *time.Time `json:"refreshed_at,omitempty"`
+	// LocalOnly keeps the source on this computer: a turn that uses its
+	// passages is never sent to a paired computer (§63).
+	LocalOnly bool `json:"local_only"`
 
 	// file is where Mimir reads the source. For text sources it is the copy
 	// Mimir keeps, which the API does not expose.
@@ -195,6 +198,8 @@ func (s *Store) Create(ctx context.Context, in CreateInput) (Source, error) {
 type UpdateInput struct {
 	Name *string `json:"name,omitempty"`
 	Text *string `json:"text,omitempty"`
+	// LocalOnly marks the source this computer only.
+	LocalOnly *bool `json:"local_only,omitempty"`
 }
 
 // Update renames a source or replaces a text source's content and reindexes it.
@@ -210,6 +215,16 @@ func (s *Store) Update(ctx context.Context, id string, in UpdateInput) (Source, 
 		}
 		if _, err := s.db.ExecContext(ctx, `UPDATE knowledge_sources SET name=?, updated_at=? WHERE id=?`,
 			name, fmtTime(s.now().UTC()), id); err != nil {
+			return Source{}, err
+		}
+	}
+	if in.LocalOnly != nil {
+		local := 0
+		if *in.LocalOnly {
+			local = 1
+		}
+		if _, err := s.db.ExecContext(ctx, `UPDATE knowledge_sources SET local_only=?, updated_at=? WHERE id=?`,
+			local, fmtTime(s.now().UTC()), id); err != nil {
 			return Source{}, err
 		}
 	}
@@ -412,7 +427,7 @@ type scanner interface{ Scan(...any) error }
 
 // sourceColumns are the columns scanSource reads. The vector count is per
 // source, from the model most of its vectors came from.
-const sourceColumns = `id, name, kind, path, status, error, chunk_count, created_at, updated_at, refreshed_at,
+const sourceColumns = `id, name, kind, path, status, error, chunk_count, created_at, updated_at, refreshed_at, local_only,
 	(SELECT COUNT(*) FROM knowledge_vectors v WHERE v.source_id = knowledge_sources.id
 	 AND v.model = (SELECT model FROM knowledge_vectors w WHERE w.source_id = knowledge_sources.id GROUP BY model ORDER BY COUNT(*) DESC LIMIT 1)),
 	(SELECT model FROM knowledge_vectors w WHERE w.source_id = knowledge_sources.id GROUP BY model ORDER BY COUNT(*) DESC LIMIT 1)`
@@ -421,10 +436,12 @@ func scanSource(row scanner) (Source, error) {
 	var src Source
 	var kind, created, updated string
 	var path, errText, refreshed, embModel sql.NullString
-	if err := row.Scan(&src.ID, &src.Name, &kind, &path, &src.Status, &errText, &src.ChunkCount, &created, &updated, &refreshed,
+	var localOnly int
+	if err := row.Scan(&src.ID, &src.Name, &kind, &path, &src.Status, &errText, &src.ChunkCount, &created, &updated, &refreshed, &localOnly,
 		&src.EmbeddedCount, &embModel); err != nil {
 		return Source{}, err
 	}
+	src.LocalOnly = localOnly != 0
 	src.EmbeddingModel = embModel.String
 	src.Kind = Kind(kind)
 	src.Path = path.String

@@ -77,6 +77,8 @@ type Deps struct {
 	LocalNodeID string
 	// Peer returns a client for a paired computer, for remote training.
 	Peer func(ctx context.Context, nodeID string) (Peer, error)
+	// Sent, when set, records training data sent to a paired computer (§63).
+	Sent func(ctx context.Context, nodeName, detail string)
 }
 
 // Service builds, trains, evaluates, and deploys specialized AIs.

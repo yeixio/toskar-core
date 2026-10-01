@@ -9,6 +9,7 @@ import (
 	"sync"
 
 	"github.com/yeixio/yggdrasil-core/internal/automations"
+	"github.com/yeixio/yggdrasil-core/internal/egress"
 	"github.com/yeixio/yggdrasil-core/internal/gjallarhorn"
 	"github.com/yeixio/yggdrasil-core/internal/huginn"
 	"github.com/yeixio/yggdrasil-core/internal/share"
@@ -40,6 +41,7 @@ func (e automationExecutor) Execute(ctx context.Context, automation automations.
 	}
 	// A chat on this computer goes first; the run waits for it instead of
 	// loading a model alongside it (§60).
+	ctx = egress.WithRun(ctx, egress.Run{Source: egress.SourceAutomation, TaskID: "automation:" + automation.ID})
 	work, err := e.app.enterWork(ctx, share.Automation, automation.Name, nil)
 	if err != nil {
 		return automations.Execution{}, err

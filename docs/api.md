@@ -66,6 +66,8 @@ Prefix: `/api/v1`
 | GET | `/notifications` | The notification center: `{"notifications": [...], "unread": n}`. `?unread=1` lists unread ones. Also `POST /notifications/read` (`{"ids": [...]}`, no ids marks all) and `POST /notifications/{id}/dismiss` |
 | GET | `/connectors` | Connected services and their status. Also `PUT /connectors/{id}` (`{"values": {...}}`), `POST /connectors/{id}/check`, and `DELETE /connectors/{id}` |
 | GET, PUT | `/personalization` | How the person likes answers: `length`, `tone`, `format`, `units`, `about_me`, `instructions` |
+| GET | `/egress` | What left this computer, newest first. `?conversation_id=` narrows to one chat |
+| GET, PUT | `/privacy` | `{"retention_days": n, "last_30_days": {...}}`; PUT sets `retention_days`. Also `POST /privacy/delete-runs` |
 | GET | `/nodes` | This computer and peers |
 | POST | `/nodes/pair` | Start pairing |
 | POST | `/nodes/{id}/pair/approve` | Approve a pairing offer |
@@ -153,6 +155,18 @@ Connected services add tools. Today they are GitHub (`github.search`, `github.is
 - **Untrusted data:** what they return is treated as untrusted data (§58), and links in results become sources.
 
 Personalization shapes how answers look in every chat, automation, and API request. It has four choices: `length` (`brief`, `balanced`, `detailed`), `tone` (`friendly`, `neutral`, `direct`), `format` (`prose`, `lists`), and `units` (`metric`, `imperial`). It also has two short notes, `about_me` and `instructions`, of up to 1,500 characters each. It is stored as a setting and added to the model's instructions as style guidance, after a specialized AI's own instructions. It is kept apart from permissions: what a tool may do comes only from profiles and Settings. A personalization note or a memory that tries to grant a permission is refused with 400, for example "you can always push without asking" or "don't ask before running commands". The refusal says where permissions are set. A memory that states a preference, such as "I use the terminal a lot", is saved and changes no policy.
+
+Each run records what left this computer.
+- **Record kinds:** `web_search` (the query), `web_page` (the address), `paired_computer` (the prompt and context, or training examples), `external_server` (a chat sent to a server that is not on this computer), and `connector` (the service and what it was asked; long text such as a comment's body is left out).
+- **Record fields:** `source` (`chat`, `api`, `automation`, `training`), plus `conversation_id` and `task_id` when there are any.
+
+Memories and knowledge sources have `local_only`. Set it with `PATCH /memory/{id}` or the knowledge update, `{"local_only": true}`. A turn that uses a local-only memory or a passage from a local-only source runs on this computer, even when placement would have chosen a paired computer, and its steps say so.
+
+Run records hold prompts and tool results: tasks and their steps, automation run results, and the egress record.
+- **Retention:** they are kept for `retention_days` (30 by default; 0 keeps them) and removed daily.
+- **Delete now:** `POST /privacy/delete-runs` removes them now and returns how many.
+- **Exceptions:** each automation keeps its latest successful result, which the `change` notification mode compares against, and work that may still be running is never removed.
+- **Chats:** chats are not run records; the `save_chat_history` setting covers them.
 
 Model, node, tool, conversation, and log routes follow the same prefix. The OpenAPI file is the route list to diff when a handler changes.
 

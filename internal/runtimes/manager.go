@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"net"
+	"net/url"
 	"sync"
 
 	"github.com/yeixio/yggdrasil-core/internal/events"
@@ -16,6 +18,9 @@ type Manager struct {
 	db       *sql.DB
 	bus      *events.Bus
 	gen      Generator
+	// OnRemote, when set, hears each chat sent to a server that is not on
+	// this computer, such as an external OpenAI-compatible server (§63).
+	OnRemote func(ctx context.Context, host string)
 
 	mu sync.RWMutex
 }
@@ -175,5 +180,26 @@ func (m *Manager) Chat(ctx context.Context, req ChatRequest) (<-chan ChatChunk, 
 	if gen == nil {
 		return nil, fmt.Errorf("no chat generator configured")
 	}
+	if m.OnRemote != nil {
+		if host, remote := remoteHost(req.ModelEndpoint); remote {
+			m.OnRemote(ctx, host)
+		}
+	}
 	return gen.Chat(ctx, req)
+}
+
+// remoteHost reports the host of an endpoint that is not on this computer.
+func remoteHost(endpoint string) (string, bool) {
+	u, err := url.Parse(endpoint)
+	if err != nil || (u.Scheme != "http" && u.Scheme != "https") || u.Hostname() == "" {
+		return "", false
+	}
+	host := u.Hostname()
+	if host == "localhost" {
+		return "", false
+	}
+	if ip := net.ParseIP(host); ip != nil && ip.IsLoopback() {
+		return "", false
+	}
+	return host, true
 }

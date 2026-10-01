@@ -129,6 +129,7 @@ type Server struct {
 	notifications   *gjallarhorn.Hub
 	connectors      *connectors.Manager
 	personal        PersonalStore
+	privacy         Privacy
 	training        *training.Service
 	trainingCatalog func() []models.CatalogEntry
 }
@@ -230,6 +231,7 @@ func (s *Server) routes() {
 	s.notificationRoutes(api)
 	s.connectorRoutes(api)
 	s.personalRoutes(api)
+	s.privacyRoutes(api)
 	s.trainingRoutes(api)
 
 	if s.deps.OpenAI != nil {

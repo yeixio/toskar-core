@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/yeixio/yggdrasil-core/internal/egress"
 	"github.com/yeixio/yggdrasil-core/internal/events"
 	"github.com/yeixio/yggdrasil-core/internal/pyenv"
 	"github.com/yeixio/yggdrasil-core/internal/share"
@@ -40,6 +41,9 @@ func (a *App) newTrainingService() *training.Service {
 		Conversation:      a.Conversations.ListMessages,
 		Logger:            a.Logger,
 		LocalNodeID:       cfg.NodeID,
+		Sent: func(ctx context.Context, nodeName, detail string) {
+			a.Egress.Add(egress.WithRun(ctx, egress.Run{Source: egress.SourceTraining}), egress.PairedComputer, nodeName, detail)
+		},
 		Peer: func(ctx context.Context, nodeID string) (training.Peer, error) {
 			n, err := a.findPairedNode(ctx, nodeID)
 			if err != nil {
