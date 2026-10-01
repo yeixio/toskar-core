@@ -2,10 +2,15 @@ package app
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"slices"
 	"strings"
+	"sync"
 
 	"github.com/yeixio/yggdrasil-core/internal/automations"
+	"github.com/yeixio/yggdrasil-core/internal/gjallarhorn"
+	"github.com/yeixio/yggdrasil-core/internal/huginn"
 	"github.com/yeixio/yggdrasil-core/internal/tools"
 	"github.com/yeixio/yggdrasil-core/pkg/contracts"
 	"github.com/yeixio/yggdrasil-core/pkg/pluginapi"
@@ -32,7 +37,17 @@ func (e automationExecutor) Execute(ctx context.Context, automation automations.
 	if err != nil {
 		return automations.Execution{}, err
 	}
-	profile = withChatModel(profile, automation.ModelID)
+	// Same stack as chat (spec §30): Auto picks the model, and the run gets
+	// connected knowledge, relevant memories, and Huginn's effort budget.
+	modelID := automation.ModelID
+	if modelID == huginn.AutoModelID {
+		choice, err := e.app.chooseAuto(ctx, automation.Prompt, e.app.turnHasData(ctx, "", profile))
+		if err != nil {
+			return automations.Execution{}, err
+		}
+		modelID = choice.Model.ID
+	}
+	profile = withChatModel(profile, modelID)
 	orch, err := e.app.OrchRegistry.Get(profile.OrchestratorID)
 	if err != nil {
 		return automations.Execution{}, err
@@ -50,10 +65,19 @@ func (e automationExecutor) Execute(ctx context.Context, automation automations.
 			app:           e.app,
 			ctx:           ctx,
 			profile:       profile,
-			modelOverride: automation.ModelID,
+			modelOverride: modelID,
 			taskID:        automation.ID,
+			turnPrompt:    automation.Prompt,
+			trace:         &turnTrace{},
 		},
 		granted: automation.Tools,
+	}
+	if e.app.Muninn != nil && e.app.Settings != nil {
+		if on, _ := e.app.Settings.GetBool(ctx, "memory_enabled", true); on {
+			if mems, err := e.app.Muninn.Relevant(ctx, automation.Prompt); err == nil {
+				env.base.memories = mems
+			}
+		}
 	}
 	defer env.releaseModels()
 
@@ -71,12 +95,67 @@ func (e automationExecutor) Execute(ctx context.Context, automation automations.
 	if nodeID != "" {
 		out.NodeID = nodeID
 	}
+	out.Skipped = env.skippedTools()
+	e.reportSkipped(ctx, automation, out.Skipped)
 	return out, runErr
+}
+
+// reportSkipped tells the person which actions a run skipped because nobody
+// approved them, and where to approve them for later runs (spec §59).
+func (e automationExecutor) reportSkipped(ctx context.Context, automation automations.Automation, skipped []string) {
+	if len(skipped) == 0 || e.app.Notifications == nil {
+		return
+	}
+	names := make([]string, 0, len(skipped))
+	for _, id := range skipped {
+		if def, ok := tools.Lookup(id); ok {
+			names = append(names, def.Name)
+		} else {
+			names = append(names, id)
+		}
+	}
+	_, _ = e.app.Notifications.Notify(context.WithoutCancel(ctx), gjallarhorn.Request{
+		SourceType: "automation",
+		SourceID:   automation.ID,
+		Category:   gjallarhorn.CategoryApproval,
+		Severity:   gjallarhorn.SeverityWarning,
+		Title:      fmt.Sprintf("%s skipped %s", automationName(automation), strings.Join(names, ", ")),
+		Body:       "These need your approval, so the run went on without them. Open the automation and allow them to let later runs use them.",
+		Link:       "/automations?id=" + automation.ID,
+		DedupeKey:  "automation.skipped:" + automation.ID,
+		Channels:   []string{"desktop"},
+	})
+}
+
+func automationName(a automations.Automation) string {
+	if strings.TrimSpace(a.Name) != "" {
+		return a.Name
+	}
+	return "An automation"
 }
 
 type automationEnv struct {
 	base    *chatExecEnv
 	granted []string
+
+	mu      sync.Mutex
+	skipped []string
+}
+
+// ReferenceMaterial and TurnInstructions give a scheduled run the same
+// knowledge and memories a chat turn gets.
+func (e *automationEnv) ReferenceMaterial(ctx context.Context, prompt string) string {
+	return e.base.ReferenceMaterial(ctx, prompt)
+}
+
+func (e *automationEnv) TurnInstructions(ctx context.Context, prompt string) string {
+	return e.base.TurnInstructions(ctx, prompt)
+}
+
+func (e *automationEnv) skippedTools() []string {
+	e.mu.Lock()
+	defer e.mu.Unlock()
+	return append([]string(nil), e.skipped...)
 }
 
 func (e *automationEnv) Generate(ctx context.Context, role string, messages []pluginapi.ChatMessage) (<-chan pluginapi.ChatChunk, error) {
@@ -88,6 +167,15 @@ func (e *automationEnv) ExecuteTool(ctx context.Context, toolID string, args map
 		return nil, fmt.Errorf("tool %q is disabled", toolID)
 	}
 	policy, err := tools.UnattendedPolicy(e.base.profile, e.granted, toolID)
+	if errors.Is(err, tools.ErrNeedsApproval) {
+		// Skip and report; never ask or widen with nobody watching (§59).
+		e.mu.Lock()
+		if !slices.Contains(e.skipped, toolID) {
+			e.skipped = append(e.skipped, toolID)
+		}
+		e.mu.Unlock()
+		return nil, fmt.Errorf("skipped: %s needs the person's approval for this automation; continue without it", toolID)
+	}
 	if err != nil {
 		return nil, err
 	}

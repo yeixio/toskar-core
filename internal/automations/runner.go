@@ -302,6 +302,9 @@ func (r *Runner) publish(eventType string, automation Automation, run Run, resul
 	if execErr != nil {
 		payload["error"] = execErr.Error()
 	}
+	if len(result.Skipped) > 0 {
+		payload["skipped"] = result.Skipped
+	}
 	r.Bus.Publish(events.New(eventType, payload))
 }
 

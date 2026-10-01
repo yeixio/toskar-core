@@ -44,4 +44,6 @@ type Execution struct {
 	Text    string
 	ModelID string
 	NodeID  string
+	// Skipped lists tools the run reached that nobody approved for it.
+	Skipped []string
 }

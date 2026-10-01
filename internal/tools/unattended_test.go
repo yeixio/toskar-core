@@ -1,6 +1,7 @@
 package tools
 
 import (
+	"errors"
 	"strings"
 	"testing"
 
@@ -19,41 +20,42 @@ func TestUnattendedPolicy(t *testing.T) {
 		},
 	}
 
+	needsApproval := func(granted []string, id string) bool {
+		_, err := UnattendedPolicy(profile, granted, id)
+		return errors.Is(err, ErrNeedsApproval)
+	}
+
+	// No approvals: read-only tools the profile allows, as before.
 	policy, err := UnattendedPolicy(profile, nil, "internet.search")
 	if err != nil || policy != PolicyAllow {
 		t.Fatalf("search policy=%q err=%v", policy, err)
 	}
-	if _, err := UnattendedPolicy(profile, nil, "filesystem.write"); err == nil {
-		t.Fatal("expected a write tool to stay off while unattended")
+	if !needsApproval(nil, "filesystem.write") || !needsApproval(nil, "terminal") || !needsApproval(nil, "git.push") {
+		t.Fatal("without approval, a write tool or an Ask is skipped and reported")
 	}
-	if _, err := UnattendedPolicy(profile, nil, "terminal"); err == nil {
-		t.Fatal("expected ask to stay a prompt")
+
+	// Approved when the automation was created: it may run unattended, even
+	// a write tool or one the profile asks about (§59).
+	for _, id := range []string{"filesystem.write", "terminal", "git.push", "filesystem.read"} {
+		policy, err := UnattendedPolicy(profile, []string{id}, id)
+		if err != nil || policy != PolicyAllow {
+			t.Fatalf("approved %s policy=%q err=%v", id, policy, err)
+		}
 	}
-	if _, err := UnattendedPolicy(profile, nil, "git.push"); err == nil {
-		t.Fatal("expected session approval to stay a prompt")
+	// With approvals, only the approved tools run.
+	if !needsApproval([]string{"filesystem.write"}, "internet.search") {
+		t.Fatal("a tool outside the approvals is skipped and reported")
 	}
-	if _, err := UnattendedPolicy(profile, nil, "git.commit"); err == nil {
-		t.Fatal("expected deny to stay denied")
-	}
-	if _, err := UnattendedPolicy(profile, []string{"filesystem.write"}, "internet.search"); err == nil {
-		t.Fatal("expected a tool outside the automation grant to be rejected")
-	}
-	if _, err := UnattendedPolicy(profile, []string{"filesystem.write"}, "filesystem.write"); err == nil {
-		t.Fatal("expected a grant to be unable to enable a write tool")
-	}
-	if _, err := UnattendedPolicy(profile, []string{"git.commit"}, "git.commit"); err == nil {
-		t.Fatal("expected a grant to be unable to enable a denied tool")
-	}
-	policy, err = UnattendedPolicy(profile, []string{"filesystem.read"}, "filesystem.read")
-	if err != nil || policy != PolicyAllow {
-		t.Fatalf("granted read policy=%q err=%v", policy, err)
+	// Deny is never lifted, and is not a question to report.
+	if _, err := UnattendedPolicy(profile, []string{"git.commit"}, "git.commit"); err == nil || errors.Is(err, ErrNeedsApproval) {
+		t.Fatalf("a denied tool stays denied: %v", err)
 	}
 	if _, err := UnattendedPolicy(profile, nil, "not.a.tool"); err == nil {
 		t.Fatal("expected an unknown tool to be rejected")
 	}
 }
 
-func TestForUnattendedHidesWriteAndPromptTools(t *testing.T) {
+func TestForUnattendedOffersOnlyWhatMayRun(t *testing.T) {
 	profile := contracts.AIProfile{
 		Tools: []contracts.ToolPolicy{
 			{ToolID: "internet.search", Policy: PolicyAllow},
@@ -71,5 +73,9 @@ func TestForUnattendedHidesWriteAndPromptTools(t *testing.T) {
 	}
 	if profile.Tools[1].Policy != PolicyAllow {
 		t.Fatal("narrowing changed the stored profile")
+	}
+	// Approved at creation, the terminal is offered even though the profile asks.
+	if prompt := PromptFor(ForUnattended(profile, []string{"terminal"}, nil)); !strings.Contains(prompt, "terminal") || strings.Contains(prompt, "internet.search") {
+		t.Fatalf("approved prompt = %s", prompt)
 	}
 }

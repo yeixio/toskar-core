@@ -1,34 +1,47 @@
 package tools
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 
 	"github.com/yeixio/yggdrasil-core/pkg/contracts"
 )
 
+// ErrNeedsApproval means a scheduled run reached a tool nobody approved for
+// it. The run skips the action and reports it; it never widens its own
+// permissions because no one answered (spec §59).
+var ErrNeedsApproval = errors.New("needs your approval for this automation")
+
 // UnattendedPolicy is the policy a scheduled run may use for one tool.
-// The profile remains the ceiling: a grant cannot turn on a tool the profile does not already allow.
-// ask and allow-for-session stay a human decision, so they do not run while the UI is closed.
-// Write tools stay off as well. Unattended work is limited to read-only tools.
+//
+// The profile stays the ceiling: Deny is never lifted. A tool approved when
+// the automation was created (listed in granted) may run unattended even
+// when the profile says Ask, because the person answered that Ask then; that
+// includes tools that change things. An automation with no approvals keeps
+// to read-only tools the profile allows. Anything else returns
+// ErrNeedsApproval.
 func UnattendedPolicy(profile contracts.AIProfile, granted []string, toolID string) (string, error) {
 	toolID = strings.TrimSpace(toolID)
 	if toolID == "" {
 		return "", fmt.Errorf("tool id is required")
-	}
-	if !grantIncludes(granted, toolID) {
-		return "", fmt.Errorf("tool %q is not enabled for this automation", toolID)
 	}
 	def, ok := Lookup(toolID)
 	if !ok {
 		return "", fmt.Errorf("tool %q is not allowed for unattended execution", toolID)
 	}
 	policy := strings.ToLower(strings.TrimSpace(PolicyForProfile(profile, toolID)))
-	if policy != PolicyAllow {
-		return "", fmt.Errorf("tool %q is not allowed for unattended execution", toolID)
+	if policy == PolicyDeny || policy == "" {
+		return "", fmt.Errorf("tool %q is not allowed by the profile", toolID)
 	}
-	if def.Risk != "read" {
-		return "", fmt.Errorf("tool %q is not allowed for unattended execution", toolID)
+	if len(granted) == 0 {
+		if policy == PolicyAllow && def.Risk == RiskRead {
+			return PolicyAllow, nil
+		}
+		return "", fmt.Errorf("tool %q: %w", toolID, ErrNeedsApproval)
+	}
+	if !grantIncludes(granted, toolID) {
+		return "", fmt.Errorf("tool %q: %w", toolID, ErrNeedsApproval)
 	}
 	return PolicyAllow, nil
 }
@@ -51,9 +64,6 @@ func ForUnattended(profile contracts.AIProfile, granted []string, disabled map[s
 }
 
 func grantIncludes(granted []string, toolID string) bool {
-	if len(granted) == 0 {
-		return true
-	}
 	for _, id := range granted {
 		if strings.TrimSpace(id) == toolID {
 			return true
