@@ -1,6 +1,6 @@
 // Package retention removes old run records (spec §63). Run records hold
 // prompts and tool results: tasks and their steps, automation run results,
-// and the record of what left this computer. Chats are kept or not by the
+// run traces, and the record of what left this computer. Chats are kept or not by the
 // chat history setting and are not touched here.
 package retention
 
@@ -16,6 +16,7 @@ const DefaultDays = 30
 // Counts are how many records were removed, by kind.
 type Counts struct {
 	Tasks          int64 `json:"tasks"`
+	Runs           int64 `json:"runs"`
 	AutomationRuns int64 `json:"automation_runs"`
 	Egress         int64 `json:"egress"`
 }
@@ -66,6 +67,10 @@ func remove(ctx context.Context, db *sql.DB, cutoff string) (Counts, error) {
 		return c, err
 	}
 	if err := exec(&c.Egress, `DELETE FROM egress WHERE at < ?`, cutoff); err != nil {
+		return c, err
+	}
+	// Run traces (§35); one still being written has no completion time.
+	if err := exec(&c.Runs, `DELETE FROM runs WHERE started_at < ? AND completed_at IS NOT NULL`, cutoff); err != nil {
 		return c, err
 	}
 	return c, tx.Commit()

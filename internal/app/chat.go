@@ -20,6 +20,7 @@ import (
 	"github.com/yeixio/yggdrasil-core/internal/muninn"
 	"github.com/yeixio/yggdrasil-core/internal/orchestrator/builtin/simple"
 	"github.com/yeixio/yggdrasil-core/internal/profiles"
+	"github.com/yeixio/yggdrasil-core/internal/runlog"
 	"github.com/yeixio/yggdrasil-core/internal/runtimes/llamacpp"
 	"github.com/yeixio/yggdrasil-core/internal/share"
 	"github.com/yeixio/yggdrasil-core/internal/tools"
@@ -205,6 +206,29 @@ func (a *App) RunChat(ctx context.Context, profileID, conversationID, message st
 			source = egress.SourceAPI
 		}
 		ctx = egress.WithRun(ctx, egress.Run{Source: source, ConversationID: conversationID, TaskID: task.ID})
+		// Trace the run (§35): every layer adds what it used and how long it
+		// took, and the run is saved however the turn ends.
+		run := runlog.New(task.ID, conversationID, profile.ID, source)
+		ctx = runlog.With(ctx, run)
+		if profile.OrchestratorID == "team" {
+			run.Strategy("Team: planner, worker, and reviewer")
+		}
+		if special != nil {
+			run.Strategy("Specialized AI " + special.name + " answered on this computer")
+		}
+		if routeReason != "" {
+			run.Strategy(routeReason)
+		}
+		runStatus, runErr := runlog.StatusFailed, ""
+		defer func() {
+			status := runStatus
+			if ctx.Err() != nil && status != runlog.StatusCompleted {
+				status = runlog.StatusStopped
+			}
+			if err := a.RunLog.Save(context.WithoutCancel(ctx), run.Finish(status, runErr)); err != nil && a.Logger != nil {
+				a.Logger.Warn("save run", "run_id", task.ID, "error", err)
+			}
+		}()
 		// Chat comes first: automations, benchmarks, and training wait
 		// for it (§60). Chat itself never waits.
 		work, _ := a.enterWork(ctx, share.Interactive, "chat", nil)
@@ -217,7 +241,7 @@ func (a *App) RunChat(ctx context.Context, profileID, conversationID, message st
 			conversationID: conversationID,
 			taskID:         task.ID,
 			turnPrompt:     message,
-			trace:          &turnTrace{},
+			trace:          &turnTrace{runID: task.ID},
 			startedAt:      turnStart,
 			attachments:    attached,
 		}
@@ -254,6 +278,7 @@ func (a *App) RunChat(ctx context.Context, profileID, conversationID, message st
 		for attempt := 0; ; attempt++ {
 			eventsCh, err := orch.Run(ctx, task, profile, env)
 			if err != nil {
+				runErr = err.Error()
 				ch <- pluginapi.ChatChunk{Error: a.explainWhileTraining(err.Error()), Done: true}
 				return
 			}
@@ -273,6 +298,8 @@ func (a *App) RunChat(ctx context.Context, profileID, conversationID, message st
 					if attempt == 0 && !teamMode && special == nil && recoverable(ctx, evt.Error, full, env) {
 						failedID := firstNonEmpty(env.modelID(), modelID)
 						if next, step, notice, ok := a.fallback(ctx, failedID, evt.Error); ok {
+							run.Retried()
+							run.Strategy("Answered on another model after " + a.modelName(failedID) + " failed")
 							a.Logger.Warn("chat model failed; retrying on another model", "failed", failedID, "next", next.ID, "error", evt.Error)
 							a.noteModelFailed(failedID)
 							env.trace.recovered(step, notice)
@@ -304,6 +331,7 @@ func (a *App) RunChat(ctx context.Context, profileID, conversationID, message st
 							}
 						}
 					}
+					runErr = evt.Error
 					ch <- pluginapi.ChatChunk{Error: a.explainWhileTraining(evt.Error), Done: true}
 					return
 				}
@@ -404,8 +432,13 @@ func (a *App) RunChat(ctx context.Context, profileID, conversationID, message st
 		} else if metrics != nil || len(roleSteps) > 0 {
 			a.recordGeneration(ctx, profile, conversationID, convTitle, "", env.modelID(), metrics, roleSteps)
 		}
+		runStatus = runlog.StatusCompleted
+		if metrics != nil {
+			run.Context(metrics.PromptTokens, env.ContextLimit())
+		}
 		payload := map[string]any{"conversation_id": conversationID}
 		if ms, ok := env.pipelineMS(); ok {
+			run.Pipeline(time.Duration(ms) * time.Millisecond)
 			payload["pipeline_ms"] = ms
 			a.Logger.Debug("chat pipeline overhead", "conversation_id", conversationID, "ms", ms)
 		}
@@ -940,6 +973,7 @@ func (e *chatExecEnv) Generate(ctx context.Context, role string, messages []plug
 		"model_id": modelID, "node_id": nodeID, "role": role,
 		"node_name": e.app.nodeDisplayName(nodeID),
 	}))
+	started := time.Now()
 	ch, err := e.app.generateOnNode(ctx, nodeID, modelID, role, e.adapter, messages)
 	if err != nil {
 		return nil, err
@@ -948,7 +982,7 @@ func (e *chatExecEnv) Generate(ctx context.Context, role string, messages []plug
 		"model_id": modelID, "node_id": nodeID, "role": role,
 		"node_name": e.app.nodeDisplayName(nodeID),
 	}))
-	return ch, nil
+	return traceGeneration(runlog.From(ctx), ch, modelID, role, e.app.nodeDisplayName(nodeID), started), nil
 }
 
 func (e *chatExecEnv) ExecuteTool(ctx context.Context, toolID string, args map[string]any) (map[string]any, error) {
@@ -962,7 +996,9 @@ func (e *chatExecEnv) ExecuteTool(ctx context.Context, toolID string, args map[s
 	}
 	ctx = artifacts.WithConversation(ctx, e.conversationID)
 	e.progress(events.ToolStarted, map[string]any{"tool_id": toolID, "args": args})
+	toolStarted := time.Now()
 	result, err := e.app.Tools.Execute(ctx, toolID, args, policy, "chat requested tool", meta)
+	runlog.From(ctx).ToolCall(tools.Canonical(toolID), time.Since(toolStarted), err != nil)
 	if err == nil && e.trace != nil {
 		e.trace.tool(toolID, args, result)
 	}
@@ -995,6 +1031,7 @@ func (e *chatExecEnv) Emit(eventType string, payload map[string]any) {
 		}
 	}
 	e.progress(eventType, payload)
+	traceEvent(runlog.From(e.ctx), eventType, payload)
 	if e.trace != nil {
 		switch eventType {
 		case simple.EventPlanCreated:

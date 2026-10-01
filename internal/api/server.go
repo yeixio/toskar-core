@@ -130,6 +130,7 @@ type Server struct {
 	connectors      *connectors.Manager
 	personal        PersonalStore
 	privacy         Privacy
+	runs            RunStore
 	training        *training.Service
 	trainingCatalog func() []models.CatalogEntry
 }
@@ -232,6 +233,7 @@ func (s *Server) routes() {
 	s.connectorRoutes(api)
 	s.personalRoutes(api)
 	s.privacyRoutes(api)
+	s.runRoutes(api)
 	s.trainingRoutes(api)
 
 	if s.deps.OpenAI != nil {

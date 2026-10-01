@@ -14,6 +14,7 @@ import (
 	"github.com/yeixio/yggdrasil-core/internal/egress"
 	"github.com/yeixio/yggdrasil-core/internal/nodes"
 	"github.com/yeixio/yggdrasil-core/internal/profiles"
+	"github.com/yeixio/yggdrasil-core/internal/runlog"
 	"github.com/yeixio/yggdrasil-core/internal/scheduler"
 	"github.com/yeixio/yggdrasil-core/internal/share"
 	"github.com/yeixio/yggdrasil-core/pkg/contracts"
@@ -195,9 +196,15 @@ func (a *App) generateOnNode(ctx context.Context, nodeID, modelID, role, adapter
 		if a.stubInference {
 			return a.stubGenerate(modelID), nil
 		}
+		loadStarted := time.Now()
 		endpoint, err := a.ensureLocalModel(ctx, modelID)
 		if err != nil {
 			return nil, err
+		}
+		// A model that was already running answers at once; count only a
+		// real start as load time (§35).
+		if d := time.Since(loadStarted); d >= minLoad {
+			runlog.From(ctx).Loaded(modelID, d)
 		}
 		ch, err := a.Runtimes.Chat(ctx, pluginapi.ChatRequest{
 			ModelEndpoint: endpoint,

@@ -66,6 +66,7 @@ Prefix: `/api/v1`
 | GET | `/notifications` | The notification center: `{"notifications": [...], "unread": n}`. `?unread=1` lists unread ones. Also `POST /notifications/read` (`{"ids": [...]}`, no ids marks all) and `POST /notifications/{id}/dismiss` |
 | GET | `/connectors` | Connected services and their status. Also `PUT /connectors/{id}` (`{"values": {...}}`), `POST /connectors/{id}/check`, and `DELETE /connectors/{id}` |
 | GET, PUT | `/personalization` | How the person likes answers: `length`, `tone`, `format`, `units`, `about_me`, `instructions` |
+| GET | `/runs/{id}` | A run trace. Also `GET /runs` (`?conversation_id=`, `?limit=`), newest first |
 | GET | `/egress` | What left this computer, newest first. `?conversation_id=` narrows to one chat |
 | GET, PUT | `/privacy` | `{"retention_days": n, "last_30_days": {...}}`; PUT sets `retention_days`. Also `POST /privacy/delete-runs` |
 | GET | `/nodes` | This computer and peers |
@@ -167,6 +168,17 @@ Run records hold prompts and tool results: tasks and their steps, automation run
 - **Delete now:** `POST /privacy/delete-runs` removes them now and returns how many.
 - **Exceptions:** each automation keeps its latest successful result, which the `change` notification mode compares against, and work that may still be running is never removed.
 - **Chats:** chats are not run records; the `save_chat_history` setting covers them.
+
+Every chat turn, API request, and automation run is traced. A chat or API run's id is the turn's task id, and the answer's `meta.run_id` names it. A run has:
+- `strategy`: how it was handled, such as "Looked up the web first" or "Worked through 3 parts side by side". It also includes the routing reason and a fallback, when there was one.
+- `effort`.
+- `models`: per model, role, and computer. Each entry has the calls, `load_ms` (a real model start of 150 ms or more), `first_token_ms`, `ttft_ms`, tokens in and out, `cached_tokens` (from llama.cpp's cache), and tokens per second.
+- `tools`: calls, failures, and total time.
+- `nodes`, `workers` and `parallel` for a plan, verification passes with issues and fixes, and `retries`.
+- `context_tokens` of `context_limit`, `latency_ms`, and `pipeline_ms`.
+- `status`: `completed`, `failed`, or `stopped`.
+
+In advanced mode, an answer has "Run details". Runs are run records, so the retention and delete action above apply to them.
 
 Model, node, tool, conversation, and log routes follow the same prefix. The OpenAPI file is the route list to diff when a handler changes.
 

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/google/uuid"
 	"slices"
 	"strings"
 	"sync"
@@ -12,6 +13,7 @@ import (
 	"github.com/yeixio/yggdrasil-core/internal/egress"
 	"github.com/yeixio/yggdrasil-core/internal/gjallarhorn"
 	"github.com/yeixio/yggdrasil-core/internal/huginn"
+	"github.com/yeixio/yggdrasil-core/internal/runlog"
 	"github.com/yeixio/yggdrasil-core/internal/share"
 	"github.com/yeixio/yggdrasil-core/internal/tools"
 	"github.com/yeixio/yggdrasil-core/pkg/contracts"
@@ -25,7 +27,27 @@ type automationExecutor struct {
 	app *App
 }
 
+// Execute runs an automation and traces the run (§35).
 func (e automationExecutor) Execute(ctx context.Context, automation automations.Automation) (automations.Execution, error) {
+	run := runlog.New(uuid.NewString(), "", automation.ProfileID, egress.SourceAutomation)
+	run.Strategy("Automation " + automation.Name)
+	result, err := e.execute(runlog.With(ctx, run), automation)
+	status, errText := runlog.StatusCompleted, ""
+	switch {
+	case ctx.Err() != nil:
+		status = runlog.StatusStopped
+	case err != nil:
+		status, errText = runlog.StatusFailed, err.Error()
+	}
+	if e.app != nil && e.app.RunLog != nil {
+		if saveErr := e.app.RunLog.Save(context.WithoutCancel(ctx), run.Finish(status, errText)); saveErr != nil && e.app.Logger != nil {
+			e.app.Logger.Warn("save automation run", "automation", automation.Name, "error", saveErr)
+		}
+	}
+	return result, err
+}
+
+func (e automationExecutor) execute(ctx context.Context, automation automations.Automation) (automations.Execution, error) {
 	if e.app == nil || e.app.Profiles == nil || e.app.OrchRegistry == nil {
 		return automations.Execution{}, fmt.Errorf("automation executor is not configured")
 	}

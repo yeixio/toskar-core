@@ -41,6 +41,7 @@ import (
 	"github.com/yeixio/yggdrasil-core/internal/orchestrator/builtin/simple"
 	"github.com/yeixio/yggdrasil-core/internal/orchestrator/builtin/team"
 	"github.com/yeixio/yggdrasil-core/internal/profiles"
+	"github.com/yeixio/yggdrasil-core/internal/runlog"
 	"github.com/yeixio/yggdrasil-core/internal/runtimes"
 	"github.com/yeixio/yggdrasil-core/internal/runtimes/external"
 	"github.com/yeixio/yggdrasil-core/internal/runtimes/llamacpp"
@@ -95,6 +96,8 @@ type App struct {
 	Connectors *connectors.Manager
 	// Egress records what left this computer (§63).
 	Egress *egress.Log
+	// RunLog keeps each request's run trace (§35).
+	RunLog *runlog.Store
 	// Artifacts holds chat attachments and files the assistant produced.
 	Artifacts  *artifacts.Store
 	summarizer *muninn.Summarizer
@@ -257,6 +260,7 @@ func New(opts Options) (*App, error) {
 	// Record what leaves this computer: web tools and connected services
 	// as they run, and chats sent to servers elsewhere (§63).
 	a.Egress = egress.New(db.SQL)
+	a.RunLog = runlog.NewStore(db.SQL)
 	toolReg.SetObserver(a.recordToolEgress)
 	rtMgr.OnRemote = func(ctx context.Context, host string) {
 		a.Egress.Add(ctx, egress.ExternalServer, host, "prompt and conversation")
@@ -527,6 +531,7 @@ func New(opts Options) (*App, error) {
 	a.API.BindConnectors(a.Connectors)
 	a.API.BindPersonal(a)
 	a.API.BindPrivacy(a)
+	a.API.BindRuns(a.RunLog)
 
 	autoRepo := repositories.NewAutomationRepo(db.SQL)
 	a.Automations = autoRepo

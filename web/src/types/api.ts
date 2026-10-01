@@ -279,6 +279,8 @@ export interface MessageMeta {
   notice?: string
   /** Files attached to a question or produced with an answer. */
   files?: FileRef[]
+  /** The run trace behind the answer (spec §35), at /api/v1/runs/{id}. */
+  run_id?: string
 }
 
 /** A stored file: an attachment or a file the assistant produced. */
@@ -1137,4 +1139,43 @@ export interface RunRecordCounts {
   tasks: number
   automation_runs: number
   egress: number
+}
+
+/** A traced request (spec §35). */
+export interface RunTrace {
+  id: string
+  conversation_id?: string
+  profile_id?: string
+  source?: string
+  strategy: string[]
+  effort?: string
+  status: 'completed' | 'failed' | 'stopped'
+  error?: string
+  started_at: string
+  completed_at?: string
+  latency_ms?: number
+  pipeline_ms?: number
+  models: {
+    model_id: string
+    role?: string
+    node?: string
+    calls: number
+    load_ms?: number
+    first_token_ms?: number
+    ttft_ms?: number
+    prompt_tokens: number
+    completion_tokens: number
+    cached_tokens: number
+    tok_per_sec?: number
+  }[]
+  tools: { tool_id: string; calls: number; failures?: number; total_ms: number }[]
+  nodes: string[]
+  workers?: number
+  parallel?: boolean
+  verification_passes: number
+  verification_issues?: number
+  verification_fixed?: number
+  retries: number
+  context_tokens?: number
+  context_limit?: number
 }

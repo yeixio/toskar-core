@@ -370,6 +370,9 @@ type MessageMeta struct {
 	Notice string `json:"notice,omitempty"`
 	// Files are attached to a question or produced with an answer.
 	Files []FileRef `json:"files,omitempty"`
+	// RunID names the run trace behind the answer (§35), at
+	// GET /api/v1/runs/{id}.
+	RunID string `json:"run_id,omitempty"`
 }
 
 // FileRef points at a stored file (an artifact). Its bytes are at

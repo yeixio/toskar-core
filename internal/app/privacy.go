@@ -54,7 +54,7 @@ func (a *App) SetRunRetention(ctx context.Context, days int) error {
 func (a *App) DeleteRunRecords(ctx context.Context) (retention.Counts, error) {
 	c, err := retention.All(ctx, a.DB.SQL)
 	if err == nil && a.Logger != nil {
-		a.Logger.Info("run records deleted", "tasks", c.Tasks, "automation_runs", c.AutomationRuns, "egress", c.Egress)
+		a.Logger.Info("run records deleted", "tasks", c.Tasks, "runs", c.Runs, "automation_runs", c.AutomationRuns, "egress", c.Egress)
 	}
 	return c, err
 }
@@ -73,8 +73,8 @@ func (a *App) sweepRunRecords(ctx context.Context) {
 		a.Logger.Warn("run record retention failed", "error", err)
 		return
 	}
-	if c.Tasks+c.AutomationRuns+c.Egress > 0 {
-		a.Logger.Info("old run records removed", "days", days, "tasks", c.Tasks, "automation_runs", c.AutomationRuns, "egress", c.Egress)
+	if c.Tasks+c.Runs+c.AutomationRuns+c.Egress > 0 {
+		a.Logger.Info("old run records removed", "days", days, "tasks", c.Tasks, "runs", c.Runs, "automation_runs", c.AutomationRuns, "egress", c.Egress)
 	}
 }
 

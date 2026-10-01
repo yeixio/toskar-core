@@ -119,6 +119,9 @@ type GenerationMetrics struct {
 	TotalMs          float64 `json:"total_ms"`
 	PromptTokPerSec  float64 `json:"prompt_tok_per_sec"`
 	EvalTokPerSec    float64 `json:"eval_tok_per_sec"`
+	// CachedTokens are prompt tokens reused from the model's cache instead
+	// of processed again, when the runtime reports them.
+	CachedTokens int `json:"cached_tokens,omitempty"`
 }
 
 // Generator can stream chat completions against a running model.

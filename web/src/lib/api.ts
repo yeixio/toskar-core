@@ -22,6 +22,7 @@ import type {
   Connector,
   EgressRecord,
   PrivacyOverview,
+  RunTrace,
   RunRecordCounts,
   PersonalStyle,
   NotificationList,
@@ -622,6 +623,8 @@ export const api = {
 
   setPersonalStyle: (style: PersonalStyle) =>
     request<PersonalStyle>('/api/v1/personalization', { method: 'PUT', body: JSON.stringify(style) }),
+
+  getRun: (id: string) => request<RunTrace>(`/api/v1/runs/${encodeURIComponent(id)}`),
 
   listEgress: async (conversationId?: string) =>
     (await request<EgressRecord[]>(`/api/v1/egress${conversationId ? `?conversation_id=${encodeURIComponent(conversationId)}` : ''}`)) ?? [],

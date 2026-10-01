@@ -608,6 +608,37 @@ paths:
       responses:
         "200":
           description: How many records were removed
+  /api/v1/runs:
+    get:
+      summary: Recent run traces, newest first
+      operationId: listRuns
+      parameters:
+        - name: conversation_id
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Runs
+  /api/v1/runs/{id}:
+    get:
+      summary: One run trace
+      operationId: getRun
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: The run
+        "404":
+          description: Not recorded, or removed by retention
   /api/v1/diagnostics:
     get:
       summary: Create a diagnostics bundle

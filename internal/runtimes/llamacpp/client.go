@@ -206,6 +206,8 @@ type timingsPayload struct {
 	PredictedN         int     `json:"predicted_n"`
 	PredictedMS        float64 `json:"predicted_ms"`
 	PredictedPerSecond float64 `json:"predicted_per_second"`
+	// CacheN is how many prompt tokens came from the cache.
+	CacheN int `json:"cache_n"`
 }
 
 func mergeServerMetrics(
@@ -243,6 +245,7 @@ func mergeServerMetrics(
 		if timings.PredictedPerSecond > 0 {
 			m.EvalTokPerSec = timings.PredictedPerSecond
 		}
+		m.CachedTokens = timings.CacheN
 	}
 	if usage != nil {
 		if usage.PromptTokens > 0 {

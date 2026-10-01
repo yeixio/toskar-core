@@ -31,6 +31,8 @@ type turnTrace struct {
 	files     []contracts.FileRef
 	notice    string
 	untrusted bool
+	// runID links the answer to its run trace (§35).
+	runID string
 }
 
 func (t *turnTrace) addSource(c contracts.Citation) {
@@ -346,7 +348,7 @@ func (t *turnTrace) sawUntrusted() bool {
 func (t *turnTrace) meta() *contracts.MessageMeta {
 	t.mu.Lock()
 	defer t.mu.Unlock()
-	if len(t.sources) == 0 && len(t.steps) == 0 && t.notice == "" && len(t.files) == 0 {
+	if len(t.sources) == 0 && len(t.steps) == 0 && t.notice == "" && len(t.files) == 0 && t.runID == "" {
 		return nil
 	}
 	return &contracts.MessageMeta{
@@ -354,6 +356,7 @@ func (t *turnTrace) meta() *contracts.MessageMeta {
 		Steps:   append([]contracts.ActivityStep(nil), t.steps...),
 		Notice:  t.notice,
 		Files:   append([]contracts.FileRef(nil), t.files...),
+		RunID:   t.runID,
 	}
 }
 
