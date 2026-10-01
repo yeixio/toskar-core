@@ -52,7 +52,9 @@ func (h *Handler) HandleModels(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusInternalServerError, "MODELS_LIST_FAILED", err.Error())
 		return
 	}
-	data := make([]map[string]any, 0, len(items))
+	// "auto" lets Yggdrasil pick an installed model for each request.
+	data := make([]map[string]any, 0, len(items)+1)
+	data = append(data, map[string]any{"id": "auto", "object": "model", "owned_by": "yggdrasil"})
 	for _, p := range items {
 		data = append(data, map[string]any{
 			"id":       "profile:" + p.ID,

@@ -38,6 +38,20 @@ describe('AnswerDetails', () => {
     expect(screen.getByText('Searched the web for “tire pressure”')).toBeInTheDocument()
   })
 
+  it('shows a notice when a fallback model answered', () => {
+    render(
+      <AnswerDetails
+        meta={{
+          steps: [{ kind: 'recover', text: 'Qwen 14B ran out of memory, so Llama 1B answered instead' }],
+          notice: 'Qwen 14B could not answer, so the smaller Llama 1B answered instead. This answer may be less detailed.',
+        }}
+      />,
+    )
+    expect(screen.getByRole('note')).toHaveTextContent('may be less detailed')
+    fireEvent.click(screen.getByRole('button', { name: /What I did \(1 step\)/ }))
+    expect(screen.getByText(/ran out of memory/)).toBeInTheDocument()
+  })
+
   it('renders nothing for an answer that used nothing', () => {
     const { container } = render(<AnswerDetails meta={undefined} />)
     expect(container).toBeEmptyDOMElement()

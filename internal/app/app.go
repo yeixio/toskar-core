@@ -11,6 +11,7 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/google/uuid"
@@ -82,7 +83,11 @@ type App struct {
 	Mimir            *mimir.Store
 	Muninn           *muninn.Store
 	summarizer       *muninn.Summarizer
-	Training         *training.Service
+	// memTotal caches this computer's memory for Auto model choice.
+	memTotal atomic.Uint64
+	// failedModels maps a model id to when it last could not answer.
+	failedModels sync.Map
+	Training     *training.Service
 
 	hw         *hardware.Detector
 	advertiser *discovery.Advertiser

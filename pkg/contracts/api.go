@@ -317,7 +317,8 @@ type Citation struct {
 
 // ActivityStep is one thing the assistant did for an answer, in plain language.
 type ActivityStep struct {
-	// Kind is knowledge, search, read, file, write, command, or git.
+	// Kind is knowledge, memory, search, read, file, write, command, git,
+	// route, or recover.
 	Kind string `json:"kind"`
 	Text string `json:"text"`
 }
@@ -326,6 +327,9 @@ type ActivityStep struct {
 type MessageMeta struct {
 	Sources []Citation     `json:"sources,omitempty"`
 	Steps   []ActivityStep `json:"steps,omitempty"`
+	// Notice tells the user something changed that may affect the answer,
+	// such as a smaller model answering after the chosen one failed.
+	Notice string `json:"notice,omitempty"`
 }
 
 // Message is a chat message.

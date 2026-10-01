@@ -46,6 +46,9 @@ type PendingToolPrompt = {
 
 type RunMode = 'automatic' | 'local'
 
+/** The Model choice that lets Yggdrasil pick an installed model for each message. */
+const AUTO_MODEL_ID = 'auto'
+
 const SUGGESTIONS = [
   { label: 'Explain a topic', prompt: 'Explain what a mutex is in two short paragraphs.' },
   { label: 'Help me code', prompt: 'Help me write a clean Go function that retries an HTTP request with backoff.' },
@@ -151,6 +154,8 @@ export function ChatPage() {
   const [draftProfileId, setDraftProfileId] = useState<string | null>(null)
   const [draftModelId, setDraftModelId] = useState<string | null>(null)
   const [modelChoice, setModelChoice] = useState<{ chatId: string | null; modelId: string } | null>(null)
+  // The model Auto (or a fallback) used for the latest turn in a chat.
+  const [routedModel, setRoutedModel] = useState<{ chatId: string; modelId: string } | null>(null)
   const [streamingContent, setStreamingContent] = useState<string | null>(null)
   const [isSending, setIsSending] = useState(false)
   const [statusMessage, setStatusMessage] = useState<string | null>(null)
@@ -309,14 +314,20 @@ export function ChatPage() {
     chosenModelId ||
     selectedConversation?.model_id ||
     draftModelId ||
-    installedModels[0]?.id ||
-    undefined
+    (installedModels.length > 0 ? AUTO_MODEL_ID : undefined)
+  const isAuto = modelIdForChat === AUTO_MODEL_ID
+  // With Auto, the model shown is the one the latest turn used.
+  const shownModelId = isAuto
+    ? routedModel && routedModel.chatId === selectedId
+      ? routedModel.modelId
+      : null
+    : modelIdForChat
 
   const modelLocations =
-    installedModels.find((m) => m.id === modelIdForChat)?.installed_on ?? []
+    installedModels.find((m) => m.id === shownModelId)?.installed_on ?? []
 
   const chatModel =
-    [...(modelsQuery.data ?? []), ...specializedModels].find((model) => model.id === modelIdForChat) ?? null
+    [...(modelsQuery.data ?? []), ...specializedModels].find((model) => model.id === shownModelId) ?? null
   const activeProfile =
     sortedProfiles.find((p) => p.id === profileIdForChat) ?? null
   const terminalAllowed = activeProfile?.tools?.find((tool) => tool.tool_id === 'terminal')?.policy !== 'deny'
@@ -354,8 +365,8 @@ export function ChatPage() {
   }, [defaultProfileId, draftProfileId])
 
   useEffect(() => {
-    if (!draftModelId && installedModels[0]?.id) {
-      setDraftModelId(installedModels[0].id)
+    if (!draftModelId && installedModels.length > 0) {
+      setDraftModelId(AUTO_MODEL_ID)
     }
   }, [draftModelId, installedModels])
 
@@ -558,6 +569,20 @@ export function ChatPage() {
               : `${formatRoleLabel(payload.role)} running…`,
           )
         }
+        if (event.type === 'chat.model_routed') {
+          const conversationId = event.payload?.conversation_id as string | undefined
+          if (!conversationId || (conversationId !== selectedId && conversationId !== streamingConvRef.current)) return
+          const routedId = event.payload?.model_id as string | undefined
+          if (routedId) setRoutedModel({ chatId: conversationId, modelId: routedId })
+          const name = (event.payload?.model_name as string | undefined) || routedId
+          if (name) setStatusMessage(event.payload?.fallback ? `Switching to ${name}…` : `Using ${name}…`)
+        }
+        if (event.type === 'chat.lookup') {
+          const conversationId = event.payload?.conversation_id as string | undefined
+          if (conversationId && conversationId !== selectedId && conversationId !== streamingConvRef.current) return
+          const query = event.payload?.query as string | undefined
+          setStatusMessage(query ? `Searching the web for “${query}”…` : 'Searching the web…')
+        }
         if (event.type === 'model.load.started') {
           const nodeId = event.payload?.node_id as string | undefined
           const role = event.payload?.role as string | undefined
@@ -607,6 +632,10 @@ export function ChatPage() {
             conversationId === (streamingConvRef.current ?? selectedId)
           ) {
             setContextUsage(nextUsage)
+          }
+          const answeredBy = event.payload?.model_id as string | undefined
+          if (conversationId && answeredBy && conversationId === (streamingConvRef.current ?? selectedId)) {
+            setRoutedModel({ chatId: conversationId, modelId: answeredBy })
           }
           if (conversationId) {
             // A turn finished that this tab did not start (another window),
@@ -739,7 +768,8 @@ export function ChatPage() {
     setResponseInterrupted(false)
     setToolFailure(null)
     const catalog = modelsQuery.data ?? []
-    const activeModel = catalog.find((item) => item.id === modelId) ?? chatModel
+    // Auto chooses a capable model itself, so there is nothing to warn about.
+    const activeModel = modelId === AUTO_MODEL_ID ? null : (catalog.find((item) => item.id === modelId) ?? chatModel)
     setCapabilityNotice(capabilityGap(message, activeModel, catalog, { terminalAllowed, internetAllowed }))
     setToolTraces([])
     setToolDetailsOpen(false)
@@ -1053,13 +1083,17 @@ export function ChatPage() {
               {installedModels.length === 0 ? (
                 <option value="">No model installed</option>
               ) : specializedModels.length === 0 ? (
-                installedModels.map((model) => (
-                  <option key={model.id} value={model.id}>
-                    {model.display_name || model.id}
-                  </option>
-                ))
+                <>
+                  <option value={AUTO_MODEL_ID}>Auto</option>
+                  {installedModels.map((model) => (
+                    <option key={model.id} value={model.id}>
+                      {model.display_name || model.id}
+                    </option>
+                  ))}
+                </>
               ) : (
                 <>
+                  <option value={AUTO_MODEL_ID}>Auto</option>
                   <optgroup label="Models">
                     {installedModels.map((model) => (
                       <option key={model.id} value={model.id}>
@@ -1111,9 +1145,16 @@ export function ChatPage() {
           </button>
         )}
       </div>
-            {chatModel && (
-          <p className="mt-2 text-xs text-ink-muted" title={chatToolAssessment?.detail}>
-            {chatModel.display_name || chatModel.id}
+            {(chatModel || isAuto) && (
+          <p
+            className="mt-2 text-xs text-ink-muted"
+            title={isAuto ? 'Auto picks an installed model for each message' : chatToolAssessment?.detail}
+          >
+            {isAuto
+              ? chatModel
+                ? `Auto · last used ${chatModel.display_name || chatModel.id}`
+                : 'Auto · picks a model for each message'
+              : chatModel?.display_name || chatModel?.id}
             {capabilityLine.length > 0 ? ` · ${capabilityLine.join(' · ')}` : ''}
           </p>
         )}

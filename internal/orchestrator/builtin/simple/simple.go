@@ -63,6 +63,12 @@ func (o *Orchestrator) Run(
 		ch <- pluginapi.OrchestrationEvent{Type: "agent.started", Role: role}
 
 		instructions := "Format answers in Markdown with short paragraphs, lists, and links. Do not wrap the whole answer in a code fence."
+		reference := referenceMaterial(ctx, env, task.Prompt)
+		if found, ok := lookUpFirst(ctx, env, profile, task.Prompt); ok {
+			reference = joinReference(reference, found)
+			instructions += "\n" + lookupGuidance
+			profile = withoutWeb(profile)
+		}
 		toolPrompt := tools.PromptFor(profile)
 		sys := instructions
 		if toolPrompt != "" {
@@ -75,7 +81,7 @@ func (o *Orchestrator) Run(
 		if prior := priorMessages(ctx, env, task.Prompt, sys); len(prior) > 0 {
 			messages = append(messages, prior...)
 		}
-		messages = append(messages, pluginapi.ChatMessage{Role: "user", Content: withReference(task.Prompt, referenceMaterial(ctx, env, task.Prompt))})
+		messages = append(messages, pluginapi.ChatMessage{Role: "user", Content: withReference(task.Prompt, reference)})
 
 		var metrics *pluginapi.GenerationMetrics
 		var usage contextusage.Usage

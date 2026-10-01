@@ -36,6 +36,7 @@ const KNOWN_EVENT_TYPES = [
   'tool.failed',
   'tool.parsed',
   'chat.model_routed',
+  'chat.lookup',
   'task.created',
   'task.started',
   'task.completed',

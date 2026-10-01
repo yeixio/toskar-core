@@ -91,9 +91,16 @@ export function AnswerDetails({ meta }: { meta?: MessageMeta }) {
   const [stepsOpen, setStepsOpen] = useState(false)
   const sources = groupSources(meta?.sources ?? [])
   const steps = meta?.steps ?? []
-  if (sources.length === 0 && steps.length === 0) return null
+  const notice = meta?.notice?.trim()
+  if (sources.length === 0 && steps.length === 0 && !notice) return null
   return (
     <div className="mt-3 space-y-2 border-t border-line/50 pt-2.5">
+      {notice ? (
+        <p role="note" className="flex items-start gap-1.5 text-xs text-warning">
+          <span aria-hidden>ⓘ</span>
+          <span>{notice}</span>
+        </p>
+      ) : null}
       {sources.length > 0 ? (
         <div>
           <p className="label-caps mb-1.5 text-[10px]">Sources</p>

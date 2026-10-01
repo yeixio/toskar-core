@@ -11,6 +11,7 @@ import (
 
 	"github.com/yeixio/yggdrasil-core/internal/contextusage"
 	"github.com/yeixio/yggdrasil-core/internal/events"
+	"github.com/yeixio/yggdrasil-core/internal/huginn"
 	"github.com/yeixio/yggdrasil-core/internal/mimir"
 	"github.com/yeixio/yggdrasil-core/internal/models"
 	modelhealth "github.com/yeixio/yggdrasil-core/internal/models/health"
@@ -40,6 +41,15 @@ func (a *App) RunChat(ctx context.Context, profileID, conversationID, message st
 	// Memory requests are answered by Yggdrasil, not the model.
 	if ch, ok := a.handleMemoryCommand(ctx, conversationID, message); ok {
 		return ch, nil
+	}
+	// Auto: Huginn picks the installed model that suits this message.
+	routeReason := ""
+	if modelID == huginn.AutoModelID {
+		choice, err := a.chooseAuto(ctx, message)
+		if err != nil {
+			return nil, err
+		}
+		modelID, routeReason = choice.Model.ID, choice.Reason
 	}
 	if profileID == "" {
 		profileID = a.defaultProfileID(ctx)
@@ -87,26 +97,26 @@ func (a *App) RunChat(ctx context.Context, profileID, conversationID, message st
 		profile = withoutTools(profile)
 		execution = "local"
 	}
-	if execution == "automatic" && a.Models != nil {
+	if execution == "automatic" && a.Models != nil && routeReason == "" && special == nil {
 		installed, listErr := a.Models.List(ctx)
 		if listErr == nil {
-			if next, reason := routeToolCapableModel(execution, message, modelID, installed); next != "" && next != modelID {
+			if next, _ := routeToolCapableModel(execution, message, modelID, installed); next != "" && next != modelID {
 				modelID = next
 				profile = withChatModel(profile, modelID)
 				profile = applyExecutionPolicy(profile, execution)
-				a.Bus.Publish(events.New("chat.model_routed", map[string]any{
-					"conversation_id": conversationID,
-					"model_id":        modelID,
-					"reason":          reason,
-				}))
+				routeReason = fmt.Sprintf("Used %s because this question needs current information from the web", a.modelName(modelID))
 			}
 		}
 	}
-	if modelID != "" && a.Models != nil {
-		if entry, ok := a.Models.Catalog().Get(modelID); ok && toolCallSupport(entry.Capabilities) == "unsupported" {
-			profile = withoutTools(profile)
-		}
+	if routeReason != "" {
+		a.Bus.Publish(events.New(events.ChatModelRouted, map[string]any{
+			"conversation_id": conversationID,
+			"model_id":        modelID,
+			"model_name":      a.modelName(modelID),
+			"reason":          routeReason,
+		}))
 	}
+	profile = a.withModelTools(profile, modelID)
 	orch, err := a.OrchRegistry.Get(profile.OrchestratorID)
 	if err != nil {
 		return nil, err
@@ -147,6 +157,9 @@ func (a *App) RunChat(ctx context.Context, profileID, conversationID, message st
 			trace:          &turnTrace{},
 			startedAt:      turnStart,
 		}
+		if routeReason != "" {
+			env.trace.routed(routeReason)
+		}
 		if a.memoryOn(ctx, conversationID) {
 			if mems, err := a.Muninn.Relevant(ctx, message); err == nil {
 				env.memories = mems
@@ -158,102 +171,134 @@ func (a *App) RunChat(ctx context.Context, profileID, conversationID, message st
 			env.instructions = special.instructions
 			env.knowledge = special.knowledge
 		}
-		eventsCh, err := orch.Run(ctx, task, profile, env)
-		if err != nil {
-			ch <- pluginapi.ChatChunk{Error: err.Error(), Done: true}
-			return
-		}
 		teamMode := profile.OrchestratorID == "team"
 		var full string
 		var metrics *pluginapi.GenerationMetrics
 		var roleSteps []contracts.GenerationRoleStep
 		var contextUsage map[string]any
-		for evt := range eventsCh {
-			if evt.Error != "" {
-				if _, healthFailure := modelhealth.Parse(evt.Error); healthFailure && full != "" {
-					if teamMode {
-						ch <- pluginapi.ChatChunk{Content: full}
-					}
-					if conversationID != "" {
-						if saveChat, _ := a.Settings.GetBool(ctx, "save_chat_history", true); saveChat {
-							_, _ = a.Conversations.AddMessage(ctx, conversationID, "assistant", full)
-						}
-					}
-				}
-				ch <- pluginapi.ChatChunk{Error: evt.Error, Done: true}
+		// One quiet retry on another model when the first fails before
+		// showing or changing anything (spec §14, §26).
+		for attempt := 0; ; attempt++ {
+			eventsCh, err := orch.Run(ctx, task, profile, env)
+			if err != nil {
+				ch <- pluginapi.ChatChunk{Error: err.Error(), Done: true}
 				return
 			}
-			if evt.Type == "agent.completed" && evt.Role != "" {
-				// Team emits a final Done envelope after the three roles; skip that one.
-				if !teamMode || !evt.Done {
-					step := roleStepFromEvent(a, profile, evt)
-					if step.NodeID == "" {
-						if id, ok := env.roleNode(evt.Role); ok {
-							step.NodeID = id
-							step.NodeName = a.nodeDisplayName(id)
-						}
-					}
-					if step.ModelID == "" {
-						if mid, ok := env.roleModel(evt.Role); ok {
-							step.ModelID = mid
-						}
-					}
-					replaced := false
-					for i := range roleSteps {
-						if roleSteps[i].Role == step.Role {
-							roleSteps[i] = step
-							replaced = true
+			retry := false
+			for evt := range eventsCh {
+				if evt.Error != "" {
+					if attempt == 0 && !teamMode && special == nil && recoverable(ctx, evt.Error, full, env) {
+						failedID := firstNonEmpty(env.modelID(), modelID)
+						if next, step, notice, ok := a.fallback(ctx, failedID, evt.Error); ok {
+							a.Logger.Warn("chat model failed; retrying on another model", "failed", failedID, "next", next.ID, "error", evt.Error)
+							a.noteModelFailed(failedID)
+							env.trace.recovered(step, notice)
+							profile = a.withModelTools(applyExecutionPolicy(withChatModel(profile, next.ID), execution), next.ID)
+							env.switchModel(profile, next.ID)
+							a.Bus.Publish(events.New(events.ChatModelRouted, map[string]any{
+								"conversation_id": conversationID,
+								"model_id":        next.ID,
+								"model_name":      huginn.Name(next),
+								"reason":          step,
+								"fallback":        true,
+							}))
+							metrics, roleSteps, contextUsage = nil, nil, nil
+							retry = true
+							go func(rest <-chan pluginapi.OrchestrationEvent) {
+								for range rest {
+								}
+							}(eventsCh)
 							break
 						}
 					}
-					if !replaced {
-						roleSteps = append(roleSteps, step)
+					if _, healthFailure := modelhealth.Parse(evt.Error); healthFailure && full != "" {
+						if teamMode {
+							ch <- pluginapi.ChatChunk{Content: full}
+						}
+						if conversationID != "" {
+							if saveChat, _ := a.Settings.GetBool(ctx, "save_chat_history", true); saveChat {
+								_, _ = a.Conversations.AddMessage(ctx, conversationID, "assistant", full)
+							}
+						}
+					}
+					ch <- pluginapi.ChatChunk{Error: evt.Error, Done: true}
+					return
+				}
+				if evt.Type == "agent.completed" && evt.Role != "" {
+					// Team emits a final Done envelope after the three roles; skip that one.
+					if !teamMode || !evt.Done {
+						step := roleStepFromEvent(a, profile, evt)
+						if step.NodeID == "" {
+							if id, ok := env.roleNode(evt.Role); ok {
+								step.NodeID = id
+								step.NodeName = a.nodeDisplayName(id)
+							}
+						}
+						if step.ModelID == "" {
+							if mid, ok := env.roleModel(evt.Role); ok {
+								step.ModelID = mid
+							}
+						}
+						replaced := false
+						for i := range roleSteps {
+							if roleSteps[i].Role == step.Role {
+								roleSteps[i] = step
+								replaced = true
+								break
+							}
+						}
+						if !replaced {
+							roleSteps = append(roleSteps, step)
+						}
 					}
 				}
-			}
-			if evt.Metrics != nil {
-				metrics = evt.Metrics
-			}
-			if copied := copyContextUsage(evt.Payload); copied != nil {
-				contextUsage = copied
-			}
-			if teamMode {
-				if evt.Type == "agent.message" && evt.Content != "" {
-					if visible := tools.VisibleText(evt.Content); visible != "" {
-						full += visible
-					}
+				if evt.Metrics != nil {
+					metrics = evt.Metrics
 				}
-				// Keep intermediate role tokens off the transcript; timeline uses bus events.
-				if evt.Done {
-					if evt.Content != "" {
-						full = evt.Content
-						ch <- pluginapi.ChatChunk{Content: evt.Content}
-						a.Bus.Publish(events.New(events.ChatToken, map[string]any{
-							"conversation_id": conversationID,
-							"content":         evt.Content,
-						}))
-					}
-					if agg := aggregateRoleMetrics(roleSteps); agg != nil {
-						metrics = agg
-					}
-					ch <- pluginapi.ChatChunk{Done: true, Metrics: metrics}
+				if copied := copyContextUsage(evt.Payload); copied != nil {
+					contextUsage = copied
 				}
-				continue
-			}
-			if evt.Content != "" && evt.Type != "agent.completed" {
-				visible := tools.VisibleText(evt.Content)
-				if visible == "" {
+				if teamMode {
+					if evt.Type == "agent.message" && evt.Content != "" {
+						if visible := tools.VisibleText(evt.Content); visible != "" {
+							full += visible
+						}
+					}
+					// Keep intermediate role tokens off the transcript; timeline uses bus events.
+					if evt.Done {
+						if evt.Content != "" {
+							full = evt.Content
+							ch <- pluginapi.ChatChunk{Content: evt.Content}
+							a.Bus.Publish(events.New(events.ChatToken, map[string]any{
+								"conversation_id": conversationID,
+								"content":         evt.Content,
+							}))
+						}
+						if agg := aggregateRoleMetrics(roleSteps); agg != nil {
+							metrics = agg
+						}
+						ch <- pluginapi.ChatChunk{Done: true, Metrics: metrics}
+					}
 					continue
 				}
-				full += visible
-				ch <- pluginapi.ChatChunk{Content: visible}
-				a.Bus.Publish(events.New(events.ChatToken, map[string]any{
-					"conversation_id": conversationID,
-					"content":         visible,
-				}))
+				if evt.Content != "" && evt.Type != "agent.completed" {
+					visible := tools.VisibleText(evt.Content)
+					if visible == "" {
+						continue
+					}
+					full += visible
+					ch <- pluginapi.ChatChunk{Content: visible}
+					a.Bus.Publish(events.New(events.ChatToken, map[string]any{
+						"conversation_id": conversationID,
+						"content":         visible,
+					}))
+				}
+				if evt.Done {
+					ch <- pluginapi.ChatChunk{Done: true, Metrics: metrics}
+				}
 			}
-			if evt.Done {
-				ch <- pluginapi.ChatChunk{Done: true, Metrics: metrics}
+			if !retry {
+				break
 			}
 		}
 		if conversationID != "" && full != "" {
@@ -978,4 +1023,37 @@ func (e *chatExecEnv) knowledgeBlock(ctx context.Context, prompt string) string 
 // ListNodesAdapter for task manager.
 func (a *App) listNodes(ctx context.Context) ([]contracts.Node, error) {
 	return a.listNodesWithHardware(ctx)
+}
+
+// switchModel points the turn at another model after the first one failed.
+// Placement is redone for the new model.
+func (e *chatExecEnv) switchModel(profile profiles.Profile, modelID string) {
+	e.mu.Lock()
+	defer e.mu.Unlock()
+	e.profile = profile
+	e.modelOverride = modelID
+	e.lastModel = ""
+	e.roleNodes = nil
+	e.roleModels = nil
+	e.usedNodes = nil
+}
+
+// withModelTools drops tools for a model that cannot call them.
+func (a *App) withModelTools(profile profiles.Profile, modelID string) profiles.Profile {
+	if modelID != "" && a.Models != nil {
+		if entry, ok := a.Models.Catalog().Get(modelID); ok && toolCallSupport(entry.Capabilities) == "unsupported" {
+			return withoutTools(profile)
+		}
+	}
+	return profile
+}
+
+// modelName is how a model is shown to the user.
+func (a *App) modelName(modelID string) string {
+	if a.Models != nil {
+		if entry, ok := a.Models.Catalog().Get(modelID); ok && entry.DisplayName != "" {
+			return entry.DisplayName
+		}
+	}
+	return modelID
 }

@@ -62,7 +62,10 @@ const (
 
 	ChatToken    = "chat.token"
 	ChatComplete = "chat.complete"
-	ChatError    = "chat.error"
+	// ChatModelRouted reports the model chosen for a turn, by Auto or after a
+	// failure, with the reason in plain language.
+	ChatModelRouted = "chat.model_routed"
+	ChatError       = "chat.error"
 )
 
 // Bus is an in-process pub/sub event bus.

@@ -2,6 +2,7 @@ package llamacpp
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"net"
@@ -34,6 +35,8 @@ type managedProcess struct {
 	logFile     *os.File
 	logPath     string
 	intentional bool
+	// exited is closed when the process ends.
+	exited chan struct{}
 }
 
 // NewSupervisor creates a process supervisor.
@@ -142,13 +145,15 @@ func (r *Runtime) StartModel(ctx context.Context, cfg pluginapi.ModelStartConfig
 		adapters: wantAdapters,
 		logFile:  logFile,
 		logPath:  logPath,
+		exited:   make(chan struct{}),
 	}
+	exited := r.sup.procs[instanceID].exited
 	r.sup.mu.Unlock()
 	registerAdapters(endpoint, wantAdapters)
 
 	go r.sup.watch(instanceID)
 
-	if err := waitReady(ctx, endpoint, 120*time.Second); err != nil {
+	if err := waitReady(ctx, endpoint, 120*time.Second, exited); err != nil {
 		_ = r.StopModel(ctx, instanceID)
 		return pluginapi.RunningModel{}, err
 	}
@@ -228,6 +233,12 @@ func (ps *ProcessSupervisor) watch(instanceID string) {
 	if p.cmd.ProcessState != nil {
 		code = p.cmd.ProcessState.ExitCode()
 	}
+	if err != nil && code == 0 {
+		code = 1
+	}
+	if p.exited != nil {
+		close(p.exited)
+	}
 	tail := tailFile(p.logPath, 800)
 	ps.mu.Lock()
 	intentional := p.intentional
@@ -240,9 +251,6 @@ func (ps *ProcessSupervisor) watch(instanceID string) {
 	registerAdapters(p.endpoint, nil)
 	if p.logFile != nil {
 		_ = p.logFile.Close()
-	}
-	if err != nil && code == 0 {
-		code = 1
 	}
 	if !intentional && onExit != nil {
 		onExit(instanceID, modelID, code, tail)
@@ -335,13 +343,21 @@ func defaultGPULayers() int {
 	}
 }
 
-func waitReady(ctx context.Context, endpoint string, timeout time.Duration) error {
+// errExitedWhileLoading is returned when llama-server ends before it is
+// ready, for example because the model file is damaged or does not fit.
+var errExitedWhileLoading = errors.New("llama-server stopped while loading the model")
+
+// waitReady polls until llama-server answers. It returns at once if the
+// process exits, instead of waiting out the timeout.
+func waitReady(ctx context.Context, endpoint string, timeout time.Duration, exited <-chan struct{}) error {
 	client := &http.Client{Timeout: 2 * time.Second}
 	deadline := time.Now().Add(timeout)
 	for time.Now().Before(deadline) {
 		select {
 		case <-ctx.Done():
 			return ctx.Err()
+		case <-exited:
+			return errExitedWhileLoading
 		default:
 		}
 		req, err := http.NewRequestWithContext(ctx, http.MethodGet, endpoint+"/health", nil)
@@ -366,7 +382,13 @@ func waitReady(ctx context.Context, endpoint string, timeout time.Duration) erro
 				return nil
 			}
 		}
-		time.Sleep(200 * time.Millisecond)
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-exited:
+			return errExitedWhileLoading
+		case <-time.After(200 * time.Millisecond):
+		}
 	}
 	return fmt.Errorf("llama-server did not become ready at %s", endpoint)
 }

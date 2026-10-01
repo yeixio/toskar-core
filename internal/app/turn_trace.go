@@ -27,6 +27,7 @@ type turnTrace struct {
 	mu        sync.Mutex
 	sources   []contracts.Citation
 	steps     []contracts.ActivityStep
+	notice    string
 	untrusted bool
 }
 
@@ -64,6 +65,38 @@ func (t *turnTrace) knowledge(hits []mimir.Hit) {
 		}
 	}
 	t.addStep("knowledge", fmt.Sprintf("Found %s in %s", plural(len(hits), "passage", "passages"), joinNames(names)))
+}
+
+// routed records which model Auto chose and why.
+func (t *turnTrace) routed(reason string) {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	t.addStep("route", reason)
+}
+
+// recovered records that another model answered after one failed. notice is
+// shown with the answer when the change may affect it.
+func (t *turnTrace) recovered(step, notice string) {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	t.addStep("recover", step)
+	if notice != "" {
+		t.notice = notice
+	}
+}
+
+// hasSideEffects reports whether the turn changed something, such as a file
+// or a commit, so it must not be run again.
+func (t *turnTrace) hasSideEffects() bool {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	for _, s := range t.steps {
+		switch s.Kind {
+		case "write", "command", "git":
+			return true
+		}
+	}
+	return false
 }
 
 // memories records persistent memories given to the model.
@@ -110,6 +143,9 @@ func (t *turnTrace) tool(toolID string, args, result map[string]any) {
 		u, title := str(result, "url"), str(result, "title")
 		if u == "" {
 			u = str(args, "url")
+		}
+		if strings.EqualFold(title, "Untitled page") {
+			title = ""
 		}
 		title = firstNonEmpty(title, hostOf(u))
 		t.addStep("read", fmt.Sprintf("Read “%s”", title))
@@ -164,12 +200,13 @@ func (t *turnTrace) sawUntrusted() bool {
 func (t *turnTrace) meta() *contracts.MessageMeta {
 	t.mu.Lock()
 	defer t.mu.Unlock()
-	if len(t.sources) == 0 && len(t.steps) == 0 {
+	if len(t.sources) == 0 && len(t.steps) == 0 && t.notice == "" {
 		return nil
 	}
 	return &contracts.MessageMeta{
 		Sources: append([]contracts.Citation(nil), t.sources...),
 		Steps:   append([]contracts.ActivityStep(nil), t.steps...),
+		Notice:  t.notice,
 	}
 }
 

@@ -93,6 +93,12 @@ Memory is on unless the setting `memory_enabled` is `false` or a conversation ha
 
 When a conversation's history passes half of the model's window, a summary of the older messages is written after the reply and replaces them in later turns. The messages stay saved. The `chat.summarized` event follows. The `chat.complete` payload's `context.summarized_messages` counts the messages the summary covers, and `pipeline_ms` is the time from the request to the first model call.
 
+A chat whose `model_id` is `auto` gets an installed model chosen for each message. The message is classified as a quick question, current information, coding, a detailed question, or a task on this computer. Auto then picks the largest suitable model that fits this computer's memory, keeps a quick question on a model that is already loaded, requires tool calling for current information and tasks, and skips a model that failed in the last 10 minutes. The `chat.model_routed` event carries `model_id`, `model_name`, and a plain-language `reason`, and the reason is the first of the answer's `steps`.
+
+When a question needs current information and the profile allows `internet.search` without asking, Yggdrasil searches the web and reads the best page before the model answers. The `chat.lookup` event carries the `query`. The results reach the model as data, and the model answers without web tools for that turn.
+
+If the model fails before it shows or changes anything, the turn runs once more on another installed model. `chat.model_routed` then has `fallback: true`. The answer's steps say what happened, and `meta.notice` warns when the model that answered is noticeably smaller. A model whose `llama-server` exits while loading fails at once instead of after the 120-second readiness timeout.
+
 A profile's `knowledge_sources` lists Mimir source ids. Chat searches them on every turn and adds the matching passages before the system prompt.
 
 Model, node, tool, conversation, and log routes follow the same prefix. The OpenAPI file is the route list to diff when a handler changes.
@@ -110,12 +116,13 @@ No other `/v1` routes are registered. Embeddings, image generation, and the lega
 
 ### `GET /v1/models`
 
-Returns profiles, not raw files on disk:
+Returns `auto` and profiles, not raw files on disk:
 
 ```json
 {
   "object": "list",
   "data": [
+    {"id": "auto", "object": "model", "owned_by": "yggdrasil"},
     {"id": "profile:general-assistant", "object": "model", "owned_by": "yggdrasil"}
   ]
 }
@@ -133,7 +140,7 @@ Built-in profile ids include `general-assistant`, `programming`, and `research`.
 }
 ```
 
-`model` may be `profile:<id>` or a bare id. A bare id is used as a profile id when that profile exists, and otherwise as a model override.
+`model` may be `profile:<id>`, `auto`, or a bare id. A bare id is used as a profile id when that profile exists, and otherwise as a model override. `auto` picks an installed model for each request, as in chat.
 
 ### Streaming
 

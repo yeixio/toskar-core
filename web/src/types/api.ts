@@ -273,6 +273,8 @@ export interface ActivityStep {
 export interface MessageMeta {
   sources?: Citation[]
   steps?: ActivityStep[]
+  /** Something changed that may affect the answer, such as a smaller model answering. */
+  notice?: string
 }
 
 export interface Message {

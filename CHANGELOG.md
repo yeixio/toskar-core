@@ -8,6 +8,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Thi
 
 ### Added
 
+- Auto model. New chats use Auto, which picks an installed model for each message. Coding questions go to a coding model, questions about current information to a model that can use tools, and quick questions to a fast model that is already loaded when there is one. The answer's "What I did" says which model answered and why. `auto` is also a model in `/v1/models`.
+- Current questions are looked up first. When a question needs current information (weather, news, prices, scores, links) and web search is allowed, Yggdrasil searches the web and reads the best page before the model answers, so small models answer from the page instead of guessing or picking the wrong tool.
+- Quiet recovery. If a model fails before it answers, another installed model answers instead, and the answer says so, with a note when the model that answered is noticeably smaller. Auto skips a model that failed in the last 10 minutes.
 - Memory. Say "Remember that…" in any chat, and Yggdrasil keeps it across chats, restarts, and model changes; "Forget…" and "What do you remember?" work too. Answers that used a memory list it as a source. The Memory page lists memories by category, where you can add, edit, pause, or delete them, and turn memory off. Each chat has a Memory on/off switch. Passwords, keys, and card numbers are not saved. Routes are under `/api/v1/memory`.
 - Long conversations keep working. When a chat's history passes half of the model's window, older messages are summarized after the reply and the summary takes their place; the messages stay saved. The context meter shows how many messages the summary covers.
 - Chat answers show their sources (web pages, knowledge passages, and files) and a "What I did" summary of searches, pages read, and knowledge used. Errors are explained in plain language with a next step and a retry; technical detail is under Details. Knowledge lookups show progress while the answer is prepared.
@@ -22,6 +25,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Thi
 
 ### Fixed
 
+- A model whose `llama-server` exits while loading, for example a damaged file, now fails at once instead of after a two-minute wait.
+- More current-information questions are recognized (news, scores, prices, exchange rates, "near me"), and cues match whole words only.
 - Chat starts faster when a paired computer is offline. Peer health is checked in the background every 10 seconds and reused for 20; a check that has to run during a turn waits at most 1.5 seconds. Before, each turn waited the full timeout for an offline peer.
 - A fast reply, such as a memory confirmation, no longer shows twice.
 - Targeted for 1.3.1: a saved schedule turns on “Keep running in background,” so closing the window does not stop the daemon that runs it.
