@@ -13,7 +13,7 @@ The data directory (see [Configuration](../README.md#configuration)) holds:
 | Path | Contents |
 | --- | --- |
 | `config.json` | Bind addresses, node name, node id, discovery, static peers. Written with mode `0600`. |
-| `yggdrasil.db` | Models, profiles, conversations, messages, tasks, settings, API key hashes, paired-node records. Chat history and task history are saved unless those settings are turned off. Both default to on. |
+| `yggdrasil.db` | Models, profiles, conversations, messages, summaries of long conversations, memories you asked Yggdrasil to keep, tasks, settings, API key hashes, paired-node records. Chat history and task history are saved unless those settings are turned off. Both default to on. Memories are listed on the Memory page, where you can edit, pause, or delete them, or turn memory off. |
 | `models/` | GGUF files you install. |
 | `knowledge/` | Copies of content (text, spreadsheets, PDFs) you pasted or uploaded as connected knowledge. Linked files and folders stay where they are. The search index is in `yggdrasil.db`. |
 | `training/` | Trained adapters (`adapters/`), temporary job files (`jobs/`, removed when a job ends), and downloaded training weights (`hf-cache/`). Examples are in `yggdrasil.db`. |

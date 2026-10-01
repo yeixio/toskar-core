@@ -95,6 +95,12 @@ export function ContextUsageButton({
                   </li>
                 ))}
               </ul>
+              {(usage.summarizedMessages ?? 0) > 0 ? (
+                <p className="mt-2 text-xs leading-relaxed text-ink-muted">
+                  The {usage.summarizedMessages} oldest messages were sent as a summary so the conversation fits. Every
+                  message is still saved.
+                </p>
+              ) : null}
             </>
           ) : (
             <p className="mt-2 text-xs leading-relaxed text-ink-muted">

@@ -9,6 +9,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/yeixio/yggdrasil-core/internal/mimir"
+	"github.com/yeixio/yggdrasil-core/internal/muninn"
 	"github.com/yeixio/yggdrasil-core/internal/tools"
 	"github.com/yeixio/yggdrasil-core/pkg/contracts"
 )
@@ -63,6 +64,19 @@ func (t *turnTrace) knowledge(hits []mimir.Hit) {
 		}
 	}
 	t.addStep("knowledge", fmt.Sprintf("Found %s in %s", plural(len(hits), "passage", "passages"), joinNames(names)))
+}
+
+// memories records persistent memories given to the model.
+func (t *turnTrace) memories(list []muninn.Memory) {
+	if len(list) == 0 {
+		return
+	}
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	for _, m := range list {
+		t.addSource(contracts.Citation{Kind: "memory", Title: m.Content, Source: "Memory"})
+	}
+	t.addStep("memory", "Used "+plural(len(list), "memory", "memories"))
 }
 
 // tool records a tool call that succeeded.

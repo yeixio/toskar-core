@@ -163,7 +163,8 @@ func (a *App) placeRole(ctx context.Context, profile profiles.Profile, role, mod
 
 func (a *App) placeRoleAvoiding(ctx context.Context, profile profiles.Profile, role, modelID string, avoidNodeIDs []string) (string, error) {
 	if a.Nodes != nil {
-		a.Nodes.RefreshPairedLiveness(ctx)
+		// A chat must not wait on a full probe of every paired computer.
+		a.Nodes.RefreshPairedLivenessIfStale(ctx)
 	}
 	nodeList, err := a.Nodes.List(ctx)
 	if err != nil {

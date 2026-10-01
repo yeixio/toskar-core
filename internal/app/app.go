@@ -30,6 +30,7 @@ import (
 	modelhealth "github.com/yeixio/yggdrasil-core/internal/models/health"
 	"github.com/yeixio/yggdrasil-core/internal/models/hfclient"
 	"github.com/yeixio/yggdrasil-core/internal/models/lifecycle"
+	"github.com/yeixio/yggdrasil-core/internal/muninn"
 	"github.com/yeixio/yggdrasil-core/internal/nodes"
 	"github.com/yeixio/yggdrasil-core/internal/orchestrator"
 	"github.com/yeixio/yggdrasil-core/internal/orchestrator/builtin/simple"
@@ -79,6 +80,8 @@ type App struct {
 	Lifecycle        *lifecycle.Sweeper
 	Health           *modelhealth.Monitor
 	Mimir            *mimir.Store
+	Muninn           *muninn.Store
+	summarizer       *muninn.Summarizer
 	Training         *training.Service
 
 	hw         *hardware.Detector
@@ -283,11 +286,12 @@ func New(opts Options) (*App, error) {
 		CreateConversation: func(ctx context.Context, title, profileID, modelID string) (contracts.Conversation, error) {
 			return convRepo.Create(ctx, title, profileID, modelID)
 		},
-		UpdateConversation: func(ctx context.Context, id string, title, profileID, modelID *string) (contracts.Conversation, error) {
+		UpdateConversation: func(ctx context.Context, id string, title, profileID, modelID *string, memoryOff *bool) (contracts.Conversation, error) {
 			return convRepo.Update(ctx, id, repositories.ConversationPatch{
 				Title:     title,
 				ProfileID: profileID,
 				ModelID:   modelID,
+				MemoryOff: memoryOff,
 			})
 		},
 		DeleteConversation: func(ctx context.Context, id string) error {
@@ -499,6 +503,9 @@ func New(opts Options) (*App, error) {
 	})
 
 	a.Mimir = mimir.NewStore(db.SQL, filepath.Join(cfg.DataDir, "knowledge"))
+	a.Muninn = muninn.NewStore(db.SQL)
+	a.summarizer = &muninn.Summarizer{Store: a.Muninn}
+	a.API.BindMemory(a.Muninn)
 	a.API.BindKnowledge(a.Mimir)
 	a.Training = a.newTrainingService()
 	if err := a.Training.Recover(context.Background()); err != nil {
@@ -640,6 +647,23 @@ func (a *App) Start(ctx context.Context) error {
 		}()
 	}
 
+	// Keep paired-computer liveness fresh so chat placement can reuse it,
+	// whether or not discovery is on.
+	a.wg.Add(1)
+	go func() {
+		defer a.wg.Done()
+		ticker := time.NewTicker(nodes.LivenessInterval)
+		defer ticker.Stop()
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-ticker.C:
+				a.Nodes.RefreshPairedLiveness(ctx)
+			}
+		}
+	}()
+
 	if a.Lifecycle != nil {
 		a.Lifecycle.Start(ctx)
 	}
@@ -727,6 +751,7 @@ func (a *App) settingsView(ctx context.Context) (contracts.SettingsView, error) 
 	downloadBehavior, _ := a.Settings.GetString(ctx, "download_behavior", "ask")
 	storageLimit, _ := a.Settings.GetInt(ctx, "model_storage_limit_gb", 0)
 	saveChat, _ := a.Settings.GetBool(ctx, "save_chat_history", true)
+	memoryEnabled, _ := a.Settings.GetBool(ctx, "memory_enabled", true)
 	saveTask, _ := a.Settings.GetBool(ctx, "save_task_history", true)
 	notifyTask, _ := a.Settings.GetBool(ctx, "notify_task_finish", true)
 	notifyPeer, _ := a.Settings.GetBool(ctx, "notify_peer_offline", true)
@@ -752,6 +777,7 @@ func (a *App) settingsView(ctx context.Context) (contracts.SettingsView, error) 
 		DownloadBehavior:        downloadBehavior,
 		ModelStorageLimitGB:     storageLimit,
 		SaveChatHistory:         saveChat,
+		MemoryEnabled:           memoryEnabled,
 		SaveTaskHistory:         saveTask,
 		NotifyTaskFinish:        notifyTask,
 		NotifyPeerOffline:       notifyPeer,
@@ -771,6 +797,11 @@ func setSettingString(ctx context.Context, repo *repositories.SettingsRepo, key,
 }
 
 func (a *App) applySettingsPatch(ctx context.Context, patch map[string]any) error {
+	if v, ok := patch["memory_enabled"].(bool); ok {
+		if err := a.Settings.SetBool(ctx, "memory_enabled", v); err != nil {
+			return err
+		}
+	}
 	if v, ok := patch["advanced_mode"].(bool); ok {
 		if err := a.Settings.SetBool(ctx, "advanced_mode", v); err != nil {
 			return err

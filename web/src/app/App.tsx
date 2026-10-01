@@ -21,6 +21,7 @@ import { ProfilesPage } from '@/features/profiles/ProfilesPage'
 import { SettingsPage } from '@/features/settings/SettingsPage'
 import { ToolsPage } from '@/features/tools/ToolsPage'
 import { KnowledgePage } from '@/features/knowledge/KnowledgePage'
+import { MemoryPage } from '@/features/memory/MemoryPage'
 import { TrainPage } from '@/features/train/TrainPage'
 import { useUIStore } from '@/stores/uiStore'
 
@@ -65,6 +66,7 @@ export function App() {
                 <Route path="models" element={<ModelsPage />} />
                 <Route path="train" element={<TrainPage />} />
                 <Route path="knowledge" element={<KnowledgePage />} />
+                <Route path="memory" element={<MemoryPage />} />
                 <Route path="profiles" element={<ProfilesPage />} />
                 <Route path="tools" element={<ToolsPage />} />
                 <Route path="nodes" element={<NodesPage />} />

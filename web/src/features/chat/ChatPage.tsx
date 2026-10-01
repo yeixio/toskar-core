@@ -20,6 +20,7 @@ import { CapabilityNotice } from './CapabilityNotice'
 import { ChatActivity } from './ChatActivity'
 import { ChatHistoryDrawer, useCanPinChatHistory } from './ChatHistoryDrawer'
 import { AnswerDetails } from './AnswerDetails'
+import { MemoryToggle } from './MemoryToggle'
 import { ChatErrorCard } from './ChatErrorCard'
 import { ChatMarkdown } from './ChatMarkdown'
 import { ContextUsageButton } from './ContextUsageButton'
@@ -154,6 +155,8 @@ export function ChatPage() {
   const [isSending, setIsSending] = useState(false)
   const [statusMessage, setStatusMessage] = useState<string | null>(null)
   const [sendError, setSendError] = useState<string | null>(null)
+  // Memory Off chosen before the conversation exists; applied when it is created.
+  const [memoryOffDraft, setMemoryOffDraft] = useState(false)
   const [modelFailure, setModelFailure] = useState<ModelFailure | null>(null)
   const [responseInterrupted, setResponseInterrupted] = useState(false)
   const [capabilityNotice, setCapabilityNotice] = useState<CapabilityGap | null>(null)
@@ -183,6 +186,10 @@ export function ChatPage() {
   const profileSelectRef = useRef<HTMLSelectElement | null>(null)
   const modelSelectRef = useRef<HTMLSelectElement | null>(null)
   const streamingTextRef = useRef('')
+  // The turn that just finished. Its stream can still deliver tokens after
+  // chat.complete (a memory reply finishes instantly); they must not draw a
+  // second copy of the saved answer.
+  const completedConvRef = useRef<string | null>(null)
 
   const conversationsQuery = useQuery({
     queryKey: ['conversations'],
@@ -387,12 +394,14 @@ export function ChatPage() {
       model_id,
       profile_id,
       title,
+      memory_off,
     }: {
       id: string
       model_id?: string
       profile_id?: string
       title?: string
-    }) => api.updateConversation(id, { model_id, profile_id, title }),
+      memory_off?: boolean
+    }) => api.updateConversation(id, { model_id, profile_id, title, memory_off }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['conversations'] })
       setRenamingId(null)
@@ -404,6 +413,7 @@ export function ChatPage() {
       if (conversationId && conversationId === streamingConvRef.current) {
         setStreamingContent(null)
         streamingConvRef.current = null
+        completedConvRef.current = conversationId
         setIsSending(false)
         setStatusMessage(null)
         setPendingTool(null)
@@ -582,6 +592,7 @@ export function ChatPage() {
           if (!payload?.conversation_id || payload.conversation_id !== selectedId) {
             return
           }
+          if (payload.conversation_id === completedConvRef.current) return
           setStatusMessage(null)
           if (payload.content) {
             setStreamingContent((current) => (current ?? '') + payload.content)
@@ -597,7 +608,14 @@ export function ChatPage() {
           ) {
             setContextUsage(nextUsage)
           }
-          if (conversationId) handleChatComplete(conversationId)
+          if (conversationId) {
+            // A turn finished that this tab did not start (another window),
+            // so later turns in it may stream here again.
+            if (conversationId !== streamingConvRef.current && conversationId === completedConvRef.current) {
+              completedConvRef.current = null
+            }
+            handleChatComplete(conversationId)
+          }
         }
         if (event.type === 'knowledge.retrieved') {
           const conversationId = event.payload?.conversation_id as string | undefined
@@ -730,6 +748,7 @@ export function ChatPage() {
     setPendingTool(null)
     setStreamingContent('')
     streamingTextRef.current = ''
+    completedConvRef.current = null
 
     let conversationId = selectedId
     try {
@@ -743,6 +762,10 @@ export function ChatPage() {
           throw new Error('Could not start a conversation.')
         }
         conversationId = created.id
+        if (memoryOffDraft) {
+          await api.updateConversation(created.id, { memory_off: true })
+          setMemoryOffDraft(false)
+        }
         setSelectedId(conversationId)
         await queryClient.invalidateQueries({ queryKey: ['conversations'] })
       }
@@ -773,12 +796,14 @@ export function ChatPage() {
         },
         signal: controller.signal,
         onToken: (content) => {
+          if (streamingConvRef.current !== conversationId) return
           setStatusMessage(null)
           setToolFailure(null)
           streamingTextRef.current += content
           setStreamingContent((current) => (current ?? '') + content)
         },
         onDone: () => {
+          if (streamingConvRef.current !== conversationId) return
           if (!streamingTextRef.current.trim()) {
             setIsSending(false)
             streamingConvRef.current = null
@@ -1053,6 +1078,18 @@ export function ChatPage() {
               )}
             </select>
           </label>
+          <MemoryToggle
+            memoryEnabled={settingsQuery.data?.memory_enabled !== false}
+            off={selectedConversation ? Boolean(selectedConversation.memory_off) : memoryOffDraft}
+            disabled={isSending}
+            onChange={(off) => {
+              if (selectedConversation) {
+                updateConversation.mutate({ id: selectedConversation.id, memory_off: off })
+              } else {
+                setMemoryOffDraft(off)
+              }
+            }}
+          />
         </div>
         <ContextUsageButton
           usage={contextUsage}

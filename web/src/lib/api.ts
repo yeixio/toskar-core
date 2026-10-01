@@ -55,6 +55,8 @@ import type {
   TrainingPlan,
   TrainingPreset,
   SampleFile,
+  MemoryCategory,
+  MemoryItem,
 } from '@/types/api'
 
 export class ApiError extends Error {
@@ -558,6 +560,16 @@ export const api = {
     request<LogContent>(
       `/api/v1/logs/${encodeURIComponent(name)}?tail_bytes=${tailBytes}`,
     ),
+
+  listMemory: () => request<{ memories: MemoryItem[]; categories: MemoryCategory[] }>('/api/v1/memory'),
+
+  addMemory: (content: string, category?: MemoryCategory) =>
+    request<MemoryItem>('/api/v1/memory', { method: 'POST', body: JSON.stringify({ content, category }) }),
+
+  updateMemory: (id: string, body: { content?: string; category?: MemoryCategory; enabled?: boolean }) =>
+    request<MemoryItem>(`/api/v1/memory/${id}`, { method: 'PATCH', body: JSON.stringify(body) }),
+
+  deleteMemory: (id: string) => request<null>(`/api/v1/memory/${id}`, { method: 'DELETE' }),
 
   listKnowledge: () => request<KnowledgeSource[]>('/api/v1/knowledge/sources'),
 

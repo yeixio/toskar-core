@@ -25,11 +25,12 @@ type ConversationPatch struct {
 	Title     *string
 	ProfileID *string
 	ModelID   *string
+	MemoryOff *bool
 }
 
 func (r *ConversationRepo) List(ctx context.Context) ([]contracts.Conversation, error) {
 	rows, err := r.db.QueryContext(ctx, `
-		SELECT id, COALESCE(title,''), COALESCE(profile_id,''), COALESCE(model_id,''), created_at, updated_at
+		SELECT id, COALESCE(title,''), COALESCE(profile_id,''), COALESCE(model_id,''), memory_off, created_at, updated_at
 		FROM conversations ORDER BY updated_at DESC`)
 	if err != nil {
 		return nil, err
@@ -51,7 +52,7 @@ func (r *ConversationRepo) List(ctx context.Context) ([]contracts.Conversation, 
 
 func (r *ConversationRepo) Get(ctx context.Context, id string) (contracts.Conversation, error) {
 	row := r.db.QueryRowContext(ctx, `
-		SELECT id, COALESCE(title,''), COALESCE(profile_id,''), COALESCE(model_id,''), created_at, updated_at
+		SELECT id, COALESCE(title,''), COALESCE(profile_id,''), COALESCE(model_id,''), memory_off, created_at, updated_at
 		FROM conversations WHERE id = ?`, id)
 	c, err := scanConversation(row)
 	if err == sql.ErrNoRows {
@@ -98,12 +99,19 @@ func (r *ConversationRepo) Update(ctx context.Context, id string, patch Conversa
 	if patch.ModelID != nil {
 		existing.ModelID = *patch.ModelID
 	}
+	if patch.MemoryOff != nil {
+		existing.MemoryOff = *patch.MemoryOff
+	}
+	memoryOff := 0
+	if existing.MemoryOff {
+		memoryOff = 1
+	}
 	existing.UpdatedAt = time.Now().UTC()
 	_, err = r.db.ExecContext(ctx, `
 		UPDATE conversations
-		SET title = ?, profile_id = ?, model_id = ?, updated_at = ?
+		SET title = ?, profile_id = ?, model_id = ?, memory_off = ?, updated_at = ?
 		WHERE id = ?`,
-		existing.Title, nullIfEmpty(existing.ProfileID), nullIfEmpty(existing.ModelID),
+		existing.Title, nullIfEmpty(existing.ProfileID), nullIfEmpty(existing.ModelID), memoryOff,
 		existing.UpdatedAt.Format(time.RFC3339Nano), id)
 	if err != nil {
 		return contracts.Conversation{}, err
@@ -200,9 +208,11 @@ type conversationScanner interface {
 func scanConversation(s conversationScanner) (contracts.Conversation, error) {
 	var c contracts.Conversation
 	var created, updated string
-	if err := s.Scan(&c.ID, &c.Title, &c.ProfileID, &c.ModelID, &created, &updated); err != nil {
+	var memoryOff int
+	if err := s.Scan(&c.ID, &c.Title, &c.ProfileID, &c.ModelID, &memoryOff, &created, &updated); err != nil {
 		return contracts.Conversation{}, err
 	}
+	c.MemoryOff = memoryOff != 0
 	c.CreatedAt = parseTime(created)
 	c.UpdatedAt = parseTime(updated)
 	return c, nil

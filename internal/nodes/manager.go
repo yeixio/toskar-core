@@ -31,6 +31,33 @@ type Manager struct {
 	mu         sync.RWMutex
 	discovered map[string]discovery.DiscoveredNode
 	health     *HealthChecker
+
+	livenessMu sync.Mutex
+	livenessAt time.Time
+}
+
+// Liveness timing for the chat path. A background loop refreshes every
+// LivenessInterval; placement reuses a result younger than livenessMaxAge
+// and otherwise probes with a short deadline, so an offline paired computer
+// costs a chat at most livenessProbeCap instead of a full HTTP timeout.
+const (
+	LivenessInterval = 10 * time.Second
+	livenessMaxAge   = 20 * time.Second
+	livenessProbeCap = 1500 * time.Millisecond
+)
+
+// RefreshPairedLivenessIfStale probes paired computers only when the last
+// probe is older than livenessMaxAge, and caps that probe's wait.
+func (m *Manager) RefreshPairedLivenessIfStale(ctx context.Context) {
+	m.livenessMu.Lock()
+	fresh := time.Since(m.livenessAt) < livenessMaxAge
+	m.livenessMu.Unlock()
+	if fresh {
+		return
+	}
+	ctx, cancel := context.WithTimeout(ctx, livenessProbeCap)
+	defer cancel()
+	m.RefreshPairedLiveness(ctx)
 }
 
 func NewManager(db *sql.DB, bus *events.Bus, pairing *auth.PairingManager, localNodeID, localName string, hw func(context.Context) (contracts.HardwareInventory, error)) *Manager {
@@ -131,6 +158,11 @@ func (m *Manager) RefreshPairedLiveness(ctx context.Context) {
 	if m.health == nil || m.pairing == nil {
 		return
 	}
+	defer func() {
+		m.livenessMu.Lock()
+		m.livenessAt = time.Now()
+		m.livenessMu.Unlock()
+	}()
 	paired, err := m.loadPaired(ctx)
 	if err != nil || len(paired) == 0 {
 		return
@@ -170,6 +202,9 @@ func (m *Manager) RefreshPairedLiveness(ctx context.Context) {
 	}
 	wg.Wait()
 
+	// Record results even when the probe deadline has passed; a capped probe
+	// that finds a peer offline must still say so.
+	ctx = context.WithoutCancel(ctx)
 	for _, res := range results {
 		if res.id == "" {
 			continue

@@ -15,7 +15,14 @@ type SourceItem = { kind: string; label: string; url?: string; passages: Citatio
 function groupSources(sources: Citation[]): SourceItem[] {
   const out: SourceItem[] = []
   for (const s of sources) {
-    if (s.kind === 'knowledge') {
+    if (s.kind === 'memory') {
+      const existing = out.find((i) => i.kind === 'memory')
+      if (existing) {
+        existing.passages.push(s)
+        continue
+      }
+      out.push({ kind: 'memory', label: 'Memory', passages: [s] })
+    } else if (s.kind === 'knowledge') {
       const name = s.source || s.title
       const existing = out.find((i) => i.kind === 'knowledge' && i.label === name)
       if (existing) {
@@ -52,12 +59,16 @@ function SourceChip({ item, index }: { item: SourceItem; index: number }) {
     )
   }
   const count = item.passages.length
-  const withText = item.passages.filter((p) => p.snippet)
+  // A memory's text is its title; show it as the passage.
+  const withText = item.passages
+    .map((p) => (item.kind === 'memory' ? { ...p, snippet: p.title, title: 'Remembered' } : p))
+    .filter((p) => p.snippet)
   return (
     <span className="relative">
       <button type="button" className={chipClass} aria-expanded={open} title={item.label} onClick={() => setOpen((v) => !v)}>
         {badge}
         {item.kind === 'knowledge' ? <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-mimir" aria-hidden /> : null}
+        {item.kind === 'memory' ? <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-norn" aria-hidden /> : null}
         <span className="truncate">{item.label}</span>
         {count > 1 ? <span className="shrink-0 text-ink-faint">· {count}</span> : null}
       </button>

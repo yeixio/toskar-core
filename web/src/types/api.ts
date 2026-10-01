@@ -251,6 +251,8 @@ export interface Conversation {
   title: string
   profile_id?: string
   model_id?: string
+  /** Persistent memory is kept out of this conversation. */
+  memory_off?: boolean
   created_at: string
   updated_at: string
 }
@@ -312,6 +314,7 @@ export interface SettingsView {
   tool_git?: string
   launch_at_login?: boolean
   discovery_needs_restart?: boolean
+  memory_enabled?: boolean
 }
 
 export interface Recommendation {
@@ -348,6 +351,20 @@ export interface UpdateConversationRequest {
   title?: string
   profile_id?: string
   model_id?: string
+  memory_off?: boolean
+}
+
+export type MemoryCategory = 'identity' | 'preferences' | 'projects' | 'technical' | 'interests' | 'people' | 'other'
+
+export interface MemoryItem {
+  id: string
+  content: string
+  category: MemoryCategory
+  source_type: 'explicit' | 'manual' | string
+  source_ref?: string
+  enabled: boolean
+  created_at: string
+  updated_at: string
 }
 
 export interface RuntimeDetection {
@@ -434,6 +451,7 @@ export interface ToolRequestedPayload {
 }
 
 export interface SettingsPatch {
+  memory_enabled?: boolean
   node_name?: string
   lan_api_enabled?: boolean
   discovery_enabled?: boolean

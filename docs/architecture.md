@@ -35,7 +35,7 @@ Some Norse names appear in comments and logs. Others are not packages in this re
 | Norn | Scheduling and workload placement | `internal/scheduler` | Implemented |
 | Heimdall | Health and diagnostics | `internal/events` calls its bus a Heimdall event stream. Diagnostics and model health live in `internal/diagnostics` and `internal/models/health`. | Partial |
 | Huginn | Agent execution | No package uses this name. Chat and tasks run through the `simple` and `team` orchestrators. | Planned as a named subsystem. Orchestrators are implemented. |
-| Muninn | Persistent memory and context | No package uses this name. Conversations, messages, tasks, and settings are rows in SQLite. | Planned as a named subsystem. Conversation storage is implemented. |
+| Muninn | Persistent memory and context | `internal/muninn`: memories ("Remember that…") with FTS5 recall, per-chat and global Memory Off, and summaries of long conversations. Conversations and messages are rows in SQLite. | Implemented (keyword recall; no embeddings yet) |
 | Mimir | Knowledge and retrieval | `internal/mimir`: file, folder, and pasted sources, SQLite FTS5 search, retrieval into chat. Sources reindex when their files change. | Implemented (keyword search; no embeddings yet) |
 | Gungnir | Tool and task execution | No package uses this name. Tools are implemented in `internal/tools` (internet, filesystem, terminal, git). Tasks are implemented in `internal/tasks`. | Planned as a named subsystem. Tools and tasks are implemented. |
 

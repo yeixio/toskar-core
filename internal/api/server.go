@@ -22,6 +22,7 @@ import (
 	"github.com/yeixio/yggdrasil-core/internal/events"
 	"github.com/yeixio/yggdrasil-core/internal/logs"
 	"github.com/yeixio/yggdrasil-core/internal/models"
+	"github.com/yeixio/yggdrasil-core/internal/muninn"
 	"github.com/yeixio/yggdrasil-core/internal/runtimes"
 	"github.com/yeixio/yggdrasil-core/internal/training"
 	"github.com/yeixio/yggdrasil-core/internal/version"
@@ -66,7 +67,7 @@ type Dependencies struct {
 	RevokeNode             func(ctx context.Context, nodeID string) error
 	ListConversations      func(ctx context.Context) ([]contracts.Conversation, error)
 	CreateConversation     func(ctx context.Context, title, profileID, modelID string) (contracts.Conversation, error)
-	UpdateConversation     func(ctx context.Context, id string, title, profileID, modelID *string) (contracts.Conversation, error)
+	UpdateConversation     func(ctx context.Context, id string, title, profileID, modelID *string, memoryOff *bool) (contracts.Conversation, error)
 	DeleteConversation     func(ctx context.Context, id string) error
 	ListMessages           func(ctx context.Context, conversationID string) ([]contracts.Message, error)
 	Chat                   func(w http.ResponseWriter, r *http.Request, conversationID, profileID, modelID, message string, stream bool, execution string) error
@@ -117,6 +118,7 @@ type Server struct {
 	http   *http.Server
 
 	knowledge       KnowledgeService
+	memory          *muninn.Store
 	training        *training.Service
 	trainingCatalog func() []models.CatalogEntry
 }
@@ -211,6 +213,7 @@ func (s *Server) routes() {
 	api.HandleFunc("/conversations/{id}", s.handleDeleteConversation).Methods(http.MethodDelete)
 	api.HandleFunc("/events", s.handleSSE).Methods(http.MethodGet, http.MethodOptions)
 	s.knowledgeRoutes(api)
+	s.memoryRoutes(api)
 	s.trainingRoutes(api)
 
 	if s.deps.OpenAI != nil {
@@ -641,6 +644,7 @@ func (s *Server) handleUpdateConversation(w http.ResponseWriter, r *http.Request
 		Title     *string `json:"title"`
 		ProfileID *string `json:"profile_id"`
 		ModelID   *string `json:"model_id"`
+		MemoryOff *bool   `json:"memory_off"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		writeErr(w, http.StatusBadRequest, "INVALID_JSON", "Request body must be JSON.", nil)
@@ -650,7 +654,7 @@ func (s *Server) handleUpdateConversation(w http.ResponseWriter, r *http.Request
 		writeErr(w, http.StatusNotImplemented, "NOT_IMPLEMENTED", "Conversations are not available yet.", nil)
 		return
 	}
-	conv, err := s.deps.UpdateConversation(r.Context(), id, body.Title, body.ProfileID, body.ModelID)
+	conv, err := s.deps.UpdateConversation(r.Context(), id, body.Title, body.ProfileID, body.ModelID, body.MemoryOff)
 	if err != nil {
 		writeErr(w, http.StatusBadRequest, "CONVERSATION_UPDATE_FAILED", err.Error(), nil)
 		return

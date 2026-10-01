@@ -10,6 +10,7 @@ const mainNav = [
   { to: '/models', label: 'Models' },
   { to: '/train', label: 'Train' },
   { to: '/knowledge', label: 'Knowledge' },
+  { to: '/memory', label: 'Memory' },
   { to: '/nodes', label: 'Computers' },
 ] as const
 

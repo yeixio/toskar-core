@@ -51,6 +51,9 @@ const KNOWN_EVENT_TYPES = [
   'training.eval',
   'training.deployed',
   'knowledge.retrieved',
+  'memory.saved',
+  'memory.deleted',
+  'chat.summarized',
 ] as const
 
 export function subscribeEvents({

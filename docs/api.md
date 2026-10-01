@@ -83,10 +83,15 @@ Prefix: `/api/v1`
 | POST | `/training/ais/{id}/train` | Start a training job; an optional `{"node_id": "..."}` picks the computer. `GET /training/jobs/{id}`, `POST /training/jobs/{id}/cancel` |
 | PUT | `/training/ais/{id}/test-prompts` | Replace the test set. `POST /training/ais/{id}/revisions/{n}/evaluate` compares base and specialized answers |
 | POST | `/training/ais/{id}/revisions/{n}/deploy` | Deploy an evaluated revision. `POST /training/ais/{id}/undeploy` |
+| GET, POST | `/memory` | Memories (Muninn). GET returns `memories` and `categories`. Also `PATCH/DELETE /memory/{id}`; PATCH takes `content`, `category`, and `enabled` |
 | GET | `/training/deployed` | Deployed specialized AIs as models |
 | POST | `/training/example` | Set up the example AI from the sample material, or return it if it exists. `GET /training/samples` returns the sample files |
 
 Assistant messages from `GET /conversations/{id}/messages` carry `meta`: the `sources` an answer drew on (`web`, `knowledge`, or `file`, with title, URL or source name, and a snippet) and plain-language `steps` describing what was done. The same `meta` is on the `chat.complete` event.
+
+Memory is on unless the setting `memory_enabled` is `false` or a conversation has `memory_off: true` (set with `PATCH /conversations/{id}`). A message that starts "Remember that…", "Forget…", or asks "What do you remember?" is answered without a model; the reply is saved as usual and the events `memory.saved` or `memory.deleted` follow. Other turns add the memories that fit the question to the instructions and list them as `memory` sources. A secret such as a password, key, or card number is not saved.
+
+When a conversation's history passes half of the model's window, a summary of the older messages is written after the reply and replaces them in later turns. The messages stay saved. The `chat.summarized` event follows. The `chat.complete` payload's `context.summarized_messages` counts the messages the summary covers, and `pipeline_ms` is the time from the request to the first model call.
 
 A profile's `knowledge_sources` lists Mimir source ids. Chat searches them on every turn and adds the matching passages before the system prompt.
 

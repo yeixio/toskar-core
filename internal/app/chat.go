@@ -14,6 +14,7 @@ import (
 	"github.com/yeixio/yggdrasil-core/internal/mimir"
 	"github.com/yeixio/yggdrasil-core/internal/models"
 	modelhealth "github.com/yeixio/yggdrasil-core/internal/models/health"
+	"github.com/yeixio/yggdrasil-core/internal/muninn"
 	"github.com/yeixio/yggdrasil-core/internal/profiles"
 	"github.com/yeixio/yggdrasil-core/internal/runtimes/llamacpp"
 	"github.com/yeixio/yggdrasil-core/internal/tools"
@@ -25,6 +26,7 @@ import (
 // modelID, when set, overrides the profile's role model bindings for this turn.
 // execution is automatic | local (empty keeps the profile node policy).
 func (a *App) RunChat(ctx context.Context, profileID, conversationID, message string, stream bool, modelID, execution string) (<-chan pluginapi.ChatChunk, error) {
+	turnStart := time.Now()
 	if conversationID != "" {
 		if conv, err := a.Conversations.Get(ctx, conversationID); err == nil {
 			if profileID == "" {
@@ -34,6 +36,10 @@ func (a *App) RunChat(ctx context.Context, profileID, conversationID, message st
 				modelID = conv.ModelID
 			}
 		}
+	}
+	// Memory requests are answered by Yggdrasil, not the model.
+	if ch, ok := a.handleMemoryCommand(ctx, conversationID, message); ok {
+		return ch, nil
 	}
 	if profileID == "" {
 		profileID = a.defaultProfileID(ctx)
@@ -139,6 +145,13 @@ func (a *App) RunChat(ctx context.Context, profileID, conversationID, message st
 			taskID:         task.ID,
 			turnPrompt:     message,
 			trace:          &turnTrace{},
+			startedAt:      turnStart,
+		}
+		if a.memoryOn(ctx, conversationID) {
+			if mems, err := a.Muninn.Relevant(ctx, message); err == nil {
+				env.memories = mems
+				env.trace.memories(mems)
+			}
 		}
 		if special != nil {
 			env.adapter = special.adapter
@@ -255,6 +268,10 @@ func (a *App) RunChat(ctx context.Context, profileID, conversationID, message st
 			a.recordGeneration(ctx, profile, conversationID, convTitle, "", env.modelID(), metrics, roleSteps)
 		}
 		payload := map[string]any{"conversation_id": conversationID}
+		if ms, ok := env.pipelineMS(); ok {
+			payload["pipeline_ms"] = ms
+			a.Logger.Debug("chat pipeline overhead", "conversation_id", conversationID, "ms", ms)
+		}
 		if meta := env.trace.meta(); meta != nil {
 			payload["meta"] = meta
 		}
@@ -264,7 +281,17 @@ func (a *App) RunChat(ctx context.Context, profileID, conversationID, message st
 		}
 		if contextUsage != nil {
 			contextUsage["limit"] = env.ContextLimit()
+			env.mu.Lock()
+			if env.summarized > 0 {
+				contextUsage["summarized_messages"] = env.summarized
+			}
+			env.mu.Unlock()
 			payload["context"] = contextUsage
+		}
+		// Summarize with the model that answered, only when it ran here, so a
+		// turn placed on a paired computer never loads a model on this one.
+		if conversationID != "" && full != "" && env.ranLocally() {
+			a.summarizeLater(conversationID, env.modelID(), env.ContextLimit())
 		}
 		if len(roleSteps) > 0 {
 			payload["role_steps"] = roleSteps
@@ -646,6 +673,14 @@ type chatExecEnv struct {
 	knowledge    []string
 	// trace records sources and steps for the answer.
 	trace *turnTrace
+	// memories are the persistent memories relevant to this turn.
+	memories []muninn.Memory
+	// summarized counts saved messages replaced by a summary this turn.
+	summarized int
+	// startedAt and firstGenerate measure the pipeline's overhead before
+	// the first model call (AI experience spec §65).
+	startedAt     time.Time
+	firstGenerate time.Time
 
 	mu         sync.Mutex
 	lastModel  string
@@ -682,7 +717,44 @@ func (e *chatExecEnv) PriorMessages(ctx context.Context) []pluginapi.ChatMessage
 	if err != nil {
 		return nil
 	}
-	return contextusage.WithoutCurrentTurn(stored, e.turnPrompt)
+	prior := contextusage.WithoutCurrentTurn(stored, e.turnPrompt)
+	// Older messages may be replaced by Muninn's summary; all of them stay saved.
+	if e.app.Muninn != nil {
+		if sum, ok, err := e.app.Muninn.GetSummary(ctx, e.conversationID); err == nil && ok {
+			var n int
+			prior, n = muninn.WithSummary(prior, stored, &sum)
+			e.mu.Lock()
+			e.summarized = n
+			e.mu.Unlock()
+		}
+	}
+	return prior
+}
+
+// pipelineMS is the time from receiving the message to the first model call.
+func (e *chatExecEnv) pipelineMS() (int64, bool) {
+	e.mu.Lock()
+	defer e.mu.Unlock()
+	if e.startedAt.IsZero() || e.firstGenerate.IsZero() {
+		return 0, false
+	}
+	return e.firstGenerate.Sub(e.startedAt).Milliseconds(), true
+}
+
+// ranLocally reports whether every role in this turn ran on this computer.
+func (e *chatExecEnv) ranLocally() bool {
+	local := ""
+	if e.app != nil && e.app.Config != nil {
+		local = e.app.Config.Get().NodeID
+	}
+	e.mu.Lock()
+	defer e.mu.Unlock()
+	for _, id := range e.roleNodes {
+		if id != "" && id != local {
+			return false
+		}
+	}
+	return true
 }
 
 func (e *chatExecEnv) roleNode(role string) (string, bool) {
@@ -703,6 +775,9 @@ func (e *chatExecEnv) Generate(ctx context.Context, role string, messages []plug
 	modelID := e.modelForRole(role)
 	e.mu.Lock()
 	e.lastModel = modelID
+	if e.firstGenerate.IsZero() {
+		e.firstGenerate = time.Now()
+	}
 	e.mu.Unlock()
 	nodeID, err := e.NodeForRole(role)
 	if err != nil {
@@ -857,7 +932,15 @@ func (e *chatExecEnv) modelForRole(role string) string {
 // AI's system instructions. The simple orchestrator places them ahead of its
 // own system prompt.
 func (e *chatExecEnv) TurnInstructions(ctx context.Context, prompt string) string {
-	return strings.TrimSpace(e.instructions)
+	var parts []string
+	if s := strings.TrimSpace(e.instructions); s != "" {
+		parts = append(parts, s)
+	}
+	// Memories come from the person, so they are trusted instructions.
+	if block := muninn.Block(e.memories); block != "" {
+		parts = append(parts, block)
+	}
+	return strings.Join(parts, "\n\n")
 }
 
 // ReferenceMaterial returns connected knowledge for this turn. It is

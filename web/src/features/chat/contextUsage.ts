@@ -6,6 +6,8 @@ export type ContextUsage = {
   conversation: number
   toolResults: number
   estimated: boolean
+  /** Older saved messages the model saw as a summary. */
+  summarizedMessages?: number
 }
 
 /** Local llama.cpp starts at this window unless the model advertises a smaller one. */
@@ -29,6 +31,7 @@ export function parseContextUsage(raw: unknown): ContextUsage | null {
     conversation: numberField(record.conversation),
     toolResults: numberField(record.tool_results),
     estimated: record.estimated === true,
+    summarizedMessages: numberField(record.summarized_messages),
   }
   if (usage.promptTokens <= 0 && usage.instructions + usage.tools + usage.conversation + usage.toolResults <= 0) {
     return null

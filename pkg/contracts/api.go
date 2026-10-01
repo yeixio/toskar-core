@@ -293,10 +293,12 @@ type AIProfile struct {
 
 // Conversation is a chat thread.
 type Conversation struct {
-	ID        string    `json:"id"`
-	Title     string    `json:"title"`
-	ProfileID string    `json:"profile_id,omitempty"`
-	ModelID   string    `json:"model_id,omitempty"`
+	ID        string `json:"id"`
+	Title     string `json:"title"`
+	ProfileID string `json:"profile_id,omitempty"`
+	ModelID   string `json:"model_id,omitempty"`
+	// MemoryOff keeps persistent memory out of this conversation.
+	MemoryOff bool      `json:"memory_off"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }
@@ -538,9 +540,11 @@ type SettingsView struct {
 	// ModelStorageLimitGB is 0 for unlimited.
 	ModelStorageLimitGB int  `json:"model_storage_limit_gb"`
 	SaveChatHistory     bool `json:"save_chat_history"`
-	SaveTaskHistory     bool `json:"save_task_history"`
-	NotifyTaskFinish    bool `json:"notify_task_finish"`
-	NotifyPeerOffline   bool `json:"notify_peer_offline"`
+	// MemoryEnabled turns persistent memory on for chats by default.
+	MemoryEnabled     bool `json:"memory_enabled"`
+	SaveTaskHistory   bool `json:"save_task_history"`
+	NotifyTaskFinish  bool `json:"notify_task_finish"`
+	NotifyPeerOffline bool `json:"notify_peer_offline"`
 	// Tool defaults: deny | ask | allow | allow-for-session
 	ToolTerminal   string `json:"tool_terminal"`
 	ToolFileWrites string `json:"tool_file_writes"`
