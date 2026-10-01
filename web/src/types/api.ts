@@ -419,6 +419,15 @@ export interface APIKeyRecord {
   created_at: string
   last_used_at?: string
   revoked: boolean
+  /** What the key may ask of the assistant (spec §62). */
+  permissions?: APIKeyPermissions
+}
+
+export interface APIKeyPermissions {
+  memory: 'never' | 'on_request' | 'always'
+  knowledge: 'never' | 'on_request' | 'always'
+  tools: 'profile' | 'read_only' | 'none'
+  placement: boolean
 }
 
 export interface CreateAPIKeyResponse {

@@ -192,14 +192,54 @@ Built-in profile ids include `general-assistant`, `programming`, and `research`.
 
 `model` may be `profile:<id>`, `auto`, or a bare id. A bare id is used as a profile id when that profile exists, and otherwise as a model override. `auto` picks an installed model for each request, as in chat.
 
+The API gets the same assistant as chat: planning, web look-ups, connected services, answer checks, personalization, and specialized AIs.
+- **Messages:** the whole `messages` array is used. The last `user` message is the turn, and earlier `user` and `assistant` messages are its history. `system` (and `developer`) messages are the calling app's instructions. They cannot change what tools may do.
+- **Effort:** `reasoning_effort` maps to effort. `minimal` and `low` give Fast, `medium` gives Balanced, and `high` gives Thorough.
+
+The optional `yggdrasil` object holds the assistant's own controls:
+
+```json
+{
+  "model": "auto",
+  "messages": [{"role": "user", "content": "What did we decide about the release?"}],
+  "yggdrasil": {
+    "memory": true,
+    "knowledge": true,
+    "knowledge_sources": ["<mimir source id>"],
+    "tools": ["internet.search", "internet.open"],
+    "effort": "thorough",
+    "placement": "local",
+    "progress": true
+  }
+}
+```
+
+| Field | Meaning |
+| --- | --- |
+| `memory` | Use the person's memories. API requests use them only when they ask, unless the key says otherwise. "Remember that …" saves a memory only when memory is on for the request. |
+| `knowledge` | Use the profile's connected knowledge. `knowledge_sources` adds sources. |
+| `tools` | Narrow the profile's tools to these ids. A request can never add a tool or loosen a policy. |
+| `effort` | `auto`, `fast`, `balanced`, or `thorough`; it takes precedence over `reasoning_effort`. |
+| `placement` | `local` or `automatic`. |
+| `progress` | With `"stream": true`, progress and tool activity arrive as chunks with an empty `delta` and a `yggdrasil.event`, such as `{"type": "tool.started", "tool_id": "internet.search"}`. Before `[DONE]`, a last such chunk carries `yggdrasil.sources`, `steps`, `notice`, and `files`. Clients that ignore unknown fields see a plain OpenAI stream. |
+
+A non-streaming response has a `yggdrasil` object with the answer's `sources`, `steps`, `notice`, and `files` when there are any.
+
+Each API key has `permissions` that a request can only narrow:
+- `memory` and `knowledge` are `never`, `on_request`, or `always`. The defaults are `on_request` for memory and `always` for knowledge.
+- `tools` is `profile` (the default), `read_only`, or `none`.
+- `placement` (true by default) lets a request choose where it runs.
+
+Asking for something a key does not allow returns 403 and says what was refused. Change a key's permissions with `PUT /api/v1/api-keys/{id}/permissions` or on the API Access page; rotating a key keeps them. When the API listens beyond this computer, every request needs a key, so its limits always apply. On this computer a key is optional; its limits apply when the app sends it, and a request without one gets the defaults.
+
 ### Streaming
 
 `"stream": true` responds with `Content-Type: text/event-stream`. Each event is `data: {json}` and the stream ends with `data: [DONE]`.
 
 ### Known differences
 
-- Only the last message with `"role": "user"` is sent into the chat path. Earlier turns, system prompts, and assistant messages in the same request are not forwarded.
 - `temperature` and `max_tokens` are accepted and ignored.
+- `tool` messages and assistant `tool_calls` in the history are skipped.
 - Tool definitions in the OpenAI request are not passed through. Tool use is controlled by the Yggdrasil profile.
 - The non-streaming `id` is the fixed string `chatcmpl-ygg`.
 - A model must already be installed and startable. The HTTP call does not download one for you.

@@ -98,6 +98,7 @@ type Dependencies struct {
 	CreateAPIKey           func(ctx context.Context, name string) (auth.APIKeyRecord, string, error)
 	RevokeAPIKey           func(ctx context.Context, id string) error
 	RotateAPIKey           func(ctx context.Context, id string) (auth.APIKeyRecord, string, error)
+	SetAPIKeyPermissions   func(ctx context.Context, id string, p auth.APIKeyPermissions) (auth.APIKeyRecord, error)
 	VerifyAPIKey           func(ctx context.Context, secret string) (auth.APIKeyRecord, error)
 	GetSettings            func(ctx context.Context) (contracts.SettingsView, error)
 	UpdateSettings         func(ctx context.Context, patch map[string]any) (contracts.SettingsView, error)
@@ -204,6 +205,7 @@ func (s *Server) routes() {
 	api.HandleFunc("/api-keys", s.handleCreateAPIKey).Methods(http.MethodPost)
 	api.HandleFunc("/api-keys/{id}", s.handleDeleteAPIKey).Methods(http.MethodDelete)
 	api.HandleFunc("/api-keys/{id}/rotate", s.handleRotateAPIKey).Methods(http.MethodPost)
+	api.HandleFunc("/api-keys/{id}/permissions", s.handleSetAPIKeyPermissions).Methods(http.MethodPut)
 	api.HandleFunc("/settings", s.handleGetSettings).Methods(http.MethodGet, http.MethodOptions)
 	api.HandleFunc("/settings", s.handlePatchSettings).Methods(http.MethodPatch, http.MethodPut)
 	api.HandleFunc("/settings/reset", s.handleResetApp).Methods(http.MethodPost, http.MethodOptions)

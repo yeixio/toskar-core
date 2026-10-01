@@ -590,6 +590,25 @@ func (s *Server) handleRotateAPIKey(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, map[string]any{"key": rec, "secret": secret})
 }
 
+// handleSetAPIKeyPermissions changes what a key may ask of the assistant (§62).
+func (s *Server) handleSetAPIKeyPermissions(w http.ResponseWriter, r *http.Request) {
+	if s.deps.SetAPIKeyPermissions == nil {
+		writeErr(w, http.StatusNotImplemented, "NOT_IMPLEMENTED", "API keys not available.", nil)
+		return
+	}
+	var p auth.APIKeyPermissions
+	if err := json.NewDecoder(r.Body).Decode(&p); err != nil {
+		writeErr(w, http.StatusBadRequest, "INVALID_BODY", "Send the permissions as JSON.", nil)
+		return
+	}
+	rec, err := s.deps.SetAPIKeyPermissions(r.Context(), mux.Vars(r)["id"], p)
+	if err != nil {
+		writeErr(w, http.StatusBadRequest, "PERMISSIONS_FAILED", err.Error(), nil)
+		return
+	}
+	writeJSON(w, http.StatusOK, rec)
+}
+
 func (s *Server) handleDiagnostics(w http.ResponseWriter, r *http.Request) {
 	if s.deps.ExportDiagnostics == nil {
 		writeErr(w, http.StatusNotImplemented, "NOT_IMPLEMENTED", "Diagnostics export is not available.", nil)

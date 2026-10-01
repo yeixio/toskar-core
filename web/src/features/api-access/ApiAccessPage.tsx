@@ -5,6 +5,7 @@ import { api, forgetApiKey, rememberApiKey, storedApiKey } from '@/lib/api'
 import { formatLastUsed } from '@/features/models/modelPresentation'
 import { useUIStore } from '@/stores/uiStore'
 import type { APIKeyRecord } from '@/types/api'
+import { KeyPermissions } from './KeyPermissions'
 import { RealmKicker } from '@/components/ui/Realm'
 
 type ProbeState = 'checking' | 'ok' | 'fail'
@@ -541,6 +542,7 @@ export function ApiAccessPage() {
                     Revoke
                   </button>
                 </div>
+                <KeyPermissions apiKey={key} />
               </li>
             ))}
           </ul>

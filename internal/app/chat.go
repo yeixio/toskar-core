@@ -22,6 +22,7 @@ import (
 	"github.com/yeixio/yggdrasil-core/internal/runtimes/llamacpp"
 	"github.com/yeixio/yggdrasil-core/internal/share"
 	"github.com/yeixio/yggdrasil-core/internal/tools"
+	"github.com/yeixio/yggdrasil-core/internal/turnopts"
 	"github.com/yeixio/yggdrasil-core/pkg/contracts"
 	"github.com/yeixio/yggdrasil-core/pkg/pluginapi"
 )
@@ -42,7 +43,11 @@ func (a *App) RunChat(ctx context.Context, profileID, conversationID, message st
 		}
 	}
 	// Memory requests are answered by Yggdrasil, not the model.
-	if ch, ok := a.handleMemoryCommand(ctx, conversationID, message); ok {
+	opts := turnopts.From(ctx)
+	// An API caller changes memories only when it opted into memory (§62).
+	if opts != nil && !opts.Memory {
+		// Fall through: "Remember …" is an ordinary message for this caller.
+	} else if ch, ok := a.handleMemoryCommand(ctx, conversationID, message); ok {
 		return ch, nil
 	}
 	if profileID == "" {
@@ -61,6 +66,13 @@ func (a *App) RunChat(ctx context.Context, profileID, conversationID, message st
 			OrchestratorID: "simple",
 			NodePolicy:     contracts.NodePolicy{Mode: "automatic"},
 		}
+	}
+	// An API request chooses its connected knowledge (§62).
+	if opts != nil {
+		if !opts.Knowledge {
+			profile.KnowledgeSources = nil
+		}
+		profile.KnowledgeSources = append(append([]string(nil), profile.KnowledgeSources...), opts.KnowledgeSources...)
 	}
 	// Auto: Huginn picks the installed model that suits this message. A
 	// question about files or connected knowledge counts as one that needs a
@@ -107,6 +119,10 @@ func (a *App) RunChat(ctx context.Context, profileID, conversationID, message st
 	// Connected services' tools, at their default policies unless the
 	// profile sets its own (§32).
 	profile = tools.WithConnected(profile)
+	if opts != nil {
+		// An API key or request can narrow the tools, never widen them (§62).
+		profile = narrowTools(profile, opts)
+	}
 	if special != nil {
 		// A specialized AI answers in the style it was trained on, without the
 		// tool protocol, on the computer that holds its adapter.
@@ -129,12 +145,16 @@ func (a *App) RunChat(ctx context.Context, profileID, conversationID, message st
 		if special != nil {
 			routedID, routedName = special.id, special.name
 		}
-		a.Bus.Publish(events.New(events.ChatModelRouted, map[string]any{
+		routed := map[string]any{
 			"conversation_id": conversationID,
 			"model_id":        routedID,
 			"model_name":      routedName,
 			"reason":          routeReason,
-		}))
+		}
+		a.Bus.Publish(events.New(events.ChatModelRouted, routed))
+		if opts != nil && opts.Progress != nil {
+			opts.Progress(events.ChatModelRouted, routed)
+		}
 	}
 	profile = a.withModelTools(profile, modelID)
 	orch, err := a.OrchRegistry.Get(profile.OrchestratorID)
@@ -200,7 +220,8 @@ func (a *App) RunChat(ctx context.Context, profileID, conversationID, message st
 		if busy, ok := a.trainingNow(); ok {
 			env.trace.sharing(busy + ", so this answer may be slower.")
 		}
-		if a.memoryOn(ctx, conversationID) {
+		env.opts = opts
+		if a.memoryOn(ctx, conversationID) && (opts == nil || opts.Memory) {
 			if mems, err := a.Muninn.Relevant(ctx, message); err == nil {
 				env.memories = mems
 				env.trace.memories(mems)
@@ -378,6 +399,9 @@ func (a *App) RunChat(ctx context.Context, profileID, conversationID, message st
 		}
 		if meta := env.trace.meta(); meta != nil {
 			payload["meta"] = meta
+			if opts != nil && opts.Meta != nil {
+				opts.Meta(meta)
+			}
 		}
 		if metrics != nil {
 			payload["metrics"] = metrics
@@ -779,6 +803,8 @@ type chatExecEnv struct {
 	trace *turnTrace
 	// memories are the persistent memories relevant to this turn.
 	memories []muninn.Memory
+	// opts are an API request's choices for this turn, or nil (§62).
+	opts *turnopts.Options
 	// attachments are the files attached to this message.
 	attachments []artifacts.Artifact
 	// summarized counts saved messages replaced by a summary this turn.
@@ -816,6 +842,10 @@ func (e *chatExecEnv) ContextLimit() int {
 }
 
 func (e *chatExecEnv) PriorMessages(ctx context.Context) []pluginapi.ChatMessage {
+	if e.conversationID == "" && e.opts != nil {
+		// An API caller sends the whole conversation each time (§62).
+		return e.opts.History
+	}
 	if e.conversationID == "" || e.app == nil || e.app.Conversations == nil {
 		return nil
 	}
@@ -914,9 +944,15 @@ func (e *chatExecEnv) ExecuteTool(ctx context.Context, toolID string, args map[s
 		meta["task_id"] = e.taskID
 	}
 	ctx = artifacts.WithConversation(ctx, e.conversationID)
+	e.progress(events.ToolStarted, map[string]any{"tool_id": toolID, "args": args})
 	result, err := e.app.Tools.Execute(ctx, toolID, args, policy, "chat requested tool", meta)
 	if err == nil && e.trace != nil {
 		e.trace.tool(toolID, args, result)
+	}
+	if err != nil {
+		e.progress(events.ToolFailed, map[string]any{"tool_id": toolID, "error": err.Error()})
+	} else {
+		e.progress(events.ToolCompleted, map[string]any{"tool_id": toolID})
 	}
 	return result, err
 }
@@ -941,6 +977,7 @@ func (e *chatExecEnv) Emit(eventType string, payload map[string]any) {
 			payload["task_id"] = e.taskID
 		}
 	}
+	e.progress(eventType, payload)
 	if e.trace != nil {
 		switch eventType {
 		case simple.EventPlanCreated:
@@ -1063,6 +1100,11 @@ func (e *chatExecEnv) TurnInstructions(ctx context.Context, prompt string) strin
 	// Memories come from the person, so they are trusted instructions.
 	if block := muninn.Block(e.memories); block != "" {
 		parts = append(parts, block)
+	}
+	// The app calling the API holds a key to this computer, so its system
+	// messages are trusted too. They cannot change what tools may do.
+	if e.opts != nil && strings.TrimSpace(e.opts.System) != "" {
+		parts = append(parts, "Instructions from the application using the API:\n"+strings.TrimSpace(e.opts.System))
 	}
 	return strings.Join(parts, "\n\n")
 }

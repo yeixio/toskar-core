@@ -11,8 +11,10 @@ import (
 	"testing"
 
 	"github.com/yeixio/yggdrasil-core/internal/events"
+	"github.com/yeixio/yggdrasil-core/internal/huginn"
 	"github.com/yeixio/yggdrasil-core/internal/profiles"
 	"github.com/yeixio/yggdrasil-core/internal/store"
+	"github.com/yeixio/yggdrasil-core/internal/turnopts"
 	"github.com/yeixio/yggdrasil-core/pkg/contracts"
 	"github.com/yeixio/yggdrasil-core/pkg/pluginapi"
 )
@@ -140,6 +142,11 @@ type scriptChat struct {
 	modelID   string
 	message   string
 	stream    bool
+	execution string
+	effort    huginn.Effort
+	opts      *turnopts.Options
+	// emit runs during the turn, as the orchestrator would.
+	emit func(o *turnopts.Options)
 }
 
 func (s *scriptChat) RunChat(ctx context.Context, profileID, conversationID, message string, stream bool, modelID, execution string) (<-chan pluginapi.ChatChunk, error) {
@@ -147,8 +154,14 @@ func (s *scriptChat) RunChat(ctx context.Context, profileID, conversationID, mes
 	s.modelID = modelID
 	s.message = message
 	s.stream = stream
+	s.execution = execution
+	s.effort = huginn.EffortFrom(ctx)
+	s.opts = turnopts.From(ctx)
 	if s.err != nil {
 		return nil, s.err
+	}
+	if s.emit != nil && s.opts != nil {
+		s.emit(s.opts)
 	}
 	ch := make(chan pluginapi.ChatChunk, len(s.chunks))
 	for _, chunk := range s.chunks {

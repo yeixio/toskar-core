@@ -294,6 +294,8 @@ func New(opts Options) (*App, error) {
 		Chat:     a,
 		Bus:      bus,
 		Auth:     a.openAIAuth,
+		// Chat completions also learn what the key may ask of the assistant (§62).
+		Permissions: a.openAIPermissions,
 	}
 
 	webRoot := opts.WebRoot
@@ -459,12 +461,13 @@ func New(opts Options) (*App, error) {
 		ToolActivity: func() any {
 			return toolReg.Recent()
 		},
-		ListAPIKeys:  apiKeyMgr.List,
-		CreateAPIKey: apiKeyMgr.Create,
-		RevokeAPIKey: apiKeyMgr.Revoke,
-		RotateAPIKey: apiKeyMgr.Rotate,
-		VerifyAPIKey: apiKeyMgr.Verify,
-		StopChat:     a.StopChat,
+		ListAPIKeys:          apiKeyMgr.List,
+		CreateAPIKey:         apiKeyMgr.Create,
+		RevokeAPIKey:         apiKeyMgr.Revoke,
+		RotateAPIKey:         apiKeyMgr.Rotate,
+		SetAPIKeyPermissions: apiKeyMgr.SetPermissions,
+		VerifyAPIKey:         apiKeyMgr.Verify,
+		StopChat:             a.StopChat,
 		Chat: func(w http.ResponseWriter, r *http.Request, conversationID, profileID, modelID, message string, stream bool, execution string) error {
 			return a.HandleHTTPChat(w, r, conversationID, profileID, modelID, message, stream, execution)
 		},
@@ -603,6 +606,28 @@ func (a *App) detectHardware(ctx context.Context) (contracts.HardwareInventory, 
 
 func (a *App) openAIAuth(r *http.Request) error {
 	return a.authorizeControlRequest(r)
+}
+
+// openAIPermissions authorizes a chat completion and returns what its key
+// may ask of the assistant. A key's limits apply even on this computer; a
+// request here without a key gets the defaults.
+func (a *App) openAIPermissions(r *http.Request) (auth.APIKeyPermissions, error) {
+	if err := a.authorizeControlRequest(r); err != nil {
+		return auth.APIKeyPermissions{}, err
+	}
+	token, err := auth.BearerToken(r)
+	if err != nil || token == "" {
+		return auth.DefaultAPIKeyPermissions(), nil
+	}
+	rec, err := a.APIKeys.Verify(r.Context(), token)
+	if err != nil {
+		if config.ListensBeyondLoopback(a.Config.Get().APIHost) {
+			return auth.APIKeyPermissions{}, err
+		}
+		// On this computer a key is optional; a wrong one gets the defaults.
+		return auth.DefaultAPIKeyPermissions(), nil
+	}
+	return rec.Permissions, nil
 }
 
 func (a *App) authorizeControlRequest(r *http.Request) error {

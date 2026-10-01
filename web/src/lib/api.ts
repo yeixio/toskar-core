@@ -1,5 +1,6 @@
 import type {
   AIProfile,
+  APIKeyPermissions,
   APIKeyRecord,
   BrowseModel,
   ChatRequest,
@@ -468,6 +469,9 @@ export const api = {
 
   deleteApiKey: (id: string) =>
     request<null>(`/api/v1/api-keys/${id}`, { method: 'DELETE' }),
+
+  setApiKeyPermissions: (id: string, permissions: APIKeyPermissions) =>
+    request<APIKeyRecord>(`/api/v1/api-keys/${id}/permissions`, { method: 'PUT', body: JSON.stringify(permissions) }),
 
   rotateApiKey: (id: string) =>
     request<CreateAPIKeyResponse>(`/api/v1/api-keys/${id}/rotate`, {

@@ -7,10 +7,14 @@ import (
 	"io"
 	"net/http"
 	"strings"
+	"sync"
 
+	"github.com/yeixio/yggdrasil-core/internal/auth"
 	"github.com/yeixio/yggdrasil-core/internal/events"
+	"github.com/yeixio/yggdrasil-core/internal/huginn"
 	"github.com/yeixio/yggdrasil-core/internal/profiles"
 	"github.com/yeixio/yggdrasil-core/internal/runtimes"
+	"github.com/yeixio/yggdrasil-core/internal/turnopts"
 	"github.com/yeixio/yggdrasil-core/pkg/contracts"
 	"github.com/yeixio/yggdrasil-core/pkg/pluginapi"
 )
@@ -27,6 +31,9 @@ type Handler struct {
 	Chat     ChatService
 	Bus      *events.Bus
 	Auth     func(r *http.Request) error
+	// Permissions authorizes a request and returns what its key may ask of
+	// the assistant (§62). When set, it replaces Auth for chat completions.
+	Permissions func(r *http.Request) (auth.APIKeyPermissions, error)
 	// Specialized lists deployed specialized AIs (sai: ids) for /v1/models.
 	Specialized func(ctx context.Context) ([]contracts.Model, error)
 }
@@ -37,6 +44,24 @@ type chatCompletionRequest struct {
 	Stream      bool                    `json:"stream"`
 	Temperature float64                 `json:"temperature"`
 	MaxTokens   int                     `json:"max_tokens"`
+	// ReasoningEffort is OpenAI's low, medium, or high.
+	ReasoningEffort string `json:"reasoning_effort"`
+	// Yggdrasil holds the assistant's own controls (§62).
+	Yggdrasil *yggdrasilOptions `json:"yggdrasil"`
+}
+
+// yggdrasilOptions are the request's assistant controls. Each one can only
+// use what the API key allows.
+type yggdrasilOptions struct {
+	Memory           *bool    `json:"memory"`
+	Knowledge        *bool    `json:"knowledge"`
+	KnowledgeSources []string `json:"knowledge_sources"`
+	Tools            []string `json:"tools"`
+	Effort           string   `json:"effort"`
+	Placement        string   `json:"placement"`
+	// Progress streams the turn's progress and tool activity as chunks with
+	// an empty delta and a yggdrasil field.
+	Progress bool `json:"progress"`
 }
 
 // HandleModels lists profiles as OpenAI models.
@@ -74,7 +99,16 @@ func (h *Handler) HandleModels(w http.ResponseWriter, r *http.Request) {
 
 // HandleChatCompletions routes profile:ID to orchestrator chat.
 func (h *Handler) HandleChatCompletions(w http.ResponseWriter, r *http.Request) {
-	if h.Auth != nil {
+	perms := auth.DefaultAPIKeyPermissions()
+	switch {
+	case h.Permissions != nil:
+		p, err := h.Permissions(r)
+		if err != nil {
+			writeError(w, http.StatusUnauthorized, "UNAUTHORIZED", err.Error())
+			return
+		}
+		perms = p
+	case h.Auth != nil:
 		if err := h.Auth(r); err != nil {
 			writeError(w, http.StatusUnauthorized, "UNAUTHORIZED", err.Error())
 			return
@@ -94,11 +128,17 @@ func (h *Handler) HandleChatCompletions(w http.ResponseWriter, r *http.Request) 
 		modelID = req.Model
 		profileID = req.Model // also try as profile id when no model files match
 	}
-	message := lastUserMessage(req.Messages)
+	message, history, system := splitMessages(req.Messages)
 	if message == "" {
 		writeError(w, http.StatusBadRequest, "INVALID_REQUEST", "messages must include a user message")
 		return
 	}
+	opts, execution, effort, err := turnOptions(req, perms)
+	if err != nil {
+		writeError(w, http.StatusForbidden, "NOT_ALLOWED", err.Error())
+		return
+	}
+	opts.History, opts.System = history, system
 
 	if h.Chat == nil {
 		writeError(w, http.StatusNotImplemented, "NOT_IMPLEMENTED", "chat not configured")
@@ -114,20 +154,54 @@ func (h *Handler) HandleChatCompletions(w http.ResponseWriter, r *http.Request) 
 		}
 	}
 
-	stream, err := h.Chat.RunChat(r.Context(), profileID, "", message, req.Stream, modelID, "")
+	// The answer's sources, steps, and notice, for the yggdrasil field.
+	var meta *contracts.MessageMeta
+	var metaMu sync.Mutex
+	opts.Meta = func(m *contracts.MessageMeta) {
+		metaMu.Lock()
+		meta = m
+		metaMu.Unlock()
+	}
+	sw := &streamWriter{w: w}
+	if req.Stream {
+		if !sw.start() {
+			writeError(w, http.StatusInternalServerError, "STREAM_UNSUPPORTED", "streaming not supported")
+			return
+		}
+		if req.Yggdrasil != nil && req.Yggdrasil.Progress {
+			opts.Progress = func(eventType string, payload map[string]any) { sw.progress(profileID, eventType, payload) }
+		}
+	}
+	ctx := turnopts.With(r.Context(), opts)
+	if effort != "" {
+		ctx = huginn.WithEffort(ctx, huginn.ParseEffort(effort))
+	}
+	stream, err := h.Chat.RunChat(ctx, profileID, "", message, req.Stream, modelID, execution)
 	if err != nil {
+		if req.Stream {
+			sw.data(map[string]any{"error": map[string]any{"message": err.Error()}})
+			return
+		}
 		writeError(w, http.StatusInternalServerError, "CHAT_FAILED", err.Error())
 		return
 	}
+	extension := func() map[string]any {
+		metaMu.Lock()
+		defer metaMu.Unlock()
+		if meta == nil {
+			return nil
+		}
+		return map[string]any{"sources": meta.Sources, "steps": meta.Steps, "notice": meta.Notice, "files": meta.Files}
+	}
 
 	if !req.Stream {
-		h.writeNonStream(w, stream, profileID)
+		h.writeNonStream(w, stream, profileID, extension)
 		return
 	}
-	h.writeStream(w, r, stream, profileID)
+	h.writeStream(sw, r, stream, profileID, extension, req.Yggdrasil != nil && req.Yggdrasil.Progress)
 }
 
-func (h *Handler) writeNonStream(w http.ResponseWriter, stream <-chan pluginapi.ChatChunk, model string) {
+func (h *Handler) writeNonStream(w http.ResponseWriter, stream <-chan pluginapi.ChatChunk, model string, extension func() map[string]any) {
 	var content strings.Builder
 	for chunk := range stream {
 		if chunk.Error != "" {
@@ -136,51 +210,46 @@ func (h *Handler) writeNonStream(w http.ResponseWriter, stream <-chan pluginapi.
 		}
 		content.WriteString(chunk.Content)
 	}
-	writeJSON(w, map[string]any{
+	out := map[string]any{
 		"id":      "chatcmpl-ygg",
 		"object":  "chat.completion",
 		"model":   model,
 		"choices": []any{map[string]any{"index": 0, "message": map[string]any{"role": "assistant", "content": content.String()}, "finish_reason": "stop"}},
-	})
+	}
+	if ext := extension(); ext != nil {
+		out["yggdrasil"] = ext
+	}
+	writeJSON(w, out)
 }
 
-func (h *Handler) writeStream(w http.ResponseWriter, r *http.Request, stream <-chan pluginapi.ChatChunk, model string) {
-	flusher, ok := w.(http.Flusher)
-	if !ok {
-		writeError(w, http.StatusInternalServerError, "STREAM_UNSUPPORTED", "streaming not supported")
-		return
-	}
-	w.Header().Set("Content-Type", "text/event-stream")
-	w.Header().Set("Cache-Control", "no-cache")
-	w.Header().Set("Connection", "keep-alive")
-	w.WriteHeader(http.StatusOK)
-	flusher.Flush()
-
+func (h *Handler) writeStream(sw *streamWriter, r *http.Request, stream <-chan pluginapi.ChatChunk, model string, extension func() map[string]any, progress bool) {
 	id := "chatcmpl-ygg"
 	for chunk := range stream {
 		if chunk.Error != "" {
-			payload, _ := json.Marshal(map[string]any{"error": map[string]any{"message": chunk.Error}})
-			fmt.Fprintf(w, "data: %s\n\n", payload)
-			flusher.Flush()
+			sw.data(map[string]any{"error": map[string]any{"message": chunk.Error}})
 			return
 		}
 		if chunk.Content == "" && !chunk.Done {
 			continue
 		}
-		data, _ := json.Marshal(map[string]any{
+		sw.data(map[string]any{
 			"id":      id,
 			"object":  "chat.completion.chunk",
 			"model":   model,
 			"choices": []any{map[string]any{"index": 0, "delta": map[string]any{"content": chunk.Content}, "finish_reason": finishReason(chunk.Done)}},
 		})
-		fmt.Fprintf(w, "data: %s\n\n", data)
-		flusher.Flush()
 		if h.Bus != nil && chunk.Content != "" {
 			h.Bus.Publish(events.New(events.ChatToken, map[string]any{"content": chunk.Content}))
 		}
 	}
-	fmt.Fprintf(w, "data: [DONE]\n\n")
-	flusher.Flush()
+	if ext := extension(); progress && ext != nil {
+		sw.data(map[string]any{
+			"id": id, "object": "chat.completion.chunk", "model": model,
+			"choices":   []any{map[string]any{"index": 0, "delta": map[string]any{}, "finish_reason": nil}},
+			"yggdrasil": ext,
+		})
+	}
+	sw.done()
 	if h.Bus != nil {
 		h.Bus.Publish(events.New(events.ChatComplete, map[string]any{}))
 	}
@@ -194,13 +263,158 @@ func finishReason(done bool) any {
 	return nil
 }
 
-func lastUserMessage(messages []pluginapi.ChatMessage) string {
+// splitMessages honors the whole message array (§62): the last user
+// message is the turn, earlier user and assistant messages are its history,
+// and system messages are the caller's instructions.
+func splitMessages(messages []pluginapi.ChatMessage) (message string, history []pluginapi.ChatMessage, system string) {
+	last := -1
 	for i := len(messages) - 1; i >= 0; i-- {
 		if messages[i].Role == "user" {
-			return messages[i].Content
+			last = i
+			break
 		}
 	}
-	return ""
+	if last < 0 {
+		return "", nil, ""
+	}
+	var sys []string
+	for i, m := range messages {
+		switch {
+		case m.Role == "system" || m.Role == "developer":
+			if s := strings.TrimSpace(m.Content); s != "" {
+				sys = append(sys, s)
+			}
+		case i < last && (m.Role == "user" || m.Role == "assistant") && strings.TrimSpace(m.Content) != "":
+			history = append(history, pluginapi.ChatMessage{Role: m.Role, Content: m.Content})
+		}
+	}
+	return messages[last].Content, history, strings.Join(sys, "\n\n")
+}
+
+// turnOptions applies the request's controls within the key's permissions.
+// Asking for something the key does not allow is refused, not ignored.
+func turnOptions(req chatCompletionRequest, perms auth.APIKeyPermissions) (*turnopts.Options, string, string, error) {
+	y := req.Yggdrasil
+	if y == nil {
+		y = &yggdrasilOptions{}
+	}
+	opts := &turnopts.Options{}
+	use := func(level string, asked *bool, what string) (bool, error) {
+		switch level {
+		case auth.UseNever:
+			if asked != nil && *asked {
+				return false, fmt.Errorf("this API key may not use %s", what)
+			}
+			return false, nil
+		case auth.UseAlways:
+			return asked == nil || *asked, nil
+		}
+		return asked != nil && *asked, nil
+	}
+	var err error
+	if opts.Memory, err = use(perms.Memory, y.Memory, "memory"); err != nil {
+		return nil, "", "", err
+	}
+	if opts.Knowledge, err = use(perms.Knowledge, y.Knowledge, "connected knowledge"); err != nil {
+		return nil, "", "", err
+	}
+	if len(y.KnowledgeSources) > 0 {
+		if perms.Knowledge == auth.UseNever {
+			return nil, "", "", fmt.Errorf("this API key may not use connected knowledge")
+		}
+		opts.KnowledgeSources = y.KnowledgeSources
+	}
+	switch perms.Tools {
+	case auth.ToolsNone:
+		if len(y.Tools) > 0 {
+			return nil, "", "", fmt.Errorf("this API key may not use tools")
+		}
+		opts.Tools = []string{}
+	case auth.ToolsReadOnly:
+		opts.ReadOnlyTools = true
+	}
+	if y.Tools != nil && opts.Tools == nil {
+		opts.Tools = y.Tools
+	}
+	execution := ""
+	switch y.Placement {
+	case "":
+	case "local", "automatic":
+		if !perms.Placement {
+			return nil, "", "", fmt.Errorf("this API key may not choose where requests run")
+		}
+		execution = y.Placement
+	default:
+		return nil, "", "", fmt.Errorf("placement must be local or automatic")
+	}
+	effort := y.Effort
+	if effort == "" {
+		switch strings.ToLower(req.ReasoningEffort) {
+		case "minimal", "low":
+			effort = "fast"
+		case "medium":
+			effort = "balanced"
+		case "high":
+			effort = "thorough"
+		}
+	}
+	return opts, execution, effort, nil
+}
+
+// streamWriter writes server-sent events; progress may arrive from several
+// goroutines at once.
+type streamWriter struct {
+	w       http.ResponseWriter
+	flusher http.Flusher
+	mu      sync.Mutex
+}
+
+func (s *streamWriter) start() bool {
+	f, ok := s.w.(http.Flusher)
+	if !ok {
+		return false
+	}
+	s.flusher = f
+	s.w.Header().Set("Content-Type", "text/event-stream")
+	s.w.Header().Set("Cache-Control", "no-cache")
+	s.w.Header().Set("Connection", "keep-alive")
+	s.w.WriteHeader(http.StatusOK)
+	f.Flush()
+	return true
+}
+
+func (s *streamWriter) data(v any) {
+	raw, _ := json.Marshal(v)
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	fmt.Fprintf(s.w, "data: %s\n\n", raw)
+	s.flusher.Flush()
+}
+
+func (s *streamWriter) done() {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	fmt.Fprintf(s.w, "data: [DONE]\n\n")
+	s.flusher.Flush()
+}
+
+// progressFields are the parts of an event an API client sees.
+var progressFields = []string{"tool_id", "query", "steps", "parallel", "index", "step", "status", "model_id", "model_name", "reason", "effort", "issues", "fixed", "remaining", "error", "name"}
+
+// progress writes one event as a chunk with an empty delta, so OpenAI
+// clients ignore it and Yggdrasil-aware ones can show it.
+func (s *streamWriter) progress(model, eventType string, payload map[string]any) {
+	event := map[string]any{"type": eventType}
+	for _, k := range progressFields {
+		if v, ok := payload[k]; ok {
+			event[k] = v
+		}
+	}
+	s.data(map[string]any{
+		"id": "chatcmpl-ygg", "object": "chat.completion.chunk", "model": model,
+		"choices":   []any{map[string]any{"index": 0, "delta": map[string]any{}, "finish_reason": nil}},
+		"yggdrasil": map[string]any{"event": event},
+	})
 }
 
 func writeJSON(w http.ResponseWriter, v any) {

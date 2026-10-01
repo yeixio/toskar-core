@@ -492,6 +492,38 @@ paths:
       responses:
         "200":
           description: Status
+  /api/v1/api-keys/{id}/permissions:
+    put:
+      summary: Change what an API key may ask of the assistant
+      operationId: setAPIKeyPermissions
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                memory:
+                  type: string
+                  enum: [never, on_request, always]
+                knowledge:
+                  type: string
+                  enum: [never, on_request, always]
+                tools:
+                  type: string
+                  enum: [profile, read_only, none]
+                placement:
+                  type: boolean
+      responses:
+        "200":
+          description: The key, with its permissions
+        "400":
+          description: Invalid permissions or unknown key
   /api/v1/diagnostics:
     get:
       summary: Create a diagnostics bundle

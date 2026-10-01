@@ -34,6 +34,8 @@ type APIKeyRecord struct {
 	CreatedAt time.Time  `json:"created_at"`
 	LastUsed  *time.Time `json:"last_used_at,omitempty"`
 	Revoked   bool       `json:"revoked"`
+	// Permissions is what the key may ask of the assistant (§62).
+	Permissions APIKeyPermissions `json:"permissions"`
 }
 
 // Create generates a new API key; secret returned once.
@@ -59,7 +61,7 @@ func (m *APIKeyManager) Create(ctx context.Context, name string) (record APIKeyR
 	if err != nil {
 		return record, "", err
 	}
-	return APIKeyRecord{ID: id, Name: name, Prefix: prefix, CreatedAt: now}, secret, nil
+	return APIKeyRecord{ID: id, Name: name, Prefix: prefix, CreatedAt: now, Permissions: DefaultAPIKeyPermissions()}, secret, nil
 }
 
 // Adopt hashes a caller-supplied key when that key is not already valid.
@@ -91,7 +93,7 @@ func (m *APIKeyManager) Adopt(ctx context.Context, name, secret string) (APIKeyR
 	if err != nil {
 		return APIKeyRecord{}, err
 	}
-	return APIKeyRecord{ID: id, Name: name, Prefix: prefix, CreatedAt: now}, nil
+	return APIKeyRecord{ID: id, Name: name, Prefix: prefix, CreatedAt: now, Permissions: DefaultAPIKeyPermissions()}, nil
 }
 
 // Verify checks a presented API key.
@@ -101,14 +103,15 @@ func (m *APIKeyManager) Verify(ctx context.Context, secret string) (APIKeyRecord
 	}
 	prefix := secret[:12]
 	row := m.db.QueryRowContext(ctx, `
-		SELECT id, name, key_prefix, key_hash, created_at, revoked_at, last_used_at
+		SELECT id, name, key_prefix, key_hash, created_at, revoked_at, last_used_at, permissions
 		FROM api_keys WHERE key_prefix = ? AND revoked_at IS NULL`, prefix)
 	var rec APIKeyRecord
 	var hash, created string
-	var revoked, lastUsed sql.NullString
-	if err := row.Scan(&rec.ID, &rec.Name, &rec.Prefix, &hash, &created, &revoked, &lastUsed); err != nil {
+	var revoked, lastUsed, perms sql.NullString
+	if err := row.Scan(&rec.ID, &rec.Name, &rec.Prefix, &hash, &created, &revoked, &lastUsed, &perms); err != nil {
 		return APIKeyRecord{}, fmt.Errorf("invalid api key")
 	}
+	rec.Permissions = parsePermissions(perms)
 	if err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(secret)); err != nil {
 		return APIKeyRecord{}, fmt.Errorf("invalid api key")
 	}
@@ -124,7 +127,7 @@ func (m *APIKeyManager) Verify(ctx context.Context, secret string) (APIKeyRecord
 // List returns non-revoked keys (metadata only).
 func (m *APIKeyManager) List(ctx context.Context) ([]APIKeyRecord, error) {
 	rows, err := m.db.QueryContext(ctx, `
-		SELECT id, name, key_prefix, created_at, revoked_at, last_used_at
+		SELECT id, name, key_prefix, created_at, revoked_at, last_used_at, permissions
 		FROM api_keys ORDER BY created_at DESC`)
 	if err != nil {
 		return nil, err
@@ -134,10 +137,11 @@ func (m *APIKeyManager) List(ctx context.Context) ([]APIKeyRecord, error) {
 	for rows.Next() {
 		var rec APIKeyRecord
 		var created string
-		var revoked, lastUsed sql.NullString
-		if err := rows.Scan(&rec.ID, &rec.Name, &rec.Prefix, &created, &revoked, &lastUsed); err != nil {
+		var revoked, lastUsed, perms sql.NullString
+		if err := rows.Scan(&rec.ID, &rec.Name, &rec.Prefix, &created, &revoked, &lastUsed, &perms); err != nil {
 			return nil, err
 		}
+		rec.Permissions = parsePermissions(perms)
 		rec.CreatedAt = parseTime(created)
 		rec.Revoked = revoked.Valid
 		if lastUsed.Valid {
@@ -172,14 +176,25 @@ func (m *APIKeyManager) Revoke(ctx context.Context, id string) error {
 // Rotate revokes old key and creates a new one with same name.
 func (m *APIKeyManager) Rotate(ctx context.Context, id string) (APIKeyRecord, string, error) {
 	var name string
-	err := m.db.QueryRowContext(ctx, `SELECT name FROM api_keys WHERE id = ?`, id).Scan(&name)
+	var perms sql.NullString
+	err := m.db.QueryRowContext(ctx, `SELECT name, permissions FROM api_keys WHERE id = ?`, id).Scan(&name, &perms)
 	if err != nil {
 		return APIKeyRecord{}, "", fmt.Errorf("api key %q not found", id)
 	}
 	if err := m.Revoke(ctx, id); err != nil {
 		return APIKeyRecord{}, "", err
 	}
-	return m.Create(ctx, name)
+	rec, secret, err := m.Create(ctx, name)
+	if err != nil {
+		return rec, secret, err
+	}
+	// The new key keeps what the old one was allowed to do.
+	if perms.Valid {
+		if rec, err = m.SetPermissions(ctx, rec.ID, parsePermissions(perms)); err != nil {
+			return rec, secret, err
+		}
+	}
+	return rec, secret, nil
 }
 
 // Fingerprint returns sha256 hex of secret for logging.
