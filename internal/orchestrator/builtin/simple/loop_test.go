@@ -376,7 +376,8 @@ func TestCurrentQuestionIsLookedUpFirst(t *testing.T) {
 	}
 	msgs := env.seen[0]
 	sys, user := msgs[0].Content, msgs[len(msgs)-1].Content
-	if !strings.Contains(sys, "already searched the web") || strings.Contains(sys, "internet.search") || !strings.Contains(sys, "filesystem.read") {
+	// Web tools are done, and files are not offered for a weather question (§16).
+	if !strings.Contains(sys, "already searched the web") || strings.Contains(sys, "internet.search") || strings.Contains(sys, "filesystem.read") {
 		t.Fatalf("system=%q", sys)
 	}
 	if !strings.Contains(user, "<<<") || !strings.Contains(user, "+48°F") || !strings.Contains(user, "weather for Juneau") {

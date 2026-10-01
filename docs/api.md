@@ -101,6 +101,8 @@ The `files.create` tool, allowed by default in the built-in profiles, saves a fi
 
 When a model under 4B parameters answers from attached files or connected knowledge, `meta.notice` says it can mix up numbers and details and suggests a larger model. Auto treats a question about the user's files or knowledge as one that needs a careful answer, so it prefers a larger model that fits.
 
+Each turn is offered only the tools it needs (spec §16). Huginn picks tool groups from the kind of request and cues in the message: web search for questions, files for a file name or folder, shell for "run" or "install", Git for "commit" or "branch". It then limits them to what the profile allows. A call to a tool that was not offered is refused, and the model is told which tools it has, so it cannot widen its own tools. The profile's Allow, Ask, and Deny still decide what runs. Tool ids have capability aliases, and `web.search`, `web.open`, `files.read`, `files.write`, `files.search`, and `shell.run` reach the built-in tools. A short answer that only writes out a call, such as `files.search {"query": "x"}`, is taken as the call when the tool was offered. Each call has a time limit (web 45 s, files 30 s, Git 90 s, shell 2 min), and `tool.failed` carries a `kind`: `timeout`, `cancelled`, `denied`, `not_offered`, `invalid`, or `failed`.
+
 `POST /chat` takes `effort`: `auto` (the default), `fast`, `balanced`, or `thorough`. Effort sets a budget, not a number of calls the client sees:
 
 - **Fast** answers in one go. It doesn't plan, a look-up uses search results without reading pages, figures are checked but not sent back for correction, and a turn may make 3 tool calls.

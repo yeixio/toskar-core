@@ -1,6 +1,7 @@
 package huginn
 
 import (
+	"slices"
 	"strings"
 	"testing"
 
@@ -170,5 +171,34 @@ func TestChooseFollowsEffort(t *testing.T) {
 	loaded.Status = "running"
 	if got, _ := ChooseFor(Research, EffortFast, []contracts.Model{loaded, big}, 24*gb); got.Model.ID != "qwen-7b" {
 		t.Fatalf("fast = %+v", got)
+	}
+}
+
+func TestToolsFor(t *testing.T) {
+	all := []string{"internet.search", "internet.open", "filesystem.search", "filesystem.read", "filesystem.write", "files.create", "terminal", "git.status", "git.diff", "git.commit", "git.push"}
+	has := func(list []string, ids ...string) bool {
+		for _, id := range ids {
+			if !slices.Contains(list, id) {
+				return false
+			}
+		}
+		return true
+	}
+	got := ToolsFor(Chat, "What is DNS?", all)
+	if !has(got, "internet.search", "files.create") || has(got, "terminal") || has(got, "filesystem.read") || has(got, "git.push") {
+		t.Fatalf("chat = %v", got)
+	}
+	if got := ToolsFor(Chat, "What's in notes.md?", all); !has(got, "filesystem.read") || has(got, "filesystem.write") {
+		t.Fatalf("a file name offers reading = %v", got)
+	}
+	if got := ToolsFor(Coding, "Fix the bug in main.go", all); !has(got, "filesystem.write", "terminal", "git.diff") || has(got, "git.push") {
+		t.Fatalf("coding = %v", got)
+	}
+	if got := ToolsFor(Local, "commit and push my changes", all); !has(got, "git.commit", "git.push") {
+		t.Fatalf("git cues = %v", got)
+	}
+	// Only tools the profile has are offered.
+	if got := ToolsFor(Local, "run the tests", []string{"terminal"}); len(got) != 1 {
+		t.Fatalf("limited profile = %v", got)
 	}
 }

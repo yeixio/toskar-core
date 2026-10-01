@@ -214,3 +214,29 @@ func pageHost(raw string) string {
 	}
 	return strings.TrimPrefix(strings.ToLower(parsed.Hostname()), "www.")
 }
+
+// enabledIDs lists the tools a profile exposes.
+func enabledIDs(profile contracts.AIProfile) []string {
+	var out []string
+	for _, def := range tools.Enabled(profile, nil) {
+		out = append(out, def.ID)
+	}
+	return out
+}
+
+// offerOnly keeps the profile's policies for the offered tools and drops the
+// rest for this turn, so they are neither described to the model nor run.
+func offerOnly(profile contracts.AIProfile, offered []string) contracts.AIProfile {
+	keep := map[string]bool{}
+	for _, id := range offered {
+		keep[id] = true
+	}
+	out := profile
+	out.Tools = make([]contracts.ToolPolicy, 0, len(offered))
+	for _, t := range profile.Tools {
+		if keep[tools.Canonical(t.ToolID)] {
+			out.Tools = append(out.Tools, t)
+		}
+	}
+	return out
+}

@@ -95,7 +95,7 @@ func (r *Registry) List() []Tool {
 }
 
 func (r *Registry) Get(id string) (Tool, error) {
-	t, ok := r.tools[id]
+	t, ok := r.tools[Canonical(id)]
 	if !ok {
 		return nil, fmt.Errorf("tool %q not found", id)
 	}
@@ -105,6 +105,7 @@ func (r *Registry) Get(id string) (Tool, error) {
 // Execute runs a tool respecting policy; may block on pending approval.
 // meta is merged into tool.* event payloads (e.g. conversation_id, task_id).
 func (r *Registry) Execute(ctx context.Context, toolID string, args map[string]any, policy string, reason string, meta map[string]any) (map[string]any, error) {
+	toolID = Canonical(toolID)
 	t, err := r.Get(toolID)
 	if err != nil {
 		return nil, err
@@ -144,12 +145,15 @@ func (r *Registry) Execute(ctx context.Context, toolID string, args map[string]a
 	started := time.Now()
 	r.record(Activity{ToolID: toolID, Status: "started", Summary: summary, At: started})
 	r.bus.Publish(events.New(events.ToolStarted, mergeMeta(meta, map[string]any{"tool_id": toolID, "summary": summary})))
-	result, err := t.Execute(ctx, args)
+	// Every call has a time limit; cancelling the turn stops it sooner.
+	callCtx, cancel := context.WithTimeout(ctx, Timeout(toolID))
+	result, err := t.Execute(callCtx, args)
+	cancel()
 	elapsed := time.Since(started).Milliseconds()
 	if err != nil {
 		r.record(Activity{ToolID: toolID, Status: "failed", Summary: summary, DurationMS: elapsed, Error: err.Error(), At: time.Now()})
 		r.bus.Publish(events.New(events.ToolFailed, mergeMeta(meta, map[string]any{
-			"tool_id": toolID, "error": err.Error(), "duration_ms": elapsed, "summary": summary,
+			"tool_id": toolID, "error": err.Error(), "kind": ErrorKind(err), "duration_ms": elapsed, "summary": summary,
 		})))
 		return nil, err
 	}

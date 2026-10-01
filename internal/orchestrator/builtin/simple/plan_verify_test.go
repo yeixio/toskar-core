@@ -235,3 +235,69 @@ func TestAutoResolvesEffortFromTheRequest(t *testing.T) {
 		t.Fatalf("a question about the user's data = %+v", p)
 	}
 }
+
+func TestOnlyRelevantToolsAreOffered(t *testing.T) {
+	all := []contracts.ToolPolicy{
+		{ToolID: "internet.search", Policy: "ask"}, {ToolID: "filesystem.read", Policy: "allow"},
+		{ToolID: "terminal", Policy: "allow"}, {ToolID: "git.push", Policy: "allow"}, {ToolID: "files.create", Policy: "allow"},
+	}
+	env := &planEnv{replies: []string{"DNS turns names into addresses."}}
+	run(t, env, "What is DNS?", all...)
+	sys := env.seen[0][0].Content
+	if !strings.Contains(sys, "internet.search") || strings.Contains(sys, "terminal") || strings.Contains(sys, "git.push") || strings.Contains(sys, "filesystem.read") {
+		t.Fatalf("a quick question offers web and files.create only: %q", sys)
+	}
+	env = &planEnv{replies: []string{"Done."}}
+	run(t, env, "Run the tests in this repo and commit the fix", all...)
+	sys = env.seen[0][0].Content
+	if !strings.Contains(sys, "terminal") || !strings.Contains(sys, "git.push") || !strings.Contains(sys, "filesystem.read") {
+		t.Fatalf("a task on this computer offers shell, files, and git: %q", sys)
+	}
+}
+
+func TestToolsNotOfferedAreRefused(t *testing.T) {
+	env := &planEnv{replies: []string{
+		`{"tool_call":{"id":"terminal","args":{"command":"rm -rf /"}}}`,
+		"DNS turns names into addresses.",
+	}}
+	text := run(t, env, "What is DNS?",
+		contracts.ToolPolicy{ToolID: "internet.search", Policy: "ask"},
+		contracts.ToolPolicy{ToolID: "terminal", Policy: "allow"})
+	if text != "DNS turns names into addresses." {
+		t.Fatalf("answer = %q", text)
+	}
+	if len(env.searches) != 0 || !strings.Contains(env.seen[1][len(env.seen[1])-1].Content, "terminal is not available for this request") {
+		t.Fatal("the hidden tool must not run, and the model is told why")
+	}
+	if p := env.payload("tool.failed"); p == nil || p["kind"] != "not_offered" {
+		t.Fatalf("event = %+v", p)
+	}
+}
+
+func TestCapabilityAliasesReachTheTool(t *testing.T) {
+	env := &planEnv{replies: []string{
+		`{"tool_call":{"id":"web.search","args":{"query":"ollama release"}}}`,
+		"Ollama 1.0 is out.",
+	}}
+	run(t, env, "What is the latest Ollama release?", contracts.ToolPolicy{ToolID: "internet.search", Policy: "ask"})
+	if len(env.searches) != 1 {
+		t.Fatalf("web.search should run internet.search: %v", env.searches)
+	}
+}
+
+func TestACallWrittenAsProseIsTaken(t *testing.T) {
+	env := &planEnv{replies: []string{
+		"You can list them with:\n```json\nfiles.search {\"query\":\"Documents\"}\n```",
+		"Your Documents folder has notes.md and plan.txt.",
+	}}
+	text := run(t, env, "What files are in my Documents folder?", contracts.ToolPolicy{ToolID: "filesystem.search", Policy: "allow"})
+	if text != "Your Documents folder has notes.md and plan.txt." {
+		t.Fatalf("answer = %q", text)
+	}
+	// A prose call to a tool that was not offered stays text.
+	env = &planEnv{replies: []string{"Try git.push {\"remote\":\"origin\"} yourself."}}
+	run(t, env, "What is DNS?", contracts.ToolPolicy{ToolID: "git.push", Policy: "allow"})
+	if len(env.seen) != 1 {
+		t.Fatalf("with no tools offered, the text is the answer: %d generations", len(env.seen))
+	}
+}

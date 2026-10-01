@@ -59,6 +59,7 @@ func BuiltinCatalog() []Definition {
 }
 
 func Lookup(id string) (Definition, bool) {
+	id = Canonical(id)
 	for _, def := range BuiltinCatalog() {
 		if def.ID == id {
 			return def, true
@@ -69,6 +70,7 @@ func Lookup(id string) (Definition, bool) {
 
 // PolicyForProfile returns the stored policy, or deny when the profile does not list the tool.
 func PolicyForProfile(profile contracts.AIProfile, toolID string) string {
+	toolID = Canonical(toolID)
 	for _, tool := range profile.Tools {
 		if tool.ToolID == toolID {
 			if strings.TrimSpace(tool.Policy) == "" {

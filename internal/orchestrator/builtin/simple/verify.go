@@ -2,12 +2,14 @@ package simple
 
 import (
 	"context"
+	"encoding/json"
 	"regexp"
 	"strings"
 	"unicode/utf8"
 
 	"github.com/yeixio/yggdrasil-core/internal/huginn"
 	"github.com/yeixio/yggdrasil-core/internal/tools"
+	"github.com/yeixio/yggdrasil-core/pkg/contracts"
 	"github.com/yeixio/yggdrasil-core/pkg/pluginapi"
 )
 
@@ -74,8 +76,34 @@ func substantial(revised, original string) bool {
 	return n >= 20 && n*10 >= utf8.RuneCountInString(original)*4
 }
 
-// toolNameRe matches tool ids written out in an answer's text.
-var toolNameRe = regexp.MustCompile(`\b(internet\.(search|open)|filesystem\.(read|write|search)|git\.(status|diff|log|show|add|commit|push)|files\.create|tool_call)\b`)
+// toolNameRe matches tool ids, and their capability aliases, written out in
+// an answer's text.
+var toolNameRe = regexp.MustCompile(`\b(internet\.(search|open)|filesystem\.(read|write|search)|git\.(status|diff|log|show|add|commit|push)|files?\.(create|read|write|search)|web\.(search|open|fetch)|shell\.(run|execute)|tool_call)\b`)
+
+// looseCallRe finds a call written as prose, such as files.search {"query":"x"}.
+var looseCallRe = regexp.MustCompile(`([a-z]+\.[a-z_]+)\s*(\{[^{}]*\})`)
+
+// looseToolCall reads a short answer that is only a tool call written as
+// prose, with the id and its JSON arguments, as the call it meant. It is
+// accepted only for an offered tool, so it cannot reach anything else.
+func looseToolCall(content string, profile contracts.AIProfile) (*tools.ModelCall, bool) {
+	if utf8.RuneCountInString(content) > 600 {
+		return nil, false
+	}
+	m := looseCallRe.FindStringSubmatch(content)
+	if m == nil {
+		return nil, false
+	}
+	id := tools.Canonical(m[1])
+	if !toolEnabled(profile, id) {
+		return nil, false
+	}
+	var args map[string]any
+	if err := json.Unmarshal([]byte(m[2]), &args); err != nil {
+		return nil, false
+	}
+	return &tools.ModelCall{ID: id, Args: args}, true
+}
 
 // narratesTools reports an answer that describes tool calls, such as
 // "use internet.search to find the price", instead of answering.

@@ -87,6 +87,9 @@ func (o *Orchestrator) Run(
 		}
 		budget := huginn.BudgetFor(huginn.EffortFrom(ctx), kind)
 		env.Emit(EventEffort, map[string]any{"effort": string(budget.Effort), "chosen": string(huginn.EffortFrom(ctx))})
+		// Offer only the tools this request needs (spec §16). The profile
+		// still decides what is allowed; this decides what is shown.
+		profile = offerOnly(profile, huginn.ToolsFor(kind, task.Prompt, enabledIDs(profile)))
 		// A request with several parts is worked through part by part;
 		// otherwise a current question is looked up first.
 		planned := false
@@ -175,7 +178,28 @@ func (o *Orchestrator) Run(
 			if parsed.Sanitized {
 				env.Emit(events.ToolParsed, map[string]any{"sanitized": true})
 			}
-			if parsed.Call != nil && toolsOn {
+			if parsed.Call == nil && toolsOn {
+				// Small models sometimes write the call out instead of
+				// sending it; take it when it names an offered tool.
+				if call, ok := looseToolCall(parsed.Text, profile); ok {
+					parsed.Call, parsed.Text = call, ""
+				}
+			}
+			if parsed.Call != nil {
+				parsed.Call.ID = tools.Canonical(parsed.Call.ID)
+			}
+			if parsed.Call != nil && toolsOn && !toolEnabled(profile, parsed.Call.ID) && malformed < 2 {
+				// A tool that was not offered is refused, whatever the profile
+				// allows: the model cannot widen its own tools (spec §17).
+				malformed++
+				env.Emit(events.ToolFailed, map[string]any{"tool_id": parsed.Call.ID, "kind": tools.ErrKindNotOffered, "error": tools.ErrNotOffered.Error()})
+				messages = append(messages,
+					pluginapi.ChatMessage{Role: "assistant", Content: content},
+					pluginapi.ChatMessage{Role: "user", Content: "The tool " + parsed.Call.ID + " is not available for this request. Use one of the listed tools, or answer in plain text."},
+				)
+				continue
+			}
+			if parsed.Call != nil && toolsOn && toolEnabled(profile, parsed.Call.ID) {
 				if calls >= budget.MaxToolCalls {
 					streamText(ch, role, nodeID, "I stopped after "+fmt.Sprint(budget.MaxToolCalls)+" tool calls so this request would not loop.", metrics, usage)
 					return
