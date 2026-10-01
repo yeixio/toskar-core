@@ -144,7 +144,12 @@ func signature(path string) (string, error) {
 	return hex.EncodeToString(h.Sum(nil)), nil
 }
 
-func readSource(path string) ([]document, error) {
+// readSource reads every supported file under path. readPDF reads PDFs;
+// nil reads only their text layer.
+func readSource(path string, readPDF pdfReader) ([]document, error) {
+	if readPDF == nil {
+		readPDF = parsePDF
+	}
 	list, err := files(path)
 	if err != nil {
 		return nil, err
@@ -172,7 +177,7 @@ func readSource(path string) ([]document, error) {
 		case ".xlsx":
 			multi = parseXLSX
 		case ".pdf":
-			multi = parsePDF
+			multi = readPDF
 		}
 		if multi != nil {
 			parts, err := multi(name, raw)

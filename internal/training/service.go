@@ -424,6 +424,11 @@ func MaterialText(filename, text, contentBase64 string) (string, string, error) 
 		return strings.TrimSuffix(filename, filepath.Ext(filename)) + ".csv", csvText, nil
 	case ".pdf":
 		text, err := mimir.PDFText(filename, raw)
+		if errors.Is(err, mimir.ErrNoText) {
+			// A scanned PDF has no examples to read, so it is classified as
+			// knowledge; connecting it reads its pages with text recognition.
+			text, err = "", nil
+		}
 		if err != nil {
 			return "", "", err
 		}

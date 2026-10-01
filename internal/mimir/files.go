@@ -1,6 +1,7 @@
 package mimir
 
 import (
+	"errors"
 	"fmt"
 	"path/filepath"
 	"sort"
@@ -48,6 +49,11 @@ func FilePassages(name string, raw []byte) ([]Passage, error) {
 		docs, err = parseXLSX(name, raw)
 	case ".pdf":
 		docs, err = parsePDF(name, raw)
+		if errors.Is(err, ErrNoText) {
+			// Chat rereads attachments every turn, which is too slow for text
+			// recognition; a knowledge source recognizes the pages once.
+			err = fmt.Errorf("%s is a scanned PDF with no text to read. Connect it on the Knowledge page, which reads scanned pages with text recognition", filepath.Base(name))
+		}
 	default:
 		var d document
 		d, err = parseDocument(name, raw)

@@ -109,6 +109,9 @@ type Store struct {
 	semMu  sync.Mutex
 	models Models
 	kick   chan struct{}
+
+	// recognizer reads scanned PDF pages, when text recognition is set up.
+	recognizer Recognizer
 }
 
 // MaxTextBytes limits pasted or uploaded content.
@@ -338,7 +341,7 @@ func (s *Store) refreshLocked(ctx context.Context, id string) error {
 		return err
 	}
 	sig, sigErr := signature(src.file)
-	docs, readErr := readSource(src.file)
+	docs, readErr := readSource(src.file, s.readPDF(ctx))
 	if sigErr != nil || readErr != nil {
 		msg := errors.Join(sigErr, readErr).Error()
 		_, _ = s.db.ExecContext(ctx, `UPDATE knowledge_sources SET status=?, error=?, updated_at=? WHERE id=?`,

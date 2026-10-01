@@ -38,10 +38,12 @@ import (
 	"github.com/yeixio/yggdrasil-core/internal/models/lifecycle"
 	"github.com/yeixio/yggdrasil-core/internal/muninn"
 	"github.com/yeixio/yggdrasil-core/internal/nodes"
+	"github.com/yeixio/yggdrasil-core/internal/ocr"
 	"github.com/yeixio/yggdrasil-core/internal/orchestrator"
 	"github.com/yeixio/yggdrasil-core/internal/orchestrator/builtin/simple"
 	"github.com/yeixio/yggdrasil-core/internal/orchestrator/builtin/team"
 	"github.com/yeixio/yggdrasil-core/internal/profiles"
+	"github.com/yeixio/yggdrasil-core/internal/pyenv"
 	"github.com/yeixio/yggdrasil-core/internal/runlog"
 	"github.com/yeixio/yggdrasil-core/internal/runtimes"
 	"github.com/yeixio/yggdrasil-core/internal/runtimes/external"
@@ -114,6 +116,8 @@ type App struct {
 	// runs maps a conversation id to its running turn, so Stop can cancel it.
 	runs     sync.Map
 	Training *training.Service
+	// python manages the private Python environments for training and OCR.
+	python *pyenv.Manager
 
 	hw         *hardware.Detector
 	advertiser *discovery.Advertiser
@@ -593,6 +597,8 @@ func New(opts Options) (*App, error) {
 	})
 
 	a.Mimir = mimir.NewStore(db.SQL, filepath.Join(cfg.DataDir, "knowledge"))
+	a.python = pyenv.New(filepath.Join(cfg.RuntimesDir, "python"))
+	a.Mimir.SetRecognizer(&ocr.Recognizer{Python: a.python, WorkDir: filepath.Join(cfg.DataDir, "knowledge", "ocr-jobs")})
 	a.Mimir.SetModels(newKnowledgeModels(a))
 	a.Muninn = muninn.NewStore(db.SQL)
 	a.summarizer = &muninn.Summarizer{Store: a.Muninn}

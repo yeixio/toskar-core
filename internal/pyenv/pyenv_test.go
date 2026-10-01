@@ -150,3 +150,27 @@ func TestEnsureRejectsAChecksumMismatch(t *testing.T) {
 		t.Fatal("an unverified uv binary was written")
 	}
 }
+
+func TestPinnedEnvironmentInstallsWithoutDependencies(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("fake uv is a shell script")
+	}
+	srv := uvRelease(t, fakeUV, false)
+	defer srv.Close()
+	m := New(t.TempDir())
+	m.ReleaseBase = srv.URL
+	spec := Spec{Name: "ocr", Requirements: []string{"rapidocr==3.9.2", "opencv-python-headless==5.0.0.93"}, Pinned: true}
+	py, err := m.Ensure(context.Background(), spec, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	b, _ := os.ReadFile(filepath.Join(filepath.Dir(m.uvPath()), "calls.log"))
+	if !strings.Contains(string(b), "pip install --python "+py+" --no-deps rapidocr==3.9.2") {
+		t.Fatalf("uv calls:\n%s", b)
+	}
+	// The same packages without pinning are a different environment.
+	spec.Pinned = false
+	if st := m.Status(spec); st.Installed || !st.Stale {
+		t.Fatalf("status = %+v", st)
+	}
+}

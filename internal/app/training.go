@@ -8,7 +8,6 @@ import (
 
 	"github.com/yeixio/yggdrasil-core/internal/egress"
 	"github.com/yeixio/yggdrasil-core/internal/events"
-	"github.com/yeixio/yggdrasil-core/internal/pyenv"
 	"github.com/yeixio/yggdrasil-core/internal/share"
 	"github.com/yeixio/yggdrasil-core/internal/training"
 	"github.com/yeixio/yggdrasil-core/pkg/contracts"
@@ -27,7 +26,7 @@ func (a *App) newTrainingService() *training.Service {
 			return err == nil && ok
 		},
 		Nodes:    a.trainingNodes,
-		Python:   pyenv.New(filepath.Join(cfg.RuntimesDir, "python")),
+		Python:   a.python,
 		Trainers: []training.Trainer{training.MLX{}, training.PEFT{}},
 		DataDir:  filepath.Join(cfg.DataDir, "training"),
 		HFHome:   filepath.Join(cfg.DataDir, "training", "hf-cache"),

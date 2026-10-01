@@ -37,6 +37,10 @@ type Spec struct {
 	Name string
 	// Requirements are pinned pip requirement strings.
 	Requirements []string
+	// Pinned installs exactly Requirements and nothing they depend on, so
+	// the list must be complete. It lets an environment swap a dependency,
+	// such as a headless build of a package for the full one.
+	Pinned bool
 }
 
 // Status reports whether an environment is ready.
@@ -96,7 +100,11 @@ func (m *Manager) markerPath(name string) string {
 func requirementsKey(spec Spec) string {
 	reqs := append([]string(nil), spec.Requirements...)
 	sort.Strings(reqs)
-	return "python " + PythonVersion + "\n" + strings.Join(reqs, "\n") + "\n"
+	key := "python " + PythonVersion + "\n"
+	if spec.Pinned {
+		key += "pinned\n"
+	}
+	return key + strings.Join(reqs, "\n") + "\n"
 }
 
 // Status reports whether spec's environment is installed and current.
@@ -145,7 +153,11 @@ func (m *Manager) Ensure(ctx context.Context, spec Spec, progress Progress) (str
 		return "", fmt.Errorf("create Python environment: %w", err)
 	}
 	progress("packages", "Installing "+strings.Join(spec.Requirements, ", "))
-	args := append([]string{"pip", "install", "--python", m.PythonPath(spec.Name)}, spec.Requirements...)
+	args := []string{"pip", "install", "--python", m.PythonPath(spec.Name)}
+	if spec.Pinned {
+		args = append(args, "--no-deps")
+	}
+	args = append(args, spec.Requirements...)
 	if err := m.runUV(ctx, uv, progress, args...); err != nil {
 		_ = os.RemoveAll(dir)
 		return "", fmt.Errorf("install packages: %w", err)

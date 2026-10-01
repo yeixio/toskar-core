@@ -15,7 +15,7 @@ Implemented for Apple Silicon. This document is the V1 specification; the notes 
 Open items:
 
 - NVIDIA training (PEFT) is not implemented.
-- Mimir has no embedding search yet. PDFs with a text layer are read with the pure-Go `github.com/ledongthuc/pdf` (BSD-3); scanned PDFs need OCR first. Excel workbooks (`.xlsx`) are read without a new dependency: each sheet is a table, and training reads the first sheet as a Q&A table when it has question and answer columns.
+- Mimir has no embedding search yet. PDFs with a text layer are read with the pure-Go `github.com/ledongthuc/pdf` (BSD-3); scanned pages are read with RapidOCR (Apache-2.0) in a managed Python environment installed on first use. Excel workbooks (`.xlsx`) are read without a new dependency: each sheet is a table, and training reads the first sheet as a Q&A table when it has question and answer columns.
 - Merging an adapter into a standalone GGUF is not offered.
 - Store builds of the desktop app cannot run a downloaded Python, so training needs the Core daemon.
 
