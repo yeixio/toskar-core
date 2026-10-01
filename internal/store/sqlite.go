@@ -67,6 +67,9 @@ func (db *DB) Migrate() error {
 		}
 	}
 	sort.Strings(names)
+	if err := checkVersions(names); err != nil {
+		return err
+	}
 
 	for _, name := range names {
 		var version int
@@ -100,6 +103,23 @@ func (db *DB) Migrate() error {
 		if err := tx.Commit(); err != nil {
 			return err
 		}
+	}
+	return nil
+}
+
+// checkVersions refuses two migrations with the same number. Only the
+// number is recorded as applied, so the second would be skipped silently.
+func checkVersions(names []string) error {
+	seen := map[int]string{}
+	for _, name := range names {
+		var version int
+		if _, err := fmt.Sscanf(name, "%d_", &version); err != nil {
+			return fmt.Errorf("parse migration version from %s: %w", name, err)
+		}
+		if other, ok := seen[version]; ok {
+			return fmt.Errorf("migrations %s and %s share version %d; renumber one", other, name, version)
+		}
+		seen[version] = name
 	}
 	return nil
 }
