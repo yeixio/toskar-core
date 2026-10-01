@@ -66,6 +66,7 @@ Prefix: `/api/v1`
 | GET | `/notifications` | The notification center: `{"notifications": [...], "unread": n}`. `?unread=1` lists unread ones. Also `POST /notifications/read` (`{"ids": [...]}`, no ids marks all) and `POST /notifications/{id}/dismiss` |
 | GET | `/connectors` | Connected services and their status. Also `PUT /connectors/{id}` (`{"values": {...}}`), `POST /connectors/{id}/check`, and `DELETE /connectors/{id}` |
 | GET, PUT | `/personalization` | How the person likes answers: `length`, `tone`, `format`, `units`, `about_me`, `instructions` |
+| GET | `/capabilities` | The capability inventory. `?ask=` returns the abilities a question is about. Also `GET /capabilities/models/{id}`, which says which computers can run a model |
 | GET | `/runs/{id}` | A run trace. Also `GET /runs` (`?conversation_id=`, `?limit=`), newest first |
 | GET | `/egress` | What left this computer, newest first. `?conversation_id=` narrows to one chat |
 | GET, PUT | `/privacy` | `{"retention_days": n, "last_30_days": {...}}`; PUT sets `retention_days`. Also `POST /privacy/delete-runs` |
@@ -203,6 +204,13 @@ Invalid values are refused with 400. In advanced mode, the profile editor has an
 Structured results are checked the same way elsewhere:
 - **Tool arguments:** they are checked against each tool's schema before the tool runs. Safe repairs are made, such as `"7"` for a whole number, or JSON data where text is expected. A call with an argument of the wrong type is refused with `kind` `invalid`, naming the argument, so the model can call again.
 - **Automations:** a condition automation's result must end with the JSON its condition reads: `{"price": number}` for a threshold, or `{"significant": boolean}`. That JSON is read with the same repairs. When it is missing or wrong, the model is asked once to supply it from its own answer. Notices show the prose, never the JSON.
+
+The capability inventory lists what exists right now:
+- `models` (with the computers they are on and whether they are running), `nodes` (online, memory, whether they can train), and `tools` from every source (built in, connected services, MCP), enabled or not;
+- `connectors`, `providers` (runtimes and MCP tool sources, with health), and stored `artifacts`;
+- `abilities`, each with `available`, the tools or models it comes `via`, and a `note` saying how it works or what would make it possible. Abilities are worked out from tools and models by what they do, so a new MCP tool that sends email counts as email without code.
+
+A chat question about what Yggdrasil can do, such as "Can you generate an image?", "Do you have access to my email?", or "Which computer can run Qwen 2.5 14B?", gets the matching facts as trusted instructions. The model answers from them instead of guessing, and the answer's steps say so. In the app, Diagnostics shows the same list.
 
 Model, node, tool, conversation, and log routes follow the same prefix. The OpenAPI file is the route list to diff when a handler changes.
 

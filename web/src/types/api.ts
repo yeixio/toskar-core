@@ -1358,3 +1358,24 @@ export interface MCPShare {
   args: string[]
   needs_key: boolean
 }
+
+/** Something Yggdrasil can or cannot do right now (spec §37). */
+export interface CapabilityAbility {
+  id: string
+  label: string
+  available: boolean
+  via?: string[]
+  note?: string
+}
+
+/** The capability inventory (spec §37). */
+export interface CapabilitySnapshot {
+  at: string
+  models: { id: string; name: string; running: boolean; on: string[]; support_role?: string }[]
+  nodes: { id: string; name: string; local: boolean; online: boolean; trainer?: string }[]
+  tools: { id: string; name: string; source: string; enabled: boolean }[]
+  connectors: { id: string; name: string; connected: boolean }[]
+  providers: { id: string; name: string; kind: string; status: string; healthy: boolean }[]
+  artifacts: { count: number; bytes: number }
+  abilities: CapabilityAbility[]
+}

@@ -292,3 +292,13 @@ func (r *rateTracker) remaining(now time.Time, iter, iters int) *int {
 	sec := int(elapsed / float64(done) * float64(iters-iter))
 	return &sec
 }
+
+// TrainerName names the trainer that can train on hw, or "" when none can.
+func (s *Service) TrainerName(hw contracts.HardwareInventory) string {
+	for _, t := range s.d.Trainers {
+		if ok, _ := t.Supports(hw); ok {
+			return t.DisplayName()
+		}
+	}
+	return ""
+}

@@ -544,6 +544,7 @@ func New(opts Options) (*App, error) {
 	a.API.BindPersonal(a)
 	a.API.BindPrivacy(a)
 	a.API.BindRuns(a.RunLog)
+	a.API.BindCapabilities(a)
 
 	autoRepo := repositories.NewAutomationRepo(db.SQL)
 	a.Automations = autoRepo

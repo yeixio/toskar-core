@@ -135,6 +135,7 @@ type Server struct {
 	personal        PersonalStore
 	privacy         Privacy
 	runs            RunStore
+	capabilities    CapabilitySource
 	training        *training.Service
 	trainingCatalog func() []models.CatalogEntry
 }
@@ -239,6 +240,7 @@ func (s *Server) routes() {
 	s.personalRoutes(api)
 	s.privacyRoutes(api)
 	s.runRoutes(api)
+	s.capabilityRoutes(api)
 	s.trainingRoutes(api)
 
 	s.mcpRootRoutes(s.router)

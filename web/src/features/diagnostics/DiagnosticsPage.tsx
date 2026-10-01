@@ -8,6 +8,7 @@ import { formatBytes } from '@/lib/format'
 import type { LogEntry, Node } from '@/types/api'
 import { useUIStore } from '@/stores/uiStore'
 import { RealmKicker } from '@/components/ui/Realm'
+import { CapabilityPanel } from './CapabilityPanel'
 import { Ratatoskr } from '@/components/ui/Ratatoskr'
 
 function kindLabel(kind: string, advanced: boolean): string {
@@ -561,6 +562,8 @@ export function DiagnosticsPage() {
           Could not create diagnostics bundle. Check that the daemon is running.
         </div>
       )}
+
+      <CapabilityPanel />
 
       {advancedMode && <ToolActivityPanel />}
 

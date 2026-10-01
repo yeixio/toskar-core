@@ -263,6 +263,10 @@ func (a *App) RunChat(ctx context.Context, profileID, conversationID, message st
 			env.trace.sharing(busy + ", so this answer may be slower.")
 		}
 		env.opts = opts
+		if facts := a.capabilityFacts(ctx, message); facts != "" {
+			env.capabilities = facts
+			env.trace.sharing("Checked what Yggdrasil can do right now")
+		}
 		if a.memoryOn(ctx, conversationID) && (opts == nil || opts.Memory) && profile.Orchestration.Memory != "off" {
 			if mems, err := a.Muninn.Relevant(ctx, message); err == nil {
 				env.memories = mems
@@ -861,6 +865,9 @@ type chatExecEnv struct {
 	memories []muninn.Memory
 	// opts are an API request's choices for this turn, or nil (§62).
 	opts *turnopts.Options
+	// capabilities are inventory facts for a question about what
+	// Yggdrasil can do (§37).
+	capabilities string
 	// localOnly is set once the turn uses a memory or knowledge source
 	// marked this computer only, so it is never sent elsewhere (§63).
 	localOnly   bool
@@ -1167,6 +1174,10 @@ func (e *chatExecEnv) TurnInstructions(ctx context.Context, prompt string) strin
 		if block := e.app.personalBlock(ctx); block != "" {
 			parts = append(parts, block)
 		}
+	}
+	// What Yggdrasil can do comes from its own inventory (§37).
+	if e.capabilities != "" {
+		parts = append(parts, e.capabilities)
 	}
 	// Memories come from the person, so they are trusted instructions.
 	if block := muninn.Block(e.memories); block != "" {

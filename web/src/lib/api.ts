@@ -23,6 +23,7 @@ import type {
   EgressRecord,
   PrivacyOverview,
   RunTrace,
+  CapabilitySnapshot,
   RunRecordCounts,
   MCPAdded,
   MCPAddRequest,
@@ -634,6 +635,8 @@ export const api = {
 
   setPersonalStyle: (style: PersonalStyle) =>
     request<PersonalStyle>('/api/v1/personalization', { method: 'PUT', body: JSON.stringify(style) }),
+
+  getCapabilities: () => request<CapabilitySnapshot>('/api/v1/capabilities'),
 
   getRun: (id: string) => request<RunTrace>(`/api/v1/runs/${encodeURIComponent(id)}`),
 
