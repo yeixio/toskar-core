@@ -38,40 +38,42 @@ type Dependencies struct {
 	OpenAI   *openai.Handler
 	Hardware func(ctx context.Context) (contracts.HardwareInventory, error)
 
-	ListModels             func(ctx context.Context) ([]contracts.Model, error)
-	RecommendModels        func(ctx context.Context, purpose string) (contracts.Recommendation, error)
-	ModelsFit              func(ctx context.Context) ([]contracts.ModelsFitResponse, error)
-	BrowseModels           func(ctx context.Context, query string, limit int) ([]contracts.BrowseModel, error)
-	InstallModel           func(ctx context.Context, id string, wait bool, nodeID string) error
-	InstallModelFromURL    func(ctx context.Context, req contracts.InstallFromURLRequest, wait bool) (string, error)
-	DeleteModel            func(ctx context.Context, id string, nodeID string) error
-	ListRunningModels      func(ctx context.Context) ([]contracts.RunningModelView, error)
-	StartModel             func(ctx context.Context, id string, nodeID string) (contracts.RunningModelView, error)
-	StopModel              func(ctx context.Context, instanceID string, nodeID string) error
-	ListRuntimes           func(ctx context.Context) ([]runtimes.RuntimeInfo, error)
-	InstallRuntime         func(ctx context.Context, id string) error
-	ListProfiles           func(ctx context.Context) ([]contracts.AIProfile, error)
-	CreateProfile          func(ctx context.Context, p contracts.AIProfile) (contracts.AIProfile, error)
-	GetProfile             func(ctx context.Context, id string) (contracts.AIProfile, error)
-	UpdateProfile          func(ctx context.Context, p contracts.AIProfile) (contracts.AIProfile, error)
-	DeleteProfile          func(ctx context.Context, id string) error
-	ListNodes              func(ctx context.Context) ([]contracts.Node, error)
-	RefreshDiscovery       func(ctx context.Context) error
-	StartPairing           func(nodeID string) (*auth.PairingSession, error)
-	ClaimPairing           func(ctx context.Context, nodeID, code string) (*auth.PairingSession, error)
-	ApprovePairing         func(ctx context.Context, sessionID, code string) (*auth.PairingSession, error)
-	ListPairingOffers      func() []auth.PairingSession
-	ReceivePairingOffer    func(offer auth.PairingOffer) (*auth.PairingSession, error)
-	LookupOutboundPairing  func(code string) (*auth.PairingSession, bool)
-	AdvertiseAddr          func() string
-	LocalCertPEM           func() string
-	RevokeNode             func(ctx context.Context, nodeID string) error
-	ListConversations      func(ctx context.Context) ([]contracts.Conversation, error)
-	CreateConversation     func(ctx context.Context, title, profileID, modelID string) (contracts.Conversation, error)
-	UpdateConversation     func(ctx context.Context, id string, title, profileID, modelID *string, memoryOff *bool) (contracts.Conversation, error)
-	DeleteConversation     func(ctx context.Context, id string) error
-	ListMessages           func(ctx context.Context, conversationID string) ([]contracts.Message, error)
-	Chat                   func(w http.ResponseWriter, r *http.Request, conversationID, profileID, modelID, message string, stream bool, execution string) error
+	ListModels            func(ctx context.Context) ([]contracts.Model, error)
+	RecommendModels       func(ctx context.Context, purpose string) (contracts.Recommendation, error)
+	ModelsFit             func(ctx context.Context) ([]contracts.ModelsFitResponse, error)
+	BrowseModels          func(ctx context.Context, query string, limit int) ([]contracts.BrowseModel, error)
+	InstallModel          func(ctx context.Context, id string, wait bool, nodeID string) error
+	InstallModelFromURL   func(ctx context.Context, req contracts.InstallFromURLRequest, wait bool) (string, error)
+	DeleteModel           func(ctx context.Context, id string, nodeID string) error
+	ListRunningModels     func(ctx context.Context) ([]contracts.RunningModelView, error)
+	StartModel            func(ctx context.Context, id string, nodeID string) (contracts.RunningModelView, error)
+	StopModel             func(ctx context.Context, instanceID string, nodeID string) error
+	ListRuntimes          func(ctx context.Context) ([]runtimes.RuntimeInfo, error)
+	InstallRuntime        func(ctx context.Context, id string) error
+	ListProfiles          func(ctx context.Context) ([]contracts.AIProfile, error)
+	CreateProfile         func(ctx context.Context, p contracts.AIProfile) (contracts.AIProfile, error)
+	GetProfile            func(ctx context.Context, id string) (contracts.AIProfile, error)
+	UpdateProfile         func(ctx context.Context, p contracts.AIProfile) (contracts.AIProfile, error)
+	DeleteProfile         func(ctx context.Context, id string) error
+	ListNodes             func(ctx context.Context) ([]contracts.Node, error)
+	RefreshDiscovery      func(ctx context.Context) error
+	StartPairing          func(nodeID string) (*auth.PairingSession, error)
+	ClaimPairing          func(ctx context.Context, nodeID, code string) (*auth.PairingSession, error)
+	ApprovePairing        func(ctx context.Context, sessionID, code string) (*auth.PairingSession, error)
+	ListPairingOffers     func() []auth.PairingSession
+	ReceivePairingOffer   func(offer auth.PairingOffer) (*auth.PairingSession, error)
+	LookupOutboundPairing func(code string) (*auth.PairingSession, bool)
+	AdvertiseAddr         func() string
+	LocalCertPEM          func() string
+	RevokeNode            func(ctx context.Context, nodeID string) error
+	ListConversations     func(ctx context.Context) ([]contracts.Conversation, error)
+	CreateConversation    func(ctx context.Context, title, profileID, modelID string) (contracts.Conversation, error)
+	UpdateConversation    func(ctx context.Context, id string, title, profileID, modelID *string, memoryOff *bool) (contracts.Conversation, error)
+	DeleteConversation    func(ctx context.Context, id string) error
+	ListMessages          func(ctx context.Context, conversationID string) ([]contracts.Message, error)
+	Chat                  func(w http.ResponseWriter, r *http.Request, conversationID, profileID, modelID, message string, stream bool, execution string) error
+	// StopChat stops a conversation's running turn and reports whether one was running.
+	StopChat               func(conversationID string) bool
 	ListTasks              func(ctx context.Context) ([]contracts.Task, error)
 	CreateTask             func(ctx context.Context, profileID, conversationID, prompt string) (contracts.Task, error)
 	GetTask                func(ctx context.Context, id string) (contracts.Task, error)
@@ -166,6 +168,7 @@ func (s *Server) routes() {
 	api.HandleFunc("/profiles/{id}", s.handlePatchProfile).Methods(http.MethodPatch)
 	api.HandleFunc("/profiles/{id}", s.handleDeleteProfile).Methods(http.MethodDelete)
 	api.HandleFunc("/chat", s.handleChat).Methods(http.MethodPost)
+	api.HandleFunc("/chat/stop", s.handleStopChat).Methods(http.MethodPost)
 	api.HandleFunc("/conversations/{id}/messages", s.handleConversationMessages).Methods(http.MethodGet, http.MethodOptions)
 	api.HandleFunc("/tasks", s.handleListTasks).Methods(http.MethodGet, http.MethodOptions)
 	api.HandleFunc("/tasks", s.handleCreateTask).Methods(http.MethodPost)

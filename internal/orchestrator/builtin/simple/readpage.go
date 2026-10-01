@@ -41,16 +41,38 @@ func readBestPage(
 	searchArgs map[string]any,
 	searchResult map[string]any,
 ) (map[string]any, bool) {
-	if !toolEnabled(profile, "internet.open") {
+	pages := readBestPages(ctx, env, profile, prompt, searchArgs, searchResult, 1)
+	if len(pages) == 0 {
 		return nil, false
 	}
+	return pages[0], true
+}
+
+// readBestPages opens up to want useful results of a search, trying a few
+// extra links when some turn out to be empty or blocked.
+func readBestPages(
+	ctx context.Context,
+	env pluginapi.ExecutionEnvironment,
+	profile contracts.AIProfile,
+	prompt string,
+	searchArgs map[string]any,
+	searchResult map[string]any,
+	want int,
+) []map[string]any {
+	if want <= 0 || !toolEnabled(profile, "internet.open") {
+		return nil
+	}
+	var out []map[string]any
 	tried := 0
 	for _, rawURL := range livePageURLs(prompt, searchArgs, searchResult) {
+		if len(out) >= want || ctx.Err() != nil {
+			break
+		}
 		if !usefulPageURL(rawURL) {
 			continue
 		}
 		tried++
-		if tried > maxPagesToRead {
+		if tried > maxPagesToRead+want-1 {
 			break
 		}
 		page, err := env.ExecuteTool(ctx, "internet.open", map[string]any{"url": rawURL})
@@ -61,9 +83,9 @@ func readBestPage(
 		if !usefulPageText(content) {
 			continue
 		}
-		return page, true
+		out = append(out, page)
 	}
-	return nil, false
+	return out
 }
 
 func toolEnabled(profile contracts.AIProfile, toolID string) bool {

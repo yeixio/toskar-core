@@ -151,6 +151,24 @@ func (t *turnTrace) verified(issues, fixed int, remaining string) {
 	}
 }
 
+// stopped records that the user stopped the turn. kept says whether part
+// of the answer was written and saved.
+func (t *turnTrace) stopped(kept bool) {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	t.addStep("stop", "Stopped by you")
+	if kept {
+		t.notice = "Stopped before the answer was finished."
+	}
+}
+
+// effort records an effort the user chose. Auto's own choice is not listed.
+func (t *turnTrace) effort(label string) {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	t.addStep("effort", "Worked at "+label+" effort, as you chose")
+}
+
 // routed records which model Auto chose and why.
 func (t *turnTrace) routed(reason string) {
 	t.mu.Lock()
@@ -176,7 +194,7 @@ func (t *turnTrace) hasSideEffects() bool {
 	defer t.mu.Unlock()
 	for _, s := range t.steps {
 		switch s.Kind {
-		case "write", "create", "command", "git":
+		case "write", "create", "command", "git", "stop":
 			return true
 		}
 	}

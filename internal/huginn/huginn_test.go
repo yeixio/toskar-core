@@ -141,3 +141,34 @@ func TestSmallAndLarger(t *testing.T) {
 		t.Fatal("nothing larger")
 	}
 }
+
+func TestBudgets(t *testing.T) {
+	if b := BudgetFor(EffortAuto, Chat); b.Effort != EffortFast || b.Plan || b.Corrections != 0 {
+		t.Fatalf("auto chat = %+v", b)
+	}
+	if b := BudgetFor(EffortAuto, Research); b.Effort != EffortThorough || b.Pages != 2 || b.Corrections != 2 {
+		t.Fatalf("auto research = %+v", b)
+	}
+	if b := BudgetFor(EffortAuto, Current); b.Effort != EffortBalanced {
+		t.Fatalf("auto current = %+v", b)
+	}
+	if b := BudgetFor(EffortBalanced, Chat); b.Effort != EffortBalanced || !b.Plan {
+		t.Fatalf("a chosen effort wins = %+v", b)
+	}
+	if ParseEffort(" Thorough ") != EffortThorough || ParseEffort("max") != EffortAuto {
+		t.Fatal("parse")
+	}
+}
+
+func TestChooseFollowsEffort(t *testing.T) {
+	// Thorough takes the largest model even for a quick question.
+	if got, _ := ChooseFor(Chat, EffortThorough, library, 24*gb); got.Model.ID != "qwen-14b" || !strings.Contains(got.Reason, "Thorough effort") {
+		t.Fatalf("thorough = %+v", got)
+	}
+	// Fast keeps research on a quick model that is already loaded.
+	loaded := mid
+	loaded.Status = "running"
+	if got, _ := ChooseFor(Research, EffortFast, []contracts.Model{loaded, big}, 24*gb); got.Model.ID != "qwen-7b" {
+		t.Fatalf("fast = %+v", got)
+	}
+}

@@ -82,7 +82,7 @@ func (a *App) chooseAuto(ctx context.Context, message string, data bool) (huginn
 	if data && kind == huginn.Chat {
 		kind = huginn.Research
 	}
-	choice, ok := huginn.Choose(kind, usable, a.memoryTotal(ctx))
+	choice, ok := huginn.ChooseFor(kind, huginn.EffortFrom(ctx), usable, a.memoryTotal(ctx))
 	if !ok {
 		return huginn.Choice{}, errNoModel
 	}

@@ -59,6 +59,7 @@ import type {
   MemoryItem,
   Artifact,
   FileRef,
+  StopChatResponse,
 } from '@/types/api'
 import type { Upload } from '@/lib/upload'
 
@@ -602,6 +603,10 @@ export const api = {
         conversation_id: conversationId,
       }),
     }),
+
+  /** Stop a conversation's running turn on the computer running it; what was written is kept. */
+  stopChat: (conversationId: string) =>
+    request<StopChatResponse>('/api/v1/chat/stop', { method: 'POST', body: JSON.stringify({ conversation_id: conversationId }) }),
 
   deleteArtifact: (id: string) => request<null>(`/api/v1/artifacts/${id}`, { method: 'DELETE' }),
 

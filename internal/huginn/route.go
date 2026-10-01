@@ -103,6 +103,13 @@ func running(m contracts.Model) bool { return m.Status == "running" }
 // computer's memory in bytes, or 0 when unknown. It returns false when no
 // model is installed.
 func Choose(k Kind, installed []contracts.Model, memTotal uint64) (Choice, bool) {
+	return ChooseFor(k, EffortAuto, installed, memTotal)
+}
+
+// ChooseFor is Choose with an effort: Fast keeps any request on a quick,
+// already-loaded model where one suits; Thorough takes the largest suitable
+// model that fits, even for a quick question.
+func ChooseFor(k Kind, e Effort, installed []contracts.Model, memTotal uint64) (Choice, bool) {
 	var models []contracts.Model
 	for _, m := range installed {
 		if m.Installed {
@@ -112,17 +119,22 @@ func Choose(k Kind, installed []contracts.Model, memTotal uint64) (Choice, bool)
 	if len(models) == 0 {
 		return Choice{}, false
 	}
+	quick := (k == Chat && e != EffortThorough) || e == EffortFast
 	share := fullShare
-	if k == Chat {
+	if quick {
 		share = quickShare
 	}
 	pick := func(m contracts.Model) (Choice, bool) {
-		return Choice{Model: m, Reason: fmt.Sprintf("Auto chose %s for %s", Name(m), k.Describe())}, true
+		reason := fmt.Sprintf("Auto chose %s for %s", Name(m), k.Describe())
+		if e == EffortFast || e == EffortThorough {
+			reason += fmt.Sprintf(" at %s effort", e.Label())
+		}
+		return Choice{Model: m, Reason: reason}, true
 	}
 
-	// A quick question goes to a suitable model that is already loaded, so it
+	// A quick request goes to a suitable model that is already loaded, so it
 	// is not slowed by loading another.
-	if k == Chat {
+	if quick {
 		if m, ok := best(models, func(m contracts.Model) bool { return running(m) && suits(k, m) && fits(m, memTotal, fullShare) }, bigger); ok {
 			return pick(m)
 		}

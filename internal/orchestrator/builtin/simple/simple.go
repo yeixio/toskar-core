@@ -16,7 +16,18 @@ import (
 )
 
 const id = "simple"
+
+// maxToolCalls is the Balanced budget's cap; huginn.Budget sets each turn's.
 const maxToolCalls = 10
+
+// EventEffort reports the effort a turn ran at, after Auto is resolved.
+const EventEffort = "chat.effort"
+
+// stoppedNotes is the partial answer kept when a plan is stopped.
+func stoppedNotes(notes string) string {
+	body := strings.TrimSpace(strings.TrimPrefix(notes, "Notes from each part of the request:"))
+	return "_Stopped before the answer was written. Here is what was found so far._\n\n" + body
+}
 
 // Orchestrator runs single-model chat with optional tools.
 type Orchestrator struct{}
@@ -65,11 +76,31 @@ func (o *Orchestrator) Run(
 
 		instructions := "Format answers in Markdown with short paragraphs, lists, and links. Do not wrap the whole answer in a code fence."
 		reference := referenceMaterial(ctx, env, task.Prompt)
+		// The effort the user chose, or Auto's pick for this kind of request,
+		// sets how much planning, reading, and checking the turn gets (§15).
+		plan, hasParts := huginn.MakePlan(task.Prompt)
+		kind := huginn.Classify(task.Prompt)
+		if (hasParts || reference != "") && kind == huginn.Chat {
+			// A request with several parts, or one answered from the user's
+			// files or knowledge, is not a quick question.
+			kind = huginn.Research
+		}
+		budget := huginn.BudgetFor(huginn.EffortFrom(ctx), kind)
+		env.Emit(EventEffort, map[string]any{"effort": string(budget.Effort), "chosen": string(huginn.EffortFrom(ctx))})
 		// A request with several parts is worked through part by part;
 		// otherwise a current question is looked up first.
 		planned := false
-		if plan, ok := huginn.MakePlan(task.Prompt); ok {
-			if notes := runPlan(ctx, env, profile, role, plan, task.Prompt, reference); notes != "" {
+		if hasParts && budget.Plan {
+			notes := runPlan(ctx, env, profile, role, plan, task.Prompt, reference, budget.Pages)
+			if ctx.Err() != nil {
+				// Stopped while working through the parts: keep what is done (§67).
+				if notes != "" {
+					ch <- pluginapi.OrchestrationEvent{Type: "agent.message", Role: role, Content: stoppedNotes(notes)}
+				}
+				ch <- pluginapi.OrchestrationEvent{Type: "agent.error", Role: role, Error: ctx.Err().Error(), Done: true}
+				return
+			}
+			if notes != "" {
 				reference = joinReference(reference, notes)
 				instructions += "\n" + planGuidance
 				if plan.NeedsWeb && webAllowed(profile) {
@@ -79,7 +110,7 @@ func (o *Orchestrator) Run(
 			}
 		}
 		if !planned {
-			if found, ok := lookUpFirst(ctx, env, profile, task.Prompt); ok {
+			if found, ok := lookUpFirst(ctx, env, profile, task.Prompt, budget.Pages); ok {
 				reference = joinReference(reference, found)
 				instructions += "\n" + lookupGuidance
 				profile = withoutWeb(profile)
@@ -145,8 +176,8 @@ func (o *Orchestrator) Run(
 				env.Emit(events.ToolParsed, map[string]any{"sanitized": true})
 			}
 			if parsed.Call != nil && toolsOn {
-				if calls >= maxToolCalls {
-					streamText(ch, role, nodeID, "I stopped after "+fmt.Sprint(maxToolCalls)+" tool calls so this request would not loop.", metrics, usage)
+				if calls >= budget.MaxToolCalls {
+					streamText(ch, role, nodeID, "I stopped after "+fmt.Sprint(budget.MaxToolCalls)+" tool calls so this request would not loop.", metrics, usage)
 					return
 				}
 				calls++
@@ -168,7 +199,7 @@ func (o *Orchestrator) Run(
 					resultNote = "Tool result for you, not for the user. " + untrustedNote + "\n" + string(raw)
 				}
 				followUp := answerAfterTools
-				if err == nil && parsed.Call.ID == "internet.search" && calls < maxToolCalls {
+				if err == nil && parsed.Call.ID == "internet.search" && calls < budget.MaxToolCalls {
 					if page, opened := followLiveSearch(ctx, env, profile, task.Prompt, parsed.Call.Args, result); opened {
 						calls++
 						raw, _ := json.Marshal(map[string]any{"ok": true, "result": page})
@@ -185,7 +216,7 @@ func (o *Orchestrator) Run(
 				)
 				continue
 			}
-			if toolsOn && parsed.Malformed && malformed < 2 && calls < maxToolCalls {
+			if toolsOn && parsed.Malformed && malformed < 2 && calls < budget.MaxToolCalls {
 				malformed++
 				env.Emit(events.ToolParsed, map[string]any{"accepted": false, "format": "rejected", "error": "invalid tool call"})
 				env.Emit(events.ToolFailed, map[string]any{"malformed": true, "error": "invalid tool call"})
@@ -205,7 +236,7 @@ func (o *Orchestrator) Run(
 				messages[0] = pluginapi.ChatMessage{Role: "system", Content: plainSys}
 				continue
 			}
-			answer := verifyAnswer(ctx, env, role, messages, parsed.Text, evidence, task.Prompt)
+			answer := verifyAnswer(ctx, env, role, messages, parsed.Text, evidence, task.Prompt, budget.Corrections)
 			streamText(ch, role, nodeID, answer, metrics, usage)
 			return
 		}

@@ -7,6 +7,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/yeixio/yggdrasil-core/internal/huginn"
 	"github.com/yeixio/yggdrasil-core/pkg/contracts"
 	"github.com/yeixio/yggdrasil-core/pkg/pluginapi"
 )
@@ -222,7 +223,8 @@ func TestToolLoopStopsAtMaxDepth(t *testing.T) {
 		replies[i] = `{"tool_call":{"id":"internet.search","args":{"query":"x"}}}`
 	}
 	env := &scriptedEnv{replies: replies}
-	events, err := New().Run(context.Background(), contracts.Task{Prompt: "loop"}, contracts.AIProfile{
+	ctx := huginn.WithEffort(context.Background(), huginn.EffortBalanced)
+	events, err := New().Run(ctx, contracts.Task{Prompt: "loop"}, contracts.AIProfile{
 		Roles: []contracts.ModelRole{{Role: "assistant", ModelID: "m"}},
 		Tools: []contracts.ToolPolicy{{ToolID: "internet.search", Policy: "allow"}},
 	}, env)

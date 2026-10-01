@@ -60,6 +60,7 @@ Prefix: `/api/v1`
 | POST | `/runtimes/{id}/install` | Install a runtime (`llamacpp`) |
 | GET, POST | `/profiles` | List or create profiles |
 | POST | `/chat` | Chat through a profile |
+| POST | `/chat/stop` | Stop a conversation's running turn: `{"conversation_id": "..."}` returns `{"stopped": true}` when one was running |
 | GET, POST | `/tasks` | Orchestration tasks |
 | GET, POST | `/automations` | Scheduled prompts. Also `POST /automations/preview`, `GET/PATCH/DELETE /automations/{id}`, and `POST /automations/{id}/run|pause|resume` |
 | GET | `/nodes` | This computer and peers |
@@ -99,6 +100,17 @@ When a conversation's history passes half of the model's window, a summary of th
 The `files.create` tool, allowed by default in the built-in profiles, saves a file the user can download: a document, JSON, a spreadsheet (`.xlsx` is built from CSV text), or code. It writes only to Yggdrasil's file store. When a message asks for a file and the profile allows `files.create` without asking, Yggdrasil has the model write only the contents and saves the file itself, with a `chat.making_file` event. The answer's `meta.files` lists produced files. File content is served as an attachment with a sandboxing `Content-Security-Policy`, so HTML never runs on the API's origin.
 
 When a model under 4B parameters answers from attached files or connected knowledge, `meta.notice` says it can mix up numbers and details and suggests a larger model. Auto treats a question about the user's files or knowledge as one that needs a careful answer, so it prefers a larger model that fits.
+
+`POST /chat` takes `effort`: `auto` (the default), `fast`, `balanced`, or `thorough`. Effort sets a budget, not a number of calls the client sees:
+
+- **Fast** answers in one go. It doesn't plan, a look-up uses search results without reading pages, figures are checked but not sent back for correction, and a turn may make 3 tool calls.
+- **Balanced** plans requests with several parts, reads one page per look-up, corrects figures once, and allows 10 tool calls.
+- **Thorough** reads two pages per look-up, corrects figures twice, allows 16 tool calls, and lets Auto pick the largest model that fits.
+- **Auto** uses Fast for a quick question, Thorough for a request that needs a detailed answer, has several parts, or uses the user's files or knowledge, and Balanced otherwise.
+
+The `chat.effort` event reports the effort used. A chosen effort is listed in the answer's `steps`.
+
+Stopping a turn, with `POST /chat/stop` or by closing the stream, stops every model call, tool call, plan step, pending approval, and paired computer working on it. The part already written is saved as the answer, with `meta.notice` "Stopped before the answer was finished." A turn stopped in the middle of a plan keeps the notes of the parts that finished. A turn stopped before anything was written keeps a short note with the sources found so far. The `chat.stopped` event carries `conversation_id` and `kept`. A new message in the same chat stops a turn still running there.
 
 A request with several parts is worked through in parts. "Compare A, B and C…" and "research A vs B" become one part per subject, looked up on the web side by side when web search is allowed without asking. "Do X, then Y, then Z" becomes parts in order, each seeing the notes before it. The final answer is written from the parts' notes, or a requested file is made from them. `plan.created` carries `steps` and `parallel`, and `plan.step` carries `index`, `step`, and `status` (`running`, `done`, or `failed`).
 

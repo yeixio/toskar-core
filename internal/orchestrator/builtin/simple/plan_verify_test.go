@@ -6,6 +6,7 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/yeixio/yggdrasil-core/internal/huginn"
 	"github.com/yeixio/yggdrasil-core/pkg/contracts"
 	"github.com/yeixio/yggdrasil-core/pkg/pluginapi"
 )
@@ -71,7 +72,12 @@ func (e *planEnv) payload(event string) map[string]any {
 
 func run(t *testing.T, env *planEnv, prompt string, tools ...contracts.ToolPolicy) string {
 	t.Helper()
-	events, err := New().Run(context.Background(), contracts.Task{Prompt: prompt}, contracts.AIProfile{
+	return runAt(t, context.Background(), env, prompt, tools...)
+}
+
+func runAt(t *testing.T, ctx context.Context, env *planEnv, prompt string, tools ...contracts.ToolPolicy) string {
+	t.Helper()
+	events, err := New().Run(ctx, contracts.Task{Prompt: prompt}, contracts.AIProfile{
 		Roles: []contracts.ModelRole{{Role: "assistant", ModelID: "m"}},
 		Tools: tools,
 	}, env)
@@ -169,7 +175,7 @@ func TestUncorrectedFiguresAreReported(t *testing.T) {
 func TestPlainAnswersAreNotChecked(t *testing.T) {
 	env := &planEnv{replies: []string{"DNS turns names into addresses."}}
 	run(t, env, "What is DNS?")
-	if len(env.seen) != 1 || len(env.events) != 0 {
+	if len(env.seen) != 1 || len(env.events) != 1 || env.events[0] != EventEffort {
 		t.Fatalf("a plain answer needs no plan and no check: %d generations, events %v", len(env.seen), env.events)
 	}
 }
@@ -190,5 +196,42 @@ func TestAnswerThatDescribesToolsIsRetriedWithoutTools(t *testing.T) {
 	}
 	if strings.Contains(env.seen[1][0].Content, "internet.search") {
 		t.Fatal("the retry must not offer tools")
+	}
+}
+
+func TestFastSkipsPlansAndCorrections(t *testing.T) {
+	fast := huginn.WithEffort(context.Background(), huginn.EffortFast)
+	env := &planEnv{replies: []string{"Ollama is easiest; MLX is fastest."}}
+	runAt(t, fast, env, "Research Ollama and MLX for running models on a Mac")
+	if len(env.seen) != 1 || env.payload(EventPlanCreated) != nil {
+		t.Fatalf("Fast answers in one go: %d generations", len(env.seen))
+	}
+	if p := env.payload(EventEffort); p["effort"] != "fast" || p["chosen"] != "fast" {
+		t.Fatalf("effort = %+v", p)
+	}
+
+	env = &planEnv{
+		reference: "item: Michelin Defender; price: 176.50; in stock: 4",
+		replies:   []string{"It costs $176.50 and 20 are in stock.", "unused"},
+	}
+	text := runAt(t, fast, env, "How much is the Michelin Defender?")
+	if text != "It costs $176.50 and 20 are in stock." || len(env.seen) != 1 {
+		t.Fatalf("Fast reports figures without a correction pass: %q, %d generations", text, len(env.seen))
+	}
+	if p := env.payload(EventVerified); p == nil || p["remaining"] != "20" {
+		t.Fatalf("verified = %+v", p)
+	}
+}
+
+func TestAutoResolvesEffortFromTheRequest(t *testing.T) {
+	env := &planEnv{replies: []string{"DNS turns names into addresses."}}
+	run(t, env, "What is DNS?")
+	if p := env.payload(EventEffort); p["effort"] != "fast" || p["chosen"] != "auto" {
+		t.Fatalf("a quick question = %+v", p)
+	}
+	env = &planEnv{reference: "item: Tire; price: 10", replies: []string{"It is $10."}}
+	run(t, env, "How much is the tire?")
+	if p := env.payload(EventEffort); p["effort"] != "thorough" {
+		t.Fatalf("a question about the user's data = %+v", p)
 	}
 }

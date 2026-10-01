@@ -51,6 +51,25 @@ type PendingToolPrompt = {
 
 type RunMode = 'automatic' | 'local'
 
+/** How much work a message gets (spec §15). Auto lets Yggdrasil decide. */
+type Effort = 'auto' | 'fast' | 'balanced' | 'thorough'
+const EFFORT_KEY = 'ygg.chat.effort'
+const EFFORTS: { id: Effort; label: string; hint: string }[] = [
+  { id: 'auto', label: 'Auto', hint: 'Yggdrasil decides: quick questions stay fast, big or data questions get more care.' },
+  { id: 'fast', label: 'Fast', hint: 'Answers in one go, without planning or a second pass.' },
+  { id: 'balanced', label: 'Balanced', hint: 'Plans big requests, reads a page when looking things up, and fixes figures once.' },
+  { id: 'thorough', label: 'Thorough', hint: 'Reads more pages, uses the largest model that fits, and checks figures twice.' },
+]
+
+function savedEffort(): Effort {
+  try {
+    const v = localStorage.getItem(EFFORT_KEY)
+    return EFFORTS.some((e) => e.id === v) ? (v as Effort) : 'auto'
+  } catch {
+    return 'auto'
+  }
+}
+
 /** The Model choice that lets Yggdrasil pick an installed model for each message. */
 const AUTO_MODEL_ID = 'auto'
 
@@ -156,6 +175,15 @@ export function ChatPage() {
 
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [draft, setDraft] = useState('')
+  const [effort, setEffortState] = useState<Effort>(savedEffort)
+  const setEffort = (next: Effort) => {
+    setEffortState(next)
+    try {
+      localStorage.setItem(EFFORT_KEY, next)
+    } catch {
+      // Remembering the choice is a convenience; the chat works without it.
+    }
+  }
   // Files added to the composer for the next message.
   const [pendingFiles, setPendingFiles] = useState<PendingFile[]>([])
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -205,6 +233,8 @@ export function ChatPage() {
   // chat.complete (a memory reply finishes instantly); they must not draw a
   // second copy of the saved answer.
   const completedConvRef = useRef<string | null>(null)
+  // Set when the user presses Stop, so the closed stream is not shown as an error.
+  const stoppedRef = useRef(false)
 
   const conversationsQuery = useQuery({
     queryKey: ['conversations'],
@@ -478,9 +508,16 @@ export function ChatPage() {
     }
   }
 
+  // The event stream is opened once. Its handler reads the current chat,
+  // model locations, and completion handler from this ref; depending on
+  // them reopened the stream on nearly every render and dropped events.
+  const eventContext = useRef({ selectedId, handleChatComplete, modelLocations })
+  eventContext.current = { selectedId, handleChatComplete, modelLocations }
+
   useEffect(() => {
     const unsubscribe = subscribeEvents({
       onEvent: (event) => {
+        const { selectedId, handleChatComplete, modelLocations } = eventContext.current
         if (event.type === 'tool.requested') {
           const payload = event.payload as ToolRequestedPayload | undefined
           if (!payload?.request_id || !payload.tool_id) return
@@ -606,6 +643,21 @@ export function ChatPage() {
             else setStatusMessage('Putting it together…')
           }
         }
+        if (event.type === 'chat.stopped') {
+          const conversationId = event.payload?.conversation_id as string | undefined
+          if (!conversationId) return
+          // The kept part of the answer is saved; show it in every window.
+          queryClient.invalidateQueries({ queryKey: ['messages', conversationId] })
+          if (conversationId === streamingConvRef.current) {
+            streamingConvRef.current = null
+            completedConvRef.current = conversationId
+            setIsSending(false)
+            setStreamingContent(null)
+            setStatusMessage(null)
+            setPendingTool(null)
+            setPlanSteps([])
+          }
+        }
         if (event.type === 'chat.making_file') {
           const conversationId = event.payload?.conversation_id as string | undefined
           if (conversationId && conversationId !== selectedId && conversationId !== streamingConvRef.current) return
@@ -706,7 +758,8 @@ export function ChatPage() {
       },
     })
     return unsubscribe
-  }, [selectedId, handleChatComplete, modelLocations])
+    // queryClient is stable; everything else is read through eventContext.
+  }, [queryClient])
 
   const setProfile = (profileId: string) => {
     setDraftProfileId(profileId)
@@ -858,6 +911,7 @@ export function ChatPage() {
     setStreamingContent('')
     streamingTextRef.current = ''
     completedConvRef.current = null
+    stoppedRef.current = false
 
     let conversationId = selectedId
     try {
@@ -883,6 +937,10 @@ export function ChatPage() {
       const controller = new AbortController()
       abortRef.current = controller
 
+      // A new chat's first fetch can return before the message is saved and
+      // wipe the message shown below; cancel it so the message stays.
+      await queryClient.cancelQueries({ queryKey: ['messages', conversationId] })
+
       queryClient.setQueryData<Message[]>(['messages', conversationId], (current) => {
         const optimistic: Message = {
           id: `optimistic-${Date.now()}`,
@@ -903,6 +961,7 @@ export function ChatPage() {
           message,
           stream: true,
           execution: effectiveRunMode,
+          effort,
           attachments: attachments.length > 0 ? attachments.map((f) => f.id) : undefined,
         },
         signal: controller.signal,
@@ -934,6 +993,10 @@ export function ChatPage() {
           setIsSending(false)
           streamingConvRef.current = null
           setStatusMessage(null)
+          if (stoppedRef.current) {
+            queryClient.invalidateQueries({ queryKey: ['messages', conversationId] })
+            return
+          }
           const failure = parseModelFailure(errMessage)
           const partial = streamingTextRef.current.trim()
           if (failure) {
@@ -954,6 +1017,12 @@ export function ChatPage() {
       setStreamingContent(null)
       streamingConvRef.current = null
       setStatusMessage(null)
+      // Stop closes this window's stream; that is not a failure. The kept
+      // part of the answer arrives with chat.stopped.
+      if (stoppedRef.current || (error instanceof DOMException && error.name === 'AbortError')) {
+        if (conversationId) queryClient.invalidateQueries({ queryKey: ['messages', conversationId] })
+        return
+      }
       setSendError(
         error instanceof Error
           ? error.message
@@ -966,6 +1035,10 @@ export function ChatPage() {
   }
 
   const handleStop = () => {
+    stoppedRef.current = true
+    // Stop the run on the computer too, not only this window's stream (§67).
+    const running = streamingConvRef.current ?? selectedId
+    if (running) void api.stopChat(running).catch(() => undefined)
     abortRef.current?.abort()
     setIsSending(false)
     setStreamingContent(null)
@@ -1250,6 +1323,17 @@ export function ChatPage() {
                   </optgroup>
                 </>
               )}
+            </select>
+          </label>
+          <label className="composer-select" title={EFFORTS.find((e) => e.id === effort)?.hint}>
+            <span className="composer-select-label">Effort</span>
+            <span className="sr-only">Effort</span>
+            <select value={effort} disabled={isSending} onChange={(event) => setEffort(event.target.value as Effort)}>
+              {EFFORTS.map((e) => (
+                <option key={e.id} value={e.id} title={e.hint}>
+                  {e.label}
+                </option>
+              ))}
             </select>
           </label>
           <MemoryToggle

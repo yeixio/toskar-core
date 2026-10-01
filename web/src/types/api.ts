@@ -357,6 +357,13 @@ export interface ChatRequest {
   execution?: 'automatic' | 'local'
   /** Artifact ids from uploadArtifact. */
   attachments?: string[]
+  /** How much work the message gets: auto (default), fast, balanced, or thorough. */
+  effort?: 'auto' | 'fast' | 'balanced' | 'thorough'
+}
+
+export interface StopChatResponse {
+  /** Whether a turn was running and has been stopped. */
+  stopped: boolean
 }
 
 export interface ChatResponse {

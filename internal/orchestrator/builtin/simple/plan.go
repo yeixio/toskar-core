@@ -34,7 +34,7 @@ const planGuidance = "Yggdrasil worked through this request in parts; the notes 
 // lookups for independent parts run at the same time; the model then writes
 // notes for each part in turn, and later parts of a sequence see the notes
 // before them. It returns the notes for the final answer.
-func runPlan(ctx context.Context, env pluginapi.ExecutionEnvironment, profile contracts.AIProfile, role string, plan huginn.Plan, prompt, reference string) string {
+func runPlan(ctx context.Context, env pluginapi.ExecutionEnvironment, profile contracts.AIProfile, role string, plan huginn.Plan, prompt, reference string, pages int) string {
 	steps := plan.Steps
 	// A step that asks for a file is done by the final answer, which writes
 	// the file from everything gathered.
@@ -56,7 +56,7 @@ func runPlan(ctx context.Context, env pluginapi.ExecutionEnvironment, profile co
 			wg.Add(1)
 			go func(i int, step string) {
 				defer wg.Done()
-				looked[i], _ = lookUp(ctx, env, profile, lookupQuery(step), step)
+				looked[i], _ = lookUp(ctx, env, profile, lookupQuery(step), step, pages)
 			}(i, step)
 		}
 		wg.Wait()
@@ -70,7 +70,7 @@ func runPlan(ctx context.Context, env pluginapi.ExecutionEnvironment, profile co
 		env.Emit(EventPlanStep, map[string]any{"index": i, "step": step, "status": "running"})
 		material := looked[i]
 		if web && !plan.Parallel {
-			material, _ = lookUp(ctx, env, profile, lookupQuery(step), step)
+			material, _ = lookUp(ctx, env, profile, lookupQuery(step), step, pages)
 		}
 		ref := joinReference(reference, material)
 		if !plan.Parallel && notes.Len() > 0 {
@@ -81,6 +81,10 @@ func runPlan(ctx context.Context, env pluginapi.ExecutionEnvironment, profile co
 			{Role: "user", Content: withReference("The whole request: "+prompt+"\n\nYour part: "+step, ref)},
 		}
 		content, _, err := generateText(ctx, env, role, ask)
+		if ctx.Err() != nil {
+			// Stopped: keep the parts already finished, not this one.
+			break
+		}
 		status := "done"
 		note := strings.TrimSpace(tools.VisibleText(content))
 		if err != nil || note == "" {

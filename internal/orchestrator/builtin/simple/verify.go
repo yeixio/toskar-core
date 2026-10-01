@@ -22,7 +22,7 @@ const (
 // check needs no model; only an answer with issues is sent back to the model
 // once, with the issues named, and the revision is kept if it has fewer.
 // Figures that still do not check out are reported for the answer's note.
-func verifyAnswer(ctx context.Context, env pluginapi.ExecutionEnvironment, role string, messages []pluginapi.ChatMessage, answer, evidence, prompt string) string {
+func verifyAnswer(ctx context.Context, env pluginapi.ExecutionEnvironment, role string, messages []pluginapi.ChatMessage, answer, evidence, prompt string, corrections int) string {
 	if !huginn.HasFigures(answer) {
 		return answer
 	}
@@ -33,23 +33,33 @@ func verifyAnswer(ctx context.Context, env pluginapi.ExecutionEnvironment, role 
 		}
 		return answer
 	}
-	env.Emit(EventVerifying, map[string]any{"issues": len(issues)})
-	ask := append(append([]pluginapi.ChatMessage(nil), messages...),
-		pluginapi.ChatMessage{Role: "assistant", Content: answer},
-		pluginapi.ChatMessage{Role: "user", Content: "Check your answer against the reference material. Problems:\n" + huginn.Describe(issues) +
-			"Rewrite the whole answer for the user. Use only figures from the reference material, or calculations done correctly from them. " +
-			"If a figure is not in the reference material, say it is not there instead of guessing. Reply with the answer only."},
-	)
-	revised, _, err := generateText(ctx, env, role, ask)
 	remaining := issues
-	if err == nil {
+	// Each pass sends the issues back once; a revision is kept only when it
+	// fixes some and is still a real answer (§24). Fast skips the passes and
+	// only reports what did not check out.
+	for pass := 0; pass < corrections && len(remaining) > 0 && ctx.Err() == nil; pass++ {
+		env.Emit(EventVerifying, map[string]any{"issues": len(remaining)})
+		ask := append(append([]pluginapi.ChatMessage(nil), messages...),
+			pluginapi.ChatMessage{Role: "assistant", Content: answer},
+			pluginapi.ChatMessage{Role: "user", Content: "Check your answer against the reference material. Problems:\n" + huginn.Describe(remaining) +
+				"Rewrite the whole answer for the user. Use only figures from the reference material, or calculations done correctly from them. " +
+				"If a figure is not in the reference material, say it is not there instead of guessing. Reply with the answer only."},
+		)
+		revised, _, err := generateText(ctx, env, role, ask)
+		if err != nil {
+			break
+		}
 		// A revision must still be an answer: one that fixes figures by
 		// dropping most of the reply is not kept.
-		if text := tools.ParseModelOutput(revised).Text; substantial(text, answer) {
-			if again := huginn.Check(text, evidence, prompt); len(again) < len(issues) {
-				answer, remaining = text, again
-			}
+		text := tools.ParseModelOutput(revised).Text
+		if !substantial(text, answer) {
+			break
 		}
+		again := huginn.Check(text, evidence, prompt)
+		if len(again) >= len(remaining) {
+			break
+		}
+		answer, remaining = text, again
 	}
 	env.Emit(EventVerified, map[string]any{
 		"issues":    len(issues),

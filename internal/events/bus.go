@@ -67,7 +67,10 @@ const (
 	// ChatModelRouted reports the model chosen for a turn, by Auto or after a
 	// failure, with the reason in plain language.
 	ChatModelRouted = "chat.model_routed"
-	ChatError       = "chat.error"
+	// ChatStopped reports a run the user stopped, and whether a partial
+	// answer was kept.
+	ChatStopped = "chat.stopped"
+	ChatError   = "chat.error"
 )
 
 // Bus is an in-process pub/sub event bus.

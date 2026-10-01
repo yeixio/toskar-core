@@ -52,11 +52,11 @@ func lookupQuery(prompt string) string {
 // often pick the wrong tool or none; Yggdrasil decides instead. It runs only
 // when the profile allows web search without asking, and returns the material
 // to give the model as data.
-func lookUpFirst(ctx context.Context, env pluginapi.ExecutionEnvironment, profile contracts.AIProfile, prompt string) (string, bool) {
+func lookUpFirst(ctx context.Context, env pluginapi.ExecutionEnvironment, profile contracts.AIProfile, prompt string, pages int) (string, bool) {
 	if !tools.MessageNeedsLiveWeb(prompt) {
 		return "", false
 	}
-	return lookUp(ctx, env, profile, lookupQuery(prompt), prompt)
+	return lookUp(ctx, env, profile, lookupQuery(prompt), prompt, pages)
 }
 
 // webAllowed reports whether the profile lets Yggdrasil search without asking.
@@ -64,9 +64,10 @@ func webAllowed(profile contracts.AIProfile) bool {
 	return strings.EqualFold(tools.PolicyForProfile(profile, "internet.search"), tools.PolicyAllow)
 }
 
-// lookUp searches the web for query and reads the best page. prompt is the
-// question the material is for.
-func lookUp(ctx context.Context, env pluginapi.ExecutionEnvironment, profile contracts.AIProfile, query, prompt string) (string, bool) {
+// lookUp searches the web for query and reads the best pages, up to pages
+// of them (0 uses the search results alone). prompt is the question the
+// material is for.
+func lookUp(ctx context.Context, env pluginapi.ExecutionEnvironment, profile contracts.AIProfile, query, prompt string, pages int) (string, bool) {
 	if !webAllowed(profile) {
 		return "", false
 	}
@@ -95,7 +96,7 @@ func lookUp(ctx context.Context, env pluginapi.ExecutionEnvironment, profile con
 		}
 		fmt.Fprintf(&b, "- %s (%s): %s\n", strings.TrimSpace(r.Title), r.URL, strings.TrimSpace(r.Snippet))
 	}
-	if page, ok := readBestPage(ctx, env, profile, prompt, args, result); ok {
+	for _, page := range readBestPages(ctx, env, profile, prompt, args, result, pages) {
 		title, _ := page["title"].(string)
 		link, _ := page["url"].(string)
 		content, _ := page["content"].(string)

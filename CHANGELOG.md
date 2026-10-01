@@ -10,6 +10,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Thi
 
 - Redrawn Yggdrasil mark: vector source, interface colors, small-size version, theme-aware favicon. The sources are in `docs/brand/logo/`, and `make icons` renders the Linux icons from them.
 - Ratatoskr, the Yggdrasil mascot. He appears at the moments that matter: thinking while a reply is written, delivering work to a paired computer, celebrating a finished download or deploy, dropping his acorn on an error, and asleep when no model is loaded. He is a still frame when the system asks for reduced motion.
+- Effort in chat: Auto, Fast, Balanced, or Thorough. Fast answers in one go; Thorough reads more pages, uses the largest model that fits, and checks figures twice. Auto keeps quick questions fast and gives questions about your data, and requests with several parts, more care. The choice is remembered.
+- Stop means stop. Stop ends every model call, tool, plan step, approval, and paired computer working on the reply, from any window or through `POST /api/v1/chat/stop`, and keeps what was already written, marked as stopped.
 - Big requests are worked through in parts. "Compare Ollama, llama.cpp and MLX" looks each one up on the web side by side; "find three NAS drives, then compare price per TB, then make a spreadsheet" runs step by step, each step building on the last. A checklist shows the parts while they run, and one answer (or file) comes from all of them.
 - Answers are checked before you see them. Calculations are recomputed, and figures in answers that use your files, knowledge, or web results must appear in the lines about the same thing. A wrong figure is sent back to the model to fix once. Anything still unconfirmed is called out under the answer ("could not confirm 20 in the sources"). An answer that only describes tools, instead of answering, is asked for again without tools.
 - Small-model notes. On the Models page, models under 4B parameters say they can mix up facts and numbers from your files and knowledge, and suggest a larger model that fits the computer. In chat, an answer from a small model that used your files or knowledge carries the same note. Auto prefers a larger model for questions about your data.
@@ -32,6 +34,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Thi
 
 ### Fixed
 
+- The chat page no longer reopens its event stream on almost every render, which dropped events such as a plan's checklist. The first message of a new chat no longer disappears while the reply is being written.
 - A model whose `llama-server` exits while loading, for example a damaged file, now fails at once instead of after a two-minute wait.
 - More current-information questions are recognized (news, scores, prices, exchange rates, "near me"), and cues match whole words only.
 - Chat starts faster when a paired computer is offline. Peer health is checked in the background every 10 seconds and reused for 20; a check that has to run during a turn waits at most 1.5 seconds. Before, each turn waited the full timeout for an offline peer.

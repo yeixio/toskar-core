@@ -90,7 +90,9 @@ type App struct {
 	memTotal atomic.Uint64
 	// failedModels maps a model id to when it last could not answer.
 	failedModels sync.Map
-	Training     *training.Service
+	// runs maps a conversation id to its running turn, so Stop can cancel it.
+	runs     sync.Map
+	Training *training.Service
 
 	hw         *hardware.Detector
 	advertiser *discovery.Advertiser
@@ -442,6 +444,7 @@ func New(opts Options) (*App, error) {
 		RevokeAPIKey: apiKeyMgr.Revoke,
 		RotateAPIKey: apiKeyMgr.Rotate,
 		VerifyAPIKey: apiKeyMgr.Verify,
+		StopChat:     a.StopChat,
 		Chat: func(w http.ResponseWriter, r *http.Request, conversationID, profileID, modelID, message string, stream bool, execution string) error {
 			return a.HandleHTTPChat(w, r, conversationID, profileID, modelID, message, stream, execution)
 		},

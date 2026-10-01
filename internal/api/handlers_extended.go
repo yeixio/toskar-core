@@ -8,6 +8,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/yeixio/yggdrasil-core/internal/artifacts"
 	"github.com/yeixio/yggdrasil-core/internal/auth"
+	"github.com/yeixio/yggdrasil-core/internal/huginn"
 	"github.com/yeixio/yggdrasil-core/pkg/contracts"
 )
 
@@ -285,15 +286,35 @@ func (s *Server) handleChat(w http.ResponseWriter, r *http.Request) {
 		Execution      string `json:"execution"`
 		// Attachments are artifact ids uploaded with POST /artifacts.
 		Attachments []string `json:"attachments"`
+		// Effort is auto, fast, balanced, or thorough (spec §15).
+		Effort string `json:"effort"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		writeErr(w, http.StatusBadRequest, "INVALID_JSON", "invalid body", nil)
 		return
 	}
-	r = r.WithContext(artifacts.WithAttachments(r.Context(), body.Attachments))
+	r = r.WithContext(huginn.WithEffort(artifacts.WithAttachments(r.Context(), body.Attachments), huginn.ParseEffort(body.Effort)))
 	if err := s.deps.Chat(w, r, body.ConversationID, body.ProfileID, body.ModelID, body.Message, body.Stream, body.Execution); err != nil {
 		writeErr(w, http.StatusInternalServerError, "CHAT_FAILED", err.Error(), nil)
 	}
+}
+
+// handleStopChat stops a conversation's running turn: every model call, tool
+// call, and paired computer working on it (spec §67). What was already
+// written is kept.
+func (s *Server) handleStopChat(w http.ResponseWriter, r *http.Request) {
+	var body struct {
+		ConversationID string `json:"conversation_id"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil || body.ConversationID == "" {
+		writeErr(w, http.StatusBadRequest, "INVALID_JSON", "conversation_id required", nil)
+		return
+	}
+	stopped := false
+	if s.deps.StopChat != nil {
+		stopped = s.deps.StopChat(body.ConversationID)
+	}
+	writeJSON(w, http.StatusOK, map[string]any{"stopped": stopped})
 }
 
 func (s *Server) handleConversationMessages(w http.ResponseWriter, r *http.Request) {

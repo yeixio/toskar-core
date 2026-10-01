@@ -38,6 +38,7 @@ const KNOWN_EVENT_TYPES = [
   'tool.parsed',
   'chat.model_routed',
   'chat.lookup',
+  'chat.stopped',
   'chat.making_file',
   'plan.created',
   'plan.step',

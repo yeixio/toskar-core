@@ -158,6 +158,10 @@ func (a *App) RunChat(ctx context.Context, profileID, conversationID, message st
 	ch := make(chan pluginapi.ChatChunk, 32)
 	go func() {
 		defer close(ch)
+		// Stop (from this client, another one, or the API) cancels ctx, and
+		// with it every model call, tool, plan step, and paired computer.
+		ctx, _, endRun := a.startRun(ctx, conversationID)
+		defer endRun()
 		env := &chatExecEnv{
 			app:            a,
 			ctx:            ctx,
@@ -200,6 +204,16 @@ func (a *App) RunChat(ctx context.Context, profileID, conversationID, message st
 			retry := false
 			for evt := range eventsCh {
 				if evt.Error != "" {
+					if ctx.Err() != nil {
+						// Stopped: keep what was already written (§67).
+						a.keepStopped(ctx, env, conversationID, full)
+						ch <- pluginapi.ChatChunk{Done: true}
+						go func(rest <-chan pluginapi.OrchestrationEvent) {
+							for range rest {
+							}
+						}(eventsCh)
+						return
+					}
 					if attempt == 0 && !teamMode && special == nil && recoverable(ctx, evt.Error, full, env) {
 						failedID := firstNonEmpty(env.modelID(), modelID)
 						if next, step, notice, ok := a.fallback(ctx, failedID, evt.Error); ok {
@@ -316,6 +330,12 @@ func (a *App) RunChat(ctx context.Context, profileID, conversationID, message st
 		}
 		if full != "" {
 			env.trace.noticeIfNone(a.smallModelNotice(ctx, env.trace.dataKind(), env.modelID(), routeReason != ""))
+		}
+		if ctx.Err() != nil {
+			// Stopped after the model finished speaking but before the turn
+			// was saved: keep it as a stopped answer (§67).
+			a.keepStopped(ctx, env, conversationID, full)
+			return
 		}
 		if conversationID != "" && full != "" {
 			saveChat, _ := a.Settings.GetBool(ctx, "save_chat_history", true)
@@ -904,6 +924,10 @@ func (e *chatExecEnv) Emit(eventType string, payload map[string]any) {
 			steps, _ := payload["steps"].([]string)
 			parallel, _ := payload["parallel"].(bool)
 			e.trace.planned(len(steps), parallel)
+		case simple.EventEffort:
+			if chosen, _ := payload["chosen"].(string); chosen != "" && chosen != string(huginn.EffortAuto) {
+				e.trace.effort(huginn.ParseEffort(chosen).Label())
+			}
 		case simple.EventVerified:
 			issues, _ := payload["issues"].(int)
 			fixed, _ := payload["fixed"].(int)
@@ -1094,4 +1118,28 @@ func (a *App) modelName(modelID string) string {
 		}
 	}
 	return modelID
+}
+
+// keepStopped saves the part of an answer written before the user stopped
+// the turn, marked as stopped, and tells every client the turn ended.
+func (a *App) keepStopped(ctx context.Context, env *chatExecEnv, conversationID, full string) {
+	// ctx is cancelled by now; the save must still happen.
+	ctx = context.WithoutCancel(ctx)
+	kept := strings.TrimSpace(full) != ""
+	env.trace.stopped(kept)
+	// Keep the answer so far; with none, keep a short note, so the stop is
+	// visible and the sources and steps already gathered are not lost.
+	content := full
+	if !kept {
+		content = "_Stopped before the answer was written._"
+	}
+	if conversationID != "" {
+		if save, _ := a.Settings.GetBool(ctx, "save_chat_history", true); save {
+			_, _ = a.Conversations.AddMessageWithMeta(ctx, conversationID, "assistant", content, env.trace.meta())
+		}
+	}
+	a.Bus.Publish(events.New(events.ChatStopped, map[string]any{
+		"conversation_id": conversationID,
+		"kept":            kept,
+	}))
 }
