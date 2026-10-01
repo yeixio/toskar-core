@@ -290,6 +290,35 @@ func (t *turnTrace) tool(toolID string, args, result map[string]any) {
 		if strings.HasPrefix(toolID, "git.") {
 			t.untrusted = true
 			t.addStep("git", "Checked the Git repository ("+strings.TrimPrefix(toolID, "git.")+")")
+			return
+		}
+		if def, ok := tools.Lookup(toolID); ok && strings.HasPrefix(def.Source, "connector:") {
+			// What a connected service returns was written by other people,
+			// so it is data, not instructions (§58).
+			t.untrusted = true
+			t.addStep("service", def.Name)
+			t.serviceSources(result)
+		}
+	}
+}
+
+// serviceSources cites the pages a connected service's result links to,
+// such as GitHub issues.
+func (t *turnTrace) serviceSources(result map[string]any) {
+	add := func(m map[string]any) {
+		u, _ := m["url"].(string)
+		if !strings.HasPrefix(u, "https://") && !strings.HasPrefix(u, "http://") {
+			return
+		}
+		title, _ := m["title"].(string)
+		t.addSource(contracts.Citation{Kind: "web", Title: firstNonEmpty(title, hostOf(u)), URL: u})
+	}
+	add(result)
+	if list, ok := result["results"].([]any); ok {
+		for i, item := range list {
+			if m, ok := item.(map[string]any); ok && i < 5 {
+				add(m)
+			}
 		}
 	}
 }

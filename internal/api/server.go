@@ -20,6 +20,7 @@ import (
 	"github.com/yeixio/yggdrasil-core/internal/auth"
 	"github.com/yeixio/yggdrasil-core/internal/automations"
 	"github.com/yeixio/yggdrasil-core/internal/config"
+	"github.com/yeixio/yggdrasil-core/internal/connectors"
 	"github.com/yeixio/yggdrasil-core/internal/events"
 	"github.com/yeixio/yggdrasil-core/internal/gjallarhorn"
 	"github.com/yeixio/yggdrasil-core/internal/logs"
@@ -125,6 +126,7 @@ type Server struct {
 	memory          *muninn.Store
 	artifacts       *artifacts.Store
 	notifications   *gjallarhorn.Hub
+	connectors      *connectors.Manager
 	training        *training.Service
 	trainingCatalog func() []models.CatalogEntry
 }
@@ -223,6 +225,7 @@ func (s *Server) routes() {
 	s.memoryRoutes(api)
 	s.artifactRoutes(api)
 	s.notificationRoutes(api)
+	s.connectorRoutes(api)
 	s.trainingRoutes(api)
 
 	if s.deps.OpenAI != nil {

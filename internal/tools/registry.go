@@ -83,10 +83,21 @@ func NewRegistry(workspace string, bus *events.Bus) *Registry {
 
 // Register adds a tool that needs app services, such as files.create.
 func (r *Registry) Register(t Tool) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
 	r.tools[t.ID()] = t
 }
 
+// Unregister removes a tool, such as one of a disconnected service.
+func (r *Registry) Unregister(id string) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	delete(r.tools, id)
+}
+
 func (r *Registry) List() []Tool {
+	r.mu.Lock()
+	defer r.mu.Unlock()
 	out := make([]Tool, 0, len(r.tools))
 	for _, t := range r.tools {
 		out = append(out, t)
@@ -95,7 +106,9 @@ func (r *Registry) List() []Tool {
 }
 
 func (r *Registry) Get(id string) (Tool, error) {
+	r.mu.Lock()
 	t, ok := r.tools[Canonical(id)]
+	r.mu.Unlock()
 	if !ok {
 		return nil, fmt.Errorf("tool %q not found", id)
 	}

@@ -55,7 +55,7 @@ func (e automationExecutor) Execute(ctx context.Context, automation automations.
 		}
 		modelID = choice.Model.ID
 	}
-	profile = withChatModel(profile, modelID)
+	profile = tools.WithConnected(withChatModel(profile, modelID))
 	orch, err := e.app.OrchRegistry.Get(profile.OrchestratorID)
 	if err != nil {
 		return automations.Execution{}, err

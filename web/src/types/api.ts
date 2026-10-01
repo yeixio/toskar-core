@@ -1058,3 +1058,29 @@ export interface NotificationList {
   notifications: AppNotification[]
   unread: number
 }
+
+export interface ConnectorField {
+  key: string
+  label: string
+  help?: string
+  secret: boolean
+  optional?: boolean
+  placeholder?: string
+}
+
+/** A connected service (spec §32). Secret values are never returned; a stored token shows only its last four characters. */
+export interface Connector {
+  id: string
+  name: string
+  description: string
+  scopes: string
+  fields: ConnectorField[]
+  connected: boolean
+  status?: 'connected' | 'error'
+  account?: string
+  connected_at?: string
+  checked_at?: string
+  error?: string
+  values?: Record<string, string>
+  tools: { id: string; name: string; description: string; risk: string; default_policy: string }[]
+}

@@ -113,7 +113,13 @@ func (o *Orchestrator) Run(
 			}
 		}
 		if !planned {
-			if found, ok := lookUpFirst(ctx, env, profile, task.Prompt, budget.Pages); ok {
+			// A message about a connected service is answered from that
+			// service, not the web.
+			if found, ok := serviceFirst(ctx, env, profile); ok {
+				reference = joinReference(reference, found)
+				instructions += "\n" + serviceGuidance
+				profile = withoutFetched(profile)
+			} else if found, ok := lookUpFirst(ctx, env, profile, task.Prompt, budget.Pages); ok {
 				reference = joinReference(reference, found)
 				instructions += "\n" + lookupGuidance
 				profile = withoutWeb(profile)

@@ -18,6 +18,7 @@ import type {
   LogContent,
   LogEntry,
   Message,
+  Connector,
   NotificationList,
   ToolActivityRecord,
   ToolRecord,
@@ -608,6 +609,16 @@ export const api = {
   /** Stop a conversation's running turn on the computer running it; what was written is kept. */
   stopChat: (conversationId: string) =>
     request<StopChatResponse>('/api/v1/chat/stop', { method: 'POST', body: JSON.stringify({ conversation_id: conversationId }) }),
+
+  listConnectors: async () => (await request<Connector[]>('/api/v1/connectors')) ?? [],
+
+  /** Checks the values with the service, then stores them. A blank secret keeps the stored one. */
+  connectService: (id: string, values: Record<string, string>) =>
+    request<Connector>(`/api/v1/connectors/${id}`, { method: 'PUT', body: JSON.stringify({ values }) }),
+
+  checkConnector: (id: string) => request<Connector>(`/api/v1/connectors/${id}/check`, { method: 'POST' }),
+
+  disconnectService: (id: string) => request<null>(`/api/v1/connectors/${id}`, { method: 'DELETE' }),
 
   listNotifications: async (unreadOnly = false) =>
     (await request<NotificationList>(`/api/v1/notifications${unreadOnly ? '?unread=1' : ''}`)) ?? {

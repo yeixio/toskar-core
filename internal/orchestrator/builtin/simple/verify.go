@@ -108,5 +108,14 @@ func looseToolCall(content string, profile contracts.AIProfile) (*tools.ModelCal
 // narratesTools reports an answer that describes tool calls, such as
 // "use internet.search to find the price", instead of answering.
 func narratesTools(answer string) bool {
-	return len(toolNameRe.FindAllString(answer, -1)) >= 1
+	if toolNameRe.MatchString(answer) {
+		return true
+	}
+	// Connected services' tools, such as homeassistant.states.
+	for _, def := range tools.ConnectedDefinitions() {
+		if strings.Contains(answer, def.ID) {
+			return true
+		}
+	}
+	return false
 }

@@ -104,6 +104,9 @@ func (a *App) RunChat(ctx context.Context, profileID, conversationID, message st
 		profile = withChatModel(profile, modelID)
 	}
 	profile = applyExecutionPolicy(profile, execution)
+	// Connected services' tools, at their default policies unless the
+	// profile sets its own (§32).
+	profile = tools.WithConnected(profile)
 	if special != nil {
 		// A specialized AI answers in the style it was trained on, without the
 		// tool protocol, on the computer that holds its adapter.

@@ -36,7 +36,7 @@ func (a *App) listToolViews(ctx context.Context) (any, error) {
 		}
 	}
 	out := make([]toolView, 0)
-	for _, def := range tools.BuiltinCatalog() {
+	for _, def := range tools.Catalog() {
 		_, off := disabled[def.ID]
 		view := toolView{Definition: def, Enabled: !off}
 		for _, profile := range profiles {

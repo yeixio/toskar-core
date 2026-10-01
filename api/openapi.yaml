@@ -426,6 +426,72 @@ paths:
           description: Dismissed
         "404":
           description: No such notification
+  /api/v1/connectors:
+    get:
+      summary: List connected services and their status. Secret values are never returned.
+      operationId: listConnectors
+      responses:
+        "200":
+          description: Services
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  additionalProperties: true
+  /api/v1/connectors/{id}:
+    put:
+      summary: Check values with the service, then store them and add its tools
+      operationId: connectService
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                values:
+                  type: object
+                  additionalProperties:
+                    type: string
+      responses:
+        "200":
+          description: Connected
+        "400":
+          description: The service did not accept the values
+        "404":
+          description: Unknown service
+    delete:
+      summary: Delete the stored credential and remove the service's tools
+      operationId: disconnectService
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Disconnected
+  /api/v1/connectors/{id}/check:
+    post:
+      summary: Check the stored credential again
+      operationId: checkConnector
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Status
   /api/v1/diagnostics:
     get:
       summary: Create a diagnostics bundle

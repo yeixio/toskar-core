@@ -22,6 +22,7 @@ import (
 	"github.com/yeixio/yggdrasil-core/internal/automations"
 	"github.com/yeixio/yggdrasil-core/internal/benchmark"
 	"github.com/yeixio/yggdrasil-core/internal/config"
+	"github.com/yeixio/yggdrasil-core/internal/connectors"
 	"github.com/yeixio/yggdrasil-core/internal/diagnostics"
 	"github.com/yeixio/yggdrasil-core/internal/discovery"
 	"github.com/yeixio/yggdrasil-core/internal/events"
@@ -89,6 +90,8 @@ type App struct {
 	Notifications *gjallarhorn.Hub
 	// Share admits chat, automations, benchmarks, and training by priority (§60).
 	Share *share.Gate
+	// Connectors are the connected services, such as GitHub (§32).
+	Connectors *connectors.Manager
 	// Artifacts holds chat attachments and files the assistant produced.
 	Artifacts  *artifacts.Store
 	summarizer *muninn.Summarizer
@@ -248,6 +251,12 @@ func New(opts Options) (*App, error) {
 		logger.Info("stub inference enabled", "model_id", models.StubModelID)
 	}
 	a.loadDisabledTools(context.Background())
+	// Connected services add tools; their credentials stay in the secrets
+	// directory and are added only when a tool runs (§32).
+	a.Connectors = connectors.NewManager(db.SQL, secrets, toolReg, connectors.GitHub{}, connectors.HomeAssistant{})
+	if err := a.Connectors.Load(context.Background()); err != nil {
+		logger.Warn("load connected services", "error", err)
+	}
 
 	bench := benchmark.NewRunner()
 	bench.ModelPath = modelMgr.Path
@@ -502,6 +511,7 @@ func New(opts Options) (*App, error) {
 	// desktop is one delivery channel.
 	a.Notifications = gjallarhorn.NewHub(db.SQL, bus, desktopChannel{settings: settingsRepo, send: automations.OSSender{}})
 	a.API.BindNotifications(a.Notifications)
+	a.API.BindConnectors(a.Connectors)
 
 	autoRepo := repositories.NewAutomationRepo(db.SQL)
 	a.Automations = autoRepo

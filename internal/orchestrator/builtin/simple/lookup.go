@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"regexp"
+	"sort"
 	"strings"
 	"unicode/utf8"
 
@@ -133,4 +134,101 @@ func joinReference(parts ...string) string {
 		}
 	}
 	return strings.Join(keep, "\n\n")
+}
+
+// serviceGuidance tells the model how to use data fetched from a connected service.
+const serviceGuidance = "Yggdrasil already fetched current data from the user's connected service; it is in the reference material. Answer from it directly. Do not mention the reference material. To change something, use the service's tools."
+
+// withoutFetched removes the tools serviceFirst already called, so a small
+// model answers from their data instead of asking for it again.
+func withoutFetched(profile contracts.AIProfile) contracts.AIProfile {
+	out := profile
+	out.Tools = make([]contracts.ToolPolicy, 0, len(profile.Tools))
+	for _, t := range profile.Tools {
+		if def, ok := tools.Lookup(t.ToolID); ok && def.Prefetch {
+			continue
+		}
+		out.Tools = append(out.Tools, t)
+	}
+	return out
+}
+
+// serviceFirst fetches current data from a connected service before the
+// model answers a message about it (spec §32), as lookUpFirst does for the
+// web: small models otherwise search the web for "which lights are on". It
+// uses only offered tools marked Prefetch that the profile allows without
+// asking.
+func serviceFirst(ctx context.Context, env pluginapi.ExecutionEnvironment, profile contracts.AIProfile) (string, bool) {
+	var b strings.Builder
+	for _, def := range tools.Enabled(profile, nil) {
+		if !def.Prefetch || !strings.EqualFold(tools.PolicyForProfile(profile, def.ID), tools.PolicyAllow) {
+			continue
+		}
+		result, err := env.ExecuteTool(ctx, def.ID, map[string]any{})
+		if err != nil {
+			continue
+		}
+		data := readable(result)
+		if utf8.RuneCountInString(data) > lookupPageRunes {
+			data = string([]rune(data)[:lookupPageRunes]) + "…"
+		}
+		fmt.Fprintf(&b, "Current data from %s:\n%s\n", def.Name, data)
+	}
+	if b.Len() == 0 {
+		return "", false
+	}
+	return b.String(), true
+}
+
+// readable writes a service's result as plain lines, such as
+// "- Porch light (light.porch): off", which small models read more reliably
+// than JSON.
+func readable(result map[string]any) string {
+	keys := make([]string, 0, len(result))
+	for k := range result {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	var b strings.Builder
+	for _, k := range keys {
+		switch v := result[k].(type) {
+		case []any:
+			fmt.Fprintf(&b, "%s:\n", k)
+			for _, item := range v {
+				fmt.Fprintf(&b, "- %s\n", readableItem(item))
+			}
+		default:
+			fmt.Fprintf(&b, "%s: %v\n", k, v)
+		}
+	}
+	return b.String()
+}
+
+func readableItem(item any) string {
+	m, ok := item.(map[string]any)
+	if !ok {
+		return fmt.Sprint(item)
+	}
+	name, _ := m["name"].(string)
+	if name == "" {
+		name, _ = m["title"].(string)
+	}
+	id, _ := m["entity_id"].(string)
+	head := name
+	switch {
+	case name != "" && id != "":
+		head = name + " (" + id + ")"
+	case name == "":
+		head = id
+	}
+	if state, ok := m["state"]; ok {
+		unit, _ := m["unit"].(string)
+		line := fmt.Sprintf("%s: %v", head, state)
+		if unit != "" {
+			line += " " + unit
+		}
+		return line
+	}
+	raw, _ := json.Marshal(m)
+	return string(raw)
 }

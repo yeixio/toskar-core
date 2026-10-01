@@ -4,6 +4,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/yeixio/yggdrasil-core/internal/tools"
 	"github.com/yeixio/yggdrasil-core/pkg/contracts"
 )
 
@@ -91,5 +92,52 @@ func TestSupportingModelsNeverAnswer(t *testing.T) {
 	}
 	if _, ok := ChooseFor(Chat, EffortAuto, []contracts.Model{embed}, 0); ok {
 		t.Error("an embedding model was chosen to chat")
+	}
+}
+
+func TestToolsForConnectedServices(t *testing.T) {
+	available := []string{"internet.search", "github.search", "github.issue", "homeassistant.states", "homeassistant.call"}
+	tools.SetConnected("homeassistant", []tools.Definition{
+		{ID: "homeassistant.states", Risk: tools.RiskRead},
+		{ID: "homeassistant.call", Risk: tools.RiskWrite},
+	})
+	t.Cleanup(func() { tools.SetConnected("homeassistant", nil) })
+	has := func(list []string, id string) bool {
+		for _, v := range list {
+			if v == id {
+				return true
+			}
+		}
+		return false
+	}
+	gh := ToolsFor(Chat, "What open issues are there in yeixio/yggdrasil-core?", available)
+	if !has(gh, "github.search") || has(gh, "homeassistant.states") {
+		t.Errorf("issues question offered %v", gh)
+	}
+	ha := ToolsFor(Local, "Turn off the kitchen lights", available)
+	if !has(ha, "homeassistant.call") || has(ha, "github.search") {
+		t.Errorf("lights request offered %v", ha)
+	}
+	// A question is never offered a way to change something.
+	q := ToolsFor(Current, "Which lights are on right now?", available)
+	if !has(q, "homeassistant.states") || has(q, "homeassistant.call") {
+		t.Errorf("lights question offered %v", q)
+	}
+	// Words the service taught, such as device names.
+	tools.SetConnected("homeassistant", []tools.Definition{
+		{ID: "homeassistant.states", Risk: tools.RiskRead, Cues: []string{"porch temperature"}},
+		{ID: "homeassistant.call", Risk: tools.RiskWrite, Cues: []string{"porch temperature"}},
+	})
+	if got := ToolsFor(Chat, "What is the porch temperature?", available); !has(got, "homeassistant.states") || has(got, "homeassistant.call") {
+		t.Errorf("device question offered %v", got)
+	}
+	if got := ToolsFor(Chat, "What temperature should I bake bread at?", available); has(got, "homeassistant.states") {
+		t.Errorf("unrelated question offered %v", got)
+	}
+	if got := ToolsFor(Chat, "Ask Home Assistant what the porch temperature is", available); !has(got, "homeassistant.states") {
+		t.Errorf("named service offered %v", got)
+	}
+	if got := ToolsFor(Chat, "What is the capital of France?", available); has(got, "github.search") || has(got, "homeassistant.states") {
+		t.Errorf("unrelated question offered %v", got)
 	}
 }

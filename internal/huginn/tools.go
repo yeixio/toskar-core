@@ -4,6 +4,8 @@ import (
 	"regexp"
 	"slices"
 	"strings"
+
+	"github.com/yeixio/yggdrasil-core/internal/tools"
 )
 
 // Tool groups, by capability. A request is offered whole groups.
@@ -71,12 +73,72 @@ func ToolsFor(k Kind, message string, available []string) []string {
 			}
 		}
 		// Tools outside the built-in groups, such as connected services,
-		// are offered when the message names them.
-		if !grouped(id) && strings.Contains(strings.ToLower(message), strings.SplitN(id, ".", 2)[0]) {
+		// are offered when the message names the service or its subject.
+		// One that changes something also needs the message to ask for a
+		// change, so a question is never offered a way to act.
+		if !grouped(id) && aboutService(strings.SplitN(id, ".", 2)[0], message) {
+			if def, ok := tools.Lookup(id); ok && def.Risk == tools.RiskWrite && !cueAction.MatchString(message) {
+				continue
+			}
 			out = append(out, id)
 		}
 	}
 	return out
+}
+
+// serviceCues are what a message says when it is about a connected service
+// without naming it (§32).
+var serviceCues = map[string]*regexp.Regexp{
+	"github":        regexp.MustCompile(`(?i)\b(git ?hub|issues?|pull requests?|PRs?)\b`),
+	"homeassistant": regexp.MustCompile(`(?i)(\bhome ?assistant\b|\b(lights?|lamps?|thermostat|heating|switch(es)?|sensors?|garage door|front door|locks?|fans?|blinds)\b)`),
+}
+
+// cueAction is a message asking to change something rather than to know.
+var cueAction = regexp.MustCompile(`(?i)\b(turn|switch|set|dim|brighten|open|close|lock|unlock|start|stop|toggle|activate|run|comment|reply|respond|post|write|add|reopen|label|assign|tell them)\b`)
+
+func aboutService(service, message string) bool {
+	lower := strings.ToLower(message)
+	if strings.Contains(lower, service) {
+		return true
+	}
+	if re, ok := serviceCues[service]; ok && re.MatchString(message) {
+		return true
+	}
+	// Words the service itself taught, such as its device names.
+	for _, def := range tools.ConnectedDefinitions() {
+		if !strings.HasPrefix(def.ID, service+".") {
+			continue
+		}
+		for _, cue := range def.Cues {
+			if containsWord(lower, strings.ToLower(cue)) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func containsWord(text, word string) bool {
+	if len(word) < 3 {
+		return false
+	}
+	for i := 0; ; {
+		k := strings.Index(text[i:], word)
+		if k < 0 {
+			return false
+		}
+		start, end := i+k, i+k+len(word)
+		before := start == 0 || !isWordByte(text[start-1])
+		after := end == len(text) || !isWordByte(text[end])
+		if before && after {
+			return true
+		}
+		i = start + 1
+	}
+}
+
+func isWordByte(b byte) bool {
+	return b == '_' || b >= 'a' && b <= 'z' || b >= '0' && b <= '9'
 }
 
 func grouped(id string) bool {

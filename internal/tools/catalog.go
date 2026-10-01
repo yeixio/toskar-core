@@ -1,7 +1,9 @@
 package tools
 
 import (
+	"sort"
 	"strings"
+	"sync"
 
 	"github.com/yeixio/yggdrasil-core/pkg/contracts"
 )
@@ -24,6 +26,13 @@ type Definition struct {
 	Schema        string `json:"schema"`
 	DefaultPolicy string `json:"default_policy"`
 	Risk          string `json:"risk"` // read | create | write
+	// Prefetch marks a connected service's read tool that Yggdrasil calls,
+	// with no arguments, before the model answers a message about that
+	// service, as it looks up the web first for current questions.
+	Prefetch bool `json:"prefetch,omitempty"`
+	// Cues are words that show a message is about this tool's service,
+	// such as a connected home's device names.
+	Cues []string `json:"cues,omitempty"`
 }
 
 // Risk levels. A create tool only adds a file to Yggdrasil's own store, so it
@@ -60,7 +69,7 @@ func BuiltinCatalog() []Definition {
 
 func Lookup(id string) (Definition, bool) {
 	id = Canonical(id)
-	for _, def := range BuiltinCatalog() {
+	for _, def := range Catalog() {
 		if def.ID == id {
 			return def, true
 		}
@@ -82,10 +91,62 @@ func PolicyForProfile(profile contracts.AIProfile, toolID string) string {
 	return PolicyDeny
 }
 
+// Connected tools come from services the user connected (spec §32). They
+// change while the daemon runs, so they live beside the built-in catalog.
+var (
+	connectedMu sync.RWMutex
+	connected   = map[string][]Definition{}
+)
+
+// SetConnected replaces the tools a connected service provides; nil
+// removes them.
+func SetConnected(source string, defs []Definition) {
+	connectedMu.Lock()
+	defer connectedMu.Unlock()
+	if len(defs) == 0 {
+		delete(connected, source)
+		return
+	}
+	connected[source] = append([]Definition(nil), defs...)
+}
+
+// ConnectedDefinitions lists the tools of every connected service, sorted by id.
+func ConnectedDefinitions() []Definition {
+	connectedMu.RLock()
+	defer connectedMu.RUnlock()
+	var out []Definition
+	for _, defs := range connected {
+		out = append(out, defs...)
+	}
+	sort.Slice(out, func(i, j int) bool { return out[i].ID < out[j].ID })
+	return out
+}
+
+// Catalog is every tool: built in, then connected services.
+func Catalog() []Definition {
+	return append(BuiltinCatalog(), ConnectedDefinitions()...)
+}
+
+// WithConnected gives a profile the tools of connected services it does not
+// list yet, at each tool's default policy: reading allowed, changes asked
+// first. A policy the profile already sets for one, such as deny, stays.
+func WithConnected(profile contracts.AIProfile) contracts.AIProfile {
+	defs := ConnectedDefinitions()
+	if len(defs) == 0 {
+		return profile
+	}
+	add := make([]contracts.ToolPolicy, 0, len(defs))
+	for _, def := range defs {
+		add = append(add, contracts.ToolPolicy{ToolID: def.ID, Policy: def.DefaultPolicy})
+	}
+	profile.Tools = MergeMissingTools(profile.Tools, add)
+	return profile
+}
+
 // Enabled reports tools this profile will actually expose to a model.
 func Enabled(profile contracts.AIProfile, globallyDisabled map[string]struct{}) []Definition {
 	var out []Definition
-	for _, def := range BuiltinCatalog() {
+	for _, def := range Catalog() {
 		if _, off := globallyDisabled[def.ID]; off {
 			continue
 		}

@@ -14,6 +14,7 @@ import {
 import { useUIStore } from '@/stores/uiStore'
 import type { SettingsPatch } from '@/types/api'
 import { RealmKicker } from '@/components/ui/Realm'
+import { ConnectedServices } from './ConnectedServices'
 import { YggdrasilMark } from '@/components/ui/YggdrasilMark'
 
 function Toggle({
@@ -565,6 +566,7 @@ export function SettingsPage() {
 
       <div className="settings-group">
         <p className="settings-group-label">Privacy & security</p>
+        <ConnectedServices />
         <section className="card space-y-4">
           <div>
             <h2 className="section-title">Tool permissions</h2>
