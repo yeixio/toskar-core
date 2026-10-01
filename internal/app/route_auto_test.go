@@ -127,3 +127,21 @@ func TestTraceKnowsWhenDataWasUsed(t *testing.T) {
 		t.Fatal("an existing notice is kept")
 	}
 }
+
+func TestTraceRecordsPlansAndChecks(t *testing.T) {
+	tr := &turnTrace{}
+	tr.planned(3, true)
+	tr.verified(2, 1, "20")
+	meta := tr.meta()
+	if meta.Steps[0].Text != "Split the request into 3 parts and looked them up side by side" ||
+		meta.Steps[1].Text != "Checked the figures; some could not be confirmed" ||
+		meta.Notice != "Yggdrasil could not confirm 20 in the sources. Check before relying on it." {
+		t.Fatalf("meta = %+v", meta)
+	}
+	tr = &turnTrace{}
+	tr.verified(1, 1, "")
+	tr.planned(2, false)
+	if meta := tr.meta(); meta.Steps[0].Text != "Checked the figures and corrected 1 figure" || meta.Steps[1].Text != "Worked through the request in 2 parts" || meta.Notice != "" {
+		t.Fatalf("meta = %+v", meta)
+	}
+}

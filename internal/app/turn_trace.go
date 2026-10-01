@@ -122,6 +122,35 @@ func (t *turnTrace) noticeIfNone(notice string) {
 	}
 }
 
+// planned records that a request was worked through in parts.
+func (t *turnTrace) planned(parts int, parallel bool) {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	text := fmt.Sprintf("Worked through the request in %d parts", parts)
+	if parallel {
+		text = fmt.Sprintf("Split the request into %d parts and looked them up side by side", parts)
+	}
+	t.addStep("plan", text)
+}
+
+// verified records an answer check (spec §24). Figures that could not be
+// confirmed become the answer's notice.
+func (t *turnTrace) verified(issues, fixed int, remaining string) {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	switch {
+	case issues == 0:
+		t.addStep("verify", "Checked the figures against the sources")
+	case fixed > 0 && remaining == "":
+		t.addStep("verify", "Checked the figures and corrected "+plural(fixed, "figure", "figures"))
+	default:
+		t.addStep("verify", "Checked the figures; some could not be confirmed")
+	}
+	if remaining != "" && t.notice == "" {
+		t.notice = fmt.Sprintf("Yggdrasil could not confirm %s in the sources. Check before relying on it.", remaining)
+	}
+}
+
 // routed records which model Auto chose and why.
 func (t *turnTrace) routed(reason string) {
 	t.mu.Lock()

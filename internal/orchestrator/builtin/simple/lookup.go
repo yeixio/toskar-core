@@ -24,7 +24,7 @@ const (
 // model answers.
 const EventLookup = "chat.lookup"
 
-var askPrefixRe = regexp.MustCompile(`(?i)^\s*(hey|hi|ok|okay|so|please|can you|could you|would you|will you|search (the web|online) for|look up|find out|tell me|i want to know|i'd like to know)[\s,:]+`)
+var askPrefixRe = regexp.MustCompile(`(?i)^\s*(hey|hi|ok|okay|so|please|can you|could you|would you|will you|search (the web|online) for|look up|find out about|find out|tell me about|tell me|i want to know|i'd like to know)[\s,:]+`)
 
 // lookupQuery turns a question into a search query: polite openers removed,
 // length capped.
@@ -53,10 +53,23 @@ func lookupQuery(prompt string) string {
 // when the profile allows web search without asking, and returns the material
 // to give the model as data.
 func lookUpFirst(ctx context.Context, env pluginapi.ExecutionEnvironment, profile contracts.AIProfile, prompt string) (string, bool) {
-	if !tools.MessageNeedsLiveWeb(prompt) || !strings.EqualFold(tools.PolicyForProfile(profile, "internet.search"), tools.PolicyAllow) {
+	if !tools.MessageNeedsLiveWeb(prompt) {
 		return "", false
 	}
-	query := lookupQuery(prompt)
+	return lookUp(ctx, env, profile, lookupQuery(prompt), prompt)
+}
+
+// webAllowed reports whether the profile lets Yggdrasil search without asking.
+func webAllowed(profile contracts.AIProfile) bool {
+	return strings.EqualFold(tools.PolicyForProfile(profile, "internet.search"), tools.PolicyAllow)
+}
+
+// lookUp searches the web for query and reads the best page. prompt is the
+// question the material is for.
+func lookUp(ctx context.Context, env pluginapi.ExecutionEnvironment, profile contracts.AIProfile, query, prompt string) (string, bool) {
+	if !webAllowed(profile) {
+		return "", false
+	}
 	env.Emit(EventLookup, map[string]any{"query": query})
 	args := map[string]any{"query": query}
 	result, err := env.ExecuteTool(ctx, "internet.search", args)
@@ -82,7 +95,7 @@ func lookUpFirst(ctx context.Context, env pluginapi.ExecutionEnvironment, profil
 		}
 		fmt.Fprintf(&b, "- %s (%s): %s\n", strings.TrimSpace(r.Title), r.URL, strings.TrimSpace(r.Snippet))
 	}
-	if page, ok := followLiveSearch(ctx, env, profile, prompt, args, result); ok {
+	if page, ok := readBestPage(ctx, env, profile, prompt, args, result); ok {
 		title, _ := page["title"].(string)
 		link, _ := page["url"].(string)
 		content, _ := page["content"].(string)

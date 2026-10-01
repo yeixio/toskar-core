@@ -405,9 +405,10 @@ func TestLookupNeedsPermissionAndACurrentQuestion(t *testing.T) {
 
 func TestLookupQuery(t *testing.T) {
 	cases := map[string]string{
-		"Can you look up the latest news on Mars?": "the latest news on Mars",
-		"Please, what's the weather in Juneau?":    "what's the weather in Juneau",
-		"weather":                                  "weather",
+		"Can you look up the latest news on Mars?":       "the latest news on Mars",
+		"Please, what's the weather in Juneau?":          "what's the weather in Juneau",
+		"weather":                                        "weather",
+		"Find out about MLX for running models on a Mac": "MLX for running models on a Mac",
 	}
 	for in, want := range cases {
 		if got := lookupQuery(in); got != want {

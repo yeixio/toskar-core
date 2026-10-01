@@ -174,6 +174,8 @@ export function ChatPage() {
   const [toolTraces, setToolTraces] = useState<{ label: string; detail: string; status: string }[]>([])
   const [toolDetailsOpen, setToolDetailsOpen] = useState(false)
   const [teamSteps, setTeamSteps] = useState<TeamStep[]>([])
+  // The parts of a request Yggdrasil is working through, shown while it runs.
+  const [planSteps, setPlanSteps] = useState<{ step: string; status: 'pending' | 'running' | 'done' | 'failed' }[]>([])
   const [pendingTool, setPendingTool] = useState<PendingToolPrompt | null>(null)
   const [toolDeciding, setToolDeciding] = useState(false)
   const [renamingId, setRenamingId] = useState<string | null>(null)
@@ -265,6 +267,7 @@ export function ChatPage() {
       setSendError(null)
       setStreamingContent(null)
       setTeamSteps([])
+      setPlanSteps([])
       setDraft('')
       setListError(null)
     }
@@ -395,6 +398,7 @@ export function ChatPage() {
         setSendError(null)
         setStreamingContent(null)
         setTeamSteps([])
+        setPlanSteps([])
       }
     },
     onError: (error) => {
@@ -582,6 +586,23 @@ export function ChatPage() {
           if (routedId) setRoutedModel({ chatId: conversationId, modelId: routedId })
           const name = (event.payload?.model_name as string | undefined) || routedId
           if (name) setStatusMessage(event.payload?.fallback ? `Switching to ${name}…` : `Using ${name}…`)
+        }
+        if (event.type === 'plan.created' || event.type === 'plan.step' || event.type === 'chat.verifying') {
+          const conversationId = event.payload?.conversation_id as string | undefined
+          if (conversationId && conversationId !== selectedId && conversationId !== streamingConvRef.current) return
+          if (event.type === 'chat.verifying') {
+            setStatusMessage('Checking the figures against the sources…')
+          } else if (event.type === 'plan.created') {
+            const steps = (event.payload?.steps as string[] | undefined) ?? []
+            setPlanSteps(steps.map((step) => ({ step, status: 'pending' })))
+            setStatusMessage(`Working through ${steps.length} parts…`)
+          } else {
+            const index = Number(event.payload?.index)
+            const status = event.payload?.status as 'running' | 'done' | 'failed'
+            setPlanSteps((cur) => cur.map((s, i) => (i === index ? { ...s, status } : s)))
+            if (status === 'running') setStatusMessage(`Working on: ${event.payload?.step as string}…`)
+            else setStatusMessage('Putting it together…')
+          }
         }
         if (event.type === 'chat.making_file') {
           const conversationId = event.payload?.conversation_id as string | undefined
@@ -830,6 +851,7 @@ export function ChatPage() {
     setToolDetailsOpen(false)
     setStatusMessage('Starting…')
     setTeamSteps([])
+    setPlanSteps([])
     setPendingTool(null)
     setStreamingContent('')
     streamingTextRef.current = ''
@@ -989,6 +1011,7 @@ export function ChatPage() {
     setToolDetailsOpen(false)
     setStreamingContent(null)
     setTeamSteps([])
+    setPlanSteps([])
     setDraft('')
     setListError(null)
     if (defaultExecution === 'ask') {
@@ -1423,6 +1446,19 @@ export function ChatPage() {
                   </div>
                   )
                 })}
+
+                {isSending && planSteps.length > 0 && (
+                  <ol className="max-w-[min(42rem,85%)] space-y-1.5 border-l-2 border-norn/40 pl-3" aria-label="Plan">
+                    {planSteps.map((s, i) => (
+                      <li key={i} className="flex items-start gap-2 text-sm text-ink-muted">
+                        <span aria-hidden className={s.status === 'done' ? 'text-success' : s.status === 'failed' ? 'text-warning' : s.status === 'running' ? 'text-norn' : 'text-ink-faint'}>
+                          {s.status === 'done' ? '✓' : s.status === 'failed' ? '!' : s.status === 'running' ? '●' : '○'}
+                        </span>
+                        <span className={s.status === 'running' ? 'text-ink' : ''}>{s.step}</span>
+                      </li>
+                    ))}
+                  </ol>
+                )}
 
                 {teamSteps.length > 0 && (
                   <ol className="max-w-[min(42rem,85%)] space-y-1.5 border-l-2 border-primary/30 pl-3">

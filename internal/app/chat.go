@@ -17,6 +17,7 @@ import (
 	"github.com/yeixio/yggdrasil-core/internal/models"
 	modelhealth "github.com/yeixio/yggdrasil-core/internal/models/health"
 	"github.com/yeixio/yggdrasil-core/internal/muninn"
+	"github.com/yeixio/yggdrasil-core/internal/orchestrator/builtin/simple"
 	"github.com/yeixio/yggdrasil-core/internal/profiles"
 	"github.com/yeixio/yggdrasil-core/internal/runtimes/llamacpp"
 	"github.com/yeixio/yggdrasil-core/internal/tools"
@@ -895,6 +896,19 @@ func (e *chatExecEnv) Emit(eventType string, payload map[string]any) {
 	if e.taskID != "" {
 		if _, ok := payload["task_id"]; !ok {
 			payload["task_id"] = e.taskID
+		}
+	}
+	if e.trace != nil {
+		switch eventType {
+		case simple.EventPlanCreated:
+			steps, _ := payload["steps"].([]string)
+			parallel, _ := payload["parallel"].(bool)
+			e.trace.planned(len(steps), parallel)
+		case simple.EventVerified:
+			issues, _ := payload["issues"].(int)
+			fixed, _ := payload["fixed"].(int)
+			remaining, _ := payload["remaining"].(string)
+			e.trace.verified(issues, fixed, remaining)
 		}
 	}
 	if e.app.Tools != nil && (eventType == events.ToolParsed || eventType == events.ToolFailed) {

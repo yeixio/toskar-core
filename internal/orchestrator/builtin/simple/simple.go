@@ -8,6 +8,7 @@ import (
 
 	"github.com/yeixio/yggdrasil-core/internal/contextusage"
 	"github.com/yeixio/yggdrasil-core/internal/events"
+	"github.com/yeixio/yggdrasil-core/internal/huginn"
 	"github.com/yeixio/yggdrasil-core/internal/mimir"
 	"github.com/yeixio/yggdrasil-core/internal/tools"
 	"github.com/yeixio/yggdrasil-core/pkg/contracts"
@@ -64,18 +65,39 @@ func (o *Orchestrator) Run(
 
 		instructions := "Format answers in Markdown with short paragraphs, lists, and links. Do not wrap the whole answer in a code fence."
 		reference := referenceMaterial(ctx, env, task.Prompt)
-		if found, ok := lookUpFirst(ctx, env, profile, task.Prompt); ok {
-			reference = joinReference(reference, found)
-			instructions += "\n" + lookupGuidance
-			profile = withoutWeb(profile)
+		// A request with several parts is worked through part by part;
+		// otherwise a current question is looked up first.
+		planned := false
+		if plan, ok := huginn.MakePlan(task.Prompt); ok {
+			if notes := runPlan(ctx, env, profile, role, plan, task.Prompt, reference); notes != "" {
+				reference = joinReference(reference, notes)
+				instructions += "\n" + planGuidance
+				if plan.NeedsWeb && webAllowed(profile) {
+					profile = withoutWeb(profile)
+				}
+				planned = true
+			}
 		}
+		if !planned {
+			if found, ok := lookUpFirst(ctx, env, profile, task.Prompt); ok {
+				reference = joinReference(reference, found)
+				instructions += "\n" + lookupGuidance
+				profile = withoutWeb(profile)
+			}
+		}
+		// evidence is what the answer may draw figures from, for the check.
+		evidence := reference
 		toolPrompt := tools.PromptFor(profile)
 		sys := instructions
 		if toolPrompt != "" {
 			sys += "\n" + toolPrompt
 		}
+		// plainSys is the same prompt without tools, for a retry when the
+		// model describes tools instead of answering.
+		plainSys := instructions
 		if extra := turnGuidance(ctx, env, task.Prompt); extra != "" {
 			sys = extra + "\n\n" + sys
+			plainSys = extra + "\n\n" + plainSys
 		}
 		messages := []pluginapi.ChatMessage{{Role: "system", Content: sys}}
 		if prior := priorMessages(ctx, env, task.Prompt, sys); len(prior) > 0 {
@@ -98,6 +120,7 @@ func (o *Orchestrator) Run(
 		}
 		calls := 0
 		malformed := 0
+		retriedPlain := false
 
 		for {
 			content, m, err := generateText(ctx, env, role, messages)
@@ -153,6 +176,9 @@ func (o *Orchestrator) Run(
 						followUp = answerFromPage
 					}
 				}
+				if err == nil {
+					evidence = joinReference(evidence, resultNote)
+				}
 				messages = append(messages,
 					pluginapi.ChatMessage{Role: "assistant", Content: content},
 					pluginapi.ChatMessage{Role: "user", Content: resultNote + followUp},
@@ -169,7 +195,18 @@ func (o *Orchestrator) Run(
 				)
 				continue
 			}
-			streamText(ch, role, nodeID, parsed.Text, metrics, usage)
+			// An answer that talks about tools instead of using them is not an
+			// answer (spec §24, tool success). Ask once more without tools,
+			// from the material already gathered.
+			if toolsOn && !retriedPlain && narratesTools(parsed.Text) {
+				retriedPlain = true
+				toolsOn = false
+				env.Emit(events.ToolFailed, map[string]any{"narrated": true, "error": "described tools instead of answering"})
+				messages[0] = pluginapi.ChatMessage{Role: "system", Content: plainSys}
+				continue
+			}
+			answer := verifyAnswer(ctx, env, role, messages, parsed.Text, evidence, task.Prompt)
+			streamText(ch, role, nodeID, answer, metrics, usage)
 			return
 		}
 	}()

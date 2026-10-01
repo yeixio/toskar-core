@@ -26,7 +26,22 @@ func followLiveSearch(
 	searchArgs map[string]any,
 	searchResult map[string]any,
 ) (map[string]any, bool) {
-	if !tools.MessageNeedsLiveWeb(prompt) || !toolEnabled(profile, "internet.open") {
+	if !tools.MessageNeedsLiveWeb(prompt) {
+		return nil, false
+	}
+	return readBestPage(ctx, env, profile, prompt, searchArgs, searchResult)
+}
+
+// readBestPage opens the most useful result of a search and returns its text.
+func readBestPage(
+	ctx context.Context,
+	env pluginapi.ExecutionEnvironment,
+	profile contracts.AIProfile,
+	prompt string,
+	searchArgs map[string]any,
+	searchResult map[string]any,
+) (map[string]any, bool) {
+	if !toolEnabled(profile, "internet.open") {
 		return nil, false
 	}
 	tried := 0
