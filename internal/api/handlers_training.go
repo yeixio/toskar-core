@@ -3,7 +3,9 @@ package api
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
+	"os"
 	"strconv"
 
 	"github.com/gorilla/mux"
@@ -44,6 +46,10 @@ func (s *Server) trainingRoutes(api *mux.Router) {
 	t.HandleFunc("/ais/{id}/test-prompts", s.trainingHandler(s.handleSetTestPrompts)).Methods(http.MethodPut)
 	t.HandleFunc("/ais/{id}/revisions/{rev}/evaluate", s.trainingHandler(s.handleEvaluate)).Methods(http.MethodPost)
 	t.HandleFunc("/ais/{id}/revisions/{rev}/deploy", s.trainingHandler(s.handleDeploy)).Methods(http.MethodPost)
+	t.HandleFunc("/ais/{id}/revisions/{rev}/export", s.trainingHandler(s.handleExportStatus)).Methods(http.MethodGet, http.MethodOptions)
+	t.HandleFunc("/ais/{id}/revisions/{rev}/export", s.trainingHandler(s.handleExport)).Methods(http.MethodPost)
+	t.HandleFunc("/ais/{id}/revisions/{rev}/export", s.trainingHandler(s.handleDeleteExport)).Methods(http.MethodDelete)
+	t.HandleFunc("/ais/{id}/revisions/{rev}/export/file", s.trainingHandler(s.handleExportFile)).Methods(http.MethodGet, http.MethodOptions)
 	t.HandleFunc("/ais/{id}/undeploy", s.trainingHandler(s.handleUndeploy)).Methods(http.MethodPost)
 	t.HandleFunc("/jobs", s.trainingHandler(s.handleListJobs)).Methods(http.MethodGet, http.MethodOptions)
 	t.HandleFunc("/jobs/{id}", s.trainingHandler(s.handleGetJob)).Methods(http.MethodGet, http.MethodOptions)
@@ -370,6 +376,78 @@ func (s *Server) handleDeploy(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, http.StatusOK, ai)
+}
+
+func (s *Server) handleExportStatus(w http.ResponseWriter, r *http.Request) {
+	rev, ok := revisionVar(w, r)
+	if !ok {
+		return
+	}
+	st, err := s.training.ExportStatus(r.Context(), mux.Vars(r)["id"], rev)
+	if err != nil {
+		writeTrainingErr(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, st)
+}
+
+func (s *Server) handleExport(w http.ResponseWriter, r *http.Request) {
+	rev, ok := revisionVar(w, r)
+	if !ok {
+		return
+	}
+	st, err := s.training.Export(r.Context(), mux.Vars(r)["id"], rev)
+	if err != nil {
+		writeTrainingErr(w, err)
+		return
+	}
+	code := http.StatusAccepted
+	if st.State == training.ExportReady {
+		code = http.StatusOK
+	}
+	writeJSON(w, code, st)
+}
+
+func (s *Server) handleDeleteExport(w http.ResponseWriter, r *http.Request) {
+	rev, ok := revisionVar(w, r)
+	if !ok {
+		return
+	}
+	if err := s.training.DeleteExport(r.Context(), mux.Vars(r)["id"], rev); err != nil {
+		writeTrainingErr(w, err)
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
+}
+
+// handleExportFile downloads an exported GGUF. Files are several GB, so it
+// streams from disk and supports range requests for resumed downloads.
+func (s *Server) handleExportFile(w http.ResponseWriter, r *http.Request) {
+	rev, ok := revisionVar(w, r)
+	if !ok {
+		return
+	}
+	path, name, err := s.training.ExportFile(r.Context(), mux.Vars(r)["id"], rev)
+	if err != nil {
+		writeTrainingErr(w, err)
+		return
+	}
+	f, err := os.Open(path)
+	if err != nil {
+		writeTrainingErr(w, err)
+		return
+	}
+	defer f.Close()
+	info, err := f.Stat()
+	if err != nil {
+		writeTrainingErr(w, err)
+		return
+	}
+	w.Header().Set("Content-Type", "application/octet-stream")
+	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%q", asciiName(name)))
+	w.Header().Set("X-Content-Type-Options", "nosniff")
+	w.Header().Set("Cache-Control", "private, no-store")
+	http.ServeContent(w, r, "", info.ModTime(), f)
 }
 
 func (s *Server) handleUndeploy(w http.ResponseWriter, r *http.Request) {

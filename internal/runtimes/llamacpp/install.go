@@ -47,6 +47,24 @@ func (r *Runtime) binaryPath() string {
 	return filepath.Join(r.runtimesDir, "llamacpp", name)
 }
 
+// Tool returns a llama.cpp program installed beside llama-server, such as
+// llama-export-lora. Builds that ship only llama-server, like the Mac App
+// Store build, do not have one.
+func (r *Runtime) Tool(name string) (string, error) {
+	if runtime.GOOS == "windows" {
+		name += ".exe"
+	}
+	server := r.binaryPath()
+	if resolved, err := filepath.EvalSymlinks(server); err == nil {
+		server = resolved
+	}
+	path := filepath.Join(filepath.Dir(server), name)
+	if st, err := os.Stat(path); err != nil || st.IsDir() {
+		return "", fmt.Errorf("this llama.cpp install has no %s. Reinstall llama.cpp from the Runtimes page", name)
+	}
+	return path, nil
+}
+
 func bundledLlamaServer() string {
 	exe, err := os.Executable()
 	if err != nil {

@@ -7,6 +7,7 @@ import (
 	"github.com/yeixio/yggdrasil-core/internal/automations"
 	"github.com/yeixio/yggdrasil-core/internal/events"
 	"github.com/yeixio/yggdrasil-core/internal/gjallarhorn"
+	"github.com/yeixio/yggdrasil-core/internal/training"
 )
 
 type boolSettings interface {
@@ -132,6 +133,14 @@ func noticeForEvent(a *App, evt events.Event) (gjallarhorn.Request, bool) {
 		return gjallarhorn.Request{SourceType: "model", SourceID: str("model_id"), Category: gjallarhorn.CategoryModel,
 			Severity: gjallarhorn.SeverityError, Title: "Download failed", Body: fmt.Sprintf("%s could not be downloaded: %s", name, str("error")),
 			Link: "/models", DedupeKey: "model.download:" + str("model_id")}, true
+	case training.EventExportCompleted:
+		return gjallarhorn.Request{SourceType: "training", SourceID: str("ai_id"), Category: gjallarhorn.CategoryTraining,
+			Severity: gjallarhorn.SeveritySuccess, Title: "Model exported", Body: fmt.Sprintf("%s is ready to download as a GGUF file.", str("name")),
+			Link: "/train"}, true
+	case training.EventExportFailed:
+		return gjallarhorn.Request{SourceType: "training", SourceID: str("ai_id"), Category: gjallarhorn.CategoryTraining,
+			Severity: gjallarhorn.SeverityError, Title: "Export failed", Body: fmt.Sprintf("%s could not be exported: %s", str("name"), str("error")),
+			Link: "/train"}, true
 	case "training.deployed":
 		return gjallarhorn.Request{SourceType: "training", SourceID: str("ai_id"), Category: gjallarhorn.CategoryTraining,
 			Severity: gjallarhorn.SeveritySuccess, Title: "Specialized AI deployed", Body: "It is now in the Chat model menu and the API.",

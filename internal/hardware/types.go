@@ -33,6 +33,12 @@ func detectDisk(ctx context.Context, path string) (contracts.DiskInfo, error) {
 	return platformDisk(ctx, path)
 }
 
+// FreeDisk returns the bytes available to this process on path's volume.
+func FreeDisk(path string) (uint64, error) {
+	d, err := platformDisk(context.Background(), path)
+	return d.AvailableBytes, err
+}
+
 func detectAccelerators(ctx context.Context) ([]contracts.Accelerator, error) {
 	return platformAccelerators(ctx)
 }

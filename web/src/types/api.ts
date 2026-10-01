@@ -951,6 +951,20 @@ export interface TrainingJob {
   finished_at?: string
 }
 
+// A revision merged into one standalone GGUF file.
+export interface ExportStatus {
+  ai_id: string
+  revision: number
+  state: 'none' | 'exporting' | 'ready' | 'failed'
+  filename?: string
+  // The file's size when ready, and the estimate while exporting.
+  size_bytes?: number
+  error?: string
+  created_at?: string
+  // Not part of the file; another tool needs them as its system prompt.
+  instructions?: string
+}
+
 export interface TrainingRevision {
   ai_id: string
   revision: number

@@ -2,12 +2,15 @@ package app
 
 import (
 	"context"
+	"fmt"
 	"path/filepath"
 	"strings"
 	"time"
 
 	"github.com/yeixio/yggdrasil-core/internal/egress"
 	"github.com/yeixio/yggdrasil-core/internal/events"
+	"github.com/yeixio/yggdrasil-core/internal/hardware"
+	"github.com/yeixio/yggdrasil-core/internal/runtimes/llamacpp"
 	"github.com/yeixio/yggdrasil-core/internal/share"
 	"github.com/yeixio/yggdrasil-core/internal/training"
 	"github.com/yeixio/yggdrasil-core/pkg/contracts"
@@ -50,7 +53,23 @@ func (a *App) newTrainingService() *training.Service {
 			}
 			return a.peerClient(n), nil
 		},
+		ModelPath:  a.Models.Path,
+		ExportTool: a.exportTool,
+		FreeDisk:   hardware.FreeDisk,
 	})
+}
+
+// exportTool finds llama-export-lora in the installed llama.cpp.
+func (a *App) exportTool(context.Context) (string, error) {
+	rt, err := a.Runtimes.Get("llamacpp")
+	if err != nil {
+		return "", err
+	}
+	lc, ok := rt.(*llamacpp.Runtime)
+	if !ok {
+		return "", fmt.Errorf("llama.cpp is not available")
+	}
+	return lc.Tool("llama-export-lora")
 }
 
 func (a *App) trainingNodes(ctx context.Context) ([]training.Node, error) {

@@ -77,6 +77,13 @@ type Deps struct {
 	LocalNodeID string
 	// Peer returns a client for a paired computer, for remote training.
 	Peer func(ctx context.Context, nodeID string) (Peer, error)
+	// ModelPath returns an installed model's GGUF file, for export.
+	ModelPath func(ctx context.Context, modelID string) (string, error)
+	// ExportTool returns llama-export-lora, which merges an adapter into its
+	// base model.
+	ExportTool func(ctx context.Context) (string, error)
+	// FreeDisk reports the free space where path is, when known.
+	FreeDisk func(path string) (uint64, error)
 	// Sent, when set, records training data sent to a paired computer (§63).
 	Sent func(ctx context.Context, nodeName, detail string)
 }
@@ -98,7 +105,9 @@ type Service struct {
 	// questions caches each deployed revision's training questions for
 	// routing, keyed by AdapterID.
 	questions map[string][]string
-	wg        sync.WaitGroup
+	// exports tracks merges into standalone GGUFs, keyed by AdapterID.
+	exports map[string]*exportRun
+	wg      sync.WaitGroup
 }
 
 // NewService returns a service. Call Recover once at startup.
@@ -109,7 +118,8 @@ func NewService(d Deps) *Service {
 	if d.Publish == nil {
 		d.Publish = func(string, map[string]any) {}
 	}
-	return &Service{d: d, slot: make(chan struct{}, 1), cancels: map[string]context.CancelFunc{}, evaluating: map[string][]Revision{}, remote: map[string]*remoteRun{}, questions: map[string][]string{}}
+	return &Service{d: d, slot: make(chan struct{}, 1), cancels: map[string]context.CancelFunc{}, evaluating: map[string][]Revision{}, remote: map[string]*remoteRun{}, questions: map[string][]string{},
+		exports: map[string]*exportRun{}}
 }
 
 // Wait blocks until running jobs and evaluations return. Used in tests and at shutdown.
@@ -298,6 +308,8 @@ func (s *Service) DeleteAI(ctx context.Context, id string) error {
 			_ = s.d.Knowledge.Delete(ctx, m.KnowledgeSourceID)
 		}
 	}
+	s.cancelExports(id, 0)
+	_ = os.RemoveAll(s.exportsDir(id))
 	return os.RemoveAll(s.adaptersDir(id))
 }
 

@@ -62,6 +62,7 @@ import type {
   ClassifyResult,
   DatasetStats,
   EvalPrompt,
+  ExportStatus,
   KnowledgeHit,
   KnowledgeSource,
   MaterialUse,
@@ -840,6 +841,20 @@ export const api = {
     request<SpecializedAI>(`/api/v1/training/ais/${id}/revisions/${revision}/deploy`, { method: 'POST' }),
 
   undeployAI: (id: string) => request<SpecializedAI>(`/api/v1/training/ais/${id}/undeploy`, { method: 'POST' }),
+
+  exportStatus: (id: string, revision: number) =>
+    request<ExportStatus>(`/api/v1/training/ais/${id}/revisions/${revision}/export`),
+
+  startExport: (id: string, revision: number) =>
+    request<ExportStatus>(`/api/v1/training/ais/${id}/revisions/${revision}/export`, { method: 'POST' }),
+
+  deleteExport: (id: string, revision: number) =>
+    request<null>(`/api/v1/training/ais/${id}/revisions/${revision}/export`, { method: 'DELETE' }),
+
+  // The exported file is several GB, so the browser downloads it directly
+  // instead of through fetch.
+  exportFileUrl: (id: string, revision: number) =>
+    `${getApiBase()}/api/v1/training/ais/${id}/revisions/${revision}/export/file`,
 
   exportDiagnostics: (includeConversations = false) =>
     request<DiagnosticsExportResult>('/api/v1/diagnostics', {

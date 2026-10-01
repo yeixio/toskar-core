@@ -173,3 +173,10 @@ export function lastAnswer(messages: { role: string; content: string }[]): strin
 export function errorText(error: unknown, fallback = 'Something went wrong.'): string {
   return error instanceof ApiError || error instanceof Error ? error.message : fallback
 }
+
+// exportRevision is the revision to export as a GGUF file: the deployed one,
+// or else the newest.
+export function exportRevision(view: Pick<SpecializedAIView, 'deployed_revision' | 'revisions'>): number {
+  if (view.deployed_revision > 0) return view.deployed_revision
+  return view.revisions.reduce((max, r) => Math.max(max, r.revision), 0)
+}

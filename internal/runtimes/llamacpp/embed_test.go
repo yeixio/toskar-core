@@ -5,6 +5,9 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"os"
+	"path/filepath"
+	"runtime"
 	"slices"
 	"strings"
 	"testing"
@@ -86,5 +89,30 @@ func TestEmbedReportsServerErrors(t *testing.T) {
 	defer srv.Close()
 	if _, err := Embed(context.Background(), srv.URL, []string{"a"}); err == nil || !strings.Contains(err.Error(), "pooling") {
 		t.Fatalf("got %v", err)
+	}
+}
+
+func TestToolIsFoundBesideLlamaServer(t *testing.T) {
+	dir := t.TempDir()
+	rt := New(dir, t.TempDir())
+	if _, err := rt.Tool("llama-export-lora"); err == nil || !strings.Contains(err.Error(), "no llama-export-lora") {
+		t.Fatalf("got %v", err)
+	}
+	name := "llama-export-lora"
+	if runtime.GOOS == "windows" {
+		name += ".exe"
+	}
+	if err := os.MkdirAll(filepath.Join(dir, "llamacpp"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(dir, "llamacpp", name), nil, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if bundledLlamaServer() != "" {
+		t.Skip("a bundled llama-server takes precedence")
+	}
+	path, err := rt.Tool("llama-export-lora")
+	if err != nil || filepath.Base(path) != name {
+		t.Fatalf("got %q, %v", path, err)
 	}
 }

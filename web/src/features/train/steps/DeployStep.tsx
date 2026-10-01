@@ -5,6 +5,7 @@ import { api } from '@/lib/api'
 import { useMascotState } from '@/lib/ratatoskr/useMascotState'
 import type { SpecializedAIView } from '@/types/api'
 import { errorText } from '../display'
+import { ExportCard } from './ExportCard'
 
 export function DeployStep({ view }: { view: SpecializedAIView }) {
   const queryClient = useQueryClient()
@@ -80,6 +81,8 @@ export function DeployStep({ view }: { view: SpecializedAIView }) {
           </p>
         </div>
       )}
+
+      <ExportCard view={view} />
     </div>
   )
 }

@@ -73,6 +73,14 @@ func TestTrainingRoutes(t *testing.T) {
 	if rec = do(http.MethodPost, "/api/v1/training/ais/"+ai.ID+"/revisions/1/deploy", ""); rec.Code != http.StatusNotFound {
 		t.Fatalf("deploy missing revision: %d %s", rec.Code, rec.Body)
 	}
+	for _, m := range []string{http.MethodGet, http.MethodPost} {
+		if rec = do(m, "/api/v1/training/ais/"+ai.ID+"/revisions/1/export", ""); rec.Code != http.StatusNotFound {
+			t.Fatalf("%s export of a missing revision: %d %s", m, rec.Code, rec.Body)
+		}
+	}
+	if rec = do(http.MethodGet, "/api/v1/training/ais/"+ai.ID+"/revisions/1/export/file", ""); rec.Code != http.StatusNotFound {
+		t.Fatalf("download of a missing export: %d %s", rec.Code, rec.Body)
+	}
 	if rec = do(http.MethodPost, "/api/v1/training/ais/"+ai.ID+"/revisions/zero/deploy", ""); rec.Code != http.StatusBadRequest {
 		t.Fatalf("bad revision: %d", rec.Code)
 	}
