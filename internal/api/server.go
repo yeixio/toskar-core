@@ -16,6 +16,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/yeixio/yggdrasil-core/internal/api/openai"
+	"github.com/yeixio/yggdrasil-core/internal/artifacts"
 	"github.com/yeixio/yggdrasil-core/internal/auth"
 	"github.com/yeixio/yggdrasil-core/internal/automations"
 	"github.com/yeixio/yggdrasil-core/internal/config"
@@ -119,6 +120,7 @@ type Server struct {
 
 	knowledge       KnowledgeService
 	memory          *muninn.Store
+	artifacts       *artifacts.Store
 	training        *training.Service
 	trainingCatalog func() []models.CatalogEntry
 }
@@ -214,6 +216,7 @@ func (s *Server) routes() {
 	api.HandleFunc("/events", s.handleSSE).Methods(http.MethodGet, http.MethodOptions)
 	s.knowledgeRoutes(api)
 	s.memoryRoutes(api)
+	s.artifactRoutes(api)
 	s.trainingRoutes(api)
 
 	if s.deps.OpenAI != nil {

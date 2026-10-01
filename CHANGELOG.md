@@ -8,6 +8,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Thi
 
 ### Added
 
+- Files in and out of chat. Attach documents, spreadsheets, PDFs, and code files with the paperclip, by dropping them on the message box, or by pasting. The answer cites the file, and later questions in the chat can still use it. Ask for a file ("make a spreadsheet of these prices") and the answer comes with a download. Spreadsheets are real `.xlsx` workbooks. Files stay on this computer, under `artifacts/` in the data directory, and are deleted with their chat. Routes are under `/api/v1/artifacts`.
 - Auto model. New chats use Auto, which picks an installed model for each message. Coding questions go to a coding model, questions about current information to a model that can use tools, and quick questions to a fast model that is already loaded when there is one. The answer's "What I did" says which model answered and why. `auto` is also a model in `/v1/models`.
 - Current questions are looked up first. When a question needs current information (weather, news, prices, scores, links) and web search is allowed, Yggdrasil searches the web and reads the best page before the model answers, so small models answer from the page instead of guessing or picking the wrong tool.
 - Quiet recovery. If a model fails before it answers, another installed model answers instead, and the answer says so, with a note when the model that answered is noticeably smaller. Auto skips a model that failed in the last 10 minutes.

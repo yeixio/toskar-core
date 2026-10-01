@@ -81,6 +81,11 @@ func NewRegistry(workspace string, bus *events.Bus) *Registry {
 	return r
 }
 
+// Register adds a tool that needs app services, such as files.create.
+func (r *Registry) Register(t Tool) {
+	r.tools[t.ID()] = t
+}
+
 func (r *Registry) List() []Tool {
 	out := make([]Tool, 0, len(r.tools))
 	for _, t := range r.tools {

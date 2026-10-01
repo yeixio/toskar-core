@@ -17,6 +17,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/yeixio/yggdrasil-core/internal/api"
 	"github.com/yeixio/yggdrasil-core/internal/api/openai"
+	"github.com/yeixio/yggdrasil-core/internal/artifacts"
 	"github.com/yeixio/yggdrasil-core/internal/auth"
 	"github.com/yeixio/yggdrasil-core/internal/automations"
 	"github.com/yeixio/yggdrasil-core/internal/benchmark"
@@ -82,7 +83,9 @@ type App struct {
 	Health           *modelhealth.Monitor
 	Mimir            *mimir.Store
 	Muninn           *muninn.Store
-	summarizer       *muninn.Summarizer
+	// Artifacts holds chat attachments and files the assistant produced.
+	Artifacts  *artifacts.Store
+	summarizer *muninn.Summarizer
 	// memTotal caches this computer's memory for Auto model choice.
 	memTotal atomic.Uint64
 	// failedModels maps a model id to when it last could not answer.
@@ -300,6 +303,11 @@ func New(opts Options) (*App, error) {
 			})
 		},
 		DeleteConversation: func(ctx context.Context, id string) error {
+			if a.Artifacts != nil {
+				if err := a.Artifacts.DeleteConversation(ctx, id); err != nil {
+					return err
+				}
+			}
 			return convRepo.Delete(ctx, id)
 		},
 		ListMessages: func(ctx context.Context, id string) ([]contracts.Message, error) {
@@ -511,6 +519,9 @@ func New(opts Options) (*App, error) {
 	a.Muninn = muninn.NewStore(db.SQL)
 	a.summarizer = &muninn.Summarizer{Store: a.Muninn}
 	a.API.BindMemory(a.Muninn)
+	a.Artifacts = artifacts.NewStore(db.SQL, filepath.Join(cfg.DataDir, "artifacts"))
+	a.Tools.Register(&artifacts.CreateTool{Store: a.Artifacts})
+	a.API.BindArtifacts(a.Artifacts)
 	a.API.BindKnowledge(a.Mimir)
 	a.Training = a.newTrainingService()
 	if err := a.Training.Recover(context.Background()); err != nil {
@@ -1019,6 +1030,11 @@ func (a *App) ResetApp(ctx context.Context, deleteModels bool) (contracts.Settin
 	a.reloadDiscovery()
 	if err := a.Conversations.DeleteAll(ctx); err != nil {
 		return contracts.SettingsView{}, fmt.Errorf("clear conversations: %w", err)
+	}
+	if a.Artifacts != nil {
+		if err := a.Artifacts.DeleteAll(ctx); err != nil {
+			return contracts.SettingsView{}, fmt.Errorf("clear files: %w", err)
+		}
 	}
 	if a.Metrics != nil {
 		if err := a.Metrics.DeleteAll(ctx); err != nil {

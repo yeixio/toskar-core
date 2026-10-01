@@ -317,8 +317,8 @@ type Citation struct {
 
 // ActivityStep is one thing the assistant did for an answer, in plain language.
 type ActivityStep struct {
-	// Kind is knowledge, memory, search, read, file, write, command, git,
-	// route, or recover.
+	// Kind is knowledge, memory, search, read, file, write, create, command,
+	// git, route, or recover.
 	Kind string `json:"kind"`
 	Text string `json:"text"`
 }
@@ -330,6 +330,21 @@ type MessageMeta struct {
 	// Notice tells the user something changed that may affect the answer,
 	// such as a smaller model answering after the chosen one failed.
 	Notice string `json:"notice,omitempty"`
+	// Files are attached to a question or produced with an answer.
+	Files []FileRef `json:"files,omitempty"`
+}
+
+// FileRef points at a stored file (an artifact). Its bytes are at
+// GET /api/v1/artifacts/{id}/content.
+type FileRef struct {
+	ID       string `json:"id"`
+	Name     string `json:"name"`
+	MimeType string `json:"mime_type"`
+	// Kind is document, spreadsheet, pdf, image, code, or other.
+	Kind string `json:"kind"`
+	Size int64  `json:"size_bytes"`
+	// Producer is user for an attachment, assistant for a produced file.
+	Producer string `json:"producer"`
 }
 
 // Message is a chat message.

@@ -52,6 +52,22 @@ describe('AnswerDetails', () => {
     expect(screen.getByText(/ran out of memory/)).toBeInTheDocument()
   })
 
+  it('lists files the assistant made, and only those', () => {
+    render(
+      <AnswerDetails
+        meta={{
+          files: [
+            { id: 'a', name: 'Budget.xlsx', mime_type: 'x', kind: 'spreadsheet', size_bytes: 5120, producer: 'assistant' },
+            { id: 'b', name: 'mine.csv', mime_type: 'x', kind: 'spreadsheet', size_bytes: 10, producer: 'user' },
+          ],
+        }}
+      />,
+    )
+    expect(screen.getByText('Files')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Budget\.xlsx/ })).toHaveTextContent('Spreadsheet · 5 KB')
+    expect(screen.queryByText('mine.csv')).not.toBeInTheDocument()
+  })
+
   it('renders nothing for an answer that used nothing', () => {
     const { container } = render(<AnswerDetails meta={undefined} />)
     expect(container).toBeEmptyDOMElement()

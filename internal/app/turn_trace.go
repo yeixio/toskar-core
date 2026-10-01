@@ -8,6 +8,7 @@ import (
 	"sync"
 	"unicode/utf8"
 
+	"github.com/yeixio/yggdrasil-core/internal/artifacts"
 	"github.com/yeixio/yggdrasil-core/internal/mimir"
 	"github.com/yeixio/yggdrasil-core/internal/muninn"
 	"github.com/yeixio/yggdrasil-core/internal/tools"
@@ -27,6 +28,7 @@ type turnTrace struct {
 	mu        sync.Mutex
 	sources   []contracts.Citation
 	steps     []contracts.ActivityStep
+	files     []contracts.FileRef
 	notice    string
 	untrusted bool
 }
@@ -67,6 +69,19 @@ func (t *turnTrace) knowledge(hits []mimir.Hit) {
 	t.addStep("knowledge", fmt.Sprintf("Found %s in %s", plural(len(hits), "passage", "passages"), joinNames(names)))
 }
 
+// attachment records a file the user attached that the model read.
+func (t *turnTrace) attachment(a artifacts.Artifact, picked, total int) {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	t.untrusted = true
+	text := "Read " + a.Name
+	if picked < total {
+		text = fmt.Sprintf("Read the %d parts of %s that match the question", picked, a.Name)
+	}
+	t.addStep("file", text)
+	t.addSource(contracts.Citation{Kind: "file", Title: a.Name, Source: "Attached file"})
+}
+
 // routed records which model Auto chose and why.
 func (t *turnTrace) routed(reason string) {
 	t.mu.Lock()
@@ -92,7 +107,7 @@ func (t *turnTrace) hasSideEffects() bool {
 	defer t.mu.Unlock()
 	for _, s := range t.steps {
 		switch s.Kind {
-		case "write", "command", "git":
+		case "write", "create", "command", "git":
 			return true
 		}
 	}
@@ -166,6 +181,14 @@ func (t *turnTrace) tool(toolID string, args, result map[string]any) {
 		t.addStep("file", fmt.Sprintf("Looked for files matching “%s”", str(args, "query")))
 	case "filesystem.write":
 		t.addStep("write", fmt.Sprintf("Saved %s", str(args, "path")))
+	case "files.create":
+		name := str(result, "name")
+		t.addStep("create", fmt.Sprintf("Created %s", name))
+		size, _ := result["size_bytes"].(int64)
+		t.files = append(t.files, contracts.FileRef{
+			ID: str(result, "id"), Name: name, MimeType: str(result, "mime_type"), Kind: str(result, "kind"),
+			Size: size, Producer: "assistant",
+		})
 	case "terminal":
 		t.untrusted = true
 		t.addStep("command", "Ran a command on this computer")
@@ -184,7 +207,7 @@ func effectivePolicy(policy, toolID string, untrusted bool) string {
 	if policy != tools.PolicyAllow || !untrusted {
 		return policy
 	}
-	if def, ok := tools.Lookup(toolID); !ok || def.Risk != "read" {
+	if def, ok := tools.Lookup(toolID); !ok || !tools.Contained(def.Risk) {
 		return tools.PolicyAsk
 	}
 	return policy
@@ -200,13 +223,14 @@ func (t *turnTrace) sawUntrusted() bool {
 func (t *turnTrace) meta() *contracts.MessageMeta {
 	t.mu.Lock()
 	defer t.mu.Unlock()
-	if len(t.sources) == 0 && len(t.steps) == 0 && t.notice == "" {
+	if len(t.sources) == 0 && len(t.steps) == 0 && t.notice == "" && len(t.files) == 0 {
 		return nil
 	}
 	return &contracts.MessageMeta{
 		Sources: append([]contracts.Citation(nil), t.sources...),
 		Steps:   append([]contracts.ActivityStep(nil), t.steps...),
 		Notice:  t.notice,
+		Files:   append([]contracts.FileRef(nil), t.files...),
 	}
 }
 

@@ -251,6 +251,10 @@
     @apply inline-flex items-center gap-1.5;
   }
 
+  .composer-attach {
+    @apply inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-ink-muted transition hover:bg-raised hover:text-ink disabled:opacity-50;
+  }
+
   .composer-select-label {
     @apply hidden text-[11px] font-medium text-ink-faint sm:inline;
   }

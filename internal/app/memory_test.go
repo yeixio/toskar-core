@@ -21,6 +21,7 @@ func memoryApp(t *testing.T) (*App, string) {
 	}
 	t.Cleanup(func() { _ = db.Close() })
 	a := &App{
+		DB:            db,
 		Muninn:        muninn.NewStore(db.SQL),
 		Settings:      repositories.NewSettingsRepo(db.SQL),
 		Conversations: repositories.NewConversationRepo(db.SQL),

@@ -23,8 +23,20 @@ type Definition struct {
 	Source        string `json:"source"`
 	Schema        string `json:"schema"`
 	DefaultPolicy string `json:"default_policy"`
-	Risk          string `json:"risk"` // read | write
+	Risk          string `json:"risk"` // read | create | write
 }
+
+// Risk levels. A create tool only adds a file to Yggdrasil's own store, so it
+// changes nothing else on the computer.
+const (
+	RiskRead   = "read"
+	RiskCreate = "create"
+	RiskWrite  = "write"
+)
+
+// Contained reports whether a tool cannot change anything outside
+// Yggdrasil: it reads, or it only creates a file in Yggdrasil's store.
+func Contained(risk string) bool { return risk == RiskRead || risk == RiskCreate }
 
 // BuiltinCatalog is the single list of tools shipped with Yggdrasil.
 func BuiltinCatalog() []Definition {
@@ -34,6 +46,7 @@ func BuiltinCatalog() []Definition {
 		{ID: "filesystem.search", Name: "Find Files", Description: "Search file names in the workspace.", Capability: CapFiles, Source: "builtin", Schema: `{"query":"string"}`, DefaultPolicy: PolicyAllow, Risk: "read"},
 		{ID: "filesystem.read", Name: "Read File", Description: "Read a file in the workspace.", Capability: CapFiles, Source: "builtin", Schema: `{"path":"string"}`, DefaultPolicy: PolicyAllow, Risk: "read"},
 		{ID: "filesystem.write", Name: "Write File", Description: "Create or replace a file in the workspace.", Capability: CapFiles, Source: "builtin", Schema: `{"path":"string","content":"string"}`, DefaultPolicy: PolicyAllow, Risk: "write"},
+		{ID: "files.create", Name: "Create File", Description: "Create a file the user can download: a document (.md, .txt, .html), data (.json, .csv), a spreadsheet (.xlsx, given as CSV text), or code. Use it when the user asks for a file, a spreadsheet, or a document.", Capability: CapFiles, Source: "builtin", Schema: `{"name":"string","content":"string"}`, DefaultPolicy: PolicyAllow, Risk: RiskCreate},
 		{ID: "terminal", Name: "Terminal", Description: "Run a shell command on this computer.", Capability: CapShell, Source: "builtin", Schema: `{"command":"string"}`, DefaultPolicy: PolicyAllow, Risk: "write"},
 		{ID: "git.status", Name: "Git Status", Description: "Show changed files in the workspace.", Capability: CapGit, Source: "builtin", Schema: `{}`, DefaultPolicy: PolicyAllow, Risk: "read"},
 		{ID: "git.diff", Name: "Git Diff", Description: "Show the current git diff.", Capability: CapGit, Source: "builtin", Schema: `{"path":"string"}`, DefaultPolicy: PolicyAllow, Risk: "read"},

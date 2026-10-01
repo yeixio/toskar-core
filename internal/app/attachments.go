@@ -1,0 +1,129 @@
+package app
+
+import (
+	"context"
+	"fmt"
+	"strings"
+
+	"github.com/yeixio/yggdrasil-core/internal/artifacts"
+	"github.com/yeixio/yggdrasil-core/internal/mimir"
+	"github.com/yeixio/yggdrasil-core/pkg/contracts"
+)
+
+// Shares of the model's window, in characters, for attached files. Files
+// attached to this message get most of it; files from earlier in the chat
+// contribute the passages that match the question.
+const (
+	attachedShare = 0.35
+	earlierShare  = 0.10
+	maxAttachRune = 24000
+)
+
+// resolveAttachments checks the files attached to a message and files any
+// that were uploaded before the chat existed under it.
+func (a *App) resolveAttachments(ctx context.Context, conversationID string, ids []string) ([]artifacts.Artifact, error) {
+	if len(ids) == 0 || a.Artifacts == nil {
+		return nil, nil
+	}
+	var out []artifacts.Artifact
+	for _, id := range ids {
+		art, err := a.Artifacts.Get(ctx, id)
+		if err != nil {
+			return nil, fmt.Errorf("an attached file is no longer available; attach it again")
+		}
+		if art.ConversationID == "" && conversationID != "" {
+			if err := a.Artifacts.Attach(ctx, id, conversationID); err != nil {
+				return nil, err
+			}
+			art.ConversationID = conversationID
+		}
+		if art.ConversationID != conversationID {
+			return nil, fmt.Errorf("%s belongs to another chat; attach it again here", art.Name)
+		}
+		out = append(out, art)
+	}
+	return out, nil
+}
+
+func fileRef(a artifacts.Artifact) contracts.FileRef {
+	return contracts.FileRef{ID: a.ID, Name: a.Name, MimeType: a.MimeType, Kind: a.Kind, Size: a.Size, Producer: a.Producer}
+}
+
+func fileRefs(list []artifacts.Artifact) []contracts.FileRef {
+	out := make([]contracts.FileRef, 0, len(list))
+	for _, a := range list {
+		out = append(out, fileRef(a))
+	}
+	return out
+}
+
+// attachmentBlock reads the files attached to this message, and the ones
+// attached earlier in the chat, as reference material. It returns "" when
+// the chat has no files.
+func (e *chatExecEnv) attachmentBlock(ctx context.Context, prompt string) string {
+	if e.app == nil || e.app.Artifacts == nil || e.conversationID == "" {
+		return ""
+	}
+	current := map[string]bool{}
+	for _, a := range e.attachments {
+		current[a.ID] = true
+	}
+	all, err := e.app.Artifacts.List(ctx, e.conversationID)
+	if err != nil {
+		return ""
+	}
+	var earlier []artifacts.Artifact
+	for _, a := range all {
+		if a.Producer == artifacts.ProducerUser && !current[a.ID] {
+			earlier = append(earlier, a)
+		}
+	}
+	if len(e.attachments) == 0 && len(earlier) == 0 {
+		return ""
+	}
+	window := e.ContextLimit() * 4
+	budget := func(share float64, files int) int {
+		n := int(float64(window) * share)
+		if n > maxAttachRune {
+			n = maxAttachRune
+		}
+		if files > 1 {
+			n /= files
+		}
+		return n
+	}
+	var b strings.Builder
+	read := func(list []artifacts.Artifact, share float64, question, label string, onlyMatching bool) {
+		for _, art := range list {
+			_, data, err := e.app.Artifacts.Read(ctx, art.ID)
+			if err != nil {
+				continue
+			}
+			passages, err := mimir.FilePassages(art.Name, data)
+			if err != nil {
+				fmt.Fprintf(&b, "\nThe user %s %s, which Yggdrasil could not read: %s\n", label, art.Name, err.Error())
+				continue
+			}
+			picked := mimir.SelectPassages(passages, question, budget(share, len(list)), onlyMatching)
+			if len(picked) == 0 {
+				continue
+			}
+			if e.trace != nil {
+				e.trace.attachment(art, len(picked), len(passages))
+			}
+			fmt.Fprintf(&b, "\nFile %s by the user: %s", label, art.Name)
+			if len(picked) < len(passages) {
+				fmt.Fprintf(&b, " (the %d of %d parts that best match the question)", len(picked), len(passages))
+			}
+			b.WriteString("\n")
+			for _, p := range picked {
+				fmt.Fprintf(&b, "[%s]\n%s\n", p.Title, strings.TrimSpace(p.Body))
+			}
+		}
+	}
+	// A message that only says "summarize this" still gets the whole file,
+	// or its beginning; earlier files only add what matches.
+	read(e.attachments, attachedShare, prompt, "attached to this message", false)
+	read(earlier, earlierShare, prompt, "attached earlier in this chat", true)
+	return strings.TrimSpace(b.String())
+}

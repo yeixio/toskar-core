@@ -9,6 +9,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/yeixio/yggdrasil-core/internal/artifacts"
 	"github.com/yeixio/yggdrasil-core/internal/contextusage"
 	"github.com/yeixio/yggdrasil-core/internal/events"
 	"github.com/yeixio/yggdrasil-core/internal/huginn"
@@ -125,9 +126,17 @@ func (a *App) RunChat(ctx context.Context, profileID, conversationID, message st
 		return nil, err
 	}
 
+	attached, err := a.resolveAttachments(ctx, conversationID, artifacts.AttachmentsFrom(ctx))
+	if err != nil {
+		return nil, err
+	}
 	if conversationID != "" {
 		if save, _ := a.Settings.GetBool(ctx, "save_chat_history", true); save {
-			_, _ = a.Conversations.AddMessage(ctx, conversationID, "user", message)
+			if len(attached) > 0 {
+				_, _ = a.Conversations.AddMessageWithMeta(ctx, conversationID, "user", message, &contracts.MessageMeta{Files: fileRefs(attached)})
+			} else {
+				_, _ = a.Conversations.AddMessage(ctx, conversationID, "user", message)
+			}
 		}
 	}
 
@@ -156,6 +165,7 @@ func (a *App) RunChat(ctx context.Context, profileID, conversationID, message st
 			turnPrompt:     message,
 			trace:          &turnTrace{},
 			startedAt:      turnStart,
+			attachments:    attached,
 		}
 		if routeReason != "" {
 			env.trace.routed(routeReason)
@@ -720,6 +730,8 @@ type chatExecEnv struct {
 	trace *turnTrace
 	// memories are the persistent memories relevant to this turn.
 	memories []muninn.Memory
+	// attachments are the files attached to this message.
+	attachments []artifacts.Artifact
 	// summarized counts saved messages replaced by a summary this turn.
 	summarized int
 	// startedAt and firstGenerate measure the pipeline's overhead before
@@ -852,6 +864,7 @@ func (e *chatExecEnv) ExecuteTool(ctx context.Context, toolID string, args map[s
 	if e.taskID != "" {
 		meta["task_id"] = e.taskID
 	}
+	ctx = artifacts.WithConversation(ctx, e.conversationID)
 	result, err := e.app.Tools.Execute(ctx, toolID, args, policy, "chat requested tool", meta)
 	if err == nil && e.trace != nil {
 		e.trace.tool(toolID, args, result)
@@ -992,7 +1005,13 @@ func (e *chatExecEnv) TurnInstructions(ctx context.Context, prompt string) strin
 // untrusted content (§58), so the orchestrator delivers it as labelled data
 // next to the question, never in the system prompt.
 func (e *chatExecEnv) ReferenceMaterial(ctx context.Context, prompt string) string {
-	return e.knowledgeBlock(ctx, prompt)
+	parts := []string{}
+	for _, block := range []string{e.attachmentBlock(ctx, prompt), e.knowledgeBlock(ctx, prompt)} {
+		if block != "" {
+			parts = append(parts, block)
+		}
+	}
+	return strings.Join(parts, "\n\n")
 }
 
 func (e *chatExecEnv) knowledgeBlock(ctx context.Context, prompt string) string {

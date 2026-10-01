@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type MouseEvent } fr
 import { Link, useSearchParams } from 'react-router-dom'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 import { api, streamChat } from '@/lib/api'
+import { ATTACH_ACCEPT, MAX_ATTACH_BYTES, isAttachable, readUpload } from '@/lib/upload'
 import { subscribeEvents } from '@/lib/events'
 import { useUIStore } from '@/stores/uiStore'
 import type {
@@ -20,6 +21,7 @@ import { CapabilityNotice } from './CapabilityNotice'
 import { ChatActivity } from './ChatActivity'
 import { ChatHistoryDrawer, useCanPinChatHistory } from './ChatHistoryDrawer'
 import { AnswerDetails } from './AnswerDetails'
+import { FileChip, PendingFileChip, type PendingFile } from './FileChips'
 import { MemoryToggle } from './MemoryToggle'
 import { ChatErrorCard } from './ChatErrorCard'
 import { ChatMarkdown } from './ChatMarkdown'
@@ -151,6 +153,9 @@ export function ChatPage() {
 
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [draft, setDraft] = useState('')
+  // Files added to the composer for the next message.
+  const [pendingFiles, setPendingFiles] = useState<PendingFile[]>([])
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const [draftProfileId, setDraftProfileId] = useState<string | null>(null)
   const [draftModelId, setDraftModelId] = useState<string | null>(null)
   const [modelChoice, setModelChoice] = useState<{ chatId: string | null; modelId: string } | null>(null)
@@ -577,6 +582,12 @@ export function ChatPage() {
           const name = (event.payload?.model_name as string | undefined) || routedId
           if (name) setStatusMessage(event.payload?.fallback ? `Switching to ${name}…` : `Using ${name}…`)
         }
+        if (event.type === 'chat.making_file') {
+          const conversationId = event.payload?.conversation_id as string | undefined
+          if (conversationId && conversationId !== selectedId && conversationId !== streamingConvRef.current) return
+          const name = event.payload?.name as string | undefined
+          setStatusMessage(name ? `Writing ${name}…` : 'Writing the file…')
+        }
         if (event.type === 'chat.lookup') {
           const conversationId = event.payload?.conversation_id as string | undefined
           if (conversationId && conversationId !== selectedId && conversationId !== streamingConvRef.current) return
@@ -731,8 +742,49 @@ export function ChatPage() {
     return candidate
   }
 
+  const addFiles = (list: FileList | File[]) => {
+    for (const file of Array.from(list)) {
+      const key = `${file.name}-${file.size}-${Math.random().toString(36).slice(2)}`
+      const base: PendingFile = { key, name: file.name, size: file.size, status: 'uploading' }
+      if (!isAttachable(file.name)) {
+        setPendingFiles((cur) => [...cur, { ...base, status: 'error', error: "Yggdrasil can't read this type of file yet" }])
+        continue
+      }
+      if (file.size > MAX_ATTACH_BYTES) {
+        setPendingFiles((cur) => [...cur, { ...base, status: 'error', error: 'Files can be up to 25 MB' }])
+        continue
+      }
+      setPendingFiles((cur) => [...cur, base])
+      void (async () => {
+        try {
+          const uploaded = await api.uploadArtifact(await readUpload(file), selectedId ?? undefined)
+          if (!uploaded) throw new Error('The file could not be added.')
+          setPendingFiles((cur) => cur.map((f) => (f.key === key ? { ...f, status: 'ready', file: uploaded } : f)))
+        } catch (err) {
+          const error = err instanceof Error ? err.message : 'The file could not be added.'
+          setPendingFiles((cur) => cur.map((f) => (f.key === key ? { ...f, status: 'error', error } : f)))
+        }
+      })()
+    }
+  }
+
+  const removePendingFile = (key: string) => {
+    setPendingFiles((cur) => {
+      const gone = cur.find((f) => f.key === key)
+      if (gone?.file) void api.deleteArtifact(gone.file.id).catch(() => undefined)
+      return cur.filter((f) => f.key !== key)
+    })
+  }
+
   const sendMessage = async (overrideText?: string) => {
-    const message = (overrideText ?? draft).trim()
+    const readyFiles = overrideText == null ? pendingFiles.filter((f) => f.status === 'ready' && f.file) : []
+    if (overrideText == null && pendingFiles.some((f) => f.status === 'uploading')) {
+      setSendError('Wait for the files to finish adding, then send.')
+      return
+    }
+    // A file on its own is a request to look at it.
+    const typed = (overrideText ?? draft).trim()
+    const message = typed || (readyFiles.length > 0 ? (readyFiles.length === 1 ? 'Summarize this file.' : 'Summarize these files.') : '')
     if (!message || isSending) return
 
     if (defaultExecution === 'ask' && !executionAsked && runMode == null) {
@@ -762,6 +814,8 @@ export function ChatPage() {
     lastUserMessageRef.current = message
     followLatest()
     setDraft('')
+    const attachments = readyFiles.map((f) => f.file!)
+    if (overrideText == null) setPendingFiles([])
     setIsSending(true)
     setSendError(null)
     setModelFailure(null)
@@ -811,6 +865,7 @@ export function ChatPage() {
           role: 'user',
           content: message,
           created_at: new Date().toISOString(),
+          meta: attachments.length > 0 ? { files: attachments } : undefined,
         }
         return [...(current ?? []), optimistic]
       })
@@ -823,6 +878,7 @@ export function ChatPage() {
           message,
           stream: true,
           execution: effectiveRunMode,
+          attachments: attachments.length > 0 ? attachments.map((f) => f.id) : undefined,
         },
         signal: controller.signal,
         onToken: (content) => {
@@ -1006,12 +1062,44 @@ export function ChatPage() {
         event.preventDefault()
         void sendMessage()
       }}
+      onDragOver={(event) => {
+        if (event.dataTransfer.types.includes('Files')) event.preventDefault()
+      }}
+      onDrop={(event) => {
+        if (event.dataTransfer.files.length === 0) return
+        event.preventDefault()
+        if (!isSending) addFiles(event.dataTransfer.files)
+      }}
     >
+      {pendingFiles.length > 0 ? (
+        <div className="flex flex-wrap gap-1.5 px-3 pt-3">
+          {pendingFiles.map((file) => (
+            <PendingFileChip key={file.key} file={file} onRemove={() => removePendingFile(file.key)} />
+          ))}
+        </div>
+      ) : null}
+      <input
+        ref={fileInputRef}
+        type="file"
+        multiple
+        accept={ATTACH_ACCEPT}
+        className="hidden"
+        onChange={(event) => {
+          if (event.target.files) addFiles(event.target.files)
+          event.target.value = ''
+        }}
+      />
       <textarea
         ref={composerRef}
         value={draft}
         rows={showLanding ? 5 : 4}
         onChange={(event) => setDraft(event.target.value)}
+        onPaste={(event) => {
+          if (event.clipboardData.files.length > 0) {
+            event.preventDefault()
+            addFiles(event.clipboardData.files)
+          }
+        }}
         onKeyDown={(event) => {
           if (event.key === 'Enter' && !event.shiftKey) {
             event.preventDefault()
@@ -1025,6 +1113,18 @@ export function ChatPage() {
       />
       <div className="composer-toolbar">
         <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
+          <button
+            type="button"
+            className="composer-attach"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isSending}
+            aria-label="Attach files"
+            title="Attach a document, spreadsheet, PDF, or code file"
+          >
+            <svg viewBox="0 0 16 16" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" aria-hidden>
+              <path d="M13.5 7.5 8 13a3.5 3.5 0 0 1-5-5l6-6a2.3 2.3 0 0 1 3.3 3.3L6.4 11.2a1.2 1.2 0 0 1-1.6-1.6L10 4.4" />
+            </svg>
+          </button>
           <label className="composer-select" title="Which assistant style to use">
             <span className="composer-select-label">Profile</span>
             <span className="sr-only">Assistant profile</span>
@@ -1137,7 +1237,7 @@ export function ChatPage() {
           <button
             type="submit"
             className="btn-primary h-9 w-9 shrink-0 rounded-full p-0 text-lg leading-none"
-            disabled={!draft.trim()}
+            disabled={!draft.trim() && !pendingFiles.some((f) => f.status === 'ready')}
             aria-label="Send"
             title="Send"
           >
@@ -1307,7 +1407,16 @@ export function ChatPage() {
                         <AnswerDetails meta={message.meta} />
                       </>
                     ) : (
-                      <span className="whitespace-pre-wrap">{text}</span>
+                      <>
+                        <span className="whitespace-pre-wrap">{text}</span>
+                        {message.meta?.files?.length ? (
+                          <span className="mt-2 flex flex-wrap justify-end gap-1.5">
+                            {message.meta.files.map((file) => (
+                              <FileChip key={file.id} file={file} />
+                            ))}
+                          </span>
+                        ) : null}
+                      </>
                     )}
                   </div>
                   )

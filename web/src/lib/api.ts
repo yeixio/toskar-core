@@ -57,7 +57,10 @@ import type {
   SampleFile,
   MemoryCategory,
   MemoryItem,
+  Artifact,
+  FileRef,
 } from '@/types/api'
+import type { Upload } from '@/lib/upload'
 
 export class ApiError extends Error {
   constructor(
@@ -199,6 +202,23 @@ export interface StreamChatOptions {
   onToken: (content: string) => void
   onDone?: () => void
   onError?: (message: string) => void
+}
+
+/** Save a stored file to the user's computer. It is fetched with the same
+ * credentials as other API calls, so it works when the API needs a key. */
+export async function downloadArtifact(file: Pick<FileRef, 'id' | 'name'>): Promise<void> {
+  const response = await fetch(`${getApiBase()}/api/v1/artifacts/${file.id}/content`, { headers: authHeaders() })
+  if (!response.ok) {
+    throw new ApiError(response.status, response.status === 404 ? 'This file is no longer available.' : response.statusText)
+  }
+  const url = URL.createObjectURL(await response.blob())
+  const link = document.createElement('a')
+  link.href = url
+  link.download = file.name
+  document.body.appendChild(link)
+  link.click()
+  link.remove()
+  setTimeout(() => URL.revokeObjectURL(url), 10_000)
 }
 
 export async function streamChat({
@@ -570,6 +590,20 @@ export const api = {
     request<MemoryItem>(`/api/v1/memory/${id}`, { method: 'PATCH', body: JSON.stringify(body) }),
 
   deleteMemory: (id: string) => request<null>(`/api/v1/memory/${id}`, { method: 'DELETE' }),
+
+  /** Upload a file to attach to a chat message. */
+  uploadArtifact: (upload: Upload, conversationId?: string) =>
+    request<Artifact>('/api/v1/artifacts', {
+      method: 'POST',
+      body: JSON.stringify({
+        name: upload.filename,
+        text: upload.text,
+        content_base64: upload.contentBase64,
+        conversation_id: conversationId,
+      }),
+    }),
+
+  deleteArtifact: (id: string) => request<null>(`/api/v1/artifacts/${id}`, { method: 'DELETE' }),
 
   listKnowledge: () => request<KnowledgeSource[]>('/api/v1/knowledge/sources'),
 

@@ -5,6 +5,21 @@ const BINARY = ['.xlsx', '.pdf']
 
 export const MAX_UPLOAD_BYTES = 20 * 1024 * 1024
 
+/** File types chat can read: documents, spreadsheets, PDFs, and code. */
+export const ATTACH_ACCEPT =
+  UPLOAD_ACCEPT +
+  ',.py,.js,.ts,.tsx,.jsx,.go,.rs,.java,.kt,.c,.h,.cpp,.hpp,.cs,.rb,.php,.swift,.sh,.sql,.yaml,.yml,.toml,.xml,.css,.ini,.log'
+
+export const MAX_ATTACH_BYTES = 25 * 1024 * 1024
+
+/** Whether chat can read a file of this name. */
+export function isAttachable(filename: string): boolean {
+  const dot = filename.lastIndexOf('.')
+  if (dot < 0) return false
+  const ext = filename.slice(dot).toLowerCase()
+  return ATTACH_ACCEPT.split(',').includes(ext)
+}
+
 export interface Upload {
   filename: string
   /** Set for text files. */

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { isBinaryUpload, readUpload } from './upload'
+import { isAttachable, isBinaryUpload, readUpload } from './upload'
 
 // jsdom's File lacks text() and arrayBuffer(), which browsers provide.
 function fakeFile(name: string, bytes: number[]): File {
@@ -21,5 +21,12 @@ describe('readUpload', () => {
       contentBase64: 'UEsDBP8=',
     })
     expect(isBinaryUpload('notes.md')).toBe(false)
+  })
+
+  it('knows which files chat can read', () => {
+    expect(isAttachable('Report.PDF')).toBe(true)
+    expect(isAttachable('main.go')).toBe(true)
+    expect(isAttachable('photo.png')).toBe(false)
+    expect(isAttachable('README')).toBe(false)
   })
 })

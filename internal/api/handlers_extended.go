@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/gorilla/mux"
+	"github.com/yeixio/yggdrasil-core/internal/artifacts"
 	"github.com/yeixio/yggdrasil-core/internal/auth"
 	"github.com/yeixio/yggdrasil-core/pkg/contracts"
 )
@@ -282,11 +283,14 @@ func (s *Server) handleChat(w http.ResponseWriter, r *http.Request) {
 		Message        string `json:"message"`
 		Stream         bool   `json:"stream"`
 		Execution      string `json:"execution"`
+		// Attachments are artifact ids uploaded with POST /artifacts.
+		Attachments []string `json:"attachments"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		writeErr(w, http.StatusBadRequest, "INVALID_JSON", "invalid body", nil)
 		return
 	}
+	r = r.WithContext(artifacts.WithAttachments(r.Context(), body.Attachments))
 	if err := s.deps.Chat(w, r, body.ConversationID, body.ProfileID, body.ModelID, body.Message, body.Stream, body.Execution); err != nil {
 		writeErr(w, http.StatusInternalServerError, "CHAT_FAILED", err.Error(), nil)
 	}

@@ -275,6 +275,24 @@ export interface MessageMeta {
   steps?: ActivityStep[]
   /** Something changed that may affect the answer, such as a smaller model answering. */
   notice?: string
+  /** Files attached to a question or produced with an answer. */
+  files?: FileRef[]
+}
+
+/** A stored file: an attachment or a file the assistant produced. */
+export interface FileRef {
+  id: string
+  name: string
+  mime_type: string
+  /** document, spreadsheet, pdf, image, code, or other */
+  kind: string
+  size_bytes: number
+  producer: 'user' | 'assistant'
+}
+
+export interface Artifact extends FileRef {
+  conversation_id?: string
+  created_at: string
 }
 
 export interface Message {
@@ -337,6 +355,8 @@ export interface ChatRequest {
   message: string
   stream?: boolean
   execution?: 'automatic' | 'local'
+  /** Artifact ids from uploadArtifact. */
+  attachments?: string[]
 }
 
 export interface ChatResponse {

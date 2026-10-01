@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { Citation, MessageMeta } from '@/types/api'
+import { FileChip } from './FileChips'
 
 function hostOf(url: string): string {
   try {
@@ -92,7 +93,8 @@ export function AnswerDetails({ meta }: { meta?: MessageMeta }) {
   const sources = groupSources(meta?.sources ?? [])
   const steps = meta?.steps ?? []
   const notice = meta?.notice?.trim()
-  if (sources.length === 0 && steps.length === 0 && !notice) return null
+  const files = (meta?.files ?? []).filter((f) => f.producer === 'assistant')
+  if (sources.length === 0 && steps.length === 0 && !notice && files.length === 0) return null
   return (
     <div className="mt-3 space-y-2 border-t border-line/50 pt-2.5">
       {notice ? (
@@ -100,6 +102,16 @@ export function AnswerDetails({ meta }: { meta?: MessageMeta }) {
           <span aria-hidden>ⓘ</span>
           <span>{notice}</span>
         </p>
+      ) : null}
+      {files.length > 0 ? (
+        <div>
+          <p className="label-caps mb-1.5 text-[10px]">Files</p>
+          <div className="flex flex-wrap gap-1.5">
+            {files.map((file) => (
+              <FileChip key={file.id} file={file} />
+            ))}
+          </div>
+        </div>
       ) : null}
       {sources.length > 0 ? (
         <div>

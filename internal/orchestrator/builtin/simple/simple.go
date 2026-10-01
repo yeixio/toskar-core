@@ -87,6 +87,15 @@ func (o *Orchestrator) Run(
 		var usage contextusage.Usage
 		toolsOn := len(tools.Enabled(profile, nil)) > 0
 		nodeID, _ := env.NodeForRole(role)
+
+		if reply, m, made := makeFileFirst(ctx, env, profile, role, messages, task.Prompt); made {
+			promptTokens := 0
+			if m != nil {
+				promptTokens = m.PromptTokens
+			}
+			streamText(ch, role, nodeID, reply, m, contextusage.Measure(instructions, toolPrompt, messages, promptTokens))
+			return
+		}
 		calls := 0
 		malformed := 0
 
