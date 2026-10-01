@@ -5,6 +5,7 @@ import { api } from '@/lib/api'
 import { isBinaryUpload, readUpload, UPLOAD_ACCEPT } from '@/lib/upload'
 import type { KnowledgeSource } from '@/types/api'
 import { errorText } from '@/features/train/display'
+import { RealmKicker } from '@/components/ui/Realm'
 
 
 export function KnowledgePage() {
@@ -16,6 +17,7 @@ export function KnowledgePage() {
   return (
     <div className="page-fill gap-4 overflow-y-auto p-4">
       <div>
+        <RealmKicker />
         <h1 className="font-display text-2xl font-semibold text-ink">Knowledge</h1>
         <p className="mt-1 max-w-2xl text-sm text-ink-muted">
           Mimir keeps catalogs, prices, policies, and documents searchable. When a profile or a specialized AI uses a

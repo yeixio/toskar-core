@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { ActivityPanel } from './ActivityPanel'
 import { BenchmarkPanel } from './BenchmarkPanel'
 import { OverviewPanel } from './OverviewPanel'
+import { RealmKicker } from '@/components/ui/Realm'
 
 type Tab = 'overview' | 'benchmarks' | 'activity'
 
@@ -17,6 +18,7 @@ export function PerformancePage() {
   return (
     <div className="w-full min-w-0 space-y-6">
       <header className="page-header">
+        <RealmKicker />
         <h1 className="page-title">Performance</h1>
         <p className="page-subtitle">
           What your AI is doing right now — load, speed, and how work moves across your team.

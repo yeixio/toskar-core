@@ -17,6 +17,7 @@ import {
 import { needsTightFitInstallWarning } from './modelPresentation'
 import { RunningTab } from './RunningTab'
 import { TightFitDialog } from './TightFitDialog'
+import { RealmKicker } from '@/components/ui/Realm'
 
 type Tab = 'discover' | 'installed' | 'running'
 
@@ -199,6 +200,7 @@ export function ModelsPage() {
   return (
     <div className="w-full min-w-0 space-y-6">
       <header className="page-header">
+        <RealmKicker />
         <h1 className="page-title">Models</h1>
         <p className="page-subtitle">
           Choose what to install — Yggdrasil recommends models that fit your hardware.

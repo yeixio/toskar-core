@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useMemo, useRef, useState, type MouseEvent } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
+import { RealmKicker } from '@/components/ui/Realm'
 import { api, streamChat } from '@/lib/api'
 import { ATTACH_ACCEPT, MAX_ATTACH_BYTES, isAttachable, readUpload } from '@/lib/upload'
 import { subscribeEvents } from '@/lib/events'
@@ -1372,6 +1373,7 @@ export function ChatPage() {
                 className="mb-5 h-14 w-14 object-contain opacity-95"
                 decoding="async"
               />
+              <RealmKicker path="/chat" className="mx-auto" />
               <h1 className="font-display text-2xl font-semibold tracking-tight text-ink sm:text-3xl">
                 What can I help you with?
               </h1>

@@ -5,6 +5,7 @@ import { api, forgetApiKey, rememberApiKey, storedApiKey } from '@/lib/api'
 import { formatLastUsed } from '@/features/models/modelPresentation'
 import { useUIStore } from '@/stores/uiStore'
 import type { APIKeyRecord } from '@/types/api'
+import { RealmKicker } from '@/components/ui/Realm'
 
 type ProbeState = 'checking' | 'ok' | 'fail'
 
@@ -236,6 +237,7 @@ export function ApiAccessPage() {
   return (
     <div className="mx-auto w-full max-w-2xl min-w-0 space-y-6">
       <header className="page-header">
+        <RealmKicker />
         <h1 className="page-title">API Access</h1>
         <p className="page-subtitle">
           Where Yggdrasil&apos;s API is reachable, and how it is secured.

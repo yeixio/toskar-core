@@ -5,6 +5,7 @@ import { api } from '@/lib/api'
 import { subscribeEvents } from '@/lib/events'
 import { errorText } from '@/features/train/display'
 import type { MemoryCategory, MemoryItem } from '@/types/api'
+import { RealmKicker } from '@/components/ui/Realm'
 
 const categoryLabels: Record<MemoryCategory, string> = {
   identity: 'About you',
@@ -46,6 +47,7 @@ export function MemoryPage() {
     <div className="page-fill gap-4 overflow-y-auto p-4">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
+          <RealmKicker />
           <h1 className="font-display text-2xl font-semibold text-ink">Memory</h1>
           <p className="mt-1 max-w-2xl text-sm text-ink-muted">
             Things you asked Yggdrasil to remember. They belong to Yggdrasil, not to one model, so they carry across

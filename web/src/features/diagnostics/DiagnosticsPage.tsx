@@ -7,6 +7,7 @@ import { displayVersion } from '@/lib/appVersion'
 import { formatBytes } from '@/lib/format'
 import type { LogEntry, Node } from '@/types/api'
 import { useUIStore } from '@/stores/uiStore'
+import { RealmKicker } from '@/components/ui/Realm'
 
 function kindLabel(kind: string, advanced: boolean): string {
   if (!advanced) {
@@ -468,8 +469,9 @@ export function DiagnosticsPage() {
     <div className="mx-auto flex w-full max-w-3xl min-w-0 flex-col gap-6">
       <header className="page-header flex min-w-0 flex-wrap items-end justify-between gap-3">
         <div className="min-w-0">
+          <RealmKicker />
           <h1 className="page-title">
-            {advancedMode ? 'Heimdall' : 'Yggdrasil health'}
+            Yggdrasil health
           </h1>
           <p className="page-subtitle">{headline}</p>
         </div>

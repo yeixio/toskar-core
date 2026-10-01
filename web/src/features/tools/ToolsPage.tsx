@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useMemo, useState } from 'react'
 import { api } from '@/lib/api'
 import type { ToolRecord } from '@/types/api'
+import { RealmKicker } from '@/components/ui/Realm'
 
 const FILTERS = ['All', 'Built-in', 'Disabled'] as const
 
@@ -50,6 +51,7 @@ export function ToolsPage() {
   return (
     <div className="page-fill gap-4 overflow-y-auto p-4">
       <div>
+        <RealmKicker />
         <h1 className="font-display text-2xl font-semibold text-ink">Tools</h1>
         <p className="mt-1 max-w-2xl text-sm text-ink-muted">
           Built-in tools are grouped into capabilities on each profile. Disable a tool here to keep it out of every chat.

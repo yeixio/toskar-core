@@ -16,6 +16,7 @@ import { PlanStep } from './steps/PlanStep'
 import { TestStep } from './steps/TestStep'
 import { TrainStep } from './steps/TrainStep'
 import { completedSteps, errorText, isTerminal, nextStep, stateLabel, steps, type StepID } from './display'
+import { RealmKicker } from '@/components/ui/Realm'
 
 export function TrainPage() {
   const queryClient = useQueryClient()
@@ -61,6 +62,7 @@ export function TrainPage() {
     <div className="page-fill gap-4 overflow-y-auto p-4">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
+          <RealmKicker />
           <h1 className="font-display text-2xl font-semibold text-ink">Train your own AI</h1>
           <p className="mt-1 max-w-2xl text-sm text-ink-muted">
             Build a small assistant that is good at one job. Show it how to respond with examples, and connect the

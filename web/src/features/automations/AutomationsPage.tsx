@@ -8,6 +8,7 @@ import type { Automation, AutomationDetail, AutomationInput, AutomationRun, Mode
 import { AutomationForm } from './AutomationForm'
 import { clockDetail, compactWhen, explainRun, runTiming } from './display'
 import { notificationLabel, resultProse, scheduleLabel, visibleTask } from './parseRequest'
+import { RealmKicker } from '@/components/ui/Realm'
 
 const screenshotSentence =
   'Every morning at 8:00 AM, check this product and tell me if the price is below $500.'
@@ -110,6 +111,7 @@ export function AutomationsPage() {
     <div className="page-fill gap-4 overflow-y-auto p-4">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
+          <RealmKicker />
           <h1 className="font-display text-2xl font-semibold text-ink">Automations</h1>
           <p className="mt-1 max-w-2xl text-sm text-ink-muted">
             Automations run in the background, even when this window is closed. Schedule a recurring task, or have Yggdrasil tell you when something changes.

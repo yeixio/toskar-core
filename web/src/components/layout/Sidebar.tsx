@@ -1,6 +1,8 @@
 import { useQuery } from '@tanstack/react-query'
 import { NavLink } from 'react-router-dom'
+import { Rune } from '@/components/ui/Realm'
 import { api } from '@/lib/api'
+import { realms } from '@/lib/realms'
 import { displayVersion } from '@/lib/appVersion'
 import { useUIStore } from '@/stores/uiStore'
 
@@ -21,6 +23,23 @@ const systemNav = [
   { to: '/tools', label: 'Tools', advanced: true },
   { to: '/api-access', label: 'API Access', advanced: true },
 ] as const
+
+/** A nav entry: the rune, then the plain English label. */
+function NavItem({ to, label }: { to: string; label: string }) {
+  const realm = realms[to]
+  return (
+    <NavLink
+      to={to}
+      title={realm ? `${label} · ${realm.norse}` : undefined}
+      className={({ isActive }) =>
+        ['nav-link', isActive ? 'nav-link-active' : ''].filter(Boolean).join(' ')
+      }
+    >
+      {realm ? <Rune id={realm.rune} className="nav-rune h-4 w-2.5" /> : null}
+      {label}
+    </NavLink>
+  )
+}
 
 export function Sidebar() {
   const advancedMode = useUIStore((s) => s.advancedMode)
@@ -137,15 +156,7 @@ export function Sidebar() {
           <p className="label-caps mb-1 px-2.5">Main</p>
           <div className="flex flex-col gap-0.5">
             {mainNav.map(({ to, label }) => (
-              <NavLink
-                key={to}
-                to={to}
-                className={({ isActive }) =>
-                  ['nav-link', isActive ? 'nav-link-active' : ''].filter(Boolean).join(' ')
-                }
-              >
-                {label}
-              </NavLink>
+              <NavItem key={to} to={to} label={label} />
             ))}
           </div>
         </div>
@@ -154,24 +165,9 @@ export function Sidebar() {
           <p className="label-caps mb-1 px-2.5">System</p>
           <div className="flex flex-col gap-0.5">
             {systemItems.map(({ to, label }) => (
-              <NavLink
-                key={to}
-                to={to}
-                className={({ isActive }) =>
-                  ['nav-link', isActive ? 'nav-link-active' : ''].filter(Boolean).join(' ')
-                }
-              >
-                {label}
-              </NavLink>
+              <NavItem key={to} to={to} label={label} />
             ))}
-            <NavLink
-              to="/settings"
-              className={({ isActive }) =>
-                ['nav-link', isActive ? 'nav-link-active' : ''].filter(Boolean).join(' ')
-              }
-            >
-              Settings
-            </NavLink>
+            <NavItem to="/settings" label="Settings" />
           </div>
         </div>
       </nav>

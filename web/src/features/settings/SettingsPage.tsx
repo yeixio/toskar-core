@@ -13,6 +13,7 @@ import {
 } from '@/lib/desktopBridge'
 import { useUIStore } from '@/stores/uiStore'
 import type { SettingsPatch } from '@/types/api'
+import { RealmKicker } from '@/components/ui/Realm'
 
 function Toggle({
   checked,
@@ -254,6 +255,7 @@ export function SettingsPage() {
   return (
     <div className="mx-auto w-full max-w-2xl min-w-0 space-y-6">
       <header className="page-header">
+        <RealmKicker />
         <h1 className="page-title">Settings</h1>
         <p className="page-subtitle">How Yggdrasil should behave on this computer.</p>
       </header>

@@ -17,6 +17,7 @@ import {
   onlineLabel,
   teamBestAt,
 } from './nodePresentation'
+import { RealmKicker } from '@/components/ui/Realm'
 
 function errorMessage(err: unknown): string {
   if (err instanceof ApiError) return err.message
@@ -503,6 +504,7 @@ export function NodesPage() {
     <div className="w-full min-w-0 space-y-8">
       <header className="page-header flex flex-wrap items-end justify-between gap-4">
         <div>
+          <RealmKicker />
           <h1 className="page-title">
             {advancedMode ? 'Your AI cluster' : 'Your Yggdrasil team'}
           </h1>

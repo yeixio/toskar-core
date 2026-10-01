@@ -26,6 +26,7 @@ import {
   type CreateStartFrom,
   type ProfileFilter,
 } from './profilePresentation'
+import { RealmKicker } from '@/components/ui/Realm'
 
 const TOOL_CATALOG: {
   id: string
@@ -316,6 +317,7 @@ export function ProfilesPage() {
     <div className="w-full min-w-0 space-y-6">
       <header className="page-header flex flex-wrap items-end justify-between gap-4">
         <div className="max-w-2xl">
+          <RealmKicker />
           <h1 className="page-title">Profiles</h1>
           <p className="page-subtitle">
             Profiles define how your AI works — its role, tools, models, and computers.
