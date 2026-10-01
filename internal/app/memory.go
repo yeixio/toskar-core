@@ -9,6 +9,7 @@ import (
 
 	"github.com/yeixio/yggdrasil-core/internal/events"
 	"github.com/yeixio/yggdrasil-core/internal/muninn"
+	"github.com/yeixio/yggdrasil-core/internal/personal"
 	"github.com/yeixio/yggdrasil-core/pkg/contracts"
 	"github.com/yeixio/yggdrasil-core/pkg/pluginapi"
 )
@@ -50,6 +51,8 @@ func (a *App) handleMemoryCommand(ctx context.Context, conversationID, message s
 		switch {
 		case errors.Is(err, muninn.ErrSensitive):
 			reply = "I didn't save that because it looks like a password, key, or card number. A password manager is the safer place for those."
+		case errors.Is(err, personal.ErrPermission):
+			reply = "I didn't save that, because a memory can't give me permission to do things. What tools may do without asking is set in Settings › Tool permissions or in a profile, so it never changes by accident. I'm happy to remember a preference, like which tools you use most."
 		case err != nil:
 			reply = "I couldn't save that: " + err.Error() + "."
 		case !created:

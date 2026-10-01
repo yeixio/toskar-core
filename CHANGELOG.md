@@ -8,6 +8,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Thi
 
 ### Added
 
+- Personalization. In Settings, choose answer length, tone, format, and units, and add a note about yourself and how you like answers. It applies to every chat, automation, and API request. It is kept apart from permissions: a preference or memory that tries to grant one ("you can always push without asking") is refused, with a pointer to Tool permissions.
 - Connected services: GitHub and Home Assistant. Connect them in Settings with a token. The AI can then search and read issues and pull requests, comment (after asking), check lights and sensors, and control devices (after asking). Tokens stay on this computer outside the database, are never shown again or given to the AI, and are scrubbed from anything a service returns. Settings explains the narrowest access to grant. Routes are under `/api/v1/connectors`.
 - Auto knows your specialized AIs. A question about what one was trained for (or one that names it) goes to that AI, and "What I did" says why. Questions that need the web, your files, or code still go to a general model, because specialized AIs answer without tools. An AI whose trained adapter is missing from this computer is skipped and explains itself.
 - Embedding, reranker, and classifier models are recognized as supporting models. They are labeled on the Models page, and they are left out of the chat and automation model menus. Auto and fallback never pick them to answer.

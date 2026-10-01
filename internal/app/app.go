@@ -512,6 +512,7 @@ func New(opts Options) (*App, error) {
 	a.Notifications = gjallarhorn.NewHub(db.SQL, bus, desktopChannel{settings: settingsRepo, send: automations.OSSender{}})
 	a.API.BindNotifications(a.Notifications)
 	a.API.BindConnectors(a.Connectors)
+	a.API.BindPersonal(a)
 
 	autoRepo := repositories.NewAutomationRepo(db.SQL)
 	a.Automations = autoRepo

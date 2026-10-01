@@ -19,6 +19,7 @@ import type {
   LogEntry,
   Message,
   Connector,
+  PersonalStyle,
   NotificationList,
   ToolActivityRecord,
   ToolRecord,
@@ -609,6 +610,11 @@ export const api = {
   /** Stop a conversation's running turn on the computer running it; what was written is kept. */
   stopChat: (conversationId: string) =>
     request<StopChatResponse>('/api/v1/chat/stop', { method: 'POST', body: JSON.stringify({ conversation_id: conversationId }) }),
+
+  getPersonalStyle: async () => (await request<PersonalStyle>('/api/v1/personalization')) ?? {},
+
+  setPersonalStyle: (style: PersonalStyle) =>
+    request<PersonalStyle>('/api/v1/personalization', { method: 'PUT', body: JSON.stringify(style) }),
 
   listConnectors: async () => (await request<Connector[]>('/api/v1/connectors')) ?? [],
 

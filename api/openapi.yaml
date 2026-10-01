@@ -492,6 +492,30 @@ paths:
       responses:
         "200":
           description: Status
+  /api/v1/personalization:
+    get:
+      summary: How the person likes answers
+      operationId: getPersonalization
+      responses:
+        "200":
+          description: Style
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PersonalStyle"
+    put:
+      summary: Save how the person likes answers. Style only; it cannot grant a permission.
+      operationId: setPersonalization
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PersonalStyle"
+      responses:
+        "200":
+          description: Saved
+        "400":
+          description: Invalid, or tries to grant a permission
   /api/v1/diagnostics:
     get:
       summary: Create a diagnostics bundle
@@ -517,6 +541,27 @@ paths:
           description: Not implemented yet
 components:
   schemas:
+    PersonalStyle:
+      type: object
+      properties:
+        length:
+          type: string
+          enum: [brief, balanced, detailed]
+        tone:
+          type: string
+          enum: [friendly, neutral, direct]
+        format:
+          type: string
+          enum: [prose, lists]
+        units:
+          type: string
+          enum: [metric, imperial]
+        about_me:
+          type: string
+          maxLength: 1500
+        instructions:
+          type: string
+          maxLength: 1500
     HealthResponse:
       type: object
       properties:

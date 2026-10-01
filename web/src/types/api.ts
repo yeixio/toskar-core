@@ -1084,3 +1084,13 @@ export interface Connector {
   values?: Record<string, string>
   tools: { id: string; name: string; description: string; risk: string; default_policy: string }[]
 }
+
+/** How the person likes answers (spec §38). Style only: it never changes what tools may do. */
+export interface PersonalStyle {
+  length?: '' | 'brief' | 'balanced' | 'detailed'
+  tone?: '' | 'friendly' | 'neutral' | 'direct'
+  format?: '' | 'prose' | 'lists'
+  units?: '' | 'metric' | 'imperial'
+  about_me?: string
+  instructions?: string
+}
