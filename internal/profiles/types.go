@@ -45,7 +45,8 @@ func ValidateOrchestration(o contracts.OrchestrationPolicy) error {
 	}
 	for _, err := range []error{
 		choice("effort", o.Effort, "fast", "balanced", "thorough"),
-		choice("planning", o.Planning, "on", "off"),
+		choice("strategy", o.Strategy, StrategySingle, StrategyPlanned, StrategyTeam),
+		choice("planning", o.Planning, "on", "off", "always"),
 		choice("parallel", o.Parallel, "on", "off"),
 		choice("verification", o.Verification, "off", "check", "correct", "thorough"),
 		choice("memory", o.Memory, "off"),
@@ -56,6 +57,14 @@ func ValidateOrchestration(o contracts.OrchestrationPolicy) error {
 	} {
 		if err != nil {
 			return err
+		}
+	}
+	if len(o.FallbackModels) > 8 {
+		return ErrInvalidProfile("orchestration.fallback_models may list up to 8 models")
+	}
+	for _, id := range o.FallbackModels {
+		if id == "" {
+			return ErrInvalidProfile("orchestration.fallback_models cannot contain an empty model id")
 		}
 	}
 	if o.ContextShare != 0 && (o.ContextShare < 0.1 || o.ContextShare > 0.9) {

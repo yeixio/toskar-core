@@ -19,6 +19,7 @@ import type {
 } from '@/types/api'
 import { capabilityGap, type CapabilityGap } from '@/features/models/capabilityGap'
 import { activeCapabilityLabels, setCapability } from '@/features/profiles/capabilities'
+import { isTeamProfile } from '@/features/profiles/profilePresentation'
 import { canChat, modelToolAssessment } from '@/features/models/modelPresentation'
 import { CapabilityNotice } from './CapabilityNotice'
 import { ChatActivity } from './ChatActivity'
@@ -98,6 +99,9 @@ function sortProfiles(profiles: AIProfile[]): AIProfile[] {
 
 function formatRoleLabel(role: string): string {
   if (!role) return 'Role'
+  // A plan's worker slots are "worker:1", "worker:2", …
+  const slot = /^([a-z]+):(\d+)$/.exec(role)
+  if (slot) return `${slot[1].charAt(0).toUpperCase()}${slot[1].slice(1)} ${slot[2]}`
   return role.charAt(0).toUpperCase() + role.slice(1)
 }
 
@@ -339,7 +343,7 @@ export function ChatPage() {
     activeProfileId ||
     (preferredExists ? preferredProfileId : null) ||
     (hasCluster
-      ? sortedProfiles.find((p) => p.orchestrator_id === 'team')?.id ||
+      ? sortedProfiles.find((p) => isTeamProfile(p))?.id ||
         sortedProfiles.find((p) => p.id === 'programming')?.id ||
         sortedProfiles.find((p) => p.purpose === 'coding')?.id
       : null) ||
@@ -388,7 +392,7 @@ export function ChatPage() {
   const capabilityLine = activeCapabilityLabels(activeProfile?.tools).map((label) =>
     label === 'Internet' ? 'Web' : label,
   )
-  const isTeamProfile = activeProfile?.orchestrator_id === 'team'
+  const activeIsTeam = isTeamProfile(activeProfile)
 
   const defaultExecution = settingsQuery.data?.default_execution ?? 'automatic'
   const downloadBehavior = settingsQuery.data?.download_behavior ?? 'ask'
@@ -401,7 +405,7 @@ export function ChatPage() {
     }
   }, [defaultExecution, runMode])
 
-  const effectiveRunMode: RunMode = runMode ?? (isTeamProfile ? 'automatic' : 'local')
+  const effectiveRunMode: RunMode = runMode ?? (activeIsTeam ? 'automatic' : 'local')
 
   useEffect(() => {
     if (!draftProfileId && defaultProfileId) {

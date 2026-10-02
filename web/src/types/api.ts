@@ -236,8 +236,9 @@ export interface AIProfile {
 }
 
 export interface OrchestrationPolicy {
+  strategy?: '' | 'single' | 'planned' | 'team'
   effort?: '' | 'fast' | 'balanced' | 'thorough'
-  planning?: '' | 'on' | 'off'
+  planning?: '' | 'on' | 'off' | 'always'
   max_workers?: number
   parallel?: '' | 'on' | 'off'
   verification?: '' | 'off' | 'check' | 'correct' | 'thorough'
@@ -245,6 +246,7 @@ export interface OrchestrationPolicy {
   memory?: '' | 'off'
   context_share?: number
   fallback?: '' | 'off'
+  fallback_models?: string[]
   timeout_seconds?: number
 }
 

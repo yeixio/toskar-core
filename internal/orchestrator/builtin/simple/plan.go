@@ -8,6 +8,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/yeixio/yggdrasil-core/internal/huginn"
+	"github.com/yeixio/yggdrasil-core/internal/profiles"
 	"github.com/yeixio/yggdrasil-core/internal/tools"
 	"github.com/yeixio/yggdrasil-core/pkg/contracts"
 	"github.com/yeixio/yggdrasil-core/pkg/pluginapi"
@@ -31,10 +32,13 @@ const planGuidance = "Yggdrasil worked through this request in parts; the notes 
 	"Do not mention the notes or the parts."
 
 // runPlan works through a request with several parts (spec §22–23). Web
-// lookups for independent parts run at the same time; the model then writes
-// notes for each part in turn, and later parts of a sequence see the notes
-// before them. It returns the notes for the final answer.
-func runPlan(ctx context.Context, env pluginapi.ExecutionEnvironment, profile contracts.AIProfile, role string, plan huginn.Plan, prompt, reference string, pages int) string {
+// lookups for independent parts run at the same time. With worker slots
+// (the Team strategy, or a worker model), each independent part has its own
+// slot, which Norn can place on another computer, and parts on different
+// computers are written side by side; otherwise the model writes notes for
+// each part in turn. Later parts of a sequence see the notes before them.
+// It returns the notes for the final answer.
+func runPlan(ctx context.Context, env pluginapi.ExecutionEnvironment, ch chan<- pluginapi.OrchestrationEvent, profile contracts.AIProfile, role string, plan huginn.Plan, prompt, reference string, pages int) string {
 	steps := plan.Steps
 	// A step that asks for a file is done by the final answer, which writes
 	// the file from everything gathered.
@@ -62,28 +66,42 @@ func runPlan(ctx context.Context, env pluginapi.ExecutionEnvironment, profile co
 		wg.Wait()
 	}
 
-	var notes strings.Builder
-	for i, step := range steps {
-		if ctx.Err() != nil {
-			break
+	spread := spreadWorkers(profile)
+	roles := make([]string, len(steps))
+	nodes := make([]string, len(steps))
+	for i := range steps {
+		roles[i] = role
+		if spread {
+			roles[i] = fmt.Sprintf("%s:%d", profiles.RoleWorker, i+1)
 		}
-		env.Emit(EventPlanStep, map[string]any{"index": i, "step": step, "status": "running"})
+		// Placed one at a time, so each slot sees where the others went.
+		nodes[i], _ = env.NodeForRole(roles[i])
+	}
+
+	notes := make([]string, len(steps))
+	done := make([]bool, len(steps))
+	work := func(i int, earlier string) {
+		step := steps[i]
+		env.Emit(EventPlanStep, map[string]any{"index": i, "step": step, "status": "running", "role": roles[i], "node_id": nodes[i]})
+		if spread {
+			announceRole(env, roles[i])
+		}
 		material := looked[i]
 		if web && !plan.Parallel {
 			material, _ = lookUp(ctx, env, profile, lookupQuery(step), step, pages)
 		}
 		ref := joinReference(reference, material)
-		if !plan.Parallel && notes.Len() > 0 {
-			ref = joinReference(ref, "Notes from earlier parts:\n"+notes.String())
+		if earlier != "" {
+			ref = joinReference(ref, "Notes from earlier parts:\n"+earlier)
 		}
 		ask := []pluginapi.ChatMessage{
 			{Role: "system", Content: workerInstructions},
 			{Role: "user", Content: withReference("The whole request: "+prompt+"\n\nYour part: "+step, ref)},
 		}
-		content, _, err := generateText(ctx, env, role, ask)
+		content, metrics, err := generateText(ctx, env, roles[i], ask)
 		if ctx.Err() != nil {
 			// Stopped: keep the parts already finished, not this one.
-			break
+			return
 		}
 		status := "done"
 		note := strings.TrimSpace(tools.VisibleText(content))
@@ -94,11 +112,63 @@ func runPlan(ctx context.Context, env pluginapi.ExecutionEnvironment, profile co
 		if utf8.RuneCountInString(note) > noteRunes {
 			note = string([]rune(note)[:noteRunes]) + "…"
 		}
-		fmt.Fprintf(&notes, "[%d] %s\n%s\n\n", i+1, step, note)
-		env.Emit(EventPlanStep, map[string]any{"index": i, "step": step, "status": status})
+		notes[i], done[i] = note, true
+		if spread {
+			reportRole(ch, env, roles[i], metrics)
+		}
+		env.Emit(EventPlanStep, map[string]any{"index": i, "step": step, "status": status, "role": roles[i], "node_id": nodes[i]})
 	}
-	if notes.Len() == 0 {
+
+	if plan.Parallel && spread {
+		// Parts on different computers run at the same time; parts that
+		// share a computer run one after another there.
+		byNode := map[string][]int{}
+		order := []string{}
+		for i, n := range nodes {
+			if _, ok := byNode[n]; !ok {
+				order = append(order, n)
+			}
+			byNode[n] = append(byNode[n], i)
+		}
+		var wg sync.WaitGroup
+		for _, n := range order {
+			wg.Add(1)
+			go func(indices []int) {
+				defer wg.Done()
+				for _, i := range indices {
+					if ctx.Err() != nil {
+						return
+					}
+					work(i, "")
+				}
+			}(byNode[n])
+		}
+		wg.Wait()
+	} else {
+		var earlier strings.Builder
+		for i := range steps {
+			if ctx.Err() != nil {
+				break
+			}
+			prior := ""
+			if !plan.Parallel {
+				prior = earlier.String()
+			}
+			work(i, prior)
+			if done[i] {
+				fmt.Fprintf(&earlier, "[%d] %s\n%s\n\n", i+1, steps[i], notes[i])
+			}
+		}
+	}
+
+	var out strings.Builder
+	for i, step := range steps {
+		if done[i] {
+			fmt.Fprintf(&out, "[%d] %s\n%s\n\n", i+1, step, notes[i])
+		}
+	}
+	if out.Len() == 0 {
 		return ""
 	}
-	return "Notes from each part of the request:\n" + strings.TrimSpace(notes.String())
+	return "Notes from each part of the request:\n" + strings.TrimSpace(out.String())
 }

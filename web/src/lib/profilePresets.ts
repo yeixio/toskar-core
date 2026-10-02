@@ -96,12 +96,12 @@ function defaultRolesForPurpose(purpose: Purpose): AIProfile['roles'] {
   switch (purpose) {
     case 'coding':
       return [
-        { role: 'coordinator', model_id: '', required: false },
+        { role: 'planner', model_id: '', required: false },
         { role: 'worker', model_id: '', required: false },
         { role: 'reviewer', model_id: '', required: false },
       ]
     case 'research':
-      return [{ role: 'researcher', model_id: '', required: false }]
+      return [{ role: 'assistant', model_id: '', required: false }]
     case 'custom':
       return [{ role: 'assistant', model_id: '', required: false }]
     default:
@@ -115,7 +115,8 @@ function profileTemplate(purpose: Purpose): Omit<AIProfile, 'id' | 'roles'> {
       return {
         name: 'Programming',
         purpose: 'coding',
-        orchestrator_id: 'team',
+        orchestrator_id: 'simple',
+        orchestration: { strategy: 'team' },
         node_policy: { mode: 'automatic' },
         tools: codingTools,
       }

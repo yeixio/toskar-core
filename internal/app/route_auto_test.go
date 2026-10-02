@@ -145,3 +145,16 @@ func TestTraceRecordsPlansAndChecks(t *testing.T) {
 		t.Fatalf("meta = %+v", meta)
 	}
 }
+
+// A profile's fallback order comes before Yggdrasil's own pick (§20).
+func TestFallbackPrefersProfileOrder(t *testing.T) {
+	models := []contracts.Model{installed("big", "Qwen 14B", 12e9), installed("mid", "Qwen 7B", 6e9), installed("tiny", "Llama 1B", 1.6e9)}
+	next, _, _, ok := fallbackFrom("big", "x", models, 24e9, "missing", "big", "tiny")
+	if !ok || next.ID != "tiny" {
+		t.Fatalf("next = %q, %v; want the profile's tiny", next.ID, ok)
+	}
+	next, _, _, _ = fallbackFrom("big", "x", models, 24e9, "missing")
+	if next.ID == "" || next.ID == "big" {
+		t.Fatalf("without an installed preference, Yggdrasil picks: %q", next.ID)
+	}
+}

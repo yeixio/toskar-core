@@ -8,7 +8,15 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Thi
 
 ### Added
 
+- Profile strategies. A profile can work Auto (the default), as a Single model, as Planner + workers, or as a Team. Team now runs on the same pipeline as every other chat: a planner splits the request, workers write notes for each part, the answering model writes the answer with tools, memory, and knowledge, and a reviewer checks it. Quick questions are still answered directly. Programming uses the Team strategy.
+- Workers on other computers. With the Team strategy or a worker model, each part of a plan has its own worker, which Norn can place on a paired computer, and parts on different computers are written at the same time. The chat timeline and run details show each worker's model and computer.
+- Model roles. A profile can assign primary, fast, coding, planner, worker, and reviewer models, each with an optional computer. With the chat on Auto, a profile's coding model answers coding requests and its fast model answers quick questions. A fallback order lists the models to try when the answering model fails.
+- Planning: Always asks the planner model to split a request that has no obvious parts.
 - The network advertisement (`_localai._tcp`) now says where the API is, as `api_port` in its TXT record. The service's own port is the computer-to-computer port, so an app that finds Yggdrasil on the network, such as the iPhone app, had to assume the default API port.
+
+### Changed
+
+- The separate Team orchestrator is gone. Profiles saved with it, and API requests that name it, move to the Team strategy with their roles and models; `coordinator` becomes `planner`. A profile's role models are now used in chat: before, the model chosen in the chat replaced them all, except in Team profiles.
 
 ### Fixed
 

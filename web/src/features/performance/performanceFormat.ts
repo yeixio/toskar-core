@@ -24,6 +24,9 @@ export function formatWhen(iso: string): string {
 
 export function formatRoleLabel(role: string): string {
   if (!role) return 'Role'
+  // A plan's worker slots are "worker:1", "worker:2", …
+  const slot = /^([a-z]+):(\d+)$/.exec(role)
+  if (slot) return `${slot[1].charAt(0).toUpperCase()}${slot[1].slice(1)} ${slot[2]}`
   return role.charAt(0).toUpperCase() + role.slice(1)
 }
 

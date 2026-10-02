@@ -95,16 +95,20 @@ Discovery is on by default. When it is on and the internal bind address is still
 
 ## Norn
 
-Norn is a deterministic placer. Given the computers the daemon knows about, which models they have, and a role, it picks a computer and records a `scheduler.placement` event. It does not split one model across computers. Cross-machine work is placement of whole roles, as in the Team profile, of automations, and of training jobs.
+Norn is a deterministic placer. Given the computers the daemon knows about, which models they have, and a role, it picks a computer and records a `scheduler.placement` event. It does not split one model across computers. Cross-machine work is placement of whole roles: a plan's workers (each part has its own worker slot), the planner and reviewer, automations, and training jobs.
 
-## Orchestrators
+## Strategies
 
-| Id | Behavior |
+Every profile runs on the request pipeline above (`internal/orchestrator/builtin/simple`). A profile's strategy decides how much of it a request uses:
+
+| Strategy | Behavior |
 | --- | --- |
-| `simple` | One model with the request pipeline above |
-| `team` | Coordinator, then worker, then reviewer, possibly on different computers |
+| Auto (default) | Quick questions get one model; requests with several parts are planned and checked, as the effort allows |
+| Single model | One model answers, without a plan |
+| Planner + workers | Requests with several parts are always worked through in parts |
+| Team | A planner splits each request that is not a quick question, workers do the parts, the answering model writes the answer with tools, memory, and knowledge, and a reviewer checks it |
 
-A profile's orchestration controls (effort, planning, workers, verification, tool calls, memory, context share, fallback, time limit) tune either one. See [API](api.md#profiles-and-orchestration).
+Profiles assign models to roles: primary, fast, coding, planner, worker, and reviewer. Each worker part has its own slot (`worker:1`, `worker:2`, …), so Norn can spread the parts over paired computers, and parts on different computers are written at the same time. Earlier versions had a separate Team orchestrator that ran a coordinator, a worker, and a reviewer without tools; profiles that used it are migrated to the Team strategy. The orchestration controls (effort, planning, workers, verification, tool calls, memory, context share, fallback order, time limit) tune any strategy. See [API](api.md#profiles-and-orchestration).
 
 ## Specialized AIs
 

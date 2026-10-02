@@ -10,7 +10,7 @@ With desktop **A** and laptop **B** on the same LAN:
 
 1. Pair through the GUI (no IP/port entry).
 2. Run Programming (**Team**) from Chat on A.
-3. See **coordinator / worker / reviewer** each land on a computer.
+3. See the **planner**, each **worker**, and the **reviewer** land on a computer.
 4. Get **one** final answer in the same conversation.
 
 ## Prerequisites
@@ -46,7 +46,7 @@ With desktop **A** and laptop **B** on the same LAN:
 
 1. Install Model A on the desktop only.
 2. Install Model B on the laptop only.
-3. Programming roles: coordinator → Model A (+ desktop if pinned), worker → Model B (+ laptop), reviewer → Model A.
+3. Programming roles: planner → Model A (+ desktop if pinned), worker → Model B (+ laptop), reviewer → Model A.
 
 **Pass:** Roles show the intended model and node pin (or Automatic).
 
@@ -62,7 +62,7 @@ With desktop **A** and laptop **B** on the same LAN:
 
 - Status updates mention roles / computer names (e.g. “Worker on …”).
 - A left-border **timeline** lists:
-  - Coordinator on \<name\>
+  - Planner on \<name\>
   - Worker on \<name\>
   - Reviewer on \<name\>
 - Worker’s computer is **B** when pinned (or when Model B is only on B).
@@ -76,7 +76,7 @@ With desktop **A** and laptop **B** on the same LAN:
 **Pass:**
 
 - **Computers** shows both machine names with a **Cross-machine** badge.
-- Expanding the row lists coordinator / worker / reviewer with computer, TTFT, total time, and eval tok/s per role.
+- Expanding the row lists the planner, each worker, and the reviewer with computer, TTFT, total time, and eval tok/s per role.
 - Summary **Cross-machine** count increased.
 
 ## 4. Negative checks (quick)
@@ -100,7 +100,7 @@ With desktop **A** and laptop **B** on the same LAN:
 
 1. Pair A and B (plus C for discovery/auth checks).
 2. Enable `YGGDRASIL_STUB_INFERENCE` so nodes seed a fake `stub-team` model (no GGUF download).
-3. Pin Programming roles: coordinator/reviewer → A, worker → B.
+3. Pin Programming roles: planner/reviewer → A, worker → B.
 4. `POST /api/v1/chat` on A and assert:
    - `orchestration.role` events place **worker on B**
    - one non-empty final answer
@@ -109,8 +109,8 @@ This exercises Bifrost remote chat + Team placement. It does **not** replace the
 
 ## Related code
 
-- Chat Team path: `internal/app/chat.go` (`withChatModel`, team streaming)
-- Team orchestrator: `internal/orchestrator/builtin/team`
+- Chat path: `internal/app/chat.go` (`withChatModel`, role steps)
+- Team strategy: `internal/orchestrator/builtin/simple/team.go` (planner, reviewer) and `plan.go` (worker slots)
 - Timeline events: `orchestration.role` (SSE)
 - UI: `web/src/features/chat/ChatPage.tsx`
 - Cluster driver: `cmd/clustercheck` + `docker-compose.cluster.yml`

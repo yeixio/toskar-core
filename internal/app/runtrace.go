@@ -56,11 +56,14 @@ func traceEvent(c *runlog.Collector, eventType string, payload map[string]any) {
 		steps, _ := payload["steps"].([]string)
 		parallel, _ := payload["parallel"].(bool)
 		c.Plan(len(steps), parallel)
-		how := "one after another"
-		if parallel {
-			how = "side by side"
+		switch {
+		case len(steps) == 1:
+			c.Strategy("A worker drafted the answer first")
+		case parallel:
+			c.Strategy(fmt.Sprintf("Worked through %d parts side by side", len(steps)))
+		default:
+			c.Strategy(fmt.Sprintf("Worked through %d parts one after another", len(steps)))
 		}
-		c.Strategy(fmt.Sprintf("Worked through %d parts %s", len(steps), how))
 	case simple.EventEffort:
 		if e, _ := payload["effort"].(string); e != "" {
 			c.Effort(huginn.ParseEffort(e).Label())

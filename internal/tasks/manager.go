@@ -271,10 +271,8 @@ func (e *execEnv) NodeForRole(role string) (string, error) {
 }
 
 func (e *execEnv) modelForRole(role string) string {
-	for _, r := range e.profile.Roles {
-		if r.Role == role && r.ModelID != "" {
-			return r.ModelID
-		}
+	if id := profiles.RoleModel(e.profile, role); id != "" {
+		return id
 	}
 	for _, r := range e.profile.Roles {
 		if r.ModelID != "" {

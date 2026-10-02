@@ -101,12 +101,16 @@ func recoverable(ctx context.Context, errText, shown string, env *chatExecEnv) b
 
 // fallback picks the model to retry with and the words that explain it
 // (spec §14, §26). The note is empty when the answer should be as good.
-func (a *App) fallback(ctx context.Context, failedID, errText string) (model contracts.Model, step, notice string, ok bool) {
-	return fallbackFrom(failedID, errText, a.installedModels(ctx), a.memoryTotal(ctx))
+// preferred is the profile's fallback order, tried before Yggdrasil's pick.
+func (a *App) fallback(ctx context.Context, failedID, errText string, preferred []string) (model contracts.Model, step, notice string, ok bool) {
+	return fallbackFrom(failedID, errText, a.installedModels(ctx), a.memoryTotal(ctx), preferred...)
 }
 
-func fallbackFrom(failedID, errText string, installed []contracts.Model, memTotal uint64) (model contracts.Model, step, notice string, ok bool) {
-	next, ok := huginn.Fallback(failedID, installed, memTotal)
+func fallbackFrom(failedID, errText string, installed []contracts.Model, memTotal uint64, preferred ...string) (model contracts.Model, step, notice string, ok bool) {
+	next, ok := preferredFallback(failedID, installed, preferred)
+	if !ok {
+		next, ok = huginn.Fallback(failedID, installed, memTotal)
+	}
 	if !ok {
 		return contracts.Model{}, "", "", false
 	}
@@ -128,6 +132,55 @@ func fallbackFrom(failedID, errText string, installed []contracts.Model, memTota
 		notice = fmt.Sprintf("%s could not answer, so the smaller %s answered instead. This answer may be less detailed.", huginn.Name(failed), huginn.Name(next))
 	}
 	return next, step, notice, true
+}
+
+// preferredFallback is the first model in a profile's fallback order that is
+// installed, can answer chats, and is not the one that failed (§20).
+func preferredFallback(failedID string, installed []contracts.Model, preferred []string) (contracts.Model, bool) {
+	for _, id := range preferred {
+		if id == failedID {
+			continue
+		}
+		for _, m := range installed {
+			if m.ID == id && (m.Installed || m.Status == "installed") && !huginn.Supporting(m) {
+				return m, true
+			}
+		}
+	}
+	return contracts.Model{}, false
+}
+
+// profileRoleModel is the profile's own model for this kind of request when
+// the chat is on Auto (§20): its coding model for coding, and its fast model
+// for a quick question. ok is false when the profile has none installed.
+func (a *App) profileRoleModel(ctx context.Context, profile profiles.Profile, message string, data bool) (id, reason string, ok bool) {
+	kind := huginn.Classify(message)
+	if data && kind == huginn.Chat {
+		kind = huginn.Research
+	}
+	role := ""
+	switch kind {
+	case huginn.Coding:
+		role = profiles.RoleCoding
+	case huginn.Chat:
+		role = profiles.RoleFast
+	default:
+		return "", "", false
+	}
+	id = profiles.RoleModel(profile, role)
+	if id == "" || a.recentlyFailed(id) {
+		return "", "", false
+	}
+	for _, m := range a.installedModels(ctx) {
+		if m.ID == id && (m.Installed || m.Status == "installed") && !huginn.Supporting(m) {
+			what := "coding model"
+			if role == profiles.RoleFast {
+				what = "model for quick questions"
+			}
+			return id, fmt.Sprintf("Used %s, the %s of %s", huginn.Name(m), what, profile.Name), true
+		}
+	}
+	return "", "", false
 }
 
 // turnHasData reports whether a turn will answer from the user's own data:

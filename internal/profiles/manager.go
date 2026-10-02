@@ -59,7 +59,41 @@ func (m *Manager) EnsurePresets(ctx context.Context) error {
 			}
 		}
 	}
+	if err := m.migrateTeamProfiles(ctx); err != nil {
+		return err
+	}
 	return m.mergeBuiltinTools(ctx)
+}
+
+// migrateTeamProfiles rewrites profiles saved for the old Team orchestrator,
+// and roles with older names, onto the main pipeline (§37). Normalize does
+// the mapping; this stores the result once.
+func (m *Manager) migrateTeamProfiles(ctx context.Context) error {
+	list, err := m.List(ctx)
+	if err != nil {
+		return err
+	}
+	for _, p := range list {
+		if !needsNormalize(p) {
+			continue
+		}
+		if err := m.Update(ctx, p); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func needsNormalize(p Profile) bool {
+	if p.OrchestratorID == legacyOrchestrator {
+		return true
+	}
+	for _, r := range p.Roles {
+		if _, ok := legacyRoles[r.Role]; ok {
+			return true
+		}
+	}
+	return false
 }
 
 // mergeBuiltinTools adds newly shipped tools without changing policies the user already saved.
@@ -156,6 +190,7 @@ func (m *Manager) Create(ctx context.Context, p Profile) (Profile, error) {
 	if p.ID == "" {
 		p.ID = uuid.NewString()
 	}
+	p = Normalize(p)
 	if err := Validate(p); err != nil {
 		return Profile{}, err
 	}
@@ -183,6 +218,7 @@ func (m *Manager) Create(ctx context.Context, p Profile) (Profile, error) {
 
 // Update replaces an existing profile.
 func (m *Manager) Update(ctx context.Context, p Profile) error {
+	p = Normalize(p)
 	if err := Validate(p); err != nil {
 		return err
 	}
@@ -318,10 +354,10 @@ func scanProfile(row scannable) (Profile, error) {
 // orchestrationJSON stores a profile's advanced controls, or NULL when it
 // keeps every default.
 func orchestrationJSON(o contracts.OrchestrationPolicy) any {
-	if o == (contracts.OrchestrationPolicy{}) {
+	b, _ := json.Marshal(o)
+	if string(b) == "{}" {
 		return nil
 	}
-	b, _ := json.Marshal(o)
 	return string(b)
 }
 

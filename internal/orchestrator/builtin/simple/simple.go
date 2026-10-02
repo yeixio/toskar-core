@@ -92,6 +92,19 @@ func (o *Orchestrator) Run(
 		// plan, tool calls, file, or figure check, which would each need
 		// output of another shape. A web look-up still runs first.
 		jsonOnly := len(structured.SchemaFrom(ctx)) > 0
+		// The profile's strategy (§20). A quick question is answered
+		// directly whatever the strategy: escalate only when it helps (§6).
+		strat := strategyOf(profile)
+		escalate := kind != huginn.Chat && !jsonOnly
+		switch {
+		case strat.single:
+			budget.Plan = false
+		case strat.planned:
+			budget.Plan = true
+		case strat.team && escalate:
+			budget.Plan, budget.Verify = true, true
+			budget.Corrections = max(budget.Corrections, 1)
+		}
 		if jsonOnly {
 			budget.Plan, budget.Verify = false, false
 		}
@@ -102,6 +115,18 @@ func (o *Orchestrator) Run(
 		// A request with several parts is worked through part by part;
 		// otherwise a current question is looked up first.
 		planned := false
+		// Planning set to Always, and the Team strategy, ask the planner to
+		// split a request that has no obvious parts (§12). Team keeps a plan
+		// of one part, so a worker drafts and the answer is written from it.
+		if !hasParts && budget.Plan && strat.alwaysPlan && escalate {
+			limit := budget.MaxWorkers
+			if limit == 0 {
+				limit = defaultTeamParts
+			}
+			if p, ok := askPlanner(ctx, env, ch, plannerRole(profile, role), task.Prompt, limit); ok && (len(p.Steps) > 1 || strat.team) {
+				plan, hasParts = p, true
+			}
+		}
 		if hasParts && budget.Plan {
 			if budget.Sequential {
 				plan.Parallel = false
@@ -109,7 +134,7 @@ func (o *Orchestrator) Run(
 			if budget.MaxWorkers > 0 && len(plan.Steps) > budget.MaxWorkers {
 				plan.Steps = plan.Steps[:budget.MaxWorkers]
 			}
-			notes := runPlan(ctx, env, profile, role, plan, task.Prompt, reference, budget.Pages)
+			notes := runPlan(ctx, env, ch, profile, role, plan, task.Prompt, reference, budget.Pages)
 			if ctx.Err() != nil {
 				// Stopped while working through the parts: keep what is done (§67).
 				if notes != "" {
@@ -310,7 +335,11 @@ func (o *Orchestrator) Run(
 			}
 			answer := parsed.Text
 			if budget.Verify {
-				answer = verifyAnswer(ctx, env, role, messages, parsed.Text, evidence, task.Prompt, budget.Corrections)
+				answer = verifyAnswer(ctx, env, reviewerRole(profile, role), messages, parsed.Text, evidence, task.Prompt, budget.Corrections)
+			}
+			// The Team strategy's reviewer reads every answer it escalated.
+			if strat.team && escalate {
+				answer = reviewAnswer(ctx, env, ch, reviewerRole(profile, role), task.Prompt, answer, evidence)
 			}
 			// An answer that says it changed something, when nothing that
 			// changes things ran, is called out (§24; found by §64).

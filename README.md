@@ -131,7 +131,7 @@ These exist in this repository today:
 - GGUF model catalog, Hugging Face search, download, start, and stop
 - llama.cpp (`llama-server`) runtime adapter, plus an adapter for an external OpenAI-compatible server
 - **Auto** model choice: each request goes to a model that suits it (quick, coding, current information, or detailed), with a retry on another model when one fails
-- profiles with orchestration controls (effort, planning, verification, tool budget, memory, fallback), a simple orchestrator, and a Team orchestrator (coordinator, worker, reviewer)
+- profiles with a strategy (Auto, single model, planner + workers, or Team: a planner, workers spread over your computers, and a reviewer), model roles, and orchestration controls (effort, planning, verification, tool budget, memory, fallback order)
 - persistent memory across chats and models, which you can review, edit, and turn off per chat
 - Mimir connected knowledge: files, folders, uploads, scanned PDFs (text recognition), read-only SQL databases, and web APIs, searched by keyword and, with an embedding model, by meaning
 - tools for web search, files, shell, Git, and making files, with per-profile Allow, Ask, and Deny policies; connected services (GitHub, Home Assistant); and tools from MCP servers

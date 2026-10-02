@@ -7,7 +7,9 @@ import (
 	"github.com/yeixio/yggdrasil-core/pkg/contracts"
 )
 
-func TestWithChatModelPreservesTeamRolesAndPins(t *testing.T) {
+// A profile's roles keep their own models and computers; the chat's model
+// writes the answer, and an old Team profile moves to the Team strategy.
+func TestWithChatModelKeepsRoles(t *testing.T) {
 	p := profiles.Profile{
 		ID:             "programming",
 		OrchestratorID: "team",
@@ -19,8 +21,8 @@ func TestWithChatModelPreservesTeamRolesAndPins(t *testing.T) {
 		},
 	}
 	got := withChatModel(p, "ui-model")
-	if got.OrchestratorID != "team" {
-		t.Fatalf("orchestrator=%q, want team", got.OrchestratorID)
+	if got.OrchestratorID != "simple" || got.Orchestration.Strategy != profiles.StrategyTeam {
+		t.Fatalf("orchestrator=%q strategy=%q", got.OrchestratorID, got.Orchestration.Strategy)
 	}
 	if got.NodePolicy.Mode != "prefer_local" {
 		t.Fatalf("node policy=%q, want prefer_local (preserved)", got.NodePolicy.Mode)
@@ -29,20 +31,17 @@ func TestWithChatModelPreservesTeamRolesAndPins(t *testing.T) {
 	for _, r := range got.Roles {
 		byRole[r.Role] = r
 	}
-	if byRole["coordinator"].ModelID != "ui-model" {
-		t.Fatalf("coordinator model=%q, want ui-model", byRole["coordinator"].ModelID)
+	if byRole[profiles.RolePrimary].ModelID != "ui-model" {
+		t.Fatalf("primary model=%q, want ui-model", byRole[profiles.RolePrimary].ModelID)
 	}
-	if byRole["worker"].ModelID != "special-worker" {
-		t.Fatalf("worker model=%q, want special-worker", byRole["worker"].ModelID)
+	if byRole["worker"].ModelID != "special-worker" || byRole["worker"].NodeID != "node-b" {
+		t.Fatalf("worker=%+v", byRole["worker"])
 	}
-	if byRole["worker"].NodeID != "node-b" {
-		t.Fatalf("worker node=%q, want node-b", byRole["worker"].NodeID)
+	if byRole[profiles.RolePlanner].NodeID != "node-a" {
+		t.Fatalf("planner pin lost: %+v", byRole[profiles.RolePlanner])
 	}
-	if byRole["reviewer"].ModelID != "ui-model" {
-		t.Fatalf("reviewer model=%q, want ui-model", byRole["reviewer"].ModelID)
-	}
-	if byRole["coordinator"].NodeID != "node-a" {
-		t.Fatalf("coordinator node=%q, want node-a", byRole["coordinator"].NodeID)
+	if _, kept := byRole["reviewer"]; kept {
+		t.Fatal("a role with no model or computer should use the primary model")
 	}
 }
 
@@ -64,38 +63,18 @@ func TestWithChatModelCollapsesNonTeam(t *testing.T) {
 }
 
 func TestProfileNeedsModelFill(t *testing.T) {
-	teamEmpty := profiles.Profile{
-		OrchestratorID: "team",
-		Roles: []contracts.ModelRole{
-			{Role: "coordinator"},
-			{Role: "worker"},
-			{Role: "reviewer"},
-		},
+	empty := profiles.Profile{
+		OrchestratorID: "simple",
+		Orchestration:  contracts.OrchestrationPolicy{Strategy: profiles.StrategyTeam},
+		Roles:          []contracts.ModelRole{{Role: "planner"}, {Role: "worker"}, {Role: "reviewer"}},
 	}
-	if !profileNeedsModelFill(teamEmpty) {
-		t.Fatal("team with empty roles should need fill")
+	if !profileNeedsModelFill(empty) {
+		t.Fatal("roles without models should need a model")
 	}
-	teamFull := profiles.Profile{
-		OrchestratorID: "team",
-		Roles: []contracts.ModelRole{
-			{Role: "coordinator", ModelID: "a"},
-			{Role: "worker", ModelID: "b"},
-			{Role: "reviewer", ModelID: "c"},
-		},
-	}
-	if profileNeedsModelFill(teamFull) {
-		t.Fatal("team with all models should not need fill")
-	}
-	teamPartial := profiles.Profile{
-		OrchestratorID: "team",
-		Roles: []contracts.ModelRole{
-			{Role: "coordinator", ModelID: "a"},
-			{Role: "worker"},
-			{Role: "reviewer", ModelID: "c"},
-		},
-	}
-	if !profileNeedsModelFill(teamPartial) {
-		t.Fatal("team missing worker should need fill")
+	partial := empty
+	partial.Roles = []contracts.ModelRole{{Role: "planner", ModelID: "a"}, {Role: "worker"}}
+	if profileNeedsModelFill(partial) {
+		t.Fatal("a role without a model uses another role's model")
 	}
 	simpleEmpty := profiles.Profile{
 		OrchestratorID: "simple",
@@ -104,13 +83,6 @@ func TestProfileNeedsModelFill(t *testing.T) {
 	if !profileNeedsModelFill(simpleEmpty) {
 		t.Fatal("simple empty should need fill")
 	}
-	simpleOK := profiles.Profile{
-		OrchestratorID: "simple",
-		Roles:          []contracts.ModelRole{{Role: "assistant", ModelID: "m"}},
-	}
-	if profileNeedsModelFill(simpleOK) {
-		t.Fatal("simple with model should not need fill")
-	}
 }
 
 func TestChatExecEnvModelForRolePrefersPinnedModel(t *testing.T) {
@@ -118,13 +90,16 @@ func TestChatExecEnvModelForRolePrefersPinnedModel(t *testing.T) {
 		modelOverride: "ui-model",
 		profile: profiles.Profile{
 			Roles: []contracts.ModelRole{
-				{Role: "coordinator", ModelID: "ui-model"},
+				{Role: "planner", ModelID: "planner-model"},
 				{Role: "worker", ModelID: "worker-model"},
 			},
 		},
 	}
 	if got := env.modelForRole("worker"); got != "worker-model" {
 		t.Fatalf("worker=%q, want worker-model", got)
+	}
+	if got := env.modelForRole("worker:3"); got != "worker-model" {
+		t.Fatalf("worker slot=%q, want worker-model", got)
 	}
 	if got := env.modelForRole("reviewer"); got != "ui-model" {
 		t.Fatalf("missing role fallback=%q, want ui-model", got)

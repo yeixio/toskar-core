@@ -338,11 +338,17 @@ type AIProfile struct {
 // Every field is optional; empty keeps the default, which follows the
 // effort a chat chooses.
 type OrchestrationPolicy struct {
+	// Strategy is how a request is worked through: single (one model, no
+	// plan), planned (a plan when the request has several parts), or team
+	// (a planner splits the request, workers do the parts, and a reviewer
+	// checks the answer). Empty is Auto.
+	Strategy string `json:"strategy,omitempty"`
 	// Effort is the profile's effort when a chat leaves it on Auto:
 	// fast, balanced, or thorough.
 	Effort string `json:"effort,omitempty"`
-	// Planning is on or off: whether a request with several parts is
-	// worked through in parts.
+	// Planning is on, off, or always: on works through a request with
+	// several parts in parts, and always also asks the planner model to
+	// split a request that has no obvious parts.
 	Planning string `json:"planning,omitempty"`
 	// MaxWorkers caps how many parts a plan has (2–8).
 	MaxWorkers int `json:"max_workers,omitempty"`
@@ -362,6 +368,9 @@ type OrchestrationPolicy struct {
 	// Fallback is off to show a failure instead of quietly answering on
 	// another model.
 	Fallback string `json:"fallback,omitempty"`
+	// FallbackModels are tried in order when the answering model fails,
+	// before Yggdrasil picks another installed model.
+	FallbackModels []string `json:"fallback_models,omitempty"`
 	// TimeoutSeconds stops a turn that runs longer (10–3600).
 	TimeoutSeconds int `json:"timeout_seconds,omitempty"`
 }

@@ -31,7 +31,7 @@ Revoke a peer with `POST /api/v1/nodes/{id}/revoke`.
 
 ## Placement
 
-Norn (`internal/scheduler`) scores candidates and picks a node for a role. The Team orchestrator runs three roles in order: coordinator, worker, reviewer. With two paired computers and models installed where those roles need them, those roles can land on different machines. The event stream records `scheduler.placement`.
+Norn (`internal/scheduler`) scores candidates and picks a node for a role. With the Team strategy, a planner splits the request, each part goes to its own worker slot, and a reviewer checks the answer. With two paired computers and the models installed where those roles need them, the workers land on different machines and write their parts at the same time. The event stream records `scheduler.placement`.
 
 A manual pass is written up in [two-machine-team-demo.md](two-machine-team-demo.md). Continuous integration does not run that pass on physical hardware. The Docker cluster check uses stub inference.
 

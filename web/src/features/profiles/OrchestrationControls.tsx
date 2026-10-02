@@ -14,8 +14,13 @@ const SELECTS: { key: keyof OrchestrationPolicy; label: string; help: string; op
   {
     key: 'planning',
     label: 'Planning',
-    help: 'Work through requests with several parts in parts.',
-    options: [DEFAULT, { value: 'on', label: 'Always plan' }, { value: 'off', label: 'Never plan' }],
+    help: 'Work through requests with several parts in parts. Always also splits requests with no obvious parts.',
+    options: [
+      DEFAULT,
+      { value: 'on', label: 'When a request has parts' },
+      { value: 'always', label: 'Always' },
+      { value: 'off', label: 'Never plan' },
+    ],
   },
   {
     key: 'parallel',
@@ -60,6 +65,7 @@ const NUMBERS: { key: keyof OrchestrationPolicy; label: string; help: string; mi
 export function cleanOrchestration(o: OrchestrationPolicy): OrchestrationPolicy | undefined {
   const out: Record<string, unknown> = {}
   for (const [k, v] of Object.entries(o)) {
+    if (Array.isArray(v) && v.length === 0) continue
     if (v !== '' && v !== undefined && v !== 0 && !(typeof v === 'number' && Number.isNaN(v))) out[k] = v
   }
   return Object.keys(out).length > 0 ? (out as OrchestrationPolicy) : undefined

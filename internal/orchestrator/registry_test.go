@@ -1,25 +1,39 @@
 package orchestrator
 
 import (
+	"context"
 	"testing"
 
 	"github.com/yeixio/yggdrasil-core/internal/orchestrator/builtin/simple"
-	"github.com/yeixio/yggdrasil-core/internal/orchestrator/builtin/team"
+	"github.com/yeixio/yggdrasil-core/pkg/contracts"
 	"github.com/yeixio/yggdrasil-core/pkg/pluginapi"
 )
+
+// other is a second orchestrator for the registry to hold.
+type other struct{}
+
+func (other) ID() string          { return "other" }
+func (other) DisplayName() string { return "Other" }
+func (other) Capabilities() pluginapi.OrchestratorCapabilities {
+	return pluginapi.OrchestratorCapabilities{}
+}
+func (other) ValidateProfile(context.Context, contracts.AIProfile) error { return nil }
+func (other) Run(context.Context, contracts.Task, contracts.AIProfile, pluginapi.ExecutionEnvironment) (<-chan pluginapi.OrchestrationEvent, error) {
+	return nil, nil
+}
 
 func TestRegistryReplacesWithoutDuplicating(t *testing.T) {
 	registry := NewRegistry()
 	registry.Register(simple.New())
-	registry.Register(team.New())
+	registry.Register(other{})
 	registry.Register(simple.New())
 
 	listed := registry.List()
-	if len(listed) != 2 || listed[0].ID() != "simple" || listed[1].ID() != "team" {
+	if len(listed) != 2 || listed[0].ID() != "simple" || listed[1].ID() != "other" {
 		t.Fatalf("list=%v", ids(listed))
 	}
-	got, err := registry.Get("team")
-	if err != nil || got.DisplayName() != "Team" {
+	got, err := registry.Get("other")
+	if err != nil || got.DisplayName() != "Other" {
 		t.Fatalf("get=%v err=%v", got, err)
 	}
 	if _, err := registry.Get("missing"); err == nil {

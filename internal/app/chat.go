@@ -97,6 +97,9 @@ func (a *App) RunChat(ctx context.Context, profileID, conversationID, message st
 		// A specialized AI trained for exactly this answers first (§61).
 		if id, reason, ok := a.chooseSpecialist(ctx, message); ok {
 			modelID, routeReason = id, reason
+		} else if id, reason, ok := a.profileRoleModel(ctx, profile, message, a.turnHasData(ctx, conversationID, profile)); ok {
+			// The profile's own coding or fast model (§20).
+			modelID, routeReason = id, reason
 		} else {
 			choice, err := a.chooseAuto(ctx, message, a.turnHasData(ctx, conversationID, profile))
 			if err != nil {
@@ -229,8 +232,8 @@ func (a *App) RunChat(ctx context.Context, profileID, conversationID, message st
 		// took, and the run is saved however the turn ends.
 		run := runlog.New(task.ID, conversationID, profile.ID, source)
 		ctx = runlog.With(ctx, run)
-		if profile.OrchestratorID == "team" {
-			run.Strategy("Team: planner, worker, and reviewer")
+		if label := strategyLabel(profile); label != "" {
+			run.Strategy(label)
 		}
 		if special != nil {
 			run.Strategy("Specialized AI " + special.name + " answered on this computer")
@@ -291,7 +294,6 @@ func (a *App) RunChat(ctx context.Context, profileID, conversationID, message st
 			env.instructions = special.instructions
 			env.knowledge = special.knowledge
 		}
-		teamMode := profile.OrchestratorID == "team"
 		var full string
 		var metrics *pluginapi.GenerationMetrics
 		var roleSteps []contracts.GenerationRoleStep
@@ -318,9 +320,9 @@ func (a *App) RunChat(ctx context.Context, profileID, conversationID, message st
 						}(eventsCh)
 						return
 					}
-					if attempt == 0 && !teamMode && special == nil && profile.Orchestration.Fallback != "off" && recoverable(ctx, evt.Error, full, env) {
+					if attempt == 0 && special == nil && profile.Orchestration.Fallback != "off" && recoverable(ctx, evt.Error, full, env) {
 						failedID := firstNonEmpty(env.modelID(), modelID)
-						if next, step, notice, ok := a.fallback(ctx, failedID, evt.Error); ok {
+						if next, step, notice, ok := a.fallback(ctx, failedID, evt.Error, profile.Orchestration.FallbackModels); ok {
 							run.Retried()
 							run.Strategy("Answered on another model after " + a.modelName(failedID) + " failed")
 							a.Logger.Warn("chat model failed; retrying on another model", "failed", failedID, "next", next.ID, "error", evt.Error)
@@ -345,9 +347,6 @@ func (a *App) RunChat(ctx context.Context, profileID, conversationID, message st
 						}
 					}
 					if _, healthFailure := modelhealth.Parse(evt.Error); healthFailure && full != "" {
-						if teamMode {
-							ch <- pluginapi.ChatChunk{Content: full}
-						}
 						if conversationID != "" {
 							if saveChat, _ := a.Settings.GetBool(ctx, "save_chat_history", true); saveChat {
 								_, _ = a.Conversations.AddMessage(ctx, conversationID, "assistant", full)
@@ -359,31 +358,30 @@ func (a *App) RunChat(ctx context.Context, profileID, conversationID, message st
 					return
 				}
 				if evt.Type == "agent.completed" && evt.Role != "" {
-					// Team emits a final Done envelope after the three roles; skip that one.
-					if !teamMode || !evt.Done {
-						step := roleStepFromEvent(a, profile, evt)
-						if step.NodeID == "" {
-							if id, ok := env.roleNode(evt.Role); ok {
-								step.NodeID = id
-								step.NodeName = a.nodeDisplayName(id)
-							}
+					// Each role that finished: the planner, each worker, the
+					// reviewer, and the model that wrote the answer.
+					step := roleStepFromEvent(a, profile, evt)
+					if step.NodeID == "" {
+						if id, ok := env.roleNode(evt.Role); ok {
+							step.NodeID = id
+							step.NodeName = a.nodeDisplayName(id)
 						}
-						if step.ModelID == "" {
-							if mid, ok := env.roleModel(evt.Role); ok {
-								step.ModelID = mid
-							}
+					}
+					if step.ModelID == "" {
+						if mid, ok := env.roleModel(evt.Role); ok {
+							step.ModelID = mid
 						}
-						replaced := false
-						for i := range roleSteps {
-							if roleSteps[i].Role == step.Role {
-								roleSteps[i] = step
-								replaced = true
-								break
-							}
+					}
+					replaced := false
+					for i := range roleSteps {
+						if roleSteps[i].Role == step.Role {
+							roleSteps[i] = step
+							replaced = true
+							break
 						}
-						if !replaced {
-							roleSteps = append(roleSteps, step)
-						}
+					}
+					if !replaced {
+						roleSteps = append(roleSteps, step)
 					}
 				}
 				if evt.Metrics != nil {
@@ -391,29 +389,6 @@ func (a *App) RunChat(ctx context.Context, profileID, conversationID, message st
 				}
 				if copied := copyContextUsage(evt.Payload); copied != nil {
 					contextUsage = copied
-				}
-				if teamMode {
-					if evt.Type == "agent.message" && evt.Content != "" {
-						if visible := tools.VisibleText(evt.Content); visible != "" {
-							full += visible
-						}
-					}
-					// Keep intermediate role tokens off the transcript; timeline uses bus events.
-					if evt.Done {
-						if evt.Content != "" {
-							full = evt.Content
-							ch <- pluginapi.ChatChunk{Content: evt.Content}
-							a.Bus.Publish(events.New(events.ChatToken, map[string]any{
-								"conversation_id": conversationID,
-								"content":         evt.Content,
-							}))
-						}
-						if agg := aggregateRoleMetrics(roleSteps); agg != nil {
-							metrics = agg
-						}
-						ch <- pluginapi.ChatChunk{Done: true, Metrics: metrics}
-					}
-					continue
 				}
 				if evt.Content != "" && evt.Type != "agent.completed" {
 					visible := tools.VisibleText(evt.Content)
@@ -551,31 +526,6 @@ func distinctNodeCount(steps []contracts.GenerationRoleStep) int {
 		}
 	}
 	return len(seen)
-}
-
-func aggregateRoleMetrics(steps []contracts.GenerationRoleStep) *pluginapi.GenerationMetrics {
-	if len(steps) == 0 {
-		return nil
-	}
-	var out pluginapi.GenerationMetrics
-	var evalMsSum float64
-	for i, s := range steps {
-		out.PromptTokens += s.PromptTokens
-		out.CompletionTokens += s.CompletionTokens
-		out.TotalTokens += s.TotalTokens
-		out.PromptMs += s.PromptMs
-		out.EvalMs += s.EvalMs
-		out.TotalMs += s.TotalMs
-		evalMsSum += s.EvalMs
-		if i == 0 {
-			out.TTFTMs = s.TTFTMs
-			out.PromptTokPerSec = s.PromptTokPerSec
-		}
-	}
-	if evalMsSum > 0 && out.CompletionTokens > 0 {
-		out.EvalTokPerSec = float64(out.CompletionTokens) / (evalMsSum / 1000.0)
-	}
-	return &out
 }
 
 func (a *App) recordGeneration(
@@ -719,20 +669,6 @@ func (a *App) nodeDisplayName(nodeID string) string {
 
 // profileNeedsModelFill reports whether empty role model_ids would fail orchestrator validation.
 func profileNeedsModelFill(p profiles.Profile) bool {
-	if p.OrchestratorID == "team" {
-		needed := map[string]bool{"coordinator": false, "worker": false, "reviewer": false}
-		for _, r := range p.Roles {
-			if _, ok := needed[r.Role]; ok && r.ModelID != "" {
-				needed[r.Role] = true
-			}
-		}
-		for _, ok := range needed {
-			if !ok {
-				return true
-			}
-		}
-		return false
-	}
 	for _, r := range p.Roles {
 		if r.ModelID != "" {
 			return false
@@ -782,25 +718,36 @@ func (a *App) defaultInstalledModelID(ctx context.Context) (string, error) {
 	return "", fmt.Errorf("no installed models")
 }
 
-// withChatModel applies the chat UI model selection to a profile for this turn.
-// Team profiles keep their orchestrator, roles, and node pins; empty role models
-// are filled from the UI pick. Other profiles collapse to simple single-agent chat.
+// withChatModel applies the chat's model to a profile for this turn: it
+// writes the answer. The profile's other roles (planner, workers, reviewer,
+// and the fast and coding models) keep their own models and computers; a
+// role without a model uses the chat's.
 func withChatModel(p profiles.Profile, modelID string) profiles.Profile {
-	out := p
+	out := profiles.Normalize(p)
 	if out.NodePolicy.Mode == "" {
 		out.NodePolicy.Mode = "automatic"
 	}
-	if out.OrchestratorID == "team" {
-		out.Roles = fillTeamRoles(out.Roles, modelID)
-		return out
-	}
 	out.OrchestratorID = "simple"
-	out.Roles = []contracts.ModelRole{{
-		Role:     "assistant",
-		ModelID:  modelID,
-		Required: false,
-	}}
+	roles := []contracts.ModelRole{{Role: profiles.RolePrimary, ModelID: modelID}}
+	for _, r := range out.Roles {
+		if r.Role == profiles.RolePrimary || (r.ModelID == "" && r.NodeID == "") {
+			continue
+		}
+		roles = append(roles, r)
+	}
+	out.Roles = roles
 	return out
+}
+
+// strategyLabel describes a profile's strategy for run details (§35).
+func strategyLabel(p profiles.Profile) string {
+	switch p.Orchestration.Strategy {
+	case profiles.StrategyTeam:
+		return "Team: a planner splits the request, workers do the parts, and a reviewer checks the answer"
+	case profiles.StrategySingle:
+		return "Single model, no plan"
+	}
+	return ""
 }
 
 // applyExecutionPolicy maps Chat UI execution preference onto node_policy.
@@ -825,33 +772,6 @@ func applyExecutionPolicy(p profiles.Profile, execution string) profiles.Profile
 		p.NodePolicy.Mode = "automatic"
 	}
 	return p
-}
-
-func fillTeamRoles(roles []contracts.ModelRole, modelID string) []contracts.ModelRole {
-	needed := []string{"coordinator", "worker", "reviewer"}
-	byRole := make(map[string]contracts.ModelRole, len(roles))
-	order := make([]string, 0, len(roles))
-	for _, r := range roles {
-		if _, seen := byRole[r.Role]; !seen {
-			order = append(order, r.Role)
-		}
-		byRole[r.Role] = r
-	}
-	for _, role := range needed {
-		if _, ok := byRole[role]; !ok {
-			order = append(order, role)
-			byRole[role] = contracts.ModelRole{Role: role, Required: false}
-		}
-	}
-	out := make([]contracts.ModelRole, 0, len(order))
-	for _, role := range order {
-		r := byRole[role]
-		if r.ModelID == "" {
-			r.ModelID = modelID
-		}
-		out = append(out, r)
-	}
-	return out
 }
 
 type chatExecEnv struct {
@@ -1164,10 +1084,8 @@ func (e *chatExecEnv) NodeForRole(role string) (string, error) {
 }
 
 func (e *chatExecEnv) modelForRole(role string) string {
-	for _, r := range e.profile.Roles {
-		if r.Role == role && r.ModelID != "" {
-			return r.ModelID
-		}
+	if id := profiles.RoleModel(e.profile, role); id != "" {
+		return id
 	}
 	if e.modelOverride != "" {
 		return e.modelOverride

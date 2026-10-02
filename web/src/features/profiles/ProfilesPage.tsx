@@ -14,13 +14,16 @@ import {
   createStartOptions,
   filterProfiles,
   isBuiltInProfile,
-  orchestratorLabel,
+  isTeamProfile,
+  MODEL_ROLES,
   PURPOSE_LABELS,
   purposeIcon,
   roleDisplayName,
   roleHelp,
   roleHint,
   sortProfilesForDisplay,
+  STRATEGY_OPTIONS,
+  strategyLabel,
   toolChipPreview,
   toolSummary,
   type CreateStartFrom,
@@ -441,11 +444,11 @@ export function ProfilesPage() {
             const isEditing = editingId === profile.id
             const showDetails = detailsId === profile.id || isEditing
             const builtIn = isBuiltInProfile(profile.id)
-            const orch = orchestratorLabel(profile.orchestrator_id, advancedMode)
+            const orch = strategyLabel(profile, advancedMode)
             const computers = computerSelectionLabel(nodeMode)
             const tools = toolSummary(profile.tools)
             const chips = toolChipPreview(profile.tools)
-            const isTeam = profile.orchestrator_id === 'team'
+            const isTeam = isTeamProfile(profile)
             const isRenaming = renamingId === profile.id
 
             return (
@@ -657,9 +660,10 @@ export function ProfilesPage() {
                     />
                     {advancedMode && (
                       <p className="text-xs text-ink-faint">
-                        Orchestrator:{' '}
+                        Strategy:{' '}
                         <span className="font-medium text-ink">
-                          {profile.orchestrator_id === 'team' ? 'Team' : 'Simple'}
+                          {(STRATEGY_OPTIONS.find((o) => o.value === (isTeam ? 'team' : (profile.orchestration?.strategy ?? ''))) ??
+                            STRATEGY_OPTIONS[0]).label}
                         </span>
                       </p>
                     )}
@@ -756,16 +760,11 @@ function AdvancedEditor({
   onCancel: () => void
 }) {
   const [name, setName] = useState(profile.name)
-  const [orchestratorId, setOrchestratorId] = useState(profile.orchestrator_id)
   const [nodeMode, setNodeMode] = useState(profile.node_policy?.mode ?? 'automatic')
-  const [roles, setRoles] = useState<ModelRole[]>(
-    (profile.roles?.length ?? 0) > 0
-      ? profile.roles.map((r) => ({ ...r }))
-      : [{ role: 'assistant', model_id: '', required: true }],
-  )
+  const [roles, setRoles] = useState<ModelRole[]>(editorRoles(profile))
   const [tools, setTools] = useState<ToolPolicy[]>(defaultToolsFrom(profile))
   const [knowledge, setKnowledge] = useState<string[]>(profile.knowledge_sources ?? [])
-  const [orchestration, setOrchestration] = useState<OrchestrationPolicy>(profile.orchestration ?? {})
+  const [orchestration, setOrchestration] = useState<OrchestrationPolicy>(editorOrchestration(profile))
   const advancedMode = useUIStore((s) => s.advancedMode)
   const profileIdRef = useRef(profile.id)
 
@@ -773,16 +772,11 @@ function AdvancedEditor({
     if (profileIdRef.current === profile.id) return
     profileIdRef.current = profile.id
     setName(profile.name)
-    setOrchestratorId(profile.orchestrator_id)
     setNodeMode(profile.node_policy?.mode ?? 'automatic')
-    setRoles(
-      (profile.roles?.length ?? 0) > 0
-        ? profile.roles.map((r) => ({ ...r }))
-        : [{ role: 'assistant', model_id: '', required: true }],
-    )
+    setRoles(editorRoles(profile))
     setTools(defaultToolsFrom(profile))
     setKnowledge(profile.knowledge_sources ?? [])
-    setOrchestration(profile.orchestration ?? {})
+    setOrchestration(editorOrchestration(profile))
   }, [profile])
 
   const updateRole = (index: number, patch: Partial<ModelRole>) => {
@@ -795,10 +789,14 @@ function AdvancedEditor({
     )
   }
 
-  const orchHint =
-    orchestratorId === 'team'
-      ? 'AI team runs three steps and can spread them across paired computers.'
-      : 'Single assistant is one turn. It can request local tools when the model needs them.'
+  const strategy = orchestration.strategy ?? ''
+  const orchHint = (STRATEGY_OPTIONS.find((o) => o.value === strategy) ?? STRATEGY_OPTIONS[0]).detail
+  const fallbacks = orchestration.fallback_models ?? []
+  const setFallback = (index: number, id: string) => {
+    const next = [...fallbacks]
+    next[index] = id
+    setOrchestration({ ...orchestration, fallback_models: next.filter(Boolean) })
+  }
 
   const nodeHint = computerSelectionLabel(nodeMode).detail
 
@@ -824,14 +822,19 @@ function AdvancedEditor({
           How it works
         </h3>
         <label className="block text-xs text-ink-muted">
-          Orchestrator
+          Strategy
           <select
             className="field mt-1 w-full py-1.5 text-sm"
-            value={orchestratorId}
-            onChange={(e) => setOrchestratorId(e.target.value)}
+            value={strategy}
+            onChange={(e) =>
+              setOrchestration({ ...orchestration, strategy: e.target.value as OrchestrationPolicy['strategy'] })
+            }
           >
-            <option value="simple">Simple — single assistant</option>
-            <option value="team">Team — coordinator → worker → reviewer</option>
+            {STRATEGY_OPTIONS.map((o) => (
+              <option key={o.value} value={o.value}>
+                {o.label}
+              </option>
+            ))}
           </select>
         </label>
         <p className="text-xs leading-relaxed text-ink-faint">{orchHint}</p>
@@ -854,8 +857,9 @@ function AdvancedEditor({
 
       <section className="space-y-2">
         <h3 className="text-xs font-semibold uppercase tracking-wide text-ink-muted">
-          Roles
+          Models
         </h3>
+        <p className="text-xs text-ink-muted">Automatic uses the model chosen in the chat.</p>
         {roles.map((role, index) => (
           <div
             key={`${profile.id}-${role.role}-${index}`}
@@ -863,14 +867,7 @@ function AdvancedEditor({
           >
             <p className="text-xs leading-relaxed text-ink-muted">{roleHelp(role.role)}</p>
             <div className="grid gap-2 sm:grid-cols-3">
-              <label className="text-xs text-ink-muted">
-                Role
-                <input
-                  className="field mt-1 w-full py-1.5 text-sm"
-                  value={role.role}
-                  onChange={(e) => updateRole(index, { role: e.target.value })}
-                />
-              </label>
+              <p className="text-sm font-medium text-ink sm:pt-5">{roleDisplayName(role.role)}</p>
               <label className="text-xs text-ink-muted">
                 Model
                 <select
@@ -878,7 +875,7 @@ function AdvancedEditor({
                   value={role.model_id}
                   onChange={(e) => updateRole(index, { model_id: e.target.value })}
                 >
-                  <option value="">Automatic / Chat pick</option>
+                  <option value="">Automatic</option>
                   {installedModels.map((m) => (
                     <option key={m.id} value={m.id}>
                       {m.name || m.id}
@@ -909,6 +906,32 @@ function AdvancedEditor({
             </div>
           </div>
         ))}
+        <div className="space-y-2 rounded-lg bg-raised px-3 py-3">
+          <p className="text-sm font-medium text-ink">Fallback order</p>
+          <p className="text-xs leading-relaxed text-ink-muted">
+            Tried in order when the answering model fails. After these, Yggdrasil picks another installed model.
+          </p>
+          <div className="grid gap-2 sm:grid-cols-3">
+            {[0, 1, 2].map((i) => (
+              <label key={i} className="text-xs text-ink-muted">
+                {i + 1}.
+                <select
+                  className="field mt-1 w-full py-1.5 text-sm"
+                  value={fallbacks[i] ?? ''}
+                  disabled={i > fallbacks.length}
+                  onChange={(e) => setFallback(i, e.target.value)}
+                >
+                  <option value="">None</option>
+                  {installedModels.map((m) => (
+                    <option key={m.id} value={m.id}>
+                      {m.name || m.id}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            ))}
+          </div>
+        </div>
       </section>
 
       <section className="space-y-3">
@@ -1000,9 +1023,9 @@ function AdvancedEditor({
             onSave({
               ...profile,
               name: name.trim(),
-              orchestrator_id: orchestratorId,
+              orchestrator_id: 'simple',
               node_policy: { mode: nodeMode },
-              roles,
+              roles: savedRoles(roles),
               tools,
               knowledge_sources: knowledge,
               orchestration: cleanOrchestration(orchestration),
@@ -1017,4 +1040,27 @@ function AdvancedEditor({
       </div>
     </div>
   )
+}
+
+/** One row per model role (spec §20), filled from the profile; older role names map onto the current ones. */
+function editorRoles(profile: AIProfile): ModelRole[] {
+  const legacy: Record<string, string> = { coordinator: 'planner', researcher: 'assistant' }
+  const byRole = new Map<string, ModelRole>()
+  for (const r of profile.roles ?? []) {
+    const role = legacy[r.role] ?? r.role
+    if (!byRole.has(role)) byRole.set(role, { ...r, role })
+  }
+  return MODEL_ROLES.map(({ role }) => byRole.get(role) ?? { role, model_id: '', required: false })
+}
+
+/** Keeps the primary role, and any other role with a model or a computer. */
+function savedRoles(roles: ModelRole[]): ModelRole[] {
+  return roles.filter((r) => r.role === 'assistant' || r.model_id || r.node_id)
+}
+
+/** A profile from an older version that used the Team orchestrator shows as the Team strategy. */
+function editorOrchestration(profile: AIProfile): OrchestrationPolicy {
+  const o = { ...(profile.orchestration ?? {}) }
+  if (profile.orchestrator_id === 'team' && !o.strategy) o.strategy = 'team'
+  return o
 }

@@ -39,9 +39,9 @@
       "id": "memory",
       "title": "Memory",
       "paragraphs": [
-        "Say \u201cRemember that\u2026\u201d in any chat, and Yggdrasil keeps it across chats, restarts, and model changes. \u201cForget\u2026\u201d removes a memory, and \u201cWhat do you remember?\u201d lists them. Answers that used a memory list it under Sources.",
+        "Say “Remember that…” in any chat, and Yggdrasil keeps it across chats, restarts, and model changes. “Forget…” removes a memory, and “What do you remember?” lists them. Answers that used a memory list it under Sources.",
         "The Memory page lists memories by category. Add a memory, edit or pause one, mark it This computer only, or delete it. A memory marked This computer only keeps any chat that uses it on this computer.",
-        "Memory is on by default. Turn it off for one chat with the Memory switch in the composer, or everywhere in Settings. Passwords, keys, and card numbers are never saved. A memory that tries to grant a permission, such as \u201cyou can push without asking\u201d, is refused: what tools may do is set only in profiles and Settings."
+        "Memory is on by default. Turn it off for one chat with the Memory switch in the composer, or everywhere in Settings. Passwords, keys, and card numbers are never saved. A memory that tries to grant a permission, such as “you can push without asking”, is refused: what tools may do is set only in profiles and Settings."
       ]
     },
     {
@@ -85,7 +85,7 @@
         "Open Automations and choose New automation.",
         "Describe when it should run and what it should check. Choose Set up automation and read the task, schedule, and notification. Change the time, day, or threshold if the guess is not the one you want.",
         "Choose Test run to try it before it is saved. Create automation stores it.",
-        "The list shows the next run in the task\u2019s time zone.",
+        "The list shows the next run in the task’s time zone.",
         "Use Run now to try it, then open History for the result. Pause stops later scheduled runs until you resume."
       ],
       "code": "yggctl automations create --name \"Morning price\" --prompt \"Check the price\" \\\n  --profile general-assistant --model MODEL_ID --schedule daily --at 08:00 --zone America/Los_Angeles\n\nyggctl automations list\nyggctl automations run AUTOMATION_ID\nyggctl automations pause AUTOMATION_ID",
@@ -129,9 +129,9 @@
       "paragraphs": [
         "Profiles control which tools a model may use. Turning on a capability allows its tools. In advanced mode, each tool has a permission: Always allow runs it, Ask each time and Ask once per session ask in chat first, and Deny never runs it. Settings sets the defaults for the terminal, file writes, and Git. A tool turned off on the Tools screen cannot run anywhere.",
         "Internet searches DuckDuckGo and reads public pages. Files finds, reads, and writes workspace files. Terminal runs commands. Git inspects a repository, commits, and pushes. Files you can download are made with files.create, which writes only to Yggdrasil's own file store. After an answer reads a web page or a file, a tool that changes something asks first even when the profile allows it, because retrieved content is data, not instructions.",
-        "Each message is offered only the tools it needs: web search for current questions, files for a file or folder, the terminal for \u201crun\u201d or \u201cinstall\u201d, Git for \u201ccommit\u201d. A plain question gets no tools. The model cannot call a tool it was not offered. How many tool calls a message may make depends on effort: 3 on Fast, 10 on Balanced, and 16 on Thorough.",
-        "Connected services add tools for GitHub and Home Assistant. Connect them in Settings \u2192 Connected services with a token; Yggdrasil checks it, stores it apart from the database, and adds it only when a tool runs, so it is never shown to the model. Reading is allowed and changes ask first unless a profile says otherwise.",
-        "MCP servers add more tools. On the Tools screen, Add tools offers a gallery of servers, servers already set up in your other apps, pasted configuration, or a custom server. Tool sources lists each server, its tools, its log, and a Sign in action for servers that sign in with a browser. Other AI apps can use Yggdrasil too: API Access \u2192 Use Yggdrasil in other AI apps shows what to paste into Claude Desktop, Claude Code, Cursor, VS Code, and other apps."
+        "Each message is offered only the tools it needs: web search for current questions, files for a file or folder, the terminal for “run” or “install”, Git for “commit”. A plain question gets no tools. The model cannot call a tool it was not offered. How many tool calls a message may make depends on effort: 3 on Fast, 10 on Balanced, and 16 on Thorough.",
+        "Connected services add tools for GitHub and Home Assistant. Connect them in Settings → Connected services with a token; Yggdrasil checks it, stores it apart from the database, and adds it only when a tool runs, so it is never shown to the model. Reading is allowed and changes ask first unless a profile says otherwise.",
+        "MCP servers add more tools. On the Tools screen, Add tools offers a gallery of servers, servers already set up in your other apps, pasted configuration, or a custom server. Tool sources lists each server, its tools, its log, and a Sign in action for servers that sign in with a browser. Other AI apps can use Yggdrasil too: API Access → Use Yggdrasil in other AI apps shows what to paste into Claude Desktop, Claude Code, Cursor, VS Code, and other apps."
       ]
     },
     {
@@ -146,9 +146,11 @@
       "id": "profiles",
       "title": "Profiles",
       "paragraphs": [
-        "A profile is an assistant style: its models, tools, connected knowledge, and where it runs. General Assistant answers with one model. Programming (Team) runs a coordinator, a worker, and a reviewer. Research focuses on looking things up. Profiles appear in the sidebar in advanced mode, where you can create, rename, and edit them.",
+        "A profile is an assistant style: how it works through requests, its models, tools, connected knowledge, and where it runs. General Assistant decides for you. Programming uses the Team strategy. Research focuses on looking things up. Profiles appear in the sidebar in advanced mode, where you can create, rename, and edit them.",
+        "Strategy is how the profile works: Auto (quick questions get one model, bigger requests are planned and checked), Single model, Planner + workers (requests with several parts are always worked through in parts), or Team (a planner splits each request, workers do the parts, and a reviewer checks the answer; quick questions are still answered directly).",
+        "Models assigns a model, and optionally a computer, to each role: Primary writes the answer, Fast and Coding answer quick and coding requests when the chat is on Auto, and Planner, Worker, and Reviewer do their part of a plan. Automatic uses the model chosen in the chat. Fallback order lists the models to try, in order, when the answering model fails.",
         "Capabilities turn tool groups on and off, and each tool has its own permission. A profile can list knowledge sources that every chat with it searches, and placement can be Automatic or Prefer this computer.",
-        "Orchestration tunes how the profile works: Reasoning level (its effort when a chat leaves effort on Auto), Planning (always or never plan requests with several parts), Workers and Parallelism (how many parts, and side by side or one at a time), Verification (check and report, or check and correct once or twice), Tool calls, Memory (off for this profile), Context budget (how much of the model's window earlier messages may use), Fallback (show the failure instead of answering on another model), and Time limit. Empty fields keep the defaults."
+        "Orchestration tunes how the profile works: Reasoning level (its effort when a chat leaves effort on Auto), Planning (when a request has parts, always, or never), Workers and Parallelism (how many parts, and side by side or one at a time), Verification (check and report, or check and correct once or twice), Tool calls, Memory (off for this profile), Context budget (how much of the model's window earlier messages may use), Fallback (show the failure instead of answering on another model), and Time limit. Empty fields keep the defaults."
       ]
     },
     {
@@ -169,13 +171,13 @@
       "id": "team",
       "title": "Run a Team profile",
       "paragraphs": [
-        "General Assistant uses a simple chat flow. Programming (Team) runs coordinator, worker, and reviewer roles and returns one final answer. Roles can use different models or different paired computers; automatic placement can also keep work on one computer."
+        "Programming uses the Team strategy: a planner splits your request into parts, a worker writes notes for each part, the answer is written from them with the usual tools, memory, and knowledge, and a reviewer checks it before you see it. Each part has its own worker, so with paired computers the parts run on different machines at the same time. Quick questions skip the team and are answered directly."
       ],
       "steps": [
         "Install the same model on both paired computers for an easy first run.",
-        "Select Programming (Team) in Chat and choose an installed model to fill any unset role model choices.",
-        "For explicit placement, enable Advanced mode and edit the profile roles to pin a model and computer, such as worker on your second machine.",
-        "Send a short request. The chat timeline identifies the role and computer. In advanced mode, Run details under the answer shows each role's model, computer, and timing."
+        "Select Programming in Chat and choose a model, or Auto. Roles without their own model use it.",
+        "To choose models or computers per role, enable Advanced mode and edit the profile's Models, such as Worker on your second machine. Set Strategy to Team on any profile to work the same way.",
+        "Send a request with some substance, such as a comparison or a plan. The chat timeline shows the planner, each worker, and the reviewer with the computer each ran on. In advanced mode, Run details under the answer shows each role's model, computer, and timing."
       ]
     },
     {
@@ -186,7 +188,7 @@
         "With local network access off, the default endpoint on this computer needs no API key. Turning on Local network access requires a key for every request. Create a named key in API Access and copy its secret when it is shown; you can rotate or revoke it there. Send it as Authorization: Bearer YOUR_KEY.",
         "Each key has permissions a request can only narrow: whether it may use memories and connected knowledge (never, on request, or always), which tools (the profile's, read-only, or none), and whether it may choose where it runs. API requests use memories only when they ask, unless the key says always. A request can ask for JSON with response_format, and Yggdrasil checks and repairs the result.",
         "For another computer, use the LAN endpoint shown in API Access rather than localhost. Keep LAN access on a trusted network; the displayed HTTP endpoint does not itself provide public-internet TLS protection.",
-        "Apps that speak MCP, such as Claude Desktop, Claude Code, Cursor, and VS Code, can ask your local AI questions, list its models, and search your connected knowledge. API Access \u2192 Use Yggdrasil in other AI apps shows what to paste into each."
+        "Apps that speak MCP, such as Claude Desktop, Claude Code, Cursor, and VS Code, can ask your local AI questions, list its models, and search your connected knowledge. API Access → Use Yggdrasil in other AI apps shows what to paste into each."
       ],
       "code": "curl http://127.0.0.1:7331/v1/models\n\ncurl http://127.0.0.1:7331/v1/chat/completions \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"model\":\"MODEL_ID_FROM_LIST\",\"messages\":[{\"role\":\"user\",\"content\":\"Hello\"}],\"stream\":false}'"
     },
@@ -206,7 +208,7 @@
       "title": "Privacy and what left this computer",
       "paragraphs": [
         "Yggdrasil does not send usage telemetry. Chats, memories, knowledge, files, and specialized AIs are stored in the data directory on this computer. Something leaves only when a feature that goes online is used: a web search or page read, a connected service or MCP server, a database or web API you connected, a model or runtime download, a paired computer that answers a chat or trains, or an external server you configured.",
-        "Settings \u2192 What left this computer lists each of those, newest first: the search queries, page addresses, what was sent to a paired computer or an external server, and what a connected service was asked. It counts them for the last 30 days.",
+        "Settings → What left this computer lists each of those, newest first: the search queries, page addresses, what was sent to a paired computer or an external server, and what a connected service was asked. It counts them for the last 30 days.",
         "Run records hold the prompts and tool results of past runs, including that list. Keep run records for sets how long they are kept: 7, 30, or 90 days, or Keep them. Delete run records now removes them at once, and clears cached web searches and pages. Chats are not run records; History in Settings decides whether chats are saved.",
         "Memories and knowledge sources marked This computer only keep every chat that uses them on this computer. Text recognition, meaning search, and training on this computer never send your data elsewhere."
       ]
@@ -225,7 +227,7 @@
       "id": "diagnostics",
       "title": "Diagnostics and performance",
       "paragraphs": [
-        "Diagnostics shows the health of the control service, the model runtime, the database, networking, storage, and the API, with a plain status for each. What Yggdrasil can do lists every ability, such as looking things up, reading files, or training, with how it works or what would make it possible. Chat answers questions like \u201cCan you generate an image?\u201d from the same list. Tool activity shows recent tool calls. Export diagnostics writes a troubleshooting bundle without secrets.",
+        "Diagnostics shows the health of the control service, the model runtime, the database, networking, storage, and the API, with a plain status for each. What Yggdrasil can do lists every ability, such as looking things up, reading files, or training, with how it works or what would make it possible. Chat answers questions like “Can you generate an image?” from the same list. Tool activity shows recent tool calls. Export diagnostics writes a troubleshooting bundle without secrets.",
         "Performance shows what your AI is doing right now and recent runs with their speed. Compare models runs the same benchmark on several models, and Recent benchmarks keeps the results. In advanced mode, Run details under an answer shows how it was handled: the models and computers used, load time, time to first token, tokens per second, tool calls, and retries."
       ]
     },

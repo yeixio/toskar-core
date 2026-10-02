@@ -16,5 +16,6 @@ describe('OrchestrationControls', () => {
   it('drops empty controls', () => {
     expect(cleanOrchestration({ effort: '', planning: 'off', max_workers: 0 })).toEqual({ planning: 'off' })
     expect(cleanOrchestration({ effort: '', max_workers: 0 })).toBeUndefined()
+    expect(cleanOrchestration({ strategy: 'team', fallback_models: [] })).toEqual({ strategy: 'team' })
   })
 })

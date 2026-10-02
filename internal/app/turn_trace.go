@@ -129,7 +129,9 @@ func (t *turnTrace) planned(parts int, parallel bool) {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 	text := fmt.Sprintf("Worked through the request in %d parts", parts)
-	if parallel {
+	if parts == 1 {
+		text = "Drafted the answer before writing it"
+	} else if parallel {
 		text = fmt.Sprintf("Split the request into %d parts and looked them up side by side", parts)
 	}
 	t.addStep("plan", text)

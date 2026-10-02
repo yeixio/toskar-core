@@ -332,8 +332,9 @@ A profile's `orchestration` object holds its advanced controls. Every field is o
 
 | Field | Values | Effect |
 | --- | --- | --- |
+| `strategy` | `single`, `planned`, `team` | How a request is worked through. Empty is Auto. `single`: one model, no plan. `planned`: a request with several parts is always worked through in parts. `team`: a planner splits the request, workers do the parts, and a reviewer checks the answer; quick questions are still answered directly |
 | `effort` | `fast`, `balanced`, `thorough` | The profile's effort when a chat leaves effort on Auto |
-| `planning` | `on`, `off` | Work through requests with several parts in parts, whatever the effort |
+| `planning` | `on`, `off`, `always` | `on` works through requests with several parts in parts, whatever the effort; `always` also asks the planner model to split a request with no obvious parts |
 | `max_workers` | 2–8 | Most parts in a plan |
 | `parallel` | `on`, `off` | `off` works through parts one at a time |
 | `verification` | `off`, `check`, `correct`, `thorough` | `off` skips the figure check; `check` reports only; `correct` and `thorough` allow one or two correction passes |
@@ -341,9 +342,23 @@ A profile's `orchestration` object holds its advanced controls. Every field is o
 | `memory` | `off` | Keeps persistent memory out of the profile's chats |
 | `context_share` | 0.1–0.9 | Most of the model's window earlier messages may use |
 | `fallback` | `off` | Shows a failure instead of answering on another model |
+| `fallback_models` | up to 8 model ids | Tried in order when the answering model fails, before Yggdrasil picks another installed model |
 | `timeout_seconds` | 10–3600 | Stops a turn that runs longer; the answer so far is kept and says it reached the time limit |
 
 Invalid values are refused with 400. In advanced mode, the profile editor has an Orchestration section, alongside model roles, tools, knowledge, and placement.
+
+A profile's `roles` assign models, and optionally computers, to these roles. A role without a model uses the model the chat chose, or Auto's pick.
+
+| Role | Used for |
+| --- | --- |
+| `assistant` | Writing the answer (the primary model) |
+| `fast` | Quick questions, when the chat is on Auto |
+| `coding` | Coding requests, when the chat is on Auto |
+| `planner` | Splitting a request into parts |
+| `worker` | Each part of a plan. With the Team strategy or a worker model, each part gets its own slot (`worker:1`, `worker:2`, …) that Norn can place on another computer, and parts on different computers are written at the same time |
+| `reviewer` | Checking the answer |
+
+`orchestrator_id` is `simple` for every profile. A profile sent with the older `team` orchestrator, or with the role names `coordinator` and `researcher`, is stored with the Team strategy and the roles `planner` and `assistant`. Profiles saved by older versions are migrated the same way at startup.
 
 ## Structured results
 
@@ -402,7 +417,8 @@ The desktop app, mobile apps, and other clients read a versioned contract: event
 | `tool.requested`, `tool.started`, `tool.completed`, `tool.failed`, `tool.parsed` | A tool call waits for approval, runs, finishes, fails (with `kind`), or is read from text |
 | `knowledge.retrieved`, `knowledge.failed` | Knowledge passages are added to a turn, or the search fails |
 | `memory.saved`, `memory.deleted` | A memory is saved or forgotten from a chat |
-| `agent.started`, `agent.message`, `agent.completed`, `orchestration.role`, `orchestration.final` | A Team profile's roles run, and its final answer |
+| `orchestration.role` | A planner, worker, or reviewer starts, with the computer it runs on |
+| `plan.planner`, `answer.reviewed` | The planner split a request (`parts`); the reviewer checked an answer (`changed`) |
 | `task.created`, `task.started`, `task.completed`, `task.failed` | An orchestration task changes state |
 | `scheduler.placement` | Norn places work on a computer |
 | `work.waiting` | Work waits for higher-priority work, with `class`, `label`, and `reason` |

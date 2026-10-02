@@ -19,22 +19,40 @@ export const PURPOSE_LABELS: Record<string, string> = {
   custom: 'Custom setup',
 }
 
-export function orchestratorLabel(
-  orchestratorId: string,
+/** Whether a profile uses the Team strategy (or the Team orchestrator of older versions). */
+export function isTeamProfile(profile: Pick<AIProfile, 'orchestrator_id' | 'orchestration'> | null | undefined): boolean {
+  if (!profile) return false
+  return profile.orchestration?.strategy === 'team' || profile.orchestrator_id === 'team'
+}
+
+export const STRATEGY_OPTIONS: { value: '' | 'single' | 'planned' | 'team'; label: string; detail: string }[] = [
+  {
+    value: '',
+    label: 'Auto',
+    detail: 'Yggdrasil decides: quick questions get one model, requests with several parts are planned and checked.',
+  },
+  { value: 'single', label: 'Single model', detail: 'One model answers every request, without a plan.' },
+  {
+    value: 'planned',
+    label: 'Planner + workers',
+    detail: 'Requests with several parts are always worked through in parts before the answer is written.',
+  },
+  {
+    value: 'team',
+    label: 'Team',
+    detail:
+      'A planner splits each request, workers do the parts (on other computers when they can), and a reviewer checks the answer. Quick questions are still answered directly.',
+  },
+]
+
+export function strategyLabel(
+  profile: Pick<AIProfile, 'orchestrator_id' | 'orchestration'>,
   advanced: boolean,
 ): { title: string; detail: string } {
-  if (orchestratorId === 'team') {
-    return {
-      title: advanced ? 'AI team · Orchestrator: Team' : 'AI team',
-      detail:
-        'Splits work into coordinator → worker → reviewer. Great with more than one computer or a plan-and-review loop.',
-    }
-  }
-  return {
-    title: advanced ? 'Single assistant · Orchestrator: Simple' : 'Single assistant',
-    detail:
-      'One assistant replies in a single pass. Best for everyday chat, and the mode that can use local tools.',
-  }
+  const value = isTeamProfile(profile) ? 'team' : (profile.orchestration?.strategy ?? '')
+  const option = STRATEGY_OPTIONS.find((o) => o.value === value) ?? STRATEGY_OPTIONS[0]
+  const title = value === 'team' ? 'AI team' : value === '' ? 'Automatic' : option.label
+  return { title: advanced ? `${title} · Strategy: ${option.label}` : title, detail: option.detail }
 }
 
 export function computerSelectionLabel(mode: string): {
@@ -109,6 +127,10 @@ export function toolChipPreview(tools: ToolPolicy[] | undefined): {
 
 export function roleDisplayName(role: string): string {
   if (!role) return 'Role'
+  const known = MODEL_ROLES.find((r) => r.role === role)
+  if (known) return known.label
+  const slot = /^([a-z]+):(\d+)$/.exec(role)
+  if (slot) return `${roleDisplayName(slot[1])} ${slot[2]}`
   return role.charAt(0).toUpperCase() + role.slice(1)
 }
 
@@ -118,18 +140,31 @@ export function roleHint(role: ModelRoleLike): string {
   return `${model} · ${computer}`
 }
 
+/** The model roles a profile can assign (spec §20). An empty role uses the chat's model. */
+export const MODEL_ROLES: { role: string; label: string }[] = [
+  { role: 'assistant', label: 'Primary' },
+  { role: 'fast', label: 'Fast' },
+  { role: 'coding', label: 'Coding' },
+  { role: 'planner', label: 'Planner' },
+  { role: 'worker', label: 'Worker' },
+  { role: 'reviewer', label: 'Reviewer' },
+]
+
 export function roleHelp(role: string): string {
   switch (role.toLowerCase()) {
-    case 'coordinator':
-      return 'Plans the approach before deeper work begins.'
-    case 'worker':
-      return 'Does the main drafting or coding step.'
-    case 'reviewer':
-      return 'Checks the draft and produces the final answer.'
-    case 'researcher':
-      return 'Focuses on careful reading and synthesis.'
     case 'assistant':
-      return 'The single voice that talks with you.'
+      return 'Writes the answer. Automatic uses the model chosen in the chat.'
+    case 'fast':
+      return 'Answers quick questions when the chat is on Auto.'
+    case 'coding':
+      return 'Answers coding requests when the chat is on Auto.'
+    case 'planner':
+    case 'coordinator':
+      return 'Splits a request into parts.'
+    case 'worker':
+      return 'Works on one part of a plan. Parts can run on different computers at once.'
+    case 'reviewer':
+      return 'Checks the answer before you see it.'
     default:
       return 'A named step in this profile’s workflow.'
   }

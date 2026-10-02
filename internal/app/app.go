@@ -43,7 +43,6 @@ import (
 	"github.com/yeixio/yggdrasil-core/internal/ocr"
 	"github.com/yeixio/yggdrasil-core/internal/orchestrator"
 	"github.com/yeixio/yggdrasil-core/internal/orchestrator/builtin/simple"
-	"github.com/yeixio/yggdrasil-core/internal/orchestrator/builtin/team"
 	"github.com/yeixio/yggdrasil-core/internal/profiles"
 	"github.com/yeixio/yggdrasil-core/internal/pyenv"
 	"github.com/yeixio/yggdrasil-core/internal/runlog"
@@ -231,7 +230,6 @@ func New(opts Options) (*App, error) {
 
 	orchReg := orchestrator.NewRegistry()
 	orchReg.Register(simple.New())
-	orchReg.Register(team.New())
 
 	sched := scheduler.New(bus)
 	wd, _ := os.Getwd()
