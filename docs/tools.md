@@ -26,7 +26,46 @@ When a question needs current information and the profile allows web search with
 
 ## Making files
 
-`files.create`, allowed by default in the built-in profiles, saves a file the user can download: a document, JSON, a spreadsheet (`.xlsx` from CSV text), or code. It writes only to Yggdrasil's file store, never to your folders. When a message asks for a file, Yggdrasil has the model write only the contents and saves the file itself.
+`files.create`, allowed by default in the built-in profiles, saves a file the user can download. It writes only to Yggdrasil's file store, never to your folders. When a message asks for a file, Yggdrasil has the model write only the contents and saves the file itself.
+
+| Asked for | Written from | Notes |
+| --- | --- | --- |
+| Word document (`.docx`) | Markdown | Headings, bold, italic, code, lists, tables, code blocks, quotes, and rules |
+| PDF (`.pdf`) | Markdown | A4, the same elements, page numbers on longer documents. It uses the PDF standard fonts, so characters outside Western European text show as `?` |
+| Spreadsheet (`.xlsx`) | CSV text | A line `## Sheet: Name` starts another sheet; a cell starting with `=` is a formula, such as `=SUM(B2:B9)`; numbers are stored as numbers |
+| Markdown, text, HTML, JSON, CSV, code | Itself | |
+
+The capability names `document.create`, `pdf.create`, and `spreadsheet.create` reach `files.create` in that format, so a name without an extension still becomes that kind of file.
+
+`spreadsheet.analyze` summarizes a spreadsheet (`.xlsx`, `.csv`, or `.tsv`) attached to or made in the chat, by name or id. For each sheet it returns the number of rows and the first five. For each column it returns the type (number, date, text, or empty), how many cells are filled, and, for numbers, the minimum, maximum, average, and total; for other columns, how many distinct values there are and the most common ones. It reads up to 10 sheets, 50 columns, and 200,000 rows, so an answer can use a whole file that would not fit in the prompt. It is offered when a message mentions a spreadsheet, CSV, Excel, a workbook, or a sheet.
+
+## Descriptors and levels
+
+Every tool, whatever it comes from, has a descriptor (`GET /api/v1/tools/{id}`, and each entry of `GET /api/v1/tools`):
+- **What it is:** its `version` and `input_schema` (a JSON Schema of the arguments), and its `outputs` (text, file, image, or audio).
+- **Where and how it runs:** `execution` (local, remote, or either), its `requirements` (network, files on this computer, a stored credential, a runtime, a GPU), and `supports` (progress, and cancel, which every tool has because Stop ends its calls).
+- **Limits and source:** `timeout_seconds` and `provider` (`builtin`, `connector:<service>`, or `mcp:<source>`).
+- **State:** `health`: `ok`, `off` (turned off on the Tools page), or `unavailable` (no provider is running it, such as an MCP source that is down).
+
+Its permission `level` describes what it can affect:
+
+| Level | Meaning | Examples |
+| --- | --- | --- |
+| 1 | Low risk, on this computer | Reading workspace files, `files.create`, `spreadsheet.analyze` |
+| 2 | Reads outside data | Web search, a connected service's or MCP source's read tools |
+| 3 | Changes things | Writing workspace files, Git commits and pushes, a connected service's write tools |
+| 4 | Runs commands or code | The terminal |
+
+The Tools page shows each tool's level, what it returns, its time limit, what it needs, its health, and its recent calls.
+
+## Audit
+
+Every call is recorded in `tool_runs`, whatever became of it:
+- **Status:** `completed`, `cached` (answered from the cache), `failed`, `denied` (by a policy or by you), `refused` (invalid arguments), or `disabled`.
+- **Context:** how it was allowed (`profile`, `you`, or `session`), how long it took, and a short summary of what it was about (a query, an address, a path; never a file's contents).
+- **Where it came from:** the source (chat, API, automation) and the chat or task.
+
+`GET /api/v1/tools/runs` lists them, filtered by `tool_id` or `conversation_id`. Records expire with run records (30 days by default), and Delete run records now removes them.
 
 ## Permissions
 

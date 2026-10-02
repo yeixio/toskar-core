@@ -14,6 +14,7 @@ var toolGroups = map[string][]string{
 	"read":   {"filesystem.search", "filesystem.read"},
 	"write":  {"filesystem.write"},
 	"create": {"files.create"},
+	"sheet":  {"spreadsheet.analyze"},
 	"shell":  {"terminal"},
 	"gitr":   {"git.status", "git.diff", "git.log", "git.show"},
 	"gitw":   {"git.add", "git.commit", "git.push"},
@@ -38,6 +39,7 @@ var (
 	cueGit   = regexp.MustCompile(`(?i)\b(git|commit|branch|diff|merge|rebase|staged|push|pull request)\b`)
 	cueGitW  = regexp.MustCompile(`(?i)\b(commit|stage|push)\b`)
 	cueMake  = regexp.MustCompile(`(?i)\b(make|create|write|generate|export|save|build)\b.{0,40}\b(files?|spreadsheets?|documents?|docs?|csv|xlsx|pdf|tables?|reports?|lists?)\b`)
+	cueSheet = regexp.MustCompile(`(?i)\b(spreadsheets?|xlsx|csv|excel|workbooks?|sheets?)\b`)
 	cueWeb   = regexp.MustCompile(`(?i)(\b(search|web|online|internet|look up|website|url|link|news|latest)\b|https?://)`)
 )
 
@@ -70,6 +72,9 @@ func ToolsFor(k Kind, message string, available []string) []string {
 	}
 	if cueMake.MatchString(message) {
 		want["create"] = true
+	}
+	if cueSheet.MatchString(message) {
+		want["sheet"] = true
 	}
 	var out []string
 	for _, id := range available {

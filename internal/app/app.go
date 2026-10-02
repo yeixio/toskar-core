@@ -237,6 +237,8 @@ func New(opts Options) (*App, error) {
 	sched := scheduler.New(bus)
 	wd, _ := os.Getwd()
 	toolReg := tools.NewRegistry(wd, bus)
+	// Every tool call is audited (Gungnir §13); records expire with run records.
+	toolReg.SetAudit(tools.NewAuditLog(db.SQL))
 
 	pairing := auth.NewPairingManager(db.SQL, identity)
 	apiKeyMgr := auth.NewAPIKeyManager(db.SQL, secrets)
@@ -490,12 +492,16 @@ func New(opts Options) (*App, error) {
 			}
 			return string(a.Identity.CertPEM)
 		},
-		RevokeNode: a.Nodes.Revoke,
-		ListTasks:  a.Tasks.List,
-		CreateTask: a.Tasks.Create,
-		GetTask:    a.Tasks.Get,
-		RunTask:    a.Tasks.Run,
-		DecideTool: toolReg.Decide,
+		RevokeNode:   a.Nodes.Revoke,
+		ListTasks:    a.Tasks.List,
+		CreateTask:   a.Tasks.Create,
+		GetTask:      a.Tasks.Get,
+		RunTask:      a.Tasks.Run,
+		DecideTool:   toolReg.Decide,
+		DescribeTool: func(ctx context.Context, id string) (any, error) { return a.describeTool(ctx, id) },
+		ListToolRuns: func(ctx context.Context, toolID, conversationID string, limit int) (any, error) {
+			return tools.NewAuditLog(db.SQL).List(ctx, tools.AuditFilter{ToolID: toolID, ConversationID: conversationID, Limit: limit})
+		},
 		ListTools: func(ctx context.Context) (any, error) {
 			return a.listToolViews(ctx)
 		},
@@ -626,6 +632,7 @@ func New(opts Options) (*App, error) {
 	a.API.BindMemory(a.Muninn)
 	a.Artifacts = artifacts.NewStore(db.SQL, filepath.Join(cfg.DataDir, "artifacts"))
 	a.Tools.Register(&artifacts.CreateTool{Store: a.Artifacts})
+	a.Tools.Register(&artifacts.AnalyzeTool{Store: a.Artifacts})
 	a.API.BindArtifacts(a.Artifacts)
 	a.API.BindKnowledge(a.Mimir)
 	a.Training = a.newTrainingService()

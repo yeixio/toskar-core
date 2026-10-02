@@ -19,6 +19,7 @@ type Counts struct {
 	Runs           int64 `json:"runs"`
 	AutomationRuns int64 `json:"automation_runs"`
 	Egress         int64 `json:"egress"`
+	ToolRuns       int64 `json:"tool_runs"`
 }
 
 // Before removes run records older than cutoff. Each automation keeps its
@@ -71,6 +72,9 @@ func remove(ctx context.Context, db *sql.DB, cutoff string) (Counts, error) {
 	}
 	// Run traces (§35); one still being written has no completion time.
 	if err := exec(&c.Runs, `DELETE FROM runs WHERE started_at < ? AND completed_at IS NOT NULL`, cutoff); err != nil {
+		return c, err
+	}
+	if err := exec(&c.ToolRuns, `DELETE FROM tool_runs WHERE at < ?`, cutoff); err != nil {
 		return c, err
 	}
 	return c, tx.Commit()

@@ -2354,7 +2354,7 @@ paths:
                 $ref: "#/components/schemas/Error"
   /api/v1/tools:
     get:
-      summary: Tools with their policies
+      summary: Every tool's descriptor, with whether it is on, its health, and the profiles that allow it
       operationId: listTools
       responses:
         "200":
@@ -2364,8 +2364,7 @@ paths:
               schema:
                 type: array
                 items:
-                  type: object
-                  additionalProperties: true
+                  $ref: "#/components/schemas/ToolDescriptor"
   /api/v1/tools/activity:
     get:
       summary: Recent tool calls and pending approvals
@@ -4142,6 +4141,51 @@ paths:
                 $ref: "#/components/schemas/QuietHours"
         "400":
           description: Invalid quiet hours
+  /api/v1/tools/runs:
+    get:
+      summary: Audited tool calls, newest first; records expire with run records
+      operationId: listToolRuns
+      parameters:
+        - name: tool_id
+          in: query
+          schema:
+            type: string
+        - name: conversation_id
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Runs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ToolRun"
+  /api/v1/tools/{id}:
+    get:
+      summary: One tool's descriptor
+      operationId: describeTool
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: The descriptor
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ToolDescriptor"
+        "404":
+          description: No such tool
 components:
   securitySchemes:
     bearerAuth:
@@ -4684,3 +4728,51 @@ components:
         end: {type: string, example: "07:00"}
         time_zone: {type: string, example: Europe/Berlin}
         allow: {type: string, enum: [errors, nothing], description: errors lets errors through; nothing holds everything}
+    ToolDescriptor:
+      type: object
+      properties:
+        id: {type: string}
+        name: {type: string}
+        description: {type: string}
+        capability: {type: string}
+        source: {type: string}
+        risk: {type: string, enum: [read, create, write]}
+        default_policy: {type: string}
+        version: {type: integer}
+        input_schema: {type: object, additionalProperties: true, description: JSON Schema of the arguments}
+        outputs: {type: array, items: {type: string, enum: [text, file, image, audio]}}
+        level: {type: integer, minimum: 1, maximum: 4, description: "1 low risk on this computer, 2 reads outside data, 3 changes things, 4 runs commands or code"}
+        level_name: {type: string}
+        execution: {type: string, enum: [local, remote, either]}
+        requirements:
+          type: object
+          properties:
+            network: {type: boolean}
+            filesystem: {type: boolean}
+            credentials: {type: boolean}
+            runtime: {type: string}
+            gpu: {type: boolean}
+        supports:
+          type: object
+          properties:
+            progress: {type: boolean}
+            cancel: {type: boolean}
+        timeout_seconds: {type: integer}
+        provider: {type: string, description: "builtin, connector:<service>, or mcp:<source>"}
+        enabled: {type: boolean}
+        health: {type: string, enum: [ok, off, unavailable]}
+        profiles: {type: array, items: {type: string}}
+    ToolRun:
+      type: object
+      properties:
+        id: {type: string}
+        at: {type: string, format: date-time}
+        tool_id: {type: string}
+        status: {type: string, enum: [completed, cached, failed, denied, refused, disabled]}
+        approval: {type: string, enum: [profile, you, session]}
+        duration_ms: {type: integer}
+        summary: {type: string, description: "What the call was about: a query, an address, a path; never a file's contents"}
+        error: {type: string}
+        source: {type: string}
+        conversation_id: {type: string}
+        task_id: {type: string}

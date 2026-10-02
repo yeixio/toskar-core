@@ -12,7 +12,7 @@ Everything Yggdrasil keeps is in the data directory. [Configuration](configurati
 
 | Path | Contents |
 | --- | --- |
-| `yggdrasil.db` | Chats and their messages, summaries of long conversations, memories, profiles, settings, automations and their results, specialized AIs and their examples, knowledge indexes and vectors, run records (traces, task history, what left this computer), notifications, API key hashes, paired computers. |
+| `yggdrasil.db` | The audit of tool calls (what each was about, never file contents), chats and their messages, summaries of long conversations, memories, profiles, settings, automations and their results, specialized AIs and their examples, knowledge indexes and vectors, run records (traces, task history, what left this computer), notifications, API key hashes, paired computers. |
 | `artifacts/` | Files attached to chats and files the assistant made, one folder per chat. Deleting a chat deletes its files. |
 | `knowledge/` | Copies of content you pasted or uploaded as knowledge, and the recognized text of scanned PDFs. Linked files, folders, databases, and web APIs stay where they are. |
 | `training/` | Trained adapters, exported GGUF files, and downloaded training weights. |

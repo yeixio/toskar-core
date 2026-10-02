@@ -44,6 +44,7 @@ import type {
   QuietHours,
   ToolActivityRecord,
   ToolRecord,
+  ToolRun,
   Model,
   ModelsFitResponse,
   Node,
@@ -480,6 +481,8 @@ export const api = {
   resetProfile: (id: string) => request<AIProfile>(`/api/v1/profiles/${id}/reset`, { method: 'POST' }),
 
   listTools: () => request<ToolRecord[]>('/api/v1/tools'),
+  listToolRuns: async (toolId?: string) =>
+    (await request<ToolRun[]>(`/api/v1/tools/runs?limit=20${toolId ? `&tool_id=${encodeURIComponent(toolId)}` : ''}`)) ?? [],
   toolActivity: () => request<ToolActivityRecord[]>('/api/v1/tools/activity'),
   setToolEnabled: (id: string, enabled: boolean) =>
     request<{ id: string; enabled: boolean }>(`/api/v1/tools/${encodeURIComponent(id)}/enabled`, {

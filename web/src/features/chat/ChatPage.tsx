@@ -141,6 +141,8 @@ function toolDisplayName(toolId: string): string {
     'filesystem.search': 'Find files',
     'filesystem.read': 'Read file',
     'filesystem.write': 'Write file',
+    'files.create': 'Create file',
+    'spreadsheet.analyze': 'Analyze spreadsheet',
     terminal: 'Terminal',
     'git.status': 'Git status',
     'git.diff': 'Git diff',
@@ -158,6 +160,8 @@ function toolProgress(toolId?: string, summary?: string): string {
   if (toolId === 'internet.open') return summary ? `Reading ${hostLabel(summary)}…` : 'Reading a page…'
   if (toolId === 'filesystem.read') return 'Reading a file…'
   if (toolId === 'filesystem.search') return 'Searching local files…'
+  if (toolId === 'spreadsheet.analyze') return 'Reading the spreadsheet…'
+  if (toolId === 'files.create') return 'Creating the file…'
   if (toolId === 'terminal') return 'Running command…'
   if (toolId === 'git.status' || toolId === 'git.diff' || toolId === 'git.log' || toolId === 'git.show') {
     return 'Checking git…'

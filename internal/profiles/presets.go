@@ -89,6 +89,7 @@ func generalToolPolicies() []contracts.ToolPolicy {
 		{ToolID: "filesystem.read", Policy: "allow"},
 		{ToolID: "filesystem.write", Policy: "allow"},
 		{ToolID: "files.create", Policy: "allow"},
+		{ToolID: "spreadsheet.analyze", Policy: "allow"},
 		{ToolID: "terminal", Policy: "allow"},
 		{ToolID: "git.status", Policy: "allow"},
 		{ToolID: "git.diff", Policy: "allow"},
@@ -108,6 +109,7 @@ func codingToolPolicies() []contracts.ToolPolicy {
 		{ToolID: "filesystem.read", Policy: "allow"},
 		{ToolID: "filesystem.write", Policy: "allow"},
 		{ToolID: "files.create", Policy: "allow"},
+		{ToolID: "spreadsheet.analyze", Policy: "allow"},
 		{ToolID: "terminal", Policy: "allow"},
 		{ToolID: "git.status", Policy: "allow"},
 		{ToolID: "git.diff", Policy: "allow"},
@@ -127,6 +129,7 @@ func researchToolPolicies() []contracts.ToolPolicy {
 		{ToolID: "filesystem.read", Policy: "allow"},
 		{ToolID: "filesystem.write", Policy: "allow"},
 		{ToolID: "files.create", Policy: "allow"},
+		{ToolID: "spreadsheet.analyze", Policy: "allow"},
 		{ToolID: "terminal", Policy: "deny"},
 		{ToolID: "git.status", Policy: "allow"},
 		{ToolID: "git.diff", Policy: "deny"},
@@ -140,7 +143,7 @@ func offlineToolPolicies() []contracts.ToolPolicy {
 	policies := generalToolPolicies()
 	for i := range policies {
 		// Files stay on this computer, so they work offline.
-		if strings.HasPrefix(policies[i].ToolID, "filesystem.") || policies[i].ToolID == "files.create" {
+		if strings.HasPrefix(policies[i].ToolID, "filesystem.") || policies[i].ToolID == "files.create" || policies[i].ToolID == "spreadsheet.analyze" {
 			policies[i].Policy = "allow"
 			continue
 		}

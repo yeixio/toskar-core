@@ -93,6 +93,8 @@ type Dependencies struct {
 	ResumeAutomation       func(ctx context.Context, id string) (automations.Automation, error)
 	DecideTool             func(requestID string, allow, allowSession bool) error
 	ListTools              func(ctx context.Context) (any, error)
+	DescribeTool           func(ctx context.Context, id string) (any, error)
+	ListToolRuns           func(ctx context.Context, toolID, conversationID string, limit int) (any, error)
 	SetToolEnabled         func(ctx context.Context, id string, enabled bool) error
 	TestTool               func(ctx context.Context, id string, args map[string]any) (map[string]any, error)
 	ToolActivity           func() any
@@ -200,10 +202,12 @@ func (s *Server) routes() {
 	api.HandleFunc("/automations/{id}", s.handleUpdateAutomation).Methods(http.MethodPatch)
 	api.HandleFunc("/automations/{id}", s.handleDeleteAutomation).Methods(http.MethodDelete)
 	api.HandleFunc("/tools", s.handleListTools).Methods(http.MethodGet, http.MethodOptions)
+	api.HandleFunc("/tools/runs", s.handleToolRuns).Methods(http.MethodGet, http.MethodOptions)
 	api.HandleFunc("/tools/activity", s.handleToolActivity).Methods(http.MethodGet, http.MethodOptions)
 	api.HandleFunc("/tools/decide", s.handleToolDecide).Methods(http.MethodPost)
 	api.HandleFunc("/tools/{id}/enabled", s.handleSetToolEnabled).Methods(http.MethodPost, http.MethodOptions)
 	api.HandleFunc("/tools/{id}/test", s.handleTestTool).Methods(http.MethodPost, http.MethodOptions)
+	api.HandleFunc("/tools/{id}", s.handleDescribeTool).Methods(http.MethodGet, http.MethodOptions)
 	api.HandleFunc("/nodes", s.handleNodes).Methods(http.MethodGet, http.MethodOptions)
 	api.HandleFunc("/nodes/refresh", s.handleRefreshNodes).Methods(http.MethodPost)
 	api.HandleFunc("/nodes/pair", s.handlePairNode).Methods(http.MethodPost)

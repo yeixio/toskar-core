@@ -2,15 +2,47 @@ package app
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	"github.com/yeixio/yggdrasil-core/internal/tools"
 )
 
 type toolView struct {
-	tools.Definition
-	Enabled  bool     `json:"enabled"`
+	tools.Descriptor
+	Enabled bool `json:"enabled"`
+	// Health is ok, off (turned off on the Tools page), or unavailable (no
+	// provider is running it, such as an MCP source that is down).
+	Health   string   `json:"health"`
 	Profiles []string `json:"profiles"`
+}
+
+func (a *App) toolHealth(id string, disabled map[string]struct{}) string {
+	if _, off := disabled[id]; off {
+		return "off"
+	}
+	if _, err := a.Tools.Get(id); err != nil {
+		return "unavailable"
+	}
+	return "ok"
+}
+
+// describeTool returns one tool's descriptor with its state (Gungnir §7–8).
+func (a *App) describeTool(ctx context.Context, id string) (any, error) {
+	def, ok := tools.Lookup(id)
+	if !ok {
+		return nil, fmt.Errorf("tool %q not found", id)
+	}
+	list, err := a.listToolViews(ctx)
+	if err != nil {
+		return nil, err
+	}
+	for _, v := range list.([]toolView) {
+		if v.ID == def.ID {
+			return v, nil
+		}
+	}
+	return nil, fmt.Errorf("tool %q not found", id)
 }
 
 func (a *App) listToolViews(ctx context.Context) (any, error) {
@@ -38,7 +70,7 @@ func (a *App) listToolViews(ctx context.Context) (any, error) {
 	out := make([]toolView, 0)
 	for _, def := range tools.Catalog() {
 		_, off := disabled[def.ID]
-		view := toolView{Definition: def, Enabled: !off}
+		view := toolView{Descriptor: tools.Describe(def), Enabled: !off, Health: a.toolHealth(def.ID, disabled)}
 		for _, profile := range profiles {
 			policy := profile.tools[def.ID]
 			if policy != "" && !strings.EqualFold(policy, tools.PolicyDeny) {

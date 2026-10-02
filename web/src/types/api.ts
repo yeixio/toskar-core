@@ -207,6 +207,34 @@ export interface ToolRecord {
   risk: string
   enabled: boolean
   profiles: string[]
+  /** The common descriptor (Gungnir §7). */
+  version?: number
+  input_schema?: Record<string, unknown>
+  outputs?: ('text' | 'file' | 'image' | 'audio')[]
+  /** 1 low risk on this computer, 2 reads outside data, 3 changes things, 4 runs commands or code. */
+  level?: 1 | 2 | 3 | 4
+  level_name?: string
+  execution?: 'local' | 'remote' | 'either'
+  requirements?: { network: boolean; filesystem: boolean; credentials: boolean; runtime?: string; gpu?: boolean }
+  supports?: { progress: boolean; cancel: boolean }
+  timeout_seconds?: number
+  provider?: string
+  health?: 'ok' | 'off' | 'unavailable'
+}
+
+/** An audited tool call (Gungnir §13). */
+export interface ToolRun {
+  id: string
+  at: string
+  tool_id: string
+  status: 'completed' | 'cached' | 'failed' | 'denied' | 'refused' | 'disabled'
+  approval?: 'profile' | 'you' | 'session'
+  duration_ms: number
+  summary?: string
+  error?: string
+  source?: string
+  conversation_id?: string
+  task_id?: string
 }
 
 export interface ToolActivityRecord {

@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useMemo, useState } from 'react'
 import { api } from '@/lib/api'
-import type { ToolRecord } from '@/types/api'
+import type { ToolRecord, ToolRun } from '@/types/api'
 import { RealmKicker } from '@/components/ui/Realm'
 import { ToolSources } from './ToolSources'
 
@@ -142,7 +142,11 @@ export function ToolsPage() {
               <Row label="Source" value={sourceLabel(selected.source)} />
               <Row label="Capability" value={selected.capability} />
               <Row label="Permission default" value={selected.default_policy} />
-              <Row label="Risk" value={selected.risk} />
+              {selected.level && <Row label="Level" value={`${selected.level} · ${selected.level_name ?? ''}`} />}
+              {selected.outputs && <Row label="Returns" value={selected.outputs.join(', ')} />}
+              {selected.timeout_seconds ? <Row label="Time limit" value={`${selected.timeout_seconds} s`} /> : null}
+              {selected.requirements && <Row label="Needs" value={needs(selected) || 'Nothing else'} />}
+              {selected.health && <Row label="Health" value={HEALTH[selected.health]} />}
               <Row label="Profiles" value={selected.profiles.join(', ') || 'None'} />
             </dl>
             <pre className="log-panel text-xs">{selected.schema}</pre>
@@ -154,6 +158,7 @@ export function ToolsPage() {
             >
               {selected.enabled ? 'Disable' : 'Enable'}
             </button>
+            <RecentCalls toolId={selected.id} />
             {selected.risk === 'read' && (
               <div className="space-y-2">
                 <textarea
@@ -175,6 +180,57 @@ export function ToolsPage() {
           </aside>
         )}
       </div>
+    </div>
+  )
+}
+
+const HEALTH: Record<NonNullable<ToolRecord['health']>, string> = {
+  ok: 'Ready',
+  off: 'Turned off',
+  unavailable: 'Not running',
+}
+
+/** What a tool needs besides itself, in words. */
+function needs(tool: ToolRecord): string {
+  const r = tool.requirements
+  if (!r) return ''
+  return [r.network && 'internet', r.filesystem && 'files on this computer', r.credentials && 'a stored credential', r.runtime, r.gpu && 'a GPU']
+    .filter(Boolean)
+    .join(', ')
+}
+
+const STATUS: Record<ToolRun['status'], string> = {
+  completed: 'ran',
+  cached: 'answered from cache',
+  failed: 'failed',
+  denied: 'not allowed',
+  refused: 'refused',
+  disabled: 'turned off',
+}
+
+/** The tool's latest audited calls (Gungnir §13). */
+function RecentCalls({ toolId }: { toolId: string }) {
+  const runs = useQuery({ queryKey: ['tool-runs', toolId], queryFn: () => api.listToolRuns(toolId), retry: false })
+  const list = runs.data ?? []
+  return (
+    <div className="space-y-1">
+      <p className="text-xs font-medium text-ink-muted">Recent calls</p>
+      {list.length === 0 ? (
+        <p className="text-xs text-ink-faint">None recorded.</p>
+      ) : (
+        <ul className="space-y-1 text-xs">
+          {list.map((run) => (
+            <li key={run.id} className="flex justify-between gap-2">
+              <span className="min-w-0 truncate text-ink-muted" title={run.error || run.summary}>
+                {new Date(run.at).toLocaleString()} · {STATUS[run.status]}
+                {run.approval === 'you' ? ' (you approved)' : run.approval === 'session' ? ' (allowed for the session)' : ''}
+                {run.summary ? ` · ${run.summary}` : ''}
+              </span>
+              {run.duration_ms > 0 && <span className="shrink-0 text-ink-faint">{run.duration_ms} ms</span>}
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   )
 }

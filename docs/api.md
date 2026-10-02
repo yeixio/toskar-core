@@ -103,7 +103,9 @@ Control-plane routes are under `/api/v1`. The OpenAI-compatible routes are under
 | GET, POST | `/profiles` | List or create profiles |
 | GET, PATCH, DELETE | `/profiles/{id}` | Read, change, or delete a profile, including its roles, tools, `knowledge_sources`, and `orchestration` |
 | POST | `/profiles/{id}/reset` | Put a built-in profile back to how Yggdrasil ships it. Other profiles are refused with 400 |
-| GET | `/tools` | Every tool from every source, with its `source`, permission, and whether it is enabled |
+| GET | `/tools` | Every tool's descriptor (level, input schema, outputs, requirements, time limit, provider), with whether it is enabled, its `health`, and the profiles that allow it |
+| GET | `/tools/{id}` | One tool's descriptor |
+| GET | `/tools/runs` | Audited tool calls, newest first; `?tool_id=`, `?conversation_id=`, `?limit=` |
 | POST | `/tools/{id}/enabled` | Turn a tool on or off everywhere |
 | POST | `/tools/{id}/test` | Run a tool with `args` and return its result |
 | POST | `/tools/decide` | Answer an Ask approval: `request_id`, `allow`, and `allow_session` |

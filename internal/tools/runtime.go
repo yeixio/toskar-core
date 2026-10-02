@@ -23,7 +23,18 @@ var aliases = map[string]string{
 	"shell.execute": "terminal",
 	"terminal.run":  "terminal",
 	"file.create":   "files.create",
+	// Document and spreadsheet capabilities (Gungnir §21–22) are files.create
+	// with a format; see formatFor.
+	"document.create":    "files.create",
+	"pdf.create":         "files.create",
+	"spreadsheet.create": "files.create",
 }
+
+// capabilityFormats are the file formats capability names ask files.create for.
+var capabilityFormats = map[string]string{"document.create": "docx", "pdf.create": "pdf", "spreadsheet.create": "xlsx"}
+
+// formatFor is the format a capability name asks for, if any.
+func formatFor(id string) string { return capabilityFormats[strings.ToLower(strings.TrimSpace(id))] }
 
 // Canonical returns the built-in id for a tool id or one of its capability
 // aliases. Unknown ids are returned unchanged.

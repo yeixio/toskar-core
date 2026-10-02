@@ -101,6 +101,8 @@ func MimeType(name string) string {
 		return "application/x-ndjson"
 	case ".xlsx":
 		return "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+	case ".docx":
+		return "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
 	}
 	if t := mime.TypeByExtension(ext); t != "" {
 		return t
@@ -119,7 +121,7 @@ func kindOf(name string) string {
 		return "pdf"
 	case ".png", ".jpg", ".jpeg", ".gif", ".webp":
 		return "image"
-	case ".txt", ".md", ".markdown", ".html", ".htm", ".json", ".jsonl", ".log":
+	case ".txt", ".md", ".markdown", ".html", ".htm", ".json", ".jsonl", ".log", ".docx":
 		return "document"
 	case ".py", ".js", ".ts", ".tsx", ".jsx", ".go", ".rs", ".java", ".kt", ".c", ".h", ".cpp", ".hpp", ".cs",
 		".rb", ".php", ".swift", ".sh", ".sql", ".yaml", ".yml", ".toml", ".xml", ".css", ".ini":

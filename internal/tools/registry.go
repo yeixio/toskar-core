@@ -7,6 +7,7 @@ import (
 	"sync"
 
 	"github.com/google/uuid"
+	"github.com/yeixio/yggdrasil-core/internal/egress"
 	"github.com/yeixio/yggdrasil-core/internal/events"
 	"github.com/yeixio/yggdrasil-core/internal/runlog"
 	"time"
@@ -45,7 +46,36 @@ type Registry struct {
 	observe func(ctx context.Context, toolID string, args map[string]any)
 	// cache serves repeats of safe lookups (§36).
 	cache ToolCache
-	mu    sync.Mutex
+	// auditLog records every call and what became of it (Gungnir §13).
+	auditLog *AuditLog
+	mu       sync.Mutex
+}
+
+// SetAudit records every call in log.
+func (r *Registry) SetAudit(log *AuditLog) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	r.auditLog = log
+}
+
+// audit records what became of a call.
+func (r *Registry) audit(ctx context.Context, toolID, status, approval, summary string, started time.Time, err error, meta map[string]any) {
+	r.mu.Lock()
+	log := r.auditLog
+	r.mu.Unlock()
+	if log == nil {
+		return
+	}
+	run := ToolRun{ToolID: toolID, Status: status, Approval: approval, Summary: summary, Source: egress.RunFrom(ctx).Source}
+	if !started.IsZero() {
+		run.DurationMS = time.Since(started).Milliseconds()
+	}
+	if err != nil {
+		run.Error = err.Error()
+	}
+	run.ConversationID, _ = meta["conversation_id"].(string)
+	run.TaskID, _ = meta["task_id"].(string)
+	log.Record(ctx, run)
 }
 
 // ToolCache serves repeat calls of safe lookups, such as a web search made
@@ -145,6 +175,15 @@ func (r *Registry) Get(id string) (Tool, error) {
 // Execute runs a tool respecting policy; may block on pending approval.
 // meta is merged into tool.* event payloads (e.g. conversation_id, task_id).
 func (r *Registry) Execute(ctx context.Context, toolID string, args map[string]any, policy string, reason string, meta map[string]any) (map[string]any, error) {
+	if f := formatFor(toolID); f != "" {
+		// pdf.create and the like are files.create in that format.
+		withFormat := make(map[string]any, len(args)+1)
+		for k, v := range args {
+			withFormat[k] = v
+		}
+		withFormat["format"] = f
+		args = withFormat
+	}
 	toolID = Canonical(toolID)
 	t, err := r.Get(toolID)
 	if err != nil {
@@ -153,6 +192,7 @@ func (r *Registry) Execute(ctx context.Context, toolID string, args map[string]a
 	if r.IsDisabled(toolID) {
 		err := fmt.Errorf("tool %q is disabled", toolID)
 		r.record(Activity{ToolID: toolID, Status: "disabled", Error: err.Error(), At: time.Now()})
+		r.audit(ctx, toolID, RunDisabled, "", activitySummary(args), time.Time{}, err, meta)
 		return nil, err
 	}
 	if def, ok := Lookup(toolID); ok {
@@ -162,6 +202,7 @@ func (r *Registry) Execute(ctx context.Context, toolID string, args map[string]a
 			r.bus.Publish(events.New(events.ToolFailed, mergeMeta(meta, map[string]any{
 				"tool_id": toolID, "error": argErr.Error(), "malformed": true, "kind": ErrKindInvalid,
 			})))
+			r.audit(ctx, toolID, RunRefused, "", activitySummary(args), time.Time{}, argErr, meta)
 			return nil, argErr
 		}
 	}
@@ -170,25 +211,35 @@ func (r *Registry) Execute(ctx context.Context, toolID string, args map[string]a
 		r.bus.Publish(events.New(events.ToolFailed, mergeMeta(meta, map[string]any{
 			"tool_id": toolID, "error": err.Error(), "malformed": true,
 		})))
+		r.audit(ctx, toolID, RunRefused, "", activitySummary(args), time.Time{}, err, meta)
 		return nil, err
 	}
 	allowed, needsPrompt, err := r.policy.Decide(toolID, policy)
 	if err != nil {
+		r.audit(ctx, toolID, RunDenied, "", activitySummary(args), time.Time{}, err, meta)
 		return nil, err
 	}
+	approval := ApprovedByProfile
 	if needsPrompt {
 		decision, err := r.requestApproval(ctx, toolID, args, reason, meta)
 		if err != nil {
+			r.audit(ctx, toolID, RunDenied, "", activitySummary(args), time.Time{}, err, meta)
 			return nil, err
 		}
 		if !decision.Allow {
-			return nil, fmt.Errorf("tool %q denied by user", toolID)
+			err := fmt.Errorf("tool %q denied by user", toolID)
+			r.audit(ctx, toolID, RunDenied, ApprovedByYou, activitySummary(args), time.Time{}, err, meta)
+			return nil, err
 		}
+		approval = ApprovedByYou
 		if decision.AllowSession {
 			r.policy.AllowSession(toolID)
+			approval = ApprovedSession
 		}
 	} else if !allowed {
-		return nil, fmt.Errorf("tool %q not allowed", toolID)
+		err := fmt.Errorf("tool %q not allowed", toolID)
+		r.audit(ctx, toolID, RunDenied, "", activitySummary(args), time.Time{}, err, meta)
+		return nil, err
 	}
 
 	summary := activitySummary(args)
@@ -205,6 +256,7 @@ func (r *Registry) Execute(ctx context.Context, toolID string, args map[string]a
 				"tool_id": toolID, "duration_ms": int64(0), "summary": summary, "cached": true,
 			})))
 			runlog.From(ctx).CacheHit(toolID)
+			r.audit(ctx, toolID, RunCached, approval, summary, started, nil, meta)
 			return result, nil
 		}
 	}
@@ -226,6 +278,7 @@ func (r *Registry) Execute(ctx context.Context, toolID string, args map[string]a
 		r.bus.Publish(events.New(events.ToolFailed, mergeMeta(meta, map[string]any{
 			"tool_id": toolID, "error": err.Error(), "kind": ErrorKind(err), "duration_ms": elapsed, "summary": summary,
 		})))
+		r.audit(ctx, toolID, RunFailed, approval, summary, started, err, meta)
 		return nil, err
 	}
 	if cache != nil {
@@ -235,6 +288,7 @@ func (r *Registry) Execute(ctx context.Context, toolID string, args map[string]a
 	r.bus.Publish(events.New(events.ToolCompleted, mergeMeta(meta, map[string]any{
 		"tool_id": toolID, "duration_ms": elapsed, "summary": summary,
 	})))
+	r.audit(ctx, toolID, RunCompleted, approval, summary, started, nil, meta)
 	return result, nil
 }
 

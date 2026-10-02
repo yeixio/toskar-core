@@ -20,7 +20,15 @@ const (
 // parseXLSX reads every worksheet of an Excel workbook as a table. The first
 // non-empty row of a sheet is its header. Formula cells use the value Excel
 // saved with the file.
-func parseXLSX(name string, raw []byte) ([]document, error) {
+// Sheet is one worksheet's cells as text, in rows.
+type Sheet struct {
+	Name string
+	Rows [][]string
+}
+
+// ReadWorkbook reads an .xlsx workbook's sheets: every sheet up to the
+// limit, with leading empty rows removed.
+func ReadWorkbook(raw []byte) ([]Sheet, error) {
 	zr, err := zip.NewReader(bytes.NewReader(raw), int64(len(raw)))
 	if err != nil {
 		return nil, fmt.Errorf("not an .xlsx workbook: %w", err)
@@ -58,7 +66,7 @@ func parseXLSX(name string, raw []byte) ([]document, error) {
 	if len(sheets) > maxXLSXSheets {
 		sheets = sheets[:maxXLSXSheets]
 	}
-	var docs []document
+	var out []Sheet
 	for _, sh := range sheets {
 		b, err := read(sh.path)
 		if err != nil {
@@ -71,16 +79,29 @@ func parseXLSX(name string, raw []byte) ([]document, error) {
 		for len(rows) > 0 && rowEmpty(rows[0]) {
 			rows = rows[1:]
 		}
+		out = append(out, Sheet{Name: sh.name, Rows: rows})
+	}
+	return out, nil
+}
+
+func parseXLSX(name string, raw []byte) ([]document, error) {
+	sheets, err := ReadWorkbook(raw)
+	if err != nil {
+		return nil, err
+	}
+	var docs []document
+	for _, sh := range sheets {
+		rows := sh.Rows
 		if len(rows) == 0 {
 			continue
 		}
 		body := rows[1:]
 		if len(body) > maxTableRows {
-			return nil, fmt.Errorf("sheet %s has more than %d rows", sh.name, maxTableRows)
+			return nil, fmt.Errorf("sheet %s has more than %d rows", sh.Name, maxTableRows)
 		}
 		docName := name
 		if len(sheets) > 1 {
-			docName = name + " › " + sh.name
+			docName = name + " › " + sh.Name
 		}
 		docs = append(docs, document{Name: docName, Header: rows[0], Rows: body})
 	}

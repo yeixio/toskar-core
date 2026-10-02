@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 
 	"github.com/gorilla/mux"
 )
@@ -66,4 +67,33 @@ func (s *Server) handleTestTool(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, http.StatusOK, result)
+}
+
+// handleDescribeTool returns one tool's descriptor (Gungnir §7–8).
+func (s *Server) handleDescribeTool(w http.ResponseWriter, r *http.Request) {
+	if s.deps.DescribeTool == nil {
+		writeErr(w, http.StatusNotImplemented, "NOT_IMPLEMENTED", "Tools not available.", nil)
+		return
+	}
+	d, err := s.deps.DescribeTool(r.Context(), mux.Vars(r)["id"])
+	if err != nil {
+		writeErr(w, http.StatusNotFound, "NOT_FOUND", err.Error(), nil)
+		return
+	}
+	writeJSON(w, http.StatusOK, d)
+}
+
+// handleToolRuns lists audited tool calls, newest first (Gungnir §13).
+func (s *Server) handleToolRuns(w http.ResponseWriter, r *http.Request) {
+	if s.deps.ListToolRuns == nil {
+		writeErr(w, http.StatusNotImplemented, "NOT_IMPLEMENTED", "Tools not available.", nil)
+		return
+	}
+	limit, _ := strconv.Atoi(r.URL.Query().Get("limit"))
+	runs, err := s.deps.ListToolRuns(r.Context(), r.URL.Query().Get("tool_id"), r.URL.Query().Get("conversation_id"), limit)
+	if err != nil {
+		writeErr(w, http.StatusInternalServerError, "TOOLS_FAILED", err.Error(), nil)
+		return
+	}
+	writeJSON(w, http.StatusOK, runs)
 }

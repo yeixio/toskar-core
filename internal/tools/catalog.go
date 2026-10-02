@@ -37,6 +37,24 @@ type Definition struct {
 	// Always offers the tool with every request, not only ones about its
 	// service: a tool source the person set to always be available.
 	Always bool `json:"always,omitempty"`
+
+	// The rest describe the tool for the registry (Gungnir §7). Each is
+	// optional; Describe works out what a definition leaves unset.
+	Version int `json:"-"`
+	// InputSchema is a full JSON Schema of the arguments, when the short
+	// Schema above is not enough.
+	InputSchema string   `json:"-"`
+	Outputs     []string `json:"-"`
+	// Level overrides the permission level worked out from risk and source.
+	Level int `json:"-"`
+	// Execution is local, remote, or either.
+	Execution string `json:"-"`
+	// Runtime is a runtime the tool needs, such as python.
+	Runtime     string `json:"-"`
+	GPU         bool   `json:"-"`
+	Credentials bool   `json:"-"`
+	// Progress marks a tool that reports progress while it runs.
+	Progress bool `json:"-"`
 }
 
 // Risk levels. A create tool only adds a file to Yggdrasil's own store, so it
@@ -59,7 +77,8 @@ func BuiltinCatalog() []Definition {
 		{ID: "filesystem.search", Name: "Find Files", Description: "Search file names in the workspace.", Capability: CapFiles, Source: "builtin", Schema: `{"query":"string"}`, DefaultPolicy: PolicyAllow, Risk: "read"},
 		{ID: "filesystem.read", Name: "Read File", Description: "Read a file in the workspace.", Capability: CapFiles, Source: "builtin", Schema: `{"path":"string"}`, DefaultPolicy: PolicyAllow, Risk: "read"},
 		{ID: "filesystem.write", Name: "Write File", Description: "Create or replace a file in the workspace.", Capability: CapFiles, Source: "builtin", Schema: `{"path":"string","content":"string"}`, DefaultPolicy: PolicyAllow, Risk: "write"},
-		{ID: "files.create", Name: "Create File", Description: "Create a file the user can download: a document (.md, .txt, .html), data (.json, .csv), a spreadsheet (.xlsx, given as CSV text), or code. Use it when the user asks for a file, a spreadsheet, or a document.", Capability: CapFiles, Source: "builtin", Schema: `{"name":"string","content":"string"}`, DefaultPolicy: PolicyAllow, Risk: RiskCreate},
+		{ID: "files.create", Name: "Create File", Description: "Create a file the user can download: a Word document (.docx) or PDF (.pdf) written in Markdown, a document (.md, .txt, .html), data (.json, .csv), a spreadsheet (.xlsx, given as CSV text; a line \"## Sheet: Name\" starts another sheet, and a cell starting with = is a formula), or code. Use it when the user asks for a file, a spreadsheet, a PDF, or a document.", Capability: CapFiles, Source: "builtin", Schema: `{"name":"string","content":"string"}`, DefaultPolicy: PolicyAllow, Risk: RiskCreate},
+		{ID: "spreadsheet.analyze", Name: "Analyze Spreadsheet", Description: "Summarize a spreadsheet (.xlsx, .csv) attached to or made in this chat: each sheet's rows, and each column's type, count, minimum, maximum, average, and total, or its most common values, with the first rows. Use it to answer questions about a spreadsheet's whole contents.", Capability: CapFiles, Source: "builtin", Schema: `{"file":"string","sheet":"string"}`, DefaultPolicy: PolicyAllow, Risk: RiskRead},
 		{ID: "terminal", Name: "Terminal", Description: "Run a shell command on this computer.", Capability: CapShell, Source: "builtin", Schema: `{"command":"string"}`, DefaultPolicy: PolicyAllow, Risk: "write"},
 		{ID: "git.status", Name: "Git Status", Description: "Show changed files in the workspace.", Capability: CapGit, Source: "builtin", Schema: `{}`, DefaultPolicy: PolicyAllow, Risk: "read"},
 		{ID: "git.diff", Name: "Git Diff", Description: "Show the current git diff.", Capability: CapGit, Source: "builtin", Schema: `{"path":"string"}`, DefaultPolicy: PolicyAllow, Risk: "read"},
