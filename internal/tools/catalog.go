@@ -14,6 +14,8 @@ const (
 	CapFiles    = "files"
 	CapShell    = "shell"
 	CapGit      = "git"
+	// CapCode runs code in a sandbox (Gungnir §20).
+	CapCode = "code"
 )
 
 // Definition is one registered tool: built in, from a connected service,
@@ -79,6 +81,8 @@ func BuiltinCatalog() []Definition {
 		{ID: "filesystem.write", Name: "Write File", Description: "Create or replace a file in the workspace.", Capability: CapFiles, Source: "builtin", Schema: `{"path":"string","content":"string"}`, DefaultPolicy: PolicyAllow, Risk: "write"},
 		{ID: "files.create", Name: "Create File", Description: "Create a file the user can download: a Word document (.docx) or PDF (.pdf) written in Markdown, a document (.md, .txt, .html), data (.json, .csv), a spreadsheet (.xlsx, given as CSV text; a line \"## Sheet: Name\" starts another sheet, and a cell starting with = is a formula), or code. Use it when the user asks for a file, a spreadsheet, a PDF, or a document.", Capability: CapFiles, Source: "builtin", Schema: `{"name":"string","content":"string"}`, DefaultPolicy: PolicyAllow, Risk: RiskCreate},
 		{ID: "spreadsheet.analyze", Name: "Analyze Spreadsheet", Description: "Summarize a spreadsheet (.xlsx, .csv) attached to or made in this chat: each sheet's rows, and each column's type, count, minimum, maximum, average, and total, or its most common values, with the first rows. Use it to answer questions about a spreadsheet's whole contents.", Capability: CapFiles, Source: "builtin", Schema: `{"file":"string","sheet":"string"}`, DefaultPolicy: PolicyAllow, Risk: RiskRead},
+		{ID: "code.execute", Name: "Run Code", Description: "Run Python in a sandbox for calculations, data analysis, and charts, with numpy, pandas, and matplotlib. It has no network and sees only files you list from this chat (\"files\": [\"sales.xlsx\"]), read from its working folder. Print results; files it saves there (.png, .csv, .xlsx, .pdf, and so on) are attached to the answer. Use matplotlib's savefig for charts.", Capability: CapCode, Source: "builtin", Schema: `{"code":"string","files":"array"}`, DefaultPolicy: PolicyAsk, Risk: RiskWrite,
+			Level: LevelHighImpact, Runtime: "python", Outputs: []string{OutputText, OutputFile}},
 		{ID: "terminal", Name: "Terminal", Description: "Run a shell command on this computer.", Capability: CapShell, Source: "builtin", Schema: `{"command":"string"}`, DefaultPolicy: PolicyAllow, Risk: "write"},
 		{ID: "git.status", Name: "Git Status", Description: "Show changed files in the workspace.", Capability: CapGit, Source: "builtin", Schema: `{}`, DefaultPolicy: PolicyAllow, Risk: "read"},
 		{ID: "git.diff", Name: "Git Diff", Description: "Show the current git diff.", Capability: CapGit, Source: "builtin", Schema: `{"path":"string"}`, DefaultPolicy: PolicyAllow, Risk: "read"},

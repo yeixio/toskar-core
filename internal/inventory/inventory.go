@@ -175,9 +175,12 @@ var rules = []rule{
 		}},
 	{"run_code", "Run commands and code", regexp.MustCompile(`(?i)\b(run|execute)\b.*\b(python|code|scripts?|commands?|programs?|shell|terminal)\b`),
 		func(s Snapshot) (bool, []string, string) {
+			if v := toolsWhere(s, toolID("code.execute")); len(v) > 0 {
+				return true, append(v, toolsWhere(s, toolID("terminal"))...), "Python runs in a sandbox with numpy, pandas, and matplotlib: no network, no access to your files beyond those in the chat, and a time limit. Charts and files it writes are attached. It asks first unless the profile allows it."
+			}
 			v := toolsWhere(s, toolID("terminal"))
 			if len(v) == 0 {
-				return false, nil, "The Terminal tool is turned off."
+				return false, nil, "The Run Code and Terminal tools are turned off."
 			}
 			return true, v, "Commands run in this computer's terminal, so Python works if it is installed. Running a command asks first unless the profile allows it."
 		}},

@@ -53,6 +53,9 @@ var timeouts = map[string]time.Duration{
 	CapFiles:    30 * time.Second,
 	CapShell:    2 * time.Minute,
 	CapGit:      90 * time.Second,
+	// The first call installs the code environment; each run is held to
+	// its own, shorter limit.
+	CapCode: 10 * time.Minute,
 }
 
 const defaultTimeout = time.Minute

@@ -21,8 +21,15 @@ func (a *App) toolHealth(id string, disabled map[string]struct{}) string {
 	if _, off := disabled[id]; off {
 		return "off"
 	}
-	if _, err := a.Tools.Get(id); err != nil {
+	t, err := a.Tools.Get(id)
+	if err != nil {
 		return "unavailable"
+	}
+	// A tool that needs something this computer lacks, such as a sandbox.
+	if av, ok := t.(interface{ Available() (bool, string) }); ok {
+		if ready, _ := av.Available(); !ready {
+			return "unavailable"
+		}
 	}
 	return "ok"
 }

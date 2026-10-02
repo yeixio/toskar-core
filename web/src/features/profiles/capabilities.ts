@@ -1,6 +1,6 @@
 import type { ToolPolicy } from '@/types/api'
 
-export type CapabilityId = 'internet' | 'files' | 'shell' | 'git'
+export type CapabilityId = 'internet' | 'files' | 'code' | 'shell' | 'git'
 
 export const CAPABILITIES: {
   id: CapabilityId
@@ -26,6 +26,12 @@ export const CAPABILITIES: {
       { id: 'filesystem.read', on: 'allow' },
       { id: 'filesystem.write', on: 'allow' },
     ],
+  },
+  {
+    id: 'code',
+    label: 'Run code',
+    description: 'Run Python in a sandbox for calculations, analysis, and charts; asks first',
+    tools: [{ id: 'code.execute', on: 'ask' }],
   },
   {
     id: 'shell',

@@ -26,6 +26,9 @@ func WithConversation(ctx context.Context, conversationID string) context.Contex
 	return context.WithValue(ctx, convKey{}, conversationID)
 }
 
+// ConversationFrom is the chat a file belongs to, set with WithConversation.
+func ConversationFrom(ctx context.Context) string { return conversationFrom(ctx) }
+
 func conversationFrom(ctx context.Context) string {
 	id, _ := ctx.Value(convKey{}).(string)
 	return id

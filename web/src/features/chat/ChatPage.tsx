@@ -143,6 +143,7 @@ function toolDisplayName(toolId: string): string {
     'filesystem.write': 'Write file',
     'files.create': 'Create file',
     'spreadsheet.analyze': 'Analyze spreadsheet',
+    'code.execute': 'Run code',
     terminal: 'Terminal',
     'git.status': 'Git status',
     'git.diff': 'Git diff',
@@ -162,6 +163,7 @@ function toolProgress(toolId?: string, summary?: string): string {
   if (toolId === 'filesystem.search') return 'Searching local files…'
   if (toolId === 'spreadsheet.analyze') return 'Reading the spreadsheet…'
   if (toolId === 'files.create') return 'Creating the file…'
+  if (toolId === 'code.execute') return 'Running code in the sandbox…'
   if (toolId === 'terminal') return 'Running command…'
   if (toolId === 'git.status' || toolId === 'git.diff' || toolId === 'git.log' || toolId === 'git.show') {
     return 'Checking git…'

@@ -23,6 +23,7 @@ import (
 	"github.com/yeixio/yggdrasil-core/internal/automations"
 	"github.com/yeixio/yggdrasil-core/internal/benchmark"
 	"github.com/yeixio/yggdrasil-core/internal/cache"
+	"github.com/yeixio/yggdrasil-core/internal/codeexec"
 	"github.com/yeixio/yggdrasil-core/internal/config"
 	"github.com/yeixio/yggdrasil-core/internal/connectors"
 	"github.com/yeixio/yggdrasil-core/internal/diagnostics"
@@ -626,6 +627,9 @@ func New(opts Options) (*App, error) {
 	a.Mimir.SetSecrets(secrets)
 	a.python = pyenv.New(filepath.Join(cfg.RuntimesDir, "python"))
 	a.Mimir.SetRecognizer(&ocr.Recognizer{Python: a.python, WorkDir: filepath.Join(cfg.DataDir, "knowledge", "ocr-jobs")})
+	// Code runs only inside the operating system's sandbox (Gungnir §20).
+	a.Tools.Register(&codeexec.Tool{Python: a.python, Sandbox: codeexec.Detect(), Store: a.Artifacts,
+		WorkDir: filepath.Join(cfg.DataDir, "code-runs"), PythonRoot: a.python.Root})
 	a.Mimir.SetModels(newKnowledgeModels(a))
 	a.Muninn = muninn.NewStore(db.SQL)
 	a.summarizer = &muninn.Summarizer{Store: a.Muninn}

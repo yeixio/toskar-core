@@ -24,10 +24,11 @@ What lives there:
 | `yggdrasil.db` | SQLite: models, profiles, chats, memories, settings, automations, specialized AIs and their examples, knowledge indexes and vectors, run records, notifications, API key hashes, paired computers. |
 | `models/` | Installed GGUF model files. |
 | `runtimes/llamacpp/` | `llama-server` and the other llama.cpp programs. |
-| `runtimes/python/` | `uv`, a private Python, and the environments for training (`envs/trainer-mlx`, `envs/trainer-peft`) and text recognition (`envs/ocr`), each installed the first time it is needed. |
+| `runtimes/python/` | `uv`, a private Python, and the environments for training (`envs/trainer-mlx`, `envs/trainer-peft`), text recognition (`envs/ocr`), and running code (`envs/code`), each installed the first time it is needed. |
 | `artifacts/` | Files attached to chats and files the assistant made, one folder per chat. |
 | `knowledge/` | Copies of pasted and uploaded knowledge, and `ocr-cache/` (recognized text of scanned PDFs). |
 | `training/` | Trained adapters (`adapters/`), exported GGUF files (`exports/`), job working files (`jobs/`, removed when a job ends), and downloaded training weights (`hf-cache/`). |
+| `code-runs/` | Each code run's working folder, deleted when the run ends. |
 | `logs/` | `daemon.log` (JSON) and llama-server logs. |
 | `secrets/` | This computer's identity (`node-<id>.key`, `.pub`), and credentials: `connector-<service>.json`, `mcp-<source>.json`, `knowledge-<source>`, `notify-<destination>`. Directory mode `0700`, files `0600`. |
 

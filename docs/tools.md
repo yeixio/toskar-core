@@ -39,6 +39,23 @@ The capability names `document.create`, `pdf.create`, and `spreadsheet.create` r
 
 `spreadsheet.analyze` summarizes a spreadsheet (`.xlsx`, `.csv`, or `.tsv`) attached to or made in the chat, by name or id. For each sheet it returns the number of rows and the first five. For each column it returns the type (number, date, text, or empty), how many cells are filled, and, for numbers, the minimum, maximum, average, and total; for other columns, how many distinct values there are and the most common ones. It reads up to 10 sheets, 50 columns, and 200,000 rows, so an answer can use a whole file that would not fit in the prompt. It is offered when a message mentions a spreadsheet, CSV, Excel, a workbook, or a sheet.
 
+## Running code
+
+`code.execute` runs Python the assistant writes, for calculations, data analysis, and charts. It asks first by default (level 4), and the Run code capability turns it on or off in a profile. It is offered when a message asks to calculate, analyze, chart, or run code.
+
+It runs only inside the operating system's sandbox. There is no fallback: where there is no sandbox, the tool is unavailable and says why.
+
+| System | Sandbox | What the code can do |
+| --- | --- | --- |
+| macOS | `sandbox-exec` | No network. Reads the system and the Python environment, but not users' folders (`/Users`, `/Volumes`) apart from its own working folder. Writes only to its working folder. |
+| Linux | bubblewrap (`bwrap`, install it with your package manager) | New namespaces with no network. The system folders and Python environment are read-only, the working folder is the only writable place, and a private `/tmp`. |
+| Windows, or Linux without bubblewrap | none | The tool is unavailable |
+
+- **Environment:** Python 3.12 with numpy, pandas, matplotlib, and openpyxl, in a managed environment (`runtimes/python/envs/code`) installed from PyPI the first time code runs.
+- **Files in:** `files` lists files from the chat by name, such as `["sales.xlsx"]`. They are copied into the working folder for the code to read.
+- **Files out:** files the code saves there (`.png`, `.jpg`, `.svg`, `.pdf`, `.csv`, `.tsv`, `.xlsx`, `.json`, `.txt`, `.md`, `.html`; up to 10, 25 MB each) are attached to the answer. Others are listed as skipped.
+- **Limits:** 90 seconds per run and 32 KB each of printed output and errors. A memory limit of 4 GB of address space applies on Linux. Each run gets a new working folder, which is deleted afterwards.
+
 ## Descriptors and levels
 
 Every tool, whatever it comes from, has a descriptor (`GET /api/v1/tools/{id}`, and each entry of `GET /api/v1/tools`):
@@ -54,7 +71,7 @@ Its permission `level` describes what it can affect:
 | 1 | Low risk, on this computer | Reading workspace files, `files.create`, `spreadsheet.analyze` |
 | 2 | Reads outside data | Web search, a connected service's or MCP source's read tools |
 | 3 | Changes things | Writing workspace files, Git commits and pushes, a connected service's write tools |
-| 4 | Runs commands or code | The terminal |
+| 4 | Runs commands or code | The terminal, `code.execute` |
 
 The Tools page shows each tool's level, what it returns, its time limit, what it needs, its health, and its recent calls.
 
