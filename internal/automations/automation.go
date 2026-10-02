@@ -26,6 +26,10 @@ type Condition struct {
 	// Op is below or above. It applies to a threshold.
 	Op    string  `json:"op,omitempty"`
 	Value float64 `json:"value,omitempty"`
+	// Currency is the ISO 4217 code of a threshold's value, such as EUR. The
+	// run is asked for the price in this currency, so the numbers compare as
+	// they are. Empty means US dollars, as before currencies were recorded.
+	Currency string `json:"currency,omitempty"`
 }
 
 const (
@@ -74,11 +78,26 @@ func (c Condition) Validate() error {
 		default:
 			return fmt.Errorf("threshold requires op %q or %q", OpBelow, OpAbove)
 		}
+		if c.Currency != "" && !isCurrencyCode(c.Currency) {
+			return fmt.Errorf("currency %q is not a three-letter ISO 4217 code such as EUR", c.Currency)
+		}
 	case ConditionAvailable, ConditionSignificant:
 	default:
 		return fmt.Errorf("unknown notification condition %q", c.Kind)
 	}
 	return nil
+}
+
+func isCurrencyCode(code string) bool {
+	if len(code) != 3 {
+		return false
+	}
+	for _, r := range code {
+		if r < 'A' || r > 'Z' {
+			return false
+		}
+	}
+	return true
 }
 
 // Automation is a scheduled prompt owned by the daemon.

@@ -1,9 +1,13 @@
 import i18n from '@/i18n'
 import { formatDate, formatPrice } from '@/i18n/format'
 import type { AutomationCondition, AutomationNotification, AutomationSchedule } from '@/types/api'
+import { type Daypart, type RequestWords, requestLanguages } from './requestWords'
+import { amountSource, hasPhrase, normalizeRequest, phrases, phraseSource, readAmount, withDigits } from './requestWords/match'
 
-// The parser reads English requests ("every morning at 8"); what it shows the
-// person, such as schedules, notes, and errors, is in the App language.
+// The parser reads a request in the App language or in English ("every
+// morning at 8", "jeden Morgen um 8 Uhr", "毎朝8時に") with the words in
+// requestWords/. What it shows the person, such as schedules, notes, and
+// errors, is in the App language.
 
 export interface ParsedAutomation {
   name: string
@@ -13,50 +17,33 @@ export interface ParsedAutomation {
   notes: string[]
 }
 
-const WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'] as const
-
 /** A weekday's name in the App language: 0 is Sunday. */
 export function weekdayName(index: number): string {
   return i18n.t(`automations:weekdays.${index}`)
 }
 
-const PRICE_INSTRUCTION =
-  'Include a JSON object in the result with the numeric price, for example {"price": 420}.'
+// The run reports the price in the threshold's currency, so the daemon can
+// compare the numbers as they are.
+function priceInstruction(currency: string | undefined): string {
+  const unit = currency ? ` in ${currency}` : ''
+  return `Include a JSON object in the result with the numeric price${unit}, for example {"price": 420}.`
+}
+const PRICE_INSTRUCTION_LINE = /Include a JSON object in the result with the numeric price(?: in [A-Z]{3})?, for example \{"price": 420\}\./g
 const AVAILABLE_INSTRUCTION =
   'Include a JSON object in the result, {"available": true} when the item is available and {"available": false} when it is not.'
 const SIGNIFICANT_INSTRUCTION =
   'Include a JSON object in the result, {"significant": true} when this is worth a notification and {"significant": false} when it is not.'
 
-const QUANTITIES: Record<string, number> = {
-  a: 1,
-  an: 1,
-  one: 1,
-  two: 2,
-  three: 3,
-  four: 4,
-  five: 5,
-  six: 6,
-  seven: 7,
-  eight: 8,
-  nine: 9,
-  ten: 10,
-  eleven: 11,
-  twelve: 12,
-  fifteen: 15,
-  twenty: 20,
-  thirty: 30,
-  forty: 40,
-  fortyfive: 45,
-  fifty: 50,
-  sixty: 60,
-  ninety: 90,
-}
-
 export function localTimeZone(): string {
   return Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'
 }
 
-export function parseAutomationRequest(text: string, now: Date, timeZone: string): ParsedAutomation {
+export function parseAutomationRequest(
+  text: string,
+  now: Date,
+  timeZone: string,
+  language: string = i18n.resolvedLanguage ?? i18n.language,
+): ParsedAutomation {
   const original = text.trim()
   if (!original) {
     throw new Error(i18n.t('automations:parse.describe'))
@@ -64,16 +51,25 @@ export function parseAutomationRequest(text: string, now: Date, timeZone: string
   if (!timeZone) {
     throw new Error(i18n.t('automations:parse.timeZone'))
   }
-  const normalized = original.toLowerCase().replace(/\s+/g, ' ')
-  const schedule = parseSchedule(normalized, now, timeZone)
-  const notification = parseNotification(normalized)
-  return {
-    name: automationName(original, notification),
-    prompt: withSignalInstruction(readableTask(original, notification), notification),
-    schedule: schedule.schedule,
-    notification,
-    notes: schedule.notes,
+  const normalized = normalizeRequest(original)
+  // The App language's words first, then English's. The first that finds
+  // a schedule is the language the request is written in.
+  const languages = requestLanguages(language)
+  for (const words of languages) {
+    const schedule = parseSchedule(withDigits(normalized, words), words, now, timeZone)
+    if (!schedule) continue
+    const order = [words, ...languages.filter((other) => other !== words)]
+    // An amount without a currency is in the App language's.
+    const notification = parseNotification(normalized, order, languages[0].currency)
+    return {
+      name: automationName(normalized, original, notification, order),
+      prompt: withSignalInstruction(readableTask(original, notification, words), notification),
+      schedule: schedule.schedule,
+      notification,
+      notes: schedule.notes,
+    }
   }
+  throw new Error(i18n.t('automations:parse.describeWhen'))
 }
 
 export function scheduleLabel(schedule: AutomationSchedule): string {
@@ -141,15 +137,20 @@ export function civilToISO(value: string, timeZone: string): string {
   ).toISOString()
 }
 
-function parseSchedule(text: string, now: Date, timeZone: string): { schedule: AutomationSchedule; notes: string[] } {
+interface ScheduleFound {
+  schedule: AutomationSchedule
+  notes: string[]
+}
+
+function parseSchedule(text: string, words: RequestWords, now: Date, timeZone: string): ScheduleFound | null {
   const notes: string[] = []
-  const interval = parseInterval(text)
+  const interval = parseInterval(text, words)
   if (interval) {
     return { schedule: { kind: 'interval', time_zone: timeZone, every_seconds: interval }, notes }
   }
-  const weekday = parseWeekday(text)
+  const weekday = parseWeekday(text, words)
   if (weekday != null) {
-    const clock = parseClock(text)
+    const clock = parseClock(text, words)
     const hour = clock?.hour ?? 8
     const minute = clock?.minute ?? 0
     if (!clock) notes.push(i18n.t('automations:parse.noTime8'))
@@ -158,12 +159,13 @@ function parseSchedule(text: string, now: Date, timeZone: string): { schedule: A
       notes,
     }
   }
-  if (isDaily(text)) {
-    const clock = parseClock(text)
+  const daily = dailyPart(text, words)
+  if (daily) {
+    const clock = parseClock(text, words)
     let hour = clock?.hour
     let minute = clock?.minute
     if (!clock) {
-      const named = namedDaypart(text)
+      const named = namedDaypart(daily === 'day' ? daypartIn(text, words) ?? 'morning' : daily)
       hour = named.hour
       minute = named.minute
       notes.push(named.note)
@@ -173,66 +175,175 @@ function parseSchedule(text: string, now: Date, timeZone: string): { schedule: A
       notes,
     }
   }
-  if (/\b(?:once|tomorrow|today)\b/.test(text)) {
-    const clock = parseClock(text)
+  const once = onceDay(text, words)
+  if (once) {
+    const clock = parseClock(text, words)
     const hour = clock?.hour ?? 9
     const minute = clock?.minute ?? 0
     if (!clock) notes.push(i18n.t('automations:parse.noTime9'))
     const today = zonedParts(now, timeZone)
-    const day = /\btoday\b/.test(text) && !/\btomorrow\b/.test(text) ? today : addDays(today, 1)
+    const day = once === 'today' ? today : addDays(today, 1)
     const at = instantInZone(day.year, day.month, day.day, hour, minute, timeZone)
     return { schedule: { kind: 'once', time_zone: timeZone, at: at.toISOString() }, notes }
   }
-  throw new Error(i18n.t('automations:parse.describeWhen'))
+  return null
 }
 
-function parseInterval(text: string): number | null {
-  if (/\bevery half an? hour\b/.test(text)) return 30 * 60
-  const match = text.match(/\bevery\s+([a-z0-9-]+)\s+(second|minute|hour|day)s?\b/)
-  if (!match) return null
-  const amount = quantity(match[1])
-  if (amount == null) return null
-  if (match[2] === 'day' && amount === 1) return null
-  const unit = match[2] === 'second' ? 1 : match[2] === 'minute' ? 60 : match[2] === 'hour' ? 3600 : 86400
-  return amount * unit
+// Regular expressions built from a language's words, made once per language.
+const built = new WeakMap<RequestWords, Map<string, RegExp | null>>()
+
+function pattern(words: RequestWords, name: string, source: () => string | null, flags = 'u'): RegExp | null {
+  let patterns = built.get(words)
+  if (!patterns) {
+    patterns = new Map()
+    built.set(words, patterns)
+  }
+  if (!patterns.has(name)) {
+    const text = source()
+    patterns.set(name, text == null ? null : new RegExp(text, flags))
+  }
+  return patterns.get(name) ?? null
 }
 
-function quantity(token: string): number | null {
+function gap(words: RequestWords): string {
+  return words.spaced ? '\\s+' : '\\s*'
+}
+
+function parseInterval(text: string, words: RequestWords): number | null {
+  if (hasPhrase(text, words.interval.halfHour, words.spaced)) return 30 * 60
+  if (hasPhrase(text, words.interval.hourly, words.spaced)) return 60 * 60
+  const { units, before, after } = words.interval
+  const amount = `(?<q>\\d+|${phraseSource(Object.keys(words.numbers), words.spaced)})`
+  const unit = `(?:(?<second>${phraseSource(units.second, words.spaced)})|(?<minute>${phraseSource(units.minute, words.spaced)})|(?<hour>${phraseSource(units.hour, words.spaced)})|(?<day>${phraseSource(units.day, words.spaced)}))`
+  const forms = [
+    pattern(words, 'intervalBefore', () => (before.length ? `${phraseSource(before, words.spaced)}(?:${gap(words)}${amount})?${gap(words)}${unit}` : null), 'gu'),
+    pattern(words, 'intervalAfter', () => (after.length ? `(?:(?<![\\d])${amount}${gap(words)})?${unit}\\s*${phraseSource(after, words.spaced, { start: false })}` : null), 'gu'),
+  ]
+  for (const form of forms) {
+    if (!form) continue
+    for (const match of text.matchAll(form)) {
+      const groups = match.groups ?? {}
+      const count = groups.q ? quantity(groups.q, words) : 1
+      if (count == null || count <= 0) continue
+      const seconds = groups.second ? 1 : groups.minute ? 60 : groups.hour ? 3600 : 86400
+      // "Every day" is a daily schedule, at a time of day.
+      if (seconds === 86400 && count === 1) continue
+      return count * seconds
+    }
+  }
+  return null
+}
+
+function quantity(token: string, words: RequestWords): number | null {
   if (/^\d+$/.test(token)) return Number(token)
-  const word = token.replace(/-/g, '')
-  if (word === 'other') return 2
-  return QUANTITIES[word] ?? null
+  return words.numbers[token] ?? words.numbers[token.replace(/[\s-]+/g, '')] ?? null
 }
 
-function parseWeekday(text: string): number | null {
-  const match = text.match(/\b(?:every|each|on)\s+(sundays?|mondays?|tuesdays?|wednesdays?|thursdays?|fridays?|saturdays?)\b/)
-  if (!match) return null
-  const name = match[1].replace(/s$/, '')
-  return WEEKDAYS.findIndex((day) => day.toLowerCase() === name)
+function parseWeekday(text: string, words: RequestWords): number | null {
+  const { before, after, days, alone } = words.weekly
+  const names = (list: string[][]) => `(?:${list.map((day, index) => `(?<d${index}>${phraseSource(day, words.spaced)})`).join('|')})`
+  const forms = [
+    pattern(words, 'weekBefore', () => (before.length && days.length ? `${phraseSource(before, words.spaced)}${gap(words)}${names(days)}` : null)),
+    pattern(words, 'weekAfter', () => (after.length && days.length ? `${names(days)}\\s*${phraseSource(after, words.spaced, { start: false })}` : null)),
+    pattern(words, 'weekAlone', () => (alone?.length ? names(alone) : null)),
+  ]
+  for (const form of forms) {
+    const groups = form?.exec(text)?.groups
+    if (!groups) continue
+    for (let index = 0; index < 7; index++) {
+      if (groups[`d${index}`] !== undefined) return index
+    }
+  }
+  return null
 }
 
-function isDaily(text: string): boolean {
-  return /\b(?:every|each)\s+(?:morning|evening|night|afternoon|day)\b/.test(text) || /\bdaily\b/.test(text) || /\bevery day\b/.test(text)
+const DAYPARTS: Daypart[] = ['morning', 'afternoon', 'evening', 'night']
+
+/** The time of day a daily phrase names, "day" when it names none, or null when the request is not daily. */
+function dailyPart(text: string, words: RequestWords): Daypart | 'day' | null {
+  for (const part of DAYPARTS) {
+    if (hasPhrase(text, words.daily[part], words.spaced)) return part
+  }
+  return hasPhrase(text, words.daily.day, words.spaced) ? 'day' : null
 }
 
-function namedDaypart(text: string): { hour: number; minute: number; note: string } {
-  if (/\bevening\b/.test(text)) return { hour: 18, minute: 0, note: i18n.t('automations:parse.evening') }
-  if (/\bnight\b/.test(text)) return { hour: 21, minute: 0, note: i18n.t('automations:parse.night') }
-  if (/\bafternoon\b/.test(text)) return { hour: 15, minute: 0, note: i18n.t('automations:parse.afternoon') }
+/** A time of day the request mentions, checked from evening to morning. */
+function daypartIn(text: string, words: RequestWords): Daypart | null {
+  for (const part of ['evening', 'night', 'afternoon', 'morning'] as const) {
+    if (hasPhrase(text, words.dayparts[part], words.spaced)) return part
+  }
+  return null
+}
+
+function namedDaypart(part: Daypart): { hour: number; minute: number; note: string } {
+  if (part === 'evening') return { hour: 18, minute: 0, note: i18n.t('automations:parse.evening') }
+  if (part === 'night') return { hour: 21, minute: 0, note: i18n.t('automations:parse.night') }
+  if (part === 'afternoon') return { hour: 15, minute: 0, note: i18n.t('automations:parse.afternoon') }
   return { hour: 8, minute: 0, note: i18n.t('automations:parse.morning') }
 }
 
-function parseClock(text: string): { hour: number; minute: number } | null {
-  const withMeridiem = text.match(/\b(?:at\s+)?(\d{1,2})(?::(\d{2}))?\s*(a\.?m\.?|p\.?m\.?)\b/)
-  if (withMeridiem) {
-    return clockFrom(Number(withMeridiem[1]), Number(withMeridiem[2] ?? '0'), withMeridiem[3].startsWith('p'))
+function onceDay(text: string, words: RequestWords): 'today' | 'tomorrow' | null {
+  const { once, today, tomorrow, notTomorrow } = words.once
+  const masked = notTomorrow?.length ? text.replace(phrases(notTomorrow, words.spaced, 'g') ?? /$^/, ' ') : text
+  const isToday = hasPhrase(text, today, words.spaced)
+  const isTomorrow = hasPhrase(masked, tomorrow, words.spaced)
+  if (!isToday && !isTomorrow && !hasPhrase(text, once, words.spaced)) return null
+  return isToday && !isTomorrow ? 'today' : 'tomorrow'
+}
+
+// A suffix that follows a number: "18h30", "8時", "6시에".
+function suffix(list: string[], words: RequestWords): string {
+  const source = phraseSource(list, words.spaced, { start: false, end: false })
+  return words.spaced ? `${source}(?!\\p{L})` : `${source}(?![間间간])`
+}
+
+// 18:30, 18 h 30, 18h, 8 Uhr, 8時30分, 6시 반, 6点半
+function timeSource(words: RequestWords): string {
+  const hour = suffix(words.clock.hour, words)
+  const minute = suffix(words.clock.minute, words)
+  const half = suffix(words.clock.half, words)
+  return `(?<![\\d.,:])(?<h>\\d{1,2})(?:(?::(?<m>\\d{2}))(?:\\s*${hour})?|\\s*${hour}(?:\\s*(?<m2>\\d{1,2})\\s*${minute}|\\s*(?<m3>\\d{2})(?!\\d)|\\s*(?<half>${half}))?)`
+}
+
+function parseClock(text: string, words: RequestWords): { hour: number; minute: number } | null {
+  const { clock, spaced } = words
+  const twelveHour = clock.am.length > 0 && clock.pm.length > 0
+  const meridiem = `(?:(?<am>${phraseSource(clock.am, spaced)})|(?<pm>${phraseSource(clock.pm, spaced)}))`
+  const forms = [
+    pattern(words, 'clockMeridiemFirst', () => (twelveHour && clock.meridiemFirst ? `${meridiem}\\s*${timeSource(words)}` : null)),
+    pattern(words, 'clockMeridiemLast', () =>
+      twelveHour && !clock.meridiemFirst
+        ? `(?<![\\d.,:])(?<h>\\d{1,2})(?::(?<m>\\d{2}))?\\s*(?:${suffix(clock.hour, words)}\\s*)?${meridiem}`
+        : null,
+    ),
+    pattern(words, 'clockTime', () => timeSource(words)),
+    pattern(words, 'clockAt', () =>
+      clock.at.length
+        ? `${phraseSource(clock.at, spaced)}\\s*(?<h>\\d{1,2})(?:\\s*(?<half>${suffix(clock.half, words)}))?(?!\\d|:|[.,]\\d)`
+        : null,
+    ),
+  ]
+  for (const form of forms) {
+    const groups = form?.exec(text)?.groups
+    if (!groups) continue
+    const hour = Number(groups.h)
+    const minute = Number(groups.m ?? groups.m2 ?? groups.m3 ?? (groups.half ? 30 : 0))
+    if (groups.am !== undefined || groups.pm !== undefined) {
+      return clockFrom(hour, minute, groups.pm !== undefined)
+    }
+    if (hour > 23 || minute > 59) return null
+    return { hour: afterDaypart(hour, text, words), minute }
   }
-  const twentyFour = text.match(/\bat\s+(\d{1,2}):(\d{2})\b/)
-  if (!twentyFour) return null
-  const hour = Number(twentyFour[1])
-  const minute = Number(twentyFour[2])
-  if (hour > 23 || minute > 59) return null
-  return { hour, minute }
+  return null
+}
+
+// "8 in the evening" is 20:00: a time of day moves a morning hour to the afternoon.
+function afterDaypart(hour: number, text: string, words: RequestWords): number {
+  if (hour < 1 || hour > 11) return hour
+  const part = daypartIn(text, words)
+  if (part === 'afternoon' || part === 'evening') return hour + 12
+  if (part === 'night' && hour >= 6) return hour + 12
+  return hour
 }
 
 function clockFrom(hour: number, minute: number, pm: boolean): { hour: number; minute: number } {
@@ -244,69 +355,144 @@ function clockFrom(hour: number, minute: number, pm: boolean): { hour: number; m
   return { hour: next, minute }
 }
 
-function parseNotification(text: string): AutomationNotification {
-  if (/\b(?:do not|don't) notify\b/.test(text) || /\bstore only\b/.test(text) || /\bno notification\b/.test(text)) {
+function parseNotification(text: string, order: RequestWords[], currency: string): AutomationNotification {
+  const says = (list: (words: RequestWords) => string[]) => order.some((words) => hasPhrase(text, list(words), words.spaced))
+  if (says((words) => words.notify.none)) {
     return { mode: 'none' }
   }
-  if (
-    /\b(?:only when|when|if) (?:it|the result|this|the content|the page) changes\b/.test(text) ||
-    /\bnotify(?: me)? (?:only )?on change\b/.test(text)
-  ) {
+  if (says((words) => words.notify.change)) {
     return { mode: 'change' }
   }
-  if (/\b(?:only if|only when|when|if)\b.{0,40}\bsignificant\b/.test(text) || /\bworth a notification\b/.test(text)) {
+  if (says((words) => words.notify.significant)) {
     return { mode: 'condition', condition: { kind: 'significant' } }
   }
-  const threshold = text.match(
-    /\b(below|under|less than|cheaper than|above|over|more than|greater than)\s+[$€£]?\s*(\d[\d,]*(?:\.\d+)?)/,
-  )
-  if (threshold) {
-    const below = /below|under|less than|cheaper than/.test(threshold[1])
+  for (const words of order) {
+    const threshold = findThreshold(text, words)
+    if (!threshold) continue
+    const amount = readAmount(threshold.amount, order)
+    if (!amount) continue
     return {
       mode: 'condition',
-      condition: {
-        kind: 'threshold',
-        op: below ? 'below' : 'above',
-        value: Number(threshold[2].replace(/,/g, '')),
-      },
+      condition: { kind: 'threshold', op: threshold.op, value: amount.value, currency: amount.currency ?? currency },
     }
   }
-  if (
-    /\b(?:back in stock|in stock|out of stock)\b/.test(text) ||
-    /\b(?:becomes|become|gets) available\b/.test(text) ||
-    /\bnotify(?: me)? (?:only )?when (?:it is |it's |it becomes )?available\b/.test(text)
-  ) {
+  if (says((words) => words.notify.available)) {
     return { mode: 'condition', condition: { kind: 'available' } }
   }
   return { mode: 'always' }
 }
 
-function readableTask(original: string, notification: AutomationNotification): string {
-  let text = original.trim().replace(/[.]+$/, '')
-  text = text.replace(/^(?:every|each)\s+[^,]+,\s+/i, '')
-  text = text.replace(/\s+(?:and\s+)?tell me if the price is (?:below|under|above|over|less than|more than)\s+[$€£]?\s*\d[\d,]*(?:\.\d+)?$/i, '')
-  text = text.replace(/\s+notify me only when it becomes available$/i, '')
-  text = text.replace(/\s+/g, ' ').trim()
-  if (!text) text = original.trim()
-  if (notification.condition?.kind === 'threshold' && !/\bprice\b/i.test(text)) {
-    text = `${text}. Report the current price`
+function findThreshold(text: string, words: RequestWords): { op: 'below' | 'above'; amount: string } | null {
+  const { below, above, belowAfter, aboveAfter } = words.notify
+  const amount = `(?<amount>${amountSource()})`
+  const forms = [
+    pattern(words, 'priceBefore', () =>
+      below.length || above.length
+        ? `(?:(?<below>${phraseSource(below, words.spaced)})|(?<above>${phraseSource(above, words.spaced)}))\\s*${amount}`
+        : null,
+    ),
+    pattern(words, 'priceAfter', () =>
+      belowAfter.length || aboveAfter.length
+        ? `(?<![\\d.,])${amount}\\s*(?:(?<below>${phraseSource(belowAfter, words.spaced, { start: false })})|(?<above>${phraseSource(aboveAfter, words.spaced, { start: false })}))`
+        : null,
+    ),
+  ]
+  for (const form of forms) {
+    const groups = form?.exec(text)?.groups
+    if (groups?.amount) return { op: groups.above !== undefined ? 'above' : 'below', amount: groups.amount }
   }
-  const sentence = text.charAt(0).toUpperCase() + text.slice(1)
-  return /[.!?]$/.test(sentence) ? sentence : `${sentence}.`
+  return null
 }
 
-function automationName(original: string, notification: AutomationNotification): string {
+function readableTask(original: string, notification: AutomationNotification, words: RequestWords): string {
+  let text = original.trim().replace(/[.。]+$/, '')
+  text = withoutScheduleClause(text, words)
+  for (const ending of words.task.dropAtEnd) {
+    text = text.replace(new RegExp(`${phraseSource([ending], words.spaced)}$`, 'iu'), '')
+  }
+  text = text.replace(/[\s,，、:：]+$/, '').replace(/\s+/g, ' ').trim()
+  if (!text) text = original.trim()
+  const stop = words.task.fullStop
+  if (notification.condition?.kind === 'threshold' && !hasPhrase(normalizeRequest(text), words.task.price, words.spaced)) {
+    text = `${text}${stop}${words.task.reportPrice}`
+  }
+  const sentence = text.charAt(0).toUpperCase() + text.slice(1)
+  return /[.!?。！？]$/.test(sentence) ? sentence : `${sentence}${stop.trim()}`
+}
+
+// "Every morning at 8:00 AM, check this product" runs "Check this product":
+// a leading clause that only says when is dropped from the task.
+function withoutScheduleClause(text: string, words: RequestWords): string {
+  // A colon ends a clause only before a space, so 8:00 stays a time.
+  const comma = text.search(/[,，、：]|:(?=\s)/)
+  if (comma <= 0 || comma > 80) return text
+  const clause = text.slice(0, comma)
+  const rest = text.slice(comma + 1).trim()
+  if (!rest || /[.!?。！？]/.test(clause)) return text
+  const normalized = withDigits(normalizeRequest(clause), words)
+  try {
+    if (!parseSchedule(normalized, words, new Date(0), 'UTC')) return text
+  } catch {
+    return text
+  }
+  return onlySchedule(normalized, words) ? rest : text
+}
+
+// Whether a clause says nothing but when: "Täglich um 7:30 Uhr prüfen" also
+// says what to do, so it stays. Short words such as "de la", に, and 에 may remain.
+function onlySchedule(clause: string, words: RequestWords): boolean {
+  const scheduleWords = pattern(
+    words,
+    'scheduleWords',
+    () => {
+      const { interval, daily, dayparts, weekly, once, clock } = words
+      const lists = [
+        interval.before,
+        interval.after,
+        ...Object.values(interval.units),
+        interval.hourly,
+        interval.halfHour,
+        Object.keys(words.numbers),
+        ...Object.values(daily),
+        ...Object.values(dayparts),
+        weekly.before,
+        weekly.after,
+        ...weekly.days,
+        ...(weekly.alone ?? []),
+        once.once,
+        once.today,
+        once.tomorrow,
+        clock.at,
+        clock.hour,
+        clock.minute,
+        clock.half,
+        clock.am,
+        clock.pm,
+      ]
+      return `\\d+(?:[:.]\\d+)?|${phraseSource(lists.flat(), words.spaced)}`
+    },
+    'gu',
+  )
+  const rest = scheduleWords ? clause.replace(scheduleWords, ' ') : clause
+  return rest
+    .split(/[\s\p{P}]+/u)
+    .filter(Boolean)
+    .every((word) => [...word].length <= 3)
+}
+
+function automationName(text: string, original: string, notification: AutomationNotification, order: RequestWords[]): string {
+  const says = (list: (words: RequestWords) => string[]) => order.some((words) => hasPhrase(text, list(words), words.spaced))
   const condition = notification.condition
   if (notification.mode === 'condition' && condition?.kind === 'threshold') {
-    const amount = formatAmount(condition.value ?? 0)
+    const amount = formatAmount(condition.value ?? 0, condition.currency)
     return i18n.t(condition.op === 'above' ? 'automations:names.priceAbove' : 'automations:names.priceBelow', { amount })
   }
   if (condition?.kind === 'available') {
-    return /\bstock\b/i.test(original) ? i18n.t('automations:names.stock') : i18n.t('automations:names.availability')
+    return says((words) => words.names.stock) ? i18n.t('automations:names.stock') : i18n.t('automations:names.availability')
   }
   if (condition?.kind === 'significant') return i18n.t('automations:names.significance')
-  if (/\breleases?\b/i.test(original)) return i18n.t('automations:names.release')
-  if (/\bresearch\b/i.test(original)) return i18n.t('automations:names.research')
+  if (says((words) => words.names.release)) return i18n.t('automations:names.release')
+  if (says((words) => words.names.research)) return i18n.t('automations:names.research')
   const cleaned = original.replace(/\s+/g, ' ').trim()
   if (!cleaned) return i18n.t('automations:names.scheduled')
   const short = cleaned.length > 48 ? `${cleaned.slice(0, 48).trim()}…` : cleaned
@@ -316,7 +502,8 @@ function automationName(original: string, notification: AutomationNotification):
 // visibleTask removes the machine-readable result instruction from a stored prompt.
 export function visibleTask(prompt: string): string {
   let text = prompt.trim()
-  for (const line of [PRICE_INSTRUCTION, AVAILABLE_INSTRUCTION, SIGNIFICANT_INSTRUCTION]) {
+  text = text.replace(PRICE_INSTRUCTION_LINE, '')
+  for (const line of [AVAILABLE_INSTRUCTION, SIGNIFICANT_INSTRUCTION]) {
     text = text.split(line).join('')
   }
   return text.replace(/\n{3,}/g, '\n\n').trim()
@@ -348,7 +535,7 @@ function withSignalInstruction(text: string, notification: AutomationNotificatio
 function signalInstruction(notification: AutomationNotification): string {
   switch (notification.condition?.kind) {
     case 'threshold':
-      return PRICE_INSTRUCTION
+      return priceInstruction(notification.condition.currency)
     case 'available':
       return AVAILABLE_INSTRUCTION
     case 'significant':
@@ -358,15 +545,15 @@ function signalInstruction(notification: AutomationNotification): string {
   }
 }
 
-function formatAmount(value: number): string {
-  return formatPrice(value)
+function formatAmount(value: number, currency: string | undefined): string {
+  return formatPrice(value, currency)
 }
 
 function conditionLabel(condition: AutomationCondition | undefined): string {
   if (!condition) return i18n.t('automations:notify.condition')
   if (condition.kind === 'threshold') {
     return i18n.t(condition.op === 'above' ? 'automations:notify.priceAbove' : 'automations:notify.priceBelow', {
-      amount: formatAmount(condition.value ?? 0),
+      amount: formatAmount(condition.value ?? 0, condition.currency),
     })
   }
   if (condition.kind === 'available') return i18n.t('automations:notify.available')

@@ -180,6 +180,7 @@
     "below": "below",
     "above": "above",
     "amount": "Amount",
+    "currency": "Currency",
     "installModel": "Install a model before creating an automation.",
     "advanced": "Advanced",
     "profile": "Profile",

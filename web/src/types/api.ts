@@ -828,6 +828,8 @@ export interface AutomationCondition {
   kind: AutomationConditionKind
   op?: AutomationThresholdOp
   value?: number
+  /** ISO 4217 code of a threshold's value, such as EUR. Omitted means USD. */
+  currency?: string
 }
 
 export interface AutomationNotification {

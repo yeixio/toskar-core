@@ -132,7 +132,7 @@ describe('AutomationsPage', () => {
     await waitFor(() => expect(api.createAutomation).toHaveBeenCalled())
     const body = vi.mocked(api.createAutomation).mock.calls[0][0]
     expect(body.schedule).toMatchObject({ kind: 'daily', hour: 8, minute: 0 })
-    expect(body.notification).toEqual({ mode: 'condition', condition: { kind: 'threshold', op: 'below', value: 500 } })
+    expect(body.notification).toEqual({ mode: 'condition', condition: { kind: 'threshold', op: 'below', value: 500, currency: 'USD' } })
     expect(body.prompt).toContain('{"price": 420}')
     expect(body.profile_id).toBe('general-assistant')
     expect(body.model_id).toBe('gemma-4-e4b')

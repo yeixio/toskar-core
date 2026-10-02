@@ -57,10 +57,18 @@ de), by script (zh-TW and zh-HK → zh-Hant, zh-CN → zh-Hans), or by another
 region in the same script (pt-PT → pt-BR). Simplified and Traditional
 Chinese never stand in for each other.
 
-Two things stay in English for now. Automations read requests written in
-English, so the request box keeps its English example in every language and
-says so. And the import of pasted training examples reads each language's
-own labels (`Q:`/`A:`, `P:`/`R:`, `F:`/`A:`, `问：`/`答：`, …): a language's
+Two features read what people type, so a language brings more than its
+catalog. Automations read a request in the App language or in English, with
+each language's words in
+`web/src/features/automations/requestWords/<tag>.ts`: schedule words,
+weekdays, times of day and 24-hour times (18:30, 18 h, 18時, 오후 6시,
+下午6点), intervals, notify conditions, and currency symbols (€, R$, ¥, ₩).
+A language's `form.describePlaceholder` and `parse.describeWhen` in
+`automations.json` are examples in that language, and a test checks that the
+parser reads the example. A new language adds a words file beside the others
+and lists it in `requestWords/index.ts`; a test fails until it does. The
+import of pasted training examples reads each language's own labels
+(`Q:`/`A:`, `P:`/`R:`, `F:`/`A:`, `问：`/`答：`, …): a language's
 `material.placeholder` in `train.json` must use labels the importer knows
 (`internal/training/dataset.go`), and a test checks that it does.
 

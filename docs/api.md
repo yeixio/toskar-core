@@ -408,7 +408,7 @@ A computer cannot be both preferred and denied. A role pinned to a computer stil
 
 Structured results are checked the same way elsewhere:
 - **Tool arguments:** they are checked against each tool's schema before the tool runs. Safe repairs are made, such as `"7"` for a whole number, or JSON data where text is expected. A call with an argument of the wrong type is refused with `kind` `invalid`, naming the argument, so the model can call again.
-- **Automations:** a condition automation's result must end with the JSON its condition reads: `{"price": number}` for a threshold, or `{"significant": boolean}`. That JSON is read with the same repairs. When it is missing or wrong, the model is asked once to supply it from its own answer. Notices show the prose, never the JSON.
+- **Automations:** a condition automation's result must end with the JSON its condition reads: `{"price": number}` for a threshold, or `{"significant": boolean}`. A threshold's optional `currency` (ISO 4217, such as `EUR`; omitted means `USD`) is the currency the run reports the price in, so the numbers compare as they are. That JSON is read with the same repairs. When it is missing or wrong, the model is asked once to supply it from its own answer. Notices show the prose, never the JSON.
 
 ## Capability inventory
 

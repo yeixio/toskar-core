@@ -187,7 +187,7 @@ func noticeFor(n Notification, result string) Notice {
 	} else if prose := strings.TrimSpace(result); prose != "" && !ok {
 		body = prose
 	} else if ok {
-		body = signal.sentence()
+		body = signal.sentence(currencyOf(n))
 	}
 	return Notice{Title: oneLine(title, 80), Body: oneLine(body, 180)}
 }
@@ -208,10 +208,26 @@ func noticeTitle(name string, notice Notice) Notice {
 	return notice
 }
 
-func (s parsedSignal) sentence() string {
+// currencyOf is the currency a threshold's price is in, or "" when the
+// notification has no threshold.
+func currencyOf(n Notification) string {
+	if n.Condition == nil || n.Condition.Kind != ConditionThreshold {
+		return ""
+	}
+	if n.Condition.Currency == "" {
+		return "USD"
+	}
+	return n.Condition.Currency
+}
+
+func (s parsedSignal) sentence(currency string) string {
 	var parts []string
 	if s.Price != nil {
-		parts = append(parts, "Price is "+strconv.FormatFloat(*s.Price, 'f', -1, 64)+".")
+		price := strconv.FormatFloat(*s.Price, 'f', -1, 64)
+		if currency != "" {
+			price += " " + currency
+		}
+		parts = append(parts, "Price is "+price+".")
 	}
 	if s.Available != nil {
 		if *s.Available {

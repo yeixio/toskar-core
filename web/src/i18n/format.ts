@@ -49,10 +49,19 @@ export function formatCurrency(value: number, currency: string): string {
   return formatNumber(value, { style: 'currency', currency })
 }
 
-/** A price an automation watches, in dollars: $20, or $19.99 with cents. */
-export function formatPrice(value: number): string {
+/** A price an automation watches: $20, or 19,99 € with cents. Without a currency it is in dollars. */
+export function formatPrice(value: number, currency = 'USD'): string {
   const fraction = Number.isInteger(value) ? 0 : 2
-  return formatNumber(value, { style: 'currency', currency: 'USD', minimumFractionDigits: fraction, maximumFractionDigits: fraction })
+  return formatNumber(value, { style: 'currency', currency: currency || 'USD', minimumFractionDigits: fraction, maximumFractionDigits: fraction })
+}
+
+/** A currency's name in the App language, such as Euro, or its code when there is none. */
+export function currencyName(code: string): string {
+  try {
+    return new Intl.DisplayNames([formatLocale()], { type: 'currency' }).of(code) ?? code
+  } catch {
+    return code
+  }
 }
 
 function asDate(value: Date | string | number): Date {

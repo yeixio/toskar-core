@@ -5,6 +5,8 @@ import { api } from '@/lib/api'
 import { canChat } from '@/features/models/modelPresentation'
 import type { AutomationPreview } from '@/types/api'
 import { useUIStore } from '@/stores/uiStore'
+import { currencyName } from '@/i18n/format'
+import { readNumber } from './requestWords/match'
 import {
   civilInputValue,
   civilToISO,
@@ -20,6 +22,9 @@ import {
 
 // The notify choices, in order; each is automations:form.notifyChoices.<mode> in the catalog.
 const NOTIFY_CHOICES: AutomationInput['notification']['mode'][] = ['condition', 'change', 'always', 'failure', 'none']
+
+// Currencies offered for a price check. A request can name others (ISO 4217), and they are kept.
+const CURRENCIES = ['USD', 'EUR', 'GBP', 'CHF', 'BRL', 'JPY', 'CNY', 'TWD', 'KRW']
 
 interface AutomationFormProps {
   profiles: AIProfile[]
@@ -54,6 +59,7 @@ export function AutomationForm({ profiles, models, tools, initial, seedDescripti
   const [conditionKind, setConditionKind] = useState(initial?.notification.condition?.kind ?? 'threshold')
   const [op, setOp] = useState(initial?.notification.condition?.op ?? 'below')
   const [value, setValue] = useState(String(initial?.notification.condition?.value ?? ''))
+  const [currency, setCurrency] = useState(initial?.notification.condition?.currency ?? 'USD')
   const [selectedTools, setSelectedTools] = useState<string[]>(initial?.tools ?? [])
 
   useEffect(() => {
@@ -68,6 +74,7 @@ export function AutomationForm({ profiles, models, tools, initial, seedDescripti
       setConditionKind(parsed.notification.condition?.kind ?? 'threshold')
       setOp(parsed.notification.condition?.op ?? 'below')
       setValue(parsed.notification.condition?.value == null ? '' : String(parsed.notification.condition.value))
+      if (parsed.notification.condition?.currency) setCurrency(parsed.notification.condition.currency)
       setNotes(parsed.notes)
       setParseError('')
     } catch (err) {
@@ -107,6 +114,7 @@ export function AutomationForm({ profiles, models, tools, initial, seedDescripti
       setConditionKind(parsed.notification.condition?.kind ?? 'threshold')
       setOp(parsed.notification.condition?.op ?? 'below')
       setValue(parsed.notification.condition?.value == null ? '' : String(parsed.notification.condition.value))
+      if (parsed.notification.condition?.currency) setCurrency(parsed.notification.condition.currency)
       setNotes(parsed.notes)
       setParseError('')
     } catch (err) {
@@ -129,7 +137,7 @@ export function AutomationForm({ profiles, models, tools, initial, seedDescripti
   function currentNotification(): AutomationInput['notification'] {
     if (mode !== 'condition') return { mode }
     if (conditionKind === 'threshold') {
-      return { mode, condition: { kind: 'threshold', op, value: Number(value) } }
+      return { mode, condition: { kind: 'threshold', op, value: readNumber(value.trim()) ?? Number.NaN, currency } }
     }
     return { mode, condition: { kind: conditionKind } }
   }
@@ -248,15 +256,25 @@ export function AutomationForm({ profiles, models, tools, initial, seedDescripti
                   <option value="above">{t('form.above')}</option>
                 </select>
               </label>
-              <label className="block space-y-1 text-sm sm:col-span-2">
+              <label className="block space-y-1 text-sm">
                 <span className="text-ink-muted">{t('form.amount')}</span>
                 <input className="field w-full" inputMode="decimal" value={value} onChange={(event) => setValue(event.target.value)} required />
+              </label>
+              <label className="block space-y-1 text-sm">
+                <span className="text-ink-muted">{t('form.currency')}</span>
+                <select className="field w-full" value={currency} onChange={(event) => setCurrency(event.target.value)}>
+                  {(CURRENCIES.includes(currency) ? CURRENCIES : [currency, ...CURRENCIES]).map((code) => (
+                    <option key={code} value={code}>
+                      {currencyName(code)}
+                    </option>
+                  ))}
+                </select>
               </label>
             </>
           )}
         </div>
       )}
-      <p className="text-sm text-ink">{notificationLabel(previewNotification(mode, conditionKind, op, value))}</p>
+      <p className="text-sm text-ink">{notificationLabel(previewNotification(mode, conditionKind, op, value, currency))}</p>
       {installed.length === 0 && <p className="text-sm text-danger">{t('form.installModel')}</p>}
       <details ref={advancedRef} className="space-y-3">
         <summary className="cursor-pointer text-sm text-ink-muted">{t('form.advanced')}</summary>
@@ -483,10 +501,16 @@ function changeKind(schedule: AutomationSchedule, kind: AutomationSchedule['kind
   return { kind: 'daily', time_zone: schedule.time_zone, hour: schedule.hour ?? 8, minute: schedule.minute ?? 0 }
 }
 
-function previewNotification(mode: AutomationInput['notification']['mode'], kind: string, op: string, value: string): AutomationInput['notification'] {
+function previewNotification(
+  mode: AutomationInput['notification']['mode'],
+  kind: string,
+  op: string,
+  value: string,
+  currency: string,
+): AutomationInput['notification'] {
   if (mode !== 'condition') return { mode }
   if (kind === 'threshold') {
-    return { mode, condition: { kind: 'threshold', op: op === 'above' ? 'above' : 'below', value: Number(value) || 0 } }
+    return { mode, condition: { kind: 'threshold', op: op === 'above' ? 'above' : 'below', value: readNumber(value.trim()) || 0, currency } }
   }
   if (kind === 'available') return { mode, condition: { kind: 'available' } }
   return { mode, condition: { kind: 'significant' } }

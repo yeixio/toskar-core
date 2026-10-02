@@ -4779,6 +4779,10 @@ components:
               enum: [below, above]
             value:
               type: number
+            currency:
+              type: string
+              pattern: "^[A-Z]{3}$"
+              description: ISO 4217 code of a threshold's value, such as EUR. The run reports the price in this currency. Omitted means USD.
     AutomationInput:
       type: object
       properties:

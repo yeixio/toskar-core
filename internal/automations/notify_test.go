@@ -85,6 +85,26 @@ func TestConditionValidation(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	for currency, valid := range map[string]bool{"": true, "EUR": true, "KRW": true, "eur": false, "€": false, "EURO": false} {
+		err = (automations.Notification{
+			Mode:      automations.NotifyOnCondition,
+			Condition: &automations.Condition{Kind: automations.ConditionThreshold, Op: automations.OpBelow, Value: 500, Currency: currency},
+		}).Validate()
+		if (err == nil) != valid {
+			t.Fatalf("currency %q: err = %v, want valid = %v", currency, err, valid)
+		}
+	}
+}
+
+func TestThresholdNoticeNamesTheCurrency(t *testing.T) {
+	n := automations.Notification{
+		Mode:      automations.NotifyOnCondition,
+		Condition: &automations.Condition{Kind: automations.ConditionThreshold, Op: automations.OpBelow, Value: 500, Currency: "EUR"},
+	}
+	got := automations.Decide(n, `{"price": 449}`, nil, false)
+	if !got.Notify || got.Notice.Body != "Price is 449 EUR." {
+		t.Fatalf("decision = %+v, want a notice that says the price in euros", got)
+	}
 }
 
 func strPtr(s string) *string { return &s }

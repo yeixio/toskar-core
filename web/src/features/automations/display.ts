@@ -70,7 +70,8 @@ function explainCondition(
   const condition = notification.condition
   const signal = readSignal(result)
   if (!condition || condition.kind === 'threshold') {
-    const amount = formatAmount(condition?.value ?? 0)
+    const currency = condition?.currency
+    const amount = formatAmount(condition?.value ?? 0, currency)
     const above = condition?.op === 'above'
     if (signal.price == null) {
       return { title: notified ? i18n.t('automations:notice.notified') : i18n.t('automations:notice.notNotified'), detail: notified ? '' : i18n.t('automations:notice.noPrice') }
@@ -79,7 +80,7 @@ function explainCondition(
     if (!matched) {
       return {
         title: i18n.t('automations:notice.conditionNotMet'),
-        detail: i18n.t(above ? 'automations:notice.notAbove' : 'automations:notice.notBelow', { price: formatAmount(signal.price), amount }),
+        detail: i18n.t(above ? 'automations:notice.notAbove' : 'automations:notice.notBelow', { price: formatAmount(signal.price, currency), amount }),
       }
     }
     return {
@@ -168,8 +169,8 @@ function readSignal(result: string | undefined): { price?: number; available?: b
   return { price, available, significant }
 }
 
-function formatAmount(value: number): string {
-  return formatPrice(value)
+function formatAmount(value: number, currency: string | undefined): string {
+  return formatPrice(value, currency)
 }
 
 function normalize(value: string | undefined): string {

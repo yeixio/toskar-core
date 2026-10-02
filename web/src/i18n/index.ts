@@ -153,7 +153,9 @@ void i18n
     // Every language, and the en-XA pseudo-locale, ends at English; i18next
     // tries the base language first (es-MX → es).
     fallbackLng: sourceLanguage,
-    supportedLngs: [...availableLanguages, ...pseudoLocales],
+    // With nonExplicitSupportedLngs, i18next checks a tag's base language,
+    // so pt-BR and zh-Hans need pt and zh listed or they fall back to English.
+    supportedLngs: [...new Set([...availableLanguages, ...availableLanguages.map((code) => code.split('-')[0]), ...pseudoLocales])],
     nonExplicitSupportedLngs: true,
     defaultNS: 'common',
     ns: [...new Set(Object.values(resources).flatMap((r) => Object.keys(r)))],

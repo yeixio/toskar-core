@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from 'vitest'
-import i18n, { applyLanguage, resolveLanguage } from './index'
+import i18n, { applyLanguage, availableLanguages, resolveLanguage } from './index'
 import {
   formatDate,
   formatDateTime,
@@ -46,6 +46,13 @@ describe('resolveLanguage', () => {
     expect(resolveLanguage('', ['pt'], tier1)).toBe('pt-BR')
     // Simplified Chinese readers don't get Traditional, or the other way round.
     expect(resolveLanguage('', ['zh-CN'], ['en', 'zh-Hant'])).toBe('en')
+  })
+
+  it('shows each catalog in its own language, including region and script tags', async () => {
+    for (const language of availableLanguages) {
+      await applyLanguage(language)
+      expect(i18n.resolvedLanguage).toBe(language)
+    }
   })
 
   it('ends at English', () => {
