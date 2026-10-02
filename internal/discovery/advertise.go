@@ -2,6 +2,7 @@ package discovery
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/grandcat/zeroconf"
 	"github.com/yeixio/yggdrasil-core/internal/config"
@@ -15,16 +16,7 @@ type Advertiser struct {
 
 // StartAdvertise registers _localai._tcp with node metadata.
 func StartAdvertise(cfg config.Config, pairingEnabled bool) (*Advertiser, error) {
-	txt := []string{
-		"node_id=" + cfg.NodeID,
-		"name=" + cfg.NodeName,
-		"version=" + version.Version,
-	}
-	if pairingEnabled {
-		txt = append(txt, "pairing=true")
-	} else {
-		txt = append(txt, "pairing=false")
-	}
+	txt := advertisedTXT(cfg, pairingEnabled)
 	svc, err := zeroconf.Register(
 		cfg.NodeName,
 		config.ServiceType,
@@ -37,6 +29,20 @@ func StartAdvertise(cfg config.Config, pairingEnabled bool) (*Advertiser, error)
 		return nil, fmt.Errorf("mdns advertise: %w", err)
 	}
 	return &Advertiser{server: svc}, nil
+}
+
+// advertisedTXT is the service's TXT record. The service's own port is
+// Bifrost's, for computers pairing with each other; api_port says where the
+// API is, for apps that find Yggdrasil on the network, such as the iPhone
+// app.
+func advertisedTXT(cfg config.Config, pairingEnabled bool) []string {
+	return []string{
+		"node_id=" + cfg.NodeID,
+		"name=" + cfg.NodeName,
+		"version=" + version.Version,
+		"pairing=" + strconv.FormatBool(pairingEnabled),
+		"api_port=" + strconv.Itoa(cfg.APIPort),
+	}
 }
 
 // Stop shuts down advertisement.

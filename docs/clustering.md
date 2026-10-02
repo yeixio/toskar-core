@@ -6,6 +6,8 @@ Yggdrasil can use more than one computer. Each computer runs `yggdrasil-daemon`.
 
 Discovery is enabled by default. The daemon advertises `_localai._tcp` and browses for the same service. Peers show up through `GET /api/v1/nodes` and the Computers page.
 
+The service's port is Bifrost's (7332). Its TXT record carries `node_id`, `name`, `version`, `pairing`, and `api_port`, the port of the API (7331 by default), so an app that finds Yggdrasil on the network, such as the iPhone app, knows where to connect.
+
 When mDNS cannot see peers, set static addresses:
 
 - `static_peers` in `config.json`, as `host:7332`
