@@ -9,6 +9,31 @@
 
 Linux package builds also need `nfpm` 2.41.3, as used by the release workflow. Day-to-day daemon work does not.
 
+## Develop in a container
+
+A dev container ships the full toolchain (Go 1.26.3, Node 22, pnpm 9.15.0) so you
+can start without installing any of them locally.
+
+**VS Code** – install the
+[Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers),
+then run **Dev Containers: Reopen in Container** from the command palette.
+
+**GitHub Codespaces** – open the repository on GitHub and click
+**Code → Create codespace on main** (or your branch).
+
+In both cases the container:
+
+- Pre-installs Go module and pnpm dependencies on first create.
+- Forwards port 7331 so the daemon is reachable from your browser at
+  `http://localhost:7331`.
+
+Once the container is ready, `make start` works as-is — the
+`YGGDRASIL_WEB_UI_DIR` environment variable is already set by the container
+configuration.
+
+For CPU-only inference, pull a small GGUF model (e.g. `Qwen3-0.6B-Q4_K_M.gguf`)
+and add it through the UI or point the daemon at it with `--model`.
+
 ## Setup
 
 ```bash
