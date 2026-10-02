@@ -1,4 +1,5 @@
 import { CLIENT_CONTRACT, CLIENT_CONTRACT_HEADER, getApiBase, storedApiKey } from '@/lib/api'
+import { hasEventRelay, onRelayedEvent } from '@/lib/desktopBridge'
 import type { YggdrasilEvent } from '@/types/api'
 
 export interface EventSubscriptionOptions {
@@ -70,6 +71,17 @@ export function subscribeEvents({
   onError,
   onOpen,
 }: EventSubscriptionOptions): () => void {
+  // In the desktop app the shell relays the events, which works on Windows,
+  // where a stream read through the app arrives only when it ends.
+  if (hasEventRelay()) {
+    const unsubscribe = onRelayedEvent((json) => {
+      const event = parseEventData(json)
+      if (event) onEvent(event)
+    })
+    onOpen?.()
+    return unsubscribe
+  }
+
   // jsdom / older runtimes may not provide EventSource.
   if (typeof EventSource === 'undefined') {
     return () => {}

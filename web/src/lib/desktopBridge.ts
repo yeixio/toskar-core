@@ -8,6 +8,8 @@ type WailsApp = {
   IsLaunchAtLogin?: () => Promise<boolean>
   MarkScreenshotReady?: () => Promise<void>
   GetDaemonURL?: () => Promise<string>
+  /** Present when the shell passes the daemon's events on as Wails events. */
+  HasEventRelay?: () => Promise<boolean>
   /** Asks where to save, then streams a daemon file there. Resolves to the saved path, or '' if cancelled. */
   SaveDownload?: (name: string, apiPath: string) => Promise<string>
   /** Asks where to save, then writes base64 bytes there. Resolves to the saved path, or '' if cancelled. */
@@ -170,6 +172,25 @@ export async function saveText(name: string, text: string): Promise<string | nul
   let binary = ''
   for (const byte of bytes) binary += String.fromCharCode(byte)
   return save(name, btoa(binary))
+}
+
+/**
+ * True when the desktop shell passes the daemon's events to the page. The
+ * page can't read the event stream through the app on every platform (on
+ * Windows, Wails hands over a proxied response only once it ends, and an
+ * event stream never ends), so the shell reads it and relays each event.
+ */
+export function hasEventRelay(): boolean {
+  return Boolean(wailsGoApp()?.HasEventRelay && wailsRuntime()?.EventsOn)
+}
+
+/** Hears each event's JSON from the desktop shell's relay. Returns an unsubscribe function. */
+export function onRelayedEvent(handler: (json: string) => void): () => void {
+  const runtime = wailsRuntime()
+  if (!runtime?.EventsOn) return () => {}
+  return runtime.EventsOn('ygg:event', (...data: unknown[]) => {
+    if (typeof data[0] === 'string') handler(data[0])
+  })
 }
 
 /** Ask the desktop shell to quit and stop the daemon (full restart by relaunching). */

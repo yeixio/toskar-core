@@ -86,7 +86,7 @@ import type {
   StopChatResponse,
 } from '@/types/api'
 import type { Upload } from '@/lib/upload'
-import { saveFromDaemon, signInReturnAddress } from '@/lib/desktopBridge'
+import { hasEventRelay, onRelayedEvent, saveFromDaemon, signInReturnAddress } from '@/lib/desktopBridge'
 
 export class ApiError extends Error {
   constructor(
@@ -258,6 +258,51 @@ export async function downloadArtifact(file: Pick<FileRef, 'id' | 'name'>): Prom
 }
 
 export async function streamChat({
+  body,
+  signal,
+  onToken,
+  onDone,
+  onError,
+}: StreamChatOptions): Promise<void> {
+  // In the desktop app the reply's text comes from the shell's event relay:
+  // on Windows the response below arrives only once it ends, so its tokens
+  // would show all at once. The response still says when the reply is done.
+  const relayed = hasEventRelay() && Boolean(body.conversation_id)
+  if (!relayed) return readChatStream({ body, signal, onToken, onDone, onError })
+  // The daemon publishes chat.complete after a reply's last token, and the
+  // relay keeps their order, so once it arrives every token has.
+  let finished = () => {}
+  const relayFinished = new Promise<void>((resolve) => {
+    finished = resolve
+  })
+  const stopRelay = onRelayedEvent((json) => {
+    let event: { type?: string; payload?: { conversation_id?: string; content?: string } }
+    try {
+      event = JSON.parse(json)
+    } catch {
+      return
+    }
+    if (event.payload?.conversation_id !== body.conversation_id) return
+    if (event.type === 'chat.token' && event.payload.content) onToken(event.payload.content)
+    if (event.type === 'chat.complete' || event.type === 'chat.stopped') finished()
+  })
+  let done = false
+  try {
+    await readChatStream({ body, signal, onToken: () => {}, onDone: () => (done = true), onError })
+    if (done) {
+      // The response can end before the relay delivers the last tokens.
+      await Promise.race([relayFinished, new Promise((resolve) => setTimeout(resolve, relayDrainMs))])
+      onDone?.()
+    }
+  } finally {
+    stopRelay()
+  }
+}
+
+/** How long a finished reply waits for the desktop relay to deliver its last tokens. */
+const relayDrainMs = 3000
+
+async function readChatStream({
   body,
   signal,
   onToken,

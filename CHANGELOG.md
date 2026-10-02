@@ -9,6 +9,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Thi
 ### Fixed
 
 - Yggdrasil Desktop: answer sources and other links that leave the app now open in the default browser. Signing in to an MCP tool source now works too: it opens in the browser and returns to the daemon's address, where before it was sent back to the app's own `wails://` address, which no browser can reach. Saving a chat file, an exported GGUF model, or a training sample now asks where to save and writes the file; a large model streams straight to disk. The desktop app's web view can't open windows or download files, so these go through the desktop shell (Yggdrasil Desktop 1.4 or later). In a browser, nothing changes.
+- Yggdrasil Desktop on Windows: live progress, tool approval prompts, notifications, and chat replies as they are written now appear. Wails hands the app's web view a proxied response only once it ends, and the daemon's event stream never ends, so none of it arrived; replies showed all at once. The desktop shell now reads the event stream and relays each event to the page, and replies take their text from that relay (Yggdrasil Desktop with the event relay). The desktop app uses the relay on every platform; in a browser, nothing changes.
 
 ## [1.4.0] - 2026-10-02
 
