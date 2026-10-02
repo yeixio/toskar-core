@@ -5,6 +5,7 @@ import { Toggle } from '@/components/ui/Toggle'
 import { api } from '@/lib/api'
 import type { MCPPrompt, MCPServer, MCPSpec, MCPUpdate } from '@/types/api'
 import { AddToolSource } from './AddToolSource'
+import { preopenSignInWindow } from '@/lib/desktopBridge'
 import { errorText, openSignIn, quoteArg, SOURCES_KEY, specSummary, splitArgs, statusOf, toneClass } from './mcpShared'
 
 /**
@@ -112,7 +113,7 @@ function SourceCard({ source }: { source: MCPServer }) {
   const [open, setOpen] = useState(false)
   const m = useSourceMutations(source)
   const status = statusOf(source)
-  const startSignIn = () => m.signIn.mutate(window.open('about:blank', 'yggdrasil-sign-in', 'width=520,height=720'))
+  const startSignIn = () => m.signIn.mutate(preopenSignInWindow())
   return (
     <div className="card space-y-3 p-4">
       <div className="flex items-start justify-between gap-3">

@@ -86,6 +86,7 @@ import type {
   StopChatResponse,
 } from '@/types/api'
 import type { Upload } from '@/lib/upload'
+import { saveFromDaemon, signInReturnAddress } from '@/lib/desktopBridge'
 
 export class ApiError extends Error {
   constructor(
@@ -240,6 +241,8 @@ export interface StreamChatOptions {
 /** Save a stored file to the user's computer. It is fetched with the same
  * credentials as other API calls, so it works when the API needs a key. */
 export async function downloadArtifact(file: Pick<FileRef, 'id' | 'name'>): Promise<void> {
+  // The desktop app's web view can't download; its shell saves the file.
+  if ((await saveFromDaemon(file.name, `/api/v1/artifacts/${file.id}/content`)) !== null) return
   const response = await fetch(`${getApiBase()}/api/v1/artifacts/${file.id}/content`, { headers: authHeaders() })
   if (!response.ok) {
     throw new ApiError(response.status, response.status === 404 ? 'This file is no longer available.' : response.statusText)
@@ -672,7 +675,7 @@ export const api = {
   addMCPServer: async (body: MCPAddRequest) => {
     const added = await request<MCPAdded>('/api/v1/mcp/servers', {
       method: 'POST',
-      body: JSON.stringify({ redirect_base: window.location.origin, ...body }),
+      body: JSON.stringify({ redirect_base: await signInReturnAddress(), ...body }),
     })
     if (!added) throw new ApiError(404, 'That gallery entry or app setting was not found.')
     return added
@@ -695,7 +698,7 @@ export const api = {
     (
       await request<{ url: string }>(`/api/v1/mcp/servers/${encodeURIComponent(id)}/sign-in`, {
         method: 'POST',
-        body: JSON.stringify({ redirect_base: window.location.origin }),
+        body: JSON.stringify({ redirect_base: await signInReturnAddress() }),
       })
     )?.url ?? '',
 
@@ -864,6 +867,8 @@ export const api = {
 
   // The exported file is several GB, so the browser downloads it directly
   // instead of through fetch.
+  exportFilePath: (id: string, revision: number) => `/api/v1/training/ais/${id}/revisions/${revision}/export/file`,
+
   exportFileUrl: (id: string, revision: number) =>
     `${getApiBase()}/api/v1/training/ais/${id}/revisions/${revision}/export/file`,
 

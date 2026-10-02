@@ -1,3 +1,4 @@
+import { isDesktopShell, openExternal } from '@/lib/desktopBridge'
 import type { MCPServer, MCPSpec } from '@/types/api'
 
 export const SOURCES_KEY = ['mcp-servers'] as const
@@ -8,9 +9,15 @@ export function errorText(err: unknown): string {
 
 /**
  * Opens a service's sign-in. A window opened during the click is reused, so
- * the browser does not block it; otherwise a new one is opened.
+ * the browser does not block it; otherwise a new one is opened. The desktop
+ * app opens it in the person's browser, and the source list notices when it
+ * finishes.
  */
 export function openSignIn(url: string, popup?: Window | null) {
+  if (isDesktopShell()) {
+    openExternal(url)
+    return
+  }
   if (popup && !popup.closed) {
     popup.location.href = url
     return

@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
+import { isDesktopShell, saveFromDaemon } from '@/lib/desktopBridge'
 import { formatBytes } from '@/lib/format'
 import type { SpecializedAIView } from '@/types/api'
 import { errorText, exportRevision } from '../display'
@@ -19,10 +20,14 @@ export function ExportCard({ view }: { view: SpecializedAIView }) {
   const refresh = () => void queryClient.invalidateQueries({ queryKey: key })
   const start = useMutation({ mutationFn: () => api.startExport(view.id, revision), onSuccess: refresh })
   const remove = useMutation({ mutationFn: () => api.deleteExport(view.id, revision), onSuccess: refresh })
+  // The desktop app's web view can't download; its shell streams the file to disk.
+  const save = useMutation({
+    mutationFn: (filename: string) => saveFromDaemon(filename, api.exportFilePath(view.id, revision)),
+  })
   if (revision === 0) return null
 
   const st = status.data
-  const error = start.error ?? remove.error ?? status.error
+  const error = start.error ?? remove.error ?? save.error ?? status.error
   return (
     <div className="card space-y-3">
       <h3 className="section-title">Export as a GGUF file</h3>
@@ -39,10 +44,21 @@ export function ExportCard({ view }: { view: SpecializedAIView }) {
       {st?.state === 'failed' && <p className="text-sm text-danger">The export failed: {st.error}</p>}
       {st?.state === 'ready' && (
         <div className="flex flex-wrap items-center gap-2 text-sm">
-          <a className="btn-primary px-3 py-1 text-xs" href={api.exportFileUrl(view.id, revision)} download={st.filename}>
-            Download {st.filename}
+          <a
+            className="btn-primary px-3 py-1 text-xs"
+            href={api.exportFileUrl(view.id, revision)}
+            download={st.filename}
+            aria-disabled={save.isPending}
+            onClick={(e) => {
+              if (!isDesktopShell()) return
+              e.preventDefault()
+              if (!save.isPending && st.filename) save.mutate(st.filename)
+            }}
+          >
+            {save.isPending ? 'Saving…' : `Download ${st.filename}`}
           </a>
           <span className="text-xs text-ink-muted">{formatBytes(st.size_bytes)}</span>
+          {save.data && <span className="text-xs text-ink-muted">Saved to {save.data}</span>}
           <button type="button" className="btn-secondary px-3 py-1 text-xs" disabled={remove.isPending} onClick={() => remove.mutate()}>
             Delete file
           </button>

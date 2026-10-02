@@ -7,10 +7,16 @@ type WailsApp = {
   SetLaunchAtLogin?: (v: boolean) => Promise<void>
   IsLaunchAtLogin?: () => Promise<boolean>
   MarkScreenshotReady?: () => Promise<void>
+  GetDaemonURL?: () => Promise<string>
+  /** Asks where to save, then streams a daemon file there. Resolves to the saved path, or '' if cancelled. */
+  SaveDownload?: (name: string, apiPath: string) => Promise<string>
+  /** Asks where to save, then writes base64 bytes there. Resolves to the saved path, or '' if cancelled. */
+  SaveData?: (name: string, base64: string) => Promise<string>
 }
 
 type WailsRuntime = {
   EventsOn?: (eventName: string, callback: (...data: unknown[]) => void) => () => void
+  BrowserOpenURL?: (url: string) => void
 }
 
 function wailsGoApp(): WailsApp | undefined {
@@ -63,9 +69,7 @@ export async function openPathInOS(path: string): Promise<boolean> {
     // fall through
   }
   try {
-    const runtime = wailsRuntime() as WailsRuntime & {
-      BrowserOpenURL?: (url: string) => void
-    }
+    const runtime = wailsRuntime()
     if (runtime?.BrowserOpenURL) {
       const href = path.startsWith('file:') ? path : `file://${path}`
       runtime.BrowserOpenURL(href)
@@ -75,6 +79,97 @@ export async function openPathInOS(path: string): Promise<boolean> {
     // ignore
   }
   return false
+}
+
+// The desktop app's web view (WebKit in Wails) cannot open windows or
+// download files: window.open, target="_blank" links, and <a download> do
+// nothing there. These helpers hand those jobs to the shell, and do the
+// usual browser thing anywhere else.
+
+const externalProtocols = new Set(['http:', 'https:', 'mailto:'])
+
+/** Opens a page in the person's own browser. */
+export function openExternal(url: string): void {
+  const runtime = wailsRuntime()
+  if (isDesktopShell() && runtime?.BrowserOpenURL) {
+    runtime.BrowserOpenURL(url)
+    return
+  }
+  window.open(url, '_blank', 'noopener,noreferrer')
+}
+
+/**
+ * In the desktop app, sends links that leave the app (answer sources, links
+ * in answers, a service's sign-in) to the default browser. Elsewhere it does
+ * nothing. Returns a function that removes the handler.
+ */
+export function routeExternalLinks(doc: Document = document): () => void {
+  if (!isDesktopShell()) return () => {}
+  const onClick = (event: MouseEvent) => {
+    if (event.defaultPrevented || event.button !== 0) return
+    const anchor = (event.target as Element | null)?.closest?.('a[href]') as HTMLAnchorElement | null
+    if (!anchor || anchor.hasAttribute('download')) return
+    let url: URL
+    try {
+      url = new URL(anchor.href, doc.baseURI)
+    } catch {
+      return
+    }
+    // Only pages outside the app: one of its own pages opened in a browser
+    // (wails://, or wails.localhost on Windows) could not load.
+    if (!externalProtocols.has(url.protocol) || url.origin === doc.defaultView?.location.origin) return
+    event.preventDefault()
+    openExternal(url.href)
+  }
+  doc.addEventListener('click', onClick, true)
+  return () => doc.removeEventListener('click', onClick, true)
+}
+
+/**
+ * Opens a window for a service's sign-in during the click, so a browser
+ * does not block it; the sign-in address is filled in later. The desktop
+ * app opens sign-in in the person's browser instead, so there is none.
+ */
+export function preopenSignInWindow(): Window | null {
+  if (isDesktopShell()) return null
+  return window.open('about:blank', 'yggdrasil-sign-in', 'width=520,height=720')
+}
+
+/**
+ * The address a service sends the browser back to after sign-in. A page in
+ * the desktop app has a wails:// origin that no browser can reach, so it is
+ * the daemon's own address there.
+ */
+export async function signInReturnAddress(): Promise<string> {
+  try {
+    const url = await wailsGoApp()?.GetDaemonURL?.()
+    if (url) return url
+  } catch {
+    // fall through
+  }
+  return window.location.origin
+}
+
+/**
+ * Saves a file the daemon serves (apiPath is its own path, such as
+ * /api/v1/artifacts/{id}/content) through the desktop shell. Resolves to
+ * the saved path, '' if the person cancelled, or null outside the desktop
+ * app, where the caller downloads as usual.
+ */
+export async function saveFromDaemon(name: string, apiPath: string): Promise<string | null> {
+  const save = wailsGoApp()?.SaveDownload
+  if (!save) return null
+  return save(name, apiPath)
+}
+
+/** Saves text the page has, as UTF-8, through the desktop shell. Resolves like saveFromDaemon. */
+export async function saveText(name: string, text: string): Promise<string | null> {
+  const save = wailsGoApp()?.SaveData
+  if (!save) return null
+  const bytes = new TextEncoder().encode(text)
+  let binary = ''
+  for (const byte of bytes) binary += String.fromCharCode(byte)
+  return save(name, btoa(binary))
 }
 
 /** Ask the desktop shell to quit and stop the daemon (full restart by relaunching). */

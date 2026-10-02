@@ -6,6 +6,10 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Thi
 
 ## [Unreleased]
 
+### Fixed
+
+- Yggdrasil Desktop: answer sources and other links that leave the app now open in the default browser. Signing in to an MCP tool source now works too: it opens in the browser and returns to the daemon's address, where before it was sent back to the app's own `wails://` address, which no browser can reach. Saving a chat file, an exported GGUF model, or a training sample now asks where to save and writes the file; a large model streams straight to disk. The desktop app's web view can't open windows or download files, so these go through the desktop shell (Yggdrasil Desktop 1.4 or later). In a browser, nothing changes.
+
 ## [1.4.0] - 2026-10-02
 
 Stable release of 1.4.0. It contains everything in [1.4.0-beta.1](#140-beta1---2026-10-01), the AI experience platform and the remaining Train Your Own AI items, plus the changes below. Existing API routes, configuration, and data are compatible with 1.3: the changes add routes, optional fields, and database tables, and migrations run automatically. NVIDIA (CUDA) training, PostgreSQL and MySQL knowledge sources, and the Mac App Store sandbox have not been tested on that hardware or in that build. Binaries and the apt repository are not signed.

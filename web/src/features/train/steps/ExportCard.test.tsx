@@ -44,6 +44,23 @@ describe('ExportCard', () => {
     expect(screen.getByText('You are Tire Bot.')).toBeInTheDocument()
   })
 
+  it('saves through the desktop shell, which streams the file to disk', async () => {
+    const SaveDownload = vi.fn().mockResolvedValue('/Users/me/Downloads/tire-bot-r1.gguf')
+    const w = window as unknown as { go?: unknown }
+    w.go = { main: { App: { SaveDownload } } }
+    try {
+      vi.mocked(api.exportStatus).mockResolvedValue({
+        ai_id: 'ai-1', revision: 1, state: 'ready', filename: 'tire-bot-r1.gguf', size_bytes: 926118016, instructions: '',
+      })
+      renderCard(view(1, [1]))
+      fireEvent.click(await screen.findByRole('link', { name: 'Download tire-bot-r1.gguf' }))
+      expect(await screen.findByText('Saved to /Users/me/Downloads/tire-bot-r1.gguf')).toBeInTheDocument()
+      expect(SaveDownload).toHaveBeenCalledWith('tire-bot-r1.gguf', '/api/v1/training/ais/ai-1/revisions/1/export/file')
+    } finally {
+      delete w.go
+    }
+  })
+
   it('shows why an export failed', async () => {
     vi.mocked(api.exportStatus).mockResolvedValue({ ai_id: 'ai-1', revision: 1, state: 'failed', error: 'adapter does not match the model' })
     renderCard(view(1, [1]))

@@ -11,6 +11,7 @@ import type {
   MCPParsed,
   MCPSpec,
 } from '@/types/api'
+import { preopenSignInWindow } from '@/lib/desktopBridge'
 import { errorText, linesToMap, openSignIn, SOURCES_KEY, specSummary, splitArgs } from './mcpShared'
 
 const TABS = [
@@ -199,7 +200,7 @@ function GallerySetup({ entry, onBack, onAdded }: { entry: MCPGalleryEntry; onBa
         ev.preventDefault()
         // Open the sign-in window now, while the click still counts, so the
         // browser does not block it.
-        const popup = entry.sign_in ? window.open('about:blank', 'yggdrasil-sign-in', 'width=520,height=720') : null
+        const popup = entry.sign_in ? preopenSignInWindow() : null
         add.mutate({ body: { preset: entry.id, values }, popup })
       }}
     >
