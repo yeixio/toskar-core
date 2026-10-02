@@ -57,6 +57,13 @@ const SELECTS: { key: keyof OrchestrationPolicy; label: string; help: string; op
 const NUMBERS: { key: keyof OrchestrationPolicy; label: string; help: string; min: number; max: number; step?: number }[] = [
   { key: 'max_workers', label: 'Workers', help: 'Most parts in a plan (2–8).', min: 2, max: 8 },
   { key: 'max_tool_calls', label: 'Tool calls', help: 'Most tool calls in one turn (1–50).', min: 1, max: 50 },
+  {
+    key: 'retries',
+    label: 'Retries',
+    help: 'Tries after a model fails (1–3): the same model on another computer, then another model.',
+    min: 1,
+    max: 3,
+  },
   { key: 'timeout_seconds', label: 'Time limit (s)', help: 'Stop a turn that runs longer (10–3600).', min: 10, max: 3600 },
   { key: 'context_share', label: 'Context budget', help: 'Most of the window earlier messages may use (0.1–0.9).', min: 0.1, max: 0.9, step: 0.05 },
 ]

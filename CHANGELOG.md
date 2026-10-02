@@ -12,6 +12,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Thi
 - Workers on other computers. With the Team strategy or a worker model, each part of a plan has its own worker, which Norn can place on a paired computer, and parts on different computers are written at the same time. The chat timeline and run details show each worker's model and computer.
 - Model roles. A profile can assign primary, fast, coding, planner, worker, and reviewer models, each with an optional computer. With the chat on Auto, a profile's coding model answers coding requests and its fast model answers quick questions. A fallback order lists the models to try when the answering model fails.
 - Planning: Always asks the planner model to split a request that has no obvious parts.
+- Placement rules per profile. Each paired computer can be Preferred or Never use, and Only this computer keeps every turn here.
+- Retry on another computer. When a model fails before showing anything, the turn runs again with the same model on another online computer that has it, before trying another model. Retries (1–3) sets how many times.
 - The network advertisement (`_localai._tcp`) now says where the API is, as `api_port` in its TXT record. The service's own port is the computer-to-computer port, so an app that finds Yggdrasil on the network, such as the iPhone app, had to assume the default API port.
 
 ### Changed

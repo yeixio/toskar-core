@@ -26,7 +26,28 @@ func Validate(p Profile) error {
 			return ErrInvalidProfile("required role " + r.Role + " missing model_id")
 		}
 	}
+	if err := ValidateNodePolicy(p.NodePolicy); err != nil {
+		return err
+	}
 	return ValidateOrchestration(p.Orchestration)
+}
+
+// ValidateNodePolicy checks a profile's placement rules.
+func ValidateNodePolicy(n contracts.NodePolicy) error {
+	switch n.Mode {
+	case "", "automatic", "prefer_local", "manual":
+	default:
+		return ErrInvalidProfile("node_policy.mode must be automatic, prefer_local, or manual")
+	}
+	if n.Remote != "" && n.Remote != "off" {
+		return ErrInvalidProfile("node_policy.remote must be off or empty")
+	}
+	for _, id := range n.PreferredNodes {
+		if slices.Contains(n.DeniedNodes, id) {
+			return ErrInvalidProfile("a computer cannot be both preferred and denied")
+		}
+	}
+	return nil
 }
 
 // ValidateOrchestration checks a profile's advanced controls (§40).
@@ -53,6 +74,7 @@ func ValidateOrchestration(o contracts.OrchestrationPolicy) error {
 		choice("fallback", o.Fallback, "off"),
 		between("max_workers", o.MaxWorkers, 2, 8),
 		between("max_tool_calls", o.MaxToolCalls, 1, 50),
+		between("retries", o.Retries, 1, 3),
 		between("timeout_seconds", o.TimeoutSeconds, 10, 3600),
 	} {
 		if err != nil {

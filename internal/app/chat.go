@@ -298,8 +298,13 @@ func (a *App) RunChat(ctx context.Context, profileID, conversationID, message st
 		var metrics *pluginapi.GenerationMetrics
 		var roleSteps []contracts.GenerationRoleStep
 		var contextUsage map[string]any
-		// One quiet retry on another model when the first fails before
-		// showing or changing anything (spec §14, §26).
+		// Quiet retries when the model fails before showing or changing
+		// anything (spec §14, §26): first the same model on another
+		// computer, then another model, up to the profile's retry count.
+		maxRetries := profile.Orchestration.Retries
+		if maxRetries == 0 {
+			maxRetries = 1
+		}
 		for attempt := 0; ; attempt++ {
 			eventsCh, err := orch.Run(ctx, task, profile, env)
 			if err != nil {
@@ -320,8 +325,28 @@ func (a *App) RunChat(ctx context.Context, profileID, conversationID, message st
 						}(eventsCh)
 						return
 					}
-					if attempt == 0 && special == nil && profile.Orchestration.Fallback != "off" && recoverable(ctx, evt.Error, full, env) {
+					if attempt < maxRetries && special == nil && profile.Orchestration.Fallback != "off" && recoverable(ctx, evt.Error, full, env) {
 						failedID := firstNonEmpty(env.modelID(), modelID)
+						failedNode, _ := env.roleNode(profiles.RolePrimary)
+						if failedNode == "" {
+							failedNode = a.Config.Get().NodeID
+						}
+						exclude := append(env.excludedNodes(), failedNode)
+						if alt, ok := a.alternateNode(ctx, profile, profiles.RolePrimary, failedID, exclude); ok && !env.keepsLocal() {
+							step := fmt.Sprintf("%s failed on %s, so it answered on %s instead", a.modelName(failedID), a.nodeDisplayName(failedNode), a.nodeDisplayName(alt))
+							run.Retried()
+							run.Strategy("Answered on " + a.nodeDisplayName(alt) + " after " + a.modelName(failedID) + " failed on " + a.nodeDisplayName(failedNode))
+							a.Logger.Warn("chat model failed; retrying on another computer", "model", failedID, "failed_node", failedNode, "next_node", alt, "error", evt.Error)
+							env.trace.recovered(step, "")
+							env.retryElsewhere(failedNode)
+							metrics, roleSteps, contextUsage = nil, nil, nil
+							retry = true
+							go func(rest <-chan pluginapi.OrchestrationEvent) {
+								for range rest {
+								}
+							}(eventsCh)
+							break
+						}
 						if next, step, notice, ok := a.fallback(ctx, failedID, evt.Error, profile.Orchestration.FallbackModels); ok {
 							run.Retried()
 							run.Strategy("Answered on another model after " + a.modelName(failedID) + " failed")
@@ -796,6 +821,9 @@ type chatExecEnv struct {
 	// capabilities are inventory facts for a question about what
 	// Yggdrasil can do (§37).
 	capabilities string
+	// excluded are computers the turn no longer uses, because the model
+	// failed there (§20, Execution).
+	excluded []string
 	// localOnly is set once the turn uses a memory or knowledge source
 	// marked this computer only, so it is never sent elsewhere (§63).
 	localOnly   bool
@@ -1060,7 +1088,10 @@ func (e *chatExecEnv) NodeForRole(role string) (string, error) {
 	e.mu.Unlock()
 
 	modelID := e.modelForRole(role)
-	nodeID, err := e.app.placeRoleAvoiding(e.ctx, e.profile, role, modelID, avoid)
+	e.mu.Lock()
+	excluded := append([]string(nil), e.excluded...)
+	e.mu.Unlock()
+	nodeID, err := e.app.placeRoleWith(e.ctx, e.profile, role, modelID, avoid, excluded, false)
 	if err != nil {
 		return "", err
 	}
@@ -1174,6 +1205,32 @@ func (a *App) listNodes(ctx context.Context) ([]contracts.Node, error) {
 
 // switchModel points the turn at another model after the first one failed.
 // Placement is redone for the new model.
+// retryElsewhere keeps the model and places the turn again, never on
+// failedNode, where the model just failed.
+func (e *chatExecEnv) retryElsewhere(failedNode string) {
+	e.mu.Lock()
+	defer e.mu.Unlock()
+	e.excluded = append(e.excluded, failedNode)
+	e.lastModel = ""
+	e.roleNodes = nil
+	e.roleModels = nil
+	e.usedNodes = nil
+}
+
+// excludedNodes are the computers this turn no longer uses.
+func (e *chatExecEnv) excludedNodes() []string {
+	e.mu.Lock()
+	defer e.mu.Unlock()
+	return append([]string(nil), e.excluded...)
+}
+
+// keepsLocal reports whether the turn must stay on this computer.
+func (e *chatExecEnv) keepsLocal() bool {
+	e.mu.Lock()
+	defer e.mu.Unlock()
+	return e.localOnly || e.adapter != ""
+}
+
 func (e *chatExecEnv) switchModel(profile profiles.Profile, modelID string) {
 	e.mu.Lock()
 	defer e.mu.Unlock()

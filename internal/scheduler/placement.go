@@ -47,7 +47,7 @@ func Place(input ScoreInput) (PlacementDecision, error) {
 func pinnedNodeError(input ScoreInput) error {
 	var pinID string
 	for _, r := range input.Profile.Roles {
-		if r.Role == input.Role && strings.TrimSpace(r.NodeID) != "" {
+		if r.Role == baseRole(input.Role) && strings.TrimSpace(r.NodeID) != "" {
 			pinID = r.NodeID
 			break
 		}

@@ -100,3 +100,19 @@ func TestTeamProfilesMigrate(t *testing.T) {
 		t.Fatalf("created = %+v", created)
 	}
 }
+
+func TestNodePolicyValidation(t *testing.T) {
+	for _, bad := range []contracts.NodePolicy{
+		{Mode: "everywhere"}, {Remote: "on"}, {PreferredNodes: []string{"a"}, DeniedNodes: []string{"a"}},
+	} {
+		if err := ValidateNodePolicy(bad); err == nil {
+			t.Errorf("%+v accepted", bad)
+		}
+	}
+	if err := ValidateNodePolicy(contracts.NodePolicy{Mode: "automatic", PreferredNodes: []string{"a"}, DeniedNodes: []string{"b"}, Remote: "off"}); err != nil {
+		t.Fatal(err)
+	}
+	if err := ValidateOrchestration(contracts.OrchestrationPolicy{Retries: 4}); err == nil {
+		t.Fatal("4 retries accepted")
+	}
+}

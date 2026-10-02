@@ -343,6 +343,7 @@ A profile's `orchestration` object holds its advanced controls. Every field is o
 | `context_share` | 0.1–0.9 | Most of the model's window earlier messages may use |
 | `fallback` | `off` | Shows a failure instead of answering on another model |
 | `fallback_models` | up to 8 model ids | Tried in order when the answering model fails, before Yggdrasil picks another installed model |
+| `retries` | 1–3 | Tries after a model fails before showing anything (default 1). Each try first runs the same model on another online computer that has it, then another model |
 | `timeout_seconds` | 10–3600 | Stops a turn that runs longer; the answer so far is kept and says it reached the time limit |
 
 Invalid values are refused with 400. In advanced mode, the profile editor has an Orchestration section, alongside model roles, tools, knowledge, and placement.
@@ -357,6 +358,17 @@ A profile's `roles` assign models, and optionally computers, to these roles. A r
 | `planner` | Splitting a request into parts |
 | `worker` | Each part of a plan. With the Team strategy or a worker model, each part gets its own slot (`worker:1`, `worker:2`, …) that Norn can place on another computer, and parts on different computers are written at the same time |
 | `reviewer` | Checking the answer |
+
+A profile's `node_policy` holds its placement rules:
+
+| Field | Values | Effect |
+| --- | --- | --- |
+| `mode` | `automatic`, `prefer_local`, `manual` | Where roles run by default; `manual` relies on role pins |
+| `preferred_nodes` | computer ids | Favored when they have the model |
+| `denied_nodes` | computer ids | Never used |
+| `remote` | `off` | Every turn stays on this computer |
+
+A computer cannot be both preferred and denied. A role pinned to a computer still follows its pin; a worker slot such as `worker:2` follows the `worker` role's pin.
 
 `orchestrator_id` is `simple` for every profile. A profile sent with the older `team` orchestrator, or with the role names `coordinator` and `researcher`, is stored with the Team strategy and the roles `planner` and `assistant`. Profiles saved by older versions are migrated the same way at startup.
 

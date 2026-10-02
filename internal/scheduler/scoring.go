@@ -1,6 +1,9 @@
 package scheduler
 
 import (
+	"slices"
+	"strings"
+
 	"github.com/yeixio/yggdrasil-core/pkg/contracts"
 )
 
@@ -15,6 +18,20 @@ type ScoreInput struct {
 	// AvoidNodeIDs softly prefers placing this role on a different computer
 	// than earlier roles in the same Team turn (automatic spread).
 	AvoidNodeIDs []string
+	// ExcludeNodeIDs are never chosen, such as a computer where the model
+	// just failed.
+	ExcludeNodeIDs []string
+	// RequireModel skips computers that do not have the model.
+	RequireModel bool
+}
+
+// baseRole strips a worker slot's number, so "worker:2" follows the
+// worker role's pin.
+func baseRole(role string) string {
+	if i := strings.IndexByte(role, ':'); i > 0 {
+		return role[:i]
+	}
+	return role
 }
 
 // NodeCandidate is a schedulable node snapshot.
@@ -43,10 +60,26 @@ func Score(input ScoreInput) []ScoredNode {
 			s.Reasons = append(s.Reasons, "offline")
 			continue
 		}
+		policy := input.Profile.NodePolicy
+		// The profile's execution rules (§20): denied computers, and this
+		// computer only, are never used.
+		if slices.Contains(policy.DeniedNodes, n.Node.ID) || slices.Contains(input.ExcludeNodeIDs, n.Node.ID) {
+			continue
+		}
+		if policy.Remote == "off" && !n.Node.IsLocal {
+			continue
+		}
+		if _, ok := n.InstalledModels[input.ModelID]; input.RequireModel && input.ModelID != "" && !ok {
+			continue
+		}
+		if slices.Contains(policy.PreferredNodes, n.Node.ID) {
+			s.Score += 120
+			s.Reasons = append(s.Reasons, "preferred computer")
+		}
 
 		// Explicit pin.
 		for _, r := range input.Profile.Roles {
-			if r.Role == input.Role && r.NodeID != "" {
+			if r.Role == baseRole(input.Role) && r.NodeID != "" {
 				if r.NodeID == n.Node.ID {
 					s.Score += 1000
 					s.Reasons = append(s.Reasons, "explicitly pinned")

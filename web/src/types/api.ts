@@ -220,6 +220,9 @@ export interface ToolActivityRecord {
 
 export interface NodePolicy {
   mode: 'automatic' | 'prefer_local' | 'manual'
+  preferred_nodes?: string[]
+  denied_nodes?: string[]
+  remote?: '' | 'off'
 }
 
 export interface AIProfile {
@@ -247,6 +250,7 @@ export interface OrchestrationPolicy {
   context_share?: number
   fallback?: '' | 'off'
   fallback_models?: string[]
+  retries?: number
   timeout_seconds?: number
 }
 

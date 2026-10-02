@@ -313,9 +313,15 @@ type ToolPolicy struct {
 	Policy string `json:"policy"` // deny | ask | allow-for-session | allow
 }
 
-// NodePolicy controls placement preferences.
+// NodePolicy controls placement preferences (spec §20, Execution).
 type NodePolicy struct {
 	Mode string `json:"mode"` // automatic | prefer_local | manual
+	// PreferredNodes are computers placement favors when they can run the model.
+	PreferredNodes []string `json:"preferred_nodes,omitempty"`
+	// DeniedNodes are computers this profile never runs on.
+	DeniedNodes []string `json:"denied_nodes,omitempty"`
+	// Remote is off to keep every turn on this computer.
+	Remote string `json:"remote,omitempty"`
 }
 
 // AIProfile is the user-facing AI configuration.
@@ -371,6 +377,10 @@ type OrchestrationPolicy struct {
 	// FallbackModels are tried in order when the answering model fails,
 	// before Yggdrasil picks another installed model.
 	FallbackModels []string `json:"fallback_models,omitempty"`
+	// Retries is how many times a turn that fails before showing anything
+	// is tried again (1–3, default 1): first the same model on another
+	// computer, then another model.
+	Retries int `json:"retries,omitempty"`
 	// TimeoutSeconds stops a turn that runs longer (10–3600).
 	TimeoutSeconds int `json:"timeout_seconds,omitempty"`
 }

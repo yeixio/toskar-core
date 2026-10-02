@@ -6,7 +6,7 @@ import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 import { api } from '@/lib/api'
 import { blankProfileTemplate, profileTemplateFromPurpose } from '@/lib/profilePresets'
 import { useUIStore } from '@/stores/uiStore'
-import type { AIProfile, ModelRole, OrchestrationPolicy, ToolPolicy } from '@/types/api'
+import type { AIProfile, ModelRole, NodePolicy, OrchestrationPolicy, ToolPolicy } from '@/types/api'
 import { KnowledgePicker } from '@/features/knowledge/KnowledgePicker'
 import { CAPABILITIES, capabilityEnabled, setCapability } from './capabilities'
 import {
@@ -761,6 +761,7 @@ function AdvancedEditor({
 }) {
   const [name, setName] = useState(profile.name)
   const [nodeMode, setNodeMode] = useState(profile.node_policy?.mode ?? 'automatic')
+  const [placement, setPlacement] = useState(placementFrom(profile))
   const [roles, setRoles] = useState<ModelRole[]>(editorRoles(profile))
   const [tools, setTools] = useState<ToolPolicy[]>(defaultToolsFrom(profile))
   const [knowledge, setKnowledge] = useState<string[]>(profile.knowledge_sources ?? [])
@@ -773,6 +774,7 @@ function AdvancedEditor({
     profileIdRef.current = profile.id
     setName(profile.name)
     setNodeMode(profile.node_policy?.mode ?? 'automatic')
+    setPlacement(placementFrom(profile))
     setRoles(editorRoles(profile))
     setTools(defaultToolsFrom(profile))
     setKnowledge(profile.knowledge_sources ?? [])
@@ -853,6 +855,32 @@ function AdvancedEditor({
           </select>
         </label>
         <p className="text-xs leading-relaxed text-ink-faint">{nodeHint}</p>
+        <label className="flex items-center gap-2 text-xs text-ink-muted">
+          <input
+            type="checkbox"
+            checked={placement.remote === 'off'}
+            onChange={(e) => setPlacement({ ...placement, remote: e.target.checked ? 'off' : '' })}
+          />
+          Only this computer — never use paired computers
+        </label>
+        {placement.remote !== 'off' && nodes.length > 0 && (
+          <div className="space-y-1.5">
+            {nodes.map((n) => (
+              <label key={n.id} className="flex items-center justify-between gap-3 text-xs text-ink-muted">
+                <span className="truncate text-ink">{n.name}</span>
+                <select
+                  className="field max-w-[160px] py-1 text-xs"
+                  value={placement.preferred.includes(n.id) ? 'preferred' : placement.denied.includes(n.id) ? 'denied' : ''}
+                  onChange={(e) => setPlacement(withPlacement(placement, n.id, e.target.value))}
+                >
+                  <option value="">Allowed</option>
+                  <option value="preferred">Preferred</option>
+                  <option value="denied">Never use</option>
+                </select>
+              </label>
+            ))}
+          </div>
+        )}
       </section>
 
       <section className="space-y-2">
@@ -1024,7 +1052,7 @@ function AdvancedEditor({
               ...profile,
               name: name.trim(),
               orchestrator_id: 'simple',
-              node_policy: { mode: nodeMode },
+              node_policy: nodePolicyFrom(nodeMode, placement),
               roles: savedRoles(roles),
               tools,
               knowledge_sources: knowledge,
@@ -1063,4 +1091,31 @@ function editorOrchestration(profile: AIProfile): OrchestrationPolicy {
   const o = { ...(profile.orchestration ?? {}) }
   if (profile.orchestrator_id === 'team' && !o.strategy) o.strategy = 'team'
   return o
+}
+
+type Placement = { preferred: string[]; denied: string[]; remote: '' | 'off' }
+
+function placementFrom(profile: AIProfile): Placement {
+  const p = profile.node_policy ?? { mode: 'automatic' }
+  return { preferred: p.preferred_nodes ?? [], denied: p.denied_nodes ?? [], remote: p.remote ?? '' }
+}
+
+/** Sets one computer to allowed, preferred, or never used. */
+function withPlacement(p: Placement, id: string, choice: string): Placement {
+  const preferred = p.preferred.filter((x) => x !== id)
+  const denied = p.denied.filter((x) => x !== id)
+  if (choice === 'preferred') preferred.push(id)
+  if (choice === 'denied') denied.push(id)
+  return { ...p, preferred, denied }
+}
+
+function nodePolicyFrom(mode: NodePolicy['mode'], p: Placement): NodePolicy {
+  const out: NodePolicy = { mode }
+  if (p.remote === 'off') {
+    out.remote = 'off'
+    return out
+  }
+  if (p.preferred.length) out.preferred_nodes = p.preferred
+  if (p.denied.length) out.denied_nodes = p.denied
+  return out
 }

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net"
+	"slices"
 	"strconv"
 	"strings"
 	"sync"
@@ -166,6 +167,12 @@ func (a *App) placeRole(ctx context.Context, profile profiles.Profile, role, mod
 }
 
 func (a *App) placeRoleAvoiding(ctx context.Context, profile profiles.Profile, role, modelID string, avoidNodeIDs []string) (string, error) {
+	return a.placeRoleWith(ctx, profile, role, modelID, avoidNodeIDs, nil, false)
+}
+
+// placeRoleWith places a role, never on an excluded computer, and only on
+// one that has the model when requireModel is set.
+func (a *App) placeRoleWith(ctx context.Context, profile profiles.Profile, role, modelID string, avoidNodeIDs, excludeNodeIDs []string, requireModel bool) (string, error) {
 	if a.Nodes != nil {
 		// A chat must not wait on a full probe of every paired computer.
 		a.Nodes.RefreshPairedLivenessIfStale(ctx)
@@ -178,7 +185,9 @@ func (a *App) placeRoleAvoiding(ctx context.Context, profile profiles.Profile, r
 	candidates := scheduler.BuildCandidates(nodeList, installed, nil)
 	decision, err := a.Scheduler.PlaceRole(ctx, scheduler.ScoreInput{
 		Role: role, ModelID: modelID, Profile: profile, Nodes: candidates,
-		AvoidNodeIDs: a.rememberUnstable(profile.NodePolicy.Mode, modelID, avoidNodeIDs),
+		AvoidNodeIDs:   a.rememberUnstable(profile.NodePolicy.Mode, modelID, avoidNodeIDs),
+		ExcludeNodeIDs: excludeNodeIDs,
+		RequireModel:   requireModel,
 	})
 	if err != nil {
 		return "", err
@@ -484,4 +493,18 @@ func (a *App) stubGenerate(modelID string, messages []pluginapi.ChatMessage) <-c
 		}
 	}()
 	return ch
+}
+
+// alternateNode is another online computer that has modelID, for retrying a
+// turn whose model failed on failedNode before trying another model (§20,
+// Execution; O6). The profile's placement rules apply.
+func (a *App) alternateNode(ctx context.Context, profile profiles.Profile, role, modelID string, exclude []string) (string, bool) {
+	if a.Nodes == nil || a.Scheduler == nil || modelID == "" {
+		return "", false
+	}
+	nodeID, err := a.placeRoleWith(ctx, profile, role, modelID, nil, exclude, true)
+	if err != nil || nodeID == "" || slices.Contains(exclude, nodeID) {
+		return "", false
+	}
+	return nodeID, true
 }
