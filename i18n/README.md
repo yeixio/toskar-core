@@ -10,8 +10,13 @@ i18n/
   locales/<language>/       one folder per BCP 47 tag, such as en, es, pt-BR
     common.json             navigation, status, and words used everywhere
     settings.json           and one file per area of the app
+    desktop.json            the desktop app's own menus, tray, and closing screen
     mobile.json             the iPhone app's text
 ```
+
+The desktop app's shell copies this folder when it builds and reads
+`desktop.json`; the web UI tells it the language, so its menus and tray
+match the page.
 
 The iPhone app keeps a copy of `languages.json` and every `mobile.json` in
 `mobile/src/i18n/catalog.json` (yeixio/yggdrasil-desktop), which its build
