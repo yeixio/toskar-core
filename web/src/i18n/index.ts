@@ -1,4 +1,5 @@
 import i18n, { type Resource } from 'i18next'
+import { notifyDesktopLanguage } from '@/lib/desktopBridge'
 import { initReactI18next } from 'react-i18next'
 import { directionOf, languages, pseudoLocale, sourceLanguage } from './languages'
 import { pseudoLocalize } from './pseudo'
@@ -131,6 +132,9 @@ void i18n
 
 markDocument(i18n.language)
 i18n.on('languageChanged', markDocument)
+// The desktop shell's menus and tray follow the page's language.
+void notifyDesktopLanguage(i18n.language)
+i18n.on('languageChanged', (language) => void notifyDesktopLanguage(language))
 
 /** Shows the UI in a language now, and remembers it for the next start. */
 export async function applyLanguage(saved: string): Promise<void> {

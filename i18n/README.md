@@ -10,7 +10,12 @@ i18n/
   locales/<language>/       one folder per BCP 47 tag, such as en, es, pt-BR
     common.json             navigation, status, and words used everywhere
     settings.json           and one file per area of the app
+    desktop.json            the desktop app's own menus, tray, and closing screen
 ```
+
+The desktop app's shell copies this folder when it builds and reads
+`desktop.json`; the web UI tells it the language, so its menus and tray
+match the page.
 
 English (`en`) is the source. Every other language has the same files and
 keys; a key that is missing falls back to English, so a language can ship

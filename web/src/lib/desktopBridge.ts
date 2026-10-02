@@ -7,6 +7,8 @@ type WailsApp = {
   SetLaunchAtLogin?: (v: boolean) => Promise<void>
   IsLaunchAtLogin?: () => Promise<boolean>
   MarkScreenshotReady?: () => Promise<void>
+  /** Shows the shell's menus and tray in a language, as the page does. */
+  SetLanguage?: (tag: string) => Promise<void>
   GetDaemonURL?: () => Promise<string>
   /** Present when the shell passes the daemon's events on as Wails events. */
   HasEventRelay?: () => Promise<boolean>
@@ -43,6 +45,15 @@ export async function notifyDesktopLaunchAtLogin(enabled: boolean): Promise<void
     await wailsGoApp()?.SetLaunchAtLogin?.(enabled)
   } catch {
     // Browser / headless — setting is still stored by the daemon.
+  }
+}
+
+/** Tells the desktop shell the UI language, so its menus and tray match the page. */
+export async function notifyDesktopLanguage(tag: string): Promise<void> {
+  try {
+    await wailsGoApp()?.SetLanguage?.(tag)
+  } catch {
+    // An older shell keeps its own language.
   }
 }
 
