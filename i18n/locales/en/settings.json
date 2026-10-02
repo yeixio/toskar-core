@@ -1,0 +1,11 @@
+{
+  "language": {
+    "title": "Language",
+    "description": "The language of menus, buttons, and messages in Yggdrasil on every computer and phone you use with it. Each device can follow its own system language.",
+    "appLanguage": "App language",
+    "systemDefault": "System default ({{language}})",
+    "pseudo": "Pseudo-locale (for testing translations)",
+    "saved": "Saved.",
+    "saveFailed": "The language could not be saved: {{error}}"
+  }
+}

@@ -18,6 +18,7 @@ import { ConnectedServices } from './ConnectedServices'
 import { NotificationDestinations } from './NotificationDestinations'
 import { WhatLeft } from './WhatLeft'
 import { Toggle } from '@/components/ui/Toggle'
+import { LanguageSettings } from './LanguageSettings'
 import { Personalization } from './Personalization'
 import { YggdrasilMark } from '@/components/ui/YggdrasilMark'
 
@@ -255,6 +256,8 @@ export function SettingsPage() {
             ]}
           />
         </section>
+
+        <LanguageSettings />
 
         <Personalization />
 

@@ -4,6 +4,7 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { LifecycleHost } from '@/components/LifecycleHost'
 import { NotificationHost } from '@/components/NotificationHost'
 import { ServiceBootGate } from '@/components/ServiceBootGate'
+import { LanguageSync } from '@/components/LanguageSync'
 import { ThemeSync } from '@/components/ThemeSync'
 import { AppLayout } from '@/components/layout/AppLayout'
 import { ScreenshotMode } from '@/app/ScreenshotMode'
@@ -46,6 +47,7 @@ export function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeSync />
+      <LanguageSync />
       <LifecycleHost>
         <NotificationHost />
         <BrowserRouter>

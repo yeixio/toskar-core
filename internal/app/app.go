@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -913,6 +914,7 @@ func (a *App) settingsView(ctx context.Context) (contracts.SettingsView, error) 
 	toolFiles, _ := a.Settings.GetString(ctx, "tool_file_writes", "ask")
 	toolGit, _ := a.Settings.GetString(ctx, "tool_git", "ask")
 	launchAtLogin, _ := a.Settings.GetBool(ctx, "launch_at_login", false)
+	uiLocale, _ := a.Settings.GetString(ctx, "ui_locale", "")
 	if defaultExec == "" {
 		defaultExec = "automatic"
 	}
@@ -940,7 +942,18 @@ func (a *App) settingsView(ctx context.Context) (contracts.SettingsView, error) 
 		ToolGit:                 toolGit,
 		LaunchAtLogin:           launchAtLogin,
 		DiscoveryNeedsRestart:   a.discoveryNeedsRestart,
+		UILocale:                uiLocale,
 	}, nil
+}
+
+// localeTag is a BCP 47 language tag: a 2–3 letter language, then optional
+// script, region, or variant subtags, such as "en", "es-MX", "zh-Hant-TW",
+// or the pseudo-locale "en-XA".
+var localeTag = regexp.MustCompile(`^[A-Za-z]{2,3}(-[A-Za-z0-9]{2,8})*$`)
+
+// validLocale accepts a language tag, or "" for the system language.
+func validLocale(tag string) bool {
+	return tag == "" || (len(tag) <= 35 && localeTag.MatchString(tag))
 }
 
 func setSettingString(ctx context.Context, repo *repositories.SettingsRepo, key, value string, allowed map[string]bool) error {
@@ -1018,6 +1031,14 @@ func (a *App) applySettingsPatch(ctx context.Context, patch map[string]any) erro
 			if err := a.Settings.SetBool(ctx, key, v); err != nil {
 				return err
 			}
+		}
+	}
+	if v, ok := patch["ui_locale"].(string); ok {
+		if !validLocale(v) {
+			return fmt.Errorf("ui_locale must be a language tag such as en or es-MX, or empty for the system language")
+		}
+		if err := a.Settings.Set(ctx, "ui_locale", v); err != nil {
+			return err
 		}
 	}
 	toolAllowed := map[string]bool{"deny": true, "ask": true, "allow": true, "allow-for-session": true}

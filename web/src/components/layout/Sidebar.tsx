@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
 import { NavLink } from 'react-router-dom'
 import { Rune } from '@/components/ui/Realm'
 import { api } from '@/lib/api'
@@ -8,25 +9,26 @@ import { useUIStore } from '@/stores/uiStore'
 import { YggdrasilMark } from '@/components/ui/YggdrasilMark'
 import { NotificationBell } from './NotificationBell'
 
+// Labels are keys in the common namespace (i18n/locales/<language>/common.json).
 const mainNav = [
-  { to: '/chat', label: 'Chat' },
-  { to: '/automations', label: 'Automations' },
-  { to: '/models', label: 'Models' },
-  { to: '/train', label: 'Train' },
-  { to: '/knowledge', label: 'Knowledge' },
-  { to: '/memory', label: 'Memory' },
-  { to: '/nodes', label: 'Computers' },
+  { to: '/chat', label: 'nav.chat' },
+  { to: '/automations', label: 'nav.automations' },
+  { to: '/models', label: 'nav.models' },
+  { to: '/train', label: 'nav.train' },
+  { to: '/knowledge', label: 'nav.knowledge' },
+  { to: '/memory', label: 'nav.memory' },
+  { to: '/nodes', label: 'nav.computers' },
 ] as const
 
 const systemNav = [
-  { to: '/performance', label: 'Performance' },
-  { to: '/diagnostics', label: 'Diagnostics' },
-  { to: '/profiles', label: 'Profiles & Orchestration', advanced: true },
-  { to: '/tools', label: 'Tools', advanced: true },
-  { to: '/api-access', label: 'API Access', advanced: true },
+  { to: '/performance', label: 'nav.performance' },
+  { to: '/diagnostics', label: 'nav.diagnostics' },
+  { to: '/profiles', label: 'nav.profiles', advanced: true },
+  { to: '/tools', label: 'nav.tools', advanced: true },
+  { to: '/api-access', label: 'nav.apiAccess', advanced: true },
 ] as const
 
-/** A nav entry: the rune, then the plain English label. */
+/** A nav entry: the rune, then the label in the UI language. */
 function NavItem({ to, label }: { to: string; label: string }) {
   const realm = realms[to]
   return (
@@ -44,6 +46,7 @@ function NavItem({ to, label }: { to: string; label: string }) {
 }
 
 export function Sidebar() {
+  const { t } = useTranslation()
   const advancedMode = useUIStore((s) => s.advancedMode)
   const healthQuery = useQuery({
     queryKey: ['health'],
@@ -87,11 +90,11 @@ export function Sidebar() {
 
   const statusLabel = !serviceOk
     ? healthPending
-      ? 'Starting…'
-      : 'Service unavailable'
+      ? t('status.starting')
+      : t('status.unavailable')
     : !hasModel
-      ? 'No model'
-      : 'Ready'
+      ? t('status.noModel')
+      : t('status.ready')
 
   const statusTone = !serviceOk
     ? healthPending
@@ -128,10 +131,10 @@ export function Sidebar() {
                   className={['status-chip shrink-0', statusTone].join(' ')}
                   title={
                     !serviceOk
-                      ? 'The local Yggdrasil service is not responding.'
+                      ? t('status.unavailableHint')
                       : !hasModel
-                        ? 'Install a model in Models to start chatting.'
-                        : 'Local service is ready.'
+                        ? t('status.noModelHint')
+                        : t('status.readyHint')
                   }
                 >
                   <span className={['h-1.5 w-1.5 rounded-full', statusDot].join(' ')} aria-hidden />
@@ -139,7 +142,7 @@ export function Sidebar() {
                 </span>
               </div>
               <p className="mt-1 whitespace-nowrap text-[11px] leading-none text-ink-faint">
-                {runningVersion || 'Local AI control plane'}
+                {runningVersion || t('tagline')}
               </p>
             </div>
           </a>
@@ -147,62 +150,60 @@ export function Sidebar() {
         </div>
       </div>
 
-      <nav className="flex flex-1 flex-col gap-4 overflow-y-auto px-2.5 pb-3" aria-label="Main">
+      <nav className="flex flex-1 flex-col gap-4 overflow-y-auto px-2.5 pb-3" aria-label={t('nav.label')}>
         <div>
-          <p className="label-caps mb-1 px-2.5">Main</p>
+          <p className="label-caps mb-1 px-2.5">{t('nav.main')}</p>
           <div className="flex flex-col gap-0.5">
             {mainNav.map(({ to, label }) => (
-              <NavItem key={to} to={to} label={label} />
+              <NavItem key={to} to={to} label={t(label)} />
             ))}
           </div>
         </div>
 
         <div>
-          <p className="label-caps mb-1 px-2.5">System</p>
+          <p className="label-caps mb-1 px-2.5">{t('nav.system')}</p>
           <div className="flex flex-col gap-0.5">
             {systemItems.map(({ to, label }) => (
-              <NavItem key={to} to={to} label={label} />
+              <NavItem key={to} to={to} label={t(label)} />
             ))}
-            <NavItem to="/settings" label="Settings" />
+            <NavItem to="/settings" label={t('nav.settings')} />
           </div>
         </div>
       </nav>
 
       <div className="mt-auto space-y-1.5 border-t border-line/50 px-4 py-3">
-        <p className="label-caps mb-2 text-[10px] text-ink-faint">System</p>
+        <p className="label-caps mb-2 text-[10px] text-ink-faint">{t('subsystems.title')}</p>
         <div
           className="flex items-center justify-between gap-2 text-[11px] text-ink-faint"
-          title="Computer discovery and networking"
+          title={t('subsystems.bifrostHint')}
         >
           <span className="flex items-center gap-1.5">
             <span className="h-1 w-1 rounded-full bg-bifrost" aria-hidden />
             Bifrost
           </span>
           <span className="tabular-nums">
-            {nodeCount === 0
-              ? 'No computers'
-              : `${nodeCount} ${nodeCount === 1 ? 'computer' : 'computers'} connected`}
+            {nodeCount === 0 ? t('subsystems.computersNone') : t('subsystems.computersConnected', { count: nodeCount })}
           </span>
         </div>
         <div
           className="flex items-center justify-between gap-2 text-[11px] text-ink-faint"
-          title="Norn schedules work across your computers"
+          title={t('subsystems.nornHint')}
         >
           <span className="flex items-center gap-1.5">
             <span className="h-1 w-1 rounded-full bg-norn" aria-hidden />
             Norn
           </span>
-          <span>Automatic</span>
+          <span>{t('subsystems.nornAutomatic')}</span>
         </div>
         <div
           className="flex items-center justify-between gap-2 text-[11px] text-ink-faint"
-          title="Local knowledge and memory"
+          title={t('subsystems.mimirHint')}
         >
           <span className="flex items-center gap-1.5">
             <span className="h-1 w-1 rounded-full bg-mimir" aria-hidden />
             Mimir
           </span>
-          <span>Ready</span>
+          <span>{t('subsystems.mimirReady')}</span>
         </div>
       </div>
     </aside>

@@ -1,3 +1,4 @@
+import '@/i18n'
 import '@testing-library/jest-dom/vitest'
 
 const memory = new Map<string, string>()

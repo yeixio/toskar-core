@@ -1,0 +1,41 @@
+{
+  "tagline": "Local AI control plane",
+  "nav": {
+    "label": "Main",
+    "main": "Main",
+    "system": "System",
+    "chat": "Chat",
+    "automations": "Automations",
+    "models": "Models",
+    "train": "Train",
+    "knowledge": "Knowledge",
+    "memory": "Memory",
+    "computers": "Computers",
+    "performance": "Performance",
+    "diagnostics": "Diagnostics",
+    "profiles": "Profiles & Orchestration",
+    "tools": "Tools",
+    "apiAccess": "API Access",
+    "settings": "Settings"
+  },
+  "status": {
+    "starting": "Starting…",
+    "unavailable": "Service unavailable",
+    "noModel": "No model",
+    "ready": "Ready",
+    "unavailableHint": "The local Yggdrasil service is not responding.",
+    "noModelHint": "Install a model in Models to start chatting.",
+    "readyHint": "Local service is ready."
+  },
+  "subsystems": {
+    "title": "System",
+    "bifrostHint": "Computer discovery and networking",
+    "computersNone": "No computers",
+    "computersConnected_one": "{{count}} computer connected",
+    "computersConnected_other": "{{count}} computers connected",
+    "nornHint": "Norn schedules work across your computers",
+    "nornAutomatic": "Automatic",
+    "mimirHint": "Local knowledge and memory",
+    "mimirReady": "Ready"
+  }
+}

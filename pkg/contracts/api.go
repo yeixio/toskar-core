@@ -673,6 +673,9 @@ type SettingsView struct {
 	// DiscoveryNeedsRestart is true when enabling discovery requires a process restart
 	// to rebind Bifrost to the LAN (listener already started on loopback).
 	DiscoveryNeedsRestart bool `json:"discovery_needs_restart,omitempty"`
+	// UILocale is the app language as a BCP 47 tag, such as "es-MX", or ""
+	// to follow each device's system language (multilingual spec §6–7, §30).
+	UILocale string `json:"ui_locale"`
 }
 
 // Recommendation explains a recommended model setup.

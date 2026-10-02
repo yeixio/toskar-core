@@ -361,6 +361,8 @@ export interface SettingsView {
   tool_git?: string
   launch_at_login?: boolean
   discovery_needs_restart?: boolean
+  /** App language as a BCP 47 tag, or '' to follow each device's system language. */
+  ui_locale?: string
   memory_enabled?: boolean
 }
 
@@ -520,6 +522,7 @@ export interface ToolRequestedPayload {
 }
 
 export interface SettingsPatch {
+  ui_locale?: string
   memory_enabled?: boolean
   node_name?: string
   lan_api_enabled?: boolean
