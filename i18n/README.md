@@ -10,7 +10,13 @@ i18n/
   locales/<language>/       one folder per BCP 47 tag, such as en, es, pt-BR
     common.json             navigation, status, and words used everywhere
     settings.json           and one file per area of the app
+    mobile.json             the iPhone app's text
 ```
+
+The iPhone app keeps a copy of `languages.json` and every `mobile.json` in
+`mobile/src/i18n/catalog.json` (yeixio/yggdrasil-desktop), which its build
+refreshes from the matching core. Its App language follows the computer it
+is connected to unless it is set on the phone.
 
 English (`en`) is the source. Every other language has the same files and
 keys; a key that is missing falls back to English, so a language can ship
@@ -30,7 +36,10 @@ before it is complete.
 1. Add it to `languages.json` with its native name, `dir` (`ltr` or `rtl`),
    and `status`: `machine`, `partial`, `reviewed`, or `community`.
 2. Copy `locales/en` to `locales/<tag>` and translate the values.
-3. Run `pnpm test` in `web/`. It checks every file against English: valid
+3. Hermes on iOS has no `Intl.PluralRules`, so the iPhone app loads plural
+   rules for each language: add the language's line to
+   `mobile/src/i18n/plurals.ts` in yeixio/yggdrasil-desktop.
+4. Run `pnpm test` in `web/`. It checks every file against English: valid
    JSON, no duplicate keys, no keys English lacks, the same placeholders,
    and complete plural forms.
 

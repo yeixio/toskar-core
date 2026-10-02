@@ -1,0 +1,357 @@
+{
+  "app": {
+    "starting": "Starting Yggdrasil",
+    "back": "Back",
+    "close": "Close",
+    "cancel": "Cancel",
+    "dismiss": "Dismiss",
+    "loading": "Loading",
+    "save": "Save"
+  },
+  "tabs": {
+    "chat": "Chat",
+    "computers": "Computers",
+    "models": "Models",
+    "settings": "Settings"
+  },
+  "screens": {
+    "connect": "Connect",
+    "chat": "Chat"
+  },
+  "units": {
+    "megabytes": "{{value}} MB",
+    "gigabytes": "{{value}} GB"
+  },
+  "connection": {
+    "enterAddress": "Enter the address of the computer running Yggdrasil.",
+    "couldNotReach": "Could not reach Yggdrasil.",
+    "unreachable": "Yggdrasil on that computer is not reachable. Use the same Wi-Fi network, and turn on LAN access for the API on that computer.",
+    "keyRejected": "That API key was rejected. Create a key in API Access on the computer, then paste it here.",
+    "dropped": "The connection to Yggdrasil dropped.",
+    "chatFailed": "Chat failed.",
+    "requestFailed": "Request failed"
+  },
+  "connect": {
+    "title": "Connect a computer",
+    "subtitle": "The phone uses the computer that already runs your models. On that computer, open API Access, allow the API on your local network, and create a key.",
+    "address": "Computer address",
+    "addressPlaceholder": "192.168.1.20",
+    "apiKey": "API key",
+    "apiKeyPlaceholder": "Paste the key",
+    "connect": "Connect",
+    "connecting": "Connecting",
+    "notReady": "Yggdrasil answered, but it is not ready."
+  },
+  "discovery": {
+    "onThisNetwork": "On this network",
+    "useAddress": "Uses this computer's address",
+    "version": "Yggdrasil {{version}}",
+    "looking": "Looking for computers on this network…",
+    "lookingLabel": "Looking for computers on this network",
+    "none": "No computers found. Start Yggdrasil on your computer and use the same Wi-Fi, or enter its address.",
+    "localNetworkDenied": "Yggdrasil may not look for computers on your network. Allow it in Settings > Privacy & Security > Local Network.",
+    "listFailed": "Computers on this network could not be listed. You can still enter an address below."
+  },
+  "computers": {
+    "title": "Computers",
+    "subtitle": "The computers your connected computer can reach, and whether they are online.",
+    "disconnected": "Connect to a computer that runs Yggdrasil to chat with its models and see its other computers.",
+    "enterAddress": "Enter an address",
+    "loading": "Loading computers",
+    "none": "No computers are visible from this connection.",
+    "unnamed": "Computer",
+    "thisConnection": "This connection",
+    "meta": "{{platform}} · {{status}}",
+    "metaPaired": "{{platform}} · {{status}} · paired",
+    "status": {
+      "online": "online",
+      "offline": "offline",
+      "degraded": "degraded"
+    }
+  },
+  "models": {
+    "title": "Models",
+    "onComputer": "On your computer",
+    "connectFirst": "Connect a computer to see the models installed there.",
+    "loading": "Loading models",
+    "noneInstalled": "No models are installed on that computer yet.",
+    "status": {
+      "installed": "installed",
+      "loaded": "loaded",
+      "downloading": "downloading"
+    },
+    "support": {
+      "embedding": "Supporting model · searches knowledge by meaning",
+      "reranker": "Supporting model · ranks the best passages",
+      "classifier": "Supporting model · helps Auto route requests",
+      "other": "Supporting model"
+    }
+  },
+  "phoneModels": {
+    "heading": "On this iPhone",
+    "copy": "These are the smaller models from the Yggdrasil catalog. The file is downloaded onto this phone and stays here.",
+    "meta": "{{parameters}} · {{size}}",
+    "chat": "Chat",
+    "remove": "Remove",
+    "install": "Install",
+    "installing": "Installing {{percent}}",
+    "tooLarge": "Too large for this phone",
+    "installFailed": "The model could not be installed.",
+    "noPlace": "This phone has no place to store models.",
+    "noSpace": "This phone does not have enough free storage for that model.",
+    "downloadIncomplete": "The model download did not finish.",
+    "summaries": {
+      "qwen2-5-coder-1-5b-q4": "Very fast coding assistant for quick edits and small tasks.",
+      "llama-3-2-1b-q4": "Tiny general assistant when you want maximum speed and low memory.",
+      "llama-3-2-3b-q4": "Balanced everyday assistant with long context.",
+      "phi-3-5-mini-q4": "Compact Microsoft model good for reasoning and light coding.",
+      "gemma-2-2b-q4": "Small Google model for snappy everyday chat.",
+      "qwen2-5-3b-q4": "Capable mid-size general model with tool calling.",
+      "deepseek-r1-distill-1-5b-q4": "Lightweight reasoning model distilled from DeepSeek R1."
+    }
+  },
+  "onboarding": {
+    "welcome": "Welcome to",
+    "lede": "This app can run AI privately on this iPhone.",
+    "thisIPhone": "This iPhone",
+    "hardware": "Hardware detected for local inference.",
+    "device": "Device",
+    "memory": "Memory",
+    "system": "System",
+    "question": "What would you like your AI to do?",
+    "purposes": {
+      "general": {
+        "title": "General Assistant",
+        "description": "Everyday questions, writing help, and local-first conversation."
+      },
+      "coding": {
+        "title": "Programming",
+        "description": "Code help for quick edits and small tasks on this iPhone."
+      },
+      "research": {
+        "title": "Research",
+        "description": "Summaries and careful reasoning, running entirely on this phone."
+      },
+      "custom": {
+        "title": "Custom",
+        "description": "Pick a model yourself from the ones that fit this iPhone."
+      }
+    },
+    "continue": "Continue",
+    "recommended": "Recommended",
+    "recommendedFor": "Recommended for {{purpose}}",
+    "modelFacts": "{{parameters}} · {{download}} download · about {{memory}} memory",
+    "install": "Install recommended setup",
+    "tooLarge": "This model needs more memory than this iPhone can spare.",
+    "chooseOther": "Choose a different model",
+    "installing": "Installing {{model}}",
+    "downloaded": "{{percent}} downloaded",
+    "keepOpen": "Large model downloads can take several minutes. Keep Yggdrasil open.",
+    "ready": "You are ready",
+    "installed": "{{model}} is installed. Start chatting with your local AI.",
+    "startChatting": "Start chatting"
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Models you install on this iPhone stay on this iPhone. Chats with a connected computer stay on that computer.",
+    "thisIPhone": "This iPhone",
+    "whereChatsRun": "Where chats run",
+    "onDevice": "On this device, after you install a model",
+    "computer": "Computer",
+    "connectedComputer": "Connected computer",
+    "notConnected": "Not connected",
+    "coreVersion": "Yggdrasil on that computer",
+    "updateCore": "Update Yggdrasil on that computer to 1.4 or later to see answer sources, what the assistant did, live progress, and effort.",
+    "jobsKeepRunning": "Closing this app does not stop a job that is already running on that computer.",
+    "forget": "Forget this computer",
+    "connect": "Connect a computer",
+    "about": "About",
+    "version": "Version {{version}}",
+    "aboutCopy": "The world tree that links the realms. Yggdrasil links your apps to the models on your computers and on this iPhone.",
+    "dangerZone": "Danger zone",
+    "resetTitle": "Reset this iPhone",
+    "resetCopy": "Restore the welcome setup. Clears chats on this iPhone and forgets the connected computer.",
+    "resetButton": "Reset settings and app data…",
+    "resetDeletesModels": "This cannot be undone. Downloaded models will also be deleted.",
+    "resetKeepsModels": "This cannot be undone. Downloaded models will be kept.",
+    "alsoDeleteModels": "Also delete downloaded models",
+    "resetting": "Resetting…",
+    "confirmReset": "Yes, reset",
+    "resetFailed": "Could not reset Yggdrasil."
+  },
+  "language": {
+    "title": "Language",
+    "appLanguage": "App language",
+    "automatic": "Automatic ({{language}})",
+    "automaticHint": "Follows the connected computer's App language, or this iPhone's language when it has none.",
+    "choose": "Choose the app's language",
+    "pseudo": "Pseudo-locale (en-XA)"
+  },
+  "chat": {
+    "history": "Chat history",
+    "newChat": "New chat",
+    "chats": "Chats",
+    "search": "Search",
+    "rename": "Rename",
+    "renameChat": "Rename chat",
+    "delete": "Delete",
+    "deleteChat": "Delete chat",
+    "computer": "Computer",
+    "newOnComputer": "New chat on this computer",
+    "untitled": "Chat",
+    "model": "Model",
+    "chooseModel": "Choose a model",
+    "loading": "Loading chat",
+    "placeholder": "Message Yggdrasil",
+    "send": "Send",
+    "sending": "Sending",
+    "stop": "Stop",
+    "working": "Working…",
+    "thinkingOnPhone": "Thinking on this iPhone…",
+    "installFirst": "Install a model to chat on this iPhone.",
+    "setUpModel": "Set up a model",
+    "modelMissing": "That model is not installed on this phone.",
+    "interrupted": "Response interrupted",
+    "couldNotRun": "This phone could not run the model.",
+    "noProfile": "That computer has no profile yet. Create one in the Mac app first.",
+    "noChatPlace": "This iPhone has no place to store chats.",
+    "speed": "{{generated}} tok/s",
+    "speedWithPrompt": "{{generated}} tok/s · prompt {{prompt}} tok/s",
+    "groups": {
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "week": "Previous 7 days",
+      "month": "Previous 30 days",
+      "older": "Older"
+    },
+    "empty": {
+      "title": "What can I help you with?",
+      "phone": "Talk to the AI on this iPhone. Nothing you write leaves it.",
+      "computer": "Yggdrasil picks the right model and computer, looks things up when it needs to, and shows what it used."
+    },
+    "unsent": {
+      "notSent": "Not sent",
+      "retry": "Retry",
+      "retryLabel": "Send again",
+      "edit": "Edit",
+      "editLabel": "Edit the message"
+    },
+    "approval": {
+      "title": "Allow {{tool}}?",
+      "fallback": "This tool wants to run on your computer.",
+      "wantsToRun": "{{tool}} wants to run.",
+      "wantsToRunSummary": "{{tool}} wants to run: {{summary}}",
+      "deny": "Deny",
+      "allowOnce": "Allow once"
+    }
+  },
+  "effort": {
+    "title": "Effort",
+    "label": "Effort: {{effort}}",
+    "hint": "Chooses how much care the reply gets",
+    "auto": {
+      "label": "Auto",
+      "hint": "Yggdrasil decides: quick questions stay fast, big or data questions get more care."
+    },
+    "fast": {
+      "label": "Fast",
+      "hint": "Answers in one go, without planning or a second pass."
+    },
+    "balanced": {
+      "label": "Balanced",
+      "hint": "Plans big requests, reads a page when looking things up, and fixes figures once."
+    },
+    "thorough": {
+      "label": "Thorough",
+      "hint": "Reads more pages, uses the largest model that fits, and checks figures twice."
+    }
+  },
+  "answer": {
+    "files": "Files",
+    "filesHint": "Open files on the computer that made them.",
+    "sources": "Sources",
+    "source": "Source",
+    "opensInSafari": "Opens in Safari",
+    "steps_one": "What I did · {{count}} step",
+    "steps_other": "What I did · {{count}} steps"
+  },
+  "tools": {
+    "internet": {
+      "search": "Web search",
+      "open": "Open page"
+    },
+    "filesystem": {
+      "search": "Find files",
+      "read": "Read file",
+      "write": "Write file"
+    },
+    "terminal": "Terminal",
+    "git": {
+      "commit": "Git commit",
+      "push": "Git push"
+    },
+    "unnamed": "Tool"
+  },
+  "progress": {
+    "searchingWeb": "Searching the web…",
+    "searchingWebFor": "Searching the web for “{{query}}”…",
+    "readingPage": "Reading a page…",
+    "readingHost": "Reading {{host}}…",
+    "readingFile": "Reading a file…",
+    "searchingFiles": "Searching local files…",
+    "runningCommand": "Running command…",
+    "checkingGit": "Checking git…",
+    "usingTool": "Using {{tool}}…",
+    "checkedKnowledge": "Checked your knowledge…",
+    "yourKnowledge": "your knowledge",
+    "foundPassages_one": "Found {{count}} passage in {{source}}…",
+    "foundPassages_other": "Found {{count}} passages in {{source}}…",
+    "foundPassagesMore_one": "Found {{count}} passage in {{source}} and {{more}} more…",
+    "foundPassagesMore_other": "Found {{count}} passages in {{source}} and {{more}} more…",
+    "checkingSources": "Checking sources…",
+    "toolFailed": "{{tool}} failed",
+    "waitingForPermission": "Waiting for permission: {{tool}}",
+    "switchingTo": "Switching to {{model}}…",
+    "using": "Using {{model}}…",
+    "workingThrough_one": "Working through {{count}} part…",
+    "workingThrough_other": "Working through {{count}} parts…",
+    "planning": "Planning…",
+    "workingOn": "Working on: {{step}}…",
+    "puttingTogether": "Putting it together…",
+    "verifying": "Checking the figures against the sources…",
+    "writingFile": "Writing the file…",
+    "writingNamed": "Writing {{name}}…",
+    "loadingModel": "Loading the model…",
+    "loadingModelOn": "Loading the model on {{node}}…",
+    "generating": "Generating response…",
+    "generatingOn": "Generating on {{node}}…"
+  },
+  "realms": {
+    "about": "{{norse}}. {{rune}}. About this name",
+    "chat": {
+      "meaning": "Chat is where your messages are carried to the models on this iPhone or your computers, and the answers carried back.",
+      "story": "Ratatoskr is the squirrel who runs up and down the trunk of Yggdrasil, carrying messages between the eagle at the top of the tree and the dragon Níðhöggr gnawing at its roots.",
+      "runeName": "Ansuz, the rune of speech"
+    },
+    "models": {
+      "meaning": "Ymir is the first giant, from whom the world was made. Models are what everything else is built on.",
+      "story": "In the beginning there was Ymir, the first of the giants. When he was slain, the gods built the world from him: the earth from his flesh, the mountains from his bones, and the sky from his skull.",
+      "runeName": "Uruz, the rune of raw strength"
+    },
+    "computers": {
+      "meaning": "Bifrost is the rainbow bridge between worlds. It connects your computers.",
+      "story": "Bifröst is the burning rainbow bridge between Midgard, the world of people, and Asgard, home of the gods. Heimdall keeps watch at its end.",
+      "runeName": "Raidho, the rune of the journey"
+    },
+    "connect": {
+      "meaning": "Valgrind is the gate of Valhalla. An API key decides who may come in.",
+      "story": "Valgrind is the ancient gate that stands before Valhalla. It is holy and old, and few know how its lock is fastened.",
+      "runeName": "Thurisaz, the rune of the gate"
+    },
+    "settings": {
+      "meaning": "Forseti settles every matter fairly. Settings are the rules Yggdrasil keeps.",
+      "story": "Forseti, son of Baldr, sits in Glitnir, a hall with pillars of gold and a roof of silver. Everyone who brings a dispute to him leaves reconciled.",
+      "runeName": "Isa, the rune of stillness"
+    }
+  }
+}
