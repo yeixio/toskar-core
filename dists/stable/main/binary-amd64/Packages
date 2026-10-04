@@ -1,13 +1,13 @@
 Package: yggdrasil
-Version: 1.4.0
+Version: 1.5.0
 Architecture: amd64
 Maintainer: YEIXIO LLC <hello@yeix.io>
-Installed-Size: 43231
-Filename: pool/main/yggdrasil_1.4.0_amd64.deb
-Size: 22921198
-MD5sum: cacb758d4777734bc758ebf451e86f7a
-SHA1: 68412aacbcab13d517299262dd7339a2ae3f2830
-SHA256: 17008025c9f5336a034d78791e56e2df86db3d0315230fba49d5266e07ad03cf
+Installed-Size: 59512
+Filename: pool/main/yggdrasil_1.5.0_amd64.deb
+Size: 29782502
+MD5sum: 73abe97de28c161144ae77819890c0a8
+SHA1: de43fbc05c59c1c47d12452fa43bff616321feb0
+SHA256: d5ed65fb6562713564c40c4c9a867c21978c50a92b4169e6f1581f21a4062ce9
 Priority: optional
 Homepage: https://yggdrasil.yeix.io
 Description: Local AI daemon and web UI
