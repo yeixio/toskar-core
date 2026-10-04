@@ -191,6 +191,25 @@ func TestToolsFor(t *testing.T) {
 	if got := ToolsFor(Chat, "Search the web for how DNS works", all); !has(got, "internet.search") || has(got, "terminal") {
 		t.Fatalf("web cue = %v", got)
 	}
+	// A request to find something offers the web, so the answer comes from
+	// it and not from memory or "search for it yourself" (§21).
+	for _, msg := range []string{
+		"Can you recommend a good bike for someone up to 500lbs?",
+		"Where can I buy a used kayak in Juneau?",
+		"What's the best espresso machine under $200?",
+		"Can you check for me please?",
+		"How much does it cost?",
+		"Is there a new Go release?",
+	} {
+		if got := ToolsFor(Chat, msg, all); !has(got, "internet.search") {
+			t.Fatalf("%q offered %v", msg, got)
+		}
+	}
+	for _, msg := range []string{"Suggest a name for my gray cat", "Write a haiku about autumn rain", "What is 17 times 23?"} {
+		if got := ToolsFor(Chat, msg, all); len(got) != 0 {
+			t.Fatalf("%q offered %v", msg, got)
+		}
+	}
 	if got := ToolsFor(Chat, "Make a spreadsheet of these prices", all); !has(got, "files.create") || has(got, "internet.search") {
 		t.Fatalf("file cue = %v", got)
 	}

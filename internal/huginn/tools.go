@@ -56,7 +56,12 @@ var (
 	cueFilm    = regexp.MustCompile(`(?i)\b(videos?|clips?|animat\w*|movies?|footage|gifs?|bring (it|this|that|the|my)( \w+)? to life|make (it|this) move)\b`)
 	cueBrowse  = regexp.MustCompile(`(?i)(\b(browser|click|fill (in|out)|sign up|add to (my )?cart|on (the|that|their) (site|page|website)|log ?in to|screenshot|navigate to)\b|\bgo to \S+\.\w{2,}\b)`)
 	cueSheet   = regexp.MustCompile(`(?i)\b(spreadsheets?|xlsx|csv|excel|workbooks?|sheets?)\b`)
-	cueWeb     = regexp.MustCompile(`(?i)(\b(search|web|online|internet|look up|website|url|link|news|latest)\b|https?://)`)
+	cueWeb     = regexp.MustCompile(`(?i)(\b(search|web|online|internet|look up|website|url|links?|news|latest)\b|https?://)`)
+	// cueFind is a request to find something rather than recall it:
+	// a recommendation, where to buy, what it costs, reviews, a result, a
+	// release, or "check" and "find" for me. Without the web tool a small
+	// model answers these from memory or tells the person to search (§21).
+	cueFind = regexp.MustCompile(`(?i)\b(recommend\w*|suggest (a|an|some)\b.{0,30}\b(to buy|for sale|product|brand|model|bike|bicycle|machine|phone|laptop|car|tool|app)s?|best \w+(?: \w+){0,5} (for|under|to buy)|which \w+(?: \w+){0,5} should i (buy|get|choose)|where (can|could|do|should) i (buy|find|get|order|rent)|for sale|how much (is|are|does|do|did)|reviews?|check (for me|it|that|this|them|again)|can you (check|find|look)|find (me|out)|winner|won the|new release|released?)\b`)
 )
 
 // ToolsFor picks the tools worth offering for a request (spec §16): the
@@ -83,7 +88,7 @@ func ToolsFor(k Kind, message string, available []string) []string {
 			want["gitw"] = true
 		}
 	}
-	if cueWeb.MatchString(message) {
+	if cueWeb.MatchString(message) || cueFind.MatchString(message) {
 		want["web"] = true
 	}
 	if cueMake.MatchString(message) {
