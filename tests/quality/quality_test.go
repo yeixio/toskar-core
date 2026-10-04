@@ -88,8 +88,9 @@ type Expect struct {
 	// when nothing that changes things ran, to carry a notice saying so.
 	NoFalseClaims bool `json:"no_false_claims"`
 	// NoDeflection fails an answer that sends the person off to search,
-	// or claims to browse, by the set's "deflection" pattern. A scripted
-	// answer proves nothing, so the stub skips it.
+	// or claims to browse, by the set's "deflection" pattern, instead of
+	// answering: an answer that also matches AnswerMatches answered. A
+	// scripted answer proves nothing, so the stub skips it.
 	NoDeflection bool `json:"no_deflection"`
 }
 
@@ -327,7 +328,11 @@ func check(driver string, c Case, r Result, deflection *regexp.Regexp) []string 
 			fail("answer %q does not match %q", r.Answer, x.AnswerMatches)
 		}
 	}
-	if x.NoDeflection && driver != "stub" && deflection.MatchString(r.Answer) {
+	// A deflection fails an answer that points elsewhere instead of
+	// answering: one with the facts it was asked for and a "visit their site
+	// for more" is an answer.
+	answered := x.AnswerMatches != "" && regexp.MustCompile(x.AnswerMatches).MatchString(r.Answer)
+	if x.NoDeflection && driver != "stub" && !answered && deflection.MatchString(r.Answer) {
 		fail("answer sends the person off to find it themselves: %q", deflection.FindString(r.Answer))
 	}
 	return failures

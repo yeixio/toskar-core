@@ -23,7 +23,7 @@ and `setup`: knowledge files and tool policies), what it checks (`what`), the
 | `prompt_contains` | The model was sent this text (stub only) |
 | `answer_matches` | The answer matches; `answer_real_only` skips it for the stub |
 | `no_false_claims` | An answer that claims a change nothing made carries a notice |
-| `no_deflection` | The answer does not match `deflection`: it does not send the person off to search, or claim to browse (real models only) |
+| `no_deflection` | The answer does not send the person off to search, or claim to browse, by `deflection`, instead of answering; with the facts `answer_matches` asks for, a pointer to a site for more is fine (real models only) |
 
 `stub` scripts what the stub model says, one reply per model call. `stub_only`
 cases check scripted behavior a real model may not produce.
