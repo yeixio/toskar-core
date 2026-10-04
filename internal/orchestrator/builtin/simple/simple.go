@@ -355,8 +355,9 @@ func (o *Orchestrator) Run(
 			}
 			// An answer that sends the person off to search, or pretends to,
 			// is looked up and written again from what the web says (§21).
-			// Core tells the model not to; a small model still does.
-			if !lookedUp && !retriedLookup && !jsonOnly && huginn.Deflects(parsed.Text) && webAllowed(webProfile) {
+			// Core tells the model not to; a small model still does. Small talk
+			// ("as an AI, I don't have feelings") is not looked up.
+			if !lookedUp && !retriedLookup && !jsonOnly && !huginn.SmallTalk(task.Prompt) && huginn.Deflects(parsed.Text) && webAllowed(webProfile) {
 				retriedLookup = true
 				if found, ok := lookUp(ctx, env, webProfile, searchQuery(ctx, env, role, task.Prompt), task.Prompt, budget.Pages); ok {
 					lookedUp = true

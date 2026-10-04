@@ -302,3 +302,16 @@ func TestDeflects(t *testing.T) {
 		}
 	}
 }
+
+func TestSmallTalk(t *testing.T) {
+	for _, message := range []string{"Hi! How are you?", "hello", "Thanks so much!", "Good morning, how's it going?", "ok"} {
+		if !SmallTalk(message) {
+			t.Errorf("not small talk: %q", message)
+		}
+	}
+	for _, message := range []string{"", "Hi! What's the weather in Juneau?", "How are you supposed to season cast iron?", "Thanks. Can you check for me please?"} {
+		if SmallTalk(message) {
+			t.Errorf("small talk: %q", message)
+		}
+	}
+}
