@@ -33,14 +33,17 @@ import (
 
 // Case is one request and the behavior it must have.
 type Case struct {
-	ID       string                  `json:"id"`
-	What     string                  `json:"what"`
-	Setup    Setup                   `json:"setup"`
-	History  []pluginapi.ChatMessage `json:"history"`
-	Message  string                  `json:"message"`
-	Stub     []string                `json:"stub"`
-	StubOnly bool                    `json:"stub_only"`
-	Expect   Expect                  `json:"expect"`
+	ID      string                  `json:"id"`
+	What    string                  `json:"what"`
+	Setup   Setup                   `json:"setup"`
+	History []pluginapi.ChatMessage `json:"history"`
+	Message string                  `json:"message"`
+	Stub    []string                `json:"stub"`
+	// StubQuery is what the stub writes when asked for a follow-up's web
+	// search; without it, the message itself.
+	StubQuery string `json:"stub_query"`
+	StubOnly  bool   `json:"stub_only"`
+	Expect    Expect `json:"expect"`
 	// Platforms the case runs on: "core", "phone", or both. Empty is core.
 	Platforms []string `json:"platforms"`
 }

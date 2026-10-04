@@ -279,3 +279,26 @@ func TestToolsFor(t *testing.T) {
 		t.Fatalf("limited profile = %v", got)
 	}
 }
+
+func TestDeflects(t *testing.T) {
+	for _, answer := range []string{
+		"I'm a text-based AI model, I don't have direct access to real-time location-based data.",
+		`You can search for "Juneau weather" on a search engine like Google.`,
+		"I'm not sure, the user needs to check a bike website for that.",
+		"I'll search the web for you. [Searching on iPhone's Safari]",
+		"You can find these by visiting specialty bike shops or online retailers. Websites like REI list them.",
+	} {
+		if !Deflects(answer) {
+			t.Errorf("not caught: %q", answer)
+		}
+	}
+	for _, answer := range []string{
+		"Zize bikes are rated for riders up to 550 lbs: https://zizebikes.com/",
+		"It is 48°F with light rain in Juneau.",
+		"Paris is the capital of France.",
+	} {
+		if Deflects(answer) {
+			t.Errorf("an answer was caught: %q", answer)
+		}
+	}
+}

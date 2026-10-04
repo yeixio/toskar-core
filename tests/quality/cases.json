@@ -358,7 +358,6 @@
       },
       "message": "Can you recommend a good bike for someone up to 500lbs?",
       "stub": [
-        "{\"tool_call\": {\"id\": \"internet.search\", \"args\": {\"query\": \"bike for riders over 500 lbs\"}}}",
         "Zize bikes are rated for riders up to 550 lbs (https://zizebikes.com/), and the Worksman Big Cruiser carries up to 500 lbs."
       ],
       "expect": {
@@ -384,7 +383,6 @@
       },
       "message": "What's the best bike for a heavy rider over 400 pounds?",
       "stub": [
-        "{\"tool_call\": {\"id\": \"internet.search\", \"args\": {\"query\": \"bike for riders over 500 lbs\"}}}",
         "Zize bikes are rated for riders up to 550 lbs (https://zizebikes.com/), and the Worksman Big Cruiser carries up to 500 lbs."
       ],
       "expect": {
@@ -410,7 +408,6 @@
       },
       "message": "Where can I find a bike that supports a rider that is over 500lbs?",
       "stub": [
-        "{\"tool_call\": {\"id\": \"internet.search\", \"args\": {\"query\": \"bike for riders over 500 lbs\"}}}",
         "Zize bikes are rated for riders up to 550 lbs (https://zizebikes.com/), and the Worksman Big Cruiser carries up to 500 lbs."
       ],
       "expect": {
@@ -436,7 +433,6 @@
       },
       "message": "Suggest a bicycle that can hold 500 lbs",
       "stub": [
-        "{\"tool_call\": {\"id\": \"internet.search\", \"args\": {\"query\": \"bike for riders over 500 lbs\"}}}",
         "Zize bikes are rated for riders up to 550 lbs (https://zizebikes.com/), and the Worksman Big Cruiser carries up to 500 lbs."
       ],
       "expect": {
@@ -462,7 +458,6 @@
       },
       "message": "What's the best espresso machine under $200?",
       "stub": [
-        "{\"tool_call\": {\"id\": \"internet.search\", \"args\": {\"query\": \"best espresso machine under $200\"}}}",
         "The De'Longhi Stilosa ($119) is the top pick under $200; the Casabrews CM5418 ($139) is the runner-up."
       ],
       "expect": {
@@ -488,7 +483,6 @@
       },
       "message": "Recommend a cheap espresso machine for lattes",
       "stub": [
-        "{\"tool_call\": {\"id\": \"internet.search\", \"args\": {\"query\": \"best espresso machine under $200\"}}}",
         "The De'Longhi Stilosa ($119) is the top pick under $200; the Casabrews CM5418 ($139) is the runner-up."
       ],
       "expect": {
@@ -514,7 +508,6 @@
       },
       "message": "Which espresso machine should I buy for less than 200 dollars?",
       "stub": [
-        "{\"tool_call\": {\"id\": \"internet.search\", \"args\": {\"query\": \"best espresso machine under $200\"}}}",
         "The De'Longhi Stilosa ($119) is the top pick under $200; the Casabrews CM5418 ($139) is the runner-up."
       ],
       "expect": {
@@ -540,7 +533,6 @@
       },
       "message": "Where can I buy a used kayak in Juneau?",
       "stub": [
-        "{\"tool_call\": {\"id\": \"internet.search\", \"args\": {\"query\": \"used kayak for sale Juneau\"}}}",
         "Juneau Outdoor Center sells used kayaks from $350 (https://juneauoutdoorcenter.com/used-kayaks)."
       ],
       "expect": {
@@ -566,7 +558,6 @@
       },
       "message": "Find me a used kayak for sale in Juneau",
       "stub": [
-        "{\"tool_call\": {\"id\": \"internet.search\", \"args\": {\"query\": \"used kayak for sale Juneau\"}}}",
         "Juneau Outdoor Center sells used kayaks from $350 (https://juneauoutdoorcenter.com/used-kayaks)."
       ],
       "expect": {
@@ -640,7 +631,6 @@
       },
       "message": "Where can I get coffee in Juneau this morning?",
       "stub": [
-        "{\"tool_call\": {\"id\": \"internet.search\", \"args\": {\"query\": \"coffee shops Juneau\"}}}",
         "Heritage Coffee at 130 Front St is open 6 am to 6 pm, and Coppa on Glacier Ave is open 7 am to 4 pm."
       ],
       "expect": {
@@ -791,7 +781,6 @@
       },
       "message": "Juneau marathon 2026 winner",
       "stub": [
-        "{\"tool_call\": {\"id\": \"internet.search\", \"args\": {\"query\": \"2026 Juneau Marathon results\"}}}",
         "Ana Ruiz won the women's race in 2:51:07, and Tom Becker won the men's in 2:38:44."
       ],
       "expect": {
@@ -842,7 +831,6 @@
       },
       "message": "Is there a new Go release?",
       "stub": [
-        "{\"tool_call\": {\"id\": \"internet.search\", \"args\": {\"query\": \"latest Go release\"}}}",
         "The latest is Go 1.26.3, released September 2, 2026."
       ],
       "expect": {
@@ -923,7 +911,6 @@
       },
       "message": "Can you provide a link to that bike?",
       "stub": [
-        "{\"tool_call\": {\"id\": \"internet.search\", \"args\": {\"query\": \"Zize bike\"}}}",
         "Here it is: https://zizebikes.com/"
       ],
       "expect": {
@@ -931,7 +918,8 @@
           "web"
         ],
         "answer_matches": "(?i)https?://\\S*(zize|worksman)",
-        "no_deflection": true
+        "no_deflection": true,
+        "steps_match": "(?i)zize"
       },
       "history": [
         {
@@ -942,7 +930,8 @@
           "role": "assistant",
           "content": "Consider a Zize bike or the Worksman Big Cruiser."
         }
-      ]
+      ],
+      "stub_query": "Zize bike"
     },
     {
       "id": "followup_check",
@@ -959,7 +948,6 @@
       },
       "message": "Can you check for me please?",
       "stub": [
-        "{\"tool_call\": {\"id\": \"internet.search\", \"args\": {\"query\": \"Zize bike rider weight limit\"}}}",
         "Zize bikes are rated for riders up to 550 lbs, from $1,795."
       ],
       "expect": {
@@ -978,7 +966,8 @@
           "role": "assistant",
           "content": "Consider a Zize bike or the Worksman Big Cruiser."
         }
-      ]
+      ],
+      "stub_query": "Zize bike rider weight limit"
     },
     {
       "id": "followup_price",
@@ -995,7 +984,6 @@
       },
       "message": "How much does it cost?",
       "stub": [
-        "{\"tool_call\": {\"id\": \"internet.search\", \"args\": {\"query\": \"Zize bike price\"}}}",
         "The Zize Forte starts at $1,795."
       ],
       "expect": {
@@ -1014,7 +1002,8 @@
           "role": "assistant",
           "content": "Consider a Zize bike or the Worksman Big Cruiser."
         }
-      ]
+      ],
+      "stub_query": "Zize bike price"
     },
     {
       "id": "capital",
@@ -1319,6 +1308,33 @@
       "expect": {
         "answer_matches": "(?i)remember",
         "no_deflection": true
+      }
+    },
+    {
+      "id": "deflection_is_looked_up",
+      "what": "An answer that sends the person off to search is looked up and written again from the web.",
+      "platforms": [
+        "core",
+        "phone"
+      ],
+      "setup": {
+        "tools": {
+          "internet.search": "allow",
+          "internet.open": "allow"
+        }
+      },
+      "stub_only": true,
+      "message": "Tell me about bikes for heavy riders",
+      "stub": [
+        "You can search for heavy-duty bikes on Google or check websites like REI.",
+        "Zize bikes are rated for riders up to 550 lbs (https://zizebikes.com/)."
+      ],
+      "expect": {
+        "lookup": true,
+        "sources": [
+          "web"
+        ],
+        "answer_matches": "(?i)zize"
       }
     }
   ]

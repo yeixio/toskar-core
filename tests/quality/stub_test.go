@@ -206,6 +206,14 @@ func (d stubDriver) Run(t *testing.T, c Case) Result {
 			}
 			return reply
 		}
+		// The search a follow-up asks for is written by the model, outside
+		// the case's script of answers.
+		if len(messages) > 0 && strings.HasPrefix(messages[0].Content, "You write web search queries") {
+			if c.StubQuery != "" {
+				return c.StubQuery
+			}
+			return c.Message
+		}
 		if len(script) == 0 {
 			return "done"
 		}
