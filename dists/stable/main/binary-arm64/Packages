@@ -1,15 +1,34 @@
-Package: yggdrasil
-Version: 1.5.0
+Package: toskar
+Version: 1.6.0
 Architecture: arm64
 Maintainer: YEIXIO LLC <hello@yeix.io>
-Installed-Size: 56632
-Filename: pool/main/yggdrasil_1.5.0_arm64.deb
-Size: 27903864
-MD5sum: 1632955e7e280df466978cf2dc6ebdd2
-SHA1: 14d229d5a08da74acf19d850c9c4918d3172c561
-SHA256: 9e33992ad760e592b9fe2988e83a217f4b5ccd02b507e2a16d502671ad0a4664
+Installed-Size: 56631
+Breaks: yggdrasil (<< 1.6.0)
+Replaces: yggdrasil (<< 1.6.0)
+Filename: pool/main/toskar_1.6.0_arm64.deb
+Size: 27923448
+MD5sum: fcfee1533d93de66ace42d06d982c887
+SHA1: bc26b83be28dc035c3c3d8e2cbbcddc86ac1986b
+SHA256: 8d206364d1f83392e942ba35a22ac6da36633ee4a157dfdf317e468890869af1
 Priority: optional
-Homepage: https://yggdrasil.yeix.io
+Homepage: https://toskar.ai
 Description: Local AI daemon and web UI
+License: AGPL-3.0-or-later
+
+Package: yggdrasil
+Version: 1.6.0
+Architecture: all
+Maintainer: YEIXIO LLC <hello@yeix.io>
+Installed-Size: 0
+Depends: toskar (>= 1.6.0)
+Filename: pool/main/yggdrasil_1.6.0_all.deb
+Size: 1280
+MD5sum: 56e8a6f90598a499e16ecfec069f2132
+SHA1: 48141e20b3b07180de3e40e5405dbafbe184af05
+SHA256: 2f6d69cd8c953e3b2c47c36627da1a60cd159def04fded1ee9dbb6e59d553eb1
+Section: oldlibs
+Priority: optional
+Homepage: https://toskar.ai
+Description: Transitional package for toskar. Yggdrasil is now Toskar; this package can be removed.
 License: AGPL-3.0-or-later
 
