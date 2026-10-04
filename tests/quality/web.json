@@ -3,7 +3,7 @@
   "sites": [
     {
       "topic": "weather",
-      "match": "(?i)weather|forecast|rain|temperature|juneau.*(today|now)",
+      "match": "(?i)weather|forecast|rain|umbrella|temperature|how (cold|warm|hot)",
       "results": [
         {
           "title": "Juneau, AK 7-Day Forecast - National Weather Service",
