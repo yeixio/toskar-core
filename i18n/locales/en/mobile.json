@@ -519,6 +519,7 @@
     "openPhone": "This needs more time than the watch gets. Open Toskar on your phone, then try again.",
     "failed": "That didn't work. Try again.",
     "tryAgain": "Try again",
-    "askAnother": "Ask another"
+    "askAnother": "Ask another",
+    "complicationDescription": "Ask Toskar from your watch face."
   }
 }

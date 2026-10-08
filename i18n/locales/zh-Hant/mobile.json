@@ -439,6 +439,7 @@
     "openPhone": "這需要的時間超出手錶的限制。請在手機上打開 Toskar，然後再試一次。",
     "failed": "沒有成功。請再試一次。",
     "tryAgain": "再試一次",
-    "askAnother": "再問一個"
+    "askAnother": "再問一個",
+    "complicationDescription": "從錶面直接問 Toskar。"
   }
 }

@@ -447,6 +447,7 @@
     "openPhone": "Cela demande plus de temps que la montre n'en dispose. Ouvrez Toskar sur votre téléphone, puis réessayez.",
     "failed": "Cela n'a pas fonctionné. Réessayez.",
     "tryAgain": "Réessayer",
-    "askAnother": "Autre question"
+    "askAnother": "Autre question",
+    "complicationDescription": "Posez une question à Toskar depuis le cadran."
   }
 }

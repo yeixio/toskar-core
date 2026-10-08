@@ -447,6 +447,7 @@
     "openPhone": "Serve più tempo di quello che ha l'orologio. Apri Toskar sul telefono e riprova.",
     "failed": "Non ha funzionato. Riprova.",
     "tryAgain": "Riprova",
-    "askAnother": "Chiedi altro"
+    "askAnother": "Chiedi altro",
+    "complicationDescription": "Chiedi a Toskar dal quadrante."
   }
 }

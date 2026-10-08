@@ -439,6 +439,7 @@
     "openPhone": "워치에 주어진 시간보다 오래 걸립니다. 휴대폰에서 Toskar를 연 다음 다시 시도하세요.",
     "failed": "실패했습니다. 다시 시도하세요.",
     "tryAgain": "다시 시도",
-    "askAnother": "다른 질문"
+    "askAnother": "다른 질문",
+    "complicationDescription": "워치 페이스에서 Toskar에게 질문하세요."
   }
 }

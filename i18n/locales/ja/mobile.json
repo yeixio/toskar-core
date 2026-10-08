@@ -439,6 +439,7 @@
     "openPhone": "ウォッチで使える時間では足りません。電話でToskarを開いてから、もう一度お試しください。",
     "failed": "うまくいきませんでした。もう一度お試しください。",
     "tryAgain": "再試行",
-    "askAnother": "別の質問"
+    "askAnother": "別の質問",
+    "complicationDescription": "文字盤からToskarに質問できます。"
   }
 }
