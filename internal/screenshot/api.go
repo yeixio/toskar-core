@@ -17,6 +17,13 @@ func serveScreenshotAPI(w http.ResponseWriter, r *http.Request) {
 		serveScreenshotEvents(w, r)
 		return
 	}
+	// Fill in the details asks the computer to read the sentence the
+	// Automations screenshot types; an empty object in its place made the
+	// form fail, and the release screenshots with it.
+	if r.Method == http.MethodPost && path == "/api/v1/automations/parse" {
+		writeJSON(w, http.StatusOK, screenshotParsedAutomation)
+		return
+	}
 	if r.Method != http.MethodGet {
 		writeJSON(w, http.StatusOK, `{}`)
 		return
@@ -494,6 +501,17 @@ const screenshotAutomations = `[
     "last_result": "Two patch releases, no behavior change."
   }
 ]`
+
+// What the computer reads from the Automations screenshot's sentence:
+// "Every morning at 8:00 AM, check this product and tell me if the price
+// is below $500."
+const screenshotParsedAutomation = `{
+  "name": "Morning price",
+  "prompt": "Check this product and tell me the price.",
+  "schedule": {"kind": "daily", "time_zone": "America/Los_Angeles", "hour": 8, "minute": 0},
+  "notification": {"mode": "condition", "condition": {"kind": "threshold", "op": "below", "value": 500}},
+  "notes": []
+}`
 
 const screenshotAutomationDetail = `{
   "id": "price-1",

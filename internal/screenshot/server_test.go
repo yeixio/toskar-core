@@ -106,3 +106,34 @@ func TestGPUFixturesHaveTheContractShape(t *testing.T) {
 		t.Errorf("running: %+v", running)
 	}
 }
+
+// The Automations screenshot fills in the form from its sentence; the
+// computer's reading must have the parsed request's fields, or the form fails.
+func TestAutomationParseFixtureHasTheParsedShape(t *testing.T) {
+	server := httptest.NewServer(Handler(fstest.MapFS{"index.html": &fstest.MapFile{Data: []byte("ui")}}))
+	t.Cleanup(server.Close)
+	resp, err := http.Post(server.URL+"/api/v1/automations/parse", "application/json", strings.NewReader(`{"text":"x","time_zone":"UTC","language":"en"}`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+	var parsed struct {
+		Name         string                `json:"name"`
+		Prompt       string                `json:"prompt"`
+		Schedule     struct{ Kind string } `json:"schedule"`
+		Notification struct {
+			Mode      string `json:"mode"`
+			Condition struct {
+				Op    string  `json:"op"`
+				Value float64 `json:"value"`
+			} `json:"condition"`
+		} `json:"notification"`
+		Notes []string `json:"notes"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&parsed); err != nil {
+		t.Fatal(err)
+	}
+	if parsed.Prompt == "" || parsed.Schedule.Kind != "daily" || parsed.Notification.Condition.Op != "below" || parsed.Notification.Condition.Value != 500 || parsed.Notes == nil {
+		t.Fatalf("parse fixture: %+v", parsed)
+	}
+}
