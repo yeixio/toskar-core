@@ -8,6 +8,511 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Thi
 
 Changes waiting for the next release are in [changes/unreleased/](changes/unreleased/), one file per pull request. `scripts/changelog.py preview` shows them together, and `scripts/changelog.py release <version>` writes them here when the release is cut.
 
+## [1.7.0] - 2026-10-08
+
+Toskar 1.7 is for more than one person and more than one device. People sign in with their own accounts, by password, invite link, an OpenID Connect provider, or a reverse proxy, and roles decide what each can do; chats, memories, files, and automations stay private to their person, and the existing user becomes the Owner. Automations run on schedules, file and folder changes, web pages, feeds, and webhooks, can chain into each other, and can be set up by asking in a chat. Chat can see pictures and watch videos. Traffic between computers and from phones is encrypted, a phone, tablet, or TV connects with a 6-digit code, and every model shows whether it runs on the GPU. The desktop app's menus and tray call it Toskar Pro, its new name. The API stays compatible: the client contract is 1.15, whose new versions only add fields, and a paired computer still on 1.6 keeps working over plain HTTP, marked Not encrypted, until it's updated. Binaries and the apt repository are not signed.
+
+### Added
+
+- Chain automations: one can run right after another finishes, given its
+  result, such as a research automation followed by one that drafts a
+  note from it, or only when the first one notifies, such as acting once
+  a price drops. Choose "After another automation" under "Runs", or
+  `toskarctl automations create --trigger after --after <id>`. Loops are
+  refused when saved, and a chain stops after five in a row.
+- Continue in chat from any automation run: the result opens in a chat
+  named after the automation, or in the chat it was already posted to, so
+  you can ask a follow-up about it.
+- A daily automation digest: turn it on in Settings → Notifications and
+  pick a time, and once a day one message in an "Automation digest" chat
+  sums up what every automation found and what failed, with one
+  notification instead of many. A quiet day sends nothing.
+- Automations can run when files in a folder in your home folder, or one
+  file, change. The task is told which files were added, changed, and
+  removed, with the start of each new or changed text file. Choose "When a
+  file or folder changes" under "Runs", or `toskarctl automations create
+  --trigger folder --trigger-path ~/Documents/Invoices`.
+- Ask in chat for something on a schedule, such as "every morning at 8,
+  summarize the news", and the answer shows the automation as a card:
+  what it does, when, and when it notifies. Nothing is scheduled until you
+  press Create, and the automation remembers the chat it came from. The
+  request is read in the language it's written in.
+- Profiles have an Automations capability, on in the built-in profiles,
+  for setting up automations from chat.
+- `POST /api/v1/automations/parse` reads a request such as "every morning at
+  8, tell me if the price is below $500" into an automation's name, task,
+  schedule, and notification, in any of the App's languages or English. It
+  uses the same words as the Automations page, now kept in
+  `i18n/requests/`, so the page, `toskarctl`, and chat can read requests the
+  same way.
+- `toskarctl automations parse "<request>"` prints what Toskar understood
+  from a request, and `toskarctl automations create --request "<request>"`
+  creates the automation from it.
+- An automation made from a chat posts each result it notifies about to
+  that chat, so you can reply to it there. The notification opens the
+  chat, and the result is marked with the automation it came from.
+- Automations can also save each result as a Markdown file in a folder
+  you choose in your home folder, such as `~/Documents/Toskar`, where
+  other apps and backups find it. The run history shows where each result
+  went. `toskarctl automations create|update --save-folder` sets it.
+- Automation templates: morning briefing, price watch, back in stock,
+  release notes, page watch, and a new folder summary. Choosing one asks
+  only for what it needs, such as a product link and a price, and fills in
+  the form without reading a request; "Describe it in your own words
+  instead" starts from an example request.
+- Automations can run when a web page changes or a feed has new posts,
+  instead of every time. The schedule says how often to check; a check is
+  a quick fetch with no model, and the task runs only when something
+  changed, told what it was: the lines that came and went, or the new
+  posts. Choose it under "Runs" in the form, or with `toskarctl
+  automations create --trigger page|feed --trigger-url <url>`.
+- Automations can run when another service calls their webhook link: pick
+  "When another service calls its link (webhook)" under "Runs", then make
+  the link on the automation's page. It's shown once, only a hash of it is
+  kept, and making a new one stops the old one. The request's body, up to
+  64 KB, is given to the task as data. `toskarctl automations hook <id>`
+  makes a link from the command line.
+- A "Only when started" schedule, for an automation that runs only from
+  Run now or its webhook.
+- Chat can see pictures. Attach a photo, screenshot, or diagram and ask
+  about it: Toskar shows it to a vision model on this computer. If the
+  chat's model reads text only, the largest vision model that fits answers
+  instead, and a follow-up question still sees the picture. With no vision
+  model installed, the answer says how to get one.
+- Two vision models in the catalog: **Gemma 3 4B** and **Qwen 2.5 VL 7B**.
+  Each downloads with its image projector.
+- Chat can watch videos. Attach an MP4, MOV, or WebM clip and ask about it:
+  a vision model is shown six frames sampled through it, with the time of
+  each, and can transcribe what's said. Frames are read on this computer
+  with the speech tools, which install the first time they're needed. A
+  follow-up question about the same clip doesn't read it again.
+- A phone can connect with a 6-digit code instead of a copied API key: the
+  computer shows the code (`POST /api/v1/devices/pairing`), and the phone
+  sends it from the local network (`POST /api/v1/devices/pair`) to get a key
+  of its own, named after it. A phone's key reaches only chat, its
+  conversations, and the lists the phone reads.
+- Connect a device, on Computers and in API Access: it shows a 6-digit code
+  to type on a phone, tablet, or TV, with the steps and this
+  computer's address, turns on local network access first if it's off, and
+  says when the device has connected. Connected devices are listed under
+  API Access → Devices, where each can be disconnected.
+- Settings → Your data stays private says whether this computer's disk is
+  encrypted: "Your disk is encrypted with FileVault", or, when it isn't,
+  where to turn on FileVault, BitLocker or Device Encryption, or LUKS. It
+  checks the disk that holds Toskar's data, without administrator rights.
+- Running models report where they run, read from llama.cpp's own log when it loads them: on the GPU, partly, or on the CPU, with the device, the layers on the GPU, the GPU memory, and the reason when a model isn't fully on the GPU. `GET /api/v1/models/running` has it in `acceleration`, and `GET /api/v1/health` sums it up in `acceleration` without changing `status` (#317).
+- Performance › Activity marks each reply GPU or CPU, with the device in its details, and filters by it; benchmark results say where each model ran. The user guide has a section, "Is my model using the GPU?", which the assistant also answers from (#317).
+- The Linux packages recommend the Vulkan loader, Mesa's Vulkan drivers, `vulkan-tools`, and `pciutils`, so apt and dnf install what an AMD or Intel GPU needs, and the service user joins the `render` and `video` groups so it can use the card. `install.sh` prints the command to install NVIDIA's driver when it finds an NVIDIA card without it, and `install.ps1` points to the card maker's driver when Windows has no Vulkan (#317).
+- The Dockerfile has a `gpu` target with Vulkan and Mesa's drivers, for a container given the card with `--device /dev/dri`.
+- [docs/gpu.md](docs/gpu.md) covers what each computer needs for its GPU, what the installers set up, and how to fix a model that runs on the CPU.
+- `GET /api/v1/performance/live`: each computer's CPU, memory, and GPU figures (busy %, video memory, temperature, power) now, over the last hour, and as per-minute averages over the last day, on Linux, macOS, and Windows without root or admin rights. A figure a computer can't give is left out rather than shown as 0. Paired computers' figures are included (#317).
+- Diagnostics lists what this computer still needs for Toskar to use its graphics card, each with the command that fixes it here: the Vulkan loader or drivers (for this Linux distribution's package manager), permission for Toskar's user to open the card, NVIDIA's driver, a Windows card's driver, or the CPU-only llama.cpp. `GET /api/v1/diagnostics/gpu` returns the same list (#317).
+- A status on each running model says where it runs: green on the GPU, amber when only part of it fits, red when the computer has a GPU it isn't using, and grey on a computer without one. Tap it for the device, the layers on the GPU, and the GPU memory, and for anything short of green, why and what to do. It's on Models › Running and on the Performance overview (#317).
+- The Performance overview shows each computer's live CPU and memory, and each GPU's use, video memory, temperature, and power where the computer gives them, with the last hour as a line. Diagnostics has a GPU acceleration row.
+- Replies, run traces, and benchmark samples record the backend and device that produced them, such as Vulkan on an AMD Radeon RX 7900 XTX, so performance history can tell GPU replies from CPU ones. `GET /api/v1/runtimes` lists what the installed llama.cpp build can run on (#317).
+- Vision models installed from Hugging Face can see pictures. Browse all
+  models marks a repository that ships an image projector as a vision
+  model. Installing it downloads the projector with it, and the model's
+  download is checked against the SHA-256 the repository lists. Reinstalling
+  a vision model installed from Hugging Face before now adds its projector.
+- Image and video generation say up front what a computer can do. A
+  computer without the memory for a model isn't offered it, can't set it
+  up, and is told how much it needs; one that's short of what the model is
+  comfortable with is warned it may be slow or fail. Without GPU
+  acceleration (every build but macOS), the setup offer, the Tools page,
+  and the progress line say a picture takes a few minutes and a clip can
+  take most of an hour.
+- A saved answer's metadata records the backend and device that ran it, when it ran on that computer, so the iPhone app can show GPU or CPU for answers from a paired computer too. The client contract is 1.8 (#317).
+- Everyone can connect their own phone, tablet, or TV from Settings → Your
+  devices, and see and disconnect the devices connected as them. A device
+  chats as the person who connected it. Only Admins and the Owner turn on
+  local network access to do it.
+- The start of people and roles: this Toskar's one user becomes its Owner,
+  and API keys, chats, memories, files, and automations record whose they
+  are. `GET /api/v1/me` says who a request is from. Nothing changes for one
+  person; signing in other people comes next.
+- Notifications belong to their person. Members see their own automation
+  results and approval requests in the bell, and nobody else does; Admins
+  and the Owner also see notices about models, training, and health.
+  Email, push, webhooks, and desktop notices still go only to the Owner's
+  destinations, so they never carry another person's results.
+- Sign in with an OpenID Connect provider such as Google, Microsoft Entra
+  ID, Okta, Authentik, Keycloak, or Authelia. Set `TOSKAR_OIDC_ISSUER`,
+  `TOSKAR_OIDC_CLIENT_ID`, and `TOSKAR_OIDC_CLIENT_SECRET`, and the sign-in
+  screen offers it. People are made the first time they sign in, with a
+  role from their groups.
+- Each person chooses their own App language, the language answers are
+  written in, and Personalization, starting from the Owner's. Members and
+  Visitors find them in Settings, and their chats and automations follow
+  their own choices.
+- Chats, memories, files, and automations are private to their person,
+  ready for more than one person to use Toskar: nobody else lists, reads,
+  or changes them, a chat draws only on its person's memories, and an
+  automation runs as its person. Nothing changes while you're the only one.
+- Sign in through a reverse proxy such as Authelia, Authentik, Cloudflare
+  Access, or Tailscale. List the proxy in `trusted_proxies`
+  (`TOSKAR_TRUSTED_PROXIES`), and Toskar takes the person from its
+  `Remote-User` header, makes them the first time, and gives them a role
+  from their groups. The headers count only from the listed addresses.
+- Roles now decide what each person can do. Visitors chat; Members also
+  have their own memories and automations; Admins run everything else,
+  such as models, tools, knowledge, computers, keys, people, and settings;
+  and only the Owner can erase everything. The app shows each person only
+  the pages and controls their role can use, and the service refuses the
+  rest.
+- People can sign in. Admins and the Owner add someone and get a one-time
+  link; opening it, they choose a username and password and are signed in.
+  Passwords are hashed with argon2id, and too many wrong ones make that
+  username wait. Admins add Members and Visitors, the Owner adds Admins
+  too, and disabling someone signs them out everywhere. A phone paired with
+  a code now gets the key of whoever showed the code. The app's sign-in
+  screen and People page come next.
+- The app has a People page under Administer. Admins and the Owner add
+  someone, pick a role, and copy a one-time link to send them; the page
+  also changes roles, makes new password links, and disables people.
+  Opening the link, the person chooses a username and password and is
+  signed in. From another device, the app now asks for a username and
+  password, or an API key, and Settings shows who is signed in with a
+  Sign out button.
+- Connect a device shows the code of this computer's certificate. A phone
+  on the new app connects over HTTPS, saves that certificate, and shows the
+  same code in its Settings, so you can see it reached this computer.
+- The automation form sets up the new schedules: pick days of the week
+  (such as Monday to Friday), add more times a day, run every month on a
+  day of the month, or enter a cron expression. Schedules read as people
+  say them, such as "Weekdays at 9:00 AM" or "Every Monday and Friday at
+  8:00 AM and 5:00 PM", in every App language.
+- Automations can run on several weekdays, such as weekdays only, at
+  several times a day, monthly on a day of the month (a shorter month uses
+  its last day), or on a cron expression. The API takes them as
+  `weekdays`, `times`, `month_day`, and `cron`, and so does `toskarctl
+  automations create --schedule monthly --day 1` or `--weekday weekdays
+  --at 08:00,17:00` or `--schedule cron --cron "0 9 * * 1-5"`. The model
+  that reads requests the words can't can now give these schedules too.
+- Every page in the sidebar has a screenshot, and the README shows them. Train, Knowledge, Memory, Tools, and Profiles & Orchestration now have demo data in the screenshot server (a training run in progress, connected documents, memories, a Notion tool source with connected services, and a team profile across two computers), so the release attaches `screenshot-train.png` through `screenshot-profiles.png` next to the others (#304). The README stills and walkthrough show the new sidebar.
+- Image and video generation use the GPU on Linux and Windows. With a
+  graphics card that has a Vulkan driver (NVIDIA, AMD, or Intel), setup
+  installs stable-diffusion.cpp's Vulkan build, so a picture takes seconds
+  instead of minutes. A Vulkan build that can't start on the GPU falls back
+  to the CPU build by itself. The Tools page says which build makes them,
+  with a button to switch. An existing setup on the CPU build offers **Use
+  the GPU build** there.
+- Paired computers that make pictures on the GPU are now reported as
+  accelerated, so heavy image work goes to them.
+- A chat can offer to set up image or video generation on a paired
+  computer. When a laptop would make pictures slowly on its CPU and a
+  paired workstation has a GPU for it, "Make me a picture of…" offers the
+  workstation, with its free disk space. **Set up** starts the download
+  there and shows its progress, and once it's ready the picture is made
+  there. A computer without the memory or the disk space isn't offered.
+- `site/highlights.json` holds the latest minor release's highlights, which toskar.ai shows as "New in 1.6" instead of a list written into the site. A new minor release updates it in the same pull request: `scripts/changelog.py check` fails until its version matches the latest release in `CHANGELOG.md`.
+- Toskar says when a newer version is out. Release builds installed from a
+  download look at toskar.ai once a day, sending nothing but the request,
+  and Settings › About shows the new version with what's new and a download
+  link. Turn it off in About; each check is listed in What left this
+  computer. The App Store edition and the desktop app's copy update with
+  their app, so they don't check.
+
+### Changed
+
+- API Access, Performance, and Diagnostics match the rest of the app: the
+  app picker under Use Toskar in other AI apps and Performance's views are
+  segmented tabs, buttons share the same sizes, and Revoke on an API key is
+  red, as a destructive action. Diagnostics is titled Diagnostics, as in the
+  sidebar.
+- The Automations page reads a request on the computer, so the page,
+  `toskarctl`, and chat read requests the same way. When its words can't
+  find a schedule, such as "first thing on weekdays", a model reads the
+  request, and the form says so, so you can check it before saving.
+- The computer adds what an automation's condition needs, such as the price
+  in the threshold's currency, when each run starts, so automations made
+  with `toskarctl`, chat, or the API check their conditions the same way as
+  ones made on the page. A saved prompt is only the task.
+- A run's history says why it did or didn't notify as the computer decided
+  it, instead of the page guessing from the result. Runs record it as
+  `notify_detail` and `notify_values`.
+- Automations explains itself. With none yet, the page shows the three parts
+  of an automation (when it runs, what Toskar does, and when you hear about
+  it) and five ideas to start from: a morning news brief, a price watch, a
+  back-in-stock check, weekly release notes, and a page watch. Choosing an
+  idea opens the form already filled in. With some automations, How it works
+  shows the same.
+- The new-automation form has two numbered steps, Describe it and Check the
+  details, and the button that reads your description is now Fill in the
+  details. A Summary above Create automation says when it runs, what it does,
+  and when you hear about it. Test run says that it runs once without saving.
+- The Automations list uses the same filters, search box, and status chips
+  as the rest of the app.
+- Chat has a cleaner look. Messages and the message box share one centred
+  column; your messages sit in a soft bubble and replies read as plain text
+  beside the Toskar mark. The header keeps History, the chat's name, Delete,
+  and New chat in one row, and the message box starts small and grows as you
+  type.
+- The chat history panel matches the new Chat look: icon buttons to dock
+  and close it, a search box with a search icon, one line per chat, and
+  tidier menus.
+- The context gauge beside Send is an open meter that fills as the chat uses
+  the model's memory and turns amber near the limit, so it no longer looks
+  like an empty radio button.
+- The Computers page is titled Computers, as in the sidebar. While this is
+  the only computer, it explains how to add another in three steps: install
+  Toskar there, connect them (Available to add on the same network, or Add
+  by command for a server), and share the work. How to add a computer shows
+  the same later. Computer cards use quieter Manage buttons and a menu like
+  the rest of the app.
+- The desktop app can post desktop notices itself: with
+  `TOSKAR_DESKTOP_NOTIFICATIONS=shell`, which the app sets on the service it
+  starts, notices go to it as `notification.desktop` events, so they carry
+  Toskar's name and icon, open the app when clicked, and work in the Mac App
+  Store edition. Without it the service posts them as before.
+- The same card now says that traffic between your computers, and from
+  other devices on your network, is encrypted.
+- Knowledge explains itself and shows where each source is used. Every
+  source says which profiles' chats use it; one that no profile uses says
+  that Chat doesn't look in it, with Use with to add it to the profile chats
+  start with. Connecting a source asks which profiles should use it, with
+  that profile already checked, so it works in Chat straight away. With
+  nothing connected yet, the page explains knowledge in three steps and shows
+  what people connect; How it works shows the same later.
+- Turning local network access on or off applies at once, without quitting
+  and reopening Toskar. Turning it off also disconnects other devices right
+  away.
+- Turning on local network access no longer asks apps on this computer for an API key. Requests over loopback (`127.0.0.1` or `::1`) work as before, so the desktop app, `toskarctl`, and a browser on this computer keep working. Other devices still need a key. A request carrying proxy forwarding headers (`Forwarded`, `X-Forwarded-For`, `X-Real-IP`) counts as coming from the network.
+- Memory explains itself. With nothing remembered yet, the page shows how
+  memory works in three steps (tell it once, it's used when it fits, you stay
+  in control), says that documents and data belong in Knowledge, and offers
+  example memories that fill in the Add box. How it works shows the same
+  later. Use memory in chats is now a switch.
+- Each memory shows its words, where it came from, and Paused or This
+  computer only when they apply. Edit changes the words and the category;
+  Pause, This computer only, and Delete are in the memory's menu.
+- Models has a cleaner look. Discover, Installed, and Running are one
+  segmented control beside a search box with a search icon. Each model's fit
+  shows as a coloured chip (green when it runs well, amber when it's tight,
+  red when it won't), and every action in a card is the same size. The
+  "Models for" strip is tidier, and on Running, Stop sits beside Open chat
+  with a bar for how much of the computer's memory the model holds.
+- Local network access no longer needs an API key once someone besides
+  the Owner has been added, since they sign in with a password.
+- The profile editor opens across the whole page and is split into four
+  tabs: Models, Tools, Knowledge and memory, and Strategy and computers. It
+  was one long column inside a half-width card. Models shows the roles in
+  use, with Show all roles for the rest; Tools uses switches, with per-tool
+  permissions folded below them.
+- The real-model quality run rides out a daemon that goes away for a moment (a restart or a settings change), retrying for up to three minutes. If the daemon starts asking for an API key partway through, the run stops with one clear reason instead of failing every case left. A case that stops before it is checked now counts as failed in the summary.
+- The Docker image takes a `COMMIT` build argument, which `/api/v1/version` reports.
+- The README's Quick start shows how to use Toskar from other devices on your network: turning on local network access and creating a key, restarting, finding the address, and the settings for a server without a browser.
+- CI can run on self-hosted runners: the repository variables `CI_RUNS_ON` (pull request and push checks) and `TRUSTED_RUNS_ON` (releases, screenshots, and the small-model quality job) pick the runner, and GitHub's runners stay the default. The installer test always runs on a GitHub runner, since it installs system-wide.
+- Settings keeps your own preferences, and the rest moved to where it's used (#203). **Find other computers** and the **External server** (advanced mode) are on the Computers page, under Network & access. **Connected services** (GitHub, Home Assistant, email, and calendar) are on the Tools page, next to tool sources. The API access summary card is gone from Settings; API Access already manages it. Settings' Network & access group is now Notifications.
+- The sidebar is grouped by who uses each page (#203). **Use** has Chat, Automations, Knowledge, and Memory; **Customize** has Models, Tools, and Profiles & Orchestration; **Administer** has Train, Computers, API Access, Performance, and Diagnostics; Settings stays at the bottom. Tools and Profiles are always listed: advanced mode no longer hides whole pages, only expert controls inside them. Administer is closed until you open it, and stays as you left it; it opens by itself while one of its pages is showing. Page addresses are unchanged.
+- The iPhone app's quality run now fails when its copies of core's
+  text rules (what needs the web, small talk, search queries, memory
+  commands) or its quality cases fall behind core's.
+- The Tools page has three tabs: Your tools, Add more, and Images and video.
+  Your tools lists every tool in a compact grid with search and filters;
+  Add more has connected services and tool sources; Images and video sets
+  up image and clip generation. How it works explains that tools are built
+  in or added, and that each profile chooses which tools its chats may use,
+  with a link to Profiles & Orchestration. A link to /tools?tab=add opens
+  Add more.
+- The Train page is titled Train, as in the sidebar, and its buttons match
+  the rest of the app. Try an example and Build a new AI appear once: in the
+  introduction when no AI is open, and at the top when one is.
+- Files that belong to no chat are removed after a week, instead of
+  piling up forever. That covers files an automation run, the API, or an
+  MCP client made, and uploads never sent with a message. Files in a chat
+  stay with the chat. The API shows when such a file goes as `expires_at`.
+- `TOSKAR_WEB_FIXTURES`, for quality runs only, makes the daemon answer web search, places, and page reads from a file of fixed pages (`tests/quality/web.json`) instead of the internet, and log a warning that it does. The self-hosted real-model run uses it, so its answers are checked against the same pages as every other run.
+- Chat looks things up on the web before answering when a message asks it to find something: a recommendation, where to buy, what something costs, reviews, a result or a release, or "check" and "find" for me. Before, these were answered from the model's memory, which for a small model often meant naming products that don't fit or telling you to search yourself.
+- A follow-up such as "Can you provide a link to that bike?" is searched by what it refers to: the model writes the search from the conversation, so it names the bike.
+- An answer that still tells you to search, check websites, or pretends to browse is looked up and written again from what the web says. Small talk such as "Hi! How are you?" is never looked up.
+
+### Removed
+
+- LLaVA 1.6 Mistral 7B left the catalog. It downloaded without its
+  projector, so it couldn't see pictures in Toskar.
+
+### Fixed
+
+- The settings to paste into another AI app can be scrolled sideways from
+  the keyboard.
+- "Notify on change" notifies when something actually changed, not when the
+  model words the same facts differently: it compares the values the
+  automation tracks and the pages it read, and otherwise asks the model
+  whether anything meaningful changed. The notification says what changed.
+- "Notify when available" works in every language: the result now carries
+  an availability flag instead of being read for English phrases.
+- The Folder summary template now watches its folder, so its runs see the
+  files; before, a run couldn't open files outside Toskar's workspace.
+- An automation's history loads its newest 20 runs, with Show older runs for
+  the rest, instead of every run it ever made.
+- Preview answers in the automation's chosen language, and with its schedule's
+  time zone, as the saved automation will.
+- Automations run two at a time, so a slow one no longer holds up the
+  others, and a run that takes more than 20 minutes is stopped instead of
+  hanging.
+- Run now starts the run and returns right away; closing the page no longer
+  stops it, and its result appears when it finishes.
+- An automation that fails three times in a row, for any reason, is paused
+  with a notification saying why, in the App language. Retries go by the
+  kind of error rather than its English wording.
+- On Linux, the hardware check counts a memory limit set on Toskar's container or service (cgroup v2 `memory.max`, such as `docker run --memory` or systemd `MemoryMax=`), so model recommendations fit the memory Toskar may use instead of the whole machine's.
+- An open chat has a page heading for screen readers.
+- In the dark theme, dialogs and drawers dim the page behind them instead of
+  covering it in a grey haze.
+- Chats no longer pile up as active tasks. A chat's task was never moved past pending, so the Performance overview counted every chat ever sent as an active task and listed the oldest as Pending. A chat's task now ends completed, failed, or cancelled with the reply, and tasks left unfinished from before are settled when Toskar starts. Chats still raise no "task finished" notice.
+- Remove from team asks first; it removed the computer at once.
+- The Remove button for a model under Manage is readable in the dark theme.
+- The copper Ratatoskr label in dark mode is a little lighter, so it meets
+  the 4.5:1 contrast small text needs. The mascot's colors are unchanged.
+- Profiles you made before image generation existed couldn't make
+  pictures: a tool a profile doesn't list counts as off, and only the
+  built-in profiles gained new tools. Your own profiles now gain new tools
+  that stay on this computer and only read or make files in Toskar's
+  store (pictures, clips, audio, files, drafting automations). Web,
+  browser, terminal, file writes, and Git still wait for you to turn them
+  on, and a tool you turned off stays off.
+- Asking for a picture in a chat whose profile keeps image generation off
+  says so, and where to turn it on, instead of listing websites. A request
+  for a picture or clip no longer searches the web first.
+- A chat's messages always load in the order they were sent. A reply could
+  appear above the question it answered when both were saved within the same
+  instant.
+- On Windows, a graphics card's memory is read from the driver's registry entry, so cards with more than 4 GB are no longer reported as having 4 GB or less, and model recommendations use the real figure. Only graphics cards that are present are listed, so a card that was removed from the computer does not keep being reported.
+- On Windows, a build from source now shows the web UI. The page used to stay
+  blank because the scripts and styles under `/assets/` were answered with the
+  start page instead of the files.
+- On Windows, `make start` from PowerShell or cmd now builds `bin/toskar.exe`
+  and runs it, and no longer prints "The system cannot find the path
+  specified." when it looks up the git commit.
+- Gemma models answer the question instead of the instructions. Gemma
+  has no place for system instructions, so Toskar's (the date, the reply
+  language, how to answer) reached it unmarked, as if the user had written
+  them. Gemma 3 4B answered "Say hi in three words" with "You've provided
+  the current date and time…". The instructions are now marked as coming
+  from the app.
+- A running model's speed is filled in from its latest replies, and its device is the one it runs on rather than the first graphics card found.
+- Browse all models offers each repository's real model file instead of a
+  guessed name. It skips speculative-decoding draft files, split parts,
+  and extras in subfolders.
+- Asking chat for a picture or a clip makes it. "Draw a dog", "please
+  generate an image of a dog", or "are you able to make a picture of a dog
+  for me?" used to get "I can't draw" or a list of stock-photo sites from
+  a small model, though image generation was set up. Toskar now makes the
+  picture itself, with the model only writing what to draw, and the same
+  for changing an attached picture or making a short video.
+- Pictures, clips, audio read aloud, files code saved, and page
+  screenshots are attached to the answer that made them; only files
+  created as documents were before.
+- A request for a picture asked as a question, before image generation is
+  set up, gets the setup offer with the request, so it's finished once
+  the model is ready, instead of only "No, I can't generate images right
+  now".
+- On Linux, AMD and Intel graphics cards are found from the kernel's card list, without `lspci`, and an AMD card's memory is counted, so model recommendations use it. A card counts only when its render device is present, so a container without the card isn't told it has one.
+- On Linux and Windows, llama.cpp now installs its Vulkan build when the
+  computer has a GPU with a Vulkan driver, instead of always the CPU-only
+  build. Chats that took minutes on the CPU now run on the graphics card.
+  Computers without a usable GPU still get the CPU build.
+- A llama.cpp install that has the CPU build is swapped for the GPU build
+  the next time Toskar starts, or when you install llama.cpp again from the
+  Runtimes page.
+- llama.cpp reports a GPU backend only when the installed build has one, so
+  Toskar no longer says it can use the GPU when it cannot.
+- Installing llama.cpp again now replaces the whole install. Before, a
+  reinstall could leave the old build in place.
+- Running models say whether they're on the GPU again with current llama.cpp builds, which log the devices and offloaded layers only at trace verbosity and in a new format. Toskar now asks llama-server for that verbosity and reads the new format (#317).
+- A model that can't call tools, such as Gemma 2, gets current answers again. Choosing one turned off every tool, including the web, places, and service look-ups Toskar runs itself before the model answers, so it answered from memory ("I don't have access to real-time information"). Those look-ups now run for every model; a model that can't call tools just isn't asked to.
+- Read aloud in the Mac App Store app reads answers with your Mac's own
+  voices, instead of trying to install speech and showing a sandbox error.
+  The daemon now recognizes the App Sandbox from its folder too, so speech,
+  text recognition, the code environment, image generation, training and the
+  browser no longer try to download what the sandbox can't run.
+- When speech can't be set up, Read aloud says so in plain words, without
+  file paths.
+- `go test ./internal/hardware/` passes on Windows: the Linux GPU tests,
+  whose fake device paths Windows can't create, are skipped there (found
+  by @black-operative).
+- Links inside sentences show their text again: the Knowledge page link
+  under a profile's knowledge, the install links for Node.js, uv, and Docker
+  when adding a tool source, the Models link when a specialized AI's base
+  model is not installed, and Open Chat after deploying one.
+- "My daughter's birthday is May 3, remember that." is saved as a memory.
+  Asking at the end of a message used to reach the model, which promised to
+  remember without saving anything.
+- Model names on the Installed and Running tabs are second-level headings,
+  so screen readers no longer skip a level.
+- A file listed under an answer's Sources, attached or made in the chat, can
+  be downloaded from its chip, like the files under Files.
+- "Make a PDF of that" and "can I have it as a Word document?" make the file,
+  instead of telling you to paste the text into a word processor. If an
+  answer still tells you to make a file yourself, Toskar asks the model once
+  more to make it.
+- Only the person who showed a device code sees whether a device connected
+  with it, or cancels it.
+- The live event stream no longer tells one person about another's chats,
+  tool calls, memories, automations, or notifications: each person hears
+  only their own, and everyone still hears about the computers and models.
+- A long chat's summary is made as the person whose chat it is, so it
+  works for people besides the Owner.
+- "Forget that …" found nothing when the exact text didn't match, because
+  its fallback search read the wrong columns.
+- A request for a picture with the word misspelled, such as "make a
+  picutre of a dog", makes the picture. When a request is worded in a way
+  Toskar doesn't recognize and the model says it can't make pictures, or
+  points to DALL-E, Midjourney, or ASCII art, Toskar makes the picture
+  anyway.
+- "Make" in a message no longer offers the terminal unless it means the
+  build tool ("make test", a Makefile), so "make a picture of a dog" can't
+  turn into a command that draws ASCII art.
+- Saving a profile without changing its tools no longer turns tools on. The
+  editor showed every tool a profile didn't list as Always allow, though
+  the daemon treats them as off, so saving gave the profile every tool,
+  including the terminal and git push. It also kept tools from connected
+  services that the editor doesn't list, which saving used to drop.
+- A question asking for a figure, such as "How much does it cost?", reads the best page it finds even at Fast effort, instead of answering from search snippets that rarely carry the price.
+- With a tool that changes things available, the assistant calls it (it asks you first) instead of saying it can't and telling you to run a command such as `rm -rf` yourself.
+- The Docker image includes the libraries the llama.cpp runtime needs (`libgomp1`, `libcurl4`), so a model the container installs can start.
+- The source-type badge on the Knowledge page ("Linked", "Database") now meets WCAG AA contrast in the light theme; it measured 4.43:1.
+- In the dark theme, red labels and buttons are easier to read: the red is a
+  little brighter, so text such as a blocking problem with a training example
+  meets the contrast standard on its tinted background.
+- A training run's progress bar has a name for screen readers, and the
+  example request on the Deploy step can be scrolled from the keyboard.
+- A question about the weather in a month or season, such as "Juneau in
+  June", is answered with typical figures from climate pages, not today's
+  reading. If a word could be a month or part of a place name, the answer
+  says how it read it.
+- What the model writes before using a tool, such as "Let me find that
+  information for you.", no longer appears in the answer.
+- A weather answer links the wttr.in forecast page, such as wttr.in/juneau,
+  instead of the percent-encoded query Toskar reads current conditions from.
+  The Sources list does the same.
+
+### Security
+
+- A run started by what a trigger delivered (a webhook's body, a changed
+  page, new feed posts, or changed files) can't use tools that change
+  things outside Toskar, even ones approved for that automation: someone
+  else wrote what it read. Those tools are skipped and reported, as
+  unapproved tools are.
+- Traffic between your computers is encrypted. Bifrost speaks TLS, and
+  each computer is checked against the key it paired with, so another
+  machine at its address is refused. Chats placed on another computer,
+  their answers, tool jobs and their files, and training runs no longer
+  cross the network readable. Once a computer has used encryption, it is
+  never reached without it again.
+- A paired computer still on an older Toskar keeps working over plain HTTP,
+  and the Computers page marks it **Not encrypted** until it's updated.
+- The API on port 7331 answers HTTPS. Phones, browsers, and apps on your
+  network can use `https://` with the same port, so keys and chats no
+  longer cross the network readable. Toskar makes and keeps its own
+  certificate, and API Access shows the start of its fingerprint to compare
+  with what a browser shows. You can use your own certificate with
+  `api_tls_cert` and `api_tls_key` (or `TOSKAR_API_TLS_CERT` and
+  `TOSKAR_API_TLS_KEY`). Plain HTTP still works from this computer and, for
+  now, for phones on an older app.
+- Websites open in a browser on this computer can no longer use or read the Toskar API on `127.0.0.1`. The daemon now answers browsers only from its own web UI, the desktop app, and loopback addresses on its own port, or when the request carries an API key, and no longer sends `Access-Control-Allow-Origin: *`. It also refuses addresses that are not this computer's over loopback, which blocks DNS rebinding. toskarctl, the iPhone app, and other devices with a key work as before.
+
 ## [1.6.1] - 2026-10-04
 
 This release carries the iPhone app's text for its on-device chat, so the iPhone release built from it can show it. The engine, API, configuration, and data are unchanged from 1.6.0: the client contract stays 1.6, and pairing works with computers on 1.5.0 and 1.6.0. Binaries and the apt repository are not signed.
