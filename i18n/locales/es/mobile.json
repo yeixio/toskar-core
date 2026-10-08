@@ -205,6 +205,7 @@
   "chat": {
     "history": "Historial de chats",
     "newChat": "Nuevo chat",
+    "share": "Compartir esta respuesta",
     "chats": "Chats",
     "search": "Buscar",
     "rename": "Cambiar nombre",

@@ -205,6 +205,7 @@
   "chat": {
     "history": "聊天紀錄",
     "newChat": "新聊天",
+    "share": "分享此回答",
     "chats": "聊天",
     "search": "搜尋",
     "rename": "重新命名",

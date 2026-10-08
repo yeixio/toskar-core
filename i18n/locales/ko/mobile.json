@@ -205,6 +205,7 @@
   "chat": {
     "history": "채팅 기록",
     "newChat": "새 채팅",
+    "share": "이 답변 공유",
     "chats": "채팅",
     "search": "검색",
     "rename": "이름 변경",

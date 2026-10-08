@@ -214,6 +214,7 @@
   "chat": {
     "history": "Chat history",
     "newChat": "New chat",
+    "share": "Share this answer",
     "chats": "Chats",
     "search": "Search",
     "rename": "Rename",

@@ -205,6 +205,7 @@
   "chat": {
     "history": "チャット履歴",
     "newChat": "新しいチャット",
+    "share": "この回答を共有",
     "chats": "チャット",
     "search": "検索",
     "rename": "名前を変更",
