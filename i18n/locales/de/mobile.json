@@ -424,5 +424,24 @@
     "subject": "Toskar: gemeldete Antwort ({{reason}})",
     "body": "Grund: {{reason}}\nModell: {{model}}\nNotiz: {{note}}\n\nAntwort:\n{{answer}}",
     "noMail": "Es ist keine E-Mail-App eingerichtet. Sende die Meldung an {{email}}."
+  },
+  "watch": {
+    "ask": "Fragen",
+    "askPrompt": "Toskar fragen",
+    "suggestionsTitle": "Probier",
+    "suggestions": {
+      "dinner": "Eine schnelle Idee fürs Abendessen",
+      "fact": "Erzähl mir einen interessanten Fakt",
+      "egg": "Wie lange kocht ein Ei?"
+    },
+    "asking": "Dein Telefon wird gefragt …",
+    "more": "Die ganze Antwort steht in Toskar auf deinem Telefon.",
+    "unreachable": "Dein Telefon ist nicht erreichbar. Halte es in der Nähe und versuche es erneut.",
+    "notInstalled": "Installiere zuerst Toskar auf deinem Telefon.",
+    "noModel": "Toskar auf deinem Telefon hat noch kein Modell. Öffne es auf dem Telefon, um eines hinzuzufügen.",
+    "openPhone": "Das braucht mehr Zeit, als die Uhr bekommt. Öffne Toskar auf deinem Telefon und versuche es erneut.",
+    "failed": "Das hat nicht geklappt. Versuche es erneut.",
+    "tryAgain": "Erneut versuchen",
+    "askAnother": "Noch etwas fragen"
   }
 }

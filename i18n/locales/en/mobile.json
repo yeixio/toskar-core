@@ -500,5 +500,24 @@
     "subject": "Toskar: reported answer ({{reason}})",
     "body": "Reason: {{reason}}\nModel: {{model}}\nNote: {{note}}\n\nAnswer:\n{{answer}}",
     "noMail": "No email app is set up. Send the report to {{email}}."
+  },
+  "watch": {
+    "ask": "Ask",
+    "askPrompt": "Ask Toskar",
+    "suggestionsTitle": "Try",
+    "suggestions": {
+      "dinner": "A quick dinner idea",
+      "fact": "Tell me a fun fact",
+      "egg": "How long to boil an egg?"
+    },
+    "asking": "Asking your phone…",
+    "more": "The full answer is in Toskar on your phone.",
+    "unreachable": "Your phone isn't reachable. Keep it nearby, then try again.",
+    "notInstalled": "Install Toskar on your phone first.",
+    "noModel": "Toskar on your phone has no model yet. Open it on your phone to add one.",
+    "openPhone": "This needs more time than the watch gets. Open Toskar on your phone, then try again.",
+    "failed": "That didn't work. Try again.",
+    "tryAgain": "Try again",
+    "askAnother": "Ask another"
   }
 }

@@ -428,5 +428,24 @@
     "subject": "Toskar: respuesta denunciada ({{reason}})",
     "body": "Motivo: {{reason}}\nModelo: {{model}}\nNota: {{note}}\n\nRespuesta:\n{{answer}}",
     "noMail": "No hay ninguna app de correo configurada. Envía el informe a {{email}}."
+  },
+  "watch": {
+    "ask": "Preguntar",
+    "askPrompt": "Pregunta a Toskar",
+    "suggestionsTitle": "Prueba",
+    "suggestions": {
+      "dinner": "Una idea rápida para cenar",
+      "fact": "Cuéntame un dato curioso",
+      "egg": "¿Cuánto tarda en cocerse un huevo?"
+    },
+    "asking": "Preguntando a tu teléfono…",
+    "more": "La respuesta completa está en Toskar en tu teléfono.",
+    "unreachable": "No se puede contactar con tu teléfono. Tenlo cerca y vuelve a intentarlo.",
+    "notInstalled": "Primero instala Toskar en tu teléfono.",
+    "noModel": "Toskar en tu teléfono aún no tiene un modelo. Ábrelo en el teléfono para añadir uno.",
+    "openPhone": "Esto necesita más tiempo del que tiene el reloj. Abre Toskar en tu teléfono y vuelve a intentarlo.",
+    "failed": "No ha funcionado. Vuelve a intentarlo.",
+    "tryAgain": "Reintentar",
+    "askAnother": "Preguntar otra cosa"
   }
 }

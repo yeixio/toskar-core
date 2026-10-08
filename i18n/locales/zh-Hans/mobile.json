@@ -420,5 +420,24 @@
     "subject": "Toskar：被举报的回答（{{reason}}）",
     "body": "原因：{{reason}}\n模型：{{model}}\n备注：{{note}}\n\n回答：\n{{answer}}",
     "noMail": "尚未设置邮件应用。请把举报内容发送到 {{email}}。"
+  },
+  "watch": {
+    "ask": "提问",
+    "askPrompt": "问 Toskar",
+    "suggestionsTitle": "试试",
+    "suggestions": {
+      "dinner": "一个快手晚餐点子",
+      "fact": "告诉我一个有趣的知识",
+      "egg": "煮鸡蛋要多久？"
+    },
+    "asking": "正在询问你的手机…",
+    "more": "完整回答在你手机上的 Toskar 中。",
+    "unreachable": "无法连接到你的手机。请将它放在附近，然后重试。",
+    "notInstalled": "请先在手机上安装 Toskar。",
+    "noModel": "你手机上的 Toskar 还没有模型。请在手机上打开它来添加。",
+    "openPhone": "这需要的时间超出了手表的限制。请在手机上打开 Toskar，然后重试。",
+    "failed": "没有成功。请重试。",
+    "tryAgain": "重试",
+    "askAnother": "再问一个"
   }
 }

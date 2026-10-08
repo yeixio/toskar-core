@@ -420,5 +420,24 @@
     "subject": "Toskar: 신고된 답변 ({{reason}})",
     "body": "이유: {{reason}}\n모델: {{model}}\n메모: {{note}}\n\n답변:\n{{answer}}",
     "noMail": "설정된 이메일 앱이 없어요. 신고 내용을 {{email}}(으)로 보내 주세요."
+  },
+  "watch": {
+    "ask": "질문",
+    "askPrompt": "Toskar에게 질문",
+    "suggestionsTitle": "예시",
+    "suggestions": {
+      "dinner": "간단한 저녁 메뉴 추천",
+      "fact": "재미있는 사실 하나 알려줘",
+      "egg": "달걀은 몇 분 삶아야 해?"
+    },
+    "asking": "휴대폰에 묻는 중…",
+    "more": "전체 답변은 휴대폰의 Toskar에 있습니다.",
+    "unreachable": "휴대폰에 연결할 수 없습니다. 가까이 두고 다시 시도하세요.",
+    "notInstalled": "먼저 휴대폰에 Toskar를 설치하세요.",
+    "noModel": "휴대폰의 Toskar에 아직 모델이 없습니다. 휴대폰에서 열어 모델을 추가하세요.",
+    "openPhone": "워치에 주어진 시간보다 오래 걸립니다. 휴대폰에서 Toskar를 연 다음 다시 시도하세요.",
+    "failed": "실패했습니다. 다시 시도하세요.",
+    "tryAgain": "다시 시도",
+    "askAnother": "다른 질문"
   }
 }

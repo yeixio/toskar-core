@@ -420,5 +420,24 @@
     "subject": "Toskar：被檢舉的回答（{{reason}}）",
     "body": "原因：{{reason}}\n模型：{{model}}\n備註：{{note}}\n\n回答：\n{{answer}}",
     "noMail": "尚未設定郵件 App。請將檢舉內容傳送到 {{email}}。"
+  },
+  "watch": {
+    "ask": "提問",
+    "askPrompt": "問 Toskar",
+    "suggestionsTitle": "試試",
+    "suggestions": {
+      "dinner": "一個快速晚餐點子",
+      "fact": "告訴我一個有趣的知識",
+      "egg": "水煮蛋要煮多久？"
+    },
+    "asking": "正在詢問你的手機…",
+    "more": "完整回答在你手機上的 Toskar 中。",
+    "unreachable": "無法連線到你的手機。請將它放在附近，然後再試一次。",
+    "notInstalled": "請先在手機上安裝 Toskar。",
+    "noModel": "你手機上的 Toskar 還沒有模型。請在手機上打開它來加入。",
+    "openPhone": "這需要的時間超出手錶的限制。請在手機上打開 Toskar，然後再試一次。",
+    "failed": "沒有成功。請再試一次。",
+    "tryAgain": "再試一次",
+    "askAnother": "再問一個"
   }
 }

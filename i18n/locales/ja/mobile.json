@@ -420,5 +420,24 @@
     "subject": "Toskar：報告された回答（{{reason}}）",
     "body": "理由：{{reason}}\nモデル：{{model}}\nメモ：{{note}}\n\n回答：\n{{answer}}",
     "noMail": "メールアプリが設定されていません。報告を {{email}} に送ってください。"
+  },
+  "watch": {
+    "ask": "質問",
+    "askPrompt": "Toskarに質問",
+    "suggestionsTitle": "例",
+    "suggestions": {
+      "dinner": "手早い夕食のアイデア",
+      "fact": "面白い豆知識を教えて",
+      "egg": "ゆで卵は何分ゆでる？"
+    },
+    "asking": "電話に問い合わせ中…",
+    "more": "回答の全文は電話のToskarにあります。",
+    "unreachable": "電話に接続できません。近くに置いて、もう一度お試しください。",
+    "notInstalled": "先に電話にToskarをインストールしてください。",
+    "noModel": "電話のToskarにはまだモデルがありません。電話で開いて追加してください。",
+    "openPhone": "ウォッチで使える時間では足りません。電話でToskarを開いてから、もう一度お試しください。",
+    "failed": "うまくいきませんでした。もう一度お試しください。",
+    "tryAgain": "再試行",
+    "askAnother": "別の質問"
   }
 }
