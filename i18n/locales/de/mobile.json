@@ -33,7 +33,7 @@
   },
   "connect": {
     "title": "Computer verbinden",
-    "subtitle": "Das Handy nutzt den Computer, auf dem deine Modelle bereits laufen. Öffne auf diesem Computer „Computer“ und wähle „Gerät verbinden“.",
+    "subtitle": "Dieses Gerät nutzt den Computer, auf dem deine Modelle bereits laufen. Öffne auf diesem Computer „Computer“ und wähle „Gerät verbinden“.",
     "address": "Adresse des Computers",
     "addressPlaceholder": "192.168.1.20",
     "code": "Code",
@@ -48,7 +48,7 @@
     "notReady": "Toskar hat geantwortet, ist aber nicht bereit.",
     "certificateMismatch": "Das Zertifikat des Computers passte nicht zu dem, das er gemeldet hat, deshalb wurde die Verbindung beendet. Versuche es in deinem eigenen Netzwerk erneut.",
     "pairUnsupported": "Toskar auf diesem Computer ist zu alt für die Verbindung per Code. Aktualisiere es oder verwende einen API-Schlüssel.",
-    "lede": "Das Handy nutzt den Computer, auf dem deine Modelle bereits laufen."
+    "lede": "Dieses Gerät nutzt den Computer, auf dem deine Modelle bereits laufen."
   },
   "discovery": {
     "onThisNetwork": "In diesem Netzwerk",
@@ -98,16 +98,16 @@
   },
   "phoneModels": {
     "heading": "Auf diesem Gerät",
-    "copy": "Das sind die kleineren Modelle aus dem Toskar-Katalog. Die Datei wird auf dieses Handy geladen und bleibt hier.",
+    "copy": "Das sind die kleineren Modelle aus dem Toskar-Katalog. Die Datei wird auf dieses Gerät geladen und bleibt hier.",
     "meta": "{{parameters}} · {{size}}",
     "chat": "Chat",
     "remove": "Entfernen",
     "install": "Installieren",
     "installing": "Wird installiert {{percent}}",
-    "tooLarge": "Zu groß für dieses Handy",
+    "tooLarge": "Zu groß für dieses Gerät",
     "installFailed": "Das Modell konnte nicht installiert werden.",
-    "noPlace": "Dieses Handy hat keinen Ort zum Speichern von Modellen.",
-    "noSpace": "Auf diesem Handy ist nicht genug freier Speicher für dieses Modell.",
+    "noPlace": "Dieses Gerät hat keinen Ort zum Speichern von Modellen.",
+    "noSpace": "Auf diesem Gerät ist nicht genug freier Speicher für dieses Modell.",
     "downloadIncomplete": "Der Download des Modells wurde nicht abgeschlossen.",
     "summaries": {
       "qwen2-5-coder-1-5b-q4": "Sehr schneller Programmierassistent für kurze Änderungen und kleine Aufgaben.",
@@ -142,7 +142,7 @@
       },
       "research": {
         "title": "Recherche",
-        "description": "Zusammenfassungen und sorgfältiges Denken, komplett auf diesem Handy."
+        "description": "Zusammenfassungen und sorgfältiges Denken, komplett auf diesem Gerät."
       },
       "custom": {
         "title": "Eigene",
@@ -173,7 +173,7 @@
     "connectedComputer": "Verbundener Computer",
     "encrypted": "Verschlüsselt · Zertifikat {{code}}",
     "notEncrypted": "Nicht verschlüsselt. Ein Update von Toskar auf dem Computer verschlüsselt Chats mit ihm.",
-    "certificateChanged": "Das Zertifikat dieses Computers hat sich geändert, deshalb verbindet sich das Telefon nicht mit ihm. Wenn Toskar dort neu installiert wurde, vergiss ihn unten und verbinde dich erneut.",
+    "certificateChanged": "Das Zertifikat dieses Computers hat sich geändert, deshalb verbindet sich dieses Gerät nicht mit ihm. Wenn Toskar dort neu installiert wurde, vergiss ihn unten und verbinde dich erneut.",
     "notConnected": "Nicht verbunden",
     "coreVersion": "Toskar auf diesem Computer",
     "updateCore": "Aktualisiere Toskar auf diesem Computer auf 1.4 oder neuer, um Antwortquellen, die Schritte des Assistenten, Live-Fortschritt und Aufwand zu sehen.",
@@ -242,9 +242,9 @@
     "thinkingOnPhone": "Denkt auf diesem Gerät nach …",
     "installFirst": "Installiere ein Modell, um auf diesem Gerät zu chatten.",
     "setUpModel": "Modell einrichten",
-    "modelMissing": "Dieses Modell ist auf diesem Handy nicht installiert.",
+    "modelMissing": "Dieses Modell ist auf diesem Gerät nicht installiert.",
     "interrupted": "Antwort unterbrochen",
-    "couldNotRun": "Dieses Handy konnte das Modell nicht ausführen.",
+    "couldNotRun": "Dieses Gerät konnte das Modell nicht ausführen.",
     "noProfile": "Dieser Computer hat noch kein Profil. Erstelle zuerst eines in der Mac-App.",
     "noChatPlace": "Dieses Gerät hat keinen Ort zum Speichern von Chats.",
     "speed": "{{generated}} tok/s",

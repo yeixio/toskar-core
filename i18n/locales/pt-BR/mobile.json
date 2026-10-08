@@ -33,7 +33,7 @@
   },
   "connect": {
     "title": "Conectar um computador",
-    "subtitle": "O celular usa o computador que já executa seus modelos. Nesse computador, abra Computadores e escolha Conectar um dispositivo.",
+    "subtitle": "Este dispositivo usa o computador que já executa seus modelos. Nesse computador, abra Computadores e escolha Conectar um dispositivo.",
     "address": "Endereço do computador",
     "addressPlaceholder": "192.168.1.20",
     "code": "Código",
@@ -48,7 +48,7 @@
     "notReady": "O Toskar respondeu, mas não está pronto.",
     "certificateMismatch": "O certificado do computador não correspondeu ao que ele informou, então a conexão foi interrompida. Tente de novo na sua própria rede.",
     "pairUnsupported": "O Toskar desse computador é antigo demais para conectar com um código. Atualize-o ou use uma chave de API.",
-    "lede": "O celular usa o computador que já executa seus modelos."
+    "lede": "Este dispositivo usa o computador que já executa seus modelos."
   },
   "discovery": {
     "onThisNetwork": "Nesta rede",
@@ -98,16 +98,16 @@
   },
   "phoneModels": {
     "heading": "Neste dispositivo",
-    "copy": "Estes são os modelos menores do catálogo do Toskar. O arquivo é baixado para este celular e fica aqui.",
+    "copy": "Estes são os modelos menores do catálogo do Toskar. O arquivo é baixado para este dispositivo e fica aqui.",
     "meta": "{{parameters}} · {{size}}",
     "chat": "Chat",
     "remove": "Remover",
     "install": "Instalar",
     "installing": "Instalando {{percent}}",
-    "tooLarge": "Grande demais para este celular",
+    "tooLarge": "Grande demais para este dispositivo",
     "installFailed": "Não foi possível instalar o modelo.",
-    "noPlace": "Este celular não tem onde armazenar modelos.",
-    "noSpace": "Este celular não tem espaço livre suficiente para esse modelo.",
+    "noPlace": "Este dispositivo não tem onde armazenar modelos.",
+    "noSpace": "Este dispositivo não tem espaço livre suficiente para esse modelo.",
     "downloadIncomplete": "O download do modelo não terminou.",
     "summaries": {
       "qwen2-5-coder-1-5b-q4": "Assistente de programação muito rápido para edições rápidas e tarefas pequenas.",
@@ -142,7 +142,7 @@
       },
       "research": {
         "title": "Pesquisa",
-        "description": "Resumos e raciocínio cuidadoso, executados inteiramente neste celular."
+        "description": "Resumos e raciocínio cuidadoso, executados inteiramente neste dispositivo."
       },
       "custom": {
         "title": "Personalizado",
@@ -173,7 +173,7 @@
     "connectedComputer": "Computador conectado",
     "encrypted": "Criptografado · certificado {{code}}",
     "notEncrypted": "Sem criptografia. Atualizar o Toskar no computador criptografa as conversas com ele.",
-    "certificateChanged": "O certificado deste computador mudou, então o telefone não vai se conectar. Se o Toskar foi reinstalado nele, esqueça-o abaixo e conecte de novo.",
+    "certificateChanged": "O certificado deste computador mudou, então este dispositivo não vai se conectar. Se o Toskar foi reinstalado nele, esqueça-o abaixo e conecte de novo.",
     "notConnected": "Não conectado",
     "coreVersion": "Toskar nesse computador",
     "updateCore": "Atualize o Toskar nesse computador para a versão 1.4 ou posterior para ver as fontes das respostas, o que o assistente fez, o progresso ao vivo e o esforço.",
@@ -242,9 +242,9 @@
     "thinkingOnPhone": "Pensando neste dispositivo…",
     "installFirst": "Instale um modelo para conversar neste dispositivo.",
     "setUpModel": "Configurar um modelo",
-    "modelMissing": "Esse modelo não está instalado neste celular.",
+    "modelMissing": "Esse modelo não está instalado neste dispositivo.",
     "interrupted": "Resposta interrompida",
-    "couldNotRun": "Este celular não conseguiu executar o modelo.",
+    "couldNotRun": "Este dispositivo não conseguiu executar o modelo.",
     "noProfile": "Esse computador ainda não tem um perfil. Crie um primeiro no app para Mac.",
     "noChatPlace": "Este dispositivo não tem onde armazenar chats.",
     "speed": "{{generated}} tok/s",

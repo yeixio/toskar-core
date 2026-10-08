@@ -33,7 +33,7 @@
   },
   "connect": {
     "title": "컴퓨터 연결",
-    "subtitle": "휴대폰은 이미 모델을 실행 중인 컴퓨터를 사용해요. 해당 컴퓨터에서 컴퓨터를 열고 '기기 연결'을 선택하세요.",
+    "subtitle": "이 기기는 이미 모델을 실행 중인 컴퓨터를 사용해요. 해당 컴퓨터에서 컴퓨터를 열고 '기기 연결'을 선택하세요.",
     "address": "컴퓨터 주소",
     "addressPlaceholder": "192.168.1.20",
     "code": "코드",
@@ -48,7 +48,7 @@
     "notReady": "Toskar가 응답했지만 준비되지 않았어요.",
     "certificateMismatch": "컴퓨터의 인증서가 알려 준 인증서와 일치하지 않아 연결을 중단했어요. 내 네트워크에서 다시 시도하세요.",
     "pairUnsupported": "해당 컴퓨터의 Toskar가 오래되어 코드로 연결할 수 없어요. 업데이트하거나 API 키를 사용하세요.",
-    "lede": "휴대폰은 이미 모델을 실행 중인 컴퓨터를 사용해요."
+    "lede": "이 기기는 이미 모델을 실행 중인 컴퓨터를 사용해요."
   },
   "discovery": {
     "onThisNetwork": "이 네트워크에 있음",
@@ -98,16 +98,16 @@
   },
   "phoneModels": {
     "heading": "이 기기에 있음",
-    "copy": "Toskar 카탈로그의 작은 모델들이에요. 파일은 이 휴대폰에 다운로드되어 여기에 보관돼요.",
+    "copy": "Toskar 카탈로그의 작은 모델들이에요. 파일은 이 기기에 다운로드되어 여기에 보관돼요.",
     "meta": "{{parameters}} · {{size}}",
     "chat": "채팅",
     "remove": "제거",
     "install": "설치",
     "installing": "설치하는 중 {{percent}}",
-    "tooLarge": "이 휴대폰에는 너무 커요",
+    "tooLarge": "이 기기에는 너무 커요",
     "installFailed": "모델을 설치할 수 없어요.",
-    "noPlace": "이 휴대폰에는 모델을 저장할 공간이 없어요.",
-    "noSpace": "이 휴대폰에 해당 모델을 저장할 여유 공간이 부족해요.",
+    "noPlace": "이 기기에는 모델을 저장할 공간이 없어요.",
+    "noSpace": "이 기기에 해당 모델을 저장할 여유 공간이 부족해요.",
     "downloadIncomplete": "모델 다운로드가 끝나지 않았어요.",
     "summaries": {
       "qwen2-5-coder-1-5b-q4": "간단한 수정과 작은 작업에 적합한 매우 빠른 코딩 어시스턴트.",
@@ -142,7 +142,7 @@
       },
       "research": {
         "title": "리서치",
-        "description": "이 휴대폰에서만 실행되는 요약과 신중한 추론."
+        "description": "이 기기에서만 실행되는 요약과 신중한 추론."
       },
       "custom": {
         "title": "사용자 지정",
@@ -173,7 +173,7 @@
     "connectedComputer": "연결된 컴퓨터",
     "encrypted": "암호화됨 · 인증서 {{code}}",
     "notEncrypted": "암호화되지 않았어요. 컴퓨터의 Toskar를 업데이트하면 채팅이 암호화돼요.",
-    "certificateChanged": "이 컴퓨터의 인증서가 바뀌어서 휴대폰이 연결하지 않아요. 그 컴퓨터에 Toskar를 다시 설치했다면 아래에서 지우고 다시 연결하세요.",
+    "certificateChanged": "이 컴퓨터의 인증서가 바뀌어서 이 기기가 연결하지 않아요. 그 컴퓨터에 Toskar를 다시 설치했다면 아래에서 지우고 다시 연결하세요.",
     "notConnected": "연결되지 않음",
     "coreVersion": "해당 컴퓨터의 Toskar",
     "updateCore": "답변 소스, 어시스턴트가 수행한 작업, 실시간 진행 상황, 노력 수준을 보려면 해당 컴퓨터의 Toskar를 1.4 이상으로 업데이트하세요.",
@@ -242,9 +242,9 @@
     "thinkingOnPhone": "이 기기에서 생각하는 중…",
     "installFirst": "이 기기에서 채팅하려면 모델을 설치하세요.",
     "setUpModel": "모델 설정",
-    "modelMissing": "해당 모델이 이 휴대폰에 설치되어 있지 않아요.",
+    "modelMissing": "해당 모델이 이 기기에 설치되어 있지 않아요.",
     "interrupted": "응답이 중단되었어요",
-    "couldNotRun": "이 휴대폰에서 모델을 실행할 수 없어요.",
+    "couldNotRun": "이 기기에서 모델을 실행할 수 없어요.",
     "noProfile": "해당 컴퓨터에 아직 프로필이 없어요. 먼저 Mac 앱에서 만드세요.",
     "noChatPlace": "이 기기에는 채팅을 저장할 공간이 없어요.",
     "speed": "{{generated}} tok/s",

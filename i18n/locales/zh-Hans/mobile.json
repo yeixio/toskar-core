@@ -33,7 +33,7 @@
   },
   "connect": {
     "title": "连接电脑",
-    "subtitle": "手机会使用已经运行你的模型的那台电脑。在那台电脑上打开“电脑”，然后选择“连接设备”。",
+    "subtitle": "这台设备会使用已经运行你的模型的那台电脑。在那台电脑上打开“电脑”，然后选择“连接设备”。",
     "address": "电脑地址",
     "addressPlaceholder": "192.168.1.20",
     "code": "代码",
@@ -48,7 +48,7 @@
     "notReady": "Toskar 已响应，但尚未就绪。",
     "certificateMismatch": "电脑的证书与它报告的证书不一致，因此已停止连接。请在你自己的网络中重试。",
     "pairUnsupported": "那台电脑上的 Toskar 版本太旧，无法用代码连接。请更新它，或改用 API 密钥。",
-    "lede": "手机会使用已经运行你的模型的那台电脑。"
+    "lede": "这台设备会使用已经运行你的模型的那台电脑。"
   },
   "discovery": {
     "onThisNetwork": "在此网络中",
@@ -97,17 +97,17 @@
     }
   },
   "phoneModels": {
-    "heading": "在这台设备 上",
-    "copy": "这些是 Toskar 目录中较小的模型。文件会下载到这部手机上，并保留在这里。",
+    "heading": "在这台设备上",
+    "copy": "这些是 Toskar 目录中较小的模型。文件会下载到这台设备上，并保留在这里。",
     "meta": "{{parameters}} · {{size}}",
     "chat": "聊天",
     "remove": "移除",
     "install": "安装",
     "installing": "正在安装 {{percent}}",
-    "tooLarge": "对这部手机来说太大",
+    "tooLarge": "对这台设备来说太大",
     "installFailed": "无法安装该模型。",
-    "noPlace": "这部手机没有可存放模型的位置。",
-    "noSpace": "这部手机的可用存储空间不足以安装该模型。",
+    "noPlace": "这台设备没有可存放模型的位置。",
+    "noSpace": "这台设备的可用存储空间不足以安装该模型。",
     "downloadIncomplete": "模型下载未完成。",
     "summaries": {
       "qwen2-5-coder-1-5b-q4": "非常快速的编程助手，适合快速修改和小任务。",
@@ -124,7 +124,7 @@
   },
   "onboarding": {
     "welcome": "欢迎使用",
-    "lede": "这个应用可以在这台设备 上私密地运行 AI。",
+    "lede": "这个应用可以在这台设备上私密地运行 AI。",
     "thisIPhone": "这台设备",
     "hardware": "这台设备 用于运行 AI 模型的硬件。",
     "device": "设备",
@@ -138,11 +138,11 @@
       },
       "coding": {
         "title": "编程",
-        "description": "在这台设备 上为快速修改和小任务提供代码帮助。"
+        "description": "在这台设备上为快速修改和小任务提供代码帮助。"
       },
       "research": {
         "title": "研究",
-        "description": "总结和严谨推理，完全在这部手机上运行。"
+        "description": "总结和严谨推理，完全在这台设备上运行。"
       },
       "custom": {
         "title": "自定义",
@@ -165,7 +165,7 @@
   },
   "settings": {
     "title": "设置",
-    "subtitle": "你在这台设备 上安装的模型会保留在这台设备 上。与已连接电脑的聊天会保留在那台电脑上。",
+    "subtitle": "你在这台设备上安装的模型会保留在这台设备上。与已连接电脑的聊天会保留在那台电脑上。",
     "thisIPhone": "这台设备",
     "whereChatsRun": "聊天运行位置",
     "onDevice": "安装模型后，在这台设备上",
@@ -173,7 +173,7 @@
     "connectedComputer": "已连接的电脑",
     "encrypted": "已加密 · 证书 {{code}}",
     "notEncrypted": "未加密。更新电脑上的 Toskar 即可加密与它的聊天。",
-    "certificateChanged": "这台电脑的证书已更改，因此手机不会连接它。如果在那台电脑上重新安装了 Toskar，请在下方忘记它，然后重新连接。",
+    "certificateChanged": "这台电脑的证书已更改，因此这台设备不会连接它。如果在那台电脑上重新安装了 Toskar，请在下方忘记它，然后重新连接。",
     "notConnected": "未连接",
     "coreVersion": "那台电脑上的 Toskar",
     "updateCore": "请将那台电脑上的 Toskar 更新到 1.4 或更高版本，以查看回答来源、助手的操作、实时进度和投入程度。",
@@ -182,10 +182,10 @@
     "connect": "连接电脑",
     "about": "关于",
     "version": "版本 {{version}}",
-    "aboutCopy": "名字来自在世界树上传递消息的松鼠 Ratatoskr。Toskar 将你的应用与你电脑上和这台设备 上的模型连接起来。",
+    "aboutCopy": "名字来自在世界树上传递消息的松鼠 Ratatoskr。Toskar 将你的应用与你电脑上和这台设备上的模型连接起来。",
     "dangerZone": "危险操作",
     "resetTitle": "重置这台设备",
-    "resetCopy": "恢复欢迎设置。会清除这台设备 上的聊天，并忘记已连接的电脑。",
+    "resetCopy": "恢复欢迎设置。会清除这台设备上的聊天，并忘记已连接的电脑。",
     "resetButton": "重置设置和应用数据…",
     "resetDeletesModels": "此操作无法撤销。已下载的模型也会被删除。",
     "resetKeepsModels": "此操作无法撤销。已下载的模型会被保留。",
@@ -239,12 +239,12 @@
     "sending": "正在发送",
     "stop": "停止",
     "working": "正在处理…",
-    "thinkingOnPhone": "正在这台设备 上思考…",
-    "installFirst": "安装一个模型即可在这台设备 上聊天。",
+    "thinkingOnPhone": "正在这台设备上思考…",
+    "installFirst": "安装一个模型即可在这台设备上聊天。",
     "setUpModel": "设置模型",
-    "modelMissing": "这部手机上没有安装该模型。",
+    "modelMissing": "这台设备上没有安装该模型。",
     "interrupted": "回复已中断",
-    "couldNotRun": "这部手机无法运行该模型。",
+    "couldNotRun": "这台设备无法运行该模型。",
     "noProfile": "那台电脑还没有配置。请先在 Mac 应用中创建一个。",
     "noChatPlace": "这台设备 没有可存放聊天的位置。",
     "speed": "{{generated}} tok/s",
@@ -258,7 +258,7 @@
     },
     "empty": {
       "title": "有什么可以帮你的？",
-      "phone": "与这台设备 上的 AI 对话。你写的任何内容都不会离开它。",
+      "phone": "与这台设备上的 AI 对话。你写的任何内容都不会离开它。",
       "computer": "Toskar 会选择合适的模型和电脑，在需要时查找信息，并显示它用到了什么。"
     },
     "unsent": {

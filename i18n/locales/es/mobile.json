@@ -33,7 +33,7 @@
   },
   "connect": {
     "title": "Conectar una computadora",
-    "subtitle": "El teléfono usa la computadora que ya ejecuta tus modelos. En esa computadora, abre Computadoras y elige Conectar un dispositivo.",
+    "subtitle": "Este dispositivo usa la computadora que ya ejecuta tus modelos. En esa computadora, abre Computadoras y elige Conectar un dispositivo.",
     "address": "Dirección de la computadora",
     "addressPlaceholder": "192.168.1.20",
     "code": "Código",
@@ -48,7 +48,7 @@
     "notReady": "Toskar respondió, pero no está listo.",
     "certificateMismatch": "El certificado de la computadora no coincidía con el que informó, así que se detuvo la conexión. Vuelve a intentarlo en tu propia red.",
     "pairUnsupported": "El Toskar de esa computadora es demasiado antiguo para conectarse con un código. Actualízalo o usa una clave de API.",
-    "lede": "El teléfono usa la computadora que ya ejecuta tus modelos."
+    "lede": "Este dispositivo usa la computadora que ya ejecuta tus modelos."
   },
   "discovery": {
     "onThisNetwork": "En esta red",
@@ -98,16 +98,16 @@
   },
   "phoneModels": {
     "heading": "En este dispositivo",
-    "copy": "Estos son los modelos más pequeños del catálogo de Toskar. El archivo se descarga en este teléfono y se queda aquí.",
+    "copy": "Estos son los modelos más pequeños del catálogo de Toskar. El archivo se descarga en este dispositivo y se queda aquí.",
     "meta": "{{parameters}} · {{size}}",
     "chat": "Chatear",
     "remove": "Quitar",
     "install": "Instalar",
     "installing": "Instalando {{percent}}",
-    "tooLarge": "Demasiado grande para este teléfono",
+    "tooLarge": "Demasiado grande para este dispositivo",
     "installFailed": "No se pudo instalar el modelo.",
-    "noPlace": "Este teléfono no tiene dónde guardar modelos.",
-    "noSpace": "Este teléfono no tiene suficiente almacenamiento libre para ese modelo.",
+    "noPlace": "Este dispositivo no tiene dónde guardar modelos.",
+    "noSpace": "Este dispositivo no tiene suficiente almacenamiento libre para ese modelo.",
     "downloadIncomplete": "La descarga del modelo no terminó.",
     "summaries": {
       "qwen2-5-coder-1-5b-q4": "Asistente de programación muy rápido para ediciones rápidas y tareas pequeñas.",
@@ -142,7 +142,7 @@
       },
       "research": {
         "title": "Investigación",
-        "description": "Resúmenes y razonamiento cuidadoso, todo ejecutándose en este teléfono."
+        "description": "Resúmenes y razonamiento cuidadoso, todo ejecutándose en este dispositivo."
       },
       "custom": {
         "title": "Personalizado",
@@ -173,7 +173,7 @@
     "connectedComputer": "Computadora conectada",
     "encrypted": "Cifrado · certificado {{code}}",
     "notEncrypted": "Sin cifrar. Actualizar Toskar en la computadora cifra los chats con ella.",
-    "certificateChanged": "El certificado de esta computadora cambió, así que el teléfono no se conectará. Si se reinstaló Toskar allí, olvídala abajo y vuelve a conectarte.",
+    "certificateChanged": "El certificado de esta computadora cambió, así que este dispositivo no se conectará. Si se reinstaló Toskar allí, olvídala abajo y vuelve a conectarte.",
     "notConnected": "No conectado",
     "coreVersion": "Toskar en esa computadora",
     "updateCore": "Actualiza Toskar en esa computadora a la versión 1.4 o posterior para ver las fuentes de las respuestas, lo que hizo el asistente, el progreso en vivo y el esfuerzo.",
@@ -242,9 +242,9 @@
     "thinkingOnPhone": "Pensando en este dispositivo…",
     "installFirst": "Instala un modelo para chatear en este dispositivo.",
     "setUpModel": "Configurar un modelo",
-    "modelMissing": "Ese modelo no está instalado en este teléfono.",
+    "modelMissing": "Ese modelo no está instalado en este dispositivo.",
     "interrupted": "Respuesta interrumpida",
-    "couldNotRun": "Este teléfono no pudo ejecutar el modelo.",
+    "couldNotRun": "Este dispositivo no pudo ejecutar el modelo.",
     "noProfile": "Esa computadora todavía no tiene ningún perfil. Primero crea uno en la app para Mac.",
     "noChatPlace": "Este dispositivo no tiene dónde guardar chats.",
     "speed": "{{generated}} tok/s",

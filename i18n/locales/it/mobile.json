@@ -33,7 +33,7 @@
   },
   "connect": {
     "title": "Collega un computer",
-    "subtitle": "Il telefono usa il computer su cui sono già in esecuzione i tuoi modelli. Su quel computer, apri Computer e scegli Collega un dispositivo.",
+    "subtitle": "Questo dispositivo usa il computer su cui sono già in esecuzione i tuoi modelli. Su quel computer, apri Computer e scegli Collega un dispositivo.",
     "address": "Indirizzo del computer",
     "addressPlaceholder": "192.168.1.20",
     "code": "Codice",
@@ -48,7 +48,7 @@
     "notReady": "Toskar ha risposto, ma non è pronto.",
     "certificateMismatch": "Il certificato del computer non corrispondeva a quello comunicato, quindi la connessione è stata interrotta. Riprova sulla tua rete.",
     "pairUnsupported": "Il Toskar di quel computer è troppo vecchio per collegarsi con un codice. Aggiornalo o usa una chiave API.",
-    "lede": "Il telefono usa il computer su cui sono già in esecuzione i tuoi modelli."
+    "lede": "Questo dispositivo usa il computer su cui sono già in esecuzione i tuoi modelli."
   },
   "discovery": {
     "onThisNetwork": "Su questa rete",
@@ -98,16 +98,16 @@
   },
   "phoneModels": {
     "heading": "Su questo dispositivo",
-    "copy": "Questi sono i modelli più piccoli del catalogo di Toskar. Il file viene scaricato su questo telefono e resta qui.",
+    "copy": "Questi sono i modelli più piccoli del catalogo di Toskar. Il file viene scaricato su questo dispositivo e resta qui.",
     "meta": "{{parameters}} · {{size}}",
     "chat": "Chat",
     "remove": "Rimuovi",
     "install": "Installa",
     "installing": "Installazione {{percent}}",
-    "tooLarge": "Troppo grande per questo telefono",
+    "tooLarge": "Troppo grande per questo dispositivo",
     "installFailed": "Impossibile installare il modello.",
-    "noPlace": "Questo telefono non ha uno spazio in cui salvare i modelli.",
-    "noSpace": "Questo telefono non ha abbastanza spazio libero per quel modello.",
+    "noPlace": "Questo dispositivo non ha uno spazio in cui salvare i modelli.",
+    "noSpace": "Questo dispositivo non ha abbastanza spazio libero per quel modello.",
     "downloadIncomplete": "Il download del modello non è stato completato.",
     "summaries": {
       "qwen2-5-coder-1-5b-q4": "Assistente di programmazione molto veloce per modifiche rapide e piccole attività.",
@@ -142,7 +142,7 @@
       },
       "research": {
         "title": "Ricerca",
-        "description": "Riassunti e ragionamenti accurati, eseguiti interamente su questo telefono."
+        "description": "Riassunti e ragionamenti accurati, eseguiti interamente su questo dispositivo."
       },
       "custom": {
         "title": "Personalizzato",
@@ -173,7 +173,7 @@
     "connectedComputer": "Computer collegato",
     "encrypted": "Cifrato · certificato {{code}}",
     "notEncrypted": "Non cifrato. Aggiornare Toskar sul computer cifra le chat con esso.",
-    "certificateChanged": "Il certificato di questo computer è cambiato, quindi il telefono non si connette. Se Toskar è stato reinstallato lì, dimenticalo qui sotto e connettiti di nuovo.",
+    "certificateChanged": "Il certificato di questo computer è cambiato, quindi questo dispositivo non si connette. Se Toskar è stato reinstallato lì, dimenticalo qui sotto e connettiti di nuovo.",
     "notConnected": "Non collegato",
     "coreVersion": "Toskar su quel computer",
     "updateCore": "Aggiorna Toskar su quel computer alla versione 1.4 o successiva per vedere le fonti delle risposte, cosa ha fatto l'assistente, l'avanzamento in tempo reale e l'impegno.",
@@ -242,9 +242,9 @@
     "thinkingOnPhone": "Ragionamento su questo dispositivo…",
     "installFirst": "Installa un modello per chattare su questo dispositivo.",
     "setUpModel": "Configura un modello",
-    "modelMissing": "Quel modello non è installato su questo telefono.",
+    "modelMissing": "Quel modello non è installato su questo dispositivo.",
     "interrupted": "Risposta interrotta",
-    "couldNotRun": "Questo telefono non è riuscito a eseguire il modello.",
+    "couldNotRun": "Questo dispositivo non è riuscito a eseguire il modello.",
     "noProfile": "Quel computer non ha ancora un profilo. Creane prima uno nell'app per Mac.",
     "noChatPlace": "Questo dispositivo non ha uno spazio in cui salvare le chat.",
     "speed": "{{generated}} tok/s",

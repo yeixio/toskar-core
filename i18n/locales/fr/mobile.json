@@ -33,7 +33,7 @@
   },
   "connect": {
     "title": "Connecter un ordinateur",
-    "subtitle": "Le téléphone utilise l'ordinateur qui exécute déjà vos modèles. Sur cet ordinateur, ouvrez Ordinateurs et choisissez Connecter un appareil.",
+    "subtitle": "Cet appareil utilise l'ordinateur qui exécute déjà vos modèles. Sur cet ordinateur, ouvrez Ordinateurs et choisissez Connecter un appareil.",
     "address": "Adresse de l'ordinateur",
     "addressPlaceholder": "192.168.1.20",
     "code": "Code",
@@ -48,7 +48,7 @@
     "notReady": "Toskar a répondu, mais n'est pas prêt.",
     "certificateMismatch": "Le certificat de l’ordinateur ne correspondait pas à celui qu’il a annoncé, la connexion a donc été arrêtée. Réessayez sur votre propre réseau.",
     "pairUnsupported": "Le Toskar de cet ordinateur est trop ancien pour une connexion par code. Mettez-le à jour ou utilisez une clé API.",
-    "lede": "Le téléphone utilise l'ordinateur qui exécute déjà vos modèles."
+    "lede": "Cet appareil utilise l'ordinateur qui exécute déjà vos modèles."
   },
   "discovery": {
     "onThisNetwork": "Sur ce réseau",
@@ -98,16 +98,16 @@
   },
   "phoneModels": {
     "heading": "Sur cet appareil",
-    "copy": "Voici les plus petits modèles du catalogue Toskar. Le fichier est téléchargé sur ce téléphone et y reste.",
+    "copy": "Voici les plus petits modèles du catalogue Toskar. Le fichier est téléchargé sur cet appareil et y reste.",
     "meta": "{{parameters}} · {{size}}",
     "chat": "Discuter",
     "remove": "Supprimer",
     "install": "Installer",
     "installing": "Installation {{percent}}",
-    "tooLarge": "Trop grand pour ce téléphone",
+    "tooLarge": "Trop grand pour cet appareil",
     "installFailed": "Impossible d'installer le modèle.",
-    "noPlace": "Ce téléphone n'a aucun emplacement pour stocker des modèles.",
-    "noSpace": "Ce téléphone n'a pas assez de stockage libre pour ce modèle.",
+    "noPlace": "Cet appareil n'a aucun emplacement pour stocker des modèles.",
+    "noSpace": "Cet appareil n'a pas assez de stockage libre pour ce modèle.",
     "downloadIncomplete": "Le téléchargement du modèle ne s'est pas terminé.",
     "summaries": {
       "qwen2-5-coder-1-5b-q4": "Assistant de code très rapide pour les modifications rapides et les petites tâches.",
@@ -142,7 +142,7 @@
       },
       "research": {
         "title": "Recherche",
-        "description": "Résumés et raisonnement approfondi, entièrement sur ce téléphone."
+        "description": "Résumés et raisonnement approfondi, entièrement sur cet appareil."
       },
       "custom": {
         "title": "Personnalisé",
@@ -173,7 +173,7 @@
     "connectedComputer": "Ordinateur connecté",
     "encrypted": "Chiffré · certificat {{code}}",
     "notEncrypted": "Non chiffré. Mettre à jour Toskar sur l’ordinateur chiffre les discussions avec lui.",
-    "certificateChanged": "Le certificat de cet ordinateur a changé, le téléphone ne s’y connecte donc pas. Si Toskar y a été réinstallé, oubliez-le ci-dessous et reconnectez-vous.",
+    "certificateChanged": "Le certificat de cet ordinateur a changé, cet appareil ne s’y connecte donc pas. Si Toskar y a été réinstallé, oubliez-le ci-dessous et reconnectez-vous.",
     "notConnected": "Non connecté",
     "coreVersion": "Toskar sur cet ordinateur",
     "updateCore": "Mettez à jour Toskar sur cet ordinateur vers la version 1.4 ou ultérieure pour voir les sources des réponses, ce qu'a fait l'assistant, la progression en direct et l'effort.",
@@ -242,9 +242,9 @@
     "thinkingOnPhone": "Réflexion sur cet appareil…",
     "installFirst": "Installez un modèle pour discuter sur cet appareil.",
     "setUpModel": "Configurer un modèle",
-    "modelMissing": "Ce modèle n'est pas installé sur ce téléphone.",
+    "modelMissing": "Ce modèle n'est pas installé sur cet appareil.",
     "interrupted": "Réponse interrompue",
-    "couldNotRun": "Ce téléphone n'a pas pu exécuter le modèle.",
+    "couldNotRun": "Cet appareil n'a pas pu exécuter le modèle.",
     "noProfile": "Cet ordinateur n'a pas encore de profil. Créez-en d'abord un dans l'app Mac.",
     "noChatPlace": "Cet appareil n'a aucun emplacement pour stocker les discussions.",
     "speed": "{{generated}} tok/s",

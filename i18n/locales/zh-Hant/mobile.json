@@ -33,7 +33,7 @@
   },
   "connect": {
     "title": "連線到電腦",
-    "subtitle": "手機會使用已在執行你的模型的電腦。請在那台電腦上打開「電腦」，然後選擇「連接裝置」。",
+    "subtitle": "這台裝置會使用已在執行你的模型的電腦。請在那台電腦上打開「電腦」，然後選擇「連接裝置」。",
     "address": "電腦位址",
     "addressPlaceholder": "192.168.1.20",
     "code": "代碼",
@@ -48,7 +48,7 @@
     "notReady": "Toskar 有回應，但尚未就緒。",
     "certificateMismatch": "電腦的憑證與它回報的憑證不符，因此已停止連線。請在你自己的網路中重試。",
     "pairUnsupported": "那台電腦上的 Toskar 版本太舊，無法用代碼連接。請更新它，或改用 API 金鑰。",
-    "lede": "手機會使用已在執行你的模型的電腦。"
+    "lede": "這台裝置會使用已在執行你的模型的電腦。"
   },
   "discovery": {
     "onThisNetwork": "在這個網路上",
@@ -97,17 +97,17 @@
     }
   },
   "phoneModels": {
-    "heading": "在這台裝置 上",
-    "copy": "這些是 Toskar 目錄中較小的模型。檔案會下載到這部手機上並保存在這裡。",
+    "heading": "在這台裝置上",
+    "copy": "這些是 Toskar 目錄中較小的模型。檔案會下載到這台裝置上並保存在這裡。",
     "meta": "{{parameters}} · {{size}}",
     "chat": "聊天",
     "remove": "移除",
     "install": "安裝",
     "installing": "正在安裝 {{percent}}",
-    "tooLarge": "對這部手機來說太大",
+    "tooLarge": "對這台裝置來說太大",
     "installFailed": "無法安裝這個模型。",
-    "noPlace": "這部手機沒有可以儲存模型的位置。",
-    "noSpace": "這部手機沒有足夠的可用儲存空間來存放這個模型。",
+    "noPlace": "這台裝置沒有可以儲存模型的位置。",
+    "noSpace": "這台裝置沒有足夠的可用儲存空間來存放這個模型。",
     "downloadIncomplete": "模型下載未完成。",
     "summaries": {
       "qwen2-5-coder-1-5b-q4": "速度非常快的程式設計助理，適合快速編輯和小型工作。",
@@ -124,7 +124,7 @@
   },
   "onboarding": {
     "welcome": "歡迎使用",
-    "lede": "這個 App 可以在這台裝置 上私密地執行 AI。",
+    "lede": "這個 App 可以在這台裝置上私密地執行 AI。",
     "thisIPhone": "這台裝置",
     "hardware": "這台裝置 用於執行 AI 模型的硬體。",
     "device": "裝置",
@@ -138,11 +138,11 @@
       },
       "coding": {
         "title": "程式設計",
-        "description": "在這台裝置 上進行快速編輯和小型工作的程式碼協助。"
+        "description": "在這台裝置上進行快速編輯和小型工作的程式碼協助。"
       },
       "research": {
         "title": "研究",
-        "description": "摘要和縝密推理，完全在這部手機上執行。"
+        "description": "摘要和縝密推理，完全在這台裝置上執行。"
       },
       "custom": {
         "title": "自訂",
@@ -165,7 +165,7 @@
   },
   "settings": {
     "title": "設定",
-    "subtitle": "你安裝在這台裝置 上的模型會留在這台裝置 上。與已連線電腦的聊天會留在那台電腦上。",
+    "subtitle": "你安裝在這台裝置上的模型會留在這台裝置上。與已連線電腦的聊天會留在那台電腦上。",
     "thisIPhone": "這台裝置",
     "whereChatsRun": "聊天執行位置",
     "onDevice": "在你安裝模型後，於這部裝置上執行",
@@ -173,7 +173,7 @@
     "connectedComputer": "已連線的電腦",
     "encrypted": "已加密 · 憑證 {{code}}",
     "notEncrypted": "未加密。更新電腦上的 Toskar 即可加密與它的聊天。",
-    "certificateChanged": "這台電腦的憑證已變更，因此手機不會連線到它。如果在那台電腦上重新安裝了 Toskar，請在下方忘記它，然後重新連線。",
+    "certificateChanged": "這台電腦的憑證已變更，因此這台裝置不會連線到它。如果在那台電腦上重新安裝了 Toskar，請在下方忘記它，然後重新連線。",
     "notConnected": "未連線",
     "coreVersion": "那台電腦上的 Toskar",
     "updateCore": "請將那台電腦上的 Toskar 更新到 1.4 或以上版本，才能查看回答來源、助理做了什麼、即時進度和投入程度。",
@@ -182,10 +182,10 @@
     "connect": "連線到電腦",
     "about": "關於",
     "version": "版本 {{version}}",
-    "aboutCopy": "名稱來自在世界之樹上傳遞訊息的松鼠 Ratatoskr。Toskar 將你的 App 連結到你電腦上和這台裝置 上的模型。",
+    "aboutCopy": "名稱來自在世界之樹上傳遞訊息的松鼠 Ratatoskr。Toskar 將你的 App 連結到你電腦上和這台裝置上的模型。",
     "dangerZone": "危險區域",
     "resetTitle": "重置這台裝置",
-    "resetCopy": "恢復歡迎設定畫面。會清除這台裝置 上的聊天，並忘記已連線的電腦。",
+    "resetCopy": "恢復歡迎設定畫面。會清除這台裝置上的聊天，並忘記已連線的電腦。",
     "resetButton": "重置設定和 App 資料…",
     "resetDeletesModels": "這個動作無法復原。已下載的模型也會被刪除。",
     "resetKeepsModels": "這個動作無法復原。已下載的模型會保留。",
@@ -239,12 +239,12 @@
     "sending": "正在傳送",
     "stop": "停止",
     "working": "正在處理…",
-    "thinkingOnPhone": "正在這台裝置 上思考…",
-    "installFirst": "安裝模型後即可在這台裝置 上聊天。",
+    "thinkingOnPhone": "正在這台裝置上思考…",
+    "installFirst": "安裝模型後即可在這台裝置上聊天。",
     "setUpModel": "設定模型",
-    "modelMissing": "這部手機上沒有安裝該模型。",
+    "modelMissing": "這台裝置上沒有安裝該模型。",
     "interrupted": "回應已中斷",
-    "couldNotRun": "這部手機無法執行該模型。",
+    "couldNotRun": "這台裝置無法執行該模型。",
     "noProfile": "那台電腦還沒有任何設定檔。請先在 Mac App 中建立一個。",
     "noChatPlace": "這台裝置 沒有可以儲存聊天的位置。",
     "speed": "{{generated}} tok/s",
@@ -258,7 +258,7 @@
     },
     "empty": {
       "title": "有什麼我可以幫你的？",
-      "phone": "和這台裝置 上的 AI 對話。你寫的任何內容都不會離開這台裝置。",
+      "phone": "和這台裝置上的 AI 對話。你寫的任何內容都不會離開這台裝置。",
       "computer": "Toskar 會挑選合適的模型和電腦，需要時查詢資料，並顯示它使用了哪些內容。"
     },
     "unsent": {

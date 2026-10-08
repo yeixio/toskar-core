@@ -33,7 +33,7 @@
   },
   "connect": {
     "title": "Connect a computer",
-    "subtitle": "The phone uses the computer that already runs your models. On that computer, open Computers and choose Connect a device.",
+    "subtitle": "This device uses the computer that already runs your models. On that computer, open Computers and choose Connect a device.",
     "address": "Computer address",
     "addressPlaceholder": "192.168.1.20",
     "code": "Code",
@@ -48,7 +48,7 @@
     "notReady": "Toskar answered, but it is not ready.",
     "certificateMismatch": "The computer's certificate didn't match the one it reported, so the connection was stopped. Try again on your own network.",
     "pairUnsupported": "That computer's Toskar is too old to connect with a code. Update it, or use an API key.",
-    "lede": "The phone uses the computer that already runs your models."
+    "lede": "This device uses the computer that already runs your models."
   },
   "discovery": {
     "onThisNetwork": "On this network",
@@ -98,16 +98,16 @@
   },
   "phoneModels": {
     "heading": "On this device",
-    "copy": "These are the smaller models from the Toskar catalog. The file is downloaded onto this phone and stays here.",
+    "copy": "These are the smaller models from the Toskar catalog. The file is downloaded onto this device and stays here.",
     "meta": "{{parameters}} · {{size}}",
     "chat": "Chat",
     "remove": "Remove",
     "install": "Install",
     "installing": "Installing {{percent}}",
-    "tooLarge": "Too large for this phone",
+    "tooLarge": "Too large for this device",
     "installFailed": "The model could not be installed.",
-    "noPlace": "This phone has no place to store models.",
-    "noSpace": "This phone does not have enough free storage for that model.",
+    "noPlace": "This device has no place to store models.",
+    "noSpace": "This device does not have enough free storage for that model.",
     "downloadIncomplete": "The model download did not finish.",
     "summaries": {
       "qwen2-5-coder-1-5b-q4": "Very fast coding assistant for quick edits and small tasks.",
@@ -142,7 +142,7 @@
       },
       "research": {
         "title": "Research",
-        "description": "Summaries and careful reasoning, running entirely on this phone."
+        "description": "Summaries and careful reasoning, running entirely on this device."
       },
       "custom": {
         "title": "Custom",
@@ -173,7 +173,7 @@
     "connectedComputer": "Connected computer",
     "encrypted": "Encrypted · certificate {{code}}",
     "notEncrypted": "Not encrypted. Updating Toskar on the computer encrypts chats with it.",
-    "certificateChanged": "This computer's certificate changed, so the phone won't connect to it. If Toskar was reinstalled there, forget it below and connect again.",
+    "certificateChanged": "This computer's certificate changed, so this device won't connect to it. If Toskar was reinstalled there, forget it below and connect again.",
     "notConnected": "Not connected",
     "coreVersion": "Toskar on that computer",
     "updateCore": "Update Toskar on that computer to 1.4 or later to see answer sources, what the assistant did, live progress, and effort.",
@@ -251,9 +251,9 @@
     "thinkingOnPhone": "Thinking on this device…",
     "installFirst": "Install a model to chat on this device.",
     "setUpModel": "Set up a model",
-    "modelMissing": "That model is not installed on this phone.",
+    "modelMissing": "That model is not installed on this device.",
     "interrupted": "Response interrupted",
-    "couldNotRun": "This phone could not run the model.",
+    "couldNotRun": "This device could not run the model.",
     "noProfile": "That computer has no profile yet. Create one in the Mac app first.",
     "noChatPlace": "This device has no place to store chats.",
     "speed": "{{generated}} tok/s",
