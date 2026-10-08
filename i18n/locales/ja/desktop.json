@@ -1,11 +1,11 @@
 {
   "menu": {
-    "quitApp": "Toskarを終了",
+    "quitApp": "Toskar Proを終了",
     "file": "ファイル",
     "quit": "終了",
-    "about": "Toskarについて",
+    "about": "Toskar Proについて",
     "settings": "設定…",
-    "hide": "Toskarを非表示",
+    "hide": "Toskar Proを非表示",
     "hideOthers": "ほかを非表示",
     "showAll": "すべてを表示",
     "newChat": "新しいチャット",
@@ -15,29 +15,29 @@
     "closeWindow": "ウインドウを閉じる"
   },
   "tray": {
-    "tooltip": "Toskarはバックグラウンドで実行中です",
-    "open": "Toskarを開く",
+    "tooltip": "Toskar Proはバックグラウンドで実行中です",
+    "open": "Toskar Proを開く",
     "openHint": "メインウインドウを表示",
     "stop": "バックグラウンドサービスを停止",
     "stopHint": "ローカルAIサービスを停止して終了"
   },
   "lifecycle": {
-    "closingTitle": "Toskarを終了しています",
+    "closingTitle": "Toskar Proを終了しています",
     "stopping": "ローカルAIサービスを停止しています…",
-    "backgroundMenuBar": "Toskarはメニューバーで実行を続けています",
-    "backgroundTray": "Toskarはシステムトレイで実行を続けています"
+    "backgroundMenuBar": "Toskar Proはメニューバーで実行を続けています",
+    "backgroundTray": "Toskar Proはシステムトレイで実行を続けています"
   },
   "conflict": {
-    "title": "別のToskarが実行中です",
+    "title": "別のToskar Proが実行中です",
     "message": "{{other}} がこのコンピュータで、このアプリに必要なアドレス（{{address}}）を使って既に実行中のため、このアプリは自分のサービスを開始できません。もう一方には別のモデル、チャット、設定があります。\n\nそちらを終了してからこのアプリを開き直すか、今はそちらを使ってください。",
     "quit": "終了",
     "useOther": "もう一方を使う",
     "messageProcess": "{{other}} がこのコンピュータで、このアプリに必要なアドレス（{{address}}）を使って既に実行中のため、このアプリは自分のサービスを開始できません。これはこのアプリのサービスではなく、プロセス {{pid}}（{{command}}）です。\n\nそれを停止して、このアプリのサービスを開始しますか？",
-    "stopAndStart": "停止してToskarを開始",
-    "programTitle": "別のプログラムがToskarのアドレスを使っています",
-    "program": "プロセス {{pid}}（{{command}}）がToskarに必要なアドレス（{{address}}）を使っているため、Toskarを開始できません。\n\nそのプログラムを終了してから、Toskarを開き直してください。",
-    "programUnknown": "別のプログラムがToskarに必要なアドレス（{{address}}）を使っているため、Toskarを開始できません。\n\nそのアドレスを使っているプログラムを終了してから、Toskarを開き直してください。",
-    "stopFailed": "Toskarはプロセス {{pid}} を停止できませんでした。ご自身で終了してから、Toskarを開き直してください。",
-    "startFailed": "Toskarはもう一方のサービスを停止しましたが、自分のサービスを開始できませんでした。Toskarを開き直してください。"
+    "stopAndStart": "停止してToskar Proを開始",
+    "programTitle": "別のプログラムがToskar Proのアドレスを使っています",
+    "program": "プロセス {{pid}}（{{command}}）がToskar Proに必要なアドレス（{{address}}）を使っているため、Toskar Proを開始できません。\n\nそのプログラムを終了してから、Toskar Proを開き直してください。",
+    "programUnknown": "別のプログラムがToskar Proに必要なアドレス（{{address}}）を使っているため、Toskar Proを開始できません。\n\nそのアドレスを使っているプログラムを終了してから、Toskar Proを開き直してください。",
+    "stopFailed": "Toskar Proはプロセス {{pid}} を停止できませんでした。ご自身で終了してから、Toskar Proを開き直してください。",
+    "startFailed": "Toskar Proはもう一方のサービスを停止しましたが、自分のサービスを開始できませんでした。Toskar Proを開き直してください。"
   }
 }

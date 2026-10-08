@@ -1,11 +1,11 @@
 {
   "menu": {
-    "quitApp": "結束 Toskar",
+    "quitApp": "結束 Toskar Pro",
     "file": "檔案",
     "quit": "結束",
-    "about": "關於 Toskar",
+    "about": "關於 Toskar Pro",
     "settings": "設定…",
-    "hide": "隱藏 Toskar",
+    "hide": "隱藏 Toskar Pro",
     "hideOthers": "隱藏其他",
     "showAll": "顯示全部",
     "newChat": "新聊天",
@@ -15,29 +15,29 @@
     "closeWindow": "關閉視窗"
   },
   "tray": {
-    "tooltip": "Toskar 正在背景執行",
-    "open": "打開 Toskar",
+    "tooltip": "Toskar Pro 正在背景執行",
+    "open": "打開 Toskar Pro",
     "openHint": "顯示主視窗",
     "stop": "停止背景服務",
     "stopHint": "停止本機 AI 服務並結束"
   },
   "lifecycle": {
-    "closingTitle": "正在關閉 Toskar",
+    "closingTitle": "正在關閉 Toskar Pro",
     "stopping": "正在停止本機 AI 服務…",
-    "backgroundMenuBar": "Toskar 仍在選單列中執行",
-    "backgroundTray": "Toskar 仍在系統匣中執行"
+    "backgroundMenuBar": "Toskar Pro 仍在選單列中執行",
+    "backgroundTray": "Toskar Pro 仍在系統匣中執行"
   },
   "conflict": {
-    "title": "另一個 Toskar 正在執行",
+    "title": "另一個 Toskar Pro 正在執行",
     "message": "{{other}} 已在這台電腦上執行，並佔用了本 App 所需的位址（{{address}}），因此本 App 無法啟動自己的服務。另一個有自己的模型、聊天和設定。\n\n請結束它後重新開啟本 App，或暫時使用另一個。",
     "quit": "結束",
     "useOther": "使用另一個",
     "messageProcess": "{{other}} 已在這台電腦上使用此 App 所需的位址（{{address}}）執行，因此此 App 無法啟動自己的服務。它不是此 App 的服務，而是程序 {{pid}}（{{command}}）。\n\n要停止它並啟動此 App 自己的服務嗎？",
-    "stopAndStart": "停止它並啟動 Toskar",
-    "programTitle": "另一個程式正在使用 Toskar 的位址",
-    "program": "程序 {{pid}}（{{command}}）正在使用 Toskar 所需的位址（{{address}}），因此 Toskar 無法啟動。\n\n請結束該程式，然後重新開啟 Toskar。",
-    "programUnknown": "另一個程式正在使用 Toskar 所需的位址（{{address}}），因此 Toskar 無法啟動。\n\n請結束正在使用它的程式，然後重新開啟 Toskar。",
-    "stopFailed": "Toskar 無法停止程序 {{pid}}。請自行結束它，然後重新開啟 Toskar。",
-    "startFailed": "Toskar 已停止另一個服務，但自己的服務沒有啟動。請重新開啟 Toskar。"
+    "stopAndStart": "停止它並啟動 Toskar Pro",
+    "programTitle": "另一個程式正在使用 Toskar Pro 的位址",
+    "program": "程序 {{pid}}（{{command}}）正在使用 Toskar Pro 所需的位址（{{address}}），因此 Toskar Pro 無法啟動。\n\n請結束該程式，然後重新開啟 Toskar Pro。",
+    "programUnknown": "另一個程式正在使用 Toskar Pro 所需的位址（{{address}}），因此 Toskar Pro 無法啟動。\n\n請結束正在使用它的程式，然後重新開啟 Toskar Pro。",
+    "stopFailed": "Toskar Pro 無法停止程序 {{pid}}。請自行結束它，然後重新開啟 Toskar Pro。",
+    "startFailed": "Toskar Pro 已停止另一個服務，但自己的服務沒有啟動。請重新開啟 Toskar Pro。"
   }
 }

@@ -1,11 +1,11 @@
 {
   "menu": {
-    "quitApp": "Toskar beenden",
+    "quitApp": "Toskar Pro beenden",
     "file": "Ablage",
     "quit": "Beenden",
-    "about": "Über Toskar",
+    "about": "Über Toskar Pro",
     "settings": "Einstellungen …",
-    "hide": "Toskar ausblenden",
+    "hide": "Toskar Pro ausblenden",
     "hideOthers": "Andere ausblenden",
     "showAll": "Alle einblenden",
     "newChat": "Neuer Chat",
@@ -15,29 +15,29 @@
     "closeWindow": "Fenster schließen"
   },
   "tray": {
-    "tooltip": "Toskar läuft im Hintergrund",
-    "open": "Toskar öffnen",
+    "tooltip": "Toskar Pro läuft im Hintergrund",
+    "open": "Toskar Pro öffnen",
     "openHint": "Hauptfenster anzeigen",
     "stop": "Hintergrunddienst stoppen",
     "stopHint": "Lokalen KI-Dienst stoppen und beenden"
   },
   "lifecycle": {
-    "closingTitle": "Toskar wird beendet",
+    "closingTitle": "Toskar Pro wird beendet",
     "stopping": "Lokaler KI-Dienst wird gestoppt …",
-    "backgroundMenuBar": "Toskar läuft weiter in der Menüleiste",
-    "backgroundTray": "Toskar läuft weiter im Infobereich"
+    "backgroundMenuBar": "Toskar Pro läuft weiter in der Menüleiste",
+    "backgroundTray": "Toskar Pro läuft weiter im Infobereich"
   },
   "conflict": {
-    "title": "Eine andere Toskar-Instanz läuft bereits",
+    "title": "Eine andere Toskar-Pro-Instanz läuft bereits",
     "message": "{{other}} läuft bereits auf diesem Computer unter der Adresse, die diese App braucht ({{address}}), deshalb kann diese App ihren eigenen Dienst nicht starten. Die andere Instanz hat eigene Modelle, Chats und Einstellungen.\n\nBeende sie und öffne diese App erneut, oder nutze vorerst die andere.",
     "quit": "Beenden",
     "useOther": "Die andere nutzen",
     "messageProcess": "{{other}} läuft bereits auf diesem Computer unter der Adresse, die diese App braucht ({{address}}), deshalb kann diese App ihren eigenen Dienst nicht starten. Es ist nicht der Dienst dieser App, sondern Prozess {{pid}}, {{command}}.\n\nDiesen beenden und den eigenen Dienst dieser App starten?",
-    "stopAndStart": "Beenden und Toskar starten",
-    "programTitle": "Ein anderes Programm nutzt die Adresse von Toskar",
-    "program": "Prozess {{pid}}, {{command}}, nutzt die Adresse, die Toskar braucht ({{address}}), deshalb kann Toskar nicht starten.\n\nBeende dieses Programm und öffne Toskar dann erneut.",
-    "programUnknown": "Ein anderes Programm nutzt die Adresse, die Toskar braucht ({{address}}), deshalb kann Toskar nicht starten.\n\nBeende das Programm, das sie nutzt, und öffne Toskar dann erneut.",
-    "stopFailed": "Toskar konnte Prozess {{pid}} nicht beenden. Beende ihn selbst und öffne Toskar dann erneut.",
-    "startFailed": "Toskar hat den anderen Dienst beendet, aber der eigene ist nicht gestartet. Öffne Toskar erneut."
+    "stopAndStart": "Beenden und Toskar Pro starten",
+    "programTitle": "Ein anderes Programm nutzt die Adresse von Toskar Pro",
+    "program": "Prozess {{pid}}, {{command}}, nutzt die Adresse, die Toskar Pro braucht ({{address}}), deshalb kann Toskar Pro nicht starten.\n\nBeende dieses Programm und öffne Toskar Pro dann erneut.",
+    "programUnknown": "Ein anderes Programm nutzt die Adresse, die Toskar Pro braucht ({{address}}), deshalb kann Toskar Pro nicht starten.\n\nBeende das Programm, das sie nutzt, und öffne Toskar Pro dann erneut.",
+    "stopFailed": "Toskar Pro konnte Prozess {{pid}} nicht beenden. Beende ihn selbst und öffne Toskar Pro dann erneut.",
+    "startFailed": "Toskar Pro hat den anderen Dienst beendet, aber der eigene ist nicht gestartet. Öffne Toskar Pro erneut."
   }
 }

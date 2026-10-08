@@ -1,11 +1,11 @@
 {
   "menu": {
-    "quitApp": "Quit Toskar",
+    "quitApp": "Quit Toskar Pro",
     "file": "File",
     "quit": "Quit",
-    "about": "About Toskar",
+    "about": "About Toskar Pro",
     "settings": "Settings…",
-    "hide": "Hide Toskar",
+    "hide": "Hide Toskar Pro",
     "hideOthers": "Hide Others",
     "showAll": "Show All",
     "newChat": "New chat",
@@ -15,29 +15,29 @@
     "closeWindow": "Close Window"
   },
   "tray": {
-    "tooltip": "Toskar is running in the background",
-    "open": "Open Toskar",
+    "tooltip": "Toskar Pro is running in the background",
+    "open": "Open Toskar Pro",
     "openHint": "Show the main window",
     "stop": "Stop background service",
     "stopHint": "Stop the local AI service and quit"
   },
   "lifecycle": {
-    "closingTitle": "Closing Toskar",
+    "closingTitle": "Closing Toskar Pro",
     "stopping": "Stopping local AI service…",
-    "backgroundMenuBar": "Toskar is still running in the menu bar",
-    "backgroundTray": "Toskar is still running in the system tray"
+    "backgroundMenuBar": "Toskar Pro is still running in the menu bar",
+    "backgroundTray": "Toskar Pro is still running in the system tray"
   },
   "conflict": {
-    "title": "Another copy of Toskar is running",
+    "title": "Another copy of Toskar Pro is running",
     "message": "{{other}} is already running on this computer at the address this app needs ({{address}}), so this app can't start its own. The other one has its own models, chats, and settings.\n\nQuit it and open this app again, or use the other one for now.",
     "quit": "Quit",
     "useOther": "Use the other one",
     "messageProcess": "{{other}} is already running on this computer at the address this app needs ({{address}}), so this app can't start its own. It isn't this app's service: it's process {{pid}}, {{command}}.\n\nStop it and start this app's own service?",
-    "stopAndStart": "Stop it and start Toskar",
-    "programTitle": "Another program is using Toskar's address",
-    "program": "Process {{pid}}, {{command}}, is using the address Toskar needs ({{address}}), so Toskar can't start.\n\nQuit that program, then open Toskar again.",
-    "programUnknown": "Another program is using the address Toskar needs ({{address}}), so Toskar can't start.\n\nQuit the program using it, then open Toskar again.",
-    "stopFailed": "Toskar couldn't stop process {{pid}}. Quit it yourself, then open Toskar again.",
-    "startFailed": "Toskar stopped the other service, but its own didn't start. Open Toskar again."
+    "stopAndStart": "Stop it and start Toskar Pro",
+    "programTitle": "Another program is using Toskar Pro's address",
+    "program": "Process {{pid}}, {{command}}, is using the address Toskar Pro needs ({{address}}), so Toskar Pro can't start.\n\nQuit that program, then open Toskar Pro again.",
+    "programUnknown": "Another program is using the address Toskar Pro needs ({{address}}), so Toskar Pro can't start.\n\nQuit the program using it, then open Toskar Pro again.",
+    "stopFailed": "Toskar Pro couldn't stop process {{pid}}. Quit it yourself, then open Toskar Pro again.",
+    "startFailed": "Toskar Pro stopped the other service, but its own didn't start. Open Toskar Pro again."
   }
 }

@@ -1,11 +1,11 @@
 {
   "menu": {
-    "quitApp": "Esci da Toskar",
+    "quitApp": "Esci da Toskar Pro",
     "file": "File",
     "quit": "Esci",
-    "about": "Informazioni su Toskar",
+    "about": "Informazioni su Toskar Pro",
     "settings": "Impostazioni…",
-    "hide": "Nascondi Toskar",
+    "hide": "Nascondi Toskar Pro",
     "hideOthers": "Nascondi altre",
     "showAll": "Mostra tutte",
     "newChat": "Nuova chat",
@@ -15,29 +15,29 @@
     "closeWindow": "Chiudi finestra"
   },
   "tray": {
-    "tooltip": "Toskar è in esecuzione in background",
-    "open": "Apri Toskar",
+    "tooltip": "Toskar Pro è in esecuzione in background",
+    "open": "Apri Toskar Pro",
     "openHint": "Mostra la finestra principale",
     "stop": "Arresta il servizio in background",
     "stopHint": "Arresta il servizio di IA locale ed esci"
   },
   "lifecycle": {
-    "closingTitle": "Chiusura di Toskar",
+    "closingTitle": "Chiusura di Toskar Pro",
     "stopping": "Arresto del servizio di IA locale…",
-    "backgroundMenuBar": "Toskar è ancora in esecuzione nella barra dei menu",
-    "backgroundTray": "Toskar è ancora in esecuzione nell'area di notifica"
+    "backgroundMenuBar": "Toskar Pro è ancora in esecuzione nella barra dei menu",
+    "backgroundTray": "Toskar Pro è ancora in esecuzione nell'area di notifica"
   },
   "conflict": {
-    "title": "È già in esecuzione un'altra copia di Toskar",
+    "title": "È già in esecuzione un'altra copia di Toskar Pro",
     "message": "{{other}} è già in esecuzione su questo computer all'indirizzo che serve a questa app ({{address}}), quindi questa app non può avviare il proprio servizio. L'altra ha i propri modelli, chat e impostazioni.\n\nChiudila e riapri questa app, oppure usa l'altra per ora.",
     "quit": "Esci",
     "useOther": "Usa l'altra",
     "messageProcess": "{{other}} è già in esecuzione su questo computer all'indirizzo di cui questa app ha bisogno ({{address}}), quindi questa app non può avviare il proprio. Non è il servizio di questa app: è il processo {{pid}}, {{command}}.\n\nInterromperlo e avviare il servizio di questa app?",
-    "stopAndStart": "Interrompilo e avvia Toskar",
-    "programTitle": "Un altro programma sta usando l'indirizzo di Toskar",
-    "program": "Il processo {{pid}}, {{command}}, sta usando l'indirizzo di cui Toskar ha bisogno ({{address}}), quindi Toskar non può avviarsi.\n\nChiudi quel programma, poi riapri Toskar.",
-    "programUnknown": "Un altro programma sta usando l'indirizzo di cui Toskar ha bisogno ({{address}}), quindi Toskar non può avviarsi.\n\nChiudi il programma che lo usa, poi riapri Toskar.",
-    "stopFailed": "Toskar non è riuscito a interrompere il processo {{pid}}. Chiudilo tu, poi riapri Toskar.",
-    "startFailed": "Toskar ha interrotto l'altro servizio, ma il suo non si è avviato. Riapri Toskar."
+    "stopAndStart": "Interrompilo e avvia Toskar Pro",
+    "programTitle": "Un altro programma sta usando l'indirizzo di Toskar Pro",
+    "program": "Il processo {{pid}}, {{command}}, sta usando l'indirizzo di cui Toskar Pro ha bisogno ({{address}}), quindi Toskar Pro non può avviarsi.\n\nChiudi quel programma, poi riapri Toskar Pro.",
+    "programUnknown": "Un altro programma sta usando l'indirizzo di cui Toskar Pro ha bisogno ({{address}}), quindi Toskar Pro non può avviarsi.\n\nChiudi il programma che lo usa, poi riapri Toskar Pro.",
+    "stopFailed": "Toskar Pro non è riuscito a interrompere il processo {{pid}}. Chiudilo tu, poi riapri Toskar Pro.",
+    "startFailed": "Toskar Pro ha interrotto l'altro servizio, ma il suo non si è avviato. Riapri Toskar Pro."
   }
 }
