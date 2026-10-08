@@ -424,6 +424,7 @@
   "watch": {
     "ask": "질문",
     "askPrompt": "Toskar에게 질문",
+    "recent": "최근",
     "suggestionsTitle": "예시",
     "suggestions": {
       "dinner": "간단한 저녁 메뉴 추천",

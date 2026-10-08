@@ -432,6 +432,7 @@
   "watch": {
     "ask": "Demander",
     "askPrompt": "Demander à Toskar",
+    "recent": "Récents",
     "suggestionsTitle": "Essayez",
     "suggestions": {
       "dinner": "Une idée de dîner rapide",

@@ -424,6 +424,7 @@
   "watch": {
     "ask": "質問",
     "askPrompt": "Toskarに質問",
+    "recent": "最近",
     "suggestionsTitle": "例",
     "suggestions": {
       "dinner": "手早い夕食のアイデア",

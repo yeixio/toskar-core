@@ -504,6 +504,7 @@
   "watch": {
     "ask": "Ask",
     "askPrompt": "Ask Toskar",
+    "recent": "Recent",
     "suggestionsTitle": "Try",
     "suggestions": {
       "dinner": "A quick dinner idea",

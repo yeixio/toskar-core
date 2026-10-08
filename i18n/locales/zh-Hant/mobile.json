@@ -424,6 +424,7 @@
   "watch": {
     "ask": "提問",
     "askPrompt": "問 Toskar",
+    "recent": "最近",
     "suggestionsTitle": "試試",
     "suggestions": {
       "dinner": "一個快速晚餐點子",

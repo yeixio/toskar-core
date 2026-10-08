@@ -428,6 +428,7 @@
   "watch": {
     "ask": "Fragen",
     "askPrompt": "Toskar fragen",
+    "recent": "Zuletzt",
     "suggestionsTitle": "Probier",
     "suggestions": {
       "dinner": "Eine schnelle Idee fürs Abendessen",
