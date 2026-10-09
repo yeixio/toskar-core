@@ -17,6 +17,12 @@
       "dimensions": ["2880x1800", "2560x1600"]
     },
     {
+      "id": "microsoft-store",
+      "viewport": { "width": 1440, "height": 810 },
+      "deviceScaleFactor": 1.3333333333,
+      "dimensions": ["1920x1080"]
+    },
+    {
       "id": "apple-iphone",
       "hideSidebar": true,
       "viewport": { "width": 440, "height": 956 },
