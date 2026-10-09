@@ -23,9 +23,9 @@
     "gigabytes": "{{value}} Go"
   },
   "connection": {
-    "enterAddress": "Saisissez l'adresse de l'ordinateur qui exécute Toskar.",
+    "enterAddress": "Saisissez l'adresse de l'ordinateur qui exécute Toskar Pro.",
     "couldNotReach": "Impossible de joindre Toskar.",
-    "unreachable": "Toskar est injoignable sur cet ordinateur. Utilisez le même réseau Wi-Fi et choisissez Connecter un appareil sur cet ordinateur.",
+    "unreachable": "Toskar Pro est injoignable sur cet ordinateur. Utilisez le même réseau Wi-Fi et choisissez Connecter un appareil sur cet ordinateur.",
     "unreachableAway": "Impossible de joindre votre ordinateur hors de la maison. Il est peut-être éteint ou en veille, ou l'accès de partout y est désactivé.",
     "keyRejected": "Cette clé API a été refusée. Connectez-vous plutôt avec un code de l'ordinateur, ou créez une clé dans Accès API.",
     "dropped": "La connexion à Toskar a été interrompue.",
@@ -57,7 +57,7 @@
     "version": "Toskar {{version}}",
     "looking": "Recherche d'ordinateurs sur ce réseau…",
     "lookingLabel": "Recherche d'ordinateurs sur ce réseau",
-    "none": "Aucun ordinateur trouvé. Lancez Toskar sur votre ordinateur et utilisez le même Wi-Fi, ou saisissez son adresse.",
+    "none": "Aucun ordinateur trouvé. Lancez Toskar Pro sur votre ordinateur et utilisez le même Wi-Fi, ou saisissez son adresse.",
     "localNetworkDenied": "Toskar n'est peut-être pas autorisé à rechercher des ordinateurs sur votre réseau. Autorisez-le dans Réglages > Confidentialité et sécurité > Réseau local.",
     "listFailed": "Impossible de lister les ordinateurs de ce réseau. Vous pouvez toujours saisir une adresse ci-dessous.",
     "lanOff": "Choisissez d'abord Connecter un appareil sur cet ordinateur"
@@ -178,11 +178,11 @@
       "direct": "Hors de la maison, en direct",
       "relay": "Hors de la maison, via {{relay}}"
     },
-    "notEncrypted": "Non chiffré. Mettre à jour Toskar sur l’ordinateur chiffre les discussions avec lui.",
+    "notEncrypted": "Non chiffré. Mettre à jour Toskar Pro sur l’ordinateur chiffre les discussions avec lui.",
     "certificateChanged": "Le certificat de cet ordinateur a changé, cet appareil ne s’y connecte donc pas. Si Toskar y a été réinstallé, oubliez-le ci-dessous et reconnectez-vous.",
     "notConnected": "Non connecté",
-    "coreVersion": "Toskar sur cet ordinateur",
-    "updateCore": "Mettez à jour Toskar sur cet ordinateur vers la version 1.4 ou ultérieure pour voir les sources des réponses, ce qu'a fait l'assistant, la progression en direct et l'effort.",
+    "coreVersion": "Toskar Pro sur cet ordinateur",
+    "updateCore": "Mettez à jour Toskar Pro sur cet ordinateur vers la version 1.4 ou ultérieure pour voir les sources des réponses, ce qu'a fait l'assistant, la progression en direct et l'effort.",
     "jobsKeepRunning": "Fermer cette app n'arrête pas une tâche déjà en cours sur cet ordinateur.",
     "forget": "Oublier cet ordinateur",
     "connect": "Connecter un ordinateur",
@@ -428,8 +428,8 @@
   },
   "setup": {
     "title": "Configurez-le sur votre ordinateur",
-    "install": "Téléchargez Toskar pour Mac, Windows ou Linux sur toskar.ai, s'il n'est pas encore sur votre ordinateur.",
-    "open": "Ouvrez Toskar sur l'ordinateur : l'app Toskar, ou http://localhost:7331 dans son navigateur.",
+    "install": "Téléchargez Toskar Pro sur toskar.ai, s'il n'est pas encore sur votre ordinateur.",
+    "open": "Ouvrez Toskar Pro sur l'ordinateur, ou http://localhost:7331 dans son navigateur.",
     "choose": "Ouvrez Ordinateurs et choisissez Connecter un appareil.",
     "code": "Ensuite, ici, choisissez l'ordinateur et saisissez le code à 6 chiffres qu'il affiche."
   },

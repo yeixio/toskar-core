@@ -23,9 +23,9 @@
     "gigabytes": "{{value}} GB"
   },
   "connection": {
-    "enterAddress": "Ingresa la dirección de la computadora que ejecuta Toskar.",
+    "enterAddress": "Ingresa la dirección de la computadora que ejecuta Toskar Pro.",
     "couldNotReach": "No se pudo acceder a Toskar.",
-    "unreachable": "No se puede acceder a Toskar en esa computadora. Usa la misma red Wi-Fi y elige Conectar un dispositivo en esa computadora.",
+    "unreachable": "No se puede acceder a Toskar Pro en esa computadora. Usa la misma red Wi-Fi y elige Conectar un dispositivo en esa computadora.",
     "unreachableAway": "No se puede llegar a tu computadora fuera de casa. Puede que esté apagada o en reposo, o que el acceso desde cualquier lugar esté desactivado en ella.",
     "keyRejected": "Se rechazó esa clave de API. Conéctate con un código de la computadora, o crea una clave en Acceso a la API.",
     "dropped": "Se perdió la conexión con Toskar.",
@@ -57,7 +57,7 @@
     "version": "Toskar {{version}}",
     "looking": "Buscando computadoras en esta red…",
     "lookingLabel": "Buscando computadoras en esta red",
-    "none": "No se encontraron computadoras. Inicia Toskar en tu computadora y usa la misma red Wi-Fi, o ingresa su dirección.",
+    "none": "No se encontraron computadoras. Inicia Toskar Pro en tu computadora y usa la misma red Wi-Fi, o ingresa su dirección.",
     "localNetworkDenied": "Toskar no tiene permiso para buscar computadoras en tu red. Permítelo en Configuración > Privacidad y seguridad > Red local.",
     "listFailed": "No se pudieron listar las computadoras de esta red. Todavía puedes ingresar una dirección abajo.",
     "lanOff": "Primero elige Conectar un dispositivo en esa computadora"
@@ -178,11 +178,11 @@
       "direct": "Fuera de casa, directamente",
       "relay": "Fuera de casa, a través de {{relay}}"
     },
-    "notEncrypted": "Sin cifrar. Actualizar Toskar en la computadora cifra los chats con ella.",
+    "notEncrypted": "Sin cifrar. Actualizar Toskar Pro en la computadora cifra los chats con ella.",
     "certificateChanged": "El certificado de esta computadora cambió, así que este dispositivo no se conectará. Si se reinstaló Toskar allí, olvídala abajo y vuelve a conectarte.",
     "notConnected": "No conectado",
-    "coreVersion": "Toskar en esa computadora",
-    "updateCore": "Actualiza Toskar en esa computadora a la versión 1.4 o posterior para ver las fuentes de las respuestas, lo que hizo el asistente, el progreso en vivo y el esfuerzo.",
+    "coreVersion": "Toskar Pro en esa computadora",
+    "updateCore": "Actualiza Toskar Pro en esa computadora a la versión 1.4 o posterior para ver las fuentes de las respuestas, lo que hizo el asistente, el progreso en vivo y el esfuerzo.",
     "jobsKeepRunning": "Cerrar esta app no detiene un trabajo que ya se está ejecutando en esa computadora.",
     "forget": "Olvidar esta computadora",
     "connect": "Conectar una computadora",
@@ -428,8 +428,8 @@
   },
   "setup": {
     "title": "Configúralo en tu computadora",
-    "install": "Descarga Toskar para Mac, Windows o Linux en toskar.ai, si aún no está en tu computadora.",
-    "open": "Abre Toskar en la computadora: la app de Toskar o http://localhost:7331 en su navegador.",
+    "install": "Descarga Toskar Pro en toskar.ai, si aún no está en tu computadora.",
+    "open": "Abre Toskar Pro en la computadora, o http://localhost:7331 en su navegador.",
     "choose": "Abre Computadoras y elige Conectar un dispositivo.",
     "code": "Luego, aquí, elige la computadora y escribe el código de 6 dígitos que muestra."
   },

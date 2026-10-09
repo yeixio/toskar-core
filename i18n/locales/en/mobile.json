@@ -23,9 +23,9 @@
     "gigabytes": "{{value}} GB"
   },
   "connection": {
-    "enterAddress": "Enter the address of the computer running Toskar.",
+    "enterAddress": "Enter the address of the computer running Toskar Pro.",
     "couldNotReach": "Could not reach Toskar.",
-    "unreachable": "Toskar on that computer is not reachable. Use the same Wi-Fi network, and choose Connect a device on that computer.",
+    "unreachable": "Toskar Pro on that computer is not reachable. Use the same Wi-Fi network, and choose Connect a device on that computer.",
     "unreachableAway": "Can't reach your computer away from home. It may be off or asleep, or access from anywhere may be off on it.",
     "keyRejected": "That API key was rejected. Connect with a code from the computer instead, or create a key in API Access.",
     "dropped": "The connection to Toskar dropped.",
@@ -57,7 +57,7 @@
     "version": "Toskar {{version}}",
     "looking": "Looking for computers on this network…",
     "lookingLabel": "Looking for computers on this network",
-    "none": "No computers found. Start Toskar on your computer and use the same Wi-Fi, or enter its address.",
+    "none": "No computers found. Start Toskar Pro on your computer and use the same Wi-Fi, or enter its address.",
     "localNetworkDenied": "Toskar may not look for computers on your network. Allow it in Settings > Privacy & Security > Local Network.",
     "listFailed": "Computers on this network could not be listed. You can still enter an address below.",
     "lanOff": "Choose Connect a device on that computer first"
@@ -178,11 +178,11 @@
       "direct": "Away from home, directly",
       "relay": "Away from home, through {{relay}}"
     },
-    "notEncrypted": "Not encrypted. Updating Toskar on the computer encrypts chats with it.",
+    "notEncrypted": "Not encrypted. Updating Toskar Pro on the computer encrypts chats with it.",
     "certificateChanged": "This computer's certificate changed, so this device won't connect to it. If Toskar was reinstalled there, forget it below and connect again.",
     "notConnected": "Not connected",
-    "coreVersion": "Toskar on that computer",
-    "updateCore": "Update Toskar on that computer to 1.4 or later to see answer sources, what the assistant did, live progress, and effort.",
+    "coreVersion": "Toskar Pro on that computer",
+    "updateCore": "Update Toskar Pro on that computer to 1.4 or later to see answer sources, what the assistant did, live progress, and effort.",
     "jobsKeepRunning": "Closing this app does not stop a job that is already running on that computer.",
     "forget": "Forget this computer",
     "connect": "Connect a computer",
@@ -500,8 +500,8 @@
   },
   "setup": {
     "title": "Set it up on your computer",
-    "install": "Get Toskar for Mac, Windows, or Linux at toskar.ai, if it isn't on your computer yet.",
-    "open": "Open Toskar on the computer: the Toskar app, or http://localhost:7331 in its browser.",
+    "install": "Get Toskar Pro at toskar.ai, if it isn't on your computer yet.",
+    "open": "Open Toskar Pro on the computer, or http://localhost:7331 in its browser.",
     "choose": "Open Computers and choose Connect a device.",
     "code": "Back here, choose the computer and type the 6-digit code it shows."
   },

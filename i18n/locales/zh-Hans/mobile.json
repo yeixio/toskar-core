@@ -23,9 +23,9 @@
     "gigabytes": "{{value}} GB"
   },
   "connection": {
-    "enterAddress": "请输入运行 Toskar 的电脑的地址。",
+    "enterAddress": "请输入运行 Toskar Pro 的电脑的地址。",
     "couldNotReach": "无法访问 Toskar。",
-    "unreachable": "无法访问那台电脑上的 Toskar。请连接同一个 Wi-Fi 网络，并在那台电脑上选择“连接设备”。",
+    "unreachable": "无法访问那台电脑上的 Toskar Pro。请连接同一个 Wi-Fi 网络，并在那台电脑上选择“连接设备”。",
     "unreachableAway": "在外无法连接你的电脑。它可能已关机或睡眠，或者随处访问已关闭。",
     "keyRejected": "该 API 密钥被拒绝。请改用那台电脑上的代码连接，或在“API 访问”中创建密钥。",
     "dropped": "与 Toskar 的连接已断开。",
@@ -57,7 +57,7 @@
     "version": "Toskar {{version}}",
     "looking": "正在此网络中查找电脑…",
     "lookingLabel": "正在此网络中查找电脑",
-    "none": "未找到电脑。请在你的电脑上启动 Toskar 并连接同一个 Wi-Fi，或输入它的地址。",
+    "none": "未找到电脑。请在你的电脑上启动 Toskar Pro 并连接同一个 Wi-Fi，或输入它的地址。",
     "localNetworkDenied": "Toskar 无权在你的网络中查找电脑。请在“设置”>“隐私与安全性”>“本地网络”中允许它。",
     "listFailed": "无法列出此网络中的电脑。你仍可以在下方输入地址。",
     "lanOff": "请先在那台电脑上选择“连接设备”"
@@ -178,11 +178,11 @@
       "direct": "在外，直接连接",
       "relay": "在外，通过 {{relay}}"
     },
-    "notEncrypted": "未加密。更新电脑上的 Toskar 即可加密与它的聊天。",
+    "notEncrypted": "未加密。更新电脑上的 Toskar Pro 即可加密与它的聊天。",
     "certificateChanged": "这台电脑的证书已更改，因此这台设备不会连接它。如果在那台电脑上重新安装了 Toskar，请在下方忘记它，然后重新连接。",
     "notConnected": "未连接",
-    "coreVersion": "那台电脑上的 Toskar",
-    "updateCore": "请将那台电脑上的 Toskar 更新到 1.4 或更高版本，以查看回答来源、助手的操作、实时进度和投入程度。",
+    "coreVersion": "那台电脑上的 Toskar Pro",
+    "updateCore": "请将那台电脑上的 Toskar Pro 更新到 1.4 或更高版本，以查看回答来源、助手的操作、实时进度和投入程度。",
     "jobsKeepRunning": "关闭这个应用不会停止已经在那台电脑上运行的任务。",
     "forget": "忘记这台电脑",
     "connect": "连接电脑",
@@ -420,8 +420,8 @@
   },
   "setup": {
     "title": "在电脑上设置",
-    "install": "如果电脑上还没有 Toskar，请到 toskar.ai 获取 Mac、Windows 或 Linux 版。",
-    "open": "在电脑上打开 Toskar：Toskar 应用，或在浏览器中打开 http://localhost:7331。",
+    "install": "如果电脑上还没有 Toskar Pro，请到 toskar.ai 获取。",
+    "open": "在电脑上打开 Toskar Pro，或在浏览器中打开 http://localhost:7331。",
     "choose": "打开“电脑”，然后选择“连接设备”。",
     "code": "回到这里，选择那台电脑，输入它显示的 6 位代码。"
   },

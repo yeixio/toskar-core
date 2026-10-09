@@ -23,9 +23,9 @@
     "gigabytes": "{{value}}GB"
   },
   "connection": {
-    "enterAddress": "Toskar를 실행 중인 컴퓨터의 주소를 입력하세요.",
+    "enterAddress": "Toskar Pro를 실행 중인 컴퓨터의 주소를 입력하세요.",
     "couldNotReach": "Toskar에 연결할 수 없어요.",
-    "unreachable": "해당 컴퓨터의 Toskar에 연결할 수 없어요. 같은 Wi-Fi 네트워크를 사용하고, 해당 컴퓨터에서 '기기 연결'을 선택하세요.",
+    "unreachable": "해당 컴퓨터의 Toskar Pro에 연결할 수 없어요. 같은 Wi-Fi 네트워크를 사용하고, 해당 컴퓨터에서 '기기 연결'을 선택하세요.",
     "unreachableAway": "외부에서 컴퓨터에 연결할 수 없어요. 꺼져 있거나 잠자기 상태이거나, 어디서나 접속이 꺼져 있을 수 있어요.",
     "keyRejected": "API 키가 거부되었어요. 대신 컴퓨터의 코드로 연결하거나, API 액세스에서 키를 만드세요.",
     "dropped": "Toskar와의 연결이 끊어졌어요.",
@@ -57,7 +57,7 @@
     "version": "Toskar {{version}}",
     "looking": "이 네트워크에서 컴퓨터를 찾는 중…",
     "lookingLabel": "이 네트워크에서 컴퓨터를 찾는 중",
-    "none": "컴퓨터를 찾지 못했어요. 컴퓨터에서 Toskar를 시작하고 같은 Wi-Fi를 사용하거나 주소를 입력하세요.",
+    "none": "컴퓨터를 찾지 못했어요. 컴퓨터에서 Toskar Pro를 시작하고 같은 Wi-Fi를 사용하거나 주소를 입력하세요.",
     "localNetworkDenied": "Toskar가 네트워크에서 컴퓨터를 찾을 수 없어요. 설정 > 개인정보 보호 및 보안 > 로컬 네트워크에서 허용하세요.",
     "listFailed": "이 네트워크의 컴퓨터 목록을 가져올 수 없어요. 아래에 주소를 직접 입력할 수 있어요.",
     "lanOff": "먼저 해당 컴퓨터에서 '기기 연결'을 선택하세요"
@@ -178,11 +178,11 @@
       "direct": "외부에서 직접",
       "relay": "외부에서 {{relay}} 경유"
     },
-    "notEncrypted": "암호화되지 않았어요. 컴퓨터의 Toskar를 업데이트하면 채팅이 암호화돼요.",
+    "notEncrypted": "암호화되지 않았어요. 컴퓨터의 Toskar Pro를 업데이트하면 채팅이 암호화돼요.",
     "certificateChanged": "이 컴퓨터의 인증서가 바뀌어서 이 기기가 연결하지 않아요. 그 컴퓨터에 Toskar를 다시 설치했다면 아래에서 지우고 다시 연결하세요.",
     "notConnected": "연결되지 않음",
-    "coreVersion": "해당 컴퓨터의 Toskar",
-    "updateCore": "답변 소스, 어시스턴트가 수행한 작업, 실시간 진행 상황, 노력 수준을 보려면 해당 컴퓨터의 Toskar를 1.4 이상으로 업데이트하세요.",
+    "coreVersion": "해당 컴퓨터의 Toskar Pro",
+    "updateCore": "답변 소스, 어시스턴트가 수행한 작업, 실시간 진행 상황, 노력 수준을 보려면 해당 컴퓨터의 Toskar Pro를 1.4 이상으로 업데이트하세요.",
     "jobsKeepRunning": "이 앱을 닫아도 해당 컴퓨터에서 이미 실행 중인 작업은 중지되지 않아요.",
     "forget": "이 컴퓨터 지우기",
     "connect": "컴퓨터 연결",
@@ -420,8 +420,8 @@
   },
   "setup": {
     "title": "컴퓨터에서 설정하기",
-    "install": "컴퓨터에 아직 Toskar가 없다면 toskar.ai에서 Mac, Windows, Linux용을 받으세요.",
-    "open": "컴퓨터에서 Toskar를 여세요. Toskar 앱이나 브라우저에서 http://localhost:7331을 열면 돼요.",
+    "install": "컴퓨터에 아직 Toskar Pro가 없다면 toskar.ai에서 받으세요.",
+    "open": "컴퓨터에서 Toskar Pro를 열거나 브라우저에서 http://localhost:7331을 여세요.",
     "choose": "컴퓨터를 열고 '기기 연결'을 선택하세요.",
     "code": "여기로 돌아와 컴퓨터를 선택하고 표시된 6자리 코드를 입력하세요."
   },

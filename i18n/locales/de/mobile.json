@@ -23,9 +23,9 @@
     "gigabytes": "{{value}} GB"
   },
   "connection": {
-    "enterAddress": "Gib die Adresse des Computers ein, auf dem Toskar läuft.",
+    "enterAddress": "Gib die Adresse des Computers ein, auf dem Toskar Pro läuft.",
     "couldNotReach": "Toskar ist nicht erreichbar.",
-    "unreachable": "Toskar auf diesem Computer ist nicht erreichbar. Nutze dasselbe WLAN und wähle auf diesem Computer „Gerät verbinden“.",
+    "unreachable": "Toskar Pro auf diesem Computer ist nicht erreichbar. Nutze dasselbe WLAN und wähle auf diesem Computer „Gerät verbinden“.",
     "unreachableAway": "Dein Computer ist unterwegs nicht erreichbar. Vielleicht ist er aus oder im Ruhezustand, oder der Zugriff von überall ist dort ausgeschaltet.",
     "keyRejected": "Dieser API-Schlüssel wurde abgelehnt. Verbinde dich stattdessen mit einem Code vom Computer, oder erstelle einen Schlüssel unter „API-Zugriff“.",
     "dropped": "Die Verbindung zu Toskar wurde unterbrochen.",
@@ -57,7 +57,7 @@
     "version": "Toskar {{version}}",
     "looking": "Computer in diesem Netzwerk werden gesucht …",
     "lookingLabel": "Computer in diesem Netzwerk werden gesucht",
-    "none": "Keine Computer gefunden. Starte Toskar auf deinem Computer und nutze dasselbe WLAN, oder gib seine Adresse ein.",
+    "none": "Keine Computer gefunden. Starte Toskar Pro auf deinem Computer und nutze dasselbe WLAN, oder gib seine Adresse ein.",
     "localNetworkDenied": "Toskar darf nicht nach Computern in deinem Netzwerk suchen. Erlaube es unter Einstellungen > Datenschutz & Sicherheit > Lokales Netzwerk.",
     "listFailed": "Computer in diesem Netzwerk konnten nicht aufgelistet werden. Du kannst unten trotzdem eine Adresse eingeben.",
     "lanOff": "Wähle zuerst auf diesem Computer „Gerät verbinden“"
@@ -178,11 +178,11 @@
       "direct": "Unterwegs, direkt",
       "relay": "Unterwegs, über {{relay}}"
     },
-    "notEncrypted": "Nicht verschlüsselt. Ein Update von Toskar auf dem Computer verschlüsselt Chats mit ihm.",
+    "notEncrypted": "Nicht verschlüsselt. Ein Update von Toskar Pro auf dem Computer verschlüsselt Chats mit ihm.",
     "certificateChanged": "Das Zertifikat dieses Computers hat sich geändert, deshalb verbindet sich dieses Gerät nicht mit ihm. Wenn Toskar dort neu installiert wurde, vergiss ihn unten und verbinde dich erneut.",
     "notConnected": "Nicht verbunden",
-    "coreVersion": "Toskar auf diesem Computer",
-    "updateCore": "Aktualisiere Toskar auf diesem Computer auf 1.4 oder neuer, um Antwortquellen, die Schritte des Assistenten, Live-Fortschritt und Aufwand zu sehen.",
+    "coreVersion": "Toskar Pro auf diesem Computer",
+    "updateCore": "Aktualisiere Toskar Pro auf diesem Computer auf 1.4 oder neuer, um Antwortquellen, die Schritte des Assistenten, Live-Fortschritt und Aufwand zu sehen.",
     "jobsKeepRunning": "Wenn du diese App schließt, wird eine Aufgabe, die auf diesem Computer bereits läuft, nicht gestoppt.",
     "forget": "Diesen Computer vergessen",
     "connect": "Computer verbinden",
@@ -424,8 +424,8 @@
   },
   "setup": {
     "title": "Auf deinem Computer einrichten",
-    "install": "Hol dir Toskar für Mac, Windows oder Linux auf toskar.ai, falls es noch nicht auf deinem Computer ist.",
-    "open": "Öffne Toskar auf dem Computer: die Toskar-App oder http://localhost:7331 in seinem Browser.",
+    "install": "Hol dir Toskar Pro auf toskar.ai, falls es noch nicht auf deinem Computer ist.",
+    "open": "Öffne Toskar Pro auf dem Computer oder http://localhost:7331 in seinem Browser.",
     "choose": "Öffne „Computer“ und wähle „Gerät verbinden“.",
     "code": "Wähle dann hier den Computer und gib den 6-stelligen Code ein, den er zeigt."
   },

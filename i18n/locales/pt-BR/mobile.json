@@ -23,9 +23,9 @@
     "gigabytes": "{{value}} GB"
   },
   "connection": {
-    "enterAddress": "Digite o endereço do computador que executa o Toskar.",
+    "enterAddress": "Digite o endereço do computador que executa o Toskar Pro.",
     "couldNotReach": "Não foi possível acessar o Toskar.",
-    "unreachable": "O Toskar naquele computador não está acessível. Use a mesma rede Wi-Fi e escolha Conectar um dispositivo naquele computador.",
+    "unreachable": "O Toskar Pro naquele computador não está acessível. Use a mesma rede Wi-Fi e escolha Conectar um dispositivo naquele computador.",
     "unreachableAway": "Não foi possível alcançar seu computador fora de casa. Ele pode estar desligado ou em repouso, ou o acesso de qualquer lugar pode estar desativado nele.",
     "keyRejected": "Essa chave de API foi recusada. Conecte-se com um código do computador, ou crie uma chave em Acesso à API.",
     "dropped": "A conexão com o Toskar caiu.",
@@ -57,7 +57,7 @@
     "version": "Toskar {{version}}",
     "looking": "Procurando computadores nesta rede…",
     "lookingLabel": "Procurando computadores nesta rede",
-    "none": "Nenhum computador encontrado. Inicie o Toskar no seu computador e use a mesma rede Wi-Fi, ou digite o endereço dele.",
+    "none": "Nenhum computador encontrado. Inicie o Toskar Pro no seu computador e use a mesma rede Wi-Fi, ou digite o endereço dele.",
     "localNetworkDenied": "O Toskar não tem permissão para procurar computadores na sua rede. Permita em Ajustes > Privacidade e Segurança > Rede Local.",
     "listFailed": "Não foi possível listar os computadores desta rede. Você ainda pode digitar um endereço abaixo.",
     "lanOff": "Primeiro escolha Conectar um dispositivo nesse computador"
@@ -178,11 +178,11 @@
       "direct": "Fora de casa, direto",
       "relay": "Fora de casa, pelo {{relay}}"
     },
-    "notEncrypted": "Sem criptografia. Atualizar o Toskar no computador criptografa as conversas com ele.",
+    "notEncrypted": "Sem criptografia. Atualizar o Toskar Pro no computador criptografa as conversas com ele.",
     "certificateChanged": "O certificado deste computador mudou, então este dispositivo não vai se conectar. Se o Toskar foi reinstalado nele, esqueça-o abaixo e conecte de novo.",
     "notConnected": "Não conectado",
-    "coreVersion": "Toskar nesse computador",
-    "updateCore": "Atualize o Toskar nesse computador para a versão 1.4 ou posterior para ver as fontes das respostas, o que o assistente fez, o progresso ao vivo e o esforço.",
+    "coreVersion": "Toskar Pro nesse computador",
+    "updateCore": "Atualize o Toskar Pro nesse computador para a versão 1.4 ou posterior para ver as fontes das respostas, o que o assistente fez, o progresso ao vivo e o esforço.",
     "jobsKeepRunning": "Fechar este app não interrompe um trabalho que já está em execução nesse computador.",
     "forget": "Esquecer este computador",
     "connect": "Conectar um computador",
@@ -428,8 +428,8 @@
   },
   "setup": {
     "title": "Configure no seu computador",
-    "install": "Baixe o Toskar para Mac, Windows ou Linux em toskar.ai, se ele ainda não estiver no seu computador.",
-    "open": "Abra o Toskar no computador: o app Toskar ou http://localhost:7331 no navegador dele.",
+    "install": "Baixe o Toskar Pro em toskar.ai, se ele ainda não estiver no seu computador.",
+    "open": "Abra o Toskar Pro no computador, ou http://localhost:7331 no navegador dele.",
     "choose": "Abra Computadores e escolha Conectar um dispositivo.",
     "code": "Depois, aqui, escolha o computador e digite o código de 6 dígitos que ele mostra."
   },
