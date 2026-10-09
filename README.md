@@ -19,7 +19,7 @@ Toskar detects your hardware, recommends and manages models, starts the right ru
 
 **Your computers. Your models. Your AI.**
 
-The daemon (`toskar`), the local web UI, and the HTTP API are in this repository. Toskar Desktop and Toskar Mobile are separate clients, developed outside this repository.
+The daemon (`toskar`), the local web UI, and the HTTP API are in this repository. Toskar Pro (the app for your computer) and Toskar (the app for phones, tablets, watches, and TVs) are separate clients, developed outside this repository.
 
 **Status:** Stable. See the latest [GitHub Release](https://github.com/yeixio/toskar-core/releases).
 
@@ -82,7 +82,7 @@ Open `http://127.0.0.1:7331` after the daemon is running. The API listens on `12
 
 ### macOS
 
-Homebrew installs the Core daemon from this repository. Toskar Desktop is a separate product. The Homebrew cask named `yggdrasil` is a different project.
+Homebrew installs the Core daemon from this repository. Toskar Pro is a separate product. The Homebrew cask named `yggdrasil` is a different project.
 
 ```bash
 brew tap yeixio/toskar https://github.com/yeixio/toskar-core
@@ -379,11 +379,11 @@ If Toskar Core is useful to you, you can support continued development through [
 
 Nothing in the software is gated on a donation.
 
-## Toskar Desktop
+## Toskar Pro and Toskar
 
 Toskar Core is the open-source engine. You can run the daemon and the web UI in this repository directly.
 
-Toskar Desktop and Toskar Mobile are separate products. They are clients for people who want a packaged application. This repository does not contain their source. Desktop release artifacts are built outside this tree. The public site describes both products at [toskar.ai](https://toskar.ai).
+Toskar Pro and Toskar are separate products. Toskar Pro is the packaged app for your computer, on the Mac App Store; Toskar is the app for phones, tablets, watches, and TVs, on the App Store. This repository does not contain their source, and their release artifacts are built outside this tree. The public site describes both products at [toskar.ai](https://toskar.ai).
 
 ## License
 

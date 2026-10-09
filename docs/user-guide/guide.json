@@ -4,7 +4,7 @@
       "id": "overview",
       "title": "What Toskar does",
       "paragraphs": [
-        "Toskar runs AI models on computers you already own. Toskar Desktop is the packaged app. Toskar Core is the open-source engine behind it: a daemon, a local web UI, and an HTTP API. You do not need a hosted model account, and your chats, files, and knowledge stay on your computers unless you use a feature that goes online.",
+        "Toskar runs AI models on computers you already own. Toskar Pro is the packaged app for your computer, and Toskar the app for your phone, tablet, watch, and TV. Toskar Core is the open-source engine behind them: a daemon, a local web UI, and an HTTP API. You do not need a hosted model account, and your chats, files, and knowledge stay on your computers unless you use a feature that goes online.",
         "Chat answers with sources you can check, remembers what you ask it to, and looks things up on the web when a question needs current information. It reads files you attach and makes documents and spreadsheets you ask for. Knowledge connects your own files, folders, databases, and web APIs, so answers use current prices, stock, and policies without retraining. Automations run prompts on a schedule. Train builds a specialized AI for one job. Computers lets several of your machines share the work.",
         "This Core release publishes headless archives, Linux deb and rpm packages, and a Homebrew formula. They are not the Desktop application, and they are not code-signed. Mobile apps are separate products."
       ]
@@ -13,12 +13,12 @@
       "id": "install",
       "title": "Install and start your first chat",
       "paragraphs": [
-        "Toskar Desktop is distributed separately from this Core release. The release files are Toskar Core. Verify them against SHA256SUMS.txt. Core archives are not code-signed.",
+        "Toskar Pro is distributed separately from this Core release. The release files are Toskar Core. Verify them against SHA256SUMS.txt. Core archives are not code-signed.",
         "On macOS, Homebrew installs Core: brew tap yeixio/toskar https://github.com/yeixio/toskar-core, then brew install yeixio/toskar/toskar, then run toskar. On Debian and Ubuntu, add the apt repository shown in the release notes and install the toskar package. RPM packages for x86_64 and aarch64 are attached to each release. The deb and rpm packages install a system service that starts Toskar at boot. Windows and other systems use the headless archive.",
         "The daemon serves the web UI at http://127.0.0.1:7331. Only this computer can reach it until you turn on local network access."
       ],
       "steps": [
-        "Open http://127.0.0.1:7331, or open Toskar Desktop if you installed it. Follow the hardware and model setup. The first model and runtime download need internet access and enough disk space.",
+        "Open http://127.0.0.1:7331, or open Toskar Pro if you installed it. Follow the hardware and model setup. The first model and runtime download need internet access and enough disk space.",
         "Open Models and install a model the fit label recommends for this computer. Wait for the download to finish.",
         "Open Chat and send a short message. New chats use Auto, which picks an installed model for each message. The first answer can take longer while the model loads.",
         "Find your version in the sidebar or Settings, and match it to the documentation version above."
