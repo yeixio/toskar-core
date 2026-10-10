@@ -1,7 +1,9 @@
 package api
 
 import (
+	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"path/filepath"
@@ -10,6 +12,7 @@ import (
 
 	"github.com/yeixio/toskar-core/internal/mimir"
 	"github.com/yeixio/toskar-core/internal/store"
+	"github.com/yeixio/toskar-core/pkg/contracts"
 )
 
 func TestKnowledgeRoutes(t *testing.T) {
@@ -91,5 +94,60 @@ func TestKnowledgeDatabaseSourceThroughAPI(t *testing.T) {
 	srv.Handler().ServeHTTP(rec, localRequest(http.MethodPost, "/api/v1/knowledge/sources", strings.NewReader(body)))
 	if rec.Code != http.StatusBadRequest || !strings.Contains(rec.Body.String(), "only SELECT") {
 		t.Fatalf("write query: %d %s", rec.Code, rec.Body)
+	}
+}
+
+// Save to Knowledge on the phone adds a source and the profiles that use it
+// in one request; a wrong profile saves nothing (toskar-apps#23).
+func TestCreateKnowledgeForProfiles(t *testing.T) {
+	db, err := store.Open(filepath.Join(t.TempDir(), "test.db"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer db.Close()
+	profiles := map[string]contracts.AIProfile{
+		"general":  {ID: "general", Name: "General", KnowledgeSources: []string{"older"}},
+		"research": {ID: "research", Name: "Research"},
+	}
+	srv := NewServer(Dependencies{
+		GetProfile: func(_ context.Context, id string) (contracts.AIProfile, error) {
+			p, ok := profiles[id]
+			if !ok {
+				return contracts.AIProfile{}, errors.New("not found")
+			}
+			return p, nil
+		},
+		UpdateProfile: func(_ context.Context, p contracts.AIProfile) (contracts.AIProfile, error) {
+			profiles[p.ID] = p
+			return p, nil
+		},
+	})
+	knowledge := mimir.NewStore(db.SQL, t.TempDir())
+	srv.BindKnowledge(knowledge)
+	do := func(body string) *httptest.ResponseRecorder {
+		rec := httptest.NewRecorder()
+		srv.Handler().ServeHTTP(rec, localRequest(http.MethodPost, "/api/v1/knowledge/sources", strings.NewReader(body)))
+		return rec
+	}
+
+	rec := do(`{"kind":"text","filename":"hours.md","text":"Open 9 to 5.","profile_ids":["general","nope"]}`)
+	if rec.Code != http.StatusNotFound || !strings.Contains(rec.Body.String(), "PROFILE_NOT_FOUND") {
+		t.Fatalf("unknown profile: %d %s", rec.Code, rec.Body)
+	}
+	if list, _ := knowledge.List(context.Background()); len(list) != 0 {
+		t.Fatalf("a wrong profile still saved %d sources", len(list))
+	}
+
+	rec = do(`{"kind":"text","filename":"hours.md","text":"Open 9 to 5.","profile_ids":["general","research"]}`)
+	if rec.Code != http.StatusCreated {
+		t.Fatalf("create: %d %s", rec.Code, rec.Body)
+	}
+	var src mimir.Source
+	_ = json.Unmarshal(rec.Body.Bytes(), &src)
+	if got := profiles["general"].KnowledgeSources; len(got) != 2 || got[0] != "older" || got[1] != src.ID {
+		t.Fatalf("general uses %v", got)
+	}
+	if got := profiles["research"].KnowledgeSources; len(got) != 1 || got[0] != src.ID {
+		t.Fatalf("research uses %v", got)
 	}
 }

@@ -708,5 +708,30 @@
     },
     "whatLeft": "O que saiu do seu computador",
     "adminOnly": "Só um administrador deste Toskar pode ver o que saiu do computador."
+  },
+  "saveKnowledge": {
+    "title": "Salvar no Conhecimento",
+    "intro": "Salve isto no Conhecimento do seu computador, para que os chats nele possam responder com base nisso.",
+    "disconnected": "Conecte-se a um computador com o Toskar para salvar isto no Conhecimento dele.",
+    "readingPage": "Lendo a página",
+    "kinds": {
+      "file": "Arquivo",
+      "page": "Página da web",
+      "text": "Texto"
+    },
+    "name": "Nome",
+    "useIn": "Usar nos chats com",
+    "noProfile": "Sem um perfil escolhido, ele é salvo, mas nenhum chat o usa até você adicioná-lo a um perfil no seu computador.",
+    "save": "Salvar no Conhecimento",
+    "saving": "Salvando…",
+    "saved": "Salvo no Conhecimento",
+    "savedFor": "Os chats com {{profiles}} agora respondem com base nisso.",
+    "savedUnused": "Está no seu computador. Adicione-o a um perfil lá para usá-lo nos chats.",
+    "done": "Concluído",
+    "adminOnly": "Só um administrador deste Toskar pode adicionar ao Conhecimento dele.",
+    "unsupported": "O Conhecimento não lê este tipo de arquivo. Arquivos PDF, Excel, CSV, JSON, Markdown, texto e HTML funcionam.",
+    "tooLarge": "Isto passa de 20 MB. Conecte-o a partir de uma pasta no seu computador.",
+    "pageFailed": "Não foi possível ler esta página. Compartilhe de novo ou salve-a primeiro como PDF.",
+    "nothing": "Não havia nada para salvar."
   }
 }

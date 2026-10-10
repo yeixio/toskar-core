@@ -684,5 +684,30 @@
     },
     "whatLeft": "离开你电脑的内容",
     "adminOnly": "只有此 Toskar 的管理员能查看离开电脑的内容。"
+  },
+  "saveKnowledge": {
+    "title": "保存到知识库",
+    "intro": "把它保存到你电脑的知识库，那里的聊天就能据此回答。",
+    "disconnected": "连接到运行 Toskar 的电脑，即可保存到它的知识库。",
+    "readingPage": "正在读取页面",
+    "kinds": {
+      "file": "文件",
+      "page": "网页",
+      "text": "文本"
+    },
+    "name": "名称",
+    "useIn": "在这些配置的聊天中使用",
+    "noProfile": "未选择配置时，它会被保存，但在你于电脑上把它加到某个配置之前，任何聊天都不会使用它。",
+    "save": "保存到知识库",
+    "saving": "正在保存…",
+    "saved": "已保存到知识库",
+    "savedFor": "使用 {{profiles}} 的聊天现在会据此回答。",
+    "savedUnused": "它已在你的电脑上。在那里把它加到某个配置，即可在聊天中使用。",
+    "done": "完成",
+    "adminOnly": "只有此 Toskar 的管理员能向它的知识库添加内容。",
+    "unsupported": "知识库无法读取这类文件。支持 PDF、Excel、CSV、JSON、Markdown、文本和 HTML 文件。",
+    "tooLarge": "超过 20 MB。请改为从电脑上的文件夹连接。",
+    "pageFailed": "无法读取此页面。请重新分享，或先存为 PDF。",
+    "nothing": "没有可保存的内容。"
   }
 }

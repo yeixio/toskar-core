@@ -684,5 +684,30 @@
     },
     "whatLeft": "離開你電腦的內容",
     "adminOnly": "只有此 Toskar 的管理員能查看離開電腦的內容。"
+  },
+  "saveKnowledge": {
+    "title": "儲存到知識",
+    "intro": "把它儲存到你電腦的知識，那裡的聊天就能據此回答。",
+    "disconnected": "連線到執行 Toskar 的電腦，即可儲存到它的知識。",
+    "readingPage": "正在讀取頁面",
+    "kinds": {
+      "file": "檔案",
+      "page": "網頁",
+      "text": "文字"
+    },
+    "name": "名稱",
+    "useIn": "在這些設定檔的聊天中使用",
+    "noProfile": "未選擇設定檔時，它會被儲存，但在你於電腦上把它加到某個設定檔之前，任何聊天都不會使用它。",
+    "save": "儲存到知識",
+    "saving": "正在儲存…",
+    "saved": "已儲存到知識",
+    "savedFor": "使用 {{profiles}} 的聊天現在會據此回答。",
+    "savedUnused": "它已在你的電腦上。在那裡把它加到某個設定檔，即可在聊天中使用。",
+    "done": "完成",
+    "adminOnly": "只有此 Toskar 的管理員能向它的知識新增內容。",
+    "unsupported": "知識無法讀取這類檔案。支援 PDF、Excel、CSV、JSON、Markdown、文字和 HTML 檔案。",
+    "tooLarge": "超過 20 MB。請改為從電腦上的資料夾連結。",
+    "pageFailed": "無法讀取此頁面。請重新分享，或先存成 PDF。",
+    "nothing": "沒有可儲存的內容。"
   }
 }

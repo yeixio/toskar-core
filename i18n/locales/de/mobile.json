@@ -696,5 +696,30 @@
     },
     "whatLeft": "Was deinen Computer verlassen hat",
     "adminOnly": "Nur ein Admin dieses Toskar kann sehen, was den Computer verlassen hat."
+  },
+  "saveKnowledge": {
+    "title": "Im Wissen speichern",
+    "intro": "Speichere das im Wissen deines Computers, damit Chats dort daraus antworten können.",
+    "disconnected": "Verbinde dich mit einem Computer, auf dem Toskar läuft, um das in seinem Wissen zu speichern.",
+    "readingPage": "Seite wird gelesen",
+    "kinds": {
+      "file": "Datei",
+      "page": "Webseite",
+      "text": "Text"
+    },
+    "name": "Name",
+    "useIn": "In Chats nutzen mit",
+    "noProfile": "Ohne gewähltes Profil wird es gespeichert, aber kein Chat nutzt es, bis du es auf deinem Computer einem Profil hinzufügst.",
+    "save": "Im Wissen speichern",
+    "saving": "Wird gespeichert …",
+    "saved": "Im Wissen gespeichert",
+    "savedFor": "Chats mit {{profiles}} antworten jetzt daraus.",
+    "savedUnused": "Es ist auf deinem Computer. Füge es dort einem Profil hinzu, um es in Chats zu nutzen.",
+    "done": "Fertig",
+    "adminOnly": "Nur ein Admin dieses Toskar kann etwas zu seinem Wissen hinzufügen.",
+    "unsupported": "Wissen kann diese Art von Datei nicht lesen. PDF-, Excel-, CSV-, JSON-, Markdown-, Text- und HTML-Dateien funktionieren.",
+    "tooLarge": "Das ist größer als 20 MB. Verbinde es stattdessen aus einem Ordner auf deinem Computer.",
+    "pageFailed": "Diese Seite konnte nicht gelesen werden. Teile sie erneut oder speichere sie zuerst als PDF.",
+    "nothing": "Es gab nichts zu speichern."
   }
 }

@@ -3912,6 +3912,11 @@ paths:
                 content_base64:
                   type: string
                   description: A binary upload such as .xlsx, in place of text
+                profile_ids:
+                  type: array
+                  items:
+                    type: string
+                  description: Profiles that use the new source from now on; an unknown one answers 404 PROFILE_NOT_FOUND and saves nothing
                 remote:
                   type: object
                   properties:

@@ -708,5 +708,30 @@
     },
     "whatLeft": "Ce qui a quitté votre ordinateur",
     "adminOnly": "Seul un administrateur de ce Toskar peut voir ce qui a quitté l’ordinateur."
+  },
+  "saveKnowledge": {
+    "title": "Enregistrer dans Connaissances",
+    "intro": "Enregistrez ceci dans les Connaissances de votre ordinateur, pour que ses chats puissent s’en servir pour répondre.",
+    "disconnected": "Connectez-vous à un ordinateur qui exécute Toskar pour enregistrer ceci dans ses Connaissances.",
+    "readingPage": "Lecture de la page",
+    "kinds": {
+      "file": "Fichier",
+      "page": "Page web",
+      "text": "Texte"
+    },
+    "name": "Nom",
+    "useIn": "L’utiliser dans les chats avec",
+    "noProfile": "Sans profil choisi, il est enregistré, mais aucun chat ne l’utilise tant que vous ne l’ajoutez pas à un profil sur votre ordinateur.",
+    "save": "Enregistrer dans Connaissances",
+    "saving": "Enregistrement…",
+    "saved": "Enregistré dans Connaissances",
+    "savedFor": "Les chats avec {{profiles}} s’en servent désormais pour répondre.",
+    "savedUnused": "Il est sur votre ordinateur. Ajoutez-le à un profil là-bas pour l’utiliser dans les chats.",
+    "done": "Terminé",
+    "adminOnly": "Seul un administrateur de ce Toskar peut ajouter des éléments à ses Connaissances.",
+    "unsupported": "Connaissances ne peut pas lire ce type de fichier. Les fichiers PDF, Excel, CSV, JSON, Markdown, texte et HTML fonctionnent.",
+    "tooLarge": "Ceci dépasse 20 Mo. Connectez-le plutôt depuis un dossier de votre ordinateur.",
+    "pageFailed": "Impossible de lire cette page. Partagez-la à nouveau, ou enregistrez-la d’abord en PDF.",
+    "nothing": "Il n’y avait rien à enregistrer."
   }
 }

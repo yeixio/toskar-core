@@ -772,5 +772,30 @@
     },
     "whatLeft": "What left your computer",
     "adminOnly": "Only an admin of this Toskar can see what left the computer."
+  },
+  "saveKnowledge": {
+    "title": "Save to Knowledge",
+    "intro": "Save this to your computer's Knowledge, so chats there can answer from it.",
+    "disconnected": "Connect to a computer that runs Toskar to save this to its Knowledge.",
+    "readingPage": "Reading the page",
+    "kinds": {
+      "file": "File",
+      "page": "Web page",
+      "text": "Text"
+    },
+    "name": "Name",
+    "useIn": "Use it in chats with",
+    "noProfile": "With no profile chosen, it's saved but no chat uses it until you add it to one on your computer.",
+    "save": "Save to Knowledge",
+    "saving": "Saving…",
+    "saved": "Saved to Knowledge",
+    "savedFor": "Chats with {{profiles}} now answer from it.",
+    "savedUnused": "It's on your computer. Add it to a profile there to use it in chats.",
+    "done": "Done",
+    "adminOnly": "Only an admin of this Toskar can add to its Knowledge.",
+    "unsupported": "Knowledge can't read this kind of file. PDF, Excel, CSV, JSON, Markdown, text, and HTML files work.",
+    "tooLarge": "This is larger than 20 MB. Connect it from a folder on your computer instead.",
+    "pageFailed": "This page couldn't be read. Try sharing it again, or save it as a PDF first.",
+    "nothing": "There was nothing to save."
   }
 }

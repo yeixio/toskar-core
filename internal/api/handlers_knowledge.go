@@ -5,9 +5,11 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"slices"
 
 	"github.com/gorilla/mux"
 	"github.com/yeixio/toskar-core/internal/mimir"
+	"github.com/yeixio/toskar-core/pkg/contracts"
 )
 
 // KnowledgeService is Mimir as the API sees it.
@@ -64,20 +66,52 @@ func (s *Server) handleListKnowledge(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, items)
 }
 
+// createKnowledgeInput is a new source and, optionally, the profiles that
+// use it from now on: a source no profile lists isn't searched in chat, so
+// the phone's Save to Knowledge picks them as it saves (toskar-apps#23).
+type createKnowledgeInput struct {
+	mimir.CreateInput
+	ProfileIDs []string `json:"profile_ids,omitempty"`
+}
+
 func (s *Server) handleCreateKnowledge(w http.ResponseWriter, r *http.Request) {
 	if !s.knowledgeReady(w) {
 		return
 	}
-	var in mimir.CreateInput
+	var in createKnowledgeInput
 	r.Body = http.MaxBytesReader(w, r.Body, mimir.MaxTextBytes+1<<20)
 	if err := json.NewDecoder(r.Body).Decode(&in); err != nil {
 		writeErr(w, http.StatusBadRequest, "BAD_REQUEST", "invalid knowledge source", nil)
 		return
 	}
-	src, err := s.knowledge.Create(r.Context(), in)
+	// Every profile is checked first, so a wrong id saves nothing.
+	profiles := make([]contracts.AIProfile, 0, len(in.ProfileIDs))
+	for _, id := range in.ProfileIDs {
+		if s.deps.GetProfile == nil || s.deps.UpdateProfile == nil {
+			writeErr(w, http.StatusNotImplemented, "NOT_IMPLEMENTED", "Profiles not available.", nil)
+			return
+		}
+		p, err := s.deps.GetProfile(r.Context(), id)
+		if err != nil {
+			writeErr(w, http.StatusNotFound, "PROFILE_NOT_FOUND", "profile not found", map[string]any{"profile_id": id})
+			return
+		}
+		profiles = append(profiles, p)
+	}
+	src, err := s.knowledge.Create(r.Context(), in.CreateInput)
 	if err != nil {
 		writeKnowledgeErr(w, err)
 		return
+	}
+	for _, p := range profiles {
+		if slices.Contains(p.KnowledgeSources, src.ID) {
+			continue
+		}
+		p.KnowledgeSources = append(p.KnowledgeSources, src.ID)
+		if _, err := s.deps.UpdateProfile(r.Context(), p); err != nil {
+			writeErrFrom(w, http.StatusInternalServerError, "PROFILE_UPDATE_FAILED", err)
+			return
+		}
 	}
 	writeJSON(w, http.StatusCreated, src)
 }

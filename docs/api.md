@@ -248,7 +248,7 @@ Control-plane routes are under `/api/v1`. The OpenAI-compatible routes are under
 
 | Method | Path | Purpose |
 | --- | --- | --- |
-| GET, POST | `/knowledge/sources` | Connected knowledge (Mimir), or add a source: `kind` `path`, `text`, `database`, or `api` |
+| GET, POST | `/knowledge/sources` | Connected knowledge (Mimir), or add a source: `kind` `path`, `text`, `database`, or `api`; `profile_ids` adds it to those profiles too, since a chat searches only its profile's sources |
 | GET, PATCH, DELETE | `/knowledge/sources/{id}` | Read, change (`name`, `text`, `local_only`, `remote`), or remove a source |
 | POST | `/knowledge/sources/{id}/refresh` | Reindex now |
 | GET | `/knowledge/sources/{id}/content` | The copy kept for a pasted or uploaded source |
