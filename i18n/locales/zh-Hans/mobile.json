@@ -12,11 +12,16 @@
     "chat": "聊天",
     "computers": "电脑",
     "models": "模型",
-    "settings": "设置"
+    "settings": "设置",
+    "activity": "动态"
   },
   "screens": {
     "connect": "连接",
-    "chat": "聊天"
+    "chat": "聊天",
+    "memory": "记忆",
+    "personalization": "个性化",
+    "automation": "自动化",
+    "privacy": "隐私"
   },
   "units": {
     "megabytes": "{{value}} MB",
@@ -77,7 +82,9 @@
       "online": "在线",
       "offline": "离线",
       "degraded": "性能下降"
-    }
+    },
+    "running": "正在运行 {{models}}",
+    "addHint": "要添加电脑，请在那台电脑上安装 Toskar，然后在你电脑的“电脑”中添加它。"
   },
   "models": {
     "title": "模型",
@@ -410,6 +417,11 @@
       "meaning": "Forseti 公正地裁决每一件事。设置就是 Toskar 遵守的规则。",
       "story": "Forseti 是 Baldr 之子，坐在 Glitnir 殿中，那里有黄金的柱子和白银的屋顶。每个带着纷争来找他的人，离开时都已和解。",
       "runeName": "Isa，静止之符文"
+    },
+    "activity": {
+      "meaning": "诺恩女神掌管命中注定会发生的事以及发生的时间。Norn 负责运行定时任务。",
+      "story": "三位诺恩女神 Urðr、Verðandi 和 Skuld 住在 Yggdrasil 下方的 Urðr 之泉旁。她们浇灌世界树的根，塑造过去、现在与未来。",
+      "runeName": "Jera，岁月轮转之符文"
     }
   },
   "tv": {
@@ -511,5 +523,153 @@
     "critique": "草稿 {{draft}}，由草稿 {{critic}} 检查：",
     "noIssues": "未发现问题。",
     "judgeWrote": "根据草稿和检查写出了答案。"
+  },
+  "personalization": {
+    "length": {
+      "label": "回答长度",
+      "brief": "简短",
+      "balanced": "适中",
+      "detailed": "详细"
+    },
+    "tone": {
+      "label": "语气",
+      "friendly": "友好",
+      "neutral": "中性",
+      "direct": "直接"
+    },
+    "format": {
+      "label": "格式",
+      "prose": "段落",
+      "lists": "列表"
+    },
+    "units": {
+      "label": "单位",
+      "metric": "公制",
+      "imperial": "英制"
+    },
+    "noPreference": "无偏好",
+    "aboutYou": "关于你",
+    "aboutYouPlaceholder": "我是一名在杭州工作的后端工程师。我的主要项目是一个 Go 服务。",
+    "instructions": "关于回答方式的其他要求",
+    "instructionsPlaceholder": "用 Go 展示代码示例。在末尾注明来源。",
+    "save": "保存",
+    "saving": "正在保存…",
+    "saved": "已保存"
+  },
+  "whatLeft": {
+    "nothing": "过去 30 天内没有任何内容离开这台电脑。",
+    "summary": "过去 30 天内：{{list}}。",
+    "summaryItem": "{{kind}} {{count}}",
+    "kinds": {
+      "web_search": "网络搜索",
+      "web_page": "网页",
+      "places": "地图和地点",
+      "paired_computer": "已配对的电脑",
+      "external_server": "外部服务器",
+      "connector": "已连接的服务",
+      "notification": "通知",
+      "community_ratings": "社区评分",
+      "update_check": "检查更新"
+    },
+    "kindsLower": {
+      "web_search": "网络搜索",
+      "web_page": "网页",
+      "places": "地图和地点",
+      "paired_computer": "已配对的电脑",
+      "external_server": "外部服务器",
+      "connector": "已连接的服务",
+      "notification": "通知",
+      "community_ratings": "社区评分",
+      "update_check": "检查更新"
+    },
+    "sources": {
+      "chat": "聊天",
+      "api": "API",
+      "automation": "自动化",
+      "training": "训练",
+      "portal": "门户"
+    }
+  },
+  "computerMemory": {
+    "categories": {
+      "identity": "关于你",
+      "preferences": "偏好",
+      "projects": "项目",
+      "technical": "技术",
+      "interests": "兴趣",
+      "people": "人物",
+      "other": "其他"
+    },
+    "delete": "删除",
+    "deleteLabel": "删除记忆：{{content}}",
+    "emptyTitle": "还没有记住任何内容",
+    "localOnly": "仅限这台电脑",
+    "paused": "已暂停",
+    "use": "在聊天中使用",
+    "useLabel": "在聊天中使用：{{content}}",
+    "confirmDelete": "再次轻点以删除",
+    "localOnlyHint": "绝不把这条记忆发送到与你的电脑配对的其他电脑。"
+  },
+  "activity": {
+    "title": "动态",
+    "subtitle": "你的电脑为你做了什么：它的通知和自动化。",
+    "disconnected": "连接到运行 Toskar 的电脑，即可在这里查看它的通知和自动化。",
+    "loading": "正在加载动态",
+    "notifications": "通知",
+    "notificationsUnread": "通知（{{count}}）",
+    "automations": "自动化",
+    "markAllRead": "全部标为已读",
+    "noNotifications": "没有通知。自动化有新消息或模型准备就绪时，会显示在这里。",
+    "noAutomations": "还没有自动化。在聊天中请求一个，例如“每个工作日 8 点，告诉我会不会下雨。”",
+    "editOnComputer": "要更改自动化做什么或何时运行，请在聊天中提出，或在电脑上打开“自动化”。",
+    "unreadLabel": "未读：{{title}}",
+    "paused": "已暂停",
+    "pausedLong": "已暂停。恢复之前不会运行。",
+    "next": "下次 {{when}}",
+    "nextLong": "下次运行：{{when}}",
+    "onDemand": "在你要求时运行",
+    "lastFailed": "失败：{{error}}",
+    "automation": "自动化",
+    "runNow": "立即运行",
+    "running": "正在运行…",
+    "pause": "暂停",
+    "resume": "恢复",
+    "results": "结果",
+    "noResults": "还没有结果。立即运行即可看到。",
+    "askAboutIt": "在聊天中询问这个结果",
+    "status": {
+      "claimed": "正在开始",
+      "running": "正在运行",
+      "retrying": "正在重试",
+      "succeeded": "已完成",
+      "failed": "失败"
+    },
+    "updateCore": "请更新电脑上的 Toskar，以便在这里查看。"
+  },
+  "computerSettings": {
+    "section": "在你的电脑上",
+    "memory": "记忆",
+    "memoryMeta": "你的电脑从聊天中记住的内容",
+    "personalization": "个性化",
+    "personalizationMeta": "回答长度、语气、单位和关于你",
+    "privacy": "隐私",
+    "privacyMeta": "数据存放的位置，以及离开电脑的内容",
+    "loading": "正在加载",
+    "memoryIntro": "你的电脑从那里的聊天中记住的内容。关闭某条记忆即可停止使用，也可以删除。此设备为自己的聊天记住的内容在“设置”的“在此设备上聊天”中。",
+    "searchMemories": "搜索记忆",
+    "noMatch": "没有匹配的记忆。",
+    "personalizationIntro": "电脑上的回答应该是什么样子，适用于那里的每个聊天和自动化。"
+  },
+  "privacy": {
+    "title": "你的数据保持私密",
+    "stored": "你的聊天、记忆、知识和文件存储在你的电脑上。云端没有 Toskar 账户。",
+    "leaves": "只有在你使用联网功能（例如网页搜索或已连接的服务）时，才会有内容离开你的电脑。每一次都会列在这里。",
+    "disk": {
+      "on": "你的电脑磁盘已用 {{method}} 加密，因此电脑关机或锁定时，这些数据仍保持加密。",
+      "encrypting": "正在用 {{method}} 加密你的电脑磁盘。",
+      "off": "你的电脑磁盘未加密，任何拿到这台电脑的人都能读取这些数据。请在那台电脑上开启磁盘加密。"
+    },
+    "whatLeft": "离开你电脑的内容",
+    "adminOnly": "只有此 Toskar 的管理员能查看离开电脑的内容。"
   }
 }

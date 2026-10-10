@@ -12,11 +12,16 @@
     "chat": "채팅",
     "computers": "컴퓨터",
     "models": "모델",
-    "settings": "설정"
+    "settings": "설정",
+    "activity": "활동"
   },
   "screens": {
     "connect": "연결",
-    "chat": "채팅"
+    "chat": "채팅",
+    "memory": "메모리",
+    "personalization": "맞춤 설정",
+    "automation": "자동화",
+    "privacy": "개인정보"
   },
   "units": {
     "megabytes": "{{value}}MB",
@@ -77,7 +82,9 @@
       "online": "온라인",
       "offline": "오프라인",
       "degraded": "성능 저하"
-    }
+    },
+    "running": "{{models}} 실행 중",
+    "addHint": "컴퓨터를 추가하려면 그 컴퓨터에 Toskar를 설치한 다음, 내 컴퓨터의 컴퓨터 화면에서 추가하세요."
   },
   "models": {
     "title": "모델",
@@ -410,6 +417,11 @@
       "meaning": "Forseti는 모든 일을 공정하게 해결해요. 설정은 Toskar가 지키는 규칙이에요.",
       "story": "Baldr의 아들 Forseti는 금기둥과 은지붕으로 된 전당 Glitnir에 앉아 있어요. 그에게 다툼을 가져온 사람은 모두 화해하고 돌아가요.",
       "runeName": "고요의 룬, Isa"
+    },
+    "activity": {
+      "meaning": "Norn들은 일어날 운명인 일과 그 때를 돌봐요. Norn은 예약된 작업을 실행해요.",
+      "story": "세 Norn인 Urðr, Verðandi, Skuld는 Yggdrasil 아래 Urðr의 샘 곁에 살아요. 이들은 나무뿌리에 물을 주며 과거와 현재와 미래를 빚어내요.",
+      "runeName": "돌아오는 해의 룬, Jera"
     }
   },
   "tv": {
@@ -511,5 +523,153 @@
     "critique": "초안 {{draft}}, 초안 {{critic}}이(가) 검토:",
     "noIssues": "문제가 없습니다.",
     "judgeWrote": "이(가) 초안과 검토를 바탕으로 답변을 작성했습니다."
+  },
+  "personalization": {
+    "length": {
+      "label": "답변 길이",
+      "brief": "짧게",
+      "balanced": "보통",
+      "detailed": "자세히"
+    },
+    "tone": {
+      "label": "어조",
+      "friendly": "친근하게",
+      "neutral": "중립적으로",
+      "direct": "직설적으로"
+    },
+    "format": {
+      "label": "형식",
+      "prose": "문단",
+      "lists": "목록"
+    },
+    "units": {
+      "label": "단위",
+      "metric": "미터법",
+      "imperial": "야드파운드법"
+    },
+    "noPreference": "선호 없음",
+    "aboutYou": "나에 관한 정보",
+    "aboutYouPlaceholder": "저는 서울에서 일하는 백엔드 엔지니어예요. 주요 프로젝트는 Go 서비스예요.",
+    "instructions": "답변 방식에 관한 기타 요청",
+    "instructionsPlaceholder": "코드 예시는 Go로 보여 주세요. 출처는 끝에 밝혀 주세요.",
+    "save": "저장",
+    "saving": "저장하는 중…",
+    "saved": "저장됨"
+  },
+  "whatLeft": {
+    "nothing": "지난 30일 동안 이 컴퓨터 밖으로 나간 데이터가 없어요.",
+    "summary": "지난 30일: {{list}}.",
+    "summaryItem": "{{kind}} {{count}}회",
+    "kinds": {
+      "web_search": "웹 검색",
+      "web_page": "웹 페이지",
+      "places": "지도 및 장소",
+      "paired_computer": "페어링된 컴퓨터",
+      "external_server": "외부 서버",
+      "connector": "연결된 서비스",
+      "notification": "알림",
+      "community_ratings": "커뮤니티 평가",
+      "update_check": "업데이트 확인"
+    },
+    "kindsLower": {
+      "web_search": "웹 검색",
+      "web_page": "웹 페이지",
+      "places": "지도 및 장소",
+      "paired_computer": "페어링된 컴퓨터",
+      "external_server": "외부 서버",
+      "connector": "연결된 서비스",
+      "notification": "알림",
+      "community_ratings": "커뮤니티 평가",
+      "update_check": "업데이트 확인"
+    },
+    "sources": {
+      "chat": "채팅",
+      "api": "API",
+      "automation": "자동화",
+      "training": "학습",
+      "portal": "포털"
+    }
+  },
+  "computerMemory": {
+    "categories": {
+      "identity": "나에 관한 정보",
+      "preferences": "선호 사항",
+      "projects": "프로젝트",
+      "technical": "기술",
+      "interests": "관심사",
+      "people": "사람",
+      "other": "기타"
+    },
+    "delete": "삭제",
+    "deleteLabel": "메모리 삭제: {{content}}",
+    "emptyTitle": "아직 기억한 내용이 없어요",
+    "localOnly": "이 컴퓨터에서만",
+    "paused": "일시 중지됨",
+    "use": "채팅에서 사용",
+    "useLabel": "채팅에서 사용: {{content}}",
+    "confirmDelete": "다시 탭하면 삭제",
+    "localOnlyHint": "이 메모리를 내 컴퓨터와 페어링된 다른 컴퓨터로 보내지 않습니다."
+  },
+  "activity": {
+    "title": "활동",
+    "subtitle": "컴퓨터가 당신을 위해 한 일: 알림과 자동화.",
+    "disconnected": "Toskar가 실행 중인 컴퓨터에 연결하면 여기서 그 알림과 자동화를 볼 수 있습니다.",
+    "loading": "활동 불러오는 중",
+    "notifications": "알림",
+    "notificationsUnread": "알림 ({{count}})",
+    "automations": "자동화",
+    "markAllRead": "모두 읽음으로 표시",
+    "noNotifications": "알림이 없습니다. 자동화에 새 소식이 있거나 모델이 준비되면 여기에 표시됩니다.",
+    "noAutomations": "아직 자동화가 없습니다. 채팅에서 요청해 보세요. 예: “평일 8시마다 비가 올지 알려줘.”",
+    "editOnComputer": "자동화가 하는 일이나 실행 시간을 바꾸려면 채팅에서 요청하거나 컴퓨터에서 자동화를 여세요.",
+    "unreadLabel": "읽지 않음: {{title}}",
+    "paused": "일시 중지됨",
+    "pausedLong": "일시 중지됨. 다시 시작할 때까지 실행되지 않습니다.",
+    "next": "다음 {{when}}",
+    "nextLong": "다음 실행 {{when}}",
+    "onDemand": "요청할 때 실행",
+    "lastFailed": "실패: {{error}}",
+    "automation": "자동화",
+    "runNow": "지금 실행",
+    "running": "실행 중…",
+    "pause": "일시 중지",
+    "resume": "다시 시작",
+    "results": "결과",
+    "noResults": "아직 결과가 없습니다. 지금 실행해 보세요.",
+    "askAboutIt": "채팅에서 이것에 대해 묻기",
+    "status": {
+      "claimed": "시작 중",
+      "running": "실행 중",
+      "retrying": "다시 시도 중",
+      "succeeded": "완료",
+      "failed": "실패"
+    },
+    "updateCore": "여기서 보려면 컴퓨터의 Toskar를 업데이트하세요."
+  },
+  "computerSettings": {
+    "section": "내 컴퓨터",
+    "memory": "메모리",
+    "memoryMeta": "컴퓨터가 채팅에서 기억하는 것",
+    "personalization": "개인 맞춤",
+    "personalizationMeta": "답변 길이, 어조, 단위, 나에 대해",
+    "privacy": "개인정보",
+    "privacyMeta": "데이터가 보관되는 곳과 컴퓨터 밖으로 나간 것",
+    "loading": "불러오는 중",
+    "memoryIntro": "컴퓨터가 그곳의 채팅에서 기억하는 것입니다. 끄면 더 이상 사용하지 않으며, 삭제할 수도 있습니다. 이 기기가 자체 채팅을 위해 기억하는 것은 설정의 '이 기기에서 채팅'에 있습니다.",
+    "searchMemories": "메모리 검색",
+    "noMatch": "일치하는 메모리가 없습니다.",
+    "personalizationIntro": "컴퓨터의 답변이 어떻게 보일지 정합니다. 그곳의 모든 채팅과 자동화에 적용됩니다."
+  },
+  "privacy": {
+    "title": "데이터는 비공개로 유지됩니다",
+    "stored": "채팅, 메모리, 지식, 파일은 내 컴퓨터에 저장됩니다. 클라우드에 Toskar 계정은 없습니다.",
+    "leaves": "웹 검색이나 연결된 서비스처럼 온라인으로 연결되는 기능을 쓸 때만 무언가가 컴퓨터 밖으로 나갑니다. 매번 여기에 기록됩니다.",
+    "disk": {
+      "on": "컴퓨터의 디스크는 {{method}}(으)로 암호화되어 있어, 꺼져 있거나 잠겨 있을 때도 이 데이터는 암호화된 상태로 유지됩니다.",
+      "encrypting": "컴퓨터의 디스크를 {{method}}(으)로 암호화하는 중입니다.",
+      "off": "컴퓨터의 디스크가 암호화되어 있지 않아, 컴퓨터를 가진 사람은 누구나 이 데이터를 읽을 수 있습니다. 그 컴퓨터에서 디스크 암호화를 켜세요."
+    },
+    "whatLeft": "컴퓨터 밖으로 나간 것",
+    "adminOnly": "컴퓨터 밖으로 나간 것은 이 Toskar의 관리자만 볼 수 있습니다."
   }
 }

@@ -264,8 +264,14 @@ var cgnat = netip.MustParsePrefix("100.64.0.0/10")
 
 // deviceRoutes are what a phone's key may reach: chat, its conversations,
 // the live events, answering a tool's question, and the lists the phone
-// reads. Everything else, such as API keys, settings changes, models,
-// computers, and files on disk, needs a key made in API Access.
+// reads. Its Activity tab reads automations and notifications, runs or
+// pauses an automation, and opens a result in chat; its Settings manage
+// the computer's memories and personalization and show what left the
+// computer; its share sheet saves a page or file to Knowledge
+// (yeixio/toskar-apps#23). The person's role still applies, so a Member's
+// phone can't read what left the computer or add knowledge. Everything
+// else, such as API keys, settings changes, models, computers, editing
+// automations, and files on disk, needs a key made in API Access.
 var deviceRoutes = map[string]bool{
 	"GET /api/v1/remote-access/route":         true,
 	"PUT /api/v1/remote-access/relay-token":   true,
@@ -289,6 +295,26 @@ var deviceRoutes = map[string]bool{
 	"GET /api/v1/conversations/{id}/messages": true,
 	"GET /api/v1/artifacts/{id}":              true,
 	"GET /api/v1/artifacts/{id}/content":      true,
+
+	"GET /api/v1/automations":                          true,
+	"GET /api/v1/automations/{id}":                     true,
+	"GET /api/v1/automations/{id}/runs":                true,
+	"POST /api/v1/automations/{id}/run":                true,
+	"POST /api/v1/automations/{id}/pause":              true,
+	"POST /api/v1/automations/{id}/resume":             true,
+	"POST /api/v1/automations/{id}/runs/{run_id}/chat": true,
+	"GET /api/v1/notifications":                        true,
+	"GET /api/v1/notifications/{id}":                   true,
+	"POST /api/v1/notifications/read":                  true,
+	"POST /api/v1/notifications/{id}/dismiss":          true,
+	"GET /api/v1/memory":                               true,
+	"PATCH /api/v1/memory/{id}":                        true,
+	"DELETE /api/v1/memory/{id}":                       true,
+	"GET /api/v1/personalization":                      true,
+	"PUT /api/v1/personalization":                      true,
+	"GET /api/v1/egress":                               true,
+	"GET /api/v1/privacy":                              true,
+	"POST /api/v1/knowledge/sources":                   true,
 }
 
 // DeviceMayReach reports whether a phone's key may make a request, by its

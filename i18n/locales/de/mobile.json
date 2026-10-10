@@ -12,11 +12,16 @@
     "chat": "Chat",
     "computers": "Computer",
     "models": "Modelle",
-    "settings": "Einstellungen"
+    "settings": "Einstellungen",
+    "activity": "Aktivität"
   },
   "screens": {
     "connect": "Verbinden",
-    "chat": "Chat"
+    "chat": "Chat",
+    "memory": "Gedächtnis",
+    "personalization": "Personalisierung",
+    "automation": "Automation",
+    "privacy": "Datenschutz"
   },
   "units": {
     "megabytes": "{{value}} MB",
@@ -77,7 +82,9 @@
       "online": "online",
       "offline": "offline",
       "degraded": "eingeschränkt"
-    }
+    },
+    "running": "Führt {{models}} aus",
+    "addHint": "Um einen Computer hinzuzufügen, installiere dort Toskar und füge ihn dann unter Computer auf deinem Computer hinzu."
   },
   "models": {
     "title": "Modelle",
@@ -417,6 +424,11 @@
       "meaning": "Forseti schlichtet jede Sache gerecht. Einstellungen sind die Regeln, an die sich Toskar hält.",
       "story": "Forseti, Sohn Baldrs, sitzt in Glitnir, einer Halle mit goldenen Säulen und silbernem Dach. Wer einen Streit vor ihn bringt, geht versöhnt davon.",
       "runeName": "Isa, die Rune der Stille"
+    },
+    "activity": {
+      "meaning": "Die Nornen hüten, was geschehen soll und wann. Norn führt geplante Arbeit aus.",
+      "story": "Die drei Nornen Urðr, Verðandi und Skuld wohnen am Urdbrunnen unter Yggdrasil. Sie begießen die Wurzeln des Baumes und formen, was war, was ist und was sein wird.",
+      "runeName": "Jera, die Rune des Jahreslaufs"
     }
   },
   "tv": {
@@ -523,5 +535,153 @@
     "critique": "Entwurf {{draft}}, geprüft von Entwurf {{critic}}:",
     "noIssues": "keine Probleme gefunden.",
     "judgeWrote": "hat die Antwort aus den Entwürfen und Prüfungen geschrieben."
+  },
+  "personalization": {
+    "length": {
+      "label": "Antwortlänge",
+      "brief": "Kurz",
+      "balanced": "Ausgewogen",
+      "detailed": "Ausführlich"
+    },
+    "tone": {
+      "label": "Tonfall",
+      "friendly": "Freundlich",
+      "neutral": "Neutral",
+      "direct": "Direkt"
+    },
+    "format": {
+      "label": "Format",
+      "prose": "Absätze",
+      "lists": "Listen"
+    },
+    "units": {
+      "label": "Einheiten",
+      "metric": "Metrisch",
+      "imperial": "Imperial"
+    },
+    "noPreference": "Keine Vorliebe",
+    "aboutYou": "Über dich",
+    "aboutYouPlaceholder": "Ich bin Backend-Entwickler in Hamburg. Mein Hauptprojekt ist ein Go-Dienst.",
+    "instructions": "Sonstiges zur Art der Antworten",
+    "instructionsPlaceholder": "Zeig Codebeispiele in Go. Nenne am Ende die Quellen.",
+    "save": "Speichern",
+    "saving": "Wird gespeichert …",
+    "saved": "Gespeichert"
+  },
+  "whatLeft": {
+    "nothing": "In den letzten 30 Tagen hat nichts diesen Computer verlassen.",
+    "summary": "In den letzten 30 Tagen: {{list}}.",
+    "summaryItem": "{{kind}} {{count}}",
+    "kinds": {
+      "web_search": "Websuche",
+      "web_page": "Webseite",
+      "places": "Karten und Orte",
+      "paired_computer": "Gekoppelter Computer",
+      "external_server": "Externer Server",
+      "connector": "Verbundener Dienst",
+      "notification": "Mitteilung",
+      "community_ratings": "Community-Bewertungen",
+      "update_check": "Update-Prüfung"
+    },
+    "kindsLower": {
+      "web_search": "Websuche",
+      "web_page": "Webseite",
+      "places": "Karten und Orte",
+      "paired_computer": "gekoppelter Computer",
+      "external_server": "externer Server",
+      "connector": "verbundener Dienst",
+      "notification": "Mitteilung",
+      "community_ratings": "Community-Bewertungen",
+      "update_check": "Update-Prüfung"
+    },
+    "sources": {
+      "chat": "Chat",
+      "api": "API",
+      "automation": "Automation",
+      "training": "Training",
+      "portal": "Portal"
+    }
+  },
+  "computerMemory": {
+    "categories": {
+      "identity": "Über dich",
+      "preferences": "Vorlieben",
+      "projects": "Projekte",
+      "technical": "Technisches",
+      "interests": "Interessen",
+      "people": "Personen",
+      "other": "Sonstiges"
+    },
+    "delete": "Löschen",
+    "deleteLabel": "Erinnerung löschen: {{content}}",
+    "emptyTitle": "Noch nichts gemerkt",
+    "localOnly": "Nur dieser Computer",
+    "paused": "Pausiert",
+    "use": "In Chats nutzen",
+    "useLabel": "In Chats nutzen: {{content}}",
+    "confirmDelete": "Zum Löschen erneut tippen",
+    "localOnlyHint": "Diese Erinnerung nie an einen anderen Computer senden, der mit deinem gekoppelt ist."
+  },
+  "activity": {
+    "title": "Aktivität",
+    "subtitle": "Was dein Computer für dich erledigt hat: seine Mitteilungen und Automationen.",
+    "disconnected": "Verbinde dich mit einem Computer, auf dem Toskar läuft, um hier seine Mitteilungen und Automationen zu sehen.",
+    "loading": "Aktivität wird geladen",
+    "notifications": "Mitteilungen",
+    "notificationsUnread": "Mitteilungen ({{count}})",
+    "automations": "Automationen",
+    "markAllRead": "Alle als gelesen markieren",
+    "noNotifications": "Keine Mitteilungen. Wenn eine Automation Neuigkeiten hat oder ein Modell bereit ist, erscheint es hier.",
+    "noAutomations": "Noch keine Automationen. Bitte in einem Chat um eine, etwa „Sag mir werktags um 8, ob es regnen wird.“",
+    "editOnComputer": "Um zu ändern, was eine Automation tut oder wann sie läuft, frag in einem Chat oder öffne Automationen auf deinem Computer.",
+    "unreadLabel": "Ungelesen: {{title}}",
+    "paused": "Pausiert",
+    "pausedLong": "Pausiert. Sie läuft erst wieder, wenn du sie fortsetzt.",
+    "next": "Nächste {{when}}",
+    "nextLong": "Läuft als Nächstes {{when}}",
+    "onDemand": "Läuft, wenn du sie startest",
+    "lastFailed": "Fehlgeschlagen: {{error}}",
+    "automation": "Automation",
+    "runNow": "Jetzt ausführen",
+    "running": "Läuft …",
+    "pause": "Pausieren",
+    "resume": "Fortsetzen",
+    "results": "Ergebnisse",
+    "noResults": "Noch keine Ergebnisse. Führe sie jetzt aus, um eines zu sehen.",
+    "askAboutIt": "In einem Chat dazu fragen",
+    "status": {
+      "claimed": "Startet",
+      "running": "Läuft",
+      "retrying": "Neuer Versuch",
+      "succeeded": "Fertig",
+      "failed": "Fehlgeschlagen"
+    },
+    "updateCore": "Aktualisiere Toskar auf deinem Computer, um das hier zu sehen."
+  },
+  "computerSettings": {
+    "section": "Auf deinem Computer",
+    "memory": "Erinnerungen",
+    "memoryMeta": "Was sich dein Computer aus deinen Chats merkt",
+    "personalization": "Personalisierung",
+    "personalizationMeta": "Antwortlänge, Ton, Einheiten und über dich",
+    "privacy": "Datenschutz",
+    "privacyMeta": "Wo deine Daten liegen und was deinen Computer verlassen hat",
+    "loading": "Wird geladen",
+    "memoryIntro": "Was sich dein Computer aus deinen Chats dort merkt. Schalte eine Erinnerung aus, damit sie nicht mehr genutzt wird, oder lösche sie. Was sich dieses Gerät für seine eigenen Chats merkt, findest du in den Einstellungen unter Chat auf diesem Gerät.",
+    "searchMemories": "Erinnerungen durchsuchen",
+    "noMatch": "Keine Erinnerung passt.",
+    "personalizationIntro": "Wie Antworten deines Computers aussehen sollen, in jedem Chat und jeder Automation dort."
+  },
+  "privacy": {
+    "title": "Deine Daten bleiben privat",
+    "stored": "Deine Chats, Erinnerungen, dein Wissen und deine Dateien sind auf deinem Computer gespeichert. Es gibt kein Toskar-Konto in der Cloud.",
+    "leaves": "Etwas verlässt deinen Computer nur, wenn du eine Funktion nutzt, die online geht, etwa eine Websuche oder einen verbundenen Dienst. Jedes Mal steht hier.",
+    "disk": {
+      "on": "Die Festplatte deines Computers ist mit {{method}} verschlüsselt, daher bleiben diese Daten verschlüsselt, solange er aus oder gesperrt ist.",
+      "encrypting": "Die Festplatte deines Computers wird mit {{method}} verschlüsselt.",
+      "off": "Die Festplatte deines Computers ist nicht verschlüsselt, daher kann jeder, der den Computer hat, diese Daten lesen. Schalte dort die Festplattenverschlüsselung ein."
+    },
+    "whatLeft": "Was deinen Computer verlassen hat",
+    "adminOnly": "Nur ein Admin dieses Toskar kann sehen, was den Computer verlassen hat."
   }
 }

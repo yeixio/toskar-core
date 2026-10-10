@@ -12,11 +12,16 @@
     "chat": "Chat",
     "computers": "Computers",
     "models": "Models",
-    "settings": "Settings"
+    "settings": "Settings",
+    "activity": "Activity"
   },
   "screens": {
     "connect": "Connect",
-    "chat": "Chat"
+    "chat": "Chat",
+    "memory": "Memory",
+    "personalization": "Personalization",
+    "automation": "Automation",
+    "privacy": "Privacy"
   },
   "units": {
     "megabytes": "{{value}} MB",
@@ -77,7 +82,9 @@
       "online": "online",
       "offline": "offline",
       "degraded": "degraded"
-    }
+    },
+    "running": "Running {{models}}",
+    "addHint": "To add a computer, install Toskar on it, then add it from Computers on your computer."
   },
   "models": {
     "title": "Models",
@@ -432,6 +439,11 @@
       "meaning": "Forseti settles every matter fairly. Settings are the rules Toskar keeps.",
       "story": "Forseti, son of Baldr, sits in Glitnir, a hall with pillars of gold and a roof of silver. Everyone who brings a dispute to him leaves reconciled.",
       "runeName": "Isa, the rune of stillness"
+    },
+    "activity": {
+      "meaning": "The Norns tend what is fated to happen and when. Norn runs scheduled work.",
+      "story": "The three Norns, Urðr, Verðandi and Skuld, live by the Well of Urðr beneath Yggdrasil. They water the tree's roots and shape what was, what is, and what shall be.",
+      "runeName": "Jera, the rune of the turning year"
     }
   },
   "phoneChat": {
@@ -599,5 +611,153 @@
     "critique": "Draft {{draft}}, checked by draft {{critic}}:",
     "noIssues": "no problems found.",
     "judgeWrote": "wrote the answer from the drafts and checks."
+  },
+  "personalization": {
+    "length": {
+      "label": "Answer length",
+      "brief": "Brief",
+      "balanced": "Balanced",
+      "detailed": "Detailed"
+    },
+    "tone": {
+      "label": "Tone",
+      "friendly": "Friendly",
+      "neutral": "Neutral",
+      "direct": "Direct"
+    },
+    "format": {
+      "label": "Format",
+      "prose": "Paragraphs",
+      "lists": "Lists"
+    },
+    "units": {
+      "label": "Units",
+      "metric": "Metric",
+      "imperial": "Imperial"
+    },
+    "noPreference": "No preference",
+    "aboutYou": "About you",
+    "aboutYouPlaceholder": "I'm a backend engineer in Juneau. My main project is a Go service.",
+    "instructions": "Anything else about how to answer",
+    "instructionsPlaceholder": "Show code examples in Go. Mention sources at the end.",
+    "save": "Save",
+    "saving": "Saving…",
+    "saved": "Saved"
+  },
+  "whatLeft": {
+    "nothing": "Nothing left this computer in the last 30 days.",
+    "summary": "In the last 30 days: {{list}}.",
+    "summaryItem": "{{kind}} {{count}}",
+    "kinds": {
+      "web_search": "Web search",
+      "web_page": "Web page",
+      "places": "Maps and places",
+      "paired_computer": "Paired computer",
+      "external_server": "External server",
+      "connector": "Connected service",
+      "notification": "Notification",
+      "community_ratings": "Community ratings",
+      "update_check": "Update check"
+    },
+    "kindsLower": {
+      "web_search": "web search",
+      "web_page": "web page",
+      "places": "maps and places",
+      "paired_computer": "paired computer",
+      "external_server": "external server",
+      "connector": "connected service",
+      "notification": "notification",
+      "community_ratings": "community ratings",
+      "update_check": "update check"
+    },
+    "sources": {
+      "chat": "Chat",
+      "api": "API",
+      "automation": "Automation",
+      "training": "Training",
+      "portal": "Portal"
+    }
+  },
+  "computerMemory": {
+    "categories": {
+      "identity": "About you",
+      "preferences": "Preferences",
+      "projects": "Projects",
+      "technical": "Technical",
+      "interests": "Interests",
+      "people": "People",
+      "other": "Other"
+    },
+    "delete": "Delete",
+    "deleteLabel": "Delete memory: {{content}}",
+    "emptyTitle": "Nothing remembered yet",
+    "localOnly": "This computer only",
+    "paused": "Paused",
+    "use": "Use in chats",
+    "useLabel": "Use in chats: {{content}}",
+    "confirmDelete": "Tap again to delete",
+    "localOnlyHint": "Never send this memory to another computer paired with yours."
+  },
+  "activity": {
+    "title": "Activity",
+    "subtitle": "What your computer did for you: its notifications and automations.",
+    "disconnected": "Connect to a computer that runs Toskar to see its notifications and automations here.",
+    "loading": "Loading activity",
+    "notifications": "Notifications",
+    "notificationsUnread": "Notifications ({{count}})",
+    "automations": "Automations",
+    "markAllRead": "Mark all read",
+    "noNotifications": "No notifications. When an automation has news or a model is ready, it shows here.",
+    "noAutomations": "No automations yet. Ask for one in a chat, such as “Every weekday at 8, tell me if it will rain.”",
+    "editOnComputer": "To change what an automation does or when it runs, ask in a chat, or open Automations on your computer.",
+    "unreadLabel": "Unread: {{title}}",
+    "paused": "Paused",
+    "pausedLong": "Paused. It won't run until you resume it.",
+    "next": "Next {{when}}",
+    "nextLong": "Runs next {{when}}",
+    "onDemand": "Runs when you ask",
+    "lastFailed": "Failed: {{error}}",
+    "automation": "Automation",
+    "runNow": "Run now",
+    "running": "Running…",
+    "pause": "Pause",
+    "resume": "Resume",
+    "results": "Results",
+    "noResults": "No results yet. Run it now to see one.",
+    "askAboutIt": "Ask about this in a chat",
+    "status": {
+      "claimed": "Starting",
+      "running": "Running",
+      "retrying": "Retrying",
+      "succeeded": "Done",
+      "failed": "Failed"
+    },
+    "updateCore": "Update Toskar on your computer to see this here."
+  },
+  "computerSettings": {
+    "section": "On your computer",
+    "memory": "Memory",
+    "memoryMeta": "What your computer remembers from your chats",
+    "personalization": "Personalization",
+    "personalizationMeta": "Answer length, tone, units, and about you",
+    "privacy": "Privacy",
+    "privacyMeta": "Where your data is kept, and what left your computer",
+    "loading": "Loading",
+    "memoryIntro": "What your computer remembers from your chats there. Turn one off to stop using it, or delete it. What this device remembers for its own chats is in Settings, under Chat on this device.",
+    "searchMemories": "Search memories",
+    "noMatch": "No memories match.",
+    "personalizationIntro": "How answers from your computer should look, in every chat and automation there."
+  },
+  "privacy": {
+    "title": "Your data stays private",
+    "stored": "Your chats, memories, knowledge, and files are stored on your computer. There's no Toskar account in the cloud.",
+    "leaves": "Something leaves your computer only when you use a feature that goes online, such as a web search or a connected service. Each time is listed here.",
+    "disk": {
+      "on": "Your computer's disk is encrypted with {{method}}, so this data stays encrypted while it's off or locked.",
+      "encrypting": "Your computer's disk is being encrypted with {{method}}.",
+      "off": "Your computer's disk isn't encrypted, so anyone who has the computer can read this data. Turn on disk encryption there."
+    },
+    "whatLeft": "What left your computer",
+    "adminOnly": "Only an admin of this Toskar can see what left the computer."
   }
 }

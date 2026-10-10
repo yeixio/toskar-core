@@ -153,6 +153,21 @@ func TestDeviceMayReach(t *testing.T) {
 		"PATCH /api/v1/settings":                  false,
 		"POST /api/v1/devices/pairing":            false,
 		"POST /api/v1/models/{id}/install":        false,
+		"GET /api/v1/automations":                 true,
+		"POST /api/v1/automations/{id}/pause":     true,
+		"POST /api/v1/automations":                false,
+		"PATCH /api/v1/automations/{id}":          false,
+		"DELETE /api/v1/automations/{id}":         false,
+		"POST /api/v1/notifications/read":         true,
+		"GET /api/v1/notifications/destinations":  false,
+		"DELETE /api/v1/memory/{id}":              true,
+		"POST /api/v1/memory":                     false,
+		"PUT /api/v1/personalization":             true,
+		"GET /api/v1/egress":                      true,
+		"PUT /api/v1/privacy":                     false,
+		"POST /api/v1/privacy/delete-runs":        false,
+		"POST /api/v1/knowledge/sources":          true,
+		"DELETE /api/v1/knowledge/sources/{id}":   false,
 	} {
 		method, path, _ := strings.Cut(route, " ")
 		if got := auth.DeviceMayReach(method, path); got != want {

@@ -32,7 +32,16 @@ A phone's key reaches only what the phone uses:
 - live events;
 - answering a tool's question;
 - the chat's files;
-- read-only lists: health, version, settings, profiles, models, running models, and computers.
+- read-only lists: health, version, settings, profiles, models, running models, and computers;
+- warming a chat's model;
+- automations: listing them, one with its runs, Run now, Pause, Resume, and opening a run's result in chat (not making, editing, or deleting one);
+- notifications: listing them, one by id, marking them read, and dismissing one;
+- memory: listing, changing (turning off, This computer only), and deleting memories;
+- personalization: reading and changing it;
+- what left this computer (`GET /egress`) and the privacy overview (`GET /privacy`), read-only;
+- adding a knowledge source from text or a file (`POST /knowledge/sources`), for the share sheet.
+
+The person's role still applies, so a Member's phone gets `403` for what left the computer and for adding knowledge.
 
 Anything else returns `403` `DEVICE_NOT_ALLOWED`. It appears in `GET /api-keys` with `kind` `device`, keeps that kind when rotated, and is revoked like any other key. Over plain HTTP the code and the key can be read by others on the same network, as any key can.
 

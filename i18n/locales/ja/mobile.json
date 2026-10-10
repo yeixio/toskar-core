@@ -12,11 +12,16 @@
     "chat": "チャット",
     "computers": "コンピュータ",
     "models": "モデル",
-    "settings": "設定"
+    "settings": "設定",
+    "activity": "アクティビティ"
   },
   "screens": {
     "connect": "接続",
-    "chat": "チャット"
+    "chat": "チャット",
+    "memory": "メモリ",
+    "personalization": "パーソナライズ",
+    "automation": "自動化",
+    "privacy": "プライバシー"
   },
   "units": {
     "megabytes": "{{value}} MB",
@@ -77,7 +82,9 @@
       "online": "オンライン",
       "offline": "オフライン",
       "degraded": "機能低下"
-    }
+    },
+    "running": "{{models}} を実行中",
+    "addHint": "コンピュータを追加するには、そこに Toskar をインストールしてから、あなたのコンピュータの「コンピュータ」で追加してください。"
   },
   "models": {
     "title": "モデル",
@@ -410,6 +417,11 @@
       "meaning": "Forsetiはあらゆる争いを公正に裁きます。設定は、Toskarが守るルールです。",
       "story": "Baldrの息子Forsetiは、金の柱と銀の屋根を持つ館Glitnirに座しています。争いを持ち込んだ者は皆、和解して帰っていきます。",
       "runeName": "Isa、静けさのルーン"
+    },
+    "activity": {
+      "meaning": "Nornたちは、何がいつ起こるべきかという運命を司ります。Nornはスケジュールされた作業を実行します。",
+      "story": "三人のNorn、Urðr、Verðandi、Skuldは、Yggdrasilの根元にあるUrðrの泉のほとりに住んでいます。彼女たちは木の根に水をやり、過去と現在と未来を形づくります。",
+      "runeName": "Jera、巡る一年のルーン"
     }
   },
   "tv": {
@@ -511,5 +523,153 @@
     "critique": "下書き {{draft}}（下書き {{critic}} がチェック）：",
     "noIssues": "問題は見つかりませんでした。",
     "judgeWrote": "が下書きとチェックから回答を作成しました。"
+  },
+  "personalization": {
+    "length": {
+      "label": "回答の長さ",
+      "brief": "簡潔",
+      "balanced": "標準",
+      "detailed": "詳細"
+    },
+    "tone": {
+      "label": "口調",
+      "friendly": "親しみやすい",
+      "neutral": "中立",
+      "direct": "率直"
+    },
+    "format": {
+      "label": "形式",
+      "prose": "段落",
+      "lists": "リスト"
+    },
+    "units": {
+      "label": "単位",
+      "metric": "メートル法",
+      "imperial": "ヤード・ポンド法"
+    },
+    "noPreference": "指定なし",
+    "aboutYou": "あなたについて",
+    "aboutYouPlaceholder": "ジュノー在住のバックエンドエンジニアです。メインのプロジェクトはGoのサービスです。",
+    "instructions": "回答の仕方についてのその他の希望",
+    "instructionsPlaceholder": "コード例はGoで示してください。最後に出典を挙げてください。",
+    "save": "保存",
+    "saving": "保存中…",
+    "saved": "保存しました"
+  },
+  "whatLeft": {
+    "nothing": "過去30日間、このコンピュータから送信されたものはありません。",
+    "summary": "過去30日間：{{list}}。",
+    "summaryItem": "{{kind}} {{count}}件",
+    "kinds": {
+      "web_search": "Web検索",
+      "web_page": "Webページ",
+      "places": "地図と場所",
+      "paired_computer": "ペアリングしたコンピュータ",
+      "external_server": "外部サーバ",
+      "connector": "連携サービス",
+      "notification": "通知",
+      "community_ratings": "コミュニティ評価",
+      "update_check": "アップデートの確認"
+    },
+    "kindsLower": {
+      "web_search": "Web検索",
+      "web_page": "Webページ",
+      "places": "地図と場所",
+      "paired_computer": "ペアリングしたコンピュータ",
+      "external_server": "外部サーバ",
+      "connector": "連携サービス",
+      "notification": "通知",
+      "community_ratings": "コミュニティ評価",
+      "update_check": "アップデートの確認"
+    },
+    "sources": {
+      "chat": "チャット",
+      "api": "API",
+      "automation": "自動化",
+      "training": "トレーニング",
+      "portal": "ポータル"
+    }
+  },
+  "computerMemory": {
+    "categories": {
+      "identity": "あなたについて",
+      "preferences": "好み",
+      "projects": "プロジェクト",
+      "technical": "技術",
+      "interests": "興味・関心",
+      "people": "人物",
+      "other": "その他"
+    },
+    "delete": "削除",
+    "deleteLabel": "メモリを削除：{{content}}",
+    "emptyTitle": "まだ何も覚えていません",
+    "localOnly": "このコンピュータのみ",
+    "paused": "一時停止中",
+    "use": "チャットで使う",
+    "useLabel": "チャットで使う：{{content}}",
+    "confirmDelete": "もう一度タップして削除",
+    "localOnlyHint": "このメモリーを、あなたのコンピュータとペアリングされた別のコンピュータに送りません。"
+  },
+  "activity": {
+    "title": "アクティビティ",
+    "subtitle": "コンピュータがあなたのために行ったこと：通知と自動化。",
+    "disconnected": "Toskar が動いているコンピュータに接続すると、その通知と自動化をここで確認できます。",
+    "loading": "アクティビティを読み込み中",
+    "notifications": "通知",
+    "notificationsUnread": "通知（{{count}}）",
+    "automations": "自動化",
+    "markAllRead": "すべて既読にする",
+    "noNotifications": "通知はありません。自動化に新しい知らせがあるときや、モデルの準備ができたときにここに表示されます。",
+    "noAutomations": "自動化はまだありません。チャットで頼んでください。例：「平日の8時に、雨が降るか教えて。」",
+    "editOnComputer": "自動化の内容や実行時刻を変えるには、チャットで頼むか、コンピュータで「自動化」を開いてください。",
+    "unreadLabel": "未読：{{title}}",
+    "paused": "一時停止中",
+    "pausedLong": "一時停止中です。再開するまで実行されません。",
+    "next": "次回 {{when}}",
+    "nextLong": "次回の実行：{{when}}",
+    "onDemand": "依頼したときに実行",
+    "lastFailed": "失敗：{{error}}",
+    "automation": "自動化",
+    "runNow": "今すぐ実行",
+    "running": "実行中…",
+    "pause": "一時停止",
+    "resume": "再開",
+    "results": "結果",
+    "noResults": "まだ結果はありません。今すぐ実行すると表示されます。",
+    "askAboutIt": "チャットでこれについて質問",
+    "status": {
+      "claimed": "開始中",
+      "running": "実行中",
+      "retrying": "再試行中",
+      "succeeded": "完了",
+      "failed": "失敗"
+    },
+    "updateCore": "ここで表示するには、コンピュータの Toskar をアップデートしてください。"
+  },
+  "computerSettings": {
+    "section": "コンピュータ上",
+    "memory": "メモリー",
+    "memoryMeta": "コンピュータがチャットから覚えていること",
+    "personalization": "パーソナライズ",
+    "personalizationMeta": "回答の長さ、トーン、単位、あなたについて",
+    "privacy": "プライバシー",
+    "privacyMeta": "データの保存場所と、コンピュータの外に出たもの",
+    "loading": "読み込み中",
+    "memoryIntro": "コンピュータがそこでのチャットから覚えていることです。オフにすると使われなくなり、削除もできます。このデバイスが自身のチャットのために覚えていることは、設定の「このデバイスでのチャット」にあります。",
+    "searchMemories": "メモリーを検索",
+    "noMatch": "一致するメモリーはありません。",
+    "personalizationIntro": "コンピュータからの回答の見た目です。そこでのすべてのチャットと自動化に適用されます。"
+  },
+  "privacy": {
+    "title": "データはプライベートなまま",
+    "stored": "チャット、メモリー、ナレッジ、ファイルはあなたのコンピュータに保存されます。クラウドの Toskar アカウントはありません。",
+    "leaves": "コンピュータの外に何かが出るのは、ウェブ検索や接続済みサービスなど、オンラインの機能を使ったときだけです。そのたびにここに記録されます。",
+    "disk": {
+      "on": "コンピュータのディスクは {{method}} で暗号化されているため、電源オフやロック中もこのデータは暗号化されたままです。",
+      "encrypting": "コンピュータのディスクを {{method}} で暗号化しています。",
+      "off": "コンピュータのディスクは暗号化されていないため、コンピュータを手にした人は誰でもこのデータを読めます。そのコンピュータでディスク暗号化をオンにしてください。"
+    },
+    "whatLeft": "コンピュータの外に出たもの",
+    "adminOnly": "コンピュータの外に出たものを見られるのは、この Toskar の管理者だけです。"
   }
 }

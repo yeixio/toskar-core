@@ -12,11 +12,16 @@
     "chat": "Chat",
     "computers": "Computadoras",
     "models": "Modelos",
-    "settings": "Configuración"
+    "settings": "Configuración",
+    "activity": "Actividad"
   },
   "screens": {
     "connect": "Conectar",
-    "chat": "Chat"
+    "chat": "Chat",
+    "memory": "Memoria",
+    "personalization": "Personalización",
+    "automation": "Automatización",
+    "privacy": "Privacidad"
   },
   "units": {
     "megabytes": "{{value}} MB",
@@ -77,7 +82,9 @@
       "online": "en línea",
       "offline": "sin conexión",
       "degraded": "con problemas"
-    }
+    },
+    "running": "Ejecuta {{models}}",
+    "addHint": "Para agregar una computadora, instala Toskar en ella y luego agrégala desde Computadoras en tu computadora."
   },
   "models": {
     "title": "Modelos",
@@ -424,6 +431,11 @@
       "meaning": "Forseti resuelve cada asunto con justicia. La configuración son las reglas que sigue Toskar.",
       "story": "Forseti, hijo de Baldr, se sienta en Glitnir, un salón con columnas de oro y techo de plata. Todo el que le lleva una disputa se va reconciliado.",
       "runeName": "Isa, la runa de la quietud"
+    },
+    "activity": {
+      "meaning": "Las Nornas cuidan lo que está destinado a suceder y cuándo. Norn ejecuta el trabajo programado.",
+      "story": "Las tres Nornas, Urðr, Verðandi y Skuld, viven junto al Pozo de Urðr, bajo Yggdrasil. Riegan las raíces del árbol y dan forma a lo que fue, lo que es y lo que será.",
+      "runeName": "Jera, la runa del año que gira"
     }
   },
   "tv": {
@@ -535,5 +547,153 @@
     "critique": "Borrador {{draft}}, revisado por el borrador {{critic}}:",
     "noIssues": "no se encontraron problemas.",
     "judgeWrote": "escribió la respuesta a partir de los borradores y las revisiones."
+  },
+  "personalization": {
+    "length": {
+      "label": "Longitud de las respuestas",
+      "brief": "Breve",
+      "balanced": "Equilibrada",
+      "detailed": "Detallada"
+    },
+    "tone": {
+      "label": "Tono",
+      "friendly": "Amigable",
+      "neutral": "Neutral",
+      "direct": "Directo"
+    },
+    "format": {
+      "label": "Formato",
+      "prose": "Párrafos",
+      "lists": "Listas"
+    },
+    "units": {
+      "label": "Unidades",
+      "metric": "Métricas",
+      "imperial": "Imperiales"
+    },
+    "noPreference": "Sin preferencia",
+    "aboutYou": "Sobre ti",
+    "aboutYouPlaceholder": "Soy ingeniero de backend en Juneau. Mi proyecto principal es un servicio en Go.",
+    "instructions": "Algo más sobre cómo responder",
+    "instructionsPlaceholder": "Muestra ejemplos de código en Go. Menciona las fuentes al final.",
+    "save": "Guardar",
+    "saving": "Guardando…",
+    "saved": "Guardado"
+  },
+  "whatLeft": {
+    "nothing": "Nada salió de esta computadora en los últimos 30 días.",
+    "summary": "En los últimos 30 días: {{list}}.",
+    "summaryItem": "{{kind}} ({{count}})",
+    "kinds": {
+      "web_search": "Búsqueda web",
+      "web_page": "Página web",
+      "places": "Mapas y lugares",
+      "paired_computer": "Computadora vinculada",
+      "external_server": "Servidor externo",
+      "connector": "Servicio conectado",
+      "notification": "Notificación",
+      "community_ratings": "Valoraciones de la comunidad",
+      "update_check": "Comprobación de actualizaciones"
+    },
+    "kindsLower": {
+      "web_search": "búsqueda web",
+      "web_page": "página web",
+      "places": "mapas y lugares",
+      "paired_computer": "computadora vinculada",
+      "external_server": "servidor externo",
+      "connector": "servicio conectado",
+      "notification": "notificación",
+      "community_ratings": "valoraciones de la comunidad",
+      "update_check": "comprobación de actualizaciones"
+    },
+    "sources": {
+      "chat": "Chat",
+      "api": "API",
+      "automation": "Automatización",
+      "training": "Entrenamiento",
+      "portal": "Portal"
+    }
+  },
+  "computerMemory": {
+    "categories": {
+      "identity": "Sobre ti",
+      "preferences": "Preferencias",
+      "projects": "Proyectos",
+      "technical": "Técnico",
+      "interests": "Intereses",
+      "people": "Personas",
+      "other": "Otro"
+    },
+    "delete": "Eliminar",
+    "deleteLabel": "Eliminar recuerdo: {{content}}",
+    "emptyTitle": "Todavía no hay recuerdos",
+    "localOnly": "Solo esta computadora",
+    "paused": "En pausa",
+    "use": "Usar en chats",
+    "useLabel": "Usar en chats: {{content}}",
+    "confirmDelete": "Toca de nuevo para eliminar",
+    "localOnlyHint": "No enviar nunca este recuerdo a otra computadora vinculada con la tuya."
+  },
+  "activity": {
+    "title": "Actividad",
+    "subtitle": "Lo que tu computadora hizo por ti: sus notificaciones y automatizaciones.",
+    "disconnected": "Conéctate a una computadora con Toskar para ver aquí sus notificaciones y automatizaciones.",
+    "loading": "Cargando actividad",
+    "notifications": "Notificaciones",
+    "notificationsUnread": "Notificaciones ({{count}})",
+    "automations": "Automatizaciones",
+    "markAllRead": "Marcar todo como leído",
+    "noNotifications": "No hay notificaciones. Cuando una automatización tenga novedades o un modelo esté listo, aparecerá aquí.",
+    "noAutomations": "Aún no hay automatizaciones. Pide una en un chat, por ejemplo: «Cada día laborable a las 8, dime si va a llover».",
+    "editOnComputer": "Para cambiar lo que hace una automatización o cuándo se ejecuta, pídelo en un chat o abre Automatizaciones en tu computadora.",
+    "unreadLabel": "Sin leer: {{title}}",
+    "paused": "En pausa",
+    "pausedLong": "En pausa. No se ejecutará hasta que la reanudes.",
+    "next": "Próxima {{when}}",
+    "nextLong": "Próxima ejecución {{when}}",
+    "onDemand": "Se ejecuta cuando lo pides",
+    "lastFailed": "Falló: {{error}}",
+    "automation": "Automatización",
+    "runNow": "Ejecutar ahora",
+    "running": "Ejecutando…",
+    "pause": "Pausar",
+    "resume": "Reanudar",
+    "results": "Resultados",
+    "noResults": "Aún no hay resultados. Ejecútala ahora para ver uno.",
+    "askAboutIt": "Preguntar sobre esto en un chat",
+    "status": {
+      "claimed": "Iniciando",
+      "running": "En ejecución",
+      "retrying": "Reintentando",
+      "succeeded": "Listo",
+      "failed": "Falló"
+    },
+    "updateCore": "Actualiza Toskar en tu computadora para ver esto aquí."
+  },
+  "computerSettings": {
+    "section": "En tu computadora",
+    "memory": "Memoria",
+    "memoryMeta": "Lo que tu computadora recuerda de tus chats",
+    "personalization": "Personalización",
+    "personalizationMeta": "Longitud de las respuestas, tono, unidades y sobre ti",
+    "privacy": "Privacidad",
+    "privacyMeta": "Dónde se guardan tus datos y qué salió de tu computadora",
+    "loading": "Cargando",
+    "memoryIntro": "Lo que tu computadora recuerda de tus chats allí. Desactiva un recuerdo para dejar de usarlo, o elimínalo. Lo que este dispositivo recuerda para sus propios chats está en Ajustes, en Chat en este dispositivo.",
+    "searchMemories": "Buscar recuerdos",
+    "noMatch": "Ningún recuerdo coincide.",
+    "personalizationIntro": "Cómo deben verse las respuestas de tu computadora, en cada chat y automatización allí."
+  },
+  "privacy": {
+    "title": "Tus datos siguen siendo privados",
+    "stored": "Tus chats, recuerdos, conocimiento y archivos se guardan en tu computadora. No hay una cuenta de Toskar en la nube.",
+    "leaves": "Algo sale de tu computadora solo cuando usas una función que se conecta a internet, como una búsqueda web o un servicio conectado. Cada vez aparece aquí.",
+    "disk": {
+      "on": "El disco de tu computadora está cifrado con {{method}}, así que estos datos siguen cifrados mientras está apagada o bloqueada.",
+      "encrypting": "El disco de tu computadora se está cifrando con {{method}}.",
+      "off": "El disco de tu computadora no está cifrado, así que cualquiera que la tenga puede leer estos datos. Activa el cifrado de disco en ella."
+    },
+    "whatLeft": "Qué salió de tu computadora",
+    "adminOnly": "Solo un administrador de este Toskar puede ver qué salió de la computadora."
   }
 }

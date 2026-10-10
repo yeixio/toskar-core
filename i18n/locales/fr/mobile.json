@@ -12,11 +12,16 @@
     "chat": "Discussion",
     "computers": "Ordinateurs",
     "models": "Modèles",
-    "settings": "Paramètres"
+    "settings": "Paramètres",
+    "activity": "Activité"
   },
   "screens": {
     "connect": "Connexion",
-    "chat": "Discussion"
+    "chat": "Discussion",
+    "memory": "Mémoire",
+    "personalization": "Personnalisation",
+    "automation": "Automatisation",
+    "privacy": "Confidentialité"
   },
   "units": {
     "megabytes": "{{value}} Mo",
@@ -77,7 +82,9 @@
       "online": "en ligne",
       "offline": "hors ligne",
       "degraded": "dégradé"
-    }
+    },
+    "running": "Exécute {{models}}",
+    "addHint": "Pour ajouter un ordinateur, installez-y Toskar, puis ajoutez-le depuis Ordinateurs sur votre ordinateur."
   },
   "models": {
     "title": "Modèles",
@@ -424,6 +431,11 @@
       "meaning": "Forseti règle chaque différend avec équité. Les paramètres sont les règles que suit Toskar.",
       "story": "Forseti, fils de Baldr, siège à Glitnir, une salle aux piliers d'or et au toit d'argent. Tous ceux qui lui soumettent un différend repartent réconciliés.",
       "runeName": "Isa, la rune de l'immobilité"
+    },
+    "activity": {
+      "meaning": "Les Nornes veillent sur ce qui doit advenir, et sur le moment où cela advient. Norn exécute le travail planifié.",
+      "story": "Les trois Nornes, Urðr, Verðandi et Skuld, vivent près du puits d'Urðr, sous Yggdrasil. Elles arrosent les racines de l'arbre et façonnent ce qui fut, ce qui est et ce qui sera.",
+      "runeName": "Jera, la rune de l'année qui tourne"
     }
   },
   "tv": {
@@ -535,5 +547,153 @@
     "critique": "Brouillon {{draft}}, vérifié par le brouillon {{critic}} :",
     "noIssues": "aucun problème trouvé.",
     "judgeWrote": "a rédigé la réponse à partir des brouillons et des vérifications."
+  },
+  "personalization": {
+    "length": {
+      "label": "Longueur des réponses",
+      "brief": "Brève",
+      "balanced": "Équilibrée",
+      "detailed": "Détaillée"
+    },
+    "tone": {
+      "label": "Ton",
+      "friendly": "Amical",
+      "neutral": "Neutre",
+      "direct": "Direct"
+    },
+    "format": {
+      "label": "Format",
+      "prose": "Paragraphes",
+      "lists": "Listes"
+    },
+    "units": {
+      "label": "Unités",
+      "metric": "Métriques",
+      "imperial": "Impériales"
+    },
+    "noPreference": "Aucune préférence",
+    "aboutYou": "À propos de vous",
+    "aboutYouPlaceholder": "Je suis ingénieur backend à Lyon. Mon projet principal est un service en Go.",
+    "instructions": "Autres indications sur la façon de répondre",
+    "instructionsPlaceholder": "Montre des exemples de code en Go. Cite les sources à la fin.",
+    "save": "Enregistrer",
+    "saving": "Enregistrement…",
+    "saved": "Enregistré"
+  },
+  "whatLeft": {
+    "nothing": "Rien n'a quitté cet ordinateur au cours des 30 derniers jours.",
+    "summary": "Au cours des 30 derniers jours : {{list}}.",
+    "summaryItem": "{{kind}} {{count}}",
+    "kinds": {
+      "web_search": "Recherche web",
+      "web_page": "Page web",
+      "places": "Cartes et lieux",
+      "paired_computer": "Ordinateur jumelé",
+      "external_server": "Serveur externe",
+      "connector": "Service connecté",
+      "notification": "Notification",
+      "community_ratings": "Notes de la communauté",
+      "update_check": "Recherche de mises à jour"
+    },
+    "kindsLower": {
+      "web_search": "recherche web",
+      "web_page": "page web",
+      "places": "cartes et lieux",
+      "paired_computer": "ordinateur jumelé",
+      "external_server": "serveur externe",
+      "connector": "service connecté",
+      "notification": "notification",
+      "community_ratings": "notes de la communauté",
+      "update_check": "recherche de mises à jour"
+    },
+    "sources": {
+      "chat": "Discussion",
+      "api": "API",
+      "automation": "Automatisation",
+      "training": "Entraînement",
+      "portal": "Portail"
+    }
+  },
+  "computerMemory": {
+    "categories": {
+      "identity": "À propos de vous",
+      "preferences": "Préférences",
+      "projects": "Projets",
+      "technical": "Technique",
+      "interests": "Centres d'intérêt",
+      "people": "Personnes",
+      "other": "Autre"
+    },
+    "delete": "Supprimer",
+    "deleteLabel": "Supprimer le souvenir : {{content}}",
+    "emptyTitle": "Aucun souvenir pour l'instant",
+    "localOnly": "Cet ordinateur uniquement",
+    "paused": "En pause",
+    "use": "Utiliser dans les chats",
+    "useLabel": "Utiliser dans les chats : {{content}}",
+    "confirmDelete": "Touchez à nouveau pour supprimer",
+    "localOnlyHint": "Ne jamais envoyer ce souvenir à un autre ordinateur jumelé au vôtre."
+  },
+  "activity": {
+    "title": "Activité",
+    "subtitle": "Ce que votre ordinateur a fait pour vous : ses notifications et ses automatisations.",
+    "disconnected": "Connectez-vous à un ordinateur qui exécute Toskar pour voir ici ses notifications et ses automatisations.",
+    "loading": "Chargement de l’activité",
+    "notifications": "Notifications",
+    "notificationsUnread": "Notifications ({{count}})",
+    "automations": "Automatisations",
+    "markAllRead": "Tout marquer comme lu",
+    "noNotifications": "Aucune notification. Quand une automatisation a du nouveau ou qu’un modèle est prêt, cela s’affiche ici.",
+    "noAutomations": "Aucune automatisation pour l’instant. Demandez-en une dans un chat, par exemple « Chaque jour de semaine à 8 h, dis-moi s’il va pleuvoir. »",
+    "editOnComputer": "Pour changer ce que fait une automatisation ou quand elle s’exécute, demandez-le dans un chat ou ouvrez Automatisations sur votre ordinateur.",
+    "unreadLabel": "Non lu : {{title}}",
+    "paused": "En pause",
+    "pausedLong": "En pause. Elle ne s’exécutera pas tant que vous ne l’aurez pas reprise.",
+    "next": "Prochaine : {{when}}",
+    "nextLong": "Prochaine exécution : {{when}}",
+    "onDemand": "S’exécute quand vous le demandez",
+    "lastFailed": "Échec : {{error}}",
+    "automation": "Automatisation",
+    "runNow": "Exécuter maintenant",
+    "running": "Exécution…",
+    "pause": "Mettre en pause",
+    "resume": "Reprendre",
+    "results": "Résultats",
+    "noResults": "Aucun résultat pour l’instant. Exécutez-la maintenant pour en voir un.",
+    "askAboutIt": "En parler dans un chat",
+    "status": {
+      "claimed": "Démarrage",
+      "running": "En cours",
+      "retrying": "Nouvel essai",
+      "succeeded": "Terminé",
+      "failed": "Échec"
+    },
+    "updateCore": "Mettez à jour Toskar sur votre ordinateur pour voir ceci ici."
+  },
+  "computerSettings": {
+    "section": "Sur votre ordinateur",
+    "memory": "Mémoire",
+    "memoryMeta": "Ce que votre ordinateur retient de vos chats",
+    "personalization": "Personnalisation",
+    "personalizationMeta": "Longueur des réponses, ton, unités et à propos de vous",
+    "privacy": "Confidentialité",
+    "privacyMeta": "Où vos données sont conservées, et ce qui a quitté votre ordinateur",
+    "loading": "Chargement",
+    "memoryIntro": "Ce que votre ordinateur retient de vos chats sur celui-ci. Désactivez un souvenir pour ne plus l’utiliser, ou supprimez-le. Ce que cet appareil retient pour ses propres chats se trouve dans Réglages, sous Chat sur cet appareil.",
+    "searchMemories": "Rechercher dans les souvenirs",
+    "noMatch": "Aucun souvenir ne correspond.",
+    "personalizationIntro": "L’apparence des réponses de votre ordinateur, dans chaque chat et chaque automatisation."
+  },
+  "privacy": {
+    "title": "Vos données restent privées",
+    "stored": "Vos chats, souvenirs, connaissances et fichiers sont stockés sur votre ordinateur. Il n’y a pas de compte Toskar dans le cloud.",
+    "leaves": "Quelque chose ne quitte votre ordinateur que lorsque vous utilisez une fonction en ligne, comme une recherche web ou un service connecté. Chaque fois est listée ici.",
+    "disk": {
+      "on": "Le disque de votre ordinateur est chiffré avec {{method}} : ces données restent chiffrées quand il est éteint ou verrouillé.",
+      "encrypting": "Le disque de votre ordinateur est en cours de chiffrement avec {{method}}.",
+      "off": "Le disque de votre ordinateur n’est pas chiffré : quiconque possède l’ordinateur peut lire ces données. Activez-y le chiffrement du disque."
+    },
+    "whatLeft": "Ce qui a quitté votre ordinateur",
+    "adminOnly": "Seul un administrateur de ce Toskar peut voir ce qui a quitté l’ordinateur."
   }
 }

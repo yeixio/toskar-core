@@ -152,6 +152,15 @@ func screenshotGET(path string) (string, bool) {
 		return screenshotKnowledge, true
 	case path == "/api/v1/memory":
 		return screenshotMemory, true
+	// The phone's Activity tab and its Settings (yeixio/toskar-apps#23).
+	case path == "/api/v1/notifications":
+		return screenshotNotifications, true
+	case path == "/api/v1/personalization":
+		return `{"length":"brief","tone":"friendly","units":"metric","about_me":"I run a small yarn shop in Juneau."}`, true
+	case path == "/api/v1/privacy":
+		return `{"retention_days":30,"last_30_days":{"web_search":14,"web_page":9,"places":2},"disk_encryption":{"state":"on","method":"FileVault"}}`, true
+	case path == "/api/v1/egress":
+		return screenshotEgress, true
 	case path == "/api/v1/connectors":
 		return screenshotConnectors, true
 	case path == "/api/v1/mcp/servers":
@@ -577,6 +586,44 @@ const screenshotAutomationDetail = `{
     }
   ]
 }`
+
+// Two notices from the automations above: the price one unread.
+const screenshotNotifications = `{
+  "notifications": [
+    {
+      "id": "note-2",
+      "created_at": "2026-09-28T15:05:00Z",
+      "source_type": "automation",
+      "source_id": "price-1",
+      "category": "automation",
+      "severity": "success",
+      "title": "Morning price",
+      "body": "Price: 420 USD.",
+      "message": {"title": {"text": "Morning price"}, "body": [{"key": "notifications:notices.automationPrice", "params": {"price": "420 USD"}}]},
+      "link": "/automations?id=price-1"
+    },
+    {
+      "id": "note-1",
+      "created_at": "2026-09-25T16:02:00Z",
+      "source_type": "automation",
+      "source_id": "friday-1",
+      "category": "automation",
+      "severity": "info",
+      "title": "Friday releases",
+      "body": "Two patch releases, no behavior change.",
+      "message": {"title": {"text": "Friday releases"}, "body": [{"text": "Two patch releases, no behavior change."}]},
+      "link": "/automations?id=friday-1",
+      "read_at": "2026-09-25T18:00:00Z"
+    }
+  ],
+  "unread": 1
+}`
+
+const screenshotEgress = `[
+  {"id": "eg-3", "at": "2026-09-28T15:01:00Z", "kind": "web_page", "destination": "shop.example.com", "detail": "/products/wool-skein", "source": "automation"},
+  {"id": "eg-2", "at": "2026-09-28T15:00:30Z", "kind": "web_search", "destination": "search.brave.com", "detail": "wool skein price", "source": "automation"},
+  {"id": "eg-1", "at": "2026-09-27T19:12:00Z", "kind": "places", "destination": "nominatim.openstreetmap.org", "detail": "coffee near Juneau", "source": "chat"}
+]`
 
 const screenshotTools = `[
   {"id": "internet.search", "name": "Web Search", "description": "Search the public internet and return titles, links, and snippets.", "capability": "internet", "source": "builtin", "schema": "{}", "default_policy": "allow", "risk": "read", "enabled": true, "profiles": ["general-assistant"]},
