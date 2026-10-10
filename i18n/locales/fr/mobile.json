@@ -681,7 +681,7 @@
       "succeeded": "Terminé",
       "failed": "Échec"
     },
-    "updateCore": "Mettez à jour Toskar sur votre ordinateur pour voir ceci ici."
+    "updateCore": "Mettez à jour Toskar Pro sur votre ordinateur pour voir ceci ici."
   },
   "computerSettings": {
     "section": "Sur votre ordinateur",
@@ -732,6 +732,7 @@
     "unsupported": "Connaissances ne peut pas lire ce type de fichier. Les fichiers PDF, Excel, CSV, JSON, Markdown, texte et HTML fonctionnent.",
     "tooLarge": "Ceci dépasse 20 Mo. Connectez-le plutôt depuis un dossier de votre ordinateur.",
     "pageFailed": "Impossible de lire cette page. Partagez-la à nouveau, ou enregistrez-la d’abord en PDF.",
-    "nothing": "Il n’y avait rien à enregistrer."
+    "nothing": "Il n’y avait rien à enregistrer.",
+    "updatePro": "Toskar Pro sur votre ordinateur doit être mis à jour pour pouvoir enregistrer dans ses Connaissances. Mettez-le à jour, puis partagez ceci à nouveau."
   }
 }

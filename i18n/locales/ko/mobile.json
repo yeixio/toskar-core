@@ -657,7 +657,7 @@
       "succeeded": "완료",
       "failed": "실패"
     },
-    "updateCore": "여기서 보려면 컴퓨터의 Toskar를 업데이트하세요."
+    "updateCore": "여기서 보려면 컴퓨터의 Toskar Pro를 업데이트하세요."
   },
   "computerSettings": {
     "section": "내 컴퓨터",
@@ -708,6 +708,7 @@
     "unsupported": "지식은 이 종류의 파일을 읽을 수 없습니다. PDF, Excel, CSV, JSON, Markdown, 텍스트, HTML 파일을 지원합니다.",
     "tooLarge": "20MB가 넘습니다. 대신 컴퓨터의 폴더에서 연결하세요.",
     "pageFailed": "이 페이지를 읽을 수 없습니다. 다시 공유하거나 먼저 PDF로 저장해 보세요.",
-    "nothing": "저장할 내용이 없었습니다."
+    "nothing": "저장할 내용이 없었습니다.",
+    "updatePro": "지식에 저장하려면 컴퓨터의 Toskar Pro를 업데이트해야 합니다. 업데이트한 다음 다시 공유하세요."
   }
 }

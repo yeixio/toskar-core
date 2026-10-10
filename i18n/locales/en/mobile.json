@@ -745,7 +745,7 @@
       "succeeded": "Done",
       "failed": "Failed"
     },
-    "updateCore": "Update Toskar on your computer to see this here."
+    "updateCore": "Update Toskar Pro on your computer to see this here."
   },
   "computerSettings": {
     "section": "On your computer",
@@ -796,6 +796,7 @@
     "unsupported": "Knowledge can't read this kind of file. PDF, Excel, CSV, JSON, Markdown, text, and HTML files work.",
     "tooLarge": "This is larger than 20 MB. Connect it from a folder on your computer instead.",
     "pageFailed": "This page couldn't be read. Try sharing it again, or save it as a PDF first.",
-    "nothing": "There was nothing to save."
+    "nothing": "There was nothing to save.",
+    "updatePro": "Toskar Pro on your computer needs an update before it can save to its Knowledge. Update it, then share this again."
   }
 }

@@ -657,7 +657,7 @@
       "succeeded": "已完成",
       "failed": "失败"
     },
-    "updateCore": "请更新电脑上的 Toskar，以便在这里查看。"
+    "updateCore": "请更新电脑上的 Toskar Pro，以便在这里查看。"
   },
   "computerSettings": {
     "section": "在你的电脑上",
@@ -708,6 +708,7 @@
     "unsupported": "知识库无法读取这类文件。支持 PDF、Excel、CSV、JSON、Markdown、文本和 HTML 文件。",
     "tooLarge": "超过 20 MB。请改为从电脑上的文件夹连接。",
     "pageFailed": "无法读取此页面。请重新分享，或先存为 PDF。",
-    "nothing": "没有可保存的内容。"
+    "nothing": "没有可保存的内容。",
+    "updatePro": "电脑上的 Toskar Pro 需要更新后才能保存到它的知识库。请更新后再分享一次。"
   }
 }
