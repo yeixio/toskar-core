@@ -1,41 +1,41 @@
 {
   "schemaVersion": 1,
-  "version": "1.7",
+  "version": "1.8",
   "items": [
     {
-      "realm": "Heimdall",
-      "title": "Everyone gets their own Toskar",
-      "text": "Sign in with a password, an invite link, or your company's sign-in. Each person's chats, memories, files, and automations stay their own, and roles decide who can do what."
+      "realm": "Valhalla",
+      "title": "Chat portals",
+      "text": "Give an assistant its own page or put it on your website, with its own profile, look, limits, and visitors, and read how it's used."
     },
     {
-      "realm": "Norn",
-      "title": "Automations that start themselves",
-      "text": "Run a task on a schedule, when files change, when a web page or feed updates, or when another service calls it, and chain one into the next."
-    },
-    {
-      "realm": "Ratatoskr",
-      "title": "Set it up by asking",
-      "text": "Say \"every morning at 8, check…\" in a chat, and Toskar drafts the automation for you to confirm."
-    },
-    {
-      "realm": "Odin",
-      "title": "Chat can see",
-      "text": "Attach a photo, screenshot, diagram, or short video and ask about it, with Gemma 3 and Qwen 2.5 VL in the catalog."
+      "realm": "Forseti",
+      "title": "Keep an assistant on topic",
+      "text": "Say what an assistant covers and what it never discusses, and Enforce checks each question and answer, with a report of what it held."
     },
     {
       "realm": "Bifrost",
-      "title": "Connect a device with a code",
-      "text": "Phones, tablets, and TVs connect with a 6-digit code, and traffic between your computers and devices is encrypted."
+      "title": "Reach your computer from anywhere",
+      "text": "Turn on access from anywhere and your devices keep working away from home, through your router or a relay, encrypted end to end."
     },
     {
-      "realm": "Gungnir",
-      "title": "See where each model runs",
-      "text": "Every running model says whether it's on the GPU, partly, or on the CPU, and Diagnostics lists what a graphics card still needs, with the fix."
+      "realm": "Norn",
+      "title": "Your computer, on your phone",
+      "text": "The Toskar app shows your computer's notifications and automations, manages its memories and personalization, and shows what left it."
+    },
+    {
+      "realm": "Mimir",
+      "title": "Save to Knowledge from anywhere",
+      "text": "Share a web page, PDF, or text to Toskar on your phone, and chats on your computer answer from it."
     },
     {
       "realm": "Ratatoskr",
-      "title": "The desktop app is Toskar Pro",
-      "text": "Same app, new name: Toskar Pro is the computer that runs your AI, and Toskar on your phone, tablet, TV, and watch connects to it."
+      "title": "Try again and edit, with versions",
+      "text": "Try an answer again, with another model if you like, or edit what you sent, and switch between the versions."
+    },
+    {
+      "realm": "Ymir",
+      "title": "Add any GGUF model",
+      "text": "Add a model from a GGUF file on your computer or another device, checked with a short test of its speed."
     }
   ]
 }

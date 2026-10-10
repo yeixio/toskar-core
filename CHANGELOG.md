@@ -8,6 +8,226 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Thi
 
 Changes waiting for the next release are in [changes/unreleased/](changes/unreleased/), one file per pull request. `scripts/changelog.py preview` shows them together, and `scripts/changelog.py release <version>` writes them here when the release is cut.
 
+## [1.8.0] - 2026-10-10
+
+Toskar 1.8 opens your AI to more places. Chat portals put an assistant on its own page or on your website, with its own profile, look, limits, and visitors, and topic controls keep an assistant on its subject, checked before and after each answer. Access from anywhere lets your devices reach your computer away from home, through your router or a relay. The Toskar app on your phone gets your computer's notifications and automations, its memories, personalization, and privacy records, and a share sheet that saves pages and files to Knowledge. Chats keep versions when you try again or edit, several chats can be deleted at once, models can be added from any GGUF file, and the computer starts loading a model as soon as a device starts asking. The API stays compatible: the client contract is 1.26, whose new versions only add fields. Binaries and the apt repository are not signed.
+
+### Added
+
+- Apps can delete several chats in one request, `POST /api/v1/conversations/delete`,
+  with their messages and files. Each person, paired device, and portal guest
+  can delete only their own chats. The web app and the phone app will use it
+  to select and delete chats together.
+- Chat history has Select: tick several chats, or Shift-click a range, and
+  delete them with one confirmation. Deleted chats, one or several, can be
+  brought back with Undo for 10 seconds. Clearing history in Settings
+  deletes in a few requests instead of one per chat.
+- Settings → History can delete chats last used more than 30, 90, or 365
+  days ago, keeping pinned chats, and says how many before you confirm.
+  Clearing all history is confirmed in the page, which also works in the
+  desktop app.
+- Deleting a chat that an automation posts its results to says so: the
+  automation keeps running, and its results stay in its history.
+- Try again and Edit in every chat, past ones included. Try again can use
+  another model; Edit puts the message back in the box, and ↑ in an empty
+  box edits the last one. Each makes a new version, and ‹ 1 / 2 › switches
+  between them. A retry says when the answer it replaces had made files or
+  run commands, which stay done.
+- Chats keep versions: retrying an answer or editing a sent message adds a
+  version of that point instead of replacing it, with the conversation
+  that followed each version kept. The API answers from any point
+  (`retry_of`, `edit_of`, `parent_id` on `POST /api/v1/chat`), lists each
+  message's `versions`, and switches the one shown; the model is sent only
+  the chat up to that point. Existing chats read as one version at every
+  point.
+- Deliberate, first part: a profile can set Deliberate to Always so its
+  answers are drafted three times, independently, on other computers when
+  there are any, and compared by their short final answers. When most
+  drafts agree, that answer is kept. When they disagree, or the answers are
+  too long to compare, each draft is checked against the others and a
+  judge writes the answer, saying where they still disagree. The answer's
+  steps say how it went, and the drafts and checks are kept with the answer
+  for the app to show. It's off by default while it's measured.
+- The web app's profile editor has the Deliberate setting, Compare
+  independent drafts, under Strategy, and Drafter and Judge models under
+  Show all roles. Under an answer, the drafts open to show each draft's
+  model, computer, and final answer, the checks, and the judge.
+- Adding a knowledge source can also add it to profiles (`profile_ids`), so
+  what you save from a connected device's share sheet is used in chats
+  right away.
+- Add a model from a GGUF file through the API, `POST /api/v1/models/import`:
+  a file on this computer, copied into Toskar's models folder or used where
+  it is, or the file itself sent from another device. The file's header is
+  checked first, so an incomplete copy or a file that isn't a model is
+  refused, and the model's name, size, quantization, and context length come
+  from the file.
+- Toskar finds models LM Studio, Ollama, llama.cpp, and GPT4All already
+  downloaded on this computer (`GET /api/v1/models/import/found`), so they
+  can be added in place without downloading them again.
+- Models → Add a model: send a GGUF file from the browser, add one by its
+  location on this computer (copied or used where it is), pick one another
+  app already downloaded, or paste a link.
+- After adding a model, Check it works loads it and asks one short
+  question: Works, with its speed, or why it didn't answer. Benchmarks have
+  the same one-prompt Quick check.
+- A model you added can be renamed and tagged with what it's good at, so
+  Auto sends coding requests to one good at coding. A vision projector found
+  with it (beside the file, or Ollama's) is offered as its image support.
+- A connected device can now see your computer's notifications and
+  automations, run or pause an automation, and open a result in a chat. It
+  can also manage the computer's memories and personalization, and show
+  what left the computer. Making or editing an automation still happens on
+  the computer or in a chat. Seeing what left the computer needs an admin.
+- Chat portals can be for Members only, who chat as themselves after
+  signing in, or for people you invite by name, each with a one-time link
+  that keeps them signed in to the portal. Remove an invited visitor and
+  they stop at once.
+- Put a chat portal on your own website: list the websites that may show
+  it, then paste a chat button script or a frame snippet from the
+  portal's editor.
+- Chat portals have limits: messages per visitor an hour, the longest
+  message, and chats at once, set under Administer → Portals. Portal chats
+  wait for the chats of the people who use Toskar, and come before
+  automations, so a busy portal never slows them down.
+- Read a chat portal's visitors' conversations and see how much it's used
+  under Administer → Portals. Visitors are told the people who run the
+  portal can read their chats, and each portal keeps them for the time you
+  choose, 30 days to start. A portal's chats show as Portal in What left
+  this computer.
+- A chat portal's page at `/p/<portal>`: only a chat, with the portal's
+  name, logo, colours, theme, welcome, suggested prompts, and footer. A
+  visitor enters with the passcode (or at once when the portal is open),
+  and comes back to their chat on the next visit.
+- Administer → Portals: add a chat portal, choose its profile, tools,
+  memory, language, and who can chat, set its heading, logo, colours,
+  theme, welcome, suggested prompts, and footer with a live preview, copy
+  its link, and turn it off at once.
+- Chat portals, first part: Admins can create portals through the API,
+  each answering with its own profile, tools, memory setting, and
+  language, open on the network or behind a passcode. Visitors who enter
+  become guests who reach only the portal's chat, with their chats private
+  to each of them. The portal page and its settings screen come next.
+- The user guide explains reaching Toskar away from home: turning on access
+  from anywhere, what the reachability line means, the free ways in when the
+  router won't open a port (a forwarded port, Tailscale), and an
+  organization's own relay. A new guide for organizations covers the ways
+  in for hundreds of people.
+- Access from anywhere, first part: an Admin can turn on a listener for
+  paired devices away from home (API Access → Access from anywhere). It
+  serves only what a phone uses, over HTTPS with the computer's
+  certificate, to paired devices' keys, and turns away an address that
+  keeps sending wrong keys. For now it's reached through a port forwarded
+  by hand or Tailscale; automatic setup comes next.
+- Access from anywhere opens its port on the router by itself (PCP,
+  NAT-PMP, or UPnP), keeps it open while it's on, and closes it when it's
+  turned off or Toskar quits. API Access says whether the computer is
+  reachable directly, over IPv6, or at a forwarded address, or why not,
+  such as an internet provider that shares one address among many homes.
+- The Toskar app can hand this computer the relay token from a
+  subscription, and an Admin's device can turn access from anywhere on at
+  the same time, so subscribing on the device is all the setup it takes.
+- Access from anywhere can go through a relay when nothing more direct
+  reaches the computer. An organization that runs its own Toskar relay
+  enters its name and enrollment secret under API Access → Your
+  organization's relay; the computer then enrolls, keeps its sealed
+  address current there, and holds a tunnel open, so paired devices reach
+  it from anywhere with no open port. Traffic stays encrypted from the
+  device to the computer. API Access shows whether the relay is connected, and paired devices
+  learn which relay to find the computer through.
+- Pairing a device now gives it this computer's route secret, for finding
+  it away from home without Toskar's service learning its addresses;
+  devices paired before get it the next time they connect at home. The
+  computer can seal its addresses in a record only paired devices can
+  open, signed with its certificate.
+- The screenshot pipeline makes Microsoft Store screenshots: a `microsoft-store` form at 1920×1080, captured at 1440×810 so the layout matches the Mac App Store set. The Toskar Pro for Windows listing in toskar-apps uses them.
+- Off-topic attempts, under a profile's topic controls: what Enforce held
+  in the last 30 days, by day and by where it came from, with the
+  messages. Mark as on topic adds one to the example questions. They're
+  kept and deleted with run records.
+- Topic controls on profiles: say what an assistant stays on, what it
+  never discusses, and the reply to anything else. The rules come first in
+  every chat, as the administrator's, and the person's preferences,
+  memories, pasted text, and API instructions can't change them. A chat
+  portal's profile brings them along.
+- Enforce for topic controls: each message is checked before it's
+  answered, and an off-topic one gets the set reply without running the
+  full answer. Each answer is checked too, and one that went off topic
+  anyway is replaced. The profile editor's Topics tab chooses Guide or
+  Enforce, and the run trace records what the check found.
+- Pin an API key to a profile: every request with the key, from a website
+  or another app, answers with that profile and its topic controls, and
+  can't name another profile or a model.
+- Pin Members, Visitors, or one person to profiles from People: they chat
+  only with those profiles, such as an assistant with topic controls, and
+  the chat's profile picker shows only them. The Owner and Admins are
+  never pinned.
+- Quality cases for topic controls: a tire shop with Enforce, its real
+  questions and small talk, and jailbreaks in many forms and languages.
+  The report gives the share held and the share wrongly refused, and the
+  weekly real-model run includes it.
+- Try it, under a profile's topic controls: run a message past them as
+  they are in the editor, or one of a few made-up attempts to talk the
+  assistant off topic, and see the label and the reply before saving.
+- A web limit for topic controls: web search and opening pages keep to
+  the profile's sites, such as a shop's own site, and its words are added
+  to every search.
+- `POST /api/v1/models/warm` starts loading the model a chat would use and answers at once, so a phone, tablet, watch, or TV can have the computer load it while someone types or speaks, instead of after the question arrives (#498, contract 1.26). It never loads beside a model that's answering, nor one that wouldn't fit beside those already loaded.
+
+### Changed
+
+- The phone app's text says "this device" instead of "this phone" where it means the device it runs on (installing models, storage, errors, connecting, and onboarding), in all ten languages, since the same app runs on tablets and Macs.
+- The README and the user guide name the two apps: Toskar Pro for your computer, and Toskar for phones, tablets, watches, and TVs (yeixio/toskar-apps#123).
+- The apps for phones, tablets, TVs, and watches call the computer app Toskar Pro where they mean it: connecting, finding computers, its version and encryption in Settings, and the setup steps, which no longer name operating systems. In all ten languages (yeixio/toskar-apps#123).
+- The guide for organizations now covers paired devices through a reverse
+  proxy or Cloudflare Tunnel: pair them by the server's name on the office
+  network, and they keep working away, with the proxy's certificate.
+- Enforce's topic checks run on the smallest installed model verified to
+  hold them (Gemma 3 4B so far) when it fits beside the answering model,
+  instead of always on the answering model. Diagnostics and the Topics tab
+  say when no verified model is installed.
+- Topic checks name the subjects a profile never discusses in the
+  off-topic label, and the topic rules say that how someone asks ("search
+  the web for…") doesn't change the subject.
+- The watch app's text for a question the phone couldn't finish while asleep says the answer appears on the watch once Toskar is open on the phone, and a new line says when the phone is still answering, in all ten languages (yeixio/toskar-apps#149).
+
+### Fixed
+
+- A finished answer could briefly show the chat as it was before it, when
+  the reply stream ended before the answer was saved.
+- Chat no longer looks up Toskar's own guide for questions that aren't about
+  it, such as a word problem that happens to mention minutes and notices, or
+  one that says "until you have". The guide is consulted when most of a
+  question's words appear in one of its passages, or when the question names
+  Toskar or asks what it can do.
+- A profile kept to one subject refuses fewer real questions: asking about
+  caring for or using what it covers counts, how someone asks ("search the
+  web: …") no longer sways the check, and a refusal is always in the
+  person's language.
+- Your messages in a chat no longer have an empty band under the text. Edit
+  sits under the message instead: on hover with a mouse, always on touch.
+- Deleting a model only deletes files in Toskar's models folder.
+- `/v1/chat/completions` honors `temperature` and `max_tokens` (and
+  `max_completion_tokens`) for the answer, on this computer, a paired one,
+  or an external server. Temperature 0 gives the same most likely answer
+  every time. Before, both were accepted and ignored.
+- A connected device says to update Toskar Pro, instead of "not
+  reachable", when the computer's Toskar Pro is too old to save what you
+  shared to its Knowledge.
+- A portal visitor whose earlier chat was gone, such as after retention,
+  starts a new one instead of sending messages that weren't kept.
+- The release screenshots of the Automations form are taken again. The demo server behind them answered "Fill in the details" with an empty object, so the form failed and the 1.7.0 release's screenshots job stopped there.
+- An assistant with topic controls no longer answers questions about
+  Toskar itself, "remember …" commands, or install offers in place of its
+  own rules.
+
+### Security
+
+- Deleting a chat removes its files only when the chat is yours. Before, a
+  request to delete someone else's chat failed but still removed that chat's
+  files.
+- Toskar's pages can no longer be shown in another website's frame, except
+  a portal's page in the websites its Admin lists.
+
 ## [1.7.0] - 2026-10-08
 
 Toskar 1.7 is for more than one person and more than one device. People sign in with their own accounts, by password, invite link, an OpenID Connect provider, or a reverse proxy, and roles decide what each can do; chats, memories, files, and automations stay private to their person, and the existing user becomes the Owner. Automations run on schedules, file and folder changes, web pages, feeds, and webhooks, can chain into each other, and can be set up by asking in a chat. Chat can see pictures and watch videos. Traffic between computers and from phones is encrypted, a phone, tablet, or TV connects with a 6-digit code, and every model shows whether it runs on the GPU. The desktop app's menus and tray call it Toskar Pro, its new name. The API stays compatible: the client contract is 1.15, whose new versions only add fields, and a paired computer still on 1.6 keeps working over plain HTTP, marked Not encrypted, until it's updated. Binaries and the apt repository are not signed.
