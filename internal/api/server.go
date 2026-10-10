@@ -67,9 +67,12 @@ type Dependencies struct {
 	ListRunningModels func(ctx context.Context) ([]contracts.RunningModelView, error)
 	// Acceleration sums up where this computer's loaded models run, for
 	// health (#317).
-	Acceleration   func(ctx context.Context) string
-	StartModel     func(ctx context.Context, id string, nodeID string) (contracts.RunningModelView, error)
-	StopModel      func(ctx context.Context, instanceID string, nodeID string) error
+	Acceleration func(ctx context.Context) string
+	StartModel   func(ctx context.Context, id string, nodeID string) (contracts.RunningModelView, error)
+	StopModel    func(ctx context.Context, instanceID string, nodeID string) error
+	// WarmModel starts loading the model a chat would use, before the
+	// question arrives (#498).
+	WarmModel      func(ctx context.Context, req contracts.ModelWarmRequest) (contracts.ModelWarmResponse, error)
 	ListRuntimes   func(ctx context.Context) ([]runtimes.RuntimeInfo, error)
 	InstallRuntime func(ctx context.Context, id string) error
 	ListProfiles   func(ctx context.Context) ([]contracts.AIProfile, error)
@@ -274,6 +277,7 @@ func (s *Server) routes() {
 	api.HandleFunc("/models/fit", s.handleModelsFit).Methods(http.MethodGet, http.MethodOptions)
 	api.HandleFunc("/models/browse", s.handleBrowseModels).Methods(http.MethodGet, http.MethodOptions)
 	api.HandleFunc("/models/running", s.handleListRunningModels).Methods(http.MethodGet, http.MethodOptions)
+	api.HandleFunc("/models/warm", s.handleWarmModel).Methods(http.MethodPost, http.MethodOptions)
 	api.HandleFunc("/models/install-from-url", s.handleInstallFromURL).Methods(http.MethodPost)
 	api.HandleFunc("/models/import", s.handleImportModel).Methods(http.MethodPost)
 	api.HandleFunc("/models/{id}/install", s.handleInstallModel).Methods(http.MethodPost)

@@ -43,6 +43,7 @@ var visitorRoutes = map[string]bool{
 	"GET /api/v1/models/running":                          true,
 	"GET /api/v1/nodes":                                   true,
 	"POST /api/v1/chat":                                   true,
+	"POST /api/v1/models/warm":                            true,
 	"POST /api/v1/chat/stop":                              true,
 	"POST /api/v1/tools/decide":                           true,
 	"GET /api/v1/conversations":                           true,

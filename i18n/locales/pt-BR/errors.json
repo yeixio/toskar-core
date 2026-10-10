@@ -132,6 +132,7 @@
   "SPEECH_UNAVAILABLE": "{{detail}}",
   "SSE_UNSUPPORTED": "O streaming não é compatível aqui.",
   "START_FAILED": "{{detail}}",
+  "WARM_FAILED": "{{detail}}",
   "STOP_FAILED": "{{detail}}",
   "SUPPORT_MODEL_BUSY": "O modelo auxiliar não pode ser executado agora.",
   "TASKS_LIST_FAILED": "{{detail}}",

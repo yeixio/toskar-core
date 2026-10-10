@@ -278,6 +278,7 @@ var deviceRoutes = map[string]bool{
 	"GET /api/v1/nodes":                       true,
 	"GET /api/v1/events":                      true,
 	"POST /api/v1/chat":                       true,
+	"POST /api/v1/models/warm":                true,
 	"POST /api/v1/chat/stop":                  true,
 	"POST /api/v1/tools/decide":               true,
 	"GET /api/v1/conversations":               true,

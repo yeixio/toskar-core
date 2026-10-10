@@ -453,6 +453,24 @@ type ModelStartRequest struct {
 	NodeID string `json:"node_id,omitempty"`
 }
 
+// ModelWarmRequest asks this computer to load the model a chat would use,
+// before the question arrives (#498): a device sends it when someone starts
+// asking. model_id empty or "auto" means the model Auto would pick for a
+// chat on profile_id (empty: the default profile).
+type ModelWarmRequest struct {
+	ProfileID string `json:"profile_id,omitempty"`
+	ModelID   string `json:"model_id,omitempty"`
+}
+
+// ModelWarmResponse says what a warm-up did. Status is loading (started
+// now, or already starting), loaded (ready), busy (a model is answering, so
+// nothing new loads), no_room (it wouldn't fit beside the loaded models),
+// not_local (not installed on this computer), or none (nothing to load).
+type ModelWarmResponse struct {
+	ModelID string `json:"model_id,omitempty"`
+	Status  string `json:"status"`
+}
+
 // ModelStopRequest stops a loaded instance.
 type ModelStopRequest struct {
 	NodeID     string `json:"node_id,omitempty"`

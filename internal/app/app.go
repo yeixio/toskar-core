@@ -179,6 +179,10 @@ type App struct {
 	memTotal atomic.Uint64
 	// failedModels maps a model id to when it last could not answer.
 	failedModels sync.Map
+	// warming holds the model ids a warm-up is loading now (#498), and
+	// warmWait its loads, so a shutdown or a test can wait for them.
+	warming  sync.Map
+	warmWait sync.WaitGroup
 	// work counts turns streaming on each computer, by node ID.
 	workMu sync.Mutex
 	work   map[string]int
@@ -591,6 +595,7 @@ func New(opts Options) (*App, error) {
 		StopModel: func(ctx context.Context, instanceID, nodeID string) error {
 			return a.stopModel(ctx, instanceID, nodeID)
 		},
+		WarmModel:    a.warmChat,
 		ListProfiles: profileMgr.List,
 		CreateProfile: func(ctx context.Context, p contracts.AIProfile) (contracts.AIProfile, error) {
 			return profileMgr.Create(ctx, p)

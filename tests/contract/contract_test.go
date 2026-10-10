@@ -49,6 +49,8 @@ var covered = map[string]any{
 	"Conversation":         contracts.Conversation{},
 	"ConversationsDeleted": contracts.ConversationsDeleted{},
 	"ConversationSkipped":  contracts.ConversationSkipped{},
+	"ModelWarmRequest":     contracts.ModelWarmRequest{},
+	"ModelWarmResponse":    contracts.ModelWarmResponse{},
 	"Artifact":             artifacts.Artifact{},
 	"Notification":         gjallarhorn.Notification{},
 	"EgressRecord":         egress.Record{},

@@ -132,6 +132,7 @@
   "SPEECH_UNAVAILABLE": "{{detail}}",
   "SSE_UNSUPPORTED": "La diffusion en continu n'est pas prise en charge ici.",
   "START_FAILED": "{{detail}}",
+  "WARM_FAILED": "{{detail}}",
   "STOP_FAILED": "{{detail}}",
   "SUPPORT_MODEL_BUSY": "Le modèle auxiliaire ne peut pas s'exécuter pour le moment.",
   "TASKS_LIST_FAILED": "{{detail}}",

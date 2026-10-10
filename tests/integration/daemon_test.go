@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"testing"
 	"time"
 
@@ -122,6 +123,20 @@ func TestDaemonHealthAndHardware(t *testing.T) {
 	src, _ = offer["source"].(string)
 	if offer["name"] != "Toskar Core" || offer["license"] != "AGPL-3.0-or-later" || src == "" {
 		t.Fatalf("source offer: %#v", offer)
+	}
+
+	// A warm-up on a computer with no models has nothing to load (#498).
+	resp4, err := client.Post(base+"/api/v1/models/warm", "application/json", strings.NewReader(`{}`))
+	if err != nil {
+		t.Fatalf("warm: %v", err)
+	}
+	defer resp4.Body.Close()
+	var warm map[string]any
+	if err := json.NewDecoder(resp4.Body).Decode(&warm); err != nil {
+		t.Fatalf("decode warm: %v", err)
+	}
+	if resp4.StatusCode != http.StatusOK || warm["status"] != "none" {
+		t.Fatalf("warm with no models: %d %#v", resp4.StatusCode, warm)
 	}
 
 	// Settings survive restart path check: config file exists.

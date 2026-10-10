@@ -148,6 +148,24 @@ func (s *Server) handleStartModel(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, view)
 }
 
+// handleWarmModel starts loading the model a chat would use and answers at
+// once (#498): devices send it when someone starts asking, so the model
+// loads while they type or speak.
+func (s *Server) handleWarmModel(w http.ResponseWriter, r *http.Request) {
+	if s.deps.WarmModel == nil {
+		writeErr(w, http.StatusNotImplemented, "NOT_IMPLEMENTED", "Model warm-up not available.", nil)
+		return
+	}
+	var body contracts.ModelWarmRequest
+	_ = json.NewDecoder(r.Body).Decode(&body)
+	out, err := s.deps.WarmModel(r.Context(), body)
+	if err != nil {
+		writeErrFrom(w, http.StatusBadRequest, "WARM_FAILED", err)
+		return
+	}
+	writeJSON(w, http.StatusOK, out)
+}
+
 func (s *Server) handleStopModel(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["id"]
 	if s.deps.StopModel == nil {

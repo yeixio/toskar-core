@@ -2838,6 +2838,40 @@ paths:
                       properties:
                         similar: {$ref: "#/components/schemas/RatingStats"}
                         overall: {$ref: "#/components/schemas/RatingStats"}
+  /api/v1/models/warm:
+    post:
+      summary: Start loading the model a chat would use
+      description: >-
+        Starts loading, in the background, the model a chat on the profile
+        would use, and answers at once (#498), so it loads while someone types
+        or speaks. Never loads beside a model that is answering, nor one that
+        wouldn't fit beside those already loaded.
+      operationId: warmModel
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                profile_id:
+                  type: string
+                  description: Empty for the default profile.
+                model_id:
+                  type: string
+                  description: Empty or auto for what Auto would pick for a general chat.
+      responses:
+        "200":
+          description: What the warm-up did
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  model_id:
+                    type: string
+                  status:
+                    type: string
+                    enum: [loading, loaded, busy, no_room, not_local, none]
   /api/v1/models/{id}/start:
     post:
       summary: Load a model

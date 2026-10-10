@@ -132,6 +132,7 @@
   "SPEECH_UNAVAILABLE": "{{detail}}",
   "SSE_UNSUPPORTED": "ここではストリーミングに対応していません。",
   "START_FAILED": "{{detail}}",
+  "WARM_FAILED": "{{detail}}",
   "STOP_FAILED": "{{detail}}",
   "SUPPORT_MODEL_BUSY": "補助モデルは現在実行できません。",
   "TASKS_LIST_FAILED": "{{detail}}",
