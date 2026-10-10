@@ -1,0 +1,40 @@
+{
+  "name": "Yggdrasil Core",
+  "image": "mcr.microsoft.com/devcontainers/go:1.26-bookworm",
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "22",
+      "nodeGypDependencies": false
+    }
+  },
+  "onCreateCommand": "npm install -g pnpm@9.15.0",
+  "postCreateCommand": "go mod download && cd web && pnpm install",
+  "forwardPorts": [7331],
+  "portsAttributes": {
+    "7331": {
+      "label": "Yggdrasil daemon",
+      "onAutoForward": "notify"
+    }
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "golang.go",
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "bradlc.vscode-tailwindcss"
+      ],
+      "settings": {
+        "go.toolsManagement.checkForUpdates": "off",
+        "go.useLanguageServer": true,
+        "editor.formatOnSave": true,
+        "[go]": {
+          "editor.defaultFormatter": "golang.go"
+        }
+      }
+    }
+  },
+  "remoteEnv": {
+    "YGGDRASIL_WEB_UI_DIR": "${containerWorkspaceFolder}/web/dist"
+  }
+}
