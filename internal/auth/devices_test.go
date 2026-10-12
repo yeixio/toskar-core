@@ -148,6 +148,8 @@ func TestDeviceMayReach(t *testing.T) {
 	for route, want := range map[string]bool{
 		"POST /api/v1/chat":                       true,
 		"GET /api/v1/conversations/{id}/messages": true,
+		"POST /api/v1/artifacts":                  true,
+		"DELETE /api/v1/artifacts/{id}":           true,
 		"get /api/v1/health":                      true,
 		"GET /api/v1/api-keys":                    false,
 		"PATCH /api/v1/settings":                  false,

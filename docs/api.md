@@ -31,7 +31,7 @@ A phone's key reaches only what the phone uses:
 - conversations and their messages, including renaming and deleting them;
 - live events;
 - answering a tool's question;
-- the chat's files;
+- the chat's files, and attaching a photo, file, or recording (`POST /artifacts`, and `DELETE /artifacts/{id}` to take it off before sending);
 - read-only lists: health, version, settings, profiles, models, running models, and computers;
 - warming a chat's model;
 - automations: listing them, one with its runs, Run now, Pause, Resume, and opening a run's result in chat (not making, editing, or deleting one);

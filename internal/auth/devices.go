@@ -295,6 +295,10 @@ var deviceRoutes = map[string]bool{
 	"GET /api/v1/conversations/{id}/messages": true,
 	"GET /api/v1/artifacts/{id}":              true,
 	"GET /api/v1/artifacts/{id}/content":      true,
+	// Attaching a photo, file, or recording to a chat, and taking one off
+	// before it's sent (yeixio/toskar-apps#155).
+	"POST /api/v1/artifacts":        true,
+	"DELETE /api/v1/artifacts/{id}": true,
 
 	"GET /api/v1/automations":                          true,
 	"GET /api/v1/automations/{id}":                     true,
