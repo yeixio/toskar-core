@@ -278,6 +278,7 @@
       "stop": "Arrêter et convertir en texte",
       "listening": "Écoute… {{seconds}} s",
       "transcribing": "Vos mots deviennent du texte…",
+      "settingUp": "Préparation de la voix sur votre ordinateur. La première fois prend quelques minutes…",
       "micDenied": "Toskar ne peut pas utiliser le micro. Autorisez-le dans Réglages pour dicter un message.",
       "failed": "Impossible de le convertir en texte : {{detail}}",
       "tooShort": "C’était trop court pour être entendu. Parlez un peu plus longtemps."

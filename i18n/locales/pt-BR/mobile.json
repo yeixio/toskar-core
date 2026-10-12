@@ -278,6 +278,7 @@
       "stop": "Parar e passar para texto",
       "listening": "Ouvindo… {{seconds}} s",
       "transcribing": "Passando suas palavras para texto…",
+      "settingUp": "Preparando a voz no seu computador. Na primeira vez leva alguns minutos…",
       "micDenied": "O Toskar não pode usar o microfone. Permita em Ajustes para ditar uma mensagem.",
       "failed": "Não foi possível passar para texto: {{detail}}",
       "tooShort": "Foi curto demais para ouvir. Fale um pouco mais."

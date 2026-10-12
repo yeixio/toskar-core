@@ -278,6 +278,7 @@
       "stop": "Stoppen und in Text umwandeln",
       "listening": "Hört zu… {{seconds}} s",
       "transcribing": "Deine Worte werden zu Text…",
+      "settingUp": "Sprache wird auf deinem Computer vorbereitet. Beim ersten Mal dauert das ein paar Minuten…",
       "micDenied": "Toskar kann das Mikrofon nicht verwenden. Erlaube es in den Einstellungen, um eine Nachricht zu sprechen.",
       "failed": "Konnte nicht in Text umgewandelt werden: {{detail}}",
       "tooShort": "Das war zu kurz, um etwas zu hören. Sprich etwas länger."

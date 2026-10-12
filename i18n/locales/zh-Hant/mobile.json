@@ -278,6 +278,7 @@
       "stop": "停止並轉為文字",
       "listening": "正在聆聽… {{seconds}} 秒",
       "transcribing": "正在把你說的話轉為文字…",
+      "settingUp": "正在電腦上準備語音。第一次需要幾分鐘…",
       "micDenied": "Toskar 無法使用麥克風。請在「設定」中允許，才能說出訊息。",
       "failed": "無法轉為文字：{{detail}}",
       "tooShort": "太短了，沒有聽清楚。請多說一會兒。"
