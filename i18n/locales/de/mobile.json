@@ -284,6 +284,15 @@
       "tooShort": "Das war zu kurz, um etwas zu hören. Sprich etwas länger.",
       "unavailable": "Dieses Gerät kann Sprache in deiner Sprache noch nicht selbst in Text umwandeln. Du kannst tippen oder in einem Chat auf deinem Computer sprechen."
     },
+    "capture": {
+      "camera": "Nimm ein Foto auf, dann antworte ich damit.",
+      "photo": "Füge das Foto hinzu, dann antworte ich damit.",
+      "file": "Füge die Datei hinzu, dann antworte ich damit.",
+      "takePhoto": "Foto aufnehmen",
+      "choosePhoto": "Foto auswählen",
+      "chooseFile": "Datei auswählen",
+      "askAnyway": "Ohne fragen"
+    },
     "send": "Senden",
     "sending": "Wird gesendet",
     "stop": "Stoppen",

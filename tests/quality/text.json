@@ -1246,5 +1246,107 @@
       "kind": "none",
       "text": ""
     }
+  ],
+  "capture_request": [
+    {
+      "in": "Take a picture of my fridge and tell me what to cook",
+      "want": "camera"
+    },
+    {
+      "in": "take a pic",
+      "want": "camera"
+    },
+    {
+      "in": "Can you take a picutre of this?",
+      "want": "camera"
+    },
+    {
+      "in": "scan this receipt",
+      "want": "camera"
+    },
+    {
+      "in": "open the camera",
+      "want": "camera"
+    },
+    {
+      "in": "What plant is this?",
+      "want": "photo"
+    },
+    {
+      "in": "what kind of bird is that",
+      "want": "photo"
+    },
+    {
+      "in": "Look at this",
+      "want": "photo"
+    },
+    {
+      "in": "What's in my latest photo?",
+      "want": "photo"
+    },
+    {
+      "in": "read this receipt",
+      "want": "photo"
+    },
+    {
+      "in": "translate this menu please",
+      "want": "photo"
+    },
+    {
+      "in": "Can you describe this image?",
+      "want": "photo"
+    },
+    {
+      "in": "Summarize this PDF",
+      "want": "file"
+    },
+    {
+      "in": "can you proofread my resume",
+      "want": "file"
+    },
+    {
+      "in": "What does this contract say about rent?",
+      "want": "file"
+    },
+    {
+      "in": "explain my spreadsheet",
+      "want": "file"
+    },
+    {
+      "in": "What is a photograph?",
+      "want": "none"
+    },
+    {
+      "in": "Tell me about the photo booth's history",
+      "want": "none"
+    },
+    {
+      "in": "my file server is down",
+      "want": "none"
+    },
+    {
+      "in": "How do I convert a PDF to Word?",
+      "want": "none"
+    },
+    {
+      "in": "What is this called in French: dog",
+      "want": "none"
+    },
+    {
+      "in": "Hi!",
+      "want": "none"
+    },
+    {
+      "in": "What's the weather in Juneau?",
+      "want": "none"
+    },
+    {
+      "in": "Write a poem about my cat",
+      "want": "none"
+    },
+    {
+      "in": "Who painted the Mona Lisa?",
+      "want": "none"
+    }
   ]
 }

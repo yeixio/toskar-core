@@ -16,14 +16,15 @@ import (
 // the same file against its copy, so a change here that the phone has not
 // followed fails there.
 type textVectors struct {
-	About         string         `json:"about"`
-	NeedsLiveWeb  []boolVector   `json:"needs_live_web"`
-	Classify      []stringVector `json:"classify"`
-	SmallTalk     []boolVector   `json:"small_talk"`
-	LookupQuery   []stringVector `json:"lookup_query"`
-	Deflects      []boolVector   `json:"deflects"`
-	CleanQuery    []stringVector `json:"clean_query"`
-	MemoryCommand []memoryVector `json:"memory_command"`
+	About          string         `json:"about"`
+	NeedsLiveWeb   []boolVector   `json:"needs_live_web"`
+	Classify       []stringVector `json:"classify"`
+	SmallTalk      []boolVector   `json:"small_talk"`
+	LookupQuery    []stringVector `json:"lookup_query"`
+	Deflects       []boolVector   `json:"deflects"`
+	CleanQuery     []stringVector `json:"clean_query"`
+	MemoryCommand  []memoryVector `json:"memory_command"`
+	CaptureRequest []stringVector `json:"capture_request"`
 }
 
 type boolVector struct {
@@ -83,6 +84,12 @@ func TestTextVectors(t *testing.T) {
 	checkBool("Deflects", v.Deflects, huginn.Deflects)
 	checkString("lookupQuery", v.LookupQuery, lookupQuery)
 	checkString("cleanQuery", v.CleanQuery, cleanQuery)
+	checkString("CaptureRequest", v.CaptureRequest, func(s string) string {
+		if c := huginn.CaptureRequest(s); c != huginn.NoCapture {
+			return string(c)
+		}
+		return "none"
+	})
 
 	// The phone has no local kind: it has no files or commands to act on.
 	var classify []stringVector

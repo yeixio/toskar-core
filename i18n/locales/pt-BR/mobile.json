@@ -284,6 +284,15 @@
       "tooShort": "Foi curto demais para ouvir. Fale um pouco mais.",
       "unavailable": "Este dispositivo ainda não consegue passar sua fala para texto sozinho no seu idioma. Você pode digitar ou falar em um chat no seu computador."
     },
+    "capture": {
+      "camera": "Tire uma foto e eu respondo com ela.",
+      "photo": "Adicione a foto e eu respondo com ela.",
+      "file": "Adicione o arquivo e eu respondo com ele.",
+      "takePhoto": "Tirar foto",
+      "choosePhoto": "Escolher foto",
+      "chooseFile": "Escolher arquivo",
+      "askAnyway": "Perguntar sem"
+    },
     "send": "Enviar",
     "sending": "Enviando",
     "stop": "Parar",

@@ -293,6 +293,15 @@
       "tooShort": "That was too short to hear. Hold on a little longer.",
       "unavailable": "This device can't turn speech into text on its own for your language yet. You can type, or speak in a chat on your computer."
     },
+    "capture": {
+      "camera": "Take a photo, and I'll answer with it.",
+      "photo": "Add the photo, and I'll answer with it.",
+      "file": "Add the file, and I'll answer with it.",
+      "takePhoto": "Take photo",
+      "choosePhoto": "Choose photo",
+      "chooseFile": "Choose file",
+      "askAnyway": "Ask without it"
+    },
     "send": "Send",
     "sending": "Sending",
     "stop": "Stop",
