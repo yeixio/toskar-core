@@ -8,6 +8,87 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Thi
 
 Changes waiting for the next release are in [changes/unreleased/](changes/unreleased/), one file per pull request. `scripts/changelog.py preview` shows them together, and `scripts/changelog.py release <version>` writes them here when the release is cut.
 
+## [1.8.2] - 2026-10-12
+
+### Added
+
+- Phones and tablets connected to this computer can attach a photo, file, or recording to a chat, at home and away from home.
+- When a picture or clip has to be shorter or smaller than asked, a note
+  under the answer says so, and why. For example: "Clips can be up to 5 s
+  long for now, so this one is 5 s instead of the 10 s asked for."
+- On the Tools page, a picture or clip model that would be slow or too
+  large here names a paired computer it works well on, with a button to set
+  it up there.
+- Pictures and clips Toskar makes keep how they were made: the model,
+  quality, seed, size, and prompt. The chat shows the model, size, and seed
+  under each one, with the prompt on hover, so it can be made again.
+- A profile can choose the quality its pictures and clips are made at when
+  a request doesn't ask for one: fast, balanced, or best (Profiles &
+  Orchestration → Behavior).
+- An answer's steps say which model made or edited the picture or clip.
+- Pictures and clips come in three qualities: fast, balanced, and best.
+  Asking for "a high-quality picture" or "a quick draft" uses the set-up
+  model for that quality, and when it isn't set up, the answer says which
+  model would give it.
+- Each picture and clip model says whether it works well on this computer,
+  may be slow or tight, or isn't supported, counting a graphics card's own
+  memory as well as system memory. A model that would be slow or tight is
+  set up only when you agree.
+- Picture models Toskar can't give out can be set up with your own
+  license: accept the license on Hugging Face, add your Hugging Face token
+  on the Tools page, and confirm your license covers how you'll use it. The
+  files come straight from the vendor. The first is FLUX.2 [klein] 9B, under
+  the FLUX Non-Commercial License.
+- API Access shows whether devices away from home can really reach this computer: the relay checks from the internet, through its tunnel and the router's port, every 30 minutes and on Check now, and says which way works, which doesn't, and what to do about it, instead of trusting what the router said.
+- Qwen-Image-Edit-2511 can be set up for editing pictures on computers with
+  32 GB of memory or more: it changes what's asked, keeps the rest, and
+  edits text in pictures. Once it's set up, edits use it, and new pictures
+  still use your picture model.
+- Speak a message instead of typing it from a phone or tablet: the recording is turned into text with Whisper on your computer, for you to check before sending.
+- A picture sent to a chat with no model that can see it gets an offer to
+  set one up, such as Gemma 3 4B, with its download size. Once it's
+  installed, the question is asked again with the picture, and answered.
+  Before, the answer ignored the picture and pointed to the Models page.
+- Wan 2.1 T2V 1.3B can be set up for clips on computers with less memory
+  than the 5B model needs, at lower quality. It's marked as not yet tested
+  on real hardware.
+- Wan 2.2 T2V A14B can be set up for clips on computers with 32 GB of
+  memory or more: higher-quality clips from a description, more slowly.
+  Clips from a picture still use Wan 2.2 TI2V 5B. It's marked as not yet
+  tested on real hardware.
+- Z-Image-Turbo can be set up for pictures on the Tools page: photorealistic
+  pictures with clear text in them, in a few steps. It doesn't edit, so
+  it's chosen rather than recommended.
+  With it as your picture model, edits use FLUX.2 [klein] 4B when that's
+  set up.
+
+### Changed
+
+- Pictures and clips use stable-diffusion.cpp master-956, which adds
+  support for newer image and video models. A computer already set up
+  updates itself (about 35 MB) the first time it makes a picture or clip,
+  without setting up again.
+
+### Fixed
+
+- Making a picture or clip no longer fails when chat models are loaded:
+  the models in its way are unloaded first, waiting for any answer being
+  written, and a model starting meanwhile waits for the picture or clip
+  to finish. One picture or clip is made at a time.
+- When a picture or clip still fails, Toskar says why in plain words, such
+  as the computer running out of memory or the graphics card stopping, and
+  what to try, instead of the generator's raw error.
+- Speaking a message and reading aloud work when Core is started with a
+  relative `--data-dir`.
+- When speech can't be set up, speaking a message says so in plain words
+  instead of showing a file path.
+- The Performance page's live figures update every few seconds while a
+  picture or clip is being made, as they do while a model is loaded,
+  instead of once a minute.
+- Asking for "a 10-second video", "a 720p clip", or "a vertical video"
+  makes it that long and that size, as far as the model allows. Before, a
+  clip was always 2 seconds at the model's usual size.
+
 ## [1.8.1] - 2026-10-10
 
 ### Added
