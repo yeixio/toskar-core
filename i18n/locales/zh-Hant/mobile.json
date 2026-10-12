@@ -108,6 +108,7 @@
     "heading": "在這台裝置上",
     "copy": "這些是 Toskar 目錄中較小的模型。檔案會下載到這台裝置上並保存在這裡。",
     "meta": "{{parameters}} · {{size}}",
+    "seesPhotos": "能看照片",
     "chat": "聊天",
     "remove": "移除",
     "install": "安裝",
@@ -127,7 +128,9 @@
       "deepseek-r1-distill-1-5b-q4": "從 DeepSeek R1 蒸餾而來的輕量推理模型。",
       "qwen2-5-7b-q4": "適合日常工作的強大通用助理。",
       "qwen2-5-coder-7b-q4": "支援工具使用的強大全能程式設計模型。",
-      "deepseek-r1-distill-7b-q4": "更強的推理能力，適合分析和多步驟問題。"
+      "deepseek-r1-distill-7b-q4": "更強的推理能力，適合分析和多步驟問題。",
+      "gemma-3-4b-vision-q4": "Google 的全能助理，也能看懂照片，支援多種語言。",
+      "qwen2-5-vl-3b-q4": "擅長讀取照片中的文字：收據、標誌、標籤和手寫，支援多種語言。"
     },
     "import": {
       "button": "加入模型檔案",
@@ -271,7 +274,8 @@
       "failed": "無法新增：{{detail}}",
       "tooLarge": "超過 25 MB，電腦最多接收 25 MB。",
       "needsUpdate": "請更新電腦上的 Toskar，才能從此裝置傳送照片和檔案。",
-      "cameraDenied": "Toskar 無法使用相機。請在「設定」中允許，才能拍照。"
+      "cameraDenied": "Toskar 無法使用相機。請在「設定」中允許，才能拍照。",
+      "needsVision": "{{model}} 看不了照片。請選擇 Auto 或能看照片的模型，或在電腦上的聊天中提問。"
     },
     "voice": {
       "start": "說出訊息",

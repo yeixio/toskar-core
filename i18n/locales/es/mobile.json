@@ -108,6 +108,7 @@
     "heading": "En este dispositivo",
     "copy": "Estos son los modelos más pequeños del catálogo de Toskar. El archivo se descarga en este dispositivo y se queda aquí.",
     "meta": "{{parameters}} · {{size}}",
+    "seesPhotos": "Ve fotos",
     "chat": "Chatear",
     "remove": "Quitar",
     "install": "Instalar",
@@ -127,7 +128,9 @@
       "deepseek-r1-distill-1-5b-q4": "Modelo de razonamiento ligero destilado de DeepSeek R1.",
       "qwen2-5-7b-q4": "Asistente general sólido para el trabajo diario.",
       "qwen2-5-coder-7b-q4": "Modelo de programación sólido y versátil, con uso de herramientas.",
-      "deepseek-r1-distill-7b-q4": "Razonamiento más sólido para análisis y problemas de varios pasos."
+      "deepseek-r1-distill-7b-q4": "Razonamiento más sólido para análisis y problemas de varios pasos.",
+      "gemma-3-4b-vision-q4": "El asistente general de Google que también entiende fotos, en muchos idiomas.",
+      "qwen2-5-vl-3b-q4": "Lee bien las fotos: recibos, carteles, etiquetas y letra a mano, en muchos idiomas."
     },
     "import": {
       "button": "Añadir un archivo de modelo",
@@ -271,7 +274,8 @@
       "failed": "No se pudo añadir: {{detail}}",
       "tooLarge": "Pesa más de 25 MB, lo máximo que acepta la computadora.",
       "needsUpdate": "Actualiza Toskar en tu computadora para enviar fotos y archivos desde este dispositivo.",
-      "cameraDenied": "Toskar no puede usar la cámara. Permítelo en Ajustes para tomar una foto."
+      "cameraDenied": "Toskar no puede usar la cámara. Permítelo en Ajustes para tomar una foto.",
+      "needsVision": "{{model}} no puede ver fotos. Elige Auto o un modelo que vea fotos, o pregunta en un chat de tu computadora."
     },
     "voice": {
       "start": "Dictar un mensaje",

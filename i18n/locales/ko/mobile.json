@@ -108,6 +108,7 @@
     "heading": "이 기기에 있음",
     "copy": "Toskar 카탈로그의 작은 모델들이에요. 파일은 이 기기에 다운로드되어 여기에 보관돼요.",
     "meta": "{{parameters}} · {{size}}",
+    "seesPhotos": "사진 인식",
     "chat": "채팅",
     "remove": "제거",
     "install": "설치",
@@ -127,7 +128,9 @@
       "deepseek-r1-distill-1-5b-q4": "DeepSeek R1에서 증류한 가벼운 추론 모델.",
       "qwen2-5-7b-q4": "일상 업무에 강한 범용 어시스턴트.",
       "qwen2-5-coder-7b-q4": "도구를 사용할 수 있는 강력한 만능 코딩 모델.",
-      "deepseek-r1-distill-7b-q4": "분석과 여러 단계의 문제에 더 강한 추론 모델."
+      "deepseek-r1-distill-7b-q4": "분석과 여러 단계의 문제에 더 강한 추론 모델.",
+      "gemma-3-4b-vision-q4": "사진도 이해하는 Google의 다재다능한 어시스턴트. 여러 언어를 지원해요.",
+      "qwen2-5-vl-3b-q4": "사진을 잘 읽어요: 영수증, 표지판, 라벨, 손글씨. 여러 언어를 지원해요."
     },
     "import": {
       "button": "모델 파일 추가",
@@ -271,7 +274,8 @@
       "failed": "추가할 수 없어요: {{detail}}",
       "tooLarge": "25MB보다 커요. 컴퓨터는 25MB까지만 받아요.",
       "needsUpdate": "이 기기에서 사진과 파일을 보내려면 컴퓨터의 Toskar를 업데이트하세요.",
-      "cameraDenied": "Toskar가 카메라를 사용할 수 없어요. 사진을 찍으려면 설정에서 허용하세요."
+      "cameraDenied": "Toskar가 카메라를 사용할 수 없어요. 사진을 찍으려면 설정에서 허용하세요.",
+      "needsVision": "{{model}}은(는) 사진을 볼 수 없어요. Auto나 사진을 인식하는 모델을 선택하거나, 컴퓨터의 채팅에서 물어보세요."
     },
     "voice": {
       "start": "음성으로 메시지 입력",

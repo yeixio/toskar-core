@@ -108,6 +108,7 @@
     "heading": "Auf diesem Gerät",
     "copy": "Das sind die kleineren Modelle aus dem Toskar-Katalog. Die Datei wird auf dieses Gerät geladen und bleibt hier.",
     "meta": "{{parameters}} · {{size}}",
+    "seesPhotos": "Sieht Fotos",
     "chat": "Chat",
     "remove": "Entfernen",
     "install": "Installieren",
@@ -127,7 +128,9 @@
       "deepseek-r1-distill-1-5b-q4": "Leichtes Denkmodell, destilliert aus DeepSeek R1.",
       "qwen2-5-7b-q4": "Starker Allround-Assistent für die tägliche Arbeit.",
       "qwen2-5-coder-7b-q4": "Starkes Allround-Programmiermodell mit Werkzeugnutzung.",
-      "deepseek-r1-distill-7b-q4": "Stärkeres Denken für Analysen und mehrstufige Aufgaben."
+      "deepseek-r1-distill-7b-q4": "Stärkeres Denken für Analysen und mehrstufige Aufgaben.",
+      "gemma-3-4b-vision-q4": "Googles Allround-Assistent, der auch Fotos versteht, in vielen Sprachen.",
+      "qwen2-5-vl-3b-q4": "Liest Fotos gut: Quittungen, Schilder, Etiketten und Handschrift, in vielen Sprachen."
     },
     "import": {
       "button": "Modelldatei hinzufügen",
@@ -271,7 +274,8 @@
       "failed": "Konnte nicht hinzugefügt werden: {{detail}}",
       "tooLarge": "Größer als 25 MB, mehr nimmt der Computer nicht an.",
       "needsUpdate": "Aktualisiere Toskar auf deinem Computer, um Fotos und Dateien von diesem Gerät zu senden.",
-      "cameraDenied": "Toskar kann die Kamera nicht verwenden. Erlaube es in den Einstellungen, um ein Foto aufzunehmen."
+      "cameraDenied": "Toskar kann die Kamera nicht verwenden. Erlaube es in den Einstellungen, um ein Foto aufzunehmen.",
+      "needsVision": "{{model}} kann keine Fotos sehen. Wähle Auto oder ein Modell, das Fotos sieht, oder frag in einem Chat auf deinem Computer."
     },
     "voice": {
       "start": "Nachricht sprechen",
