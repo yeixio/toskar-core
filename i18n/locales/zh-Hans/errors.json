@@ -210,6 +210,7 @@
   "REMOTE_PORT_INVALID": "端口范围为 1024 到 65535，且不能是应用或电脑使用的端口。",
   "REMOTE_ADDRESS_INVALID": "请输入主机名或 IP，端口不同时一并填写，例如 home.example.com 或 203.0.113.7:7333。",
   "REMOTE_LISTEN_FAILED": "随处访问无法在端口 {{port}} 上监听。可能有其他程序正在使用它。",
+  "REMOTE_ACCESS_OFF": "随处访问已关闭，所以没有可检查的内容。请先打开它。",
   "RELAY_INVALID": "请输入中继的名称，例如 relay.example.com；端口不是 443 时才需要加上。",
   "RELAY_SECRET_INVALID": "这不是注册密钥。请从中继的 enroll.secret 文件中复制。",
   "RELAY_TOKEN_INVALID": "这个中继令牌不属于这台电脑，或已过期。请在此设备上重新订阅。",

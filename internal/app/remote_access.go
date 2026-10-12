@@ -75,6 +75,7 @@ func (a *App) remoteReach() api.RemoteReach {
 		relayed = st.State == "connected"
 	}
 	out.Reachable, out.Reason = reachOf(cfg, listening, m, len(out.IPv6) > 0, relayed)
+	out.Check = a.reachCheck()
 	return out
 }
 

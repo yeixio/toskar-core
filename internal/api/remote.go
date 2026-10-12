@@ -266,6 +266,9 @@ func (s *Server) handleRemoteAccess(w http.ResponseWriter, r *http.Request) {
 			}
 			out["relay"] = relay
 		}
+		if reach.Check != nil {
+			out["check"] = reach.Check
+		}
 	}
 	st := s.RemoteListening()
 	if st.Listening != "" {
@@ -294,6 +297,46 @@ type RemoteReach struct {
 	// Relay is the relay used, and RelayState how it's doing: no_token,
 	// connecting, connected, or error, with RelayError its code.
 	Relay, RelayState, RelayError string
+	// Check is the last outside check (#546), nil before the first.
+	Check *ReachCheck
+}
+
+// ReachCheck is the relay reaching this computer from the internet (#546):
+// through its tunnel, and each direct way in, as a device away from home.
+type ReachCheck struct {
+	// At is when the last check that reached the relay ran.
+	At     time.Time  `json:"at,omitzero"`
+	Relay  *ReachWay  `json:"relay,omitempty"`
+	Direct []ReachWay `json:"direct,omitempty"`
+	// Tried is the last attempt, and Error its code when it didn't reach
+	// the relay: CHECK_UNSUPPORTED, CHECK_TOO_SOON, NO_TOKEN,
+	// RELAY_UNREACHABLE, or the relay's code. The last result stays.
+	Tried time.Time `json:"tried,omitzero"`
+	Error string    `json:"error,omitempty"`
+}
+
+// ReachWay is how one way in did.
+type ReachWay struct {
+	Address string `json:"address,omitempty"`
+	OK      bool   `json:"ok"`
+	// Reason is no_tunnel, not_public, unresolved, refused, timeout,
+	// unreachable, tls, wrong_computer, or http.
+	Reason string `json:"reason,omitempty"`
+	MS     int64  `json:"ms,omitempty"`
+}
+
+// handleRemoteCheck runs the outside check now and answers what
+// GET /remote-access does (#546).
+func (s *Server) handleRemoteCheck(w http.ResponseWriter, r *http.Request) {
+	if s.deps.CheckReach == nil {
+		writeErr(w, http.StatusNotImplemented, "NOT_IMPLEMENTED", "The outside check isn't available.", nil)
+		return
+	}
+	if err := s.deps.CheckReach(r.Context()); err != nil {
+		writeErrFrom(w, http.StatusConflict, "REMOTE_ACCESS_OFF", err)
+		return
+	}
+	s.handleRemoteAccess(w, r)
 }
 
 // handleRelayToken takes the route token the app got from a store

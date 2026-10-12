@@ -210,6 +210,7 @@
   "REMOTE_PORT_INVALID": "連接埠範圍為 1024 到 65535，且不能是應用程式或電腦使用的連接埠。",
   "REMOTE_ADDRESS_INVALID": "請輸入主機名稱或 IP，連接埠不同時一併填寫，例如 home.example.com 或 203.0.113.7:7333。",
   "REMOTE_LISTEN_FAILED": "隨處存取無法在連接埠 {{port}} 上監聽。可能有其他程式正在使用它。",
+  "REMOTE_ACCESS_OFF": "隨處存取已關閉，所以沒有可檢查的內容。請先開啟它。",
   "RELAY_INVALID": "請輸入中繼的名稱，例如 relay.example.com；連接埠不是 443 時才需要加上。",
   "RELAY_SECRET_INVALID": "這不是註冊密鑰。請從中繼的 enroll.secret 檔案中複製。",
   "RELAY_TOKEN_INVALID": "這個中繼權杖不屬於這台電腦，或已過期。請在此裝置上重新訂閱。",

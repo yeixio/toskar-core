@@ -210,6 +210,7 @@
   "REMOTE_PORT_INVALID": "La porta va da 1024 a 65535 e non è quella dell'app o dei computer.",
   "REMOTE_ADDRESS_INVALID": "Inserisci un nome host o un IP, con la porta se diversa, come home.example.com o 203.0.113.7:7333.",
   "REMOTE_LISTEN_FAILED": "L'accesso ovunque non può restare in ascolto sulla porta {{port}}. Forse la usa un altro programma.",
+  "REMOTE_ACCESS_OFF": "L'accesso ovunque è disattivato, quindi non c'è niente da verificare. Attivalo prima.",
   "RELAY_INVALID": "Inserisci il nome del relay, ad esempio relay.example.com, con una porta solo se non è la 443.",
   "RELAY_SECRET_INVALID": "Questo non è un segreto di registrazione. Copialo dal file enroll.secret del relay.",
   "RELAY_TOKEN_INVALID": "Questo token del relay non è per questo computer o è scaduto. Abbonati di nuovo da questo dispositivo.",

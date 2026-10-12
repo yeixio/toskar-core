@@ -158,6 +158,40 @@
       "noPort": "Noch nicht erreichbar: Der Router hat Port {{port}} nicht geöffnet. Leite ihn auf diesen Computer weiter und gib die Adresse ein, oder nutze Tailscale.",
       "relay": "Von überall über {{relay}} erreichbar."
     },
+    "check": {
+      "reachable": "Von außerhalb deines Netzwerks erreichbar",
+      "unreachable": "Von außerhalb deines Netzwerks nicht erreichbar",
+      "unchecked": "Noch nicht von außen geprüft",
+      "checked": "Geprüft {{when}}",
+      "now": "Jetzt prüfen",
+      "checking": "Wird geprüft…",
+      "viaRelay": "Über {{relay}}",
+      "ok": "erreicht in {{ms}} ms",
+      "reason": {
+        "no_tunnel": "Dieser Computer ist gerade nicht mit dem Relay verbunden.",
+        "not_public": "Diese Adresse liegt nicht im Internet, daher können Geräte unterwegs sie nicht nutzen.",
+        "unresolved": "Dieser Name führt zu keiner Adresse.",
+        "refused": "Die Adresse antwortet, aber auf diesem Port lauscht nichts. Prüfe, ob der Port auf diesen Computer weitergeleitet ist.",
+        "timeout": "Aus dem Internet kam keine Antwort. Ein zweiter Router davor (Double NAT) oder eine Firewall blockiert ihn vielleicht.",
+        "unreachable": "Das Internet erreicht diese Adresse nicht.",
+        "tls": "Auf diesem Port hat etwas anderes als Toskar geantwortet.",
+        "http": "Auf diesem Port hat etwas anderes als Toskar geantwortet.",
+        "wrong_computer": "Auf diesem Port hat ein anderer Computer geantwortet. Leite den Port auf diesen weiter."
+      },
+      "relayState": {
+        "connecting": "Verbindung zu {{relay}} wird hergestellt…",
+        "noToken": "Noch kein Relay: Schließe in der Toskar-App auf deinem Telefon oder Tablet den Zugriff von überall ab, oder gib unten das Relay deiner Organisation ein.",
+        "error": "Keine Verbindung zu {{relay}} ({{code}})."
+      },
+      "error": {
+        "CHECK_UNSUPPORTED": "Dieses Relay kann noch nicht von außen prüfen.",
+        "CHECK_TOO_SOON": "Gerade eben geprüft. Versuch es in einer Minute noch einmal.",
+        "NO_TOKEN": "Es gibt noch keinen Relay-Token zum Prüfen.",
+        "RELAY_UNREACHABLE": "Das Relay war für die Prüfung nicht erreichbar.",
+        "other": "Die Prüfung konnte nicht laufen ({{code}})."
+      },
+      "nextSteps": "Geräte unterwegs erreichen diesen Computer nicht. Behebe, was markiert ist, und prüfe noch einmal, oder nutze ein Relay, das hinter jedem Router funktioniert."
+    },
     "relay": {
       "title": "Relay deiner Organisation",
       "body": "Wenn deine Organisation ein eigenes Toskar-Relay betreibt, gib seinen Namen und den Registrierungsschlüssel ein, den dir die IT gegeben hat. Mit diesem Computer gekoppelte Geräte erreichen ihn dann über dieses Relay, wenn kein direkterer Weg funktioniert.",

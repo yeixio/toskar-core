@@ -797,11 +797,21 @@ paths:
   /api/v1/remote-access:
     get:
       summary: Access from anywhere's setting and its listener (#456)
-      description: "enabled, port, address (a forwarded address, when set), listening (the address it listens on) or error, port_mapping, mapped and mapped_by (pcp, nat-pmp, or upnp) for the router port it opened, map_error, ipv6, reachable (direct, ipv6, manual, relay, or none) with reason (off, not_listening, carrier_nat, or no_port), and relay (name, state: no_token, connecting, connected, or error, and error, its code) while the relay client runs. Set it with PATCH /api/v1/settings: remote_access_enabled, remote_access_port, remote_access_address, remote_access_port_mapping, remote_access_relay (an organization's relay, empty for Toskar's), and remote_access_relay_secret (its enrollment secret; write-only, empty clears it)."
+      description: "enabled, port, address (a forwarded address, when set), listening (the address it listens on) or error, port_mapping, mapped and mapped_by (pcp, nat-pmp, or upnp) for the router port it opened, map_error, ipv6, reachable (direct, ipv6, manual, relay, or none) with reason (off, not_listening, carrier_nat, or no_port), relay (name, state: no_token, connecting, connected, or error, and error, its code) while the relay client runs, and check, the last outside check (#546, contract 1.28): at, relay and direct (each way in with address, ok, reason, and ms), tried, and error when the last attempt didn't reach the relay (CHECK_UNSUPPORTED, CHECK_TOO_SOON, NO_TOKEN, RELAY_UNREACHABLE). Set it with PATCH /api/v1/settings: remote_access_enabled, remote_access_port, remote_access_address, remote_access_port_mapping, remote_access_relay (an organization's relay, empty for Toskar's), and remote_access_relay_secret (its enrollment secret; write-only, empty clears it)."
       operationId: getRemoteAccess
       responses:
         "200":
           description: The setting and what the listener is doing
+  /api/v1/remote-access/check:
+    post:
+      summary: Check access from anywhere from outside, now (#546)
+      description: "The relay reaches this computer from the internet, through its tunnel and each direct way in, as a paired device away from home does: TLS to this computer's certificate and GET /api/v1/health. It also runs on its own every 30 minutes and after the relay connects or the ways in change. Answers what GET /api/v1/remote-access does, with check updated. Admins only. 409 REMOTE_ACCESS_OFF when access from anywhere is off or its listener isn't up."
+      operationId: checkRemoteAccess
+      responses:
+        "200":
+          description: The setting and the listener, with check
+        "409":
+          description: REMOTE_ACCESS_OFF
   /api/v1/remote-access/route:
     get:
       summary: The route secret, for a paired device on the home network (#456)

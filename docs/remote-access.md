@@ -52,6 +52,38 @@ When the person turns on **Settings → Access from anywhere** (off by default; 
 - **Relay tunnel:** whenever it has a route token, it keeps one outbound connection to the relay, over TLS to the relay's own certificate, and accepts the streams the relay passes it as connections to the remote listener, each with the device's address so the remote listener's limits count the device. No inbound port is needed. An idle tunnel costs only a ping every 25 seconds, and keeping it up means a device can switch to the relay the moment a direct path fails.
 - **Status in Settings:** "Reachable from anywhere: direct", "through IPv6", "through Toskar's relay", or "not reachable, and why" (no mapping, no subscription, the service unreachable), with the address and port it found.
 
+## Is it working? The outside check
+
+API Access shows whether devices away from home can reach this computer,
+as the relay finds it from the internet (#546), like Plex's "fully
+accessible outside your network". A router that says it opened a port can
+still be unreachable: a second router in front of it (double NAT), a
+firewall, or a provider that blocks inbound ports. So the check doesn't
+trust it.
+
+- **What's tried:** the computer asks its relay (toskar-relay's
+  `POST /v1/routes/{route}/check`) to reach it through its tunnel, and at
+  each direct way in it would advertise. Each way counts only when TLS
+  completes to this computer's certificate and `/api/v1/health` answers, as
+  a paired device requires.
+- **When:** every 30 minutes, after the relay connects or the ways in
+  change, and on **Check now**.
+- **What it shows:** green when any way works, red when none does, and a
+  row per way with what failed and what to do.
+
+| Result | What it means | What to do |
+|---|---|---|
+| `timeout` | Nothing answered from the internet | Another router in front (double NAT) or a firewall blocks it; use the relay, or forward the port on the outer router too |
+| `refused` | The address answered, but nothing listens on the port | Forward the port to this computer |
+| `wrong_computer` | Another device answered on the port | Point the forward at this computer |
+| `tls`, `http` | Something other than Toskar answered | Free the port, or choose another one |
+| `not_public` | The address isn't on the internet | Use a public address, or the relay |
+| `no_tunnel` | This computer isn't connected to the relay | See the relay's state on the same card |
+
+The relay dials only public addresses, checks only this computer's
+certificate and health path, answers pass or fail, and takes one check a
+minute per computer, so the check can't be used to look at anything else.
+
 ## The rendezvous
 
 A small stateless service with a key-value store. It holds no traffic.

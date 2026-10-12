@@ -158,6 +158,40 @@
       "noPort": "Non ancora raggiungibile: il router non ha aperto la porta {{port}}. Inoltrala a questo computer e inserisci l'indirizzo, oppure usa Tailscale.",
       "relay": "Raggiungibile ovunque tramite {{relay}}."
     },
+    "check": {
+      "reachable": "Raggiungibile dall'esterno della tua rete",
+      "unreachable": "Non raggiungibile dall'esterno della tua rete",
+      "unchecked": "Non ancora verificato dall'esterno",
+      "checked": "Verificato {{when}}",
+      "now": "Verifica ora",
+      "checking": "Verifica in corso…",
+      "viaRelay": "Tramite {{relay}}",
+      "ok": "raggiunto in {{ms}} ms",
+      "reason": {
+        "no_tunnel": "Questo computer non è collegato al relay in questo momento.",
+        "not_public": "Questo indirizzo non è su internet, quindi i dispositivi fuori casa non possono usarlo.",
+        "unresolved": "Questo nome non porta a nessun indirizzo.",
+        "refused": "L'indirizzo risponde, ma nulla ascolta su questa porta. Controlla che la porta sia inoltrata a questo computer.",
+        "timeout": "Da internet non ha risposto niente. Un altro router davanti al tuo (doppio NAT) o un firewall potrebbe bloccarlo.",
+        "unreachable": "Internet non riesce a raggiungere questo indirizzo.",
+        "tls": "Su questa porta ha risposto qualcosa che non è Toskar.",
+        "http": "Su questa porta ha risposto qualcosa che non è Toskar.",
+        "wrong_computer": "Su questa porta ha risposto un altro computer. Inoltra la porta a questo."
+      },
+      "relayState": {
+        "connecting": "Connessione a {{relay}}…",
+        "noToken": "Nessun relay ancora: abbonati all'accesso ovunque nell'app Toskar sul telefono o tablet, oppure inserisci qui sotto il relay della tua organizzazione.",
+        "error": "Impossibile connettersi a {{relay}} ({{code}})."
+      },
+      "error": {
+        "CHECK_UNSUPPORTED": "Questo relay non può ancora verificare dall'esterno.",
+        "CHECK_TOO_SOON": "Verificato poco fa. Riprova tra un minuto.",
+        "NO_TOKEN": "Non c'è ancora un token del relay per verificare.",
+        "RELAY_UNREACHABLE": "Non è stato possibile raggiungere il relay per la verifica.",
+        "other": "La verifica non è riuscita ({{code}})."
+      },
+      "nextSteps": "I dispositivi fuori casa non raggiungono questo computer. Correggi ciò che è segnato e verifica di nuovo, oppure usa un relay, che funziona dietro qualsiasi router."
+    },
     "relay": {
       "title": "Relay della tua organizzazione",
       "body": "Se la tua organizzazione gestisce un proprio relay Toskar, inserisci il suo nome e il segreto di registrazione che ti ha dato il reparto IT. I dispositivi associati a questo computer lo raggiungeranno tramite quel relay quando nessun percorso più diretto funziona.",

@@ -158,6 +158,40 @@
       "noPort": "Pas encore joignable : la box n'a pas ouvert le port {{port}}. Redirigez-le vers cet ordinateur et saisissez l'adresse, ou utilisez Tailscale.",
       "relay": "Joignable de partout via {{relay}}."
     },
+    "check": {
+      "reachable": "Joignable depuis l’extérieur de votre réseau",
+      "unreachable": "Injoignable depuis l’extérieur de votre réseau",
+      "unchecked": "Pas encore vérifié depuis l’extérieur",
+      "checked": "Vérifié {{when}}",
+      "now": "Vérifier maintenant",
+      "checking": "Vérification…",
+      "viaRelay": "Par {{relay}}",
+      "ok": "atteint en {{ms}} ms",
+      "reason": {
+        "no_tunnel": "Cet ordinateur n’est pas connecté au relais pour le moment.",
+        "not_public": "Cette adresse n’est pas sur Internet : les appareils hors de chez vous ne peuvent pas l’utiliser.",
+        "unresolved": "Ce nom ne mène à aucune adresse.",
+        "refused": "L’adresse répond, mais rien n’écoute sur ce port. Vérifiez que le port est redirigé vers cet ordinateur.",
+        "timeout": "Rien n’a répondu depuis Internet. Un autre routeur devant le vôtre (double NAT) ou un pare-feu le bloque peut-être.",
+        "unreachable": "Internet ne peut pas joindre cette adresse.",
+        "tls": "Autre chose que Toskar a répondu sur ce port.",
+        "http": "Autre chose que Toskar a répondu sur ce port.",
+        "wrong_computer": "Un autre ordinateur a répondu sur ce port. Redirigez le port vers celui-ci."
+      },
+      "relayState": {
+        "connecting": "Connexion à {{relay}}…",
+        "noToken": "Pas encore de relais : abonnez-vous à l’accès depuis partout dans l’app Toskar de votre téléphone ou tablette, ou saisissez ci-dessous le relais de votre organisation.",
+        "error": "Impossible de se connecter à {{relay}} ({{code}})."
+      },
+      "error": {
+        "CHECK_UNSUPPORTED": "Ce relais ne peut pas encore vérifier depuis l’extérieur.",
+        "CHECK_TOO_SOON": "Vérifié à l’instant. Réessayez dans une minute.",
+        "NO_TOKEN": "Pas encore de jeton de relais pour vérifier.",
+        "RELAY_UNREACHABLE": "Le relais était injoignable pour la vérification.",
+        "other": "La vérification n’a pas pu se faire ({{code}})."
+      },
+      "nextSteps": "Les appareils hors de chez vous ne joignent pas cet ordinateur. Corrigez ce qui est signalé et vérifiez à nouveau, ou utilisez un relais, qui fonctionne derrière n’importe quel routeur."
+    },
     "relay": {
       "title": "Relais de votre organisation",
       "body": "Si votre organisation exploite son propre relais Toskar, saisissez son nom et le secret d'inscription fourni par votre équipe informatique. Les appareils associés à cet ordinateur l'atteindront alors via ce relais quand aucun chemin plus direct ne fonctionne.",

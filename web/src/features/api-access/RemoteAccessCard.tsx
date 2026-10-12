@@ -1,7 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { api } from '@/lib/api'
+import { api, type ReachCheck, type ReachWay } from '@/lib/api'
+import { formatRelativeTime } from '@/i18n/format'
 import { Toggle } from './Toggle'
 
 /**
@@ -54,7 +55,7 @@ export function RemoteAccessCard() {
           onChange={() => save.mutate({ remote_access_enabled: !enabled })}
         />
       </div>
-      {enabled && st ? <ReachLine status={st} /> : null}
+      {enabled && st ? <OutsideCheck status={st} /> : null}
       <label className="flex items-center gap-2 text-sm">
         <input
           type="checkbox"
@@ -218,6 +219,102 @@ function RelayLine({ status }: { status: NonNullable<RelayStatus> }) {
 }
 
 type Status = NonNullable<Awaited<ReturnType<typeof api.getRemoteAccess>>>
+
+/**
+ * Whether access from anywhere works, as the relay found it from the
+ * internet (#546), like Plex's "fully accessible outside your network": a
+ * line in green or red, when it was checked, Check now, and a row for each
+ * way in with what to do when it fails. Before the first check, the line
+ * says how Toskar set it up, as before.
+ */
+function OutsideCheck({ status }: { status: Status }) {
+  const { t } = useTranslation('apiAccess')
+  const queryClient = useQueryClient()
+  const check = useMutation({
+    mutationFn: () => api.checkRemoteAccess(),
+    onSuccess: (data) => queryClient.setQueryData(['remote-access'], data),
+  })
+  if (!status.listening) return <ReachLine status={status} />
+  const result = status.check
+  const ways = result?.at ? [...(result.relay ? [result.relay] : []), ...(result.direct ?? [])] : []
+  const reachable = ways.some((w) => w.ok)
+  const summary = !result?.at ? 'unchecked' : reachable ? 'reachable' : 'unreachable'
+  const tone = { reachable: 'text-success', unreachable: 'text-danger', unchecked: 'text-ink-muted' }[summary]
+  const dot = { reachable: 'bg-success', unreachable: 'bg-danger', unchecked: 'bg-ink-faint' }[summary]
+  return (
+    <div className="space-y-3 rounded-lg border border-line p-3" role="status" aria-live="polite">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className={`flex items-center gap-2 text-sm font-medium ${tone}`}>
+          <span className={`inline-block h-2.5 w-2.5 rounded-full ${dot}`} aria-hidden />
+          {t(`remote.check.${summary}`)}
+        </p>
+        <div className="flex items-center gap-3 text-xs text-ink-faint">
+          {result?.at ? <span>{t('remote.check.checked', { when: formatRelativeTime(result.at) })}</span> : null}
+          <button type="button" className="btn-secondary" disabled={check.isPending} onClick={() => check.mutate()}>
+            {check.isPending ? t('remote.check.checking') : t('remote.check.now')}
+          </button>
+        </div>
+      </div>
+      {result?.at ? (
+        <ul className="space-y-2">
+          {result.relay ? <WayRow way={result.relay} label={t('remote.check.viaRelay', { relay: (status.relay?.name ?? '').replace(/:\d+$/, '') })} /> : null}
+          {(result.direct ?? []).map((way) => (
+            <WayRow key={way.address} way={way} label={way.address ?? ''} />
+          ))}
+        </ul>
+      ) : (
+        <ReachLine status={status} />
+      )}
+      {status.relay && status.relay.state !== 'connected' ? <ToskarRelayLine relay={status.relay} /> : null}
+      <CheckProblem result={result} failed={check.error} />
+      {result?.at && !reachable ? <p className="text-xs text-ink-muted">{t('remote.check.nextSteps')}</p> : null}
+    </div>
+  )
+}
+
+/** One way in: what it is, and whether the internet reached it. */
+function WayRow({ way, label }: { way: ReachWay; label: string }) {
+  const { t } = useTranslation('apiAccess')
+  return (
+    <li className="flex gap-2 text-sm">
+      <span className={way.ok ? 'text-success' : 'text-danger'} aria-hidden>
+        {way.ok ? '✓' : '✗'}
+      </span>
+      <span>
+        <span className="font-medium">{label}</span>
+        <span className="text-ink-muted">
+          {' — '}
+          {way.ok ? t('remote.check.ok', { ms: way.ms ?? 0 }) : t(`remote.check.reason.${way.reason ?? 'unreachable'}`)}
+        </span>
+      </span>
+    </li>
+  )
+}
+
+/** The relay connection when it isn't up, for Toskar's relay as for an organization's. */
+function ToskarRelayLine({ relay }: { relay: NonNullable<Status['relay']> }) {
+  const { t } = useTranslation('apiAccess')
+  const key = relay.state === 'no_token' ? 'noToken' : relay.state === 'error' ? 'error' : 'connecting'
+  return (
+    <p className={`text-sm ${relay.state === 'connecting' ? 'text-ink-muted' : 'text-warning'}`}>
+      {t(`remote.check.relayState.${key}`, { relay: relay.name, code: relay.error ?? '' })}
+    </p>
+  )
+}
+
+/** Why the last check didn't reach the relay, when it didn't. */
+function CheckProblem({ result, failed }: { result?: ReachCheck; failed: Error | null }) {
+  const { t } = useTranslation('apiAccess')
+  const code = failed ? 'failed' : result?.error
+  if (!code) return null
+  const known = ['CHECK_UNSUPPORTED', 'CHECK_TOO_SOON', 'NO_TOKEN', 'RELAY_UNREACHABLE']
+  const text = failed
+    ? failed.message
+    : known.includes(code)
+      ? t(`remote.check.error.${code}`)
+      : t('remote.check.error.other', { code })
+  return <p className="text-xs text-warning">{text}</p>
+}
 
 /** How the internet reaches this computer, in a line. */
 function ReachLine({ status }: { status: Status }) {

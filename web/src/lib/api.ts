@@ -573,6 +573,23 @@ function mediaSetupPath(kind: MediaKind, nodeId?: string): string {
   return nodeId ? `${path}?node_id=${encodeURIComponent(nodeId)}` : path
 }
 
+/** One way in, as the relay found it from the internet (#546). */
+export type ReachWay = {
+  address?: string
+  ok: boolean
+  reason?: 'no_tunnel' | 'not_public' | 'unresolved' | 'refused' | 'timeout' | 'unreachable' | 'tls' | 'wrong_computer' | 'http'
+  ms?: number
+}
+
+/** The last outside check (#546): through the relay, and each direct way in. */
+export type ReachCheck = {
+  at?: string
+  relay?: ReachWay
+  direct?: ReachWay[]
+  tried?: string
+  error?: string
+}
+
 export const api = {
   /** How the API speaks HTTPS on the local network (#213). */
   /** Access from anywhere's setting and what its listener is doing (#456). */
@@ -591,7 +608,12 @@ export const api = {
       reachable?: 'direct' | 'ipv6' | 'manual' | 'relay' | 'none'
       reason?: 'off' | 'not_listening' | 'carrier_nat' | 'no_port'
       relay?: { name: string; state: 'no_token' | 'connecting' | 'connected' | 'error'; error?: string }
+      check?: ReachCheck
     }>('/api/v1/remote-access'),
+
+  /** Has the relay reach this computer from the internet now (#546); answers what getRemoteAccess does. */
+  checkRemoteAccess: () =>
+    request<Awaited<ReturnType<typeof api.getRemoteAccess>>>('/api/v1/remote-access/check', { method: 'POST' }),
 
   getApiTLS: () => request<APITLS>('/api/v1/tls'),
 

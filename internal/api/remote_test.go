@@ -331,3 +331,53 @@ func TestRelayToken(t *testing.T) {
 		t.Fatal("a paired device can't hand over a token")
 	}
 }
+
+// The outside check (#546): Check now runs it and answers the same as
+// GET /remote-access, with the result under check.
+func TestRemoteCheck(t *testing.T) {
+	ran := 0
+	on := true
+	at := time.Date(2026, 10, 12, 18, 0, 0, 0, time.UTC)
+	srv := NewServer(Dependencies{
+		RemoteReach: func() RemoteReach {
+			r := RemoteReach{Reachable: "relay", Relay: "relay.toskar.ai:4443", RelayState: "connected"}
+			if ran > 0 {
+				r.Check = &ReachCheck{At: at, Tried: at, Relay: &ReachWay{OK: true, MS: 80},
+					Direct: []ReachWay{{Address: "198.51.100.7:7333", Reason: "timeout", MS: 8000}}}
+			}
+			return r
+		},
+		CheckReach: func(context.Context) error {
+			if !on {
+				return contracts.NewError("REMOTE_ACCESS_OFF", nil, errors.New("off"))
+			}
+			ran++
+			return nil
+		},
+	})
+	call := func() (int, map[string]any) {
+		w := httptest.NewRecorder()
+		srv.handleRemoteCheck(w, httptest.NewRequest(http.MethodPost, "/api/v1/remote-access/check", nil))
+		var out map[string]any
+		_ = json.Unmarshal(w.Body.Bytes(), &out)
+		return w.Code, out
+	}
+	status, out := call()
+	if status != http.StatusOK || ran != 1 {
+		t.Fatalf("check: %d ran %d", status, ran)
+	}
+	check, _ := out["check"].(map[string]any)
+	relay, _ := check["relay"].(map[string]any)
+	direct, _ := check["direct"].([]any)
+	if relay["ok"] != true || len(direct) != 1 || direct[0].(map[string]any)["reason"] != "timeout" || check["at"] != "2026-10-12T18:00:00Z" {
+		t.Fatalf("answer: %v", out)
+	}
+	on = false
+	if status, out := call(); status != http.StatusConflict || out["error"].(map[string]any)["code"] != "REMOTE_ACCESS_OFF" {
+		t.Fatalf("off: %d %v", status, out)
+	}
+	// Admins only: it isn't a Member's or a device's to run.
+	if auth.DeviceMayReach(http.MethodPost, "/api/v1/remote-access/check") {
+		t.Fatal("a device may run the check")
+	}
+}

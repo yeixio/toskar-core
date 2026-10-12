@@ -210,6 +210,7 @@
   "REMOTE_PORT_INVALID": "Le port va de 1024 à 65535 et n'est pas celui de l'app ou des ordinateurs.",
   "REMOTE_ADDRESS_INVALID": "Saisissez un nom d'hôte ou une IP, avec le port s'il diffère, comme home.example.com ou 203.0.113.7:7333.",
   "REMOTE_LISTEN_FAILED": "L'accès de partout ne peut pas écouter sur le port {{port}}. Un autre programme l'utilise peut-être.",
+  "REMOTE_ACCESS_OFF": "L’accès depuis partout est désactivé : il n’y a rien à vérifier. Activez-le d’abord.",
   "RELAY_INVALID": "Saisissez le nom du relais, comme relay.example.com, avec un port seulement s'il ne s'agit pas du 443.",
   "RELAY_SECRET_INVALID": "Ce n'est pas un secret d'inscription. Copiez-le depuis le fichier enroll.secret du relais.",
   "RELAY_TOKEN_INVALID": "Ce jeton de relais n'est pas pour cet ordinateur ou il a expiré. Abonnez-vous à nouveau depuis cet appareil.",

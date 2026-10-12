@@ -210,6 +210,7 @@
   "REMOTE_PORT_INVALID": "The port is 1024 to 65535, and not the one the app or the computers use.",
   "REMOTE_ADDRESS_INVALID": "Enter a host name or IP, with a port when it differs, such as home.example.com or 203.0.113.7:7333.",
   "REMOTE_LISTEN_FAILED": "Access from anywhere can't listen on port {{port}}. Another program may be using it.",
+  "REMOTE_ACCESS_OFF": "Access from anywhere is off, so there's nothing to check. Turn it on first.",
   "RELAY_INVALID": "Enter the relay's name, such as relay.example.com, with a port only when it isn't 443.",
   "RELAY_SECRET_INVALID": "That isn't an enrollment secret. Copy it from the relay's enroll.secret file.",
   "RELAY_TOKEN_INVALID": "That relay token isn't for this computer, or it has run out. Subscribe again from this device.",

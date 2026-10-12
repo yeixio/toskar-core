@@ -158,6 +158,40 @@
       "noPort": "Ainda não acessível: o roteador não abriu a porta {{port}}. Redirecione-a para este computador e informe o endereço, ou use o Tailscale.",
       "relay": "Acessível de qualquer lugar pelo {{relay}}."
     },
+    "check": {
+      "reachable": "Acessível de fora da sua rede",
+      "unreachable": "Não acessível de fora da sua rede",
+      "unchecked": "Ainda não verificado de fora",
+      "checked": "Verificado {{when}}",
+      "now": "Verificar agora",
+      "checking": "Verificando…",
+      "viaRelay": "Pelo {{relay}}",
+      "ok": "alcançado em {{ms}} ms",
+      "reason": {
+        "no_tunnel": "Este computador não está conectado ao relay agora.",
+        "not_public": "Este endereço não está na internet, então dispositivos fora de casa não podem usá-lo.",
+        "unresolved": "Este nome não leva a nenhum endereço.",
+        "refused": "O endereço respondeu, mas nada escuta nesta porta. Confira se a porta está redirecionada para este computador.",
+        "timeout": "Nada respondeu pela internet. Outro roteador na frente do seu (NAT duplo) ou um firewall pode estar bloqueando.",
+        "unreachable": "A internet não consegue chegar a este endereço.",
+        "tls": "Algo que não é o Toskar respondeu nesta porta.",
+        "http": "Algo que não é o Toskar respondeu nesta porta.",
+        "wrong_computer": "Outro computador respondeu nesta porta. Redirecione a porta para este."
+      },
+      "relayState": {
+        "connecting": "Conectando a {{relay}}…",
+        "noToken": "Ainda sem relay: assine o acesso de qualquer lugar no app Toskar do seu celular ou tablet, ou informe abaixo o relay da sua organização.",
+        "error": "Não foi possível conectar a {{relay}} ({{code}})."
+      },
+      "error": {
+        "CHECK_UNSUPPORTED": "Este relay ainda não consegue verificar de fora.",
+        "CHECK_TOO_SOON": "Verificado há pouco. Tente de novo em um minuto.",
+        "NO_TOKEN": "Ainda não há um token do relay para verificar.",
+        "RELAY_UNREACHABLE": "Não foi possível alcançar o relay para verificar.",
+        "other": "A verificação não pôde ser feita ({{code}})."
+      },
+      "nextSteps": "Dispositivos fora de casa não alcançam este computador. Corrija o que está marcado e verifique de novo, ou use um relay, que funciona atrás de qualquer roteador."
+    },
     "relay": {
       "title": "Relay da sua organização",
       "body": "Se a sua organização mantém o próprio relay do Toskar, digite o nome dele e o segredo de inscrição que a equipe de TI passou para você. Os dispositivos pareados com este computador vão chegar a ele por esse relay quando nada mais direto funcionar.",

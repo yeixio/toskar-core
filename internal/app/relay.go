@@ -114,6 +114,8 @@ func (a *App) applyRelay() {
 	ctx, cancel := context.WithCancel(context.Background())
 	a.relay, a.relayStop = c, cancel
 	go c.Run(ctx)
+	// A new relay connection, or new ways in: check from outside once it's up.
+	a.reachSoon()
 }
 
 // enrollSecret is the enrollment secret to use: only with an

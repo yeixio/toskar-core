@@ -158,6 +158,40 @@
       "noPort": "Aún no es accesible: el router no abrió el puerto {{port}}. Redirígelo a esta computadora e indica la dirección, o usa Tailscale.",
       "relay": "Accesible desde cualquier lugar a través de {{relay}}."
     },
+    "check": {
+      "reachable": "Accesible desde fuera de tu red",
+      "unreachable": "No accesible desde fuera de tu red",
+      "unchecked": "Aún no se comprobó desde fuera",
+      "checked": "Comprobado {{when}}",
+      "now": "Comprobar ahora",
+      "checking": "Comprobando…",
+      "viaRelay": "A través de {{relay}}",
+      "ok": "alcanzado en {{ms}} ms",
+      "reason": {
+        "no_tunnel": "Esta computadora no está conectada al relé ahora mismo.",
+        "not_public": "Esta dirección no está en internet, así que los dispositivos fuera de casa no pueden usarla.",
+        "unresolved": "Este nombre no lleva a ninguna dirección.",
+        "refused": "La dirección respondió, pero nada escucha en este puerto. Comprueba que el puerto esté redirigido a esta computadora.",
+        "timeout": "Nada respondió desde internet. Otro router delante del tuyo (doble NAT) o un firewall puede estar bloqueándolo.",
+        "unreachable": "Internet no puede llegar a esta dirección.",
+        "tls": "En este puerto respondió algo que no es Toskar.",
+        "http": "En este puerto respondió algo que no es Toskar.",
+        "wrong_computer": "En este puerto respondió otra computadora. Redirige el puerto a esta."
+      },
+      "relayState": {
+        "connecting": "Conectando con {{relay}}…",
+        "noToken": "Aún no hay relé: suscríbete al acceso desde cualquier lugar en la app Toskar de tu teléfono o tableta, o indica abajo el relé de tu organización.",
+        "error": "No se puede conectar con {{relay}} ({{code}})."
+      },
+      "error": {
+        "CHECK_UNSUPPORTED": "Este relé todavía no puede comprobar desde fuera.",
+        "CHECK_TOO_SOON": "Se comprobó hace un momento. Inténtalo de nuevo en un minuto.",
+        "NO_TOKEN": "Aún no hay un token del relé para comprobar.",
+        "RELAY_UNREACHABLE": "No se pudo llegar al relé para comprobar.",
+        "other": "La comprobación no pudo ejecutarse ({{code}})."
+      },
+      "nextSteps": "Los dispositivos fuera de casa no llegan a esta computadora. Corrige lo marcado y vuelve a comprobar, o usa un relé, que funciona detrás de cualquier router."
+    },
     "relay": {
       "title": "Relé de tu organización",
       "body": "Si tu organización tiene su propio relé de Toskar, escribe su nombre y el secreto de inscripción que te dio tu equipo de TI. Los dispositivos vinculados a esta computadora llegarán a ella a través de ese relé cuando no funcione nada más directo.",

@@ -128,6 +128,8 @@ type Dependencies struct {
 	// that subscribed, can find the computer away from home (#456).
 	RelayToken  func() string
 	RemoteReach func() RemoteReach
+	// CheckReach runs the outside check now (#546).
+	CheckReach func(ctx context.Context) error
 	// SetRelayToken keeps a route token the app got for this computer from
 	// a store subscription, and with enable turns access from anywhere on.
 	SetRelayToken func(ctx context.Context, token string, enable bool) (state string, err error)
@@ -384,6 +386,7 @@ func (s *Server) routes() {
 	s.portalRoutes(api)
 	api.HandleFunc("/tls", s.handleTLS).Methods(http.MethodGet)
 	api.HandleFunc("/remote-access", s.handleRemoteAccess).Methods(http.MethodGet)
+	api.HandleFunc("/remote-access/check", s.handleRemoteCheck).Methods(http.MethodPost)
 	api.HandleFunc("/remote-access/route", s.handleRouteSecret).Methods(http.MethodGet)
 	api.HandleFunc("/remote-access/relay-token", s.handleRelayToken).Methods(http.MethodPut)
 	s.notificationRoutes(api)

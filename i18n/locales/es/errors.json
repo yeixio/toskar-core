@@ -210,6 +210,7 @@
   "REMOTE_PORT_INVALID": "El puerto va de 1024 a 65535 y no es el que usan la app o las computadoras.",
   "REMOTE_ADDRESS_INVALID": "Escribe un nombre de host o una IP, con el puerto si es distinto, como home.example.com o 203.0.113.7:7333.",
   "REMOTE_LISTEN_FAILED": "El acceso desde cualquier lugar no puede escuchar en el puerto {{port}}. Puede que otro programa lo esté usando.",
+  "REMOTE_ACCESS_OFF": "El acceso desde cualquier lugar está desactivado, así que no hay nada que comprobar. Actívalo primero.",
   "RELAY_INVALID": "Escribe el nombre del relé, como relay.example.com, con un puerto solo si no es el 443.",
   "RELAY_SECRET_INVALID": "Eso no es un secreto de inscripción. Cópialo del archivo enroll.secret del relé.",
   "RELAY_TOKEN_INVALID": "Ese token del relé no es para esta computadora o ya caducó. Vuelve a suscribirte desde este dispositivo.",

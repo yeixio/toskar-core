@@ -117,7 +117,9 @@ type App struct {
 	// portKeeper keeps the router port access from anywhere uses (#456).
 	portKeeper portmap.Keeper
 	// relay is the relay client while access from anywhere is on (#456).
-	relayMu   sync.Mutex
+	relayMu sync.Mutex
+	// reach is the outside check's last result (#546).
+	reach     reachChecker
 	relay     *relayclient.Client
 	relayStop context.CancelFunc
 	// TopicLog keeps off-topic attempts (#345).
@@ -507,6 +509,7 @@ func New(opts Options) (*App, error) {
 		},
 		ShowVersion:   convRepo.ShowVersion,
 		RemoteReach:   a.remoteReach,
+		CheckReach:    a.checkReach,
 		RouteSecret:   a.routeSecret,
 		RelayName:     func() string { return relayName(a.Config.Get()) },
 		RelayToken:    a.relayToken,
@@ -1064,6 +1067,12 @@ func (a *App) Start(ctx context.Context) error {
 			a.Updates.Run(ctx)
 		}()
 	}
+	// The outside check of access from anywhere (#546).
+	a.wg.Add(1)
+	go func() {
+		defer a.wg.Done()
+		a.reachLoop(ctx)
+	}()
 	a.startLive(ctx)
 	// Tasks an earlier run left pending or running can't finish now, and
 	// chats from before chat tasks were settled never left pending.

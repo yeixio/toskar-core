@@ -210,6 +210,7 @@
   "REMOTE_PORT_INVALID": "Der Port liegt zwischen 1024 und 65535 und ist nicht der, den die App oder die Computer nutzen.",
   "REMOTE_ADDRESS_INVALID": "Gib einen Hostnamen oder eine IP ein, mit Port, wenn er abweicht, etwa home.example.com oder 203.0.113.7:7333.",
   "REMOTE_LISTEN_FAILED": "Zugriff von überall kann nicht auf Port {{port}} warten. Vielleicht nutzt ihn ein anderes Programm.",
+  "REMOTE_ACCESS_OFF": "Zugriff von überall ist aus, daher gibt es nichts zu prüfen. Schalte ihn zuerst ein.",
   "RELAY_INVALID": "Gib den Namen des Relays ein, etwa relay.example.com, mit Port nur, wenn er nicht 443 ist.",
   "RELAY_SECRET_INVALID": "Das ist kein Registrierungsschlüssel. Kopiere ihn aus der Datei enroll.secret des Relays.",
   "RELAY_TOKEN_INVALID": "Dieses Relay-Token gilt nicht für diesen Computer oder ist abgelaufen. Schließe das Abo auf diesem Gerät erneut ab.",

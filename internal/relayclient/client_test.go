@@ -76,6 +76,10 @@ type fakeRelay struct {
 	enrolls int
 	opens   chan [2]string // stream, client
 	streams chan net.Conn
+	// checked is the last outside check asked for; noCheck answers as a
+	// relay from before the check does.
+	checked map[string]any
+	noCheck bool
 }
 
 func newFakeRelay(t *testing.T) *fakeRelay {
@@ -136,6 +140,25 @@ func newFakeRelay(t *testing.T) *fakeRelay {
 		_, _ = buf.WriteString("HTTP/1.1 101 Switching Protocols\r\nConnection: Upgrade\r\nUpgrade: toskar-stream\r\n\r\n")
 		_ = buf.Flush()
 		f.streams <- conn
+	})
+	mux.HandleFunc("POST /v1/routes/{route}/check", func(w http.ResponseWriter, r *http.Request) {
+		if !f.authorized(r) {
+			http.Error(w, `{"error":{"code":"TOKEN_EXPIRED"}}`, http.StatusUnauthorized)
+			return
+		}
+		f.mu.Lock()
+		defer f.mu.Unlock()
+		if f.noCheck {
+			http.NotFound(w, r)
+			return
+		}
+		if f.checked != nil {
+			w.WriteHeader(http.StatusTooManyRequests)
+			_, _ = io.WriteString(w, `{"error":{"code":"CHECK_TOO_SOON"}}`)
+			return
+		}
+		_ = json.NewDecoder(r.Body).Decode(&f.checked)
+		_, _ = io.WriteString(w, `{"relay":{"ok":true,"ms":80},"direct":[{"address":"203.0.113.7:7333","ok":false,"reason":"timeout","ms":8000}]}`)
 	})
 	f.srv = httptest.NewUnstartedServer(mux)
 	f.srv.StartTLS()

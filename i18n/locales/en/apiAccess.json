@@ -158,6 +158,40 @@
       "noPort": "Not reachable yet: the router didn't open port {{port}}. Forward it to this computer and enter the address, or use Tailscale.",
       "relay": "Reachable from anywhere through {{relay}}."
     },
+    "check": {
+      "reachable": "Reachable from outside your network",
+      "unreachable": "Not reachable from outside your network",
+      "unchecked": "Not checked from outside yet",
+      "checked": "Checked {{when}}",
+      "now": "Check now",
+      "checking": "Checking…",
+      "viaRelay": "Through {{relay}}",
+      "ok": "reached in {{ms}} ms",
+      "reason": {
+        "no_tunnel": "This computer isn't connected to the relay right now.",
+        "not_public": "This address isn't on the internet, so devices away from home can't use it.",
+        "unresolved": "This name doesn't lead to an address.",
+        "refused": "The address answered, but nothing listens on this port. Check that the port is forwarded to this computer.",
+        "timeout": "Nothing answered from the internet. Another router in front of yours (double NAT) or a firewall may be blocking it.",
+        "unreachable": "The internet can't reach this address.",
+        "tls": "Something other than Toskar answered on this port.",
+        "http": "Something other than Toskar answered on this port.",
+        "wrong_computer": "Another computer answered on this port. Forward the port to this one."
+      },
+      "relayState": {
+        "connecting": "Connecting to {{relay}}…",
+        "noToken": "No relay yet: subscribe to access from anywhere in the Toskar app on your phone or tablet, or enter your organization's relay below.",
+        "error": "Can't connect to {{relay}} ({{code}})."
+      },
+      "error": {
+        "CHECK_UNSUPPORTED": "This relay can't check from outside yet.",
+        "CHECK_TOO_SOON": "Checked moments ago. Try again in a minute.",
+        "NO_TOKEN": "There's no relay token to check with yet.",
+        "RELAY_UNREACHABLE": "The relay couldn't be reached to run the check.",
+        "other": "The check couldn't run ({{code}})."
+      },
+      "nextSteps": "Devices away from home can't reach this computer. Fix what's marked and check again, or use a relay, which works behind any router."
+    },
     "relay": {
       "title": "Your organization's relay",
       "body": "If your organization runs its own Toskar relay, enter its name and the enrollment secret your IT team gave you. Devices paired with this computer then reach it through that relay when nothing more direct works.",
