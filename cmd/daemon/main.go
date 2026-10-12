@@ -38,6 +38,11 @@ func main() {
 	if *dataDir == "" {
 		*dataDir = config.DefaultDataDir()
 	}
+	// Tools run in their own working directories (speech runs Python from a
+	// job folder), so a relative --data-dir would point somewhere else there.
+	if abs, err := filepath.Abs(*dataDir); err == nil {
+		*dataDir = abs
+	}
 
 	logger, logCloser, err := setupLogger(*dataDir)
 	if err != nil {
