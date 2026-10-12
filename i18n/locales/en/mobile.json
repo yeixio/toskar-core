@@ -282,6 +282,15 @@
       "needsUpdate": "Update Toskar on your computer to send photos and files from this device.",
       "cameraDenied": "Toskar can't use the camera. Allow it in Settings to take a photo."
     },
+    "voice": {
+      "start": "Speak a message",
+      "stop": "Stop and turn into text",
+      "listening": "Listening… {{seconds}} s",
+      "transcribing": "Turning your words into text…",
+      "micDenied": "Toskar can't use the microphone. Allow it in Settings to speak a message.",
+      "failed": "Couldn't turn that into text: {{detail}}",
+      "tooShort": "That was too short to hear. Hold on a little longer."
+    },
     "send": "Send",
     "sending": "Sending",
     "stop": "Stop",

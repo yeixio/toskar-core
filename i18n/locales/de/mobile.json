@@ -273,6 +273,15 @@
       "needsUpdate": "Aktualisiere Toskar auf deinem Computer, um Fotos und Dateien von diesem Gerät zu senden.",
       "cameraDenied": "Toskar kann die Kamera nicht verwenden. Erlaube es in den Einstellungen, um ein Foto aufzunehmen."
     },
+    "voice": {
+      "start": "Nachricht sprechen",
+      "stop": "Stoppen und in Text umwandeln",
+      "listening": "Hört zu… {{seconds}} s",
+      "transcribing": "Deine Worte werden zu Text…",
+      "micDenied": "Toskar kann das Mikrofon nicht verwenden. Erlaube es in den Einstellungen, um eine Nachricht zu sprechen.",
+      "failed": "Konnte nicht in Text umgewandelt werden: {{detail}}",
+      "tooShort": "Das war zu kurz, um etwas zu hören. Sprich etwas länger."
+    },
     "send": "Senden",
     "sending": "Wird gesendet",
     "stop": "Stoppen",

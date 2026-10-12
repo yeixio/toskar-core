@@ -273,6 +273,15 @@
       "needsUpdate": "Actualiza Toskar en tu computadora para enviar fotos y archivos desde este dispositivo.",
       "cameraDenied": "Toskar no puede usar la cámara. Permítelo en Ajustes para tomar una foto."
     },
+    "voice": {
+      "start": "Dictar un mensaje",
+      "stop": "Detener y pasar a texto",
+      "listening": "Escuchando… {{seconds}} s",
+      "transcribing": "Pasando tus palabras a texto…",
+      "micDenied": "Toskar no puede usar el micrófono. Permítelo en Ajustes para dictar un mensaje.",
+      "failed": "No se pudo pasar a texto: {{detail}}",
+      "tooShort": "Fue demasiado corto para oírlo. Habla un poco más."
+    },
     "send": "Enviar",
     "sending": "Enviando",
     "stop": "Detener",

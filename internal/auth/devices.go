@@ -299,6 +299,8 @@ var deviceRoutes = map[string]bool{
 	// before it's sent (yeixio/toskar-apps#155).
 	"POST /api/v1/artifacts":        true,
 	"DELETE /api/v1/artifacts/{id}": true,
+	// Speaking a message: the recording, attached above, as text (#155).
+	"POST /api/v1/speech/transcribe": true,
 
 	"GET /api/v1/automations":                          true,
 	"GET /api/v1/automations/{id}":                     true,

@@ -128,6 +128,9 @@ type Dependencies struct {
 	// that subscribed, can find the computer away from home (#456).
 	RelayToken  func() string
 	RemoteReach func() RemoteReach
+	// Transcribe turns an attached recording into text with speech.transcribe,
+	// wherever it runs (yeixio/toskar-apps#155).
+	Transcribe func(ctx context.Context, artifactID, language string) (map[string]any, error)
 	// CheckReach runs the outside check now (#546).
 	CheckReach func(ctx context.Context) error
 	// SetRelayToken keeps a route token the app got for this computer from

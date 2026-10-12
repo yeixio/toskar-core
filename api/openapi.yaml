@@ -3394,6 +3394,36 @@ paths:
                   seconds: {type: number}
         "400":
           description: Invalid text or voice, or reading failed
+  /api/v1/speech/transcribe:
+    post:
+      summary: A recording's text, for speaking a message instead of typing it (yeixio/toskar-apps#155)
+      description: "The recording is attached first with POST /api/v1/artifacts (audio). Runs speech.transcribe (Whisper) on this computer or a paired one that has it, and answers the text for the person to check before sending. Visitors and paired devices may use it."
+      operationId: transcribeRecording
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [artifact_id]
+              properties:
+                artifact_id: {type: string}
+                language: {type: string, description: "A hint such as en or de; empty detects the language"}
+      responses:
+        "200":
+          description: The text
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  text: {type: string}
+                  language: {type: string}
+                  duration_seconds: {type: number}
+        "400":
+          description: No artifact_id
+        "503":
+          description: SPEECH_UNAVAILABLE when no computer can transcribe, or SPEECH_FAILED
           content:
             application/json:
               schema:

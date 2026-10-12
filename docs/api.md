@@ -32,6 +32,7 @@ A phone's key reaches only what the phone uses:
 - live events;
 - answering a tool's question;
 - the chat's files, and attaching a photo, file, or recording (`POST /artifacts`, and `DELETE /artifacts/{id}` to take it off before sending);
+- a recording's text, for speaking a message (`POST /speech/transcribe` with `{artifact_id, language}`: `{text, language, duration_seconds}` from Whisper on this computer or a paired one, or `503 SPEECH_UNAVAILABLE`);
 - read-only lists: health, version, settings, profiles, models, running models, and computers;
 - warming a chat's model;
 - automations: listing them, one with its runs, Run now, Pause, Resume, and opening a run's result in chat (not making, editing, or deleting one);
@@ -68,7 +69,7 @@ Chats and their messages, memories, files, and automations are private to their 
 - **Network access:** turning on `lan_api_enabled` needs an API key, trusted proxies, an OpenID Connect provider, or a person other than the Owner who isn't disabled, since they sign in with a password or still have a link to; otherwise it answers `API_KEY_REQUIRED`. The app's People page (`/people`) adds people and shows their links, and `/invite/<token>` is the page a link opens.
 
 **Roles.** Every `/api/v1` request from a key or a signed-in browser is checked against its person's role; one that needs more answers `403 ROLE_REQUIRED` with `details.role`, the least role that may.
-- **Visitors** chat: `/chat`, their conversations and their files, `/tools/decide`, `/speech`, and reading settings, profiles, models, tools, specialized AIs, and computers.
+- **Visitors** chat: `/chat`, their conversations and their files, `/tools/decide`, `/speech` and `/speech/transcribe`, and reading settings, profiles, models, tools, specialized AIs, and computers.
 - **Members** also have their memories, automations, and notifications, and read knowledge sources and search them.
 - **Admins** have everything else: models, runtimes, tools, profiles, knowledge sources, computers, keys, devices, people, settings, notifications, runs, training, performance, and diagnostics.
 - **The Owner** alone erases everything (`POST /settings/reset`).

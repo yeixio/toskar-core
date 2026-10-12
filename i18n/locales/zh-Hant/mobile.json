@@ -273,6 +273,15 @@
       "needsUpdate": "請更新電腦上的 Toskar，才能從此裝置傳送照片和檔案。",
       "cameraDenied": "Toskar 無法使用相機。請在「設定」中允許，才能拍照。"
     },
+    "voice": {
+      "start": "說出訊息",
+      "stop": "停止並轉為文字",
+      "listening": "正在聆聽… {{seconds}} 秒",
+      "transcribing": "正在把你說的話轉為文字…",
+      "micDenied": "Toskar 無法使用麥克風。請在「設定」中允許，才能說出訊息。",
+      "failed": "無法轉為文字：{{detail}}",
+      "tooShort": "太短了，沒有聽清楚。請多說一會兒。"
+    },
     "send": "傳送",
     "sending": "正在傳送",
     "stop": "停止",

@@ -510,6 +510,7 @@ func New(opts Options) (*App, error) {
 		ShowVersion:   convRepo.ShowVersion,
 		RemoteReach:   a.remoteReach,
 		CheckReach:    a.checkReach,
+		Transcribe:    a.transcribeRecording,
 		RouteSecret:   a.routeSecret,
 		RelayName:     func() string { return relayName(a.Config.Get()) },
 		RelayToken:    a.relayToken,
