@@ -287,6 +287,7 @@
       "stop": "Stop and turn into text",
       "listening": "Listening… {{seconds}} s",
       "transcribing": "Turning your words into text…",
+      "settingUp": "Getting speech ready on your computer. The first time takes a few minutes…",
       "micDenied": "Toskar can't use the microphone. Allow it in Settings to speak a message.",
       "failed": "Couldn't turn that into text: {{detail}}",
       "tooShort": "That was too short to hear. Hold on a little longer."

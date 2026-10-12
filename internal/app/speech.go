@@ -41,6 +41,11 @@ func (a *App) transcribeRecording(ctx context.Context, artifactID, language stri
 	}
 	out, err := t.Execute(ctx, args)
 	if err != nil {
+		// A coded error, such as SPEECH_SETUP_FAILED when speech couldn't be
+		// installed, keeps its code and its plain text in every language.
+		if code, _ := contracts.ErrorCode(err); code != "" {
+			return nil, err
+		}
 		return nil, contracts.NewError("SPEECH_FAILED", map[string]any{"detail": err.Error()}, err)
 	}
 	return map[string]any{"text": strings.TrimSpace(asString(out["text"])), "language": out["language"], "duration_seconds": out["duration_seconds"]}, nil
