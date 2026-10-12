@@ -13,6 +13,6 @@ export YGG_API_KEY=YOUR_API_KEY   # required when the API is not on loopback
 | [curl/models.sh](curl/models.sh) | `GET /v1/models` |
 | [curl/chat.sh](curl/chat.sh) | `POST /v1/chat/completions` |
 | [python/chat.py](python/chat.py) | same calls, Python 3 standard library |
-| [javascript/chat.mjs](javascript/chat.mjs) | same calls, Node.js 18+ `fetch` |
+| [javascript/chat.mjs](javascript/chat.mjs) | streams chat completions, Node.js 18+ `fetch` |
 
 Known limits of this API are in [docs/api.md](../docs/api.md).
