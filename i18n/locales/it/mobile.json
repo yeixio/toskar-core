@@ -281,7 +281,8 @@
       "settingUp": "Preparazione della voce sul computer. La prima volta richiede qualche minuto…",
       "micDenied": "Toskar non può usare il microfono. Consentilo in Impostazioni per dettare un messaggio.",
       "failed": "Impossibile trasformarlo in testo: {{detail}}",
-      "tooShort": "Era troppo breve per sentirlo. Parla un po' più a lungo."
+      "tooShort": "Era troppo breve per sentirlo. Parla un po' più a lungo.",
+      "unavailable": "Questo dispositivo non sa ancora trasformare da solo la voce in testo nella tua lingua. Puoi scrivere, o parlare in una chat sul computer."
     },
     "send": "Invia",
     "sending": "Invio",

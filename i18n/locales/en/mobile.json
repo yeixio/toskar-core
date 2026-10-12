@@ -290,7 +290,8 @@
       "settingUp": "Getting speech ready on your computer. The first time takes a few minutes…",
       "micDenied": "Toskar can't use the microphone. Allow it in Settings to speak a message.",
       "failed": "Couldn't turn that into text: {{detail}}",
-      "tooShort": "That was too short to hear. Hold on a little longer."
+      "tooShort": "That was too short to hear. Hold on a little longer.",
+      "unavailable": "This device can't turn speech into text on its own for your language yet. You can type, or speak in a chat on your computer."
     },
     "send": "Send",
     "sending": "Sending",

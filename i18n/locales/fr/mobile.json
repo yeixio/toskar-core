@@ -281,7 +281,8 @@
       "settingUp": "Préparation de la voix sur votre ordinateur. La première fois prend quelques minutes…",
       "micDenied": "Toskar ne peut pas utiliser le micro. Autorisez-le dans Réglages pour dicter un message.",
       "failed": "Impossible de le convertir en texte : {{detail}}",
-      "tooShort": "C’était trop court pour être entendu. Parlez un peu plus longtemps."
+      "tooShort": "C’était trop court pour être entendu. Parlez un peu plus longtemps.",
+      "unavailable": "Cet appareil ne sait pas encore convertir seul la parole en texte dans votre langue. Vous pouvez écrire, ou parler dans une discussion sur votre ordinateur."
     },
     "send": "Envoyer",
     "sending": "Envoi",

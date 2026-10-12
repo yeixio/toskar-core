@@ -281,7 +281,8 @@
       "settingUp": "Sprache wird auf deinem Computer vorbereitet. Beim ersten Mal dauert das ein paar Minuten…",
       "micDenied": "Toskar kann das Mikrofon nicht verwenden. Erlaube es in den Einstellungen, um eine Nachricht zu sprechen.",
       "failed": "Konnte nicht in Text umgewandelt werden: {{detail}}",
-      "tooShort": "Das war zu kurz, um etwas zu hören. Sprich etwas länger."
+      "tooShort": "Das war zu kurz, um etwas zu hören. Sprich etwas länger.",
+      "unavailable": "Dieses Gerät kann Sprache in deiner Sprache noch nicht selbst in Text umwandeln. Du kannst tippen oder in einem Chat auf deinem Computer sprechen."
     },
     "send": "Senden",
     "sending": "Wird gesendet",
