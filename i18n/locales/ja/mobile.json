@@ -261,6 +261,18 @@
     },
     "loading": "チャットを読み込み中",
     "placeholder": "Toskarにメッセージを送信",
+    "attach": {
+      "add": "写真またはファイルを追加",
+      "camera": "カメラ",
+      "photos": "写真",
+      "files": "ファイル",
+      "remove": "{{name}} を削除",
+      "adding": "追加中…",
+      "failed": "追加できませんでした: {{detail}}",
+      "tooLarge": "25 MB を超えています。コンピュータが受け取れるのは 25 MB までです。",
+      "needsUpdate": "このデバイスから写真やファイルを送るには、コンピュータの Toskar をアップデートしてください。",
+      "cameraDenied": "Toskar はカメラを使えません。写真を撮るには「設定」で許可してください。"
+    },
     "send": "送信",
     "sending": "送信中",
     "stop": "停止",

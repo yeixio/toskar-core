@@ -261,6 +261,18 @@
     },
     "loading": "正在載入聊天",
     "placeholder": "傳訊息給 Toskar",
+    "attach": {
+      "add": "新增照片或檔案",
+      "camera": "相機",
+      "photos": "照片",
+      "files": "檔案",
+      "remove": "移除 {{name}}",
+      "adding": "正在新增…",
+      "failed": "無法新增：{{detail}}",
+      "tooLarge": "超過 25 MB，電腦最多接收 25 MB。",
+      "needsUpdate": "請更新電腦上的 Toskar，才能從此裝置傳送照片和檔案。",
+      "cameraDenied": "Toskar 無法使用相機。請在「設定」中允許，才能拍照。"
+    },
     "send": "傳送",
     "sending": "正在傳送",
     "stop": "停止",

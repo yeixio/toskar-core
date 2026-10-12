@@ -261,6 +261,18 @@
     },
     "loading": "채팅을 불러오는 중",
     "placeholder": "Toskar에게 메시지 보내기",
+    "attach": {
+      "add": "사진 또는 파일 추가",
+      "camera": "카메라",
+      "photos": "사진",
+      "files": "파일",
+      "remove": "{{name}} 제거",
+      "adding": "추가하는 중…",
+      "failed": "추가할 수 없어요: {{detail}}",
+      "tooLarge": "25MB보다 커요. 컴퓨터는 25MB까지만 받아요.",
+      "needsUpdate": "이 기기에서 사진과 파일을 보내려면 컴퓨터의 Toskar를 업데이트하세요.",
+      "cameraDenied": "Toskar가 카메라를 사용할 수 없어요. 사진을 찍으려면 설정에서 허용하세요."
+    },
     "send": "보내기",
     "sending": "보내는 중",
     "stop": "중지",

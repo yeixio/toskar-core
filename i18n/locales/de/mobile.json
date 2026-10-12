@@ -261,6 +261,18 @@
     },
     "loading": "Chat wird geladen",
     "placeholder": "Nachricht an Toskar",
+    "attach": {
+      "add": "Foto oder Datei hinzufügen",
+      "camera": "Kamera",
+      "photos": "Fotos",
+      "files": "Dateien",
+      "remove": "{{name}} entfernen",
+      "adding": "Wird hinzugefügt…",
+      "failed": "Konnte nicht hinzugefügt werden: {{detail}}",
+      "tooLarge": "Größer als 25 MB, mehr nimmt der Computer nicht an.",
+      "needsUpdate": "Aktualisiere Toskar auf deinem Computer, um Fotos und Dateien von diesem Gerät zu senden.",
+      "cameraDenied": "Toskar kann die Kamera nicht verwenden. Erlaube es in den Einstellungen, um ein Foto aufzunehmen."
+    },
     "send": "Senden",
     "sending": "Wird gesendet",
     "stop": "Stoppen",

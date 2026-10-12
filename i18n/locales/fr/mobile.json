@@ -261,6 +261,18 @@
     },
     "loading": "Chargement de la discussion",
     "placeholder": "Écrire à Toskar",
+    "attach": {
+      "add": "Ajouter une photo ou un fichier",
+      "camera": "Appareil photo",
+      "photos": "Photos",
+      "files": "Fichiers",
+      "remove": "Retirer {{name}}",
+      "adding": "Ajout…",
+      "failed": "Impossible de l’ajouter : {{detail}}",
+      "tooLarge": "Plus de 25 Mo, le maximum accepté par l’ordinateur.",
+      "needsUpdate": "Mettez à jour Toskar sur votre ordinateur pour envoyer des photos et des fichiers depuis cet appareil.",
+      "cameraDenied": "Toskar ne peut pas utiliser l’appareil photo. Autorisez-le dans Réglages pour prendre une photo."
+    },
     "send": "Envoyer",
     "sending": "Envoi",
     "stop": "Arrêter",

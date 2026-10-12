@@ -261,6 +261,18 @@
     },
     "loading": "正在加载聊天",
     "placeholder": "给 Toskar 发消息",
+    "attach": {
+      "add": "添加照片或文件",
+      "camera": "相机",
+      "photos": "照片",
+      "files": "文件",
+      "remove": "移除 {{name}}",
+      "adding": "正在添加…",
+      "failed": "无法添加：{{detail}}",
+      "tooLarge": "超过 25 MB，电脑最多接收 25 MB。",
+      "needsUpdate": "请更新电脑上的 Toskar，以便从此设备发送照片和文件。",
+      "cameraDenied": "Toskar 无法使用相机。请在“设置”中允许，以便拍照。"
+    },
     "send": "发送",
     "sending": "正在发送",
     "stop": "停止",

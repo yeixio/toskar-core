@@ -270,6 +270,18 @@
     },
     "loading": "Loading chat",
     "placeholder": "Message Toskar",
+    "attach": {
+      "add": "Add a photo or file",
+      "camera": "Camera",
+      "photos": "Photos",
+      "files": "Files",
+      "remove": "Remove {{name}}",
+      "adding": "Adding…",
+      "failed": "Couldn't add it: {{detail}}",
+      "tooLarge": "Larger than 25 MB, the most the computer takes.",
+      "needsUpdate": "Update Toskar on your computer to send photos and files from this device.",
+      "cameraDenied": "Toskar can't use the camera. Allow it in Settings to take a photo."
+    },
     "send": "Send",
     "sending": "Sending",
     "stop": "Stop",
