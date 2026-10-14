@@ -1,0 +1,42 @@
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA512
+
+Origin: Yggdrasil
+Label: Yggdrasil
+Suite: stable
+Codename: stable
+Architectures: amd64 arm64
+Components: main
+Description: Toskar core packages
+Date: Wed, 14 Oct 2026 13:12:52 +0000
+MD5Sum:
+ fed3ea14a0934aae41ce287f4a50d4cd              182 Release
+ 4d0dec802010fe4ab4154f47499df3b9             1118 main/binary-amd64/Packages
+ 7c8ff66747e632da0e1c59bfb1ee2932              634 main/binary-amd64/Packages.gz
+ 124a7c93ea737a570b03b5a90d82c2b4             1118 main/binary-arm64/Packages
+ 8f264a6e4df06d40406c21fe8a0b308b              635 main/binary-arm64/Packages.gz
+SHA1:
+ 015a10e79ce5a7dd7f78a76ffe8950d0df0c9ece              182 Release
+ ba6d7faef34cdb70a47dfa36f068606e1f382de0             1118 main/binary-amd64/Packages
+ d973bf007a98726ffab159b195577c477f708df3              634 main/binary-amd64/Packages.gz
+ 5431b4276c560790fe727549ddc3e45d4ee91501             1118 main/binary-arm64/Packages
+ 9c7bd408b897410f4dff00a9a8b509d4ca0d223f              635 main/binary-arm64/Packages.gz
+SHA256:
+ b46905ed0e5479a4d965132b2a363ecfa99dc561c8fde3cfbe6d67115d8b829d              182 Release
+ bfcbef1de756a65c396450e65d3c8491eb0ca2350b3b6c55279ebb623feb9f28             1118 main/binary-amd64/Packages
+ 7d1a64414858238a1778bcd79622c5642468254a735284f0c20a8f8de9ddc2ad              634 main/binary-amd64/Packages.gz
+ b5762ce3dfcff292bd8e31d04911aee3d4f4a564f8df4b882f7ee8c1f82d1354             1118 main/binary-arm64/Packages
+ a4518affe5f6623c2558fe3b619a2b9694ee5aa4cd2d397fe01bd2fbf759de62              635 main/binary-arm64/Packages.gz
+SHA512:
+ 2b87991f1626ebeb31d54d6253f61f1e411ce8c82f433b616692e9a4eb559dfbbb28ca4ed71ea38190a1aa10331e723840013ff2bb406999c0c82091ab44c66a              182 Release
+ e2a15409da1c4f920a3390a49c1c53169aba68601c752c41eb1d0863c05afeda3b443d8770c05988488f68e8fbac790081a6594193a3d1374f1352695f994859             1118 main/binary-amd64/Packages
+ 26639db5cef633662afcf9894ba0b88176fa241815df715832ab79d0c0f7cd2e3a2d683c11abf2200384c8a44dab4f8915ce3a984d15440bc08e3f8d1ce72276              634 main/binary-amd64/Packages.gz
+ 124dc8f729b4a2435097173b29eb4a496bdeadc2910718d7d3f123c3696a61c0d580e789ceb20c001e17c2444bcf609d076e972d53aee13d1aeeb12a05a9763b             1118 main/binary-arm64/Packages
+ e902b54060cce2827b059e4668155a5f07cadf8e1503402aa5ea563a5d13dce2b0801f9e20aaec6f70af884ef0a78906a2c7edb6f793a77366454bb4e33bf3b1              635 main/binary-arm64/Packages.gz
+-----BEGIN PGP SIGNATURE-----
+
+iHUEARYKAB0WIQRxJCjI6CHmTNQYMvUtKEYjkNDGBAUCas9/1AAKCRAtKEYjkNDG
+BJrVAP9wcxa5k/c3i3M02ZUQwoSJO/9UfPLFgW1tZ2MOSK4ZiAEAyGsAZedfsgLH
+NYbQBHMqGdS8Wp4KelxMBPejSv8usA8=
+=XG6I
+-----END PGP SIGNATURE-----
