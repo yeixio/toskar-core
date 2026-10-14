@@ -33,6 +33,9 @@ const allPages = [
   '/tools?tab=add',
   '/api-access',
   '/settings',
+  // People and Portals (#206, #205), added after the audit's first passes.
+  '/people',
+  '/portals',
 ]
 const only = (process.env.A11Y_PAGES || '').split(',').map((p) => p.trim()).filter(Boolean)
 const pages = only.length ? allPages.filter((p) => only.includes(p)) : allPages

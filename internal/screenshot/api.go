@@ -72,6 +72,14 @@ func screenshotGET(path string) (string, bool) {
 		return `[{"id":"owner","name":"Owner","role":"owner","created_at":"2026-09-24T00:00:00Z","sign_in":false},` +
 			`{"id":"p-dana","name":"Dana","username":"dana","role":"member","created_at":"2026-09-25T00:00:00Z","sign_in":true,"profiles":["research"]},` +
 			`{"id":"p-sam","name":"Sam","role":"visitor","created_at":"2026-09-26T00:00:00Z","sign_in":false}]`, true
+	// A shop's chat portal for its customers (#205).
+	case path == "/api/v1/portals":
+		return `[{"id":"portal-shop","slug":"yarn-help","name":"Yarn shop help","profile_id":"general-assistant","tools":"read_only","memory":false,"language":"en",` +
+			`"access":"open","has_passcode":false,"branding":{"title":"Ask the yarn shop","accent":"#0a7d6f","theme":"system","welcome":"Questions about yarn, patterns, or your order?","prompts":["Which yarn for a first scarf?","When do you open?"]},` +
+			`"enabled":true,"hourly_limit":30,"max_message":2000,"concurrency":2,"embed_origins":["https://shop.example.com"],"retention_days":30,` +
+			`"created_at":"2026-10-01T00:00:00Z","updated_at":"2026-10-08T00:00:00Z"}]`, true
+	case strings.HasPrefix(path, "/api/v1/portals/") && strings.HasSuffix(path, "/usage"):
+		return `{"visitors_7":12,"conversations_7":15,"messages_7":48,"visitors_30":41,"conversations_30":57,"messages_30":190}`, true
 	case path == "/api/v1/profile-pins":
 		return `{"roles":{"member":[],"visitor":["general-assistant"]}}`, true
 	case path == "/api/v1/version":
