@@ -14,6 +14,7 @@ import (
 
 	"github.com/dlclark/regexp2"
 	toskar "github.com/yeixio/toskar-core"
+	"github.com/yeixio/toskar-core/internal/typo"
 	"golang.org/x/text/unicode/norm"
 )
 
@@ -91,6 +92,48 @@ type requestWordList struct {
 	code     string
 	mu       sync.Mutex
 	compiled map[string]*regexp2.Regexp
+
+	typoOnce  sync.Once
+	typoWords *typo.Vocab
+}
+
+// typos is the language's words, for requests with typos in them (#451):
+// "evry mornign at 8". Languages written without spaces have none, since
+// their words can't be told apart.
+func (w *requestWordList) typos() *typo.Vocab {
+	w.typoOnce.Do(func() {
+		if !w.Spaced {
+			return
+		}
+		raw, err := json.Marshal(w)
+		if err != nil {
+			return
+		}
+		var all any
+		if json.Unmarshal(raw, &all) != nil {
+			return
+		}
+		var words []string
+		var walk func(any)
+		walk = func(v any) {
+			switch v := v.(type) {
+			case string:
+				words = append(words, v)
+			case []any:
+				for _, x := range v {
+					walk(x)
+				}
+			case map[string]any:
+				for k, x := range v {
+					words = append(words, k)
+					walk(x)
+				}
+			}
+		}
+		walk(all)
+		w.typoWords = typo.FromWords(words...)
+	})
+	return w.typoWords
 }
 
 var (

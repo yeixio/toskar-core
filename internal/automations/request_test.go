@@ -145,6 +145,26 @@ func TestParseRequestEnglish(t *testing.T) {
 	}
 }
 
+// Requests with typos read as if they were spelled right (#451).
+func TestParseRequestTypos(t *testing.T) {
+	price := mustParse(t, "evry mornign at 8 chek this product and tell me if the price is below $500", "en")
+	daily(8, 0).check(t, "every morning", price.Schedule)
+	if !sameNotification(price.Notification, threshold(OpBelow, 500, "USD")) {
+		t.Errorf("notification = %+v", price.Notification)
+	}
+	weekly(3, 9, 0).check(t, "wednesday", mustParse(t, "every wenesday at 9am check the news", "en").Schedule)
+	weekly(5, 8, 0).check(t, "friday", mustParse(t, "evrey fridy, check for new releases", "en").Schedule)
+	once(tomorrowAt9).check(t, "tomorrow", mustParse(t, "tomorow at 9am run this research prompt", "en").Schedule)
+	daily(7, 0).check(t, "day", mustParse(t, "evrey day at 7am check the news", "en").Schedule)
+	// Written without accents, as on a keyboard without them.
+	daily(8, 0).check(t, "spanish", mustParse(t, "todos los dias a las 8 revisa las noticias", "es").Schedule)
+	// No schedule stays no schedule: "whether" isn't "weather", and a
+	// request with no time words still asks when.
+	if _, err := ParseRequest("tell me whether it rains", requestNow, requestZone, "en"); !errors.Is(err, ErrRequestWhen) {
+		t.Errorf("no schedule: %v", err)
+	}
+}
+
 func TestParseRequestEnglishInAnotherLanguage(t *testing.T) {
 	parsed := mustParse(t, "Every morning at 8:00 AM, tell me if the price is below 500.", "de")
 	daily(8, 0).check(t, "english in de", parsed.Schedule)

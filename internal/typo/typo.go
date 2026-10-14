@@ -22,12 +22,18 @@ import (
 	"strings"
 	"unicode"
 	"unicode/utf8"
+
+	"golang.org/x/text/runes"
+	"golang.org/x/text/transform"
+	"golang.org/x/text/unicode/norm"
 )
 
 // Vocab is the words a set of rules matches.
 type Vocab struct {
 	words map[string]bool
 	list  []string
+	// folded is each word without accents, so "manana" is "mañana".
+	folded map[string]string
 }
 
 var (
@@ -52,15 +58,49 @@ func FromPatterns(patterns ...string) *Vocab {
 			if loc[0] > 0 && strings.ContainsRune(")]", rune(p[loc[0]-1])) {
 				continue
 			}
-			w := strings.ToLower(strings.Trim(p[loc[0]:loc[1]], "'"))
-			if utf8.RuneCountInString(w) >= 4 && !v.words[w] {
-				v.words[w] = true
-				v.list = append(v.list, w)
-			}
+			v.add(p[loc[0]:loc[1]])
 		}
 	}
 	sort.Strings(v.list)
 	return v
+}
+
+// FromWords collects a vocabulary from words and phrases, such as a
+// language's automation request words (internal/automations).
+func FromWords(phrases ...string) *Vocab {
+	v := &Vocab{words: map[string]bool{}}
+	for _, p := range phrases {
+		for _, w := range tokenRe.FindAllString(p, -1) {
+			v.add(w)
+		}
+	}
+	sort.Strings(v.list)
+	return v
+}
+
+func (v *Vocab) add(w string) {
+	w = strings.ToLower(strings.Trim(w, "'"))
+	if utf8.RuneCountInString(w) < 4 || v.words[w] {
+		return
+	}
+	v.words[w] = true
+	v.list = append(v.list, w)
+	if f := fold(w); f != w {
+		if v.folded == nil {
+			v.folded = map[string]string{}
+		}
+		v.folded[f] = w
+	}
+}
+
+// fold takes the accents off letters: "mañana" is "manana", "émission"
+// "emission".
+func fold(s string) string {
+	out, _, err := transform.String(transform.Chain(norm.NFD, runes.Remove(runes.In(unicode.Mn)), norm.NFC), s)
+	if err != nil {
+		return s
+	}
+	return out
 }
 
 // Words lists the vocabulary, for tests.
@@ -110,6 +150,10 @@ func (v *Vocab) correct(token string, atStart bool) string {
 	if v.words[word] || common[word] || inflected(word, v.words) {
 		return ""
 	}
+	// Typed without its accents: "manana" is "mañana".
+	if w, ok := v.folded[word]; ok {
+		return w
+	}
 	// A capitalized word past the start is likely a name: "Brandy", "Lisa".
 	if !atStart {
 		if r, _ := utf8.DecodeRuneInString(token); unicode.IsUpper(r) {
@@ -125,7 +169,7 @@ func (v *Vocab) correct(token string, atStart bool) string {
 		if abs(n-size) > limit {
 			continue
 		}
-		d, same := Distance(word, cand, limit), n == size
+		d, same := Distance(fold(word), fold(cand), limit), n == size
 		if d > limit {
 			continue
 		}

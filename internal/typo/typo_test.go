@@ -87,3 +87,18 @@ func TestFixTie(t *testing.T) {
 		t.Errorf("Fix(thansk) = %q, want thanks", got)
 	}
 }
+
+func TestFromWordsAndAccents(t *testing.T) {
+	v := FromWords("cada mañana", "todos los días", "semana", "every", "tomorrow")
+	for _, c := range []struct{ in, want string }{
+		{"cada manana a las 8", "cada mañana a las 8"}, // typed without the accent
+		{"cada manaña", "cada mañana"},                 // the accent in the wrong place
+		{"cada semnaa", "cada semana"},
+		{"evry day", "every day"},
+		{"todos los dias", "todos los días"},
+	} {
+		if got := v.Fix(c.in); got != c.want {
+			t.Errorf("Fix(%q) = %q, want %q", c.in, got, c.want)
+		}
+	}
+}

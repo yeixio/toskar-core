@@ -59,9 +59,20 @@ func ParseRequest(text string, now time.Time, timeZone, lang string) (ParsedRequ
 	// schedule is the language the request is written in.
 	languages := requestLanguages(lang)
 	for _, words := range languages {
-		found, err := parseSchedule(withDigits(normalized, words), words, now, loc, timeZone, lang)
+		text := normalized
+		found, err := parseSchedule(withDigits(text, words), words, now, loc, timeZone, lang)
 		if err != nil {
 			return ParsedRequest{}, err
+		}
+		// The same request with its typos corrected toward the language's
+		// words (#451): "evry mornign at 8", "on wenesday", "cada manana".
+		if found == nil && words.Spaced {
+			if fixed := words.typos().Fix(text); fixed != text {
+				if found, err = parseSchedule(withDigits(fixed, words), words, now, loc, timeZone, lang); err != nil {
+					return ParsedRequest{}, err
+				}
+				text = fixed
+			}
 		}
 		if found == nil {
 			continue
@@ -73,9 +84,9 @@ func ParseRequest(text string, now time.Time, timeZone, lang string) (ParsedRequ
 			}
 		}
 		// An amount without a currency is in the language's.
-		notification := parseNotification(normalized, order, languages[0].Currency)
+		notification := parseNotification(text, order, languages[0].Currency)
 		return ParsedRequest{
-			Name:         automationName(normalized, original, notification, order, lang),
+			Name:         automationName(text, original, notification, order, lang),
 			Prompt:       readableTask(original, notification, words),
 			Schedule:     found.schedule,
 			Notification: notification,
