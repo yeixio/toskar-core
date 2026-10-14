@@ -571,6 +571,7 @@
       "egg": "¿Cuánto tarda en cocerse un huevo?"
     },
     "asking": "Preguntando a tu teléfono…",
+    "askingComputer": "Preguntando a tu ordenador…",
     "more": "La respuesta completa está en Toskar en tu teléfono.",
     "stillAnswering": "Tu teléfono sigue respondiendo. Abre Toskar allí para ver el resto.",
     "unreachable": "No se puede contactar con tu teléfono. Tenlo cerca y vuelve a intentarlo.",
@@ -580,7 +581,22 @@
     "failed": "No ha funcionado. Vuelve a intentarlo.",
     "tryAgain": "Reintentar",
     "askAnother": "Preguntar otra cosa",
-    "complicationDescription": "Pregunta a Toskar desde la esfera del reloj."
+    "complicationDescription": "Pregunta a Toskar desde la esfera del reloj.",
+    "via": {
+      "home": "Por tu red de casa",
+      "direct": "Por internet",
+      "relay": "Por el relé de Toskar",
+      "phone": "Por tu teléfono"
+    }
+  },
+  "watchLink": {
+    "companionName": "Reloj con {{device}}",
+    "title": "Reloj",
+    "direct": "Tu reloj pregunta directamente a tu ordenador, en casa o fuera, y a través de este teléfono cuando no puede.",
+    "throughPhone": "Tu reloj pregunta a través de este teléfono.",
+    "alwaysPhone": "Preguntar siempre a través de este teléfono",
+    "alwaysPhoneHint": "Entonces las respuestas esperan a este teléfono, que puede estar en reposo.",
+    "failed": "No se pudo conectar tu reloj al ordenador: {{detail}}"
   },
   "anywhere": {
     "title": "Usa Toskar fuera de casa",

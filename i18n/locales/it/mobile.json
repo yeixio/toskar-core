@@ -571,6 +571,7 @@
       "egg": "Quanto si cuoce un uovo sodo?"
     },
     "asking": "Sto chiedendo al telefono…",
+    "askingComputer": "Chiedo al tuo computer…",
     "more": "La risposta completa è in Toskar sul telefono.",
     "stillAnswering": "Il telefono sta ancora rispondendo. Apri Toskar lì per il resto.",
     "unreachable": "Il telefono non è raggiungibile. Tienilo vicino e riprova.",
@@ -580,7 +581,22 @@
     "failed": "Non ha funzionato. Riprova.",
     "tryAgain": "Riprova",
     "askAnother": "Chiedi altro",
-    "complicationDescription": "Chiedi a Toskar dal quadrante."
+    "complicationDescription": "Chiedi a Toskar dal quadrante.",
+    "via": {
+      "home": "Tramite la rete di casa",
+      "direct": "Tramite internet",
+      "relay": "Tramite il relay di Toskar",
+      "phone": "Tramite il telefono"
+    }
+  },
+  "watchLink": {
+    "companionName": "Orologio con {{device}}",
+    "title": "Orologio",
+    "direct": "L'orologio chiede direttamente al computer, a casa o fuori, e tramite questo telefono quando non può.",
+    "throughPhone": "L'orologio chiede tramite questo telefono.",
+    "alwaysPhone": "Chiedi sempre tramite questo telefono",
+    "alwaysPhoneHint": "Le risposte aspettano questo telefono, che potrebbe essere in standby.",
+    "failed": "Impossibile collegare l'orologio al computer: {{detail}}"
   },
   "anywhere": {
     "title": "Usa Toskar fuori casa",

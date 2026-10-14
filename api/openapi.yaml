@@ -750,6 +750,32 @@ paths:
                 type: array
                 items:
                   type: object
+    post:
+      summary: Connect a companion device, such as a watch with its phone
+      description: >-
+        A connected device asks for a key of its own for a device that goes along with it
+        (yeixio/toskar-apps#213), for the same person, so it shows in Devices and can be
+        disconnected on its own. It works from anywhere, as no code is typed. The answer is
+        the same as POST /devices/pair's. A person may have 20 connected devices.
+      operationId: addCompanionDevice
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                device_name:
+                  type: string
+      responses:
+        "201":
+          description: The companion's key, the certificate's fingerprint, and the route for away from home
+          content:
+            application/json:
+              schema:
+                type: object
+        "409":
+          description: DEVICE_LIMIT, the person has 20 connected devices
   /api/v1/me/devices/{id}:
     delete:
       summary: Disconnect one of your devices (#206)

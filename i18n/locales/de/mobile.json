@@ -564,6 +564,7 @@
       "egg": "Wie lange kocht ein Ei?"
     },
     "asking": "Dein Telefon wird gefragt …",
+    "askingComputer": "Frage deinen Computer…",
     "more": "Die ganze Antwort steht in Toskar auf deinem Telefon.",
     "stillAnswering": "Dein Telefon antwortet noch. Öffne Toskar dort für den Rest.",
     "unreachable": "Dein Telefon ist nicht erreichbar. Halte es in der Nähe und versuche es erneut.",
@@ -573,7 +574,22 @@
     "failed": "Das hat nicht geklappt. Versuche es erneut.",
     "tryAgain": "Erneut versuchen",
     "askAnother": "Noch etwas fragen",
-    "complicationDescription": "Frag Toskar direkt vom Zifferblatt."
+    "complicationDescription": "Frag Toskar direkt vom Zifferblatt.",
+    "via": {
+      "home": "Über dein Heimnetz",
+      "direct": "Über das Internet",
+      "relay": "Über das Toskar-Relay",
+      "phone": "Über dein Telefon"
+    }
+  },
+  "watchLink": {
+    "companionName": "Uhr mit {{device}}",
+    "title": "Uhr",
+    "direct": "Deine Uhr fragt deinen Computer direkt, zu Hause oder unterwegs, und über dieses Telefon, wenn das nicht geht.",
+    "throughPhone": "Deine Uhr fragt über dieses Telefon.",
+    "alwaysPhone": "Immer über dieses Telefon fragen",
+    "alwaysPhoneHint": "Antworten warten dann auf dieses Telefon, das vielleicht schläft.",
+    "failed": "Deine Uhr konnte nicht mit dem Computer verbunden werden: {{detail}}"
   },
   "anywhere": {
     "title": "Toskar unterwegs nutzen",

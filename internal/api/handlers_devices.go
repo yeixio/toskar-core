@@ -20,6 +20,7 @@ func (s *Server) deviceRoutes(api *mux.Router) {
 	api.HandleFunc("/devices/pairing", s.handleCancelDevicePairing).Methods(http.MethodDelete)
 	api.HandleFunc(pairDeviceRoute, s.handlePairDevice).Methods(http.MethodPost)
 	api.HandleFunc("/me/devices", s.handleMyDevices).Methods(http.MethodGet)
+	api.HandleFunc("/me/devices", s.handleAddCompanion).Methods(http.MethodPost)
 	api.HandleFunc("/me/devices/{id}", s.handleDisconnectMyDevice).Methods(http.MethodDelete)
 }
 
@@ -140,13 +141,17 @@ func (s *Server) handlePairDevice(w http.ResponseWriter, r *http.Request) {
 		writeErrFrom(w, status, "PAIRING_FAILED", err)
 		return
 	}
-	// The certificate's fingerprint, for a phone to keep and check from
-	// now on (#213); over plain HTTP the phone checks it on its next HTTPS
-	// connection.
+	writeJSON(w, http.StatusCreated, s.pairedAnswer(rec, secret))
+}
+
+// pairedAnswer is what a newly connected device keeps: its key, the
+// certificate's fingerprint to check from now on (#213; over plain HTTP the
+// phone checks it on its next HTTPS connection), and the route secret for
+// finding this computer away from home (#456).
+func (s *Server) pairedAnswer(rec auth.APIKeyRecord, secret string) map[string]any {
 	tlsInfo := s.TLS()
 	out := map[string]any{"api_key": secret, "key": rec,
 		"tls_fingerprint": tlsInfo.Fingerprint, "tls_short": tlsInfo.Short}
-	// The route secret, for finding this computer away from home (#456).
 	if s.deps.RouteSecret != nil {
 		if route, id, err := s.deps.RouteSecret(); err == nil {
 			out["route_secret"], out["route_id"] = route, id
@@ -156,7 +161,52 @@ func (s *Server) handlePairDevice(w http.ResponseWriter, r *http.Request) {
 			s.addRelayToken(out)
 		}
 	}
-	writeJSON(w, http.StatusCreated, out)
+	return out
+}
+
+// maxDevices is how many connected devices one person may have; a
+// companion past it is refused, so a key can't make keys without end.
+const maxDevices = 20
+
+// handleAddCompanion connects a device that goes along with one already
+// connected, such as a watch with its phone (yeixio/toskar-apps#213): it
+// gets a key of its own, for the same person, so it shows in Devices and
+// can be disconnected on its own. A connected device asks for it, from
+// anywhere, so there's no code to type on a watch.
+func (s *Server) handleAddCompanion(w http.ResponseWriter, r *http.Request) {
+	if s.deps.Devices == nil || s.deps.Devices.CreateKey == nil || s.deps.ListAPIKeys == nil {
+		writeErr(w, http.StatusNotImplemented, "NOT_IMPLEMENTED", "Connecting a device isn't available.", nil)
+		return
+	}
+	var body struct {
+		DeviceName string `json:"device_name"`
+	}
+	if err := json.NewDecoder(io.LimitReader(r.Body, 4096)).Decode(&body); err != nil {
+		writeErr(w, http.StatusBadRequest, "INVALID_JSON", "invalid body", nil)
+		return
+	}
+	list, err := s.myDevices(r)
+	if err != nil {
+		writeErrFrom(w, http.StatusInternalServerError, "DEVICES_FAILED", err)
+		return
+	}
+	live := 0
+	for _, k := range list {
+		if !k.Revoked {
+			live++
+		}
+	}
+	if live >= maxDevices {
+		writeErr(w, http.StatusConflict, "DEVICE_LIMIT", "You have as many connected devices as you can. Disconnect one first.",
+			map[string]any{"limit": maxDevices})
+		return
+	}
+	rec, secret, err := s.deps.Devices.CreateKey(r.Context(), auth.CleanDeviceName(body.DeviceName))
+	if err != nil {
+		writeErrFrom(w, http.StatusInternalServerError, "PAIRING_FAILED", err)
+		return
+	}
+	writeJSON(w, http.StatusCreated, s.pairedAnswer(rec, secret))
 }
 
 // myDevices are the request's person's connected devices (#206).

@@ -640,6 +640,7 @@
       "egg": "How long to boil an egg?"
     },
     "asking": "Asking your phone…",
+    "askingComputer": "Asking your computer…",
     "more": "The full answer is in Toskar on your phone.",
     "stillAnswering": "Still answering on your phone. Open Toskar there for the rest.",
     "unreachable": "Your phone isn't reachable. Keep it nearby, then try again.",
@@ -649,7 +650,22 @@
     "failed": "That didn't work. Try again.",
     "tryAgain": "Try again",
     "askAnother": "Ask another",
-    "complicationDescription": "Ask Toskar from your watch face."
+    "complicationDescription": "Ask Toskar from your watch face.",
+    "via": {
+      "home": "Via your home network",
+      "direct": "Via the internet",
+      "relay": "Via Toskar's relay",
+      "phone": "Via your phone"
+    }
+  },
+  "watchLink": {
+    "companionName": "Watch with {{device}}",
+    "title": "Watch",
+    "direct": "Your watch asks your computer directly, at home or away, and asks through this phone when it can't.",
+    "throughPhone": "Your watch asks through this phone.",
+    "alwaysPhone": "Always ask through this phone",
+    "alwaysPhoneHint": "Answers then wait for this phone, which may be asleep.",
+    "failed": "Couldn't connect your watch to the computer: {{detail}}"
   },
   "anywhere": {
     "title": "Use Toskar away from home",

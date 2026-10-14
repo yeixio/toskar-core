@@ -557,6 +557,7 @@
       "egg": "ゆで卵は何分ゆでる？"
     },
     "asking": "電話に問い合わせ中…",
+    "askingComputer": "コンピュータに質問中…",
     "more": "回答の全文は電話のToskarにあります。",
     "stillAnswering": "電話でまだ回答中です。続きは電話のToskarで確認してください。",
     "unreachable": "電話に接続できません。近くに置いて、もう一度お試しください。",
@@ -566,7 +567,22 @@
     "failed": "うまくいきませんでした。もう一度お試しください。",
     "tryAgain": "再試行",
     "askAnother": "別の質問",
-    "complicationDescription": "文字盤からToskarに質問できます。"
+    "complicationDescription": "文字盤からToskarに質問できます。",
+    "via": {
+      "home": "自宅のネットワーク経由",
+      "direct": "インターネット経由",
+      "relay": "Toskar のリレー経由",
+      "phone": "電話経由"
+    }
+  },
+  "watchLink": {
+    "companionName": "{{device}} のウォッチ",
+    "title": "ウォッチ",
+    "direct": "ウォッチは自宅でも外出先でもコンピュータに直接質問し、できないときはこの電話を経由します。",
+    "throughPhone": "ウォッチはこの電話を経由して質問します。",
+    "alwaysPhone": "常にこの電話を経由する",
+    "alwaysPhoneHint": "その場合、回答はスリープ中かもしれないこの電話を待ちます。",
+    "failed": "ウォッチをコンピュータに接続できませんでした：{{detail}}"
   },
   "anywhere": {
     "title": "外出先で Toskar を使う",

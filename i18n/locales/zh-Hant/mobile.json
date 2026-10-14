@@ -557,6 +557,7 @@
       "egg": "水煮蛋要煮多久？"
     },
     "asking": "正在詢問你的手機…",
+    "askingComputer": "正在詢問你的電腦…",
     "more": "完整回答在你手機上的 Toskar 中。",
     "stillAnswering": "手機仍在回答。請在手機上打開 Toskar 查看其餘內容。",
     "unreachable": "無法連線到你的手機。請將它放在附近，然後再試一次。",
@@ -566,7 +567,22 @@
     "failed": "沒有成功。請再試一次。",
     "tryAgain": "再試一次",
     "askAnother": "再問一個",
-    "complicationDescription": "從錶面直接問 Toskar。"
+    "complicationDescription": "從錶面直接問 Toskar。",
+    "via": {
+      "home": "透過家用網路",
+      "direct": "透過網際網路",
+      "relay": "透過 Toskar 中繼",
+      "phone": "透過你的手機"
+    }
+  },
+  "watchLink": {
+    "companionName": "{{device}} 的手錶",
+    "title": "手錶",
+    "direct": "你的手錶會直接詢問你的電腦，無論在家還是外出；無法直接詢問時，透過這支手機詢問。",
+    "throughPhone": "你的手錶透過這支手機詢問。",
+    "alwaysPhone": "一律透過這支手機詢問",
+    "alwaysPhoneHint": "這樣回答會等待這支手機，而它可能處於休眠狀態。",
+    "failed": "無法將你的手錶連線到電腦：{{detail}}"
   },
   "anywhere": {
     "title": "在外使用 Toskar",

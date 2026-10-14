@@ -571,6 +571,7 @@
       "egg": "Combien de temps cuire un œuf ?"
     },
     "asking": "Question envoyée à votre téléphone…",
+    "askingComputer": "Question à votre ordinateur…",
     "more": "La réponse complète est dans Toskar sur votre téléphone.",
     "stillAnswering": "Votre téléphone répond encore. Ouvrez Toskar sur celui-ci pour la suite.",
     "unreachable": "Votre téléphone est injoignable. Gardez-le à proximité, puis réessayez.",
@@ -580,7 +581,22 @@
     "failed": "Cela n'a pas fonctionné. Réessayez.",
     "tryAgain": "Réessayer",
     "askAnother": "Autre question",
-    "complicationDescription": "Posez une question à Toskar depuis le cadran."
+    "complicationDescription": "Posez une question à Toskar depuis le cadran.",
+    "via": {
+      "home": "Par votre réseau domestique",
+      "direct": "Par Internet",
+      "relay": "Par le relais Toskar",
+      "phone": "Par votre téléphone"
+    }
+  },
+  "watchLink": {
+    "companionName": "Montre avec {{device}}",
+    "title": "Montre",
+    "direct": "Votre montre interroge directement votre ordinateur, chez vous ou ailleurs, et passe par ce téléphone quand elle ne peut pas.",
+    "throughPhone": "Votre montre passe par ce téléphone.",
+    "alwaysPhone": "Toujours passer par ce téléphone",
+    "alwaysPhoneHint": "Les réponses attendent alors ce téléphone, qui peut être en veille.",
+    "failed": "Impossible de connecter votre montre à l'ordinateur : {{detail}}"
   },
   "anywhere": {
     "title": "Utiliser Toskar hors de la maison",

@@ -557,6 +557,7 @@
       "egg": "煮鸡蛋要多久？"
     },
     "asking": "正在询问你的手机…",
+    "askingComputer": "正在询问你的电脑…",
     "more": "完整回答在你手机上的 Toskar 中。",
     "stillAnswering": "手机仍在回答。请在手机上打开 Toskar 查看其余内容。",
     "unreachable": "无法连接到你的手机。请将它放在附近，然后重试。",
@@ -566,7 +567,22 @@
     "failed": "没有成功。请重试。",
     "tryAgain": "重试",
     "askAnother": "再问一个",
-    "complicationDescription": "从表盘直接问 Toskar。"
+    "complicationDescription": "从表盘直接问 Toskar。",
+    "via": {
+      "home": "通过家庭网络",
+      "direct": "通过互联网",
+      "relay": "通过 Toskar 中继",
+      "phone": "通过你的手机"
+    }
+  },
+  "watchLink": {
+    "companionName": "{{device}} 的手表",
+    "title": "手表",
+    "direct": "你的手表会直接询问你的电脑，无论在家还是外出；无法直接询问时，通过这部手机询问。",
+    "throughPhone": "你的手表通过这部手机询问。",
+    "alwaysPhone": "始终通过这部手机询问",
+    "alwaysPhoneHint": "这样回答会等待这部手机，而它可能处于休眠状态。",
+    "failed": "无法将你的手表连接到电脑：{{detail}}"
   },
   "anywhere": {
     "title": "在外使用 Toskar",

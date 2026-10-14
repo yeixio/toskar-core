@@ -277,10 +277,13 @@ var deviceRoutes = map[string]bool{
 	"PUT /api/v1/remote-access/relay-token": true,
 	// Whether devices away from home reach the computer, and Check now,
 	// for an Admin's phone (#546); a Member's gets ROLE_REQUIRED.
-	"GET /api/v1/remote-access":               true,
-	"POST /api/v1/remote-access/check":        true,
-	"GET /api/v1/health":                      true,
-	"GET /api/v1/version":                     true,
+	"GET /api/v1/remote-access":        true,
+	"POST /api/v1/remote-access/check": true,
+	"GET /api/v1/health":               true,
+	"GET /api/v1/version":              true,
+	// A watch going along with the phone gets a key of its own
+	// (yeixio/toskar-apps#213).
+	"POST /api/v1/me/devices":                 true,
 	"GET /api/v1/settings":                    true,
 	"GET /api/v1/profiles":                    true,
 	"GET /api/v1/models":                      true,

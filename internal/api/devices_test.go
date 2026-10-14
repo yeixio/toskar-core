@@ -123,4 +123,46 @@ func TestConnectAPhone(t *testing.T) {
 	if len(list) != 1 || list[0].Kind != auth.KindDevice {
 		t.Fatalf("keys = %+v", list)
 	}
+
+	// The phone connects its watch, from anywhere, with no code: the watch
+	// gets a key of its own (yeixio/toskar-apps#213).
+	companion := func(addr, key string) *httptest.ResponseRecorder {
+		r := httptest.NewRequest(http.MethodPost, "/api/v1/me/devices", strings.NewReader(`{"device_name":"Watch with Mike's phone"}`))
+		r.RemoteAddr = addr
+		if key != "" {
+			r.Header.Set("Authorization", "Bearer "+key)
+		}
+		return do(r)
+	}
+	if got := companion("192.168.1.20:5000", ""); got.Code != http.StatusUnauthorized {
+		t.Fatalf("companion without a key: %d", got.Code)
+	}
+	watch := companion("192.168.1.20:5000", got.APIKey)
+	if watch.Code != http.StatusCreated {
+		t.Fatalf("companion: %d %s", watch.Code, watch.Body.String())
+	}
+	var w struct {
+		APIKey string            `json:"api_key"`
+		Key    auth.APIKeyRecord `json:"key"`
+	}
+	_ = json.Unmarshal(watch.Body.Bytes(), &w)
+	if w.APIKey == "" || w.APIKey == got.APIKey || w.Key.Kind != auth.KindDevice || w.Key.Name != "Watch with Mike's phone" || w.Key.PersonID != got.Key.PersonID {
+		t.Fatalf("watch = %+v (phone %+v)", w.Key, got.Key)
+	}
+	r := httptest.NewRequest(http.MethodGet, "/api/v1/health", nil)
+	r.RemoteAddr = "192.168.1.20:5000"
+	r.Header.Set("Authorization", "Bearer "+w.APIKey)
+	if code := do(r).Code; code != http.StatusOK {
+		t.Fatalf("watch health: %d", code)
+	}
+
+	// No end of keys: past 20 devices, a companion is refused.
+	for i := 0; i < 18; i++ {
+		if got := companion("192.168.1.20:5000", got.APIKey); got.Code != http.StatusCreated {
+			t.Fatalf("companion %d: %d", i, got.Code)
+		}
+	}
+	if got := companion("192.168.1.20:5000", got.APIKey); got.Code != http.StatusConflict || !strings.Contains(got.Body.String(), "DEVICE_LIMIT") {
+		t.Fatalf("21st device: %d %s", got.Code, got.Body.String())
+	}
 }

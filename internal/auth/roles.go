@@ -20,6 +20,7 @@ var visitorRoutes = map[string]bool{
 	"PATCH /api/v1/me/preferences":                        true,
 	"GET /api/v1/me/devices":                              true,
 	"DELETE /api/v1/me/devices/{id}":                      true,
+	"POST /api/v1/me/devices":                             true,
 	"POST /api/v1/devices/pairing":                        true,
 	"GET /api/v1/devices/pairing":                         true,
 	"DELETE /api/v1/devices/pairing":                      true,
