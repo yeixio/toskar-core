@@ -40,12 +40,18 @@ type peerProviders struct {
 	at        time.Time
 	providers []Provider
 	err       error
-	fetching  bool
+	// done is closed when the fetch under way ends; nil when none is.
+	done chan struct{}
 }
 
 const (
 	defaultTTL   = 30 * time.Second
 	fetchTimeout = 4 * time.Second
+	// firstLook is how long a question that mustn't wait still waits
+	// when nothing is known yet about a computer: long enough for most
+	// fetches, so the first turn after a computer connects doesn't say a
+	// tool it has ready isn't set up (yeixio/toskar-apps#195).
+	firstLook = 2500 * time.Millisecond
 )
 
 func (n *Network) ttl() time.Duration {
@@ -56,37 +62,60 @@ func (n *Network) ttl() time.Duration {
 }
 
 // providers returns what a peer can run, fetching it when it is stale.
-// With wait false it never blocks: it answers from what it knows and
-// refreshes in the background.
+// With wait false it answers from what it knows and refreshes in the
+// background, except that it waits up to firstLook the first time, when it
+// knows nothing. Callers asking at once share one fetch.
 func (n *Network) providers(ctx context.Context, p Peer, wait bool) ([]Provider, error) {
 	n.mu.Lock()
 	if n.known == nil {
 		n.known = map[string]peerProviders{}
 	}
-	k, ok := n.known[p.ID]
-	fresh := ok && time.Since(k.at) < n.ttl()
-	if fresh || (!wait && k.fetching) {
+	k := n.known[p.ID]
+	seen := !k.at.IsZero()
+	if seen && time.Since(k.at) < n.ttl() {
 		n.mu.Unlock()
 		return k.providers, k.err
 	}
-	k.fetching = true
-	n.known[p.ID] = k
+	done := k.done
+	if done == nil {
+		done = make(chan struct{})
+		k.done = done
+		n.known[p.ID] = k
+		go n.fetch(p, done)
+	}
 	n.mu.Unlock()
 
-	fetch := func(ctx context.Context) ([]Provider, error) {
-		ctx, cancel := context.WithTimeout(ctx, fetchTimeout)
-		defer cancel()
-		list, err := FetchProviders(ctx, p.Client)
-		n.mu.Lock()
-		n.known[p.ID] = peerProviders{at: time.Now(), providers: list, err: err}
-		n.mu.Unlock()
-		return list, err
+	var limit <-chan time.Time
+	switch {
+	case wait:
+	case !seen:
+		timer := time.NewTimer(firstLook)
+		defer timer.Stop()
+		limit = timer.C
+	default:
+		return k.providers, k.err
 	}
-	if wait {
-		return fetch(ctx)
+	select {
+	case <-done:
+	case <-limit:
+	case <-ctx.Done():
 	}
-	go func() { _, _ = fetch(context.Background()) }()
+	n.mu.Lock()
+	k = n.known[p.ID]
+	n.mu.Unlock()
 	return k.providers, k.err
+}
+
+// fetch asks a peer what it can run and remembers the answer.
+func (n *Network) fetch(p Peer, done chan struct{}) {
+	ctx, cancel := context.WithTimeout(context.Background(), fetchTimeout)
+	defer cancel()
+	list, err := FetchProviders(ctx, p.Client)
+	n.mu.Lock()
+	// A Forget while it ran started over; this answer is still the newest.
+	n.known[p.ID] = peerProviders{at: time.Now(), providers: list, err: err}
+	n.mu.Unlock()
+	close(done)
 }
 
 // Forget drops what is known about a computer, such as after it went

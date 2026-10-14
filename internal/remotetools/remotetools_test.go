@@ -287,3 +287,85 @@ func TestProviderSpeaks(t *testing.T) {
 		t.Errorf("short text = %q", got)
 	}
 }
+
+// countingDoer counts provider fetches and can answer slowly.
+type countingDoer struct {
+	inner Doer
+	delay time.Duration
+	calls atomic.Int32
+}
+
+func (d *countingDoer) Do(ctx context.Context, method, path string, body io.Reader) (*http.Response, error) {
+	d.calls.Add(1)
+	select {
+	case <-time.After(d.delay):
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	}
+	return d.inner.Do(ctx, method, path, body)
+}
+
+// The first time a tool is asked about, before anything is known about the
+// paired computers, it waits briefly for them, rather than saying a tool a
+// paired computer has ready isn't set up (yeixio/toskar-apps#195). Callers
+// asking at once share one fetch, and once known, the answer is immediate.
+func TestFirstLookWaitsForPairedComputers(t *testing.T) {
+	remote := &fakeTool{where: "workstation", state: Healthy}
+	peer := peerServer(t, remote)
+	doer := &countingDoer{inner: peer.Client, delay: 300 * time.Millisecond}
+	peer.Client = doer
+	net, _ := network(peer)
+	proxy := net.Proxy(&fakeTool{where: "laptop", state: Unavailable})
+
+	var wg sync.WaitGroup
+	results := make([]bool, 4)
+	for i := range results {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			results[i], _ = proxy.Available()
+		}()
+	}
+	wg.Wait()
+	for i, ok := range results {
+		if !ok {
+			t.Fatalf("caller %d: not available on the first look", i)
+		}
+	}
+	if n := doer.calls.Load(); n != 1 {
+		t.Fatalf("%d fetches, want one shared", n)
+	}
+
+	start := time.Now()
+	if ok, _ := proxy.Available(); !ok || time.Since(start) > 50*time.Millisecond {
+		t.Fatalf("known answer: ok=%v after %s", ok, time.Since(start))
+	}
+}
+
+// A computer too slow to answer the first look doesn't hold a turn up past
+// it; its answer counts once it comes.
+func TestFirstLookIsBounded(t *testing.T) {
+	remote := &fakeTool{where: "workstation", state: Healthy}
+	peer := peerServer(t, remote)
+	peer.Client = &countingDoer{inner: peer.Client, delay: firstLook + time.Second}
+	net, _ := network(peer)
+	proxy := net.Proxy(&fakeTool{where: "laptop", state: Unavailable})
+
+	start := time.Now()
+	if ok, _ := proxy.Available(); ok {
+		t.Fatal("available before the computer answered")
+	}
+	if waited := time.Since(start); waited < firstLook || waited > firstLook+500*time.Millisecond {
+		t.Fatalf("waited %s, want about %s", waited, firstLook)
+	}
+	deadline := time.Now().Add(3 * time.Second)
+	for {
+		if ok, _ := proxy.Available(); ok {
+			break
+		}
+		if time.Now().After(deadline) {
+			t.Fatal("never available after the computer answered")
+		}
+		time.Sleep(50 * time.Millisecond)
+	}
+}
