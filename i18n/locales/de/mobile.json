@@ -436,7 +436,9 @@
     "continuing": "Eingerichtet. Deine Anfrage wird fertiggestellt …",
     "askAdmin": "Bitte einen Admin auf {{node}}, das einzurichten.",
     "onComputer": "Richte das auf {{node}} ein, auf der Seite Werkzeuge.",
-    "yourComputer": "deinem Computer"
+    "detailsHere": "{{name}} · {{size}} Download · auf deinem Computer",
+    "askAdminHere": "Bitte einen Admin auf deinem Computer, das einzurichten.",
+    "onComputerHere": "Richte das auf deinem Computer ein, auf der Seite Werkzeuge."
   },
   "tools": {
     "internet": {

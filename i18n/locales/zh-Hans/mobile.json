@@ -432,7 +432,9 @@
     "continuing": "已设置好。正在完成你的请求…",
     "askAdmin": "请 {{node}} 的管理员来设置。",
     "onComputer": "请在 {{node}} 的“工具”页面上设置。",
-    "yourComputer": "你的电脑"
+    "detailsHere": "{{name}} · 下载 {{size}} · 在你的电脑上",
+    "askAdminHere": "请你的电脑的管理员来设置。",
+    "onComputerHere": "请在你的电脑的“工具”页面上设置。"
   },
   "tools": {
     "internet": {

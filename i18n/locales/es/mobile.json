@@ -440,7 +440,9 @@
     "continuing": "Configurado. Terminando tu solicitud…",
     "askAdmin": "Pide a un administrador de {{node}} que lo configure.",
     "onComputer": "Configúralo en {{node}}, en su página Herramientas.",
-    "yourComputer": "tu computadora"
+    "detailsHere": "{{name}} · descarga de {{size}} · en tu computadora",
+    "askAdminHere": "Pide a un administrador de tu computadora que lo configure.",
+    "onComputerHere": "Configúralo en tu computadora, en su página Herramientas."
   },
   "tools": {
     "internet": {

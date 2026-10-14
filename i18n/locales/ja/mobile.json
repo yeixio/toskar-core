@@ -432,7 +432,9 @@
     "continuing": "セットアップ完了。リクエストを仕上げています…",
     "askAdmin": "{{node}} の管理者に設定を頼んでください。",
     "onComputer": "{{node}} の「ツール」ページで設定してください。",
-    "yourComputer": "あなたのコンピュータ"
+    "detailsHere": "{{name}} · ダウンロード{{size}} · あなたのコンピュータ上",
+    "askAdminHere": "あなたのコンピュータの管理者に設定を頼んでください。",
+    "onComputerHere": "あなたのコンピュータの「ツール」ページで設定してください。"
   },
   "tools": {
     "internet": {

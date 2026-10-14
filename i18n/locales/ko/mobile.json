@@ -432,7 +432,9 @@
     "continuing": "설정이 끝났어요. 요청을 마무리하는 중…",
     "askAdmin": "{{node}}의 관리자에게 설정을 요청하세요.",
     "onComputer": "{{node}}의 도구 페이지에서 설정하세요.",
-    "yourComputer": "내 컴퓨터"
+    "detailsHere": "{{name}} · {{size}} 다운로드 · 내 컴퓨터에 설치",
+    "askAdminHere": "내 컴퓨터의 관리자에게 설정을 요청하세요.",
+    "onComputerHere": "내 컴퓨터의 도구 페이지에서 설정하세요."
   },
   "tools": {
     "internet": {

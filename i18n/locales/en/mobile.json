@@ -447,7 +447,9 @@
     "continuing": "Set up. Finishing your request…",
     "askAdmin": "Ask an Admin on {{node}} to set this up.",
     "onComputer": "Set this up on {{node}}, on its Tools page.",
-    "yourComputer": "your computer"
+    "detailsHere": "{{name}} · {{size}} download · on your computer",
+    "askAdminHere": "Ask an Admin on your computer to set this up.",
+    "onComputerHere": "Set this up on your computer, on its Tools page."
   },
   "tools": {
     "internet": {
