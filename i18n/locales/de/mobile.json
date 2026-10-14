@@ -418,28 +418,6 @@
     "steps_one": "Was ich getan habe · {{count}} Schritt",
     "steps_other": "Was ich getan habe · {{count}} Schritte"
   },
-  "setupOffer": {
-    "details": "{{name}} · {{size}} Download · auf {{node}}",
-    "detailsRemote": "{{name}} · {{size}} Download · auf {{node}} · {{free}} frei",
-    "tightMemory": "Dieser Computer hat weniger Arbeitsspeicher, als ideal wäre, daher kann es langsam sein oder fehlschlagen.",
-    "tightMemoryOn": "{{node}} hat weniger Arbeitsspeicher, als ideal wäre, daher kann es langsam sein oder fehlschlagen.",
-    "slowImage": "Dieser Computer hat dafür keine GPU-Beschleunigung, daher dauert jedes Bild ein paar Minuten.",
-    "slowImageOn": "{{node}} hat dafür keine GPU-Beschleunigung, daher dauert jedes Bild ein paar Minuten.",
-    "slowVideo": "Dieser Computer hat dafür keine GPU-Beschleunigung, daher kann ein Clip fast eine Stunde dauern.",
-    "slowVideoOn": "{{node}} hat dafür keine GPU-Beschleunigung, daher kann ein Clip fast eine Stunde dauern.",
-    "install": "Einrichten",
-    "installing": "Wird installiert …",
-    "downloading": "Wird geladen … {{done}} von {{total}}",
-    "stop": "Stoppen",
-    "ready": "{{label}} ist eingerichtet.",
-    "continue": "Weiter",
-    "continuing": "Eingerichtet. Deine Anfrage wird fertiggestellt …",
-    "askAdmin": "Bitte einen Admin auf {{node}}, das einzurichten.",
-    "onComputer": "Richte das auf {{node}} ein, auf der Seite Werkzeuge.",
-    "detailsHere": "{{name}} · {{size}} Download · auf deinem Computer",
-    "askAdminHere": "Bitte einen Admin auf deinem Computer, das einzurichten.",
-    "onComputerHere": "Richte das auf deinem Computer ein, auf der Seite Werkzeuge."
-  },
   "tools": {
     "internet": {
       "search": "Websuche",

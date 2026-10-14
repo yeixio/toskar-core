@@ -422,28 +422,6 @@
     "steps_many": "Ce que j'ai fait · {{count}} étapes",
     "steps_other": "Ce que j'ai fait · {{count}} étapes"
   },
-  "setupOffer": {
-    "details": "{{name}} · téléchargement de {{size}} · sur {{node}}",
-    "detailsRemote": "{{name}} · téléchargement de {{size}} · sur {{node}} · {{free}} libres",
-    "tightMemory": "Cet ordinateur a moins de mémoire que recommandé, cela peut donc être lent ou échouer.",
-    "tightMemoryOn": "{{node}} a moins de mémoire que recommandé, cela peut donc être lent ou échouer.",
-    "slowImage": "Cet ordinateur n’a pas d’accélération GPU pour cela, chaque image prend donc quelques minutes.",
-    "slowImageOn": "{{node}} n’a pas d’accélération GPU pour cela, chaque image prend donc quelques minutes.",
-    "slowVideo": "Cet ordinateur n’a pas d’accélération GPU pour cela, un clip peut donc prendre près d’une heure.",
-    "slowVideoOn": "{{node}} n’a pas d’accélération GPU pour cela, un clip peut donc prendre près d’une heure.",
-    "install": "Configurer",
-    "installing": "Installation…",
-    "downloading": "Téléchargement… {{done}} sur {{total}}",
-    "stop": "Arrêter",
-    "ready": "{{label}} est configuré.",
-    "continue": "Continuer",
-    "continuing": "Configuré. Finalisation de votre demande…",
-    "askAdmin": "Demande à un administrateur de {{node}} de le configurer.",
-    "onComputer": "Configure-le sur {{node}}, dans sa page Outils.",
-    "detailsHere": "{{name}} · téléchargement de {{size}} · sur ton ordinateur",
-    "askAdminHere": "Demande à un administrateur de ton ordinateur de le configurer.",
-    "onComputerHere": "Configure-le sur ton ordinateur, dans sa page Outils."
-  },
   "tools": {
     "internet": {
       "search": "Recherche web",

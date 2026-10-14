@@ -414,28 +414,6 @@
     "opensInSafari": "Safariで開きます",
     "steps_other": "実行した内容 · {{count}}ステップ"
   },
-  "setupOffer": {
-    "details": "{{name}} · ダウンロード{{size}} · {{node}}上",
-    "detailsRemote": "{{name}} · ダウンロード{{size}} · {{node}}上 · 空き{{free}}",
-    "tightMemory": "このコンピューターのメモリは推奨より少ないため、遅くなったり失敗したりすることがあります。",
-    "tightMemoryOn": "{{node}}のメモリは推奨より少ないため、遅くなったり失敗したりすることがあります。",
-    "slowImage": "このコンピューターでは GPU アクセラレーションが使えないため、画像1枚に数分かかります。",
-    "slowImageOn": "{{node}}では GPU アクセラレーションが使えないため、画像1枚に数分かかります。",
-    "slowVideo": "このコンピューターでは GPU アクセラレーションが使えないため、クリップ1本に1時間近くかかることがあります。",
-    "slowVideoOn": "{{node}}では GPU アクセラレーションが使えないため、クリップ1本に1時間近くかかることがあります。",
-    "install": "セットアップ",
-    "installing": "インストール中…",
-    "downloading": "ダウンロード中… {{total}}中{{done}}",
-    "stop": "停止",
-    "ready": "{{label}}のセットアップが完了しました。",
-    "continue": "続ける",
-    "continuing": "セットアップ完了。リクエストを仕上げています…",
-    "askAdmin": "{{node}} の管理者に設定を頼んでください。",
-    "onComputer": "{{node}} の「ツール」ページで設定してください。",
-    "detailsHere": "{{name}} · ダウンロード{{size}} · あなたのコンピュータ上",
-    "askAdminHere": "あなたのコンピュータの管理者に設定を頼んでください。",
-    "onComputerHere": "あなたのコンピュータの「ツール」ページで設定してください。"
-  },
   "tools": {
     "internet": {
       "search": "Web検索",

@@ -414,28 +414,6 @@
     "opensInSafari": "在 Safari 中打开",
     "steps_other": "我做了什么 · {{count}} 个步骤"
   },
-  "setupOffer": {
-    "details": "{{name}} · 下载 {{size}} · 在 {{node}} 上",
-    "detailsRemote": "{{name}} · 下载 {{size}} · 在 {{node}} 上 · 可用 {{free}}",
-    "tightMemory": "这台电脑的内存低于建议值，可能会很慢或失败。",
-    "tightMemoryOn": "{{node}} 的内存低于建议值，可能会很慢或失败。",
-    "slowImage": "这台电脑没有 GPU 加速，每张图片需要几分钟。",
-    "slowImageOn": "{{node}} 没有 GPU 加速，每张图片需要几分钟。",
-    "slowVideo": "这台电脑没有 GPU 加速，一段短片可能需要将近一小时。",
-    "slowVideoOn": "{{node}} 没有 GPU 加速，一段短片可能需要将近一小时。",
-    "install": "设置",
-    "installing": "正在安装…",
-    "downloading": "正在下载… {{done}}/{{total}}",
-    "stop": "停止",
-    "ready": "{{label}} 已设置好。",
-    "continue": "继续",
-    "continuing": "已设置好。正在完成你的请求…",
-    "askAdmin": "请 {{node}} 的管理员来设置。",
-    "onComputer": "请在 {{node}} 的“工具”页面上设置。",
-    "detailsHere": "{{name}} · 下载 {{size}} · 在你的电脑上",
-    "askAdminHere": "请你的电脑的管理员来设置。",
-    "onComputerHere": "请在你的电脑的“工具”页面上设置。"
-  },
   "tools": {
     "internet": {
       "search": "网络搜索",

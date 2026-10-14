@@ -429,28 +429,6 @@
     "steps_one": "What I did · {{count}} step",
     "steps_other": "What I did · {{count}} steps"
   },
-  "setupOffer": {
-    "details": "{{name}} · {{size}} download · on {{node}}",
-    "detailsRemote": "{{name}} · {{size}} download · on {{node}} · {{free}} free",
-    "tightMemory": "This computer has less memory than it's comfortable with, so it may be slow or fail.",
-    "tightMemoryOn": "{{node}} has less memory than it's comfortable with, so it may be slow or fail.",
-    "slowImage": "This computer has no GPU acceleration for it, so each picture takes a few minutes.",
-    "slowImageOn": "{{node}} has no GPU acceleration for it, so each picture takes a few minutes.",
-    "slowVideo": "This computer has no GPU acceleration for it, so a clip can take most of an hour.",
-    "slowVideoOn": "{{node}} has no GPU acceleration for it, so a clip can take most of an hour.",
-    "install": "Set up",
-    "installing": "Installing…",
-    "downloading": "Downloading… {{done}} of {{total}}",
-    "stop": "Stop",
-    "ready": "{{label}} is set up.",
-    "continue": "Continue",
-    "continuing": "Set up. Finishing your request…",
-    "askAdmin": "Ask an Admin on {{node}} to set this up.",
-    "onComputer": "Set this up on {{node}}, on its Tools page.",
-    "detailsHere": "{{name}} · {{size}} download · on your computer",
-    "askAdminHere": "Ask an Admin on your computer to set this up.",
-    "onComputerHere": "Set this up on your computer, on its Tools page."
-  },
   "tools": {
     "internet": {
       "search": "Web search",

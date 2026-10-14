@@ -422,28 +422,6 @@
     "steps_many": "Cosa ho fatto · {{count}} passaggi",
     "steps_other": "Cosa ho fatto · {{count}} passaggi"
   },
-  "setupOffer": {
-    "details": "{{name}} · download di {{size}} · su {{node}}",
-    "detailsRemote": "{{name}} · download di {{size}} · su {{node}} · {{free}} liberi",
-    "tightMemory": "Questo computer ha meno memoria di quella consigliata, quindi potrebbe essere lento o non riuscire.",
-    "tightMemoryOn": "{{node}} ha meno memoria di quella consigliata, quindi potrebbe essere lento o non riuscire.",
-    "slowImage": "Questo computer non ha l’accelerazione GPU per questo, quindi ogni immagine richiede alcuni minuti.",
-    "slowImageOn": "{{node}} non ha l’accelerazione GPU per questo, quindi ogni immagine richiede alcuni minuti.",
-    "slowVideo": "Questo computer non ha l’accelerazione GPU per questo, quindi un clip può richiedere quasi un’ora.",
-    "slowVideoOn": "{{node}} non ha l’accelerazione GPU per questo, quindi un clip può richiedere quasi un’ora.",
-    "install": "Configura",
-    "installing": "Installazione…",
-    "downloading": "Download… {{done}} di {{total}}",
-    "stop": "Interrompi",
-    "ready": "{{label}} è configurato.",
-    "continue": "Continua",
-    "continuing": "Configurato. Completamento della tua richiesta…",
-    "askAdmin": "Chiedi a un amministratore di {{node}} di configurarlo.",
-    "onComputer": "Configuralo su {{node}}, nella sua pagina Strumenti.",
-    "detailsHere": "{{name}} · download di {{size}} · sul tuo computer",
-    "askAdminHere": "Chiedi a un amministratore del tuo computer di configurarlo.",
-    "onComputerHere": "Configuralo sul tuo computer, nella sua pagina Strumenti."
-  },
   "tools": {
     "internet": {
       "search": "Ricerca web",
