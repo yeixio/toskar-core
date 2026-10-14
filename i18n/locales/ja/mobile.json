@@ -535,6 +535,17 @@
     "body": "理由：{{reason}}\nモデル：{{model}}\nメモ：{{note}}\n\n回答：\n{{answer}}",
     "noMail": "メールアプリが設定されていません。報告を {{email}} に送ってください。"
   },
+  "problemReport": {
+    "link": "報告する",
+    "title": "この問題を報告",
+    "lede": "{{email}} の Toskar チームに送られます。名前、アドレス、キーは事前に取り除かれ、送信前にすべて確認できます。",
+    "note": "何をしていましたか？（任意）",
+    "notePlaceholder": "例：明日の天気を聞いた",
+    "whatSends": "送信される内容",
+    "gathering": "詳細を集めています…",
+    "send": "メールで送信",
+    "share": "共有"
+  },
   "watch": {
     "ask": "質問",
     "askPrompt": "Toskarに質問",

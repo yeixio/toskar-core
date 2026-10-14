@@ -618,6 +618,17 @@
     "body": "Reason: {{reason}}\nModel: {{model}}\nNote: {{note}}\n\nAnswer:\n{{answer}}",
     "noMail": "No email app is set up. Send the report to {{email}}."
   },
+  "problemReport": {
+    "link": "Report this",
+    "title": "Report this problem",
+    "lede": "This goes to the Toskar team at {{email}}. Names, addresses, and keys are taken out first, and you see everything before it goes.",
+    "note": "What were you doing? (optional)",
+    "notePlaceholder": "For example: I asked about tomorrow's weather",
+    "whatSends": "What it sends",
+    "gathering": "Gathering details…",
+    "send": "Send by email",
+    "share": "Share"
+  },
   "watch": {
     "ask": "Ask",
     "askPrompt": "Ask Toskar",

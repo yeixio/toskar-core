@@ -535,6 +535,17 @@
     "body": "이유: {{reason}}\n모델: {{model}}\n메모: {{note}}\n\n답변:\n{{answer}}",
     "noMail": "설정된 이메일 앱이 없어요. 신고 내용을 {{email}}(으)로 보내 주세요."
   },
+  "problemReport": {
+    "link": "신고",
+    "title": "이 문제 신고",
+    "lede": "{{email}}의 Toskar 팀에 전송됩니다. 이름, 주소, 키는 먼저 제거되며, 보내기 전에 모든 내용을 확인할 수 있습니다.",
+    "note": "무엇을 하고 있었나요? (선택)",
+    "notePlaceholder": "예: 내일 날씨를 물어봤어요",
+    "whatSends": "전송되는 내용",
+    "gathering": "세부 정보를 모으는 중…",
+    "send": "이메일로 보내기",
+    "share": "공유"
+  },
   "watch": {
     "ask": "질문",
     "askPrompt": "Toskar에게 질문",

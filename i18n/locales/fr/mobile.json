@@ -549,6 +549,17 @@
     "body": "Motif : {{reason}}\nModèle : {{model}}\nRemarque : {{note}}\n\nRéponse :\n{{answer}}",
     "noMail": "Aucune app de messagerie n'est configurée. Envoyez le signalement à {{email}}."
   },
+  "problemReport": {
+    "link": "Signaler",
+    "title": "Signaler ce problème",
+    "lede": "Ceci est envoyé à l'équipe Toskar à {{email}}. Les noms, adresses et clés sont retirés d'abord, et vous voyez tout avant l'envoi.",
+    "note": "Que faisiez-vous ? (facultatif)",
+    "notePlaceholder": "Par exemple : j'ai demandé la météo de demain",
+    "whatSends": "Ce qui est envoyé",
+    "gathering": "Collecte des détails…",
+    "send": "Envoyer par e-mail",
+    "share": "Partager"
+  },
   "watch": {
     "ask": "Demander",
     "askPrompt": "Demander à Toskar",

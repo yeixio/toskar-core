@@ -535,6 +535,17 @@
     "body": "原因：{{reason}}\n模型：{{model}}\n备注：{{note}}\n\n回答：\n{{answer}}",
     "noMail": "尚未设置邮件应用。请把举报内容发送到 {{email}}。"
   },
+  "problemReport": {
+    "link": "报告",
+    "title": "报告此问题",
+    "lede": "这会发送给 Toskar 团队（{{email}}）。名称、地址和密钥会先被移除，发送前你可以看到全部内容。",
+    "note": "你当时在做什么？（可选）",
+    "notePlaceholder": "例如：我问了明天的天气",
+    "whatSends": "发送的内容",
+    "gathering": "正在收集详细信息…",
+    "send": "通过电子邮件发送",
+    "share": "分享"
+  },
   "watch": {
     "ask": "提问",
     "askPrompt": "问 Toskar",

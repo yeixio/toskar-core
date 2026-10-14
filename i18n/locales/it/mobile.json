@@ -549,6 +549,17 @@
     "body": "Motivo: {{reason}}\nModello: {{model}}\nNota: {{note}}\n\nRisposta:\n{{answer}}",
     "noMail": "Non è configurata nessuna app di posta. Invia la segnalazione a {{email}}."
   },
+  "problemReport": {
+    "link": "Segnala",
+    "title": "Segnala questo problema",
+    "lede": "Viene inviato al team di Toskar a {{email}}. Nomi, indirizzi e chiavi vengono rimossi prima, e vedi tutto prima dell'invio.",
+    "note": "Cosa stavi facendo? (facoltativo)",
+    "notePlaceholder": "Ad esempio: ho chiesto il meteo di domani",
+    "whatSends": "Cosa viene inviato",
+    "gathering": "Raccolta dei dettagli…",
+    "send": "Invia per email",
+    "share": "Condividi"
+  },
   "watch": {
     "ask": "Chiedi",
     "askPrompt": "Chiedi a Toskar",

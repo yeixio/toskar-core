@@ -542,6 +542,17 @@
     "body": "Grund: {{reason}}\nModell: {{model}}\nNotiz: {{note}}\n\nAntwort:\n{{answer}}",
     "noMail": "Es ist keine E-Mail-App eingerichtet. Sende die Meldung an {{email}}."
   },
+  "problemReport": {
+    "link": "Melden",
+    "title": "Dieses Problem melden",
+    "lede": "Das geht an das Toskar-Team unter {{email}}. Namen, Adressen und Schlüssel werden vorher entfernt, und du siehst alles, bevor es gesendet wird.",
+    "note": "Was hast du gerade gemacht? (optional)",
+    "notePlaceholder": "Zum Beispiel: Ich habe nach dem Wetter für morgen gefragt",
+    "whatSends": "Was gesendet wird",
+    "gathering": "Details werden gesammelt…",
+    "send": "Per E-Mail senden",
+    "share": "Teilen"
+  },
   "watch": {
     "ask": "Fragen",
     "askPrompt": "Toskar fragen",
