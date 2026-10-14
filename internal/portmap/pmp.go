@@ -21,6 +21,13 @@ const pmpPort = 5351
 // errUnsupportedVersion is a router that doesn't speak the version asked.
 var errUnsupportedVersion = errors.New("unsupported version")
 
+// pcpNetworkFailure and pmpNetworkFailure are the routers' answer when they
+// have no outside address of their own to map on (ErrNoPublicAddress).
+const (
+	pcpNetworkFailure = 7
+	pmpNetworkFailure = 3
+)
+
 // pcpCannotProvideExternal is PCP's answer when the outside port asked for
 // is taken (RFC 6887 §7.4).
 const pcpCannotProvideExternal = 11
@@ -96,8 +103,11 @@ func pcpMap(ctx context.Context, gw netip.AddrPort, internal, external uint16, l
 		if code == 1 {
 			return Mapping{}, errUnsupportedVersion
 		}
-		if code == pcpCannotProvideExternal {
+		switch code {
+		case pcpCannotProvideExternal:
 			return Mapping{}, fmt.Errorf("pcp: %w (result %d)", ErrPortTaken, code)
+		case pcpNetworkFailure:
+			return Mapping{}, fmt.Errorf("pcp: %w (result %d)", ErrNoPublicAddress, code)
 		}
 		return Mapping{}, fmt.Errorf("pcp: %w (result %d)", ErrRefused, code)
 	}
@@ -129,7 +139,9 @@ func natpmpMap(ctx context.Context, gw netip.AddrPort, internal, external uint16
 	if len(resp) < 16 || resp[0] != 0 || resp[1] != 130 {
 		return Mapping{}, fmt.Errorf("nat-pmp: unexpected answer")
 	}
-	if code := binary.BigEndian.Uint16(resp[2:4]); code != 0 {
+	if code := binary.BigEndian.Uint16(resp[2:4]); code == pmpNetworkFailure {
+		return Mapping{}, fmt.Errorf("nat-pmp: %w (result %d)", ErrNoPublicAddress, code)
+	} else if code != 0 {
 		return Mapping{}, fmt.Errorf("nat-pmp: %w (result %d)", ErrRefused, code)
 	}
 	m := Mapping{
@@ -158,7 +170,9 @@ func natpmpExternal(ctx context.Context, gw netip.AddrPort) (netip.Addr, error) 
 	if len(resp) < 12 || resp[0] != 0 || resp[1] != 128 {
 		return netip.Addr{}, fmt.Errorf("nat-pmp: unexpected answer")
 	}
-	if code := binary.BigEndian.Uint16(resp[2:4]); code != 0 {
+	if code := binary.BigEndian.Uint16(resp[2:4]); code == pmpNetworkFailure {
+		return netip.Addr{}, fmt.Errorf("nat-pmp: %w (result %d)", ErrNoPublicAddress, code)
+	} else if code != 0 {
 		return netip.Addr{}, fmt.Errorf("nat-pmp: the router refused (result %d)", code)
 	}
 	return netip.AddrFrom4([4]byte(resp[8:12])), nil

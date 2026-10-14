@@ -300,7 +300,8 @@ type RemoteReach struct {
 	MapError       string
 	// MapReason is why the router's port doesn't reach the internet, in a
 	// word (#602): off (not asked), no_gateway, no_answer, refused,
-	// port_taken, or, though a port was opened, double_nat or carrier_nat.
+	// port_taken, no_public_address (the router has no internet address of
+	// its own, #617), or, though a port was opened, double_nat or carrier_nat.
 	// Empty when the port reaches the internet, or while still asking.
 	MapReason string
 	IPv6      []string

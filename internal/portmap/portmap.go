@@ -44,6 +44,13 @@ var (
 	ErrRefused = errors.New("the router refused")
 	// ErrPortTaken is an outside port already forwarded to another device.
 	ErrPortTaken = errors.New("the port is already forwarded to another device")
+	// ErrNoPublicAddress is a router whose own outside address isn't on the
+	// internet: a provider's shared address (carrier-grade NAT) or another
+	// router in front of it. Routers say so instead of mapping (#617):
+	// NAT-PMP and PCP with "network failure", UPnP by giving no outside
+	// address, and they hide the address, so which of the two it is can't
+	// be told.
+	ErrNoPublicAddress = errors.New("the router has no public address of its own")
 )
 
 // Why a mapping didn't work, for Settings (#602).
@@ -54,14 +61,19 @@ const (
 	WhyNoAnswer  = "no_answer"
 	WhyRefused   = "refused"
 	WhyPortTaken = "port_taken"
+	// WhyNoPublicAddress is ErrNoPublicAddress: the relay is the way in.
+	WhyNoPublicAddress = "no_public_address"
 )
 
-// Why sorts the error Map ended with: the port is taken, the router
-// refused, there's no router, or no router answered. "" for no error.
+// Why sorts the error Map ended with: the router has no public address,
+// the port is taken, the router refused, there's no router, or no router
+// answered. "" for no error.
 func Why(err error) string {
 	switch {
 	case err == nil:
 		return ""
+	case errors.Is(err, ErrNoPublicAddress):
+		return WhyNoPublicAddress
 	case errors.Is(err, ErrPortTaken):
 		return WhyPortTaken
 	case errors.Is(err, ErrRefused):

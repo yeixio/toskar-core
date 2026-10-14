@@ -94,6 +94,7 @@ Under the ways in, a line says how the router's port was opened ("Your router op
 | `no_answer` | No router answered PCP, NAT-PMP, or UPnP | Turn on UPnP or NAT-PMP in the router's settings, or forward the port by hand |
 | `refused` | The router answered and wouldn't open the port | Check its UPnP settings, or forward the port by hand |
 | `port_taken` | The outside port is forwarded to another device | Choose another port, or remove that forward on the router |
+| `no_public_address` | The router has no internet address of its own: carrier-grade NAT, or another router in front. Routers refuse to map then, and hide the address, so which of the two can't be told | Use the relay; to connect directly, ask the provider for a public IPv4 address, or forward the port on the outer router |
 | `double_nat` | The router opened the port, but sits behind another router | Forward the port on the outer router too, or use the relay |
 | `carrier_nat` | The provider shares one address among many homes | Use the relay |
 | `no_gateway` | This computer couldn't find its router | Check its network connection |

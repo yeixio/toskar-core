@@ -159,6 +159,7 @@
       "port_taken": "Port {{port}} is already forwarded to another device on your router. Choose another port below, or remove that forward on the router.",
       "double_nat": "Your router opened port {{port}}, but it sits behind another router (double NAT), so the port doesn't reach the internet. Forward the port on the outer router too, or use the relay.",
       "carrier_nat": "Your router opened port {{port}}, but your internet provider shares one address among many homes (carrier-grade NAT), so the port can't reach the internet. Use the relay.",
+      "no_public_address": "Your router has no internet address of its own: your internet provider shares one among many homes (carrier-grade NAT), or another router sits in front of it, so no port on it can reach the internet. Use the relay. To connect directly, ask your provider for a public IPv4 address, or forward port {{port}} on the outer router.",
       "relayOnly": "Using the relay only: Toskar doesn't ask your router to open a port.",
       "tryAnotherPort": "Try another port",
       "useRelayOnly": "Use the relay only"

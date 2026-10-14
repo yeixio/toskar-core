@@ -224,15 +224,21 @@ func upnpMap(ctx context.Context, g *igd, internal, external uint16, lifetime ti
 		{"NewLeaseDuration", strconv.Itoa(int(lifetime / time.Second))},
 	})
 	if err != nil {
+		// A refusal from a router with no public address: it says so by
+		// giving none when asked.
+		if errors.Is(err, ErrRefused) {
+			if ip, ok := upnpExternal(ctx, g); ok && !Public(ip) {
+				return Mapping{}, fmt.Errorf("upnp: %w (it gave %q)", ErrNoPublicAddress, ip)
+			}
+		}
 		return Mapping{}, err
 	}
-	out, err := g.soap(ctx, "GetExternalIPAddress", nil)
-	if err != nil {
-		return Mapping{}, err
-	}
-	ip, err := netip.ParseAddr(between(string(out), "<NewExternalIPAddress>", "</NewExternalIPAddress>"))
-	if err != nil {
+	ip, ok := upnpExternal(ctx, g)
+	if !ok {
 		return Mapping{}, errors.New("upnp: the router didn't say its outside address")
+	}
+	if !ip.IsValid() || ip.IsUnspecified() {
+		return Mapping{}, fmt.Errorf("upnp: %w", ErrNoPublicAddress)
 	}
 	return Mapping{
 		Method:       MethodUPnP,
@@ -241,6 +247,25 @@ func upnpMap(ctx context.Context, g *igd, internal, external uint16, lifetime ti
 		Lifetime:     lifetime,
 		upnp:         g,
 	}, nil
+}
+
+// upnpExternal is the router's outside address, as it says it; ok is false
+// when it didn't answer. A router with no outside address gives an empty or
+// 0.0.0.0 one, which is the zero or unspecified Addr here.
+func upnpExternal(ctx context.Context, g *igd) (netip.Addr, bool) {
+	out, err := g.soap(ctx, "GetExternalIPAddress", nil)
+	if err != nil {
+		return netip.Addr{}, false
+	}
+	text := between(string(out), "<NewExternalIPAddress>", "</NewExternalIPAddress>")
+	if text == "" {
+		return netip.Addr{}, true
+	}
+	ip, err := netip.ParseAddr(text)
+	if err != nil {
+		return netip.Addr{}, false
+	}
+	return ip.Unmap(), true
 }
 
 // upnpUnmap removes a mapping.

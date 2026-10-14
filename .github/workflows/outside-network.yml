@@ -1,0 +1,68 @@
+name: Outside network
+
+# A real Core behind a real router (NAT, PCP/NAT-PMP, UPnP, carrier NAT), a
+# relay on a simulated internet, and a paired device at home and away, in
+# Docker (tests/outside, #617). Each scenario checks what the device
+# reached against what Core's own outside check said.
+on:
+  pull_request:
+    paths:
+      - "internal/relayclient/**"
+      - "internal/portmap/**"
+      - "internal/api/remote*.go"
+      - "internal/app/remote_access*.go"
+      - "internal/app/relay*.go"
+      - "internal/app/reach_check*.go"
+      - "tests/outside/**"
+      - ".github/workflows/outside-network.yml"
+  schedule:
+    - cron: "17 9 * * *"
+  workflow_dispatch:
+
+# The networks have fixed names and addresses on the runner's Docker, so
+# one run at a time across the repository.
+concurrency:
+  group: outside-network
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  outside:
+    runs-on: ${{ fromJSON(vars.CI_RUNS_ON || '"ubuntu-latest"') }}
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - name: Relay access
+        id: relay
+        env:
+          TOKEN: ${{ secrets.RELAY_READ_TOKEN }}
+        run: |
+          if [ -z "$TOKEN" ]; then
+            echo "::warning::RELAY_READ_TOKEN isn't set (or this is a fork's pull request), so the outside-network check can't build the relay and is skipped."
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          fi
+      # The relay is private: built from its main branch, with a token that
+      # can read it.
+      - uses: actions/checkout@v7
+        if: steps.relay.outputs.ok == 'true'
+        with:
+          repository: yeixio/toskar-relay
+          token: ${{ secrets.RELAY_READ_TOKEN }}
+          path: toskar-relay
+      - uses: actions/setup-go@v7
+        if: steps.relay.outputs.ok == 'true'
+        with:
+          go-version: "1.26.x"
+          check-latest: true
+          cache: ${{ !vars.CI_RUNS_ON }}
+      - name: Outside-network check
+        if: steps.relay.outputs.ok == 'true'
+        env:
+          TOSKAR_RELAY_SRC: ${{ github.workspace }}/toskar-relay
+        run: |
+          docker info --format 'Docker {{.ServerVersion}}'
+          go test -tags outside -count=1 -v -timeout 25m ./tests/outside

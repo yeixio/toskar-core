@@ -159,6 +159,7 @@
       "port_taken": "El puerto {{port}} ya está redirigido a otro dispositivo en tu router. Elige otro puerto abajo o quita esa redirección en el router.",
       "double_nat": "Tu router abrió el puerto {{port}}, pero está detrás de otro router (doble NAT), así que el puerto no llega a internet. Redirige el puerto también en el router exterior o usa el relay.",
       "carrier_nat": "Tu router abrió el puerto {{port}}, pero tu proveedor de internet comparte una dirección entre muchos hogares (CGNAT), así que el puerto no llega a internet. Usa el relay.",
+      "no_public_address": "Tu router no tiene una dirección de internet propia: tu proveedor de internet comparte una entre muchos hogares (CGNAT), o hay otro router delante, así que ningún puerto en él llega a internet. Usa el relay. Para conectar directamente, pide a tu proveedor una dirección IPv4 pública, o redirige el puerto {{port}} en el router exterior.",
       "relayOnly": "Solo se usa el relay: Toskar no le pide a tu router que abra un puerto.",
       "tryAnotherPort": "Probar otro puerto",
       "useRelayOnly": "Usar solo el relay"

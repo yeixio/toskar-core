@@ -161,10 +161,31 @@ func TestUPnP(t *testing.T) {
 			fmt.Fprint(w, `<NewExternalIPAddress>192.0.2.44</NewExternalIPAddress>`)
 		}
 	})
-	srv := httptest.NewServer(mux)
-	defer srv.Close()
+	fakeIGD(t, mux)
 
-	// A fake SSDP responder pointing at the description.
+	m, err := Router{Gateway: closedPort(t)}.Map(context.Background(), 7333, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if m.Method != MethodUPnP || m.External != netip.MustParseAddrPort("192.0.2.44:7333") {
+		t.Fatalf("mapping: %+v", m)
+	}
+	if err := m.Unmap(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	mu.Lock()
+	defer mu.Unlock()
+	if strings.Join(actions, ",") != "AddPortMapping,GetExternalIPAddress,DeletePortMapping" {
+		t.Fatalf("actions: %v", actions)
+	}
+}
+
+// fakeIGD serves mux as a UPnP gateway's description and control, found
+// by a fake SSDP responder, until the test ends.
+func fakeIGD(t *testing.T, mux *http.ServeMux) {
+	t.Helper()
+	srv := httptest.NewServer(mux)
+	t.Cleanup(srv.Close)
 	ssdp, err := net.ListenUDP("udp4", &net.UDPAddr{IP: net.IPv4(127, 0, 0, 1)})
 	if err != nil {
 		t.Fatal(err)
@@ -184,25 +205,31 @@ func TestUPnP(t *testing.T) {
 			}
 		}
 	}()
-	defer func() { ssdp.Close(); <-done }()
 	old := ssdpAddr
 	ssdpAddr = ssdp.LocalAddr().String()
-	defer func() { ssdpAddr = old }()
+	t.Cleanup(func() { ssdpAddr = old; ssdp.Close(); <-done })
+}
 
-	m, err := Router{Gateway: closedPort(t)}.Map(context.Background(), 7333, 0)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if m.Method != MethodUPnP || m.External != netip.MustParseAddrPort("192.0.2.44:7333") {
-		t.Fatalf("mapping: %+v", m)
-	}
-	if err := m.Unmap(context.Background()); err != nil {
-		t.Fatal(err)
-	}
-	mu.Lock()
-	defer mu.Unlock()
-	if strings.Join(actions, ",") != "AddPortMapping,GetExternalIPAddress,DeletePortMapping" {
-		t.Fatalf("actions: %v", actions)
+// A router behind carrier-grade NAT or another router, as miniupnpd
+// answers (#617): UPnP refuses the mapping and gives no outside address.
+func TestUPnPNoPublicAddress(t *testing.T) {
+	mux := http.NewServeMux()
+	mux.HandleFunc("/desc.xml", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprint(w, `<?xml version="1.0"?><root><device><serviceList><service>
+<serviceType>urn:schemas-upnp-org:service:WANIPConnection:2</serviceType><controlURL>/ctl/IPConn</controlURL>
+</service></serviceList></device></root>`)
+	})
+	mux.HandleFunc("/ctl/IPConn", func(w http.ResponseWriter, r *http.Request) {
+		if strings.Contains(r.Header.Get("SOAPAction"), "AddPortMapping") {
+			http.Error(w, "<errorCode>501</errorCode><errorDescription>Action Failed</errorDescription>", http.StatusInternalServerError)
+			return
+		}
+		fmt.Fprint(w, `<NewExternalIPAddress></NewExternalIPAddress>`)
+	})
+	fakeIGD(t, mux)
+	_, err := Router{Gateway: closedPort(t)}.Map(context.Background(), 7333, 0)
+	if got := Why(err); got != WhyNoPublicAddress {
+		t.Fatalf("Why = %q (%v), want %q", got, err, WhyNoPublicAddress)
 	}
 }
 
@@ -299,6 +326,16 @@ func TestWhyAMappingFailed(t *testing.T) {
 	taken.pcpCode, taken.pmpCode = pcpCannotProvideExternal, 2
 	if got := Why(map7333(taken)); got != WhyPortTaken {
 		t.Errorf("taken: %q", got)
+	}
+	// No public address: PCP's and NAT-PMP's "network failure", and what
+	// miniupnpd answers on a carrier's address (PCP "no resources", then
+	// NAT-PMP "network failure"), #617.
+	for name, codes := range map[string][2]int{"network failure": {pcpNetworkFailure, pmpNetworkFailure}, "miniupnpd": {8, pmpNetworkFailure}} {
+		f := newFakeRouter(t, true)
+		f.pcpCode, f.pmpCode = byte(codes[0]), uint16(codes[1])
+		if got := Why(map7333(f)); got != WhyNoPublicAddress {
+			t.Errorf("%s: %q", name, got)
+		}
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()

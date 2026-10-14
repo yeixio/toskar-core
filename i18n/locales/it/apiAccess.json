@@ -159,6 +159,7 @@
       "port_taken": "La porta {{port}} è già inoltrata a un altro dispositivo sul router. Scegli un’altra porta qui sotto, oppure rimuovi quell’inoltro sul router.",
       "double_nat": "Il tuo router ha aperto la porta {{port}}, ma si trova dietro un altro router (doppio NAT), quindi la porta non raggiunge internet. Inoltra la porta anche sul router esterno, oppure usa il relay.",
       "carrier_nat": "Il tuo router ha aperto la porta {{port}}, ma il tuo provider condivide un indirizzo tra molte case (CGNAT), quindi la porta non raggiunge internet. Usa il relay.",
+      "no_public_address": "Il tuo router non ha un indirizzo internet proprio: il tuo provider ne condivide uno tra molte case (CGNAT), oppure c’è un altro router davanti, quindi nessuna porta raggiunge internet. Usa il relay. Per collegarti direttamente, chiedi al provider un indirizzo IPv4 pubblico, oppure inoltra la porta {{port}} sul router esterno.",
       "relayOnly": "Si usa solo il relay: Toskar non chiede al router di aprire una porta.",
       "tryAnotherPort": "Prova un’altra porta",
       "useRelayOnly": "Usa solo il relay"
