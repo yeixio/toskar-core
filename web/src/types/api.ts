@@ -590,6 +590,9 @@ export interface AutomationDraft {
 }
 
 /** An offer to install a missing ability, then finish the request (Gungnir §29). */
+/** What a picture or video model is short of on a computer (#550): memory, a graphics card's own memory, or the share of memory Apple silicon's graphics may use. */
+export type MediaShort = 'memory' | 'graphics' | 'shared'
+
 export interface SetupOffer {
   /** The inventory ability, such as image_generation. */
   ability: string
@@ -606,6 +609,11 @@ export interface SetupOffer {
   slow?: boolean
   /** Less memory here than it's comfortable with, so it may be slow or fail (contract 1.12). */
   tight_memory?: boolean
+  /** The model's verdict there; for tight, what it's short of (memory, graphics for a card's own memory, or shared for the share of memory Apple silicon's graphics may use), what it needs of it, and what the computer has (contract 1.34, #550). */
+  verdict?: 'works' | 'tight' | 'unsupported'
+  short?: MediaShort
+  need_bytes?: number
+  have_bytes?: number
   /** node_id is a paired computer, set up there with ?node_id=, and free_bytes its free disk space (contract 1.14, #153). */
   remote?: boolean
   free_bytes?: number
@@ -698,7 +706,12 @@ export interface ImageModel {
   /** This computer's graphics card has less memory than that: parts run from system memory, more slowly. */
   graphics_short?: boolean
   /** works, tight (set up only when the person agrees), or unsupported (#550). */
-  verdict?: 'works' | 'tight' | 'unsupported'   /** It changes pictures but doesn't make new ones: edits prefer it, and it's never the active model (#548). */
+  verdict?: 'works' | 'tight' | 'unsupported'
+  /** For a verdict other than works: what it's short of, what it needs of it, and what this computer has (#550). */
+  short?: MediaShort
+  need_bytes?: number
+  have_bytes?: number
+  /** It changes pictures but doesn't make new ones: edits prefer it, and it's never the active model (#548). */
   edit_only?: boolean
   /** Toskar can't give it out: it's set up with the person's own Hugging Face token and their confirmation that their license covers their use (#551). */
   needs_license?: boolean

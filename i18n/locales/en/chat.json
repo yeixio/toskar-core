@@ -400,6 +400,12 @@
     "continue": "Continue",
     "continuing": "Set up. Finishing your request…",
     "tightMemory": "This computer has less memory than it's comfortable with, so it may be slow or fail.",
+    "needsMemory": "Needs about {{need}} of memory to run well; this computer has {{have}}, so it may be slow or fail.",
+    "needsMemoryOn": "Needs about {{need}} of memory to run well; {{node}} has {{have}}, so it may be slow or fail.",
+    "needsGraphics": "Needs about {{need}} of graphics memory; this computer's graphics card has {{have}}, so it will be slower.",
+    "needsGraphicsOn": "Needs about {{need}} of graphics memory; the graphics card on {{node}} has {{have}}, so it will be slower.",
+    "needsShared": "Needs about {{need}} of graphics memory; this computer's graphics can use {{have}}, so it may be slow or fail.",
+    "needsSharedOn": "Needs about {{need}} of graphics memory; the graphics on {{node}} can use {{have}}, so it may be slow or fail.",
     "slowImage": "This computer has no GPU acceleration for it, so each picture takes a few minutes.",
     "slowVideo": "This computer has no GPU acceleration for it, so a clip can take most of an hour."
   },

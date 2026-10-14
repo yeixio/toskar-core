@@ -823,6 +823,15 @@ type SetupOffer struct {
 	// TightMemory says the computer has less memory than the model is
 	// comfortable with, so it may be slow or fail (contract 1.12).
 	TightMemory bool `json:"tight_memory,omitempty"`
+	// Verdict is works, tight (set up only when the person agrees), or
+	// unsupported; for tight, Short is what it's short of (memory,
+	// graphics for a card's own memory, or shared for the share of memory
+	// Apple silicon's graphics may use), NeedBytes what the model needs of
+	// it, and HaveBytes what the computer has (contract 1.34, #550).
+	Verdict   string `json:"verdict,omitempty"`
+	Short     string `json:"short,omitempty"`
+	NeedBytes int64  `json:"need_bytes,omitempty"`
+	HaveBytes int64  `json:"have_bytes,omitempty"`
 	// Remote says NodeID is a paired computer, not this one, and FreeBytes
 	// is its free disk space when known (contract 1.14, #153). The app sets
 	// it up there with ?node_id= on the setup routes.

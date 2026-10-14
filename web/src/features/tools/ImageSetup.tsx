@@ -17,6 +17,10 @@ const OWN = new Set(['title', 'unsupported', 'ready', 'notSetUp', 'makesAndEdits
 // daemon counts it.
 const headroom = 2 * 1024 ** 3
 
+// What a tight model is short of, said with what it needs and what this
+// computer has (#550).
+const shortKeys = { memory: 'images.tightMemory', graphics: 'images.graphicsShort', shared: 'images.sharedShort' } as const
+
 /** Image generation (Gungnir §17). */
 export function ImageSetupCard() {
   return <MediaSetupCard kind="images" />
@@ -183,10 +187,10 @@ function MediaSetupCard({ kind }: { kind: MediaKind }) {
                   <p className="mt-1 text-xs text-danger">
                     {t('images.tooLittleMemory', { need: gb(model.size_bytes + headroom), have: gb(status.memory_bytes ?? 0) })}
                   </p>
-                ) : model.tight_memory ? (
-                  <p className="mt-1 text-xs text-warning">{t('images.tightMemory', { comfortable: gb(model.memory_bytes) })}</p>
-                ) : model.graphics_short ? (
-                  <p className="mt-1 text-xs text-warning">{t('images.graphicsShort', { comfortable: gb(model.graphics_bytes ?? 0) })}</p>
+                ) : model.verdict === 'tight' && model.short ? (
+                  <p className="mt-1 text-xs text-warning">
+                    {t(shortKeys[model.short], { need: gb(model.need_bytes ?? 0), have: gb(model.have_bytes ?? 0) })}
+                  </p>
                 ) : null}
                 {model.verdict && model.verdict !== 'works'
                   ? (status.elsewhere ?? [])

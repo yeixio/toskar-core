@@ -15,6 +15,14 @@ function gb(bytes: number): string {
  * size, and where it runs. Once it is installed from here, the request is
  * sent again so it is finished.
  */
+// What a tight model is short of, with what it needs and what the computer
+// has (#550); an older computer sends neither, and gets the plain words.
+const needsKeys = {
+  memory: { here: 'setup.needsMemory', on: 'setup.needsMemoryOn' },
+  graphics: { here: 'setup.needsGraphics', on: 'setup.needsGraphicsOn' },
+  shared: { here: 'setup.needsShared', on: 'setup.needsSharedOn' },
+} as const
+
 export function SetupOfferCard({ offer, onContinue }: { offer: SetupOffer; onContinue: (text: string, attachments?: string[]) => void }) {
   if (offer.ability === 'vision') return <VisionOfferCard offer={offer} onContinue={onContinue} />
   return <MediaOfferCard offer={offer} onContinue={onContinue} />
@@ -68,7 +76,17 @@ function MediaOfferCard({ offer, onContinue }: { offer: SetupOffer; onContinue: 
     <div className="mt-3 space-y-2 rounded-xl border border-line/70 bg-surface px-3 py-2.5 text-sm">
       {/* Said before it's set up: it will be slow here, or may fail. */}
       {!ready && offer.tight_memory ? (
-        <p className="text-xs text-warning">{there ? t('setup.tightMemoryOn', { node: there }) : t('setup.tightMemory')}</p>
+        <p className="text-xs text-warning">
+          {offer.short && offer.need_bytes
+            ? t(there ? needsKeys[offer.short].on : needsKeys[offer.short].here, {
+                need: gb(offer.need_bytes),
+                have: gb(offer.have_bytes ?? 0),
+                node: there,
+              })
+            : there
+              ? t('setup.tightMemoryOn', { node: there })
+              : t('setup.tightMemory')}
+        </p>
       ) : null}
       {!ready && offer.slow ? (
         <p className="text-xs text-ink-muted">

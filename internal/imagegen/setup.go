@@ -35,9 +35,13 @@ type Setup struct {
 	Changed func()
 	// Catalog lists the models this setup offers; nil is the image models.
 	Catalog func() []Model
-	// Graphics is this computer's own graphics memory, or 0 when it has
-	// none, shares system memory (Apple silicon), or it isn't known (#550).
+	// Graphics is the memory this computer's graphics can use: a card's
+	// own, or the share of system memory Apple silicon gives its graphics;
+	// 0 when there are none or it isn't known (#550).
 	Graphics func() int64
+	// Shared reports graphics that share system memory (Apple silicon),
+	// so Graphics is a share of Memory rather than a card's own.
+	Shared func() bool
 	// Token is the person's Hugging Face token, for files behind a
 	// model's license (#551); "" when none is set.
 	Token func() string
@@ -101,6 +105,38 @@ type ModelStatus struct {
 	// Verdict is works, tight (it runs, slowly or near the limit, and is
 	// set up only when the person agrees), or unsupported (#550).
 	Verdict string `json:"verdict"`
+	// Short is what a tight or unsupported verdict is short of: memory,
+	// graphics (a card's own memory), or shared (the share of system
+	// memory the graphics may use); NeedBytes is what the model needs of
+	// it, and HaveBytes what this computer has, for "needs 14 GB; this
+	// computer has 10 GB" (#550).
+	Short     string `json:"short,omitempty"`
+	NeedBytes int64  `json:"need_bytes,omitempty"`
+	HaveBytes int64  `json:"have_bytes,omitempty"`
+}
+
+// What a verdict is short of (#550).
+const (
+	ShortMemory   = "memory"
+	ShortGraphics = "graphics"
+	ShortShared   = "shared"
+)
+
+// shortOf is what m is short of on a computer with this memory and
+// graphics memory, with what it needs and what there is; "" when nothing.
+func shortOf(m Model, memory, graphics int64, shared bool) (short string, need, have int64) {
+	switch {
+	case tooLittleMemory(m, memory):
+		return ShortMemory, m.SizeBytes() + headroom, memory
+	case tightMemory(m, memory):
+		return ShortMemory, m.MemoryBytes, memory
+	case graphicsShort(m, graphics):
+		if shared {
+			return ShortShared, m.GraphicsBytes, graphics
+		}
+		return ShortGraphics, m.GraphicsBytes, graphics
+	}
+	return "", 0, 0
 }
 
 // Verdicts (#550).
@@ -212,6 +248,10 @@ type Status struct {
 	// build uses the GPU: without it, each picture or clip takes minutes.
 	MemoryBytes int64 `json:"memory_bytes,omitempty"`
 	Accelerated bool  `json:"accelerated"`
+	// GraphicsBytes is the memory this computer's graphics can use, and
+	// SharedGraphics says it's a share of MemoryBytes (#550).
+	GraphicsBytes  int64 `json:"graphics_bytes,omitempty"`
+	SharedGraphics bool  `json:"shared_graphics,omitempty"`
 	// Build is the installed build (metal, vulkan, or cpu), and GPUBuild
 	// the GPU build this computer can use, or "" (#154).
 	Build    string        `json:"build,omitempty"`
@@ -291,12 +331,15 @@ func (s *Setup) Status() Status {
 	memory := s.memory()
 	st.MemoryBytes, st.Accelerated = memory, s.Accelerated()
 	st.Build, st.GPUBuild = s.InstalledBuild(), s.gpuBuildHere()
-	graphics := s.graphics()
+	graphics, shared := s.graphics(), s.shared()
+	st.GraphicsBytes, st.SharedGraphics = graphics, shared
 	rec := recommendIn(s.models(), memory).ID
 	for _, m := range s.models() {
+		short, need, have := shortOf(m, memory, graphics, shared)
 		st.Models = append(st.Models, ModelStatus{Model: m, SizeBytes: m.SizeBytes(), Installed: s.installed(m.ID), Recommended: m.ID == rec,
 			TooLittleMemory: tooLittleMemory(m, memory), TightMemory: tightMemory(m, memory), LicenseAccepted: m.NeedsLicense && s.licenseAccepted(m.ID),
-			GraphicsShort: graphicsShort(m, graphics), Verdict: verdict(m, memory, graphics)})
+			GraphicsShort: graphicsShort(m, graphics), Verdict: verdict(m, memory, graphics),
+			Short: short, NeedBytes: need, HaveBytes: have})
 	}
 	st.TokenSet = s.token() != ""
 	s.mu.Lock()
@@ -472,7 +515,7 @@ func (s *Setup) Start(id string) error {
 	// A model that would be slow or near the limit here is set up only
 	// when the person agrees (#550).
 	if !s.installed(id) && verdict(m, s.memory(), s.graphics()) == VerdictTight && !s.tightAllowed(id) {
-		return errors.New(tightReason(m, s.memory(), s.graphics()))
+		return errors.New(tightReason(m, s.memory(), s.graphics(), s.shared()))
 	}
 	need := int64(0)
 	if !s.installed(id) {
@@ -751,6 +794,10 @@ func (s *Setup) graphics() int64 {
 	return s.Graphics()
 }
 
+func (s *Setup) shared() bool {
+	return s.Shared != nil && s.Shared()
+}
+
 // AllowTight records that the person agreed to set up a model that would
 // be slow or near the limit here (#550).
 func (s *Setup) AllowTight(id string) {
@@ -768,10 +815,15 @@ func (s *Setup) tightAllowed(id string) bool {
 	return s.tightOK[id]
 }
 
-// tightReason says why a model would be slow or near the limit here.
-func tightReason(m Model, memory, graphics int64) string {
-	if graphicsShort(m, graphics) {
-		return fmt.Sprintf("%s works best with %.0f GB of graphics memory, and this computer's graphics card has %.0f GB, so parts of it run from system memory and it's slower; agree to set it up anyway, or choose a lighter model", m.Name, gb(m.GraphicsBytes), gb(graphics))
+// tightReason says why a model would be slow or near the limit here, with
+// what it needs and what this computer has (#550).
+func tightReason(m Model, memory, graphics int64, shared bool) string {
+	switch short, need, have := shortOf(m, memory, graphics, shared); short {
+	case ShortGraphics:
+		return fmt.Sprintf("%s needs about %.0f GB of graphics memory, and this computer's graphics card has %.0f GB, so parts of it run from system memory and it's slower; agree to set it up anyway, or choose a lighter model", m.Name, gb(need), gb(have))
+	case ShortShared:
+		return fmt.Sprintf("%s needs about %.0f GB of graphics memory, and this computer's graphics can use %.0f GB of its %.0f GB of memory, so it may be slow or fail; agree to set it up anyway, or choose a lighter model", m.Name, gb(need), gb(have), gb(memory))
+	default:
+		return fmt.Sprintf("%s needs about %.0f GB of memory to run well, and this computer has %.0f GB, so it may be slow or fail; agree to set it up anyway, or choose a lighter model", m.Name, gb(need), gb(have))
 	}
-	return fmt.Sprintf("%s is comfortable with %.0f GB of memory, and this computer has %.0f GB, so it may be slow or fail; agree to set it up anyway, or choose a lighter model", m.Name, gb(m.MemoryBytes), gb(memory))
 }

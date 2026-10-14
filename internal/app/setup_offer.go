@@ -51,7 +51,8 @@ func (a *App) setupOptions(ctx context.Context, s inventory.Snapshot, wait bool)
 			m := best.model
 			out = append(out, inventory.Setup{Ability: k.ability, Option: m.ID, Name: m.Name, SizeBytes: m.SizeBytes,
 				NodeID: best.nodeID, NodeName: best.nodeName, Remote: best.remote, FreeBytes: best.status.FreeBytes,
-				Tools: k.tools, Slow: !best.status.Accelerated, TightMemory: m.TightMemory || m.GraphicsShort})
+				Tools: k.tools, Slow: !best.status.Accelerated, TightMemory: m.TightMemory || m.GraphicsShort,
+				Verdict: m.Verdict, Short: m.Short, NeedBytes: m.NeedBytes, HaveBytes: m.HaveBytes})
 		}
 	}
 	return out
@@ -112,7 +113,7 @@ func setupOffer(a inventory.Ability, request string) *contracts.SetupOffer {
 	s := a.Setup
 	return &contracts.SetupOffer{Ability: a.ID, Label: a.Label, Option: s.Option, Name: s.Name, SizeBytes: s.SizeBytes,
 		NodeID: s.NodeID, NodeName: s.NodeName, Request: request, Slow: s.Slow, TightMemory: s.TightMemory,
-		Remote: s.Remote, FreeBytes: s.FreeBytes}
+		Remote: s.Remote, FreeBytes: s.FreeBytes, Verdict: s.Verdict, Short: s.Short, NeedBytes: s.NeedBytes, HaveBytes: s.HaveBytes}
 }
 
 // offerSetup answers a request for an ability that is not installed but can

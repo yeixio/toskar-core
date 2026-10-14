@@ -73,6 +73,12 @@ describe('SetupOfferCard', () => {
     expect(screen.getByText(/less memory than it's comfortable with/)).toBeInTheDocument()
   })
 
+  it('says what a tight model needs and what the computer has (#550)', async () => {
+    vi.mocked(api.getMediaSetup).mockResolvedValue(status({}))
+    renderIt(vi.fn(), { ...offer, tight_memory: true, verdict: 'tight', short: 'shared', need_bytes: 12e9, have_bytes: 10e9 })
+    expect(await screen.findByText(/Needs about 12 GB of graphics memory; this computer's graphics can use 10 GB/)).toBeInTheDocument()
+  })
+
   it('offers to continue when it was set up elsewhere', async () => {
     vi.mocked(api.getMediaSetup).mockResolvedValue(status({ ready: true, program: true, active: 'flux2-klein-4b' }))
     const onContinue = vi.fn()

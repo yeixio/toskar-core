@@ -52,12 +52,12 @@ The files come straight from the vendor's own repository, never a mirror. These 
 - **Recommended:** Wan 2.2 TI2V 5B, which also brings pictures to life. The A14B and 1.3B models take no picture, so clips from a picture use the 5B model when it's set up.
 - **Length and size:** clips are 2 seconds unless you ask for more, up to 5 seconds, at up to about 832×480. Asking for longer or larger makes the most the model allows, and the answer says so.
 
-"Comfortable with" is the memory a model runs well with: system memory, or unified memory on Apple silicon. On a computer with its own graphics card, each model also has the graphics memory it works best with; with less, parts of it run from system memory and it's slower.
+"Comfortable with" is the memory a model runs well with: system memory, or unified memory on Apple silicon. Each model also has the graphics memory it works best with. On a computer with its own graphics card, that's the card's memory; with less, parts of it run from system memory and it's slower. On Apple silicon, the graphics may use about two thirds of the computer's memory, or three quarters above 36 GB, and a model needing more than that may be slow or fail.
 
 Each model gets a verdict for the computer it would run on, on the Tools page and in a chat's setup offer:
 
 - **Works well:** it fits, with room to spare.
-- **May be slow or tight:** it fits, but below the memory or graphics memory it's comfortable with. It's set up only when you agree.
+- **May be slow or tight:** it fits, but below the memory or graphics memory it's comfortable with. Toskar says what it needs and what the computer has, such as "Needs about 16 GB of graphics memory; this computer's graphics card has 10 GB". It's set up only when you agree.
 - **Not supported here:** it can't fit at all. A lighter model, a smaller or shorter request, or a paired computer with more memory can make it instead. An estimate hasn't been measured on real hardware yet; "Not yet" models can be set up, but they're labeled as untested and never recommended.
 
 ## Test machines

@@ -35,8 +35,8 @@ describe('ImageSetupCard', () => {
   })
 
   it('warns when memory is tight, and still sets it up', async () => {
-    renderWith({ supported: true, ready: false, program: false, release: 'r', memory_bytes: 8 * 1024 ** 3, accelerated: true, models: [model({ tight_memory: true })] })
-    expect(await screen.findByText(/less memory than it's comfortable with/)).toBeInTheDocument()
+    renderWith({ supported: true, ready: false, program: false, release: 'r', memory_bytes: 8 * 1024 ** 3, accelerated: true, models: [model({ tight_memory: true, verdict: 'tight', short: 'memory', need_bytes: 12e9, have_bytes: 8e9 })] })
+    expect(await screen.findByText(/Needs about 12 GB of memory to run well; this computer has 8 GB/)).toBeInTheDocument()
     expect(screen.queryByText(/no GPU acceleration/)).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: /Set up/ })).toBeInTheDocument()
   })
@@ -87,10 +87,10 @@ describe('ImageSetupCard', () => {
     vi.mocked(api.startMediaSetup).mockResolvedValue(null)
     renderWith({
       supported: true, ready: true, program: true, release: 'r', active: 'flux2-klein-4b', accelerated: true,
-      models: [model({ installed: true }), model({ id: 'big', name: 'Big', recommended: false, graphics_short: true, graphics_bytes: 16 * 1024 ** 3, verdict: 'tight' })],
+      models: [model({ installed: true }), model({ id: 'big', name: 'Big', recommended: false, graphics_short: true, graphics_bytes: 16 * 1024 ** 3, verdict: 'tight', short: 'graphics', need_bytes: 16e9, have_bytes: 8e9 })],
     })
     fireEvent.click(await screen.findByRole('radio', { name: 'Big' }))
-    expect(screen.getByText(/graphics card has less memory than this model works best with/)).toBeInTheDocument()
+    expect(screen.getByText(/Needs about 16 GB of graphics memory; this computer's graphics card has 8 GB/)).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /Download/ })).toBeDisabled()
     fireEvent.click(screen.getByRole('checkbox', { name: /Set it up anyway/ }))
     fireEvent.click(screen.getByRole('button', { name: /Download/ }))
@@ -101,7 +101,7 @@ describe('ImageSetupCard', () => {
     vi.mocked(api.startMediaSetup).mockResolvedValue(null)
     renderWith({
       supported: true, ready: true, program: true, release: 'r', active: 'flux2-klein-4b', accelerated: true,
-      models: [model({ installed: true }), model({ id: 'big', name: 'Big', recommended: false, graphics_short: true, graphics_bytes: 16 * 1024 ** 3, verdict: 'tight' })],
+      models: [model({ installed: true }), model({ id: 'big', name: 'Big', recommended: false, graphics_short: true, graphics_bytes: 16 * 1024 ** 3, verdict: 'tight', short: 'graphics', need_bytes: 16e9, have_bytes: 8e9 })],
       elsewhere: [{ node_id: 'ws', node_name: 'Workstation', model_id: 'big' }],
     })
     expect(await screen.findByText('Works well on Workstation.')).toBeInTheDocument()

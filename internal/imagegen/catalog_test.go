@@ -248,6 +248,28 @@ func TestVerdicts(t *testing.T) {
 			t.Errorf("%d GB / %d GB graphics = %s, want %s", c.memory>>30, c.graphics>>30, got, c.want)
 		}
 	}
+	// What it's short of, needs, and has, for "needs 12 GB; this computer
+	// has 8 GB".
+	for _, c := range []struct {
+		memory, graphics int64
+		shared           bool
+		short            string
+		need, have       int64
+	}{
+		{4 << 30, 0, false, ShortMemory, 8 << 30, 4 << 30},
+		{12 << 30, 0, false, ShortMemory, 16 << 30, 12 << 30},
+		{32 << 30, 8 << 30, false, ShortGraphics, 12 << 30, 8 << 30},
+		{24 << 30, 10 << 30, true, ShortShared, 12 << 30, 10 << 30},
+		{32 << 30, 24 << 30, false, "", 0, 0},
+	} {
+		short, need, have := shortOf(m, c.memory, c.graphics, c.shared)
+		if short != c.short || need != c.need || have != c.have {
+			t.Errorf("%d GB / %d GB graphics: %s %d %d, want %s %d %d", c.memory>>30, c.graphics>>30, short, need>>30, have>>30, c.short, c.need>>30, c.have>>30)
+		}
+	}
+	if why := tightReason(m, 24<<30, 10<<30, true); !strings.Contains(why, "needs about 12 GB of graphics memory") || !strings.Contains(why, "can use 10 GB of its 24 GB") {
+		t.Errorf("shared reason: %s", why)
+	}
 	for _, list := range [][]Model{Catalog(), VideoCatalog()} {
 		for _, x := range list {
 			if x.GraphicsBytes == 0 {
@@ -262,7 +284,8 @@ func TestVerdicts(t *testing.T) {
 	f.setup.Catalog = func() []Model { return []Model{model} }
 	f.setup.Graphics = func() int64 { return 8 << 30 }
 	st := f.setup.Status()
-	if st.Models[0].Verdict != VerdictTight || !st.Models[0].GraphicsShort {
+	if st.Models[0].Verdict != VerdictTight || !st.Models[0].GraphicsShort || st.Models[0].Short != ShortGraphics ||
+		st.Models[0].NeedBytes != 64<<30 || st.Models[0].HaveBytes != 8<<30 || st.GraphicsBytes != 8<<30 {
 		t.Fatalf("status %+v", st.Models[0])
 	}
 	if err := f.setup.Start(model.ID); err == nil || !strings.Contains(err.Error(), "graphics card has 8 GB") {

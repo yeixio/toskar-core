@@ -31,8 +31,8 @@ func (a *App) newSDSetup(cfg config.Config, folder string, catalog func() []imag
 		}
 		return int64(inv.Memory.TotalBytes)
 	})
-	// A graphics card's own memory; 0 on Apple silicon, which shares
-	// system memory, or without a card (#550).
+	// The memory graphics can use: a card's own, or the share of system
+	// memory Apple silicon gives its graphics; 0 without either (#550).
 	graphics := sync.OnceValue(func() int64 {
 		inv, err := a.hw.Detect(context.Background())
 		if err != nil {
@@ -40,15 +40,33 @@ func (a *App) newSDSetup(cfg config.Config, folder string, catalog func() []imag
 		}
 		var most uint64
 		for _, ac := range inv.Accelerators {
-			if ac.Kind == "gpu" && !softwareAdapter(ac.Model) {
+			if ac.Kind != "gpu" || softwareAdapter(ac.Model) {
+				continue
+			}
+			if ac.DedicatedVRAM == 0 && ac.UnifiedMemory > 0 {
+				most = max(most, sharedGraphics(ac.UnifiedMemory))
+			} else {
 				most = max(most, ac.DedicatedVRAM)
 			}
 		}
 		return int64(most)
 	})
+	shared := sync.OnceValue(func() bool {
+		inv, err := a.hw.Detect(context.Background())
+		if err != nil {
+			return false
+		}
+		for _, ac := range inv.Accelerators {
+			if ac.Kind == "gpu" && ac.DedicatedVRAM == 0 && ac.UnifiedMemory > 0 {
+				return true
+			}
+		}
+		return false
+	})
 	return &imagegen.Setup{
 		ProgramDir: filepath.Join(cfg.RuntimesDir, "sdcpp"),
 		Graphics:   graphics,
+		Shared:     shared,
 		ModelsDir:  filepath.Join(cfg.ModelsDir, folder),
 		Catalog:    catalog,
 		Memory:     memory,
@@ -77,3 +95,14 @@ var vulkanUsable = sync.OnceValue(func() bool {
 	defer cancel()
 	return llamacpp.VulkanUsable(ctx)
 })
+
+// sharedGraphics is how much of Apple silicon's memory its graphics may
+// use: macOS lets the GPU wire about two thirds of it, and three quarters
+// above 36 GB (its recommendedMaxWorkingSetSize). 24 GB of memory isn't
+// 24 GB of graphics memory (#550).
+func sharedGraphics(memory uint64) uint64 {
+	if memory > 36<<30 {
+		return memory / 4 * 3
+	}
+	return memory / 3 * 2
+}

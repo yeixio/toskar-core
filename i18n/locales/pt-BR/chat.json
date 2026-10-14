@@ -411,6 +411,12 @@
     "continue": "Continuar",
     "continuing": "Configurado. Concluindo sua solicitação…",
     "tightMemory": "Este computador tem menos memória do que o ideal, então pode ficar lento ou falhar.",
+    "needsMemory": "Precisa de cerca de {{need}} de memória para funcionar bem; este computador tem {{have}}, então pode ficar lento ou falhar.",
+    "needsMemoryOn": "Precisa de cerca de {{need}} de memória para funcionar bem; {{node}} tem {{have}}, então pode ficar lento ou falhar.",
+    "needsGraphics": "Precisa de cerca de {{need}} de memória gráfica; a placa de vídeo deste computador tem {{have}}, então vai ficar mais lento.",
+    "needsGraphicsOn": "Precisa de cerca de {{need}} de memória gráfica; a placa de vídeo de {{node}} tem {{have}}, então vai ficar mais lento.",
+    "needsShared": "Precisa de cerca de {{need}} de memória gráfica; os gráficos deste computador podem usar {{have}}, então pode ficar lento ou falhar.",
+    "needsSharedOn": "Precisa de cerca de {{need}} de memória gráfica; os gráficos de {{node}} podem usar {{have}}, então pode ficar lento ou falhar.",
     "slowImage": "Este computador não tem aceleração por GPU para isso, então cada imagem leva alguns minutos.",
     "slowVideo": "Este computador não tem aceleração por GPU para isso, então um clipe pode levar quase uma hora."
   },

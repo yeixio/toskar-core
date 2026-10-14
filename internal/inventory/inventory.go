@@ -112,6 +112,12 @@ type Setup struct {
 	// TightMemory is a computer below the memory it's comfortable with,
 	// where it may be slow or fail.
 	TightMemory bool `json:"tight_memory,omitempty"`
+	// Verdict, Short, NeedBytes, and HaveBytes are the model's, from its
+	// setup status (#550).
+	Verdict   string `json:"verdict,omitempty"`
+	Short     string `json:"short,omitempty"`
+	NeedBytes int64  `json:"need_bytes,omitempty"`
+	HaveBytes int64  `json:"have_bytes,omitempty"`
 }
 
 // Snapshot is the inventory at one moment.

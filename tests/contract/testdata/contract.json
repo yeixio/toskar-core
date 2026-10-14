@@ -1,5 +1,5 @@
 {
-  "version": "1.33",
+  "version": "1.34",
   "types": {
     "ActivityStep": [
       "kind",
@@ -217,16 +217,20 @@
       "ability",
       "attachments",
       "free_bytes",
+      "have_bytes",
       "label",
       "name",
+      "need_bytes",
       "node_id",
       "node_name",
       "option",
       "remote",
       "request",
+      "short",
       "size_bytes",
       "slow",
-      "tight_memory"
+      "tight_memory",
+      "verdict"
     ],
     "ToolUse": [
       "calls",
