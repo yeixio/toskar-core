@@ -150,6 +150,7 @@
   "UNAUTHORIZED": "このToskarにはAPIキーが必要です。",
   "UNREADABLE_FILE": "Toskarは{{name}}を読み取れません：{{cause}}",
   "UNSUPPORTED_FILE": "Toskarはまだ{{name}}を読み取れません。ドキュメント、スプレッドシート、PDF、コードファイル、音声、動画、またはPNGかJPEGの画像を添付してください。",
+  "DEVICE_LIMIT": "接続済みのデバイスが上限の {{limit}} 台です。先にどれかの接続を解除してください。",
   "DEVICE_NOT_ALLOWED": "デバイスのキーではこの操作はできません。API アクセスのキーを使ってください。",
   "PORTAL_NOT_FOUND": "このアドレスにポータルはないか、オフになっています。",
   "PORTAL_SLUG_TAKEN": "別のポータルがそのアドレスを使っています。",

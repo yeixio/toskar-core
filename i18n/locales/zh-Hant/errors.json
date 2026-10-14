@@ -150,6 +150,7 @@
   "UNAUTHORIZED": "這個 Toskar 需要 API 金鑰。",
   "UNREADABLE_FILE": "Toskar 無法讀取 {{name}}：{{cause}}",
   "UNSUPPORTED_FILE": "Toskar 目前還無法讀取 {{name}}。請附加文件、試算表、PDF、程式碼檔案、音訊、影片，或 PNG、JPEG 圖片。",
+  "DEVICE_LIMIT": "你已連線 {{limit}} 台裝置，已達上限。請先中斷一台。",
   "DEVICE_NOT_ALLOWED": "裝置的金鑰無法執行此操作。請使用 API 存取中的金鑰。",
   "PORTAL_NOT_FOUND": "此位址沒有入口網站，或它已關閉。",
   "PORTAL_SLUG_TAKEN": "另一個入口網站已使用該位址。",

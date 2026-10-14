@@ -150,6 +150,7 @@
   "UNAUTHORIZED": "这个 Toskar 需要 API 密钥。",
   "UNREADABLE_FILE": "Toskar 无法读取 {{name}}：{{cause}}",
   "UNSUPPORTED_FILE": "Toskar 暂时无法读取 {{name}}。请附加文档、电子表格、PDF、代码文件、音频、视频，或 PNG、JPEG 图片。",
+  "DEVICE_LIMIT": "你已连接 {{limit}} 台设备，已达上限。请先断开一台。",
   "DEVICE_NOT_ALLOWED": "设备的密钥无法执行此操作。请使用 API 访问中的密钥。",
   "PORTAL_NOT_FOUND": "此地址没有门户，或它已关闭。",
   "PORTAL_SLUG_TAKEN": "另一个门户已使用该地址。",

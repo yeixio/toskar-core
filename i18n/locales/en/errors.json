@@ -150,6 +150,7 @@
   "UNAUTHORIZED": "This Toskar needs an API key.",
   "UNREADABLE_FILE": "Toskar can't read {{name}}: {{cause}}",
   "UNSUPPORTED_FILE": "Toskar can't read {{name}} yet. Attach a document, spreadsheet, PDF, code file, audio, video, or a PNG or JPEG image.",
+  "DEVICE_LIMIT": "You have {{limit}} connected devices, the most you can. Disconnect one first.",
   "DEVICE_NOT_ALLOWED": "A device's key can't do this. Use a key from API Access.",
   "PORTAL_NOT_FOUND": "There's no portal at this address, or it's turned off.",
   "PORTAL_SLUG_TAKEN": "Another portal has that address.",
