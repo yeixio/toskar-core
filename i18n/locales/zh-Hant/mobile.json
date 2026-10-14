@@ -432,7 +432,7 @@
     "continuing": "已設定完成。正在完成你的請求…",
     "askAdmin": "請 {{node}} 的管理員來設定。",
     "onComputer": "請在 {{node}} 的「工具」頁面上設定。",
-    "detailsHere": "{{name}} · 下載 {{size}} · 在你的電腦上",
+    "detailsHere": "{{name}} · 下載大小 {{size}} · 在你的電腦上",
     "askAdminHere": "請你的電腦的管理員來設定。",
     "onComputerHere": "請在你的電腦的「工具」頁面上設定。"
   },
