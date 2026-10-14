@@ -4,6 +4,7 @@ import { useDialog } from '@/lib/useDialog'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 import type { Conversation } from '@/types/api'
 import { rovingKeyDown, useMenu } from '@/lib/roving'
+import { searchItems } from '@/lib/search'
 
 const PIN_MIN_WIDTH = 1100
 
@@ -145,9 +146,8 @@ export function ChatHistoryDrawer({
   const panelRef = useDialog<HTMLElement>(open && overlay, () => (selecting ? leaveSelect() : onClose()))
 
   const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase()
-    if (!q) return conversations
-    return conversations.filter((c) => c.title.toLowerCase().includes(q))
+    // Typos forgiven (#451); exact matches first.
+    return searchItems(conversations, search, (c) => [c.title])
   }, [conversations, search])
 
   const grouped = useMemo(

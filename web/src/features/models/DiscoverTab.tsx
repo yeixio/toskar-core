@@ -8,6 +8,7 @@ import type {
 } from '@/types/api'
 import { ModelCard } from './ModelCard'
 import { CATEGORY_SECTIONS, largerAlternative } from './modelPresentation'
+import { searchItems } from '@/lib/search'
 
 export function DiscoverTab({
   models,
@@ -31,16 +32,8 @@ export function DiscoverTab({
   installingId?: string | null
 }) {
   const { t } = useTranslation('models')
-  const q = search.trim().toLowerCase()
-  const filtered = models.filter((m) => {
-    if (!q) return true
-    return (
-      m.display_name.toLowerCase().includes(q) ||
-      m.id.toLowerCase().includes(q) ||
-      m.summary?.toLowerCase().includes(q) ||
-      m.tags?.some((t) => t.toLowerCase().includes(q))
-    )
-  })
+  // Typos forgiven (#451): "lama" finds Llama. Exact matches first.
+  const filtered = searchItems(models, search, (m) => [m.display_name, m.id, m.summary, ...(m.tags ?? [])])
 
   // One winner badge per category — keep gold rare.
   const winnerByModel = new Map<string, string>()

@@ -16,6 +16,7 @@ import { Skeleton } from '@/components/ui/Skeleton'
 import { AutomationsIntro, IdeaGallery } from './Intro'
 import type { IdeaId } from './ideas'
 import { WebhookLink } from './WebhookLink'
+import { matchesSearch } from '@/lib/search'
 
 const screenshotSentence =
   'Every morning at 8:00 AM, check this product and tell me if the price is below $500.'
@@ -491,8 +492,8 @@ function StatusPill({ item }: { item: Pick<Automation, 'enabled' | 'last_status'
 }
 
 function matchesAutomation(item: Automation, query: string, filter: 'all' | 'active' | 'paused' | 'attention'): boolean {
-  const needle = query.trim().toLowerCase()
-  if (needle && !`${item.name} ${item.prompt} ${item.last_result ?? ''}`.toLowerCase().includes(needle)) return false
+  // Typos forgiven (#451).
+  if (!matchesSearch(query, item.name, item.prompt, item.last_result)) return false
   if (filter === 'active') return item.enabled
   if (filter === 'paused') return !item.enabled
   if (filter === 'attention') return item.last_status === 'failed' || item.consecutive_failures > 0

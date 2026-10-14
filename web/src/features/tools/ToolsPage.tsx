@@ -14,6 +14,7 @@ import { LoadError } from '@/components/ui/LoadError'
 import { Skeleton } from '@/components/ui/Skeleton'
 import { HowItWorks, stepIcons } from '@/components/ui/HowItWorks'
 import { rovingKeyDown } from '@/lib/roving'
+import { searchItems } from '@/lib/search'
 
 // The page's sections, as tabs; each is tools:tabs.<id>. ?tab=add opens Add more.
 const TABS = ['yours', 'add', 'media'] as const
@@ -66,17 +67,14 @@ export function ToolsPage() {
   const selected = tools.find((tool) => tool.id === selectedId) ?? null
 
   const visible = useMemo(() => {
-    const needle = query.trim().toLowerCase()
-    return tools.filter((tool) => {
+    const shown = tools.filter((tool) => {
       if (filter === 'builtin' && tool.source !== 'builtin') return false
       if (filter === 'added' && tool.source === 'builtin') return false
       if (filter === 'disabled' && tool.enabled) return false
-      if (!needle) return true
-      return [tool.name, tool.description, tool.capability, tool.source, tool.id]
-        .join(' ')
-        .toLowerCase()
-        .includes(needle)
+      return true
     })
+    // Typos forgiven (#451); exact matches first.
+    return searchItems(shown, query, (tool) => [tool.name, tool.description, tool.capability, tool.source, tool.id])
   }, [tools, query, filter])
 
   const toggle = useMutation({

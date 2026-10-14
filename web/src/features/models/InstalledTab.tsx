@@ -15,6 +15,7 @@ import { SmallModelNote } from './SmallModelNote'
 import { CommunityScore, RateButton } from './ratings'
 import { formatPercent } from '@/i18n/format'
 import { rovingKeyDown, useMenu } from '@/lib/roving'
+import { searchItems } from '@/lib/search'
 
 export function InstalledTab({
   models,
@@ -59,17 +60,12 @@ export function InstalledTab({
   const { t } = useTranslation('models')
   const [menuOpenId, setMenuOpenId] = useState<string | null>(null)
   const menuRef = useMenu(menuOpenId, () => setMenuOpenId(null))
-  const q = search.trim().toLowerCase()
-  const installed = models.filter((m) => {
-    const isInstalled =
-      m.installed || (m.installed_on?.length ?? 0) > 0 || m.status === 'downloading'
-    if (!isInstalled) return false
-    if (!q) return true
-    return (
-      m.display_name.toLowerCase().includes(q) ||
-      m.id.toLowerCase().includes(q)
-    )
-  })
+  // Typos forgiven (#451); exact matches first.
+  const installed = searchItems(
+    models.filter((m) => m.installed || (m.installed_on?.length ?? 0) > 0 || m.status === 'downloading'),
+    search,
+    (m) => [m.display_name, m.id],
+  )
   const runningByModel = new Map(running.map((r) => [r.model_id, r]))
   const alternative = largerAlternative(models, fits ?? {})
   const paired = nodes.filter((n) => (n.paired || n.is_local) && n.status !== 'offline')
