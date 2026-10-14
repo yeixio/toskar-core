@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { notifyDesktopTheme } from '@/lib/desktopBridge'
 import { moveStored } from '@/lib/storage'
 
 export type ThemePreference = 'light' | 'dark' | 'system'
@@ -60,6 +61,7 @@ export function applyTheme(preference: ThemePreference) {
   const resolved = resolveTheme(preference)
   document.documentElement.dataset.theme = resolved
   document.documentElement.style.colorScheme = resolved
+  void notifyDesktopTheme(resolved)
 }
 
 // Moved before the store reads it (#237).

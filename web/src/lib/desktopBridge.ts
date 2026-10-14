@@ -9,6 +9,8 @@ type WailsApp = {
   MarkScreenshotReady?: () => Promise<void>
   /** Shows the shell's menus and tray in a language, as the page does. */
   SetLanguage?: (tag: string) => Promise<void>
+  /** Gives the window's title bar the page's theme (yeixio/toskar-apps#26). */
+  SetTheme?: (theme: 'light' | 'dark') => Promise<void>
   GetDaemonURL?: () => Promise<string>
   /** Present when the shell passes the daemon's events on as Wails events. */
   HasEventRelay?: () => Promise<boolean>
@@ -54,6 +56,19 @@ export async function notifyDesktopLanguage(tag: string): Promise<void> {
     await wailsGoApp()?.SetLanguage?.(tag)
   } catch {
     // An older shell keeps its own language.
+  }
+}
+
+/**
+ * Tells the desktop shell the theme the page shows, so the window's title
+ * bar matches it: Windows otherwise draws it in its own mode, white above a
+ * dark Toskar (yeixio/toskar-apps#26).
+ */
+export async function notifyDesktopTheme(theme: 'light' | 'dark'): Promise<void> {
+  try {
+    await wailsGoApp()?.SetTheme?.(theme)
+  } catch {
+    // An older shell keeps the system's title bar.
   }
 }
 
