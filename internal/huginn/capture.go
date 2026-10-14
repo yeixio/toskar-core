@@ -1,6 +1,10 @@
 package huginn
 
-import "regexp"
+import (
+	"regexp"
+
+	"github.com/yeixio/toskar-core/internal/typo"
+)
 
 // Capture is what a message asks the person to add before it can be
 // answered: a photo, from the camera or the library, or a file.
@@ -43,6 +47,19 @@ var asksForHelp = regexp.MustCompile(`(?i)\b(?:summari[sz]e|summary|read|review|
 // choose one, instead of a model guessing at a picture it can't see. Only
 // the person's tap in the system camera or picker adds anything.
 func CaptureRequest(message string) Capture {
+	if c := captureRequest(message); c != NoCapture {
+		return c
+	}
+	// The same request with its typos corrected (#451): "tke a foto".
+	if fixed := captureWords.Fix(message); fixed != message {
+		return captureRequest(fixed)
+	}
+	return NoCapture
+}
+
+var captureWords = typo.FromPatterns(cameraRe.String(), asksForHelp.String(), photoRe.String(), fileRe.String())
+
+func captureRequest(message string) Capture {
 	switch {
 	case cameraRe.MatchString(message):
 		return CaptureCamera

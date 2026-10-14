@@ -1,6 +1,7 @@
 package huginn
 
 import (
+	"github.com/yeixio/toskar-core/internal/typo"
 	"regexp"
 	"strings"
 )
@@ -37,6 +38,9 @@ var smallTalkRe = regexp.MustCompile(`(?i)^(hi|hello|hey|hiya|howdy|yo|good (mor
 
 // SmallTalk reports a message that is only small talk, such as "Hi! How
 // are you?". Its answer is never looked up on the web.
+// smallTalkWords are small talk's words, so "helo" and "thnaks" count (#451).
+var smallTalkWords = typo.FromPatterns(smallTalkRe.String())
+
 func SmallTalk(message string) bool {
 	parts := strings.FieldsFunc(message, func(r rune) bool { return strings.ContainsRune(".!?,;:\n", r) })
 	seen := false
@@ -45,7 +49,7 @@ func SmallTalk(message string) bool {
 		if part == "" {
 			continue
 		}
-		if !smallTalkRe.MatchString(part) {
+		if !smallTalkRe.MatchString(part) && !smallTalkRe.MatchString(smallTalkWords.Fix(part)) {
 			return false
 		}
 		seen = true

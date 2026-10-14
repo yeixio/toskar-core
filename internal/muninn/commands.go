@@ -1,6 +1,7 @@
 package muninn
 
 import (
+	"github.com/yeixio/toskar-core/internal/typo"
 	"regexp"
 	"strings"
 )
@@ -37,6 +38,26 @@ var (
 // "Forget that …", and "What do you remember about me?". Yggdrasil handles these
 // itself, so the result does not depend on how well a model follows them.
 func ParseCommand(message string) Command {
+	cmd := parseCommand(message)
+	if cmd.Kind != "" {
+		return cmd
+	}
+	// "remmeber that …": the command's own words with typos corrected
+	// (#451). Only the first few words: the rest is the person's text.
+	if fixed := commandWords.FixLeading(message, commandLead); fixed != message {
+		return parseCommand(fixed)
+	}
+	return cmd
+}
+
+// commandWords are the commands' words, and commandLead how many of a
+// message's first words may be corrected toward them ("please remmeber
+// that", "what do you remeber").
+var commandWords = typo.FromPatterns(listRe.String(), forgetRe.String(), rememberRe.String())
+
+const commandLead = 5
+
+func parseCommand(message string) Command {
 	msg := strings.TrimSpace(message)
 	if listRe.MatchString(msg) {
 		return Command{Kind: CommandList}

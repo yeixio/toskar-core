@@ -1,6 +1,10 @@
 package tools
 
-import "regexp"
+import (
+	"regexp"
+
+	"github.com/yeixio/toskar-core/internal/typo"
+)
 
 // liveWebRe matches questions that need current public information. Cues are
 // whole words, so "score" does not match "underscore".
@@ -8,8 +12,15 @@ var liveWebRe = regexp.MustCompile(`(?i)(\b(weather|forecast|latest version|late
 
 // MessageNeedsLiveWeb reports questions that need current public information.
 func MessageNeedsLiveWeb(message string) bool {
-	return liveWebRe.MatchString(message)
+	return liveWebRe.MatchString(message) || liveWebRe.MatchString(liveWebWords.Fix(message))
 }
+
+// The rules' own words, for messages with typos in them (#451): "wether"
+// counts as "weather", "recomend" as "recommend".
+var (
+	liveWebWords = typo.FromPatterns(liveWebRe.String())
+	askFindWords = typo.FromPatterns(askFindRe.String())
+)
 
 // askFindRe matches a request to find something rather than recall it: a
 // recommendation, where to buy, what it costs, reviews, a result or a
@@ -20,5 +31,5 @@ var askFindRe = regexp.MustCompile(`(?i)\b(recommend\w*|suggest (a|an|some)\b.{0
 
 // MessageAsksToFind reports requests to find something on the web.
 func MessageAsksToFind(message string) bool {
-	return askFindRe.MatchString(message)
+	return askFindRe.MatchString(message) || askFindRe.MatchString(askFindWords.Fix(message))
 }

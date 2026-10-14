@@ -4,6 +4,7 @@
 package huginn
 
 import (
+	"github.com/yeixio/toskar-core/internal/typo"
 	"regexp"
 	"strings"
 	"unicode/utf8"
@@ -67,6 +68,9 @@ func Brief(k Kind, message, client string) bool {
 // treated as needing a careful answer.
 const researchLength = 600
 
+// classifyWords are the words the rules below match, for typos.
+var classifyWords = typo.FromPatterns(localRe.String(), codingRe.String(), researchRe.String())
+
 // Classify sorts a request. The order matters: acting on this computer and
 // current information decide what the turn needs to do, so they win over the
 // subject of the question.
@@ -75,16 +79,19 @@ func Classify(message string) Kind {
 	if msg == "" {
 		return Chat
 	}
-	if localRe.MatchString(msg) {
+	// The rules' words with typos corrected (#451); a match on what was
+	// typed counts first.
+	fixed := classifyWords.Fix(msg)
+	if localRe.MatchString(msg) || localRe.MatchString(fixed) {
 		return Local
 	}
 	if tools.MessageNeedsLiveWeb(msg) {
 		return Current
 	}
-	if codingRe.MatchString(msg) {
+	if codingRe.MatchString(msg) || codingRe.MatchString(fixed) {
 		return Coding
 	}
-	if researchRe.MatchString(msg) || utf8.RuneCountInString(msg) > researchLength {
+	if researchRe.MatchString(msg) || researchRe.MatchString(fixed) || utf8.RuneCountInString(msg) > researchLength {
 		return Research
 	}
 	return Chat

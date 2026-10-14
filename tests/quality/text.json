@@ -276,6 +276,126 @@
     {
       "in": "Write a haiku about rain.",
       "want": false
+    },
+    {
+      "in": "whats teh wether in juneau tomorow",
+      "want": true
+    },
+    {
+      "in": "wether forcast for seattle",
+      "want": true
+    },
+    {
+      "in": "what's the wheather like today",
+      "want": true
+    },
+    {
+      "in": "any new headines about the eleciton",
+      "want": true
+    },
+    {
+      "in": "latest nwes on the mars mission",
+      "want": true
+    },
+    {
+      "in": "stok price of apple",
+      "want": true
+    },
+    {
+      "in": "who won the game lsat night",
+      "want": true
+    },
+    {
+      "in": "exchnage rate dollar to euro",
+      "want": true
+    },
+    {
+      "in": "what's the wether this weekned",
+      "want": true
+    },
+    {
+      "in": "is the pharmacy opne now",
+      "want": true
+    },
+    {
+      "in": "forcast for tonite",
+      "want": true
+    },
+    {
+      "in": "wehather in paris",
+      "want": true
+    },
+    {
+      "in": "news headlnies today",
+      "want": true
+    },
+    {
+      "in": "election reslts in ohio",
+      "want": true
+    },
+    {
+      "in": "what's the curent price of bitcoin",
+      "want": true
+    },
+    {
+      "in": "relase date of the new zelda",
+      "want": true
+    },
+    {
+      "in": "is it raining right now in denver, wether please",
+      "want": true
+    },
+    {
+      "in": "look up the documentaton for go generics",
+      "want": true
+    },
+    {
+      "in": "seach the web for cheap flights",
+      "want": true
+    },
+    {
+      "in": "latest verison of node",
+      "want": true
+    },
+    {
+      "in": "whether I should learn go or rust",
+      "want": false
+    },
+    {
+      "in": "fill in the form",
+      "want": false
+    },
+    {
+      "in": "is the trail open",
+      "want": false
+    },
+    {
+      "in": "I like the weave of this fabric",
+      "want": false
+    },
+    {
+      "in": "a plain answer please",
+      "want": false
+    },
+    {
+      "in": "my test failed",
+      "want": false
+    },
+    {
+      "in": "I need to plan a party",
+      "want": false
+    },
+    {
+      "in": "the hike was great",
+      "want": false
+    },
+    {
+      "in": "explain how the heart works",
+      "want": false
+    },
+    {
+      "in": "is the store open on sunday or is it closed",
+      "want": false
     }
   ],
   "classify": [
@@ -545,6 +665,50 @@
     },
     {
       "in": "Write a haiku about rain.",
+      "want": "chat"
+    },
+    {
+      "in": "whats teh wether in juneau tomorow",
+      "want": "current"
+    },
+    {
+      "in": "latest nwes on the mars mission",
+      "want": "current"
+    },
+    {
+      "in": "stok price of apple",
+      "want": "current"
+    },
+    {
+      "in": "wehather in paris",
+      "want": "current"
+    },
+    {
+      "in": "compair python and go for web servers",
+      "want": "coding"
+    },
+    {
+      "in": "anaylsis of the housing market in boise",
+      "want": "research"
+    },
+    {
+      "in": "evalute the pros and cons of solar",
+      "want": "research"
+    },
+    {
+      "in": "write a scirpt that renames files",
+      "want": "coding"
+    },
+    {
+      "in": "fix this pyhton functon",
+      "want": "coding"
+    },
+    {
+      "in": "whether I should learn go or rust",
+      "want": "chat"
+    },
+    {
+      "in": "a plain answer please",
       "want": "chat"
     }
   ],
@@ -823,6 +987,46 @@
     },
     {
       "in": "Write a haiku about rain.",
+      "want": false
+    },
+    {
+      "in": "helo",
+      "want": true
+    },
+    {
+      "in": "thnaks",
+      "want": true
+    },
+    {
+      "in": "godo morning",
+      "want": true
+    },
+    {
+      "in": "hellp there",
+      "want": true
+    },
+    {
+      "in": "thansk so much",
+      "want": true
+    },
+    {
+      "in": "awsome",
+      "want": true
+    },
+    {
+      "in": "goodbey",
+      "want": true
+    },
+    {
+      "in": "help me with my taxes",
+      "want": false
+    },
+    {
+      "in": "hello, what's the weather",
+      "want": false
+    },
+    {
+      "in": "the hello world program",
       "want": false
     }
   ],
@@ -1245,6 +1449,56 @@
       "in": "Did I tell you, do you remember that?",
       "kind": "none",
       "text": ""
+    },
+    {
+      "in": "remmeber that i like tea",
+      "kind": "remember",
+      "text": "I like tea"
+    },
+    {
+      "in": "please remeber I prefer metric units",
+      "kind": "remember",
+      "text": "I prefer metric units"
+    },
+    {
+      "in": "froget that I live in Ohio",
+      "kind": "forget",
+      "text": "I live in Ohio"
+    },
+    {
+      "in": "forgt my old address",
+      "kind": "forget",
+      "text": "My old address"
+    },
+    {
+      "in": "remembr this: the wifi password is on the fridge",
+      "kind": "remember",
+      "text": "This: the wifi password is on the fridge"
+    },
+    {
+      "in": "what do you remeber about me",
+      "kind": "list",
+      "text": ""
+    },
+    {
+      "in": "remind me to buy milk",
+      "kind": "none",
+      "text": ""
+    },
+    {
+      "in": "remember the time we went hiking?",
+      "kind": "remember",
+      "text": "The time we went hiking"
+    },
+    {
+      "in": "I remember when this was a field",
+      "kind": "none",
+      "text": ""
+    },
+    {
+      "in": "remmeber that my dog is named Rex",
+      "kind": "remember",
+      "text": "My dog is named Rex"
     }
   ],
   "capture_request": [
