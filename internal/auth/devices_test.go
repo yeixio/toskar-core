@@ -144,6 +144,17 @@ func TestFromLocalNetwork(t *testing.T) {
 	}
 }
 
+// A phone sets up what a chat asked for (yeixio/toskar-apps#198), and only
+// an Admin's phone may: the role still applies to a device key.
+func TestDeviceSetupOfferIsAdmins(t *testing.T) {
+	for _, route := range []string{"GET /api/v1/images/setup", "POST /api/v1/images/setup", "DELETE /api/v1/video/setup", "POST /api/v1/models/{id}/install"} {
+		method, path, _ := strings.Cut(route, " ")
+		if !auth.DeviceMayReach(method, path) || auth.RoleNeeded(method, path) != auth.RoleAdmin {
+			t.Errorf("%s: a phone may ask, and only an Admin's", route)
+		}
+	}
+}
+
 func TestDeviceMayReach(t *testing.T) {
 	for route, want := range map[string]bool{
 		"POST /api/v1/chat":                       true,
@@ -156,7 +167,13 @@ func TestDeviceMayReach(t *testing.T) {
 		"GET /api/v1/api-keys":                    false,
 		"PATCH /api/v1/settings":                  false,
 		"POST /api/v1/devices/pairing":            false,
-		"POST /api/v1/models/{id}/install":        false,
+		"POST /api/v1/models/{id}/install":        true,
+		"GET /api/v1/images/setup":                true,
+		"POST /api/v1/video/setup":                true,
+		"DELETE /api/v1/images/setup":             true,
+		"POST /api/v1/images/setup/build":         false,
+		"DELETE /api/v1/images/models/{id}":       false,
+		"DELETE /api/v1/models/{id}":              false,
 		"GET /api/v1/automations":                 true,
 		"POST /api/v1/automations/{id}/pause":     true,
 		"POST /api/v1/automations":                false,

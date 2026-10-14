@@ -305,6 +305,16 @@ var deviceRoutes = map[string]bool{
 	"DELETE /api/v1/artifacts/{id}": true,
 	// Speaking a message: the recording, attached above, as text (#155).
 	"POST /api/v1/speech/transcribe": true,
+	// A setup offer in a chat (yeixio/toskar-apps#198): set up what the
+	// request needed, follow it, or stop it. Admins only, by role, as on
+	// the computer; a Member's phone gets ROLE_REQUIRED.
+	"GET /api/v1/images/setup":         true,
+	"POST /api/v1/images/setup":        true,
+	"DELETE /api/v1/images/setup":      true,
+	"GET /api/v1/video/setup":          true,
+	"POST /api/v1/video/setup":         true,
+	"DELETE /api/v1/video/setup":       true,
+	"POST /api/v1/models/{id}/install": true,
 
 	"GET /api/v1/automations":                          true,
 	"GET /api/v1/automations/{id}":                     true,
