@@ -431,7 +431,8 @@
     "continue": "繼續",
     "continuing": "已設定完成。正在完成你的請求…",
     "askAdmin": "請 {{node}} 的管理員來設定。",
-    "onComputer": "請在 {{node}} 的「工具」頁面上設定。"
+    "onComputer": "請在 {{node}} 的「工具」頁面上設定。",
+    "yourComputer": "你的電腦"
   },
   "tools": {
     "internet": {

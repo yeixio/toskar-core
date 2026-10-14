@@ -431,7 +431,8 @@
     "continue": "继续",
     "continuing": "已设置好。正在完成你的请求…",
     "askAdmin": "请 {{node}} 的管理员来设置。",
-    "onComputer": "请在 {{node}} 的“工具”页面上设置。"
+    "onComputer": "请在 {{node}} 的“工具”页面上设置。",
+    "yourComputer": "你的电脑"
   },
   "tools": {
     "internet": {

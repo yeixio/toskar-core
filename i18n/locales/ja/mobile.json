@@ -431,7 +431,8 @@
     "continue": "続ける",
     "continuing": "セットアップ完了。リクエストを仕上げています…",
     "askAdmin": "{{node}} の管理者に設定を頼んでください。",
-    "onComputer": "{{node}} の「ツール」ページで設定してください。"
+    "onComputer": "{{node}} の「ツール」ページで設定してください。",
+    "yourComputer": "あなたのコンピュータ"
   },
   "tools": {
     "internet": {

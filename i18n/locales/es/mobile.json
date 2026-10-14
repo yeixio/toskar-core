@@ -439,7 +439,8 @@
     "continue": "Continuar",
     "continuing": "Configurado. Terminando tu solicitud…",
     "askAdmin": "Pide a un administrador de {{node}} que lo configure.",
-    "onComputer": "Configúralo en {{node}}, en su página Herramientas."
+    "onComputer": "Configúralo en {{node}}, en su página Herramientas.",
+    "yourComputer": "tu computadora"
   },
   "tools": {
     "internet": {

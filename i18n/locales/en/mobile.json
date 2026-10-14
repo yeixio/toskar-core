@@ -446,7 +446,8 @@
     "continue": "Continue",
     "continuing": "Set up. Finishing your request…",
     "askAdmin": "Ask an Admin on {{node}} to set this up.",
-    "onComputer": "Set this up on {{node}}, on its Tools page."
+    "onComputer": "Set this up on {{node}}, on its Tools page.",
+    "yourComputer": "your computer"
   },
   "tools": {
     "internet": {
