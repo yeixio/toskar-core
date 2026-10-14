@@ -8,6 +8,141 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Thi
 
 Changes waiting for the next release are in [changes/unreleased/](changes/unreleased/), one file per pull request. `scripts/changelog.py preview` shows them together, and `scripts/changelog.py release <version>` writes them here when the release is cut.
 
+## [1.8.3] - 2026-10-14
+
+### Added
+
+- Dev container configuration (`.devcontainer/devcontainer.json`) for VS Code
+  and GitHub Codespaces, with Go 1.26, Node 22, and pnpm 9.15.0 pre-installed
+  and port 7331 forwarded.
+- An Admin's paired phone or tablet can read whether access from anywhere
+  works, and run Check now, for the summary in the app's Settings (#546).
+  A Member's device still can't.
+- Diagnostics shows how fast answers start: the wait for the first word
+  over the last week, for each app, with the model already running and
+  with one loading first (#498). Chat requests can name their app in
+  `client`, and run traces keep it and whether the request came from
+  outside the home network. `GET /api/v1/diagnostics/first-answers` has
+  the numbers.
+- A picture or clip a paired computer made says which one, beside its
+  model, size, and seed.
+- Toskar notices another copy of itself running on the same computer,
+  such as the installed service and a copy started by hand (#602). Access
+  from anywhere names it, with its port, data folder, and version, since
+  both copies connect to the relay as separate computers. Installing or
+  upgrading the Linux package says so too.
+- An Admin can set up what a chat asked for, such as picture making or a
+  model that sees pictures, from their phone: the answer shows what it
+  would install, its size and computer, and its progress, and the chat
+  finishes the request once it's ready. People who aren't Admins see who
+  to ask. In all ten languages (yeixio/toskar-apps#198).
+- Access from anywhere has **Copy details for a report**: what it's doing,
+  as text to paste into a bug report or support question (#602). It
+  contains no tokens or secrets, and your internet addresses are replaced
+  by their kind.
+- When the router won't open the port, access from anywhere offers **Try
+  another port**. When the relay already works, it offers **Use the relay
+  only**, which stops asking the router (#602).
+- Access from anywhere says how your router opened the port ("Your router
+  opened port 7333 for this computer (UPnP)"), or why it couldn't, with the
+  next step (#602). Possible reasons: no router answered, it refused, the
+  port is already forwarded to another device, double NAT, carrier-grade
+  NAT, or automatic opening is off. When the relay already works, the line
+  is shown quietly.
+
+### Changed
+
+- A short question that needs the web or this computer, and any question
+  from the watch, is answered by a model that is already loaded instead
+  of waiting for a better one to load (#498). What I did says so when it
+  skipped a load. Thorough effort keeps the usual choice, and automations
+  are unchanged.
+- Settings has **Keep models ready** (15 minutes, 1 hour, 4 hours, or
+  Until I stop them) in place of a minutes field. A model your phone,
+  tablet, watch, or TV used in the last hour stays loaded either way, so
+  the next question from it starts at once (#498).
+- FLUX.2 [klein] 9B is tested on real hardware: about 36 seconds a picture
+  on a fast graphics card, within 32 GB of memory.
+- **From a link** no longer starts a download right away (#611, reported
+  by @innovagent). Checking the link first shows what it would download:
+  the size, the space left, and that it's a direct download saved on this
+  computer, which Toskar doesn't charge for. When LM Studio, Ollama,
+  llama.cpp, or GPT4All already has the same file, it offers **Use it
+  where it is**: no download and no extra space. It won't start a second
+  copy that doesn't fit.
+- **From another app** comes first in Add a model when another app has
+  models Toskar could use.
+- While a model loads for an answer, chat says which model, on which
+  computer, and about how long it took last time ("Loading Qwen 2.5 7B on
+  Office, about 20 s"), and no longer says "Loading" when the model is
+  already running (#498). A load on a paired computer now counts as load
+  time in run traces and in Diagnostics' first-answer times.
+- When this computer connects to a relay, it sends its name, so the relay
+  operator's dashboard can tell computers apart (#602). Only the operator
+  sees it. It never reaches devices or the address record, and the relay
+  still can't read anything inside a connection.
+- When only the relay reaches this computer from outside, Settings says
+  "Reachable from outside your network, through the relay" in green. A
+  direct way in that failed is shown quietly, as an optional speed-up,
+  instead of in red as a problem to fix (#602).
+- When llama.cpp can't be installed, the error says which build it looked
+  for, which releases it checked, and GitHub's HTTP status (with a hint
+  when it's GitHub's rate limit), and where to put llama-server by hand
+  (#64). docs/runtimes.md has the steps.
+- Model health events carry the end of what the process wrote
+  (`stderr_tail`) and the last health probe's error (`last_probe`), so a
+  diagnostics subscriber can show why a model stopped (#9).
+- Wan 2.2 T2V A14B is tested on real hardware, and asks for 48 GB of
+  memory, as measured, instead of 32 GB: a 2-second clip took about 13
+  minutes on a fast graphics card. Below 48 GB it's set up only when you
+  agree.
+- Wan 2.1 T2V 1.3B is tested on real hardware: about 3 minutes for a
+  2-second clip on a fast graphics card.
+
+### Fixed
+
+- On Computers, the header button for the open panel is the highlighted one:
+  Add by command and Connect a device show which one is open, one at a time,
+  and Find computers is the main button only while neither is open.
+- Asked to run a command that deletes or wipes things, the assistant no
+  longer refuses and hands you the command to run yourself, which skipped
+  the approval step (#557). It asks to run it with your approval when it
+  can, or says plainly that it wasn't done; a command left in the answer is
+  taken out, with a notice. Questions about how to do it still get the
+  command.
+- The access-from-anywhere check says what answered instead of "Something
+  other than Toskar answered on this port": another Toskar by name ("Toskar
+  on linix-rig"), a web server that isn't Toskar, or this computer
+  answering with an unexpected HTTP status (#602). The details need relay
+  0.3.4.
+- "Checked moments ago" is a note about the latest result, not an error.
+  Settings shows the start of this computer's route ID, as the relay's
+  dashboard lists it.
+- The route secret is made only once, even when several requests need it
+  at the same moment. Before, a computer could enroll on the relay twice,
+  under two routes, with its devices knowing only one (#602).
+- Access from anywhere says when your router has no internet address of its
+  own, behind your provider's shared address (carrier-grade NAT) or another
+  router, instead of that it refused to open a port, and suggests the relay.
+- **Start** on the Models page no longer does nothing when llama.cpp isn't
+  set up, such as after adding a model From a link without going through
+  onboarding (#610, reported by @innovagent). Start now sets llama.cpp up
+  first and shows "Starting…" while it works. If it can't, it says why
+  under the model, and the first chat that needs a model does the same.
+  Every start attempt and how it ended is now in the daemon log.
+
+### Security
+
+- Toskar is built with the newest Go patch release and golang.org/x/net
+  0.60.0, which fix ten security problems govulncheck found in Go's web
+  server, TLS, and HTML template code (GO-2026-6603 to GO-2026-6617).
+- Toskar's apt repository is signed, and the install steps no longer add
+  it with `[trusted=yes]`, which turned off apt's signature check (#599).
+  New installs add its key from `https://toskar.ai/apt/toskar.asc`
+  (fingerprint `7124 28C8 E821 E64C D418 32F5 2D28 4623 90D0 C604`), and
+  the source is now `/etc/apt/sources.list.d/toskar.list`. An existing
+  install moves to the signed form by itself when the package upgrades.
+
 ## [1.8.2] - 2026-10-12
 
 ### Added
