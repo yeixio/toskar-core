@@ -1,11 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { api, ApiError } from '@/lib/api'
+import { api } from '@/lib/api'
 import { formatRelativeTime } from '@/i18n/format'
 import type { JoinToken, JoinTokenCreated } from '@/types/api'
 import { rovingKeyDown } from '@/lib/roving'
 import { clock, useCountdown } from './countdown'
+import { ShownError, shownError } from '@/components/ui/ShownError'
 
 type Kind = 'installed' | 'install' | 'windows'
 
@@ -77,11 +78,7 @@ export function JoinByCommand({ onClose }: { onClose: () => void }) {
         </button>
       </div>
 
-      {error ? (
-        <p role="alert" className="rounded-lg bg-danger/10 px-3 py-2 text-sm text-danger">
-          {error instanceof ApiError ? error.message : String(error)}
-        </p>
-      ) : null}
+      {error ? <ShownError {...shownError(error)} role="alert" className="rounded-lg bg-danger/10 px-3 py-2 text-sm text-danger" /> : null}
 
       {!created ? (
         <div className="space-y-2">

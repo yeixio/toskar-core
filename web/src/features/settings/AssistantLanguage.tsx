@@ -4,6 +4,8 @@ import { directionOf } from '@/i18n'
 import { answerLanguages, nameInItself } from '@/i18n/answerLanguages'
 import { api } from '@/lib/api'
 import type { AssistantLanguageMode } from '@/types/api'
+import { ReportProblem } from '@/components/ui/ReportProblem'
+import { shownError } from '@/components/ui/ShownError'
 
 /**
  * The assistant language (multilingual spec §11, §30): the language answers
@@ -53,6 +55,7 @@ export function AssistantLanguage() {
       {save.isError ? (
         <p className="text-sm text-danger">
           {t('language.saveFailed', { error: save.error instanceof Error ? save.error.message : String(save.error) })}
+          <ReportProblem {...shownError(save.error)} className="ms-2 text-xs text-ink-faint underline hover:text-ink" />
         </p>
       ) : null}
     </div>

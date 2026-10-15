@@ -8,6 +8,7 @@ import {
 } from './contextUsage'
 import { formatPercent } from '@/i18n/format'
 import { formatBytes } from '@/lib/format'
+import { ShownError, type Shown } from '@/components/ui/ShownError'
 
 const rowColor: Record<string, string> = {
   instructions: 'bg-ink-faint',
@@ -24,7 +25,7 @@ export interface CompactControls {
   off: boolean
   busy: boolean
   /** Why the last action failed, if it did. */
-  error?: string
+  error?: Shown | null
   onView: () => void
   onCompactNow: () => void
   onNewChat: () => void
@@ -155,7 +156,7 @@ export function ContextUsageButton({
                   </button>
                 ) : null}
               </div>
-              {compact.error ? <p className="text-xs text-danger">{compact.error}</p> : null}
+              {compact.error ? <ShownError {...compact.error} className="text-xs text-danger" /> : null}
               <label className="flex items-start gap-2 text-xs text-ink-muted">
                 <input type="checkbox" className="mt-0.5" checked={compact.off} onChange={(e) => compact.onVerbatim(e.target.checked)} />
                 <span>

@@ -13,8 +13,9 @@ import type {
   MCPSpec,
 } from '@/types/api'
 import { preopenSignInWindow } from '@/lib/desktopBridge'
-import { errorText, linesToMap, openSignIn, SOURCES_KEY, specSummary, splitArgs } from './mcpShared'
+import { linesToMap, openSignIn, SOURCES_KEY, specSummary, splitArgs } from './mcpShared'
 import { rovingKeyDown } from '@/lib/roving'
+import { ShownError, shownError } from '@/components/ui/ShownError'
 
 // The tabs, in order; each is tools:add.tabs.<id> in the catalog.
 const TABS = ['gallery', 'paste', 'apps', 'custom'] as const
@@ -157,7 +158,7 @@ function GalleryTab({ onAdded }: { onAdded: (a: MCPAdded) => void }) {
   }, [gallery.data])
 
   if (chosen) return <GallerySetup entry={chosen} onBack={() => setChosen(null)} onAdded={onAdded} />
-  if (gallery.isError) return <p className="text-sm text-danger">{errorText(gallery.error)}</p>
+  if (gallery.isError) return <ShownError {...shownError(gallery.error)} className="text-sm text-danger" />
   return (
     <div className="space-y-4">
       {gallery.isLoading && <p className="text-sm text-ink-muted">{t('add.loadingGallery')}</p>}
@@ -225,7 +226,7 @@ function GallerySetup({ entry, onBack, onAdded }: { entry: MCPGalleryEntry; onBa
         <FieldInput key={f.key} field={f} value={values[f.key] ?? ''} onChange={(v) => setValues((cur) => ({ ...cur, [f.key]: v }))} />
       ))}
       {add.isPending && <Working local={!entry.remote} />}
-      {add.isError && <p className="text-xs text-danger">{errorText(add.error)}</p>}
+      {add.isError && <ShownError {...shownError(add.error)} className="text-xs text-danger" />}
       <button type="submit" className="btn-primary px-3 py-1.5 text-xs" disabled={add.isPending}>
         {add.isPending
           ? t('add.adding')
@@ -323,7 +324,7 @@ function PasteTab({ onAdded }: { onAdded: (a: MCPAdded) => void }) {
       >
         {parse.isPending ? t('add.reading') : t('add.read')}
       </button>
-      {parse.isError && <p className="text-xs text-danger">{errorText(parse.error)}</p>}
+      {parse.isError && <ShownError {...shownError(parse.error)} className="text-xs text-danger" />}
       {parse.data?.map((p, i) => <ParsedServer key={`${p.spec.name}-${i}`} parsed={p} onAdded={onAdded} />)}
     </div>
   )
@@ -353,7 +354,7 @@ function ParsedServer({ parsed, onAdded }: { parsed: MCPParsed; onAdded: (a: MCP
       {parsed.missing && <MissingRuntime name={parsed.missing} />}
       <NeedsInputs needs={parsed.needs} values={values} setValues={setValues} />
       {add.isPending && <Working local={local} />}
-      {add.isError && <p className="text-xs text-danger">{errorText(add.error)}</p>}
+      {add.isError && <ShownError {...shownError(add.error)} className="text-xs text-danger" />}
       <button type="submit" className="btn-primary px-3 py-1.5 text-xs" disabled={add.isPending || missingValues || !name.trim()}>
         {add.isPending ? t('add.adding') : name ? t('add.addName', { name }) : t('add.addIt')}
       </button>
@@ -404,7 +405,7 @@ function AppsTab({ onAdded }: { onAdded: (a: MCPAdded) => void }) {
     return [...out.entries()]
   }, [found.data])
   if (found.isLoading) return <p className="text-sm text-ink-muted">{t('add.lookingApps')}</p>
-  if (found.isError) return <p className="text-sm text-danger">{errorText(found.error)}</p>
+  if (found.isError) return <ShownError {...shownError(found.error)} className="text-sm text-danger" />
   if (groups.length === 0) {
     return (
       <p className="text-sm text-ink-muted">{t('add.noneFound')}</p>
@@ -455,7 +456,7 @@ function ImportRow({ candidate, onAdded }: { candidate: MCPImportCandidate; onAd
       {!candidate.added && candidate.missing && <MissingRuntime name={candidate.missing} />}
       {!candidate.added && <NeedsInputs needs={needs} values={values} setValues={setValues} />}
       {add.isPending && <Working local={!candidate.spec.url} />}
-      {add.isError && <p className="text-xs text-danger">{errorText(add.error)}</p>}
+      {add.isError && <ShownError {...shownError(add.error)} className="text-xs text-danger" />}
     </div>
   )
 }
@@ -569,7 +570,7 @@ function CustomTab({ onAdded }: { onAdded: (a: MCPAdded) => void }) {
       )}
       <p className="text-[11px] text-ink-faint">{t('add.keptHere')}</p>
       {add.isPending && <Working local={where === 'local'} />}
-      {add.isError && <p className="text-xs text-danger">{errorText(add.error)}</p>}
+      {add.isError && <ShownError {...shownError(add.error)} className="text-xs text-danger" />}
       <button type="submit" className="btn-primary px-3 py-1.5 text-xs" disabled={!ready || add.isPending}>
         {add.isPending ? t('add.adding') : t('add.add')}
       </button>

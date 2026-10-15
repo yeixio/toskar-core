@@ -8,13 +8,10 @@ import { useShareBase } from '@/features/people/shareBase'
 import { PortalPreview } from '@/features/portal/PortalPreview'
 import { availableLanguages, languages } from '@/i18n'
 import { formatDate } from '@/i18n/format'
-import { api, ApiError } from '@/lib/api'
+import { api } from '@/lib/api'
 import type { Person, Portal, PortalBranding, PortalInput, PortalVisitorLink } from '@/types/api'
 import { slugFrom } from './slug'
-
-function errorText(err: unknown): string {
-  return err instanceof ApiError ? err.message : err ? String(err) : ''
-}
+import { ShownError, shownError } from '@/components/ui/ShownError'
 
 function usePrefersDark(): boolean {
   return typeof window !== 'undefined' && window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)').matches : true
@@ -124,11 +121,7 @@ function AddPortal({ onAdded }: { onAdded: (p: Portal) => void }) {
         ) : (
           <p className="self-end text-xs text-ink-faint">{t(`access.${access}Hint`)}</p>
         )}
-        {add.error ? (
-          <p className="text-sm text-danger sm:col-span-2" role="alert">
-            {errorText(add.error)}
-          </p>
-        ) : null}
+        {add.error ? <ShownError {...shownError(add.error)} role="alert" className="text-sm text-danger sm:col-span-2" /> : null}
         <div className="sm:col-span-2">
           <button
             type="submit"
@@ -239,7 +232,7 @@ function InvitedVisitors({ portal }: { portal: Portal }) {
           </p>
         </div>
       ) : null}
-      {error ? <p className="text-xs text-danger">{errorText(error)}</p> : null}
+      {error ? <ShownError {...shownError(error)} className="text-xs text-danger" /> : null}
       {visitors.isSuccess && (visitors.data ?? []).length === 0 ? <p className="text-xs text-ink-faint">{t('visitors.none')}</p> : null}
       <ul className="divide-y divide-line">
         {(visitors.data ?? []).map((v) => (
@@ -543,11 +536,7 @@ function PortalEditor({ portal, onClose }: { portal: Portal; onClose: () => void
             {portal.embed_origins.length > 0 ? <EmbedSnippets slug={portal.slug} name={portal.name} /> : null}
           </fieldset>
 
-          {save.error ? (
-            <p className="text-sm text-danger" role="alert">
-              {errorText(save.error)}
-            </p>
-          ) : null}
+          {save.error ? <ShownError {...shownError(save.error)} role="alert" /> : null}
           <div className="flex items-center gap-3">
             <button type="submit" className="btn-primary" disabled={save.isPending || !name.trim() || slug.length < 2}>
               {t('edit.save')}
@@ -666,7 +655,7 @@ function PortalRow({ portal, onEdit }: { portal: Portal; onEdit: () => void }) {
       </div>
       {portal.enabled ? <PortalLink slug={portal.slug} /> : null}
       {reading ? <PortalConversations portal={portal} /> : null}
-      {change.error || remove.error ? <p className="text-xs text-danger">{errorText(change.error ?? remove.error)}</p> : null}
+      {change.error || remove.error ? <ShownError {...shownError(change.error ?? remove.error)} className="text-xs text-danger" /> : null}
     </li>
   )
 }

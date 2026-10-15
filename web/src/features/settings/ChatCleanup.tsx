@@ -5,6 +5,7 @@ import { api } from '@/lib/api'
 import { useUIStore } from '@/stores/uiStore'
 import type { Conversation } from '@/types/api'
 import { olderChats } from './olderChats'
+import { ShownError, shownOr } from '@/components/ui/ShownError'
 
 const AGES = [30, 90, 365] as const
 // The most chats one bulk delete takes (#452).
@@ -43,7 +44,7 @@ export function ChatCleanup() {
     },
     onError: () => setConfirming(null),
   })
-  const error = remove.error instanceof Error ? remove.error.message : remove.isError ? t('history.deleteFailed') : null
+  const error = remove.isError ? shownOr(remove.error, t('history.deleteFailed')) : null
 
   const confirmRow = (text: string, chosen: Conversation[]) => (
     <div role="alertdialog" aria-label={text} className="space-y-2 rounded-lg border border-danger/40 bg-danger/5 p-3">
@@ -112,11 +113,7 @@ export function ChatCleanup() {
           {done}
         </p>
       ) : null}
-      {error ? (
-        <p role="alert" className="text-xs text-danger">
-          {error}
-        </p>
-      ) : null}
+      {error ? <ShownError {...error} role="alert" className="text-xs text-danger" /> : null}
     </div>
   )
 }

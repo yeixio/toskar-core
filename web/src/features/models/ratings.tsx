@@ -9,6 +9,7 @@ import { languageName } from './modelPresentation'
 import { formatDecimal, formatLocale, formatMilliseconds, formatNumber, formatPercent, formatTokensPerSecond } from '@/i18n/format'
 import type { LanguageRatingStats, ModelRating, RatingObservations, RatingStats, RatingTag } from '@/types/api'
 import { rovingKeyDown } from '@/lib/roving'
+import { ShownError, shownError, type Shown } from '@/components/ui/ShownError'
 
 function Stars({ value }: { value: number }) {
   const full = Math.round(value)
@@ -119,7 +120,7 @@ function RateModelDialog({ modelId, modelName, onClose }: { modelId: string; mod
   const [observe, setObserve] = useState(false)
   // A new rating is for the App language; the person can change it, or not say.
   const [language, setLanguage] = useState(() => ratingLanguage(i18n.language))
-  const [error, setError] = useState('')
+  const [error, setError] = useState<Shown | null>(null)
 
   useEffect(() => {
     if (!rating) return
@@ -138,7 +139,7 @@ function RateModelDialog({ modelId, modelName, onClose }: { modelId: string; mod
     else void queryClient.invalidateQueries({ queryKey: ['model-rating', modelId] })
   }
   const failed = (err: unknown) => {
-    setError(err instanceof Error ? err.message : String(err))
+    setError(shownError(err))
     // A rating the service could not take is still saved here.
     if (err instanceof ApiError && err.status === 502) refresh()
   }
@@ -288,11 +289,7 @@ function RateModelDialog({ modelId, modelName, onClose }: { modelId: string; mod
           </div>
         ) : null}
 
-        {error ? (
-          <p role="alert" className="text-sm text-danger">
-            {error}
-          </p>
-        ) : null}
+        {error ? <ShownError {...error} role="alert" /> : null}
 
         <div className="flex flex-wrap justify-between gap-2">
           <div>

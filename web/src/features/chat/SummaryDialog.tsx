@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { api } from '@/lib/api'
 import { useDialog } from '@/lib/useDialog'
 import type { ConversationSummary } from '@/types/api'
+import { ShownError, shownError, type Shown } from '@/components/ui/ShownError'
 
 /**
  * A chat's auto-compact summary (#342): what the model is told about the
@@ -16,15 +17,15 @@ export function SummaryDialog({ summary, onClose }: { summary: ConversationSumma
   const ref = useDialog(true, onClose)
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState(summary.summary)
-  const [error, setError] = useState('')
+  const [error, setError] = useState<Shown | null>(null)
   const save = useMutation({
     mutationFn: () => api.editConversationSummary(summary.conversation_id, draft),
     onSuccess: (next) => {
       queryClient.setQueryData(['summary', summary.conversation_id], next)
       setEditing(false)
-      setError('')
+      setError(null)
     },
-    onError: (err) => setError(err instanceof Error ? err.message : String(err)),
+    onError: (err) => setError(shownError(err)),
   })
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center scrim p-4 sm:items-center" role="presentation" onClick={onClose}>
@@ -57,7 +58,7 @@ export function SummaryDialog({ summary, onClose }: { summary: ConversationSumma
         )}
         {summary.edited && !editing ? <p className="text-xs text-ink-faint">{t('compact.edited')}</p> : null}
         {editing ? <p className="text-xs text-ink-faint">{t('compact.editHint')}</p> : null}
-        {error ? <p className="text-sm text-danger">{error}</p> : null}
+        {error ? <ShownError {...error} className="text-sm text-danger" /> : null}
         <div className="flex flex-wrap justify-end gap-2">
           {editing ? (
             <>

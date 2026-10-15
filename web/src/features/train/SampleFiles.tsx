@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { api } from '@/lib/api'
 import { saveText } from '@/lib/desktopBridge'
 import type { SampleFile } from '@/types/api'
+import { ShownError, shownError, type Shown } from '@/components/ui/ShownError'
 
 async function download(file: SampleFile) {
   // The desktop app's web view can't download; its shell saves the file.
@@ -21,12 +22,12 @@ export function SampleFiles({ open = false }: { open?: boolean }) {
   const { t } = useTranslation('train')
   const samples = useQuery({ queryKey: ['training', 'samples'], queryFn: () => api.trainingSamples(), staleTime: Infinity })
   const [shown, setShown] = useState<string | null>(null)
-  const [saveError, setSaveError] = useState<string | null>(null)
+  const [saveError, setSaveError] = useState<Shown | null>(null)
   return (
     <details className="text-sm" open={open}>
       <summary className="cursor-pointer text-ink">{t('samples.see')}</summary>
       <p className="mt-2 text-ink-muted">{t('samples.description')}</p>
-      {saveError && <p className="mt-2 text-xs text-danger">{saveError}</p>}
+      {saveError && <ShownError {...saveError} className="mt-2 text-xs text-danger" />}
       <ul className="mt-2 space-y-2">
         {(samples.data ?? []).map((f) => {
           const lines = f.content.split('\n')
@@ -44,7 +45,7 @@ export function SampleFiles({ open = false }: { open?: boolean }) {
                     className="btn-secondary btn-sm"
                     onClick={() => {
                       setSaveError(null)
-                      download(f).catch((err) => setSaveError(err instanceof Error ? err.message : String(err)))
+                      download(f).catch((err) => setSaveError(shownError(err)))
                     }}
                   >
                     {t('samples.download')}

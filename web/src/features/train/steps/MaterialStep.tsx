@@ -6,7 +6,8 @@ import { MAX_UPLOAD_BYTES, readUpload, UPLOAD_ACCEPT } from '@/lib/upload'
 import type { ClassifyResult, MaterialUse, SpecializedAIView, TrainingMaterial } from '@/types/api'
 import { ConceptCards } from '../ConceptCards'
 import { SampleFiles } from '../SampleFiles'
-import { errorText, MATERIAL_USES, materialUseDescription, materialUseLabel } from '../display'
+import { MATERIAL_USES, materialUseDescription, materialUseLabel } from '../display'
+import { ShownError, shownError } from '@/components/ui/ShownError'
 
 
 export function UseBadge({ use }: { use: MaterialUse }) {
@@ -171,10 +172,10 @@ function AddFile({ aiID }: { aiID: string }) {
             ))}
           </fieldset>
           {preview?.warning && <p className="mt-2 rounded-md bg-warning/10 p-2 text-warning">{preview.warning}</p>}
-          {preview?.error && <p className="mt-2 rounded-md bg-danger/10 p-2 text-danger">{preview.error}</p>}
+          {preview?.error && <ShownError error={preview.error} className="mt-2 rounded-md bg-danger/10 p-2 text-danger" />}
         </div>
       )}
-      {add.error && <p className="text-sm text-danger">{errorText(add.error)}</p>}
+      {add.error && <ShownError {...shownError(add.error)} className="text-sm text-danger" />}
       <button
         type="button"
         className="btn-primary"
@@ -218,7 +219,7 @@ function AddChats({ aiID }: { aiID: string }) {
           </li>
         ))}
       </ul>
-      {add.error && <p className="text-sm text-danger">{errorText(add.error)}</p>}
+      {add.error && <ShownError {...shownError(add.error)} className="text-sm text-danger" />}
       <button type="button" className="btn-primary" disabled={picked.length === 0 || add.isPending} onClick={() => add.mutate()}>
         {picked.length ? t('material.addChats', { count: picked.length }) : t('material.addChatsNone')}
       </button>

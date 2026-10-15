@@ -8,13 +8,13 @@ import { useRole } from '@/lib/role'
 import { api } from '@/lib/api'
 import { rovingKeyDown, useMenu } from '@/lib/roving'
 import { subscribeEvents } from '@/lib/events'
-import { errorText } from '@/features/train/display'
 import type { MemoryCategory, MemoryItem } from '@/types/api'
 import { RealmKicker } from '@/components/ui/Realm'
 import { formatDate } from '@/i18n/format'
 import { nameInItself } from '@/i18n/answerLanguages'
 import { LoadError } from '@/components/ui/LoadError'
 import { Skeleton } from '@/components/ui/Skeleton'
+import { ShownError, shownError } from '@/components/ui/ShownError'
 
 // The categories, in order; their names are memory:categories.<category> in the catalog.
 const CATEGORIES: MemoryCategory[] = ['identity', 'preferences', 'projects', 'technical', 'interests', 'people', 'other']
@@ -214,7 +214,7 @@ function AddMemory({
           ))}
         </div>
       ) : null}
-      {add.error && <p className="text-sm text-danger">{errorText(add.error)}</p>}
+      {add.error && <ShownError {...shownError(add.error)} className="text-sm text-danger" />}
     </form>
   )
 }
@@ -373,7 +373,7 @@ function MemoryRow({ memory, categories, onChanged }: { memory: MemoryItem; cate
           </div>
         </div>
       )}
-      {(update.error || remove.error) && <p className="mt-1 text-xs text-danger">{errorText(update.error ?? remove.error)}</p>}
+      {(update.error || remove.error) && <ShownError {...shownError(update.error ?? remove.error)} className="mt-1 text-xs text-danger" />}
     </li>
   )
 }

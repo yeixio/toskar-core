@@ -16,7 +16,7 @@ import { Skeleton } from '@/components/ui/Skeleton'
 import { AutomationsIntro, IdeaGallery } from './Intro'
 import type { IdeaId } from './ideas'
 import { WebhookLink } from './WebhookLink'
-import { ShownError, shownError } from '@/components/ui/ShownError'
+import { ShownError, shownError, type Shown } from '@/components/ui/ShownError'
 import { useCapabilities } from '@/lib/capabilities'
 import { matchesSearch } from '@/lib/search'
 
@@ -30,7 +30,7 @@ export function AutomationsPage() {
   const [selectedID, setSelectedID] = useState<string | null>(() => searchParams.get('id'))
   const [creating, setCreating] = useState(false)
   const [editing, setEditing] = useState(false)
-  const [formError, setFormError] = useState('')
+  const [formError, setFormError] = useState<Shown | null>(null)
   const [query, setQuery] = useState('')
   const [filter, setFilter] = useState<'all' | 'active' | 'paused' | 'attention'>('all')
   // A template to start the form from: an idea someone chose.
@@ -89,7 +89,7 @@ export function AutomationsPage() {
     setCreating(true)
     setEditing(false)
     setSelectedID(null)
-    setFormError('')
+    setFormError(null)
   }
 
   useEffect(() => {
@@ -123,13 +123,13 @@ export function AutomationsPage() {
       return api.createAutomation(input)
     },
     onSuccess: (saved) => {
-      setFormError('')
+      setFormError(null)
       setCreating(false)
       setEditing(false)
       if (saved?.id) setSelectedID(saved.id)
       refresh()
     },
-    onError: (error) => setFormError(error instanceof ApiError ? error.message : t('page.saveFailed')),
+    onError: (error) => setFormError(error instanceof ApiError ? shownError(error) : { error: t('page.saveFailed') }),
   })
 
   const pause = useMutation({
@@ -243,7 +243,7 @@ export function AutomationsPage() {
                     setSelectedID(item.id)
                     setCreating(false)
                     setEditing(false)
-                    setFormError('')
+                    setFormError(null)
                   }}
                 >
                   <div className="flex items-start justify-between gap-3">
@@ -283,7 +283,7 @@ export function AutomationsPage() {
                 setSeed(null)
                 setCreating(false)
                 setEditing(false)
-                setFormError('')
+                setFormError(null)
               }}
               onSubmit={(input) => save.mutate(input)}
             />
@@ -300,7 +300,7 @@ export function AutomationsPage() {
               onToggle={() => pause.mutate(detail)}
               onEdit={() => {
                 setEditing(true)
-                setFormError('')
+                setFormError(null)
               }}
               onDelete={() => {
                 if (window.confirm(t('page.confirmDelete', { name: detail.name }))) {
@@ -470,7 +470,7 @@ function HistoryRow({
             {continueInChat.isPending ? t('run.openingChat') : t('run.continueInChat')}
           </button>
           {continueInChat.isError ? (
-            <p className="mt-1 text-xs text-danger">{continueInChat.error instanceof Error ? continueInChat.error.message : ''}</p>
+            <ShownError {...shownError(continueInChat.error)} className="mt-1 text-xs text-danger" />
           ) : null}
         </div>
       ) : null}

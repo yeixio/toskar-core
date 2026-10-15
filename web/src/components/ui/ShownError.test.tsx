@@ -3,7 +3,7 @@ import { fireEvent, render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { describe, expect, it, vi } from 'vitest'
 import { ApiError } from '@/lib/api'
-import { ShownError, shownError } from './ShownError'
+import { ShownError, shownError, shownOr } from './ShownError'
 
 vi.mock('@/lib/api', async (importOriginal) => ({
   ...(await importOriginal<typeof import('@/lib/api')>()),
@@ -36,5 +36,11 @@ describe('ShownError (#588)', () => {
     const error = new ApiError(404, 'model "qwen3" not installed', 'MODEL_NOT_INSTALLED', { model_id: 'qwen3' })
     expect(shownError(error)).toEqual({ error: 'model "qwen3" not installed', code: 'MODEL_NOT_INSTALLED', details: { model_id: 'qwen3' } })
     expect(shownError(new Error('boom'))).toEqual({ error: 'boom', code: undefined, details: undefined })
+  })
+
+  it('uses the page’s own text for an error that has none', () => {
+    expect(shownOr(new Error(''), 'Couldn’t save.')).toEqual({ error: 'Couldn’t save.' })
+    expect(shownOr('not an error', 'Couldn’t save.')).toEqual({ error: 'Couldn’t save.' })
+    expect(shownOr(new ApiError(500, 'disk full', 'SETTINGS_SAVE_FAILED'), 'x').code).toBe('SETTINGS_SAVE_FAILED')
   })
 })

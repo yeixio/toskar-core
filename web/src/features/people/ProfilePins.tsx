@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { api } from '@/lib/api'
 import type { AIProfile, Person } from '@/types/api'
+import { ShownError, shownError, type Shown } from '@/components/ui/ShownError'
 
 /**
  * Pinning profiles (#345): Admins keep Members and Visitors, or one
@@ -54,14 +55,14 @@ export function RolePins() {
   const queryClient = useQueryClient()
   const profiles = useProfiles()
   const pins = useQuery({ queryKey: ['profile-pins'], queryFn: () => api.getProfilePins(), retry: false })
-  const [error, setError] = useState('')
+  const [error, setError] = useState<Shown | null>(null)
   const save = useMutation({
     mutationFn: ({ role, ids }: { role: 'member' | 'visitor'; ids: string[] }) => api.setRoleProfiles(role, ids),
     onSuccess: (next) => {
-      setError('')
+      setError(null)
       if (next) queryClient.setQueryData(['profile-pins'], next)
     },
-    onError: (err) => setError(err instanceof Error ? err.message : String(err)),
+    onError: (err) => setError(shownError(err)),
   })
   if (!pins.data) return null
   return (
@@ -90,7 +91,7 @@ export function RolePins() {
           </details>
         )
       })}
-      {error ? <p className="text-sm text-danger">{error}</p> : null}
+      {error ? <ShownError {...error} className="text-sm text-danger" /> : null}
     </section>
   )
 }
@@ -104,14 +105,14 @@ export function PersonPins({ person }: { person: Person }) {
   const profiles = useProfiles()
   const mode: Mode = person.profiles === undefined ? 'role' : person.profiles.length === 0 ? 'any' : 'only'
   const [picking, setPicking] = useState(false)
-  const [error, setError] = useState('')
+  const [error, setError] = useState<Shown | null>(null)
   const save = useMutation({
     mutationFn: (ids: string[] | null) => api.setPersonProfiles(person.id, ids),
     onSuccess: () => {
-      setError('')
+      setError(null)
       void queryClient.invalidateQueries({ queryKey: ['people'] })
     },
-    onError: (err) => setError(err instanceof Error ? err.message : String(err)),
+    onError: (err) => setError(shownError(err)),
   })
   const shown: Mode = picking ? 'only' : mode
   const summary =
@@ -156,7 +157,7 @@ export function PersonPins({ person }: { person: Person }) {
             <p className="text-ink-faint">{t('pins.pickOne')}</p>
           </>
         ) : null}
-        {error ? <p className="text-danger">{error}</p> : null}
+        {error ? <ShownError {...error} className="text-danger" /> : null}
       </div>
     </details>
   )

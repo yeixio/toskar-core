@@ -26,6 +26,7 @@ import { useMascotState } from '@/lib/ratatoskr/useMascotState'
 import { rovingKeyDown } from '@/lib/roving'
 import { LoadError } from '@/components/ui/LoadError'
 import { Skeleton } from '@/components/ui/Skeleton'
+import { shownError, type Shown } from '@/components/ui/ShownError'
 
 type Tab = 'discover' | 'installed' | 'running'
 
@@ -159,12 +160,12 @@ export function ModelsPage() {
   })
   // A start says it's working, and why it failed: it used to do nothing
   // on screen when llama.cpp wasn't set up (#610).
-  const [startError, setStartError] = useState<{ id: string; message: string } | null>(null)
+  const [startError, setStartError] = useState<(Shown & { id: string }) | null>(null)
   const startMutation = useMutation({
     mutationFn: (id: string) => api.startModel(id),
     onMutate: () => setStartError(null),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['models-running'] }),
-    onError: (err, id) => setStartError({ id, message: err instanceof Error ? err.message : String(err) }),
+    onError: (err, id) => setStartError({ id, ...shownError(err) }),
   })
   const stopMutation = useMutation({
     mutationFn: ({

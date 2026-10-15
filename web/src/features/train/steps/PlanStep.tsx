@@ -5,7 +5,8 @@ import { api } from '@/lib/api'
 import { KnowledgePicker } from '@/features/knowledge/KnowledgePicker'
 import { formatBytes } from '@/lib/format'
 import type { NodeTrainingFit, SpecializedAIView, TrainingHyper, TrainingPreset } from '@/types/api'
-import { errorText, fitLabel, fitTone, formatDuration, PRESETS, presetDescription, presetLabel } from '../display'
+import { fitLabel, fitTone, formatDuration, PRESETS, presetDescription, presetLabel } from '../display'
+import { ShownError, shownError } from '@/components/ui/ShownError'
 
 export function PlanStep({ view, onStarted }: { view: SpecializedAIView; onStarted: () => void }) {
   const { t } = useTranslation('train')
@@ -45,7 +46,7 @@ export function PlanStep({ view, onStarted }: { view: SpecializedAIView; onStart
         <div className="card-outline space-y-2 border-s-4 !border-s-mimir p-4">
           <p className="label-caps text-mimir">{t('plan.connected')}</p>
           <KnowledgePicker selected={view.knowledge_sources} disabled={setKnowledge.isPending} onChange={(ids) => setKnowledge.mutate(ids)} />
-          {setKnowledge.error && <p className="text-xs text-danger">{errorText(setKnowledge.error)}</p>}
+          {setKnowledge.error && <ShownError {...shownError(setKnowledge.error)} className="text-xs text-danger" />}
           <p className="text-xs text-ink-muted">{t('plan.connectedHint')}</p>
         </div>
       </div>
@@ -98,7 +99,7 @@ export function PlanStep({ view, onStarted }: { view: SpecializedAIView; onStart
           ))}
         </div>
       )}
-      {start.error && <p className="text-sm text-danger">{errorText(start.error)}</p>}
+      {start.error && <ShownError {...shownError(start.error)} className="text-sm text-danger" />}
       <button type="button" className="btn-primary" disabled={!p?.ready || start.isPending} onClick={() => start.mutate(undefined)}>
         {start.isPending ? t('plan.starting') : t('plan.train', { revision: p?.next_revision ?? 1 })}
       </button>
@@ -218,7 +219,7 @@ function AdvancedSettings({ view, planned }: { view: SpecializedAIView; planned?
             </label>
           ))}
         </div>
-        {save.error && <p className="text-danger">{errorText(save.error)}</p>}
+        {save.error && <ShownError {...shownError(save.error)} className="text-danger" />}
         <div className="flex gap-2">
           <button type="button" className="btn-secondary btn-sm" disabled={save.isPending} onClick={() => save.mutate(false)}>
             {t('plan.saveAdvanced')}

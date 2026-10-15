@@ -9,6 +9,7 @@ import type { Person, PersonLink, Role } from '@/types/api'
 import { PersonCapabilities, RoleCapabilities } from './Capabilities'
 import { PersonPins, RolePins } from './ProfilePins'
 import { useShareBase } from './shareBase'
+import { ShownError, shownError, type Shown } from '@/components/ui/ShownError'
 
 const ROLES: Role[] = ['admin', 'member', 'visitor']
 
@@ -63,18 +64,18 @@ function LinkPanel({ name, link, onDone }: { name: string; link: PersonLink; onD
 function PersonRow({ person, me, onLink }: { person: Person; me?: Person; onLink: (person: Person, link: PersonLink) => void }) {
   const { t } = useTranslation('people')
   const queryClient = useQueryClient()
-  const [error, setError] = useState('')
+  const [error, setError] = useState<Shown | null>(null)
   const self = person.id === me?.id
   const canManage = !self && mayManage(me?.role, person.role)
   const change = useMutation({
     mutationFn: (c: { role?: Role; disabled?: boolean }) => api.changePerson(person.id, c),
     onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['people'] }),
-    onError: (err) => setError(err instanceof Error ? err.message : String(err)),
+    onError: (err) => setError(shownError(err)),
   })
   const link = useMutation({
     mutationFn: () => api.personLink(person.id),
     onSuccess: (l) => l && onLink(person, l),
-    onError: (err) => setError(err instanceof Error ? err.message : String(err)),
+    onError: (err) => setError(shownError(err)),
   })
   const disabled = !!person.disabled_at
   return (
@@ -94,7 +95,7 @@ function PersonRow({ person, me, onLink }: { person: Person; me?: Person; onLink
                 : t('notSignedIn')}
           {disabled ? <span className="status-chip ms-2 bg-danger/15 text-danger">{t('disabled')}</span> : null}
         </p>
-        {error ? <p className="mt-1 text-xs text-danger">{error}</p> : null}
+        {error ? <ShownError {...error} className="mt-1 text-xs text-danger" /> : null}
         {canManage && !disabled && (person.role === 'member' || person.role === 'visitor') ? (
           <div className="mt-1">
             <PersonPins person={person} />
@@ -157,7 +158,7 @@ export function PeoplePage() {
   const people = useQuery({ queryKey: ['people'], queryFn: () => api.listPeople(), retry: false })
   const [name, setName] = useState('')
   const [role, setRole] = useState<Role>('member')
-  const [error, setError] = useState('')
+  const [error, setError] = useState<Shown | null>(null)
   const [shown, setShown] = useState<{ name: string; link: PersonLink } | null>(null)
   const add = useMutation({
     mutationFn: () => api.addPerson(name.trim(), role),
@@ -165,11 +166,11 @@ export function PeoplePage() {
       if (!added) return
       const { person, link } = added
       setName('')
-      setError('')
+      setError(null)
       setShown({ name: person.name, link })
       void queryClient.invalidateQueries({ queryKey: ['people'] })
     },
-    onError: (err) => setError(err instanceof Error ? err.message : String(err)),
+    onError: (err) => setError(shownError(err)),
   })
   const actor = me.data?.person
   const refused = people.error instanceof ApiError && people.error.status === 403
@@ -216,7 +217,7 @@ export function PeoplePage() {
                 {t('add.submit')}
               </button>
             </form>
-            {error ? <p className="text-sm text-danger">{error}</p> : null}
+            {error ? <ShownError {...error} className="text-sm text-danger" /> : null}
             <p className="text-xs text-ink-faint">{t(`add.roleHint.${role}`)}</p>
           </section>
 

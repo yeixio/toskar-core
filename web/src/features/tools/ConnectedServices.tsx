@@ -4,12 +4,9 @@ import { useTranslation } from 'react-i18next'
 import i18n from '@/i18n'
 import { api } from '@/lib/api'
 import type { Connector } from '@/types/api'
+import { ShownError, shownError, shownOr, type Shown } from '@/components/ui/ShownError'
 
 const KEY = ['connectors'] as const
-
-function errorText(err: unknown): string {
-  return err instanceof Error ? err.message : i18n.t('services:generic')
-}
 
 /**
  * Connected services (spec §32): GitHub, Home Assistant, and so on. Tokens
@@ -27,7 +24,7 @@ export function ConnectedServices() {
         <h2 className="section-title">{t('title')}</h2>
         <p className="mt-1 text-sm text-ink-muted">{t('description')}</p>
       </div>
-      {query.isError && <p className="text-sm text-danger">{errorText(query.error)}</p>}
+      {query.isError && <ShownError {...shownError(query.error)} className="text-sm text-danger" />}
       {services.map((service) => (
         <ServiceRow key={service.id} service={service} />
       ))}
@@ -40,7 +37,7 @@ function ServiceRow({ service }: { service: Connector }) {
   const queryClient = useQueryClient()
   const [editing, setEditing] = useState(false)
   const [values, setValues] = useState<Record<string, string>>({})
-  const [error, setError] = useState('')
+  const [error, setError] = useState<Shown | null>(null)
   const refresh = () => queryClient.invalidateQueries({ queryKey: KEY })
 
   const connect = useMutation({
@@ -48,23 +45,23 @@ function ServiceRow({ service }: { service: Connector }) {
     onSuccess: () => {
       setEditing(false)
       setValues({})
-      setError('')
+      setError(null)
       void refresh()
     },
-    onError: (err) => setError(errorText(err)),
+    onError: (err) => setError(shownOr(err, i18n.t('services:generic'))),
   })
   const check = useMutation({
     mutationFn: () => api.checkConnector(service.id),
     onSettled: () => void refresh(),
-    onError: (err) => setError(errorText(err)),
+    onError: (err) => setError(shownOr(err, i18n.t('services:generic'))),
   })
   const disconnect = useMutation({
     mutationFn: () => api.disconnectService(service.id),
     onSuccess: () => {
-      setError('')
+      setError(null)
       void refresh()
     },
-    onError: (err) => setError(errorText(err)),
+    onError: (err) => setError(shownOr(err, i18n.t('services:generic'))),
   })
 
   const statusLine = service.connected
@@ -150,7 +147,7 @@ function ServiceRow({ service }: { service: Connector }) {
               onClick={() => {
                 setEditing(false)
                 setValues({})
-                setError('')
+                setError(null)
               }}
             >
               {t('cancel')}
@@ -158,7 +155,7 @@ function ServiceRow({ service }: { service: Connector }) {
           </div>
         </form>
       )}
-      {error && <p className="mt-2 text-xs text-danger">{error}</p>}
+      {error && <ShownError {...error} className="mt-2 text-xs text-danger" />}
       {service.connected && service.tools.length > 0 && (
         <p className="mt-2 text-xs text-ink-faint">
           {t('tools', {

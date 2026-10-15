@@ -4,6 +4,7 @@ import { formatMilliseconds, formatTokensPerSecond } from '@/i18n/format'
 import { api, errorText } from '@/lib/api'
 import type { RunTrace } from '@/types/api'
 import { roleLabel, roleOrder } from './runRoles'
+import { ShownError, shownOr, type Shown } from '@/components/ui/ShownError'
 
 function msText(ms?: number): string {
   if (!ms) return '—'
@@ -29,7 +30,7 @@ export function RunDetails({ runId }: { runId: string }) {
   const { t } = useTranslation('chat')
   const [open, setOpen] = useState(false)
   const [run, setRun] = useState<RunTrace | null>(null)
-  const [error, setError] = useState('')
+  const [error, setError] = useState<Shown | null>(null)
 
   const toggle = async () => {
     const next = !open
@@ -38,9 +39,9 @@ export function RunDetails({ runId }: { runId: string }) {
       try {
         const r = await api.getRun(runId)
         if (r) setRun(r)
-        else setError(t('run.gone'))
+        else setError({ error: t('run.gone') })
       } catch (err) {
-        setError(err instanceof Error ? err.message : t('run.loadFailed'))
+        setError(shownOr(err, t('run.loadFailed')))
       }
     }
   }
@@ -50,7 +51,7 @@ export function RunDetails({ runId }: { runId: string }) {
       <button type="button" className="underline-offset-2 hover:text-ink hover:underline" aria-expanded={open} onClick={() => void toggle()}>
         {open ? '▾' : '▸'} {t('run.details')}
       </button>
-      {open && error && <p className="mt-1 text-danger">{error}</p>}
+      {open && error && <ShownError {...error} className="mt-1 text-danger" />}
       {open && run && (
         <dl className="mt-1.5 space-y-1 rounded-lg bg-raised/60 p-2.5">
           <Row label={t('run.run')}>

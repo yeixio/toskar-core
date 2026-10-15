@@ -5,6 +5,7 @@ import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 import { api } from '@/lib/api'
 import { formatBytes } from '@/lib/format'
 import type { BrowseModel } from '@/types/api'
+import { ShownError, shownOr } from '@/components/ui/ShownError'
 
 export function BrowseAllPanel({
   installTarget,
@@ -102,11 +103,7 @@ export function BrowseAllPanel({
           </li>
         ))}
       </ul>
-      {installMutation.isError && (
-        <p className="text-sm text-danger">
-          {(installMutation.error as Error)?.message || t('browse.installFailed')}
-        </p>
-      )}
+      {installMutation.isError && <ShownError {...shownOr(installMutation.error, t('browse.installFailed'))} />}
     </div>
   )
 }

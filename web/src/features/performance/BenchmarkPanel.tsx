@@ -21,6 +21,7 @@ import {
   modelDisplayName,
 } from './performanceFormat'
 import { formatPercent } from '@/i18n/format'
+import { ShownError, shownOr, type Shown } from '@/components/ui/ShownError'
 
 const JOB_STATUSES = ['pending', 'running', 'completed', 'failed', 'cancelled', 'canceled']
 
@@ -171,11 +172,7 @@ function BenchmarkResults({
         )}
       </div>
 
-      {job.error && (
-        <div className="rounded-lg border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger">
-          {job.error}
-        </div>
-      )}
+      {job.error && <ShownError error={job.error} className="rounded-lg border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger" />}
 
       {Object.keys(job.winners ?? {}).length > 0 && (
         <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
@@ -336,7 +333,7 @@ export function BenchmarkPanel() {
   const [selectedWorkloads, setSelectedWorkloads] = useState<string[]>([])
   const [runsPerPrompt, setRunsPerPrompt] = useState(2)
   const [activeJobId, setActiveJobId] = useState<string | null>(null)
-  const [benchError, setBenchError] = useState<string | null>(null)
+  const [benchError, setBenchError] = useState<Shown | null>(null)
 
   const modelsQuery = useQuery({
     queryKey: ['models'],
@@ -415,7 +412,7 @@ export function BenchmarkPanel() {
       }
     },
     onError: (error) => {
-      setBenchError(error instanceof Error ? error.message : t('benchmark.startFailed'))
+      setBenchError(shownOr(error, t('benchmark.startFailed')))
     },
   })
 
@@ -564,11 +561,7 @@ export function BenchmarkPanel() {
           )}
         </div>
 
-        {benchError && (
-          <div className="rounded-lg border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger">
-            {benchError}
-          </div>
-        )}
+        {benchError && <ShownError {...benchError} className="rounded-lg border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger" />}
       </section>
 
       {activeJob && (

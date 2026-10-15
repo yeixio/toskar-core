@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { api } from '@/lib/api'
 import type { Capability, Person, Role } from '@/types/api'
+import { ShownError, shownError, type Shown } from '@/components/ui/ShownError'
 
 /**
  * What people may use (#589): each role's capabilities, which Admins
@@ -22,16 +23,16 @@ export function RoleCapabilities({ actor }: { actor?: Role }) {
   const { t } = useTranslation('people')
   const queryClient = useQueryClient()
   const roles = useRoleCapabilities()
-  const [error, setError] = useState('')
+  const [error, setError] = useState<Shown | null>(null)
   const save = useMutation({
     mutationFn: ({ role, capability, on }: { role: Role; capability: Capability; on: boolean }) =>
       api.setRoleCapabilities(role, { ...roles.data?.roles[role], [capability]: on }),
     onSuccess: () => {
-      setError('')
+      setError(null)
       void queryClient.invalidateQueries({ queryKey: ['role-capabilities'] })
       void queryClient.invalidateQueries({ queryKey: ['person-capabilities'] })
     },
-    onError: (err) => setError(err instanceof Error ? err.message : String(err)),
+    onError: (err) => setError(shownError(err)),
   })
   if (!roles.data?.capabilities) return null
   const { capabilities, roles: current, defaults } = roles.data
@@ -90,7 +91,7 @@ export function RoleCapabilities({ actor }: { actor?: Role }) {
         </table>
       </div>
       <p className="text-xs text-ink-faint">{t('capabilities.owner')}</p>
-      {error ? <p className="text-sm text-danger">{error}</p> : null}
+      {error ? <ShownError {...error} className="text-sm text-danger" /> : null}
     </section>
   )
 }
@@ -109,14 +110,14 @@ export function PersonCapabilities({ person }: { person: Person }) {
     enabled: open,
     retry: false,
   })
-  const [error, setError] = useState('')
+  const [error, setError] = useState<Shown | null>(null)
   const save = useMutation({
     mutationFn: (set: Partial<Record<Capability, boolean | null>>) => api.setPersonCapabilities(person.id, set),
     onSuccess: (next) => {
-      setError('')
+      setError(null)
       if (next) queryClient.setQueryData(['person-capabilities', person.id], next)
     },
-    onError: (err) => setError(err instanceof Error ? err.message : String(err)),
+    onError: (err) => setError(shownError(err)),
   })
   const set = caps.data?.set ?? {}
   const changed = Object.keys(set).length
@@ -159,7 +160,7 @@ export function PersonCapabilities({ person }: { person: Person }) {
           })}
         </div>
       ) : null}
-      {error ? <p className="mt-1 text-danger">{error}</p> : null}
+      {error ? <ShownError {...error} className="mt-1 text-danger" /> : null}
     </details>
   )
 }

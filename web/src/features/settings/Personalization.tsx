@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { api } from '@/lib/api'
 import type { PersonalStyle } from '@/types/api'
+import { ShownError, shownOr, type Shown } from '@/components/ui/ShownError'
 
 const KEY = ['personalization'] as const
 
@@ -23,7 +24,7 @@ export function Personalization() {
   const queryClient = useQueryClient()
   const query = useQuery({ queryKey: KEY, queryFn: () => api.getPersonalStyle(), retry: false })
   const [draft, setDraft] = useState<PersonalStyle>({})
-  const [error, setError] = useState('')
+  const [error, setError] = useState<Shown | null>(null)
   const [saved, setSaved] = useState(false)
 
   useEffect(() => {
@@ -33,13 +34,13 @@ export function Personalization() {
   const save = useMutation({
     mutationFn: () => api.setPersonalStyle(draft),
     onSuccess: (data) => {
-      setError('')
+      setError(null)
       setSaved(true)
       if (data) queryClient.setQueryData(KEY, data)
     },
     onError: (err) => {
       setSaved(false)
-      setError(err instanceof Error ? err.message : t('personalization.saveFailed'))
+      setError(shownOr(err, t('personalization.saveFailed')))
     },
   })
 
@@ -99,7 +100,7 @@ export function Personalization() {
         </button>
         {saved && <span className="text-xs text-ink-faint">{t('personalization.saved')}</span>}
       </div>
-      {error && <p className="text-xs text-danger">{error}</p>}
+      {error && <ShownError {...error} className="text-xs text-danger" />}
     </section>
   )
 }

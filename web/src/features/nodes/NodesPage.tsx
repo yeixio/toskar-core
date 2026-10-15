@@ -28,6 +28,8 @@ import { Ratatoskr } from '@/components/ui/Ratatoskr'
 import { useMascotState } from '@/lib/ratatoskr/useMascotState'
 import { LoadError } from '@/components/ui/LoadError'
 import { Skeleton } from '@/components/ui/Skeleton'
+import { ReportProblem } from '@/components/ui/ReportProblem'
+import { shownError } from '@/components/ui/ShownError'
 
 function errorMessage(err: unknown): string {
   if (err instanceof ApiError) return err.message
@@ -645,7 +647,10 @@ export function NodesPage() {
       {actionError && (
         <div className="rounded-lg bg-danger/10 px-4 py-3 text-sm text-danger">
           <p className="font-medium">{t('errors.action')}</p>
-          <p className="mt-1">{errorMessage(actionError)}</p>
+          <p className="mt-1">
+            {errorMessage(actionError)}
+            <ReportProblem {...shownError(actionError)} className="ms-2 text-xs text-ink-faint underline hover:text-ink" />
+          </p>
           {(pairMutation.error ||
             approveMutation.error ||
             claimMutation.error ||

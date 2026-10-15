@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { api } from '@/lib/api'
 import type { SpecializedAIView } from '@/types/api'
-import { errorText } from '../display'
+import { ShownError, shownError } from '@/components/ui/ShownError'
 
 export function DescribeStep({ view, onNext, onDeleted }: { view: SpecializedAIView; onNext: () => void; onDeleted: () => void }) {
   const { t } = useTranslation('train')
@@ -44,7 +44,7 @@ export function DescribeStep({ view, onNext, onDeleted }: { view: SpecializedAIV
         <textarea className="field min-h-32 w-full font-mono text-xs" value={instructions} onChange={(e) => setInstructions(e.target.value)} />
         <span className="block text-xs text-ink-faint">{t('describe.instructionsHint')}</span>
       </label>
-      {(save.error || remove.error) && <p className="text-sm text-danger">{errorText(save.error ?? remove.error)}</p>}
+      {(save.error || remove.error) && <ShownError {...shownError(save.error ?? remove.error)} className="text-sm text-danger" />}
       <div className="flex flex-wrap items-center gap-2">
         <button
           type="button"

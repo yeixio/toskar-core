@@ -5,7 +5,7 @@ import { formatSize } from '@/i18n/format'
 import { api, type MediaKind } from '@/lib/api'
 import { subscribeEvents } from '@/lib/events'
 import type { ModelDownloadProgressPayload, SetupOffer } from '@/types/api'
-import { ShownError, shownError } from '@/components/ui/ShownError'
+import { ShownError, shownError, type Shown } from '@/components/ui/ShownError'
 
 function gb(bytes: number): string {
   return formatSize(bytes, { base: 1000 })
@@ -33,7 +33,7 @@ function MediaOfferCard({ offer, onContinue }: { offer: SetupOffer; onContinue: 
   const { t } = useTranslation('chat')
   const queryClient = useQueryClient()
   const [started, setStarted] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<Shown | null>(null)
   const continued = useRef(false)
   // The setup each installable ability uses.
   const kind: MediaKind | null = offer.ability === 'image_generation' ? 'images' : offer.ability === 'video_generation' ? 'video' : null
@@ -71,7 +71,7 @@ function MediaOfferCard({ offer, onContinue }: { offer: SetupOffer; onContinue: 
   // Slow or tight is said of the computer that would make them.
   const there = offer.remote ? offer.node_name : undefined
   const percent = job && job.total_bytes > 0 ? Math.round((job.done_bytes / job.total_bytes) * 100) : 0
-  const failed = error ?? (job && !job.running ? job.error : undefined)
+  const failed: Shown | undefined = error ?? (job && !job.running && job.error ? { error: job.error } : undefined)
 
   return (
     <div className="mt-3 space-y-2 rounded-xl border border-line/70 bg-surface px-3 py-2.5 text-sm">
@@ -141,7 +141,7 @@ function MediaOfferCard({ offer, onContinue }: { offer: SetupOffer; onContinue: 
                 if (next) queryClient.setQueryData(statusKey, next)
                 else void statusQuery.refetch()
               } catch (err) {
-                setError(err instanceof Error ? err.message : String(err))
+                setError(shownError(err))
               }
             }}
           >
@@ -149,7 +149,7 @@ function MediaOfferCard({ offer, onContinue }: { offer: SetupOffer; onContinue: 
           </button>
         </div>
       )}
-      {failed && !ready ? <p className="text-xs text-danger">{failed}</p> : null}
+      {failed && !ready ? <ShownError {...failed} className="text-xs text-danger" /> : null}
     </div>
   )
 }

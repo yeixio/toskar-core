@@ -2,10 +2,11 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useRef, useState } from 'react'
 import { Trans, useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
-import { api, ApiError } from '@/lib/api'
+import { api } from '@/lib/api'
 import { useRole } from '@/lib/role'
 import type { DevicePairing } from '@/types/api'
 import { clock, useCountdown } from './countdown'
+import { ShownError, shownError } from '@/components/ui/ShownError'
 
 /** Toskar for iPhone on the App Store. */
 export const IPHONE_APP_URL = 'https://apps.apple.com/app/id6817062966'
@@ -93,11 +94,7 @@ export function ConnectPhone({ onClose }: { onClose: () => void }) {
         </button>
       </div>
 
-      {error ? (
-        <p role="alert" className="rounded-lg bg-danger/10 px-3 py-2 text-sm text-danger">
-          {error instanceof ApiError ? error.message : String(error)}
-        </p>
-      ) : null}
+      {error ? <ShownError {...shownError(error)} role="alert" className="rounded-lg bg-danger/10 px-3 py-2 text-sm text-danger" /> : null}
 
       {!shown ? (
         <div className="space-y-3">

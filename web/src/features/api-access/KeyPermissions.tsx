@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { api } from '@/lib/api'
 import type { APIKeyPermissions, APIKeyRecord } from '@/types/api'
+import { ShownError, shownOr, type Shown } from '@/components/ui/ShownError'
 
 const DEFAULTS: APIKeyPermissions = { memory: 'on_request', knowledge: 'always', tools: 'profile', placement: true }
 
@@ -18,14 +19,14 @@ export function KeyPermissions({ apiKey }: { apiKey: APIKeyRecord }) {
   const { t } = useTranslation('apiAccess')
   const queryClient = useQueryClient()
   const current = apiKey.permissions ?? DEFAULTS
-  const [error, setError] = useState('')
+  const [error, setError] = useState<Shown | null>(null)
   const save = useMutation({
     mutationFn: (p: APIKeyPermissions) => api.setApiKeyPermissions(apiKey.id, p),
     onSuccess: () => {
-      setError('')
+      setError(null)
       void queryClient.invalidateQueries({ queryKey: ['api-keys'] })
     },
-    onError: (err) => setError(err instanceof Error ? err.message : t('permissions.saveFailed')),
+    onError: (err) => setError(shownOr(err, t('permissions.saveFailed'))),
   })
   const change = (patch: Partial<APIKeyPermissions>) => save.mutate({ ...current, ...patch })
   const profiles = useQuery({ queryKey: ['profiles'], queryFn: () => api.getProfiles(), retry: false })
@@ -105,7 +106,7 @@ export function KeyPermissions({ apiKey }: { apiKey: APIKeyRecord }) {
         </label>
       </div>
       <p className="mt-2 text-ink-faint">{t('permissions.note')}</p>
-      {error && <p className="mt-1 text-danger">{error}</p>}
+      {error && <ShownError {...error} className="mt-1 text-danger" />}
     </details>
   )
 }

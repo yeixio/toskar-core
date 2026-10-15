@@ -5,9 +5,9 @@ import { Ratatoskr } from '@/components/ui/Ratatoskr'
 import { api } from '@/lib/api'
 import { useMascotState } from '@/lib/ratatoskr/useMascotState'
 import type { SpecializedAIView } from '@/types/api'
-import { errorText } from '../display'
 import { ExportCard } from './ExportCard'
 import { formatDate, formatDecimal } from '@/i18n/format'
+import { ShownError, shownError } from '@/components/ui/ShownError'
 
 export function DeployStep({ view }: { view: SpecializedAIView }) {
   const { t } = useTranslation('train')
@@ -63,7 +63,7 @@ export function DeployStep({ view }: { view: SpecializedAIView }) {
             )
           })}
         </ul>
-        {(deploy.error || undeploy.error) && <p className="text-sm text-danger">{errorText(deploy.error ?? undeploy.error)}</p>}
+        {(deploy.error || undeploy.error) && <ShownError {...shownError(deploy.error ?? undeploy.error)} className="text-sm text-danger" />}
       </div>
 
       {view.deployed_revision > 0 && (

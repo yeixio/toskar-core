@@ -4,7 +4,8 @@ import { Link } from 'react-router-dom'
 import { api } from '@/lib/api'
 import { formatBytes } from '@/lib/format'
 import type { SpecializedAIView } from '@/types/api'
-import { errorText, fitLabel, fitTone } from '../display'
+import { fitLabel, fitTone } from '../display'
+import { ShownError, shownError } from '@/components/ui/ShownError'
 
 export function BaseModelStep({ view, onNext }: { view: SpecializedAIView; onNext: () => void }) {
   const { t } = useTranslation('train')
@@ -23,7 +24,7 @@ export function BaseModelStep({ view, onNext }: { view: SpecializedAIView; onNex
         <p className="mt-1 text-sm text-ink-muted">{t('base.description')}</p>
       </div>
       {choices.isLoading && <p className="text-sm text-ink-muted">{t('base.checking')}</p>}
-      {choices.error && <p className="text-sm text-danger">{errorText(choices.error)}</p>}
+      {choices.error && <ShownError {...shownError(choices.error)} className="text-sm text-danger" />}
       <ul className="space-y-2">
         {(choices.data ?? []).map((c) => {
           const selected = c.model_id === view.base_model_id
@@ -70,7 +71,7 @@ export function BaseModelStep({ view, onNext }: { view: SpecializedAIView; onNex
           />
         </p>
       )}
-      {choose.error && <p className="text-sm text-danger">{errorText(choose.error)}</p>}
+      {choose.error && <ShownError {...shownError(choose.error)} className="text-sm text-danger" />}
       <button type="button" className="btn-primary" disabled={!view.base_model_id} onClick={onNext}>
         {t('base.continue')}
       </button>

@@ -22,7 +22,7 @@ import {
   weekdayName,
 } from './parseRequest'
 import { IDEAS, buildIdea, ideaDefaults, ideaReady, type IdeaField, type IdeaId, type IdeaValues } from './ideas'
-import { ShownError } from '@/components/ui/ShownError'
+import { ShownError, shownOr, type Shown } from '@/components/ui/ShownError'
 
 // The notify choices, in order; each is automations:form.notifyChoices.<mode> in the catalog.
 const NOTIFY_CHOICES: AutomationInput['notification']['mode'][] = ['condition', 'change', 'always', 'failure', 'none']
@@ -43,7 +43,7 @@ interface AutomationFormProps {
   /** Offer the ideas as shortcuts; off when the page already shows them. */
   showIdeas?: boolean
   pending: boolean
-  error?: string
+  error?: Shown | null
   onCancel: () => void
   onSubmit: (input: AutomationInput) => void
 }
@@ -64,7 +64,7 @@ export function AutomationForm({ profiles, models, tools, others = [], initial, 
   const [name, setName] = useState(initial?.name ?? '')
   const [task, setTask] = useState(visibleTask(initial?.prompt ?? ''))
   const [preview, setPreview] = useState<AutomationPreview | null>(null)
-  const [previewError, setPreviewError] = useState('')
+  const [previewError, setPreviewError] = useState<Shown | null>(null)
   const [testing, setTesting] = useState(false)
   const installed = models.filter((model) => model.installed && canChat(model))
   const [profileID, setProfileID] = useState(initial?.profile_id || profiles.find((p) => p.id === 'general-assistant')?.id || profiles[0]?.id || '')
@@ -220,11 +220,11 @@ export function AutomationForm({ profiles, models, tools, others = [], initial, 
     if (!modelID || !task.trim()) return
     setTesting(true)
     setPreview(null)
-    setPreviewError('')
+    setPreviewError(null)
     try {
       setPreview(await api.previewAutomation(draft()))
     } catch (err) {
-      setPreviewError(err instanceof Error ? err.message : t('form.testCouldNotRun'))
+      setPreviewError(shownOr(err, t('form.testCouldNotRun')))
     } finally {
       setTesting(false)
     }
@@ -622,7 +622,7 @@ export function AutomationForm({ profiles, models, tools, others = [], initial, 
           <dd className="text-ink">{notificationLabel(previewNotification(mode, conditionKind, op, value, currency))}</dd>
         </dl>
       </section>
-      {previewError && <p className="text-sm text-danger">{previewError}</p>}
+      {previewError && <ShownError {...previewError} />}
       {preview && (
         <div className="rounded-lg bg-raised/50 p-3 text-sm">
           <p className="font-medium text-ink">{testing ? t('form.testing') : preview.error ? t('form.testFailed') : preview.would_notify ? t('form.wouldNotify') : t('form.wouldNotNotify')}</p>
@@ -633,7 +633,7 @@ export function AutomationForm({ profiles, models, tools, others = [], initial, 
         </div>
       )}
       {testing && !preview && <p className="text-sm text-ink-muted">{t('form.testing')}</p>}
-      {error && <p className="text-sm text-danger">{error}</p>}
+      {error && <ShownError {...error} />}
       <div className="flex flex-wrap items-center gap-2">
         <button type="submit" className="btn-primary" disabled={pending || testing || profiles.length === 0 || !modelID || !task.trim()}>
           {pending ? t('form.saving') : initial ? t('form.saveChanges') : t('form.create')}

@@ -4,6 +4,8 @@ import { Trans, useTranslation } from 'react-i18next'
 import { api } from '@/lib/api'
 import type { AutomationDraft, AutomationRunRef } from '@/types/api'
 import { notificationLabel, scheduleLabel } from '@/features/automations/parseRequest'
+import { ReportProblem } from '@/components/ui/ReportProblem'
+import { shownError } from '@/components/ui/ShownError'
 
 /**
  * An automation the answer drafted (#204): what it does, when, and when it
@@ -73,6 +75,7 @@ export function AutomationDraftCard({ draft, conversationId }: { draft: Automati
       {create.isError ? (
         <p className="mt-2 text-xs text-danger">
           {t('draft.failed')} {create.error instanceof Error ? create.error.message : ''}
+          <ReportProblem {...shownError(create.error)} className="ms-2 text-xs text-ink-faint underline hover:text-ink" />
         </p>
       ) : null}
     </div>

@@ -11,6 +11,7 @@ import type {
   QuietHours,
 } from '@/types/api'
 import { CATEGORIES, categoryLabel } from './notificationLabels'
+import { ShownError, shownError, shownOr, type Shown } from '@/components/ui/ShownError'
 
 const KEY = ['notification-destinations'] as const
 
@@ -21,8 +22,8 @@ function severityLabel(value: '' | NotificationSeverity): string {
   return i18n.t(`notifications:destinations.severities.${value || 'all'}`)
 }
 
-function errorText(err: unknown): string {
-  return err instanceof Error ? err.message : i18n.t('notifications:destinations.generic')
+function errorOf(err: unknown): Shown {
+  return shownOr(err, i18n.t('notifications:destinations.generic'))
 }
 
 /**
@@ -42,7 +43,7 @@ export function NotificationDestinations() {
         <h2 className="section-title">{t('destinations.title')}</h2>
         <p className="mt-1 text-sm text-ink-muted">{t('destinations.description')}</p>
       </div>
-      {query.isError && <p className="text-sm text-danger">{errorText(query.error)}</p>}
+      {query.isError && <ShownError {...shownError(query.error)} className="text-sm text-danger" />}
       {destinations.map((d) => (
         <DestinationRow key={d.id} destination={d} />
       ))}
@@ -89,7 +90,7 @@ function DestinationRow({ destination: d }: { destination: NotificationDestinati
   const { t } = useTranslation('notifications')
   const queryClient = useQueryClient()
   const [editing, setEditing] = useState(false)
-  const [result, setResult] = useState<{ ok: boolean; text: string } | null>(null)
+  const [result, setResult] = useState<{ ok: boolean; text: string; failure?: Shown } | null>(null)
   const [secret, setSecret] = useState('')
   const refresh = () => queryClient.invalidateQueries({ queryKey: KEY })
 
@@ -97,7 +98,7 @@ function DestinationRow({ destination: d }: { destination: NotificationDestinati
     mutationFn: () => api.testNotificationDestination(d.id),
     onSuccess: (r) =>
       setResult(r.ok ? { ok: true, text: t('destinations.sent') } : { ok: false, text: r.error ?? t('destinations.notSent') }),
-    onError: (err) => setResult({ ok: false, text: errorText(err) }),
+    onError: (err) => setResult({ ok: false, text: '', failure: errorOf(err) }),
   })
   const toggle = useMutation({
     mutationFn: () => api.updateNotificationDestination(d.id, { enabled: !d.enabled }),
@@ -154,7 +155,7 @@ function DestinationRow({ destination: d }: { destination: NotificationDestinati
           </button>
         </div>
       </div>
-      {result && <p className={['mt-2 text-xs', result.ok ? 'text-success' : 'text-danger'].join(' ')}>{result.text}</p>}
+      {result?.ok ? <p className="mt-2 text-xs text-success">{result.text}</p> : result ? <ShownError {...(result.failure ?? { error: result.text })} className="mt-2 text-xs text-danger" /> : null}
       {secret && <SecretOnce secret={secret} />}
     </div>
   )
@@ -197,7 +198,7 @@ function DestinationForm({
   const [categories, setCategories] = useState<NotificationCategory[]>(existing?.categories ?? [])
   const [minSeverity, setMinSeverity] = useState<'' | NotificationSeverity>(existing?.min_severity ?? '')
   const [digestAt, setDigestAt] = useState(existing?.digest?.at ?? '')
-  const [error, setError] = useState('')
+  const [error, setError] = useState<Shown | null>(null)
   const [secret, setSecret] = useState('')
 
   const save = useMutation({
@@ -235,7 +236,7 @@ function DestinationForm({
       if (newSecret) setSecret(newSecret)
       else onDone()
     },
-    onError: (err) => setError(errorText(err)),
+    onError: (err) => setError(errorOf(err)),
   })
 
   if (secret) {
@@ -262,7 +263,7 @@ function DestinationForm({
       className="space-y-3 rounded-lg border border-line/60 p-3"
       onSubmit={(e) => {
         e.preventDefault()
-        setError('')
+        setError(null)
         save.mutate()
       }}
     >
@@ -364,7 +365,7 @@ function DestinationForm({
           <p className="mt-1 text-xs text-ink-faint">{t('destinations.digestHint')}</p>
         </div>
       ) : null}
-      {error && <p className="text-xs text-danger">{error}</p>}
+      {error && <ShownError {...error} className="text-xs text-danger" />}
       <div className="flex gap-2">
         <button type="submit" className="btn-primary px-3 py-1.5 text-xs" disabled={save.isPending}>
           {save.isPending ? t('destinations.saving') : existing ? t('destinations.save') : t('destinations.add')}
@@ -390,17 +391,17 @@ function QuietHoursForm() {
   const queryClient = useQueryClient()
   const query = useQuery({ queryKey: ['quiet-hours'], queryFn: () => api.getQuietHours(), retry: false })
   const [q, setQ] = useState<QuietHours | null>(null)
-  const [error, setError] = useState('')
+  const [error, setError] = useState<Shown | null>(null)
   useEffect(() => {
     if (query.data && !q) setQ({ ...query.data, time_zone: query.data.enabled ? query.data.time_zone : localZone })
   }, [query.data, q])
   const save = useMutation({
     mutationFn: (next: QuietHours) => api.setQuietHours(next),
     onSuccess: () => {
-      setError('')
+      setError(null)
       void queryClient.invalidateQueries({ queryKey: ['quiet-hours'] })
     },
-    onError: (err) => setError(errorText(err)),
+    onError: (err) => setError(errorOf(err)),
   })
   if (!q) return null
   const update = (patch: Partial<QuietHours>) => {
@@ -437,7 +438,7 @@ function QuietHoursForm() {
           <p className="text-xs text-ink-faint sm:col-span-3">{t('quiet.timeZone', { zone: q.time_zone })}</p>
         </div>
       )}
-      {error && <p className="text-xs text-danger">{error}</p>}
+      {error && <ShownError {...error} className="text-xs text-danger" />}
     </div>
   )
 }

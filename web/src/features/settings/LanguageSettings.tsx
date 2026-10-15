@@ -4,6 +4,8 @@ import { applyLanguage, availableLanguages, languages, pseudoLocale, pseudoRtlLo
 import { api } from '@/lib/api'
 import { useUIStore } from '@/stores/uiStore'
 import { AssistantLanguage } from './AssistantLanguage'
+import { ReportProblem } from '@/components/ui/ReportProblem'
+import { shownError } from '@/components/ui/ShownError'
 
 /** The App language (spec §7): System default, or a language from the catalog. */
 export function LanguageSettings() {
@@ -59,6 +61,7 @@ export function LanguageSettings() {
       {save.isError ? (
         <p className="text-sm text-danger">
           {t('language.saveFailed', { error: save.error instanceof Error ? save.error.message : String(save.error) })}
+          <ReportProblem {...shownError(save.error)} className="ms-2 text-xs text-ink-faint underline hover:text-ink" />
         </p>
       ) : null}
       <AssistantLanguage />

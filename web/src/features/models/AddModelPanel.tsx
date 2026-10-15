@@ -7,15 +7,12 @@ import { formatBytes } from '@/lib/format'
 import { formatSize } from '@/i18n/format'
 import { rovingKeyDown } from '@/lib/roving'
 import type { BenchmarkJob, FoundModel, ModelImportResult } from '@/types/api'
+import { ShownError, shownError } from '@/components/ui/ShownError'
 
 type Way = 'file' | 'apps' | 'link'
 
 // Each app's name, as people know it.
 const APP_NAMES: Record<string, string> = { lmstudio: 'LM Studio', ollama: 'Ollama', llamacpp: 'llama.cpp', gpt4all: 'GPT4All' }
-
-function errorText(error: unknown, fallback: string): string {
-  return error instanceof Error && error.message ? error.message : fallback
-}
 
 /**
  * Adds a model that isn't in the catalog (#467): a GGUF file, sent from
@@ -168,7 +165,7 @@ function AddedDetails({ modelId, name, projector, onSaved }: { modelId: string; 
           </button>
           {saved ? <span className="text-xs text-ink-faint">{t('add.details.saved')}</span> : null}
         </div>
-        {save.isError ? <p className="text-danger">{errorText(save.error, t('add.failed'))}</p> : null}
+        {save.isError ? <ShownError {...shownError(save.error)} className="text-danger" /> : null}
       </form>
       {projector ? (
         <div className="flex flex-wrap items-center gap-3 border-t border-line/50 pt-3">
@@ -187,7 +184,7 @@ function AddedDetails({ modelId, name, projector, onSaved }: { modelId: string; 
               </button>
             </>
           )}
-          {pair.isError ? <p className="w-full text-danger">{errorText(pair.error, t('add.failed'))}</p> : null}
+          {pair.isError ? <ShownError {...shownError(pair.error)} className="w-full text-danger" /> : null}
         </div>
       ) : null}
     </div>
@@ -254,7 +251,7 @@ function QuickCheck({ modelId }: { modelId: string }) {
           </button>
         </>
       )}
-      {start.isError ? <p className="text-danger">{errorText(start.error, t('add.failed'))}</p> : null}
+      {start.isError ? <ShownError {...shownError(start.error)} className="text-danger" /> : null}
     </div>
   )
 }
@@ -325,7 +322,7 @@ function FromFile({ onAdded }: { onAdded: (r: ModelImportResult | null, name?: s
           </>
         )}
       </div>
-      {upload.isError ? <p className="text-sm text-danger">{errorText(upload.error, t('add.failed'))}</p> : null}
+      {upload.isError ? <ShownError {...shownError(upload.error)} className="text-sm text-danger" /> : null}
 
       <form
         className="space-y-2"
@@ -364,7 +361,7 @@ function FromFile({ onAdded }: { onAdded: (r: ModelImportResult | null, name?: s
         <button type="submit" className="btn-secondary btn-sm" disabled={!path.trim() || byPath.isPending}>
           {byPath.isPending ? t('add.adding') : t('add.add')}
         </button>
-        {byPath.isError ? <p className="text-sm text-danger">{errorText(byPath.error, t('add.failed'))}</p> : null}
+        {byPath.isError ? <ShownError {...shownError(byPath.error)} className="text-sm text-danger" /> : null}
       </form>
     </div>
   )
@@ -413,8 +410,8 @@ function FromApps({ onAdded }: { onAdded: (r: ModelImportResult | null, name?: s
           ))}
         </ul>
       )}
-      {found.isError ? <p className="text-sm text-danger">{errorText(found.error, t('add.failed'))}</p> : null}
-      {add.isError ? <p className="text-sm text-danger">{errorText(add.error, t('add.failed'))}</p> : null}
+      {found.isError ? <ShownError {...shownError(found.error)} className="text-sm text-danger" /> : null}
+      {add.isError ? <ShownError {...shownError(add.error)} className="text-sm text-danger" /> : null}
     </div>
   )
 }
@@ -529,9 +526,9 @@ function FromLink({ onAdded }: { onAdded: (r: ModelImportResult | null, name?: s
           </button>
         </div>
       )}
-      {preview.isError ? <p className="text-sm text-danger">{errorText(preview.error, t('add.failed'))}</p> : null}
-      {install.isError ? <p className="text-sm text-danger">{errorText(install.error, t('add.failed'))}</p> : null}
-      {useCopy.isError ? <p className="text-sm text-danger">{errorText(useCopy.error, t('add.failed'))}</p> : null}
+      {preview.isError ? <ShownError {...shownError(preview.error)} className="text-sm text-danger" /> : null}
+      {install.isError ? <ShownError {...shownError(install.error)} className="text-sm text-danger" /> : null}
+      {useCopy.isError ? <ShownError {...shownError(useCopy.error)} className="text-sm text-danger" /> : null}
     </form>
   )
 }

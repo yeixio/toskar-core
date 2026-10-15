@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { api } from '@/lib/api'
+import { ShownError, shownError, type Shown } from '@/components/ui/ShownError'
 
 const KEY = ['external-server']
 
@@ -16,7 +17,7 @@ export function ExternalServer() {
   // null shows the stored URL until the person edits it.
   const [edited, setEdited] = useState<string | null>(null)
   const [key, setKey] = useState('')
-  const [error, setError] = useState('')
+  const [error, setError] = useState<Shown | null>(null)
   const url = edited ?? server.data?.base_url ?? ''
 
   const save = useMutation({
@@ -24,11 +25,11 @@ export function ExternalServer() {
     onSuccess: (next) => {
       setKey('')
       setEdited(null)
-      setError('')
+      setError(null)
       queryClient.setQueryData(KEY, next)
       void queryClient.invalidateQueries({ queryKey: ['models'] })
     },
-    onError: (err) => setError(err instanceof Error ? err.message : String(err)),
+    onError: (err) => setError(shownError(err)),
   })
   const submit = (e: FormEvent) => {
     e.preventDefault()
@@ -72,14 +73,10 @@ export function ExternalServer() {
         </div>
       </form>
       {error ? (
-        <p role="alert" className="text-sm text-danger">
-          {error}
-        </p>
+        <ShownError {...error} role="alert" />
       ) : data?.base_url ? (
         data.error ? (
-          <p role="alert" className="text-sm text-danger">
-            {data.error}
-          </p>
+          <ShownError error={data.error} role="alert" />
         ) : (
           <p className="text-sm text-ink-muted">{t('external.models', { count: data.models.length })}</p>
         )

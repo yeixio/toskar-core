@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { api, getApiBase } from '@/lib/api'
+import { ShownError, shownError } from '@/components/ui/ShownError'
 
 /**
  * An automation's webhook link (#204). Another service starts the
@@ -49,7 +50,7 @@ export function WebhookLink({ automationId, hookSet }: { automationId: string; h
           {hookSet ? <p className="text-xs text-ink-faint">{t('webhook.replaces')}</p> : null}
         </>
       )}
-      {make.isError ? <p className="text-xs text-danger">{make.error instanceof Error ? make.error.message : ''}</p> : null}
+      {make.isError ? <ShownError {...shownError(make.error)} className="text-xs text-danger" /> : null}
     </div>
   )
 }

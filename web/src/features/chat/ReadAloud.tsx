@@ -1,16 +1,17 @@
 import { useTranslation } from 'react-i18next'
 import { useEffect, useRef, useState } from 'react'
-import { api } from '@/lib/api'
+import { api, errorText } from '@/lib/api'
 import type { FileRef } from '@/types/api'
 import { AudioChip } from './FileChips'
 import { speakableText } from './speakableText'
+import { shownOr, type Shown } from '@/components/ui/ShownError'
 
 /** Reads an answer aloud on this computer and plays it. */
 export function ReadAloudButton({ text, conversationId }: { text: string; conversationId?: string }) {
   const { t } = useTranslation('chat')
   const [audio, setAudio] = useState<FileRef | null>(null)
   const [busy, setBusy] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<Shown | null>(null)
 
   if (audio) return <AudioChip file={audio} autoPlay />
   return (
@@ -27,7 +28,7 @@ export function ReadAloudButton({ text, conversationId }: { text: string; conver
             const res = await api.readAloud(speakableText(text), conversationId)
             if (res) setAudio(res.artifact)
           } catch (err) {
-            setError(err instanceof Error ? err.message : t('readAloud.failed'))
+            setError(shownOr(err, t('readAloud.failed')))
           } finally {
             setBusy(false)
           }
@@ -39,7 +40,7 @@ export function ReadAloudButton({ text, conversationId }: { text: string; conver
         </svg>
         {busy ? t('readAloud.busy') : t('readAloud.button')}
       </button>
-      {error ? <span className="text-xs text-danger">{error}</span> : null}
+      {error ? <span className="text-xs text-danger">{errorText(error.code, error.error, error.details)}</span> : null}
     </span>
   )
 }

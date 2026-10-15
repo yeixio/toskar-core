@@ -29,6 +29,7 @@ import { Personalization } from './Personalization'
 import { YggdrasilMark } from '@/components/ui/YggdrasilMark'
 import { formatGigabytes } from '@/i18n/format'
 import { AutomationDigestSetting } from './AutomationDigest'
+import { ShownError, shownOr, type Shown } from '@/components/ui/ShownError'
 
 /** How long models stay loaded, in minutes; 0 keeps them until stopped (#498). */
 const KEEP_READY = [15, 60, 240, 0]
@@ -134,7 +135,7 @@ export function SettingsPage() {
   const resetToDefaults = useUIStore((s) => s.resetToDefaults)
   const [confirmReset, setConfirmReset] = useState(false)
   const [deleteModels, setDeleteModels] = useState(false)
-  const [resetError, setResetError] = useState<string | null>(null)
+  const [resetError, setResetError] = useState<Shown | null>(null)
   const folderLabel = isMac() ? t('storage.showInFinder') : t('storage.openFolder')
 
   const settingsQuery = useQuery({
@@ -231,11 +232,7 @@ export function SettingsPage() {
     },
     onError: (error) => {
       setConfirmReset(false)
-      setResetError(
-        error instanceof Error
-          ? error.message
-          : t('reset.failed'),
-      )
+      setResetError(shownOr(error, t('reset.failed')))
     },
   })
 
@@ -692,11 +689,7 @@ export function SettingsPage() {
                 <p className="mt-1 text-sm text-ink-muted">{t('reset.description')}</p>
               </div>
 
-              {resetError && (
-                <div className="rounded-lg bg-danger/10 px-4 py-3 text-sm text-danger">
-                  {resetError}
-                </div>
-              )}
+              {resetError && <ShownError {...resetError} className="rounded-lg bg-danger/10 px-4 py-3 text-sm text-danger" />}
 
               {!confirmReset ? (
                 <button

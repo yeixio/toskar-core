@@ -3,8 +3,7 @@ import { useState } from 'react'
 import { Trans, useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { api } from '@/lib/api'
-import { errorText } from '@/features/train/display'
-import { ShownError } from '@/components/ui/ShownError'
+import { ShownError, shownError } from '@/components/ui/ShownError'
 
 /**
  * Chooses which Mimir sources a profile or specialized AI searches. It can
@@ -95,7 +94,7 @@ export function KnowledgePicker({
           {connect.isPending ? t('picker.indexing') : t('picker.connect')}
         </button>
       </form>
-      {connect.error && <p className="text-xs text-danger">{errorText(connect.error)}</p>}
+      {connect.error && <ShownError {...shownError(connect.error)} className="text-xs text-danger" />}
       {connect.data?.status === 'failed' && (
         <ShownError error={connect.data.error ?? ''} code={connect.data.error_code} details={connect.data.error_details} className="text-xs text-danger" />
       )}

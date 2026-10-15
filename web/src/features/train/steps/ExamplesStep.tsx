@@ -3,7 +3,8 @@ import { useState } from 'react'
 import { Trans, useTranslation } from 'react-i18next'
 import { api } from '@/lib/api'
 import type { ExampleFlag, SpecializedAIView, TrainingExample, TrainingMessage } from '@/types/api'
-import { errorText, flagCount, flagInfo, lastAnswer, lastUserTurn } from '../display'
+import { flagCount, flagInfo, lastAnswer, lastUserTurn } from '../display'
+import { ShownError, shownError } from '@/components/ui/ShownError'
 
 const PAGE = 50
 
@@ -80,7 +81,7 @@ export function ExamplesStep({ view, onNext }: { view: SpecializedAIView; onNext
             {t('examples.showMore', { count: list.length - shown })}
           </button>
         )}
-        {(update.error || remove.error) && <p className="text-sm text-danger">{errorText(update.error ?? remove.error)}</p>}
+        {(update.error || remove.error) && <ShownError {...shownError(update.error ?? remove.error)} className="text-sm text-danger" />}
       </div>
       <AddExample aiID={view.id} onAdded={refresh} />
       <button type="button" className="btn-primary" disabled={stats.usable < 10} onClick={onNext}>
@@ -190,7 +191,7 @@ function AddExample({ aiID, onAdded }: { aiID: string; onAdded: () => void }) {
       <p className="text-sm text-ink-muted">{t('examples.writeDescription')}</p>
       <input className="field w-full" value={question} onChange={(e) => setQuestion(e.target.value)} placeholder={t('examples.questionPlaceholder')} aria-label={t('examples.question')} />
       <textarea className="field min-h-20 w-full" value={answer} onChange={(e) => setAnswer(e.target.value)} placeholder={t('examples.answerPlaceholder')} aria-label={t('examples.answer')} />
-      {add.error && <p className="text-sm text-danger">{errorText(add.error)}</p>}
+      {add.error && <ShownError {...shownError(add.error)} className="text-sm text-danger" />}
       <button type="button" className="btn-secondary" disabled={!question.trim() || !answer.trim() || add.isPending} onClick={() => add.mutate()}>
         {t('examples.add')}
       </button>

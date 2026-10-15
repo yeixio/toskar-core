@@ -18,6 +18,8 @@ import { formatRelativeTime } from '@/i18n/format'
 import { MemoryPanel } from './MemoryPanel'
 import { FirstAnswersPanel } from './FirstAnswersPanel'
 import { GPUSetupList } from './GPUSetupList'
+import { ReportProblem } from '@/components/ui/ReportProblem'
+import { shownError } from '@/components/ui/ShownError'
 
 function kindLabel(kind: string, advanced: boolean): string {
   const known = kind === 'daemon' || kind === 'runtime'
@@ -549,6 +551,7 @@ export function DiagnosticsPage() {
       {diagnosticsMutation.isError && (
         <div className="rounded-lg bg-danger/10 px-4 py-3 text-sm text-danger">
           {t('page.bundleFailed')}
+          <ReportProblem {...shownError(diagnosticsMutation.error)} className="ms-2 text-xs text-ink-faint underline hover:text-ink" />
         </div>
       )}
 

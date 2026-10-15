@@ -53,6 +53,7 @@ import { RatingDialogHost, RatingPrompt } from '@/features/models/ratings'
 import { Skeleton } from '@/components/ui/Skeleton'
 import { YggdrasilMark } from '@/components/ui/YggdrasilMark'
 import { moveStored } from '@/lib/storage'
+import { shownError, type Shown } from '@/components/ui/ShownError'
 
 type TeamStep = {
   role: string
@@ -633,14 +634,14 @@ export function ChatPage() {
     retry: false,
   })
   const [summaryOpen, setSummaryOpen] = useState(false)
-  const [compactError, setCompactError] = useState('')
+  const [compactError, setCompactError] = useState<Shown | null>(null)
   const compactNow = useMutation({
     mutationFn: (id: string) => api.compactConversation(id),
     onSuccess: (next, id) => {
-      setCompactError('')
+      setCompactError(null)
       if (next) queryClient.setQueryData(['summary', id], next)
     },
-    onError: (err) => setCompactError(err instanceof Error ? err.message : String(err)),
+    onError: (err) => setCompactError(shownError(err)),
   })
   const newChatFromSummary = useMutation({
     mutationFn: (id: string) => api.conversationFromSummary(id),
@@ -649,7 +650,7 @@ export function ChatPage() {
       void queryClient.invalidateQueries({ queryKey: ['conversations'] })
       setSelectedId(created.id)
     },
-    onError: (err) => setCompactError(err instanceof Error ? err.message : String(err)),
+    onError: (err) => setCompactError(shownError(err)),
   })
 
   const handleChatComplete = useCallback(

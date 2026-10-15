@@ -3,8 +3,8 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { api } from '@/lib/api'
 import type { SpecializedAIView } from '@/types/api'
-import { errorText } from '../display'
 import { formatDateTime } from '@/i18n/format'
+import { ShownError, shownError } from '@/components/ui/ShownError'
 
 export function TestStep({ view, onNext }: { view: SpecializedAIView; onNext: () => void }) {
   const { t } = useTranslation('train')
@@ -55,7 +55,7 @@ export function TestStep({ view, onNext }: { view: SpecializedAIView; onNext: ()
           <span className="text-sm font-medium text-ink">{t('test.prompts')}</span>
           <textarea className="field min-h-28 w-full text-sm" value={prompts} onChange={(e) => setPrompts(e.target.value)} />
         </label>
-        {(savePrompts.error || run.error) && <p className="text-sm text-danger">{errorText(savePrompts.error ?? run.error)}</p>}
+        {(savePrompts.error || run.error) && <ShownError {...shownError(savePrompts.error ?? run.error)} className="text-sm text-danger" />}
         <div className="flex flex-wrap gap-2">
           <button
             type="button"
@@ -81,13 +81,13 @@ export function TestStep({ view, onNext }: { view: SpecializedAIView; onNext: ()
             {latest.status === 'running' && <span className="status-chip bg-info/15 text-info">{t('test.running')}</span>}
             {latest.status === 'failed' && <span className="status-chip bg-danger/15 text-danger">{t('test.failed')}</span>}
           </div>
-          {latest.error && <p className="text-sm text-danger">{latest.error}</p>}
+          {latest.error && <ShownError error={latest.error} />}
           <ul className="space-y-3">
             {(latest.results ?? []).map((r, i) => (
               <li key={i} className="space-y-2">
                 <p className="text-sm font-medium text-ink">{r.prompt}</p>
                 {r.error ? (
-                  <p className="text-sm text-danger">{r.error}</p>
+                  <ShownError error={r.error} />
                 ) : (
                   <div className="grid gap-2 md:grid-cols-2">
                     <div className="rounded-lg bg-raised p-3">

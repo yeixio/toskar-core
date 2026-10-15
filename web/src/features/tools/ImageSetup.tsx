@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { formatSize } from '@/i18n/format'
 import { api, type MediaKind } from '@/lib/api'
 import type { ImageSetup } from '@/types/api'
+import { ShownError, shownError, type Shown } from '@/components/ui/ShownError'
 
 function gb(bytes: number): string {
   return formatSize(bytes, { base: 1000 })
@@ -103,7 +104,7 @@ function MediaSetupCard({ kind }: { kind: MediaKind }) {
   const selected = choice ?? (fits.find((m) => m.recommended) ?? fits[0])?.id
   const selectedModel = status.models.find((m) => m.id === selected)
   const failed = start.error ?? remove.error ?? switchBuild.error
-  const error = failed instanceof Error ? failed.message : job && !job.running ? job.error : undefined
+  const error: Shown | undefined = failed instanceof Error ? shownError(failed) : job && !job.running && job.error ? { error: job.error } : undefined
   const percent = job && job.total_bytes > 0 ? Math.round((job.done_bytes / job.total_bytes) * 100) : 0
 
   return (
@@ -268,7 +269,7 @@ function MediaSetupCard({ kind }: { kind: MediaKind }) {
                 </span>
               </label>
               <p className="text-ink-faint">{t('images.tokenHelp')}</p>
-              {saveToken.error instanceof Error ? <p className="text-danger">{saveToken.error.message}</p> : null}
+              {saveToken.error instanceof Error ? <ShownError {...shownError(saveToken.error)} className="text-danger" /> : null}
             </div>
           )}
           <label className="flex items-start gap-2 text-ink">
@@ -303,8 +304,8 @@ function MediaSetupCard({ kind }: { kind: MediaKind }) {
       ) : null}
 
       {startedOn ? <p className="text-xs text-ink-muted">{t('images.elsewhereStarted', { node: startedOn })}</p> : null}
-      {startThere.error instanceof Error ? <p className="text-xs text-danger">{startThere.error.message}</p> : null}
-      {error ? <p className="text-xs text-danger">{error}</p> : null}
+      {startThere.error instanceof Error ? <ShownError {...shownError(startThere.error)} className="text-xs text-danger" /> : null}
+      {error ? <ShownError {...error} className="text-xs text-danger" /> : null}
     </section>
   )
 }

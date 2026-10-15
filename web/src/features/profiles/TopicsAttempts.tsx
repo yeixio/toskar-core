@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { formatDate } from '@/i18n/format'
 import { api } from '@/lib/api'
 import type { TopicActivity, TopicWhere } from '@/types/api'
+import { ShownError, shownError, type Shown } from '@/components/ui/ShownError'
 
 const DAYS = 30
 
@@ -56,15 +57,15 @@ export function TopicsAttempts({ profileId }: { profileId: string }) {
   const queryClient = useQueryClient()
   const key = ['topic-attempts', profileId]
   const activity = useQuery({ queryKey: key, queryFn: () => api.getTopicAttempts(profileId, DAYS), retry: false })
-  const [error, setError] = useState('')
+  const [error, setError] = useState<Shown | null>(null)
   const mark = useMutation({
     mutationFn: (id: string) => api.markOnTopic(profileId, id),
     onSuccess: () => {
-      setError('')
+      setError(null)
       void queryClient.invalidateQueries({ queryKey: key })
       void queryClient.invalidateQueries({ queryKey: ['profiles'] })
     },
-    onError: (err) => setError(err instanceof Error ? err.message : String(err)),
+    onError: (err) => setError(shownError(err)),
   })
   const data = activity.data
   if (!data) return null
@@ -106,7 +107,7 @@ export function TopicsAttempts({ profileId }: { profileId: string }) {
               </li>
             ))}
           </ul>
-          {error ? <p className="text-sm text-danger">{error}</p> : null}
+          {error ? <ShownError {...error} className="text-sm text-danger" /> : null}
         </>
       )}
       <p className="text-xs text-ink-faint">{t('topics.attempts.privacy')}</p>

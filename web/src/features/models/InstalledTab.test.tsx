@@ -39,7 +39,7 @@ describe('InstalledTab start', () => {
   })
 
   it("shows why a start failed under that model", () => {
-    renderTab({ startError: { id: 'qwen3.5-35b', message: "llama.cpp couldn't be set up, so the model can't start (no network)." } })
+    renderTab({ startError: { id: 'qwen3.5-35b', error: "llama.cpp couldn't be set up, so the model can't start (no network)." } })
     expect(screen.getByRole('alert')).toHaveTextContent("llama.cpp couldn't be set up")
     expect(screen.getByRole('button', { name: 'Start' })).toBeEnabled()
   })

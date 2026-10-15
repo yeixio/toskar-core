@@ -15,8 +15,8 @@ import { SmallModelNote } from './SmallModelNote'
 import { CommunityScore, RateButton } from './ratings'
 import { formatPercent } from '@/i18n/format'
 import { rovingKeyDown, useMenu } from '@/lib/roving'
-import { ReportProblem } from '@/components/ui/ReportProblem'
 import { searchItems } from '@/lib/search'
+import { ShownError, type Shown } from '@/components/ui/ShownError'
 
 export function InstalledTab({
   models,
@@ -56,7 +56,7 @@ export function InstalledTab({
   /** The model starting now, which may first set up llama.cpp (#610). */
   startingId?: string | null
   /** Why the last start failed, for its model. */
-  startError?: { id: string; message: string } | null
+  startError?: (Shown & { id: string }) | null
 }) {
   const { t } = useTranslation('models')
   const [menuOpenId, setMenuOpenId] = useState<string | null>(null)
@@ -222,10 +222,7 @@ export function InstalledTab({
               </div>
             </div>
             {startError?.id === model.id ? (
-              <p className="mt-2 text-sm text-danger" role="alert">
-                {startError.message}
-                <ReportProblem error={startError.message} className="ms-2 text-xs text-ink-faint underline hover:text-ink" />
-              </p>
+              <ShownError {...startError} role="alert" className="mt-2 text-sm text-danger" />
             ) : null}
           </li>
         )

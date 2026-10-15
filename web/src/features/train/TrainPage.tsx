@@ -16,10 +16,11 @@ import { MaterialStep } from './steps/MaterialStep'
 import { PlanStep } from './steps/PlanStep'
 import { TestStep } from './steps/TestStep'
 import { TrainStep } from './steps/TrainStep'
-import { completedSteps, errorText, isTerminal, nextStep, stateLabel, stepLabel, steps, type StepID } from './display'
+import { completedSteps, isTerminal, nextStep, stateLabel, stepLabel, steps, type StepID } from './display'
 import { RealmKicker } from '@/components/ui/Realm'
 import { LoadError } from '@/components/ui/LoadError'
 import { Skeleton } from '@/components/ui/Skeleton'
+import { ShownError, shownError } from '@/components/ui/ShownError'
 
 export function TrainPage() {
   const { t } = useTranslation('train')
@@ -80,7 +81,7 @@ export function TrainPage() {
           </div>
         ) : null}
       </div>
-      {example.error && <p className="text-sm text-danger">{errorText(example.error)}</p>}
+      {example.error && <ShownError {...shownError(example.error)} className="text-sm text-danger" />}
 
       <div className="grid gap-4 xl:grid-cols-[16rem_minmax(0,1fr)]">
         <aside className="space-y-2">
@@ -189,7 +190,7 @@ function NewAIForm({ onCancel, onCreated }: { onCancel: () => void; onCreated: (
           placeholder={t('page.jobPlaceholder')}
         />
       </label>
-      {create.error && <p className="text-sm text-danger">{errorText(create.error)}</p>}
+      {create.error && <ShownError {...shownError(create.error)} className="text-sm text-danger" />}
       <div className="flex gap-2">
         <button type="submit" className="btn-primary" disabled={!name.trim() || create.isPending}>
           {create.isPending ? t('page.creating') : t('page.continue')}

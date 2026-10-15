@@ -10,6 +10,7 @@ import { preopenSignInWindow } from '@/lib/desktopBridge'
 import { errorText, openSignIn, quoteArg, SOURCES_KEY, specSummary, splitArgs, statusOf, toneClass } from './mcpShared'
 import { formatDate } from '@/i18n/format'
 import { LoadError } from '@/components/ui/LoadError'
+import { ShownError, shownError } from '@/components/ui/ShownError'
 
 /**
  * Tool sources: MCP servers the person added. Each card says in plain words
@@ -158,7 +159,7 @@ function SourceCard({ source }: { source: MCPServer }) {
           )}
         </div>
       )}
-      {m.error && <p className="text-xs text-danger">{m.error}</p>}
+      {m.error && <ShownError error={m.error} className="text-xs text-danger" />}
       {open && <SourceDetails source={source} m={m} onSignIn={startSignIn} />}
     </div>
   )
@@ -386,7 +387,7 @@ function Prompts({ source }: { source: MCPServer }) {
           </button>
         </form>
       )}
-      {use.isError && <p className="text-xs text-danger">{errorText(use.error)}</p>}
+      {use.isError && <ShownError {...shownError(use.error)} className="text-xs text-danger" />}
     </div>
   )
 }
@@ -491,7 +492,7 @@ function EditSource({ source, onDone }: { source: MCPServer; onDone: () => void 
           />
         </label>
       ))}
-      {save.isError && <p className="text-xs text-danger">{errorText(save.error)}</p>}
+      {save.isError && <ShownError {...shownError(save.error)} className="text-xs text-danger" />}
       <button type="submit" className="btn-primary px-3 py-1.5 text-xs" disabled={save.isPending}>
         {save.isPending ? t('sources.checking') : t('sources.saveAndCheck')}
       </button>

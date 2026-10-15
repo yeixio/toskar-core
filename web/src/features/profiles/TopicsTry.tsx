@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { api } from '@/lib/api'
 import type { TopicPolicy, TopicTrial } from '@/types/api'
+import { ShownError, shownOr, type Shown } from '@/components/ui/ShownError'
 
 // Each is profiles:topics.try.samples.<key>: made-up attempts to talk the
 // assistant off topic, and small talk it should still answer.
@@ -30,14 +31,14 @@ export function TopicsTry({ profileId, topics, examples }: { profileId: string; 
   const { t } = useTranslation('profiles')
   const [message, setMessage] = useState('')
   const [tried, setTried] = useState<Tried[]>([])
-  const [error, setError] = useState('')
+  const [error, setError] = useState<Shown | null>(null)
   const run = useMutation({
     mutationFn: (m: string) => api.tryTopics(profileId, m, topics),
     onSuccess: (result, m) => {
-      setError('')
+      setError(null)
       if (result) setTried((list) => [{ message: m, result, enforce: topics?.strictness === 'enforce' }, ...list].slice(0, 10))
     },
-    onError: (err) => setError(err instanceof Error ? err.message : t('topics.try.failed')),
+    onError: (err) => setError(shownOr(err, t('topics.try.failed'))),
   })
   if (!topics) return null
   const ask = (m: string) => {
@@ -78,7 +79,7 @@ export function TopicsTry({ profileId, topics, examples }: { profileId: string; 
           {run.isPending ? t('topics.try.trying') : t('topics.try.send')}
         </button>
       </form>
-      {error ? <p className="text-sm text-danger">{error}</p> : null}
+      {error ? <ShownError {...error} className="text-sm text-danger" /> : null}
       <ul className="space-y-2" aria-live="polite">
         {tried.map(({ message: m, result, enforce }, i) => (
           <li key={tried.length - i} className="space-y-1 rounded-lg bg-ink/5 p-3 text-sm">

@@ -6,6 +6,7 @@ import { formatBytes } from '@/lib/format'
 import type { SpecializedAIView, TrainingJob } from '@/types/api'
 import { elapsedSec, formatDuration, isTerminal, jobPercent, jobStages, stateLabel } from '../display'
 import { formatDecimal, formatGigabytes } from '@/i18n/format'
+import { ReportProblem } from '@/components/ui/ReportProblem'
 
 export function TrainStep({ view, onNext }: { view: SpecializedAIView; onNext: () => void }) {
   const { t } = useTranslation('train')
@@ -111,6 +112,7 @@ function JobCard({ job, now }: { job: TrainingJob; now: number }) {
       {job.state === 'failed' && (
         <p className="rounded-md bg-danger/10 p-3 text-sm text-danger">
           {t('train.failed', { error: job.error || t('train.failedDefault') })}
+          <ReportProblem error={job.error || 'training failed'} className="ms-2 text-xs text-ink-faint underline hover:text-ink" />
         </p>
       )}
       {job.state === 'cancelled' && (

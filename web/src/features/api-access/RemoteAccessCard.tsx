@@ -6,6 +6,7 @@ import { api, type ReachCheck, type ReachWay } from '@/lib/api'
 import { formatRelativeTime } from '@/i18n/format'
 import { Toggle } from './Toggle'
 import { remoteDetails } from './remoteDetails'
+import { ShownError, shownError, type Shown } from '@/components/ui/ShownError'
 
 /**
  * Access from anywhere (#456, docs/remote-access.md): a listener for the
@@ -22,7 +23,7 @@ export function RemoteAccessCard() {
   const enabled = settings.data?.remote_access_enabled ?? false
   const [port, setPort] = useState('')
   const [address, setAddress] = useState('')
-  const [error, setError] = useState('')
+  const [error, setError] = useState<Shown | null>(null)
   useEffect(() => {
     if (settings.data) {
       setPort(String(settings.data.remote_access_port ?? 7333))
@@ -32,11 +33,11 @@ export function RemoteAccessCard() {
   const save = useMutation({
     mutationFn: (patch: Parameters<typeof api.updateSettings>[0]) => api.updateSettings(patch),
     onSuccess: () => {
-      setError('')
+      setError(null)
       void queryClient.invalidateQueries({ queryKey: ['settings'] })
       void queryClient.invalidateQueries({ queryKey: ['remote-access'] })
     },
-    onError: (err) => setError(err instanceof Error ? err.message : String(err)),
+    onError: (err) => setError(shownError(err)),
   })
   const st = status.data
   const current = String(settings.data?.remote_access_port ?? 7333)
@@ -92,7 +93,7 @@ export function RemoteAccessCard() {
           {t('remote.save')}
         </button>
       </form>
-      {error ? <p className="text-sm text-danger">{error}</p> : null}
+      {error ? <ShownError {...error} className="text-sm text-danger" /> : null}
       <p className="text-xs text-ink-faint">{t('remote.notes', { port: current })}</p>
       <RelaySettings
         relay={settings.data?.remote_access_relay ?? ''}

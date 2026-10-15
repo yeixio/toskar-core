@@ -1,4 +1,4 @@
-import { errorText } from '@/lib/api'
+import { errorText } from '@/lib/errorText'
 import { ReportProblem } from './ReportProblem'
 
 /**
@@ -10,14 +10,16 @@ export function ShownError({
   code,
   details,
   className = 'text-sm text-danger',
+  role,
 }: {
   error: string
   code?: string
   details?: Record<string, unknown>
   className?: string
+  role?: 'alert' | 'status'
 }) {
   return (
-    <p className={className}>
+    <p className={className} role={role}>
       {errorText(code, error, details)}
       <ReportProblem error={error} code={code} className="ms-2 text-xs text-ink-faint underline hover:text-ink" />
     </p>
@@ -33,4 +35,12 @@ export function shownError(error: unknown): { error: string; code?: string; deta
     code: typeof e?.code === 'string' ? e.code : undefined,
     details: e?.details && typeof e.details === 'object' ? (e.details as Record<string, unknown>) : undefined,
   }
+}
+
+/** An error ShownError shows: its text, and its code and values when it has them. */
+export type Shown = ReturnType<typeof shownError>
+
+/** A failed request's error for ShownError, or fallback when it has no text. */
+export function shownOr(error: unknown, fallback: string): Shown {
+  return error instanceof Error && error.message ? shownError(error) : { error: fallback }
 }

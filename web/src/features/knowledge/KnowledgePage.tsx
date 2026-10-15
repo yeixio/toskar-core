@@ -5,7 +5,6 @@ import { HowItWorks, stepIcons } from '@/components/ui/HowItWorks'
 import { api } from '@/lib/api'
 import { isBinaryUpload, readUpload, UPLOAD_ACCEPT } from '@/lib/upload'
 import type { AIProfile, KnowledgeSource } from '@/types/api'
-import { errorText } from '@/features/train/display'
 import { RealmKicker } from '@/components/ui/Realm'
 import { crossLanguageNote, meaningNote, sourceLanguages } from './semantic'
 import { refreshNote, sourceBadge, sourceWhere } from './remote'
@@ -13,7 +12,7 @@ import { RemoteSourceForm } from './RemoteSourceForm'
 import { formatDateTime } from '@/i18n/format'
 import { LoadError } from '@/components/ui/LoadError'
 import { Skeleton } from '@/components/ui/Skeleton'
-import { ShownError } from '@/components/ui/ShownError'
+import { ShownError, shownError } from '@/components/ui/ShownError'
 
 
 type Mode = 'path' | 'text' | 'database' | 'api'
@@ -291,7 +290,7 @@ function SourceRow({
         </div>
       )}
       {(reindex.error || remove.error || open.error || save.error) && (
-        <p className="mt-2 text-xs text-danger">{errorText(reindex.error ?? remove.error ?? open.error ?? save.error)}</p>
+        <ShownError {...shownError(reindex.error ?? remove.error ?? open.error ?? save.error)} className="mt-2 text-xs text-danger" />
       )}
     </li>
   )
@@ -393,7 +392,7 @@ function AddSource({
             <input className="field w-full" value={name} onChange={(e) => setName(e.target.value)} />
           </label>
           {profilePicker}
-          {add.error && <p className="text-sm text-danger">{errorText(add.error)}</p>}
+          {add.error && <ShownError {...shownError(add.error)} className="text-sm text-danger" />}
           {add.data?.status === 'failed' && (
             <ShownError error={add.data.error ?? ''} code={add.data.error_code} details={add.data.error_details} />
           )}

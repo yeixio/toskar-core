@@ -4,7 +4,9 @@ import { api } from '@/lib/api'
 import { isDesktopShell, saveFromDaemon } from '@/lib/desktopBridge'
 import { formatBytes } from '@/lib/format'
 import type { SpecializedAIView } from '@/types/api'
-import { errorText, exportRevision } from '../display'
+import { exportRevision } from '../display'
+import { ShownError, shownError } from '@/components/ui/ShownError'
+import { ReportProblem } from '@/components/ui/ReportProblem'
 
 // ExportCard merges a revision into one GGUF file that other GGUF tools can
 // load without Yggdrasil.
@@ -39,7 +41,12 @@ export function ExportCard({ view }: { view: SpecializedAIView }) {
           {t('export.exporting')} {st.size_bytes ? t('export.upTo', { size: formatBytes(st.size_bytes) }) : ''}
         </p>
       )}
-      {st?.state === 'failed' && <p className="text-sm text-danger">{t('export.failed', { error: st.error })}</p>}
+      {st?.state === 'failed' && (
+        <p className="text-sm text-danger">
+          {t('export.failed', { error: st.error })}
+          <ReportProblem error={st.error || 'export failed'} className="ms-2 text-xs text-ink-faint underline hover:text-ink" />
+        </p>
+      )}
       {st?.state === 'ready' && (
         <div className="flex flex-wrap items-center gap-2 text-sm">
           <a
@@ -78,7 +85,7 @@ export function ExportCard({ view }: { view: SpecializedAIView }) {
           <pre className="log-panel mt-2 whitespace-pre-wrap">{st.instructions}</pre>
         </details>
       )}
-      {error && <p className="text-sm text-danger">{errorText(error)}</p>}
+      {error && <ShownError {...shownError(error)} className="text-sm text-danger" />}
     </div>
   )
 }

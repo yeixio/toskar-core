@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { api } from '@/lib/api'
 import type { EgressKind, EgressRecord } from '@/types/api'
 import { formatDate } from '@/i18n/format'
+import { ShownError, shownError } from '@/components/ui/ShownError'
 
 // What left, in order; the names are settings:whatLeft.kinds.<kind> in the catalog.
 const KINDS: EgressKind[] = ['web_search', 'web_page', 'places', 'paired_computer', 'external_server', 'connector', 'notification', 'community_ratings', 'update_check']
@@ -117,7 +118,7 @@ export function WhatLeft() {
       <p className="text-xs text-ink-faint">{t('whatLeft.footnote')}</p>
       {message && <p className="text-xs text-ink-muted">{message}</p>}
       {(retention.error || deleteRuns.error) && (
-        <p className="text-xs text-danger">{String((retention.error ?? deleteRuns.error) as Error)}</p>
+        <ShownError {...shownError(retention.error ?? deleteRuns.error)} className="text-xs text-danger" />
       )}
     </section>
   )
