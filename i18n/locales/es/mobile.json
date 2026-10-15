@@ -859,5 +859,25 @@
     "checkedDays_one": "Comprobado hace {{count}} día",
     "checkedDays_many": "Comprobado hace {{count}} días",
     "checkedDays_other": "Comprobado hace {{count}} días"
+  },
+  "phoneChat": {
+    "compact": {
+      "title": "Compactación automática",
+      "explain": "Los chats largos se compactan: los mensajes antiguos se envían al modelo como resumen y todos los mensajes siguen guardados en este dispositivo.",
+      "view": "Ver resumen",
+      "now": "Compactar ahora",
+      "compacting": "Compactando mensajes anteriores…",
+      "tooShort": "Este chat es demasiado corto para compactarlo.",
+      "divider": "Los mensajes anteriores se envían como resumen",
+      "summaryTitle": "Resumen de la conversación anterior",
+      "summaryBody_one": "Lo que recibe el modelo en lugar de {{count}} mensaje anterior. Todos los mensajes siguen guardados.",
+      "summaryBody_other": "Lo que recibe el modelo en lugar de los primeros {{count}} mensajes. Todos los mensajes siguen guardados.",
+      "summaryBody_many": "Lo que recibe el modelo en lugar de los primeros {{count}} mensajes. Todos los mensajes siguen guardados.",
+      "edited": "Corregiste este resumen; los siguientes conservan tus correcciones.",
+      "editHint": "Corrige lo que esté mal; los resúmenes siguientes conservan tus correcciones.",
+      "edit": "Editar",
+      "save": "Guardar",
+      "cancel": "Cancelar"
+    }
   }
 }

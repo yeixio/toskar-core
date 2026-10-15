@@ -549,7 +549,24 @@
       "couldNotLoad": "{{model}} could not be loaded. Reinstall it from Models, or pick another model.",
       "couldNotAnswer": "{{model}} could not answer this time. Try again, or pick another model."
     },
-    "currentSource": "Current conditions (wttr.in)"
+    "currentSource": "Current conditions (wttr.in)",
+    "compact": {
+      "title": "Auto-compact",
+      "explain": "Long chats are compacted: older messages are sent to the model as a summary, and every message is still saved on this device.",
+      "view": "View summary",
+      "now": "Compact now",
+      "compacting": "Compacting earlier messages…",
+      "tooShort": "This chat is too short to compact.",
+      "divider": "Earlier messages are sent as a summary",
+      "summaryTitle": "Summary of the earlier conversation",
+      "summaryBody_one": "What the model is told in place of the first {{count}} message. Every message is still saved.",
+      "summaryBody_other": "What the model is told in place of the first {{count}} messages. Every message is still saved.",
+      "edited": "You corrected this summary; later summaries keep your corrections.",
+      "editHint": "Fix anything wrong; later summaries keep your corrections.",
+      "edit": "Edit",
+      "save": "Save",
+      "cancel": "Cancel"
+    }
   },
   "memory": {
     "saved": "Got it. I'll remember: “{{memory}}”.",

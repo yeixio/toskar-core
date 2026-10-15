@@ -829,5 +829,24 @@
     "checkedMinutes_other": "{{count}} 分钟前检查过",
     "checkedHours_other": "{{count}} 小时前检查过",
     "checkedDays_other": "{{count}} 天前检查过"
+  },
+  "phoneChat": {
+    "compact": {
+      "title": "自动压缩",
+      "explain": "长对话会被压缩：较早的消息以摘要形式发送给模型，所有消息仍保存在此设备上。",
+      "view": "查看摘要",
+      "now": "立即压缩",
+      "compacting": "正在压缩较早的消息…",
+      "tooShort": "这个聊天太短，无法压缩。",
+      "divider": "较早的消息以摘要形式发送",
+      "summaryTitle": "较早对话的摘要",
+      "summaryBody_one": "模型在前 {{count}} 条消息处收到的内容。所有消息仍会保存。",
+      "summaryBody_other": "模型在前 {{count}} 条消息处收到的内容。所有消息仍会保存。",
+      "edited": "你已修改此摘要；之后的摘要会保留你的修改。",
+      "editHint": "修正错误之处；之后的摘要会保留你的修改。",
+      "edit": "编辑",
+      "save": "保存",
+      "cancel": "取消"
+    }
   }
 }

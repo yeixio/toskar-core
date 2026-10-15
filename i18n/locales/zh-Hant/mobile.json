@@ -829,5 +829,24 @@
     "checkedMinutes_other": "{{count}} 分鐘前檢查過",
     "checkedHours_other": "{{count}} 小時前檢查過",
     "checkedDays_other": "{{count}} 天前檢查過"
+  },
+  "phoneChat": {
+    "compact": {
+      "title": "自動壓縮",
+      "explain": "長對話會被壓縮：較早的訊息以摘要形式傳送給模型，所有訊息仍儲存在此裝置上。",
+      "view": "檢視摘要",
+      "now": "立即壓縮",
+      "compacting": "正在壓縮較早的訊息…",
+      "tooShort": "這個聊天太短，無法壓縮。",
+      "divider": "較早的訊息以摘要形式傳送",
+      "summaryTitle": "較早對話的摘要",
+      "summaryBody_one": "模型在前 {{count}} 則訊息處收到的內容。所有訊息仍會儲存。",
+      "summaryBody_other": "模型在前 {{count}} 則訊息處收到的內容。所有訊息仍會儲存。",
+      "edited": "你已修改此摘要；之後的摘要會保留你的修改。",
+      "editHint": "修正錯誤之處；之後的摘要會保留你的修改。",
+      "edit": "編輯",
+      "save": "儲存",
+      "cancel": "取消"
+    }
   }
 }

@@ -859,5 +859,25 @@
     "checkedDays_one": "Verificato {{count}} giorno fa",
     "checkedDays_many": "Verificato {{count}} giorni fa",
     "checkedDays_other": "Verificato {{count}} giorni fa"
+  },
+  "phoneChat": {
+    "compact": {
+      "title": "Compattazione automatica",
+      "explain": "Le chat lunghe vengono compattate: i messaggi più vecchi arrivano al modello come riassunto e ogni messaggio resta salvato su questo dispositivo.",
+      "view": "Vedi riassunto",
+      "now": "Compatta ora",
+      "compacting": "Compattazione dei messaggi precedenti…",
+      "tooShort": "Questa chat è troppo corta per essere compattata.",
+      "divider": "I messaggi precedenti vengono inviati come riassunto",
+      "summaryTitle": "Riassunto della conversazione precedente",
+      "summaryBody_one": "Ciò che il modello riceve al posto di {{count}} messaggio precedente. Ogni messaggio resta salvato.",
+      "summaryBody_other": "Ciò che il modello riceve al posto dei primi {{count}} messaggi. Ogni messaggio resta salvato.",
+      "summaryBody_many": "Ciò che il modello riceve al posto dei primi {{count}} messaggi. Ogni messaggio resta salvato.",
+      "edited": "Hai corretto questo riassunto; i successivi mantengono le tue correzioni.",
+      "editHint": "Correggi ciò che è sbagliato; i riassunti successivi mantengono le tue correzioni.",
+      "edit": "Modifica",
+      "save": "Salva",
+      "cancel": "Annulla"
+    }
   }
 }

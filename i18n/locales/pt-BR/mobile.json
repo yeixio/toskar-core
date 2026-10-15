@@ -859,5 +859,25 @@
     "checkedDays_one": "Verificado há {{count}} dia",
     "checkedDays_many": "Verificado há {{count}} dias",
     "checkedDays_other": "Verificado há {{count}} dias"
+  },
+  "phoneChat": {
+    "compact": {
+      "title": "Compactação automática",
+      "explain": "Conversas longas são compactadas: mensagens antigas vão para o modelo como resumo, e todas as mensagens continuam salvas neste dispositivo.",
+      "view": "Ver resumo",
+      "now": "Compactar agora",
+      "compacting": "Compactando mensagens anteriores…",
+      "tooShort": "Esta conversa é curta demais para compactar.",
+      "divider": "As mensagens anteriores são enviadas como resumo",
+      "summaryTitle": "Resumo da conversa anterior",
+      "summaryBody_one": "O que o modelo recebe no lugar de {{count}} mensagem anterior. Todas as mensagens continuam salvas.",
+      "summaryBody_other": "O que o modelo recebe no lugar das primeiras {{count}} mensagens. Todas as mensagens continuam salvas.",
+      "summaryBody_many": "O que o modelo recebe no lugar das primeiras {{count}} mensagens. Todas as mensagens continuam salvas.",
+      "edited": "Você corrigiu este resumo; os próximos mantêm suas correções.",
+      "editHint": "Corrija o que estiver errado; os próximos resumos mantêm suas correções.",
+      "edit": "Editar",
+      "save": "Salvar",
+      "cancel": "Cancelar"
+    }
   }
 }

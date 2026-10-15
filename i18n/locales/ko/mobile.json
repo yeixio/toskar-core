@@ -829,5 +829,24 @@
     "checkedMinutes_other": "{{count}}분 전에 확인함",
     "checkedHours_other": "{{count}}시간 전에 확인함",
     "checkedDays_other": "{{count}}일 전에 확인함"
+  },
+  "phoneChat": {
+    "compact": {
+      "title": "자동 압축",
+      "explain": "긴 채팅은 압축됩니다. 오래된 메시지는 요약으로 모델에 보내지고, 모든 메시지는 이 기기에 그대로 저장됩니다.",
+      "view": "요약 보기",
+      "now": "지금 압축",
+      "compacting": "이전 메시지를 압축하는 중…",
+      "tooShort": "이 채팅은 너무 짧아서 압축할 수 없습니다.",
+      "divider": "이전 메시지는 요약으로 보내집니다",
+      "summaryTitle": "이전 대화 요약",
+      "summaryBody_one": "처음 {{count}}개 메시지 대신 모델에 전달되는 내용입니다. 모든 메시지는 그대로 저장됩니다.",
+      "summaryBody_other": "처음 {{count}}개 메시지 대신 모델에 전달되는 내용입니다. 모든 메시지는 그대로 저장됩니다.",
+      "edited": "이 요약을 수정했습니다. 이후 요약도 수정 내용을 유지합니다.",
+      "editHint": "틀린 내용을 고치세요. 이후 요약도 수정 내용을 유지합니다.",
+      "edit": "편집",
+      "save": "저장",
+      "cancel": "취소"
+    }
   }
 }
