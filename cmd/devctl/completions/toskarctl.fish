@@ -54,3 +54,13 @@ complete -c toskarctl -n $ygg_edit -l disabled -d 'Create the automation paused'
 
 # yggctl, the name from before the rename, completes the same way.
 complete -c yggctl -w toskarctl
+complete -c toskarctl -n __fish_use_subcommand -a people -d 'Add, change, and remove people'
+complete -c toskarctl -n '__fish_seen_subcommand_from people; and not __fish_seen_subcommand_from list add show set link keys devices rm activity' -a 'list add show set link keys devices rm activity'
+complete -c toskarctl -n '__fish_seen_subcommand_from people' -l role -x -a 'admin member visitor' -d 'Role'
+complete -c toskarctl -n '__fish_seen_subcommand_from people' -l email -r -d 'Email address'
+complete -c toskarctl -n '__fish_seen_subcommand_from people' -l username -r -d 'The name they sign in with'
+complete -c toskarctl -n '__fish_seen_subcommand_from people' -l password-stdin -d 'Read the password from standard input'
+complete -c toskarctl -n '__fish_seen_subcommand_from people' -l must-change -d 'They change the password first'
+complete -c toskarctl -n '__fish_seen_subcommand_from people' -l transfer-to -r -d 'Who gets their data'
+complete -c toskarctl -n '__fish_seen_subcommand_from people' -l yes -d 'Remove without asking'
+complete -c toskarctl -n '__fish_seen_subcommand_from people' -l output -x -a 'text json' -d 'Output format'

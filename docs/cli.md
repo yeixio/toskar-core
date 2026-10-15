@@ -42,6 +42,7 @@ How it is started depends on how it was installed:
 | `toskarctl join --server … --token … --fingerprint … [--name …] [--wait 60s]` | Join this computer to the network that made the command, optionally renaming it, and waiting for Toskar to start. Exits 0 when joined or already joined, 1 when refused, 2 for a usage error |
 | `toskarctl network` | This computer's address, fingerprint, network, and paired computers |
 | `toskarctl leave` | Leave the network: tell each paired computer, then forget them all |
+| `toskarctl people …` | Add, change, and remove the people who use this Toskar (below) |
 | `toskarctl completion <bash\|zsh\|fish>` | Print a shell completion script |
 
 ### Automations
@@ -75,6 +76,31 @@ toskarctl automations delete AUTOMATION_ID
 | `--condition-op`, `--condition-value` | With `threshold`: `below` or `above`, and the amount |
 | `--tool` | A tool the automation may use unattended. Repeat it for more tools. Tools listed here were approved by you and run even if they change things. |
 | `--disabled` | Create the automation paused |
+
+### People
+
+```bash
+toskarctl people list [--role member] [--disabled true|false]
+toskarctl people add "Ana" --role member --email ana@example.com
+printf '%s\n' "$PASSWORD" | toskarctl people add "Ana" --username ana --password-stdin --must-change
+toskarctl people show ana
+toskarctl people set ana --role admin --email ana@work.example
+toskarctl people set ana --disable
+toskarctl people link ana
+toskarctl people keys ana [--revoke KEY_ID]
+toskarctl people devices ana [--revoke KEY_ID]
+toskarctl people rm ana --transfer-to Owner
+toskarctl people activity [ana]
+```
+
+A person is named by their ID, name, or username. When two people share a name, use the ID; the command lists them.
+
+- **Adding:** without a password, `add` prints a one-time link where they choose a username and password, as the People page does. With `--username` and `--password-stdin`, they can sign in at once. `--must-change` has them choose their own password first.
+- **Passwords** are read from standard input only, never from the command line, where they'd show in the process list and shell history. At a terminal, the password isn't shown as you type it, except on Windows.
+- **Removing:** `rm` asks you to type their name, unless you pass `--yes`. Their chats, memories, automations, and files are deleted, or given to `--transfer-to`. Their keys and devices stop working.
+- **Who may do what:** Admins manage Members and Visitors. The Owner also manages Admins, and nobody removes themselves or the Owner.
+- **Signing in:** on this computer, `toskarctl` acts as the Owner. From elsewhere, it needs an Admin's key in `TOSKAR_API_KEY`, with `TOSKAR_URL`.
+- **Output:** `--output json` prints what the API answered, for scripts. The command exits 1 when the API refuses and 2 for a usage mistake.
 
 ### MCP bridge
 

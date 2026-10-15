@@ -1130,6 +1130,11 @@ func (a *App) Start(ctx context.Context) error {
 	} else if _, err := auth.NewOIDC(settings); err != nil {
 		return err
 	}
+	// An Admin from the environment first, who counts as someone who can
+	// connect (#592).
+	if err := a.seedAdmin(ctx); err != nil {
+		return err
+	}
 	if err := a.requireKeyForRemoteBind(ctx); err != nil {
 		return err
 	}
