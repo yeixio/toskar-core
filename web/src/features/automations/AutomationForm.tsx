@@ -22,6 +22,7 @@ import {
   weekdayName,
 } from './parseRequest'
 import { IDEAS, buildIdea, ideaDefaults, ideaReady, type IdeaField, type IdeaId, type IdeaValues } from './ideas'
+import { ShownError } from '@/components/ui/ShownError'
 
 // The notify choices, in order; each is automations:form.notifyChoices.<mode> in the catalog.
 const NOTIFY_CHOICES: AutomationInput['notification']['mode'][] = ['condition', 'change', 'always', 'failure', 'none']
@@ -626,7 +627,9 @@ export function AutomationForm({ profiles, models, tools, others = [], initial, 
         <div className="rounded-lg bg-raised/50 p-3 text-sm">
           <p className="font-medium text-ink">{testing ? t('form.testing') : preview.error ? t('form.testFailed') : preview.would_notify ? t('form.wouldNotify') : t('form.wouldNotNotify')}</p>
           {resultProse(preview.result) && <p className="mt-2 whitespace-pre-wrap text-ink-muted">{resultProse(preview.result)}</p>}
-          {preview.error && <p className="mt-2 text-danger">{preview.error}</p>}
+          {preview.error && (
+            <ShownError error={preview.error} code={preview.error_code} details={preview.error_details} className="mt-2 text-danger" />
+          )}
         </div>
       )}
       {testing && !preview && <p className="text-sm text-ink-muted">{t('form.testing')}</p>}

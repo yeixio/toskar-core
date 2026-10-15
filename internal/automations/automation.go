@@ -152,6 +152,9 @@ type Automation struct {
 	ConsecutiveFailures int `json:"consecutive_failures"`
 	// LastError is the most recent failure, including one that is waiting to retry.
 	LastError string `json:"last_error,omitempty"`
+	// LastErrorCode and LastErrorDetails are its stable code and values (#588).
+	LastErrorCode    string         `json:"last_error_code,omitempty"`
+	LastErrorDetails map[string]any `json:"last_error_details,omitempty"`
 	// LastStatus and LastResult summarize the newest occurrence. List fills them.
 	LastStatus RunStatus `json:"last_status,omitempty"`
 	LastResult string    `json:"last_result,omitempty"`

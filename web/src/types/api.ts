@@ -1331,6 +1331,9 @@ export interface Task {
   status: TaskStatus
   result?: string
   error?: string
+  /** The error's stable code and values (#588). */
+  error_code?: string
+  error_details?: Record<string, unknown>
   created_at: string
 }
 
@@ -1406,6 +1409,9 @@ export interface Automation {
   last_run_at?: string
   consecutive_failures: number
   last_error?: string
+  /** The last error's stable code and values (#588). */
+  last_error_code?: string
+  last_error_details?: Record<string, unknown>
   last_status?: AutomationRunStatus
   last_result?: string
 }
@@ -1419,6 +1425,9 @@ export interface AutomationRun {
   finished_at?: string
   result?: string
   error?: string
+  /** The error's stable code and values (#588). */
+  error_code?: string
+  error_details?: Record<string, unknown>
   notification_sent: boolean
   model_id?: string
   node_id?: string
@@ -1459,6 +1468,9 @@ export interface AutomationDetail extends Automation {
 export interface AutomationPreview {
   result?: string
   error?: string
+  /** The error's stable code and values (#588). */
+  error_code?: string
+  error_details?: Record<string, unknown>
   model_id?: string
   node_id?: string
   would_notify: boolean
@@ -1530,6 +1542,9 @@ export interface KnowledgeSource {
   filename?: string
   status: 'ready' | 'failed' | 'indexing'
   error?: string
+  /** The error's stable code and values (#588). */
+  error_code?: string
+  error_details?: Record<string, unknown>
   chunk_count: number
   // Passages with a vector for semantic search, and the embedding model that
   // made them. Zero until an embedding model is installed.

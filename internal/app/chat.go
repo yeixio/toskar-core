@@ -402,7 +402,7 @@ func (a *App) RunChat(ctx context.Context, profileID, conversationID, message st
 			run.Strategy(routeReason)
 		}
 		runStatus, runErr := runlog.StatusFailed, error(nil)
-		a.Tasks.SetChatStatus(ctx, task.ID, contracts.TaskRunning, "")
+		a.Tasks.SetChatStatus(ctx, task.ID, contracts.TaskRunning, contracts.Failure{})
 		defer func() {
 			status := runStatus
 			if ctx.Err() != nil && status != runlog.StatusCompleted {
@@ -414,15 +414,15 @@ func (a *App) RunChat(ctx context.Context, profileID, conversationID, message st
 			// The turn's task ends with it, however it ends.
 			switch status {
 			case runlog.StatusCompleted:
-				a.Tasks.SetChatStatus(context.WithoutCancel(ctx), task.ID, contracts.TaskCompleted, "")
+				a.Tasks.SetChatStatus(context.WithoutCancel(ctx), task.ID, contracts.TaskCompleted, contracts.Failure{})
 			case runlog.StatusStopped:
-				a.Tasks.SetChatStatus(context.WithoutCancel(ctx), task.ID, contracts.TaskCancelled, "")
+				a.Tasks.SetChatStatus(context.WithoutCancel(ctx), task.ID, contracts.TaskCancelled, contracts.Failure{})
 			default:
-				msg := "The reply failed."
-				if runErr != nil {
-					msg = runErr.Error()
+				failed := runErr
+				if failed == nil {
+					failed = errors.New("The reply failed.") //nolint:staticcheck // ST1005: sentence shown in the UI
 				}
-				a.Tasks.SetChatStatus(context.WithoutCancel(ctx), task.ID, contracts.TaskFailed, msg)
+				a.Tasks.SetChatStatus(context.WithoutCancel(ctx), task.ID, contracts.TaskFailed, contracts.FailureOf(failed, "CHAT_FAILED"))
 			}
 		}()
 		// Chat comes first: automations, benchmarks, and training wait

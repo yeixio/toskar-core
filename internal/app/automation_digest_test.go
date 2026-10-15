@@ -10,6 +10,7 @@ import (
 	"github.com/yeixio/toskar-core/internal/automations"
 	"github.com/yeixio/toskar-core/internal/store"
 	"github.com/yeixio/toskar-core/internal/store/repositories"
+	"github.com/yeixio/toskar-core/pkg/contracts"
 )
 
 // The digest goes out once a day at its time, with every automation's
@@ -50,7 +51,7 @@ func TestAutomationDigest(t *testing.T) {
 			t.Fatal(err)
 		}
 		if failure != "" {
-			err = repo.FailRun(ctx, run.ID, failure, automations.Execution{}, at)
+			err = repo.FailRun(ctx, run.ID, contracts.Failure{Text: failure, Code: "AUTOMATION_FAILED"}, automations.Execution{}, at)
 		} else {
 			err = repo.CompleteRun(ctx, run.ID, automations.Execution{Text: text}, at)
 		}

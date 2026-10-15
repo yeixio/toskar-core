@@ -7201,6 +7201,12 @@ components:
           type: string
         error:
           type: string
+        error_code:
+          type: string
+          description: The error's stable code (#588, contract 1.36), with its values in error_details.
+        error_details:
+          type: object
+          additionalProperties: true
         chunk_count:
           type: integer
         embedded_count:
@@ -7508,6 +7514,12 @@ components:
           type: integer
         last_error:
           type: string
+        last_error_code:
+          type: string
+          description: The last error's stable code (#588, contract 1.36), with its values in last_error_details.
+        last_error_details:
+          type: object
+          additionalProperties: true
         last_status:
           type: string
         last_result:

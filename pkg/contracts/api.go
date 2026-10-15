@@ -1065,7 +1065,10 @@ type Task struct {
 	Status         TaskStatus `json:"status"`
 	Result         string     `json:"result,omitempty"`
 	Error          string     `json:"error,omitempty"`
-	CreatedAt      time.Time  `json:"created_at"`
+	// ErrorCode and ErrorDetails are Error's stable code and values (#588).
+	ErrorCode    string         `json:"error_code,omitempty"`
+	ErrorDetails map[string]any `json:"error_details,omitempty"`
+	CreatedAt    time.Time      `json:"created_at"`
 }
 
 // SettingsView is the user-visible settings payload.

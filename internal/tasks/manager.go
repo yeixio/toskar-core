@@ -3,6 +3,7 @@ package tasks
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"strings"
 	"sync"
@@ -105,21 +106,22 @@ func (m *Manager) Create(ctx context.Context, profileID, conversationID, prompt 
 // chat counted as active on the Performance page. It publishes no task
 // events: those raise a "task finished" notice, and a chat reply is its
 // own notice.
-func (m *Manager) SetChatStatus(ctx context.Context, taskID string, status contracts.TaskStatus, errMsg string) {
+func (m *Manager) SetChatStatus(ctx context.Context, taskID string, status contracts.TaskStatus, failure contracts.Failure) {
 	if status == contracts.TaskRunning || status == contracts.TaskPending {
 		_, _ = m.db.ExecContext(ctx, `UPDATE tasks SET status = ? WHERE id = ?`, status, taskID)
 		return
 	}
-	_, _ = m.db.ExecContext(ctx, `UPDATE tasks SET status = ?, error = ?, completed_at = ? WHERE id = ?`,
-		status, nullStr(errMsg), time.Now().UTC().Format(time.RFC3339Nano), taskID)
+	_, _ = m.db.ExecContext(ctx, `UPDATE tasks SET status = ?, error = ?, error_code = ?, error_details = ?, completed_at = ? WHERE id = ?`,
+		status, nullStr(failure.Text), failure.CodeColumn(), failure.DetailsColumn(), time.Now().UTC().Format(time.RFC3339Nano), taskID)
 }
 
 // SettleInterrupted ends tasks left pending or running by an earlier run of
 // the daemon, which can't finish them now, and chats from before
 // SetChatStatus, which never left pending. It reports how many it ended.
 func (m *Manager) SettleInterrupted(ctx context.Context) (int64, error) {
-	res, err := m.db.ExecContext(ctx, `UPDATE tasks SET status = ?, error = ?, completed_at = ? WHERE status IN (?, ?)`,
-		contracts.TaskFailed, "Toskar stopped before this finished.", time.Now().UTC().Format(time.RFC3339Nano),
+	interrupted := contracts.FailureOf(errors.New("Toskar stopped before this finished."), "TASK_INTERRUPTED") //nolint:staticcheck // ST1005: sentence shown in the UI
+	res, err := m.db.ExecContext(ctx, `UPDATE tasks SET status = ?, error = ?, error_code = ?, completed_at = ? WHERE status IN (?, ?)`,
+		contracts.TaskFailed, interrupted.Text, interrupted.CodeColumn(), time.Now().UTC().Format(time.RFC3339Nano),
 		contracts.TaskPending, contracts.TaskRunning)
 	if err != nil {
 		return 0, err
@@ -131,10 +133,11 @@ func (m *Manager) SettleInterrupted(ctx context.Context) (int64, error) {
 func (m *Manager) Get(ctx context.Context, id string) (contracts.Task, error) {
 	var t contracts.Task
 	var profileID, convID, created, completed sql.NullString
+	var details string
 	err := m.db.QueryRowContext(ctx, `
-		SELECT id, profile_id, conversation_id, prompt, status, COALESCE(result,''), COALESCE(error,''), created_at, completed_at
+		SELECT id, profile_id, conversation_id, prompt, status, COALESCE(result,''), COALESCE(error,''), COALESCE(error_code,''), COALESCE(error_details,''), created_at, completed_at
 		FROM tasks WHERE id = ?`, id).Scan(
-		&t.ID, &profileID, &convID, &t.Prompt, &t.Status, &t.Result, &t.Error, &created, &completed)
+		&t.ID, &profileID, &convID, &t.Prompt, &t.Status, &t.Result, &t.Error, &t.ErrorCode, &details, &created, &completed)
 	if err == sql.ErrNoRows {
 		return t, fmt.Errorf("task %q not found", id)
 	}
@@ -144,13 +147,14 @@ func (m *Manager) Get(ctx context.Context, id string) (contracts.Task, error) {
 	t.ProfileID = profileID.String
 	t.ConversationID = convID.String
 	t.CreatedAt = parseTime(created.String)
+	t.ErrorDetails = contracts.ParseErrorDetails(details)
 	return t, nil
 }
 
 // List returns recent tasks.
 func (m *Manager) List(ctx context.Context) ([]contracts.Task, error) {
 	rows, err := m.db.QueryContext(ctx, `
-		SELECT id, profile_id, conversation_id, prompt, status, COALESCE(result,''), COALESCE(error,''), created_at
+		SELECT id, profile_id, conversation_id, prompt, status, COALESCE(result,''), COALESCE(error,''), COALESCE(error_code,''), COALESCE(error_details,''), created_at
 		FROM tasks ORDER BY created_at DESC LIMIT 100`)
 	if err != nil {
 		return nil, err
@@ -160,9 +164,11 @@ func (m *Manager) List(ctx context.Context) ([]contracts.Task, error) {
 	for rows.Next() {
 		var t contracts.Task
 		var profileID, convID, created sql.NullString
-		if err := rows.Scan(&t.ID, &profileID, &convID, &t.Prompt, &t.Status, &t.Result, &t.Error, &created); err != nil {
+		var details string
+		if err := rows.Scan(&t.ID, &profileID, &convID, &t.Prompt, &t.Status, &t.Result, &t.Error, &t.ErrorCode, &details, &created); err != nil {
 			return nil, err
 		}
+		t.ErrorDetails = contracts.ParseErrorDetails(details)
 		t.ProfileID = profileID.String
 		t.ConversationID = convID.String
 		t.CreatedAt = parseTime(created.String)
@@ -223,9 +229,12 @@ func (m *Manager) runTask(ctx context.Context, task contracts.Task, profile prof
 
 func (m *Manager) failTask(ctx context.Context, taskID string, err error) {
 	now := time.Now().UTC()
-	_, _ = m.db.ExecContext(ctx, `UPDATE tasks SET status = ?, error = ?, completed_at = ? WHERE id = ?`,
-		contracts.TaskFailed, err.Error(), now.Format(time.RFC3339Nano), taskID)
-	m.bus.PublishFor(ctx, events.New(events.TaskFailed, map[string]any{"task_id": taskID, "error": err.Error()}))
+	failure := contracts.FailureOf(err, "TASK_FAILED")
+	_, _ = m.db.ExecContext(ctx, `UPDATE tasks SET status = ?, error = ?, error_code = ?, error_details = ?, completed_at = ? WHERE id = ?`,
+		contracts.TaskFailed, failure.Text, failure.CodeColumn(), failure.DetailsColumn(), now.Format(time.RFC3339Nano), taskID)
+	m.bus.PublishFor(ctx, events.New(events.TaskFailed, map[string]any{
+		"task_id": taskID, "error": failure.Text, "error_code": failure.Code, "error_details": failure.Details,
+	}))
 }
 
 func (m *Manager) recordStep(ctx context.Context, taskID string, idx int, evt pluginapi.OrchestrationEvent) {

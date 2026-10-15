@@ -241,5 +241,10 @@
   "ROUTE_NOT_FOUND": "Questa versione del servizio Toskar non conosce questa richiesta ({{route}}). Aggiorna l'app e il servizio alla stessa versione.",
   "METHOD_NOT_ALLOWED": "Il servizio Toskar non accetta questa richiesta ({{route}}). Aggiorna l'app e il servizio alla stessa versione.",
   "BAD_RESPONSE": "Il servizio Toskar ha inviato una risposta che l'app non riesce a leggere (HTTP {{status}}). Riprova; se succede ancora, segnalalo.",
-  "REPLY_INTERRUPTED": "La risposta si è interrotta prima della fine perché la connessione al servizio Toskar si è persa. Riprova."
+  "REPLY_INTERRUPTED": "La risposta si è interrotta prima della fine perché la connessione al servizio Toskar si è persa. Riprova.",
+  "AUTOMATION_FAILED": "{{detail}}",
+  "AUTOMATION_INTERRUPTED": "L'esecuzione non è terminata perché Toskar si è fermato mentre era in corso. Ripartirà al prossimo orario.",
+  "KNOWLEDGE_SYNC_FAILED": "{{detail}}",
+  "TASK_FAILED": "{{detail}}",
+  "TASK_INTERRUPTED": "Toskar si è fermato prima che finisse."
 }

@@ -15,6 +15,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/yeixio/toskar-core/internal/events"
+	"github.com/yeixio/toskar-core/pkg/contracts"
 )
 
 // Downloader handles resumable HTTP downloads with integrity verification.
@@ -250,9 +251,12 @@ func (d *Downloader) emitProgress(modelID string, downloaded, total uint64) {
 func (d *Downloader) fail(ctx context.Context, modelID, downloadID string, err error) error {
 	_, _ = d.db.ExecContext(ctx, `UPDATE downloads SET status = 'failed', error = ?, updated_at = datetime('now') WHERE model_id = ?`,
 		err.Error(), modelID)
+	failure := contracts.FailureOf(err, "INSTALL_FAILED")
 	d.bus.Publish(events.New(events.ModelDownloadFailed, map[string]any{
-		"model_id": modelID,
-		"error":    err.Error(),
+		"model_id":      modelID,
+		"error":         failure.Text,
+		"error_code":    failure.Code,
+		"error_details": failure.Details,
 	}))
 	return err
 }

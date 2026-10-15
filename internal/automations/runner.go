@@ -46,8 +46,8 @@ type Store interface {
 	RenewLease(ctx context.Context, runID string, now time.Time, lease time.Duration) error
 	CompleteRun(ctx context.Context, runID string, result Execution, finished time.Time) error
 	SetSavedFile(ctx context.Context, runID, path string) error
-	FailRun(ctx context.Context, runID string, message string, result Execution, finished time.Time) error
-	ScheduleRetry(ctx context.Context, runID, message string, result Execution, finished, retryAt time.Time) error
+	FailRun(ctx context.Context, runID string, failure contracts.Failure, result Execution, finished time.Time) error
+	ScheduleRetry(ctx context.Context, runID string, failure contracts.Failure, result Execution, finished, retryAt time.Time) error
 	AbandonExpired(ctx context.Context, now time.Time) ([]Run, error)
 	PreviousResult(ctx context.Context, automationID string, before time.Time) (prev Previous, ok bool, err error)
 	SetNotificationSent(ctx context.Context, runID string, sent bool) error
@@ -354,12 +354,12 @@ func (r *Runner) finish(ctx context.Context, automation Automation, run Run, che
 		}
 		if ClassifyFailure(execErr) == FailureTransient && run.Attempt < MaxAttempts {
 			retryAt := finished.Add(RetryDelay(run.Attempt))
-			if err := r.Store.ScheduleRetry(ctx, run.ID, execErr.Error(), result, finished, retryAt); err != nil {
+			if err := r.Store.ScheduleRetry(ctx, run.ID, contracts.FailureOf(execErr, "AUTOMATION_FAILED"), result, finished, retryAt); err != nil {
 				return err
 			}
 			return nil
 		}
-		if err := r.Store.FailRun(ctx, run.ID, execErr.Error(), result, finished); err != nil {
+		if err := r.Store.FailRun(ctx, run.ID, contracts.FailureOf(execErr, "AUTOMATION_FAILED"), result, finished); err != nil {
 			return err
 		}
 		updated, err := r.Store.Get(ctx, automation.ID)

@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { api } from '@/lib/api'
 import type { KnowledgeRemoteInput, KnowledgeSource } from '@/types/api'
 import { errorText } from '@/features/train/display'
+import { ShownError } from '@/components/ui/ShownError'
 
 type Driver = NonNullable<KnowledgeRemoteInput['driver']>
 
@@ -161,7 +162,7 @@ export function RemoteSourceForm({
       </label>
       {beforeConnect}
       {add.error && <p className="text-sm text-danger">{errorText(add.error)}</p>}
-      {add.data?.status === 'failed' && <p className="text-sm text-danger">{add.data.error}</p>}
+      {add.data?.status === 'failed' && <ShownError error={add.data.error ?? ''} code={add.data.error_code} details={add.data.error_details} />}
       <button type="button" className="btn-primary" disabled={add.isPending || !ready} onClick={() => add.mutate()}>
         {add.isPending ? t('remote.connecting') : t('remote.connect')}
       </button>

@@ -5,6 +5,7 @@ import { formatSize } from '@/i18n/format'
 import { api, type MediaKind } from '@/lib/api'
 import { subscribeEvents } from '@/lib/events'
 import type { ModelDownloadProgressPayload, SetupOffer } from '@/types/api'
+import { ShownError, shownError } from '@/components/ui/ShownError'
 
 function gb(bytes: number): string {
   return formatSize(bytes, { base: 1000 })
@@ -163,7 +164,7 @@ function VisionOfferCard({ offer, onContinue }: { offer: SetupOffer; onContinue:
   const queryClient = useQueryClient()
   const [started, setStarted] = useState(false)
   const [progress, setProgress] = useState<number | null>(null)
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<ReturnType<typeof shownError> | null>(null)
   const continued = useRef(false)
   // While its download runs, the list is checked too, in case the end
   // came before the events were followed.
@@ -180,12 +181,14 @@ function VisionOfferCard({ offer, onContinue }: { offer: SetupOffer; onContinue:
     if (!started) return
     return subscribeEvents({
       onEvent: (event) => {
-        const payload = event.payload as Partial<ModelDownloadProgressPayload> & { model_id?: string; error?: string } | undefined
+        const payload = event.payload as
+          | (Partial<ModelDownloadProgressPayload> & { model_id?: string; error?: string; error_code?: string; error_details?: Record<string, unknown> })
+          | undefined
         if (payload?.model_id !== offer.option) return
         if (event.type === 'model.download.progress') setProgress(Math.round(payload.percent ?? 0))
         if (event.type === 'model.download.failed') {
           setProgress(null)
-          setError(payload.error ?? t('send.downloadFailed'))
+          setError(payload.error ? { error: payload.error, code: payload.error_code, details: payload.error_details } : { error: t('send.downloadFailed') })
         }
         if (event.type === 'model.download.completed') void queryClient.invalidateQueries({ queryKey: ['models'] })
       },
@@ -233,7 +236,7 @@ function VisionOfferCard({ offer, onContinue }: { offer: SetupOffer; onContinue:
                 await api.installModel(offer.option)
                 setStarted(true)
               } catch (err) {
-                setError(err instanceof Error ? err.message : String(err))
+                setError(shownError(err))
               }
             }}
           >
@@ -241,7 +244,7 @@ function VisionOfferCard({ offer, onContinue }: { offer: SetupOffer; onContinue:
           </button>
         </div>
       )}
-      {error && !installed ? <p className="text-xs text-danger">{error}</p> : null}
+      {error && !installed ? <ShownError {...error} className="text-xs text-danger" /> : null}
     </div>
   )
 }

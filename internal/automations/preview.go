@@ -4,16 +4,21 @@ import (
 	"context"
 	"fmt"
 	"strings"
+
+	"github.com/yeixio/toskar-core/pkg/contracts"
 )
 
 // Preview is one unsaved run of a draft automation.
 type Preview struct {
-	Result      string `json:"result,omitempty"`
-	Error       string `json:"error,omitempty"`
-	ModelID     string `json:"model_id,omitempty"`
-	NodeID      string `json:"node_id,omitempty"`
-	WouldNotify bool   `json:"would_notify"`
-	Reason      string `json:"reason"`
+	Result string `json:"result,omitempty"`
+	Error  string `json:"error,omitempty"`
+	// ErrorCode and ErrorDetails are Error's stable code and values (#588).
+	ErrorCode    string         `json:"error_code,omitempty"`
+	ErrorDetails map[string]any `json:"error_details,omitempty"`
+	ModelID      string         `json:"model_id,omitempty"`
+	NodeID       string         `json:"node_id,omitempty"`
+	WouldNotify  bool           `json:"would_notify"`
+	Reason       string         `json:"reason"`
 }
 
 // Preview runs the draft once and reports whether its notification rule would match.
@@ -62,7 +67,8 @@ func (r *Runner) Preview(ctx context.Context, in CreateInput) (Preview, error) {
 		Reason:      decision.Reason,
 	}
 	if execErr != nil {
-		out.Error = execErr.Error()
+		failure := contracts.FailureOf(execErr, "AUTOMATION_FAILED")
+		out.Error, out.ErrorCode, out.ErrorDetails = failure.Text, failure.Code, failure.Details
 		out.WouldNotify = false
 		if out.Reason == "" {
 			out.Reason = "the run did not finish"

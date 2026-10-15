@@ -209,8 +209,8 @@ func TestAPISourceKeepsItsTokenSecret(t *testing.T) {
 	}
 	src, _ = s.Get(ctx, src.ID)
 	if src.Status != StatusFailed || strings.Contains(src.Error, "s3cret") || !strings.Contains(src.Error, "401") ||
-		!strings.Contains(src.Error, "last successful fetch") {
-		t.Fatalf("error = %q", src.Error)
+		!strings.Contains(src.Error, "last successful fetch") || src.ErrorCode == "" {
+		t.Fatalf("error = %q, code %q", src.Error, src.ErrorCode)
 	}
 	hits, _ := s.Search(ctx, SearchInput{Query: "MP-22545 price", SourceIDs: []string{src.ID}})
 	if len(hits) == 0 || !strings.Contains(hits[0].Body, "189.99") {

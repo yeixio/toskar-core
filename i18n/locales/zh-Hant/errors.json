@@ -241,5 +241,10 @@
   "ROUTE_NOT_FOUND": "此版本的 Toskar 服務不認得這個請求（{{route}}）。請把應用程式和服務更新到同一版本。",
   "METHOD_NOT_ALLOWED": "Toskar 服務不接受這個請求（{{route}}）。請把應用程式和服務更新到同一版本。",
   "BAD_RESPONSE": "Toskar 服務傳來了應用程式無法讀取的回應（HTTP {{status}}）。請重試；如果反覆出現，請回報。",
-  "REPLY_INTERRUPTED": "與 Toskar 服務的連線中斷，回覆在完成前停止了。請重試。"
+  "REPLY_INTERRUPTED": "與 Toskar 服務的連線中斷，回覆在完成前停止了。請重試。",
+  "AUTOMATION_FAILED": "{{detail}}",
+  "AUTOMATION_INTERRUPTED": "執行期間 Toskar 停止了，所以這次執行沒有完成。它會在下一次的時間再次執行。",
+  "KNOWLEDGE_SYNC_FAILED": "{{detail}}",
+  "TASK_FAILED": "{{detail}}",
+  "TASK_INTERRUPTED": "Toskar 在此完成前停止了。"
 }

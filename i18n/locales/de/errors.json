@@ -241,5 +241,10 @@
   "ROUTE_NOT_FOUND": "Diese Version des Toskar-Dienstes kennt diese Anfrage nicht ({{route}}). Bringe App und Dienst auf dieselbe Version.",
   "METHOD_NOT_ALLOWED": "Der Toskar-Dienst nimmt diese Anfrage nicht an ({{route}}). Bringe App und Dienst auf dieselbe Version.",
   "BAD_RESPONSE": "Der Toskar-Dienst hat eine Antwort gesendet, die die App nicht lesen kann (HTTP {{status}}). Versuche es erneut; wenn es wieder passiert, melde es.",
-  "REPLY_INTERRUPTED": "Die Antwort brach ab, weil die Verbindung zum Toskar-Dienst verloren ging. Versuche es erneut."
+  "REPLY_INTERRUPTED": "Die Antwort brach ab, weil die Verbindung zum Toskar-Dienst verloren ging. Versuche es erneut.",
+  "AUTOMATION_FAILED": "{{detail}}",
+  "AUTOMATION_INTERRUPTED": "Der Lauf wurde nicht beendet, weil Toskar währenddessen gestoppt wurde. Er läuft zur nächsten Zeit wieder.",
+  "KNOWLEDGE_SYNC_FAILED": "{{detail}}",
+  "TASK_FAILED": "{{detail}}",
+  "TASK_INTERRUPTED": "Toskar wurde gestoppt, bevor dies fertig war."
 }

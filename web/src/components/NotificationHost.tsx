@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import i18n from '@/i18n'
-import { api } from '@/lib/api'
+import { api, errorText } from '@/lib/api'
 import { subscribeEvents } from '@/lib/events'
 
 type RuntimeNotify = {
@@ -95,9 +95,10 @@ export function NotificationHost() {
           void sendNotice(i18n.t('notifications:desktop.taskFinished'), i18n.t('notifications:desktop.taskFinishedBody'))
         }
         if (notifyTask && event.type === 'task.failed') {
-          const msg =
-            (event.payload?.error as string | undefined) ||
-            i18n.t('notifications:desktop.taskFailedBody')
+          const failed = event.payload as { error?: string; error_code?: string; error_details?: Record<string, unknown> } | undefined
+          const msg = failed?.error
+            ? errorText(failed.error_code, failed.error, failed.error_details)
+            : i18n.t('notifications:desktop.taskFailedBody')
           void sendNotice(i18n.t('notifications:desktop.taskFailed'), msg)
         }
         if (notifyPeer && event.type === 'node.offline') {

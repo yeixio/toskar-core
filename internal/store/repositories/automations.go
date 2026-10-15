@@ -11,6 +11,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/yeixio/toskar-core/internal/auth"
 	"github.com/yeixio/toskar-core/internal/automations"
+	"github.com/yeixio/toskar-core/pkg/contracts"
 )
 
 // AutomationRepo persists scheduled prompts.
@@ -26,7 +27,7 @@ const automationSelect = `
 	SELECT id, name, enabled, schedule_json, time_zone, prompt,
 		COALESCE(profile_id, ''), COALESCE(model_id, ''), tools_json, notification_json,
 		created_at, updated_at, next_run_at, last_run_at,
-		consecutive_failures, COALESCE(last_error, ''), COALESCE(response_language, ''),
+		consecutive_failures, COALESCE(last_error, ''), COALESCE(last_error_code, ''), COALESCE(last_error_details, ''), COALESCE(response_language, ''),
 		COALESCE(conversation_id, ''), COALESCE(draft_id, ''), COALESCE(save_folder, ''),
 		COALESCE(trigger_json, ''), COALESCE(watch_state, ''), last_checked_at, COALESCE(hook_hash, ''), person_id
 	FROM automations`
@@ -278,12 +279,12 @@ func (r *AutomationRepo) insert(ctx context.Context, a automations.Automation) e
 		INSERT INTO automations (
 			id, name, enabled, schedule_json, time_zone, prompt, profile_id, model_id,
 			tools_json, notification_json, created_at, updated_at, next_run_at, last_run_at,
-			consecutive_failures, last_error, response_language, conversation_id, draft_id, save_folder,
+			consecutive_failures, last_error, last_error_code, last_error_details, response_language, conversation_id, draft_id, save_folder,
 			trigger_json, watch_state, last_checked_at, person_id
-		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 		a.ID, a.Name, boolInt(a.Enabled), sched, a.Schedule.TimeZone, a.Prompt, nullIfEmpty(a.ProfileID), nullIfEmpty(a.ModelID),
 		tools, note, formatTime(a.CreatedAt), formatTime(a.UpdatedAt), formatTimePtr(a.NextRunAt), formatTimePtr(a.LastRunAt),
-		a.ConsecutiveFailures, nullIfEmpty(a.LastError), nullIfEmpty(a.ResponseLanguage),
+		a.ConsecutiveFailures, nullIfEmpty(a.LastError), lastFailure(a).CodeColumn(), lastFailure(a).DetailsColumn(), nullIfEmpty(a.ResponseLanguage),
 		nullIfEmpty(a.ConversationID), nullIfEmpty(a.DraftID), nullIfEmpty(a.SaveFolder),
 		triggerJSON(a.Trigger), nullIfEmpty(string(a.WatchState)), formatTimePtr(a.LastCheckedAt), a.PersonID)
 	return err
@@ -306,12 +307,12 @@ func updateAutomation(ctx context.Context, db execer, a automations.Automation) 
 		UPDATE automations SET
 			name = ?, enabled = ?, schedule_json = ?, time_zone = ?, prompt = ?, profile_id = ?, model_id = ?,
 			tools_json = ?, notification_json = ?, updated_at = ?, next_run_at = ?, last_run_at = ?,
-			consecutive_failures = ?, last_error = ?, response_language = ?, save_folder = ?,
+			consecutive_failures = ?, last_error = ?, last_error_code = ?, last_error_details = ?, response_language = ?, save_folder = ?,
 			trigger_json = ?, watch_state = ?, last_checked_at = ?, hook_hash = ?
 		WHERE id = ?`,
 		a.Name, boolInt(a.Enabled), sched, a.Schedule.TimeZone, a.Prompt, nullIfEmpty(a.ProfileID), nullIfEmpty(a.ModelID),
 		tools, note, formatTime(a.UpdatedAt), formatTimePtr(a.NextRunAt), formatTimePtr(a.LastRunAt),
-		a.ConsecutiveFailures, nullIfEmpty(a.LastError), nullIfEmpty(a.ResponseLanguage), nullIfEmpty(a.SaveFolder),
+		a.ConsecutiveFailures, nullIfEmpty(a.LastError), lastFailure(a).CodeColumn(), lastFailure(a).DetailsColumn(), nullIfEmpty(a.ResponseLanguage), nullIfEmpty(a.SaveFolder),
 		triggerJSON(a.Trigger), nullIfEmpty(string(a.WatchState)), formatTimePtr(a.LastCheckedAt), nullIfEmpty(a.HookHash), a.ID)
 	if err != nil {
 		return err
@@ -389,14 +390,15 @@ func scanAutomation(s automationScanner) (automations.Automation, error) {
 	var enabled int
 	var sched, zone, tools, note, created, updated string
 	var next, last, checked sql.NullString
-	var trigger, watchState string
+	var trigger, watchState, lastErrorDetails string
 	if err := s.Scan(
 		&a.ID, &a.Name, &enabled, &sched, &zone, &a.Prompt, &a.ProfileID, &a.ModelID, &tools, &note,
-		&created, &updated, &next, &last, &a.ConsecutiveFailures, &a.LastError, &a.ResponseLanguage,
+		&created, &updated, &next, &last, &a.ConsecutiveFailures, &a.LastError, &a.LastErrorCode, &lastErrorDetails, &a.ResponseLanguage,
 		&a.ConversationID, &a.DraftID, &a.SaveFolder, &trigger, &watchState, &checked, &a.HookHash, &a.PersonID,
 	); err != nil {
 		return automations.Automation{}, err
 	}
+	a.LastErrorDetails = contracts.ParseErrorDetails(lastErrorDetails)
 	if err := json.Unmarshal([]byte(sched), &a.Schedule); err != nil {
 		return automations.Automation{}, fmt.Errorf("schedule: %w", err)
 	}
@@ -587,4 +589,9 @@ func boolInt(v bool) int {
 		return 1
 	}
 	return 0
+}
+
+// lastFailure is a's most recent failure, for its columns.
+func lastFailure(a automations.Automation) contracts.Failure {
+	return contracts.Failure{Text: a.LastError, Code: a.LastErrorCode, Details: a.LastErrorDetails}
 }

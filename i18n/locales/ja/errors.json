@@ -241,5 +241,10 @@
   "ROUTE_NOT_FOUND": "このバージョンの Toskar サービスはこのリクエストに対応していません（{{route}}）。アプリとサービスを同じバージョンにしてください。",
   "METHOD_NOT_ALLOWED": "Toskar サービスはこのリクエストを受け付けません（{{route}}）。アプリとサービスを同じバージョンにしてください。",
   "BAD_RESPONSE": "Toskar サービスからアプリが読めない応答が届きました（HTTP {{status}}）。もう一度お試しください。繰り返し起きる場合は報告してください。",
-  "REPLY_INTERRUPTED": "Toskar サービスとの接続が切れたため、返答が途中で止まりました。もう一度お試しください。"
+  "REPLY_INTERRUPTED": "Toskar サービスとの接続が切れたため、返答が途中で止まりました。もう一度お試しください。",
+  "AUTOMATION_FAILED": "{{detail}}",
+  "AUTOMATION_INTERRUPTED": "実行中に Toskar が停止したため、この実行は完了しませんでした。次の予定時刻にもう一度実行されます。",
+  "KNOWLEDGE_SYNC_FAILED": "{{detail}}",
+  "TASK_FAILED": "{{detail}}",
+  "TASK_INTERRUPTED": "完了する前に Toskar が停止しました。"
 }

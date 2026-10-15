@@ -16,7 +16,7 @@ import {
 } from '@/lib/profilePresets'
 import { useUIStore } from '@/stores/uiStore'
 import type { ModelDownloadProgressPayload, Purpose, Recommendation } from '@/types/api'
-import { ReportProblem } from '@/components/ui/ReportProblem'
+import { ShownError, shownError } from '@/components/ui/ShownError'
 import { formatPercent } from '@/i18n/format'
 
 type OnboardingStep = 'setup' | 'recommend' | 'installing' | 'ready'
@@ -37,7 +37,7 @@ export function OnboardingPage() {
   const [step, setStep] = useState<OnboardingStep>('setup')
   const [selectedPurpose, setSelectedPurpose] = useState<Purpose>('general')
   const [recommendation, setRecommendation] = useState<Recommendation | null>(null)
-  const [installError, setInstallError] = useState<string | null>(null)
+  const [installError, setInstallError] = useState<ReturnType<typeof shownError> | null>(null)
   const [phase, setPhase] = useState<InstallPhase>('runtime')
   const [phaseDetail, setPhaseDetail] = useState('')
   const [downloadProgress, setDownloadProgress] = useState<Record<string, number>>({})
@@ -58,7 +58,7 @@ export function OnboardingPage() {
       }
     },
     onError: (error: Error) => {
-      setInstallError(error.message || t('recommendFailed'))
+      setInstallError(error.message ? shownError(error) : { error: t('recommendFailed') })
     },
   })
 
@@ -86,8 +86,10 @@ export function OnboardingPage() {
           }
         }
         if (event.type === 'model.download.failed') {
-          const message = (event.payload?.error as string) || t('install.downloadFailed')
-          setInstallError(message)
+          const payload = event.payload as { error?: string; error_code?: string; error_details?: Record<string, unknown> } | undefined
+          setInstallError(
+            payload?.error ? { error: payload.error, code: payload.error_code, details: payload.error_details } : { error: t('install.downloadFailed') },
+          )
         }
       },
     })
@@ -135,7 +137,7 @@ export function OnboardingPage() {
       setStep('ready')
     },
     onError: (error: Error) => {
-      setInstallError(error.message || t('install.failed'))
+      setInstallError(error.message ? shownError(error) : { error: t('install.failed') })
       setStep('recommend')
     },
   })
@@ -293,12 +295,7 @@ export function OnboardingPage() {
             </div>
           </section>
 
-          {installError && (
-            <p className="mb-4 rounded-lg bg-danger/10 px-4 py-3 text-sm text-danger">
-              {installError}
-              <ReportProblem error={installError} className="ms-2 text-xs text-ink-faint underline hover:text-ink" />
-            </p>
-          )}
+          {installError && <ShownError {...installError} className="mb-4 rounded-lg bg-danger/10 px-4 py-3 text-sm text-danger" />}
 
           <div className="flex justify-center gap-3">
             <button
@@ -372,12 +369,7 @@ export function OnboardingPage() {
             </dl>
           </section>
 
-          {installError && (
-            <p className="mb-4 rounded-lg bg-danger/10 px-4 py-3 text-sm text-danger">
-              {installError}
-              <ReportProblem error={installError} className="ms-2 text-xs text-ink-faint underline hover:text-ink" />
-            </p>
-          )}
+          {installError && <ShownError {...installError} className="mb-4 rounded-lg bg-danger/10 px-4 py-3 text-sm text-danger" />}
 
           <div className="flex flex-wrap justify-center gap-3">
             <button

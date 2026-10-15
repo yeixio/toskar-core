@@ -9,6 +9,7 @@ import (
 	"github.com/yeixio/toskar-core/internal/automations"
 	"github.com/yeixio/toskar-core/internal/store"
 	"github.com/yeixio/toskar-core/internal/store/repositories"
+	"github.com/yeixio/toskar-core/pkg/contracts"
 )
 
 func TestAutomationHistory(t *testing.T) {
@@ -79,7 +80,7 @@ func TestAutomationHistory(t *testing.T) {
 			t.Fatal(err)
 		}
 		if fail != "" {
-			if err := repo.FailRun(ctx, run.ID, fail, result, finished); err != nil {
+			if err := repo.FailRun(ctx, run.ID, contracts.Failure{Text: fail, Code: "AUTOMATION_FAILED"}, result, finished); err != nil {
 				t.Fatal(err)
 			}
 		} else if err := repo.CompleteRun(ctx, run.ID, result, finished); err != nil {

@@ -13,6 +13,7 @@ import (
 	"github.com/yeixio/toskar-core/internal/gjallarhorn"
 	"github.com/yeixio/toskar-core/internal/store"
 	"github.com/yeixio/toskar-core/internal/store/repositories"
+	"github.com/yeixio/toskar-core/pkg/contracts"
 )
 
 func TestAutomationNotifierHonorsTaskSetting(t *testing.T) {
@@ -233,7 +234,7 @@ func TestContinueAutomationRunInChat(t *testing.T) {
 			t.Fatal(err)
 		}
 		if fail {
-			err = repo.FailRun(ctx, run.ID, "model failed", automations.Execution{}, at)
+			err = repo.FailRun(ctx, run.ID, contracts.Failure{Text: "model failed", Code: "AUTOMATION_FAILED"}, automations.Execution{}, at)
 		} else {
 			err = repo.CompleteRun(ctx, run.ID, automations.Execution{Text: "Three stories today.\n{\"significant\": true}"}, at)
 		}

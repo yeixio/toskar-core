@@ -69,13 +69,20 @@ func TestSettleInterrupted(t *testing.T) {
 	ctx := context.Background()
 	stuck, _ := a.Tasks.Create(ctx, "", "", "an old chat")
 	done, _ := a.Tasks.Create(ctx, "", "", "a finished chat")
-	a.Tasks.SetChatStatus(ctx, done.ID, contracts.TaskCompleted, "")
+	a.Tasks.SetChatStatus(ctx, done.ID, contracts.TaskCompleted, contracts.Failure{})
 	if n, err := a.Tasks.SettleInterrupted(ctx); err != nil || n != 1 {
 		t.Fatalf("settled %d, %v", n, err)
 	}
 	got, _ := a.Tasks.Get(ctx, stuck.ID)
-	if got.Status != contracts.TaskFailed {
+	if got.Status != contracts.TaskFailed || got.ErrorCode != "TASK_INTERRUPTED" {
 		t.Errorf("stuck task: %+v", got)
+	}
+	// A failed chat keeps its error's code and values (#588).
+	failed, _ := a.Tasks.Create(ctx, "", "", "a chat that failed")
+	a.Tasks.SetChatStatus(ctx, failed.ID, contracts.TaskFailed,
+		contracts.Failure{Text: "out of memory", Code: "OUT_OF_MEMORY", Details: map[string]any{"model_id": "qwen3"}})
+	if got, _ := a.Tasks.Get(ctx, failed.ID); got.ErrorCode != "OUT_OF_MEMORY" || got.ErrorDetails["model_id"] != "qwen3" {
+		t.Errorf("failed task: %+v", got)
 	}
 	if got, _ := a.Tasks.Get(ctx, done.ID); got.Status != contracts.TaskCompleted {
 		t.Errorf("finished task changed: %+v", got)

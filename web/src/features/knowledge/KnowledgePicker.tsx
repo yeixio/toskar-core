@@ -4,6 +4,7 @@ import { Trans, useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { api } from '@/lib/api'
 import { errorText } from '@/features/train/display'
+import { ShownError } from '@/components/ui/ShownError'
 
 /**
  * Chooses which Mimir sources a profile or specialized AI searches. It can
@@ -95,7 +96,9 @@ export function KnowledgePicker({
         </button>
       </form>
       {connect.error && <p className="text-xs text-danger">{errorText(connect.error)}</p>}
-      {connect.data?.status === 'failed' && <p className="text-xs text-danger">{connect.data.error}</p>}
+      {connect.data?.status === 'failed' && (
+        <ShownError error={connect.data.error ?? ''} code={connect.data.error_code} details={connect.data.error_details} className="text-xs text-danger" />
+      )}
       <p className="text-xs text-ink-faint">
         <Trans t={t} i18nKey="picker.manage" components={{ go: <Link to="/knowledge" className="underline" /> }} />
       </p>

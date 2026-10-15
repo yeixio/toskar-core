@@ -13,6 +13,7 @@ import { RemoteSourceForm } from './RemoteSourceForm'
 import { formatDateTime } from '@/i18n/format'
 import { LoadError } from '@/components/ui/LoadError'
 import { Skeleton } from '@/components/ui/Skeleton'
+import { ShownError } from '@/components/ui/ShownError'
 
 
 type Mode = 'path' | 'text' | 'database' | 'api'
@@ -227,7 +228,9 @@ function SourceRow({
           {refreshNote(source) && <p className="mt-0.5 text-xs text-ink-faint">{refreshNote(source)}</p>}
           {meaningNote(source) && <p className="mt-0.5 text-xs text-ink-faint">{meaningNote(source)}</p>}
           {crossNote && <p className="mt-0.5 text-xs text-ink-faint">{crossNote}</p>}
-          {source.error && <p className="mt-1 text-xs text-danger">{source.error}</p>}
+          {source.error && (
+            <ShownError error={source.error} code={source.error_code} details={source.error_details} className="mt-1 text-xs text-danger" />
+          )}
           {usedBy.length > 0 ? (
             <p className="mt-2 flex items-center gap-1.5 text-xs text-ink-muted">
               <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-success" aria-hidden />
@@ -391,7 +394,9 @@ function AddSource({
           </label>
           {profilePicker}
           {add.error && <p className="text-sm text-danger">{errorText(add.error)}</p>}
-          {add.data?.status === 'failed' && <p className="text-sm text-danger">{add.data.error}</p>}
+          {add.data?.status === 'failed' && (
+            <ShownError error={add.data.error ?? ''} code={add.data.error_code} details={add.data.error_details} />
+          )}
           <button
             type="button"
             className="btn-primary"

@@ -46,14 +46,17 @@ var ErrNotFound = contracts.NewError("KNOWLEDGE_SOURCE_NOT_FOUND", nil, errors.N
 
 // Source is one connected knowledge source.
 type Source struct {
-	ID         string `json:"id"`
-	Name       string `json:"name"`
-	Kind       Kind   `json:"kind"`
-	Path       string `json:"path,omitempty"`
-	Filename   string `json:"filename,omitempty"`
-	Status     string `json:"status"`
-	Error      string `json:"error,omitempty"`
-	ChunkCount int    `json:"chunk_count"`
+	ID       string `json:"id"`
+	Name     string `json:"name"`
+	Kind     Kind   `json:"kind"`
+	Path     string `json:"path,omitempty"`
+	Filename string `json:"filename,omitempty"`
+	Status   string `json:"status"`
+	Error    string `json:"error,omitempty"`
+	// ErrorCode and ErrorDetails are Error's stable code and values (#588).
+	ErrorCode    string         `json:"error_code,omitempty"`
+	ErrorDetails map[string]any `json:"error_details,omitempty"`
+	ChunkCount   int            `json:"chunk_count"`
 	// EmbeddedCount is how many passages have a vector for semantic search,
 	// and EmbeddingModel the model that made them. Both are empty until an
 	// embedding model is installed.
@@ -435,13 +438,13 @@ func (s *Store) refreshLocked(ctx context.Context, id string) error {
 		docs, readErr = readSource(src.file, s.readPDF(ctx))
 	}
 	if sigErr != nil || readErr != nil {
-		msg := errors.Join(sigErr, readErr).Error()
+		failure := contracts.FailureOf(errors.Join(sigErr, readErr), "KNOWLEDGE_SYNC_FAILED")
 		if src.Remote != nil && src.ChunkCount > 0 {
 			// The last fetched data stays searchable until a fetch works.
-			msg += ". Search uses the data from the last successful fetch."
+			failure.Text += ". Search uses the data from the last successful fetch."
 		}
-		_, _ = s.db.ExecContext(ctx, `UPDATE knowledge_sources SET status=?, error=?, updated_at=?, signature=COALESCE(?, signature) WHERE id=?`,
-			StatusFailed, msg, fmtTime(s.now().UTC()), remoteAttempt(src, sig), id)
+		_, _ = s.db.ExecContext(ctx, `UPDATE knowledge_sources SET status=?, error=?, error_code=?, error_details=?, updated_at=?, signature=COALESCE(?, signature) WHERE id=?`,
+			StatusFailed, failure.Text, failure.CodeColumn(), failure.DetailsColumn(), fmtTime(s.now().UTC()), remoteAttempt(src, sig), id)
 		return errors.Join(sigErr, readErr)
 	}
 	chunks := chunkDocuments(docs)
@@ -493,7 +496,7 @@ func (s *Store) refreshLocked(ctx context.Context, id string) error {
 	}
 	now := fmtTime(s.now().UTC())
 	if _, err := tx.ExecContext(ctx, `
-		UPDATE knowledge_sources SET status=?, error=NULL, chunk_count=?, signature=?, refreshed_at=?, updated_at=?, languages_json=?
+		UPDATE knowledge_sources SET status=?, error=NULL, error_code=NULL, error_details=NULL, chunk_count=?, signature=?, refreshed_at=?, updated_at=?, languages_json=?
 		WHERE id=?`, StatusReady, len(chunks), sig, now, now, languagesJSON(languages), id); err != nil {
 		return err
 	}
@@ -571,7 +574,7 @@ type scanner interface{ Scan(...any) error }
 
 // sourceColumns are the columns scanSource reads. The vector count is per
 // source, from the model most of its vectors came from.
-const sourceColumns = `id, name, kind, path, status, error, chunk_count, created_at, updated_at, refreshed_at, local_only, remote_json, languages_json,
+const sourceColumns = `id, name, kind, path, status, error, error_code, error_details, chunk_count, created_at, updated_at, refreshed_at, local_only, remote_json, languages_json,
 	(SELECT COUNT(*) FROM knowledge_vectors v WHERE v.source_id = knowledge_sources.id
 	 AND v.model = (SELECT model FROM knowledge_vectors w WHERE w.source_id = knowledge_sources.id GROUP BY model ORDER BY COUNT(*) DESC LIMIT 1)),
 	(SELECT model FROM knowledge_vectors w WHERE w.source_id = knowledge_sources.id GROUP BY model ORDER BY COUNT(*) DESC LIMIT 1)`
@@ -579,9 +582,9 @@ const sourceColumns = `id, name, kind, path, status, error, chunk_count, created
 func scanSource(row scanner) (Source, error) {
 	var src Source
 	var kind, created, updated string
-	var path, errText, refreshed, embModel, remoteJSON, langJSON sql.NullString
+	var path, errText, errCode, errDetails, refreshed, embModel, remoteJSON, langJSON sql.NullString
 	var localOnly int
-	if err := row.Scan(&src.ID, &src.Name, &kind, &path, &src.Status, &errText, &src.ChunkCount, &created, &updated, &refreshed, &localOnly,
+	if err := row.Scan(&src.ID, &src.Name, &kind, &path, &src.Status, &errText, &errCode, &errDetails, &src.ChunkCount, &created, &updated, &refreshed, &localOnly,
 		&remoteJSON, &langJSON, &src.EmbeddedCount, &embModel); err != nil {
 		return Source{}, err
 	}
@@ -603,7 +606,7 @@ func scanSource(row scanner) (Source, error) {
 		src.Filename = filepath.Base(src.Path)
 		src.Path = ""
 	}
-	src.Error = errText.String
+	src.Error, src.ErrorCode, src.ErrorDetails = errText.String, errCode.String, contracts.ParseErrorDetails(errDetails.String)
 	src.CreatedAt = parseTime(created)
 	src.UpdatedAt = parseTime(updated)
 	if refreshed.Valid {

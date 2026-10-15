@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -11,11 +12,12 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/yeixio/toskar-core/internal/automations"
+	"github.com/yeixio/toskar-core/pkg/contracts"
 )
 
 const runSelect = `
 	SELECT id, automation_id, occurrence_at, status, claimed_at, lease_until,
-		started_at, finished_at, COALESCE(result, ''), COALESCE(error, ''),
+		started_at, finished_at, COALESCE(result, ''), COALESCE(error, ''), COALESCE(error_code, ''), COALESCE(error_details, ''),
 		notification_sent, COALESCE(model_id, ''), COALESCE(node_id, ''),
 		attempt, retry_at, created_at, COALESCE(notify_detail, ''), COALESCE(notify_values, ''), COALESCE(conversation_id, ''), COALESCE(saved_file, '')
 	FROM automation_runs`
@@ -175,7 +177,7 @@ func (r *AutomationRepo) CompleteRun(ctx context.Context, runID string, result a
 	automation.LastRunAt = &bound
 	automation.UpdatedAt = finished
 	automation.ConsecutiveFailures = 0
-	automation.LastError = ""
+	automation.LastError, automation.LastErrorCode, automation.LastErrorDetails = "", "", nil
 	if err := automation.SetNextRun(finished); err != nil {
 		return err
 	}
@@ -186,7 +188,7 @@ func (r *AutomationRepo) CompleteRun(ctx context.Context, runID string, result a
 }
 
 // ScheduleRetry keeps this occurrence and waits until retryAt before another attempt.
-func (r *AutomationRepo) ScheduleRetry(ctx context.Context, runID, message string, result automations.Execution, finished, retryAt time.Time) error {
+func (r *AutomationRepo) ScheduleRetry(ctx context.Context, runID string, failure contracts.Failure, result automations.Execution, finished, retryAt time.Time) error {
 	finished = clock(finished)
 	retryAt = clock(retryAt)
 	tx, err := r.db.BeginTx(ctx, nil)
@@ -208,10 +210,10 @@ func (r *AutomationRepo) ScheduleRetry(ctx context.Context, runID, message strin
 	}
 	if _, err := tx.ExecContext(ctx, `
 		UPDATE automation_runs
-		SET status = ?, result = ?, error = ?, model_id = ?, node_id = ?,
+		SET status = ?, result = ?, error = ?, error_code = ?, error_details = ?, model_id = ?, node_id = ?,
 			finished_at = ?, lease_until = NULL, retry_at = ?
 		WHERE id = ?`,
-		automations.RunRetrying, result.Text, message, nullIfEmpty(result.ModelID), nullIfEmpty(result.NodeID),
+		automations.RunRetrying, result.Text, failure.Text, failure.CodeColumn(), failure.DetailsColumn(), nullIfEmpty(result.ModelID), nullIfEmpty(result.NodeID),
 		formatTime(finished), formatTime(retryAt), runID); err != nil {
 		return err
 	}
@@ -219,7 +221,7 @@ func (r *AutomationRepo) ScheduleRetry(ctx context.Context, runID, message strin
 	if err != nil {
 		return err
 	}
-	automation.LastError = message
+	automation.LastError, automation.LastErrorCode, automation.LastErrorDetails = failure.Text, failure.Code, failure.Details
 	automation.UpdatedAt = finished
 	if err := updateAutomation(ctx, tx, automation); err != nil {
 		return err
@@ -228,7 +230,7 @@ func (r *AutomationRepo) ScheduleRetry(ctx context.Context, runID, message strin
 }
 
 // FailRun records a terminal failure, shows it on the automation, and moves the schedule past this occurrence.
-func (r *AutomationRepo) FailRun(ctx context.Context, runID, message string, result automations.Execution, finished time.Time) error {
+func (r *AutomationRepo) FailRun(ctx context.Context, runID string, failure contracts.Failure, result automations.Execution, finished time.Time) error {
 	finished = clock(finished)
 	tx, err := r.db.BeginTx(ctx, nil)
 	if err != nil {
@@ -249,14 +251,14 @@ func (r *AutomationRepo) FailRun(ctx context.Context, runID, message string, res
 	}
 	if _, err := tx.ExecContext(ctx, `
 		UPDATE automation_runs
-		SET status = ?, result = ?, error = ?, model_id = ?, node_id = ?,
+		SET status = ?, result = ?, error = ?, error_code = ?, error_details = ?, model_id = ?, node_id = ?,
 			finished_at = ?, lease_until = NULL, retry_at = NULL
 		WHERE id = ?`,
-		automations.RunFailed, result.Text, message, nullIfEmpty(result.ModelID), nullIfEmpty(result.NodeID),
+		automations.RunFailed, result.Text, failure.Text, failure.CodeColumn(), failure.DetailsColumn(), nullIfEmpty(result.ModelID), nullIfEmpty(result.NodeID),
 		formatTime(finished), runID); err != nil {
 		return err
 	}
-	if err := noteTerminalFailure(ctx, tx, automationID, parseTime(occurrenceText), message, finished); err != nil {
+	if err := noteTerminalFailure(ctx, tx, automationID, parseTime(occurrenceText), failure, finished); err != nil {
 		return err
 	}
 	return tx.Commit()
@@ -292,15 +294,17 @@ func (r *AutomationRepo) AbandonExpired(ctx context.Context, now time.Time) ([]a
 
 	var terminal []automations.Run
 	for _, run := range expired {
-		message := run.Error
-		if message == "" {
-			message = "lease expired before the run finished"
+		failure := contracts.Failure{Text: run.Error, Code: run.ErrorCode, Details: run.ErrorDetails}
+		if failure.Text == "" {
+			failure = contracts.FailureOf(errors.New("lease expired before the run finished"), "AUTOMATION_INTERRUPTED")
+		} else if failure.Code == "" {
+			failure.Code = "AUTOMATION_FAILED"
 		}
 		res, err := tx.ExecContext(ctx, `
 			UPDATE automation_runs
-			SET status = ?, error = ?, finished_at = ?, lease_until = NULL, retry_at = NULL
+			SET status = ?, error = ?, error_code = ?, error_details = ?, finished_at = ?, lease_until = NULL, retry_at = NULL
 			WHERE id = ? AND status IN (?, ?)`,
-			automations.RunFailed, message, formatTime(now), run.ID,
+			automations.RunFailed, failure.Text, failure.CodeColumn(), failure.DetailsColumn(), formatTime(now), run.ID,
 			automations.RunClaimed, automations.RunRunning)
 		if err != nil {
 			return nil, err
@@ -316,11 +320,11 @@ func (r *AutomationRepo) AbandonExpired(ctx context.Context, now time.Time) ([]a
 		if automation.NextRunAt == nil || !automation.NextRunAt.Equal(run.OccurrenceAt) {
 			continue
 		}
-		if err := noteTerminalFailure(ctx, tx, run.AutomationID, run.OccurrenceAt, message, now); err != nil {
+		if err := noteTerminalFailure(ctx, tx, run.AutomationID, run.OccurrenceAt, failure, now); err != nil {
 			return nil, err
 		}
 		run.Status = automations.RunFailed
-		run.Error = message
+		run.Error, run.ErrorCode, run.ErrorDetails = failure.Text, failure.Code, failure.Details
 		terminal = append(terminal, run)
 	}
 	if terminal == nil {
@@ -332,12 +336,12 @@ func (r *AutomationRepo) AbandonExpired(ctx context.Context, now time.Time) ([]a
 	return terminal, nil
 }
 
-func noteTerminalFailure(ctx context.Context, tx *sql.Tx, automationID string, occurrence time.Time, message string, finished time.Time) error {
+func noteTerminalFailure(ctx context.Context, tx *sql.Tx, automationID string, occurrence time.Time, failure contracts.Failure, finished time.Time) error {
 	automation, err := getAutomation(ctx, tx, automationID)
 	if err != nil {
 		return err
 	}
-	automation.LastError = message
+	automation.LastError, automation.LastErrorCode, automation.LastErrorDetails = failure.Text, failure.Code, failure.Details
 	automation.ConsecutiveFailures++
 	bound := clock(finished)
 	occurrence = clock(occurrence)
@@ -381,7 +385,7 @@ func (r *AutomationRepo) attachLatest(ctx context.Context, items []automations.A
 func (r *AutomationRepo) latestRuns(ctx context.Context) (map[string]automations.Run, error) {
 	rows, err := r.db.QueryContext(ctx, `
 		SELECT r.id, r.automation_id, r.occurrence_at, r.status, r.claimed_at, r.lease_until,
-			r.started_at, r.finished_at, COALESCE(r.result, ''), COALESCE(r.error, ''),
+			r.started_at, r.finished_at, COALESCE(r.result, ''), COALESCE(r.error, ''), COALESCE(r.error_code, ''), COALESCE(r.error_details, ''),
 			r.notification_sent, COALESCE(r.model_id, ''), COALESCE(r.node_id, ''),
 			r.attempt, r.retry_at, r.created_at, COALESCE(r.notify_detail, ''), COALESCE(r.notify_values, ''), COALESCE(r.conversation_id, ''), COALESCE(r.saved_file, '')
 		FROM automation_runs r
@@ -610,10 +614,10 @@ func scanRun(s automationScanner) (automations.Run, error) {
 	var status, occurrence, created string
 	var claimed, lease, started, finished, retryAt sql.NullString
 	var notified int
-	var values string
+	var values, errorDetails string
 	if err := s.Scan(
 		&run.ID, &run.AutomationID, &occurrence, &status, &claimed, &lease,
-		&started, &finished, &run.Result, &run.Error, &notified, &run.ModelID, &run.NodeID,
+		&started, &finished, &run.Result, &run.Error, &run.ErrorCode, &errorDetails, &notified, &run.ModelID, &run.NodeID,
 		&run.Attempt, &retryAt, &created, &run.NotifyDetail, &values, &run.ConversationID, &run.SavedFile,
 	); err != nil {
 		return automations.Run{}, err
@@ -621,6 +625,7 @@ func scanRun(s automationScanner) (automations.Run, error) {
 	if values != "" {
 		_ = json.Unmarshal([]byte(values), &run.NotifyValues)
 	}
+	run.ErrorDetails = contracts.ParseErrorDetails(errorDetails)
 	run.Status = automations.RunStatus(status)
 	run.OccurrenceAt = parseTime(occurrence)
 	run.ClaimedAt = parseTimePtr(claimed)

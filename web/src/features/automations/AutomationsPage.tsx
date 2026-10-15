@@ -16,7 +16,7 @@ import { Skeleton } from '@/components/ui/Skeleton'
 import { AutomationsIntro, IdeaGallery } from './Intro'
 import type { IdeaId } from './ideas'
 import { WebhookLink } from './WebhookLink'
-import { ReportProblem } from '@/components/ui/ReportProblem'
+import { ShownError, shownError } from '@/components/ui/ShownError'
 import { useCapabilities } from '@/lib/capabilities'
 import { matchesSearch } from '@/lib/search'
 
@@ -295,7 +295,7 @@ export function AutomationsPage() {
               // Run now answers once the run starts (#204); it's running
               // until its history says it ended.
               running={runNow.isPending || (detail.history ?? []).some((run) => run.status === 'running' || run.status === 'claimed')}
-              runError={runNow.error instanceof Error ? runNow.error.message : ''}
+              runError={runNow.error ? shownError(runNow.error) : null}
               onRun={() => runNow.mutate(detail.id)}
               onToggle={() => pause.mutate(detail)}
               onEdit={() => {
@@ -333,7 +333,7 @@ function Detail({
   names: Record<string, string>
   models: Model[]
   running: boolean
-  runError: string
+  runError: ReturnType<typeof shownError> | null
   onRun: () => void
   onToggle: () => void
   onEdit: () => void
@@ -381,10 +381,12 @@ function Detail({
           </div>
         </div>
         {detail.last_error && (
-          <p className="mt-3 text-sm text-danger">
-            {detail.last_error}
-            <ReportProblem error={detail.last_error} className="ms-2 text-xs text-ink-faint underline hover:text-ink" />
-          </p>
+          <ShownError
+            error={detail.last_error}
+            code={detail.last_error_code}
+            details={detail.last_error_details}
+            className="mt-3 text-sm text-danger"
+          />
         )}
       </div>
       <div className="flex flex-wrap gap-2">
@@ -401,12 +403,7 @@ function Detail({
           {t('detail.delete')}
         </button>
       </div>
-      {runError && (
-        <p className="text-sm text-danger">
-          {runError}
-          <ReportProblem error={runError} className="ms-2 text-xs text-ink-faint underline hover:text-ink" />
-        </p>
-      )}
+      {runError && <ShownError {...runError} />}
       <div>
         <h3 className="label-caps">{t('detail.history')}</h3>
         {history.length === 0 ? (
@@ -463,12 +460,7 @@ function HistoryRow({
       <p className="mt-1 text-xs text-ink-faint">{runTiming(run, zone)}</p>
       {prose && <p className="mt-2 whitespace-pre-wrap text-sm text-ink-muted">{prose}</p>}
       {notice.detail && <p className="mt-1 text-sm text-ink-muted">{notice.detail}</p>}
-      {run.error && (
-        <p className="mt-2 text-sm text-danger">
-          {run.error}
-          <ReportProblem error={run.error} className="ms-2 text-xs text-ink-faint underline hover:text-ink" />
-        </p>
-      )}
+      {run.error && <ShownError error={run.error} code={run.error_code} details={run.error_details} className="mt-2 text-sm text-danger" />}
       {run.saved_file ? (
         <p className="mt-1 break-all text-xs text-ink-faint">{t('run.savedTo', { path: run.saved_file })}</p>
       ) : null}

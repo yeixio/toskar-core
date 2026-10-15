@@ -15,22 +15,25 @@ const (
 
 // Run is the durable record for one occurrence of an automation.
 type Run struct {
-	ID               string     `json:"id"`
-	AutomationID     string     `json:"automation_id"`
-	OccurrenceAt     time.Time  `json:"occurrence_at"`
-	Status           RunStatus  `json:"status"`
-	ClaimedAt        *time.Time `json:"claimed_at,omitempty"`
-	LeaseUntil       *time.Time `json:"lease_until,omitempty"`
-	StartedAt        *time.Time `json:"started_at,omitempty"`
-	FinishedAt       *time.Time `json:"finished_at,omitempty"`
-	Result           string     `json:"result,omitempty"`
-	Error            string     `json:"error,omitempty"`
-	NotificationSent bool       `json:"notification_sent"`
-	ModelID          string     `json:"model_id,omitempty"`
-	NodeID           string     `json:"node_id,omitempty"`
-	Attempt          int        `json:"attempt"`
-	RetryAt          *time.Time `json:"retry_at,omitempty"`
-	CreatedAt        time.Time  `json:"created_at"`
+	ID           string     `json:"id"`
+	AutomationID string     `json:"automation_id"`
+	OccurrenceAt time.Time  `json:"occurrence_at"`
+	Status       RunStatus  `json:"status"`
+	ClaimedAt    *time.Time `json:"claimed_at,omitempty"`
+	LeaseUntil   *time.Time `json:"lease_until,omitempty"`
+	StartedAt    *time.Time `json:"started_at,omitempty"`
+	FinishedAt   *time.Time `json:"finished_at,omitempty"`
+	Result       string     `json:"result,omitempty"`
+	Error        string     `json:"error,omitempty"`
+	// ErrorCode and ErrorDetails are Error's stable code and values (#588).
+	ErrorCode        string         `json:"error_code,omitempty"`
+	ErrorDetails     map[string]any `json:"error_details,omitempty"`
+	NotificationSent bool           `json:"notification_sent"`
+	ModelID          string         `json:"model_id,omitempty"`
+	NodeID           string         `json:"node_id,omitempty"`
+	Attempt          int            `json:"attempt"`
+	RetryAt          *time.Time     `json:"retry_at,omitempty"`
+	CreatedAt        time.Time      `json:"created_at"`
 	// NotifyDetail says why a finished run did or didn't notify, as
 	// automations:notice.<detail>, with NotifyValues for its placeholders
 	// (price, amount, currency), so the apps explain the server's decision

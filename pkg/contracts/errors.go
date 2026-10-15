@@ -1,6 +1,7 @@
 package contracts
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 )
@@ -46,4 +47,58 @@ func ErrorCode(err error) (string, map[string]any) {
 		return coded.Code, coded.Params
 	}
 	return "", nil
+}
+
+// Failure is an error as a record keeps it for people to read (#588): its
+// English text, its stable code, and the code's values.
+type Failure struct {
+	Text    string
+	Code    string
+	Details map[string]any
+}
+
+// FailureOf is err as a Failure, with its own code, or fallback when it has
+// none, so every failure a record shows carries a code.
+func FailureOf(err error, fallback string) Failure {
+	if err == nil {
+		return Failure{}
+	}
+	code, details := ErrorCode(err)
+	if code == "" {
+		code = fallback
+	}
+	return Failure{Text: err.Error(), Code: code, Details: details}
+}
+
+// DetailsColumn is f's details for a database column: JSON, or nil when
+// there are none.
+func (f Failure) DetailsColumn() any {
+	if len(f.Details) == 0 {
+		return nil
+	}
+	data, err := json.Marshal(f.Details)
+	if err != nil {
+		return nil
+	}
+	return string(data)
+}
+
+// CodeColumn is f's code for a database column, nil when there is none.
+func (f Failure) CodeColumn() any {
+	if f.Code == "" {
+		return nil
+	}
+	return f.Code
+}
+
+// ParseErrorDetails reads a details column; nil when it is empty or unreadable.
+func ParseErrorDetails(column string) map[string]any {
+	if column == "" {
+		return nil
+	}
+	var details map[string]any
+	if json.Unmarshal([]byte(column), &details) != nil {
+		return nil
+	}
+	return details
 }
