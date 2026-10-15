@@ -232,5 +232,10 @@
   "KEY_NOT_FOUND": "Non ha nessuna chiave con questo id.",
   "KEYS_FAILED": "Impossibile leggere le sue chiavi: {{detail}}",
   "CAPABILITY_OFF": "È disattivato per il tuo account. Chiedi a {{admin}} o a un altro Admin di attivarlo.",
-  "CAPABILITY_UNKNOWN": "Toskar non conosce questa funzione."
+  "CAPABILITY_UNKNOWN": "Toskar non conosce questa funzione.",
+  "NOTHING_TO_COMPACT": "Questa chat è troppo corta per essere compattata.",
+  "SUMMARY_NOT_FOUND": "Questa chat non è ancora stata compattata.",
+  "SUMMARY_EMPTY": "Un riassunto non può essere vuoto.",
+  "SUMMARY_FAILED": "Impossibile leggere o salvare il riassunto: {{detail}}",
+  "COMPACT_FAILED": "Impossibile compattare la chat: {{detail}}"
 }

@@ -232,5 +232,10 @@
   "KEY_NOT_FOUND": "Diese Person hat keinen Schlüssel mit dieser ID.",
   "KEYS_FAILED": "Die Schlüssel konnten nicht gelesen werden: {{detail}}",
   "CAPABILITY_OFF": "Das ist für dein Konto ausgeschaltet. Bitte {{admin}} oder einen anderen Admin, es einzuschalten.",
-  "CAPABILITY_UNKNOWN": "Toskar kennt diese Fähigkeit nicht."
+  "CAPABILITY_UNKNOWN": "Toskar kennt diese Fähigkeit nicht.",
+  "NOTHING_TO_COMPACT": "Dieser Chat ist zu kurz zum Verdichten.",
+  "SUMMARY_NOT_FOUND": "Dieser Chat wurde noch nicht verdichtet.",
+  "SUMMARY_EMPTY": "Eine Zusammenfassung darf nicht leer sein.",
+  "SUMMARY_FAILED": "Die Zusammenfassung konnte nicht gelesen oder gespeichert werden: {{detail}}",
+  "COMPACT_FAILED": "Der Chat konnte nicht verdichtet werden: {{detail}}"
 }

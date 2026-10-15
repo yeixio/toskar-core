@@ -232,5 +232,10 @@
   "KEY_NOT_FOUND": "此人沒有該 ID 的金鑰。",
   "KEYS_FAILED": "無法讀取其金鑰：{{detail}}",
   "CAPABILITY_OFF": "你的帳戶已關閉此功能。請 {{admin}} 或其他管理員開啟。",
-  "CAPABILITY_UNKNOWN": "Toskar 不認識這個功能。"
+  "CAPABILITY_UNKNOWN": "Toskar 不認識這個功能。",
+  "NOTHING_TO_COMPACT": "這個聊天太短，無法壓縮。",
+  "SUMMARY_NOT_FOUND": "這個聊天還沒有被壓縮。",
+  "SUMMARY_EMPTY": "摘要不能為空。",
+  "SUMMARY_FAILED": "無法讀取或儲存摘要：{{detail}}",
+  "COMPACT_FAILED": "無法壓縮聊天：{{detail}}"
 }

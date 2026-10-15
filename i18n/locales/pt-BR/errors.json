@@ -232,5 +232,10 @@
   "KEY_NOT_FOUND": "Essa pessoa não tem chave com esse id.",
   "KEYS_FAILED": "Não foi possível ler as chaves: {{detail}}",
   "CAPABILITY_OFF": "Isso está desativado para sua conta. Peça a {{admin}} ou a outro Admin para ativar.",
-  "CAPABILITY_UNKNOWN": "O Toskar não conhece esse recurso."
+  "CAPABILITY_UNKNOWN": "O Toskar não conhece esse recurso.",
+  "NOTHING_TO_COMPACT": "Esta conversa é curta demais para compactar.",
+  "SUMMARY_NOT_FOUND": "Esta conversa ainda não foi compactada.",
+  "SUMMARY_EMPTY": "Um resumo não pode ficar vazio.",
+  "SUMMARY_FAILED": "Não foi possível ler ou salvar o resumo: {{detail}}",
+  "COMPACT_FAILED": "Não foi possível compactar a conversa: {{detail}}"
 }

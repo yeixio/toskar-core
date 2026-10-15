@@ -511,6 +511,8 @@ func New(opts Options) (*App, error) {
 		CreateConversation: func(ctx context.Context, title, profileID, modelID string) (contracts.Conversation, error) {
 			return convRepo.Create(ctx, title, profileID, modelID)
 		},
+		Compact: &api.Compacter{Summary: a.ConversationSummary, Edit: a.EditConversationSummary, Now: a.CompactConversation,
+			NewChat: a.ConversationFromSummary, SetOff: a.Conversations.SetCompactOff},
 		UpdateConversation: func(ctx context.Context, id string, title, profileID, modelID *string, memoryOff *bool) (contracts.Conversation, error) {
 			return convRepo.Update(ctx, id, repositories.ConversationPatch{
 				Title:     title,
@@ -1347,6 +1349,7 @@ func (a *App) settingsView(ctx context.Context) (contracts.SettingsView, error) 
 	downloadBehavior, _ := a.Settings.GetString(ctx, "download_behavior", "ask")
 	storageLimit, _ := a.Settings.GetInt(ctx, "model_storage_limit_gb", 0)
 	saveChat, _ := a.Settings.GetBool(ctx, "save_chat_history", true)
+	compactAt, _ := a.Settings.GetString(ctx, "compact_at", "normal")
 	memoryEnabled, _ := a.Settings.GetBool(ctx, "memory_enabled", true)
 	saveTask, _ := a.Settings.GetBool(ctx, "save_task_history", true)
 	notifyTask, _ := a.Settings.GetBool(ctx, "notify_task_finish", true)
@@ -1390,6 +1393,7 @@ func (a *App) settingsView(ctx context.Context) (contracts.SettingsView, error) 
 		ModelStorageLimitGB:     storageLimit,
 		SaveChatHistory:         saveChat,
 		MemoryEnabled:           memoryEnabled,
+		CompactAt:               compactAt,
 		SaveTaskHistory:         saveTask,
 		NotifyTaskFinish:        notifyTask,
 		NotifyPeerOffline:       notifyPeer,
@@ -1499,6 +1503,14 @@ func (a *App) applySettingsPatch(ctx context.Context, patch map[string]any) erro
 			if err := a.Settings.SetBool(ctx, key, v); err != nil {
 				return err
 			}
+		}
+	}
+	if v, ok := patch["compact_at"].(string); ok {
+		if v != "early" && v != "normal" && v != "late" {
+			return contracts.Errorf("INVALID_SETTING", map[string]any{"setting": "compact_at", "value": v}, "compact_at is early, normal, or late")
+		}
+		if err := a.Settings.Set(ctx, "compact_at", v); err != nil {
+			return err
 		}
 	}
 	if v, ok := patch["ui_locale"].(string); ok {

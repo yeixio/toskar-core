@@ -37,6 +37,15 @@
       ]
     },
     {
+      "id": "auto-compact",
+      "title": "Long chats and auto-compact",
+      "paragraphs": [
+        "A model can read only so much at once: its context window. When a chat grows long, Toskar's auto-compact sends the older messages to the model as a summary, and the newest ones word for word. Every message stays saved, and the summary is rebuilt from the original messages, not from an earlier summary.",
+        "Auto-compact starts when a chat fills about half the model's window, after an answer, without delaying it. Settings › Chat sets when: Early (40%), Normal (50%), or Late (70%). When one long message or a big lookup wouldn't fit, Toskar compacts first and says \"Compacting earlier messages…\", instead of leaving the oldest messages out.",
+        "The context gauge under a chat says when its older messages are a summary. From there you can read the summary and correct it (later summaries keep your corrections), compact now, for example before pasting something long, start a new chat that begins with the summary, or keep the chat verbatim, which turns auto-compact off for that chat only."
+      ]
+    },
+    {
       "id": "memory",
       "title": "Memory",
       "paragraphs": [

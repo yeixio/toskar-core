@@ -30,7 +30,7 @@ type ConversationPatch struct {
 
 func (r *ConversationRepo) List(ctx context.Context) ([]contracts.Conversation, error) {
 	rows, err := r.db.QueryContext(ctx, `
-		SELECT id, COALESCE(title,''), COALESCE(profile_id,''), COALESCE(model_id,''), memory_off, created_at, updated_at
+		SELECT id, COALESCE(title,''), COALESCE(profile_id,''), COALESCE(model_id,''), memory_off, compact_off, created_at, updated_at
 		FROM conversations WHERE person_id = ? ORDER BY updated_at DESC`, auth.PersonID(ctx))
 	if err != nil {
 		return nil, err
@@ -52,7 +52,7 @@ func (r *ConversationRepo) List(ctx context.Context) ([]contracts.Conversation, 
 
 func (r *ConversationRepo) Get(ctx context.Context, id string) (contracts.Conversation, error) {
 	row := r.db.QueryRowContext(ctx, `
-		SELECT id, COALESCE(title,''), COALESCE(profile_id,''), COALESCE(model_id,''), memory_off, created_at, updated_at
+		SELECT id, COALESCE(title,''), COALESCE(profile_id,''), COALESCE(model_id,''), memory_off, compact_off, created_at, updated_at
 		FROM conversations WHERE id = ? AND person_id = ?`, id, auth.PersonID(ctx))
 	c, err := scanConversation(row)
 	if err == sql.ErrNoRows {
@@ -119,6 +119,19 @@ func (r *ConversationRepo) Update(ctx context.Context, id string, patch Conversa
 	return existing, nil
 }
 
+// SetCompactOff keeps a conversation verbatim, or lets auto-compact
+// summarize it again (#342).
+func (r *ConversationRepo) SetCompactOff(ctx context.Context, id string, off bool) error {
+	res, err := r.db.ExecContext(ctx, `UPDATE conversations SET compact_off = ? WHERE id = ? AND person_id = ?`, off, id, auth.PersonID(ctx))
+	if err != nil {
+		return err
+	}
+	if n, _ := res.RowsAffected(); n == 0 {
+		return fmt.Errorf("conversation %q not found", id)
+	}
+	return nil
+}
+
 func (r *ConversationRepo) Delete(ctx context.Context, id string) error {
 	res, err := r.db.ExecContext(ctx, `DELETE FROM conversations WHERE id = ? AND person_id = ?`, id, auth.PersonID(ctx))
 	if err != nil {
@@ -177,11 +190,11 @@ type conversationScanner interface {
 func scanConversation(s conversationScanner) (contracts.Conversation, error) {
 	var c contracts.Conversation
 	var created, updated string
-	var memoryOff int
-	if err := s.Scan(&c.ID, &c.Title, &c.ProfileID, &c.ModelID, &memoryOff, &created, &updated); err != nil {
+	var memoryOff, compactOff int
+	if err := s.Scan(&c.ID, &c.Title, &c.ProfileID, &c.ModelID, &memoryOff, &compactOff, &created, &updated); err != nil {
 		return contracts.Conversation{}, err
 	}
-	c.MemoryOff = memoryOff != 0
+	c.MemoryOff, c.CompactOff = memoryOff != 0, compactOff != 0
 	c.CreatedAt = parseTime(created)
 	c.UpdatedAt = parseTime(updated)
 	return c, nil

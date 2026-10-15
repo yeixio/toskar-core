@@ -232,5 +232,10 @@
   "KEY_NOT_FOUND": "그 ID의 키가 없습니다.",
   "KEYS_FAILED": "키를 읽을 수 없습니다: {{detail}}",
   "CAPABILITY_OFF": "이 기능은 계정에서 꺼져 있습니다. {{admin}} 또는 다른 관리자에게 켜 달라고 요청하세요.",
-  "CAPABILITY_UNKNOWN": "Toskar가 알지 못하는 기능입니다."
+  "CAPABILITY_UNKNOWN": "Toskar가 알지 못하는 기능입니다.",
+  "NOTHING_TO_COMPACT": "이 채팅은 너무 짧아서 압축할 수 없습니다.",
+  "SUMMARY_NOT_FOUND": "이 채팅은 아직 압축되지 않았습니다.",
+  "SUMMARY_EMPTY": "요약은 비워 둘 수 없습니다.",
+  "SUMMARY_FAILED": "요약을 읽거나 저장할 수 없습니다: {{detail}}",
+  "COMPACT_FAILED": "채팅을 압축할 수 없습니다: {{detail}}"
 }

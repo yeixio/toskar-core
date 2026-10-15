@@ -110,7 +110,9 @@ type Dependencies struct {
 	ListConversations     func(ctx context.Context) ([]contracts.Conversation, error)
 	CreateConversation    func(ctx context.Context, title, profileID, modelID string) (contracts.Conversation, error)
 	UpdateConversation    func(ctx context.Context, id string, title, profileID, modelID *string, memoryOff *bool) (contracts.Conversation, error)
-	DeleteConversation    func(ctx context.Context, id string) error
+	// Compact is auto-compact (#342).
+	Compact            *Compacter
+	DeleteConversation func(ctx context.Context, id string) error
 	// RecognizeUpload starts text recognition on a scanned PDF being
 	// attached, and reports whether it can (#510).
 	RecognizeUpload func(name string, data []byte) bool
@@ -389,6 +391,7 @@ func (s *Server) routes() {
 	api.HandleFunc("/conversations/delete", s.handleDeleteConversations).Methods(http.MethodPost)
 	api.HandleFunc("/conversations/{id}", s.handleUpdateConversation).Methods(http.MethodPatch)
 	api.HandleFunc("/conversations/{id}", s.handleDeleteConversation).Methods(http.MethodDelete)
+	s.compactRoutes(api)
 	api.HandleFunc("/events", s.handleSSE).Methods(http.MethodGet, http.MethodOptions)
 	s.knowledgeRoutes(api)
 	s.memoryRoutes(api)
@@ -1176,10 +1179,18 @@ func (s *Server) handleUpdateConversation(w http.ResponseWriter, r *http.Request
 		ProfileID *string `json:"profile_id"`
 		ModelID   *string `json:"model_id"`
 		MemoryOff *bool   `json:"memory_off"`
+		// CompactOff keeps the chat verbatim (#342).
+		CompactOff *bool `json:"compact_off"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		writeErr(w, http.StatusBadRequest, "INVALID_JSON", "Request body must be JSON.", nil)
 		return
+	}
+	if body.CompactOff != nil && s.deps.Compact != nil && s.deps.Compact.SetOff != nil {
+		if err := s.deps.Compact.SetOff(r.Context(), id, *body.CompactOff); err != nil {
+			writeErrFrom(w, http.StatusBadRequest, "CONVERSATION_UPDATE_FAILED", err)
+			return
+		}
 	}
 	if s.deps.UpdateConversation == nil {
 		writeErr(w, http.StatusNotImplemented, "NOT_IMPLEMENTED", "Conversations are not available yet.", nil)

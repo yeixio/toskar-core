@@ -232,5 +232,10 @@
   "KEY_NOT_FOUND": "They have no key with that id.",
   "KEYS_FAILED": "Their keys couldn't be read: {{detail}}",
   "CAPABILITY_OFF": "This is turned off for your account. Ask {{admin}} or another Admin to turn it on.",
-  "CAPABILITY_UNKNOWN": "Toskar doesn't know that capability."
+  "CAPABILITY_UNKNOWN": "Toskar doesn't know that capability.",
+  "NOTHING_TO_COMPACT": "This chat is too short to compact.",
+  "SUMMARY_NOT_FOUND": "This chat hasn't been compacted yet.",
+  "SUMMARY_EMPTY": "A summary can't be empty.",
+  "SUMMARY_FAILED": "The summary couldn't be read or saved: {{detail}}",
+  "COMPACT_FAILED": "The chat couldn't be compacted: {{detail}}"
 }

@@ -300,8 +300,13 @@ var deviceRoutes = map[string]bool{
 	"DELETE /api/v1/conversations/{id}":       true,
 	"POST /api/v1/conversations/delete":       true,
 	"GET /api/v1/conversations/{id}/messages": true,
-	"GET /api/v1/artifacts/{id}":              true,
-	"GET /api/v1/artifacts/{id}/content":      true,
+	// Auto-compact, for the phone's computer chats (#342).
+	"GET /api/v1/conversations/{id}/summary":       true,
+	"PUT /api/v1/conversations/{id}/summary":       true,
+	"POST /api/v1/conversations/{id}/compact":      true,
+	"POST /api/v1/conversations/{id}/from-summary": true,
+	"GET /api/v1/artifacts/{id}":                   true,
+	"GET /api/v1/artifacts/{id}/content":           true,
 	// Attaching a photo, file, or recording to a chat, and taking one off
 	// before it's sent (yeixio/toskar-apps#155).
 	"POST /api/v1/artifacts":        true,

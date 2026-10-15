@@ -25,6 +25,9 @@ type Summary struct {
 	Text             string    `json:"summary"`
 	ModelID          string    `json:"model_id,omitempty"`
 	UpdatedAt        time.Time `json:"updated_at"`
+	// Edited says the person corrected it (#342); later summaries keep
+	// their corrections.
+	Edited bool `json:"edited"`
 }
 
 // GetSummary returns a conversation's summary, if it has one.
@@ -33,9 +36,9 @@ func (s *Store) GetSummary(ctx context.Context, conversationID string) (Summary,
 	var through, updated string
 	var model sql.NullString
 	err := s.db.QueryRowContext(ctx, `
-		SELECT conversation_id, through_message_id, through_created_at, message_count, summary, model_id, updated_at
+		SELECT conversation_id, through_message_id, through_created_at, message_count, summary, model_id, updated_at, edited
 		FROM conversation_summaries WHERE conversation_id = ?`, conversationID).
-		Scan(&sum.ConversationID, &sum.ThroughMessageID, &through, &sum.MessageCount, &sum.Text, &model, &updated)
+		Scan(&sum.ConversationID, &sum.ThroughMessageID, &through, &sum.MessageCount, &sum.Text, &model, &updated, &sum.Edited)
 	if errors.Is(err, sql.ErrNoRows) {
 		return Summary{}, false, nil
 	}
@@ -49,12 +52,12 @@ func (s *Store) GetSummary(ctx context.Context, conversationID string) (Summary,
 // SaveSummary stores or replaces a conversation's summary.
 func (s *Store) SaveSummary(ctx context.Context, sum Summary) error {
 	_, err := s.db.ExecContext(ctx, `
-		INSERT INTO conversation_summaries (conversation_id, through_message_id, through_created_at, message_count, summary, model_id, updated_at)
-		VALUES (?, ?, ?, ?, ?, ?, ?)
+		INSERT INTO conversation_summaries (conversation_id, through_message_id, through_created_at, message_count, summary, model_id, updated_at, edited)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?)
 		ON CONFLICT(conversation_id) DO UPDATE SET through_message_id=excluded.through_message_id,
 			through_created_at=excluded.through_created_at, message_count=excluded.message_count,
-			summary=excluded.summary, model_id=excluded.model_id, updated_at=excluded.updated_at`,
-		sum.ConversationID, sum.ThroughMessageID, ts(sum.ThroughCreatedAt), sum.MessageCount, sum.Text, nullable(sum.ModelID), ts(s.now()))
+			summary=excluded.summary, model_id=excluded.model_id, updated_at=excluded.updated_at, edited=excluded.edited`,
+		sum.ConversationID, sum.ThroughMessageID, ts(sum.ThroughCreatedAt), sum.MessageCount, sum.Text, nullable(sum.ModelID), ts(s.now()), sum.Edited)
 	return err
 }
 
@@ -62,7 +65,8 @@ func (s *Store) SaveSummary(ctx context.Context, sum Summary) error {
 // in tokens. Tokens are counted with the model's tokenizer when it runs
 // here, and estimated otherwise (§66).
 const (
-	// summarizeAt starts summarizing when saved history passes this share.
+	// summarizeAt starts summarizing when saved history passes this share,
+	// unless the person chose Early or Late (CompactAt).
 	summarizeAt = 0.5
 	// keepRecent is the share of newest messages always sent verbatim.
 	keepRecent = 0.3
@@ -71,6 +75,18 @@ const (
 )
 
 func tokens(window int, share float64) int { return int(float64(window) * share) }
+
+// CompactAt is the share of the window at which auto-compact starts for a
+// setting (#342): early 40%, late 70%, and anything else normal, 50%.
+func CompactAt(setting string) float64 {
+	switch setting {
+	case "early":
+		return 0.4
+	case "late":
+		return 0.7
+	}
+	return summarizeAt
+}
 
 func size(count contextusage.Counter, msgs []contracts.Message) int {
 	n := 0
@@ -120,16 +136,29 @@ func WithSummary(msgs []pluginapi.ChatMessage, stored []contracts.Message, sum *
 // window verbatim and summarizes everything older.
 // count is the model's tokenizer, or nil to estimate.
 func Plan(stored []contracts.Message, windowTokens int, prev *Summary, count contextusage.Counter) (through int, needed bool) {
+	return PlanAt(stored, windowTokens, prev, count, summarizeAt, false)
+}
+
+// PlanAt is Plan starting at share of the window, or at any size with
+// force, as when the person asks to compact now (#342).
+func PlanAt(stored []contracts.Message, windowTokens int, prev *Summary, count contextusage.Counter, share float64, force bool) (through int, needed bool) {
 	if windowTokens <= 0 || len(stored) < 4 {
 		return 0, false
 	}
-	if size(count, stored) <= tokens(windowTokens, summarizeAt) {
+	total := size(count, stored)
+	if !force && total <= tokens(windowTokens, share) {
 		return 0, false
+	}
+	// Compacting now makes room even in a chat that fits: it keeps at most
+	// the newest half verbatim.
+	budget := tokens(windowTokens, keepRecent)
+	if force {
+		budget = min(budget, total/2)
 	}
 	keep, used := len(stored), 0
 	for i := len(stored) - 1; i >= 0; i-- {
 		n, _ := count.Count(stored[i].Content)
-		if used+n > tokens(windowTokens, keepRecent) {
+		if used+n > budget {
 			break
 		}
 		used += n
@@ -183,6 +212,11 @@ type Summarizer struct {
 	ModelID  string
 	// Count is the model's tokenizer, or nil to estimate.
 	Count contextusage.Counter
+	// At is the share of the window at which it starts (CompactAt); 0 is
+	// the default. Force summarizes whatever the size, as when the person
+	// asks to compact now or a turn wouldn't fit (#342).
+	At    float64
+	Force bool
 
 	running sync.Map
 }
@@ -214,7 +248,11 @@ func (s *Summarizer) run(ctx context.Context, conversationID string, stored []co
 	if ok {
 		prevPtr = &prev
 	}
-	through, needed := Plan(stored, windowTokens, prevPtr, s.Count)
+	share := s.At
+	if share <= 0 {
+		share = summarizeAt
+	}
+	through, needed := PlanAt(stored, windowTokens, prevPtr, s.Count, share, s.Force)
 	if !needed {
 		return false, nil
 	}
@@ -230,10 +268,22 @@ func (s *Summarizer) run(ctx context.Context, conversationID string, stored []co
 			}
 		}
 	}
+	// A summary the person corrected is read again each time, so a new one
+	// keeps their corrections (#342). When the history is folded into the
+	// previous summary, that summary is the corrected one already.
+	edited := prevPtr != nil && prev.Edited
+	corrected := ""
+	if edited && start == 0 {
+		corrected = "The person corrected the earlier summary; their corrections are right, so keep them:\n" + prev.Text + "\n\n"
+	}
+	earlier := "Earlier summary:\n"
+	if edited {
+		earlier = "Earlier summary, which the person corrected (keep their corrections):\n"
+	}
 	for _, chunk := range chunks(source[start:], tokens(windowTokens, sourceFits), s.Count) {
-		body := "Conversation:\n\n" + transcript(chunk)
+		body := corrected + "Conversation:\n\n" + transcript(chunk)
 		if text != "" {
-			body = "Earlier summary:\n" + text + "\n\nConversation since then:\n\n" + transcript(chunk)
+			body = earlier + text + "\n\nConversation since then:\n\n" + transcript(chunk)
 		}
 		text, err = s.Generate(ctx, []pluginapi.ChatMessage{
 			{Role: "system", Content: summaryInstructions},
@@ -249,7 +299,8 @@ func (s *Summarizer) run(ctx context.Context, conversationID string, stored []co
 	}
 	last := source[len(source)-1]
 	return true, s.Store.SaveSummary(ctx, Summary{ConversationID: conversationID, ThroughMessageID: last.ID,
-		ThroughCreatedAt: last.CreatedAt, MessageCount: len(source), Text: text, ModelID: s.ModelID})
+		ThroughCreatedAt: last.CreatedAt, MessageCount: len(source), Text: text, ModelID: s.ModelID,
+		Edited: prevPtr != nil && prev.Edited})
 }
 
 // chunks splits messages into runs of at most n tokens. A single message

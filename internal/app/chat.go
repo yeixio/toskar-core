@@ -1207,18 +1207,72 @@ func (e *chatExecEnv) PriorMessages(ctx context.Context) []pluginapi.ChatMessage
 	if err != nil {
 		return nil
 	}
-	prior := contextusage.WithoutCurrentTurn(stored, e.turnPrompt)
-	// Older messages may be replaced by Muninn's summary; all of them stay saved.
-	if e.app.Muninn != nil {
-		if sum, ok, err := e.app.Muninn.GetSummary(ctx, e.conversationID); err == nil && ok {
-			var n int
-			prior, n = muninn.WithSummary(prior, stored, &sum)
-			e.mu.Lock()
-			e.summarized = n
-			e.mu.Unlock()
-		}
+	all := contextusage.WithoutCurrentTurn(stored, e.turnPrompt)
+	// Older messages may be replaced by Muninn's summary; all of them stay
+	// saved. A chat kept verbatim never is (#342).
+	if e.app.Muninn == nil || e.app.compactOff(ctx, e.conversationID) {
+		return all
+	}
+	prior := e.withSummary(ctx, all, stored)
+	// When this turn wouldn't fit, compact first rather than leave the
+	// oldest messages out with nothing covering them (#342).
+	if e.overflows(ctx, prior) && e.compactNow(ctx, stored) {
+		prior = e.withSummary(ctx, all, stored)
 	}
 	return prior
+}
+
+// withSummary puts the chat's summary in place of the messages it covers.
+func (e *chatExecEnv) withSummary(ctx context.Context, prior []pluginapi.ChatMessage, stored []contracts.Message) []pluginapi.ChatMessage {
+	sum, ok, err := e.app.Muninn.GetSummary(ctx, e.conversationID)
+	if err != nil || !ok {
+		return prior
+	}
+	out, n := muninn.WithSummary(prior, stored, &sum)
+	e.mu.Lock()
+	e.summarized = n
+	e.mu.Unlock()
+	return out
+}
+
+// overflowShare is how much of the room the model's window leaves the
+// earlier messages may fill before the turn compacts first; the rest is
+// for instructions and tools, not known here.
+const overflowShare = 0.8
+
+// overflows reports earlier messages too long for this turn's model.
+func (e *chatExecEnv) overflows(ctx context.Context, prior []pluginapi.ChatMessage) bool {
+	limit := e.ContextLimit()
+	if limit <= 0 {
+		return false
+	}
+	count := e.TokenCounter(ctx, "chat")
+	used := 0
+	for _, m := range prior {
+		n, _ := count.Count(m.Content)
+		used += n
+	}
+	return used > int(overflowShare*float64(contextusage.Room(limit, count, e.turnPrompt)))
+}
+
+// compactNow summarizes the chat before this turn's answer, saying so in
+// its progress, and reports whether it did.
+func (e *chatExecEnv) compactNow(ctx context.Context, stored []contracts.Message) bool {
+	modelID := e.modelID()
+	if e.app.summarizer == nil || e.app.stubInference || !usableForCompact(modelID) {
+		return false
+	}
+	e.app.publish(ctx, events.New("chat.compacting", map[string]any{"conversation_id": e.conversationID}))
+	e.progress("compacting", map[string]any{"conversation_id": e.conversationID})
+	ran, err := e.app.summarizer.RunWith(ctx, e.app.compactJob(ctx, modelID, true), e.conversationID, stored, e.ContextLimit())
+	if err != nil {
+		e.app.Logger.Warn("compact before the answer", "conversation_id", e.conversationID, "error", err)
+		return false
+	}
+	if ran {
+		e.app.publish(ctx, events.New("chat.summarized", map[string]any{"conversation_id": e.conversationID}))
+	}
+	return ran
 }
 
 // pipelineMS is the time from receiving the message to the first model call.

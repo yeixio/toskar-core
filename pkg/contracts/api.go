@@ -618,9 +618,12 @@ type Conversation struct {
 	ProfileID string `json:"profile_id,omitempty"`
 	ModelID   string `json:"model_id,omitempty"`
 	// MemoryOff keeps persistent memory out of this conversation.
-	MemoryOff bool      `json:"memory_off"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	MemoryOff bool `json:"memory_off"`
+	// CompactOff keeps this conversation verbatim: auto-compact never
+	// sends its older messages as a summary (contract 1.35, #342).
+	CompactOff bool      `json:"compact_off"`
+	CreatedAt  time.Time `json:"created_at"`
+	UpdatedAt  time.Time `json:"updated_at"`
 }
 
 // ConversationsDeleteRequest is POST /api/v1/conversations/delete: chats to
@@ -1115,10 +1118,14 @@ type SettingsView struct {
 	ModelStorageLimitGB int  `json:"model_storage_limit_gb"`
 	SaveChatHistory     bool `json:"save_chat_history"`
 	// MemoryEnabled turns persistent memory on for chats by default.
-	MemoryEnabled     bool `json:"memory_enabled"`
-	SaveTaskHistory   bool `json:"save_task_history"`
-	NotifyTaskFinish  bool `json:"notify_task_finish"`
-	NotifyPeerOffline bool `json:"notify_peer_offline"`
+	MemoryEnabled bool `json:"memory_enabled"`
+	// CompactAt is when auto-compact starts sending a long chat's older
+	// messages as a summary: early (40% of the model's window), normal
+	// (50%), or late (70%) (contract 1.35, #342).
+	CompactAt         string `json:"compact_at"`
+	SaveTaskHistory   bool   `json:"save_task_history"`
+	NotifyTaskFinish  bool   `json:"notify_task_finish"`
+	NotifyPeerOffline bool   `json:"notify_peer_offline"`
 	// CommunityRatings shows community model ratings, downloading the
 	// public summary once a day while models are browsed (#37).
 	CommunityRatings bool `json:"community_ratings"`

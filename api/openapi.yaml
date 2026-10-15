@@ -3754,6 +3754,94 @@ paths:
           description: The chat as shown
         "404":
           description: MESSAGE_NOT_FOUND
+  /api/v1/conversations/{id}/summary:
+    get:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      summary: A chat's auto-compact summary (#342)
+      description: What the model sees in place of the chat's older messages, through which message. Every message stays saved.
+      operationId: getConversationSummary
+      responses:
+        "200":
+          description: The summary
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  conversation_id:
+                    type: string
+                  through_message_id:
+                    type: string
+                  through_created_at:
+                    type: string
+                    format: date-time
+                  message_count:
+                    type: integer
+                  summary:
+                    type: string
+                  model_id:
+                    type: string
+                  updated_at:
+                    type: string
+                    format: date-time
+                  edited:
+                    type: boolean
+        "404":
+          description: SUMMARY_NOT_FOUND, the chat hasn't been compacted
+    put:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      summary: Correct a chat's summary (#342)
+      description: Later summaries keep the correction.
+      operationId: editConversationSummary
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                summary:
+                  type: string
+      responses:
+        "200":
+          description: The summary, edited
+  /api/v1/conversations/{id}/compact:
+    post:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      summary: Compact a chat now (#342)
+      description: Summarizes its older messages whatever its size, keeping the newest verbatim. NOTHING_TO_COMPACT for a chat too short.
+      operationId: compactConversation
+      responses:
+        "200":
+          description: The summary
+  /api/v1/conversations/{id}/from-summary:
+    post:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      summary: A new chat that begins with this chat's summary (#342)
+      operationId: conversationFromSummary
+      responses:
+        "201":
+          description: The new conversation
   /api/v1/conversations/{id}/messages:
     get:
       summary: Messages of a conversation, with sources, steps, and files

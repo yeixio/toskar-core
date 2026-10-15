@@ -232,5 +232,10 @@
   "KEY_NOT_FOUND": "Cette personne n'a aucune clé avec cet identifiant.",
   "KEYS_FAILED": "Ses clés n'ont pas pu être lues : {{detail}}",
   "CAPABILITY_OFF": "C'est désactivé pour votre compte. Demandez à {{admin}} ou à un autre Admin de l'activer.",
-  "CAPABILITY_UNKNOWN": "Toskar ne connaît pas cette capacité."
+  "CAPABILITY_UNKNOWN": "Toskar ne connaît pas cette capacité.",
+  "NOTHING_TO_COMPACT": "Cette conversation est trop courte pour être compactée.",
+  "SUMMARY_NOT_FOUND": "Cette conversation n'a pas encore été compactée.",
+  "SUMMARY_EMPTY": "Un résumé ne peut pas être vide.",
+  "SUMMARY_FAILED": "Le résumé n'a pas pu être lu ou enregistré : {{detail}}",
+  "COMPACT_FAILED": "La conversation n'a pas pu être compactée : {{detail}}"
 }

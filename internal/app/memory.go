@@ -157,15 +157,15 @@ func (a *App) summarizeLater(turn context.Context, conversationID, modelID strin
 		// (#206), past the end of the turn.
 		ctx, cancel := context.WithTimeout(context.WithoutCancel(turn), 5*time.Minute)
 		defer cancel()
+		// A chat kept verbatim isn't compacted (#342).
+		if a.compactOff(ctx, conversationID) {
+			return
+		}
 		stored, err := a.Conversations.ListMessages(ctx, conversationID)
 		if err != nil {
 			return
 		}
-		job := &muninn.Summarizer{Store: a.Muninn, ModelID: modelID, Count: a.tokenCounter(ctx, modelID),
-			Generate: func(ctx context.Context, msgs []pluginapi.ChatMessage) (string, error) {
-				return a.generateOnce(ctx, modelID, "", a.localAdapters(ctx, modelID), msgs)
-			}}
-		ran, err := a.summarizer.RunWith(ctx, job, conversationID, stored, windowTokens)
+		ran, err := a.summarizer.RunWith(ctx, a.compactJob(ctx, modelID, false), conversationID, stored, windowTokens)
 		switch {
 		case err != nil:
 			a.Logger.Warn("summarize conversation", "conversation_id", conversationID, "error", err)

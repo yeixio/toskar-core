@@ -232,5 +232,10 @@
   "KEY_NOT_FOUND": "その ID のキーはありません。",
   "KEYS_FAILED": "キーを読み込めませんでした：{{detail}}",
   "CAPABILITY_OFF": "これはあなたのアカウントでは無効になっています。{{admin}} か他の管理者に有効にしてもらってください。",
-  "CAPABILITY_UNKNOWN": "Toskar はその機能を知りません。"
+  "CAPABILITY_UNKNOWN": "Toskar はその機能を知りません。",
+  "NOTHING_TO_COMPACT": "このチャットは短すぎて圧縮できません。",
+  "SUMMARY_NOT_FOUND": "このチャットはまだ圧縮されていません。",
+  "SUMMARY_EMPTY": "要約は空にできません。",
+  "SUMMARY_FAILED": "要約を読み込みまたは保存できませんでした：{{detail}}",
+  "COMPACT_FAILED": "チャットを圧縮できませんでした：{{detail}}"
 }

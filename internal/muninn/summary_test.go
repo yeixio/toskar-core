@@ -157,3 +157,51 @@ func TestChunksCutLongMessagesByTokens(t *testing.T) {
 		t.Fatalf("cut to %d words", n)
 	}
 }
+
+// Auto-compact (#342): the threshold setting, compacting a short chat when
+// asked, and a summary the person corrected kept in the next one.
+func TestAutoCompactControls(t *testing.T) {
+	if CompactAt("early") != 0.4 || CompactAt("late") != 0.7 || CompactAt("normal") != 0.5 || CompactAt("") != 0.5 {
+		t.Fatal("thresholds")
+	}
+	// About 45% of an 8k window: Early compacts, Normal waits.
+	stored := history(9, 800)
+	if _, needed := PlanAt(stored, 8192, nil, nil, CompactAt("early"), false); !needed {
+		t.Fatal("early didn't compact at 45%")
+	}
+	if _, needed := PlanAt(stored, 8192, nil, nil, CompactAt("normal"), false); needed {
+		t.Fatal("normal compacted at 45%")
+	}
+	// Asked to compact now, a smaller chat is compacted too, keeping its newest verbatim.
+	small := history(6, 300)
+	through, needed := PlanAt(small, 8192, nil, nil, 0.5, true)
+	if !needed || through >= len(small)-1 || small[through].Role != "assistant" {
+		t.Fatalf("forced: %d %v", through, needed)
+	}
+
+	s := newStore(t)
+	ctx := context.Background()
+	if _, err := s.db.Exec(`INSERT INTO conversations (id, title, created_at, updated_at) VALUES ('c2', 't', '2026-01-01', '2026-01-01')`); err != nil {
+		t.Fatal(err)
+	}
+	if err := s.SaveSummary(ctx, Summary{ConversationID: "c2", ThroughMessageID: "a1", MessageCount: 4,
+		Text: "The user's dog is named Rex (not Max).", Edited: true}); err != nil {
+		t.Fatal(err)
+	}
+	var asked string
+	job := &Summarizer{Store: s, ModelID: "m", Force: true, Generate: func(ctx context.Context, msgs []pluginapi.ChatMessage) (string, error) {
+		asked = msgs[len(msgs)-1].Content
+		return "The dog is Rex; they talked about walks.", nil
+	}}
+	ran, err := job.Run(ctx, "c2", history(8, 300), 8192)
+	if err != nil || !ran {
+		t.Fatalf("run %v %v", ran, err)
+	}
+	if !strings.Contains(asked, "The person corrected the earlier summary") || !strings.Contains(asked, "Rex (not Max)") {
+		t.Fatalf("the correction wasn't kept in the prompt: %q", asked)
+	}
+	got, _, _ := s.GetSummary(ctx, "c2")
+	if !got.Edited || got.Text != "The dog is Rex; they talked about walks." {
+		t.Fatalf("saved %+v", got)
+	}
+}
