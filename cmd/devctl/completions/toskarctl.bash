@@ -6,7 +6,7 @@ _toskarctl() {
   prev="${COMP_WORDS[COMP_CWORD-1]}"
 
   if [[ ${COMP_CWORD} -eq 1 ]]; then
-    COMPREPLY=($(compgen -W "version about paths automations mcp join join-token network leave completion" -- "$cur"))
+    COMPREPLY=($(compgen -W "version about paths automations mcp join join-token network leave people completion" -- "$cur"))
     return
   fi
 
@@ -26,6 +26,13 @@ _toskarctl() {
         COMPREPLY=($(compgen -W "create list revoke" -- "$cur"))
       elif [[ "$cur" == -* ]]; then
         COMPREPLY=($(compgen -W "--ttl --output" -- "$cur"))
+      fi
+      ;;
+    people)
+      if [[ ${COMP_CWORD} -eq 2 ]]; then
+        COMPREPLY=($(compgen -W "list add show set link keys devices rm activity" -- "$cur"))
+      elif [[ "$cur" == -* ]]; then
+        COMPREPLY=($(compgen -W "--role --disabled --email --name --username --password-stdin --must-change --disable --enable --revoke --transfer-to --yes --output" -- "$cur"))
       fi
       ;;
     network|leave)

@@ -46,7 +46,7 @@ The person's role still applies, so a Member's phone gets `403` for what left th
 
 Anything else returns `403` `DEVICE_NOT_ALLOWED`. It appears in `GET /api-keys` with `kind` `device`, keeps that kind when rotated, and is revoked like any other key. Over plain HTTP the code and the key can be read by others on the same network, as any key can.
 
-`TOSKAR_API_KEY`, when set, is hashed at startup if that secret is not already valid. The Docker image binds `0.0.0.0` and will not start until that variable is set or a key is already in the data directory. The cluster compose file sets a local test key for that reason.
+`TOSKAR_API_KEY`, when set, is hashed at startup if that secret is not already valid. The Docker image binds `0.0.0.0` and will not start until that variable is set, a key is already in the data directory, or someone can sign in, such as an Admin from `TOSKAR_ADMIN_EMAIL` and `TOSKAR_ADMIN_PASSWORD_FILE` ([Configuration](configuration.md#environment-variables)). The cluster compose file sets a local test key for that reason.
 
 A bearer token on plain HTTP does not encrypt traffic; use HTTPS on the same port from other devices (see below).
 

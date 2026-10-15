@@ -71,7 +71,7 @@ func TestBashCompletionCandidates(t *testing.T) {
 		line string
 		want string
 	}{
-		{"toskarctl ''", "version about paths automations mcp join join-token network leave completion"},
+		{"toskarctl ''", "version about paths automations mcp join join-token network leave people completion"},
 		{"toskarctl j", "join join-token"},
 		{"toskarctl join-token ''", "create list revoke"},
 		{"toskarctl join --f", "--fingerprint"},
