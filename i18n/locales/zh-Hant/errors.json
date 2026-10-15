@@ -220,5 +220,15 @@
   "RELAY_TOKEN_NOT_NEEDED": "這台電腦使用你所屬組織的中繼，因此不需要訂閱。",
   "RELAY_TOKEN_FAILED": "無法在這台電腦上儲存中繼權杖。",
   "ROUTE_NOT_LOCAL": "請先在家裡連線一次，以在此裝置上設定隨處存取。",
-  "ROUTE_FAILED": "無法在這台電腦上設定隨處存取。"
+  "ROUTE_FAILED": "無法在這台電腦上設定隨處存取。",
+  "PASSWORD_CHANGE_REQUIRED": "請先變更你收到的密碼。",
+  "PASSWORD_WRONG": "這不是你目前的密碼。",
+  "PASSWORD_SAME": "請選擇與目前密碼不同的密碼。",
+  "NO_PASSWORD": "你在這裡不使用密碼登入。",
+  "CONFIRM_NAME": "要移除 {{name}}，請輸入其名字以確認。",
+  "TRANSFER_INVALID": "沒有可接收其資料的有效使用者。",
+  "EMAIL_INVALID": "這不是電子郵件地址。",
+  "EMAIL_TAKEN": "其他人已在使用這個電子郵件地址。",
+  "KEY_NOT_FOUND": "此人沒有該 ID 的金鑰。",
+  "KEYS_FAILED": "無法讀取其金鑰：{{detail}}"
 }

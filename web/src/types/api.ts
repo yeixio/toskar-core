@@ -947,6 +947,10 @@ export interface Person {
   external?: string
   /** The profiles they're pinned to in place of their role's (#345); [] is any profile. */
   profiles?: string[]
+  /** Where to reach them (#592). */
+  email?: string
+  /** The password an Admin set must be changed before anything else (#592). */
+  must_change?: boolean
 }
 
 /** The profiles each pinnable role is kept to (#345); empty is any profile. */

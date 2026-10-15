@@ -187,6 +187,10 @@ type Dependencies struct {
 	People   *auth.People
 	Sessions *auth.Sessions
 	Invites  *auth.Invites
+	// PeopleActivity logs who changed whom (#592), and RemovePerson
+	// removes someone, deleting their data or giving it to transferTo.
+	PeopleActivity *auth.Activity
+	RemovePerson   func(ctx context.Context, id, transferTo string) error
 	// Devices makes the codes a phone connects with (#216).
 	Devices *auth.DevicePairer
 	// PhoneAddress is where a phone reaches this computer, and whether it
@@ -729,6 +733,11 @@ func (s *Server) serveAs(w http.ResponseWriter, r *http.Request, principal auth.
 	// A portal's guest reaches only its chat (#205).
 	if principal.Person.PortalID != "" && r.Method != http.MethodOptions && !guestRoutes[r.Method+" "+route] {
 		writeErr(w, http.StatusForbidden, "PORTAL_ONLY", "a portal's visitor can only chat in the portal", nil)
+		return
+	}
+	// A password an Admin set is changed before anything else (#592).
+	if principal.Via == auth.ViaSession && principal.Person.MustChange && r.Method != http.MethodOptions && !mustChangeRoutes[r.Method+" "+route] {
+		writeErr(w, http.StatusForbidden, "PASSWORD_CHANGE_REQUIRED", "change the password you were given first", nil)
 		return
 	}
 	if need := auth.RoleNeeded(r.Method, route); r.Method != http.MethodOptions && !principal.Person.Role.AtLeast(need) {

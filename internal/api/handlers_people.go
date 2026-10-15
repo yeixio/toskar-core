@@ -37,6 +37,7 @@ func (s *Server) peopleRoutes(api *mux.Router) {
 	api.HandleFunc("/people/{id}", s.atLeast(auth.RoleAdmin, s.handleChangePerson)).Methods(http.MethodPatch)
 	api.HandleFunc("/people/{id}/link", s.atLeast(auth.RoleAdmin, s.handlePersonLink)).Methods(http.MethodPost)
 	s.pinRoutes(api)
+	s.peopleAdminRoutes(api)
 }
 
 // atLeast refuses a request whose person's role is below min.
@@ -208,6 +209,10 @@ func peopleError(w http.ResponseWriter, err error) {
 		writeErr(w, http.StatusBadRequest, "NAME_INVALID", msg, nil)
 	case errors.Is(err, auth.ErrNoPerson):
 		writeErr(w, http.StatusNotFound, "PERSON_NOT_FOUND", msg, nil)
+	case errors.Is(err, auth.ErrBadEmail):
+		writeErr(w, http.StatusBadRequest, "EMAIL_INVALID", msg, nil)
+	case errors.Is(err, auth.ErrEmailTaken):
+		writeErr(w, http.StatusConflict, "EMAIL_TAKEN", msg, nil)
 	default:
 		writeErr(w, http.StatusInternalServerError, "INTERNAL_ERROR", msg, nil)
 	}
@@ -287,7 +292,7 @@ func (s *Server) handleListPeople(w http.ResponseWriter, r *http.Request) {
 		writeErr(w, http.StatusInternalServerError, "INTERNAL_ERROR", err.Error(), nil)
 		return
 	}
-	writeJSON(w, http.StatusOK, list)
+	writeJSON(w, http.StatusOK, filterPeople(list, r))
 }
 
 // linkView is a one-time link to give a person: the path of its page on
@@ -314,10 +319,7 @@ func (s *Server) handleAddPerson(w http.ResponseWriter, r *http.Request) {
 	if !s.signInReady(w) {
 		return
 	}
-	var body struct {
-		Name string    `json:"name"`
-		Role auth.Role `json:"role"`
-	}
+	var body newPerson
 	if err := json.NewDecoder(io.LimitReader(r.Body, 4096)).Decode(&body); err != nil {
 		writeErr(w, http.StatusBadRequest, "INVALID_JSON", "invalid body", nil)
 		return
@@ -329,9 +331,28 @@ func (s *Server) handleAddPerson(w http.ResponseWriter, r *http.Request) {
 		writeErr(w, http.StatusForbidden, "ROLE_REQUIRED", "only the Owner adds Admins", map[string]any{"role": string(auth.RoleOwner)})
 		return
 	}
-	person, err := s.deps.People.Create(r.Context(), body.Name, body.Role)
+	// A password needs a username to sign in with; both are checked before
+	// anyone is added, so a bad one adds no one (#592).
+	if body.Password != "" {
+		if err := s.deps.People.CheckSignIn(r.Context(), "", body.Username, body.Password); err != nil {
+			peopleError(w, err)
+			return
+		}
+	}
+	person, err := s.deps.People.CreateWith(r.Context(), body.Name, body.Role, body.Email)
 	if err != nil {
 		peopleError(w, err)
+		return
+	}
+	s.record(r.Context(), person, "added", "role "+string(person.Role))
+	if body.Password != "" {
+		password := body.Password
+		if err := s.setPassword(r.Context(), person, passwordChange{Password: &password, Username: body.Username, MustChange: body.MustChange}); err != nil {
+			peopleError(w, err)
+			return
+		}
+		person, _ = s.deps.People.Get(r.Context(), person.ID)
+		writeJSON(w, http.StatusCreated, map[string]any{"person": person})
 		return
 	}
 	link, err := s.makeLink(r, person)
@@ -346,11 +367,15 @@ func (s *Server) handleChangePerson(w http.ResponseWriter, r *http.Request) {
 	if !s.signInReady(w) {
 		return
 	}
-	var change auth.Change
-	if err := json.NewDecoder(io.LimitReader(r.Body, 4096)).Decode(&change); err != nil {
+	var body struct {
+		auth.Change
+		passwordChange
+	}
+	if err := json.NewDecoder(io.LimitReader(r.Body, 4096)).Decode(&body); err != nil {
 		writeErr(w, http.StatusBadRequest, "INVALID_JSON", "invalid body", nil)
 		return
 	}
+	change := body.Change
 	actor := auth.PrincipalFrom(r.Context()).Person
 	target, err := s.deps.People.Get(r.Context(), mux.Vars(r)["id"])
 	if err != nil {
@@ -379,6 +404,14 @@ func (s *Server) handleChangePerson(w http.ResponseWriter, r *http.Request) {
 	if person.Disabled != nil {
 		_ = s.deps.Sessions.DeleteFor(r.Context(), person.ID)
 	}
+	s.recordChange(r.Context(), target, person)
+	if body.Password != nil {
+		if err := s.setPassword(r.Context(), person, body.passwordChange); err != nil {
+			peopleError(w, err)
+			return
+		}
+		person, _ = s.deps.People.Get(r.Context(), person.ID)
+	}
 	writeJSON(w, http.StatusOK, person)
 }
 
@@ -401,5 +434,6 @@ func (s *Server) handlePersonLink(w http.ResponseWriter, r *http.Request) {
 		writeErr(w, http.StatusInternalServerError, "INTERNAL_ERROR", err.Error(), nil)
 		return
 	}
+	s.record(r.Context(), target, "link_made", link.Kind)
 	writeJSON(w, http.StatusCreated, link)
 }

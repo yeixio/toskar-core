@@ -220,5 +220,15 @@
   "RELAY_TOKEN_NOT_NEEDED": "这台电脑使用你所在组织的中继，因此不需要订阅。",
   "RELAY_TOKEN_FAILED": "无法在这台电脑上保存中继令牌。",
   "ROUTE_NOT_LOCAL": "请先在家里连接一次，以在此设备上设置随处访问。",
-  "ROUTE_FAILED": "无法在这台电脑上设置随处访问。"
+  "ROUTE_FAILED": "无法在这台电脑上设置随处访问。",
+  "PASSWORD_CHANGE_REQUIRED": "请先更改你收到的密码。",
+  "PASSWORD_WRONG": "这不是你当前的密码。",
+  "PASSWORD_SAME": "请选择与当前密码不同的密码。",
+  "NO_PASSWORD": "你在这里不使用密码登录。",
+  "CONFIRM_NAME": "要移除 {{name}}，请输入其名字以确认。",
+  "TRANSFER_INVALID": "没有可接收其数据的有效用户。",
+  "EMAIL_INVALID": "这不是电子邮件地址。",
+  "EMAIL_TAKEN": "其他人已在使用这个电子邮件地址。",
+  "KEY_NOT_FOUND": "此人没有该 ID 的密钥。",
+  "KEYS_FAILED": "无法读取其密钥：{{detail}}"
 }

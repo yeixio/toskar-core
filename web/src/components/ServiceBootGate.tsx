@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useEffect, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useLocation } from 'react-router-dom'
+import { ChangePasswordForm } from '@/features/people/ChangePasswordForm'
 import { SignInForm } from '@/features/people/SignInForm'
 import { ScheduleBackgroundSync } from '@/components/ScheduleBackgroundSync'
 import { ApiError, api, rememberApiKey } from '@/lib/api'
@@ -128,6 +129,12 @@ function HealthGate({ children }: { children: ReactNode }) {
 
   if (ready && meQuery.isPending) {
     return null
+  }
+
+  // A password an Admin set is changed before anything else (#592).
+  const me = meQuery.data
+  if (ready && me?.via === 'session' && me.person.must_change) {
+    return <ChangePasswordForm name={me.person.name} onChanged={() => void meQuery.refetch()} />
   }
 
   if (ready) {

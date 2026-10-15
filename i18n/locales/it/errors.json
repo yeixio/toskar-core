@@ -220,5 +220,15 @@
   "RELAY_TOKEN_NOT_NEEDED": "Questo computer usa il relay della tua organizzazione, quindi non serve un abbonamento.",
   "RELAY_TOKEN_FAILED": "Impossibile salvare il token del relay su questo computer.",
   "ROUTE_NOT_LOCAL": "Connettiti una volta a casa per configurare l'accesso ovunque su questo dispositivo.",
-  "ROUTE_FAILED": "Impossibile configurare l'accesso ovunque su questo computer."
+  "ROUTE_FAILED": "Impossibile configurare l'accesso ovunque su questo computer.",
+  "PASSWORD_CHANGE_REQUIRED": "Prima cambia la password che hai ricevuto.",
+  "PASSWORD_WRONG": "Questa non è la tua password attuale.",
+  "PASSWORD_SAME": "Scegli una password diversa da quella attuale.",
+  "NO_PASSWORD": "Qui non accedi con una password.",
+  "CONFIRM_NAME": "Per rimuovere {{name}}, scrivi il nome per confermare.",
+  "TRANSFER_INVALID": "Non c'è nessuna persona attiva a cui dare i dati.",
+  "EMAIL_INVALID": "Questo non è un indirizzo email.",
+  "EMAIL_TAKEN": "Qualcun altro ha questo indirizzo email.",
+  "KEY_NOT_FOUND": "Non ha nessuna chiave con questo id.",
+  "KEYS_FAILED": "Impossibile leggere le sue chiavi: {{detail}}"
 }

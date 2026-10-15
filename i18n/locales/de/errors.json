@@ -220,5 +220,15 @@
   "RELAY_TOKEN_NOT_NEEDED": "Dieser Computer nutzt das Relay deiner Organisation und braucht daher kein Abo.",
   "RELAY_TOKEN_FAILED": "Das Relay-Token konnte auf diesem Computer nicht gespeichert werden.",
   "ROUTE_NOT_LOCAL": "Verbinde dich einmal zu Hause, um den Zugriff von überall auf diesem Gerät einzurichten.",
-  "ROUTE_FAILED": "Der Zugriff von überall konnte auf diesem Computer nicht eingerichtet werden."
+  "ROUTE_FAILED": "Der Zugriff von überall konnte auf diesem Computer nicht eingerichtet werden.",
+  "PASSWORD_CHANGE_REQUIRED": "Ändere zuerst das Passwort, das du bekommen hast.",
+  "PASSWORD_WRONG": "Das ist nicht dein aktuelles Passwort.",
+  "PASSWORD_SAME": "Wähle ein anderes Passwort als dein aktuelles.",
+  "NO_PASSWORD": "Du meldest dich hier nicht mit einem Passwort an.",
+  "CONFIRM_NAME": "Um {{name}} zu entfernen, gib zur Bestätigung den Namen ein.",
+  "TRANSFER_INVALID": "Es gibt keine aktive Person, die die Daten bekommen kann.",
+  "EMAIL_INVALID": "Das ist keine E-Mail-Adresse.",
+  "EMAIL_TAKEN": "Jemand anderes hat diese E-Mail-Adresse.",
+  "KEY_NOT_FOUND": "Diese Person hat keinen Schlüssel mit dieser ID.",
+  "KEYS_FAILED": "Die Schlüssel konnten nicht gelesen werden: {{detail}}"
 }

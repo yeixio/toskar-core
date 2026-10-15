@@ -220,5 +220,15 @@
   "RELAY_TOKEN_NOT_NEEDED": "Cet ordinateur utilise le relais de votre organisation : il n'a pas besoin d'abonnement.",
   "RELAY_TOKEN_FAILED": "Impossible d'enregistrer le jeton de relais sur cet ordinateur.",
   "ROUTE_NOT_LOCAL": "Connectez-vous une fois à la maison pour configurer l'accès de partout sur cet appareil.",
-  "ROUTE_FAILED": "Impossible de configurer l'accès de partout sur cet ordinateur."
+  "ROUTE_FAILED": "Impossible de configurer l'accès de partout sur cet ordinateur.",
+  "PASSWORD_CHANGE_REQUIRED": "Changez d'abord le mot de passe qu'on vous a donné.",
+  "PASSWORD_WRONG": "Ce n'est pas votre mot de passe actuel.",
+  "PASSWORD_SAME": "Choisissez un mot de passe différent de l'actuel.",
+  "NO_PASSWORD": "Vous ne vous connectez pas avec un mot de passe ici.",
+  "CONFIRM_NAME": "Pour retirer {{name}}, tapez son nom pour confirmer.",
+  "TRANSFER_INVALID": "Aucune personne active à qui donner ses données.",
+  "EMAIL_INVALID": "Ce n'est pas une adresse e-mail.",
+  "EMAIL_TAKEN": "Quelqu'un d'autre a cette adresse e-mail.",
+  "KEY_NOT_FOUND": "Cette personne n'a aucune clé avec cet identifiant.",
+  "KEYS_FAILED": "Ses clés n'ont pas pu être lues : {{detail}}"
 }

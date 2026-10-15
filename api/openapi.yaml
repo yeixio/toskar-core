@@ -127,6 +127,18 @@ paths:
     get:
       summary: Everyone who uses this Toskar (Admins and the Owner)
       operationId: listPeople
+      parameters:
+        - name: role
+          in: query
+          description: Only people with this role (#592).
+          schema:
+            type: string
+            enum: [owner, admin, member, visitor]
+        - name: disabled
+          in: query
+          description: true for only disabled people, false for only active ones.
+          schema:
+            type: boolean
       responses:
         "200":
           description: People, the Owner first
@@ -166,12 +178,69 @@ paths:
                 role:
                   type: string
                   enum: [admin, member, visitor]
+                email:
+                  type: string
+                  description: Where to reach them (#592).
+                username:
+                  type: string
+                  description: With password, the username they sign in with.
+                password:
+                  type: string
+                  description: Lets them sign in at once, with no invite link (#592).
+                must_change:
+                  type: boolean
+                  description: With password, they must change it at their next sign-in.
       responses:
         "201":
-          description: The person, and link with path (/invite/<token>), kind, and expires_at
+          description: The person, and, without a password, link with path (/invite/<token>), kind, and expires_at
         "403":
           description: ROLE_REQUIRED
   /api/v1/people/{id}:
+    get:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      summary: One person (#592)
+      operationId: getPerson
+      responses:
+        "200":
+          description: The person, with email and must_change
+        "404":
+          description: PERSON_NOT_FOUND
+    delete:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: transfer_to
+          in: query
+          description: A person to give their chats, memories, automations, files, and notifications to, instead of deleting them.
+          schema:
+            type: string
+      summary: Remove a person (#592)
+      description: Revokes their keys and devices, signs them out, and deletes their data or gives it to transfer_to. Nobody removes themselves or the Owner, and only the Owner removes Admins. The body's confirm must be their name.
+      operationId: removePerson
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                confirm:
+                  type: string
+      responses:
+        "204":
+          description: Removed
+        "400":
+          description: CONFIRM_NAME or TRANSFER_INVALID
+        "403":
+          description: ROLE_REQUIRED or OWNER_FIXED
     patch:
       parameters:
         - name: id
@@ -196,6 +265,18 @@ paths:
                   enum: [admin, member, visitor]
                 disabled:
                   type: boolean
+                email:
+                  type: string
+                  description: Their email address; empty removes it (#592).
+                password:
+                  type: string
+                  description: A password an Admin sets; they're signed out everywhere (#592).
+                username:
+                  type: string
+                  description: With password, when they have no sign-in yet.
+                must_change:
+                  type: boolean
+                  description: With password, they must change it at their next sign-in.
       responses:
         "200":
           description: The person
@@ -220,6 +301,112 @@ paths:
                     format: date-time
         "403":
           description: ROLE_REQUIRED or OWNER_FIXED
+  /api/v1/people/activity:
+    get:
+      summary: Who changed whom (#592)
+      description: Newest first. Adding, changing, disabling, removing, setting passwords, making links, and revoking keys and devices; never a password.
+      operationId: peopleActivity
+      parameters:
+        - name: person
+          in: query
+          description: Only entries by or about this person.
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: At most this many, 100 by default and 500 at most.
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Entries with at, actor_id, actor_name, target_id, target_name, action, and detail
+  /api/v1/people/{id}/keys:
+    get:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      summary: A person's API keys, other than their devices (#592)
+      operationId: personKeys
+      responses:
+        "200":
+          description: Their keys
+  /api/v1/people/{id}/keys/{key}:
+    delete:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: key
+          in: path
+          required: true
+          schema:
+            type: string
+      summary: Revoke one of a person's keys (#592)
+      operationId: revokePersonKey
+      responses:
+        "204":
+          description: Revoked
+        "404":
+          description: KEY_NOT_FOUND
+  /api/v1/people/{id}/devices:
+    get:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      summary: A person's connected devices (#592)
+      operationId: personDevices
+      responses:
+        "200":
+          description: Their devices' keys
+  /api/v1/people/{id}/devices/{key}:
+    delete:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: key
+          in: path
+          required: true
+          schema:
+            type: string
+      summary: Disconnect one of a person's devices (#592)
+      operationId: revokePersonDevice
+      responses:
+        "204":
+          description: Disconnected
+        "404":
+          description: KEY_NOT_FOUND
+  /api/v1/me/password:
+    post:
+      summary: Change your own password (#592)
+      description: With your current one. A password an Admin set with must_change is changed here before anything else works; until then other routes answer PASSWORD_CHANGE_REQUIRED. You're signed out everywhere else.
+      operationId: changeMyPassword
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                current:
+                  type: string
+                new:
+                  type: string
+      responses:
+        "200":
+          description: Who you are now
+        "403":
+          description: PASSWORD_WRONG
   /api/v1/people/{id}/link:
     post:
       parameters:

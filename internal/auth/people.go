@@ -64,6 +64,10 @@ type Person struct {
 	// Profiles pins them to these profiles (#345), in place of their
 	// role's: nil is their role's, empty is any profile.
 	Profiles *[]string `json:"profiles,omitempty"`
+	// Email is where to reach them (#592), and MustChange says the
+	// password an Admin set must be changed at their next sign-in.
+	Email      string `json:"email,omitempty"`
+	MustChange bool   `json:"must_change,omitempty"`
 }
 
 // ErrNoPerson is an unknown or disabled person.
@@ -77,13 +81,13 @@ type People struct {
 // NewPeople reads people from db.
 func NewPeople(db *sql.DB) *People { return &People{db: db} }
 
-const personColumns = `id, name, COALESCE(username, ''), role, created_at, disabled_at, password_hash IS NOT NULL, COALESCE(external_label, external_id, ''), COALESCE(portal_id, ''), profiles_json`
+const personColumns = `id, name, COALESCE(username, ''), role, created_at, disabled_at, password_hash IS NOT NULL, COALESCE(external_label, external_id, ''), COALESCE(portal_id, ''), profiles_json, COALESCE(email, ''), must_change`
 
 func scanPerson(row interface{ Scan(...any) error }) (Person, error) {
 	var p Person
 	var created string
 	var disabled, profiles sql.NullString
-	if err := row.Scan(&p.ID, &p.Name, &p.Username, &p.Role, &created, &disabled, &p.SignIn, &p.External, &p.PortalID, &profiles); err != nil {
+	if err := row.Scan(&p.ID, &p.Name, &p.Username, &p.Role, &created, &disabled, &p.SignIn, &p.External, &p.PortalID, &profiles, &p.Email, &p.MustChange); err != nil {
 		return Person{}, err
 	}
 	if profiles.Valid {
@@ -148,7 +152,33 @@ var (
 	ErrOwnerFixed    = errors.New("the Owner can't be given another role or disabled")
 	ErrOneOwner      = errors.New("there is only one Owner")
 	ErrBadName       = errors.New("a name is 1 to 80 characters")
+	ErrBadEmail      = errors.New("that isn't an email address")
+	ErrEmailTaken    = errors.New("someone else has that email address")
 )
+
+var emailRe = regexp.MustCompile(`^[^@\s]+@[^@\s]+\.[^@\s]+$`)
+
+// cleanEmail is an email address, trimmed, or "" for none.
+func cleanEmail(email string) (string, error) {
+	email = strings.TrimSpace(email)
+	if email != "" && (len(email) > 254 || !emailRe.MatchString(email)) {
+		return "", ErrBadEmail
+	}
+	return email, nil
+}
+
+// emailTaken reports someone other than id with email.
+func (p *People) emailTaken(ctx context.Context, id, email string) (bool, error) {
+	if email == "" {
+		return false, nil
+	}
+	var other string
+	err := p.db.QueryRowContext(ctx, `SELECT id FROM people WHERE email = ? COLLATE NOCASE AND id <> ?`, email, id).Scan(&other)
+	if errors.Is(err, sql.ErrNoRows) {
+		return false, nil
+	}
+	return err == nil, err
+}
 
 var usernameRe = regexp.MustCompile(`^[A-Za-z0-9._-]{3,32}$`)
 
@@ -163,9 +193,22 @@ func cleanName(name string) (string, error) {
 // Create adds a person with a role other than Owner. They sign in once
 // they accept an invite.
 func (p *People) Create(ctx context.Context, name string, role Role) (Person, error) {
+	return p.CreateWith(ctx, name, role, "")
+}
+
+// CreateWith adds a person with an email address (#592).
+func (p *People) CreateWith(ctx context.Context, name string, role Role, email string) (Person, error) {
 	name, err := cleanName(name)
 	if err != nil {
 		return Person{}, err
+	}
+	if email, err = cleanEmail(email); err != nil {
+		return Person{}, err
+	}
+	if taken, err := p.emailTaken(ctx, "", email); err != nil {
+		return Person{}, err
+	} else if taken {
+		return Person{}, ErrEmailTaken
 	}
 	if !role.Valid() {
 		return Person{}, ErrBadRole
@@ -174,8 +217,8 @@ func (p *People) Create(ctx context.Context, name string, role Role) (Person, er
 		return Person{}, ErrOneOwner
 	}
 	id := uuid.NewString()
-	if _, err := p.db.ExecContext(ctx, `INSERT INTO people (id, name, role, created_at) VALUES (?, ?, ?, ?)`,
-		id, name, string(role), stamp(time.Now())); err != nil {
+	if _, err := p.db.ExecContext(ctx, `INSERT INTO people (id, name, role, created_at, email) VALUES (?, ?, ?, ?, ?)`,
+		id, name, string(role), stamp(time.Now()), nullable(email)); err != nil {
 		return Person{}, err
 	}
 	return p.Get(ctx, id)
@@ -186,6 +229,8 @@ type Change struct {
 	Name     *string `json:"name,omitempty"`
 	Role     *Role   `json:"role,omitempty"`
 	Disabled *bool   `json:"disabled,omitempty"`
+	// Email is their address; "" removes it (#592).
+	Email *string `json:"email,omitempty"`
 }
 
 // Update changes a person. The Owner keeps their role and can't be
@@ -201,6 +246,18 @@ func (p *People) Update(ctx context.Context, id string, c Change) (Person, error
 			return Person{}, err
 		}
 		person.Name = name
+	}
+	if c.Email != nil {
+		email, err := cleanEmail(*c.Email)
+		if err != nil {
+			return Person{}, err
+		}
+		if taken, err := p.emailTaken(ctx, id, email); err != nil {
+			return Person{}, err
+		} else if taken {
+			return Person{}, ErrEmailTaken
+		}
+		person.Email = email
 	}
 	if c.Role != nil && *c.Role != person.Role {
 		if !c.Role.Valid() {
@@ -229,8 +286,8 @@ func (p *People) Update(ctx context.Context, id string, c Change) (Person, error
 			disabledAt = stamp(time.Now())
 		}
 	}
-	if _, err := p.db.ExecContext(ctx, `UPDATE people SET name = ?, role = ?, disabled_at = ? WHERE id = ?`,
-		person.Name, string(person.Role), disabledAt, id); err != nil {
+	if _, err := p.db.ExecContext(ctx, `UPDATE people SET name = ?, role = ?, disabled_at = ?, email = ? WHERE id = ?`,
+		person.Name, string(person.Role), disabledAt, nullable(person.Email), id); err != nil {
 		return Person{}, err
 	}
 	return p.Get(ctx, id)
@@ -272,14 +329,46 @@ func (p *People) SetSignIn(ctx context.Context, id, username, password string) e
 	return err
 }
 
-// SetPassword gives a person a new password, keeping their username.
+// SetPassword gives a person a new password, keeping their username. It's
+// their own, so they needn't change it again.
 func (p *People) SetPassword(ctx context.Context, id, password string) error {
 	hash, err := HashPassword(password)
 	if err != nil {
 		return err
 	}
-	_, err = p.db.ExecContext(ctx, `UPDATE people SET password_hash = ? WHERE id = ?`, hash, id)
+	_, err = p.db.ExecContext(ctx, `UPDATE people SET password_hash = ?, must_change = 0 WHERE id = ?`, hash, id)
 	return err
+}
+
+// SetPasswordFor is a password an Admin sets for someone (#592): with a
+// username when they have none yet, and, with mustChange, one they must
+// change at their next sign-in.
+func (p *People) SetPasswordFor(ctx context.Context, id, username, password string, mustChange bool) error {
+	if p.HasSignIn(ctx, id) {
+		if err := p.SetPassword(ctx, id, password); err != nil {
+			return err
+		}
+	} else if err := p.SetSignIn(ctx, id, username, password); err != nil {
+		return err
+	}
+	_, err := p.db.ExecContext(ctx, `UPDATE people SET must_change = ? WHERE id = ?`, mustChange, id)
+	return err
+}
+
+// Delete removes a person who isn't the Owner, with their sessions and
+// sign-in links; their data must be removed or given away first.
+func (p *People) Delete(ctx context.Context, id string) error {
+	if id == OwnerID {
+		return ErrOwnerFixed
+	}
+	res, err := p.db.ExecContext(ctx, `DELETE FROM people WHERE id = ? AND role <> 'owner'`, id)
+	if err != nil {
+		return err
+	}
+	if n, _ := res.RowsAffected(); n == 0 {
+		return ErrNoPerson
+	}
+	return nil
 }
 
 // SignIn is the active person with this username and password. A wrong
@@ -416,4 +505,12 @@ func (p *People) Guests(ctx context.Context, portalID string) ([]Person, error) 
 		out = append(out, person)
 	}
 	return out, rows.Err()
+}
+
+// nullable is s, or NULL when it's empty.
+func nullable(s string) any {
+	if s == "" {
+		return nil
+	}
+	return s
 }

@@ -74,6 +74,16 @@
       "unavailable": "L'accesso con un altro servizio non è disponibile al momento."
     }
   },
+  "changePassword": {
+    "title": "Scegli la tua password, {{name}}",
+    "body": "La password che hai ricevuto l'ha impostata un Admin. Scegline una che conosci solo tu prima di continuare.",
+    "current": "Password ricevuta",
+    "new": "Nuova password",
+    "again": "Ripeti la nuova password",
+    "mismatch": "Le nuove password non coincidono.",
+    "submit": "Cambia password",
+    "signOut": "Esci"
+  },
   "account": {
     "label": "Il tuo account",
     "signedInAs": "Accesso come {{name}} (@{{username}}), {{role}}.",

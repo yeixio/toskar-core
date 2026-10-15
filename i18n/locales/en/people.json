@@ -74,6 +74,16 @@
       "unavailable": "Signing in with another service isn't available right now."
     }
   },
+  "changePassword": {
+    "title": "Choose your own password, {{name}}",
+    "body": "The password you were given was set by an Admin. Choose one only you know before you go on.",
+    "current": "Password you were given",
+    "new": "New password",
+    "again": "New password again",
+    "mismatch": "The new passwords don't match.",
+    "submit": "Change password",
+    "signOut": "Sign out"
+  },
   "account": {
     "label": "Your account",
     "signedInAs": "Signed in as {{name}} (@{{username}}), {{role}}.",

@@ -220,5 +220,15 @@
   "RELAY_TOKEN_NOT_NEEDED": "Este computador usa o relay da sua organização, então não precisa de assinatura.",
   "RELAY_TOKEN_FAILED": "Não foi possível salvar o token do relay neste computador.",
   "ROUTE_NOT_LOCAL": "Conecte-se uma vez em casa para configurar o acesso de qualquer lugar neste dispositivo.",
-  "ROUTE_FAILED": "Não foi possível configurar o acesso de qualquer lugar neste computador."
+  "ROUTE_FAILED": "Não foi possível configurar o acesso de qualquer lugar neste computador.",
+  "PASSWORD_CHANGE_REQUIRED": "Primeiro troque a senha que você recebeu.",
+  "PASSWORD_WRONG": "Essa não é sua senha atual.",
+  "PASSWORD_SAME": "Escolha uma senha diferente da atual.",
+  "NO_PASSWORD": "Você não entra com senha aqui.",
+  "CONFIRM_NAME": "Para remover {{name}}, digite o nome para confirmar.",
+  "TRANSFER_INVALID": "Não há nenhuma pessoa ativa para receber os dados.",
+  "EMAIL_INVALID": "Isso não é um endereço de e-mail.",
+  "EMAIL_TAKEN": "Outra pessoa já usa esse e-mail.",
+  "KEY_NOT_FOUND": "Essa pessoa não tem chave com esse id.",
+  "KEYS_FAILED": "Não foi possível ler as chaves: {{detail}}"
 }

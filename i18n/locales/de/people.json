@@ -74,6 +74,16 @@
       "unavailable": "Die Anmeldung mit einem anderen Dienst ist gerade nicht verfügbar."
     }
   },
+  "changePassword": {
+    "title": "Wähle dein eigenes Passwort, {{name}}",
+    "body": "Das Passwort, das du bekommen hast, hat ein Admin festgelegt. Wähle eines, das nur du kennst, bevor du weitermachst.",
+    "current": "Passwort, das du bekommen hast",
+    "new": "Neues Passwort",
+    "again": "Neues Passwort wiederholen",
+    "mismatch": "Die neuen Passwörter stimmen nicht überein.",
+    "submit": "Passwort ändern",
+    "signOut": "Abmelden"
+  },
   "account": {
     "label": "Dein Konto",
     "signedInAs": "Angemeldet als {{name}} (@{{username}}), {{role}}.",

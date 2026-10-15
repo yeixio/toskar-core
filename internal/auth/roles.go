@@ -13,10 +13,12 @@ import "strings"
 
 // visitorRoutes are what everyone signed in may reach.
 var visitorRoutes = map[string]bool{
-	"GET /api/v1/remote-access/route":                     true,
-	"GET /api/v1/health":                                  true,
-	"GET /api/v1/version":                                 true,
-	"GET /api/v1/me":                                      true,
+	"GET /api/v1/remote-access/route": true,
+	"GET /api/v1/health":              true,
+	"GET /api/v1/version":             true,
+	"GET /api/v1/me":                  true,
+	// Changing one's own password, such as one an Admin set (#592).
+	"POST /api/v1/me/password":                            true,
 	"PATCH /api/v1/me/preferences":                        true,
 	"GET /api/v1/me/devices":                              true,
 	"DELETE /api/v1/me/devices/{id}":                      true,

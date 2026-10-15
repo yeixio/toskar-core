@@ -694,6 +694,9 @@ export const api = {
   getOIDC: () => request<{ enabled: boolean; label?: string }>('/api/v1/oidc'),
 
   /** Sign this browser out. */
+  /** Changes your own password, with your current one, as when an Admin set it (#592). */
+  changeMyPassword: (current: string, next: string) =>
+    request<Principal>('/api/v1/me/password', { method: 'POST', body: JSON.stringify({ current, new: next }) }),
   signOut: () => request<void>('/api/v1/session', { method: 'DELETE' }),
 
   /** What a one-time sign-in link is for. */

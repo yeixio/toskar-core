@@ -220,5 +220,15 @@
   "RELAY_TOKEN_NOT_NEEDED": "이 컴퓨터는 조직의 릴레이를 사용하므로 구독이 필요 없어요.",
   "RELAY_TOKEN_FAILED": "이 컴퓨터에 릴레이 토큰을 저장하지 못했어요.",
   "ROUTE_NOT_LOCAL": "이 기기에서 어디서나 접속을 설정하려면 집에서 한 번 연결하세요.",
-  "ROUTE_FAILED": "이 컴퓨터에서 어디서나 접속을 설정하지 못했어요."
+  "ROUTE_FAILED": "이 컴퓨터에서 어디서나 접속을 설정하지 못했어요.",
+  "PASSWORD_CHANGE_REQUIRED": "먼저 받은 비밀번호를 바꾸세요.",
+  "PASSWORD_WRONG": "현재 비밀번호가 아닙니다.",
+  "PASSWORD_SAME": "현재 비밀번호와 다른 비밀번호를 고르세요.",
+  "NO_PASSWORD": "이곳에서는 비밀번호로 로그인하지 않습니다.",
+  "CONFIRM_NAME": "{{name}}을(를) 삭제하려면 확인을 위해 이름을 입력하세요.",
+  "TRANSFER_INVALID": "데이터를 넘겨받을 활성 사용자가 없습니다.",
+  "EMAIL_INVALID": "이메일 주소가 아닙니다.",
+  "EMAIL_TAKEN": "다른 사람이 이 이메일 주소를 쓰고 있습니다.",
+  "KEY_NOT_FOUND": "그 ID의 키가 없습니다.",
+  "KEYS_FAILED": "키를 읽을 수 없습니다: {{detail}}"
 }

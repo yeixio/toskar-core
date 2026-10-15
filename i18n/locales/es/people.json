@@ -74,6 +74,16 @@
       "unavailable": "Iniciar sesión con otro servicio no está disponible ahora."
     }
   },
+  "changePassword": {
+    "title": "Elige tu propia contraseña, {{name}}",
+    "body": "La contraseña que te dieron la puso un Admin. Elige una que solo tú conozcas antes de seguir.",
+    "current": "Contraseña que te dieron",
+    "new": "Nueva contraseña",
+    "again": "Repite la nueva contraseña",
+    "mismatch": "Las nuevas contraseñas no coinciden.",
+    "submit": "Cambiar contraseña",
+    "signOut": "Cerrar sesión"
+  },
   "account": {
     "label": "Tu cuenta",
     "signedInAs": "Sesión iniciada como {{name}} (@{{username}}), {{role}}.",

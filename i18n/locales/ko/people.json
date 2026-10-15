@@ -74,6 +74,16 @@
       "unavailable": "지금은 다른 서비스로 로그인할 수 없어요."
     }
   },
+  "changePassword": {
+    "title": "{{name}}님, 직접 비밀번호를 정하세요",
+    "body": "받은 비밀번호는 관리자가 설정한 것입니다. 계속하기 전에 본인만 아는 비밀번호를 정하세요.",
+    "current": "받은 비밀번호",
+    "new": "새 비밀번호",
+    "again": "새 비밀번호 확인",
+    "mismatch": "새 비밀번호가 일치하지 않습니다.",
+    "submit": "비밀번호 변경",
+    "signOut": "로그아웃"
+  },
   "account": {
     "label": "내 계정",
     "signedInAs": "{{name}}(@{{username}}, {{role}})(으)로 로그인됨.",

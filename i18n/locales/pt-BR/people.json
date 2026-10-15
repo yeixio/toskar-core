@@ -74,6 +74,16 @@
       "unavailable": "Entrar com outro serviço não está disponível agora."
     }
   },
+  "changePassword": {
+    "title": "Escolha sua própria senha, {{name}}",
+    "body": "A senha que você recebeu foi definida por um Admin. Escolha uma que só você conheça antes de continuar.",
+    "current": "Senha que você recebeu",
+    "new": "Nova senha",
+    "again": "Repita a nova senha",
+    "mismatch": "As novas senhas não coincidem.",
+    "submit": "Alterar senha",
+    "signOut": "Sair"
+  },
   "account": {
     "label": "Sua conta",
     "signedInAs": "Conectado como {{name}} (@{{username}}), {{role}}.",

@@ -74,6 +74,16 @@
       "unavailable": "La connexion avec un autre service n'est pas disponible pour le moment."
     }
   },
+  "changePassword": {
+    "title": "Choisissez votre propre mot de passe, {{name}}",
+    "body": "Le mot de passe qu'on vous a donné a été défini par un Admin. Choisissez-en un que vous seul connaissez avant de continuer.",
+    "current": "Mot de passe reçu",
+    "new": "Nouveau mot de passe",
+    "again": "Nouveau mot de passe, à nouveau",
+    "mismatch": "Les nouveaux mots de passe ne correspondent pas.",
+    "submit": "Changer le mot de passe",
+    "signOut": "Se déconnecter"
+  },
   "account": {
     "label": "Votre compte",
     "signedInAs": "Connecté en tant que {{name}} (@{{username}}), {{role}}.",

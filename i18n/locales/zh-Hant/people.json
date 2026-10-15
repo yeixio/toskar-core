@@ -74,6 +74,16 @@
       "unavailable": "目前無法使用其他服務登入。"
     }
   },
+  "changePassword": {
+    "title": "{{name}}，請設定你自己的密碼",
+    "body": "你收到的密碼是管理員設定的。繼續之前，請設定一個只有你知道的密碼。",
+    "current": "收到的密碼",
+    "new": "新密碼",
+    "again": "再次輸入新密碼",
+    "mismatch": "兩次輸入的新密碼不一致。",
+    "submit": "變更密碼",
+    "signOut": "登出"
+  },
   "account": {
     "label": "你的帳戶",
     "signedInAs": "已登入為 {{name}}（@{{username}}），{{role}}。",

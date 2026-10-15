@@ -220,5 +220,15 @@
   "RELAY_TOKEN_NOT_NEEDED": "Esta computadora usa el relé de tu organización, así que no necesita una suscripción.",
   "RELAY_TOKEN_FAILED": "No se pudo guardar el token del relé en esta computadora.",
   "ROUTE_NOT_LOCAL": "Conéctate una vez en casa para configurar el acceso desde cualquier lugar en este dispositivo.",
-  "ROUTE_FAILED": "No se pudo configurar el acceso desde cualquier lugar en esta computadora."
+  "ROUTE_FAILED": "No se pudo configurar el acceso desde cualquier lugar en esta computadora.",
+  "PASSWORD_CHANGE_REQUIRED": "Primero cambia la contraseña que te dieron.",
+  "PASSWORD_WRONG": "Esa no es tu contraseña actual.",
+  "PASSWORD_SAME": "Elige una contraseña distinta de la actual.",
+  "NO_PASSWORD": "Aquí no inicias sesión con contraseña.",
+  "CONFIRM_NAME": "Para quitar a {{name}}, escribe su nombre para confirmar.",
+  "TRANSFER_INVALID": "No hay ninguna persona activa a quien dar sus datos.",
+  "EMAIL_INVALID": "Eso no es una dirección de correo.",
+  "EMAIL_TAKEN": "Otra persona tiene esa dirección de correo.",
+  "KEY_NOT_FOUND": "No tiene ninguna clave con ese id.",
+  "KEYS_FAILED": "No se pudieron leer sus claves: {{detail}}"
 }

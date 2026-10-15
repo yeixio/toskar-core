@@ -74,6 +74,16 @@
       "unavailable": "目前无法使用其他服务登录。"
     }
   },
+  "changePassword": {
+    "title": "{{name}}，请设置你自己的密码",
+    "body": "你收到的密码是管理员设置的。继续之前，请设置一个只有你知道的密码。",
+    "current": "收到的密码",
+    "new": "新密码",
+    "again": "再次输入新密码",
+    "mismatch": "两次输入的新密码不一致。",
+    "submit": "更改密码",
+    "signOut": "退出登录"
+  },
   "account": {
     "label": "你的账户",
     "signedInAs": "已登录为 {{name}}（@{{username}}），{{role}}。",

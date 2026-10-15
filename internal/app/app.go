@@ -692,6 +692,8 @@ func New(opts Options) (*App, error) {
 		Portals:              a.Portals,
 		Sessions:             auth.NewSessions(db.SQL),
 		Invites:              auth.NewInvites(db.SQL),
+		PeopleActivity:       auth.NewActivity(db.SQL),
+		RemovePerson:         a.RemovePerson,
 		Devices:              &auth.DevicePairer{CreateKey: apiKeyMgr.CreateDevice},
 		PhoneAddress:         a.phoneAddress,
 		EnableLANForPhone:    a.enableLANForPhone,
