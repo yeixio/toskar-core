@@ -650,5 +650,25 @@
     "critique": "草稿 {{draft}}，由草稿 {{critic}} 检查：",
     "noIssues": "未发现问题。",
     "judgeWrote": "根据草稿和检查写出了答案。"
+  },
+  "compact": {
+    "title": "自动压缩",
+    "explain": "长对话会被压缩：较早的消息以摘要形式发送给模型，所有消息仍会保存。",
+    "view": "查看摘要",
+    "now": "立即压缩",
+    "compacting": "正在压缩较早的消息…",
+    "newChat": "从摘要开始新聊天",
+    "verbatim": "保持此聊天原样",
+    "verbatimHint": "此聊天将关闭自动压缩；快满时指示器会提醒。",
+    "divider": "较早的消息以摘要形式发送",
+    "summaryTitle": "较早对话的摘要",
+    "summaryBody_one": "模型在前 {{count}} 条消息处收到的内容。所有消息仍会保存。",
+    "summaryBody_other": "模型在前 {{count}} 条消息处收到的内容。所有消息仍会保存。",
+    "edited": "你已修改此摘要；之后的摘要会保留你的修改。",
+    "editHint": "修正错误之处；之后的摘要会保留你的修改。",
+    "edit": "编辑",
+    "save": "保存",
+    "cancel": "取消",
+    "close": "关闭"
   }
 }

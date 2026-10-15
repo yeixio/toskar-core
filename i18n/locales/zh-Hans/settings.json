@@ -173,7 +173,12 @@
     "pinnedKept": "已置顶的聊天会保留。",
     "cancel": "取消",
     "deleted_other": "已删除 {{count}} 个聊天。",
-    "deleteFailed": "无法删除这些聊天。"
+    "deleteFailed": "无法删除这些聊天。",
+    "compactAt": "何时开始自动压缩",
+    "compactAtHint": "长对话占满模型窗口的这一比例后，较早的消息会以摘要发送。",
+    "compactEarly": "较早（40%）",
+    "compactNormal": "标准（50%）",
+    "compactLate": "较晚（70%）"
   },
   "ratings": {
     "title": "社区评分",

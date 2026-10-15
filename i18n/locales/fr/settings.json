@@ -187,7 +187,12 @@
     "deleted_one": "{{count}} discussion supprimée.",
     "deleted_other": "{{count}} discussions supprimées.",
     "deleted_many": "{{count}} discussions supprimées.",
-    "deleteFailed": "Impossible de supprimer les discussions."
+    "deleteFailed": "Impossible de supprimer les discussions.",
+    "compactAt": "Quand le compactage commence",
+    "compactAtHint": "Les longues conversations envoient les anciens messages sous forme de résumé dès qu'elles remplissent cette part de la fenêtre du modèle.",
+    "compactEarly": "Tôt (40 %)",
+    "compactNormal": "Normal (50 %)",
+    "compactLate": "Tard (70 %)"
   },
   "ratings": {
     "title": "Notes de la communauté",

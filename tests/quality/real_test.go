@@ -277,9 +277,9 @@ func (d realDriver) Run(t *testing.T, c Case) Result {
 		attached = append(attached, saved.ID)
 	}
 	// The real model answers the earlier turns itself.
-	for _, m := range c.History {
+	for i, m := range c.History {
 		if m.Role == "user" {
-			chat(m.Content)
+			chat(padded(c, i, m.Content))
 		}
 	}
 

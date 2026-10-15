@@ -16,12 +16,29 @@ const rowColor: Record<string, string> = {
   toolResults: 'bg-mimir',
 }
 
+/** Auto-compact for an open chat (#342), from ChatPage. */
+export interface CompactControls {
+  /** The chat has a summary to read and start a new chat from. */
+  hasSummary: boolean
+  /** The chat is kept verbatim. */
+  off: boolean
+  busy: boolean
+  /** Why the last action failed, if it did. */
+  error?: string
+  onView: () => void
+  onCompactNow: () => void
+  onNewChat: () => void
+  onVerbatim: (off: boolean) => void
+}
+
 export function ContextUsageButton({
   usage,
   windowLimit,
+  compact,
 }: {
   usage: ContextUsage | null
   windowLimit: number
+  compact?: CompactControls
 }) {
   const { t } = useTranslation('chat')
   const [open, setOpen] = useState(false)
@@ -117,6 +134,37 @@ export function ContextUsageButton({
           ) : (
             <p className="mt-2 text-xs leading-relaxed text-ink-muted">{t('context.empty')}</p>
           )}
+          {compact ? (
+            <div className="mt-3 space-y-2 border-t border-line/70 pt-3">
+              <p className="text-xs font-medium text-ink">{t('compact.title')}</p>
+              <p className="text-xs leading-relaxed text-ink-muted">{t('compact.explain')}</p>
+              <div className="flex flex-wrap gap-1.5">
+                {compact.hasSummary ? (
+                  <button type="button" className="btn-secondary btn-sm" onClick={compact.onView}>
+                    {t('compact.view')}
+                  </button>
+                ) : null}
+                {!compact.off ? (
+                  <button type="button" className="btn-secondary btn-sm" disabled={compact.busy} onClick={compact.onCompactNow}>
+                    {compact.busy ? t('compact.compacting') : t('compact.now')}
+                  </button>
+                ) : null}
+                {compact.hasSummary ? (
+                  <button type="button" className="btn-secondary btn-sm" onClick={compact.onNewChat}>
+                    {t('compact.newChat')}
+                  </button>
+                ) : null}
+              </div>
+              {compact.error ? <p className="text-xs text-danger">{compact.error}</p> : null}
+              <label className="flex items-start gap-2 text-xs text-ink-muted">
+                <input type="checkbox" className="mt-0.5" checked={compact.off} onChange={(e) => compact.onVerbatim(e.target.checked)} />
+                <span>
+                  <span className="text-ink">{t('compact.verbatim')}</span>
+                  <span className="block text-ink-faint">{t('compact.verbatimHint')}</span>
+                </span>
+              </label>
+            </div>
+          ) : null}
         </div>
       ) : null}
     </div>

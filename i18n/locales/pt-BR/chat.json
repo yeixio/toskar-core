@@ -736,5 +736,26 @@
     "critique": "Rascunho {{draft}}, verificado pelo rascunho {{critic}}:",
     "noIssues": "nenhum problema encontrado.",
     "judgeWrote": "escreveu a resposta a partir dos rascunhos e verificações."
+  },
+  "compact": {
+    "title": "Compactação automática",
+    "explain": "Conversas longas são compactadas: mensagens antigas vão para o modelo como resumo, e todas as mensagens continuam salvas.",
+    "view": "Ver resumo",
+    "now": "Compactar agora",
+    "compacting": "Compactando mensagens anteriores…",
+    "newChat": "Nova conversa a partir do resumo",
+    "verbatim": "Manter esta conversa literal",
+    "verbatimHint": "A compactação fica desligada nesta conversa; o indicador avisa quando ela enche.",
+    "divider": "As mensagens anteriores são enviadas como resumo",
+    "summaryTitle": "Resumo da conversa anterior",
+    "summaryBody_one": "O que o modelo recebe no lugar de {{count}} mensagem anterior. Todas as mensagens continuam salvas.",
+    "summaryBody_other": "O que o modelo recebe no lugar das primeiras {{count}} mensagens. Todas as mensagens continuam salvas.",
+    "summaryBody_many": "O que o modelo recebe no lugar das primeiras {{count}} mensagens. Todas as mensagens continuam salvas.",
+    "edited": "Você corrigiu este resumo; os próximos mantêm suas correções.",
+    "editHint": "Corrija o que estiver errado; os próximos resumos mantêm suas correções.",
+    "edit": "Editar",
+    "save": "Salvar",
+    "cancel": "Cancelar",
+    "close": "Fechar"
   }
 }

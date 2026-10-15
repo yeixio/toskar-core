@@ -173,7 +173,12 @@
     "pinnedKept": "已釘選的聊天會保留。",
     "cancel": "取消",
     "deleted_other": "已刪除 {{count}} 個聊天。",
-    "deleteFailed": "無法刪除這些聊天。"
+    "deleteFailed": "無法刪除這些聊天。",
+    "compactAt": "何時開始自動壓縮",
+    "compactAtHint": "長對話占滿模型視窗的這個比例後，較早的訊息會以摘要傳送。",
+    "compactEarly": "較早（40%）",
+    "compactNormal": "標準（50%）",
+    "compactLate": "較晚（70%）"
   },
   "ratings": {
     "title": "社群評分",

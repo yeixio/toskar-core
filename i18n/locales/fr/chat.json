@@ -736,5 +736,26 @@
     "critique": "Brouillon {{draft}}, vérifié par le brouillon {{critic}} :",
     "noIssues": "aucun problème trouvé.",
     "judgeWrote": "a rédigé la réponse à partir des brouillons et des vérifications."
+  },
+  "compact": {
+    "title": "Compactage automatique",
+    "explain": "Les longues conversations sont compactées : les anciens messages sont envoyés au modèle sous forme de résumé, et chaque message reste enregistré.",
+    "view": "Voir le résumé",
+    "now": "Compacter maintenant",
+    "compacting": "Compactage des messages précédents…",
+    "newChat": "Nouvelle conversation à partir du résumé",
+    "verbatim": "Garder cette conversation telle quelle",
+    "verbatimHint": "Le compactage reste désactivé pour cette conversation ; la jauge prévient quand elle se remplit.",
+    "divider": "Les messages précédents sont envoyés sous forme de résumé",
+    "summaryTitle": "Résumé de la conversation précédente",
+    "summaryBody_one": "Ce que le modèle reçoit à la place de {{count}} message précédent. Chaque message reste enregistré.",
+    "summaryBody_other": "Ce que le modèle reçoit à la place des {{count}} premiers messages. Chaque message reste enregistré.",
+    "summaryBody_many": "Ce que le modèle reçoit à la place des {{count}} premiers messages. Chaque message reste enregistré.",
+    "edited": "Vous avez corrigé ce résumé ; les suivants gardent vos corrections.",
+    "editHint": "Corrigez ce qui est faux ; les résumés suivants gardent vos corrections.",
+    "edit": "Modifier",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "close": "Fermer"
   }
 }

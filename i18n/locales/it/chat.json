@@ -736,5 +736,26 @@
     "critique": "Bozza {{draft}}, controllata dalla bozza {{critic}}:",
     "noIssues": "nessun problema trovato.",
     "judgeWrote": "ha scritto la risposta a partire dalle bozze e dai controlli."
+  },
+  "compact": {
+    "title": "Compattazione automatica",
+    "explain": "Le chat lunghe vengono compattate: i messaggi più vecchi arrivano al modello come riassunto e ogni messaggio resta salvato.",
+    "view": "Vedi riassunto",
+    "now": "Compatta ora",
+    "compacting": "Compattazione dei messaggi precedenti…",
+    "newChat": "Nuova chat dal riassunto",
+    "verbatim": "Mantieni questa chat parola per parola",
+    "verbatimHint": "La compattazione resta disattivata per questa chat; l'indicatore avvisa quando si riempie.",
+    "divider": "I messaggi precedenti vengono inviati come riassunto",
+    "summaryTitle": "Riassunto della conversazione precedente",
+    "summaryBody_one": "Ciò che il modello riceve al posto di {{count}} messaggio precedente. Ogni messaggio resta salvato.",
+    "summaryBody_other": "Ciò che il modello riceve al posto dei primi {{count}} messaggi. Ogni messaggio resta salvato.",
+    "summaryBody_many": "Ciò che il modello riceve al posto dei primi {{count}} messaggi. Ogni messaggio resta salvato.",
+    "edited": "Hai corretto questo riassunto; i successivi mantengono le tue correzioni.",
+    "editHint": "Correggi ciò che è sbagliato; i riassunti successivi mantengono le tue correzioni.",
+    "edit": "Modifica",
+    "save": "Salva",
+    "cancel": "Annulla",
+    "close": "Chiudi"
   }
 }

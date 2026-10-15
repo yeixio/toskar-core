@@ -39,6 +39,10 @@ type Case struct {
 	What    string                  `json:"what"`
 	Setup   Setup                   `json:"setup"`
 	History []pluginapi.ChatMessage `json:"history"`
+	// HistoryPad adds about this many characters of notes to each history
+	// message after the first, so a chat grows past auto-compact's
+	// threshold (#342) without the case spelling the text out.
+	HistoryPad int `json:"history_pad"`
 	// Attach are files sent with the message (#510).
 	Attach  []Attachment `json:"attach"`
 	Message string       `json:"message"`
@@ -598,4 +602,16 @@ func metaNotice(r Result) string {
 		return ""
 	}
 	return r.Meta.Notice
+}
+
+// padNote is the filler HistoryPad adds: notes with no facts the question
+// needs.
+const padNote = "Notes to keep in mind: the trail was quiet, the weather mild, and nothing else happened worth remembering. "
+
+// padded is a history message's content with c's padding, after the first.
+func padded(c Case, i int, content string) string {
+	if c.HistoryPad <= 0 || i == 0 {
+		return content
+	}
+	return content + "\n\n" + strings.Repeat(padNote, c.HistoryPad/len(padNote)+1)[:c.HistoryPad]
 }

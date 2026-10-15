@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useCallback, useEffect, useMemo, useRef, useState, type MouseEvent } from 'react'
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState, type MouseEvent } from 'react'
 import { Trans, useTranslation } from 'react-i18next'
 import { Link, useLocation, useSearchParams } from 'react-router-dom'
 import i18n from '@/i18n'
@@ -41,6 +41,7 @@ import { AutomationDraftCard, AutomationRunNote } from './AutomationDraftCard'
 import { ChatErrorCard } from './ChatErrorCard'
 import { ChatMarkdown } from './ChatMarkdown'
 import { ContextUsageButton } from './ContextUsageButton'
+import { SummaryDialog } from './SummaryDialog'
 import { contextWindow, parseContextUsage, type ContextUsage } from './contextUsage'
 import { displayChatText } from './displayChatText'
 import { parseModelFailure, type ModelFailure } from './modelFailure'
@@ -607,17 +608,48 @@ export function ChatPage() {
       profile_id,
       title,
       memory_off,
+      compact_off,
     }: {
       id: string
       model_id?: string
       profile_id?: string
       title?: string
       memory_off?: boolean
-    }) => api.updateConversation(id, { model_id, profile_id, title, memory_off }),
+      compact_off?: boolean
+    }) => api.updateConversation(id, { model_id, profile_id, title, memory_off, compact_off }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['conversations'] })
       setRenamingId(null)
     },
+  })
+
+  // Auto-compact (#342): the open chat's summary, compacting it now, and a
+  // new chat from it.
+  const summaryQuery = useQuery({
+    queryKey: ['summary', selectedId],
+    queryFn: () => api.getConversationSummary(selectedId!),
+    enabled: !!selectedId,
+    staleTime: 30_000,
+    retry: false,
+  })
+  const [summaryOpen, setSummaryOpen] = useState(false)
+  const [compactError, setCompactError] = useState('')
+  const compactNow = useMutation({
+    mutationFn: (id: string) => api.compactConversation(id),
+    onSuccess: (next, id) => {
+      setCompactError('')
+      if (next) queryClient.setQueryData(['summary', id], next)
+    },
+    onError: (err) => setCompactError(err instanceof Error ? err.message : String(err)),
+  })
+  const newChatFromSummary = useMutation({
+    mutationFn: (id: string) => api.conversationFromSummary(id),
+    onSuccess: (created) => {
+      if (!created) return
+      void queryClient.invalidateQueries({ queryKey: ['conversations'] })
+      setSelectedId(created.id)
+    },
+    onError: (err) => setCompactError(err instanceof Error ? err.message : String(err)),
   })
 
   const handleChatComplete = useCallback(
@@ -754,6 +786,17 @@ export function ChatPage() {
             }
             return next
           })
+        }
+        // A turn that wouldn't fit compacts first (#342).
+        if (event.type === 'chat.compacting') {
+          const conversationId = event.payload?.conversation_id as string | undefined
+          if (conversationId && (conversationId === selectedId || conversationId === streamingConvRef.current)) {
+            setStatusMessage(t('compact.compacting'))
+          }
+        }
+        if (event.type === 'chat.summarized') {
+          const conversationId = event.payload?.conversation_id as string | undefined
+          if (conversationId) void queryClient.invalidateQueries({ queryKey: ['summary', conversationId] })
         }
         if (event.type === 'orchestration.role') {
           const payload = event.payload as OrchestrationRolePayload | undefined
@@ -1733,7 +1776,22 @@ export function ChatPage() {
         <ContextUsageButton
           usage={contextUsage}
           windowLimit={contextWindow(chatModel?.context)}
+          compact={
+            selectedConversation
+              ? {
+                  hasSummary: !!summaryQuery.data,
+                  off: !!selectedConversation.compact_off,
+                  busy: compactNow.isPending,
+                  error: compactError,
+                  onView: () => setSummaryOpen(true),
+                  onCompactNow: () => compactNow.mutate(selectedConversation.id),
+                  onNewChat: () => newChatFromSummary.mutate(selectedConversation.id),
+                  onVerbatim: (off) => updateConversation.mutate({ id: selectedConversation.id, compact_off: off }),
+                }
+              : undefined
+          }
         />
+        {summaryOpen && summaryQuery.data ? <SummaryDialog summary={summaryQuery.data} onClose={() => setSummaryOpen(false)} /> : null}
         {isSending ? (
           <button type="button" className="composer-stop" onClick={handleStop}>
             <span className="h-2.5 w-2.5 rounded-[3px] bg-current" aria-hidden />
@@ -1925,6 +1983,7 @@ export function ChatPage() {
                   const text = displayChatText(message.content)
                   if (message.role === 'assistant' && !text) return null
                   return (
+                  <Fragment key={message.id}>
                   <div
                     key={message.id}
                     className={
@@ -1986,6 +2045,17 @@ export function ChatPage() {
                       </>
                     )}
                   </div>
+                  {/* Where auto-compact takes over (#342): the messages above are sent as its summary. */}
+                  {summaryQuery.data && message.id === summaryQuery.data.through_message_id && !selectedConversation?.compact_off ? (
+                    <div className="flex items-center gap-3 text-xs text-ink-faint" role="separator">
+                      <span className="h-px flex-1 bg-line" aria-hidden />
+                      <button type="button" className="hover:text-ink hover:underline" onClick={() => setSummaryOpen(true)}>
+                        {t('compact.divider')}
+                      </button>
+                      <span className="h-px flex-1 bg-line" aria-hidden />
+                    </div>
+                  ) : null}
+                  </Fragment>
                   )
                 })}
 

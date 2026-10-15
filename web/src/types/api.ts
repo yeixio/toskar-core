@@ -494,9 +494,28 @@ export interface Conversation {
   model_id?: string
   /** Persistent memory is kept out of this conversation. */
   memory_off?: boolean
+  /** Kept verbatim: auto-compact never sends its older messages as a summary (#342). */
+  compact_off?: boolean
   created_at: string
   updated_at: string
 }
+
+/** What the model sees in place of a long chat's older messages (#342); every message stays saved. */
+export interface ConversationSummary {
+  conversation_id: string
+  through_message_id: string
+  through_created_at: string
+  message_count: number
+  summary: string
+  model_id?: string
+  updated_at: string
+  /** The person corrected it; later summaries keep the corrections. */
+  edited: boolean
+}
+
+/** When auto-compact starts: 40%, 50%, or 70% of the model's window (#342). */
+export type CompactAt = 'early' | 'normal' | 'late'
+
 
 export interface Citation {
   kind: 'web' | 'knowledge' | 'file' | string
@@ -821,6 +840,7 @@ export interface SettingsView {
   /** The language answers are written in with assistant_language_mode language, such as de. */
   assistant_language?: string
   memory_enabled?: boolean
+  compact_at?: CompactAt
 }
 
 export type AssistantLanguageMode = 'auto' | 'app' | 'language'
@@ -881,6 +901,7 @@ export interface UpdateConversationRequest {
   profile_id?: string
   model_id?: string
   memory_off?: boolean
+  compact_off?: boolean
 }
 
 export type MemoryCategory = 'identity' | 'preferences' | 'projects' | 'technical' | 'interests' | 'people' | 'other'
@@ -1125,6 +1146,7 @@ export interface SettingsPatch {
   assistant_language_mode?: AssistantLanguageMode
   assistant_language?: string
   memory_enabled?: boolean
+  compact_at?: CompactAt
   node_name?: string
   lan_api_enabled?: boolean
   remote_access_enabled?: boolean

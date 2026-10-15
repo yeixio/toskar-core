@@ -187,7 +187,12 @@
     "deleted_one": "{{count}} conversa excluída.",
     "deleted_other": "{{count}} conversas excluídas.",
     "deleted_many": "{{count}} conversas excluídas.",
-    "deleteFailed": "Não foi possível excluir as conversas."
+    "deleteFailed": "Não foi possível excluir as conversas.",
+    "compactAt": "Quando a compactação começa",
+    "compactAtHint": "Conversas longas enviam mensagens antigas como resumo quando ocupam esta parte da janela do modelo.",
+    "compactEarly": "Cedo (40%)",
+    "compactNormal": "Normal (50%)",
+    "compactLate": "Tarde (70%)"
   },
   "ratings": {
     "title": "Avaliações da comunidade",

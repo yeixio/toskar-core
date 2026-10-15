@@ -173,7 +173,12 @@
     "pinnedKept": "ピン留めしたチャットは残ります。",
     "cancel": "キャンセル",
     "deleted_other": "{{count}} 件のチャットを削除しました。",
-    "deleteFailed": "チャットを削除できませんでした。"
+    "deleteFailed": "チャットを削除できませんでした。",
+    "compactAt": "自動圧縮を始めるタイミング",
+    "compactAtHint": "長いチャットは、モデルのウィンドウがここまで埋まると古いメッセージを要約として送ります。",
+    "compactEarly": "早め（40%）",
+    "compactNormal": "標準（50%）",
+    "compactLate": "遅め（70%）"
   },
   "ratings": {
     "title": "コミュニティ評価",

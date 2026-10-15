@@ -693,5 +693,25 @@
     "critique": "Entwurf {{draft}}, geprüft von Entwurf {{critic}}:",
     "noIssues": "keine Probleme gefunden.",
     "judgeWrote": "hat die Antwort aus den Entwürfen und Prüfungen geschrieben."
+  },
+  "compact": {
+    "title": "Auto-Verdichten",
+    "explain": "Lange Chats werden verdichtet: Ältere Nachrichten gehen als Zusammenfassung an das Modell, und jede Nachricht bleibt gespeichert.",
+    "view": "Zusammenfassung ansehen",
+    "now": "Jetzt verdichten",
+    "compacting": "Ältere Nachrichten werden verdichtet…",
+    "newChat": "Neuer Chat aus Zusammenfassung",
+    "verbatim": "Diesen Chat wörtlich behalten",
+    "verbatimHint": "Auto-Verdichten bleibt für diesen Chat aus; die Anzeige warnt, wenn er voll wird.",
+    "divider": "Ältere Nachrichten werden als Zusammenfassung gesendet",
+    "summaryTitle": "Zusammenfassung des früheren Gesprächs",
+    "summaryBody_one": "Was das Modell anstelle der ersten {{count}} Nachricht erhält. Jede Nachricht bleibt gespeichert.",
+    "summaryBody_other": "Was das Modell anstelle der ersten {{count}} Nachrichten erhält. Jede Nachricht bleibt gespeichert.",
+    "edited": "Du hast diese Zusammenfassung korrigiert; spätere behalten deine Korrekturen.",
+    "editHint": "Korrigiere, was falsch ist; spätere Zusammenfassungen behalten deine Korrekturen.",
+    "edit": "Bearbeiten",
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "close": "Schließen"
   }
 }

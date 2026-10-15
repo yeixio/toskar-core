@@ -650,5 +650,25 @@
     "critique": "草稿 {{draft}}，由草稿 {{critic}} 檢查：",
     "noIssues": "未發現問題。",
     "judgeWrote": "根據草稿和檢查寫出了答案。"
+  },
+  "compact": {
+    "title": "自動壓縮",
+    "explain": "長對話會被壓縮：較早的訊息以摘要形式傳送給模型，所有訊息仍會儲存。",
+    "view": "檢視摘要",
+    "now": "立即壓縮",
+    "compacting": "正在壓縮較早的訊息…",
+    "newChat": "從摘要開始新聊天",
+    "verbatim": "保持此聊天原樣",
+    "verbatimHint": "此聊天將關閉自動壓縮；快滿時指示器會提醒。",
+    "divider": "較早的訊息以摘要形式傳送",
+    "summaryTitle": "較早對話的摘要",
+    "summaryBody_one": "模型在前 {{count}} 則訊息處收到的內容。所有訊息仍會儲存。",
+    "summaryBody_other": "模型在前 {{count}} 則訊息處收到的內容。所有訊息仍會儲存。",
+    "edited": "你已修改此摘要；之後的摘要會保留你的修改。",
+    "editHint": "修正錯誤之處；之後的摘要會保留你的修改。",
+    "edit": "編輯",
+    "save": "儲存",
+    "cancel": "取消",
+    "close": "關閉"
   }
 }

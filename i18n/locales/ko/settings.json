@@ -173,7 +173,12 @@
     "pinnedKept": "고정한 채팅은 유지됩니다.",
     "cancel": "취소",
     "deleted_other": "채팅 {{count}}개를 삭제했습니다.",
-    "deleteFailed": "채팅을 삭제하지 못했습니다."
+    "deleteFailed": "채팅을 삭제하지 못했습니다.",
+    "compactAt": "자동 압축 시작 시점",
+    "compactAtHint": "긴 채팅은 모델 창이 이만큼 차면 오래된 메시지를 요약으로 보냅니다.",
+    "compactEarly": "이르게 (40%)",
+    "compactNormal": "보통 (50%)",
+    "compactLate": "늦게 (70%)"
   },
   "ratings": {
     "title": "커뮤니티 평가",

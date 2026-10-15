@@ -164,6 +164,77 @@
       }
     },
     {
+      "id": "long_chat_compacts_and_remembers",
+      "what": "A chat that grows past auto-compact's threshold mid-way still knows a fact from its start (#342).",
+      "history": [
+        {
+          "role": "user",
+          "content": "My sister's name is Maribel and she lives in Sitka."
+        },
+        {
+          "role": "assistant",
+          "content": "Nice, Sitka is a beautiful town."
+        },
+        {
+          "role": "user",
+          "content": "Can you help me plan meals for the week?"
+        },
+        {
+          "role": "assistant",
+          "content": "Sure: soups early in the week, a roast on Wednesday, and leftovers after."
+        },
+        {
+          "role": "user",
+          "content": "What's a good way to store fresh herbs?"
+        },
+        {
+          "role": "assistant",
+          "content": "Wrap them in a damp towel or stand them in water in the fridge."
+        },
+        {
+          "role": "user",
+          "content": "How long should I rest bread dough?"
+        },
+        {
+          "role": "assistant",
+          "content": "Usually one to two hours, until it has doubled."
+        },
+        {
+          "role": "user",
+          "content": "What makes a good packing list for a ferry trip?"
+        },
+        {
+          "role": "assistant",
+          "content": "Layers, rain gear, snacks, and something to read."
+        },
+        {
+          "role": "user",
+          "content": "Any ideas for a rainy weekend?"
+        },
+        {
+          "role": "assistant",
+          "content": "Board games, baking, a museum, or a long movie."
+        },
+        {
+          "role": "user",
+          "content": "How do I clean a wool sweater?"
+        },
+        {
+          "role": "assistant",
+          "content": "Hand wash in cool water with wool soap and dry it flat."
+        }
+      ],
+      "history_pad": 3000,
+      "message": "Where does my sister live?",
+      "stub": [
+        "Your sister Maribel lives in Sitka."
+      ],
+      "expect": {
+        "answer_matches": "(?i)sitka",
+        "answer_real_only": true
+      }
+    },
+    {
       "id": "current_question_is_looked_up",
       "what": "A question about current information looks the web up before answering and cites what it read.",
       "setup": {

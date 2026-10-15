@@ -180,7 +180,12 @@
     "cancel": "Cancel",
     "deleted_one": "Deleted {{count}} chat.",
     "deleted_other": "Deleted {{count}} chats.",
-    "deleteFailed": "Couldn't delete the chats."
+    "deleteFailed": "Couldn't delete the chats.",
+    "compactAt": "When auto-compact starts",
+    "compactAtHint": "Long chats send older messages as a summary once they fill this much of the model's window.",
+    "compactEarly": "Early (40%)",
+    "compactNormal": "Normal (50%)",
+    "compactLate": "Late (70%)"
   },
   "ratings": {
     "title": "Community ratings",

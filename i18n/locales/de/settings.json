@@ -180,7 +180,12 @@
     "cancel": "Abbrechen",
     "deleted_one": "{{count}} Chat gelöscht.",
     "deleted_other": "{{count}} Chats gelöscht.",
-    "deleteFailed": "Die Chats konnten nicht gelöscht werden."
+    "deleteFailed": "Die Chats konnten nicht gelöscht werden.",
+    "compactAt": "Wann Auto-Verdichten beginnt",
+    "compactAtHint": "Lange Chats senden ältere Nachrichten als Zusammenfassung, sobald sie so viel vom Fenster des Modells füllen.",
+    "compactEarly": "Früh (40 %)",
+    "compactNormal": "Normal (50 %)",
+    "compactLate": "Spät (70 %)"
   },
   "ratings": {
     "title": "Community-Bewertungen",

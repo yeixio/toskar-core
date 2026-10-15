@@ -693,5 +693,25 @@
     "critique": "Draft {{draft}}, checked by draft {{critic}}:",
     "noIssues": "no problems found.",
     "judgeWrote": "wrote the answer from the drafts and checks."
+  },
+  "compact": {
+    "title": "Auto-compact",
+    "explain": "Long chats are compacted: older messages are sent to the model as a summary, and every message is still saved.",
+    "view": "View summary",
+    "now": "Compact now",
+    "compacting": "Compacting earlier messages…",
+    "newChat": "New chat from summary",
+    "verbatim": "Keep this chat verbatim",
+    "verbatimHint": "Auto-compact stays off for this chat; the gauge warns as it fills.",
+    "divider": "Earlier messages are sent as a summary",
+    "summaryTitle": "Summary of the earlier conversation",
+    "summaryBody_one": "What the model is told in place of the first {{count}} message. Every message is still saved.",
+    "summaryBody_other": "What the model is told in place of the first {{count}} messages. Every message is still saved.",
+    "edited": "You corrected this summary; later summaries keep your corrections.",
+    "editHint": "Fix anything wrong; later summaries keep your corrections.",
+    "edit": "Edit",
+    "save": "Save",
+    "cancel": "Cancel",
+    "close": "Close"
   }
 }

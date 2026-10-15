@@ -187,7 +187,12 @@
     "deleted_one": "Se eliminó {{count}} chat.",
     "deleted_other": "Se eliminaron {{count}} chats.",
     "deleted_many": "Se eliminaron {{count}} chats.",
-    "deleteFailed": "No se pudieron eliminar los chats."
+    "deleteFailed": "No se pudieron eliminar los chats.",
+    "compactAt": "Cuándo empieza la compactación",
+    "compactAtHint": "Los chats largos envían los mensajes antiguos como resumen cuando llenan esta parte de la ventana del modelo.",
+    "compactEarly": "Pronto (40 %)",
+    "compactNormal": "Normal (50 %)",
+    "compactLate": "Tarde (70 %)"
   },
   "ratings": {
     "title": "Valoraciones de la comunidad",

@@ -13,7 +13,7 @@ import {
   openPathInOS,
 } from '@/lib/desktopBridge'
 import { useUIStore } from '@/stores/uiStore'
-import type { SettingsPatch } from '@/types/api'
+import type { SettingsPatch, CompactAt } from '@/types/api'
 import { RealmKicker } from '@/components/ui/Realm'
 import { NotificationDestinations } from './NotificationDestinations'
 import { UpdateCheckSetting, UpdateNotice } from './Updates'
@@ -534,6 +534,20 @@ export function SettingsPage() {
                   }
                 />
               </div>
+              <label className="block text-sm">
+                <span className="font-medium text-ink">{t('history.compactAt')}</span>
+                <span className="mt-0.5 block text-ink-muted">{t('history.compactAtHint')}</span>
+                <select
+                  className="field mt-1 w-full"
+                  value={settings?.compact_at ?? 'normal'}
+                  disabled={busy}
+                  onChange={(e) => patch({ compact_at: e.target.value as CompactAt })}
+                >
+                  <option value="early">{t('history.compactEarly')}</option>
+                  <option value="normal">{t('history.compactNormal')}</option>
+                  <option value="late">{t('history.compactLate')}</option>
+                </select>
+              </label>
               <ChatCleanup />
             </section>
 

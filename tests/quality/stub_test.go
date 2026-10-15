@@ -148,8 +148,8 @@ func (d stubDriver) Run(t *testing.T, c Case) Result {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, m := range c.History {
-		if _, err := a.Conversations.AddMessage(ctx, conv.ID, m.Role, m.Content); err != nil {
+	for i, m := range c.History {
+		if _, err := a.Conversations.AddMessage(ctx, conv.ID, m.Role, padded(c, i, m.Content)); err != nil {
 			t.Fatal(err)
 		}
 	}

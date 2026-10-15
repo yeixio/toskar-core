@@ -1,6 +1,7 @@
 import type {
   ModelURLPreview,
   FirstAnswers,
+  ConversationSummary,
   Capabilities,
   Capability,
   PersonCapabilities,
@@ -1009,6 +1010,29 @@ export const api = {
       body: JSON.stringify(body),
     }),
 
+  /** A chat's auto-compact summary, or null before it's compacted (#342). */
+  getConversationSummary: async (id: string): Promise<ConversationSummary | null> => {
+    try {
+      const sum = await request<ConversationSummary>(`/api/v1/conversations/${encodeURIComponent(id)}/summary`)
+      // An older service answers something else for a route it doesn't know.
+      return sum && typeof sum.summary === 'string' ? sum : null
+    } catch (err) {
+      if (err instanceof ApiError && err.status === 404) return null
+      throw err
+    }
+  },
+  /** Corrects a chat's summary; later summaries keep the correction. */
+  editConversationSummary: (id: string, summary: string) =>
+    request<ConversationSummary>(`/api/v1/conversations/${encodeURIComponent(id)}/summary`, {
+      method: 'PUT',
+      body: JSON.stringify({ summary }),
+    }),
+  /** Compacts a chat now, whatever its size. */
+  compactConversation: (id: string) =>
+    request<ConversationSummary>(`/api/v1/conversations/${encodeURIComponent(id)}/compact`, { method: 'POST' }),
+  /** A new chat that begins with this chat's summary. */
+  conversationFromSummary: (id: string) =>
+    request<Conversation>(`/api/v1/conversations/${encodeURIComponent(id)}/from-summary`, { method: 'POST' }),
   updateConversation: (id: string, body: UpdateConversationRequest) =>
     request<Conversation>(`/api/v1/conversations/${id}`, {
       method: 'PATCH',

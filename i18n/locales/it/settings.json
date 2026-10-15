@@ -187,7 +187,12 @@
     "deleted_one": "{{count}} chat eliminata.",
     "deleted_other": "{{count}} chat eliminate.",
     "deleted_many": "{{count}} chat eliminate.",
-    "deleteFailed": "Impossibile eliminare le chat."
+    "deleteFailed": "Impossibile eliminare le chat.",
+    "compactAt": "Quando inizia la compattazione",
+    "compactAtHint": "Le chat lunghe inviano i messaggi più vecchi come riassunto quando riempiono questa parte della finestra del modello.",
+    "compactEarly": "Presto (40%)",
+    "compactNormal": "Normale (50%)",
+    "compactLate": "Tardi (70%)"
   },
   "ratings": {
     "title": "Valutazioni della community",
