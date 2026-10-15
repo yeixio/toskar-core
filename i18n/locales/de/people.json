@@ -107,5 +107,50 @@
       "only": "Nur diese"
     },
     "pickOne": "Hake mindestens eines an."
+  },
+  "capabilities": {
+    "title": "Was Personen nutzen dürfen",
+    "body": "Schalte für jede Rolle Dinge ein oder aus. Das eigene Erlauben oder Sperren einer Person, unten, geht ihrer Rolle vor.",
+    "capability": "Fähigkeit",
+    "forRole": "{{capability}} für {{role}}",
+    "changed": "Vom Standard geändert",
+    "owner": "Der Owner hat immer alles. Nur der Owner ändert, was Admins nutzen dürfen.",
+    "personSummary": "Was die Person nutzen darf",
+    "asRole": "wie ihre Rolle",
+    "personChanged_one": "{{count}} für sie geändert",
+    "personChanged_other": "{{count}} für sie geändert",
+    "forPerson": "{{capability}} für {{name}}",
+    "roleOn": "Wie Rolle (an)",
+    "roleOff": "Wie Rolle (aus)",
+    "allow": "Erlauben",
+    "block": "Sperren",
+    "names": {
+      "files": "Dateien",
+      "pictures_in": "Bilder senden",
+      "make_pictures": "Bilder erstellen",
+      "make_video": "Videos erstellen",
+      "voice": "Sprache",
+      "web": "Web",
+      "knowledge": "Wissen in Antworten",
+      "knowledge_add": "Wissen hinzufügen",
+      "automations": "Automationen",
+      "changing_tools": "Werkzeuge, die etwas ändern",
+      "choose_model": "Modell wählen",
+      "remote_access": "Unterwegs"
+    },
+    "hints": {
+      "files": "Dokumente, Tabellen, PDFs und Code anhängen",
+      "pictures_in": "Bilder und Videos zum Ansehen senden",
+      "make_pictures": "Bilder erstellen und bearbeiten",
+      "make_video": "Clips erstellen; belegt die Grafikkarte",
+      "voice": "Nachrichten sprechen und Antworten vorlesen lassen",
+      "web": "Websuche, Seiten, Orte und Karten",
+      "knowledge": "Wissensquellen in Antworten",
+      "knowledge_add": "Wissensquellen hinzufügen, ändern und entfernen",
+      "automations": "Automationen erstellen",
+      "changing_tools": "Befehle, Dateien schreiben, MCP- und Plugin-Aktionen",
+      "choose_model": "Modell selbst wählen; sonst Auto",
+      "remote_access": "Gekoppelte Geräte unterwegs nutzen"
+    }
   }
 }

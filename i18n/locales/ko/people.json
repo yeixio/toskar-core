@@ -107,5 +107,50 @@
       "only": "이것만"
     },
     "pickOne": "하나 이상 선택하세요."
+  },
+  "capabilities": {
+    "title": "사용할 수 있는 기능",
+    "body": "역할마다 기능을 켜거나 끕니다. 아래에서 사람별로 허용하거나 차단한 설정이 역할보다 우선합니다.",
+    "capability": "기능",
+    "forRole": "{{role}}의 {{capability}}",
+    "changed": "기본값에서 변경됨",
+    "owner": "소유자는 항상 모든 기능을 씁니다. 관리자가 쓸 수 있는 기능은 소유자만 바꿀 수 있습니다.",
+    "personSummary": "사용할 수 있는 기능",
+    "asRole": "역할대로",
+    "personChanged_one": "{{count}}개 개별 변경",
+    "personChanged_other": "{{count}}개 개별 변경",
+    "forPerson": "{{name}}의 {{capability}}",
+    "roleOn": "역할대로 (켜짐)",
+    "roleOff": "역할대로 (꺼짐)",
+    "allow": "허용",
+    "block": "차단",
+    "names": {
+      "files": "파일",
+      "pictures_in": "이미지 보내기",
+      "make_pictures": "이미지 만들기",
+      "make_video": "동영상 만들기",
+      "voice": "음성",
+      "web": "웹",
+      "knowledge": "답변 속 지식",
+      "knowledge_add": "지식 추가",
+      "automations": "자동화",
+      "changing_tools": "무언가를 바꾸는 도구",
+      "choose_model": "모델 선택",
+      "remote_access": "외부에서"
+    },
+    "hints": {
+      "files": "문서, 스프레드시트, PDF, 코드 첨부",
+      "pictures_in": "이미지와 동영상을 보내 보여 주기",
+      "make_pictures": "이미지 만들기와 편집",
+      "make_video": "클립 만들기 (그래픽 카드를 차지함)",
+      "voice": "메시지를 말하고 답변을 소리로 듣기",
+      "web": "웹 검색, 페이지, 장소, 지도",
+      "knowledge": "답변에 지식 소스 사용",
+      "knowledge_add": "지식 소스 추가, 변경, 삭제",
+      "automations": "자동화 만들기",
+      "changing_tools": "명령, 파일 쓰기, MCP와 플러그인 작업",
+      "choose_model": "모델 직접 선택 (아니면 Auto)",
+      "remote_access": "외부에서 페어링한 기기 사용"
+    }
   }
 }

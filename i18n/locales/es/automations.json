@@ -20,7 +20,8 @@
     "lastNext": "Última: {{last}} · Próxima: {{next}}",
     "saveFailed": "No se pudo guardar la automatización.",
     "confirmDelete": "¿Eliminar “{{name}}”? También se elimina su historial.",
-    "selectHint": "Selecciona una automatización para ver su historial, o crea una."
+    "selectHint": "Selecciona una automatización para ver su historial, o crea una.",
+    "createOff": "Crear automatizaciones está desactivado para tu cuenta. Pide a un Admin que lo active."
   },
   "intro": {
     "title": "Pon a Toskar a trabajar mientras no estás",

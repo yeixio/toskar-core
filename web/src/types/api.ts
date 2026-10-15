@@ -959,6 +959,37 @@ export interface ProfilePins {
 }
 
 /** Who a request is from: GET /api/v1/me. */
+/** What someone may use (#589). */
+export type Capability =
+  | 'files'
+  | 'pictures_in'
+  | 'make_pictures'
+  | 'make_video'
+  | 'voice'
+  | 'web'
+  | 'knowledge'
+  | 'knowledge_add'
+  | 'automations'
+  | 'changing_tools'
+  | 'choose_model'
+  | 'remote_access'
+
+/** Capability to allowed; a missing one is allowed. */
+export type Capabilities = Partial<Record<Capability, boolean>>
+
+/** Every capability, each role's, and what each role ships with (#589). */
+export interface RoleCapabilities {
+  capabilities: Capability[]
+  roles: Record<Role, Capabilities>
+  defaults: Record<Role, Capabilities>
+}
+
+/** One person's own Allows (true) and Blocks (false), and what they may use now (#589). */
+export interface PersonCapabilities {
+  set: Capabilities
+  effective: Capabilities
+}
+
 export interface Principal {
   person: Person
   /** this_computer, api_key, or session. */
@@ -966,6 +997,8 @@ export interface Principal {
   key_id?: string
   /** The profiles they may chat with, when they're pinned to some (#345). */
   profiles?: string[]
+  /** What they may use (#589); missing from an older service, where everything is allowed. */
+  capabilities?: Capabilities
 }
 
 /** A one-time link to give a person: its page's path on this Toskar. */

@@ -20,7 +20,8 @@
     "lastNext": "Zuletzt {{last}} · Nächste {{next}}",
     "saveFailed": "Die Automation konnte nicht gespeichert werden.",
     "confirmDelete": "„{{name}}“ löschen? Der Verlauf wird ebenfalls entfernt.",
-    "selectHint": "Wähle eine Automation, um ihren Verlauf zu sehen, oder erstelle eine."
+    "selectHint": "Wähle eine Automation, um ihren Verlauf zu sehen, oder erstelle eine.",
+    "createOff": "Automationen erstellen ist für dein Konto ausgeschaltet. Bitte einen Admin, es einzuschalten."
   },
   "intro": {
     "title": "Lass Toskar arbeiten, während du weg bist",

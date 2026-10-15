@@ -17,6 +17,7 @@ import { AutomationsIntro, IdeaGallery } from './Intro'
 import type { IdeaId } from './ideas'
 import { WebhookLink } from './WebhookLink'
 import { ReportProblem } from '@/components/ui/ReportProblem'
+import { useCapabilities } from '@/lib/capabilities'
 import { matchesSearch } from '@/lib/search'
 
 const screenshotSentence =
@@ -78,6 +79,10 @@ export function AutomationsPage() {
   const hasAutomations = (listQuery.data ?? []).length > 0
   // With none yet, the page explains automations and offers ideas instead of an empty list.
   const empty = !listQuery.isLoading && !listQuery.isError && !hasAutomations
+
+  // Making automations may be turned off for the person (#589); the ones
+  // they have still run and show here.
+  const mayCreate = useCapabilities().allows('automations')
 
   function startNew(idea: IdeaId | null = null) {
     setSeed(idea)
@@ -164,29 +169,31 @@ export function AutomationsPage() {
               {showIntro ? t('page.hideHowItWorks') : t('page.howItWorks')}
             </button>
           ) : null}
-          <button type="button" className="btn-primary" onClick={() => startNew()}>
-            {t('page.new')}
-          </button>
+          {mayCreate ? (
+            <button type="button" className="btn-primary" onClick={() => startNew()}>
+              {t('page.new')}
+            </button>
+          ) : null}
         </div>
       </div>
 
       {hasAutomations && showIntro ? (
         <div id="automations-intro" className="space-y-5">
           <AutomationsIntro />
-          <IdeaGallery onUse={startNew} />
+          {mayCreate ? <IdeaGallery onUse={startNew} /> : null}
         </div>
       ) : null}
 
       {empty && !creating ? (
         <div className="space-y-6">
           <AutomationsIntro mascot />
-          <IdeaGallery onUse={startNew} />
+          {mayCreate ? <IdeaGallery onUse={startNew} /> : <p className="text-sm text-ink-muted">{t('page.createOff')}</p>}
         </div>
       ) : (
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(22rem,34rem)]">
         <section className="min-w-0 space-y-3">
           {empty ? (
-            <IdeaGallery onUse={startNew} compact />
+            mayCreate ? <IdeaGallery onUse={startNew} compact /> : null
           ) : (
           <div className="flex flex-wrap items-center gap-2">
             <label className="search-field min-w-40 flex-1">

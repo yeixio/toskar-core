@@ -20,7 +20,8 @@
     "lastNext": "Última {{last}} · Próxima {{next}}",
     "saveFailed": "Não foi possível salvar a automação.",
     "confirmDelete": "Apagar “{{name}}”? O histórico também será removido.",
-    "selectHint": "Selecione uma automação para ver o histórico dela ou crie uma."
+    "selectHint": "Selecione uma automação para ver o histórico dela ou crie uma.",
+    "createOff": "Criar automações está desativado para sua conta. Peça a um Admin para ativar."
   },
   "intro": {
     "title": "Coloque o Toskar para trabalhar enquanto você está fora",

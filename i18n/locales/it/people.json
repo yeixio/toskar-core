@@ -107,5 +107,51 @@
       "only": "Solo questi"
     },
     "pickOne": "Selezionane almeno uno."
+  },
+  "capabilities": {
+    "title": "Cosa possono usare le persone",
+    "body": "Attiva o disattiva le funzioni per ogni ruolo. Il Consenti o Blocca di una persona, qui sotto, vale prima del suo ruolo.",
+    "capability": "Funzione",
+    "forRole": "{{capability}} per {{role}}",
+    "changed": "Cambiato rispetto al predefinito",
+    "owner": "L'Owner ha sempre tutto. Solo l'Owner cambia cosa possono usare gli Admin.",
+    "personSummary": "Cosa può usare",
+    "asRole": "come il suo ruolo",
+    "personChanged_one": "{{count}} cambiato per questa persona",
+    "personChanged_other": "{{count}} cambiati per questa persona",
+    "personChanged_many": "{{count}} cambiati per questa persona",
+    "forPerson": "{{capability}} per {{name}}",
+    "roleOn": "Come il ruolo (sì)",
+    "roleOff": "Come il ruolo (no)",
+    "allow": "Consenti",
+    "block": "Blocca",
+    "names": {
+      "files": "File",
+      "pictures_in": "Inviare immagini",
+      "make_pictures": "Creare immagini",
+      "make_video": "Creare video",
+      "voice": "Voce",
+      "web": "Web",
+      "knowledge": "Conoscenza nelle risposte",
+      "knowledge_add": "Aggiungere conoscenza",
+      "automations": "Automazioni",
+      "changing_tools": "Strumenti che modificano",
+      "choose_model": "Scegliere il modello",
+      "remote_access": "Fuori casa"
+    },
+    "hints": {
+      "files": "Allegare documenti, fogli di calcolo, PDF e codice",
+      "pictures_in": "Inviare immagini e video da guardare",
+      "make_pictures": "Creare e modificare immagini",
+      "make_video": "Creare clip; occupa la scheda grafica",
+      "voice": "Dettare messaggi e ascoltare le risposte",
+      "web": "Ricerca web, pagine, luoghi e mappe",
+      "knowledge": "Fonti di conoscenza nelle risposte",
+      "knowledge_add": "Aggiungere, cambiare e rimuovere fonti",
+      "automations": "Creare automazioni",
+      "changing_tools": "Comandi, scrittura di file e azioni MCP e plugin",
+      "choose_model": "Scegliere il modello a mano; altrimenti Auto",
+      "remote_access": "Usare i dispositivi associati fuori casa"
+    }
   }
 }

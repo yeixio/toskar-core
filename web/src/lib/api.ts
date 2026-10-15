@@ -1,6 +1,10 @@
 import type {
   ModelURLPreview,
   FirstAnswers,
+  Capabilities,
+  Capability,
+  PersonCapabilities,
+  RoleCapabilities,
   DiagnosticsReport,
   RuntimeHistory,
   AIProfile,
@@ -694,6 +698,14 @@ export const api = {
   getOIDC: () => request<{ enabled: boolean; label?: string }>('/api/v1/oidc'),
 
   /** Sign this browser out. */
+  /** What each role may use (#589). */
+  getRoleCapabilities: () => request<RoleCapabilities>('/api/v1/roles/capabilities'),
+  setRoleCapabilities: (role: Role, caps: Capabilities) =>
+    request<Capabilities>(`/api/v1/roles/${role}/capabilities`, { method: 'PUT', body: JSON.stringify(caps) }),
+  /** One person's Allows and Blocks (#589); null is as their role's. */
+  getPersonCapabilities: (id: string) => request<PersonCapabilities>(`/api/v1/people/${encodeURIComponent(id)}/capabilities`),
+  setPersonCapabilities: (id: string, set: Partial<Record<Capability, boolean | null>>) =>
+    request<PersonCapabilities>(`/api/v1/people/${encodeURIComponent(id)}/capabilities`, { method: 'PUT', body: JSON.stringify(set) }),
   /** Changes your own password, with your current one, as when an Admin set it (#592). */
   changeMyPassword: (current: string, next: string) =>
     request<Principal>('/api/v1/me/password', { method: 'POST', body: JSON.stringify({ current, new: next }) }),

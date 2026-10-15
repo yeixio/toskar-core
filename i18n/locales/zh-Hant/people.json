@@ -107,5 +107,50 @@
       "only": "僅限這些"
     },
     "pickOne": "請至少勾選一個。"
+  },
+  "capabilities": {
+    "title": "成員可以使用的功能",
+    "body": "為每個角色開啟或關閉功能。下方為個人設定的允許或封鎖優先於其角色。",
+    "capability": "功能",
+    "forRole": "{{role}} 的 {{capability}}",
+    "changed": "已偏離預設",
+    "owner": "擁有者一律擁有全部功能。只有擁有者能變更管理員可用的功能。",
+    "personSummary": "可用的功能",
+    "asRole": "與角色相同",
+    "personChanged_one": "為其個別變更了 {{count}} 項",
+    "personChanged_other": "為其個別變更了 {{count}} 項",
+    "forPerson": "{{name}} 的 {{capability}}",
+    "roleOn": "與角色相同（開）",
+    "roleOff": "與角色相同（關）",
+    "allow": "允許",
+    "block": "封鎖",
+    "names": {
+      "files": "檔案",
+      "pictures_in": "傳送圖片",
+      "make_pictures": "產生圖片",
+      "make_video": "產生影片",
+      "voice": "語音",
+      "web": "網路",
+      "knowledge": "在回答中使用知識",
+      "knowledge_add": "新增知識",
+      "automations": "自動化",
+      "changing_tools": "會變更內容的工具",
+      "choose_model": "選擇模型",
+      "remote_access": "外出時"
+    },
+    "hints": {
+      "files": "附加文件、試算表、PDF 和程式碼",
+      "pictures_in": "傳送圖片和影片讓模型查看",
+      "make_pictures": "產生和編輯圖片",
+      "make_video": "產生短片；會占用顯示卡",
+      "voice": "說出訊息並收聽朗讀的回答",
+      "web": "網頁搜尋、網頁、地點和地圖",
+      "knowledge": "在回答中使用知識來源",
+      "knowledge_add": "新增、變更和移除知識來源",
+      "automations": "建立自動化",
+      "changing_tools": "指令、寫入檔案以及 MCP 和外掛操作",
+      "choose_model": "手動選擇模型；否則使用 Auto",
+      "remote_access": "外出時使用已配對的裝置"
+    }
   }
 }

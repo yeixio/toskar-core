@@ -6,6 +6,7 @@ import { RealmKicker } from '@/components/ui/Realm'
 import { formatDate } from '@/i18n/format'
 import { api, ApiError } from '@/lib/api'
 import type { Person, PersonLink, Role } from '@/types/api'
+import { PersonCapabilities, RoleCapabilities } from './Capabilities'
 import { PersonPins, RolePins } from './ProfilePins'
 import { useShareBase } from './shareBase'
 
@@ -97,6 +98,11 @@ function PersonRow({ person, me, onLink }: { person: Person; me?: Person; onLink
         {canManage && !disabled && (person.role === 'member' || person.role === 'visitor') ? (
           <div className="mt-1">
             <PersonPins person={person} />
+          </div>
+        ) : null}
+        {canManage && !disabled ? (
+          <div className="mt-1">
+            <PersonCapabilities person={person} />
           </div>
         ) : null}
       </div>
@@ -215,6 +221,8 @@ export function PeoplePage() {
           </section>
 
           {shown ? <LinkPanel name={shown.name} link={shown.link} onDone={() => setShown(null)} /> : null}
+
+          <RoleCapabilities actor={actor?.role} />
 
           <RolePins />
 

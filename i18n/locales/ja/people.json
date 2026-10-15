@@ -107,5 +107,50 @@
       "only": "これらのみ"
     },
     "pickOne": "1つ以上選んでください。"
+  },
+  "capabilities": {
+    "title": "使える機能",
+    "body": "ロールごとに機能をオン・オフします。下で人ごとに許可またはブロックした設定がロールより優先されます。",
+    "capability": "機能",
+    "forRole": "{{role}} の {{capability}}",
+    "changed": "既定から変更済み",
+    "owner": "オーナーは常にすべて使えます。管理者が使える機能を変えられるのはオーナーだけです。",
+    "personSummary": "使える機能",
+    "asRole": "ロールどおり",
+    "personChanged_one": "{{count}} 件を個別に変更",
+    "personChanged_other": "{{count}} 件を個別に変更",
+    "forPerson": "{{name}} の {{capability}}",
+    "roleOn": "ロールどおり（オン）",
+    "roleOff": "ロールどおり（オフ）",
+    "allow": "許可",
+    "block": "ブロック",
+    "names": {
+      "files": "ファイル",
+      "pictures_in": "画像を送る",
+      "make_pictures": "画像の作成",
+      "make_video": "動画の作成",
+      "voice": "音声",
+      "web": "ウェブ",
+      "knowledge": "回答でのナレッジ",
+      "knowledge_add": "ナレッジの追加",
+      "automations": "オートメーション",
+      "changing_tools": "変更を加えるツール",
+      "choose_model": "モデルの選択",
+      "remote_access": "外出先"
+    },
+    "hints": {
+      "files": "文書、表計算、PDF、コードを添付",
+      "pictures_in": "画像や動画を送って見てもらう",
+      "make_pictures": "画像を作成・編集",
+      "make_video": "クリップを作成（グラフィックカードを占有）",
+      "voice": "メッセージを話す、回答を読み上げる",
+      "web": "ウェブ検索、ページ、場所、地図",
+      "knowledge": "回答でナレッジソースを使う",
+      "knowledge_add": "ナレッジソースの追加・変更・削除",
+      "automations": "オートメーションを作成",
+      "changing_tools": "コマンド、ファイル書き込み、MCP やプラグインの操作",
+      "choose_model": "モデルを手動で選ぶ（それ以外は Auto）",
+      "remote_access": "外出先でペアリングしたデバイスを使う"
+    }
   }
 }

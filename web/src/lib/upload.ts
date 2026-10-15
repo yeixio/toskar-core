@@ -71,3 +71,18 @@ export async function readUpload(file: File): Promise<Upload> {
   }
   return { filename: file.name, contentBase64: btoa(binary) }
 }
+
+/**
+ * The file types someone may attach (#589): files, pictures and videos to
+ * look at, and recordings, as their capabilities allow; '' for none.
+ */
+export function attachAccept(allow: { files: boolean; pictures: boolean; voice: boolean }): string {
+  if (allow.files && allow.pictures && allow.voice) return ATTACH_ACCEPT
+  const parts: string[] = []
+  if (allow.files) {
+    parts.push(UPLOAD_ACCEPT, '.py,.js,.ts,.tsx,.jsx,.go,.rs,.java,.kt,.c,.h,.cpp,.hpp,.cs,.rb,.php,.swift,.sh,.sql,.yaml,.yml,.toml,.xml,.css,.ini,.log')
+  }
+  if (allow.voice) parts.push(AUDIO_ACCEPT)
+  if (allow.pictures) parts.push(IMAGE_ACCEPT, VIDEO_ACCEPT)
+  return parts.join(',')
+}

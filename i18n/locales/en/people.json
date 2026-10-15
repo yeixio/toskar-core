@@ -107,5 +107,50 @@
       "only": "Only these"
     },
     "pickOne": "Tick at least one."
+  },
+  "capabilities": {
+    "title": "What people may use",
+    "body": "Turn things on or off for each role. Someone's own Allow or Block, below, comes before their role's.",
+    "capability": "Capability",
+    "forRole": "{{capability}} for {{role}}",
+    "changed": "Changed from the default",
+    "owner": "The Owner always has everything. Only the Owner changes what Admins may use.",
+    "personSummary": "What they may use",
+    "asRole": "as their role",
+    "personChanged_one": "{{count}} changed for them",
+    "personChanged_other": "{{count}} changed for them",
+    "forPerson": "{{capability}} for {{name}}",
+    "roleOn": "As role (on)",
+    "roleOff": "As role (off)",
+    "allow": "Allow",
+    "block": "Block",
+    "names": {
+      "files": "Files",
+      "pictures_in": "Pictures in",
+      "make_pictures": "Making pictures",
+      "make_video": "Making video",
+      "voice": "Voice",
+      "web": "Web",
+      "knowledge": "Knowledge in answers",
+      "knowledge_add": "Adding to Knowledge",
+      "automations": "Automations",
+      "changing_tools": "Tools that change things",
+      "choose_model": "Choosing a model",
+      "remote_access": "Away from home"
+    },
+    "hints": {
+      "files": "Attach documents, spreadsheets, PDFs, and code",
+      "pictures_in": "Send pictures and videos to look at",
+      "make_pictures": "Make and edit pictures",
+      "make_video": "Make clips; ties up the graphics card",
+      "voice": "Speak messages and hear answers read aloud",
+      "web": "Web lookup, pages, places, and maps",
+      "knowledge": "Knowledge sources in answers",
+      "knowledge_add": "Add, change, and remove Knowledge sources",
+      "automations": "Make automations",
+      "changing_tools": "Commands, file writes, and MCP and plugin actions",
+      "choose_model": "Pick a model by hand; otherwise Auto",
+      "remote_access": "Use paired devices away from home"
+    }
   }
 }

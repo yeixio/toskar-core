@@ -20,7 +20,8 @@
     "lastNext": "Dernière {{last}} · Prochaine {{next}}",
     "saveFailed": "Impossible d'enregistrer l'automatisation.",
     "confirmDelete": "Supprimer « {{name}} » ? Son historique sera également supprimé.",
-    "selectHint": "Sélectionnez une automatisation pour voir son historique, ou créez-en une."
+    "selectHint": "Sélectionnez une automatisation pour voir son historique, ou créez-en une.",
+    "createOff": "La création d'automatisations est désactivée pour votre compte. Demandez à un Admin de l'activer."
   },
   "intro": {
     "title": "Faites travailler Toskar pendant votre absence",

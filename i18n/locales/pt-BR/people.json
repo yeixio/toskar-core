@@ -107,5 +107,51 @@
       "only": "Só estes"
     },
     "pickOne": "Marque pelo menos um."
+  },
+  "capabilities": {
+    "title": "O que cada pessoa pode usar",
+    "body": "Ative ou desative recursos para cada função. O que for permitido ou bloqueado para alguém, abaixo, vale antes da função.",
+    "capability": "Recurso",
+    "forRole": "{{capability}} para {{role}}",
+    "changed": "Alterado em relação ao padrão",
+    "owner": "O Owner sempre tem tudo. Só o Owner muda o que os Admins podem usar.",
+    "personSummary": "O que pode usar",
+    "asRole": "como a função",
+    "personChanged_one": "{{count}} alterado para a pessoa",
+    "personChanged_other": "{{count}} alterados para a pessoa",
+    "personChanged_many": "{{count}} alterados para a pessoa",
+    "forPerson": "{{capability}} para {{name}}",
+    "roleOn": "Como a função (sim)",
+    "roleOff": "Como a função (não)",
+    "allow": "Permitir",
+    "block": "Bloquear",
+    "names": {
+      "files": "Arquivos",
+      "pictures_in": "Enviar imagens",
+      "make_pictures": "Criar imagens",
+      "make_video": "Criar vídeos",
+      "voice": "Voz",
+      "web": "Web",
+      "knowledge": "Conhecimento nas respostas",
+      "knowledge_add": "Adicionar conhecimento",
+      "automations": "Automações",
+      "changing_tools": "Ferramentas que alteram",
+      "choose_model": "Escolher o modelo",
+      "remote_access": "Fora de casa"
+    },
+    "hints": {
+      "files": "Anexar documentos, planilhas, PDFs e código",
+      "pictures_in": "Enviar imagens e vídeos para ver",
+      "make_pictures": "Criar e editar imagens",
+      "make_video": "Criar clipes; ocupa a placa de vídeo",
+      "voice": "Ditar mensagens e ouvir as respostas",
+      "web": "Busca na web, páginas, lugares e mapas",
+      "knowledge": "Fontes de conhecimento nas respostas",
+      "knowledge_add": "Adicionar, alterar e remover fontes",
+      "automations": "Criar automações",
+      "changing_tools": "Comandos, gravação de arquivos e ações de MCP e plugins",
+      "choose_model": "Escolher o modelo à mão; senão Auto",
+      "remote_access": "Usar dispositivos pareados fora de casa"
+    }
   }
 }

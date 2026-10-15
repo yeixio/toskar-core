@@ -20,7 +20,8 @@
     "lastNext": "上次 {{last}} · 下次 {{next}}",
     "saveFailed": "无法保存该自动化。",
     "confirmDelete": "删除“{{name}}”？它的历史记录也会一并删除。",
-    "selectHint": "选择一个自动化查看其历史记录，或新建一个。"
+    "selectHint": "选择一个自动化查看其历史记录，或新建一个。",
+    "createOff": "你的账户已关闭创建自动化。请让管理员开启。"
   },
   "intro": {
     "title": "在你离开时让 Toskar 替你干活",

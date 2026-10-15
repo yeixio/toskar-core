@@ -80,6 +80,15 @@ func screenshotGET(path string) (string, bool) {
 			`"created_at":"2026-10-01T00:00:00Z","updated_at":"2026-10-08T00:00:00Z"}]`, true
 	case strings.HasPrefix(path, "/api/v1/portals/") && strings.HasSuffix(path, "/usage"):
 		return `{"visitors_7":12,"conversations_7":15,"messages_7":48,"visitors_30":41,"conversations_30":57,"messages_30":190}`, true
+	// What each role may use (#589): Members without video, as an Admin might set it.
+	case path == "/api/v1/roles/capabilities":
+		all := `["files","pictures_in","make_pictures","make_video","voice","web","knowledge","knowledge_add","automations","changing_tools","choose_model","remote_access"]`
+		every := `{"files":true,"pictures_in":true,"make_pictures":true,"make_video":true,"voice":true,"web":true,"knowledge":true,"knowledge_add":true,"automations":true,"changing_tools":true,"choose_model":true,"remote_access":true}`
+		member := `{"files":true,"pictures_in":true,"make_pictures":true,"make_video":false,"voice":true,"web":true,"knowledge":true,"knowledge_add":true,"automations":true,"changing_tools":false,"choose_model":true,"remote_access":true}`
+		memberDefault := `{"files":true,"pictures_in":true,"make_pictures":true,"make_video":true,"voice":true,"web":true,"knowledge":true,"knowledge_add":true,"automations":true,"changing_tools":false,"choose_model":true,"remote_access":true}`
+		visitor := `{"files":false,"pictures_in":true,"make_pictures":false,"make_video":false,"voice":true,"web":true,"knowledge":true,"knowledge_add":false,"automations":false,"changing_tools":false,"choose_model":true,"remote_access":true}`
+		return `{"capabilities":` + all + `,"roles":{"owner":` + every + `,"admin":` + every + `,"member":` + member + `,"visitor":` + visitor + `},` +
+			`"defaults":{"owner":` + every + `,"admin":` + every + `,"member":` + memberDefault + `,"visitor":` + visitor + `}}`, true
 	case path == "/api/v1/profile-pins":
 		return `{"roles":{"member":[],"visitor":["general-assistant"]}}`, true
 	case path == "/api/v1/version":

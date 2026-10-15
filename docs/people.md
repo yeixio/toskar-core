@@ -23,11 +23,12 @@ Each role has capabilities. These are the defaults:
 | Choosing a model | ✓ | ✓ | ✓ | ✓ |
 | Away from home | ✓ | ✓ | ✓ | ✓ |
 
+- **Where:** Administer → People. **What people may use** has a switch for each capability and role, with a dot where it differs from the default. Under each person, **What they may use** sets their Allow or Block.
 - **Changing a role:** an Admin changes what Members and Visitors may use. Only the Owner changes what Admins may use. The Owner always has everything, so nobody can lock them out.
 - **One person:** each capability can be **Allow** or **Block** for one person, in place of their role's. Anything not set is as their role's.
 - **Portal guests:** a [chat portal](api.md#chat-portals)'s guests have the Visitor's capabilities, and the portal's own tool setting narrows them further.
 
-Their API keys and paired devices act as them, so the same applies through `/v1`, MCP, and the phone.
+Their API keys and paired devices act as them, so the same applies through `/v1`, MCP, and the phone. The app hides what's off: the attach button offers only the files someone may send (or is gone), the model picker is gone without **Choosing a model**, read aloud without **Voice**, and **New automation** and its ideas without **Automations**.
 
 ## Each capability
 

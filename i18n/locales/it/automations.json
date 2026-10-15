@@ -20,7 +20,8 @@
     "lastNext": "Ultima {{last}} · Prossima {{next}}",
     "saveFailed": "Impossibile salvare l'automazione.",
     "confirmDelete": "Eliminare “{{name}}”? Verrà rimossa anche la sua cronologia.",
-    "selectHint": "Seleziona un'automazione per vederne la cronologia, oppure creane una."
+    "selectHint": "Seleziona un'automazione per vederne la cronologia, oppure creane una.",
+    "createOff": "La creazione di automazioni è disattivata per il tuo account. Chiedi a un Admin di attivarla."
   },
   "intro": {
     "title": "Fai lavorare Toskar mentre sei via",

@@ -107,5 +107,51 @@
       "only": "Solo estos"
     },
     "pickOne": "Marca al menos uno."
+  },
+  "capabilities": {
+    "title": "Qué puede usar cada persona",
+    "body": "Activa o desactiva cosas para cada rol. Lo que se permita o bloquee a alguien, abajo, va antes que su rol.",
+    "capability": "Capacidad",
+    "forRole": "{{capability}} para {{role}}",
+    "changed": "Cambiado respecto al valor predeterminado",
+    "owner": "El Owner siempre lo tiene todo. Solo el Owner cambia lo que pueden usar los Admins.",
+    "personSummary": "Qué puede usar",
+    "asRole": "como su rol",
+    "personChanged_one": "{{count}} cambiado para esa persona",
+    "personChanged_other": "{{count}} cambiados para esa persona",
+    "personChanged_many": "{{count}} cambiados para esa persona",
+    "forPerson": "{{capability}} para {{name}}",
+    "roleOn": "Como el rol (sí)",
+    "roleOff": "Como el rol (no)",
+    "allow": "Permitir",
+    "block": "Bloquear",
+    "names": {
+      "files": "Archivos",
+      "pictures_in": "Enviar imágenes",
+      "make_pictures": "Crear imágenes",
+      "make_video": "Crear vídeos",
+      "voice": "Voz",
+      "web": "Web",
+      "knowledge": "Conocimiento en respuestas",
+      "knowledge_add": "Añadir conocimiento",
+      "automations": "Automatizaciones",
+      "changing_tools": "Herramientas que cambian cosas",
+      "choose_model": "Elegir modelo",
+      "remote_access": "Fuera de casa"
+    },
+    "hints": {
+      "files": "Adjuntar documentos, hojas de cálculo, PDF y código",
+      "pictures_in": "Enviar imágenes y vídeos para verlos",
+      "make_pictures": "Crear y editar imágenes",
+      "make_video": "Crear clips; ocupa la tarjeta gráfica",
+      "voice": "Dictar mensajes y oír las respuestas",
+      "web": "Búsqueda web, páginas, lugares y mapas",
+      "knowledge": "Fuentes de conocimiento en las respuestas",
+      "knowledge_add": "Añadir, cambiar y quitar fuentes de conocimiento",
+      "automations": "Crear automatizaciones",
+      "changing_tools": "Comandos, escribir archivos y acciones de MCP y plugins",
+      "choose_model": "Elegir el modelo a mano; si no, Auto",
+      "remote_access": "Usar dispositivos vinculados fuera de casa"
+    }
   }
 }

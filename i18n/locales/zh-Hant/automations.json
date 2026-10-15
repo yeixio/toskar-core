@@ -20,7 +20,8 @@
     "lastNext": "上次 {{last}} · 下次 {{next}}",
     "saveFailed": "無法儲存自動化。",
     "confirmDelete": "要刪除「{{name}}」嗎？它的歷史紀錄也會一併移除。",
-    "selectHint": "選擇一項自動化以查看其歷史紀錄，或建立新的自動化。"
+    "selectHint": "選擇一項自動化以查看其歷史紀錄，或建立新的自動化。",
+    "createOff": "你的帳戶已關閉建立自動化。請管理員開啟。"
   },
   "intro": {
     "title": "在你離開時讓 Toskar 替你做事",

@@ -9,7 +9,8 @@ import { Ratatoskr } from '@/components/ui/Ratatoskr'
 import { useMascotState } from '@/lib/ratatoskr/useMascotState'
 import { useRole } from '@/lib/role'
 import { ApiError, api, streamChat } from '@/lib/api'
-import { ATTACH_ACCEPT, MAX_ATTACH_BYTES, isAttachable, readUpload } from '@/lib/upload'
+import { attachAccept, MAX_ATTACH_BYTES, isAttachable, readUpload } from '@/lib/upload'
+import { useCapabilities } from '@/lib/capabilities'
 import { subscribeEvents } from '@/lib/events'
 import { useDialog } from '@/lib/useDialog'
 import { useUIStore } from '@/stores/uiStore'
@@ -377,11 +378,14 @@ export function ChatPage() {
     retry: false,
     staleTime: 60_000,
   })
+  // What the person may use (#589): what's off isn't offered.
+  const { allows } = useCapabilities()
+  const accept = attachAccept({ files: allows('files'), pictures: allows('pictures_in'), voice: allows('voice') })
   // Read aloud runs on this computer, where speech can be installed.
   const speechTool = toolsQuery.data?.find((t) => t.id === 'speech.synthesize')
-  const canReadAloud = !!speechTool && speechTool.health !== 'unavailable'
+  const canReadAloud = allows('voice') && !!speechTool && speechTool.health !== 'unavailable'
   // Where it can't, such as the Mac App Store app, the device's own voices read instead.
-  const systemReadAloud = !!toolsQuery.data && !canReadAloud && hasSystemSpeech()
+  const systemReadAloud = allows('voice') && !!toolsQuery.data && !canReadAloud && hasSystemSpeech()
 
   const messagesQuery = useQuery({
     queryKey: ['messages', selectedId],
@@ -1504,7 +1508,7 @@ export function ChatPage() {
         ref={fileInputRef}
         type="file"
         multiple
-        accept={ATTACH_ACCEPT}
+        accept={accept}
         className="hidden"
         onChange={(event) => {
           if (event.target.files) addFiles(event.target.files)
@@ -1557,6 +1561,7 @@ export function ChatPage() {
       />
       <div className="composer-toolbar">
         <div className="flex min-w-0 flex-1 flex-wrap items-center gap-1.5 sm:gap-2">
+{accept ? (
           <button
             type="button"
             className="composer-attach"
@@ -1569,6 +1574,7 @@ export function ChatPage() {
               <path d="M13.5 7.5 8 13a3.5 3.5 0 0 1-5-5l6-6a2.3 2.3 0 0 1 3.3 3.3L6.4 11.2a1.2 1.2 0 0 1-1.6-1.6L10 4.4" />
             </svg>
           </button>
+          ) : null}
           {needsRunOn ? (
             <label className="composer-select ring-1 ring-primary/50" title={runOnTitle}>
               <span className="composer-select-label">{t('composer.runOn')}</span>
@@ -1590,6 +1596,8 @@ export function ChatPage() {
               </select>
             </label>
           ) : null}
+{/* Without choosing models, every chat uses Auto (#589). */}
+          {allows('choose_model') ? (
           <label className="composer-select" title={t('composer.modelHint')}>
             <span className="composer-select-label">{t('composer.model')}</span>
             <select
@@ -1639,6 +1647,7 @@ export function ChatPage() {
               )}
             </select>
           </label>
+          ) : null}
           <div ref={optionsRef} className="relative">
             <button
               ref={optionsButtonRef}
@@ -1934,7 +1943,7 @@ export function ChatPage() {
                         {message.meta?.setup && admin ? (
                           <SetupOfferCard offer={message.meta.setup} onContinue={continueAfterSetup} />
                         ) : null}
-                        {message.meta?.automation && member ? (
+                        {message.meta?.automation && member && allows('automations') ? (
                           <AutomationDraftCard draft={message.meta.automation} conversationId={message.conversation_id} />
                         ) : null}
                         <div className="mt-2 flex flex-wrap items-center gap-2">

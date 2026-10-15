@@ -20,7 +20,8 @@
     "lastNext": "Last {{last}} · Next {{next}}",
     "saveFailed": "Could not save the automation.",
     "confirmDelete": "Delete “{{name}}”? Its history is removed too.",
-    "selectHint": "Select an automation to see its history, or create one."
+    "selectHint": "Select an automation to see its history, or create one.",
+    "createOff": "Making automations is turned off for your account. Ask an Admin to turn it on."
   },
   "intro": {
     "title": "Put Toskar to work while you're away",
