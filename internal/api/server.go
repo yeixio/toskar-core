@@ -434,8 +434,39 @@ func (s *Server) routes() {
 	if s.deps.WebRoot != nil {
 		fileServer := http.FileServer(http.FS(s.deps.WebRoot))
 		s.router.HandleFunc("/embed.js", s.handleEmbedScript).Methods(http.MethodGet)
-		s.router.PathPrefix("/").Handler(s.framing(spaFallback(s.deps.WebRoot, fileServer)))
+		s.router.PathPrefix("/").Handler(s.framing(spaFallback(s.deps.WebRoot, fileServer, s.apiRouteMissing))).Name(webRoute)
 	}
+	s.router.NotFoundHandler = http.HandlerFunc(s.apiRouteMissing)
+	s.router.MethodNotAllowedHandler = http.HandlerFunc(s.apiRouteMissing)
+}
+
+// webRoute names the catch-all that serves the web UI.
+const webRoute = "web"
+
+// isAPIPath reports a path the API answers, as opposed to the web UI's.
+func isAPIPath(p string) bool {
+	return strings.HasPrefix(p, "/api/") || strings.HasPrefix(p, "/v1/") || p == "/mcp"
+}
+
+// apiRouteMissing answers a request no route takes with a coded error
+// (#588), so a client on another version says so instead of reading the
+// web UI's page as an answer: METHOD_NOT_ALLOWED when the path has a route
+// for another method, else ROUTE_NOT_FOUND.
+func (s *Server) apiRouteMissing(w http.ResponseWriter, r *http.Request) {
+	what := r.Method + " " + r.URL.Path
+	for _, method := range []string{http.MethodGet, http.MethodPost, http.MethodPut, http.MethodPatch, http.MethodDelete} {
+		if method == r.Method {
+			continue
+		}
+		other := r.Clone(r.Context())
+		other.Method = method
+		var match mux.RouteMatch
+		if s.router.Match(other, &match) && match.MatchErr == nil && match.Route != nil && match.Route.GetName() != webRoute {
+			writeErr(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", what+" is not supported", map[string]any{"route": what})
+			return
+		}
+	}
+	writeErr(w, http.StatusNotFound, "ROUTE_NOT_FOUND", what+" is not a route of this version", map[string]any{"route": what})
 }
 
 // Handler returns the root HTTP handler.
@@ -1397,9 +1428,13 @@ func (s *Server) logMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-func spaFallback(root fs.FS, files http.Handler) http.Handler {
+func spaFallback(root fs.FS, files http.Handler, apiMissing http.HandlerFunc) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		urlPath := r.URL.Path
+		if isAPIPath(urlPath) {
+			apiMissing(w, r)
+			return
+		}
 		if urlPath == "/" {
 			files.ServeHTTP(w, r)
 			return

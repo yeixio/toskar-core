@@ -237,5 +237,9 @@
   "SUMMARY_NOT_FOUND": "Dieser Chat wurde noch nicht verdichtet.",
   "SUMMARY_EMPTY": "Eine Zusammenfassung darf nicht leer sein.",
   "SUMMARY_FAILED": "Die Zusammenfassung konnte nicht gelesen oder gespeichert werden: {{detail}}",
-  "COMPACT_FAILED": "Der Chat konnte nicht verdichtet werden: {{detail}}"
+  "COMPACT_FAILED": "Der Chat konnte nicht verdichtet werden: {{detail}}",
+  "ROUTE_NOT_FOUND": "Diese Version des Toskar-Dienstes kennt diese Anfrage nicht ({{route}}). Bringe App und Dienst auf dieselbe Version.",
+  "METHOD_NOT_ALLOWED": "Der Toskar-Dienst nimmt diese Anfrage nicht an ({{route}}). Bringe App und Dienst auf dieselbe Version.",
+  "BAD_RESPONSE": "Der Toskar-Dienst hat eine Antwort gesendet, die die App nicht lesen kann (HTTP {{status}}). Versuche es erneut; wenn es wieder passiert, melde es.",
+  "REPLY_INTERRUPTED": "Die Antwort brach ab, weil die Verbindung zum Toskar-Dienst verloren ging. Versuche es erneut."
 }

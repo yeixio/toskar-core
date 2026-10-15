@@ -20,7 +20,7 @@ func TestSPAFallbackServesFilesInFolders(t *testing.T) {
 		"assets/app.css":   {Data: []byte("body{}")},
 		"assets/img/a.png": {Data: []byte("png")},
 	}
-	h := spaFallback(root, http.FileServer(http.FS(root)))
+	h := spaFallback(root, http.FileServer(http.FS(root)), func(w http.ResponseWriter, _ *http.Request) { w.WriteHeader(http.StatusNotFound) })
 
 	tests := []struct {
 		name string

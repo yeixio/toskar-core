@@ -297,6 +297,44 @@ async function parseJson<T>(response: Response): Promise<T | null> {
   return JSON.parse(text) as T
 }
 
+/** A cancelled request, which callers ignore rather than show. */
+function isAbort(err: unknown): boolean {
+  return err instanceof DOMException && err.name === 'AbortError'
+}
+
+/** The service could not be reached at all. */
+function unreachable(err: unknown): ApiError {
+  const detail = err instanceof Error ? err.message : 'network error'
+  return new ApiError(
+    0,
+    `Could not reach the local Toskar service (${detail}). If this is the desktop app, quit and reopen it so the daemon restarts.`,
+    'SERVICE_UNREACHABLE',
+    { detail },
+  )
+}
+
+/**
+ * A failed response as an ApiError with a code (#588): the service's own,
+ * or BAD_RESPONSE when the body isn't the service's JSON error, as from a
+ * proxy's error page or an empty 405.
+ */
+async function responseError(response: Response): Promise<ApiError> {
+  const text = await response.text().catch(() => '')
+  try {
+    const body = JSON.parse(text) as { error?: ServiceError }
+    if (body?.error?.code) {
+      return new ApiError(response.status, body.error.message ?? '', body.error.code, body.error.details)
+    }
+  } catch {
+    // not JSON: described below
+  }
+  return badResponse(response.status)
+}
+
+function badResponse(status: number): ApiError {
+  return new ApiError(status, `The service sent an answer the app couldn't read (HTTP ${status}).`, 'BAD_RESPONSE', { status })
+}
+
 async function request<T>(path: string, init?: RequestInit): Promise<T | null> {
   const url = `${getApiBase()}${path}`
 
@@ -313,13 +351,8 @@ async function request<T>(path: string, init?: RequestInit): Promise<T | null> {
       },
     })
   } catch (err) {
-    const detail = err instanceof Error ? err.message : 'network error'
-    throw new ApiError(
-      0,
-      `Could not reach the local Toskar service (${detail}). If this is the desktop app, quit and reopen it so the daemon restarts.`,
-      'SERVICE_UNREACHABLE',
-      { detail },
-    )
+    if (isAbort(err)) throw err
+    throw unreachable(err)
   }
 
   if (response.status === 404) {
@@ -327,20 +360,19 @@ async function request<T>(path: string, init?: RequestInit): Promise<T | null> {
   }
 
   if (!response.ok) {
-    const body = await parseJson<{ error?: ServiceError }>(response)
-    throw new ApiError(
-      response.status,
-      body?.error?.message ?? response.statusText ?? `HTTP ${response.status}`,
-      body?.error?.code,
-      body?.error?.details,
-    )
+    throw await responseError(response)
   }
 
   if (response.status === 204) {
     return null
   }
 
-  return parseJson<T>(response)
+  try {
+    return await parseJson<T>(response)
+  } catch (err) {
+    if (isAbort(err)) throw err
+    throw badResponse(response.status)
+  }
 }
 
 /**
@@ -371,7 +403,8 @@ export function uploadModel(
         // Not JSON: the status says what failed.
       }
       if (xhr.status >= 200 && xhr.status < 300) resolve(body as ModelImportResult)
-      else reject(new ApiError(xhr.status, body.error?.message ?? `HTTP ${xhr.status}`, body.error?.code, body.error?.details))
+      else if (body.error?.code) reject(new ApiError(xhr.status, body.error.message ?? '', body.error.code, body.error.details))
+      else reject(badResponse(xhr.status))
     }
     xhr.send(file)
   })
@@ -407,7 +440,7 @@ export async function downloadArtifact(file: Pick<FileRef, 'id' | 'name'>): Prom
   if (!response.ok) {
     throw response.status === 404
       ? new ApiError(404, 'This file is no longer available.', 'FILE_NOT_FOUND')
-      : new ApiError(response.status, response.statusText)
+      : await responseError(response)
   }
   const url = URL.createObjectURL(await response.blob())
   const link = document.createElement('a')
@@ -425,7 +458,7 @@ export async function artifactObjectUrl(id: string): Promise<string> {
   if (!response.ok) {
     throw response.status === 404
       ? new ApiError(404, 'This file is no longer available.', 'FILE_NOT_FOUND')
-      : new ApiError(response.status, response.statusText)
+      : await responseError(response)
   }
   return URL.createObjectURL(await response.blob())
 }
@@ -492,25 +525,25 @@ async function readChatStream({
   onError,
 }: StreamChatOptions): Promise<void> {
   const url = `${getApiBase()}/api/v1/chat`
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: {
-      Accept: 'text/event-stream',
-      'Content-Type': 'application/json',
-      ...authHeaders(),
-    },
-    body: JSON.stringify({ time_zone: localTimeZone(), client: clientKind(), ...body, stream: true }),
-    signal,
-  })
+  let response: Response
+  try {
+    response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        Accept: 'text/event-stream',
+        'Content-Type': 'application/json',
+        ...authHeaders(),
+      },
+      body: JSON.stringify({ time_zone: localTimeZone(), client: clientKind(), ...body, stream: true }),
+      signal,
+    })
+  } catch (err) {
+    if (isAbort(err)) throw err
+    throw unreachable(err)
+  }
 
   if (!response.ok) {
-    const errBody = await parseJson<{ error?: ServiceError }>(response)
-    throw new ApiError(
-      response.status,
-      errBody?.error?.message ?? response.statusText,
-      errBody?.error?.code,
-      errBody?.error?.details,
-    )
+    throw await responseError(response)
   }
 
   const reader = response.body?.getReader()
@@ -525,7 +558,14 @@ async function readChatStream({
   let errorCode: string | undefined
 
   while (true) {
-    const { done, value } = await reader.read()
+    let chunk: ReadableStreamReadResult<Uint8Array>
+    try {
+      chunk = await reader.read()
+    } catch (err) {
+      if (isAbort(err)) throw err
+      throw interrupted()
+    }
+    const { done, value } = chunk
     if (done) {
       break
     }
@@ -572,7 +612,13 @@ async function readChatStream({
     }
   }
 
-  onDone?.()
+  // The service ends every reply with done or error, so a stream without
+  // either was cut off (#588).
+  throw interrupted()
+}
+
+function interrupted(): ApiError {
+  return new ApiError(0, 'The reply stopped before it finished: the connection to the service was lost.', 'REPLY_INTERRUPTED')
 }
 
 /** A setup route, on a paired computer when nodeId is set. */

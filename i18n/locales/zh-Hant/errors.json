@@ -237,5 +237,9 @@
   "SUMMARY_NOT_FOUND": "這個聊天還沒有被壓縮。",
   "SUMMARY_EMPTY": "摘要不能為空。",
   "SUMMARY_FAILED": "無法讀取或儲存摘要：{{detail}}",
-  "COMPACT_FAILED": "無法壓縮聊天：{{detail}}"
+  "COMPACT_FAILED": "無法壓縮聊天：{{detail}}",
+  "ROUTE_NOT_FOUND": "此版本的 Toskar 服務不認得這個請求（{{route}}）。請把應用程式和服務更新到同一版本。",
+  "METHOD_NOT_ALLOWED": "Toskar 服務不接受這個請求（{{route}}）。請把應用程式和服務更新到同一版本。",
+  "BAD_RESPONSE": "Toskar 服務傳來了應用程式無法讀取的回應（HTTP {{status}}）。請重試；如果反覆出現，請回報。",
+  "REPLY_INTERRUPTED": "與 Toskar 服務的連線中斷，回覆在完成前停止了。請重試。"
 }

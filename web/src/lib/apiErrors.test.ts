@@ -52,6 +52,28 @@ describe('ApiError', () => {
     expect(error.code).toBe('SERVICE_UNREACHABLE')
     expect(error.message).toBe("Couldn't reach the local Toskar service (Failed to fetch). If this is the desktop app, quit and reopen it so the service restarts.")
   })
+
+  it('gives an answer that is not the service’s JSON a code (#588)', async () => {
+    for (const response of [
+      new Response('<html>502 Bad Gateway</html>', { status: 502, headers: { 'Content-Type': 'text/html' } }),
+      new Response(null, { status: 405 }),
+      new Response('{"error":"no code"}', { status: 500 }),
+    ]) {
+      vi.stubGlobal('fetch', vi.fn().mockResolvedValue(response))
+      const error = (await api.getSettings().catch((e: unknown) => e)) as ApiError
+      expect(error).toBeInstanceOf(ApiError)
+      expect(error.code).toBe('BAD_RESPONSE')
+      expect(error.message).toBe(`The Toskar service sent an answer the app couldn't read (HTTP ${response.status}). Try again; if it keeps happening, report it.`)
+    }
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response('<!doctype html>app', { status: 200 })))
+    expect(((await api.getSettings().catch((e: unknown) => e)) as ApiError).code).toBe('BAD_RESPONSE')
+  })
+
+  it('lets a cancelled request through as itself, not as unreachable', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new DOMException('aborted', 'AbortError')))
+    const error = await api.getSettings().catch((e: unknown) => e)
+    expect(error).toBeInstanceOf(DOMException)
+  })
 })
 
 describe('streamChat', () => {
@@ -73,5 +95,22 @@ describe('streamChat', () => {
     const onError = vi.fn()
     await streamChat({ body: { conversation_id: 'c1', message: 'hi' }, onToken: () => {}, onError })
     expect(onError).toHaveBeenCalledWith('out of memory', undefined)
+  })
+
+  it('says a reply that was cut off was cut off, not finished (#588)', async () => {
+    vi.stubGlobal('fetch', stream('event: token\ndata: {"content":"Hel"}\n\n'))
+    const onDone = vi.fn()
+    const error = (await streamChat({ body: { conversation_id: 'c1', message: 'hi' }, onToken: () => {}, onDone }).catch((e: unknown) => e)) as ApiError
+    expect(onDone).not.toHaveBeenCalled()
+    expect(error.code).toBe('REPLY_INTERRUPTED')
+  })
+
+  it('codes a stream that could not start', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new TypeError('Failed to fetch')))
+    let error = (await streamChat({ body: { conversation_id: 'c1', message: 'hi' }, onToken: () => {} }).catch((e: unknown) => e)) as ApiError
+    expect(error.code).toBe('SERVICE_UNREACHABLE')
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response('Bad Gateway', { status: 502 })))
+    error = (await streamChat({ body: { conversation_id: 'c1', message: 'hi' }, onToken: () => {} }).catch((e: unknown) => e)) as ApiError
+    expect(error.code).toBe('BAD_RESPONSE')
   })
 })

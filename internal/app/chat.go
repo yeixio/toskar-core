@@ -522,7 +522,8 @@ func (a *App) RunChat(ctx context.Context, profileID, conversationID, message st
 			eventsCh, err := orch.Run(ctx, task, profile, env)
 			if err != nil {
 				runErr = codedError(err)
-				ch <- pluginapi.ChatChunk{Error: a.explainFailure(appLang, err.Error()), Done: true}
+				code, params := contracts.ErrorCode(runErr)
+				ch <- pluginapi.ChatChunk{Error: a.explainFailure(appLang, err.Error()), Code: code, Details: params, Done: true}
 				return
 			}
 			retry := false
@@ -882,6 +883,9 @@ func (a *App) HandleHTTPChat(w http.ResponseWriter, r *http.Request, conversatio
 		var metrics *pluginapi.GenerationMetrics
 		for chunk := range ch {
 			if chunk.Error != "" {
+				if chunk.Code != "" {
+					return contracts.NewError(chunk.Code, chunk.Details, errString(chunk.Error))
+				}
 				return codedChatError(chunk.Error)
 			}
 			content += chunk.Content
@@ -896,6 +900,12 @@ func (a *App) HandleHTTPChat(w http.ResponseWriter, r *http.Request, conversatio
 		}
 		return json.NewEncoder(w).Encode(out)
 	}
+	return writeChatStream(w, ch)
+}
+
+// writeChatStream sends a chat's chunks as server-sent events: token, done,
+// and for a failure error_code then error.
+func writeChatStream(w http.ResponseWriter, ch <-chan pluginapi.ChatChunk) error {
 	flusher, ok := w.(http.Flusher)
 	if !ok {
 		return fmt.Errorf("streaming unsupported")
@@ -903,15 +913,22 @@ func (a *App) HandleHTTPChat(w http.ResponseWriter, r *http.Request, conversatio
 	w.Header().Set("Content-Type", "text/event-stream")
 	w.Header().Set("Cache-Control", "no-cache")
 	w.WriteHeader(http.StatusOK)
+	ended := false
 	for chunk := range ch {
 		if chunk.Error != "" {
 			// error_code comes first, so a client that knows it shows the
 			// error in the App language; older clients ignore it and show
-			// the text in error.
-			if code, params := chatErrorCode(chunk.Error); code != "" {
-				data, _ := json.Marshal(contracts.ErrorBody{Code: code, Message: chunk.Error, Details: params})
-				fmt.Fprintf(w, "event: error_code\ndata: %s\n\n", data)
+			// the text in error. Every error has a code (#588): its own,
+			// one recognized from its text, or CHAT_FAILED.
+			code, params := chunk.Code, chunk.Details
+			if code == "" {
+				code, params = chatErrorCode(chunk.Error)
 			}
+			if code == "" {
+				code, params = "CHAT_FAILED", nil
+			}
+			data, _ := json.Marshal(contracts.ErrorBody{Code: code, Message: chunk.Error, Details: params})
+			fmt.Fprintf(w, "event: error_code\ndata: %s\n\n", data)
 			fmt.Fprintf(w, "event: error\ndata: %s\n\n", chunk.Error)
 			flusher.Flush()
 			return nil
@@ -929,7 +946,15 @@ func (a *App) HandleHTTPChat(w http.ResponseWriter, r *http.Request, conversatio
 			data, _ := json.Marshal(payload)
 			fmt.Fprintf(w, "event: done\ndata: %s\n\n", data)
 			flusher.Flush()
+			ended = true
 		}
+	}
+	// Every stream ends with done or error (#588), so a client can tell a
+	// reply that was cut off from one that finished, as when a stopped run
+	// closes without a last chunk.
+	if !ended {
+		fmt.Fprint(w, "event: done\ndata: {}\n\n")
+		flusher.Flush()
 	}
 	return nil
 }

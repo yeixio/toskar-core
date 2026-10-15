@@ -237,5 +237,9 @@
   "SUMMARY_NOT_FOUND": "このチャットはまだ圧縮されていません。",
   "SUMMARY_EMPTY": "要約は空にできません。",
   "SUMMARY_FAILED": "要約を読み込みまたは保存できませんでした：{{detail}}",
-  "COMPACT_FAILED": "チャットを圧縮できませんでした：{{detail}}"
+  "COMPACT_FAILED": "チャットを圧縮できませんでした：{{detail}}",
+  "ROUTE_NOT_FOUND": "このバージョンの Toskar サービスはこのリクエストに対応していません（{{route}}）。アプリとサービスを同じバージョンにしてください。",
+  "METHOD_NOT_ALLOWED": "Toskar サービスはこのリクエストを受け付けません（{{route}}）。アプリとサービスを同じバージョンにしてください。",
+  "BAD_RESPONSE": "Toskar サービスからアプリが読めない応答が届きました（HTTP {{status}}）。もう一度お試しください。繰り返し起きる場合は報告してください。",
+  "REPLY_INTERRUPTED": "Toskar サービスとの接続が切れたため、返答が途中で止まりました。もう一度お試しください。"
 }

@@ -237,5 +237,9 @@
   "SUMMARY_NOT_FOUND": "Cette conversation n'a pas encore été compactée.",
   "SUMMARY_EMPTY": "Un résumé ne peut pas être vide.",
   "SUMMARY_FAILED": "Le résumé n'a pas pu être lu ou enregistré : {{detail}}",
-  "COMPACT_FAILED": "La conversation n'a pas pu être compactée : {{detail}}"
+  "COMPACT_FAILED": "La conversation n'a pas pu être compactée : {{detail}}",
+  "ROUTE_NOT_FOUND": "Cette version du service Toskar ne connaît pas cette requête ({{route}}). Mettez l'app et le service à la même version.",
+  "METHOD_NOT_ALLOWED": "Le service Toskar n'accepte pas cette requête ({{route}}). Mettez l'app et le service à la même version.",
+  "BAD_RESPONSE": "Le service Toskar a envoyé une réponse que l'app ne peut pas lire (HTTP {{status}}). Réessayez ; si cela se reproduit, signalez-le.",
+  "REPLY_INTERRUPTED": "La réponse s'est arrêtée avant la fin, car la connexion au service Toskar a été perdue. Réessayez."
 }

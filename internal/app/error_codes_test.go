@@ -16,7 +16,7 @@ import (
 )
 
 // Codes the web UI and apps make themselves, not sent by core.
-var clientErrorCodes = []string{"SERVICE_UNREACHABLE", "TOOL_SOURCE_ENTRY_NOT_FOUND"}
+var clientErrorCodes = []string{"SERVICE_UNREACHABLE", "TOOL_SOURCE_ENTRY_NOT_FOUND", "BAD_RESPONSE", "REPLY_INTERRUPTED"}
 
 var codePattern = regexp.MustCompile(`^[A-Z][A-Z0-9_]+$`)
 

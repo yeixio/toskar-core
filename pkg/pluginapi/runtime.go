@@ -259,6 +259,10 @@ type ChatChunk struct {
 	Done    bool               `json:"done"`
 	Error   string             `json:"error,omitempty"`
 	Metrics *GenerationMetrics `json:"metrics,omitempty"`
+	// Code and Details are Error's stable code and values, when the error
+	// had its own (#588); without them, core recognizes the code from Error.
+	Code    string         `json:"code,omitempty"`
+	Details map[string]any `json:"details,omitempty"`
 }
 
 // GenerationMetrics mirrors contracts.GenerationMetrics for runtime adapters.

@@ -237,5 +237,9 @@
   "SUMMARY_NOT_FOUND": "Este chat aún no se ha compactado.",
   "SUMMARY_EMPTY": "Un resumen no puede estar vacío.",
   "SUMMARY_FAILED": "No se pudo leer ni guardar el resumen: {{detail}}",
-  "COMPACT_FAILED": "No se pudo compactar el chat: {{detail}}"
+  "COMPACT_FAILED": "No se pudo compactar el chat: {{detail}}",
+  "ROUTE_NOT_FOUND": "Esta versión del servicio de Toskar no conoce esa solicitud ({{route}}). Actualiza la app y el servicio a la misma versión.",
+  "METHOD_NOT_ALLOWED": "El servicio de Toskar no acepta esa solicitud ({{route}}). Actualiza la app y el servicio a la misma versión.",
+  "BAD_RESPONSE": "El servicio de Toskar envió una respuesta que la app no puede leer (HTTP {{status}}). Inténtalo de nuevo; si sigue pasando, infórmalo.",
+  "REPLY_INTERRUPTED": "La respuesta se cortó antes de terminar porque se perdió la conexión con el servicio de Toskar. Inténtalo de nuevo."
 }
