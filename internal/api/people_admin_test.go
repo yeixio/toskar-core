@@ -73,7 +73,7 @@ func TestManagePeople(t *testing.T) {
 		return send(r)
 	}
 	field := func(r reply, path ...string) any {
-		var v any = r.body
+		v := r.body
 		for _, k := range path {
 			m, _ := v.(map[string]any)
 			v = m[k]
