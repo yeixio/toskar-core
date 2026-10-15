@@ -165,28 +165,28 @@ func (s *InternalServer) authMiddleware(next http.Handler) http.Handler {
 			return
 		}
 		if s.deps.Pairing == nil {
-			http.Error(w, "auth unavailable", http.StatusServiceUnavailable)
+			peerError(w, r, http.StatusServiceUnavailable, "PEER_UNAVAILABLE", errors.New("auth unavailable"))
 			return
 		}
 		authz := r.Header.Get("Authorization")
 		if !strings.HasPrefix(authz, "Bearer ") {
-			http.Error(w, "authorization required", http.StatusUnauthorized)
+			peerError(w, r, http.StatusUnauthorized, "PEER_UNAUTHORIZED", errors.New("authorization required"))
 			return
 		}
 		token := strings.TrimPrefix(authz, "Bearer ")
 		// Peek node id from token without verify to load cert.
 		nodeID, cert, err := s.lookupTokenPeer(r.Context(), token)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusUnauthorized)
+			peerError(w, r, http.StatusUnauthorized, "PEER_UNAUTHORIZED", err)
 			return
 		}
 		claims, err := auth.ParseAndVerifyAuthToken(token, cert, s.localNodeID())
 		if err != nil {
-			http.Error(w, "invalid token", http.StatusUnauthorized)
+			peerError(w, r, http.StatusUnauthorized, "PEER_UNAUTHORIZED", errors.New("invalid token"))
 			return
 		}
 		if !s.replay.Use(claims) {
-			http.Error(w, "token already used", http.StatusUnauthorized)
+			peerError(w, r, http.StatusUnauthorized, "PEER_UNAUTHORIZED", errors.New("token already used"))
 			return
 		}
 		next.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), peerKey{}, nodeID)))
@@ -238,11 +238,11 @@ func PeerFrom(ctx context.Context) string {
 func (s *InternalServer) handleLeave(w http.ResponseWriter, r *http.Request) {
 	peer := PeerFrom(r.Context())
 	if peer == "" {
-		http.Error(w, "authorization required", http.StatusUnauthorized)
+		peerError(w, r, http.StatusUnauthorized, "PEER_UNAUTHORIZED", errors.New("authorization required"))
 		return
 	}
 	if err := s.deps.Leave(r.Context(), peer); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		peerError(w, r, http.StatusInternalServerError, "PEER_FAILED", err)
 		return
 	}
 	w.WriteHeader(http.StatusNoContent)
@@ -282,12 +282,12 @@ func (s *InternalServer) handleNode(w http.ResponseWriter, r *http.Request) {
 
 func (s *InternalServer) handleLive(w http.ResponseWriter, r *http.Request) {
 	if s.deps.Live == nil {
-		http.Error(w, "unavailable", http.StatusServiceUnavailable)
+		peerError(w, r, http.StatusServiceUnavailable, "PEER_UNAVAILABLE", errors.New("unavailable"))
 		return
 	}
 	live, err := s.deps.Live(r.Context())
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		peerError(w, r, http.StatusInternalServerError, "PEER_FAILED", err)
 		return
 	}
 	writeJSON(w, live)
@@ -295,12 +295,12 @@ func (s *InternalServer) handleLive(w http.ResponseWriter, r *http.Request) {
 
 func (s *InternalServer) handleHardware(w http.ResponseWriter, r *http.Request) {
 	if s.deps.Hardware == nil {
-		http.Error(w, "unavailable", http.StatusServiceUnavailable)
+		peerError(w, r, http.StatusServiceUnavailable, "PEER_UNAVAILABLE", errors.New("unavailable"))
 		return
 	}
 	inv, err := s.deps.Hardware(r.Context())
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		peerError(w, r, http.StatusInternalServerError, "PEER_FAILED", err)
 		return
 	}
 	writeJSON(w, inv)
@@ -313,7 +313,7 @@ func (s *InternalServer) handleListModels(w http.ResponseWriter, r *http.Request
 	}
 	items, err := s.deps.ListModels(r.Context())
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		peerError(w, r, http.StatusInternalServerError, "PEER_FAILED", err)
 		return
 	}
 	writeJSON(w, items)
@@ -321,7 +321,7 @@ func (s *InternalServer) handleListModels(w http.ResponseWriter, r *http.Request
 
 func (s *InternalServer) handleInstallModel(w http.ResponseWriter, r *http.Request) {
 	if s.deps.InstallModel == nil {
-		http.Error(w, "unavailable", http.StatusNotImplemented)
+		peerError(w, r, http.StatusNotImplemented, "PEER_UNAVAILABLE", errors.New("unavailable"))
 		return
 	}
 	var body struct {
@@ -329,11 +329,11 @@ func (s *InternalServer) handleInstallModel(w http.ResponseWriter, r *http.Reque
 		Wait    bool   `json:"wait"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil || body.ModelID == "" {
-		http.Error(w, "model_id required", http.StatusBadRequest)
+		peerError(w, r, http.StatusBadRequest, "BAD_REQUEST", errors.New("model_id required"))
 		return
 	}
 	if err := s.deps.InstallModel(r.Context(), body.ModelID, body.Wait); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		peerError(w, r, http.StatusBadRequest, "PEER_FAILED", err)
 		return
 	}
 	writeJSON(w, map[string]any{"ok": true, "model_id": body.ModelID})
@@ -341,17 +341,17 @@ func (s *InternalServer) handleInstallModel(w http.ResponseWriter, r *http.Reque
 
 func (s *InternalServer) handleInstallFromURL(w http.ResponseWriter, r *http.Request) {
 	if s.deps.InstallFromURL == nil {
-		http.Error(w, "unavailable", http.StatusNotImplemented)
+		peerError(w, r, http.StatusNotImplemented, "PEER_UNAVAILABLE", errors.New("unavailable"))
 		return
 	}
 	var req contracts.InstallFromURLRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "invalid body", http.StatusBadRequest)
+		peerError(w, r, http.StatusBadRequest, "INVALID_BODY", errors.New("invalid body"))
 		return
 	}
 	id, err := s.deps.InstallFromURL(r.Context(), req, false)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		peerError(w, r, http.StatusBadRequest, "PEER_FAILED", err)
 		return
 	}
 	writeJSON(w, map[string]any{"ok": true, "model_id": id})
@@ -359,16 +359,16 @@ func (s *InternalServer) handleInstallFromURL(w http.ResponseWriter, r *http.Req
 
 func (s *InternalServer) handleDeleteModel(w http.ResponseWriter, r *http.Request) {
 	if s.deps.DeleteModel == nil {
-		http.Error(w, "unavailable", http.StatusNotImplemented)
+		peerError(w, r, http.StatusNotImplemented, "PEER_UNAVAILABLE", errors.New("unavailable"))
 		return
 	}
 	id := mux.Vars(r)["id"]
 	if id == "" {
-		http.Error(w, "model id required", http.StatusBadRequest)
+		peerError(w, r, http.StatusBadRequest, "BAD_REQUEST", errors.New("model id required"))
 		return
 	}
 	if err := s.deps.DeleteModel(r.Context(), id); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		peerError(w, r, http.StatusBadRequest, "PEER_FAILED", err)
 		return
 	}
 	writeJSON(w, map[string]any{"ok": true})
@@ -381,7 +381,7 @@ func (s *InternalServer) handleListRunning(w http.ResponseWriter, r *http.Reques
 	}
 	items, err := s.deps.ListRunning(r.Context())
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		peerError(w, r, http.StatusInternalServerError, "PEER_FAILED", err)
 		return
 	}
 	writeJSON(w, items)
@@ -389,13 +389,13 @@ func (s *InternalServer) handleListRunning(w http.ResponseWriter, r *http.Reques
 
 func (s *InternalServer) handleStartModel(w http.ResponseWriter, r *http.Request) {
 	if s.deps.StartModel == nil {
-		http.Error(w, "unavailable", http.StatusNotImplemented)
+		peerError(w, r, http.StatusNotImplemented, "PEER_UNAVAILABLE", errors.New("unavailable"))
 		return
 	}
 	id := mux.Vars(r)["id"]
 	view, err := s.deps.StartModel(r.Context(), id)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		peerError(w, r, http.StatusBadRequest, "PEER_FAILED", err)
 		return
 	}
 	writeJSON(w, view)
@@ -403,12 +403,12 @@ func (s *InternalServer) handleStartModel(w http.ResponseWriter, r *http.Request
 
 func (s *InternalServer) handleStopModel(w http.ResponseWriter, r *http.Request) {
 	if s.deps.StopModel == nil {
-		http.Error(w, "unavailable", http.StatusNotImplemented)
+		peerError(w, r, http.StatusNotImplemented, "PEER_UNAVAILABLE", errors.New("unavailable"))
 		return
 	}
 	id := mux.Vars(r)["id"]
 	if err := s.deps.StopModel(r.Context(), id); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		peerError(w, r, http.StatusBadRequest, "PEER_FAILED", err)
 		return
 	}
 	writeJSON(w, map[string]any{"ok": true})
@@ -416,21 +416,21 @@ func (s *InternalServer) handleStopModel(w http.ResponseWriter, r *http.Request)
 
 func (s *InternalServer) handleChat(w http.ResponseWriter, r *http.Request) {
 	if s.deps.Chat == nil {
-		http.Error(w, "unavailable", http.StatusNotImplemented)
+		peerError(w, r, http.StatusNotImplemented, "PEER_UNAVAILABLE", errors.New("unavailable"))
 		return
 	}
 	var req RemoteChatRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "invalid body", http.StatusBadRequest)
+		peerError(w, r, http.StatusBadRequest, "INVALID_BODY", errors.New("invalid body"))
 		return
 	}
 	if req.ModelID == "" {
-		http.Error(w, "model_id required", http.StatusBadRequest)
+		peerError(w, r, http.StatusBadRequest, "BAD_REQUEST", errors.New("model_id required"))
 		return
 	}
 	ch, err := s.deps.Chat(r.Context(), req)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		peerError(w, r, http.StatusBadRequest, "PEER_FAILED", err)
 		return
 	}
 	w.Header().Set("Content-Type", "application/x-ndjson")
@@ -452,17 +452,17 @@ func (s *InternalServer) handleChat(w http.ResponseWriter, r *http.Request) {
 
 func (s *InternalServer) handlePairingOffer(w http.ResponseWriter, r *http.Request) {
 	if s.deps.ReceiveOffer == nil {
-		http.Error(w, "unavailable", http.StatusNotImplemented)
+		peerError(w, r, http.StatusNotImplemented, "PEER_UNAVAILABLE", errors.New("unavailable"))
 		return
 	}
 	var offer auth.PairingOffer
 	if err := json.NewDecoder(io.LimitReader(r.Body, 64<<10)).Decode(&offer); err != nil {
-		http.Error(w, "invalid body", http.StatusBadRequest)
+		peerError(w, r, http.StatusBadRequest, "INVALID_BODY", errors.New("invalid body"))
 		return
 	}
 	session, err := s.deps.ReceiveOffer(offer)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		peerError(w, r, http.StatusBadRequest, "PAIR_FAILED", err)
 		return
 	}
 	writeJSON(w, session)
@@ -470,16 +470,16 @@ func (s *InternalServer) handlePairingOffer(w http.ResponseWriter, r *http.Reque
 
 func (s *InternalServer) handlePairingComplete(w http.ResponseWriter, r *http.Request) {
 	if s.deps.CompletePairing == nil {
-		http.Error(w, "unavailable", http.StatusNotImplemented)
+		peerError(w, r, http.StatusNotImplemented, "PEER_UNAVAILABLE", errors.New("unavailable"))
 		return
 	}
 	var complete auth.PairingComplete
 	if err := json.NewDecoder(io.LimitReader(r.Body, 64<<10)).Decode(&complete); err != nil {
-		http.Error(w, "invalid body", http.StatusBadRequest)
+		peerError(w, r, http.StatusBadRequest, "INVALID_BODY", errors.New("invalid body"))
 		return
 	}
 	if _, err := s.deps.CompletePairing(r.Context(), sourceAddr(r), complete); err != nil {
-		http.Error(w, err.Error(), pairingStatus(err))
+		peerError(w, r, pairingStatus(err), "PAIR_FAILED", err)
 		return
 	}
 	writeJSON(w, map[string]any{"ok": true})
@@ -487,7 +487,7 @@ func (s *InternalServer) handlePairingComplete(w http.ResponseWriter, r *http.Re
 
 func (s *InternalServer) handlePairingOutbound(w http.ResponseWriter, r *http.Request) {
 	if s.deps.LookupOutbound == nil {
-		http.Error(w, "unavailable", http.StatusNotImplemented)
+		peerError(w, r, http.StatusNotImplemented, "PEER_UNAVAILABLE", errors.New("unavailable"))
 		return
 	}
 	offer, err := s.deps.LookupOutbound(sourceAddr(r), mux.Vars(r)["code"])
@@ -496,10 +496,27 @@ func (s *InternalServer) handlePairingOutbound(w http.ResponseWriter, r *http.Re
 		if status == http.StatusBadRequest {
 			status = http.StatusNotFound
 		}
-		http.Error(w, err.Error(), status)
+		peerError(w, r, status, "PAIR_FAILED", err)
 		return
 	}
 	writeJSON(w, offer)
+}
+
+// peerError answers a request that failed (#588). A computer that asks
+// for JSON gets the API's error, with a stable code: the error's own, or
+// code. Others, from before codes, get the text, as they always have.
+func peerError(w http.ResponseWriter, r *http.Request, status int, code string, err error) {
+	if !strings.Contains(r.Header.Get("Accept"), "application/json") {
+		http.Error(w, err.Error(), status)
+		return
+	}
+	var details map[string]any
+	if own, params := contracts.ErrorCode(err); own != "" {
+		code, details = own, params
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+	_ = json.NewEncoder(w).Encode(contracts.APIError{Error: contracts.ErrorBody{Code: code, Message: err.Error(), Details: details}})
 }
 
 func pairingStatus(err error) int {

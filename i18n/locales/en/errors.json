@@ -246,5 +246,9 @@
   "AUTOMATION_INTERRUPTED": "The run didn't finish because Toskar stopped while it ran. It runs again at its next time.",
   "KNOWLEDGE_SYNC_FAILED": "{{detail}}",
   "TASK_FAILED": "{{detail}}",
-  "TASK_INTERRUPTED": "Toskar stopped before this finished."
+  "TASK_INTERRUPTED": "Toskar stopped before this finished.",
+  "PEER_UNAVAILABLE": "That computer doesn't offer this right now. It may still be starting, or need a newer Toskar.",
+  "PEER_UNAUTHORIZED": "That computer didn't accept this one's sign-in ({{detail}}). If it keeps happening, pair the two computers again in Computers.",
+  "PEER_FAILED": "{{detail}}",
+  "REMOTE_TRAINING_FAILED": "{{detail}}"
 }

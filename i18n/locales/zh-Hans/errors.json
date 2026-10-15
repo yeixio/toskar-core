@@ -246,5 +246,9 @@
   "AUTOMATION_INTERRUPTED": "运行期间 Toskar 停止了，所以这次运行没有完成。它会在下一次的时间再次运行。",
   "KNOWLEDGE_SYNC_FAILED": "{{detail}}",
   "TASK_FAILED": "{{detail}}",
-  "TASK_INTERRUPTED": "Toskar 在此完成前停止了。"
+  "TASK_INTERRUPTED": "Toskar 在此完成前停止了。",
+  "PEER_UNAVAILABLE": "那台电脑现在不提供此功能。它可能仍在启动，或需要更新版本的 Toskar。",
+  "PEER_UNAUTHORIZED": "那台电脑没有接受这台电脑的登录（{{detail}}）。如果反复出现，请在“电脑”中重新配对这两台电脑。",
+  "PEER_FAILED": "{{detail}}",
+  "REMOTE_TRAINING_FAILED": "{{detail}}"
 }

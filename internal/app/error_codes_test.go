@@ -21,8 +21,9 @@ var clientErrorCodes = []string{"SERVICE_UNREACHABLE", "TOOL_SOURCE_ENTRY_NOT_FO
 var codePattern = regexp.MustCompile(`^[A-Z][A-Z0-9_]+$`)
 
 // sentErrorCodes reads every literal error code core sends: the code given
-// to writeErr and writeErrFrom, to contracts.NewError and Errorf, and the
-// fallback given to contracts.FailureOf. The
+// to writeErr and writeErrFrom, to contracts.NewError and Errorf, the
+// fallback given to contracts.FailureOf, and the codes paired computers
+// answer each other with (peerError, peerJSONError, remoteErr). The
 // OpenAI-compatible API keeps OpenAI's own errors for its clients.
 func sentErrorCodes(t *testing.T, root string) map[string]string {
 	t.Helper()
@@ -51,8 +52,11 @@ func sentErrorCodes(t *testing.T, root string) map[string]string {
 				arg := -1
 				switch fun := call.Fun.(type) {
 				case *ast.Ident:
-					if fun.Name == "writeErr" || fun.Name == "writeErrFrom" {
+					switch fun.Name {
+					case "writeErr", "writeErrFrom", "remoteErr", "peerJSONError":
 						arg = 2
+					case "peerError":
+						arg = 3
 					}
 				case *ast.SelectorExpr:
 					if pkg, ok := fun.X.(*ast.Ident); ok && pkg.Name == "contracts" && (fun.Sel.Name == "NewError" || fun.Sel.Name == "Errorf") {

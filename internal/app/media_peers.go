@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -58,7 +59,7 @@ func (a *App) mediaSetupHandler() http.Handler {
 	bound := func(w http.ResponseWriter, r *http.Request) *imagegen.Setup {
 		st := a.mediaSetup(r.PathValue("kind"))
 		if st == nil {
-			writeJSONStatus(w, http.StatusNotFound, map[string]string{"error": "this computer doesn't make " + r.PathValue("kind")})
+			peerJSONError(w, http.StatusNotFound, "SETUP_REFUSED", errors.New("this computer doesn't make "+r.PathValue("kind")))
 		}
 		return st
 	}
@@ -76,11 +77,11 @@ func (a *App) mediaSetupHandler() http.Handler {
 			ModelID string `json:"model_id"`
 		}
 		if err := json.NewDecoder(io.LimitReader(r.Body, 4096)).Decode(&body); err != nil {
-			writeJSONStatus(w, http.StatusBadRequest, map[string]string{"error": "invalid body"})
+			peerJSONError(w, http.StatusBadRequest, "INVALID_BODY", errors.New("invalid body"))
 			return
 		}
 		if err := st.Start(body.ModelID); err != nil {
-			writeJSONStatus(w, http.StatusConflict, map[string]string{"error": err.Error()})
+			peerJSONError(w, http.StatusConflict, "SETUP_REFUSED", err)
 			return
 		}
 		writeJSONStatus(w, http.StatusAccepted, a.mediaSetupStatus(r.Context(), st))
@@ -310,4 +311,12 @@ func worksWell(m imagegen.ModelStatus) bool {
 		return !m.TooLittleMemory && !m.TightMemory
 	}
 	return m.Verdict == imagegen.VerdictWorks
+}
+
+// peerJSONError answers a paired computer's failed request with the
+// error's text, as before, and its stable code (#588): the error's own, or
+// code.
+func peerJSONError(w http.ResponseWriter, status int, code string, err error) {
+	failure := contracts.FailureOf(err, code)
+	writeJSONStatus(w, status, map[string]any{"error": failure.Text, "code": failure.Code, "details": failure.Details})
 }

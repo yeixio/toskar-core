@@ -118,8 +118,11 @@ func remoteJSON(w http.ResponseWriter, status int, v any) {
 	_ = json.NewEncoder(w).Encode(v)
 }
 
-func remoteErr(w http.ResponseWriter, status int, msg string) {
-	remoteJSON(w, status, map[string]string{"error": msg})
+// remoteErr answers a computer's failed request with the error's text, as
+// before, and its stable code (#588): the error's own, or code.
+func remoteErr(w http.ResponseWriter, status int, code string, err error) {
+	failure := contracts.FailureOf(err, code)
+	remoteJSON(w, status, map[string]any{"error": failure.Text, "code": failure.Code, "details": failure.Details})
 }
 
 func (s *Service) handleCapabilities(w http.ResponseWriter, r *http.Request) {
@@ -149,7 +152,7 @@ func (s *Service) handleCapabilities(w http.ResponseWriter, r *http.Request) {
 func (s *Service) handleStartRun(w http.ResponseWriter, r *http.Request) {
 	var req RemoteRunRequest
 	if err := json.NewDecoder(io.LimitReader(r.Body, maxRemoteBody)).Decode(&req); err != nil {
-		remoteErr(w, http.StatusBadRequest, "invalid run")
+		remoteErr(w, http.StatusBadRequest, "INVALID_BODY", errors.New("invalid run"))
 		return
 	}
 	if err := s.StartRemoteRun(req); err != nil {
@@ -157,7 +160,7 @@ func (s *Service) handleStartRun(w http.ResponseWriter, r *http.Request) {
 		if errors.Is(err, ErrConflict) {
 			status = http.StatusConflict
 		}
-		remoteErr(w, status, err.Error())
+		remoteErr(w, status, "REMOTE_TRAINING_FAILED", err)
 		return
 	}
 	remoteJSON(w, http.StatusAccepted, map[string]string{"id": req.ID})
@@ -168,7 +171,7 @@ func (s *Service) remoteRunFor(w http.ResponseWriter, r *http.Request) *remoteRu
 	run := s.remote[mux.Vars(r)["id"]]
 	s.mu.Unlock()
 	if run == nil {
-		remoteErr(w, http.StatusNotFound, "run not found")
+		remoteErr(w, http.StatusNotFound, "REMOTE_TRAINING_FAILED", errors.New("run not found"))
 	}
 	return run
 }
@@ -193,12 +196,12 @@ func (s *Service) handleRunAdapter(w http.ResponseWriter, r *http.Request) {
 	}
 	st := run.snapshot()
 	if st.State != StateComplete {
-		remoteErr(w, http.StatusConflict, "the run has not completed")
+		remoteErr(w, http.StatusConflict, "REMOTE_TRAINING_FAILED", errors.New("the run has not completed"))
 		return
 	}
 	f, err := os.Open(run.adapter)
 	if err != nil {
-		remoteErr(w, http.StatusGone, "the adapter is gone")
+		remoteErr(w, http.StatusGone, "REMOTE_TRAINING_FAILED", errors.New("the adapter is gone"))
 		return
 	}
 	defer f.Close()
@@ -395,10 +398,15 @@ var errOldPeer = errors.New("that computer runs a Toskar version without remote 
 func decodePeer(resp *http.Response, v any) error {
 	if resp.StatusCode >= 300 {
 		var e struct {
-			Error string `json:"error"`
+			Error   string         `json:"error"`
+			Code    string         `json:"code"`
+			Details map[string]any `json:"details"`
 		}
 		body, _ := io.ReadAll(io.LimitReader(resp.Body, 4096))
 		if json.Unmarshal(body, &e) == nil && e.Error != "" {
+			if e.Code != "" {
+				return contracts.NewError(e.Code, e.Details, errors.New(e.Error))
+			}
 			return errors.New(e.Error)
 		}
 		return fmt.Errorf("HTTP %d: %s", resp.StatusCode, strings.TrimSpace(string(body)))

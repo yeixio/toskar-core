@@ -246,5 +246,9 @@
   "AUTOMATION_INTERRUPTED": "L'exécution n'a pas abouti, car Toskar s'est arrêté pendant qu'elle tournait. Elle reprendra à sa prochaine heure.",
   "KNOWLEDGE_SYNC_FAILED": "{{detail}}",
   "TASK_FAILED": "{{detail}}",
-  "TASK_INTERRUPTED": "Toskar s'est arrêté avant la fin de cette tâche."
+  "TASK_INTERRUPTED": "Toskar s'est arrêté avant la fin de cette tâche.",
+  "PEER_UNAVAILABLE": "Cet ordinateur ne propose pas cela pour le moment. Il est peut-être encore en train de démarrer, ou il lui faut un Toskar plus récent.",
+  "PEER_UNAUTHORIZED": "Cet ordinateur n'a pas accepté la connexion de celui-ci ({{detail}}). Si cela se reproduit, associez de nouveau les deux ordinateurs dans Ordinateurs.",
+  "PEER_FAILED": "{{detail}}",
+  "REMOTE_TRAINING_FAILED": "{{detail}}"
 }

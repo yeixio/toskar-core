@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -89,7 +90,7 @@ func (c *Client) HealthInfo(ctx context.Context) (Health, error) {
 		return Health{}, err
 	}
 	c.applyAuth(req)
-	resp, err := c.http.Do(req)
+	resp, err := c.send(req)
 	if err != nil {
 		return Health{}, err
 	}
@@ -164,18 +165,14 @@ func (c *Client) DeleteModel(ctx context.Context, modelID string) error {
 		return err
 	}
 	c.applyAuth(req)
-	resp, err := c.http.Do(req)
+	resp, err := c.send(req)
 	if err != nil {
 		return err
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode >= 300 {
 		b, _ := io.ReadAll(io.LimitReader(resp.Body, 4096))
-		msg := strings.TrimSpace(string(b))
-		if msg == "" {
-			msg = fmt.Sprintf("HTTP %d", resp.StatusCode)
-		}
-		return fmt.Errorf("%s", msg)
+		return responseError(resp.StatusCode, b, false)
 	}
 	return nil
 }
@@ -244,7 +241,7 @@ func (c *Client) Chat(ctx context.Context, req RemoteChatRequest) (<-chan plugin
 		return nil, err
 	}
 	httpReq.Header.Set("Content-Type", "application/json")
-	httpReq.Header.Set("Accept", "application/x-ndjson")
+	httpReq.Header.Set("Accept", "application/x-ndjson, application/json")
 	c.applyAuth(httpReq)
 	// Streaming may exceed default client timeout.
 	streamClient := &http.Client{Timeout: 0, Transport: c.http.Transport}
@@ -255,7 +252,7 @@ func (c *Client) Chat(ctx context.Context, req RemoteChatRequest) (<-chan plugin
 	if resp.StatusCode >= 400 {
 		b, _ := io.ReadAll(resp.Body)
 		resp.Body.Close()
-		return nil, fmt.Errorf("HTTP %d: %s", resp.StatusCode, string(b))
+		return nil, responseError(resp.StatusCode, b, true)
 	}
 	ch := make(chan pluginapi.ChatChunk, 16)
 	go func() {
@@ -293,14 +290,14 @@ func (c *Client) getJSON(ctx context.Context, path string, v any, auth bool) err
 	if auth {
 		c.applyAuth(req)
 	}
-	resp, err := c.http.Do(req)
+	resp, err := c.send(req)
 	if err != nil {
 		return err
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode >= 400 {
 		b, _ := io.ReadAll(resp.Body)
-		return fmt.Errorf("HTTP %d: %s", resp.StatusCode, string(b))
+		return responseError(resp.StatusCode, b, true)
 	}
 	return json.NewDecoder(resp.Body).Decode(v)
 }
@@ -314,14 +311,14 @@ func (c *Client) postJSON(ctx context.Context, path string, body []byte, out any
 	if auth {
 		c.applyAuth(req)
 	}
-	resp, err := c.http.Do(req)
+	resp, err := c.send(req)
 	if err != nil {
 		return err
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode >= 400 {
 		b, _ := io.ReadAll(resp.Body)
-		return fmt.Errorf("HTTP %d: %s", resp.StatusCode, string(b))
+		return responseError(resp.StatusCode, b, true)
 	}
 	if out == nil {
 		_, err := io.Copy(io.Discard, resp.Body)
@@ -346,6 +343,36 @@ func (c *Client) Do(ctx context.Context, method, path string, body io.Reader) (*
 	hc := *c.http
 	hc.Timeout = 0
 	return hc.Do(req)
+}
+
+// send makes a request, asking for errors as JSON with a stable code
+// (#588); a computer from before codes answers with text.
+func (c *Client) send(req *http.Request) (*http.Response, error) {
+	if req.Header.Get("Accept") == "" {
+		req.Header.Set("Accept", "application/json")
+	}
+	return c.http.Do(req)
+}
+
+// responseError is a failed answer as an error: with the answering
+// computer's code when it sent one, and its text, after the status when
+// withStatus is set.
+func responseError(status int, body []byte, withStatus bool) error {
+	var coded contracts.APIError
+	text := strings.TrimSpace(string(body))
+	if json.Unmarshal(body, &coded) == nil && coded.Error.Code != "" {
+		text = coded.Error.Message
+	}
+	switch {
+	case text == "":
+		text = fmt.Sprintf("HTTP %d", status)
+	case withStatus:
+		text = fmt.Sprintf("HTTP %d: %s", status, text)
+	}
+	if coded.Error.Code == "" {
+		return errors.New(text)
+	}
+	return contracts.NewError(coded.Error.Code, coded.Error.Details, errors.New(text))
 }
 
 func (c *Client) applyAuth(req *http.Request) {

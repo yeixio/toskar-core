@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"strings"
@@ -71,10 +72,24 @@ func (s *Server) onPeer(w http.ResponseWriter, r *http.Request, kind string) boo
 	}
 	if status >= 300 {
 		var e struct {
-			Error string `json:"error"`
+			Error   string         `json:"error"`
+			Code    string         `json:"code"`
+			Details map[string]any `json:"details"`
 		}
 		_ = json.Unmarshal(raw, &e)
-		writeErr(w, status, "SETUP_REFUSED", e.Error, map[string]any{"node_id": nodeID})
+		// The other computer's code when it sent one (#588).
+		code, details := "SETUP_REFUSED", map[string]any{}
+		if e.Code != "" {
+			code = e.Code
+			for k, v := range e.Details {
+				details[k] = v
+			}
+		}
+		details["node_id"] = nodeID
+		if e.Error == "" {
+			e.Error = fmt.Sprintf("the computer answered HTTP %d", status)
+		}
+		writeErr(w, status, code, e.Error, details)
 		return true
 	}
 	w.Header().Set("Content-Type", "application/json")

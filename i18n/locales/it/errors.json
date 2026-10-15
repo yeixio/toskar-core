@@ -246,5 +246,9 @@
   "AUTOMATION_INTERRUPTED": "L'esecuzione non è terminata perché Toskar si è fermato mentre era in corso. Ripartirà al prossimo orario.",
   "KNOWLEDGE_SYNC_FAILED": "{{detail}}",
   "TASK_FAILED": "{{detail}}",
-  "TASK_INTERRUPTED": "Toskar si è fermato prima che finisse."
+  "TASK_INTERRUPTED": "Toskar si è fermato prima che finisse.",
+  "PEER_UNAVAILABLE": "Quel computer non offre questa funzione ora. Forse si sta ancora avviando o gli serve un Toskar più recente.",
+  "PEER_UNAUTHORIZED": "Quel computer non ha accettato l'accesso di questo ({{detail}}). Se succede ancora, abbina di nuovo i due computer in Computer.",
+  "PEER_FAILED": "{{detail}}",
+  "REMOTE_TRAINING_FAILED": "{{detail}}"
 }
