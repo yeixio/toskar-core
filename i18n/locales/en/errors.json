@@ -230,5 +230,7 @@
   "EMAIL_INVALID": "That isn't an email address.",
   "EMAIL_TAKEN": "Someone else has that email address.",
   "KEY_NOT_FOUND": "They have no key with that id.",
-  "KEYS_FAILED": "Their keys couldn't be read: {{detail}}"
+  "KEYS_FAILED": "Their keys couldn't be read: {{detail}}",
+  "CAPABILITY_OFF": "This is turned off for your account. Ask {{admin}} or another Admin to turn it on.",
+  "CAPABILITY_UNKNOWN": "Toskar doesn't know that capability."
 }

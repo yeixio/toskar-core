@@ -554,7 +554,11 @@
     "smallModelKnowledge": "{{model}} est un petit modèle et peut confondre des chiffres et des détails de vos connaissances. Vérifiez-les dans la source.",
     "smallModelKnowledgeChoose": "{{model}} est un petit modèle et peut confondre des chiffres et des détails de vos connaissances. Vérifiez-les dans la source. Pour ce type de question, choisissez {{larger}} ou Auto dans Modèle.",
     "smallModelKnowledgeInstall": "{{model}} est un petit modèle et peut confondre des chiffres et des détails de vos connaissances. Vérifiez-les dans la source. Un modèle plus grand de la page Modèles sera plus fiable.",
-    "actionsStay": "Ce qu'a fait la réponse précédente, comme des fichiers créés ou des commandes lancées, n'est pas annulé."
+    "actionsStay": "Ce qu'a fait la réponse précédente, comme des fichiers créés ou des commandes lancées, n'est pas annulé.",
+    "capabilityOff": {
+      "make_pictures": "La création d'images est désactivée pour votre compte. Demandez à {{admin}} ou à un autre Admin de l'activer.",
+      "make_video": "La création de vidéos est désactivée pour votre compte. Demandez à {{admin}} ou à un autre Admin de l'activer."
+    }
   },
   "steps": {
     "autoChose": "Auto a choisi {{model}} pour {{kind}}",

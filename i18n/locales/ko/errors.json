@@ -230,5 +230,7 @@
   "EMAIL_INVALID": "이메일 주소가 아닙니다.",
   "EMAIL_TAKEN": "다른 사람이 이 이메일 주소를 쓰고 있습니다.",
   "KEY_NOT_FOUND": "그 ID의 키가 없습니다.",
-  "KEYS_FAILED": "키를 읽을 수 없습니다: {{detail}}"
+  "KEYS_FAILED": "키를 읽을 수 없습니다: {{detail}}",
+  "CAPABILITY_OFF": "이 기능은 계정에서 꺼져 있습니다. {{admin}} 또는 다른 관리자에게 켜 달라고 요청하세요.",
+  "CAPABILITY_UNKNOWN": "Toskar가 알지 못하는 기능입니다."
 }

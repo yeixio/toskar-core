@@ -230,5 +230,7 @@
   "EMAIL_INVALID": "メールアドレスではありません。",
   "EMAIL_TAKEN": "そのメールアドレスは別の人が使っています。",
   "KEY_NOT_FOUND": "その ID のキーはありません。",
-  "KEYS_FAILED": "キーを読み込めませんでした：{{detail}}"
+  "KEYS_FAILED": "キーを読み込めませんでした：{{detail}}",
+  "CAPABILITY_OFF": "これはあなたのアカウントでは無効になっています。{{admin}} か他の管理者に有効にしてもらってください。",
+  "CAPABILITY_UNKNOWN": "Toskar はその機能を知りません。"
 }

@@ -514,7 +514,11 @@
     "smallModelKnowledge": "{{model}} 是小型模型，可能會弄混你知識中的數字和細節。請對照來源檢查。",
     "smallModelKnowledgeChoose": "{{model}} 是小型模型，可能會弄混你知識中的數字和細節。請對照來源檢查。對於這類問題，請在「模型」中選擇 {{larger}} 或「自動」。",
     "smallModelKnowledgeInstall": "{{model}} 是小型模型，可能會弄混你知識中的數字和細節。請對照來源檢查。從「模型」頁面取得較大的模型會更可靠。",
-    "actionsStay": "上一個回答做過的事（例如建立的檔案或執行的指令）不會被復原。"
+    "actionsStay": "上一個回答做過的事（例如建立的檔案或執行的指令）不會被復原。",
+    "capabilityOff": {
+      "make_pictures": "你的帳戶已關閉產生圖片。請 {{admin}} 或其他管理員開啟。",
+      "make_video": "你的帳戶已關閉產生影片。請 {{admin}} 或其他管理員開啟。"
+    }
   },
   "steps": {
     "autoChose": "「自動」為{{kind}}選擇了 {{model}}",

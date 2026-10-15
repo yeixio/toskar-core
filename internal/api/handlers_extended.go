@@ -423,7 +423,12 @@ func (s *Server) handleChat(w http.ResponseWriter, r *http.Request) {
 	ctx = runlog.WithOrigin(ctx, runlog.Origin{Client: body.Client, Remote: remoteRequest(r) || !auth.FromLocalNetwork(r)})
 	r = r.WithContext(locale.WithTimeZone(ctx, body.TimeZone))
 	if err := s.deps.Chat(w, r, body.ConversationID, body.ProfileID, body.ModelID, body.Message, body.Stream, body.Execution); err != nil {
-		writeErrFrom(w, http.StatusInternalServerError, "CHAT_FAILED", err)
+		status := http.StatusInternalServerError
+		// Something turned off for the person, such as attaching files (#589).
+		if code, _ := contracts.ErrorCode(err); code == "CAPABILITY_OFF" {
+			status = http.StatusForbidden
+		}
+		writeErrFrom(w, status, "CHAT_FAILED", err)
 	}
 }
 

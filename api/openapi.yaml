@@ -407,6 +407,75 @@ paths:
           description: Who you are now
         "403":
           description: PASSWORD_WRONG
+  /api/v1/roles/capabilities:
+    get:
+      summary: What each role may use (#589)
+      description: Every capability in order, each role's, and the defaults each role ships with. The Owner always has everything.
+      operationId: roleCapabilities
+      responses:
+        "200":
+          description: capabilities, roles, and defaults
+  /api/v1/roles/{role}/capabilities:
+    put:
+      summary: Change what a role may use (#589)
+      description: Only the Owner changes the Admins'. The Owner's are fixed.
+      operationId: setRoleCapabilities
+      parameters:
+        - name: role
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [admin, member, visitor]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Capability ids (files, pictures_in, make_pictures, make_video, voice, web, knowledge, knowledge_add, automations, changing_tools, choose_model, remote_access) to true (allowed) or false.
+              additionalProperties:
+                type: boolean
+      responses:
+        "200":
+          description: The role's capabilities now
+        "400":
+          description: OWNER_FIXED or CAPABILITY_UNKNOWN
+  /api/v1/people/{id}/capabilities:
+    get:
+      summary: What one person may use (#589)
+      operationId: personCapabilities
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: set (their own Allows and Blocks) and effective (what they may use now)
+    put:
+      summary: Allow or Block something for one person (#589)
+      description: true allows, false blocks, and null is as their role's. The Owner's are fixed.
+      operationId: setPersonCapabilities
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties:
+                type: boolean
+                nullable: true
+      responses:
+        "200":
+          description: set and effective
   /api/v1/people/{id}/link:
     post:
       parameters:

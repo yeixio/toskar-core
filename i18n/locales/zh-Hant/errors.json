@@ -230,5 +230,7 @@
   "EMAIL_INVALID": "這不是電子郵件地址。",
   "EMAIL_TAKEN": "其他人已在使用這個電子郵件地址。",
   "KEY_NOT_FOUND": "此人沒有該 ID 的金鑰。",
-  "KEYS_FAILED": "無法讀取其金鑰：{{detail}}"
+  "KEYS_FAILED": "無法讀取其金鑰：{{detail}}",
+  "CAPABILITY_OFF": "你的帳戶已關閉此功能。請 {{admin}} 或其他管理員開啟。",
+  "CAPABILITY_UNKNOWN": "Toskar 不認識這個功能。"
 }

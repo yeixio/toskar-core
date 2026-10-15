@@ -95,6 +95,8 @@ A profile's `topics` keep its assistant on its subject (#345; see [topic-control
 
 ### Pinning profiles
 
+Admins choose what each role and person may use, such as files, making pictures or video, the web, and tools that change things, with `/api/v1/roles/{role}/capabilities` and `/api/v1/people/{id}/capabilities`; `GET /api/v1/me` answers `capabilities`, and something turned off answers `403 CAPABILITY_OFF` ([What people may use](people.md), #589).
+
 Admins pin Members and Visitors to profiles (#345): `GET /api/v1/profile-pins` answers `{"roles": {"member": [...], "visitor": [...]}}`, and `PUT /api/v1/profile-pins/{role}` with `{"profiles": [...]}` sets a role's (empty is any profile). `PUT /api/v1/people/{id}/profiles` sets one person's in place of their role's: a list, `[]` for any profile, or `null` for their role's again; a person's `profiles` shows it. The Owner and Admins can't be pinned (`400 PIN_INVALID`), and only to profiles that exist. A pinned person's turns, from the app, `/v1`, MCP, or their automations, use the profile asked for when they may use it, and otherwise their first; `GET /api/v1/me` lists the profiles they may use in `profiles`.
 
 ### Chat portals

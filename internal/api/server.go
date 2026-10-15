@@ -744,6 +744,10 @@ func (s *Server) serveAs(w http.ResponseWriter, r *http.Request, principal auth.
 		writeErr(w, http.StatusForbidden, "ROLE_REQUIRED", "this needs the "+string(need)+" role", map[string]any{"role": string(need)})
 		return
 	}
+	// And the capability it needs, when it needs one (#589).
+	if c, ok := routeCapability[r.Method+" "+route]; ok && s.refuseCapability(w, r.Context(), principal.Person, c) {
+		return
+	}
 	next.ServeHTTP(w, r.WithContext(auth.WithPrincipal(r.Context(), principal)))
 }
 

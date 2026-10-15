@@ -514,7 +514,11 @@
     "smallModelKnowledge": "{{model}} 是小模型，可能会弄混你知识库中的数字和细节。请对照来源核对。",
     "smallModelKnowledgeChoose": "{{model}} 是小模型，可能会弄混你知识库中的数字和细节。请对照来源核对。对于这类问题，请在“模型”中选择 {{larger}} 或“自动”。",
     "smallModelKnowledgeInstall": "{{model}} 是小模型，可能会弄混你知识库中的数字和细节。请对照来源核对。从“模型”页面获取更大的模型会更可靠。",
-    "actionsStay": "上一个回答做过的事（例如创建的文件或运行的命令）不会被撤销。"
+    "actionsStay": "上一个回答做过的事（例如创建的文件或运行的命令）不会被撤销。",
+    "capabilityOff": {
+      "make_pictures": "你的账户已关闭生成图片。请让 {{admin}} 或其他管理员开启。",
+      "make_video": "你的账户已关闭生成视频。请让 {{admin}} 或其他管理员开启。"
+    }
   },
   "steps": {
     "autoChose": "“自动”为{{kind}}选择了 {{model}}",

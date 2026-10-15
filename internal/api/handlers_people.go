@@ -38,6 +38,7 @@ func (s *Server) peopleRoutes(api *mux.Router) {
 	api.HandleFunc("/people/{id}/link", s.atLeast(auth.RoleAdmin, s.handlePersonLink)).Methods(http.MethodPost)
 	s.pinRoutes(api)
 	s.peopleAdminRoutes(api)
+	s.personCapabilityRoutes(api)
 }
 
 // atLeast refuses a request whose person's role is below min.
@@ -107,7 +108,10 @@ func (s *Server) handleMe(w http.ResponseWriter, r *http.Request) {
 		// Profiles are the profiles they may chat with, when they're
 		// pinned to some (#345).
 		Profiles []string `json:"profiles,omitempty"`
-	}{auth.PrincipalFrom(r.Context()), s.myProfiles(r)})
+		// Capabilities are what they may use (#589), so an app hides the
+		// rest.
+		Capabilities auth.Capabilities `json:"capabilities"`
+	}{auth.PrincipalFrom(r.Context()), s.myProfiles(r), s.capabilitiesOf(r.Context(), auth.PrincipalFrom(r.Context()).Person)})
 }
 
 // setSession signs the browser in as person.

@@ -534,7 +534,11 @@
     "smallModelKnowledge": "{{model}} is a small model and can mix up numbers and details from your knowledge. Check them against the source.",
     "smallModelKnowledgeChoose": "{{model}} is a small model and can mix up numbers and details from your knowledge. Check them against the source. For questions like this, choose {{larger}} or Auto in Model.",
     "smallModelKnowledgeInstall": "{{model}} is a small model and can mix up numbers and details from your knowledge. Check them against the source. A larger model from the Models page will be more reliable.",
-    "actionsStay": "The earlier answer's actions, such as files made or commands run, aren't undone."
+    "actionsStay": "The earlier answer's actions, such as files made or commands run, aren't undone.",
+    "capabilityOff": {
+      "make_pictures": "Making pictures is turned off for your account. Ask {{admin}} or another Admin to turn it on.",
+      "make_video": "Making video is turned off for your account. Ask {{admin}} or another Admin to turn it on."
+    }
   },
   "steps": {
     "autoChose": "Auto chose {{model}} for {{kind}}",

@@ -90,6 +90,12 @@ func (s *Server) remoteHandler() http.Handler {
 			writeErr(w, http.StatusForbidden, "REMOTE_DEVICES_ONLY", "from outside the home network, only paired devices can connect", nil)
 			return
 		}
+		// Away from home is a capability of the device's person (#589).
+		if s.deps.People != nil {
+			if person, err := s.deps.People.Active(r.Context(), rec.PersonID); err == nil && s.refuseCapability(w, r.Context(), person, auth.CapRemoteAccess) {
+				return
+			}
+		}
 		ctx := context.WithValue(r.Context(), remoteKey{}, token)
 		s.router.ServeHTTP(w, r.WithContext(ctx))
 	})

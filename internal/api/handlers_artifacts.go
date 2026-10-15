@@ -12,6 +12,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/yeixio/toskar-core/internal/artifacts"
+	"github.com/yeixio/toskar-core/internal/auth"
 	"github.com/yeixio/toskar-core/internal/imagegen"
 	"github.com/yeixio/toskar-core/internal/mimir"
 )
@@ -58,6 +59,10 @@ func (s *Server) handleUploadArtifact(w http.ResponseWriter, r *http.Request) {
 	}
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		writeErr(w, http.StatusBadRequest, "INVALID_JSON", "The file could not be read. Files can be up to 25 MB.", nil)
+		return
+	}
+	// What the file is for needs its capability (#589).
+	if s.refuseCapability(w, r.Context(), auth.PrincipalFrom(r.Context()).Person, uploadCapability(body.Name)) {
 		return
 	}
 	// Audio is kept as it is, to be played and transcribed (speech.transcribe),

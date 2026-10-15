@@ -534,7 +534,11 @@
     "smallModelKnowledge": "{{model}} ist ein kleines Modell und kann Zahlen und Details aus deinem Wissen verwechseln. Prüfe sie anhand der Quelle.",
     "smallModelKnowledgeChoose": "{{model}} ist ein kleines Modell und kann Zahlen und Details aus deinem Wissen verwechseln. Prüfe sie anhand der Quelle. Wähle für Fragen wie diese {{larger}} oder „Automatisch“ unter „Modell“.",
     "smallModelKnowledgeInstall": "{{model}} ist ein kleines Modell und kann Zahlen und Details aus deinem Wissen verwechseln. Prüfe sie anhand der Quelle. Ein größeres Modell unter „Modelle“ ist zuverlässiger.",
-    "actionsStay": "Was die frühere Antwort getan hat, etwa erstellte Dateien oder ausgeführte Befehle, wird nicht rückgängig gemacht."
+    "actionsStay": "Was die frühere Antwort getan hat, etwa erstellte Dateien oder ausgeführte Befehle, wird nicht rückgängig gemacht.",
+    "capabilityOff": {
+      "make_pictures": "Bilder erstellen ist für dein Konto ausgeschaltet. Bitte {{admin}} oder einen anderen Admin, es einzuschalten.",
+      "make_video": "Videos erstellen ist für dein Konto ausgeschaltet. Bitte {{admin}} oder einen anderen Admin, es einzuschalten."
+    }
   },
   "steps": {
     "autoChose": "„Automatisch“ hat {{model}} gewählt – für {{kind}}",

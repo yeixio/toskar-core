@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/yeixio/toskar-core/internal/artifacts"
+	"github.com/yeixio/toskar-core/internal/auth"
 	"github.com/yeixio/toskar-core/internal/contextusage"
 	"github.com/yeixio/toskar-core/internal/egress"
 	"github.com/yeixio/toskar-core/internal/events"
@@ -93,6 +94,11 @@ func (a *App) RunChat(ctx context.Context, profileID, conversationID, message st
 	}
 	// Memory requests are answered by Yggdrasil, not the model.
 	opts := turnopts.From(ctx)
+	// What the person may use (#589): without choosing models, Auto.
+	caps := a.personCapabilities(ctx)
+	if !caps.Allows(auth.CapChooseModel) && modelID != "" {
+		modelID = huginn.AutoModelID
+	}
 	if profileID == "" {
 		profileID = a.defaultProfileID(ctx)
 	}
@@ -153,6 +159,12 @@ func (a *App) RunChat(ctx context.Context, profileID, conversationID, message st
 			NodePolicy:     contracts.NodePolicy{Mode: "automatic"},
 		}
 	}
+	// Asking for a picture or a clip that's turned off for the person gets
+	// a plain answer saying who can turn it on, not a setup offer (#589).
+	if c, off := mediaTurnedOff(caps, message, len(artifacts.AttachmentsFrom(ctx)) > 0); off {
+		reply := locale.T(a.appLanguage(ctx), "chat:notices.capabilityOff."+string(c), map[string]any{"admin": a.ownerName(ctx)})
+		return a.replyDirectly(ctx, conversationID, message, reply, nil), nil
+	}
 	// A request for something that is not installed but can be, such as an
 	// image before image generation is set up, is offered the setup (§29).
 	if !topical && !branch.Any() {
@@ -174,6 +186,11 @@ func (a *App) RunChat(ctx context.Context, profileID, conversationID, message st
 	attached, err := a.resolveAttachments(ctx, conversationID, artifacts.AttachmentsFrom(ctx))
 	if err != nil {
 		return nil, err
+	}
+	for _, f := range attached {
+		if c := attachmentCapability(f); !caps.Allows(c) {
+			return nil, a.capabilityOff(ctx, c)
+		}
 	}
 	// Auto: Huginn picks the installed model that suits this message. A
 	// question about files or connected knowledge counts as one that needs a
@@ -235,6 +252,7 @@ func (a *App) RunChat(ctx context.Context, profileID, conversationID, message st
 		// An API key or request can narrow the tools, never widen them (§62).
 		profile = narrowTools(profile, opts)
 	}
+	profile = withCapabilities(profile, caps)
 	if special != nil {
 		// A specialized AI answers in the style it was trained on, without the
 		// tool protocol, on the computer that holds its adapter.

@@ -230,5 +230,7 @@
   "EMAIL_INVALID": "Questo non è un indirizzo email.",
   "EMAIL_TAKEN": "Qualcun altro ha questo indirizzo email.",
   "KEY_NOT_FOUND": "Non ha nessuna chiave con questo id.",
-  "KEYS_FAILED": "Impossibile leggere le sue chiavi: {{detail}}"
+  "KEYS_FAILED": "Impossibile leggere le sue chiavi: {{detail}}",
+  "CAPABILITY_OFF": "È disattivato per il tuo account. Chiedi a {{admin}} o a un altro Admin di attivarlo.",
+  "CAPABILITY_UNKNOWN": "Toskar non conosce questa funzione."
 }
