@@ -43,6 +43,10 @@ func main() {
 		exit(networkCommand(os.Args[2:], newDaemon(), os.Stdout))
 	case "leave":
 		exit(leaveCommand(os.Args[2:], newDaemon(), os.Stdout))
+	case "people":
+		info, _ := os.Stdin.Stat()
+		terminal := info != nil && info.Mode()&os.ModeCharDevice != 0
+		exit(peopleCommand(os.Args[2:], newDaemon(), peopleIO{in: os.Stdin, out: os.Stdout, prompt: os.Stderr, terminal: terminal}))
 	case "completion":
 		if err := completionCommand(os.Args[2:], os.Stdout); err != nil {
 			fmt.Fprintln(os.Stderr, err)
@@ -55,7 +59,7 @@ func main() {
 }
 
 func usage() {
-	fmt.Fprintf(os.Stderr, "usage: toskarctl <version|about|paths|automations|mcp|join|join-token|network|leave|completion>\n")
+	fmt.Fprintf(os.Stderr, "usage: toskarctl <version|about|paths|automations|mcp|join|join-token|network|leave|people|completion>\n")
 }
 
 // exit ends with err's message and exit status: 2 for usage, 1 otherwise.

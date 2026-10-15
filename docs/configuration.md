@@ -75,6 +75,7 @@ Restart the daemon after editing the file by hand. A changed `api_host` or `inte
 | `TOSKAR_API_HOST` | `api_host` | `0.0.0.0` makes the API reachable from other computers. The daemon will not start until a key exists or `TOSKAR_API_KEY` is set. |
 | `TOSKAR_API_PORT` | `api_port` | |
 | `TOSKAR_API_KEY` | | Stored, hashed, as an API key at startup if it is not already valid. |
+| `TOSKAR_ADMIN_EMAIL`, `TOSKAR_ADMIN_PASSWORD_FILE` | | Together, add an Admin at startup when there is none yet (#592), so a fresh server can be set up without a browser. The password is read from the file, such as a mounted secret, not from the environment. `TOSKAR_ADMIN_USERNAME` is the name they sign in with (the address before `@` when it's unset) and `TOSKAR_ADMIN_NAME` their name (`Admin`). Once there's an Admin, these do nothing. A server reachable from other computers starts with them in place of `TOSKAR_API_KEY`. |
 | `TOSKAR_INTERNAL_HOST` | `internal_host` | |
 | `TOSKAR_INTERNAL_PORT` | `internal_port` | |
 | `TOSKAR_DISCOVERY_ENABLED` | `discovery_enabled` | `1`, `true`, `yes`, or `on` turn it on; anything else turns it off. |
