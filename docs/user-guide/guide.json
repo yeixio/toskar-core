@@ -156,6 +156,19 @@
       ]
     },
     {
+      "id": "media",
+      "title": "What pictures and clips need",
+      "paragraphs": [
+        "Toskar makes pictures and clips on your own computers; the prompt and what it makes aren't sent anywhere. Each model needs enough memory: system memory, or unified memory on Apple silicon, and graphics memory on a computer with its own graphics card. Better hardware makes a model faster or lets a larger one run; it doesn't change what a given model can draw.",
+        "Pictures. FLUX.2 [klein] 4B makes and edits pictures and is comfortable with 12 GB of memory (a 5.2 GB download, about 10 to 22 seconds a picture on a 24 GB graphics card); its high-quality build wants 20 GB. Z-Image-Turbo makes photorealistic pictures with clear text in them and wants about 14 GB (6.7 GB download, about 35 to 40 seconds). Qwen-Image-Edit-2511 only edits, keeping what you didn't ask to change, and wants 32 GB (19.5 GB download, about 80 seconds an edit).",
+        "Clips. Wan 2.2 TI2V 5B makes clips from a description or a picture and is comfortable with 16 GB (8.5 GB download; about a minute for 2 seconds on a 24 GB graphics card, about 3½ minutes on a 24 GB Apple silicon Mac). Wan 2.1 T2V 1.3B fits smaller computers, about 10 GB, at about 3 minutes for 2 seconds. Wan 2.2 T2V A14B makes higher-quality clips much more slowly and wants 48 GB, about 13 minutes for 2 seconds.",
+        "Each model gets a verdict for the computer it would run on, on the Tools page and in a chat's offer to set it up: Works well; May be slow or tight, which says what it needs and what the computer has, and is set up only when you agree; or Not supported here. A model not yet measured on real hardware is labeled untested and never recommended. On Apple silicon, the graphics can use about two thirds of the computer's memory (three quarters above 36 GB), so a model comfortable with 24 GB may be tight on a 24 GB Mac.",
+        "When memory is short, Toskar unloads chat models in its way while a picture or clip is made. If it still runs out, the answer says so and suggests a smaller picture, a shorter or smaller clip, a lighter model, or a paired computer with more memory, which can make it for this one.",
+        "Pictures are up to 1536 pixels on a side, and clips 2 seconds unless you ask for more, up to 5 seconds at about 832×480; asking for more makes the most the model allows, and the answer says so. Slow pictures or clips usually mean the CPU is making them: the Tools page says which, and on Linux and Windows the GPU needs a Vulkan driver (see Is my model using the GPU?). The Mac App Store build can't make pictures or clips, since its sandbox can't run a program Toskar downloads; use Toskar from outside the Mac App Store, or a paired computer.",
+        "Some models, such as FLUX.2 [klein] 9B, have a non-commercial license. Toskar sets one up only when you bring your own: accept the license on Hugging Face, add a Hugging Face read token on the Tools page, and confirm your license covers your use. Every other model and part is Apache 2.0 or MIT, needs no account, and is checked against its published checksum."
+      ]
+    },
+    {
       "id": "notifications",
       "title": "Notifications",
       "paragraphs": [

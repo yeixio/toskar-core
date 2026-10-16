@@ -123,5 +123,8 @@
   "roles": {
     "adminsOnly": "This page is for Admins and the Owner.",
     "membersOnly": "This page is for Members, Admins, and the Owner."
+  },
+  "help": {
+    "media": "What pictures and clips need ↗"
   }
 }

@@ -6,6 +6,7 @@ import { api, type MediaKind } from '@/lib/api'
 import { subscribeEvents } from '@/lib/events'
 import type { ModelDownloadProgressPayload, SetupOffer } from '@/types/api'
 import { ShownError, shownError, type Shown } from '@/components/ui/ShownError'
+import { useGuideUrl } from '@/lib/guide'
 
 function gb(bytes: number): string {
   return formatSize(bytes, { base: 1000 })
@@ -59,6 +60,8 @@ function MediaOfferCard({ offer, onContinue }: { offer: SetupOffer; onContinue: 
     if (offer.request) onContinue(offer.request)
   }, [ready, started, offer.request, onContinue, queryClient])
 
+  // What each model needs, in the user guide (#552).
+  const needsUrl = useGuideUrl('media')
   if (!kind || !status) return null
 
   const where = offer.node_name ? `${offer.node_name} (${t('setup.thisComputer')})` : t('setup.thisComputer')
@@ -95,6 +98,11 @@ function MediaOfferCard({ offer, onContinue }: { offer: SetupOffer; onContinue: 
             ? t(kind === 'video' ? 'setup.slowVideoOn' : 'setup.slowImageOn', { node: there })
             : t(kind === 'video' ? 'setup.slowVideo' : 'setup.slowImage')}
         </p>
+      ) : null}
+      {!ready && (offer.slow || offer.tight_memory) ? (
+        <a className="text-xs text-primary hover:underline" href={needsUrl} target="_blank" rel="noreferrer">
+          {t('common:help.media')}
+        </a>
       ) : null}
       {ready ? (
         <div className="flex flex-wrap items-center gap-2">

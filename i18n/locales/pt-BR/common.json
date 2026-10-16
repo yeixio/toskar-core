@@ -124,5 +124,8 @@
   "roles": {
     "adminsOnly": "Esta página é para administradores e o proprietário.",
     "membersOnly": "Esta página é para membros, administradores e o proprietário."
+  },
+  "help": {
+    "media": "O que imagens e clipes precisam ↗"
   }
 }

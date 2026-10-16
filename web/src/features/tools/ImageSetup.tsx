@@ -7,6 +7,7 @@ import type { ImageSetup } from '@/types/api'
 import { ShownError, shownError, type Shown } from '@/components/ui/ShownError'
 import { LoadError } from '@/components/ui/LoadError'
 import { Skeleton } from '@/components/ui/Skeleton'
+import { useGuideUrl } from '@/lib/guide'
 
 function gb(bytes: number): string {
   return formatSize(bytes, { base: 1000 })
@@ -53,6 +54,8 @@ function MediaSetupCard({ kind }: { kind: MediaKind }) {
     // Follow a setup while it runs.
     refetchInterval: (query) => (query.state.data?.job?.running ? 1000 : false),
   })
+  // What each model needs, in the user guide (#552).
+  const needsUrl = useGuideUrl('media')
   const update = (status: ImageSetup | null) => {
     if (status) queryClient.setQueryData([kind, 'setup'], status)
     else void queryClient.invalidateQueries({ queryKey: [kind, 'setup'] })
@@ -137,6 +140,9 @@ function MediaSetupCard({ kind }: { kind: MediaKind }) {
               ? t('images.ready', { model: active.name })
               : t('images.notSetUp')}
         </p>
+        <a className="mt-1 inline-block text-xs text-primary hover:underline" href={needsUrl} target="_blank" rel="noreferrer">
+          {tt('common:help.media')}
+        </a>
       </div>
 
       {status.supported && status.accelerated === false && !status.gpu_build ? <p className="text-xs text-ink-muted">{t('images.slow')}</p> : null}
