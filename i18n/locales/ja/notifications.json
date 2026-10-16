@@ -44,7 +44,8 @@
     "kinds": {
       "email": "メール",
       "webhook": "Webhook",
-      "ntfy": "プッシュ"
+      "ntfy": "プッシュ",
+      "app": "Toskar アプリ"
     },
     "severities": {
       "all": "すべて",

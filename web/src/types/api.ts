@@ -1864,13 +1864,15 @@ export type NotificationCategory = 'automation' | 'approval' | 'model' | 'traini
 /** An email or webhook destination (Gjallarhorn §12–13). Passwords and signing secrets are never returned. */
 export interface NotificationDestination {
   id: string
-  kind: 'email' | 'webhook' | 'ntfy'
+  kind: 'email' | 'webhook' | 'ntfy' | 'app'
   name: string
   enabled: boolean
   email?: { host: string; port: number; username?: string; from: string; to: string[]; tls?: 'starttls' | 'tls' | 'none' }
   webhook?: { url: string }
   /** Push through ntfy, on ntfy.sh or your own server. */
   ntfy?: NtfyConfig
+  /** The Toskar app on the person's paired devices (#460): what a push carries. */
+  app?: { content?: 'title' | 'full' | 'private' }
   categories?: NotificationCategory[]
   min_severity?: '' | NotificationSeverity
   /** A daily digest instead of each notice; errors still go out at once. An empty at turns it off. */
@@ -1888,7 +1890,7 @@ export interface NtfyConfig {
 }
 
 export interface NotificationDestinationInput {
-  kind?: 'email' | 'webhook' | 'ntfy'
+  kind?: 'email' | 'webhook' | 'ntfy' | 'app'
   name?: string
   enabled?: boolean
   email?: NotificationDestination['email']

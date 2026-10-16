@@ -250,5 +250,9 @@
   "PEER_UNAVAILABLE": "그 컴퓨터는 지금 이 기능을 제공하지 않습니다. 아직 시작 중이거나 더 새로운 Toskar가 필요할 수 있습니다.",
   "PEER_UNAUTHORIZED": "그 컴퓨터가 이 컴퓨터의 로그인을 받아들이지 않았습니다({{detail}}). 계속되면 컴퓨터에서 두 컴퓨터를 다시 페어링하세요.",
   "PEER_FAILED": "{{detail}}",
-  "REMOTE_TRAINING_FAILED": "{{detail}}"
+  "REMOTE_TRAINING_FAILED": "{{detail}}",
+  "PUSH_UNAVAILABLE": "이 컴퓨터에서는 Toskar 앱 알림을 사용할 수 없습니다.",
+  "PUSH_DEVICE_ONLY": "페어링된 휴대폰이나 태블릿만 알림을 켤 수 있습니다.",
+  "PUSH_INVALID": "{{detail}}",
+  "PUSH_FAILED": "{{detail}}"
 }

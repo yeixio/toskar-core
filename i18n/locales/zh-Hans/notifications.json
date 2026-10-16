@@ -44,7 +44,8 @@
     "kinds": {
       "email": "电子邮件",
       "webhook": "Webhook",
-      "ntfy": "推送"
+      "ntfy": "推送",
+      "app": "Toskar 应用"
     },
     "severities": {
       "all": "全部",

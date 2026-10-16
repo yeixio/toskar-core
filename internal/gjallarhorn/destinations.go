@@ -60,6 +60,7 @@ type Destination struct {
 	Email   *EmailConfig   `json:"email,omitempty"`
 	Webhook *WebhookConfig `json:"webhook,omitempty"`
 	Ntfy    *NtfyConfig    `json:"ntfy,omitempty"`
+	App     *AppConfig     `json:"app,omitempty"`
 	// Categories it receives; empty receives every category (§26).
 	Categories []string `json:"categories,omitempty"`
 	// MinSeverity is the lowest severity it receives: info (the default),
@@ -82,6 +83,7 @@ type DestinationInput struct {
 	Email       *EmailConfig   `json:"email,omitempty"`
 	Webhook     *WebhookConfig `json:"webhook,omitempty"`
 	Ntfy        *NtfyConfig    `json:"ntfy,omitempty"`
+	App         *AppConfig     `json:"app,omitempty"`
 	Categories  *[]string      `json:"categories,omitempty"`
 	MinSeverity *string        `json:"min_severity,omitempty"`
 	// Digest sets a daily digest; an empty At sends each notice again.
@@ -144,8 +146,13 @@ func validate(d Destination) error {
 			return fmt.Errorf("ntfy settings are required")
 		}
 		return validateNtfy(*d.Ntfy)
+	case KindApp:
+		if d.App == nil {
+			return fmt.Errorf("app settings are required")
+		}
+		return validateApp(*d.App)
 	}
-	return fmt.Errorf("kind must be email, webhook, or ntfy")
+	return fmt.Errorf("kind must be email, webhook, ntfy, or app")
 }
 
 // SetSecrets gives the hub a place to keep destination credentials.
@@ -202,6 +209,10 @@ func (h *Hub) scanDestination(row interface{ Scan(...any) error }) (Destination,
 	case KindNtfy:
 		d.Ntfy = &NtfyConfig{}
 		_ = json.Unmarshal([]byte(config), d.Ntfy)
+	case KindApp:
+		d.App = &AppConfig{}
+		_ = json.Unmarshal([]byte(config), d.App)
+		applyAppDefaults(d.App)
 	}
 	if cats != "" {
 		_ = json.Unmarshal([]byte(cats), &d.Categories)
@@ -217,7 +228,10 @@ func (h *Hub) scanDestination(row interface{ Scan(...any) error }) (Destination,
 // CreateDestination stores a destination. For a webhook it returns the
 // signing secret, which is shown this once (§13).
 func (h *Hub) CreateDestination(ctx context.Context, in DestinationInput) (Destination, string, error) {
-	d := Destination{ID: uuid.NewString(), Kind: in.Kind, Enabled: true, Email: in.Email, Webhook: in.Webhook, Ntfy: in.Ntfy}
+	d := Destination{ID: uuid.NewString(), Kind: in.Kind, Enabled: true, Email: in.Email, Webhook: in.Webhook, Ntfy: in.Ntfy, App: in.App}
+	if d.Kind == KindApp && d.App == nil {
+		d.App = &AppConfig{}
+	}
 	applyInput(&d, in)
 	if err := validate(d); err != nil {
 		return Destination{}, "", err
@@ -261,6 +275,9 @@ func (h *Hub) UpdateDestination(ctx context.Context, id string, in DestinationIn
 	}
 	if in.Ntfy != nil && d.Kind == KindNtfy {
 		d.Ntfy = in.Ntfy
+	}
+	if in.App != nil && d.Kind == KindApp {
+		d.App = in.App
 	}
 	applyInput(&d, in)
 	if err := validate(d); err != nil {
@@ -332,6 +349,9 @@ func applyInput(d *Destination, in DestinationInput) {
 	if d.Ntfy != nil {
 		applyNtfyDefaults(d.Ntfy)
 	}
+	if d.App != nil {
+		applyAppDefaults(d.App)
+	}
 	if d.Email != nil {
 		if d.Email.TLS == "" {
 			d.Email.TLS = "starttls"
@@ -354,6 +374,8 @@ func (h *Hub) saveDestination(ctx context.Context, d Destination, create bool) e
 		config, _ = json.Marshal(d.Webhook)
 	case KindNtfy:
 		config, _ = json.Marshal(d.Ntfy)
+	case KindApp:
+		config, _ = json.Marshal(d.App)
 	}
 	var cats any
 	if len(d.Categories) > 0 {

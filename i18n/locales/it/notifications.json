@@ -44,7 +44,8 @@
     "kinds": {
       "email": "Email",
       "webhook": "Webhook",
-      "ntfy": "Push"
+      "ntfy": "Push",
+      "app": "App Toskar"
     },
     "severities": {
       "all": "Tutto",

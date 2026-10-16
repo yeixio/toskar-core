@@ -250,5 +250,9 @@
   "PEER_UNAVAILABLE": "そのコンピューターは今これを提供していません。まだ起動中か、新しい Toskar が必要な可能性があります。",
   "PEER_UNAUTHORIZED": "そのコンピューターはこのコンピューターのサインインを受け付けませんでした（{{detail}}）。繰り返し起きる場合は、「コンピューター」で 2 台をもう一度ペアリングしてください。",
   "PEER_FAILED": "{{detail}}",
-  "REMOTE_TRAINING_FAILED": "{{detail}}"
+  "REMOTE_TRAINING_FAILED": "{{detail}}",
+  "PUSH_UNAVAILABLE": "このコンピューターでは Toskar アプリへの通知を利用できません。",
+  "PUSH_DEVICE_ONLY": "通知をオンにできるのは、ペアリング済みのスマートフォンかタブレットだけです。",
+  "PUSH_INVALID": "{{detail}}",
+  "PUSH_FAILED": "{{detail}}"
 }

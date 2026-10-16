@@ -250,5 +250,9 @@
   "PEER_UNAVAILABLE": "Esa computadora no ofrece esto ahora. Puede que aún esté iniciándose o que necesite un Toskar más reciente.",
   "PEER_UNAUTHORIZED": "Esa computadora no aceptó el inicio de sesión de esta ({{detail}}). Si sigue pasando, vuelve a emparejar las dos computadoras en Computadoras.",
   "PEER_FAILED": "{{detail}}",
-  "REMOTE_TRAINING_FAILED": "{{detail}}"
+  "REMOTE_TRAINING_FAILED": "{{detail}}",
+  "PUSH_UNAVAILABLE": "Las notificaciones en la app de Toskar no están disponibles en esta computadora.",
+  "PUSH_DEVICE_ONLY": "Solo un teléfono o tablet emparejado puede activar las notificaciones.",
+  "PUSH_INVALID": "{{detail}}",
+  "PUSH_FAILED": "{{detail}}"
 }

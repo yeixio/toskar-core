@@ -170,6 +170,7 @@ type Hub struct {
 	secrets  Secrets
 	settings SettingsStore
 	egress   EgressRecorder
+	push     PushSender
 	client   *http.Client
 	wake     chan struct{}
 }

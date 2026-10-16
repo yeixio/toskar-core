@@ -35,6 +35,7 @@ import (
 	"github.com/yeixio/toskar-core/internal/models"
 	"github.com/yeixio/toskar-core/internal/muninn"
 	"github.com/yeixio/toskar-core/internal/portals"
+	"github.com/yeixio/toskar-core/internal/push"
 	"github.com/yeixio/toskar-core/internal/runtimes"
 	"github.com/yeixio/toskar-core/internal/speech"
 	"github.com/yeixio/toskar-core/internal/training"
@@ -255,6 +256,8 @@ type Server struct {
 	// mediaElsewhere lists paired computers a model works well on (#550).
 	mediaElsewhere MediaElsewhere
 	notifications  *gjallarhorn.Hub
+	push           *push.Store
+	pushClient     *push.Client
 	connectors     *connectors.Manager
 	mcp            *mcp.Manager
 	mcpServer      *mcp.Server
@@ -397,6 +400,7 @@ func (s *Server) routes() {
 	s.memoryRoutes(api)
 	s.artifactRoutes(api)
 	s.deviceRoutes(api)
+	s.pushRoutes(api)
 	s.peopleRoutes(api)
 	s.oidcRoutes(api)
 	s.portalRoutes(api)

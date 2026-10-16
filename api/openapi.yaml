@@ -992,6 +992,58 @@ paths:
       responses:
         "303":
           description: Signed in, or back to the sign-in screen with oidc_error
+  /api/v1/me/push:
+    get:
+      summary: Push to the Toskar app on this device (#460)
+      description: >-
+        What a paired phone or tablet needs to register with the push relay (the relay and this
+        computer's key, which the relay seals into the device's handle), and whether this device
+        has registered. See docs/push.md.
+      operationId: getPushStatus
+      responses:
+        "200":
+          description: The relay, the computer's key, and this device's registration
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PushStatus"
+    put:
+      summary: Register this device's push handle
+      description: >-
+        A paired phone or tablet gives the sealed handle the push relay made from its push token.
+        Only a paired device's key may; another gets PUSH_DEVICE_ONLY. The computer never sees
+        the token. Disconnecting the device ends its pushes.
+      operationId: registerPush
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [handle, platform]
+              properties:
+                handle:
+                  type: string
+                platform:
+                  type: string
+                  enum: [ios, android]
+      responses:
+        "200":
+          description: Registered
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PushStatus"
+        "400":
+          description: PUSH_INVALID
+        "403":
+          description: PUSH_DEVICE_ONLY
+    delete:
+      summary: Stop pushes to this device
+      operationId: unregisterPush
+      responses:
+        "204":
+          description: No longer registered
   /api/v1/me/devices:
     get:
       summary: Your connected devices (#206)
@@ -6727,6 +6779,19 @@ components:
       scheme: bearer
       description: An API key from the API Access page, or TOSKAR_API_KEY
   schemas:
+    PushStatus:
+      type: object
+      properties:
+        relay:
+          type: string
+          description: The push relay to register with.
+        computer_key:
+          type: string
+          description: This computer's Ed25519 public key, base64.
+        registered:
+          type: boolean
+        platform:
+          type: string
     AssistantOptions:
       type: object
       description: The assistant's own controls for an OpenAI-compatible request, sent as toskar (or yggdrasil, its name from before the rename)

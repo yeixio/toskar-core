@@ -44,7 +44,8 @@
     "kinds": {
       "email": "이메일",
       "webhook": "웹훅",
-      "ntfy": "푸시"
+      "ntfy": "푸시",
+      "app": "Toskar 앱"
     },
     "severities": {
       "all": "전체",

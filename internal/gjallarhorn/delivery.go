@@ -294,11 +294,21 @@ func (h *Hub) sendTo(ctx context.Context, dest Destination, n Notification) erro
 			host = u.Host
 		}
 		err = sendNtfy(ctx, h.client, *dest.Ntfy, secret, n)
+	case KindApp:
+		if h.push != nil {
+			host = h.push.Host()
+		}
+		err = h.sendApp(ctx, *dest.App, n)
 	default:
 		return PermanentError{Err: fmt.Errorf("unknown destination kind %q", dest.Kind)}
 	}
 	if h.egress != nil && host != "" {
-		h.egress.Add(ctx, EgressKind, host, dest.Name+": "+n.Title)
+		what := n.Title
+		// A private push leaves without its title.
+		if dest.Kind == KindApp && dest.App != nil && dest.App.Content == "private" {
+			what = n.text("notifications:sent.privatePush", nil)
+		}
+		h.egress.Add(ctx, EgressKind, host, dest.Name+": "+what)
 	}
 	return err
 }

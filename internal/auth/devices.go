@@ -273,6 +273,10 @@ var cgnat = netip.MustParsePrefix("100.64.0.0/10")
 // else, such as API keys, settings changes, models, computers, editing
 // automations, and files on disk, needs a key made in API Access.
 var deviceRoutes = map[string]bool{
+	// Push to the app (#460): the device's own registration.
+	"GET /api/v1/me/push":                   true,
+	"PUT /api/v1/me/push":                   true,
+	"DELETE /api/v1/me/push":                true,
 	"GET /api/v1/remote-access/route":       true,
 	"PUT /api/v1/remote-access/relay-token": true,
 	// Whether devices away from home reach the computer, and Check now,
