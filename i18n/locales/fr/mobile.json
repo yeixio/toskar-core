@@ -530,7 +530,11 @@
       "trip": "Planifie un samedi pluvieux à Juneau pour une famille de quatre personnes.",
       "movie": "Propose une soirée cinéma en famille avec trois films qui vont bien ensemble."
     },
-    "tryAgain": "Réessayer"
+    "tryAgain": "Réessayer",
+    "report": {
+      "scan": "Scannez ce code avec l’appareil photo de votre téléphone pour envoyer le rapport par e-mail.",
+      "noCode": "Envoyez ce rapport à {{email}}."
+    }
   },
   "setup": {
     "title": "Configurez-le sur votre ordinateur",

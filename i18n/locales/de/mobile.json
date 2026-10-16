@@ -523,7 +523,11 @@
       "trip": "Plane einen verregneten Samstag in Juneau für eine vierköpfige Familie.",
       "movie": "Schlag einen Familien-Filmabend mit drei Filmen vor, die zusammenpassen."
     },
-    "tryAgain": "Noch einmal"
+    "tryAgain": "Noch einmal",
+    "report": {
+      "scan": "Scanne diesen Code mit der Kamera deines Telefons, um den Bericht per E-Mail zu senden.",
+      "noCode": "Sende diesen Bericht an {{email}}."
+    }
   },
   "setup": {
     "title": "Auf deinem Computer einrichten",

@@ -616,7 +616,11 @@
       "trip": "Plan a rainy Saturday in Juneau for a family of four.",
       "movie": "Suggest a family movie night with three films that go together."
     },
-    "tryAgain": "Try again"
+    "tryAgain": "Try again",
+    "report": {
+      "scan": "Scan this with your phone’s camera to send the report by email.",
+      "noCode": "Send this report to {{email}}."
+    }
   },
   "setup": {
     "title": "Set it up on your computer",
