@@ -19,7 +19,8 @@
         "kind": "image",
         "ext": ".png",
         "shows": "a red apple",
-        "min_side": 512
+        "min_side": 512,
+        "clean": true
       }
     },
     {
@@ -40,7 +41,8 @@
         "kind": "image",
         "ext": ".png",
         "shows": "a dog on a beach",
-        "min_side": 512
+        "min_side": 512,
+        "clean": true
       }
     },
     {
@@ -61,7 +63,8 @@
         "kind": "image",
         "ext": ".png",
         "shows": "a sign with the word OPEN written on it, spelled correctly",
-        "min_side": 512
+        "min_side": 512,
+        "clean": true
       }
     },
     {
@@ -87,7 +90,8 @@
         "kind": "image",
         "ext": ".png",
         "shows": "a red circle on a blue background",
-        "min_side": 256
+        "min_side": 256,
+        "clean": true
       }
     },
     {
@@ -108,7 +112,28 @@
         "kind": "video",
         "ext": ".webm",
         "shows": "waves or the sea at a beach",
-        "moves": true
+        "moves": true,
+        "clean": true
+      }
+    },
+    {
+      "id": "make_video_mac_decode",
+      "what": "On a Mac, a clip with fine detail and steady motion comes out with every frame clean: no blocks of wrong color, noise, or frames that jump, the corruption Apple's video decode path has shown (#553).",
+      "os": "darwin",
+      "real_only": true,
+      "message": "Make a short video of a slow pan across a busy market street with colorful signs and awnings.",
+      "expect": {
+        "tools_run": [
+          "video.generate"
+        ],
+        "answer_lacks": "(?i)(can'?t|cannot|unable to|not able to) (draw|create|make|generate|produce|edit)|as an ai|text-based|language model"
+      },
+      "judge": {
+        "kind": "video",
+        "ext": ".webm",
+        "shows": "a street or market with signs",
+        "moves": true,
+        "clean": true
       }
     },
     {

@@ -110,7 +110,14 @@ real daemon; a WAV must be whole and at least half a second long. Against a
 real daemon, a model that sees (`TOSKAR_QUALITY_JUDGE_MODEL`, gemma-3-4b by
 default) is then asked whether the picture, or the clip's sampled frames,
 shows `shows`, and speech is transcribed back and compared with `says` by
-word error rate (`max_wer`, 25% by default). `make: png` draws an
+word error rate (`max_wer`, 25% by default). `moves` asks whether a
+clip's frames change, so a frozen clip fails, and `clean` whether any part
+of a picture, or any frame, is garbled or corrupted (blocks of wrong color,
+noise, stripes, smears) or a frame flashes or jumps apart from its
+neighbors, so a broken decode fails even when it shows the right thing
+(#553). `os` runs a case only on that system: `make_video_mac_decode` is
+the regression case for Apple's video decode path, run with the media set
+on a Mac. `make: png` draws an
 attachment from a description, such as `size=512 bg=white shape=square
 color=blue count=3`, for edits and for the reading cases, whose
 `image_sent` checks (stub only) that the picture reached the model.

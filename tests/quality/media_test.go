@@ -12,6 +12,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"runtime"
 	"strconv"
 	"strings"
 	"testing"
@@ -45,6 +46,11 @@ type Judge struct {
 	// Moves asks the judge whether a clip's frames change, so a frozen
 	// clip fails (#553).
 	Moves bool `json:"moves,omitempty"`
+	// Clean asks the judge whether any part of the picture, or any of a
+	// clip's frames, is garbled or corrupted, or a frame flashes or jumps
+	// apart from the frames around it, so a broken decode fails even when
+	// the clip shows the right thing (#553).
+	Clean bool `json:"clean,omitempty"`
 }
 
 // mediaCase is a case in media.json.
@@ -56,6 +62,9 @@ type mediaCase struct {
 	// Recording is text Toskar's own voice reads into a WAV that's attached
 	// to the message (real only), for a transcription case.
 	Recording string `json:"recording"`
+	// OS limits the case to computers running it, such as darwin for a
+	// regression in Apple's video decode path (#553); empty runs anywhere.
+	OS string `json:"os,omitempty"`
 }
 
 type mediaFile struct {
@@ -214,6 +223,15 @@ func judgeFailures(t *testing.T, d realDriver, j *Judge, r Result) []string {
 				return []string{fmt.Sprintf("the judge says nothing moves in %s: %.200q", name, moving)}
 			}
 		}
+		if j.Clean {
+			broken, err := d.askAbout(t, judgeModel(), name, data, cleanQuestion(j.Kind))
+			if err != nil {
+				return []string{fmt.Sprintf("the judge couldn't look at %s: %v", name, err)}
+			}
+			if saysYes(broken) {
+				return []string{fmt.Sprintf("the judge says %s is corrupted: %.200q", name, broken)}
+			}
+		}
 	case "audio":
 		answer, err := d.askAbout(t, d.modelID(), name, data, "Transcribe this recording word for word. Reply with only the words it says.")
 		if err != nil {
@@ -228,6 +246,18 @@ func judgeFailures(t *testing.T, d realDriver, j *Judge, r Result) []string {
 		}
 	}
 	return nil
+}
+
+// cleanQuestion asks about decode corruption: blocks, noise, stripes,
+// smears, and, for a clip, a frame that flashes or jumps. Yes means broken.
+func cleanQuestion(kind string) string {
+	if kind == "video" {
+		return "Look closely at each of these frames of a video. Is any frame garbled or corrupted, with blocks of solid or wrong color, " +
+			"noise, stripes, smears, or a scrambled area, or does any frame flash or jump, looking unlike the frames before and after it? " +
+			"Answer no on the first line if every frame looks clean and each follows smoothly from the one before; otherwise answer yes and say which frame and what's wrong."
+	}
+	return "Look closely at this picture. Is any part of it garbled or corrupted, with blocks of solid or wrong color, noise, stripes, " +
+		"smears, or a scrambled area? Answer no on the first line if it looks clean; otherwise answer yes and say where and what's wrong."
 }
 
 // judgeModel is the model that sees, asked about pictures and clips.
@@ -375,7 +405,13 @@ func TestMediaCasesValid(t *testing.T) {
 				t.Errorf("%s: %v", c.ID, err)
 			}
 		}
+		if c.OS != "" && c.OS != "darwin" && c.OS != "linux" && c.OS != "windows" {
+			t.Errorf("%s: os %q", c.ID, c.OS)
+		}
 		if j := c.Judge; j != nil {
+			if j.Clean && j.Kind == "audio" {
+				t.Errorf("%s: clean is for pictures and clips", c.ID)
+			}
 			if j.Ext == "" || (j.Kind != "image" && j.Kind != "video" && j.Kind != "audio") {
 				t.Errorf("%s: judge %+v", c.ID, j)
 			}
@@ -412,6 +448,9 @@ func TestMediaQuality(t *testing.T) {
 	var peaks []memoryPeak
 	for _, mc := range loadMediaCases(t) {
 		if mc.RealOnly && !isReal {
+			continue
+		}
+		if mc.OS != "" && mc.OS != runtime.GOOS {
 			continue
 		}
 		if stopped(t, d, mc.Case) {
