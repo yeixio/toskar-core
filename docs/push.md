@@ -27,6 +27,7 @@ The relay keeps no content and no tokens; it counts deliveries. Every push is li
    - `PUT /api/v1/me/push` with `{handle, platform}`.
    - Only a paired device's key may; another key gets `PUSH_DEVICE_ONLY`.
    - A new handle replaces the old one, as when the token changes.
+   - The first device to register adds a **Toskar app** destination if there's none, with the title-only default. Turning notifications on in the app is all it takes.
 
 To stop: `DELETE /api/v1/me/push`. Disconnecting the device in Settings or API Access ends its pushes too, as its key no longer counts.
 

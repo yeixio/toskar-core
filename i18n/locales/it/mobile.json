@@ -885,5 +885,18 @@
       "save": "Salva",
       "cancel": "Annulla"
     }
+  },
+  "push": {
+    "title": "Notifiche su questo dispositivo",
+    "switch": "Notifiche dal tuo computer",
+    "explain": "Gli avvisi del tuo computer, come il risultato di un'automazione, arrivano qui anche quando Toskar è chiuso o sei fuori casa. Scegli cosa contengono in Impostazioni › Notifiche sul computer.",
+    "denied": "Le notifiche di Toskar sono disattivate nelle impostazioni di questo dispositivo. Attivale lì, poi torna qui.",
+    "openSettings": "Apri Impostazioni",
+    "promptTitle": "Ricevi avvisi su questo dispositivo",
+    "turnOn": "Attiva",
+    "turningOn": "Attivazione…",
+    "notNow": "Non ora",
+    "updateComputer": "Aggiorna Toskar sul computer per ricevere notifiche qui.",
+    "relayFailed": "Impossibile attivare le notifiche: {{detail}}"
   }
 }

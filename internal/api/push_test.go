@@ -13,6 +13,8 @@ import (
 
 	"github.com/yeixio/toskar-core/internal/auth"
 	"github.com/yeixio/toskar-core/internal/config"
+	"github.com/yeixio/toskar-core/internal/events"
+	"github.com/yeixio/toskar-core/internal/gjallarhorn"
 	"github.com/yeixio/toskar-core/internal/push"
 	"github.com/yeixio/toskar-core/internal/store"
 )
@@ -33,6 +35,9 @@ func TestPhoneRegistersForPush(t *testing.T) {
 	t.Cleanup(func() { _ = db.Close() })
 	keys := auth.NewAPIKeyManager(db.SQL, auth.NewSecretStore(dir))
 	srv := NewServer(Dependencies{Config: mgr, VerifyAPIKey: keys.Verify, ListAPIKeys: keys.List})
+	hub := gjallarhorn.NewHub(db.SQL, events.NewBus(4))
+	hub.SetSecrets(auth.NewSecretStore(dir))
+	srv.BindNotifications(hub)
 	_, priv, _ := ed25519.GenerateKey(rand.Reader)
 	regs := push.NewStore(db.SQL)
 	srv.BindPush(regs, &push.Client{Key: priv})
@@ -64,6 +69,12 @@ func TestPhoneRegistersForPush(t *testing.T) {
 	}
 	if regs, _ := regs.ForPerson(ctx, auth.OwnerID); len(regs) != 1 || regs[0].Handle != "sealed-h1" {
 		t.Fatalf("registrations %+v", regs)
+	}
+	// Turning notifications on is all it takes: the app destination is added once.
+	_ = do(phoneKey, http.MethodPut, `{"handle":"sealed-h1","platform":"ios"}`)
+	dests, _ := hub.Destinations(ctx)
+	if len(dests) != 1 || dests[0].Kind != gjallarhorn.KindApp || dests[0].App.Content != "title" {
+		t.Fatalf("destinations %+v", dests)
 	}
 	// The person's device list says which take pushes.
 	list := localRequest(http.MethodGet, "/api/v1/me/devices", nil)

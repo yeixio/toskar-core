@@ -869,5 +869,18 @@
       "save": "Speichern",
       "cancel": "Abbrechen"
     }
+  },
+  "push": {
+    "title": "Benachrichtigungen auf diesem Gerät",
+    "switch": "Benachrichtigungen von deinem Computer",
+    "explain": "Meldungen deines Computers, etwa das Ergebnis einer Automation, kommen hier an, auch wenn Toskar geschlossen ist oder du unterwegs bist. Was sie enthalten, legst du am Computer unter Einstellungen › Benachrichtigungen fest.",
+    "denied": "Benachrichtigungen für Toskar sind in den Einstellungen dieses Geräts aus. Schalte sie dort ein und komm dann zurück.",
+    "openSettings": "Einstellungen öffnen",
+    "promptTitle": "Auf diesem Gerät benachrichtigt werden",
+    "turnOn": "Einschalten",
+    "turningOn": "Wird eingeschaltet…",
+    "notNow": "Nicht jetzt",
+    "updateComputer": "Aktualisiere Toskar auf deinem Computer, um hier Benachrichtigungen zu bekommen.",
+    "relayFailed": "Benachrichtigungen konnten nicht eingeschaltet werden: {{detail}}"
   }
 }

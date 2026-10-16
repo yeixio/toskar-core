@@ -854,5 +854,18 @@
       "save": "儲存",
       "cancel": "取消"
     }
+  },
+  "push": {
+    "title": "此裝置上的通知",
+    "switch": "來自電腦的通知",
+    "explain": "電腦的通知（例如自動化的結果）會傳送到這裡，即使 Toskar 已關閉或你不在家。可以在電腦的「設定 › 通知」中選擇通知內容。",
+    "denied": "此裝置的設定中關閉了 Toskar 的通知。請在設定中開啟後再回來。",
+    "openSettings": "打開設定",
+    "promptTitle": "在此裝置上接收通知",
+    "turnOn": "開啟",
+    "turningOn": "正在開啟…",
+    "notNow": "以後再說",
+    "updateComputer": "請更新電腦上的 Toskar，才能在這裡接收通知。",
+    "relayFailed": "無法開啟通知：{{detail}}"
   }
 }

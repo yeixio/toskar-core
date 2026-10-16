@@ -885,5 +885,18 @@
       "save": "Enregistrer",
       "cancel": "Annuler"
     }
+  },
+  "push": {
+    "title": "Notifications sur cet appareil",
+    "switch": "Notifications de votre ordinateur",
+    "explain": "Les avis de votre ordinateur, comme le résultat d’une automatisation, arrivent ici même quand Toskar est fermé ou que vous n’êtes pas chez vous. Choisissez leur contenu dans Réglages › Notifications sur l’ordinateur.",
+    "denied": "Les notifications de Toskar sont désactivées dans les réglages de cet appareil. Activez-les là, puis revenez.",
+    "openSettings": "Ouvrir les Réglages",
+    "promptTitle": "Être averti sur cet appareil",
+    "turnOn": "Activer",
+    "turningOn": "Activation…",
+    "notNow": "Plus tard",
+    "updateComputer": "Mettez à jour Toskar sur votre ordinateur pour recevoir des notifications ici.",
+    "relayFailed": "Les notifications n’ont pas pu être activées : {{detail}}"
   }
 }

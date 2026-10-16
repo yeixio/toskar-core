@@ -8,6 +8,7 @@ import (
 	"github.com/gorilla/mux"
 
 	"github.com/yeixio/toskar-core/internal/auth"
+	"github.com/yeixio/toskar-core/internal/gjallarhorn"
 	"github.com/yeixio/toskar-core/internal/push"
 )
 
@@ -101,7 +102,29 @@ func (s *Server) handleRegisterPush(w http.ResponseWriter, r *http.Request) {
 		writeErrFrom(w, http.StatusBadRequest, "PUSH_INVALID", err)
 		return
 	}
+	s.ensureAppDestination(r)
 	s.handlePushStatus(w, r)
+}
+
+// ensureAppDestination adds the Toskar app as a notification destination
+// when a device turns notifications on and there's none yet, so turning
+// them on in the app is all it takes. Its settings, title only by default,
+// are changed in Settings › Notifications.
+func (s *Server) ensureAppDestination(r *http.Request) {
+	if s.notifications == nil {
+		return
+	}
+	list, err := s.notifications.Destinations(r.Context())
+	if err != nil {
+		return
+	}
+	for _, d := range list {
+		if d.Kind == gjallarhorn.KindApp {
+			return
+		}
+	}
+	name := "Toskar app"
+	_, _, _ = s.notifications.CreateDestination(r.Context(), gjallarhorn.DestinationInput{Kind: gjallarhorn.KindApp, Name: &name})
 }
 
 func (s *Server) handleUnregisterPush(w http.ResponseWriter, r *http.Request) {

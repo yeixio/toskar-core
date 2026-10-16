@@ -854,5 +854,18 @@
       "save": "保存",
       "cancel": "取消"
     }
+  },
+  "push": {
+    "title": "此设备上的通知",
+    "switch": "来自电脑的通知",
+    "explain": "电脑的通知（例如自动化的结果）会发送到这里，即使 Toskar 已关闭或你不在家。可以在电脑的“设置 › 通知”中选择通知内容。",
+    "denied": "此设备的设置中关闭了 Toskar 的通知。请在设置中开启后再回来。",
+    "openSettings": "打开设置",
+    "promptTitle": "在此设备上接收通知",
+    "turnOn": "开启",
+    "turningOn": "正在开启…",
+    "notNow": "以后再说",
+    "updateComputer": "请更新电脑上的 Toskar，才能在这里接收通知。",
+    "relayFailed": "无法开启通知：{{detail}}"
   }
 }
