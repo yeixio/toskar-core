@@ -73,7 +73,8 @@
     "defaultNames": {
       "email": "Meine E-Mail",
       "webhook": "Mein Webhook",
-      "ntfy": "Mein Handy"
+      "ntfy": "Mein Handy",
+      "app": "Mein Telefon und Tablet"
     },
     "added": "{{name}} hinzugefügt",
     "done": "Fertig",
@@ -111,7 +112,17 @@
     "saving": "Wird gespeichert …",
     "save": "Speichern",
     "add": "Hinzufügen",
-    "cancel": "Abbrechen"
+    "cancel": "Abbrechen",
+    "addApp": "Toskar-App hinzufügen",
+    "appIntro": "Benachrichtigungen gehen an die Toskar-App auf deinen Telefonen und Tablets, auch unterwegs, über das Push-Relay von Toskar. Schalte Benachrichtigungen in der App auf jedem Gerät ein; eine Uhr zeigt, was ihr Telefon bekommt.",
+    "appDevices_one": "{{count}} deiner Geräte hat Benachrichtigungen eingeschaltet.",
+    "appDevices_other": "{{count}} deiner Geräte haben Benachrichtigungen eingeschaltet.",
+    "appNoDevices": "Noch keines deiner Geräte hat Benachrichtigungen eingeschaltet. Öffne die Toskar-App auf deinem Telefon oder Tablet und schalte sie ein.",
+    "appContentTitle": "Nur den Titel (empfohlen)",
+    "appContentHint": "Der Titel ist, was deine Automation oder Toskar geschrieben hat, etwa „Wieder verfügbar: Laufschuh, Größe 44“. Er geht über das Push-Relay von Toskar; mit nur dem Titel bleibt der Text auf diesem Computer.",
+    "appWhereTitle": "Deine Geräte, nur Titel",
+    "appWhereFull": "Deine Geräte, Titel und Text",
+    "appWherePrivate": "Deine Geräte, privat"
   },
   "quiet": {
     "title": "Ruhezeit",

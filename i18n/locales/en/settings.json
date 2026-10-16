@@ -321,6 +321,7 @@
     "disconnect": "Disconnect",
     "lastUsed": "Last used {{date}}",
     "neverUsed": "Not used yet",
-    "confirm": "Disconnect {{name}}? It will need a new code to connect again."
+    "confirm": "Disconnect {{name}}? It will need a new code to connect again.",
+    "pushOn": "Notifications on"
   }
 }

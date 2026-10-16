@@ -48,7 +48,10 @@ export function YourDevices() {
             {list.map((d) => (
               <li key={d.id} className="flex flex-wrap items-center justify-between gap-2 py-2">
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-medium text-ink">{d.name}</p>
+                  <p className="truncate text-sm font-medium text-ink">
+                    {d.name}
+                    {d.push ? <span className="status-chip ms-2 bg-success/15 text-success">{t('devices.pushOn')}</span> : null}
+                  </p>
                   <p className="text-xs text-ink-muted">
                     {d.last_used_at
                       ? t('devices.lastUsed', { date: formatDate(d.last_used_at, { dateStyle: 'medium', timeStyle: 'short' }) })

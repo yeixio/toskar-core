@@ -11,6 +11,7 @@ import type {
   AIProfile,
   APIKeyPermissions,
   APIKeyRecord,
+  MyDevice,
   DevicePairing,
   BrowseModel,
   ChatRequest,
@@ -1003,7 +1004,7 @@ export const api = {
   cancelDevicePairing: () => request<null>('/api/v1/devices/pairing', { method: 'DELETE' }),
 
   /** The devices connected as this person (#206). */
-  listMyDevices: () => request<APIKeyRecord[]>('/api/v1/me/devices'),
+  listMyDevices: () => request<MyDevice[]>('/api/v1/me/devices'),
 
   /** Disconnect one of this person's devices; it needs a new code to connect again. */
   disconnectMyDevice: (id: string) => request<null>(`/api/v1/me/devices/${encodeURIComponent(id)}`, { method: 'DELETE' }),

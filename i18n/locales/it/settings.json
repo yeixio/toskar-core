@@ -330,6 +330,7 @@
     "disconnect": "Scollega",
     "lastUsed": "Ultimo utilizzo {{date}}",
     "neverUsed": "Non ancora usato",
-    "confirm": "Scollegare {{name}}? Servirà un nuovo codice per ricollegarlo."
+    "confirm": "Scollegare {{name}}? Servirà un nuovo codice per ricollegarlo.",
+    "pushOn": "Notifiche attive"
   }
 }

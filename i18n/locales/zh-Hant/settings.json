@@ -312,6 +312,7 @@
     "disconnect": "中斷連線",
     "lastUsed": "上次使用：{{date}}",
     "neverUsed": "尚未使用",
-    "confirm": "要中斷 {{name}} 的連線嗎？重新連線需要新的代碼。"
+    "confirm": "要中斷 {{name}} 的連線嗎？重新連線需要新的代碼。",
+    "pushOn": "通知已開啟"
   }
 }

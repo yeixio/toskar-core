@@ -321,6 +321,7 @@
     "disconnect": "Trennen",
     "lastUsed": "Zuletzt verwendet {{date}}",
     "neverUsed": "Noch nicht verwendet",
-    "confirm": "{{name}} trennen? Zum erneuten Verbinden braucht es einen neuen Code."
+    "confirm": "{{name}} trennen? Zum erneuten Verbinden braucht es einen neuen Code.",
+    "pushOn": "Benachrichtigungen an"
   }
 }

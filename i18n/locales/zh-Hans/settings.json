@@ -312,6 +312,7 @@
     "disconnect": "断开",
     "lastUsed": "上次使用：{{date}}",
     "neverUsed": "尚未使用",
-    "confirm": "要断开 {{name}} 吗？重新连接需要新的代码。"
+    "confirm": "要断开 {{name}} 吗？重新连接需要新的代码。",
+    "pushOn": "通知已开启"
   }
 }

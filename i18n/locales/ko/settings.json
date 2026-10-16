@@ -312,6 +312,7 @@
     "disconnect": "연결 해제",
     "lastUsed": "마지막 사용 {{date}}",
     "neverUsed": "아직 사용 안 함",
-    "confirm": "{{name}} 연결을 해제할까요? 다시 연결하려면 새 코드가 필요해요."
+    "confirm": "{{name}} 연결을 해제할까요? 다시 연결하려면 새 코드가 필요해요.",
+    "pushOn": "알림 켜짐"
   }
 }

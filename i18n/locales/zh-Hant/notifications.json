@@ -73,7 +73,8 @@
     "defaultNames": {
       "email": "我的電子郵件",
       "webhook": "我的 Webhook",
-      "ntfy": "我的手機"
+      "ntfy": "我的手機",
+      "app": "我的手機和平板"
     },
     "added": "已新增 {{name}}",
     "done": "完成",
@@ -111,7 +112,17 @@
     "saving": "正在儲存…",
     "save": "儲存",
     "add": "新增",
-    "cancel": "取消"
+    "cancel": "取消",
+    "addApp": "新增 Toskar 應用程式",
+    "appIntro": "通知會透過 Toskar 的推播中繼傳送到你手機和平板上的 Toskar 應用程式，即使不在家也收得到。請在每台裝置的應用程式中開啟通知；手錶會顯示其配對手機收到的通知。",
+    "appDevices_one": "你有 {{count}} 台裝置已開啟通知。",
+    "appDevices_other": "你有 {{count}} 台裝置已開啟通知。",
+    "appNoDevices": "你的裝置都還沒有開啟通知。請在手機或平板上開啟 Toskar 應用程式並開啟通知。",
+    "appContentTitle": "僅標題（建議）",
+    "appContentHint": "標題是你的自動化或 Toskar 寫的內容，例如「已到貨：越野跑鞋 42 號」。它會經過 Toskar 的推播中繼；只傳送標題時，內文會留在這台電腦上。",
+    "appWhereTitle": "你的裝置，僅標題",
+    "appWhereFull": "你的裝置，標題和內文",
+    "appWherePrivate": "你的裝置，私密"
   },
   "quiet": {
     "title": "勿擾時段",

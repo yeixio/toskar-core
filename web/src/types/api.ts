@@ -937,6 +937,9 @@ export interface RuntimeInfo {
   status: string
 }
 
+/** A device connected as you, and whether it takes pushes from the Toskar app (#460). */
+export type MyDevice = APIKeyRecord & { push?: boolean }
+
 export interface APIKeyRecord {
   id: string
   name: string
@@ -1896,6 +1899,7 @@ export interface NotificationDestinationInput {
   email?: NotificationDestination['email']
   webhook?: { url: string }
   ntfy?: NtfyConfig
+  app?: { content?: 'title' | 'full' | 'private' }
   categories?: NotificationCategory[]
   min_severity?: '' | NotificationSeverity
   /** A daily digest instead of each notice; errors still go out at once. An empty at turns it off. */

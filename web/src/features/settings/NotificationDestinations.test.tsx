@@ -16,6 +16,7 @@ vi.mock('@/lib/api', () => ({
     rotateNotificationSecret: vi.fn(),
     getQuietHours: vi.fn(),
     setQuietHours: vi.fn(),
+    listMyDevices: vi.fn(),
   },
 }))
 
@@ -32,6 +33,23 @@ describe('Email, push, and webhooks', () => {
   beforeEach(() => {
     vi.mocked(api.listNotificationDestinations).mockResolvedValue([])
     vi.mocked(api.getQuietHours).mockResolvedValue({ enabled: false, start: '22:00', end: '07:00', time_zone: 'UTC', allow: 'errors' })
+  })
+
+  it('adds the Toskar app, sending the title only unless asked, and says when no device has notifications on (#460)', async () => {
+    vi.mocked(api.listMyDevices).mockResolvedValue([
+      { id: 'k1', name: 'Phone', prefix: 'p', created_at: '', revoked: false, permissions: {}, person_id: 'owner', push: false },
+    ] as never)
+    vi.mocked(api.createNotificationDestination).mockResolvedValue({
+      destination: { id: 'd2', kind: 'app', name: 'My phone and tablet', enabled: true, has_secret: false, app: { content: 'title' } },
+    } as never)
+    renderCard()
+    fireEvent.click(await screen.findByRole('button', { name: 'Add the Toskar app' }))
+    expect(await screen.findByText(/None of your devices has notifications on yet/)).toBeInTheDocument()
+    expect(screen.getByLabelText('What to send')).toHaveValue('title')
+    fireEvent.click(screen.getByRole('button', { name: /^Save|^Add/ }))
+    await waitFor(() =>
+      expect(api.createNotificationDestination).toHaveBeenCalledWith(expect.objectContaining({ kind: 'app', app: { content: 'title' } })),
+    )
   })
 
   it('adds a webhook and shows its signing secret once', async () => {

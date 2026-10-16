@@ -73,7 +73,8 @@
     "defaultNames": {
       "email": "Meu e-mail",
       "webhook": "Meu webhook",
-      "ntfy": "Meu celular"
+      "ntfy": "Meu celular",
+      "app": "Meu celular e tablet"
     },
     "added": "{{name}} adicionado",
     "done": "Concluído",
@@ -111,7 +112,18 @@
     "saving": "Salvando…",
     "save": "Salvar",
     "add": "Adicionar",
-    "cancel": "Cancelar"
+    "cancel": "Cancelar",
+    "addApp": "Adicionar o app Toskar",
+    "appIntro": "As notificações chegam ao app Toskar nos seus celulares e tablets, mesmo fora de casa, pelo relay de notificações do Toskar. Ative as notificações no app em cada dispositivo; um relógio mostra o que o celular dele recebe.",
+    "appDevices_one": "{{count}} dos seus dispositivos tem as notificações ativadas.",
+    "appDevices_other": "{{count}} dos seus dispositivos têm as notificações ativadas.",
+    "appDevices_many": "{{count}} dos seus dispositivos têm as notificações ativadas.",
+    "appNoDevices": "Nenhum dos seus dispositivos tem as notificações ativadas ainda. Abra o app Toskar no celular ou tablet e ative-as.",
+    "appContentTitle": "Só o título (recomendado)",
+    "appContentHint": "O título é o que sua automação ou o Toskar escreveu, como “De volta ao estoque: tênis de trilha, tamanho 42”. Ele passa pelo relay de notificações do Toskar; só com o título, o texto fica neste computador.",
+    "appWhereTitle": "Seus dispositivos, só título",
+    "appWhereFull": "Seus dispositivos, título e texto",
+    "appWherePrivate": "Seus dispositivos, privado"
   },
   "quiet": {
     "title": "Horário de silêncio",

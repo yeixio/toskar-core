@@ -54,6 +54,9 @@ export function NotificationDestinations() {
         <DestinationForm kind={adding} onDone={() => setAdding('')} />
       ) : (
         <div className="flex flex-wrap gap-2">
+          <button type="button" className="btn-secondary px-3 py-1.5 text-xs" onClick={() => setAdding('app')}>
+            {t('destinations.addApp')}
+          </button>
           <button type="button" className="btn-secondary px-3 py-1.5 text-xs" onClick={() => setAdding('email')}>
             {t('destinations.addEmail')}
           </button>
@@ -76,7 +79,15 @@ function summary(d: NotificationDestination): string {
     server: d.ntfy?.server.replace(/^https?:\/\//, '') ?? '',
   }
   const where =
-    d.kind === 'email'
+    d.kind === 'app'
+      ? i18n.t(
+          d.app?.content === 'private'
+            ? 'notifications:destinations.appWherePrivate'
+            : d.app?.content === 'full'
+              ? 'notifications:destinations.appWhereFull'
+              : 'notifications:destinations.appWhereTitle',
+        )
+      : d.kind === 'email'
       ? (d.email?.to ?? []).join(', ')
       : d.kind === 'ntfy'
         ? i18n.t(d.ntfy?.content === 'private' ? 'notifications:destinations.ntfyWherePrivate' : 'notifications:destinations.ntfyWhere', ntfy)
@@ -189,6 +200,7 @@ function DestinationForm({
   const [server, setServer] = useState(existing?.ntfy?.server ?? 'https://ntfy.sh')
   const [topic, setTopic] = useState(existing?.ntfy?.topic ?? randomTopic())
   const [content, setContent] = useState<'' | 'full' | 'private'>(existing?.ntfy?.content ?? '')
+  const [appContent, setAppContent] = useState<'title' | 'full' | 'private'>(existing?.app?.content ?? 'title')
   const [openUrl, setOpenUrl] = useState(existing?.ntfy?.open_url ?? '')
   const [url, setUrl] = useState(existing?.webhook?.url ?? '')
   const [host, setHost] = useState(existing?.email?.host ?? '')
@@ -209,7 +221,8 @@ function DestinationForm({
       const input: NotificationDestinationInput = { name, categories, min_severity: minSeverity }
       if (digestAt) input.digest = { at: digestAt, time_zone: Intl.DateTimeFormat().resolvedOptions().timeZone }
       else if (existing?.digest?.at) input.digest = { at: '' }
-      if (kind === 'webhook') input.webhook = { url: url.trim() }
+      if (kind === 'app') input.app = { content: appContent }
+      else if (kind === 'webhook') input.webhook = { url: url.trim() }
       else if (kind === 'ntfy') {
         input.ntfy = { server: server.trim(), topic: topic.trim(), content: content || undefined, open_url: openUrl.trim() || undefined }
         if (password) input.password = password
@@ -271,7 +284,21 @@ function DestinationForm({
       }}
     >
       {field(t('destinations.name'), name, setName)}
-      {kind === 'ntfy' ? (
+      {kind === 'app' ? (
+        <>
+          <p className="rounded-md bg-info/10 px-2.5 py-2 text-xs leading-relaxed text-ink">{t('destinations.appIntro')}</p>
+          <AppDevices />
+          <label className="block text-sm">
+            <span className="text-ink-muted">{t('destinations.whatToSend')}</span>
+            <select className="field mt-1 w-full" value={appContent} onChange={(e) => setAppContent(e.target.value as typeof appContent)}>
+              <option value="title">{t('destinations.appContentTitle')}</option>
+              <option value="full">{t('destinations.contentFull')}</option>
+              <option value="private">{t('destinations.contentPrivate')}</option>
+            </select>
+          </label>
+          <p className="text-xs text-ink-faint">{t('destinations.appContentHint')}</p>
+        </>
+      ) : kind === 'ntfy' ? (
         <>
           <p className="rounded-md bg-info/10 px-2.5 py-2 text-xs leading-relaxed text-ink">{t('destinations.ntfyIntro')}</p>
           <div className="grid gap-3 sm:grid-cols-2">
@@ -453,4 +480,17 @@ function randomTopic(): string {
   const bytes = new Uint8Array(8)
   crypto.getRandomValues(bytes)
   return `yggdrasil-${Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('')}`
+}
+
+/** How many of your devices take pushes from the Toskar app, or how to turn them on (#460). */
+function AppDevices() {
+  const { t } = useTranslation('notifications')
+  const devices = useQuery({ queryKey: ['my-devices'], queryFn: () => api.listMyDevices(), retry: false })
+  if (!devices.data) return null
+  const on = devices.data.filter((d) => d.push && !d.revoked).length
+  return (
+    <p className={['text-xs', on ? 'text-ink-muted' : 'text-warning'].join(' ')}>
+      {on ? t('destinations.appDevices', { count: on }) : t('destinations.appNoDevices')}
+    </p>
+  )
 }

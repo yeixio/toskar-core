@@ -73,7 +73,8 @@
     "defaultNames": {
       "email": "내 이메일",
       "webhook": "내 웹훅",
-      "ntfy": "내 휴대폰"
+      "ntfy": "내 휴대폰",
+      "app": "내 휴대폰과 태블릿"
     },
     "added": "{{name}} 추가됨",
     "done": "완료",
@@ -111,7 +112,17 @@
     "saving": "저장하는 중…",
     "save": "저장",
     "add": "추가",
-    "cancel": "취소"
+    "cancel": "취소",
+    "addApp": "Toskar 앱 추가",
+    "appIntro": "알림은 Toskar의 푸시 중계를 거쳐 외출 중에도 휴대폰과 태블릿의 Toskar 앱으로 갑니다. 각 기기의 앱에서 알림을 켜세요. 워치에는 짝을 이룬 휴대폰이 받은 알림이 표시됩니다.",
+    "appDevices_one": "기기 {{count}}대에서 알림이 켜져 있습니다.",
+    "appDevices_other": "기기 {{count}}대에서 알림이 켜져 있습니다.",
+    "appNoDevices": "아직 알림이 켜진 기기가 없습니다. 휴대폰이나 태블릿에서 Toskar 앱을 열고 알림을 켜세요.",
+    "appContentTitle": "제목만 (권장)",
+    "appContentHint": "제목은 자동화나 Toskar가 쓴 내용입니다. 예: “재입고: 트레일 러닝화 270”. Toskar의 푸시 중계를 거칩니다. 제목만 보내면 본문은 이 컴퓨터에 남습니다.",
+    "appWhereTitle": "내 기기, 제목만",
+    "appWhereFull": "내 기기, 제목과 본문",
+    "appWherePrivate": "내 기기, 비공개"
   },
   "quiet": {
     "title": "방해 금지 시간",

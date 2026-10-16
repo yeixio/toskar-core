@@ -65,6 +65,13 @@ func TestPhoneRegistersForPush(t *testing.T) {
 	if regs, _ := regs.ForPerson(ctx, auth.OwnerID); len(regs) != 1 || regs[0].Handle != "sealed-h1" {
 		t.Fatalf("registrations %+v", regs)
 	}
+	// The person's device list says which take pushes.
+	list := localRequest(http.MethodGet, "/api/v1/me/devices", nil)
+	rec := httptest.NewRecorder()
+	srv.Handler().ServeHTTP(rec, list)
+	if !strings.Contains(rec.Body.String(), `"push":true`) {
+		t.Fatalf("my devices: %s", rec.Body)
+	}
 	if got := do(phoneKey, http.MethodPut, `{"handle":"h","platform":"palm"}`); got.Code != http.StatusBadRequest || !strings.Contains(got.Body.String(), "PUSH_INVALID") {
 		t.Fatalf("bad platform: %d %s", got.Code, got.Body)
 	}

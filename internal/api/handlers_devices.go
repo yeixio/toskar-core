@@ -237,7 +237,24 @@ func (s *Server) handleMyDevices(w http.ResponseWriter, r *http.Request) {
 		writeErrFrom(w, http.StatusInternalServerError, "DEVICES_FAILED", err)
 		return
 	}
-	writeJSON(w, http.StatusOK, list)
+	// Each says whether it takes pushes from the Toskar app (#460).
+	type device struct {
+		auth.APIKeyRecord
+		Push bool `json:"push"`
+	}
+	pushed := map[string]bool{}
+	if s.push != nil {
+		if regs, err := s.push.ForPerson(r.Context(), auth.PersonID(r.Context())); err == nil {
+			for _, reg := range regs {
+				pushed[reg.KeyID] = true
+			}
+		}
+	}
+	out := make([]device, 0, len(list))
+	for _, k := range list {
+		out = append(out, device{APIKeyRecord: k, Push: pushed[k.ID]})
+	}
+	writeJSON(w, http.StatusOK, out)
 }
 
 // handleDisconnectMyDevice revokes one of the person's own devices' keys.

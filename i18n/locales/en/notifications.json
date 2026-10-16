@@ -73,7 +73,8 @@
     "defaultNames": {
       "email": "My email",
       "webhook": "My webhook",
-      "ntfy": "My phone"
+      "ntfy": "My phone",
+      "app": "My phone and tablet"
     },
     "added": "{{name}} added",
     "done": "Done",
@@ -111,7 +112,17 @@
     "saving": "Saving…",
     "save": "Save",
     "add": "Add",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "addApp": "Add the Toskar app",
+    "appIntro": "Notifications go to the Toskar app on your phones and tablets, even away from home, through Toskar's push relay. Turn on notifications in the app on each device; a watch shows what its phone gets.",
+    "appDevices_one": "{{count}} of your devices has notifications on.",
+    "appDevices_other": "{{count}} of your devices have notifications on.",
+    "appNoDevices": "None of your devices has notifications on yet. Open the Toskar app on your phone or tablet and turn them on.",
+    "appContentTitle": "The title only (recommended)",
+    "appContentHint": "The title is what your automation or Toskar wrote, such as “Back in stock: Trail runner, size 10”. It passes through Toskar's push relay; with the title only, the text stays on this computer.",
+    "appWhereTitle": "Your devices, title only",
+    "appWhereFull": "Your devices, title and text",
+    "appWherePrivate": "Your devices, private"
   },
   "quiet": {
     "title": "Quiet hours",

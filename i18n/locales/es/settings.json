@@ -330,6 +330,7 @@
     "disconnect": "Desconectar",
     "lastUsed": "Usado por última vez el {{date}}",
     "neverUsed": "Aún sin usar",
-    "confirm": "¿Desconectar {{name}}? Necesitará un código nuevo para volver a conectarse."
+    "confirm": "¿Desconectar {{name}}? Necesitará un código nuevo para volver a conectarse.",
+    "pushOn": "Notificaciones activadas"
   }
 }
