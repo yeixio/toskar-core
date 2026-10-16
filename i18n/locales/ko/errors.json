@@ -254,5 +254,6 @@
   "PUSH_UNAVAILABLE": "이 컴퓨터에서는 Toskar 앱 알림을 사용할 수 없습니다.",
   "PUSH_DEVICE_ONLY": "페어링된 휴대폰이나 태블릿만 알림을 켤 수 있습니다.",
   "PUSH_INVALID": "{{detail}}",
-  "PUSH_FAILED": "{{detail}}"
+  "PUSH_FAILED": "{{detail}}",
+  "EMPTY_ANSWER": "모델이 답변을 작성하지 않았습니다. 다시 시도하거나 다른 모델을 선택하세요."
 }

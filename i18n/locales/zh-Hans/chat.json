@@ -433,7 +433,8 @@
     "attachedFile": "附加的文件",
     "madeInChat": "在此聊天中创建",
     "remembered": "已记住",
-    "steps_other": "我做了什么（{{count}} 个步骤）"
+    "steps_other": "我做了什么（{{count}} 个步骤）",
+    "madeOnly": "这是我做好的结果。"
   },
   "run": {
     "details": "运行详情",

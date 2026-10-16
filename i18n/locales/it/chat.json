@@ -459,7 +459,8 @@
     "remembered": "Memorizzato",
     "steps_one": "Cosa ho fatto ({{count}} passaggio)",
     "steps_many": "Cosa ho fatto ({{count}} passaggi)",
-    "steps_other": "Cosa ho fatto ({{count}} passaggi)"
+    "steps_other": "Cosa ho fatto ({{count}} passaggi)",
+    "madeOnly": "Ecco il risultato."
   },
   "run": {
     "details": "Dettagli dell'esecuzione",

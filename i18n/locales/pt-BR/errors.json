@@ -254,5 +254,6 @@
   "PUSH_UNAVAILABLE": "Notificações no app Toskar não estão disponíveis neste computador.",
   "PUSH_DEVICE_ONLY": "Só um celular ou tablet pareado pode ativar as notificações.",
   "PUSH_INVALID": "{{detail}}",
-  "PUSH_FAILED": "{{detail}}"
+  "PUSH_FAILED": "{{detail}}",
+  "EMPTY_ANSWER": "O modelo não escreveu uma resposta. Tente de novo ou escolha outro modelo."
 }

@@ -254,5 +254,6 @@
   "PUSH_UNAVAILABLE": "這台電腦無法向 Toskar 應用程式傳送通知。",
   "PUSH_DEVICE_ONLY": "只有已配對的手機或平板可以開啟通知。",
   "PUSH_INVALID": "{{detail}}",
-  "PUSH_FAILED": "{{detail}}"
+  "PUSH_FAILED": "{{detail}}",
+  "EMPTY_ANSWER": "模型沒有寫出回答。請重試，或選擇其他模型。"
 }

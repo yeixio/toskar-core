@@ -459,7 +459,8 @@
     "remembered": "Retenu",
     "steps_one": "Ce que j'ai fait ({{count}} étape)",
     "steps_many": "Ce que j'ai fait ({{count}} étapes)",
-    "steps_other": "Ce que j'ai fait ({{count}} étapes)"
+    "steps_other": "Ce que j'ai fait ({{count}} étapes)",
+    "madeOnly": "Voici le résultat."
   },
   "run": {
     "details": "Détails de l'exécution",

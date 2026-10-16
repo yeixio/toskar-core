@@ -254,5 +254,6 @@
   "PUSH_UNAVAILABLE": "このコンピューターでは Toskar アプリへの通知を利用できません。",
   "PUSH_DEVICE_ONLY": "通知をオンにできるのは、ペアリング済みのスマートフォンかタブレットだけです。",
   "PUSH_INVALID": "{{detail}}",
-  "PUSH_FAILED": "{{detail}}"
+  "PUSH_FAILED": "{{detail}}",
+  "EMPTY_ANSWER": "モデルが回答を書きませんでした。もう一度試すか、別のモデルを選んでください。"
 }

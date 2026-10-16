@@ -641,6 +641,20 @@ func (a *App) RunChat(ctx context.Context, profileID, conversationID, message st
 						"content":         visible,
 					}))
 				}
+				if evt.Done && full == "" && !held && ctx.Err() == nil {
+					// The model wrote nothing (#553): a file a tool made is still the
+					// answer, with a line saying so; with nothing at all, the turn
+					// failed, rather than ending as if it answered.
+					if m := env.trace.meta(); m != nil && len(m.Files) > 0 {
+						full = locale.T(appLang, "chat:answer.madeOnly", nil)
+						ch <- pluginapi.ChatChunk{Content: full}
+						a.publish(ctx, events.New(events.ChatToken, map[string]any{"conversation_id": conversationID, "content": full}))
+					} else {
+						runErr = contracts.NewError("EMPTY_ANSWER", map[string]any{"model_id": env.modelID()}, errors.New("the model didn't write an answer"))
+						ch <- pluginapi.ChatChunk{Error: locale.T(appLang, "errors:EMPTY_ANSWER", map[string]any{"model_id": env.modelID()}), Code: "EMPTY_ANSWER", Details: map[string]any{"model_id": env.modelID()}, Done: true}
+						return
+					}
+				}
 				if evt.Done {
 					ch <- pluginapi.ChatChunk{Done: true, Metrics: metrics}
 				}

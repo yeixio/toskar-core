@@ -254,5 +254,6 @@
   "PUSH_UNAVAILABLE": "Benachrichtigungen in der Toskar-App sind auf diesem Computer nicht verfügbar.",
   "PUSH_DEVICE_ONLY": "Nur ein verbundenes Telefon oder Tablet kann Benachrichtigungen einschalten.",
   "PUSH_INVALID": "{{detail}}",
-  "PUSH_FAILED": "{{detail}}"
+  "PUSH_FAILED": "{{detail}}",
+  "EMPTY_ANSWER": "Das Modell hat keine Antwort geschrieben. Versuche es erneut oder wähle ein anderes Modell."
 }

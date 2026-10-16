@@ -433,7 +433,8 @@
     "attachedFile": "첨부 파일",
     "madeInChat": "이 채팅에서 만듦",
     "remembered": "기억함",
-    "steps_other": "수행한 작업({{count}}단계)"
+    "steps_other": "수행한 작업({{count}}단계)",
+    "madeOnly": "만든 결과입니다."
   },
   "run": {
     "details": "실행 세부 정보",

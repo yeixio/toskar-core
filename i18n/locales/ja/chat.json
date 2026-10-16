@@ -433,7 +433,8 @@
     "attachedFile": "添付ファイル",
     "madeInChat": "このチャットで作成",
     "remembered": "記憶しました",
-    "steps_other": "実行した内容（{{count}}ステップ）"
+    "steps_other": "実行した内容（{{count}}ステップ）",
+    "madeOnly": "作成したものはこちらです。"
   },
   "run": {
     "details": "実行の詳細",

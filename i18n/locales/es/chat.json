@@ -459,7 +459,8 @@
     "remembered": "Recordado",
     "steps_one": "Lo que hice ({{count}} paso)",
     "steps_many": "Lo que hice ({{count}} pasos)",
-    "steps_other": "Lo que hice ({{count}} pasos)"
+    "steps_other": "Lo que hice ({{count}} pasos)",
+    "madeOnly": "Esto es lo que hice."
   },
   "run": {
     "details": "Detalles de la ejecución",

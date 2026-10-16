@@ -446,7 +446,8 @@
     "madeInChat": "In diesem Chat erstellt",
     "remembered": "Gemerkt",
     "steps_one": "Was ich getan habe ({{count}} Schritt)",
-    "steps_other": "Was ich getan habe ({{count}} Schritte)"
+    "steps_other": "Was ich getan habe ({{count}} Schritte)",
+    "madeOnly": "Hier ist das Ergebnis."
   },
   "run": {
     "details": "Details zum Durchlauf",
