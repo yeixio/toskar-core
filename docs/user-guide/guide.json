@@ -367,7 +367,20 @@
         "No live web answer: check that Internet is allowed in the profile, and ask for a search or about something current; a plain question is answered without tools. The same search within 15 minutes is answered from the cache.",
         "An answer did not use your knowledge or memories: use Try a question on the Knowledge page, install an embedding model so search matches meaning, and check that memory is on for the chat. A knowledge source that failed shows the reason; database and web API sources keep answering from the last data fetched.",
         "API connection refused: confirm the daemon is running and copy the current endpoint from API Access. A 401 with local network access on means a request from another device needs a valid API key, and a 403 means the key does not allow what the request asked for. Run Test API after changing settings.",
-        "For a bug report, include the app version, OS and processor, model, profile, steps to reproduce, and relevant diagnostics. Remove secrets and private prompt or file content before posting to the public issue tracker."
+        "To tell the Toskar team about a problem, use Report this beside the error (see Report a problem). For the public issue tracker, include the app version, OS and processor, model, profile, steps to reproduce, and relevant diagnostics, and remove secrets and private prompt or file content before posting."
+      ]
+    },
+    {
+      "id": "report",
+      "title": "Report a problem",
+      "paragraphs": [
+        "Most errors have Report this beside them: in the app and the desktop app, on the phone and tablet, and on the TV. It opens the report so you see everything it sends before it goes, with room to say what you were doing. Nothing is sent until you send it.",
+        "A report says what went wrong and where: the error and its code, the page or screen, the app and its version, and the device's system. When you're connected to a computer, it adds that computer's Toskar version, its operating system, processor, memory, and graphics. An Admin's report also has the computer's last 40 warnings and errors from its log; a Member's doesn't, and a Visitor's leaves out the computer entirely.",
+        "Before you see it, the report has email addresses, keys and tokens, and the name in home-folder paths taken out, and internet addresses replaced by their kind, such as public IPv4; the computer's part also has the computer's name taken out. Addresses on your home network stay, since they help and say nothing about where you are, and so do IDs that match the report to a log. Read it before sending; take out anything else you'd rather not share.",
+        "Reports go to the Toskar team at info@yeix.io by email, from your own email app, so you can see and keep what you sent. When there's no email app, copy or share the report instead. A long report drops its oldest log lines to fit in an email.",
+        "The TV has no email app, so its report shows a code: scan it with your phone's camera and the email opens there. On the watch, Report on phone hands the problem to the phone, and the report shows the next time you open Toskar there.",
+        "There is nothing to turn off: Toskar doesn't send reports, crash data, or usage data on its own. A report leaves only when you send it, and only what it showed you.",
+        "To report an answer rather than a problem, such as a wrong or offensive one, use Report this answer under it on the phone or tablet. It works the same way: your email app opens with the report."
       ]
     }
   ],
