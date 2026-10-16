@@ -253,11 +253,12 @@ func judgeFailures(t *testing.T, d realDriver, j *Judge, r Result) []string {
 func cleanQuestion(kind string) string {
 	if kind == "video" {
 		return "Look closely at each of these frames of a video. Is any frame garbled or corrupted, with blocks of solid or wrong color, " +
-			"noise, stripes, smears, or a scrambled area, or does any frame flash or jump, looking unlike the frames before and after it? " +
+			"noise, stripes, smears, or a scrambled area, is any frame washed out, overexposed or faded so that most of it is close to white, " +
+			"or does any frame flash or jump, looking unlike the frames before and after it? " +
 			"Answer no on the first line if every frame looks clean and each follows smoothly from the one before; otherwise answer yes and say which frame and what's wrong."
 	}
 	return "Look closely at this picture. Is any part of it garbled or corrupted, with blocks of solid or wrong color, noise, stripes, " +
-		"smears, or a scrambled area? Answer no on the first line if it looks clean; otherwise answer yes and say where and what's wrong."
+		"smears, or a scrambled area, or is it washed out, overexposed or faded so that most of it is close to white? Answer no on the first line if it looks clean; otherwise answer yes and say where and what's wrong."
 }
 
 // judgeModel is the model that sees, asked about pictures and clips.
@@ -459,7 +460,7 @@ func TestMediaQuality(t *testing.T) {
 		c := mc.Case
 		var failures []string
 		recorded := false
-		t.Run(c.ID, func(t *testing.T) {
+		ok := t.Run(c.ID, func(t *testing.T) {
 			if mc.Recording != "" {
 				c.Attach = append(c.Attach, Attachment{Name: "recording.wav", Content: string(real.recording(t, mc.Recording))})
 			}
@@ -488,7 +489,8 @@ func TestMediaQuality(t *testing.T) {
 			}
 			report = append(report, reportRow{Case: c, Answer: r.Answer, Failures: failures})
 		})
-		if !recorded {
+		// A case -run leaves out passes without running, and isn't counted.
+		if !recorded && !ok {
 			report = append(report, reportRow{Case: c, Failures: []string{"the case stopped before it could be checked; see its log"}})
 		}
 	}

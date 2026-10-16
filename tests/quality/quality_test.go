@@ -316,13 +316,13 @@ func stopped(t *testing.T, d Driver, c Case) bool {
 }
 
 // runCase runs and checks one case. ok is false for a case skipped for
-// this model. A case that stops before it is checked, such as one whose
+// this model or left out by -run. A case that stops before it is checked, such as one whose
 // daemon refuses or drops the request, counts as failed; otherwise a run
 // that broke partway would report only the cases that got an answer.
 func runCase(t *testing.T, d Driver, c Case, deflection *regexp.Regexp) (reportRow, bool) {
 	var row reportRow
 	recorded, skipped := false, false
-	t.Run(c.ID, func(t *testing.T) {
+	ok := t.Run(c.ID, func(t *testing.T) {
 		if c.StubOnly && d.Name() != "stub" {
 			skipped = true
 			t.Skip("checks a scripted reply")
@@ -348,7 +348,8 @@ func runCase(t *testing.T, d Driver, c Case, deflection *regexp.Regexp) (reportR
 			}
 		}
 	})
-	if skipped {
+	// A case -run leaves out passes without running, and is skipped too.
+	if skipped || (!recorded && ok) {
 		return row, false
 	}
 	if !recorded {

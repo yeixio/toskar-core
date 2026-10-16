@@ -113,7 +113,7 @@ shows `shows`, and speech is transcribed back and compared with `says` by
 word error rate (`max_wer`, 25% by default). `moves` asks whether a
 clip's frames change, so a frozen clip fails, and `clean` whether any part
 of a picture, or any frame, is garbled or corrupted (blocks of wrong color,
-noise, stripes, smears) or a frame flashes or jumps apart from its
+noise, stripes, smears), washed out until most of it is near white, or a frame flashes or jumps apart from its
 neighbors, so a broken decode fails even when it shows the right thing
 (#553). `os` runs a case only on that system: `make_video_mac_decode` is
 the regression case for Apple's video decode path, run with the media set
