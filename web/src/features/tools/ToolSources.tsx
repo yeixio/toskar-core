@@ -11,6 +11,7 @@ import { errorText, openSignIn, quoteArg, SOURCES_KEY, specSummary, splitArgs, s
 import { formatDate } from '@/i18n/format'
 import { LoadError } from '@/components/ui/LoadError'
 import { ShownError, shownError } from '@/components/ui/ShownError'
+import { Skeleton } from '@/components/ui/Skeleton'
 
 /**
  * Tool sources: MCP servers the person added. Each card says in plain words
@@ -56,6 +57,7 @@ export function ToolSources() {
         )}
       </div>
       {adding && <AddToolSource onClose={() => setAdding(false)} />}
+      {sources.isLoading && <Skeleton label={t('sources.title')} shape="rows" count={2} />}
       {sources.isError && !sources.data && (
         <LoadError error={sources.error} onRetry={() => void sources.refetch()} retrying={sources.isFetching} />
       )}
@@ -395,15 +397,19 @@ function Prompts({ source }: { source: MCPServer }) {
 function SourceLog({ id }: { id: string }) {
   const { t } = useTranslation('tools')
   const [open, setOpen] = useState(false)
-  const logs = useQuery({ queryKey: ['mcp-logs', id], queryFn: () => api.mcpServerLogs(id), enabled: open, refetchInterval: open ? 4000 : false })
+  const logs = useQuery({ queryKey: ['mcp-logs', id], queryFn: () => api.mcpServerLogs(id), enabled: open, refetchInterval: open ? 4000 : false, retry: false })
   return (
     <div className="space-y-1.5">
       <button type="button" className="label-caps hover:text-ink" aria-expanded={open} onClick={() => setOpen((v) => !v)}>
         {open ? '▾' : '▸'} {t('sources.log')}
       </button>
-      {open && (
+      {open && logs.isError && !logs.data ? (
+        <LoadError compact error={logs.error} onRetry={() => void logs.refetch()} retrying={logs.isFetching} />
+      ) : open && (
         <pre className="log-panel max-h-56 text-[11px]">
-          {(logs.data ?? []).length === 0
+          {logs.isLoading
+            ? '…'
+            : (logs.data ?? []).length === 0
             ? t('sources.logEmpty')
             : (logs.data ?? []).map((l) => `${formatDate(l.at, { timeStyle: 'medium' })}  ${l.level.padEnd(6)} ${l.text}`).join('\n')}
         </pre>

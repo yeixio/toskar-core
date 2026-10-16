@@ -44,6 +44,9 @@ export function KeyPermissions({ apiKey }: { apiKey: APIKeyRecord }) {
             onChange={(e) => change({ profile: e.target.value || undefined })}
           >
             <option value="">{t('permissions.anyProfile')}</option>
+            {current.profile && !(profiles.data ?? []).some((p) => p.id === current.profile) ? (
+              <option value={current.profile}>{current.profile}</option>
+            ) : null}
             {(profiles.data ?? []).map((p) => (
               <option key={p.id} value={p.id}>
                 {p.name}

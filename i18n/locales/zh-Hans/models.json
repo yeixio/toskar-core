@@ -168,7 +168,8 @@
     "searching": "正在搜索 Hugging Face…",
     "failed": "无法访问 Hugging Face。请检查网络后重试。",
     "install": "安装",
-    "installFailed": "安装失败"
+    "installFailed": "安装失败",
+    "none": "没有与此搜索匹配的模型。请换个词试试。"
   },
   "installedTab": {
     "empty": "还没有已安装的模型。从“发现”中安装后，它们会显示在这里。",

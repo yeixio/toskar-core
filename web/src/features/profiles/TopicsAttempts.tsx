@@ -5,6 +5,7 @@ import { formatDate } from '@/i18n/format'
 import { api } from '@/lib/api'
 import type { TopicActivity, TopicWhere } from '@/types/api'
 import { ShownError, shownError, type Shown } from '@/components/ui/ShownError'
+import { LoadError } from '@/components/ui/LoadError'
 
 const DAYS = 30
 
@@ -68,7 +69,11 @@ export function TopicsAttempts({ profileId }: { profileId: string }) {
     onError: (err) => setError(shownError(err)),
   })
   const data = activity.data
-  if (!data) return null
+  if (!data) {
+    return activity.isError ? (
+      <LoadError compact error={activity.error} onRetry={() => void activity.refetch()} retrying={activity.isFetching} />
+    ) : null
+  }
   const whereName = (w: TopicWhere) =>
     w.kind === 'automation' ? t('topics.attempts.where.automation') : t(`topics.attempts.where.${w.kind}`, { name: w.name || w.id || '?' })
   return (

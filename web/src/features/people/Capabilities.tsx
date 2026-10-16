@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { api } from '@/lib/api'
 import type { Capability, Person, Role } from '@/types/api'
 import { ShownError, shownError, type Shown } from '@/components/ui/ShownError'
+import { LoadError } from '@/components/ui/LoadError'
 
 /**
  * What people may use (#589): each role's capabilities, which Admins
@@ -34,7 +35,17 @@ export function RoleCapabilities({ actor }: { actor?: Role }) {
     },
     onError: (err) => setError(shownError(err)),
   })
-  if (!roles.data?.capabilities) return null
+  if (!roles.data?.capabilities) {
+    if (!roles.isError) return null
+    return (
+      <section className="card space-y-3" aria-labelledby="role-capabilities">
+        <h2 id="role-capabilities" className="section-title">
+          {t('capabilities.title')}
+        </h2>
+        <LoadError compact error={roles.error} onRetry={() => void roles.refetch()} retrying={roles.isFetching} />
+      </section>
+    )
+  }
   const { capabilities, roles: current, defaults } = roles.data
   return (
     <section className="card space-y-3" aria-labelledby="role-capabilities">
@@ -131,6 +142,19 @@ export function PersonCapabilities({ person }: { person: Person }) {
           </>
         ) : null}
       </summary>
+      {open && (caps.isError || roles.isError) ? (
+        <div className="mt-2">
+          <LoadError
+            compact
+            error={caps.error ?? roles.error}
+            onRetry={() => {
+              void caps.refetch()
+              void roles.refetch()
+            }}
+            retrying={caps.isFetching || roles.isFetching}
+          />
+        </div>
+      ) : null}
       {caps.data?.set && roles.data?.capabilities ? (
         <div className="mt-2 grid gap-x-4 gap-y-1.5 sm:grid-cols-2">
           {roles.data.capabilities.map((c) => {

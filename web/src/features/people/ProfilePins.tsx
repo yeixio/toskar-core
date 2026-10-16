@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { api } from '@/lib/api'
 import type { AIProfile, Person } from '@/types/api'
 import { ShownError, shownError, type Shown } from '@/components/ui/ShownError'
+import { LoadError } from '@/components/ui/LoadError'
 
 /**
  * Pinning profiles (#345): Admins keep Members and Visitors, or one
@@ -64,7 +65,18 @@ export function RolePins() {
     },
     onError: (err) => setError(shownError(err)),
   })
-  if (!pins.data) return null
+  // Not read: an Admin sees why; an older computer without pins has no section.
+  if (!pins.data) {
+    if (!pins.isError) return null
+    return (
+      <section className="card space-y-3" aria-labelledby="profile-pins">
+        <h2 id="profile-pins" className="section-title">
+          {t('pins.title')}
+        </h2>
+        <LoadError compact error={pins.error} onRetry={() => void pins.refetch()} retrying={pins.isFetching} />
+      </section>
+    )
+  }
   return (
     <section className="card space-y-3" aria-labelledby="profile-pins">
       <h2 id="profile-pins" className="section-title">

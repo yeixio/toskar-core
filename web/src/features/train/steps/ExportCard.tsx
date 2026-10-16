@@ -7,6 +7,7 @@ import type { SpecializedAIView } from '@/types/api'
 import { exportRevision } from '../display'
 import { ShownError, shownError } from '@/components/ui/ShownError'
 import { ReportProblem } from '@/components/ui/ReportProblem'
+import { LoadError } from '@/components/ui/LoadError'
 
 // ExportCard merges a revision into one GGUF file that other GGUF tools can
 // load without Yggdrasil.
@@ -31,7 +32,7 @@ export function ExportCard({ view }: { view: SpecializedAIView }) {
   if (revision === 0) return null
 
   const st = status.data
-  const error = start.error ?? remove.error ?? save.error ?? status.error
+  const error = start.error ?? remove.error ?? save.error
   return (
     <div className="card space-y-3">
       <h3 className="section-title">{t('export.title')}</h3>
@@ -85,6 +86,7 @@ export function ExportCard({ view }: { view: SpecializedAIView }) {
           <pre className="log-panel mt-2 whitespace-pre-wrap">{st.instructions}</pre>
         </details>
       )}
+      {status.isError && <LoadError compact error={status.error} onRetry={() => void status.refetch()} retrying={status.isFetching} />}
       {error && <ShownError {...shownError(error)} className="text-sm text-danger" />}
     </div>
   )

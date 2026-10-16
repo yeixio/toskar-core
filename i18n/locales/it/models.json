@@ -170,7 +170,8 @@
     "searching": "Ricerca su Hugging Face…",
     "failed": "Impossibile raggiungere Hugging Face. Controlla la rete e riprova.",
     "install": "Installa",
-    "installFailed": "Installazione non riuscita"
+    "installFailed": "Installazione non riuscita",
+    "none": "Nessun modello corrisponde a questa ricerca. Prova altre parole."
   },
   "installedTab": {
     "empty": "Ancora nessun modello installato. Installane uno da Scopri e comparirà qui.",

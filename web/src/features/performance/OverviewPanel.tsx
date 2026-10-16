@@ -208,7 +208,10 @@ export function OverviewPanel() {
         </ul>
       )}
 
-      {running.length === 0 && fleet.length > 0 && (
+      {runningQuery.isError && !runningQuery.data && (
+        <LoadError compact error={runningQuery.error} onRetry={() => void runningQuery.refetch()} retrying={runningQuery.isFetching} />
+      )}
+      {runningQuery.isSuccess && running.length === 0 && fleet.length > 0 && (
         <p className="text-sm text-ink-faint">
           <Trans
             t={t}

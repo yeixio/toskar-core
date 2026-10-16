@@ -313,7 +313,11 @@ function RecentCalls({ toolId }: { toolId: string }) {
   return (
     <div className="space-y-1">
       <p className="text-xs font-medium text-ink-muted">{t('calls.title')}</p>
-      {list.length === 0 ? (
+      {runs.isError ? (
+        <LoadError compact error={runs.error} onRetry={() => void runs.refetch()} retrying={runs.isFetching} />
+      ) : runs.isLoading ? (
+        <p className="text-xs text-ink-faint">…</p>
+      ) : list.length === 0 ? (
         <p className="text-xs text-ink-faint">{t('calls.none')}</p>
       ) : (
         <ul className="space-y-1 text-xs">

@@ -262,7 +262,19 @@ export function OnboardingPage() {
                 </dl>
               ) : (
                 !hardwareQuery.isLoading && (
-                  <p className="text-sm text-ink-muted">{t('hardware.unavailable')}</p>
+                  <p className="flex flex-wrap items-center gap-3 text-sm text-ink-muted">
+                    {t('hardware.unavailable')}
+                    {hardwareQuery.isError ? (
+                      <button
+                        type="button"
+                        className="font-medium text-primary hover:underline"
+                        disabled={hardwareQuery.isFetching}
+                        onClick={() => void hardwareQuery.refetch()}
+                      >
+                        {t('loadError.retry', { ns: 'common' })}
+                      </button>
+                    ) : null}
+                  </p>
                 )
               )}
             </div>

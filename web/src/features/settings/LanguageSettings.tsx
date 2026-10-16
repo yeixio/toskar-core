@@ -6,6 +6,7 @@ import { useUIStore } from '@/stores/uiStore'
 import { AssistantLanguage } from './AssistantLanguage'
 import { ReportProblem } from '@/components/ui/ReportProblem'
 import { shownError } from '@/components/ui/ShownError'
+import { LoadError } from '@/components/ui/LoadError'
 
 /** The App language (spec §7): System default, or a language from the catalog. */
 export function LanguageSettings() {
@@ -33,12 +34,15 @@ export function LanguageSettings() {
         <h2 className="section-title">{t('language.title')}</h2>
         <p className="mt-1 text-sm text-ink-muted">{t('language.description')}</p>
       </div>
+      {settings.isError ? (
+        <LoadError compact error={settings.error} onRetry={() => void settings.refetch()} retrying={settings.isFetching} />
+      ) : null}
       <label className="block text-sm">
         <span className="text-ink-muted">{t('language.appLanguage')}</span>
         <select
           className="field mt-1 w-full sm:w-80"
           value={saved}
-          disabled={settings.isPending || save.isPending}
+          disabled={!settings.data || save.isPending}
           onChange={(e) => save.mutate(e.target.value)}
         >
           <option value="">{t('language.systemDefault', { language: nameOf(systemLanguage) })}</option>

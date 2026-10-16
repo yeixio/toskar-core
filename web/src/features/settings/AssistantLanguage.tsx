@@ -6,6 +6,7 @@ import { api } from '@/lib/api'
 import type { AssistantLanguageMode } from '@/types/api'
 import { ReportProblem } from '@/components/ui/ReportProblem'
 import { shownError } from '@/components/ui/ShownError'
+import { LoadError } from '@/components/ui/LoadError'
 
 /**
  * The assistant language (multilingual spec §11, §30): the language answers
@@ -34,12 +35,15 @@ export function AssistantLanguage() {
 
   return (
     <div className="space-y-1">
+      {settings.isError ? (
+        <LoadError compact error={settings.error} onRetry={() => void settings.refetch()} retrying={settings.isFetching} />
+      ) : null}
       <label className="block text-sm">
         <span className="text-ink-muted">{t('language.assistantLanguage')}</span>
         <select
           className="field mt-1 w-full sm:w-80"
           value={value}
-          disabled={settings.isPending || save.isPending}
+          disabled={!settings.data || save.isPending}
           onChange={(e) => save.mutate(e.target.value)}
         >
           <option value=":auto">{t('language.assistantAuto')}</option>

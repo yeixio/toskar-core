@@ -169,7 +169,8 @@
     "searching": "Searching Hugging Face…",
     "failed": "Could not reach Hugging Face. Check your network and try again.",
     "install": "Install",
-    "installFailed": "Install failed"
+    "installFailed": "Install failed",
+    "none": "No models match that search. Try other words."
   },
   "installedTab": {
     "empty": "No installed models yet. Install from Discover, then they will appear here.",

@@ -4,7 +4,9 @@ import { useTranslation } from 'react-i18next'
 import i18n from '@/i18n'
 import { api } from '@/lib/api'
 import type { Connector } from '@/types/api'
-import { ShownError, shownError, shownOr, type Shown } from '@/components/ui/ShownError'
+import { ShownError, shownOr, type Shown } from '@/components/ui/ShownError'
+import { LoadError } from '@/components/ui/LoadError'
+import { Skeleton } from '@/components/ui/Skeleton'
 
 const KEY = ['connectors'] as const
 
@@ -24,7 +26,8 @@ export function ConnectedServices() {
         <h2 className="section-title">{t('title')}</h2>
         <p className="mt-1 text-sm text-ink-muted">{t('description')}</p>
       </div>
-      {query.isError && <ShownError {...shownError(query.error)} className="text-sm text-danger" />}
+      {query.isLoading && <Skeleton label={t('title')} shape="rows" count={2} />}
+      {query.isError && <LoadError compact error={query.error} onRetry={() => void query.refetch()} retrying={query.isFetching} />}
       {services.map((service) => (
         <ServiceRow key={service.id} service={service} />
       ))}

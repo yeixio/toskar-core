@@ -7,6 +7,7 @@ import { useRole } from '@/lib/role'
 import type { DevicePairing } from '@/types/api'
 import { clock, useCountdown } from './countdown'
 import { ShownError, shownError } from '@/components/ui/ShownError'
+import { LoadError } from '@/components/ui/LoadError'
 
 /** Toskar for iPhone on the App Store. */
 export const IPHONE_APP_URL = 'https://apps.apple.com/app/id6817062966'
@@ -98,9 +99,12 @@ export function ConnectPhone({ onClose }: { onClose: () => void }) {
 
       {!shown ? (
         <div className="space-y-3">
+          {settings.isError ? (
+            <LoadError compact error={settings.error} onRetry={() => void settings.refetch()} retrying={settings.isFetching} />
+          ) : null}
           {settings.data && !lanOn ? <p className="text-sm text-ink-muted">{admin ? t('phone.lanOff') : t('phone.lanOffAsk')}</p> : null}
           {admin || lanOn ? (
-            <button type="button" className="btn-primary" disabled={start.isPending || settings.isLoading} onClick={() => start.mutate()}>
+            <button type="button" className="btn-primary" disabled={start.isPending || !settings.data} onClick={() => start.mutate()}>
               {start.isPending ? t('phone.showing') : lanOn ? t('phone.show') : t('phone.allowAndShow')}
             </button>
           ) : null}

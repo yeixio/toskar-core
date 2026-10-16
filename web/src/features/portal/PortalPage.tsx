@@ -337,7 +337,11 @@ function PortalChat({ slug, view, onLeft }: { slug: string; view: PortalPageView
     <div className="flex min-h-0 flex-1 flex-col">
       <div className="min-h-0 flex-1 overflow-y-auto px-4 py-6">
         <div className="mx-auto flex w-full max-w-2xl flex-col gap-4">
-          {turns.length === 0 && restoreId && (mine.isLoading || history.isLoading) ? null : turns.length === 0 ? (
+          {turns.length === 0 && restoreId && (mine.isLoading || history.isLoading) ? (
+            <div className="flex justify-center py-10" role="status" aria-busy="true">
+              <span className="inline-block h-6 w-6 animate-spin rounded-full border-2 border-line border-t-primary" />
+            </div>
+          ) : turns.length === 0 ? (
             <div className="space-y-4 py-10 text-center">
               <p className="text-ink-muted">{text(branding.welcome, t('welcome', { name: view.name }), 1000)}</p>
               {suggestions.length > 0 ? (

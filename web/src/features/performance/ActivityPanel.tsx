@@ -21,6 +21,7 @@ import {
 import { LoadError } from '@/components/ui/LoadError'
 import { Skeleton } from '@/components/ui/Skeleton'
 import { RanOnTag } from './RanOnTag'
+import { Link } from 'react-router-dom'
 
 function SummaryCard({ label, value }: { label: string; value: string }) {
   return (
@@ -367,6 +368,11 @@ export function ActivityPanel() {
         <EmptyState
           title={t('activity.emptyTitle')}
           description={t('activity.emptyDescription')}
+          action={
+            <Link to="/chat" className="btn-primary">
+              {t('nav.chat', { ns: 'common' })}
+            </Link>
+          }
         />
       )}
 

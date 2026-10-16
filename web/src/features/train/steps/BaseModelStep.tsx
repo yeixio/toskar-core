@@ -6,12 +6,14 @@ import { formatBytes } from '@/lib/format'
 import type { SpecializedAIView } from '@/types/api'
 import { fitLabel, fitTone } from '../display'
 import { ShownError, shownError } from '@/components/ui/ShownError'
+import { LoadError } from '@/components/ui/LoadError'
+import { Skeleton } from '@/components/ui/Skeleton'
 
 export function BaseModelStep({ view, onNext }: { view: SpecializedAIView; onNext: () => void }) {
   const { t } = useTranslation('train')
   const queryClient = useQueryClient()
   const goal = `${view.name}. ${view.goal}`
-  const choices = useQuery({ queryKey: ['training', 'bases', goal], queryFn: () => api.baseModels(goal) })
+  const choices = useQuery({ queryKey: ['training', 'bases', goal], queryFn: () => api.baseModels(goal), retry: false })
   const choose = useMutation({
     mutationFn: (modelID: string) => api.updateAI(view.id, { base_model_id: modelID }),
     onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['training'] }),
@@ -23,8 +25,9 @@ export function BaseModelStep({ view, onNext }: { view: SpecializedAIView; onNex
         <h3 className="section-title">{t('base.title')}</h3>
         <p className="mt-1 text-sm text-ink-muted">{t('base.description')}</p>
       </div>
-      {choices.isLoading && <p className="text-sm text-ink-muted">{t('base.checking')}</p>}
-      {choices.error && <ShownError {...shownError(choices.error)} className="text-sm text-danger" />}
+      {choices.isLoading && <Skeleton label={t('base.checking')} shape="rows" count={3} />}
+      {choices.isError && <LoadError compact error={choices.error} onRetry={() => void choices.refetch()} retrying={choices.isFetching} />}
+      {choices.isSuccess && (choices.data ?? []).length === 0 && <p className="text-sm text-ink-muted">{t('base.none')}</p>}
       <ul className="space-y-2">
         {(choices.data ?? []).map((c) => {
           const selected = c.model_id === view.base_model_id

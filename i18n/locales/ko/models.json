@@ -168,7 +168,8 @@
     "searching": "Hugging Face 검색하는 중…",
     "failed": "Hugging Face에 연결할 수 없어요. 네트워크를 확인하고 다시 시도하세요.",
     "install": "설치",
-    "installFailed": "설치 실패"
+    "installFailed": "설치 실패",
+    "none": "검색과 일치하는 모델이 없습니다. 다른 단어로 검색해 보세요."
   },
   "installedTab": {
     "empty": "아직 설치된 모델이 없어요. 찾아보기에서 설치하면 여기에 표시돼요.",

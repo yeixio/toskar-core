@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next'
 import { ConnectPhone } from '@/features/nodes/ConnectPhone'
 import { formatDate } from '@/i18n/format'
 import { api } from '@/lib/api'
+import { LoadError } from '@/components/ui/LoadError'
+import { Skeleton } from '@/components/ui/Skeleton'
 
 /**
  * Settings → Your devices (#206): the phones, tablets, and TVs connected as
@@ -18,7 +20,6 @@ export function YourDevices() {
     mutationFn: (id: string) => api.disconnectMyDevice(id),
     onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['my-devices'] }),
   })
-  if (devices.isError) return null
   const list = devices.data ?? []
 
   return (
@@ -37,6 +38,10 @@ export function YourDevices() {
             </button>
           ) : null}
         </div>
+        {devices.isLoading ? <Skeleton label={t('devices.title')} shape="rows" count={2} /> : null}
+        {devices.isError ? (
+          <LoadError compact error={devices.error} onRetry={() => void devices.refetch()} retrying={devices.isFetching} />
+        ) : null}
         {devices.isSuccess && list.length === 0 ? <p className="text-sm text-ink-faint">{t('devices.none')}</p> : null}
         {list.length > 0 ? (
           <ul className="divide-y divide-line">

@@ -179,7 +179,8 @@
     "memory": " · training needs about {{size}}",
     "download": " · downloads {{size}} once",
     "notInstalled": "{{model}} is not installed. Training works without it, but you need it to test and use the result. <go>Install it from Models</go>.",
-    "continue": "Continue"
+    "continue": "Continue",
+    "none": "No base model can train on this computer. Pair a computer with more memory to train here."
   },
   "material": {
     "add": "Add material",

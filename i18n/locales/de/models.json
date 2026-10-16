@@ -169,7 +169,8 @@
     "searching": "Hugging Face wird durchsucht …",
     "failed": "Hugging Face ist nicht erreichbar. Prüfe dein Netzwerk und versuche es erneut.",
     "install": "Installieren",
-    "installFailed": "Installation fehlgeschlagen"
+    "installFailed": "Installation fehlgeschlagen",
+    "none": "Keine Modelle passen zu dieser Suche. Versuche andere Wörter."
   },
   "installedTab": {
     "empty": "Noch keine Modelle installiert. Installiere welche unter „Entdecken“, dann erscheinen sie hier.",

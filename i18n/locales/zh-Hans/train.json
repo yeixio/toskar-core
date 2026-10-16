@@ -179,7 +179,8 @@
     "memory": " · 训练约需 {{size}}",
     "download": " · 需一次性下载 {{size}}",
     "notInstalled": "{{model}} 尚未安装。没有它也能训练，但测试和使用训练结果需要它。<go>从“模型”中安装</go>。",
-    "continue": "继续"
+    "continue": "继续",
+    "none": "这台电脑无法训练任何基础模型。请配对一台内存更大的电脑来训练。"
   },
   "material": {
     "add": "添加素材",

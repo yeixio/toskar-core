@@ -179,7 +179,8 @@
     "memory": " · l'addestramento richiede circa {{size}}",
     "download": " · scarica {{size}} una sola volta",
     "notInstalled": "{{model}} non è installato. L'addestramento funziona anche senza, ma ti serve per provare e usare il risultato. <go>Installalo da Modelli</go>.",
-    "continue": "Continua"
+    "continue": "Continua",
+    "none": "Nessun modello base può essere addestrato su questo computer. Abbina un computer con più memoria per addestrare qui."
   },
   "material": {
     "add": "Aggiungi materiale",

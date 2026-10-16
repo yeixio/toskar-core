@@ -109,7 +109,9 @@ export function TrainPage() {
           ) : selectedID && viewQuery.data ? (
             <Workspace key={selectedID} view={viewQuery.data} onDeleted={() => select(null)} />
           ) : selectedID && viewQuery.isLoading ? (
-            <p className="text-sm text-ink-muted">{t('page.loading')}</p>
+            <div className="card">
+              <Skeleton label={t('page.loading')} shape="rows" count={4} />
+            </div>
           ) : selectedID && viewQuery.isError ? (
             <LoadError error={viewQuery.error} onRetry={() => void viewQuery.refetch()} retrying={viewQuery.isFetching} />
           ) : (

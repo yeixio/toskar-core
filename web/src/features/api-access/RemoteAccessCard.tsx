@@ -7,6 +7,7 @@ import { formatRelativeTime } from '@/i18n/format'
 import { Toggle } from './Toggle'
 import { remoteDetails } from './remoteDetails'
 import { ShownError, shownError, type Shown } from '@/components/ui/ShownError'
+import { LoadError } from '@/components/ui/LoadError'
 
 /**
  * Access from anywhere (#456, docs/remote-access.md): a listener for the
@@ -58,6 +59,17 @@ export function RemoteAccessCard() {
           onChange={() => save.mutate({ remote_access_enabled: !enabled })}
         />
       </div>
+      {settings.isError || (status.isError && !status.data) ? (
+        <LoadError
+          compact
+          error={settings.error ?? status.error}
+          onRetry={() => {
+            void settings.refetch()
+            void status.refetch()
+          }}
+          retrying={settings.isFetching || status.isFetching}
+        />
+      ) : null}
       {st?.others?.length ? <OtherToskars others={st.others} /> : null}
       {enabled && st ? <OutsideCheck status={st} saving={save.isPending} onSave={(patch) => save.mutate(patch)} /> : null}
       <label className="flex items-center gap-2 text-sm">

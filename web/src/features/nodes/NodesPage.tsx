@@ -74,6 +74,7 @@ function ComputerCard({
   node,
   runningCount,
   installedModels,
+  modelsUnknown,
   claimCode,
   onClaimCode,
   onPair,
@@ -88,6 +89,8 @@ function ComputerCard({
   node: Node
   runningCount: number
   installedModels: Model[]
+  /** The model list couldn't be read yet: don't say there are none (#217). */
+  modelsUnknown?: boolean
   claimCode: string
   onClaimCode: (code: string) => void
   onPair: () => void
@@ -245,7 +248,9 @@ function ComputerCard({
                 ? t('card.modelsHereCount', { count: installedModels.length })
                 : t('card.modelsHere')}
             </p>
-            {installedModels.length === 0 ? (
+            {installedModels.length === 0 && modelsUnknown ? (
+              <p className="mt-1 text-xs text-ink-faint">…</p>
+            ) : installedModels.length === 0 ? (
               <p className="mt-1 text-xs text-ink-faint">{t('card.noModels')}</p>
             ) : (
               <ul className="mt-2 space-y-1.5">
@@ -807,6 +812,7 @@ export function NodesPage() {
                   node={node}
                   runningCount={runningByNode.get(node.id) ?? 0}
                   installedModels={modelsOnNode(models, node.id)}
+                  modelsUnknown={!modelsQuery.isSuccess}
                   claimCode={claimCodes[node.id] ?? ''}
                   onClaimCode={(code) =>
                     setClaimCodes((prev) => ({ ...prev, [node.id]: code }))

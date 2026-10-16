@@ -11,7 +11,9 @@ import type {
   QuietHours,
 } from '@/types/api'
 import { CATEGORIES, categoryLabel } from './notificationLabels'
-import { ShownError, shownError, shownOr, type Shown } from '@/components/ui/ShownError'
+import { ShownError, shownOr, type Shown } from '@/components/ui/ShownError'
+import { LoadError } from '@/components/ui/LoadError'
+import { Skeleton } from '@/components/ui/Skeleton'
 
 const KEY = ['notification-destinations'] as const
 
@@ -43,7 +45,8 @@ export function NotificationDestinations() {
         <h2 className="section-title">{t('destinations.title')}</h2>
         <p className="mt-1 text-sm text-ink-muted">{t('destinations.description')}</p>
       </div>
-      {query.isError && <ShownError {...shownError(query.error)} className="text-sm text-danger" />}
+      {query.isLoading && <Skeleton label={t('destinations.title')} shape="rows" count={2} />}
+      {query.isError && <LoadError compact error={query.error} onRetry={() => void query.refetch()} retrying={query.isFetching} />}
       {destinations.map((d) => (
         <DestinationRow key={d.id} destination={d} />
       ))}
@@ -403,7 +406,9 @@ function QuietHoursForm() {
     },
     onError: (err) => setError(errorOf(err)),
   })
-  if (!q) return null
+  if (!q) {
+    return query.isError ? <LoadError compact error={query.error} onRetry={() => void query.refetch()} retrying={query.isFetching} /> : null
+  }
   const update = (patch: Partial<QuietHours>) => {
     const next = { ...q, ...patch }
     setQ(next)

@@ -16,6 +16,8 @@ import { preopenSignInWindow } from '@/lib/desktopBridge'
 import { linesToMap, openSignIn, SOURCES_KEY, specSummary, splitArgs } from './mcpShared'
 import { rovingKeyDown } from '@/lib/roving'
 import { ShownError, shownError } from '@/components/ui/ShownError'
+import { LoadError } from '@/components/ui/LoadError'
+import { Skeleton } from '@/components/ui/Skeleton'
 
 // The tabs, in order; each is tools:add.tabs.<id> in the catalog.
 const TABS = ['gallery', 'paste', 'apps', 'custom'] as const
@@ -158,10 +160,10 @@ function GalleryTab({ onAdded }: { onAdded: (a: MCPAdded) => void }) {
   }, [gallery.data])
 
   if (chosen) return <GallerySetup entry={chosen} onBack={() => setChosen(null)} onAdded={onAdded} />
-  if (gallery.isError) return <ShownError {...shownError(gallery.error)} className="text-sm text-danger" />
+  if (gallery.isError) return <LoadError compact error={gallery.error} onRetry={() => void gallery.refetch()} retrying={gallery.isFetching} />
   return (
     <div className="space-y-4">
-      {gallery.isLoading && <p className="text-sm text-ink-muted">{t('add.loadingGallery')}</p>}
+      {gallery.isLoading && <Skeleton label={t('add.loadingGallery')} shape="cards" count={3} />}
       {groups.map(([category, entries]) => (
         <div key={category} className="space-y-2">
           <p className="label-caps">{category}</p>
@@ -405,7 +407,7 @@ function AppsTab({ onAdded }: { onAdded: (a: MCPAdded) => void }) {
     return [...out.entries()]
   }, [found.data])
   if (found.isLoading) return <p className="text-sm text-ink-muted">{t('add.lookingApps')}</p>
-  if (found.isError) return <ShownError {...shownError(found.error)} className="text-sm text-danger" />
+  if (found.isError) return <LoadError compact error={found.error} onRetry={() => void found.refetch()} retrying={found.isFetching} />
   if (groups.length === 0) {
     return (
       <p className="text-sm text-ink-muted">{t('add.noneFound')}</p>

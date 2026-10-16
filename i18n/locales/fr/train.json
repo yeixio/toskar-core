@@ -179,7 +179,8 @@
     "memory": " · l'entraînement nécessite environ {{size}}",
     "download": " · télécharge {{size}} une seule fois",
     "notInstalled": "{{model}} n'est pas installé. L'entraînement fonctionne sans lui, mais vous en aurez besoin pour tester et utiliser le résultat. <go>Installez-le depuis Modèles</go>.",
-    "continue": "Continuer"
+    "continue": "Continuer",
+    "none": "Aucun modèle de base ne peut s’entraîner sur cet ordinateur. Associez un ordinateur avec plus de mémoire pour entraîner ici."
   },
   "material": {
     "add": "Ajouter du matériel",

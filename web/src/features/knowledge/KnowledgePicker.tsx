@@ -4,6 +4,7 @@ import { Trans, useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { api } from '@/lib/api'
 import { ShownError, shownError } from '@/components/ui/ShownError'
+import { LoadError } from '@/components/ui/LoadError'
 
 /**
  * Chooses which Mimir sources a profile or specialized AI searches. It can
@@ -20,7 +21,7 @@ export function KnowledgePicker({
 }) {
   const { t } = useTranslation('knowledge')
   const queryClient = useQueryClient()
-  const sources = useQuery({ queryKey: ['knowledge'], queryFn: () => api.listKnowledge() })
+  const sources = useQuery({ queryKey: ['knowledge'], queryFn: () => api.listKnowledge(), retry: false })
   const [path, setPath] = useState('')
   const connect = useMutation({
     mutationFn: () => api.createKnowledge({ kind: 'path', path }),
@@ -37,7 +38,12 @@ export function KnowledgePicker({
 
   return (
     <div className="space-y-2">
-      {attached.length === 0 ? (
+      {/* Unread sources aren't "none attached" (#217). */}
+      {sources.isError ? (
+        <LoadError compact error={sources.error} onRetry={() => void sources.refetch()} retrying={sources.isFetching} />
+      ) : sources.isLoading && selected.length > 0 ? (
+        <p className="text-sm text-ink-faint">…</p>
+      ) : attached.length === 0 ? (
         <p className="text-sm text-ink-muted">{t('picker.none')}</p>
       ) : (
         <ul className="space-y-1">

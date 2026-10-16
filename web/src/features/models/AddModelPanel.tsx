@@ -8,6 +8,7 @@ import { formatSize } from '@/i18n/format'
 import { rovingKeyDown } from '@/lib/roving'
 import type { BenchmarkJob, FoundModel, ModelImportResult } from '@/types/api'
 import { ShownError, shownError } from '@/components/ui/ShownError'
+import { LoadError } from '@/components/ui/LoadError'
 
 type Way = 'file' | 'apps' | 'link'
 
@@ -379,6 +380,7 @@ function FromApps({ onAdded }: { onAdded: (r: ModelImportResult | null, name?: s
   })
   const list = found.data?.models ?? []
   if (found.isLoading) return <LoadingSpinner label={t('add.apps.looking')} />
+  if (found.isError) return <LoadError compact error={found.error} onRetry={() => void found.refetch()} retrying={found.isFetching} />
   return (
     <div className="space-y-3">
       <p className="text-sm text-ink-muted">{t('add.apps.description')}</p>
@@ -410,7 +412,6 @@ function FromApps({ onAdded }: { onAdded: (r: ModelImportResult | null, name?: s
           ))}
         </ul>
       )}
-      {found.isError ? <ShownError {...shownError(found.error)} className="text-sm text-danger" /> : null}
       {add.isError ? <ShownError {...shownError(add.error)} className="text-sm text-danger" /> : null}
     </div>
   )

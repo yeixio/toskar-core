@@ -59,7 +59,10 @@ export function BrowseAllPanel({
         className="flex flex-wrap gap-2"
         onSubmit={(e) => {
           e.preventDefault()
-          setSubmitted(query.trim() || 'gguf')
+          const next = query.trim() || 'gguf'
+          // The same search again asks again, as after a failure.
+          if (next === submitted) void browseQuery.refetch()
+          setSubmitted(next)
         }}
       >
         <input
@@ -75,10 +78,21 @@ export function BrowseAllPanel({
 
       {browseQuery.isLoading && <LoadingSpinner label={t('browse.searching')} />}
       {browseQuery.isError && (
-        <p className="text-sm text-danger">{t('browse.failed')}</p>
+        <p className="flex flex-wrap items-center gap-3 text-sm text-danger" role="alert">
+          {t('browse.failed')}
+          <button
+            type="button"
+            className="font-medium text-primary hover:underline"
+            disabled={browseQuery.isFetching}
+            onClick={() => void browseQuery.refetch()}
+          >
+            {t('loadError.retry', { ns: 'common' })}
+          </button>
+        </p>
       )}
+      {browseQuery.isSuccess && (browseQuery.data ?? []).length === 0 && <p className="text-sm text-ink-muted">{t('browse.none')}</p>}
 
-      <ul className="divide-y divide-line rounded-xl border border-line">
+      <ul className={(browseQuery.data ?? []).length > 0 ? 'divide-y divide-line rounded-xl border border-line' : 'hidden'}>
         {(browseQuery.data ?? []).map((item) => (
           <li
             key={item.id}

@@ -3,6 +3,7 @@ import { useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { api } from '@/lib/api'
 import { ShownError, shownError, type Shown } from '@/components/ui/ShownError'
+import { LoadError } from '@/components/ui/LoadError'
 
 const KEY = ['external-server']
 
@@ -45,6 +46,9 @@ export function ExternalServer() {
         </h2>
         <p className="mt-1 text-sm text-ink-muted">{t('external.description')}</p>
       </div>
+      {server.isError ? (
+        <LoadError compact error={server.error} onRetry={() => void server.refetch()} retrying={server.isFetching} />
+      ) : null}
       <form className="space-y-3" onSubmit={submit}>
         <label className="block text-sm">
           <span className="text-ink-muted">{t('external.url')}</span>
@@ -62,7 +66,7 @@ export function ExternalServer() {
           />
         </label>
         <div className="flex flex-wrap gap-2">
-          <button type="submit" className="btn-primary px-3 py-1.5 text-xs" disabled={save.isPending}>
+          <button type="submit" className="btn-primary px-3 py-1.5 text-xs" disabled={save.isPending || !server.isSuccess}>
             {save.isPending ? t('external.saving') : t('external.save')}
           </button>
           {data?.has_key ? (

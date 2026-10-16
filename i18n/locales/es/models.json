@@ -170,7 +170,8 @@
     "searching": "Buscando en Hugging Face…",
     "failed": "No se pudo acceder a Hugging Face. Revisa tu conexión de red y vuelve a intentarlo.",
     "install": "Instalar",
-    "installFailed": "Falló la instalación"
+    "installFailed": "Falló la instalación",
+    "none": "Ningún modelo coincide con esa búsqueda. Prueba otras palabras."
   },
   "installedTab": {
     "empty": "Todavía no hay modelos instalados. Instálalos desde Descubrir y aparecerán aquí.",

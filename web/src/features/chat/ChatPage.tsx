@@ -1724,6 +1724,10 @@ export function ChatPage() {
                     disabled={isSending || updateConversation.isPending}
                     onChange={(event) => setProfile(event.target.value)}
                   >
+                    {/* Kept when the profiles couldn't be read, so the select isn't empty (#217). */}
+                    {profileIdForChat && !sortedProfiles.some((p: AIProfile) => p.id === profileIdForChat) ? (
+                      <option value={profileIdForChat}>{profileIdForChat}</option>
+                    ) : null}
                     {sortedProfiles.map((profile: AIProfile) => (
                       <option key={profile.id} value={profile.id}>
                         {profile.name}

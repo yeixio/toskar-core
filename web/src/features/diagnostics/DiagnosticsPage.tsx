@@ -21,6 +21,7 @@ import { FirstAnswersPanel } from './FirstAnswersPanel'
 import { GPUSetupList } from './GPUSetupList'
 import { ReportProblem } from '@/components/ui/ReportProblem'
 import { shownError } from '@/components/ui/ShownError'
+import { LoadError } from '@/components/ui/LoadError'
 
 function kindLabel(kind: string, advanced: boolean): string {
   const known = kind === 'daemon' || kind === 'runtime'
@@ -642,7 +643,12 @@ export function DiagnosticsPage() {
               </label>
             </div>
             {logsQuery.isLoading && <LoadingSpinner label={t('logs.loading')} />}
-            {!logsQuery.isLoading && logEntries.length === 0 && (
+            {logsQuery.isError && (
+              <div className="mt-3">
+                <LoadError compact error={logsQuery.error} onRetry={() => void logsQuery.refetch()} retrying={logsQuery.isFetching} />
+              </div>
+            )}
+            {logsQuery.isSuccess && logEntries.length === 0 && (
               <p className="mt-3 text-sm text-ink-muted">{t('logs.none')}</p>
             )}
             <ul className="mt-3 min-h-0 flex-1 space-y-1 overflow-y-auto overflow-x-hidden">
@@ -700,7 +706,17 @@ export function DiagnosticsPage() {
 
                 {logQuery.isLoading && <LoadingSpinner label={t('logs.reading')} />}
                 {logQuery.isError && (
-                  <p className="text-sm text-danger">{t('logs.readFailed')}</p>
+                  <p className="flex flex-wrap items-center gap-3 text-sm text-danger" role="alert">
+                    {t('logs.readFailed')}
+                    <button
+                      type="button"
+                      className="font-medium text-primary hover:underline"
+                      disabled={logQuery.isFetching}
+                      onClick={() => void logQuery.refetch()}
+                    >
+                      {t('loadError.retry', { ns: 'common' })}
+                    </button>
+                  </p>
                 )}
                 {logQuery.data && (
                   <pre className="log-panel flex-1">{logQuery.data.content || t('logs.empty')}</pre>
@@ -720,12 +736,17 @@ function ToolActivityPanel() {
     queryKey: ['tool-activity'],
     queryFn: () => api.toolActivity(),
     refetchInterval: 5000,
+    retry: false,
   })
   const rows = [...(activityQuery.data ?? [])].reverse().slice(0, 12)
   return (
     <section className="card space-y-2">
       <h2 className="section-title">{t('tools.title')}</h2>
-      {rows.length === 0 ? (
+      {activityQuery.isError && !activityQuery.data ? (
+        <LoadError compact error={activityQuery.error} onRetry={() => void activityQuery.refetch()} retrying={activityQuery.isFetching} />
+      ) : activityQuery.isLoading ? (
+        <p className="text-sm text-ink-faint">…</p>
+      ) : rows.length === 0 ? (
         <p className="text-sm text-ink-muted">{t('tools.none')}</p>
       ) : (
         <ul className="space-y-1 text-xs text-ink-muted">

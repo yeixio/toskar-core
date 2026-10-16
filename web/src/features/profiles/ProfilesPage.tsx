@@ -798,6 +798,10 @@ function AdvancedEditor({
                         onChange={(e) => updateRole(index, { model_id: e.target.value })}
                       >
                         <option value="">{t('editor.automatic')}</option>
+                        {/* Kept when the model list couldn't be read, so the choice still shows (#217). */}
+                        {role.model_id && !installedModels.some((m) => m.id === role.model_id) ? (
+                          <option value={role.model_id}>{role.model_id}</option>
+                        ) : null}
                         {installedModels.map((m) => (
                           <option key={m.id} value={m.id}>
                             {m.name || m.id}
@@ -847,6 +851,9 @@ function AdvancedEditor({
                     onChange={(e) => setFallback(i, e.target.value)}
                   >
                     <option value="">{t('editor.none')}</option>
+                    {fallbacks[i] && !installedModels.some((m) => m.id === fallbacks[i]) ? (
+                      <option value={fallbacks[i]}>{fallbacks[i]}</option>
+                    ) : null}
                     {installedModels.map((m) => (
                       <option key={m.id} value={m.id}>
                         {m.name || m.id}

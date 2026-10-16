@@ -8,6 +8,7 @@ import { ConceptCards } from '../ConceptCards'
 import { SampleFiles } from '../SampleFiles'
 import { MATERIAL_USES, materialUseDescription, materialUseLabel } from '../display'
 import { ShownError, shownError } from '@/components/ui/ShownError'
+import { LoadError } from '@/components/ui/LoadError'
 
 
 export function UseBadge({ use }: { use: MaterialUse }) {
@@ -191,7 +192,7 @@ function AddFile({ aiID }: { aiID: string }) {
 function AddChats({ aiID }: { aiID: string }) {
   const { t } = useTranslation('train')
   const queryClient = useQueryClient()
-  const conversations = useQuery({ queryKey: ['conversations'], queryFn: () => api.getConversations() })
+  const conversations = useQuery({ queryKey: ['conversations'], queryFn: () => api.getConversations(), retry: false })
   const [picked, setPicked] = useState<string[]>([])
   const add = useMutation({
     mutationFn: () => api.addConversations(aiID, picked),
@@ -204,7 +205,10 @@ function AddChats({ aiID }: { aiID: string }) {
   return (
     <div className="space-y-3">
       <p className="text-sm text-ink-muted">{t('material.chatsHint')}</p>
-      {list.length === 0 && <p className="text-sm text-ink-faint">{t('material.noChats')}</p>}
+      {conversations.isError && (
+        <LoadError compact error={conversations.error} onRetry={() => void conversations.refetch()} retrying={conversations.isFetching} />
+      )}
+      {conversations.isSuccess && list.length === 0 && <p className="text-sm text-ink-faint">{t('material.noChats')}</p>}
       <ul className="max-h-64 space-y-1 overflow-y-auto">
         {list.map((c) => (
           <li key={c.id}>

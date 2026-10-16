@@ -179,7 +179,8 @@
     "memory": " · Training braucht etwa {{size}}",
     "download": " · lädt einmalig {{size}}",
     "notInstalled": "{{model}} ist nicht installiert. Das Training funktioniert ohne, aber zum Testen und Nutzen des Ergebnisses brauchst du es. <go>Unter „Modelle“ installieren</go>.",
-    "continue": "Weiter"
+    "continue": "Weiter",
+    "none": "Auf diesem Computer kann kein Basismodell trainiert werden. Verbinde einen Computer mit mehr Speicher, um hier zu trainieren."
   },
   "material": {
     "add": "Material hinzufügen",

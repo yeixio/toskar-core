@@ -170,7 +170,8 @@
     "searching": "Recherche sur Hugging Face…",
     "failed": "Impossible de joindre Hugging Face. Vérifiez votre réseau et réessayez.",
     "install": "Installer",
-    "installFailed": "Échec de l'installation"
+    "installFailed": "Échec de l'installation",
+    "none": "Aucun modèle ne correspond à cette recherche. Essayez d’autres mots."
   },
   "installedTab": {
     "empty": "Aucun modèle installé pour l'instant. Installez-en depuis Découvrir, ils apparaîtront ici.",

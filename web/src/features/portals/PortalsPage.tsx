@@ -177,7 +177,7 @@ function InvitedVisitors({ portal }: { portal: Portal }) {
   const [name, setName] = useState('')
   const [shown, setShown] = useState<{ name: string; url: string; expires: string } | null>(null)
   const [copied, setCopied] = useState(false)
-  const visitors = useQuery({ queryKey: ['portal-visitors', portal.id], queryFn: () => api.listPortalVisitors(portal.id) })
+  const visitors = useQuery({ queryKey: ['portal-visitors', portal.id], queryFn: () => api.listPortalVisitors(portal.id), retry: false })
   const refresh = () => void queryClient.invalidateQueries({ queryKey: ['portal-visitors', portal.id] })
   const show = (who: string, link: PortalVisitorLink | null) => {
     if (!link) return
@@ -235,6 +235,10 @@ function InvitedVisitors({ portal }: { portal: Portal }) {
         </div>
       ) : null}
       {error ? <ShownError {...shownError(error)} className="text-xs text-danger" /> : null}
+      {visitors.isError ? (
+        <LoadError compact error={visitors.error} onRetry={() => void visitors.refetch()} retrying={visitors.isFetching} />
+      ) : null}
+      {visitors.isLoading ? <p className="text-xs text-ink-faint">…</p> : null}
       {visitors.isSuccess && (visitors.data ?? []).length === 0 ? <p className="text-xs text-ink-faint">{t('visitors.none')}</p> : null}
       <ul className="divide-y divide-line">
         {(visitors.data ?? []).map((v) => (
@@ -379,6 +383,8 @@ function PortalEditor({ portal, onClose }: { portal: Portal; onClose: () => void
               <span className={label}>{t('field.profile')}</span>
               <select className="field w-full" value={profileId} onChange={(e) => setProfileId(e.target.value)}>
                 <option value="">{t('field.defaultProfile')}</option>
+                {/* Kept when the profiles couldn't be read, so the choice still shows (#217). */}
+                {profileId && !(profiles.data ?? []).some((p) => p.id === profileId) ? <option value={profileId}>{profileId}</option> : null}
                 {(profiles.data ?? []).map((p) => (
                   <option key={p.id} value={p.id}>
                     {p.name}
@@ -563,11 +569,12 @@ function PortalEditor({ portal, onClose }: { portal: Portal; onClose: () => void
 function PortalConversations({ portal }: { portal: Portal }) {
   const { t } = useTranslation('portals')
   const [open, setOpen] = useState<string | null>(null)
-  const list = useQuery({ queryKey: ['portal-conversations', portal.id], queryFn: () => api.listPortalConversations(portal.id) })
+  const list = useQuery({ queryKey: ['portal-conversations', portal.id], queryFn: () => api.listPortalConversations(portal.id), retry: false })
   const messages = useQuery({
     queryKey: ['portal-messages-admin', portal.id, open],
     queryFn: () => api.getPortalMessages(portal.id, open ?? ''),
     enabled: open !== null,
+    retry: false,
   })
   const items = list.data ?? []
   return (
@@ -575,6 +582,8 @@ function PortalConversations({ portal }: { portal: Portal }) {
       <p className="text-xs text-ink-faint">
         {portal.access === 'members' ? t('conversations.members') : t('conversations.hint')}
       </p>
+      {list.isError ? <LoadError compact error={list.error} onRetry={() => void list.refetch()} retrying={list.isFetching} /> : null}
+      {list.isLoading ? <p className="text-sm text-ink-faint">…</p> : null}
       {list.isSuccess && items.length === 0 ? <p className="text-sm text-ink-faint">{t('conversations.none')}</p> : null}
       <ul className="divide-y divide-line">
         {items.map((c) => (
@@ -592,6 +601,10 @@ function PortalConversations({ portal }: { portal: Portal }) {
             </button>
             {open === c.id ? (
               <div className="mt-2 space-y-2 rounded-md bg-ink/5 p-2">
+                {messages.isLoading ? <p className="text-sm text-ink-faint">…</p> : null}
+                {messages.isError ? (
+                  <LoadError compact error={messages.error} onRetry={() => void messages.refetch()} retrying={messages.isFetching} />
+                ) : null}
                 {(messages.data ?? []).map((m, i) => (
                   <div key={i} className={m.role === 'user' ? 'text-sm text-ink' : 'text-sm text-ink-muted'}>
                     <span className="label-caps me-2">{m.role === 'user' ? c.visitor : t('conversations.assistant')}</span>

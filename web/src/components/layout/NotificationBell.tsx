@@ -9,6 +9,7 @@ import { subscribeEvents } from '@/lib/events'
 import type { AppNotification, NotificationCategory, NotificationList } from '@/types/api'
 import { CATEGORIES, categoryLabel, deliveryNote, noticeText } from '@/features/settings/notificationLabels'
 import { formatDate, formatRelativeTime } from '@/i18n/format'
+import { LoadError } from '@/components/ui/LoadError'
 
 const KEY = ['notifications'] as const
 const WIDTH = 352
@@ -193,11 +194,17 @@ export function NotificationBell() {
               </div>
             )}
             <ul className="min-h-0 flex-1 overflow-y-auto">
-              {notifications.length === 0 && (
+              {query.isError && !query.data ? (
+                <li className="px-4 py-6">
+                  <LoadError compact error={query.error} onRetry={() => void query.refetch()} retrying={query.isFetching} />
+                </li>
+              ) : query.isLoading ? (
+                <li className="px-4 py-8 text-center text-sm text-ink-faint">…</li>
+              ) : notifications.length === 0 ? (
                 <li className="px-4 py-8 text-center text-sm text-ink-faint">
                   {t('bell.empty')}
                 </li>
-              )}
+              ) : null}
               {notifications.map((n) => {
                 const text = noticeText(n)
                 return (

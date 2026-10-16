@@ -577,6 +577,12 @@ export function BenchmarkPanel() {
         <BenchmarkResults job={activeJob} workloads={workloads} models={models} />
       )}
 
+      {jobsQuery.isError && !jobsQuery.data && (
+        <section className="card space-y-3">
+          <h2 className="section-title">{t('benchmark.recent')}</h2>
+          <LoadError compact error={jobsQuery.error} onRetry={() => void jobsQuery.refetch()} retrying={jobsQuery.isFetching} />
+        </section>
+      )}
       {recentJobs.length > 0 && (
         <section className="card space-y-3">
           <div>

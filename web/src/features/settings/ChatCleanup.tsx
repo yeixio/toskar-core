@@ -6,6 +6,7 @@ import { useUIStore } from '@/stores/uiStore'
 import type { Conversation } from '@/types/api'
 import { olderChats } from './olderChats'
 import { ShownError, shownOr } from '@/components/ui/ShownError'
+import { LoadError } from '@/components/ui/LoadError'
 
 const AGES = [30, 90, 365] as const
 // The most chats one bulk delete takes (#452).
@@ -85,15 +86,16 @@ export function ChatCleanup() {
         <button
           type="button"
           className="btn-secondary px-3 py-1.5 text-xs"
-          disabled={older.length === 0 || remove.isPending || chats.isLoading}
+          disabled={older.length === 0 || remove.isPending || !chats.isSuccess}
           onClick={() => {
             setDone(null)
             setConfirming('older')
           }}
         >
-          {older.length === 0 ? t('history.noneOlder') : t('history.deleteCount', { count: older.length })}
+          {older.length === 0 && chats.isSuccess ? t('history.noneOlder') : t('history.deleteCount', { count: older.length })}
         </button>
       </div>
+      {chats.isError ? <LoadError compact error={chats.error} onRetry={() => void chats.refetch()} retrying={chats.isFetching} /> : null}
       {confirming === 'older' ? confirmRow(t('history.confirmOlder', { count: older.length, days }), older) : null}
       {pinned.length > 0 ? <p className="text-xs text-ink-faint">{t('history.pinnedKept')}</p> : null}
       <button
