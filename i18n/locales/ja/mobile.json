@@ -583,7 +583,9 @@
       "direct": "インターネット経由",
       "relay": "Toskar のリレー経由",
       "phone": "電話経由"
-    }
+    },
+    "reportOnPhone": "スマートフォンで報告",
+    "reportSent": "スマートフォンで Toskar を開いてレポートを送ってください。"
   },
   "watchLink": {
     "companionName": "{{device}} のウォッチ",

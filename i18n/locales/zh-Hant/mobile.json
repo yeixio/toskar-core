@@ -583,7 +583,9 @@
       "direct": "透過網際網路",
       "relay": "透過 Toskar 中繼",
       "phone": "透過你的手機"
-    }
+    },
+    "reportOnPhone": "在手機上回報",
+    "reportSent": "在手機上開啟 Toskar 以傳送報告。"
   },
   "watchLink": {
     "companionName": "{{device}} 的手錶",

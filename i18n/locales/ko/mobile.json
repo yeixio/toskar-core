@@ -583,7 +583,9 @@
       "direct": "인터넷으로",
       "relay": "Toskar 릴레이로",
       "phone": "휴대폰으로"
-    }
+    },
+    "reportOnPhone": "휴대폰에서 신고",
+    "reportSent": "휴대폰에서 Toskar를 열어 보고서를 보내세요."
   },
   "watchLink": {
     "companionName": "{{device}}의 워치",

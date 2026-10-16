@@ -683,7 +683,9 @@
       "direct": "Via the internet",
       "relay": "Via Toskar's relay",
       "phone": "Via your phone"
-    }
+    },
+    "reportOnPhone": "Report on phone",
+    "reportSent": "Open Toskar on your phone to send the report."
   },
   "watchLink": {
     "companionName": "Watch with {{device}}",

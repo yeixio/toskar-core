@@ -597,7 +597,9 @@
       "direct": "Por internet",
       "relay": "Por el relé de Toskar",
       "phone": "Por tu teléfono"
-    }
+    },
+    "reportOnPhone": "Informar en el teléfono",
+    "reportSent": "Abre Toskar en tu teléfono para enviar el informe."
   },
   "watchLink": {
     "companionName": "Reloj con {{device}}",

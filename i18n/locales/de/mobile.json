@@ -590,7 +590,9 @@
       "direct": "Über das Internet",
       "relay": "Über das Toskar-Relay",
       "phone": "Über dein Telefon"
-    }
+    },
+    "reportOnPhone": "Auf dem Telefon melden",
+    "reportSent": "Öffne Toskar auf deinem Telefon, um den Bericht zu senden."
   },
   "watchLink": {
     "companionName": "Uhr mit {{device}}",
