@@ -245,7 +245,8 @@
     "questionPlaceholder": "Customer question",
     "question": "Question",
     "answerPlaceholder": "The answer you want",
-    "add": "Add example"
+    "add": "Add example",
+    "none": "No examples here."
   },
   "plan": {
     "willTrain": "Will be trained",

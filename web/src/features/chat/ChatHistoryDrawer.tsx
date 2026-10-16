@@ -5,6 +5,7 @@ import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 import type { Conversation } from '@/types/api'
 import { rovingKeyDown, useMenu } from '@/lib/roving'
 import { searchItems } from '@/lib/search'
+import { LoadError } from '@/components/ui/LoadError'
 
 const PIN_MIN_WIDTH = 1100
 
@@ -83,6 +84,10 @@ type ChatHistoryDrawerProps = {
   selectedId: string | null
   loading?: boolean
   error?: string | null
+  /** The list couldn't be read: shown with Retry instead of "no chats" (#217). */
+  loadError?: unknown
+  onRetry?: () => void
+  retrying?: boolean
   onClose: () => void
   onSelect: (id: string) => void
   onNewChat: () => void
@@ -109,6 +114,9 @@ export function ChatHistoryDrawer({
   selectedId,
   loading,
   error,
+  loadError,
+  onRetry,
+  retrying,
   onClose,
   onSelect,
   onNewChat,
@@ -307,13 +315,18 @@ export function ChatHistoryDrawer({
 
       <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden px-2 py-3">
         {loading && <LoadingSpinner label={t('history.loading')} />}
+        {loadError ? (
+          <div className="px-2">
+            <LoadError compact error={loadError} onRetry={() => onRetry?.()} retrying={retrying} />
+          </div>
+        ) : null}
         {error && (
           <p className="px-2 text-xs text-danger" role="alert">
             {error}
           </p>
         )}
 
-        {!loading && conversations.length === 0 && (
+        {!loading && !loadError && conversations.length === 0 && (
           <div className="px-2 py-6 text-center">
             <p className="text-sm text-ink-muted">{t('history.empty')}</p>
             <button type="button" className="btn-primary mt-4 text-xs" onClick={onNewChat}>

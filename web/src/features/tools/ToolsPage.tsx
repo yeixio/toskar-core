@@ -204,6 +204,11 @@ export function ToolsPage() {
               <LoadError error={toolsQuery.error} onRetry={() => void toolsQuery.refetch()} retrying={toolsQuery.isFetching} />
             </li>
           )}
+          {toolsQuery.isSuccess && visible.length === 0 && (
+            <li className="sm:col-span-2 xl:col-span-3">
+              <p className="py-6 text-center text-sm text-ink-muted">{t('page.noMatch')}</p>
+            </li>
+          )}
           {visible.map((tool) => (
             <li key={tool.id}>
               <button

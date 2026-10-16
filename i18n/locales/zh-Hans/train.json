@@ -242,7 +242,8 @@
     "questionPlaceholder": "顾客的问题",
     "question": "问题",
     "answerPlaceholder": "你想要的回答",
-    "add": "添加示例"
+    "add": "添加示例",
+    "none": "这里没有示例。"
   },
   "plan": {
     "willTrain": "将被训练",

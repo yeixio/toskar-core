@@ -19,7 +19,8 @@
     "testFailed": "測試失敗",
     "disable": "停用",
     "enable": "啟用",
-    "test": "測試工具"
+    "test": "測試工具",
+    "noMatch": "沒有符合的工具。請試試其他篩選條件或搜尋。"
   },
   "intro": {
     "title": "工具如何運作",

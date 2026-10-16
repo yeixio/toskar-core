@@ -12,6 +12,8 @@ import { api } from '@/lib/api'
 import type { Person, Portal, PortalBranding, PortalInput, PortalVisitorLink } from '@/types/api'
 import { slugFrom } from './slug'
 import { ShownError, shownError } from '@/components/ui/ShownError'
+import { LoadError } from '@/components/ui/LoadError'
+import { Skeleton } from '@/components/ui/Skeleton'
 
 function usePrefersDark(): boolean {
   return typeof window !== 'undefined' && window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)').matches : true
@@ -688,6 +690,10 @@ export function PortalsPage() {
         <h2 id="all-portals" className="section-title">
           {t('list.title')}
         </h2>
+        {portals.isLoading ? <Skeleton label={t('list.title')} shape="rows" count={2} /> : null}
+        {portals.isError ? (
+          <LoadError compact error={portals.error} onRetry={() => void portals.refetch()} retrying={portals.isFetching} />
+        ) : null}
         {portals.isSuccess && list.length === 0 ? <p className="mt-2 text-sm text-ink-faint">{t('list.none')}</p> : null}
         <ul className="divide-y divide-line">
           {list.map((p) => (

@@ -245,7 +245,8 @@
     "questionPlaceholder": "Kundenfrage",
     "question": "Frage",
     "answerPlaceholder": "Die gewünschte Antwort",
-    "add": "Beispiel hinzufügen"
+    "add": "Beispiel hinzufügen",
+    "none": "Hier gibt es keine Beispiele."
   },
   "plan": {
     "willTrain": "Wird trainiert",

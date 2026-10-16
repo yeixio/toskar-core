@@ -19,7 +19,8 @@
     "testFailed": "Échec du test",
     "disable": "Désactiver",
     "enable": "Activer",
-    "test": "Tester l'outil"
+    "test": "Tester l'outil",
+    "noMatch": "Aucun outil ne correspond. Essayez un autre filtre ou une autre recherche."
   },
   "intro": {
     "title": "Comment fonctionnent les outils",

@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { api } from '@/lib/api'
 import type { PersonalStyle } from '@/types/api'
 import { ShownError, shownOr, type Shown } from '@/components/ui/ShownError'
+import { LoadError } from '@/components/ui/LoadError'
 
 const KEY = ['personalization'] as const
 
@@ -55,6 +56,9 @@ export function Personalization() {
         <h2 className="section-title">{t('personalization.title')}</h2>
         <p className="mt-1 text-sm text-ink-muted">{t('personalization.description')}</p>
       </div>
+      {query.isError ? (
+        <LoadError compact error={query.error} onRetry={() => void query.refetch()} retrying={query.isFetching} />
+      ) : null}
       <div className="grid gap-3 sm:grid-cols-2">
         {SELECTS.map((s) => (
           <label key={s.key} className="block text-sm">
@@ -95,7 +99,7 @@ export function Personalization() {
         />
       </label>
       <div className="flex items-center gap-3">
-        <button type="button" className="btn-primary px-3 py-1.5 text-xs" disabled={save.isPending} onClick={() => save.mutate()}>
+        <button type="button" className="btn-primary px-3 py-1.5 text-xs" disabled={save.isPending || !query.data} onClick={() => save.mutate()}>
           {save.isPending ? t('personalization.saving') : t('personalization.save')}
         </button>
         {saved && <span className="text-xs text-ink-faint">{t('personalization.saved')}</span>}

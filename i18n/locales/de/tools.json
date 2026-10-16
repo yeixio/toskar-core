@@ -19,7 +19,8 @@
     "testFailed": "Test fehlgeschlagen",
     "disable": "Deaktivieren",
     "enable": "Aktivieren",
-    "test": "Werkzeug testen"
+    "test": "Werkzeug testen",
+    "noMatch": "Keine Werkzeuge passen. Versuche einen anderen Filter oder eine andere Suche."
   },
   "intro": {
     "title": "So funktionieren Werkzeuge",

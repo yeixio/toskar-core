@@ -315,6 +315,11 @@ export function ModelsPage() {
         <EmptyState
           title={t('page.emptyTitle')}
           description={t('page.emptyDescription')}
+          action={
+            <button type="button" className="btn-primary" onClick={() => setBrowseOpen(true)}>
+              {t('discover.browseAll')}
+            </button>
+          }
         />
       )}
 
@@ -351,7 +356,8 @@ export function ModelsPage() {
         />
       )}
 
-      {tab === 'installed' && (
+      {/* Only once the list is read: a failed or unread list isn't "none installed" (#217). */}
+      {tab === 'installed' && modelsQuery.data && (
         <InstalledTab
           models={models}
           running={running}
@@ -373,6 +379,7 @@ export function ModelsPage() {
             stopMutation.mutate({ id, instanceId, nodeId: live?.node_id })
           }}
           onDelete={(id) => deleteMutation.mutate(id)}
+          onDiscover={() => setTab('discover')}
         />
       )}
       {tab === 'installed' && externalModels.length > 0 ? (
@@ -383,7 +390,11 @@ export function ModelsPage() {
         </section>
       ) : null}
 
-      {tab === 'running' && (
+      {tab === 'running' && runningQuery.isLoading && <Skeleton label={t('tabs.running')} shape="rows" count={2} />}
+      {tab === 'running' && runningQuery.isError && !runningQuery.data && (
+        <LoadError error={runningQuery.error} onRetry={() => void runningQuery.refetch()} retrying={runningQuery.isFetching} />
+      )}
+      {tab === 'running' && runningQuery.data && (
         <RunningTab
           running={running}
           profiles={profiles}

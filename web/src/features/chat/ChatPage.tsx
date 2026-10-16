@@ -54,6 +54,7 @@ import { Skeleton } from '@/components/ui/Skeleton'
 import { YggdrasilMark } from '@/components/ui/YggdrasilMark'
 import { moveStored } from '@/lib/storage'
 import { shownError, type Shown } from '@/components/ui/ShownError'
+import { LoadError } from '@/components/ui/LoadError'
 
 type TeamStep = {
   role: string
@@ -1493,6 +1494,9 @@ export function ChatPage() {
       selectedId={selectedId}
       loading={conversationsQuery.isLoading}
       error={listError}
+      loadError={conversationsQuery.isError ? conversationsQuery.error : undefined}
+      onRetry={() => void conversationsQuery.refetch()}
+      retrying={conversationsQuery.isFetching}
       drawerPinned={chatHistoryPinned}
       canPinDrawer={canPinHistory}
       renamingId={renamingId}
@@ -1980,6 +1984,9 @@ export function ChatPage() {
                 >
                   <div ref={contentRef} className="chat-column space-y-6 pt-2">
                 {messagesQuery.isLoading && <Skeleton label={t('status.loadingChat')} shape="chat" />}
+                {messagesQuery.isError ? (
+                  <LoadError compact error={messagesQuery.error} onRetry={() => void messagesQuery.refetch()} retrying={messagesQuery.isFetching} />
+                ) : null}
                 {messages.map((message) => {
                   const text = displayChatText(message.content)
                   if (message.role === 'assistant' && !text) return null

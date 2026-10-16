@@ -5,6 +5,8 @@ import { formatSize } from '@/i18n/format'
 import { api, type MediaKind } from '@/lib/api'
 import type { ImageSetup } from '@/types/api'
 import { ShownError, shownError, type Shown } from '@/components/ui/ShownError'
+import { LoadError } from '@/components/ui/LoadError'
+import { Skeleton } from '@/components/ui/Skeleton'
 
 function gb(bytes: number): string {
   return formatSize(bytes, { base: 1000 })
@@ -95,7 +97,22 @@ function MediaSetupCard({ kind }: { kind: MediaKind }) {
   }, [runningNow, queryClient])
 
   const status = setupQuery.data
-  if (!status) return null
+  if (!status) {
+    // A computer from before media setup answers with nothing: no card.
+    if (setupQuery.isSuccess) return null
+    return (
+      <section className="card space-y-3" aria-labelledby={`${kind}-setup-title`}>
+        <h2 id={`${kind}-setup-title`} className="section-title">
+          {t('images.title')}
+        </h2>
+        {setupQuery.isError ? (
+          <LoadError compact error={setupQuery.error} onRetry={() => void setupQuery.refetch()} retrying={setupQuery.isFetching} />
+        ) : (
+          <Skeleton label={t('images.title')} shape="rows" count={2} />
+        )}
+      </section>
+    )
+  }
   const job = status.job
   const running = !!job?.running
   const active = status.models.find((m) => m.id === status.active)

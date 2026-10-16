@@ -19,7 +19,8 @@
     "testFailed": "Falló la prueba",
     "disable": "Desactivar",
     "enable": "Activar",
-    "test": "Probar herramienta"
+    "test": "Probar herramienta",
+    "noMatch": "Ninguna herramienta coincide. Prueba otro filtro o búsqueda."
   },
   "intro": {
     "title": "Cómo funcionan las herramientas",

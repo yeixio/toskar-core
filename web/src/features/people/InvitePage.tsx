@@ -5,6 +5,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { YggdrasilMark } from '@/components/ui/YggdrasilMark'
 import { api, forgetApiKey } from '@/lib/api'
 import { useUIStore } from '@/stores/uiStore'
+import { LoadError } from '@/components/ui/LoadError'
 
 /**
  * The page a one-time link opens (#206): the person chooses a username and
@@ -43,6 +44,11 @@ export function InvitePage() {
       <YggdrasilMark size={64} lore />
       {invite.isLoading ? (
         <p className="mt-6 text-sm text-ink-muted">{t('invite.loading')}</p>
+      ) : invite.error && !refused(invite.error) ? (
+        // A failed request isn't an expired link: say so, with Retry (#217).
+        <div className="mt-6 w-full max-w-md">
+          <LoadError error={invite.error} onRetry={() => void invite.refetch()} retrying={invite.isFetching} />
+        </div>
       ) : invite.error || !invite.data ? (
         <>
           <h1 className="mt-6 font-display text-2xl font-semibold tracking-tight text-ink">{t('invite.goneTitle')}</h1>
@@ -116,4 +122,10 @@ export function InvitePage() {
       )}
     </div>
   )
+}
+
+/** Toskar answered and turned the link down (4xx), as opposed to not answering. */
+function refused(error: unknown): boolean {
+  const status = (error as { status?: unknown } | null)?.status
+  return typeof status === 'number' && status >= 400 && status < 500
 }

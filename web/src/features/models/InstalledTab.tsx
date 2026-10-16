@@ -36,6 +36,7 @@ export function InstalledTab({
   installingId,
   startingId,
   startError,
+  onDiscover,
 }: {
   models: Model[]
   running: RunningModelView[]
@@ -57,6 +58,8 @@ export function InstalledTab({
   startingId?: string | null
   /** Why the last start failed, for its model. */
   startError?: (Shown & { id: string }) | null
+  /** Opens Discover, the empty tab's next step. */
+  onDiscover?: () => void
 }) {
   const { t } = useTranslation('models')
   const [menuOpenId, setMenuOpenId] = useState<string | null>(null)
@@ -80,7 +83,14 @@ export function InstalledTab({
 
   if (installed.length === 0) {
     return (
-      <p className="text-sm text-ink-muted">{t('installedTab.empty')}</p>
+      <div className="flex flex-wrap items-center gap-3">
+        <p className="text-sm text-ink-muted">{t('installedTab.empty')}</p>
+        {onDiscover && !search ? (
+          <button type="button" className="btn-secondary btn-sm" onClick={onDiscover}>
+            {t('tabs.discover')}
+          </button>
+        ) : null}
+      </div>
     )
   }
 

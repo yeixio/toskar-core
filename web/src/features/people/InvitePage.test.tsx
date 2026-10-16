@@ -66,9 +66,17 @@ describe('InvitePage', () => {
   })
 
   it('says when a link no longer works', async () => {
-    vi.mocked(api.peekInvite).mockRejectedValue(new Error('gone'))
+    // Toskar answers 404 for a link that's used up or expired.
+    vi.mocked(api.peekInvite).mockResolvedValue(null)
     renderInvite()
     expect(await screen.findByRole('heading', { name: "This link doesn't work anymore" })).toBeInTheDocument()
+  })
+
+  it('says a link it couldn’t check couldn’t be checked, with Retry (#217)', async () => {
+    vi.mocked(api.peekInvite).mockRejectedValue(Object.assign(new Error('Failed to fetch'), { status: 0 }))
+    renderInvite()
+    expect(await screen.findByRole('button', { name: 'Try again' })).toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: "This link doesn't work anymore" })).not.toBeInTheDocument()
   })
 })
 

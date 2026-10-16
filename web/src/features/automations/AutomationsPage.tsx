@@ -57,6 +57,7 @@ export function AutomationsPage() {
     queryKey: ['automation', selectedID],
     queryFn: () => api.getAutomation(selectedID ?? ''),
     enabled: Boolean(selectedID),
+    retry: false,
   })
 
   useEffect(() => {
@@ -308,6 +309,14 @@ export function AutomationsPage() {
                 }
               }}
             />
+          ) : selectedID && detailQuery.isLoading ? (
+            <div className="card">
+              <Skeleton label={t('page.loading')} shape="rows" count={4} />
+            </div>
+          ) : selectedID && detailQuery.isError ? (
+            <div className="card">
+              <LoadError compact error={detailQuery.error} onRetry={() => void detailQuery.refetch()} retrying={detailQuery.isFetching} />
+            </div>
           ) : (
             <div className="card-outline text-sm text-ink-muted">{t('page.selectHint')}</div>
           )}

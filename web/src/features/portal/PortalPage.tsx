@@ -133,7 +133,19 @@ export function PortalPage({ slug }: { slug: string }) {
       style={themeVars(branding)}
       className="flex h-full min-h-0 flex-col bg-canvas text-ink"
     >
-      {page.isLoading ? null : !view ? (
+      {page.isLoading ? (
+        <div className="flex flex-1 items-center justify-center" role="status" aria-busy="true">
+          <span className="inline-block h-6 w-6 animate-spin rounded-full border-2 border-line border-t-primary" />
+        </div>
+      ) : page.isError && !(page.error instanceof ApiError && page.error.status >= 400 && page.error.status < 500) ? (
+        // A failed request isn't a missing portal: the visitor can try again (#217).
+        <div className="flex flex-1 flex-col items-center justify-center gap-4 px-6 text-center" role="alert">
+          <p className="text-sm text-ink-muted">{t('error')}</p>
+          <button type="button" className="btn-secondary" disabled={page.isFetching} onClick={() => void page.refetch()}>
+            {t('loadError.retry', { ns: 'common' })}
+          </button>
+        </div>
+      ) : !view ? (
         <div className="flex flex-1 flex-col items-center justify-center px-6 text-center">
           <h1 className="font-display text-2xl font-semibold">{t('gone.title')}</h1>
           <p className="mt-2 max-w-md text-sm text-ink-muted">{t('gone.body')}</p>
@@ -167,9 +179,16 @@ export function PortalPage({ slug }: { slug: string }) {
               </p>
             </div>
           ) : enter.isError ? (
-            <p className="m-6 text-sm text-danger" role="alert">
-              {t('error')}
-            </p>
+            <div className="m-6 flex flex-wrap items-center gap-3" role="alert">
+              <p className="text-sm text-danger">{t('error')}</p>
+              <button type="button" className="btn-secondary btn-sm" disabled={enter.isPending} onClick={() => enter.mutate(enter.variables ?? {})}>
+                {t('loadError.retry', { ns: 'common' })}
+              </button>
+            </div>
+          ) : enter.isPending ? (
+            <div className="flex flex-1 items-center justify-center" role="status" aria-busy="true">
+              <span className="inline-block h-6 w-6 animate-spin rounded-full border-2 border-line border-t-primary" />
+            </div>
           ) : null}
           {text(branding.footer) ? (
             <footer className="border-t border-line/60 px-4 py-2 text-center text-xs text-ink-faint">{text(branding.footer)}</footer>

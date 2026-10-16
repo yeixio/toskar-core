@@ -242,7 +242,8 @@
     "questionPlaceholder": "고객 질문",
     "question": "질문",
     "answerPlaceholder": "원하는 답변",
-    "add": "예시 추가"
+    "add": "예시 추가",
+    "none": "여기에는 예시가 없습니다."
   },
   "plan": {
     "willTrain": "학습할 내용",

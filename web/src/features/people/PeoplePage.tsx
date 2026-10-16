@@ -10,6 +10,8 @@ import { PersonCapabilities, RoleCapabilities } from './Capabilities'
 import { PersonPins, RolePins } from './ProfilePins'
 import { useShareBase } from './shareBase'
 import { ShownError, shownError, type Shown } from '@/components/ui/ShownError'
+import { LoadError } from '@/components/ui/LoadError'
+import { Skeleton } from '@/components/ui/Skeleton'
 
 const ROLES: Role[] = ['admin', 'member', 'visitor']
 
@@ -231,6 +233,10 @@ export function PeoplePage() {
             <h2 id="everyone" className="section-title">
               {t('everyone')}
             </h2>
+            {people.isLoading ? <Skeleton label={t('everyone')} shape="rows" count={3} /> : null}
+            {people.isError && !refused ? (
+              <LoadError compact error={people.error} onRetry={() => void people.refetch()} retrying={people.isFetching} />
+            ) : null}
             <ul className="divide-y divide-line">
               {(people.data ?? []).map((p) => (
                 <PersonRow key={p.id} person={p} me={actor} onLink={(person, link) => setShown({ name: person.name, link })} />

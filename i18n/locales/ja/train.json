@@ -242,7 +242,8 @@
     "questionPlaceholder": "お客様の質問",
     "question": "質問",
     "answerPlaceholder": "望む回答",
-    "add": "例を追加"
+    "add": "例を追加",
+    "none": "ここには例がありません。"
   },
   "plan": {
     "willTrain": "トレーニングするもの",

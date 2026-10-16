@@ -7,6 +7,7 @@ import { formatBytes } from '@/lib/format'
 import type { NodeTrainingFit, SpecializedAIView, TrainingHyper, TrainingPreset } from '@/types/api'
 import { fitLabel, fitTone, formatDuration, PRESETS, presetDescription, presetLabel } from '../display'
 import { ShownError, shownError } from '@/components/ui/ShownError'
+import { LoadError } from '@/components/ui/LoadError'
 
 export function PlanStep({ view, onStarted }: { view: SpecializedAIView; onStarted: () => void }) {
   const { t } = useTranslation('train')
@@ -72,6 +73,7 @@ export function PlanStep({ view, onStarted }: { view: SpecializedAIView; onStart
       <div className="card space-y-3">
         <h3 className="section-title">{t('plan.where')}</h3>
         {plan.isLoading && <p className="text-sm text-ink-muted">{t('plan.estimating')}</p>}
+        {plan.isError && <LoadError compact error={plan.error} onRetry={() => void plan.refetch()} retrying={plan.isFetching} />}
         <ul className="space-y-2">
           {(p?.fits ?? []).map((f) => (
             <FitRow

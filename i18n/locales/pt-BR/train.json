@@ -248,7 +248,8 @@
     "questionPlaceholder": "Pergunta do cliente",
     "question": "Pergunta",
     "answerPlaceholder": "A resposta que você quer",
-    "add": "Adicionar exemplo"
+    "add": "Adicionar exemplo",
+    "none": "Não há exemplos aqui."
   },
   "plan": {
     "willTrain": "Será treinado",

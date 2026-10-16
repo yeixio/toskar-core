@@ -6,6 +6,7 @@ import { quitDesktopForRestart } from '@/lib/desktopBridge'
 import { useUIStore } from '@/stores/uiStore'
 import type { SettingsPatch } from '@/types/api'
 import { ExternalServer } from './ExternalServer'
+import { LoadError } from '@/components/ui/LoadError'
 
 /**
  * How this computer reaches others (#203): finding computers on the local
@@ -26,7 +27,9 @@ export function NetworkSettings() {
       queryClient.invalidateQueries({ queryKey: ['nodes'] })
     },
   })
-  const busy = patchMutation.isPending || settingsQuery.isLoading
+  // Nothing changes until the settings are read, so a failed read can't
+  // turn discovery off by mistake (#217).
+  const busy = patchMutation.isPending || !settings
   const discoveryOn = settings?.discovery_enabled ?? true
 
   return (
@@ -35,6 +38,9 @@ export function NetworkSettings() {
         {t('groups.network')}
       </h2>
       <div className="card space-y-4">
+        {settingsQuery.isError ? (
+          <LoadError compact error={settingsQuery.error} onRetry={() => void settingsQuery.refetch()} retrying={settingsQuery.isFetching} />
+        ) : null}
         <div className="flex items-start justify-between gap-4">
           <div>
             <h3 className="font-medium text-ink">{t('discovery.title')}</h3>

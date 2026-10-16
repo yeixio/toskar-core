@@ -30,6 +30,7 @@ import { YggdrasilMark } from '@/components/ui/YggdrasilMark'
 import { formatGigabytes } from '@/i18n/format'
 import { AutomationDigestSetting } from './AutomationDigest'
 import { ShownError, shownOr, type Shown } from '@/components/ui/ShownError'
+import { LoadError } from '@/components/ui/LoadError'
 
 /** How long models stay loaded, in minutes; 0 keeps them until stopped (#498). */
 const KEEP_READY = [15, 60, 240, 0]
@@ -240,7 +241,9 @@ export function SettingsPage() {
   const profiles = profilesQuery.data ?? []
 
   const patch = (body: SettingsPatch) => patchMutation.mutate(body)
-  const busy = patchMutation.isPending || settingsQuery.isLoading
+  // Nothing saves until the settings are read, so a failed read can't
+  // overwrite them with defaults (#217).
+  const busy = patchMutation.isPending || !settings
 
   return (
     <div className="mx-auto w-full max-w-2xl min-w-0 space-y-6">
@@ -254,9 +257,11 @@ export function SettingsPage() {
 
       <YourDevices />
 
-      {(settingsQuery.isLoading || versionQuery.isLoading) && (
+      {admin && settingsQuery.isError ? (
+        <LoadError error={settingsQuery.error} onRetry={() => void settingsQuery.refetch()} retrying={settingsQuery.isFetching} />
+      ) : (settingsQuery.isLoading || versionQuery.isLoading) ? (
         <LoadingSpinner label={t('page.loading')} />
-      )}
+      ) : null}
 
       <div className="settings-group">
         <p className="settings-group-label">{t('groups.general')}</p>
@@ -281,7 +286,7 @@ export function SettingsPage() {
 
         <Personalization />
 
-        {admin ? (
+        {admin && settings ? (
           <>
 
             <section className="card space-y-4">
@@ -323,7 +328,7 @@ export function SettingsPage() {
         ) : null}
       </div>
 
-      {admin ? (
+      {admin && settings ? (
         <>
           <div className="settings-group">
             <p className="settings-group-label">{t('groups.ai')}</p>
@@ -738,7 +743,7 @@ export function SettingsPage() {
             </section>
           </div>
         </>
-      ) : (
+      ) : admin ? null : (
         <p className="text-sm text-ink-muted">{t('page.adminsOnly')}</p>
       )}
     </div>

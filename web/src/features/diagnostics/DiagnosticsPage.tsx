@@ -4,6 +4,7 @@ import { Trans, useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import i18n from '@/i18n'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
+import { Skeleton } from '@/components/ui/Skeleton'
 import { api } from '@/lib/api'
 import { displayVersion } from '@/lib/appVersion'
 import { formatBytes } from '@/lib/format'
@@ -282,7 +283,8 @@ export function DiagnosticsPage() {
           busy: refreshMutation.isPending,
         },
       ]
-    } else if (!runtimeInstalled && !hasModel) {
+    } else if (!runtimeInstalled && !hasModel && modelsQuery.isSuccess && runtimesQuery.isSuccess) {
+      // Only when both lists were read: one that failed isn't "not set up" (#217).
       runtimeTone = 'warn'
       runtimeDetail = t('rows.runtime.notSetUp')
       runtimeMessage = t('rows.runtime.installModel')
@@ -407,6 +409,8 @@ export function DiagnosticsPage() {
 
     return out
   }, [
+    modelsQuery.isSuccess,
+    runtimesQuery.isSuccess,
     serviceOk,
     connected,
     nodes,
@@ -501,14 +505,18 @@ export function DiagnosticsPage() {
         <div className="flex flex-wrap items-start justify-between gap-3 border-b border-line/50 pb-3">
           <div>
             <p className="label-caps text-[10px] text-ink-faint">{t('page.overall')}</p>
-            <p
-              className={[
-                'mt-1 text-sm font-medium',
-                allOk ? 'text-success' : hasWarn ? 'text-warning' : 'text-danger',
-              ].join(' ')}
-            >
-              {allOk ? t('page.allOk') : !serviceOk ? t('page.needsAttention') : t('page.checkBelow')}
-            </p>
+            {healthQuery.isLoading ? (
+              <p className="mt-1 text-sm font-medium text-ink-muted">{t('page.checking')}</p>
+            ) : (
+              <p
+                className={[
+                  'mt-1 text-sm font-medium',
+                  allOk ? 'text-success' : hasWarn ? 'text-warning' : 'text-danger',
+                ].join(' ')}
+              >
+                {allOk ? t('page.allOk') : !serviceOk ? t('page.needsAttention') : t('page.checkBelow')}
+              </p>
+            )}
           </div>
           <div className="flex items-center gap-2 text-xs text-ink-faint">
             <span>{lastCheckedLabel(healthQuery.dataUpdatedAt)}</span>
@@ -523,13 +531,18 @@ export function DiagnosticsPage() {
           </div>
         </div>
 
-        <ul>
-          {rows.map((row) => (
-            <HealthRow key={row.id} row={row} />
-          ))}
-        </ul>
+        {/* Before the first answer, nothing is known yet: not "not responding" (#217). */}
+        {healthQuery.isLoading ? (
+          <Skeleton label={t('page.checking')} shape="rows" count={4} />
+        ) : (
+          <ul>
+            {rows.map((row) => (
+              <HealthRow key={row.id} row={row} />
+            ))}
+          </ul>
+        )}
 
-        {!hasModel && serviceOk && (
+        {!hasModel && serviceOk && modelsQuery.isSuccess && (
           <p className="border-t border-line/50 pt-3 text-sm text-ink-muted">{t('page.tip')}</p>
         )}
       </section>

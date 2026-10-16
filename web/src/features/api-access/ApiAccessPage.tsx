@@ -15,6 +15,7 @@ import { ConnectPhone } from '@/features/nodes/ConnectPhone'
 import { formatDate } from '@/i18n/format'
 import { RemoteAccessCard } from './RemoteAccessCard'
 import { Toggle } from './Toggle'
+import { LoadError } from '@/components/ui/LoadError'
 
 type ProbeState = 'checking' | 'ok' | 'fail'
 
@@ -260,9 +261,18 @@ export function ApiAccessPage() {
         <p className="page-subtitle">{t('page.subtitle')}</p>
       </header>
 
-      {(settingsQuery.isLoading || keysQuery.isLoading) && (
+      {settingsQuery.isError || keysQuery.isError ? (
+        <LoadError
+          error={settingsQuery.error ?? keysQuery.error}
+          onRetry={() => {
+            void settingsQuery.refetch()
+            void keysQuery.refetch()
+          }}
+          retrying={settingsQuery.isFetching || keysQuery.isFetching}
+        />
+      ) : (settingsQuery.isLoading || keysQuery.isLoading) ? (
         <LoadingSpinner label={t('page.loading')} />
-      )}
+      ) : null}
 
       <section className="card space-y-4">
         <div className="flex flex-wrap items-start justify-between gap-3">
@@ -406,12 +416,13 @@ export function ApiAccessPage() {
           <Toggle
             label={t('lan.title')}
             checked={lanEnabled}
-            disabled={updateSettingsMutation.isPending}
+            // Unread settings aren't off: nothing changes until they're read (#217).
+            disabled={updateSettingsMutation.isPending || !settings}
             onChange={() => requestLanEnable(!lanEnabled)}
           />
         </div>
 
-        {lanEnabled && allActive.length === 0 && (
+        {lanEnabled && keysQuery.isSuccess && allActive.length === 0 && (
           <div className="rounded-lg border border-warning/30 bg-warning/10 px-4 py-3 text-sm text-ink">
             {t('lan.noKeys')}
           </div>
@@ -438,7 +449,7 @@ export function ApiAccessPage() {
             </button>
           )}
         </div>
-        {phones.length === 0 && !keysQuery.isLoading ? (
+        {phones.length === 0 && keysQuery.isSuccess ? (
           <p className="text-sm text-ink-muted">{t('phones.none')}</p>
         ) : (
           <ul className="divide-y divide-line">
@@ -543,7 +554,7 @@ export function ApiAccessPage() {
           </div>
         )}
 
-        {activeKeys.length === 0 && !keysQuery.isLoading && (
+        {activeKeys.length === 0 && keysQuery.isSuccess && (
           <p className="text-sm text-ink-muted">{t('keys.none')}</p>
         )}
 

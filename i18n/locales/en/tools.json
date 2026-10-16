@@ -19,7 +19,8 @@
     "testFailed": "Test failed",
     "disable": "Disable",
     "enable": "Enable",
-    "test": "Test tool"
+    "test": "Test tool",
+    "noMatch": "No tools match. Try another filter or search."
   },
   "intro": {
     "title": "How tools work",

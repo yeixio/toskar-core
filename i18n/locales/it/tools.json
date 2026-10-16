@@ -19,7 +19,8 @@
     "testFailed": "Prova non riuscita",
     "disable": "Disattiva",
     "enable": "Attiva",
-    "test": "Prova strumento"
+    "test": "Prova strumento",
+    "noMatch": "Nessuno strumento corrisponde. Prova un altro filtro o un'altra ricerca."
   },
   "intro": {
     "title": "Come funzionano gli strumenti",

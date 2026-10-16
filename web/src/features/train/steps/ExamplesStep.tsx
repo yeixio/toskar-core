@@ -5,6 +5,8 @@ import { api } from '@/lib/api'
 import type { ExampleFlag, SpecializedAIView, TrainingExample, TrainingMessage } from '@/types/api'
 import { flagCount, flagInfo, lastAnswer, lastUserTurn } from '../display'
 import { ShownError, shownError } from '@/components/ui/ShownError'
+import { LoadError } from '@/components/ui/LoadError'
+import { Skeleton } from '@/components/ui/Skeleton'
 
 const PAGE = 50
 
@@ -63,7 +65,11 @@ export function ExamplesStep({ view, onNext }: { view: SpecializedAIView; onNext
             </button>
           ))}
         </div>
-        {examples.isLoading && <p className="text-sm text-ink-muted">{t('examples.loading')}</p>}
+        {examples.isLoading && <Skeleton label={t('examples.loading')} shape="rows" count={3} />}
+        {examples.isError && (
+          <LoadError compact error={examples.error} onRetry={() => void examples.refetch()} retrying={examples.isFetching} />
+        )}
+        {examples.isSuccess && list.length === 0 && <p className="text-sm text-ink-muted">{t('examples.none')}</p>}
         <ul className="space-y-2">
           {list.slice(0, shown).map((ex) => (
             <ExampleRow

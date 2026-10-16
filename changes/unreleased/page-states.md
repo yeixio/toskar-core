@@ -1,0 +1,3 @@
+### Fixed
+- Pages no longer show defaults or "none yet" when their data couldn't be read (#217). Settings, API Access, Personalization, and network discovery wait for their settings before anything can be saved, so a failed read can't overwrite them. Chat history, a chat's messages, People, portals, keys and devices, what left this computer, the Media tab, benchmarks, training examples and plans, and installed and running models say they couldn't load, with Try again. An invite or public chat page that couldn't be checked says so instead of calling the link gone.
+- Diagnostics no longer shows every row as not responding before its first check, the empty Installed tab and Discover offer their next step, and Tools says when no tool matches the filter.

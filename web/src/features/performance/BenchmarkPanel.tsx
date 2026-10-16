@@ -22,6 +22,8 @@ import {
 } from './performanceFormat'
 import { formatPercent } from '@/i18n/format'
 import { ShownError, shownOr, type Shown } from '@/components/ui/ShownError'
+import { LoadError } from '@/components/ui/LoadError'
+import { Skeleton } from '@/components/ui/Skeleton'
 
 const JOB_STATUSES = ['pending', 'running', 'completed', 'failed', 'cancelled', 'canceled']
 
@@ -475,7 +477,10 @@ export function BenchmarkPanel() {
         <div>
           <p className="label-caps mb-2">{t('benchmark.step', { n: 1, label: t('benchmark.chooseModels') })}</p>
           {modelsQuery.isLoading && <LoadingSpinner label={t('benchmark.loadingModels')} />}
-          {!modelsQuery.isLoading && installedModels.length === 0 && (
+          {modelsQuery.isError && (
+            <LoadError compact error={modelsQuery.error} onRetry={() => void modelsQuery.refetch()} retrying={modelsQuery.isFetching} />
+          )}
+          {modelsQuery.isSuccess && installedModels.length === 0 && (
             <p className="text-sm text-ink-muted">{t('benchmark.installFirst')}</p>
           )}
           <div className="grid gap-2 sm:grid-cols-2">
@@ -494,6 +499,10 @@ export function BenchmarkPanel() {
 
         <div>
           <p className="label-caps mb-2">{t('benchmark.step', { n: 2, label: t('benchmark.chooseWorkloads') })}</p>
+          {workloadsQuery.isLoading && <Skeleton label={t('benchmark.chooseWorkloads')} shape="cards" count={3} />}
+          {workloadsQuery.isError && (
+            <LoadError compact error={workloadsQuery.error} onRetry={() => void workloadsQuery.refetch()} retrying={workloadsQuery.isFetching} />
+          )}
           <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
             {workloads.map((workload) => (
               <SelectCard

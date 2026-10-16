@@ -7,15 +7,28 @@ interface LoadErrorProps {
   error: unknown
   onRetry: () => void
   retrying?: boolean
+  /** One line, for a panel or card inside a page rather than the page itself. */
+  compact?: boolean
 }
 
 /**
  * What a page shows when its data could not be loaded, in place of its
  * empty state, so a failed request never looks like "you have none".
  */
-export function LoadError({ error, onRetry, retrying }: LoadErrorProps) {
+export function LoadError({ error, onRetry, retrying, compact }: LoadErrorProps) {
   const { t } = useTranslation()
   const detail = error instanceof Error ? error.message : typeof error === 'string' ? error : ''
+  if (compact) {
+    return (
+      <p role="alert" className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-danger">
+        <span title={detail || undefined}>{t('loadError.title')}</span>
+        <button type="button" className="font-medium text-primary hover:underline disabled:opacity-60" disabled={retrying} onClick={onRetry}>
+          {retrying ? t('loadError.retrying') : t('loadError.retry')}
+        </button>
+        <ReportProblem error={detail} code={errorCode(error)} />
+      </p>
+    )
+  }
   return (
     <div role="alert" className="empty-hero max-w-lg">
       <h2 className="font-display text-xl font-semibold text-ink">{t('loadError.title')}</h2>

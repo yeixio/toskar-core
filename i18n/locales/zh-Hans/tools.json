@@ -19,7 +19,8 @@
     "testFailed": "测试失败",
     "disable": "停用",
     "enable": "启用",
-    "test": "测试工具"
+    "test": "测试工具",
+    "noMatch": "没有匹配的工具。请试试其他筛选条件或搜索。"
   },
   "intro": {
     "title": "工具如何运作",
