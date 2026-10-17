@@ -400,7 +400,9 @@ func TestSubscriptionRoutes(t *testing.T) {
 			}
 			return "https://billing.stripe.test/s", nil
 		},
-		Subscription: func() *Subscription { return &Subscription{State: "pending", Store: "stripe", Checkout: "https://checkout.stripe.test/x"} },
+		Subscription: func() *Subscription {
+			return &Subscription{State: "pending", Store: "stripe", Checkout: "https://checkout.stripe.test/x"}
+		},
 	})
 	call := func(handler http.HandlerFunc, body string) (int, string) {
 		r := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(body))
