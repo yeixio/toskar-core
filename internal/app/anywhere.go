@@ -53,7 +53,7 @@ var (
 	errOwnRelay     = contracts.NewError("SUBSCRIPTION_OWN_RELAY", nil, errors.New("this computer uses its organization's relay; a subscription is for Toskar's relay"))
 	errActive       = contracts.NewError("SUBSCRIPTION_ACTIVE", nil, errors.New("this computer already has access from anywhere"))
 	errNoneHere     = contracts.NewError("SUBSCRIPTION_NONE", nil, errors.New("this computer has no subscription bought in its settings; one bought in the Toskar app is managed in the app's store"))
-	errSoldOut      = contracts.NewError("RELAY_SOLD_OUT", nil, errors.New("Toskar's relay isn't taking new subscriptions right now"))
+	errSoldOut      = contracts.NewError("RELAY_SOLD_OUT", nil, errors.New("the relay isn't taking new subscriptions right now"))
 	errBillingReach = func(cause error) error {
 		return contracts.NewError("BILLING_UNAVAILABLE", nil, fmt.Errorf("billing couldn't be reached; try again in a minute: %w", cause))
 	}
