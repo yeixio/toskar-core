@@ -533,7 +533,13 @@
     "tryAgain": "Riprova",
     "report": {
       "scan": "Inquadra questo codice con la fotocamera del telefono per inviare la segnalazione via email.",
-      "noCode": "Invia questa segnalazione a {{email}}."
+      "noCode": "Invia questa segnalazione a {{email}}.",
+      "send": "Invia al team di Toskar",
+      "sending": "Invio…",
+      "sent": "Inviata. Grazie: il team di Toskar la esaminerà.",
+      "sentAdded": "Inviata. È successo anche ad altri, e la tua si aggiunge alla loro.",
+      "failed": "Non è stato possibile inviarla da qui. Scansiona il codice per inviarla per email.",
+      "off": "Un amministratore ha disattivato l'invio delle segnalazioni a Toskar."
     }
   },
   "setup": {
@@ -568,7 +574,21 @@
     "whatSends": "Cosa viene inviato",
     "gathering": "Raccolta dei dettagli…",
     "send": "Invia per email",
-    "share": "Condividi"
+    "share": "Condividi",
+    "ledeSend": "Arriva al team di Toskar, dove diventa una segnalazione che può correggere. Nomi, indirizzi e chiavi vengono rimossi prima, e vedi tutto prima dell'invio.",
+    "sendHere": "Invia",
+    "sending": "Invio…",
+    "sent": "Inviata. Grazie: il team di Toskar la esaminerà.",
+    "sentAdded": "Inviata. È successo anche ad altri, e la tua si aggiunge alla loro.",
+    "done": "Fatto",
+    "off": "Un amministratore ha disattivato l'invio delle segnalazioni a Toskar. Copia la segnalazione e consegnala a chi gestisce Toskar qui.",
+    "emailLabel": "Email, per una risposta (facoltativa)",
+    "emailHint": "La vede solo il team di Toskar; non compare mai nella segnalazione.",
+    "details": "Includi i dettagli",
+    "detailsHint": "La versione di Toskar, il sistema e il processore di questo computer e, per un amministratore, i suoi avvisi ed errori recenti.",
+    "failed": "Al momento non è stato possibile inviarla da qui. Invia la stessa segnalazione per email.",
+    "invalid": "Controlla l'indirizzo email, poi invia di nuovo.",
+    "sendEmail": "Invia per email"
   },
   "watch": {
     "ask": "Chiedi",

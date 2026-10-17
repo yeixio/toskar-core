@@ -526,7 +526,13 @@
     "tryAgain": "Noch einmal",
     "report": {
       "scan": "Scanne diesen Code mit der Kamera deines Telefons, um den Bericht per E-Mail zu senden.",
-      "noCode": "Sende diesen Bericht an {{email}}."
+      "noCode": "Sende diesen Bericht an {{email}}.",
+      "send": "An das Toskar-Team senden",
+      "sending": "Wird gesendet…",
+      "sent": "Gesendet. Danke: Das Toskar-Team schaut es sich an.",
+      "sentAdded": "Gesendet. Andere hatten das auch, deins wurde ihrem hinzugefügt.",
+      "failed": "Von hier konnte er nicht gesendet werden. Scanne den Code, um ihn per E-Mail zu senden.",
+      "off": "Ein Admin hat das Senden von Berichten an Toskar ausgeschaltet."
     }
   },
   "setup": {
@@ -561,7 +567,21 @@
     "whatSends": "Was gesendet wird",
     "gathering": "Details werden gesammelt…",
     "send": "Per E-Mail senden",
-    "share": "Teilen"
+    "share": "Teilen",
+    "ledeSend": "Das geht an das Toskar-Team und wird dort zu einem Issue, das es beheben kann. Namen, Adressen und Schlüssel werden vorher entfernt, und du siehst alles, bevor es gesendet wird.",
+    "sendHere": "Senden",
+    "sending": "Wird gesendet…",
+    "sent": "Gesendet. Danke: Das Toskar-Team schaut es sich an.",
+    "sentAdded": "Gesendet. Andere hatten das auch, deins wurde ihrem hinzugefügt.",
+    "done": "Fertig",
+    "off": "Ein Admin hat das Senden von Berichten an Toskar ausgeschaltet. Kopiere den Bericht und gib ihn der Person, die Toskar hier betreut.",
+    "emailLabel": "E-Mail für eine Antwort (optional)",
+    "emailHint": "Nur das Toskar-Team sieht sie; sie steht nie im Bericht.",
+    "details": "Details mitsenden",
+    "detailsHint": "Toskar-Version, System und Prozessor dieses Computers, für einen Admin auch die letzten Warnungen und Fehler.",
+    "failed": "Von hier konnte er gerade nicht gesendet werden. Sende denselben Bericht stattdessen per E-Mail.",
+    "invalid": "Prüfe die E-Mail-Adresse und sende erneut.",
+    "sendEmail": "Per E-Mail senden"
   },
   "watch": {
     "ask": "Fragen",

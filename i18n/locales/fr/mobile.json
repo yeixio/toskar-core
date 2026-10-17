@@ -533,7 +533,13 @@
     "tryAgain": "Réessayer",
     "report": {
       "scan": "Scannez ce code avec l’appareil photo de votre téléphone pour envoyer le rapport par e-mail.",
-      "noCode": "Envoyez ce rapport à {{email}}."
+      "noCode": "Envoyez ce rapport à {{email}}.",
+      "send": "Envoyer à l'équipe Toskar",
+      "sending": "Envoi…",
+      "sent": "Envoyé. Merci : l'équipe Toskar va regarder.",
+      "sentAdded": "Envoyé. D'autres ont eu le même problème, et le vôtre s'ajoute au leur.",
+      "failed": "Il n'a pas pu être envoyé d'ici. Scannez le code pour l'envoyer par e-mail.",
+      "off": "Un administrateur a désactivé l'envoi des signalements à Toskar."
     }
   },
   "setup": {
@@ -568,7 +574,21 @@
     "whatSends": "Ce qui est envoyé",
     "gathering": "Collecte des détails…",
     "send": "Envoyer par e-mail",
-    "share": "Partager"
+    "share": "Partager",
+    "ledeSend": "Ceci va à l'équipe Toskar, où il devient un ticket qu'elle peut corriger. Les noms, adresses et clés sont retirés avant, et vous voyez tout avant l'envoi.",
+    "sendHere": "Envoyer",
+    "sending": "Envoi…",
+    "sent": "Envoyé. Merci : l'équipe Toskar va regarder.",
+    "sentAdded": "Envoyé. D'autres ont eu le même problème, et le vôtre s'ajoute au leur.",
+    "done": "Terminé",
+    "off": "Un administrateur a désactivé l'envoi des signalements à Toskar. Copiez le signalement et donnez-le à la personne qui gère Toskar ici.",
+    "emailLabel": "E-mail, pour une réponse (facultatif)",
+    "emailHint": "Seule l'équipe Toskar le voit ; il n'apparaît jamais dans le signalement.",
+    "details": "Inclure les détails",
+    "detailsHint": "La version de Toskar, le système et le processeur de cet ordinateur, et pour un administrateur ses avertissements et erreurs récents.",
+    "failed": "Il n'a pas pu être envoyé d'ici pour le moment. Envoyez le même signalement par e-mail.",
+    "invalid": "Vérifiez l'adresse e-mail, puis renvoyez.",
+    "sendEmail": "Envoyer par e-mail"
   },
   "watch": {
     "ask": "Demander",

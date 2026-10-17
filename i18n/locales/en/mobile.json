@@ -619,7 +619,13 @@
     "tryAgain": "Try again",
     "report": {
       "scan": "Scan this with your phone’s camera to send the report by email.",
-      "noCode": "Send this report to {{email}}."
+      "noCode": "Send this report to {{email}}.",
+      "send": "Send to the Toskar team",
+      "sending": "Sending…",
+      "sent": "Sent. Thanks: the Toskar team will look at it.",
+      "sentAdded": "Sent. Others hit this too, and yours is added to theirs.",
+      "failed": "It couldn't be sent from here. Scan the code to send it by email.",
+      "off": "An Admin turned off sending reports to Toskar."
     }
   },
   "setup": {
@@ -654,7 +660,21 @@
     "whatSends": "What it sends",
     "gathering": "Gathering details…",
     "send": "Send by email",
-    "share": "Share"
+    "share": "Share",
+    "ledeSend": "This goes to the Toskar team, where it becomes an issue they can fix. Names, addresses, and keys are taken out first, and you see everything before it goes.",
+    "sendHere": "Send",
+    "sending": "Sending…",
+    "sent": "Sent. Thanks: the Toskar team will look at it.",
+    "sentAdded": "Sent. Others hit this too, and yours is added to theirs.",
+    "done": "Done",
+    "off": "An Admin turned off sending reports to Toskar. Copy the report and give it to whoever runs Toskar here.",
+    "emailLabel": "Email, for a reply (optional)",
+    "emailHint": "Only the Toskar team sees it; it's never in the report.",
+    "details": "Include details",
+    "detailsHint": "This computer's Toskar version, system, and processor, and for an Admin its recent warnings and errors.",
+    "failed": "It couldn't be sent from here right now. Send the same report by email instead.",
+    "invalid": "Check the email address, then send again.",
+    "sendEmail": "Send by email"
   },
   "watch": {
     "ask": "Ask",

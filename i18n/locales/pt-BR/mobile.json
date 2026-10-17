@@ -533,7 +533,13 @@
     "tryAgain": "Tentar de novo",
     "report": {
       "scan": "Escaneie este código com a câmera do celular para enviar o relatório por e-mail.",
-      "noCode": "Envie este relatório para {{email}}."
+      "noCode": "Envie este relatório para {{email}}.",
+      "send": "Enviar para a equipe do Toskar",
+      "sending": "Enviando…",
+      "sent": "Enviado. Obrigado: a equipe do Toskar vai analisar.",
+      "sentAdded": "Enviado. Outras pessoas também passaram por isso, e o seu foi somado ao delas.",
+      "failed": "Não foi possível enviar daqui. Escaneie o código para enviar por e-mail.",
+      "off": "Um administrador desativou o envio de relatórios ao Toskar."
     }
   },
   "setup": {
@@ -568,7 +574,21 @@
     "whatSends": "O que é enviado",
     "gathering": "Reunindo detalhes…",
     "send": "Enviar por e-mail",
-    "share": "Compartilhar"
+    "share": "Compartilhar",
+    "ledeSend": "Isto vai para a equipe do Toskar, onde vira um problema que ela pode corrigir. Nomes, endereços e chaves são removidos antes, e você vê tudo antes de enviar.",
+    "sendHere": "Enviar",
+    "sending": "Enviando…",
+    "sent": "Enviado. Obrigado: a equipe do Toskar vai analisar.",
+    "sentAdded": "Enviado. Outras pessoas também passaram por isso, e o seu foi somado ao delas.",
+    "done": "Pronto",
+    "off": "Um administrador desativou o envio de relatórios ao Toskar. Copie o relatório e entregue a quem administra o Toskar aqui.",
+    "emailLabel": "E-mail, para uma resposta (opcional)",
+    "emailHint": "Só a equipe do Toskar vê; ele nunca entra no relatório.",
+    "details": "Incluir detalhes",
+    "detailsHint": "A versão do Toskar, o sistema e o processador deste computador e, para um administrador, os avisos e erros recentes.",
+    "failed": "Não foi possível enviar daqui agora. Envie o mesmo relatório por e-mail.",
+    "invalid": "Confira o e-mail e envie de novo.",
+    "sendEmail": "Enviar por e-mail"
   },
   "watch": {
     "ask": "Perguntar",

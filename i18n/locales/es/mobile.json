@@ -533,7 +533,13 @@
     "tryAgain": "Reintentar",
     "report": {
       "scan": "Escanea este código con la cámara del teléfono para enviar el informe por correo.",
-      "noCode": "Envía este informe a {{email}}."
+      "noCode": "Envía este informe a {{email}}.",
+      "send": "Enviar al equipo de Toskar",
+      "sending": "Enviando…",
+      "sent": "Enviado. Gracias: el equipo de Toskar lo revisará.",
+      "sentAdded": "Enviado. A otras personas les pasó lo mismo, y el tuyo se suma al suyo.",
+      "failed": "No se pudo enviar desde aquí. Escanea el código para enviarlo por correo electrónico.",
+      "off": "Un administrador desactivó el envío de informes a Toskar."
     }
   },
   "setup": {
@@ -568,7 +574,21 @@
     "whatSends": "Lo que se envía",
     "gathering": "Reuniendo detalles…",
     "send": "Enviar por correo",
-    "share": "Compartir"
+    "share": "Compartir",
+    "ledeSend": "Esto llega al equipo de Toskar, donde se convierte en una incidencia que pueden corregir. Los nombres, direcciones y claves se quitan antes, y ves todo antes de enviarlo.",
+    "sendHere": "Enviar",
+    "sending": "Enviando…",
+    "sent": "Enviado. Gracias: el equipo de Toskar lo revisará.",
+    "sentAdded": "Enviado. A otras personas les pasó lo mismo, y el tuyo se suma al suyo.",
+    "done": "Listo",
+    "off": "Un administrador desactivó el envío de informes a Toskar. Copia el informe y dáselo a quien administra Toskar aquí.",
+    "emailLabel": "Correo electrónico, para responderte (opcional)",
+    "emailHint": "Solo lo ve el equipo de Toskar; nunca aparece en el informe.",
+    "details": "Incluir detalles",
+    "detailsHint": "La versión de Toskar, el sistema y el procesador de esta computadora, y para un administrador, sus advertencias y errores recientes.",
+    "failed": "No se pudo enviar desde aquí en este momento. Envía el mismo informe por correo electrónico.",
+    "invalid": "Revisa el correo electrónico y vuelve a enviar.",
+    "sendEmail": "Enviar por correo electrónico"
   },
   "watch": {
     "ask": "Preguntar",
