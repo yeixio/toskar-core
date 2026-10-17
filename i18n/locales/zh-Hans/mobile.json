@@ -622,7 +622,10 @@
     "statusPaused": "暂停至下个月",
     "statusInactive": "未启用",
     "inactiveBody": "你的订阅已结束或未续订。重新订阅，即可在外出时访问你的电脑。",
-    "manage": "管理订阅"
+    "manage": "管理订阅",
+    "throughComputer": "通过这台电脑的订阅启用",
+    "throughComputerBody": "与这台电脑配对的每台设备都在使用它。在购买的地方管理：订阅的那台设备，或电脑上 Toskar 的设置。",
+    "boughtInSettings": "在电脑上 Toskar 的设置中购买。可在那里的“API 访问”中更换银行卡或取消。"
   },
   "deliberation": {
     "summary": {

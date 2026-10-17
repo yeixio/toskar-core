@@ -622,7 +622,10 @@
     "statusPaused": "다음 달까지 일시 중지됨",
     "statusInactive": "비활성",
     "inactiveBody": "구독이 끝났거나 갱신되지 않았습니다. 외출 중에도 컴퓨터에 연결하려면 다시 구독하세요.",
-    "manage": "구독 관리"
+    "manage": "구독 관리",
+    "throughComputer": "이 컴퓨터의 구독으로 활성화됨",
+    "throughComputerBody": "이 컴퓨터와 페어링된 모든 기기가 이 구독을 사용해요. 구매한 곳에서 관리해요. 구독한 기기나 컴퓨터의 Toskar 설정에서요.",
+    "boughtInSettings": "컴퓨터의 Toskar 설정에서 구매했어요. 카드 변경이나 해지는 그곳의 API 액세스에서 할 수 있어요."
   },
   "deliberation": {
     "summary": {

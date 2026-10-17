@@ -636,7 +636,10 @@
     "statusPaused": "Pausada até o próximo mês",
     "statusInactive": "Inativa",
     "inactiveBody": "Sua assinatura terminou ou não foi renovada. Assine de novo para acessar seu computador fora de casa.",
-    "manage": "Gerenciar assinatura"
+    "manage": "Gerenciar assinatura",
+    "throughComputer": "Ativo pela assinatura deste computador",
+    "throughComputerBody": "Todos os dispositivos pareados com este computador a usam. Ela é gerenciada onde foi comprada: no dispositivo que assinou ou nas configurações do Toskar no computador.",
+    "boughtInSettings": "Comprada nas configurações do Toskar no computador. Troque o cartão ou cancele lá, em Acesso à API."
   },
   "deliberation": {
     "summary": {

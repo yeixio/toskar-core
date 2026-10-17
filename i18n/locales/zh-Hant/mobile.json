@@ -622,7 +622,10 @@
     "statusPaused": "暫停至下個月",
     "statusInactive": "未啟用",
     "inactiveBody": "你的訂閱已結束或未續訂。重新訂閱，即可在外出時存取你的電腦。",
-    "manage": "管理訂閱"
+    "manage": "管理訂閱",
+    "throughComputer": "透過這台電腦的訂閱啟用",
+    "throughComputerBody": "與這台電腦配對的每台裝置都在使用它。在購買的地方管理：訂閱的那台裝置，或電腦上 Toskar 的設定。",
+    "boughtInSettings": "在電腦上 Toskar 的設定中購買。可在那裡的「API 存取」中更換信用卡或取消。"
   },
   "deliberation": {
     "summary": {

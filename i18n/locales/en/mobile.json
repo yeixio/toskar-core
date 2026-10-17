@@ -722,7 +722,10 @@
     "statusPaused": "Paused until next month",
     "statusInactive": "Not active",
     "inactiveBody": "Your subscription ended or didn't renew. Subscribe again to reach your computer away from home.",
-    "manage": "Manage subscription"
+    "manage": "Manage subscription",
+    "throughComputer": "Active through this computer's subscription",
+    "throughComputerBody": "Every device paired with this computer uses it. It's managed where it was bought: on the device that subscribed, or in Toskar's settings on the computer.",
+    "boughtInSettings": "Bought in Toskar's settings on the computer. Change the card or cancel there, under API Access."
   },
   "deliberation": {
     "summary": {

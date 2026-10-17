@@ -622,7 +622,10 @@
     "statusPaused": "来月まで一時停止中",
     "statusInactive": "無効",
     "inactiveBody": "サブスクリプションが終了したか、更新されませんでした。外出先からコンピュータにアクセスするには、もう一度登録してください。",
-    "manage": "サブスクリプションを管理"
+    "manage": "サブスクリプションを管理",
+    "throughComputer": "このコンピュータのサブスクリプションで有効",
+    "throughComputerBody": "このコンピュータとペアリングしたすべてのデバイスで使えます。管理は購入した場所で行います。登録したデバイス、またはコンピュータの Toskar の設定です。",
+    "boughtInSettings": "コンピュータの Toskar の設定で購入されました。カードの変更や解約は、そこの「APIアクセス」で行えます。"
   },
   "deliberation": {
     "summary": {

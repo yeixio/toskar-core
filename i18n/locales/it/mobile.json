@@ -636,7 +636,10 @@
     "statusPaused": "In pausa fino al mese prossimo",
     "statusInactive": "Non attivo",
     "inactiveBody": "L'abbonamento è terminato o non è stato rinnovato. Abbonati di nuovo per raggiungere il tuo computer fuori casa.",
-    "manage": "Gestisci abbonamento"
+    "manage": "Gestisci abbonamento",
+    "throughComputer": "Attivo tramite l'abbonamento di questo computer",
+    "throughComputerBody": "Ogni dispositivo associato a questo computer lo usa. Si gestisce dove è stato acquistato: sul dispositivo che si è abbonato o nelle impostazioni di Toskar sul computer.",
+    "boughtInSettings": "Acquistato nelle impostazioni di Toskar sul computer. Cambia carta o annulla lì, in Accesso API."
   },
   "deliberation": {
     "summary": {

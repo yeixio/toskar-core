@@ -629,7 +629,10 @@
     "statusPaused": "Pausiert bis nächsten Monat",
     "statusInactive": "Nicht aktiv",
     "inactiveBody": "Dein Abo ist abgelaufen oder wurde nicht verlängert. Schließe es erneut ab, um deinen Computer unterwegs zu erreichen.",
-    "manage": "Abo verwalten"
+    "manage": "Abo verwalten",
+    "throughComputer": "Aktiv über das Abo dieses Computers",
+    "throughComputerBody": "Jedes mit diesem Computer gekoppelte Gerät nutzt es. Verwaltet wird es dort, wo es abgeschlossen wurde: auf dem Gerät, das es abonniert hat, oder in den Einstellungen von Toskar auf dem Computer.",
+    "boughtInSettings": "In den Einstellungen von Toskar auf dem Computer abgeschlossen. Karte ändern oder kündigen kannst du dort unter API-Zugriff."
   },
   "deliberation": {
     "summary": {

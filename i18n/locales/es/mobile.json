@@ -636,7 +636,10 @@
     "statusPaused": "En pausa hasta el próximo mes",
     "statusInactive": "No activa",
     "inactiveBody": "Tu suscripción terminó o no se renovó. Suscríbete de nuevo para llegar a tu computadora fuera de casa.",
-    "manage": "Administrar suscripción"
+    "manage": "Administrar suscripción",
+    "throughComputer": "Activo con la suscripción de esta computadora",
+    "throughComputerBody": "Todos los dispositivos vinculados a esta computadora la usan. Se administra donde se compró: en el dispositivo que se suscribió o en la configuración de Toskar en la computadora.",
+    "boughtInSettings": "Comprada en la configuración de Toskar en la computadora. Cambia la tarjeta o cancela allí, en Acceso a la API."
   },
   "deliberation": {
     "summary": {
