@@ -276,7 +276,11 @@
       "tooLarge": "Più di 25 MB, il massimo che il computer accetta.",
       "needsUpdate": "Aggiorna Toskar sul computer per inviare foto e file da questo dispositivo.",
       "cameraDenied": "Toskar non può usare la fotocamera. Consentilo in Impostazioni per scattare una foto.",
-      "needsVision": "{{model}} non vede le foto. Scegli Auto o un modello che vede le foto, oppure chiedi in una chat sul computer."
+      "needsVision": "{{model}} non vede le foto. Scegli Auto o un modello che vede le foto, oppure chiedi in una chat sul computer.",
+      "cantRead": "{{name}} non può essere letto su questo dispositivo. Chiedi in una chat sul tuo computer.",
+      "noText": "{{name}} non contiene testo da leggere. Chiedi in una chat sul tuo computer.",
+      "tooLargeHere": "{{name}} è troppo grande per essere letto su questo dispositivo. Chiedi in una chat sul tuo computer.",
+      "noTextInPhoto": "Nessun testo trovato in {{name}}, e {{model}} non può vedere le foto. Scegli un modello che vede le foto, o chiedi in una chat sul tuo computer."
     },
     "voice": {
       "start": "Detta un messaggio",
@@ -482,7 +486,9 @@
     "loadingNamedOn": "Caricamento di {{model}} su {{node}}…",
     "loadingNamedOnAbout": "Caricamento di {{model}} su {{node}}, circa {{time}}…",
     "generating": "Generazione della risposta…",
-    "generatingOn": "Generazione su {{node}}…"
+    "generatingOn": "Generazione su {{node}}…",
+    "readingNamed": "Lettura di {{name}}…",
+    "readingPhotoText": "Lettura del testo in {{name}}…"
   },
   "realms": {
     "about": "{{norse}}. {{rune}}. Informazioni su questo nome",
@@ -909,6 +915,14 @@
       "edit": "Modifica",
       "save": "Salva",
       "cancel": "Annulla"
+    },
+    "steps": {
+      "readFile": "Letto {{name}}",
+      "readFilePart": "Letta la prima parte di {{name}}",
+      "readPhotoText": "Letto il testo in {{name}}, perché {{model}} non può vedere le foto"
+    },
+    "notices": {
+      "filePart": "Solo la prima parte di {{name}} rientrava in ciò che {{model}} può leggere in una volta. Chiedi di una parte successiva, o chiedi l'intero file in una chat sul tuo computer."
     }
   },
   "push": {

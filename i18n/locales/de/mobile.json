@@ -276,7 +276,11 @@
       "tooLarge": "Größer als 25 MB, mehr nimmt der Computer nicht an.",
       "needsUpdate": "Aktualisiere Toskar auf deinem Computer, um Fotos und Dateien von diesem Gerät zu senden.",
       "cameraDenied": "Toskar kann die Kamera nicht verwenden. Erlaube es in den Einstellungen, um ein Foto aufzunehmen.",
-      "needsVision": "{{model}} kann keine Fotos sehen. Wähle Auto oder ein Modell, das Fotos sieht, oder frag in einem Chat auf deinem Computer."
+      "needsVision": "{{model}} kann keine Fotos sehen. Wähle Auto oder ein Modell, das Fotos sieht, oder frag in einem Chat auf deinem Computer.",
+      "cantRead": "{{name}} kann auf diesem Gerät nicht gelesen werden. Frag in einem Chat auf deinem Computer danach.",
+      "noText": "{{name}} enthält keinen Text zum Lesen. Frag in einem Chat auf deinem Computer danach.",
+      "tooLargeHere": "{{name}} ist zu groß, um auf diesem Gerät gelesen zu werden. Frag in einem Chat auf deinem Computer danach.",
+      "noTextInPhoto": "In {{name}} wurde kein Text gefunden, und {{model}} kann keine Fotos sehen. Wähle ein Modell, das Fotos sieht, oder frag in einem Chat auf deinem Computer."
     },
     "voice": {
       "start": "Nachricht sprechen",
@@ -475,7 +479,9 @@
     "loadingNamedOn": "{{model}} wird auf {{node}} geladen …",
     "loadingNamedOnAbout": "{{model}} wird auf {{node}} geladen, etwa {{time}} …",
     "generating": "Antwort wird erzeugt …",
-    "generatingOn": "Wird auf {{node}} erzeugt …"
+    "generatingOn": "Wird auf {{node}} erzeugt …",
+    "readingNamed": "{{name}} wird gelesen …",
+    "readingPhotoText": "Text in {{name}} wird gelesen …"
   },
   "realms": {
     "about": "{{norse}}. {{rune}}. Über diesen Namen",
@@ -893,6 +899,14 @@
       "edit": "Bearbeiten",
       "save": "Speichern",
       "cancel": "Abbrechen"
+    },
+    "steps": {
+      "readFile": "{{name}} gelesen",
+      "readFilePart": "Den ersten Teil von {{name}} gelesen",
+      "readPhotoText": "Den Text in {{name}} gelesen, da {{model}} keine Fotos sehen kann"
+    },
+    "notices": {
+      "filePart": "Nur der erste Teil von {{name}} passte in das, was {{model}} auf einmal lesen kann. Frag nach einem späteren Teil, oder frag in einem Chat auf deinem Computer nach der ganzen Datei."
     }
   },
   "push": {

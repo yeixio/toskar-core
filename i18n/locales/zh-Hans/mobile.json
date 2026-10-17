@@ -276,7 +276,11 @@
       "tooLarge": "超过 25 MB，电脑最多接收 25 MB。",
       "needsUpdate": "请更新电脑上的 Toskar，以便从此设备发送照片和文件。",
       "cameraDenied": "Toskar 无法使用相机。请在“设置”中允许，以便拍照。",
-      "needsVision": "{{model}} 看不了照片。请选择 Auto 或能看照片的模型，或在电脑上的聊天中提问。"
+      "needsVision": "{{model}} 看不了照片。请选择 Auto 或能看照片的模型，或在电脑上的聊天中提问。",
+      "cantRead": "无法在此设备上读取 {{name}}。请在电脑上的聊天中询问。",
+      "noText": "{{name}} 中没有可读取的文字。请在电脑上的聊天中询问。",
+      "tooLargeHere": "{{name}} 太大，无法在此设备上读取。请在电脑上的聊天中询问。",
+      "noTextInPhoto": "在 {{name}} 中没有找到文字，而 {{model}} 无法查看照片。请选择能查看照片的模型，或在电脑上的聊天中询问。"
     },
     "voice": {
       "start": "说出消息",
@@ -468,7 +472,9 @@
     "loadingNamedOn": "正在 {{node}} 上加载 {{model}}…",
     "loadingNamedOnAbout": "正在 {{node}} 上加载 {{model}}，约 {{time}}…",
     "generating": "正在生成回复…",
-    "generatingOn": "正在 {{node}} 上生成…"
+    "generatingOn": "正在 {{node}} 上生成…",
+    "readingNamed": "正在读取 {{name}}…",
+    "readingPhotoText": "正在读取 {{name}} 中的文字…"
   },
   "realms": {
     "about": "{{norse}}。{{rune}}。关于这个名字",
@@ -878,6 +884,14 @@
       "edit": "编辑",
       "save": "保存",
       "cancel": "取消"
+    },
+    "steps": {
+      "readFile": "已读取 {{name}}",
+      "readFilePart": "已读取 {{name}} 的开头部分",
+      "readPhotoText": "由于 {{model}} 无法查看照片，已读取 {{name}} 中的文字"
+    },
+    "notices": {
+      "filePart": "{{model}} 一次能读取的内容只容得下 {{name}} 的开头部分。可以询问后面的部分，或在电脑上的聊天中询问整个文件。"
     }
   },
   "push": {

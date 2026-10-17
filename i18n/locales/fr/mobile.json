@@ -276,7 +276,11 @@
       "tooLarge": "Plus de 25 Mo, le maximum accepté par l’ordinateur.",
       "needsUpdate": "Mettez à jour Toskar sur votre ordinateur pour envoyer des photos et des fichiers depuis cet appareil.",
       "cameraDenied": "Toskar ne peut pas utiliser l’appareil photo. Autorisez-le dans Réglages pour prendre une photo.",
-      "needsVision": "{{model}} ne voit pas les photos. Choisissez Auto ou un modèle qui voit les photos, ou posez la question dans une discussion sur votre ordinateur."
+      "needsVision": "{{model}} ne voit pas les photos. Choisissez Auto ou un modèle qui voit les photos, ou posez la question dans une discussion sur votre ordinateur.",
+      "cantRead": "{{name}} ne peut pas être lu sur cet appareil. Posez la question dans un chat sur votre ordinateur.",
+      "noText": "{{name}} ne contient aucun texte à lire. Posez la question dans un chat sur votre ordinateur.",
+      "tooLargeHere": "{{name}} est trop volumineux pour être lu sur cet appareil. Posez la question dans un chat sur votre ordinateur.",
+      "noTextInPhoto": "Aucun texte trouvé dans {{name}}, et {{model}} ne peut pas voir les photos. Choisissez un modèle qui voit les photos, ou posez la question dans un chat sur votre ordinateur."
     },
     "voice": {
       "start": "Dicter un message",
@@ -482,7 +486,9 @@
     "loadingNamedOn": "Chargement de {{model}} sur {{node}}…",
     "loadingNamedOnAbout": "Chargement de {{model}} sur {{node}}, environ {{time}}…",
     "generating": "Génération de la réponse…",
-    "generatingOn": "Génération sur {{node}}…"
+    "generatingOn": "Génération sur {{node}}…",
+    "readingNamed": "Lecture de {{name}}…",
+    "readingPhotoText": "Lecture du texte de {{name}}…"
   },
   "realms": {
     "about": "{{norse}}. {{rune}}. À propos de ce nom",
@@ -909,6 +915,14 @@
       "edit": "Modifier",
       "save": "Enregistrer",
       "cancel": "Annuler"
+    },
+    "steps": {
+      "readFile": "{{name}} lu",
+      "readFilePart": "Première partie de {{name}} lue",
+      "readPhotoText": "Texte de {{name}} lu, car {{model}} ne peut pas voir les photos"
+    },
+    "notices": {
+      "filePart": "Seule la première partie de {{name}} tenait dans ce que {{model}} peut lire en une fois. Demandez une partie suivante, ou demandez le fichier entier dans un chat sur votre ordinateur."
     }
   },
   "push": {

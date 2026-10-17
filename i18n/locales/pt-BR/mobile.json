@@ -276,7 +276,11 @@
       "tooLarge": "Maior que 25 MB, o máximo que o computador aceita.",
       "needsUpdate": "Atualize o Toskar no seu computador para enviar fotos e arquivos deste dispositivo.",
       "cameraDenied": "O Toskar não pode usar a câmera. Permita em Ajustes para tirar uma foto.",
-      "needsVision": "{{model}} não consegue ver fotos. Escolha Auto ou um modelo que veja fotos, ou pergunte em um chat no seu computador."
+      "needsVision": "{{model}} não consegue ver fotos. Escolha Auto ou um modelo que veja fotos, ou pergunte em um chat no seu computador.",
+      "cantRead": "{{name}} não pode ser lido neste dispositivo. Pergunte sobre ele em um chat no seu computador.",
+      "noText": "{{name}} não tem texto para ler. Pergunte sobre ele em um chat no seu computador.",
+      "tooLargeHere": "{{name}} é grande demais para ser lido neste dispositivo. Pergunte sobre ele em um chat no seu computador.",
+      "noTextInPhoto": "Nenhum texto encontrado em {{name}}, e {{model}} não consegue ver fotos. Escolha um modelo que vê fotos ou pergunte em um chat no seu computador."
     },
     "voice": {
       "start": "Ditar uma mensagem",
@@ -482,7 +486,9 @@
     "loadingNamedOn": "Carregando {{model}} em {{node}}…",
     "loadingNamedOnAbout": "Carregando {{model}} em {{node}}, cerca de {{time}}…",
     "generating": "Gerando resposta…",
-    "generatingOn": "Gerando em {{node}}…"
+    "generatingOn": "Gerando em {{node}}…",
+    "readingNamed": "Lendo {{name}}…",
+    "readingPhotoText": "Lendo o texto em {{name}}…"
   },
   "realms": {
     "about": "{{norse}}. {{rune}}. Sobre este nome",
@@ -909,6 +915,14 @@
       "edit": "Editar",
       "save": "Salvar",
       "cancel": "Cancelar"
+    },
+    "steps": {
+      "readFile": "Leu {{name}}",
+      "readFilePart": "Leu a primeira parte de {{name}}",
+      "readPhotoText": "Leu o texto em {{name}}, já que {{model}} não consegue ver fotos"
+    },
+    "notices": {
+      "filePart": "Só a primeira parte de {{name}} coube no que {{model}} consegue ler de uma vez. Pergunte sobre uma parte posterior ou pergunte em um chat no seu computador sobre o arquivo inteiro."
     }
   },
   "push": {

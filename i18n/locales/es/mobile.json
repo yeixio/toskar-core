@@ -276,7 +276,11 @@
       "tooLarge": "Pesa más de 25 MB, lo máximo que acepta la computadora.",
       "needsUpdate": "Actualiza Toskar en tu computadora para enviar fotos y archivos desde este dispositivo.",
       "cameraDenied": "Toskar no puede usar la cámara. Permítelo en Ajustes para tomar una foto.",
-      "needsVision": "{{model}} no puede ver fotos. Elige Auto o un modelo que vea fotos, o pregunta en un chat de tu computadora."
+      "needsVision": "{{model}} no puede ver fotos. Elige Auto o un modelo que vea fotos, o pregunta en un chat de tu computadora.",
+      "cantRead": "{{name}} no se puede leer en este dispositivo. Pregunta por él en un chat en tu computadora.",
+      "noText": "{{name}} no tiene texto que leer. Pregunta por él en un chat en tu computadora.",
+      "tooLargeHere": "{{name}} es demasiado grande para leerlo en este dispositivo. Pregunta por él en un chat en tu computadora.",
+      "noTextInPhoto": "No se encontró texto en {{name}}, y {{model}} no puede ver fotos. Elige un modelo que vea fotos o pregunta en un chat en tu computadora."
     },
     "voice": {
       "start": "Dictar un mensaje",
@@ -482,7 +486,9 @@
     "loadingNamedOn": "Cargando {{model}} en {{node}}…",
     "loadingNamedOnAbout": "Cargando {{model}} en {{node}}, unos {{time}}…",
     "generating": "Generando la respuesta…",
-    "generatingOn": "Generando en {{node}}…"
+    "generatingOn": "Generando en {{node}}…",
+    "readingNamed": "Leyendo {{name}}…",
+    "readingPhotoText": "Leyendo el texto de {{name}}…"
   },
   "realms": {
     "about": "{{norse}}. {{rune}}. Acerca de este nombre",
@@ -909,6 +915,14 @@
       "edit": "Editar",
       "save": "Guardar",
       "cancel": "Cancelar"
+    },
+    "steps": {
+      "readFile": "Leyó {{name}}",
+      "readFilePart": "Leyó la primera parte de {{name}}",
+      "readPhotoText": "Leyó el texto de {{name}}, ya que {{model}} no puede ver fotos"
+    },
+    "notices": {
+      "filePart": "Solo la primera parte de {{name}} cupo en lo que {{model}} puede leer de una vez. Pregunta por una parte posterior o pregunta en un chat en tu computadora por el archivo completo."
     }
   },
   "push": {

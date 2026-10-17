@@ -285,7 +285,11 @@
       "tooLarge": "Larger than 25 MB, the most the computer takes.",
       "needsUpdate": "Update Toskar on your computer to send photos and files from this device.",
       "cameraDenied": "Toskar can't use the camera. Allow it in Settings to take a photo.",
-      "needsVision": "{{model}} can't see photos. Choose Auto or a model that sees photos, or ask in a chat on your computer."
+      "needsVision": "{{model}} can't see photos. Choose Auto or a model that sees photos, or ask in a chat on your computer.",
+      "cantRead": "{{name}} can't be read on this device. Ask about it in a chat on your computer.",
+      "noText": "{{name}} has no text to read. Ask about it in a chat on your computer.",
+      "tooLargeHere": "{{name}} is too large to read on this device. Ask about it in a chat on your computer.",
+      "noTextInPhoto": "No text found in {{name}}, and {{model}} can't see photos. Choose a model that sees photos, or ask in a chat on your computer."
     },
     "voice": {
       "start": "Speak a message",
@@ -490,7 +494,9 @@
     "loadingNamed": "Loading {{model}}…",
     "summarizing": "Summarizing earlier messages…",
     "reasoning": "Reasoning…",
-    "writingAnswer": "Writing the answer…"
+    "writingAnswer": "Writing the answer…",
+    "readingNamed": "Reading {{name}}…",
+    "readingPhotoText": "Reading the text in {{name}}…"
   },
   "realms": {
     "about": "{{norse}}. {{rune}}. About this name",
@@ -537,12 +543,16 @@
       "searched": "Searched the web for “{{query}}”",
       "read": "Read {{host}}",
       "fallbackOutOfMemory": "{{failed}} ran out of memory, so {{model}} answered instead",
-      "fallbackFailed": "{{failed}} could not load, so {{model}} answered instead"
+      "fallbackFailed": "{{failed}} could not load, so {{model}} answered instead",
+      "readFile": "Read {{name}}",
+      "readFilePart": "Read the first part of {{name}}",
+      "readPhotoText": "Read the text in {{name}}, since {{model}} can't see photos"
     },
     "notices": {
       "fallback": "{{failed}} couldn't run on this device, so {{model}} answered. The answer may be less detailed.",
       "noWeb": "I couldn't reach the web, so this answer comes from what the model already knows and may be out of date.",
-      "webOff": "Web lookup is off in Settings, so this answer may be out of date."
+      "webOff": "Web lookup is off in Settings, so this answer may be out of date.",
+      "filePart": "Only the first part of {{name}} fit in what {{model}} can read at once. Ask about a later part, or ask in a chat on your computer for the whole file."
     },
     "errors": {
       "outOfMemory": "This device ran out of memory for {{model}}. Close other apps, or pick a smaller model.",

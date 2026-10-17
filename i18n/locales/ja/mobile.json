@@ -276,7 +276,11 @@
       "tooLarge": "25 MB を超えています。コンピュータが受け取れるのは 25 MB までです。",
       "needsUpdate": "このデバイスから写真やファイルを送るには、コンピュータの Toskar をアップデートしてください。",
       "cameraDenied": "Toskar はカメラを使えません。写真を撮るには「設定」で許可してください。",
-      "needsVision": "{{model}} は写真を見られません。Auto か写真を理解するモデルを選ぶか、コンピュータのチャットで質問してください。"
+      "needsVision": "{{model}} は写真を見られません。Auto か写真を理解するモデルを選ぶか、コンピュータのチャットで質問してください。",
+      "cantRead": "{{name}}はこのデバイスでは読めません。コンピュータのチャットで尋ねてください。",
+      "noText": "{{name}}には読めるテキストがありません。コンピュータのチャットで尋ねてください。",
+      "tooLargeHere": "{{name}}は大きすぎてこのデバイスでは読めません。コンピュータのチャットで尋ねてください。",
+      "noTextInPhoto": "{{name}}にテキストが見つからず、{{model}}は写真を見られません。写真を見られるモデルを選ぶか、コンピュータのチャットで尋ねてください。"
     },
     "voice": {
       "start": "音声でメッセージを入力",
@@ -468,7 +472,9 @@
     "loadingNamedOn": "{{node}}で{{model}}を読み込んでいます…",
     "loadingNamedOnAbout": "{{node}}で{{model}}を読み込んでいます（約 {{time}}）…",
     "generating": "応答を生成しています…",
-    "generatingOn": "{{node}}で生成しています…"
+    "generatingOn": "{{node}}で生成しています…",
+    "readingNamed": "{{name}}を読んでいます…",
+    "readingPhotoText": "{{name}}のテキストを読んでいます…"
   },
   "realms": {
     "about": "{{norse}}。{{rune}}。この名前について",
@@ -878,6 +884,14 @@
       "edit": "編集",
       "save": "保存",
       "cancel": "キャンセル"
+    },
+    "steps": {
+      "readFile": "{{name}}を読みました",
+      "readFilePart": "{{name}}の最初の部分を読みました",
+      "readPhotoText": "{{model}}は写真を見られないため、{{name}}のテキストを読みました"
+    },
+    "notices": {
+      "filePart": "{{model}}が一度に読める量に収まったのは{{name}}の最初の部分だけです。後の部分について尋ねるか、ファイル全体についてはコンピュータのチャットで尋ねてください。"
     }
   },
   "push": {
