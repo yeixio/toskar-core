@@ -208,7 +208,7 @@
       },
       "relayState": {
         "connecting": "Conectando con {{relay}}…",
-        "noToken": "Aún no hay relé: suscríbete al acceso desde cualquier lugar en la app Toskar de tu teléfono o tableta, o indica abajo el relé de tu organización.",
+        "noToken": "Aún no hay relé: suscríbete arriba o en la app de Toskar de tu teléfono o tableta, o ingresa abajo el relé de tu organización.",
         "error": "No se puede conectar con {{relay}} ({{code}})."
       },
       "error": {
@@ -237,6 +237,23 @@
         "noToken": "Escribe el secreto de inscripción del relé para conectarte.",
         "error": "No se puede conectar con {{relay}} ({{code}}). Revisa el nombre y el secreto de inscripción."
       }
+    },
+    "subscription": {
+      "title": "Relé de Toskar",
+      "offer": "Cuando nada más llega a esta computadora, el relé de Toskar sí llega, para esta computadora y cada dispositivo vinculado a ella.",
+      "monthly": "Suscribirse por {{price}} al mes",
+      "yearly": "Suscribirse por {{price}} al año",
+      "billing": "Facturado por Yeix.io LLC. Cancela cuando quieras.",
+      "opening": "Abriendo…",
+      "soldOut": "El relé de Toskar no acepta suscripciones nuevas en este momento. Vuelve a intentarlo en unos días.",
+      "pending": "Termina de pagar en la página de pago. El acceso desde cualquier lugar se activa aquí unos segundos después.",
+      "reopen": "Abrir la página de pago otra vez",
+      "active": "Suscrito. El relé de Toskar llega a esta computadora cuando nada más lo hace.",
+      "activeApp": "Suscrito en la app de Toskar. Adminístralo en la tienda de tu teléfono o tableta.",
+      "manage": "Administrar facturación",
+      "ended": "Tu suscripción terminó. Vuelve a suscribirte para seguir usando el relé de Toskar.",
+      "error": "No se pudo comprobar la suscripción con el relé de Toskar ({{code}}). Toskar lo vuelve a intentar por su cuenta.",
+      "noPage": "La página de facturación no se abrió. Vuelve a intentarlo."
     }
   }
 }

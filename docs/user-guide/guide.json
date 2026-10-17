@@ -266,13 +266,14 @@
         "Access from anywhere lets the phones, tablets, and other devices you paired reach Toskar when they're away from home. It's off until you turn it on in API Access. It answers only paired devices' keys, over HTTPS, and only what those devices use: no sign-in page, no settings, and nothing for other apps' keys.",
         "While it's on, Toskar asks your router to open its port (7333 unless you change it), keeps it open, and closes it when you turn access from anywhere off or quit Toskar. The line under the switch says how Toskar can be reached: at the router's address, over IPv6, at an address you entered, through a relay, or why not, such as an internet provider that shares one address among many homes.",
         "If the router won't open a port, there are free ways around it. Forward the port in your router's settings and enter the address it's reached at under Forwarded address. Or use Tailscale: install it here and on your device, and pair the device while both are on Tailscale. The device then reaches Toskar wherever it is, with no port open at all.",
+        "When none of that works, Toskar's relay does. Subscribe under Toskar's relay in API Access, for $4.99 a month or $39.99 a year, or in the Toskar app on your phone or tablet. One subscription covers Toskar here and every device paired with it, and it turns on by itself a few seconds after you pay. Manage billing changes the card or cancels; one bought in the app is managed in your device's store.",
         "If your organization runs its own Toskar relay, open Your organization's relay in API Access and enter the relay's name and the enrollment secret your IT team gave you. Toskar then keeps a line open to the relay, so devices get through even when nothing more direct works.",
         "A device takes the most direct way that works: at home first, then directly, then through the relay. Settings on the device shows which. Traffic is encrypted all the way to Toskar, to the certificate the device saved when it was paired, so a router or relay in between can't read it or answer in Toskar's place.",
         "A device paired before access from anywhere learns the way the next time it's home."
       ],
       "steps": [
         "Open API Access and turn on Access from anywhere.",
-        "Check the line under the switch. If it says Toskar isn't reachable yet, forward the port and enter the address, use Tailscale, or set up your organization's relay.",
+        "Check the line under the switch. If it says Toskar isn't reachable yet, forward the port and enter the address, use Tailscale, subscribe to Toskar's relay, or set up your organization's relay.",
         "Take a paired device off your home Wi-Fi and open Toskar. Its Settings say how it got through."
       ]
     },

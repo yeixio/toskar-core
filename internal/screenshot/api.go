@@ -118,7 +118,7 @@ func screenshotGET(path string) (string, bool) {
 		// reaches this computer, the router's port doesn't.
 		at := time.Now().Add(-4 * time.Minute).UTC().Format(time.RFC3339)
 		return `{"enabled":true,"port":7333,"listening":"[::]:7333","port_mapping":true,"mapped":"198.51.100.24:7333","mapped_by":"upnp","reachable":"direct",` +
-			`"relay":{"name":"relay.toskar.ai:4443","state":"connected"},` +
+			`"relay":{"name":"relay.toskar.ai:4443","state":"connected"},"subscription":{"state":"active","store":"stripe"},` +
 			`"check":{"at":"` + at + `","tried":"` + at + `","relay":{"ok":true,"ms":84},"direct":[{"address":"198.51.100.24:7333","ok":false,"reason":"timeout","ms":8003}]}}`, true
 	case path == "/api/v1/conversations":
 		return screenshotConversations(), true

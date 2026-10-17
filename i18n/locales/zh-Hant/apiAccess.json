@@ -208,7 +208,7 @@
       },
       "relayState": {
         "connecting": "正在連線到 {{relay}}…",
-        "noToken": "還沒有中繼：在手機或平板上的 Toskar App 中訂閱隨處存取，或在下方填寫你所屬組織的中繼。",
+        "noToken": "還沒有中繼：請在上方訂閱，或在手機或平板上的 Toskar 應用程式中訂閱，或在下方輸入你所屬組織的中繼。",
         "error": "無法連線到 {{relay}}（{{code}}）。"
       },
       "error": {
@@ -237,6 +237,23 @@
         "noToken": "輸入中繼的註冊密鑰以連線。",
         "error": "無法連線到 {{relay}}（{{code}}）。請檢查名稱和註冊密鑰。"
       }
+    },
+    "subscription": {
+      "title": "Toskar 中繼",
+      "offer": "當其他方式都無法連到這台電腦時，Toskar 中繼可以連到它，適用於這台電腦及與其配對的每台裝置。",
+      "monthly": "以每月 {{price}} 訂閱",
+      "yearly": "以每年 {{price}} 訂閱",
+      "billing": "由 Yeix.io LLC 收費。可隨時取消。",
+      "opening": "正在開啟…",
+      "soldOut": "Toskar 中繼目前不接受新訂閱。請過幾天再試。",
+      "pending": "請在付款頁面完成付款。付款幾秒後，這裡會開啟隨處存取。",
+      "reopen": "重新開啟付款頁面",
+      "active": "已訂閱。其他方式都無法連到這台電腦時，Toskar 中繼會連到它。",
+      "activeApp": "已在 Toskar 應用程式中訂閱。請在手機或平板的商店中管理。",
+      "manage": "管理帳單",
+      "ended": "你的訂閱已結束。重新訂閱即可繼續使用 Toskar 中繼。",
+      "error": "無法透過 Toskar 中繼核對訂閱（{{code}}）。Toskar 會自動重試。",
+      "noPage": "帳單頁面沒有開啟。請再試一次。"
     }
   }
 }

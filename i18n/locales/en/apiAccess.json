@@ -208,7 +208,7 @@
       },
       "relayState": {
         "connecting": "Connecting to {{relay}}…",
-        "noToken": "No relay yet: subscribe to access from anywhere in the Toskar app on your phone or tablet, or enter your organization's relay below.",
+        "noToken": "No relay yet: subscribe above, or in the Toskar app on your phone or tablet, or enter your organization's relay below.",
         "error": "Can't connect to {{relay}} ({{code}})."
       },
       "error": {
@@ -237,6 +237,23 @@
         "noToken": "Enter the relay's enrollment secret to connect.",
         "error": "Can't connect to {{relay}} ({{code}}). Check the name and the enrollment secret."
       }
+    },
+    "subscription": {
+      "title": "Toskar's relay",
+      "offer": "When nothing else reaches this computer, Toskar's relay does, for this computer and every device paired with it.",
+      "monthly": "Subscribe for {{price}} a month",
+      "yearly": "Subscribe for {{price}} a year",
+      "billing": "Billed by Yeix.io LLC. Cancel any time.",
+      "opening": "Opening…",
+      "soldOut": "Toskar's relay isn't taking new subscriptions right now. Try again in a few days.",
+      "pending": "Finish paying on the checkout page. Access from anywhere turns on here a few seconds after.",
+      "reopen": "Open the checkout page again",
+      "active": "Subscribed. Toskar's relay reaches this computer when nothing else does.",
+      "activeApp": "Subscribed in the Toskar app. Manage it in the store on your phone or tablet.",
+      "manage": "Manage billing",
+      "ended": "Your subscription has ended. Subscribe again to keep using Toskar's relay.",
+      "error": "Couldn't check the subscription with Toskar's relay ({{code}}). Toskar tries again on its own.",
+      "noPage": "The billing page didn't open. Try again."
     }
   }
 }

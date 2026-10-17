@@ -208,7 +208,7 @@
       },
       "relayState": {
         "connecting": "Verbindung zu {{relay}} wird hergestellt…",
-        "noToken": "Noch kein Relay: Schließe in der Toskar-App auf deinem Telefon oder Tablet den Zugriff von überall ab, oder gib unten das Relay deiner Organisation ein.",
+        "noToken": "Noch kein Relay: Abonniere oben oder in der Toskar-App auf deinem Smartphone oder Tablet, oder gib unten das Relay deiner Organisation ein.",
         "error": "Keine Verbindung zu {{relay}} ({{code}})."
       },
       "error": {
@@ -237,6 +237,23 @@
         "noToken": "Gib den Registrierungsschlüssel des Relays ein, um dich zu verbinden.",
         "error": "Keine Verbindung zu {{relay}} ({{code}}). Prüfe den Namen und den Registrierungsschlüssel."
       }
+    },
+    "subscription": {
+      "title": "Relay von Toskar",
+      "offer": "Wenn sonst nichts diesen Computer erreicht, erreicht ihn das Relay von Toskar – für diesen Computer und jedes damit gekoppelte Gerät.",
+      "monthly": "Für {{price}} im Monat abonnieren",
+      "yearly": "Für {{price}} im Jahr abonnieren",
+      "billing": "Abgerechnet von Yeix.io LLC. Jederzeit kündbar.",
+      "opening": "Wird geöffnet …",
+      "soldOut": "Das Relay von Toskar nimmt gerade keine neuen Abos an. Versuch es in ein paar Tagen noch einmal.",
+      "pending": "Schließ die Zahlung auf der Bezahlseite ab. Zugriff von überall wird hier wenige Sekunden danach eingeschaltet.",
+      "reopen": "Bezahlseite erneut öffnen",
+      "active": "Abonniert. Das Relay von Toskar erreicht diesen Computer, wenn sonst nichts ihn erreicht.",
+      "activeApp": "In der Toskar-App abonniert. Verwalte das Abo im Store auf deinem Smartphone oder Tablet.",
+      "manage": "Abrechnung verwalten",
+      "ended": "Dein Abo ist beendet. Abonniere erneut, um das Relay von Toskar weiter zu nutzen.",
+      "error": "Das Abo konnte beim Relay von Toskar nicht geprüft werden ({{code}}). Toskar versucht es selbst erneut.",
+      "noPage": "Die Abrechnungsseite wurde nicht geöffnet. Versuch es noch einmal."
     }
   }
 }

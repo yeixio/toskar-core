@@ -208,7 +208,7 @@
       },
       "relayState": {
         "connecting": "Conectando a {{relay}}…",
-        "noToken": "Ainda sem relay: assine o acesso de qualquer lugar no app Toskar do seu celular ou tablet, ou informe abaixo o relay da sua organização.",
+        "noToken": "Ainda não há relay: assine acima ou no app Toskar do seu celular ou tablet, ou informe abaixo o relay da sua organização.",
         "error": "Não foi possível conectar a {{relay}} ({{code}})."
       },
       "error": {
@@ -237,6 +237,23 @@
         "noToken": "Digite o segredo de inscrição do relay para conectar.",
         "error": "Não foi possível conectar a {{relay}} ({{code}}). Confira o nome e o segredo de inscrição."
       }
+    },
+    "subscription": {
+      "title": "Relay do Toskar",
+      "offer": "Quando nada mais chega a este computador, o relay do Toskar chega, para este computador e cada dispositivo pareado com ele.",
+      "monthly": "Assinar por {{price}} por mês",
+      "yearly": "Assinar por {{price}} por ano",
+      "billing": "Cobrado pela Yeix.io LLC. Cancele quando quiser.",
+      "opening": "Abrindo…",
+      "soldOut": "O relay do Toskar não está aceitando novas assinaturas agora. Tente de novo em alguns dias.",
+      "pending": "Termine o pagamento na página de pagamento. O acesso de qualquer lugar é ativado aqui alguns segundos depois.",
+      "reopen": "Abrir a página de pagamento de novo",
+      "active": "Assinado. O relay do Toskar chega a este computador quando nada mais chega.",
+      "activeApp": "Assinado no app Toskar. Gerencie na loja do seu celular ou tablet.",
+      "manage": "Gerenciar cobrança",
+      "ended": "Sua assinatura terminou. Assine de novo para continuar usando o relay do Toskar.",
+      "error": "Não foi possível verificar a assinatura com o relay do Toskar ({{code}}). O Toskar tenta de novo sozinho.",
+      "noPage": "A página de cobrança não abriu. Tente de novo."
     }
   }
 }

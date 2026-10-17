@@ -5,7 +5,15 @@ import { api } from '@/lib/api'
 import { RemoteAccessCard } from './RemoteAccessCard'
 
 vi.mock('@/lib/api', () => ({
-  api: { getSettings: vi.fn(), getRemoteAccess: vi.fn(), updateSettings: vi.fn(), checkRemoteAccess: vi.fn(), getVersion: vi.fn() },
+  api: {
+    getSettings: vi.fn(),
+    getRemoteAccess: vi.fn(),
+    updateSettings: vi.fn(),
+    checkRemoteAccess: vi.fn(),
+    getVersion: vi.fn(),
+    startSubscriptionCheckout: vi.fn(),
+    manageSubscription: vi.fn(),
+  },
 }))
 
 describe('RemoteAccessCard (#456)', () => {
@@ -90,7 +98,7 @@ describe('RemoteAccessCard (#456)', () => {
     expect(await screen.findByText('Not reachable from outside your network')).toBeInTheDocument()
     expect(screen.getByText('Checked 5 minutes ago')).toBeInTheDocument()
     expect(screen.getByText(/Another router in front of yours \(double NAT\)/)).toBeInTheDocument()
-    expect(screen.getByText(/subscribe to access from anywhere in the Toskar app/)).toBeInTheDocument()
+    expect(screen.getByText(/No relay yet: subscribe above, or in the Toskar app/)).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'Check now' }))
     // The relay works and direct doesn't: reachable, and direct is only a speed-up (#602).
     expect(await screen.findByText('Reachable from outside your network, through the relay')).toBeInTheDocument()
@@ -223,5 +231,82 @@ describe('RemoteAccessCard (#456)', () => {
     expect(text).toContain('Version: 1.8.3')
     expect(text).toContain('<public IPv4>:7333')
     expect(text).not.toContain('198.51.100.9')
+  })
+
+  describe("Toskar's relay, bought here (#639)", () => {
+    const renderCard = (subscription: object, relay = '') => {
+      vi.mocked(api.getSettings).mockResolvedValue({ remote_access_enabled: false, remote_access_port: 7333, remote_access_relay: relay } as never)
+      vi.mocked(api.getRemoteAccess).mockResolvedValue({ enabled: false, port: 7333, subscription } as never)
+      return render(
+        <QueryClientProvider client={new QueryClient()}>
+          <RemoteAccessCard />
+        </QueryClientProvider>,
+      )
+    }
+    const fakeTab = () => ({ closed: false, opener: {}, location: { href: '' }, close: vi.fn() })
+
+    it('subscribes in a tab opened during the click, with the prices shown', async () => {
+      const tab = fakeTab()
+      const open = vi.spyOn(window, 'open').mockReturnValue(tab as unknown as Window)
+      vi.mocked(api.startSubscriptionCheckout).mockResolvedValue({ url: 'https://checkout.stripe.test/cs_1' })
+      renderCard({ state: 'none', open: true })
+      expect(await screen.findByText(/Toskar's relay does, for this computer and every device paired with it/)).toBeInTheDocument()
+      fireEvent.click(screen.getByRole('button', { name: 'Subscribe for $39.99 a year' }))
+      expect(open).toHaveBeenCalledWith('', '_blank')
+      expect(tab.opener).toBeNull()
+      await waitFor(() => expect(tab.location.href).toBe('https://checkout.stripe.test/cs_1'))
+      expect(api.startSubscriptionCheckout).toHaveBeenCalledWith('yearly')
+      expect(screen.getByRole('button', { name: 'Subscribe for $4.99 a month' })).toBeInTheDocument()
+      open.mockRestore()
+    })
+
+    it('closes the tab and says why when the checkout cannot open', async () => {
+      const tab = fakeTab()
+      const open = vi.spyOn(window, 'open').mockReturnValue(tab as unknown as Window)
+      vi.mocked(api.startSubscriptionCheckout).mockRejectedValue(new Error("Billing couldn't be reached. Try again in a minute."))
+      renderCard({ state: 'none', open: true })
+      fireEvent.click(await screen.findByRole('button', { name: 'Subscribe for $4.99 a month' }))
+      expect(await screen.findByText("Billing couldn't be reached. Try again in a minute.")).toBeInTheDocument()
+      expect(tab.close).toHaveBeenCalled()
+      open.mockRestore()
+    })
+
+    it('waits for the payment with a way back to the checkout page', async () => {
+      renderCard({ state: 'pending', store: 'stripe', checkout: 'https://checkout.stripe.test/cs_1' })
+      expect(await screen.findByText(/Finish paying on the checkout page/)).toBeInTheDocument()
+      expect(screen.getByRole('link', { name: 'Open the checkout page again' })).toHaveAttribute('href', 'https://checkout.stripe.test/cs_1')
+      expect(screen.queryByRole('button', { name: /Subscribe for/ })).not.toBeInTheDocument()
+    })
+
+    it('manages one bought here, and points to the store for one bought in the app', async () => {
+      const tab = fakeTab()
+      const open = vi.spyOn(window, 'open').mockReturnValue(tab as unknown as Window)
+      vi.mocked(api.manageSubscription).mockResolvedValue({ url: 'https://billing.stripe.test/s' })
+      const { unmount } = renderCard({ state: 'active', store: 'stripe' })
+      fireEvent.click(await screen.findByRole('button', { name: 'Manage billing' }))
+      await waitFor(() => expect(tab.location.href).toBe('https://billing.stripe.test/s'))
+      unmount()
+      open.mockRestore()
+      renderCard({ state: 'active', store: 'app' })
+      expect(await screen.findByText(/Subscribed in the Toskar app/)).toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: 'Manage billing' })).not.toBeInTheDocument()
+    })
+
+    it("can't subscribe while the relay is full, and offers it again once one ended", async () => {
+      const { unmount } = renderCard({ state: 'none', open: false })
+      expect(await screen.findByText(/isn't taking new subscriptions right now/)).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'Subscribe for $4.99 a month' })).toBeDisabled()
+      unmount()
+      renderCard({ state: 'ended', store: 'stripe' })
+      expect(await screen.findByText(/Your subscription has ended/)).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'Subscribe for $4.99 a month' })).toBeEnabled()
+    })
+
+    it("isn't shown with an organization's relay", async () => {
+      renderCard({ state: 'none' }, 'relay.example.com')
+      expect(await screen.findByText('Access from anywhere', { selector: 'h2' })).toBeInTheDocument()
+      await waitFor(() => expect(api.getRemoteAccess).toHaveBeenCalled())
+      expect(screen.queryByText("Toskar's relay", { selector: 'h3' })).not.toBeInTheDocument()
+    })
   })
 })

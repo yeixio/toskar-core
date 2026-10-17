@@ -208,7 +208,7 @@
       },
       "relayState": {
         "connecting": "Connexion à {{relay}}…",
-        "noToken": "Pas encore de relais : abonnez-vous à l’accès depuis partout dans l’app Toskar de votre téléphone ou tablette, ou saisissez ci-dessous le relais de votre organisation.",
+        "noToken": "Pas encore de relais : abonnez-vous ci-dessus ou dans l'app Toskar sur votre téléphone ou tablette, ou saisissez ci-dessous le relais de votre organisation.",
         "error": "Impossible de se connecter à {{relay}} ({{code}})."
       },
       "error": {
@@ -237,6 +237,23 @@
         "noToken": "Saisissez le secret d'inscription du relais pour vous connecter.",
         "error": "Impossible de se connecter à {{relay}} ({{code}}). Vérifiez le nom et le secret d'inscription."
       }
+    },
+    "subscription": {
+      "title": "Relais de Toskar",
+      "offer": "Quand rien d'autre n'atteint cet ordinateur, le relais de Toskar l'atteint, pour cet ordinateur et chaque appareil associé.",
+      "monthly": "S'abonner pour {{price}} par mois",
+      "yearly": "S'abonner pour {{price}} par an",
+      "billing": "Facturé par Yeix.io LLC. Résiliable à tout moment.",
+      "opening": "Ouverture…",
+      "soldOut": "Le relais de Toskar n'accepte pas de nouveaux abonnements pour le moment. Réessayez dans quelques jours.",
+      "pending": "Terminez le paiement sur la page de paiement. L'accès depuis n'importe où s'active ici quelques secondes après.",
+      "reopen": "Rouvrir la page de paiement",
+      "active": "Abonné. Le relais de Toskar atteint cet ordinateur quand rien d'autre ne l'atteint.",
+      "activeApp": "Abonné dans l'app Toskar. Gérez l'abonnement dans la boutique de votre téléphone ou tablette.",
+      "manage": "Gérer la facturation",
+      "ended": "Votre abonnement a pris fin. Réabonnez-vous pour continuer à utiliser le relais de Toskar.",
+      "error": "Impossible de vérifier l'abonnement auprès du relais de Toskar ({{code}}). Toskar réessaie de lui-même.",
+      "noPage": "La page de facturation ne s'est pas ouverte. Réessayez."
     }
   }
 }

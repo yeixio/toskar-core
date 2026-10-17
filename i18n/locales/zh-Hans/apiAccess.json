@@ -208,7 +208,7 @@
       },
       "relayState": {
         "connecting": "正在连接 {{relay}}…",
-        "noToken": "还没有中继：在手机或平板上的 Toskar 应用中订阅随处访问，或在下方填写你所在组织的中继。",
+        "noToken": "还没有中继：请在上方订阅，或在手机或平板上的 Toskar 应用中订阅，或在下方输入你所在组织的中继。",
         "error": "无法连接到 {{relay}}（{{code}}）。"
       },
       "error": {
@@ -237,6 +237,23 @@
         "noToken": "输入中继的注册密钥以连接。",
         "error": "无法连接到 {{relay}}（{{code}}）。请检查名称和注册密钥。"
       }
+    },
+    "subscription": {
+      "title": "Toskar 中继",
+      "offer": "当其他方式都无法连到这台电脑时，Toskar 中继可以连到它，适用于这台电脑及与其配对的每台设备。",
+      "monthly": "以每月 {{price}} 订阅",
+      "yearly": "以每年 {{price}} 订阅",
+      "billing": "由 Yeix.io LLC 收费。可随时取消。",
+      "opening": "正在打开…",
+      "soldOut": "Toskar 中继目前不接受新订阅。请过几天再试。",
+      "pending": "请在付款页面完成付款。付款几秒后，这里会开启随处访问。",
+      "reopen": "重新打开付款页面",
+      "active": "已订阅。其他方式都无法连到这台电脑时，Toskar 中继会连到它。",
+      "activeApp": "已在 Toskar 应用中订阅。请在手机或平板的应用商店中管理。",
+      "manage": "管理账单",
+      "ended": "你的订阅已结束。重新订阅即可继续使用 Toskar 中继。",
+      "error": "无法通过 Toskar 中继核对订阅（{{code}}）。Toskar 会自动重试。",
+      "noPage": "账单页面没有打开。请再试一次。"
     }
   }
 }

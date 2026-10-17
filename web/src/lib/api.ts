@@ -631,6 +631,19 @@ export type ReachCheck = {
   error?: string
 }
 
+/** Access from anywhere on Toskar's relay, as GET /remote-access says (#639). */
+export type AnywhereSubscription = {
+  state: 'none' | 'pending' | 'active' | 'ended'
+  /** stripe when bought here in Settings, app when bought in the Toskar app. */
+  store?: 'stripe' | 'app'
+  expires?: string
+  /** Whether Toskar's relay takes new subscriptions now; missing until it's been asked. */
+  open?: boolean
+  /** The open checkout's page, while pending. */
+  checkout?: string
+  error?: string
+}
+
 export const api = {
   /** How the API speaks HTTPS on the local network (#213). */
   /** Access from anywhere's setting and what its listener is doing (#456). */
@@ -654,7 +667,16 @@ export const api = {
       check?: ReachCheck
       /** Other Toskars running on this computer (#602). */
       others?: { name: string; pid: number; api_port: number; data_dir: string; version: string; remote?: boolean }[]
+      /** Access from anywhere on Toskar's relay as this computer has it (#639); missing with an organization's relay. */
+      subscription?: AnywhereSubscription
     }>('/api/v1/remote-access'),
+
+  /** Opens a Stripe checkout for access from anywhere on this computer (#639); answers its page. */
+  startSubscriptionCheckout: (plan: 'monthly' | 'yearly') =>
+    request<{ url: string }>('/api/v1/remote-access/subscription/checkout', { method: 'POST', body: JSON.stringify({ plan }) }),
+
+  /** Stripe's billing page for the subscription bought here (#639). */
+  manageSubscription: () => request<{ url: string }>('/api/v1/remote-access/subscription/manage', { method: 'POST' }),
 
   /** Has the relay reach this computer from the internet now (#546); answers what getRemoteAccess does. */
   checkRemoteAccess: () =>

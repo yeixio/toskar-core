@@ -208,7 +208,7 @@
       },
       "relayState": {
         "connecting": "Connessione a {{relay}}…",
-        "noToken": "Nessun relay ancora: abbonati all'accesso ovunque nell'app Toskar sul telefono o tablet, oppure inserisci qui sotto il relay della tua organizzazione.",
+        "noToken": "Nessun relay ancora: abbonati qui sopra o nell'app Toskar sul telefono o tablet, oppure inserisci qui sotto il relay della tua organizzazione.",
         "error": "Impossibile connettersi a {{relay}} ({{code}})."
       },
       "error": {
@@ -237,6 +237,23 @@
         "noToken": "Inserisci il segreto di registrazione del relay per connetterti.",
         "error": "Impossibile connettersi a {{relay}} ({{code}}). Controlla il nome e il segreto di registrazione."
       }
+    },
+    "subscription": {
+      "title": "Relay di Toskar",
+      "offer": "Quando nient'altro raggiunge questo computer, lo raggiunge il relay di Toskar, per questo computer e ogni dispositivo associato.",
+      "monthly": "Abbonati a {{price}} al mese",
+      "yearly": "Abbonati a {{price}} all'anno",
+      "billing": "Fatturato da Yeix.io LLC. Puoi annullare quando vuoi.",
+      "opening": "Apertura…",
+      "soldOut": "Il relay di Toskar al momento non accetta nuovi abbonamenti. Riprova tra qualche giorno.",
+      "pending": "Completa il pagamento nella pagina di pagamento. L'accesso da ovunque si attiva qui pochi secondi dopo.",
+      "reopen": "Riapri la pagina di pagamento",
+      "active": "Abbonato. Il relay di Toskar raggiunge questo computer quando nient'altro lo raggiunge.",
+      "activeApp": "Abbonato nell'app Toskar. Gestiscilo nello store del telefono o del tablet.",
+      "manage": "Gestisci fatturazione",
+      "ended": "Il tuo abbonamento è terminato. Abbonati di nuovo per continuare a usare il relay di Toskar.",
+      "error": "Impossibile verificare l'abbonamento con il relay di Toskar ({{code}}). Toskar riprova da solo.",
+      "noPage": "La pagina di fatturazione non si è aperta. Riprova."
     }
   }
 }
