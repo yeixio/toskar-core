@@ -231,7 +231,8 @@
       "connector": "Service connecté",
       "notification": "Notification",
       "community_ratings": "Notes de la communauté",
-      "update_check": "Recherche de mises à jour"
+      "update_check": "Recherche de mises à jour",
+      "problem_report": "Signalement"
     },
     "kindsLower": {
       "web_search": "recherche web",
@@ -242,7 +243,8 @@
       "connector": "service connecté",
       "notification": "notification",
       "community_ratings": "notes de la communauté",
-      "update_check": "recherche de mises à jour"
+      "update_check": "recherche de mises à jour",
+      "problem_report": "signalement"
     },
     "sources": {
       "chat": "Discussion",
@@ -332,5 +334,11 @@
     "neverUsed": "Pas encore utilisé",
     "confirm": "Déconnecter {{name}} ? Il lui faudra un nouveau code pour se reconnecter.",
     "pushOn": "Notifications activées"
+  },
+  "reports": {
+    "title": "Signalements",
+    "description": "Signaler, à côté d'une erreur, envoie ce qui n'a pas marché à l'équipe Toskar, après avoir montré à la personne tout ce qui est envoyé.",
+    "send": "Permettre d'envoyer des signalements à Toskar",
+    "sendHint": "Désactivé, Signaler copie seulement le signalement, à donner à la personne qui gère Toskar ici."
   }
 }

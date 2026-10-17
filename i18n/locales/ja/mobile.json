@@ -693,7 +693,8 @@
       "connector": "連携サービス",
       "notification": "通知",
       "community_ratings": "コミュニティ評価",
-      "update_check": "アップデートの確認"
+      "update_check": "アップデートの確認",
+      "problem_report": "問題の報告"
     },
     "kindsLower": {
       "web_search": "Web検索",
@@ -704,7 +705,8 @@
       "connector": "連携サービス",
       "notification": "通知",
       "community_ratings": "コミュニティ評価",
-      "update_check": "アップデートの確認"
+      "update_check": "アップデートの確認",
+      "problem_report": "問題の報告"
     },
     "sources": {
       "chat": "チャット",

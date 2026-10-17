@@ -74,7 +74,7 @@
   "report": {
     "open": "Signaler",
     "title": "Signaler ce problème",
-    "body": "Ceci est envoyé à l'équipe Toskar à {{address}}. Les noms, adresses et clés sont retirés d'abord, et vous voyez tout avant l'envoi.",
+    "body": "Ceci va à l'équipe Toskar, où il devient un ticket qu'elle peut corriger. Les noms, adresses et clés sont retirés avant, et vous voyez tout avant l'envoi.",
     "noteLabel": "Que faisiez-vous ? (facultatif)",
     "notePlaceholder": "Par exemple : j'ai demandé la météo de demain",
     "whatSends": "Ce qui est envoyé",
@@ -82,7 +82,20 @@
     "cancel": "Annuler",
     "copy": "Copier",
     "copied": "Copié",
-    "send": "Envoyer par e-mail"
+    "send": "Envoyer",
+    "sending": "Envoi…",
+    "sent": "Envoyé. Merci : l'équipe Toskar va regarder.",
+    "sentAdded": "Envoyé. D'autres ont eu le même problème, et le vôtre s'ajoute au leur.",
+    "done": "Terminé",
+    "off": "Un administrateur a désactivé l'envoi des signalements à Toskar. Copiez le signalement et donnez-le à la personne qui gère Toskar ici.",
+    "emailLabel": "E-mail, pour une réponse (facultatif)",
+    "emailHint": "Seule l'équipe Toskar le voit ; il n'apparaît jamais dans le signalement.",
+    "details": "Inclure les détails",
+    "detailsHint": "La version de Toskar, le système et le processeur de cet ordinateur, et pour un administrateur ses avertissements et erreurs récents.",
+    "failed": "Il n'a pas pu être envoyé d'ici pour le moment. Envoyez le même signalement par e-mail.",
+    "invalid": "Vérifiez l'adresse e-mail, puis renvoyez.",
+    "sendEmail": "Envoyer par e-mail",
+    "orEmail": "Ou l'envoyer par e-mail"
   },
   "loadError": {
     "title": "Toskar n'a pas pu charger ceci",

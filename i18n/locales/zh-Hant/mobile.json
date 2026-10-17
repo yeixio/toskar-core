@@ -693,7 +693,8 @@
       "connector": "已連結的服務",
       "notification": "通知",
       "community_ratings": "社群評分",
-      "update_check": "檢查更新"
+      "update_check": "檢查更新",
+      "problem_report": "問題回報"
     },
     "kindsLower": {
       "web_search": "網路搜尋",
@@ -704,7 +705,8 @@
       "connector": "已連結的服務",
       "notification": "通知",
       "community_ratings": "社群評分",
-      "update_check": "檢查更新"
+      "update_check": "檢查更新",
+      "problem_report": "問題回報"
     },
     "sources": {
       "chat": "聊天",

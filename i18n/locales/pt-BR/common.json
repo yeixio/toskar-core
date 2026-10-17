@@ -74,7 +74,7 @@
   "report": {
     "open": "Relatar",
     "title": "Relatar este problema",
-    "body": "Isto vai para a equipe do Toskar em {{address}}. Nomes, endereços e chaves são removidos antes, e você vê tudo antes do envio.",
+    "body": "Isto vai para a equipe do Toskar, onde vira um problema que ela pode corrigir. Nomes, endereços e chaves são removidos antes, e você vê tudo antes de enviar.",
     "noteLabel": "O que você estava fazendo? (opcional)",
     "notePlaceholder": "Por exemplo: perguntei a previsão do tempo de amanhã",
     "whatSends": "O que é enviado",
@@ -82,7 +82,20 @@
     "cancel": "Cancelar",
     "copy": "Copiar",
     "copied": "Copiado",
-    "send": "Enviar por e-mail"
+    "send": "Enviar",
+    "sending": "Enviando…",
+    "sent": "Enviado. Obrigado: a equipe do Toskar vai analisar.",
+    "sentAdded": "Enviado. Outras pessoas também passaram por isso, e o seu foi somado ao delas.",
+    "done": "Pronto",
+    "off": "Um administrador desativou o envio de relatórios ao Toskar. Copie o relatório e entregue a quem administra o Toskar aqui.",
+    "emailLabel": "E-mail, para uma resposta (opcional)",
+    "emailHint": "Só a equipe do Toskar vê; ele nunca entra no relatório.",
+    "details": "Incluir detalhes",
+    "detailsHint": "A versão do Toskar, o sistema e o processador deste computador e, para um administrador, os avisos e erros recentes.",
+    "failed": "Não foi possível enviar daqui agora. Envie o mesmo relatório por e-mail.",
+    "invalid": "Confira o e-mail e envie de novo.",
+    "sendEmail": "Enviar por e-mail",
+    "orEmail": "Ou envie por e-mail"
   },
   "loadError": {
     "title": "O Toskar não conseguiu carregar isto",

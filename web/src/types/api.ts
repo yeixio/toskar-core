@@ -828,6 +828,8 @@ export interface SettingsView {
   ratings_prompts?: boolean
   /** Look at toskar.ai once a day for a newer version. */
   update_check?: boolean
+  /** Report this may send reports to Toskar (#588); off, it only copies or emails them. */
+  problem_reports?: boolean
   tool_terminal?: string
   tool_file_writes?: string
   tool_git?: string
@@ -1145,6 +1147,7 @@ export interface SettingsPatch {
   huggingface_token?: string
   community_ratings?: boolean
   update_check?: boolean
+  problem_reports?: boolean
   ratings_prompts?: boolean
   assistant_language_mode?: AssistantLanguageMode
   assistant_language?: string
@@ -1989,7 +1992,7 @@ export interface PersonalStyle {
   instructions?: string
 }
 
-export type EgressKind = 'web_search' | 'web_page' | 'places' | 'paired_computer' | 'external_server' | 'connector' | 'notification' | 'community_ratings' | 'update_check'
+export type EgressKind = 'web_search' | 'web_page' | 'places' | 'paired_computer' | 'external_server' | 'connector' | 'notification' | 'community_ratings' | 'update_check' | 'problem_report'
 
 /** The OpenAI-compatible server whose models can be chosen for a chat (#111). */
 export interface ExternalServerInfo {

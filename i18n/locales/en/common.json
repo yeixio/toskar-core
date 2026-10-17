@@ -73,7 +73,7 @@
   "report": {
     "open": "Report this",
     "title": "Report this problem",
-    "body": "This goes to the Toskar team at {{address}}. Names, addresses, and keys are taken out first, and you'll see everything before it goes.",
+    "body": "This goes to the Toskar team, where it becomes an issue they can fix. Names, addresses, and keys are taken out first, and you see everything before it goes.",
     "noteLabel": "What were you doing? (optional)",
     "notePlaceholder": "For example: I asked about tomorrow's weather",
     "whatSends": "What it sends",
@@ -81,7 +81,20 @@
     "cancel": "Cancel",
     "copy": "Copy",
     "copied": "Copied",
-    "send": "Send by email"
+    "send": "Send",
+    "sending": "Sending…",
+    "sent": "Sent. Thanks: the Toskar team will look at it.",
+    "sentAdded": "Sent. Others hit this too, and yours is added to theirs.",
+    "done": "Done",
+    "off": "An Admin turned off sending reports to Toskar. Copy the report and give it to whoever runs Toskar here.",
+    "emailLabel": "Email, for a reply (optional)",
+    "emailHint": "Only the Toskar team sees it; it's never in the report.",
+    "details": "Include details",
+    "detailsHint": "This computer's Toskar version, system, and processor, and for an Admin its recent warnings and errors.",
+    "failed": "It couldn't be sent from here right now. Send the same report by email instead.",
+    "invalid": "Check the email address, then send again.",
+    "sendEmail": "Send by email",
+    "orEmail": "Or send it by email"
   },
   "loadError": {
     "title": "Toskar couldn't load this",

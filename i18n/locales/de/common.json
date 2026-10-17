@@ -73,7 +73,7 @@
   "report": {
     "open": "Melden",
     "title": "Dieses Problem melden",
-    "body": "Das geht an das Toskar-Team unter {{address}}. Namen, Adressen und Schlüssel werden vorher entfernt, und du siehst alles, bevor es gesendet wird.",
+    "body": "Das geht an das Toskar-Team und wird dort zu einem Issue, das es beheben kann. Namen, Adressen und Schlüssel werden vorher entfernt, und du siehst alles, bevor es gesendet wird.",
     "noteLabel": "Was hast du gerade gemacht? (optional)",
     "notePlaceholder": "Zum Beispiel: Ich habe nach dem Wetter für morgen gefragt",
     "whatSends": "Was gesendet wird",
@@ -81,7 +81,20 @@
     "cancel": "Abbrechen",
     "copy": "Kopieren",
     "copied": "Kopiert",
-    "send": "Per E-Mail senden"
+    "send": "Senden",
+    "sending": "Wird gesendet…",
+    "sent": "Gesendet. Danke: Das Toskar-Team schaut es sich an.",
+    "sentAdded": "Gesendet. Andere hatten das auch, deins wurde ihrem hinzugefügt.",
+    "done": "Fertig",
+    "off": "Ein Admin hat das Senden von Berichten an Toskar ausgeschaltet. Kopiere den Bericht und gib ihn der Person, die Toskar hier betreut.",
+    "emailLabel": "E-Mail für eine Antwort (optional)",
+    "emailHint": "Nur das Toskar-Team sieht sie; sie steht nie im Bericht.",
+    "details": "Details mitsenden",
+    "detailsHint": "Toskar-Version, System und Prozessor dieses Computers, für einen Admin auch die letzten Warnungen und Fehler.",
+    "failed": "Von hier konnte er gerade nicht gesendet werden. Sende denselben Bericht stattdessen per E-Mail.",
+    "invalid": "Prüfe die E-Mail-Adresse und sende erneut.",
+    "sendEmail": "Per E-Mail senden",
+    "orEmail": "Oder per E-Mail senden"
   },
   "loadError": {
     "title": "Toskar konnte das nicht laden",

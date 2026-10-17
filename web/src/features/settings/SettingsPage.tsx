@@ -583,6 +583,25 @@ export function SettingsPage() {
                 />
               </div>
             </section>
+
+            <section className="card space-y-4">
+              <div>
+                <h2 className="section-title">{t('reports.title')}</h2>
+                <p className="mt-1 text-sm text-ink-muted">{t('reports.description')}</p>
+              </div>
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-sm font-medium text-ink">{t('reports.send')}</p>
+                  <p className="mt-1 text-xs text-ink-muted">{t('reports.sendHint')}</p>
+                </div>
+                <Toggle
+                  label={t('reports.send')}
+                  checked={settings?.problem_reports ?? true}
+                  disabled={busy}
+                  onChange={() => patch({ problem_reports: !(settings?.problem_reports ?? true) })}
+                />
+              </div>
+            </section>
           </div>
 
           <div className="settings-group">

@@ -1555,6 +1555,9 @@ export const api = {
   getRuntimeHistory: () => request<RuntimeHistory>('/api/v1/diagnostics/runtime'),
   /** What a problem report sends, scrubbed (#588). */
   getReport: () => request<DiagnosticsReport>('/api/v1/diagnostics/report'),
+  /** Sends a problem report to Toskar's report service through this computer (#588). */
+  sendReport: (body: { product: 'core'; app: string; where: string; code?: string; error: string; note?: string; email?: string; details: boolean }) =>
+    request<{ status: 'created' | 'added'; number: number }>('/api/v1/diagnostics/report', { method: 'POST', body: JSON.stringify(body) }),
   getFirstAnswers: (days = 7) => request<FirstAnswers>(`/api/v1/diagnostics/first-answers?days=${days}`),
   /** Each computer's live CPU, memory, and GPU figures, this one first (#317). */
   getLiveFigures: () => request<LiveFigures[]>('/api/v1/performance/live'),

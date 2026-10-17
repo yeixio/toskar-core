@@ -693,7 +693,8 @@
       "connector": "연결된 서비스",
       "notification": "알림",
       "community_ratings": "커뮤니티 평가",
-      "update_check": "업데이트 확인"
+      "update_check": "업데이트 확인",
+      "problem_report": "문제 보고"
     },
     "kindsLower": {
       "web_search": "웹 검색",
@@ -704,7 +705,8 @@
       "connector": "연결된 서비스",
       "notification": "알림",
       "community_ratings": "커뮤니티 평가",
-      "update_check": "업데이트 확인"
+      "update_check": "업데이트 확인",
+      "problem_report": "문제 보고"
     },
     "sources": {
       "chat": "채팅",

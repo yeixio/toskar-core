@@ -72,7 +72,7 @@
   "report": {
     "open": "回報",
     "title": "回報此問題",
-    "body": "這會傳送給 Toskar 團隊（{{address}}）。名稱、位址和金鑰會先被移除，傳送前你可以看到全部內容。",
+    "body": "回報會傳送給 Toskar 團隊，成為他們可以修正的問題。名字、地址和金鑰會先被移除，傳送前你能看到全部內容。",
     "noteLabel": "你當時在做什麼？（選填）",
     "notePlaceholder": "例如：我問了明天的天氣",
     "whatSends": "傳送的內容",
@@ -80,7 +80,20 @@
     "cancel": "取消",
     "copy": "複製",
     "copied": "已複製",
-    "send": "透過電子郵件傳送"
+    "send": "傳送",
+    "sending": "正在傳送…",
+    "sent": "已傳送。謝謝，Toskar 團隊會查看。",
+    "sentAdded": "已傳送。其他人也遇到了這個問題，你的回報已加入其中。",
+    "done": "完成",
+    "off": "管理員已關閉向 Toskar 傳送回報。請複製回報，交給這裡負責 Toskar 的人。",
+    "emailLabel": "用於回覆的電子郵件（選填）",
+    "emailHint": "只有 Toskar 團隊看得到，不會出現在回報中。",
+    "details": "包含詳細資訊",
+    "detailsHint": "這台電腦的 Toskar 版本、系統和處理器；管理員還會包含最近的警告和錯誤。",
+    "failed": "現在無法從這裡傳送。請改用電子郵件傳送同一份回報。",
+    "invalid": "請檢查電子郵件地址，然後重新傳送。",
+    "sendEmail": "透過電子郵件傳送",
+    "orEmail": "也可以透過電子郵件傳送"
   },
   "loadError": {
     "title": "Toskar 無法載入此內容",

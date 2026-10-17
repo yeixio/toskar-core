@@ -798,7 +798,8 @@
       "connector": "Connected service",
       "notification": "Notification",
       "community_ratings": "Community ratings",
-      "update_check": "Update check"
+      "update_check": "Update check",
+      "problem_report": "Problem report"
     },
     "kindsLower": {
       "web_search": "web search",
@@ -809,7 +810,8 @@
       "connector": "connected service",
       "notification": "notification",
       "community_ratings": "community ratings",
-      "update_check": "update check"
+      "update_check": "update check",
+      "problem_report": "problem report"
     },
     "sources": {
       "chat": "Chat",

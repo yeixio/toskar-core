@@ -217,7 +217,8 @@
       "connector": "연결된 서비스",
       "notification": "알림",
       "community_ratings": "커뮤니티 평가",
-      "update_check": "업데이트 확인"
+      "update_check": "업데이트 확인",
+      "problem_report": "문제 보고"
     },
     "kindsLower": {
       "web_search": "웹 검색",
@@ -228,7 +229,8 @@
       "connector": "연결된 서비스",
       "notification": "알림",
       "community_ratings": "커뮤니티 평가",
-      "update_check": "업데이트 확인"
+      "update_check": "업데이트 확인",
+      "problem_report": "문제 보고"
     },
     "sources": {
       "chat": "채팅",
@@ -314,5 +316,11 @@
     "neverUsed": "아직 사용 안 함",
     "confirm": "{{name}} 연결을 해제할까요? 다시 연결하려면 새 코드가 필요해요.",
     "pushOn": "알림 켜짐"
+  },
+  "reports": {
+    "title": "문제 보고",
+    "description": "오류 옆의 신고는 보내는 내용을 모두 보여 준 뒤, 무엇이 잘못됐는지 Toskar 팀에 보내요.",
+    "send": "Toskar로 보고를 보낼 수 있게 하기",
+    "sendHint": "끄면 신고는 보고를 복사만 해요. 여기서 Toskar를 관리하는 사람에게 전해 주세요."
   }
 }

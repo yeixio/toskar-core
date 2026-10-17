@@ -217,7 +217,8 @@
       "connector": "已連結的服務",
       "notification": "通知",
       "community_ratings": "社群評分",
-      "update_check": "檢查更新"
+      "update_check": "檢查更新",
+      "problem_report": "問題回報"
     },
     "kindsLower": {
       "web_search": "網路搜尋",
@@ -228,7 +229,8 @@
       "connector": "已連結的服務",
       "notification": "通知",
       "community_ratings": "社群評分",
-      "update_check": "檢查更新"
+      "update_check": "檢查更新",
+      "problem_report": "問題回報"
     },
     "sources": {
       "chat": "聊天",
@@ -314,5 +316,11 @@
     "neverUsed": "尚未使用",
     "confirm": "要中斷 {{name}} 的連線嗎？重新連線需要新的代碼。",
     "pushOn": "通知已開啟"
+  },
+  "reports": {
+    "title": "問題回報",
+    "description": "錯誤旁的「回報」會先向使用者顯示要傳送的全部內容，再把出錯情況傳送給 Toskar 團隊。",
+    "send": "允許向 Toskar 傳送回報",
+    "sendHint": "關閉後，「回報」只會複製回報，以便交給這裡負責 Toskar 的人。"
   }
 }

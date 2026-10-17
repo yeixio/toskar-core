@@ -705,7 +705,8 @@
       "connector": "Verbundener Dienst",
       "notification": "Mitteilung",
       "community_ratings": "Community-Bewertungen",
-      "update_check": "Update-Prüfung"
+      "update_check": "Update-Prüfung",
+      "problem_report": "Problembericht"
     },
     "kindsLower": {
       "web_search": "Websuche",
@@ -716,7 +717,8 @@
       "connector": "verbundener Dienst",
       "notification": "Mitteilung",
       "community_ratings": "Community-Bewertungen",
-      "update_check": "Update-Prüfung"
+      "update_check": "Update-Prüfung",
+      "problem_report": "Problembericht"
     },
     "sources": {
       "chat": "Chat",

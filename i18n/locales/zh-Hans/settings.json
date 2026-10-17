@@ -217,7 +217,8 @@
       "connector": "已连接的服务",
       "notification": "通知",
       "community_ratings": "社区评分",
-      "update_check": "检查更新"
+      "update_check": "检查更新",
+      "problem_report": "问题报告"
     },
     "kindsLower": {
       "web_search": "网络搜索",
@@ -228,7 +229,8 @@
       "connector": "已连接的服务",
       "notification": "通知",
       "community_ratings": "社区评分",
-      "update_check": "检查更新"
+      "update_check": "检查更新",
+      "problem_report": "问题报告"
     },
     "sources": {
       "chat": "聊天",
@@ -314,5 +316,11 @@
     "neverUsed": "尚未使用",
     "confirm": "要断开 {{name}} 吗？重新连接需要新的代码。",
     "pushOn": "通知已开启"
+  },
+  "reports": {
+    "title": "问题报告",
+    "description": "错误旁的“报告”会先向用户展示要发送的全部内容，再把出错情况发送给 Toskar 团队。",
+    "send": "允许向 Toskar 发送报告",
+    "sendHint": "关闭后，“报告”只会复制报告，以便交给这里负责 Toskar 的人。"
   }
 }

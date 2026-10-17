@@ -231,7 +231,8 @@
       "connector": "Serviço conectado",
       "notification": "Notificação",
       "community_ratings": "Avaliações da comunidade",
-      "update_check": "Verificação de atualizações"
+      "update_check": "Verificação de atualizações",
+      "problem_report": "Relatório de problema"
     },
     "kindsLower": {
       "web_search": "pesquisa na web",
@@ -242,7 +243,8 @@
       "connector": "serviço conectado",
       "notification": "notificação",
       "community_ratings": "avaliações da comunidade",
-      "update_check": "verificação de atualizações"
+      "update_check": "verificação de atualizações",
+      "problem_report": "relatório de problema"
     },
     "sources": {
       "chat": "Chat",
@@ -332,5 +334,11 @@
     "neverUsed": "Ainda não usado",
     "confirm": "Desconectar {{name}}? Ele vai precisar de um novo código para se conectar de novo.",
     "pushOn": "Notificações ativadas"
+  },
+  "reports": {
+    "title": "Relatórios de problemas",
+    "description": "Relatar, ao lado de um erro, envia o que deu errado para a equipe do Toskar, depois de mostrar à pessoa tudo o que é enviado.",
+    "send": "Permitir enviar relatórios ao Toskar",
+    "sendHint": "Desativado, Relatar só copia o relatório, para entregar a quem administra o Toskar aqui."
   }
 }

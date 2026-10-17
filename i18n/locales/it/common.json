@@ -74,7 +74,7 @@
   "report": {
     "open": "Segnala",
     "title": "Segnala questo problema",
-    "body": "Viene inviato al team di Toskar a {{address}}. Nomi, indirizzi e chiavi vengono rimossi prima, e vedi tutto prima dell'invio.",
+    "body": "Arriva al team di Toskar, dove diventa una segnalazione che può correggere. Nomi, indirizzi e chiavi vengono rimossi prima, e vedi tutto prima dell'invio.",
     "noteLabel": "Cosa stavi facendo? (facoltativo)",
     "notePlaceholder": "Ad esempio: ho chiesto il meteo di domani",
     "whatSends": "Cosa viene inviato",
@@ -82,7 +82,20 @@
     "cancel": "Annulla",
     "copy": "Copia",
     "copied": "Copiato",
-    "send": "Invia per email"
+    "send": "Invia",
+    "sending": "Invio…",
+    "sent": "Inviata. Grazie: il team di Toskar la esaminerà.",
+    "sentAdded": "Inviata. È successo anche ad altri, e la tua si aggiunge alla loro.",
+    "done": "Fatto",
+    "off": "Un amministratore ha disattivato l'invio delle segnalazioni a Toskar. Copia la segnalazione e consegnala a chi gestisce Toskar qui.",
+    "emailLabel": "Email, per una risposta (facoltativa)",
+    "emailHint": "La vede solo il team di Toskar; non compare mai nella segnalazione.",
+    "details": "Includi i dettagli",
+    "detailsHint": "La versione di Toskar, il sistema e il processore di questo computer e, per un amministratore, i suoi avvisi ed errori recenti.",
+    "failed": "Al momento non è stato possibile inviarla da qui. Invia la stessa segnalazione per email.",
+    "invalid": "Controlla l'indirizzo email, poi invia di nuovo.",
+    "sendEmail": "Invia per email",
+    "orEmail": "Oppure inviala per email"
   },
   "loadError": {
     "title": "Toskar non è riuscito a caricare questo",

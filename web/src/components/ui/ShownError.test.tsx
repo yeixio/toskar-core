@@ -7,7 +7,10 @@ import { ShownError, shownError, shownOr } from './ShownError'
 
 vi.mock('@/lib/api', async (importOriginal) => ({
   ...(await importOriginal<typeof import('@/lib/api')>()),
-  api: { getReport: vi.fn().mockResolvedValue({ version: '1.9.0', contract: '1.36', os: 'darwin', arch: 'arm64' }) },
+  api: {
+    getReport: vi.fn().mockResolvedValue({ version: '1.9.0', contract: '1.36', os: 'darwin', arch: 'arm64' }),
+    getSettings: vi.fn().mockResolvedValue({ problem_reports: true }),
+  },
 }))
 
 function show(node: React.ReactNode) {
@@ -23,7 +26,7 @@ describe('ShownError (#588)', () => {
     show(<ShownError error='model "qwen3" not installed' code="MODEL_NOT_INSTALLED" details={{ model_id: 'qwen3' }} />)
     expect(screen.getByText("qwen3 isn't installed.")).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'Report this' }))
-    const send = screen.getByRole('link', { name: 'Send by email' })
+    const send = screen.getByRole('link', { name: 'Or send it by email' })
     expect(send.getAttribute('href')).toContain('MODEL_NOT_INSTALLED')
   })
 

@@ -217,7 +217,8 @@
       "connector": "連携サービス",
       "notification": "通知",
       "community_ratings": "コミュニティ評価",
-      "update_check": "アップデートの確認"
+      "update_check": "アップデートの確認",
+      "problem_report": "問題の報告"
     },
     "kindsLower": {
       "web_search": "Web検索",
@@ -228,7 +229,8 @@
       "connector": "連携サービス",
       "notification": "通知",
       "community_ratings": "コミュニティ評価",
-      "update_check": "アップデートの確認"
+      "update_check": "アップデートの確認",
+      "problem_report": "問題の報告"
     },
     "sources": {
       "chat": "チャット",
@@ -314,5 +316,11 @@
     "neverUsed": "未使用",
     "confirm": "{{name}}の接続を解除しますか？再接続には新しいコードが必要です。",
     "pushOn": "通知オン"
+  },
+  "reports": {
+    "title": "問題の報告",
+    "description": "エラーの横にある「報告する」は、送信する内容をすべて見せたうえで、何が起きたかを Toskar チームに送ります。",
+    "send": "Toskar への報告の送信を許可する",
+    "sendHint": "オフの場合、「報告する」は報告をコピーするだけです。ここで Toskar を管理している人に渡してください。"
   }
 }

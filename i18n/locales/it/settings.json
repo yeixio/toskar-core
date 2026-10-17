@@ -231,7 +231,8 @@
       "connector": "Servizio collegato",
       "notification": "Notifica",
       "community_ratings": "Valutazioni della community",
-      "update_check": "Controllo aggiornamenti"
+      "update_check": "Controllo aggiornamenti",
+      "problem_report": "Segnalazione"
     },
     "kindsLower": {
       "web_search": "ricerca web",
@@ -242,7 +243,8 @@
       "connector": "servizio collegato",
       "notification": "notifica",
       "community_ratings": "valutazioni della community",
-      "update_check": "controllo aggiornamenti"
+      "update_check": "controllo aggiornamenti",
+      "problem_report": "segnalazione"
     },
     "sources": {
       "chat": "Chat",
@@ -332,5 +334,11 @@
     "neverUsed": "Non ancora usato",
     "confirm": "Scollegare {{name}}? Servirà un nuovo codice per ricollegarlo.",
     "pushOn": "Notifiche attive"
+  },
+  "reports": {
+    "title": "Segnalazioni di problemi",
+    "description": "Segnala, accanto a un errore, invia cosa è andato storto al team di Toskar, dopo aver mostrato alla persona tutto ciò che invia.",
+    "send": "Consenti di inviare segnalazioni a Toskar",
+    "sendHint": "Disattivato, Segnala copia solo la segnalazione, da consegnare a chi gestisce Toskar qui."
   }
 }

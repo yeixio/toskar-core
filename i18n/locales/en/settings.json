@@ -224,7 +224,8 @@
       "connector": "Connected service",
       "notification": "Notification",
       "community_ratings": "Community ratings",
-      "update_check": "Update check"
+      "update_check": "Update check",
+      "problem_report": "Problem report"
     },
     "kindsLower": {
       "web_search": "web search",
@@ -235,7 +236,8 @@
       "connector": "connected service",
       "notification": "notification",
       "community_ratings": "community ratings",
-      "update_check": "update check"
+      "update_check": "update check",
+      "problem_report": "problem report"
     },
     "sources": {
       "chat": "Chat",
@@ -323,5 +325,11 @@
     "neverUsed": "Not used yet",
     "confirm": "Disconnect {{name}}? It will need a new code to connect again.",
     "pushOn": "Notifications on"
+  },
+  "reports": {
+    "title": "Problem reports",
+    "description": "Report this beside an error sends what went wrong to the Toskar team, after showing the person everything it sends.",
+    "send": "Let people send reports to Toskar",
+    "sendHint": "Off, Report this only copies the report, to give to whoever runs Toskar here."
   }
 }

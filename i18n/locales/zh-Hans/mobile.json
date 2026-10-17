@@ -693,7 +693,8 @@
       "connector": "已连接的服务",
       "notification": "通知",
       "community_ratings": "社区评分",
-      "update_check": "检查更新"
+      "update_check": "检查更新",
+      "problem_report": "问题报告"
     },
     "kindsLower": {
       "web_search": "网络搜索",
@@ -704,7 +705,8 @@
       "connector": "已连接的服务",
       "notification": "通知",
       "community_ratings": "社区评分",
-      "update_check": "检查更新"
+      "update_check": "检查更新",
+      "problem_report": "问题报告"
     },
     "sources": {
       "chat": "聊天",

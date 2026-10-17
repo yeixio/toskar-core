@@ -717,7 +717,8 @@
       "connector": "Servizio collegato",
       "notification": "Notifica",
       "community_ratings": "Valutazioni della community",
-      "update_check": "Controllo aggiornamenti"
+      "update_check": "Controllo aggiornamenti",
+      "problem_report": "Segnalazione"
     },
     "kindsLower": {
       "web_search": "ricerca web",
@@ -728,7 +729,8 @@
       "connector": "servizio collegato",
       "notification": "notifica",
       "community_ratings": "valutazioni della community",
-      "update_check": "controllo aggiornamenti"
+      "update_check": "controllo aggiornamenti",
+      "problem_report": "segnalazione"
     },
     "sources": {
       "chat": "Chat",

@@ -74,7 +74,7 @@
   "report": {
     "open": "Informar",
     "title": "Informar de este problema",
-    "body": "Esto va al equipo de Toskar en {{address}}. Antes se quitan nombres, direcciones y claves, y verás todo antes de que se envíe.",
+    "body": "Esto llega al equipo de Toskar, donde se convierte en una incidencia que pueden corregir. Los nombres, direcciones y claves se quitan antes, y ves todo antes de enviarlo.",
     "noteLabel": "¿Qué estabas haciendo? (opcional)",
     "notePlaceholder": "Por ejemplo: pregunté por el tiempo de mañana",
     "whatSends": "Lo que se envía",
@@ -82,7 +82,20 @@
     "cancel": "Cancelar",
     "copy": "Copiar",
     "copied": "Copiado",
-    "send": "Enviar por correo"
+    "send": "Enviar",
+    "sending": "Enviando…",
+    "sent": "Enviado. Gracias: el equipo de Toskar lo revisará.",
+    "sentAdded": "Enviado. A otras personas les pasó lo mismo, y el tuyo se suma al suyo.",
+    "done": "Listo",
+    "off": "Un administrador desactivó el envío de informes a Toskar. Copia el informe y dáselo a quien administra Toskar aquí.",
+    "emailLabel": "Correo electrónico, para responderte (opcional)",
+    "emailHint": "Solo lo ve el equipo de Toskar; nunca aparece en el informe.",
+    "details": "Incluir detalles",
+    "detailsHint": "La versión de Toskar, el sistema y el procesador de esta computadora, y para un administrador, sus advertencias y errores recientes.",
+    "failed": "No se pudo enviar desde aquí en este momento. Envía el mismo informe por correo electrónico.",
+    "invalid": "Revisa el correo electrónico y vuelve a enviar.",
+    "sendEmail": "Enviar por correo electrónico",
+    "orEmail": "O envíalo por correo electrónico"
   },
   "loadError": {
     "title": "Toskar no pudo cargar esto",
