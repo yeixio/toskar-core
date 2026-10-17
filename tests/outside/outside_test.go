@@ -125,8 +125,13 @@ func setup(relaySrc string) error {
 		return err
 	}
 	teardown()
+	// nat-unprotected: Docker otherwise drops packets for a container that
+	// come in on another network than its own. Here they always do (Core
+	// to the relay goes through the router), and where the host has bridge
+	// netfilter on (k3s loads it), the drop sees them on the home network.
 	for _, n := range [][2]string{{homeNet, "10.77.0.0/24"}, {inetNet, "11.0.0.0/24"}, {carrNet, "100.64.0.0/24"}} {
-		if _, err := docker("network", "create", "--subnet", n[1], "-o", "com.docker.network.bridge.enable_ip_masquerade=false", n[0]); err != nil {
+		if _, err := docker("network", "create", "--subnet", n[1], "-o", "com.docker.network.bridge.enable_ip_masquerade=false",
+			"-o", "com.docker.network.bridge.gateway_mode_ipv4=nat-unprotected", n[0]); err != nil {
 			return err
 		}
 	}
@@ -220,8 +225,23 @@ func newLab(t *testing.T, r router) *lab {
 	t.Cleanup(func() {
 		if t.Failed() {
 			for _, c := range []string{"core", "router", "relay", "isp"} {
+				if _, err := docker("inspect", "--format", "{{.Id}}", prefix+c); err != nil {
+					continue // isp runs only behind carrier NAT
+				}
 				out, _ := exec.Command("docker", "logs", "--tail", "40", prefix+c).CombinedOutput()
 				t.Logf("--- %s ---\n%s", c, out)
+			}
+			// Where packets stop: each hop's addresses, routes and rules,
+			// and whether it reaches the relay.
+			probe := "ip -br addr; ip route; curl -sS -o /dev/null -m 5 -k -w 'relay: HTTP %{http_code}\\n' https://" + relayIP + "/ 2>&1"
+			for _, c := range []struct{ name, cmd string }{
+				{"core", probe},
+				{"router", probe + "; sysctl net.ipv4.ip_forward; nft list ruleset"},
+				{"isp", probe + "; nft list ruleset"},
+			} {
+				if out, err := docker("exec", prefix+c.name, "sh", "-c", c.cmd); err == nil || out != "" {
+					t.Logf("--- %s network ---\n%s", c.name, out)
+				}
 			}
 		}
 		out, _ := docker("ps", "-aq", "--filter", "name="+prefix)
