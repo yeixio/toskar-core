@@ -134,6 +134,19 @@ func TestAnywhereCheckout(t *testing.T) {
 	if s := a.subscription(); s == nil || s.State != "none" {
 		t.Fatalf("before: %+v", s)
 	}
+	// Showing it asks the relay whether it takes subscriptions, in the
+	// background; let that finish before the relay's answer changes.
+	for deadline := time.Now().Add(5 * time.Second); ; time.Sleep(5 * time.Millisecond) {
+		a.anywhere.mu.Lock()
+		asking := a.anywhere.asking
+		a.anywhere.mu.Unlock()
+		if !asking {
+			break
+		}
+		if time.Now().After(deadline) {
+			t.Fatal("the relay's availability was never asked")
+		}
+	}
 	if _, err := a.startCheckout(ctx, "weekly"); !errors.Is(err, errPlanInvalid) {
 		t.Fatalf("weekly: %v", err)
 	}
