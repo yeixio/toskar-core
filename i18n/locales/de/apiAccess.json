@@ -253,7 +253,8 @@
       "manage": "Abrechnung verwalten",
       "ended": "Dein Abo ist beendet. Abonniere erneut, um das Relay von Toskar weiter zu nutzen.",
       "error": "Das Abo konnte beim Relay von Toskar nicht geprüft werden ({{code}}). Toskar versucht es selbst erneut.",
-      "noPage": "Die Abrechnungsseite wurde nicht geöffnet. Versuch es noch einmal."
+      "noPage": "Die Abrechnungsseite wurde nicht geöffnet. Versuch es noch einmal.",
+      "inAppOnly": "Diese Kopie von Toskar stammt aus dem App Store. Abonniere daher in der Toskar-App auf deinem Smartphone oder Tablet und verwalte das Abo im Store dieses Geräts. Dort abgeschlossen, gilt es auch für diesen Computer."
     }
   }
 }

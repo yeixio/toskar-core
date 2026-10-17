@@ -221,6 +221,7 @@
   "SUBSCRIPTION_PLAN_INVALID": "Elige mensual o anual.",
   "SUBSCRIPTION_OWN_RELAY": "Esta computadora usa el relé de tu organización, así que no necesita una suscripción al de Toskar.",
   "SUBSCRIPTION_ACTIVE": "Esta computadora ya tiene acceso desde cualquier lugar.",
+  "SUBSCRIPTION_IN_APP_ONLY": "Esta copia de Toskar es de la App Store, así que el acceso desde cualquier lugar se vende en la app de Toskar de tu teléfono o tableta.",
   "SUBSCRIPTION_NONE": "Esta computadora no tiene una suscripción comprada en su configuración. Una comprada en la app de Toskar se administra en la tienda de tu teléfono o tableta.",
   "RELAY_SOLD_OUT": "El relé de Toskar no acepta suscripciones nuevas en este momento. Vuelve a intentarlo en unos días.",
   "BILLING_UNAVAILABLE": "No se pudo conectar con la facturación. Vuelve a intentarlo en un minuto.",

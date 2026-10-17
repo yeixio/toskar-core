@@ -221,6 +221,7 @@
   "SUBSCRIPTION_PLAN_INVALID": "请选择按月或按年。",
   "SUBSCRIPTION_OWN_RELAY": "这台电脑使用你所在组织的中继，因此不需要订阅 Toskar 的中继。",
   "SUBSCRIPTION_ACTIVE": "这台电脑已经可以随处访问。",
+  "SUBSCRIPTION_IN_APP_ONLY": "这份 Toskar 来自 App Store，因此随处访问需在手机或平板上的 Toskar 应用中购买。",
   "SUBSCRIPTION_NONE": "这台电脑的设置中没有购买订阅。在 Toskar 应用中购买的订阅，请在手机或平板的应用商店中管理。",
   "RELAY_SOLD_OUT": "Toskar 的中继目前不接受新订阅。请过几天再试。",
   "BILLING_UNAVAILABLE": "无法连接到计费服务。请一分钟后再试。",

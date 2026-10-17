@@ -221,6 +221,7 @@
   "SUBSCRIPTION_PLAN_INVALID": "월간 또는 연간을 선택하세요.",
   "SUBSCRIPTION_OWN_RELAY": "이 컴퓨터는 조직의 릴레이를 사용하므로 Toskar 릴레이 구독이 필요 없어요.",
   "SUBSCRIPTION_ACTIVE": "이 컴퓨터는 이미 어디서나 접속할 수 있어요.",
+  "SUBSCRIPTION_IN_APP_ONLY": "이 Toskar는 App Store 버전이라서 어디서나 접속은 휴대폰이나 태블릿의 Toskar 앱에서 구매해요.",
   "SUBSCRIPTION_NONE": "이 컴퓨터 설정에서 구매한 구독이 없어요. Toskar 앱에서 구매한 구독은 휴대폰이나 태블릿의 스토어에서 관리해요.",
   "RELAY_SOLD_OUT": "지금은 Toskar 릴레이가 새 구독을 받지 않아요. 며칠 뒤에 다시 시도하세요.",
   "BILLING_UNAVAILABLE": "결제 서비스에 연결할 수 없어요. 1분 뒤에 다시 시도하세요.",

@@ -221,6 +221,7 @@
   "SUBSCRIPTION_PLAN_INVALID": "Scegli mensile o annuale.",
   "SUBSCRIPTION_OWN_RELAY": "Questo computer usa il relay della tua organizzazione, quindi non serve un abbonamento a quello di Toskar.",
   "SUBSCRIPTION_ACTIVE": "Questo computer ha già l'accesso da ovunque.",
+  "SUBSCRIPTION_IN_APP_ONLY": "Questa copia di Toskar viene dall'App Store, quindi l'accesso da ovunque si acquista nell'app Toskar sul telefono o tablet.",
   "SUBSCRIPTION_NONE": "Per questo computer non è stato acquistato un abbonamento dalle sue impostazioni. Uno acquistato nell'app Toskar si gestisce nello store del telefono o del tablet.",
   "RELAY_SOLD_OUT": "Il relay di Toskar al momento non accetta nuovi abbonamenti. Riprova tra qualche giorno.",
   "BILLING_UNAVAILABLE": "Impossibile raggiungere la fatturazione. Riprova tra un minuto.",

@@ -253,7 +253,8 @@
       "manage": "Administrar facturación",
       "ended": "Tu suscripción terminó. Vuelve a suscribirte para seguir usando el relé de Toskar.",
       "error": "No se pudo comprobar la suscripción con el relé de Toskar ({{code}}). Toskar lo vuelve a intentar por su cuenta.",
-      "noPage": "La página de facturación no se abrió. Vuelve a intentarlo."
+      "noPage": "La página de facturación no se abrió. Vuelve a intentarlo.",
+      "inAppOnly": "Esta copia de Toskar es de la App Store, así que suscríbete en la app de Toskar de tu teléfono o tableta y adminístralo en la tienda de ese dispositivo. Una vez comprada allí, también cubre esta computadora."
     }
   }
 }

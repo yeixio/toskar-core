@@ -77,6 +77,17 @@ export function ToskarSubscription({ subscription }: { subscription: AnywhereSub
     onError: (err) => setError(shownError(err)),
   })
   const busy = checkout.isPending || manage.isPending
+  // The App Store's copy only points to the Toskar app (App Review 3.1.1).
+  if (subscription.in_app_only && subscription.state !== 'active') {
+    return (
+      <div className="space-y-2 rounded-lg border border-line p-3" aria-labelledby="toskar-relay-subscription">
+        <h3 id="toskar-relay-subscription" className="text-sm font-medium">
+          {t('remote.subscription.title')}
+        </h3>
+        <p className="text-sm text-ink-muted">{t('remote.subscription.inAppOnly')}</p>
+      </div>
+    )
+  }
   const soldOut = subscription.open === false
   const subscribe = (plan: 'monthly' | 'yearly') => checkout.mutate({ plan, tab: blankTab() })
 
@@ -90,7 +101,7 @@ export function ToskarSubscription({ subscription }: { subscription: AnywhereSub
           <p className="text-sm text-success" role="status">
             {t(subscription.store === 'app' ? 'remote.subscription.activeApp' : 'remote.subscription.active')}
           </p>
-          {subscription.store === 'stripe' ? (
+          {subscription.store === 'stripe' && !subscription.in_app_only ? (
             <button type="button" className="btn-secondary" disabled={busy} onClick={() => manage.mutate(blankTab())}>
               {manage.isPending ? t('remote.subscription.opening') : t('remote.subscription.manage')}
             </button>

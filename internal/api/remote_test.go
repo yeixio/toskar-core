@@ -425,6 +425,7 @@ func TestSubscriptionRoutes(t *testing.T) {
 		"SUBSCRIPTION_PLAN_INVALID": http.StatusBadRequest,
 		"SUBSCRIPTION_OWN_RELAY":    http.StatusConflict,
 		"SUBSCRIPTION_ACTIVE":       http.StatusConflict,
+		"SUBSCRIPTION_IN_APP_ONLY":  http.StatusConflict,
 		"SUBSCRIPTION_NONE":         http.StatusNotFound,
 		"RELAY_SOLD_OUT":            http.StatusServiceUnavailable,
 		"BILLING_UNAVAILABLE":       http.StatusBadGateway,

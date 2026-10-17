@@ -253,7 +253,8 @@
       "manage": "Gérer la facturation",
       "ended": "Votre abonnement a pris fin. Réabonnez-vous pour continuer à utiliser le relais de Toskar.",
       "error": "Impossible de vérifier l'abonnement auprès du relais de Toskar ({{code}}). Toskar réessaie de lui-même.",
-      "noPage": "La page de facturation ne s'est pas ouverte. Réessayez."
+      "noPage": "La page de facturation ne s'est pas ouverte. Réessayez.",
+      "inAppOnly": "Cette copie de Toskar vient de l'App Store : abonnez-vous dans l'app Toskar sur votre téléphone ou tablette, et gérez l'abonnement dans la boutique de cet appareil. Une fois souscrit là-bas, il couvre aussi cet ordinateur."
     }
   }
 }

@@ -221,6 +221,7 @@
   "SUBSCRIPTION_PLAN_INVALID": "月額か年額を選んでください。",
   "SUBSCRIPTION_OWN_RELAY": "このコンピュータは組織のリレーを使っているため、Toskar のリレーのサブスクリプションは不要です。",
   "SUBSCRIPTION_ACTIVE": "このコンピュータはすでにどこからでもアクセスできます。",
+  "SUBSCRIPTION_IN_APP_ONLY": "この Toskar は App Store 版のため、どこからでもアクセスはスマートフォンやタブレットの Toskar アプリで購入します。",
   "SUBSCRIPTION_NONE": "このコンピュータの設定で購入したサブスクリプションはありません。Toskar アプリで購入したものは、スマートフォンやタブレットのストアで管理します。",
   "RELAY_SOLD_OUT": "Toskar のリレーは現在、新しいサブスクリプションを受け付けていません。数日後にもう一度お試しください。",
   "BILLING_UNAVAILABLE": "支払いサービスに接続できませんでした。1分後にもう一度お試しください。",

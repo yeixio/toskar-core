@@ -26,6 +26,9 @@ type Subscription struct {
 	// Error is the last exchange's code when it didn't work, such as
 	// RELAY_UNREACHABLE.
 	Error string `json:"error,omitempty"`
+	// InAppOnly is this copy being the Mac App Store's, which doesn't sell
+	// or manage it: the Toskar app on a phone or tablet does (#630).
+	InAppOnly bool `json:"in_app_only,omitempty"`
 }
 
 // handleSubscriptionCheckout starts a subscription to access from
@@ -72,6 +75,7 @@ var subscriptionStatus = map[string]int{
 	"SUBSCRIPTION_PLAN_INVALID": http.StatusBadRequest,
 	"SUBSCRIPTION_OWN_RELAY":    http.StatusConflict,
 	"SUBSCRIPTION_ACTIVE":       http.StatusConflict,
+	"SUBSCRIPTION_IN_APP_ONLY":  http.StatusConflict,
 	"SUBSCRIPTION_NONE":         http.StatusNotFound,
 	"RELAY_SOLD_OUT":            http.StatusServiceUnavailable,
 	"BILLING_UNAVAILABLE":       http.StatusBadGateway,

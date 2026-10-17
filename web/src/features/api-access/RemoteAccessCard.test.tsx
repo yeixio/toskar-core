@@ -302,6 +302,12 @@ describe('RemoteAccessCard (#456)', () => {
       expect(screen.getByRole('button', { name: 'Subscribe for $4.99 a month' })).toBeEnabled()
     })
 
+    it("points to the Toskar app in the Mac App Store's copy, which sells nothing (#630)", async () => {
+      renderCard({ state: 'none', in_app_only: true })
+      expect(await screen.findByText(/This copy of Toskar is from the App Store, so subscribe in the Toskar app/)).toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: /Subscribe for/ })).not.toBeInTheDocument()
+    })
+
     it("isn't shown with an organization's relay", async () => {
       renderCard({ state: 'none' }, 'relay.example.com')
       expect(await screen.findByText('Access from anywhere', { selector: 'h2' })).toBeInTheDocument()

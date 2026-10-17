@@ -262,3 +262,34 @@ func TestAnywhereCheckout(t *testing.T) {
 		t.Fatalf("own relay shows %+v", s)
 	}
 }
+
+// The Mac App Store's copy sells nothing and manages nothing (App Review
+// Guideline 3.1.1): the Toskar app on a phone or tablet does, and a token
+// it bought works here as anywhere (#630).
+func TestAnywhereInAppOnly(t *testing.T) {
+	a, b, relay := newAnywhereApp(t)
+	ctx := context.Background()
+	yes := true
+	a.anywhere.inAppOnly = &yes
+	if _, err := a.startCheckout(ctx, "monthly"); !errors.Is(err, errInAppOnly) {
+		t.Fatalf("checkout: %v", err)
+	}
+	if _, err := a.manageSubscription(ctx); !errors.Is(err, errInAppOnly) {
+		t.Fatalf("manage: %v", err)
+	}
+	s := a.subscription()
+	if s == nil || s.State != "none" || !s.InAppOnly {
+		t.Fatalf("status: %+v", s)
+	}
+	a.anywhere.mu.Lock()
+	asking := a.anywhere.asking
+	a.anywhere.mu.Unlock()
+	if asking || len(b.checkout) != 0 {
+		t.Fatal("the App Store's copy asked the relay or billing")
+	}
+	relay.mu.Lock()
+	defer relay.mu.Unlock()
+	if relay.exchanges != 0 {
+		t.Fatal("exchanged without a subscription")
+	}
+}

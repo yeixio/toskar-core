@@ -221,6 +221,7 @@
   "SUBSCRIPTION_PLAN_INVALID": "請選擇按月或按年。",
   "SUBSCRIPTION_OWN_RELAY": "這台電腦使用你所屬組織的中繼，因此不需要訂閱 Toskar 的中繼。",
   "SUBSCRIPTION_ACTIVE": "這台電腦已經可以隨處存取。",
+  "SUBSCRIPTION_IN_APP_ONLY": "這份 Toskar 來自 App Store，因此隨處存取需在手機或平板上的 Toskar 應用程式中購買。",
   "SUBSCRIPTION_NONE": "這台電腦的設定中沒有購買訂閱。在 Toskar 應用程式中購買的訂閱，請在手機或平板的商店中管理。",
   "RELAY_SOLD_OUT": "Toskar 的中繼目前不接受新訂閱。請過幾天再試。",
   "BILLING_UNAVAILABLE": "無法連線到帳務服務。請一分鐘後再試。",

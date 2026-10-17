@@ -253,7 +253,8 @@
       "manage": "Manage billing",
       "ended": "Your subscription has ended. Subscribe again to keep using Toskar's relay.",
       "error": "Couldn't check the subscription with Toskar's relay ({{code}}). Toskar tries again on its own.",
-      "noPage": "The billing page didn't open. Try again."
+      "noPage": "The billing page didn't open. Try again.",
+      "inAppOnly": "This copy of Toskar is from the App Store, so subscribe in the Toskar app on your phone or tablet, and manage it in that device's store. Once it's bought there, it covers this computer too."
     }
   }
 }

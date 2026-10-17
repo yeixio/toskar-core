@@ -15,6 +15,7 @@ import (
 	"github.com/yeixio/toskar-core/internal/api"
 	"github.com/yeixio/toskar-core/internal/auth"
 	"github.com/yeixio/toskar-core/internal/config"
+	"github.com/yeixio/toskar-core/internal/pyenv"
 	"github.com/yeixio/toskar-core/internal/relayclient"
 	"github.com/yeixio/toskar-core/internal/rendezvous"
 	"github.com/yeixio/toskar-core/pkg/contracts"
@@ -54,6 +55,7 @@ var (
 	errActive       = contracts.NewError("SUBSCRIPTION_ACTIVE", nil, errors.New("this computer already has access from anywhere"))
 	errNoneHere     = contracts.NewError("SUBSCRIPTION_NONE", nil, errors.New("this computer has no subscription bought in its settings; one bought in the Toskar app is managed in the app's store"))
 	errSoldOut      = contracts.NewError("RELAY_SOLD_OUT", nil, errors.New("the relay isn't taking new subscriptions right now"))
+	errInAppOnly    = contracts.NewError("SUBSCRIPTION_IN_APP_ONLY", nil, errors.New("this copy of Toskar is from the App Store, so the subscription is sold in the Toskar app on a phone or tablet"))
 	errBillingReach = func(cause error) error {
 		return contracts.NewError("BILLING_UNAVAILABLE", nil, fmt.Errorf("billing couldn't be reached; try again in a minute: %w", cause))
 	}
@@ -73,7 +75,9 @@ type anywhere struct {
 	openAt    time.Time
 	asking    bool
 	wake      chan struct{}
-	// For tests: yeix.io, its client, the relay, and the clock.
+	// For tests: whether this is the App Store's copy, yeix.io, its client,
+	// the relay, and the clock.
+	inAppOnly    *bool
 	billing      string
 	httpClient   *http.Client
 	relayForTest *relayclient.Client
@@ -85,6 +89,17 @@ func (s *anywhere) now() time.Time {
 		return s.nowForTest()
 	}
 	return time.Now()
+}
+
+// inAppOnly is whether this copy of Toskar may only point to the Toskar
+// app for the subscription: the Mac App Store's, which runs in the App
+// Sandbox, where a digital subscription is sold with in-app purchase
+// (App Review Guideline 3.1.1). A token the app bought still works here.
+func (a *App) inAppOnly() bool {
+	if a.anywhere.inAppOnly != nil {
+		return *a.anywhere.inAppOnly
+	}
+	return pyenv.Sandboxed()
 }
 
 func (a *App) billingURL() string {
@@ -168,6 +183,9 @@ func (a *App) routeID() (string, error) {
 // startCheckout opens a Stripe checkout for access from anywhere on this
 // computer, monthly or yearly, and answers its page.
 func (a *App) startCheckout(ctx context.Context, plan string) (string, error) {
+	if a.inAppOnly() {
+		return "", errInAppOnly
+	}
 	if plan != "monthly" && plan != "yearly" {
 		return "", errPlanInvalid
 	}
@@ -216,6 +234,9 @@ func (a *App) startCheckout(ctx context.Context, plan string) (string, error) {
 // manageSubscription answers the billing page for the subscription bought
 // here.
 func (a *App) manageSubscription(ctx context.Context) (string, error) {
+	if a.inAppOnly() {
+		return "", errInAppOnly
+	}
 	session := a.stripeSession()
 	if session == "" {
 		return "", errNoneHere
@@ -272,7 +293,7 @@ func (a *App) subscription() *api.Subscription {
 	if cfg.RemoteAccess.Relay != "" {
 		return nil
 	}
-	out := &api.Subscription{State: "none"}
+	out := &api.Subscription{State: "none", InAppOnly: a.inAppOnly()}
 	session := a.stripeSession()
 	if tok := a.relayToken(); tok != "" {
 		_, exp, _ := relayclient.ParseToken(tok)
@@ -296,8 +317,9 @@ func (a *App) subscription() *api.Subscription {
 	}
 	out.Open, out.Error = a.anywhere.open, a.anywhere.lastError
 	// Whether the relay takes new subscriptions is asked only when Settings
-	// shows this, never on its own, and answered on the next look.
-	if out.State == "none" && !a.anywhere.asking && (a.anywhere.open == nil || a.anywhere.now().Sub(a.anywhere.openAt) >= availabilityFor) {
+	// shows this, never on its own, and answered on the next look; never
+	// by the App Store's copy, which doesn't offer it.
+	if out.State == "none" && !out.InAppOnly && !a.anywhere.asking && (a.anywhere.open == nil || a.anywhere.now().Sub(a.anywhere.openAt) >= availabilityFor) {
 		a.anywhere.asking = true
 		go func() {
 			a.relayOpen(context.Background())

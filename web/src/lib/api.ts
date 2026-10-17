@@ -642,6 +642,8 @@ export type AnywhereSubscription = {
   /** The open checkout's page, while pending. */
   checkout?: string
   error?: string
+  /** This copy is the Mac App Store's, which sells nothing: the Toskar app on a phone or tablet does (#630). */
+  in_app_only?: boolean
 }
 
 export const api = {
