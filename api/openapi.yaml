@@ -1131,7 +1131,7 @@ paths:
   /api/v1/remote-access:
     get:
       summary: Access from anywhere's setting and its listener (#456)
-      description: "enabled, port, address (a forwarded address, when set), listening (the address it listens on) or error, port_mapping, mapped and mapped_by (pcp, nat-pmp, or upnp) for the router port it opened, map_error, ipv6, reachable (direct, ipv6, manual, relay, or none) with reason (off, not_listening, carrier_nat, or no_port), relay (name, state: no_token, connecting, connected, or error, and error, its code) while the relay client runs, and check, the last outside check (#546, contract 1.28): at, relay and direct (each way in with address, ok, reason, and ms), tried, and error when the last attempt didn't reach the relay (CHECK_UNSUPPORTED, CHECK_TOO_SOON, NO_TOKEN, RELAY_UNREACHABLE). Set it with PATCH /api/v1/settings: remote_access_enabled, remote_access_port, remote_access_address, remote_access_port_mapping, remote_access_relay (an organization's relay, empty for Toskar's), and remote_access_relay_secret (its enrollment secret; write-only, empty clears it)."
+      description: "enabled, port, address (a forwarded address, when set), listening (the address it listens on) or error, port_mapping, mapped and mapped_by (pcp, nat-pmp, or upnp) for the router port it opened, map_error, ipv6, reachable (direct, ipv6, manual, relay, or none) with reason (off, not_listening, carrier_nat, or no_port), relay (name, state: no_token, connecting, connected, or error, and error, its code) while the relay client runs, and check, the last outside check (#546, contract 1.28): at, relay and direct (each way in with address, ok, reason, and ms), tried, and error when the last attempt didn't reach the relay (CHECK_UNSUPPORTED, CHECK_TOO_SOON, NO_TOKEN, RELAY_UNREACHABLE). With Toskar's relay, subscription (#639, contract 1.38): state (none, pending, active, or ended), store (stripe when bought here in Settings, app when bought in the Toskar app), expires, open (whether Toskar's relay takes new subscriptions now, when known), checkout (the open checkout's page while pending), and error (the last exchange's code when it didn't reach the relay). Set it with PATCH /api/v1/settings: remote_access_enabled, remote_access_port, remote_access_address, remote_access_port_mapping, remote_access_relay (an organization's relay, empty for Toskar's), and remote_access_relay_secret (its enrollment secret; write-only, empty clears it)."
       operationId: getRemoteAccess
       responses:
         "200":
@@ -1168,6 +1168,34 @@ paths:
           description: RELAY_TOKEN_INVALID or RELAY_TOKEN_NOT_NEEDED
         "403":
           description: ROLE_REQUIRED, turning access from anywhere on without the admin role
+  /api/v1/remote-access/subscription/checkout:
+    post:
+      summary: Subscribe to access from anywhere here, with Stripe (#639)
+      description: "Body {plan}: monthly or yearly. Opens a Stripe checkout at yeix.io, which bills for Toskar, for this computer's route on Toskar's relay, and answers {url}, its page, for the person to open. Toskar then asks the relay every few seconds whether it's paid; once it is, it keeps the relay token, turns access from anywhere on, and renews the token as the subscription does. Admins only. 400 SUBSCRIPTION_PLAN_INVALID; 409 SUBSCRIPTION_OWN_RELAY with an organization's relay, SUBSCRIPTION_ACTIVE when this computer already has a current token; 503 RELAY_SOLD_OUT when Toskar's relay takes no new subscriptions; 502 BILLING_UNAVAILABLE."
+      operationId: startSubscriptionCheckout
+      responses:
+        "200":
+          description: The checkout page, url
+        "400":
+          description: SUBSCRIPTION_PLAN_INVALID
+        "409":
+          description: SUBSCRIPTION_OWN_RELAY or SUBSCRIPTION_ACTIVE
+        "502":
+          description: BILLING_UNAVAILABLE
+        "503":
+          description: RELAY_SOLD_OUT
+  /api/v1/remote-access/subscription/manage:
+    post:
+      summary: The billing page for the subscription bought here (#639)
+      description: "Answers {url}, Stripe's billing page for the subscription bought in Settings: change the card, download receipts, cancel. Admins only. 404 SUBSCRIPTION_NONE when none was bought here (one bought in the Toskar app is managed in the device's store); 502 BILLING_UNAVAILABLE."
+      operationId: manageSubscription
+      responses:
+        "200":
+          description: The billing page, url
+        "404":
+          description: SUBSCRIPTION_NONE
+        "502":
+          description: BILLING_UNAVAILABLE
   /api/v1/tls:
     get:
       summary: How the API speaks HTTPS on the local network (#213)

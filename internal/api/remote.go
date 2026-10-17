@@ -285,6 +285,11 @@ func (s *Server) handleRemoteAccess(w http.ResponseWriter, r *http.Request) {
 			out["others"] = reach.Others
 		}
 	}
+	if s.deps.Subscription != nil {
+		if sub := s.deps.Subscription(); sub != nil {
+			out["subscription"] = sub
+		}
+	}
 	st := s.RemoteListening()
 	if st.Listening != "" {
 		out["listening"] = st.Listening

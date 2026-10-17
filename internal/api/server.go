@@ -142,8 +142,15 @@ type Dependencies struct {
 	// SetRelayToken keeps a route token the app got for this computer from
 	// a store subscription, and with enable turns access from anywhere on.
 	SetRelayToken func(ctx context.Context, token string, enable bool) (state string, err error)
-	ShowVersion   func(ctx context.Context, conversationID, messageID string) ([]contracts.Message, error)
-	Chat          func(w http.ResponseWriter, r *http.Request, conversationID, profileID, modelID, message string, stream bool, execution string) error
+	// Subscription is access from anywhere on Toskar's relay as this
+	// computer has it; StartCheckout opens a Stripe checkout for it (plan
+	// monthly or yearly), and ManageSubscription the billing page of one
+	// bought here (#639).
+	Subscription       func() *Subscription
+	StartCheckout      func(ctx context.Context, plan string) (url string, err error)
+	ManageSubscription func(ctx context.Context) (url string, err error)
+	ShowVersion        func(ctx context.Context, conversationID, messageID string) ([]contracts.Message, error)
+	Chat               func(w http.ResponseWriter, r *http.Request, conversationID, profileID, modelID, message string, stream bool, execution string) error
 	// StopChat stops a conversation's running turn and reports whether one was running.
 	StopChat           func(conversationID string) bool
 	ListTasks          func(ctx context.Context) ([]contracts.Task, error)
@@ -409,6 +416,8 @@ func (s *Server) routes() {
 	api.HandleFunc("/remote-access/check", s.handleRemoteCheck).Methods(http.MethodPost)
 	api.HandleFunc("/remote-access/route", s.handleRouteSecret).Methods(http.MethodGet)
 	api.HandleFunc("/remote-access/relay-token", s.handleRelayToken).Methods(http.MethodPut)
+	api.HandleFunc("/remote-access/subscription/checkout", s.handleSubscriptionCheckout).Methods(http.MethodPost)
+	api.HandleFunc("/remote-access/subscription/manage", s.handleSubscriptionManage).Methods(http.MethodPost)
 	s.notificationRoutes(api)
 	s.connectorRoutes(api)
 	s.mcpRoutes(api)

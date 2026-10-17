@@ -282,7 +282,9 @@ func (c *Client) do(ctx context.Context, method, path, bearer string, body io.Re
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Set("Authorization", "Bearer "+bearer)
+	if bearer != "" {
+		req.Header.Set("Authorization", "Bearer "+bearer)
+	}
 	if body != nil {
 		req.Header.Set("Content-Type", "application/octet-stream")
 	}

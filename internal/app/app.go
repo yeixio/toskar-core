@@ -121,7 +121,9 @@ type App struct {
 	// relay is the relay client while access from anywhere is on (#456).
 	relayMu sync.Mutex
 	// reach is the outside check's last result (#546).
-	reach     reachChecker
+	reach reachChecker
+	// anywhere is access from anywhere bought in Settings (#639).
+	anywhere  anywhere
 	relay     *relayclient.Client
 	relayStop context.CancelFunc
 	// TopicLog keeps off-topic attempts (#345).
@@ -530,14 +532,17 @@ func New(opts Options) (*App, error) {
 		ListMessages: func(ctx context.Context, id string) ([]contracts.Message, error) {
 			return convRepo.ListMessages(ctx, id)
 		},
-		ShowVersion:   convRepo.ShowVersion,
-		RemoteReach:   a.remoteReach,
-		CheckReach:    a.checkReach,
-		Transcribe:    a.transcribeRecording,
-		RouteSecret:   a.routeSecret,
-		RelayName:     func() string { return relayName(a.Config.Get()) },
-		RelayToken:    a.relayToken,
-		SetRelayToken: a.setRelayToken,
+		ShowVersion:        convRepo.ShowVersion,
+		RemoteReach:        a.remoteReach,
+		CheckReach:         a.checkReach,
+		Transcribe:         a.transcribeRecording,
+		RouteSecret:        a.routeSecret,
+		RelayName:          func() string { return relayName(a.Config.Get()) },
+		RelayToken:         a.relayToken,
+		SetRelayToken:      a.setRelayToken,
+		Subscription:       a.subscription,
+		StartCheckout:      a.startCheckout,
+		ManageSubscription: a.manageSubscription,
 		GetSettings: func(ctx context.Context) (contracts.SettingsView, error) {
 			return a.settingsView(ctx)
 		},
@@ -1118,6 +1123,12 @@ func (a *App) Start(ctx context.Context) error {
 	go func() {
 		defer a.wg.Done()
 		a.reachLoop(ctx)
+	}()
+	// Access from anywhere bought in Settings: its token, and renewals (#639).
+	a.wg.Add(1)
+	go func() {
+		defer a.wg.Done()
+		a.anywhereLoop(ctx)
 	}()
 	a.startLive(ctx)
 	// Tasks an earlier run left pending or running can't finish now, and

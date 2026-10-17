@@ -382,3 +382,72 @@ func TestRemoteCheck(t *testing.T) {
 		t.Fatal("the check is for Admins, from any of their devices")
 	}
 }
+
+// Subscribing in Settings (#639): an Admin's, never a paired device's, and
+// each failure with its own status.
+func TestSubscriptionRoutes(t *testing.T) {
+	var fail error
+	srv := NewServer(Dependencies{
+		StartCheckout: func(_ context.Context, plan string) (string, error) {
+			if fail != nil {
+				return "", fail
+			}
+			return "https://checkout.stripe.test/" + plan, nil
+		},
+		ManageSubscription: func(context.Context) (string, error) {
+			if fail != nil {
+				return "", fail
+			}
+			return "https://billing.stripe.test/s", nil
+		},
+		Subscription: func() *Subscription { return &Subscription{State: "pending", Store: "stripe", Checkout: "https://checkout.stripe.test/x"} },
+	})
+	call := func(handler http.HandlerFunc, body string) (int, string) {
+		r := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(body))
+		w := httptest.NewRecorder()
+		handler(w, r)
+		var out struct {
+			URL   string
+			Error struct{ Code string }
+		}
+		_ = json.Unmarshal(w.Body.Bytes(), &out)
+		return w.Code, out.URL + out.Error.Code
+	}
+	if status, url := call(srv.handleSubscriptionCheckout, `{"plan":"yearly"}`); status != http.StatusOK || url != "https://checkout.stripe.test/yearly" {
+		t.Fatalf("checkout: %d %s", status, url)
+	}
+	if status, url := call(srv.handleSubscriptionManage, ``); status != http.StatusOK || url != "https://billing.stripe.test/s" {
+		t.Fatalf("manage: %d %s", status, url)
+	}
+	for code, want := range map[string]int{
+		"SUBSCRIPTION_PLAN_INVALID": http.StatusBadRequest,
+		"SUBSCRIPTION_OWN_RELAY":    http.StatusConflict,
+		"SUBSCRIPTION_ACTIVE":       http.StatusConflict,
+		"SUBSCRIPTION_NONE":         http.StatusNotFound,
+		"RELAY_SOLD_OUT":            http.StatusServiceUnavailable,
+		"BILLING_UNAVAILABLE":       http.StatusBadGateway,
+	} {
+		fail = contracts.NewError(code, nil, errors.New(code))
+		if status, got := call(srv.handleSubscriptionCheckout, `{"plan":"monthly"}`); status != want || got != code {
+			t.Errorf("%s: %d %s", code, status, got)
+		}
+	}
+	fail = errors.New("disk full")
+	if status, got := call(srv.handleSubscriptionManage, ``); status != http.StatusInternalServerError || got != "SUBSCRIPTION_FAILED" {
+		t.Fatalf("other: %d %s", status, got)
+	}
+	if status, got := call(srv.handleSubscriptionCheckout, `nope`); status != http.StatusBadRequest || got != "INVALID_JSON" {
+		t.Fatalf("bad JSON: %d %s", status, got)
+	}
+	for _, route := range []string{"/api/v1/remote-access/subscription/checkout", "/api/v1/remote-access/subscription/manage"} {
+		if auth.RoleNeeded(http.MethodPost, route) != auth.RoleAdmin || auth.DeviceMayReach(http.MethodPost, route) {
+			t.Errorf("%s isn't an Admin's alone", route)
+		}
+	}
+	// GET /remote-access says how it stands.
+	w := httptest.NewRecorder()
+	srv.handleRemoteAccess(w, httptest.NewRequest(http.MethodGet, "/api/v1/remote-access", nil))
+	if !strings.Contains(w.Body.String(), `"subscription":{"state":"pending","store":"stripe","checkout":"https://checkout.stripe.test/x"}`) {
+		t.Fatalf("status: %s", w.Body.String())
+	}
+}
