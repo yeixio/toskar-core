@@ -907,5 +907,12 @@
     "notNow": "Nicht jetzt",
     "updateComputer": "Aktualisiere Toskar auf deinem Computer, um hier Benachrichtigungen zu bekommen.",
     "relayFailed": "Benachrichtigungen konnten nicht eingeschaltet werden: {{detail}}"
+  },
+  "permissions": {
+    "photos": "Toskar öffnet deine Fotos, wenn du eines auswählst, um danach zu fragen. Es bleibt auf diesem Gerät oder geht nur an deinen eigenen Computer.",
+    "camera": "Toskar nutzt die Kamera, wenn du ein Foto aufnimmst, um danach zu fragen. Es bleibt auf diesem Gerät oder geht nur an deinen eigenen Computer.",
+    "microphone": "Toskar nutzt das Mikrofon, wenn du eine Nachricht sprichst. Was du sagst, bleibt auf diesem Gerät oder geht nur an deinen eigenen Computer.",
+    "speechRecognition": "Toskar wandelt auf diesem Gerät in Text um, was du sagst, wenn du eine Nachricht sprichst.",
+    "localNetwork": "Toskar sucht in deinem lokalen Netzwerk nach dem Computer, auf dem deine Modelle laufen."
   }
 }

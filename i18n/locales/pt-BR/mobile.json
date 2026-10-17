@@ -923,5 +923,12 @@
     "notNow": "Agora não",
     "updateComputer": "Atualize o Toskar no computador para receber notificações aqui.",
     "relayFailed": "Não foi possível ativar as notificações: {{detail}}"
+  },
+  "permissions": {
+    "photos": "O Toskar abre suas fotos quando você escolhe uma para perguntar sobre ela. Ela fica neste dispositivo ou vai só para o seu próprio computador.",
+    "camera": "O Toskar usa a câmera quando você tira uma foto para perguntar sobre ela. Ela fica neste dispositivo ou vai só para o seu próprio computador.",
+    "microphone": "O Toskar usa o microfone quando você fala uma mensagem. O que você diz fica neste dispositivo ou vai só para o seu próprio computador.",
+    "speechRecognition": "O Toskar transforma o que você diz em texto neste dispositivo quando você fala uma mensagem.",
+    "localNetwork": "O Toskar procura na sua rede local o computador que executa seus modelos."
   }
 }

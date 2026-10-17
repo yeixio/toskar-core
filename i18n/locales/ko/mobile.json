@@ -892,5 +892,12 @@
     "notNow": "나중에",
     "updateComputer": "여기서 알림을 받으려면 컴퓨터의 Toskar를 업데이트하세요.",
     "relayFailed": "알림을 켜지 못했습니다: {{detail}}"
+  },
+  "permissions": {
+    "photos": "물어볼 사진을 고르면 Toskar가 사진을 열어요. 사진은 이 기기에 남거나 내 컴퓨터로만 가요.",
+    "camera": "물어볼 사진을 찍을 때 Toskar가 카메라를 사용해요. 사진은 이 기기에 남거나 내 컴퓨터로만 가요.",
+    "microphone": "메시지를 말할 때 Toskar가 마이크를 사용해요. 말한 내용은 이 기기에 남거나 내 컴퓨터로만 가요.",
+    "speechRecognition": "메시지를 말할 때 Toskar가 이 기기에서 말한 내용을 텍스트로 바꿔요.",
+    "localNetwork": "Toskar가 로컬 네트워크에서 모델을 실행하는 컴퓨터를 찾아요."
   }
 }

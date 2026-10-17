@@ -981,5 +981,12 @@
     "notNow": "Not now",
     "updateComputer": "Update Toskar on your computer to get notifications here.",
     "relayFailed": "Notifications couldn't be turned on: {{detail}}"
+  },
+  "permissions": {
+    "photos": "Toskar opens your photos when you choose one to ask about. It stays on this device or goes only to your own computer.",
+    "camera": "Toskar uses the camera when you take a photo to ask about. It stays on this device or goes only to your own computer.",
+    "microphone": "Toskar uses the microphone when you speak a message. What you say stays on this device or goes only to your own computer.",
+    "speechRecognition": "Toskar turns what you say into text on this device when you speak a message.",
+    "localNetwork": "Toskar looks on your local network for the computer that runs your models."
   }
 }

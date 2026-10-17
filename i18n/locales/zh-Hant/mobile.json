@@ -892,5 +892,12 @@
     "notNow": "以後再說",
     "updateComputer": "請更新電腦上的 Toskar，才能在這裡接收通知。",
     "relayFailed": "無法開啟通知：{{detail}}"
+  },
+  "permissions": {
+    "photos": "當你選擇一張照片來提問時，Toskar 會開啟你的照片。照片會留在此裝置上，或只傳送到你自己的電腦。",
+    "camera": "當你拍照來提問時，Toskar 會使用相機。照片會留在此裝置上，或只傳送到你自己的電腦。",
+    "microphone": "當你說出一則訊息時，Toskar 會使用麥克風。你說的內容會留在此裝置上，或只傳送到你自己的電腦。",
+    "speechRecognition": "當你說出一則訊息時，Toskar 會在此裝置上把你說的話轉成文字。",
+    "localNetwork": "Toskar 會在你的本地網路中尋找執行你的模型的電腦。"
   }
 }

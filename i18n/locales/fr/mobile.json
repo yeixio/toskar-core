@@ -923,5 +923,12 @@
     "notNow": "Plus tard",
     "updateComputer": "Mettez à jour Toskar sur votre ordinateur pour recevoir des notifications ici.",
     "relayFailed": "Les notifications n’ont pas pu être activées : {{detail}}"
+  },
+  "permissions": {
+    "photos": "Toskar ouvre vos photos quand vous en choisissez une pour poser une question. Elle reste sur cet appareil ou va seulement sur votre propre ordinateur.",
+    "camera": "Toskar utilise l'appareil photo quand vous prenez une photo pour poser une question. Elle reste sur cet appareil ou va seulement sur votre propre ordinateur.",
+    "microphone": "Toskar utilise le micro quand vous dictez un message. Ce que vous dites reste sur cet appareil ou va seulement sur votre propre ordinateur.",
+    "speechRecognition": "Toskar transforme ce que vous dites en texte sur cet appareil quand vous dictez un message.",
+    "localNetwork": "Toskar cherche sur votre réseau local l'ordinateur qui exécute vos modèles."
   }
 }
