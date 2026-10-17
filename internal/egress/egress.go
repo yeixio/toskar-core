@@ -30,6 +30,8 @@ const (
 	CommunityRatings = "community_ratings"
 	// UpdateCheck is the daily look at toskar.ai for a newer version.
 	UpdateCheck = "update_check"
+	// ProblemReport is a problem report sent with Report this (#588).
+	ProblemReport = "problem_report"
 )
 
 // Sources of a run.

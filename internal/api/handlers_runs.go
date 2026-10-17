@@ -26,6 +26,7 @@ func (s *Server) runRoutes(api *mux.Router) {
 	api.HandleFunc("/runs/{id}", s.handleGetRun).Methods(http.MethodGet)
 	api.HandleFunc("/diagnostics/first-answers", s.handleFirstAnswers).Methods(http.MethodGet, http.MethodOptions)
 	api.HandleFunc("/diagnostics/report", s.handleReport).Methods(http.MethodGet, http.MethodOptions)
+	api.HandleFunc("/diagnostics/report", s.handleSendReport).Methods(http.MethodPost)
 }
 
 // handleFirstAnswers summarizes how long answers took to start (#498), by

@@ -79,7 +79,8 @@ var visitorRoutes = map[string]bool{
 var memberRoutes = map[string]bool{
 	// Anyone signed in may report a problem; only an Admin's report has
 	// Core's log (#588).
-	"GET /api/v1/diagnostics/report": true,
+	"GET /api/v1/diagnostics/report":  true,
+	"POST /api/v1/diagnostics/report": true,
 
 	"GET /api/v1/memory":         true,
 	"POST /api/v1/memory":        true,

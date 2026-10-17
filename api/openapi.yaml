@@ -2331,7 +2331,7 @@ paths:
                   properties:
                     id: {type: string}
                     at: {type: string, format: date-time}
-                    kind: {type: string, enum: [web_search, web_page, places, paired_computer, external_server, connector, notification, community_ratings, update_check]}
+                    kind: {type: string, enum: [web_search, web_page, places, paired_computer, external_server, connector, notification, community_ratings, update_check, problem_report]}
                     destination: {type: string}
                     detail: {type: string}
                     source: {type: string}
@@ -2510,7 +2510,7 @@ paths:
       description: >-
         Versions and the kind of computer, and for an Admin Core's last 40 warnings and errors.
         Email addresses, keys, tokens, home folder names, the computer's name, and internet
-        addresses are taken out first. Members may call it.
+        addresses are taken out first. Members and paired devices may call it.
       operationId: getReport
       responses:
         "200":
@@ -2543,6 +2543,31 @@ paths:
                     description: For an Admin only.
                     items:
                       type: string
+    post:
+      summary: Send a problem report to Toskar (#588)
+      description: >-
+        Body {product (core, the default, or apps), app, where, code, error, note, email, details}.
+        Core scrubs the error and note as it scrubs its own report, adds that report when details
+        is true, and sends it to Toskar's report service (https://toskar.ai/api/report, or
+        TOSKAR_REPORT_URL), which files it as an issue in a private repository, grouped with
+        others for the same error and version. A reply address goes to the Toskar team by email,
+        never into the issue. Answers {status: created or added, number}. Each one is listed in
+        What left this computer as problem_report. Members and paired devices may send. 400
+        REPORT_INVALID; 403 REPORTS_OFF when an Admin turned problem_reports off; 429
+        REPORT_RATE_LIMITED; 502 REPORTS_UNAVAILABLE when the service can't be reached or isn't
+        set up, for the client to send by email instead (contract 1.40).
+      operationId: sendReport
+      responses:
+        "200":
+          description: Sent; status and the issue's number
+        "400":
+          description: REPORT_INVALID or INVALID_JSON
+        "403":
+          description: REPORTS_OFF
+        "429":
+          description: REPORT_RATE_LIMITED
+        "502":
+          description: REPORTS_UNAVAILABLE
   /api/v1/diagnostics/first-answers:
     get:
       summary: How long answers took to start, by app, cold or warm

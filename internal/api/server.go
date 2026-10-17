@@ -229,8 +229,10 @@ type Dependencies struct {
 	GPUSetup func(ctx context.Context) (contracts.GPUSetup, error)
 	ListLogs func(ctx context.Context) ([]logs.Entry, error)
 	GetLog   func(ctx context.Context, name string, tailBytes int64) (logs.Content, error)
-	Version  func() contracts.VersionResponse
-	WebRoot  fs.FS
+	// SendReport sends a problem report on to Toskar's report service (#588).
+	SendReport SendReportFunc
+	Version    func() contracts.VersionResponse
+	WebRoot    fs.FS
 }
 
 // Server is the control-plane HTTP server.

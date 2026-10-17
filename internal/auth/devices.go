@@ -345,8 +345,13 @@ var deviceRoutes = map[string]bool{
 	"GET /api/v1/personalization":                      true,
 	"PUT /api/v1/personalization":                      true,
 	"GET /api/v1/egress":                               true,
-	"GET /api/v1/privacy":                              true,
-	"POST /api/v1/knowledge/sources":                   true,
+	// Report this on a phone, tablet, or TV (#588): the computer's part of
+	// a report, and sending it through the computer, so an Admin's switch
+	// and What left this computer cover it too.
+	"GET /api/v1/diagnostics/report":  true,
+	"POST /api/v1/diagnostics/report": true,
+	"GET /api/v1/privacy":             true,
+	"POST /api/v1/knowledge/sources":  true,
 }
 
 // DeviceMayReach reports whether a phone's key may make a request, by its

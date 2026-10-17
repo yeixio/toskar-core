@@ -589,6 +589,7 @@ func New(opts Options) (*App, error) {
 		ListLogs: func(ctx context.Context) ([]logs.Entry, error) {
 			return (&logs.Store{Dir: a.Config.Get().LogsDir}).List()
 		},
+		SendReport: a.sendReport,
 		GetLog: func(ctx context.Context, name string, tailBytes int64) (logs.Content, error) {
 			return (&logs.Store{Dir: a.Config.Get().LogsDir}).ReadTail(name, tailBytes)
 		},
@@ -1377,6 +1378,7 @@ func (a *App) settingsView(ctx context.Context) (contracts.SettingsView, error) 
 	communityRatings, _ := a.Settings.GetBool(ctx, ratings.SettingShow, false)
 	ratingsPrompts, _ := a.Settings.GetBool(ctx, ratings.SettingAsk, true)
 	updateCheck, _ := a.Settings.GetBool(ctx, updates.Setting, true)
+	problemReports, _ := a.Settings.GetBool(ctx, settingProblemReports, true)
 	toolTerminal, _ := a.Settings.GetString(ctx, "tool_terminal", "ask")
 	toolFiles, _ := a.Settings.GetString(ctx, "tool_file_writes", "ask")
 	toolGit, _ := a.Settings.GetString(ctx, "tool_git", "ask")
@@ -1420,6 +1422,7 @@ func (a *App) settingsView(ctx context.Context) (contracts.SettingsView, error) 
 		CommunityRatings:        communityRatings,
 		RatingsPrompts:          ratingsPrompts,
 		UpdateCheck:             updateCheck,
+		ProblemReports:          problemReports,
 		ToolTerminal:            toolTerminal,
 		ToolFileWrites:          toolFiles,
 		ToolGit:                 toolGit,
@@ -1518,7 +1521,7 @@ func (a *App) applySettingsPatch(ctx context.Context, patch map[string]any) erro
 			return err
 		}
 	}
-	for _, key := range []string{"save_chat_history", "save_task_history", "notify_task_finish", "notify_peer_offline", "launch_at_login", ratings.SettingShow, ratings.SettingAsk, updates.Setting} {
+	for _, key := range []string{"save_chat_history", "save_task_history", "notify_task_finish", "notify_peer_offline", "launch_at_login", ratings.SettingShow, ratings.SettingAsk, updates.Setting, settingProblemReports} {
 		if v, ok := patch[key].(bool); ok {
 			if err := a.Settings.SetBool(ctx, key, v); err != nil {
 				return err
