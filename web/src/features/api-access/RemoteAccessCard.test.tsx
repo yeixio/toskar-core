@@ -302,6 +302,34 @@ describe('RemoteAccessCard (#456)', () => {
       expect(screen.getByRole('button', { name: 'Subscribe for $4.99 a month' })).toBeEnabled()
     })
 
+    it('says when access ended once the token ran out, and offers it again (#692)', async () => {
+      const { unmount } = renderCard({ state: 'ended', store: 'app', expires: '2026-10-15T12:00:00Z', open: true })
+      expect(await screen.findByText(/Access from anywhere ended on Oct 15, 2026\. Subscribe again/)).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'Subscribe for $4.99 a month' })).toBeEnabled()
+      unmount()
+      renderCard({ state: 'ended', store: 'app', expires: '2026-10-15T12:00:00Z', in_app_only: true })
+      expect(await screen.findByText(/ended on Oct 15, 2026\. Subscribe again in the Toskar app/)).toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: /Subscribe for/ })).not.toBeInTheDocument()
+    })
+
+    it("doesn't call an ended token a fault (#692)", async () => {
+      vi.mocked(api.getSettings).mockResolvedValue({ remote_access_enabled: true, remote_access_port: 7333, remote_access_relay: '' } as never)
+      vi.mocked(api.getRemoteAccess).mockResolvedValue({
+        enabled: true,
+        port: 7333,
+        reachable: 'none',
+        relay: { name: 'relay.toskar.ai:4443', state: 'ended' },
+        subscription: { state: 'ended', store: 'stripe', expires: '2026-10-15T12:00:00Z' },
+      } as never)
+      render(
+        <QueryClientProvider client={new QueryClient()}>
+          <RemoteAccessCard />
+        </QueryClientProvider>,
+      )
+      expect(await screen.findByText(/Access from anywhere ended on Oct 15, 2026/)).toBeInTheDocument()
+      expect(screen.queryByText(/Can't connect to/)).not.toBeInTheDocument()
+    })
+
     it("points to the Toskar app in the Mac App Store's copy, which sells nothing (#630)", async () => {
       renderCard({ state: 'none', in_app_only: true })
       expect(await screen.findByText(/This copy of Toskar is from the App Store, so subscribe in the Toskar app/)).toBeInTheDocument()

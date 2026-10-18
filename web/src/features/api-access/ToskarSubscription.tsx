@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { api, type AnywhereSubscription } from '@/lib/api'
-import { formatCurrency } from '@/i18n/format'
+import { formatCurrency, formatDate } from '@/i18n/format'
 import { isDesktopShell, openExternal } from '@/lib/desktopBridge'
 import { ShownError, shownError, type Shown } from '@/components/ui/ShownError'
 
@@ -77,6 +77,8 @@ export function ToskarSubscription({ subscription }: { subscription: AnywhereSub
     onError: (err) => setError(shownError(err)),
   })
   const busy = checkout.isPending || manage.isPending
+  // When the last token ran out, as a lapsed subscription's does (#692).
+  const endedOn = subscription.state === 'ended' && subscription.expires ? formatDate(subscription.expires) : ''
   // The App Store's copy only points to the Toskar app (App Review 3.1.1).
   if (subscription.in_app_only && subscription.state !== 'active') {
     return (
@@ -84,7 +86,9 @@ export function ToskarSubscription({ subscription }: { subscription: AnywhereSub
         <h3 id="toskar-relay-subscription" className="text-sm font-medium">
           {t('remote.subscription.title')}
         </h3>
-        <p className="text-sm text-ink-muted">{t('remote.subscription.inAppOnly')}</p>
+        <p className="text-sm text-ink-muted">
+          {endedOn ? t('remote.subscription.endedInApp', { date: endedOn }) : t('remote.subscription.inAppOnly')}
+        </p>
       </div>
     )
   }
@@ -121,7 +125,11 @@ export function ToskarSubscription({ subscription }: { subscription: AnywhereSub
       ) : (
         <>
           <p className="text-sm text-ink-muted">
-            {subscription.state === 'ended' ? t('remote.subscription.ended') : t('remote.subscription.offer')}
+            {endedOn
+              ? t('remote.subscription.endedOn', { date: endedOn })
+              : subscription.state === 'ended'
+                ? t('remote.subscription.ended')
+                : t('remote.subscription.offer')}
           </p>
           {soldOut ? (
             <p className="text-sm text-warning" role="status">

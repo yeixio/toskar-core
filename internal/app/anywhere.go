@@ -315,11 +315,23 @@ func (a *App) subscription() *api.Subscription {
 	case session != "" && a.anywhere.ended:
 		out.State, out.Store = "ended", "stripe"
 	}
+	// A token that ran out, from the app's store or a Stripe subscription
+	// that wasn't renewed, is a subscription that ended, on the day it
+	// ran out (#692).
+	if out.State == "none" || out.State == "ended" {
+		if exp := a.expiredRelayToken(); !exp.IsZero() {
+			out.State, out.Expires, out.Store = "ended", exp, "app"
+			if session != "" {
+				out.Store = "stripe"
+			}
+		}
+	}
 	out.Open, out.Error = a.anywhere.open, a.anywhere.lastError
 	// Whether the relay takes new subscriptions is asked only when Settings
-	// shows this, never on its own, and answered on the next look; never
-	// by the App Store's copy, which doesn't offer it.
-	if out.State == "none" && !out.InAppOnly && !a.anywhere.asking && (a.anywhere.open == nil || a.anywhere.now().Sub(a.anywhere.openAt) >= availabilityFor) {
+	// offers one (none yet, or one ended), never on its own, and answered
+	// on the next look; never by the App Store's copy, which doesn't offer
+	// it.
+	if (out.State == "none" || out.State == "ended") && !out.InAppOnly && !a.anywhere.asking && (a.anywhere.open == nil || a.anywhere.now().Sub(a.anywhere.openAt) >= availabilityFor) {
 		a.anywhere.asking = true
 		go func() {
 			a.relayOpen(context.Background())

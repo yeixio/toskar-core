@@ -252,6 +252,8 @@
       "activeApp": "Assinado no app Toskar. Gerencie na loja do seu celular ou tablet.",
       "manage": "Gerenciar cobrança",
       "ended": "Sua assinatura terminou. Assine de novo para continuar usando o relay do Toskar.",
+      "endedOn": "O acesso de qualquer lugar terminou em {{date}}. Assine de novo para continuar usando o relay do Toskar.",
+      "endedInApp": "O acesso de qualquer lugar terminou em {{date}}. Assine de novo no app Toskar do seu celular ou tablet, e ele vale para este computador também.",
       "error": "Não foi possível verificar a assinatura com o relay do Toskar ({{code}}). O Toskar tenta de novo sozinho.",
       "noPage": "A página de cobrança não abriu. Tente de novo.",
       "inAppOnly": "Esta cópia do Toskar é da App Store: assine no app Toskar do seu celular ou tablet e gerencie na loja desse dispositivo. Depois de comprada lá, a assinatura também vale para este computador."

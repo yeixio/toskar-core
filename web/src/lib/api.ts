@@ -665,7 +665,7 @@ export const api = {
       ipv6?: string[]
       reachable?: 'direct' | 'ipv6' | 'manual' | 'relay' | 'none'
       reason?: 'off' | 'not_listening' | 'carrier_nat' | 'no_port'
-      relay?: { name: string; state: 'no_token' | 'connecting' | 'connected' | 'error'; error?: string; route?: string }
+      relay?: { name: string; state: 'no_token' | 'ended' | 'connecting' | 'connected' | 'error'; error?: string; route?: string }
       check?: ReachCheck
       /** Other Toskars running on this computer (#602). */
       others?: { name: string; pid: number; api_port: number; data_dir: string; version: string; remote?: boolean }[]

@@ -1,0 +1,2 @@
+### Fixed
+- When access from anywhere ends because its token ran out, as a lapsed subscription's does, Settings › API Access says so, "Access from anywhere ended on Oct 15, 2026", with Subscribe again, instead of "Can't connect to relay.toskar.ai (TOKEN_EXPIRED)". Toskar stops sending the expired token to the relay every few minutes, logs once, and a new token from the Toskar app or a subscription takes over within a minute, without a restart (#692, contract 1.41: relay state `ended`, and subscription `ended` with `expires`).

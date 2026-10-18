@@ -321,7 +321,8 @@ type RemoteReach struct {
 	// not_listening, carrier_nat, or no_port.
 	Reachable, Reason string
 	// Relay is the relay used, and RelayState how it's doing: no_token,
-	// connecting, connected, or error, with RelayError its code.
+	// ended (the token ran out, #692), connecting, connected, or error,
+	// with RelayError its code.
 	Relay, RelayState, RelayError string
 	// Route is the start of this computer's route ID, as the relay's
 	// dashboard shows it (#602).

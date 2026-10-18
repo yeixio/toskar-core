@@ -252,6 +252,8 @@
       "activeApp": "已在 Toskar 应用中订阅。请在手机或平板的应用商店中管理。",
       "manage": "管理账单",
       "ended": "你的订阅已结束。重新订阅即可继续使用 Toskar 中继。",
+      "endedOn": "随处访问已于 {{date}} 结束。重新订阅即可继续使用 Toskar 中继。",
+      "endedInApp": "随处访问已于 {{date}} 结束。在手机或平板上的 Toskar 应用中重新订阅，这台电脑也会一并适用。",
       "error": "无法通过 Toskar 中继核对订阅（{{code}}）。Toskar 会自动重试。",
       "noPage": "账单页面没有打开。请再试一次。",
       "inAppOnly": "这份 Toskar 来自 App Store。请在手机或平板上的 Toskar 应用中订阅，并在该设备的应用商店中管理。在那里购买后，也适用于这台电脑。"

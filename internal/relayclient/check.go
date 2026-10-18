@@ -80,7 +80,8 @@ func (c *Client) Check(ctx context.Context) (CheckResult, error) {
 }
 
 // CheckCode is a check's failure as a code for Settings: CHECK_UNSUPPORTED,
-// CHECK_TOO_SOON, NO_TOKEN, the relay's own code, or RELAY_UNREACHABLE.
+// CHECK_TOO_SOON, NO_TOKEN, TOKEN_EXPIRED (it ran out, and wasn't sent),
+// the relay's own code, or RELAY_UNREACHABLE.
 func CheckCode(err error) string {
 	switch {
 	case errors.Is(err, ErrCheckUnsupported):
@@ -89,6 +90,8 @@ func CheckCode(err error) string {
 		return "CHECK_TOO_SOON"
 	case errors.Is(err, errNoToken):
 		return "NO_TOKEN"
+	case errors.Is(err, errEnded):
+		return "TOKEN_EXPIRED"
 	}
 	return errorCode(err)
 }

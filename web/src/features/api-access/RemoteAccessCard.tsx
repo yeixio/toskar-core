@@ -300,7 +300,8 @@ function OutsideCheck({ status, saving, onSave }: { status: Status; saving: bool
       ) : (
         <ReachLine status={status} />
       )}
-      {status.relay && status.relay.state !== 'connected' ? <ToskarRelayLine relay={status.relay} /> : null}
+      {/* An ended token is said by the subscription, with when and how to renew (#692). */}
+      {status.relay && status.relay.state !== 'connected' && status.relay.state !== 'ended' ? <ToskarRelayLine relay={status.relay} /> : null}
       {result?.at ? <RouterLine status={status} quiet={onlyRelay} saving={saving} onSave={onSave} /> : null}
       <div className="flex flex-wrap items-center justify-between gap-2">
         {status.relay?.route ? <p className="text-xs text-ink-faint">{t('remote.check.route', { route: status.relay.route })}</p> : <span />}

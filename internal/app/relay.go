@@ -217,6 +217,23 @@ func (a *App) relayToken() string {
 	return tok
 }
 
+// expiredRelayToken is when this computer's token for Toskar's relay ran
+// out, when it has one that has; zero otherwise (#692).
+func (a *App) expiredRelayToken() time.Time {
+	cfg := a.Config.Get()
+	if cfg.RemoteAccess.Relay != "" {
+		return time.Time{}
+	}
+	tok, err := auth.NewSecretStore(cfg.DataDir).Read(relayclient.TokenName)
+	if err != nil {
+		return time.Time{}
+	}
+	if _, exp, ok := relayclient.ParseToken(tok); ok && !time.Now().Before(exp) {
+		return exp
+	}
+	return time.Time{}
+}
+
 // setRelayToken keeps the route token the app got for this computer from a
 // store subscription (#456), for Toskar's relay, and starts using it; with
 // enable it turns access from anywhere on too (the caller is an Admin).

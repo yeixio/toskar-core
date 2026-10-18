@@ -293,3 +293,47 @@ func TestAnywhereInAppOnly(t *testing.T) {
 		t.Fatal("exchanged without a subscription")
 	}
 }
+
+// A token that ran out is a subscription that ended, on the day it ran
+// out, from the app's store or a Stripe subscription; a new one is active
+// again (#692).
+func TestAnywhereTokenRanOut(t *testing.T) {
+	a, _, _ := newAnywhereApp(t)
+	route, err := a.routeID()
+	if err != nil {
+		t.Fatal(err)
+	}
+	secrets := auth.NewSecretStore(a.Config.Get().DataDir)
+	exp := time.Now().Add(-48 * time.Hour).Truncate(time.Second)
+	_ = secrets.Write(relayclient.TokenName, mintToken(route, exp))
+	waitAsked := func() {
+		for i := 0; i < 200; i++ {
+			a.anywhere.mu.Lock()
+			asking := a.anywhere.asking
+			a.anywhere.mu.Unlock()
+			if !asking {
+				return
+			}
+			time.Sleep(10 * time.Millisecond)
+		}
+	}
+	s := a.subscription()
+	waitAsked()
+	if s == nil || s.State != "ended" || s.Store != "app" || !s.Expires.Equal(exp) {
+		t.Fatalf("an app token that ran out: %+v", s)
+	}
+	if a.relayToken() != "" {
+		t.Fatal("an expired token is offered to devices")
+	}
+
+	_ = secrets.Write(stripeSessionName, "cs_test_ran_out")
+	if s := a.subscription(); s.State != "ended" || s.Store != "stripe" {
+		t.Fatalf("a Stripe token that ran out: %+v", s)
+	}
+	waitAsked()
+
+	_ = secrets.Write(relayclient.TokenName, mintToken(route, time.Now().Add(30*24*time.Hour)))
+	if s := a.subscription(); s.State != "active" {
+		t.Fatalf("after a new token: %+v", s)
+	}
+}

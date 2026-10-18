@@ -44,6 +44,10 @@ const (
 	replacedWait = time.Minute
 )
 
+// endedWait is how often a computer whose token ran out looks for a new
+// one; a variable so tests can look sooner.
+var endedWait = time.Minute
+
 // Store keeps the token between runs.
 type Store interface {
 	Read(name string) (string, error)
@@ -93,7 +97,8 @@ type Client struct {
 
 // Status is how the relay connection is doing, for Settings.
 type Status struct {
-	// State is no_token (nothing to connect with yet), connecting,
+	// State is no_token (nothing to connect with yet), ended (the token
+	// ran out with nothing to renew it, toskar-core#692), connecting,
 	// connected, or error.
 	State string `json:"state"`
 	// Error is the last failure's code, such as TOKEN_EXPIRED, or a short
@@ -174,6 +179,12 @@ func errorCode(err error) string {
 
 var errNoToken = errors.New("no relay token")
 
+// errEnded is a token past its own expiry with no enrollment secret to
+// renew it, such as a lapsed subscription's: the relay would only refuse
+// it, so it isn't sent. A new token in the store takes over on the next
+// look (#692).
+var errEnded = errors.New("the relay token has run out")
+
 // token is the token to use: the one kept, renewed by enrolling when it's
 // near its end and an enrollment secret is set.
 func (c *Client) token(ctx context.Context, renew bool) (string, error) {
@@ -196,7 +207,21 @@ func (c *Client) token(ctx context.Context, renew bool) (string, error) {
 	c.mu.Lock()
 	c.status.Expires = exp
 	c.mu.Unlock()
+	if c.EnrollSecret == "" && !exp.IsZero() && !time.Now().Before(exp) {
+		return "", errEnded
+	}
 	return tok, nil
+}
+
+// setEnded says the token ran out, logging it once rather than each look.
+func (c *Client) setEnded() {
+	c.mu.Lock()
+	was, exp := c.status.State, c.status.Expires
+	c.status.State, c.status.Error = "ended", ""
+	c.mu.Unlock()
+	if was != "ended" {
+		c.logger().Info("the relay token has run out; waiting for a new one", "relay", c.Relay, "expired", exp)
+	}
 }
 
 // tokenExpiry reads a token's expiry without checking it; only the relay
@@ -350,6 +375,9 @@ func (c *Client) registerLoop(ctx context.Context) {
 			}
 			if errors.Is(err, errNoToken) {
 				c.setState("no_token", "")
+			} else if errors.Is(err, errEnded) {
+				c.setEnded()
+				wait = endedWait
 			} else {
 				c.logger().Warn("couldn't register with the relay", "relay", c.Relay, "err", err)
 				wait = time.Minute
@@ -384,6 +412,9 @@ func (c *Client) tunnelLoop(ctx context.Context) {
 		case errors.Is(err, errNoToken):
 			c.setState("no_token", "")
 			wait = time.Minute
+		case errors.Is(err, errEnded):
+			c.setEnded()
+			wait = endedWait
 		case err != nil:
 			c.setState("error", errorCode(err))
 			c.logger().Warn("relay tunnel failed", "relay", c.Relay, "err", err)

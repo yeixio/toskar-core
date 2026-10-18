@@ -252,6 +252,8 @@
       "activeApp": "已在 Toskar 應用程式中訂閱。請在手機或平板的商店中管理。",
       "manage": "管理帳單",
       "ended": "你的訂閱已結束。重新訂閱即可繼續使用 Toskar 中繼。",
+      "endedOn": "隨處存取已於 {{date}} 結束。重新訂閱即可繼續使用 Toskar 中繼。",
+      "endedInApp": "隨處存取已於 {{date}} 結束。在手機或平板上的 Toskar 應用程式中重新訂閱，這台電腦也會一併適用。",
       "error": "無法透過 Toskar 中繼核對訂閱（{{code}}）。Toskar 會自動重試。",
       "noPage": "帳單頁面沒有開啟。請再試一次。",
       "inAppOnly": "這份 Toskar 來自 App Store。請在手機或平板上的 Toskar 應用程式中訂閱，並在該裝置的商店中管理。在那裡購買後，也適用於這台電腦。"

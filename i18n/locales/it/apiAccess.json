@@ -252,6 +252,8 @@
       "activeApp": "Abbonato nell'app Toskar. Gestiscilo nello store del telefono o del tablet.",
       "manage": "Gestisci fatturazione",
       "ended": "Il tuo abbonamento è terminato. Abbonati di nuovo per continuare a usare il relay di Toskar.",
+      "endedOn": "L'accesso ovunque è terminato il {{date}}. Abbonati di nuovo per continuare a usare il relay di Toskar.",
+      "endedInApp": "L'accesso ovunque è terminato il {{date}}. Abbonati di nuovo nell'app Toskar sul telefono o tablet, e varrà anche per questo computer.",
       "error": "Impossibile verificare l'abbonamento con il relay di Toskar ({{code}}). Toskar riprova da solo.",
       "noPage": "La pagina di fatturazione non si è aperta. Riprova.",
       "inAppOnly": "Questa copia di Toskar viene dall'App Store: abbonati nell'app Toskar sul telefono o tablet e gestisci l'abbonamento nello store di quel dispositivo. Una volta acquistato lì, vale anche per questo computer."

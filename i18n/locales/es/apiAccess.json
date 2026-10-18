@@ -252,6 +252,8 @@
       "activeApp": "Suscrito en la app de Toskar. Adminístralo en la tienda de tu teléfono o tableta.",
       "manage": "Administrar facturación",
       "ended": "Tu suscripción terminó. Vuelve a suscribirte para seguir usando el relé de Toskar.",
+      "endedOn": "El acceso desde cualquier lugar terminó el {{date}}. Vuelve a suscribirte para seguir usando el relé de Toskar.",
+      "endedInApp": "El acceso desde cualquier lugar terminó el {{date}}. Vuelve a suscribirte en la app de Toskar de tu teléfono o tableta, y también cubrirá esta computadora.",
       "error": "No se pudo comprobar la suscripción con el relé de Toskar ({{code}}). Toskar lo vuelve a intentar por su cuenta.",
       "noPage": "La página de facturación no se abrió. Vuelve a intentarlo.",
       "inAppOnly": "Esta copia de Toskar es de la App Store, así que suscríbete en la app de Toskar de tu teléfono o tableta y adminístralo en la tienda de ese dispositivo. Una vez comprada allí, también cubre esta computadora."

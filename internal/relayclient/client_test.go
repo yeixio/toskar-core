@@ -83,6 +83,8 @@ type fakeRelay struct {
 	// relay from before the check does.
 	checked map[string]any
 	noCheck bool
+	// asked counts the calls that sent a token.
+	asked int
 }
 
 func newFakeRelay(t *testing.T) *fakeRelay {
@@ -176,6 +178,7 @@ func (f *fakeRelay) authorized(r *http.Request) bool {
 	tok, _ := strings.CutPrefix(r.Header.Get("Authorization"), "Bearer ")
 	f.mu.Lock()
 	defer f.mu.Unlock()
+	f.asked++
 	return f.tokens[tok]
 }
 
@@ -364,6 +367,42 @@ func TestNoToken(t *testing.T) {
 	if f.record != nil {
 		t.Fatal("registered without a token")
 	}
+}
+
+// A token that ran out, with nothing to renew it (a lapsed subscription's),
+// isn't sent: the computer says it ended, and a new token in the store
+// takes over without a restart (#692).
+func TestTokenRanOut(t *testing.T) {
+	endedWait = 50 * time.Millisecond
+	defer func() { endedWait = time.Minute }()
+	f := newFakeRelay(t)
+	c, _, store := f.client(t, "", func(net.Conn) bool { return false })
+	exp := time.Now().Add(-time.Hour).Truncate(time.Second)
+	_ = store.Write(TokenName, fakeToken(c.Route(), exp))
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	go c.Run(ctx)
+	waitFor(t, "ended", func() bool { return c.Status().State == "ended" })
+	if st := c.Status(); !st.Expires.Equal(exp) || st.Error != "" {
+		t.Fatalf("ended status: %+v", st)
+	}
+	time.Sleep(200 * time.Millisecond)
+	f.mu.Lock()
+	asked := f.asked
+	f.mu.Unlock()
+	if asked != 0 {
+		t.Fatalf("sent the expired token %d times", asked)
+	}
+	if _, err := c.Check(ctx); CheckCode(err) != "TOKEN_EXPIRED" {
+		t.Fatalf("check with the expired token: %v", err)
+	}
+
+	fresh := fakeToken(c.Route(), time.Now().Add(30*24*time.Hour))
+	f.mu.Lock()
+	f.tokens[fresh] = true
+	f.mu.Unlock()
+	_ = store.Write(TokenName, fresh)
+	waitFor(t, "connected", func() bool { return c.Status().State == "connected" })
 }
 
 func TestStatusBeforeRun(t *testing.T) {
