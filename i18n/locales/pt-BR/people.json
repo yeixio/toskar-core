@@ -2,7 +2,7 @@
   "subtitle": "Quem usa este Toskar e o que cada pessoa pode fazer.",
   "adminsOnly": "Só administradores e o proprietário gerenciam pessoas.",
   "you": "(você)",
-  "ownerNoSignIn": "Usa este computador; ainda sem login para outros dispositivos",
+  "ownerNoSignIn": "Usa este computador. Para entrar de outros dispositivos, crie um link de login e escolha uma senha.",
   "notSignedIn": "Ainda não escolheu um nome de usuário",
   "byProxy": "Entra pelo seu serviço de login como {{name}}",
   "disabled": "Desativado",
@@ -38,8 +38,10 @@
     "copied": "Copiado",
     "expires": "Funciona uma vez, até {{date}}.",
     "lanOff": "Só este computador consegue abri-lo até o acesso pela rede local ser ativado.",
-    "lanOffAction": "Ativar em Acesso à API",
-    "done": "Pronto"
+    "lanOffAction": "Ativar o acesso pela rede",
+    "done": "Pronto",
+    "lanOffAsk": "Só este computador consegue abri-lo até um admin ativar o acesso pela rede.",
+    "turningOn": "Ativando…"
   },
   "invite": {
     "loading": "Abrindo seu link…",

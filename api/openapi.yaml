@@ -1377,7 +1377,7 @@ paths:
       operationId: getSettings
       responses:
         "200":
-          description: OK
+          description: "OK. For Admins and the Owner, network_access (#711, contract 1.42) counts who could use Toskar from another computer: people (who sign in with a username and password, or still have a link to choose them), devices (connected with a code), keys (API keys for apps and scripts), and sign_in_service (a trusted proxy or OpenID Connect provider). lan_api_enabled can be turned on when any of them is there."
           content:
             application/json:
               schema:

@@ -1027,35 +1027,51 @@ func (a *App) authorizeControlRequest(r *http.Request) error {
 	return nil
 }
 
-// someoneCanConnect reports whether anything could use the API from the
-// network: an API key, a trusted proxy that signs people in, or a person
-// other than the Owner, who signs in with a password or still has a link to
-// choose one (#206).
-func (a *App) someoneCanConnect(ctx context.Context) (bool, error) {
+// whoCanConnect counts what could use the API from the network: API keys,
+// connected devices, a trusted proxy or OpenID Connect provider that signs
+// people in, and people other than the Owner, who sign in with a password
+// or still have a link to choose one, or an Owner who chose one (#206,
+// #711).
+func (a *App) whoCanConnect(ctx context.Context) (contracts.NetworkAccess, error) {
+	var n contracts.NetworkAccess
 	keys, err := a.APIKeys.List(ctx)
-	if err != nil || len(keys) > 0 {
-		return len(keys) > 0, err
+	if err != nil {
+		return n, err
 	}
-	// People a trusted proxy or an OpenID Connect provider signs in (#206).
-	if proxy, err := a.Config.Get().Proxy(); err == nil && proxy != nil {
-		return true, nil
+	for _, k := range keys {
+		if k.Kind == auth.KindDevice {
+			n.Devices++
+		} else {
+			n.Keys++
+		}
 	}
-	if a.Config.Get().OIDC.Issuer != "" {
-		return true, nil
+	cfg := a.Config.Get()
+	if proxy, err := cfg.Proxy(); err == nil && proxy != nil {
+		n.SignInService = true
+	}
+	if cfg.OIDC.Issuer != "" {
+		n.SignInService = true
 	}
 	if a.People == nil {
-		return false, nil
+		return n, nil
 	}
 	people, err := a.People.List(ctx)
 	if err != nil {
-		return false, err
+		return n, err
 	}
 	for _, p := range people {
 		if p.Disabled == nil && (p.SignIn || p.Role != auth.RoleOwner) {
-			return true, nil
+			n.People++
 		}
 	}
-	return false, nil
+	return n, nil
+}
+
+// someoneCanConnect reports whether anything could use the API from the
+// network (see whoCanConnect).
+func (a *App) someoneCanConnect(ctx context.Context) (bool, error) {
+	n, err := a.whoCanConnect(ctx)
+	return n.Anyone(), err
 }
 
 // requireKeyForRemoteBind refuses a non-loopback control API with no key.
@@ -1398,8 +1414,17 @@ func (a *App) settingsView(ctx context.Context) (contracts.SettingsView, error) 
 	if downloadBehavior == "" {
 		downloadBehavior = "ask"
 	}
+	// Who could connect from another computer, for the Admins who turn it
+	// on (#711); Members and Visitors read settings too, so not for them.
+	var network *contracts.NetworkAccess
+	if auth.PrincipalFrom(ctx).Person.Role.AtLeast(auth.RoleAdmin) {
+		if n, err := a.whoCanConnect(ctx); err == nil {
+			network = &n
+		}
+	}
 	return contracts.SettingsView{
-		DataDir: cfg.DataDir, ModelsDir: cfg.ModelsDir, RuntimesDir: cfg.RuntimesDir,
+		NetworkAccess: network,
+		DataDir:       cfg.DataDir, ModelsDir: cfg.ModelsDir, RuntimesDir: cfg.RuntimesDir,
 		LogsDir: cfg.LogsDir, APIHost: cfg.APIHost, APIPort: cfg.APIPort,
 		LANAPIEnabled: cfg.LANAPIEnabled, WebUIEnabled: cfg.WebUIEnabled,
 		RemoteAccessEnabled: cfg.RemoteAccess.Enabled, RemoteAccessPort: cfg.RemotePort(), RemoteAccessAddress: cfg.RemoteAccess.Address,

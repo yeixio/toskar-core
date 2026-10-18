@@ -1,7 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link } from 'react-router-dom'
 import { RealmKicker } from '@/components/ui/Realm'
 import { formatDate } from '@/i18n/format'
 import { api, ApiError } from '@/lib/api'
@@ -27,6 +26,15 @@ function LinkPanel({ name, link, onDone }: { name: string; link: PersonLink; onD
   const { t } = useTranslation('people')
   const { base, reachable } = useShareBase()
   const [copied, setCopied] = useState(false)
+  const queryClient = useQueryClient()
+  const me = useQuery({ queryKey: ['me'], queryFn: () => api.getMe() })
+  const admin = me.data?.person.role === 'owner' || me.data?.person.role === 'admin'
+  // Turned on here, where the link needs it (#711): the person just added is
+  // who will connect, so no API key is needed.
+  const turnOn = useMutation({
+    mutationFn: () => api.updateSettings({ lan_api_enabled: true }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['settings'] }),
+  })
   const url = `${base}${link.path}`
   return (
     <div className="space-y-2 rounded-xl border border-primary/30 bg-primary/5 p-3 text-sm" role="status">
@@ -49,12 +57,15 @@ function LinkPanel({ name, link, onDone }: { name: string; link: PersonLink; onD
         {t('link.expires', { date: formatDate(link.expires_at, { dateStyle: 'medium', timeStyle: 'short' }) })}
       </p>
       {!reachable ? (
-        <p className="text-xs text-warning">
-          {t('link.lanOff')}{' '}
-          <Link to="/api-access" className="text-primary hover:underline">
-            {t('link.lanOffAction')}
-          </Link>
-        </p>
+        <div className="space-y-2">
+          <p className="text-xs text-warning">{admin ? t('link.lanOff') : t('link.lanOffAsk')}</p>
+          {admin ? (
+            <button type="button" className="btn-secondary btn-sm" disabled={turnOn.isPending} onClick={() => turnOn.mutate()}>
+              {turnOn.isPending ? t('link.turningOn') : t('link.lanOffAction')}
+            </button>
+          ) : null}
+          {turnOn.error ? <ShownError {...shownError(turnOn.error)} className="text-xs text-danger" /> : null}
+        </div>
       ) : null}
       <button type="button" className="text-xs text-ink-faint hover:text-ink" onClick={onDone}>
         {t('link.done')}

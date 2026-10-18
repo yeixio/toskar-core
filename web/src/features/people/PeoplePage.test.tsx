@@ -23,6 +23,7 @@ vi.mock('@/lib/api', async () => {
       getProfilePins: vi.fn(),
       setRoleProfiles: vi.fn(),
       setPersonProfiles: vi.fn(),
+      updateSettings: vi.fn(),
     },
   }
 })
@@ -122,6 +123,26 @@ describe('PeoplePage', () => {
     fireEvent.click(within(row).getByRole('button', { name: 'New password link' }))
     expect(await screen.findByText(/Send Grace this link to choose a new password/)).toBeInTheDocument()
     expect(screen.getByText(/until local network access is on/)).toBeInTheDocument()
+
+    // Turned on right here, with no API key: Grace signs in with her password (#711).
+    vi.mocked(api.updateSettings).mockResolvedValue({ lan_api_enabled: true, api_port: 7331 } as never)
+    vi.mocked(api.getSettings).mockResolvedValue({ lan_api_enabled: true, api_port: 7331 } as never)
+    fireEvent.click(screen.getByRole('button', { name: 'Turn on network access' }))
+    await waitFor(() => expect(api.updateSettings).toHaveBeenCalledWith({ lan_api_enabled: true }))
+    expect(await screen.findByText('https://192.168.1.20:7331/invite/xyz')).toBeInTheDocument()
+    expect(screen.queryByText(/until local network access is on/)).not.toBeInTheDocument()
+  })
+
+  it('asks a Member making their own link to have an Admin turn network access on (#711)', async () => {
+    vi.mocked(api.getSettings).mockResolvedValue({ lan_api_enabled: false, api_port: 7331 } as never)
+    vi.mocked(api.getMe).mockResolvedValue({ person: kid, via: 'session' })
+    vi.mocked(api.listPeople).mockResolvedValue([kid])
+    vi.mocked(api.personLink).mockResolvedValue({ path: '/invite/me', kind: 'reset', expires_at: '2026-10-15T00:00:00Z' })
+    renderIt()
+    const row = (await screen.findByText('Sam')).closest('li') as HTMLElement
+    fireEvent.click(within(row).getByRole('button', { name: 'Sign-in link' }))
+    expect(await screen.findByText(/until an Admin turns on network access/)).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Turn on network access' })).not.toBeInTheDocument()
   })
 
   it('tells people who are not admins that only admins manage people', async () => {

@@ -2,7 +2,7 @@
   "subtitle": "Wer dieses Toskar nutzt und was jede Person darf.",
   "adminsOnly": "Nur Admins und der Eigentümer verwalten Personen.",
   "you": "(du)",
-  "ownerNoSignIn": "Nutzt diesen Computer; noch keine Anmeldung für andere Geräte",
+  "ownerNoSignIn": "Nutzt diesen Computer. Um dich auf anderen Geräten anzumelden, erstelle einen Anmeldelink und wähle ein Passwort.",
   "notSignedIn": "Hat noch keinen Benutzernamen gewählt",
   "byProxy": "Meldet sich über deinen Anmeldedienst als {{name}} an",
   "disabled": "Deaktiviert",
@@ -38,8 +38,10 @@
     "copied": "Kopiert",
     "expires": "Er funktioniert einmal, bis {{date}}.",
     "lanOff": "Nur dieser Computer kann ihn öffnen, bis der Zugriff im lokalen Netzwerk eingeschaltet ist.",
-    "lanOffAction": "Unter API-Zugriff einschalten",
-    "done": "Fertig"
+    "lanOffAction": "Netzwerkzugriff einschalten",
+    "done": "Fertig",
+    "lanOffAsk": "Nur dieser Computer kann ihn öffnen, bis ein Admin den Netzwerkzugriff einschaltet.",
+    "turningOn": "Wird eingeschaltet …"
   },
   "invite": {
     "loading": "Dein Link wird geöffnet …",

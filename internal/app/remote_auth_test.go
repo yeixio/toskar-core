@@ -196,3 +196,51 @@ func TestStartTurnsOffUnusedLANAccess(t *testing.T) {
 		t.Fatal("the setting didn't change")
 	}
 }
+
+// Settings say who could connect from another computer, for Admins only
+// (#711): people sign in with a password, devices with a code, apps with
+// an API key.
+func TestSettingsSayWhoCanConnect(t *testing.T) {
+	t.Setenv("YGGDRASIL_API_HOST", "127.0.0.1")
+	t.Setenv("YGGDRASIL_DISCOVERY_ENABLED", "false")
+	application, err := New(Options{DataDir: t.TempDir()})
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = application.Shutdown(context.Background()) })
+	ctx := context.Background()
+
+	view, err := application.settingsView(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if view.NetworkAccess == nil || view.NetworkAccess.Anyone() {
+		t.Fatalf("a new install: %+v", view.NetworkAccess)
+	}
+
+	if _, err := application.People.Create(ctx, "Sam", auth.RoleMember); err != nil {
+		t.Fatal(err)
+	}
+	if _, _, err := application.APIKeys.CreateDevice(ctx, "Sam's phone"); err != nil {
+		t.Fatal(err)
+	}
+	if _, _, err := application.APIKeys.Create(ctx, "Script"); err != nil {
+		t.Fatal(err)
+	}
+	view, err = application.settingsView(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if n := view.NetworkAccess; n == nil || n.People != 1 || n.Devices != 1 || n.Keys != 1 || n.SignInService {
+		t.Fatalf("a person, a device, and a key: %+v", n)
+	}
+
+	member := auth.WithPrincipal(ctx, auth.Principal{Person: auth.Person{ID: "sam", Role: auth.RoleMember}})
+	view, err = application.settingsView(member)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if view.NetworkAccess != nil {
+		t.Fatalf("a Member sees who can connect: %+v", view.NetworkAccess)
+	}
+}

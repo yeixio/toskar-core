@@ -2,7 +2,7 @@
   "subtitle": "谁在使用这个 Toskar，以及每个人能做什么。",
   "adminsOnly": "只有管理员和所有者可以管理人员。",
   "you": "（你）",
-  "ownerNoSignIn": "使用这台电脑；尚未设置其他设备的登录",
+  "ownerNoSignIn": "使用这台电脑。要从其他设备登录，请创建登录链接并设置密码。",
   "notSignedIn": "尚未选择用户名",
   "byProxy": "通过你的登录服务以 {{name}} 登录",
   "disabled": "已停用",
@@ -38,8 +38,10 @@
     "copied": "已复制",
     "expires": "只能使用一次，有效期至 {{date}}。",
     "lanOff": "在打开本地网络访问之前，只有这台电脑能打开它。",
-    "lanOffAction": "在 API 访问中打开",
-    "done": "完成"
+    "lanOffAction": "打开网络访问",
+    "done": "完成",
+    "lanOffAsk": "在管理员打开网络访问之前，只有这台电脑能打开它。",
+    "turningOn": "正在打开…"
   },
   "invite": {
     "loading": "正在打开你的链接…",

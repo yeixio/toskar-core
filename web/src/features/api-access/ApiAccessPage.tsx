@@ -8,6 +8,9 @@ import { useDialog } from '@/lib/useDialog'
 import { formatLastUsed } from '@/features/models/modelPresentation'
 import { useUIStore } from '@/stores/uiStore'
 import type { APIKeyRecord } from '@/types/api'
+import { Link } from 'react-router-dom'
+import { anyoneCanConnect } from './networkAccess'
+import { WhoConnects } from './WhoConnects'
 import { KeyPermissions } from './KeyPermissions'
 import { RealmKicker } from '@/components/ui/Realm'
 import { ShareWithApps } from './ShareWithApps'
@@ -114,7 +117,6 @@ export function ApiAccessPage() {
   const [probeTick, setProbeTick] = useState(0)
   const [lanConfirmOpen, setLanConfirmOpen] = useState(false)
   const lanDialogRef = useDialog(lanConfirmOpen, () => setLanConfirmOpen(false))
-  const [browserHasKey, setBrowserHasKey] = useState(() => Boolean(storedApiKey()))
   const [dialogKeyName, setDialogKeyName] = useState(() => t('lan.defaultKeyName'))
   const [docsOpen, setDocsOpen] = useState(false)
   const [showCreate, setShowCreate] = useState(false)
@@ -140,6 +142,10 @@ export function ApiAccessPage() {
   })
 
   const lanEnabled = settingsQuery.data?.lan_api_enabled ?? false
+  // Who could connect from another computer (#711). Older daemons don't say;
+  // then the server's own answer to Allow decides.
+  const network = settingsQuery.data?.network_access
+  const nobodyYet = Boolean(network && !anyoneCanConnect(network))
   const port = settingsQuery.data?.api_port ?? 7331
   const bindHost = settingsQuery.data?.api_host ?? '127.0.0.1'
 
@@ -178,7 +184,6 @@ export function ApiAccessPage() {
         setRevealedSecret(result.secret)
         setRevealedKeyId(result.key?.id ?? null)
         rememberApiKey(result.secret, result.key?.id)
-        setBrowserHasKey(true)
       }
       setNewKeyName('')
       setShowCreate(false)
@@ -193,7 +198,6 @@ export function ApiAccessPage() {
         setRevealedSecret(result.secret)
         setRevealedKeyId(result.key?.id ?? null)
         rememberApiKey(result.secret, result.key?.id)
-        setBrowserHasKey(true)
       }
       queryClient.invalidateQueries({ queryKey: ['api-keys'] })
     },
@@ -207,7 +211,6 @@ export function ApiAccessPage() {
         setRevealedKeyId(null)
       }
       forgetApiKey(id)
-      setBrowserHasKey(Boolean(storedApiKey()))
       queryClient.invalidateQueries({ queryKey: ['api-keys'] })
     },
   })
@@ -422,9 +425,12 @@ export function ApiAccessPage() {
           />
         </div>
 
-        {lanEnabled && keysQuery.isSuccess && allActive.length === 0 && (
+        {/* Who connects how (#711): people with a password, devices with a code, apps with a key. */}
+        <WhoConnects access={network} onConnectDevice={() => setPhoneOpen(true)} />
+
+        {lanEnabled && network && !anyoneCanConnect(network) && (
           <div className="rounded-lg border border-warning/30 bg-warning/10 px-4 py-3 text-sm text-ink">
-            {t('lan.noKeys')}
+            {t('lan.nobody')}
           </div>
         )}
 
@@ -651,10 +657,16 @@ export function ApiAccessPage() {
               {t('lan.confirmTitle')}
             </h2>
             <p className="mt-2 text-sm leading-relaxed text-ink-muted">{t('lan.confirmBody')}</p>
-            <p className="mt-2 text-sm leading-relaxed text-ink-muted">{t('lan.confirmHttp')}</p>
-            {!browserHasKey && (
+            {tls?.enabled ? null : (
+              <p className="mt-2 text-sm leading-relaxed text-ink-muted">{t('lan.confirmHttp')}</p>
+            )}
+            {nobodyYet && (
               <div className="mt-4 space-y-2">
-                <p className="text-sm text-ink">{t('lan.browserKey')}</p>
+                <p className="text-sm text-ink">{t('lan.needSomeone')}</p>
+                <Link to="/people" className="btn-secondary btn-sm inline-flex" onClick={() => setLanConfirmOpen(false)}>
+                  {t('lan.addPerson')}
+                </Link>
+                <p className="pt-2 text-sm text-ink-muted">{t('lan.orKey')}</p>
                 <label className="block text-sm font-medium text-ink" htmlFor="lan-key-name">
                   {t('lan.keyName')}
                 </label>
@@ -698,9 +710,7 @@ export function ApiAccessPage() {
               <button
                 type="button"
                 className="btn-primary"
-                disabled={
-                  updateSettingsMutation.isPending || activeKeys.length === 0 || !browserHasKey
-                }
+                disabled={updateSettingsMutation.isPending || nobodyYet}
                 onClick={() => updateSettingsMutation.mutate(true)}
               >
                 {updateSettingsMutation.isPending ? t('lan.enabling') : t('lan.allow')}
