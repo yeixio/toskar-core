@@ -8,6 +8,24 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Thi
 
 Changes waiting for the next release are in [changes/unreleased/](changes/unreleased/), one file per pull request. `scripts/changelog.py preview` shows them together, and `scripts/changelog.py release <version>` writes them here when the release is cut.
 
+## [1.9.1] - 2026-10-18
+
+### Added
+
+- User guide: Get more careful answers, covering Effort, reasoning models and why Auto doesn't pick one for a quick question, a profile's Reasoning level, comparing independent drafts, and what each costs (#697). The Chat section and the API's `reasoning_effort` point to it.
+- A step that takes a while, such as making a picture or a clip, shows how long it has taken beside it after 15 seconds, so a long wait doesn't look stuck (#705).
+- Toskar on phones and tablets has the words to say a picture or clip is being made on your computer, in the 10 languages (#705, yeixio/toskar-apps#290).
+
+### Changed
+
+- A computer tells Toskar's relay its Toskar version when it connects, beside its name, so the relay's operator sees which version each computer runs on the relay's dashboard (toskar-relay#47). It goes only to the relay, never to devices or into records.
+
+### Fixed
+
+- Asking to make a picture ("make a picture of a cat riding a bike") no longer offers to take a photo instead: the typo fixer read "make" as a misspelled "take". It now leaves 131 more everyday words alone, such as make, think, show, short, and plan (yeixio/toskar-apps#195).
+- Phone text for subscribing to access from anywhere when the store hasn't passed a renewal on yet, and for Restore purchase finding nothing, in all ten languages (yeixio/toskar-apps#285).
+- When access from anywhere ends because its token ran out, as a lapsed subscription's does, Settings › API Access says so, "Access from anywhere ended on Oct 15, 2026", with Subscribe again, instead of "Can't connect to relay.toskar.ai (TOKEN_EXPIRED)". Toskar stops sending the expired token to the relay every few minutes, logs once, and a new token from the Toskar app or a subscription takes over within a minute, without a restart (#692, contract 1.41: relay state `ended`, and subscription `ended` with `expires`).
+
 ## [1.9.0] - 2026-10-17
 
 ### Added
