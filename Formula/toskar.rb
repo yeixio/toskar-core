@@ -2,17 +2,17 @@
 class Toskar < Formula
   desc "Local AI daemon and web UI"
   homepage "https://toskar.ai"
-  version "1.8.3"
+  version "1.9.0"
   license "AGPL-3.0-or-later"
 
   on_arm do
-    url "https://github.com/yeixio/toskar-core/releases/download/v1.8.3/toskar-1.8.3-darwin-arm64-headless.tar.gz"
-    sha256 "785dc08d70f4694aae229595a260513a1ea4f49f656e593c959455f3b0efbab4"
+    url "https://github.com/yeixio/toskar-core/releases/download/v1.9.0/toskar-1.9.0-darwin-arm64-headless.tar.gz"
+    sha256 "f2e87b36c003a1b93d62680a37190da13df56f59ab51e1bda23a6aae1112f5b5"
   end
 
   on_intel do
-    url "https://github.com/yeixio/toskar-core/releases/download/v1.8.3/toskar-1.8.3-darwin-amd64-headless.tar.gz"
-    sha256 "08b762aa06f3f8389764b126f78188b10d9f2eacf76e481db40698ffe3bb91a4"
+    url "https://github.com/yeixio/toskar-core/releases/download/v1.9.0/toskar-1.9.0-darwin-amd64-headless.tar.gz"
+    sha256 "31fa75b98483a3ed26d949d0defe7f63745756f2d021c105b53960515df03d8b"
   end
 
   def install
