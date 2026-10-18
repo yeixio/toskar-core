@@ -786,6 +786,18 @@ export interface Message {
   versions?: { index: number; count: number; ids: string[] }
 }
 
+/** Who could use Toskar from another computer (#711). */
+export interface NetworkAccess {
+  /** People who sign in with a username and password, or still have a link to choose them. */
+  people: number
+  /** Phones, tablets, watches, and TVs connected with a code. */
+  devices: number
+  /** API keys made in API Access, for apps and scripts. */
+  keys: number
+  /** A trusted proxy or OpenID Connect provider signs people in. */
+  sign_in_service: boolean
+}
+
 export interface SettingsView {
   data_dir: string
   models_dir: string
@@ -794,6 +806,8 @@ export interface SettingsView {
   api_host: string
   api_port: number
   lan_api_enabled: boolean
+  /** Who could use Toskar from another computer (#711, contract 1.42); only for Admins and the Owner. */
+  network_access?: NetworkAccess
   /** Access from anywhere (#456): the listener for paired devices away from home. */
   remote_access_enabled?: boolean
   remote_access_port?: number

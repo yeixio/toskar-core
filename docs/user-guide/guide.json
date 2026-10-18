@@ -251,7 +251,7 @@
       "title": "Connect another app through the API",
       "paragraphs": [
         "Open API Access to copy the endpoint and run Test API. The default base URL is http://127.0.0.1:7331/v1. Use GET /v1/models to find a model ID, such as auto or a profile, then POST /v1/chat/completions. The API gets the same assistant as chat: Auto, web look-ups, connected services, answer checks, personalization, and specialized AIs. It is an OpenAI-compatible subset, not every hosted API feature.",
-        "With local network access off, the default endpoint on this computer needs no API key. Turning on Local network access requires a key for every request from another device; apps on this computer still need none. Create a named key in API Access and copy its secret when it is shown; you can rotate or revoke it there. Send it as Authorization: Bearer YOUR_KEY.",
+        "With local network access off, the default endpoint on this computer needs no API key. With it on, an app or script on another device needs a key for every request; apps on this computer still need none, and people sign in with their password in a browser instead. Create a named key in API Access and copy its secret when it is shown; you can rotate or revoke it there. Send it as Authorization: Bearer YOUR_KEY.",
         "Each key has permissions a request can only narrow: whether it may use memories and connected knowledge (never, on request, or always), which tools (the profile's, read-only, or none), and whether it may choose where it runs. API requests use memories only when they ask, unless the key says always. A request can ask for JSON with response_format, and Toskar checks and repairs the result.",
         "For another computer, use the LAN endpoint shown in API Access rather than localhost. Keep LAN access on a trusted network; the displayed HTTP endpoint does not itself provide public-internet TLS protection.",
         "Apps that speak MCP, such as Claude Desktop, Claude Code, Cursor, and VS Code, can ask your local AI questions, list its models, and search your connected knowledge. API Access → Use Toskar in other AI apps shows what to paste into each."
@@ -297,12 +297,13 @@
         "Everyone in your home or team can use the same Toskar, each with their own chats, memories, files, and automations. Nobody sees anyone else's, not even the Owner. Models, tools, knowledge, and profiles are shared.",
         "Whoever installed Toskar is the Owner and uses it on this computer without signing in. Admins manage models, tools, knowledge, computers, settings, and people other than Admins and the Owner. Members chat and have their own memories and automations. Visitors only chat. Each person sees only the pages their role can use.",
         "Everyone chooses their own App language, the language answers are written in, and Personalization in Settings. Until they do, they have the Owner's.",
+        "Who signs in how, from another computer or device: people sign in with their username and password, in any browser. Phones, tablets, watches, and TVs connect with a 6-digit code, under Connect a device. Apps and scripts, such as one using the OpenAI-compatible API, use an API key from API Access. People never need a key. The Owner uses this computer without signing in; to sign in from another device, the Owner makes a sign-in link on People and chooses a password.",
         "Everyone can connect their own phone, tablet, or TV under Settings → Your devices, and disconnect it there. Local network access has to be on first, which an Admin or the Owner turns on.",
         "The People page under Administer lists everyone. Change someone's role there, make them a new password link, or disable them, which signs them out everywhere and stops their keys and automations."
       ],
       "steps": [
-        "Turn on local network access under API Access, so other devices can open Toskar.",
         "Open People, type the person's name, choose a role, and choose Add.",
+        "If local network access is off, choose Turn on network access under the link, so other devices can open it. No API key is needed: the person signs in with a password.",
         "Copy the link and send it to them. It works once, for a week.",
         "They open it, choose a username and password, and are signed in. Next time, they sign in at the same address.",
         "Forgot a password? Choose New password link next to their name and send them the new link."
@@ -393,7 +394,7 @@
         "Start with What I did under the answer: it names the model that answered and why, and what went wrong. No reply or a model load failure: confirm the installation finished, check the selected computer is online, close memory-heavy applications, or try a smaller model. A model that cannot load fails at once with the reason.",
         "No live web answer: check that Internet is allowed in the profile, and ask for a search or about something current; a plain question is answered without tools. The same search within 15 minutes is answered from the cache.",
         "An answer did not use your knowledge or memories: use Try a question on the Knowledge page, install an embedding model so search matches meaning, and check that memory is on for the chat. A knowledge source that failed shows the reason; database and web API sources keep answering from the last data fetched.",
-        "API connection refused: confirm the daemon is running and copy the current endpoint from API Access. A 401 with local network access on means a request from another device needs a valid API key, and a 403 means the key does not allow what the request asked for. Run Test API after changing settings.",
+        "API connection refused: confirm the daemon is running and copy the current endpoint from API Access. A 401 with local network access on means a request from an app on another device needs a valid API key (people signing in in a browser use their password instead), and a 403 means the key does not allow what the request asked for. Run Test API after changing settings.",
         "To tell the Toskar team about a problem, use Report this beside the error (see Report a problem). For the public issue tracker, include the app version, OS and processor, model, profile, steps to reproduce, and relevant diagnostics, and remove secrets and private prompt or file content before posting."
       ]
     },

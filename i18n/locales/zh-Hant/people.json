@@ -2,7 +2,7 @@
   "subtitle": "誰在使用這個 Toskar，以及每個人能做什麼。",
   "adminsOnly": "只有管理員和擁有者可以管理人員。",
   "you": "（你）",
-  "ownerNoSignIn": "使用這台電腦；尚未設定其他裝置的登入",
+  "ownerNoSignIn": "使用這台電腦。要從其他裝置登入，請建立登入連結並設定密碼。",
   "notSignedIn": "尚未選擇使用者名稱",
   "byProxy": "透過你的登入服務以 {{name}} 登入",
   "disabled": "已停用",
@@ -38,8 +38,10 @@
     "copied": "已複製",
     "expires": "只能使用一次，有效期至 {{date}}。",
     "lanOff": "在開啟本機網路存取之前，只有這台電腦能開啟它。",
-    "lanOffAction": "在 API 存取中開啟",
-    "done": "完成"
+    "lanOffAction": "開啟網路存取",
+    "done": "完成",
+    "lanOffAsk": "在管理員開啟網路存取之前，只有這台電腦能開啟它。",
+    "turningOn": "正在開啟…"
   },
   "invite": {
     "loading": "正在開啟你的連結…",

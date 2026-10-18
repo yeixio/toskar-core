@@ -1072,6 +1072,27 @@ type Task struct {
 }
 
 // SettingsView is the user-visible settings payload.
+// NetworkAccess counts who could use Toskar from another computer (#711).
+// Network access can be turned on when any of these is above zero, or a
+// sign-in service is set up.
+type NetworkAccess struct {
+	// People is everyone who signs in with a username and password, or
+	// still has a link to choose them: everyone but an Owner without one.
+	People int `json:"people"`
+	// Devices is phones, tablets, watches, and TVs connected with a code.
+	Devices int `json:"devices"`
+	// Keys is API keys made in API Access, for apps and scripts.
+	Keys int `json:"keys"`
+	// SignInService is a trusted proxy or OpenID Connect provider that
+	// signs people in.
+	SignInService bool `json:"sign_in_service"`
+}
+
+// Anyone reports whether anyone at all could connect.
+func (n NetworkAccess) Anyone() bool {
+	return n.People > 0 || n.Devices > 0 || n.Keys > 0 || n.SignInService
+}
+
 type SettingsView struct {
 	DataDir       string `json:"data_dir"`
 	ModelsDir     string `json:"models_dir"`
@@ -1080,6 +1101,10 @@ type SettingsView struct {
 	APIHost       string `json:"api_host"`
 	APIPort       int    `json:"api_port"`
 	LANAPIEnabled bool   `json:"lan_api_enabled"`
+	// NetworkAccess is who could use Toskar from another computer (#711,
+	// contract 1.42). Settings show it so an Admin knows that people sign in
+	// with a password, devices with a code, and apps with an API key.
+	NetworkAccess *NetworkAccess `json:"network_access,omitempty"`
 	// RemoteAccessEnabled, RemoteAccessPort, and RemoteAccessAddress are
 	// access from anywhere (#456): the listener for paired devices outside
 	// the home network, its port, and the address a forwarded port is

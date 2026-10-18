@@ -2,7 +2,7 @@
   "subtitle": "Who uses this Toskar, and what each person may do.",
   "adminsOnly": "Only Admins and the Owner manage people.",
   "you": "(you)",
-  "ownerNoSignIn": "Uses this computer; no sign-in for other devices yet",
+  "ownerNoSignIn": "Uses this computer. To sign in from other devices, make a sign-in link and choose a password.",
   "notSignedIn": "Hasn't chosen a username yet",
   "byProxy": "Signs in through your sign-in service as {{name}}",
   "disabled": "Disabled",
@@ -38,8 +38,10 @@
     "copied": "Copied",
     "expires": "It works once, until {{date}}.",
     "lanOff": "Only this computer can open it until local network access is on.",
-    "lanOffAction": "Turn it on in API Access",
-    "done": "Done"
+    "lanOffAction": "Turn on network access",
+    "done": "Done",
+    "lanOffAsk": "Only this computer can open it until an Admin turns on network access.",
+    "turningOn": "Turning on…"
   },
   "invite": {
     "loading": "Opening your link…",
