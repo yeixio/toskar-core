@@ -488,7 +488,13 @@
     "generating": "Generando la respuesta…",
     "generatingOn": "Generando en {{node}}…",
     "readingNamed": "Leyendo {{name}}…",
-    "readingPhotoText": "Leyendo el texto de {{name}}…"
+    "readingPhotoText": "Leyendo el texto de {{name}}…",
+    "makingImage": "Creando la imagen…",
+    "changingImage": "Cambiando la imagen…",
+    "makingVideo": "Creando el clip; tarda unos minutos…",
+    "makingImageSlow": "Creando la imagen. En tu computadora tarda unos minutos…",
+    "changingImageSlow": "Cambiando la imagen. En tu computadora tarda unos minutos…",
+    "makingVideoSlow": "Creando el clip. En tu computadora puede tardar casi una hora…"
   },
   "realms": {
     "about": "{{norse}}. {{rune}}. Acerca de este nombre",

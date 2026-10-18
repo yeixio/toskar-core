@@ -496,7 +496,13 @@
     "reasoning": "Reasoning…",
     "writingAnswer": "Writing the answer…",
     "readingNamed": "Reading {{name}}…",
-    "readingPhotoText": "Reading the text in {{name}}…"
+    "readingPhotoText": "Reading the text in {{name}}…",
+    "makingImage": "Making the picture…",
+    "changingImage": "Changing the picture…",
+    "makingVideo": "Making the clip, which takes a few minutes…",
+    "makingImageSlow": "Making the picture. On your computer it takes a few minutes…",
+    "changingImageSlow": "Changing the picture. On your computer it takes a few minutes…",
+    "makingVideoSlow": "Making the clip. On your computer it can take most of an hour…"
   },
   "realms": {
     "about": "{{norse}}. {{rune}}. About this name",

@@ -481,7 +481,13 @@
     "generating": "Antwort wird erzeugt …",
     "generatingOn": "Wird auf {{node}} erzeugt …",
     "readingNamed": "{{name}} wird gelesen …",
-    "readingPhotoText": "Text in {{name}} wird gelesen …"
+    "readingPhotoText": "Text in {{name}} wird gelesen …",
+    "makingImage": "Bild wird erstellt…",
+    "changingImage": "Bild wird geändert…",
+    "makingVideo": "Clip wird erstellt, das dauert ein paar Minuten…",
+    "makingImageSlow": "Bild wird erstellt. Auf deinem Computer dauert das ein paar Minuten…",
+    "changingImageSlow": "Bild wird geändert. Auf deinem Computer dauert das ein paar Minuten…",
+    "makingVideoSlow": "Clip wird erstellt. Auf deinem Computer kann das fast eine Stunde dauern…"
   },
   "realms": {
     "about": "{{norse}}. {{rune}}. Über diesen Namen",
