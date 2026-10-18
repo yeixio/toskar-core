@@ -1,2 +1,0 @@
-### Changed
-- The errors that lists show now carry a code beside their text (#588, contract 1.36): automation runs, previews, and last errors, knowledge sources, tasks, and failed model downloads. The web app shows them in the App language and sends the code with Report this. A failure without a code of its own gets one for where it happened, such as `AUTOMATION_FAILED` or `KNOWLEDGE_SYNC_FAILED`, and a run or task cut short when Toskar stopped is `AUTOMATION_INTERRUPTED` or `TASK_INTERRUPTED`.

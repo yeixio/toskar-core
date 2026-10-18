@@ -8,6 +8,139 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Thi
 
 Changes waiting for the next release are in [changes/unreleased/](changes/unreleased/), one file per pull request. `scripts/changelog.py preview` shows them together, and `scripts/changelog.py release <version>` writes them here when the release is cut.
 
+## [1.9.0] - 2026-10-17
+
+### Added
+
+- API Access sells Toskar's relay itself: Subscribe for $4.99 a month or $39.99 a year opens the checkout in your browser, access from anywhere turns on a few seconds after you pay, and Manage billing changes the card or cancels. A subscription bought in the Toskar app shows as such, and is managed in the device's store (#639).
+- Access from anywhere can be bought on the computer itself, without a phone: `POST /api/v1/remote-access/subscription/checkout` opens a Stripe checkout (monthly or yearly), Toskar turns access from anywhere on once it's paid and renews it as the subscription does, and `POST /api/v1/remote-access/subscription/manage` opens the billing page for changing the card or cancelling. `GET /api/v1/remote-access` says how the subscription stands (#639, contract 1.38).
+- The chat shows auto-compact (#342):
+  - The context gauge explains it and offers View summary, Compact now,
+    New chat from summary, and Keep this chat verbatim.
+  - A divider in the chat marks where the summary takes over, and opens
+    it to read and correct.
+  - "Compacting earlier messages…" shows while a long turn compacts first.
+  - Settings › Chats & history chooses when it starts.
+- Auto-compact has a name and controls (#342):
+  - A long chat's older messages are sent to the model as a summary, and
+    every message stays saved. Now you can read the summary and correct
+    it, compact a chat now, start a new chat from its summary, or keep a
+    chat verbatim.
+  - Settings › Chat chooses when it starts: Early, Normal, or Late.
+  - A turn that wouldn't fit compacts first, instead of leaving the oldest
+    messages out.
+  - API: `GET` and `PUT /api/v1/conversations/{id}/summary`, `POST
+    …/compact`, `POST …/from-summary`, a chat's `compact_off`, and the
+    `compact_at` setting (contract 1.35).
+- Administer → People has **What people may use**: a switch for each
+  capability and role, and under each person their own Allow or Block
+  (#589). The app hides what's off for the person using it: attaching
+  files, the model picker, read aloud, and making automations.
+- Admins choose what each role, and each person, may use (#589):
+  - the capabilities are files, pictures in, making pictures, making video,
+    voice, the web, Knowledge, adding to Knowledge, automations, tools that
+    change things, choosing a model, and access from anywhere;
+  - Visitors start without files, making pictures or video, or
+    automations, and Members without tools that change things;
+  - Toskar enforces them everywhere a person comes in, and `GET
+    /api/v1/me` lists them so apps can hide what's off;
+  - asking for something turned off gets a plain answer saying who can
+    turn it on. See [What people may use](docs/people.md).
+- A connected phone can connect its watch to the computer, from anywhere
+  and with no code to type: `POST /api/v1/me/devices` (contract 1.33)
+  gives the watch a key of its own, for the same person, so it shows in
+  Devices and can be disconnected on its own (yeixio/toskar-apps#213). A
+  person may have 20 connected devices.
+- User guide: Report a problem, covering what a report sends, what's taken out first, how the TV and watch send theirs, and that Toskar sends nothing on its own, so there's nothing to turn off (#588).
+- The media quality set asks its judge whether a picture or any frame of a clip is garbled or corrupted, or flashes or jumps apart from its neighbors, so a broken decode fails even when it shows the right thing; and a Mac-only clip case guards Apple's video decode path (#553).
+- User guide: What pictures and clips need, with each model's memory, download, and measured speed, the verdicts, what happens when memory is short, and the Mac App Store limit (#552). The Media setup card and a chat's offer to set one up when it may be slow or tight link to it, for the guide of the running release.
+- `toskarctl people`: list, add, show, change, link, remove, and see the
+  keys, devices, and activity of the people who use this Toskar, from a
+  script or a server without a browser (#592). Passwords come from
+  standard input only.
+- `TOSKAR_ADMIN_EMAIL` and `TOSKAR_ADMIN_PASSWORD_FILE` add an Admin when a
+  new server starts, once, for Docker and Kubernetes installs set up from a
+  script.
+- Manage people without a browser (#592). Through the API, Admins can:
+  - add someone with an email address and a password they can sign in
+    with at once, which they can be made to change first;
+  - set a password for someone;
+  - look up one person, or filter people by role or by disabled;
+  - remove someone, deleting their chats, memories, automations, and
+    files, or giving them to another person;
+  - see and revoke someone's API keys and devices.
+  Every change is logged in `GET /api/v1/people/activity`. Someone who
+  must change their password is asked for a new one when they sign in.
+- Core's side of notifications in the Toskar app (#460): an `app` notification destination that pushes to the person's paired phones and tablets through Toskar's push relay, with the title only (the default), the full text, or a private notice, and `GET`, `PUT`, and `DELETE /api/v1/me/push` for a paired device to register the sealed handle the relay gives it. Each push is signed with the computer's key; the computer never sees a device's push token. It takes effect once the relay and the apps support it (docs/push.md).
+- The first phone or tablet that turns on notifications in the Toskar app adds the Toskar app as a notification destination, with the title only, so turning them on in the app is all it takes (#460). The app's text for notifications is in the 10 languages.
+- Settings › Notifications can send to the Toskar app on your phones and tablets (#460): **Add the Toskar app**, with the title only (the default), the title and text, or a private notice, and how many of your devices have notifications on. Your devices shows which ones do. Pushes arrive once the apps and Toskar's push relay support them.
+- `POST /api/v1/diagnostics/report` sends a problem report to Toskar's report service, which files it as an issue grouped with others for the same error and version, instead of the person writing an email. It's listed in What left this computer, an Admin can turn it off with the `problem_reports` setting, and paired devices may send through it too (#588, contract 1.40).
+- Report this, beside errors in chat, on a page that couldn't load or ran
+  into a problem, in automation runs, and when a model won't start or
+  install (#588). It shows everything the report sends: what went wrong
+  and where, the Toskar version, the kind of computer, and for an Admin
+  Toskar's last warnings and errors. You can add what you were doing.
+  Email addresses, keys, home folder names, the computer's name, and
+  internet addresses are taken out first. Send by email opens your mail
+  app addressed to info@yeix.io, and Copy is there if email isn't set up.
+- `GET /api/v1/diagnostics/report` (contract 1.32) gives that report,
+  scrubbed. Members may call it; only an Admin's report has the log.
+
+### Changed
+
+- The Mac App Store's copy of Toskar doesn't sell access from anywhere: API Access says to subscribe in the Toskar app on a phone or tablet, as the App Store requires for an app it sells, and a subscription bought there covers the computer as before (#630).
+- Search boxes forgive typos: "mistrl" finds Mistral in Models, and
+  "atomations" finds a chat or automation named Automations (#451). Exact
+  matches still come first, and searches of three letters or fewer stay
+  exact. This covers the chat list, Models (both tabs), Tools, and
+  Automations.
+- Report this is now beside the errors the web app shows when an action fails or a page part can't load, about 90 in all, from saving settings to training and connecting a computer (#588). Each shows its text in the App language from its code and sends the code with the report. Sign-in and password errors, form checks, and the public chat portal stay as they were.
+- When a picture or video model may be slow or tight, the Tools page and
+  the chat's setup offer say what it needs and what the computer has, such
+  as "Needs about 16 GB of graphics memory; this computer's graphics card
+  has 10 GB" (#550).
+- On Apple silicon, models are checked against the share of memory the
+  graphics may use, about two thirds, or three quarters above 36 GB, so a
+  model that needs more is marked as possibly slow before it's set up.
+- The chat's setup offer carries the model's verdict and these numbers
+  (`verdict`, `short`, `need_bytes`, `have_bytes`, contract 1.34), and
+  `GET /api/v1/images/setup` and `/video/setup` add them to each model,
+  with the computer's `graphics_bytes` and `shared_graphics`.
+- The errors that lists show now carry a code beside their text (#588, contract 1.36): automation runs, previews, and last errors, knowledge sources, tasks, and failed model downloads. The web app shows them in the App language and sends the code with Report this. A failure without a code of its own gets one for where it happened, such as `AUTOMATION_FAILED` or `KNOWLEDGE_SYNC_FAILED`, and a run or task cut short when Toskar stopped is `AUTOMATION_INTERRUPTED` or `TASK_INTERRUPTED`.
+- An error on another computer now reaches the app with its own code instead of as plain text (#588). Paired computers answer each other with coded errors, such as `MODEL_NOT_INSTALLED` from the computer running a model, and `PEER_UNAUTHORIZED` or `PEER_UNAVAILABLE` when one won't take a request. Computers on an older Toskar still get, and send, plain text.
+- Report this sends the report to the Toskar team from the app and the desktop app, where it becomes an issue, instead of opening your email app: it says when others hit the same error, Include details chooses whether the computer's part goes, and an email for a reply reaches only the team. It falls back to email when it can't be sent, and an Admin can turn sending off in Settings, under Problem reports (#588).
+- Automation requests with typos are understood too: "evry mornign at 8 chek
+  the price" runs every morning at 8, and "every wenesday" on Wednesdays
+  (#451). Words typed without their accents count in every language written
+  with spaces, so "todos los dias" is "todos los días".
+- Toskar understands typos in the requests it handles itself: "whats teh
+  wether tomorow" looks up the weather, "remmeber that i like tea" saves a
+  memory, and "helo" or "thnaks" is small talk (#451). It corrects a word
+  only toward the words those rules look for, and leaves real words such as
+  "whether", "plain", or "test" alone.
+
+### Fixed
+
+- On Windows, the desktop app's title bar follows Toskar's theme instead
+  of Windows' own, so a dark Toskar no longer sits under a white title bar
+  (needs the desktop app from yeixio/toskar-apps#251).
+- A picture or clip a tool made is no longer lost when the model then writes nothing: the answer keeps the file, with "Here's what I made." A turn where the model writes nothing at all now says so (`EMPTY_ANSWER`) instead of ending without an answer (#553).
+- Every error now carries a code for Report this (#588). Chat errors that had none send `CHAT_FAILED`, an error with its own code keeps it in the chat stream, and an API path no route takes answers `ROUTE_NOT_FOUND` or `METHOD_NOT_ALLOWED` instead of the web page.
+- A reply cut off by a lost connection now says so instead of looking finished. Every chat stream ends with `done` or `error`, including a stopped one.
+- The web app explains an answer it can't read, such as a proxy's error page, instead of showing a parse error, and no longer reports a cancelled request as the service being unreachable.
+- The media quality set's judge also fails a washed-out picture or clip, one faded until most of it is near white, which passed before (#553).
+- A quality run narrowed with `-run` counts only the cases it ran, instead of failing the ones it left out as stopped.
+- Pages no longer show defaults or "none yet" when their data couldn't be read (#217). Settings, API Access, Personalization, and network discovery wait for their settings before anything can be saved, so a failed read can't overwrite them. Chat history, a chat's messages, People, portals, keys and devices, what left this computer, the Media tab, benchmarks, training examples and plans, and installed and running models say they couldn't load, with Try again. An invite or public chat page that couldn't be checked says so instead of calling the link gone.
+- Diagnostics no longer shows every row as not responding before its first check, the empty Installed tab and Discover offer their next step, and Tools says when no tool matches the filter.
+- The smaller panels and lists say when they couldn't load, with Try again, instead of saying there's nothing or hiding (#217): your devices, chat cleanup, notification destinations and quiet hours, connected services, tool sources and their log, a tool's recent calls, the add-a-source gallery, models found in other apps, Browse all, base models, chats to train from, sample files, exports, the knowledge picker, topic attempts, computers' models, the external server, Connect a device, roles and profile pins, portal visitors and conversations, remote access, Diagnostics logs and tool activity, running models, recent benchmarks, the notification bell, and onboarding's hardware check.
+- Language, quiet-hours, and other settings controls wait for their saved values, and a choice whose list couldn't be read still shows in its menu. Browse all says when nothing matches, and the empty Activity page links to Chat.
+- On Portals, the link to turn on local network access is underlined, so
+  it stands out from the warning around it by more than its colour.
+- The first chat after a paired computer connects no longer says a tool
+  isn't set up, such as image generation, when the paired computer has it
+  ready. Toskar waits briefly to hear what that computer can run, the
+  first time only (yeixio/toskar-apps#195).
+
 ## [1.8.3] - 2026-10-14
 
 ### Added

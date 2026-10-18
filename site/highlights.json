@@ -1,41 +1,36 @@
 {
   "schemaVersion": 1,
-  "version": "1.8",
+  "version": "1.9",
   "items": [
     {
-      "realm": "Valhalla",
-      "title": "Chat portals",
-      "text": "Give an assistant its own page or put it on your website, with its own profile, look, limits, and visitors, and read how it's used."
+      "realm": "Valgrind",
+      "title": "Access from anywhere, bought on your computer",
+      "text": "Subscribe in API Access for $4.99 a month or $39.99 a year: pay in your browser, and access from anywhere turns on a few seconds later, no phone needed. Manage billing changes the card or cancels."
     },
     {
-      "realm": "Forseti",
-      "title": "Keep an assistant on topic",
-      "text": "Say what an assistant covers and what it never discusses, and Enforce checks each question and answer, with a report of what it held."
+      "realm": "Midgard",
+      "title": "Choose what each person may use",
+      "text": "Turn files, pictures, voice, the web, Knowledge, automations, and more on or off for each role and each person, and the app hides what's off for them. Admins can also manage people from a script or server."
     },
     {
-      "realm": "Bifrost",
-      "title": "Reach your computer from anywhere",
-      "text": "Turn on access from anywhere and your devices keep working away from home, through your router or a relay, encrypted end to end."
-    },
-    {
-      "realm": "Norn",
-      "title": "Your computer, on your phone",
-      "text": "The Toskar app shows your computer's notifications and automations, manages its memories and personalization, and shows what left it."
-    },
-    {
-      "realm": "Mimir",
-      "title": "Save to Knowledge from anywhere",
-      "text": "Share a web page, PDF, or text to Toskar on your phone, and chats on your computer answer from it."
+      "realm": "Heimdall",
+      "title": "Report a problem from where it happens",
+      "text": "Report this sits beside errors in chat, on pages, and in automations. It shows everything it sends, lets you add what you were doing, and reaches the Toskar team as an issue, grouped with others who hit the same thing."
     },
     {
       "realm": "Ratatoskr",
-      "title": "Try again and edit, with versions",
-      "text": "Try an answer again, with another model if you like, or edit what you sent, and switch between the versions."
+      "title": "Long chats, summarized your way",
+      "text": "Auto-compact shows the summary that stands in for older messages, so you can read and correct it, compact now, start a new chat from it, or keep a chat word for word."
     },
     {
-      "realm": "Ymir",
-      "title": "Add any GGUF model",
-      "text": "Add a model from a GGUF file on your computer or another device, checked with a short test of its speed."
+      "realm": "Mimir",
+      "title": "Photos and files in chats on your phone",
+      "text": "Ask about a photo, PDF, or text file in a chat on the device itself. It's read right there, scanned pages too, and a model that can't see photos gets the text in them."
+    },
+    {
+      "realm": "Norn",
+      "title": "Typos welcome",
+      "text": "\"whats teh wether tomorow\" looks up the weather, \"evry mornign at 8\" runs every morning at 8, and \"mistrl\" finds Mistral in Models. Real words are left alone."
     }
   ]
 }

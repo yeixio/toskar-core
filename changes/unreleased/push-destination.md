@@ -1,2 +1,0 @@
-### Added
-- Core's side of notifications in the Toskar app (#460): an `app` notification destination that pushes to the person's paired phones and tablets through Toskar's push relay, with the title only (the default), the full text, or a private notice, and `GET`, `PUT`, and `DELETE /api/v1/me/push` for a paired device to register the sealed handle the relay gives it. Each push is signed with the computer's key; the computer never sees a device's push token. It takes effect once the relay and the apps support it (docs/push.md).
