@@ -73,3 +73,28 @@ func TestTextBeforeAToolCallIsNotShown(t *testing.T) {
 		t.Fatalf("tools=%d text=%q", env.tools, text)
 	}
 }
+
+// A sunrise or sunset question reads the times from the weather service, in
+// the place's local time, first (toskar-apps#255).
+func TestSunTimesComeFromTheWeatherService(t *testing.T) {
+	results := map[string]any{"results": []any{map[string]any{"url": "https://example.com/sunrise-chicago"}}}
+	urls := livePageURLs("What time is sunrise in chicago this morning?", map[string]any{"query": "sunrise chicago"}, results)
+	if len(urls) != 2 || !strings.HasPrefix(urls[0], "https://wttr.in/chicago?format=") || !strings.Contains(urls[0], "%25S") {
+		t.Fatalf("sunrise urls = %v", urls)
+	}
+	cases := map[string]string{
+		"What time is sunrise in chicago this morning?": "chicago",
+		"When does the sun set in Juneau tonight?":      "juneau",
+		"sunset times for San Francisco":                "san francisco",
+		"what time is dawn":                             "",
+	}
+	for in, want := range cases {
+		if got := sunPlace(in); got != want {
+			t.Errorf("sunPlace(%q) = %q, want %q", in, got, want)
+		}
+	}
+	// Not a sun question: the weather reading as before.
+	if urls := livePageURLs("What's the weather in Juneau today?", map[string]any{"query": "Juneau weather"}, results); strings.Contains(urls[0], "%25S") {
+		t.Fatalf("weather got sun times: %v", urls)
+	}
+}

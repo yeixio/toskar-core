@@ -396,6 +396,38 @@
     {
       "in": "is the store open on sunday or is it closed",
       "want": false
+    },
+    {
+      "in": "What time is sunrise in chicago this morning?",
+      "want": true
+    },
+    {
+      "in": "When does the sun set in Juneau tonight?",
+      "want": true
+    },
+    {
+      "in": "sunset times for San Francisco",
+      "want": true
+    },
+    {
+      "in": "when is sunrsie in Paris",
+      "want": true
+    },
+    {
+      "in": "What time is dawn in Seattle?",
+      "want": true
+    },
+    {
+      "in": "is the server down",
+      "want": false
+    },
+    {
+      "in": "a surprise party for my sister",
+      "want": false
+    },
+    {
+      "in": "my flight number is on the ticket",
+      "want": false
     }
   ],
   "classify": [

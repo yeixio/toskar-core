@@ -127,10 +127,59 @@ func searchResultURLs(result map[string]any) []string {
 
 func livePageURLs(prompt string, args map[string]any, result map[string]any) []string {
 	urls := orderedSearchURLs(prompt, result)
+	// Sunrise and sunset come from the same weather service, already in the
+	// place's local time, instead of a time a model picks out of search
+	// results (toskar-apps#255: a small model said 6:36 AM for Chicago's
+	// sunrise, which was that day's dawn).
+	if sun := sunTimesURL(prompt, args); sun != "" {
+		return append([]string{sun}, urls...)
+	}
 	if observation := weatherObservationURL(prompt, args); observation != "" {
 		return append([]string{observation}, urls...)
 	}
 	return urls
+}
+
+// sunRe matches a question about when the sun rises or sets.
+var sunRe = regexp.MustCompile(`(?i)\b(sunrise|sunset|sun ?rise|sun ?set|sun come up|sun go down|dawn|dusk|first light|golden hour)s?\b`)
+
+// sunTimesURL is today's sunrise, sunset, dawn, and dusk for the place a
+// sun question names, from wttr.in, in that place's local time.
+func sunTimesURL(prompt string, args map[string]any) string {
+	if !sunRe.MatchString(prompt) {
+		return ""
+	}
+	query, _ := args["query"].(string)
+	place := sunPlace(query)
+	if place == "" {
+		place = sunPlace(prompt)
+	}
+	if place == "" {
+		return ""
+	}
+	return "https://wttr.in/" + url.PathEscape(place) + "?format=" + url.QueryEscape("%l local time, today: sunrise %S, sunset %s, dawn %D, dusk %d")
+}
+
+// sunPlace is the place a sun question names: "What time is sunrise in
+// chicago this morning?" is "chicago".
+func sunPlace(value string) string {
+	value = sunRe.ReplaceAllString(value, " ")
+	var kept []string
+	for _, word := range strings.Fields(value) {
+		if sunDrop[strings.ToLower(strings.Trim(word, "?.!,\"'"))] {
+			continue
+		}
+		kept = append(kept, word)
+	}
+	return weatherPlace(strings.Join(kept, " "))
+}
+
+var sunDrop = map[string]bool{
+	"time": true, "times": true, "when": true, "does": true, "do": true, "did": true, "at": true,
+	"this": true, "morning": true, "evening": true, "afternoon": true, "tonight": true, "tomorrow": true,
+	"sun": true, "rise": true, "set": true, "rises": true, "sets": true, "come": true, "up": true,
+	"go": true, "down": true, "and": true, "of": true, "there": true, "here": true, "o'clock": true,
+	"exactly": true, "tell": true, "know": true, "i": true, "need": true, "to": true, "get": true,
 }
 
 // climateRe matches a question about the usual weather at a time of year:
