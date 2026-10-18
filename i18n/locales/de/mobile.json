@@ -646,6 +646,8 @@
     "moveHint": "Verschiebe es hierher, dann funktioniert der andere Computer unterwegs nicht mehr.",
     "move": "Auf diesen Computer verschieben",
     "moveTooSoon": "Ein Abo kann einmal am Tag auf einen anderen Computer wechseln. Versuch es morgen noch einmal.",
+    "notYet": "Der Store hat die Verlängerung noch nicht bestätigt. Warte kurz und tippe dann auf Kauf wiederherstellen.",
+    "noneFound": "Für das Store-Konto auf diesem Gerät wurde kein aktives Abo gefunden.",
     "failed": "Konnte nicht abgeschlossen werden: {{detail}}",
     "renews": "Verlängert sich automatisch, bis du es in den Abo-Einstellungen deines Kontos kündigst.",
     "terms": "Bedingungen",

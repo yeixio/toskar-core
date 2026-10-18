@@ -653,6 +653,8 @@
     "moveHint": "Spostalo qui e l'altro computer smetterà di funzionare fuori casa.",
     "move": "Spostalo su questo computer",
     "moveTooSoon": "Un abbonamento può passare a un altro computer una volta al giorno. Riprova domani.",
+    "notYet": "Lo store non ha ancora confermato il rinnovo. Attendi un minuto, poi tocca Ripristina acquisto.",
+    "noneFound": "Nessun abbonamento attivo trovato per l'account dello store su questo dispositivo.",
     "failed": "Impossibile completare: {{detail}}",
     "renews": "Si rinnova automaticamente finché non lo annulli nelle impostazioni degli abbonamenti del tuo account.",
     "terms": "Termini",

@@ -653,6 +653,8 @@
     "moveHint": "Muévela aquí y la otra computadora dejará de funcionar fuera de casa.",
     "move": "Moverla a esta computadora",
     "moveTooSoon": "Una suscripción puede pasar a otra computadora una vez al día. Inténtalo de nuevo mañana.",
+    "notYet": "La tienda aún no ha confirmado la renovación. Espera un minuto y toca Restaurar compra.",
+    "noneFound": "No se encontró ninguna suscripción activa para la cuenta de la tienda en este dispositivo.",
     "failed": "No se pudo terminar: {{detail}}",
     "renews": "Se renueva automáticamente hasta que la canceles en los ajustes de suscripciones de tu cuenta.",
     "terms": "Términos",

@@ -743,6 +743,8 @@
     "moveHint": "Move it here, and the other computer stops working away from home.",
     "move": "Move it to this computer",
     "moveTooSoon": "A subscription can move to another computer once a day. Try again tomorrow.",
+    "notYet": "The store hasn't confirmed the renewal yet. Wait a minute, then tap Restore purchase.",
+    "noneFound": "No active subscription was found for the store account on this device.",
     "failed": "Couldn't finish: {{detail}}",
     "renews": "Renews automatically until you cancel it in your account's subscription settings.",
     "terms": "Terms",

@@ -653,6 +653,8 @@
     "moveHint": "Mova para cá, e o outro computador deixa de funcionar fora de casa.",
     "move": "Mover para este computador",
     "moveTooSoon": "Uma assinatura pode passar para outro computador uma vez por dia. Tente de novo amanhã.",
+    "notYet": "A loja ainda não confirmou a renovação. Aguarde um minuto e toque em Restaurar compra.",
+    "noneFound": "Nenhuma assinatura ativa foi encontrada para a conta da loja neste dispositivo.",
     "failed": "Não foi possível concluir: {{detail}}",
     "renews": "Renova automaticamente até você cancelar nas configurações de assinaturas da sua conta.",
     "terms": "Termos",

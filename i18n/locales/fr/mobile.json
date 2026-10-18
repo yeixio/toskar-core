@@ -653,6 +653,8 @@
     "moveHint": "Déplacez-le ici : l’autre ordinateur ne fonctionnera plus hors de chez vous.",
     "move": "Le déplacer sur cet ordinateur",
     "moveTooSoon": "Un abonnement peut passer à un autre ordinateur une fois par jour. Réessayez demain.",
+    "notYet": "La boutique n'a pas encore confirmé le renouvellement. Attendez une minute, puis touchez Restaurer l'achat.",
+    "noneFound": "Aucun abonnement actif n'a été trouvé pour le compte de la boutique sur cet appareil.",
     "failed": "Impossible de terminer : {{detail}}",
     "renews": "Se renouvelle automatiquement jusqu'à ce que vous le résiliiez dans les réglages d'abonnement de votre compte.",
     "terms": "Conditions",
