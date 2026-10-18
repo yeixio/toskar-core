@@ -71,6 +71,10 @@ type Client struct {
 	// tunnel opens so the relay's operator can tell computers apart on its
 	// dashboard (#602). It never reaches devices or the address record.
 	Name func() string
+	// Version is the Toskar version this computer runs, such as "1.9.1",
+	// sent beside its name so the relay's operator sees it on the
+	// dashboard (toskar-relay#47).
+	Version string
 	// Store keeps the token.
 	Store Store
 	// Certificate is the API certificate the record is signed with.
@@ -454,6 +458,9 @@ func (c *Client) tunnel(ctx context.Context) (string, error) {
 		if name := strings.TrimSpace(c.Name()); name != "" {
 			req.Header.Set("Toskar-Computer-Name", url.QueryEscape(name))
 		}
+	}
+	if c.Version != "" {
+		req.Header.Set("Toskar-Version", c.Version)
 	}
 	hc := c.httpClient()
 	hc.Timeout = 0 // the stream stays open

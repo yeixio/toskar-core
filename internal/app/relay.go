@@ -15,6 +15,7 @@ import (
 	"github.com/yeixio/toskar-core/internal/portmap"
 	"github.com/yeixio/toskar-core/internal/relayclient"
 	"github.com/yeixio/toskar-core/internal/rendezvous"
+	"github.com/yeixio/toskar-core/internal/version"
 	"github.com/yeixio/toskar-core/pkg/contracts"
 )
 
@@ -105,6 +106,7 @@ func (a *App) applyRelay() {
 		Secret:       routeSecret,
 		EnrollSecret: enrollSecret(cfg, secrets),
 		Name:         func() string { return a.Config.Get().NodeName },
+		Version:      strings.TrimPrefix(version.CurrentOffer().Version, "v"),
 		Store:        secrets,
 		Certificate:  a.API.TLSCertificate,
 		Addresses:    a.directAddresses,

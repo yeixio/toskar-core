@@ -76,8 +76,9 @@ type fakeRelay struct {
 	record  []byte
 	enrolls int
 	opens   chan [2]string // stream, client
-	// name is the computer name the last tunnel sent.
+	// name and version are what the last tunnel sent.
 	name    string
+	version string
 	streams chan net.Conn
 	// checked is the last outside check asked for; noCheck answers as a
 	// relay from before the check does.
@@ -122,6 +123,7 @@ func newFakeRelay(t *testing.T) *fakeRelay {
 		}
 		f.mu.Lock()
 		f.name = r.Header.Get("Toskar-Computer-Name")
+		f.version = r.Header.Get("Toskar-Version")
 		f.mu.Unlock()
 		fl := w.(http.Flusher)
 		_, _ = io.WriteString(w, `{"type":"hello"}`+"\n")
@@ -199,6 +201,7 @@ func (f *fakeRelay) client(t *testing.T, enroll string, deliver func(net.Conn) b
 		Addresses:    func() []string { return []string{"203.0.113.7:7333"} },
 		Deliver:      deliver,
 		Name:         func() string { return "Mike's Mac" },
+		Version:      "1.9.1",
 		RootCAs:      pool,
 		Dial: func(ctx context.Context, network, _ string) (net.Conn, error) {
 			return (&net.Dialer{}).DialContext(ctx, network, addr)
@@ -257,10 +260,14 @@ func TestClient(t *testing.T) {
 	// The tunnel tells the relay the computer's name, for its dashboard (#602).
 	waitFor(t, "the name", func() bool { f.mu.Lock(); defer f.mu.Unlock(); return f.name != "" })
 	f.mu.Lock()
-	sent := f.name
+	sent, version := f.name, f.version
 	f.mu.Unlock()
 	if name, _ := url.QueryUnescape(sent); name != "Mike's Mac" {
 		t.Fatalf("name sent: %q", sent)
+	}
+	// And its version (toskar-relay#47).
+	if version != "1.9.1" {
+		t.Fatalf("version sent: %q", version)
 	}
 	// The tunnel and the record are separate, so either can come first.
 	waitFor(t, "connected and registered", func() bool {
