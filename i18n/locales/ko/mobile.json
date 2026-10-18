@@ -474,7 +474,13 @@
     "generating": "응답을 생성하는 중…",
     "generatingOn": "{{node}}에서 생성하는 중…",
     "readingNamed": "{{name}} 읽는 중…",
-    "readingPhotoText": "{{name}}의 텍스트 읽는 중…"
+    "readingPhotoText": "{{name}}의 텍스트 읽는 중…",
+    "makingImage": "그림을 만드는 중…",
+    "changingImage": "그림을 바꾸는 중…",
+    "makingVideo": "클립을 만드는 중이며 몇 분 걸립니다…",
+    "makingImageSlow": "그림을 만드는 중입니다. 사용 중인 컴퓨터에서는 몇 분 걸립니다…",
+    "changingImageSlow": "그림을 바꾸는 중입니다. 사용 중인 컴퓨터에서는 몇 분 걸립니다…",
+    "makingVideoSlow": "클립을 만드는 중입니다. 사용 중인 컴퓨터에서는 거의 한 시간이 걸릴 수 있습니다…"
   },
   "realms": {
     "about": "{{norse}}. {{rune}}. 이 이름에 관하여",

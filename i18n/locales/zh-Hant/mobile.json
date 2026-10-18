@@ -474,7 +474,13 @@
     "generating": "正在產生回應…",
     "generatingOn": "正在 {{node}} 上生成…",
     "readingNamed": "正在讀取 {{name}}…",
-    "readingPhotoText": "正在讀取 {{name}} 中的文字…"
+    "readingPhotoText": "正在讀取 {{name}} 中的文字…",
+    "makingImage": "正在產生圖片…",
+    "changingImage": "正在修改圖片…",
+    "makingVideo": "正在產生短片，需要幾分鐘…",
+    "makingImageSlow": "正在產生圖片。在電腦上需要幾分鐘…",
+    "changingImageSlow": "正在修改圖片。在電腦上需要幾分鐘…",
+    "makingVideoSlow": "正在產生短片。在電腦上可能需要將近一小時…"
   },
   "realms": {
     "about": "{{norse}}。{{rune}}。關於這個名稱",
