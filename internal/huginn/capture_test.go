@@ -33,6 +33,13 @@ func TestCaptureRequest(t *testing.T) {
 		{"What's the weather in Juneau?", NoCapture},
 		{"Write a poem about my cat", NoCapture},
 		{"Who painted the Mona Lisa?", NoCapture},
+		// Asking for a new picture isn't asking to add one (toskar-apps#195):
+		// "make" is a word, not a typo of "take".
+		{"make a picture of a cat riding a bike", NoCapture},
+		{"Make me a picture of a sunset", NoCapture},
+		{"make an image of a dragon", NoCapture},
+		{"Can you make a photo of a red car?", NoCapture},
+		{"show me a picture of a cat", NoCapture},
 	}
 	for _, c := range cases {
 		if got := CaptureRequest(c.in); got != c.want {
