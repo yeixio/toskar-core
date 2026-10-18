@@ -648,6 +648,7 @@
     "statusPaused": "暂停至下个月",
     "statusInactive": "未启用",
     "inactiveBody": "你的订阅已结束或未续订。重新订阅，即可在外出时访问你的电脑。",
+    "inactiveBodyOn": "你的订阅已于 {{date}} 结束。重新订阅，即可在外出时访问你的电脑。",
     "manage": "管理订阅",
     "throughComputer": "通过这台电脑的订阅启用",
     "throughComputerBody": "与这台电脑配对的每台设备都在使用它。在购买的地方管理：订阅的那台设备，或电脑上 Toskar 的设置。",
@@ -863,6 +864,7 @@
     "tooSoon": "不到一分钟前刚检查过，这就是最新结果。",
     "details": "每条访问路径以及需要修复的地方，都在电脑上 Toskar 的“API 访问”中。",
     "failed": "无法运行检查（{{code}}）。",
+    "ended": "随处访问已结束，因此无法通过中继检查。请在“在外使用 Toskar”中重新订阅。",
     "checkedMinutes_other": "{{count}} 分钟前检查过",
     "checkedHours_other": "{{count}} 小时前检查过",
     "checkedDays_other": "{{count}} 天前检查过"

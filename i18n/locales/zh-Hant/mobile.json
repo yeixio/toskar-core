@@ -648,6 +648,7 @@
     "statusPaused": "暫停至下個月",
     "statusInactive": "未啟用",
     "inactiveBody": "你的訂閱已結束或未續訂。重新訂閱，即可在外出時存取你的電腦。",
+    "inactiveBodyOn": "你的訂閱已於 {{date}} 結束。重新訂閱，即可在外出時存取你的電腦。",
     "manage": "管理訂閱",
     "throughComputer": "透過這台電腦的訂閱啟用",
     "throughComputerBody": "與這台電腦配對的每台裝置都在使用它。在購買的地方管理：訂閱的那台裝置，或電腦上 Toskar 的設定。",
@@ -863,6 +864,7 @@
     "tooSoon": "不到一分鐘前剛檢查過，這就是最新結果。",
     "details": "每條存取路徑以及需要修正的地方，都在電腦上 Toskar 的「API 存取」中。",
     "failed": "無法執行檢查（{{code}}）。",
+    "ended": "隨處存取已結束，因此無法透過中繼檢查。請在「在外使用 Toskar」中重新訂閱。",
     "checkedMinutes_other": "{{count}} 分鐘前檢查過",
     "checkedHours_other": "{{count}} 小時前檢查過",
     "checkedDays_other": "{{count}} 天前檢查過"
