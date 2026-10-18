@@ -1601,6 +1601,26 @@
     {
       "in": "Who painted the Mona Lisa?",
       "want": "none"
+    },
+    {
+      "in": "make a picture of a cat riding a bike",
+      "want": "none"
+    },
+    {
+      "in": "Make me a picture of a sunset",
+      "want": "none"
+    },
+    {
+      "in": "make an image of a dragon",
+      "want": "none"
+    },
+    {
+      "in": "Can you make a photo of a red car?",
+      "want": "none"
+    },
+    {
+      "in": "show me a picture of a cat",
+      "want": "none"
     }
   ]
 }
