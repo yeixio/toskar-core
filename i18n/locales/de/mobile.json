@@ -222,7 +222,16 @@
     "alsoDeleteModels": "Auch geladene Modelle löschen",
     "resetting": "Wird zurückgesetzt …",
     "confirmReset": "Ja, zurücksetzen",
-    "resetFailed": "Toskar konnte nicht zurückgesetzt werden."
+    "resetFailed": "Toskar konnte nicht zurückgesetzt werden.",
+    "memory": "Gedächtnis",
+    "chatOnPhone": "Auf diesem Gerät chatten",
+    "webLookup": "Aktuelle Informationen nachschlagen",
+    "webLookupCopy": "Wenn eine Frage aktuelle Informationen braucht, etwa Wetter oder Nachrichten, sucht dieses Gerät mit DuckDuckGo im Web und liest vor der Antwort die beste Seite. Nur die Suchwörter verlassen dieses Gerät. Antworten nennen ihre Quellen.",
+    "memoryCopy": "Sag in einem Chat „Merk dir, dass …“, und es wird für künftige Chats auf diesem Gerät gespeichert. Wenn du das Gedächtnis ausschaltest, bleibt Gespeichertes erhalten.",
+    "memoryEmpty": "Noch nichts gemerkt.",
+    "forgetMemory": "Vergessen",
+    "forgetMemoryLabel": "„{{memory}}“ vergessen",
+    "resetCopyMemories": "Die Willkommenseinrichtung wiederherstellen. Löscht Chats und Erinnerungen auf diesem Gerät und vergisst den verbundenen Computer."
   },
   "language": {
     "title": "Sprache",
@@ -326,7 +335,8 @@
     "empty": {
       "title": "Wobei kann ich helfen?",
       "phone": "Sprich mit der KI auf diesem Gerät. Nichts, was du schreibst, verlässt es.",
-      "computer": "Toskar wählt das passende Modell und den passenden Computer, schlägt bei Bedarf nach und zeigt, was es genutzt hat."
+      "computer": "Toskar wählt das passende Modell und den passenden Computer, schlägt bei Bedarf nach und zeigt, was es genutzt hat.",
+      "phoneLookup": "Sprich mit der KI auf diesem Gerät. Nur Suchwörter verlassen es, wenn eine Frage aktuelle Informationen braucht."
     },
     "unsent": {
       "notSent": "Nicht gesendet",
@@ -396,7 +406,8 @@
       "continuing": "Eingerichtet. Deine Anfrage wird fertiggestellt …",
       "askAdmin": "Bitte einen Admin auf {{node}}, das einzurichten.",
       "downloadFailed": "Der Download wurde nicht abgeschlossen. Tippe auf Einrichten, um es erneut zu versuchen."
-    }
+    },
+    "phoneAutoHint": "Wählt für jede Nachricht das beste Modell auf diesem Gerät"
   },
   "effort": {
     "title": "Aufwand",
@@ -489,7 +500,9 @@
     "changingImageSlow": "Bild wird geändert. Auf deinem Computer dauert das ein paar Minuten…",
     "makingVideoSlow": "Clip wird erstellt. Auf deinem Computer kann das fast eine Stunde dauern…",
     "reasoning": "Denkt nach …",
-    "writingAnswer": "Schreibt die Antwort …"
+    "writingAnswer": "Schreibt die Antwort …",
+    "loadingNamed": "{{model}} wird geladen …",
+    "summarizing": "Frühere Nachrichten werden zusammengefasst …"
   },
   "realms": {
     "about": "{{norse}}. {{rune}}. Über diesen Namen",
@@ -915,11 +928,31 @@
     "steps": {
       "readFile": "{{name}} gelesen",
       "readFilePart": "Den ersten Teil von {{name}} gelesen",
-      "readPhotoText": "Den Text in {{name}} gelesen, da {{model}} keine Fotos sehen kann"
+      "readPhotoText": "Den Text in {{name}} gelesen, da {{model}} keine Fotos sehen kann",
+      "autoChose": "„Automatisch“ hat {{model}} gewählt – für {{kind}}",
+      "searched": "Im Web nach „{{query}}“ gesucht",
+      "fallbackOutOfMemory": "{{failed}} hatte nicht genug Speicher, deshalb hat {{model}} geantwortet",
+      "read": "{{host}} gelesen",
+      "fallbackFailed": "{{failed}} ließ sich nicht laden, daher hat {{model}} geantwortet"
     },
     "notices": {
-      "filePart": "Nur der erste Teil von {{name}} passte in das, was {{model}} auf einmal lesen kann. Frag nach einem späteren Teil, oder frag in einem Chat auf deinem Computer nach der ganzen Datei."
-    }
+      "filePart": "Nur der erste Teil von {{name}} passte in das, was {{model}} auf einmal lesen kann. Frag nach einem späteren Teil, oder frag in einem Chat auf deinem Computer nach der ganzen Datei.",
+      "fallback": "{{failed}} konnte auf diesem Gerät nicht laufen, daher hat {{model}} geantwortet. Die Antwort ist vielleicht weniger ausführlich.",
+      "noWeb": "Ich konnte das Web nicht erreichen. Diese Antwort beruht auf dem, was das Modell schon weiß, und ist vielleicht veraltet.",
+      "webOff": "Das Nachschlagen im Web ist in den Einstellungen aus, daher ist diese Antwort vielleicht veraltet."
+    },
+    "kinds": {
+      "chat": "eine kurze Frage",
+      "current": "eine Frage zu aktuellen Informationen",
+      "coding": "eine Programmierfrage",
+      "research": "eine Frage, die eine ausführliche Antwort braucht"
+    },
+    "errors": {
+      "outOfMemory": "Diesem Gerät ging für {{model}} der Speicher aus. Schließe andere Apps oder wähle ein kleineres Modell.",
+      "couldNotLoad": "{{model}} ließ sich nicht laden. Installiere es unter Modelle neu oder wähle ein anderes Modell.",
+      "couldNotAnswer": "{{model}} konnte diesmal nicht antworten. Versuch es noch einmal oder wähle ein anderes Modell."
+    },
+    "currentSource": "Aktuelle Bedingungen (wttr.in)"
   },
   "push": {
     "title": "Benachrichtigungen auf diesem Gerät",
@@ -940,5 +973,40 @@
     "microphone": "Toskar nutzt das Mikrofon, wenn du eine Nachricht sprichst. Was du sagst, bleibt auf diesem Gerät oder geht nur an deinen eigenen Computer.",
     "speechRecognition": "Toskar wandelt auf diesem Gerät in Text um, was du sagst, wenn du eine Nachricht sprichst.",
     "localNetwork": "Toskar sucht in deinem lokalen Netzwerk nach dem Computer, auf dem deine Modelle laufen."
+  },
+  "context": {
+    "usage": "Kontextnutzung",
+    "full": "Kontext zu {{percent}} voll",
+    "title": "Kontext",
+    "used": "{{used}} / {{limit}} Tokens",
+    "usedEstimated": "ca. {{used}} / {{limit}} Tokens",
+    "limit": "{{limit}} Tokens",
+    "rows": {
+      "conversation": "Gespräch",
+      "instructions": "Anweisungen und Gedächtnis",
+      "webResults": "Web-Ergebnisse"
+    },
+    "nearFull": "Fast voll: Wenn der Chat wächst, werden seine ältesten Nachrichten als Zusammenfassung gesendet. Starte einen neuen Chat für ein frisches Fenster.",
+    "summarized_one": "Die älteste Nachricht wurde als Zusammenfassung gesendet, damit das Gespräch passt. Jede Nachricht bleibt gespeichert.",
+    "summarized_other": "Die {{count}} ältesten Nachrichten wurden als Zusammenfassung gesendet, damit das Gespräch passt. Jede Nachricht bleibt gespeichert.",
+    "empty": "Sende eine Nachricht, um zu sehen, wie viel vom Speicher dieses Modells der Chat belegt.",
+    "omitted_one": "Die älteste Nachricht passte nicht mehr und wurde weggelassen. Jede Nachricht bleibt gespeichert.",
+    "omitted_other": "Die {{count}} ältesten Nachrichten passten nicht mehr und wurden weggelassen. Jede Nachricht bleibt gespeichert.",
+    "hint": "Das Fenster ist, wie viel vom Chat das Modell auf diesem Gerät auf einmal lesen kann."
+  },
+  "memory": {
+    "saved": "Alles klar. Ich merke mir: „{{memory}}“.",
+    "savedStep": "Im Gedächtnis gespeichert: {{memory}}",
+    "already": "Das weiß ich schon: „{{memory}}“.",
+    "sensitive": "Das habe ich nicht gespeichert, weil es wie ein Passwort, ein Schlüssel oder eine Kartennummer aussieht. Dafür ist ein Passwortmanager der sicherere Ort.",
+    "forgot": "Erledigt. Ich habe vergessen: „{{memory}}“.",
+    "removedStep": "Aus dem Gedächtnis entfernt: {{memory}}",
+    "notFound": "So eine Erinnerung habe ich nicht gefunden. In den Einstellungen steht alles, was ich mir merke.",
+    "none": "Ich habe mir noch nichts gemerkt. Sag „Merk dir, dass …“, und ich behalte es für künftige Chats.",
+    "list": "Das merke ich mir:",
+    "more_one": "… und {{count}} weitere in den Einstellungen.",
+    "more_other": "… und {{count}} weitere in den Einstellungen.",
+    "offSaved": "Das Gedächtnis ist aus, daher nutze ich es nicht, bis du es in den Einstellungen wieder einschaltest.",
+    "offList": "Das Gedächtnis ist aus, daher nutze ich das gerade nicht."
   }
 }

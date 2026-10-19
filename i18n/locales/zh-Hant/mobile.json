@@ -222,7 +222,16 @@
     "alsoDeleteModels": "同時刪除已下載的模型",
     "resetting": "正在重置…",
     "confirmReset": "是，重置",
-    "resetFailed": "無法重置 Toskar。"
+    "resetFailed": "無法重置 Toskar。",
+    "memory": "記憶",
+    "chatOnPhone": "在這台裝置上聊天",
+    "webLookup": "查詢最新資訊",
+    "webLookupCopy": "當問題需要最新資訊（例如天氣或新聞）時，這台裝置會用 DuckDuckGo 搜尋網路，並在回答前閱讀最合適的頁面。只有搜尋字詞會離開這台裝置。回答會列出來源。",
+    "memoryCopy": "在聊天中說「記住……」，內容就會儲存在這台裝置上，供之後的聊天使用。關閉記憶不會刪除已儲存的內容。",
+    "memoryEmpty": "還沒有記住任何內容。",
+    "forgetMemory": "忘記",
+    "forgetMemoryLabel": "忘記「{{memory}}」",
+    "resetCopyMemories": "還原歡迎設定。清除這台裝置上的聊天和記憶，並忘記已連線的電腦。"
   },
   "language": {
     "title": "語言",
@@ -326,7 +335,8 @@
     "empty": {
       "title": "有什麼我可以幫你的？",
       "phone": "和這台裝置上的 AI 對話。你寫的任何內容都不會離開這台裝置。",
-      "computer": "Toskar 會挑選合適的模型和電腦，需要時查詢資料，並顯示它使用了哪些內容。"
+      "computer": "Toskar 會挑選合適的模型和電腦，需要時查詢資料，並顯示它使用了哪些內容。",
+      "phoneLookup": "與這台裝置上的 AI 對話。只有在問題需要最新資訊時，搜尋字詞才會離開裝置。"
     },
     "unsent": {
       "notSent": "未傳送",
@@ -393,7 +403,8 @@
       "continuing": "已設定完成。正在完成你的請求…",
       "askAdmin": "請 {{node}} 上的管理員來設定。",
       "downloadFailed": "下載沒有完成。輕點「設定」再試一次。"
-    }
+    },
+    "phoneAutoHint": "為每則訊息選擇這台裝置上最合適的模型"
   },
   "effort": {
     "title": "投入程度",
@@ -482,7 +493,9 @@
     "changingImageSlow": "正在修改圖片。在電腦上需要幾分鐘…",
     "makingVideoSlow": "正在產生短片。在電腦上可能需要將近一小時…",
     "reasoning": "正在思考…",
-    "writingAnswer": "正在撰寫回答…"
+    "writingAnswer": "正在撰寫回答…",
+    "loadingNamed": "正在載入 {{model}}…",
+    "summarizing": "正在摘要先前的訊息…"
   },
   "realms": {
     "about": "{{norse}}。{{rune}}。關於這個名稱",
@@ -900,11 +913,31 @@
     "steps": {
       "readFile": "已讀取 {{name}}",
       "readFilePart": "已讀取 {{name}} 的開頭部分",
-      "readPhotoText": "由於 {{model}} 無法查看照片，已讀取 {{name}} 中的文字"
+      "readPhotoText": "由於 {{model}} 無法查看照片，已讀取 {{name}} 中的文字",
+      "autoChose": "「自動」為{{kind}}選擇了 {{model}}",
+      "searched": "在網路上搜尋了「{{query}}」",
+      "fallbackOutOfMemory": "{{failed}} 記憶體不足，因此改由 {{model}} 回答",
+      "read": "已閱讀 {{host}}",
+      "fallbackFailed": "{{failed}} 無法載入，因此改由 {{model}} 回答"
     },
     "notices": {
-      "filePart": "{{model}} 一次能讀取的內容只容得下 {{name}} 的開頭部分。可以詢問後面的部分，或在電腦上的聊天中詢問整個檔案。"
-    }
+      "filePart": "{{model}} 一次能讀取的內容只容得下 {{name}} 的開頭部分。可以詢問後面的部分，或在電腦上的聊天中詢問整個檔案。",
+      "fallback": "{{failed}} 無法在這台裝置上執行，因此由 {{model}} 回答。回答可能不夠詳細。",
+      "noWeb": "無法連上網路，因此這個回答來自模型已有的知識，可能已經過時。",
+      "webOff": "設定中已關閉網路查詢，因此這個回答可能已經過時。"
+    },
+    "kinds": {
+      "chat": "簡單的問題",
+      "current": "涉及最新資訊的問題",
+      "coding": "程式設計問題",
+      "research": "需要詳細回答的問題"
+    },
+    "errors": {
+      "outOfMemory": "這台裝置執行 {{model}} 時記憶體不足。請關閉其他 App，或選擇較小的模型。",
+      "couldNotLoad": "無法載入 {{model}}。請在「模型」中重新安裝，或選擇其他模型。",
+      "couldNotAnswer": "{{model}} 這次未能回答。請再試一次，或選擇其他模型。"
+    },
+    "currentSource": "目前天氣（wttr.in）"
   },
   "push": {
     "title": "此裝置上的通知",
@@ -925,5 +958,37 @@
     "microphone": "當你說出一則訊息時，Toskar 會使用麥克風。你說的內容會留在此裝置上，或只傳送到你自己的電腦。",
     "speechRecognition": "當你說出一則訊息時，Toskar 會在此裝置上把你說的話轉成文字。",
     "localNetwork": "Toskar 會在你的本地網路中尋找執行你的模型的電腦。"
+  },
+  "context": {
+    "usage": "上下文用量",
+    "full": "上下文已使用 {{percent}}",
+    "title": "上下文",
+    "used": "{{used}} / {{limit}} token",
+    "usedEstimated": "約 {{used}} / {{limit}} token",
+    "limit": "{{limit}} token",
+    "rows": {
+      "conversation": "對話",
+      "instructions": "指示和記憶",
+      "webResults": "網路結果"
+    },
+    "nearFull": "即將用滿：聊天變長後，最早的訊息會以摘要形式傳送。開始新聊天即可獲得全新的視窗。",
+    "summarized_other": "最舊的 {{count}} 則訊息已改以摘要形式傳送，讓對話能夠容納。每則訊息仍會保存。",
+    "empty": "傳送一則訊息，即可查看這個聊天使用了多少模型記憶體。",
+    "omitted_other": "最早的 {{count}} 則訊息放不下，已被省略。所有訊息仍然保存著。",
+    "hint": "視窗是指模型在這台裝置上一次能讀取的聊天內容。"
+  },
+  "memory": {
+    "saved": "好的，我會記住：「{{memory}}」。",
+    "savedStep": "已儲存到記憶：{{memory}}",
+    "already": "我已經記得了：「{{memory}}」。",
+    "sensitive": "這看起來像密碼、金鑰或卡號，所以我沒有儲存。這類資訊放在密碼管理工具裡更安全。",
+    "forgot": "好了，我已忘記：「{{memory}}」。",
+    "removedStep": "已從記憶中刪除：{{memory}}",
+    "notFound": "找不到這樣的記憶。我記住的所有內容都在設定中。",
+    "none": "我還沒有記住任何內容。說「記住……」，我會為之後的聊天儲存下來。",
+    "list": "我記得這些：",
+    "more_other": "……另外 {{count}} 則在設定中。",
+    "offSaved": "記憶已關閉，在你於設定中重新開啟之前，我不會使用它。",
+    "offList": "記憶已關閉，所以我現在不會使用這些內容。"
   }
 }

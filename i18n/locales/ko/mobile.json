@@ -222,7 +222,16 @@
     "alsoDeleteModels": "다운로드한 모델도 삭제",
     "resetting": "재설정하는 중…",
     "confirmReset": "예, 재설정",
-    "resetFailed": "Toskar를 재설정할 수 없어요."
+    "resetFailed": "Toskar를 재설정할 수 없어요.",
+    "memory": "메모리",
+    "chatOnPhone": "이 기기에서 채팅",
+    "webLookup": "최신 정보 찾아보기",
+    "webLookupCopy": "날씨나 뉴스처럼 최신 정보가 필요한 질문이면 이 기기가 DuckDuckGo로 웹을 검색하고 가장 좋은 페이지를 읽은 뒤 답해요. 이 기기 밖으로 나가는 건 검색어뿐이에요. 답변에는 출처가 표시돼요.",
+    "memoryCopy": "채팅에서 “…을 기억해 줘”라고 말하면 앞으로의 채팅을 위해 이 기기에 저장돼요. 메모리를 꺼도 저장된 내용은 남아요.",
+    "memoryEmpty": "아직 기억한 것이 없어요.",
+    "forgetMemory": "잊기",
+    "forgetMemoryLabel": "“{{memory}}” 잊기",
+    "resetCopyMemories": "처음 설정으로 되돌려요. 이 기기의 채팅과 메모리를 지우고 연결된 컴퓨터를 잊어요."
   },
   "language": {
     "title": "언어",
@@ -326,7 +335,8 @@
     "empty": {
       "title": "무엇을 도와드릴까요?",
       "phone": "이 기기의 AI와 대화하세요. 작성한 내용은 이 기기 밖으로 나가지 않아요.",
-      "computer": "Toskar가 알맞은 모델과 컴퓨터를 선택하고, 필요하면 정보를 찾아보고, 사용한 내용을 보여 줘요."
+      "computer": "Toskar가 알맞은 모델과 컴퓨터를 선택하고, 필요하면 정보를 찾아보고, 사용한 내용을 보여 줘요.",
+      "phoneLookup": "이 기기의 AI와 대화하세요. 최신 정보가 필요한 질문일 때만 검색어가 기기 밖으로 나가요."
     },
     "unsent": {
       "notSent": "보내지 않음",
@@ -393,7 +403,8 @@
       "continuing": "설정이 끝났어요. 요청을 마무리하는 중…",
       "askAdmin": "{{node}}의 관리자에게 설정해 달라고 요청하세요.",
       "downloadFailed": "다운로드가 끝나지 않았어요. 다시 하려면 설정을 탭하세요."
-    }
+    },
+    "phoneAutoHint": "메시지마다 이 기기에서 가장 좋은 모델을 골라요"
   },
   "effort": {
     "title": "노력 수준",
@@ -482,7 +493,9 @@
     "changingImageSlow": "그림을 바꾸는 중입니다. 사용 중인 컴퓨터에서는 몇 분 걸립니다…",
     "makingVideoSlow": "클립을 만드는 중입니다. 사용 중인 컴퓨터에서는 거의 한 시간이 걸릴 수 있습니다…",
     "reasoning": "생각하는 중…",
-    "writingAnswer": "답변을 쓰는 중…"
+    "writingAnswer": "답변을 쓰는 중…",
+    "loadingNamed": "{{model}} 불러오는 중…",
+    "summarizing": "이전 메시지를 요약하는 중…"
   },
   "realms": {
     "about": "{{norse}}. {{rune}}. 이 이름에 관하여",
@@ -900,11 +913,31 @@
     "steps": {
       "readFile": "{{name}} 읽음",
       "readFilePart": "{{name}}의 앞부분 읽음",
-      "readPhotoText": "{{model}}이(가) 사진을 볼 수 없어 {{name}}의 텍스트를 읽음"
+      "readPhotoText": "{{model}}이(가) 사진을 볼 수 없어 {{name}}의 텍스트를 읽음",
+      "autoChose": "자동이 {{kind}}에 맞춰 {{model}}을(를) 선택했어요",
+      "searched": "웹에서 “{{query}}”을(를) 검색했어요",
+      "fallbackOutOfMemory": "{{failed}}의 메모리가 부족해서 {{model}}이(가) 대신 답했어요",
+      "read": "{{host}}을(를) 읽었어요",
+      "fallbackFailed": "{{failed}}을(를) 불러올 수 없어서 {{model}}이(가) 대신 답했어요"
     },
     "notices": {
-      "filePart": "{{model}}이(가) 한 번에 읽을 수 있는 분량에는 {{name}}의 앞부분만 들어갔습니다. 뒷부분에 대해 물어보거나, 파일 전체는 컴퓨터의 채팅에서 물어보세요."
-    }
+      "filePart": "{{model}}이(가) 한 번에 읽을 수 있는 분량에는 {{name}}의 앞부분만 들어갔습니다. 뒷부분에 대해 물어보거나, 파일 전체는 컴퓨터의 채팅에서 물어보세요.",
+      "fallback": "{{failed}}을(를) 이 기기에서 실행할 수 없어서 {{model}}이(가) 답했어요. 답변이 덜 자세할 수 있어요.",
+      "noWeb": "웹에 연결할 수 없어서 이 답변은 모델이 이미 알고 있는 내용이며 최신이 아닐 수 있어요.",
+      "webOff": "설정에서 웹 검색이 꺼져 있어서 이 답변은 최신이 아닐 수 있어요."
+    },
+    "kinds": {
+      "chat": "간단한 질문",
+      "current": "최신 정보에 관한 질문",
+      "coding": "코딩 질문",
+      "research": "자세한 답변이 필요한 질문"
+    },
+    "errors": {
+      "outOfMemory": "이 기기에서 {{model}}에 쓸 메모리가 부족해요. 다른 앱을 닫거나 더 작은 모델을 고르세요.",
+      "couldNotLoad": "{{model}}을(를) 불러올 수 없어요. 모델에서 다시 설치하거나 다른 모델을 고르세요.",
+      "couldNotAnswer": "{{model}}이(가) 이번에는 답하지 못했어요. 다시 시도하거나 다른 모델을 고르세요."
+    },
+    "currentSource": "현재 날씨 (wttr.in)"
   },
   "push": {
     "title": "이 기기의 알림",
@@ -925,5 +958,37 @@
     "microphone": "메시지를 말할 때 Toskar가 마이크를 사용해요. 말한 내용은 이 기기에 남거나 내 컴퓨터로만 가요.",
     "speechRecognition": "메시지를 말할 때 Toskar가 이 기기에서 말한 내용을 텍스트로 바꿔요.",
     "localNetwork": "Toskar가 로컬 네트워크에서 모델을 실행하는 컴퓨터를 찾아요."
+  },
+  "context": {
+    "usage": "컨텍스트 사용량",
+    "full": "컨텍스트 {{percent}} 사용",
+    "title": "컨텍스트",
+    "used": "{{used}} / {{limit}} 토큰",
+    "usedEstimated": "약 {{used}} / {{limit}} 토큰",
+    "limit": "{{limit}} 토큰",
+    "rows": {
+      "conversation": "대화",
+      "instructions": "지침 및 메모리",
+      "webResults": "웹 검색 결과"
+    },
+    "nearFull": "거의 가득 찼어요. 채팅이 길어지면 가장 오래된 메시지는 요약으로 보내져요. 새 창으로 시작하려면 새 채팅을 여세요.",
+    "summarized_other": "대화가 들어갈 수 있도록 가장 오래된 메시지 {{count}}개를 요약해서 보냈어요. 모든 메시지는 그대로 저장되어 있어요.",
+    "empty": "메시지를 보내면 이 채팅이 모델의 메모리를 얼마나 사용하는지 확인할 수 있어요.",
+    "omitted_other": "가장 오래된 메시지 {{count}}개가 들어가지 않아 빠졌어요. 모든 메시지는 그대로 저장돼 있어요.",
+    "hint": "창은 이 기기에서 모델이 한 번에 읽을 수 있는 채팅의 양이에요."
+  },
+  "memory": {
+    "saved": "알겠어요. 기억할게요: “{{memory}}”",
+    "savedStep": "메모리에 저장함: {{memory}}",
+    "already": "이미 기억하고 있어요: “{{memory}}”",
+    "sensitive": "비밀번호, 키, 카드 번호처럼 보여서 저장하지 않았어요. 이런 정보는 비밀번호 관리자에 두는 게 더 안전해요.",
+    "forgot": "완료했어요. 잊었어요: “{{memory}}”",
+    "removedStep": "메모리에서 삭제함: {{memory}}",
+    "notFound": "그런 기억을 찾지 못했어요. 기억하는 내용은 모두 설정에 있어요.",
+    "none": "아직 기억한 것이 없어요. “…을 기억해 줘”라고 말하면 앞으로의 채팅을 위해 저장할게요.",
+    "list": "기억하고 있는 내용이에요:",
+    "more_other": "…외 {{count}}개는 설정에 있어요.",
+    "offSaved": "메모리가 꺼져 있어서 설정에서 다시 켤 때까지 사용하지 않아요.",
+    "offList": "메모리가 꺼져 있어서 지금은 이 내용을 사용하지 않아요."
   }
 }
