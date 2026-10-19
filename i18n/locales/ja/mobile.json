@@ -625,6 +625,7 @@
     "asking": "電話に問い合わせ中…",
     "askingComputer": "コンピュータに質問中…",
     "more": "回答の全文は電話のToskarにあります。",
+    "askBetter": "より良い回答は、電話かコンピュータで聞いてください。",
     "stillAnswering": "電話でまだ回答中です。続きは電話のToskarで確認してください。",
     "unreachable": "電話に接続できません。近くに置いて、もう一度お試しください。",
     "notInstalled": "先に電話にToskarをインストールしてください。",

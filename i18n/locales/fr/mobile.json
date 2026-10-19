@@ -639,6 +639,7 @@
     "asking": "Question envoyée à votre téléphone…",
     "askingComputer": "Question à votre ordinateur…",
     "more": "La réponse complète est dans Toskar sur votre téléphone.",
+    "askBetter": "Pour une meilleure réponse, demandez sur votre téléphone ou votre ordinateur.",
     "stillAnswering": "Votre téléphone répond encore. Ouvrez Toskar sur celui-ci pour la suite.",
     "unreachable": "Votre téléphone est injoignable. Gardez-le à proximité, puis réessayez.",
     "notInstalled": "Installez d'abord Toskar sur votre téléphone.",
