@@ -8,6 +8,21 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Thi
 
 Changes waiting for the next release are in [changes/unreleased/](changes/unreleased/), one file per pull request. `scripts/changelog.py preview` shows them together, and `scripts/changelog.py release <version>` writes them here when the release is cut.
 
+## [1.9.2] - 2026-10-18
+
+### Added
+
+- A reasoning model's thinking is no longer a silent wait (#701). The chat says **Reasoning…** while it thinks, the answer's steps say how long it thought ("Thought for 12 s before answering"), and **Thinking** under the answer opens what it thought. The model's thinking was thrown away before.
+- `chat.reasoning` events (`started`, then `done` with `ms`), the answer's `meta.reasoning` (`ms` and `text`), and `include_reasoning` on the OpenAI-compatible API, which returns the thinking as `reasoning_content` (#701, contract 1.43). External servers that send `reasoning` or `reasoning_content` work too.
+- `GET /api/v1/settings` tells Admins who could connect from another computer, in `network_access`: people, devices, keys, and whether a sign-in service is set up (#711, contract 1.42).
+
+### Fixed
+
+- Memory commands work in all ten languages, not only English (#718): „Merk dir, dass …“, « Souviens-toi que … », „…, merk dir das“, 「…を覚えておいて」, “记住：…”, and the forget and “what do you remember about me” forms. The help text already told people to say them in their language, but only English was recognized, so a small model often said it would remember and saved nothing. Each language's words are in `i18n/memory/`.
+- Toskar on phones and tablets no longer shows 57 messages in English in the other nine languages (#716): memory confirmations, the context gauge, the memory and web lookup settings, and the steps, notices, and errors of chats on the device. A catalog check now fails when a language misses a key English has, unless the language is marked partial.
+- Setting up people no longer looks like it needs an API key (#711). Turning on local network access asked for a key, even though people you add sign in with their username and password. API Access now says who connects how (people with a password, phones and tablets with a code, apps and scripts with a key) and lets you turn it on once anyone could connect. People offers **Turn on network access** right under a new person's link. The user guide's People section has the steps in the order that works.
+- Sunrise and sunset questions are looked up instead of guessed (yeixio/toskar-apps#255). "What time is sunrise in Chicago this morning?" didn't count as needing current information, so a small model made a time up (6:36 AM, that day's dawn). Sunrise, sunset, dawn, dusk, first light, and golden hour now count, and the answer reads today's times for the place from the weather service, in its local time, before any search result.
+
 ## [1.9.1] - 2026-10-18
 
 ### Added
