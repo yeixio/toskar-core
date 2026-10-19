@@ -674,5 +674,34 @@
     "save": "保存",
     "cancel": "取消",
     "close": "关闭"
+  },
+  "mediaProgress": {
+    "loadingImage": "正在加载图片模型…",
+    "loadingVideo": "正在加载短片模型…",
+    "finishingImage": "正在完成图片…",
+    "finishingVideo": "正在完成短片…",
+    "step": "第 {{step}} 步，共 {{steps}} 步",
+    "leftSeconds": "大约还需 {{seconds}} 秒",
+    "leftMinutes": "大约还需 {{minutes}} 分钟",
+    "frameImage": "图片将显示在这里",
+    "frameVideo": "短片将显示在这里",
+    "ratatoskr": {
+      "image": {
+        "paint": "拉塔托斯克正沿着世界树跑下去拿更多颜料。",
+        "acorn": "拉塔托斯克正在橡果壳里调颜色。",
+        "eagle": "拉塔托斯克正在问树顶的老鹰该画成什么样。",
+        "leaf": "拉塔托斯克正在世界树的叶子上打草稿。",
+        "stroke": "拉塔托斯克正沿着树枝追一笔跑偏的笔触。",
+        "light": "拉塔托斯克正把图片举到光下看。"
+      },
+      "video": {
+        "branch": "拉塔托斯克每根树枝画一帧。",
+        "flip": "拉塔托斯克正在翻看每一帧，检查动作。",
+        "trunk": "拉塔托斯克正把画面一帧一帧搬上树干。",
+        "tail": "拉塔托斯克正用尾巴给画面打节拍。",
+        "nidhogg": "拉塔托斯克正在请树根下的尼德霍格别乱动。",
+        "acorns": "拉塔托斯克正在攒够一整段短片的橡果。"
+      }
+    }
   }
 }

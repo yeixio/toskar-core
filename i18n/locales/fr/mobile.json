@@ -1027,5 +1027,34 @@
     "more_other": "… et {{count}} autres dans les Paramètres.",
     "offSaved": "La mémoire est désactivée, donc je ne l’utiliserai pas tant que vous ne la réactivez pas dans les Paramètres.",
     "offList": "La mémoire est désactivée, donc je ne les utilise pas pour l’instant."
+  },
+  "mediaProgress": {
+    "loadingImage": "Chargement du modèle d’image…",
+    "loadingVideo": "Chargement du modèle de clip…",
+    "finishingImage": "Finition de l’image…",
+    "finishingVideo": "Finition du clip…",
+    "step": "Étape {{step}} sur {{steps}}",
+    "leftSeconds": "encore environ {{seconds}} s",
+    "leftMinutes": "encore environ {{minutes}} min",
+    "frameImage": "Votre image apparaîtra ici",
+    "frameVideo": "Votre clip apparaîtra ici",
+    "ratatoskr": {
+      "image": {
+        "paint": "Ratatoskr descend Yggdrasil en courant chercher de la peinture.",
+        "acorn": "Ratatoskr mélange les couleurs dans une cupule de gland.",
+        "eagle": "Ratatoskr demande à l’aigle au sommet à quoi ça doit ressembler.",
+        "leaf": "Ratatoskr fait une esquisse sur une feuille de l’arbre du monde.",
+        "stroke": "Ratatoskr poursuit un coup de pinceau égaré le long d’une branche.",
+        "light": "Ratatoskr lève l’image vers la lumière."
+      },
+      "video": {
+        "branch": "Ratatoskr dessine une image par branche.",
+        "flip": "Ratatoskr feuillette les images pour vérifier le mouvement.",
+        "trunk": "Ratatoskr monte les images le long du tronc, une à une.",
+        "tail": "Ratatoskr bat la mesure de la scène avec sa queue.",
+        "nidhogg": "Ratatoskr demande à Nidhögg, aux racines, de ne plus bouger.",
+        "acorns": "Ratatoskr rassemble assez de glands pour tout un clip."
+      }
+    }
   }
 }

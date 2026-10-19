@@ -1008,5 +1008,34 @@
     "more_other": "… und {{count}} weitere in den Einstellungen.",
     "offSaved": "Das Gedächtnis ist aus, daher nutze ich es nicht, bis du es in den Einstellungen wieder einschaltest.",
     "offList": "Das Gedächtnis ist aus, daher nutze ich das gerade nicht."
+  },
+  "mediaProgress": {
+    "loadingImage": "Bildmodell wird geladen …",
+    "loadingVideo": "Clipmodell wird geladen …",
+    "finishingImage": "Bild wird fertiggestellt …",
+    "finishingVideo": "Clip wird fertiggestellt …",
+    "step": "Schritt {{step}} von {{steps}}",
+    "leftSeconds": "noch etwa {{seconds}} s",
+    "leftMinutes": "noch etwa {{minutes}} min",
+    "frameImage": "Hier erscheint dein Bild",
+    "frameVideo": "Hier erscheint dein Clip",
+    "ratatoskr": {
+      "image": {
+        "paint": "Ratatoskr rennt Yggdrasil hinunter, um mehr Farbe zu holen.",
+        "acorn": "Ratatoskr mischt Farben in einem Eichelbecher.",
+        "eagle": "Ratatoskr fragt den Adler im Wipfel, wie es aussehen soll.",
+        "leaf": "Ratatoskr skizziert auf einem Blatt des Weltenbaums.",
+        "stroke": "Ratatoskr jagt einem verirrten Pinselstrich über einen Ast nach.",
+        "light": "Ratatoskr hält das Bild ins Licht."
+      },
+      "video": {
+        "branch": "Ratatoskr zeichnet ein Bild pro Ast.",
+        "flip": "Ratatoskr blättert die Bilder durch, um die Bewegung zu prüfen.",
+        "trunk": "Ratatoskr trägt die Bilder einzeln den Stamm hinauf.",
+        "tail": "Ratatoskr gibt mit dem Schwanz den Takt der Szene vor.",
+        "nidhogg": "Ratatoskr bittet Nidhöggr an den Wurzeln, stillzuhalten.",
+        "acorns": "Ratatoskr sammelt genug Eicheln für einen ganzen Clip."
+      }
+    }
   }
 }

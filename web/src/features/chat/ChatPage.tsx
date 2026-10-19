@@ -29,6 +29,8 @@ import { isTeamProfile } from '@/features/profiles/profilePresentation'
 import { canChat, modelToolAssessment } from '@/features/models/modelPresentation'
 import { CapabilityNotice } from './CapabilityNotice'
 import { ChatActivity } from './ChatActivity'
+import { MediaProgress } from './MediaProgress'
+import { mediaKindOf, mediaProgressFrom, type MediaKind, type MediaProgressState } from './mediaProgressState'
 import { ChatHistoryDrawer, useCanPinChatHistory } from './ChatHistoryDrawer'
 import { AnswerDetails } from './AnswerDetails'
 import { FileChip, PendingFileChip, type PendingFile } from './FileChips'
@@ -161,6 +163,14 @@ function formatToolArgs(args: Record<string, unknown> | undefined): string {
   } catch {
     return i18n.t('chat:tools.argumentsUnavailable')
   }
+}
+
+/** The activity line while a picture or clip is made: loading the model, making it, or finishing (#706). */
+function mediaLabel(kind: MediaKind, progress: MediaProgressState, making: string | null): string {
+  const t = i18n.getFixedT(null, 'chat')
+  if (progress.stage === 'loading') return kind === 'video' ? t('mediaProgress.loadingVideo') : t('mediaProgress.loadingImage')
+  if (progress.stage === 'finishing') return kind === 'video' ? t('mediaProgress.finishingVideo') : t('mediaProgress.finishingImage')
+  return making || (kind === 'video' ? t('status.makingVideo') : kind === 'edit' ? t('status.changingImage') : t('status.makingImage'))
 }
 
 function toolProgress(toolId?: string, summary?: string, slow = false): string {
@@ -327,6 +337,8 @@ export function ChatPage() {
   const streamingConvRef = useRef<string | null>(null)
   // The picture or clip being made takes minutes here (chat.making_media).
   const mediaSlowRef = useRef(false)
+  // A picture or clip being made, and how far it has got (#706).
+  const [media, setMedia] = useState<{ kind: MediaKind; progress: MediaProgressState } | null>(null)
   const composerRef = useRef<HTMLTextAreaElement | null>(null)
   const profileSelectRef = useRef<HTMLSelectElement | null>(null)
   const modelSelectRef = useRef<HTMLSelectElement | null>(null)
@@ -749,12 +761,24 @@ export function ChatPage() {
           const toolId = event.payload?.tool_id as string | undefined
           const summary = event.payload?.summary as string | undefined
           setStatusMessage(toolProgress(toolId, summary, mediaSlowRef.current))
+          const kind = mediaKindOf(toolId)
+          setMedia(kind ? { kind, progress: { stage: 'starting', step: 0, steps: 0, secondsLeft: 0 } } : null)
           if (toolId) {
             setToolTraces((current) => [
               ...current,
               { label: toolDisplayName(toolId), detail: summary || '', status: 'running' },
             ])
           }
+        }
+        if (event.type === 'tool.progress') {
+          const conversationId = event.payload?.conversation_id as string | undefined
+          if (conversationId && conversationId !== selectedId && conversationId !== streamingConvRef.current) return
+          const kind = mediaKindOf(event.payload?.tool_id as string | undefined)
+          const progress = mediaProgressFrom(event.payload)
+          if (kind && progress) setMedia({ kind, progress })
+        }
+        if (event.type === 'tool.completed' || event.type === 'tool.failed') {
+          setMedia(null)
         }
         if (event.type === 'tool.completed') {
           const ms = Number(event.payload?.duration_ms)
@@ -2230,7 +2254,16 @@ export function ChatPage() {
             >
               {replyInProgress ? (
                 <div className="mb-3 px-1">
-                  <ChatActivity label={statusMessage} mascot={replyMascot} />
+                  {media ? (
+                    <MediaProgress
+                      kind={media.kind}
+                      progress={media.progress}
+                      label={mediaLabel(media.kind, media.progress, statusMessage)}
+                      mascot={replyMascot}
+                    />
+                  ) : (
+                    <ChatActivity label={statusMessage} mascot={replyMascot} />
+                  )}
                 </div>
               ) : null}
               {composer}

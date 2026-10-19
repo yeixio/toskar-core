@@ -16,7 +16,7 @@ function parseEventData(raw: string): YggdrasilEvent | null {
   }
 }
 
-const KNOWN_EVENT_TYPES = [
+export const KNOWN_EVENT_TYPES = [
   'chat.token',
   'chat.complete',
   'chat.error',
@@ -34,6 +34,8 @@ const KNOWN_EVENT_TYPES = [
   'agent.completed',
   'tool.requested',
   'tool.started',
+  // How far a picture or clip has got (#706).
+  'tool.progress',
   'tool.completed',
   'tool.failed',
   'tool.parsed',
@@ -42,6 +44,10 @@ const KNOWN_EVENT_TYPES = [
   'chat.stopped',
   'chat.making_file',
   'chat.making_media',
+  // A long turn compacting earlier messages first (#342).
+  'chat.compacting',
+  // A reasoning model thinking before it answers (#701).
+  'chat.reasoning',
   'plan.created',
   'plan.step',
   'chat.verifying',

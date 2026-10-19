@@ -8,6 +8,7 @@ import (
 	"image"
 	_ "image/jpeg" // DecodeConfig reads the size of an image to edit
 	_ "image/png"
+	"io"
 	"log/slog"
 	"math"
 	"math/rand/v2"
@@ -320,6 +321,10 @@ func runCLI(ctx context.Context, cli, dir string, args []string, out, what strin
 	cmd.WaitDelay = 5 * time.Second
 	var stderr tail
 	cmd.Stdout, cmd.Stderr = &stderr, &stderr
+	// Its progress, for a chat waiting on it (#706).
+	if report := progressFrom(ctx); report != nil {
+		cmd.Stdout = io.MultiWriter(&stderr, newProgressWriter(report))
+	}
 	if err := cmd.Run(); err != nil {
 		if ctx.Err() == context.DeadlineExceeded {
 			return nil, fmt.Errorf("the %s took longer than %d minutes and was stopped", what, int(limit.Minutes()))
