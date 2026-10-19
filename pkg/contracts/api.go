@@ -261,6 +261,13 @@ type ModelFit struct {
 	Recommendations        []string `json:"recommendations,omitempty"`
 	GPUNote                string   `json:"gpu_note,omitempty"`
 	KnownToRun             bool     `json:"known_to_run,omitempty"`
+	// Short is what a model is short of when that holds it back: "shared"
+	// on Apple silicon, where the graphics may use only part of memory, with
+	// NeedBytes what it needs and HaveBytes what the graphics may use
+	// (contract 1.46, #751).
+	Short     string `json:"short,omitempty"`
+	NeedBytes uint64 `json:"need_bytes,omitempty"`
+	HaveBytes uint64 `json:"have_bytes,omitempty"`
 }
 
 // CategoryWinner is a recommendation badge for Discover.

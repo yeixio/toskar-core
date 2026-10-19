@@ -139,6 +139,10 @@ export interface ModelFit {
   recommendations?: string[]
   gpu_note?: string
   known_to_run?: boolean
+  /** On Apple silicon, what holds it back: `shared`, the part of memory the graphics may use, with what it needs and what there is (contract 1.46). */
+  short?: 'shared'
+  need_bytes?: number
+  have_bytes?: number
 }
 
 export interface CategoryWinner {

@@ -1,4 +1,4 @@
-package app
+package models
 
 import "testing"
 
@@ -12,7 +12,7 @@ func TestSharedGraphics(t *testing.T) {
 		{48 << 30, 36 << 30},
 		{128 << 30, 96 << 30},
 	} {
-		if got := sharedGraphics(c.memory); got != c.want {
+		if got := SharedGraphics(c.memory); got != c.want {
 			t.Errorf("%d GB: %d GB, want %d GB", c.memory>>30, got>>30, c.want>>30)
 		}
 	}
