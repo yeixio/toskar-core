@@ -404,9 +404,9 @@
       "askAdmin": "{{node}}의 관리자에게 설정해 달라고 요청하세요.",
       "downloadFailed": "다운로드가 끝나지 않았어요. 다시 하려면 설정을 탭하세요.",
       "model": {
-        "details": "{{size}} 다운로드 · {{fit}} · 이 컴퓨터에만 있어요",
-        "fitExcellent": "이 컴퓨터에서 넉넉하게 돌아가요",
-        "fitGood": "이 컴퓨터에서 잘 돌아가요",
+        "details": "{{size}} 다운로드 · {{node}}에 설치 · {{fit}}",
+        "fitExcellent": "넉넉하게 돌아가요",
+        "fitGood": "잘 돌아가요",
         "install": "설치하고 다시 답하기",
         "notNow": "나중에"
       }

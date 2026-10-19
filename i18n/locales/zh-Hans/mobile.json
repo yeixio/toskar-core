@@ -404,9 +404,9 @@
       "askAdmin": "请 {{node}} 上的管理员来设置。",
       "downloadFailed": "下载没有完成。轻点“设置”再试一次。",
       "model": {
-        "details": "下载 {{size}} · {{fit}} · 只留在这台电脑上",
-        "fitExcellent": "这台电脑能轻松运行",
-        "fitGood": "这台电脑能很好运行",
+        "details": "下载 {{size}} · 在 {{node}} 上 · {{fit}}",
+        "fitExcellent": "能轻松运行",
+        "fitGood": "能很好运行",
         "install": "安装并重新回答",
         "notNow": "暂不"
       }
