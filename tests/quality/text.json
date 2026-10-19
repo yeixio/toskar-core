@@ -1531,6 +1531,151 @@
       "in": "remmeber that my dog is named Rex",
       "kind": "remember",
       "text": "My dog is named Rex"
+    },
+    {
+      "in": "Merk dir, dass ich Tee mag",
+      "kind": "remember",
+      "text": "Ich Tee mag"
+    },
+    {
+      "in": "Meine Tochter hat am 3. Mai Geburtstag, merk dir das",
+      "kind": "remember",
+      "text": "Meine Tochter hat am 3. Mai Geburtstag"
+    },
+    {
+      "in": "Vergiss nicht, dass ich vegetarisch esse",
+      "kind": "remember",
+      "text": "Ich vegetarisch esse"
+    },
+    {
+      "in": "Vergiss, dass ich Tee mag",
+      "kind": "forget",
+      "text": "Ich Tee mag"
+    },
+    {
+      "in": "Was weißt du über mich?",
+      "kind": "list",
+      "text": ""
+    },
+    {
+      "in": "Kannst du dir Namen gut merken?",
+      "kind": "none",
+      "text": ""
+    },
+    {
+      "in": "Recuerda que prefiero el sistema métrico",
+      "kind": "remember",
+      "text": "Prefiero el sistema métrico"
+    },
+    {
+      "in": "¿Qué sabes de mí?",
+      "kind": "list",
+      "text": ""
+    },
+    {
+      "in": "Guarda esto en el Conocimiento",
+      "kind": "none",
+      "text": ""
+    },
+    {
+      "in": "Souviens-toi que je préfère le thé",
+      "kind": "remember",
+      "text": "Je préfère le thé"
+    },
+    {
+      "in": "Retiens qu'il pleut souvent ici",
+      "kind": "remember",
+      "text": "Il pleut souvent ici"
+    },
+    {
+      "in": "N’oublie pas que je suis végétarien",
+      "kind": "remember",
+      "text": "Je suis végétarien"
+    },
+    {
+      "in": "Oublie que je préfère le thé",
+      "kind": "forget",
+      "text": "Je préfère le thé"
+    },
+    {
+      "in": "Retiens ça",
+      "kind": "none",
+      "text": ""
+    },
+    {
+      "in": "Ricordati che lavoro il sabato",
+      "kind": "remember",
+      "text": "Lavoro il sabato"
+    },
+    {
+      "in": "Note di rilascio: Toskar",
+      "kind": "none",
+      "text": ""
+    },
+    {
+      "in": "Ricordare la spesa è difficile",
+      "kind": "none",
+      "text": ""
+    },
+    {
+      "in": "Lembre-se de que trabalho aos sábados",
+      "kind": "remember",
+      "text": "Trabalho aos sábados"
+    },
+    {
+      "in": "O que você sabe sobre mim?",
+      "kind": "list",
+      "text": ""
+    },
+    {
+      "in": "紅茶が好きなことを覚えておいて",
+      "kind": "remember",
+      "text": "紅茶が好きなこと"
+    },
+    {
+      "in": "覚えておいて：娘の誕生日は5月3日",
+      "kind": "remember",
+      "text": "娘の誕生日は5月3日"
+    },
+    {
+      "in": "覚えておいてくれる？",
+      "kind": "none",
+      "text": ""
+    },
+    {
+      "in": "딸 생일은 5월 3일이야, 기억해 줘",
+      "kind": "remember",
+      "text": "딸 생일은 5월 3일이야"
+    },
+    {
+      "in": "나에 대해 뭘 기억해?",
+      "kind": "list",
+      "text": ""
+    },
+    {
+      "in": "记住：我喜欢喝茶",
+      "kind": "remember",
+      "text": "我喜欢喝茶"
+    },
+    {
+      "in": "我喜欢喝茶，记住这一点",
+      "kind": "remember",
+      "text": "我喜欢喝茶"
+    },
+    {
+      "in": "记住了吗",
+      "kind": "none",
+      "text": ""
+    },
+    {
+      "in": "忘记密码？请向管理员索取新密码链接。",
+      "kind": "none",
+      "text": ""
+    },
+    {
+      "in": "記住：我喜歡喝茶",
+      "kind": "remember",
+      "text": "我喜歡喝茶"
     }
   ],
   "capture_request": [

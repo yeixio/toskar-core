@@ -35,7 +35,8 @@ var (
 )
 
 // ParseCommand recognizes "Remember that …" (or "…, remember that"),
-// "Forget that …", and "What do you remember about me?". Yggdrasil handles these
+// "Forget that …", and "What do you remember about me?", in English and the
+// other languages in i18n/memory (#718). Yggdrasil handles these
 // itself, so the result does not depend on how well a model follows them.
 func ParseCommand(message string) Command {
 	cmd := parseCommand(message)
@@ -45,9 +46,12 @@ func ParseCommand(message string) Command {
 	// "remmeber that …": the command's own words with typos corrected
 	// (#451). Only the first few words: the rest is the person's text.
 	if fixed := commandWords.FixLeading(message, commandLead); fixed != message {
-		return parseCommand(fixed)
+		if cmd := parseCommand(fixed); cmd.Kind != "" {
+			return cmd
+		}
 	}
-	return cmd
+	// The same commands in the other languages (#718).
+	return parseOther(message)
 }
 
 // commandWords are the commands' words, and commandLead how many of a

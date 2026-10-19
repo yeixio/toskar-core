@@ -1,0 +1,63 @@
+{
+  "spaced": true,
+  "polite": [
+    "por favor",
+    "oye",
+    "vale",
+    "ok"
+  ],
+  "remember": {
+    "before": [
+      "recuerda",
+      "acuérdate de",
+      "acuerdate de",
+      "no olvides",
+      "ten en cuenta",
+      "anota"
+    ],
+    "joiners": [
+      "que",
+      "de que"
+    ],
+    "after": [
+      "recuérdalo",
+      "recuerdalo",
+      "no lo olvides",
+      "tenlo en cuenta",
+      "acuérdate",
+      "acuerdate"
+    ]
+  },
+  "forget": {
+    "before": [
+      "olvida",
+      "olvídate de",
+      "olvidate de",
+      "borra el recuerdo de"
+    ],
+    "joiners": [
+      "que",
+      "lo de"
+    ],
+    "after": [
+      "olvídalo",
+      "olvidalo"
+    ]
+  },
+  "list": [
+    "qué sabes de mí",
+    "que sabes de mi",
+    "qué recuerdas de mí",
+    "que recuerdas de mi",
+    "qué recuerdas",
+    "que recuerdas",
+    "muéstrame mis recuerdos",
+    "muestrame mis recuerdos",
+    "lista mis recuerdos"
+  ],
+  "nothing": [
+    "eso",
+    "esto",
+    "lo"
+  ]
+}

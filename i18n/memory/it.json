@@ -1,0 +1,56 @@
+{
+  "spaced": true,
+  "polite": [
+    "per favore",
+    "ehi",
+    "ok"
+  ],
+  "remember": {
+    "before": [
+      "ricordati",
+      "ricorda",
+      "tieni a mente",
+      "non dimenticare",
+      "memorizza",
+      "annota"
+    ],
+    "joiners": [
+      "che",
+      "di"
+    ],
+    "after": [
+      "ricordalo",
+      "ricordatelo",
+      "non dimenticarlo",
+      "tienilo a mente"
+    ]
+  },
+  "forget": {
+    "before": [
+      "dimenticati di",
+      "dimentica",
+      "cancella il ricordo di"
+    ],
+    "joiners": [
+      "che"
+    ],
+    "after": [
+      "dimenticalo",
+      "dimenticatelo"
+    ]
+  },
+  "list": [
+    "cosa sai di me",
+    "cosa ricordi di me",
+    "cosa ricordi",
+    "mostra i miei ricordi",
+    "mostrami i miei ricordi",
+    "elenca i miei ricordi"
+  ],
+  "nothing": [
+    "questo",
+    "ciò",
+    "cio",
+    "lo"
+  ]
+}

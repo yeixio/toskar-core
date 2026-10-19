@@ -1,0 +1,62 @@
+{
+  "spaced": true,
+  "polite": [
+    "por favor",
+    "ei",
+    "ok"
+  ],
+  "remember": {
+    "before": [
+      "lembre-se de",
+      "lembre-se",
+      "lembre",
+      "lembra",
+      "não esqueça",
+      "nao esqueca",
+      "guarde",
+      "anote"
+    ],
+    "joiners": [
+      "que",
+      "de que"
+    ],
+    "after": [
+      "lembre disso",
+      "lembre-se disso",
+      "não esqueça disso",
+      "nao esqueca disso",
+      "guarde isso"
+    ]
+  },
+  "forget": {
+    "before": [
+      "esqueça",
+      "esqueca",
+      "apague a memória de",
+      "apague a memoria de"
+    ],
+    "joiners": [
+      "que"
+    ],
+    "after": [
+      "esqueça isso",
+      "esqueca isso"
+    ]
+  },
+  "list": [
+    "o que você sabe sobre mim",
+    "o que voce sabe sobre mim",
+    "o que você lembra de mim",
+    "o que voce lembra de mim",
+    "o que você lembra",
+    "o que voce lembra",
+    "mostre minhas memórias",
+    "mostre minhas memorias",
+    "liste minhas memórias",
+    "liste minhas memorias"
+  ],
+  "nothing": [
+    "isso",
+    "isto"
+  ]
+}
