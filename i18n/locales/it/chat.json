@@ -761,5 +761,34 @@
     "save": "Salva",
     "cancel": "Annulla",
     "close": "Chiudi"
+  },
+  "mediaProgress": {
+    "loadingImage": "Caricamento del modello per le immagini…",
+    "loadingVideo": "Caricamento del modello per le clip…",
+    "finishingImage": "Rifinitura dell’immagine…",
+    "finishingVideo": "Rifinitura della clip…",
+    "step": "Passo {{step}} di {{steps}}",
+    "leftSeconds": "mancano circa {{seconds}} s",
+    "leftMinutes": "mancano circa {{minutes}} min",
+    "frameImage": "La tua immagine apparirà qui",
+    "frameVideo": "La tua clip apparirà qui",
+    "ratatoskr": {
+      "image": {
+        "paint": "Ratatoskr scende di corsa lungo Yggdrasil a prendere altra pittura.",
+        "acorn": "Ratatoskr mescola i colori in una cupola di ghianda.",
+        "eagle": "Ratatoskr chiede all’aquila in cima come dev’essere.",
+        "leaf": "Ratatoskr fa uno schizzo su una foglia dell’albero del mondo.",
+        "stroke": "Ratatoskr insegue una pennellata sfuggita lungo un ramo.",
+        "light": "Ratatoskr alza l’immagine controluce."
+      },
+      "video": {
+        "branch": "Ratatoskr disegna un fotogramma per ramo.",
+        "flip": "Ratatoskr sfoglia i fotogrammi per controllare il movimento.",
+        "trunk": "Ratatoskr porta i fotogrammi su per il tronco, uno alla volta.",
+        "tail": "Ratatoskr dà il tempo alla scena con un colpo di coda.",
+        "nidhogg": "Ratatoskr chiede a Nidhogg, tra le radici, di stare fermo.",
+        "acorns": "Ratatoskr raccoglie abbastanza ghiande per una clip intera."
+      }
+    }
   }
 }

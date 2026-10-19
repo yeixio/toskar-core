@@ -94,8 +94,11 @@ const (
 	ToolRequested = "tool.requested"
 	ToolStarted   = "tool.started"
 	ToolCompleted = "tool.completed"
-	ToolFailed    = "tool.failed"
-	ToolParsed    = "tool.parsed"
+	// ToolProgress is how far a picture or clip has got (#706): stage, step
+	// and steps, and seconds_left.
+	ToolProgress = "tool.progress"
+	ToolFailed   = "tool.failed"
+	ToolParsed   = "tool.parsed"
 
 	NodeDiscovered = "node.discovered"
 	NodePaired     = "node.paired"

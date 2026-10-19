@@ -18,6 +18,7 @@ import (
 	"github.com/yeixio/toskar-core/internal/events"
 	"github.com/yeixio/toskar-core/internal/guide"
 	"github.com/yeixio/toskar-core/internal/huginn"
+	"github.com/yeixio/toskar-core/internal/imagegen"
 	"github.com/yeixio/toskar-core/internal/locale"
 	"github.com/yeixio/toskar-core/internal/mimir"
 	"github.com/yeixio/toskar-core/internal/models"
@@ -1421,6 +1422,12 @@ func (e *chatExecEnv) ExecuteTool(ctx context.Context, toolID string, args map[s
 		return nil, err
 	}
 	args = withMediaQuality(e.profile.Orchestration.MediaQuality, toolID, args)
+	// A picture or clip says how far it has got while it's made here (#706).
+	ctx = imagegen.WithProgress(ctx, func(p imagegen.Progress) {
+		e.Emit(events.ToolProgress, map[string]any{
+			"tool_id": toolID, "stage": p.Stage, "step": p.Step, "steps": p.Steps, "seconds_left": p.SecondsLeft,
+		})
+	})
 	e.progress(events.ToolStarted, map[string]any{"tool_id": toolID, "args": args})
 	toolStarted := time.Now()
 	result, err := e.app.Tools.Execute(ctx, toolID, args, policy, "chat requested tool", meta)

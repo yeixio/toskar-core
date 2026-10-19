@@ -761,5 +761,34 @@
     "save": "Guardar",
     "cancel": "Cancelar",
     "close": "Cerrar"
+  },
+  "mediaProgress": {
+    "loadingImage": "Cargando el modelo de imágenes…",
+    "loadingVideo": "Cargando el modelo de clips…",
+    "finishingImage": "Terminando la imagen…",
+    "finishingVideo": "Terminando el clip…",
+    "step": "Paso {{step}} de {{steps}}",
+    "leftSeconds": "faltan unos {{seconds}} s",
+    "leftMinutes": "faltan unos {{minutes}} min",
+    "frameImage": "Tu imagen aparecerá aquí",
+    "frameVideo": "Tu clip aparecerá aquí",
+    "ratatoskr": {
+      "image": {
+        "paint": "Ratatoskr baja corriendo por Yggdrasil a buscar más pintura.",
+        "acorn": "Ratatoskr mezcla colores en una taza de bellota.",
+        "eagle": "Ratatoskr le pregunta al águila de la copa cómo debe quedar.",
+        "leaf": "Ratatoskr dibuja un boceto en una hoja del árbol del mundo.",
+        "stroke": "Ratatoskr persigue una pincelada perdida por una rama.",
+        "light": "Ratatoskr levanta la imagen hacia la luz."
+      },
+      "video": {
+        "branch": "Ratatoskr dibuja un fotograma por rama.",
+        "flip": "Ratatoskr pasa los fotogramas para revisar el movimiento.",
+        "trunk": "Ratatoskr sube los fotogramas por el tronco, uno a uno.",
+        "tail": "Ratatoskr marca el ritmo de la escena con la cola.",
+        "nidhogg": "Ratatoskr le pide a Nidhogg, en las raíces, que se quede quieto.",
+        "acorns": "Ratatoskr junta bellotas suficientes para un clip entero."
+      }
+    }
   }
 }

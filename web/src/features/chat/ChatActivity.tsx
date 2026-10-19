@@ -5,9 +5,18 @@ import type { MascotState } from '@/lib/ratatoskr/rig'
 import { ELAPSED_AFTER_MS, formatElapsed } from '@/lib/elapsed'
 
 /** Shown while a reply has not produced visible text yet. Ratatoskr thinks, or delivers when the reply runs on a paired computer. */
-export function ChatActivity({ label, mascot = 'think' }: { label?: string | null; mascot?: MascotState }) {
+export function ChatActivity({
+  label,
+  mascot = 'think',
+  timing,
+}: {
+  label?: string | null
+  mascot?: MascotState
+  /** What the time counts: the label by default; a picture's steps share one (#706). */
+  timing?: string
+}) {
   const { t } = useTranslation('chat')
-  const elapsed = useElapsed(label ?? '')
+  const elapsed = useElapsed(timing ?? label ?? '')
   return (
     <div
       className="flex max-w-[min(42rem,85%)] items-center gap-3 rounded-2xl bg-raised/80 px-4 py-3"

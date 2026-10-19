@@ -1027,5 +1027,34 @@
     "more_other": "…e mais {{count}} em Configurações.",
     "offSaved": "A memória está desativada, então não vou usá-la até você reativá-la em Configurações.",
     "offList": "A memória está desativada, então não estou usando isto agora."
+  },
+  "mediaProgress": {
+    "loadingImage": "Carregando o modelo de imagens…",
+    "loadingVideo": "Carregando o modelo de clipes…",
+    "finishingImage": "Finalizando a imagem…",
+    "finishingVideo": "Finalizando o clipe…",
+    "step": "Etapa {{step}} de {{steps}}",
+    "leftSeconds": "faltam cerca de {{seconds}} s",
+    "leftMinutes": "faltam cerca de {{minutes}} min",
+    "frameImage": "Sua imagem vai aparecer aqui",
+    "frameVideo": "Seu clipe vai aparecer aqui",
+    "ratatoskr": {
+      "image": {
+        "paint": "Ratatoskr desce correndo pela Yggdrasil para buscar mais tinta.",
+        "acorn": "Ratatoskr mistura cores numa xícara de bolota.",
+        "eagle": "Ratatoskr pergunta à águia lá no alto como deve ficar.",
+        "leaf": "Ratatoskr faz um esboço numa folha da árvore do mundo.",
+        "stroke": "Ratatoskr persegue uma pincelada perdida por um galho.",
+        "light": "Ratatoskr ergue a imagem contra a luz."
+      },
+      "video": {
+        "branch": "Ratatoskr desenha um quadro por galho.",
+        "flip": "Ratatoskr folheia os quadros para conferir o movimento.",
+        "trunk": "Ratatoskr leva os quadros tronco acima, um de cada vez.",
+        "tail": "Ratatoskr marca o ritmo da cena com a cauda.",
+        "nidhogg": "Ratatoskr pede a Nidhogg, lá nas raízes, que fique parado.",
+        "acorns": "Ratatoskr junta bolotas suficientes para um clipe inteiro."
+      }
+    }
   }
 }

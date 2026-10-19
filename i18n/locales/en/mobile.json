@@ -1008,5 +1008,34 @@
     "microphone": "Toskar uses the microphone when you speak a message. What you say stays on this device or goes only to your own computer.",
     "speechRecognition": "Toskar turns what you say into text on this device when you speak a message.",
     "localNetwork": "Toskar looks on your local network for the computer that runs your models."
+  },
+  "mediaProgress": {
+    "loadingImage": "Loading the picture model…",
+    "loadingVideo": "Loading the clip model…",
+    "finishingImage": "Finishing the picture…",
+    "finishingVideo": "Finishing the clip…",
+    "step": "Step {{step}} of {{steps}}",
+    "leftSeconds": "about {{seconds}} s left",
+    "leftMinutes": "about {{minutes}} min left",
+    "frameImage": "Your picture will appear here",
+    "frameVideo": "Your clip will appear here",
+    "ratatoskr": {
+      "image": {
+        "paint": "Ratatoskr is running down Yggdrasil for more paint.",
+        "acorn": "Ratatoskr is mixing colors in an acorn cup.",
+        "eagle": "Ratatoskr is asking the eagle at the top how it should look.",
+        "leaf": "Ratatoskr is sketching on a leaf of the world tree.",
+        "stroke": "Ratatoskr is chasing a stray brushstroke along a branch.",
+        "light": "Ratatoskr is holding the picture up to the light."
+      },
+      "video": {
+        "branch": "Ratatoskr is drawing one frame per branch.",
+        "flip": "Ratatoskr is flipping through the frames to check the motion.",
+        "trunk": "Ratatoskr is carrying frames up the trunk, one at a time.",
+        "tail": "Ratatoskr is timing the scene with a flick of the tail.",
+        "nidhogg": "Ratatoskr is asking Nidhogg at the roots to hold still.",
+        "acorns": "Ratatoskr is gathering enough acorns for a whole clip."
+      }
+    }
   }
 }
