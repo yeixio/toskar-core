@@ -1,0 +1,64 @@
+{
+  "spaced": true,
+  "polite": [
+    "bitte",
+    "hey",
+    "ok",
+    "okay"
+  ],
+  "remember": {
+    "before": [
+      "merk dir",
+      "merke dir",
+      "merkt euch",
+      "merken sie sich",
+      "denk daran",
+      "denke daran",
+      "vergiss nicht",
+      "behalte im kopf"
+    ],
+    "joiners": [
+      "dass"
+    ],
+    "after": [
+      "merk dir das",
+      "merke dir das",
+      "merk dir das bitte",
+      "bitte merk dir das",
+      "denk daran",
+      "nicht vergessen",
+      "vergiss das nicht"
+    ]
+  },
+  "forget": {
+    "before": [
+      "vergiss",
+      "vergessen sie",
+      "lösch die erinnerung",
+      "lösche die erinnerung"
+    ],
+    "joiners": [
+      "dass",
+      "das mit",
+      "die sache mit"
+    ],
+    "after": [
+      "vergiss das"
+    ]
+  },
+  "list": [
+    "was weißt du über mich",
+    "was weisst du über mich",
+    "was hast du dir gemerkt",
+    "woran erinnerst du dich",
+    "zeig meine erinnerungen",
+    "zeig mir meine erinnerungen",
+    "liste meine erinnerungen auf"
+  ],
+  "nothing": [
+    "das",
+    "es",
+    "dies",
+    "dieses"
+  ]
+}

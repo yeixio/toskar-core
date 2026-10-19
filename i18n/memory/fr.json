@@ -1,0 +1,64 @@
+{
+  "spaced": true,
+  "polite": [
+    "s'il te plaît",
+    "s'il te plait",
+    "stp",
+    "hé",
+    "ok"
+  ],
+  "remember": {
+    "before": [
+      "souviens-toi",
+      "rappelle-toi",
+      "retiens",
+      "n'oublie pas",
+      "mémorise",
+      "memorise",
+      "garde en mémoire"
+    ],
+    "joiners": [
+      "que",
+      "qu'"
+    ],
+    "after": [
+      "retiens-le",
+      "retiens ça",
+      "retiens ca",
+      "souviens-t'en",
+      "ne l'oublie pas",
+      "n'oublie pas",
+      "garde-le en mémoire"
+    ]
+  },
+  "forget": {
+    "before": [
+      "oublie",
+      "efface le souvenir de"
+    ],
+    "joiners": [
+      "que",
+      "qu'"
+    ],
+    "after": [
+      "oublie ça",
+      "oublie ca",
+      "oublie-le"
+    ]
+  },
+  "list": [
+    "qu'est-ce que tu sais sur moi",
+    "que sais-tu de moi",
+    "de quoi te souviens-tu",
+    "qu'est-ce que tu as retenu",
+    "montre mes souvenirs",
+    "montre-moi mes souvenirs",
+    "liste mes souvenirs"
+  ],
+  "nothing": [
+    "ça",
+    "ca",
+    "cela",
+    "le"
+  ]
+}
