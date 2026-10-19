@@ -60,12 +60,14 @@ Each model gets a verdict for the computer it would run on, on the Tools page an
 - **May be slow or tight:** it fits, but below the memory or graphics memory it's comfortable with. Toskar says what it needs and what the computer has, such as "Needs about 16 GB of graphics memory; this computer's graphics card has 10 GB". It's set up only when you agree.
 - **Not supported here:** it can't fit at all. A lighter model, a smaller or shorter request, or a paired computer with more memory can make it instead. An estimate hasn't been measured on real hardware yet; "Not yet" models can be set up, but they're labeled as untested and never recommended.
 
+For FLUX.2 [klein] 4B high quality and Wan 2.2 TI2V 5B, the graphics memory comes from measured parts (#550): the text encoder, the diffusion model, and the decoder, which run on the graphics one at a time, each with buffers that grow with the picture's size and the clip's frames. A request needs its largest part plus about half a gigabyte. A 1024×1024 picture with FLUX.2 [klein] 4B high quality needs about 6 GB, and 1536×1024 about 8.5 GB; a 2-second clip with Wan 2.2 TI2V 5B about 7 GB, and 5 seconds about 15 GB. A request this computer's graphics can't hold is turned down before it starts, with the size or length that fits, such as "Ask for 3 seconds or less". The other models have one estimate each, for their default request.
+
 ## Test machines
 
 | Computer | Status |
 | --- | --- |
 | Linux, AMD Radeon RX 7900 XTX 24 GB, Vulkan | Tested in the [media quality set](../tests/quality/README.md) |
-| Mac, Apple silicon (M5 Pro), 24 GB unified memory, Metal | Wan 2.2 TI2V 5B measured; the others not yet |
+| Mac, Apple silicon (M5 Pro), 24 GB unified memory, Metal | FLUX.2 [klein] 4B high quality and Wan 2.2 TI2V 5B measured per part and size (#550); the others not yet |
 | Windows or Linux, NVIDIA RTX 3080 10–12 GB, Vulkan | Not yet measured |
 
 24 GB of unified memory isn't 24 GB of graphics memory: the system and other apps share it, so a model comfortable with 24 GB may be tight on a 24 GB Mac.

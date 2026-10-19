@@ -49,15 +49,22 @@ type manifestModel struct {
 	LicenseURL     string  `json:"license_url,omitempty"`
 	LicenseAllows  string  `json:"license_allows,omitempty"`
 	Files          []File  `json:"files"`
+	// Stages are its measured parts (#550); see Stage.
+	Stages []Stage `json:"stages,omitempty"`
 }
 
 func (m manifestModel) model() Model {
-	return Model{ID: m.ID, Name: m.Name, Kind: m.Kind, Tier: m.Tier, Description: m.Description, License: m.License,
+	out := Model{ID: m.ID, Name: m.Name, Kind: m.Kind, Tier: m.Tier, Description: m.Description, License: m.License,
 		MemoryBytes: m.MemoryBytes, GraphicsBytes: m.GraphicsBytes, Edits: m.Edits, EditOnly: m.EditOnly, Untested: m.Untested,
 		Steps: m.Steps, CFG: m.CFG, FlowShift: m.FlowShift, Frames: m.Frames, FPS: m.FPS,
 		HighNoiseSteps: m.HighNoiseSteps, HighNoiseCFG: m.HighNoiseCFG, ModelArgs: m.ModelArgs,
 		NeedsLicense: m.NeedsLicense, LicenseURL: m.LicenseURL, LicenseAllows: m.LicenseAllows,
-		Files: append([]File(nil), m.Files...)}
+		Files: append([]File(nil), m.Files...), Stages: append([]Stage(nil), m.Stages...)}
+	// Measured parts say what the default request needs (#550).
+	if len(out.Stages) > 0 {
+		out.GraphicsBytes = out.GraphicsFor(out.defaultRequest())
+	}
+	return out
 }
 
 var (

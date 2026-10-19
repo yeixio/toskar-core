@@ -195,6 +195,11 @@ func (e *Engine) Generate(ctx context.Context, req Request) (Result, error) {
 		}
 	}
 	w, h = fit(w, h)
+	// A size this computer's graphics can't hold is turned down before it
+	// runs, with the size that fits (#550).
+	if why := tooBigFor(model, w, h, 1, e.Setup.graphics()); why != "" {
+		return Result{}, errors.New(why)
+	}
 	seed := req.Seed
 	if seed <= 0 {
 		seed = rand.Int64N(1 << 31)

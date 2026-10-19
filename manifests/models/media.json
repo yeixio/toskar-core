@@ -43,16 +43,20 @@
     {
       "id": "flux2-klein-4b-q8",
       "name": "FLUX.2 [klein] 4B, high quality",
-      "note": "The same model in Q8 with a Q8 text encoder, for more detail. Graphics memory: an estimate until measured (#553).",
+      "note": "The same model in Q8 with a Q8 text encoder, for more detail. Graphics memory: measured per stage on the M5 Pro (#550).",
       "kind": "image",
       "tier": "balanced",
       "description": "The same model with more detail, for computers with 24 GB of memory or more.",
       "license": "Apache-2.0",
       "memory_bytes": 21474836480,
-      "graphics_bytes": 12884901888,
       "edits": true,
       "steps": 4,
       "cfg": 1,
+      "stages": [
+        { "part": "text", "weights_bytes": 3309148570, "compute_bytes": 68157440 },
+        { "part": "diffusion", "weights_bytes": 4300629606, "compute_bytes": 170917888, "per_megapixel_bytes": 967835648 },
+        { "part": "decode", "weights_bytes": 124864430, "per_megapixel_bytes": 4993948058 }
+      ],
       "files": [
         {
           "role": "diffusion",
@@ -217,19 +221,23 @@
     {
       "id": "wan2.2-ti2v-5b",
       "name": "Wan 2.2 TI2V 5B",
-      "note": "The default: clips from a description or a picture. TAEHV (MIT) decodes in seconds; the full VAE takes most of an hour on a 24 GB Mac. Graphics memory: an estimate until measured (#553).",
+      "note": "The default: clips from a description or a picture. TAEHV (MIT) decodes in seconds; the full VAE takes most of an hour on a 24 GB Mac. Graphics memory: measured per stage on the M5 Pro, with TAEHV (#550).",
       "kind": "video",
       "tier": "balanced",
       "description": "Makes short clips from a description, or from an image. Needs about 16 GB of memory; a clip takes minutes.",
       "license": "Apache-2.0",
       "memory_bytes": 17179869184,
-      "graphics_bytes": 12884901888,
       "edits": true,
       "steps": 20,
       "cfg": 6,
       "flow_shift": 3,
       "frames": 33,
       "fps": 16,
+      "stages": [
+        { "part": "text", "weights_bytes": 3436697354, "compute_bytes": 311427072 },
+        { "part": "diffusion", "weights_bytes": 3648782336, "compute_bytes": 39845888, "per_megapixel_bytes": 26424115 },
+        { "part": "decode", "weights_bytes": 19860029, "compute_bytes": 517996544, "per_megapixel_bytes": 432118170 }
+      ],
       "files": [
         {
           "role": "diffusion",

@@ -46,8 +46,12 @@ type Model struct {
 	// GraphicsBytes is the graphics memory it is comfortable with on a
 	// computer with its own graphics card; with less, parts of it run from
 	// system memory, more slowly (#550).
-	GraphicsBytes int64  `json:"graphics_bytes,omitempty"`
-	Files         []File `json:"files"`
+	GraphicsBytes int64 `json:"graphics_bytes,omitempty"`
+	// Stages are its measured parts, from which GraphicsFor works out the
+	// graphics memory a request of a given size and length needs (#550);
+	// with them, GraphicsBytes is what the default request needs.
+	Stages []Stage `json:"-"`
+	Files  []File  `json:"files"`
 	// Edits says whether it can change an image from an instruction, or,
 	// for a video model, animate one.
 	Edits bool `json:"edits"`
