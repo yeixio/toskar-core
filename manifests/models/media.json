@@ -9,10 +9,14 @@
       "description": "Makes and edits images in a few steps. Fits most computers with 16 GB of memory.",
       "license": "Apache-2.0",
       "memory_bytes": 12884901888,
-      "graphics_bytes": 8589934592,
       "edits": true,
       "steps": 4,
       "cfg": 1,
+      "stages": [
+        { "part": "text", "weights_bytes": 1930512302, "compute_bytes": 68157440 },
+        { "part": "diffusion", "weights_bytes": 2460378726, "compute_bytes": 170917888, "per_megapixel_bytes": 967835648 },
+        { "part": "decode", "weights_bytes": 55952015, "per_megapixel_bytes": 4993948058 }
+      ],
       "files": [
         {
           "role": "diffusion",
@@ -87,15 +91,19 @@
     {
       "id": "z-image-turbo",
       "name": "Z-Image-Turbo",
-      "note": "Tongyi-MAI, Apache 2.0. The FLUX.1 VAE comes from ComfyUI's repackage, the same file as black-forest-labs' gated copy. Tested on an RX 7900 XTX: about 35-40 s a picture (quality run 38306108732). Graphics memory: an estimate until measured (#553).",
+      "note": "Tongyi-MAI, Apache 2.0. The FLUX.1 VAE comes from ComfyUI's repackage, the same file as black-forest-labs' gated copy. Tested on an RX 7900 XTX: about 35-40 s a picture (quality run 38306108732). Graphics memory: measured per stage on the M5 Pro (#553).",
       "kind": "image",
       "tier": "best",
       "description": "Photorealistic pictures, with clear text in them, in a few steps. It can't edit pictures.",
       "license": "Apache-2.0",
       "memory_bytes": 15032385536,
-      "graphics_bytes": 10737418240,
       "steps": 8,
       "cfg": 1,
+      "stages": [
+        { "part": "text", "weights_bytes": 2427421983, "compute_bytes": 2097152 },
+        { "part": "diffusion", "weights_bytes": 3864201789, "compute_bytes": 1048576, "per_megapixel_bytes": 688998318 },
+        { "part": "decode", "weights_bytes": 99163832, "per_megapixel_bytes": 6656989594 }
+      ],
       "files": [
         {
           "role": "diffusion",
@@ -234,8 +242,8 @@
       "frames": 33,
       "fps": 16,
       "stages": [
-        { "part": "text", "weights_bytes": 3436697354, "compute_bytes": 311427072 },
-        { "part": "diffusion", "weights_bytes": 3648782336, "compute_bytes": 39845888, "per_megapixel_bytes": 26424115 },
+        { "part": "text", "weights_bytes": 3648782336, "compute_bytes": 311427072 },
+        { "part": "diffusion", "weights_bytes": 3436697354, "compute_bytes": 39845888, "per_megapixel_bytes": 26424115 },
         { "part": "decode", "weights_bytes": 19860029, "compute_bytes": 517996544, "per_megapixel_bytes": 432118170 }
       ],
       "files": [
@@ -341,11 +349,15 @@
       "description": "Short clips from a description on computers with less memory, at lower quality. It can't start from a picture.",
       "license": "Apache-2.0",
       "memory_bytes": 10737418240,
-      "graphics_bytes": 12884901888,
       "steps": 20,
       "cfg": 6,
       "flow_shift": 3,
       "fps": 16,
+      "stages": [
+        { "part": "text", "weights_bytes": 3648782336, "compute_bytes": 311427072 },
+        { "part": "diffusion", "weights_bytes": 2840508498, "compute_bytes": 66165146, "per_megapixel_bytes": 48255468 },
+        { "part": "decode", "weights_bytes": 19702743, "compute_bytes": 2070623027, "per_megapixel_bytes": 1728262963, "max_compute_bytes": 13803873894 }
+      ],
       "files": [
         {
           "role": "diffusion",

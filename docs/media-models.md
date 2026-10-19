@@ -18,9 +18,9 @@ Each model has a tier: **fast**, **balanced**, or **best**. Asking for "a high-q
 
 | Model | Does | Download | Comfortable with | Tested |
 | --- | --- | --- | --- | --- |
-| FLUX.2 [klein] 4B | Makes and edits | 5.2 GB | 12 GB of memory | Yes: RX 7900 XTX, about 10–22 s a picture, peak 6–9 GB of graphics memory |
-| FLUX.2 [klein] 4B, high quality | Makes and edits, with more detail | 8.8 GB | 20 GB | Not yet |
-| Z-Image-Turbo | Makes photorealistic pictures, with clear text in them | 6.7 GB | 14 GB (estimate) | Yes: RX 7900 XTX, about 35–40 s a picture |
+| FLUX.2 [klein] 4B | Makes and edits | 5.2 GB | 12 GB of memory | Yes: RX 7900 XTX, about 10–22 s a picture, peak 6–9 GB of graphics memory. M5 Pro, measured: about 29 s at 1024×1024, 5.4 GB of graphics memory |
+| FLUX.2 [klein] 4B, high quality | Makes and edits, with more detail | 8.8 GB | 20 GB | Yes: M5 Pro, about 33 s a picture at 1024×1024, 5.9 GB of graphics memory (8.5 GB at 1536×1024) |
+| Z-Image-Turbo | Makes photorealistic pictures, with clear text in them | 6.7 GB | 14 GB (estimate) | Yes: RX 7900 XTX, about 35–40 s a picture. M5 Pro, measured: about 73 s at 1024×1024, 6.7 GB of graphics memory (10.9 GB at 1536×1024) |
 | Qwen-Image-Edit-2511 | Edits only: changes what's asked, keeps the rest, edits text | 19.5 GB | 32 GB | Yes: RX 7900 XTX, about 80 s an edit, peak 24 GB of memory and 14 GB of graphics memory |
 
 - **Recommended:** the model Toskar picks for you does everything, making and editing. That's one of the FLUX.2 [klein] 4B builds, by memory. The others are set up by choice on the Tools page.
@@ -47,7 +47,7 @@ The files come straight from the vendor's own repository, never a mirror. These 
 | --- | --- | --- | --- | --- |
 | Wan 2.2 TI2V 5B | Clips from a description or a picture | 8.5 GB | 16 GB | Yes: about 1 minute for 2 seconds on an RX 7900 XTX (peak 5 GB of graphics memory), 3½ minutes on an M5 Pro with 24 GB |
 | Wan 2.2 T2V A14B | Higher-quality clips from a description, much more slowly | 23 GB | 48 GB | Yes: RX 7900 XTX, about 13 minutes for 2 seconds, peak 46 GB of memory |
-| Wan 2.1 T2V 1.3B | Short clips from a description, on smaller computers | 6.8 GB | 10 GB (estimate) | Yes: RX 7900 XTX, about 3 minutes for 2 seconds, peak 11 GB of graphics memory |
+| Wan 2.1 T2V 1.3B | Short clips from a description, on smaller computers | 6.8 GB | 10 GB (estimate) | Yes: RX 7900 XTX, about 3 minutes for 2 seconds, peak 11 GB of graphics memory. M5 Pro, measured: about 13 minutes for 2 seconds, 11 GB of graphics memory, and 14 GB at 1 second |
 
 - **Recommended:** Wan 2.2 TI2V 5B, which also brings pictures to life. The A14B and 1.3B models take no picture, so clips from a picture use the 5B model when it's set up.
 - **Length and size:** clips are 2 seconds unless you ask for more, up to 5 seconds, at up to about 832×480. Asking for longer or larger makes the most the model allows, and the answer says so.
@@ -60,14 +60,14 @@ Each model gets a verdict for the computer it would run on, on the Tools page an
 - **May be slow or tight:** it fits, but below the memory or graphics memory it's comfortable with. Toskar says what it needs and what the computer has, such as "Needs about 16 GB of graphics memory; this computer's graphics card has 10 GB". It's set up only when you agree.
 - **Not supported here:** it can't fit at all. A lighter model, a smaller or shorter request, or a paired computer with more memory can make it instead. An estimate hasn't been measured on real hardware yet; "Not yet" models can be set up, but they're labeled as untested and never recommended.
 
-For FLUX.2 [klein] 4B high quality and Wan 2.2 TI2V 5B, the graphics memory comes from measured parts (#550): the text encoder, the diffusion model, and the decoder, which run on the graphics one at a time, each with buffers that grow with the picture's size and the clip's frames. A request needs its largest part plus about half a gigabyte. A 1024×1024 picture with FLUX.2 [klein] 4B high quality needs about 6 GB, and 1536×1024 about 8.5 GB; a 2-second clip with Wan 2.2 TI2V 5B about 7 GB, and 5 seconds about 15 GB. A request this computer's graphics can't hold is turned down before it starts, with the size or length that fits, such as "Ask for 3 seconds or less". The other models have one estimate each, for their default request.
+For FLUX.2 [klein] 4B (both), Z-Image-Turbo, Wan 2.2 TI2V 5B and Wan 2.1 T2V 1.3B, the graphics memory comes from measured parts (#550, #553): the text encoder, the diffusion model, and the decoder, which run on the graphics one at a time, each with buffers that grow with the picture's size and the clip's frames. A request needs its largest part plus about a gigabyte. Wan 2.1 T2V 1.3B's decoder works in chunks on longer clips, so its estimate stops at the most it was seen to use, about 14 GB. A 1024×1024 picture with FLUX.2 [klein] 4B high quality needs about 6.5 GB, and 1536×1024 about 9 GB; a 2-second clip with Wan 2.2 TI2V 5B about 7 GB, and 5 seconds about 16 GB. A request this computer's graphics can't hold is turned down before it starts, with the size or length that fits, such as "Ask for 3 seconds or less". The other models have one estimate each, for their default request.
 
 ## Test machines
 
 | Computer | Status |
 | --- | --- |
 | Linux, AMD Radeon RX 7900 XTX 24 GB, Vulkan | Tested in the [media quality set](../tests/quality/README.md) |
-| Mac, Apple silicon (M5 Pro), 24 GB unified memory, Metal | FLUX.2 [klein] 4B high quality and Wan 2.2 TI2V 5B measured per part and size (#550); the others not yet |
+| Mac, Apple silicon (M5 Pro), 24 GB unified memory, Metal | FLUX.2 [klein] 4B (both), Z-Image-Turbo, Wan 2.2 TI2V 5B and Wan 2.1 T2V 1.3B measured per part and size (#550, #553); Qwen-Image-Edit, FLUX.2 [klein] 9B and Wan 2.2 A14B not yet |
 | Windows or Linux, NVIDIA RTX 3080 10–12 GB, Vulkan | Not yet measured |
 
 24 GB of unified memory isn't 24 GB of graphics memory: the system and other apps share it, so a model comfortable with 24 GB may be tight on a 24 GB Mac.

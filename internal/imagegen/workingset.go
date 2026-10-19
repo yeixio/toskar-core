@@ -17,12 +17,17 @@ type Stage struct {
 	WeightsBytes      int64 `json:"weights_bytes"`
 	ComputeBytes      int64 `json:"compute_bytes,omitempty"`
 	PerMegapixelBytes int64 `json:"per_megapixel_bytes,omitempty"`
+	// MaxComputeBytes caps the buffers of a part that works in chunks when
+	// they'd grow too large, such as Wan 2.1's TAEHV decoder: the most it
+	// was seen to take (#553). 0 is no cap.
+	MaxComputeBytes int64 `json:"max_compute_bytes,omitempty"`
 }
 
 // stageOverhead is what the graphics hold beyond the largest stage: the
 // backend's own buffers and what the stage before leaves. Measured as
-// 0.24–0.48 GB on the M5 Pro across picture sizes (#550).
-const stageOverhead = 512 << 20
+// 0.24–0.48 GB on the M5 Pro for FLUX.2 [klein] and Wan 2.2 (#550), and
+// up to 0.97 GB for Z-Image-Turbo at 512×512 (#553).
+const stageOverhead = 1 << 30
 
 // GraphicsFor is the graphics memory m needs to make a picture or clip of
 // w×h pixels and this many frames (1 for a picture): its largest stage,
@@ -35,7 +40,11 @@ func (m Model) GraphicsFor(w, h, n int) int64 {
 	pixels := float64(w) * float64(h) / 1e6 * float64(max(n, 1))
 	var most int64
 	for _, s := range m.Stages {
-		most = max(most, s.WeightsBytes+s.ComputeBytes+int64(math.Ceil(float64(s.PerMegapixelBytes)*pixels)))
+		compute := s.ComputeBytes + int64(math.Ceil(float64(s.PerMegapixelBytes)*pixels))
+		if s.MaxComputeBytes > 0 {
+			compute = min(compute, s.MaxComputeBytes)
+		}
+		most = max(most, s.WeightsBytes+compute)
 	}
 	return most + stageOverhead
 }
