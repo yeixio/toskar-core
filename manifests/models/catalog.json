@@ -648,6 +648,43 @@
       ]
     },
     {
+      "id": "muse-glimmer-30b-q4",
+      "display_name": "Muse Glimmer 30B",
+      "summary": "Meta's large model that sees pictures, codes, and reasons well; for 32 GB Macs or 24 GB graphics cards.",
+      "family": "muse-glimmer",
+      "variant": "UD-Q4_K_XL",
+      "parameters": "30B",
+      "size_bytes": 15878222368,
+      "memory_needed_bytes": 20000000000,
+      "context": 131072,
+      "capabilities": { "tool_calling": true, "vision": true, "coding": true },
+      "source": {
+        "url": "https://huggingface.co/unsloth/Muse-Glimmer-30B-GGUF/resolve/main/Muse-Glimmer-30B-UD-Q4_K_XL.gguf",
+        "sha256": "82bece304887a313ece08400bc030f6066c7bff5b906b0cd40308ec8a409fd38",
+        "format": "gguf"
+      },
+      "projector": {
+        "url": "https://huggingface.co/unsloth/Muse-Glimmer-30B-GGUF/resolve/main/mmproj-Muse-Glimmer-30B-Q8_0.gguf",
+        "sha256": "01ff73c95108e1754a4c145176c6d3ba44338942285cb87dcac7f4f193192ea2",
+        "size_bytes": 2051685088
+      },
+      "purpose": ["assistant", "general", "research", "coding"],
+      "tags": ["general", "large", "reasoning", "vision"],
+      "runtime": ["llamacpp"],
+      "recommended_roles": ["assistant"],
+      "languages": [
+        { "language": "en", "level": "good", "confidence": "medium", "sources": ["model_card"] },
+        { "language": "de", "level": "fair", "confidence": "low", "sources": ["model_card"] },
+        { "language": "es", "level": "fair", "confidence": "low", "sources": ["model_card"] },
+        { "language": "fr", "level": "fair", "confidence": "low", "sources": ["model_card"] },
+        { "language": "it", "level": "fair", "confidence": "low", "sources": ["model_card"] },
+        { "language": "pt", "level": "fair", "confidence": "low", "sources": ["model_card"] },
+        { "language": "ja", "level": "fair", "confidence": "low", "sources": ["model_card"] },
+        { "language": "ko", "level": "fair", "confidence": "low", "sources": ["model_card"] },
+        { "language": "zh-Hans", "level": "fair", "confidence": "low", "sources": ["model_card"] }
+      ]
+    },
+    {
       "id": "nomic-embed-text-v1.5-q8",
       "display_name": "Nomic Embed Text v1.5",
       "summary": "Small embedding model. Lets knowledge search find passages by meaning, not only by matching words. It does not chat.",
