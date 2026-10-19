@@ -46,6 +46,16 @@ const (
 
 	// Used only when the artifact size is missing, so the estimate is marked approximate.
 	unknownQuantBytesPerParam = 0.55
+
+	// visionComputeBytes is the image encoder's working memory, on top of
+	// its projector file, for a model that sees pictures (#751).
+	visionComputeBytes = 1 << 30
+
+	// On Apple silicon, a model that needs more than graphicsTightShare of
+	// what the graphics may use is tight, and one that needs more than all
+	// of it can't run there: llama.cpp's Metal backend stops with "out of
+	// memory" however much memory the Mac has (#751).
+	graphicsTightShare = 0.85
 )
 
 // FitOptions carries measurements and the context window the daemon actually runs.
@@ -114,8 +124,9 @@ func ClassifyFit(e CatalogEntry, hw contracts.HardwareInventory, nodeID, nodeNam
 	ctx := float64(fit.ContextTokens)
 	kvLow := uint64(billions * ctx * kvBytesPerTokenPerBillionLow)
 	kvHigh := uint64(billions * ctx * kvBytesPerTokenPerBillionHigh)
-	low := weights + kvLow + runtimeScratchBytes
-	high := weights + kvHigh + runtimeScratchBytes + uint64(float64(weights)*runtimeOverheadFraction)
+	vision := visionBytes(e)
+	low := weights + vision + kvLow + runtimeScratchBytes
+	high := weights + vision + kvHigh + runtimeScratchBytes + uint64(float64(weights)*runtimeOverheadFraction)
 	if high < low {
 		high = low
 	}
@@ -135,6 +146,9 @@ func ClassifyFit(e CatalogEntry, hw contracts.HardwareInventory, nodeID, nodeNam
 	fit.Reason = reasonForLabel(fit.Label)
 	fit.EstTokPerSec = estimateTokPerSec(e, hw, low, capacity)
 	fit.GPUNote = gpuNote(hw, low)
+	if kind == "unified" && !opts.Proven[e.ID] && !hasMeasured {
+		graphicsFit(&fit, low, SharedGraphics(capacity))
+	}
 	fit.InstallAllowed = fit.Label != contracts.FitUnsupported
 	fit.Recommendations = recommendationsFor(fit.Label, kind)
 
@@ -171,6 +185,53 @@ func ClassifyFit(e CatalogEntry, hw contracts.HardwareInventory, nodeID, nodeNam
 		fit.TokPerSecMeasured = true
 	}
 	return fit
+}
+
+// graphicsFit holds a model on Apple silicon to what its graphics may use
+// (#751): over all of it, it's heavy at best, and over most of it, tight;
+// short says so, with what it needs and what there is.
+func graphicsFit(fit *contracts.ModelFit, need, share uint64) {
+	var label contracts.FitLabel
+	switch {
+	case need > share:
+		label = contracts.FitHeavy
+		fit.Reason = fmt.Sprintf("Needs about %s of graphics memory; this Mac's graphics can use %s.", formatGiB(need), formatGiB(share))
+	case float64(need) > float64(share)*graphicsTightShare:
+		label = contracts.FitTight
+		fit.Reason = fmt.Sprintf("Needs about %s of the %s of graphics memory this Mac can use.", formatGiB(need), formatGiB(share))
+	default:
+		return
+	}
+	if fitRank(label) < fitRank(fit.Label) {
+		fit.Label = label
+	} else {
+		fit.Reason = reasonForLabel(fit.Label)
+	}
+	fit.Short, fit.NeedBytes, fit.HaveBytes = "shared", need, share
+}
+
+// fitRank orders labels from unsupported (0) to excellent.
+func fitRank(l contracts.FitLabel) int {
+	switch l {
+	case contracts.FitExcellent:
+		return 4
+	case contracts.FitGood:
+		return 3
+	case contracts.FitTight:
+		return 2
+	case contracts.FitHeavy:
+		return 1
+	}
+	return 0
+}
+
+// visionBytes is what a model that sees pictures adds: its projector and
+// the image encoder's working memory (#751).
+func visionBytes(e CatalogEntry) uint64 {
+	if e.Projector == nil || e.Projector.SizeBytes <= 0 {
+		return 0
+	}
+	return uint64(e.Projector.SizeBytes) + visionComputeBytes
 }
 
 func labelForHeadroom(headroom float64) contracts.FitLabel {

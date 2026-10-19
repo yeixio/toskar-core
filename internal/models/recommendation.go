@@ -139,9 +139,20 @@ func Recommend(catalog *Catalog, input RecommendInput) (contracts.Recommendation
 }
 
 func effectiveMemory(hw contracts.HardwareInventory) uint64 {
-	vram := vramTotal(hw)
-	if vram > 0 {
-		return vram
+	var dedicated, unified uint64
+	for _, a := range hw.Accelerators {
+		if a.DedicatedVRAM > 0 {
+			dedicated += a.DedicatedVRAM
+		} else if a.UnifiedMemory > 0 {
+			unified = max(unified, a.UnifiedMemory)
+		}
+	}
+	if dedicated > 0 {
+		return dedicated
+	}
+	// Apple silicon's graphics may use only part of its memory (#751).
+	if unified > 0 {
+		return SharedGraphics(unified)
 	}
 	if hw.Memory.AvailableBytes > 0 {
 		return hw.Memory.AvailableBytes

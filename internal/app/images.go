@@ -8,6 +8,7 @@ import (
 
 	"github.com/yeixio/toskar-core/internal/config"
 	"github.com/yeixio/toskar-core/internal/imagegen"
+	"github.com/yeixio/toskar-core/internal/models"
 	"github.com/yeixio/toskar-core/internal/runtimes/llamacpp"
 )
 
@@ -44,7 +45,7 @@ func (a *App) newSDSetup(cfg config.Config, folder string, catalog func() []imag
 				continue
 			}
 			if ac.DedicatedVRAM == 0 && ac.UnifiedMemory > 0 {
-				most = max(most, sharedGraphics(ac.UnifiedMemory))
+				most = max(most, models.SharedGraphics(ac.UnifiedMemory))
 			} else {
 				most = max(most, ac.DedicatedVRAM)
 			}
@@ -95,14 +96,3 @@ var vulkanUsable = sync.OnceValue(func() bool {
 	defer cancel()
 	return llamacpp.VulkanUsable(ctx)
 })
-
-// sharedGraphics is how much of Apple silicon's memory its graphics may
-// use: macOS lets the GPU wire about two thirds of it, and three quarters
-// above 36 GB (its recommendedMaxWorkingSetSize). 24 GB of memory isn't
-// 24 GB of graphics memory (#550).
-func sharedGraphics(memory uint64) uint64 {
-	if memory > 36<<30 {
-		return memory / 4 * 3
-	}
-	return memory / 3 * 2
-}

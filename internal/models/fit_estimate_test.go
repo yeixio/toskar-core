@@ -209,17 +209,59 @@ func TestLoadedModelWarnsWithoutChangingFit(t *testing.T) {
 	}
 }
 
-func fitRank(label contracts.FitLabel) int {
-	switch label {
-	case contracts.FitExcellent:
-		return 5
-	case contracts.FitGood:
-		return 4
-	case contracts.FitTight:
-		return 3
-	case contracts.FitHeavy:
-		return 2
-	default:
-		return 1
+// On Apple silicon a model is held to what the graphics may use, with a
+// model that sees pictures counting its projector (#751): Muse Glimmer 30B
+// ran out of graphics memory with its projector on a 24 GB Mac, and Qwen
+// 2.5 32B can't fit there at all.
+func TestFitHoldsMacsToTheirGraphicsShare(t *testing.T) {
+	catalog, err := NewCatalogEmbedded()
+	if err != nil {
+		t.Fatal(err)
+	}
+	glimmer, ok := catalog.Get("muse-glimmer-30b-q4")
+	if !ok {
+		t.Fatal("muse-glimmer-30b-q4 not in the catalog")
+	}
+	qwen, _ := catalog.Get("qwen2.5-32b-q4")
+	gemma, _ := catalog.Get("gemma-3-4b-q4")
+
+	mac24, mac36 := apple(gib(24), gib(20)), apple(gib(36), gib(30))
+	for _, c := range []struct {
+		name  string
+		entry CatalogEntry
+		hw    contracts.HardwareInventory
+		worst contracts.FitLabel // the best label it may get
+		short bool
+	}{
+		{"Muse Glimmer on 24 GB", glimmer, mac24, contracts.FitHeavy, true},
+		{"Qwen 2.5 32B on 24 GB", qwen, mac24, contracts.FitHeavy, true},
+		{"Gemma 3 4B on 24 GB", gemma, mac24, contracts.FitExcellent, false},
+	} {
+		fit := ClassifyFit(c.entry, c.hw, "n", "Mac", FitOptions{})
+		if fitRank(fit.Label) > fitRank(c.worst) || (c.short != (fit.Short == "shared")) {
+			t.Errorf("%s: %s %q short=%q", c.name, fit.Label, fit.Reason, fit.Short)
+		}
+		if c.short && (fit.HaveBytes != SharedGraphics(gib(24)) || fit.NeedBytes <= fit.HaveBytes || !strings.Contains(fit.Reason, "graphics memory")) {
+			t.Errorf("%s: need %d have %d, %q", c.name, fit.NeedBytes, fit.HaveBytes, fit.Reason)
+		}
+	}
+	// With room for it, it's offered: good or better on 36 GB.
+	if fit := ClassifyFit(glimmer, mac36, "n", "Mac", FitOptions{}); fitRank(fit.Label) < fitRank(contracts.FitGood) {
+		t.Errorf("Muse Glimmer on 36 GB: %s %q", fit.Label, fit.Reason)
+	}
+	// The projector counts: the same model without one needs less.
+	plain := glimmer
+	plain.Projector = nil
+	with, without := ClassifyFit(glimmer, mac36, "n", "Mac", FitOptions{}), ClassifyFit(plain, mac36, "n", "Mac", FitOptions{})
+	if with.ExpectedMemoryBytes-without.ExpectedMemoryBytes != glimmer.Projector.SizeBytes+visionComputeBytes {
+		t.Errorf("projector adds %d", with.ExpectedMemoryBytes-without.ExpectedMemoryBytes)
+	}
+	// A graphics card's own memory isn't shared: a 24 GB card is judged as before.
+	card := contracts.HardwareInventory{
+		Memory:       contracts.MemoryInfo{TotalBytes: gib(64), AvailableBytes: gib(48)},
+		Accelerators: []contracts.Accelerator{{Kind: "gpu", DedicatedVRAM: gib(24), Backends: []string{"vulkan", "cpu"}}},
+	}
+	if fit := ClassifyFit(glimmer, card, "n", "PC", FitOptions{}); fit.Short != "" || fitRank(fit.Label) < fitRank(contracts.FitGood) {
+		t.Errorf("Muse Glimmer with a 24 GB card: %s %q short=%q", fit.Label, fit.Reason, fit.Short)
 	}
 }
