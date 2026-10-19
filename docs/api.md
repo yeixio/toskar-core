@@ -392,6 +392,8 @@ Pictures (`.png`, `.jpg`, `.jpeg`, `.gif`, `.bmp`) are shown to a model that can
 - **Limits:** up to 8 pictures a message, counting video frames, and 2 videos; each picture is estimated at 768 tokens of the window.
 - **No vision model:** the model is told it can't see the picture, and `meta.notice` says to install a vision model on the Models page.
 
+While a reasoning model thinks before answering, the chat publishes `chat.reasoning` with `state` `started`, then `done` with `ms` (#701, contract 1.43). The answer's `meta.reasoning` keeps how long it thought (`ms`) and what it thought (`text`, at most 20,000 characters), and its steps say "Thought for 12 s before answering". Models served by llama.cpp send it as `reasoning_content`; external servers that say `reasoning` work too.
+
 The `files.create` tool, allowed by default in the built-in profiles, saves a file the user can download: a document, JSON, a spreadsheet (`.xlsx` is built from CSV text), or code. It writes only to Toskar's file store. When a message asks for a file and the profile allows `files.create` without asking, Toskar has the model write only the contents and saves the file itself, with a `chat.making_file` event. The answer's `meta.files` lists produced files: from `files.create`, and from every tool that makes one, such as a picture, a clip, audio read aloud, files code saved, or a page's screenshot.
 
 Pictures and clips work the same way. A message that asks for an image ("draw a dog", "are you able to make a picture of a dog for me?"), a change to an attached image ("make it night"), or a short video doesn't depend on the model choosing the tool, because a small model often says it can't.
@@ -825,6 +827,7 @@ Built-in profile ids include `general-assistant`, `programming`, and `research`.
 The API gets the same assistant as chat: planning, web look-ups, connected services, answer checks, personalization, and specialized AIs.
 - **Messages:** the whole `messages` array is used. The last `user` message is the turn, and earlier `user` and `assistant` messages are its history. `system` (and `developer`) messages are the calling app's instructions. They cannot change what tools may do.
 - **Effort:** `reasoning_effort` maps to effort. `minimal` and `low` give Fast, `medium` gives Balanced, and `high` gives Thorough. What each one does, and other ways to get more careful answers, are in the user guide's Get more careful answers.
+- **Reasoning:** with `"include_reasoning": true`, a reasoning model's thinking comes back as `reasoning_content`: on the message, or streamed as deltas before the answer (#701, as OpenRouter's `include_reasoning` and llama.cpp's field name). Without it, only the answer is sent.
 - **Sampling:** `temperature` (0 to 2; 0 gives the same most likely answer every time) and `max_tokens` (or `max_completion_tokens`) apply to the model calls that write the answer, on this computer, a paired one, or an external server. Planning, look-ups, and answer checks keep their own settings, so a small `max_tokens` doesn't cut them short. Left out, the model's defaults stand. Out of range is `400 INVALID_REQUEST`.
 
 The optional `toskar` object holds the assistant's own controls. Its name from before the rename, `yggdrasil`, works too; when a request sends both, `toskar` wins.

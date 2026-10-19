@@ -183,7 +183,8 @@
     "makingVideo": "正在生成短片，需要几分钟…",
     "makingImageSlow": "正在生成图片。在这台电脑上需要几分钟…",
     "changingImageSlow": "正在修改图片。在这台电脑上需要几分钟…",
-    "makingVideoSlow": "正在生成短片。在这台电脑上可能需要将近一小时…"
+    "makingVideoSlow": "正在生成短片。在这台电脑上可能需要将近一小时…",
+    "reasoning": "正在思考…"
   },
   "tools": {
     "names": {
@@ -434,7 +435,8 @@
     "madeInChat": "在此聊天中创建",
     "remembered": "已记住",
     "steps_other": "我做了什么（{{count}} 个步骤）",
-    "madeOnly": "这是我做好的结果。"
+    "madeOnly": "这是我做好的结果。",
+    "thinking": "思考过程（{{seconds}} 秒）"
   },
   "run": {
     "details": "运行详情",
@@ -611,7 +613,8 @@
     "deliberateDisagreed_other": "比较了 {{count}} 份独立草稿：结果不一致，因此这是第一份",
     "deliberateLong_other": "写了 {{count}} 份独立草稿；答案太长无法比较，因此这是第一份",
     "deliberateJudged_other": "比较了 {{count}} 份独立草稿：结果不一致，因此由评判进行了调和",
-    "deliberateCombined_other": "写了 {{count}} 份独立草稿并互相核对，评判将其合并为一个答案"
+    "deliberateCombined_other": "写了 {{count}} 份独立草稿并互相核对，评判将其合并为一个答案",
+    "thought": "回答前思考了 {{seconds}} 秒"
   },
   "help": {
     "mcpTools": "MCP 本身无需安装：Toskar 已经支持它。要添加 MCP 服务器的工具，请打开 **{{tools}} → {{addTools}}**，然后从四种方式中选择一种：\n\n- **图库：** 选择一个服务器，例如文件夹、浏览器、Notion、Linear 或 GitHub，最多回答一两个问题。需要登录的服务会打开登录窗口。\n- **粘贴：** 粘贴服务器说明中的内容：适用于 Claude Desktop、Cursor 或 VS Code 的 JSON、一条命令行、一条 `claude mcp add` 命令或一个网址。\n- **从其他应用导入：** 添加你已在 Claude Desktop、Claude Code、Cursor、VS Code、Windsurf、Gemini CLI 或 LM Studio 中设置好的服务器。\n- **自定义：** 一条要运行的命令或一个网址。\n\nToskar 会先连接服务器并列出其工具，然后才保存。在这台电脑上运行的服务器需要 Node.js 或 uv；缺少时错误信息会说明缺哪个。会更改内容的工具会先征求你的同意。",

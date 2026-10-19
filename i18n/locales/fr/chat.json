@@ -191,7 +191,8 @@
     "makingVideo": "Création du clip, ce qui prend quelques minutes…",
     "makingImageSlow": "Création de l’image. Sur cet ordinateur, cela prend quelques minutes…",
     "changingImageSlow": "Modification de l’image. Sur cet ordinateur, cela prend quelques minutes…",
-    "makingVideoSlow": "Création du clip. Sur cet ordinateur, cela peut prendre près d’une heure…"
+    "makingVideoSlow": "Création du clip. Sur cet ordinateur, cela peut prendre près d’une heure…",
+    "reasoning": "Réflexion…"
   },
   "tools": {
     "names": {
@@ -460,7 +461,8 @@
     "steps_one": "Ce que j'ai fait ({{count}} étape)",
     "steps_many": "Ce que j'ai fait ({{count}} étapes)",
     "steps_other": "Ce que j'ai fait ({{count}} étapes)",
-    "madeOnly": "Voici le résultat."
+    "madeOnly": "Voici le résultat.",
+    "thinking": "Réflexion ({{seconds}} s)"
   },
   "run": {
     "details": "Détails de l'exécution",
@@ -687,7 +689,8 @@
     "deliberateJudged_many": "{{count}} brouillons indépendants comparés : ils divergeaient, un juge les a donc conciliés",
     "deliberateCombined_one": "{{count}} brouillon indépendant rédigé et vérifié ; un juge en a fait une seule réponse",
     "deliberateCombined_other": "{{count}} brouillons indépendants rédigés et vérifiés les uns par les autres ; un juge en a fait une seule réponse",
-    "deliberateCombined_many": "{{count}} brouillons indépendants rédigés et vérifiés les uns par les autres ; un juge en a fait une seule réponse"
+    "deliberateCombined_many": "{{count}} brouillons indépendants rédigés et vérifiés les uns par les autres ; un juge en a fait une seule réponse",
+    "thought": "A réfléchi {{seconds}} s avant de répondre"
   },
   "help": {
     "mcpTools": "Il n'y a rien à installer pour MCP : Toskar le parle déjà. Pour ajouter les outils d'un serveur MCP, ouvrez **{{tools}} → {{addTools}}** et choisissez l'une des quatre façons :\n\n- **Galerie :** choisissez un serveur, comme des dossiers, un navigateur, Notion, Linear ou GitHub, et répondez à une ou deux questions au plus. Les services qui demandent une connexion ouvrent une fenêtre pour cela.\n- **Coller :** collez ce que disent les instructions du serveur : du JSON pour Claude Desktop, Cursor ou VS Code, une ligne de commande, une ligne `claude mcp add` ou une adresse web.\n- **Depuis vos autres apps :** ajoutez des serveurs déjà configurés dans Claude Desktop, Claude Code, Cursor, VS Code, Windsurf, Gemini CLI ou LM Studio.\n- **Personnalisé :** une commande à lancer ou une adresse web.\n\nToskar se connecte et liste les outils du serveur avant de l'enregistrer. Les serveurs qui tournent sur cet ordinateur ont besoin de Node.js ou de uv ; l'erreur indique lequel manque. Les outils qui modifient quelque chose vous demandent d'abord.",

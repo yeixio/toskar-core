@@ -634,6 +634,14 @@ func (a *App) RunChat(ctx context.Context, profileID, conversationID, message st
 					if visible == "" {
 						continue
 					}
+					// The model's thinking goes first, for API callers who
+					// ask for it (#701); the chat and apps read it from the
+					// saved answer instead.
+					if full == "" && env.trace != nil {
+						if thinking := env.trace.thinking(); thinking != "" {
+							ch <- pluginapi.ChatChunk{Reasoning: thinking}
+						}
+					}
 					full += visible
 					ch <- pluginapi.ChatChunk{Content: visible}
 					a.publish(ctx, events.New(events.ChatToken, map[string]any{
@@ -1470,6 +1478,15 @@ func (e *chatExecEnv) Emit(eventType string, payload map[string]any) {
 			steps, _ := payload["steps"].([]string)
 			parallel, _ := payload["parallel"].(bool)
 			e.trace.planned(len(steps), parallel)
+		case simple.EventReasoning:
+			// The answer's thinking is kept with it (#701).
+			if state, _ := payload["state"].(string); state == "done" {
+				if answer, _ := payload["answer"].(bool); answer {
+					ms, _ := payload["ms"].(int64)
+					text, _ := payload["text"].(string)
+					e.trace.thought(ms, text)
+				}
+			}
 		case simple.EventEffort:
 			if chosen, _ := payload["chosen"].(string); chosen != "" && chosen != string(huginn.EffortAuto) {
 				e.trace.effort(huginn.ParseEffort(chosen))

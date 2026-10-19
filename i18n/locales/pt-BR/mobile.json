@@ -494,7 +494,9 @@
     "makingVideo": "Criando o clipe, o que leva alguns minutos…",
     "makingImageSlow": "Criando a imagem. No seu computador leva alguns minutos…",
     "changingImageSlow": "Alterando a imagem. No seu computador leva alguns minutos…",
-    "makingVideoSlow": "Criando o clipe. No seu computador pode levar quase uma hora…"
+    "makingVideoSlow": "Criando o clipe. No seu computador pode levar quase uma hora…",
+    "reasoning": "Raciocinando…",
+    "writingAnswer": "Escrevendo a resposta…"
   },
   "realms": {
     "about": "{{norse}}. {{rune}}. Sobre este nome",

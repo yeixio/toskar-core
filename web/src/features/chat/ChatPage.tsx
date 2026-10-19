@@ -880,6 +880,12 @@ export function ChatPage() {
           const name = event.payload?.name as string | undefined
           setStatusMessage(name ? t('status.writingNamed', { name }) : t('status.writingFile'))
         }
+        // A reasoning model thinks before it writes (#701).
+        if (event.type === 'chat.reasoning') {
+          const conversationId = event.payload?.conversation_id as string | undefined
+          if (conversationId && conversationId !== selectedId && conversationId !== streamingConvRef.current) return
+          setStatusMessage(event.payload?.state === 'started' ? t('status.reasoning') : t('status.generating'))
+        }
         // Toskar is making a picture or a clip the message asked for.
         if (event.type === 'chat.making_media') {
           const conversationId = event.payload?.conversation_id as string | undefined

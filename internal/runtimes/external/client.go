@@ -182,6 +182,11 @@ func (r *Runtime) Chat(ctx context.Context, model string, req pluginapi.ChatRequ
 				Choices []struct {
 					Delta struct {
 						Content string `json:"content"`
+						// What a reasoning model thinks first (#701): llama.cpp,
+						// vLLM, and DeepSeek say reasoning_content; Ollama and
+						// OpenRouter say reasoning.
+						ReasoningContent string `json:"reasoning_content"`
+						Reasoning        string `json:"reasoning"`
 					} `json:"delta"`
 				} `json:"choices"`
 				Error *struct {
@@ -207,6 +212,13 @@ func (r *Runtime) Chat(ctx context.Context, model string, req pluginapi.ChatRequ
 				return
 			}
 			for _, c := range ev.Choices {
+				thought := c.Delta.ReasoningContent
+				if thought == "" {
+					thought = c.Delta.Reasoning
+				}
+				if thought != "" && !send(pluginapi.ChatChunk{Reasoning: thought}) {
+					return
+				}
 				if c.Delta.Content != "" && !send(pluginapi.ChatChunk{Content: c.Delta.Content}) {
 					return
 				}

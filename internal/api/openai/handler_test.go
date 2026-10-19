@@ -215,3 +215,34 @@ func TestChatCompletionsSampling(t *testing.T) {
 		}
 	}
 }
+
+// A reasoning model's thinking comes back as reasoning_content only when
+// the request asks for it with include_reasoning (#701).
+func TestIncludeReasoning(t *testing.T) {
+	h := testHandler(t)
+	chunks := func() []pluginapi.ChatChunk {
+		return []pluginapi.ChatChunk{{Reasoning: "17 × 23 is 391."}, {Content: "391", Done: true}}
+	}
+	ask := func(body string) string {
+		h.Chat = &scriptChat{chunks: chunks()}
+		rec := httptest.NewRecorder()
+		h.HandleChatCompletions(rec, httptest.NewRequest(http.MethodPost, "/v1/chat/completions", strings.NewReader(body)))
+		if rec.Code != http.StatusOK {
+			t.Fatalf("status=%d body=%s", rec.Code, rec.Body.String())
+		}
+		return rec.Body.String()
+	}
+	const msgs = `"model":"profile:general","messages":[{"role":"user","content":"17*23?"}]`
+	if body := ask(`{` + msgs + `}`); strings.Contains(body, "reasoning_content") || !strings.Contains(body, "391") {
+		t.Fatalf("without include_reasoning: %s", body)
+	}
+	if body := ask(`{` + msgs + `,"include_reasoning":true}`); !strings.Contains(body, `"reasoning_content":"17 × 23 is 391."`) {
+		t.Fatalf("with include_reasoning: %s", body)
+	}
+	if body := ask(`{` + msgs + `,"include_reasoning":true,"stream":true}`); !strings.Contains(body, `"delta":{"reasoning_content":"17 × 23 is 391."}`) || !strings.Contains(body, `"content":"391"`) {
+		t.Fatalf("streamed with include_reasoning: %s", body)
+	}
+	if body := ask(`{` + msgs + `,"stream":true}`); strings.Contains(body, "reasoning_content") {
+		t.Fatalf("streamed without include_reasoning: %s", body)
+	}
+}

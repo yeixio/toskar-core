@@ -102,6 +102,8 @@ func (c *Client) readNonStream(resp *http.Response, ch chan<- pluginapi.ChatChun
 		Choices []struct {
 			Message struct {
 				Content string `json:"content"`
+				// What a reasoning model thought first (#701).
+				Reasoning string `json:"reasoning_content"`
 			} `json:"message"`
 		} `json:"choices"`
 		Usage   *usagePayload   `json:"usage"`
@@ -114,6 +116,9 @@ func (c *Client) readNonStream(resp *http.Response, ch chan<- pluginapi.ChatChun
 	content := ""
 	if len(out.Choices) > 0 {
 		content = out.Choices[0].Message.Content
+		if thought := out.Choices[0].Message.Reasoning; thought != "" {
+			ch <- pluginapi.ChatChunk{Reasoning: thought}
+		}
 	}
 	metrics := mergeServerMetrics(out.Usage, out.Timings, started, time.Time{}, time.Now(), content)
 	ch <- pluginapi.ChatChunk{Content: content, Done: true, Metrics: metrics}
@@ -158,6 +163,8 @@ func (c *Client) readStream(resp *http.Response, ch chan<- pluginapi.ChatChunk, 
 			Choices []struct {
 				Delta struct {
 					Content string `json:"content"`
+					// What a reasoning model thinks first (#701).
+					Reasoning string `json:"reasoning_content"`
 				} `json:"delta"`
 				FinishReason *string `json:"finish_reason"`
 			} `json:"choices"`
@@ -179,6 +186,9 @@ func (c *Client) readStream(resp *http.Response, ch chan<- pluginapi.ChatChunk, 
 		}
 		delta := chunk.Choices[0].Delta.Content
 		done := chunk.Choices[0].FinishReason != nil
+		if thought := chunk.Choices[0].Delta.Reasoning; thought != "" {
+			ch <- pluginapi.ChatChunk{Reasoning: thought}
+		}
 		if delta != "" {
 			if firstToken.IsZero() {
 				firstToken = time.Now()

@@ -2690,6 +2690,9 @@ paths:
                 reasoning_effort:
                   type: string
                   enum: [low, medium, high]
+                include_reasoning:
+                  type: boolean
+                  description: "A reasoning model's thinking as reasoning_content, on the message or as stream deltas before the answer (#701, contract 1.43). Off by default."
                 response_format:
                   type: object
                   properties:

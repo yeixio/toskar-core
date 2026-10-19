@@ -255,10 +255,14 @@ func (m *ChatMessage) UnmarshalJSON(data []byte) error {
 
 // ChatChunk is a streaming generation fragment.
 type ChatChunk struct {
-	Content string             `json:"content,omitempty"`
-	Done    bool               `json:"done"`
-	Error   string             `json:"error,omitempty"`
-	Metrics *GenerationMetrics `json:"metrics,omitempty"`
+	Content string `json:"content,omitempty"`
+	// Reasoning is what a reasoning model thinks before it answers
+	// (#701): llama-server's delta.reasoning_content. It is never part of
+	// the answer.
+	Reasoning string             `json:"reasoning,omitempty"`
+	Done      bool               `json:"done"`
+	Error     string             `json:"error,omitempty"`
+	Metrics   *GenerationMetrics `json:"metrics,omitempty"`
 	// Code and Details are Error's stable code and values, when the error
 	// had its own (#588); without them, core recognizes the code from Error.
 	Code    string         `json:"code,omitempty"`

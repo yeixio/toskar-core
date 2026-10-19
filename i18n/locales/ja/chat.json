@@ -183,7 +183,8 @@
     "makingVideo": "クリップを作成しています。数分かかります…",
     "makingImageSlow": "画像を作成しています。このコンピューターでは数分かかります…",
     "changingImageSlow": "画像を変更しています。このコンピューターでは数分かかります…",
-    "makingVideoSlow": "クリップを作成しています。このコンピューターでは1時間近くかかることがあります…"
+    "makingVideoSlow": "クリップを作成しています。このコンピューターでは1時間近くかかることがあります…",
+    "reasoning": "考えています…"
   },
   "tools": {
     "names": {
@@ -434,7 +435,8 @@
     "madeInChat": "このチャットで作成",
     "remembered": "記憶しました",
     "steps_other": "実行した内容（{{count}}ステップ）",
-    "madeOnly": "作成したものはこちらです。"
+    "madeOnly": "作成したものはこちらです。",
+    "thinking": "思考（{{seconds}}秒）"
   },
   "run": {
     "details": "実行の詳細",
@@ -611,7 +613,8 @@
     "deliberateDisagreed_other": "{{count}} 件の独立した下書きを比較しました：一致しなかったため、最初の下書きです",
     "deliberateLong_other": "{{count}} 件の独立した下書きを書きました。答えが長すぎて比較できなかったため、最初の下書きです",
     "deliberateJudged_other": "{{count}} 件の独立した下書きを比較しました：一致しなかったため、判定役がまとめました",
-    "deliberateCombined_other": "{{count}} 件の独立した下書きを書いて互いに確認し、判定役が1つの答えにまとめました"
+    "deliberateCombined_other": "{{count}} 件の独立した下書きを書いて互いに確認し、判定役が1つの答えにまとめました",
+    "thought": "回答前に{{seconds}}秒考えました"
   },
   "help": {
     "mcpTools": "MCPそのものをインストールする必要はありません。ToskarはすでにMCPに対応しています。MCPサーバーのツールを追加するには、**{{tools}} → {{addTools}}** を開き、次の4つの方法から選びます。\n\n- **ギャラリー:** フォルダ、ブラウザ、Notion、Linear、GitHub などのサーバーを選び、必要なら1〜2問に答えます。サインインが必要なサービスではサインイン画面が開きます。\n- **貼り付け:** サーバーの説明にある内容をそのまま貼り付けます。Claude Desktop・Cursor・VS Code 用の JSON、コマンドライン、`claude mcp add` の行、Webアドレスのいずれでも構いません。\n- **ほかのアプリから:** Claude Desktop、Claude Code、Cursor、VS Code、Windsurf、Gemini CLI、LM Studio ですでに設定したサーバーを追加します。\n- **カスタム:** 実行するコマンド、またはWebアドレスを指定します。\n\nToskarは保存する前にサーバーに接続し、ツールの一覧を表示します。このコンピュータで動くサーバーには Node.js か uv が必要で、足りない場合はエラーで知らせます。何かを変更するツールは、実行前に確認します。",
