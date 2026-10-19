@@ -129,6 +129,11 @@ func (e *Engine) GenerateVideo(ctx context.Context, req VideoRequest) (VideoResu
 	}
 	w, h := videoSize(req.Width, req.Height, req.Image)
 	n := frames(req.Seconds, model.FPS)
+	// A length this computer's graphics can't hold is turned down before
+	// it runs, with the length that fits (#550).
+	if why := tooBigFor(model, w, h, n, e.Setup.graphics()); why != "" {
+		return VideoResult{}, errors.New(why)
+	}
 	seed := req.Seed
 	if seed <= 0 {
 		seed = rand.Int64N(1 << 31)
