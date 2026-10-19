@@ -6,26 +6,40 @@ import (
 )
 
 // The working-set estimate is calibrated with the graphics memory jobs
-// used on the M5 Pro (2026-10-19, #550): "In use system memory" above
-// idle, sampled every 0.2 s. It must never be below a measured run, and
-// not more than 1 GB above it.
+// used on the M5 Pro (2026-10-19, #550, #553): "In use system memory"
+// above idle, sampled every 0.2 s. It must never be below a measured run,
+// and not more than 1.6 GB above it, except where a part decoded in
+// chunks and used less than it would have (chunked).
 func TestGraphicsForMatchesMeasuredRuns(t *testing.T) {
 	klein := mustModel(t, "flux2-klein-4b-q8")
+	klein4 := mustModel(t, "flux2-klein-4b")
+	zimage := mustModel(t, "z-image-turbo")
 	wan := mustModel(t, "wan2.2-ti2v-5b")
+	wan21 := mustModel(t, "wan2.1-t2v-1.3b")
 	for _, c := range []struct {
 		name     string
 		m        Model
 		w, h, n  int
 		measured float64 // GB
+		chunked  bool
 	}{
-		{"FLUX.2 klein Q8 512×512", klein, 512, 512, 1, 4.96},
-		{"FLUX.2 klein Q8 1024×1024", klein, 1024, 1024, 1, 5.91},
-		{"FLUX.2 klein Q8 1536×1024", klein, 1536, 1024, 1, 8.46},
-		{"Wan 2.2 5B 9 frames", wan, 832, 480, 9, 3.98},
-		{"Wan 2.2 5B 17 frames", wan, 832, 480, 17, 4.24},
+		{"FLUX.2 klein Q8 512×512", klein, 512, 512, 1, 4.96, false},
+		{"FLUX.2 klein Q8 1024×1024", klein, 1024, 1024, 1, 5.91, false},
+		{"FLUX.2 klein Q8 1536×1024", klein, 1536, 1024, 1, 8.46, false},
+		{"FLUX.2 klein Q4 512×512", klein4, 512, 512, 1, 2.37, false},
+		{"FLUX.2 klein Q4 1024×1024", klein4, 1024, 1024, 1, 5.39, false},
+		{"FLUX.2 klein Q4 1536×1024", klein4, 1536, 1024, 1, 8.36, false},
+		{"Z-Image-Turbo 512×512", zimage, 512, 512, 1, 5.02, false},
+		{"Z-Image-Turbo 1024×1024", zimage, 1024, 1024, 1, 6.68, false},
+		{"Z-Image-Turbo 1536×1024", zimage, 1536, 1024, 1, 10.85, false},
+		{"Wan 2.2 5B 9 frames", wan, 832, 480, 9, 3.98, false},
+		{"Wan 2.2 5B 17 frames", wan, 832, 480, 17, 4.24, false},
+		{"Wan 2.1 1.3B 9 frames", wan21, 832, 480, 9, 8.15, false},
+		{"Wan 2.1 1.3B 17 frames", wan21, 832, 480, 17, 14.11, false},
+		{"Wan 2.1 1.3B 33 frames", wan21, 832, 480, 33, 11.00, true},
 	} {
 		got := float64(c.m.GraphicsFor(c.w, c.h, c.n)) / 1e9
-		if got < c.measured || got > c.measured+1 {
+		if got < c.measured || (!c.chunked && got > c.measured+1.6) {
 			t.Errorf("%s: estimated %.2f GB, measured %.2f GB", c.name, got, c.measured)
 		}
 	}
