@@ -43,6 +43,8 @@ type turnTrace struct {
 	automation *contracts.AutomationDraft
 	// deliberation is how Deliberate reached the answer (#459).
 	deliberation *contracts.Deliberation
+	// reasoning is what a reasoning model thought before the answer (#701).
+	reasoning *contracts.Reasoning
 	// lang is the App language notices are written in (multilingual spec
 	// §16); "" is English.
 	lang string
@@ -577,7 +579,7 @@ func (t *turnTrace) sawUntrusted() bool {
 func (t *turnTrace) meta() *contracts.MessageMeta {
 	t.mu.Lock()
 	defer t.mu.Unlock()
-	if len(t.sources) == 0 && len(t.steps) == 0 && t.notice == "" && len(t.files) == 0 && t.runID == "" && t.automation == nil && t.deliberation == nil {
+	if len(t.sources) == 0 && len(t.steps) == 0 && t.notice == "" && len(t.files) == 0 && t.runID == "" && t.automation == nil && t.deliberation == nil && t.reasoning == nil {
 		return nil
 	}
 	return &contracts.MessageMeta{
@@ -589,7 +591,44 @@ func (t *turnTrace) meta() *contracts.MessageMeta {
 		Contract:     contracts.ContractVersion,
 		Automation:   t.automation,
 		Deliberation: t.deliberation,
+		Reasoning:    t.reasoning,
 	}
+}
+
+// thinking is what the model thought before the answer, if anything (#701).
+func (t *turnTrace) thinking() string {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	if t.reasoning == nil {
+		return ""
+	}
+	return t.reasoning.Text
+}
+
+// thought records how long the model thought before the answer, and what
+// it thought (#701), with a step that says so.
+func (t *turnTrace) thought(ms int64, text string) {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	if t.reasoning == nil {
+		t.reasoning = &contracts.Reasoning{}
+	}
+	t.reasoning.Ms += ms
+	if text != "" {
+		t.reasoning.Text = text
+	}
+	seconds := (t.reasoning.Ms + 500) / 1000
+	if seconds < 1 {
+		seconds = 1
+	}
+	// One step, however many times it thought.
+	for i := range t.steps {
+		if t.steps[i].Kind == "reasoning" {
+			t.steps = append(t.steps[:i], t.steps[i+1:]...)
+			break
+		}
+	}
+	t.step("reasoning", "thought", map[string]any{"seconds": seconds})
 }
 
 // draft records one of Deliberate's drafts (#459), in the order they came.

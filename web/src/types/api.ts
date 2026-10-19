@@ -556,6 +556,8 @@ export interface MessageMeta {
   automation_run?: AutomationRunRef
   /** The drafts Deliberate compared and its outcome (#459, contract 1.23). */
   deliberation?: Deliberation
+  /** How long a reasoning model thought first, and what it thought (#701, contract 1.43). */
+  reasoning?: { ms: number; text?: string }
 }
 
 export interface Deliberation {

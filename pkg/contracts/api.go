@@ -706,6 +706,18 @@ type MessageMeta struct {
 	// deliberates: the drafts compared and the outcome (#459, contract
 	// 1.23).
 	Deliberation *Deliberation `json:"deliberation,omitempty"`
+	// Reasoning is how long a reasoning model thought before it answered,
+	// and what it thought (#701, contract 1.43).
+	Reasoning *Reasoning `json:"reasoning,omitempty"`
+}
+
+// Reasoning is a reasoning model's thinking before an answer (#701).
+type Reasoning struct {
+	// Ms is how long it thought, in milliseconds.
+	Ms int64 `json:"ms"`
+	// Text is what it thought, cut at 20,000 characters; empty when the
+	// model didn't say.
+	Text string `json:"text,omitempty"`
 }
 
 // Deliberation is Deliberate's record of one answer (#459).

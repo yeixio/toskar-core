@@ -480,7 +480,9 @@
     "makingVideo": "正在生成短片，需要几分钟…",
     "makingImageSlow": "正在生成图片。在电脑上需要几分钟…",
     "changingImageSlow": "正在修改图片。在电脑上需要几分钟…",
-    "makingVideoSlow": "正在生成短片。在电脑上可能需要将近一小时…"
+    "makingVideoSlow": "正在生成短片。在电脑上可能需要将近一小时…",
+    "reasoning": "正在思考…",
+    "writingAnswer": "正在撰写回答…"
   },
   "realms": {
     "about": "{{norse}}。{{rune}}。关于这个名字",

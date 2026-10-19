@@ -142,7 +142,8 @@ export function AnswerDetails({ meta, runs = true }: { meta?: MessageMeta; runs?
   const advancedMode = useUIStore((s) => s.advancedMode)
   const runId = advancedMode ? meta?.run_id : undefined
   const deliberation = meta?.deliberation
-  if (sources.length === 0 && steps.length === 0 && !notice && files.length === 0 && !runId && !deliberation) return null
+  const reasoning = meta?.reasoning
+  if (sources.length === 0 && steps.length === 0 && !notice && files.length === 0 && !runId && !deliberation && !reasoning?.text) return null
   return (
     <div className="mt-3 space-y-2 border-t border-line/50 pt-2.5">
       {notice ? (
@@ -192,8 +193,33 @@ export function AnswerDetails({ meta, runs = true }: { meta?: MessageMeta; runs?
           ) : null}
         </div>
       ) : null}
+      {reasoning?.text ? <ThinkingDetails ms={reasoning.ms} text={reasoning.text} /> : null}
       {deliberation ? <DeliberationDetails deliberation={deliberation} /> : null}
       {runId && runs ? <RunDetails runId={runId} /> : null}
+    </div>
+  )
+}
+
+/** What a reasoning model thought before the answer (#701), folded away until asked for. */
+function ThinkingDetails({ ms, text }: { ms: number; text: string }) {
+  const { t } = useTranslation('chat')
+  const [open, setOpen] = useState(false)
+  const seconds = Math.max(1, Math.round(ms / 1000))
+  return (
+    <div className="text-xs text-ink-muted">
+      <button
+        type="button"
+        className="underline-offset-2 hover:text-ink hover:underline"
+        aria-expanded={open}
+        onClick={() => setOpen((v) => !v)}
+      >
+        {open ? '▾' : '▸'} {t('answer.thinking', { seconds })}
+      </button>
+      {open ? (
+        <p className="mt-1.5 max-h-64 overflow-y-auto whitespace-pre-wrap rounded-md bg-canvas/60 p-2 leading-relaxed" data-testid="answer-thinking">
+          {text}
+        </p>
+      ) : null}
     </div>
   )
 }

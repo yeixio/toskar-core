@@ -187,7 +187,8 @@
     "makingVideo": "Clip wird erstellt, das dauert ein paar Minuten…",
     "makingImageSlow": "Bild wird erstellt. Auf diesem Computer dauert das ein paar Minuten…",
     "changingImageSlow": "Bild wird geändert. Auf diesem Computer dauert das ein paar Minuten…",
-    "makingVideoSlow": "Clip wird erstellt. Auf diesem Computer kann das fast eine Stunde dauern…"
+    "makingVideoSlow": "Clip wird erstellt. Auf diesem Computer kann das fast eine Stunde dauern…",
+    "reasoning": "Denkt nach …"
   },
   "tools": {
     "names": {
@@ -447,7 +448,8 @@
     "remembered": "Gemerkt",
     "steps_one": "Was ich getan habe ({{count}} Schritt)",
     "steps_other": "Was ich getan habe ({{count}} Schritte)",
-    "madeOnly": "Hier ist das Ergebnis."
+    "madeOnly": "Hier ist das Ergebnis.",
+    "thinking": "Gedanken ({{seconds}} s)"
   },
   "run": {
     "details": "Details zum Durchlauf",
@@ -649,7 +651,8 @@
     "deliberateJudged_one": "{{count}} unabhängigen Entwurf verglichen: Sie widersprachen sich, daher hat ein Richter sie abgeglichen",
     "deliberateJudged_other": "{{count}} unabhängige Entwürfe verglichen: Sie widersprachen sich, daher hat ein Richter sie abgeglichen",
     "deliberateCombined_one": "{{count}} unabhängigen Entwurf geschrieben und geprüft; ein Richter hat daraus eine Antwort gemacht",
-    "deliberateCombined_other": "{{count}} unabhängige Entwürfe geschrieben und gegeneinander geprüft; ein Richter hat daraus eine Antwort gemacht"
+    "deliberateCombined_other": "{{count}} unabhängige Entwürfe geschrieben und gegeneinander geprüft; ein Richter hat daraus eine Antwort gemacht",
+    "thought": "Vor der Antwort {{seconds}} s nachgedacht"
   },
   "help": {
     "mcpTools": "Für MCP selbst musst du nichts installieren: Toskar beherrscht es bereits. Um die Werkzeuge eines MCP-Servers hinzuzufügen, öffne **{{tools}} → {{addTools}}** und wähle einen von vier Wegen:\n\n- **Galerie:** Wähle einen Server, etwa Ordner, einen Browser, Notion, Linear oder GitHub, und beantworte höchstens ein, zwei Fragen. Dienste mit Anmeldung öffnen eine.\n- **Einfügen:** Füge ein, was die Anleitung des Servers sagt: JSON für Claude Desktop, Cursor oder VS Code, eine Befehlszeile, eine `claude mcp add`-Zeile oder eine Webadresse.\n- **Aus deinen anderen Apps:** Übernimm Server, die du schon in Claude Desktop, Claude Code, Cursor, VS Code, Windsurf, Gemini CLI oder LM Studio eingerichtet hast.\n- **Eigener:** Ein Befehl zum Ausführen oder eine Webadresse.\n\nToskar verbindet sich und listet die Werkzeuge des Servers, bevor es ihn speichert. Server auf diesem Computer brauchen Node.js oder uv; die Fehlermeldung sagt, was fehlt. Werkzeuge, die etwas ändern, fragen dich vorher.",

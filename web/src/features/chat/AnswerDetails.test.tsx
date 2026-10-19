@@ -11,6 +11,22 @@ vi.mock('@/lib/api', async (importOriginal) => ({
 }))
 
 describe('AnswerDetails', () => {
+  it('folds away what a reasoning model thought, and opens it on request (#701)', () => {
+    render(
+      <MemoryRouter>
+        <AnswerDetails
+          meta={{
+            steps: [{ kind: 'reasoning', text: 'Thought for 12 s before answering' }],
+            reasoning: { ms: 12400, text: '17 × 20 is 340, 17 × 3 is 51, so 391.' },
+          }}
+        />
+      </MemoryRouter>,
+    )
+    expect(screen.queryByTestId('answer-thinking')).toBeNull()
+    fireEvent.click(screen.getByRole('button', { name: /Thinking \(12 s\)/ }))
+    expect(screen.getByTestId('answer-thinking')).toHaveTextContent('so 391.')
+  })
+
   it('shows the drafts Deliberate compared, their checks, and the judge (#459)', () => {
     render(
       <AnswerDetails

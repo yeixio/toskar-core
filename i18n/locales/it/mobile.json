@@ -494,7 +494,9 @@
     "makingVideo": "Creazione del clip, ci vogliono alcuni minuti…",
     "makingImageSlow": "Creazione dell’immagine. Sul tuo computer richiede alcuni minuti…",
     "changingImageSlow": "Modifica dell’immagine. Sul tuo computer richiede alcuni minuti…",
-    "makingVideoSlow": "Creazione del clip. Sul tuo computer può richiedere quasi un’ora…"
+    "makingVideoSlow": "Creazione del clip. Sul tuo computer può richiedere quasi un’ora…",
+    "reasoning": "Ragionamento…",
+    "writingAnswer": "Scrittura della risposta…"
   },
   "realms": {
     "about": "{{norse}}. {{rune}}. Informazioni su questo nome",

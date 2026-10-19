@@ -187,7 +187,8 @@
     "makingVideo": "Making the clip, which takes a few minutes…",
     "makingImageSlow": "Making the picture. On this computer it takes a few minutes…",
     "changingImageSlow": "Changing the picture. On this computer it takes a few minutes…",
-    "makingVideoSlow": "Making the clip. On this computer it can take most of an hour…"
+    "makingVideoSlow": "Making the clip. On this computer it can take most of an hour…",
+    "reasoning": "Reasoning…"
   },
   "tools": {
     "names": {
@@ -447,7 +448,8 @@
     "remembered": "Remembered",
     "steps_one": "What I did ({{count}} step)",
     "steps_other": "What I did ({{count}} steps)",
-    "madeOnly": "Here's what I made."
+    "madeOnly": "Here's what I made.",
+    "thinking": "Thinking ({{seconds}} s)"
   },
   "run": {
     "details": "Run details",
@@ -649,7 +651,8 @@
     "deliberateJudged_one": "Compared {{count}} independent draft: they disagreed, so a judge reconciled them",
     "deliberateJudged_other": "Compared {{count}} independent drafts: they disagreed, so a judge reconciled them",
     "deliberateCombined_one": "Wrote {{count}} independent draft, checked it, and a judge combined them into one answer",
-    "deliberateCombined_other": "Wrote {{count}} independent drafts, checked them against each other, and a judge combined them into one answer"
+    "deliberateCombined_other": "Wrote {{count}} independent drafts, checked them against each other, and a judge combined them into one answer",
+    "thought": "Thought for {{seconds}} s before answering"
   },
   "help": {
     "mcpTools": "There's nothing to install for MCP itself: Toskar already speaks it. To add an MCP server's tools, open **{{tools}} → {{addTools}}** and pick one of four ways:\n\n- **Gallery:** choose a server, such as folders, a browser, Notion, Linear, or GitHub, and answer at most a question or two. Services that need a sign-in open one.\n- **Paste:** paste whatever the server's instructions say: JSON for Claude Desktop, Cursor, or VS Code, a command line, a `claude mcp add` line, or a web address.\n- **From your other apps:** add servers you already set up in Claude Desktop, Claude Code, Cursor, VS Code, Windsurf, Gemini CLI, or LM Studio.\n- **Custom:** a command to run, or a web address.\n\nToskar connects and lists the server's tools before saving it. Servers that run on this computer need Node.js or uv, and the error says which if one is missing. Tools that change things ask you first.",

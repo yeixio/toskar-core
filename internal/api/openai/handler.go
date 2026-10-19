@@ -53,6 +53,10 @@ type chatCompletionRequest struct {
 	MaxCompletionTokens int      `json:"max_completion_tokens"`
 	// ReasoningEffort is OpenAI's low, medium, or high.
 	ReasoningEffort string `json:"reasoning_effort"`
+	// IncludeReasoning returns a reasoning model's thinking as
+	// reasoning_content beside the answer (#701), as OpenRouter's
+	// include_reasoning does. Off, it's left out.
+	IncludeReasoning bool `json:"include_reasoning"`
 	// Toskar holds the assistant's own controls (§62). Yggdrasil is its name
 	// from before the rename, still accepted; Toskar wins when both are sent
 	// (#237).
@@ -290,10 +294,10 @@ func (h *Handler) HandleChatCompletions(w http.ResponseWriter, r *http.Request) 
 		one <- pluginapi.ChatChunk{Content: content, Done: true}
 		close(one)
 		if !req.Stream {
-			h.writeNonStream(w, one, profileID, func() map[string]any { return nil })
+			h.writeNonStream(w, one, profileID, func() map[string]any { return nil }, false)
 			return
 		}
-		h.writeStream(sw, r, one, profileID, func() map[string]any { return nil }, false)
+		h.writeStream(sw, r, one, profileID, func() map[string]any { return nil }, false, false)
 		return
 	}
 	stream, err := h.Chat.RunChat(ctx, profileID, "", message, req.Stream, modelID, execution)
@@ -315,26 +319,31 @@ func (h *Handler) HandleChatCompletions(w http.ResponseWriter, r *http.Request) 
 	}
 
 	if !req.Stream {
-		h.writeNonStream(w, stream, profileID, extension)
+		h.writeNonStream(w, stream, profileID, extension, req.IncludeReasoning)
 		return
 	}
-	h.writeStream(sw, r, stream, profileID, extension, req.assistant() != nil && req.assistant().Progress)
+	h.writeStream(sw, r, stream, profileID, extension, req.assistant() != nil && req.assistant().Progress, req.IncludeReasoning)
 }
 
-func (h *Handler) writeNonStream(w http.ResponseWriter, stream <-chan pluginapi.ChatChunk, model string, extension func() map[string]any) {
-	var content strings.Builder
+func (h *Handler) writeNonStream(w http.ResponseWriter, stream <-chan pluginapi.ChatChunk, model string, extension func() map[string]any, includeReasoning bool) {
+	var content, reasoning strings.Builder
 	for chunk := range stream {
 		if chunk.Error != "" {
 			writeError(w, http.StatusInternalServerError, "CHAT_FAILED", chunk.Error)
 			return
 		}
 		content.WriteString(chunk.Content)
+		reasoning.WriteString(chunk.Reasoning)
+	}
+	message := map[string]any{"role": "assistant", "content": content.String()}
+	if includeReasoning && reasoning.Len() > 0 {
+		message["reasoning_content"] = reasoning.String()
 	}
 	out := map[string]any{
 		"id":      "chatcmpl-ygg",
 		"object":  "chat.completion",
 		"model":   model,
-		"choices": []any{map[string]any{"index": 0, "message": map[string]any{"role": "assistant", "content": content.String()}, "finish_reason": "stop"}},
+		"choices": []any{map[string]any{"index": 0, "message": message, "finish_reason": "stop"}},
 	}
 	if ext := extension(); ext != nil {
 		withExtension(out, ext)
@@ -342,12 +351,20 @@ func (h *Handler) writeNonStream(w http.ResponseWriter, stream <-chan pluginapi.
 	writeJSON(w, out)
 }
 
-func (h *Handler) writeStream(sw *streamWriter, r *http.Request, stream <-chan pluginapi.ChatChunk, model string, extension func() map[string]any, progress bool) {
+func (h *Handler) writeStream(sw *streamWriter, r *http.Request, stream <-chan pluginapi.ChatChunk, model string, extension func() map[string]any, progress, includeReasoning bool) {
 	id := "chatcmpl-ygg"
 	for chunk := range stream {
 		if chunk.Error != "" {
 			sw.data(map[string]any{"error": map[string]any{"message": chunk.Error}})
 			return
+		}
+		if includeReasoning && chunk.Reasoning != "" {
+			sw.data(map[string]any{
+				"id":      id,
+				"object":  "chat.completion.chunk",
+				"model":   model,
+				"choices": []any{map[string]any{"index": 0, "delta": map[string]any{"reasoning_content": chunk.Reasoning}, "finish_reason": nil}},
+			})
 		}
 		if chunk.Content == "" && !chunk.Done {
 			continue

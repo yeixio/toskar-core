@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"slices"
 	"strings"
+	"time"
 
 	"github.com/yeixio/toskar-core/internal/contextusage"
 	"github.com/yeixio/toskar-core/internal/events"
@@ -243,7 +244,7 @@ func (o *Orchestrator) Run(
 		}
 
 		if jsonOnly {
-			content, m, err := generateText(answerCtx, env, role, messages)
+			content, m, err := generate(answerCtx, env, role, messages, true)
 			if err != nil {
 				ch <- pluginapi.OrchestrationEvent{Type: "agent.error", Role: role, Error: err.Error(), Done: true}
 				return
@@ -293,7 +294,7 @@ func (o *Orchestrator) Run(
 		declined := false
 
 		for {
-			content, m, err := generateText(answerCtx, env, role, messages)
+			content, m, err := generate(answerCtx, env, role, messages, true)
 			if err != nil {
 				if content != "" {
 					ch <- pluginapi.OrchestrationEvent{Type: "agent.message", Role: role, NodeID: nodeID, Content: content}
@@ -538,26 +539,79 @@ func generateText(
 	role string,
 	messages []pluginapi.ChatMessage,
 ) (string, *pluginapi.GenerationMetrics, error) {
+	return generate(ctx, env, role, messages, false)
+}
+
+// EventReasoning says a reasoning model is thinking before it answers
+// (#701): state started, then done with ms, how long it thought. For the
+// answer itself, done also has text, the thinking, cut at maxReasoningText.
+const EventReasoning = "chat.reasoning"
+
+// maxReasoningText is as much of a model's thinking as an answer keeps.
+const maxReasoningText = 20000
+
+// generate is generateText; answer says it writes the answer the person
+// sees, whose thinking is kept with it.
+func generate(
+	ctx context.Context,
+	env pluginapi.ExecutionEnvironment,
+	role string,
+	messages []pluginapi.ChatMessage,
+	answer bool,
+) (string, *pluginapi.GenerationMetrics, error) {
 	stream, err := env.Generate(ctx, role, messages)
 	if err != nil {
 		return "", nil, err
 	}
 	var b strings.Builder
 	var metrics *pluginapi.GenerationMetrics
+	var thinking strings.Builder
+	var thinkingSince time.Time
+	thought := false
+	// The thinking ends when the answer starts, or with the stream.
+	endThinking := func() {
+		if thinkingSince.IsZero() || thought {
+			return
+		}
+		thought = true
+		payload := map[string]any{"state": "done", "ms": time.Since(thinkingSince).Milliseconds(), "role": role}
+		if answer {
+			payload["answer"] = true
+			if text := strings.TrimSpace(thinking.String()); text != "" {
+				if r := []rune(text); len(r) > maxReasoningText {
+					text = string(r[:maxReasoningText]) + "…"
+				}
+				payload["text"] = text
+			}
+		}
+		env.Emit(EventReasoning, payload)
+	}
 	for chunk := range stream {
 		if chunk.Error != "" {
+			endThinking()
 			return b.String(), metrics, fmt.Errorf("%s", chunk.Error)
 		}
 		if chunk.Metrics != nil {
 			metrics = chunk.Metrics
 		}
+		if chunk.Reasoning != "" && !thought {
+			if thinkingSince.IsZero() {
+				thinkingSince = time.Now()
+				env.Emit(EventReasoning, map[string]any{"state": "started", "role": role})
+			}
+			if thinking.Len() <= maxReasoningText*4 {
+				thinking.WriteString(chunk.Reasoning)
+			}
+		}
 		if chunk.Content != "" {
+			endThinking()
 			b.WriteString(chunk.Content)
 		}
 		if chunk.Done {
 			break
 		}
 	}
+	endThinking()
 	return b.String(), metrics, nil
 }
 
