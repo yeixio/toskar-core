@@ -222,7 +222,16 @@
     "alsoDeleteModels": "Supprimer aussi les modèles téléchargés",
     "resetting": "Réinitialisation…",
     "confirmReset": "Oui, réinitialiser",
-    "resetFailed": "Impossible de réinitialiser Toskar."
+    "resetFailed": "Impossible de réinitialiser Toskar.",
+    "memory": "Mémoire",
+    "chatOnPhone": "Discuter sur cet appareil",
+    "webLookup": "Chercher des informations à jour",
+    "webLookupCopy": "Quand une question demande des informations à jour, comme la météo ou l’actualité, cet appareil cherche sur le web avec DuckDuckGo et lit la meilleure page avant de répondre. Seuls les mots de la recherche quittent cet appareil. Les réponses citent leurs sources.",
+    "memoryCopy": "Dites « Souviens-toi que … » dans une discussion, et c’est gardé sur cet appareil pour les prochaines discussions. Désactiver la mémoire conserve ce qui est enregistré.",
+    "memoryEmpty": "Rien de mémorisé pour l’instant.",
+    "forgetMemory": "Oublier",
+    "forgetMemoryLabel": "Oublier « {{memory}} »",
+    "resetCopyMemories": "Rétablir la configuration d’accueil. Efface les discussions et les souvenirs de cet appareil et oublie l’ordinateur connecté."
   },
   "language": {
     "title": "Langue",
@@ -326,7 +335,8 @@
     "empty": {
       "title": "Comment puis-je vous aider ?",
       "phone": "Parlez à l'IA de cet appareil. Rien de ce que vous écrivez n'en sort.",
-      "computer": "Toskar choisit le bon modèle et le bon ordinateur, effectue des recherches si nécessaire et montre ce qu'il a utilisé."
+      "computer": "Toskar choisit le bon modèle et le bon ordinateur, effectue des recherches si nécessaire et montre ce qu'il a utilisé.",
+      "phoneLookup": "Parlez à l’IA de cet appareil. Seuls les mots de recherche le quittent, quand une question demande des informations à jour."
     },
     "unsent": {
       "notSent": "Non envoyé",
@@ -399,7 +409,8 @@
       "continuing": "Configuré. Finalisation de votre demande…",
       "askAdmin": "Demandez à un admin de {{node}} de le configurer.",
       "downloadFailed": "Le téléchargement n’a pas abouti. Touchez Configurer pour réessayer."
-    }
+    },
+    "phoneAutoHint": "Choisit le meilleur modèle de cet appareil pour chaque message"
   },
   "effort": {
     "title": "Effort",
@@ -496,7 +507,9 @@
     "changingImageSlow": "Modification de l’image. Sur votre ordinateur, cela prend quelques minutes…",
     "makingVideoSlow": "Création du clip. Sur votre ordinateur, cela peut prendre près d’une heure…",
     "reasoning": "Réflexion…",
-    "writingAnswer": "Rédaction de la réponse…"
+    "writingAnswer": "Rédaction de la réponse…",
+    "loadingNamed": "Chargement de {{model}}…",
+    "summarizing": "Résumé des messages précédents…"
   },
   "realms": {
     "about": "{{norse}}. {{rune}}. À propos de ce nom",
@@ -931,11 +944,31 @@
     "steps": {
       "readFile": "{{name}} lu",
       "readFilePart": "Première partie de {{name}} lue",
-      "readPhotoText": "Texte de {{name}} lu, car {{model}} ne peut pas voir les photos"
+      "readPhotoText": "Texte de {{name}} lu, car {{model}} ne peut pas voir les photos",
+      "autoChose": "Auto a choisi {{model}} pour {{kind}}",
+      "searched": "J'ai recherché « {{query}} » sur le web",
+      "fallbackOutOfMemory": "{{failed}} a manqué de mémoire, c'est donc {{model}} qui a répondu",
+      "read": "J’ai lu {{host}}",
+      "fallbackFailed": "{{failed}} n’a pas pu se charger, donc {{model}} a répondu à la place"
     },
     "notices": {
-      "filePart": "Seule la première partie de {{name}} tenait dans ce que {{model}} peut lire en une fois. Demandez une partie suivante, ou demandez le fichier entier dans un chat sur votre ordinateur."
-    }
+      "filePart": "Seule la première partie de {{name}} tenait dans ce que {{model}} peut lire en une fois. Demandez une partie suivante, ou demandez le fichier entier dans un chat sur votre ordinateur.",
+      "fallback": "{{failed}} n’a pas pu fonctionner sur cet appareil, donc {{model}} a répondu. La réponse peut être moins détaillée.",
+      "noWeb": "Je n’ai pas pu accéder au web, donc cette réponse vient de ce que le modèle sait déjà et peut être dépassée.",
+      "webOff": "La recherche web est désactivée dans les Paramètres, donc cette réponse peut être dépassée."
+    },
+    "kinds": {
+      "chat": "une question rapide",
+      "current": "une question qui demande des informations à jour",
+      "coding": "une question de programmation",
+      "research": "une question qui demande une réponse détaillée"
+    },
+    "errors": {
+      "outOfMemory": "Cet appareil a manqué de mémoire pour {{model}}. Fermez d’autres apps ou choisissez un modèle plus petit.",
+      "couldNotLoad": "{{model}} n’a pas pu être chargé. Réinstallez-le depuis Modèles ou choisissez un autre modèle.",
+      "couldNotAnswer": "{{model}} n’a pas pu répondre cette fois. Réessayez ou choisissez un autre modèle."
+    },
+    "currentSource": "Conditions actuelles (wttr.in)"
   },
   "push": {
     "title": "Notifications sur cet appareil",
@@ -956,5 +989,43 @@
     "microphone": "Toskar utilise le micro quand vous dictez un message. Ce que vous dites reste sur cet appareil ou va seulement sur votre propre ordinateur.",
     "speechRecognition": "Toskar transforme ce que vous dites en texte sur cet appareil quand vous dictez un message.",
     "localNetwork": "Toskar cherche sur votre réseau local l'ordinateur qui exécute vos modèles."
+  },
+  "context": {
+    "usage": "Utilisation du contexte",
+    "full": "Contexte rempli à {{percent}}",
+    "title": "Contexte",
+    "used": "{{used}} / {{limit}} tokens",
+    "usedEstimated": "~{{used}} / {{limit}} tokens",
+    "limit": "{{limit}} tokens",
+    "rows": {
+      "conversation": "Conversation",
+      "instructions": "Instructions et mémoire",
+      "webResults": "Résultats web"
+    },
+    "nearFull": "Presque plein : à mesure que la conversation s'allonge, ses plus anciens messages sont envoyés sous forme de résumé. Commencez une nouvelle conversation pour repartir de zéro.",
+    "summarized_one": "Le message le plus ancien a été envoyé sous forme de résumé pour que la conversation tienne. Tous les messages restent enregistrés.",
+    "summarized_many": "Les {{count}} messages les plus anciens ont été envoyés sous forme de résumé pour que la conversation tienne. Tous les messages restent enregistrés.",
+    "summarized_other": "Les {{count}} messages les plus anciens ont été envoyés sous forme de résumé pour que la conversation tienne. Tous les messages restent enregistrés.",
+    "empty": "Envoyez un message pour voir quelle part de la mémoire de ce modèle la discussion utilise.",
+    "omitted_one": "Le message le plus ancien ne tenait pas et a été laissé de côté. Tous les messages restent enregistrés.",
+    "omitted_many": "Les {{count}} messages les plus anciens ne tenaient pas et ont été laissés de côté. Tous les messages restent enregistrés.",
+    "omitted_other": "Les {{count}} messages les plus anciens ne tenaient pas et ont été laissés de côté. Tous les messages restent enregistrés.",
+    "hint": "La fenêtre, c’est la part de la discussion que le modèle peut lire d’un coup sur cet appareil."
+  },
+  "memory": {
+    "saved": "C’est noté. Je retiens : « {{memory}} ».",
+    "savedStep": "Enregistré en mémoire : {{memory}}",
+    "already": "Je le sais déjà : « {{memory}} ».",
+    "sensitive": "Je ne l’ai pas enregistré, car cela ressemble à un mot de passe, une clé ou un numéro de carte. Un gestionnaire de mots de passe est plus sûr pour cela.",
+    "forgot": "C’est fait. J’ai oublié : « {{memory}} ».",
+    "removedStep": "Retiré de la mémoire : {{memory}}",
+    "notFound": "Je n’ai pas trouvé de souvenir comme celui-là. Les Paramètres listent tout ce que je retiens.",
+    "none": "Je ne retiens rien pour l’instant. Dites « Souviens-toi que … » et je le garderai pour les prochaines discussions.",
+    "list": "Voici ce que je retiens :",
+    "more_one": "… et {{count}} autre dans les Paramètres.",
+    "more_many": "… et {{count}} autres dans les Paramètres.",
+    "more_other": "… et {{count}} autres dans les Paramètres.",
+    "offSaved": "La mémoire est désactivée, donc je ne l’utiliserai pas tant que vous ne la réactivez pas dans les Paramètres.",
+    "offList": "La mémoire est désactivée, donc je ne les utilise pas pour l’instant."
   }
 }

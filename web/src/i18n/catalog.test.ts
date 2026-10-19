@@ -102,6 +102,21 @@ function compareToEnglish(language: string, en: Record<string, Flat>, translated
   return [...new Set(problems)]
 }
 
+/**
+ * English keys a language lacks, which show in English (#716). A language
+ * marked partial in languages.json may lack them; the others may not.
+ */
+function missingFromEnglish(language: string, en: Record<string, Flat>, translated: Record<string, Flat>): string[] {
+  const missing: string[] = []
+  for (const [ns, keys] of Object.entries(en)) {
+    const have = new Set(Object.keys(translated[ns] ?? {}).map(baseKey))
+    for (const base of new Set(Object.keys(keys).map(baseKey))) {
+      if (!have.has(base)) missing.push(`${language} ${ns}:${base} is missing, so it shows in English`)
+    }
+  }
+  return missing
+}
+
 const localeNames = [...new Set(Object.keys(catalogFiles).map((p) => fileOf(p)?.[1]).filter((l): l is string => Boolean(l)))]
 const english = readLocale(source)
 
@@ -131,10 +146,16 @@ describe('the shared catalog', () => {
     }
   })
 
+  const statuses = new Map((JSON.parse(languagesFile) as { code: string; status: string }[]).map((l) => [l.code, l.status]))
   for (const language of localeNames.filter((l) => l !== source)) {
     it(`${language} matches English`, () => {
       expect(compareToEnglish(language, english, readLocale(language))).toEqual([])
     })
+    if (statuses.get(language) !== 'partial') {
+      it(`${language} has every key English has (#716)`, () => {
+        expect(missingFromEnglish(language, english, readLocale(language))).toEqual([])
+      })
+    }
   }
 })
 
@@ -161,6 +182,13 @@ describe('the catalog checks', () => {
   it('accept a partial translation and extra plural forms', () => {
     const ru = { common: { count_one: '{{count}} модель', count_few: '{{count}} модели', count_many: '{{count}} моделей', count_other: '{{count}} модели' } }
     expect(compareToEnglish('ru', en, ru)).toEqual([])
+  })
+
+  it('find English keys a language lacks, whatever its plural forms (#716)', () => {
+    const de = { common: { title: 'Modelle', count_one: '{{count}} Modell', count_other: '{{count}} Modelle' } }
+    expect(missingFromEnglish('de', en, de)).toEqual(['de common:hello is missing, so it shows in English'])
+    const ja = { common: { title: 'モデル', count_other: '{{count}} 個', hello: 'こんにちは {{name}}' } }
+    expect(missingFromEnglish('ja', en, ja)).toEqual([])
   })
 
   it('find duplicate keys in the same object only', () => {
