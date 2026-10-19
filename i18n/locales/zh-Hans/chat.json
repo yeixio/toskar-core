@@ -397,7 +397,19 @@
     "needsShared": "需要约 {{need}} 显存；这台电脑的图形处理器可使用 {{have}}，因此可能较慢或失败。",
     "needsSharedOn": "需要约 {{need}} 显存；{{node}} 的图形处理器可使用 {{have}}，因此可能较慢或失败。",
     "slowImage": "这台电脑没有 GPU 加速，每张图片需要几分钟。",
-    "slowVideo": "这台电脑没有 GPU 加速，一段短片可能需要将近一小时。"
+    "slowVideo": "这台电脑没有 GPU 加速，一段短片可能需要将近一小时。",
+    "model": {
+      "coding": "{{name}} 写代码比 {{model}} 更好。",
+      "data": "{{name}} 读取你的文件和知识比小模型 {{model}} 更可靠。",
+      "language": "{{name}} 写{{language}}比 {{model}} 更好。",
+      "reasoning": "{{name}} 会先把问题想清楚再回答：速度较慢，但数学和逻辑比 {{model}} 更强。",
+      "context": "{{name}} 一次能读的聊天比 {{model}} 更长，所以需要概括的内容更少。",
+      "details": "下载 {{size}} · {{fit}} · 只留在这台电脑上",
+      "fitExcellent": "这台电脑能轻松运行",
+      "fitGood": "这台电脑能很好运行",
+      "install": "安装并重新回答",
+      "notNow": "暂不"
+    }
   },
   "readAloud": {
     "button": "朗读",

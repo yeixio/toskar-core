@@ -408,7 +408,14 @@
       "continue": "Continuar",
       "continuing": "Configurado. Concluindo sua solicitação…",
       "askAdmin": "Peça a um administrador de {{node}} para configurar isso.",
-      "downloadFailed": "O download não terminou. Toque em Configurar para tentar de novo."
+      "downloadFailed": "O download não terminou. Toque em Configurar para tentar de novo.",
+      "model": {
+        "details": "download de {{size}} · {{fit}} · fica neste computador",
+        "fitExcellent": "cabe com folga neste computador",
+        "fitGood": "cabe bem neste computador",
+        "install": "Instalar e responder de novo",
+        "notNow": "Agora não"
+      }
     },
     "phoneAutoHint": "Escolhe o melhor modelo deste dispositivo para cada mensagem"
   },

@@ -402,7 +402,14 @@
       "continue": "繼續",
       "continuing": "已設定完成。正在完成你的請求…",
       "askAdmin": "請 {{node}} 上的管理員來設定。",
-      "downloadFailed": "下載沒有完成。輕點「設定」再試一次。"
+      "downloadFailed": "下載沒有完成。輕點「設定」再試一次。",
+      "model": {
+        "details": "下載 {{size}} · {{fit}} · 只留在這台電腦上",
+        "fitExcellent": "這台電腦能輕鬆執行",
+        "fitGood": "這台電腦能順暢執行",
+        "install": "安裝並重新回答",
+        "notNow": "暫不"
+      }
     },
     "phoneAutoHint": "為每則訊息選擇這台裝置上最合適的模型"
   },

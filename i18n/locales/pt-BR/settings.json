@@ -192,7 +192,9 @@
     "compactAtHint": "Conversas longas enviam mensagens antigas como resumo quando ocupam esta parte da janela do modelo.",
     "compactEarly": "Cedo (40%)",
     "compactNormal": "Normal (50%)",
-    "compactLate": "Tarde (70%)"
+    "compactLate": "Tarde (70%)",
+    "suggestModels": "Sugerir modelos melhores",
+    "suggestModelsHint": "Depois de uma resposta, oferecer um modelo que este computador consegue rodar e que responderia melhor esse tipo de pergunta. Só para você."
   },
   "ratings": {
     "title": "Avaliações da comunidade",

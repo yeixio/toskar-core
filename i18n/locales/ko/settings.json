@@ -178,7 +178,9 @@
     "compactAtHint": "긴 채팅은 모델 창이 이만큼 차면 오래된 메시지를 요약으로 보냅니다.",
     "compactEarly": "이르게 (40%)",
     "compactNormal": "보통 (50%)",
-    "compactLate": "늦게 (70%)"
+    "compactLate": "늦게 (70%)",
+    "suggestModels": "더 나은 모델 제안",
+    "suggestModelsHint": "답변 후, 그런 질문에 더 잘 답할 수 있고 이 컴퓨터에서 실행되는 모델을 제안해요. 나에게만 적용돼요."
   },
   "ratings": {
     "title": "커뮤니티 평가",

@@ -397,7 +397,19 @@
     "needsShared": "需要約 {{need}} 顯示記憶體；這台電腦的圖形處理器可使用 {{have}}，因此可能較慢或失敗。",
     "needsSharedOn": "需要約 {{need}} 顯示記憶體；{{node}} 的圖形處理器可使用 {{have}}，因此可能較慢或失敗。",
     "slowImage": "這台電腦沒有 GPU 加速，每張圖片需要幾分鐘。",
-    "slowVideo": "這台電腦沒有 GPU 加速，一段短片可能需要將近一小時。"
+    "slowVideo": "這台電腦沒有 GPU 加速，一段短片可能需要將近一小時。",
+    "model": {
+      "coding": "{{name}} 寫程式碼比 {{model}} 更好。",
+      "data": "{{name}} 讀取你的檔案和知識比小模型 {{model}} 更可靠。",
+      "language": "{{name}} 寫{{language}}比 {{model}} 更好。",
+      "reasoning": "{{name}} 會先把問題想清楚再回答：速度較慢，但數學和邏輯比 {{model}} 更強。",
+      "context": "{{name}} 一次能讀的聊天比 {{model}} 更長，所以需要摘要的內容更少。",
+      "details": "下載 {{size}} · {{fit}} · 只留在這台電腦上",
+      "fitExcellent": "這台電腦能輕鬆執行",
+      "fitGood": "這台電腦能順暢執行",
+      "install": "安裝並重新回答",
+      "notNow": "暫不"
+    }
   },
   "readAloud": {
     "button": "朗讀",

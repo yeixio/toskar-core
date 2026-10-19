@@ -408,7 +408,19 @@
     "needsShared": "Needs about {{need}} of graphics memory; this computer's graphics can use {{have}}, so it may be slow or fail.",
     "needsSharedOn": "Needs about {{need}} of graphics memory; the graphics on {{node}} can use {{have}}, so it may be slow or fail.",
     "slowImage": "This computer has no GPU acceleration for it, so each picture takes a few minutes.",
-    "slowVideo": "This computer has no GPU acceleration for it, so a clip can take most of an hour."
+    "slowVideo": "This computer has no GPU acceleration for it, so a clip can take most of an hour.",
+    "model": {
+      "coding": "{{name}} writes code better than {{model}}.",
+      "data": "{{name}} reads your files and knowledge more reliably than {{model}}, a small model.",
+      "language": "{{name}} writes {{language}} better than {{model}}.",
+      "reasoning": "{{name}} thinks a problem through before answering: slower, and better at math and logic than {{model}}.",
+      "context": "{{name}} reads a longer chat at once than {{model}}, so less of it is summarized.",
+      "details": "{{size}} download · {{fit}} · stays on this computer",
+      "fitExcellent": "fits this computer easily",
+      "fitGood": "fits this computer well",
+      "install": "Install and answer again",
+      "notNow": "Not now"
+    }
   },
   "readAloud": {
     "button": "Read aloud",

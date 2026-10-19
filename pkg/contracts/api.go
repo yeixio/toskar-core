@@ -857,6 +857,13 @@ type SetupOffer struct {
 	// For ability "vision", Option is the model id for
 	// POST /api/v1/models/{id}/install.
 	Attachments []string `json:"attachments,omitempty"`
+	// Reason and Fit are for a model offer (#707, contract 1.45; ability
+	// model): why the model would answer this kind of request better
+	// (coding, data, language, reasoning, or context), and how well it fits
+	// this computer (excellent or good). Request is then answered again
+	// with Option.
+	Reason string `json:"reason,omitempty"`
+	Fit    string `json:"fit,omitempty"`
 }
 
 // FileRef points at a stored file (an artifact). Its bytes are at
@@ -1189,6 +1196,9 @@ type SettingsView struct {
 	// UILocale is the app language as a BCP 47 tag, such as "es-MX", or ""
 	// to follow each device's system language (multilingual spec §6–7, §30).
 	UILocale string `json:"ui_locale"`
+	// SuggestModels is this person's choice that answers may offer a
+	// better-fitting model to install (#707, contract 1.45); on by default.
+	SuggestModels bool `json:"suggest_models"`
 	// AssistantLanguageMode is the language answers are written in (§11,
 	// §30): "auto", the language the person writes in (the default); "app",
 	// the App language; or "language", AssistantLanguage. A language asked

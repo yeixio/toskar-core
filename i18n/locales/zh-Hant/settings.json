@@ -178,7 +178,9 @@
     "compactAtHint": "長對話占滿模型視窗的這個比例後，較早的訊息會以摘要傳送。",
     "compactEarly": "較早（40%）",
     "compactNormal": "標準（50%）",
-    "compactLate": "較晚（70%）"
+    "compactLate": "較晚（70%）",
+    "suggestModels": "推薦更好的模型",
+    "suggestModelsHint": "回答之後，推薦一個這台電腦能執行、能更好回答這類問題的模型。只對你生效。"
   },
   "ratings": {
     "title": "社群評分",

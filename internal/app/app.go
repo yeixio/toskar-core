@@ -11,6 +11,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"strconv"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -1401,6 +1402,7 @@ func (a *App) settingsView(ctx context.Context) (contracts.SettingsView, error) 
 	launchAtLogin, _ := a.Settings.GetBool(ctx, "launch_at_login", false)
 	// The person's own languages (#206).
 	uiLocale := a.personalString(ctx, "ui_locale", "")
+	suggestModels := a.personalString(ctx, "suggest_models", "true") != "false"
 	assistantMode := a.personalString(ctx, "assistant_language_mode", replylang.ModeAuto)
 	assistantLanguage := a.personalString(ctx, "assistant_language", "")
 	digest, _ := a.Settings.GetString(ctx, settingDigest, "")
@@ -1454,6 +1456,7 @@ func (a *App) settingsView(ctx context.Context) (contracts.SettingsView, error) 
 		LaunchAtLogin:           launchAtLogin,
 		DiscoveryNeedsRestart:   a.discoveryNeedsRestart,
 		UILocale:                uiLocale,
+		SuggestModels:           suggestModels,
 		AssistantLanguageMode:   assistantMode,
 		AssistantLanguage:       assistantLanguage,
 		AutomationDigest:        digest,
@@ -1558,6 +1561,12 @@ func (a *App) applySettingsPatch(ctx context.Context, patch map[string]any) erro
 			return contracts.Errorf("INVALID_SETTING", map[string]any{"setting": "compact_at", "value": v}, "compact_at is early, normal, or late")
 		}
 		if err := a.Settings.Set(ctx, "compact_at", v); err != nil {
+			return err
+		}
+	}
+	// Each person's own (#707): answers may offer a better-fitting model.
+	if v, ok := patch["suggest_models"].(bool); ok {
+		if err := a.setPersonal(ctx, "suggest_models", strconv.FormatBool(v)); err != nil {
 			return err
 		}
 	}

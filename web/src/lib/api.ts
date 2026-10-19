@@ -689,8 +689,8 @@ export const api = {
   /** Who this browser is (#206). */
   getMe: () => request<Principal>('/api/v1/me'),
 
-  /** Save this person's own App language and assistant language (#206). */
-  setMyPreferences: (patch: Pick<SettingsPatch, 'ui_locale' | 'assistant_language_mode' | 'assistant_language'>) =>
+  /** Save this person's own App language, assistant language (#206), and model suggestions (#707). */
+  setMyPreferences: (patch: Pick<SettingsPatch, 'ui_locale' | 'assistant_language_mode' | 'assistant_language' | 'suggest_models'>) =>
     request<SettingsView>('/api/v1/me/preferences', { method: 'PATCH', body: JSON.stringify(patch) }),
 
   /** Sign this browser in with a username and password. */

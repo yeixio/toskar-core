@@ -640,6 +640,9 @@ export interface SetupOffer {
   free_bytes?: number
   /** Files to send again with request, such as the pictures a vision model is set up for; ability "vision" installs option as a model (contract 1.28, #529). */
   attachments?: string[]
+  /** For a model offer (#707, contract 1.45; ability model): why it would answer this better, and how well it fits this computer. */
+  reason?: 'coding' | 'data' | 'language' | 'reasoning' | 'context'
+  fit?: 'excellent' | 'good'
 }
 
 /** A stored file: an attachment or a file the assistant produced. */
@@ -853,6 +856,8 @@ export interface SettingsView {
   discovery_needs_restart?: boolean
   /** App language as a BCP 47 tag, or '' to follow each device's system language. */
   ui_locale?: string
+  /** This person's choice that answers may offer a better-fitting model to install (#707, contract 1.45). */
+  suggest_models?: boolean
   /** auto (the language the person writes in), app (the App language), or language (assistant_language). */
   assistant_language_mode?: AssistantLanguageMode
   /** The language answers are written in with assistant_language_mode language, such as de. */
@@ -1159,6 +1164,8 @@ export interface ToolRequestedPayload {
 
 export interface SettingsPatch {
   ui_locale?: string
+  /** This person's own: answers may offer a better-fitting model (#707). */
+  suggest_models?: boolean
   /** The person's Hugging Face token, for models behind a license; '' forgets it. Never read back (#551). */
   huggingface_token?: string
   community_ratings?: boolean

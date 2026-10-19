@@ -152,3 +152,61 @@ describe('SetupOfferCard', () => {
     expect(onContinue).toHaveBeenCalledTimes(1)
   })
 })
+
+describe('a better-fitting model (#707)', () => {
+  const modelOffer: SetupOffer = {
+    ability: 'model',
+    reason: 'coding',
+    label: 'Qwen 2.5 Coder 7B writes code better than Llama 3.2 3B.',
+    option: 'qwen2.5-coder-7b',
+    name: 'Qwen 2.5 Coder 7B',
+    size_bytes: 4_700_000_000,
+    fit: 'good',
+    request: 'Write a function that reverses a string',
+  }
+  const card = (onRetry: (id: string) => void) =>
+    render(
+      <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
+        <SetupOfferCard offer={modelOffer} onContinue={() => undefined} onRetry={onRetry} />
+      </QueryClientProvider>,
+    )
+
+  beforeEach(async () => {
+    vi.clearAllMocks()
+    await applyLanguage('en')
+  })
+
+  it('says why, its size and fit, and goes away on Not now', async () => {
+    vi.mocked(api.getModels).mockResolvedValue([{ id: 'qwen2.5-coder-7b', installed: false }] as never)
+    card(() => undefined)
+    expect(await screen.findByText('Qwen 2.5 Coder 7B writes code better than Llama 3.2 3B.')).toBeInTheDocument()
+    expect(screen.getByText(/4\.7 GB download · fits this computer well · stays on this computer/)).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Not now' }))
+    expect(screen.queryByTestId('model-offer')).toBeNull()
+  })
+
+  it('installs the model and answers the question again with it', async () => {
+    vi.mocked(api.getModels).mockResolvedValue([{ id: 'qwen2.5-coder-7b', installed: false }] as never)
+    vi.mocked(api.installModel).mockResolvedValue(undefined as never)
+    const onRetry = vi.fn()
+    card(onRetry)
+    fireEvent.click(await screen.findByRole('button', { name: 'Install and answer again' }))
+    await waitFor(() => expect(api.installModel).toHaveBeenCalledWith('qwen2.5-coder-7b'))
+    vi.mocked(api.getModels).mockResolvedValue([{ id: 'qwen2.5-coder-7b', installed: true }] as never)
+    sendEvent?.({ type: 'model.download.completed', payload: { model_id: 'qwen2.5-coder-7b' } })
+    await waitFor(() => expect(onRetry).toHaveBeenCalledWith('qwen2.5-coder-7b'))
+    expect(onRetry).toHaveBeenCalledTimes(1)
+  })
+
+  it('isn\'t offered without a way to answer again, or once the model is installed', async () => {
+    vi.mocked(api.getModels).mockResolvedValue([{ id: 'qwen2.5-coder-7b', installed: true }] as never)
+    const { container } = render(
+      <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
+        <SetupOfferCard offer={modelOffer} onContinue={() => undefined} />
+      </QueryClientProvider>,
+    )
+    expect(container).toBeEmptyDOMElement()
+    card(() => undefined)
+    await waitFor(() => expect(screen.queryByTestId('model-offer')).toBeNull())
+  })
+})
