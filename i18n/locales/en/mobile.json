@@ -226,6 +226,8 @@
     "chatOnPhone": "Chat on this device",
     "webLookup": "Look up current information",
     "webLookupCopy": "When a question needs current information, like weather or news, this device searches the web with DuckDuckGo and reads the best page before answering. Only the search words leave this device. Answers list their sources.",
+    "suggestModels": "Suggest better models",
+    "suggestModelsCopy": "After an answer, suggest a model or a computer that would answer that kind of question better.",
     "memory": "Memory",
     "memoryCopy": "Say “Remember that …” in a chat and it is kept on this device for future chats. Turning memory off keeps what is saved.",
     "memoryEmpty": "Nothing remembered yet.",
@@ -589,6 +591,22 @@
       "edit": "Edit",
       "save": "Save",
       "cancel": "Cancel"
+    },
+    "offer": {
+      "coding": "{{name}} writes code better than {{model}}.",
+      "vision": "{{name}} sees photos. {{model}} reads only the text in them.",
+      "language": "{{name}} writes {{language}} better than {{model}}.",
+      "file": "{{name}} reads files better than {{model}}, a small model.",
+      "details": "{{size}} download · fits this device",
+      "computer": {
+        "media": "Pictures and clips are made on a computer running Toskar.",
+        "file": "This file is longer than this device reads at once. A computer running Toskar reads more of it.",
+        "model": "{{name}} would answer this better, but it's too large for this device. A computer running Toskar can run it.",
+        "ask": "Ask on your computer",
+        "none": "Toskar Core is free and open source, and Toskar Pro is the app for your computer. Either answers with larger models and more tools.",
+        "connect": "Connect a computer",
+        "learn": "More at toskar.ai"
+      }
     }
   },
   "memory": {

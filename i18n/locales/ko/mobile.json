@@ -227,6 +227,8 @@
     "chatOnPhone": "이 기기에서 채팅",
     "webLookup": "최신 정보 찾아보기",
     "webLookupCopy": "날씨나 뉴스처럼 최신 정보가 필요한 질문이면 이 기기가 DuckDuckGo로 웹을 검색하고 가장 좋은 페이지를 읽은 뒤 답해요. 이 기기 밖으로 나가는 건 검색어뿐이에요. 답변에는 출처가 표시돼요.",
+    "suggestModels": "더 나은 모델 제안",
+    "suggestModelsCopy": "답변 후에 그런 질문에 더 잘 답할 모델이나 컴퓨터를 제안해요.",
     "memoryCopy": "채팅에서 “…을 기억해 줘”라고 말하면 앞으로의 채팅을 위해 이 기기에 저장돼요. 메모리를 꺼도 저장된 내용은 남아요.",
     "memoryEmpty": "아직 기억한 것이 없어요.",
     "forgetMemory": "잊기",
@@ -944,7 +946,23 @@
       "couldNotLoad": "{{model}}을(를) 불러올 수 없어요. 모델에서 다시 설치하거나 다른 모델을 고르세요.",
       "couldNotAnswer": "{{model}}이(가) 이번에는 답하지 못했어요. 다시 시도하거나 다른 모델을 고르세요."
     },
-    "currentSource": "현재 날씨 (wttr.in)"
+    "currentSource": "현재 날씨 (wttr.in)",
+    "offer": {
+      "coding": "{{name}}은(는) {{model}}보다 코드를 더 잘 써요.",
+      "vision": "{{name}}은(는) 사진을 볼 수 있어요. {{model}}은(는) 사진 속 글자만 읽어요.",
+      "language": "{{name}}은(는) {{model}}보다 {{language}}를 더 잘 써요.",
+      "file": "{{name}}은(는) 작은 모델인 {{model}}보다 파일을 더 잘 읽어요.",
+      "details": "{{size}} 다운로드 · 이 기기에서 잘 돌아가요",
+      "computer": {
+        "media": "이미지와 영상은 Toskar를 실행하는 컴퓨터에서 만들어요.",
+        "file": "이 파일은 이 기기가 한 번에 읽을 수 있는 것보다 길어요. Toskar를 실행하는 컴퓨터는 더 많이 읽어요.",
+        "model": "{{name}}이(가) 더 잘 답할 수 있지만 이 기기에는 너무 커요. Toskar를 실행하는 컴퓨터에서는 실행할 수 있어요.",
+        "ask": "컴퓨터에서 물어보기",
+        "none": "Toskar Core는 무료 오픈 소스이고, Toskar Pro는 컴퓨터용 앱이에요. 둘 다 더 큰 모델과 더 많은 도구로 답해요.",
+        "connect": "컴퓨터 연결",
+        "learn": "toskar.ai에서 더 알아보기"
+      }
+    }
   },
   "push": {
     "title": "이 기기의 알림",

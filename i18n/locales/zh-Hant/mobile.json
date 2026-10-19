@@ -227,6 +227,8 @@
     "chatOnPhone": "在這台裝置上聊天",
     "webLookup": "查詢最新資訊",
     "webLookupCopy": "當問題需要最新資訊（例如天氣或新聞）時，這台裝置會用 DuckDuckGo 搜尋網路，並在回答前閱讀最合適的頁面。只有搜尋字詞會離開這台裝置。回答會列出來源。",
+    "suggestModels": "推薦更合適的模型",
+    "suggestModelsCopy": "回答之後，推薦能更好地回答這類問題的模型或電腦。",
     "memoryCopy": "在聊天中說「記住……」，內容就會儲存在這台裝置上，供之後的聊天使用。關閉記憶不會刪除已儲存的內容。",
     "memoryEmpty": "還沒有記住任何內容。",
     "forgetMemory": "忘記",
@@ -944,7 +946,23 @@
       "couldNotLoad": "無法載入 {{model}}。請在「模型」中重新安裝，或選擇其他模型。",
       "couldNotAnswer": "{{model}} 這次未能回答。請再試一次，或選擇其他模型。"
     },
-    "currentSource": "目前天氣（wttr.in）"
+    "currentSource": "目前天氣（wttr.in）",
+    "offer": {
+      "coding": "{{name}} 寫程式碼比 {{model}} 更好。",
+      "vision": "{{name}} 能看懂照片。{{model}} 只能讀取照片裡的文字。",
+      "language": "{{name}} 寫{{language}}比 {{model}} 更好。",
+      "file": "{{name}} 讀檔案比小模型 {{model}} 更好。",
+      "details": "下載 {{size}} · 適合這台裝置",
+      "computer": {
+        "media": "圖片和影片要在執行 Toskar 的電腦上產生。",
+        "file": "這個檔案超出了這台裝置一次能讀的長度。執行 Toskar 的電腦能讀更多。",
+        "model": "{{name}} 能回答得更好，但對這台裝置來說太大。執行 Toskar 的電腦可以執行它。",
+        "ask": "在電腦上提問",
+        "none": "Toskar Core 免費且開源，Toskar Pro 是電腦上的 App。兩者都能用更大的模型和更多工具來回答。",
+        "connect": "連線到電腦",
+        "learn": "在 toskar.ai 了解更多"
+      }
+    }
   },
   "push": {
     "title": "此裝置上的通知",

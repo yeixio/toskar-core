@@ -227,6 +227,8 @@
     "chatOnPhone": "Discuter sur cet appareil",
     "webLookup": "Chercher des informations à jour",
     "webLookupCopy": "Quand une question demande des informations à jour, comme la météo ou l’actualité, cet appareil cherche sur le web avec DuckDuckGo et lit la meilleure page avant de répondre. Seuls les mots de la recherche quittent cet appareil. Les réponses citent leurs sources.",
+    "suggestModels": "Suggérer de meilleurs modèles",
+    "suggestModelsCopy": "Après une réponse, suggérer un modèle ou un ordinateur qui répondrait mieux à ce type de question.",
     "memoryCopy": "Dites « Souviens-toi que … » dans une discussion, et c’est gardé sur cet appareil pour les prochaines discussions. Désactiver la mémoire conserve ce qui est enregistré.",
     "memoryEmpty": "Rien de mémorisé pour l’instant.",
     "forgetMemory": "Oublier",
@@ -975,7 +977,23 @@
       "couldNotLoad": "{{model}} n’a pas pu être chargé. Réinstallez-le depuis Modèles ou choisissez un autre modèle.",
       "couldNotAnswer": "{{model}} n’a pas pu répondre cette fois. Réessayez ou choisissez un autre modèle."
     },
-    "currentSource": "Conditions actuelles (wttr.in)"
+    "currentSource": "Conditions actuelles (wttr.in)",
+    "offer": {
+      "coding": "{{name}} écrit du meilleur code que {{model}}.",
+      "vision": "{{name}} voit les photos. {{model}} n’en lit que le texte.",
+      "language": "{{name}} écrit mieux en {{language}} que {{model}}.",
+      "file": "{{name}} lit les fichiers mieux que {{model}}, un petit modèle.",
+      "details": "téléchargement de {{size}} · tient sur cet appareil",
+      "computer": {
+        "media": "Les images et les clips se créent sur un ordinateur avec Toskar.",
+        "file": "Ce fichier est plus long que ce que cet appareil lit d’un coup. Un ordinateur avec Toskar en lit davantage.",
+        "model": "{{name}} répondrait mieux, mais il est trop grand pour cet appareil. Un ordinateur avec Toskar peut l’exécuter.",
+        "ask": "Demander sur votre ordinateur",
+        "none": "Toskar Core est gratuit et open source, et Toskar Pro est l’app pour votre ordinateur. Les deux répondent avec de plus grands modèles et plus d’outils.",
+        "connect": "Connecter un ordinateur",
+        "learn": "En savoir plus sur toskar.ai"
+      }
+    }
   },
   "push": {
     "title": "Notifications sur cet appareil",

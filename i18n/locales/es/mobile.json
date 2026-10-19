@@ -227,6 +227,8 @@
     "chatOnPhone": "Chatear en este dispositivo",
     "webLookup": "Buscar información actual",
     "webLookupCopy": "Cuando una pregunta necesita información actual, como el clima o las noticias, este dispositivo busca en la web con DuckDuckGo y lee la mejor página antes de responder. Solo las palabras de búsqueda salen de este dispositivo. Las respuestas indican sus fuentes.",
+    "suggestModels": "Sugerir mejores modelos",
+    "suggestModelsCopy": "Después de una respuesta, sugiere un modelo o una computadora que responda mejor ese tipo de pregunta.",
     "memoryCopy": "Di “Recuerda que …” en un chat y se guarda en este dispositivo para chats futuros. Si desactivas la memoria, lo guardado se conserva.",
     "memoryEmpty": "Todavía no recuerdo nada.",
     "forgetMemory": "Olvidar",
@@ -975,7 +977,23 @@
       "couldNotLoad": "No se pudo cargar {{model}}. Vuelve a instalarlo desde Modelos o elige otro modelo.",
       "couldNotAnswer": "{{model}} no pudo responder esta vez. Inténtalo de nuevo o elige otro modelo."
     },
-    "currentSource": "Condiciones actuales (wttr.in)"
+    "currentSource": "Condiciones actuales (wttr.in)",
+    "offer": {
+      "coding": "{{name}} escribe mejor código que {{model}}.",
+      "vision": "{{name}} ve las fotos. {{model}} solo lee el texto que contienen.",
+      "language": "{{name}} escribe mejor en {{language}} que {{model}}.",
+      "file": "{{name}} lee los archivos mejor que {{model}}, un modelo pequeño.",
+      "details": "descarga de {{size}} · cabe en este dispositivo",
+      "computer": {
+        "media": "Las imágenes y los clips se crean en una computadora con Toskar.",
+        "file": "Este archivo es más largo de lo que este dispositivo lee de una vez. Una computadora con Toskar lee más.",
+        "model": "{{name}} respondería mejor, pero es demasiado grande para este dispositivo. Una computadora con Toskar puede ejecutarlo.",
+        "ask": "Preguntar en tu computadora",
+        "none": "Toskar Core es gratis y de código abierto, y Toskar Pro es la app para tu computadora. Ambos responden con modelos más grandes y más herramientas.",
+        "connect": "Conectar una computadora",
+        "learn": "Más en toskar.ai"
+      }
+    }
   },
   "push": {
     "title": "Notificaciones en este dispositivo",

@@ -227,6 +227,8 @@
     "chatOnPhone": "Conversar neste dispositivo",
     "webLookup": "Buscar informações atuais",
     "webLookupCopy": "Quando uma pergunta precisa de informações atuais, como o tempo ou notícias, este dispositivo pesquisa na web com o DuckDuckGo e lê a melhor página antes de responder. Só as palavras da busca saem deste dispositivo. As respostas mostram suas fontes.",
+    "suggestModels": "Sugerir modelos melhores",
+    "suggestModelsCopy": "Depois de uma resposta, sugere um modelo ou um computador que responderia melhor a esse tipo de pergunta.",
     "memoryCopy": "Diga “Lembre que …” em uma conversa e isso fica guardado neste dispositivo para conversas futuras. Desativar a memória mantém o que já foi salvo.",
     "memoryEmpty": "Nada lembrado ainda.",
     "forgetMemory": "Esquecer",
@@ -975,7 +977,23 @@
       "couldNotLoad": "Não foi possível carregar {{model}}. Reinstale em Modelos ou escolha outro modelo.",
       "couldNotAnswer": "{{model}} não conseguiu responder desta vez. Tente de novo ou escolha outro modelo."
     },
-    "currentSource": "Condições atuais (wttr.in)"
+    "currentSource": "Condições atuais (wttr.in)",
+    "offer": {
+      "coding": "{{name}} escreve código melhor que {{model}}.",
+      "vision": "{{name}} vê as fotos. {{model}} só lê o texto delas.",
+      "language": "{{name}} escreve melhor em {{language}} que {{model}}.",
+      "file": "{{name}} lê arquivos melhor que {{model}}, um modelo pequeno.",
+      "details": "download de {{size}} · cabe neste dispositivo",
+      "computer": {
+        "media": "Imagens e clipes são criados em um computador com o Toskar.",
+        "file": "Este arquivo é mais longo do que este dispositivo lê de uma vez. Um computador com o Toskar lê mais dele.",
+        "model": "{{name}} responderia melhor, mas é grande demais para este dispositivo. Um computador com o Toskar consegue executá-lo.",
+        "ask": "Perguntar no seu computador",
+        "none": "O Toskar Core é gratuito e de código aberto, e o Toskar Pro é o app para o seu computador. Os dois respondem com modelos maiores e mais ferramentas.",
+        "connect": "Conectar um computador",
+        "learn": "Mais em toskar.ai"
+      }
+    }
   },
   "push": {
     "title": "Notificações neste dispositivo",
