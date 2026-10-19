@@ -945,7 +945,10 @@ func (a *App) HandleHTTPChat(w http.ResponseWriter, r *http.Request, conversatio
 }
 
 // writeChatStream sends a chat's chunks as server-sent events: token, done,
-// and for a failure error_code then error.
+// and for a failure error_code then error. done waits for the channel to
+// close, which is after the answer is saved, so a client that reads the
+// chat on done finds it there (#707: an offer for a better model is worked
+// out after the model finishes, before the answer is saved).
 func writeChatStream(w http.ResponseWriter, ch <-chan pluginapi.ChatChunk) error {
 	flusher, ok := w.(http.Flusher)
 	if !ok {
@@ -954,7 +957,7 @@ func writeChatStream(w http.ResponseWriter, ch <-chan pluginapi.ChatChunk) error
 	w.Header().Set("Content-Type", "text/event-stream")
 	w.Header().Set("Cache-Control", "no-cache")
 	w.WriteHeader(http.StatusOK)
-	ended := false
+	done := map[string]any{}
 	for chunk := range ch {
 		if chunk.Error != "" {
 			// error_code comes first, so a client that knows it shows the
@@ -979,24 +982,16 @@ func writeChatStream(w http.ResponseWriter, ch <-chan pluginapi.ChatChunk) error
 			fmt.Fprintf(w, "event: token\ndata: %s\n\n", data)
 			flusher.Flush()
 		}
-		if chunk.Done {
-			payload := map[string]any{}
-			if chunk.Metrics != nil {
-				payload["metrics"] = chunk.Metrics
-			}
-			data, _ := json.Marshal(payload)
-			fmt.Fprintf(w, "event: done\ndata: %s\n\n", data)
-			flusher.Flush()
-			ended = true
+		if chunk.Done && chunk.Metrics != nil {
+			done["metrics"] = chunk.Metrics
 		}
 	}
 	// Every stream ends with done or error (#588), so a client can tell a
 	// reply that was cut off from one that finished, as when a stopped run
 	// closes without a last chunk.
-	if !ended {
-		fmt.Fprint(w, "event: done\ndata: {}\n\n")
-		flusher.Flush()
-	}
+	data, _ := json.Marshal(done)
+	fmt.Fprintf(w, "event: done\ndata: %s\n\n", data)
+	flusher.Flush()
 	return nil
 }
 
