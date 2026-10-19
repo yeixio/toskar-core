@@ -5,6 +5,7 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/yeixio/toskar-core/pkg/contracts"
 	"github.com/yeixio/toskar-core/pkg/pluginapi"
@@ -69,5 +70,32 @@ func TestChatStreamAlwaysEnds(t *testing.T) {
 	_ = writeChatStream(rec, ch)
 	if n := strings.Count(rec.Body.String(), "event: done"); n != 1 {
 		t.Fatalf("done sent %d times: %q", n, rec.Body)
+	}
+}
+
+// done waits for the channel to close, after the answer is saved, so a
+// client that reads the chat on done finds the answer (#707).
+func TestChatStreamDoneWaitsForTheEnd(t *testing.T) {
+	ch := make(chan pluginapi.ChatChunk)
+	rec := httptest.NewRecorder()
+	finished := make(chan struct{})
+	go func() {
+		_ = writeChatStream(rec, ch)
+		close(finished)
+	}()
+	ch <- pluginapi.ChatChunk{Content: "Hi"}
+	ch <- pluginapi.ChatChunk{Done: true, Metrics: &pluginapi.GenerationMetrics{CompletionTokens: 3}}
+	// The answer is still being saved: the stream has its tokens, not done.
+	time.Sleep(20 * time.Millisecond)
+	select {
+	case <-finished:
+		t.Fatal("the stream ended before the channel closed")
+	default:
+	}
+	close(ch)
+	<-finished
+	out := rec.Body.String()
+	if strings.Count(out, "event: done") != 1 || !strings.Contains(out, `"completion_tokens":3`) || !strings.HasSuffix(out, "\n\n") {
+		t.Fatalf("stream: %q", out)
 	}
 }
