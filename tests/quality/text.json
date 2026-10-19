@@ -742,6 +742,54 @@
     {
       "in": "a plain answer please",
       "want": "chat"
+    },
+    {
+      "in": "Write a Swift function that reverses an array",
+      "want": "coding"
+    },
+    {
+      "in": "Write a Rust function that adds two ints",
+      "want": "coding"
+    },
+    {
+      "in": "write a short function to parse dates",
+      "want": "coding"
+    },
+    {
+      "in": "Write a Ruby method that sums a list",
+      "want": "coding"
+    },
+    {
+      "in": "How do I sort an array in Swift?",
+      "want": "coding"
+    },
+    {
+      "in": "How do I reverse a string in Go?",
+      "want": "coding"
+    },
+    {
+      "in": "What does this Rust trait do?",
+      "want": "coding"
+    },
+    {
+      "in": "Taylor Swift's best album?",
+      "want": "chat"
+    },
+    {
+      "in": "How do I remove rust from my bike?",
+      "want": "chat"
+    },
+    {
+      "in": "Write a short story about a fox",
+      "want": "chat"
+    },
+    {
+      "in": "Thanks for the swift reply",
+      "want": "chat"
+    },
+    {
+      "in": "How do I build a base in Rust?",
+      "want": "chat"
     }
   ],
   "small_talk": [
