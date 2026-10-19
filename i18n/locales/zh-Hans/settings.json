@@ -178,7 +178,9 @@
     "compactAtHint": "长对话占满模型窗口的这一比例后，较早的消息会以摘要发送。",
     "compactEarly": "较早（40%）",
     "compactNormal": "标准（50%）",
-    "compactLate": "较晚（70%）"
+    "compactLate": "较晚（70%）",
+    "suggestModels": "推荐更好的模型",
+    "suggestModelsHint": "回答之后，推荐一个这台电脑能运行、能更好回答这类问题的模型。仅对你生效。"
   },
   "ratings": {
     "title": "社区评分",

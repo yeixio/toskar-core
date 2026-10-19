@@ -185,7 +185,9 @@
     "compactAtHint": "Lange Chats senden ältere Nachrichten als Zusammenfassung, sobald sie so viel vom Fenster des Modells füllen.",
     "compactEarly": "Früh (40 %)",
     "compactNormal": "Normal (50 %)",
-    "compactLate": "Spät (70 %)"
+    "compactLate": "Spät (70 %)",
+    "suggestModels": "Bessere Modelle vorschlagen",
+    "suggestModelsHint": "Nach einer Antwort ein Modell anbieten, das dieser Computer ausführen kann und das solche Fragen besser beantwortet. Nur für dich."
   },
   "ratings": {
     "title": "Community-Bewertungen",

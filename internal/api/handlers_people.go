@@ -53,7 +53,7 @@ func (s *Server) atLeast(min auth.Role, h http.HandlerFunc) http.HandlerFunc {
 }
 
 // myPreferences are the settings each person keeps for themselves (#206).
-var myPreferences = map[string]bool{"ui_locale": true, "assistant_language_mode": true, "assistant_language": true}
+var myPreferences = map[string]bool{"ui_locale": true, "assistant_language_mode": true, "assistant_language": true, "suggest_models": true}
 
 // handleMyPreferences saves the request's person's own App language and
 // assistant language, whatever their role, and answers with their
@@ -71,10 +71,14 @@ func (s *Server) handleMyPreferences(w http.ResponseWriter, r *http.Request) {
 	patch := map[string]any{}
 	for k, v := range in {
 		if !myPreferences[k] {
-			writeErr(w, http.StatusBadRequest, "INVALID_SETTING", "Only ui_locale, assistant_language_mode, and assistant_language are your own.", map[string]any{"setting": k})
+			writeErr(w, http.StatusBadRequest, "INVALID_SETTING", "Only ui_locale, assistant_language_mode, assistant_language, and suggest_models are your own.", map[string]any{"setting": k})
 			return
 		}
-		if _, ok := v.(string); !ok {
+		// suggest_models is on or off (#707); the rest are strings.
+		if _, isBool := v.(bool); k == "suggest_models" && !isBool {
+			writeErr(w, http.StatusBadRequest, "INVALID_SETTING", "suggest_models is true or false.", map[string]any{"setting": k})
+			return
+		} else if _, ok := v.(string); !ok && k != "suggest_models" {
 			writeErr(w, http.StatusBadRequest, "INVALID_SETTING", "Each preference is a string.", map[string]any{"setting": k})
 			return
 		}

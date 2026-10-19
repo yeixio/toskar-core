@@ -2042,7 +2042,11 @@ export function ChatPage() {
                         <AnswerDetails meta={message.meta} runs={admin} />
 
                         {message.meta?.setup && admin ? (
-                          <SetupOfferCard offer={message.meta.setup} onContinue={continueAfterSetup} />
+                          <SetupOfferCard
+                            offer={message.meta.setup}
+                            onContinue={continueAfterSetup}
+                            onRetry={(modelId) => void sendMessage(undefined, { retryOf: message.id, modelId })}
+                          />
                         ) : null}
                         {message.meta?.automation && member && allows('automations') ? (
                           <AutomationDraftCard draft={message.meta.automation} conversationId={message.conversation_id} />

@@ -199,6 +199,8 @@ func (a *App) RunChat(ctx context.Context, profileID, conversationID, message st
 	// Steps and notices are written in the App language.
 	appLang := a.appLanguage(ctx)
 	routeReason, routeNotice := "", ""
+	// What the request was, for offering a better-fitting model (#707).
+	offerKind, offerLang, offerWeak := huginn.Classify(message), "", false
 	if modelID == huginn.AutoModelID {
 		// A specialized AI trained for exactly this answers first (§61).
 		if id, reason, ok := a.chooseSpecialist(ctx, message); ok {
@@ -213,6 +215,7 @@ func (a *App) RunChat(ctx context.Context, profileID, conversationID, message st
 				return nil, err
 			}
 			modelID, routeReason = choice.Model.ID, choice.Reason(appLang)
+			offerKind, offerLang, offerWeak = choice.Kind, lang, choice.LanguageWeak
 			if choice.LanguageWeak {
 				// Nothing installed writes the language well (§16): the
 				// answer is still in it, with a word that it may read less well.
@@ -696,6 +699,21 @@ func (a *App) RunChat(ctx context.Context, profileID, conversationID, message st
 		// The answer keeps its context reading, so the gauge shows it when the
 		// chat is opened again.
 		answerMeta := withContextUsage(env.trace.meta(), contextUsage)
+		// A model that would have answered this better, to install (#707).
+		if full != "" && !held && (answerMeta == nil || answerMeta.Setup == nil) && ctx.Err() == nil {
+			env.mu.Lock()
+			longChat := env.summarized > 0
+			env.mu.Unlock()
+			if offer := a.modelOffer(ctx, conversationID, appLang, offerSignals{
+				message: message, kind: offerKind, effort: huginn.EffortFrom(ctx), lang: offerLang, weakLang: offerWeak,
+				dataKind: env.trace.dataKind(), longChat: longChat, answered: env.modelID(),
+			}); offer != nil {
+				if answerMeta == nil {
+					answerMeta = &contracts.MessageMeta{Contract: contracts.ContractVersion}
+				}
+				answerMeta.Setup = offer
+			}
+		}
 		// And where it ran, when every step ran here (#317).
 		if env.ranLocally() {
 			answerMeta = withDevice(answerMeta, a.localAcceleration(ctx, env.modelID()))

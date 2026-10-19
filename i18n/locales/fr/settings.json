@@ -192,7 +192,9 @@
     "compactAtHint": "Les longues conversations envoient les anciens messages sous forme de résumé dès qu'elles remplissent cette part de la fenêtre du modèle.",
     "compactEarly": "Tôt (40 %)",
     "compactNormal": "Normal (50 %)",
-    "compactLate": "Tard (70 %)"
+    "compactLate": "Tard (70 %)",
+    "suggestModels": "Proposer de meilleurs modèles",
+    "suggestModelsHint": "Après une réponse, proposer un modèle que cet ordinateur peut faire tourner et qui répondrait mieux à ce genre de question. Pour vous seulement."
   },
   "ratings": {
     "title": "Notes de la communauté",

@@ -405,7 +405,14 @@
       "continue": "Weiter",
       "continuing": "Eingerichtet. Deine Anfrage wird fertiggestellt …",
       "askAdmin": "Bitte einen Admin auf {{node}}, das einzurichten.",
-      "downloadFailed": "Der Download wurde nicht abgeschlossen. Tippe auf Einrichten, um es erneut zu versuchen."
+      "downloadFailed": "Der Download wurde nicht abgeschlossen. Tippe auf Einrichten, um es erneut zu versuchen.",
+      "model": {
+        "details": "{{size}} Download · {{fit}} · bleibt auf diesem Computer",
+        "fitExcellent": "passt locker auf diesen Computer",
+        "fitGood": "passt gut auf diesen Computer",
+        "install": "Installieren und neu antworten",
+        "notNow": "Jetzt nicht"
+      }
     },
     "phoneAutoHint": "Wählt für jede Nachricht das beste Modell auf diesem Gerät"
   },

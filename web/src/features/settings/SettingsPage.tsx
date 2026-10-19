@@ -550,6 +550,22 @@ export function SettingsPage() {
                   <option value="late">{t('history.compactLate')}</option>
                 </select>
               </label>
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-sm font-medium text-ink">{t('history.suggestModels')}</p>
+                  <p className="mt-1 text-xs text-ink-muted">{t('history.suggestModelsHint')}</p>
+                </div>
+                <Toggle
+                  label={t('history.suggestModels')}
+                  checked={settings?.suggest_models ?? true}
+                  disabled={busy}
+                  onChange={() =>
+                    void api
+                      .setMyPreferences({ suggest_models: !(settings?.suggest_models ?? true) })
+                      .then(() => queryClient.invalidateQueries({ queryKey: ['settings'] }))
+                  }
+                />
+              </div>
               <ChatCleanup />
             </section>
 

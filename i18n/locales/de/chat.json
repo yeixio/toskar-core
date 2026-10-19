@@ -408,7 +408,19 @@
     "needsShared": "Braucht etwa {{need}} Grafikspeicher; die Grafik dieses Computers kann {{have}} nutzen, daher kann es langsam sein oder fehlschlagen.",
     "needsSharedOn": "Braucht etwa {{need}} Grafikspeicher; die Grafik von {{node}} kann {{have}} nutzen, daher kann es langsam sein oder fehlschlagen.",
     "slowImage": "Dieser Computer hat dafür keine GPU-Beschleunigung, daher dauert jedes Bild ein paar Minuten.",
-    "slowVideo": "Dieser Computer hat dafür keine GPU-Beschleunigung, daher kann ein Clip fast eine Stunde dauern."
+    "slowVideo": "Dieser Computer hat dafür keine GPU-Beschleunigung, daher kann ein Clip fast eine Stunde dauern.",
+    "model": {
+      "coding": "{{name}} schreibt besseren Code als {{model}}.",
+      "data": "{{name}} liest deine Dateien und dein Wissen zuverlässiger als {{model}}, ein kleines Modell.",
+      "language": "{{name}} schreibt besser {{language}} als {{model}}.",
+      "reasoning": "{{name}} denkt ein Problem vor der Antwort durch: langsamer, aber besser in Mathe und Logik als {{model}}.",
+      "context": "{{name}} liest einen längeren Chat auf einmal als {{model}}, daher wird weniger davon zusammengefasst.",
+      "details": "{{size}} Download · {{fit}} · bleibt auf diesem Computer",
+      "fitExcellent": "passt locker auf diesen Computer",
+      "fitGood": "passt gut auf diesen Computer",
+      "install": "Installieren und neu antworten",
+      "notNow": "Jetzt nicht"
+    }
   },
   "readAloud": {
     "button": "Vorlesen",

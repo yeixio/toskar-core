@@ -47,6 +47,8 @@ var personalKeys = map[string]bool{
 	"assistant_language_mode": true,
 	"assistant_language":      true,
 	personalKey:               true,
+	// Whether answers may offer a better-fitting model (#707).
+	"suggest_models": true,
 }
 
 // personalSettingKey is where ctx's person keeps key.

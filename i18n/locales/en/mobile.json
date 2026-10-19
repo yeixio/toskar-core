@@ -406,7 +406,14 @@
       "continue": "Continue",
       "continuing": "Set up. Finishing your request…",
       "askAdmin": "Ask an Admin on {{node}} to set this up.",
-      "downloadFailed": "The download didn't finish. Tap Set up to try again."
+      "downloadFailed": "The download didn't finish. Tap Set up to try again.",
+      "model": {
+        "details": "{{size}} download · {{fit}} · stays on this computer",
+        "fitExcellent": "fits this computer easily",
+        "fitGood": "fits this computer well",
+        "install": "Install and answer again",
+        "notNow": "Not now"
+      }
     }
   },
   "effort": {

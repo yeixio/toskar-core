@@ -192,7 +192,9 @@
     "compactAtHint": "Los chats largos envían los mensajes antiguos como resumen cuando llenan esta parte de la ventana del modelo.",
     "compactEarly": "Pronto (40 %)",
     "compactNormal": "Normal (50 %)",
-    "compactLate": "Tarde (70 %)"
+    "compactLate": "Tarde (70 %)",
+    "suggestModels": "Sugerir mejores modelos",
+    "suggestModelsHint": "Después de una respuesta, ofrecer un modelo que esta computadora puede ejecutar y que respondería mejor ese tipo de pregunta. Solo para ti."
   },
   "ratings": {
     "title": "Valoraciones de la comunidad",

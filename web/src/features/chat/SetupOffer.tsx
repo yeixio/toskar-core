@@ -25,7 +25,17 @@ const needsKeys = {
   shared: { here: 'setup.needsShared', on: 'setup.needsSharedOn' },
 } as const
 
-export function SetupOfferCard({ offer, onContinue }: { offer: SetupOffer; onContinue: (text: string, attachments?: string[]) => void }) {
+export function SetupOfferCard({
+  offer,
+  onContinue,
+  onRetry,
+}: {
+  offer: SetupOffer
+  onContinue: (text: string, attachments?: string[]) => void
+  /** Answers the question again with another model, as a new version (#707). */
+  onRetry?: (modelId: string) => void
+}) {
+  if (offer.ability === 'model') return onRetry ? <ModelOfferCard offer={offer} onRetry={onRetry} /> : null
   if (offer.ability === 'vision') return <VisionOfferCard offer={offer} onContinue={onContinue} />
   return <MediaOfferCard offer={offer} onContinue={onContinue} />
 }
@@ -249,6 +259,100 @@ function VisionOfferCard({ offer, onContinue }: { offer: SetupOffer; onContinue:
             }}
           >
             {t('setup.install')}
+          </button>
+        </div>
+      )}
+      {error && !installed ? <ShownError {...error} className="text-xs text-danger" /> : null}
+    </div>
+  )
+}
+
+/**
+ * A model that would have answered this better (#707): why, its size and
+ * fit, and Install and answer again, which answers the question again with
+ * it as a new version, so the first answer stays. Not now hides it.
+ */
+function ModelOfferCard({ offer, onRetry }: { offer: SetupOffer; onRetry: (modelId: string) => void }) {
+  const { t } = useTranslation('chat')
+  const queryClient = useQueryClient()
+  const [dismissed, setDismissed] = useState(false)
+  const [started, setStarted] = useState(false)
+  const [progress, setProgress] = useState<number | null>(null)
+  const [error, setError] = useState<ReturnType<typeof shownError> | null>(null)
+  const retried = useRef(false)
+  const modelsQuery = useQuery({
+    queryKey: ['models'],
+    queryFn: () => api.getModels(),
+    retry: false,
+    refetchInterval: (query) => (started && !query.state.data?.find((m) => m.id === offer.option)?.installed ? 3000 : false),
+  })
+  const installed = !!modelsQuery.data?.find((m) => m.id === offer.option)?.installed
+
+  useEffect(() => {
+    if (!started) return
+    return subscribeEvents({
+      onEvent: (event) => {
+        const payload = event.payload as
+          | (Partial<ModelDownloadProgressPayload> & { model_id?: string; error?: string; error_code?: string; error_details?: Record<string, unknown> })
+          | undefined
+        if (payload?.model_id !== offer.option) return
+        if (event.type === 'model.download.progress') setProgress(Math.round(payload.percent ?? 0))
+        if (event.type === 'model.download.failed') {
+          setProgress(null)
+          setError(payload.error ? { error: payload.error, code: payload.error_code, details: payload.error_details } : { error: t('send.downloadFailed') })
+        }
+        if (event.type === 'model.download.completed') void queryClient.invalidateQueries({ queryKey: ['models'] })
+      },
+    })
+  }, [started, offer.option, queryClient, t])
+
+  // Installed from this card: answer again with it, once.
+  useEffect(() => {
+    if (!installed || !started || retried.current) return
+    retried.current = true
+    onRetry(offer.option)
+  }, [installed, started, offer.option, onRetry])
+
+  // Already installed some other way, or put away: nothing to offer.
+  if (dismissed || (installed && !started)) return null
+  return (
+    <div className="mt-3 space-y-2 rounded-xl border border-line/70 bg-surface px-3 py-2.5 text-sm" data-testid="model-offer">
+      <p className="text-ink">{offer.label}</p>
+      {started && !error ? (
+        installed ? (
+          <p className="text-xs text-ink-muted">{t('setup.continuing')}</p>
+        ) : (
+          <div className="space-y-1.5">
+            <div className="text-xs text-ink-muted">
+              {t('setup.downloading', { done: gb((offer.size_bytes * (progress ?? 0)) / 100), total: gb(offer.size_bytes) })}
+            </div>
+            <div className="h-2 overflow-hidden rounded-full bg-raised" role="progressbar" aria-valuenow={progress ?? 0} aria-valuemin={0} aria-valuemax={100}>
+              <div className="h-full bg-primary transition-[width] duration-500" style={{ width: `${progress ?? 0}%` }} />
+            </div>
+          </div>
+        )
+      ) : (
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+          <span className="min-w-0 flex-1 text-xs text-ink-muted">
+            {t('setup.model.details', { size: gb(offer.size_bytes), fit: offer.fit === 'excellent' ? t('setup.model.fitExcellent') : t('setup.model.fitGood') })}
+          </span>
+          <button type="button" className="btn-secondary px-3 py-1.5 text-xs" onClick={() => setDismissed(true)}>
+            {t('setup.model.notNow')}
+          </button>
+          <button
+            type="button"
+            className="btn-primary px-3 py-1.5 text-xs"
+            onClick={async () => {
+              setError(null)
+              try {
+                await api.installModel(offer.option)
+                setStarted(true)
+              } catch (err) {
+                setError(shownError(err))
+              }
+            }}
+          >
+            {t('setup.model.install')}
           </button>
         </div>
       )}
