@@ -4,10 +4,20 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    ignore:
+      # chromedp 0.21 rewrote its API; internal/browser moves to it in #596.
+      # Remove these with that change.
+      - dependency-name: github.com/chromedp/chromedp
+      - dependency-name: github.com/chromedp/cdproto
   - package-ecosystem: npm
     directory: /web
     schedule:
       interval: weekly
+    ignore:
+      # The build runs on Node 22: its types stay on 22 until #347 moves the
+      # build to Node 26.
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
   - package-ecosystem: npm
     directory: /scripts/screenshots
     schedule:
