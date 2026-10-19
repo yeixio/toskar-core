@@ -410,9 +410,9 @@
       "askAdmin": "Chiedi a un admin di {{node}} di configurarlo.",
       "downloadFailed": "Il download non è stato completato. Tocca Configura per riprovare.",
       "model": {
-        "details": "download di {{size}} · {{fit}} · resta su questo computer",
-        "fitExcellent": "ci sta comodamente su questo computer",
-        "fitGood": "ci sta bene su questo computer",
+        "details": "download di {{size}} · su {{node}} · {{fit}}",
+        "fitExcellent": "ci sta comodamente",
+        "fitGood": "ci sta bene",
         "install": "Installa e rispondi di nuovo",
         "notNow": "Non ora"
       }

@@ -410,9 +410,9 @@
       "askAdmin": "Peça a um administrador de {{node}} para configurar isso.",
       "downloadFailed": "O download não terminou. Toque em Configurar para tentar de novo.",
       "model": {
-        "details": "download de {{size}} · {{fit}} · fica neste computador",
-        "fitExcellent": "cabe com folga neste computador",
-        "fitGood": "cabe bem neste computador",
+        "details": "download de {{size}} · em {{node}} · {{fit}}",
+        "fitExcellent": "cabe com folga",
+        "fitGood": "cabe bem",
         "install": "Instalar e responder de novo",
         "notNow": "Agora não"
       }

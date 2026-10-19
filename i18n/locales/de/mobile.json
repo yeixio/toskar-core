@@ -407,9 +407,9 @@
       "askAdmin": "Bitte einen Admin auf {{node}}, das einzurichten.",
       "downloadFailed": "Der Download wurde nicht abgeschlossen. Tippe auf Einrichten, um es erneut zu versuchen.",
       "model": {
-        "details": "{{size}} Download · {{fit}} · bleibt auf diesem Computer",
-        "fitExcellent": "passt locker auf diesen Computer",
-        "fitGood": "passt gut auf diesen Computer",
+        "details": "{{size}} Download · auf {{node}} · {{fit}}",
+        "fitExcellent": "passt locker",
+        "fitGood": "passt gut",
         "install": "Installieren und neu antworten",
         "notNow": "Jetzt nicht"
       }
