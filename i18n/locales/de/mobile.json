@@ -227,6 +227,8 @@
     "chatOnPhone": "Auf diesem Gerät chatten",
     "webLookup": "Aktuelle Informationen nachschlagen",
     "webLookupCopy": "Wenn eine Frage aktuelle Informationen braucht, etwa Wetter oder Nachrichten, sucht dieses Gerät mit DuckDuckGo im Web und liest vor der Antwort die beste Seite. Nur die Suchwörter verlassen dieses Gerät. Antworten nennen ihre Quellen.",
+    "suggestModels": "Bessere Modelle vorschlagen",
+    "suggestModelsCopy": "Nach einer Antwort ein Modell oder einen Computer vorschlagen, der diese Art von Frage besser beantwortet.",
     "memoryCopy": "Sag in einem Chat „Merk dir, dass …“, und es wird für künftige Chats auf diesem Gerät gespeichert. Wenn du das Gedächtnis ausschaltest, bleibt Gespeichertes erhalten.",
     "memoryEmpty": "Noch nichts gemerkt.",
     "forgetMemory": "Vergessen",
@@ -959,7 +961,23 @@
       "couldNotLoad": "{{model}} ließ sich nicht laden. Installiere es unter Modelle neu oder wähle ein anderes Modell.",
       "couldNotAnswer": "{{model}} konnte diesmal nicht antworten. Versuch es noch einmal oder wähle ein anderes Modell."
     },
-    "currentSource": "Aktuelle Bedingungen (wttr.in)"
+    "currentSource": "Aktuelle Bedingungen (wttr.in)",
+    "offer": {
+      "coding": "{{name}} schreibt besseren Code als {{model}}.",
+      "vision": "{{name}} sieht Fotos. {{model}} liest nur den Text darin.",
+      "language": "{{name}} schreibt besser {{language}} als {{model}}.",
+      "file": "{{name}} liest Dateien besser als {{model}}, ein kleines Modell.",
+      "details": "{{size}} Download · passt auf dieses Gerät",
+      "computer": {
+        "media": "Bilder und Clips entstehen auf einem Computer mit Toskar.",
+        "file": "Diese Datei ist länger, als dieses Gerät auf einmal liest. Ein Computer mit Toskar liest mehr davon.",
+        "model": "{{name}} würde das besser beantworten, ist aber zu groß für dieses Gerät. Ein Computer mit Toskar kann es ausführen.",
+        "ask": "Auf deinem Computer fragen",
+        "none": "Toskar Core ist kostenlos und Open Source, Toskar Pro ist die App für deinen Computer. Beide antworten mit größeren Modellen und mehr Werkzeugen.",
+        "connect": "Computer verbinden",
+        "learn": "Mehr auf toskar.ai"
+      }
+    }
   },
   "push": {
     "title": "Benachrichtigungen auf diesem Gerät",
