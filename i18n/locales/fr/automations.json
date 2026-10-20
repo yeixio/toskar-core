@@ -374,7 +374,33 @@
     "afterWhen": "Quand",
     "afterSucceeded": "Chaque fois qu’elle se termine",
     "afterNotified": "Seulement quand elle notifie",
-    "afterHint": "Elle s’exécute juste après l’autre automatisation, avec son résultat. Une exécution qui en suit une autre ne peut pas utiliser d’outils qui modifient des choses hors de Toskar."
+    "afterHint": "Elle s’exécute juste après l’autre automatisation, avec son résultat. Une exécution qui en suit une autre ne peut pas utiliser d’outils qui modifient des choses hors de Toskar.",
+    "runsDevice": "Quand un appareil change",
+    "device": "Appareil",
+    "deviceTo": "Passe à",
+    "deviceToAny": "Tout changement",
+    "cooldown": "Ensuite, attendre",
+    "cooldowns": {
+      "s15": "15 secondes",
+      "s60": "1 minute",
+      "s300": "5 minutes",
+      "s900": "15 minutes",
+      "s3600": "1 heure"
+    },
+    "deviceHint": "Elle s'exécute dès que l'appareil change, en sachant ce qui a changé. Les changements pendant l'attente après une exécution n'en lancent pas d'autre : un capteur qui clignote ne la lance qu'une fois.",
+    "cameras": "Regarder des caméras",
+    "camerasHint": "Chaque exécution commence par une image de ces caméras, montrée à un modèle qui voit les images. Jusqu'à {{count}}.",
+    "deviceKinds": {
+      "camera": "Caméras",
+      "sensor": "Capteurs",
+      "speaker": "Haut-parleurs",
+      "light": "Lumières",
+      "switch": "Interrupteurs",
+      "lock": "Serrures",
+      "cover": "Volets",
+      "climate": "Climat",
+      "other": "Autres"
+    }
   },
   "draft": {
     "label": "Automatisation à confirmer",
@@ -404,6 +430,8 @@
     "feed": "Nouveaux articles sur {{site}} · vérifié : {{schedule}}",
     "folder": "Quand {{name}} change · vérifié : {{schedule}}",
     "webhook": "Quand son lien webhook est appelé",
+    "device": "Quand {{device}} change",
+    "deviceTo": "Quand {{device}} passe à {{to}}",
     "after": "Après la fin de {{name}}",
     "afterNotified": "Après une notification de {{name}}",
     "anotherAutomation": "une autre automatisation"

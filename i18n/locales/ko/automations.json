@@ -374,7 +374,33 @@
     "afterWhen": "시점",
     "afterSucceeded": "끝날 때마다",
     "afterNotified": "알림을 보낼 때만",
-    "afterHint": "다른 자동화가 끝난 직후 그 결과를 받아 실행됩니다. 다른 자동화를 이어 실행할 때는 Toskar 밖의 무언가를 바꾸는 도구를 쓸 수 없습니다."
+    "afterHint": "다른 자동화가 끝난 직후 그 결과를 받아 실행됩니다. 다른 자동화를 이어 실행할 때는 Toskar 밖의 무언가를 바꾸는 도구를 쓸 수 없습니다.",
+    "runsDevice": "기기가 바뀔 때",
+    "device": "기기",
+    "deviceTo": "바뀌는 상태",
+    "deviceToAny": "모든 변화",
+    "cooldown": "그다음 대기",
+    "cooldowns": {
+      "s15": "15초",
+      "s60": "1분",
+      "s300": "5분",
+      "s900": "15분",
+      "s3600": "1시간"
+    },
+    "deviceHint": "기기가 바뀌는 즉시, 무엇이 바뀌었는지 알려 주고 실행합니다. 실행 후 대기 중의 변화로는 다시 실행되지 않으므로, 깜빡이는 센서도 한 번만 실행합니다.",
+    "cameras": "카메라 보기",
+    "camerasHint": "실행할 때마다 먼저 이 카메라들의 사진을 이미지를 볼 수 있는 모델에게 보여 줍니다. 최대 {{count}}대.",
+    "deviceKinds": {
+      "camera": "카메라",
+      "sensor": "센서",
+      "speaker": "스피커",
+      "light": "조명",
+      "switch": "스위치",
+      "lock": "잠금장치",
+      "cover": "블라인드",
+      "climate": "냉난방",
+      "other": "기타"
+    }
   },
   "draft": {
     "label": "확인할 자동화",
@@ -400,6 +426,8 @@
     "feed": "{{site}}의 새 글 · 확인: {{schedule}}",
     "folder": "{{name}}이(가) 바뀌면 · 확인: {{schedule}}",
     "webhook": "웹훅 링크가 호출되면",
+    "device": "{{device}}이(가) 바뀔 때",
+    "deviceTo": "{{device}}이(가) {{to}}(으)로 바뀔 때",
     "after": "{{name}}이(가) 끝난 뒤",
     "afterNotified": "{{name}}이(가) 알림을 보낸 뒤",
     "anotherAutomation": "다른 자동화"

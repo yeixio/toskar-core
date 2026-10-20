@@ -374,7 +374,33 @@
     "afterWhen": "Quando",
     "afterSucceeded": "Toda vez que terminar",
     "afterNotified": "Só quando notificar",
-    "afterHint": "Ela roda logo depois da outra automação, com o resultado dela. Uma execução que segue outra não pode usar ferramentas que mudam coisas fora do Toskar."
+    "afterHint": "Ela roda logo depois da outra automação, com o resultado dela. Uma execução que segue outra não pode usar ferramentas que mudam coisas fora do Toskar.",
+    "runsDevice": "Quando um dispositivo muda",
+    "device": "Dispositivo",
+    "deviceTo": "Muda para",
+    "deviceToAny": "Qualquer mudança",
+    "cooldown": "Depois, esperar",
+    "cooldowns": {
+      "s15": "15 segundos",
+      "s60": "1 minuto",
+      "s300": "5 minutos",
+      "s900": "15 minutos",
+      "s3600": "1 hora"
+    },
+    "deviceHint": "Ela roda assim que o dispositivo muda, sabendo o que mudou. Mudanças durante a espera depois de uma execução não iniciam outra, então um sensor que oscila a roda uma vez só.",
+    "cameras": "Olhar câmeras",
+    "camerasHint": "Cada execução começa com uma imagem destas câmeras, mostrada a um modelo que vê imagens. Até {{count}}.",
+    "deviceKinds": {
+      "camera": "Câmeras",
+      "sensor": "Sensores",
+      "speaker": "Alto-falantes",
+      "light": "Luzes",
+      "switch": "Interruptores",
+      "lock": "Fechaduras",
+      "cover": "Persianas",
+      "climate": "Clima",
+      "other": "Outros"
+    }
   },
   "draft": {
     "label": "Automação para confirmar",
@@ -404,6 +430,8 @@
     "feed": "Posts novos em {{site}} · verificado: {{schedule}}",
     "folder": "Quando {{name}} muda · verificado: {{schedule}}",
     "webhook": "Quando o link de webhook é chamado",
+    "device": "Quando {{device}} muda",
+    "deviceTo": "Quando {{device}} passa a {{to}}",
     "after": "Depois que {{name}} terminar",
     "afterNotified": "Depois que {{name}} notificar",
     "anotherAutomation": "outra automação"

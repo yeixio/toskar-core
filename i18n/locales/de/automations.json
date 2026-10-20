@@ -374,7 +374,33 @@
     "afterWhen": "Wann",
     "afterSucceeded": "Jedes Mal, wenn sie fertig ist",
     "afterNotified": "Nur wenn sie benachrichtigt",
-    "afterHint": "Sie läuft direkt nach der anderen Automation und erhält deren Ergebnis. Ein Lauf, der einer anderen folgt, kann keine Werkzeuge nutzen, die außerhalb von Toskar etwas ändern."
+    "afterHint": "Sie läuft direkt nach der anderen Automation und erhält deren Ergebnis. Ein Lauf, der einer anderen folgt, kann keine Werkzeuge nutzen, die außerhalb von Toskar etwas ändern.",
+    "runsDevice": "Wenn sich ein Gerät ändert",
+    "device": "Gerät",
+    "deviceTo": "Ändert sich zu",
+    "deviceToAny": "Jede Änderung",
+    "cooldown": "Danach warten",
+    "cooldowns": {
+      "s15": "15 Sekunden",
+      "s60": "1 Minute",
+      "s300": "5 Minuten",
+      "s900": "15 Minuten",
+      "s3600": "1 Stunde"
+    },
+    "deviceHint": "Sie läuft, sobald sich das Gerät ändert, und erfährt, was sich geändert hat. Änderungen während der Wartezeit nach einem Lauf starten keinen weiteren, sodass ein flackernder Sensor sie nur einmal startet.",
+    "cameras": "Kameras ansehen",
+    "camerasHint": "Jeder Lauf beginnt mit einem Bild dieser Kameras, das ein Modell bekommt, das Bilder sehen kann. Bis zu {{count}}.",
+    "deviceKinds": {
+      "camera": "Kameras",
+      "sensor": "Sensoren",
+      "speaker": "Lautsprecher",
+      "light": "Lichter",
+      "switch": "Schalter",
+      "lock": "Schlösser",
+      "cover": "Rollläden",
+      "climate": "Klima",
+      "other": "Sonstiges"
+    }
   },
   "draft": {
     "label": "Automation zum Bestätigen",
@@ -402,6 +428,8 @@
     "feed": "Neue Beiträge auf {{site}} · geprüft: {{schedule}}",
     "folder": "Wenn sich {{name}} ändert · geprüft: {{schedule}}",
     "webhook": "Wenn ihr Webhook-Link aufgerufen wird",
+    "device": "Wenn sich {{device}} ändert",
+    "deviceTo": "Wenn {{device}} zu {{to}} wechselt",
     "after": "Nachdem {{name}} fertig ist",
     "afterNotified": "Nachdem {{name}} benachrichtigt",
     "anotherAutomation": "einer anderen Automation"

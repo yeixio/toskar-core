@@ -374,7 +374,33 @@
     "afterWhen": "时机",
     "afterSucceeded": "每次完成时",
     "afterNotified": "仅在发出通知时",
-    "afterHint": "在另一个自动化之后立即运行，并获得它的结果。跟随其他自动化的运行不能使用会更改 Toskar 之外内容的工具。"
+    "afterHint": "在另一个自动化之后立即运行，并获得它的结果。跟随其他自动化的运行不能使用会更改 Toskar 之外内容的工具。",
+    "runsDevice": "当设备变化时",
+    "device": "设备",
+    "deviceTo": "变为",
+    "deviceToAny": "任何变化",
+    "cooldown": "之后等待",
+    "cooldowns": {
+      "s15": "15 秒",
+      "s60": "1 分钟",
+      "s300": "5 分钟",
+      "s900": "15 分钟",
+      "s3600": "1 小时"
+    },
+    "deviceHint": "设备一变化就立即运行，并告诉它变化了什么。运行后的等待时间内的变化不会再次触发，因此闪烁的传感器只会触发一次。",
+    "cameras": "查看摄像头",
+    "camerasHint": "每次运行先拍下这些摄像头的画面，交给能看图片的模型。最多 {{count}} 个。",
+    "deviceKinds": {
+      "camera": "摄像头",
+      "sensor": "传感器",
+      "speaker": "扬声器",
+      "light": "灯",
+      "switch": "开关",
+      "lock": "门锁",
+      "cover": "窗帘",
+      "climate": "空调",
+      "other": "其他"
+    }
   },
   "draft": {
     "label": "待确认的自动化",
@@ -400,6 +426,8 @@
     "feed": "{{site}} 有新文章 · 检查：{{schedule}}",
     "folder": "{{name}} 有变化时 · 检查：{{schedule}}",
     "webhook": "其 Webhook 链接被调用时",
+    "device": "当 {{device}} 变化时",
+    "deviceTo": "当 {{device}} 变为 {{to}} 时",
     "after": "{{name}} 完成后",
     "afterNotified": "{{name}} 发出通知后",
     "anotherAutomation": "另一个自动化"

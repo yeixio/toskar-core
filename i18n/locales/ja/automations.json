@@ -374,7 +374,33 @@
     "afterWhen": "タイミング",
     "afterSucceeded": "終わるたびに",
     "afterNotified": "通知したときだけ",
-    "afterHint": "別のオートメーションの直後に、その結果を受け取って実行します。別のオートメーションに続く実行では、Toskar の外の何かを変更するツールは使えません。"
+    "afterHint": "別のオートメーションの直後に、その結果を受け取って実行します。別のオートメーションに続く実行では、Toskar の外の何かを変更するツールは使えません。",
+    "runsDevice": "デバイスが変化したとき",
+    "device": "デバイス",
+    "deviceTo": "変化後の状態",
+    "deviceToAny": "どんな変化でも",
+    "cooldown": "その後の待ち時間",
+    "cooldowns": {
+      "s15": "15秒",
+      "s60": "1分",
+      "s300": "5分",
+      "s900": "15分",
+      "s3600": "1時間"
+    },
+    "deviceHint": "デバイスが変化した瞬間に、何が変わったかを伝えて実行します。実行後の待ち時間中の変化では次の実行は始まらないため、ちらつくセンサーでも 1 回だけ実行されます。",
+    "cameras": "カメラを見る",
+    "camerasHint": "実行のたびに、まずこれらのカメラの画像を、画像を見られるモデルに見せます。最大 {{count}} 台。",
+    "deviceKinds": {
+      "camera": "カメラ",
+      "sensor": "センサー",
+      "speaker": "スピーカー",
+      "light": "照明",
+      "switch": "スイッチ",
+      "lock": "ロック",
+      "cover": "シャッター",
+      "climate": "空調",
+      "other": "その他"
+    }
   },
   "draft": {
     "label": "確認待ちのオートメーション",
@@ -400,6 +426,8 @@
     "feed": "{{site}} の新しい投稿 · 確認: {{schedule}}",
     "folder": "{{name}} が変わったとき · 確認: {{schedule}}",
     "webhook": "Webhook リンクが呼び出されたとき",
+    "device": "{{device}} が変化したとき",
+    "deviceTo": "{{device}} が {{to}} になったとき",
     "after": "{{name}} が終わったあと",
     "afterNotified": "{{name}} が通知したあと",
     "anotherAutomation": "別のオートメーション"

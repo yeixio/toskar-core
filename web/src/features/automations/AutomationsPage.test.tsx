@@ -26,6 +26,7 @@ vi.mock('@/lib/api', async () => {
       listAutomationRuns: vi.fn(),
       parseAutomation: vi.fn(),
       continueAutomationRun: vi.fn(),
+      listDevices: vi.fn(),
     },
   }
 })
@@ -109,6 +110,7 @@ describe('AutomationsPage', () => {
     ])
     vi.mocked(api.pauseAutomation).mockResolvedValue({ ...saved, enabled: false })
     vi.mocked(api.createAutomation).mockResolvedValue({ ...saved, id: 'auto-2' })
+    vi.mocked(api.listDevices).mockResolvedValue([])
     // The computer reads requests (#204); its cases are in request_test.go.
     vi.mocked(api.parseAutomation).mockResolvedValue({
       name: 'Price below $500',
@@ -339,6 +341,33 @@ describe('AutomationsPage', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Create automation' }))
     await waitFor(() => expect(api.createAutomation).toHaveBeenCalled())
     expect(vi.mocked(api.createAutomation).mock.calls[0][0].response_language).toBe('de')
+  })
+
+  it('runs when a device changes, and looks at cameras (#586, #667)', async () => {
+    vi.mocked(api.listDevices).mockResolvedValue([
+      { connector: 'homeassistant', device: 'camera.porch', name: 'Porch', kind: 'camera', state: 'idle' },
+      { connector: 'homeassistant', device: 'binary_sensor.porch_visitor', name: 'Porch Visitor', kind: 'sensor', state: 'off' },
+    ])
+    renderPage()
+    fireEvent.click(await screen.findByRole('button', { name: 'New automation' }))
+    fireEvent.change(screen.getByPlaceholderText(/Every morning at 8:00 AM/), {
+      target: { value: 'Every morning at 8:00 AM, check this product and tell me if the price is below $500.' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'Fill in the details' }))
+    expect(await screen.findByDisplayValue('Price below $500')).toBeInTheDocument()
+    fireEvent.change(screen.getByRole('combobox', { name: 'Runs' }), { target: { value: 'device' } })
+    // The picker shows names, grouped by kind; the camera isn't a trigger.
+    const device = screen.getByRole('combobox', { name: 'Device' })
+    expect([...device.querySelectorAll('option')].map((o) => o.textContent)).toEqual(['Porch Visitor'])
+    fireEvent.change(screen.getByRole('combobox', { name: 'Changes to' }), { target: { value: 'on' } })
+    fireEvent.change(screen.getByRole('combobox', { name: 'Then wait' }), { target: { value: '300' } })
+    fireEvent.click(screen.getByRole('checkbox', { name: 'Porch' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Create automation' }))
+    await waitFor(() => expect(api.createAutomation).toHaveBeenCalled())
+    const body = vi.mocked(api.createAutomation).mock.calls[0][0]
+    expect(body.trigger).toEqual({ kind: 'device', connector: 'homeassistant', device: 'binary_sensor.porch_visitor', to: 'on', cooldown_seconds: 300 })
+    expect(body.schedule.kind).toBe('manual')
+    expect(body.cameras).toEqual([{ connector: 'homeassistant', device: 'camera.porch' }])
   })
 
   it('lists tools that change things apart, offers Auto, and saves approvals', async () => {

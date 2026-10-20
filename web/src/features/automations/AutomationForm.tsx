@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import type { AIProfile, Automation, AutomationClockTime, AutomationInput, AutomationSchedule, AutomationTrigger, Model, ParsedAutomation, ToolRecord } from '@/types/api'
+import type { AIProfile, Automation, AutomationClockTime, AutomationInput, AutomationSchedule, AutomationTrigger, Device, Model, ParsedAutomation, ToolRecord } from '@/types/api'
 import i18n from '@/i18n'
 import { api } from '@/lib/api'
 import { canChat } from '@/features/models/modelPresentation'
@@ -80,9 +80,25 @@ export function AutomationForm({ profiles, models, tools, others = [], initial, 
   // Run when a page or feed changes instead of every time (#204).
   const [triggerKind, setTriggerKind] = useState<AutomationTrigger['kind']>(initial?.trigger?.kind ?? '')
   // The link to watch, or the folder or file.
-  const [triggerURL, setTriggerURL] = useState(initial?.trigger?.url ?? initial?.trigger?.path ?? initial?.trigger?.automation_id ?? '')
+  const [triggerURL, setTriggerURL] = useState(initial?.trigger?.url ?? initial?.trigger?.path ?? initial?.trigger?.automation_id ?? initial?.trigger?.device ?? '')
   // When it follows another automation: each time it finishes, or only when it notifies.
   const [afterWhen, setAfterWhen] = useState<'succeeded' | 'notified'>(initial?.trigger?.when ?? 'succeeded')
+  // A device trigger's state to wait for, and the wait after a run (#586).
+  const [deviceTo, setDeviceTo] = useState(initial?.trigger?.to ?? '')
+  const [cooldown, setCooldown] = useState(initial?.trigger?.cooldown_seconds || 60)
+  // Cameras each run looks at (#667).
+  const [cameraIDs, setCameraIDs] = useState<string[]>(initial?.cameras?.map((c) => c.device) ?? [])
+  // The connected services' devices to pick from; none for someone who can't list them.
+  const [devices, setDevices] = useState<Device[]>([])
+  useEffect(() => {
+    let live = true
+    api.listDevices().then((list) => live && setDevices(list), () => undefined)
+    return () => {
+      live = false
+    }
+  }, [])
+  const cameras = devices.filter((d) => d.kind === 'camera')
+  const watchable = devices.filter((d) => d.kind !== 'camera')
   // Also save each result as a file in a folder (#204).
   const [saving, setSaving] = useState(Boolean(initial?.save_folder))
   const [saveFolder, setSaveFolder] = useState(initial?.save_folder || '~/Documents/Toskar')
@@ -198,8 +214,19 @@ export function AutomationForm({ profiles, models, tools, others = [], initial, 
       response_language: responseLanguage,
       save_folder: saving ? saveFolder.trim() : '',
       // An edit that stops watching sends a trigger with no kind.
-      trigger: triggerKind ? watchTrigger(triggerKind, triggerURL, afterWhen) : initial?.trigger ? { kind: '' } : undefined,
+      trigger: triggerKind ? currentTrigger() : initial?.trigger ? { kind: '' } : undefined,
+      // An edit that stops looking sends no cameras.
+      cameras: cameraIDs.length > 0 || initial?.cameras?.length ? cameraIDs.map((device) => ({ connector: connectorOf(device), device })) : undefined,
     }
+  }
+
+  function currentTrigger(): AutomationTrigger {
+    if (triggerKind === 'device') return { kind: 'device', connector: connectorOf(triggerURL), device: triggerURL, to: deviceTo.trim() || undefined, cooldown_seconds: cooldown }
+    return watchTrigger(triggerKind, triggerURL, afterWhen)
+  }
+
+  function connectorOf(device: string): 'homeassistant' {
+    return (devices.find((d) => d.device === device)?.connector ?? 'homeassistant') as 'homeassistant'
   }
 
   function currentNotification(): AutomationInput['notification'] {
@@ -231,8 +258,8 @@ export function AutomationForm({ profiles, models, tools, others = [], initial, 
   }
 
   const summary = whenLabel(
-    { schedule, trigger: triggerKind ? watchTrigger(triggerKind, triggerURL, afterWhen) : undefined },
-    Object.fromEntries(others.map((item) => [item.id, item.name])),
+    { schedule, trigger: triggerKind ? currentTrigger() : undefined },
+    Object.fromEntries([...others.map((item) => [item.id, item.name]), ...devices.map((d) => [d.device, d.name])]),
   )
 
   return (
@@ -350,13 +377,14 @@ export function AutomationForm({ profiles, models, tools, others = [], initial, 
               setTriggerKind(next)
               // The link, folder, or automation is the kind's own.
               if (next === 'after' && triggerKind !== 'after') setTriggerURL(others[0]?.id ?? '')
-              else if (triggerKind === 'after' && next !== 'after') setTriggerURL('')
-              // A webhook or a follower runs only when started; watching checks every hour to start with.
-              if (next === 'webhook' || next === 'after') {
+              else if (next === 'device' && triggerKind !== 'device') setTriggerURL(watchable[0]?.device ?? '')
+              else if ((triggerKind === 'after' || triggerKind === 'device') && next !== triggerKind) setTriggerURL('')
+              // A webhook, a follower, or a device runs only when started; watching checks every hour to start with.
+              if (next === 'webhook' || next === 'after' || next === 'device') {
                 setSchedule({ kind: 'manual', time_zone: schedule.time_zone })
                 return
               }
-              if (next && (!triggerKind || triggerKind === 'webhook' || triggerKind === 'after') && schedule.kind !== 'interval') setSchedule({ kind: 'interval', time_zone: schedule.time_zone, every_seconds: 3600 })
+              if (next && (!triggerKind || triggerKind === 'webhook' || triggerKind === 'after' || triggerKind === 'device') && schedule.kind !== 'interval') setSchedule({ kind: 'interval', time_zone: schedule.time_zone, every_seconds: 3600 })
               else if (!next && schedule.kind === 'manual') setSchedule({ kind: 'daily', time_zone: schedule.time_zone, hour: 8, minute: 0, times: [{ hour: 8, minute: 0 }] })
             }}
           >
@@ -366,9 +394,56 @@ export function AutomationForm({ profiles, models, tools, others = [], initial, 
             <option value="folder">{t('form.runsFolder')}</option>
             <option value="webhook">{t('form.runsWebhook')}</option>
             {others.length > 0 || triggerKind === 'after' ? <option value="after">{t('form.runsAfter')}</option> : null}
+            {watchable.length > 0 || triggerKind === 'device' ? <option value="device">{t('form.runsDevice')}</option> : null}
           </select>
         </label>
-        {triggerKind === 'after' ? (
+        {triggerKind === 'device' ? (
+          <>
+            <label className="block space-y-1 text-sm">
+              <span className="text-ink-muted">{t('form.device')}</span>
+              <select className="field w-full" value={triggerURL} onChange={(event) => setTriggerURL(event.target.value)} required>
+                {triggerURL && !watchable.some((d) => d.device === triggerURL) ? <option value={triggerURL}>{triggerURL}</option> : null}
+                {deviceKinds(watchable).map((kind) => (
+                  <optgroup key={kind} label={t(`form.deviceKinds.${kind}`)}>
+                    {watchable
+                      .filter((d) => d.kind === kind)
+                      .map((d) => (
+                        <option key={d.device} value={d.device}>
+                          {d.name}
+                        </option>
+                      ))}
+                  </optgroup>
+                ))}
+              </select>
+            </label>
+            <label className="block space-y-1 text-sm">
+              <span className="text-ink-muted">{t('form.deviceTo')}</span>
+              <input
+                className="field w-full"
+                value={deviceTo}
+                list="automation-device-states"
+                spellCheck={false}
+                placeholder={t('form.deviceToAny')}
+                onChange={(event) => setDeviceTo(event.target.value)}
+              />
+              <datalist id="automation-device-states">
+                {deviceStates(watchable.find((d) => d.device === triggerURL)?.state).map((state) => (
+                  <option key={state} value={state} />
+                ))}
+              </datalist>
+            </label>
+            <label className="block space-y-1 text-sm">
+              <span className="text-ink-muted">{t('form.cooldown')}</span>
+              <select className="field w-full" value={cooldown} onChange={(event) => setCooldown(Number(event.target.value))}>
+                {COOLDOWNS.map((seconds) => (
+                  <option key={seconds} value={seconds}>
+                    {t(`form.cooldowns.s${seconds}`)}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </>
+        ) : triggerKind === 'after' ? (
           <>
             <label className="block space-y-1 text-sm">
               <span className="text-ink-muted">{t('form.afterWhich')}</span>
@@ -403,14 +478,38 @@ export function AutomationForm({ profiles, models, tools, others = [], initial, 
           </label>
         ) : null}
       </div>
-      {triggerKind === 'webhook' ? (
+      {triggerKind === 'device' ? (
+        <p className="text-xs text-ink-faint">{t('form.deviceHint')}</p>
+      ) : triggerKind === 'webhook' ? (
         <p className="text-xs text-ink-faint">{t('form.webhookHint')}</p>
       ) : triggerKind === 'after' ? (
         <p className="text-xs text-ink-faint">{t('form.afterHint')}</p>
       ) : triggerKind ? (
         <p className="text-xs text-ink-faint">{t('form.watchHint')}</p>
       ) : null}
-      {triggerKind === 'webhook' || triggerKind === 'after' ? null : (
+      {cameras.length > 0 || cameraIDs.length > 0 ? (
+        <fieldset className="space-y-2 text-sm">
+          <legend className="text-ink-muted">{t('form.cameras')}</legend>
+          <div className="flex flex-wrap gap-x-4 gap-y-2">
+            {[...cameras.map((c) => c.device), ...cameraIDs.filter((id) => !cameras.some((c) => c.device === id))].map((id) => {
+              const on = cameraIDs.includes(id)
+              return (
+                <label key={id} className="inline-flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={on}
+                    disabled={!on && cameraIDs.length >= MAX_CAMERAS}
+                    onChange={() => setCameraIDs(on ? cameraIDs.filter((x) => x !== id) : [...cameraIDs, id])}
+                  />
+                  <span>{cameras.find((c) => c.device === id)?.name ?? id}</span>
+                </label>
+              )
+            })}
+          </div>
+          <p className="text-xs text-ink-faint">{t('form.camerasHint', { count: MAX_CAMERAS })}</p>
+        </fieldset>
+      ) : null}
+      {triggerKind === 'webhook' || triggerKind === 'after' || triggerKind === 'device' ? null : (
         <>
       <p className="text-sm text-ink-muted">{triggerKind ? t('form.checkSchedule') : t('form.schedule')}</p>
       <div className="grid gap-3 sm:grid-cols-2">
@@ -901,6 +1000,22 @@ function splitInterval(seconds: number): { amount: number; unit: IntervalUnit } 
   if (seconds % 86400 === 0 && seconds >= 86400) return { amount: seconds / 86400, unit: 'days' }
   if (seconds % 3600 === 0 && seconds >= 3600) return { amount: seconds / 3600, unit: 'hours' }
   return { amount: Math.max(1, Math.round(seconds / 60)), unit: 'minutes' }
+}
+
+// How long a device trigger waits after a run, in seconds (#586).
+const COOLDOWNS = [15, 60, 300, 900, 3600]
+const MAX_CAMERAS = 4
+const DEVICE_KIND_ORDER: Device['kind'][] = ['sensor', 'switch', 'light', 'lock', 'cover', 'climate', 'speaker', 'other']
+
+/** The kinds present, sensors first. */
+function deviceKinds(list: Device[]): Device['kind'][] {
+  return DEVICE_KIND_ORDER.filter((kind) => list.some((d) => d.kind === kind))
+}
+
+/** States to suggest: common ones, and the device's own now. */
+function deviceStates(current?: string): string[] {
+  const common = ['on', 'off', 'open', 'closed', 'locked', 'unlocked', 'home', 'not_home']
+  return current && !common.includes(current) ? [current, ...common] : common
 }
 
 function watchTrigger(kind: AutomationTrigger['kind'], target: string, when: 'succeeded' | 'notified' = 'succeeded'): AutomationTrigger {
