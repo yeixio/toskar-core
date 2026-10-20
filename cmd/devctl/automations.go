@@ -20,8 +20,8 @@ const automationsUsage = `usage: toskarctl automations <list|get|parse|create|up
   get <id>
   parse <request> [--zone <tz>] [--language <tag>]
   create --request <text> [--profile <id>] [--model <id>] [--zone <tz>] [any flag below to change what it read]
-  create --name <name> --prompt <text> [--profile <id>] [--model <id>] --schedule <once|daily|weekly|monthly|interval|cron|manual> [--at <time>] [--every <duration>] [--weekday <days>] [--day <1-31>] [--cron <expr>] [--zone <tz>] [--tool <id>] [--notify <mode>] [--save-folder <path>] [--trigger <page|feed|folder|webhook|after|none> --trigger-url <url> | --trigger-path <path> | --after <id> [--after-when notified]] [--disabled]
-  update <id> [--name <name>] [--prompt <text>] [--profile <id>] [--model <id>] [--schedule ...] [--notify <mode>]
+  create --name <name> --prompt <text> [--profile <id>] [--model <id>] --schedule <once|daily|weekly|monthly|interval|cron|manual> [--at <time>] [--every <duration>] [--weekday <days>] [--day <1-31>] [--cron <expr>] [--zone <tz>] [--tool <id>] [--notify <mode>] [--save-folder <path>] [--camera <camera.entity>]... [--trigger <page|feed|folder|webhook|after|none> --trigger-url <url> | --trigger-path <path> | --after <id> [--after-when notified]] [--disabled]
+  update <id> [--name <name>] [--prompt <text>] [--profile <id>] [--model <id>] [--schedule ...] [--notify <mode>] [--camera <camera.entity>|""]
   delete <id>
   run <id>
   pause <id>
@@ -233,6 +233,8 @@ func automationBody(args []string, create bool, parse func(text, zone string) (a
 	after := fs.String("after", "", "with --trigger after: the automation it runs after, given its result")
 	afterWhen := fs.String("after-when", "", "with --trigger after: succeeded (each time it finishes, the default) or notified (only when it notifies)")
 	saveFolder := fs.String("save-folder", "", "also save each result as a Markdown file in this folder, such as ~/Documents/Toskar; \"\" stops saving")
+	var cameras stringList
+	fs.Var(&cameras, "camera", "a Home Assistant camera to look at as each run starts, such as camera.driveway; repeat for more; \"\" alone stops looking")
 	var tools stringList
 	fs.Var(&tools, "tool", "tool id allowed for this automation, repeatable")
 	if err := fs.Parse(args); err != nil {
@@ -292,6 +294,9 @@ func automationBody(args []string, create bool, parse func(text, zone string) (a
 		if seen["save-folder"] {
 			in.SaveFolder = *saveFolder
 		}
+		if seen["camera"] {
+			in.Cameras = cameraFlags(cameras)
+		}
 		if seen["trigger"] {
 			in.Trigger = buildTrigger(*trigger, *triggerURL, *triggerPath, *after, *afterWhen)
 		}
@@ -324,6 +329,7 @@ func automationBody(args []string, create bool, parse func(text, zone string) (a
 			Tools:        []string(tools),
 			Notification: note,
 			SaveFolder:   *saveFolder,
+			Cameras:      cameraFlags(cameras),
 			Trigger:      buildTrigger(*trigger, *triggerURL, *triggerPath, *after, *afterWhen),
 		}
 		if *disabled {
@@ -366,6 +372,10 @@ func automationBody(args []string, create bool, parse func(text, zone string) (a
 			return nil, err
 		}
 		patch.Notification = &note
+	}
+	if seen["camera"] {
+		cams := cameraFlags(cameras)
+		patch.Cameras = &cams
 	}
 	if seen["save-folder"] {
 		patch.SaveFolder = saveFolder
@@ -572,4 +582,15 @@ func (s *stringList) String() string { return strings.Join(*s, ",") }
 func (s *stringList) Set(v string) error {
 	*s = append(*s, v)
 	return nil
+}
+
+// cameraFlags are --camera's Home Assistant cameras (#667); "" alone is none.
+func cameraFlags(devices []string) []automations.Camera {
+	out := []automations.Camera{}
+	for _, d := range devices {
+		if d = strings.TrimSpace(d); d != "" {
+			out = append(out, automations.Camera{Connector: automations.CameraHomeAssistant, Device: d})
+		}
+	}
+	return out
 }

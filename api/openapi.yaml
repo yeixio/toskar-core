@@ -7547,6 +7547,19 @@ components:
         save_folder:
           type: string
           description: A folder in the home folder, such as ~/Documents/Toskar, to also save each result to as a Markdown file. Empty stops saving.
+        cameras:
+          type: array
+          maxItems: 4
+          description: Cameras to look at as each run starts (#667). Their pictures, taken through the connected service, are shown to a model that can see. On update, an empty list stops looking.
+          items:
+            type: object
+            properties:
+              connector:
+                type: string
+                enum: [homeassistant]
+              device:
+                type: string
+                description: The camera as that service names it, such as Home Assistant's camera.driveway
         trigger:
           type: object
           description: Run only when a page, feed, or folder changed, checked on the schedule. On update, a trigger with no kind runs on the schedule again.
@@ -7602,6 +7615,16 @@ components:
         save_folder:
           type: string
           description: The folder each result is also saved to
+        cameras:
+          type: array
+          description: The cameras looked at as each run starts (#667)
+          items:
+            type: object
+            properties:
+              connector:
+                type: string
+              device:
+                type: string
         trigger:
           type: object
           description: Run only when a page, feed, or folder changed, checked on the schedule.

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/google/uuid"
+	"github.com/yeixio/toskar-core/internal/artifacts"
 	"slices"
 	"strings"
 	"sync"
@@ -92,7 +93,26 @@ func (e automationExecutor) execute(ctx context.Context, automation automations.
 		}
 		modelID = choice.Model.ID
 	}
+	// A camera's picture goes to a model that can see it, on this
+	// computer, as a photo attached in chat does (#667, #191).
+	var pictures []artifacts.Artifact
+	if len(automation.Cameras) > 0 {
+		pictures, err = e.app.lookAtCameras(ctx, automation)
+		if err != nil {
+			return automations.Execution{}, err
+		}
+		if !e.app.seesImages(modelID) {
+			m, ok := e.app.seeingModel(ctx)
+			if !ok {
+				return automations.Execution{}, fmt.Errorf("looking at a camera needs a model that can see pictures; install one on the Models page")
+			}
+			modelID = m.ID
+		}
+	}
 	profile = tools.WithConnected(withChatModel(profile, modelID))
+	if len(pictures) > 0 {
+		profile = applyExecutionPolicy(profile, "local")
+	}
 	orch, err := e.app.OrchRegistry.Get(profile.OrchestratorID)
 	if err != nil {
 		return automations.Execution{}, err
@@ -116,13 +136,16 @@ func (e automationExecutor) execute(ctx context.Context, automation automations.
 			trace:         &turnTrace{lang: e.app.appLanguage(ctx)},
 			// Results in the automation's response language (§22).
 			responseLanguage: automation.ResponseLanguage,
+			pictures:         pictures,
 		},
 		granted: automation.Tools,
 	}
 	// What a trigger delivered, a page, posts, files, or a webhook's body,
 	// was written by someone else, so the run treats it as data, as chat
 	// does after reading a page (§58, #204).
-	if automations.ChangeNote(ctx) != "" {
+	// A camera's picture is someone else's too: a sign held up to the door
+	// is data, not instructions (#667).
+	if automations.ChangeNote(ctx) != "" || len(automation.Cameras) > 0 {
 		env.base.trace.untrusted = true
 		env.fromTrigger = true
 	}
@@ -140,7 +163,7 @@ func (e automationExecutor) execute(ctx context.Context, automation automations.
 		ProfileID: profile.ID,
 		// The task with its condition's instruction, which the server adds
 		// rather than the saved prompt carrying it (#204).
-		Prompt: withChangeNote(automations.RunPrompt(automation), runNote(ctx, automation)),
+		Prompt: withChangeNote(withChangeNote(automations.RunPrompt(automation), runNote(ctx, automation)), camerasNote(automation.Cameras)),
 		Status: contracts.TaskRunning,
 	}, tools.ForUnattended(profile, automation.Tools, disabled), env)
 	if err != nil {
@@ -218,6 +241,11 @@ func (e *automationEnv) ReferenceMaterial(ctx context.Context, prompt string) st
 
 func (e *automationEnv) TurnInstructions(ctx context.Context, prompt string) string {
 	return e.base.TurnInstructions(ctx, prompt)
+}
+
+// TurnImages are the pictures the run is shown: its cameras' (#667).
+func (e *automationEnv) TurnImages() []string {
+	return e.base.TurnImages()
 }
 
 func (e *automationEnv) skippedTools() []string {
