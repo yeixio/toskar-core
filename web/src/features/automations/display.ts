@@ -1,7 +1,7 @@
 import i18n from '@/i18n'
 import { formatDate, formatPrice } from '@/i18n/format'
 import type { AutomationRun } from '@/types/api'
-import { formatWhen } from './parseRequest'
+import { formatWhen, safeZone } from './parseRequest'
 
 export interface NoticeExplanation {
   title: string
@@ -37,7 +37,7 @@ export function compactWhen(iso: string | undefined, timeZone: string): string {
   const date = new Date(iso)
   if (Number.isNaN(date.getTime())) return i18n.t('automations:time.notScheduled')
   return formatDate(date, {
-    timeZone: timeZone || 'UTC',
+    timeZone: safeZone(timeZone),
     month: 'short',
     day: 'numeric',
     hour: 'numeric',

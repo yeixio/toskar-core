@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"github.com/yeixio/toskar-core/internal/locale"
 	"strings"
 	"time"
 
@@ -417,6 +418,10 @@ func scanAutomation(s automationScanner) (automations.Automation, error) {
 	}
 	if a.Schedule.TimeZone == "" {
 		a.Schedule.TimeZone = zone
+	}
+	// Saved before SystemZone, as Go's "Local", which clients can't read.
+	if a.Schedule.TimeZone == "Local" {
+		a.Schedule.TimeZone = locale.SystemZone()
 	}
 	if err := json.Unmarshal([]byte(tools), &a.Tools); err != nil {
 		return automations.Automation{}, fmt.Errorf("tools: %w", err)

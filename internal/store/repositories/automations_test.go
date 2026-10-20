@@ -313,3 +313,26 @@ func TestAutomationCameras(t *testing.T) {
 		}
 	}
 }
+
+// An automation saved with Go's "Local" zone reads back with this
+// computer's IANA name, which clients can show (#768).
+func TestAutomationLocalZoneReadsAsIANA(t *testing.T) {
+	db, err := store.Open(filepath.Join(t.TempDir(), "test.db"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer db.Close()
+	ctx := context.Background()
+	repo := repositories.NewAutomationRepo(db.SQL)
+	created, err := repo.Create(ctx, automations.CreateInput{
+		ModelID: "auto", Name: "n", Prompt: "p",
+		Schedule: automations.Schedule{Kind: automations.KindInterval, EverySeconds: 60, TimeZone: "Local"},
+	}, time.Now())
+	if err != nil {
+		t.Fatal(err)
+	}
+	got, _ := repo.Get(ctx, created.ID)
+	if got.Schedule.TimeZone == "Local" || got.Schedule.TimeZone == "" {
+		t.Fatalf("zone %q", got.Schedule.TimeZone)
+	}
+}

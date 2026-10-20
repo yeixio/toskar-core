@@ -3,6 +3,7 @@ package locale
 import (
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestResolve(t *testing.T) {
@@ -62,5 +63,25 @@ func TestLanguageName(t *testing.T) {
 		if got := LanguageName(in[0], in[1]); got != want {
 			t.Errorf("LanguageName(%q, %q) = %q, want %q", in[0], in[1], got, want)
 		}
+	}
+}
+
+// This computer's zone is an IANA name clients understand, never Go's
+// "Local", which browsers refuse.
+func TestSystemZone(t *testing.T) {
+	t.Setenv("TZ", "America/Juneau")
+	if got := SystemZone(); got != "America/Juneau" {
+		t.Fatalf("with TZ: %q", got)
+	}
+	t.Setenv("TZ", "")
+	got := SystemZone()
+	if got == "" || got == "Local" {
+		t.Fatalf("without TZ: %q", got)
+	}
+	if _, err := time.LoadLocation(got); err != nil {
+		t.Fatalf("%q doesn't load: %v", got, err)
+	}
+	if ZoneName("Local") == "Local" || ZoneName("Europe/Berlin") != "Europe/Berlin" {
+		t.Fatal("ZoneName")
 	}
 }
