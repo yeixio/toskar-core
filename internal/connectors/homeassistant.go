@@ -210,11 +210,11 @@ func haCameraPicture(ctx context.Context, c *http.Client, cred Credential, entit
 	defer resp.Body.Close()
 	switch {
 	case resp.StatusCode == http.StatusNotFound:
-		return nil, "", fmt.Errorf("Home Assistant has no camera %s", entity)
+		return nil, "", fmt.Errorf("no camera %s in Home Assistant", entity)
 	case resp.StatusCode == http.StatusUnauthorized || resp.StatusCode == http.StatusForbidden:
-		return nil, "", fmt.Errorf("Home Assistant refused the token; connect it again in Settings")
+		return nil, "", fmt.Errorf("the Home Assistant token was refused; connect it again in Settings")
 	case resp.StatusCode != http.StatusOK:
-		return nil, "", fmt.Errorf("Home Assistant answered %d for the camera %s", resp.StatusCode, entity)
+		return nil, "", fmt.Errorf("the camera %s: Home Assistant answered %d", entity, resp.StatusCode)
 	}
 	mime := strings.TrimSpace(strings.Split(resp.Header.Get("Content-Type"), ";")[0])
 	if mime != "image/jpeg" && mime != "image/png" {
