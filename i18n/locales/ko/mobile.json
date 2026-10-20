@@ -976,7 +976,9 @@
     "turningOn": "켜는 중…",
     "notNow": "나중에",
     "updateComputer": "여기서 알림을 받으려면 컴퓨터의 Toskar를 업데이트하세요.",
-    "relayFailed": "알림을 켜지 못했습니다: {{detail}}"
+    "relayFailed": "알림을 켜지 못했습니다: {{detail}}",
+    "openPage": "페이지 열기",
+    "openInToskar": "Toskar에서 열기"
   },
   "permissions": {
     "photos": "물어볼 사진을 고르면 Toskar가 사진을 열어요. 사진은 이 기기에 남거나 내 컴퓨터로만 가요.",

@@ -976,7 +976,9 @@
     "turningOn": "正在开启…",
     "notNow": "以后再说",
     "updateComputer": "请更新电脑上的 Toskar，才能在这里接收通知。",
-    "relayFailed": "无法开启通知：{{detail}}"
+    "relayFailed": "无法开启通知：{{detail}}",
+    "openPage": "打开页面",
+    "openInToskar": "在 Toskar 中打开"
   },
   "permissions": {
     "photos": "当你选择一张照片来提问时，Toskar 会打开你的照片。照片会留在此设备上，或只发送到你自己的电脑。",

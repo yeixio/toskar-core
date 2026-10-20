@@ -991,7 +991,9 @@
     "turningOn": "Wird eingeschaltet…",
     "notNow": "Nicht jetzt",
     "updateComputer": "Aktualisiere Toskar auf deinem Computer, um hier Benachrichtigungen zu bekommen.",
-    "relayFailed": "Benachrichtigungen konnten nicht eingeschaltet werden: {{detail}}"
+    "relayFailed": "Benachrichtigungen konnten nicht eingeschaltet werden: {{detail}}",
+    "openPage": "Seite öffnen",
+    "openInToskar": "In Toskar öffnen"
   },
   "permissions": {
     "photos": "Toskar öffnet deine Fotos, wenn du eines auswählst, um danach zu fragen. Es bleibt auf diesem Gerät oder geht nur an deinen eigenen Computer.",

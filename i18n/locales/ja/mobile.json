@@ -976,7 +976,9 @@
     "turningOn": "オンにしています…",
     "notNow": "後で",
     "updateComputer": "ここで通知を受け取るには、コンピューターの Toskar をアップデートしてください。",
-    "relayFailed": "通知をオンにできませんでした: {{detail}}"
+    "relayFailed": "通知をオンにできませんでした: {{detail}}",
+    "openPage": "ページを開く",
+    "openInToskar": "Toskarで開く"
   },
   "permissions": {
     "photos": "質問したい写真を選ぶと、Toskar が写真を開きます。写真はこのデバイスに残るか、あなた自身のコンピュータにだけ送られます。",
