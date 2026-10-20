@@ -77,7 +77,7 @@ func TestAppPush(t *testing.T) {
 
 // With no device that takes pushes, the delivery says so and isn't retried.
 func TestAppPushWithoutDevices(t *testing.T) {
-	hub, _, _ := deliveryHub(t)
+	hub, eg, _ := deliveryHub(t)
 	hub.SetPush(&fakePush{})
 	ctx := context.Background()
 	d, _, err := hub.CreateDestination(ctx, DestinationInput{Kind: KindApp, Name: ptr("Phones")})
@@ -87,6 +87,10 @@ func TestAppPushWithoutDevices(t *testing.T) {
 	err = hub.TestDestination(ctx, d.ID)
 	if !IsPermanent(err) || !strings.Contains(err.Error(), "turned on") {
 		t.Fatalf("no devices: %v", err)
+	}
+	// Nothing went to the relay, so What left this computer doesn't say so.
+	if len(eg.adds) != 0 {
+		t.Fatalf("egress for a push no device took: %v", eg.adds)
 	}
 }
 

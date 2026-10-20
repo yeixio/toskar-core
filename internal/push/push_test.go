@@ -61,6 +61,39 @@ func TestRegistrationsFollowTheirKeys(t *testing.T) {
 	}
 }
 
+// Revoking a key, from any path, removes its device's registration, so a
+// disconnected device isn't kept on file (#460).
+func TestRevokingAKeyRemovesItsRegistration(t *testing.T) {
+	db, err := store.Open(filepath.Join(t.TempDir(), "test.db"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer db.Close()
+	ctx := context.Background()
+	for _, id := range []string{"phone", "tablet"} {
+		if _, err := db.SQL.Exec(`INSERT INTO api_keys (id, name, key_prefix, key_hash) VALUES (?, ?, 'p', 'h')`, id, id); err != nil {
+			t.Fatal(err)
+		}
+	}
+	s := NewStore(db.SQL)
+	_ = s.Set(ctx, Registration{KeyID: "phone", PersonID: "sam", Handle: "h1", Platform: PlatformIOS})
+	_ = s.Set(ctx, Registration{KeyID: "tablet", PersonID: "sam", Handle: "h2", Platform: PlatformAndroid})
+	if _, err := db.SQL.Exec(`UPDATE api_keys SET revoked_at = '2026-10-20' WHERE id = 'phone'`); err != nil {
+		t.Fatal(err)
+	}
+	var left []string
+	rows, _ := db.SQL.Query(`SELECT key_id FROM push_registrations ORDER BY key_id`)
+	for rows.Next() {
+		var id string
+		_ = rows.Scan(&id)
+		left = append(left, id)
+	}
+	_ = rows.Close()
+	if len(left) != 1 || left[0] != "tablet" {
+		t.Fatalf("registrations after revoking the phone: %v", left)
+	}
+}
+
 // Each push is signed with the computer's key over the time and the body,
 // as the relay checks it; a handle the relay calls gone is ErrGone, and a
 // refusal keeps the relay's code.
