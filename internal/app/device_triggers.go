@@ -69,6 +69,7 @@ func (d *deviceTriggers) loop(ctx context.Context) {
 		dropped                     = make(chan error, 1)
 		backoff                     = deviceBackoff
 		retryAt  time.Time
+		started  time.Time
 	)
 	defer func() { cancel() }()
 	tick := time.NewTicker(deviceRecheck)
@@ -82,7 +83,7 @@ func (d *deviceTriggers) loop(ctx context.Context) {
 			watching, cancel = nil, func() {}
 			if devices := want[homeAssistant]; len(devices) > 0 {
 				wctx, stop := context.WithCancel(ctx)
-				watching, cancel = want, stop
+				watching, cancel, started = want, stop, time.Now()
 				go func() {
 					err := d.app.Connectors.WatchDevices(wctx, homeAssistant, devices, func(c connectors.DeviceChange) {
 						d.changed(ctx, homeAssistant, c)
@@ -97,18 +98,33 @@ func (d *deviceTriggers) loop(ctx context.Context) {
 		case <-ctx.Done():
 			return
 		case err := <-dropped:
-			// The watch dropped: try again after a wait that grows.
+			// The watch dropped: try again after a wait that grows, unless
+			// it had been up a while.
+			var wait time.Duration
+			wait, backoff = deviceRetry(backoff, time.Since(started))
 			if d.app.Logger != nil {
-				d.app.Logger.Warn("device watch dropped", "error", err, "retry_in", backoff)
+				d.app.Logger.Warn("device watch dropped", "error", err, "retry_in", wait)
 			}
-			watching, retryAt = nil, time.Now().Add(backoff)
-			backoff = min(backoff*2, deviceBackoffMax)
+			watching, retryAt = nil, time.Now().Add(wait)
 		case <-tick.C:
-			if watching != nil {
-				backoff = deviceBackoff
-			}
 		}
 	}
+}
+
+// deviceStable is how long a watch stays up before a drop counts as new,
+// so the wait after it starts over.
+var deviceStable = time.Minute
+
+// deviceRetry is the wait before connecting again after a drop, and the
+// backoff after that: it doubles, to deviceBackoffMax, while connecting
+// keeps failing, and starts over after a watch that had been up. The
+// backoff once reset whenever the 15-second recheck found a watch still
+// connecting, so an unreachable service was tried every 15 to 90 seconds.
+func deviceRetry(backoff, upFor time.Duration) (wait, next time.Duration) {
+	if upFor >= deviceStable {
+		backoff = deviceBackoff
+	}
+	return backoff, min(backoff*2, deviceBackoffMax)
 }
 
 func sameDevices(a, b map[string][]string) bool {

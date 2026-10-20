@@ -50,3 +50,23 @@ func TestDeviceTriggerMatchesAndCools(t *testing.T) {
 		t.Fatal("sameDevices")
 	}
 }
+
+// While a service stays unreachable, the wait doubles to its cap; a watch
+// that had been up starts the wait over.
+func TestDeviceRetryBacksOff(t *testing.T) {
+	backoff, waits := deviceBackoff, []time.Duration{}
+	for range 8 {
+		var wait time.Duration
+		wait, backoff = deviceRetry(backoff, 10*time.Second)
+		waits = append(waits, wait)
+	}
+	want := []time.Duration{5 * time.Second, 10 * time.Second, 20 * time.Second, 40 * time.Second, 80 * time.Second, 160 * time.Second, 5 * time.Minute, 5 * time.Minute}
+	for i := range want {
+		if waits[i] != want[i] {
+			t.Fatalf("waits %v, want %v", waits, want)
+		}
+	}
+	if wait, _ := deviceRetry(5*time.Minute, 2*time.Minute); wait != deviceBackoff {
+		t.Fatalf("after a watch that was up: %v", wait)
+	}
+}
