@@ -42,9 +42,11 @@
     "title": "Recommended for {{purpose}}",
     "communityChosen": "People with computers like yours rated this setup's main model highly, so it's suggested ahead of the usual first choice.",
     "download": "{{size}} download",
+    "installed": "Already on this computer",
     "storage": "Estimated storage",
     "memory": "Estimated active memory",
     "install": "Install recommended setup",
+    "use": "Use this setup",
     "skip": "Skip for now",
     "back": "Back"
   },

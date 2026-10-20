@@ -42,9 +42,11 @@
     "title": "Empfohlen für {{purpose}}",
     "communityChosen": "Leute mit Computern wie deinem bewerten das Hauptmodell dieser Einrichtung gut, daher wird es vor der üblichen ersten Wahl vorgeschlagen.",
     "download": "{{size}} Download",
+    "installed": "Schon auf diesem Computer",
     "storage": "Geschätzter Speicherplatz",
     "memory": "Geschätzter aktiver Arbeitsspeicher",
     "install": "Empfehlung installieren",
+    "use": "Dieses Setup verwenden",
     "skip": "Später",
     "back": "Zurück"
   },

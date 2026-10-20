@@ -43,9 +43,11 @@
     "title": "Recomendado para {{purpose}}",
     "communityChosen": "Quienes tienen equipos como el tuyo valoran bien el modelo principal de esta configuración, así que se sugiere antes que la opción habitual.",
     "download": "Descarga de {{size}}",
+    "installed": "Ya está en este ordenador",
     "storage": "Almacenamiento estimado",
     "memory": "Memoria activa estimada",
     "install": "Instalar la configuración recomendada",
+    "use": "Usar esta configuración",
     "skip": "Omitir por ahora",
     "back": "Atrás"
   },

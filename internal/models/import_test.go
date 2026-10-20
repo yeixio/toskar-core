@@ -202,3 +202,54 @@ func TestAddedModelDetails(t *testing.T) {
 		t.Error("renamed a catalog model")
 	}
 }
+
+// A copy of a catalog model, named as Toskar saves it or as its source
+// names it, is that model: installed under its ID, not a new one, so it
+// isn't offered for download again.
+func TestImportRecognizesCatalogModels(t *testing.T) {
+	m, storage, dir := importManager(t)
+	ctx := context.Background()
+	write := func(sub, name, arch string) string {
+		return gguftest.Write(t, filepath.Join(dir, sub), name, gguftest.Options{Name: "Tiny Llama", FileType: 15, Architecture: arch})
+	}
+	probe := write("probe", "probe.gguf", "llama")
+	st, _ := os.Stat(probe)
+	m.catalog.Upsert(CatalogEntry{
+		ID: "tiny-llama-q4", DisplayName: "Tiny Llama (catalog)", SizeBytes: uint64(st.Size()),
+		Source:   contracts.ModelSource{URL: "https://huggingface.co/x/y/resolve/main/Tiny-Llama-Q4_K_M.gguf", Format: "gguf"},
+		Training: &TrainingInfo{Architecture: "llama"},
+	})
+
+	// Another Toskar's download, used in place.
+	other := write("other-toskar", "tiny-llama-q4.gguf", "llama")
+	got, err := m.ImportFile(ctx, ImportRequest{Path: other, InPlace: true})
+	if err != nil || got.ID != "tiny-llama-q4" {
+		t.Fatalf("Toskar's own copy: %+v, %v", got, err)
+	}
+	if waitInstalled(t, storage, "tiny-llama-q4") != other {
+		t.Fatal("not installed in place")
+	}
+	if entry, _ := m.catalog.Get("tiny-llama-q4"); entry.DisplayName != "Tiny Llama (catalog)" {
+		t.Fatalf("catalog entry replaced: %+v", entry)
+	}
+	// The same file again keeps the catalog ID.
+	if again, _ := m.ImportFile(ctx, ImportRequest{Path: other, InPlace: true}); again.ID != "tiny-llama-q4" {
+		t.Fatalf("again: %s", again.ID)
+	}
+	// A second copy, named as its source names it, is its own model now.
+	lm := write("lmstudio", "Tiny-Llama-Q4_K_M.gguf", "llama")
+	if second, _ := m.ImportFile(ctx, ImportRequest{Path: lm, InPlace: true}); second.ID == "tiny-llama-q4" {
+		t.Fatal("a second copy took the installed catalog ID")
+	}
+	// Named like it, but another architecture, isn't it.
+	if err := m.Delete(ctx, "tiny-llama-q4"); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := os.Stat(other); err != nil {
+		t.Fatalf("deleting the model deleted the other Toskar's file: %v", err)
+	}
+	wrong := write("wrong", "tiny-llama-q4.gguf", "qwen2")
+	if notIt, _ := m.ImportFile(ctx, ImportRequest{Path: wrong, InPlace: true}); notIt.ID == "tiny-llama-q4" {
+		t.Fatal("another architecture matched")
+	}
+}

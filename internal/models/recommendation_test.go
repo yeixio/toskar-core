@@ -72,3 +72,29 @@ func TestRecommendUnknownPurposeUsesCatalog(t *testing.T) {
 		t.Fatal("expected models")
 	}
 }
+
+// The estimated active memory is what the recommended models need, not the
+// computer's graphics memory (the setup showed 24 GB for a 4.4 GB model).
+func TestRecommendEstimatesTheModelsMemory(t *testing.T) {
+	rec, err := Recommend(testCatalog(t), RecommendInput{
+		Purpose: "general",
+		Hardware: contracts.HardwareInventory{
+			Memory:       contracts.MemoryInfo{TotalBytes: 24 * 1024 * 1024 * 1024},
+			Accelerators: []contracts.Accelerator{{Vendor: "apple", DedicatedVRAM: 24 * 1024 * 1024 * 1024}},
+		},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	var want uint64
+	for _, m := range rec.Models {
+		if m.MemoryNeeded > 0 {
+			want += m.MemoryNeeded
+		} else {
+			want += m.SizeBytes
+		}
+	}
+	if rec.VRAMBytes != want || rec.VRAMBytes >= 24*1024*1024*1024 {
+		t.Fatalf("active memory %d, models need %d", rec.VRAMBytes, want)
+	}
+}

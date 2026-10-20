@@ -351,7 +351,9 @@ export function OnboardingPage() {
                     <p className="font-medium text-ink">
                       {model?.display_name ?? role.model_id}
                     </p>
-                    {model?.size_bytes ? (
+                    {model?.installed ? (
+                      <p className="mt-1 text-xs text-ink-muted">{t('recommend.installed')}</p>
+                    ) : model?.size_bytes ? (
                       <p className="mt-1 text-xs text-ink-muted">
                         {t('recommend.download', { size: formatBytes(model.size_bytes) })}
                       </p>
@@ -390,7 +392,8 @@ export function OnboardingPage() {
               onClick={() => installMutation.mutate(recommendation)}
               disabled={installMutation.isPending}
             >
-              {t('recommend.install')}
+              {/* Nothing to download: the setup's models are already here. */}
+              {recommendation.models.length > 0 && recommendation.models.every((m) => m.installed) ? t('recommend.use') : t('recommend.install')}
             </button>
             <button type="button" className="btn-secondary px-6" onClick={handleSkipInstall}>
               {t('recommend.skip')}

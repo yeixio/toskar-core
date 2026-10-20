@@ -43,9 +43,11 @@
     "title": "Consigliato per {{purpose}}",
     "communityChosen": "Chi ha un computer come il tuo valuta bene il modello principale di questa configurazione, quindi viene suggerito prima della scelta abituale.",
     "download": "Download di {{size}}",
+    "installed": "Già su questo computer",
     "storage": "Spazio stimato",
     "memory": "Memoria attiva stimata",
     "install": "Installa la configurazione consigliata",
+    "use": "Usa questa configurazione",
     "skip": "Salta per ora",
     "back": "Indietro"
   },

@@ -41,9 +41,11 @@
     "title": "{{purpose}} 추천 설정",
     "communityChosen": "비슷한 컴퓨터를 쓰는 사람들이 이 구성의 주 모델을 높게 평가해, 평소의 첫 번째 선택보다 먼저 제안합니다.",
     "download": "{{size}} 다운로드",
+    "installed": "이 컴퓨터에 이미 있음",
     "storage": "예상 저장 공간",
     "memory": "예상 사용 메모리",
     "install": "추천 설정 설치",
+    "use": "이 설정 사용",
     "skip": "나중에 하기",
     "back": "뒤로"
   },
