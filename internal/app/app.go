@@ -838,6 +838,10 @@ func New(opts Options) (*App, error) {
 	a.API.BindAutomations(api.Dependencies{
 		ListAutomations: a.Automations.List,
 		CreateAutomation: func(ctx context.Context, in automations.CreateInput) (automations.Automation, error) {
+			in, err := a.createDefaults(ctx, in)
+			if err != nil {
+				return automations.Automation{}, err
+			}
 			created, err := a.Automations.Create(ctx, in, time.Now())
 			if err != nil {
 				return automations.Automation{}, err

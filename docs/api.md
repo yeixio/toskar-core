@@ -302,7 +302,7 @@ Uploads send `text`, or `content_base64` for binary files such as `.xlsx` and `.
 
 | Method | Path | Purpose |
 | --- | --- | --- |
-| GET, POST | `/automations` | Scheduled prompts, or create one |
+| GET, POST | `/automations` | Scheduled prompts, or create one. Left out on create: `profile_id` is General Assistant (else the first profile), `model_id` is `auto`, and `schedule.time_zone` is this computer's; a profile that doesn't exist answers `400` (#762) |
 | POST | `/automations/preview` | Run an automation once without saving it |
 | GET, PATCH, DELETE | `/automations/{id}` | An automation with its history, change it, or delete it |
 | POST | `/automations/{id}/run`, `/pause`, `/resume` | Run now, pause, or resume |
