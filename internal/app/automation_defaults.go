@@ -3,7 +3,7 @@ package app
 import (
 	"context"
 	"fmt"
-	"time"
+	"github.com/yeixio/toskar-core/internal/locale"
 
 	"github.com/yeixio/toskar-core/internal/automations"
 	"github.com/yeixio/toskar-core/internal/huginn"
@@ -61,5 +61,5 @@ func (a *App) createDefaults(ctx context.Context, in automations.CreateInput) (a
 			ids = append(ids, p.ID)
 		}
 	}
-	return withCreateDefaults(in, ids, time.Now().Location().String())
+	return withCreateDefaults(in, ids, locale.SystemZone())
 }

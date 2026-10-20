@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from 'vitest'
 import { applyLanguage } from '@/i18n'
-import { civilToISO, notificationLabel, scheduleLabel, visibleTask } from './parseRequest'
+import { civilToISO, formatWhen, localTimeZone, notificationLabel, safeZone, scheduleLabel, visibleTask } from './parseRequest'
 import { readNumber } from './number'
 
 // Requests are read on the computer (internal/automations/request_test.go
@@ -55,5 +55,14 @@ describe('schedule labels', () => {
     expect(scheduleLabel({ kind: 'cron', ...tz, cron: '0 9 * * 1-5' })).toBe('Custom schedule: 0 9 * * 1-5')
     await applyLanguage('de')
     expect(scheduleLabel({ kind: 'weekly', ...tz, weekdays: [1, 3], hour: 9 })).toBe('Jeden Montag und Mittwoch um 9:00')
+  })
+})
+
+describe('safeZone', () => {
+  it("keeps a zone the browser knows, and falls back for one it doesn't, such as Go's Local", () => {
+    expect(safeZone('America/Juneau')).toBe('America/Juneau')
+    expect(safeZone('Local')).toBe(localTimeZone())
+    expect(safeZone(undefined)).toBe('UTC')
+    expect(() => formatWhen('2026-10-20T19:00:00Z', 'Local')).not.toThrow()
   })
 })

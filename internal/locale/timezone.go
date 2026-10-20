@@ -2,6 +2,8 @@ package locale
 
 import (
 	"context"
+	"os"
+	"strings"
 	"time"
 )
 
@@ -29,4 +31,35 @@ func TimeZone(ctx context.Context) *time.Location {
 		}
 	}
 	return time.Local
+}
+
+// SystemZone is this computer's time zone as an IANA name, such as
+// America/Juneau, which every client understands. Go names it "Local" when
+// TZ isn't set, which browsers refuse, so this reads TZ, then the
+// /etc/localtime link that macOS and Linux keep; else UTC.
+func SystemZone() string {
+	if tz := strings.TrimPrefix(os.Getenv("TZ"), ":"); tz != "" && tz != "Local" {
+		if _, err := time.LoadLocation(tz); err == nil {
+			return tz
+		}
+	}
+	if target, err := os.Readlink("/etc/localtime"); err == nil {
+		if _, name, ok := strings.Cut(target, "zoneinfo/"); ok {
+			if _, err := time.LoadLocation(name); err == nil {
+				return name
+			}
+		}
+	}
+	if name := time.Local.String(); name != "" && name != "Local" {
+		return name
+	}
+	return "UTC"
+}
+
+// ZoneName is name, or this computer's IANA zone for "Local" or none.
+func ZoneName(name string) string {
+	if name == "" || name == "Local" {
+		return SystemZone()
+	}
+	return name
 }

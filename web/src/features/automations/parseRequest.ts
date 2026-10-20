@@ -22,6 +22,17 @@ export function localTimeZone(): string {
   return Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'
 }
 
+/** A zone the browser can format, or this browser's: a stored name it refuses, such as Go's "Local", never breaks the page. */
+export function safeZone(timeZone: string | undefined): string {
+  if (!timeZone) return 'UTC'
+  try {
+    new Intl.DateTimeFormat('en-US', { timeZone })
+    return timeZone
+  } catch {
+    return localTimeZone()
+  }
+}
+
 export function scheduleLabel(schedule: AutomationSchedule): string {
   switch (schedule.kind) {
     case 'once':
@@ -96,7 +107,7 @@ export function formatWhen(iso: string | undefined, timeZone: string): string {
   if (!iso) return i18n.t('automations:time.notScheduled')
   const date = new Date(iso)
   if (Number.isNaN(date.getTime())) return i18n.t('automations:time.notScheduled')
-  return formatDate(date, { timeZone: timeZone || 'UTC', dateStyle: 'medium', timeStyle: 'short' })
+  return formatDate(date, { timeZone: safeZone(timeZone), dateStyle: 'medium', timeStyle: 'short' })
 }
 
 export function civilInputValue(iso: string | undefined, timeZone: string): string {
@@ -207,7 +218,7 @@ interface CivilParts {
 
 function zonedParts(date: Date, timeZone: string): CivilParts {
   const fmt = new Intl.DateTimeFormat('en-US', {
-    timeZone,
+    timeZone: safeZone(timeZone),
     year: 'numeric',
     month: '2-digit',
     day: '2-digit',

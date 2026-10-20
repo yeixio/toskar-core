@@ -22,7 +22,7 @@ func (a *App) parseAutomation(ctx context.Context, text, timeZone, language stri
 		language = a.appLanguage(ctx)
 	}
 	if timeZone == "" {
-		timeZone = time.Now().Location().String()
+		timeZone = locale.SystemZone()
 	}
 	now := time.Now()
 	parsed, err := automations.ParseRequest(text, now, timeZone, language)
