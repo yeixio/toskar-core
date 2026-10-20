@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/yeixio/toskar-core/internal/auth"
 	"io"
 	"net/http"
 	"strconv"
@@ -38,6 +39,9 @@ func (s *Server) handleCreateAutomation(w http.ResponseWriter, r *http.Request) 
 	var in automations.CreateInput
 	if err := json.NewDecoder(r.Body).Decode(&in); err != nil {
 		writeErr(w, http.StatusBadRequest, "BAD_REQUEST", "invalid automation", nil)
+		return
+	}
+	if len(in.Cameras) > 0 && !camerasAllowed(w, r) {
 		return
 	}
 	created, err := s.deps.CreateAutomation(r.Context(), in)
@@ -162,6 +166,9 @@ func (s *Server) handleUpdateAutomation(w http.ResponseWriter, r *http.Request) 
 		writeErr(w, http.StatusBadRequest, "BAD_REQUEST", "invalid automation", nil)
 		return
 	}
+	if patch.Cameras != nil && len(*patch.Cameras) > 0 && !camerasAllowed(w, r) {
+		return
+	}
 	updated, err := s.deps.UpdateAutomation(r.Context(), mux.Vars(r)["id"], patch)
 	if err != nil {
 		writeAutomationErr(w, err)
@@ -275,4 +282,15 @@ func writeAutomationErr(w http.ResponseWriter, err error) {
 	default:
 		writeErr(w, http.StatusBadRequest, "AUTOMATION_INVALID", msg, nil)
 	}
+}
+
+// camerasAllowed reports an Admin or the Owner, who may have an automation
+// look at cameras (#667): a camera is a live view of the home, through a
+// connection an Admin made. Anyone else gets ROLE_REQUIRED.
+func camerasAllowed(w http.ResponseWriter, r *http.Request) bool {
+	if auth.PrincipalFrom(r.Context()).Person.Role.AtLeast(auth.RoleAdmin) {
+		return true
+	}
+	writeErr(w, http.StatusForbidden, "ROLE_REQUIRED", "looking at cameras needs the admin role", map[string]any{"role": string(auth.RoleAdmin)})
+	return false
 }

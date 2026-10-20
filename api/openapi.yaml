@@ -7581,7 +7581,7 @@ components:
           properties:
             kind:
               type: string
-              enum: [page, feed, folder, webhook, after, ""]
+              enum: [page, feed, folder, webhook, after, device, ""]
             url:
               type: string
               description: The page or feed, for page and feed
@@ -7595,6 +7595,21 @@ components:
               type: string
               enum: [succeeded, notified]
               description: For after, each time that one succeeds (the default) or only when it notifies
+            connector:
+              type: string
+              enum: [homeassistant]
+              description: For device, the connected service whose device it watches (#586)
+            device:
+              type: string
+              description: For device, the device as that service names it, such as binary_sensor.front_door_visitor
+            to:
+              type: string
+              description: For device, the state it must change to, such as on; empty runs on any change
+            cooldown_seconds:
+              type: integer
+              minimum: 0
+              maximum: 86400
+              description: For device, the seconds after a run during which changes start no other; 0 is 60
     Automation:
       type: object
       properties:
@@ -7646,7 +7661,7 @@ components:
           properties:
             kind:
               type: string
-              enum: [page, feed, folder, webhook, after, ""]
+              enum: [page, feed, folder, webhook, after, device, ""]
             url:
               type: string
               description: The page or feed, for page and feed
@@ -7660,6 +7675,21 @@ components:
               type: string
               enum: [succeeded, notified]
               description: For after, each time that one succeeds (the default) or only when it notifies
+            connector:
+              type: string
+              enum: [homeassistant]
+              description: For device, the connected service whose device it watches (#586)
+            device:
+              type: string
+              description: For device, the device as that service names it, such as binary_sensor.front_door_visitor
+            to:
+              type: string
+              description: For device, the state it must change to, such as on; empty runs on any change
+            cooldown_seconds:
+              type: integer
+              minimum: 0
+              maximum: 86400
+              description: For device, the seconds after a run during which changes start no other; 0 is 60
         last_checked_at:
           type: string
           format: date-time

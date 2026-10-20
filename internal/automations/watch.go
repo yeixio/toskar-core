@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"net/url"
 	"strings"
+	"time"
 )
 
 // A trigger runs an automation when something changes instead of on every
@@ -30,6 +31,16 @@ type Trigger struct {
 	// (only when it notified) (#204).
 	AutomationID string `json:"automation_id,omitempty"`
 	When         string `json:"when,omitempty"`
+	// Connector and Device are a device trigger's: a connected service's
+	// device, such as Home Assistant's binary_sensor.front_door_visitor,
+	// whose state changing runs the automation at once (#586, #667). To,
+	// when set, is the state it must change to, such as on; Cooldown is
+	// the seconds after a run during which changes start no other run, so
+	// a flickering sensor runs it once (0 is DefaultDeviceCooldown).
+	Connector string `json:"connector,omitempty"`
+	Device    string `json:"device,omitempty"`
+	To        string `json:"to,omitempty"`
+	Cooldown  int    `json:"cooldown_seconds,omitempty"`
 }
 
 // Trigger kinds.
@@ -42,7 +53,25 @@ const (
 	// TriggerAfter runs it when another automation finishes, with that
 	// one's result (#204).
 	TriggerAfter = "after"
+	// TriggerDevice runs it when a connected service's device changes
+	// state, as it happens (#586).
+	TriggerDevice = "device"
 )
+
+// DefaultDeviceCooldown and MaxDeviceCooldown bound a device trigger's
+// cooldown, in seconds.
+const (
+	DefaultDeviceCooldown = 60
+	MaxDeviceCooldown     = 86400
+)
+
+// DeviceCooldown is how long after a run a device trigger waits.
+func (t Trigger) DeviceCooldown() time.Duration {
+	if t.Cooldown <= 0 {
+		return DefaultDeviceCooldown * time.Second
+	}
+	return time.Duration(t.Cooldown) * time.Second
+}
 
 // When an after trigger follows.
 const (
@@ -70,6 +99,17 @@ func (t *Trigger) Validate() error {
 		}
 		if t.When != "" && t.When != AfterSucceeded && t.When != AfterNotified {
 			return errors.New("an after trigger's when is succeeded or notified")
+		}
+	case TriggerDevice:
+		if t.Connector != "homeassistant" {
+			return fmt.Errorf("unsupported device connector %q", t.Connector)
+		}
+		domain, name, ok := strings.Cut(t.Device, ".")
+		if !ok || domain == "" || name == "" || strings.ContainsAny(t.Device, "/?# ") {
+			return errors.New("a Home Assistant device is an entity such as binary_sensor.front_door_visitor")
+		}
+		if t.Cooldown < 0 || t.Cooldown > MaxDeviceCooldown {
+			return fmt.Errorf("a device trigger's cooldown is 0 to %d seconds", MaxDeviceCooldown)
 		}
 	case TriggerWebhook:
 		if t.URL != "" || t.Path != "" {

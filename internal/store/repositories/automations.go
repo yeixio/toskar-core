@@ -511,6 +511,27 @@ func (r *AutomationRepo) Followers(ctx context.Context, id string) ([]automation
 	return out, nil
 }
 
+// DeviceTriggered are the enabled automations a device change runs (#586).
+func (r *AutomationRepo) DeviceTriggered(ctx context.Context) ([]automations.Automation, error) {
+	clause, args := mine(ctx, "AND")
+	rows, err := r.db.QueryContext(ctx, automationSelect+` WHERE trigger_json IS NOT NULL AND enabled = 1`+clause+` ORDER BY name`, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	all, err := scanAutomations(rows)
+	if err != nil {
+		return nil, err
+	}
+	var out []automations.Automation
+	for _, a := range all {
+		if a.Trigger != nil && a.Trigger.Kind == automations.TriggerDevice {
+			out = append(out, a)
+		}
+	}
+	return out, nil
+}
+
 // checkChain refuses an after trigger on an automation that doesn't exist,
 // or one that would come back around to a, so finishing never loops
 // (#204).

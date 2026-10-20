@@ -1279,6 +1279,15 @@ func (a *App) Start(ctx context.Context) error {
 			defer a.wg.Done()
 			a.digestLoop(ctx)
 		}()
+		// Device triggers run automations as their devices change (#586).
+		if a.Connectors != nil && a.Automations != nil {
+			d := &deviceTriggers{app: a, last: map[string]time.Time{}, now: time.Now}
+			a.wg.Add(1)
+			go func() {
+				defer a.wg.Done()
+				d.loop(ctx)
+			}()
+		}
 	}
 	if a.Portals != nil {
 		a.wg.Add(1)

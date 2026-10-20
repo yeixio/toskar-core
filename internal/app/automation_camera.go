@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/yeixio/toskar-core/internal/artifacts"
+	"github.com/yeixio/toskar-core/internal/auth"
 	"github.com/yeixio/toskar-core/internal/automations"
 	"github.com/yeixio/toskar-core/internal/egress"
 )
@@ -17,6 +18,13 @@ import (
 func (a *App) lookAtCameras(ctx context.Context, automation automations.Automation) ([]artifacts.Artifact, error) {
 	if a.Connectors == nil || a.Artifacts == nil {
 		return nil, fmt.Errorf("cameras aren't available on this computer")
+	}
+	// Only an Admin's automation looks: one made by someone who is no longer
+	// an Admin stops (#667).
+	if a.People != nil && automation.PersonID != "" {
+		if p, err := a.People.Get(ctx, automation.PersonID); err != nil || !p.Role.AtLeast(auth.RoleAdmin) {
+			return nil, fmt.Errorf("looking at cameras needs an Admin's automation")
+		}
 	}
 	var out []artifacts.Artifact
 	for _, cam := range automation.Cameras {

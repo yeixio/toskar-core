@@ -282,7 +282,7 @@ type checked struct {
 func (r *Runner) check(ctx context.Context, automation Automation) (*checked, error) {
 	// A webhook or an after trigger has nothing to look at; its schedule,
 	// if any, just runs.
-	if automation.Trigger == nil || automation.Trigger.Kind == TriggerWebhook || automation.Trigger.Kind == TriggerAfter || r.Watch == nil {
+	if automation.Trigger == nil || automation.Trigger.Kind == TriggerWebhook || automation.Trigger.Kind == TriggerAfter || automation.Trigger.Kind == TriggerDevice || r.Watch == nil {
 		return nil, nil
 	}
 	found, state, err := r.Watch.Check(ctx, *automation.Trigger, automation.WatchState)

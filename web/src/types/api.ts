@@ -1541,13 +1541,18 @@ export interface AutomationCamera {
 }
 
 export interface AutomationTrigger {
-  kind: 'page' | 'feed' | 'folder' | 'webhook' | 'after' | ''
+  kind: 'page' | 'feed' | 'folder' | 'webhook' | 'after' | 'device' | ''
   url?: string
   /** A folder or file in the home folder, for a folder trigger; ~ is the home folder. */
   path?: string
   /** The automation an after trigger follows, and whether each time it succeeds or only when it notifies. */
   automation_id?: string
   when?: 'succeeded' | 'notified'
+  /** A device trigger's connected service and device, such as Home Assistant's binary_sensor.front_door_visitor; to is the state it must change to (empty: any change), and cooldown_seconds the wait after a run (0: 60) (#586, contract 1.50). */
+  connector?: 'homeassistant'
+  device?: string
+  to?: string
+  cooldown_seconds?: number
 }
 
 
