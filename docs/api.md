@@ -537,6 +537,11 @@ Saved schedules also carry `hour`, `minute`, and `weekday`: the first time and d
   - **The link:** `POST /api/v1/automations/{id}/hook` makes the link and returns `{token, path}`, shown only then (only the token's SHA-256 is kept). A new one stops the old one, and `hook_set` says one exists.
   - **Calling it:** `POST /hooks/{token}`, which needs no API key, answers `202` with `run_id`. The body, up to 64 KB of any type, ends the run's prompt as data from that service, not instructions.
   - **Refusals:** an unknown token answers `404`, a paused automation `409` `AUTOMATION_PAUSED`, a call within 10 seconds of the last `429` `HOOK_TOO_SOON` with `Retry-After`, and a bigger body `413` `HOOK_TOO_LARGE`.
+- **Devices** (#586, contract 1.50): `{"kind": "device", "connector": "homeassistant", "device": "binary_sensor.front_door_visitor", "to": "on"}` runs the automation as soon as that device changes to `to`, or on any change without one; usually with the `manual` schedule.
+  - **Live:** while an enabled automation has one, Toskar keeps a WebSocket open to the connected service, which sends only the named devices' changes (Home Assistant's `subscribe_trigger`). It follows the automations as they change, and reconnects after a drop, waiting 5 seconds, doubling to 5 minutes.
+  - **Cooldown:** `cooldown_seconds` (0 is 60, up to 86400) is how long after a run its device's changes start no other, so a sensor that flickers, or a doorbell pressed twice, runs it once.
+  - **The run** is told the change (`The device … changed from "off" to "on" at 10:56:47.`), and counts as started by untrusted content, like other triggers.
+  - `toskarctl`: `--trigger device --device <entity> [--to on] [--cooldown 2m]`.
 - **Chaining:** `{"kind": "after", "automation_id": "…", "when": "succeeded"}` runs the automation right after another one finishes well. With `"when": "notified"`, it runs only when that one notified, such as after a price condition was met. Its prompt ends with the other one's result, labelled as data.
   - An after trigger on a missing automation, or one that comes back around to itself through others, is refused when saved.
   - A chain stops after 5 automations in a row.

@@ -20,7 +20,7 @@ const automationsUsage = `usage: toskarctl automations <list|get|parse|create|up
   get <id>
   parse <request> [--zone <tz>] [--language <tag>]
   create --request <text> [--profile <id>] [--model <id>] [--zone <tz>] [any flag below to change what it read]
-  create --name <name> --prompt <text> [--profile <id>] [--model <id>] --schedule <once|daily|weekly|monthly|interval|cron|manual> [--at <time>] [--every <duration>] [--weekday <days>] [--day <1-31>] [--cron <expr>] [--zone <tz>] [--tool <id>] [--notify <mode>] [--save-folder <path>] [--camera <camera.entity>]... [--trigger <page|feed|folder|webhook|after|none> --trigger-url <url> | --trigger-path <path> | --after <id> [--after-when notified]] [--disabled]
+  create --name <name> --prompt <text> [--profile <id>] [--model <id>] --schedule <once|daily|weekly|monthly|interval|cron|manual> [--at <time>] [--every <duration>] [--weekday <days>] [--day <1-31>] [--cron <expr>] [--zone <tz>] [--tool <id>] [--notify <mode>] [--save-folder <path>] [--camera <camera.entity>]... [--trigger <page|feed|folder|webhook|after|device|none> --trigger-url <url> | --trigger-path <path> | --after <id> [--after-when notified] | --device <entity> [--to <state>] [--cooldown <duration>]] [--disabled]
   update <id> [--name <name>] [--prompt <text>] [--profile <id>] [--model <id>] [--schedule ...] [--notify <mode>] [--camera <camera.entity>|""]
   delete <id>
   run <id>
@@ -227,7 +227,10 @@ func automationBody(args []string, create bool, parse func(text, zone string) (a
 	op := fs.String("condition-op", "", "below or above")
 	value := fs.Float64("condition-value", 0, "threshold value")
 	disabled := fs.Bool("disabled", false, "create the automation paused")
-	trigger := fs.String("trigger", "", "page, feed, or folder: run only when it changed, checked on the schedule; webhook: run when its link is called; none runs on the schedule again")
+	trigger := fs.String("trigger", "", "page, feed, or folder: run only when it changed, checked on the schedule; webhook: run when its link is called; device: run when a Home Assistant device changes; none runs on the schedule again")
+	device := fs.String("device", "", "with --trigger device: the Home Assistant device, such as binary_sensor.front_door_visitor")
+	deviceTo := fs.String("to", "", "with --trigger device: the state it must change to, such as on; empty runs on any change")
+	cooldown := fs.Duration("cooldown", 0, "with --trigger device: how long after a run changes start no other, such as 2m; 0 is a minute")
 	triggerURL := fs.String("trigger-url", "", "the page or feed to watch")
 	triggerPath := fs.String("trigger-path", "", "the folder or file to watch, in your home folder, such as ~/Documents/Invoices")
 	after := fs.String("after", "", "with --trigger after: the automation it runs after, given its result")
@@ -298,7 +301,7 @@ func automationBody(args []string, create bool, parse func(text, zone string) (a
 			in.Cameras = cameraFlags(cameras)
 		}
 		if seen["trigger"] {
-			in.Trigger = buildTrigger(*trigger, *triggerURL, *triggerPath, *after, *afterWhen)
+			in.Trigger = withDevice(buildTrigger(*trigger, *triggerURL, *triggerPath, *after, *afterWhen), *device, *deviceTo, *cooldown)
 		}
 		if *disabled {
 			off := false
@@ -330,7 +333,7 @@ func automationBody(args []string, create bool, parse func(text, zone string) (a
 			Notification: note,
 			SaveFolder:   *saveFolder,
 			Cameras:      cameraFlags(cameras),
-			Trigger:      buildTrigger(*trigger, *triggerURL, *triggerPath, *after, *afterWhen),
+			Trigger:      withDevice(buildTrigger(*trigger, *triggerURL, *triggerPath, *after, *afterWhen), *device, *deviceTo, *cooldown),
 		}
 		if *disabled {
 			off := false
@@ -381,7 +384,7 @@ func automationBody(args []string, create bool, parse func(text, zone string) (a
 		patch.SaveFolder = saveFolder
 	}
 	if seen["trigger"] {
-		t := buildTrigger(*trigger, *triggerURL, *triggerPath, *after, *afterWhen)
+		t := withDevice(buildTrigger(*trigger, *triggerURL, *triggerPath, *after, *afterWhen), *device, *deviceTo, *cooldown)
 		if t == nil {
 			t = &automations.Trigger{}
 		}
@@ -593,4 +596,13 @@ func cameraFlags(devices []string) []automations.Camera {
 		}
 	}
 	return out
+}
+
+// withDevice adds a device trigger's flags (#586).
+func withDevice(t *automations.Trigger, device, to string, cooldown time.Duration) *automations.Trigger {
+	if t == nil || t.Kind != automations.TriggerDevice {
+		return t
+	}
+	t.Connector, t.Device, t.To, t.Cooldown = "homeassistant", device, to, int(cooldown/time.Second)
+	return t
 }
