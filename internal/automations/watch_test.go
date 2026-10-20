@@ -3,6 +3,7 @@ package automations
 import (
 	"strings"
 	"testing"
+	"time"
 )
 
 // A page counts as changed when its text did, and the run is told which
@@ -86,6 +87,29 @@ func TestWatchNote(t *testing.T) {
 	for _, none := range []*Trigger{nil, {Kind: TriggerWebhook}, {Kind: TriggerAfter, AutomationID: "a"}} {
 		if WatchNote(none) != "" {
 			t.Fatalf("note for %+v", none)
+		}
+	}
+}
+
+// A device trigger names a Home Assistant entity, and a cooldown in range
+// (#586); 0 is a minute.
+func TestDeviceTrigger(t *testing.T) {
+	ok := Trigger{Kind: TriggerDevice, Connector: "homeassistant", Device: "binary_sensor.front_door_visitor", To: "on"}
+	if err := ok.Validate(); err != nil {
+		t.Fatal(err)
+	}
+	if ok.DeviceCooldown() != time.Minute {
+		t.Fatalf("default cooldown %v", ok.DeviceCooldown())
+	}
+	for name, bad := range map[string]Trigger{
+		"no device":     {Kind: TriggerDevice, Connector: "homeassistant"},
+		"no domain":     {Kind: TriggerDevice, Connector: "homeassistant", Device: "front_door"},
+		"a path":        {Kind: TriggerDevice, Connector: "homeassistant", Device: "sensor.a/b"},
+		"other service": {Kind: TriggerDevice, Connector: "github", Device: "sensor.a"},
+		"long cooldown": {Kind: TriggerDevice, Connector: "homeassistant", Device: "sensor.a", Cooldown: MaxDeviceCooldown + 1},
+	} {
+		if err := bad.Validate(); err == nil {
+			t.Fatalf("%s accepted", name)
 		}
 	}
 }
