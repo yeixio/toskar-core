@@ -1,8 +1,11 @@
 package llamacpp
 
 import (
+	"context"
+	"fmt"
 	"io"
 	"net/http"
+	"net/http/httptest"
 	"strings"
 	"testing"
 	"time"
@@ -92,7 +95,7 @@ func TestReasoningContentIsKeptApart(t *testing.T) {
 	}, "\n\n") + "\n\n"
 	resp := &http.Response{Body: io.NopCloser(strings.NewReader(frames))}
 	ch := make(chan pluginapi.ChatChunk, 16)
-	go NewClient().readStream(resp, ch, time.Now())
+	go NewClient().readStream(resp, ch, time.Now(), nil)
 	var content, thinking strings.Builder
 	for c := range ch {
 		content.WriteString(c.Content)
@@ -104,7 +107,7 @@ func TestReasoningContentIsKeptApart(t *testing.T) {
 
 	body := `{"choices":[{"message":{"content":"391","reasoning_content":"17 times 23"}}]}`
 	ch = make(chan pluginapi.ChatChunk, 4)
-	go NewClient().readNonStream(&http.Response{Body: io.NopCloser(strings.NewReader(body))}, ch, time.Now())
+	go NewClient().readNonStream(&http.Response{Body: io.NopCloser(strings.NewReader(body))}, ch, time.Now(), nil)
 	content.Reset()
 	thinking.Reset()
 	for c := range ch {
@@ -113,5 +116,78 @@ func TestReasoningContentIsKeptApart(t *testing.T) {
 	}
 	if content.String() != "391" || thinking.String() != "17 times 23" {
 		t.Fatalf("non-stream content %q thinking %q", content.String(), thinking.String())
+	}
+}
+
+// A reply llama.cpp can't read, as when Muse Glimmer calls places.search in
+// a turn with no tools, is asked for once more with a note in the person's
+// message, and that answer comes back in its place (#755): streamed, where
+// the error follows the thinking, and as a 500 before anything.
+func TestChatAsksAgainAfterAnUnreadableReply(t *testing.T) {
+	const mismatch = `{"error":{"code":500,"message":"The model produced output that does not match the expected peg-native format","type":"server_error"}}`
+	for _, stream := range []bool{true, false} {
+		var bodies []string
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			b, _ := io.ReadAll(r.Body)
+			bodies = append(bodies, string(b))
+			if len(bodies) == 1 {
+				if stream {
+					fmt.Fprint(w, `data: {"choices":[{"delta":{"reasoning_content":"Let's search."}}]}`+"\n\n")
+					fmt.Fprint(w, "data: "+mismatch+"\n\n")
+					return
+				}
+				w.WriteHeader(http.StatusInternalServerError)
+				fmt.Fprint(w, mismatch)
+				return
+			}
+			if stream {
+				fmt.Fprint(w, `data: {"choices":[{"delta":{"content":"Try Heritage Coffee."},"finish_reason":"stop"}]}`+"\n\n")
+				return
+			}
+			fmt.Fprint(w, `{"choices":[{"message":{"content":"Try Heritage Coffee."}}]}`)
+		}))
+		ch, err := NewClient().Chat(context.Background(), pluginapi.ChatRequest{
+			ModelEndpoint: srv.URL, Stream: stream,
+			Messages: []pluginapi.ChatMessage{{Role: "system", Content: "Be brief."}, {Role: "user", Content: "Find a cafe in downtown Juneau"}},
+		})
+		if err != nil {
+			t.Fatalf("stream=%v: %v", stream, err)
+		}
+		var answer, failed string
+		for c := range ch {
+			answer += c.Content
+			if c.Error != "" {
+				failed = c.Error
+			}
+		}
+		srv.Close()
+		if failed != "" || answer != "Try Heritage Coffee." {
+			t.Errorf("stream=%v: answer %q, error %q", stream, answer, failed)
+		}
+		if len(bodies) != 2 || !strings.Contains(bodies[1], "No tools are available for this message") || strings.Contains(bodies[0], "No tools") {
+			t.Errorf("stream=%v: asked %d times; second %q", stream, len(bodies), bodies[len(bodies)-1])
+		}
+	}
+	// It's asked again once, not again and again.
+	calls := 0
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		calls++
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprint(w, mismatch)
+	}))
+	defer srv.Close()
+	if _, err := NewClient().Chat(context.Background(), pluginapi.ChatRequest{ModelEndpoint: srv.URL, Messages: []pluginapi.ChatMessage{{Role: "user", Content: "hi"}}}); err == nil || calls != 2 {
+		t.Errorf("err %v after %d calls", err, calls)
+	}
+}
+
+// With tools offered, the note names them.
+func TestToolNoteNamesTheOfferedTools(t *testing.T) {
+	req := withToolNote(pluginapi.ChatRequest{
+		Messages: []pluginapi.ChatMessage{{Role: "user", Content: "Weather in Juneau?"}, {Role: "assistant", Content: "…"}},
+		Tools:    []map[string]any{{"type": "function", "function": map[string]any{"name": "web_search"}}},
+	})
+	if got := req.Messages[0].Content; !strings.Contains(got, "Only these tools are available for this message: web_search.") {
+		t.Errorf("note: %q", got)
 	}
 }
