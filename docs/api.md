@@ -255,6 +255,7 @@ Control-plane routes are under `/api/v1`. The OpenAI-compatible routes are under
 | GET | `/tools/providers` | Each computer's providers for image and speech tools, which can run on any paired computer: state (healthy, installing, failed, unavailable), what runs it, whether a GPU does the work, and the `languages` it works in (`auto_detect` when it tells the language itself) |
 | GET | `/connectors` | Connected services and their status |
 | PUT, DELETE | `/connectors/{id}` | Connect a service (`{"values": {...}}`), or disconnect it. `POST /connectors/{id}/check` tests the stored credential. |
+| GET | `/devices` | The connected services' devices (#586, contract 1.51): `{"devices": [{connector, device, name, kind, state}]}`, by a kind that doesn't depend on the service: `camera`, `sensor`, `speaker`, `light`, `switch`, `lock`, `cover`, `climate`, or `other`; `?kind=camera` narrows to one. `device` is how the service names it, such as Home Assistant's `camera.driveway`, and is what automations' cameras and device triggers take. A service that isn't connected has none. |
 | GET, POST | `/mcp/servers` | MCP tool sources, or add one |
 | GET, PATCH, PUT, DELETE | `/mcp/servers/{id}` | Read, change, replace, or remove a source |
 | POST | `/mcp/servers/{id}/check`, `/sign-in`, `/sign-out` | Test a source, or start or end its browser sign-in |

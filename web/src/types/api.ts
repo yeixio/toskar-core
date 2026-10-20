@@ -2005,6 +2005,16 @@ export interface ConnectorField {
 }
 
 /** A connected service (spec §32). Secret values are never returned; a stored token shows only its last four characters. */
+/** A connected service's device, by a kind that doesn't depend on the service (#586, contract 1.51). */
+export interface Device {
+  connector: string
+  /** How the service names it, such as camera.driveway: what automations' cameras and device triggers take. */
+  device: string
+  name: string
+  kind: 'camera' | 'sensor' | 'speaker' | 'light' | 'switch' | 'lock' | 'cover' | 'climate' | 'other'
+  state: string
+}
+
 export interface Connector {
   id: string
   name: string

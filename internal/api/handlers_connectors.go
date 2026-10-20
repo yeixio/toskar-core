@@ -17,6 +17,27 @@ func (s *Server) connectorRoutes(api *mux.Router) {
 	api.HandleFunc("/connectors/{id}", s.connectorHandler(s.handleConnect)).Methods(http.MethodPut)
 	api.HandleFunc("/connectors/{id}", s.connectorHandler(s.handleDisconnect)).Methods(http.MethodDelete)
 	api.HandleFunc("/connectors/{id}/check", s.connectorHandler(s.handleCheckConnector)).Methods(http.MethodPost)
+	api.HandleFunc("/devices", s.connectorHandler(s.handleDevices)).Methods(http.MethodGet)
+}
+
+// handleDevices lists the connected services' devices (#586), by a kind
+// that doesn't depend on the service; ?kind=camera narrows to one kind.
+func (s *Server) handleDevices(w http.ResponseWriter, r *http.Request) {
+	list, err := s.connectors.Devices(r.Context())
+	if err != nil {
+		writeErrFrom(w, http.StatusBadGateway, "DEVICES_FAILED", err)
+		return
+	}
+	if kind := r.URL.Query().Get("kind"); kind != "" {
+		out := []connectors.Device{}
+		for _, d := range list {
+			if d.Kind == kind {
+				out = append(out, d)
+			}
+		}
+		list = out
+	}
+	writeJSON(w, http.StatusOK, map[string]any{"devices": list})
 }
 
 func (s *Server) connectorHandler(h http.HandlerFunc) http.HandlerFunc {

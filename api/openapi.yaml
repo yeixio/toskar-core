@@ -1888,6 +1888,21 @@ paths:
       responses:
         "200":
           description: Status
+  /api/v1/devices:
+    get:
+      summary: The connected services' devices, by kind (#586)
+      operationId: listDevices
+      parameters:
+        - name: kind
+          in: query
+          schema:
+            type: string
+            enum: [camera, sensor, speaker, light, switch, lock, cover, climate, other]
+      responses:
+        "200":
+          description: "{devices: [{connector, device, name, kind, state}]}"
+        "502":
+          description: The service couldn't be read (DEVICES_FAILED)
   /api/v1/mcp/servers:
     get:
       summary: List MCP tool sources with status, tools, and masked values. Secret values are never returned.
