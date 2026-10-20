@@ -530,6 +530,7 @@ Saved schedules also carry `hour`, `minute`, and `weekday`: the first time and d
 - **First check:** it only remembers what it found.
 - **After a run:** what a check found is kept only once its run succeeds, so a run that fails or retries sees the change again.
 - **Can't fetch:** a check that can't fetch fails the run, so failure notices and auto-pause apply.
+- **Run now:** a run started by hand has no change to report, so its prompt ends with what the trigger watches (the page's or feed's link, or the folder), and the run opens it itself.
 - **Changing or clearing:** watching a different link starts fresh. On update, `{"trigger": {"kind": ""}}` runs on the schedule again.
 - **Webhooks:** `{"kind": "webhook"}` runs the automation when another service calls its link, usually with the `manual` schedule, which never runs on its own.
   - **The link:** `POST /api/v1/automations/{id}/hook` makes the link and returns `{token, path}`, shown only then (only the token's SHA-256 is kept). A new one stops the old one, and `hook_set` says one exists.
