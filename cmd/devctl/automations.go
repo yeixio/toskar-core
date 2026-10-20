@@ -20,7 +20,7 @@ const automationsUsage = `usage: toskarctl automations <list|get|parse|create|up
   get <id>
   parse <request> [--zone <tz>] [--language <tag>]
   create --request <text> [--profile <id>] [--model <id>] [--zone <tz>] [any flag below to change what it read]
-  create --name <name> --prompt <text> --profile <id> --model <id> --schedule <once|daily|weekly|monthly|interval|cron|manual> [--at <time>] [--every <duration>] [--weekday <days>] [--day <1-31>] [--cron <expr>] [--zone <tz>] [--tool <id>] [--notify <mode>] [--save-folder <path>] [--trigger <page|feed|folder|webhook|after|none> --trigger-url <url> | --trigger-path <path> | --after <id> [--after-when notified]] [--disabled]
+  create --name <name> --prompt <text> [--profile <id>] [--model <id>] --schedule <once|daily|weekly|monthly|interval|cron|manual> [--at <time>] [--every <duration>] [--weekday <days>] [--day <1-31>] [--cron <expr>] [--zone <tz>] [--tool <id>] [--notify <mode>] [--save-folder <path>] [--trigger <page|feed|folder|webhook|after|none> --trigger-url <url> | --trigger-path <path> | --after <id> [--after-when notified]] [--disabled]
   update <id> [--name <name>] [--prompt <text>] [--profile <id>] [--model <id>] [--schedule ...] [--notify <mode>]
   delete <id>
   run <id>
@@ -303,8 +303,9 @@ func automationBody(args []string, create bool, parse func(text, zone string) (a
 	}
 
 	if create {
-		if strings.TrimSpace(*name) == "" || strings.TrimSpace(*prompt) == "" || strings.TrimSpace(*profile) == "" || strings.TrimSpace(*model) == "" {
-			return nil, fmt.Errorf("create requires --request, or --name, --prompt, --profile, and --model")
+		// Without --profile and --model, Toskar uses General Assistant and Auto (#762).
+		if strings.TrimSpace(*name) == "" || strings.TrimSpace(*prompt) == "" {
+			return nil, fmt.Errorf("create requires --request, or --name and --prompt")
 		}
 		sched, err := buildSchedule(scheduleFlags{kind: *schedule, at: *at, every: *every, zone: *zone, weekdays: *weekday, day: *day, cron: *cron})
 		if err != nil {
