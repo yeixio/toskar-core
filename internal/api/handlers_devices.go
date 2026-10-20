@@ -22,6 +22,7 @@ func (s *Server) deviceRoutes(api *mux.Router) {
 	api.HandleFunc("/me/devices", s.handleMyDevices).Methods(http.MethodGet)
 	api.HandleFunc("/me/devices", s.handleAddCompanion).Methods(http.MethodPost)
 	api.HandleFunc("/me/devices/{id}", s.handleDisconnectMyDevice).Methods(http.MethodDelete)
+	api.HandleFunc("/me/device", s.handleDisconnectThisDevice).Methods(http.MethodDelete)
 }
 
 // pairDeviceRoute is the one control API route that needs no key.
@@ -201,7 +202,15 @@ func (s *Server) handleAddCompanion(w http.ResponseWriter, r *http.Request) {
 			map[string]any{"limit": maxDevices})
 		return
 	}
-	rec, secret, err := s.deps.Devices.CreateKey(r.Context(), auth.CleanDeviceName(body.DeviceName))
+	name := auth.CleanDeviceName(body.DeviceName)
+	var rec auth.APIKeyRecord
+	var secret string
+	// Tied to the device asking, so it goes when that one disconnects (#766).
+	if p := auth.PrincipalFrom(r.Context()); p.Via == auth.ViaAPIKey && p.KeyID != "" && s.deps.Devices.CreateCompanion != nil {
+		rec, secret, err = s.deps.Devices.CreateCompanion(r.Context(), name, p.KeyID)
+	} else {
+		rec, secret, err = s.deps.Devices.CreateKey(r.Context(), name)
+	}
 	if err != nil {
 		writeErrFrom(w, http.StatusInternalServerError, "PAIRING_FAILED", err)
 		return
@@ -280,4 +289,52 @@ func (s *Server) handleDisconnectMyDevice(w http.ResponseWriter, r *http.Request
 		}
 	}
 	writeErr(w, http.StatusNotFound, "DEVICE_NOT_FOUND", "No device of yours has that id.", nil)
+}
+
+// handleDisconnectThisDevice is a device disconnecting itself, such as when
+// the phone removes this computer (#766): its key and its companions' keys
+// are revoked, so nothing reaches it from here again, notifications
+// included. Only a device's own key may ask.
+func (s *Server) handleDisconnectThisDevice(w http.ResponseWriter, r *http.Request) {
+	if s.deps.ListAPIKeys == nil || s.deps.RevokeAPIKey == nil {
+		writeErr(w, http.StatusNotImplemented, "NOT_IMPLEMENTED", "Devices aren't available.", nil)
+		return
+	}
+	p := auth.PrincipalFrom(r.Context())
+	list, err := s.myDevices(r)
+	if err != nil {
+		writeErrFrom(w, http.StatusInternalServerError, "DEVICES_FAILED", err)
+		return
+	}
+	mine := false
+	for _, k := range list {
+		if k.ID == p.KeyID && !k.Revoked {
+			mine = true
+		}
+	}
+	if p.Via != auth.ViaAPIKey || !mine {
+		writeErr(w, http.StatusBadRequest, "NOT_A_DEVICE", "Only a connected device can disconnect itself.", nil)
+		return
+	}
+	ids := []string{p.KeyID}
+	if s.deps.Devices != nil && s.deps.Devices.Companions != nil {
+		more, err := s.deps.Devices.Companions(r.Context(), p.KeyID)
+		if err != nil {
+			writeErrFrom(w, http.StatusInternalServerError, "DEVICES_FAILED", err)
+			return
+		}
+		ids = append(ids, more...)
+	}
+	// Companions first, so a failure part way leaves the device able to ask
+	// again.
+	for i := len(ids) - 1; i >= 0; i-- {
+		if s.push != nil {
+			_ = s.push.Remove(r.Context(), ids[i])
+		}
+		if err := s.deps.RevokeAPIKey(r.Context(), ids[i]); err != nil {
+			writeErrFrom(w, http.StatusInternalServerError, "DEVICES_FAILED", err)
+			return
+		}
+	}
+	w.WriteHeader(http.StatusNoContent)
 }

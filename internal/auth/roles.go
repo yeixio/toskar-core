@@ -25,6 +25,7 @@ var visitorRoutes = map[string]bool{
 	"PUT /api/v1/me/push":                     true,
 	"DELETE /api/v1/me/push":                  true,
 	"DELETE /api/v1/me/devices/{id}":          true,
+	"DELETE /api/v1/me/device":                true,
 	"POST /api/v1/me/devices":                 true,
 	"POST /api/v1/devices/pairing":            true,
 	"GET /api/v1/devices/pairing":             true,

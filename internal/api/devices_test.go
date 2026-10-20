@@ -2,6 +2,8 @@ package api
 
 import (
 	"context"
+	"crypto/ed25519"
+	"crypto/rand"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -11,6 +13,7 @@ import (
 
 	"github.com/yeixio/toskar-core/internal/auth"
 	"github.com/yeixio/toskar-core/internal/config"
+	"github.com/yeixio/toskar-core/internal/push"
 	"github.com/yeixio/toskar-core/internal/store"
 )
 
@@ -164,5 +167,75 @@ func TestConnectAPhone(t *testing.T) {
 	}
 	if got := companion("192.168.1.20:5000", got.APIKey); got.Code != http.StatusConflict || !strings.Contains(got.Body.String(), "DEVICE_LIMIT") {
 		t.Fatalf("21st device: %d %s", got.Code, got.Body.String())
+	}
+}
+
+// A device removing this computer disconnects itself: its key, its watch's,
+// and its notifications go, and other devices stay (#766).
+func TestDeviceDisconnectsItself(t *testing.T) {
+	dir := t.TempDir()
+	mgr, err := config.NewManager(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	_ = mgr.Update(func(c *config.Config) { c.APIHost = "0.0.0.0" })
+	db, err := store.Open(filepath.Join(dir, "t.db"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = db.Close() })
+	keys := auth.NewAPIKeyManager(db.SQL, auth.NewSecretStore(dir))
+	srv := NewServer(Dependencies{
+		Config:       mgr,
+		VerifyAPIKey: keys.Verify,
+		ListAPIKeys:  keys.List,
+		RevokeAPIKey: keys.Revoke,
+		Devices:      &auth.DevicePairer{CreateKey: keys.CreateDevice, CreateCompanion: keys.CreateCompanion, Companions: keys.Companions},
+	})
+	_, priv, _ := ed25519.GenerateKey(rand.Reader)
+	regs := push.NewStore(db.SQL)
+	srv.BindPush(regs, &push.Client{Key: priv})
+	ctx := context.Background()
+	_, phone, _ := keys.CreateDevice(ctx, "Sam's phone")
+	_, tablet, _ := keys.CreateDevice(ctx, "Sam's tablet")
+	_, script, _ := keys.Create(ctx, "a script")
+	do := func(key, method, path, body string) *httptest.ResponseRecorder {
+		r := httptest.NewRequest(method, path, strings.NewReader(body))
+		r.RemoteAddr = "192.168.1.20:5000"
+		r.Header.Set("Authorization", "Bearer "+key)
+		rec := httptest.NewRecorder()
+		srv.Handler().ServeHTTP(rec, r)
+		return rec
+	}
+	var watch struct {
+		APIKey string `json:"api_key"`
+	}
+	_ = json.Unmarshal(do(phone, http.MethodPost, "/api/v1/me/devices", `{"device_name":"Watch with Sam's phone"}`).Body.Bytes(), &watch)
+	if watch.APIKey == "" {
+		t.Fatal("no watch key")
+	}
+	for _, key := range []string{phone, tablet} {
+		if got := do(key, http.MethodPut, "/api/v1/me/push", `{"handle":"h-`+key[:12]+`","platform":"ios"}`); got.Code != http.StatusOK {
+			t.Fatalf("register: %d %s", got.Code, got.Body)
+		}
+	}
+
+	if got := do(script, http.MethodDelete, "/api/v1/me/device", ""); got.Code != http.StatusBadRequest || !strings.Contains(got.Body.String(), "NOT_A_DEVICE") {
+		t.Fatalf("a script key: %d %s", got.Code, got.Body)
+	}
+	if got := do(phone, http.MethodDelete, "/api/v1/me/device", ""); got.Code != http.StatusNoContent {
+		t.Fatalf("disconnect: %d %s", got.Code, got.Body)
+	}
+	for name, key := range map[string]string{"phone": phone, "watch": watch.APIKey} {
+		if got := do(key, http.MethodGet, "/api/v1/health", ""); got.Code != http.StatusUnauthorized {
+			t.Fatalf("%s still connected: %d", name, got.Code)
+		}
+	}
+	if got := do(tablet, http.MethodGet, "/api/v1/health", ""); got.Code != http.StatusOK {
+		t.Fatalf("the tablet was disconnected too: %d", got.Code)
+	}
+	left, _ := regs.ForPerson(ctx, auth.OwnerID)
+	if len(left) != 1 || left[0].Handle != "h-"+tablet[:12] {
+		t.Fatalf("registrations left %+v", left)
 	}
 }

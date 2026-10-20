@@ -91,6 +91,7 @@
   "NOTIFICATIONS_DISABLED": "Notifications are turned off.",
   "NOTIFICATIONS_FAILED": "{{detail}}",
   "NOTIFICATION_NOT_FOUND": "That notification was removed.",
+  "NOT_A_DEVICE": "Only a connected device can disconnect itself.",
   "NOT_FOUND": "{{detail}}",
   "NOT_IMPLEMENTED": "{{detail}}",
   "NO_MODEL_ASSIGNED": "No model is chosen for this. Install one in Models, or choose one in the profile.",

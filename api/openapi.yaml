@@ -1099,6 +1099,16 @@ paths:
           description: Disconnected; it needs a new code to connect again
         "404":
           description: No device of yours has that id
+  /api/v1/me/device:
+    delete:
+      summary: Disconnect this device, with its companions (#766)
+      description: A device's own key disconnects it, as the apps do when the person removes this computer. Its key and its companions' keys, such as its watch's, are revoked, and their notifications stop.
+      operationId: disconnectThisDevice
+      responses:
+        "204":
+          description: Disconnected; it needs a new code to connect again
+        "400":
+          description: The request didn't come from a connected device's key (NOT_A_DEVICE)
   /api/v1/me/preferences:
     patch:
       summary: Save your own languages (#206)

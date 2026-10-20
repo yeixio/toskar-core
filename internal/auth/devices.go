@@ -60,6 +60,11 @@ type DevicePairing struct {
 type DevicePairer struct {
 	// CreateKey makes the phone's key; *APIKeyManager.CreateDevice.
 	CreateKey func(ctx context.Context, name string) (APIKeyRecord, string, error)
+	// CreateCompanion makes a watch's key, tied to its phone's (#766);
+	// *APIKeyManager.CreateCompanion. Without it, CreateKey is used.
+	CreateCompanion func(ctx context.Context, name, parentID string) (APIKeyRecord, string, error)
+	// Companions lists a device's companions' keys; *APIKeyManager.Companions.
+	Companions func(ctx context.Context, parentID string) ([]string, error)
 	// Now is the clock; tests replace it.
 	Now func() time.Time
 
@@ -288,6 +293,7 @@ var deviceRoutes = map[string]bool{
 	// A watch going along with the phone gets a key of its own
 	// (yeixio/toskar-apps#213).
 	"POST /api/v1/me/devices":                 true,
+	"DELETE /api/v1/me/device":                true,
 	"GET /api/v1/settings":                    true,
 	"GET /api/v1/profiles":                    true,
 	"GET /api/v1/models":                      true,
