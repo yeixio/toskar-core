@@ -374,7 +374,33 @@
     "afterWhen": "Cuándo",
     "afterSucceeded": "Cada vez que termina",
     "afterNotified": "Solo cuando avisa",
-    "afterHint": "Se ejecuta justo después de la otra automatización, con su resultado. Una ejecución que sigue a otra no puede usar herramientas que cambien cosas fuera de Toskar."
+    "afterHint": "Se ejecuta justo después de la otra automatización, con su resultado. Una ejecución que sigue a otra no puede usar herramientas que cambien cosas fuera de Toskar.",
+    "runsDevice": "Cuando cambia un dispositivo",
+    "device": "Dispositivo",
+    "deviceTo": "Cambia a",
+    "deviceToAny": "Cualquier cambio",
+    "cooldown": "Después, esperar",
+    "cooldowns": {
+      "s15": "15 segundos",
+      "s60": "1 minuto",
+      "s300": "5 minutos",
+      "s900": "15 minutos",
+      "s3600": "1 hora"
+    },
+    "deviceHint": "Se ejecuta en cuanto cambia el dispositivo y se le dice qué cambió. Los cambios durante la espera tras una ejecución no inician otra, así que un sensor que parpadea la ejecuta una sola vez.",
+    "cameras": "Mirar cámaras",
+    "camerasHint": "Cada ejecución empieza con una imagen de estas cámaras, que ve un modelo capaz de ver imágenes. Hasta {{count}}.",
+    "deviceKinds": {
+      "camera": "Cámaras",
+      "sensor": "Sensores",
+      "speaker": "Altavoces",
+      "light": "Luces",
+      "switch": "Interruptores",
+      "lock": "Cerraduras",
+      "cover": "Persianas",
+      "climate": "Clima",
+      "other": "Otros"
+    }
   },
   "draft": {
     "label": "Automatización por confirmar",
@@ -404,6 +430,8 @@
     "feed": "Publicaciones nuevas en {{site}} · revisado: {{schedule}}",
     "folder": "Cuando cambia {{name}} · revisado: {{schedule}}",
     "webhook": "Cuando se llama a su enlace de webhook",
+    "device": "Cuando cambia {{device}}",
+    "deviceTo": "Cuando {{device}} pasa a {{to}}",
     "after": "Después de que termine {{name}}",
     "afterNotified": "Después de que {{name}} avise",
     "anotherAutomation": "otra automatización"

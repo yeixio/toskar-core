@@ -374,7 +374,33 @@
     "afterWhen": "時機",
     "afterSucceeded": "每次完成時",
     "afterNotified": "僅在發出通知時",
-    "afterHint": "在另一個自動化之後立即執行，並取得它的結果。跟隨其他自動化的執行不能使用會變更 Toskar 之外內容的工具。"
+    "afterHint": "在另一個自動化之後立即執行，並取得它的結果。跟隨其他自動化的執行不能使用會變更 Toskar 之外內容的工具。",
+    "runsDevice": "當裝置變化時",
+    "device": "裝置",
+    "deviceTo": "變為",
+    "deviceToAny": "任何變化",
+    "cooldown": "之後等待",
+    "cooldowns": {
+      "s15": "15 秒",
+      "s60": "1 分鐘",
+      "s300": "5 分鐘",
+      "s900": "15 分鐘",
+      "s3600": "1 小時"
+    },
+    "deviceHint": "裝置一變化就立即執行，並告訴它變化了什麼。執行後的等待時間內的變化不會再次觸發，因此閃爍的感測器只會觸發一次。",
+    "cameras": "查看攝影機",
+    "camerasHint": "每次執行先拍下這些攝影機的畫面，交給能看圖片的模型。最多 {{count}} 台。",
+    "deviceKinds": {
+      "camera": "攝影機",
+      "sensor": "感測器",
+      "speaker": "揚聲器",
+      "light": "燈",
+      "switch": "開關",
+      "lock": "門鎖",
+      "cover": "窗簾",
+      "climate": "空調",
+      "other": "其他"
+    }
   },
   "draft": {
     "label": "待確認的自動化",
@@ -400,6 +426,8 @@
     "feed": "{{site}} 有新文章 · 檢查：{{schedule}}",
     "folder": "{{name}} 有變化時 · 檢查：{{schedule}}",
     "webhook": "其 Webhook 連結被呼叫時",
+    "device": "當 {{device}} 變化時",
+    "deviceTo": "當 {{device}} 變為 {{to}} 時",
     "after": "{{name}} 完成後",
     "afterNotified": "{{name}} 發出通知後",
     "anotherAutomation": "另一個自動化"

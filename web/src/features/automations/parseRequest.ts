@@ -69,6 +69,10 @@ export function whenLabel(item: { schedule: AutomationSchedule; trigger?: Automa
   const schedule = scheduleLabel(item.schedule)
   const trigger = item.trigger
   if (trigger?.kind === 'webhook') return i18n.t('automations:trigger.webhook')
+  if (trigger?.kind === 'device') {
+    const device = names[trigger.device ?? ''] ?? trigger.device ?? ''
+    return trigger.to ? i18n.t('automations:trigger.deviceTo', { device, to: trigger.to }) : i18n.t('automations:trigger.device', { device })
+  }
   if (trigger?.kind === 'after') {
     const name = names[trigger.automation_id ?? ''] ?? i18n.t('automations:trigger.anotherAutomation')
     return i18n.t(trigger.when === 'notified' ? 'automations:trigger.afterNotified' : 'automations:trigger.after', { name })

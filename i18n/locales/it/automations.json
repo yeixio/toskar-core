@@ -374,7 +374,33 @@
     "afterWhen": "Quando",
     "afterSucceeded": "Ogni volta che finisce",
     "afterNotified": "Solo quando invia una notifica",
-    "afterHint": "Viene eseguita subito dopo l’altra automazione, con il suo risultato. Un’esecuzione che ne segue un’altra non può usare strumenti che cambiano cose fuori da Toskar."
+    "afterHint": "Viene eseguita subito dopo l’altra automazione, con il suo risultato. Un’esecuzione che ne segue un’altra non può usare strumenti che cambiano cose fuori da Toskar.",
+    "runsDevice": "Quando un dispositivo cambia",
+    "device": "Dispositivo",
+    "deviceTo": "Passa a",
+    "deviceToAny": "Qualsiasi cambiamento",
+    "cooldown": "Poi attendi",
+    "cooldowns": {
+      "s15": "15 secondi",
+      "s60": "1 minuto",
+      "s300": "5 minuti",
+      "s900": "15 minuti",
+      "s3600": "1 ora"
+    },
+    "deviceHint": "Si avvia appena il dispositivo cambia, sapendo cosa è cambiato. I cambiamenti durante l'attesa dopo un'esecuzione non ne avviano un'altra, così un sensore che sfarfalla la avvia una volta sola.",
+    "cameras": "Guarda le telecamere",
+    "camerasHint": "Ogni esecuzione inizia con un'immagine di queste telecamere, mostrata a un modello che vede le immagini. Fino a {{count}}.",
+    "deviceKinds": {
+      "camera": "Telecamere",
+      "sensor": "Sensori",
+      "speaker": "Altoparlanti",
+      "light": "Luci",
+      "switch": "Interruttori",
+      "lock": "Serrature",
+      "cover": "Tapparelle",
+      "climate": "Clima",
+      "other": "Altro"
+    }
   },
   "draft": {
     "label": "Automazione da confermare",
@@ -404,6 +430,8 @@
     "feed": "Nuovi articoli su {{site}} · controllo: {{schedule}}",
     "folder": "Quando cambia {{name}} · controllo: {{schedule}}",
     "webhook": "Quando viene chiamato il suo link webhook",
+    "device": "Quando {{device}} cambia",
+    "deviceTo": "Quando {{device}} passa a {{to}}",
     "after": "Dopo che {{name}} finisce",
     "afterNotified": "Dopo una notifica di {{name}}",
     "anotherAutomation": "un’altra automazione"

@@ -374,7 +374,33 @@
     "afterWhen": "When",
     "afterSucceeded": "Each time it finishes",
     "afterNotified": "Only when it notifies",
-    "afterHint": "It runs right after the other automation, given its result. A run that follows another can't use tools that change things outside Toskar."
+    "afterHint": "It runs right after the other automation, given its result. A run that follows another can't use tools that change things outside Toskar.",
+    "runsDevice": "When a device changes",
+    "device": "Device",
+    "deviceTo": "Changes to",
+    "deviceToAny": "Any change",
+    "cooldown": "Then wait",
+    "cooldowns": {
+      "s15": "15 seconds",
+      "s60": "1 minute",
+      "s300": "5 minutes",
+      "s900": "15 minutes",
+      "s3600": "1 hour"
+    },
+    "deviceHint": "It runs the moment the device changes, told what changed. Changes during the wait after a run start no other run, so a sensor that flickers runs it once.",
+    "cameras": "Look at cameras",
+    "camerasHint": "Each run starts with a picture from these cameras, shown to a model that can see. Up to {{count}}.",
+    "deviceKinds": {
+      "camera": "Cameras",
+      "sensor": "Sensors",
+      "speaker": "Speakers",
+      "light": "Lights",
+      "switch": "Switches",
+      "lock": "Locks",
+      "cover": "Covers",
+      "climate": "Climate",
+      "other": "Other"
+    }
   },
   "draft": {
     "label": "Automation to confirm",
@@ -402,6 +428,8 @@
     "feed": "New posts on {{site}} · checked: {{schedule}}",
     "folder": "When {{name}} changes · checked: {{schedule}}",
     "webhook": "When its webhook link is called",
+    "device": "When {{device}} changes",
+    "deviceTo": "When {{device}} turns {{to}}",
     "after": "After {{name}} finishes",
     "afterNotified": "After {{name}} notifies",
     "anotherAutomation": "another automation"
