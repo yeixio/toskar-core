@@ -24,8 +24,16 @@ func NewClient() *Client {
 	return &Client{http: &http.Client{}}
 }
 
-// Chat implements pluginapi.Generator.
+// Chat implements pluginapi.Generator. A reply llama.cpp can't read, as
+// when the model calls a tool it wasn't offered, is asked for once more,
+// with a note saying which tools there are (#755).
 func (c *Client) Chat(ctx context.Context, req pluginapi.ChatRequest) (<-chan pluginapi.ChatChunk, error) {
+	again := func() (<-chan pluginapi.ChatChunk, error) { return c.chat(ctx, withToolNote(req), nil) }
+	return c.chat(ctx, req, again)
+}
+
+// chat sends req; again, when set, asks once more after a format mismatch.
+func (c *Client) chat(ctx context.Context, req pluginapi.ChatRequest, again func() (<-chan pluginapi.ChatChunk, error)) (<-chan pluginapi.ChatChunk, error) {
 	if req.ModelEndpoint == "" {
 		return nil, fmt.Errorf("model endpoint required")
 	}
@@ -74,19 +82,73 @@ func (c *Client) Chat(ctx context.Context, req pluginapi.ChatRequest) (<-chan pl
 	if resp.StatusCode >= 400 {
 		b, _ := io.ReadAll(resp.Body)
 		resp.Body.Close()
+		if again != nil && formatMismatch(string(b)) {
+			return again()
+		}
 		return nil, fmt.Errorf("llama-server error %d: %s", resp.StatusCode, string(b))
 	}
 
 	ch := make(chan pluginapi.ChatChunk, 16)
 	if !req.Stream {
-		go c.readNonStream(resp, ch, started)
+		go c.readNonStream(resp, ch, started, again)
 		return ch, nil
 	}
-	go c.readStream(resp, ch, started)
+	go c.readStream(resp, ch, started, again)
 	return ch, nil
 }
 
-func (c *Client) readNonStream(resp *http.Response, ch chan<- pluginapi.ChatChunk, started time.Time) {
+// formatMismatch is llama.cpp's chat parser rejecting a reply it can't
+// read, as when a model calls a tool it wasn't offered: Muse Glimmer calls
+// places.search, from its training, in a turn with no tools (#755).
+func formatMismatch(message string) bool {
+	return strings.Contains(message, "does not match the expected")
+}
+
+// withToolNote is req to ask again after a format mismatch: the person's
+// last message says which tools there are, or that there are none. A
+// system line didn't stop it; a note in the message did (#755).
+func withToolNote(req pluginapi.ChatRequest) pluginapi.ChatRequest {
+	note := "(No tools are available for this message. Answer directly from what you know.)"
+	if names := toolNames(req.Tools); len(names) > 0 {
+		note = "(Only these tools are available for this message: " + strings.Join(names, ", ") + ". Use one of them, or answer directly.)"
+	}
+	msgs := append([]pluginapi.ChatMessage(nil), req.Messages...)
+	for i := len(msgs) - 1; i >= 0; i-- {
+		if msgs[i].Role == "user" {
+			msgs[i].Content = strings.TrimRight(msgs[i].Content, "\n") + "\n\n" + note
+			break
+		}
+	}
+	req.Messages = msgs
+	return req
+}
+
+// toolNames are the names of the tools a request offers.
+func toolNames(tools []map[string]any) []string {
+	var names []string
+	for _, t := range tools {
+		if fn, ok := t["function"].(map[string]any); ok {
+			if name, ok := fn["name"].(string); ok && name != "" {
+				names = append(names, name)
+			}
+		}
+	}
+	return names
+}
+
+// pipe sends what asking again answers, in place of the reply that failed.
+func pipe(ch chan<- pluginapi.ChatChunk, again func() (<-chan pluginapi.ChatChunk, error), failed string) {
+	next, err := again()
+	if err != nil {
+		ch <- pluginapi.ChatChunk{Error: failed, Done: true}
+		return
+	}
+	for chunk := range next {
+		ch <- chunk
+	}
+}
+
+func (c *Client) readNonStream(resp *http.Response, ch chan<- pluginapi.ChatChunk, started time.Time, again func() (<-chan pluginapi.ChatChunk, error)) {
 	defer close(ch)
 	defer resp.Body.Close()
 	body, err := io.ReadAll(resp.Body)
@@ -95,6 +157,10 @@ func (c *Client) readNonStream(resp *http.Response, ch chan<- pluginapi.ChatChun
 		return
 	}
 	if message, failed := streamDataError(string(body)); failed {
+		if again != nil && formatMismatch(message) {
+			pipe(ch, again, message)
+			return
+		}
 		ch <- pluginapi.ChatChunk{Error: message, Done: true}
 		return
 	}
@@ -124,7 +190,7 @@ func (c *Client) readNonStream(resp *http.Response, ch chan<- pluginapi.ChatChun
 	ch <- pluginapi.ChatChunk{Content: content, Done: true, Metrics: metrics}
 }
 
-func (c *Client) readStream(resp *http.Response, ch chan<- pluginapi.ChatChunk, started time.Time) {
+func (c *Client) readStream(resp *http.Response, ch chan<- pluginapi.ChatChunk, started time.Time, again func() (<-chan pluginapi.ChatChunk, error)) {
 	defer close(ch)
 	defer resp.Body.Close()
 	scanner := bufio.NewScanner(resp.Body)
@@ -156,6 +222,13 @@ func (c *Client) readStream(resp *http.Response, ch chan<- pluginapi.ChatChunk, 
 			return
 		}
 		if message, failed := streamDataError(data); failed {
+			// Before any of the answer was sent, it's asked for again; only
+			// its thinking went out (#755).
+			if again != nil && formatMismatch(message) && content.Len() == 0 {
+				resp.Body.Close()
+				pipe(ch, again, message)
+				return
+			}
 			ch <- pluginapi.ChatChunk{Error: message, Done: true}
 			return
 		}
