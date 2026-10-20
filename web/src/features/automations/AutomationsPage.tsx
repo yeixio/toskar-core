@@ -72,7 +72,17 @@ export function AutomationsPage() {
 
   const items = (listQuery.data ?? []).filter((item) => matchesAutomation(item, query, filter))
   // Names for an automation that runs after another (#204).
-  const names = Object.fromEntries((listQuery.data ?? []).map((item) => [item.id, item.name]))
+  // Device triggers show the device's name, for whoever can list devices (#586).
+  const devicesQuery = useQuery({
+    queryKey: ['devices'],
+    queryFn: () => api.listDevices(),
+    enabled: (listQuery.data ?? []).some((item) => item.trigger?.kind === 'device'),
+    retry: false,
+  })
+  const names = Object.fromEntries([
+    ...(devicesQuery.data ?? []).map((d) => [d.device, d.name]),
+    ...(listQuery.data ?? []).map((item) => [item.id, item.name]),
+  ])
   const detail = detailQuery.data
   const profiles = profilesQuery.data ?? []
   const tools = toolsQuery.data ?? []
@@ -374,9 +384,12 @@ function Detail({
             {detail.trigger?.kind && detail.last_checked_at ? (
               <p className="text-ink-muted">{t('detail.lastChecked', { when: compactWhen(detail.last_checked_at, zone) })}</p>
             ) : null}
-            <p className="text-ink-muted">
-              {detail.trigger?.kind ? t('detail.nextCheck', { when: compactWhen(detail.next_run_at, zone) }) : t('detail.next', { when: compactWhen(detail.next_run_at, zone) })}
-            </p>
+            {/* A device, a webhook, or another automation starts it: nothing is checked on a schedule. */}
+            {['device', 'webhook', 'after'].includes(detail.trigger?.kind ?? '') && !detail.next_run_at ? null : (
+              <p className="text-ink-muted">
+                {detail.trigger?.kind ? t('detail.nextCheck', { when: compactWhen(detail.next_run_at, zone) }) : t('detail.next', { when: compactWhen(detail.next_run_at, zone) })}
+              </p>
+            )}
           </div>
           {detail.trigger?.kind === 'webhook' ? <WebhookLink automationId={detail.id} hookSet={Boolean(detail.hook_set)} /> : null}
           <div>
