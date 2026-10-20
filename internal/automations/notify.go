@@ -27,6 +27,9 @@ type Notice struct {
 	// to the chat it was made from, where its result is (#204).
 	AutomationID   string
 	ConversationID string
+	// URL is the web page the run read, such as the product page it
+	// watches, for a tap on the phone to open (#460).
+	URL string
 	// Failure is true when the notice reports a failed run.
 	Failure bool
 }

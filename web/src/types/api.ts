@@ -1972,6 +1972,8 @@ export interface AppNotification {
   message?: LocalizedMessage
   /** App path back to the source, such as /automations?id=…. */
   link?: string
+  /** The web page it's about, such as the page an automation watched; a tap on the phone opens it (#460, contract 1.47). */
+  url?: string
   read_at?: string
   /** How many times the same notice came within ten minutes. */
   repeat_count?: number

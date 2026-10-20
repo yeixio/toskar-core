@@ -1,5 +1,5 @@
 {
-  "version": "1.46",
+  "version": "1.47",
   "types": {
     "ActivityStep": [
       "kind",
@@ -181,7 +181,8 @@
       "severity",
       "source_id",
       "source_type",
-      "title"
+      "title",
+      "url"
     ],
     "Run": [
       "cache_hits",

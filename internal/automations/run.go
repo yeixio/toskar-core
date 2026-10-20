@@ -81,6 +81,9 @@ type Execution struct {
 	// the same pages as the last one hasn't changed (#204). Empty when it
 	// read nothing.
 	SourceHash string
+	// Page is the first web page the run's tools opened: for an automation
+	// that watches a page, that page (#460).
+	Page string
 	// Change is the model's judgment of whether the result differs from the
 	// previous one, when only a judgment could tell.
 	Change *Change

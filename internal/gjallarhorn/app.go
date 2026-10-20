@@ -22,9 +22,11 @@ type AppConfig struct {
 
 // PushMessage is one push to a person's devices.
 type PushMessage struct {
-	Title          string
-	Body           string
-	Link           string
+	Title string
+	Body  string
+	Link  string
+	// URL is the web page a tap opens, left out of a private push (#460).
+	URL            string
 	NotificationID string
 	Category       string
 	Severity       string
@@ -71,6 +73,8 @@ func pushMessageFor(c AppConfig, n Notification) PushMessage {
 	if c.Content == "private" {
 		return m
 	}
+	// The page says what was watched, so it goes only with the title.
+	m.URL = n.URL
 	m.Title = n.Title
 	if n.RepeatCount > 1 {
 		m.Title = n.text("notifications:sent.times", map[string]any{"title": n.Title, "count": n.RepeatCount})

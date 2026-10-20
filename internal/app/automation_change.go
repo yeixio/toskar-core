@@ -26,6 +26,8 @@ type sourceRecorder struct {
 	mu   sync.Mutex
 	hash []byte
 	seen bool
+	// page is the first web page a tool opened (#460).
+	page string
 }
 
 func (s *sourceRecorder) add(toolID string, args, result map[string]any) {
@@ -39,10 +41,20 @@ func (s *sourceRecorder) add(toolID string, args, result map[string]any) {
 	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
+	if u, _ := args["url"].(string); s.page == "" && (strings.HasPrefix(u, "https://") || strings.HasPrefix(u, "http://")) {
+		s.page = u
+	}
 	h := sha256.New()
 	h.Write(s.hash)
 	h.Write(raw)
 	s.hash, s.seen = h.Sum(nil), true
+}
+
+// firstPage is the first web page a tool opened, or "".
+func (s *sourceRecorder) firstPage() string {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return s.page
 }
 
 func (s *sourceRecorder) sum() string {

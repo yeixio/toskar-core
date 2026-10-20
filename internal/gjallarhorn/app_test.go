@@ -89,3 +89,35 @@ func TestAppPushWithoutDevices(t *testing.T) {
 		t.Fatalf("no devices: %v", err)
 	}
 }
+
+// A notice's web page is kept and sent with its title, so a tap opens the
+// page an automation watched without reaching the computer, and a private
+// push leaves it out, since it says what was watched (#460).
+func TestAppPushCarriesThePage(t *testing.T) {
+	hub, _, _ := deliveryHub(t)
+	push := &fakePush{devices: map[string]int{auth.OwnerID: 1}}
+	hub.SetPush(push)
+	ctx := context.Background()
+	d, _, err := hub.CreateDestination(ctx, DestinationInput{Kind: KindApp, Name: ptr("My phone")})
+	if err != nil {
+		t.Fatal(err)
+	}
+	const page = "https://shop.example/trail-runner?size=10"
+	n, err := hub.Notify(ctx, Request{Title: "Back in stock: Trail runner, size 10", Severity: SeverityWarning, Link: "/automations?id=a1", URL: page})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got, err := hub.Get(ctx, n.ID); err != nil || got.URL != page {
+		t.Fatalf("stored url %q, %v", got.URL, err)
+	}
+	hub.DeliverDue(ctx)
+	if m := push.got[0]; m.URL != page || m.Link != "/automations?id=a1" {
+		t.Fatalf("pushed %+v", m)
+	}
+	if _, err := hub.UpdateDestination(ctx, d.ID, DestinationInput{App: &AppConfig{Content: "private"}}); err != nil {
+		t.Fatal(err)
+	}
+	if m := pushMessageFor(AppConfig{Content: "private"}, n); m.URL != "" {
+		t.Fatalf("a private push carried the page: %+v", m)
+	}
+}
