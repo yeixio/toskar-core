@@ -57,6 +57,18 @@ func (s *sourceRecorder) firstPage() string {
 	return s.page
 }
 
+// runPage is the page a run's notification opens (#460): the page its
+// trigger watches, which a run started by a change often doesn't open
+// again, or else the first one a tool opened.
+func runPage(trigger *automations.Trigger, opened string) string {
+	if trigger != nil && trigger.Kind == automations.TriggerPage {
+		if u := strings.TrimSpace(trigger.URL); strings.HasPrefix(u, "https://") || strings.HasPrefix(u, "http://") {
+			return u
+		}
+	}
+	return opened
+}
+
 func (s *sourceRecorder) sum() string {
 	s.mu.Lock()
 	defer s.mu.Unlock()
