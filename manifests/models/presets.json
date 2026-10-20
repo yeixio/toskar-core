@@ -17,7 +17,7 @@
       "id": "research",
       "label": "Research",
       "description": "Long-context reading, synthesis, and reasoning.",
-      "preferred_models": ["deepseek-r1-distill-7b-q4", "qwen2.5-14b-q4", "phi-3.5-mini-q4", "deepseek-r1-distill-1.5b-q4"]
+      "preferred_models": ["muse-glimmer-30b-q4", "deepseek-r1-distill-7b-q4", "qwen2.5-14b-q4", "phi-3.5-mini-q4", "deepseek-r1-distill-1.5b-q4"]
     },
     {
       "id": "custom",
