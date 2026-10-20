@@ -1007,7 +1007,9 @@
     "turningOn": "Activando…",
     "notNow": "Ahora no",
     "updateComputer": "Actualiza Toskar en tu computadora para recibir notificaciones aquí.",
-    "relayFailed": "No se pudieron activar las notificaciones: {{detail}}"
+    "relayFailed": "No se pudieron activar las notificaciones: {{detail}}",
+    "openPage": "Abrir página",
+    "openInToskar": "Abrir en Toskar"
   },
   "permissions": {
     "photos": "Toskar abre tus fotos cuando eliges una para preguntar sobre ella. Se queda en este dispositivo o va solo a tu propia computadora.",
