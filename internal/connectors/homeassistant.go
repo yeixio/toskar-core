@@ -3,6 +3,7 @@ package connectors
 import (
 	"context"
 	"fmt"
+	"io"
 	"net/http"
 	"net/url"
 	"regexp"
@@ -183,4 +184,48 @@ func haService(domain, service, entity string) (string, string, string) {
 		domain, _, _ = strings.Cut(entity, ".")
 	}
 	return strings.ToLower(domain), strings.ToLower(service), entity
+}
+
+// maxCameraPicture caps a camera picture: a 4K JPEG is a few megabytes.
+const maxCameraPicture = 10 << 20
+
+// haCameraPicture is a Home Assistant camera's picture now, through its
+// camera proxy (#667), as a JPEG or PNG.
+func haCameraPicture(ctx context.Context, c *http.Client, cred Credential, entity string) ([]byte, string, error) {
+	base, err := haBase(cred)
+	if err != nil {
+		return nil, "", err
+	}
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, base+"/api/camera_proxy/"+url.PathEscape(entity), nil)
+	if err != nil {
+		return nil, "", err
+	}
+	for k, v := range haHeader(cred) {
+		req.Header.Set(k, v)
+	}
+	resp, err := c.Do(req)
+	if err != nil {
+		return nil, "", err
+	}
+	defer resp.Body.Close()
+	switch {
+	case resp.StatusCode == http.StatusNotFound:
+		return nil, "", fmt.Errorf("Home Assistant has no camera %s", entity)
+	case resp.StatusCode == http.StatusUnauthorized || resp.StatusCode == http.StatusForbidden:
+		return nil, "", fmt.Errorf("Home Assistant refused the token; connect it again in Settings")
+	case resp.StatusCode != http.StatusOK:
+		return nil, "", fmt.Errorf("Home Assistant answered %d for the camera %s", resp.StatusCode, entity)
+	}
+	mime := strings.TrimSpace(strings.Split(resp.Header.Get("Content-Type"), ";")[0])
+	if mime != "image/jpeg" && mime != "image/png" {
+		return nil, "", fmt.Errorf("the camera %s sent %q, not a picture", entity, mime)
+	}
+	data, err := io.ReadAll(io.LimitReader(resp.Body, maxCameraPicture+1))
+	if err != nil {
+		return nil, "", err
+	}
+	if len(data) > maxCameraPicture {
+		return nil, "", fmt.Errorf("the camera %s sent a picture over 10 MB", entity)
+	}
+	return data, mime, nil
 }

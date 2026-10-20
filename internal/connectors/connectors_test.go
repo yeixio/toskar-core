@@ -268,3 +268,52 @@ func TestSecretsOnly(t *testing.T) {
 		t.Fatalf("sanitized %v", got)
 	}
 }
+
+// A Home Assistant camera's picture comes through its camera proxy, and
+// only a picture; a refusal never shows the token (#667).
+func TestHomeAssistantCameraPicture(t *testing.T) {
+	const haToken = "ha-long-lived-token-xyz"
+	jpeg := []byte{0xff, 0xd8, 0xff, 0xe0, 'j', 'p', 'g'}
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Header.Get("Authorization") != "Bearer "+haToken {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+		switch r.URL.Path {
+		case "/api/config":
+			_, _ = w.Write([]byte(`{"location_name":"Home"}`))
+		case "/api/states":
+			_, _ = w.Write([]byte(`[]`))
+		case "/api/camera_proxy/camera.front_door":
+			w.Header().Set("Content-Type", "image/jpeg")
+			_, _ = w.Write(jpeg)
+		case "/api/camera_proxy/camera.page":
+			w.Header().Set("Content-Type", "text/html")
+			_, _ = w.Write([]byte("<html>"))
+		default:
+			w.WriteHeader(http.StatusNotFound)
+		}
+	}))
+	defer srv.Close()
+	m, _, _ := newManager(t)
+	ctx := context.Background()
+	if _, _, err := m.CameraPicture(ctx, "homeassistant", "camera.front_door"); err == nil || !strings.Contains(err.Error(), "not connected") {
+		t.Fatalf("before connecting: %v", err)
+	}
+	if _, err := m.Connect(ctx, "homeassistant", map[string]string{"url": srv.URL, "token": haToken}); err != nil {
+		t.Fatal(err)
+	}
+	data, mime, err := m.CameraPicture(ctx, "homeassistant", "camera.front_door")
+	if err != nil || mime != "image/jpeg" || string(data) != string(jpeg) {
+		t.Fatalf("picture = %q %q, %v", data, mime, err)
+	}
+	if _, _, err := m.CameraPicture(ctx, "homeassistant", "camera.gone"); err == nil || !strings.Contains(err.Error(), "no camera camera.gone") {
+		t.Fatalf("missing camera: %v", err)
+	}
+	if _, _, err := m.CameraPicture(ctx, "homeassistant", "camera.page"); err == nil || !strings.Contains(err.Error(), "not a picture") {
+		t.Fatalf("a page taken for a picture: %v", err)
+	}
+	if _, _, err := m.CameraPicture(ctx, "github", "camera.x"); err == nil {
+		t.Fatal("GitHub has no cameras")
+	}
+}

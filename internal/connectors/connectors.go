@@ -484,3 +484,24 @@ func (m *Manager) ServiceName(id string) string {
 	}
 	return id
 }
+
+// CameraPicture is a connected service's camera's picture now (#667): its
+// bytes and type. Home Assistant is the only service with cameras so far.
+func (m *Manager) CameraPicture(ctx context.Context, service, entity string) ([]byte, string, error) {
+	s, err := m.service(service)
+	if err != nil {
+		return nil, "", err
+	}
+	if service != "homeassistant" {
+		return nil, "", fmt.Errorf("%s has no cameras", s.Name())
+	}
+	cred, err := m.credential(service)
+	if err != nil {
+		return nil, "", fmt.Errorf("%s is not connected. Connect it in Settings", s.Name())
+	}
+	data, mime, err := haCameraPicture(ctx, m.client, cred, entity)
+	if err != nil {
+		return nil, "", sanitizeErr(err, secretsOnly(s, cred))
+	}
+	return data, mime, nil
+}

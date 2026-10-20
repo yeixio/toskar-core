@@ -29,7 +29,8 @@ const automationSelect = `
 		created_at, updated_at, next_run_at, last_run_at,
 		consecutive_failures, COALESCE(last_error, ''), COALESCE(last_error_code, ''), COALESCE(last_error_details, ''), COALESCE(response_language, ''),
 		COALESCE(conversation_id, ''), COALESCE(draft_id, ''), COALESCE(save_folder, ''),
-		COALESCE(trigger_json, ''), COALESCE(watch_state, ''), last_checked_at, COALESCE(hook_hash, ''), person_id
+		COALESCE(trigger_json, ''), COALESCE(watch_state, ''), last_checked_at, COALESCE(hook_hash, ''), person_id,
+		COALESCE(camera_json, '')
 	FROM automations`
 
 // mine narrows a query to the request's person's automations (#206); the
@@ -73,6 +74,7 @@ func (r *AutomationRepo) Create(ctx context.Context, in automations.CreateInput,
 		DraftID:          in.DraftID,
 		SaveFolder:       in.SaveFolder,
 		Trigger:          in.Trigger,
+		Camera:           in.Camera,
 		CreatedAt:        now,
 		UpdatedAt:        now,
 		PersonID:         auth.PersonID(ctx),
@@ -185,6 +187,12 @@ func (r *AutomationRepo) Update(ctx context.Context, id string, patch automation
 			existing.HookHash = ""
 		}
 	}
+	if patch.Camera != nil {
+		existing.Camera = patch.Camera
+		if patch.Camera.Entity == "" {
+			existing.Camera = nil
+		}
+	}
 	if patch.ResponseLanguage != nil {
 		existing.ResponseLanguage = *patch.ResponseLanguage
 	}
@@ -280,13 +288,13 @@ func (r *AutomationRepo) insert(ctx context.Context, a automations.Automation) e
 			id, name, enabled, schedule_json, time_zone, prompt, profile_id, model_id,
 			tools_json, notification_json, created_at, updated_at, next_run_at, last_run_at,
 			consecutive_failures, last_error, last_error_code, last_error_details, response_language, conversation_id, draft_id, save_folder,
-			trigger_json, watch_state, last_checked_at, person_id
-		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+			trigger_json, watch_state, last_checked_at, person_id, camera_json
+		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 		a.ID, a.Name, boolInt(a.Enabled), sched, a.Schedule.TimeZone, a.Prompt, nullIfEmpty(a.ProfileID), nullIfEmpty(a.ModelID),
 		tools, note, formatTime(a.CreatedAt), formatTime(a.UpdatedAt), formatTimePtr(a.NextRunAt), formatTimePtr(a.LastRunAt),
 		a.ConsecutiveFailures, nullIfEmpty(a.LastError), lastFailure(a).CodeColumn(), lastFailure(a).DetailsColumn(), nullIfEmpty(a.ResponseLanguage),
 		nullIfEmpty(a.ConversationID), nullIfEmpty(a.DraftID), nullIfEmpty(a.SaveFolder),
-		triggerJSON(a.Trigger), nullIfEmpty(string(a.WatchState)), formatTimePtr(a.LastCheckedAt), a.PersonID)
+		triggerJSON(a.Trigger), nullIfEmpty(string(a.WatchState)), formatTimePtr(a.LastCheckedAt), a.PersonID, cameraJSON(a.Camera))
 	return err
 }
 
@@ -308,12 +316,12 @@ func updateAutomation(ctx context.Context, db execer, a automations.Automation) 
 			name = ?, enabled = ?, schedule_json = ?, time_zone = ?, prompt = ?, profile_id = ?, model_id = ?,
 			tools_json = ?, notification_json = ?, updated_at = ?, next_run_at = ?, last_run_at = ?,
 			consecutive_failures = ?, last_error = ?, last_error_code = ?, last_error_details = ?, response_language = ?, save_folder = ?,
-			trigger_json = ?, watch_state = ?, last_checked_at = ?, hook_hash = ?
+			trigger_json = ?, watch_state = ?, last_checked_at = ?, hook_hash = ?, camera_json = ?
 		WHERE id = ?`,
 		a.Name, boolInt(a.Enabled), sched, a.Schedule.TimeZone, a.Prompt, nullIfEmpty(a.ProfileID), nullIfEmpty(a.ModelID),
 		tools, note, formatTime(a.UpdatedAt), formatTimePtr(a.NextRunAt), formatTimePtr(a.LastRunAt),
 		a.ConsecutiveFailures, nullIfEmpty(a.LastError), lastFailure(a).CodeColumn(), lastFailure(a).DetailsColumn(), nullIfEmpty(a.ResponseLanguage), nullIfEmpty(a.SaveFolder),
-		triggerJSON(a.Trigger), nullIfEmpty(string(a.WatchState)), formatTimePtr(a.LastCheckedAt), nullIfEmpty(a.HookHash), a.ID)
+		triggerJSON(a.Trigger), nullIfEmpty(string(a.WatchState)), formatTimePtr(a.LastCheckedAt), nullIfEmpty(a.HookHash), cameraJSON(a.Camera), a.ID)
 	if err != nil {
 		return err
 	}
@@ -349,6 +357,13 @@ func prepareAutomation(a *automations.Automation) error {
 		a.Trigger.Path = strings.TrimSpace(a.Trigger.Path)
 	}
 	if err := a.Trigger.Validate(); err != nil {
+		return err
+	}
+	if a.Camera != nil {
+		a.Camera.Connector = strings.TrimSpace(a.Camera.Connector)
+		a.Camera.Entity = strings.TrimSpace(a.Camera.Entity)
+	}
+	if err := a.Camera.Validate(); err != nil {
 		return err
 	}
 	a.SaveFolder = strings.TrimSpace(a.SaveFolder)
@@ -390,11 +405,12 @@ func scanAutomation(s automationScanner) (automations.Automation, error) {
 	var enabled int
 	var sched, zone, tools, note, created, updated string
 	var next, last, checked sql.NullString
-	var trigger, watchState, lastErrorDetails string
+	var trigger, watchState, lastErrorDetails, camera string
 	if err := s.Scan(
 		&a.ID, &a.Name, &enabled, &sched, &zone, &a.Prompt, &a.ProfileID, &a.ModelID, &tools, &note,
 		&created, &updated, &next, &last, &a.ConsecutiveFailures, &a.LastError, &a.LastErrorCode, &lastErrorDetails, &a.ResponseLanguage,
 		&a.ConversationID, &a.DraftID, &a.SaveFolder, &trigger, &watchState, &checked, &a.HookHash, &a.PersonID,
+		&camera,
 	); err != nil {
 		return automations.Automation{}, err
 	}
@@ -428,6 +444,13 @@ func scanAutomation(s automationScanner) (automations.Automation, error) {
 		}
 		a.Trigger = &t
 	}
+	if camera != "" {
+		var c automations.Camera
+		if err := json.Unmarshal([]byte(camera), &c); err != nil {
+			return automations.Automation{}, fmt.Errorf("camera: %w", err)
+		}
+		a.Camera = &c
+	}
 	if watchState != "" {
 		a.WatchState = []byte(watchState)
 	}
@@ -439,6 +462,14 @@ func triggerJSON(t *automations.Trigger) any {
 		return nil
 	}
 	b, _ := json.Marshal(t)
+	return string(b)
+}
+
+func cameraJSON(c *automations.Camera) any {
+	if c == nil || c.Entity == "" {
+		return nil
+	}
+	b, _ := json.Marshal(c)
 	return string(b)
 }
 

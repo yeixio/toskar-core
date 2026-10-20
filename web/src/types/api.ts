@@ -1432,6 +1432,8 @@ export interface Automation {
   save_folder?: string
   /** Runs only when a page or feed changed, checked on the schedule (#204). */
   trigger?: AutomationTrigger
+  /** A camera looked at as each run starts; its picture is shown to a model that can see (#667, contract 1.49). */
+  camera?: AutomationCamera
   /** When the trigger last checked and found nothing new. */
   last_checked_at?: string
   /** A webhook trigger has a link; making a new one shows it once. */
@@ -1528,6 +1530,14 @@ export interface AutomationInput {
   save_folder?: string
   /** A page or feed to watch; one with no kind runs on the schedule again. */
   trigger?: AutomationTrigger
+  /** A camera to look at as each run starts; one with no entity stops looking. */
+  camera?: AutomationCamera
+}
+
+/** A connected service's camera (#667): Home Assistant's, such as camera.front_door. */
+export interface AutomationCamera {
+  connector: 'homeassistant'
+  entity: string
 }
 
 export interface AutomationTrigger {

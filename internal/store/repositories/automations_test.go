@@ -270,3 +270,42 @@ func TestAutomationResponseLanguage(t *testing.T) {
 		t.Fatal("a response language that isn't a tag was accepted")
 	}
 }
+
+// An automation keeps the camera it looks at, a patch with no entity stops
+// looking, and only a Home Assistant camera entity is taken (#667).
+func TestAutomationCamera(t *testing.T) {
+	db, err := store.Open(filepath.Join(t.TempDir(), "test.db"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer db.Close()
+	ctx := context.Background()
+	repo := repositories.NewAutomationRepo(db.SQL)
+	in := automations.CreateInput{
+		ModelID: "model-a", Name: "Front door", Prompt: "Who is at the door?",
+		Schedule: automations.Schedule{Kind: automations.KindManual, TimeZone: "UTC"},
+		Camera:   &automations.Camera{Connector: "homeassistant", Entity: " camera.front_door_fluent "},
+	}
+	created, err := repo.Create(ctx, in, time.Now())
+	if err != nil {
+		t.Fatal(err)
+	}
+	got, _ := repo.Get(ctx, created.ID)
+	if got.Camera == nil || got.Camera.Entity != "camera.front_door_fluent" || got.Camera.Connector != "homeassistant" {
+		t.Fatalf("camera = %+v", got.Camera)
+	}
+	if got, err = repo.Update(ctx, created.ID, automations.Patch{Camera: &automations.Camera{}}, time.Now()); err != nil || got.Camera != nil {
+		t.Fatalf("cleared = %+v, %v", got.Camera, err)
+	}
+	for _, bad := range []automations.Camera{
+		{Connector: "homeassistant", Entity: "binary_sensor.front_door_person"},
+		{Connector: "homeassistant", Entity: "camera."},
+		{Connector: "homeassistant", Entity: "camera.x/../y"},
+		{Connector: "github", Entity: "camera.x"},
+	} {
+		in.Camera = &bad
+		if _, err := repo.Create(ctx, in, time.Now()); err == nil {
+			t.Fatalf("camera %+v accepted", bad)
+		}
+	}
+}
