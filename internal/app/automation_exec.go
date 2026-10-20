@@ -155,7 +155,7 @@ func (e automationExecutor) execute(ctx context.Context, automation automations.
 		out.NodeID = nodeID
 	}
 	out.SourceHash = env.sources.sum()
-	out.Page = env.sources.firstPage()
+	out.Page = runPage(automation.Trigger, env.sources.firstPage())
 	// "Notify on change" compares what changed; when the values and sources
 	// can't tell, the run's model, still loaded, judges (#204).
 	if prev, ok := automations.PreviousFrom(ctx); ok && runErr == nil && ctx.Err() == nil && automations.NeedsJudgment(automation.Notification, prev, out) {

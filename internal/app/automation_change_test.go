@@ -1,6 +1,10 @@
 package app
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/yeixio/toskar-core/internal/automations"
+)
 
 // A run's sources are what its read-only tools returned: the same reads
 // give the same fingerprint, a different page a different one, and a tool
@@ -45,5 +49,24 @@ func TestSourceRecorderKeepsTheFirstPage(t *testing.T) {
 	none.add("internet.search", map[string]any{"query": "q"}, map[string]any{})
 	if none.firstPage() != "" {
 		t.Fatal("a run that opened no page has one")
+	}
+}
+
+// A watched page is the notification's page even when the run, told what
+// changed, didn't open it again (#460).
+func TestRunPageIsTheWatchedPage(t *testing.T) {
+	watched := &automations.Trigger{Kind: automations.TriggerPage, URL: "https://shop.example/trail-runner"}
+	if got := runPage(watched, ""); got != watched.URL {
+		t.Fatalf("watched page: %q", got)
+	}
+	if got := runPage(watched, "https://shop.example/other"); got != watched.URL {
+		t.Fatalf("watched page loses to an opened one: %q", got)
+	}
+	feed := &automations.Trigger{Kind: automations.TriggerFeed, URL: "https://news.example/feed.xml"}
+	if got := runPage(feed, ""); got != "" {
+		t.Fatalf("a feed is not a page to open: %q", got)
+	}
+	if got := runPage(nil, "https://shop.example/a"); got != "https://shop.example/a" {
+		t.Fatalf("opened page: %q", got)
 	}
 }
