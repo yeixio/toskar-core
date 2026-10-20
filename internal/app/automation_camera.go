@@ -58,17 +58,31 @@ func cameraName(device string) string {
 	return strings.TrimPrefix(device, "camera.")
 }
 
-// camerasNote tells the run about the pictures it's shown, in order.
+// camerasNote tells the run about the pictures it's shown. It names each
+// camera as a person would, not by its service's ID, and says the picture,
+// not the camera's status, is what's there: a small model given
+// camera.front_door asked Home Assistant for it and answered "idle".
 func camerasNote(cams []automations.Camera) string {
 	if len(cams) == 0 {
 		return ""
 	}
 	names := make([]string, len(cams))
 	for i, c := range cams {
-		names[i] = c.Device
+		names[i] = spokenCamera(c.Device)
 	}
-	if len(names) == 1 {
-		return "A picture from the camera " + names[0] + ", taken as this run started, is shown with this message. Look at it to answer."
+	shown := "A picture from the " + names[0] + " camera, taken as this run started, is shown with this message."
+	if len(names) > 1 {
+		shown = "Pictures from the " + strings.Join(names, ", ") + " cameras, in that order, taken as this run started, are shown with this message."
 	}
-	return "Pictures from the cameras " + strings.Join(names, ", ") + ", in that order, taken as this run started, are shown with this message. Look at them to answer."
+	return shown + " They are what the cameras see now: answer from them. A camera's status, such as idle or recording, says nothing about what is in front of it."
+}
+
+// spokenCamera is a camera's name as a person says it: camera.front_door_fluent
+// is "front door", without its domain and a stream name such as fluent.
+func spokenCamera(device string) string {
+	name := strings.TrimPrefix(device, "camera.")
+	for _, stream := range []string{"_fluent", "_clear", "_sub", "_main", "_snapshots", "_high", "_low"} {
+		name = strings.TrimSuffix(name, stream)
+	}
+	return strings.ReplaceAll(name, "_", " ")
 }
