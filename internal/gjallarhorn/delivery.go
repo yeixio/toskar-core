@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net"
 	"net/url"
@@ -302,7 +303,8 @@ func (h *Hub) sendTo(ctx context.Context, dest Destination, n Notification) erro
 	default:
 		return PermanentError{Err: fmt.Errorf("unknown destination kind %q", dest.Kind)}
 	}
-	if h.egress != nil && host != "" {
+	// A push no device took never left this computer.
+	if h.egress != nil && host != "" && !errors.Is(err, ErrNoDevices) {
 		what := n.Title
 		// A private push leaves without its title.
 		if dest.Kind == KindApp && dest.App != nil && dest.App.Content == "private" {
