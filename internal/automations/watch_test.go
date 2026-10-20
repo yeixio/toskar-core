@@ -72,3 +72,20 @@ func TestTriggerValidate(t *testing.T) {
 		t.Error("a feed link was refused")
 	}
 }
+
+// A run that no change started, such as Run now, is told what its trigger
+// watches, so it opens the page instead of guessing (#460).
+func TestWatchNote(t *testing.T) {
+	page := WatchNote(&Trigger{Kind: TriggerPage, URL: "https://shop.example/trail-runner"})
+	if !strings.Contains(page, "https://shop.example/trail-runner") || !strings.Contains(page, "by hand") {
+		t.Fatalf("page note %q", page)
+	}
+	if !strings.Contains(WatchNote(&Trigger{Kind: TriggerFolder, Path: "~/Invoices"}), "~/Invoices") {
+		t.Fatal("folder note lacks the folder")
+	}
+	for _, none := range []*Trigger{nil, {Kind: TriggerWebhook}, {Kind: TriggerAfter, AutomationID: "a"}} {
+		if WatchNote(none) != "" {
+			t.Fatalf("note for %+v", none)
+		}
+	}
+}

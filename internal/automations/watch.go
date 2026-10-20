@@ -131,6 +131,25 @@ func ChangeNote(ctx context.Context) string {
 	return "This run was started because something changed since the last check:\n\n" + c.Summary
 }
 
+// WatchNote is the text added to a run's prompt when it wasn't started by a
+// change, such as by Run now: what the trigger watches, so the run can
+// look itself instead of guessing (#460). It's "" for triggers that bring
+// their own data, and for none.
+func WatchNote(t *Trigger) string {
+	if t == nil {
+		return ""
+	}
+	switch t.Kind {
+	case TriggerPage:
+		return "This run was started by hand, not by a change. The page this automation watches is " + t.URL + ". Open it to answer."
+	case TriggerFeed:
+		return "This run was started by hand, not by a change. The feed this automation watches is " + t.URL + ". Read it to answer."
+	case TriggerFolder:
+		return "This run was started by hand, not by a change. The folder this automation watches is " + t.Path + "."
+	}
+	return ""
+}
+
 // maxSummaryLines keeps what changed short enough for a small model.
 const maxSummaryLines = 40
 
