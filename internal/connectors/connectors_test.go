@@ -317,3 +317,43 @@ func TestHomeAssistantCameraPicture(t *testing.T) {
 		t.Fatal("GitHub has no cameras")
 	}
 }
+
+// Devices lists a connected service's devices by kind, none before it's
+// connected (#586).
+func TestDevices(t *testing.T) {
+	const haToken = "ha-long-lived-token-xyz"
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case "/api/config":
+			_, _ = w.Write([]byte(`{"location_name":"Home"}`))
+		case "/api/states":
+			_, _ = w.Write([]byte(`[{"entity_id":"camera.porch","state":"idle","attributes":{"friendly_name":"Porch"}},
+				{"entity_id":"binary_sensor.porch_visitor","state":"off","attributes":{"friendly_name":"Porch Visitor"}},
+				{"entity_id":"media_player.kitchen","state":"idle","attributes":{"friendly_name":"Kitchen speaker"}},
+				{"entity_id":"sun.sun","state":"above_horizon","attributes":{}}]`))
+		}
+	}))
+	defer srv.Close()
+	m, _, _ := newManager(t)
+	ctx := context.Background()
+	if got, err := m.Devices(ctx); err != nil || len(got) != 0 {
+		t.Fatalf("before connecting: %+v, %v", got, err)
+	}
+	if _, err := m.Connect(ctx, "homeassistant", map[string]string{"url": srv.URL, "token": haToken}); err != nil {
+		t.Fatal(err)
+	}
+	got, err := m.Devices(ctx)
+	if err != nil || len(got) != 4 {
+		t.Fatalf("devices = %+v, %v", got, err)
+	}
+	kinds := map[string]string{}
+	for _, d := range got {
+		kinds[d.Device] = d.Kind
+	}
+	if kinds["camera.porch"] != KindCamera || kinds["binary_sensor.porch_visitor"] != KindSensor || kinds["media_player.kitchen"] != KindSpeaker || kinds["sun.sun"] != KindOther {
+		t.Fatalf("kinds = %v", kinds)
+	}
+	if got[0].Kind != KindCamera || got[0].Name != "Porch" {
+		t.Fatalf("not sorted by kind and name: %+v", got[0])
+	}
+}

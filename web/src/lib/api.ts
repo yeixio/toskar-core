@@ -34,6 +34,7 @@ import type {
   LogEntry,
   Message,
   Connector,
+  Device,
   CommunityRatings,
   EgressRecord,
   JoinToken,
@@ -1389,6 +1390,8 @@ export const api = {
   mcpShare: () => request<MCPShare>('/api/v1/mcp/share'),
 
   listConnectors: async () => (await request<Connector[]>('/api/v1/connectors')) ?? [],
+  listDevices: async (kind?: Device['kind']) =>
+    (await request<{ devices: Device[] }>(`/api/v1/devices${kind ? `?kind=${kind}` : ''}`))?.devices ?? [],
 
   /** Checks the values with the service, then stores them. A blank secret keeps the stored one. */
   connectService: (id: string, values: Record<string, string>) =>
