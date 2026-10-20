@@ -91,6 +91,7 @@
   "NOTIFICATIONS_DISABLED": "通知已关闭。",
   "NOTIFICATIONS_FAILED": "{{detail}}",
   "NOTIFICATION_NOT_FOUND": "该通知已被移除。",
+  "NOT_A_DEVICE": "只有已连接的设备才能自行断开连接。",
   "NOT_FOUND": "{{detail}}",
   "NOT_IMPLEMENTED": "{{detail}}",
   "NO_MODEL_ASSIGNED": "还没有为此选择模型。请在“模型”中安装一个，或在配置中选择一个。",

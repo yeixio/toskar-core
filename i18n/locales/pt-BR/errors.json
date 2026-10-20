@@ -91,6 +91,7 @@
   "NOTIFICATIONS_DISABLED": "As notificações estão desativadas.",
   "NOTIFICATIONS_FAILED": "{{detail}}",
   "NOTIFICATION_NOT_FOUND": "Essa notificação foi removida.",
+  "NOT_A_DEVICE": "Só um dispositivo conectado pode se desconectar sozinho.",
   "NOT_FOUND": "{{detail}}",
   "NOT_IMPLEMENTED": "{{detail}}",
   "NO_MODEL_ASSIGNED": "Nenhum modelo foi escolhido para isto. Instale um em Modelos ou escolha um no perfil.",

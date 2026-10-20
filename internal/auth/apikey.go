@@ -57,7 +57,39 @@ func (m *APIKeyManager) CreateDevice(ctx context.Context, name string) (APIKeyRe
 	return m.create(ctx, name, KindDevice)
 }
 
+// CreateCompanion generates a key for a device connected through another,
+// such as a watch through its phone (#766); parentID is that device's key,
+// so disconnecting it disconnects this one too.
+func (m *APIKeyManager) CreateCompanion(ctx context.Context, name, parentID string) (APIKeyRecord, string, error) {
+	return m.createWith(ctx, name, KindDevice, parentID)
+}
+
+// Companions are the live keys of devices connected through parentID.
+func (m *APIKeyManager) Companions(ctx context.Context, parentID string) ([]string, error) {
+	if parentID == "" {
+		return nil, nil
+	}
+	rows, err := m.db.QueryContext(ctx, `SELECT id FROM api_keys WHERE parent_key_id = ? AND revoked_at IS NULL`, parentID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var out []string
+	for rows.Next() {
+		var id string
+		if err := rows.Scan(&id); err != nil {
+			return nil, err
+		}
+		out = append(out, id)
+	}
+	return out, rows.Err()
+}
+
 func (m *APIKeyManager) create(ctx context.Context, name, kind string) (record APIKeyRecord, secret string, err error) {
+	return m.createWith(ctx, name, kind, "")
+}
+
+func (m *APIKeyManager) createWith(ctx context.Context, name, kind, parentID string) (record APIKeyRecord, secret string, err error) {
 	if name == "" {
 		name = "default"
 	}
@@ -76,8 +108,8 @@ func (m *APIKeyManager) create(ctx context.Context, name, kind string) (record A
 	// The key is its maker's (#206).
 	person := PersonID(ctx)
 	_, err = m.db.ExecContext(ctx, `
-		INSERT INTO api_keys (id, name, key_prefix, key_hash, created_at, kind, person_id)
-		VALUES (?, ?, ?, ?, ?, ?, ?)`, id, name, prefix, string(hash), now.Format(time.RFC3339Nano), kind, person)
+		INSERT INTO api_keys (id, name, key_prefix, key_hash, created_at, kind, person_id, parent_key_id)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?)`, id, name, prefix, string(hash), now.Format(time.RFC3339Nano), kind, person, parentID)
 	if err != nil {
 		return record, "", err
 	}

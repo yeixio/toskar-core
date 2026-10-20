@@ -91,6 +91,7 @@
   "NOTIFICATIONS_DISABLED": "通知はオフになっています。",
   "NOTIFICATIONS_FAILED": "{{detail}}",
   "NOTIFICATION_NOT_FOUND": "その通知は削除されています。",
+  "NOT_A_DEVICE": "自分で接続を解除できるのは、接続済みのデバイスだけです。",
   "NOT_FOUND": "{{detail}}",
   "NOT_IMPLEMENTED": "{{detail}}",
   "NO_MODEL_ASSIGNED": "これに使うモデルが選ばれていません。「モデル」でインストールするか、プロファイルで選んでください。",

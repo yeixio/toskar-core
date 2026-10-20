@@ -91,6 +91,7 @@
   "NOTIFICATIONS_DISABLED": "Mitteilungen sind ausgeschaltet.",
   "NOTIFICATIONS_FAILED": "{{detail}}",
   "NOTIFICATION_NOT_FOUND": "Diese Mitteilung wurde entfernt.",
+  "NOT_A_DEVICE": "Nur ein verbundenes Gerät kann seine Verbindung selbst trennen.",
   "NOT_FOUND": "{{detail}}",
   "NOT_IMPLEMENTED": "{{detail}}",
   "NO_MODEL_ASSIGNED": "Dafür ist kein Modell gewählt. Installiere eines unter „Modelle“ oder wähle eines im Profil.",
