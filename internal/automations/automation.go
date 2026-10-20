@@ -133,8 +133,8 @@ type Automation struct {
 	// Trigger, when set, runs the automation only when what it watches
 	// changed, checked on the schedule (#204).
 	Trigger *Trigger `json:"trigger,omitempty"`
-	// Camera, when set, is looked at as each run starts (#667).
-	Camera *Camera `json:"camera,omitempty"`
+	// Cameras are looked at as each run starts (#667).
+	Cameras []Camera `json:"cameras,omitempty"`
 	// WatchState is what the trigger's last check found, and
 	// LastCheckedAt when it was.
 	WatchState    []byte     `json:"-"`
@@ -205,8 +205,8 @@ type CreateInput struct {
 	SaveFolder string `json:"save_folder,omitempty"`
 	// Trigger: see Automation.
 	Trigger *Trigger `json:"trigger,omitempty"`
-	// Camera: see Automation.
-	Camera *Camera `json:"camera,omitempty"`
+	// Cameras: see Automation.
+	Cameras []Camera `json:"cameras,omitempty"`
 }
 
 // Patch updates the fields that are non-nil.
@@ -225,8 +225,8 @@ type Patch struct {
 	SaveFolder *string `json:"save_folder,omitempty"`
 	// Trigger: see Automation; one with no kind runs on the schedule again.
 	Trigger *Trigger `json:"trigger,omitempty"`
-	// Camera: see Automation; one with no entity stops looking.
-	Camera *Camera `json:"camera,omitempty"`
+	// Cameras: see Automation; an empty list stops looking.
+	Cameras *[]Camera `json:"cameras,omitempty"`
 }
 
 // Response languages an automation can have besides a language tag.
@@ -273,27 +273,41 @@ func validateIdentity(name, prompt, modelID string, tools []string, notification
 	return notification.Validate()
 }
 
-// Camera is what an automation looks at as each run starts (#667): a
-// camera of a connected service, whose picture then is shown to a model
-// that can see, like a photo attached in chat. Home Assistant's are the
-// first: Entity is its camera, such as camera.front_door.
+// Camera is one an automation looks at as each run starts (#667): a
+// connected service's camera, whose picture is then shown to a model that
+// can see, like a photo attached in chat. Device is the camera as that
+// service names it; Home Assistant's are the first, such as
+// camera.driveway.
 type Camera struct {
 	Connector string `json:"connector"`
-	Entity    string `json:"entity"`
+	Device    string `json:"device"`
 }
+
+// MaxCameras is how many cameras one run looks at.
+const MaxCameras = 4
 
 // CameraHomeAssistant is a Home Assistant camera.
 const CameraHomeAssistant = "homeassistant"
 
-// Validate checks a camera can be looked at.
-func (c *Camera) Validate() error {
-	if c == nil {
-		return nil
+// ValidateCameras checks the cameras can be looked at.
+func ValidateCameras(cams []Camera) error {
+	if len(cams) > MaxCameras {
+		return fmt.Errorf("a run can look at %d cameras at most", MaxCameras)
 	}
+	for _, c := range cams {
+		if err := c.Validate(); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// Validate checks a camera can be looked at.
+func (c Camera) Validate() error {
 	switch c.Connector {
 	case CameraHomeAssistant:
-		if !strings.HasPrefix(c.Entity, "camera.") || len(c.Entity) <= len("camera.") || strings.ContainsAny(c.Entity, "/?# ") {
-			return fmt.Errorf("camera must be a Home Assistant camera entity, such as camera.front_door")
+		if !strings.HasPrefix(c.Device, "camera.") || len(c.Device) <= len("camera.") || strings.ContainsAny(c.Device, "/?# ") {
+			return fmt.Errorf("a Home Assistant camera is an entity such as camera.driveway, not %q", c.Device)
 		}
 	default:
 		return fmt.Errorf("unsupported camera connector %q", c.Connector)

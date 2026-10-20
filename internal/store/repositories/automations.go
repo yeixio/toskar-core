@@ -74,7 +74,7 @@ func (r *AutomationRepo) Create(ctx context.Context, in automations.CreateInput,
 		DraftID:          in.DraftID,
 		SaveFolder:       in.SaveFolder,
 		Trigger:          in.Trigger,
-		Camera:           in.Camera,
+		Cameras:          in.Cameras,
 		CreatedAt:        now,
 		UpdatedAt:        now,
 		PersonID:         auth.PersonID(ctx),
@@ -187,11 +187,8 @@ func (r *AutomationRepo) Update(ctx context.Context, id string, patch automation
 			existing.HookHash = ""
 		}
 	}
-	if patch.Camera != nil {
-		existing.Camera = patch.Camera
-		if patch.Camera.Entity == "" {
-			existing.Camera = nil
-		}
+	if patch.Cameras != nil {
+		existing.Cameras = *patch.Cameras
 	}
 	if patch.ResponseLanguage != nil {
 		existing.ResponseLanguage = *patch.ResponseLanguage
@@ -294,7 +291,7 @@ func (r *AutomationRepo) insert(ctx context.Context, a automations.Automation) e
 		tools, note, formatTime(a.CreatedAt), formatTime(a.UpdatedAt), formatTimePtr(a.NextRunAt), formatTimePtr(a.LastRunAt),
 		a.ConsecutiveFailures, nullIfEmpty(a.LastError), lastFailure(a).CodeColumn(), lastFailure(a).DetailsColumn(), nullIfEmpty(a.ResponseLanguage),
 		nullIfEmpty(a.ConversationID), nullIfEmpty(a.DraftID), nullIfEmpty(a.SaveFolder),
-		triggerJSON(a.Trigger), nullIfEmpty(string(a.WatchState)), formatTimePtr(a.LastCheckedAt), a.PersonID, cameraJSON(a.Camera))
+		triggerJSON(a.Trigger), nullIfEmpty(string(a.WatchState)), formatTimePtr(a.LastCheckedAt), a.PersonID, cameraJSON(a.Cameras))
 	return err
 }
 
@@ -321,7 +318,7 @@ func updateAutomation(ctx context.Context, db execer, a automations.Automation) 
 		a.Name, boolInt(a.Enabled), sched, a.Schedule.TimeZone, a.Prompt, nullIfEmpty(a.ProfileID), nullIfEmpty(a.ModelID),
 		tools, note, formatTime(a.UpdatedAt), formatTimePtr(a.NextRunAt), formatTimePtr(a.LastRunAt),
 		a.ConsecutiveFailures, nullIfEmpty(a.LastError), lastFailure(a).CodeColumn(), lastFailure(a).DetailsColumn(), nullIfEmpty(a.ResponseLanguage), nullIfEmpty(a.SaveFolder),
-		triggerJSON(a.Trigger), nullIfEmpty(string(a.WatchState)), formatTimePtr(a.LastCheckedAt), nullIfEmpty(a.HookHash), cameraJSON(a.Camera), a.ID)
+		triggerJSON(a.Trigger), nullIfEmpty(string(a.WatchState)), formatTimePtr(a.LastCheckedAt), nullIfEmpty(a.HookHash), cameraJSON(a.Cameras), a.ID)
 	if err != nil {
 		return err
 	}
@@ -359,11 +356,11 @@ func prepareAutomation(a *automations.Automation) error {
 	if err := a.Trigger.Validate(); err != nil {
 		return err
 	}
-	if a.Camera != nil {
-		a.Camera.Connector = strings.TrimSpace(a.Camera.Connector)
-		a.Camera.Entity = strings.TrimSpace(a.Camera.Entity)
+	for i := range a.Cameras {
+		a.Cameras[i].Connector = strings.TrimSpace(a.Cameras[i].Connector)
+		a.Cameras[i].Device = strings.TrimSpace(a.Cameras[i].Device)
 	}
-	if err := a.Camera.Validate(); err != nil {
+	if err := automations.ValidateCameras(a.Cameras); err != nil {
 		return err
 	}
 	a.SaveFolder = strings.TrimSpace(a.SaveFolder)
@@ -445,11 +442,9 @@ func scanAutomation(s automationScanner) (automations.Automation, error) {
 		a.Trigger = &t
 	}
 	if camera != "" {
-		var c automations.Camera
-		if err := json.Unmarshal([]byte(camera), &c); err != nil {
-			return automations.Automation{}, fmt.Errorf("camera: %w", err)
+		if err := json.Unmarshal([]byte(camera), &a.Cameras); err != nil {
+			return automations.Automation{}, fmt.Errorf("cameras: %w", err)
 		}
-		a.Camera = &c
 	}
 	if watchState != "" {
 		a.WatchState = []byte(watchState)
@@ -465,11 +460,11 @@ func triggerJSON(t *automations.Trigger) any {
 	return string(b)
 }
 
-func cameraJSON(c *automations.Camera) any {
-	if c == nil || c.Entity == "" {
+func cameraJSON(cams []automations.Camera) any {
+	if len(cams) == 0 {
 		return nil
 	}
-	b, _ := json.Marshal(c)
+	b, _ := json.Marshal(cams)
 	return string(b)
 }
 

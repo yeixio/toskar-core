@@ -271,9 +271,10 @@ func TestAutomationResponseLanguage(t *testing.T) {
 	}
 }
 
-// An automation keeps the camera it looks at, a patch with no entity stops
-// looking, and only a Home Assistant camera entity is taken (#667).
-func TestAutomationCamera(t *testing.T) {
+// An automation keeps the cameras it looks at, an empty list stops
+// looking, and only Home Assistant camera entities are taken, up to four
+// (#667).
+func TestAutomationCameras(t *testing.T) {
 	db, err := store.Open(filepath.Join(t.TempDir(), "test.db"))
 	if err != nil {
 		t.Fatal(err)
@@ -281,31 +282,34 @@ func TestAutomationCamera(t *testing.T) {
 	defer db.Close()
 	ctx := context.Background()
 	repo := repositories.NewAutomationRepo(db.SQL)
+	ha := func(d string) automations.Camera { return automations.Camera{Connector: "homeassistant", Device: d} }
 	in := automations.CreateInput{
-		ModelID: "model-a", Name: "Front door", Prompt: "Who is at the door?",
+		ModelID: "model-a", Name: "Who's there", Prompt: "Who is at the door?",
 		Schedule: automations.Schedule{Kind: automations.KindManual, TimeZone: "UTC"},
-		Camera:   &automations.Camera{Connector: "homeassistant", Entity: " camera.front_door_fluent "},
+		Cameras:  []automations.Camera{ha(" camera.front_door "), ha("camera.driveway")},
 	}
 	created, err := repo.Create(ctx, in, time.Now())
 	if err != nil {
 		t.Fatal(err)
 	}
 	got, _ := repo.Get(ctx, created.ID)
-	if got.Camera == nil || got.Camera.Entity != "camera.front_door_fluent" || got.Camera.Connector != "homeassistant" {
-		t.Fatalf("camera = %+v", got.Camera)
+	if len(got.Cameras) != 2 || got.Cameras[0] != ha("camera.front_door") || got.Cameras[1] != ha("camera.driveway") {
+		t.Fatalf("cameras = %+v", got.Cameras)
 	}
-	if got, err = repo.Update(ctx, created.ID, automations.Patch{Camera: &automations.Camera{}}, time.Now()); err != nil || got.Camera != nil {
-		t.Fatalf("cleared = %+v, %v", got.Camera, err)
+	none := []automations.Camera{}
+	if got, err = repo.Update(ctx, created.ID, automations.Patch{Cameras: &none}, time.Now()); err != nil || len(got.Cameras) != 0 {
+		t.Fatalf("cleared = %+v, %v", got.Cameras, err)
 	}
-	for _, bad := range []automations.Camera{
-		{Connector: "homeassistant", Entity: "binary_sensor.front_door_person"},
-		{Connector: "homeassistant", Entity: "camera."},
-		{Connector: "homeassistant", Entity: "camera.x/../y"},
-		{Connector: "github", Entity: "camera.x"},
+	for name, bad := range map[string][]automations.Camera{
+		"a sensor":     {ha("binary_sensor.front_door_person")},
+		"no name":      {ha("camera.")},
+		"a path":       {ha("camera.x/../y")},
+		"another app":  {{Connector: "github", Device: "camera.x"}},
+		"five cameras": {ha("camera.a"), ha("camera.b"), ha("camera.c"), ha("camera.d"), ha("camera.e")},
 	} {
-		in.Camera = &bad
+		in.Cameras = bad
 		if _, err := repo.Create(ctx, in, time.Now()); err == nil {
-			t.Fatalf("camera %+v accepted", bad)
+			t.Fatalf("%s accepted", name)
 		}
 	}
 }
