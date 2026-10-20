@@ -7,9 +7,9 @@ Notifications reach the Toskar app on a person's phones and tablets, even when t
 - **The device's push token:** only inside the sealed handle, which only the relay can open. The computer never sees the token.
 - **The computer's public key:** it signs every push.
 - **Each push's content, by the destination's setting:**
-  - **Title** (the default): the notification's title, which the person's own automation or Toskar wrote, such as "Back in stock: Trail runner, size 10". The text stays on the computer.
-  - **Full:** the title and the text.
-  - **Private:** only "You have a new Toskar notification".
+  - **Title** (the default): the notification's title, which the person's own automation or Toskar wrote, such as "Back in stock: Trail runner, size 10", and the web page it's about, such as the product page the automation watched, so a tap opens it at once, away from home. The text stays on the computer.
+  - **Full:** the title, the text, and the page.
+  - **Private:** only "You have a new Toskar notification", with no page.
 - **The notification's ID and app path:** so the app opens it, and can fetch the rest from the computer.
 
 The relay keeps no content and no tokens; it counts deliveries. Every push is listed in **What left this computer**, under the relay's address.

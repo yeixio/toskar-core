@@ -86,6 +86,7 @@ func (n automationNotifier) Notify(ctx context.Context, notice automations.Notic
 		Body:       notice.Body,
 		Message:    notice.Message,
 		Link:       link,
+		URL:        notice.URL,
 		Channels:   []string{"desktop"},
 	})
 	return err

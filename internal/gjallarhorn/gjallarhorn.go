@@ -96,7 +96,11 @@ type Notification struct {
 	// elsewhere, such as an automation's result, may have none.
 	Message *locale.Message `json:"message,omitempty"`
 	// Link is an app path to the source, such as /automations?id=….
-	Link   string     `json:"link,omitempty"`
+	Link string `json:"link,omitempty"`
+	// URL is the web page it's about, such as the product page an
+	// automation watched, so a tap opens it without reaching this computer
+	// (#460).
+	URL    string     `json:"url,omitempty"`
 	ReadAt *time.Time `json:"read_at,omitempty"`
 	// RepeatCount is how many times the same notice came within the dedupe
 	// window, shown as "4 times" (§22).
@@ -121,6 +125,8 @@ type Request struct {
 	// and Body may be left empty: they are written from it in English.
 	Message *locale.Message
 	Link    string
+	// URL is the web page it's about (#460).
+	URL string
 	// DedupeKey folds repeats within dedupeWindow into one notification.
 	DedupeKey string
 	// Channels to deliver to besides the notification center, such as "desktop".
@@ -285,18 +291,18 @@ func (h *Hub) Notify(ctx context.Context, req Request) (Notification, error) {
 	n := Notification{
 		ID: uuid.NewString(), CreatedAt: now, RepeatCount: 1, SourceType: req.SourceType, SourceID: req.SourceID,
 		Category: req.Category, Severity: req.Severity, Title: req.Title, Body: strings.TrimSpace(req.Body), Message: req.Message, Link: req.Link,
-		PersonID: person,
+		URL: req.URL, PersonID: person,
 	}
 	_, err := h.db.ExecContext(ctx, `
-		INSERT INTO notifications (id, created_at, updated_at, source_type, source_id, category, severity, title, body, message, link, dedupe_key, person_id)
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-		n.ID, ts(now), ts(now), n.SourceType, nullable(n.SourceID), n.Category, n.Severity, n.Title, n.Body, messageJSON(n.Message), nullable(n.Link), nullable(req.DedupeKey), person)
+		INSERT INTO notifications (id, created_at, updated_at, source_type, source_id, category, severity, title, body, message, link, url, dedupe_key, person_id)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+		n.ID, ts(now), ts(now), n.SourceType, nullable(n.SourceID), n.Category, n.Severity, n.Title, n.Body, messageJSON(n.Message), nullable(n.Link), nullable(n.URL), nullable(req.DedupeKey), person)
 	if err != nil {
 		return Notification{}, err
 	}
 	if h.bus != nil {
 		h.bus.PublishFor(ctx, events.New(EventCreated, map[string]any{
-			"id": n.ID, "category": n.Category, "severity": n.Severity, "title": n.Title, "body": n.Body, "message": n.Message, "link": n.Link,
+			"id": n.ID, "category": n.Category, "severity": n.Severity, "title": n.Title, "body": n.Body, "message": n.Message, "link": n.Link, "url": n.URL,
 		}))
 	}
 	if !leaves(n) {
@@ -369,13 +375,13 @@ func (h *Hub) deliver(ctx context.Context, n Notification, name string) Delivery
 	return d
 }
 
-const columns = `id, created_at, source_type, COALESCE(source_id, ''), category, severity, title, body, COALESCE(message, ''), COALESCE(link, ''), read_at, repeat_count, person_id`
+const columns = `id, created_at, source_type, COALESCE(source_id, ''), category, severity, title, body, COALESCE(message, ''), COALESCE(link, ''), COALESCE(url, ''), read_at, repeat_count, person_id`
 
 func scan(row interface{ Scan(...any) error }) (Notification, error) {
 	var n Notification
 	var created, message string
 	var read sql.NullString
-	if err := row.Scan(&n.ID, &created, &n.SourceType, &n.SourceID, &n.Category, &n.Severity, &n.Title, &n.Body, &message, &n.Link, &read, &n.RepeatCount, &n.PersonID); err != nil {
+	if err := row.Scan(&n.ID, &created, &n.SourceType, &n.SourceID, &n.Category, &n.Severity, &n.Title, &n.Body, &message, &n.Link, &n.URL, &read, &n.RepeatCount, &n.PersonID); err != nil {
 		return Notification{}, err
 	}
 	if message != "" {

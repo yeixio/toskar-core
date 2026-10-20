@@ -123,6 +123,9 @@ type Message struct {
 	Body   string `json:"body,omitempty"`
 	// Link is the app path the notification opens, such as /automations?id=….
 	Link string `json:"link,omitempty"`
+	// URL is the web page a tap opens instead, such as the product page an
+	// automation watched, so it needs no way back to the computer (#460).
+	URL string `json:"url,omitempty"`
 	// NotificationID lets the app fetch the whole notification from the
 	// computer, and mark it read.
 	NotificationID string `json:"notification_id,omitempty"`

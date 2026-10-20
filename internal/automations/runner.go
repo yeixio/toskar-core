@@ -542,6 +542,7 @@ func (r *Runner) deliver(ctx context.Context, automation Automation, run Run, re
 	}
 	notice := decision.Notice
 	notice.AutomationID = automation.ID
+	notice.URL = result.Page
 	// The notice opens the chat when the result is there; a chat deleted
 	// since leaves it opening the automation.
 	if r.Post != nil && automation.ConversationID != "" {

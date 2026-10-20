@@ -45,7 +45,7 @@ func (p *pushSender) SendToPerson(ctx context.Context, personID string, m gjalla
 	var last error
 	for _, r := range regs {
 		err := p.client.Send(ctx, push.Message{
-			Handle: r.Handle, Title: m.Title, Body: m.Body, Link: m.Link, NotificationID: m.NotificationID,
+			Handle: r.Handle, Title: m.Title, Body: m.Body, Link: m.Link, URL: m.URL, NotificationID: m.NotificationID,
 			Category: m.Category, Severity: m.Severity, Collapse: m.NotificationID, Urgent: m.Urgent,
 		})
 		switch {

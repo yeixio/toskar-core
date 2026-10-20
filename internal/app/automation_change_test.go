@@ -29,3 +29,21 @@ func TestSourceRecorder(t *testing.T) {
 		t.Fatal("a tool that creates files was counted as a source")
 	}
 }
+
+// The run's page is the first web page a read-only tool opened: the page an
+// automation watches, for a tap on the phone to open (#460).
+func TestSourceRecorderKeepsTheFirstPage(t *testing.T) {
+	var s sourceRecorder
+	s.add("internet.search", map[string]any{"query": "trail runner size 10"}, map[string]any{"results": []any{"a"}})
+	s.add("internet.open", map[string]any{"url": "file:///etc/passwd"}, map[string]any{"content": "x"})
+	s.add("internet.open", map[string]any{"url": "https://shop.example/trail-runner"}, map[string]any{"content": "In stock"})
+	s.add("browser.open", map[string]any{"url": "https://shop.example/other"}, map[string]any{"content": "y"})
+	if got := s.firstPage(); got != "https://shop.example/trail-runner" {
+		t.Fatalf("page %q", got)
+	}
+	var none sourceRecorder
+	none.add("internet.search", map[string]any{"query": "q"}, map[string]any{})
+	if none.firstPage() != "" {
+		t.Fatal("a run that opened no page has one")
+	}
+}
