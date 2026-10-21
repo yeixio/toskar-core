@@ -21,20 +21,21 @@ type DeviceChange struct {
 
 // WatchDevices tells onChange of each state change of devices, as it
 // happens, until ctx ends or the connection drops; the caller connects
-// again. Home Assistant is the first service with devices to watch.
+// again.
 func (m *Manager) WatchDevices(ctx context.Context, service string, devices []string, onChange func(DeviceChange)) error {
 	s, err := m.service(service)
 	if err != nil {
 		return err
 	}
-	if service != "homeassistant" {
+	watcher, ok := s.(DeviceWatcher)
+	if !ok {
 		return fmt.Errorf("%s has no devices to watch", s.Name())
 	}
 	cred, err := m.credential(service)
 	if err != nil {
 		return fmt.Errorf("%s is not connected. Connect it in Settings", s.Name())
 	}
-	if err := haWatch(ctx, cred, devices, onChange); err != nil && ctx.Err() == nil {
+	if err := watcher.WatchDevices(ctx, cred, devices, onChange); err != nil && ctx.Err() == nil {
 		return sanitizeErr(err, secretsOnly(s, cred))
 	}
 	return nil

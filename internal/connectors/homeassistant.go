@@ -229,3 +229,13 @@ func haCameraPicture(ctx context.Context, c *http.Client, cred Credential, entit
 	}
 	return data, mime, nil
 }
+
+// CameraPicture is a Home Assistant camera's picture, through its camera proxy.
+func (HomeAssistant) CameraPicture(ctx context.Context, c *http.Client, cred Credential, device string) ([]byte, string, error) {
+	return haCameraPicture(ctx, c, cred, device)
+}
+
+// WatchDevices watches Home Assistant's devices over its WebSocket API.
+func (HomeAssistant) WatchDevices(ctx context.Context, cred Credential, devices []string, onChange func(DeviceChange)) error {
+	return haWatch(ctx, cred, devices, onChange)
+}

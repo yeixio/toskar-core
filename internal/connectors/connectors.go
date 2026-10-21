@@ -486,22 +486,33 @@ func (m *Manager) ServiceName(id string) string {
 }
 
 // CameraPicture is a connected service's camera's picture now (#667): its
-// bytes and type. Home Assistant is the only service with cameras so far.
+// bytes and type.
 func (m *Manager) CameraPicture(ctx context.Context, service, device string) ([]byte, string, error) {
 	s, err := m.service(service)
 	if err != nil {
 		return nil, "", err
 	}
-	if service != "homeassistant" {
+	source, ok := s.(CameraSource)
+	if !ok {
 		return nil, "", fmt.Errorf("%s has no cameras", s.Name())
 	}
 	cred, err := m.credential(service)
 	if err != nil {
 		return nil, "", fmt.Errorf("%s is not connected. Connect it in Settings", s.Name())
 	}
-	data, mime, err := haCameraPicture(ctx, m.client, cred, device)
+	data, mime, err := source.CameraPicture(ctx, m.client, cred, device)
 	if err != nil {
 		return nil, "", sanitizeErr(err, secretsOnly(s, cred))
 	}
 	return data, mime, nil
+}
+
+// serviceIDs are the services' IDs, sorted, for a steady order.
+func (m *Manager) serviceIDs() []string {
+	ids := make([]string, 0, len(m.services))
+	for id := range m.services {
+		ids = append(ids, id)
+	}
+	sort.Strings(ids)
+	return ids
 }
