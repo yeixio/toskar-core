@@ -667,7 +667,8 @@
       "sentAdded": "Sent. Others hit this too, and yours is added to theirs.",
       "failed": "It couldn't be sent from here. Scan the code to send it by email.",
       "off": "An Admin turned off sending reports to Toskar."
-    }
+    },
+    "locked": "Toskar on TV comes with Toskar Unlock. Unlock it in Toskar on your phone or tablet."
   },
   "setup": {
     "title": "Set it up on your computer",
@@ -747,7 +748,8 @@
       "phone": "Via your phone"
     },
     "reportOnPhone": "Report on phone",
-    "reportSent": "Open Toskar on your phone to send the report."
+    "reportSent": "Open Toskar on your phone to send the report.",
+    "locked": "Asking from your watch comes with Toskar Unlock. Unlock it in Toskar on your phone."
   },
   "watchLink": {
     "companionName": "Watch with {{device}}",
@@ -791,6 +793,43 @@
     "throughComputer": "Active through this computer's subscription",
     "throughComputerBody": "Every device paired with this computer uses it. It's managed where it was bought: on the device that subscribed, or in Toskar's settings on the computer.",
     "boughtInSettings": "Bought in Toskar's settings on the computer. Change the card or cancel there, under API Access."
+  },
+  "unlock": {
+    "title": "Toskar Unlock",
+    "body": "One purchase, yours to keep. Everything you do through your own computer stays free.",
+    "includes": "Toskar Unlock adds:",
+    "features": {
+      "models": "More and larger models on this device",
+      "importFile": "Models from your own files",
+      "attachments": "Photos and files in chats on this device",
+      "web": "Web lookups in chats on this device",
+      "memory": "Memory on this device",
+      "watch": "Asking from your watch"
+    },
+    "reasons": {
+      "models": "This device's free model is {{model}}. More models come with Toskar Unlock.",
+      "importFile": "Adding a model from a file comes with Toskar Unlock.",
+      "attachments": "Photos and files in chats on this device come with Toskar Unlock. Chats on your computer use them for free.",
+      "web": "Web lookups in chats on this device come with Toskar Unlock. Chats on your computer look things up for free.",
+      "memory": "Memory on this device comes with Toskar Unlock. Your computer's memory is free.",
+      "watch": "Asking from your watch comes with Toskar Unlock."
+    },
+    "buy": "Unlock for {{price}}",
+    "restore": "Restore purchase",
+    "notNow": "Not now",
+    "free": "Free",
+    "locked": "Unlock",
+    "freeModel": "Free on this device",
+    "unlocked": "Unlocked",
+    "unlockedBody": "Everything is unlocked on this device.",
+    "earlier": "You bought Toskar before it was free, so everything stays unlocked.",
+    "family": "Unlocked through Family Sharing.",
+    "pending": "Waiting for the purchase to be approved.",
+    "noneFound": "No Toskar Unlock was found for the store account on this device.",
+    "unavailable": "The store isn't available right now. Try again later.",
+    "failed": "Couldn't finish: {{detail}}",
+    "computerFree": "Connecting to your own computer is always free.",
+    "settingsFree": "Free version"
   },
   "deliberation": {
     "summary": {

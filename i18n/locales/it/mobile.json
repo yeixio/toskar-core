@@ -576,7 +576,8 @@
       "sentAdded": "Inviata. È successo anche ad altri, e la tua si aggiunge alla loro.",
       "failed": "Non è stato possibile inviarla da qui. Scansiona il codice per inviarla per email.",
       "off": "Un amministratore ha disattivato l'invio delle segnalazioni a Toskar."
-    }
+    },
+    "locked": "Toskar sulla TV arriva con Toskar Unlock. Sbloccalo in Toskar sul telefono o sul tablet."
   },
   "setup": {
     "title": "Configuralo sul tuo computer",
@@ -656,7 +657,8 @@
       "phone": "Tramite il telefono"
     },
     "reportOnPhone": "Segnala sul telefono",
-    "reportSent": "Apri Toskar sul telefono per inviare la segnalazione."
+    "reportSent": "Apri Toskar sul telefono per inviare la segnalazione.",
+    "locked": "Chiedere dall'orologio arriva con Toskar Unlock. Sbloccalo in Toskar sul telefono."
   },
   "watchLink": {
     "companionName": "Orologio con {{device}}",
@@ -700,6 +702,43 @@
     "throughComputer": "Attivo tramite l'abbonamento di questo computer",
     "throughComputerBody": "Ogni dispositivo associato a questo computer lo usa. Si gestisce dove è stato acquistato: sul dispositivo che si è abbonato o nelle impostazioni di Toskar sul computer.",
     "boughtInSettings": "Acquistato nelle impostazioni di Toskar sul computer. Cambia carta o annulla lì, in Accesso API."
+  },
+  "unlock": {
+    "title": "Toskar Unlock",
+    "body": "Un solo acquisto, tuo per sempre. Tutto ciò che fai tramite il tuo computer resta gratuito.",
+    "includes": "Toskar Unlock aggiunge:",
+    "features": {
+      "models": "Più modelli, e più grandi, su questo dispositivo",
+      "importFile": "Modelli dai tuoi file",
+      "attachments": "Foto e file nelle chat su questo dispositivo",
+      "web": "Ricerche sul web nelle chat su questo dispositivo",
+      "memory": "Memoria su questo dispositivo",
+      "watch": "Chiedere dall'orologio"
+    },
+    "reasons": {
+      "models": "Il modello gratuito di questo dispositivo è {{model}}. Altri modelli arrivano con Toskar Unlock.",
+      "importFile": "Aggiungere un modello da un file arriva con Toskar Unlock.",
+      "attachments": "Foto e file nelle chat su questo dispositivo arrivano con Toskar Unlock. Le chat sul tuo computer li usano gratis.",
+      "web": "Le ricerche sul web nelle chat su questo dispositivo arrivano con Toskar Unlock. Le chat sul tuo computer cercano gratis.",
+      "memory": "La memoria su questo dispositivo arriva con Toskar Unlock. La memoria del tuo computer è gratuita.",
+      "watch": "Chiedere dall'orologio arriva con Toskar Unlock."
+    },
+    "buy": "Sblocca per {{price}}",
+    "restore": "Ripristina acquisto",
+    "notNow": "Non ora",
+    "free": "Gratis",
+    "locked": "Sblocca",
+    "freeModel": "Gratis su questo dispositivo",
+    "unlocked": "Sbloccato",
+    "unlockedBody": "Su questo dispositivo è tutto sbloccato.",
+    "earlier": "Hai acquistato Toskar prima che fosse gratuito, quindi resta tutto sbloccato.",
+    "family": "Sbloccato tramite In famiglia.",
+    "pending": "In attesa dell'approvazione dell'acquisto.",
+    "noneFound": "Nessun Toskar Unlock trovato per l'account dello store su questo dispositivo.",
+    "unavailable": "Lo store non è disponibile al momento. Riprova più tardi.",
+    "failed": "Impossibile completare: {{detail}}",
+    "computerFree": "Collegarti al tuo computer è sempre gratuito.",
+    "settingsFree": "Versione gratuita"
   },
   "deliberation": {
     "summary": {
