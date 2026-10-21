@@ -149,6 +149,9 @@
     "pending": "正在等待購買獲准。",
     "noneFound": "未在此電腦的商店帳號中找到 Unlock。",
     "failed": "無法完成：{{detail}}",
-    "unlocked": "Toskar Pro 已解鎖。"
+    "unlocked": "Toskar Pro 已解鎖。",
+    "available": "開始 Toskar Pro 的 14 天免費試用。14 天內一切開放；之後，已設定的內容繼續可用，安裝模型、建立自動化和新增人員需要一次性購買的 Unlock。",
+    "startTrial": "開始免費試用",
+    "unlockPrice": "Unlock：{{price}}，一次性購買。"
   }
 }

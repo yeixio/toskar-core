@@ -2387,7 +2387,7 @@ paths:
               type: object
               required: [kind]
               properties:
-                kind: {type: string, enum: ["", trial, unlocked, ended]}
+                kind: {type: string, enum: ["", available, trial, unlocked, ended]}
                 trial_ends: {type: string, format: date-time, description: Required with trial.}
                 store: {type: string, enum: [mac, windows]}
       responses:
@@ -6899,7 +6899,7 @@ components:
     License:
       type: object
       properties:
-        kind: {type: string, enum: ["", trial, unlocked, ended]}
+        kind: {type: string, enum: ["", available, trial, unlocked, ended]}
         trial_ends: {type: string, format: date-time}
         store: {type: string, enum: [mac, windows]}
         limited: {type: boolean, description: New setup waits for the Unlock.}

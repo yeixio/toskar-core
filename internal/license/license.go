@@ -31,6 +31,10 @@ const (
 	Unlocked Kind = "unlocked"
 	// Ended: the trial is over and the Unlock isn't bought.
 	Ended Kind = "ended"
+	// Available: the Mac App Store's trial isn't started yet. Apple has the
+	// person start it themselves, as a $0 purchase, after the app has said
+	// how long it lasts and what it costs after; until then new setup waits.
+	Available Kind = "available"
 )
 
 // State is what Pro said, with the trial's end. Store is where Pro was
@@ -42,8 +46,9 @@ type State struct {
 	Store     string    `json:"store,omitempty"`
 }
 
-// Limited reports whether new setup waits for the Unlock.
-func (s State) Limited() bool { return s.Kind == Ended }
+// Limited reports whether new setup waits for the Unlock, or for the trial
+// to be started.
+func (s State) Limited() bool { return s.Kind == Ended || s.Kind == Available }
 
 // at is the state at a moment: a trial past its end has ended.
 func (s State) at(now time.Time) State {
@@ -80,7 +85,7 @@ func Open(dataDir string) *Keeper {
 
 func valid(s State) bool {
 	switch s.Kind {
-	case None, Unlocked, Ended:
+	case None, Unlocked, Ended, Available:
 		return true
 	case Trial:
 		return !s.TrialEnds.IsZero()

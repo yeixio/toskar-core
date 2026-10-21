@@ -151,6 +151,9 @@
     "pending": "Waiting for the purchase to be approved.",
     "noneFound": "No Unlock was found for the store account on this computer.",
     "failed": "Couldn't finish: {{detail}}",
-    "unlocked": "Toskar Pro is unlocked."
+    "unlocked": "Toskar Pro is unlocked.",
+    "available": "Start your free 14-day trial of Toskar Pro. Everything is open for 14 days; after that, what's set up keeps working, and installing models, creating automations, and adding people need the one-time Unlock.",
+    "startTrial": "Start free trial",
+    "unlockPrice": "Unlock: {{price}}, one time."
   }
 }

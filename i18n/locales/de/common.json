@@ -151,6 +151,9 @@
     "pending": "Der Kauf wartet auf Freigabe.",
     "noneFound": "Für das Store-Konto auf diesem Computer wurde kein Unlock gefunden.",
     "failed": "Konnte nicht abgeschlossen werden: {{detail}}",
-    "unlocked": "Toskar Pro ist freigeschaltet."
+    "unlocked": "Toskar Pro ist freigeschaltet.",
+    "available": "Starte deine kostenlose 14-tägige Testphase von Toskar Pro. 14 Tage lang ist alles offen; danach funktioniert, was eingerichtet ist, weiter, und Modelle installieren, Automatisierungen erstellen und Personen hinzufügen braucht das einmalige Unlock.",
+    "startTrial": "Kostenlos testen",
+    "unlockPrice": "Unlock: {{price}}, einmalig."
   }
 }

@@ -270,5 +270,6 @@
   "PUSH_FAILED": "{{detail}}",
   "EMPTY_ANSWER": "El modelo no escribió una respuesta. Inténtalo de nuevo o elige otro modelo.",
   "SHELL_ONLY": "Solo la app Toskar Pro en esta computadora puede cambiar esto.",
-  "UNLOCK_REQUIRED": "Tu prueba de Toskar Pro terminó. Desbloquea Toskar Pro para agregar modelos, automatizaciones o personas."
+  "UNLOCK_REQUIRED": "Tu prueba de Toskar Pro terminó. Desbloquea Toskar Pro para agregar modelos, automatizaciones o personas.",
+  "TRIAL_NOT_STARTED": "Empieza la prueba gratis de 14 días de Toskar Pro para agregar modelos, automatizaciones o personas."
 }

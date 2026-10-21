@@ -270,5 +270,6 @@
   "PUSH_FAILED": "{{detail}}",
   "EMPTY_ANSWER": "モデルが回答を書きませんでした。もう一度試すか、別のモデルを選んでください。",
   "SHELL_ONLY": "これを変更できるのは、このコンピューターの Toskar Pro アプリだけです。",
-  "UNLOCK_REQUIRED": "Toskar Pro の試用期間が終了しました。モデル、オートメーション、人を追加するには Toskar Pro のロックを解除してください。"
+  "UNLOCK_REQUIRED": "Toskar Pro の試用期間が終了しました。モデル、オートメーション、人を追加するには Toskar Pro のロックを解除してください。",
+  "TRIAL_NOT_STARTED": "モデル、オートメーション、人を追加するには、Toskar Pro の 14 日間無料試用を開始してください。"
 }

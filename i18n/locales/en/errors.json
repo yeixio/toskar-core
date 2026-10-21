@@ -270,5 +270,6 @@
   "PUSH_FAILED": "{{detail}}",
   "EMPTY_ANSWER": "The model didn't write an answer. Try again, or choose another model.",
   "SHELL_ONLY": "Only the Toskar Pro app on this computer can change this.",
-  "UNLOCK_REQUIRED": "Your Toskar Pro trial has ended. Unlock Toskar Pro to add models, automations, or people."
+  "UNLOCK_REQUIRED": "Your Toskar Pro trial has ended. Unlock Toskar Pro to add models, automations, or people.",
+  "TRIAL_NOT_STARTED": "Start Toskar Pro's free 14-day trial to add models, automations, or people."
 }

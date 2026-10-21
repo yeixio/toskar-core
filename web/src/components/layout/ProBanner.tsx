@@ -8,8 +8,10 @@ import { desktopProUnlock } from '@/lib/desktopBridge'
 /**
  * Toskar Pro's trial and Unlock (yeixio/toskar-apps#336), above every page:
  * the days left, or that the trial has ended and what still works, with
- * the store's Unlock (and Restore, on the Mac) in the desktop app. Core on
- * its own, and an unlocked Pro, show nothing.
+ * the store's Unlock (and Restore, on the Mac) in the desktop app. On the
+ * Mac the trial is a $0 purchase the person starts, after reading how long
+ * it lasts and what the Unlock costs (Apple's guideline 3.1.1). Core on its
+ * own, and an unlocked Pro, show nothing.
  */
 export function ProBanner() {
   const { t } = useTranslation()
@@ -24,7 +26,7 @@ export function ProBanner() {
   const [price, setPrice] = useState('')
   const [busy, setBusy] = useState(false)
   const [note, setNote] = useState('')
-  const shown = license?.kind === 'trial' || license?.kind === 'ended'
+  const shown = license?.kind === 'trial' || license?.kind === 'ended' || license?.kind === 'available'
 
   useEffect(() => {
     if (!shown || !store) return
@@ -50,6 +52,7 @@ export function ProBanner() {
     try {
       const outcome = await action()
       if (outcome === 'unlocked') setNote(t('pro.unlocked'))
+      else if (outcome === 'started') setNote('')
       else if (outcome === 'pending') setNote(t('pro.pending'))
       else if (outcome === 'none') setNote(t('pro.noneFound'))
     } catch (error) {
@@ -61,6 +64,7 @@ export function ProBanner() {
   }
 
   const ended = license.kind === 'ended'
+  const available = license.kind === 'available'
   return (
     <div
       role="status"
@@ -68,14 +72,31 @@ export function ProBanner() {
         ended ? 'border-warning/40 bg-warning/10 text-ink' : 'border-line/60 bg-primary/10 text-ink'
       }`}
     >
-      <p className="min-w-0 flex-1">{ended ? t('pro.ended') : t('pro.trialLeft', { count: license.days_left ?? 0 })}</p>
+      <p className="min-w-0 flex-1">
+        {available ? t('pro.available') : ended ? t('pro.ended') : t('pro.trialLeft', { count: license.days_left ?? 0 })}
+        {available && price ? <span className="text-ink-muted"> {t('pro.unlockPrice', { price })}</span> : null}
+      </p>
       {store ? (
         <div className="flex items-center gap-2">
+          {available && store.startTrial ? (
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => void run(store.startTrial!)}
+              className="rounded-lg bg-primary px-3 py-1.5 text-sm font-medium text-primary-fg hover:bg-primary-hover disabled:opacity-60"
+            >
+              {t('pro.startTrial')}
+            </button>
+          ) : null}
           <button
             type="button"
             disabled={busy}
             onClick={() => void run(store.unlock)}
-            className="rounded-lg bg-primary px-3 py-1.5 text-sm font-medium text-primary-fg hover:bg-primary-hover disabled:opacity-60"
+            className={
+              available && store.startTrial
+                ? 'rounded-lg px-3 py-1.5 text-sm text-primary hover:bg-raised/60 disabled:opacity-60'
+                : 'rounded-lg bg-primary px-3 py-1.5 text-sm font-medium text-primary-fg hover:bg-primary-hover disabled:opacity-60'
+            }
           >
             {price ? t('pro.unlockFor', { price }) : t('pro.unlock')}
           </button>
