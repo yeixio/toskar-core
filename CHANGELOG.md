@@ -8,6 +8,45 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Thi
 
 Changes waiting for the next release are in [changes/unreleased/](changes/unreleased/), one file per pull request. `scripts/changelog.py preview` shows them together, and `scripts/changelog.py release <version>` writes them here when the release is cut.
 
+## [1.10.0] - 2026-10-20
+
+### Added
+
+- An automation can look at cameras as each run starts, such as Home Assistant's: their pictures are shown to a model that can see, so a run can say what's at the door or in the driveway. Set them with `cameras` in the API or `toskarctl automations … --camera camera.driveway`. Only Admins and the Owner can give an automation cameras.
+- In Automations, Runs › When a device changes picks a device of a connected service, such as Home Assistant's, by name, with the state to wait for and how long to wait after a run; Look at cameras picks up to 4 cameras for each run to look at. The list shows them by name, such as "When Front Door Visitor turns on".
+- An automation can run the moment a device changes, such as a Home Assistant doorbell, motion sensor, or door contact: a device trigger, with the state to wait for and a cooldown so it runs once per event. Set it with `{"kind": "device", …}` in the API or `toskarctl automations … --trigger device --device binary_sensor.front_door_visitor --to on`.
+- `GET /api/v1/devices` lists the devices of connected services, such as Home Assistant's cameras, sensors, and speakers, by kind, for picking them in automations.
+- Pictures and clips show how far they've got (#706): whether the model is loading, which step it's on with about how long is left, and when it's finishing, beside a frame where the result will appear. On a long wait, a line says what Ratatoskr is up to, such as running down Yggdrasil for more paint (from a user's idea). Screen readers hear the facts, not the jokes.
+- `tool.progress` events with `stage`, `step`, `steps`, and `seconds_left` while a picture or clip is made on this computer (#706, contract 1.44).
+- After an answer, Toskar may offer a model that would have answered it better, and install it in one tap (#707): one that writes code better, reads your files and knowledge more reliably than a small model, writes your language better, thinks through math and logic, or reads a longer chat at once. **Install and answer again** answers the same question with it as a new version. Only for Admins and the Owner, once per kind in a chat, and only for a model this computer runs well with room on disk. Settings › History › Suggest better models turns it off for you.
+- Model offers: `meta.setup` with `ability` `model`, `reason`, and `fit`, and the per-person `suggest_models` preference (#707, contract 1.45).
+- Muse Glimmer 30B, Meta's model that sees pictures, codes, and reasons well, is in the model catalog for computers with 32 GB of memory or a 24 GB graphics card.
+- A notification from an automation that watches a web page keeps that page, and a push sends it with the title, so tapping it on the phone opens the page at once, even away from home. A private push leaves it out.
+
+### Changed
+
+- Research recommends Muse Glimmer 30B on computers with room for it, about 24 GB of graphics memory or a 32 GB Mac. It answered every reasoning question right on an RX 7900 XTX, matching Qwen 2.5 32B, and also reads pictures.
+- FLUX.2 [klein] 4B, Z-Image-Turbo and Wan 2.1 T2V 1.3B now also work out their graphics memory from parts measured on Apple silicon, as FLUX.2 [klein] 4B high quality and Wan 2.2 TI2V 5B do. Wan 2.1 T2V 1.3B needs more than its old estimate, up to about 15 GB of graphics memory for a short clip.
+- The graphics memory FLUX.2 [klein] 4B high quality and Wan 2.2 TI2V 5B need is worked out from measured parts and the requested size and length, instead of one generous estimate: about 6 GB for a 1024×1024 picture and 7 GB for a 2-second clip, rather than 12 GB. Smaller graphics cards get "Works well" where they can.
+- A picture or clip too big for this computer's graphics is turned down before it starts, with the size or length that fits.
+
+### Fixed
+
+- An automation created through the API without a profile, model, or time zone now gets General Assistant, Auto, and this computer's time zone, instead of being saved and then failing every run. A profile that doesn't exist is refused when it's saved. `toskarctl automations create --name` no longer needs `--profile` and `--model`.
+- An automation that looks at a camera answers from the camera's picture: it no longer looked up the camera in Home Assistant and answered with its status, such as "the person is currently idle".
+- Auto treats requests like "Write a Swift function…", "a string in Go" or "this Rust trait" as coding, so it picks a coding model and suggests one when none is installed.
+- A phone, tablet, or TV that removes this computer now disconnects from it, with its watch. Before, the computer kept the device connected and kept sending it notifications. The apps use the new `DELETE /api/v1/me/device`.
+- A chat's stream ends once the answer is saved, so the phone app no longer misses an answer it reads back as the stream ends, as when the first answer in a new chat suggested a better model.
+- On a Mac, how well a model fits now counts the part of memory the graphics may use, and a model's picture projector, so a 24 GB Mac is no longer told a 30B model runs comfortably. Recommendations and better-model suggestions follow it.
+- The web app now shows "Reasoning…" while a model thinks (#701) and "Compacting earlier messages…" before a long turn (#342): it never subscribed to those events, so neither line appeared. A test now checks that the web subscribes to every event the chat page handles.
+- What left this computer no longer lists a notification push that no phone or tablet took.
+- Disconnecting a device, from Devices, API Access, or by removing a person, now also removes its notification registration; ones left by devices disconnected before are cleared.
+- Run now on an automation that watches a page, feed, or folder now looks at what it watches. Before, the run wasn't told the page, so it answered without it.
+- The first-run setup no longer offers to download a model that's already here, and its estimated active memory is what the recommended models need, not the computer's whole graphics memory.
+- A model file added from another Toskar, or kept under its source's name as LM Studio does, is recognized as that catalog model: it's installed under the catalog's name, with its details, instead of as a new model.
+- The Automations page no longer fails to open after an automation is made without a time zone, through the API, toskarctl, or a request the computer read. Toskar now fills in this computer's zone by its name, such as America/Juneau, and reads ones saved before as that.
+- When a model calls a tool Toskar didn't offer, as Muse Glimmer 30B sometimes does, Toskar asks it once more, saying which tools there are, instead of failing with no answer.
+
 ## [1.9.2] - 2026-10-18
 
 ### Added

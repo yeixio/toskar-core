@@ -1,36 +1,36 @@
 {
   "schemaVersion": 1,
-  "version": "1.9",
+  "version": "1.10",
   "items": [
     {
-      "realm": "Valgrind",
-      "title": "Access from anywhere, bought on your computer",
-      "text": "Subscribe in API Access for $4.99 a month or $39.99 a year: pay in your browser, and access from anywhere turns on a few seconds later, no phone needed. Manage billing changes the card or cancels."
-    },
-    {
       "realm": "Midgard",
-      "title": "Choose what each person may use",
-      "text": "Turn files, pictures, voice, the web, Knowledge, automations, and more on or off for each role and each person, and the app hides what's off for them. Admins can also manage people from a script or server."
+      "title": "Notifications on your phone",
+      "text": "Your computer's notices, such as an automation's result, reach the Toskar app even when it's closed or you're away from home. A notice about a web page opens it with a tap, and connecting a device offers to turn them on."
     },
     {
-      "realm": "Heimdall",
-      "title": "Report a problem from where it happens",
-      "text": "Report this sits beside errors in chat, on pages, and in automations. It shows everything it sends, lets you add what you were doing, and reaches the Toskar team as an issue, grouped with others who hit the same thing."
-    },
-    {
-      "realm": "Ratatoskr",
-      "title": "Long chats, summarized your way",
-      "text": "Auto-compact shows the summary that stands in for older messages, so you can read and correct it, compact now, start a new chat from it, or keep a chat word for word."
-    },
-    {
-      "realm": "Mimir",
-      "title": "Photos and files in chats on your phone",
-      "text": "Ask about a photo, PDF, or text file in a chat on the device itself. It's read right there, scanned pages too, and a model that can't see photos gets the text in them."
+      "realm": "Ymir",
+      "title": "A better model, when it would help",
+      "text": "After an answer, Toskar may offer a model that would have answered it better, for code, your files, or your language, and installs it in one tap. Turn the offers off in Settings."
     },
     {
       "realm": "Norn",
-      "title": "Typos welcome",
-      "text": "\"whats teh wether tomorow\" looks up the weather, \"evry mornign at 8\" runs every morning at 8, and \"mistrl\" finds Mistral in Models. Real words are left alone."
+      "title": "Automations that see and react",
+      "text": "Run an automation the moment a device changes, such as a doorbell's person sensor or a door contact in Home Assistant, and have it look at your cameras, so it can tell you who's at the door."
+    },
+    {
+      "realm": "Odin",
+      "title": "Muse Glimmer 30B for Research",
+      "text": "Research recommends Muse Glimmer 30B on computers with room for it. It answered every reasoning question right in our tests, codes well, and reads pictures."
+    },
+    {
+      "realm": "Gungnir",
+      "title": "See pictures and clips come together",
+      "text": "While a picture or clip is made, Toskar shows whether the model is loading, which step it's on with about how long is left, and a frame where the result will appear."
+    },
+    {
+      "realm": "Sleipnir",
+      "title": "Honest fit on a Mac",
+      "text": "How well a model fits now counts the memory a Mac's graphics may use, so a 24 GB Mac isn't told a 30B model runs comfortably, and a picture too big for this computer is turned down with the size that fits."
     }
   ]
 }
