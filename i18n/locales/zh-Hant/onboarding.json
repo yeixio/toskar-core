@@ -41,9 +41,11 @@
     "title": "適合「{{purpose}}」的建議配置",
     "communityChosen": "使用類似電腦的人對此配置的主模型評價很高，因此優先於平常的首選推薦它。",
     "download": "下載大小 {{size}}",
+    "installed": "已在這台電腦上",
     "storage": "預估儲存空間",
     "memory": "預估使用中記憶體",
     "install": "安裝建議配置",
+    "use": "使用此設定",
     "skip": "暫時略過",
     "back": "返回"
   },

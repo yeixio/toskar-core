@@ -108,10 +108,22 @@ func (m *Manager) List(ctx context.Context) ([]contracts.Model, error) {
 // Recommend wraps the recommendation engine with presets.
 func (m *Manager) Recommend(ctx context.Context, purpose string, hw contracts.HardwareInventory, community map[string]CommunitySignal) (contracts.Recommendation, error) {
 	in := RecommendInput{Purpose: purpose, Hardware: hw, Community: community}
+	rec, err := Recommend(m.catalog, in)
 	if len(m.presets) > 0 {
-		return RecommendWithPresets(m.catalog, m.presets, in)
+		rec, err = RecommendWithPresets(m.catalog, m.presets, in)
 	}
-	return Recommend(m.catalog, in)
+	if err != nil {
+		return rec, err
+	}
+	// A recommended model already here says so, and isn't counted as a
+	// download.
+	for i, model := range rec.Models {
+		if installed, _, _ := m.storage.IsInstalled(ctx, model.ID); installed {
+			rec.Models[i].Installed = true
+			rec.StorageBytes -= min(rec.StorageBytes, model.SizeBytes)
+		}
+	}
+	return rec, nil
 }
 
 // Fit builds hardware fit + winners for a node.

@@ -43,9 +43,11 @@
     "title": "Recommandé pour {{purpose}}",
     "communityChosen": "Les personnes ayant un ordinateur comme le vôtre notent bien le modèle principal de cette configuration : il est donc proposé avant le choix habituel.",
     "download": "Téléchargement de {{size}}",
+    "installed": "Déjà sur cet ordinateur",
     "storage": "Stockage estimé",
     "memory": "Mémoire active estimée",
     "install": "Installer la configuration recommandée",
+    "use": "Utiliser cette configuration",
     "skip": "Passer pour l'instant",
     "back": "Retour"
   },

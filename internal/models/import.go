@@ -6,7 +6,9 @@ import (
 	"encoding/hex"
 	"fmt"
 	"io"
+	"net/url"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 	"time"
@@ -98,13 +100,27 @@ func (m *Manager) importChecked(ctx context.Context, req ImportRequest, path str
 		return Imported{}, contracts.Errorf("MODEL_FILE_PROJECTOR", nil, "this is a vision projector, which helps a model see pictures; add the model it belongs to")
 	}
 	entry := importEntry(req, details, filepath.Base(path), uint64(st.Size()))
-	entry.ID = m.freeID(ctx, entry.ID, path)
+	// A copy of a catalog model, such as one another Toskar downloaded,
+	// is that model: installed under its ID, with its name and abilities,
+	// so it isn't offered for download again.
+	match, matched := CatalogEntry{}, false
+	if strings.TrimSpace(req.ID) == "" {
+		match, matched = m.catalogMatch(ctx, details, path, uint64(st.Size()))
+	}
+	if matched {
+		entry = match
+	} else {
+		entry.ID = m.freeID(ctx, entry.ID, path)
+	}
 	out := Imported{ID: entry.ID, Details: details}
 	if !uploaded {
 		out.Projector = projectorNear(path)
 	}
 
-	m.catalog.Upsert(entry)
+	// A catalog model keeps its entry; it's stored, as installing one does.
+	if !matched {
+		m.catalog.Upsert(entry)
+	}
 	if err := m.storage.UpsertCatalogEntry(ctx, entry); err != nil {
 		return out, err
 	}
@@ -149,6 +165,36 @@ func (m *Manager) importChecked(ctx context.Context, req ImportRequest, path str
 		}()
 	}
 	return out, nil
+}
+
+// catalogMatch is the catalog model a file is a copy of: named as Toskar
+// saves a download (<id>.gguf) or as its source names it, of the same
+// architecture and about its size, and not installed from another file. The catalog
+// keeps no checksums, so the name and the header decide together.
+func (m *Manager) catalogMatch(ctx context.Context, d gguf.Details, file string, size uint64) (CatalogEntry, bool) {
+	filename := filepath.Base(file)
+	stem := strings.TrimSuffix(filename, filepath.Ext(filename))
+	for _, e := range m.catalog.List() {
+		source := ""
+		if u, err := url.Parse(e.Source.URL); err == nil && u.Path != "" {
+			source = path.Base(u.Path)
+		}
+		if !strings.EqualFold(stem, e.ID) && (source == "" || !strings.EqualFold(filename, source)) {
+			continue
+		}
+		if e.Training != nil && e.Training.Architecture != "" && d.Architecture != "" && !strings.EqualFold(e.Training.Architecture, d.Architecture) {
+			continue
+		}
+		if e.SizeBytes > 0 && (size < e.SizeBytes*8/10 || size > e.SizeBytes*12/10) {
+			continue
+		}
+		// Installed already, it's another copy, unless it's this same file.
+		if installed, at, _ := m.storage.IsInstalled(ctx, e.ID); installed && at != file {
+			continue
+		}
+		return e, true
+	}
+	return CatalogEntry{}, false
 }
 
 // importPath is req.Path, checked: absolute, and a .gguf file.

@@ -132,7 +132,7 @@ func Recommend(catalog *Catalog, input RecommendInput) (contracts.Recommendation
 		Models:       modelsOut,
 		Reason:       reason,
 		StorageBytes: storage,
-		VRAMBytes:    vramTotal(input.Hardware),
+		VRAMBytes:    activeMemory(modelsOut),
 
 		CommunityChosen: byCommunity,
 	}, nil
@@ -356,7 +356,7 @@ func RecommendWithPresets(catalog *Catalog, presets []PurposePreset, input Recom
 		Models:       modelsOut,
 		Reason:       reason,
 		StorageBytes: storage,
-		VRAMBytes:    vramTotal(input.Hardware),
+		VRAMBytes:    activeMemory(modelsOut),
 
 		CommunityChosen: byCommunity,
 	}, nil
@@ -386,4 +386,19 @@ func entryToContract(e CatalogEntry, installed bool) contracts.Model {
 	}
 	m.SupportRole = contracts.SupportRoleOf(m)
 	return m
+}
+
+// activeMemory is what the recommended models need while they answer, which
+// the setup shows as its estimated active memory: not the computer's whole
+// graphics memory, which it showed before (24 GB for a 4.4 GB model).
+func activeMemory(models []contracts.Model) uint64 {
+	var total uint64
+	for _, m := range models {
+		if m.MemoryNeeded > 0 {
+			total += m.MemoryNeeded
+		} else {
+			total += m.SizeBytes
+		}
+	}
+	return total
 }
