@@ -139,5 +139,18 @@
   },
   "help": {
     "media": "What pictures and clips need ↗"
+  },
+  "pro": {
+    "trialLeft_one": "Toskar Pro trial: {{count}} day left.",
+    "trialLeft_other": "Toskar Pro trial: {{count}} days left.",
+    "ended": "Your Toskar Pro trial has ended. What's set up keeps working; installing models, creating automations, and adding people need the Unlock.",
+    "unlock": "Unlock Toskar Pro",
+    "unlockFor": "Unlock for {{price}}",
+    "restore": "Restore purchase",
+    "unlockHere": "Unlock it in Toskar Pro on this computer.",
+    "pending": "Waiting for the purchase to be approved.",
+    "noneFound": "No Unlock was found for the store account on this computer.",
+    "failed": "Couldn't finish: {{detail}}",
+    "unlocked": "Toskar Pro is unlocked."
   }
 }

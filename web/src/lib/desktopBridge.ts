@@ -18,6 +18,12 @@ type WailsApp = {
   SaveDownload?: (name: string, apiPath: string) => Promise<string>
   /** Asks where to save, then writes base64 bytes there. Resolves to the saved path, or '' if cancelled. */
   SaveData?: (name: string, base64: string) => Promise<string>
+  /** Toskar Pro's Unlock as the store sells it, such as "$24.99"; '' when it can't be bought here (#336). */
+  ProUnlockPrice?: () => Promise<string>
+  /** Buys the Unlock through the store: 'unlocked', 'cancelled', or 'pending'. */
+  ProUnlock?: () => Promise<string>
+  /** Brings the store's purchases to this computer (the Mac); 'unlocked' or 'none'. */
+  ProRestore?: () => Promise<string>
 }
 
 type WailsRuntime = {
@@ -281,4 +287,11 @@ export function onDesktopLifecycle(
     }
     handler({ state: 'stopping' })
   })
+}
+
+/** The desktop app's Unlock for Toskar Pro (#336), when it offers one; undefined in a browser or an older app. */
+export function desktopProUnlock(): { price: () => Promise<string>; unlock: () => Promise<string>; restore?: () => Promise<string> } | undefined {
+  const app = wailsGoApp()
+  if (!app?.ProUnlock || !app.ProUnlockPrice) return undefined
+  return { price: app.ProUnlockPrice, unlock: app.ProUnlock, restore: app.ProRestore }
 }

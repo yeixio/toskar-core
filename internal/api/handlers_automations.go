@@ -32,6 +32,10 @@ func (s *Server) handleListAutomations(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) handleCreateAutomation(w http.ResponseWriter, r *http.Request) {
+	// New setup waits for the Unlock once Pro's trial has ended (#336).
+	if s.refuseLocked(w) {
+		return
+	}
 	if s.deps.CreateAutomation == nil {
 		writeErr(w, http.StatusNotImplemented, "NOT_IMPLEMENTED", "Automations are not available.", nil)
 		return

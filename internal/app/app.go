@@ -40,6 +40,7 @@ import (
 	"github.com/yeixio/toskar-core/internal/instances"
 	"github.com/yeixio/toskar-core/internal/inventory"
 	"github.com/yeixio/toskar-core/internal/join"
+	"github.com/yeixio/toskar-core/internal/license"
 	"github.com/yeixio/toskar-core/internal/logs"
 	"github.com/yeixio/toskar-core/internal/mcp"
 	"github.com/yeixio/toskar-core/internal/mimir"
@@ -141,6 +142,8 @@ type App struct {
 	Egress *egress.Log
 	// Updates says when a newer Toskar is out.
 	Updates *updates.Checker
+	// License is Toskar Pro's trial or Unlock, as its desktop app says (#336).
+	License *license.Keeper
 	// RunLog keeps each request's run trace (§35).
 	RunLog *runlog.Store
 	// Caches lists every cache and its policy (§36).
@@ -804,6 +807,10 @@ func New(opts Options) (*App, error) {
 		},
 	}
 	a.API.BindUpdates(a.Updates)
+	// The Toskar Pro desktop app starts Core with a secret
+	// (TOSKAR_SHELL_SECRET) and sets its trial or Unlock with it.
+	a.License = license.Open(cfg.DataDir)
+	a.API.BindLicense(a.License, config.Env("SHELL_SECRET"))
 	a.Ratings = a.newRatings(cfg)
 	ratingsRef.Store(a.Ratings)
 	a.API.BindRatings(a.Ratings)

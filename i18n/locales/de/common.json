@@ -139,5 +139,18 @@
   },
   "help": {
     "media": "Was Bilder und Clips brauchen ↗"
+  },
+  "pro": {
+    "trialLeft_one": "Toskar Pro Testphase: noch {{count}} Tag.",
+    "trialLeft_other": "Toskar Pro Testphase: noch {{count}} Tage.",
+    "ended": "Deine Testphase von Toskar Pro ist vorbei. Was eingerichtet ist, funktioniert weiter; Modelle installieren, Automatisierungen erstellen und Personen hinzufügen braucht das Unlock.",
+    "unlock": "Toskar Pro freischalten",
+    "unlockFor": "Freischalten für {{price}}",
+    "restore": "Kauf wiederherstellen",
+    "unlockHere": "Schalte es in Toskar Pro auf diesem Computer frei.",
+    "pending": "Der Kauf wartet auf Freigabe.",
+    "noneFound": "Für das Store-Konto auf diesem Computer wurde kein Unlock gefunden.",
+    "failed": "Konnte nicht abgeschlossen werden: {{detail}}",
+    "unlocked": "Toskar Pro ist freigeschaltet."
   }
 }

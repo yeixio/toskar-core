@@ -2481,6 +2481,17 @@ export interface LatestRelease {
 }
 
 /** GET /api/v1/updates: whether a newer Toskar is out. */
+/** Toskar Pro's trial or Unlock (yeixio/toskar-apps#336); kind is empty for Core on its own. */
+export interface ProLicense {
+  kind: '' | 'trial' | 'unlocked' | 'ended'
+  trial_ends?: string
+  /** Where Pro was bought: the Mac App Store or the Microsoft Store. */
+  store?: 'mac' | 'windows'
+  /** New setup (models, automations, people) waits for the Unlock. */
+  limited: boolean
+  days_left?: number
+}
+
 export interface UpdatesStatus {
   /** This build checks (not the App Store edition, the desktop app's copy, or a development build). */
   supported: boolean

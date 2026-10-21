@@ -268,5 +268,7 @@
   "PUSH_DEVICE_ONLY": "通知をオンにできるのは、ペアリング済みのスマートフォンかタブレットだけです。",
   "PUSH_INVALID": "{{detail}}",
   "PUSH_FAILED": "{{detail}}",
-  "EMPTY_ANSWER": "モデルが回答を書きませんでした。もう一度試すか、別のモデルを選んでください。"
+  "EMPTY_ANSWER": "モデルが回答を書きませんでした。もう一度試すか、別のモデルを選んでください。",
+  "SHELL_ONLY": "これを変更できるのは、このコンピューターの Toskar Pro アプリだけです。",
+  "UNLOCK_REQUIRED": "Toskar Pro の試用期間が終了しました。モデル、オートメーション、人を追加するには Toskar Pro のロックを解除してください。"
 }

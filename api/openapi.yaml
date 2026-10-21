@@ -2362,6 +2362,42 @@ paths:
                     source: {type: string}
                     conversation_id: {type: string}
                     task_id: {type: string}
+  /api/v1/license:
+    get:
+      summary: Toskar Pro's trial or Unlock, as its desktop app last said
+      operationId: getLicense
+      description: Core on its own has no license (`kind` empty) and nothing is limited. The Toskar Pro desktop app from the Mac App Store or the Microsoft Store sets a 14-day trial, unlocked, or ended (yeixio/toskar-apps#336). While `limited`, installing models, creating automations, and adding people answer 403 `UNLOCK_REQUIRED`; what's set up keeps working.
+      responses:
+        "200":
+          description: The license now; a trial past its end reads `ended`
+          content:
+            application/json:
+              schema: {$ref: "#/components/schemas/License"}
+    put:
+      summary: Set Toskar Pro's trial or Unlock (the desktop app only)
+      operationId: putLicense
+      description: Only the Toskar Pro desktop app on this computer, with the `X-Toskar-Shell` secret it started Core with (`TOSKAR_SHELL_SECRET`). Anything else gets 403 `SHELL_ONLY`.
+      parameters:
+        - {name: X-Toskar-Shell, in: header, required: true, schema: {type: string}}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [kind]
+              properties:
+                kind: {type: string, enum: ["", trial, unlocked, ended]}
+                trial_ends: {type: string, format: date-time, description: Required with trial.}
+                store: {type: string, enum: [mac, windows]}
+      responses:
+        "200":
+          description: The license kept
+          content:
+            application/json:
+              schema: {$ref: "#/components/schemas/License"}
+        "400": {description: Not a license (INVALID_JSON or BAD_REQUEST)}
+        "403": {description: Not the desktop app on this computer (SHELL_ONLY)}
   /api/v1/updates:
     get:
       summary: Whether a newer Toskar is out, from the daily check of toskar.ai
@@ -6860,6 +6896,14 @@ components:
       scheme: bearer
       description: An API key from the API Access page, or TOSKAR_API_KEY
   schemas:
+    License:
+      type: object
+      properties:
+        kind: {type: string, enum: ["", trial, unlocked, ended]}
+        trial_ends: {type: string, format: date-time}
+        store: {type: string, enum: [mac, windows]}
+        limited: {type: boolean, description: New setup waits for the Unlock.}
+        days_left: {type: integer, description: Days left in a trial, rounded up.}
     PushStatus:
       type: object
       properties:

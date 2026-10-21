@@ -117,6 +117,7 @@ import type {
   LiveFigures,
   GPUSetup,
   UpdatesStatus,
+  ProLicense,
   APITLS,
   Principal,
   Person,
@@ -805,6 +806,7 @@ export const api = {
 
   getVersion: () => request<VersionResponse>('/api/v1/version'),
   getUpdates: () => request<UpdatesStatus>('/api/v1/updates'),
+  getLicense: () => request<ProLicense>('/api/v1/license'),
 
   getHardware: () => request<HardwareInventory>('/api/v1/hardware'),
 
