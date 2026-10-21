@@ -69,6 +69,14 @@ func TestLicenseRoutes(t *testing.T) {
 		}
 	}
 
+	// A Mac trial not started yet: new setup waits for it.
+	if code, body := call(http.MethodPut, "/api/v1/license", `{"kind":"available","store":"mac"}`, "shell-secret", here); code != http.StatusOK || !strings.Contains(body, `"limited":true`) {
+		t.Fatalf("trial available: %d %s", code, body)
+	}
+	if code, body := call(http.MethodPost, "/api/v1/automations", `{}`, "", here); code != http.StatusForbidden || !strings.Contains(body, "TRIAL_NOT_STARTED") {
+		t.Errorf("trial not started: %d %s", code, body)
+	}
+
 	if code, body := call(http.MethodPut, "/api/v1/license", `{"kind":"unlocked","store":"mac"}`, "shell-secret", here); code != http.StatusOK || !strings.Contains(body, `"limited":false`) {
 		t.Fatalf("unlock: %d %s", code, body)
 	}

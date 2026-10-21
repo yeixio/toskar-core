@@ -97,6 +97,10 @@ func (s *Server) refuseLocked(w http.ResponseWriter) bool {
 	if !st.Limited() {
 		return false
 	}
+	if st.Kind == license.Available {
+		writeErr(w, http.StatusForbidden, "TRIAL_NOT_STARTED", "Toskar Pro's free trial hasn't been started", map[string]any{"store": st.Store})
+		return true
+	}
 	writeErr(w, http.StatusForbidden, "UNLOCK_REQUIRED", "Toskar Pro's trial has ended; this needs the Unlock", map[string]any{"store": st.Store})
 	return true
 }

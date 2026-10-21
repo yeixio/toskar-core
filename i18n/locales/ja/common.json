@@ -149,6 +149,9 @@
     "pending": "購入の承認を待っています。",
     "noneFound": "このコンピューターのストアアカウントに Unlock が見つかりませんでした。",
     "failed": "完了できませんでした：{{detail}}",
-    "unlocked": "Toskar Pro のロックが解除されています。"
+    "unlocked": "Toskar Pro のロックが解除されています。",
+    "available": "Toskar Pro の 14 日間無料試用を始めましょう。14 日間はすべて使えます。その後も設定済みのものは使え、モデルのインストール、オートメーションの作成、人の追加には買い切りの Unlock が必要です。",
+    "startTrial": "無料試用を開始",
+    "unlockPrice": "Unlock：{{price}}（買い切り）"
   }
 }

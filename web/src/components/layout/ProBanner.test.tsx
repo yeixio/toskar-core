@@ -49,4 +49,17 @@ describe('ProBanner', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Restore purchase' }))
     expect(await screen.findByText('No Unlock was found for the store account on this computer.')).toBeTruthy()
   })
+
+  it('offers the free trial first on the Mac, with its length and the price', async () => {
+    const startTrial = vi.fn(async () => 'started')
+    ;(window as Shell).go = {
+      main: { App: { ProUnlockPrice: async () => '$24.99', ProUnlock: async () => 'cancelled', ProStartTrial: startTrial } },
+    }
+    show({ kind: 'available', limited: true, store: 'mac' })
+    expect(await screen.findByText(/Start your free 14-day trial of Toskar Pro/)).toBeTruthy()
+    expect(await screen.findByText('Unlock: $24.99, one time.')).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: 'Start free trial' }))
+    await waitFor(() => expect(startTrial).toHaveBeenCalled())
+    expect(screen.getByRole('button', { name: 'Unlock for $24.99' })).toBeTruthy()
+  })
 })

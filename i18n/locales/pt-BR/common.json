@@ -153,6 +153,9 @@
     "pending": "Aguardando a aprovação da compra.",
     "noneFound": "Nenhum Unlock foi encontrado para a conta da loja neste computador.",
     "failed": "Não foi possível concluir: {{detail}}",
-    "unlocked": "O Toskar Pro está desbloqueado."
+    "unlocked": "O Toskar Pro está desbloqueado.",
+    "available": "Comece seu teste grátis de 14 dias do Toskar Pro. Tudo fica aberto por 14 dias; depois, o que já está configurado continua funcionando, e instalar modelos, criar automações e adicionar pessoas precisa do Unlock, pago uma vez.",
+    "startTrial": "Começar teste grátis",
+    "unlockPrice": "Unlock: {{price}}, pagamento único."
   }
 }

@@ -149,6 +149,9 @@
     "pending": "구매 승인을 기다리는 중이에요.",
     "noneFound": "이 컴퓨터의 스토어 계정에서 Unlock을 찾지 못했어요.",
     "failed": "완료하지 못했어요: {{detail}}",
-    "unlocked": "Toskar Pro 잠금이 해제됐어요."
+    "unlocked": "Toskar Pro 잠금이 해제됐어요.",
+    "available": "Toskar Pro 14일 무료 체험을 시작하세요. 14일 동안 모든 기능을 쓸 수 있어요. 그 후에도 설정한 것은 계속 작동하고, 모델 설치, 자동화 만들기, 사람 추가에는 한 번 구매하는 Unlock이 필요해요.",
+    "startTrial": "무료 체험 시작",
+    "unlockPrice": "Unlock: {{price}}, 한 번 구매"
   }
 }

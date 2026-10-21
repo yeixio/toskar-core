@@ -53,6 +53,17 @@ func TestUnlockedDropsTheTrialEnd(t *testing.T) {
 	}
 }
 
+func TestATrialNotStartedIsLimited(t *testing.T) {
+	k := Open(t.TempDir())
+	got, err := k.Set(State{Kind: Available, Store: "mac"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !got.Limited() {
+		t.Fatalf("a trial not started = %+v, want limited", got)
+	}
+}
+
 func TestRefusesWhatProMustNotSend(t *testing.T) {
 	k := Open(t.TempDir())
 	for _, s := range []State{{Kind: "lifetime"}, {Kind: Trial}} {
