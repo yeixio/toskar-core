@@ -324,6 +324,10 @@ func (s *Server) makeLink(r *http.Request, person auth.Person) (linkView, error)
 }
 
 func (s *Server) handleAddPerson(w http.ResponseWriter, r *http.Request) {
+	// New setup waits for the Unlock once Pro's trial has ended (#336).
+	if s.refuseLocked(w) {
+		return
+	}
 	if !s.signInReady(w) {
 		return
 	}

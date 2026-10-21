@@ -5,6 +5,7 @@ import { PageErrorBoundary } from '@/components/layout/PageErrorBoundary'
 import { Sidebar } from '@/components/layout/Sidebar'
 import { YggdrasilMark } from '@/components/ui/YggdrasilMark'
 import { useDialog } from '@/lib/useDialog'
+import { ProBanner } from '@/components/layout/ProBanner'
 
 // Each page's name in the window title: common:nav.<key>.
 const pageTitles: Record<string, string> = {
@@ -70,6 +71,7 @@ export function AppLayout() {
           <YggdrasilMark size={24} />
           <span className="truncate font-display text-base font-semibold text-ink">{titleKey ? t(titleKey) : 'Toskar'}</span>
         </div>
+        <ProBanner />
         <div className="page-scroll px-page-x py-5 sm:py-6">
           <PageErrorBoundary key={pathname}>
             <Outlet />

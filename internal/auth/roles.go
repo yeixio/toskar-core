@@ -16,6 +16,7 @@ var visitorRoutes = map[string]bool{
 	"GET /api/v1/remote-access/route": true,
 	"GET /api/v1/health":              true,
 	"GET /api/v1/version":             true,
+	"GET /api/v1/license":             true,
 	"GET /api/v1/me":                  true,
 	// Changing one's own password, such as one an Admin set (#592).
 	"POST /api/v1/me/password":                true,
@@ -121,6 +122,8 @@ var memberRoutes = map[string]bool{
 // ownerRoutes are the Owner's alone.
 var ownerRoutes = map[string]bool{
 	"POST /api/v1/settings/reset": true,
+	// Only the desktop app on this computer, with its secret (#336).
+	"PUT /api/v1/license": true,
 }
 
 // RoleNeeded is the least role that may make a request, by its method and

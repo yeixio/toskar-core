@@ -140,5 +140,19 @@
   },
   "help": {
     "media": "Ce qu’il faut pour les images et les clips ↗"
+  },
+  "pro": {
+    "trialLeft_one": "Essai de Toskar Pro : {{count}} jour restant.",
+    "trialLeft_other": "Essai de Toskar Pro : {{count}} jours restants.",
+    "trialLeft_many": "Essai de Toskar Pro : {{count}} jours restants.",
+    "ended": "Votre essai de Toskar Pro est terminé. Ce qui est configuré continue de fonctionner ; installer des modèles, créer des automatisations et ajouter des personnes demande l'Unlock.",
+    "unlock": "Débloquer Toskar Pro",
+    "unlockFor": "Débloquer pour {{price}}",
+    "restore": "Restaurer l'achat",
+    "unlockHere": "Débloquez-le dans Toskar Pro sur cet ordinateur.",
+    "pending": "En attente de l'approbation de l'achat.",
+    "noneFound": "Aucun Unlock n'a été trouvé pour le compte de la boutique sur cet ordinateur.",
+    "failed": "Impossible de terminer : {{detail}}",
+    "unlocked": "Toskar Pro est débloqué."
   }
 }

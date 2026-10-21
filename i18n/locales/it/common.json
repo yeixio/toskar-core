@@ -140,5 +140,19 @@
   },
   "help": {
     "media": "Cosa serve per immagini e clip ↗"
+  },
+  "pro": {
+    "trialLeft_one": "Prova di Toskar Pro: manca {{count}} giorno.",
+    "trialLeft_other": "Prova di Toskar Pro: mancano {{count}} giorni.",
+    "trialLeft_many": "Prova di Toskar Pro: mancano {{count}} giorni.",
+    "ended": "La prova di Toskar Pro è terminata. Ciò che è configurato continua a funzionare; installare modelli, creare automazioni e aggiungere persone richiede l'Unlock.",
+    "unlock": "Sblocca Toskar Pro",
+    "unlockFor": "Sblocca per {{price}}",
+    "restore": "Ripristina acquisto",
+    "unlockHere": "Sbloccalo in Toskar Pro su questo computer.",
+    "pending": "In attesa dell'approvazione dell'acquisto.",
+    "noneFound": "Nessun Unlock trovato per l'account dello store su questo computer.",
+    "failed": "Impossibile completare: {{detail}}",
+    "unlocked": "Toskar Pro è sbloccato."
   }
 }

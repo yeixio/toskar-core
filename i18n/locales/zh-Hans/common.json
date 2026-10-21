@@ -138,5 +138,17 @@
   },
   "help": {
     "media": "生成图片和视频需要什么 ↗"
+  },
+  "pro": {
+    "trialLeft_other": "Toskar Pro 试用：还剩 {{count}} 天。",
+    "ended": "你的 Toskar Pro 试用已结束。已设置的内容继续可用；安装模型、创建自动化和添加人员需要 Unlock。",
+    "unlock": "解锁 Toskar Pro",
+    "unlockFor": "以 {{price}} 解锁",
+    "restore": "恢复购买",
+    "unlockHere": "请在此电脑上的 Toskar Pro 中解锁。",
+    "pending": "正在等待购买获批。",
+    "noneFound": "未在此电脑的商店账户中找到 Unlock。",
+    "failed": "无法完成：{{detail}}",
+    "unlocked": "Toskar Pro 已解锁。"
   }
 }

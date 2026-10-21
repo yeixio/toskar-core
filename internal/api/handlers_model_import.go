@@ -27,6 +27,10 @@ type modelImportBody struct {
 // body (application/octet-stream), from the web app on another device or
 // a paired computer. The file is checked before it's added.
 func (s *Server) handleImportModel(w http.ResponseWriter, r *http.Request) {
+	// New setup waits for the Unlock once Pro's trial has ended (#336).
+	if s.refuseLocked(w) {
+		return
+	}
 	if s.deps.ImportModel == nil || s.deps.AdoptModelUpload == nil || s.deps.ModelUploadPath == nil {
 		writeErr(w, http.StatusNotImplemented, "NOT_IMPLEMENTED", "Adding a model from a file is not available.", nil)
 		return

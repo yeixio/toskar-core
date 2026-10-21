@@ -278,6 +278,8 @@ type Server struct {
 	personal        PersonalStore
 	privacy         Privacy
 	updates         Updates
+	license         License
+	shellSecret     string
 	ratings         Ratings
 	network         Network
 	external        ExternalServers
@@ -426,6 +428,7 @@ func (s *Server) routes() {
 	s.personalRoutes(api)
 	s.privacyRoutes(api)
 	s.updatesRoutes(api)
+	s.licenseRoutes(api)
 	s.ratingsRoutes(api)
 	s.networkRoutes(api)
 	s.externalRoutes(api)

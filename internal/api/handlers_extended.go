@@ -82,6 +82,10 @@ func (s *Server) handleListRunningModels(w http.ResponseWriter, r *http.Request)
 }
 
 func (s *Server) handleInstallFromURL(w http.ResponseWriter, r *http.Request) {
+	// New setup waits for the Unlock once Pro's trial has ended (#336).
+	if s.refuseLocked(w) {
+		return
+	}
 	if s.deps.InstallModelFromURL == nil {
 		writeErr(w, http.StatusNotImplemented, "NOT_IMPLEMENTED", "Install from URL not available.", nil)
 		return
@@ -122,6 +126,10 @@ func (s *Server) handlePreviewFromURL(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) handleInstallModel(w http.ResponseWriter, r *http.Request) {
+	// New setup waits for the Unlock once Pro's trial has ended (#336).
+	if s.refuseLocked(w) {
+		return
+	}
 	id := mux.Vars(r)["id"]
 	if s.deps.InstallModel == nil {
 		writeErr(w, http.StatusNotImplemented, "NOT_IMPLEMENTED", "Model install not available.", nil)

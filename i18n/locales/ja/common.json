@@ -138,5 +138,17 @@
   },
   "help": {
     "media": "画像と動画に必要なもの ↗"
+  },
+  "pro": {
+    "trialLeft_other": "Toskar Pro の試用期間：残り {{count}} 日。",
+    "ended": "Toskar Pro の試用期間が終了しました。設定済みのものは引き続き使えます。モデルのインストール、オートメーションの作成、人の追加には Unlock が必要です。",
+    "unlock": "Toskar Pro のロックを解除",
+    "unlockFor": "{{price}} でロック解除",
+    "restore": "購入を復元",
+    "unlockHere": "このコンピューターの Toskar Pro でロックを解除してください。",
+    "pending": "購入の承認を待っています。",
+    "noneFound": "このコンピューターのストアアカウントに Unlock が見つかりませんでした。",
+    "failed": "完了できませんでした：{{detail}}",
+    "unlocked": "Toskar Pro のロックが解除されています。"
   }
 }

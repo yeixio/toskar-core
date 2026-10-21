@@ -268,5 +268,7 @@
   "PUSH_DEVICE_ONLY": "Solo un teléfono o tablet emparejado puede activar las notificaciones.",
   "PUSH_INVALID": "{{detail}}",
   "PUSH_FAILED": "{{detail}}",
-  "EMPTY_ANSWER": "El modelo no escribió una respuesta. Inténtalo de nuevo o elige otro modelo."
+  "EMPTY_ANSWER": "El modelo no escribió una respuesta. Inténtalo de nuevo o elige otro modelo.",
+  "SHELL_ONLY": "Solo la app Toskar Pro en esta computadora puede cambiar esto.",
+  "UNLOCK_REQUIRED": "Tu prueba de Toskar Pro terminó. Desbloquea Toskar Pro para agregar modelos, automatizaciones o personas."
 }

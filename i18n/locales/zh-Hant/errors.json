@@ -268,5 +268,7 @@
   "PUSH_DEVICE_ONLY": "只有已配對的手機或平板可以開啟通知。",
   "PUSH_INVALID": "{{detail}}",
   "PUSH_FAILED": "{{detail}}",
-  "EMPTY_ANSWER": "模型沒有寫出回答。請重試，或選擇其他模型。"
+  "EMPTY_ANSWER": "模型沒有寫出回答。請重試，或選擇其他模型。",
+  "SHELL_ONLY": "只有此電腦上的 Toskar Pro 應用程式可以變更此項。",
+  "UNLOCK_REQUIRED": "你的 Toskar Pro 試用已結束。解鎖 Toskar Pro 才能新增模型、自動化或人員。"
 }
