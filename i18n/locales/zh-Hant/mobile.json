@@ -562,7 +562,8 @@
       "sentAdded": "已傳送。其他人也遇到了這個問題，你的回報已加入其中。",
       "failed": "無法從這裡傳送。請掃描條碼，透過電子郵件傳送。",
       "off": "管理員已關閉向 Toskar 傳送回報。"
-    }
+    },
+    "locked": "電視上的 Toskar 隨 Toskar Unlock 提供。請在手機或平板上的 Toskar 中解鎖。"
   },
   "setup": {
     "title": "在電腦上設定",
@@ -642,7 +643,8 @@
       "phone": "透過你的手機"
     },
     "reportOnPhone": "在手機上回報",
-    "reportSent": "在手機上開啟 Toskar 以傳送報告。"
+    "reportSent": "在手機上開啟 Toskar 以傳送報告。",
+    "locked": "從手錶提問隨 Toskar Unlock 提供。請在手機上的 Toskar 中解鎖。"
   },
   "watchLink": {
     "companionName": "{{device}} 的手錶",
@@ -686,6 +688,43 @@
     "throughComputer": "透過這台電腦的訂閱啟用",
     "throughComputerBody": "與這台電腦配對的每台裝置都在使用它。在購買的地方管理：訂閱的那台裝置，或電腦上 Toskar 的設定。",
     "boughtInSettings": "在電腦上 Toskar 的設定中購買。可在那裡的「API 存取」中更換信用卡或取消。"
+  },
+  "unlock": {
+    "title": "Toskar Unlock",
+    "body": "一次購買，永久擁有。透過你自己的電腦完成的一切依然免費。",
+    "includes": "Toskar Unlock 增加：",
+    "features": {
+      "models": "在此裝置上使用更多、更大的模型",
+      "importFile": "來自你自己檔案的模型",
+      "attachments": "此裝置聊天中的照片和檔案",
+      "web": "此裝置聊天中的網頁查詢",
+      "memory": "此裝置上的記憶",
+      "watch": "從手錶提問"
+    },
+    "reasons": {
+      "models": "此裝置的免費模型是 {{model}}。更多模型隨 Toskar Unlock 提供。",
+      "importFile": "從檔案新增模型需要 Toskar Unlock。",
+      "attachments": "此裝置聊天中的照片和檔案隨 Toskar Unlock 提供。你電腦上的聊天可免費使用。",
+      "web": "此裝置聊天中的網頁查詢隨 Toskar Unlock 提供。你電腦上的聊天可免費查詢。",
+      "memory": "此裝置上的記憶隨 Toskar Unlock 提供。你電腦的記憶免費。",
+      "watch": "從手錶提問隨 Toskar Unlock 提供。"
+    },
+    "buy": "以 {{price}} 解鎖",
+    "restore": "回復購買",
+    "notNow": "暫不",
+    "free": "免費",
+    "locked": "解鎖",
+    "freeModel": "在此裝置上免費",
+    "unlocked": "已解鎖",
+    "unlockedBody": "此裝置上的一切都已解鎖。",
+    "earlier": "你在 Toskar 免費之前就已購買，所以一切保持解鎖。",
+    "family": "已透過家人共享解鎖。",
+    "pending": "正在等待購買獲准。",
+    "noneFound": "未在此裝置的商店帳號中找到 Toskar Unlock。",
+    "unavailable": "商店暫時無法使用，請稍後再試。",
+    "failed": "無法完成：{{detail}}",
+    "computerFree": "連線到你自己的電腦永遠免費。",
+    "settingsFree": "免費版"
   },
   "deliberation": {
     "summary": {

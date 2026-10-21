@@ -20,6 +20,7 @@
     "mobile:discovery.version",
     "mobile:tools.git.commit",
     "mobile:tools.git.push",
+    "mobile:unlock.title",
     "models:card.gpu",
     "models:speed.tokPerSec",
     "notifications:notices.automationUnnamed",

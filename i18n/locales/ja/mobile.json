@@ -562,7 +562,8 @@
       "sentAdded": "送信しました。ほかの人にも同じ問題が起きていて、あなたの報告もそこに加わりました。",
       "failed": "ここからは送信できませんでした。コードをスキャンしてメールで送ってください。",
       "off": "管理者が Toskar への報告の送信をオフにしています。"
-    }
+    },
+    "locked": "テレビの Toskar は Toskar Unlock で使えます。スマートフォンかタブレットの Toskar でロック解除してください。"
   },
   "setup": {
     "title": "コンピュータで設定する",
@@ -642,7 +643,8 @@
       "phone": "電話経由"
     },
     "reportOnPhone": "スマートフォンで報告",
-    "reportSent": "スマートフォンで Toskar を開いてレポートを送ってください。"
+    "reportSent": "スマートフォンで Toskar を開いてレポートを送ってください。",
+    "locked": "ウォッチからの質問は Toskar Unlock で使えます。スマートフォンの Toskar でロック解除してください。"
   },
   "watchLink": {
     "companionName": "{{device}} のウォッチ",
@@ -686,6 +688,43 @@
     "throughComputer": "このコンピュータのサブスクリプションで有効",
     "throughComputerBody": "このコンピュータとペアリングしたすべてのデバイスで使えます。管理は購入した場所で行います。登録したデバイス、またはコンピュータの Toskar の設定です。",
     "boughtInSettings": "コンピュータの Toskar の設定で購入されました。カードの変更や解約は、そこの「APIアクセス」で行えます。"
+  },
+  "unlock": {
+    "title": "Toskar Unlock",
+    "body": "一度の購入で、ずっと使えます。自分のコンピューターを通して行うことはすべて無料のままです。",
+    "includes": "Toskar Unlock で使えるもの：",
+    "features": {
+      "models": "このデバイスで、より多くの大きなモデル",
+      "importFile": "自分のファイルからのモデル",
+      "attachments": "このデバイスのチャットで写真とファイル",
+      "web": "このデバイスのチャットでウェブ検索",
+      "memory": "このデバイスのメモリ",
+      "watch": "ウォッチから質問"
+    },
+    "reasons": {
+      "models": "このデバイスの無料モデルは {{model}} です。ほかのモデルは Toskar Unlock で使えます。",
+      "importFile": "ファイルからモデルを追加するには Toskar Unlock が必要です。",
+      "attachments": "このデバイスのチャットでの写真とファイルは Toskar Unlock で使えます。コンピューターのチャットでは無料で使えます。",
+      "web": "このデバイスのチャットでのウェブ検索は Toskar Unlock で使えます。コンピューターのチャットでは無料で検索できます。",
+      "memory": "このデバイスのメモリは Toskar Unlock で使えます。コンピューターのメモリは無料です。",
+      "watch": "ウォッチからの質問は Toskar Unlock で使えます。"
+    },
+    "buy": "{{price}} でロック解除",
+    "restore": "購入を復元",
+    "notNow": "今はしない",
+    "free": "無料",
+    "locked": "ロック解除",
+    "freeModel": "このデバイスで無料",
+    "unlocked": "ロック解除済み",
+    "unlockedBody": "このデバイスではすべてロック解除されています。",
+    "earlier": "無料になる前に Toskar を購入されたので、すべてロック解除されたままです。",
+    "family": "ファミリー共有でロック解除されています。",
+    "pending": "購入の承認を待っています。",
+    "noneFound": "このデバイスのストアアカウントに Toskar Unlock が見つかりませんでした。",
+    "unavailable": "現在ストアを利用できません。あとでもう一度お試しください。",
+    "failed": "完了できませんでした：{{detail}}",
+    "computerFree": "自分のコンピューターへの接続はいつでも無料です。",
+    "settingsFree": "無料版"
   },
   "deliberation": {
     "summary": {
