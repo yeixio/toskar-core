@@ -40,6 +40,7 @@ type manifestModel struct {
 	Steps          int     `json:"steps"`
 	CFG            float64 `json:"cfg"`
 	FlowShift      float64 `json:"flow_shift,omitempty"`
+	Sampler        string  `json:"sampler,omitempty"`
 	Frames         int     `json:"frames,omitempty"`
 	FPS            int     `json:"fps,omitempty"`
 	HighNoiseSteps int     `json:"high_noise_steps,omitempty"`
@@ -56,7 +57,7 @@ type manifestModel struct {
 func (m manifestModel) model() Model {
 	out := Model{ID: m.ID, Name: m.Name, Kind: m.Kind, Tier: m.Tier, Description: m.Description, License: m.License,
 		MemoryBytes: m.MemoryBytes, GraphicsBytes: m.GraphicsBytes, Edits: m.Edits, EditOnly: m.EditOnly, Untested: m.Untested,
-		Steps: m.Steps, CFG: m.CFG, FlowShift: m.FlowShift, Frames: m.Frames, FPS: m.FPS,
+		Steps: m.Steps, CFG: m.CFG, FlowShift: m.FlowShift, Sampler: m.Sampler, Frames: m.Frames, FPS: m.FPS,
 		HighNoiseSteps: m.HighNoiseSteps, HighNoiseCFG: m.HighNoiseCFG, ModelArgs: m.ModelArgs,
 		NeedsLicense: m.NeedsLicense, LicenseURL: m.LicenseURL, LicenseAllows: m.LicenseAllows,
 		Files: append([]File(nil), m.Files...), Stages: append([]Stage(nil), m.Stages...)}

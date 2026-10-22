@@ -85,6 +85,8 @@ type Model struct {
 	FlowShift float64 `json:"-"`
 	Frames    int     `json:"-"`
 	FPS       int     `json:"-"`
+	// Sampler is sd.cpp's sampling method for it; empty is euler.
+	Sampler string `json:"-"`
 	// HighNoiseSteps and HighNoiseCFG are a two-stage video model's first
 	// stage, which lays out the clip before the second adds detail.
 	HighNoiseSteps int     `json:"-"`
@@ -109,6 +111,15 @@ func Catalog() []Model { return toModels(manifest().Images) }
 // 2.2 TI2V 5B, the default, makes a short clip from a description or
 // brings an image to life.
 func VideoCatalog() []Model { return toModels(manifest().Video) }
+
+// sampler is the model's sampling method for sd.cpp: euler unless the
+// catalog names another, as Wan 2.2 TI2V 5B does (#758).
+func (m Model) sampler() string {
+	if m.Sampler != "" {
+		return m.Sampler
+	}
+	return "euler"
+}
 
 // Lookup returns an image model by id.
 func Lookup(id string) (Model, bool) { return lookupIn(Catalog(), id) }

@@ -46,7 +46,8 @@ func TestVideoTool(t *testing.T) {
 		t.Fatalf("clip %+v %v", a, err)
 	}
 	got := args(t, f)
-	if flag(got, "-M") != "vid_gen" || flag(got, "--video-frames") != "49" || flag(got, "--fps") != "16" || flag(got, "--flow-shift") != "3" ||
+	if flag(got, "-M") != "vid_gen" || flag(got, "--video-frames") != "49" || flag(got, "--fps") != "16" || flag(got, "--flow-shift") != "5" ||
+		flag(got, "--cfg-scale") != "5" || flag(got, "--sampling-method") != "dpm++2m" ||
 		filepath.Base(flag(got, "--t5xxl")) != "umt5-xxl-encoder-Q4_K_M.gguf" || filepath.Base(flag(got, "--vae")) != "wan2.2_vae.safetensors" ||
 		!strings.HasSuffix(flag(got, "-o"), "out.webm") || flag(got, "-i") != "" || flag(got, "-n") == "" ||
 		filepath.Base(flag(got, "--tae")) != "taew2_2.safetensors" || flag(got, "--batched-cfg") != "off" {

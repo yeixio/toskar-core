@@ -214,22 +214,19 @@ func judgeFailures(t *testing.T, d realDriver, j *Judge, r Result) []string {
 			return []string{fmt.Sprintf("the judge says %s doesn't show %s: %.200q", name, j.Shows, answer)}
 		}
 		if j.Kind == "video" && j.Moves {
-			moving, err := d.askAbout(t, judgeModel(), name, data,
-				"Do these frames of a video change from one to the next, with something moving, or are they all the same picture? Answer yes if something moves or changes, or no if they're the same, on the first line.")
-			if err != nil {
-				return []string{fmt.Sprintf("the judge couldn't look at %s: %v", name, err)}
-			}
-			if !saysYes(moving) {
-				return []string{fmt.Sprintf("the judge says nothing moves in %s: %.200q", name, moving)}
+			const question = "Do these frames of a video change from one to the next, with something moving, or are they all the same picture? Answer yes if something moves or changes, or no if they're the same, on the first line."
+			still := func(answer string) bool { return !saysYes(answer) }
+			if why, err := d.bothSay(t, name, data, question, still); err != nil {
+				return []string{err.Error()}
+			} else if why != "" {
+				return []string{fmt.Sprintf("the judges say nothing moves in %s: %s", name, why)}
 			}
 		}
 		if j.Clean {
-			broken, err := d.askAbout(t, judgeModel(), name, data, cleanQuestion(j.Kind))
-			if err != nil {
-				return []string{fmt.Sprintf("the judge couldn't look at %s: %v", name, err)}
-			}
-			if saysYes(broken) {
-				return []string{fmt.Sprintf("the judge says %s is corrupted: %.200q", name, broken)}
+			if why, err := d.bothSay(t, name, data, cleanQuestion(j.Kind), saysYes); err != nil {
+				return []string{err.Error()}
+			} else if why != "" {
+				return []string{fmt.Sprintf("the judges say %s is corrupted: %s", name, why)}
 			}
 		}
 	case "audio":
@@ -267,6 +264,37 @@ func judgeModel() string {
 		return m
 	}
 	return "gemma-3-4b-q4"
+}
+
+// confirmModel is a larger model that sees, asked before a picture or clip
+// fails as corrupted or still: gemma-3-4b took bright sky for "a block of
+// solid white" and gentle waves for "garbled frames" (#758).
+func confirmModel() string {
+	if m := config.Env("QUALITY_JUDGE_CONFIRM_MODEL"); m != "" {
+		return m
+	}
+	return "qwen2.5-vl-7b-q4"
+}
+
+// bothSay asks the judge, and when its answer is bad, the confirming model
+// too: the reasons when both find fault, or "" when either finds none.
+func (d realDriver) bothSay(t *testing.T, name string, data []byte, question string, bad func(string) bool) (string, error) {
+	first, err := d.askAbout(t, judgeModel(), name, data, question)
+	if err != nil {
+		return "", fmt.Errorf("the judge couldn't look at %s: %v", name, err)
+	}
+	if !bad(first) {
+		return "", nil
+	}
+	second, err := d.askAbout(t, confirmModel(), name, data, question)
+	if err != nil {
+		return "", fmt.Errorf("the second judge couldn't look at %s: %v", name, err)
+	}
+	if !bad(second) {
+		t.Logf("%s: %s found fault (%.200q), %s didn't (%.200q); passed", name, judgeModel(), first, confirmModel(), second)
+		return "", nil
+	}
+	return fmt.Sprintf("%s: %.200q; %s: %.200q", judgeModel(), first, confirmModel(), second), nil
 }
 
 // askAbout sends a file to a fresh chat with model and returns the answer.
@@ -393,6 +421,7 @@ func (d realDriver) installMedia(t *testing.T) {
 		}
 	}
 	d.installModel(t, judgeModel())
+	d.installModel(t, confirmModel())
 	// Speech installs on first use; one sentence now keeps that out of the cases.
 	_ = d.recording(t, "Getting ready.")
 }
