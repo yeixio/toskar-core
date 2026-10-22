@@ -115,7 +115,10 @@ clip's frames change, so a frozen clip fails, and `clean` whether any part
 of a picture, or any frame, is garbled or corrupted (blocks of wrong color,
 noise, stripes, smears), washed out until most of it is near white, or a frame flashes or jumps apart from its
 neighbors, so a broken decode fails even when it shows the right thing
-(#553). `os` runs a case only on that system: `make_video_mac_decode` is
+(#553). Before a picture or clip fails as corrupted or still, a larger model
+that sees (`TOSKAR_QUALITY_JUDGE_CONFIRM_MODEL`, Qwen 2.5 VL 7B by default)
+is asked the same question; it fails only when both find fault, with both
+answers (#758). `os` runs a case only on that system: `make_video_mac_decode` is
 the regression case for Apple's video decode path, run with the media set
 on a Mac. `make: png` draws an
 attachment from a description, such as `size=512 bg=white shape=square
