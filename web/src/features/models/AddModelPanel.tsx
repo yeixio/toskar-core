@@ -15,6 +15,11 @@ type Way = 'file' | 'apps' | 'link'
 // Each app's name, as people know it.
 const APP_NAMES: Record<string, string> = { lmstudio: 'LM Studio', ollama: 'Ollama', llamacpp: 'llama.cpp', gpt4all: 'GPT4All' }
 
+/** Where a found model is: an app's name, or Toskar's own models folder (#763). */
+function foundIn(t: (key: string) => string, app: string): string {
+  return app === 'toskar' ? t('add.apps.toskarFolder') : (APP_NAMES[app] ?? app)
+}
+
 /**
  * Adds a model that isn't in the catalog (#467): a GGUF file, sent from
  * this browser or found by its location on this computer, one another
@@ -393,7 +398,7 @@ function FromApps({ onAdded }: { onAdded: (r: ModelImportResult | null, name?: s
               <div className="min-w-0">
                 <p className="font-medium text-ink">{m.name}</p>
                 <p className="mt-0.5 truncate text-xs text-ink-muted" title={m.path}>
-                  {[APP_NAMES[m.app] ?? m.app, m.parameters, m.quantization, formatBytes(m.size_bytes)].filter(Boolean).join(' · ')}
+                  {[foundIn(t, m.app), m.parameters, m.quantization, formatBytes(m.size_bytes)].filter(Boolean).join(' · ')}
                 </p>
               </div>
               {m.model_id ? (
@@ -487,7 +492,7 @@ function FromLink({ onAdded }: { onAdded: (r: ModelImportResult | null, name?: s
           {copy ? (
             <div className="space-y-2 rounded-lg bg-primary-soft/40 p-3">
               <p className="text-sm text-ink">
-                {t('add.link.haveIt', { app: APP_NAMES[copy.app] ?? copy.app, size: size(copy.size_bytes) })}
+                {t('add.link.haveIt', { app: foundIn(t, copy.app), size: size(copy.size_bytes) })}
               </p>
               <p className="truncate text-xs text-ink-muted" title={copy.path}>
                 {copy.path}

@@ -56,6 +56,15 @@ describe('AddModelPanel (#467)', () => {
     expect(api.importModelPath).toHaveBeenCalledWith({ path: '/o/blobs/sha256-1', in_place: true, display_name: 'qwen3-coder:30b' })
   })
 
+  it("names a file put in Toskar's models folder by where it is (#763)", async () => {
+    vi.mocked(api.findModelsInOtherApps).mockResolvedValue({
+      models: [{ app: 'toskar', path: '/models/mine.gguf', name: 'Gemma 3 1B', size_bytes: 8e8, quantization: 'Q4_K_M' }],
+    })
+    renderIt()
+    expect(await screen.findByText('Gemma 3 1B')).toBeInTheDocument()
+    expect(screen.getByText(/Toskar's models folder · Q4_K_M/)).toBeInTheDocument()
+  })
+
   it('checks a model it added: loads it, asks one question, and shows the speed', async () => {
     vi.mocked(api.findModelsInOtherApps).mockResolvedValue({ models: [] })
     vi.mocked(api.startBenchmark).mockResolvedValue({ id: 'b1' } as never)

@@ -16,7 +16,8 @@ import (
 // FoundModel is a GGUF model another local AI app already downloaded on
 // this computer, which can be added without downloading it again (#467).
 type FoundModel struct {
-	// App is lmstudio, ollama, llamacpp, or gpt4all.
+	// App is lmstudio, ollama, llamacpp, or gpt4all; toskar is a file put
+	// in Toskar's own models folder by hand (#763).
 	App string `json:"app"`
 	// Path is the file; an Ollama model is its blob, named by digest.
 	Path string `json:"path"`
@@ -81,8 +82,10 @@ func otherAppDirs(home, goos string, env func(string) string) []appDir {
 }
 
 // FindOtherApps lists the GGUF models other local AI apps keep on this
-// computer. It only reads: headers, and Ollama's manifests. A file that
-// isn't a whole model, or is a vision projector, is left out.
+// computer, and files put in Toskar's own models folder by hand that
+// aren't models yet (#763). It only reads: headers, and Ollama's
+// manifests. A file that isn't a whole model, or is a vision projector, is
+// left out.
 func (m *Manager) FindOtherApps(ctx context.Context) []FoundModel {
 	home := m.Home
 	if home == "" {
@@ -128,7 +131,11 @@ func (m *Manager) FindOtherApps(ctx context.Context) []FoundModel {
 			ModelID: byPath[key], Projector: projector,
 		})
 	}
-	for _, dir := range otherAppDirs(home, runtime.GOOS, os.Getenv) {
+	dirs := otherAppDirs(home, runtime.GOOS, os.Getenv)
+	if folder := m.storage.ModelsDir(); folder != "" {
+		dirs = append([]appDir{{app: "toskar", dir: folder}}, dirs...)
+	}
+	for _, dir := range dirs {
 		if dir.ollama {
 			for _, o := range ollamaModels(dir.dir) {
 				add(dir.app, o.path, o.name, o.projector)
@@ -146,6 +153,10 @@ func (m *Manager) FindOtherApps(ctx context.Context) []FoundModel {
 				return fs.SkipDir
 			}
 			if !e.IsDir() && strings.EqualFold(filepath.Ext(path), ".gguf") && !strings.Contains(strings.ToLower(e.Name()), "mmproj") {
+				// Toskar's own models are already listed on the Models page.
+				if dir.app == "toskar" && byPath[canonical(path)] != "" {
+					return nil
+				}
 				add(dir.app, path, "", projectorNear(path))
 			}
 			return nil

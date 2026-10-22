@@ -3035,6 +3035,8 @@ paths:
         GGUF models LM Studio, Ollama (through its manifests), llama.cpp, and GPT4All already
         downloaded, to add with POST /api/v1/models/import without downloading them again. Only
         headers and Ollama's manifests are read; incomplete files and vision projectors are left out (#467).
+        GGUF files put in Toskar's own models folder by hand that aren't models yet come first, as app
+        toskar; one is always added in place (#763).
       operationId: findModelsInOtherApps
       responses:
         "200":
@@ -3051,7 +3053,7 @@ paths:
                       properties:
                         app:
                           type: string
-                          enum: [lmstudio, ollama, llamacpp, gpt4all]
+                          enum: [toskar, lmstudio, ollama, llamacpp, gpt4all]
                         path:
                           type: string
                         name:

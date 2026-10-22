@@ -16,7 +16,7 @@ func TestFindOtherApps(t *testing.T) {
 	m, _, dir := importManager(t)
 	home := filepath.Join(dir, "home")
 	m.Home = home
-	t.Setenv("OLLAMA_MODELS", "")
+	isolateAppDirs(t, home)
 	ctx := context.Background()
 
 	lm := filepath.Join(home, ".lmstudio", "models", "lmstudio-community", "Qwen3-8B-GGUF")
@@ -76,4 +76,50 @@ func TestFindOtherApps(t *testing.T) {
 	if ollamaName("/m", "/m/registry.ollama.ai/me/custom/latest") != "me/custom:latest" {
 		t.Error("namespaced Ollama names")
 	}
+}
+
+// A GGUF put in Toskar's own models folder by hand is found, and added
+// where it is rather than copied beside itself; Toskar's own models aren't
+// listed (#763).
+func TestFindModelsFolder(t *testing.T) {
+	m, storage, dir := importManager(t)
+	m.Home = filepath.Join(dir, "home")
+	isolateAppDirs(t, m.Home)
+	ctx := context.Background()
+
+	folder := storage.ModelsDir()
+	loose := gguftest.Write(t, filepath.Join(folder, "mine"), "Gemma-3-1B-Q4_K_M.gguf", gguftest.Options{Name: "Gemma 3 1B", FileType: 15})
+	gguftest.Write(t, folder, "Gemma-3-1B.mmproj.gguf", gguftest.Options{Architecture: "clip", Type: "mmproj"})
+	gguftest.Write(t, filepath.Join(folder, ".partial"), "upload-1.gguf", gguftest.Options{})
+
+	found := m.FindOtherApps(ctx)
+	if len(found) != 1 || found[0].App != "toskar" || found[0].Path != loose || found[0].Name != "Gemma 3 1B" {
+		t.Fatalf("found = %+v", found)
+	}
+
+	// Asked for a copy, it's still used where it is.
+	imported, err := m.ImportFile(ctx, ImportRequest{Path: loose})
+	if err != nil || imported.Copying {
+		t.Fatalf("import = %+v, %v", imported, err)
+	}
+	if ok, at, _ := storage.IsInstalled(ctx, imported.ID); !ok || at != loose {
+		t.Fatalf("installed %v at %s, want %s", ok, at, loose)
+	}
+	if entries, _ := os.ReadDir(folder); len(entries) != 3 {
+		t.Errorf("models folder has %d entries, want the same 3 (no copy)", len(entries))
+	}
+	// Now a model, it's on the Models page, not offered again.
+	if found := m.FindOtherApps(ctx); len(found) != 0 {
+		t.Errorf("after adding, found = %+v", found)
+	}
+}
+
+// isolateAppDirs keeps the finder in home: the XDG and Windows folders it
+// reads would otherwise be the machine's own, such as a runner's cache.
+func isolateAppDirs(t *testing.T, home string) {
+	t.Helper()
+	t.Setenv("OLLAMA_MODELS", "")
+	t.Setenv("XDG_CACHE_HOME", filepath.Join(home, ".cache"))
+	t.Setenv("XDG_DATA_HOME", filepath.Join(home, ".local", "share"))
+	t.Setenv("LOCALAPPDATA", filepath.Join(home, "AppData", "Local"))
 }

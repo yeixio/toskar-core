@@ -68,6 +68,16 @@ export function ModelsPage() {
   const [installingId, setInstallingId] = useState<string | null>(null)
   const [tightConfirm, setTightConfirm] = useState<{ id: string; name: string } | null>(null)
 
+  // A model file put in Toskar's models folder by hand isn't a model until
+  // it's added (#763); the page says so, and Add model opens on it.
+  const foundQuery = useQuery({
+    queryKey: ['models-found'],
+    queryFn: () => api.findModelsInOtherApps(),
+    enabled: canAdd,
+    retry: false,
+    staleTime: 60_000,
+  })
+  const looseFiles = (foundQuery.data?.models ?? []).filter((m) => m.app === 'toskar' && !m.model_id).length
   const modelsQuery = useQuery({
     queryKey: ['models'],
     queryFn: () => api.getModels(),
@@ -302,6 +312,15 @@ export function ModelsPage() {
           </span>
           <button type="button" className="text-xs text-ink-faint hover:text-ink" onClick={() => setJustInstalled(null)}>
             {t('page.dismiss')}
+          </button>
+        </div>
+      ) : null}
+
+      {looseFiles > 0 && !addOpen ? (
+        <div role="status" className="flex flex-wrap items-center gap-3 rounded-xl border border-line px-4 py-2 text-sm text-ink animate-fade">
+          <span className="min-w-0 flex-1">{t('page.looseFiles', { count: looseFiles })}</span>
+          <button type="button" className="btn-secondary btn-sm" onClick={() => setAddOpen(true)}>
+            {t('page.looseFilesAdd')}
           </button>
         </div>
       ) : null}

@@ -112,6 +112,11 @@ func (m *Manager) importChecked(ctx context.Context, req ImportRequest, path str
 	} else {
 		entry.ID = m.freeID(ctx, entry.ID, path)
 	}
+	// A file put in the models folder by hand is used where it is: a copy
+	// would sit beside it in the same folder (#763).
+	if !uploaded && m.storage.owns(path) {
+		req.InPlace = true
+	}
 	out := Imported{ID: entry.ID, Details: details}
 	if !uploaded {
 		out.Projector = projectorNear(path)

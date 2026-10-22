@@ -8,7 +8,9 @@
     "emptyDescription": "로컬 카탈로그가 비어 있어요. 모든 모델 둘러보기에서 Hugging Face의 모델을 설치해 보세요.",
     "ready": "{{model}} 다운로드가 끝났으며 사용할 준비가 되었어요.",
     "readyFallback": "모델",
-    "dismiss": "닫기"
+    "dismiss": "닫기",
+    "looseFiles_other": "Toskar 모델 폴더에 아직 추가되지 않은 모델 파일이 {{count}}개 있습니다.",
+    "looseFilesAdd": "추가"
   },
   "tabs": {
     "discover": "찾아보기",
@@ -332,9 +334,10 @@
     },
     "apps": {
       "looking": "모델을 찾는 중…",
-      "description": "LM Studio, Ollama, llama.cpp, GPT4All이 이미 다운로드한 모델입니다. 있는 위치에서 사용하므로 공간을 더 쓰지 않습니다.",
-      "none": "이 컴퓨터에 LM Studio, Ollama, llama.cpp, GPT4All 모델이 없습니다.",
-      "already": "추가됨"
+      "description": "LM Studio, Ollama, llama.cpp, GPT4All이 이미 다운로드한 모델과 Toskar 모델 폴더에 넣은 모델 파일입니다. 있는 위치에서 사용하므로 공간을 더 쓰지 않습니다.",
+      "none": "이 컴퓨터에 LM Studio, Ollama, llama.cpp, GPT4All 또는 Toskar 모델 폴더의 모델이 없습니다.",
+      "already": "추가됨",
+      "toskarFolder": "Toskar 모델 폴더"
     },
     "link": {
       "description": ".gguf 파일로 바로 가는 링크입니다. Hugging Face 링크는 파일 체크섬으로 확인하며, 비전 모델의 이미지 지원도 함께 추가됩니다.",

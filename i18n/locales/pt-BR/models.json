@@ -8,7 +8,11 @@
     "emptyDescription": "O catálogo local está vazio. Experimente Explorar todos os modelos para instalar do Hugging Face.",
     "ready": "O download de {{model}} terminou e ele está pronto para uso.",
     "readyFallback": "O modelo",
-    "dismiss": "Dispensar"
+    "dismiss": "Dispensar",
+    "looseFiles_one": "{{count}} arquivo de modelo na pasta de modelos do Toskar ainda não foi adicionado.",
+    "looseFiles_many": "{{count}} arquivos de modelo na pasta de modelos do Toskar ainda não foram adicionados.",
+    "looseFiles_other": "{{count}} arquivos de modelo na pasta de modelos do Toskar ainda não foram adicionados.",
+    "looseFilesAdd": "Adicionar"
   },
   "tabs": {
     "discover": "Descobrir",
@@ -346,9 +350,10 @@
     },
     "apps": {
       "looking": "Procurando modelos…",
-      "description": "Modelos que o LM Studio, o Ollama, o llama.cpp e o GPT4All já baixaram. Eles são usados onde estão, sem ocupar mais espaço.",
-      "none": "Nenhum modelo do LM Studio, Ollama, llama.cpp ou GPT4All neste computador.",
-      "already": "Adicionado"
+      "description": "Modelos que o LM Studio, o Ollama, o llama.cpp e o GPT4All já baixaram, e arquivos de modelo colocados na pasta de modelos do Toskar. Eles são usados onde estão, sem ocupar mais espaço.",
+      "none": "Nenhum modelo do LM Studio, Ollama, llama.cpp, GPT4All ou da pasta de modelos do Toskar neste computador.",
+      "already": "Adicionado",
+      "toskarFolder": "Pasta de modelos do Toskar"
     },
     "link": {
       "description": "Um link direto para um arquivo .gguf. Um link do Hugging Face é conferido com o checksum do arquivo, e o suporte a imagens de um modelo de visão vem junto.",
