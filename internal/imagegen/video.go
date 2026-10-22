@@ -161,7 +161,7 @@ func (e *Engine) GenerateVideo(ctx context.Context, req VideoRequest) (VideoResu
 		"-p", prompt, "-n", videoNegative, "-W", strconv.Itoa(w), "-H", strconv.Itoa(h),
 		"--video-frames", strconv.Itoa(n), "--fps", strconv.Itoa(model.FPS),
 		"--steps", strconv.Itoa(model.Steps), "--cfg-scale", f(model.CFG), "--flow-shift", f(model.FlowShift),
-		"--sampling-method", "euler", "-s", strconv.FormatInt(seed, 10), "-o", out,
+		"--sampling-method", model.sampler(), "-s", strconv.FormatInt(seed, 10), "-o", out,
 		"--offload-to-cpu", "--diffusion-fa",
 		// Guided and unguided passes run one after the other, as before
 		// master-956, so a clip needs no more memory than it did (#548).
