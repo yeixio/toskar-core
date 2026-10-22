@@ -220,7 +220,8 @@
       "notification": "通知",
       "community_ratings": "コミュニティ評価",
       "update_check": "アップデートの確認",
-      "problem_report": "問題の報告"
+      "problem_report": "問題の報告",
+      "news": "AI ニュース"
     },
     "kindsLower": {
       "web_search": "Web検索",
@@ -232,7 +233,8 @@
       "notification": "通知",
       "community_ratings": "コミュニティ評価",
       "update_check": "アップデートの確認",
-      "problem_report": "問題の報告"
+      "problem_report": "問題の報告",
+      "news": "AI ニュース"
     },
     "sources": {
       "chat": "チャット",
@@ -324,5 +326,11 @@
     "description": "エラーの横にある「報告する」は、送信する内容をすべて見せたうえで、何が起きたかを Toskar チームに送ります。",
     "send": "Toskar への報告の送信を許可する",
     "sendHint": "オフの場合、「報告する」は報告をコピーするだけです。ここで Toskar を管理している人に渡してください。"
+  },
+  "news": {
+    "title": "AI ニュース",
+    "description": "ニュースのページでは、新しいオープンモデル、ランタイムのリリース、AI 研究機関の発表を toskar.ai から表示します。",
+    "show": "AI ニュースを表示",
+    "showHint": "ニュースを開いたときに toskar.ai から読み込みます（最大 6 時間ごと）。送信されるのはリクエストだけです。"
   }
 }

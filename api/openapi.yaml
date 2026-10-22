@@ -2356,7 +2356,7 @@ paths:
                   properties:
                     id: {type: string}
                     at: {type: string, format: date-time}
-                    kind: {type: string, enum: [web_search, web_page, places, paired_computer, external_server, connector, notification, community_ratings, update_check, problem_report]}
+                    kind: {type: string, enum: [web_search, web_page, places, paired_computer, external_server, connector, notification, community_ratings, update_check, news, problem_report]}
                     destination: {type: string}
                     detail: {type: string}
                     source: {type: string}
@@ -2424,6 +2424,41 @@ paths:
                       prerelease: {type: boolean}
                       notes_url: {type: string}
                       download_url: {type: string}
+  /api/v1/news:
+    get:
+      summary: The AI news from toskar.ai
+      operationId: getNews
+      description: New open models, runtime releases, and AI labs' announcements, a few lines each, from https://toskar.ai/news.json (#750). Read when asked, at most every six hours, and kept in the data folder so it shows offline; each read is listed in What left this computer as `news`. With the `ai_news` setting off, nothing is read and `enabled` is false. Members and Admins.
+      responses:
+        "200":
+          description: The news
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  enabled: {type: boolean, description: The ai_news setting is on.}
+                  updated: {type: string, description: When toskar.ai last wrote the news.}
+                  fetched_at: {type: string, format: date-time, description: When this computer last read it.}
+                  stale: {type: boolean, description: toskar.ai couldn't be reached just now; this is the copy kept from before.}
+                  items:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id: {type: string}
+                        date: {type: string, description: YYYY-MM-DD}
+                        kind: {type: string, enum: [model, runtime, announcement]}
+                        title: {type: string}
+                        summary: {type: string, description: One or two sentences written by a local model.}
+                        source:
+                          type: object
+                          properties:
+                            name: {type: string}
+                            url: {type: string}
+                        model_id: {type: string, description: The catalog model it's about, for Install.}
+        "502":
+          description: NEWS_UNAVAILABLE, toskar.ai couldn't be reached and no copy is kept
   /api/v1/privacy:
     get:
       summary: Run record retention and a 30-day summary of what left this computer

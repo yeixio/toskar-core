@@ -1,0 +1,27 @@
+{
+  "page": {
+    "title": "KI-Neuigkeiten",
+    "description": "Neue offene Modelle, Runtime-Versionen und Ankündigungen von KI-Laboren, jeweils in wenigen Zeilen. Jeden Morgen auf toskar.ai aktualisiert.",
+    "byAI": "Die Zusammenfassungen schreibt eine KI, und sie werden automatisch geprüft.",
+    "updated": "Aktualisiert {{when}}.",
+    "loading": "Neuigkeiten werden geladen …",
+    "empty": "Noch keine Neuigkeiten. Sie werden jeden Morgen aktualisiert.",
+    "stale": "toskar.ai war nicht erreichbar, daher sind das die Neuigkeiten vom {{when}}."
+  },
+  "off": {
+    "title": "KI-Neuigkeiten sind aus",
+    "admin": "Schalte sie ein, um die Neuigkeiten von toskar.ai zu lesen, wenn diese Seite geöffnet wird. Gesendet wird nur die Anfrage.",
+    "member": "Ein Admin hat die KI-Neuigkeiten auf diesem Computer ausgeschaltet.",
+    "turnOn": "KI-Neuigkeiten einschalten"
+  },
+  "kinds": {
+    "model": "Modell",
+    "runtime": "Runtime",
+    "announcement": "Ankündigung"
+  },
+  "model": {
+    "installed": "Installiert",
+    "installing": "Wird installiert … siehe Modelle",
+    "inCatalog": "In Toskars Katalog"
+  }
+}

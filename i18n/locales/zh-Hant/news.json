@@ -1,0 +1,27 @@
+{
+  "page": {
+    "title": "AI 新聞",
+    "description": "新的開放模型、執行環境版本和 AI 實驗室的公告，每則幾行。每天早上在 toskar.ai 更新。",
+    "byAI": "摘要由 AI 撰寫，並經過自動檢查。",
+    "updated": "更新於 {{when}}。",
+    "loading": "正在載入新聞…",
+    "empty": "還沒有新聞。每天早上更新。",
+    "stale": "無法連線到 toskar.ai，以下是 {{when}} 的新聞。"
+  },
+  "off": {
+    "title": "AI 新聞已關閉",
+    "admin": "開啟後，打開此頁面時會從 toskar.ai 讀取新聞。除了請求本身，不會傳送任何內容。",
+    "member": "管理員已在這台電腦上關閉 AI 新聞。",
+    "turnOn": "開啟 AI 新聞"
+  },
+  "kinds": {
+    "model": "模型",
+    "runtime": "執行環境",
+    "announcement": "公告"
+  },
+  "model": {
+    "installed": "已安裝",
+    "installing": "正在安裝… 查看「模型」",
+    "inCatalog": "在 Toskar 目錄中"
+  }
+}

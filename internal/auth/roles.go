@@ -79,6 +79,10 @@ var visitorRoutes = map[string]bool{
 
 // memberRoutes are, besides the visitors', what Members may reach.
 var memberRoutes = map[string]bool{
+	// The AI news from toskar.ai (#750); installing a model it names is an
+	// Admin's.
+	"GET /api/v1/news": true,
+
 	// Anyone signed in may report a problem; only an Admin's report has
 	// Core's log (#588).
 	"GET /api/v1/diagnostics/report":  true,

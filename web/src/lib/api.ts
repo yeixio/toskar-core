@@ -116,6 +116,7 @@ import type {
   StopChatResponse,
   LiveFigures,
   GPUSetup,
+  NewsView,
   UpdatesStatus,
   ProLicense,
   APITLS,
@@ -806,6 +807,7 @@ export const api = {
 
   getVersion: () => request<VersionResponse>('/api/v1/version'),
   getUpdates: () => request<UpdatesStatus>('/api/v1/updates'),
+  getNews: () => request<NewsView>('/api/v1/news'),
   getLicense: () => request<ProLicense>('/api/v1/license'),
 
   getHardware: () => request<HardwareInventory>('/api/v1/hardware'),

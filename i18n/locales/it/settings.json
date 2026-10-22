@@ -234,7 +234,8 @@
       "notification": "Notifica",
       "community_ratings": "Valutazioni della community",
       "update_check": "Controllo aggiornamenti",
-      "problem_report": "Segnalazione"
+      "problem_report": "Segnalazione",
+      "news": "Notizie sull’IA"
     },
     "kindsLower": {
       "web_search": "ricerca web",
@@ -246,7 +247,8 @@
       "notification": "notifica",
       "community_ratings": "valutazioni della community",
       "update_check": "controllo aggiornamenti",
-      "problem_report": "segnalazione"
+      "problem_report": "segnalazione",
+      "news": "notizie sull’IA"
     },
     "sources": {
       "chat": "Chat",
@@ -342,5 +344,11 @@
     "description": "Segnala, accanto a un errore, invia cosa è andato storto al team di Toskar, dopo aver mostrato alla persona tutto ciò che invia.",
     "send": "Consenti di inviare segnalazioni a Toskar",
     "sendHint": "Disattivato, Segnala copia solo la segnalazione, da consegnare a chi gestisce Toskar qui."
+  },
+  "news": {
+    "title": "Notizie sull’IA",
+    "description": "La pagina Notizie mostra nuovi modelli aperti, versioni dei runtime e annunci dei laboratori di IA da toskar.ai.",
+    "show": "Mostra le notizie sull’IA",
+    "showHint": "Lette da toskar.ai quando apri Notizie, al massimo ogni sei ore. Viene inviata solo la richiesta."
   }
 }

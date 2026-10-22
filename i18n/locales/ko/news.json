@@ -1,0 +1,27 @@
+{
+  "page": {
+    "title": "AI 뉴스",
+    "description": "새 오픈 모델, 런타임 릴리스, AI 연구소의 발표를 각각 몇 줄로 소개합니다. toskar.ai에서 매일 아침 업데이트됩니다.",
+    "byAI": "요약은 AI가 작성하고 자동으로 확인합니다.",
+    "updated": "{{when}}에 업데이트됨.",
+    "loading": "뉴스를 불러오는 중…",
+    "empty": "아직 뉴스가 없습니다. 매일 아침 업데이트됩니다.",
+    "stale": "toskar.ai에 연결할 수 없어 {{when}} 기준 뉴스를 보여 줍니다."
+  },
+  "off": {
+    "title": "AI 뉴스가 꺼져 있습니다",
+    "admin": "켜면 이 페이지를 열 때 toskar.ai에서 뉴스를 읽어 옵니다. 요청 외에는 아무것도 보내지 않습니다.",
+    "member": "관리자가 이 컴퓨터의 AI 뉴스를 껐습니다.",
+    "turnOn": "AI 뉴스 켜기"
+  },
+  "kinds": {
+    "model": "모델",
+    "runtime": "런타임",
+    "announcement": "발표"
+  },
+  "model": {
+    "installed": "설치됨",
+    "installing": "설치 중… 모델에서 확인",
+    "inCatalog": "Toskar 카탈로그에 있음"
+  }
+}

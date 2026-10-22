@@ -271,5 +271,6 @@
   "EMPTY_ANSWER": "模型没有写出回答。请重试，或选择其他模型。",
   "SHELL_ONLY": "只有此电脑上的 Toskar Pro 应用可以更改此项。",
   "UNLOCK_REQUIRED": "你的 Toskar Pro 试用已结束。解锁 Toskar Pro 才能添加模型、自动化或人员。",
-  "TRIAL_NOT_STARTED": "开始 Toskar Pro 的 14 天免费试用，才能添加模型、自动化或人员。"
+  "TRIAL_NOT_STARTED": "开始 Toskar Pro 的 14 天免费试用，才能添加模型、自动化或人员。",
+  "NEWS_UNAVAILABLE": "无法从 toskar.ai 读取 AI 新闻。请检查网络连接后重试。"
 }

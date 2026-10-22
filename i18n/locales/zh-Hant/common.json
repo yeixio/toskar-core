@@ -21,7 +21,8 @@
     "profiles": "設定檔與協作編排",
     "tools": "工具",
     "apiAccess": "API 存取",
-    "settings": "設定"
+    "settings": "設定",
+    "news": "新聞"
   },
   "status": {
     "starting": "正在啟動…",

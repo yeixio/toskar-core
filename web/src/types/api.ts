@@ -851,6 +851,8 @@ export interface SettingsView {
   ratings_prompts?: boolean
   /** Look at toskar.ai once a day for a newer version. */
   update_check?: boolean
+  /** Reads the AI news from toskar.ai when News is opened (#750). */
+  ai_news?: boolean
   /** Report this may send reports to Toskar (#588); off, it only copies or emails them. */
   problem_reports?: boolean
   tool_terminal?: string
@@ -1174,6 +1176,8 @@ export interface SettingsPatch {
   huggingface_token?: string
   community_ratings?: boolean
   update_check?: boolean
+  /** Reads the AI news from toskar.ai when News is opened (#750). */
+  ai_news?: boolean
   problem_reports?: boolean
   ratings_prompts?: boolean
   assistant_language_mode?: AssistantLanguageMode
@@ -2046,7 +2050,7 @@ export interface PersonalStyle {
   instructions?: string
 }
 
-export type EgressKind = 'web_search' | 'web_page' | 'places' | 'paired_computer' | 'external_server' | 'connector' | 'notification' | 'community_ratings' | 'update_check' | 'problem_report'
+export type EgressKind = 'web_search' | 'web_page' | 'places' | 'paired_computer' | 'external_server' | 'connector' | 'notification' | 'community_ratings' | 'update_check' | 'news' | 'problem_report'
 
 /** The OpenAI-compatible server whose models can be chosen for a chat (#111). */
 export interface ExternalServerInfo {
@@ -2627,4 +2631,29 @@ export interface FirstAnswersGroup {
   first_word_ms: number
   first_word_p90_ms: number
   load_ms?: number
+}
+
+/** One piece of AI news from toskar.ai (#750). */
+export interface NewsItem {
+  id: string
+  /** YYYY-MM-DD */
+  date: string
+  kind: 'model' | 'runtime' | 'announcement'
+  title: string
+  /** One or two sentences, written by a local model. */
+  summary: string
+  source: { name: string; url: string }
+  /** The catalog model it's about, for Install. */
+  model_id?: string
+}
+
+/** GET /api/v1/news */
+export interface NewsView {
+  /** The ai_news setting is on. */
+  enabled: boolean
+  items: NewsItem[]
+  updated?: string
+  fetched_at?: string
+  /** toskar.ai couldn't be reached; this is the copy kept from before. */
+  stale?: boolean
 }

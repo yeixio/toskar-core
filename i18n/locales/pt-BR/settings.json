@@ -234,7 +234,8 @@
       "notification": "Notificação",
       "community_ratings": "Avaliações da comunidade",
       "update_check": "Verificação de atualizações",
-      "problem_report": "Relatório de problema"
+      "problem_report": "Relatório de problema",
+      "news": "Notícias de IA"
     },
     "kindsLower": {
       "web_search": "pesquisa na web",
@@ -246,7 +247,8 @@
       "notification": "notificação",
       "community_ratings": "avaliações da comunidade",
       "update_check": "verificação de atualizações",
-      "problem_report": "relatório de problema"
+      "problem_report": "relatório de problema",
+      "news": "notícias de IA"
     },
     "sources": {
       "chat": "Chat",
@@ -342,5 +344,11 @@
     "description": "Relatar, ao lado de um erro, envia o que deu errado para a equipe do Toskar, depois de mostrar à pessoa tudo o que é enviado.",
     "send": "Permitir enviar relatórios ao Toskar",
     "sendHint": "Desativado, Relatar só copia o relatório, para entregar a quem administra o Toskar aqui."
+  },
+  "news": {
+    "title": "Notícias de IA",
+    "description": "A página Notícias mostra novos modelos abertos, versões de runtimes e anúncios de laboratórios de IA do toskar.ai.",
+    "show": "Mostrar notícias de IA",
+    "showHint": "Lidas do toskar.ai quando Notícias é aberta, no máximo a cada seis horas. Só a solicitação é enviada."
   }
 }

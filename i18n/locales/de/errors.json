@@ -271,5 +271,6 @@
   "EMPTY_ANSWER": "Das Modell hat keine Antwort geschrieben. Versuche es erneut oder wähle ein anderes Modell.",
   "SHELL_ONLY": "Das kann nur die Toskar Pro App auf diesem Computer ändern.",
   "UNLOCK_REQUIRED": "Deine Testphase von Toskar Pro ist vorbei. Schalte Toskar Pro frei, um Modelle, Automatisierungen oder Personen hinzuzufügen.",
-  "TRIAL_NOT_STARTED": "Starte die kostenlose 14-tägige Testphase von Toskar Pro, um Modelle, Automatisierungen oder Personen hinzuzufügen."
+  "TRIAL_NOT_STARTED": "Starte die kostenlose 14-tägige Testphase von Toskar Pro, um Modelle, Automatisierungen oder Personen hinzuzufügen.",
+  "NEWS_UNAVAILABLE": "Die KI-Neuigkeiten konnten nicht von toskar.ai gelesen werden. Prüfe die Internetverbindung und versuche es erneut."
 }

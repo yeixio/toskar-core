@@ -49,6 +49,7 @@ import (
 	"github.com/yeixio/toskar-core/internal/models/hfclient"
 	"github.com/yeixio/toskar-core/internal/models/lifecycle"
 	"github.com/yeixio/toskar-core/internal/muninn"
+	"github.com/yeixio/toskar-core/internal/news"
 	"github.com/yeixio/toskar-core/internal/nodes"
 	"github.com/yeixio/toskar-core/internal/ocr"
 	"github.com/yeixio/toskar-core/internal/orchestrator"
@@ -142,6 +143,8 @@ type App struct {
 	Egress *egress.Log
 	// Updates says when a newer Toskar is out.
 	Updates *updates.Checker
+	// News is the AI news from toskar.ai (#750).
+	News *news.Reader
 	// License is Toskar Pro's trial or Unlock, as its desktop app says (#336).
 	License *license.Keeper
 	// RunLog keeps each request's run trace (§35).
@@ -807,6 +810,19 @@ func New(opts Options) (*App, error) {
 		},
 	}
 	a.API.BindUpdates(a.Updates)
+	a.News = &news.Reader{
+		// TOSKAR_NEWS_URL reads another feed, such as a test copy.
+		URL: config.Env("NEWS_URL"),
+		Dir: filepath.Join(cfg.DataDir, "news"),
+		On: func(ctx context.Context) bool {
+			on, err := settingsRepo.GetBool(ctx, news.Setting, true)
+			return err == nil && on
+		},
+		Sent: func(ctx context.Context, host, detail string) {
+			a.Egress.Add(ctx, egress.News, host, detail)
+		},
+	}
+	a.API.BindNews(a.News)
 	// The Toskar Pro desktop app starts Core with a secret
 	// (TOSKAR_SHELL_SECRET) and sets its trial or Unlock with it.
 	a.License = license.Open(cfg.DataDir)
@@ -1415,6 +1431,7 @@ func (a *App) settingsView(ctx context.Context) (contracts.SettingsView, error) 
 	communityRatings, _ := a.Settings.GetBool(ctx, ratings.SettingShow, false)
 	ratingsPrompts, _ := a.Settings.GetBool(ctx, ratings.SettingAsk, true)
 	updateCheck, _ := a.Settings.GetBool(ctx, updates.Setting, true)
+	aiNews, _ := a.Settings.GetBool(ctx, news.Setting, true)
 	problemReports, _ := a.Settings.GetBool(ctx, settingProblemReports, true)
 	toolTerminal, _ := a.Settings.GetString(ctx, "tool_terminal", "ask")
 	toolFiles, _ := a.Settings.GetString(ctx, "tool_file_writes", "ask")
@@ -1469,6 +1486,7 @@ func (a *App) settingsView(ctx context.Context) (contracts.SettingsView, error) 
 		CommunityRatings:        communityRatings,
 		RatingsPrompts:          ratingsPrompts,
 		UpdateCheck:             updateCheck,
+		AINews:                  aiNews,
 		ProblemReports:          problemReports,
 		ToolTerminal:            toolTerminal,
 		ToolFileWrites:          toolFiles,
@@ -1569,7 +1587,7 @@ func (a *App) applySettingsPatch(ctx context.Context, patch map[string]any) erro
 			return err
 		}
 	}
-	for _, key := range []string{"save_chat_history", "save_task_history", "notify_task_finish", "notify_peer_offline", "launch_at_login", ratings.SettingShow, ratings.SettingAsk, updates.Setting, settingProblemReports} {
+	for _, key := range []string{"save_chat_history", "save_task_history", "notify_task_finish", "notify_peer_offline", "launch_at_login", ratings.SettingShow, ratings.SettingAsk, updates.Setting, news.Setting, settingProblemReports} {
 		if v, ok := patch[key].(bool); ok {
 			if err := a.Settings.SetBool(ctx, key, v); err != nil {
 				return err

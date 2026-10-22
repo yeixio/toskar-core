@@ -1,0 +1,27 @@
+{
+  "page": {
+    "title": "AI 新闻",
+    "description": "新的开放模型、运行时版本和 AI 实验室的公告，每条几行。每天早上在 toskar.ai 更新。",
+    "byAI": "摘要由 AI 撰写，并经过自动检查。",
+    "updated": "更新于 {{when}}。",
+    "loading": "正在加载新闻…",
+    "empty": "还没有新闻。每天早上更新。",
+    "stale": "无法连接 toskar.ai，以下是 {{when}} 的新闻。"
+  },
+  "off": {
+    "title": "AI 新闻已关闭",
+    "admin": "打开后，打开此页面时会从 toskar.ai 读取新闻。除了请求本身，不会发送任何内容。",
+    "member": "管理员已在这台电脑上关闭 AI 新闻。",
+    "turnOn": "打开 AI 新闻"
+  },
+  "kinds": {
+    "model": "模型",
+    "runtime": "运行时",
+    "announcement": "公告"
+  },
+  "model": {
+    "installed": "已安装",
+    "installing": "正在安装… 查看“模型”",
+    "inCatalog": "在 Toskar 目录中"
+  }
+}

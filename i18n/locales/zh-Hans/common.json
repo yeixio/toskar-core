@@ -21,7 +21,8 @@
     "profiles": "配置与编排",
     "tools": "工具",
     "apiAccess": "API 访问",
-    "settings": "设置"
+    "settings": "设置",
+    "news": "新闻"
   },
   "status": {
     "starting": "正在启动…",

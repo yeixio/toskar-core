@@ -15,6 +15,7 @@ const pageTitles: Record<string, string> = {
   '/train': 'nav.train',
   '/knowledge': 'nav.knowledge',
   '/memory': 'nav.memory',
+  '/news': 'nav.news',
   '/nodes': 'nav.computers',
   '/performance': 'nav.performance',
   '/diagnostics': 'nav.diagnostics',
