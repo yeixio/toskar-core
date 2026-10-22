@@ -577,12 +577,20 @@
       "failed": "Non è stato possibile inviarla da qui. Scansiona il codice per inviarla per email.",
       "off": "Un amministratore ha disattivato l'invio delle segnalazioni a Toskar."
     },
-    "locked": "Toskar sulla TV arriva con Toskar Unlock. Sbloccalo in Toskar sul telefono o sul tablet."
+    "locked": "Toskar sulla TV arriva con Toskar Unlock. Sbloccalo in Toskar sul telefono o sul tablet.",
+    "demo": {
+      "label": "Demo: risposte di esempio, niente esce da questa TV",
+      "leave": "Esci dalla demo",
+      "hint": "Scegli un suggerimento per vedere come risponde Toskar. Con Toskar su un computer di casa, le risposte arrivano dai suoi modelli e niente di ciò che chiedi va a un servizio di IA ospitato.",
+      "try": "Provalo senza computer",
+      "tryMeta": "Una demo con risposte di esempio",
+      "other": "Questa demo risponde alle domande suggerite a sinistra. Per chiedere qualsiasi cosa, configura Toskar su un computer di casa (Toskar Core è gratuito), poi collega questa TV in Computer → Collega un dispositivo."
+    }
   },
   "setup": {
     "title": "Configuralo sul tuo computer",
-    "install": "Scarica Toskar Pro da toskar.ai, se non è ancora sul tuo computer.",
-    "open": "Apri Toskar Pro sul computer oppure http://localhost:7331 nel suo browser.",
+    "install": "Se Toskar non è ancora sul tuo computer, scarica Toskar Core, gratuito e open source, oppure Toskar Pro. toskar.ai spiega come.",
+    "open": "Apri http://localhost:7331 nel browser del computer, oppure apri Toskar Pro.",
     "choose": "Apri Computer e scegli Collega un dispositivo.",
     "code": "Poi, qui, scegli il computer e inserisci il codice di 6 cifre che mostra."
   },

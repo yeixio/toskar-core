@@ -570,12 +570,20 @@
       "failed": "Von hier konnte er nicht gesendet werden. Scanne den Code, um ihn per E-Mail zu senden.",
       "off": "Ein Admin hat das Senden von Berichten an Toskar ausgeschaltet."
     },
-    "locked": "Toskar auf dem Fernseher gibt es mit Toskar Unlock. Schalte es in Toskar auf deinem Telefon oder Tablet frei."
+    "locked": "Toskar auf dem Fernseher gibt es mit Toskar Unlock. Schalte es in Toskar auf deinem Telefon oder Tablet frei.",
+    "demo": {
+      "label": "Demo: Beispielantworten, nichts verlässt diesen Fernseher",
+      "leave": "Demo beenden",
+      "hint": "Wähle einen Vorschlag, um zu sehen, wie Toskar antwortet. Mit Toskar auf einem Computer zu Hause kommen die Antworten von seinen Modellen, und nichts, was du fragst, geht an einen gehosteten KI-Dienst.",
+      "try": "Ohne Computer ausprobieren",
+      "tryMeta": "Eine Demo mit Beispielantworten",
+      "other": "Diese Demo beantwortet die vorgeschlagenen Fragen links. Um alles zu fragen, richte Toskar auf einem Computer zu Hause ein (Toskar Core ist kostenlos) und verbinde dann diesen Fernseher unter „Computer“ → „Gerät verbinden“."
+    }
   },
   "setup": {
     "title": "Auf deinem Computer einrichten",
-    "install": "Hol dir Toskar Pro auf toskar.ai, falls es noch nicht auf deinem Computer ist.",
-    "open": "Öffne Toskar Pro auf dem Computer oder http://localhost:7331 in seinem Browser.",
+    "install": "Falls Toskar noch nicht auf deinem Computer ist, hol dir Toskar Core, kostenlos und Open Source, oder Toskar Pro. Auf toskar.ai steht, wie.",
+    "open": "Öffne http://localhost:7331 im Browser des Computers oder öffne Toskar Pro.",
     "choose": "Öffne „Computer“ und wähle „Gerät verbinden“.",
     "code": "Wähle dann hier den Computer und gib den 6-stelligen Code ein, den er zeigt."
   },

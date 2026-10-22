@@ -563,12 +563,20 @@
       "failed": "여기서 보낼 수 없었어요. 코드를 스캔해서 이메일로 보내 주세요.",
       "off": "관리자가 Toskar로 보고를 보내는 기능을 껐어요."
     },
-    "locked": "TV의 Toskar는 Toskar Unlock으로 사용할 수 있어요. 휴대폰이나 태블릿의 Toskar에서 잠금 해제하세요."
+    "locked": "TV의 Toskar는 Toskar Unlock으로 사용할 수 있어요. 휴대폰이나 태블릿의 Toskar에서 잠금 해제하세요.",
+    "demo": {
+      "label": "데모: 예시 답변이며, 이 TV에서 아무것도 전송되지 않아요",
+      "leave": "데모 나가기",
+      "hint": "제안을 골라 Toskar가 어떻게 답하는지 보세요. 집에 있는 컴퓨터의 Toskar를 쓰면 답은 그 모델에서 나오고, 묻는 내용은 호스팅된 AI 서비스로 전송되지 않아요.",
+      "try": "컴퓨터 없이 사용해 보기",
+      "tryMeta": "예시 답변으로 보는 데모",
+      "other": "이 데모는 왼쪽의 제안된 질문에 답해요. 무엇이든 물어보려면 집에 있는 컴퓨터에 Toskar를 설정하고(Toskar Core는 무료예요) 컴퓨터 → '기기 연결'에서 이 TV를 연결하세요."
+    }
   },
   "setup": {
     "title": "컴퓨터에서 설정하기",
-    "install": "컴퓨터에 아직 Toskar Pro가 없다면 toskar.ai에서 받으세요.",
-    "open": "컴퓨터에서 Toskar Pro를 열거나 브라우저에서 http://localhost:7331을 여세요.",
+    "install": "컴퓨터에 아직 Toskar가 없다면 무료 오픈 소스인 Toskar Core나 Toskar Pro를 받으세요. 방법은 toskar.ai에 있어요.",
+    "open": "컴퓨터의 브라우저에서 http://localhost:7331을 열거나 Toskar Pro를 여세요.",
     "choose": "컴퓨터를 열고 '기기 연결'을 선택하세요.",
     "code": "여기로 돌아와 컴퓨터를 선택하고 표시된 6자리 코드를 입력하세요."
   },

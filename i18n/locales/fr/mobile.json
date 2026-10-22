@@ -577,12 +577,20 @@
       "failed": "Il n'a pas pu être envoyé d'ici. Scannez le code pour l'envoyer par e-mail.",
       "off": "Un administrateur a désactivé l'envoi des signalements à Toskar."
     },
-    "locked": "Toskar sur la TV vient avec Toskar Unlock. Débloquez-le dans Toskar sur votre téléphone ou votre tablette."
+    "locked": "Toskar sur la TV vient avec Toskar Unlock. Débloquez-le dans Toskar sur votre téléphone ou votre tablette.",
+    "demo": {
+      "label": "Démo : réponses d’exemple, rien ne quitte ce téléviseur",
+      "leave": "Quitter la démo",
+      "hint": "Choisissez une suggestion pour voir comment Toskar répond. Avec Toskar sur un ordinateur à la maison, les réponses viennent de ses modèles, et rien de ce que vous demandez ne part vers un service d’IA hébergé.",
+      "try": "Essayer sans ordinateur",
+      "tryMeta": "Une démo avec des réponses d’exemple",
+      "other": "Cette démo répond aux questions suggérées à gauche. Pour poser n’importe quelle question, installez Toskar sur un ordinateur à la maison (Toskar Core est gratuit), puis connectez ce téléviseur dans Ordinateurs → Connecter un appareil."
+    }
   },
   "setup": {
     "title": "Configurez-le sur votre ordinateur",
-    "install": "Téléchargez Toskar Pro sur toskar.ai, s'il n'est pas encore sur votre ordinateur.",
-    "open": "Ouvrez Toskar Pro sur l'ordinateur, ou http://localhost:7331 dans son navigateur.",
+    "install": "Si Toskar n'est pas encore sur votre ordinateur, installez Toskar Core, gratuit et open source, ou Toskar Pro. toskar.ai explique comment.",
+    "open": "Ouvrez http://localhost:7331 dans le navigateur de l'ordinateur, ou ouvrez Toskar Pro.",
     "choose": "Ouvrez Ordinateurs et choisissez Connecter un appareil.",
     "code": "Ensuite, ici, choisissez l'ordinateur et saisissez le code à 6 chiffres qu'il affiche."
   },
