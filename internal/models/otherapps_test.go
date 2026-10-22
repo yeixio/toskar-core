@@ -16,7 +16,7 @@ func TestFindOtherApps(t *testing.T) {
 	m, _, dir := importManager(t)
 	home := filepath.Join(dir, "home")
 	m.Home = home
-	t.Setenv("OLLAMA_MODELS", "")
+	isolateAppDirs(t, home)
 	ctx := context.Background()
 
 	lm := filepath.Join(home, ".lmstudio", "models", "lmstudio-community", "Qwen3-8B-GGUF")
@@ -84,7 +84,7 @@ func TestFindOtherApps(t *testing.T) {
 func TestFindModelsFolder(t *testing.T) {
 	m, storage, dir := importManager(t)
 	m.Home = filepath.Join(dir, "home")
-	t.Setenv("OLLAMA_MODELS", "")
+	isolateAppDirs(t, m.Home)
 	ctx := context.Background()
 
 	folder := storage.ModelsDir()
@@ -112,4 +112,14 @@ func TestFindModelsFolder(t *testing.T) {
 	if found := m.FindOtherApps(ctx); len(found) != 0 {
 		t.Errorf("after adding, found = %+v", found)
 	}
+}
+
+// isolateAppDirs keeps the finder in home: the XDG and Windows folders it
+// reads would otherwise be the machine's own, such as a runner's cache.
+func isolateAppDirs(t *testing.T, home string) {
+	t.Helper()
+	t.Setenv("OLLAMA_MODELS", "")
+	t.Setenv("XDG_CACHE_HOME", filepath.Join(home, ".cache"))
+	t.Setenv("XDG_DATA_HOME", filepath.Join(home, ".local", "share"))
+	t.Setenv("LOCALAPPDATA", filepath.Join(home, "AppData", "Local"))
 }
