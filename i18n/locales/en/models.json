@@ -8,7 +8,10 @@
     "emptyDescription": "The local catalog is empty. Try Browse all models to install from Hugging Face.",
     "ready": "{{model}} finished downloading and is ready to use.",
     "readyFallback": "The model",
-    "dismiss": "Dismiss"
+    "dismiss": "Dismiss",
+    "looseFiles_one": "{{count}} model file in Toskar's models folder isn't added yet.",
+    "looseFiles_other": "{{count}} model files in Toskar's models folder aren't added yet.",
+    "looseFilesAdd": "Add it"
   },
   "tabs": {
     "discover": "Discover",
@@ -339,9 +342,10 @@
     },
     "apps": {
       "looking": "Looking for models…",
-      "description": "Models LM Studio, Ollama, llama.cpp, and GPT4All already downloaded. They're used where they are, so they take no more space.",
-      "none": "No models from LM Studio, Ollama, llama.cpp, or GPT4All on this computer.",
-      "already": "Added"
+      "description": "Models LM Studio, Ollama, llama.cpp, and GPT4All already downloaded, and model files put in Toskar's models folder. They're used where they are, so they take no more space.",
+      "none": "No models from LM Studio, Ollama, llama.cpp, GPT4All, or Toskar's models folder on this computer.",
+      "already": "Added",
+      "toskarFolder": "Toskar's models folder"
     },
     "link": {
       "description": "A direct link to a .gguf file. A Hugging Face link is checked against the file's checksum, and a vision model's image support comes with it.",

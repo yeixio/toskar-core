@@ -8,7 +8,9 @@
     "emptyDescription": "本機目錄是空的。請試試「瀏覽所有模型」，從 Hugging Face 安裝。",
     "ready": "{{model}} 已下載完成，可以開始使用。",
     "readyFallback": "模型",
-    "dismiss": "關閉"
+    "dismiss": "關閉",
+    "looseFiles_other": "Toskar 模型資料夾中有 {{count}} 個模型檔案尚未加入。",
+    "looseFilesAdd": "加入"
   },
   "tabs": {
     "discover": "探索",
@@ -332,9 +334,10 @@
     },
     "apps": {
       "looking": "正在尋找模型…",
-      "description": "LM Studio、Ollama、llama.cpp 和 GPT4All 已下載的模型。它們在原位置使用，不額外佔用空間。",
-      "none": "這台電腦上沒有來自 LM Studio、Ollama、llama.cpp 或 GPT4All 的模型。",
-      "already": "已加入"
+      "description": "LM Studio、Ollama、llama.cpp 和 GPT4All 已下載的模型，以及放進 Toskar 模型資料夾的模型檔案。它們在原位置使用，不額外佔用空間。",
+      "none": "這台電腦上沒有來自 LM Studio、Ollama、llama.cpp、GPT4All 或 Toskar 模型資料夾的模型。",
+      "already": "已加入",
+      "toskarFolder": "Toskar 模型資料夾"
     },
     "link": {
       "description": "指向 .gguf 檔案的直接連結。Hugging Face 連結會以檔案檢查碼核對，視覺模型的圖片支援也會一併加入。",

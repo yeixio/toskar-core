@@ -8,7 +8,10 @@
     "emptyDescription": "Der lokale Katalog ist leer. Versuche „Alle Modelle durchsuchen“, um von Hugging Face zu installieren.",
     "ready": "{{model}} ist fertig geladen und einsatzbereit.",
     "readyFallback": "Das Modell",
-    "dismiss": "Ausblenden"
+    "dismiss": "Ausblenden",
+    "looseFiles_one": "{{count}} Modelldatei in Toskars Modellordner ist noch nicht hinzugefügt.",
+    "looseFiles_other": "{{count}} Modelldateien in Toskars Modellordner sind noch nicht hinzugefügt.",
+    "looseFilesAdd": "Hinzufügen"
   },
   "tabs": {
     "discover": "Entdecken",
@@ -339,9 +342,10 @@
     },
     "apps": {
       "looking": "Suche nach Modellen…",
-      "description": "Modelle, die LM Studio, Ollama, llama.cpp und GPT4All schon heruntergeladen haben. Sie werden dort verwendet, wo sie sind, und brauchen keinen weiteren Platz.",
-      "none": "Keine Modelle von LM Studio, Ollama, llama.cpp oder GPT4All auf diesem Computer.",
-      "already": "Hinzugefügt"
+      "description": "Modelle, die LM Studio, Ollama, llama.cpp und GPT4All schon heruntergeladen haben, und Modelldateien im Modellordner von Toskar. Sie werden dort verwendet, wo sie sind, und brauchen keinen weiteren Platz.",
+      "none": "Keine Modelle von LM Studio, Ollama, llama.cpp, GPT4All oder aus Toskars Modellordner auf diesem Computer.",
+      "already": "Hinzugefügt",
+      "toskarFolder": "Toskars Modellordner"
     },
     "link": {
       "description": "Ein direkter Link zu einer .gguf-Datei. Ein Hugging-Face-Link wird mit der Prüfsumme der Datei abgeglichen, und die Bildunterstützung eines Bildmodells kommt mit.",

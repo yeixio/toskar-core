@@ -8,7 +8,9 @@
     "emptyDescription": "ローカルカタログが空です。「すべてのモデルを見る」からHugging Faceのモデルをインストールしてみてください。",
     "ready": "{{model}}のダウンロードが完了し、使用できるようになりました。",
     "readyFallback": "モデル",
-    "dismiss": "閉じる"
+    "dismiss": "閉じる",
+    "looseFiles_other": "Toskar のモデルフォルダに、まだ追加されていないモデルファイルが{{count}}個あります。",
+    "looseFilesAdd": "追加"
   },
   "tabs": {
     "discover": "見つける",
@@ -332,9 +334,10 @@
     },
     "apps": {
       "looking": "モデルを探しています…",
-      "description": "LM Studio、Ollama、llama.cpp、GPT4All がすでにダウンロードしたモデルです。今の場所のまま使うので、容量は増えません。",
-      "none": "このコンピュータには LM Studio、Ollama、llama.cpp、GPT4All のモデルがありません。",
-      "already": "追加済み"
+      "description": "LM Studio、Ollama、llama.cpp、GPT4All がすでにダウンロードしたモデルと、Toskar のモデルフォルダに置かれたモデルファイルです。今の場所のまま使うので、容量は増えません。",
+      "none": "このコンピュータには LM Studio、Ollama、llama.cpp、GPT4All、Toskar のモデルフォルダのモデルがありません。",
+      "already": "追加済み",
+      "toskarFolder": "Toskar のモデルフォルダ"
     },
     "link": {
       "description": ".gguf ファイルへの直接リンクです。Hugging Face のリンクはファイルのチェックサムで確認され、ビジョンモデルの画像対応も一緒に追加されます。",

@@ -471,7 +471,7 @@ export interface ModelURLPreview {
 }
 
 export interface FoundModel {
-  app: 'lmstudio' | 'ollama' | 'llamacpp' | 'gpt4all' | string
+  app: 'toskar' | 'lmstudio' | 'ollama' | 'llamacpp' | 'gpt4all' | string
   path: string
   name: string
   size_bytes: number
