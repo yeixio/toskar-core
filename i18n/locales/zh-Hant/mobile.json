@@ -563,12 +563,20 @@
       "failed": "無法從這裡傳送。請掃描條碼，透過電子郵件傳送。",
       "off": "管理員已關閉向 Toskar 傳送回報。"
     },
-    "locked": "電視上的 Toskar 隨 Toskar Unlock 提供。請在手機或平板上的 Toskar 中解鎖。"
+    "locked": "電視上的 Toskar 隨 Toskar Unlock 提供。請在手機或平板上的 Toskar 中解鎖。",
+    "demo": {
+      "label": "示範：範例回答，不會從這台電視傳送任何內容",
+      "leave": "離開示範",
+      "hint": "選擇一個建議，看看 Toskar 如何回答。在家裡的電腦上使用 Toskar 時，回答來自它的模型，你問的內容不會傳送到託管的 AI 服務。",
+      "try": "不用電腦試用",
+      "tryMeta": "使用範例回答的示範",
+      "other": "此示範回答左側的建議問題。要問任何問題，請在家裡的電腦上設定 Toskar（Toskar Core 免費），然後在「電腦」→「連接裝置」中連接這台電視。"
+    }
   },
   "setup": {
     "title": "在電腦上設定",
-    "install": "如果電腦上還沒有 Toskar Pro，請到 toskar.ai 取得。",
-    "open": "在電腦上打開 Toskar Pro，或在瀏覽器中打開 http://localhost:7331。",
+    "install": "如果電腦上還沒有 Toskar，請取得免費開源的 Toskar Core 或 Toskar Pro。toskar.ai 上有說明。",
+    "open": "在電腦的瀏覽器中打開 http://localhost:7331，或打開 Toskar Pro。",
     "choose": "打開「電腦」，然後選擇「連接裝置」。",
     "code": "回到這裡，選擇那台電腦，輸入它顯示的 6 位代碼。"
   },

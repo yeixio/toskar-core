@@ -563,12 +563,20 @@
       "failed": "无法从这里发送。请扫描二维码，通过电子邮件发送。",
       "off": "管理员已关闭向 Toskar 发送报告。"
     },
-    "locked": "电视上的 Toskar 随 Toskar Unlock 提供。请在手机或平板上的 Toskar 中解锁。"
+    "locked": "电视上的 Toskar 随 Toskar Unlock 提供。请在手机或平板上的 Toskar 中解锁。",
+    "demo": {
+      "label": "演示：示例回答，不会从这台电视发送任何内容",
+      "leave": "退出演示",
+      "hint": "选择一个建议，看看 Toskar 如何回答。在家里的电脑上使用 Toskar 时，回答来自它的模型，你问的内容不会发送到托管的 AI 服务。",
+      "try": "无需电脑试用",
+      "tryMeta": "使用示例回答的演示",
+      "other": "此演示回答左侧的建议问题。要问任何问题，请在家里的电脑上设置 Toskar（Toskar Core 免费），然后在“电脑”→“连接设备”中连接这台电视。"
+    }
   },
   "setup": {
     "title": "在电脑上设置",
-    "install": "如果电脑上还没有 Toskar Pro，请到 toskar.ai 获取。",
-    "open": "在电脑上打开 Toskar Pro，或在浏览器中打开 http://localhost:7331。",
+    "install": "如果电脑上还没有 Toskar，请获取免费开源的 Toskar Core 或 Toskar Pro。toskar.ai 上有说明。",
+    "open": "在电脑的浏览器中打开 http://localhost:7331，或打开 Toskar Pro。",
     "choose": "打开“电脑”，然后选择“连接设备”。",
     "code": "回到这里，选择那台电脑，输入它显示的 6 位代码。"
   },
