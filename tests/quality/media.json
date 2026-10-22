@@ -117,6 +117,26 @@
       }
     },
     {
+      "id": "make_video_short",
+      "what": "A one-second clip, the shortest the video tool makes, is that short and comes out clean, not as noise: DPM++ 2M turned the shortest Wan 2.2 5B clips into noise, which no other case caught (#758). It fails on length until the asked-for length reaches the tool (#789).",
+      "real_only": true,
+      "message": "Make a video of waves rolling onto a beach, just one second long.",
+      "expect": {
+        "tools_run": [
+          "video.generate"
+        ],
+        "answer_lacks": "(?i)(can'?t|cannot|unable to|not able to) (draw|create|make|generate|produce|edit)|as an ai|text-based|language model"
+      },
+      "judge": {
+        "kind": "video",
+        "ext": ".webm",
+        "shows": "waves or the sea at a beach",
+        "moves": true,
+        "clean": true,
+        "max_frames": 17
+      }
+    },
+    {
       "id": "make_video_mac_decode",
       "what": "On a Mac, a clip with fine detail and steady motion comes out with every frame clean: no blocks of wrong color, noise, or frames that jump, the corruption Apple's video decode path has shown (#553).",
       "os": "darwin",

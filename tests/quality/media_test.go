@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"image"
 	"image/png"
+	"math/bits"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -51,6 +52,9 @@ type Judge struct {
 	// apart from the frames around it, so a broken decode fails even when
 	// the clip shows the right thing (#553).
 	Clean bool `json:"clean,omitempty"`
+	// MaxFrames is the most frames a clip may have, so a case about a
+	// short clip fails when a longer one was made instead (#758).
+	MaxFrames int `json:"max_frames,omitempty"`
 }
 
 // mediaCase is a case in media.json.
@@ -127,8 +131,89 @@ func fileFailures(j *Judge, r Result, real bool) []string {
 		if real && len(data) < 10_000 {
 			return []string{fmt.Sprintf("%s is only %d bytes", name, len(data))}
 		}
+		if j.MaxFrames > 0 && real {
+			n, err := webmFrames(data)
+			if err != nil {
+				return []string{fmt.Sprintf("%s isn't a WebM whose frames can be counted: %v", name, err)}
+			}
+			if n > j.MaxFrames {
+				return []string{fmt.Sprintf("%s has %d frames; a clip this short has at most %d", name, n, j.MaxFrames)}
+			}
+		}
 	}
 	return nil
+}
+
+// webmFrames counts a WebM's frames: its SimpleBlocks and Blocks, found by
+// walking the EBML tree through the Segment, Clusters, and BlockGroups.
+func webmFrames(data []byte) (int, error) {
+	const (
+		segment    = 0x18538067
+		cluster    = 0x1F43B675
+		blockGroup = 0xA0
+		block      = 0xA1
+		simple     = 0xA3
+	)
+	var walk func(b []byte) (int, error)
+	walk = func(b []byte) (int, error) {
+		n := 0
+		for len(b) > 0 {
+			id, idLen, err := vint(b, false)
+			if err != nil {
+				return n, err
+			}
+			size, sizeLen, err := vint(b[idLen:], true)
+			if err != nil {
+				return n, err
+			}
+			body := b[idLen+sizeLen:]
+			// An unknown size, as a live encoder writes, runs to the end.
+			if size < 0 || size > int64(len(body)) {
+				size = int64(len(body))
+			}
+			switch id {
+			case segment, cluster, blockGroup:
+				m, err := walk(body[:size])
+				n += m
+				if err != nil {
+					return n, err
+				}
+			case block, simple:
+				n++
+			}
+			b = body[size:]
+		}
+		return n, nil
+	}
+	if len(data) < 4 || binary.BigEndian.Uint32(data) != 0x1A45DFA3 {
+		return 0, fmt.Errorf("no EBML header")
+	}
+	return walk(data)
+}
+
+// vint reads an EBML variable-length number: an element ID keeps its
+// length marker; a size drops it, and all ones means unknown (-1).
+func vint(b []byte, isSize bool) (int64, int, error) {
+	if len(b) == 0 || b[0] == 0 {
+		return 0, 0, fmt.Errorf("bad length byte")
+	}
+	n := bits.LeadingZeros8(b[0]) + 1
+	if len(b) < n {
+		return 0, 0, fmt.Errorf("cut short")
+	}
+	v := int64(b[0])
+	if isSize {
+		v &= int64(0xFF >> n)
+	}
+	allOnes := v == int64(0xFF>>n)
+	for _, c := range b[1:n] {
+		v = v<<8 | int64(c)
+		allOnes = allOnes && c == 0xFF
+	}
+	if isSize && allOnes {
+		return -1, n, nil
+	}
+	return v, n, nil
 }
 
 // wavSeconds reads a PCM WAV's header and checks its data is all there.
@@ -215,8 +300,9 @@ func judgeFailures(t *testing.T, d realDriver, j *Judge, r Result) []string {
 		}
 		if j.Kind == "video" && j.Moves {
 			const question = "Do these frames of a video change from one to the next, with something moving, or are they all the same picture? Answer yes if something moves or changes, or no if they're the same, on the first line."
-			still := func(answer string) bool { return !saysYes(answer) }
-			if why, err := d.bothSay(t, name, data, question, still); err != nil {
+			// Still only when a judge says no: "The frames show a person
+			// walking, so there is movement" isn't a no (#758).
+			if why, err := d.bothSay(t, name, data, question, saysNo); err != nil {
 				return []string{err.Error()}
 			} else if why != "" {
 				return []string{fmt.Sprintf("the judges say nothing moves in %s: %s", name, why)}
@@ -450,6 +536,17 @@ func TestMediaCasesValid(t *testing.T) {
 			}
 		}
 	}
+	for answer, want := range map[string]bool{
+		"No\n\nThe clip is below.":                                true,
+		"**No.** They're all the same picture.":                   true,
+		"Nothing moves.":                                          false,
+		"The frames show a person walking, so there is movement.": false,
+		"Yes, the waves move.":                                    false,
+	} {
+		if saysNo(answer) != want {
+			t.Errorf("saysNo(%q) = %v", answer, !want)
+		}
+	}
 	for want, got := range map[float64]float64{
 		0:    wordErrorRate("The quick brown fox", "the quick, brown fox."),
 		0.25: wordErrorRate("The quick brown fox", "the quick brown box"),
@@ -458,6 +555,35 @@ func TestMediaCasesValid(t *testing.T) {
 		if got != want {
 			t.Errorf("word error rate %v, want %v", got, want)
 		}
+	}
+}
+
+// webmFrames counts a clip's frames from its container: SimpleBlocks and a
+// BlockGroup's Block, in a Segment of unknown size as a live encoder writes.
+func TestWebmFrames(t *testing.T) {
+	el := func(id []byte, body ...[]byte) []byte {
+		b := append([]byte(nil), id...)
+		n := 0
+		for _, p := range body {
+			n += len(p)
+		}
+		b = append(b, 0x40|byte(n>>8), byte(n)) // a 2-byte size
+		for _, p := range body {
+			b = append(b, p...)
+		}
+		return b
+	}
+	frame := []byte{0x81, 0, 0, 0x80, 1, 2, 3}
+	cluster := el([]byte{0x1F, 0x43, 0xB6, 0x75}, el([]byte{0xE7}, []byte{0}), el([]byte{0xA3}, frame), el([]byte{0xA3}, frame),
+		el([]byte{0xA0}, el([]byte{0xA1}, frame)))
+	data := el([]byte{0x1A, 0x45, 0xDF, 0xA3}, el([]byte{0x42, 0x82}, []byte("webm")))
+	data = append(data, 0x18, 0x53, 0x80, 0x67, 0x01, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF) // unknown size
+	data = append(append(data, cluster...), cluster...)
+	if n, err := webmFrames(data); n != 6 || err != nil {
+		t.Errorf("webmFrames = %d, %v; want 6", n, err)
+	}
+	if _, err := webmFrames([]byte("RIFF....")); err == nil {
+		t.Error("counted frames in a file that isn't WebM")
 	}
 }
 
@@ -596,6 +722,13 @@ func orDefault(s, def string) string {
 // saysYes reads a judge's yes-or-no first line.
 func saysYes(answer string) bool {
 	return strings.HasPrefix(strings.ToLower(strings.Trim(strings.TrimSpace(answer), "*`\"'")), "yes")
+}
+
+// saysNo reports an answer whose first word is no, so "Nothing moves" or
+// an answer that skips the yes or no isn't taken for one.
+func saysNo(answer string) bool {
+	words := strings.Fields(strings.ToLower(answer))
+	return len(words) > 0 && strings.Trim(words[0], "*`\"'.,!:;") == "no"
 }
 
 // flat reports a picture of nearly one color: samples across it differ
