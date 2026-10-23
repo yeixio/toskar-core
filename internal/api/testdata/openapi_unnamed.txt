@@ -2,7 +2,6 @@ get /api/v1/automations/{id} 200
 get /api/v1/automations/{id}/runs 200
 get /api/v1/caches 200
 get /api/v1/capabilities 200
-get /api/v1/capabilities/models/{id} 200
 get /api/v1/connectors 200
 get /api/v1/diagnostics 200
 get /api/v1/diagnostics/first-answers 200
@@ -14,10 +13,6 @@ get /api/v1/logs 200
 get /api/v1/logs/{name} 200
 get /api/v1/mcp/servers 200
 get /api/v1/memory 200
-get /api/v1/models/browse 200
-get /api/v1/models/fit 200
-get /api/v1/models/import/found 200
-get /api/v1/models/recommend 200
 get /api/v1/network 200
 get /api/v1/news 200
 get /api/v1/notifications 200
@@ -28,8 +23,6 @@ get /api/v1/portals/{id}/conversations/{cid}/messages 200
 get /api/v1/portals/{id}/usage 200
 get /api/v1/portals/{id}/visitors 200
 get /api/v1/portals/{slug}/page 200
-get /api/v1/ratings/community 200
-get /api/v1/runtimes 200
 get /api/v1/tasks 200
 get /api/v1/tasks/{id} 200
 get /api/v1/tls 200
@@ -54,13 +47,6 @@ post /api/v1/automations/{id}/runs/{run_id}/chat 200
 post /api/v1/diagnostics 200
 post /api/v1/join-tokens 201
 post /api/v1/knowledge/search 200
-post /api/v1/models/import 200
-post /api/v1/models/install-from-url 200
-post /api/v1/models/install-from-url/preview 200
-post /api/v1/models/warm 200
-post /api/v1/models/{id}/install 200
-post /api/v1/models/{id}/start 200
-post /api/v1/models/{id}/stop 200
 post /api/v1/network/join 200
 post /api/v1/network/leave 200
 post /api/v1/nodes/pair 200
@@ -69,12 +55,10 @@ post /api/v1/nodes/pairing/offer 200
 post /api/v1/nodes/{id}/pair/approve 200
 post /api/v1/notifications/destinations 201
 post /api/v1/notifications/destinations/{id}/rotate-secret 200
-post /api/v1/notifications/destinations/{id}/test 200
 post /api/v1/portals 201
 post /api/v1/portals/{id}/visitors 201
 post /api/v1/portals/{id}/visitors/{vid}/link 200
 post /api/v1/portals/{slug}/enter 200
-post /api/v1/runtimes/{id}/install 200
 post /api/v1/speech 200
 post /api/v1/speech/transcribe 200
 post /api/v1/tasks 201

@@ -101,7 +101,7 @@ func (s *Server) handleInstallFromURL(w http.ResponseWriter, r *http.Request) {
 		writeErrFrom(w, http.StatusBadRequest, "INSTALL_FAILED", err)
 		return
 	}
-	writeJSON(w, http.StatusOK, map[string]any{"status": "started", "model_id": id})
+	writeJSON(w, http.StatusOK, modelInstall{Status: "started", ModelID: id})
 }
 
 // handlePreviewFromURL answers what installing from a link would download,
@@ -159,7 +159,7 @@ func (s *Server) handleInstallModel(w http.ResponseWriter, r *http.Request) {
 	if wait {
 		status = "installed"
 	}
-	writeJSON(w, http.StatusOK, map[string]any{"status": status, "model_id": id})
+	writeJSON(w, http.StatusOK, modelInstall{Status: status, ModelID: id})
 }
 
 func (s *Server) handleStartModel(w http.ResponseWriter, r *http.Request) {
@@ -212,7 +212,7 @@ func (s *Server) handleStopModel(w http.ResponseWriter, r *http.Request) {
 		writeErrFrom(w, http.StatusBadRequest, "STOP_FAILED", err)
 		return
 	}
-	writeJSON(w, http.StatusOK, map[string]any{"ok": true})
+	writeJSON(w, http.StatusOK, okView{OK: true})
 }
 
 func (s *Server) handleDeleteModel(w http.ResponseWriter, r *http.Request) {
@@ -260,7 +260,7 @@ func (s *Server) handleInstallRuntime(w http.ResponseWriter, r *http.Request) {
 		writeErrFrom(w, http.StatusBadRequest, "INSTALL_FAILED", err)
 		return
 	}
-	writeJSON(w, http.StatusOK, map[string]any{"status": "installed", "runtime_id": id})
+	writeJSON(w, http.StatusOK, runtimeInstall{Status: "installed", RuntimeID: id})
 }
 
 func (s *Server) handleCreateProfile(w http.ResponseWriter, r *http.Request) {
@@ -839,4 +839,17 @@ func (s *Server) handleShowVersion(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, http.StatusOK, msgs)
+}
+
+// modelInstall is a model's download started, or already installed; its
+// progress comes as events.
+type modelInstall struct {
+	Status  string `json:"status"`
+	ModelID string `json:"model_id"`
+}
+
+// runtimeInstall is a runtime installed.
+type runtimeInstall struct {
+	Status    string `json:"status"`
+	RuntimeID string `json:"runtime_id"`
 }

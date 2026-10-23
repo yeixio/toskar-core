@@ -57,19 +57,13 @@ func (s *Server) handleImportModel(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	d := got.Details
-	writeJSON(w, http.StatusOK, map[string]any{
-		"model_id":  got.ID,
-		"projector": got.Projector,
-		"status":    map[bool]string{true: "copying", false: "installed"}[got.Copying],
-		"details": map[string]any{
-			"name":           d.Name,
-			"architecture":   d.Architecture,
-			"parameters":     d.Parameters,
-			"size_label":     d.SizeLabel,
-			"context_length": d.ContextLength,
-			"quantization":   d.Quantization,
-			"chat_template":  d.ChatTemplate,
-			"license":        d.License,
+	writeJSON(w, http.StatusOK, importedModel{
+		ModelID:   got.ID,
+		Projector: got.Projector,
+		Status:    map[bool]string{true: "copying", false: "installed"}[got.Copying],
+		Details: modelFileDetails{
+			Name: d.Name, Architecture: d.Architecture, Parameters: d.Parameters, SizeLabel: d.SizeLabel,
+			ContextLength: d.ContextLength, Quantization: d.Quantization, ChatTemplate: d.ChatTemplate, License: d.License,
 		},
 	})
 }
@@ -94,7 +88,7 @@ func (s *Server) handleUpdateAddedModel(w http.ResponseWriter, r *http.Request) 
 		writeErrFrom(w, http.StatusBadRequest, "MODEL_UPDATE_FAILED", err)
 		return
 	}
-	writeJSON(w, http.StatusOK, map[string]any{"model_id": entry.ID, "display_name": entry.DisplayName, "tags": entry.Tags})
+	writeJSON(w, http.StatusOK, addedModelView{ModelID: entry.ID, DisplayName: entry.DisplayName, Tags: entry.Tags})
 }
 
 // handleSetModelProjector gives a model its vision projector, a GGUF file on
@@ -115,7 +109,7 @@ func (s *Server) handleSetModelProjector(w http.ResponseWriter, r *http.Request)
 		writeErrFrom(w, http.StatusBadRequest, "MODEL_UPDATE_FAILED", err)
 		return
 	}
-	writeJSON(w, http.StatusOK, map[string]any{"model_id": mux.Vars(r)["id"], "vision": true})
+	writeJSON(w, http.StatusOK, modelVision{ModelID: mux.Vars(r)["id"], Vision: true})
 }
 
 // handleFoundModels lists models other local AI apps keep on this computer,
@@ -127,7 +121,35 @@ func (s *Server) handleFoundModels(w http.ResponseWriter, r *http.Request) {
 			found = list
 		}
 	}
-	writeJSON(w, http.StatusOK, map[string]any{"models": found})
+	writeJSON(w, http.StatusOK, foundModels{Models: found})
+}
+
+// importedModel is a model added from a file (#467): copying while its
+// file is still being copied in, then installed.
+type importedModel struct {
+	ModelID string `json:"model_id"`
+	// Projector is the vision projector found beside it, if any.
+	Projector string           `json:"projector"`
+	Status    string           `json:"status"`
+	Details   modelFileDetails `json:"details"`
+}
+
+// modelFileDetails is what a GGUF file says about its model.
+type modelFileDetails struct {
+	Name          string `json:"name"`
+	Architecture  string `json:"architecture"`
+	Parameters    uint64 `json:"parameters"`
+	SizeLabel     string `json:"size_label"`
+	ContextLength uint64 `json:"context_length"`
+	Quantization  string `json:"quantization"`
+	// ChatTemplate says the file has its own chat template.
+	ChatTemplate bool   `json:"chat_template"`
+	License      string `json:"license"`
+}
+
+// foundModels are model files other apps on this computer have (#467).
+type foundModels struct {
+	Models []models.FoundModel `json:"models"`
 }
 
 // importUpload writes the body to the models folder, then adds it.
@@ -161,4 +183,17 @@ func (s *Server) importUpload(r *http.Request) (models.Imported, error) {
 		_ = os.Remove(path)
 	}
 	return got, err
+}
+
+// addedModelView is an added model's name and tags, after a change.
+type addedModelView struct {
+	ModelID     string   `json:"model_id"`
+	DisplayName string   `json:"display_name"`
+	Tags        []string `json:"tags"`
+}
+
+// modelVision says a model sees pictures now, with its projector set.
+type modelVision struct {
+	ModelID string `json:"model_id"`
+	Vision  bool   `json:"vision"`
 }

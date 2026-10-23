@@ -48,5 +48,12 @@ func (s *Server) handleModelPlacement(w http.ResponseWriter, r *http.Request) {
 		writeErr(w, http.StatusNotFound, "MODEL_NOT_INSTALLED", "That model is not installed on any computer.", map[string]any{"model_id": mux.Vars(r)["id"]})
 		return
 	}
-	writeJSON(w, http.StatusOK, map[string]any{"model_id": mux.Vars(r)["id"], "computers": places})
+	writeJSON(w, http.StatusOK, modelPlacement{ModelID: mux.Vars(r)["id"], Computers: places})
+}
+
+// modelPlacement is where a model can run: each computer that has it,
+// whether it's online, and whether the model fits.
+type modelPlacement struct {
+	ModelID   string                `json:"model_id"`
+	Computers []inventory.Placement `json:"computers"`
 }

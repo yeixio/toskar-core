@@ -178,7 +178,7 @@ func (s *Server) handleTestDestination(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, http.StatusOK, map[string]any{"ok": false, "error": err.Error(), "permanent": gjallarhorn.IsPermanent(err)})
 		return
 	}
-	writeJSON(w, http.StatusOK, map[string]any{"ok": true})
+	writeJSON(w, http.StatusOK, okView{OK: true})
 }
 
 func (s *Server) handleRotateSecret(w http.ResponseWriter, r *http.Request) {

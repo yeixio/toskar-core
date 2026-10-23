@@ -1598,6 +1598,10 @@ paths:
       responses:
         "200":
           description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OK"
   /api/v1/conversations:
     get:
       summary: List conversations
@@ -2874,15 +2878,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  model_id:
-                    type: string
-                  computers:
-                    type: array
-                    items:
-                      type: object
-                      additionalProperties: true
+                $ref: "#/components/schemas/ModelPlacement"
         "404":
           description: The model is not installed on any computer
           content:
@@ -2938,8 +2934,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                additionalProperties: true
+                $ref: "#/components/schemas/Recommendation"
   /api/v1/models/fit:
     get:
       summary: How well each catalog model fits this computer
@@ -2952,8 +2947,7 @@ paths:
               schema:
                 type: array
                 items:
-                  type: object
-                  additionalProperties: true
+                  $ref: "#/components/schemas/ModelFit"
   /api/v1/models/browse:
     get:
       summary: Search Hugging Face for GGUF models
@@ -2975,8 +2969,7 @@ paths:
               schema:
                 type: array
                 items:
-                  type: object
-                  additionalProperties: true
+                  $ref: "#/components/schemas/BrowseModel"
   /api/v1/models/running:
     get:
       summary: Loaded model instances on this and paired computers
@@ -3044,35 +3037,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  model_id:
-                    type: string
-                  status:
-                    type: string
-                    enum: [copying, installed]
-                  projector:
-                    type: string
-                    description: A vision projector found beside the file, to offer with PUT /models/{id}/projector
-                  details:
-                    type: object
-                    properties:
-                      name:
-                        type: string
-                      architecture:
-                        type: string
-                      parameters:
-                        type: integer
-                      size_label:
-                        type: string
-                      context_length:
-                        type: integer
-                      quantization:
-                        type: string
-                      chat_template:
-                        type: boolean
-                      license:
-                        type: string
+                $ref: "#/components/schemas/ImportedModel"
         "400":
           description: MODEL_FILE_NOT_FOUND, MODEL_FILE_INVALID (not GGUF, incomplete, or damaged), or MODEL_FILE_PROJECTOR
   /api/v1/models/import/found:
@@ -3091,34 +3056,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  models:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        app:
-                          type: string
-                          enum: [toskar, lmstudio, ollama, llamacpp, gpt4all]
-                        path:
-                          type: string
-                        name:
-                          type: string
-                        size_bytes:
-                          type: integer
-                        architecture:
-                          type: string
-                        parameters:
-                          type: string
-                        quantization:
-                          type: string
-                        model_id:
-                          type: string
-                          description: Set when the file is already a model here
-                        projector:
-                          type: string
-                          description: Its vision projector, when the app keeps one with it
+                $ref: "#/components/schemas/FoundModels"
   /api/v1/models/install-from-url/preview:
     post:
       summary: What a download from a URL would bring, without downloading it
@@ -3139,37 +3077,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  model_id:
-                    type: string
-                  filename:
-                    type: string
-                  size_bytes:
-                    type: integer
-                  projector_bytes:
-                    type: integer
-                  free_bytes:
-                    type: integer
-                  installed:
-                    type: boolean
-                  installed_as:
-                    type: string
-                  elsewhere:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        app:
-                          type: string
-                        path:
-                          type: string
-                        name:
-                          type: string
-                        size_bytes:
-                          type: integer
-                        projector:
-                          type: string
+                $ref: "#/components/schemas/URLPreview"
         "400":
           description: Not a GGUF URL
   /api/v1/models/install-from-url:
@@ -3195,12 +3103,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  status:
-                    type: string
-                  model_id:
-                    type: string
+                $ref: "#/components/schemas/ModelInstall"
         "400":
           description: Invalid request
           content:
@@ -3242,13 +3145,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  status:
-                    type: string
-                    enum: [started, installed]
-                  model_id:
-                    type: string
+                $ref: "#/components/schemas/ModelInstall"
         "400":
           description: Invalid request
           content:
@@ -3519,20 +3416,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  enabled: {type: boolean}
-                  fetched_at: {type: string, format: date-time}
-                  generated_at: {type: string, format: date-time}
-                  source: {type: string}
-                  error: {type: string}
-                  models:
-                    type: object
-                    additionalProperties:
-                      type: object
-                      properties:
-                        similar: {$ref: "#/components/schemas/RatingStats"}
-                        overall: {$ref: "#/components/schemas/RatingStats"}
+                $ref: "#/components/schemas/CommunityRatings"
   /api/v1/models/warm:
     post:
       summary: Start loading the model a chat would use
@@ -3560,13 +3444,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  model_id:
-                    type: string
-                  status:
-                    type: string
-                    enum: [loading, loaded, busy, no_room, not_local, none]
+                $ref: "#/components/schemas/ModelWarmResponse"
   /api/v1/models/{id}/start:
     post:
       summary: Load a model
@@ -3591,8 +3469,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                additionalProperties: true
+                $ref: "#/components/schemas/RunningModelView"
         "400":
           description: Invalid request
           content:
@@ -3626,10 +3503,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  ok:
-                    type: boolean
+                $ref: "#/components/schemas/OK"
         "400":
           description: Invalid request
           content:
@@ -3660,6 +3534,10 @@ paths:
       responses:
         "200":
           description: The model sees pictures
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ModelVision"
         "400":
           description: MODEL_FILE_INVALID, MODEL_FILE_NOT_PROJECTOR, MODEL_NOT_INSTALLED, or MODEL_NOT_FOUND
   /api/v1/models/{id}:
@@ -3689,6 +3567,10 @@ paths:
       responses:
         "200":
           description: The model's name and tags
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AddedModel"
         "400":
           description: MODEL_NOT_EDITABLE, MODEL_NAME_INVALID, or MODEL_NOT_FOUND
     delete:
@@ -3733,8 +3615,7 @@ paths:
               schema:
                 type: array
                 items:
-                  type: object
-                  additionalProperties: true
+                  $ref: "#/components/schemas/RuntimeInfo"
   /api/v1/runtimes/{id}/install:
     post:
       summary: Install a runtime, such as llamacpp
@@ -3751,12 +3632,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  status:
-                    type: string
-                  runtime_id:
-                    type: string
+                $ref: "#/components/schemas/RuntimeInstall"
         "400":
           description: Invalid request
           content:
@@ -6411,9 +6287,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Node"
+                $ref: "#/components/schemas/OK"
         "400":
           description: Invalid request
           content:
@@ -6824,15 +6698,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  ok:
-                    type: boolean
-                  error:
-                    type: string
-                  permanent:
-                    type: boolean
-                    description: Retrying will not help until the destination is changed
+                $ref: "#/components/schemas/OK"
         "404":
           description: No such destination
   /api/v1/notifications/destinations/{id}/rotate-secret:
@@ -7050,47 +6916,54 @@ components:
       enum: [great_responses, fast, slow, stable, crashed, too_much_memory, great_for_coding, great_for_chat, good_tool_use, poor_tool_use]
     ModelRating:
       type: object
+      description: A person's rating of one model and what sharing it would send.
+      required: [ask, model_id, rateable, share_observations, shared, tags]
       properties:
         model_id: {type: string}
-        rateable:
-          type: boolean
-          description: False when the model cannot be compared with others' ratings (reason says why); it can still be rated on this computer.
+        rateable: {type: boolean, description: False when the model cannot be compared with others' ratings (reason says why); it can still be rated on this computer.}
         reason: {type: string}
-        stars: {type: integer, minimum: 1, maximum: 5, description: Absent when not rated}
+        stars: {type: integer, description: Absent when not rated}
         tags:
           type: array
-          items: {$ref: "#/components/schemas/RatingTag"}
+          items: {type: string}
+        language: {type: string, description: 'The language the rating is for, or "".'}
         shared: {type: boolean}
         shared_at: {type: string, format: date-time}
         updated_at: {type: string, format: date-time}
         share_observations: {type: boolean, description: The shared rating includes how the model runs here}
-        observations:
-          $ref: "#/components/schemas/RatingObservations"
+        observations: {$ref: '#/components/schemas/RatingObservations'}
         ask: {type: boolean, description: A good time to ask for a rating}
         shares:
           type: object
           description: What sharing sends besides the stars, tags, a random rating ID, and the app version
+          required: [destination, hardware, model]
           properties:
             destination: {type: string}
             model:
               type: object
+              description: Which model a rating is about. Ratings of different formats, quantizations, runtimes, or backends are never combined.
+              required: [backend, format, id, quantization, runtime]
               properties:
-                id: {type: string}
+                id: {type: string, description: 'The base model as a lower-case slug, such as qwen2.5-coder-7b-instruct: the same whoever converted it.'}
                 format: {type: string}
                 quantization: {type: string}
                 runtime: {type: string}
                 backend: {type: string}
             hardware:
               type: object
+              description: 'A computer''s class: never a name, serial, or address.'
+              required: [architecture, family, memory_bucket_gb, memory_type, platform, vendor]
               properties:
                 platform: {type: string}
                 architecture: {type: string}
-                vendor: {type: string}
-                family: {type: string}
-                memory_type: {type: string}
-                memory_bucket_gb: {type: string}
+                vendor: {type: string, description: 'Apple, nvidia, amd, intel, or cpu (no accelerator).'}
+                family: {type: string, description: 'The accelerator model, such as m4-max or rtx-4090, or for cpu, the CPU''s maker.'}
+                memory_type: {type: string, description: 'Unified, dedicated, or system.'}
+                memory_bucket_gb: {type: string, description: 'The memory the model can use, in GB.'}
     RatingStats:
       type: object
+      description: One cohort's ratings.
+      required: [average, confidence, ratings, tier, weighted_score]
       properties:
         tier: {type: string, enum: [family, class, backend, global]}
         cohort: {type: string}
@@ -7135,6 +7008,8 @@ components:
             there is a GPU, on the CPU with no GPU to use, or no model loaded. Never changes status.
     RunningModelView:
       type: object
+      description: A loaded model instance for the Running tab.
+      required: [display_name, instance_id, model_id, node_id, node_name, status]
       properties:
         model_id: {type: string}
         display_name: {type: string}
@@ -7142,15 +7017,30 @@ components:
         node_id: {type: string}
         node_name: {type: string}
         status: {type: string}
-        memory_bytes: {type: integer}
+        memory_bytes: {type: integer, format: int64}
         endpoint: {type: string}
         speed_tok_per_sec: {type: number, description: Generation speed in the model's latest replies}
-        used_by_profiles: {type: array, items: {type: string}}
-        accelerator: {type: string, description: "The devices the model is on, or CPU"}
+        used_by_profiles:
+          type: array
+          items: {type: string}
+        accelerator: {type: string, description: 'The devices the model is on, or CPU'}
         last_used_at: {type: string, format: date-time}
-        mode: {type: string, enum: [embedding, reranking]}
+        mode: {type: string, description: '"embedding" or "reranking" for a supporting model serving knowledge search, and empty for a chat model.', enum: [embedding, reranking]}
         acceleration:
-          $ref: "#/components/schemas/Acceleration"
+          type: object
+          description: Where the model runs, from the runtime's own report; absent when that is not known.
+          required: [backend, layers_offloaded, layers_total, state]
+          properties:
+            state: {type: string, description: 'Gpu, partial, cpu, or cpu_expected (Acceleration* constants).'}
+            reason: {type: string, description: '`reason` says why for a state short of gpu (AccelerationReason*).'}
+            backend: {type: string, description: 'Metal, vulkan, cuda, rocm, sycl, or cpu.'}
+            devices:
+              type: array
+              description: The GPUs the model is on.
+              items: {type: string}
+            layers_offloaded: {type: integer}
+            layers_total: {type: integer}
+            gpu_memory_bytes: {type: integer, format: int64, description: What the model takes on its GPUs.}
     GPUSetup:
       type: object
       properties:
@@ -7238,7 +7128,110 @@ components:
       additionalProperties: true
     Model:
       type: object
-      additionalProperties: true
+      description: A catalog or installed model.
+      required: [capabilities, display_name, id, installed]
+      properties:
+        id: {type: string}
+        display_name: {type: string}
+        summary: {type: string}
+        family: {type: string}
+        variant: {type: string}
+        parameters: {type: string, description: e.g. "14B"}
+        size_bytes: {type: integer, format: int64}
+        memory_needed_bytes: {type: integer, format: int64}
+        context: {type: integer}
+        capabilities:
+          type: object
+          description: Describes model features.
+          required: [coding, tool_calling, vision]
+          properties:
+            tool_calling: {type: boolean}
+            tool_call_support: {type: string, description: native | compatible | limited | unsupported}
+            vision: {type: boolean}
+            coding: {type: boolean}
+        source:
+          type: object
+          description: Describes where a model artifact comes from.
+          required: [url]
+          properties:
+            url: {type: string}
+            sha256: {type: string}
+            format: {type: string}
+        purpose:
+          type: array
+          items: {type: string}
+        tags:
+          type: array
+          description: coding, general, reasoning, vision, fast, large
+          items: {type: string}
+        runtime:
+          type: array
+          items: {type: string}
+        recommended_roles:
+          type: array
+          items: {type: string}
+        installed: {type: boolean}
+        installed_on:
+          type: array
+          items:
+            type: object
+            description: Records that a model file is present on a computer.
+            required: [node_id, node_name]
+            properties:
+              node_id: {type: string}
+              node_name: {type: string}
+        status: {type: string, description: available|downloading|installed|loading|running|stopping|error}
+        last_used_at: {type: string, format: date-time}
+        fit:
+          type: object
+          description: Describes how well a model fits a node's hardware.
+          required: [expected_memory_bytes, install_allowed, label, model_id]
+          properties:
+            model_id: {type: string}
+            node_id: {type: string}
+            node_name: {type: string}
+            label: {type: string}
+            expected_memory_bytes: {type: integer, format: int64}
+            reason: {type: string}
+            est_tok_per_sec: {type: number}
+            tok_per_sec_measured: {type: boolean}
+            runtime_memory_low_bytes: {type: integer, format: int64, description: '`runtime_memory_low_bytes` and RuntimeMemoryHighBytes are a conservative range for weights, KV cache, and runtime buffers. They are not the file size alone.'}
+            runtime_memory_high_bytes: {type: integer, format: int64}
+            weight_bytes: {type: integer, format: int64}
+            quantization: {type: string}
+            approximate: {type: boolean}
+            context_tokens: {type: integer}
+            total_memory_bytes: {type: integer, format: int64}
+            available_memory_bytes: {type: integer, format: int64}
+            memory_kind: {type: string, description: unified | system}
+            headroom: {type: number}
+            install_allowed: {type: boolean}
+            runtime_warning: {type: string}
+            recommendations:
+              type: array
+              items: {type: string}
+            gpu_note: {type: string}
+            known_to_run: {type: boolean}
+            short: {type: string, description: 'What a model is short of when that holds it back: "shared" on Apple silicon, where the graphics may use only part of memory, with NeedBytes what it needs and HaveBytes what the graphics may use (contract 1.46, #751).'}
+            need_bytes: {type: integer, format: int64}
+            have_bytes: {type: integer, format: int64}
+        dynamic: {type: boolean, description: installed from browse-all / URL}
+        support_role: {type: string, description: '`support_role` marks a model that serves Yggdrasil instead of chatting: SupportEmbedding, SupportReranker, or SupportClassifier. Empty for chat models.'}
+        languages:
+          type: array
+          description: How well the model writes each language it has a level for (§13–14, §31), best first.
+          items:
+            type: object
+            description: 'How well a model writes a language (multilingual spec §13–14, §31). Levels are coarse on purpose: they don''t imply precision the sources don''t have. A language a model has no level for is unknown, and is left out.'
+            required: [confidence, language, level, sources]
+            properties:
+              language: {type: string, description: 'A BCP 47 tag, such as "de" or "zh-Hans".'}
+              level: {type: string, description: '"limited", "fair", "good", or "excellent".'}
+              confidence: {type: string, description: '`confidence` in the level: "low", "medium", or "high".'}
+              sources:
+                type: array
+                description: '`sources` the level comes from: "model_card", "maintainer", "benchmark", "provider", "community", or "local_evaluation".'
+                items: {type: string}
     AIProfile:
       type: object
       additionalProperties: true
@@ -8571,3 +8564,266 @@ components:
         prompt_tok_per_sec: {type: number}
         eval_tok_per_sec: {type: number}
         cached_tokens: {type: integer, description: 'Prompt tokens reused from the model''s cache instead of processed again, when the runtime reports them.'}
+    Recommendation:
+      type: object
+      description: Explains a recommended model setup.
+      required: [estimated_storage_bytes, estimated_vram_bytes, models, purpose, reason, roles]
+      properties:
+        purpose: {type: string}
+        roles:
+          type: array
+          items:
+            type: object
+            description: Assignment within a profile.
+            required: [model_id, required, role]
+            properties:
+              role: {type: string}
+              model_id: {type: string}
+              node_id: {type: string}
+              required: {type: boolean}
+        models:
+          type: array
+          items: {$ref: '#/components/schemas/Model'}
+        reason: {type: string}
+        estimated_storage_bytes: {type: integer, format: int64}
+        estimated_vram_bytes: {type: integer, format: int64}
+        community_chosen: {type: boolean, description: True when community ratings moved the main model ahead of the curated first choice.}
+    ModelFit:
+      type: object
+      description: Returned by GET /models/fit.
+      required: [fits, memory_bytes, winners]
+      properties:
+        node_id: {type: string}
+        node_name: {type: string}
+        memory_bytes: {type: integer, format: int64}
+        fits:
+          type: array
+          items:
+            type: object
+            description: Describes how well a model fits a node's hardware.
+            required: [expected_memory_bytes, install_allowed, label, model_id]
+            properties:
+              model_id: {type: string}
+              node_id: {type: string}
+              node_name: {type: string}
+              label: {type: string}
+              expected_memory_bytes: {type: integer, format: int64}
+              reason: {type: string}
+              est_tok_per_sec: {type: number}
+              tok_per_sec_measured: {type: boolean}
+              runtime_memory_low_bytes: {type: integer, format: int64, description: '`runtime_memory_low_bytes` and RuntimeMemoryHighBytes are a conservative range for weights, KV cache, and runtime buffers. They are not the file size alone.'}
+              runtime_memory_high_bytes: {type: integer, format: int64}
+              weight_bytes: {type: integer, format: int64}
+              quantization: {type: string}
+              approximate: {type: boolean}
+              context_tokens: {type: integer}
+              total_memory_bytes: {type: integer, format: int64}
+              available_memory_bytes: {type: integer, format: int64}
+              memory_kind: {type: string, description: unified | system}
+              headroom: {type: number}
+              install_allowed: {type: boolean}
+              runtime_warning: {type: string}
+              recommendations:
+                type: array
+                items: {type: string}
+              gpu_note: {type: string}
+              known_to_run: {type: boolean}
+              short: {type: string, description: 'What a model is short of when that holds it back: "shared" on Apple silicon, where the graphics may use only part of memory, with NeedBytes what it needs and HaveBytes what the graphics may use (contract 1.46, #751).'}
+              need_bytes: {type: integer, format: int64}
+              have_bytes: {type: integer, format: int64}
+        winners:
+          type: array
+          items:
+            type: object
+            description: A recommendation badge for Discover.
+            required: [category, label, model_id]
+            properties:
+              category: {type: string, description: best_overall|fastest|best_quality|lowest_memory|coding|general|reasoning|vision}
+              label: {type: string, description: human label e.g. "Best coding"}
+              model_id: {type: string}
+              community_chosen: {type: boolean, description: True when community ratings from hardware like this computer's moved this model ahead of the curated first choice.}
+    BrowseModel:
+      type: object
+      description: A Hugging Face browse-all hit (GGUF filtered).
+      required: [display_name, filename, id, repo_id, source_url]
+      properties:
+        id: {type: string}
+        display_name: {type: string}
+        summary: {type: string}
+        repo_id: {type: string}
+        filename: {type: string}
+        source_url: {type: string}
+        size_bytes: {type: integer, format: int64}
+        parameters: {type: string}
+        variant: {type: string}
+        downloads: {type: integer}
+        tags:
+          type: array
+          items: {type: string}
+    URLPreview:
+      type: object
+      description: 'What a download from a link would bring, shown before it starts (#611): the file and its size, the free space where models are kept, and a copy of the same file another app already has, which can be used where it is instead of downloaded again.'
+      required: [filename, model_id]
+      properties:
+        model_id: {type: string}
+        filename: {type: string}
+        size_bytes: {type: integer, format: int64, description: 'The model file''s size, and ProjectorBytes its vision projector''s, both from the repository; 0 when it didn''t say.'}
+        projector_bytes: {type: integer, format: int64}
+        free_bytes: {type: integer, format: int64, description: The space left where models are kept; 0 when unknown.}
+        installed: {type: boolean, description: Set when this model is already here; InstalledAs is its model ID.}
+        installed_as: {type: string}
+        elsewhere:
+          type: array
+          description: Copies of the same file that other apps have.
+          items: {$ref: '#/components/schemas/FoundModel'}
+    FoundModel:
+      type: object
+      description: A GGUF model another local AI app already downloaded on this computer, which can be added without downloading it again (#467).
+      required: [app, name, path, size_bytes]
+      properties:
+        app: {type: string, description: 'Lmstudio, ollama, llamacpp, or gpt4all; toskar is a file put in Toskar''s own models folder by hand (#763).'}
+        path: {type: string, description: 'The file; an Ollama model is its blob, named by digest.'}
+        name: {type: string, description: 'What the app calls it (Ollama''s model:tag), or the header''s name, or the file''s.'}
+        size_bytes: {type: integer, format: int64}
+        architecture: {type: string}
+        parameters: {type: string}
+        quantization: {type: string}
+        model_id: {type: string, description: Set when the file is already a model here.}
+        projector: {type: string, description: 'Its vision projector, when the app keeps one with it.'}
+    FoundModels:
+      type: object
+      description: Model files other apps on this computer have (#467).
+      required: [models]
+      properties:
+        models:
+          type: array
+          items: {$ref: '#/components/schemas/FoundModel'}
+    ImportedModel:
+      type: object
+      description: 'A model added from a file (#467): copying while its file is still being copied in, then installed.'
+      required: [details, model_id, projector, status]
+      properties:
+        model_id: {type: string}
+        projector: {type: string, description: 'The vision projector found beside it, if any.'}
+        status: {type: string}
+        details: {$ref: '#/components/schemas/ModelFileDetails'}
+    ModelFileDetails:
+      type: object
+      description: What a GGUF file says about its model.
+      required: [architecture, chat_template, context_length, license, name, parameters, quantization, size_label]
+      properties:
+        name: {type: string}
+        architecture: {type: string}
+        parameters: {type: integer, format: int64}
+        size_label: {type: string}
+        context_length: {type: integer, format: int64}
+        quantization: {type: string}
+        chat_template: {type: boolean, description: '`chat_template` says the file has its own chat template.'}
+        license: {type: string}
+    ModelInstall:
+      type: object
+      description: A model's download started, or already installed; its progress comes as events.
+      required: [model_id, status]
+      properties:
+        status: {type: string}
+        model_id: {type: string}
+    AddedModel:
+      type: object
+      description: An added model's name and tags, after a change.
+      required: [display_name, model_id, tags]
+      properties:
+        model_id: {type: string}
+        display_name: {type: string}
+        tags:
+          type: array
+          items: {type: string}
+    ModelVision:
+      type: object
+      description: Says a model sees pictures now, with its projector set.
+      required: [model_id, vision]
+      properties:
+        model_id: {type: string}
+        vision: {type: boolean}
+    ModelPlacement:
+      type: object
+      description: 'Where a model can run: each computer that has it, whether it''s online, and whether the model fits.'
+      required: [computers, model_id]
+      properties:
+        model_id: {type: string}
+        computers:
+          type: array
+          items:
+            type: object
+            description: Whether a computer can run a model.
+            required: [fits, installed, node, note, online]
+            properties:
+              node: {type: string}
+              online: {type: boolean}
+              installed: {type: boolean}
+              fits: {type: boolean}
+              note: {type: string}
+    CommunityRatings:
+      type: object
+      description: Everyone's ratings of the models here.
+      required: [enabled, models]
+      properties:
+        enabled: {type: boolean, description: Whether community ratings are shown.}
+        fetched_at: {type: string, format: date-time, description: When the summary was downloaded; nil when there is none.}
+        generated_at: {type: string, format: date-time}
+        source: {type: string}
+        error: {type: string, description: Why the latest download failed; an older summary may still be shown.}
+        models:
+          type: object
+          description: By local model ID.
+          additionalProperties:
+            type: object
+            description: 'One model''s community ratings: from hardware like this computer''s, from everyone who runs it the same way, and from everyone by the language they used it in.'
+            properties:
+              similar: {$ref: '#/components/schemas/RatingStats'}
+              overall: {$ref: '#/components/schemas/RatingStats'}
+              languages:
+                type: array
+                items:
+                  type: object
+                  description: 'A model configuration''s ratings given for one language, for everyone who runs it that way: never split by hardware.'
+                  required: [average, confidence, language, ratings, weighted_score]
+                  properties:
+                    language: {type: string}
+                    ratings: {type: integer}
+                    average: {type: number}
+                    weighted_score: {type: number}
+                    confidence: {type: string}
+    RuntimeInfo:
+      type: object
+      description: The API view of a runtime.
+      required: [detection, display_name, id, status]
+      properties:
+        id: {type: string}
+        display_name: {type: string}
+        detection:
+          type: object
+          description: Reports what a runtime found on the host.
+          required: [installed]
+          properties:
+            installed: {type: boolean}
+            version: {type: string}
+            path: {type: string}
+            message: {type: string}
+            backends:
+              type: array
+              description: What the installed build can run on, such as ["cpu", "vulkan"]; a CPU-only build is just ["cpu"] (#317).
+              items: {type: string}
+        status: {type: string}
+    RuntimeInstall:
+      type: object
+      description: A runtime installed.
+      required: [runtime_id, status]
+      properties:
+        status: {type: string}
+        runtime_id: {type: string}
+    OK:
+      type: object
+      description: The answer of a route that has nothing else to say.
+      required: [ok]
+      properties:
+        ok: {type: boolean}
