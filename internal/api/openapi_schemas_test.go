@@ -19,14 +19,25 @@ import (
 
 	"github.com/yeixio/toskar-core/internal/artifacts"
 	"github.com/yeixio/toskar-core/internal/auth"
+	"github.com/yeixio/toskar-core/internal/automations"
+	"github.com/yeixio/toskar-core/internal/cache"
+	"github.com/yeixio/toskar-core/internal/connectors"
+	"github.com/yeixio/toskar-core/internal/diagnostics"
 	"github.com/yeixio/toskar-core/internal/egress"
 	"github.com/yeixio/toskar-core/internal/events"
 	"github.com/yeixio/toskar-core/internal/gjallarhorn"
+	"github.com/yeixio/toskar-core/internal/logs"
+	"github.com/yeixio/toskar-core/internal/mcp"
+	"github.com/yeixio/toskar-core/internal/mimir"
 	"github.com/yeixio/toskar-core/internal/models"
 	"github.com/yeixio/toskar-core/internal/muninn"
+	"github.com/yeixio/toskar-core/internal/news"
+	"github.com/yeixio/toskar-core/internal/portals"
 	"github.com/yeixio/toskar-core/internal/ratings"
 	"github.com/yeixio/toskar-core/internal/runlog"
 	"github.com/yeixio/toskar-core/internal/runtimes"
+	"github.com/yeixio/toskar-core/internal/training"
+	"github.com/yeixio/toskar-core/internal/updates"
 	"github.com/yeixio/toskar-core/pkg/contracts"
 )
 
@@ -110,6 +121,49 @@ var specTypes = map[string]any{
 	"RuntimeInfo":        runtimes.RuntimeInfo{},
 	"RuntimeInstall":     runtimeInstall{},
 	"OK":                 okView{},
+
+	// Automations, tasks, knowledge, and training.
+	"Automation":             automations.Automation{},
+	"AutomationInput":        automations.CreateInput{},
+	"Schedule":               automations.Schedule{},
+	"AutomationNotification": automations.Notification{},
+	"AutomationDetail":       automations.Detail{},
+	"AutomationRunsPage":     automations.RunsPage{},
+	"AutomationRequest":      automations.ParsedRequest{},
+	"AutomationPreview":      automations.Preview{},
+	"AutomationRunInfo":      automations.Run{},
+	"Task":                   contracts.Task{},
+	"KnowledgeSource":        mimir.Source{},
+	"KnowledgeHit":           mimir.Hit{},
+	"TrainingBaseModel":      training.BaseChoice{},
+	"TrainingSample":         training.SampleFile{},
+	"TrainingMaterial":       training.Material{},
+	"TrainingPlan":           training.Plan{},
+	"EvalPrompt":             training.EvalPrompt{},
+
+	// Computers, portals, and the rest.
+	"NetworkStatus":      NetworkStatus{},
+	"JoinResult":         JoinResult{},
+	"LeaveResult":        LeaveResult{},
+	"JoinTokenCreated":   JoinTokenCreated{},
+	"PairingSession":     auth.PairingSession{},
+	"TLSInfo":            APITLS{},
+	"Portal":             portals.Portal{},
+	"PortalConversation": portals.Conversation{},
+	"PortalMessage":      portals.Message{},
+	"PortalUsage":        portals.Usage{},
+	"PortalPage":         portalPage{},
+	"EnteredPortal":      enteredGuest{},
+	"VisitorLink":        visitorLink{},
+	"CacheInfo":          cache.Info{},
+	"ConnectorStatus":    connectors.Status{},
+	"DiagnosticsReport":  diagnostics.Report{},
+	"RuntimeHistory":     diagnostics.RuntimeHistory{},
+	"LogFile":            logs.Entry{},
+	"LogContent":         logs.Content{},
+	"MCPServer":          mcp.View{},
+	"News":               news.View{},
+	"UpdateStatus":       updates.Status{},
 }
 
 // The Go types that encode themselves, with the schema of what they send.
@@ -579,6 +633,10 @@ func commentText(c *ast.CommentGroup, goName, _ string) string {
 	text := strings.Join(strings.Fields(c.Text()), " ")
 	for _, verb := range []string{" is ", " are "} {
 		if rest, ok := strings.CutPrefix(text, goName+verb); ok && rest != "" {
+			// A value such as this_computer keeps its case.
+			if first, _, _ := strings.Cut(rest, " "); strings.ContainsAny(first, "_.\"`") {
+				return rest
+			}
 			return strings.ToUpper(rest[:1]) + rest[1:]
 		}
 	}
