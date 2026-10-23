@@ -455,7 +455,12 @@ func (s *Server) handleStopChat(w http.ResponseWriter, r *http.Request) {
 	if s.deps.StopChat != nil {
 		stopped = s.deps.StopChat(body.ConversationID)
 	}
-	writeJSON(w, http.StatusOK, map[string]any{"stopped": stopped})
+	writeJSON(w, http.StatusOK, chatStopped{Stopped: stopped})
+}
+
+// chatStopped says whether a turn was running to stop.
+type chatStopped struct {
+	Stopped bool `json:"stopped"`
 }
 
 func (s *Server) handleConversationMessages(w http.ResponseWriter, r *http.Request) {

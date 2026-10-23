@@ -1658,22 +1658,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  deleted:
-                    type: array
-                    items:
-                      type: string
-                  skipped:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        id:
-                          type: string
-                        reason:
-                          type: string
-                          enum: [not_found]
+                $ref: "#/components/schemas/ConversationsDeleted"
         "400":
           description: INVALID_JSON, or INVALID_CONVERSATION_IDS for no ids or more than 1,000
   /api/v1/conversations/{id}:
@@ -3958,10 +3943,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  stopped:
-                    type: boolean
+                $ref: "#/components/schemas/ChatStopped"
   /api/v1/conversations/{id}/messages/{mid}/shown:
     put:
       parameters:
@@ -3980,6 +3962,12 @@ paths:
       responses:
         "200":
           description: The chat as shown
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Message"
         "404":
           description: MESSAGE_NOT_FOUND
   /api/v1/conversations/{id}/summary:
@@ -3999,26 +3987,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  conversation_id:
-                    type: string
-                  through_message_id:
-                    type: string
-                  through_created_at:
-                    type: string
-                    format: date-time
-                  message_count:
-                    type: integer
-                  summary:
-                    type: string
-                  model_id:
-                    type: string
-                  updated_at:
-                    type: string
-                    format: date-time
-                  edited:
-                    type: boolean
+                $ref: "#/components/schemas/ConversationSummary"
         "404":
           description: SUMMARY_NOT_FOUND, the chat hasn't been compacted
     put:
@@ -4043,6 +4012,10 @@ paths:
       responses:
         "200":
           description: The summary, edited
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConversationSummary"
   /api/v1/conversations/{id}/compact:
     post:
       parameters:
@@ -4057,6 +4030,10 @@ paths:
       responses:
         "200":
           description: The summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConversationSummary"
   /api/v1/conversations/{id}/from-summary:
     post:
       parameters:
@@ -4070,6 +4047,10 @@ paths:
       responses:
         "201":
           description: The new conversation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Conversation"
   /api/v1/conversations/{id}/messages:
     get:
       summary: Messages of a conversation, with sources, steps, and files
@@ -7225,28 +7206,16 @@ components:
         gpu_memory_bytes: {type: integer, description: "The model, its cache, and its working memory on the GPUs"}
     VersionResponse:
       type: object
+      description: Returned by GET /api/v1/version.
+      required: [build_date, commit, contract, license, product, source, version]
       properties:
-        version:
-          type: string
-        commit:
-          type: string
-        build_date:
-          type: string
-        product:
-          type: string
-        license:
-          type: string
-        source:
-          type: string
-          description: URL of the corresponding source for this build.
-        contract:
-          type: object
-          description: The client contract this build speaks (major.minor). Also in the Toskar-Contract and Yggdrasil-Contract headers on every response.
-          properties:
-            version:
-              type: string
-            major:
-              type: integer
+        version: {type: string}
+        commit: {type: string}
+        build_date: {type: string}
+        product: {type: string}
+        license: {type: string}
+        source: {type: string, description: URL of the corresponding source for this build.}
+        contract: {$ref: '#/components/schemas/ContractInfo'}
     SourceOffer:
       type: object
       properties:
@@ -7289,20 +7258,23 @@ components:
       additionalProperties: true
     Conversation:
       type: object
-      additionalProperties: true
+      description: A chat thread.
+      required: [compact_off, created_at, id, memory_off, title, updated_at]
+      properties:
+        id: {type: string}
+        title: {type: string}
+        profile_id: {type: string}
+        model_id: {type: string}
+        memory_off: {type: boolean, description: '`memory_off` keeps persistent memory out of this conversation.'}
+        compact_off: {type: boolean, description: '`compact_off` keeps this conversation verbatim: auto-compact never sends its older messages as a summary (contract 1.35, #342).'}
+        created_at: {type: string, format: date-time}
+        updated_at: {type: string, format: date-time}
     Error:
       type: object
+      description: Wraps ErrorBody for JSON responses.
+      required: [error]
       properties:
-        error:
-          type: object
-          properties:
-            code:
-              type: string
-            message:
-              type: string
-            details:
-              type: object
-              additionalProperties: true
+        error: {$ref: '#/components/schemas/ErrorBody'}
     InstallFromURLRequest:
       type: object
       properties:
@@ -7329,23 +7301,26 @@ components:
       required: [source_url]
     Message:
       type: object
+      description: A chat message.
+      required: [content, conversation_id, created_at, id, role]
       properties:
-        id:
-          type: string
-        conversation_id:
-          type: string
-        role:
-          type: string
-        content:
-          type: string
-        created_at:
-          type: string
-          format: date-time
-        meta:
+        id: {type: string}
+        conversation_id: {type: string}
+        role: {type: string}
+        content: {type: string}
+        created_at: {type: string, format: date-time}
+        meta: {$ref: '#/components/schemas/MessageMeta'}
+        parent_id: {type: string, description: 'The message this one follows (#447), or "" for the chat''s first.'}
+        versions:
           type: object
-          description: Sources, steps, and files of an answer
-          additionalProperties: true
-      additionalProperties: true
+          description: The versions of this point in the chat, when a retry or an edit made more than one.
+          required: [count, ids, index]
+          properties:
+            index: {type: integer, description: 'This one''s place, from 1.'}
+            count: {type: integer}
+            ids:
+              type: array
+              items: {type: string}
     ImageSetup:
       type: object
       properties:
@@ -7394,28 +7369,23 @@ components:
             error: {type: string}
     Artifact:
       type: object
+      description: One stored file.
+      required: [created_at, id, kind, mime_type, name, producer, size_bytes]
       properties:
-        id:
-          type: string
-        conversation_id:
-          type: string
-        name:
-          type: string
-        mime_type:
-          type: string
-        kind:
-          type: string
-        size_bytes:
-          type: integer
-        producer:
-          type: string
-        source_task:
-          type: string
-        expires_at:
-          type: string
-          format: date-time
-          description: When a file that belongs to no chat is removed, a week after it was made. A file attached to or made in a chat has none.
-      additionalProperties: true
+        id: {type: string}
+        conversation_id: {type: string}
+        name: {type: string}
+        mime_type: {type: string}
+        kind: {type: string, description: 'Document, spreadsheet, pdf, image, code, or other.'}
+        size_bytes: {type: integer, format: int64}
+        producer: {type: string}
+        source_task: {type: string}
+        created_at: {type: string, format: date-time}
+        expires_at: {type: string, format: date-time, description: 'When a file that belongs to no chat is removed, a week after it was made. A file attached to or made in a chat has none.'}
+        details:
+          type: object
+          description: How it was made, such as a picture's model, seed, and prompt (#553).
+          additionalProperties: {}
     Memory:
       type: object
       properties:
@@ -7872,6 +7842,8 @@ components:
         person_id: {type: string}
     Notification:
       type: object
+      description: A stored notice.
+      required: [body, category, created_at, id, severity, source_type, title]
       properties:
         id: {type: string}
         created_at: {type: string, format: date-time}
@@ -7879,22 +7851,50 @@ components:
         source_id: {type: string}
         category: {type: string, enum: [automation, approval, model, training, health, system]}
         severity: {type: string, enum: [info, success, warning, error]}
-        title: {type: string}
+        title: {type: string, description: '`title` and Body are in English, for logs and clients that read text.'}
         body: {type: string}
-        link: {type: string}
+        message:
+          type: object
+          description: The title and body as catalog keys with their values (multilingual spec §22), so each place that shows the notification writes it in its own language. Notices whose text comes from elsewhere, such as an automation's result, may have none.
+          required: [title]
+          properties:
+            title:
+              type: object
+              description: 'One piece of a message: a catalog key with the values it needs, such as {"key": "notifications:notices.modelReady"}, or literal text that is the same in every language, such as an automation''s name or what a model wrote.'
+              properties:
+                key: {type: string}
+                params:
+                  type: object
+                  additionalProperties: {}
+                text: {type: string}
+            body:
+              type: array
+              items:
+                type: object
+                description: 'One piece of a message: a catalog key with the values it needs, such as {"key": "notifications:notices.modelReady"}, or literal text that is the same in every language, such as an automation''s name or what a model wrote.'
+                properties:
+                  key: {type: string}
+                  params:
+                    type: object
+                    additionalProperties: {}
+                  text: {type: string}
+        link: {type: string, description: 'An app path to the source, such as /automations?id=….'}
+        url: {type: string, description: 'The web page it''s about, such as the product page an automation watched, so a tap opens it without reaching this computer (#460).'}
         read_at: {type: string, format: date-time}
-        repeat_count: {type: integer}
+        repeat_count: {type: integer, description: 'How many times the same notice came within the dedupe window, shown as "4 times" (§22).'}
         deliveries:
           type: array
           items:
             type: object
+            description: One channel's attempt to deliver a notification.
+            required: [attempts, channel, status]
             properties:
-              channel: {type: string, description: "desktop, or email:<id> or webhook:<id>"}
-              destination_id: {type: string}
+              channel: {type: string, description: 'desktop, or email:<id> or webhook:<id>'}
+              destination_id: {type: string, description: 'The email or webhook destination, when there is one.'}
               status: {type: string, enum: [delivered, failed, suppressed, pending, held, cancelled]}
               attempts: {type: integer}
               delivered_at: {type: string, format: date-time}
-              next_attempt_at: {type: string, format: date-time}
+              next_attempt_at: {type: string, format: date-time, description: When a pending or held delivery is tried next.}
               error: {type: string}
     NotificationDestinationInput:
       type: object
@@ -8166,3 +8166,371 @@ components:
           required: [push]
           properties:
             push: {type: boolean}
+    ConversationSummary:
+      type: object
+      description: Covers a conversation's older messages, through one message. The messages themselves stay saved; the summary is only what the model sees in their place.
+      required: [conversation_id, edited, message_count, summary, through_created_at, through_message_id, updated_at]
+      properties:
+        conversation_id: {type: string}
+        through_message_id: {type: string}
+        through_created_at: {type: string, format: date-time}
+        message_count: {type: integer}
+        summary: {type: string}
+        model_id: {type: string}
+        updated_at: {type: string, format: date-time}
+        edited: {type: boolean, description: '`edited` says the person corrected it (#342); later summaries keep their corrections.'}
+    Event:
+      type: object
+      description: A structured Heimdall event.
+      required: [contract, id, timestamp, type]
+      properties:
+        id: {type: string}
+        type: {type: string}
+        timestamp: {type: string, format: date-time}
+        task_id: {type: string}
+        node_id: {type: string}
+        payload:
+          type: object
+          additionalProperties: {}
+        contract: {type: string, description: The client contract the event is written in (§68).}
+    Run:
+      type: object
+      description: A traced request.
+      required: [contract, id, models, nodes, retries, started_at, status, strategy, tools, verification_passes]
+      properties:
+        id: {type: string}
+        contract: {type: string, description: The client contract the trace is written in (§68).}
+        conversation_id: {type: string}
+        profile_id: {type: string}
+        source: {type: string}
+        client: {type: string, description: 'The app that asked: phone, tablet, watch, tv, desktop, or web, or other; empty when it didn''t say, such as an API call (#498).'}
+        remote: {type: boolean, description: Set when the request came from outside the home network.}
+        strategy:
+          type: array
+          items: {type: string}
+        effort: {type: string}
+        status: {type: string}
+        error: {type: string, description: The English text; ErrorCode and ErrorDetails let clients show it in the App language (multilingual spec §10).}
+        error_code: {type: string}
+        error_details:
+          type: object
+          additionalProperties: {}
+        started_at: {type: string, format: date-time}
+        completed_at: {type: string, format: date-time}
+        latency_ms: {type: number}
+        pipeline_ms: {type: number, description: The time before the first model call.}
+        models:
+          type: array
+          items: {$ref: '#/components/schemas/ModelUse'}
+        tools:
+          type: array
+          items: {$ref: '#/components/schemas/ToolUse'}
+        nodes:
+          type: array
+          items: {type: string}
+        workers: {type: integer, description: How many parts a plan had; 0 when there was no plan.}
+        parallel: {type: boolean}
+        verification_passes: {type: integer, description: '`verification_passes` counts answer checks; Issues and Fixed what they found.'}
+        verification_issues: {type: integer}
+        verification_fixed: {type: integer}
+        retries: {type: integer, description: '`retries` counts answers tried again on another model.'}
+        context_tokens: {type: integer}
+        context_limit: {type: integer}
+        cache_hits:
+          type: object
+          description: '`cache_hits` counts tool calls answered from a cache, by tool (§36).'
+          additionalProperties: {type: integer}
+        topic: {type: string, description: 'What an Enforce profile''s topic check found (#345): on_topic, small_talk, off_topic when the set reply went out without an answer, or answer_off_topic when the answer was replaced by it.'}
+    ModelUse:
+      type: object
+      description: One model's part in a run.
+      required: [cached_tokens, calls, completion_tokens, model_id, prompt_tokens]
+      properties:
+        model_id: {type: string}
+        role: {type: string}
+        node: {type: string}
+        calls: {type: integer}
+        load_ms: {type: number, description: 'Time spent starting the model for this run, if it had to.'}
+        first_token_ms: {type: number, description: 'The wait for the first token of the first call, including loading.'}
+        ttft_ms: {type: number}
+        prompt_tokens: {type: integer}
+        completion_tokens: {type: integer}
+        cached_tokens: {type: integer}
+        tok_per_sec: {type: number}
+        backend: {type: string, description: '`backend` and Device ran the model, such as vulkan and "AMD Radeon RX 7900 XTX" (#317); empty when not known, such as on a paired computer.'}
+        device: {type: string}
+    ToolUse:
+      type: object
+      description: One tool's part in a run.
+      required: [calls, tool_id, total_ms]
+      properties:
+        tool_id: {type: string}
+        calls: {type: integer}
+        failures: {type: integer}
+        total_ms: {type: number}
+    FirstAnswers:
+      type: object
+      description: How long people waited for the first word of an answer (#498), by the app they asked from and whether a model had to load first.
+      required: [groups, since]
+      properties:
+        since: {type: string, format: date-time}
+        groups:
+          type: array
+          items: {$ref: '#/components/schemas/FirstAnswersGroup'}
+    FirstAnswersGroup:
+      type: object
+      description: One app's answers, cold (a model loaded first) or warm (every model was already running).
+      required: [client, cold, first_word_ms, first_word_p90_ms, runs]
+      properties:
+        client: {type: string, description: As in Run; empty for requests that didn't say.}
+        cold: {type: boolean}
+        runs: {type: integer}
+        remote: {type: integer, description: '`remote` counts the runs that came from outside the home network.'}
+        first_word_ms: {type: number, description: The median wait from the request to the first token; FirstWordP90Ms is the wait nine in ten answers beat.}
+        first_word_p90_ms: {type: number}
+        load_ms: {type: number, description: The median time spent loading models; 0 when warm.}
+    MessageMeta:
+      type: object
+      description: What an assistant answer used and did.
+      properties:
+        sources:
+          type: array
+          items: {$ref: '#/components/schemas/Citation'}
+        steps:
+          type: array
+          items: {$ref: '#/components/schemas/ActivityStep'}
+        notice: {type: string, description: '`notice` tells the user something changed that may affect the answer, such as a smaller model answering after the chosen one failed.'}
+        files:
+          type: array
+          description: Attached to a question or produced with an answer.
+          items: {$ref: '#/components/schemas/FileRef'}
+        run_id: {type: string, description: '`run_id` names the run trace behind the answer (§35), at GET /api/v1/runs/{id}.'}
+        contract: {type: string, description: 'The client contract the metadata was written in (§68). Metadata saved before the contract existed has none, and reads as 1.0.'}
+        setup: {$ref: '#/components/schemas/SetupOffer'}
+        context: {$ref: '#/components/schemas/ContextUsage'}
+        backend: {type: string, description: '`backend` and Device ran the answer, such as vulkan and "AMD Radeon RX 7900 XTX", or cpu and "" (#317, contract 1.8), so a client such as the iPhone app can say whether it came from the GPU. Empty when not known, such as when a step ran on a paired computer.'}
+        device: {type: string}
+        automation: {$ref: '#/components/schemas/AutomationDraft'}
+        automation_run: {$ref: '#/components/schemas/AutomationRun'}
+        deliberation:
+          type: object
+          description: 'How the answer was reached when its profile deliberates: the drafts compared and the outcome (#459, contract 1.23).'
+          required: [drafts, outcome]
+          properties:
+            outcome: {type: string, description: 'Agreed (every draft gave the same short final answer), majority (most did), disagreed (no answer had a majority), or long (the answers weren''t short, so there was nothing to compare).'}
+            final: {type: string, description: 'The final answer kept, when there was one.'}
+            drafts:
+              type: array
+              items:
+                type: object
+                description: One independent draft.
+                required: [role]
+                properties:
+                  role: {type: string, description: 'The turn''s own role for the first draft, then drafter:2…'}
+                  model_id: {type: string}
+                  node_id: {type: string}
+                  node_name: {type: string, description: 'The computer it ran on, for people.'}
+                  final: {type: string, description: 'Its short final answer, when it gave one.'}
+                  text: {type: string, description: 'The draft, cut to a few thousand characters.'}
+                  chosen: {type: boolean}
+                  failed: {type: boolean}
+            critiques:
+              type: array
+              description: Each draft checked by another drafter, when the drafts disagreed or were too long to compare (contract 1.24).
+              items:
+                type: object
+                description: One draft checked against the others.
+                required: [critic, draft]
+                properties:
+                  draft: {type: integer, description: The index of the draft checked; Critic the drafter's role.}
+                  critic: {type: string}
+                  claims:
+                    type: array
+                    items: {type: string}
+                  disagreements:
+                    type: array
+                    items: {type: string}
+                  likely_errors:
+                    type: array
+                    items: {type: string}
+                  failed: {type: boolean}
+            judge:
+              type: object
+              description: '`judge` wrote the answer from the drafts and critiques, when it did (contract 1.24). Then no draft is chosen.'
+              required: [role]
+              properties:
+                role: {type: string}
+                model_id: {type: string}
+                node_id: {type: string}
+                node_name: {type: string}
+        reasoning:
+          type: object
+          description: How long a reasoning model thought before it answered, and what it thought (#701, contract 1.43).
+          required: [ms]
+          properties:
+            ms: {type: integer, format: int64, description: 'How long it thought, in milliseconds.'}
+            text: {type: string, description: 'What it thought, cut at 20,000 characters; empty when the model didn''t say.'}
+    Citation:
+      type: object
+      description: A source an answer drew on. The product renders citations; the model is not asked to invent citation syntax.
+      required: [kind, title]
+      properties:
+        kind: {type: string, description: 'Web, knowledge, or file.'}
+        title: {type: string}
+        url: {type: string}
+        source: {type: string, description: The knowledge source name or the file path.}
+        snippet: {type: string}
+        artifact_id: {type: string, description: 'The chat file a file citation names, so a client can offer it for download (contract 1.9).'}
+    ActivityStep:
+      type: object
+      description: One thing the assistant did for an answer, in plain language.
+      required: [kind, text]
+      properties:
+        kind: {type: string, description: 'Knowledge, memory, search, read, file, write, create, command, git, route, or recover.'}
+        text: {type: string}
+    FileRef:
+      type: object
+      description: Points at a stored file (an artifact). Its bytes are at GET /api/v1/artifacts/{id}/content.
+      required: [id, kind, mime_type, name, producer, size_bytes]
+      properties:
+        id: {type: string}
+        name: {type: string}
+        mime_type: {type: string}
+        kind: {type: string, description: 'Document, spreadsheet, pdf, image, code, or other.'}
+        size_bytes: {type: integer, format: int64}
+        producer: {type: string, description: 'User for an attachment, assistant for a produced file.'}
+        details:
+          type: object
+          description: 'How a made file was made, such as a picture''s model, quality, seed, size, and prompt (contract 1.29, #553).'
+          additionalProperties: {}
+    SetupOffer:
+      type: object
+      description: Offers to install a missing ability, such as image generation, and to finish the request once it is ready.
+      required: [ability, label, name, option, size_bytes]
+      properties:
+        ability: {type: string, description: 'The inventory ability, such as image_generation.'}
+        label: {type: string}
+        option: {type: string, description: 'What to install: for image_generation, the model id for POST /api/v1/images/setup.'}
+        name: {type: string}
+        size_bytes: {type: integer, format: int64}
+        node_id: {type: string}
+        node_name: {type: string}
+        request: {type: string, description: The message to send again once it is set up; empty for a question about the ability.}
+        slow: {type: boolean, description: '`slow` says the computer it runs on has no GPU acceleration for it, so each picture takes minutes and a clip can take most of an hour (contract 1.12).'}
+        tight_memory: {type: boolean, description: '`tight_memory` says the computer has less memory than the model is comfortable with, so it may be slow or fail (contract 1.12).'}
+        verdict: {type: string, description: 'Works, tight (set up only when the person agrees), or unsupported; for tight, Short is what it''s short of (memory, graphics for a card''s own memory, or shared for the share of memory Apple silicon''s graphics may use), NeedBytes what the model needs of it, and HaveBytes what the computer has (contract 1.34, #550).'}
+        short: {type: string}
+        need_bytes: {type: integer, format: int64}
+        have_bytes: {type: integer, format: int64}
+        remote: {type: boolean, description: '`remote` says NodeID is a paired computer, not this one, and FreeBytes is its free disk space when known (contract 1.14, #153). The app sets it up there with ?node_id= on the setup routes.'}
+        free_bytes: {type: integer, format: int64}
+        attachments:
+          type: array
+          description: 'The files to send again with Request, such as the pictures a vision model is set up to look at (contract 1.28, #529). For ability "vision", Option is the model id for POST /api/v1/models/{id}/install.'
+          items: {type: string}
+        reason: {type: string, description: '`reason` and Fit are for a model offer (#707, contract 1.45; ability model): why the model would answer this kind of request better (coding, data, language, reasoning, or context), and how well it fits this computer (excellent or good). Request is then answered again with Option.'}
+        fit: {type: string}
+    AutomationDraft:
+      type: object
+      description: An automation a chat drafted from a request. A client shows it and, when the person confirms, creates it with POST /api/v1/automations, passing ID as draft_id and the conversation as conversation_id; creating the same draft again returns that automation.
+      required: [id, name, notification, prompt, schedule]
+      properties:
+        id: {type: string}
+        name: {type: string}
+        prompt: {type: string}
+        schedule: {description: '`schedule` and Notification are the automation''s, as POST /api/v1/automations takes them.'}
+        notification: {}
+        profile_id: {type: string, description: 'The chat''s profile, which runs it.'}
+        notes:
+          type: array
+          description: '`notes` say what was assumed, such as a time the request didn''t give, in the App language.'
+          items: {type: string}
+    AutomationRun:
+      type: object
+      description: The automation run a chat message came from.
+      required: [automation_id, name, run_id]
+      properties:
+        automation_id: {type: string}
+        run_id: {type: string}
+        name: {type: string, description: The automation's name when it ran.}
+    ContextUsage:
+      type: object
+      description: How a turn used the model's context window, in tokens.
+      required: [conversation, instructions, limit, prompt_tokens, tool_results, tools]
+      properties:
+        prompt_tokens: {type: integer}
+        limit: {type: integer}
+        instructions: {type: integer}
+        tools: {type: integer}
+        conversation: {type: integer}
+        tool_results: {type: integer}
+        estimated: {type: boolean}
+        summarized_messages: {type: integer, description: Older messages the model saw as a summary.}
+        memory_bytes: {type: integer, format: int64, description: 'About how much memory the window reserves, when the model ran on this computer.'}
+    ConversationsDeleted:
+      type: object
+      description: What a bulk delete removed, and what it left and why.
+      required: [deleted, skipped]
+      properties:
+        deleted:
+          type: array
+          items: {type: string}
+        skipped:
+          type: array
+          items: {$ref: '#/components/schemas/ConversationSkipped'}
+    ConversationSkipped:
+      type: object
+      description: 'A chat a bulk delete left. Reason is not_found: there''s no such chat, or it''s someone else''s.'
+      required: [id, reason]
+      properties:
+        id: {type: string}
+        reason: {type: string}
+    ModelWarmRequest:
+      type: object
+      description: 'Asks this computer to load the model a chat would use, before the question arrives (#498): a device sends it when someone starts asking. model_id empty or "auto" means the model Auto would pick for a chat on profile_id (empty: the default profile).'
+      properties:
+        profile_id: {type: string}
+        model_id: {type: string}
+    ModelWarmResponse:
+      type: object
+      description: Says what a warm-up did. Status is loading (started now, or already starting), loaded (ready), busy (a model is answering, so nothing new loads), no_room (it wouldn't fit beside the loaded models), not_local (not installed on this computer), or none (nothing to load).
+      required: [status]
+      properties:
+        model_id: {type: string}
+        status: {type: string}
+    EgressRecord:
+      type: object
+      description: One time data left this computer.
+      required: [at, destination, id, kind]
+      properties:
+        id: {type: string}
+        at: {type: string, format: date-time}
+        kind: {type: string}
+        destination: {type: string, description: 'Where it went: a host, a paired computer''s name, or a connected service.'}
+        detail: {type: string, description: 'What went: a search query, a page address, or what was sent.'}
+        source: {type: string}
+        conversation_id: {type: string}
+        task_id: {type: string}
+    ContractInfo:
+      type: object
+      description: Describes the contract in /api/v1/version.
+      required: [major, version]
+      properties:
+        version: {type: string}
+        major: {type: integer, description: The major version clients must match.}
+    ErrorBody:
+      type: object
+      description: The standard public API error envelope.
+      required: [code, message]
+      properties:
+        code: {type: string}
+        message: {type: string}
+        details:
+          type: object
+          additionalProperties: {}
+    ChatStopped:
+      type: object
+      description: Says whether a turn was running to stop.
+      required: [stopped]
+      properties:
+        stopped: {type: boolean}
