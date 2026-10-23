@@ -104,18 +104,20 @@ func (s *Server) signInReady(w http.ResponseWriter) bool {
 	return true
 }
 
-// handleMe is who the request is from (#206): their person, role, and how
+// meView is who the request is from (#206): their person, role, and how
 // Toskar knows, so a client can show what that person may do.
+type meView struct {
+	auth.Principal
+	// Profiles are the profiles they may chat with, when they're pinned to
+	// some (#345).
+	Profiles []string `json:"profiles,omitempty"`
+	// Capabilities are what they may use (#589), so an app hides the rest.
+	Capabilities auth.Capabilities `json:"capabilities"`
+}
+
 func (s *Server) handleMe(w http.ResponseWriter, r *http.Request) {
-	writeJSON(w, http.StatusOK, struct {
-		auth.Principal
-		// Profiles are the profiles they may chat with, when they're
-		// pinned to some (#345).
-		Profiles []string `json:"profiles,omitempty"`
-		// Capabilities are what they may use (#589), so an app hides the
-		// rest.
-		Capabilities auth.Capabilities `json:"capabilities"`
-	}{auth.PrincipalFrom(r.Context()), s.myProfiles(r), s.capabilitiesOf(r.Context(), auth.PrincipalFrom(r.Context()).Person)})
+	principal := auth.PrincipalFrom(r.Context())
+	writeJSON(w, http.StatusOK, meView{principal, s.myProfiles(r), s.capabilitiesOf(r.Context(), principal.Person)})
 }
 
 // setSession signs the browser in as person.
@@ -364,7 +366,7 @@ func (s *Server) handleAddPerson(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		person, _ = s.deps.People.Get(r.Context(), person.ID)
-		writeJSON(w, http.StatusCreated, map[string]any{"person": person})
+		writeJSON(w, http.StatusCreated, addedPerson{Person: person})
 		return
 	}
 	link, err := s.makeLink(r, person)
@@ -372,7 +374,14 @@ func (s *Server) handleAddPerson(w http.ResponseWriter, r *http.Request) {
 		writeErr(w, http.StatusInternalServerError, "INTERNAL_ERROR", err.Error(), nil)
 		return
 	}
-	writeJSON(w, http.StatusCreated, map[string]any{"person": person, "link": link})
+	writeJSON(w, http.StatusCreated, addedPerson{Person: person, Link: &link})
+}
+
+// addedPerson is the person just added, and the link that lets them set a
+// password, unless the Admin set one.
+type addedPerson struct {
+	Person auth.Person `json:"person"`
+	Link   *linkView   `json:"link,omitempty"`
 }
 
 func (s *Server) handleChangePerson(w http.ResponseWriter, r *http.Request) {

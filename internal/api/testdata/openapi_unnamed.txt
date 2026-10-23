@@ -10,12 +10,10 @@ get /api/v1/diagnostics/first-answers 200
 get /api/v1/diagnostics/report 200
 get /api/v1/diagnostics/runtime 200
 get /api/v1/egress 200
-get /api/v1/invites/{token} 200
 get /api/v1/knowledge/sources/{id}/content 200
 get /api/v1/logs 200
 get /api/v1/logs/{name} 200
 get /api/v1/mcp/servers 200
-get /api/v1/me 200
 get /api/v1/me/devices 200
 get /api/v1/memory 200
 get /api/v1/models/browse 200
@@ -25,8 +23,6 @@ get /api/v1/models/recommend 200
 get /api/v1/network 200
 get /api/v1/news 200
 get /api/v1/notifications 200
-get /api/v1/oidc 200
-get /api/v1/people 200
 get /api/v1/portals 200
 get /api/v1/portals/{id} 200
 get /api/v1/portals/{id}/conversations 200
@@ -49,7 +45,6 @@ get /api/v1/training/deployed 200
 get /api/v1/training/samples 200
 get /api/v1/updates 200
 get /v1/models 200
-patch /api/v1/people/{id} 200
 patch /api/v1/portals/{id} 200
 post /api/v1/api-keys 201
 post /api/v1/api-keys/{id}/rotate 200

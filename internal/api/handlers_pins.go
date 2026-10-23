@@ -58,7 +58,13 @@ func (s *Server) handleProfilePins(w http.ResponseWriter, r *http.Request) {
 	for role, list := range roles {
 		out[string(role)] = list
 	}
-	writeJSON(w, http.StatusOK, map[string]any{"roles": out})
+	writeJSON(w, http.StatusOK, profilePinsView{Roles: out})
+}
+
+// profilePinsView is the profiles each role is pinned to (#345); a role
+// pinned to none may use any.
+type profilePinsView struct {
+	Roles map[string][]string `json:"roles"`
 }
 
 func (s *Server) handleSetRoleProfiles(w http.ResponseWriter, r *http.Request) {

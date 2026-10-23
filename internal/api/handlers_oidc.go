@@ -63,10 +63,17 @@ func (s *Server) oidc() (*auth.OIDC, error) {
 func (s *Server) handleOIDCInfo(w http.ResponseWriter, _ *http.Request) {
 	o, err := s.oidc()
 	if err != nil || o == nil {
-		writeJSON(w, http.StatusOK, map[string]any{"enabled": false})
+		writeJSON(w, http.StatusOK, oidcInfo{})
 		return
 	}
-	writeJSON(w, http.StatusOK, map[string]any{"enabled": true, "label": o.Label()})
+	writeJSON(w, http.StatusOK, oidcInfo{Enabled: true, Label: o.Label()})
+}
+
+// oidcInfo says whether the sign-in screen offers an OpenID Connect
+// provider, and the name to show on its button.
+type oidcInfo struct {
+	Enabled bool   `json:"enabled"`
+	Label   string `json:"label,omitempty"`
 }
 
 // localPath is return when it's a path in Toskar, else "/".
