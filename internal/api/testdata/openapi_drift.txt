@@ -1,0 +1,45 @@
+get /api/v1/artifacts/{id}/content 200: content type text/html not described
+get /api/v1/artifacts/{id}/content 200: content type text/markdown not described
+get /api/v1/devices/pairing 200: body not described
+get /api/v1/me 200: $.capabilities: not described
+get /api/v1/me 200: $.person.email: not described
+get /api/v1/me 200: $.person.external: not described
+get /api/v1/me 200: $.person.must_change: not described
+get /api/v1/me 200: $.person.portal_id: not described
+get /api/v1/me 200: $.person.profiles: not described
+get /api/v1/me 200: $.person.sign_in: not described
+get /api/v1/me 200: $.profiles: not described
+get /api/v1/me/devices 200: $[]: an object with no described fields
+get /api/v1/people 200: $[].created_at: not described
+get /api/v1/people 200: $[].email: not described
+get /api/v1/people/activity 200: body not described
+get /api/v1/people/{id} 200: body not described
+get /api/v1/people/{id}/keys 200: body not described
+get /api/v1/portals/{id}/visitors 200: $[]: an object with no described fields
+get /api/v1/portals/{slug}/page 200: $: an object with no described fields
+get /api/v1/remote-access/route 200: body not described
+get /api/v1/roles/capabilities 200: body not described
+get /api/v1/training/base-models 200: $: an array, but described as an object
+patch /api/v1/models/{id} 200: body not described
+patch /api/v1/people/{id} 200: $.created_at: not described
+patch /api/v1/people/{id} 200: $.must_change: not described
+post /api/v1/chat 200: $.ok: not described
+post /api/v1/conversations/{id}/from-summary 201: body not described
+post /api/v1/devices/pair 201: body not described
+post /api/v1/devices/pairing 201: body not described
+post /api/v1/invites/{token} 200: body not described
+post /api/v1/knowledge/sources 201: $.language: not described
+post /api/v1/knowledge/sources 201: $.languages: not described
+post /api/v1/me/devices 201: $: an object with no described fields
+post /api/v1/me/password 200: body not described
+post /api/v1/people 201: body not described
+post /api/v1/portals/{id}/visitors 201: $: an object with no described fields
+post /api/v1/portals/{slug}/enter 200: $: an object with no described fields
+post /api/v1/session 200: body not described
+put /api/v1/conversations/{id}/messages/{mid}/shown 200: body not described
+put /api/v1/conversations/{id}/summary 200: body not described
+put /api/v1/models/{id}/projector 200: body not described
+put /api/v1/people/{id}/capabilities 200: body not described
+put /api/v1/people/{id}/profiles 200: body not described
+put /api/v1/profile-pins/{role} 200: body not described
+put /api/v1/roles/{role}/capabilities 200: body not described

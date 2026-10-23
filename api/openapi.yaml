@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Toskar Control Plane API
-  version: 1.4.0
+  version: "1.55"
   description: >-
     Local AI control plane API for Toskar, its OpenAI-compatible routes, and its MCP server.
     On the default loopback bind no key is needed. When the daemon listens on any other address,
@@ -4148,8 +4148,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
-        "503":
-          description: Speech cannot run on this computer
   /api/v1/images/setup/build:
     post:
       summary: Switch stable-diffusion.cpp to its CPU build, or back to its GPU build

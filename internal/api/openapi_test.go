@@ -10,6 +10,8 @@ import (
 
 	"github.com/gorilla/mux"
 	"gopkg.in/yaml.v3"
+
+	"github.com/yeixio/toskar-core/pkg/contracts"
 )
 
 type openAPIDoc struct {
@@ -134,5 +136,77 @@ func TestOpenAPIIsConsistent(t *testing.T) {
 		if _, ok := doc.Components.Schemas[match[1]]; !ok {
 			t.Errorf("schema %q is referenced but not defined", match[1])
 		}
+	}
+}
+
+// The spec's version is the client contract's, so a generated SDK says
+// which contract it was built for (#666).
+func TestOpenAPIVersionIsTheContract(t *testing.T) {
+	_, raw := loadOpenAPI(t)
+	var head struct {
+		Info struct {
+			Version string `yaml:"version"`
+		} `yaml:"info"`
+	}
+	if err := yaml.Unmarshal([]byte(raw), &head); err != nil {
+		t.Fatal(err)
+	}
+	if head.Info.Version != contracts.ContractVersion {
+		t.Errorf("api/openapi.yaml info.version is %q; it follows the contract, %q (pkg/contracts/contract.go)", head.Info.Version, contracts.ContractVersion)
+	}
+}
+
+// Generated SDKs name their types after the spec's schemas, so a JSON
+// response is a named schema (or a list of one), not an object described
+// in place (#666). The operations that aren't yet are listed in
+// testdata/openapi_unnamed.txt; the list may only shrink.
+func TestOpenAPIResponsesAreNamed(t *testing.T) {
+	_, raw := loadOpenAPI(t)
+	var spec map[string]any
+	if err := yaml.Unmarshal([]byte(raw), &spec); err != nil {
+		t.Fatal(err)
+	}
+	spec = normalize(spec).(map[string]any)
+	var unnamed []string
+	for path, ops := range asMap(spec["paths"]) {
+		for m, op := range asMap(ops) {
+			if !openAPIMethods[m] {
+				continue
+			}
+			for code, resp := range asMap(asMap(op)["responses"]) {
+				if !strings.HasPrefix(code, "2") {
+					continue
+				}
+				schema := asMap(asMap(asMap(asMap(resp)["content"])["application/json"])["schema"])
+				if schema == nil || schema["$ref"] != nil || asMap(schema["items"])["$ref"] != nil {
+					continue
+				}
+				unnamed = append(unnamed, m+" "+path+" "+code)
+			}
+		}
+	}
+	sort.Strings(unnamed)
+	const file = "testdata/openapi_unnamed.txt"
+	if os.Getenv("UPDATE_OPENAPI_DRIFT") != "" {
+		if err := os.WriteFile(file, []byte(strings.Join(unnamed, "\n")+"\n"), 0o644); err != nil {
+			t.Fatal(err)
+		}
+		return
+	}
+	raw2, _ := os.ReadFile(file)
+	listed := map[string]bool{}
+	for _, line := range strings.Split(string(raw2), "\n") {
+		if line = strings.TrimSpace(line); line != "" {
+			listed[line] = true
+		}
+	}
+	for _, u := range unnamed {
+		if !listed[u] {
+			t.Errorf("%s describes its JSON in place; give it a named schema in components/schemas", u)
+		}
+		delete(listed, u)
+	}
+	for done := range listed {
+		t.Errorf("%s has a named schema now; remove it from %s", done, file)
 	}
 }

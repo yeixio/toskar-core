@@ -491,8 +491,15 @@ func (s *Server) apiRouteMissing(w http.ResponseWriter, r *http.Request) {
 
 // Handler returns the root HTTP handler.
 func (s *Server) Handler() http.Handler {
+	if wrapHandler != nil {
+		return wrapHandler(s.router)
+	}
 	return s.router
 }
+
+// wrapHandler is set only by this package's tests, which check every
+// response they see against api/openapi.yaml (openapi_responses_test.go).
+var wrapHandler func(*mux.Router) http.Handler
 
 // ListenAndServe starts the server on addr, and serves until Shutdown. A
 // Rebind swaps the socket without returning.
