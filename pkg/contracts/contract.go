@@ -17,6 +17,8 @@ import (
 //     client built for another major version is told to update.
 //
 // tests/contract checks that no field in the contract is removed or renamed.
+// api/openapi.yaml's info.version is this version too, so the SDKs
+// generated from it say which contract they were built for (#666).
 const ContractVersion = "1.55"
 
 // Headers that carry the contract version. Each has a name from before the

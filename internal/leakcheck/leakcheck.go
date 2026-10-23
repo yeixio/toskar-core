@@ -41,6 +41,12 @@ var expected = []string{
 // stacks to accept, as substrings, for goroutines a package starts on
 // purpose for the life of the process.
 func Main(m *testing.M, ignore ...string) {
+	os.Exit(Run(m, ignore...))
+}
+
+// Run is Main without exiting: it returns the exit code, so a TestMain can
+// check more before it exits.
+func Run(m *testing.M, ignore ...string) int {
 	code := m.Run()
 	if code == 0 {
 		if leaks := Find(settle, ignore...); len(leaks) > 0 {
@@ -48,7 +54,7 @@ func Main(m *testing.M, ignore ...string) {
 			code = 1
 		}
 	}
-	os.Exit(code)
+	return code
 }
 
 // Find waits up to wait for goroutines other than the caller, the runtime,
