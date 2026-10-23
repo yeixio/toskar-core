@@ -1063,7 +1063,7 @@ paths:
               schema:
                 type: array
                 items:
-                  type: object
+                  $ref: "#/components/schemas/MyDevice"
     post:
       summary: Connect a companion device, such as a watch with its phone
       description: >-
@@ -1087,7 +1087,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
+                $ref: "#/components/schemas/PairedDevice"
         "409":
           description: DEVICE_LIMIT, the person has 20 connected devices
   /api/v1/me/devices/{id}:
@@ -1170,6 +1170,10 @@ paths:
       responses:
         "200":
           description: route_secret and route_id
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeviceRoute"
         "403":
           description: ROUTE_NOT_LOCAL
   /api/v1/remote-access/relay-token:
@@ -2295,12 +2299,20 @@ paths:
       responses:
         "201":
           description: The code, when it expires, this computer's address, and whether a phone can reach it yet
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DevicePairing"
     get:
       summary: Whether a phone has connected with the code shown
       operationId: getDevicePairing
       responses:
         "200":
           description: The state (waiting, connected, expired, or cancelled) and the phone's key record, without the code
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DevicePairing"
     delete:
       summary: Stop showing the code
       operationId: cancelDevicePairing
@@ -2329,6 +2341,10 @@ paths:
       responses:
         "201":
           description: The phone's key (api_key, shown once) and its record, with kind device
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PairedDevice"
         "401":
           description: PAIRING_WRONG_CODE
         "403":
@@ -8108,3 +8124,45 @@ components:
       properties:
         enabled: {type: boolean}
         label: {type: string, description: "The provider's name for its button"}
+    DevicePairing:
+      type: object
+      description: "A code shown to connect a device (#216), and what became of it."
+      required: [expires_at, state, reachable]
+      properties:
+        code: {type: string, description: "The 6 digits; only when the code is made"}
+        expires_at: {type: string, format: date-time}
+        state: {type: string, enum: [waiting, connected, expired, cancelled]}
+        device: {$ref: "#/components/schemas/APIKey"}
+        address: {type: string, description: "This computer's address on the local network, such as 192.168.1.20:7331"}
+        reachable: {type: boolean, description: "False while the API answers only on this computer, so a device can't connect yet"}
+        tls_short: {type: string, description: "The start of the certificate's fingerprint, which the device shows too (#213)"}
+    PairedDevice:
+      type: object
+      description: "A newly connected device's key, shown once, with the certificate to pin from now on (#213) and, when this computer has one, its route (#456)."
+      required: [api_key, key, tls_fingerprint, tls_short]
+      properties:
+        api_key: {type: string, description: "The device's own key; keep it, it isn't shown again"}
+        key: {$ref: "#/components/schemas/APIKey"}
+        tls_fingerprint: {type: string, description: "SHA-256 of the API certificate's public key, to pin"}
+        tls_short: {type: string}
+        route_secret: {type: string, description: "Seals and finds this computer's address record (#456); present when it has access from anywhere"}
+        route_id: {type: string}
+        relay: {type: string, description: "The relay it's reached through, such as relay.toskar.ai"}
+        token: {type: string, description: "This computer's token for the relay, for every paired device on the home network"}
+    DeviceRoute:
+      type: object
+      description: "How a paired device finds this computer away from home (#456)."
+      required: [route_secret, route_id]
+      properties:
+        route_secret: {type: string, description: "Seals and finds this computer's address record (#456); present when it has access from anywhere"}
+        route_id: {type: string}
+        relay: {type: string, description: "The relay it's reached through, such as relay.toskar.ai"}
+        token: {type: string, description: "This computer's token for the relay, for every paired device on the home network"}
+    MyDevice:
+      description: "One of your connected devices, and whether it takes pushes from the Toskar app (#460)."
+      allOf:
+        - $ref: "#/components/schemas/APIKey"
+        - type: object
+          required: [push]
+          properties:
+            push: {type: boolean}

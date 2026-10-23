@@ -14,7 +14,6 @@ get /api/v1/knowledge/sources/{id}/content 200
 get /api/v1/logs 200
 get /api/v1/logs/{name} 200
 get /api/v1/mcp/servers 200
-get /api/v1/me/devices 200
 get /api/v1/memory 200
 get /api/v1/models/browse 200
 get /api/v1/models/fit 200
@@ -59,7 +58,6 @@ post /api/v1/conversations/delete 200
 post /api/v1/diagnostics 200
 post /api/v1/join-tokens 201
 post /api/v1/knowledge/search 200
-post /api/v1/me/devices 201
 post /api/v1/models/import 200
 post /api/v1/models/install-from-url 200
 post /api/v1/models/install-from-url/preview 200
