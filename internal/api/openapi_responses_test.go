@@ -12,6 +12,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"testing"
 
 	"github.com/gorilla/mux"
 	"gopkg.in/yaml.v3"
@@ -174,6 +175,9 @@ func checkResponse(spec map[string]any, method, template string, status int, con
 	if described == nil {
 		return []string{fmt.Sprintf("%s: content type %s not described", where, media)}
 	}
+	if media == "text/event-stream" {
+		return checkStream(spec, described, body, where)
+	}
 	if media != "application/json" {
 		return nil
 	}
@@ -188,6 +192,73 @@ func checkResponse(spec map[string]any, method, template string, status int, con
 	var out []string
 	for _, d := range checkValue(spec, schema, value, "$", 0) {
 		out = append(out, where+": "+d)
+	}
+	return out
+}
+
+// checkStream checks a stream of server-sent events against the media
+// type's x-events: each event's name, and its data against that event's
+// schema ("*" for any name). OpenAPI 3.0 has no way to describe the
+// events, so the spec names them in this extension.
+func checkStream(spec, described map[string]any, body []byte, where string) []string {
+	events := asMap(described["x-events"])
+	if events == nil {
+		return []string{where + ": stream events not described (x-events)"}
+	}
+	var out []string
+	seen := map[string]bool{}
+	for _, e := range parseSSE(body) {
+		schema := asMap(events[e.name])
+		if schema == nil {
+			schema = asMap(events["*"])
+		}
+		var drift []string
+		if schema == nil {
+			drift = []string{"event " + e.name + ": not described"}
+		} else if resolve(spec, schema)["type"] != "string" {
+			var value any
+			if err := json.Unmarshal([]byte(e.data), &value); err != nil {
+				drift = []string{"event " + e.name + ": data isn't JSON"}
+			} else {
+				for _, d := range checkValue(spec, schema, value, "$", 0) {
+					drift = append(drift, "event "+e.name+": "+d)
+				}
+			}
+		}
+		for _, d := range drift {
+			if !seen[d] {
+				seen[d] = true
+				out = append(out, where+": "+d)
+			}
+		}
+	}
+	return out
+}
+
+type sseEvent struct{ name, data string }
+
+// parseSSE reads server-sent events: blocks of "event:" and "data:" lines,
+// with comments (":") left out. An event without a name is "message".
+func parseSSE(body []byte) []sseEvent {
+	var out []sseEvent
+	for _, block := range strings.Split(strings.ReplaceAll(string(body), "\r\n", "\n"), "\n\n") {
+		e := sseEvent{name: "message"}
+		var data []string
+		for _, line := range strings.Split(block, "\n") {
+			field, value, _ := strings.Cut(line, ":")
+			value = strings.TrimPrefix(value, " ")
+			switch field {
+			case "event":
+				e.name = value
+			case "data":
+				data = append(data, value)
+			}
+		}
+		if data == nil {
+			continue
+		}
+		e.data = strings.Join(data, "\n")
+		out = append(out, e)
 	}
 	return out
 }
@@ -386,4 +457,33 @@ func kind(v any) string {
 		return "a boolean"
 	}
 	return "null"
+}
+
+// The stream check reads server-sent events as clients do, and holds each
+// to the spec's x-events.
+func TestOpenAPIStreamCheck(t *testing.T) {
+	spec := specResponses.spec
+	stream := "event: token\ndata: {\"content\":\"Hel\"}\n\n: ping\n\nevent: token\ndata: {\"content\":\"lo\"}\n\nevent: done\ndata: {}\n\n"
+	if d := checkResponse(spec, "post", "/api/v1/chat", 200, "text/event-stream", []byte(stream)); len(d) > 0 {
+		t.Errorf("a well-formed chat stream: %v", d)
+	}
+	bad := "event: token\ndata: {\"text\":\"Hi\"}\n\nevent: thinking\ndata: {}\n\n"
+	got := checkResponse(spec, "post", "/api/v1/chat", 200, "text/event-stream", []byte(bad))
+	want := []string{
+		"post /api/v1/chat 200: event token: $.content: required, but missing",
+		"post /api/v1/chat 200: event token: $.text: not described",
+		"post /api/v1/chat 200: event thinking: not described",
+	}
+	sort.Strings(got)
+	sort.Strings(want)
+	if strings.Join(got, "\n") != strings.Join(want, "\n") {
+		t.Errorf("a stream that doesn't match:\n got  %q\n want %q", got, want)
+	}
+	// Any event name on /events is an Event.
+	events := "event: model.unloaded\ndata: {}\n\n"
+	for _, d := range checkResponse(spec, "get", "/api/v1/events", 200, "text/event-stream", []byte(events)) {
+		if strings.Contains(d, "not described") {
+			t.Errorf("an event stream: %s", d)
+		}
+	}
 }

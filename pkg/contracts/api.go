@@ -925,6 +925,32 @@ type GenerationMetrics struct {
 	TotalMs          float64 `json:"total_ms"`
 	PromptTokPerSec  float64 `json:"prompt_tok_per_sec"`
 	EvalTokPerSec    float64 `json:"eval_tok_per_sec"`
+	// CachedTokens are prompt tokens reused from the model's cache instead
+	// of processed again, when the runtime reports them.
+	CachedTokens int `json:"cached_tokens,omitempty"`
+}
+
+// ChatAnswer is POST /api/v1/chat's answer when it isn't streamed: the
+// whole reply, and how the model did when the runtime said.
+type ChatAnswer struct {
+	Content string             `json:"content"`
+	Metrics *GenerationMetrics `json:"metrics,omitempty"`
+}
+
+// A streamed chat is server-sent events (#588): token events with the
+// answer as it's written, then done when it finished, or error_code (an
+// ErrorBody) and error (its message as plain text) when it failed. Every
+// stream ends with done or error, so a client can tell an answer that was
+// cut off from one that finished.
+
+// ChatToken is a token event: the next piece of the answer.
+type ChatToken struct {
+	Content string `json:"content"`
+}
+
+// ChatDone is the done event: the answer is finished and saved.
+type ChatDone struct {
+	Metrics *GenerationMetrics `json:"metrics,omitempty"`
 }
 
 // GenerationRoleStep is one orchestrator role's metrics on a specific node.

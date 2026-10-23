@@ -17,6 +17,7 @@ import (
 	"github.com/yeixio/toskar-core/internal/portals"
 	"github.com/yeixio/toskar-core/internal/store"
 	"github.com/yeixio/toskar-core/internal/turnopts"
+	"github.com/yeixio/toskar-core/pkg/contracts"
 )
 
 // A visitor enters a portal with its passcode and chats there, with the
@@ -52,7 +53,7 @@ func TestPortalGuests(t *testing.T) {
 		Config: mgr, People: auth.NewPeople(db.SQL), Sessions: auth.NewSessions(db.SQL), Invites: auth.NewInvites(db.SQL), Portals: store,
 		Chat: func(w http.ResponseWriter, r *http.Request, conversationID, profileID, modelID, message string, stream bool, execution string) error {
 			calls = append(calls, chatCall{auth.PersonID(r.Context()), profileID, modelID, turnopts.From(r.Context())})
-			writeJSON(w, http.StatusOK, map[string]string{"ok": "yes"})
+			writeJSON(w, http.StatusOK, contracts.ChatAnswer{Content: "yes"})
 			return nil
 		},
 	})
@@ -199,7 +200,7 @@ func TestPortalLimits(t *testing.T) {
 				started <- struct{}{}
 				<-release
 			}
-			writeJSON(w, http.StatusOK, map[string]string{"ok": "yes"})
+			writeJSON(w, http.StatusOK, contracts.ChatAnswer{Content: "yes"})
 			return nil
 		},
 	})
@@ -284,7 +285,7 @@ func TestPortalMembersAndInvited(t *testing.T) {
 			if o := turnopts.From(r.Context()); o != nil {
 				chats = append(chats, auth.PersonID(r.Context())+"@"+o.Portal)
 			}
-			writeJSON(w, http.StatusOK, map[string]string{"ok": "yes"})
+			writeJSON(w, http.StatusOK, contracts.ChatAnswer{Content: "yes"})
 			return nil
 		},
 	})
