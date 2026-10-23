@@ -43,7 +43,7 @@ func (s *Server) handleListMemory(w http.ResponseWriter, r *http.Request) {
 		writeErrFrom(w, http.StatusInternalServerError, "INTERNAL_ERROR", err)
 		return
 	}
-	writeJSON(w, http.StatusOK, map[string]any{"memories": items, "categories": muninn.Categories})
+	writeJSON(w, http.StatusOK, memoryList{Memories: items, Categories: muninn.Categories})
 }
 
 func (s *Server) handleAddMemory(w http.ResponseWriter, r *http.Request) {
@@ -87,4 +87,10 @@ func (s *Server) handleDeleteMemory(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.WriteHeader(http.StatusNoContent)
+}
+
+// memoryList is what the assistant remembers, and the categories there are.
+type memoryList struct {
+	Memories   []muninn.Memory `json:"memories"`
+	Categories []string        `json:"categories"`
 }

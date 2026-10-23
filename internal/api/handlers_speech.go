@@ -72,5 +72,11 @@ func (s *Server) handleSpeech(w http.ResponseWriter, r *http.Request) {
 		writeErrFrom(w, http.StatusBadRequest, "SPEECH_FAILED", err)
 		return
 	}
-	writeJSON(w, http.StatusOK, map[string]any{"artifact": a, "seconds": seconds})
+	writeJSON(w, http.StatusOK, spokenText{Artifact: a, Seconds: seconds})
+}
+
+// spokenText is text read aloud: the recording, and how long it plays.
+type spokenText struct {
+	Artifact artifacts.Artifact `json:"artifact"`
+	Seconds  float64            `json:"seconds"`
 }

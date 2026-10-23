@@ -48,7 +48,7 @@ func (s *Server) handleListNotifications(w http.ResponseWriter, r *http.Request)
 		writeErrFrom(w, http.StatusInternalServerError, "NOTIFICATIONS_FAILED", err)
 		return
 	}
-	writeJSON(w, http.StatusOK, map[string]any{"notifications": list, "unread": unread})
+	writeJSON(w, http.StatusOK, notificationList{Notifications: list, Unread: unread})
 }
 
 // handleReadNotifications marks the given ids read, or all with an empty list.
@@ -128,9 +128,9 @@ func (s *Server) handleCreateDestination(w http.ResponseWriter, r *http.Request)
 		writeDestinationErr(w, err)
 		return
 	}
-	out := map[string]any{"destination": d}
+	out := createdDestination{Destination: d}
 	if secret != "" {
-		out["secret"] = secret
+		out.Secret = secret
 	}
 	writeJSON(w, http.StatusCreated, out)
 }
@@ -187,7 +187,7 @@ func (s *Server) handleRotateSecret(w http.ResponseWriter, r *http.Request) {
 		writeDestinationErr(w, err)
 		return
 	}
-	writeJSON(w, http.StatusOK, map[string]any{"secret": secret})
+	writeJSON(w, http.StatusOK, destinationSecret{Secret: secret})
 }
 
 func (s *Server) handleGetQuietHours(w http.ResponseWriter, r *http.Request) {
@@ -206,4 +206,22 @@ func (s *Server) handlePutQuietHours(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, http.StatusOK, saved)
+}
+
+// notificationList is the latest notifications, and how many are unread.
+type notificationList struct {
+	Notifications []gjallarhorn.Notification `json:"notifications"`
+	Unread        int                        `json:"unread"`
+}
+
+// createdDestination is a new destination and, for a webhook, the secret
+// that signs its requests, shown this once.
+type createdDestination struct {
+	Destination gjallarhorn.Destination `json:"destination"`
+	Secret      string                  `json:"secret,omitempty"`
+}
+
+// destinationSecret is a webhook's new signing secret, shown this once.
+type destinationSecret struct {
+	Secret string `json:"secret"`
 }

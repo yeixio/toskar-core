@@ -103,7 +103,7 @@ func (s *Server) handleContinueAutomationRun(w http.ResponseWriter, r *http.Requ
 		writeAutomationErr(w, err)
 		return
 	}
-	writeJSON(w, http.StatusOK, map[string]string{"conversation_id": conversationID})
+	writeJSON(w, http.StatusOK, continuedRun{ConversationID: conversationID})
 }
 
 // maxHookBody is the largest webhook request body.
@@ -125,7 +125,7 @@ func (s *Server) handleMakeHookLink(w http.ResponseWriter, r *http.Request) {
 		writeAutomationErr(w, err)
 		return
 	}
-	writeJSON(w, http.StatusOK, map[string]string{"token": token, "path": "/hooks/" + token})
+	writeJSON(w, http.StatusOK, hookLink{Token: token, Path: "/hooks/" + token})
 }
 
 // handleHook starts the automation a webhook link belongs to (#204). An
@@ -157,7 +157,7 @@ func (s *Server) handleHook(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-	writeJSON(w, http.StatusAccepted, map[string]string{"run_id": run.ID})
+	writeJSON(w, http.StatusAccepted, hookRun{RunID: run.ID})
 }
 
 func (s *Server) handleUpdateAutomation(w http.ResponseWriter, r *http.Request) {
@@ -297,4 +297,20 @@ func camerasAllowed(w http.ResponseWriter, r *http.Request) bool {
 	}
 	writeErr(w, http.StatusForbidden, "ROLE_REQUIRED", "looking at cameras needs the admin role", map[string]any{"role": string(auth.RoleAdmin)})
 	return false
+}
+
+// hookLink is an automation's webhook: POST to path to run it.
+type hookLink struct {
+	Token string `json:"token"`
+	Path  string `json:"path"`
+}
+
+// continuedRun is the chat that goes on from an automation's run.
+type continuedRun struct {
+	ConversationID string `json:"conversation_id"`
+}
+
+// hookRun is the run a webhook started.
+type hookRun struct {
+	RunID string `json:"run_id"`
 }

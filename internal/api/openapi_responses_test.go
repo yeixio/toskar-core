@@ -88,7 +88,11 @@ func checkOpenAPIDrift() int {
 		fmt.Fprintf(os.Stderr, "openapi: the tests got a successful answer from %d operations\n", len(specResponses.reached))
 	}
 	if os.Getenv("UPDATE_OPENAPI_DRIFT") != "" {
-		if err := os.WriteFile(driftFile, []byte(strings.Join(seen, "\n")+"\n"), 0o644); err != nil {
+		text := ""
+		if len(seen) > 0 {
+			text = strings.Join(seen, "\n") + "\n"
+		}
+		if err := os.WriteFile(driftFile, []byte(text), 0o644); err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			return 1
 		}
@@ -172,6 +176,14 @@ func checkResponse(spec map[string]any, method, template string, status int, con
 	}
 	media, _, _ := mime.ParseMediaType(contentType)
 	described, _ := content[media].(map[string]any)
+	if described == nil {
+		// A media range, such as image/* or */* for a file served with
+		// its own type.
+		kind, _, _ := strings.Cut(media, "/")
+		if described, _ = content[kind+"/*"].(map[string]any); described == nil {
+			described, _ = content["*/*"].(map[string]any)
+		}
+	}
 	if described == nil {
 		return []string{fmt.Sprintf("%s: content type %s not described", where, media)}
 	}

@@ -56,7 +56,7 @@ func (s *Server) handleSetToolEnabled(w http.ResponseWriter, r *http.Request) {
 		writeErrFrom(w, http.StatusBadRequest, "TOOL_UPDATE_FAILED", err)
 		return
 	}
-	writeJSON(w, http.StatusOK, map[string]any{"id": id, "enabled": body.Enabled})
+	writeJSON(w, http.StatusOK, toolEnabled{ID: id, Enabled: body.Enabled})
 }
 
 func (s *Server) handleTestTool(w http.ResponseWriter, r *http.Request) {
@@ -106,4 +106,10 @@ func (s *Server) handleToolRuns(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, http.StatusOK, runs)
+}
+
+// toolEnabled is a tool turned on or off.
+type toolEnabled struct {
+	ID      string `json:"id"`
+	Enabled bool   `json:"enabled"`
 }

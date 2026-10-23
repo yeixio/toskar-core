@@ -20,3 +20,6 @@
 - It describes automations, tasks, knowledge, training, portals, joining
   computers, logs, diagnostics, caches, connectors, MCP servers, news,
   and updates with named types, from the code.
+- It describes memory, notifications and their destinations, API keys,
+  webhooks, speech, tools, and more of training with named types; every
+  answer the tests see now matches it.
