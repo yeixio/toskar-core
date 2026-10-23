@@ -35,7 +35,7 @@ func TestSandboxedComputerTrainsOnAPairedOne(t *testing.T) {
 		t.Fatalf("local fit = %+v", local)
 	}
 	for _, b := range coord.svc.Backends(ctx) {
-		if b["supported"] != false || !strings.Contains(b["reason"].(string), "App Sandbox") {
+		if b.Supported || !strings.Contains(b.Reason, "App Sandbox") {
 			t.Fatalf("backend = %+v", b)
 		}
 	}

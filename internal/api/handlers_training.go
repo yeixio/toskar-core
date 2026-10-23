@@ -120,15 +120,14 @@ func (s *Server) handleClassifyMaterial(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 	rec := s.training.Classify(name, text)
-	out := map[string]any{"recommendation": rec}
 	use := in.Use
 	if use == "" {
 		use = rec.Use
 	}
 	warning, err := training.ChoiceWarning(rec, use)
-	out["use"], out["warning"] = use, warning
+	out := classifiedMaterial{Recommendation: rec, Use: use, Warning: warning}
 	if err != nil {
-		out["error"] = err.Error()
+		out.Error = err.Error()
 	}
 	writeJSON(w, http.StatusOK, out)
 }
@@ -259,7 +258,7 @@ func (s *Server) handleListExamples(w http.ResponseWriter, r *http.Request) {
 		writeTrainingErr(w, err)
 		return
 	}
-	writeJSON(w, http.StatusOK, map[string]any{"examples": examples, "stats": stats})
+	writeJSON(w, http.StatusOK, trainingExamples{Examples: examples, Stats: stats})
 }
 
 func (s *Server) handleAddExample(w http.ResponseWriter, r *http.Request) {
@@ -362,7 +361,7 @@ func (s *Server) handleEvaluate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	s.training.EvaluateAsync(id, rev)
-	writeJSON(w, http.StatusAccepted, map[string]any{"ai_id": id, "revision": rev, "status": "running"})
+	writeJSON(w, http.StatusAccepted, evaluation{AIID: id, Revision: rev, Status: "running"})
 }
 
 func (s *Server) handleDeploy(w http.ResponseWriter, r *http.Request) {
@@ -484,4 +483,26 @@ func (s *Server) handleCancelJob(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, http.StatusAccepted, job)
+}
+
+// trainingExamples are a specialized AI's examples, and what they add up to.
+type trainingExamples struct {
+	Examples []training.Example    `json:"examples"`
+	Stats    training.DatasetStats `json:"stats"`
+}
+
+// evaluation is a revision's evaluation, started.
+type evaluation struct {
+	AIID     string `json:"ai_id"`
+	Revision int    `json:"revision"`
+	Status   string `json:"status"`
+}
+
+// classifiedMaterial is what a material looks like it's for, the use
+// chosen, and a warning, or an error, when that choice doesn't suit it.
+type classifiedMaterial struct {
+	Recommendation training.Recommendation `json:"recommendation"`
+	Use            training.Use            `json:"use"`
+	Warning        string                  `json:"warning"`
+	Error          string                  `json:"error,omitempty"`
 }

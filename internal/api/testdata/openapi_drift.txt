@@ -1,3 +1,0 @@
-get /api/v1/artifacts/{id}/content 200: content type text/html not described
-get /api/v1/artifacts/{id}/content 200: content type text/markdown not described
-post /api/v1/portals/{id}/visitors 201: $: an object with no described fields

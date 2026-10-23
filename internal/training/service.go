@@ -151,8 +151,18 @@ func (s *Service) Recover(ctx context.Context) error {
 	return nil
 }
 
+// Backend is a trainer, whether this computer can run it, and why not.
+type Backend struct {
+	ID        string `json:"id"`
+	Name      string `json:"name"`
+	Supported bool   `json:"supported"`
+	Reason    string `json:"reason"`
+	// Installed says its Python environment is set up.
+	Installed bool `json:"installed"`
+}
+
 // Backends lists trainers and whether this computer supports each.
-func (s *Service) Backends(ctx context.Context) []map[string]any {
+func (s *Service) Backends(ctx context.Context) []Backend {
 	var local contracts.HardwareInventory
 	if nodes, err := s.d.Nodes(ctx); err == nil {
 		for _, n := range nodes {
@@ -161,11 +171,11 @@ func (s *Service) Backends(ctx context.Context) []map[string]any {
 			}
 		}
 	}
-	out := []map[string]any{}
+	out := []Backend{}
 	for _, t := range s.d.Trainers {
 		ok, why := s.supportsHere(t, local)
 		st := s.d.Python.Status(t.Environment())
-		out = append(out, map[string]any{"id": t.ID(), "name": t.DisplayName(), "supported": ok, "reason": why, "installed": st.Installed})
+		out = append(out, Backend{ID: t.ID(), Name: t.DisplayName(), Supported: ok, Reason: why, Installed: st.Installed})
 	}
 	return out
 }

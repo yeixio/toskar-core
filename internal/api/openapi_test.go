@@ -178,7 +178,7 @@ func TestOpenAPIResponsesAreNamed(t *testing.T) {
 					continue
 				}
 				schema := asMap(asMap(asMap(asMap(resp)["content"])["application/json"])["schema"])
-				if schema == nil || schema["$ref"] != nil || asMap(schema["items"])["$ref"] != nil {
+				if schema == nil || schema["$ref"] != nil || asMap(schema["items"])["$ref"] != nil || allRefs(schema["oneOf"]) {
 					continue
 				}
 				unnamed = append(unnamed, m+" "+path+" "+code)
@@ -209,4 +209,16 @@ func TestOpenAPIResponsesAreNamed(t *testing.T) {
 	for done := range listed {
 		t.Errorf("%s has a named schema now; remove it from %s", done, file)
 	}
+}
+
+// allRefs says a oneOf lists only named schemas, such as an answer that is
+// one of two shapes.
+func allRefs(options any) bool {
+	list := asSlice(options)
+	for _, o := range list {
+		if asMap(o)["$ref"] == nil {
+			return false
+		}
+	}
+	return len(list) > 0
 }

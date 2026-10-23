@@ -555,7 +555,7 @@ func (s *Server) handleToolDecide(w http.ResponseWriter, r *http.Request) {
 		writeErrFrom(w, http.StatusBadRequest, "DECIDE_FAILED", err)
 		return
 	}
-	writeJSON(w, http.StatusOK, map[string]any{"status": "ok"})
+	writeJSON(w, http.StatusOK, statusView{Status: "ok"})
 }
 
 func (s *Server) handlePairNode(w http.ResponseWriter, r *http.Request) {
@@ -704,7 +704,7 @@ func (s *Server) handleCreateAPIKey(w http.ResponseWriter, r *http.Request) {
 		writeErrFrom(w, http.StatusBadRequest, "CREATE_FAILED", err)
 		return
 	}
-	writeJSON(w, http.StatusCreated, map[string]any{"key": rec, "secret": secret})
+	writeJSON(w, http.StatusCreated, newAPIKey{Key: rec, Secret: secret})
 }
 
 func (s *Server) handleDeleteAPIKey(w http.ResponseWriter, r *http.Request) {
@@ -731,7 +731,7 @@ func (s *Server) handleRotateAPIKey(w http.ResponseWriter, r *http.Request) {
 		writeErrFrom(w, http.StatusBadRequest, "ROTATE_FAILED", err)
 		return
 	}
-	writeJSON(w, http.StatusOK, map[string]any{"key": rec, "secret": secret})
+	writeJSON(w, http.StatusOK, newAPIKey{Key: rec, Secret: secret})
 }
 
 // handleSetAPIKeyPermissions changes what a key may ask of the assistant (§62).
@@ -852,4 +852,15 @@ type modelInstall struct {
 type runtimeInstall struct {
 	Status    string `json:"status"`
 	RuntimeID string `json:"runtime_id"`
+}
+
+// newAPIKey is a key just made or rotated, with its secret, shown this once.
+type newAPIKey struct {
+	Key    auth.APIKeyRecord `json:"key"`
+	Secret string            `json:"secret"`
+}
+
+// statusView is the answer of a route that only says it's done.
+type statusView struct {
+	Status string `json:"status"`
 }

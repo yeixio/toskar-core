@@ -184,7 +184,7 @@ func (s *Server) handleKnowledgeContent(w http.ResponseWriter, r *http.Request) 
 		writeKnowledgeErr(w, err)
 		return
 	}
-	writeJSON(w, http.StatusOK, map[string]string{"text": text})
+	writeJSON(w, http.StatusOK, textView{Text: text})
 }
 
 func (s *Server) handleSearchKnowledge(w http.ResponseWriter, r *http.Request) {
@@ -202,4 +202,9 @@ func (s *Server) handleSearchKnowledge(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, http.StatusOK, hits)
+}
+
+// textView is a source's text, as Toskar reads it.
+type textView struct {
+	Text string `json:"text"`
 }

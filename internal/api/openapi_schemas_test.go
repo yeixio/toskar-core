@@ -26,6 +26,7 @@ import (
 	"github.com/yeixio/toskar-core/internal/egress"
 	"github.com/yeixio/toskar-core/internal/events"
 	"github.com/yeixio/toskar-core/internal/gjallarhorn"
+	"github.com/yeixio/toskar-core/internal/inventory"
 	"github.com/yeixio/toskar-core/internal/logs"
 	"github.com/yeixio/toskar-core/internal/mcp"
 	"github.com/yeixio/toskar-core/internal/mimir"
@@ -164,6 +165,32 @@ var specTypes = map[string]any{
 	"MCPServer":          mcp.View{},
 	"News":               news.View{},
 	"UpdateStatus":       updates.Status{},
+
+	// Answers that were maps.
+	"CapabilityInventory":          inventory.Snapshot{},
+	"CapabilityAnswer":             capabilityAnswer{},
+	"SourceText":                   textView{},
+	"Memory":                       muninn.Memory{},
+	"MemoryList":                   memoryList{},
+	"NotificationList":             notificationList{},
+	"NotificationDestination":      gjallarhorn.Destination{},
+	"NotificationDestinationInput": gjallarhorn.DestinationInput{},
+	"NotificationDigest":           gjallarhorn.Digest{},
+	"QuietHours":                   gjallarhorn.QuietHours{},
+	"CreatedDestination":           createdDestination{},
+	"DestinationSecret":            destinationSecret{},
+	"NewAPIKey":                    newAPIKey{},
+	"Status":                       statusView{},
+	"HookLink":                     hookLink{},
+	"ContinuedRun":                 continuedRun{},
+	"HookRun":                      hookRun{},
+	"InvitedVisitor":               invitedVisitor{},
+	"SpokenText":                   spokenText{},
+	"ToolEnabled":                  toolEnabled{},
+	"TrainingExamples":             trainingExamples{},
+	"Evaluation":                   evaluation{},
+	"ClassifiedMaterial":           classifiedMaterial{},
+	"TrainingBackend":              training.Backend{},
 }
 
 // The Go types that encode themselves, with the schema of what they send.

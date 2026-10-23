@@ -31,7 +31,7 @@ func (s *Server) handleCapabilities(w http.ResponseWriter, r *http.Request) {
 	}
 	snap := s.capabilities.Capabilities(r.Context())
 	if q := r.URL.Query().Get("ask"); q != "" {
-		writeJSON(w, http.StatusOK, map[string]any{"question": q, "abilities": inventory.Ask(snap, q)})
+		writeJSON(w, http.StatusOK, capabilityAnswer{Question: q, Abilities: inventory.Ask(snap, q)})
 		return
 	}
 	writeJSON(w, http.StatusOK, snap)
@@ -56,4 +56,10 @@ func (s *Server) handleModelPlacement(w http.ResponseWriter, r *http.Request) {
 type modelPlacement struct {
 	ModelID   string                `json:"model_id"`
 	Computers []inventory.Placement `json:"computers"`
+}
+
+// capabilityAnswer is what the computers can do for a question (?q=).
+type capabilityAnswer struct {
+	Question  string              `json:"question"`
+	Abilities []inventory.Ability `json:"abilities"`
 }

@@ -865,7 +865,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
+                $ref: "#/components/schemas/InvitedVisitor"
   /api/v1/portals/{id}/visitors/{vid}/link:
     post:
       summary: A new link for an invited visitor (#205)
@@ -1273,10 +1273,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  run_id:
-                    type: string
+                $ref: "#/components/schemas/HookRun"
         "404":
           description: No automation has this link
           content:
@@ -1766,14 +1763,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  notifications:
-                    type: array
-                    items:
-                      $ref: "#/components/schemas/Notification"
-                  unread:
-                    type: integer
+                $ref: "#/components/schemas/NotificationList"
   /api/v1/notifications/read:
     post:
       summary: Mark notifications read; no ids marks all of them
@@ -2730,8 +2720,9 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                additionalProperties: true
+                oneOf:
+                  - $ref: "#/components/schemas/CapabilityInventory"
+                  - $ref: "#/components/schemas/CapabilityAnswer"
   /api/v1/capabilities/models/{id}:
     get:
       summary: Which computers can run an installed model
@@ -3835,11 +3826,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  artifact:
-                    $ref: "#/components/schemas/Artifact"
-                  seconds: {type: number}
+                $ref: "#/components/schemas/SpokenText"
         "400":
           description: Invalid text or voice, or reading failed
   /api/v1/speech/transcribe:
@@ -4164,7 +4151,7 @@ paths:
         "200":
           description: The file, with its own content type
           content:
-            application/octet-stream:
+            "*/*":
               schema:
                 type: string
                 format: binary
@@ -4250,16 +4237,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  memories:
-                    type: array
-                    items:
-                      $ref: "#/components/schemas/Memory"
-                  categories:
-                    type: array
-                    items:
-                      type: string
+                $ref: "#/components/schemas/MemoryList"
     post:
       summary: "Add a memory; an existing equal memory is returned instead"
       operationId: addMemory
@@ -4568,10 +4546,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  text:
-                    type: string
+                $ref: "#/components/schemas/SourceText"
         "404":
           description: Not found
           content:
@@ -4718,10 +4693,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  status:
-                    type: string
+                $ref: "#/components/schemas/Status"
         "400":
           description: Invalid request
           content:
@@ -4754,12 +4726,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  id:
-                    type: string
-                  enabled:
-                    type: boolean
+                $ref: "#/components/schemas/ToolEnabled"
         "400":
           description: Invalid request
           content:
@@ -4812,8 +4779,7 @@ paths:
               schema:
                 type: array
                 items:
-                  type: object
-                  additionalProperties: true
+                  $ref: "#/components/schemas/TrainingBackend"
   /api/v1/training/base-models:
     get:
       summary: Trainable base models, ranked for a goal
@@ -4859,12 +4825,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  recommendation:
-                    type: object
-                    additionalProperties: true
-                additionalProperties: true
+                $ref: "#/components/schemas/ClassifiedMaterial"
         "400":
           description: Invalid request
           content:
@@ -5212,16 +5173,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  examples:
-                    type: array
-                    items:
-                      type: object
-                      additionalProperties: true
-                  stats:
-                    type: object
-                    additionalProperties: true
+                $ref: "#/components/schemas/TrainingExamples"
     post:
       summary: Add an example
       operationId: addExample
@@ -5455,14 +5407,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  ai_id:
-                    type: string
-                  revision:
-                    type: integer
-                  status:
-                    type: string
+                $ref: "#/components/schemas/Evaluation"
         "400":
           description: Invalid request
           content:
@@ -5948,13 +5893,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  token:
-                    type: string
-                  path:
-                    type: string
-                    description: /hooks/{token}
+                $ref: "#/components/schemas/HookLink"
         "404":
           description: No such automation
           content:
@@ -5989,10 +5928,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  conversation_id:
-                    type: string
+                $ref: "#/components/schemas/ContinuedRun"
         "404":
           description: No such automation or run
           content:
@@ -6329,12 +6265,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  key:
-                    $ref: "#/components/schemas/APIKey"
-                  secret:
-                    type: string
+                $ref: "#/components/schemas/NewAPIKey"
         "400":
           description: Invalid request
           content:
@@ -6376,12 +6307,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  key:
-                    $ref: "#/components/schemas/APIKey"
-                  secret:
-                    type: string
+                $ref: "#/components/schemas/NewAPIKey"
         "400":
           description: Invalid request
           content:
@@ -6435,13 +6361,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  destination:
-                    $ref: "#/components/schemas/NotificationDestination"
-                  secret:
-                    type: string
-                    description: The webhook signing secret, shown only now
+                $ref: "#/components/schemas/CreatedDestination"
         "400":
           description: Invalid destination
           content:
@@ -6546,10 +6466,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  secret:
-                    type: string
+                $ref: "#/components/schemas/DestinationSecret"
         "400":
           description: Not a webhook
   /api/v1/notifications/quiet-hours:
@@ -7214,18 +7131,19 @@ components:
           additionalProperties: {}
     Memory:
       type: object
+      description: One durable fact or preference.
+      required: [category, content, created_at, enabled, id, local_only, source_type, updated_at]
       properties:
-        id:
-          type: string
-        content:
-          type: string
-        category:
-          type: string
-        enabled:
-          type: boolean
-        local_only:
-          type: boolean
-      additionalProperties: true
+        id: {type: string}
+        content: {type: string}
+        category: {type: string}
+        source_type: {type: string}
+        source_ref: {type: string}
+        enabled: {type: boolean}
+        local_only: {type: boolean, description: '`local_only` keeps the memory on this computer: work that uses it is never sent to a paired computer (§63).'}
+        language: {type: string, description: 'The language the memory is written in, as a BCP 47 tag detected on this computer (multilingual spec §18), or "" when it is too short to tell. A memory is found in any language; this says which one its text is in.'}
+        created_at: {type: string, format: date-time}
+        updated_at: {type: string, format: date-time}
     KnowledgeSource:
       type: object
       description: One connected knowledge source.
@@ -7596,64 +7514,117 @@ components:
               error: {type: string}
     NotificationDestinationInput:
       type: object
+      description: Creates or changes a destination. On a change, nil fields keep their value, and an empty Password keeps the stored one.
       properties:
-        kind: {type: string, enum: [email, webhook, ntfy], description: Required when creating}
+        kind: {type: string, description: Required when creating, enum: [email, webhook, ntfy]}
         name: {type: string}
         enabled: {type: boolean}
         email:
           type: object
+          description: How an email destination reaches your SMTP server (§12). The password is a secret and is not part of it.
+          required: [from, host, port, to]
           properties:
             host: {type: string}
-            port: {type: integer, description: Default 587, or 465 with tls}
+            port: {type: integer, description: Default 587}
             username: {type: string}
             from: {type: string}
-            to: {type: array, items: {type: string}, maxItems: 20}
-            tls: {type: string, enum: [starttls, tls, none], description: none only for a server on this computer}
+            to:
+              type: array
+              items: {type: string}
+            tls: {type: string, description: none only for a server on this computer, enum: [starttls, tls, none]}
         webhook:
           type: object
+          description: Where a webhook destination posts (§13). Its signing secret is a secret and is not part of it.
+          required: [url]
           properties:
-            url: {type: string, description: "https, or http on this computer or the local network"}
+            url: {type: string, description: 'https, or http on this computer or the local network'}
         ntfy:
           type: object
+          description: Where push notifications are published. An access token, when the topic needs one, is a secret and is not part of it.
+          required: [server, topic]
           properties:
-            server: {type: string, description: "Default https://ntfy.sh"}
-            topic: {type: string, pattern: "^[A-Za-z0-9_-]{1,64}$"}
-            content: {type: string, enum: [full, private], description: "private sends only a generic notice; the default on ntfy.sh"}
+            server: {type: string, description: 'Default https://ntfy.sh'}
+            topic: {type: string}
+            content: {type: string, description: private sends only a generic notice; the default on ntfy.sh, enum: [full, private]}
             open_url: {type: string, description: This Toskar's address; tapping a notification opens it there}
-        categories: {type: array, items: {type: string}, description: Empty receives every category}
+        app:
+          type: object
+          description: 'What an app push carries (§11). Content is title (the default): the notification''s title, which the person''s own automation or Toskar wrote, with the text left on the computer; full: the title and text; or private: only "You have a new Toskar notification".'
+          properties:
+            content: {type: string}
+        categories:
+          type: array
+          description: Empty receives every category
+          items: {type: string}
         min_severity: {type: string, enum: [info, success, warning, error]}
-        digest:
-          $ref: "#/components/schemas/NotificationDigest"
+        digest: {$ref: '#/components/schemas/NotificationDigest'}
         password: {type: string, description: The SMTP password or ntfy access token; stored as a secret and never returned}
     NotificationDestination:
       type: object
+      description: An email address or a webhook that notifications are sent to.
+      required: [enabled, has_secret, id, kind, name]
       properties:
         id: {type: string}
         kind: {type: string, enum: [email, webhook, ntfy]}
         name: {type: string}
         enabled: {type: boolean}
-        email: {type: object, additionalProperties: true}
-        webhook: {type: object, additionalProperties: true}
-        ntfy: {type: object, additionalProperties: true}
-        categories: {type: array, items: {type: string}}
-        min_severity: {type: string}
-        digest:
-          $ref: "#/components/schemas/NotificationDigest"
-        has_secret: {type: boolean}
+        email:
+          type: object
+          description: How an email destination reaches your SMTP server (§12). The password is a secret and is not part of it.
+          required: [from, host, port, to]
+          properties:
+            host: {type: string}
+            port: {type: integer}
+            username: {type: string}
+            from: {type: string}
+            to:
+              type: array
+              items: {type: string}
+            tls: {type: string, description: 'Starttls (the default), tls (implicit, usually port 465), or none, which is allowed only for a server on this computer.'}
+        webhook:
+          type: object
+          description: Where a webhook destination posts (§13). Its signing secret is a secret and is not part of it.
+          required: [url]
+          properties:
+            url: {type: string}
+        ntfy:
+          type: object
+          description: Where push notifications are published. An access token, when the topic needs one, is a secret and is not part of it.
+          required: [server, topic]
+          properties:
+            server: {type: string}
+            topic: {type: string}
+            content: {type: string, description: 'Full (title and text) or private, which sends only "You have a new Yggdrasil notification" (§11). Private is the default on the public server, where anyone who knows the topic can read it.'}
+            open_url: {type: string, description: 'This Yggdrasil''s address, such as http://192.168.1.10:7331. When set, tapping a notification opens it there.'}
+        app:
+          type: object
+          description: 'What an app push carries (§11). Content is title (the default): the notification''s title, which the person''s own automation or Toskar wrote, with the text left on the computer; full: the title and text; or private: only "You have a new Toskar notification".'
+          properties:
+            content: {type: string}
+        categories:
+          type: array
+          description: '`categories` it receives; empty receives every category (§26).'
+          items: {type: string}
+        min_severity: {type: string, description: 'The lowest severity it receives: info (the default), success, warning, or error.'}
+        digest: {$ref: '#/components/schemas/NotificationDigest'}
+        has_secret: {type: boolean, description: '`has_secret` reports a stored password, signing secret, or access token, never its value.'}
     NotificationDigest:
       type: object
       description: A daily digest instead of each notice; errors still go out at once. On a change, an empty at turns it off.
+      required: [at, time_zone]
       properties:
-        at: {type: string, description: "HH:MM"}
-        time_zone: {type: string, description: "IANA time zone; UTC when left out"}
+        at: {type: string, description: 'HH:MM'}
+        time_zone: {type: string, description: IANA time zone; UTC when left out}
     QuietHours:
       type: object
+      description: Hold notices from channels outside the app overnight (§24–25). Held notices are in the notification center at once and go out when quiet hours end.
+      required: [allow, enabled, end, start, time_zone]
       properties:
         enabled: {type: boolean}
-        start: {type: string, example: "22:00"}
+        start: {type: string, description: '`start` and End are HH:MM in TimeZone; End may be the next day.', example: "22:00"}
         end: {type: string, example: "07:00"}
         time_zone: {type: string, example: Europe/Berlin}
-        allow: {type: string, enum: [errors, nothing], description: errors lets errors through; nothing holds everything}
+        allow: {type: string, description: errors lets errors through; nothing holds everything, enum: [errors, nothing]}
     ToolDescriptor:
       type: object
       properties:
@@ -9352,3 +9323,376 @@ components:
         key_id: {type: string, description: 'The API key the request used, when Via is api_key.'}
         key_profile: {type: string, description: 'The profile that key is pinned to (#345), or "".'}
         session: {type: string}
+    CapabilityAnswer:
+      type: object
+      description: What the computers can do for a question (?q=).
+      required: [abilities, question]
+      properties:
+        question: {type: string}
+        abilities:
+          type: array
+          items:
+            type: object
+            description: Something Yggdrasil can or cannot do right now, and why.
+            required: [available, id, label]
+            properties:
+              id: {type: string}
+              label: {type: string}
+              available: {type: boolean}
+              via:
+                type: array
+                items: {type: string}
+              note: {type: string, description: '`note` says how it works, or what would make it possible.'}
+              setup:
+                type: object
+                description: What would add a missing ability, when Yggdrasil can install it (Gungnir §29).
+                required: [ability, name, option, size_bytes, tools]
+                properties:
+                  ability: {type: string}
+                  option: {type: string, description: 'What to install, such as an image model''s id.'}
+                  name: {type: string}
+                  size_bytes: {type: integer, format: int64}
+                  node_id: {type: string}
+                  node_name: {type: string}
+                  remote: {type: boolean, description: 'A paired computer, not this one (#153), and FreeBytes its free disk space, when known.'}
+                  free_bytes: {type: integer, format: int64}
+                  tools:
+                    type: array
+                    description: The tools it makes ready; a profile that denies them is not offered it.
+                    items: {type: string}
+                  slow: {type: boolean, description: 'A computer without GPU acceleration for it, where each picture takes minutes and a clip can take most of an hour.'}
+                  tight_memory: {type: boolean, description: 'A computer below the memory it''s comfortable with, where it may be slow or fail.'}
+                  verdict: {type: string, description: 'Verdict, Short, NeedBytes, and HaveBytes are the model''s, from its setup status (#550).'}
+                  short: {type: string}
+                  need_bytes: {type: integer, format: int64}
+                  have_bytes: {type: integer, format: int64}
+    CapabilityInventory:
+      type: object
+      description: The inventory at one moment.
+      required: [abilities, artifacts, at, connectors, models, nodes, providers, tools]
+      properties:
+        at: {type: string, format: date-time}
+        models:
+          type: array
+          items:
+            type: object
+            description: An installed model.
+            required: [coding, id, name, "on", running, tool_calling, vision]
+            properties:
+              id: {type: string}
+              name: {type: string}
+              running: {type: boolean}
+              tool_calling: {type: boolean}
+              vision: {type: boolean}
+              coding: {type: boolean}
+              support_role: {type: string}
+              topic_check: {type: boolean, description: A model verified to hold topic controls (#457).}
+              memory_needed_bytes: {type: integer, format: int64}
+              on:
+                type: array
+                items: {type: string}
+        nodes:
+          type: array
+          items:
+            type: object
+            description: A computer Yggdrasil can use.
+            required: [id, local, name, online]
+            properties:
+              id: {type: string}
+              name: {type: string}
+              local: {type: boolean}
+              online: {type: boolean}
+              memory_bytes: {type: integer, format: int64}
+              trainer: {type: string, description: '`trainer` names how it can train specialized AIs, if it can.'}
+        tools:
+          type: array
+          items:
+            type: object
+            description: A tool the assistant can call.
+            required: [enabled, id, name, source]
+            properties:
+              id: {type: string}
+              name: {type: string}
+              description: {type: string}
+              source: {type: string, description: 'Builtin, connector:<id>, or mcp:<id>.'}
+              risk: {type: string}
+              enabled: {type: boolean}
+              unavailable: {type: string, description: '`unavailable` says why a tool that is on cannot run on this computer yet, such as image generation before it is set up.'}
+        connectors:
+          type: array
+          items:
+            type: object
+            description: A connected-service integration.
+            required: [connected, id, name]
+            properties:
+              id: {type: string}
+              name: {type: string}
+              connected: {type: boolean}
+              status: {type: string}
+        providers:
+          type: array
+          items:
+            type: object
+            description: 'Something that serves models or tools: a runtime, or an MCP server.'
+            required: [healthy, id, kind, name, status]
+            properties:
+              id: {type: string}
+              name: {type: string}
+              kind: {type: string}
+              status: {type: string}
+              healthy: {type: boolean}
+        artifacts:
+          type: object
+          description: Summarizes stored files.
+          required: [bytes, count]
+          properties:
+            count: {type: integer}
+            bytes: {type: integer, format: int64}
+        abilities:
+          type: array
+          items:
+            type: object
+            description: Something Yggdrasil can or cannot do right now, and why.
+            required: [available, id, label]
+            properties:
+              id: {type: string}
+              label: {type: string}
+              available: {type: boolean}
+              via:
+                type: array
+                items: {type: string}
+              note: {type: string, description: '`note` says how it works, or what would make it possible.'}
+              setup:
+                type: object
+                description: What would add a missing ability, when Yggdrasil can install it (Gungnir §29).
+                required: [ability, name, option, size_bytes, tools]
+                properties:
+                  ability: {type: string}
+                  option: {type: string, description: 'What to install, such as an image model''s id.'}
+                  name: {type: string}
+                  size_bytes: {type: integer, format: int64}
+                  node_id: {type: string}
+                  node_name: {type: string}
+                  remote: {type: boolean, description: 'A paired computer, not this one (#153), and FreeBytes its free disk space, when known.'}
+                  free_bytes: {type: integer, format: int64}
+                  tools:
+                    type: array
+                    description: The tools it makes ready; a profile that denies them is not offered it.
+                    items: {type: string}
+                  slow: {type: boolean, description: 'A computer without GPU acceleration for it, where each picture takes minutes and a clip can take most of an hour.'}
+                  tight_memory: {type: boolean, description: 'A computer below the memory it''s comfortable with, where it may be slow or fail.'}
+                  verdict: {type: string, description: 'Verdict, Short, NeedBytes, and HaveBytes are the model''s, from its setup status (#550).'}
+                  short: {type: string}
+                  need_bytes: {type: integer, format: int64}
+                  have_bytes: {type: integer, format: int64}
+        setups:
+          type: array
+          description: Installable ways to add missing abilities.
+          items:
+            type: object
+            description: 'An installable way to add an ability: a provider, how much it downloads, and the computer it would run on.'
+            required: [ability, name, option, size_bytes, tools]
+            properties:
+              ability: {type: string}
+              option: {type: string, description: 'What to install, such as an image model''s id.'}
+              name: {type: string}
+              size_bytes: {type: integer, format: int64}
+              node_id: {type: string}
+              node_name: {type: string}
+              remote: {type: boolean, description: 'A paired computer, not this one (#153), and FreeBytes its free disk space, when known.'}
+              free_bytes: {type: integer, format: int64}
+              tools:
+                type: array
+                description: The tools it makes ready; a profile that denies them is not offered it.
+                items: {type: string}
+              slow: {type: boolean, description: 'A computer without GPU acceleration for it, where each picture takes minutes and a clip can take most of an hour.'}
+              tight_memory: {type: boolean, description: 'A computer below the memory it''s comfortable with, where it may be slow or fail.'}
+              verdict: {type: string, description: 'Verdict, Short, NeedBytes, and HaveBytes are the model''s, from its setup status (#550).'}
+              short: {type: string}
+              need_bytes: {type: integer, format: int64}
+              have_bytes: {type: integer, format: int64}
+    ClassifiedMaterial:
+      type: object
+      description: What a material looks like it's for, the use chosen, and a warning, or an error, when that choice doesn't suit it.
+      required: [recommendation, use, warning]
+      properties:
+        recommendation:
+          type: object
+          description: Yggdrasil's advice for one piece of material.
+          required: [can_train, example_count, reasons, use]
+          properties:
+            use: {type: string}
+            reasons:
+              type: array
+              items: {type: string}
+            signals:
+              type: array
+              items:
+                type: object
+                description: One observation behind a classification.
+                required: [detail, kind]
+                properties:
+                  kind: {type: string}
+                  detail: {type: string}
+            warning: {type: string, description: Shown when the chosen use conflicts with the advice.}
+            example_count: {type: integer, description: How many training examples the material yields.}
+            can_train: {type: boolean, description: 'False when no examples could be read, so the material can only be connected knowledge.'}
+        use: {type: string}
+        warning: {type: string}
+        error: {type: string}
+    ContinuedRun:
+      type: object
+      description: The chat that goes on from an automation's run.
+      required: [conversation_id]
+      properties:
+        conversation_id: {type: string}
+    CreatedDestination:
+      type: object
+      description: A new destination and, for a webhook, the secret that signs its requests, shown this once.
+      required: [destination]
+      properties:
+        destination: {$ref: '#/components/schemas/NotificationDestination'}
+        secret: {type: string}
+    DestinationSecret:
+      type: object
+      description: A webhook's new signing secret, shown this once.
+      required: [secret]
+      properties:
+        secret: {type: string}
+    Evaluation:
+      type: object
+      description: A revision's evaluation, started.
+      required: [ai_id, revision, status]
+      properties:
+        ai_id: {type: string}
+        revision: {type: integer}
+        status: {type: string}
+    HookLink:
+      type: object
+      description: 'An automation''s webhook: POST to path to run it.'
+      required: [path, token]
+      properties:
+        token: {type: string}
+        path: {type: string}
+    HookRun:
+      type: object
+      description: The run a webhook started.
+      required: [run_id]
+      properties:
+        run_id: {type: string}
+    InvitedVisitor:
+      type: object
+      description: A portal's new visitor and their link.
+      required: [link, person]
+      properties:
+        person: {$ref: '#/components/schemas/Person'}
+        link: {$ref: '#/components/schemas/VisitorLink'}
+    MemoryList:
+      type: object
+      description: What the assistant remembers, and the categories there are.
+      required: [categories, memories]
+      properties:
+        memories:
+          type: array
+          items: {$ref: '#/components/schemas/Memory'}
+        categories:
+          type: array
+          items: {type: string}
+    NewAPIKey:
+      type: object
+      description: A key just made or rotated, with its secret, shown this once.
+      required: [key, secret]
+      properties:
+        key: {$ref: '#/components/schemas/APIKey'}
+        secret: {type: string}
+    NotificationList:
+      type: object
+      description: The latest notifications, and how many are unread.
+      required: [notifications, unread]
+      properties:
+        notifications:
+          type: array
+          items: {$ref: '#/components/schemas/Notification'}
+        unread: {type: integer}
+    SourceText:
+      type: object
+      description: A source's text, as Toskar reads it.
+      required: [text]
+      properties:
+        text: {type: string}
+    SpokenText:
+      type: object
+      description: 'Text read aloud: the recording, and how long it plays.'
+      required: [artifact, seconds]
+      properties:
+        artifact: {$ref: '#/components/schemas/Artifact'}
+        seconds: {type: number}
+    Status:
+      type: object
+      description: The answer of a route that only says it's done.
+      required: [status]
+      properties:
+        status: {type: string}
+    ToolEnabled:
+      type: object
+      description: A tool turned on or off.
+      required: [enabled, id]
+      properties:
+        id: {type: string}
+        enabled: {type: boolean}
+    TrainingBackend:
+      type: object
+      description: A trainer, whether this computer can run it, and why not.
+      required: [id, installed, name, reason, supported]
+      properties:
+        id: {type: string}
+        name: {type: string}
+        supported: {type: boolean}
+        reason: {type: string}
+        installed: {type: boolean, description: '`installed` says its Python environment is set up.'}
+    TrainingExamples:
+      type: object
+      description: A specialized AI's examples, and what they add up to.
+      required: [examples, stats]
+      properties:
+        examples:
+          type: array
+          items:
+            type: object
+            description: One training example.
+            required: [ai_id, created_at, excluded, id, messages]
+            properties:
+              id: {type: string}
+              ai_id: {type: string}
+              material_id: {type: string}
+              messages:
+                type: array
+                items:
+                  type: object
+                  description: One chat turn in a training example.
+                  required: [content, role]
+                  properties:
+                    role: {type: string}
+                    content: {type: string}
+              flags:
+                type: array
+                items: {type: string}
+              excluded: {type: boolean, description: The user's choice to leave the example out.}
+              created_at: {type: string, format: date-time}
+        stats:
+          type: object
+          description: Summarizes the examples that will train.
+          required: [excluded, flagged, p95_tokens, tokens, total, usable]
+          properties:
+            total: {type: integer}
+            usable: {type: integer}
+            excluded: {type: integer}
+            flagged:
+              type: object
+              additionalProperties: {type: integer}
+            tokens: {type: integer}
+            p95_tokens: {type: integer, description: '`p95_tokens` sizes the maximum sequence length.'}
+            warnings:
+              type: array
+              description: Human sentences about the dataset as a whole.
+              items: {type: string}

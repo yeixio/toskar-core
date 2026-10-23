@@ -513,7 +513,7 @@ func (s *Server) handleInviteVisitor(w http.ResponseWriter, r *http.Request) {
 		writeErr(w, http.StatusInternalServerError, "INTERNAL_ERROR", err.Error(), nil)
 		return
 	}
-	writeJSON(w, http.StatusCreated, map[string]any{"person": guest, "link": link})
+	writeJSON(w, http.StatusCreated, invitedVisitor{Person: guest, Link: link})
 }
 
 // handleVisitorLink makes an invited visitor a new link, which replaces
@@ -639,4 +639,10 @@ func (s *Server) handlePortalUsage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, http.StatusOK, u)
+}
+
+// invitedVisitor is a portal's new visitor and their link.
+type invitedVisitor struct {
+	Person auth.Person `json:"person"`
+	Link   visitorLink `json:"link"`
 }
