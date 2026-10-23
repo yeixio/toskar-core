@@ -1116,5 +1116,45 @@
         "acorns": "Ratatoskr sammelt genug Eicheln für einen ganzen Clip."
       }
     }
+  },
+  "askText": {
+    "title": "Toskar fragen",
+    "intro": "Was soll Toskar mit diesem Text machen?",
+    "selected": "Ausgewählter Text",
+    "actions": {
+      "rewrite": "Umformulieren",
+      "reply": "Antworten",
+      "translate": "Übersetzen",
+      "explain": "Erklären",
+      "summarize": "Zusammenfassen",
+      "fix": "Rechtschreibung und Grammatik korrigieren"
+    },
+    "instructions": {
+      "rewrite": "Formuliere diesen Text so um, dass er klarer zu lesen ist. Behalte Bedeutung, Ton und Sprache bei. Antworte nur mit dem umformulierten Text.",
+      "reply": "Schreibe eine kurze, freundliche Antwort auf diese Nachricht, in ihrer Sprache. Antworte nur mit der Antwort.",
+      "translate": "Übersetze diesen Text in diese Sprache: {{language}}. Antworte nur mit der Übersetzung.",
+      "explain": "Erkläre diesen Text einfach, in wenigen Sätzen.",
+      "summarize": "Fasse diesen Text in wenigen Sätzen zusammen.",
+      "fix": "Korrigiere Rechtschreibung und Grammatik in diesem Text, ohne sonst etwas zu ändern. Antworte nur mit dem korrigierten Text."
+    },
+    "translateTo": "Übersetzen: {{language}}",
+    "ask": "Oder frag etwas dazu",
+    "askPlaceholder": "Frag etwas zu diesem Text",
+    "working": "Wird geschrieben …",
+    "copy": "Kopieren",
+    "copied": "Kopiert",
+    "replace": "Ersetzen",
+    "again": "Erneut versuchen",
+    "done": "Fertig",
+    "back": "Wechsle zurück zur vorherigen App und füge es dort ein.",
+    "empty": "Markiere Text in einer anderen App und wähle dann „Toskar fragen“.",
+    "shortcuts": {
+      "rewrite": "Mit Toskar umformulieren",
+      "translate": "Mit Toskar übersetzen",
+      "explain": "Mit Toskar erklären",
+      "summarize": "Mit Toskar zusammenfassen",
+      "fix": "Mit Toskar korrigieren",
+      "text": "Text"
+    }
   }
 }
