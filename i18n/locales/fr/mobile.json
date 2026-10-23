@@ -1135,5 +1135,45 @@
         "acorns": "Ratatoskr rassemble assez de glands pour tout un clip."
       }
     }
+  },
+  "askText": {
+    "title": "Demander à Toskar",
+    "intro": "Que doit faire Toskar avec ce texte ?",
+    "selected": "Texte sélectionné",
+    "actions": {
+      "rewrite": "Reformuler",
+      "reply": "Répondre",
+      "translate": "Traduire",
+      "explain": "Expliquer",
+      "summarize": "Résumer",
+      "fix": "Corriger l’orthographe et la grammaire"
+    },
+    "instructions": {
+      "rewrite": "Reformule ce texte pour qu’il se lise plus clairement. Garde son sens, son ton et sa langue. Réponds uniquement avec le texte reformulé.",
+      "reply": "Écris une réponse courte et aimable à ce message, dans sa langue. Réponds uniquement avec la réponse.",
+      "translate": "Traduis ce texte en {{language}}. Réponds uniquement avec la traduction.",
+      "explain": "Explique ce texte simplement, en quelques phrases.",
+      "summarize": "Résume ce texte en quelques phrases.",
+      "fix": "Corrige l’orthographe et la grammaire de ce texte sans rien changer d’autre. Réponds uniquement avec le texte corrigé."
+    },
+    "translateTo": "Traduire en {{language}}",
+    "ask": "Ou posez une question à son sujet",
+    "askPlaceholder": "Posez une question sur ce texte",
+    "working": "Rédaction…",
+    "copy": "Copier",
+    "copied": "Copié",
+    "replace": "Remplacer",
+    "again": "Réessayer",
+    "done": "Terminé",
+    "back": "Revenez à l’app précédente et collez-le.",
+    "empty": "Sélectionnez du texte dans une autre app, puis choisissez Demander à Toskar.",
+    "shortcuts": {
+      "rewrite": "Reformuler avec Toskar",
+      "translate": "Traduire avec Toskar",
+      "explain": "Expliquer avec Toskar",
+      "summarize": "Résumer avec Toskar",
+      "fix": "Corriger avec Toskar",
+      "text": "Texte"
+    }
   }
 }

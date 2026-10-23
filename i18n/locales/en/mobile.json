@@ -1116,5 +1116,45 @@
         "acorns": "Ratatoskr is gathering enough acorns for a whole clip."
       }
     }
+  },
+  "askText": {
+    "title": "Ask Toskar",
+    "intro": "What should Toskar do with this text?",
+    "selected": "Selected text",
+    "actions": {
+      "rewrite": "Rewrite",
+      "reply": "Reply",
+      "translate": "Translate",
+      "explain": "Explain",
+      "summarize": "Summarize",
+      "fix": "Fix spelling and grammar"
+    },
+    "instructions": {
+      "rewrite": "Rewrite this text so it reads more clearly. Keep its meaning, its tone, and its language. Reply with only the rewritten text.",
+      "reply": "Write a short, friendly reply to this message, in its language. Reply with only the reply.",
+      "translate": "Translate this text into {{language}}. Reply with only the translation.",
+      "explain": "Explain this text simply, in a few sentences.",
+      "summarize": "Summarize this text in a few sentences.",
+      "fix": "Fix the spelling and grammar in this text without changing anything else. Reply with only the corrected text."
+    },
+    "translateTo": "Translate to {{language}}",
+    "ask": "Or ask anything about it",
+    "askPlaceholder": "Ask about this text",
+    "working": "Writing…",
+    "copy": "Copy",
+    "copied": "Copied",
+    "replace": "Replace",
+    "again": "Try again",
+    "done": "Done",
+    "back": "Go back to the app you were in, and paste it there.",
+    "empty": "Select some text in another app, then choose Ask Toskar.",
+    "shortcuts": {
+      "rewrite": "Rewrite with Toskar",
+      "translate": "Translate with Toskar",
+      "explain": "Explain with Toskar",
+      "summarize": "Summarize with Toskar",
+      "fix": "Fix with Toskar",
+      "text": "Text"
+    }
   }
 }

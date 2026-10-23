@@ -1098,5 +1098,45 @@
         "acorns": "라타토스크가 클립 하나 분량의 도토리를 모으는 중이에요."
       }
     }
+  },
+  "askText": {
+    "title": "Toskar에게 묻기",
+    "intro": "이 텍스트로 무엇을 할까요?",
+    "selected": "선택한 텍스트",
+    "actions": {
+      "rewrite": "다시 쓰기",
+      "reply": "답장 쓰기",
+      "translate": "번역",
+      "explain": "설명",
+      "summarize": "요약",
+      "fix": "맞춤법과 문법 고치기"
+    },
+    "instructions": {
+      "rewrite": "이 텍스트를 더 읽기 쉽게 다시 써 주세요. 뜻과 어조, 언어는 그대로 유지하세요. 다시 쓴 텍스트만 답하세요.",
+      "reply": "이 메시지에 대한 짧고 친근한 답장을 같은 언어로 써 주세요. 답장만 답하세요.",
+      "translate": "이 텍스트를 {{language}}로 번역해 주세요. 번역문만 답하세요.",
+      "explain": "이 텍스트를 몇 문장으로 쉽게 설명해 주세요.",
+      "summarize": "이 텍스트를 몇 문장으로 요약해 주세요.",
+      "fix": "이 텍스트의 맞춤법과 문법만 고치고 다른 것은 바꾸지 마세요. 고친 텍스트만 답하세요."
+    },
+    "translateTo": "{{language}}로 번역",
+    "ask": "또는 이 텍스트에 대해 무엇이든 물어보세요",
+    "askPlaceholder": "이 텍스트에 대해 묻기",
+    "working": "작성 중…",
+    "copy": "복사",
+    "copied": "복사됨",
+    "replace": "바꾸기",
+    "again": "다시 시도",
+    "done": "완료",
+    "back": "이전 앱으로 돌아가 붙여 넣으세요.",
+    "empty": "다른 앱에서 텍스트를 선택한 뒤 'Toskar에게 묻기'를 고르세요.",
+    "shortcuts": {
+      "rewrite": "Toskar로 다시 쓰기",
+      "translate": "Toskar로 번역",
+      "explain": "Toskar로 설명",
+      "summarize": "Toskar로 요약",
+      "fix": "Toskar로 고치기",
+      "text": "텍스트"
+    }
   }
 }

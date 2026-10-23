@@ -1135,5 +1135,45 @@
         "acorns": "Ratatoskr junta bolotas suficientes para um clipe inteiro."
       }
     }
+  },
+  "askText": {
+    "title": "Perguntar ao Toskar",
+    "intro": "O que o Toskar deve fazer com este texto?",
+    "selected": "Texto selecionado",
+    "actions": {
+      "rewrite": "Reescrever",
+      "reply": "Responder",
+      "translate": "Traduzir",
+      "explain": "Explicar",
+      "summarize": "Resumir",
+      "fix": "Corrigir ortografia e gramática"
+    },
+    "instructions": {
+      "rewrite": "Reescreva este texto para que fique mais claro. Mantenha o significado, o tom e o idioma. Responda só com o texto reescrito.",
+      "reply": "Escreva uma resposta curta e simpática para esta mensagem, no idioma dela. Responda só com a resposta.",
+      "translate": "Traduza este texto para {{language}}. Responda só com a tradução.",
+      "explain": "Explique este texto de forma simples, em poucas frases.",
+      "summarize": "Resuma este texto em poucas frases.",
+      "fix": "Corrija a ortografia e a gramática deste texto sem mudar mais nada. Responda só com o texto corrigido."
+    },
+    "translateTo": "Traduzir para {{language}}",
+    "ask": "Ou pergunte o que quiser sobre ele",
+    "askPlaceholder": "Pergunte sobre este texto",
+    "working": "Escrevendo…",
+    "copy": "Copiar",
+    "copied": "Copiado",
+    "replace": "Substituir",
+    "again": "Tentar de novo",
+    "done": "Pronto",
+    "back": "Volte ao app em que você estava e cole lá.",
+    "empty": "Selecione um texto em outro app e escolha Perguntar ao Toskar.",
+    "shortcuts": {
+      "rewrite": "Reescrever com o Toskar",
+      "translate": "Traduzir com o Toskar",
+      "explain": "Explicar com o Toskar",
+      "summarize": "Resumir com o Toskar",
+      "fix": "Corrigir com o Toskar",
+      "text": "Texto"
+    }
   }
 }

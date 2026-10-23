@@ -1098,5 +1098,45 @@
         "acorns": "拉塔托斯克正在攒够一整段短片的橡果。"
       }
     }
+  },
+  "askText": {
+    "title": "问 Toskar",
+    "intro": "要让 Toskar 如何处理这段文字？",
+    "selected": "选中的文字",
+    "actions": {
+      "rewrite": "改写",
+      "reply": "回复",
+      "translate": "翻译",
+      "explain": "解释",
+      "summarize": "总结",
+      "fix": "修正拼写和语法"
+    },
+    "instructions": {
+      "rewrite": "改写这段文字，让它读起来更清楚。保持原意、语气和语言不变。只回复改写后的文字。",
+      "reply": "用这条消息的语言，写一段简短友好的回复。只回复回复内容。",
+      "translate": "把这段文字翻译成{{language}}。只回复译文。",
+      "explain": "用几句话简单地解释这段文字。",
+      "summarize": "用几句话总结这段文字。",
+      "fix": "只修正这段文字的拼写和语法，其他内容不要改动。只回复修正后的文字。"
+    },
+    "translateTo": "翻译成{{language}}",
+    "ask": "或者问任何相关问题",
+    "askPlaceholder": "就这段文字提问",
+    "working": "正在撰写…",
+    "copy": "复制",
+    "copied": "已复制",
+    "replace": "替换",
+    "again": "重试",
+    "done": "完成",
+    "back": "回到原来的 App，在那里粘贴。",
+    "empty": "先在其他 App 中选中文字，再选择“问 Toskar”。",
+    "shortcuts": {
+      "rewrite": "用 Toskar 改写",
+      "translate": "用 Toskar 翻译",
+      "explain": "用 Toskar 解释",
+      "summarize": "用 Toskar 总结",
+      "fix": "用 Toskar 修正",
+      "text": "文字"
+    }
   }
 }
