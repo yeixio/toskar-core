@@ -3,16 +3,28 @@ package api
 import (
 	"encoding/json"
 	"fmt"
+	"go/ast"
+	"go/parser"
+	"go/token"
 	"os"
+	"path/filepath"
 	"reflect"
 	"sort"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
 	"gopkg.in/yaml.v3"
 
+	"github.com/yeixio/toskar-core/internal/artifacts"
 	"github.com/yeixio/toskar-core/internal/auth"
+	"github.com/yeixio/toskar-core/internal/egress"
+	"github.com/yeixio/toskar-core/internal/events"
+	"github.com/yeixio/toskar-core/internal/gjallarhorn"
+	"github.com/yeixio/toskar-core/internal/muninn"
+	"github.com/yeixio/toskar-core/internal/runlog"
+	"github.com/yeixio/toskar-core/pkg/contracts"
 )
 
 // The named schemas in api/openapi.yaml that stand for a Go type, so the
@@ -20,23 +32,54 @@ import (
 // types, and required exactly when the field isn't omitempty. A schema not
 // listed here is written by hand.
 var specTypes = map[string]any{
-	"Person":             auth.Person{},
-	"Principal":          auth.Principal{},
-	"Me":                 meView{},
-	"Invite":             inviteView{},
-	"InviteLink":         linkView{},
-	"AddedPerson":        addedPerson{},
-	"ActivityEntry":      auth.ActivityEntry{},
-	"APIKey":             auth.APIKeyRecord{},
-	"RoleCapabilities":   roleCapabilitiesView{},
-	"PersonCapabilities": personCapabilitiesView{},
-	"ProfilePins":        profilePinsView{},
-	"OIDCInfo":           oidcInfo{},
-	"Capabilities":       auth.Capabilities{},
-	"DevicePairing":      pairingView{},
-	"PairedDevice":       pairedView{},
-	"DeviceRoute":        routeView{},
-	"MyDevice":           myDevice{},
+	"Person":              auth.Person{},
+	"Principal":           auth.Principal{},
+	"Me":                  meView{},
+	"Invite":              inviteView{},
+	"InviteLink":          linkView{},
+	"AddedPerson":         addedPerson{},
+	"ActivityEntry":       auth.ActivityEntry{},
+	"APIKey":              auth.APIKeyRecord{},
+	"RoleCapabilities":    roleCapabilitiesView{},
+	"PersonCapabilities":  personCapabilitiesView{},
+	"ProfilePins":         profilePinsView{},
+	"OIDCInfo":            oidcInfo{},
+	"Capabilities":        auth.Capabilities{},
+	"DevicePairing":       pairingView{},
+	"PairedDevice":        pairedView{},
+	"DeviceRoute":         routeView{},
+	"MyDevice":            myDevice{},
+	"ConversationSummary": muninn.Summary{},
+	"ChatStopped":         chatStopped{},
+	"Error":               contracts.APIError{},
+
+	// The client contract's types (tests/contract), by the same names.
+	"Event":                events.Event{},
+	"Run":                  runlog.Run{},
+	"ModelUse":             runlog.ModelUse{},
+	"ToolUse":              runlog.ToolUse{},
+	"FirstAnswers":         runlog.FirstAnswers{},
+	"FirstAnswersGroup":    runlog.FirstAnswersGroup{},
+	"Message":              contracts.Message{},
+	"MessageMeta":          contracts.MessageMeta{},
+	"Citation":             contracts.Citation{},
+	"ActivityStep":         contracts.ActivityStep{},
+	"FileRef":              contracts.FileRef{},
+	"SetupOffer":           contracts.SetupOffer{},
+	"AutomationDraft":      contracts.AutomationDraft{},
+	"AutomationRun":        contracts.AutomationRunRef{},
+	"ContextUsage":         contracts.ContextUsage{},
+	"Conversation":         contracts.Conversation{},
+	"ConversationsDeleted": contracts.ConversationsDeleted{},
+	"ConversationSkipped":  contracts.ConversationSkipped{},
+	"ModelWarmRequest":     contracts.ModelWarmRequest{},
+	"ModelWarmResponse":    contracts.ModelWarmResponse{},
+	"Artifact":             artifacts.Artifact{},
+	"Notification":         gjallarhorn.Notification{},
+	"EgressRecord":         egress.Record{},
+	"ContractInfo":         contracts.ContractInfo{},
+	"VersionResponse":      contracts.VersionResponse{},
+	"ErrorBody":            contracts.ErrorBody{},
 }
 
 // The Go types that encode themselves, with the schema of what they send.
@@ -91,9 +134,12 @@ func schemaOf(t reflect.Type, top bool) map[string]any {
 		return map[string]any{}
 	case reflect.Struct:
 		props := map[string]any{}
-		var required []string
-		addFields(t, props, &required)
-		s := map[string]any{"type": "object", "properties": props}
+		var required, order []string
+		addFieldsOf(t, props, &required, &order, false)
+		s := map[string]any{"type": "object", "properties": props, "x-order": order}
+		if doc := typeDoc(t); doc != "" {
+			s["description"] = doc
+		}
 		if len(required) > 0 {
 			sort.Strings(required)
 			s["required"] = required
@@ -105,13 +151,9 @@ func schemaOf(t reflect.Type, top bool) map[string]any {
 
 // addFields adds a struct's JSON fields, with embedded structs' fields
 // flattened in as encoding/json does.
-func addFields(t reflect.Type, props map[string]any, required *[]string) {
-	addFieldsOf(t, props, required, false)
-}
-
-// addFieldsOf adds t's fields; optional ones (from an embedded pointer,
-// which may be nil) are never required.
-func addFieldsOf(t reflect.Type, props map[string]any, required *[]string, optional bool) {
+// addFieldsOf adds t's fields, in order; optional ones (from an embedded
+// pointer, which may be nil) are never required.
+func addFieldsOf(t reflect.Type, props map[string]any, required, order *[]string, optional bool) {
 	for i := 0; i < t.NumField(); i++ {
 		f := t.Field(i)
 		tag := f.Tag.Get("json")
@@ -125,7 +167,7 @@ func addFieldsOf(t reflect.Type, props map[string]any, required *[]string, optio
 				ft, viaPointer = ft.Elem(), true
 			}
 			if ft.Kind() == reflect.Struct {
-				addFieldsOf(ft, props, required, optional || viaPointer)
+				addFieldsOf(ft, props, required, order, optional || viaPointer)
 				continue
 			}
 		}
@@ -133,12 +175,19 @@ func addFieldsOf(t reflect.Type, props map[string]any, required *[]string, optio
 			name = f.Name
 		}
 		omitted := strings.Contains(opts, "omitempty") || strings.Contains(opts, "omitzero")
+		var field map[string]any
 		if f.Type.Kind() == reflect.Pointer && omitted {
 			// A nil pointer is left out, never sent as null.
-			props[name] = schemaOf(f.Type.Elem(), false)
+			field = schemaOf(f.Type.Elem(), false)
 		} else {
-			props[name] = schemaOf(f.Type, false)
+			field = schemaOf(f.Type, false)
 		}
+		if doc := fieldDoc(t, f.Name, name); doc != "" && field["$ref"] == nil {
+			field = copyMap(field)
+			field["description"] = doc
+		}
+		props[name] = field
+		*order = append(*order, name)
 		if !omitted && !optional {
 			*required = append(*required, name)
 		}
@@ -185,6 +234,27 @@ func flattenAllOf(spec, schema map[string]any) map[string]any {
 		required = append(required, asSlice(part["required"])...)
 	}
 	return map[string]any{"type": "object", "properties": props, "required": required}
+}
+
+// Every type in the client contract is a schema of the same name, so what
+// tests/contract keeps compatible is what the spec, and the SDKs made from
+// it, describe (#666).
+func TestOpenAPICoversTheContract(t *testing.T) {
+	raw, err := os.ReadFile("../../tests/contract/testdata/contract.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var snap struct {
+		Types map[string][]string `json:"types"`
+	}
+	if err := json.Unmarshal(raw, &snap); err != nil {
+		t.Fatal(err)
+	}
+	for name := range snap.Types {
+		if _, ok := specTypes[name]; !ok {
+			t.Errorf("the contract's %s isn't in specTypes; add it, with its schema in api/openapi.yaml", name)
+		}
+	}
 }
 
 // compareSchema reports where the spec's schema differs from the Go type's.
@@ -263,18 +333,227 @@ func compareSchema(want, got map[string]any, at string) []string {
 }
 
 // TestOpenAPIPrint prints the schemas named in OPENAPI_PRINT (comma
-// separated) as YAML to paste into api/openapi.yaml, as a start.
+// separated) as YAML for api/openapi.yaml: the Go type's fields in order,
+// described by their doc comments, keeping what the spec's schema of that
+// name already says (descriptions, enums, examples).
 func TestOpenAPIPrint(t *testing.T) {
 	names := os.Getenv("OPENAPI_PRINT")
 	if names == "" {
 		t.Skip("set OPENAPI_PRINT")
 	}
+	_, raw := loadOpenAPI(t)
+	var spec map[string]any
+	if err := yaml.Unmarshal([]byte(raw), &spec); err != nil {
+		t.Fatal(err)
+	}
+	spec = normalize(spec).(map[string]any)
 	for _, name := range strings.Split(names, ",") {
 		v, ok := specTypes[name]
 		if !ok {
 			t.Fatalf("%s isn't in specTypes", name)
 		}
-		out, _ := yaml.Marshal(map[string]any{name: schemaOf(reflect.TypeOf(v), true)})
-		fmt.Print(string(out))
+		schema := schemaOf(reflect.TypeOf(v), true)
+		keepWritten(schema, asMap(dig(spec, "components", "schemas", name)))
+		doc := &yaml.Node{Kind: yaml.MappingNode, Content: []*yaml.Node{
+			{Kind: yaml.ScalarNode, Value: name}, schemaNode(schema),
+		}}
+		var b strings.Builder
+		enc := yaml.NewEncoder(&b)
+		enc.SetIndent(2)
+		if err := enc.Encode(doc); err != nil {
+			t.Fatal(err)
+		}
+		fmt.Print(b.String())
 	}
+}
+
+// keepWritten copies what a person wrote in the spec's schema into the
+// generated one: descriptions, enums, and examples.
+func keepWritten(gen, written map[string]any) {
+	if written == nil || gen == nil || gen["$ref"] != nil {
+		return
+	}
+	for _, k := range []string{"description", "enum", "example"} {
+		if v, ok := written[k]; ok {
+			gen[k] = v
+		}
+	}
+	if gen["type"] == "string" && written["format"] != nil && gen["format"] == nil {
+		gen["format"] = written["format"]
+	}
+	props := asMap(written["properties"])
+	for name, g := range asMap(gen["properties"]) {
+		if w := asMap(props[name]); w != nil {
+			gm := copyMap(asMap(g))
+			keepWritten(gm, w)
+			asMap(gen["properties"])[name] = gm
+		}
+	}
+	if items := asMap(gen["items"]); items != nil {
+		gm := copyMap(items)
+		keepWritten(gm, asMap(written["items"]))
+		gen["items"] = gm
+	}
+}
+
+// schemaNode is a schema as YAML in the spec's style: keys in a fixed
+// order, properties in the Go type's order, and short schemas on one line.
+func schemaNode(s map[string]any) *yaml.Node {
+	n := &yaml.Node{Kind: yaml.MappingNode}
+	simple := true
+	add := func(key string, v *yaml.Node) {
+		n.Content = append(n.Content, &yaml.Node{Kind: yaml.ScalarNode, Value: key}, v)
+		if v.Kind != yaml.ScalarNode && (v.Kind != yaml.SequenceNode || key != "enum") {
+			simple = false
+		}
+	}
+	for _, key := range []string{"$ref", "type", "format", "nullable", "description", "enum", "example", "required", "properties", "items", "additionalProperties", "allOf"} {
+		v, ok := s[key]
+		if !ok {
+			continue
+		}
+		switch key {
+		case "properties":
+			props := &yaml.Node{Kind: yaml.MappingNode}
+			order, _ := s["x-order"].([]string)
+			if len(order) == 0 {
+				for name := range asMap(v) {
+					order = append(order, name)
+				}
+				sort.Strings(order)
+			}
+			for _, name := range order {
+				props.Content = append(props.Content, &yaml.Node{Kind: yaml.ScalarNode, Value: name}, schemaNode(asMap(asMap(v)[name])))
+			}
+			add(key, props)
+		case "items", "additionalProperties":
+			if b, isBool := v.(bool); isBool {
+				add(key, &yaml.Node{Kind: yaml.ScalarNode, Tag: "!!bool", Value: fmt.Sprint(b)})
+			} else {
+				add(key, schemaNode(asMap(v)))
+			}
+		case "allOf":
+			seq := &yaml.Node{Kind: yaml.SequenceNode}
+			for _, p := range asSlice(v) {
+				seq.Content = append(seq.Content, schemaNode(asMap(p)))
+			}
+			add(key, seq)
+		default:
+			var node yaml.Node
+			if err := node.Encode(v); err != nil {
+				panic(err)
+			}
+			if node.Kind == yaml.SequenceNode {
+				node.Style = yaml.FlowStyle
+			}
+			add(key, &node)
+		}
+	}
+	if simple {
+		n.Style = yaml.FlowStyle
+	}
+	return n
+}
+
+func copyMap(m map[string]any) map[string]any {
+	out := make(map[string]any, len(m))
+	for k, v := range m {
+		out[k] = v
+	}
+	return out
+}
+
+// Doc comments, read from the Go source: a type's, and its fields'.
+var (
+	docsOnce sync.Map // package dir -> map["Type" or "Type.Field"]string
+)
+
+func docsOf(t reflect.Type) map[string]string {
+	const module = "github.com/yeixio/toskar-core"
+	if !strings.HasPrefix(t.PkgPath(), module) {
+		return nil
+	}
+	dir := filepath.Join("..", "..", strings.TrimPrefix(t.PkgPath(), module))
+	if got, ok := docsOnce.Load(dir); ok {
+		return got.(map[string]string)
+	}
+	docs := map[string]string{}
+	paths, _ := filepath.Glob(filepath.Join(dir, "*.go"))
+	fset := token.NewFileSet()
+	for _, path := range paths {
+		if strings.HasSuffix(path, "_test.go") {
+			continue
+		}
+		file, err := parser.ParseFile(fset, path, nil, parser.ParseComments)
+		if err != nil {
+			continue
+		}
+		ast.Inspect(file, func(node ast.Node) bool {
+			decl, ok := node.(*ast.GenDecl)
+			if !ok || decl.Tok != token.TYPE {
+				return true
+			}
+			for _, spec := range decl.Specs {
+				ts := spec.(*ast.TypeSpec)
+				doc := ts.Doc
+				if doc == nil && len(decl.Specs) == 1 {
+					doc = decl.Doc
+				}
+				docs[ts.Name.Name] = commentText(doc, ts.Name.Name, "")
+				st, ok := ts.Type.(*ast.StructType)
+				if !ok {
+					continue
+				}
+				for _, f := range st.Fields.List {
+					c := f.Doc
+					if c == nil {
+						c = f.Comment
+					}
+					for _, name := range f.Names {
+						docs[ts.Name.Name+"."+name.Name] = commentText(c, name.Name, "")
+					}
+				}
+			}
+			return false
+		})
+	}
+	docsOnce.Store(dir, docs)
+	return docs
+}
+
+// typeDoc is a type's doc comment without its name: "Summary covers a
+// conversation" becomes "Covers a conversation".
+func typeDoc(t reflect.Type) string {
+	text := docsOf(t)[t.Name()]
+	if rest, ok := strings.CutPrefix(text, "`"+t.Name()+"` "); ok && rest != "" {
+		return strings.ToUpper(rest[:1]) + rest[1:]
+	}
+	return text
+}
+
+func fieldDoc(t reflect.Type, goName, jsonName string) string {
+	text := docsOf(t)[t.Name()+"."+goName]
+	if text == "" {
+		return ""
+	}
+	return strings.Replace(text, "`"+goName+"`", "`"+jsonName+"`", 1)
+}
+
+// commentText is a doc comment as one paragraph for the spec. "Code is the
+// 6 digits" becomes "The 6 digits"; a comment that names the field
+// otherwise names it in backquotes.
+func commentText(c *ast.CommentGroup, goName, _ string) string {
+	if c == nil {
+		return ""
+	}
+	text := strings.Join(strings.Fields(c.Text()), " ")
+	for _, verb := range []string{" is ", " are "} {
+		if rest, ok := strings.CutPrefix(text, goName+verb); ok && rest != "" {
+			return strings.ToUpper(rest[:1]) + rest[1:]
+		}
+	}
+	if rest, ok := strings.CutPrefix(text, goName+" "); ok {
+		return "`" + goName + "` " + rest
+	}
+	return text
 }
