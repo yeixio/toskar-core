@@ -6,6 +6,8 @@ import (
 	"strconv"
 
 	"github.com/gorilla/mux"
+	"github.com/yeixio/toskar-core/internal/remotetools"
+	"github.com/yeixio/toskar-core/internal/tools"
 )
 
 func (s *Server) handleListTools(w http.ResponseWriter, r *http.Request) {
@@ -25,7 +27,7 @@ func (s *Server) handleListTools(w http.ResponseWriter, r *http.Request) {
 // (Gungnir §16).
 func (s *Server) handleToolProviders(w http.ResponseWriter, r *http.Request) {
 	if s.deps.ToolProviders == nil {
-		writeJSON(w, http.StatusOK, []any{})
+		writeJSON(w, http.StatusOK, []remotetools.NodeProviders{})
 		return
 	}
 	writeJSON(w, http.StatusOK, s.deps.ToolProviders(r.Context()))
@@ -33,7 +35,7 @@ func (s *Server) handleToolProviders(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) handleToolActivity(w http.ResponseWriter, r *http.Request) {
 	if s.deps.ToolActivity == nil {
-		writeJSON(w, http.StatusOK, []any{})
+		writeJSON(w, http.StatusOK, []tools.Activity{})
 		return
 	}
 	writeJSON(w, http.StatusOK, s.deps.ToolActivity())

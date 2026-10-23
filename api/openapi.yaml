@@ -2475,12 +2475,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  path:
-                    type: string
-                  message:
-                    type: string
+                $ref: "#/components/schemas/DiagnosticsBundle"
         "500":
           description: The bundle could not be created
           content:
@@ -2504,12 +2499,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  path:
-                    type: string
-                  message:
-                    type: string
+                $ref: "#/components/schemas/DiagnosticsBundle"
         "500":
           description: The bundle could not be created
           content:
@@ -2599,22 +2589,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  object:
-                    type: string
-                    enum: [list]
-                  data:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        id:
-                          type: string
-                        object:
-                          type: string
-                        owned_by:
-                          type: string
+                $ref: "#/components/schemas/OpenAIModelList"
   /v1/chat/completions:
     post:
       summary: OpenAI-compatible chat completions
@@ -2685,15 +2660,16 @@ paths:
                   $ref: "#/components/schemas/AssistantOptions"
       responses:
         "200":
-          description: A chat.completion, or with stream, server-sent chat.completion.chunk events ending with data [DONE]
+          description: The completion, or with stream, OpenAI's server-sent events
           content:
             application/json:
               schema:
-                type: object
-                additionalProperties: true
+                $ref: "#/components/schemas/OpenAIChatCompletion"
             text/event-stream:
               schema:
                 type: string
+              x-events:
+                message: {type: string, description: "A chat.completion.chunk as JSON, and last [DONE], as OpenAI streams them"}
         "400":
           description: Invalid JSON, no user message, or an invalid response_format
         "401":
@@ -3850,11 +3826,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  text: {type: string}
-                  language: {type: string}
-                  duration_seconds: {type: number}
+                $ref: "#/components/schemas/Transcription"
         "400":
           description: No artifact_id
         "503":
@@ -4637,8 +4609,7 @@ paths:
               schema:
                 type: array
                 items:
-                  type: object
-                  additionalProperties: true
+                  $ref: "#/components/schemas/ToolActivity"
   /api/v1/tools/providers:
     get:
       summary: Each computer's providers for tools that can run on any paired computer, and their state
@@ -4651,23 +4622,7 @@ paths:
               schema:
                 type: array
                 items:
-                  type: object
-                  properties:
-                    node_id: {type: string}
-                    name: {type: string}
-                    local: {type: boolean}
-                    online: {type: boolean}
-                    note: {type: string, description: "Why its providers are unknown, such as offline"}
-                    providers:
-                      type: array
-                      items:
-                        type: object
-                        properties:
-                          tool: {type: string}
-                          name: {type: string, description: "What runs it, such as FLUX.2 [klein] 4B"}
-                          state: {type: string, enum: [healthy, installing, failed, unavailable]}
-                          reason: {type: string}
-                          accelerated: {type: boolean, description: "A GPU does the work"}
+                  $ref: "#/components/schemas/NodeToolProviders"
   /api/v1/tools/decide:
     post:
       summary: Answer a tool approval request
@@ -4759,8 +4714,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                additionalProperties: true
+                $ref: "#/components/schemas/ToolResult"
         "400":
           description: Invalid request
           content:
@@ -9696,3 +9650,115 @@ components:
               type: array
               description: Human sentences about the dataset as a whole.
               items: {type: string}
+    DiagnosticsBundle:
+      type: object
+      description: Where a diagnostics bundle was saved on this computer.
+      required: [message, path]
+      properties:
+        path: {type: string}
+        message: {type: string}
+    Transcription:
+      type: object
+      description: A recording's text, for the person to check before sending, with the language it was in and how long it was.
+      required: [duration_seconds, language, text]
+      properties:
+        text: {type: string}
+        language: {type: string}
+        duration_seconds: {type: number}
+    ToolActivity:
+      type: object
+      description: A short diagnostics record. It does not include file contents.
+      required: [at, status, tool_id]
+      properties:
+        tool_id: {type: string}
+        status: {type: string}
+        summary: {type: string}
+        duration_ms: {type: integer, format: int64}
+        error: {type: string}
+        at: {type: string, format: date-time}
+    NodeToolProviders:
+      type: object
+      description: One computer's providers, for Diagnostics (§16).
+      required: [local, name, node_id, online, providers]
+      properties:
+        node_id: {type: string}
+        name: {type: string}
+        local: {type: boolean}
+        online: {type: boolean}
+        note: {type: string}
+        providers:
+          type: array
+          items:
+            type: object
+            description: One computer's ability to run one tool.
+            required: [accelerated, state, tool]
+            properties:
+              tool: {type: string}
+              name: {type: string, description: 'What runs it, such as FLUX.2 [klein] 4B.'}
+              state: {type: string}
+              reason: {type: string, description: '`reason` says why it is not healthy.'}
+              accelerated: {type: boolean, description: '`accelerated` means a GPU does the work, which matters for images.'}
+              languages:
+                type: array
+                description: The languages the provider works in, as base BCP 47 tags such as "de", when they matter, such as for speech (multilingual spec §20). Empty means any language, or not known.
+                items: {type: string}
+              auto_detect: {type: boolean, description: '`auto_detect` means the provider tells the language itself, such as Whisper hearing which language is spoken.'}
+    ToolResult:
+      type: object
+      description: "What the tool answered. Each tool's result is its own: see the tool's description in GET /api/v1/tools."
+      additionalProperties: true
+    OpenAIModel:
+      type: object
+      description: "A model as OpenAI clients list them: auto (Toskar picks), profile:<id>, or a specialized AI."
+      required: [id, object, owned_by]
+      properties:
+        id: {type: string, example: "profile:default"}
+        object: {type: string, enum: [model]}
+        owned_by: {type: string, description: "yggdrasil, within contract 1.x (#237)"}
+    OpenAIModelList:
+      type: object
+      required: [object, data]
+      properties:
+        object: {type: string, enum: [list]}
+        data:
+          type: array
+          items: {$ref: "#/components/schemas/OpenAIModel"}
+    ToskarExtension:
+      type: object
+      description: "What Toskar adds to an OpenAI answer, under toskar (and yggdrasil, its name before): the answer's sources, steps, notice, and files."
+      properties:
+        sources:
+          type: array
+          items: {$ref: "#/components/schemas/Citation"}
+        steps:
+          type: array
+          items: {$ref: "#/components/schemas/ActivityStep"}
+        notice: {type: string}
+        files:
+          type: array
+          items: {$ref: "#/components/schemas/FileRef"}
+    OpenAIChatCompletion:
+      type: object
+      description: "An OpenAI chat completion, for clients that speak OpenAI's API."
+      required: [id, object, model, choices]
+      properties:
+        id: {type: string}
+        object: {type: string, enum: [chat.completion]}
+        model: {type: string}
+        choices:
+          type: array
+          items:
+            type: object
+            required: [index, message, finish_reason]
+            properties:
+              index: {type: integer}
+              message:
+                type: object
+                required: [role, content]
+                properties:
+                  role: {type: string, enum: [assistant]}
+                  content: {type: string}
+                  reasoning_content: {type: string, description: "What a reasoning model thought first, when the request asked for it"}
+              finish_reason: {type: string}
+        toskar: {$ref: "#/components/schemas/ToskarExtension"}
+        yggdrasil: {$ref: "#/components/schemas/ToskarExtension"}

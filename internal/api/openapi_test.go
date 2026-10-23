@@ -158,8 +158,7 @@ func TestOpenAPIVersionIsTheContract(t *testing.T) {
 
 // Generated SDKs name their types after the spec's schemas, so a JSON
 // response is a named schema (or a list of one), not an object described
-// in place (#666). The operations that aren't yet are listed in
-// testdata/openapi_unnamed.txt; the list may only shrink.
+// in place (#666).
 func TestOpenAPIResponsesAreNamed(t *testing.T) {
 	_, raw := loadOpenAPI(t)
 	var spec map[string]any
@@ -186,28 +185,8 @@ func TestOpenAPIResponsesAreNamed(t *testing.T) {
 		}
 	}
 	sort.Strings(unnamed)
-	const file = "testdata/openapi_unnamed.txt"
-	if os.Getenv("UPDATE_OPENAPI_DRIFT") != "" {
-		if err := os.WriteFile(file, []byte(strings.Join(unnamed, "\n")+"\n"), 0o644); err != nil {
-			t.Fatal(err)
-		}
-		return
-	}
-	raw2, _ := os.ReadFile(file)
-	listed := map[string]bool{}
-	for _, line := range strings.Split(string(raw2), "\n") {
-		if line = strings.TrimSpace(line); line != "" {
-			listed[line] = true
-		}
-	}
 	for _, u := range unnamed {
-		if !listed[u] {
-			t.Errorf("%s describes its JSON in place; give it a named schema in components/schemas", u)
-		}
-		delete(listed, u)
-	}
-	for done := range listed {
-		t.Errorf("%s has a named schema now; remove it from %s", done, file)
+		t.Errorf("%s describes its JSON in place; give it a named schema in components/schemas", u)
 	}
 }
 

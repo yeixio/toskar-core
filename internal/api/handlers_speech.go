@@ -80,3 +80,11 @@ type spokenText struct {
 	Artifact artifacts.Artifact `json:"artifact"`
 	Seconds  float64            `json:"seconds"`
 }
+
+// Transcription is a recording's text, for the person to check before
+// sending, with the language it was in and how long it was.
+type Transcription struct {
+	Text            string  `json:"text"`
+	Language        string  `json:"language"`
+	DurationSeconds float64 `json:"duration_seconds"`
+}

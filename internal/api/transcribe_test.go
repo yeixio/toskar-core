@@ -17,12 +17,12 @@ import (
 func TestTranscribe(t *testing.T) {
 	var gotID, gotLang string
 	srv := NewServer(Dependencies{
-		Transcribe: func(_ context.Context, id, lang string) (map[string]any, error) {
+		Transcribe: func(_ context.Context, id, lang string) (Transcription, error) {
 			if id == "none" {
-				return nil, contracts.NewError("SPEECH_UNAVAILABLE", map[string]any{"detail": "not set up"}, errors.New("not set up"))
+				return Transcription{}, contracts.NewError("SPEECH_UNAVAILABLE", map[string]any{"detail": "not set up"}, errors.New("not set up"))
 			}
 			gotID, gotLang = id, lang
-			return map[string]any{"text": "what plant is this", "language": "en", "duration_seconds": 2.1}, nil
+			return Transcription{Text: "what plant is this", Language: "en", DurationSeconds: 2.1}, nil
 		},
 	})
 	call := func(body string) (int, map[string]any) {

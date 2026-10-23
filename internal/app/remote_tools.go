@@ -61,7 +61,7 @@ func (a *App) enterToolWork(ctx context.Context, label string) (func(), error) {
 }
 
 // toolProviders is each computer's tool providers, for Diagnostics.
-func (a *App) toolProviders(ctx context.Context) any {
+func (a *App) toolProviders(ctx context.Context) []remotetools.NodeProviders {
 	if a.toolNet == nil {
 		return []remotetools.NodeProviders{}
 	}

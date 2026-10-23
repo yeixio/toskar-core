@@ -692,14 +692,10 @@ func New(opts Options) (*App, error) {
 		ListTools: func(ctx context.Context) (any, error) {
 			return a.listToolViews(ctx)
 		},
-		SetToolEnabled: a.setToolEnabled,
-		TestTool:       a.testTool,
-		ToolActivity: func() any {
-			return toolReg.Recent()
-		},
-		ToolProviders: func(ctx context.Context) any {
-			return a.toolProviders(ctx)
-		},
+		SetToolEnabled:       a.setToolEnabled,
+		TestTool:             a.testTool,
+		ToolActivity:         toolReg.Recent,
+		ToolProviders:        a.toolProviders,
 		ListAPIKeys:          apiKeyMgr.List,
 		CreateAPIKey:         apiKeyMgr.Create,
 		RevokeAPIKey:         apiKeyMgr.Revoke,

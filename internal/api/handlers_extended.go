@@ -772,10 +772,17 @@ func (s *Server) handleDiagnostics(w http.ResponseWriter, r *http.Request) {
 			"Could not create a diagnostics bundle.", map[string]any{"cause": err.Error()})
 		return
 	}
-	writeJSON(w, http.StatusOK, map[string]any{
-		"path":    path,
-		"message": "Diagnostics bundle created. Secrets and private keys were excluded.",
+	writeJSON(w, http.StatusOK, diagnosticsBundle{
+		Path:    path,
+		Message: "Diagnostics bundle created. Secrets and private keys were excluded.",
 	})
+}
+
+// diagnosticsBundle is where a diagnostics bundle was saved on this
+// computer.
+type diagnosticsBundle struct {
+	Path    string `json:"path"`
+	Message string `json:"message"`
 }
 
 // handleLiveFigures reports each computer's CPU, memory, and GPU figures
