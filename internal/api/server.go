@@ -1000,7 +1000,7 @@ func (s *Server) handleRefreshNodes(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if s.deps.ListNodes == nil {
-		writeJSON(w, http.StatusOK, map[string]any{"ok": true})
+		writeJSON(w, http.StatusOK, okView{OK: true})
 		return
 	}
 	items, err := s.deps.ListNodes(r.Context())
@@ -1192,7 +1192,7 @@ func (s *Server) handleCancelBenchmark(w http.ResponseWriter, r *http.Request) {
 		writeErr(w, http.StatusNotFound, "NOT_FOUND", "Benchmark not found.", map[string]any{"cause": err.Error()})
 		return
 	}
-	writeJSON(w, http.StatusOK, map[string]any{"ok": true})
+	writeJSON(w, http.StatusOK, okView{OK: true})
 }
 
 func (s *Server) handleListConversations(w http.ResponseWriter, r *http.Request) {
@@ -1363,6 +1363,11 @@ func (s *Server) handleOpenAIModels(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) handleOpenAIChat(w http.ResponseWriter, r *http.Request) {
 	writeErr(w, http.StatusNotImplemented, "NOT_IMPLEMENTED", "Chat completions will be available after local models are installed.", nil)
+}
+
+// okView is the answer of a route that has nothing else to say.
+type okView struct {
+	OK bool `json:"ok"`
 }
 
 func writeJSON(w http.ResponseWriter, status int, v any) {

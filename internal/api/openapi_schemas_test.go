@@ -22,8 +22,11 @@ import (
 	"github.com/yeixio/toskar-core/internal/egress"
 	"github.com/yeixio/toskar-core/internal/events"
 	"github.com/yeixio/toskar-core/internal/gjallarhorn"
+	"github.com/yeixio/toskar-core/internal/models"
 	"github.com/yeixio/toskar-core/internal/muninn"
+	"github.com/yeixio/toskar-core/internal/ratings"
 	"github.com/yeixio/toskar-core/internal/runlog"
+	"github.com/yeixio/toskar-core/internal/runtimes"
 	"github.com/yeixio/toskar-core/pkg/contracts"
 )
 
@@ -84,6 +87,29 @@ var specTypes = map[string]any{
 	"ChatToken":            contracts.ChatToken{},
 	"ChatDone":             contracts.ChatDone{},
 	"GenerationMetrics":    contracts.GenerationMetrics{},
+
+	// Models and runtimes.
+	"Model":              contracts.Model{},
+	"Recommendation":     contracts.Recommendation{},
+	"ModelFit":           contracts.ModelsFitResponse{},
+	"BrowseModel":        contracts.BrowseModel{},
+	"RunningModelView":   contracts.RunningModelView{},
+	"URLPreview":         models.URLPreview{},
+	"FoundModel":         models.FoundModel{},
+	"FoundModels":        foundModels{},
+	"ImportedModel":      importedModel{},
+	"ModelFileDetails":   modelFileDetails{},
+	"ModelInstall":       modelInstall{},
+	"AddedModel":         addedModelView{},
+	"ModelVision":        modelVision{},
+	"ModelPlacement":     modelPlacement{},
+	"ModelRating":        ratings.View{},
+	"RatingStats":        ratings.Stats{},
+	"RatingObservations": ratings.Observations{},
+	"CommunityRatings":   ratings.Community{},
+	"RuntimeInfo":        runtimes.RuntimeInfo{},
+	"RuntimeInstall":     runtimeInstall{},
+	"OK":                 okView{},
 }
 
 // The Go types that encode themselves, with the schema of what they send.

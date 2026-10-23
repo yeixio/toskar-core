@@ -14,3 +14,6 @@
 - It describes the chat stream's events (token, done, error_code, and
   error) and the events stream, so a client can read each event as a type.
   Chat answers' metrics include `cached_tokens` (contract 1.56).
+- It describes models, runtimes, and ratings fully: the model list,
+  recommendations, browsing, installing, importing, running models, and
+  where a model can run.

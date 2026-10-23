@@ -3,9 +3,7 @@ get /api/v1/artifacts/{id}/content 200: content type text/markdown not described
 get /api/v1/portals/{id}/visitors 200: $[]: an object with no described fields
 get /api/v1/portals/{slug}/page 200: $: an object with no described fields
 get /api/v1/training/base-models 200: $: an array, but described as an object
-patch /api/v1/models/{id} 200: body not described
 post /api/v1/knowledge/sources 201: $.language: not described
 post /api/v1/knowledge/sources 201: $.languages: not described
 post /api/v1/portals/{id}/visitors 201: $: an object with no described fields
 post /api/v1/portals/{slug}/enter 200: $: an object with no described fields
-put /api/v1/models/{id}/projector 200: body not described
