@@ -55,6 +55,10 @@ paths:
       responses:
         "200":
           description: Signed in; the body is the request's person, as GET /api/v1/me
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Principal"
         "401":
           description: SIGN_IN_FAILED, the same whichever of username or password was wrong
         "429":
@@ -81,15 +85,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  name:
-                    type: string
-                  kind:
-                    type: string
-                    enum: [invite, reset]
-                  username:
-                    type: string
+                $ref: "#/components/schemas/Invite"
         "410":
           description: INVITE_INVALID, used or expired
     post:
@@ -117,6 +113,10 @@ paths:
       responses:
         "200":
           description: Set and signed in
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Principal"
         "400":
           description: USERNAME_INVALID or PASSWORD_TOO_SHORT; the link is still good
         "409":
@@ -147,22 +147,7 @@ paths:
               schema:
                 type: array
                 items:
-                  type: object
-                  properties:
-                    id:
-                      type: string
-                    name:
-                      type: string
-                    username:
-                      type: string
-                    role:
-                      type: string
-                      enum: [owner, admin, member, visitor]
-                    sign_in:
-                      type: boolean
-                    disabled_at:
-                      type: string
-                      format: date-time
+                  $ref: "#/components/schemas/Person"
     post:
       summary: Add a person and make their invite link (Admins add Members and Visitors; the Owner adds Admins too)
       operationId: addPerson
@@ -193,6 +178,10 @@ paths:
       responses:
         "201":
           description: The person, and, without a password, link with path (/invite/<token>), kind, and expires_at
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AddedPerson"
         "403":
           description: ROLE_REQUIRED
   /api/v1/people/{id}:
@@ -208,6 +197,10 @@ paths:
       responses:
         "200":
           description: The person, with email and must_change
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Person"
         "404":
           description: PERSON_NOT_FOUND
     delete:
@@ -283,22 +276,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  id:
-                    type: string
-                  name:
-                    type: string
-                  username:
-                    type: string
-                  role:
-                    type: string
-                    enum: [owner, admin, member, visitor]
-                  sign_in:
-                    type: boolean
-                  disabled_at:
-                    type: string
-                    format: date-time
+                $ref: "#/components/schemas/Person"
         "403":
           description: ROLE_REQUIRED or OWNER_FIXED
   /api/v1/people/activity:
@@ -320,6 +298,12 @@ paths:
       responses:
         "200":
           description: Entries with at, actor_id, actor_name, target_id, target_name, action, and detail
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ActivityEntry"
   /api/v1/people/{id}/keys:
     get:
       parameters:
@@ -333,6 +317,12 @@ paths:
       responses:
         "200":
           description: Their keys
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/APIKey"
   /api/v1/people/{id}/keys/{key}:
     delete:
       parameters:
@@ -366,6 +356,12 @@ paths:
       responses:
         "200":
           description: Their devices' keys
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/APIKey"
   /api/v1/people/{id}/devices/{key}:
     delete:
       parameters:
@@ -405,6 +401,10 @@ paths:
       responses:
         "200":
           description: Who you are now
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Principal"
         "403":
           description: PASSWORD_WRONG
   /api/v1/roles/capabilities:
@@ -415,6 +415,10 @@ paths:
       responses:
         "200":
           description: capabilities, roles, and defaults
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RoleCapabilities"
   /api/v1/roles/{role}/capabilities:
     put:
       summary: Change what a role may use (#589)
@@ -439,6 +443,10 @@ paths:
       responses:
         "200":
           description: The role's capabilities now
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Capabilities"
         "400":
           description: OWNER_FIXED or CAPABILITY_UNKNOWN
   /api/v1/people/{id}/capabilities:
@@ -454,6 +462,10 @@ paths:
       responses:
         "200":
           description: set (their own Allows and Blocks) and effective (what they may use now)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PersonCapabilities"
     put:
       summary: Allow or Block something for one person (#589)
       description: true allows, false blocks, and null is as their role's. The Owner's are fixed.
@@ -476,6 +488,10 @@ paths:
       responses:
         "200":
           description: set and effective
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PersonCapabilities"
   /api/v1/people/{id}/link:
     post:
       parameters:
@@ -489,6 +505,10 @@ paths:
       responses:
         "201":
           description: path (/invite/<token>), kind (invite or reset), and expires_at (a week for an invite, a day for a reset)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InviteLink"
   /api/v1/people/{id}/profiles:
     put:
       parameters:
@@ -515,6 +535,10 @@ paths:
       responses:
         "200":
           description: The person, with profiles
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Person"
         "400":
           description: PIN_INVALID
   /api/v1/profiles/{id}/try-topics:
@@ -596,6 +620,10 @@ paths:
       responses:
         "200":
           description: "roles: member and visitor, each a list of profile ids; empty is any profile"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProfilePins"
   /api/v1/profile-pins/{role}:
     put:
       parameters:
@@ -621,6 +649,10 @@ paths:
       responses:
         "200":
           description: The pins of every role
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProfilePins"
         "400":
           description: PIN_INVALID
   /api/v1/me:
@@ -634,28 +666,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  person:
-                    type: object
-                    properties:
-                      id:
-                        type: string
-                      name:
-                        type: string
-                      username:
-                        type: string
-                      role:
-                        type: string
-                        enum: [owner, admin, member, visitor]
-                      created_at:
-                        type: string
-                        format: date-time
-                  via:
-                    type: string
-                    enum: [this_computer, api_key, session]
-                  key_id:
-                    type: string
+                $ref: "#/components/schemas/Me"
   /api/v1/portals:
     get:
       summary: Chat portals (#205)
@@ -952,12 +963,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  enabled:
-                    type: boolean
-                  label:
-                    type: string
+                $ref: "#/components/schemas/OIDCInfo"
   /api/v1/oidc/start:
     get:
       summary: Go to the provider to sign in (#206)
@@ -7827,36 +7833,27 @@ components:
           description: Base64 ed25519 signature by the key in from_cert_pem over the session, both node IDs, the code, the expiry, and the key's fingerprint. Unsigned offers are refused.
     APIKey:
       type: object
+      description: An API key's details; its secret is shown only when it's made.
+      required: [id, name, prefix, created_at, revoked, permissions, person_id]
       properties:
-        id:
-          type: string
-        name:
-          type: string
-        prefix:
-          type: string
-        created_at:
-          type: string
-          format: date-time
-        last_used_at:
-          type: string
-          format: date-time
-        revoked:
-          type: boolean
+        id: {type: string}
+        name: {type: string}
+        prefix: {type: string}
+        created_at: {type: string, format: date-time}
+        last_used_at: {type: string, format: date-time}
+        revoked: {type: boolean}
         permissions:
           type: object
+          description: What the key may ask of the assistant
+          required: [memory, knowledge, tools, placement]
           properties:
-            memory:
-              type: string
-              enum: [never, on_request, always]
-            knowledge:
-              type: string
-              enum: [never, on_request, always]
-            tools:
-              type: string
-              enum: [profile, read_only, none]
-            placement:
-              type: boolean
-      additionalProperties: true
+            memory: {type: string, enum: [never, on_request, always]}
+            knowledge: {type: string, enum: [never, on_request, always]}
+            tools: {type: string, enum: [profile, read_only, none]}
+            placement: {type: boolean}
+            profile: {type: string, description: "The one profile the key is pinned to (#345); absent lets each request choose"}
+        kind: {type: string, enum: [device], description: "device for a key a phone or other device got by pairing (#216); absent for one made in API Access"}
+        person_id: {type: string}
     Notification:
       type: object
       properties:
@@ -7991,3 +7988,123 @@ components:
         source: {type: string}
         conversation_id: {type: string}
         task_id: {type: string}
+
+    Person:
+      type: object
+      description: Someone who uses this computer (#206).
+      required: [id, name, role, created_at, sign_in]
+      properties:
+        id: {type: string}
+        name: {type: string}
+        username: {type: string, description: "Set once they can sign in with a password"}
+        role: {type: string, enum: [owner, admin, member, visitor]}
+        created_at: {type: string, format: date-time}
+        disabled_at: {type: string, format: date-time, description: "When an Admin turned them off; absent while they're on"}
+        sign_in: {type: boolean, description: "They've set a username and password"}
+        external: {type: string, description: "Who they are at a trusted proxy or OpenID Connect provider"}
+        portal_id: {type: string, description: "The chat portal a guest belongs to (#205)"}
+        profiles:
+          type: array
+          items: {type: string}
+          description: "The profiles they're pinned to (#345). Absent is their role's; empty is any profile."
+        email: {type: string}
+        must_change: {type: boolean, description: "The password an Admin set must be changed at their next sign-in"}
+    Principal:
+      type: object
+      description: Who a request is from, and how Toskar knows.
+      required: [person, via]
+      properties:
+        person: {$ref: "#/components/schemas/Person"}
+        via: {type: string, enum: [this_computer, api_key, session, proxy, none, system]}
+        key_id: {type: string, description: "The API key the request used, when via is api_key"}
+        key_profile: {type: string, description: "The profile that key is pinned to (#345)"}
+    Me:
+      type: object
+      description: "Who the request is from (#206): a Principal, with the profiles and capabilities they have."
+      required: [person, via, capabilities]
+      properties:
+        person: {$ref: "#/components/schemas/Person"}
+        via: {type: string, enum: [this_computer, api_key, session, proxy, none, system]}
+        key_id: {type: string}
+        key_profile: {type: string}
+        profiles:
+          type: array
+          items: {type: string}
+          description: "The profiles they may chat with, when they're pinned to some (#345)"
+        capabilities: {$ref: "#/components/schemas/Capabilities"}
+    Invite:
+      type: object
+      description: Whom an invite or reset link is for, before it's used.
+      required: [name, kind]
+      properties:
+        name: {type: string}
+        kind: {type: string, enum: [invite, reset, portal]}
+        username: {type: string}
+    InviteLink:
+      type: object
+      description: A link that lets someone set their password, once, before it expires.
+      required: [path, kind, expires_at]
+      properties:
+        path: {type: string, description: "The link's path on this computer, such as /invite/TOKEN"}
+        kind: {type: string, enum: [invite, reset]}
+        expires_at: {type: string, format: date-time}
+    AddedPerson:
+      type: object
+      description: The person just added, and their invite link unless an Admin set their password.
+      required: [person]
+      properties:
+        person: {$ref: "#/components/schemas/Person"}
+        link: {$ref: "#/components/schemas/InviteLink"}
+    ActivityEntry:
+      type: object
+      description: Something an Admin did to someone's account (#592).
+      required: [at, actor_id, actor_name, target_id, target_name, action]
+      properties:
+        at: {type: string, format: date-time}
+        actor_id: {type: string}
+        actor_name: {type: string}
+        target_id: {type: string}
+        target_name: {type: string}
+        action: {type: string, enum: [added, changed, disabled, enabled, deleted, password_set, link_made, key_revoked, device_revoked]}
+        detail: {type: string, description: "What changed, such as \"role member → admin\""}
+    RoleCapabilities:
+      type: object
+      description: What each role may use (#589), and the defaults.
+      required: [capabilities, roles, defaults]
+      properties:
+        capabilities: {type: array, items: {type: string}, description: "Every capability there is"}
+        roles:
+          type: object
+          additionalProperties: {$ref: "#/components/schemas/Capabilities"}
+        defaults:
+          type: object
+          additionalProperties: {$ref: "#/components/schemas/Capabilities"}
+    PersonCapabilities:
+      type: object
+      description: One person's own capability settings (#589), and what they end up with.
+      required: [set, effective]
+      properties:
+        set:
+          type: object
+          additionalProperties: {type: boolean}
+          description: Set for them, over their role's
+        effective: {$ref: "#/components/schemas/Capabilities"}
+    ProfilePins:
+      type: object
+      description: The profiles each role is pinned to (#345); a role pinned to none may use any.
+      required: [roles]
+      properties:
+        roles:
+          type: object
+          additionalProperties: {type: array, items: {type: string}}
+    Capabilities:
+      type: object
+      description: "What someone may use (#589): each capability, on or off, so an app hides what they can't."
+      additionalProperties: {type: boolean}
+    OIDCInfo:
+      type: object
+      description: Whether the sign-in screen offers an OpenID Connect provider.
+      required: [enabled]
+      properties:
+        enabled: {type: boolean}
+        label: {type: string, description: "The provider's name for its button"}
