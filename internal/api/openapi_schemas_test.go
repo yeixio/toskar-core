@@ -403,7 +403,7 @@ func schemaNode(s map[string]any) *yaml.Node {
 	simple := true
 	add := func(key string, v *yaml.Node) {
 		n.Content = append(n.Content, &yaml.Node{Kind: yaml.ScalarNode, Value: key}, v)
-		if v.Kind != yaml.ScalarNode && !(v.Kind == yaml.SequenceNode && key == "enum") {
+		if v.Kind != yaml.ScalarNode && (v.Kind != yaml.SequenceNode || key != "enum") {
 			simple = false
 		}
 	}
@@ -478,38 +478,44 @@ func docsOf(t reflect.Type) map[string]string {
 		return got.(map[string]string)
 	}
 	docs := map[string]string{}
-	pkgs, _ := parser.ParseDir(token.NewFileSet(), dir, func(fi os.FileInfo) bool { return !strings.HasSuffix(fi.Name(), "_test.go") }, parser.ParseComments)
-	for _, pkg := range pkgs {
-		for _, file := range pkg.Files {
-			ast.Inspect(file, func(node ast.Node) bool {
-				decl, ok := node.(*ast.GenDecl)
-				if !ok || decl.Tok != token.TYPE {
-					return true
-				}
-				for _, spec := range decl.Specs {
-					ts := spec.(*ast.TypeSpec)
-					doc := ts.Doc
-					if doc == nil && len(decl.Specs) == 1 {
-						doc = decl.Doc
-					}
-					docs[ts.Name.Name] = commentText(doc, ts.Name.Name, "")
-					st, ok := ts.Type.(*ast.StructType)
-					if !ok {
-						continue
-					}
-					for _, f := range st.Fields.List {
-						c := f.Doc
-						if c == nil {
-							c = f.Comment
-						}
-						for _, name := range f.Names {
-							docs[ts.Name.Name+"."+name.Name] = commentText(c, name.Name, "")
-						}
-					}
-				}
-				return false
-			})
+	paths, _ := filepath.Glob(filepath.Join(dir, "*.go"))
+	fset := token.NewFileSet()
+	for _, path := range paths {
+		if strings.HasSuffix(path, "_test.go") {
+			continue
 		}
+		file, err := parser.ParseFile(fset, path, nil, parser.ParseComments)
+		if err != nil {
+			continue
+		}
+		ast.Inspect(file, func(node ast.Node) bool {
+			decl, ok := node.(*ast.GenDecl)
+			if !ok || decl.Tok != token.TYPE {
+				return true
+			}
+			for _, spec := range decl.Specs {
+				ts := spec.(*ast.TypeSpec)
+				doc := ts.Doc
+				if doc == nil && len(decl.Specs) == 1 {
+					doc = decl.Doc
+				}
+				docs[ts.Name.Name] = commentText(doc, ts.Name.Name, "")
+				st, ok := ts.Type.(*ast.StructType)
+				if !ok {
+					continue
+				}
+				for _, f := range st.Fields.List {
+					c := f.Doc
+					if c == nil {
+						c = f.Comment
+					}
+					for _, name := range f.Names {
+						docs[ts.Name.Name+"."+name.Name] = commentText(c, name.Name, "")
+					}
+				}
+			}
+			return false
+		})
 	}
 	docsOnce.Store(dir, docs)
 	return docs
