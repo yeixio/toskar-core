@@ -149,20 +149,25 @@ func (s *Server) handlePairDevice(w http.ResponseWriter, r *http.Request) {
 // certificate's fingerprint to check from now on (#213; over plain HTTP the
 // phone checks it on its next HTTPS connection), and the route secret for
 // finding this computer away from home (#456).
-func (s *Server) pairedAnswer(rec auth.APIKeyRecord, secret string) map[string]any {
+func (s *Server) pairedAnswer(rec auth.APIKeyRecord, secret string) pairedView {
 	tlsInfo := s.TLS()
-	out := map[string]any{"api_key": secret, "key": rec,
-		"tls_fingerprint": tlsInfo.Fingerprint, "tls_short": tlsInfo.Short}
+	out := pairedView{APIKey: secret, Key: rec, TLSFingerprint: tlsInfo.Fingerprint, TLSShort: tlsInfo.Short}
 	if s.deps.RouteSecret != nil {
-		if route, id, err := s.deps.RouteSecret(); err == nil {
-			out["route_secret"], out["route_id"] = route, id
-			if s.deps.RelayName != nil {
-				out["relay"] = s.deps.RelayName()
-			}
-			s.addRelayToken(out)
+		if route, err := s.route(); err == nil {
+			out.routeView = route
 		}
 	}
 	return out
+}
+
+// pairedView is a newly connected device's key, once, with the
+// certificate to pin and, when this computer has one, its route.
+type pairedView struct {
+	APIKey         string            `json:"api_key"`
+	Key            auth.APIKeyRecord `json:"key"`
+	TLSFingerprint string            `json:"tls_fingerprint"`
+	TLSShort       string            `json:"tls_short"`
+	*routeView
 }
 
 // maxDevices is how many connected devices one person may have; a
@@ -246,11 +251,6 @@ func (s *Server) handleMyDevices(w http.ResponseWriter, r *http.Request) {
 		writeErrFrom(w, http.StatusInternalServerError, "DEVICES_FAILED", err)
 		return
 	}
-	// Each says whether it takes pushes from the Toskar app (#460).
-	type device struct {
-		auth.APIKeyRecord
-		Push bool `json:"push"`
-	}
 	pushed := map[string]bool{}
 	if s.push != nil {
 		if regs, err := s.push.ForPerson(r.Context(), auth.PersonID(r.Context())); err == nil {
@@ -259,11 +259,18 @@ func (s *Server) handleMyDevices(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	}
-	out := make([]device, 0, len(list))
+	out := make([]myDevice, 0, len(list))
 	for _, k := range list {
-		out = append(out, device{APIKeyRecord: k, Push: pushed[k.ID]})
+		out = append(out, myDevice{APIKeyRecord: k, Push: pushed[k.ID]})
 	}
 	writeJSON(w, http.StatusOK, out)
+}
+
+// myDevice is one of the person's connected devices, and whether it takes
+// pushes from the Toskar app (#460).
+type myDevice struct {
+	auth.APIKeyRecord
+	Push bool `json:"push"`
 }
 
 // handleDisconnectMyDevice revokes one of the person's own devices' keys.

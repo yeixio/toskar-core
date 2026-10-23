@@ -33,6 +33,10 @@ var specTypes = map[string]any{
 	"ProfilePins":        profilePinsView{},
 	"OIDCInfo":           oidcInfo{},
 	"Capabilities":       auth.Capabilities{},
+	"DevicePairing":      pairingView{},
+	"PairedDevice":       pairedView{},
+	"DeviceRoute":        routeView{},
+	"MyDevice":           myDevice{},
 }
 
 // The Go types that encode themselves, with the schema of what they send.
@@ -102,6 +106,12 @@ func schemaOf(t reflect.Type, top bool) map[string]any {
 // addFields adds a struct's JSON fields, with embedded structs' fields
 // flattened in as encoding/json does.
 func addFields(t reflect.Type, props map[string]any, required *[]string) {
+	addFieldsOf(t, props, required, false)
+}
+
+// addFieldsOf adds t's fields; optional ones (from an embedded pointer,
+// which may be nil) are never required.
+func addFieldsOf(t reflect.Type, props map[string]any, required *[]string, optional bool) {
 	for i := 0; i < t.NumField(); i++ {
 		f := t.Field(i)
 		tag := f.Tag.Get("json")
@@ -110,12 +120,12 @@ func addFields(t reflect.Type, props map[string]any, required *[]string) {
 		}
 		name, opts, _ := strings.Cut(tag, ",")
 		if f.Anonymous && name == "" {
-			ft := f.Type
+			ft, viaPointer := f.Type, false
 			if ft.Kind() == reflect.Pointer {
-				ft = ft.Elem()
+				ft, viaPointer = ft.Elem(), true
 			}
 			if ft.Kind() == reflect.Struct {
-				addFields(ft, props, required)
+				addFieldsOf(ft, props, required, optional || viaPointer)
 				continue
 			}
 		}
@@ -129,7 +139,7 @@ func addFields(t reflect.Type, props map[string]any, required *[]string) {
 		} else {
 			props[name] = schemaOf(f.Type, false)
 		}
-		if !omitted {
+		if !omitted && !optional {
 			*required = append(*required, name)
 		}
 	}
@@ -151,10 +161,30 @@ func TestOpenAPISchemasMatchGo(t *testing.T) {
 			t.Errorf("components/schemas/%s is missing; OPENAPI_PRINT=%s go test ./internal/api -run TestOpenAPIPrint prints it", name, name)
 			continue
 		}
-		for _, d := range compareSchema(schemaOf(reflect.TypeOf(v), true), got, name) {
+		for _, d := range compareSchema(schemaOf(reflect.TypeOf(v), true), flattenAllOf(spec, got), name) {
 			t.Error(d)
 		}
 	}
+}
+
+// flattenAllOf merges a schema written as allOf (another schema and more
+// fields) into one, as the Go type is: an embedded struct's fields are its
+// own.
+func flattenAllOf(spec, schema map[string]any) map[string]any {
+	parts, ok := schema["allOf"].([]any)
+	if !ok || schema["nullable"] == true {
+		return schema
+	}
+	props := map[string]any{}
+	var required []any
+	for _, p := range parts {
+		part := flattenAllOf(spec, resolve(spec, asMap(p)))
+		for k, v := range asMap(part["properties"]) {
+			props[k] = v
+		}
+		required = append(required, asSlice(part["required"])...)
+	}
+	return map[string]any{"type": "object", "properties": props, "required": required}
 }
 
 // compareSchema reports where the spec's schema differs from the Go type's.

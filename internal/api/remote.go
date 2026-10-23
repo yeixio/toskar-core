@@ -433,28 +433,38 @@ func (s *Server) handleRouteSecret(w http.ResponseWriter, r *http.Request) {
 		writeErr(w, http.StatusNotImplemented, "NOT_IMPLEMENTED", "Access from anywhere isn't available.", nil)
 		return
 	}
-	secret, route, err := s.deps.RouteSecret()
+	route, err := s.route()
 	if err != nil {
 		writeErr(w, http.StatusInternalServerError, "ROUTE_FAILED", err.Error(), nil)
 		return
 	}
-	out := map[string]any{"route_secret": secret, "route_id": route}
-	if s.deps.RelayName != nil {
-		out["relay"] = s.deps.RelayName()
-	}
-	s.addRelayToken(out)
-	writeJSON(w, http.StatusOK, out)
+	writeJSON(w, http.StatusOK, route)
 }
 
-// addRelayToken puts this computer's token for Toskar's relay in a route
-// answer, which only paired devices on the home network get, so every one
-// of them can look the computer up away from home, not only the one that
-// subscribed (#456). A computer without one answers without it.
-func (s *Server) addRelayToken(out map[string]any) {
-	if s.deps.RelayToken == nil {
-		return
+// routeView is how a paired device finds this computer away from home
+// (#456): the route secret and id, the relay it's reached through, and
+// this computer's token for that relay.
+type routeView struct {
+	RouteSecret string `json:"route_secret"`
+	RouteID     string `json:"route_id"`
+	Relay       string `json:"relay,omitempty"`
+	// Token goes only to paired devices on the home network, so every one
+	// of them can look the computer up away from home, not only the one
+	// that subscribed. A computer without one answers without it.
+	Token string `json:"token,omitempty"`
+}
+
+func (s *Server) route() (*routeView, error) {
+	secret, id, err := s.deps.RouteSecret()
+	if err != nil {
+		return nil, err
 	}
-	if tok := s.deps.RelayToken(); tok != "" {
-		out["token"] = tok
+	out := &routeView{RouteSecret: secret, RouteID: id}
+	if s.deps.RelayName != nil {
+		out.Relay = s.deps.RelayName()
 	}
+	if s.deps.RelayToken != nil {
+		out.Token = s.deps.RelayToken()
+	}
+	return out, nil
 }
