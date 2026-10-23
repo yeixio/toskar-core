@@ -23,3 +23,7 @@
 - It describes memory, notifications and their destinations, API keys,
   webhooks, speech, tools, and more of training with named types; every
   answer the tests see now matches it.
+- Every JSON answer in the API description is a named type, including
+  diagnostics, transcription, tool activity and providers, and the
+  OpenAI-compatible model list and chat completions, ready for SDKs to be
+  generated from.

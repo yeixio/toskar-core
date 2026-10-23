@@ -35,8 +35,10 @@ import (
 	"github.com/yeixio/toskar-core/internal/news"
 	"github.com/yeixio/toskar-core/internal/portals"
 	"github.com/yeixio/toskar-core/internal/ratings"
+	"github.com/yeixio/toskar-core/internal/remotetools"
 	"github.com/yeixio/toskar-core/internal/runlog"
 	"github.com/yeixio/toskar-core/internal/runtimes"
+	"github.com/yeixio/toskar-core/internal/tools"
 	"github.com/yeixio/toskar-core/internal/training"
 	"github.com/yeixio/toskar-core/internal/updates"
 	"github.com/yeixio/toskar-core/pkg/contracts"
@@ -191,6 +193,10 @@ var specTypes = map[string]any{
 	"Evaluation":                   evaluation{},
 	"ClassifiedMaterial":           classifiedMaterial{},
 	"TrainingBackend":              training.Backend{},
+	"DiagnosticsBundle":            diagnosticsBundle{},
+	"Transcription":                Transcription{},
+	"ToolActivity":                 tools.Activity{},
+	"NodeToolProviders":            remotetools.NodeProviders{},
 }
 
 // The Go types that encode themselves, with the schema of what they send.

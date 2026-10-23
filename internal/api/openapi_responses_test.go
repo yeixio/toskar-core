@@ -25,12 +25,8 @@ import (
 // body has the described types and required fields and no field the spec
 // leaves out.
 //
-// What doesn't match yet is listed in testdata/openapi_drift.txt. A new
-// mismatch fails the tests; fix the spec (or the handler) rather than
-// adding it to the list. UPDATE_OPENAPI_DRIFT=1 rewrites the list from a
-// full run, once entries are fixed.
-
-const driftFile = "testdata/openapi_drift.txt"
+// Any mismatch fails the tests: describe the response in the spec, or fix
+// the handler.
 
 var specResponses = struct {
 	sync.Mutex
@@ -76,8 +72,7 @@ func watchOpenAPIResponses() error {
 	return nil
 }
 
-// checkOpenAPIDrift compares what the tests saw with the recorded drift,
-// and returns the exit code.
+// checkOpenAPIDrift reports what didn't match, and returns the exit code.
 func checkOpenAPIDrift() int {
 	seen := make([]string, 0, len(specResponses.drift))
 	for d := range specResponses.drift {
@@ -87,35 +82,10 @@ func checkOpenAPIDrift() int {
 	if os.Getenv("OPENAPI_REACHED") != "" {
 		fmt.Fprintf(os.Stderr, "openapi: the tests got a successful answer from %d operations\n", len(specResponses.reached))
 	}
-	if os.Getenv("UPDATE_OPENAPI_DRIFT") != "" {
-		text := ""
-		if len(seen) > 0 {
-			text = strings.Join(seen, "\n") + "\n"
-		}
-		if err := os.WriteFile(driftFile, []byte(text), 0o644); err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			return 1
-		}
+	if len(seen) == 0 {
 		return 0
 	}
-	known := map[string]bool{}
-	if raw, err := os.ReadFile(driftFile); err == nil {
-		for _, line := range strings.Split(string(raw), "\n") {
-			if line = strings.TrimSpace(line); line != "" {
-				known[line] = true
-			}
-		}
-	}
-	var added []string
-	for _, d := range seen {
-		if !known[d] {
-			added = append(added, d)
-		}
-	}
-	if len(added) == 0 {
-		return 0
-	}
-	fmt.Fprintf(os.Stderr, "Responses that api/openapi.yaml doesn't describe (toskar-core#666); describe them in the spec:\n  %s\n", strings.Join(added, "\n  "))
+	fmt.Fprintf(os.Stderr, "Responses that api/openapi.yaml doesn't describe (toskar-core#666); describe them in the spec:\n  %s\n", strings.Join(seen, "\n  "))
 	return 1
 }
 

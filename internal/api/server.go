@@ -36,8 +36,10 @@ import (
 	"github.com/yeixio/toskar-core/internal/muninn"
 	"github.com/yeixio/toskar-core/internal/portals"
 	"github.com/yeixio/toskar-core/internal/push"
+	"github.com/yeixio/toskar-core/internal/remotetools"
 	"github.com/yeixio/toskar-core/internal/runtimes"
 	"github.com/yeixio/toskar-core/internal/speech"
+	"github.com/yeixio/toskar-core/internal/tools"
 	"github.com/yeixio/toskar-core/internal/training"
 	"github.com/yeixio/toskar-core/internal/version"
 	"github.com/yeixio/toskar-core/pkg/contracts"
@@ -136,7 +138,7 @@ type Dependencies struct {
 	RemoteReach func() RemoteReach
 	// Transcribe turns an attached recording into text with speech.transcribe,
 	// wherever it runs (yeixio/toskar-apps#155).
-	Transcribe func(ctx context.Context, artifactID, language string) (map[string]any, error)
+	Transcribe func(ctx context.Context, artifactID, language string) (Transcription, error)
 	// CheckReach runs the outside check now (#546).
 	CheckReach func(ctx context.Context) error
 	// SetRelayToken keeps a route token the app got for this computer from
@@ -183,8 +185,8 @@ type Dependencies struct {
 	ListToolRuns         func(ctx context.Context, toolID, conversationID string, limit int) (any, error)
 	SetToolEnabled       func(ctx context.Context, id string, enabled bool) error
 	TestTool             func(ctx context.Context, id string, args map[string]any) (map[string]any, error)
-	ToolActivity         func() any
-	ToolProviders        func(ctx context.Context) any
+	ToolActivity         func() []tools.Activity
+	ToolProviders        func(ctx context.Context) []remotetools.NodeProviders
 	ListAPIKeys          func(ctx context.Context) ([]auth.APIKeyRecord, error)
 	CreateAPIKey         func(ctx context.Context, name string) (auth.APIKeyRecord, string, error)
 	RevokeAPIKey         func(ctx context.Context, id string) error

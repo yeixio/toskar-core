@@ -5,6 +5,7 @@ import (
 	"errors"
 	"strings"
 
+	"github.com/yeixio/toskar-core/internal/api"
 	"github.com/yeixio/toskar-core/pkg/contracts"
 )
 
@@ -19,20 +20,20 @@ var errNoTranscription = contracts.NewError("SPEECH_UNAVAILABLE", map[string]any
 
 // transcribeRecording answers an attached recording's text, its language,
 // and its length.
-func (a *App) transcribeRecording(ctx context.Context, artifactID, language string) (map[string]any, error) {
+func (a *App) transcribeRecording(ctx context.Context, artifactID, language string) (api.Transcription, error) {
 	if a.Tools == nil {
-		return nil, errNoTranscription
+		return api.Transcription{}, errNoTranscription
 	}
 	t, err := a.Tools.Get("speech.transcribe")
 	if err != nil {
-		return nil, errNoTranscription
+		return api.Transcription{}, errNoTranscription
 	}
 	if av, ok := t.(interface{ Available() (bool, string) }); ok {
 		if ready, why := av.Available(); !ready {
 			if why == "" {
-				return nil, errNoTranscription
+				return api.Transcription{}, errNoTranscription
 			}
-			return nil, contracts.NewError("SPEECH_UNAVAILABLE", map[string]any{"detail": why}, errors.New(why))
+			return api.Transcription{}, contracts.NewError("SPEECH_UNAVAILABLE", map[string]any{"detail": why}, errors.New(why))
 		}
 	}
 	args := map[string]any{"file": artifactID}
@@ -44,11 +45,13 @@ func (a *App) transcribeRecording(ctx context.Context, artifactID, language stri
 		// A coded error, such as SPEECH_SETUP_FAILED when speech couldn't be
 		// installed, keeps its code and its plain text in every language.
 		if code, _ := contracts.ErrorCode(err); code != "" {
-			return nil, err
+			return api.Transcription{}, err
 		}
-		return nil, contracts.NewError("SPEECH_FAILED", map[string]any{"detail": err.Error()}, err)
+		return api.Transcription{}, contracts.NewError("SPEECH_FAILED", map[string]any{"detail": err.Error()}, err)
 	}
-	return map[string]any{"text": strings.TrimSpace(asString(out["text"])), "language": out["language"], "duration_seconds": out["duration_seconds"]}, nil
+	spoken, _ := out["language"].(string)
+	seconds, _ := out["duration_seconds"].(float64)
+	return api.Transcription{Text: strings.TrimSpace(asString(out["text"])), Language: spoken, DurationSeconds: seconds}, nil
 }
 
 func asString(v any) string {
