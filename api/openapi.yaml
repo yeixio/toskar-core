@@ -680,7 +680,7 @@ paths:
               schema:
                 type: array
                 items:
-                  type: object
+                  $ref: "#/components/schemas/Portal"
     post:
       summary: Add a chat portal (#205)
       description: slug (2 to 40 lowercase letters, digits, or dashes) and name are required. It starts with no tools, no memory, passcode access (passcode required), and on.
@@ -697,7 +697,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
+                $ref: "#/components/schemas/Portal"
         "400":
           description: A setting that can't be used
         "409":
@@ -718,7 +718,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
+                $ref: "#/components/schemas/Portal"
         "404":
           description: No such portal
     patch:
@@ -743,7 +743,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
+                $ref: "#/components/schemas/Portal"
     delete:
       summary: Remove a chat portal (#205)
       description: Its guests can no longer chat.
@@ -776,7 +776,7 @@ paths:
               schema:
                 type: array
                 items:
-                  type: object
+                  $ref: "#/components/schemas/PortalConversation"
   /api/v1/portals/{id}/conversations/{cid}/messages:
     get:
       summary: One visitor's conversation, to read (#205)
@@ -800,7 +800,7 @@ paths:
               schema:
                 type: array
                 items:
-                  type: object
+                  $ref: "#/components/schemas/PortalMessage"
         "404":
           description: Not one of the portal's conversations
   /api/v1/portals/{id}/usage:
@@ -820,7 +820,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
+                $ref: "#/components/schemas/PortalUsage"
   /api/v1/portals/{id}/visitors:
     get:
       summary: A portal's invited visitors (#205)
@@ -839,7 +839,7 @@ paths:
               schema:
                 type: array
                 items:
-                  type: object
+                  $ref: "#/components/schemas/Person"
     post:
       summary: Invite a visitor to a portal by name (#205)
       description: Answers with the visitor and their one-time link (path /p/<slug>?invite=<token>, good for a week).
@@ -888,7 +888,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
+                $ref: "#/components/schemas/VisitorLink"
   /api/v1/portals/{id}/visitors/{vid}:
     delete:
       summary: Remove an invited visitor (#205)
@@ -926,7 +926,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
+                $ref: "#/components/schemas/PortalPage"
         "404":
           description: No portal there, or it's turned off
   /api/v1/portals/{slug}/enter:
@@ -947,7 +947,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
+                $ref: "#/components/schemas/EnteredPortal"
         "401":
           description: Wrong passcode
         "404":
@@ -1226,25 +1226,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  enabled:
-                    type: boolean
-                  fingerprint:
-                    type: string
-                    description: sha256 and the hex of the certificate
-                  short:
-                    type: string
-                    description: The fingerprint's start for a person to compare, such as E863-B509
-                  not_after:
-                    type: string
-                    format: date-time
-                  custom:
-                    type: boolean
-                    description: The operator's own certificate (api_tls_cert, api_tls_key)
-                  error:
-                    type: string
-                    description: Why the operator's certificate could not be used
+                $ref: "#/components/schemas/TLSInfo"
   /about:
     get:
       summary: AGPL corresponding-source offer
@@ -1737,8 +1719,7 @@ paths:
               schema:
                 type: array
                 items:
-                  type: object
-                  additionalProperties: true
+                  $ref: "#/components/schemas/LogFile"
   /api/v1/logs/{name}:
     get:
       summary: Read a log file tail
@@ -1759,8 +1740,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                additionalProperties: true
+                $ref: "#/components/schemas/LogContent"
   /api/v1/notifications:
     get:
       summary: List notifications that were not dismissed, newest first
@@ -1838,8 +1818,7 @@ paths:
               schema:
                 type: array
                 items:
-                  type: object
-                  additionalProperties: true
+                  $ref: "#/components/schemas/ConnectorStatus"
   /api/v1/connectors/{id}:
     put:
       summary: Check values with the service, then store them and add its tools
@@ -1919,8 +1898,7 @@ paths:
               schema:
                 type: array
                 items:
-                  type: object
-                  additionalProperties: true
+                  $ref: "#/components/schemas/MCPServer"
     post:
       summary: Check a tool source connects and list its tools, then store it and add the tools
       description: >-
@@ -2368,16 +2346,7 @@ paths:
               schema:
                 type: array
                 items:
-                  type: object
-                  properties:
-                    id: {type: string}
-                    at: {type: string, format: date-time}
-                    kind: {type: string, enum: [web_search, web_page, places, paired_computer, external_server, connector, notification, community_ratings, update_check, news, problem_report]}
-                    destination: {type: string}
-                    detail: {type: string}
-                    source: {type: string}
-                    conversation_id: {type: string}
-                    task_id: {type: string}
+                  $ref: "#/components/schemas/EgressRecord"
   /api/v1/license:
     get:
       summary: Toskar Pro's trial or Unlock, as its desktop app last said
@@ -2425,21 +2394,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  supported: {type: boolean, description: This build checks. False for the App Store edition, the desktop app's copy, and development builds.}
-                  enabled: {type: boolean, description: This build checks and the update_check setting is on.}
-                  current: {type: string}
-                  available: {type: boolean, description: The latest release is newer than this one. A prerelease is offered only to prerelease builds.}
-                  checked_at: {type: string, format: date-time}
-                  latest:
-                    type: object
-                    properties:
-                      version: {type: string}
-                      published_at: {type: string}
-                      prerelease: {type: boolean}
-                      notes_url: {type: string}
-                      download_url: {type: string}
+                $ref: "#/components/schemas/UpdateStatus"
   /api/v1/news:
     get:
       summary: The AI news from toskar.ai
@@ -2451,28 +2406,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  enabled: {type: boolean, description: The ai_news setting is on.}
-                  updated: {type: string, description: When toskar.ai last wrote the news.}
-                  fetched_at: {type: string, format: date-time, description: When this computer last read it.}
-                  stale: {type: boolean, description: toskar.ai couldn't be reached just now; this is the copy kept from before.}
-                  items:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        id: {type: string}
-                        date: {type: string, description: YYYY-MM-DD}
-                        kind: {type: string, enum: [model, runtime, announcement]}
-                        title: {type: string}
-                        summary: {type: string, description: One or two sentences written by a local model.}
-                        source:
-                          type: object
-                          properties:
-                            name: {type: string}
-                            url: {type: string}
-                        model_id: {type: string, description: The catalog model it's about, for Install.}
+                $ref: "#/components/schemas/News"
         "502":
           description: NEWS_UNAVAILABLE, toskar.ai couldn't be reached and no copy is kept
   /api/v1/privacy:
@@ -2603,19 +2537,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  started_at:
-                    type: string
-                    format: date-time
-                  interval_seconds:
-                    type: integer
-                  now:
-                    $ref: "#/components/schemas/RuntimeSample"
-                  samples:
-                    type: array
-                    items:
-                      $ref: "#/components/schemas/RuntimeSample"
+                $ref: "#/components/schemas/RuntimeHistory"
   /api/v1/diagnostics/report:
     get:
       summary: What a problem report sends, scrubbed
@@ -2630,31 +2552,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  version:
-                    type: string
-                  commit:
-                    type: string
-                  contract:
-                    type: string
-                  os:
-                    type: string
-                  arch:
-                    type: string
-                  cpu:
-                    type: string
-                  memory_gb:
-                    type: integer
-                  gpus:
-                    type: array
-                    items:
-                      type: string
-                  log:
-                    type: array
-                    description: For an Admin only.
-                    items:
-                      type: string
+                $ref: "#/components/schemas/DiagnosticsReport"
     post:
       summary: Send a problem report to Toskar (#588)
       description: >-
@@ -2699,35 +2597,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  since:
-                    type: string
-                    format: date-time
-                  groups:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        client:
-                          type: string
-                          description: phone, tablet, watch, tv, desktop, web, or other; empty when the request didn't say.
-                        cold:
-                          type: boolean
-                          description: A model loaded before the answer started.
-                        runs:
-                          type: integer
-                        remote:
-                          type: integer
-                          description: Runs from outside the home network.
-                        first_word_ms:
-                          type: number
-                          description: Median wait from the request to the first token.
-                        first_word_p90_ms:
-                          type: number
-                        load_ms:
-                          type: number
-                          description: Median time spent loading models.
+                $ref: "#/components/schemas/FirstAnswers"
   /v1/models:
     get:
       summary: OpenAI-compatible model list
@@ -2897,8 +2767,7 @@ paths:
               schema:
                 type: array
                 items:
-                  type: object
-                  additionalProperties: true
+                  $ref: "#/components/schemas/CacheInfo"
   /api/v1/caches/{name}/clear:
     post:
       summary: Clear one cache
@@ -3204,16 +3073,7 @@ paths:
           content:
             application/json:
               schema:
-                allOf:
-                  - $ref: "#/components/schemas/JoinToken"
-                  - type: object
-                    properties:
-                      token: {type: string, description: "ygj_…, shown only now"}
-                      server: {type: string, description: "This computer's Bifrost address, host:port"}
-                      fingerprint: {type: string, description: "sha256: of this computer's public key"}
-                      command: {type: string, description: "yggctl join … for a computer with Toskar installed"}
-                      install_command: {type: string, description: "Installs Toskar on Linux or macOS, then joins"}
-                      windows_command: {type: string, description: "The same in PowerShell"}
+                $ref: "#/components/schemas/JoinTokenCreated"
         "409":
           description: Other computers can't reach this one
     get:
@@ -3258,14 +3118,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  network_id: {type: string, description: Empty until a join token is made or a network joined}
-                  reachable: {type: boolean}
-                  node: {$ref: "#/components/schemas/NetworkNode"}
-                  peers:
-                    type: array
-                    items: {$ref: "#/components/schemas/NetworkNode"}
+                $ref: "#/components/schemas/NetworkStatus"
   /api/v1/network/join:
     post:
       summary: Join this computer to the network of the computer that made a join token
@@ -3289,12 +3142,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  status: {type: string, enum: [joined, already_joined]}
-                  network_id: {type: string}
-                  server: {$ref: "#/components/schemas/NetworkNode"}
-                  node: {$ref: "#/components/schemas/NetworkNode"}
+                $ref: "#/components/schemas/JoinResult"
         "400":
           description: Malformed server, token, or fingerprint
         "401":
@@ -3318,10 +3166,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  left: {type: array, items: {type: string}}
-                  unreachable: {type: array, items: {type: string}}
+                $ref: "#/components/schemas/LeaveResult"
   /api/v1/models/{id}/rating:
     get:
       summary: This person's rating of a model, and exactly what sharing it would send
@@ -4341,8 +4186,7 @@ paths:
               schema:
                 type: array
                 items:
-                  type: object
-                  additionalProperties: true
+                  $ref: "#/components/schemas/Task"
     post:
       summary: Run a prompt as a task
       operationId: createTask
@@ -4366,8 +4210,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                additionalProperties: true
+                $ref: "#/components/schemas/Task"
         "400":
           description: Invalid request
           content:
@@ -4390,8 +4233,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                additionalProperties: true
+                $ref: "#/components/schemas/Task"
         "404":
           description: Not found
           content:
@@ -4788,8 +4630,7 @@ paths:
               schema:
                 type: array
                 items:
-                  type: object
-                  additionalProperties: true
+                  $ref: "#/components/schemas/KnowledgeHit"
         "400":
           description: Invalid request
           content:
@@ -4988,8 +4829,9 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                additionalProperties: true
+                type: array
+                items:
+                  $ref: "#/components/schemas/TrainingBaseModel"
   /api/v1/training/classify:
     post:
       summary: Recommend whether material is for training, knowledge, or both
@@ -5041,8 +4883,7 @@ paths:
               schema:
                 type: array
                 items:
-                  type: object
-                  additionalProperties: true
+                  $ref: "#/components/schemas/TrainingSample"
   /api/v1/training/example:
     post:
       summary: Create the example specialized AI
@@ -5072,8 +4913,7 @@ paths:
               schema:
                 type: array
                 items:
-                  type: object
-                  additionalProperties: true
+                  $ref: "#/components/schemas/Model"
   /api/v1/training/ais:
     get:
       summary: Specialized AIs
@@ -5287,8 +5127,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                additionalProperties: true
+                $ref: "#/components/schemas/TrainingMaterial"
         "400":
           description: Invalid request
           content:
@@ -5349,8 +5188,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                additionalProperties: true
+                $ref: "#/components/schemas/TrainingMaterial"
         "400":
           description: Invalid request
           content:
@@ -5510,8 +5348,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                additionalProperties: true
+                $ref: "#/components/schemas/TrainingPlan"
         "404":
           description: Not found
           content:
@@ -5586,8 +5423,9 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                additionalProperties: true
+                type: array
+                items:
+                  $ref: "#/components/schemas/EvalPrompt"
         "400":
           description: Invalid request
           content:
@@ -5949,8 +5787,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                additionalProperties: true
+                $ref: "#/components/schemas/AutomationRequest"
         "400":
           description: REQUEST_EMPTY, REQUEST_NO_SCHEDULE, REQUEST_BAD_TIME, or REQUEST_TIME_ZONE
           content:
@@ -5973,8 +5810,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                additionalProperties: true
+                $ref: "#/components/schemas/AutomationPreview"
         "400":
           description: Invalid automation
           content:
@@ -5997,8 +5833,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                additionalProperties: true
+                $ref: "#/components/schemas/AutomationDetail"
         "404":
           description: No such automation
           content:
@@ -6089,8 +5924,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                additionalProperties: true
+                $ref: "#/components/schemas/AutomationRunsPage"
         "404":
           description: No such automation or run
           content:
@@ -6187,8 +6021,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                additionalProperties: true
+                $ref: "#/components/schemas/AutomationRunInfo"
         "400":
           description: Invalid automation
           content:
@@ -6314,8 +6147,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                additionalProperties: true
+                $ref: "#/components/schemas/PairingSession"
         "400":
           description: Invalid request
           content:
@@ -6344,8 +6176,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                additionalProperties: true
+                $ref: "#/components/schemas/PairingSession"
         "400":
           description: Invalid request
           content:
@@ -6381,8 +6212,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                additionalProperties: true
+                $ref: "#/components/schemas/PairingSession"
         "400":
           description: Invalid request
           content:
@@ -6442,8 +6272,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                additionalProperties: true
+                $ref: "#/components/schemas/PairingSession"
         "400":
           description: Invalid request
           content:
@@ -7399,49 +7228,52 @@ components:
       additionalProperties: true
     KnowledgeSource:
       type: object
+      description: One connected knowledge source.
+      required: [chunk_count, created_at, embedded_count, id, kind, local_only, name, status, updated_at]
       properties:
-        id:
-          type: string
-        name:
-          type: string
-        kind:
-          type: string
-          enum: [path, text, database, api]
-        path:
-          type: string
-        filename:
-          type: string
-        status:
-          type: string
-        error:
-          type: string
-        error_code:
-          type: string
-          description: The error's stable code (#588, contract 1.36), with its values in error_details.
+        id: {type: string}
+        name: {type: string}
+        kind: {type: string, enum: [path, text, database, api]}
+        path: {type: string}
+        filename: {type: string}
+        status: {type: string}
+        error: {type: string}
+        error_code: {type: string, description: 'The error''s stable code (#588, contract 1.36), with its values in error_details.'}
         error_details:
           type: object
-          additionalProperties: true
-        chunk_count:
-          type: integer
-        embedded_count:
-          type: integer
-        embedding_model:
-          type: string
-        created_at:
-          type: string
-          format: date-time
-        updated_at:
-          type: string
-          format: date-time
-        refreshed_at:
-          type: string
-          format: date-time
-        local_only:
-          type: boolean
+          additionalProperties: {}
+        chunk_count: {type: integer}
+        embedded_count: {type: integer, description: 'How many passages have a vector for semantic search, and EmbeddingModel the model that made them. Both are empty until an embedding model is installed.'}
+        embedding_model: {type: string}
+        created_at: {type: string, format: date-time}
+        updated_at: {type: string, format: date-time}
+        refreshed_at: {type: string, format: date-time}
+        local_only: {type: boolean, description: '`local_only` keeps the source on this computer: a turn that uses its passages is never sent to a paired computer (§63).'}
+        language: {type: string, description: 'The language most of the source''s passages are written in, detected on this computer when it was indexed (multilingual spec §19), and Languages every language found, with its passage count. A question in another language still finds it by meaning when a multilingual embedding model is installed.'}
+        languages:
+          type: array
+          items:
+            type: object
+            description: A language a source is written in, and how many of its passages are in it.
+            required: [language, passages]
+            properties:
+              language: {type: string}
+              passages: {type: integer}
         remote:
           type: object
           description: How a database or API source is reached, without its credentials
-          additionalProperties: true
+          required: [refresh_minutes]
+          properties:
+            driver: {type: string}
+            database: {type: string, description: 'The SQLite file. A PostgreSQL or MySQL connection string contains credentials, so it is stored as a secret.'}
+            query: {type: string}
+            url: {type: string}
+            items: {type: string, description: 'The dotted path to the list in a JSON response, such as "data.products". Empty finds a top-level list.'}
+            header_names:
+              type: array
+              description: '`header_names` lists the request headers that are set, without values.'
+              items: {type: string}
+            refresh_minutes: {type: integer, description: How old the data may get before a search fetches it again.}
     SpecializedAI:
       type: object
       properties:
@@ -7516,281 +7348,150 @@ components:
       additionalProperties: true
     Schedule:
       type: object
+      description: The time rule for an automation. Clock fields are civil time in TimeZone. At and Anchor are absolute instants.
+      required: [kind, time_zone]
       properties:
-        kind:
-          type: string
-          enum: [once, daily, weekly, monthly, interval, cron, manual]
-        time_zone:
-          type: string
-          description: IANA time zone
-        at:
-          type: string
-          format: date-time
-          description: For once
-        hour:
-          type: integer
-          description: The first of times, for clients that read one
-        minute:
-          type: integer
-        times:
-          type: array
-          maxItems: 24
-          description: The times of day a daily, weekly, or monthly schedule runs at
-          items:
-            type: object
-            properties:
-              hour:
-                type: integer
-                minimum: 0
-                maximum: 23
-              minute:
-                type: integer
-                minimum: 0
-                maximum: 59
-        weekday:
-          type: integer
-          minimum: 0
-          maximum: 6
-          description: Sunday is 0. The first of weekdays, for clients that read one
+        kind: {type: string, enum: [once, daily, weekly, monthly, interval, cron, manual]}
+        time_zone: {type: string, description: IANA time zone}
+        at: {type: string, format: date-time, description: For once}
+        hour: {type: integer, description: 'The first of times, for clients that read one'}
+        minute: {type: integer}
+        weekday: {type: integer, description: 'Sunday is 0. The first of weekdays, for clients that read one'}
+        every_seconds: {type: integer, description: For interval}
+        anchor: {type: string, format: date-time}
         weekdays:
           type: array
           description: A weekly schedule's days, Sunday is 0; 1-5 is weekdays only
-          items:
-            type: integer
-            minimum: 0
-            maximum: 6
-        month_day:
-          type: integer
-          minimum: 1
-          maximum: 31
-          description: For monthly. A month without the day runs on its last day.
-        cron:
-          type: string
-          description: For cron, five fields (minute hour day-of-month month day-of-week) in time_zone, such as "0 9 * * 1-5"
-        every_seconds:
-          type: integer
-          description: For interval
-        anchor:
-          type: string
-          format: date-time
-      required: [kind, time_zone]
-    AutomationNotification:
-      type: object
-      properties:
-        mode:
-          type: string
-          enum: [always, condition, change, failure, none]
-        condition:
-          type: object
-          properties:
-            kind:
-              type: string
-              enum: [threshold, available, significant]
-            op:
-              type: string
-              enum: [below, above]
-            value:
-              type: number
-            currency:
-              type: string
-              pattern: "^[A-Z]{3}$"
-              description: ISO 4217 code of a threshold's value, such as EUR. The run reports the price in this currency. Omitted means USD.
-    AutomationInput:
-      type: object
-      properties:
-        name:
-          type: string
-        enabled:
-          type: boolean
-        schedule:
-          $ref: "#/components/schemas/Schedule"
-        prompt:
-          type: string
-        profile_id:
-          type: string
-        model_id:
-          type: string
-          description: An installed model, or auto
-        tools:
+          items: {type: integer}
+        times:
           type: array
-          items:
-            type: string
-          description: Tools approved to run unattended
-        notification:
-          $ref: "#/components/schemas/AutomationNotification"
-        response_language:
-          type: string
-          description: The language results are written in. account (or omitted) follows the assistant language setting, app the App language, auto the language of the request, or a BCP 47 tag such as de. A language the request asks for always wins.
-        conversation_id:
-          type: string
-          description: The chat the automation was made from, when it came from a chat's draft
-        draft_id:
-          type: string
-          description: The id of the chat's draft (an answer's meta.automation). Creating the same draft again returns the automation it made.
-        save_folder:
-          type: string
-          description: A folder in the home folder, such as ~/Documents/Toskar, to also save each result to as a Markdown file. Empty stops saving.
-        cameras:
-          type: array
-          maxItems: 4
-          description: Cameras to look at as each run starts (#667). Their pictures, taken through the connected service, are shown to a model that can see. On update, an empty list stops looking.
+          description: The times of day a daily, weekly, or monthly schedule runs at
           items:
             type: object
+            description: A time of day, in the schedule's time zone.
+            required: [hour, minute]
             properties:
-              connector:
-                type: string
-                enum: [homeassistant]
-              device:
-                type: string
-                description: The camera as that service names it, such as Home Assistant's camera.driveway
+              hour: {type: integer}
+              minute: {type: integer}
+        month_day: {type: integer, description: For monthly. A month without the day runs on its last day.}
+        cron: {type: string, description: 'For cron, five fields (minute hour day-of-month month day-of-week) in time_zone, such as "0 9 * * 1-5"'}
+    AutomationNotification:
+      type: object
+      description: Stored with the automation and evaluated after the run result is saved.
+      required: [mode]
+      properties:
+        mode: {type: string, enum: [always, condition, change, failure, none]}
+        condition:
+          type: object
+          description: The structured rule for NotifyOnCondition. Price checks use threshold. Stock checks use available. A model can mark a result significant.
+          required: [kind]
+          properties:
+            kind: {type: string, enum: [threshold, available, significant]}
+            op: {type: string, description: Below or above. It applies to a threshold., enum: [below, above]}
+            value: {type: number}
+            currency: {type: string, description: 'ISO 4217 code of a threshold''s value, such as EUR. The run reports the price in this currency. Omitted means USD.'}
+    AutomationInput:
+      type: object
+      description: The caller-supplied body of a new automation.
+      required: [name, notification, prompt, schedule]
+      properties:
+        name: {type: string}
+        enabled: {type: boolean}
+        schedule: {$ref: '#/components/schemas/Schedule'}
+        prompt: {type: string}
+        profile_id: {type: string}
+        model_id: {type: string, description: 'An installed model, or auto'}
+        tools:
+          type: array
+          description: Tools approved to run unattended
+          items: {type: string}
+        notification: {$ref: '#/components/schemas/AutomationNotification'}
+        response_language: {type: string, description: 'The language results are written in. account (or omitted) follows the assistant language setting, app the App language, auto the language of the request, or a BCP 47 tag such as de. A language the request asks for always wins.'}
+        conversation_id: {type: string, description: 'The chat the automation was made from, when it came from a chat''s draft'}
+        draft_id: {type: string, description: The id of the chat's draft (an answer's meta.automation). Creating the same draft again returns the automation it made.}
+        save_folder: {type: string, description: 'A folder in the home folder, such as ~/Documents/Toskar, to also save each result to as a Markdown file. Empty stops saving.'}
         trigger:
           type: object
           description: Run only when a page, feed, or folder changed, checked on the schedule. On update, a trigger with no kind runs on the schedule again.
+          required: [kind]
           properties:
-            kind:
-              type: string
-              enum: [page, feed, folder, webhook, after, device, ""]
-            url:
-              type: string
-              description: The page or feed, for page and feed
-            path:
-              type: string
-              description: A folder or file in the home folder, for folder; ~ is the home folder
-            automation_id:
-              type: string
-              description: For after, the automation it runs after
-            when:
-              type: string
-              enum: [succeeded, notified]
-              description: For after, each time that one succeeds (the default) or only when it notifies
-            connector:
-              type: string
-              enum: [homeassistant]
-              description: For device, the connected service whose device it watches (#586)
-            device:
-              type: string
-              description: For device, the device as that service names it, such as binary_sensor.front_door_visitor
-            to:
-              type: string
-              description: For device, the state it must change to, such as on; empty runs on any change
-            cooldown_seconds:
-              type: integer
-              minimum: 0
-              maximum: 86400
-              description: For device, the seconds after a run during which changes start no other; 0 is 60
+            kind: {type: string, description: 'Page (a web page''s text changed), feed (an RSS or Atom feed has new posts), or folder (files in a folder, or one file, changed).', enum: [page, feed, folder, webhook, after, device, ""]}
+            url: {type: string, description: 'The page or feed, for page and feed'}
+            path: {type: string, description: 'A folder or file in the home folder, for folder; ~ is the home folder'}
+            automation_id: {type: string, description: 'For after, the automation it runs after'}
+            when: {type: string, description: 'For after, each time that one succeeds (the default) or only when it notifies', enum: [succeeded, notified]}
+            connector: {type: string, description: 'For device, the connected service whose device it watches (#586)', enum: [homeassistant]}
+            device: {type: string, description: 'For device, the device as that service names it, such as binary_sensor.front_door_visitor'}
+            to: {type: string, description: 'For device, the state it must change to, such as on; empty runs on any change'}
+            cooldown_seconds: {type: integer, description: 'For device, the seconds after a run during which changes start no other; 0 is 60'}
+        cameras:
+          type: array
+          description: Cameras to look at as each run starts (#667). Their pictures, taken through the connected service, are shown to a model that can see. On update, an empty list stops looking.
+          items:
+            type: object
+            description: 'One an automation looks at as each run starts (#667): a connected service''s camera, whose picture is then shown to a model that can see, like a photo attached in chat. Device is the camera as that service names it; Home Assistant''s are the first, such as camera.driveway.'
+            required: [connector, device]
+            properties:
+              connector: {type: string, enum: [homeassistant]}
+              device: {type: string, description: 'The camera as that service names it, such as Home Assistant''s camera.driveway'}
     Automation:
       type: object
+      description: A scheduled prompt owned by the daemon.
+      required: [consecutive_failures, created_at, enabled, id, name, notification, prompt, schedule, tools, updated_at]
       properties:
-        id:
-          type: string
-        name:
-          type: string
-        enabled:
-          type: boolean
-        schedule:
-          $ref: "#/components/schemas/Schedule"
-        prompt:
-          type: string
-        profile_id:
-          type: string
-        model_id:
-          type: string
+        id: {type: string}
+        name: {type: string}
+        enabled: {type: boolean}
+        schedule: {$ref: '#/components/schemas/Schedule'}
+        prompt: {type: string}
+        profile_id: {type: string}
+        model_id: {type: string, description: The installed model this scheduled prompt runs.}
         tools:
           type: array
-          items:
-            type: string
-        notification:
-          $ref: "#/components/schemas/AutomationNotification"
-        response_language:
-          type: string
-          description: The language results are written in. account (or omitted) follows the assistant language setting, app the App language, auto the language of the request, or a BCP 47 tag such as de. A language the request asks for always wins.
-        conversation_id:
-          type: string
-          description: The chat the automation was made from
-        draft_id:
-          type: string
-          description: The chat draft it was made from
-        save_folder:
-          type: string
-          description: The folder each result is also saved to
+          items: {type: string}
+        notification: {$ref: '#/components/schemas/AutomationNotification'}
+        response_language: {type: string, description: 'The language results are written in. account (or omitted) follows the assistant language setting, app the App language, auto the language of the request, or a BCP 47 tag such as de. A language the request asks for always wins.'}
+        conversation_id: {type: string, description: The chat the automation was made from}
+        draft_id: {type: string, description: The chat draft it was made from}
+        save_folder: {type: string, description: The folder each result is also saved to}
+        trigger:
+          type: object
+          description: Run only when a page, feed, or folder changed, checked on the schedule.
+          required: [kind]
+          properties:
+            kind: {type: string, description: 'Page (a web page''s text changed), feed (an RSS or Atom feed has new posts), or folder (files in a folder, or one file, changed).', enum: [page, feed, folder, webhook, after, device, ""]}
+            url: {type: string, description: 'The page or feed, for page and feed'}
+            path: {type: string, description: 'A folder or file in the home folder, for folder; ~ is the home folder'}
+            automation_id: {type: string, description: 'For after, the automation it runs after'}
+            when: {type: string, description: 'For after, each time that one succeeds (the default) or only when it notifies', enum: [succeeded, notified]}
+            connector: {type: string, description: 'For device, the connected service whose device it watches (#586)', enum: [homeassistant]}
+            device: {type: string, description: 'For device, the device as that service names it, such as binary_sensor.front_door_visitor'}
+            to: {type: string, description: 'For device, the state it must change to, such as on; empty runs on any change'}
+            cooldown_seconds: {type: integer, description: 'For device, the seconds after a run during which changes start no other; 0 is 60'}
         cameras:
           type: array
           description: The cameras looked at as each run starts (#667)
           items:
             type: object
+            description: 'One an automation looks at as each run starts (#667): a connected service''s camera, whose picture is then shown to a model that can see, like a photo attached in chat. Device is the camera as that service names it; Home Assistant''s are the first, such as camera.driveway.'
+            required: [connector, device]
             properties:
-              connector:
-                type: string
-              device:
-                type: string
-        trigger:
-          type: object
-          description: Run only when a page, feed, or folder changed, checked on the schedule.
-          properties:
-            kind:
-              type: string
-              enum: [page, feed, folder, webhook, after, device, ""]
-            url:
-              type: string
-              description: The page or feed, for page and feed
-            path:
-              type: string
-              description: A folder or file in the home folder, for folder; ~ is the home folder
-            automation_id:
-              type: string
-              description: For after, the automation it runs after
-            when:
-              type: string
-              enum: [succeeded, notified]
-              description: For after, each time that one succeeds (the default) or only when it notifies
-            connector:
-              type: string
-              enum: [homeassistant]
-              description: For device, the connected service whose device it watches (#586)
-            device:
-              type: string
-              description: For device, the device as that service names it, such as binary_sensor.front_door_visitor
-            to:
-              type: string
-              description: For device, the state it must change to, such as on; empty runs on any change
-            cooldown_seconds:
-              type: integer
-              minimum: 0
-              maximum: 86400
-              description: For device, the seconds after a run during which changes start no other; 0 is 60
-        last_checked_at:
-          type: string
-          format: date-time
-          description: When the trigger last checked and found nothing new
-        hook_set:
-          type: boolean
-          description: A webhook trigger has a link; POST /api/v1/automations/{id}/hook makes a new one
-        created_at:
-          type: string
-          format: date-time
-        updated_at:
-          type: string
-          format: date-time
-        next_run_at:
-          type: string
-          format: date-time
-        last_run_at:
-          type: string
-          format: date-time
-        consecutive_failures:
-          type: integer
-        last_error:
-          type: string
-        last_error_code:
-          type: string
-          description: The last error's stable code (#588, contract 1.36), with its values in last_error_details.
+              connector: {type: string}
+              device: {type: string}
+        last_checked_at: {type: string, format: date-time, description: When the trigger last checked and found nothing new}
+        hook_set: {type: boolean, description: 'A webhook trigger has a link; POST /api/v1/automations/{id}/hook makes a new one'}
+        created_at: {type: string, format: date-time}
+        updated_at: {type: string, format: date-time}
+        next_run_at: {type: string, format: date-time, description: The occurrence the daemon should execute next. A missed restart keeps only the latest missed occurrence here.}
+        last_run_at: {type: string, format: date-time, description: When the previous occurrence finished. Zero means never run.}
+        consecutive_failures: {type: integer, description: '`consecutive_failures` counts terminal failures in a row. A success clears it.'}
+        last_error: {type: string, description: 'The most recent failure, including one that is waiting to retry.'}
+        last_error_code: {type: string, description: 'The last error''s stable code (#588, contract 1.36), with its values in last_error_details.'}
         last_error_details:
           type: object
-          additionalProperties: true
-        last_status:
-          type: string
-        last_result:
-          type: string
+          additionalProperties: {}
+        last_status: {type: string, description: '`last_status` and LastResult summarize the newest occurrence. List fills them.'}
+        last_result: {type: string}
     PairingOffer:
       type: object
       properties:
@@ -8827,3 +8528,827 @@ components:
       required: [ok]
       properties:
         ok: {type: boolean}
+    AutomationDetail:
+      type: object
+      description: An automation and its newest runs, newest occurrence first.
+      required: [consecutive_failures, created_at, enabled, history, history_more, id, name, notification, prompt, schedule, tools, updated_at]
+      properties:
+        id: {type: string}
+        name: {type: string}
+        enabled: {type: boolean}
+        schedule: {$ref: '#/components/schemas/Schedule'}
+        prompt: {type: string}
+        profile_id: {type: string}
+        model_id: {type: string, description: The installed model this scheduled prompt runs.}
+        tools:
+          type: array
+          items: {type: string}
+        notification: {$ref: '#/components/schemas/AutomationNotification'}
+        response_language: {type: string, description: 'The language results are written in (multilingual spec §22): "" or "account" follows the assistant language setting, "app" the App language, "auto" the language the request is written in, or a BCP 47 tag such as "de". A language the request asks for always wins.'}
+        conversation_id: {type: string, description: 'The chat the automation was made from, and DraftID the draft that chat showed (#204). Both are empty for one made elsewhere.'}
+        draft_id: {type: string}
+        save_folder: {type: string, description: 'SaveFolder, when set, is a folder each result is also saved to as a Markdown file (#204), such as ~/Documents/Toskar/News.'}
+        trigger:
+          type: object
+          description: Trigger, when set, runs the automation only when what it watches changed, checked on the schedule (#204).
+          required: [kind]
+          properties:
+            kind: {type: string, description: 'Page (a web page''s text changed), feed (an RSS or Atom feed has new posts), or folder (files in a folder, or one file, changed).'}
+            url: {type: string}
+            path: {type: string, description: 'A folder''s or file''s, in the home folder; ~ is the home folder.'}
+            automation_id: {type: string, description: 'The automation an after trigger follows, and When is succeeded (the default: each time it finishes well) or notified (only when it notified) (#204).'}
+            when: {type: string}
+            connector: {type: string, description: '`connector` and Device are a device trigger''s: a connected service''s device, such as Home Assistant''s binary_sensor.front_door_visitor, whose state changing runs the automation at once (#586, #667). To, when set, is the state it must change to, such as on; Cooldown is the seconds after a run during which changes start no other run, so a flickering sensor runs it once (0 is DefaultDeviceCooldown).'}
+            device: {type: string}
+            to: {type: string}
+            cooldown_seconds: {type: integer}
+        cameras:
+          type: array
+          description: Looked at as each run starts (#667).
+          items:
+            type: object
+            description: 'One an automation looks at as each run starts (#667): a connected service''s camera, whose picture is then shown to a model that can see, like a photo attached in chat. Device is the camera as that service names it; Home Assistant''s are the first, such as camera.driveway.'
+            required: [connector, device]
+            properties:
+              connector: {type: string}
+              device: {type: string}
+        last_checked_at: {type: string, format: date-time}
+        hook_set: {type: boolean}
+        created_at: {type: string, format: date-time}
+        updated_at: {type: string, format: date-time}
+        next_run_at: {type: string, format: date-time, description: The occurrence the daemon should execute next. A missed restart keeps only the latest missed occurrence here.}
+        last_run_at: {type: string, format: date-time, description: When the previous occurrence finished. Zero means never run.}
+        consecutive_failures: {type: integer, description: '`consecutive_failures` counts terminal failures in a row. A success clears it.'}
+        last_error: {type: string, description: 'The most recent failure, including one that is waiting to retry.'}
+        last_error_code: {type: string, description: '`last_error_code` and LastErrorDetails are its stable code and values (#588).'}
+        last_error_details:
+          type: object
+          additionalProperties: {}
+        last_status: {type: string, description: '`last_status` and LastResult summarize the newest occurrence. List fills them.'}
+        last_result: {type: string}
+        history:
+          type: array
+          items: {$ref: '#/components/schemas/AutomationRunInfo'}
+        history_more: {type: boolean, description: '`history_more` says older runs exist; GET /automations/{id}/runs pages them.'}
+    AutomationPreview:
+      type: object
+      description: One unsaved run of a draft automation.
+      required: [reason, would_notify]
+      properties:
+        result: {type: string}
+        error: {type: string}
+        error_code: {type: string, description: '`error_code` and ErrorDetails are Error''s stable code and values (#588).'}
+        error_details:
+          type: object
+          additionalProperties: {}
+        model_id: {type: string}
+        node_id: {type: string}
+        would_notify: {type: boolean}
+        reason: {type: string}
+    AutomationRequest:
+      type: object
+      description: An automation read from a request.
+      required: [name, notes, notification, prompt, schedule]
+      properties:
+        name: {type: string}
+        prompt: {type: string}
+        schedule: {$ref: '#/components/schemas/Schedule'}
+        notification: {$ref: '#/components/schemas/AutomationNotification'}
+        notes:
+          type: array
+          description: '`notes` say what was assumed, such as a time of day when none was given.'
+          items: {type: string}
+    AutomationRunInfo:
+      type: object
+      description: The durable record for one occurrence of an automation.
+      required: [attempt, automation_id, created_at, id, notification_sent, occurrence_at, status]
+      properties:
+        id: {type: string}
+        automation_id: {type: string}
+        occurrence_at: {type: string, format: date-time}
+        status: {type: string}
+        claimed_at: {type: string, format: date-time}
+        lease_until: {type: string, format: date-time}
+        started_at: {type: string, format: date-time}
+        finished_at: {type: string, format: date-time}
+        result: {type: string}
+        error: {type: string}
+        error_code: {type: string, description: '`error_code` and ErrorDetails are Error''s stable code and values (#588).'}
+        error_details:
+          type: object
+          additionalProperties: {}
+        notification_sent: {type: boolean}
+        model_id: {type: string}
+        node_id: {type: string}
+        attempt: {type: integer}
+        retry_at: {type: string, format: date-time}
+        created_at: {type: string, format: date-time}
+        notify_detail: {type: string, description: '`notify_detail` says why a finished run did or didn''t notify, as automations:notice.<detail>, with NotifyValues for its placeholders (price, amount, currency), so the apps explain the server''s decision (#204). Empty for runs from before it was recorded.'}
+        notify_values:
+          type: object
+          additionalProperties: {}
+        conversation_id: {type: string, description: 'The chat its result was posted to, by the automation''s own chat or by "Continue in chat" (#204).'}
+        saved_file: {type: string, description: 'Where its result was saved, for an automation with a save folder (#204).'}
+    AutomationRunsPage:
+      type: object
+      description: One page of an automation's runs, newest first.
+      required: [more, runs]
+      properties:
+        runs:
+          type: array
+          items: {$ref: '#/components/schemas/AutomationRunInfo'}
+        more: {type: boolean, description: '`more` says older runs exist; ask again with before set to the last run''s id.'}
+    CacheInfo:
+      type: object
+      description: A cache's policy and stats, for listing.
+      required: [entries, evictions, hits, invalidation, key, label, misses, name, privacy, scope, ttl, ttl_ns]
+      properties:
+        name: {type: string}
+        label: {type: string, description: How the cache is shown.}
+        key: {type: string, description: '`key` says what an entry is looked up by.'}
+        ttl_ns: {type: integer, format: int64}
+        invalidation: {type: string, description: '`invalidation` says what removes entries besides age.'}
+        scope: {type: string, description: '`scope` says where the cache applies, such as "this computer".'}
+        privacy: {type: string}
+        max_entries: {type: integer, description: '`max_entries` bounds the cache; the least recently used entry goes first.'}
+        persistent: {type: boolean, description: '`persistent` marks a store kept on disk by its owner, which this package describes but does not hold.'}
+        ttl: {type: string}
+        entries: {type: integer}
+        hits: {type: integer, format: int64}
+        misses: {type: integer, format: int64}
+        evictions: {type: integer, format: int64}
+        last_cleared: {type: string, format: date-time}
+    ConnectorStatus:
+      type: object
+      description: 'What may be shown about a service: never a secret value.'
+      required: [connected, description, fields, id, name, scopes, tools]
+      properties:
+        id: {type: string}
+        name: {type: string}
+        description: {type: string}
+        scopes: {type: string}
+        fields:
+          type: array
+          items:
+            type: object
+            description: One value a service needs to connect, such as a token.
+            required: [key, label, secret]
+            properties:
+              key: {type: string}
+              label: {type: string}
+              help: {type: string}
+              secret: {type: boolean, description: '`secret` values are stored in the secrets directory and never shown again.'}
+              optional: {type: boolean}
+              placeholder: {type: string}
+        connected: {type: boolean}
+        status: {type: string}
+        account: {type: string}
+        connected_at: {type: string, format: date-time}
+        checked_at: {type: string, format: date-time}
+        error: {type: string}
+        values:
+          type: object
+          description: '`values` shows non-secret fields as stored, and secret ones masked.'
+          additionalProperties: {type: string}
+        tools:
+          type: array
+          items:
+            type: object
+            description: 'One registered tool: built in, from a connected service, or from an MCP tool source.'
+            required: [capability, default_policy, description, id, name, risk, schema, source]
+            properties:
+              id: {type: string}
+              name: {type: string}
+              description: {type: string}
+              capability: {type: string}
+              source: {type: string}
+              schema: {type: string}
+              default_policy: {type: string}
+              risk: {type: string, description: read | create | write}
+              prefetch: {type: boolean, description: '`prefetch` marks a connected service''s read tool that Yggdrasil calls, with no arguments, before the model answers a message about that service, as it looks up the web first for current questions.'}
+              cues:
+                type: array
+                description: Words that show a message is about this tool's service, such as a connected home's device names.
+                items: {type: string}
+              always: {type: boolean, description: '`always` offers the tool with every request, not only ones about its service: a tool source the person set to always be available.'}
+    DiagnosticsReport:
+      type: object
+      description: 'What a "Report this" sends with a problem (#588): enough to find it, nothing that says who or where the person is.'
+      required: [arch, contract, os, version]
+      properties:
+        version: {type: string}
+        commit: {type: string}
+        contract: {type: string}
+        os: {type: string}
+        arch: {type: string}
+        cpu: {type: string}
+        memory_gb: {type: integer}
+        gpus:
+          type: array
+          description: '`gpus` names each graphics card or chip, such as "Apple M3 Pro".'
+          items: {type: string}
+        log:
+          type: array
+          description: Core's last warnings and errors, scrubbed, for an Admin.
+          items: {type: string}
+    EvalPrompt:
+      type: object
+      description: One test prompt.
+      required: [id, prompt]
+      properties:
+        id: {type: string}
+        prompt: {type: string}
+    JoinResult:
+      type: object
+      description: A finished join.
+      required: [network_id, node, server, status]
+      properties:
+        status: {type: string, description: 'Joined, or already_joined when this computer already trusted the server.'}
+        network_id: {type: string}
+        server:
+          type: object
+          description: A computer in a network.
+          required: [id, name]
+          properties:
+            id: {type: string}
+            name: {type: string}
+            address: {type: string}
+            status: {type: string}
+            fingerprint: {type: string}
+        node:
+          type: object
+          description: This computer, named as the server knows it.
+          required: [id, name]
+          properties:
+            id: {type: string}
+            name: {type: string}
+            address: {type: string}
+            status: {type: string}
+            fingerprint: {type: string}
+    JoinTokenCreated:
+      type: object
+      description: A new token, shown once, and the command to use it.
+      required: [command, created_at, expires_at, fingerprint, id, install_command, server, status, token, windows_command]
+      properties:
+        id: {type: string}
+        created_at: {type: string, format: date-time}
+        expires_at: {type: string, format: date-time}
+        used_at: {type: string, format: date-time}
+        used_by: {type: string, description: The name of the computer that joined with it.}
+        revoked_at: {type: string, format: date-time}
+        status: {type: string, description: 'Active, used, revoked, or expired.'}
+        token: {type: string}
+        server: {type: string}
+        fingerprint: {type: string}
+        command: {type: string}
+        install_command: {type: string, description: '`install_command` installs Yggdrasil on a Linux or macOS computer that doesn''t have it yet, then joins; WindowsCommand does so in PowerShell.'}
+        windows_command: {type: string}
+    KnowledgeHit:
+      type: object
+      description: One retrieved passage.
+      required: [body, score, source_id, source_name, title]
+      properties:
+        source_id: {type: string}
+        source_name: {type: string}
+        title: {type: string}
+        body: {type: string}
+        score: {type: number, description: '`score` orders the hits; higher is better. It compares hits within one search only: BM25 for keyword-only search, fused rank for hybrid search, and the reranker''s score when a reranker ordered them.'}
+        match: {type: string, description: '`match` says how the passage was found: MatchKeyword, MatchSemantic, or MatchBoth.'}
+    LeaveResult:
+      type: object
+      description: Says which computers were told this one left.
+      required: [left, unreachable]
+      properties:
+        left:
+          type: array
+          items: {type: string}
+        unreachable:
+          type: array
+          items: {type: string}
+    LogContent:
+      type: object
+      description: A log file payload returned to the UI.
+      required: [content, kind, label, name, size_bytes, truncated]
+      properties:
+        name: {type: string}
+        kind: {type: string}
+        label: {type: string}
+        content: {type: string}
+        truncated: {type: boolean}
+        size_bytes: {type: integer, format: int64}
+    LogFile:
+      type: object
+      description: Describes a log file available for diagnostics.
+      required: [kind, label, modified_at, name, size_bytes]
+      properties:
+        name: {type: string}
+        kind: {type: string, description: daemon | runtime | other}
+        size_bytes: {type: integer, format: int64}
+        modified_at: {type: string, format: date-time}
+        label: {type: string}
+    MCPServer:
+      type: object
+      description: 'What may be shown about a source: never a secret value.'
+      required: [added_at, allow_sampling, always_offer, enabled, env, has_prompts, has_resources, headers, id, keywords, name, running, status, tools, where]
+      properties:
+        id: {type: string}
+        name: {type: string}
+        description: {type: string}
+        preset: {type: string}
+        where: {type: string, description: '"local" for a program on this computer, "remote" for a web address.'}
+        command: {type: string}
+        args:
+          type: array
+          items: {type: string}
+        url: {type: string}
+        env:
+          type: array
+          items:
+            type: object
+            description: An environment variable or header; secret values show only their last four characters.
+            required: [key, secret, value]
+            properties:
+              key: {type: string}
+              value: {type: string}
+              secret: {type: boolean}
+        headers:
+          type: array
+          items:
+            type: object
+            description: An environment variable or header; secret values show only their last four characters.
+            required: [key, secret, value]
+            properties:
+              key: {type: string}
+              value: {type: string}
+              secret: {type: boolean}
+        enabled: {type: boolean}
+        allow_sampling: {type: boolean}
+        always_offer: {type: boolean}
+        keywords:
+          type: array
+          items: {type: string}
+        status: {type: string, description: 'Ready, sign_in, error, or off.'}
+        running: {type: boolean}
+        error: {type: string}
+        signed_in: {type: boolean}
+        missing: {type: string, description: '`missing` names a program this source needs that is not installed, such as Node.js.'}
+        server_name: {type: string}
+        server_version: {type: string}
+        protocol: {type: string}
+        instructions: {type: string}
+        has_resources: {type: boolean}
+        has_prompts: {type: boolean}
+        tools:
+          type: array
+          items:
+            type: object
+            description: One of a source's tools.
+            required: [changed, description, enabled, id, name, policy, remote_name, risk]
+            properties:
+              id: {type: string}
+              name: {type: string}
+              remote_name: {type: string}
+              description: {type: string}
+              risk: {type: string}
+              policy: {type: string, description: Allow or ask; Changed is true when the person set it.}
+              changed: {type: boolean}
+              enabled: {type: boolean}
+        added_at: {type: string, format: date-time}
+        checked_at: {type: string, format: date-time}
+        last_used: {type: string, format: date-time}
+    NetworkStatus:
+      type: object
+      description: This computer's network membership.
+      required: [network_id, node, peers, reachable]
+      properties:
+        network_id: {type: string}
+        reachable: {type: boolean, description: Whether other computers can reach this one's Bifrost.}
+        node:
+          type: object
+          description: A computer in a network.
+          required: [id, name]
+          properties:
+            id: {type: string}
+            name: {type: string}
+            address: {type: string}
+            status: {type: string}
+            fingerprint: {type: string}
+        peers:
+          type: array
+          items:
+            type: object
+            description: A computer in a network.
+            required: [id, name]
+            properties:
+              id: {type: string}
+              name: {type: string}
+              address: {type: string}
+              status: {type: string}
+              fingerprint: {type: string}
+    News:
+      type: object
+      description: What the app shows.
+      required: [enabled, items]
+      properties:
+        enabled: {type: boolean, description: False when the setting is off; nothing is read then.}
+        items:
+          type: array
+          items:
+            type: object
+            description: One piece of news.
+            required: [date, id, kind, source, summary, title]
+            properties:
+              id: {type: string}
+              date: {type: string}
+              kind: {type: string}
+              title: {type: string}
+              summary: {type: string}
+              source:
+                type: object
+                required: [name, url]
+                properties:
+                  name: {type: string}
+                  url: {type: string}
+              model_id: {type: string, description: 'The catalog model it''s about, so an Admin can install it.'}
+        updated: {type: string, description: When toskar.ai last wrote the news.}
+        fetched_at: {type: string, format: date-time, description: When this computer last read it.}
+        stale: {type: boolean, description: Set when the news couldn't be read just now and the copy kept from before is shown.}
+    PairingSession:
+      type: object
+      description: An in-flight pairing attempt.
+      required: [code, created_at, expires_at, id, local_node_id, remote_name, remote_node_id, state]
+      properties:
+        id: {type: string}
+        local_node_id: {type: string}
+        remote_node_id: {type: string}
+        remote_name: {type: string}
+        remote_address: {type: string}
+        code: {type: string}
+        state: {type: string}
+        created_at: {type: string, format: date-time}
+        expires_at: {type: string, format: date-time}
+        incoming: {type: boolean}
+    Portal:
+      type: object
+      description: One chat portal.
+      required: [access, branding, concurrency, created_at, embed_origins, enabled, has_passcode, hourly_limit, id, language, max_message, memory, name, profile_id, retention_days, slug, tools, updated_at]
+      properties:
+        id: {type: string}
+        slug: {type: string}
+        name: {type: string}
+        profile_id: {type: string, description: '`profile_id` answers its chats; empty is the default profile.'}
+        tools: {type: string, description: 'None, read_only, or profile (the profile''s own).'}
+        memory: {type: boolean, description: '`memory` lets a visitor''s chats keep and use memories of their own.'}
+        language: {type: string, description: '`language` answers in this language; empty follows the visitor.'}
+        access: {type: string, description: Open or passcode.}
+        has_passcode: {type: boolean}
+        hourly_limit: {type: integer, description: How many messages each visitor may send an hour; 0 is no limit.}
+        max_message: {type: integer, description: 'The longest message, in characters.'}
+        concurrency: {type: integer, description: How many of the portal's chats may run at once.}
+        retention_days: {type: integer, description: How long visitors' conversations are kept; 0 keeps them.}
+        embed_origins:
+          type: array
+          description: The websites that may show the portal in a frame, such as https://shop.example.com.
+          items: {type: string}
+        branding: {description: 'How the page looks, as the page reads it.'}
+        enabled: {type: boolean}
+        created_at: {type: string, format: date-time}
+        updated_at: {type: string, format: date-time}
+    PortalConversation:
+      type: object
+      description: One of a portal's visitors' conversations.
+      required: [created_at, id, messages, title, updated_at, visitor]
+      properties:
+        id: {type: string}
+        title: {type: string}
+        visitor: {type: string}
+        messages: {type: integer}
+        created_at: {type: string, format: date-time}
+        updated_at: {type: string, format: date-time}
+    PortalMessage:
+      type: object
+      description: One message of a visitor's conversation.
+      required: [content, created_at, role]
+      properties:
+        role: {type: string}
+        content: {type: string}
+        created_at: {type: string, format: date-time}
+    PortalPage:
+      type: object
+      description: What a portal's page shows before anyone enters.
+      required: [access, branding, entered, language, max_message, name, slug]
+      properties:
+        slug: {type: string}
+        name: {type: string}
+        access: {type: string}
+        language: {type: string}
+        branding: {}
+        max_message: {type: integer, description: The longest message the portal takes.}
+        entered: {type: boolean, description: True when this browser is already the portal's guest.}
+    PortalUsage:
+      type: object
+      description: How much a portal was used.
+      required: [conversations_30, conversations_7, messages_30, messages_7, visitors_30, visitors_7]
+      properties:
+        visitors_7: {type: integer, description: 'Visitors who wrote, conversations they started, and messages they sent, over the last 7 and 30 days.'}
+        conversations_7: {type: integer}
+        messages_7: {type: integer}
+        visitors_30: {type: integer}
+        conversations_30: {type: integer}
+        messages_30: {type: integer}
+    RuntimeHistory:
+      type: object
+      description: What the Diagnostics page shows.
+      required: [interval_seconds, now, samples, started_at]
+      properties:
+        started_at: {type: string, format: date-time}
+        now:
+          type: object
+          description: The daemon's own memory and background work at a moment.
+          required: [at, goroutines, heap_bytes, sys_bytes]
+          properties:
+            at: {type: string, format: date-time}
+            goroutines: {type: integer, description: The daemon's background tasks.}
+            heap_bytes: {type: integer, format: int64, description: Memory in use by Go objects; SysBytes is all the memory the Go runtime holds from the system.}
+            sys_bytes: {type: integer, format: int64}
+        samples:
+          type: array
+          items:
+            type: object
+            description: The daemon's own memory and background work at a moment.
+            required: [at, goroutines, heap_bytes, sys_bytes]
+            properties:
+              at: {type: string, format: date-time}
+              goroutines: {type: integer, description: The daemon's background tasks.}
+              heap_bytes: {type: integer, format: int64, description: Memory in use by Go objects; SysBytes is all the memory the Go runtime holds from the system.}
+              sys_bytes: {type: integer, format: int64}
+        interval_seconds: {type: integer, description: 'How often a sample is kept, in seconds.'}
+    TLSInfo:
+      type: object
+      description: How the API speaks HTTPS.
+      required: [enabled]
+      properties:
+        enabled: {type: boolean}
+        fingerprint: {type: string, description: 'The certificate''s SHA-256, and Short its start, such as "4F2A-9C1B", for a person to compare with what a phone or browser shows.'}
+        short: {type: string}
+        not_after: {type: string, format: date-time}
+        custom: {type: boolean, description: 'The person''s own certificate (api_tls_cert, api_tls_key).'}
+        error: {type: string, description: 'Why their certificate couldn''t be used, so Toskar''s own is.'}
+    Task:
+      type: object
+      description: An orchestration unit of work.
+      required: [created_at, id, profile_id, prompt, status]
+      properties:
+        id: {type: string}
+        profile_id: {type: string}
+        conversation_id: {type: string}
+        prompt: {type: string}
+        status: {type: string}
+        result: {type: string}
+        error: {type: string}
+        error_code: {type: string, description: '`error_code` and ErrorDetails are Error''s stable code and values (#588).'}
+        error_details:
+          type: object
+          additionalProperties: {}
+        created_at: {type: string, format: date-time}
+    TrainingBaseModel:
+      type: object
+      description: One recommended base model.
+      required: [display_name, fit, installed, license, model_id, parameters, reasons, recommended]
+      properties:
+        model_id: {type: string}
+        display_name: {type: string}
+        parameters: {type: string}
+        license: {type: string}
+        license_note: {type: string}
+        installed: {type: boolean}
+        recommended: {type: boolean}
+        reasons:
+          type: array
+          items: {type: string}
+        fit:
+          type: object
+          description: 'The training estimate for one computer. It is separate from the inference fit: training holds optimizer state and activations the chat runtime never needs.'
+          required: [download_bytes, duration_sec, eligible, hyper, label, local, memory_available_bytes, memory_needed_bytes, node_id, node_name, reason, storage_available_bytes, storage_needed_bytes]
+          properties:
+            node_id: {type: string}
+            node_name: {type: string}
+            local: {type: boolean}
+            backend: {type: string}
+            label: {type: string}
+            eligible: {type: boolean}
+            reason: {type: string}
+            hyper:
+              type: object
+              description: Holds raw training settings. Presets fill them; Advanced mode may override individual fields.
+              properties:
+                method: {type: string}
+                epochs: {type: integer}
+                rank: {type: integer}
+                scale: {type: number}
+                layers: {type: integer}
+                learning_rate: {type: number}
+                batch_size: {type: integer}
+                max_seq_length: {type: integer}
+                iters: {type: integer, description: 'Derived from epochs, examples, and batch size.'}
+                grad_checkpoint: {type: boolean}
+                seed: {type: integer}
+            memory_needed_bytes: {type: integer, format: int64, description: '`memory_needed_bytes` and MemoryAvailable are bytes of accelerator memory.'}
+            memory_available_bytes: {type: integer, format: int64}
+            download_bytes: {type: integer, format: int64, description: '`download_bytes` counts base weights and the trainer environment still to fetch.'}
+            storage_needed_bytes: {type: integer, format: int64}
+            storage_available_bytes: {type: integer, format: int64}
+            duration_sec: {type: integer, description: A rough estimate of the training time after downloads.}
+            notes:
+              type: array
+              items: {type: string}
+    TrainingMaterial:
+      type: object
+      description: A file, paste, or set of conversations the user added.
+      required: [ai_id, created_at, example_count, id, name, recommended, use]
+      properties:
+        id: {type: string}
+        ai_id: {type: string}
+        name: {type: string}
+        filename: {type: string}
+        use: {type: string, description: The user's decision. Recommended is Yggdrasil's advice.}
+        recommended:
+          type: object
+          description: Yggdrasil's advice for one piece of material.
+          required: [can_train, example_count, reasons, use]
+          properties:
+            use: {type: string}
+            reasons:
+              type: array
+              items: {type: string}
+            signals:
+              type: array
+              items:
+                type: object
+                description: One observation behind a classification.
+                required: [detail, kind]
+                properties:
+                  kind: {type: string}
+                  detail: {type: string}
+            warning: {type: string, description: Shown when the chosen use conflicts with the advice.}
+            example_count: {type: integer, description: How many training examples the material yields.}
+            can_train: {type: boolean, description: 'False when no examples could be read, so the material can only be connected knowledge.'}
+        warning: {type: string, description: '`warning` explains a conflict between Use and the recommendation.'}
+        knowledge_source_id: {type: string}
+        example_count: {type: integer}
+        created_at: {type: string, format: date-time}
+    TrainingPlan:
+      type: object
+      description: 'The review step: what trains, what stays connected, and where.'
+      required: [blockers, examples, fits, hyper, knowledge_sources, next_revision, preset, ready, warnings]
+      properties:
+        ready: {type: boolean}
+        blockers:
+          type: array
+          items: {type: string}
+        warnings:
+          type: array
+          items: {type: string}
+        examples: {type: integer, description: Training}
+        preset: {type: string}
+        hyper:
+          type: object
+          description: Holds raw training settings. Presets fill them; Advanced mode may override individual fields.
+          properties:
+            method: {type: string}
+            epochs: {type: integer}
+            rank: {type: integer}
+            scale: {type: number}
+            layers: {type: integer}
+            learning_rate: {type: number}
+            batch_size: {type: integer}
+            max_seq_length: {type: integer}
+            iters: {type: integer, description: 'Derived from epochs, examples, and batch size.'}
+            grad_checkpoint: {type: boolean}
+            seed: {type: integer}
+        knowledge_sources:
+          type: array
+          description: Knowledge
+          items: {type: string}
+        fits:
+          type: array
+          description: Where
+          items:
+            type: object
+            description: 'The training estimate for one computer. It is separate from the inference fit: training holds optimizer state and activations the chat runtime never needs.'
+            required: [download_bytes, duration_sec, eligible, hyper, label, local, memory_available_bytes, memory_needed_bytes, node_id, node_name, reason, storage_available_bytes, storage_needed_bytes]
+            properties:
+              node_id: {type: string}
+              node_name: {type: string}
+              local: {type: boolean}
+              backend: {type: string}
+              label: {type: string}
+              eligible: {type: boolean}
+              reason: {type: string}
+              hyper:
+                type: object
+                description: Holds raw training settings. Presets fill them; Advanced mode may override individual fields.
+                properties:
+                  method: {type: string}
+                  epochs: {type: integer}
+                  rank: {type: integer}
+                  scale: {type: number}
+                  layers: {type: integer}
+                  learning_rate: {type: number}
+                  batch_size: {type: integer}
+                  max_seq_length: {type: integer}
+                  iters: {type: integer, description: 'Derived from epochs, examples, and batch size.'}
+                  grad_checkpoint: {type: boolean}
+                  seed: {type: integer}
+              memory_needed_bytes: {type: integer, format: int64, description: '`memory_needed_bytes` and MemoryAvailable are bytes of accelerator memory.'}
+              memory_available_bytes: {type: integer, format: int64}
+              download_bytes: {type: integer, format: int64, description: '`download_bytes` counts base weights and the trainer environment still to fetch.'}
+              storage_needed_bytes: {type: integer, format: int64}
+              storage_available_bytes: {type: integer, format: int64}
+              duration_sec: {type: integer, description: A rough estimate of the training time after downloads.}
+              notes:
+                type: array
+                items: {type: string}
+        chosen:
+          type: object
+          description: 'The training estimate for one computer. It is separate from the inference fit: training holds optimizer state and activations the chat runtime never needs.'
+          required: [download_bytes, duration_sec, eligible, hyper, label, local, memory_available_bytes, memory_needed_bytes, node_id, node_name, reason, storage_available_bytes, storage_needed_bytes]
+          properties:
+            node_id: {type: string}
+            node_name: {type: string}
+            local: {type: boolean}
+            backend: {type: string}
+            label: {type: string}
+            eligible: {type: boolean}
+            reason: {type: string}
+            hyper:
+              type: object
+              description: Holds raw training settings. Presets fill them; Advanced mode may override individual fields.
+              properties:
+                method: {type: string}
+                epochs: {type: integer}
+                rank: {type: integer}
+                scale: {type: number}
+                layers: {type: integer}
+                learning_rate: {type: number}
+                batch_size: {type: integer}
+                max_seq_length: {type: integer}
+                iters: {type: integer, description: 'Derived from epochs, examples, and batch size.'}
+                grad_checkpoint: {type: boolean}
+                seed: {type: integer}
+            memory_needed_bytes: {type: integer, format: int64, description: '`memory_needed_bytes` and MemoryAvailable are bytes of accelerator memory.'}
+            memory_available_bytes: {type: integer, format: int64}
+            download_bytes: {type: integer, format: int64, description: '`download_bytes` counts base weights and the trainer environment still to fetch.'}
+            storage_needed_bytes: {type: integer, format: int64}
+            storage_available_bytes: {type: integer, format: int64}
+            duration_sec: {type: integer, description: A rough estimate of the training time after downloads.}
+            notes:
+              type: array
+              items: {type: string}
+        next_revision: {type: integer, description: The number the next training run will create.}
+    TrainingSample:
+      type: object
+      description: Example material people can read, download, or load.
+      required: [content, description, filename, name]
+      properties:
+        filename: {type: string}
+        name: {type: string}
+        description: {type: string}
+        content: {type: string}
+    UpdateStatus:
+      type: object
+      description: 'What the app shows: whether a newer version is out.'
+      required: [available, current, enabled, supported]
+      properties:
+        supported: {type: boolean, description: 'False for a build that doesn''t check: the App Store edition, the desktop app''s copy, and development builds.'}
+        enabled: {type: boolean, description: True when this build checks and the setting is on.}
+        current: {type: string}
+        latest:
+          type: object
+          description: The release toskar.ai named at the last successful check.
+          required: [version]
+          properties:
+            version: {type: string}
+            published_at: {type: string}
+            prerelease: {type: boolean}
+            notes_url: {type: string}
+            download_url: {type: string}
+        available: {type: boolean, description: True when Latest is newer than Current.}
+        checked_at: {type: string, format: date-time}
+    VisitorLink:
+      type: object
+      description: 'An invited visitor''s one-time link: the portal''s page with the invitation, good for a week.'
+      required: [expires_at, path]
+      properties:
+        path: {type: string}
+        expires_at: {type: string, format: date-time}
+    EnteredPortal:
+      type: object
+      description: A portal's guest, with their session when the page asked for it to send in a header.
+      required: [person, via]
+      properties:
+        person: {$ref: '#/components/schemas/Person'}
+        via: {type: string, description: 'this_computer (a request from this computer, which is the Owner''s), api_key, or, later, a session.'}
+        key_id: {type: string, description: 'The API key the request used, when Via is api_key.'}
+        key_profile: {type: string, description: 'The profile that key is pinned to (#345), or "".'}
+        session: {type: string}

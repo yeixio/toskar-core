@@ -17,3 +17,6 @@
 - It describes models, runtimes, and ratings fully: the model list,
   recommendations, browsing, installing, importing, running models, and
   where a model can run.
+- It describes automations, tasks, knowledge, training, portals, joining
+  computers, logs, diagnostics, caches, connectors, MCP servers, news,
+  and updates with named types, from the code.
