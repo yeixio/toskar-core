@@ -80,6 +80,10 @@ var specTypes = map[string]any{
 	"ContractInfo":         contracts.ContractInfo{},
 	"VersionResponse":      contracts.VersionResponse{},
 	"ErrorBody":            contracts.ErrorBody{},
+	"ChatAnswer":           contracts.ChatAnswer{},
+	"ChatToken":            contracts.ChatToken{},
+	"ChatDone":             contracts.ChatDone{},
+	"GenerationMetrics":    contracts.GenerationMetrics{},
 }
 
 // The Go types that encode themselves, with the schema of what they send.

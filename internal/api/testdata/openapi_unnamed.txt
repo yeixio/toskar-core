@@ -51,7 +51,6 @@ post /api/v1/automations/preview 200
 post /api/v1/automations/{id}/hook 200
 post /api/v1/automations/{id}/run 202
 post /api/v1/automations/{id}/runs/{run_id}/chat 200
-post /api/v1/chat 200
 post /api/v1/diagnostics 200
 post /api/v1/join-tokens 201
 post /api/v1/knowledge/search 200

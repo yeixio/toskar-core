@@ -59,6 +59,10 @@ var covered = map[string]any{
 	"ContractInfo":         contracts.ContractInfo{},
 	"VersionResponse":      contracts.VersionResponse{},
 	"ErrorBody":            contracts.ErrorBody{},
+	"ChatAnswer":           contracts.ChatAnswer{},
+	"ChatToken":            contracts.ChatToken{},
+	"ChatDone":             contracts.ChatDone{},
+	"GenerationMetrics":    contracts.GenerationMetrics{},
 }
 
 type snapshot struct {

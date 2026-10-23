@@ -935,9 +935,10 @@ func (a *App) HandleHTTPChat(w http.ResponseWriter, r *http.Request, conversatio
 			}
 		}
 		w.Header().Set("Content-Type", "application/json")
-		out := map[string]any{"content": content}
+		out := contracts.ChatAnswer{Content: content}
 		if metrics != nil {
-			out["metrics"] = metrics
+			m := contracts.GenerationMetrics(*metrics)
+			out.Metrics = &m
 		}
 		return json.NewEncoder(w).Encode(out)
 	}
@@ -957,7 +958,7 @@ func writeChatStream(w http.ResponseWriter, ch <-chan pluginapi.ChatChunk) error
 	w.Header().Set("Content-Type", "text/event-stream")
 	w.Header().Set("Cache-Control", "no-cache")
 	w.WriteHeader(http.StatusOK)
-	done := map[string]any{}
+	var done contracts.ChatDone
 	for chunk := range ch {
 		if chunk.Error != "" {
 			// error_code comes first, so a client that knows it shows the
@@ -978,12 +979,13 @@ func writeChatStream(w http.ResponseWriter, ch <-chan pluginapi.ChatChunk) error
 			return nil
 		}
 		if chunk.Content != "" {
-			data, _ := json.Marshal(map[string]any{"content": chunk.Content})
+			data, _ := json.Marshal(contracts.ChatToken{Content: chunk.Content})
 			fmt.Fprintf(w, "event: token\ndata: %s\n\n", data)
 			flusher.Flush()
 		}
 		if chunk.Done && chunk.Metrics != nil {
-			done["metrics"] = chunk.Metrics
+			m := contracts.GenerationMetrics(*chunk.Metrics)
+			done.Metrics = &m
 		}
 	}
 	// Every stream ends with done or error (#588), so a client can tell a

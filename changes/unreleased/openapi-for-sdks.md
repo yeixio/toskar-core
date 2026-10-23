@@ -11,3 +11,6 @@
   sources, steps, files and deliberation, run traces, events,
   notifications, and errors) from the code's own fields and comments, and
   the routes for chats, their summaries, and versions use them.
+- It describes the chat stream's events (token, done, error_code, and
+  error) and the events stream, so a client can read each event as a type.
+  Chat answers' metrics include `cached_tokens` (contract 1.56).

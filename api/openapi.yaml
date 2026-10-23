@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Toskar Control Plane API
-  version: "1.55"
+  version: "1.56"
   description: >-
     Local AI control plane API for Toskar, its OpenAI-compatible routes, and its MCP server.
     On the default loopback bind no key is needed. When the daemon listens on any other address,
@@ -1711,11 +1711,16 @@ paths:
       operationId: eventStream
       responses:
         "200":
-          description: SSE stream
+          description: >-
+            Server-sent events, one per event: its name is the event's type, such as
+            model.unloaded, and its data the Event. A ": ping" comment keeps the
+            connection open. x-events describes them, since OpenAPI 3.0 can't.
           content:
             text/event-stream:
               schema:
                 type: string
+              x-events:
+                "*": {$ref: "#/components/schemas/Event"}
   /api/v1/logs:
     get:
       summary: List diagnostic log files
@@ -3907,16 +3912,15 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  content:
-                    type: string
-                  metrics:
-                    type: object
-                    additionalProperties: true
+                $ref: "#/components/schemas/ChatAnswer"
             text/event-stream:
               schema:
                 type: string
+              x-events:
+                token: {$ref: "#/components/schemas/ChatToken"}
+                done: {$ref: "#/components/schemas/ChatDone"}
+                error_code: {$ref: "#/components/schemas/ErrorBody"}
+                error: {type: string, description: "The error's message, as plain text, after error_code; for clients from before error codes"}
         "400":
           description: Invalid request
           content:
@@ -8534,3 +8538,36 @@ components:
       required: [stopped]
       properties:
         stopped: {type: boolean}
+    ChatAnswer:
+      type: object
+      description: 'POST /api/v1/chat''s answer when it isn''t streamed: the whole reply, and how the model did when the runtime said.'
+      required: [content]
+      properties:
+        content: {type: string}
+        metrics: {$ref: '#/components/schemas/GenerationMetrics'}
+    ChatToken:
+      type: object
+      description: 'A token event: the next piece of the answer.'
+      required: [content]
+      properties:
+        content: {type: string}
+    ChatDone:
+      type: object
+      description: 'The done event: the answer is finished and saved.'
+      properties:
+        metrics: {$ref: '#/components/schemas/GenerationMetrics'}
+    GenerationMetrics:
+      type: object
+      description: Per-turn inference performance.
+      required: [completion_tokens, eval_ms, eval_tok_per_sec, prompt_ms, prompt_tok_per_sec, prompt_tokens, total_ms, total_tokens, ttft_ms]
+      properties:
+        prompt_tokens: {type: integer}
+        completion_tokens: {type: integer}
+        total_tokens: {type: integer}
+        ttft_ms: {type: number}
+        prompt_ms: {type: number}
+        eval_ms: {type: number}
+        total_ms: {type: number}
+        prompt_tok_per_sec: {type: number}
+        eval_tok_per_sec: {type: number}
+        cached_tokens: {type: integer, description: 'Prompt tokens reused from the model''s cache instead of processed again, when the runtime reports them.'}

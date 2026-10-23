@@ -1,5 +1,5 @@
 {
-  "version": "1.55",
+  "version": "1.56",
   "types": {
     "ActivityStep": [
       "kind",
@@ -31,6 +31,16 @@
       "automation_id",
       "name",
       "run_id"
+    ],
+    "ChatAnswer": [
+      "content",
+      "metrics"
+    ],
+    "ChatDone": [
+      "metrics"
+    ],
+    "ChatToken": [
+      "content"
     ],
     "Citation": [
       "artifact_id",
@@ -118,6 +128,18 @@
       "load_ms",
       "remote",
       "runs"
+    ],
+    "GenerationMetrics": [
+      "cached_tokens",
+      "completion_tokens",
+      "eval_ms",
+      "eval_tok_per_sec",
+      "prompt_ms",
+      "prompt_tok_per_sec",
+      "prompt_tokens",
+      "total_ms",
+      "total_tokens",
+      "ttft_ms"
     ],
     "Message": [
       "content",
