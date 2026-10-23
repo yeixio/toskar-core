@@ -1,0 +1,27 @@
+{
+  "page": {
+    "title": "Notícias de IA",
+    "description": "Novos modelos abertos, versões de runtimes e anúncios de laboratórios de IA, em poucas linhas cada. Atualizadas toda manhã no toskar.ai.",
+    "byAI": "Os resumos são escritos por IA e verificados automaticamente.",
+    "updated": "Atualizadas {{when}}.",
+    "loading": "Carregando as notícias…",
+    "empty": "Ainda não há notícias. Elas são atualizadas toda manhã.",
+    "stale": "Não foi possível acessar o toskar.ai, então estas são as notícias de {{when}}."
+  },
+  "off": {
+    "title": "As notícias de IA estão desativadas",
+    "admin": "Ative-as para ler as notícias do toskar.ai quando esta página for aberta. Só a solicitação é enviada.",
+    "member": "Um administrador desativou as notícias de IA neste computador.",
+    "turnOn": "Ativar notícias de IA"
+  },
+  "kinds": {
+    "model": "Modelo",
+    "runtime": "Runtime",
+    "announcement": "Anúncio"
+  },
+  "model": {
+    "installed": "Instalado",
+    "installing": "Instalando… veja Modelos",
+    "inCatalog": "No catálogo do Toskar"
+  }
+}

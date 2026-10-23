@@ -227,7 +227,8 @@
       "notification": "Notification",
       "community_ratings": "Community ratings",
       "update_check": "Update check",
-      "problem_report": "Problem report"
+      "problem_report": "Problem report",
+      "news": "AI news"
     },
     "kindsLower": {
       "web_search": "web search",
@@ -239,7 +240,8 @@
       "notification": "notification",
       "community_ratings": "community ratings",
       "update_check": "update check",
-      "problem_report": "problem report"
+      "problem_report": "problem report",
+      "news": "AI news"
     },
     "sources": {
       "chat": "Chat",
@@ -333,5 +335,11 @@
     "description": "Report this beside an error sends what went wrong to the Toskar team, after showing the person everything it sends.",
     "send": "Let people send reports to Toskar",
     "sendHint": "Off, Report this only copies the report, to give to whoever runs Toskar here."
+  },
+  "news": {
+    "title": "AI news",
+    "description": "The News page shows new open models, runtime releases, and AI labs' announcements from toskar.ai.",
+    "show": "Show AI news",
+    "showHint": "Read from toskar.ai when News is opened, at most every six hours. Nothing is sent but the request."
   }
 }

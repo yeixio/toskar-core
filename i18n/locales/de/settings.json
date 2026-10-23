@@ -227,7 +227,8 @@
       "notification": "Mitteilung",
       "community_ratings": "Community-Bewertungen",
       "update_check": "Update-Prüfung",
-      "problem_report": "Problembericht"
+      "problem_report": "Problembericht",
+      "news": "KI-Neuigkeiten"
     },
     "kindsLower": {
       "web_search": "Websuche",
@@ -239,7 +240,8 @@
       "notification": "Mitteilung",
       "community_ratings": "Community-Bewertungen",
       "update_check": "Update-Prüfung",
-      "problem_report": "Problembericht"
+      "problem_report": "Problembericht",
+      "news": "KI-Neuigkeiten"
     },
     "sources": {
       "chat": "Chat",
@@ -333,5 +335,11 @@
     "description": "„Melden“ neben einem Fehler sendet, was schiefging, an das Toskar-Team, nachdem die Person alles gesehen hat, was gesendet wird.",
     "send": "Berichte an Toskar senden lassen",
     "sendHint": "Aus: „Melden“ kopiert den Bericht nur, für die Person, die Toskar hier betreut."
+  },
+  "news": {
+    "title": "KI-Neuigkeiten",
+    "description": "Die Seite „Neuigkeiten“ zeigt neue offene Modelle, Runtime-Versionen und Ankündigungen von KI-Laboren von toskar.ai.",
+    "show": "KI-Neuigkeiten anzeigen",
+    "showHint": "Von toskar.ai gelesen, wenn „Neuigkeiten“ geöffnet wird, höchstens alle sechs Stunden. Gesendet wird nur die Anfrage."
   }
 }

@@ -1186,6 +1186,9 @@ type SettingsView struct {
 	// UpdateCheck looks at toskar.ai once a day for a newer version, and
 	// says so in the app. Builds that update themselves don't check.
 	UpdateCheck bool `json:"update_check"`
+	// AINews reads the AI news toskar.ai publishes when News is opened,
+	// at most every six hours (#750).
+	AINews bool `json:"ai_news"`
 	// ProblemReports lets Report this send to Toskar's report service
 	// (#588); off, reports aren't sent, and the sheet says so.
 	ProblemReports bool `json:"problem_reports"`

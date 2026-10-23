@@ -21,7 +21,8 @@
     "profiles": "Perfiles y orquestación",
     "tools": "Herramientas",
     "apiAccess": "Acceso a la API",
-    "settings": "Configuración"
+    "settings": "Configuración",
+    "news": "Noticias"
   },
   "status": {
     "starting": "Iniciando…",

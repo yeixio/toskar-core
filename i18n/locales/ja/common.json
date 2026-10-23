@@ -21,7 +21,8 @@
     "profiles": "プロファイルとオーケストレーション",
     "tools": "ツール",
     "apiAccess": "APIアクセス",
-    "settings": "設定"
+    "settings": "設定",
+    "news": "ニュース"
   },
   "status": {
     "starting": "起動中…",

@@ -89,6 +89,11 @@
       "meaning": "Walhall ist die Halle, die Gäste willkommen heißt. Hier öffnest du Chats für die Menschen, denen du dienst.",
       "story": "Walhall, Odins große Halle in Asgard, hat fünfhundertvierzig Tore, und jeder Gast wird hereingebeten und bewirtet.",
       "rune": "Wunjo, die Rune der Freude"
+    },
+    "news": {
+      "meaning": "Huginn, Odins Rabe des Gedankens, bringt die Neuigkeiten aus der Welt der KI.",
+      "story": "Jeden Morgen fliegen Huginn und Muninn über die Welt und kehren zurück, um Odin zu erzählen, was sie gesehen haben. Huginn ist der Gedanke, Muninn die Erinnerung.",
+      "rune": "Dagaz, die Rune des Tages"
     }
   }
 }

@@ -602,6 +602,25 @@ export function SettingsPage() {
 
             <section className="card space-y-4">
               <div>
+                <h2 className="section-title">{t('news.title')}</h2>
+                <p className="mt-1 text-sm text-ink-muted">{t('news.description')}</p>
+              </div>
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-sm font-medium text-ink">{t('news.show')}</p>
+                  <p className="mt-1 text-xs text-ink-muted">{t('news.showHint')}</p>
+                </div>
+                <Toggle
+                  label={t('news.show')}
+                  checked={settings?.ai_news ?? true}
+                  disabled={busy}
+                  onChange={() => patch({ ai_news: !(settings?.ai_news ?? true) })}
+                />
+              </div>
+            </section>
+
+            <section className="card space-y-4">
+              <div>
                 <h2 className="section-title">{t('reports.title')}</h2>
                 <p className="mt-1 text-sm text-ink-muted">{t('reports.description')}</p>
               </div>

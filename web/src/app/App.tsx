@@ -25,6 +25,7 @@ import { SettingsPage } from '@/features/settings/SettingsPage'
 import { ToolsPage } from '@/features/tools/ToolsPage'
 import { KnowledgePage } from '@/features/knowledge/KnowledgePage'
 import { MemoryPage } from '@/features/memory/MemoryPage'
+import { NewsPage } from '@/features/news/NewsPage'
 import { TrainPage } from '@/features/train/TrainPage'
 import { InvitePage } from '@/features/people/InvitePage'
 import { PeoplePage } from '@/features/people/PeoplePage'
@@ -97,6 +98,7 @@ export function App() {
                 <Route path="train" element={<RequireRole min="admin"><TrainPage /></RequireRole>} />
                 <Route path="knowledge" element={<RequireRole min="admin"><KnowledgePage /></RequireRole>} />
                 <Route path="memory" element={<RequireRole min="member"><MemoryPage /></RequireRole>} />
+                <Route path="news" element={<RequireRole min="member"><NewsPage /></RequireRole>} />
                 <Route path="profiles" element={<RequireRole min="admin"><ProfilesPage /></RequireRole>} />
                 <Route path="tools" element={<RequireRole min="admin"><ToolsPage /></RequireRole>} />
                 <Route path="nodes" element={<RequireRole min="admin"><NodesPage /></RequireRole>} />

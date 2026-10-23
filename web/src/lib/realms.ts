@@ -22,6 +22,7 @@ export type RuneId =
   | 'isa'
   | 'gebo'
   | 'wunjo'
+  | 'dagaz'
 
 export interface Realm {
   /**
@@ -73,6 +74,14 @@ export const realms: Record<string, Realm> = {
     norse: 'Muninn',
     rune: 'othala',
     accent: 'text-muninn',
+  },
+  // AI news (#750): Huginn, Odin's raven of thought, who flies over the
+  // world each morning and tells him what he saw; Dagaz, the rune of day.
+  '/news': {
+    id: 'news',
+    norse: 'Huginn',
+    rune: 'dagaz',
+    accent: 'text-huginn',
   },
   // People share this Toskar (#206): Midgard, the world of people, and
   // Gebo, the rune of the gift and of fellowship.
@@ -161,4 +170,5 @@ export const runePaths: Record<RuneId, string> = {
   thurisaz: 'M3 1v14M3 4l5 4-5 4',
   isa: 'M5 1v14',
   wunjo: 'M3 15V1l5 3.5L3 8',
+  dagaz: 'M1 2v12M9 2v12M1 2l8 12M9 2 1 14',
 }

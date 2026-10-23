@@ -220,7 +220,8 @@
       "notification": "通知",
       "community_ratings": "社区评分",
       "update_check": "检查更新",
-      "problem_report": "问题报告"
+      "problem_report": "问题报告",
+      "news": "AI 新闻"
     },
     "kindsLower": {
       "web_search": "网络搜索",
@@ -232,7 +233,8 @@
       "notification": "通知",
       "community_ratings": "社区评分",
       "update_check": "检查更新",
-      "problem_report": "问题报告"
+      "problem_report": "问题报告",
+      "news": "AI 新闻"
     },
     "sources": {
       "chat": "聊天",
@@ -324,5 +326,11 @@
     "description": "错误旁的“报告”会先向用户展示要发送的全部内容，再把出错情况发送给 Toskar 团队。",
     "send": "允许向 Toskar 发送报告",
     "sendHint": "关闭后，“报告”只会复制报告，以便交给这里负责 Toskar 的人。"
+  },
+  "news": {
+    "title": "AI 新闻",
+    "description": "“新闻”页面显示来自 toskar.ai 的新开放模型、运行时版本和 AI 实验室公告。",
+    "show": "显示 AI 新闻",
+    "showHint": "打开“新闻”时从 toskar.ai 读取，最多每六小时一次。除了请求本身，不会发送任何内容。"
   }
 }

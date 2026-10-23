@@ -33,6 +33,23 @@ export const CATEGORY_SECTIONS: { id: string; match: (m: Model) => boolean }[] =
   },
 ]
 
+/** The fit chip's colours: green when it runs well, amber when tight, red when it won't. */
+export function fitTone(label?: string): string {
+  switch (label) {
+    case 'excellent':
+    case 'good':
+      return 'bg-success/15 text-success'
+    case 'tight':
+      return 'bg-warning/15 text-warning'
+    case 'heavy':
+    case 'too_large':
+    case 'unsupported':
+      return 'bg-danger/15 text-danger'
+    default:
+      return 'bg-raised text-ink-muted'
+  }
+}
+
 export function fitLabelText(label?: FitLabel): string {
   switch (label) {
     case 'excellent':

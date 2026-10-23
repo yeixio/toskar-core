@@ -41,7 +41,7 @@ describe('Sidebar', () => {
     renderAt('/chat')
     expect(screen.getByText('Use')).toBeInTheDocument()
     expect(screen.getByText('Customize')).toBeInTheDocument()
-    expect(links()).toEqual(['/chat', '/automations', '/knowledge', '/memory', '/models', '/tools', '/profiles', '/settings'])
+    expect(links()).toEqual(['/chat', '/automations', '/knowledge', '/memory', '/news', '/models', '/tools', '/profiles', '/settings'])
   })
 
   it('keeps Administer closed until it is opened, and remembers the choice', () => {
@@ -53,7 +53,7 @@ describe('Sidebar', () => {
     fireEvent.click(toggle)
     expect(toggle).toHaveAttribute('aria-expanded', 'true')
     expect(links()).toEqual([
-      '/chat', '/automations', '/knowledge', '/memory', '/models', '/tools', '/profiles',
+      '/chat', '/automations', '/knowledge', '/memory', '/news', '/models', '/tools', '/profiles',
       '/train', '/nodes', '/people', '/portals', '/api-access', '/performance', '/diagnostics', '/settings',
     ])
     expect(useUIStore.getState().administerOpen).toBe(true)
@@ -74,7 +74,7 @@ describe('Sidebar', () => {
     const person = { id: 'sam', name: 'Sam', created_at: '', sign_in: true }
     vi.mocked(api.getMe).mockResolvedValueOnce({ person: { ...person, role: 'member' }, via: 'session' })
     const { unmount } = renderAt('/chat')
-    await waitFor(() => expect(links()).toEqual(['/chat', '/automations', '/memory', '/settings']))
+    await waitFor(() => expect(links()).toEqual(['/chat', '/automations', '/memory', '/news', '/settings']))
     expect(screen.queryByRole('button', { name: 'Administer' })).not.toBeInTheDocument()
     expect(screen.queryByText('Customize')).not.toBeInTheDocument()
     unmount()

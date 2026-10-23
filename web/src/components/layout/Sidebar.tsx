@@ -20,6 +20,7 @@ const useNav = [
   { to: '/automations', label: 'nav.automations', member: true },
   { to: '/knowledge', label: 'nav.knowledge', admin: true },
   { to: '/memory', label: 'nav.memory', member: true },
+  { to: '/news', label: 'nav.news', member: true },
 ] as const
 
 const customizeNav = [

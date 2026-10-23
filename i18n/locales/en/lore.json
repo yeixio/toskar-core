@@ -89,6 +89,11 @@
       "meaning": "Valhalla is the hall that welcomes guests. Here you open chats for the people you serve.",
       "story": "Valhalla, Odin's great hall in Asgard, has five hundred and forty doors, and every guest is welcomed in and served.",
       "rune": "Wunjo, the rune of joy"
+    },
+    "news": {
+      "meaning": "Huginn, Odin's raven of thought, brings the news from the world of AI.",
+      "story": "Each morning Huginn and Muninn fly over the world and return to tell Odin what they saw. Huginn is thought; Muninn is memory.",
+      "rune": "Dagaz, the rune of day"
     }
   }
 }

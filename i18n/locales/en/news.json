@@ -1,0 +1,27 @@
+{
+  "page": {
+    "title": "AI news",
+    "description": "New open models, runtime releases, and AI labs' announcements, a few lines each. Updated every morning on toskar.ai.",
+    "byAI": "Summaries are written by AI and checked automatically.",
+    "updated": "Updated {{when}}.",
+    "loading": "Loading the news…",
+    "empty": "No news yet. It's updated every morning.",
+    "stale": "toskar.ai couldn't be reached, so this is the news from {{when}}."
+  },
+  "off": {
+    "title": "AI news is off",
+    "admin": "Turn it on to read the news from toskar.ai when this page is opened. Nothing is sent but the request.",
+    "member": "An Admin turned off AI news on this computer.",
+    "turnOn": "Turn on AI news"
+  },
+  "kinds": {
+    "model": "Model",
+    "runtime": "Runtime",
+    "announcement": "Announcement"
+  },
+  "model": {
+    "installed": "Installed",
+    "installing": "Installing… see Models",
+    "inCatalog": "In Toskar's catalog"
+  }
+}

@@ -89,6 +89,11 @@
       "meaning": "Valhalla es la sala que da la bienvenida a los invitados. Aquí abres chats para las personas a las que atiendes.",
       "story": "Valhalla, el gran salón de Odín en Asgard, tiene quinientas cuarenta puertas, y cada invitado es recibido y atendido.",
       "rune": "Wunjo, la runa de la alegría"
+    },
+    "news": {
+      "meaning": "Huginn, el cuervo del pensamiento de Odín, trae las noticias del mundo de la IA.",
+      "story": "Cada mañana Huginn y Muninn sobrevuelan el mundo y vuelven para contarle a Odín lo que han visto. Huginn es el pensamiento; Muninn, la memoria.",
+      "rune": "Dagaz, la runa del día"
     }
   }
 }

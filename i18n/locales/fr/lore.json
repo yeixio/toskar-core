@@ -89,6 +89,11 @@
       "meaning": "Le Valhalla est la salle qui accueille les invités. Ici, vous ouvrez des discussions pour les personnes que vous servez.",
       "story": "Le Valhalla, la grande salle d'Odin en Asgard, a cinq cent quarante portes, et chaque invité y est accueilli et servi.",
       "rune": "Wunjo, la rune de la joie"
+    },
+    "news": {
+      "meaning": "Huginn, le corbeau de la pensée d’Odin, rapporte les nouvelles du monde de l’IA.",
+      "story": "Chaque matin, Huginn et Muninn survolent le monde et reviennent raconter à Odin ce qu’ils ont vu. Huginn est la pensée ; Muninn, la mémoire.",
+      "rune": "Dagaz, la rune du jour"
     }
   }
 }
