@@ -96,7 +96,7 @@ The answer, `DeviceRoute`, has `route_secret`, `route_id`, `relay`, and `token`.
 
 ## 5. Connecting
 
-Try the ways in this order, and use the first that answers `GET /api/v1/health` with `{"status": "ok"}` over a pinned connection:
+Try the ways in this order, and use the first that answers `GET /api/v1/health` with `{"status": "ok"}` over a pinned connection. Send the device's key with it (`Authorization: Bearer <api key>`): a computer that asks for keys answers health only with one, and the pin is checked before anything is sent. Check the pin on every connection, including a resumed TLS session; where a resumed session doesn't show the certificate, turn resumption off.
 
 1. **Home:** the paired address, with 2.5 seconds to answer. Use this whenever it answers: it's free and fastest.
 2. **Away:** the addresses in the computer's address record (below). Try the direct ones at once, and the relay's one second later, each with 6 seconds to answer. Keep the first that answers.
