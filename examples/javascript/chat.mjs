@@ -1,83 +1,23 @@
-// Call the local OpenAI-compatible API. Node.js 18+ (global fetch).
-const base = process.env.YGG_BASE_URL || "http://127.0.0.1:7331";
-const model = process.env.YGG_MODEL || "profile:general-assistant";
-const apiKey = process.env.YGG_API_KEY || "";
+// Stream an answer, a piece at a time, with the JavaScript SDK.
+//
+//   node chat.mjs "Plan a three-day trip to Juneau"
+import { ErrorCodes, Toskar, ToskarError } from 'toskar'
 
-function headers() {
-  const h = { "Content-Type": "application/json" };
-  if (apiKey) {
-    h.Authorization = `Bearer ${apiKey}`;
+const message = process.argv.slice(2).join(' ') || 'Hello'
+
+// This computer's Toskar Core needs no key. Elsewhere, set TOSKAR_URL and
+// TOSKAR_API_KEY, or pass baseUrl and apiKey.
+const toskar = new Toskar()
+
+try {
+  for await (const event of toskar.chatStream({ message })) {
+    if (event.type === 'token') process.stdout.write(event.content)
+    if (event.type === 'done' && event.metrics) console.log(`\n\n${event.metrics.completion_tokens} tokens`)
   }
-  return h;
-}
-
-const models = await fetch(`${base}/v1/models`, { headers: headers() });
-if (!models.ok) {
-  throw new Error(`GET /v1/models failed: ${models.status}`);
-}
-console.log(await models.json());
-
-
-const chat = await fetch(`${base}/v1/chat/completions`, {
-  method: "POST",
-  headers: headers(),
-  body: JSON.stringify({
-    model,
-    messages: [{ role: "user", content: "Hello" }],
-    stream: true,
-  }),
-});
-
-if (!chat.ok) {
-  throw new Error(`POST /v1/chat/completions failed: ${chat.status}`);
-}
-
-if (!chat.body) {
-  throw new Error("Chat completion response has no body");
-}
-
-const decoder = new TextDecoder();
-let buffer = "";
-let done = false;
-
-function processLine(line) {
-  const trimmed = line.trim();
-
-  if (!trimmed.startsWith("data:")) return;
-
-  const data = trimmed.slice(5).trim();
-
-  if (data === "[DONE]") {
-    done = true;
-    return;
+} catch (err) {
+  if (err instanceof ToskarError && err.code === ErrorCodes.NO_MODEL_INSTALLED) {
+    console.error('Install a model first: open Toskar and choose one in Models.')
+    process.exit(1)
   }
-
-  if (data) {
-    console.log(JSON.parse(data));
-  }
-}
-
-for await (const chunk of chat.body) {
-  buffer += decoder.decode(chunk, { stream: true });
-
-  const lines = buffer.split("\n");
-  buffer = lines.pop() ?? "";
-
-  for (const line of lines) {
-    processLine(line);
-
-    if (done) break;
-  }
-
-  if (done) break;
-}
-
-buffer += decoder.decode();
-
-if (!done && buffer) {
-  processLine(buffer);
-}
-
-if (!done) {
-  throw new Error("Chat completion stream ended before data: [DONE]");
+  throw err
 }

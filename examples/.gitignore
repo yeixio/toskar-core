@@ -1,0 +1,3 @@
+# A paired device's key: never commit it.
+device.json
+node_modules/
