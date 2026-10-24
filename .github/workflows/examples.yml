@@ -1,0 +1,49 @@
+name: Examples
+
+# Every example in examples/ runs against a throwaway Core built from this
+# commit, with the SDKs from toskar-sdks main, and is checked for what it
+# prints (examples/test.py). Core chats with toskar-sdks' scripted model,
+# so no model is downloaded. toskar-sdks runs the same test against its own
+# changes, so an SDK change that breaks an example fails there first.
+on:
+  pull_request:
+  push:
+    branches: [main]
+  # The SDKs change too: each night against their main.
+  schedule:
+    - cron: "53 9 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  examples:
+    runs-on: ${{ fromJSON(vars.CI_RUNS_ON || '"ubuntu-latest"') }}
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7
+        with:
+          repository: yeixio/toskar-sdks
+          path: toskar-sdks
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+          cache: ${{ !vars.CI_RUNS_ON }}
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.14"
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+      - name: Build Core
+        env:
+          CGO_ENABLED: "0"
+        run: go build -o "$RUNNER_TEMP/toskar" ./cmd/daemon
+      - name: Build the SDKs
+        run: |
+          python -m venv "$RUNNER_TEMP/venv" && "$RUNNER_TEMP/venv/bin/pip" install -q "./toskar-sdks/python[anywhere]"
+          (cd toskar-sdks/typescript && npm ci && npm run build)
+      - name: Run the examples
+        run: python examples/test.py --core "$RUNNER_TEMP/toskar" --sdks toskar-sdks --python "$RUNNER_TEMP/venv/bin/python"

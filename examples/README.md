@@ -46,4 +46,12 @@ go run ./chat "Plan a three-day trip to Juneau"
 | [curl/models.sh](curl/models.sh) | `GET /v1/models`: auto, profiles as `profile:<id>`, and specialized AIs as `sai:<slug>` |
 | [curl/chat.sh](curl/chat.sh) | `POST /v1/chat/completions`, streamed, ending with `data: [DONE]` (`TOSKAR_MODEL` picks the model; `auto` by default) |
 
+## Keeping them working
+
+`examples/test.py` runs every example against a throwaway Core and checks what it prints, on every pull request and each night (`.github/workflows/examples.yml`), and in toskar-sdks against each SDK change. Change an example and its check together:
+
+```bash
+python3 examples/test.py --core ./bin/toskar --sdks ../toskar-sdks --python ../toskar-sdks/python/.venv/bin/python
+```
+
 The full API is in [api/openapi.yaml](../api/openapi.yaml), and on [toskar.ai/developers](https://toskar.ai/developers). Known limits of the OpenAI-compatible API are in [docs/api.md](../docs/api.md).
