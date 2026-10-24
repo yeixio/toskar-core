@@ -43,13 +43,16 @@ def main() -> int:
     ap.add_argument("--go-sdk-from-checkout", action="store_true", help="build the Go examples with the checkout's SDK")
     args = ap.parse_args()
 
-    sys.path.insert(0, str(Path(args.sdks) / "conformance"))
+    # The examples run from other folders, so paths are made absolute.
+    sdks = Path(args.sdks).resolve()
+    python = str(Path(args.python).absolute()) if os.sep in args.python else args.python
+    sys.path.insert(0, str(sdks / "conformance"))
     import run  # toskar-sdks' scripted model and throwaway Core
 
     with tempfile.TemporaryDirectory(prefix="toskar-examples-") as tmp_name:
         tmp = Path(tmp_name)
-        bin_dir = build_go(tmp, Path(args.sdks) / "go" if args.go_sdk_from_checkout else None)
-        js = link_javascript(tmp, Path(args.sdks) / "typescript")
+        bin_dir = build_go(tmp, sdks / "go" if args.go_sdk_from_checkout else None)
+        js = link_javascript(tmp, sdks / "typescript")
 
         model = ThreadingHTTPServer(("127.0.0.1", 0), run.ScriptedModel)
         threading.Thread(target=model.serve_forever, daemon=True).start()
@@ -67,7 +70,7 @@ def main() -> int:
             env["TOSKAR_URL"] = core.url
             runner = Runner(env)
             languages = {
-                "python": [args.python, str(HERE / "python" / "{}.py")],
+                "python": [python, str(HERE / "python" / "{}.py")],
                 "javascript": ["node", str(js / "{}.mjs")],
                 "go": [str(bin_dir / "{}")],
             }
@@ -89,9 +92,9 @@ def main() -> int:
                 try:
                     case()
                     print(f"ok   {name:18} {time.time() - started:5.1f}s", flush=True)
-                except Failed as e:
+                except Exception as e:
                     failed += 1
-                    print(f"FAIL {name:18} {e}", flush=True)
+                    print(f"FAIL {name:18} {e if isinstance(e, Failed) else repr(e)}", flush=True)
         finally:
             core.stop()
             model.shutdown()
