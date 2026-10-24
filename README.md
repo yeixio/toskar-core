@@ -366,6 +366,14 @@ This brief is not a commitment to build.
 
 Hardware reports, runtime notes, documentation, and code all help. Read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request. Code contributions are covered by the [Toskar Contributor License Agreement](CLA.md).
 
+New here? Start with a [good first issue](https://github.com/yeixio/toskar-core/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22), or [report how Toskar runs on your machine](https://github.com/yeixio/toskar-core/issues/new?template=hardware_compatibility.yml). A hardware report needs no code. Regular contributors can join the core team as triagers, reviewers, and maintainers: see [GOVERNANCE.md](GOVERNANCE.md).
+
+### Contributors
+
+<a href="https://github.com/yeixio/toskar-core/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=yeixio/toskar-core" alt="People who have contributed to Toskar Core">
+</a>
+
 ## Community
 
 - **Questions and brainstorming:** [GitHub Discussions](https://github.com/yeixio/toskar-core/discussions)
