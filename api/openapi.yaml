@@ -12,11 +12,51 @@ servers:
 security:
   - {}
   - bearerAuth: []
+tags:
+  - name: Chat
+    description: "Asking, streamed answers, attachments, read-aloud and transcription, and run traces."
+  - name: Conversations
+    description: "Chats, their messages and versions, and their summaries."
+  - name: Models
+    description: "The catalog, installing and importing models, running them, runtimes, ratings, and benchmarks."
+  - name: Images and video
+    description: "Making and editing pictures and short clips on this computer."
+  - name: Knowledge
+    description: "Documents, folders, and sources the assistant searches."
+  - name: Memory
+    description: "What the assistant remembers, and how it writes to you."
+  - name: Profiles
+    description: "Assistants with their own models, tools, and topics, and who may use them."
+  - name: Automations
+    description: "Scheduled and triggered automations, their runs, and webhooks."
+  - name: Tools
+    description: "Tools, MCP servers Toskar uses, and connected services."
+  - name: Training
+    description: "Specialized AIs: materials, examples, training, and evaluation."
+  - name: People
+    description: "People, roles, capabilities, signing in, and API keys."
+  - name: Portals
+    description: "Public chat portals and their visitors."
+  - name: Devices
+    description: "Connecting a phone or other device, and reaching this computer from anywhere."
+  - name: Computers
+    description: "Pairing computers, the network, and joining it."
+  - name: Notifications
+    description: "Notifications, where they're delivered, and digests."
+  - name: Settings
+    description: "Settings, privacy, what left this computer, caches, the license, and updates."
+  - name: Diagnostics
+    description: "Health, versions, logs, diagnostics, the events stream, and news."
+  - name: OpenAI-compatible
+    description: "Chat completions and models for OpenAI's SDKs and other OpenAI clients."
+  - name: MCP
+    description: "Toskar as an MCP server, for Claude, Cursor, VS Code, and others."
 paths:
   /api/v1/health:
     get:
       summary: Health check
       operationId: getHealth
+      tags: [Diagnostics]
       responses:
         "200":
           description: OK
@@ -28,6 +68,7 @@ paths:
     get:
       summary: Application version
       operationId: getVersion
+      tags: [Diagnostics]
       responses:
         "200":
           description: OK
@@ -40,6 +81,7 @@ paths:
       summary: Sign in with a username and password (#206)
       description: Sets the session cookie. Five failures for a username in 15 minutes, or twenty from an address in ten, answer 429 SIGN_IN_THROTTLED for a while.
       operationId: signIn
+      tags: [People]
       requestBody:
         required: true
         content:
@@ -66,6 +108,7 @@ paths:
     delete:
       summary: Sign out this browser
       operationId: signOut
+      tags: [People]
       responses:
         "204":
           description: Signed out
@@ -79,6 +122,7 @@ paths:
             type: string
       summary: What a one-time sign-in link is for (#206)
       operationId: peekInvite
+      tags: [People]
       responses:
         "200":
           description: Whose link it is, and whether it sets up a sign-in (invite) or a new password (reset)
@@ -97,6 +141,7 @@ paths:
             type: string
       summary: Use a one-time link to set a username and password, or a new password, and sign in
       operationId: acceptInvite
+      tags: [People]
       requestBody:
         required: true
         content:
@@ -127,6 +172,7 @@ paths:
     get:
       summary: Everyone who uses this Toskar (Admins and the Owner)
       operationId: listPeople
+      tags: [People]
       parameters:
         - name: role
           in: query
@@ -151,6 +197,7 @@ paths:
     post:
       summary: Add a person and make their invite link (Admins add Members and Visitors; the Owner adds Admins too)
       operationId: addPerson
+      tags: [People]
       requestBody:
         required: true
         content:
@@ -194,6 +241,7 @@ paths:
             type: string
       summary: One person (#592)
       operationId: getPerson
+      tags: [People]
       responses:
         "200":
           description: The person, with email and must_change
@@ -218,6 +266,7 @@ paths:
       summary: Remove a person (#592)
       description: Revokes their keys and devices, signs them out, and deletes their data or gives it to transfer_to. Nobody removes themselves or the Owner, and only the Owner removes Admins. The body's confirm must be their name.
       operationId: removePerson
+      tags: [People]
       requestBody:
         required: true
         content:
@@ -244,6 +293,7 @@ paths:
       summary: Rename, change the role of, disable, or enable a person
       description: The Owner's role is fixed and they can't be disabled; nobody changes their own role or disables themselves. Disabling signs the person out everywhere and stops their keys.
       operationId: changePerson
+      tags: [People]
       requestBody:
         required: true
         content:
@@ -284,6 +334,7 @@ paths:
       summary: Who changed whom (#592)
       description: Newest first. Adding, changing, disabling, removing, setting passwords, making links, and revoking keys and devices; never a password.
       operationId: peopleActivity
+      tags: [People]
       parameters:
         - name: person
           in: query
@@ -314,6 +365,7 @@ paths:
             type: string
       summary: A person's API keys, other than their devices (#592)
       operationId: personKeys
+      tags: [People]
       responses:
         "200":
           description: Their keys
@@ -338,6 +390,7 @@ paths:
             type: string
       summary: Revoke one of a person's keys (#592)
       operationId: revokePersonKey
+      tags: [People]
       responses:
         "204":
           description: Revoked
@@ -353,6 +406,7 @@ paths:
             type: string
       summary: A person's connected devices (#592)
       operationId: personDevices
+      tags: [People]
       responses:
         "200":
           description: Their devices' keys
@@ -377,6 +431,7 @@ paths:
             type: string
       summary: Disconnect one of a person's devices (#592)
       operationId: revokePersonDevice
+      tags: [People]
       responses:
         "204":
           description: Disconnected
@@ -387,6 +442,7 @@ paths:
       summary: Change your own password (#592)
       description: With your current one. A password an Admin set with must_change is changed here before anything else works; until then other routes answer PASSWORD_CHANGE_REQUIRED. You're signed out everywhere else.
       operationId: changeMyPassword
+      tags: [People]
       requestBody:
         required: true
         content:
@@ -412,6 +468,7 @@ paths:
       summary: What each role may use (#589)
       description: Every capability in order, each role's, and the defaults each role ships with. The Owner always has everything.
       operationId: roleCapabilities
+      tags: [People]
       responses:
         "200":
           description: capabilities, roles, and defaults
@@ -424,6 +481,7 @@ paths:
       summary: Change what a role may use (#589)
       description: Only the Owner changes the Admins'. The Owner's are fixed.
       operationId: setRoleCapabilities
+      tags: [People]
       parameters:
         - name: role
           in: path
@@ -453,6 +511,7 @@ paths:
     get:
       summary: What one person may use (#589)
       operationId: personCapabilities
+      tags: [People]
       parameters:
         - name: id
           in: path
@@ -470,6 +529,7 @@ paths:
       summary: Allow or Block something for one person (#589)
       description: true allows, false blocks, and null is as their role's. The Owner's are fixed.
       operationId: setPersonCapabilities
+      tags: [People]
       parameters:
         - name: id
           in: path
@@ -502,6 +562,7 @@ paths:
             type: string
       summary: A new one-time link for a person; a reset link once they have a sign-in
       operationId: personLink
+      tags: [People]
       responses:
         "201":
           description: path (/invite/<token>), kind (invite or reset), and expires_at (a week for an invite, a day for a reset)
@@ -520,6 +581,7 @@ paths:
       summary: Pin a Member or Visitor to profiles (#345)
       description: "profiles: a list replaces their role's pin, [] is any profile, and null is their role's again. The Owner and Admins can't be pinned."
       operationId: setPersonProfiles
+      tags: [People]
       requestBody:
         required: true
         content:
@@ -552,6 +614,7 @@ paths:
       summary: Try one message against a profile's topic controls (#345)
       description: "message (up to 2000 characters), and optional topics: draft topic controls used in place of the saved ones. Nothing is saved. The answer is a quick one, without tools, knowledge, or memories."
       operationId: tryTopics
+      tags: [Profiles]
       requestBody:
         required: true
         content:
@@ -585,6 +648,7 @@ paths:
       summary: A profile's off-topic attempts (#345)
       description: What an Enforce profile held, or whose answer it replaced, over the last days (30 by default, up to 365), kept as run records are.
       operationId: getTopicAttempts
+      tags: [Profiles]
       responses:
         "200":
           description: "days, total, by_day ({day, count}), by_where ({kind: portal, key, person, or automation; id; name; count}), and attempts, the latest 100 with their where"
@@ -606,6 +670,7 @@ paths:
       summary: Mark an off-topic attempt as on topic (#345)
       description: Adds its message to the profile's example questions and forgets the attempts with that message.
       operationId: markOnTopic
+      tags: [Profiles]
       responses:
         "204":
           description: Added
@@ -617,6 +682,7 @@ paths:
     get:
       summary: The profiles each pinnable role is kept to (#345)
       operationId: getProfilePins
+      tags: [Profiles]
       responses:
         "200":
           description: "roles: member and visitor, each a list of profile ids; empty is any profile"
@@ -635,6 +701,7 @@ paths:
             enum: [member, visitor]
       summary: Pin a role to profiles (#345)
       operationId: setRoleProfiles
+      tags: [Profiles]
       requestBody:
         required: true
         content:
@@ -660,6 +727,7 @@ paths:
       summary: Who the request is from (#206)
       description: The person, their role, and how Toskar knows. A request from this computer is the Owner's; one with an API key is its person's.
       operationId: getMe
+      tags: [People]
       responses:
         "200":
           description: The request's person
@@ -672,6 +740,7 @@ paths:
       summary: Chat portals (#205)
       description: Every portal, for Admins and the Owner.
       operationId: listPortals
+      tags: [Portals]
       responses:
         "200":
           description: The portals
@@ -685,6 +754,7 @@ paths:
       summary: Add a chat portal (#205)
       description: slug (2 to 40 lowercase letters, digits, or dashes) and name are required. It starts with no tools, no memory, passcode access (passcode required), and on.
       operationId: createPortal
+      tags: [Portals]
       requestBody:
         required: true
         content:
@@ -706,6 +776,7 @@ paths:
     get:
       summary: One chat portal (#205)
       operationId: getPortal
+      tags: [Portals]
       parameters:
         - name: id
           in: path
@@ -725,6 +796,7 @@ paths:
       summary: Change a chat portal (#205)
       description: Any of slug, name, profile_id, tools (none, read_only, profile), memory, language, access (open, passcode), passcode (empty removes it), branding (a JSON object), and enabled. Turning it off stops its visitors at once.
       operationId: updatePortal
+      tags: [Portals]
       parameters:
         - name: id
           in: path
@@ -748,6 +820,7 @@ paths:
       summary: Remove a chat portal (#205)
       description: Its guests can no longer chat.
       operationId: deletePortal
+      tags: [Portals]
       parameters:
         - name: id
           in: path
@@ -762,6 +835,7 @@ paths:
       summary: A portal's visitors' conversations (#205)
       description: Newest first, for Admins. A Members only portal's chats are each Member's own, so they aren't here.
       operationId: listPortalConversations
+      tags: [Portals]
       parameters:
         - name: id
           in: path
@@ -781,6 +855,7 @@ paths:
     get:
       summary: One visitor's conversation, to read (#205)
       operationId: listPortalMessages
+      tags: [Portals]
       parameters:
         - name: id
           in: path
@@ -808,6 +883,7 @@ paths:
       summary: How much a portal is used (#205)
       description: Visitors who wrote, conversations, and messages they sent, over the last 7 and 30 days.
       operationId: getPortalUsage
+      tags: [Portals]
       parameters:
         - name: id
           in: path
@@ -825,6 +901,7 @@ paths:
     get:
       summary: A portal's invited visitors (#205)
       operationId: listPortalVisitors
+      tags: [Portals]
       parameters:
         - name: id
           in: path
@@ -844,6 +921,7 @@ paths:
       summary: Invite a visitor to a portal by name (#205)
       description: Answers with the visitor and their one-time link (path /p/<slug>?invite=<token>, good for a week).
       operationId: invitePortalVisitor
+      tags: [Portals]
       parameters:
         - name: id
           in: path
@@ -871,6 +949,7 @@ paths:
       summary: A new link for an invited visitor (#205)
       description: Replaces any link they haven't used.
       operationId: portalVisitorLink
+      tags: [Portals]
       parameters:
         - name: id
           in: path
@@ -894,6 +973,7 @@ paths:
       summary: Remove an invited visitor (#205)
       description: They're disabled and signed out at once.
       operationId: removePortalVisitor
+      tags: [Portals]
       parameters:
         - name: id
           in: path
@@ -913,6 +993,7 @@ paths:
       summary: What a portal's page shows (#205)
       description: Its name, access, language, and branding, and whether this browser is already its guest. Answers without signing in.
       operationId: getPortalPage
+      tags: [Portals]
       security: []
       parameters:
         - name: slug
@@ -934,6 +1015,7 @@ paths:
       summary: Enter a portal as its guest (#205)
       description: With passcode when the portal has one. Makes this browser the portal's guest, signed in by a toskar_portal_<slug> cookie that counts only on requests carrying X-Toskar-Portal. A guest reaches only the portal's chat, with the portal's profile, tools, memory, and language.
       operationId: enterPortal
+      tags: [Portals]
       security: []
       parameters:
         - name: slug
@@ -956,6 +1038,7 @@ paths:
     get:
       summary: Whether sign-in with an OpenID Connect provider is offered (#206)
       operationId: getOIDC
+      tags: [People]
       security: []
       responses:
         "200":
@@ -969,6 +1052,7 @@ paths:
       summary: Go to the provider to sign in (#206)
       description: Redirects to the provider with PKCE, and sets a short-lived cookie with the sign-in's state. return is the path in Toskar to go to afterwards.
       operationId: startOIDC
+      tags: [People]
       security: []
       parameters:
         - name: return
@@ -985,6 +1069,7 @@ paths:
       summary: Where the provider sends people back (#206)
       description: Checks the state against this browser's cookie, swaps the code for an ID token and checks it, signs the browser in, and redirects to the path it started from. A failure redirects to /?oidc_error= failed, refused, disabled, or unavailable.
       operationId: oidcCallback
+      tags: [People]
       security: []
       parameters:
         - name: state
@@ -1006,6 +1091,7 @@ paths:
         computer's key, which the relay seals into the device's handle), and whether this device
         has registered. See docs/push.md.
       operationId: getPushStatus
+      tags: [People]
       responses:
         "200":
           description: The relay, the computer's key, and this device's registration
@@ -1020,6 +1106,7 @@ paths:
         Only a paired device's key may; another gets PUSH_DEVICE_ONLY. The computer never sees
         the token. Disconnecting the device ends its pushes.
       operationId: registerPush
+      tags: [People]
       requestBody:
         required: true
         content:
@@ -1047,6 +1134,7 @@ paths:
     delete:
       summary: Stop pushes to this device
       operationId: unregisterPush
+      tags: [People]
       responses:
         "204":
           description: No longer registered
@@ -1055,6 +1143,7 @@ paths:
       summary: Your connected devices (#206)
       description: The phones, tablets, and TVs connected as the request's person, whatever their role.
       operationId: listMyDevices
+      tags: [People]
       responses:
         "200":
           description: The person's device keys
@@ -1072,6 +1161,7 @@ paths:
         disconnected on its own. It works from anywhere, as no code is typed. The answer is
         the same as POST /devices/pair's. A person may have 20 connected devices.
       operationId: addCompanionDevice
+      tags: [People]
       requestBody:
         required: true
         content:
@@ -1094,6 +1184,7 @@ paths:
     delete:
       summary: Disconnect one of your devices (#206)
       operationId: disconnectMyDevice
+      tags: [People]
       parameters:
         - name: id
           in: path
@@ -1110,6 +1201,7 @@ paths:
       summary: Disconnect this device, with its companions (#766)
       description: A device's own key disconnects it, as the apps do when the person removes this computer. Its key and its companions' keys, such as its watch's, are revoked, and their notifications stop.
       operationId: disconnectThisDevice
+      tags: [People]
       responses:
         "204":
           description: Disconnected; it needs a new code to connect again
@@ -1120,6 +1212,7 @@ paths:
       summary: Save your own languages (#206)
       description: The request's person's App language and assistant language, whatever their role. The Owner's are the install's, which others start from until they choose. Answers with the person's settings.
       operationId: setMyPreferences
+      tags: [People]
       requestBody:
         required: true
         content:
@@ -1149,6 +1242,7 @@ paths:
       summary: Access from anywhere's setting and its listener (#456)
       description: "enabled, port, address (a forwarded address, when set), listening (the address it listens on) or error, port_mapping, mapped and mapped_by (pcp, nat-pmp, or upnp) for the router port it opened, map_error, ipv6, reachable (direct, ipv6, manual, relay, or none) with reason (off, not_listening, carrier_nat, or no_port), relay (name, state: no_token, ended (contract 1.41: the token ran out with nothing to renew it, so it isn't sent; a new one takes over within a minute), connecting, connected, or error, and error, its code) while the relay client runs, and check, the last outside check (#546, contract 1.28): at, relay and direct (each way in with address, ok, reason, and ms), tried, and error when the last attempt didn't reach the relay (CHECK_UNSUPPORTED, CHECK_TOO_SOON, NO_TOKEN, RELAY_UNREACHABLE). With Toskar's relay, subscription (#639, contract 1.38): state (none, pending, active, or ended; contract 1.41: ended also when the token from the app's store or a subscription ran out, with expires the day it did), store (stripe when bought here in Settings, app when bought in the Toskar app), expires, open (whether Toskar's relay takes new subscriptions now, when known), checkout (the open checkout's page while pending), error (the last exchange's code when it didn't reach the relay), and in_app_only (contract 1.39: this copy is the Mac App Store's, which neither sells nor manages it; the Toskar app on a phone or tablet does). Set it with PATCH /api/v1/settings: remote_access_enabled, remote_access_port, remote_access_address, remote_access_port_mapping, remote_access_relay (an organization's relay, empty for Toskar's), and remote_access_relay_secret (its enrollment secret; write-only, empty clears it)."
       operationId: getRemoteAccess
+      tags: [Devices]
       responses:
         "200":
           description: The setting and what the listener is doing
@@ -1157,6 +1251,7 @@ paths:
       summary: Check access from anywhere from outside, now (#546)
       description: "The relay reaches this computer from the internet, through its tunnel and each direct way in, as a paired device away from home does: TLS to this computer's certificate and GET /api/v1/health. It also runs on its own every 30 minutes and after the relay connects or the ways in change. Answers what GET /api/v1/remote-access does, with check updated. Admins only. 409 REMOTE_ACCESS_OFF when access from anywhere is off or its listener isn't up."
       operationId: checkRemoteAccess
+      tags: [Devices]
       responses:
         "200":
           description: The setting and the listener, with check
@@ -1167,6 +1262,7 @@ paths:
       summary: The route secret, for a paired device on the home network (#456)
       description: "route_secret (base64url, 32 bytes), route_id, relay (the relay this computer uses away from home), and token, the computer's current token for Toskar's relay when it has one (contract 1.27), so each paired device can look it up away from home. Given only on the home network, never through the remote listener; pairing (POST /api/v1/devices/pair) returns them too."
       operationId: getRouteSecret
+      tags: [Devices]
       responses:
         "200":
           description: route_secret and route_id
@@ -1181,6 +1277,7 @@ paths:
       summary: Hand over a subscription's relay token (#456)
       description: "Body {token, enable}. token is the route token the app got for this computer by exchanging a store receipt with Toskar's relay; the computer keeps it and registers and keeps its tunnel there. A paired device may send it, from home or through the remote listener. enable also turns access from anywhere on, and needs an Admin (403 ROLE_REQUIRED). Answers state: the relay client's state, or off. 400 RELAY_TOKEN_INVALID for a token that isn't for this computer's route or has expired, RELAY_TOKEN_NOT_NEEDED when an organization's relay is set."
       operationId: putRelayToken
+      tags: [Devices]
       responses:
         "200":
           description: The token is kept; state
@@ -1193,6 +1290,7 @@ paths:
       summary: Subscribe to access from anywhere here, with Stripe (#639)
       description: "Body {plan}: monthly or yearly. Opens a Stripe checkout at yeix.io, which bills for Toskar, for this computer's route on Toskar's relay, and answers {url}, its page, for the person to open. Toskar then asks the relay every few seconds whether it's paid; once it is, it keeps the relay token, turns access from anywhere on, and renews the token as the subscription does. Admins only. 400 SUBSCRIPTION_PLAN_INVALID; 409 SUBSCRIPTION_IN_APP_ONLY in the Mac App Store's copy, SUBSCRIPTION_OWN_RELAY with an organization's relay, SUBSCRIPTION_ACTIVE when this computer already has a current token; 503 RELAY_SOLD_OUT when Toskar's relay takes no new subscriptions; 502 BILLING_UNAVAILABLE."
       operationId: startSubscriptionCheckout
+      tags: [Devices]
       responses:
         "200":
           description: The checkout page, url
@@ -1209,6 +1307,7 @@ paths:
       summary: The billing page for the subscription bought here (#639)
       description: "Answers {url}, Stripe's billing page for the subscription bought in Settings: change the card, download receipts, cancel. Admins only. 409 SUBSCRIPTION_IN_APP_ONLY in the Mac App Store's copy; 404 SUBSCRIPTION_NONE when none was bought here (one bought in the Toskar app is managed in the device's store); 502 BILLING_UNAVAILABLE."
       operationId: manageSubscription
+      tags: [Devices]
       responses:
         "200":
           description: The billing page, url
@@ -1220,6 +1319,7 @@ paths:
     get:
       summary: How the API speaks HTTPS on the local network (#213)
       operationId: getApiTLS
+      tags: [Devices]
       responses:
         "200":
           description: The certificate the API serves over HTTPS
@@ -1231,6 +1331,7 @@ paths:
     get:
       summary: AGPL corresponding-source offer
       operationId: getAbout
+      tags: [Diagnostics]
       responses:
         "200":
           description: Name, version, commit, license, and source URL for this build
@@ -1242,6 +1343,7 @@ paths:
     get:
       summary: AGPL corresponding-source offer
       operationId: getSource
+      tags: [Diagnostics]
       responses:
         "200":
           description: Same body as /about
@@ -1254,6 +1356,7 @@ paths:
       summary: Start the automation a webhook link belongs to
       description: The token in the link is the only proof, so this needs no API key. The request body (up to 64 KB, any type) goes to the run as data from the caller, never as instructions. One automation's link takes a call at most every 10 seconds.
       operationId: runHook
+      tags: [Automations]
       security: []
       parameters:
         - name: token
@@ -1302,6 +1405,7 @@ paths:
     get:
       summary: Local hardware inventory
       operationId: getHardware
+      tags: [Models]
       responses:
         "200":
           description: OK
@@ -1313,6 +1417,7 @@ paths:
     get:
       summary: List catalog and installed models
       operationId: listModels
+      tags: [Models]
       responses:
         "200":
           description: OK
@@ -1326,6 +1431,7 @@ paths:
     get:
       summary: List AI profiles
       operationId: listProfiles
+      tags: [Profiles]
       responses:
         "200":
           description: OK
@@ -1338,6 +1444,7 @@ paths:
     post:
       summary: Create a profile
       operationId: createProfile
+      tags: [Profiles]
       requestBody:
         required: true
         content:
@@ -1361,6 +1468,7 @@ paths:
     get:
       summary: List local and discovered computers
       operationId: listNodes
+      tags: [Computers]
       responses:
         "200":
           description: OK
@@ -1374,6 +1482,7 @@ paths:
     get:
       summary: Get settings
       operationId: getSettings
+      tags: [Settings]
       responses:
         "200":
           description: "OK. For Admins and the Owner, network_access (#711, contract 1.42) counts who could use Toskar from another computer: people (who sign in with a username and password, or still have a link to choose them), devices (connected with a code), keys (API keys for apps and scripts), and sign_in_service (a trusted proxy or OpenID Connect provider). lan_api_enabled can be turned on when any of them is there."
@@ -1384,6 +1493,7 @@ paths:
     patch:
       summary: Update settings
       operationId: updateSettings
+      tags: [Settings]
       requestBody:
         required: true
         content:
@@ -1401,6 +1511,7 @@ paths:
     put:
       summary: Update settings (same as PATCH)
       operationId: putSettings
+      tags: [Settings]
       requestBody:
         required: true
         content:
@@ -1423,6 +1534,7 @@ paths:
         built-in profiles. Downloaded models and runtimes are kept unless delete_models
         is true. The client should clear local UI state and restart onboarding. Not reversible.
       operationId: resetApp
+      tags: [Settings]
       parameters:
         - name: delete_models
           in: query
@@ -1453,6 +1565,7 @@ paths:
         driver, a Windows card's driver, or the CPU-only llama.cpp build. No problems when the GPU is
         ready, when there is no GPU, and on macOS.
       operationId: getGPUSetup
+      tags: [Diagnostics]
       responses:
         "200":
           description: GPU setup
@@ -1469,6 +1582,7 @@ paths:
         GPU temperature on a Mac, is left out rather than reported as 0. A paired computer that doesn't
         answer within 5 seconds is left out.
       operationId: listLiveFigures
+      tags: [Models]
       responses:
         "200":
           description: One entry per computer, this one first
@@ -1482,6 +1596,7 @@ paths:
     get:
       summary: List generation performance samples
       operationId: listPerformance
+      tags: [Models]
       parameters:
         - name: sort
           in: query
@@ -1509,6 +1624,7 @@ paths:
     get:
       summary: List benchmark workload categories
       operationId: listBenchmarkWorkloads
+      tags: [Models]
       responses:
         "200":
           description: OK
@@ -1522,6 +1638,7 @@ paths:
     get:
       summary: List recent benchmark jobs
       operationId: listBenchmarks
+      tags: [Models]
       responses:
         "200":
           description: OK
@@ -1534,6 +1651,7 @@ paths:
     post:
       summary: Start a multi-model benchmark
       operationId: startBenchmark
+      tags: [Models]
       requestBody:
         required: true
         content:
@@ -1551,6 +1669,7 @@ paths:
     get:
       summary: Get benchmark job status and results
       operationId: getBenchmark
+      tags: [Models]
       parameters:
         - name: id
           in: path
@@ -1568,6 +1687,7 @@ paths:
     post:
       summary: Cancel a running benchmark
       operationId: cancelBenchmark
+      tags: [Models]
       parameters:
         - name: id
           in: path
@@ -1585,6 +1705,7 @@ paths:
     get:
       summary: List conversations
       operationId: listConversations
+      tags: [Conversations]
       responses:
         "200":
           description: OK
@@ -1597,6 +1718,7 @@ paths:
     post:
       summary: Create conversation
       operationId: createConversation
+      tags: [Conversations]
       requestBody:
         content:
           application/json:
@@ -1621,6 +1743,7 @@ paths:
       summary: Delete several conversations
       description: Deletes the caller's chats among ids, with their messages and files, in one request (#452, contract 1.25). Another person's chat, or one that doesn't exist, is skipped as not_found.
       operationId: deleteConversations
+      tags: [Conversations]
       requestBody:
         required: true
         content:
@@ -1648,6 +1771,7 @@ paths:
     patch:
       summary: Update conversation
       operationId: updateConversation
+      tags: [Conversations]
       parameters:
         - name: id
           in: path
@@ -1679,6 +1803,7 @@ paths:
     delete:
       summary: Delete conversation
       operationId: deleteConversation
+      tags: [Conversations]
       parameters:
         - name: id
           in: path
@@ -1692,6 +1817,7 @@ paths:
     get:
       summary: Heimdall event stream (SSE)
       operationId: eventStream
+      tags: [Diagnostics]
       responses:
         "200":
           description: >-
@@ -1708,6 +1834,7 @@ paths:
     get:
       summary: List diagnostic log files
       operationId: listLogs
+      tags: [Diagnostics]
       responses:
         "200":
           description: OK
@@ -1721,6 +1848,7 @@ paths:
     get:
       summary: Read a log file tail
       operationId: getLog
+      tags: [Diagnostics]
       parameters:
         - name: name
           in: path
@@ -1742,6 +1870,7 @@ paths:
     get:
       summary: List notifications that were not dismissed, newest first
       operationId: listNotifications
+      tags: [Notifications]
       parameters:
         - name: unread
           in: query
@@ -1768,6 +1897,7 @@ paths:
     post:
       summary: Mark notifications read; no ids marks all of them
       operationId: markNotificationsRead
+      tags: [Notifications]
       requestBody:
         content:
           application/json:
@@ -1785,6 +1915,7 @@ paths:
     post:
       summary: Hide a notification from the notification center
       operationId: dismissNotification
+      tags: [Notifications]
       parameters:
         - name: id
           in: path
@@ -1800,6 +1931,7 @@ paths:
     get:
       summary: List connected services and their status. Secret values are never returned.
       operationId: listConnectors
+      tags: [Tools]
       responses:
         "200":
           description: Services
@@ -1813,6 +1945,7 @@ paths:
     put:
       summary: Check values with the service, then store them and add its tools
       operationId: connectService
+      tags: [Tools]
       parameters:
         - name: id
           in: path
@@ -1839,6 +1972,7 @@ paths:
     delete:
       summary: Delete the stored credential and remove the service's tools
       operationId: disconnectService
+      tags: [Tools]
       parameters:
         - name: id
           in: path
@@ -1852,6 +1986,7 @@ paths:
     post:
       summary: Check the stored credential again
       operationId: checkConnector
+      tags: [Tools]
       parameters:
         - name: id
           in: path
@@ -1865,6 +2000,7 @@ paths:
     get:
       summary: The connected services' devices, by kind (#586)
       operationId: listDevices
+      tags: [Devices]
       parameters:
         - name: kind
           in: query
@@ -1880,6 +2016,7 @@ paths:
     get:
       summary: List MCP tool sources with status, tools, and masked values. Secret values are never returned.
       operationId: listMCPServers
+      tags: [Tools]
       responses:
         "200":
           description: Tool sources
@@ -1896,6 +2033,7 @@ paths:
         another app ({"import": {"app", "name"}}). redirect_base is the address the browser uses, for a
         sign-in. When the service needs a sign-in, the source is stored and sign_in_url is returned.
       operationId: addMCPServer
+      tags: [Tools]
       requestBody:
         content:
           application/json:
@@ -1931,6 +2069,7 @@ paths:
     get:
       summary: One tool source
       operationId: getMCPServer
+      tags: [Tools]
       parameters:
         - name: id
           in: path
@@ -1945,6 +2084,7 @@ paths:
     patch:
       summary: Change enabled, allow_sampling, always_offer, keywords, or per-tool policies (allow, ask, default)
       operationId: updateMCPServer
+      tags: [Tools]
       parameters:
         - name: id
           in: path
@@ -1963,6 +2103,7 @@ paths:
     put:
       summary: Change how a tool source is reached, then check it. Blank secret values keep the stored ones.
       operationId: replaceMCPServer
+      tags: [Tools]
       parameters:
         - name: id
           in: path
@@ -1988,6 +2129,7 @@ paths:
     delete:
       summary: Stop a tool source, remove its tools, and delete its stored secrets
       operationId: removeMCPServer
+      tags: [Tools]
       parameters:
         - name: id
           in: path
@@ -2001,6 +2143,7 @@ paths:
     post:
       summary: Connect again and list the tools
       operationId: checkMCPServer
+      tags: [Tools]
       parameters:
         - name: id
           in: path
@@ -2014,6 +2157,7 @@ paths:
     post:
       summary: Start signing in to the tool source's service; returns the address to open
       operationId: signInMCPServer
+      tags: [Tools]
       parameters:
         - name: id
           in: path
@@ -2035,6 +2179,7 @@ paths:
     post:
       summary: Forget the tool source's sign-in
       operationId: signOutMCPServer
+      tags: [Tools]
       parameters:
         - name: id
           in: path
@@ -2048,6 +2193,7 @@ paths:
     get:
       summary: Recent log lines of a tool source
       operationId: mcpServerLogs
+      tags: [Tools]
       parameters:
         - name: id
           in: path
@@ -2061,6 +2207,7 @@ paths:
     get:
       summary: The tool source's ready-made prompts
       operationId: mcpServerPrompts
+      tags: [Tools]
       parameters:
         - name: id
           in: path
@@ -2074,6 +2221,7 @@ paths:
     post:
       summary: Fill a prompt; returns its text
       operationId: getMCPPrompt
+      tags: [Tools]
       parameters:
         - name: id
           in: path
@@ -2102,6 +2250,7 @@ paths:
     get:
       summary: The tool source's resources
       operationId: mcpServerResources
+      tags: [Tools]
       parameters:
         - name: id
           in: path
@@ -2115,6 +2264,7 @@ paths:
     get:
       summary: Gallery entries, with programs that are missing and sources already added
       operationId: mcpGallery
+      tags: [Tools]
       responses:
         "200":
           description: Gallery
@@ -2122,6 +2272,7 @@ paths:
     get:
       summary: MCP servers set up in other apps on this computer, with secret values hidden
       operationId: mcpImportCandidates
+      tags: [Tools]
       responses:
         "200":
           description: Servers
@@ -2129,6 +2280,7 @@ paths:
     post:
       summary: Read pasted settings, a web address, or a command line into server specs and what each still needs
       operationId: parseMCP
+      tags: [Tools]
       requestBody:
         content:
           application/json:
@@ -2146,6 +2298,7 @@ paths:
     get:
       summary: The address and command other apps use to reach Toskar's MCP server
       operationId: mcpShare
+      tags: [Tools]
       responses:
         "200":
           description: Address, command, args, and whether a key is needed
@@ -2155,6 +2308,7 @@ paths:
       description: >-
         Checked like /v1. A request with an Origin header from another site is refused.
       operationId: mcpServer
+      tags: [MCP]
       requestBody:
         content:
           application/json:
@@ -2173,12 +2327,14 @@ paths:
     get:
       summary: Not supported; the server does not open a stream
       operationId: mcpServerGet
+      tags: [MCP]
       responses:
         "405":
           description: This endpoint takes POST
     delete:
       summary: End an MCP session
       operationId: mcpServerDelete
+      tags: [MCP]
       responses:
         "200":
           description: Ended
@@ -2186,6 +2342,7 @@ paths:
     get:
       summary: Where a tool source's sign-in returns; shows a page that says how it went
       operationId: mcpOAuthCallback
+      tags: [MCP]
       responses:
         "200":
           description: HTML page
@@ -2193,6 +2350,7 @@ paths:
     get:
       summary: How the person likes answers
       operationId: getPersonalization
+      tags: [Memory]
       responses:
         "200":
           description: Style
@@ -2203,6 +2361,7 @@ paths:
     put:
       summary: Save how the person likes answers. Style only; it cannot grant a permission.
       operationId: setPersonalization
+      tags: [Memory]
       requestBody:
         content:
           application/json:
@@ -2217,6 +2376,7 @@ paths:
     put:
       summary: Change what an API key may ask of the assistant
       operationId: setAPIKeyPermissions
+      tags: [People]
       parameters:
         - name: id
           in: path
@@ -2249,6 +2409,7 @@ paths:
     post:
       summary: Show a 6-digit code a phone connects with, replacing any other
       operationId: startDevicePairing
+      tags: [Devices]
       requestBody:
         content:
           application/json:
@@ -2268,6 +2429,7 @@ paths:
     get:
       summary: Whether a phone has connected with the code shown
       operationId: getDevicePairing
+      tags: [Devices]
       responses:
         "200":
           description: The state (waiting, connected, expired, or cancelled) and the phone's key record, without the code
@@ -2278,6 +2440,7 @@ paths:
     delete:
       summary: Stop showing the code
       operationId: cancelDevicePairing
+      tags: [Devices]
       responses:
         "204":
           description: Stopped
@@ -2285,6 +2448,7 @@ paths:
     post:
       summary: A phone exchanges the code for its own key (no key needed; local network only)
       operationId: pairDevice
+      tags: [Devices]
       security: []
       requestBody:
         required: true
@@ -2319,6 +2483,7 @@ paths:
     get:
       summary: What left this computer, newest first
       operationId: listEgress
+      tags: [Settings]
       parameters:
         - name: conversation_id
           in: query
@@ -2341,6 +2506,7 @@ paths:
     get:
       summary: Toskar Pro's trial or Unlock, as its desktop app last said
       operationId: getLicense
+      tags: [Settings]
       description: Core on its own has no license (`kind` empty) and nothing is limited. The Toskar Pro desktop app from the Mac App Store or the Microsoft Store sets a 14-day trial, unlocked, or ended (yeixio/toskar-apps#336). While `limited`, installing models, creating automations, and adding people answer 403 `UNLOCK_REQUIRED`; what's set up keeps working.
       responses:
         "200":
@@ -2351,6 +2517,7 @@ paths:
     put:
       summary: Set Toskar Pro's trial or Unlock (the desktop app only)
       operationId: putLicense
+      tags: [Settings]
       description: Only the Toskar Pro desktop app on this computer, with the `X-Toskar-Shell` secret it started Core with (`TOSKAR_SHELL_SECRET`). Anything else gets 403 `SHELL_ONLY`.
       parameters:
         - {name: X-Toskar-Shell, in: header, required: true, schema: {type: string}}
@@ -2377,6 +2544,7 @@ paths:
     get:
       summary: Whether a newer Toskar is out, from the daily check of toskar.ai
       operationId: getUpdates
+      tags: [Settings]
       description: Release builds installed from a download check https://toskar.ai/releases/latest.json once a day, while the `update_check` setting is on. The App Store edition, the copy the desktop app runs (`TOSKAR_UPDATE_CHECK=off`), and development builds don't check, and say `supported` false.
       responses:
         "200":
@@ -2389,6 +2557,7 @@ paths:
     get:
       summary: The AI news from toskar.ai
       operationId: getNews
+      tags: [Diagnostics]
       description: New open models, runtime releases, and AI labs' announcements, a few lines each, from https://toskar.ai/news.json (#750). Read when asked, at most every six hours, and kept in the data folder so it shows offline; each read is listed in What left this computer as `news`. With the `ai_news` setting off, nothing is read and `enabled` is false. Members and Admins.
       responses:
         "200":
@@ -2403,12 +2572,14 @@ paths:
     get:
       summary: Run record retention and a 30-day summary of what left this computer
       operationId: getPrivacy
+      tags: [Settings]
       responses:
         "200":
           description: Overview
     put:
       summary: Set how long run records are kept; 0 keeps them
       operationId: setRunRetention
+      tags: [Settings]
       requestBody:
         content:
           application/json:
@@ -2425,6 +2596,7 @@ paths:
     post:
       summary: Delete run records now
       operationId: deleteRunRecords
+      tags: [Settings]
       responses:
         "200":
           description: How many records were removed
@@ -2432,6 +2604,7 @@ paths:
     get:
       summary: Recent run traces, newest first
       operationId: listRuns
+      tags: [Chat]
       parameters:
         - name: conversation_id
           in: query
@@ -2448,6 +2621,7 @@ paths:
     get:
       summary: One run trace
       operationId: getRun
+      tags: [Chat]
       parameters:
         - name: id
           in: path
@@ -2463,6 +2637,7 @@ paths:
     get:
       summary: Create a diagnostics bundle (a zip without secrets or private keys)
       operationId: exportDiagnostics
+      tags: [Diagnostics]
       parameters:
         - name: include_conversations
           in: query
@@ -2485,6 +2660,7 @@ paths:
     post:
       summary: Create a diagnostics bundle
       operationId: createDiagnostics
+      tags: [Diagnostics]
       requestBody:
         content:
           application/json:
@@ -2511,6 +2687,7 @@ paths:
       summary: The daemon's memory and goroutines now and over the last day
       description: Sampled every five minutes and kept for a day, so a slow leak shows on the Diagnostics page. Resets when the daemon restarts.
       operationId: getRuntimeHistory
+      tags: [Diagnostics]
       responses:
         "200":
           description: Current and sampled counts
@@ -2526,6 +2703,7 @@ paths:
         Email addresses, keys, tokens, home folder names, the computer's name, and internet
         addresses are taken out first. Members and paired devices may call it.
       operationId: getReport
+      tags: [Diagnostics]
       responses:
         "200":
           description: The report
@@ -2547,6 +2725,7 @@ paths:
         REPORT_RATE_LIMITED; 502 REPORTS_UNAVAILABLE when the service can't be reached or isn't
         set up, for the client to send by email instead (contract 1.40).
       operationId: sendReport
+      tags: [Diagnostics]
       responses:
         "200":
           description: Sent; status and the issue's number
@@ -2565,6 +2744,7 @@ paths:
         Chat runs that reached a first token, grouped by the app that asked (the chat request's client)
         and by whether a model had to load first. Automations are left out.
       operationId: getFirstAnswers
+      tags: [Diagnostics]
       parameters:
         - name: days
           in: query
@@ -2583,6 +2763,7 @@ paths:
       summary: OpenAI-compatible model list
       description: auto, each profile as profile:<id>, and each deployed specialized AI as sai:<slug>.
       operationId: openaiListModels
+      tags: [OpenAI-compatible]
       responses:
         "200":
           description: OK
@@ -2599,6 +2780,7 @@ paths:
         yggdrasil, its name from before the rename, works too; toskar wins when both are
         sent. Responses carry the answer's extension fields under both names.
       operationId: openaiChatCompletions
+      tags: [OpenAI-compatible]
       requestBody:
         required: true
         content:
@@ -2684,6 +2866,7 @@ paths:
     get:
       summary: "Capability inventory: what Toskar can do right now"
       operationId: getCapabilities
+      tags: [Models]
       parameters:
         - name: ask
           in: query
@@ -2703,6 +2886,7 @@ paths:
     get:
       summary: Which computers can run an installed model
       operationId: getModelPlacement
+      tags: [Models]
       parameters:
         - name: id
           in: path
@@ -2726,6 +2910,7 @@ paths:
     get:
       summary: Caches with their declared policies and sizes
       operationId: listCaches
+      tags: [Settings]
       responses:
         "200":
           description: Caches
@@ -2739,6 +2924,7 @@ paths:
     post:
       summary: Clear one cache
       operationId: clearCache
+      tags: [Settings]
       parameters:
         - name: name
           in: path
@@ -2758,6 +2944,7 @@ paths:
     get:
       summary: Recommended models for this computer
       operationId: recommendModels
+      tags: [Models]
       parameters:
         - name: purpose
           in: query
@@ -2775,6 +2962,7 @@ paths:
     get:
       summary: How well each catalog model fits this computer
       operationId: modelsFit
+      tags: [Models]
       responses:
         "200":
           description: Fit per model
@@ -2788,6 +2976,7 @@ paths:
     get:
       summary: Search Hugging Face for GGUF models
       operationId: browseModels
+      tags: [Models]
       parameters:
         - name: q
           in: query
@@ -2810,6 +2999,7 @@ paths:
     get:
       summary: Loaded model instances on this and paired computers
       operationId: listRunningModels
+      tags: [Models]
       responses:
         "200":
           description: Running models
@@ -2828,6 +3018,7 @@ paths:
         application/octet-stream body with filename in the query. The header and tensor bounds are
         checked first (#467).
       operationId: importModel
+      tags: [Models]
       parameters:
         - name: filename
           in: query
@@ -2886,6 +3077,7 @@ paths:
         GGUF files put in Toskar's own models folder by hand that aren't models yet come first, as app
         toskar; one is always added in place (#763).
       operationId: findModelsInOtherApps
+      tags: [Models]
       responses:
         "200":
           description: The models found
@@ -2901,6 +3093,7 @@ paths:
         whether it's already a model here, and copies of the same file other apps have (by name, Ollama's SHA-256 blob,
         or a large file's exact size), which can be added where they are instead (#611).
       operationId: previewModelFromURL
+      tags: [Models]
       requestBody:
         required: true
         content:
@@ -2920,6 +3113,7 @@ paths:
     post:
       summary: Download a GGUF from a URL
       operationId: installModelFromURL
+      tags: [Models]
       parameters:
         - name: wait
           in: query
@@ -2950,6 +3144,7 @@ paths:
     post:
       summary: Download a catalog model, here or on a paired computer
       operationId: installModel
+      tags: [Models]
       parameters:
         - name: id
           in: path
@@ -2992,6 +3187,7 @@ paths:
     get:
       summary: The OpenAI-compatible server whose models can be chosen for a chat, and the models it offers
       operationId: getExternalServer
+      tags: [Models]
       responses:
         "200":
           description: Settings and models
@@ -3003,6 +3199,7 @@ paths:
       summary: Set the external server's base URL and API key
       description: The key is stored in the secrets folder and never returned. An empty api_key keeps the stored one; clear_key removes it; an empty base_url turns the server off.
       operationId: setExternalServer
+      tags: [Models]
       requestBody:
         required: true
         content:
@@ -3027,6 +3224,7 @@ paths:
       summary: Make a one-time join token and the command that adds a computer to this network
       description: The token is shown once and only its proof key is kept. It lasts `ttl_minutes` (15 by default, at most 1440) and can be used once. Refused with 409 when other computers can't reach this one's Bifrost.
       operationId: createJoinToken
+      tags: [Computers]
       requestBody:
         content:
           application/json:
@@ -3046,6 +3244,7 @@ paths:
     get:
       summary: Join tokens, active and from the last week, without their secrets
       operationId: listJoinTokens
+      tags: [Computers]
       responses:
         "200":
           description: Tokens, newest first
@@ -3058,6 +3257,7 @@ paths:
     delete:
       summary: Revoke an unused join token
       operationId: revokeJoinToken
+      tags: [Computers]
       parameters:
         - name: id
           in: path
@@ -3079,6 +3279,7 @@ paths:
     get:
       summary: This computer's network, its Bifrost address and fingerprint, and the computers it trusts
       operationId: getNetwork
+      tags: [Computers]
       responses:
         "200":
           description: Network
@@ -3091,6 +3292,7 @@ paths:
       summary: Join this computer to the network of the computer that made a join token
       description: Verifies the server's key against the fingerprint before proving the token, which never leaves this computer. Safe to repeat; refuses to switch networks while paired.
       operationId: joinNetwork
+      tags: [Computers]
       requestBody:
         required: true
         content:
@@ -3127,6 +3329,7 @@ paths:
       summary: Leave the network, telling each paired computer, and forget them all
       description: Models, settings, and this computer's identity stay.
       operationId: leaveNetwork
+      tags: [Computers]
       responses:
         "200":
           description: Left
@@ -3138,6 +3341,7 @@ paths:
     get:
       summary: This person's rating of a model, and exactly what sharing it would send
       operationId: getModelRating
+      tags: [Models]
       parameters:
         - name: id
           in: path
@@ -3157,6 +3361,7 @@ paths:
       summary: Rate a model 1–5 stars, and share the rating with the community or keep it on this computer
       description: Sharing sends the stars, tags, model identity, hardware class, a random rating ID, and the app version to the ratings service. `share` false withdraws a rating that was shared. A 502 means the rating was saved here but the service could not be reached.
       operationId: putModelRating
+      tags: [Models]
       parameters:
         - name: id
           in: path
@@ -3193,6 +3398,7 @@ paths:
     delete:
       summary: Remove this person's rating, withdrawing it first if it was shared
       operationId: deleteModelRating
+      tags: [Models]
       parameters:
         - name: id
           in: path
@@ -3208,6 +3414,7 @@ paths:
     post:
       summary: Stop asking for a rating of a model
       operationId: dismissModelRating
+      tags: [Models]
       parameters:
         - name: id
           in: path
@@ -3222,6 +3429,7 @@ paths:
       summary: Everyone's ratings of the models here, from hardware like this computer's and overall
       description: Empty unless `community_ratings` is on. The public summary is downloaded at most once a day; when that fails, the last one is used and `error` says why.
       operationId: getCommunityRatings
+      tags: [Models]
       responses:
         "200":
           description: Community ratings by local model ID
@@ -3238,6 +3446,7 @@ paths:
         or speaks. Never loads beside a model that is answering, nor one that
         wouldn't fit beside those already loaded.
       operationId: warmModel
+      tags: [Models]
       requestBody:
         content:
           application/json:
@@ -3261,6 +3470,7 @@ paths:
     post:
       summary: Load a model
       operationId: startModel
+      tags: [Models]
       parameters:
         - name: id
           in: path
@@ -3292,6 +3502,7 @@ paths:
     post:
       summary: Unload a model instance
       operationId: stopModel
+      tags: [Models]
       parameters:
         - name: id
           in: path
@@ -3327,6 +3538,7 @@ paths:
       summary: Give an added model its vision projector
       description: A GGUF vision projector (mmproj) on this computer, copied beside the model so it can see pictures (#467).
       operationId: setModelProjector
+      tags: [Models]
       parameters:
         - name: id
           in: path
@@ -3357,6 +3569,7 @@ paths:
       summary: Rename or retag an added model
       description: For a model added from a file or a link; catalog models keep their own (#467). Tags are general, coding, reasoning, and writing; vision comes with a projector.
       operationId: updateAddedModel
+      tags: [Models]
       parameters:
         - name: id
           in: path
@@ -3388,6 +3601,7 @@ paths:
     delete:
       summary: Delete a model file
       operationId: deleteModel
+      tags: [Models]
       parameters:
         - name: id
           in: path
@@ -3419,6 +3633,7 @@ paths:
     get:
       summary: Runtimes and whether each is installed
       operationId: listRuntimes
+      tags: [Models]
       responses:
         "200":
           description: Runtimes
@@ -3432,6 +3647,7 @@ paths:
     post:
       summary: Install a runtime, such as llamacpp
       operationId: installRuntime
+      tags: [Models]
       parameters:
         - name: id
           in: path
@@ -3455,6 +3671,7 @@ paths:
     get:
       summary: One profile
       operationId: getProfile
+      tags: [Profiles]
       parameters:
         - name: id
           in: path
@@ -3477,6 +3694,7 @@ paths:
     patch:
       summary: Update a profile, including its orchestration controls
       operationId: updateProfile
+      tags: [Profiles]
       parameters:
         - name: id
           in: path
@@ -3505,6 +3723,7 @@ paths:
     delete:
       summary: Delete a custom profile
       operationId: deleteProfile
+      tags: [Profiles]
       parameters:
         - name: id
           in: path
@@ -3524,6 +3743,7 @@ paths:
     post:
       summary: Put a built-in profile back to how Toskar ships it
       operationId: resetProfile
+      tags: [Profiles]
       parameters:
         - name: id
           in: path
@@ -3548,6 +3768,7 @@ paths:
       summary: Send a chat message
       description: "Without stream, returns {content, metrics}. With stream, a server-sent event stream of token events, then done; an error event ends it early."
       operationId: chat
+      tags: [Chat]
       requestBody:
         required: true
         content:
@@ -3619,6 +3840,7 @@ paths:
     post:
       summary: Stop a conversation's running turn
       operationId: stopChat
+      tags: [Chat]
       requestBody:
         required: true
         content:
@@ -3651,6 +3873,7 @@ paths:
             type: string
       summary: Show a version of its point in the chat, with what followed it (#447)
       operationId: showMessageVersion
+      tags: [Conversations]
       responses:
         "200":
           description: The chat as shown
@@ -3673,6 +3896,7 @@ paths:
       summary: A chat's auto-compact summary (#342)
       description: What the model sees in place of the chat's older messages, through which message. Every message stays saved.
       operationId: getConversationSummary
+      tags: [Conversations]
       responses:
         "200":
           description: The summary
@@ -3692,6 +3916,7 @@ paths:
       summary: Correct a chat's summary (#342)
       description: Later summaries keep the correction.
       operationId: editConversationSummary
+      tags: [Conversations]
       requestBody:
         required: true
         content:
@@ -3719,6 +3944,7 @@ paths:
       summary: Compact a chat now (#342)
       description: Summarizes its older messages whatever its size, keeping the newest verbatim. NOTHING_TO_COMPACT for a chat too short.
       operationId: compactConversation
+      tags: [Conversations]
       responses:
         "200":
           description: The summary
@@ -3736,6 +3962,7 @@ paths:
             type: string
       summary: A new chat that begins with this chat's summary (#342)
       operationId: conversationFromSummary
+      tags: [Conversations]
       responses:
         "201":
           description: The new conversation
@@ -3747,6 +3974,7 @@ paths:
     get:
       summary: Messages of a conversation, with sources, steps, and files
       operationId: listConversationMessages
+      tags: [Conversations]
       parameters:
         - name: id
           in: path
@@ -3766,6 +3994,7 @@ paths:
     get:
       summary: Files attached to or made in a conversation
       operationId: listConversationArtifacts
+      tags: [Conversations]
       parameters:
         - name: id
           in: path
@@ -3785,6 +4014,7 @@ paths:
     post:
       summary: Read text aloud on this computer; the audio is kept as a file in the chat
       operationId: readAloud
+      tags: [Chat]
       requestBody:
         required: true
         content:
@@ -3810,6 +4040,7 @@ paths:
       summary: A recording's text, for speaking a message instead of typing it (yeixio/toskar-apps#155)
       description: "The recording is attached first with POST /api/v1/artifacts (audio). Runs speech.transcribe (Whisper) on this computer or a paired one that has it, and answers the text for the person to check before sending. Visitors and paired devices may use it."
       operationId: transcribeRecording
+      tags: [Chat]
       requestBody:
         required: true
         content:
@@ -3840,6 +4071,7 @@ paths:
       summary: Switch stable-diffusion.cpp to its CPU build, or back to its GPU build
       description: Images and video share the program, so this switches both. The GPU build is Metal on macOS and Vulkan on Linux and Windows, used when a GPU with a Vulkan driver is found; a Vulkan build that can't start on the GPU falls back to the CPU build by itself.
       operationId: useImageBuild
+      tags: [Images and video]
       requestBody:
         required: true
         content:
@@ -3868,6 +4100,7 @@ paths:
     get:
       summary: What image generation has installed, the models on offer, and any setup in progress
       operationId: getImageSetup
+      tags: [Images and video]
       responses:
         "200":
           description: Image generation status
@@ -3878,6 +4111,7 @@ paths:
     post:
       summary: Install stable-diffusion.cpp and an image model in the background
       operationId: startImageSetup
+      tags: [Images and video]
       requestBody:
         required: true
         content:
@@ -3903,6 +4137,7 @@ paths:
     delete:
       summary: Stop the setup in progress; what was downloaded is kept and resumed next time
       operationId: cancelImageSetup
+      tags: [Images and video]
       responses:
         "200":
           description: Image generation status
@@ -3914,6 +4149,7 @@ paths:
     delete:
       summary: Delete an installed image model to free its space
       operationId: removeImageModel
+      tags: [Images and video]
       parameters:
         - name: id
           in: path
@@ -3937,6 +4173,7 @@ paths:
       summary: Switch stable-diffusion.cpp to its CPU build, or back to its GPU build
       description: Images and video share the program, so this switches both. The GPU build is Metal on macOS and Vulkan on Linux and Windows, used when a GPU with a Vulkan driver is found; a Vulkan build that can't start on the GPU falls back to the CPU build by itself.
       operationId: useVideoBuild
+      tags: [Images and video]
       requestBody:
         required: true
         content:
@@ -3965,6 +4202,7 @@ paths:
     get:
       summary: What video generation has installed, the models on offer, and any setup in progress
       operationId: getVideoSetup
+      tags: [Images and video]
       responses:
         "200":
           description: Image generation status
@@ -3975,6 +4213,7 @@ paths:
     post:
       summary: Install stable-diffusion.cpp and a video model in the background
       operationId: startVideoSetup
+      tags: [Images and video]
       requestBody:
         required: true
         content:
@@ -4000,6 +4239,7 @@ paths:
     delete:
       summary: Stop the setup in progress; what was downloaded is kept and resumed next time
       operationId: cancelVideoSetup
+      tags: [Images and video]
       responses:
         "200":
           description: Image generation status
@@ -4011,6 +4251,7 @@ paths:
     delete:
       summary: Delete an installed video model to free its space
       operationId: removeVideoModel
+      tags: [Images and video]
       parameters:
         - name: id
           in: path
@@ -4033,6 +4274,7 @@ paths:
     post:
       summary: Upload a file to attach to a chat (up to 25 MB)
       operationId: uploadArtifact
+      tags: [Chat]
       requestBody:
         required: true
         content:
@@ -4066,6 +4308,7 @@ paths:
     get:
       summary: One file
       operationId: getArtifact
+      tags: [Chat]
       parameters:
         - name: id
           in: path
@@ -4088,6 +4331,7 @@ paths:
     delete:
       summary: Delete a file
       operationId: deleteArtifact
+      tags: [Chat]
       parameters:
         - name: id
           in: path
@@ -4107,6 +4351,7 @@ paths:
     get:
       summary: A file's content
       operationId: getArtifactContent
+      tags: [Chat]
       parameters:
         - name: id
           in: path
@@ -4137,6 +4382,7 @@ paths:
     get:
       summary: Recent tasks
       operationId: listTasks
+      tags: [Chat]
       responses:
         "200":
           description: Tasks
@@ -4149,6 +4395,7 @@ paths:
     post:
       summary: Run a prompt as a task
       operationId: createTask
+      tags: [Chat]
       requestBody:
         required: true
         content:
@@ -4180,6 +4427,7 @@ paths:
     get:
       summary: One task
       operationId: getTask
+      tags: [Chat]
       parameters:
         - name: id
           in: path
@@ -4203,6 +4451,7 @@ paths:
     get:
       summary: Memories and the categories they can have
       operationId: listMemories
+      tags: [Memory]
       responses:
         "200":
           description: Memories
@@ -4213,6 +4462,7 @@ paths:
     post:
       summary: "Add a memory; an existing equal memory is returned instead"
       operationId: addMemory
+      tags: [Memory]
       requestBody:
         required: true
         content:
@@ -4248,6 +4498,7 @@ paths:
     patch:
       summary: Edit, turn off, or keep a memory on this computer only
       operationId: updateMemory
+      tags: [Memory]
       parameters:
         - name: id
           in: path
@@ -4291,6 +4542,7 @@ paths:
     delete:
       summary: Delete a memory
       operationId: deleteMemory
+      tags: [Memory]
       parameters:
         - name: id
           in: path
@@ -4310,6 +4562,7 @@ paths:
     get:
       summary: Connected knowledge sources
       operationId: listKnowledgeSources
+      tags: [Knowledge]
       responses:
         "200":
           description: Sources
@@ -4322,6 +4575,7 @@ paths:
     post:
       summary: Connect a file, folder, upload, pasted text, database, or web API
       operationId: createKnowledgeSource
+      tags: [Knowledge]
       requestBody:
         required: true
         content:
@@ -4396,6 +4650,7 @@ paths:
     get:
       summary: One source
       operationId: getKnowledgeSource
+      tags: [Knowledge]
       parameters:
         - name: id
           in: path
@@ -4418,6 +4673,7 @@ paths:
     patch:
       summary: Rename a source, replace a text source's content, or change its connection
       operationId: updateKnowledgeSource
+      tags: [Knowledge]
       parameters:
         - name: id
           in: path
@@ -4487,6 +4743,7 @@ paths:
     delete:
       summary: Remove a source and its index
       operationId: deleteKnowledgeSource
+      tags: [Knowledge]
       parameters:
         - name: id
           in: path
@@ -4506,6 +4763,7 @@ paths:
     get:
       summary: The text of a pasted or uploaded source
       operationId: getKnowledgeContent
+      tags: [Knowledge]
       parameters:
         - name: id
           in: path
@@ -4529,6 +4787,7 @@ paths:
     post:
       summary: "Reindex a source; a failure is recorded on the source"
       operationId: refreshKnowledgeSource
+      tags: [Knowledge]
       parameters:
         - name: id
           in: path
@@ -4552,6 +4811,7 @@ paths:
     post:
       summary: Search connected knowledge
       operationId: searchKnowledge
+      tags: [Knowledge]
       requestBody:
         required: true
         content:
@@ -4588,6 +4848,7 @@ paths:
     get:
       summary: Every tool's descriptor, with whether it is on, its health, and the profiles that allow it
       operationId: listTools
+      tags: [Tools]
       responses:
         "200":
           description: Tools
@@ -4601,6 +4862,7 @@ paths:
     get:
       summary: Recent tool calls and pending approvals
       operationId: toolActivity
+      tags: [Tools]
       responses:
         "200":
           description: Activity
@@ -4614,6 +4876,7 @@ paths:
     get:
       summary: Each computer's providers for tools that can run on any paired computer, and their state
       operationId: toolProviders
+      tags: [Tools]
       responses:
         "200":
           description: This computer first, then each paired computer
@@ -4627,6 +4890,7 @@ paths:
     post:
       summary: Answer a tool approval request
       operationId: decideTool
+      tags: [Tools]
       requestBody:
         required: true
         content:
@@ -4659,6 +4923,7 @@ paths:
     post:
       summary: Turn a tool on or off
       operationId: setToolEnabled
+      tags: [Tools]
       parameters:
         - name: id
           in: path
@@ -4692,6 +4957,7 @@ paths:
     post:
       summary: Run a tool once with the given arguments
       operationId: testTool
+      tags: [Tools]
       parameters:
         - name: id
           in: path
@@ -4725,6 +4991,7 @@ paths:
     get:
       summary: Trainers on this computer and whether each can run
       operationId: trainingBackends
+      tags: [Training]
       responses:
         "200":
           description: Backends
@@ -4738,6 +5005,7 @@ paths:
     get:
       summary: Trainable base models, ranked for a goal
       operationId: trainingBaseModels
+      tags: [Training]
       parameters:
         - name: goal
           in: query
@@ -4756,6 +5024,7 @@ paths:
     post:
       summary: Recommend whether material is for training, knowledge, or both
       operationId: classifyMaterial
+      tags: [Training]
       requestBody:
         required: true
         content:
@@ -4790,6 +5059,7 @@ paths:
     get:
       summary: Sample material files
       operationId: trainingSamples
+      tags: [Training]
       responses:
         "200":
           description: Samples
@@ -4803,6 +5073,7 @@ paths:
     post:
       summary: Create the example specialized AI
       operationId: createExampleAI
+      tags: [Training]
       responses:
         "200":
           description: The specialized AI
@@ -4820,6 +5091,7 @@ paths:
     get:
       summary: "Deployed specialized AIs, as model ids sai:<slug>"
       operationId: deployedAIs
+      tags: [Training]
       responses:
         "200":
           description: Deployed AIs
@@ -4833,6 +5105,7 @@ paths:
     get:
       summary: Specialized AIs
       operationId: listAIs
+      tags: [Training]
       responses:
         "200":
           description: Specialized AIs
@@ -4845,6 +5118,7 @@ paths:
     post:
       summary: Create a specialized AI
       operationId: createAI
+      tags: [Training]
       requestBody:
         required: true
         content:
@@ -4881,6 +5155,7 @@ paths:
     get:
       summary: A specialized AI with its materials, revisions, and jobs
       operationId: getAI
+      tags: [Training]
       parameters:
         - name: id
           in: path
@@ -4904,6 +5179,7 @@ paths:
     patch:
       summary: Update a specialized AI
       operationId: updateAI
+      tags: [Training]
       parameters:
         - name: id
           in: path
@@ -4984,6 +5260,7 @@ paths:
     delete:
       summary: Delete a specialized AI
       operationId: deleteAI
+      tags: [Training]
       parameters:
         - name: id
           in: path
@@ -5010,6 +5287,7 @@ paths:
     post:
       summary: Add material
       operationId: addMaterial
+      tags: [Training]
       parameters:
         - name: id
           in: path
@@ -5053,6 +5331,7 @@ paths:
     delete:
       summary: Remove material
       operationId: deleteMaterial
+      tags: [Training]
       parameters:
         - name: id
           in: path
@@ -5078,6 +5357,7 @@ paths:
     post:
       summary: Add chats as training material
       operationId: addConversations
+      tags: [Training]
       parameters:
         - name: id
           in: path
@@ -5114,6 +5394,7 @@ paths:
     get:
       summary: Training examples and their statistics
       operationId: listExamples
+      tags: [Training]
       parameters:
         - name: id
           in: path
@@ -5131,6 +5412,7 @@ paths:
     post:
       summary: Add an example
       operationId: addExample
+      tags: [Training]
       parameters:
         - name: id
           in: path
@@ -5168,6 +5450,7 @@ paths:
     patch:
       summary: Edit or exclude an example
       operationId: updateExample
+      tags: [Training]
       parameters:
         - name: id
           in: path
@@ -5216,6 +5499,7 @@ paths:
     delete:
       summary: Delete an example
       operationId: deleteExample
+      tags: [Training]
       parameters:
         - name: id
           in: path
@@ -5241,6 +5525,7 @@ paths:
     get:
       summary: "Training plan: fit, downloads, disk, time, and the computer to train on"
       operationId: trainingPlan
+      tags: [Training]
       parameters:
         - name: id
           in: path
@@ -5265,6 +5550,7 @@ paths:
     post:
       summary: Start training
       operationId: startTraining
+      tags: [Training]
       parameters:
         - name: id
           in: path
@@ -5304,6 +5590,7 @@ paths:
     put:
       summary: Set the prompts evaluation compares
       operationId: setTestPrompts
+      tags: [Training]
       parameters:
         - name: id
           in: path
@@ -5342,6 +5629,7 @@ paths:
     post:
       summary: Compare a revision with the base model
       operationId: evaluateRevision
+      tags: [Training]
       parameters:
         - name: id
           in: path
@@ -5378,6 +5666,7 @@ paths:
     post:
       summary: Deploy an evaluated revision
       operationId: deployRevision
+      tags: [Training]
       parameters:
         - name: id
           in: path
@@ -5414,6 +5703,7 @@ paths:
     get:
       summary: Export status of a revision
       operationId: exportStatus
+      tags: [Training]
       parameters:
         - name: id
           in: path
@@ -5443,6 +5733,7 @@ paths:
     post:
       summary: Export a revision as one GGUF file
       operationId: exportRevision
+      tags: [Training]
       parameters:
         - name: id
           in: path
@@ -5484,6 +5775,7 @@ paths:
     delete:
       summary: Delete an exported file
       operationId: deleteExport
+      tags: [Training]
       parameters:
         - name: id
           in: path
@@ -5510,6 +5802,7 @@ paths:
     get:
       summary: Download the exported GGUF
       operationId: downloadExport
+      tags: [Training]
       parameters:
         - name: id
           in: path
@@ -5541,6 +5834,7 @@ paths:
     post:
       summary: Stop serving a specialized AI
       operationId: undeployAI
+      tags: [Training]
       parameters:
         - name: id
           in: path
@@ -5565,6 +5859,7 @@ paths:
     get:
       summary: Training jobs
       operationId: listTrainingJobs
+      tags: [Training]
       parameters:
         - name: ai_id
           in: query
@@ -5583,6 +5878,7 @@ paths:
     get:
       summary: One training job
       operationId: getTrainingJob
+      tags: [Training]
       parameters:
         - name: id
           in: path
@@ -5606,6 +5902,7 @@ paths:
     post:
       summary: Cancel a training job
       operationId: cancelTrainingJob
+      tags: [Training]
       parameters:
         - name: id
           in: path
@@ -5629,6 +5926,7 @@ paths:
     get:
       summary: Automations with their last result
       operationId: listAutomations
+      tags: [Automations]
       responses:
         "200":
           description: Automations
@@ -5641,6 +5939,7 @@ paths:
     post:
       summary: Create an automation
       operationId: createAutomation
+      tags: [Automations]
       requestBody:
         required: true
         content:
@@ -5664,6 +5963,7 @@ paths:
     post:
       summary: Read a request such as "every morning at 8, tell me if the price is below $500" into an automation
       operationId: parseAutomation
+      tags: [Automations]
       requestBody:
         required: true
         content:
@@ -5697,6 +5997,7 @@ paths:
     post:
       summary: Check an automation and show its next runs without saving it
       operationId: previewAutomation
+      tags: [Automations]
       requestBody:
         required: true
         content:
@@ -5720,6 +6021,7 @@ paths:
     get:
       summary: An automation with its run history
       operationId: getAutomation
+      tags: [Automations]
       parameters:
         - name: id
           in: path
@@ -5742,6 +6044,7 @@ paths:
     patch:
       summary: Change only the fields given
       operationId: updateAutomation
+      tags: [Automations]
       parameters:
         - name: id
           in: path
@@ -5782,6 +6085,7 @@ paths:
     delete:
       summary: Delete an automation
       operationId: deleteAutomation
+      tags: [Automations]
       parameters:
         - name: id
           in: path
@@ -5801,6 +6105,7 @@ paths:
     get:
       summary: A page of an automation's runs, newest first
       operationId: listAutomationRuns
+      tags: [Automations]
       parameters:
         - name: id
           in: path
@@ -5835,6 +6140,7 @@ paths:
       summary: Make a webhook trigger's link
       description: Returns a new token, the only time it's shown; only its hash is kept. The old link stops working.
       operationId: makeAutomationHook
+      tags: [Automations]
       parameters:
         - name: id
           in: path
@@ -5865,6 +6171,7 @@ paths:
       summary: Open a run's result in a chat to reply to
       description: Returns the chat the result was already posted to, or makes one with the result as its first answer, marked with meta.automation_run.
       operationId: continueAutomationRun
+      tags: [Automations]
       parameters:
         - name: id
           in: path
@@ -5899,6 +6206,7 @@ paths:
     post:
       summary: Run an automation now
       operationId: runAutomation
+      tags: [Automations]
       parameters:
         - name: id
           in: path
@@ -5934,6 +6242,7 @@ paths:
     post:
       summary: Pause an automation
       operationId: pauseAutomation
+      tags: [Automations]
       parameters:
         - name: id
           in: path
@@ -5969,6 +6278,7 @@ paths:
     post:
       summary: Resume an automation
       operationId: resumeAutomation
+      tags: [Automations]
       parameters:
         - name: id
           in: path
@@ -6004,6 +6314,7 @@ paths:
     post:
       summary: Look for computers again
       operationId: refreshNodes
+      tags: [Computers]
       responses:
         "200":
           description: Computers
@@ -6021,6 +6332,7 @@ paths:
     post:
       summary: Offer to pair with a discovered computer
       operationId: pairNode
+      tags: [Computers]
       requestBody:
         required: true
         content:
@@ -6048,6 +6360,7 @@ paths:
     post:
       summary: Pair using the code shown on the other computer
       operationId: claimPairing
+      tags: [Computers]
       requestBody:
         required: true
         content:
@@ -6077,6 +6390,7 @@ paths:
     get:
       summary: Pairing offers waiting for approval on this computer
       operationId: pendingPairings
+      tags: [Computers]
       responses:
         "200":
           description: Offers
@@ -6090,6 +6404,7 @@ paths:
     post:
       summary: Receive a pairing offer from another computer
       operationId: receivePairingOffer
+      tags: [Computers]
       requestBody:
         required: true
         content:
@@ -6113,6 +6428,7 @@ paths:
     get:
       summary: The offer this computer made for a code
       operationId: outboundPairing
+      tags: [Computers]
       parameters:
         - name: code
           in: path
@@ -6142,6 +6458,7 @@ paths:
     post:
       summary: Approve a pairing offer
       operationId: approvePairing
+      tags: [Computers]
       parameters:
         - name: id
           in: path
@@ -6173,6 +6490,7 @@ paths:
     post:
       summary: Stop trusting a paired computer
       operationId: revokeNode
+      tags: [Computers]
       parameters:
         - name: id
           in: path
@@ -6192,6 +6510,7 @@ paths:
     get:
       summary: API keys, without their secrets
       operationId: listAPIKeys
+      tags: [People]
       responses:
         "200":
           description: Keys
@@ -6204,6 +6523,7 @@ paths:
     post:
       summary: "Create an API key; the secret is shown only in this response"
       operationId: createAPIKey
+      tags: [People]
       requestBody:
         required: true
         content:
@@ -6230,6 +6550,7 @@ paths:
     delete:
       summary: Delete an API key
       operationId: deleteAPIKey
+      tags: [People]
       parameters:
         - name: id
           in: path
@@ -6249,6 +6570,7 @@ paths:
     post:
       summary: "Replace a key's secret; the old one stops working"
       operationId: rotateAPIKey
+      tags: [People]
       parameters:
         - name: id
           in: path
@@ -6272,6 +6594,7 @@ paths:
     get:
       summary: One notification with each channel's delivery
       operationId: getNotification
+      tags: [Notifications]
       parameters:
         - name: id
           in: path
@@ -6291,6 +6614,7 @@ paths:
     get:
       summary: Email and webhook destinations. Passwords and signing secrets are never returned.
       operationId: listNotificationDestinations
+      tags: [Notifications]
       responses:
         "200":
           description: Destinations
@@ -6303,6 +6627,7 @@ paths:
     post:
       summary: Add an email or webhook destination; a webhook's signing secret is returned this once
       operationId: createNotificationDestination
+      tags: [Notifications]
       requestBody:
         required: true
         content:
@@ -6326,6 +6651,7 @@ paths:
     get:
       summary: One destination
       operationId: getNotificationDestination
+      tags: [Notifications]
       parameters:
         - name: id
           in: path
@@ -6344,6 +6670,7 @@ paths:
     patch:
       summary: Change a destination; an empty password keeps the stored one
       operationId: updateNotificationDestination
+      tags: [Notifications]
       parameters:
         - name: id
           in: path
@@ -6374,6 +6701,7 @@ paths:
     delete:
       summary: Remove a destination, its stored secret, and its waiting deliveries
       operationId: deleteNotificationDestination
+      tags: [Notifications]
       parameters:
         - name: id
           in: path
@@ -6389,6 +6717,7 @@ paths:
     post:
       summary: Send a test notification now
       operationId: testNotificationDestination
+      tags: [Notifications]
       parameters:
         - name: id
           in: path
@@ -6408,6 +6737,7 @@ paths:
     post:
       summary: Replace a webhook's signing secret; the old one stops working
       operationId: rotateNotificationSecret
+      tags: [Notifications]
       parameters:
         - name: id
           in: path
@@ -6427,6 +6757,7 @@ paths:
     get:
       summary: Quiet hours
       operationId: getQuietHours
+      tags: [Notifications]
       responses:
         "200":
           description: Quiet hours
@@ -6437,6 +6768,7 @@ paths:
     put:
       summary: Set quiet hours
       operationId: setQuietHours
+      tags: [Notifications]
       requestBody:
         required: true
         content:
@@ -6456,6 +6788,7 @@ paths:
     get:
       summary: Audited tool calls, newest first; records expire with run records
       operationId: listToolRuns
+      tags: [Tools]
       parameters:
         - name: tool_id
           in: query
@@ -6482,6 +6815,7 @@ paths:
     get:
       summary: One tool's descriptor
       operationId: describeTool
+      tags: [Tools]
       parameters:
         - name: id
           in: path

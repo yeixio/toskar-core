@@ -201,3 +201,43 @@ func allRefs(options any) bool {
 	}
 	return len(list) > 0
 }
+
+// Every operation has one tag, from the spec's list, so the API reference
+// and generated SDKs group routes by area (#666).
+func TestOpenAPIOperationsAreTagged(t *testing.T) {
+	_, raw := loadOpenAPI(t)
+	var spec struct {
+		Tags []struct {
+			Name string `yaml:"name"`
+		} `yaml:"tags"`
+		Paths map[string]map[string]struct {
+			OperationID string   `yaml:"operationId"`
+			Tags        []string `yaml:"tags"`
+		} `yaml:"paths"`
+	}
+	if err := yaml.Unmarshal([]byte(raw), &spec); err != nil {
+		t.Fatal(err)
+	}
+	declared := map[string]bool{}
+	for _, tag := range spec.Tags {
+		declared[tag.Name] = true
+	}
+	used := map[string]bool{}
+	for path, ops := range spec.Paths {
+		for m, op := range ops {
+			if !openAPIMethods[m] {
+				continue
+			}
+			if len(op.Tags) != 1 || !declared[op.Tags[0]] {
+				t.Errorf("%s %s has tags %v; give it one of the spec's tags", m, path, op.Tags)
+				continue
+			}
+			used[op.Tags[0]] = true
+		}
+	}
+	for name := range declared {
+		if !used[name] {
+			t.Errorf("tag %q has no operations", name)
+		}
+	}
+}
