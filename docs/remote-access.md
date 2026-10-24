@@ -2,6 +2,8 @@
 
 Status: in progress (#456). The remote listener, its setting, router port mapping, the route secret, the address record, and the computer's side of the relay (enrollment, registration, and the tunnel) have shipped in core; the rendezvous and relay are built in the private `yeixio/toskar-relay`. Receipt exchange, hosting Toskar's relay, and the apps are what's left.
 
+Building a client? [connecting.md](connecting.md) says exactly how to pair and connect, with test vectors.
+
 The phone, tablet, TV, and watch apps reach a person's own Toskar from anywhere, not only on the home network, with no port forwarding, VPN, or dynamic DNS to set up. Like Plex remote access, the connection is direct whenever it can be, and Toskar's service mostly introduces the two ends. Everything stays end-to-end encrypted to the computer the app already trusts.
 
 ## What exists today

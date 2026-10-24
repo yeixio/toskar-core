@@ -1,0 +1,167 @@
+{
+  "about": "Test vectors for connecting to Toskar Core as a paired device: docs/connecting.md. Made by internal/rendezvous's TestConnectionVectors, which keeps them in step with the reference code.",
+  "routes": [
+    {
+      "secret": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
+      "route_id": "2tmuvlcde47sagxxpvexynrgvmecwn6f",
+      "record_key_hex": "fcb3e7e499dd44ce4b715de945d4818a2b843756df9eaf6511efc39c73c34f23"
+    },
+    {
+      "secret": "QEFCQ0RFRkdISUpLTE1OT1BRUlNUVVZXWFlaW1xdXl8",
+      "route_id": "jfcuyflqtfl4yat3nrwor2eqkluq4w5g",
+      "record_key_hex": "a7a4d580c61bff1fbf76ca70a487d50218e595b298e7a72b6b92ef351cdfdc5a"
+    },
+    {
+      "secret": "oKGio6SlpqeoqaqrrK2ur7CxsrO0tba3uLm6u7y9vr8",
+      "route_id": "pzlde624wfmqlw7tob5c4awtxpzl3zro",
+      "record_key_hex": "bab8ec4b7fd0091feb12c8ba4f778845776496d80713bd8c2afd6624167738fe"
+    }
+  ],
+  "pins": [
+    {
+      "cert_der_base64": "MIIBRjCB7aADAgECAgEBMAoGCCqGSM49BAMCMC0xKzApBgNVBAMTIlRvc2thciB0ZXN0IHZlY3RvcnMgKGVjZHNhLXNoYTI1NikwHhcNMjYwMTAxMDAwMDAwWhcNMzYwMTAxMDAwMDAwWjAtMSswKQYDVQQDEyJUb3NrYXIgdGVzdCB2ZWN0b3JzIChlY2RzYS1zaGEyNTYpMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEBf0j8Rij9jJZ8m5OOesFkkjzlNgtFZfZ1XDIaFu9c3Guf2sYY7o6a4ltjk806ETv1wUAduvLBdPnaiwR/CK6PDAKBggqhkjOPQQDAgNIADBFAiEAjL2MZ07HBB/gcVBKhRubkkcy3SmUGsBKidKuZMJRzEgCID90IlF02jyQVjeMjjKMwn/IW53+G4OdYGMHbhEA4kFE",
+      "fingerprint": "sha256:353ac203e870607a3c5eeb27b64441c52d14ba712c1e6e3ff84b41fd8bfd4edb",
+      "short": "353A-C203"
+    },
+    {
+      "cert_der_base64": "MIH8MIGvoAMCAQICAQEwBQYDK2VwMCgxJjAkBgNVBAMTHVRvc2thciB0ZXN0IHZlY3RvcnMgKGVkMjU1MTkpMB4XDTI2MDEwMTAwMDAwMFoXDTM2MDEwMTAwMDAwMFowKDEmMCQGA1UEAxMdVG9za2FyIHRlc3QgdmVjdG9ycyAoZWQyNTUxOSkwKjAFBgMrZXADIQATI2LWFNtZchdRvgcfToD5/a/B72v9p99EvIxlHM3OVzAFBgMrZXADQQAB+kR+zS8dCBP0ExQfkeAyCWBoNEq3o9DXVXzkNe/uXwvEj0RMonB+2yjkgzG2L8hnvwbyg4x7Gg9sw++R7EYJ",
+      "fingerprint": "sha256:251f887356280c112a8f85db442fb55495bab3ede50f1719a51f310aa079cd69",
+      "short": "251F-8873"
+    },
+    {
+      "cert_der_base64": "MIIC2zCCAcOgAwIBAgIBATANBgkqhkiG9w0BAQsFADAxMS8wLQYDVQQDEyZUb3NrYXIgdGVzdCB2ZWN0b3JzIChyc2EtcGtjczEtc2hhMjU2KTAeFw0yNjAxMDEwMDAwMDBaFw0zNjAxMDEwMDAwMDBaMDExLzAtBgNVBAMTJlRvc2thciB0ZXN0IHZlY3RvcnMgKHJzYS1wa2NzMS1zaGEyNTYpMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAv90cbVYj3ucy6yg2+mSdx/hnnYPSr9XEt1qYvp8j940q41itvQxc+nJiZPtEKe86K8hu5VbibE6KGJpptEp5cYZOkLXqRr4n8Amgw+vM2Z5UOsQf8OaxHhQjOsdH5YTL5E9EPCR/kk8SAIg9WYtJKelv23fF+wL2ZBN2O9i1LC9HWpcFGdIeT0lOglHtkOnVBPy0T6qkLpx1ZkBfFdA3NVL98DzXgJmpr5BVzy/z8JeOAzJkvvXGFik7lRotg9RbbuGlRW0+FoogUCfyuoX2F7O3hnrm8k9GykE3AgKFn2x4ZF6hVgbIXbDj0+yXqEi6gDePaHKf9MLxS13DFZHzkQIDAQABMA0GCSqGSIb3DQEBCwUAA4IBAQAuPcb6IfYuyI1TYWNvEurfWRj4HYmrRo4FNsDnGVMUMkR3NvGLisoIBCfPg4tSdujkara3rXlpk12+zmZm/r9FN2xwB/pru35rzUntjL5wL02Bb/w62wbpBSigzmGGUbymDvZ91DCyFLPkUkNUdHb1b1j9g+vNeMWB4SAGKV6W5o7CWqhGfwrbNIJwV3CCRgCa1/rioWOt9bETpQijya6OApE6ohELhV34ulB2BWqCwZGhPVGx4lPUVL9i/9fgFLo6UslbQ2t3VQPGRy09xNxH5sz6P9JPSk4+VIA/+OY41KPCBYp2q7XnWEREv6SJBLIZq7DqT3mj+rXAxsPuxAdV",
+      "fingerprint": "sha256:e8e0bab48e4d9e79eae37f02718e65c255e5ddc623b40b39c8625ef1bae34a99",
+      "short": "E8E0-BAB4"
+    }
+  ],
+  "records": [
+    {
+      "name": "opens: signed with an ECDSA P-256 key",
+      "blob_base64": "OnJF2C9/uiBR43X0rKVENLJaXFTGZ+Fcbha6q42XvCqZwoWIoISac5UsuvGa/yB4t1Wq5VCt51Pmuu22QK9FpCMdqcP76FwA0lcf3sCWhACw8vr/JV27fRfpfOJ7w+3S0WmC7TOnw5UVZrcH1v+ci2W601oiUkWzqv/cP9HLWEdyXUvaGP/BryY1YXh9Cm8PFtaQYkz5F7i9iwndFAhGPte1anM6iwkbGDeCVr4hS9uknuwWZIqP5EKpu5Tax6wOXsgEnMWEppfzFigPXOrhHMEf1yPsCnaOo+mW7fWMrnSnh39nkI29r8Mlp/T4BhI8pJOfW3ZO2StO8wbKowrsYypOfFbtdKBydZVzAeC/Q3wjGLnk/OsyyeR6cvxVpHemqieoYozAZ1ruLSTBe+xhkm9QDYcsF2YJ3ayHVblF1ZhjdwodXP5JTZVq2AxckHdTqsuaMZuGmn3EXhd5/OXIJ/y59atBKlWBpCZpT64bA7wRi3almh59YqFepqCEdunraaMNN34syhPQBGNLjVBmEhICJevkq7NYR9Xh656u6YcZg6AUsxnW4BEJ6lihJasrF7XmPzyKYo9VWF9wwpSBoSIkoGfalEuWegSNE4OsgCzUIBh5Dz2rduOWp8GyCQ4gWRMTcURtdNBYmf5WpqfRP/pJCPQGV/l7rp/7XAt/Rz8keMBTqw9SIi/wY3X08vLo3DIyDm2/MUozNrNcLHNBVLe8PliUN/w9FJU1D93YVWkgDxFwx/l0c4LRsMnQ6PQjVNsyt4xmx2qnRYMF1V6tHBzGLEXPU1kSqWRGDTODrrxIAIqVtIEQYlrONhaq0owGTkEbamb5WpRfA0s8ZloVfpTzlee3YP2zyuqHkyuQhhaV72SSfTBr0Qah93V+BKNYqvBfUSzILyEfLmGt5OOsJK2nf9cEgV2SJfCu/ukTVBGbkcEAuuJQd2JQ8YOOsIIadtIKbLxb25UTW5trI5FJRQkBm+I1E9L/vWouA70CWTQRVGFfi+7j1RC7DvOPkVThmNWlZ/98c0UU7hXym3b8DNUWA806beWD5jp3m0gyInB1Bet8YIpLJql3K9CMaePQbQbvlyT+9qcHJ0AoxuZI2jbRsBi0gHRe6kH1N8lKWnnLmeBfzto=",
+      "secret": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
+      "pin": "sha256:353ac203e870607a3c5eeb27b64441c52d14ba712c1e6e3ff84b41fd8bfd4edb",
+      "now": 1792843800,
+      "max_age_seconds": 3600,
+      "addresses": [
+        "203.0.113.7:7333",
+        "[2001:db8::7]:7333",
+        "2tmuvlcde47sagxxpvexynrgvmecwn6f.relay.toskar.ai:4443"
+      ],
+      "at": 1792843200
+    },
+    {
+      "name": "opens: signed with an Ed25519 key",
+      "blob_base64": "veStm7RZ6Gol4NUe6cspzYNn/zkA5ZQoyIOckuKNo2OLoM13MWgkugsByA124ADGntcghHkpRr0OR3yf7i37/in1VLhyV6U0QD8PskkZPQOX3+oY4QDfYFftJtOTyvWxslHqA8jUDqUUqM7qNH6lgfgf1CU3sDgdgC/6rW21zLSN9cSTBdRg/l65TE8lFO/23SzCVkOa1sVa8NYxWB+BFoDVToQOIE5OGL7dd+XMxGT8v0MuFZMpVJKUXDQ5hYx1Hgir36UN2BJEvWryKXEufhnKhdICSYKV3xpQBF2xZ7P7SN2iW9jfJunJwx/dNiGidfJFTHdm5a3PCXEy1DmqKFNFw1qdYyUiEEvL9el95km2++CxEK7Ta+iB73pO3dqYxN2yxo5eVMp73OSItxCg8utidkKrwShXdbr16jIl147b0eEoW1Vw1xIih0vOPg9R576Q5eLijtJCC+XpLdqUpYsBuVhijb0m2qStdpz79DtEAnHZCJmuEnBXjf205S01dpp0XJSA6ergkXLY4/mYQlf1X5DbUTK1HhbhQoLhBGSqPZQicG5b87I1MUMz4NbZ1lLDkKrFlxweiMzyYhqBueWVooL0nZ5XrEmeyk+faYZbLCpq1vse+GKenrhGCzld7D4lCqVThiPwJI2yObkTUAi0ArtS2UwycuUgaK1CmW8k7YFBV4ydAvQW7frO0fZDJwo8XSkxehjpIYVed4TybXxooZXkSjDAJdNc6Kq5pQsbXufmd1x9onomWZ6n3gKvsfs8dFeT/lgRPgcqA89r1F1r4N+pu8+BJwHlssX0fWNeFwRsl5xP9roQgBwVsWn0P7jARRIiKLKAP1CTZndeQ9U+Sq1wKyxoYcRLOh5rYA8WfF1S35C2gbTzu1BCEFoO+qCmvcnQBdVktMg9cxPdPjmI6Xq0MgL/NUSD8IT9z0aahuVAkJhl+Nd8ERijdgcVhqv8MP8gwhP1ZrSN+Pi9DHfFj9uK",
+      "secret": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
+      "pin": "sha256:251f887356280c112a8f85db442fb55495bab3ede50f1719a51f310aa079cd69",
+      "now": 1792843800,
+      "max_age_seconds": 3600,
+      "addresses": [
+        "203.0.113.7:7333",
+        "[2001:db8::7]:7333",
+        "2tmuvlcde47sagxxpvexynrgvmecwn6f.relay.toskar.ai:4443"
+      ],
+      "at": 1792843200
+    },
+    {
+      "name": "opens: signed with an RSA key",
+      "blob_base64": "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",
+      "secret": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
+      "pin": "sha256:e8e0bab48e4d9e79eae37f02718e65c255e5ddc623b40b39c8625ef1bae34a99",
+      "now": 1792843800,
+      "max_age_seconds": 3600,
+      "addresses": [
+        "203.0.113.7:7333",
+        "[2001:db8::7]:7333",
+        "2tmuvlcde47sagxxpvexynrgvmecwn6f.relay.toskar.ai:4443"
+      ],
+      "at": 1792843200
+    },
+    {
+      "name": "opens: written a minute in the future, within the 5 minutes allowed",
+      "blob_base64": "OnJF2C9/uiBR43X0rKVENLJaXFTGZ+Fcbha6q42XvCqZwoWIoISac5UsuvGa/yB4t1Wq5VCt51Pmuu22QK9FpCMdqcP76FwA0lcf3sCWhACw8vr/JV27fRfpfOJ7w+3S0WmC7TOnw5UVZrcH1v+ci2W601oiUkWzqv/cP9HLWEdyXUvaGP/BryY1YXh9Cm8PFtaQYkz5F7i9iwndFAhGPte1anM6iwkbGDeCVr4hS9uknuwWZIqP5EKpu5Tax6wOXsgEnMWEppfzFigPXOrhHMEf1yPsCnaOo+mW7fWMrnSnh39nkI29r8Mlp/T4BhI8pJOfW3ZO2StO8wbKowrsYypOfFbtdKBydZVzAeC/Q3wjGLnk/OsyyeR6cvxVpHemqieoYozAZ1ruLSTBe+xhkm9QDYcsF2YJ3ayHVblF1ZhjdwodXP5JTZVq2AxckHdTqsuaMZuGmn3EXhd5/OXIJ/y59atBKlWBpCZpT64bA7wRi3almh59YqFepqCEdunraaMNN34syhPQBGNLjVBmEhICJevkq7NYR9Xh656u6YcZg6AUsxnW4BEJ6lihJasrF7XmPzyKYo9VWF9wwpSBoSIkoGfalEuWegSNE4OsgCzUIBh5Dz2rduOWp8GyCQ4gWRMTcURtdNBYmf5WpqfRP/pJCPQGV/l7rp/7XAt/Rz8keMBTqw9SIi/wY3X08vLo3DIyDm2/MUozNrNcLHNBVLe8PliUN/w9FJU1D93YVWkgDxFwx/l0c4LRsMnQ6PQjVNsyt4xmx2qnRYMF1V6tHBzGLEXPU1kSqWRGDTODrrxIAIqVtIEQYlrONhaq0owGTkEbamb5WpRfA0s8ZloVfpTzlee3YP2zyuqHkyuQhhaV72SSfTBr0Qah93V+BKNYqvBfUSzILyEfLmGt5OOsJK2nf9cEgV2SJfCu/ukTVBGbkcEAuuJQd2JQ8YOOsIIadtIKbLxb25UTW5trI5FJRQkBm+I1E9L/vWouA70CWTQRVGFfi+7j1RC7DvOPkVThmNWlZ/98c0UU7hXym3b8DNUWA806beWD5jp3m0gyInB1Bet8YIpLJql3K9CMaePQbQbvlyT+9qcHJ0AoxuZI2jbRsBi0gHRe6kH1N8lKWnnLmeBfzto=",
+      "secret": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
+      "pin": "sha256:353ac203e870607a3c5eeb27b64441c52d14ba712c1e6e3ff84b41fd8bfd4edb",
+      "now": 1792843140,
+      "max_age_seconds": 3600,
+      "addresses": [
+        "203.0.113.7:7333",
+        "[2001:db8::7]:7333",
+        "2tmuvlcde47sagxxpvexynrgvmecwn6f.relay.toskar.ai:4443"
+      ],
+      "at": 1792843200
+    },
+    {
+      "name": "refused: another computer's route secret",
+      "blob_base64": "OnJF2C9/uiBR43X0rKVENLJaXFTGZ+Fcbha6q42XvCqZwoWIoISac5UsuvGa/yB4t1Wq5VCt51Pmuu22QK9FpCMdqcP76FwA0lcf3sCWhACw8vr/JV27fRfpfOJ7w+3S0WmC7TOnw5UVZrcH1v+ci2W601oiUkWzqv/cP9HLWEdyXUvaGP/BryY1YXh9Cm8PFtaQYkz5F7i9iwndFAhGPte1anM6iwkbGDeCVr4hS9uknuwWZIqP5EKpu5Tax6wOXsgEnMWEppfzFigPXOrhHMEf1yPsCnaOo+mW7fWMrnSnh39nkI29r8Mlp/T4BhI8pJOfW3ZO2StO8wbKowrsYypOfFbtdKBydZVzAeC/Q3wjGLnk/OsyyeR6cvxVpHemqieoYozAZ1ruLSTBe+xhkm9QDYcsF2YJ3ayHVblF1ZhjdwodXP5JTZVq2AxckHdTqsuaMZuGmn3EXhd5/OXIJ/y59atBKlWBpCZpT64bA7wRi3almh59YqFepqCEdunraaMNN34syhPQBGNLjVBmEhICJevkq7NYR9Xh656u6YcZg6AUsxnW4BEJ6lihJasrF7XmPzyKYo9VWF9wwpSBoSIkoGfalEuWegSNE4OsgCzUIBh5Dz2rduOWp8GyCQ4gWRMTcURtdNBYmf5WpqfRP/pJCPQGV/l7rp/7XAt/Rz8keMBTqw9SIi/wY3X08vLo3DIyDm2/MUozNrNcLHNBVLe8PliUN/w9FJU1D93YVWkgDxFwx/l0c4LRsMnQ6PQjVNsyt4xmx2qnRYMF1V6tHBzGLEXPU1kSqWRGDTODrrxIAIqVtIEQYlrONhaq0owGTkEbamb5WpRfA0s8ZloVfpTzlee3YP2zyuqHkyuQhhaV72SSfTBr0Qah93V+BKNYqvBfUSzILyEfLmGt5OOsJK2nf9cEgV2SJfCu/ukTVBGbkcEAuuJQd2JQ8YOOsIIadtIKbLxb25UTW5trI5FJRQkBm+I1E9L/vWouA70CWTQRVGFfi+7j1RC7DvOPkVThmNWlZ/98c0UU7hXym3b8DNUWA806beWD5jp3m0gyInB1Bet8YIpLJql3K9CMaePQbQbvlyT+9qcHJ0AoxuZI2jbRsBi0gHRe6kH1N8lKWnnLmeBfzto=",
+      "secret": "QEFCQ0RFRkdISUpLTE1OT1BRUlNUVVZXWFlaW1xdXl8",
+      "pin": "sha256:353ac203e870607a3c5eeb27b64441c52d14ba712c1e6e3ff84b41fd8bfd4edb",
+      "now": 1792843800,
+      "max_age_seconds": 3600,
+      "error": "sealed"
+    },
+    {
+      "name": "refused: not the pinned certificate",
+      "blob_base64": "OnJF2C9/uiBR43X0rKVENLJaXFTGZ+Fcbha6q42XvCqZwoWIoISac5UsuvGa/yB4t1Wq5VCt51Pmuu22QK9FpCMdqcP76FwA0lcf3sCWhACw8vr/JV27fRfpfOJ7w+3S0WmC7TOnw5UVZrcH1v+ci2W601oiUkWzqv/cP9HLWEdyXUvaGP/BryY1YXh9Cm8PFtaQYkz5F7i9iwndFAhGPte1anM6iwkbGDeCVr4hS9uknuwWZIqP5EKpu5Tax6wOXsgEnMWEppfzFigPXOrhHMEf1yPsCnaOo+mW7fWMrnSnh39nkI29r8Mlp/T4BhI8pJOfW3ZO2StO8wbKowrsYypOfFbtdKBydZVzAeC/Q3wjGLnk/OsyyeR6cvxVpHemqieoYozAZ1ruLSTBe+xhkm9QDYcsF2YJ3ayHVblF1ZhjdwodXP5JTZVq2AxckHdTqsuaMZuGmn3EXhd5/OXIJ/y59atBKlWBpCZpT64bA7wRi3almh59YqFepqCEdunraaMNN34syhPQBGNLjVBmEhICJevkq7NYR9Xh656u6YcZg6AUsxnW4BEJ6lihJasrF7XmPzyKYo9VWF9wwpSBoSIkoGfalEuWegSNE4OsgCzUIBh5Dz2rduOWp8GyCQ4gWRMTcURtdNBYmf5WpqfRP/pJCPQGV/l7rp/7XAt/Rz8keMBTqw9SIi/wY3X08vLo3DIyDm2/MUozNrNcLHNBVLe8PliUN/w9FJU1D93YVWkgDxFwx/l0c4LRsMnQ6PQjVNsyt4xmx2qnRYMF1V6tHBzGLEXPU1kSqWRGDTODrrxIAIqVtIEQYlrONhaq0owGTkEbamb5WpRfA0s8ZloVfpTzlee3YP2zyuqHkyuQhhaV72SSfTBr0Qah93V+BKNYqvBfUSzILyEfLmGt5OOsJK2nf9cEgV2SJfCu/ukTVBGbkcEAuuJQd2JQ8YOOsIIadtIKbLxb25UTW5trI5FJRQkBm+I1E9L/vWouA70CWTQRVGFfi+7j1RC7DvOPkVThmNWlZ/98c0UU7hXym3b8DNUWA806beWD5jp3m0gyInB1Bet8YIpLJql3K9CMaePQbQbvlyT+9qcHJ0AoxuZI2jbRsBi0gHRe6kH1N8lKWnnLmeBfzto=",
+      "secret": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
+      "pin": "sha256:251f887356280c112a8f85db442fb55495bab3ede50f1719a51f310aa079cd69",
+      "now": 1792843800,
+      "max_age_seconds": 3600,
+      "error": "pin"
+    },
+    {
+      "name": "refused: older than the hour allowed",
+      "blob_base64": "OnJF2C9/uiBR43X0rKVENLJaXFTGZ+Fcbha6q42XvCqZwoWIoISac5UsuvGa/yB4t1Wq5VCt51Pmuu22QK9FpCMdqcP76FwA0lcf3sCWhACw8vr/JV27fRfpfOJ7w+3S0WmC7TOnw5UVZrcH1v+ci2W601oiUkWzqv/cP9HLWEdyXUvaGP/BryY1YXh9Cm8PFtaQYkz5F7i9iwndFAhGPte1anM6iwkbGDeCVr4hS9uknuwWZIqP5EKpu5Tax6wOXsgEnMWEppfzFigPXOrhHMEf1yPsCnaOo+mW7fWMrnSnh39nkI29r8Mlp/T4BhI8pJOfW3ZO2StO8wbKowrsYypOfFbtdKBydZVzAeC/Q3wjGLnk/OsyyeR6cvxVpHemqieoYozAZ1ruLSTBe+xhkm9QDYcsF2YJ3ayHVblF1ZhjdwodXP5JTZVq2AxckHdTqsuaMZuGmn3EXhd5/OXIJ/y59atBKlWBpCZpT64bA7wRi3almh59YqFepqCEdunraaMNN34syhPQBGNLjVBmEhICJevkq7NYR9Xh656u6YcZg6AUsxnW4BEJ6lihJasrF7XmPzyKYo9VWF9wwpSBoSIkoGfalEuWegSNE4OsgCzUIBh5Dz2rduOWp8GyCQ4gWRMTcURtdNBYmf5WpqfRP/pJCPQGV/l7rp/7XAt/Rz8keMBTqw9SIi/wY3X08vLo3DIyDm2/MUozNrNcLHNBVLe8PliUN/w9FJU1D93YVWkgDxFwx/l0c4LRsMnQ6PQjVNsyt4xmx2qnRYMF1V6tHBzGLEXPU1kSqWRGDTODrrxIAIqVtIEQYlrONhaq0owGTkEbamb5WpRfA0s8ZloVfpTzlee3YP2zyuqHkyuQhhaV72SSfTBr0Qah93V+BKNYqvBfUSzILyEfLmGt5OOsJK2nf9cEgV2SJfCu/ukTVBGbkcEAuuJQd2JQ8YOOsIIadtIKbLxb25UTW5trI5FJRQkBm+I1E9L/vWouA70CWTQRVGFfi+7j1RC7DvOPkVThmNWlZ/98c0UU7hXym3b8DNUWA806beWD5jp3m0gyInB1Bet8YIpLJql3K9CMaePQbQbvlyT+9qcHJ0AoxuZI2jbRsBi0gHRe6kH1N8lKWnnLmeBfzto=",
+      "secret": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
+      "pin": "sha256:353ac203e870607a3c5eeb27b64441c52d14ba712c1e6e3ff84b41fd8bfd4edb",
+      "now": 1792846860,
+      "max_age_seconds": 3600,
+      "error": "stale"
+    },
+    {
+      "name": "refused: more than 5 minutes in the future",
+      "blob_base64": "OnJF2C9/uiBR43X0rKVENLJaXFTGZ+Fcbha6q42XvCqZwoWIoISac5UsuvGa/yB4t1Wq5VCt51Pmuu22QK9FpCMdqcP76FwA0lcf3sCWhACw8vr/JV27fRfpfOJ7w+3S0WmC7TOnw5UVZrcH1v+ci2W601oiUkWzqv/cP9HLWEdyXUvaGP/BryY1YXh9Cm8PFtaQYkz5F7i9iwndFAhGPte1anM6iwkbGDeCVr4hS9uknuwWZIqP5EKpu5Tax6wOXsgEnMWEppfzFigPXOrhHMEf1yPsCnaOo+mW7fWMrnSnh39nkI29r8Mlp/T4BhI8pJOfW3ZO2StO8wbKowrsYypOfFbtdKBydZVzAeC/Q3wjGLnk/OsyyeR6cvxVpHemqieoYozAZ1ruLSTBe+xhkm9QDYcsF2YJ3ayHVblF1ZhjdwodXP5JTZVq2AxckHdTqsuaMZuGmn3EXhd5/OXIJ/y59atBKlWBpCZpT64bA7wRi3almh59YqFepqCEdunraaMNN34syhPQBGNLjVBmEhICJevkq7NYR9Xh656u6YcZg6AUsxnW4BEJ6lihJasrF7XmPzyKYo9VWF9wwpSBoSIkoGfalEuWegSNE4OsgCzUIBh5Dz2rduOWp8GyCQ4gWRMTcURtdNBYmf5WpqfRP/pJCPQGV/l7rp/7XAt/Rz8keMBTqw9SIi/wY3X08vLo3DIyDm2/MUozNrNcLHNBVLe8PliUN/w9FJU1D93YVWkgDxFwx/l0c4LRsMnQ6PQjVNsyt4xmx2qnRYMF1V6tHBzGLEXPU1kSqWRGDTODrrxIAIqVtIEQYlrONhaq0owGTkEbamb5WpRfA0s8ZloVfpTzlee3YP2zyuqHkyuQhhaV72SSfTBr0Qah93V+BKNYqvBfUSzILyEfLmGt5OOsJK2nf9cEgV2SJfCu/ukTVBGbkcEAuuJQd2JQ8YOOsIIadtIKbLxb25UTW5trI5FJRQkBm+I1E9L/vWouA70CWTQRVGFfi+7j1RC7DvOPkVThmNWlZ/98c0UU7hXym3b8DNUWA806beWD5jp3m0gyInB1Bet8YIpLJql3K9CMaePQbQbvlyT+9qcHJ0AoxuZI2jbRsBi0gHRe6kH1N8lKWnnLmeBfzto=",
+      "secret": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
+      "pin": "sha256:353ac203e870607a3c5eeb27b64441c52d14ba712c1e6e3ff84b41fd8bfd4edb",
+      "now": 1792842840,
+      "max_age_seconds": 3600,
+      "error": "stale"
+    },
+    {
+      "name": "refused: changed on the way",
+      "blob_base64": "OnJF2C9/uiBR43X0rKVENLJaXFTGZ+Fcbha6q42XvCqZwoWIoISac5UsuvGa/yB4t1Wq5VCt51Pmuu22QK9FpCMdqcP76FwA0lcf3sCWhACw8vr/JV27fRfpfOJ7w+3S0WmC7TOnw5UVZrcH1v+ci2W601oiUkWzqv/cP9HLWEdyXUvaGP/BryY1YXh9Cm8PFtaQYkz5F7i9iwndFAhGPte1anM6iwkbGDeCVr4hS9uknuwWZIqP5EKpu5Tax6wOXsgEnMWEppfzFigPXOrhHMEf1yPsCnaOo+mW7fWMrnSnh39nkI29r8Mlp/T4BhI8pJOfW3ZO2StO8wbKowrsYypOfFbtdKBydZVzAeC/Q3wjGLnk/OsyyeR6cvxVpHemqieoYozAZ1ruLSTBe+xhkm9QDYcsF2YJ3ayHVblF1ZhjdwodXP5JTZVq2AxckHdTqsuaMZuGmn3EXhd5/OXIJ/y59atBKlWBpCZpT64bA7wRi3almh59YqFepqCEdunraaMNN34syhPQBGNLjVBmEhICJevkq7NYR9Xh656u6YcZg6AUsxnW4BEJ6lmhJasrF7XmPzyKYo9VWF9wwpSBoSIkoGfalEuWegSNE4OsgCzUIBh5Dz2rduOWp8GyCQ4gWRMTcURtdNBYmf5WpqfRP/pJCPQGV/l7rp/7XAt/Rz8keMBTqw9SIi/wY3X08vLo3DIyDm2/MUozNrNcLHNBVLe8PliUN/w9FJU1D93YVWkgDxFwx/l0c4LRsMnQ6PQjVNsyt4xmx2qnRYMF1V6tHBzGLEXPU1kSqWRGDTODrrxIAIqVtIEQYlrONhaq0owGTkEbamb5WpRfA0s8ZloVfpTzlee3YP2zyuqHkyuQhhaV72SSfTBr0Qah93V+BKNYqvBfUSzILyEfLmGt5OOsJK2nf9cEgV2SJfCu/ukTVBGbkcEAuuJQd2JQ8YOOsIIadtIKbLxb25UTW5trI5FJRQkBm+I1E9L/vWouA70CWTQRVGFfi+7j1RC7DvOPkVThmNWlZ/98c0UU7hXym3b8DNUWA806beWD5jp3m0gyInB1Bet8YIpLJql3K9CMaePQbQbvlyT+9qcHJ0AoxuZI2jbRsBi0gHRe6kH1N8lKWnnLmeBfzto=",
+      "secret": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
+      "pin": "sha256:353ac203e870607a3c5eeb27b64441c52d14ba712c1e6e3ff84b41fd8bfd4edb",
+      "now": 1792843800,
+      "max_age_seconds": 3600,
+      "error": "sealed"
+    },
+    {
+      "name": "refused: too short to be a record",
+      "blob_base64": "OnJF2C9/uiA=",
+      "secret": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
+      "pin": "sha256:353ac203e870607a3c5eeb27b64441c52d14ba712c1e6e3ff84b41fd8bfd4edb",
+      "now": 1792843800,
+      "max_age_seconds": 3600,
+      "error": "sealed"
+    },
+    {
+      "name": "refused: sealed with the secret but signed by another computer",
+      "blob_base64": "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",
+      "secret": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
+      "pin": "sha256:353ac203e870607a3c5eeb27b64441c52d14ba712c1e6e3ff84b41fd8bfd4edb",
+      "now": 1792843800,
+      "max_age_seconds": 3600,
+      "error": "pin"
+    },
+    {
+      "name": "refused: signed for another route",
+      "blob_base64": "XTjqEJRasFEpGIRIMJ4gGZ5vyrS+sqjM9dmHkKMAk57e3EGNnt/RiEvLHpcO+aa6bfizHbpp+QJvHH3vvfO2OtlvNR+mA2tBAulwq94ySKwQF/0QRrmkO9dAObqz1xpsaHmevCM2mM4IAtNk+R2ydWWtGJsBxwfr0ZrqDnJaQhxPVAF3qB3p163/Jve8ttlP58u8uFbbAfsVRhfPbuqFVNe8X0TJvLu2SW05ZyVVLUbv7viDv9kC9kAJxRLtrwRbFFGhWlT9abVVjf018uLq1FiTXmbsaVKTK5zcy51rm02DbFeiac7Rb2Ir+UZ8oxtVLCCqyCgoNTq/zCiAKm/knSdvNgJRatHqr2Uw5IIFR5SwSKVUUGrsI+R9CrfanMZybOi44gs5/PmCz28t/cHbR4FW3NckydblcE2fkncD2oGBBzvfe/0QlC/aG4jBAvctlZ1bWPaWThgOcX2pRuO/OOmPMoSWyGRpy4XWMevACvyHcm4o28MtXsGymJqJ16BidI7prWzzvB9/kQfyCoodimBwYpy+czbQOH+q4WA55e3OuZcjtmJJ2cY7q2M7shezvbnfZ8YZA7Y+1GKBDHTeaMB8b5nXaP/GxeZ843ZF1MGCtErUnMJplH8I3Juf+F/M6vAPfnHzWlpcibf3lHMYfOVJhI3PDbySGi46yvjyQpV88s6va7Z1AchPFi2NFy2BaQ2VDuVunfWdWmCdWMGRyDdoO4oRoyIRW1gKfmP3aGgCBfU8nG3nq6BjmLdp7knRBdpRVQ78AFteQpRA83LZiP9xone7lD5HsAylmhxIqO5MYqEiNNoo0+KsKKE4ZzrqgSm86kfjTxPYZUxuhZcKzv+Tv96rc779TqS59miDwpjvPJ77tLAh3WgqbEo/EOcWQgUZ9c/5kv7p0dKeZR/vdOqx/1MnWR58LjJ7JKxFrXUfJAVm0Y0u8NcOECNX+/8BPvicK7Uh/gvjfMWu6F/wh9O7GVdFp9aMfSlcBzJJFgTk7Q==",
+      "secret": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
+      "pin": "sha256:353ac203e870607a3c5eeb27b64441c52d14ba712c1e6e3ff84b41fd8bfd4edb",
+      "now": 1792843800,
+      "max_age_seconds": 3600,
+      "error": "pin"
+    }
+  ]
+}
