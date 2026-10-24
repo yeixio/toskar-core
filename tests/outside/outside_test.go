@@ -19,6 +19,9 @@
 // Run it with Docker and a toskar-relay checkout:
 //
 //	TOSKAR_RELAY_SRC=../toskar-relay go test -tags outside -v -timeout 30m ./tests/outside
+//
+// With a toskar-sdks checkout as well (TOSKAR_SDKS_SRC), each SDK's
+// conformance program also pairs at home and connects from away (#666).
 package outside_test
 
 import (
@@ -43,6 +46,7 @@ import (
 
 const (
 	image     = "toskar-outside:test"
+	sdkImage  = "toskar-outside-sdks:test"
 	prefix    = "toskar-outside-"
 	homeNet   = prefix + "home"
 	inetNet   = prefix + "internet"
@@ -67,6 +71,7 @@ const (
 var (
 	binDir   string // toskar, client, toskar-relay for Linux
 	relayDir string // the relay's certificate, keys, and enrollment secret
+	sdks     bool   // whether the SDKs' conformance image was built
 )
 
 func TestMain(m *testing.M) {
@@ -123,6 +128,12 @@ func setup(relaySrc string) error {
 	}
 	if _, err := docker("build", "-q", "-t", image, "."); err != nil {
 		return err
+	}
+	if src := os.Getenv("TOSKAR_SDKS_SRC"); src != "" {
+		if _, err := docker("build", "-q", "-f", filepath.Join(src, "conformance", "Dockerfile"), "-t", sdkImage, src); err != nil {
+			return err
+		}
+		sdks = true
 	}
 	teardown()
 	// nat-unprotected: Docker otherwise drops packets for a container that
@@ -714,5 +725,92 @@ func TestNewCertificate(t *testing.T) {
 				t.Errorf("away=%v %s: kind %q (%s), want pin: the device must be able to tell it should pair again", away, tr.Name, tr.Kind, tr.Error)
 			}
 		}
+	}
+}
+
+// sdkDevice runs an SDK's conformance program (toskar-sdks conformance/)
+// as a device at home or away, as device does the lab's own client. The
+// relay's certificate comes from the lab's certificate authority.
+func (l *lab) sdkDevice(sdk string, away bool, dir string, args ...string) (map[string]any, error) {
+	l.t.Helper()
+	network, ip, route := homeNet, homeDev, "ip route replace default via "+routerLAN
+	if away {
+		network, ip, route = inetNet, awayDev, "ip route del default 2>/dev/null"
+	}
+	run := []string{"run", "--rm", "--name", prefix + "sdk", "--network", network, "--ip", ip, "--cap-add", "NET_ADMIN",
+		"--add-host", relayName + ":" + relayIP, "--add-host", l.route + "." + relayName + ":" + relayIP,
+		"-v", relayDir + ":/relay:ro", "-v", dir + ":/work",
+		"-e", "SSL_CERT_FILE=/relay/ca.pem", "-e", "NODE_EXTRA_CA_CERTS=/relay/ca.pem",
+		sdkImage, "sh", "-c", route + `; exec "$@"`, "sdk", "toskar-conformance-" + sdk}
+	out, err := docker(append(run, args...)...)
+	var v map[string]any
+	if jerr := json.Unmarshal([]byte(lastLine(out)), &v); jerr != nil {
+		return nil, fmt.Errorf("%s: %v %v: %s", sdk, err, jerr, out)
+	}
+	if err != nil {
+		return v, fmt.Errorf("%s: %v", sdk, v["error"])
+	}
+	return v, nil
+}
+
+func lastLine(s string) string {
+	lines := strings.Split(strings.TrimSpace(s), "\n")
+	return lines[len(lines)-1]
+}
+
+// The SDKs connect as the apps do (#666): each pairs at home with a code
+// and the short pin, reaches its computer at home, and from away comes in
+// through the address record, directly where the router opened a port and
+// through the relay where it opened none, the computer's certificate
+// pinned all the way.
+func TestSDKs(t *testing.T) {
+	if !sdks {
+		t.Skip("TOSKAR_SDKS_SRC isn't set")
+	}
+	for _, c := range []struct {
+		mode, away string
+	}{{"pcp", "direct"}, {"none", "relay"}} {
+		t.Run(c.away, func(t *testing.T) {
+			l := newLab(t, router{mode: c.mode})
+			l.anywhere(true, "")
+			l.settled(true)
+			for _, sdk := range []string{"go", "python", "node"} {
+				t.Run(sdk, func(t *testing.T) {
+					l.t = t
+					dir := t.TempDir()
+					var code struct {
+						Code     string `json:"code"`
+						TLSShort string `json:"tls_short"`
+					}
+					l.apiJSON("POST", "/api/v1/devices/pairing", `{"enable_lan":true}`, &code)
+					paired, err := l.sdkDevice(sdk, false, dir, "pair", coreIP+":7331", code.Code)
+					if err != nil {
+						t.Fatal(err)
+					}
+					if paired["short_pin"] != code.TLSShort {
+						t.Errorf("the SDK showed the short pin %v; the computer showed %s", paired["short_pin"], code.TLSShort)
+					}
+					device, _ := json.Marshal(paired["device"])
+					if err := os.WriteFile(filepath.Join(dir, "device.json"), device, 0o644); err != nil {
+						t.Fatal(err)
+					}
+					if !strings.Contains(string(device), `"secret"`) {
+						t.Fatalf("pairing gave no route: %s", device)
+					}
+					got, err := l.sdkDevice(sdk, false, dir, "call", "/work/device.json")
+					if err != nil || got["path"] != "home" || got["node_name"] != "outside-check" {
+						t.Fatalf("at home the SDK should reach the computer on the home network: %v %v", got, err)
+					}
+					// The record can take a moment after the tunnel is up.
+					l.eventually(60*time.Second, "the SDK to reach the computer from away", func() (bool, string) {
+						got, err = l.sdkDevice(sdk, true, dir, "call", "/work/device.json")
+						return err == nil, fmt.Sprint(got, err)
+					})
+					if got["path"] != c.away || got["node_name"] != "outside-check" {
+						t.Errorf("away, the SDK should come in %s: %v", c.away, got)
+					}
+				})
+			}
+		})
 	}
 }

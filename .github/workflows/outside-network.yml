@@ -3,7 +3,8 @@ name: Outside network
 # A real Core behind a real router (NAT, PCP/NAT-PMP, UPnP, carrier NAT), a
 # relay on a simulated internet, and a paired device at home and away, in
 # Docker (tests/outside, #617). Each scenario checks what the device
-# reached against what Core's own outside check said.
+# reached against what Core's own outside check said. The SDKs connect the
+# same way (#666), from toskar-sdks main.
 on:
   pull_request:
     paths:
@@ -53,6 +54,13 @@ jobs:
           repository: yeixio/toskar-relay
           token: ${{ secrets.RELAY_READ_TOKEN }}
           path: toskar-relay
+      # The SDKs (public): each one's conformance program pairs at home and
+      # connects from away, as the apps do (#666).
+      - uses: actions/checkout@v7
+        if: steps.relay.outputs.ok == 'true'
+        with:
+          repository: yeixio/toskar-sdks
+          path: toskar-sdks
       - uses: actions/setup-go@v7
         if: steps.relay.outputs.ok == 'true'
         with:
@@ -63,6 +71,7 @@ jobs:
         if: steps.relay.outputs.ok == 'true'
         env:
           TOSKAR_RELAY_SRC: ${{ github.workspace }}/toskar-relay
+          TOSKAR_SDKS_SRC: ${{ github.workspace }}/toskar-sdks
         run: |
           docker info --format 'Docker {{.ServerVersion}}'
           go test -tags outside -count=1 -v -timeout 25m ./tests/outside
