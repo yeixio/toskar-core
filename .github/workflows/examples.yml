@@ -1,10 +1,12 @@
 name: Examples
 
-# Every example in examples/ runs against a throwaway Core built from this
-# commit, with the SDKs from toskar-sdks main, and is checked for what it
-# prints (examples/test.py). Core chats with toskar-sdks' scripted model,
-# so no model is downloaded. toskar-sdks runs the same test against its own
-# changes, so an SDK change that breaks an example fails there first.
+# The official SDKs against a throwaway Core built from this commit, so a
+# Core change that breaks them fails here, before it merges: every SDK's
+# shared conformance cases (toskar-sdks conformance/run.py), then every
+# example in examples/, checked for what it prints (examples/test.py).
+# Core chats with toskar-sdks' scripted model, so no model is downloaded.
+# toskar-sdks runs both against its own changes, so an SDK change that
+# breaks them fails there first.
 on:
   pull_request:
   push:
@@ -43,7 +45,14 @@ jobs:
         run: go build -o "$RUNNER_TEMP/toskar" ./cmd/daemon
       - name: Build the SDKs
         run: |
+          (cd toskar-sdks/go && go build -o "$RUNNER_TEMP/toskar-conformance-go" ./cmd/toskar-conformance)
           python -m venv "$RUNNER_TEMP/venv" && "$RUNNER_TEMP/venv/bin/pip" install -q "./toskar-sdks/python[anywhere]"
           (cd toskar-sdks/typescript && npm ci && npm run build)
+      - name: Run the SDKs' conformance cases
+        run: |
+          python toskar-sdks/conformance/run.py --core "$RUNNER_TEMP/toskar" \
+            --program "go=$RUNNER_TEMP/toskar-conformance-go" \
+            --program "python=$RUNNER_TEMP/venv/bin/python toskar-sdks/python/conformance.py" \
+            --program "node=node toskar-sdks/typescript/conformance.mjs"
       - name: Run the examples
         run: python examples/test.py --core "$RUNNER_TEMP/toskar" --sdks toskar-sdks --python "$RUNNER_TEMP/venv/bin/python"
