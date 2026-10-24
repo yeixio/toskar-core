@@ -27,3 +27,5 @@
   diagnostics, transcription, tool activity and providers, and the
   OpenAI-compatible model list and chat completions, ready for SDKs to be
   generated from.
+- Every route in the API description is tagged by area, such as Chat,
+  Models, or Automations, so the API reference and SDKs group them.
