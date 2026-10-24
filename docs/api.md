@@ -2,6 +2,8 @@
 
 The daemon listens on `http://127.0.0.1:7331` unless `config.json` or `TOSKAR_API_HOST` / `TOSKAR_API_PORT` say otherwise. This page lists every route and records behavior that matters when you call the server. [api/openapi.yaml](../api/openapi.yaml) describes every route below in OpenAPI 3.0. A test fails when a route is added to the daemon without it. [CLI](cli.md) and [Configuration](configuration.md) cover the command line and settings.
 
+An app or SDK that pairs as a device, as the Toskar apps do, follows [connecting.md](connecting.md): finding a computer, pairing, the certificate pin, and reaching it from anywhere.
+
 ## Authentication
 
 Loopback binds (`127.0.0.1`, `::1`, `localhost`) do not require an API key. Any other API host, including `0.0.0.0` and `::`, requires `Authorization: Bearer YOUR_API_KEY` on every `/api/v1/*` and `/v1/*` request from another machine. A request that arrives over loopback (`127.0.0.1` or `::1`) still needs no key, so apps on this computer keep working when network access is on. A request carrying `Forwarded`, `X-Forwarded-For`, or `X-Real-IP` came through a proxy and is treated as coming from the network. The daemon refuses to listen on a non-loopback address until at least one API key exists. `GET /about` and `GET /source` stay open so a network user can obtain the corresponding source.
