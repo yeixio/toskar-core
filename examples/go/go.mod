@@ -1,0 +1,11 @@
+module github.com/yeixio/toskar-core/examples/go
+
+go 1.24.0
+
+require github.com/yeixio/toskar-sdks/go v0.0.0-20261024172511-55c2a88b4b5b
+
+require (
+	github.com/apapsch/go-jsonmerge/v2 v2.0.0 // indirect
+	github.com/google/uuid v1.6.0 // indirect
+	github.com/oapi-codegen/runtime v1.8.0 // indirect
+)

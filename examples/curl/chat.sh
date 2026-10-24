@@ -1,20 +1,22 @@
 #!/bin/sh
-# Send one user message to /v1/chat/completions.
-# Requires a running daemon and an installed model. See ../README.md.
+# Stream one answer from the OpenAI-compatible /v1/chat/completions, as
+# server-sent events ending with data: [DONE]. Needs an installed model.
+# See ../README.md.
 set -eu
 
-base="${YGG_BASE_URL:-http://127.0.0.1:7331}"
-model="${YGG_MODEL:-profile:general-assistant}"
+base="${TOSKAR_URL:-http://127.0.0.1:7331}"
+model="${TOSKAR_MODEL:-auto}"
+message="${1:-Hello}"
 
-body=$(printf '%s' "{\"model\":\"$model\",\"messages\":[{\"role\":\"user\",\"content\":\"Hello\"}]}")
+body=$(printf '{"model":"%s","stream":true,"messages":[{"role":"user","content":"%s"}]}' "$model" "$message")
 
-if [ -n "${YGG_API_KEY:-}" ]; then
-  exec curl -fsS "$base/v1/chat/completions" \
-    -H "Authorization: Bearer $YGG_API_KEY" \
+if [ -n "${TOSKAR_API_KEY:-}" ]; then
+  exec curl -fsSN "$base/v1/chat/completions" \
+    -H "Authorization: Bearer $TOSKAR_API_KEY" \
     -H "Content-Type: application/json" \
     -d "$body"
 fi
 
-exec curl -fsS "$base/v1/chat/completions" \
+exec curl -fsSN "$base/v1/chat/completions" \
   -H "Content-Type: application/json" \
   -d "$body"
