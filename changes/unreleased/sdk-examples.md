@@ -4,3 +4,6 @@
   streaming an answer, watching events, and connecting as a device at
   home or from anywhere. The curl examples stream through the
   OpenAI-compatible API and read `TOSKAR_URL` and `TOSKAR_API_KEY`.
+- Every example runs in CI against a throwaway Core, on each pull
+  request and each night, so one that breaks fails the build. The Python
+  events example prints each event as it comes, even into a pipe.
