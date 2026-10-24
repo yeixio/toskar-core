@@ -100,8 +100,12 @@ jobs:
       - name: Write the release body
         env:
           PRERELEASE: ${{ contains(github.ref_name, '-') }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
+          # Thank everyone outside MAINTAINERS.md with a commit since the
+          # last release. A failed lookup leaves the line out, not the release.
+          THANKS="$(./scripts/release-thanks.sh "$GITHUB_REPOSITORY" "$GITHUB_REF_NAME" || true)"
           # This version's section of CHANGELOG.md: what changed, and what to
           # know before updating, such as compatibility notes.
           VERSION="${GITHUB_REF_NAME#v}"
@@ -117,6 +121,9 @@ jobs:
             fi
             if [ -n "$SECTION" ]; then
               printf '## What changed in %s\n%s\n\n' "$VERSION" "$SECTION"
+            fi
+            if [ -n "$THANKS" ]; then
+              printf '%s' "$THANKS"
             fi
             cat packaging/release-install.md
           } > /tmp/release-body.md

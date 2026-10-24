@@ -10,7 +10,7 @@ gathers these files into a dated section of `CHANGELOG.md` and removes them.
 Name the file after the change, such as `ntfy-push.md` or `fix-pdf-spaces.md`.
 Use [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) headings
 (`Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`) and one
-bullet per change, written for the people who use Yggdrasil:
+bullet per change, written for the people who use Toskar:
 
 ```markdown
 ### Added

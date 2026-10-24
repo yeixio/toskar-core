@@ -137,4 +137,8 @@ Start with issues labeled [good first issue](https://github.com/yeixio/toskar-co
 
 Hardware reports are genuine contributions. Toskar has a large heterogeneous hardware surface, and CI does not generate tokens on those GPUs. A report that names the machine, the model, and the result is more useful than a guess.
 
-Suggested starter issues are listed in [.github/SEED_ISSUES.md](.github/SEED_ISSUES.md). Those are drafts. They are not already filed on GitHub.
+Comment on an issue if you want it, so two people don't do the same work. If nobody has replied in a few days, start anyway.
+
+## Growing into a role
+
+Regular contributors can become triagers, reviewers, and maintainers. [GOVERNANCE.md](GOVERNANCE.md) describes each role, and [MAINTAINERS.md](MAINTAINERS.md) lists who holds them. Every release's notes thank the people whose commits are in it.
