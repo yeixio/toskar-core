@@ -105,7 +105,9 @@ var specTypes = map[string]any{
 	// Models and runtimes.
 	"Model":              contracts.Model{},
 	"Recommendation":     contracts.Recommendation{},
-	"ModelFit":           contracts.ModelsFitResponse{},
+	"ModelsFit":          contracts.ModelsFitResponse{},
+	"ModelFit":           contracts.ModelFit{},
+	"CategoryWinner":     contracts.CategoryWinner{},
 	"BrowseModel":        contracts.BrowseModel{},
 	"RunningModelView":   contracts.RunningModelView{},
 	"URLPreview":         models.URLPreview{},

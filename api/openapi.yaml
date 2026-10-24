@@ -2783,7 +2783,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/ModelFit"
+                  $ref: "#/components/schemas/ModelsFit"
   /api/v1/models/browse:
     get:
       summary: Search Hugging Face for GGUF models
@@ -6882,39 +6882,7 @@ components:
               node_name: {type: string}
         status: {type: string, description: available|downloading|installed|loading|running|stopping|error}
         last_used_at: {type: string, format: date-time}
-        fit:
-          type: object
-          description: Describes how well a model fits a node's hardware.
-          required: [expected_memory_bytes, install_allowed, label, model_id]
-          properties:
-            model_id: {type: string}
-            node_id: {type: string}
-            node_name: {type: string}
-            label: {type: string}
-            expected_memory_bytes: {type: integer, format: int64}
-            reason: {type: string}
-            est_tok_per_sec: {type: number}
-            tok_per_sec_measured: {type: boolean}
-            runtime_memory_low_bytes: {type: integer, format: int64, description: '`runtime_memory_low_bytes` and RuntimeMemoryHighBytes are a conservative range for weights, KV cache, and runtime buffers. They are not the file size alone.'}
-            runtime_memory_high_bytes: {type: integer, format: int64}
-            weight_bytes: {type: integer, format: int64}
-            quantization: {type: string}
-            approximate: {type: boolean}
-            context_tokens: {type: integer}
-            total_memory_bytes: {type: integer, format: int64}
-            available_memory_bytes: {type: integer, format: int64}
-            memory_kind: {type: string, description: unified | system}
-            headroom: {type: number}
-            install_allowed: {type: boolean}
-            runtime_warning: {type: string}
-            recommendations:
-              type: array
-              items: {type: string}
-            gpu_note: {type: string}
-            known_to_run: {type: boolean}
-            short: {type: string, description: 'What a model is short of when that holds it back: "shared" on Apple silicon, where the graphics may use only part of memory, with NeedBytes what it needs and HaveBytes what the graphics may use (contract 1.46, #751).'}
-            need_bytes: {type: integer, format: int64}
-            have_bytes: {type: integer, format: int64}
+        fit: {$ref: '#/components/schemas/ModelFit'}
         dynamic: {type: boolean, description: installed from browse-all / URL}
         support_role: {type: string, description: '`support_role` marks a model that serves Yggdrasil instead of chatting: SupportEmbedding, SupportReranker, or SupportClassifier. Empty for chat models.'}
         languages:
@@ -8214,7 +8182,7 @@ components:
         estimated_storage_bytes: {type: integer, format: int64}
         estimated_vram_bytes: {type: integer, format: int64}
         community_chosen: {type: boolean, description: True when community ratings moved the main model ahead of the curated first choice.}
-    ModelFit:
+    ModelsFit:
       type: object
       description: Returned by GET /models/fit.
       required: [fits, memory_bytes, winners]
@@ -8224,50 +8192,10 @@ components:
         memory_bytes: {type: integer, format: int64}
         fits:
           type: array
-          items:
-            type: object
-            description: Describes how well a model fits a node's hardware.
-            required: [expected_memory_bytes, install_allowed, label, model_id]
-            properties:
-              model_id: {type: string}
-              node_id: {type: string}
-              node_name: {type: string}
-              label: {type: string}
-              expected_memory_bytes: {type: integer, format: int64}
-              reason: {type: string}
-              est_tok_per_sec: {type: number}
-              tok_per_sec_measured: {type: boolean}
-              runtime_memory_low_bytes: {type: integer, format: int64, description: '`runtime_memory_low_bytes` and RuntimeMemoryHighBytes are a conservative range for weights, KV cache, and runtime buffers. They are not the file size alone.'}
-              runtime_memory_high_bytes: {type: integer, format: int64}
-              weight_bytes: {type: integer, format: int64}
-              quantization: {type: string}
-              approximate: {type: boolean}
-              context_tokens: {type: integer}
-              total_memory_bytes: {type: integer, format: int64}
-              available_memory_bytes: {type: integer, format: int64}
-              memory_kind: {type: string, description: unified | system}
-              headroom: {type: number}
-              install_allowed: {type: boolean}
-              runtime_warning: {type: string}
-              recommendations:
-                type: array
-                items: {type: string}
-              gpu_note: {type: string}
-              known_to_run: {type: boolean}
-              short: {type: string, description: 'What a model is short of when that holds it back: "shared" on Apple silicon, where the graphics may use only part of memory, with NeedBytes what it needs and HaveBytes what the graphics may use (contract 1.46, #751).'}
-              need_bytes: {type: integer, format: int64}
-              have_bytes: {type: integer, format: int64}
+          items: {$ref: '#/components/schemas/ModelFit'}
         winners:
           type: array
-          items:
-            type: object
-            description: A recommendation badge for Discover.
-            required: [category, label, model_id]
-            properties:
-              category: {type: string, description: best_overall|fastest|best_quality|lowest_memory|coding|general|reasoning|vision}
-              label: {type: string, description: human label e.g. "Best coding"}
-              model_id: {type: string}
-              community_chosen: {type: boolean, description: True when community ratings from hardware like this computer's moved this model ahead of the curated first choice.}
+          items: {$ref: '#/components/schemas/CategoryWinner'}
     BrowseModel:
       type: object
       description: A Hugging Face browse-all hit (GGUF filtered).
@@ -9762,3 +9690,45 @@ components:
               finish_reason: {type: string}
         toskar: {$ref: "#/components/schemas/ToskarExtension"}
         yggdrasil: {$ref: "#/components/schemas/ToskarExtension"}
+    ModelFit:
+      type: object
+      description: Describes how well a model fits a node's hardware.
+      required: [expected_memory_bytes, install_allowed, label, model_id]
+      properties:
+        model_id: {type: string}
+        node_id: {type: string}
+        node_name: {type: string}
+        label: {type: string}
+        expected_memory_bytes: {type: integer, format: int64}
+        reason: {type: string}
+        est_tok_per_sec: {type: number}
+        tok_per_sec_measured: {type: boolean}
+        runtime_memory_low_bytes: {type: integer, format: int64, description: '`runtime_memory_low_bytes` and RuntimeMemoryHighBytes are a conservative range for weights, KV cache, and runtime buffers. They are not the file size alone.'}
+        runtime_memory_high_bytes: {type: integer, format: int64}
+        weight_bytes: {type: integer, format: int64}
+        quantization: {type: string}
+        approximate: {type: boolean}
+        context_tokens: {type: integer}
+        total_memory_bytes: {type: integer, format: int64}
+        available_memory_bytes: {type: integer, format: int64}
+        memory_kind: {type: string, description: unified | system}
+        headroom: {type: number}
+        install_allowed: {type: boolean}
+        runtime_warning: {type: string}
+        recommendations:
+          type: array
+          items: {type: string}
+        gpu_note: {type: string}
+        known_to_run: {type: boolean}
+        short: {type: string, description: 'What a model is short of when that holds it back: "shared" on Apple silicon, where the graphics may use only part of memory, with NeedBytes what it needs and HaveBytes what the graphics may use (contract 1.46, #751).'}
+        need_bytes: {type: integer, format: int64}
+        have_bytes: {type: integer, format: int64}
+    CategoryWinner:
+      type: object
+      description: A recommendation badge for Discover.
+      required: [category, label, model_id]
+      properties:
+        category: {type: string, description: best_overall|fastest|best_quality|lowest_memory|coding|general|reasoning|vision}
+        label: {type: string, description: human label e.g. "Best coding"}
+        model_id: {type: string}
+        community_chosen: {type: boolean, description: True when community ratings from hardware like this computer's moved this model ahead of the curated first choice.}
