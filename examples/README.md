@@ -17,18 +17,17 @@ The pairing examples connect the way the Toskar app does: with the code Connect 
 **Python** 3.10 or newer:
 
 ```bash
-pip install "git+https://github.com/yeixio/toskar-sdks#subdirectory=python"
+pip install toskar
 python examples/python/chat.py "Plan a three-day trip to Juneau"
 ```
 
-Pairing from away from home also needs the `anywhere` extra: `pip install "toskar[anywhere] @ git+https://github.com/yeixio/toskar-sdks#subdirectory=python"`.
+Pairing from away from home also needs the `anywhere` extra: `pip install "toskar[anywhere]"`.
 
-**JavaScript**, Node.js 18 or newer. Until the package is on npm, build it and link it:
+**JavaScript**, Node.js 18 or newer:
 
 ```bash
-git clone https://github.com/yeixio/toskar-sdks
-(cd toskar-sdks/typescript && npm install && npm run build && npm link)
-cd examples/javascript && npm link toskar
+cd examples/javascript
+npm install toskar
 node chat.mjs "Plan a three-day trip to Juneau"
 ```
 

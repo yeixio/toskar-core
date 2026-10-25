@@ -19,7 +19,7 @@ github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+
 github.com/stretchr/testify v1.3.0/go.mod h1:M5WIy9Dh21IEIfnGCwXGc5bZfKNJtfHm1UVUgZn+9EI=
 github.com/stretchr/testify v1.11.1 h1:7s2iGBzp5EwR7/aIZr8ao5+dra3wiQyKjjFuvgVKu7U=
 github.com/stretchr/testify v1.11.1/go.mod h1:wZwfW3scLgRK+23gO65QZefKpKQRnfz6sD981Nm4B6U=
-github.com/yeixio/toskar-sdks/go v0.0.0-20261024172511-55c2a88b4b5b h1:Ace7gHQ1DiTY+V+kgW7XkP3/VbjoDOrqQMu2XrLOKx8=
-github.com/yeixio/toskar-sdks/go v0.0.0-20261024172511-55c2a88b4b5b/go.mod h1:CpZs9WYBUhlPfn0Pa8xI4rgWJh9Wmzcr/csNr2FF8rM=
+github.com/yeixio/toskar-sdks/go v0.1.0 h1:DWVWjiYk0ywtGKyhHG2RVMdPZuTQ1vzMKHGb2iAMBw8=
+github.com/yeixio/toskar-sdks/go v0.1.0/go.mod h1:CpZs9WYBUhlPfn0Pa8xI4rgWJh9Wmzcr/csNr2FF8rM=
 gopkg.in/yaml.v3 v3.0.1 h1:fxVm/GzAzEWqLHuvctI91KS9hhNmmWOoWu0XTYJS7CA=
 gopkg.in/yaml.v3 v3.0.1/go.mod h1:K4uyk7z7BCEPqu6E+C64Yfv1cQ7kz7rIZviUmN+EgEM=
