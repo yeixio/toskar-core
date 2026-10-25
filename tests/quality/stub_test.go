@@ -64,6 +64,11 @@ func served(base string, messages []pluginapi.ChatMessage) (string, error) {
 		}
 		out = append(out, msg{Role: role, Content: m.Content})
 	}
+	// As the llama.cpp runtime sends it: text that spells a control token
+	// stays text (#829).
+	for i := range out {
+		out[i].Content = pluginapi.EscapeChatMarkers(out[i].Content)
+	}
 	body, _ := json.Marshal(map[string]any{"messages": out, "temperature": 0, "seed": 1, "max_tokens": 768})
 	resp, err := (&http.Client{Timeout: 10 * time.Minute}).Post(base+"/v1/chat/completions", "application/json", bytes.NewReader(body))
 	if err != nil {

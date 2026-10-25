@@ -132,7 +132,14 @@ func (r *Runtime) ListModels(ctx context.Context) ([]string, error) {
 // Chat streams a reply from model on the external server (POST
 // /v1/chat/completions with stream).
 func (r *Runtime) Chat(ctx context.Context, model string, req pluginapi.ChatRequest) (<-chan pluginapi.ChatChunk, error) {
-	body := map[string]any{"model": model, "messages": req.Messages, "stream": true}
+	// The server may be a llama-server, which parses control tokens in the
+	// prompt: text that spells a turn marker stays text (#829).
+	messages := make([]pluginapi.ChatMessage, len(req.Messages))
+	for i, m := range req.Messages {
+		m.Content = pluginapi.EscapeChatMarkers(m.Content)
+		messages[i] = m
+	}
+	body := map[string]any{"model": model, "messages": messages, "stream": true}
 	if t, ok := pluginapi.SamplingTemperature(req.Temperature); ok {
 		body["temperature"] = t
 	}

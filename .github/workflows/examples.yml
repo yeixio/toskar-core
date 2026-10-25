@@ -42,7 +42,9 @@ jobs:
       - name: Build Core
         env:
           CGO_ENABLED: "0"
-        run: go build -o "$RUNNER_TEMP/toskar" ./cmd/daemon
+        # Not $RUNNER_TEMP/toskar: the Ask Toskar action keeps its Toskar's
+        # folder there, and a home runner can still have one.
+        run: go build -o "$RUNNER_TEMP/toskar-daemon" ./cmd/daemon
       - name: Build the SDKs
         run: |
           (cd toskar-sdks/go && go build -o "$RUNNER_TEMP/toskar-conformance-go" ./cmd/toskar-conformance)
@@ -50,9 +52,9 @@ jobs:
           (cd toskar-sdks/typescript && npm ci && npm run build)
       - name: Run the SDKs' conformance cases
         run: |
-          python toskar-sdks/conformance/run.py --core "$RUNNER_TEMP/toskar" \
+          python toskar-sdks/conformance/run.py --core "$RUNNER_TEMP/toskar-daemon" \
             --program "go=$RUNNER_TEMP/toskar-conformance-go" \
             --program "python=$RUNNER_TEMP/venv/bin/python toskar-sdks/python/conformance.py" \
             --program "node=node toskar-sdks/typescript/conformance.mjs"
       - name: Run the examples
-        run: python examples/test.py --core "$RUNNER_TEMP/toskar" --sdks toskar-sdks --python "$RUNNER_TEMP/venv/bin/python"
+        run: python examples/test.py --core "$RUNNER_TEMP/toskar-daemon" --sdks toskar-sdks --python "$RUNNER_TEMP/venv/bin/python"

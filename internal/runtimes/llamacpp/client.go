@@ -38,7 +38,8 @@ func (c *Client) chat(ctx context.Context, req pluginapi.ChatRequest, again func
 		return nil, fmt.Errorf("model endpoint required")
 	}
 	body := map[string]any{
-		"messages": req.Messages,
+		// Text that spells a control token stays text (#829).
+		"messages": escapeControl(req.ModelEndpoint, req.Messages),
 		"stream":   req.Stream,
 	}
 	if t, ok := pluginapi.SamplingTemperature(req.Temperature); ok {

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"regexp"
 	"strings"
 )
 
@@ -288,4 +289,30 @@ type GenerationMetrics struct {
 // Generator can stream chat completions against a running model.
 type Generator interface {
 	Chat(ctx context.Context, req ChatRequest) (<-chan ChatChunk, error)
+}
+
+// WordJoiner is what EscapeToken puts in a control token's spelling.
+const WordJoiner = "\u2060"
+
+// chatMarkers are the common chat templates' markers: ChatML, Llama 3, Phi,
+// and harmony's <|…|>, DeepSeek's <｜…｜>, Gemma's turns, and Mistral's
+// [INST] and its tool markers (#829).
+var chatMarkers = regexp.MustCompile(`<\|[A-Za-z0-9_]{1,48}\|>|<｜[^｜<>\n]{1,48}｜>|</?(?:start_of_turn|end_of_turn|bos|eos)>|\[/?(?:INST|SYSTEM_PROMPT|AVAILABLE_TOOLS|TOOL_CALLS|TOOL_RESULTS|TOOL_CONTENT)\]`)
+
+// EscapeToken is a control token's spelling with a word joiner after its
+// first character: it reads the same, and matches no token, so a model
+// server that parses special tokens in a prompt sees it as text (#829).
+func EscapeToken(tok string) string {
+	for i := range tok {
+		if i > 0 {
+			return tok[:i] + WordJoiner + tok[i:]
+		}
+	}
+	return tok
+}
+
+// EscapeChatMarkers escapes every common chat-template marker in text,
+// such as <|im_start|>, so text that spells one stays text in the prompt.
+func EscapeChatMarkers(text string) string {
+	return chatMarkers.ReplaceAllStringFunc(text, EscapeToken)
 }

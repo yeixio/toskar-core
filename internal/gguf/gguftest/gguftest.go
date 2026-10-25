@@ -23,6 +23,10 @@ type Options struct {
 	Elements uint64
 	// Cut drops this many bytes from the end, as an interrupted copy would.
 	Cut int
+	// Vocab is tokenizer.ggml.tokens, and Control which of them are control
+	// tokens (tokenizer.ggml.token_type 3; the rest are 1, normal).
+	Vocab   []string
+	Control map[string]bool
 }
 
 // Bytes is the file's content.
@@ -37,7 +41,7 @@ func Bytes(o Options) []byte {
 	u32 := func(v uint32) { _ = binary.Write(&b, binary.LittleEndian, v) }
 	u64 := func(v uint64) { _ = binary.Write(&b, binary.LittleEndian, v) }
 	str := func(s string) { u64(uint64(len(s))); b.WriteString(s) }
-	const typeUint32, typeString = 4, 8
+	const typeUint32, typeInt32, typeString, typeArray = 4, 5, 8, 9
 	var kv bytes.Buffer
 	n := 0
 	put := func(key string, write func()) {
@@ -62,6 +66,28 @@ func Bytes(o Options) []byte {
 	}
 	if o.Context != 0 {
 		put(o.Architecture+".context_length", func() { u32(typeUint32); u32(o.Context) })
+	}
+	if len(o.Vocab) > 0 {
+		put("tokenizer.ggml.tokens", func() {
+			u32(typeArray)
+			u32(typeString)
+			u64(uint64(len(o.Vocab)))
+			for _, tok := range o.Vocab {
+				str(tok)
+			}
+		})
+		put("tokenizer.ggml.token_type", func() {
+			u32(typeArray)
+			u32(typeInt32)
+			u64(uint64(len(o.Vocab)))
+			for _, tok := range o.Vocab {
+				if o.Control[tok] {
+					u32(3)
+				} else {
+					u32(1)
+				}
+			}
+		})
 	}
 	b.WriteString("GGUF")
 	u32(3)

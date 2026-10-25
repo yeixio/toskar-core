@@ -166,6 +166,7 @@ func (r *Runtime) StartModel(ctx context.Context, cfg pluginapi.ModelStartConfig
 	exited := r.sup.procs[instanceID].exited
 	r.sup.mu.Unlock()
 	registerAdapters(endpoint, wantAdapters)
+	registerControl(endpoint, cfg.ModelPath)
 
 	go r.sup.watch(instanceID)
 
@@ -247,6 +248,7 @@ func (r *Runtime) StopModel(ctx context.Context, id string) error {
 	}
 	stopLlamaProcess(p.cmd, 1500*time.Millisecond)
 	registerAdapters(p.endpoint, nil)
+	forgetControl(p.endpoint)
 	if p.logFile != nil {
 		_ = p.logFile.Close()
 	}
@@ -317,6 +319,7 @@ func (ps *ProcessSupervisor) watch(instanceID string) {
 	}
 	ps.mu.Unlock()
 	registerAdapters(p.endpoint, nil)
+	forgetControl(p.endpoint)
 	if p.logFile != nil {
 		_ = p.logFile.Close()
 	}
