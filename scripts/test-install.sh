@@ -14,6 +14,7 @@ ls dist/*.deb dist/SHA256SUMS.txt >/dev/null
 
 work="$(mktemp -d)"
 cleanup() {
+	if [[ -f "$work/ci/toskar.pid" ]]; then kill "$(cat "$work/ci/toskar.pid")" 2>/dev/null || true; fi
 	if [[ -n "${http_pid:-}" ]]; then kill "$http_pid" 2>/dev/null || true; fi
 	if [[ -n "${issuer_pid:-}" ]]; then kill "$issuer_pid" 2>/dev/null || true; fi
 }
@@ -80,4 +81,21 @@ else
 	cat "$work/again.txt"
 	exit 1
 fi
+echo "== ci: in a folder, with no root or service (#455)"
+: >"$work/github_env"
+: >"$work/github_path"
+GITHUB_ENV="$work/github_env" GITHUB_PATH="$work/github_path" sh scripts/install.sh ci --dir "$work/ci" --port 17451
+grep -qx "TOSKAR_URL=http://127.0.0.1:17451" "$work/github_env"
+curl -fsS http://127.0.0.1:17451/api/v1/health
+"$(cat "$work/github_path")/toskarctl" version | head -1
+# Its own port: a second one there is refused, not started over the first.
+if sh scripts/install.sh ci --dir "$work/ci2" --port 17451 >"$work/ci2.txt" 2>&1; then
+	echo "a second ci on the same port should be refused"
+	exit 1
+fi
+grep -q "already answers on port 17451" "$work/ci2.txt"
+# --no-start: toskarctl only, beside the one running.
+: >"$work/github_path3"
+GITHUB_PATH="$work/github_path3" sh scripts/install.sh ci --dir "$work/ci3" --port 17451 --no-start
+"$(cat "$work/github_path3")/toskarctl" version | head -1
 echo "installer test passed"

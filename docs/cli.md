@@ -25,7 +25,7 @@ The daemon runs in the foreground and logs JSON to standard output and to `logs/
 How it is started depends on how it was installed:
 
 - **deb and rpm packages:** they install a systemd service, `toskar.service` (also reachable as `yggdrasil.service`), and enable and start it. It runs as the system user `yggdrasil`, so its data directory is `/var/lib/yggdrasil/.local/share/toskar`, or `/var/lib/yggdrasil/.local/share/yggdrasil` for an install from before the rename. Use `sudo systemctl status toskar`, `restart`, and `stop`. `journalctl -u toskar` shows its log. Removing the package stops and disables the service.
-- **Homebrew and the headless archives:** they install the programs only. Run `toskar` from a terminal or your own service manager.
+- **Homebrew and the headless archives:** they install the programs only. Run `toskar` from a terminal or your own service manager. `install.sh ci` installs and starts one in a folder for a CI job ([Toskar in CI](ci.md)).
 
 ## `toskarctl`
 
@@ -75,6 +75,8 @@ Text piped in, or from `--file`, is sent as data to work on, apart from the prom
 The answer never uses tools. It goes through the OpenAI-compatible API (`/v1/chat/completions`), so it saves no conversation, and an API key's permissions apply: a key that may not use memory can't be given `--memory`. For a CI job, make the key with **For a CI job** on the API Access page: it can only ask, with no memories, knowledge, or tools, whatever the job sends ([API key permissions](api.md#openai-compatible-api)).
 
 Exit status: 0 for an answer, 1 for a model or connection error, 2 for a usage error, and 3 for an answer that doesn't fit `--json-schema`.
+
+A CI runner with no Toskar nearby can run one: [Toskar in CI](ci.md).
 
 `ask` reads standard input whenever it isn't a terminal. Where it's an open pipe that never ends, such as some job runners and `ssh` without a command, give it `< /dev/null`.
 

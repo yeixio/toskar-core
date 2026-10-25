@@ -164,7 +164,7 @@ Issue labels are defined in [`.github/labels.yml`](../.github/labels.yml). GitHu
 
 ## Release flow
 
-Tag `v*` → release workflow → Linux `.deb` and `.rpm` (amd64 and arm64), macOS headless archives (arm64 and amd64), Windows amd64 headless archive, `SHA256SUMS.txt` → GitHub Release.
+Tag `v*` → release workflow → Linux `.deb`, `.rpm`, and headless archives (amd64 and arm64), macOS headless archives (arm64 and amd64), Windows amd64 headless archive, `SHA256SUMS.txt` → GitHub Release.
 
 The same job opens a Homebrew formula pull request, updates the `apt` branch, and opens a documentation snapshot pull request. The release token cannot approve those pull requests, so a required review leaves them open and does not fail the release. Signing is not part of this workflow. The checklist is [release-checklist.md](release-checklist.md).
 
