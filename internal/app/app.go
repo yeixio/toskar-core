@@ -896,6 +896,8 @@ func New(opts Options) (*App, error) {
 	a.Mimir.SetSecrets(secrets)
 	// The file store comes first: the tools below read and attach chat files.
 	a.Artifacts = artifacts.NewStore(db.SQL, filepath.Join(cfg.DataDir, "artifacts"))
+	// Pictures in a chat completion are kept as files while its turn runs (#830).
+	openaiHandler.Pictures = a.Artifacts
 	a.python = pyenv.New(filepath.Join(cfg.RuntimesDir, "python"))
 	a.Mimir.SetRecognizer(&ocr.Recognizer{Python: a.python, WorkDir: filepath.Join(cfg.DataDir, "knowledge", "ocr-jobs")})
 	// Code runs only inside the operating system's sandbox (Gungnir §20).

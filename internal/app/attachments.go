@@ -103,16 +103,21 @@ func (a *App) toolReady(id string) bool {
 }
 
 func (e *chatExecEnv) attachmentBlock(ctx context.Context, prompt string) string {
-	if e.app == nil || e.app.Artifacts == nil || e.conversationID == "" {
+	// A turn with no chat, as an API request's (#830), has only its own
+	// attachments.
+	if e.app == nil || e.app.Artifacts == nil || (e.conversationID == "" && len(e.attachments) == 0) {
 		return ""
 	}
 	current := map[string]bool{}
 	for _, a := range e.attachments {
 		current[a.ID] = true
 	}
-	all, err := e.app.Artifacts.List(ctx, e.conversationID)
-	if err != nil {
-		return ""
+	var all []artifacts.Artifact
+	if e.conversationID != "" {
+		var err error
+		if all, err = e.app.Artifacts.List(ctx, e.conversationID); err != nil {
+			return ""
+		}
 	}
 	var earlier []artifacts.Artifact
 	for _, a := range all {
