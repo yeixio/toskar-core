@@ -1,9 +1,19 @@
 #!/bin/sh
-# Install Toskar Core and, optionally, join a network (#40).
+# Install Toskar Core and, optionally, join a network (#40), or run it for
+# a CI job (#455).
 #
 #   curl -fsSL https://github.com/yeixio/toskar-core/releases/latest/download/install.sh | sh
 #   curl -fsSL https://github.com/yeixio/toskar-core/releases/latest/download/install.sh | \
 #     sh -s -- join --server 192.168.1.10:7332 --token ygj_… --fingerprint sha256:…
+#   curl -fsSL https://github.com/yeixio/toskar-core/releases/latest/download/install.sh | \
+#     sh -s -- ci --model llama-3.2-1b-q4
+#
+# ci installs the release's headless archive in a folder, without root or
+# a service, starts Toskar there in the background, installs a model and
+# waits for it, and says where it is: TOSKAR_URL, and toskarctl on PATH,
+# written to GITHUB_ENV and GITHUB_PATH in GitHub Actions and printed as
+# export lines elsewhere. Cache the folder's data/models and data/runtimes
+# between runs to skip the downloads.
 #
 # Linux: the release's .deb (apt) or .rpm (dnf, yum), which run Toskar as
 # a systemd service. macOS: the release's headless archive in
@@ -38,17 +48,48 @@ die() {
 usage() {
 	cat <<'EOF'
 usage: install.sh [join --server <host:port> --token <ygj_…> --fingerprint <sha256:…>]
+       install.sh ci [--model <id>] [--dir <folder>] [--port <port>]
 Installs Toskar Core, starts it as a service, and with join, joins this
 computer to the network that made the join command.
+With ci, installs it in a folder (default ~/.toskar-ci) for a CI job, with
+no root or service, starts it there on port 17331, and installs the model.
 EOF
 }
 
 joining=0
+ci=0
+ci_model=""
+ci_dir="${HOME:-.}/.toskar-ci"
+ci_port="17331"
 if [ "$#" -gt 0 ]; then
 	case "$1" in
 	join)
 		joining=1
 		shift
+		;;
+	ci)
+		ci=1
+		shift
+		while [ "$#" -gt 0 ]; do
+			case "$1" in
+			--model)
+				ci_model="${2:?--model needs a model id}"
+				shift 2
+				;;
+			--dir)
+				ci_dir="${2:?--dir needs a folder}"
+				shift 2
+				;;
+			--port)
+				ci_port="${2:?--port needs a port}"
+				shift 2
+				;;
+			*)
+				usage >&2
+				exit 2
+				;;
+			esac
+		done
 		;;
 	-h | --help | help)
 		usage
@@ -321,6 +362,71 @@ EOF
 		launchctl bootstrap "user/$(id -u)" "$plist" || die "launchd couldn't start Toskar; run this with sudo on a computer nobody is logged in to"
 	fi
 }
+
+# run_ci installs and starts Toskar in ci_dir for a CI job, on ci_port, so
+# it never meets a Toskar the runner already has.
+run_ci() {
+	command -v curl >/dev/null 2>&1 || die "ci needs curl"
+	case "$os" in
+	Linux) oslower="linux" ;;
+	Darwin) oslower="darwin" ;;
+	*) die "ci runs on Linux and macOS" ;;
+	esac
+	API="http://127.0.0.1:${ci_port}"
+	if healthy; then
+		die "something already answers on port ${ci_port}; choose another with --port"
+	fi
+	# Linux archives start with Toskar 1.11.
+	archive="$(download_release "toskar-[0-9][^ ]*-${oslower}-${arch}-headless\.tar\.gz")"
+	tar -xzf "$archive" -C "$tmp"
+	src="$(find "$tmp" -maxdepth 1 -type d -name 'toskar-*-headless' | head -n 1)"
+	[ -n "$src" ] || die "the archive didn't have the expected folder"
+	app="${ci_dir}/app"
+	mkdir -p "$ci_dir/data"
+	rm -rf "$app"
+	cp -R "$src" "$app"
+	if [ "$os" = "Darwin" ]; then xattr -dr com.apple.quarantine "$app" 2>/dev/null || true; fi
+
+	say "Starting Toskar..."
+	TOSKAR_API_PORT="$ci_port" TOSKAR_INTERNAL_PORT="$((ci_port + 1))" TOSKAR_DISCOVERY_ENABLED=false \
+		YGGDRASIL_WEB_UI_DIR="$app/web" nohup "$app/toskar" -data-dir "$ci_dir/data" >"$ci_dir/toskar.log" 2>&1 &
+	printf '%s\n' "$!" >"$ci_dir/toskar.pid"
+	if ! wait_healthy; then
+		tail -n 25 "$ci_dir/toskar.log" >&2
+		die "Toskar didn't start within a minute"
+	fi
+	ok "Toskar Core is running at ${API} (log: ${ci_dir}/toskar.log)"
+
+	if [ -n "$ci_model" ]; then
+		say "Installing llama.cpp..."
+		curl -fsS -m 900 -X POST "${API}/api/v1/runtimes/llamacpp/install" >/dev/null ||
+			die "couldn't install llama.cpp; see ${ci_dir}/toskar.log"
+		say "Installing ${ci_model}, from the cache or a download..."
+		if ! out="$(curl -sS -m "${TOSKAR_CI_TIMEOUT:-3600}" -X POST -H 'Content-Type: application/json' -d '{"wait":true}' \
+			-w ' %{http_code}' "${API}/api/v1/models/${ci_model}/install")"; then
+			die "couldn't install ${ci_model}; see ${ci_dir}/toskar.log"
+		fi
+		case "${out##* }" in
+		2??) ok "${ci_model} is installed" ;;
+		*) die "couldn't install ${ci_model}: ${out% *}" ;;
+		esac
+	fi
+
+	if [ -n "${GITHUB_ENV:-}" ] && [ -n "${GITHUB_PATH:-}" ]; then
+		printf 'TOSKAR_URL=%s\n' "$API" >>"$GITHUB_ENV"
+		printf '%s\n' "$app" >>"$GITHUB_PATH"
+		ok "TOSKAR_URL and toskarctl are set for the job's next steps"
+	else
+		say "For the job's next steps:"
+		printf 'export TOSKAR_URL=%s\n' "$API"
+		printf 'export PATH="%s:$PATH"\n' "$app"
+	fi
+}
+
+if [ "$ci" -eq 1 ]; then
+	run_ci
+	exit 0
+fi
 
 YGGCTL="toskarctl"
 command -v toskarctl >/dev/null 2>&1 || YGGCTL="yggctl"

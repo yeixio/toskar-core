@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Build the core release artifacts: Linux deb and rpm, macOS archives, and a Windows amd64 archive.
+# Build the core release artifacts: Linux deb, rpm, and archives, macOS archives, and a Windows amd64 archive.
 # Usage: VERSION=1.1.0-beta.3 ./scripts/build/package-core-release.sh
 # Artifacts are not code-signed.
 set -euo pipefail
@@ -155,7 +155,13 @@ EOF
   nfpm package -p deb -f "$cfg" -t "dist/toskar_${VERSION}_${debarch}.deb"
   nfpm package -p rpm -f "$cfg" -t "dist/toskar-${VERSION}-1.${rpmarch}.rpm"
   rm -f "$cfg"
-  rm -rf "$stage"
+  # The same files as an archive, for a computer or CI runner that installs
+  # without root or a service: install.sh ci (#455).
+  local name="toskar-${VERSION}-linux-${goarch}-headless"
+  rm -rf "dist/${name}"
+  mv "$stage" "dist/${name}"
+  tar -C dist -czf "dist/${name}.tar.gz" "$name"
+  rm -rf "dist/${name}"
 }
 
 # package_transitional builds an empty yggdrasil deb that depends on toskar,
