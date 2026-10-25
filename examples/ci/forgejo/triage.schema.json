@@ -1,0 +1,1 @@
+{"type": "object", "properties": {"labels": {"type": "array", "items": {"enum": ["bug", "feature", "docs", "question"]}}}, "required": ["labels"]}

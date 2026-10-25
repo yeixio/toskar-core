@@ -1,0 +1,39 @@
+# Suggests labels for each new issue, in a comment for a person to apply.
+# Forgejo and Gitea Actions.
+#
+# Copy this to .forgejo/workflows/, and triage.schema.json to .forgejo/. Set
+# the secrets TOSKAR_URL and TOSKAR_API_KEY, a key made with For a CI job on
+# Toskar's API Access page. To start Toskar on the runner instead, drop
+# `--no-start` and the two secrets.
+name: Triage
+
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  suggest:
+    runs-on: docker
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install toskarctl
+        run: curl -fsSL https://github.com/yeixio/toskar-core/releases/latest/download/install.sh | sh -s -- ci --no-start
+      - name: Suggest labels in a comment
+        env:
+          TOSKAR_URL: ${{ secrets.TOSKAR_URL }}
+          TOSKAR_API_KEY: ${{ secrets.TOSKAR_API_KEY }}
+          TITLE: ${{ github.event.issue.title }}
+          BODY: ${{ github.event.issue.body }}
+          ISSUE: ${{ github.event.issue.number }}
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          API: ${{ github.server_url }}/api/v1
+        run: |
+          printf '%s\n\n%s\n' "$TITLE" "$BODY" |
+            toskarctl ask --json-schema .forgejo/triage.schema.json \
+              "Suggest labels for this issue, from bug, feature, docs, and question." > labels.json
+          # Only the labels you allow, never the answer's own text.
+          allowed=$(jq -r '[.labels[] | select(IN("bug", "feature", "docs", "question"))] | join(", ")' labels.json)
+          [ -n "$allowed" ] || exit 0
+          jq -n --arg body "Suggested labels: $allowed" '{body: $body}' |
+            curl -fsS -X POST -H "Authorization: token $TOKEN" -H "Content-Type: application/json" \
+              --data @- "$API/repos/$GITHUB_REPOSITORY/issues/$ISSUE/comments"
