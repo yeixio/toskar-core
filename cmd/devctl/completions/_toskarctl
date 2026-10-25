@@ -7,6 +7,7 @@ _toskarctl() {
     'version:print the version, license, and source URL'
     'about:print the version, license, and source URL'
     'paths:print the data, model, runtime, log, and database directories'
+    'ask:send one prompt and print the answer, for scripts and CI'
     'automations:manage scheduled automations on the daemon'
     'mcp:connect an app such as Claude Desktop to Yggdrasil over MCP'
     'join:join this computer to a Yggdrasil network with a join command'
@@ -23,6 +24,12 @@ _toskarctl() {
   fi
 
   case "${words[2]}" in
+    ask)
+      _arguments '--model[a model, auto, or sai:<slug>]:model:' '--profile[answer as this profile]:profile:' \
+        '--system[a system prompt]:text:' '--file[data to work on]:file:_files' '--json-schema[answer with JSON that fits this schema]:file:_files' \
+        '--max-tokens[the longest answer, in tokens]:n:' '--temperature[sampling temperature]:t:' '--timeout[how long to wait]:duration:' \
+        '--memory[let the answer use memory]' '--knowledge[let the answer use connected knowledge]' '*:prompt:'
+      ;;
     mcp)
       _arguments '--url[Yggdrasil address]:url:'
       ;;

@@ -252,6 +252,9 @@ func (a *App) RunChat(ctx context.Context, profileID, conversationID, message st
 	// Connected services' tools, at their default policies unless the
 	// profile sets its own (§32).
 	profile = tools.WithConnected(profile)
+	// Whether the profile keeps work here, before a request narrows its
+	// tools: an API caller that turns tools off hasn't asked for that.
+	offline := profileOffline(profile)
 	if opts != nil {
 		// An API key or request can narrow the tools, never widen them (§62).
 		profile = narrowTools(profile, opts)
@@ -447,6 +450,7 @@ func (a *App) RunChat(ctx context.Context, profileID, conversationID, message st
 			app:            a,
 			ctx:            ctx,
 			profile:        profile,
+			offline:        &offline,
 			modelOverride:  modelID,
 			conversationID: conversationID,
 			taskID:         task.ID,
@@ -1151,10 +1155,13 @@ func applyExecutionPolicy(p profiles.Profile, execution string) profiles.Profile
 type chatExecEnv struct {
 	// trainingNoted is set once the turn's steps say this computer is
 	// training.
-	trainingNoted  bool
-	app            *App
-	ctx            context.Context
-	profile        profiles.Profile
+	trainingNoted bool
+	app           *App
+	ctx           context.Context
+	profile       profiles.Profile
+	// offline is whether the profile keeps work on this computer, as set
+	// before a request narrowed its tools; nil reads it from profile.
+	offline        *bool
 	modelOverride  string
 	conversationID string
 	taskID         string
@@ -1635,7 +1642,7 @@ func (e *chatExecEnv) NodeForRole(role string) (string, error) {
 	// A model on the external server runs there, chosen explicitly, never
 	// for a profile or a chat that keeps work here (#111).
 	if external.IsModel(modelID) {
-		if err := externalAllowed(e.profile, e.keepsLocal()); err != nil {
+		if err := externalAllowed(e.profileOffline(), e.keepsLocal()); err != nil {
 			return "", err
 		}
 		local := e.app.Config.Get().NodeID

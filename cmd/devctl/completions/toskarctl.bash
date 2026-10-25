@@ -6,11 +6,18 @@ _toskarctl() {
   prev="${COMP_WORDS[COMP_CWORD-1]}"
 
   if [[ ${COMP_CWORD} -eq 1 ]]; then
-    COMPREPLY=($(compgen -W "version about paths automations mcp join join-token network leave people completion" -- "$cur"))
+    COMPREPLY=($(compgen -W "version about paths ask automations mcp join join-token network leave people completion" -- "$cur"))
     return
   fi
 
   case "${COMP_WORDS[1]}" in
+    ask)
+      if [[ "$cur" == -* ]]; then
+        COMPREPLY=($(compgen -W "--model --profile --system --file --json-schema --max-tokens --temperature --timeout --memory --knowledge" -- "$cur"))
+      elif [[ "$prev" == --file || "$prev" == --json-schema ]]; then
+        COMPREPLY=($(compgen -f -- "$cur"))
+      fi
+      ;;
     mcp)
       if [[ "$cur" == -* ]]; then
         COMPREPLY=($(compgen -W "--url" -- "$cur"))
