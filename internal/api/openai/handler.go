@@ -273,11 +273,9 @@ func (h *Handler) HandleChatCompletions(w http.ResponseWriter, r *http.Request) 
 		ctx = huginn.WithEffort(ctx, huginn.ParseEffort(effort))
 	}
 	if wantJSON {
-		// The model's reply is constrained to the schema where the runtime
-		// supports it.
-		if raw, err := json.Marshal(schema); err == nil {
-			ctx = structured.WithSchema(ctx, raw)
-		}
+		// The model's reply is constrained to the caller's schema, as they
+		// sent it, where the runtime supports it (#831).
+		ctx = structured.WithSchema(ctx, schema.Raw)
 		// The answer must be data a program can read: checked, repaired,
 		// and asked for once more if needed, then sent whole (§27).
 		content, err := h.structuredAnswer(ctx, opts, profileID, message, modelID, execution, schema)
