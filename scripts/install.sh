@@ -398,7 +398,9 @@ run_ci() {
 			ok "toskarctl is set for the job's next steps"
 		else
 			say "For the job's next steps:"
-			printf 'export PATH="%s:$PATH"\n' "$app"
+			# shellcheck disable=SC2016 # $PATH is for the shell that runs the line
+			# shellcheck disable=SC2016 # $PATH is for the shell that runs the line
+		printf 'export PATH="%s:$PATH"\n' "$app"
 		fi
 		return 0
 	fi
@@ -435,6 +437,7 @@ run_ci() {
 	else
 		say "For the job's next steps:"
 		printf 'export TOSKAR_URL=%s\n' "$API"
+		# shellcheck disable=SC2016 # $PATH is for the shell that runs the line
 		printf 'export PATH="%s:$PATH"\n' "$app"
 	fi
 }
