@@ -18,8 +18,6 @@ import (
 // matches no token. Core's own text holds no control tokens; its tool
 // protocol's <tool_call> and <tool_result> aren't control tokens.
 
-const wordJoiner = "⁠"
-
 var (
 	controlMu sync.RWMutex
 	// controlBy is each running llama-server's escaper, from its model's

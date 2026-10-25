@@ -67,7 +67,7 @@ func ControlTokens(path string) ([]string, error) {
 
 func notAWord(tok string) bool {
 	return len(tok) >= 3 && strings.ContainsFunc(tok, func(r rune) bool {
-		return !(r >= 'a' && r <= 'z' || r >= 'A' && r <= 'Z' || r >= '0' && r <= '9' || r == '_')
+		return (r < 'a' || r > 'z') && (r < 'A' || r > 'Z') && (r < '0' || r > '9') && r != '_'
 	})
 }
 
