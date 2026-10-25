@@ -1,5 +1,5 @@
 {
-  "version": "1.57",
+  "version": "1.58",
   "types": {
     "ActivityStep": [
       "kind",
@@ -134,9 +134,11 @@
       "completion_tokens",
       "eval_ms",
       "eval_tok_per_sec",
+      "finish_reason",
       "prompt_ms",
       "prompt_tok_per_sec",
       "prompt_tokens",
+      "reasoning_tokens",
       "total_ms",
       "total_tokens",
       "ttft_ms"

@@ -49,10 +49,10 @@ func jsonInstruction(s *structured.FullSchema) string {
 // structuredAnswer runs the turn, then checks its JSON against the schema
 // after safe repairs. An answer that still does not fit is sent back once
 // with the problems named. It returns compact JSON, or why none fit.
-func (h *Handler) structuredAnswer(ctx context.Context, opts *turnopts.Options, profileID, message, modelID, execution string, s *structured.FullSchema) (string, error) {
-	text, err := h.collect(ctx, profileID, message, modelID, execution)
+func (h *Handler) structuredAnswer(ctx context.Context, opts *turnopts.Options, profileID, message, modelID, execution string, s *structured.FullSchema) (string, *pluginapi.GenerationMetrics, error) {
+	text, used, err := h.collect(ctx, profileID, message, modelID, execution)
 	if err != nil {
-		return "", err
+		return "", nil, err
 	}
 	r := structured.ParseFull(text, s)
 	if !r.OK() {
@@ -60,31 +60,54 @@ func (h *Handler) structuredAnswer(ctx context.Context, opts *turnopts.Options, 
 		retry.History = append(append([]pluginapi.ChatMessage(nil), opts.History...),
 			pluginapi.ChatMessage{Role: "user", Content: message},
 			pluginapi.ChatMessage{Role: "assistant", Content: text})
-		text, err = h.collect(turnopts.With(ctx, &retry), profileID, structured.FixPromptFull(r, s), modelID, execution)
+		var again *pluginapi.GenerationMetrics
+		text, again, err = h.collect(turnopts.With(ctx, &retry), profileID, structured.FixPromptFull(r, s), modelID, execution)
 		if err != nil {
-			return "", err
+			return "", nil, err
 		}
+		used = addUsage(used, again)
 		r = structured.ParseFull(text, s)
 	}
 	if !r.OK() {
-		return "", fmt.Errorf("the model did not produce JSON that fits: %s", strings.TrimSpace(strings.ReplaceAll(structured.Describe(r.Issues), "\n", "; ")))
+		return "", nil, fmt.Errorf("the model did not produce JSON that fits: %s", strings.TrimSpace(strings.ReplaceAll(structured.Describe(r.Issues), "\n", "; ")))
 	}
 	raw, err := json.Marshal(r.Value)
-	return string(raw), err
+	return string(raw), used, err
+}
+
+// addUsage is both calls' tokens, and why the last one stopped.
+func addUsage(a, b *pluginapi.GenerationMetrics) *pluginapi.GenerationMetrics {
+	switch {
+	case a == nil:
+		return b
+	case b == nil:
+		return a
+	}
+	sum := *b
+	sum.PromptTokens += a.PromptTokens
+	sum.CompletionTokens += a.CompletionTokens
+	sum.TotalTokens += a.TotalTokens
+	sum.CachedTokens += a.CachedTokens
+	sum.ReasoningTokens += a.ReasoningTokens
+	return &sum
 }
 
 // collect runs one turn and returns its text.
-func (h *Handler) collect(ctx context.Context, profileID, message, modelID, execution string) (string, error) {
+func (h *Handler) collect(ctx context.Context, profileID, message, modelID, execution string) (string, *pluginapi.GenerationMetrics, error) {
 	ch, err := h.Chat.RunChat(ctx, profileID, "", message, false, modelID, execution)
 	if err != nil {
-		return "", err
+		return "", nil, err
 	}
 	var b strings.Builder
+	var metrics *pluginapi.GenerationMetrics
 	for chunk := range ch {
 		if chunk.Error != "" {
-			return "", fmt.Errorf("%s", chunk.Error)
+			return "", nil, fmt.Errorf("%s", chunk.Error)
 		}
 		b.WriteString(chunk.Content)
+		if chunk.Metrics != nil {
+			metrics = chunk.Metrics
+		}
 	}
-	return b.String(), nil
+	return b.String(), metrics, nil
 }

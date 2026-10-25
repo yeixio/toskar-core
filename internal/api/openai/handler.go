@@ -57,6 +57,11 @@ type chatCompletionRequest struct {
 	Temperature         *float64 `json:"temperature"`
 	MaxTokens           int      `json:"max_tokens"`
 	MaxCompletionTokens int      `json:"max_completion_tokens"`
+	// StreamOptions.IncludeUsage ends a stream with a chunk of the tokens
+	// it took (#832).
+	StreamOptions *struct {
+		IncludeUsage bool `json:"include_usage"`
+	} `json:"stream_options"`
 	// ReasoningEffort is OpenAI's low, medium, or high.
 	ReasoningEffort string `json:"reasoning_effort"`
 	// IncludeReasoning returns a reasoning model's thinking as
@@ -275,7 +280,8 @@ func (h *Handler) HandleChatCompletions(w http.ResponseWriter, r *http.Request) 
 		meta = m
 		metaMu.Unlock()
 	}
-	sw := &streamWriter{w: w}
+	// One id and time for the whole response, its progress chunks too.
+	sw := &streamWriter{w: w, c: newCompletion(profileID)}
 	if req.Stream {
 		if !sw.start() {
 			writeError(w, http.StatusInternalServerError, "STREAM_UNSUPPORTED", "streaming not supported")
@@ -285,6 +291,7 @@ func (h *Handler) HandleChatCompletions(w http.ResponseWriter, r *http.Request) 
 			opts.Progress = func(eventType string, payload map[string]any) { sw.progress(profileID, eventType, payload) }
 		}
 	}
+	includeUsage := req.StreamOptions != nil && req.StreamOptions.IncludeUsage
 	ctx := turnopts.With(r.Context(), opts)
 	if len(pictures) > 0 {
 		ctx = artifacts.WithAttachments(ctx, pictures)
@@ -301,30 +308,29 @@ func (h *Handler) HandleChatCompletions(w http.ResponseWriter, r *http.Request) 
 		ctx = structured.WithSchema(ctx, schema.Raw)
 		// The answer must be data a program can read: checked, repaired,
 		// and asked for once more if needed, then sent whole (§27).
-		content, err := h.structuredAnswer(ctx, opts, profileID, message, modelID, execution, schema)
+		content, metrics, err := h.structuredAnswer(ctx, opts, profileID, message, modelID, execution, schema)
 		if err != nil {
 			if req.Stream {
-				sw.data(map[string]any{"error": map[string]any{"message": err.Error()}})
-				sw.done()
+				streamError(sw, http.StatusUnprocessableEntity, "INVALID_STRUCTURED_OUTPUT", err.Error())
 				return
 			}
 			writeError(w, http.StatusUnprocessableEntity, "INVALID_STRUCTURED_OUTPUT", err.Error())
 			return
 		}
 		one := make(chan pluginapi.ChatChunk, 1)
-		one <- pluginapi.ChatChunk{Content: content, Done: true}
+		one <- pluginapi.ChatChunk{Content: content, Done: true, Metrics: metrics}
 		close(one)
 		if !req.Stream {
 			h.writeNonStream(w, one, profileID, func() map[string]any { return nil }, false)
 			return
 		}
-		h.writeStream(sw, r, one, profileID, func() map[string]any { return nil }, false, false)
+		h.writeStream(sw, r, one, profileID, func() map[string]any { return nil }, false, false, includeUsage)
 		return
 	}
 	stream, err := h.Chat.RunChat(ctx, profileID, "", message, req.Stream, modelID, execution)
 	if err != nil {
 		if req.Stream {
-			sw.data(map[string]any{"error": map[string]any{"message": err.Error()}})
+			streamError(sw, http.StatusInternalServerError, "CHAT_FAILED", err.Error())
 			return
 		}
 		writeError(w, http.StatusInternalServerError, "CHAT_FAILED", err.Error())
@@ -343,11 +349,12 @@ func (h *Handler) HandleChatCompletions(w http.ResponseWriter, r *http.Request) 
 		h.writeNonStream(w, stream, profileID, extension, req.IncludeReasoning)
 		return
 	}
-	h.writeStream(sw, r, stream, profileID, extension, req.assistant() != nil && req.assistant().Progress, req.IncludeReasoning)
+	h.writeStream(sw, r, stream, profileID, extension, req.assistant() != nil && req.assistant().Progress, req.IncludeReasoning, includeUsage)
 }
 
 func (h *Handler) writeNonStream(w http.ResponseWriter, stream <-chan pluginapi.ChatChunk, model string, extension func() map[string]any, includeReasoning bool) {
 	var content, reasoning strings.Builder
+	var metrics *pluginapi.GenerationMetrics
 	for chunk := range stream {
 		if chunk.Error != "" {
 			writeError(w, http.StatusInternalServerError, "CHAT_FAILED", chunk.Error)
@@ -355,69 +362,61 @@ func (h *Handler) writeNonStream(w http.ResponseWriter, stream <-chan pluginapi.
 		}
 		content.WriteString(chunk.Content)
 		reasoning.WriteString(chunk.Reasoning)
+		if chunk.Metrics != nil {
+			metrics = chunk.Metrics
+		}
 	}
 	message := map[string]any{"role": "assistant", "content": content.String()}
 	if includeReasoning && reasoning.Len() > 0 {
 		message["reasoning_content"] = reasoning.String()
 	}
-	out := map[string]any{
-		"id":      "chatcmpl-ygg",
-		"object":  "chat.completion",
-		"model":   model,
-		"choices": []any{map[string]any{"index": 0, "message": message, "finish_reason": "stop"}},
-	}
+	out := newCompletion(model).whole(message, metrics)
 	if ext := extension(); ext != nil {
 		withExtension(out, ext)
 	}
 	writeJSON(w, out)
 }
 
-func (h *Handler) writeStream(sw *streamWriter, r *http.Request, stream <-chan pluginapi.ChatChunk, model string, extension func() map[string]any, progress, includeReasoning bool) {
-	id := "chatcmpl-ygg"
+func (h *Handler) writeStream(sw *streamWriter, r *http.Request, stream <-chan pluginapi.ChatChunk, model string, extension func() map[string]any, progress, includeReasoning, includeUsage bool) {
+	c := sw.c
+	if c.id == "" {
+		c = newCompletion(model)
+	}
+	var metrics *pluginapi.GenerationMetrics
 	for chunk := range stream {
 		if chunk.Error != "" {
-			sw.data(map[string]any{"error": map[string]any{"message": chunk.Error}})
+			streamError(sw, http.StatusInternalServerError, "CHAT_FAILED", chunk.Error)
 			return
 		}
+		if chunk.Metrics != nil {
+			metrics = chunk.Metrics
+		}
 		if includeReasoning && chunk.Reasoning != "" {
-			sw.data(map[string]any{
-				"id":      id,
-				"object":  "chat.completion.chunk",
-				"model":   model,
-				"choices": []any{map[string]any{"index": 0, "delta": map[string]any{"reasoning_content": chunk.Reasoning}, "finish_reason": nil}},
-			})
+			sw.data(c.chunk(map[string]any{"reasoning_content": chunk.Reasoning}, nil))
 		}
 		if chunk.Content == "" && !chunk.Done {
 			continue
 		}
-		sw.data(map[string]any{
-			"id":      id,
-			"object":  "chat.completion.chunk",
-			"model":   model,
-			"choices": []any{map[string]any{"index": 0, "delta": map[string]any{"content": chunk.Content}, "finish_reason": finishReason(chunk.Done)}},
-		})
+		var reason any
+		if chunk.Done {
+			reason = finish(metrics)
+		}
+		sw.data(c.chunk(map[string]any{"content": chunk.Content}, reason))
 		if h.Bus != nil && chunk.Content != "" {
 			h.Bus.PublishFor(r.Context(), events.New(events.ChatToken, map[string]any{"content": chunk.Content}))
 		}
 	}
 	if ext := extension(); progress && ext != nil {
-		sw.data(withExtension(map[string]any{
-			"id": id, "object": "chat.completion.chunk", "model": model,
-			"choices": []any{map[string]any{"index": 0, "delta": map[string]any{}, "finish_reason": nil}},
-		}, ext))
+		sw.data(withExtension(c.chunk(map[string]any{}, nil), ext))
+	}
+	if includeUsage {
+		sw.data(c.usageChunk(metrics))
 	}
 	sw.done()
 	if h.Bus != nil {
 		h.Bus.PublishFor(r.Context(), events.New(events.ChatComplete, map[string]any{}))
 	}
 	_ = r.Context().Err()
-}
-
-func finishReason(done bool) any {
-	if done {
-		return "stop"
-	}
-	return nil
 }
 
 // splitMessages honors the whole message array (§62): the last user
@@ -524,6 +523,8 @@ type streamWriter struct {
 	w       http.ResponseWriter
 	flusher http.Flusher
 	mu      sync.Mutex
+	// c is the response's id, time, and model.
+	c completion
 }
 
 func (s *streamWriter) start() bool {
@@ -567,10 +568,7 @@ func (s *streamWriter) progress(model, eventType string, payload map[string]any)
 			event[k] = v
 		}
 	}
-	s.data(withExtension(map[string]any{
-		"id": "chatcmpl-ygg", "object": "chat.completion.chunk", "model": model,
-		"choices": []any{map[string]any{"index": 0, "delta": map[string]any{}, "finish_reason": nil}},
-	}, map[string]any{"event": event}))
+	s.data(withExtension(s.c.chunk(map[string]any{}, nil), map[string]any{"event": event}))
 }
 
 // assistant is the request's assistant controls, under either name.
@@ -595,10 +593,19 @@ func writeJSON(w http.ResponseWriter, v any) {
 	_ = json.NewEncoder(w).Encode(v)
 }
 
+// writeError answers OpenAI's error shape (#832): message, type, param,
+// and code, which is Toskar's stable code.
 func writeError(w http.ResponseWriter, status int, code, msg string) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
-	_ = json.NewEncoder(w).Encode(contracts.APIError{Error: contracts.ErrorBody{Code: code, Message: msg}})
+	_ = json.NewEncoder(w).Encode(errorBody(status, code, msg))
+}
+
+// streamError ends a stream that failed: an error event, then [DONE], so a
+// client never waits on a stream that just stops.
+func streamError(sw *streamWriter, status int, code, msg string) {
+	sw.data(errorBody(status, code, msg))
+	sw.done()
 }
 
 // Drain closes unused stream on error paths.

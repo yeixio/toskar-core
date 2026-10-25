@@ -191,3 +191,42 @@ func TestToolNoteNamesTheOfferedTools(t *testing.T) {
 		t.Errorf("note: %q", got)
 	}
 }
+
+// Why the model stopped, and how long it thought, reach the metrics (#832):
+// length when it reached its token limit; reasoning tokens counted from the
+// stream's chunks, or with /tokenize for a whole answer.
+func TestFinishReasonAndReasoningTokens(t *testing.T) {
+	for _, stream := range []bool{true, false} {
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if r.URL.Path == "/tokenize" {
+				fmt.Fprint(w, `{"tokens":[1,2,3,4]}`)
+				return
+			}
+			if stream {
+				fmt.Fprint(w, `data: {"choices":[{"delta":{"reasoning_content":"Think"}}]}`+"\n\n")
+				fmt.Fprint(w, `data: {"choices":[{"delta":{"reasoning_content":"ing."}}]}`+"\n\n")
+				fmt.Fprint(w, `data: {"choices":[{"delta":{"content":"Cut"},"finish_reason":"length"}]}`+"\n\n")
+				return
+			}
+			fmt.Fprint(w, `{"choices":[{"message":{"content":"Cut","reasoning_content":"Thinking hard."},"finish_reason":"length"}]}`)
+		}))
+		ch, err := NewClient().Chat(context.Background(), pluginapi.ChatRequest{ModelEndpoint: srv.URL, Stream: stream, Messages: []pluginapi.ChatMessage{{Role: "user", Content: "hi"}}})
+		if err != nil {
+			t.Fatal(err)
+		}
+		var m *pluginapi.GenerationMetrics
+		for c := range ch {
+			if c.Metrics != nil {
+				m = c.Metrics
+			}
+		}
+		srv.Close()
+		want := 4 // from /tokenize
+		if stream {
+			want = 2 // the stream's reasoning chunks
+		}
+		if m == nil || m.FinishReason != "length" || m.ReasoningTokens != want {
+			t.Errorf("stream=%v: metrics %+v", stream, m)
+		}
+	}
+}
