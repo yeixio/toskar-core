@@ -1,0 +1,52 @@
+# Suggests labels for each new issue, and adds the ones you allow.
+#
+# Copy this to .github/workflows/, and triage.schema.json to .github/. Set
+# the secrets TOSKAR_URL and TOSKAR_API_KEY, a key made with For a CI job on
+# Toskar's API Access page, or leave them unset to start Toskar on the runner.
+name: Triage
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  contents: read
+
+jobs:
+  # Reads the issue, with no permission to write anything.
+  suggest:
+    runs-on: ubuntu-latest
+    outputs:
+      labels: ${{ steps.toskar.outputs.answer }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: yeixio/toskar-action@v1
+        id: toskar
+        with:
+          url: ${{ secrets.TOSKAR_URL }}
+          api-key: ${{ secrets.TOSKAR_API_KEY }}
+          prompt: Suggest labels for this issue, from bug, feature, docs, and question.
+          input: |
+            ${{ github.event.issue.title }}
+
+            ${{ github.event.issue.body }}
+          json-schema: .github/triage.schema.json
+
+  # Writes only the labels it allows, never the answer's own text.
+  label:
+    needs: suggest
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - name: Add the allowed labels
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE: ${{ github.event.issue.number }}
+          LABELS: ${{ needs.suggest.outputs.labels }}
+        run: |
+          for label in $(jq -r '.labels[]' <<<"$LABELS"); do
+            case "$label" in
+              bug | feature | docs | question) gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" --add-label "$label" ;;
+            esac
+          done

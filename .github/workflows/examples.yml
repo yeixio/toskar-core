@@ -56,5 +56,7 @@ jobs:
             --program "go=$RUNNER_TEMP/toskar-conformance-go" \
             --program "python=$RUNNER_TEMP/venv/bin/python toskar-sdks/python/conformance.py" \
             --program "node=node toskar-sdks/typescript/conformance.mjs"
+      - name: Lint the CI examples' GitHub workflows
+        run: go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.12 examples/ci/github/*.yml
       - name: Run the examples
         run: python examples/test.py --core "$RUNNER_TEMP/toskar-daemon" --sdks toskar-sdks --python "$RUNNER_TEMP/venv/bin/python"

@@ -12,6 +12,8 @@ They call this computer's Toskar Core, `http://127.0.0.1:7331`, which needs no k
 
 The pairing examples connect the way the Toskar app does: with the code Connect a device shows, the computer's certificate pinned, and, with access from anywhere, through the computer's address record directly or through its relay ([docs/connecting.md](../docs/connecting.md)).
 
+In CI, [ci/](ci/) has workflows that ask Toskar as a step, for GitHub Actions, GitLab CI, and Forgejo: label new issues, and explain a failed build from its log.
+
 ## Running them
 
 **Python** 3.10 or newer:

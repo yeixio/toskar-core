@@ -67,6 +67,8 @@ summarize:
 
 **Forgejo and Gitea Actions** take the GitHub Actions steps as they are.
 
+Whole workflows, for issue triage and explaining a failed build, are in [examples/ci](../examples/ci/), for GitHub Actions, GitLab CI, and Forgejo.
+
 ## Untrusted input
 
 An issue's text, a review, or a log is written by someone else. Keep it in the data, apart from the prompt, as `toskarctl ask` does with what's piped in, and give the job a CI key, so an instruction inside the text can't reach anyone's memories or make a tool act. When a job writes back, such as labels or a comment, ask for structured output with `--json-schema`, check the answer against the labels you allow, and write it in a separate step, never from the answer's free text.

@@ -1,0 +1,64 @@
+# When the CI workflow fails, reads the failed steps' log and says what
+# went wrong: on the run's summary page, and on its pull request.
+#
+# Copy this to .github/workflows/ and set `workflows:` to your CI's name.
+# Set the secrets TOSKAR_URL and TOSKAR_API_KEY, a key made with For a CI
+# job on Toskar's API Access page, or leave them unset to start Toskar on
+# the runner. A long log on a small model can take minutes; set `timeout`.
+name: Explain a failure
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+
+permissions:
+  contents: read
+
+jobs:
+  # Reads the log, with no permission to write anything.
+  read:
+    if: github.event.workflow_run.conclusion == 'failure'
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+    outputs:
+      answer: ${{ steps.toskar.outputs.answer }}
+    steps:
+      - name: Get the failed steps' log
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN: ${{ github.event.workflow_run.id }}
+        # The end of the log, where the error usually is.
+        run: gh run view "$RUN" --repo "$GITHUB_REPOSITORY" --log-failed | tail -c 50000 > failed.log
+      - uses: yeixio/toskar-action@v1
+        id: toskar
+        with:
+          url: ${{ secrets.TOSKAR_URL }}
+          api-key: ${{ secrets.TOSKAR_API_KEY }}
+          prompt: What's the first real error in this log, and its likely cause? Answer in a few sentences.
+          input-file: failed.log
+          timeout: 20m
+
+  explain:
+    needs: read
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Explain it on the run and its pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ANSWER: ${{ needs.read.outputs.answer }}
+          RUN_URL: ${{ github.event.workflow_run.html_url }}
+          PR: ${{ github.event.workflow_run.pull_requests[0].number }}
+        run: |
+          {
+            echo "### Why [the run]($RUN_URL) failed, as Toskar reads it"
+            echo
+            printf '%s\n' "$ANSWER"
+          } > explanation.md
+          cat explanation.md >> "$GITHUB_STEP_SUMMARY"
+          if [ -n "$PR" ]; then
+            gh pr comment "$PR" --repo "$GITHUB_REPOSITORY" --body-file explanation.md
+          fi

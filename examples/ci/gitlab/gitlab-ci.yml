@@ -1,0 +1,33 @@
+# When the build fails, a later job reads its log and says what went wrong,
+# in the job's log and as explanation.md, kept with the pipeline.
+#
+# Merge this into your .gitlab-ci.yml, with your own build command. The
+# explain job starts Toskar on the runner (an image with curl and tar) and
+# caches its model. To ask a Toskar the runner can reach instead, set the
+# CI/CD variables TOSKAR_URL and TOSKAR_API_KEY (a key made with For a CI
+# job) and run install.sh with `ci --no-start`, which only installs toskarctl.
+stages: [build, explain]
+
+build:
+  stage: build
+  script:
+    - set -o pipefail
+    - make test 2>&1 | tee build.log
+  artifacts:
+    when: always
+    paths: [build.log]
+
+explain-failure:
+  stage: explain
+  when: on_failure
+  needs: [build]
+  cache:
+    key: toskar-llama-3.2-1b-q4
+    paths: [.toskar-ci/data/models, .toskar-ci/data/runtimes]
+  script:
+    - curl -fsSL https://github.com/yeixio/toskar-core/releases/latest/download/install.sh | sh -s -- ci --dir "$CI_PROJECT_DIR/.toskar-ci" --model llama-3.2-1b-q4 > toskar.env
+    - eval "$(grep '^export ' toskar.env)"
+    - tail -c 50000 build.log | toskarctl ask --timeout 20m "What's the first real error in this log, and its likely cause? Answer in a few sentences." | tee explanation.md
+  artifacts:
+    when: always
+    paths: [explanation.md]
