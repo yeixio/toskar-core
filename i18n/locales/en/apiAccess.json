@@ -87,6 +87,8 @@
     "namePlaceholder": "VS Code",
     "creating": "Creating…",
     "createKey": "Create key",
+    "forCI": "For a CI job: chat only",
+    "forCIHint": "It can only ask, through the OpenAI-compatible API, with no memories, knowledge, or tools, so what a job sends can't reach your data or make anything happen.",
     "cancel": "Cancel",
     "copyNow": "Copy this secret now — it won't be shown again",
     "copiedBang": "Copied!",
@@ -97,7 +99,8 @@
     "confirmRotate": "Rotate “{{name}}”? The old secret stops working immediately.",
     "rotate": "Rotate",
     "confirmRevoke": "Revoke “{{name}}”? Apps using this key will lose access.",
-    "revoke": "Revoke"
+    "revoke": "Revoke",
+    "chatOnly": "Chat only"
   },
   "advanced": {
     "title": "Advanced",
@@ -119,6 +122,11 @@
       "profile": "What the profile allows",
       "read_only": "Read-only tools",
       "none": "No tools"
+    },
+    "routes": "Reaches",
+    "routeChoices": {
+      "all": "Everything its person may",
+      "chat": "Chat only, for CI jobs"
     },
     "placement": "May choose where requests run",
     "note": "Requests can ask for less, never more. Over the network these limits always apply; on this computer they apply when the app sends this key.",

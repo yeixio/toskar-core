@@ -90,6 +90,8 @@
     "namePlaceholder": "VS Code",
     "creating": "Criando…",
     "createKey": "Criar chave",
+    "forCI": "Para um job de CI: só chat",
+    "forCIHint": "Ela só pode perguntar, pela API compatível com OpenAI, sem memórias, conhecimento ou ferramentas, então o que um job envia não alcança seus dados nem faz nada acontecer.",
     "cancel": "Cancelar",
     "copyNow": "Copie este segredo agora. Ele não será exibido novamente",
     "copiedBang": "Copiado!",
@@ -100,7 +102,8 @@
     "confirmRotate": "Renovar “{{name}}”? O segredo antigo para de funcionar imediatamente.",
     "rotate": "Renovar",
     "confirmRevoke": "Revogar “{{name}}”? Os apps que usam esta chave perderão o acesso.",
-    "revoke": "Revogar"
+    "revoke": "Revogar",
+    "chatOnly": "Só chat"
   },
   "advanced": {
     "title": "Avançado",
@@ -122,6 +125,11 @@
       "profile": "O que o perfil permite",
       "read_only": "Ferramentas somente leitura",
       "none": "Nenhuma ferramenta"
+    },
+    "routes": "Alcança",
+    "routeChoices": {
+      "all": "Tudo o que sua pessoa pode",
+      "chat": "Só chat, para jobs de CI"
     },
     "placement": "Pode escolher onde as solicitações são executadas",
     "note": "As solicitações podem pedir menos, nunca mais. Pela rede, esses limites sempre se aplicam; neste computador, eles se aplicam quando o app envia esta chave.",

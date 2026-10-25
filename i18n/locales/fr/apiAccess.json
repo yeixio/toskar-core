@@ -90,6 +90,8 @@
     "namePlaceholder": "VS Code",
     "creating": "Création…",
     "createKey": "Créer la clé",
+    "forCI": "Pour une tâche CI : chat seulement",
+    "forCIHint": "Elle peut seulement poser des questions, par l'API compatible OpenAI, sans souvenirs, connaissances ni outils : ce qu'une tâche envoie ne peut ni atteindre vos données ni déclencher quoi que ce soit.",
     "cancel": "Annuler",
     "copyNow": "Copiez ce secret maintenant : il ne sera plus affiché",
     "copiedBang": "Copié !",
@@ -100,7 +102,8 @@
     "confirmRotate": "Renouveler « {{name}} » ? L'ancien secret cesse immédiatement de fonctionner.",
     "rotate": "Renouveler",
     "confirmRevoke": "Révoquer « {{name}} » ? Les apps qui utilisent cette clé perdront l'accès.",
-    "revoke": "Révoquer"
+    "revoke": "Révoquer",
+    "chatOnly": "Chat seulement"
   },
   "advanced": {
     "title": "Avancé",
@@ -122,6 +125,11 @@
       "profile": "Ce que le profil autorise",
       "read_only": "Outils en lecture seule",
       "none": "Aucun outil"
+    },
+    "routes": "Accès",
+    "routeChoices": {
+      "all": "Tout ce que sa personne peut faire",
+      "chat": "Chat seulement, pour les tâches CI"
     },
     "placement": "Peut choisir où s'exécutent les requêtes",
     "note": "Les requêtes peuvent demander moins, jamais plus. Sur le réseau, ces limites s'appliquent toujours ; sur cet ordinateur, elles s'appliquent lorsque l'app envoie cette clé.",

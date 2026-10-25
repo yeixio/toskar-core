@@ -3,6 +3,7 @@ package mcp
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net"
@@ -48,6 +49,12 @@ type Server struct{ b Backend }
 // NewServer returns the MCP endpoint for b.
 func NewServer(b Backend) *Server { return &Server{b: b} }
 
+// RefusedError is a good key that may not use MCP, such as one for chat
+// only (#455): 403 with its message, not a request for a key.
+type RefusedError struct{ Message string }
+
+func (e *RefusedError) Error() string { return e.Message }
+
 // ServeHTTP handles POST (messages), GET (no server stream: 405), and
 // DELETE (session end: nothing to do).
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -62,6 +69,11 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if s.b.Authorize != nil {
 		var err error
 		if ctx, err = s.b.Authorize(r); err != nil {
+			var refused *RefusedError
+			if errors.As(err, &refused) {
+				http.Error(w, refused.Error(), http.StatusForbidden)
+				return
+			}
 			w.Header().Set("WWW-Authenticate", `Bearer realm="toskar"`)
 			http.Error(w, "authorization required: create an API key on the API Access page", http.StatusUnauthorized)
 			return

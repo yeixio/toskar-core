@@ -41,6 +41,11 @@ func (a *App) mcpAuthorize(r *http.Request) (context.Context, error) {
 	if err != nil {
 		return nil, err
 	}
+	// A key for chat only asks through /v1/chat/completions (#455); MCP
+	// reaches tools and knowledge.
+	if perms.Routes == auth.RoutesChat {
+		return nil, &mcp.RefusedError{Message: "KEY_CHAT_ONLY: this key is for chat only: it can ask through /v1/chat/completions, and nothing else"}
+	}
 	// Its tools and memories are a Member's to use, not a Visitor's (#203).
 	if !auth.PrincipalFrom(ctx).Person.Role.AtLeast(auth.RoleMember) {
 		return nil, errMCPRole

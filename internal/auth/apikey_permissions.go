@@ -22,6 +22,12 @@ const (
 	ToolsNone     = "none"
 )
 
+// Route scopes: everything a key's person may reach, or only chat.
+const (
+	RoutesAll  = ""
+	RoutesChat = "chat"
+)
+
 // APIKeyPermissions is what a key may ask of the assistant (spec §62).
 // Requests can only narrow it.
 type APIKeyPermissions struct {
@@ -38,6 +44,31 @@ type APIKeyPermissions struct {
 	// with it and its topic controls, and can't name another profile or a
 	// model. Empty lets each request choose.
 	Profile string `json:"profile,omitempty"`
+	// Routes is what the key reaches: empty for whatever its person may,
+	// or chat for only asking (#455), as a CI job needs. See ChatKeyMayReach.
+	Routes string `json:"routes,omitempty"`
+}
+
+// CIAPIKeyPermissions is the For a CI job preset (#455): it only asks, with
+// no memory, knowledge, or tools, so what a job sends, such as issue text
+// or logs, can't reach a person's data or make anything happen.
+func CIAPIKeyPermissions() APIKeyPermissions {
+	return APIKeyPermissions{Memory: UseNever, Knowledge: UseNever, Tools: ToolsNone, Routes: RoutesChat}
+}
+
+// chatRoutes are what a chat-only key reaches: the OpenAI-compatible chat,
+// which saves no conversation, and what a client checks first.
+var chatRoutes = map[string]bool{
+	"POST /v1/chat/completions": true,
+	"GET /v1/models":            true,
+	"GET /api/v1/health":        true,
+	"GET /api/v1/version":       true,
+}
+
+// ChatKeyMayReach reports whether a chat-only key may make a request, by
+// its method and route template.
+func ChatKeyMayReach(method, route string) bool {
+	return method == "OPTIONS" || chatRoutes[method+" "+route]
 }
 
 // ErrProfilePinned is a request naming another profile, or a model, with a
@@ -73,6 +104,9 @@ func (p APIKeyPermissions) Validate() error {
 	}
 	if p.Tools != ToolsProfile && p.Tools != ToolsReadOnly && p.Tools != ToolsNone {
 		return fmt.Errorf("tools must be profile, read_only, or none")
+	}
+	if p.Routes != RoutesAll && p.Routes != RoutesChat {
+		return fmt.Errorf("routes must be empty or chat")
 	}
 	return nil
 }

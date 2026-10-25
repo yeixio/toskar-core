@@ -54,4 +54,25 @@ describe('KeyPermissions', () => {
       }),
     )
   })
+
+  it('makes a key that only asks, as a CI job needs', async () => {
+    vi.mocked(api.setApiKeyPermissions).mockResolvedValue(null)
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <KeyPermissions
+          apiKey={{ id: 'k3', name: 'ci', prefix: 'ygg_ghi', created_at: '2026-10-01T00:00:00Z', revoked: false }}
+        />
+      </QueryClientProvider>,
+    )
+    fireEvent.change(screen.getByLabelText('Reaches'), { target: { value: 'chat' } })
+    await waitFor(() =>
+      expect(api.setApiKeyPermissions).toHaveBeenCalledWith('k3', {
+        memory: 'on_request',
+        knowledge: 'always',
+        tools: 'profile',
+        placement: true,
+        routes: 'chat',
+      }),
+    )
+  })
 })

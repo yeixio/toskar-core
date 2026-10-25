@@ -3,6 +3,7 @@ package auth_test
 import (
 	"context"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/yeixio/toskar-core/internal/auth"
@@ -44,5 +45,25 @@ func TestAPIKeyPermissions(t *testing.T) {
 	list, _ := m.List(ctx)
 	if len(list) != 1 || list[0].Permissions != narrow {
 		t.Fatalf("list = %+v", list)
+	}
+}
+
+func TestChatOnlyRoutes(t *testing.T) {
+	if err := auth.CIAPIKeyPermissions().Validate(); err != nil {
+		t.Fatal(err)
+	}
+	p := auth.DefaultAPIKeyPermissions()
+	p.Routes = "admin"
+	if p.Validate() == nil {
+		t.Fatal("an unknown route scope is valid")
+	}
+	for route, want := range map[string]bool{
+		"POST /v1/chat/completions": true, "GET /v1/models": true, "GET /api/v1/health": true,
+		"OPTIONS /api/v1/settings": true, "GET /api/v1/models": false, "POST /api/v1/chat": false, "POST /mcp": false,
+	} {
+		method, path, _ := strings.Cut(route, " ")
+		if auth.ChatKeyMayReach(method, path) != want {
+			t.Errorf("%s: %v", route, !want)
+		}
 	}
 }

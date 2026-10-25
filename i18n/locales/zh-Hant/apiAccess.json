@@ -84,6 +84,8 @@
     "namePlaceholder": "VS Code",
     "creating": "正在建立…",
     "createKey": "建立金鑰",
+    "forCI": "用於 CI 工作：僅聊天",
+    "forCIHint": "它只能透過相容 OpenAI 的 API 提問，不使用記憶、知識或工具，因此工作送出的內容無法觸及你的資料，也無法觸發任何動作。",
     "cancel": "取消",
     "copyNow": "請立即拷貝這個密鑰，之後將不會再顯示",
     "copiedBang": "已拷貝！",
@@ -94,7 +96,8 @@
     "confirmRotate": "要更換「{{name}}」嗎？舊的密鑰會立即失效。",
     "rotate": "更換",
     "confirmRevoke": "要撤銷「{{name}}」嗎？使用這把金鑰的 App 將失去存取權。",
-    "revoke": "撤銷"
+    "revoke": "撤銷",
+    "chatOnly": "僅聊天"
   },
   "advanced": {
     "title": "進階",
@@ -116,6 +119,11 @@
       "profile": "依設定檔允許的範圍",
       "read_only": "唯讀工具",
       "none": "不使用工具"
+    },
+    "routes": "可存取",
+    "routeChoices": {
+      "all": "其所屬的人能存取的一切",
+      "chat": "僅聊天，用於 CI 工作"
     },
     "placement": "可選擇請求在哪裡執行",
     "note": "請求只能要求更少，不能要求更多。透過網路時一律套用這些限制；在這台電腦上，則在 App 傳送這把金鑰時套用。",

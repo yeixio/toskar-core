@@ -12,7 +12,8 @@ const USE_OPTIONS: APIKeyPermissions['memory'][] = ['never', 'on_request', 'alwa
 
 /**
  * What an API key may ask of the assistant (spec §62): memory, connected
- * knowledge, tools, and placement, and the profile it answers with (#345).
+ * knowledge, tools, and placement, the profile it answers with (#345), and
+ * whether it only asks, as a CI job's key does (#455).
  * Requests can narrow it, never widen it.
  */
 export function KeyPermissions({ apiKey }: { apiKey: APIKeyRecord }) {
@@ -96,6 +97,18 @@ export function KeyPermissions({ apiKey }: { apiKey: APIKeyRecord }) {
             <option value="profile">{t('permissions.toolChoices.profile')}</option>
             <option value="read_only">{t('permissions.toolChoices.read_only')}</option>
             <option value="none">{t('permissions.toolChoices.none')}</option>
+          </select>
+        </label>
+        <label className="block">
+          <span className="text-ink-muted">{t('permissions.routes')}</span>
+          <select
+            className="field mt-1 w-full"
+            value={current.routes ?? ''}
+            disabled={save.isPending}
+            onChange={(e) => change({ routes: e.target.value === 'chat' ? 'chat' : undefined })}
+          >
+            <option value="">{t('permissions.routeChoices.all')}</option>
+            <option value="chat">{t('permissions.routeChoices.chat')}</option>
           </select>
         </label>
         <label className="flex items-center gap-2 pt-5">

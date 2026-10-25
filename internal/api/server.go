@@ -838,6 +838,11 @@ func (s *Server) keyPrincipal(w http.ResponseWriter, r *http.Request, token, rou
 		writeErr(w, http.StatusForbidden, "DEVICE_NOT_ALLOWED", "a phone's key can't do this; use a key from API Access", nil)
 		return auth.Principal{}, false
 	}
+	// A key for chat only, such as a CI job's (#455), only asks.
+	if rec.Permissions.Routes == auth.RoutesChat && !auth.ChatKeyMayReach(r.Method, route) {
+		writeErr(w, http.StatusForbidden, "KEY_CHAT_ONLY", "this key is for chat only: it can ask through /v1/chat/completions, and nothing else", nil)
+		return auth.Principal{}, false
+	}
 	principal := auth.Principal{Person: auth.Person{ID: rec.PersonID, Role: auth.RoleOwner}, Via: auth.ViaAPIKey, KeyID: rec.ID, KeyProfile: rec.Permissions.Profile}
 	if s.deps.People != nil {
 		person, err := s.deps.People.Active(r.Context(), rec.PersonID)

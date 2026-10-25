@@ -90,6 +90,8 @@
     "namePlaceholder": "VS Code",
     "creating": "Creazione…",
     "createKey": "Crea chiave",
+    "forCI": "Per un job di CI: solo chat",
+    "forCIHint": "Può solo fare domande, tramite l'API compatibile con OpenAI, senza ricordi, conoscenza o strumenti: ciò che un job invia non può raggiungere i tuoi dati né far succedere nulla.",
     "cancel": "Annulla",
     "copyNow": "Copia subito questo segreto: non verrà più mostrato",
     "copiedBang": "Copiato!",
@@ -100,7 +102,8 @@
     "confirmRotate": "Rinnovare “{{name}}”? Il vecchio segreto smette subito di funzionare.",
     "rotate": "Rinnova",
     "confirmRevoke": "Revocare “{{name}}”? Le app che usano questa chiave perderanno l'accesso.",
-    "revoke": "Revoca"
+    "revoke": "Revoca",
+    "chatOnly": "Solo chat"
   },
   "advanced": {
     "title": "Avanzate",
@@ -122,6 +125,11 @@
       "profile": "Ciò che consente il profilo",
       "read_only": "Strumenti di sola lettura",
       "none": "Nessuno strumento"
+    },
+    "routes": "Raggiunge",
+    "routeChoices": {
+      "all": "Tutto ciò che può la sua persona",
+      "chat": "Solo chat, per i job di CI"
     },
     "placement": "Può scegliere dove eseguire le richieste",
     "note": "Le richieste possono chiedere di meno, mai di più. In rete questi limiti valgono sempre; su questo computer valgono quando l'app invia questa chiave.",

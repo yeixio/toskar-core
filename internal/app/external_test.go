@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"io"
 	"log/slog"
 	"net/http"
@@ -11,6 +12,8 @@ import (
 	"testing"
 
 	"github.com/yeixio/toskar-core/internal/api"
+	"github.com/yeixio/toskar-core/internal/auth"
+	"github.com/yeixio/toskar-core/internal/mcp"
 	"github.com/yeixio/toskar-core/internal/runtimes/external"
 	"github.com/yeixio/toskar-core/internal/turnopts"
 	"github.com/yeixio/toskar-core/pkg/contracts"
@@ -91,5 +94,30 @@ func TestExternalModelWithToolsOff(t *testing.T) {
 	}
 	if failed != "" || answer != "From the server." {
 		t.Fatalf("answer %q, error %q", answer, failed)
+	}
+}
+
+// A key for chat only (#455) can't use MCP, which reaches tools and
+// knowledge.
+func TestChatOnlyKeyCantUseMCP(t *testing.T) {
+	t.Setenv("TOSKAR_DISCOVERY_ENABLED", "false")
+	a, err := New(Options{DataDir: t.TempDir(), Logger: slog.New(slog.NewTextHandler(io.Discard, nil))})
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = a.DB.Close() })
+	ctx := context.Background()
+	rec, secret, err := a.APIKeys.Create(ctx, "CI")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := a.APIKeys.SetPermissions(ctx, rec.ID, auth.CIAPIKeyPermissions()); err != nil {
+		t.Fatal(err)
+	}
+	req := httptest.NewRequest(http.MethodPost, "/mcp", nil)
+	req.Header.Set("Authorization", "Bearer "+secret)
+	var refused *mcp.RefusedError
+	if _, err := a.mcpAuthorize(req); !errors.As(err, &refused) {
+		t.Fatalf("a chat-only key on MCP: %v", err)
 	}
 }
