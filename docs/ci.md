@@ -8,6 +8,8 @@ Three pieces fit together:
 - **A key for a CI job**, made with **For a CI job** on the API Access page, only asks: no memories, knowledge, or tools, whatever the job sends ([API key permissions](api.md#openai-compatible-api)).
 - **`install.sh ci`** runs Toskar on the runner itself, for a runner with no Toskar nearby.
 
+In GitHub Actions, the [Ask Toskar action](https://github.com/yeixio/toskar-action) puts these together in one step, connected to a Toskar or started on the runner. The rest of this page is for other CI systems, and for jobs that want the pieces themselves.
+
 ## A Toskar the runner can reach
 
 On a self-hosted runner beside a computer running Toskar, or with Toskar reachable over the network, set its address and a CI key as the job's secrets, and ask:
@@ -40,7 +42,7 @@ The model is a download the first time, about 0.8 GB for `llama-3.2-1b-q4`. Cach
 **GitHub Actions**
 
 ```yaml
-- uses: actions/cache@v4
+- uses: actions/cache@v6
   with:
     path: |
       ~/.toskar-ci/data/models
