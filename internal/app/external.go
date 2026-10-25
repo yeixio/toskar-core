@@ -114,11 +114,19 @@ func profileOffline(p profiles.Profile) bool {
 	return true
 }
 
+// profileOffline is whether the turn's profile keeps work on this computer.
+func (e *chatExecEnv) profileOffline() bool {
+	if e.offline != nil {
+		return *e.offline
+	}
+	return profileOffline(e.profile)
+}
+
 // externalAllowed says why a turn may not go to the external server, or
 // nil: an offline profile, or memories or knowledge marked This computer
 // only.
-func externalAllowed(p profiles.Profile, keepsLocal bool) error {
-	if profileOffline(p) {
+func externalAllowed(offline, keepsLocal bool) error {
+	if offline {
 		return contracts.Errorf("EXTERNAL_OFFLINE_PROFILE", nil, "this profile keeps work on this computer, so it doesn't use the external server; choose a model on this computer or another profile")
 	}
 	if keepsLocal {

@@ -35,6 +35,7 @@ How it is started depends on how it was installed:
 | --- | --- |
 | `toskarctl version` (or `about`) | Version, license, and corresponding source |
 | `toskarctl paths` | Default data, model, runtime, log, and database paths |
+| `toskarctl ask [flags] [prompt]` | Send one prompt and print the answer, for scripts and CI jobs (below) |
 | `toskarctl automations …` | Manage scheduled automations (below) |
 | `toskarctl mcp` | Let an app that starts MCP servers as programs, such as Claude Desktop, use Toskar (below) |
 | `toskarctl join-token create [--ttl 15m]` | Make a one-time join token and print the command that adds a computer to this network ([Clustering](clustering.md#joining-with-one-command)) |
@@ -44,6 +45,38 @@ How it is started depends on how it was installed:
 | `toskarctl leave` | Leave the network: tell each paired computer, then forget them all |
 | `toskarctl people …` | Add, change, and remove the people who use this Toskar (below) |
 | `toskarctl completion <bash\|zsh\|fish>` | Print a shell completion script |
+
+### Ask
+
+`toskarctl ask` sends one prompt and prints the answer, so a script or a CI job can use Toskar as a step: summarize a bug report, label an issue, read a failing log.
+
+```bash
+toskarctl ask "Write a haiku about Juneau"
+gh issue view 12 | toskarctl ask "Summarize this bug in two sentences"
+toskarctl ask --file build.log "What's the first real error, and its likely cause?"
+toskarctl ask --json-schema triage.json "Suggest labels for this issue" < issue.txt | jq -r '.labels[]'
+```
+
+Text piped in, or from `--file`, is sent as data to work on, apart from the prompt: it goes in a fence it can't close, and the model is told to follow only the prompt. Issue text and logs are untrusted, and this keeps an instruction inside them from becoming yours. Text piped in with no prompt is the prompt.
+
+| Flag | Meaning |
+| --- | --- |
+| `--model id` | A model, `auto` (the default), or a specialized AI, `sai:<slug>` |
+| `--profile id` | Answer as this profile instead |
+| `--system text` | A system prompt |
+| `--file path` | Data to work on, from a file (`-` for standard input) |
+| `--json-schema path` | Answer with JSON that fits this JSON Schema. Toskar checks the answer, and asks the model once more with what was wrong when it doesn't fit |
+| `--max-tokens n` | The longest answer, in tokens |
+| `--temperature t` | Sampling temperature, such as `0` for the steadiest answers |
+| `--timeout d` | How long to wait for the answer: 5 minutes unless set, such as `--timeout 20m` for a long log on a small computer |
+| `--memory` | Let the answer use and add to memory. Off unless given, so a CI job never reads or writes a person's memories |
+| `--knowledge` | Let the answer use connected knowledge. Off unless given |
+
+The answer never uses tools. It goes through the OpenAI-compatible API (`/v1/chat/completions`), so it saves no conversation, and an API key's permissions apply: a key that may not use memory can't be given `--memory`.
+
+Exit status: 0 for an answer, 1 for a model or connection error, 2 for a usage error, and 3 for an answer that doesn't fit `--json-schema`.
+
+`ask` reads standard input whenever it isn't a terminal. Where it's an open pipe that never ends, such as some job runners and `ssh` without a command, give it `< /dev/null`.
 
 ### Automations
 
