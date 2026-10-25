@@ -172,6 +172,7 @@ func (c *Client) readNonStream(resp *http.Response, ch chan<- pluginapi.ChatChun
 				// What a reasoning model thought first (#701).
 				Reasoning string `json:"reasoning_content"`
 			} `json:"message"`
+			FinishReason string `json:"finish_reason"`
 		} `json:"choices"`
 		Usage   *usagePayload   `json:"usage"`
 		Timings *timingsPayload `json:"timings"`
@@ -180,14 +181,18 @@ func (c *Client) readNonStream(resp *http.Response, ch chan<- pluginapi.ChatChun
 		ch <- pluginapi.ChatChunk{Error: err.Error(), Done: true}
 		return
 	}
-	content := ""
+	content, finish, thought := "", "", ""
 	if len(out.Choices) > 0 {
-		content = out.Choices[0].Message.Content
-		if thought := out.Choices[0].Message.Reasoning; thought != "" {
+		content, finish, thought = out.Choices[0].Message.Content, out.Choices[0].FinishReason, out.Choices[0].Message.Reasoning
+		if thought != "" {
 			ch <- pluginapi.ChatChunk{Reasoning: thought}
 		}
 	}
 	metrics := mergeServerMetrics(out.Usage, out.Timings, started, time.Time{}, time.Now(), content)
+	metrics.FinishReason = finish
+	if thought != "" {
+		metrics.ReasoningTokens = reasoningTokens(resp, thought)
+	}
 	ch <- pluginapi.ChatChunk{Content: content, Done: true, Metrics: metrics}
 }
 
@@ -202,6 +207,9 @@ func (c *Client) readStream(resp *http.Response, ch chan<- pluginapi.ChatChunk, 
 	var usage *usagePayload
 	var timings *timingsPayload
 	sentDone := false
+	// llama-server streams a token a chunk, so the thinking's chunks are
+	// its tokens.
+	finish, thoughtTokens := "", 0
 
 	flushDone := func() {
 		if sentDone {
@@ -209,6 +217,7 @@ func (c *Client) readStream(resp *http.Response, ch chan<- pluginapi.ChatChunk, 
 		}
 		sentDone = true
 		metrics := mergeServerMetrics(usage, timings, started, firstToken, time.Now(), content.String())
+		metrics.FinishReason, metrics.ReasoningTokens = finish, thoughtTokens
 		ch <- pluginapi.ChatChunk{Done: true, Metrics: metrics}
 	}
 
@@ -260,7 +269,11 @@ func (c *Client) readStream(resp *http.Response, ch chan<- pluginapi.ChatChunk, 
 		}
 		delta := chunk.Choices[0].Delta.Content
 		done := chunk.Choices[0].FinishReason != nil
+		if done {
+			finish = *chunk.Choices[0].FinishReason
+		}
 		if thought := chunk.Choices[0].Delta.Reasoning; thought != "" {
+			thoughtTokens++
 			ch <- pluginapi.ChatChunk{Reasoning: thought}
 		}
 		if delta != "" {
@@ -404,4 +417,18 @@ func streamDataError(data string) (string, bool) {
 		}
 	}
 	return "", false
+}
+
+// reasoningTokens counts a reasoning model's thinking with the model's own
+// tokenizer, at the llama-server that answered; an estimate when it can't.
+func reasoningTokens(resp *http.Response, thought string) int {
+	if resp.Request != nil && resp.Request.URL != nil {
+		endpoint := resp.Request.URL.Scheme + "://" + resp.Request.URL.Host
+		ctx, cancel := context.WithTimeout(context.WithoutCancel(resp.Request.Context()), 5*time.Second)
+		defer cancel()
+		if n, err := Tokenize(ctx, endpoint, thought); err == nil {
+			return n
+		}
+	}
+	return estimateTokens(thought)
 }

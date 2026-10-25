@@ -928,6 +928,13 @@ type GenerationMetrics struct {
 	// CachedTokens are prompt tokens reused from the model's cache instead
 	// of processed again, when the runtime reports them.
 	CachedTokens int `json:"cached_tokens,omitempty"`
+	// FinishReason is why the model stopped (contract 1.58, #832): stop, or
+	// length when it reached its token limit, so a cut-off answer can be
+	// told from a finished one. Empty when the runtime didn't say.
+	FinishReason string `json:"finish_reason,omitempty"`
+	// ReasoningTokens are the tokens a reasoning model thought before it
+	// answered, part of CompletionTokens (contract 1.58).
+	ReasoningTokens int `json:"reasoning_tokens,omitempty"`
 }
 
 // ChatAnswer is POST /api/v1/chat's answer when it isn't streamed: the

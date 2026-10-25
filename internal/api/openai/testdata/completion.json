@@ -1,0 +1,28 @@
+{
+  "choices": [
+    {
+      "finish_reason": "length",
+      "index": 0,
+      "message": {
+        "content": "Hello, Juneau",
+        "reasoning_content": "The user wants a greeting.",
+        "role": "assistant"
+      }
+    }
+  ],
+  "created": 1700000000,
+  "id": "chatcmpl-ID",
+  "model": "general",
+  "object": "chat.completion",
+  "usage": {
+    "completion_tokens": 7,
+    "completion_tokens_details": {
+      "reasoning_tokens": 5
+    },
+    "prompt_tokens": 12,
+    "prompt_tokens_details": {
+      "cached_tokens": 8
+    },
+    "total_tokens": 19
+  }
+}
