@@ -1,0 +1,26 @@
+{
+  "labels": {
+    "bug": "Something is not working correctly",
+    "enhancement": "A new feature or an improvement",
+    "documentation": "Documentation changes or improvements",
+    "question": "A question, or more information or discussion is needed",
+    "research": "Investigation or design, before code",
+    "security": "Security-related work",
+    "performance": "Performance, latency, memory, or resource usage",
+    "hardware": "Hardware support or compatibility",
+    "runtime": "AI runtimes and backends, such as llama.cpp, and models running on them",
+    "networking": "Networking, discovery, pairing, remote access, or connectivity",
+    "orchestration": "Scheduling, routing, agents, tools, or how an answer is put together",
+    "api": "The control API or the OpenAI-compatible API",
+    "cli": "toskarctl and other command-line tools",
+    "translation": "Text in a language other than English, or a new language",
+    "tests": "Tests, CI checks, and the quality suite",
+    "linux": "Linux-specific",
+    "macos": "macOS-specific",
+    "windows": "Windows-specific",
+    "amd": "AMD hardware or software support",
+    "apple-silicon": "Apple Silicon hardware",
+    "intel": "Intel hardware or software support",
+    "nvidia": "NVIDIA hardware or CUDA support"
+  }
+}

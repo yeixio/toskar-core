@@ -1,0 +1,90 @@
+name: Triage
+
+# Suggests labels for each new issue, as a comment a maintainer acts on
+# (#455): Toskar triaging its own issues with the Ask Toskar action. It
+# asks the Toskar on the computer beside the runner in TOSKAR_RUNS_ON, at
+# TOSKAR_URL, with TOSKAR_API_KEY, a key made with For a CI job, so the
+# issue's text can't reach anyone's memories or make a tool act. The labels
+# it may suggest, and what each means, are in .github/triage.json. Until
+# those variables are set it does nothing. Run it by hand on an existing
+# issue to try it.
+on:
+  issues:
+    types: [opened]
+  workflow_dispatch:
+    inputs:
+      issue:
+        description: Issue number
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  # Reads the issue, with no permission to write anything.
+  suggest:
+    if: vars.TOSKAR_URL != '' && vars.TOSKAR_RUNS_ON != ''
+    runs-on: ${{ fromJSON(vars.TOSKAR_RUNS_ON || '"ubuntu-latest"') }}
+    timeout-minutes: 15
+    outputs:
+      labels: ${{ steps.toskar.outputs.answer }}
+      issue: ${{ steps.issue.outputs.number }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          sparse-checkout: .github/triage.json
+          sparse-checkout-cone-mode: false
+      - name: The issue, and what to ask
+        id: issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NUMBER: ${{ github.event.issue.number || inputs.issue }}
+        run: |
+          gh issue view "$NUMBER" --repo "$GITHUB_REPOSITORY" --json title,body --jq '.title + "\n\n" + .body' > "$RUNNER_TEMP/issue.txt"
+          jq '{type: "object", properties: {labels: {type: "array", items: {enum: (.labels | keys)}}}, required: ["labels"]}' \
+            .github/triage.json > "$RUNNER_TEMP/triage.schema.json"
+          {
+            echo "number=$NUMBER"
+            echo "prompt<<EOF_PROMPT"
+            echo "Suggest labels for this issue of Toskar, a local AI app: every one that fits, and only those, from this list."
+            jq -r '.labels | to_entries[] | "- \(.key): \(.value)"' .github/triage.json
+            echo "EOF_PROMPT"
+          } >> "$GITHUB_OUTPUT"
+      - uses: yeixio/toskar-action@v1
+        id: toskar
+        with:
+          url: ${{ vars.TOSKAR_URL }}
+          api-key: ${{ secrets.TOSKAR_API_KEY }}
+          prompt: ${{ steps.issue.outputs.prompt }}
+          input-file: ${{ runner.temp }}/issue.txt
+          json-schema: ${{ runner.temp }}/triage.schema.json
+          temperature: "0"
+          timeout: 10m
+
+  # Writes a comment with the allowed labels, never the answer's own text.
+  comment:
+    needs: suggest
+    runs-on: ${{ fromJSON(vars.CI_RUNS_ON || '"ubuntu-latest"') }}
+    timeout-minutes: 5
+    permissions:
+      issues: write
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          sparse-checkout: .github/triage.json
+          sparse-checkout-cone-mode: false
+      - name: Suggest them in a comment
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE: ${{ needs.suggest.outputs.issue }}
+          LABELS: ${{ needs.suggest.outputs.labels }}
+        run: |
+          labels=$(jq -c --slurpfile allowed .github/triage.json \
+            '[.labels[] | select(. as $l | $allowed[0].labels | has($l))] | unique' <<<"$LABELS")
+          [ "$labels" != "[]" ] || exit 0
+          {
+            printf '**Toskar suggests:** %s\n\n' "$(jq -r 'map("`" + . + "`") | join(", ")' <<<"$labels")"
+            printf '<sub>From [Ask Toskar](https://github.com/yeixio/toskar-action), on our own computer. A maintainer applies the labels.</sub>\n'
+            printf '<!-- toskar-triage %s -->\n' "$labels"
+          } > comment.md
+          gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body-file comment.md
