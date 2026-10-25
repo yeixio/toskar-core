@@ -10,6 +10,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/yeixio/toskar-core/internal/artifacts"
 	"github.com/yeixio/toskar-core/internal/auth"
 	"github.com/yeixio/toskar-core/internal/events"
 	"github.com/yeixio/toskar-core/internal/huginn"
@@ -39,6 +40,11 @@ type Handler struct {
 	Permissions func(r *http.Request) (auth.APIKeyPermissions, context.Context, error)
 	// Specialized lists deployed specialized AIs (sai: ids) for /v1/models.
 	Specialized func(ctx context.Context) ([]contracts.Model, error)
+	// Pictures keeps a request's pictures while its turn runs (#830), and
+	// PictureClient, when set, fetches http(s) ones instead of the
+	// internet-only client.
+	Pictures      PictureStore
+	PictureClient *http.Client
 }
 
 type chatCompletionRequest struct {
@@ -247,6 +253,20 @@ func (h *Handler) HandleChatCompletions(w http.ResponseWriter, r *http.Request) 
 		}
 	}
 
+	// The last user message's pictures, attached as the web chat attaches
+	// them (#830), and removed once the answer is done.
+	pictures, removePictures, err := h.savePictures(r.Context(), lastUserPictures(req.Messages))
+	if err != nil {
+		var bad errPicture
+		if errors.As(err, &bad) {
+			writeError(w, http.StatusBadRequest, "INVALID_IMAGE", err.Error())
+			return
+		}
+		writeError(w, http.StatusInternalServerError, "INVALID_IMAGE", err.Error())
+		return
+	}
+	defer removePictures()
+
 	// The answer's sources, steps, and notice, for the yggdrasil field.
 	var meta *contracts.MessageMeta
 	var metaMu sync.Mutex
@@ -266,6 +286,9 @@ func (h *Handler) HandleChatCompletions(w http.ResponseWriter, r *http.Request) 
 		}
 	}
 	ctx := turnopts.With(r.Context(), opts)
+	if len(pictures) > 0 {
+		ctx = artifacts.WithAttachments(ctx, pictures)
+	}
 	if sampling != (pluginapi.GenerateOptions{}) {
 		ctx = pluginapi.WithAnswerOptions(ctx, sampling)
 	}

@@ -887,6 +887,8 @@ The optional `toskar` object holds the assistant's own controls. Its name from b
 
 A non-streaming response has a `toskar` object, and the same object as `yggdrasil`, with the answer's `sources`, `steps`, `notice`, and `files` when there are any.
 
+Pictures in the last user message, as `image_url` parts, are shown to a model that can see, as pictures attached in the chat are (#830): the same choice of model, the same limits, and with no vision model, the model is told it can't see the picture and `toskar.notice` says so. A picture is a `data:` URL (`data:image/png;base64,…`), or an `http(s)` URL that Toskar fetches from the internet only, never this computer or its network, within 20 seconds and 25 MB. Anything else, or a URL that isn't a picture, is `400 INVALID_IMAGE`. The pictures are kept only while the answer is written. Pictures in earlier messages aren't shown.
+
 Each API key has `permissions` that a request can only narrow:
 - `memory` and `knowledge` are `never`, `on_request`, or `always`. The defaults are `on_request` for memory and `always` for knowledge.
 - `tools` is `profile` (the default), `read_only`, or `none`.
