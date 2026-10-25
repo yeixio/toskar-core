@@ -94,4 +94,8 @@ if sh scripts/install.sh ci --dir "$work/ci2" --port 17451 >"$work/ci2.txt" 2>&1
 	exit 1
 fi
 grep -q "already answers on port 17451" "$work/ci2.txt"
+# --no-start: toskarctl only, beside the one running.
+: >"$work/github_path3"
+GITHUB_PATH="$work/github_path3" sh scripts/install.sh ci --dir "$work/ci3" --port 17451 --no-start
+"$(cat "$work/github_path3")/toskarctl" version | head -1
 echo "installer test passed"

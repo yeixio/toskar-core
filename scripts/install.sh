@@ -48,11 +48,12 @@ die() {
 usage() {
 	cat <<'EOF'
 usage: install.sh [join --server <host:port> --token <ygj_…> --fingerprint <sha256:…>]
-       install.sh ci [--model <id>] [--dir <folder>] [--port <port>]
+       install.sh ci [--model <id>] [--dir <folder>] [--port <port>] [--no-start]
 Installs Toskar Core, starts it as a service, and with join, joins this
 computer to the network that made the join command.
 With ci, installs it in a folder (default ~/.toskar-ci) for a CI job, with
 no root or service, starts it there on port 17331, and installs the model.
+--no-start installs toskarctl only, for a job that asks a Toskar elsewhere.
 EOF
 }
 
@@ -61,6 +62,7 @@ ci=0
 ci_model=""
 ci_dir="${HOME:-.}/.toskar-ci"
 ci_port="17331"
+ci_start=1
 if [ "$#" -gt 0 ]; then
 	case "$1" in
 	join)
@@ -83,6 +85,10 @@ if [ "$#" -gt 0 ]; then
 			--port)
 				ci_port="${2:?--port needs a port}"
 				shift 2
+				;;
+			--no-start)
+				ci_start=0
+				shift
 				;;
 			*)
 				usage >&2
@@ -373,7 +379,7 @@ run_ci() {
 	*) die "ci runs on Linux and macOS" ;;
 	esac
 	API="http://127.0.0.1:${ci_port}"
-	if healthy; then
+	if [ "$ci_start" -eq 1 ] && healthy; then
 		die "something already answers on port ${ci_port}; choose another with --port"
 	fi
 	# Linux archives start with Toskar 1.11.
@@ -386,6 +392,16 @@ run_ci() {
 	rm -rf "$app"
 	cp -R "$src" "$app"
 	if [ "$os" = "Darwin" ]; then xattr -dr com.apple.quarantine "$app" 2>/dev/null || true; fi
+	if [ "$ci_start" -eq 0 ]; then
+		if [ -n "${GITHUB_PATH:-}" ]; then
+			printf '%s\n' "$app" >>"$GITHUB_PATH"
+			ok "toskarctl is set for the job's next steps"
+		else
+			say "For the job's next steps:"
+			printf 'export PATH="%s:$PATH"\n' "$app"
+		fi
+		return 0
+	fi
 
 	say "Starting Toskar..."
 	TOSKAR_API_PORT="$ci_port" TOSKAR_INTERNAL_PORT="$((ci_port + 1))" TOSKAR_DISCOVERY_ENABLED=false \

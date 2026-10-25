@@ -19,7 +19,11 @@ On a self-hosted runner beside a computer running Toskar, or with Toskar reachab
     TOSKAR_API_KEY: ${{ secrets.TOSKAR_API_KEY }}
 ```
 
-`toskarctl` is in every Toskar install; on a runner without one, `install.sh ci` below puts it on PATH.
+`toskarctl` is in every Toskar install. On a runner without one, `install.sh ci --no-start` puts it on PATH, without starting a Toskar:
+
+```sh
+curl -fsSL https://github.com/yeixio/toskar-core/releases/latest/download/install.sh | sh -s -- ci --no-start
+```
 
 ## Toskar on the runner
 
