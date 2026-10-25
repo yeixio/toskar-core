@@ -8,6 +8,128 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Thi
 
 Changes waiting for the next release are in [changes/unreleased/](changes/unreleased/), one file per pull request. `scripts/changelog.py preview` shows them together, and `scripts/changelog.py release <version>` writes them here when the release is cut.
 
+## [1.11.0] - 2026-10-24
+
+### Added
+
+- News: new open models, runtime releases, and AI labs' announcements, a few lines each, from the AI news toskar.ai publishes every morning. A model in Toskar's catalog shows how well it fits this computer, and Admins can install it from there. Toskar reads the news only when News is opened, at most every six hours, keeps a copy for offline, and lists each read in What left this computer; Settings › AI news turns it off.
+- Text for Ask Toskar on selected text in the phone app (yeixio/toskar-apps#276): rewrite, reply, translate, explain, summarize, and fix spelling and grammar, with each action's instruction to the model, in every language.
+- **For a CI job** on the API Access page makes a key that only asks: it
+  reaches the OpenAI-compatible chat, with no memories, knowledge, or
+  tools, so what a job sends, such as an issue's text or a build log, can't
+  reach your data or make anything happen. Anything else answers
+  `403 KEY_CHAT_ONLY`, MCP included. A key's permissions can also be set
+  to chat only later, and `POST /api/v1/api-keys` takes `"preset": "ci"`
+  or `permissions` from the start (contract 1.57).
+- `docs/connecting.md` says exactly how an app or SDK finds a computer,
+  pairs with it, pins its certificate, and reaches it from anywhere, with
+  test vectors in `api/connection-vectors.json` that Core's tests keep in
+  step with its own code.
+- The outside-network check also runs the official SDKs' conformance
+  programs, as devices that pair at home and connect from away, both
+  directly and through the relay.
+- Release notes thank everyone outside the maintainers who has a commit in the release.
+- GOVERNANCE.md describes the contributor, triager, reviewer, and maintainer roles, and MAINTAINERS.md lists who holds them.
+- `install.sh ci` runs Toskar for a CI job on the runner itself: it
+  installs the release in a folder, with no root or service, starts it,
+  installs a model, and sets `TOSKAR_URL` and `toskarctl` for the job's
+  next steps, in GitHub Actions, GitLab, Forgejo, or anywhere with a shell.
+  [Toskar in CI](docs/ci.md) puts it together with `toskarctl ask` and a
+  key for a CI job.
+- Releases include Linux headless archives (amd64 and arm64), the same
+  programs as the packages, for installs without root.
+- Toskar Pro's 14-day trial and Unlock (yeixio/toskar-apps#336): the Pro desktop app from the Mac App Store or the Microsoft Store tells Core where its purchase stands, `GET /api/v1/license` reports it, and once a trial has ended without the Unlock, installing models, creating automations, and adding people wait for it (`UNLOCK_REQUIRED`). Everything already set up keeps working. Core on its own is unaffected.
+- On the Mac App Store, Toskar Pro's free 14-day trial is started by the person, as Apple asks: until then the banner says how long the trial lasts and what the Unlock costs, with **Start free trial**, and new setup answers `TRIAL_NOT_STARTED` (yeixio/toskar-apps#336).
+- `toskarctl ask` sends one prompt and prints the answer, for scripts and
+  CI jobs: `gh issue view 12 | toskarctl ask "Summarize this bug"`. Piped
+  text is sent as data apart from the prompt, `--json-schema` answers with
+  JSON that fits a schema, and memory, knowledge, and tools are off unless
+  asked for. It's built on the official Go SDK.
+- The TV app's demo, for trying it without a computer, in every language.
+
+### Changed
+
+- The examples use the official SDKs, in Python, JavaScript, and Go:
+  streaming an answer, watching events, and connecting as a device at
+  home or from anywhere. The curl examples stream through the
+  OpenAI-compatible API and read `TOSKAR_URL` and `TOSKAR_API_KEY`.
+- Every example runs in CI against a throwaway Core, on each pull
+  request and each night, so one that breaks fails the build. The Python
+  events example prints each event as it comes, even into a pipe.
+- The examples install the SDKs from npm and PyPI (`toskar` 0.1.0), and
+  the Go examples use the Go SDK's v0.1.0 release.
+- The phone and TV setup steps name Toskar Core first, and open Toskar at http://localhost:7331, which works with Core and Pro alike.
+
+### Fixed
+
+- Clips from Wan 2.2 TI2V 5B, the default clip model, no longer wash out toward white as they get longer, and the shortest no longer come out as noise. It now samples 30 steps with guidance 5 and shift 5, so a clip takes about 1.5 times as long as before.
+- `docs/connecting.md` says to send the device's key with the health
+  check, since a computer that asks for keys answers it only with one, and
+  to check the certificate on resumed TLS sessions too.
+- A model file put in Toskar's models folder by hand now shows up: the Models page says it isn't added yet, and Add model › From another app adds it where it is, without a copy.
+- Pictures sent to `/v1/chat/completions` reach the model. They were read,
+  then dropped, so a model answered without having seen them. They're now
+  shown to a model that can see, as pictures attached in the chat are, and
+  with none, the answer says so. A picture is a `data:` URL, or an
+  `http(s)` one Toskar fetches from the internet only.
+- Answers from `/v1/chat/completions` look like OpenAI's to the libraries
+  and tools that read them. Each has its own `id` and a `created` time,
+  `usage` counts the tokens (cached and reasoning ones too, and a stream
+  sends it with `stream_options.include_usage`), and `finish_reason` says
+  `length` when an answer was cut short at its token limit, instead of
+  always `stop`. Errors use OpenAI's shape, `type`, `param`, and `code`,
+  including an error partway through a stream.
+- The API description (`api/openapi.yaml`) gives the client contract's
+  version (1.55, not 1.4.0), and no longer lists one response twice.
+- The API description now describes people, sign-in, invites, roles and
+  profile pins fully, with named types, including fields it left out
+  (an API key's pinned profile, and a person's email and portal).
+- It describes connecting a device, too: the pairing code, the paired
+  device's key and certificate, and its route for access from anywhere.
+- It describes every type in the client contract (messages and their
+  sources, steps, files and deliberation, run traces, events,
+  notifications, and errors) from the code's own fields and comments, and
+  the routes for chats, their summaries, and versions use them.
+- It describes the chat stream's events (token, done, error_code, and
+  error) and the events stream, so a client can read each event as a type.
+  Chat answers' metrics include `cached_tokens` (contract 1.56).
+- It describes models, runtimes, and ratings fully: the model list,
+  recommendations, browsing, installing, importing, running models, and
+  where a model can run.
+- It describes automations, tasks, knowledge, training, portals, joining
+  computers, logs, diagnostics, caches, connectors, MCP servers, news,
+  and updates with named types, from the code.
+- It describes memory, notifications and their destinations, API keys,
+  webhooks, speech, tools, and more of training with named types; every
+  answer the tests see now matches it.
+- Every JSON answer in the API description is a named type, including
+  diagnostics, transcription, tool activity and providers, and the
+  OpenAI-compatible model list and chat completions, ready for SDKs to be
+  generated from.
+- Every route in the API description is tagged by area, such as Chat,
+  Models, or Automations, so the API reference and SDKs group them.
+- Structured output uses the whole JSON Schema a request sends. Only
+  `type`, `properties`, `required`, `enum`, and `items` reached the model's
+  grammar and the check, so `anyOf`, `$ref`, `additionalProperties: false`,
+  bounds, `pattern`, and `const` were dropped without notice, and a schema
+  whose top level was `anyOf` accepted anything. The schema now goes to
+  llama.cpp as sent, answers are checked against every keyword, and a
+  schema that isn't valid JSON Schema, refers outside itself, or is over
+  64 KB is refused with `400 INVALID_RESPONSE_FORMAT`.
+- An API request that turns tools off can use a model on the external
+  server again. It was refused as if its profile kept work on this
+  computer.
+
+### Security
+
+- Text a model reads can't pose as its own turn markers. A web page, a
+  file in Knowledge, a tool's result, an automation's trigger, or a
+  visitor's message that spelled a control token, such as
+  `<|im_end|><|im_start|>system`, reached llama.cpp as that token, so it
+  could start a real system turn. Every message is now escaped on its way
+  to the model, from the model's own vocabulary and the common chat
+  templates' markers, and so is what goes to an external server.
+
 ## [1.10.0] - 2026-10-20
 
 ### Added

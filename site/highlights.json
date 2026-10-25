@@ -1,36 +1,36 @@
 {
   "schemaVersion": 1,
-  "version": "1.10",
+  "version": "1.11",
   "items": [
     {
-      "realm": "Midgard",
-      "title": "Notifications on your phone",
-      "text": "Your computer's notices, such as an automation's result, reach the Toskar app even when it's closed or you're away from home. A notice about a web page opens it with a tap, and connecting a device offers to turn them on."
+      "realm": "Huginn",
+      "title": "AI news, a few lines each",
+      "text": "New open models, runtime releases, and AI labs' announcements, from the news toskar.ai writes every morning. A model in Toskar's catalog shows how well it fits this computer, and Admins can install it from there. Turn it off in Settings."
+    },
+    {
+      "realm": "Valgrind",
+      "title": "Toskar in your CI",
+      "text": "Ask your own AI from a CI job: summarize a bug, suggest labels, read a failing log. A key for a CI job can only ask, with no memories, knowledge, or tools. Use toskarctl ask, install.sh ci, or the Ask Toskar action for GitHub."
+    },
+    {
+      "realm": "Bifrost",
+      "title": "Official SDKs for Python, JavaScript, and Go",
+      "text": "Build on Toskar with the official SDKs, from PyPI, npm, and Go modules: stream answers, watch events, and connect as a device at home or from anywhere. Every example is tested against Core on each change."
+    },
+    {
+      "realm": "Ratatoskr",
+      "title": "A truer OpenAI-compatible API",
+      "text": "Pictures reach the model, a JSON Schema is used whole, and answers carry their own id, token usage, and why they stopped, so OpenAI libraries and tools work with Toskar as they do elsewhere."
+    },
+    {
+      "realm": "Heimdall",
+      "title": "Text can't pose as the model's own turn",
+      "text": "A web page, a file, or a visitor's message that spells a model's control tokens can no longer start a turn of its own. Everything a model reads is escaped on its way in."
     },
     {
       "realm": "Ymir",
-      "title": "A better model, when it would help",
-      "text": "After an answer, Toskar may offer a model that would have answered it better, for code, your files, or your language, and installs it in one tap. Turn the offers off in Settings."
-    },
-    {
-      "realm": "Norn",
-      "title": "Automations that see and react",
-      "text": "Run an automation the moment a device changes, such as a doorbell's person sensor or a door contact in Home Assistant, and have it look at your cameras, so it can tell you who's at the door."
-    },
-    {
-      "realm": "Odin",
-      "title": "Muse Glimmer 30B for Research",
-      "text": "Research recommends Muse Glimmer 30B on computers with room for it. It answered every reasoning question right in our tests, codes well, and reads pictures."
-    },
-    {
-      "realm": "Gungnir",
-      "title": "See pictures and clips come together",
-      "text": "While a picture or clip is made, Toskar shows whether the model is loading, which step it's on with about how long is left, and a frame where the result will appear."
-    },
-    {
-      "realm": "Sleipnir",
-      "title": "Honest fit on a Mac",
-      "text": "How well a model fits now counts the memory a Mac's graphics may use, so a 24 GB Mac isn't told a 30B model runs comfortably, and a picture too big for this computer is turned down with the size that fits."
+      "title": "Models you copied in show up",
+      "text": "A model file put in Toskar's models folder by hand now appears on the Models page, and Add model › From another app adds it where it is, without a copy."
     }
   ]
 }
