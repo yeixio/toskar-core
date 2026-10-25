@@ -7,3 +7,5 @@
 - Every example runs in CI against a throwaway Core, on each pull
   request and each night, so one that breaks fails the build. The Python
   events example prints each event as it comes, even into a pipe.
+- The examples install the SDKs from npm and PyPI (`toskar` 0.1.0), and
+  the Go examples use the Go SDK's v0.1.0 release.

@@ -174,11 +174,14 @@ def events(run: Runner, core, cmd: list[str]) -> None:  # type: ignore[no-untype
     with tempfile.TemporaryFile("w+") as log:
         p = subprocess.Popen(fill(cmd, "events"), cwd=HERE, env=run.env, stdout=log, stderr=subprocess.STDOUT, text=True)
         try:
-            # Time to subscribe before asking.
-            time.sleep(3)
-            core.api("POST", "/api/v1/chat", {"message": "ping"})
-            deadline = time.time() + 15
+            # Ask until the example shows a chat: it may still be starting,
+            # and a chat before it has subscribed goes unseen.
+            deadline = time.time() + 30
+            asked = 0.0
             while time.time() < deadline:
+                if time.time() - asked > 3:
+                    core.api("POST", "/api/v1/chat", {"message": "ping"})
+                    asked = time.time()
                 log.seek(0)
                 if "chat.complete" in log.read():
                     break
