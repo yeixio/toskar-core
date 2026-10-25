@@ -153,6 +153,7 @@
   "UNSUPPORTED_FILE": "Toskar todavía no puede leer {{name}}. Adjunta un documento, una hoja de cálculo, un PDF, un archivo de código, audio, un video o una imagen PNG o JPEG.",
   "DEVICE_LIMIT": "Tienes {{limit}} dispositivos conectados, el máximo. Desconecta uno primero.",
   "DEVICE_NOT_ALLOWED": "La clave de un dispositivo no puede hacer esto. Usa una clave de Acceso a la API.",
+  "KEY_CHAT_ONLY": "Esta clave es solo para el chat, así que no puede hacer esto. Usa otra clave de Acceso a la API.",
   "PORTAL_NOT_FOUND": "No hay ningún portal en esta dirección, o está desactivado.",
   "PORTAL_SLUG_TAKEN": "Otro portal tiene esa dirección.",
   "PORTAL_TOO_LONG": "Aquí un mensaje puede tener {{max}} caracteres como máximo.",

@@ -1015,10 +1015,11 @@ export const api = {
 
   listApiKeys: () => request<APIKeyRecord[]>('/api/v1/api-keys'),
 
-  createApiKey: (name: string) =>
+  /** A preset sets the key's permissions from the start: ci is chat only, for a CI job (#455). */
+  createApiKey: (name: string, preset?: 'ci') =>
     request<CreateAPIKeyResponse>('/api/v1/api-keys', {
       method: 'POST',
-      body: JSON.stringify({ name }),
+      body: JSON.stringify(preset ? { name, preset } : { name }),
     }),
 
   deleteApiKey: (id: string) =>

@@ -72,7 +72,7 @@ Text piped in, or from `--file`, is sent as data to work on, apart from the prom
 | `--memory` | Let the answer use and add to memory. Off unless given, so a CI job never reads or writes a person's memories |
 | `--knowledge` | Let the answer use connected knowledge. Off unless given |
 
-The answer never uses tools. It goes through the OpenAI-compatible API (`/v1/chat/completions`), so it saves no conversation, and an API key's permissions apply: a key that may not use memory can't be given `--memory`.
+The answer never uses tools. It goes through the OpenAI-compatible API (`/v1/chat/completions`), so it saves no conversation, and an API key's permissions apply: a key that may not use memory can't be given `--memory`. For a CI job, make the key with **For a CI job** on the API Access page: it can only ask, with no memories, knowledge, or tools, whatever the job sends ([API key permissions](api.md#openai-compatible-api)).
 
 Exit status: 0 for an answer, 1 for a model or connection error, 2 for a usage error, and 3 for an answer that doesn't fit `--json-schema`.
 

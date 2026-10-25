@@ -1104,6 +1104,8 @@ export interface APIKeyPermissions {
   placement: boolean
   /** The profile every request answers with (#345); empty lets each request choose. */
   profile?: string
+  /** chat for a key that only asks, such as a CI job's (#455); empty reaches whatever its person may. */
+  routes?: 'chat'
 }
 
 export interface CreateAPIKeyResponse {

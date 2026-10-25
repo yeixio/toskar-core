@@ -87,6 +87,8 @@
     "namePlaceholder": "VS Code",
     "creating": "Wird erstellt …",
     "createKey": "Schlüssel erstellen",
+    "forCI": "Für einen CI-Job: nur Chat",
+    "forCIHint": "Er kann nur fragen, über die OpenAI-kompatible API, ohne Erinnerungen, Wissen oder Werkzeuge. So erreicht nichts, was ein Job sendet, deine Daten oder löst etwas aus.",
     "cancel": "Abbrechen",
     "copyNow": "Kopiere dieses Geheimnis jetzt – es wird nicht wieder angezeigt",
     "copiedBang": "Kopiert!",
@@ -97,7 +99,8 @@
     "confirmRotate": "„{{name}}“ erneuern? Das alte Geheimnis funktioniert sofort nicht mehr.",
     "rotate": "Erneuern",
     "confirmRevoke": "„{{name}}“ widerrufen? Apps mit diesem Schlüssel verlieren den Zugriff.",
-    "revoke": "Widerrufen"
+    "revoke": "Widerrufen",
+    "chatOnly": "Nur Chat"
   },
   "advanced": {
     "title": "Erweitert",
@@ -119,6 +122,11 @@
       "profile": "Was das Profil erlaubt",
       "read_only": "Nur lesende Werkzeuge",
       "none": "Keine Werkzeuge"
+    },
+    "routes": "Erreicht",
+    "routeChoices": {
+      "all": "Alles, was seine Person darf",
+      "chat": "Nur Chat, für CI-Jobs"
     },
     "placement": "Darf wählen, wo Anfragen laufen",
     "note": "Anfragen können weniger verlangen, nie mehr. Über das Netzwerk gelten diese Grenzen immer; auf diesem Computer gelten sie, wenn die App diesen Schlüssel sendet.",

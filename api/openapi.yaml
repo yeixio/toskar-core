@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Toskar Control Plane API
-  version: "1.56"
+  version: "1.57"
   description: >-
     Local AI control plane API for Toskar, its OpenAI-compatible routes, and its MCP server.
     On the default loopback bind no key is needed. When the daemon listens on any other address,
@@ -6533,6 +6533,13 @@ paths:
               properties:
                 name:
                   type: string
+                permissions:
+                  type: object
+                  description: "The key's permissions from the start, as PUT /api/v1/api-keys/{id}/permissions takes them (contract 1.57); the defaults when absent"
+                preset:
+                  type: string
+                  enum: [ci]
+                  description: "ci makes a key for a CI job (#455, contract 1.57): chat only, with no memory, knowledge, or tools, and no choice of placement"
       responses:
         "201":
           description: Created
@@ -7710,6 +7717,7 @@ components:
             tools: {type: string, enum: [profile, read_only, none]}
             placement: {type: boolean}
             profile: {type: string, description: "The one profile the key is pinned to (#345); absent lets each request choose"}
+            routes: {type: string, enum: [chat], description: "chat for a key that only asks (#455, contract 1.57): POST /v1/chat/completions, GET /v1/models, and health and version, and 403 KEY_CHAT_ONLY anywhere else; absent reaches whatever its person may"}
         kind: {type: string, enum: [device], description: "device for a key a phone or other device got by pairing (#216); absent for one made in API Access"}
         person_id: {type: string}
     Notification:

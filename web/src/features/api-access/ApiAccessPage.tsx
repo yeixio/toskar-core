@@ -111,6 +111,7 @@ export function ApiAccessPage() {
   const queryClient = useQueryClient()
   const advancedMode = useUIStore((s) => s.advancedMode)
   const [newKeyName, setNewKeyName] = useState('')
+  const [newKeyForCI, setNewKeyForCI] = useState(false)
   const [revealedSecret, setRevealedSecret] = useState<string | null>(null)
   const [revealedKeyId, setRevealedKeyId] = useState<string | null>(null)
   const [copiedField, setCopiedField] = useState<string | null>(null)
@@ -178,7 +179,7 @@ export function ApiAccessPage() {
   })
 
   const createKeyMutation = useMutation({
-    mutationFn: (name: string) => api.createApiKey(name),
+    mutationFn: ({ name, preset }: { name: string; preset?: 'ci' }) => api.createApiKey(name, preset),
     onSuccess: (result) => {
       if (result?.secret) {
         setRevealedSecret(result.secret)
@@ -186,6 +187,7 @@ export function ApiAccessPage() {
         rememberApiKey(result.secret, result.key?.id)
       }
       setNewKeyName('')
+      setNewKeyForCI(false)
       setShowCreate(false)
       queryClient.invalidateQueries({ queryKey: ['api-keys'] })
     },
@@ -519,12 +521,24 @@ export function ApiAccessPage() {
               className="field w-full"
               autoFocus
             />
+            <label className="flex items-start gap-2 text-sm">
+              <input
+                type="checkbox"
+                className="mt-1"
+                checked={newKeyForCI}
+                onChange={(e) => setNewKeyForCI(e.target.checked)}
+              />
+              <span>
+                <span className="text-ink">{t('keys.forCI')}</span>
+                <span className="block text-ink-muted">{t('keys.forCIHint')}</span>
+              </span>
+            </label>
             <div className="flex gap-2">
               <button
                 type="button"
                 className="btn-primary btn-sm"
                 disabled={createKeyMutation.isPending || !newKeyName.trim()}
-                onClick={() => createKeyMutation.mutate(newKeyName.trim())}
+                onClick={() => createKeyMutation.mutate({ name: newKeyName.trim(), preset: newKeyForCI ? 'ci' : undefined })}
               >
                 {createKeyMutation.isPending ? t('keys.creating') : t('keys.createKey')}
               </button>
@@ -534,6 +548,7 @@ export function ApiAccessPage() {
                 onClick={() => {
                   setShowCreate(false)
                   setNewKeyName('')
+                  setNewKeyForCI(false)
                 }}
               >
                 {t('keys.cancel')}
@@ -569,7 +584,14 @@ export function ApiAccessPage() {
             {activeKeys.map((key: APIKeyRecord) => (
               <li key={key.id} className="flex flex-wrap items-start justify-between gap-3 py-3">
                 <div className="min-w-0">
-                  <p className="font-medium text-ink">{key.name}</p>
+                  <p className="font-medium text-ink">
+                    {key.name}
+                    {key.permissions?.routes === 'chat' ? (
+                      <span className="ms-2 rounded bg-raised px-1.5 py-0.5 text-xs font-normal text-ink-muted">
+                        {t('keys.chatOnly')}
+                      </span>
+                    ) : null}
+                  </p>
                   <p className="mt-0.5 text-xs text-ink-muted">
                     {t('keys.meta', {
                       created: formatDate(key.created_at, { month: 'short', day: 'numeric' }),
@@ -681,7 +703,7 @@ export function ApiAccessPage() {
                   type="button"
                   className="btn-secondary"
                   disabled={createKeyMutation.isPending || !dialogKeyName.trim()}
-                  onClick={() => createKeyMutation.mutate(dialogKeyName.trim())}
+                  onClick={() => createKeyMutation.mutate({ name: dialogKeyName.trim() })}
                 >
                   {createKeyMutation.isPending ? t('keys.creating') : t('keys.createKey')}
                 </button>

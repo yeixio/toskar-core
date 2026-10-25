@@ -153,6 +153,7 @@
   "UNSUPPORTED_FILE": "Toskar can't read {{name}} yet. Attach a document, spreadsheet, PDF, code file, audio, video, or a PNG or JPEG image.",
   "DEVICE_LIMIT": "You have {{limit}} connected devices, the most you can. Disconnect one first.",
   "DEVICE_NOT_ALLOWED": "A device's key can't do this. Use a key from API Access.",
+  "KEY_CHAT_ONLY": "This key is for chat only, so it can't do this. Use another key from API Access.",
   "PORTAL_NOT_FOUND": "There's no portal at this address, or it's turned off.",
   "PORTAL_SLUG_TAKEN": "Another portal has that address.",
   "PORTAL_TOO_LONG": "A message here can be {{max}} characters at most.",

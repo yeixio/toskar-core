@@ -84,6 +84,8 @@
     "namePlaceholder": "VS Code",
     "creating": "正在创建…",
     "createKey": "创建密钥",
+    "forCI": "用于 CI 任务：仅聊天",
+    "forCIHint": "它只能通过兼容 OpenAI 的 API 提问，不使用记忆、知识或工具，因此任务发送的内容无法触及你的数据，也无法触发任何操作。",
     "cancel": "取消",
     "copyNow": "请立即复制此密钥——它不会再次显示",
     "copiedBang": "已复制！",
@@ -94,7 +96,8 @@
     "confirmRotate": "轮换“{{name}}”？旧密钥将立即失效。",
     "rotate": "轮换",
     "confirmRevoke": "吊销“{{name}}”？使用此密钥的应用将失去访问权限。",
-    "revoke": "吊销"
+    "revoke": "吊销",
+    "chatOnly": "仅聊天"
   },
   "advanced": {
     "title": "高级",
@@ -116,6 +119,11 @@
       "profile": "配置允许的工具",
       "read_only": "只读工具",
       "none": "不使用工具"
+    },
+    "routes": "可访问",
+    "routeChoices": {
+      "all": "其所属的人能访问的一切",
+      "chat": "仅聊天，用于 CI 任务"
     },
     "placement": "可以选择请求在哪里运行",
     "note": "请求只能要求更少的权限，不能更多。通过网络访问时，这些限制始终有效；在这台电脑上，当应用发送此密钥时才生效。",

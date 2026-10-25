@@ -697,12 +697,48 @@ func (s *Server) handleCreateAPIKey(w http.ResponseWriter, r *http.Request) {
 	}
 	var body struct {
 		Name string `json:"name"`
+		// Permissions, or a preset's name (ci), are the new key's from the
+		// start, so it's never broader than meant (#455).
+		Permissions *auth.APIKeyPermissions `json:"permissions"`
+		Preset      string                  `json:"preset"`
 	}
 	_ = json.NewDecoder(r.Body).Decode(&body)
+	perms := body.Permissions
+	switch body.Preset {
+	case "":
+	case "ci":
+		p := auth.CIAPIKeyPermissions()
+		perms = &p
+	default:
+		writeErr(w, http.StatusBadRequest, "INVALID_BODY", "preset must be ci, or left out.", nil)
+		return
+	}
+	if perms != nil {
+		if s.deps.SetAPIKeyPermissions == nil {
+			writeErr(w, http.StatusNotImplemented, "NOT_IMPLEMENTED", "API key permissions not available.", nil)
+			return
+		}
+		if err := perms.Validate(); err != nil {
+			writeErrFrom(w, http.StatusBadRequest, "PERMISSIONS_FAILED", err)
+			return
+		}
+	}
 	rec, secret, err := s.deps.CreateAPIKey(r.Context(), body.Name)
 	if err != nil {
 		writeErrFrom(w, http.StatusBadRequest, "CREATE_FAILED", err)
 		return
+	}
+	if perms != nil {
+		set, err := s.deps.SetAPIKeyPermissions(r.Context(), rec.ID, *perms)
+		if err != nil {
+			// Not a key broader than asked for.
+			if s.deps.RevokeAPIKey != nil {
+				_ = s.deps.RevokeAPIKey(r.Context(), rec.ID)
+			}
+			writeErrFrom(w, http.StatusBadRequest, "PERMISSIONS_FAILED", err)
+			return
+		}
+		rec = set
 	}
 	writeJSON(w, http.StatusCreated, newAPIKey{Key: rec, Secret: secret})
 }
