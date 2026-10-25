@@ -399,8 +399,7 @@ run_ci() {
 		else
 			say "For the job's next steps:"
 			# shellcheck disable=SC2016 # $PATH is for the shell that runs the line
-			# shellcheck disable=SC2016 # $PATH is for the shell that runs the line
-		printf 'export PATH="%s:$PATH"\n' "$app"
+			printf 'export PATH="%s:$PATH"\n' "$app"
 		fi
 		return 0
 	fi
