@@ -361,10 +361,18 @@ func kind(s *Schema) string {
 // FixPrompt asks a model to send the JSON again, naming what was wrong
 // and the shape it must have.
 func FixPrompt(r Result, s *Schema) string {
-	shape := ""
+	raw := ""
 	if s != nil {
-		raw, _ := json.Marshal(s)
-		shape = "\nIt must match this JSON Schema: " + string(raw)
+		b, _ := json.Marshal(s)
+		raw = string(b)
+	}
+	return fixPrompt(r, raw)
+}
+
+func fixPrompt(r Result, schema string) string {
+	shape := ""
+	if schema != "" {
+		shape = "\nIt must match this JSON Schema: " + schema
 	}
 	return "The JSON in your reply has problems:\n" + Describe(r.Issues) + shape +
 		"\nReply with only the corrected JSON, no other text."

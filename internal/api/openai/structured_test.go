@@ -7,6 +7,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/yeixio/toskar-core/internal/structured"
 	"github.com/yeixio/toskar-core/internal/turnopts"
 	"github.com/yeixio/toskar-core/pkg/pluginapi"
 )
@@ -16,11 +17,13 @@ type queueChat struct {
 	replies  []string
 	messages []string
 	opts     []*turnopts.Options
+	schemas  []string
 }
 
 func (q *queueChat) RunChat(ctx context.Context, profileID, conversationID, message string, stream bool, modelID, execution string) (<-chan pluginapi.ChatChunk, error) {
 	q.messages = append(q.messages, message)
 	q.opts = append(q.opts, turnopts.From(ctx))
+	q.schemas = append(q.schemas, string(structured.SchemaFrom(ctx)))
 	reply := "done"
 	if len(q.replies) > 0 {
 		reply, q.replies = q.replies[0], q.replies[1:]
@@ -66,7 +69,7 @@ func TestResponseFormat(t *testing.T) {
 	q = &queueChat{replies: []string{`{"price": 420}`, `{"price": 420, "currency": "USD"}`}}
 	h.Chat = q
 	rec = post(h, `{"model":"profile:general","messages":[{"role":"user","content":"Price?"}],`+priceSchema+`}`)
-	if rec.Code != http.StatusOK || len(q.messages) != 2 || !strings.Contains(q.messages[1], "currency: is required") ||
+	if rec.Code != http.StatusOK || len(q.messages) != 2 || !strings.Contains(q.messages[1], "missing property 'currency'") ||
 		len(q.opts[1].History) != 2 || q.opts[1].History[1].Content != `{"price": 420}` {
 		t.Fatalf("retry: %d %s %q", rec.Code, rec.Body, q.messages)
 	}
@@ -89,6 +92,45 @@ func TestResponseFormat(t *testing.T) {
 	for _, f := range []string{`{"type":"xml"}`, `{"type":"json_schema"}`, `{"type":"json_schema","json_schema":{"schema":"{"}}`} {
 		if rec := post(h, `{"model":"profile:general","messages":[{"role":"user","content":"x"}],"response_format":`+f+`}`); rec.Code != http.StatusBadRequest {
 			t.Errorf("%s: %d", f, rec.Code)
+		}
+	}
+}
+
+// The caller's schema reaches the runtime whole, and is checked whole
+// (#831): a top-level anyOf, a $ref, additionalProperties, and bounds
+// aren't dropped, so they neither vanish from the grammar nor pass unseen.
+func TestResponseFormatKeepsTheWholeSchema(t *testing.T) {
+	h := testHandler(t)
+	const schema = `{"anyOf":[{"$ref":"#/$defs/ok"},{"type":"string","const":"none"}],"$defs":{"ok":{"type":"object","properties":{"n":{"type":"integer","minimum":1}},"required":["n"],"additionalProperties":false}}}`
+	format := `"response_format":{"type":"json_schema","json_schema":{"name":"n","schema":` + schema + `}}`
+	q := &queueChat{replies: []string{`{"n": 2, "note": "extra"}`, `{"n": 2}`}}
+	h.Chat = q
+	rec := post(h, `{"model":"profile:general","messages":[{"role":"user","content":"n?"}],`+format+`}`)
+	if rec.Code != http.StatusOK || content(t, rec.Body.String()) != `{"n":2}` {
+		t.Fatalf("%d %s", rec.Code, rec.Body)
+	}
+	for _, kw := range []string{`"anyOf"`, `"$ref"`, `"additionalProperties":false`, `"minimum":1`, `"const":"none"`} {
+		if !strings.Contains(q.schemas[0], kw) {
+			t.Errorf("%s didn't reach the runtime: %s", kw, q.schemas[0])
+		}
+		if !strings.Contains(q.opts[0].System, kw) {
+			t.Errorf("%s isn't in the model's instruction: %s", kw, q.opts[0].System)
+		}
+	}
+	// The extra property was caught, and named when asked again.
+	if len(q.messages) != 2 || !strings.Contains(q.messages[1], "note") {
+		t.Fatalf("asked again with %q", q.messages)
+	}
+
+	// A schema that isn't JSON Schema, or is too big, is refused with why.
+	for name, s := range map[string]string{
+		"not JSON Schema": `{"type":5}`,
+		"an outside $ref": `{"$ref":"https://example.com/s.json"}`,
+		"too big":         `{"description":"` + strings.Repeat("x", structured.MaxSchemaBytes) + `"}`,
+	} {
+		rec := post(h, `{"model":"profile:general","messages":[{"role":"user","content":"x"}],"response_format":{"type":"json_schema","json_schema":{"name":"x","schema":`+s+`}}}`)
+		if rec.Code != http.StatusBadRequest || !strings.Contains(rec.Body.String(), "INVALID_RESPONSE_FORMAT") {
+			t.Errorf("%s: %d %.200s", name, rec.Code, rec.Body)
 		}
 	}
 }
