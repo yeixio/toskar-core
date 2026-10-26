@@ -463,9 +463,11 @@ func (a *App) ensureLocalModelWith(ctx context.Context, modelID string, adapters
 	if err := a.ensureRuntime(ctx, modelID); err != nil {
 		return "", err
 	}
+	loaded := a.loadingModel(modelID)
 	running, err := a.Runtimes.StartModel(ctx, "llamacpp", pluginapi.ModelStartConfig{
 		ModelID: modelID, ModelPath: path, Adapters: adapters, Projector: a.Models.ProjectorPath(modelID),
 	})
+	loaded()
 	if err != nil {
 		return "", err
 	}
