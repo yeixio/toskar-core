@@ -201,3 +201,18 @@ the set confirms the license for that run.
   is installed first and asked for by every chat.
 
 Add a case when a change fixes a behavior, so it stays fixed.
+
+`triage.json` is the triage set (#455): 30 issues of this repository, as
+written on 2026-10-26, with the labels maintainers gave them that the Triage
+workflow (`.github/workflows/triage.yml`) may suggest. The workflow's labels,
+their groups and limits, and its prompt are in `.github/triage.json`, which
+both read; `TestTriageCases` checks the set, and that the test builds the
+prompt, schema, and filter as the workflow's jq does. `TestTriageQuality`
+asks a daemon to label every issue the way the workflow does (the untrusted
+text fenced as data, no memory or tools, temperature 0, the schema), and
+reports how often the type was right, precision and recall against the
+maintainers' labels, and the labels it added or left out most. It's measured,
+not gated: the labels are sparse, so a suggestion they lack isn't always
+wrong. `TOSKAR_QUALITY_TRIAGE_MODEL` picks the model, `TOSKAR_QUALITY_TRIAGE_REPORT`
+writes a Markdown report and `TOSKAR_QUALITY_TRIAGE_JSON` the results, and the
+weekly real-model run includes it. It needs a daemon; the stub skips it.
