@@ -44,10 +44,14 @@ jobs:
       labels: ${{ steps.toskar.outputs.answer }}
       issue: ${{ steps.issue.outputs.number }}
     steps:
-      - uses: actions/checkout@v5
-        with:
-          sparse-checkout: .github/triage.json
-          sparse-checkout-cone-mode: false
+      # Only triage.json, read from this commit: no checkout, since a sparse
+      # one stays sparse for the next job on a shared self-hosted runner.
+      - name: The labels it may suggest
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api "repos/$GITHUB_REPOSITORY/contents/.github/triage.json?ref=$GITHUB_SHA" \
+            -H "Accept: application/vnd.github.raw" > "$RUNNER_TEMP/triage.json"
       - name: The issue, and what to ask
         id: issue
         env:
@@ -70,17 +74,17 @@ jobs:
               platform: {type: "array", items: {enum: (.platform | keys)}, maxItems: 2}
             },
             required: ["type", "area", "platform"]
-          }' .github/triage.json > "$RUNNER_TEMP/triage.schema.json"
+          }' "$RUNNER_TEMP/triage.json" > "$RUNNER_TEMP/triage.schema.json"
           {
             echo "number=$NUMBER"
             echo "prompt<<EOF_PROMPT"
             echo "Label this issue of Toskar, a local AI app."
             echo "type: the one kind of issue it is:"
-            jq -r '.type | to_entries[] | "- \(.key): \(.value)"' .github/triage.json
+            jq -r '.type | to_entries[] | "- \(.key): \(.value)"' "$RUNNER_TEMP/triage.json"
             echo "area: the parts of Toskar it's mainly about, one or two, at most three:"
-            jq -r '.area | to_entries[] | "- \(.key): \(.value)"' .github/triage.json
+            jq -r '.area | to_entries[] | "- \(.key): \(.value)"' "$RUNNER_TEMP/triage.json"
             echo "platform: only when the issue happens on, or is specifically about, that platform or hardware. Usually none: []."
-            jq -r '.platform | to_entries[] | "- \(.key): \(.value)"' .github/triage.json
+            jq -r '.platform | to_entries[] | "- \(.key): \(.value)"' "$RUNNER_TEMP/triage.json"
             echo "EOF_PROMPT"
           } >> "$GITHUB_OUTPUT"
       - uses: yeixio/toskar-action@v1
@@ -105,10 +109,14 @@ jobs:
     permissions:
       issues: write
     steps:
-      - uses: actions/checkout@v5
-        with:
-          sparse-checkout: .github/triage.json
-          sparse-checkout-cone-mode: false
+      # Only triage.json, read from this commit: no checkout, since a sparse
+      # one stays sparse for the next job on a shared self-hosted runner.
+      - name: The labels it may suggest
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api "repos/$GITHUB_REPOSITORY/contents/.github/triage.json?ref=$GITHUB_SHA" \
+            -H "Accept: application/vnd.github.raw" > "$RUNNER_TEMP/triage.json"
       - name: Suggest them
         env:
           GH_TOKEN: ${{ github.token }}
@@ -117,7 +125,7 @@ jobs:
           COMMENT: ${{ github.event_name == 'issues' || inputs.comment }}
         run: |
           # Only labels in triage.json, in its groups, never the answer's own text.
-          labels=$(jq -c --slurpfile allowed .github/triage.json '
+          labels=$(jq -c --slurpfile allowed "$RUNNER_TEMP/triage.json" '
             [.type // empty] as $t | (.area // []) as $a | (.platform // []) as $p
             | [($t[] | select(. as $l | $allowed[0].type | has($l))),
                ($a[] | select(. as $l | $allowed[0].area | has($l))),
