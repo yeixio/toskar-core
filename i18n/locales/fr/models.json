@@ -174,6 +174,7 @@
     "searching": "Recherche sur Hugging Face…",
     "failed": "Impossible de joindre Hugging Face. Vérifiez votre réseau et réessayez.",
     "install": "Installer",
+    "starting": "Démarrage…",
     "installFailed": "Échec de l'installation",
     "none": "Aucun modèle ne correspond à cette recherche. Essayez d’autres mots."
   },

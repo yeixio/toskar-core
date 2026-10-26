@@ -170,6 +170,7 @@
     "searching": "正在搜尋 Hugging Face…",
     "failed": "無法連線到 Hugging Face。請檢查網路後再試一次。",
     "install": "安裝",
+    "starting": "正在開始…",
     "installFailed": "安裝失敗",
     "none": "沒有符合此搜尋的模型。請換個詞試試。"
   },

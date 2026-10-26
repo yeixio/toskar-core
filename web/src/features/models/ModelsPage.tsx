@@ -66,6 +66,8 @@ export function ModelsPage() {
     Record<string, ModelDownloadProgressPayload>
   >({})
   const [installingId, setInstallingId] = useState<string | null>(null)
+  // Why a download failed, by model ID, until it's tried again.
+  const [failedDownloads, setFailedDownloads] = useState<Record<string, string>>({})
   const [tightConfirm, setTightConfirm] = useState<{ id: string; name: string } | null>(null)
 
   // A model file put in Toskar's models folder by hand isn't a model until
@@ -140,6 +142,15 @@ export function ModelsPage() {
           const modelId = event.payload?.model_id as string | undefined
           if (modelId && event.type === 'model.download.completed') setJustInstalled(modelId)
           if (modelId && event.type === 'model.download.started') setJustInstalled(null)
+          if (modelId) {
+            const error = event.type === 'model.download.failed' ? String(event.payload?.error ?? '') : null
+            setFailedDownloads((current) => {
+              const next = { ...current }
+              if (error === null) delete next[modelId]
+              else next[modelId] = error
+              return next
+            })
+          }
           if (modelId && event.type !== 'model.download.started') {
             setDownloadProgress((current) => {
               const next = { ...current }
@@ -354,6 +365,9 @@ export function ModelsPage() {
       {browseOpen && tab === 'discover' && (
         <BrowseAllPanel
           installTarget={resolveInstallNodeId(target)}
+          models={models}
+          progress={downloadProgress}
+          failed={failedDownloads}
           onClose={() => setBrowseOpen(false)}
           onInstalled={() => {
             queryClient.invalidateQueries({ queryKey: ['models'] })
