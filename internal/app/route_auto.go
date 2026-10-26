@@ -13,6 +13,7 @@ import (
 	"github.com/yeixio/toskar-core/internal/profiles"
 	"github.com/yeixio/toskar-core/internal/ratings"
 	"github.com/yeixio/toskar-core/internal/runlog"
+	"github.com/yeixio/toskar-core/internal/turnopts"
 	"github.com/yeixio/toskar-core/pkg/contracts"
 )
 
@@ -369,4 +370,11 @@ func (a *App) languageWeakNotice(ctx context.Context, m contracts.Model, lang st
 // notices shown with an answer are written in.
 func (a *App) appLanguage(ctx context.Context) string {
 	return locale.Resolve(a.personalString(ctx, "ui_locale", ""))
+}
+
+// exactModel reports a turn whose request named its model (#871): no other
+// model may answer in its place.
+func exactModel(ctx context.Context) bool {
+	o := turnopts.From(ctx)
+	return o != nil && o.ExactModel
 }

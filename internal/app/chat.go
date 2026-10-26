@@ -569,7 +569,9 @@ func (a *App) RunChat(ctx context.Context, profileID, conversationID, message st
 							}(eventsCh)
 							break
 						}
-						if next, step, notice, ok := a.fallback(ctx, env.trace.lang, failedID, evt.Error, profile.Orchestration.FallbackModels); ok {
+						if exactModel(ctx) {
+							a.Logger.Warn("named model failed; not trying another, since the request named it", "model", failedID, "error", evt.Error)
+						} else if next, step, notice, ok := a.fallback(ctx, env.trace.lang, failedID, evt.Error, profile.Orchestration.FallbackModels); ok {
 							run.Retried()
 							run.Note("otherModel", map[string]any{"model": a.modelName(failedID)})
 							a.Logger.Warn("chat model failed; retrying on another model", "failed", failedID, "next", next.ID, "error", evt.Error)

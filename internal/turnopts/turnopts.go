@@ -43,6 +43,10 @@ type Options struct {
 	// Portal is the chat portal the turn is a visitor's in (#205), which
 	// waits for the people who run Toskar.
 	Portal string
+	// ExactModel answers with the model the request named, or fails: no
+	// other model stands in for it when it can't answer (#871). The same
+	// model on another computer still may.
+	ExactModel bool
 }
 
 type key struct{}
