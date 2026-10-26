@@ -201,6 +201,9 @@ type App struct {
 	runtimeSetup sync.Mutex
 	deviceUse    sync.Map
 	deviceClock  func() time.Time
+	// modelLoads counts the loads in progress by model id: a model being
+	// loaded for a request is in use, though it hasn't answered yet.
+	modelLoads sync.Map // model id -> *atomic.Int32
 	// instances is where Toskars on this machine announce themselves
 	// (#602); nil announces nothing.
 	instances *instances.Registry
@@ -764,7 +767,7 @@ func New(opts Options) (*App, error) {
 			return a.stopModelLocal(ctx, instanceID)
 		},
 		Keep: func(_ context.Context, inst lifecycle.Instance) bool {
-			return a.keptForDevices(inst.ModelID)
+			return a.keepLoaded(inst.ModelID)
 		},
 		Settings: func(ctx context.Context) (string, int, error) {
 			mode, _ := a.Settings.GetString(ctx, "model_lifecycle", "automatic")

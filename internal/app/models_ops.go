@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/yeixio/toskar-core/internal/models"
@@ -14,6 +15,27 @@ import (
 
 // runtimeLastUsed tracks in-memory activity for idle unload.
 var runtimeLastUsed sync.Map // modelID -> time.Time
+
+// loadingModel marks modelID in use while it loads for a request, and
+// returns what marks the load done. Its last use is the previous
+// instance's, often long ago, so without this the idle sweep unloaded a
+// model while it loaded and the request moved to another model.
+func (a *App) loadingModel(modelID string) func() {
+	a.markModelUsed(modelID)
+	v, _ := a.modelLoads.LoadOrStore(modelID, new(atomic.Int32))
+	n := v.(*atomic.Int32)
+	n.Add(1)
+	return func() { n.Add(-1) }
+}
+
+// keepLoaded reports a model the idle sweep must leave loaded: one being
+// loaded for a request, or one another device is using (#498).
+func (a *App) keepLoaded(modelID string) bool {
+	if v, ok := a.modelLoads.Load(modelID); ok && v.(*atomic.Int32).Load() > 0 {
+		return true
+	}
+	return a.keptForDevices(modelID)
+}
 
 func (a *App) markModelUsed(modelID string) {
 	now := time.Now().UTC()
@@ -182,10 +204,12 @@ func (a *App) startModelLocal(ctx context.Context, modelID string) (contracts.Ru
 	if err := a.ensureRuntime(ctx, modelID); err != nil {
 		return fail(err)
 	}
+	loaded := a.loadingModel(modelID)
 	running, err := a.Runtimes.StartModel(ctx, "llamacpp", pluginapi.ModelStartConfig{
 		ModelID: modelID, ModelPath: path, Adapters: a.localAdapters(ctx, modelID),
 		Projector: a.Models.ProjectorPath(modelID),
 	})
+	loaded()
 	if err != nil {
 		return fail(err)
 	}
