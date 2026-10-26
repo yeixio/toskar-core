@@ -66,25 +66,20 @@ jobs:
           fi
           echo "open=true" >> "$GITHUB_OUTPUT"
           gh issue view "$NUMBER" --repo "$GITHUB_REPOSITORY" --json title,body --jq '.title + "\n\n" + .body' > "$RUNNER_TEMP/issue.txt"
+          # The schema and the prompt, from triage.json's groups, as
+          # tests/quality/triage_test.go builds them: a group with max is a
+          # list of at most that many, one without is exactly one.
           jq '{
             type: "object",
-            properties: {
-              type: {enum: (.type | keys)},
-              area: {type: "array", items: {enum: (.area | keys)}, maxItems: 3},
-              platform: {type: "array", items: {enum: (.platform | keys)}, maxItems: 2}
-            },
-            required: ["type", "area", "platform"]
+            properties: (.groups | map({key: .name, value: (if .max then
+              {type: "array", items: {enum: (.labels | keys)}, maxItems: .max}
+            else {enum: (.labels | keys)} end)}) | from_entries),
+            required: [.groups[].name]
           }' "$RUNNER_TEMP/triage.json" > "$RUNNER_TEMP/triage.schema.json"
           {
             echo "number=$NUMBER"
             echo "prompt<<EOF_PROMPT"
-            echo "Label this issue of Toskar, a local AI app."
-            echo "type: the one kind of issue it is:"
-            jq -r '.type | to_entries[] | "- \(.key): \(.value)"' "$RUNNER_TEMP/triage.json"
-            echo "area: the parts of Toskar it's mainly about, one or two, at most three:"
-            jq -r '.area | to_entries[] | "- \(.key): \(.value)"' "$RUNNER_TEMP/triage.json"
-            echo "platform: only when the issue happens on, or is specifically about, that platform or hardware. Usually none: []."
-            jq -r '.platform | to_entries[] | "- \(.key): \(.value)"' "$RUNNER_TEMP/triage.json"
+            jq -r '.prompt, (.groups[] | .ask, (.labels | to_entries[] | "- \(.key): \(.value)"))' "$RUNNER_TEMP/triage.json"
             echo "EOF_PROMPT"
           } >> "$GITHUB_OUTPUT"
       - uses: yeixio/toskar-action@v1
@@ -125,11 +120,11 @@ jobs:
           COMMENT: ${{ github.event_name == 'issues' || inputs.comment }}
         run: |
           # Only labels in triage.json, in its groups, never the answer's own text.
-          labels=$(jq -c --slurpfile allowed "$RUNNER_TEMP/triage.json" '
-            [.type // empty] as $t | (.area // []) as $a | (.platform // []) as $p
-            | [($t[] | select(. as $l | $allowed[0].type | has($l))),
-               ($a[] | select(. as $l | $allowed[0].area | has($l))),
-               ($p[] | select(. as $l | $allowed[0].platform | has($l)))]
+          labels=$(jq -c --slurpfile cfg "$RUNNER_TEMP/triage.json" '
+            . as $answer
+            | [$cfg[0].groups[] | . as $g
+               | ($answer[$g.name] // [] | if type == "array" then .[] else . end)
+               | select(type == "string" and (. as $l | $g.labels | has($l)))]
             | unique' <<<"$ANSWER")
           [ "$labels" != "[]" ] || exit 0
           {

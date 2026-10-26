@@ -257,10 +257,30 @@ jobs:
             -e TOSKAR_QUALITY_REASONING_JSON=/src/.quality/reasoning.json \
             golang:1.26-bookworm \
             go test ./tests/quality -run 'TestReasoning' -count=1 -v -timeout 240m
+      # The triage set (#455): issues of this repository labeled the way
+      # the Triage workflow asks. Measured, not gated: precision, recall,
+      # and how often the type was right.
+      - name: Triage
+        if: ${{ !cancelled() }}
+        run: |
+          mkdir -p .quality
+          docker run --rm --network "$NAME" \
+            --cap-drop ALL --security-opt no-new-privileges \
+            --memory 4g --memory-swap 4g --cpus 2 \
+            -v "$PWD:/src" -w /src \
+            -v toskar-quality-go:/go \
+            -e TOSKAR_QUALITY_URL="http://$NAME:7331" \
+            -e TOSKAR_QUALITY_KEY="$QUALITY_KEY" \
+            -e TOSKAR_QUALITY_INSTALL=recommended \
+            -e TOSKAR_QUALITY_MODEL="${{ matrix.model }}" \
+            -e TOSKAR_QUALITY_TRIAGE_REPORT=/src/.quality/triage.md \
+            -e TOSKAR_QUALITY_TRIAGE_JSON=/src/.quality/triage.json \
+            golang:1.26-bookworm \
+            go test ./tests/quality -run 'TestTriage' -count=1 -v -timeout 60m
       - name: Report
         if: always()
         run: |
-          for f in .quality/report.md .quality/topics.md .quality/files.md .quality/media.md .quality/reasoning.md; do
+          for f in .quality/report.md .quality/topics.md .quality/files.md .quality/media.md .quality/reasoning.md .quality/triage.md; do
             if [ -f "$f" ]; then
               head -c 60000 "$f" >> "$GITHUB_STEP_SUMMARY"
             fi
@@ -276,6 +296,8 @@ jobs:
             .quality/media.md
             .quality/reasoning.md
             .quality/reasoning.json
+            .quality/triage.md
+            .quality/triage.json
           if-no-files-found: ignore
       - name: Daemon log
         if: failure()

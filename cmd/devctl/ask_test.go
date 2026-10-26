@@ -12,6 +12,8 @@ import (
 	"time"
 
 	toskar "github.com/yeixio/toskar-sdks/go"
+
+	"github.com/yeixio/toskar-core/internal/askdata"
 )
 
 // fakeCompletions is Core's /v1/chat/completions, answering with answer,
@@ -102,7 +104,7 @@ func TestAskSaysWhenToskarIsntRunning(t *testing.T) {
 }
 
 func TestAskFencesDataTheDataCantClose(t *testing.T) {
-	m := askMessage("Read this", "a ```` fence")
+	m := askdata.Message("Read this", "a ```` fence")
 	if !strings.Contains(m, "`````\na ```` fence\n`````") {
 		t.Fatalf("%q", m)
 	}
