@@ -4,7 +4,8 @@ name: Triage
 # (#455): Toskar triaging its own issues with the Ask Toskar action. It
 # asks the Toskar on the computer beside the runner in TOSKAR_RUNS_ON, at
 # TOSKAR_URL, with TOSKAR_API_KEY, a key made with For a CI job, so the
-# issue's text can't reach anyone's memories or make a tool act. The labels
+# issue's text can't reach anyone's memories or make a tool act, and the
+# model TOSKAR_MODEL (auto unless set), fixed so runs compare. The labels
 # it may suggest, and what each means, are in .github/triage.json. Until
 # those variables are set it does nothing. Run it by hand on an existing
 # issue to try it.
@@ -19,6 +20,13 @@ on:
 
 permissions:
   contents: read
+
+# One at a time on Toskar's computer. In a flood of issues GitHub keeps one
+# run waiting and cancels the rest, so spam can't crowd the computer; run
+# it by hand for an issue that was skipped.
+concurrency:
+  group: triage
+  cancel-in-progress: false
 
 jobs:
   # Reads the issue, with no permission to write anything.
@@ -40,6 +48,13 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           NUMBER: ${{ github.event.issue.number || inputs.issue }}
         run: |
+          # Closed while it waited, as spam is: nothing to suggest.
+          if [ "$(gh issue view "$NUMBER" --repo "$GITHUB_REPOSITORY" --json state --jq .state)" != OPEN ]; then
+            echo "Issue $NUMBER is closed; nothing to suggest."
+            echo "open=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "open=true" >> "$GITHUB_OUTPUT"
           gh issue view "$NUMBER" --repo "$GITHUB_REPOSITORY" --json title,body --jq '.title + "\n\n" + .body' > "$RUNNER_TEMP/issue.txt"
           jq '{type: "object", properties: {labels: {type: "array", items: {enum: (.labels | keys)}}}, required: ["labels"]}' \
             .github/triage.json > "$RUNNER_TEMP/triage.schema.json"
@@ -51,10 +66,12 @@ jobs:
             echo "EOF_PROMPT"
           } >> "$GITHUB_OUTPUT"
       - uses: yeixio/toskar-action@v1
+        if: steps.issue.outputs.open == 'true'
         id: toskar
         with:
           url: ${{ vars.TOSKAR_URL }}
           api-key: ${{ secrets.TOSKAR_API_KEY }}
+          model: ${{ vars.TOSKAR_MODEL || 'auto' }}
           prompt: ${{ steps.issue.outputs.prompt }}
           input-file: ${{ runner.temp }}/issue.txt
           json-schema: ${{ runner.temp }}/triage.schema.json
@@ -64,6 +81,7 @@ jobs:
   # Writes a comment with the allowed labels, never the answer's own text.
   comment:
     needs: suggest
+    if: needs.suggest.outputs.labels != ''
     runs-on: ${{ fromJSON(vars.CI_RUNS_ON || '"ubuntu-latest"') }}
     timeout-minutes: 5
     permissions:
