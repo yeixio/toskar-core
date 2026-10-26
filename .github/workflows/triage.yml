@@ -41,6 +41,10 @@ jobs:
     if: vars.TOSKAR_URL != '' && vars.TOSKAR_RUNS_ON != ''
     runs-on: ${{ fromJSON(vars.TOSKAR_RUNS_ON || '"ubuntu-latest"') }}
     timeout-minutes: 15
+    # Reading the issue needs issues: read in a private repository.
+    permissions:
+      contents: read
+      issues: read
     outputs:
       labels: ${{ steps.toskar.outputs.answer }}
       issue: ${{ steps.issue.outputs.number }}
@@ -59,14 +63,19 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           NUMBER: ${{ github.event.issue.number || inputs.issue }}
         run: |
-          # Closed while it waited, as spam is: nothing to suggest.
-          if [ "$(gh issue view "$NUMBER" --repo "$GITHUB_REPOSITORY" --json state --jq .state)" != OPEN ]; then
+          # Closed while it waited, as spam is: nothing to suggest. An
+          # issue that can't be read fails the run, rather than look closed.
+          state=$(gh issue view "$NUMBER" --repo "$GITHUB_REPOSITORY" --json state --jq .state)
+          if [ "$state" != OPEN ]; then
             echo "Issue $NUMBER is closed; nothing to suggest."
             echo "open=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           echo "open=true" >> "$GITHUB_OUTPUT"
-          gh issue view "$NUMBER" --repo "$GITHUB_REPOSITORY" --json title,body --jq '.title + "\n\n" + .body' > "$RUNNER_TEMP/issue.txt"
+          # The start of a long issue, such as a crash report's stack, so
+          # it fits the model's context: what it's about comes first.
+          gh issue view "$NUMBER" --repo "$GITHUB_REPOSITORY" --json title,body --jq '.title + "\n\n" + .body' |
+            head -c 12000 > "$RUNNER_TEMP/issue.txt"
           # The schema and the prompt, from triage.json's groups, as
           # tests/quality/triage_test.go builds them: a group with max is a
           # list of at most that many, one without is exactly one.
@@ -103,6 +112,7 @@ jobs:
     runs-on: ${{ fromJSON(vars.CI_RUNS_ON || '"ubuntu-latest"') }}
     timeout-minutes: 5
     permissions:
+      contents: read
       issues: write
     steps:
       # Only triage.json, read from this commit: no checkout, since a sparse

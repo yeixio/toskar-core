@@ -25,6 +25,10 @@ import (
 
 const triageConfigPath = "../../.github/triage.json"
 
+// triageMaxBytes is how much of an issue the workflow sends, as its
+// head -c does, so a crash report's stack fits the model's context.
+const triageMaxBytes = 12000
+
 // triageConfig is .github/triage.json.
 type triageConfig struct {
 	Prompt string        `json:"prompt"`
@@ -233,11 +237,19 @@ func TestTriageCases(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, field := range []string{".prompt, (.groups[] | .ask,", "if .max then", "maxItems: .max", "required: [.groups[].name]", "$cfg[0].groups[]"} {
+	for _, field := range []string{fmt.Sprintf("head -c %d", triageMaxBytes), ".prompt, (.groups[] | .ask,", "if .max then", "maxItems: .max", "required: [.groups[].name]", "$cfg[0].groups[]"} {
 		if !strings.Contains(string(workflow), field) {
 			t.Errorf("triage.yml no longer builds its question with %q; keep it and this test in step", field)
 		}
 	}
+}
+
+// firstBytes is the start of s, at most n bytes.
+func firstBytes(s string, n int) string {
+	if len(s) > n {
+		return s[:n]
+	}
+	return s
 }
 
 // triageResult is one issue's outcome, for the reports.
@@ -284,7 +296,7 @@ func TestTriageQuality(t *testing.T) {
 			ran = true
 			body := map[string]any{
 				"model":           model,
-				"messages":        []map[string]string{{"role": "user", "content": askdata.Message(prompt, c.Title+"\n\n"+c.Body)}},
+				"messages":        []map[string]string{{"role": "user", "content": askdata.Message(prompt, firstBytes(c.Title+"\n\n"+c.Body, triageMaxBytes))}},
 				"toskar":          map[string]any{"memory": false, "knowledge": false, "tools": []string{}},
 				"temperature":     0,
 				"response_format": format,
