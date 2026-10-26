@@ -97,6 +97,9 @@ type assistantOptions struct {
 	// Progress streams the turn's progress and tool activity as chunks with
 	// an empty delta and the extension fields.
 	Progress bool `json:"progress"`
+	// Fallback lets another model answer when the model the request names
+	// can't (#871). Off, a named model answers or the request fails.
+	Fallback bool `json:"fallback"`
 }
 
 // HandleModels lists profiles as OpenAI models.
@@ -256,6 +259,13 @@ func (h *Handler) HandleChatCompletions(w http.ResponseWriter, r *http.Request) 
 		} else {
 			modelID = ""
 		}
+	}
+
+	// A request that names a model means that model: it answers or the
+	// request fails, rather than another model answering unsaid (#871).
+	// auto and profiles still fall back, and the caller may allow it.
+	if o := req.assistant(); modelID != "" && modelID != "auto" && (o == nil || !o.Fallback) {
+		opts.ExactModel = true
 	}
 
 	// The last user message's pictures, attached as the web chat attaches

@@ -246,3 +246,30 @@ func TestIncludeReasoning(t *testing.T) {
 		t.Fatalf("streamed without include_reasoning: %s", body)
 	}
 }
+
+// A request that names a model means that model: another doesn't answer in
+// its place when it fails, unless the request allows it (#871). auto and
+// profiles still fall back.
+func TestNamedModelAnswersOrFails(t *testing.T) {
+	h := testHandler(t)
+	chat := &scriptChat{chunks: []pluginapi.ChatChunk{{Content: "ok", Done: true}}}
+	h.Chat = chat
+	for model, want := range map[string]bool{
+		`"qwen2.5-14b-q4"`:  true,
+		`"sai:support"`:     true,
+		`"auto"`:            false,
+		`"profile:general"`: false,
+		`"general"`:         false,
+		`"qwen2.5-14b-q4","toskar":{"fallback":true}`: false,
+	} {
+		rec := httptest.NewRecorder()
+		body := `{"model":` + model + `,"messages":[{"role":"user","content":"hi"}]}`
+		h.HandleChatCompletions(rec, httptest.NewRequest(http.MethodPost, "/v1/chat/completions", strings.NewReader(body)))
+		if rec.Code != http.StatusOK || chat.opts == nil {
+			t.Fatalf("%s: %d %s", model, rec.Code, rec.Body)
+		}
+		if chat.opts.ExactModel != want {
+			t.Errorf("%s: exact model = %v, want %v", model, chat.opts.ExactModel, want)
+		}
+	}
+}

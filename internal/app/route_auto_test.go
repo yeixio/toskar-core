@@ -11,6 +11,7 @@ import (
 	"github.com/yeixio/toskar-core/internal/mimir"
 	modelhealth "github.com/yeixio/toskar-core/internal/models/health"
 	"github.com/yeixio/toskar-core/internal/muninn"
+	"github.com/yeixio/toskar-core/internal/turnopts"
 	"github.com/yeixio/toskar-core/pkg/contracts"
 )
 
@@ -255,5 +256,16 @@ func TestFallbackTriesAnotherQuantizationFirst(t *testing.T) {
 	// A different model with a similar name is not another quantization.
 	if _, _, _, ok := otherQuantization("mistral-7b", models, 24e9, false); ok {
 		t.Fatal("a model without a Hugging Face source matched")
+	}
+}
+
+// A turn whose request named its model doesn't fall back to another (#871).
+func TestExactModelTurn(t *testing.T) {
+	ctx := context.Background()
+	if exactModel(ctx) || exactModel(turnopts.With(ctx, &turnopts.Options{})) {
+		t.Fatal("an ordinary turn may fall back")
+	}
+	if !exactModel(turnopts.With(ctx, &turnopts.Options{ExactModel: true})) {
+		t.Fatal("a named model's turn may not")
 	}
 }
