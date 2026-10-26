@@ -143,10 +143,11 @@ jobs:
             scripts/install.ps1
       # Homebrew and apt serve stable releases. A pre-release (a tag with a
       # suffix such as -beta.1) must not replace what their users install.
-      - name: Open the Homebrew formula pull request
+      - name: Publish the Homebrew formula
         if: ${{ !contains(github.ref_name, '-') }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_DEPLOY_KEY: ${{ secrets.RELEASE_DEPLOY_KEY }}
         run: |
           set -euo pipefail
           # The new formula is already written in the worktree. Keep a copy, then
@@ -163,18 +164,9 @@ jobs:
             echo "Homebrew formula matches main"
           else
             git commit -m "Publish the Homebrew formula for ${GITHUB_REF_NAME#v}."
-            # formula is a release branch. main requires a pull request, so this ref is replaced each release.
-            git push --force origin HEAD:formula
-            # gh pr view matches a merged pull request for this head, so look for an open one.
-            if [ -z "$(gh pr list --head formula --base main --state open --json number --jq '.[0].number')" ]; then
-              gh pr create --base main --head formula \
-                --title "Publish the Homebrew formula for ${GITHUB_REF_NAME#v}" \
-                --body "Updates Formula/toskar.rb from the ${GITHUB_REF_NAME} release."
-            fi
-            # The actions token opens the pull request but cannot approve it. A required review must not fail the release.
-            if ! gh pr merge formula --squash --admin; then
-              echo "::warning::The Homebrew formula pull request is open and still needs an approving review."
-            fi
+            scripts/release-publish.sh formula \
+              "Publish the Homebrew formula for ${GITHUB_REF_NAME#v}" \
+              "Updates Formula/toskar.rb from the ${GITHUB_REF_NAME} release."
           fi
       - name: Publish the apt repository
         if: ${{ !contains(github.ref_name, '-') }}
@@ -202,13 +194,13 @@ jobs:
       - name: Publish versioned documentation
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_DEPLOY_KEY: ${{ secrets.RELEASE_DEPLOY_KEY }}
         run: |
           set -euo pipefail
           version="${GITHUB_REF_NAME#v}"
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git fetch origin main
-          # main requires a pull request, so this ref is replaced each release.
           git checkout -f -B documentation origin/main
           python3 scripts/publish-docs.py \
             --source /tmp/guide.json \
@@ -221,16 +213,9 @@ jobs:
             exit 0
           fi
           git commit -m "docs: publish Toskar ${version}"
-          git push --force origin HEAD:documentation
-          if [ -z "$(gh pr list --head documentation --base main --state open --json number --jq '.[0].number')" ]; then
-            gh pr create --base main --head documentation \
-              --title "Publish the documentation for ${version}" \
-              --body "Freezes docs/${version}.json from the ${GITHUB_REF_NAME} release."
-          fi
-          # The actions token opens the pull request but cannot approve it. A required review must not fail the release.
-          if ! gh pr merge documentation --squash --admin; then
-            echo "::warning::The documentation pull request is open and still needs an approving review."
-          fi
+          scripts/release-publish.sh documentation \
+            "Publish the documentation for ${version}" \
+            "Freezes docs/${version}.json from the ${GITHUB_REF_NAME} release."
 
   # Capture the release's screenshots and walkthrough and attach them to it,
   # for toskar.ai. A failure here does not undo the release.
