@@ -7,16 +7,16 @@
     "research": "Investigation or design, before code"
   },
   "area": {
-    "security": "Security-related work",
-    "performance": "Performance, latency, memory, or resource usage",
-    "hardware": "Hardware support or compatibility",
-    "runtime": "AI runtimes and backends, such as llama.cpp, and models running on them",
-    "networking": "Networking, discovery, pairing, remote access, or connectivity",
-    "orchestration": "Scheduling, routing, agents, tools, or how an answer is put together",
-    "api": "The control API or the OpenAI-compatible API",
+    "security": "Security: keys, sign-in, encryption, permissions, or attacks",
+    "performance": "Speed, latency, memory, or resource use is the point of the issue",
+    "hardware": "Support for particular hardware: GPUs, accelerators, or devices",
+    "runtime": "llama.cpp or another inference runtime itself: installing, starting, or running it, or its GPU backends. Not every issue that involves a model",
+    "networking": "Networking: discovery, pairing, remote access, the relay, or connections between computers",
+    "orchestration": "How a request is planned and routed: agents, tools, model choice, or placement across computers",
+    "api": "The control API or the OpenAI-compatible API, as programs call them",
     "cli": "toskarctl and other command-line tools",
     "translation": "Text in a language other than English, or a new language",
-    "tests": "Tests, CI checks, and the quality suite"
+    "tests": "Tests, CI checks, benchmarks, or the quality suite"
   },
   "platform": {
     "linux": "Linux-specific",

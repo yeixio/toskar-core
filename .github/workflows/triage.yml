@@ -7,7 +7,7 @@ name: Triage
 # issue's text can't reach anyone's memories or make a tool act, and the
 # model TOSKAR_MODEL (auto unless set), fixed so runs compare. The labels
 # it may suggest, and what each means, are in .github/triage.json: one
-# type, up to three areas, and a platform only when the issue is about
+# type, up to two areas, and a platform only when the issue is about
 # that platform, limits the answer's schema enforces. Until those variables
 # are set it does nothing. Run it by hand on an existing issue to try it:
 # that writes to the run's summary, and comments only when asked.
@@ -70,7 +70,7 @@ jobs:
             type: "object",
             properties: {
               type: {enum: (.type | keys)},
-              area: {type: "array", items: {enum: (.area | keys)}, maxItems: 3},
+              area: {type: "array", items: {enum: (.area | keys)}, maxItems: 2},
               platform: {type: "array", items: {enum: (.platform | keys)}, maxItems: 2}
             },
             required: ["type", "area", "platform"]
@@ -81,7 +81,7 @@ jobs:
             echo "Label this issue of Toskar, a local AI app."
             echo "type: the one kind of issue it is:"
             jq -r '.type | to_entries[] | "- \(.key): \(.value)"' "$RUNNER_TEMP/triage.json"
-            echo "area: the parts of Toskar it's mainly about, one or two, at most three:"
+            echo "area: the part of Toskar the issue is mainly about: usually one, two only when both are central, none when nothing fits well. Don't add an area just because the issue touches it:"
             jq -r '.area | to_entries[] | "- \(.key): \(.value)"' "$RUNNER_TEMP/triage.json"
             echo "platform: only when the issue happens on, or is specifically about, that platform or hardware. Usually none: []."
             jq -r '.platform | to_entries[] | "- \(.key): \(.value)"' "$RUNNER_TEMP/triage.json"
