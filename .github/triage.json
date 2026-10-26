@@ -1,10 +1,12 @@
 {
-  "labels": {
+  "type": {
     "bug": "Something is not working correctly",
     "enhancement": "A new feature or an improvement",
     "documentation": "Documentation changes or improvements",
     "question": "A question, or more information or discussion is needed",
-    "research": "Investigation or design, before code",
+    "research": "Investigation or design, before code"
+  },
+  "area": {
     "security": "Security-related work",
     "performance": "Performance, latency, memory, or resource usage",
     "hardware": "Hardware support or compatibility",
@@ -14,7 +16,9 @@
     "api": "The control API or the OpenAI-compatible API",
     "cli": "toskarctl and other command-line tools",
     "translation": "Text in a language other than English, or a new language",
-    "tests": "Tests, CI checks, and the quality suite",
+    "tests": "Tests, CI checks, and the quality suite"
+  },
+  "platform": {
     "linux": "Linux-specific",
     "macos": "macOS-specific",
     "windows": "Windows-specific",
