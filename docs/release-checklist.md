@@ -6,6 +6,15 @@ A tag with a pre-release suffix (`-alpha.N`, `-beta.N`, `-rc.N`) is published as
 
 After a successful release, the workflow sends a `core-release` event to `yeixio/toskar-apps`, which builds the desktop, Mac App Store, and iOS apps from that core release. Sending it needs the repository secret `TOSKAR_APPS_TOKEN` (`TOSKAR_DESKTOP_TOKEN` and `YGGDRASIL_DESKTOP_TOKEN`, earlier names for it, still work until they're deleted): a fine-grained personal access token (or GitHub App token) for `yeixio/toskar-apps` only, with the **Contents: Read and write** permission. Without the secret, the run shows an "Apps not notified" warning, and the apps repository picks the release up in its daily check, or when its Release workflow is started by hand.
 
+A stable release publishes the Homebrew formula and the documentation snapshot as commits on main (`scripts/release-publish.sh`). main takes changes only by an approved pull request, except from a deploy key, so with the repository secret `RELEASE_DEPLOY_KEY` they go straight to main with no one to approve them. That secret is the private half of a deploy key with write access, titled "Release workflow", on this repository only. Without it, each opens a pull request that needs an approving review, and the run shows a warning. To set it up, or replace the key:
+
+```sh
+ssh-keygen -t ed25519 -N '' -C "toskar-core release" -f release-key
+gh repo deploy-key add release-key.pub --repo yeixio/toskar-core --allow-write --title "Release workflow"
+gh secret set RELEASE_DEPLOY_KEY --repo yeixio/toskar-core < release-key
+rm release-key release-key.pub
+```
+
 - [ ] Version passed into the release build matches the tag (`scripts/build/package-core-release.sh` strips a leading `v` in CI).
 - [ ] The release's section is in [CHANGELOG.md](../CHANGELOG.md): `python3 scripts/changelog.py release <version>` writes it from the fragments in [changes/unreleased/](../changes/unreleased/) and removes them. Edit the section's opening sentence by hand if the release needs one.
 - [ ] For a new minor version (1.7.0, not 1.6.2), [site/highlights.json](../site/highlights.json) has its highlights: 3 to 9 short items, each with a realm, a title, and a sentence, written for the people who use Toskar. toskar.ai shows them as "New in 1.7". `python3 scripts/changelog.py check`, which CI runs, fails until the file's `version` matches the latest release in CHANGELOG.md.
