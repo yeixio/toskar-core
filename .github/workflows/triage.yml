@@ -4,7 +4,8 @@ name: Triage
 # (#455): Toskar triaging its own issues with the Ask Toskar action. It
 # asks the Toskar on the computer beside the runner in TOSKAR_RUNS_ON, at
 # TOSKAR_URL, with TOSKAR_API_KEY, a key made with For a CI job, so the
-# issue's text can't reach anyone's memories or make a tool act. The labels
+# issue's text can't reach anyone's memories or make a tool act, and the
+# model TOSKAR_MODEL (auto unless set), fixed so runs compare. The labels
 # it may suggest, and what each means, are in .github/triage.json. Until
 # those variables are set it does nothing. Run it by hand on an existing
 # issue to try it.
@@ -55,6 +56,7 @@ jobs:
         with:
           url: ${{ vars.TOSKAR_URL }}
           api-key: ${{ secrets.TOSKAR_API_KEY }}
+          model: ${{ vars.TOSKAR_MODEL || 'auto' }}
           prompt: ${{ steps.issue.outputs.prompt }}
           input-file: ${{ runner.temp }}/issue.txt
           json-schema: ${{ runner.temp }}/triage.schema.json
