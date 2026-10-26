@@ -21,6 +21,13 @@ on:
 permissions:
   contents: read
 
+# One at a time on Toskar's computer. In a flood of issues GitHub keeps one
+# run waiting and cancels the rest, so spam can't crowd the computer; run
+# it by hand for an issue that was skipped.
+concurrency:
+  group: triage
+  cancel-in-progress: false
+
 jobs:
   # Reads the issue, with no permission to write anything.
   suggest:
@@ -41,6 +48,13 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           NUMBER: ${{ github.event.issue.number || inputs.issue }}
         run: |
+          # Closed while it waited, as spam is: nothing to suggest.
+          if [ "$(gh issue view "$NUMBER" --repo "$GITHUB_REPOSITORY" --json state --jq .state)" != OPEN ]; then
+            echo "Issue $NUMBER is closed; nothing to suggest."
+            echo "open=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "open=true" >> "$GITHUB_OUTPUT"
           gh issue view "$NUMBER" --repo "$GITHUB_REPOSITORY" --json title,body --jq '.title + "\n\n" + .body' > "$RUNNER_TEMP/issue.txt"
           jq '{type: "object", properties: {labels: {type: "array", items: {enum: (.labels | keys)}}}, required: ["labels"]}' \
             .github/triage.json > "$RUNNER_TEMP/triage.schema.json"
@@ -52,6 +66,7 @@ jobs:
             echo "EOF_PROMPT"
           } >> "$GITHUB_OUTPUT"
       - uses: yeixio/toskar-action@v1
+        if: steps.issue.outputs.open == 'true'
         id: toskar
         with:
           url: ${{ vars.TOSKAR_URL }}
@@ -66,6 +81,7 @@ jobs:
   # Writes a comment with the allowed labels, never the answer's own text.
   comment:
     needs: suggest
+    if: needs.suggest.outputs.labels != ''
     runs-on: ${{ fromJSON(vars.CI_RUNS_ON || '"ubuntu-latest"') }}
     timeout-minutes: 5
     permissions:
