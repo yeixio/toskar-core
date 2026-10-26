@@ -170,6 +170,7 @@
     "searching": "Hugging Faceを検索しています…",
     "failed": "Hugging Faceに接続できませんでした。ネットワークを確認してもう一度お試しください。",
     "install": "インストール",
+    "starting": "開始しています…",
     "installFailed": "インストールに失敗しました",
     "none": "その検索に一致するモデルはありません。別の言葉を試してください。"
   },

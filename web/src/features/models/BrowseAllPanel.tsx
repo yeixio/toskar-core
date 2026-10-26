@@ -4,16 +4,26 @@ import { useState } from 'react'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 import { api } from '@/lib/api'
 import { formatBytes } from '@/lib/format'
-import type { BrowseModel } from '@/types/api'
+import { formatPercent } from '@/i18n/format'
+import type { BrowseModel, Model, ModelDownloadProgressPayload } from '@/types/api'
 import { ShownError, shownOr } from '@/components/ui/ShownError'
 
 export function BrowseAllPanel({
   installTarget,
+  models,
+  progress,
+  failed = {},
   onClose,
   onInstalled,
 }: {
   /** Resolved from the page-level Models for: selector. */
   installTarget?: string
+  /** The model list, so a row shows its model downloading or installed. */
+  models: Model[]
+  /** Live download progress by model ID, from the page's events. */
+  progress: Record<string, ModelDownloadProgressPayload>
+  /** Why a download failed, by model ID, from the page's events. */
+  failed?: Record<string, string>
   onClose: () => void
   onInstalled: () => void
 }) {
@@ -40,8 +50,31 @@ export function BrowseAllPanel({
         tags: item.tags,
         node_id: installTarget,
       }),
-    onSuccess: () => onInstalled(),
+    onSuccess: (result, item) => {
+      setStarted((current) => ({ ...current, [item.id]: result?.model_id || item.id }))
+      onInstalled()
+    },
   })
+  // The models these rows started, by row: the download goes on in the
+  // background after the request returns, so the row follows it.
+  const [started, setStarted] = useState<Record<string, string>>({})
+
+  // What a row's button shows: starting while the request is sent, then
+  // the download as the model list and its progress events say, then
+  // installed. A download that failed offers Install again.
+  const rowState = (
+    item: BrowseModel,
+  ): { kind: 'idle' | 'starting' | 'downloading' | 'installed'; progress?: ModelDownloadProgressPayload; failed?: string } => {
+    const modelId = started[item.id] ?? item.id
+    const model = models.find((m) => m.id === modelId)
+    const live = progress[modelId]
+    if (installMutation.isPending && installMutation.variables?.id === item.id) return { kind: 'starting' }
+    if (live || model?.status === 'downloading') return { kind: 'downloading', progress: live }
+    if (model?.installed) return { kind: 'installed' }
+    if (modelId in failed) return { kind: 'idle', failed: failed[modelId] || t('browse.installFailed') }
+    if (started[item.id] && model?.status !== 'failed') return { kind: 'downloading' }
+    return { kind: 'idle' }
+  }
 
   return (
     <div className="space-y-4 rounded-xl border border-line bg-surface p-4">
@@ -106,14 +139,52 @@ export function BrowseAllPanel({
                 {item.variant ? ` · ${item.variant}` : ''}
               </p>
             </div>
-            <button
-              type="button"
-              className="btn-primary btn-sm shrink-0"
-              disabled={installMutation.isPending}
-              onClick={() => installMutation.mutate(item)}
-            >
-              {t('browse.install')}
-            </button>
+            {(() => {
+              const state = rowState(item)
+              if (state.kind === 'installed') {
+                // As an installed model's card shows it.
+                return (
+                  <span className="status-chip h-8 shrink-0 bg-success/15 px-2.5 text-success">
+                    <svg viewBox="0 0 16 16" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                      <path d="m3.5 8.5 3 3 6-7" />
+                    </svg>
+                    {t('install.installed')}
+                  </span>
+                )
+              }
+              const busy = state.kind !== 'idle'
+              return (
+                <div className="flex shrink-0 flex-col items-end gap-1">
+                  <button
+                    type="button"
+                    className="btn-primary btn-sm"
+                    disabled={busy}
+                    aria-busy={busy}
+                    onClick={() => installMutation.mutate(item)}
+                  >
+                    {state.kind === 'starting'
+                      ? t('browse.starting')
+                      : state.kind === 'downloading'
+                        ? t('install.downloading')
+                        : t('browse.install')}
+                  </button>
+                  {state.failed && (
+                    <span className="max-w-xs text-end text-xs text-danger" role="alert">
+                      {state.failed}
+                    </span>
+                  )}
+                  {state.progress && (
+                    <span className="text-xs text-ink-muted">
+                      {t('install.progress', {
+                        percent: formatPercent(state.progress.percent / 100),
+                        done: formatBytes(state.progress.bytes_downloaded),
+                        total: formatBytes(state.progress.bytes_total),
+                      })}
+                    </span>
+                  )}
+                </div>
+              )
+            })()}
           </li>
         ))}
       </ul>
