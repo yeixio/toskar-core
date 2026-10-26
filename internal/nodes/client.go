@@ -232,6 +232,10 @@ type RemoteChatRequest struct {
 	Role              string                  `json:"role,omitempty"`
 	RequesterNodeID   string                  `json:"requester_node_id,omitempty"`
 	RequesterNodeName string                  `json:"requester_node_name,omitempty"`
+	// ResponseSchema is a structured answer's JSON Schema, so the paired
+	// computer's llama.cpp constrains the reply to it (#865). A computer
+	// from before it ignores it, and Core checks the answer either way.
+	ResponseSchema json.RawMessage `json:"response_schema,omitempty"`
 }
 
 func (c *Client) Chat(ctx context.Context, req RemoteChatRequest) (<-chan pluginapi.ChatChunk, error) {

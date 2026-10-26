@@ -47,6 +47,7 @@ func setupInternalServer(t *testing.T) (*InternalServer, *auth.NodeIdentity, *au
 			return []contracts.Model{{ID: "m1", Installed: true}}, nil
 		},
 		Chat: func(ctx context.Context, req RemoteChatRequest) (<-chan pluginapi.ChatChunk, error) {
+			lastChat = req
 			ch := make(chan pluginapi.ChatChunk, 1)
 			ch <- pluginapi.ChatChunk{Content: "hi", Done: true}
 			close(ch)
@@ -58,6 +59,9 @@ func setupInternalServer(t *testing.T) (*InternalServer, *auth.NodeIdentity, *au
 	})
 	return srv, local, pm, peer
 }
+
+// lastChat is the chat request the test server last got.
+var lastChat RemoteChatRequest
 
 func TestAuthMiddlewareRejectsUnsigned(t *testing.T) {
 	srv, _, _, _ := setupInternalServer(t)
@@ -355,8 +359,9 @@ func TestRemoteChatStream(t *testing.T) {
 		t.Fatal(err)
 	}
 	body, _ := json.Marshal(RemoteChatRequest{
-		ModelID:  "m1",
-		Messages: []pluginapi.ChatMessage{{Role: "user", Content: "hi"}},
+		ModelID:        "m1",
+		Messages:       []pluginapi.ChatMessage{{Role: "user", Content: "hi"}},
+		ResponseSchema: json.RawMessage(`{"type":"object"}`),
 	})
 	req := httptest.NewRequest(http.MethodPost, "/internal/v1/chat", bytes.NewReader(body))
 	req.Header.Set("Authorization", "Bearer "+peer.AuthToken("local-node"))
@@ -372,6 +377,10 @@ func TestRemoteChatStream(t *testing.T) {
 	}
 	if chunk.Content != "hi" || !chunk.Done {
 		t.Fatalf("chunk=%+v", chunk)
+	}
+	// A structured answer's schema reaches the paired computer (#865).
+	if string(lastChat.ResponseSchema) != `{"type":"object"}` {
+		t.Fatalf("schema = %s", lastChat.ResponseSchema)
 	}
 }
 

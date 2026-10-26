@@ -10,6 +10,7 @@ import (
 	"github.com/yeixio/toskar-core/internal/egress"
 	"github.com/yeixio/toskar-core/internal/profiles"
 	"github.com/yeixio/toskar-core/internal/runtimes/external"
+	"github.com/yeixio/toskar-core/internal/structured"
 	"github.com/yeixio/toskar-core/pkg/contracts"
 	"github.com/yeixio/toskar-core/pkg/pluginapi"
 )
@@ -141,7 +142,7 @@ func (a *App) generateExternal(ctx context.Context, modelID string, messages []p
 	model := external.ServerModel(modelID)
 	a.Egress.Add(ctx, egress.ExternalServer, a.External.Host(), "prompt and conversation for "+model)
 	opts := pluginapi.GenerateOptionsFrom(ctx)
-	ch, err := a.External.Chat(ctx, model, pluginapi.ChatRequest{Messages: messages, Stream: true, Temperature: opts.Temperature, MaxTokens: opts.MaxTokens})
+	ch, err := a.External.Chat(ctx, model, pluginapi.ChatRequest{Messages: messages, Stream: true, Temperature: opts.Temperature, MaxTokens: opts.MaxTokens, ResponseSchema: structured.SchemaFrom(ctx)})
 	if err != nil {
 		return nil, contracts.NewError("EXTERNAL_FAILED", nil, err)
 	}
