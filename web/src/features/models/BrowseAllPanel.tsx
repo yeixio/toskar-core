@@ -51,7 +51,7 @@ export function BrowseAllPanel({
         node_id: installTarget,
       }),
     onSuccess: (result, item) => {
-      setStarted((current) => ({ ...current, [item.id]: result.model_id || item.id }))
+      setStarted((current) => ({ ...current, [item.id]: result?.model_id || item.id }))
       onInstalled()
     },
   })
