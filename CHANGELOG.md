@@ -8,6 +8,53 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Thi
 
 Changes waiting for the next release are in [changes/unreleased/](changes/unreleased/), one file per pull request. `scripts/changelog.py preview` shows them together, and `scripts/changelog.py release <version>` writes them here when the release is cut.
 
+## [1.11.1] - 2026-10-26
+
+### Added
+
+- `examples/ci` has workflows that ask Toskar as a CI step: label new
+  issues (GitHub Actions and Forgejo) and explain a failed build from its
+  log (GitHub Actions and GitLab CI). Each one keeps the issue or log as
+  data, and changes only what it allows, in a separate step. Their shell
+  steps run in CI against a throwaway Core, as the other examples do.
+- A triage set in the quality tests: 30 of Toskar's own issues with the
+  labels maintainers gave them. It measures how well a model suggests them
+  the way the Triage workflow asks (#455), as precision, recall, and how
+  often the issue's type is right, and it runs in the weekly real-model
+  run. `toskarctl ask`'s fencing of data moved to `internal/askdata`, so
+  the test sends exactly what the workflow does.
+
+### Changed
+
+- A request to `/v1/chat/completions` that names a model gets that model,
+  or an error saying why. When the model couldn't answer, such as one that
+  failed to load, another installed model used to answer in its place
+  without saying so, which made results that compare or measure models
+  wrong. `auto` and profiles still fall back, and `"toskar": {"fallback":
+  true}` allows it for a named model too (contract 1.59). `toskarctl ask
+  --model` gets the model it names.
+
+### Fixed
+
+- Install in Browse all models now shows what happens. It said Install
+  again as soon as the request was sent, while the model downloaded in the
+  background, so it looked as if nothing happened. A row now shows
+  Starting…, then Downloading… with how far along it is, then Installed,
+  as the catalog's cards do. A download that fails says why and offers
+  Install again.
+- Structured output holds on an external OpenAI-compatible server and on a
+  paired computer too. The JSON Schema reached only this computer's
+  llama.cpp, so a model elsewhere could answer outside it, and the request
+  failed with `422 INVALID_STRUCTURED_OUTPUT`. An external server now gets
+  it as `response_format` (and is asked again without it if it refuses),
+  and a paired computer's llama.cpp constrains the reply as this one's does.
+- A model loading for a request is no longer unloaded as idle partway
+  through. The idle unload went by the model's last use, which was the
+  previous instance's, often long ago. So a model that had been unloaded
+  once could be stopped again while it loaded, and the request moved to
+  another model or waited a long time. A load in progress now counts as
+  use, and the model stays loaded until it finishes.
+
 ## [1.11.0] - 2026-10-24
 
 ### Added
