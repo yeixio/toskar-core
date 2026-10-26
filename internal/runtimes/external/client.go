@@ -147,13 +147,22 @@ func (r *Runtime) Chat(ctx context.Context, model string, req pluginapi.ChatRequ
 		body["max_tokens"] = req.MaxTokens
 	}
 	// Ask for the token counts at the end of the stream, so the context
-	// gauge shows the real prompt size (#230). A server that rejects the
-	// option is asked again without it.
+	// gauge shows the real prompt size (#230).
 	body["stream_options"] = map[string]any{"include_usage": true}
+	if len(req.ResponseSchema) > 0 {
+		// A structured answer's schema, as OpenAI takes it, so a server
+		// that supports it (llama-server, vLLM, OpenAI) constrains the reply
+		// as Toskar's own llama.cpp does (#865). Core still checks the
+		// answer, for a server that doesn't.
+		body["response_format"] = map[string]any{"type": "json_schema", "json_schema": map[string]any{"name": "answer", "schema": req.ResponseSchema}}
+	}
+	// A server that rejects an option is asked again without it.
 	resp, err := r.request(ctx, http.MethodPost, "/chat/completions", body)
-	if err != nil && strings.Contains(err.Error(), "stream_options") {
-		delete(body, "stream_options")
-		resp, err = r.request(ctx, http.MethodPost, "/chat/completions", body)
+	for _, option := range []string{"stream_options", "response_format"} {
+		if err != nil && body[option] != nil && rejects(err, option) {
+			delete(body, option)
+			resp, err = r.request(ctx, http.MethodPost, "/chat/completions", body)
+		}
 	}
 	if err != nil {
 		return nil, err
@@ -238,4 +247,15 @@ func (r *Runtime) Chat(ctx context.Context, model string, req pluginapi.ChatRequ
 		done()
 	}()
 	return out, nil
+}
+
+// rejects reports an error that names the option a server turned down,
+// such as "Unrecognized request argument: response_format" or a
+// json_schema it can't take.
+func rejects(err error, option string) bool {
+	msg := err.Error()
+	if option == "response_format" && strings.Contains(msg, "json_schema") {
+		return true
+	}
+	return strings.Contains(msg, option)
 }

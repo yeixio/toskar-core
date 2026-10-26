@@ -302,6 +302,7 @@ func (a *App) generateOnNode(ctx context.Context, nodeID, modelID, role, adapter
 		Role:              role,
 		RequesterNodeID:   cfg.NodeID,
 		RequesterNodeName: cfg.NodeName,
+		ResponseSchema:    structured.SchemaFrom(ctx),
 	})
 	if err != nil {
 		return nil, remoteUnreachableErr(n, err)
@@ -507,11 +508,12 @@ func (a *App) internalChatStream(ctx context.Context, req nodes.RemoteChatReques
 			return nil, err2
 		}
 		ch, err = a.Runtimes.Chat(ctx, pluginapi.ChatRequest{
-			ModelEndpoint: endpoint,
-			Messages:      a.forTemplate(req.ModelID, req.Messages),
-			Stream:        true,
-			Temperature:   req.Temperature,
-			MaxTokens:     req.MaxTokens,
+			ModelEndpoint:  endpoint,
+			Messages:       a.forTemplate(req.ModelID, req.Messages),
+			Stream:         true,
+			Temperature:    req.Temperature,
+			MaxTokens:      req.MaxTokens,
+			ResponseSchema: req.ResponseSchema,
 		})
 		if err != nil {
 			return nil, err

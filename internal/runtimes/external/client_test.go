@@ -160,3 +160,52 @@ func TestChatEscapesForgedTurns(t *testing.T) {
 		t.Fatalf("sent %q", sent)
 	}
 }
+
+// A structured answer's schema goes to the server as OpenAI's json_schema
+// response_format (#865), and a server that turns it down is asked again
+// without it, leaving Core's own check.
+func TestChatSendsResponseSchema(t *testing.T) {
+	for _, refuses := range []bool{false, true} {
+		var formats []any
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			var body map[string]any
+			_ = json.NewDecoder(r.Body).Decode(&body)
+			formats = append(formats, body["response_format"])
+			if refuses && body["response_format"] != nil {
+				w.WriteHeader(http.StatusBadRequest)
+				_, _ = w.Write([]byte(`{"error":{"message":"Unrecognized request argument supplied: response_format"}}`))
+				return
+			}
+			w.Header().Set("Content-Type", "text/event-stream")
+			fmt.Fprint(w, "data: {\"choices\":[{\"delta\":{\"content\":\"{}\"}}]}\n\ndata: [DONE]\n\n")
+		}))
+		schema := json.RawMessage(`{"type":"object","properties":{"labels":{"type":"array"}}}`)
+		ch, err := New(Config{BaseURL: srv.URL}).Chat(context.Background(), "m", pluginapi.ChatRequest{
+			Messages: []pluginapi.ChatMessage{{Role: "user", Content: "label it"}}, ResponseSchema: schema,
+		})
+		if err != nil {
+			t.Fatalf("refuses=%v: %v", refuses, err)
+		}
+		for range ch {
+		}
+		srv.Close()
+		sent, _ := json.Marshal(formats[0])
+		if string(sent) != `{"json_schema":{"name":"answer","schema":{"properties":{"labels":{"type":"array"}},"type":"object"}},"type":"json_schema"}` {
+			t.Errorf("refuses=%v: response_format %s", refuses, sent)
+		}
+		if want := map[bool]int{false: 1, true: 2}[refuses]; len(formats) != want || (refuses && formats[1] != nil) {
+			t.Errorf("refuses=%v: requests %v", refuses, formats)
+		}
+	}
+	// Without a schema there's no response_format.
+	srv, got := fakeServer(t)
+	ch, err := New(Config{BaseURL: srv.URL, APIKey: "sk-test"}).Chat(context.Background(), "m", pluginapi.ChatRequest{Messages: []pluginapi.ChatMessage{{Role: "user", Content: "hi"}}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	for range ch {
+	}
+	if _, ok := (*got)["response_format"]; ok {
+		t.Errorf("response_format sent without a schema: %v", *got)
+	}
+}
