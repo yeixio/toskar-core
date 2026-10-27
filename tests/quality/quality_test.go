@@ -168,6 +168,9 @@ type Result struct {
 	Prompts [][]pluginapi.ChatMessage
 	// Files are the files the assistant made in the turn, by name.
 	Files map[string][]byte
+	// Failed is why a real model's turn failed, such as writing no answer:
+	// a failed case, counted in the pass rate (#834).
+	Failed string `json:",omitempty"`
 }
 
 // Event is one event during a request.
@@ -239,11 +242,14 @@ func TestQualitySet(t *testing.T) {
 	d, build := qualityDriver(t)
 	file := loadCases(t)
 	deflection := regexp.MustCompile(file.Deflection)
+	runs := qualityRuns(t, d)
 	var report []reportRow
+	var planned []string
 	for _, c := range file.Cases {
 		if !c.On("core") {
 			continue
 		}
+		planned = append(planned, c.ID)
 		// A run that can't go on, such as one whose daemon now wants a key,
 		// stops with that reason instead of failing every case left.
 		if stopped(t, d, c) {
@@ -253,27 +259,22 @@ func TestQualitySet(t *testing.T) {
 			t.Logf("%s: skipped, since a model that sees is installed", c.ID)
 			continue
 		}
-		if row, ok := runCase(t, d, c, deflection); ok {
-			report = append(report, row)
+		for _, run := range runs.runs {
+			if row, ok := runCaseNamed(t, run.driver, c, deflection, run.name(c.ID)); ok {
+				row.Repeat = run.repeat
+				report = append(report, row)
+			}
 		}
 	}
-	passed := 0
-	for _, row := range report {
-		if len(row.Failures) == 0 {
-			passed++
-		}
-	}
-	rate := 1.0
-	if len(report) > 0 {
-		rate = float64(passed) / float64(len(report))
-	}
-	t.Logf("quality: %d of %d cases passed (%.0f%%) with the %s model", passed, len(report), rate*100, d.Name())
+	runs.save(t, report)
+	sum := summarizeRuns(report, planned)
+	t.Logf("quality: %s with the %s model", sum.line(), d.Name())
 	if path := config.Env("QUALITY_REPORT"); path != "" {
-		md := markdownReport(d.Name(), report, rate, minPass(d.Name()))
+		md := markdownReport(d.Name(), report, sum, minPass(d.Name()))
 		writeReport(t, d, build, path, md)
 	}
-	if rate < minPass(d.Name()) {
-		t.Errorf("%.0f%% of cases passed; at least %.0f%% must", rate*100, minPass(d.Name())*100)
+	if sum.rate < minPass(d.Name()) {
+		t.Errorf("%.0f%% of runs passed; at least %.0f%% must", sum.rate*100, minPass(d.Name())*100)
 	}
 }
 
@@ -320,9 +321,15 @@ func stopped(t *testing.T, d Driver, c Case) bool {
 // daemon refuses or drops the request, counts as failed; otherwise a run
 // that broke partway would report only the cases that got an answer.
 func runCase(t *testing.T, d Driver, c Case, deflection *regexp.Regexp) (reportRow, bool) {
+	return runCaseNamed(t, d, c, deflection, c.ID)
+}
+
+// runCaseNamed is runCase as the subtest name, such as "case#2" for a
+// repeat.
+func runCaseNamed(t *testing.T, d Driver, c Case, deflection *regexp.Regexp, name string) (reportRow, bool) {
 	var row reportRow
 	recorded, skipped := false, false
-	ok := t.Run(c.ID, func(t *testing.T) {
+	ok := t.Run(name, func(t *testing.T) {
 		if c.StubOnly && d.Name() != "stub" {
 			skipped = true
 			t.Skip("checks a scripted reply")
@@ -338,7 +345,7 @@ func runCase(t *testing.T, d Driver, c Case, deflection *regexp.Regexp) (reportR
 		r := d.Run(t, c)
 		failures := check(d.Name(), c, r, deflection)
 		recorded = true
-		row = reportRow{Case: c, Answer: r.Answer, Failures: failures}
+		row = reportRow{Case: c, Answer: r.Answer, Failures: failures, Result: r}
 		for _, f := range failures {
 			// A real model is held to a pass rate, not every case.
 			if d.Name() == "stub" {
@@ -376,19 +383,25 @@ func writeReport(t *testing.T, d Driver, build, path, md string) {
 	}
 }
 
-// reportRow is one case's outcome, for the report.
+// reportRow is one run of a case, for the report.
 type reportRow struct {
 	Case     Case
 	Answer   string
 	Failures []string
+	// Repeat is which run of the case this is, from 0.
+	Repeat int
+	// Result is what the run did, saved for rescoring.
+	Result Result
 }
 
-// markdownReport lists every case with its answer, failures first, so a
-// release can be read and not only scored.
-func markdownReport(driver string, rows []reportRow, rate, min float64) string {
+// markdownReport gives the pass rate with its interval, then every case,
+// failures first, with each run's answer, so a release can be read and not
+// only scored.
+func markdownReport(driver string, rows []reportRow, sum summary, min float64) string {
 	var b strings.Builder
 	fmt.Fprintf(&b, "# Chat quality: core, %s model\n\n", driver)
-	fmt.Fprintf(&b, "%.0f%% of %d cases passed; at least %.0f%% must.\n\n", rate*100, len(rows), min*100)
+	fmt.Fprintf(&b, "%s; at least %.0f%% must pass.\n\n", sum.sentence(), min*100)
+	sum.details(&b)
 	sorted := slices.Clone(rows)
 	slices.SortStableFunc(sorted, func(a, b reportRow) int { return len(b.Failures) - len(a.Failures) })
 	for _, row := range sorted {
@@ -396,7 +409,11 @@ func markdownReport(driver string, rows []reportRow, rate, min float64) string {
 		if len(row.Failures) > 0 {
 			mark = "FAIL"
 		}
-		fmt.Fprintf(&b, "## %s %s\n\n%s\n\n> %s\n\n", mark, row.Case.ID, row.Case.What, strings.ReplaceAll(row.Case.Message, "\n", " "))
+		id := row.Case.ID
+		if sum.repeats > 1 {
+			id += fmt.Sprintf(" (run %d of %d)", row.Repeat+1, sum.repeats)
+		}
+		fmt.Fprintf(&b, "## %s %s\n\n%s\n\n> %s\n\n", mark, id, row.Case.What, strings.ReplaceAll(row.Case.Message, "\n", " "))
 		for _, f := range row.Failures {
 			fmt.Fprintf(&b, "- %s\n", f)
 		}
@@ -435,6 +452,10 @@ func check(driver string, c Case, r Result, deflection *regexp.Regexp) []string 
 	var failures []string
 	fail := func(format string, args ...any) {
 		failures = append(failures, fmt.Sprintf("%s (%s): "+format, append([]any{c.What, driver}, args...)...))
+	}
+	if r.Failed != "" {
+		fail("%s", r.Failed)
+		return failures
 	}
 	if x.Effort != "" && (r.Run == nil || r.Run.Effort != x.Effort) {
 		fail("effort = %v, want %s", runField(r, func(run *runlog.Run) any { return run.Effort }), x.Effort)

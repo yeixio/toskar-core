@@ -165,10 +165,33 @@ the set confirms the license for that run.
   llama.cpp (`LLAMA_CPP_TAG`, with `gh`) and Llama 3.2 1B
   (`QUALITY_MODEL_GGUF_URL`), starts llama-server, and runs the cases in-process
   with every model call sent to it (`TOSKAR_QUALITY_MODEL_URL`) and the web
-  answered from `web.json`. At least 90% of cases must pass
+  answered from `web.json`. At least 90% of runs must pass
   (`TOSKAR_QUALITY_MIN_PASS`); `TOSKAR_QUALITY_REPORT` writes every answer to a
   Markdown report. The Release workflow runs this before it publishes, and the
   Quality workflow runs it on pull requests that change how chat decides.
+- **Running each case more than once (#834):** one run per case can swing a
+  real model's pass rate by a case either way. `TOSKAR_QUALITY_REPEATS=3` runs
+  each case three times, sampling with seeds 1, 2, and 3 at
+  `TOSKAR_QUALITY_TEMPERATURE` (0.7 when repeating; one run samples greedily,
+  temperature 0 and seed 1, as it always has). The report then gives:
+  - the pass rate of all runs with its 95% interval (Wilson);
+  - the flaky cases, which passed some runs but not all;
+  - from three or more runs, pass@3 (any of three tries passes) and majority
+    of 3 (two of three tries pass), to see where Deliberate would help
+    before paying for it.
+
+  It also says whether the run covered every case. A run that stopped
+  partway isn't a full run to compare with another. The weekly served-model
+  job runs three repeats. A release runs one, and is held to 90% of it.
+- **Saving and rescoring:** `TOSKAR_QUALITY_SAVE=runs.jsonl` saves every run's
+  answer and what it did (sources, steps, the run trace, files). After a check
+  changes, `TOSKAR_QUALITY_RESCORE=runs.jsonl go test ./tests/quality -run
+  TestQualitySet` checks the saved runs again, without a model. The weekly
+  job keeps its runs with its report.
+- **A turn that fails:** with a real model, a case whose turn fails, such as
+  one where the model wrote no answer, is a failed case in the pass rate, not
+  the end of the run. With the stub, whose replies are scripted, it fails the
+  test.
 - **Real models on a daemon:** start a daemon with models installed, and with
   `TOSKAR_WEB_FIXTURES=tests/quality/web.json` so its web tools read the
   pages above instead of the internet (it logs a warning when they do), then run

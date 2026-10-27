@@ -664,7 +664,7 @@ func TestMediaQuality(t *testing.T) {
 		t.Logf("sees: %d of %d", seen, sees)
 	}
 	if path := config.Env("QUALITY_MEDIA_REPORT"); path != "" {
-		md := strings.Replace(markdownReport(d.Name(), report, rate, min), "# Chat quality:", "# Media quality:", 1)
+		md := strings.Replace(markdownReport(d.Name(), report, summarizeRows(report), min), "# Chat quality:", "# Media quality:", 1)
 		models := ""
 		if isReal {
 			models = fmt.Sprintf("Picture model: %s. Clip model: %s.", orDefault(config.Env("QUALITY_MEDIA_IMAGE_MODEL"), "flux2-klein-4b"), orDefault(config.Env("QUALITY_MEDIA_VIDEO_MODEL"), "wan2.2-ti2v-5b"))

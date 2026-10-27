@@ -32,11 +32,17 @@ on:
       video_model:
         description: The clip model the media set tests, such as wan2.2-t2v-a14b (#548). Blank for Wan 2.2 TI2V 5B.
         default: ""
+      repeats:
+        description: How many times the served model runs each case, sampling with a seed each time (#834).
+        default: "3"
 
 jobs:
   # The quality set with a real model on CPU (Llama 3.2 1B through
-  # llama-server), the web answered from tests/quality/web.json. It fails
-  # when fewer than 90% of cases pass; the report lists every answer.
+  # llama-server), the web answered from tests/quality/web.json. Each case
+  # runs three times, sampling with seeds 1-3 (#834), so the report gives
+  # the pass rate with a 95% interval and names the flaky cases, and the
+  # saved runs (quality-runs.jsonl) can be rescored after a check changes.
+  # It fails when fewer than 90% of runs pass; the report lists every answer.
   served-model:
     runs-on: ${{ fromJSON(vars.TRUSTED_RUNS_ON || '"ubuntu-latest"') }}
     timeout-minutes: 150
@@ -58,6 +64,8 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           TOSKAR_QUALITY_REPORT: ${{ runner.temp }}/quality-report.md
+          TOSKAR_QUALITY_REPEATS: ${{ inputs.repeats || '3' }}
+          TOSKAR_QUALITY_SAVE: ${{ runner.temp }}/quality-runs.jsonl
         run: scripts/quality-model.sh run
       - name: Report
         if: always()
@@ -67,9 +75,12 @@ jobs:
           fi
       - uses: actions/upload-artifact@v7
         if: always()
+        continue-on-error: true
         with:
           name: quality-report-core
-          path: ${{ runner.temp }}/quality-report.md
+          path: |
+            ${{ runner.temp }}/quality-report.md
+            ${{ runner.temp }}/quality-runs.jsonl
           if-no-files-found: ignore
 
   # The quality set against the daemon built from the commit under test,
