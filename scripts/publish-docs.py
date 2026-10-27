@@ -20,9 +20,20 @@ def text(value):
 def texts(value):
     return isinstance(value, list) and len(value) > 0 and all(text(v) for v in value)
 
+def screen_src(screen):
+    """Where scripts/capture-docs-screenshots.sh saves a screen's screenshot."""
+    return f'docs/user-guide/images/{screen}.png'
+
 def check_image(image):
     if not isinstance(image, dict):
         raise ValueError('Image must be an object')
+    # A generated screenshot names its screen (docs/user-guide/screens.json);
+    # the snapshot gets its path, so the site needs nothing more.
+    if 'screen' in image:
+        if not isinstance(image['screen'], str) or not SECTION_ID.fullmatch(image['screen']):
+            raise ValueError('Image screen must be a screen id')
+        if image.setdefault('src', screen_src(image['screen'])) != screen_src(image['screen']):
+            raise ValueError('An image names a screen or a src, not both')
     for key in ('src', 'alt', 'caption'):
         if not text(image.get(key, '')):
             raise ValueError(f'Image {key} is required')

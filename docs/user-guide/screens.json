@@ -1,0 +1,10 @@
+{
+  "about": "The user guide's screenshots, captured from the web UI with demo data (internal/screenshot) by scripts/capture-docs-screenshots.sh into docs/user-guide/images/<id>.png. A guide image names its screen. path and query open it in screenshot mode; readyText is on the page once it has loaded; actions (click, fill, wait) reach the state the page describes. viewport, deviceScaleFactor, theme (dark or light), and form (phone or tablet) can be set per screen.",
+  "viewport": { "width": 1440, "height": 900 },
+  "deviceScaleFactor": 1,
+  "theme": "dark",
+  "screens": [
+    { "id": "automations", "path": "/automations", "readyText": "Morning price" },
+    { "id": "automations-create", "path": "/automations", "query": "compose=1&simple=1", "readyText": "Notify when the price is below $500" }
+  ]
+}

@@ -1,0 +1,116 @@
+name: User guide screenshots
+
+# The user guide's screenshots (docs/user-guide/screens.json) are captured
+# from the web UI with demo data, not taken by hand, so they follow the
+# interface (#882). On a pull request this captures them, says which ones
+# changed, and attaches them for review; a screen that doesn't render fails.
+# On main it commits the ones that changed, so the guide at a release tag
+# shows that release's interface. It commits only images, which aren't in
+# the paths below, so it doesn't start itself again.
+on:
+  pull_request:
+    paths:
+      - "web/**"
+      - "i18n/**"
+      - "internal/screenshot/**"
+      - "cmd/screenshot/**"
+      - "docs/user-guide/guide.json"
+      - "docs/user-guide/screens.json"
+      - "scripts/screenshots/**"
+      - "scripts/capture-docs-screenshots.sh"
+      - ".github/workflows/docs-screenshots.yml"
+  push:
+    branches: [main]
+    paths:
+      - "web/**"
+      - "i18n/**"
+      - "internal/screenshot/**"
+      - "cmd/screenshot/**"
+      - "docs/user-guide/guide.json"
+      - "docs/user-guide/screens.json"
+      - "scripts/screenshots/**"
+      - "scripts/capture-docs-screenshots.sh"
+      - ".github/workflows/docs-screenshots.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: docs-screenshots-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  capture:
+    runs-on: ${{ fromJSON(vars.TRUSTED_RUNS_ON || '"ubuntu-latest"') }}
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version: "1.26.x"
+          check-latest: true
+      # Each job gets its own pnpm: self-hosted runners share a home folder,
+      # and two jobs installing into ~/setup-pnpm at once break each other.
+      - uses: pnpm/action-setup@v6
+        with:
+          dest: ${{ runner.temp }}/setup-pnpm
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+          cache: pnpm
+          cache-dependency-path: |
+            web/pnpm-lock.yaml
+            scripts/screenshots/pnpm-lock.yaml
+      - name: Capture the user guide's screenshots
+        run: scripts/capture-docs-screenshots.sh
+      - name: Which screenshots changed
+        id: changed
+        run: |
+          set -euo pipefail
+          changed="$(git status --porcelain -- docs/user-guide/images | awk '{print $2}')"
+          {
+            echo "### User guide screenshots"
+            if [ -z "$changed" ]; then
+              echo "No screenshot changed."
+            else
+              echo "These changed; they're attached to this run as **user-guide-screenshots**:"
+              echo
+              printf -- '- `%s`\n' $changed
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo "any=$([ -n "$changed" ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+      - uses: actions/upload-artifact@v7
+        if: steps.changed.outputs.any == 'true'
+        continue-on-error: true
+        with:
+          name: user-guide-screenshots
+          path: docs/user-guide/images
+          retention-days: 7
+      - name: Keep what the page showed when a screen timed out
+        if: failure()
+        uses: actions/upload-artifact@v7
+        continue-on-error: true
+        with:
+          name: user-guide-screenshot-failures
+          path: screenshot-failed-*.png
+          if-no-files-found: ignore
+          retention-days: 7
+      # On main, the changed screenshots go straight to main with the docs
+      # deploy key (the ruleset lets deploy keys push), or in a pull request
+      # without one.
+      - name: Commit the changed screenshots
+        if: github.event_name != 'pull_request' && steps.changed.outputs.any == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_DEPLOY_KEY: ${{ secrets.DOCS_DEPLOY_KEY }}
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add docs/user-guide/images
+          git commit -m "docs: refresh the user guide's screenshots"
+          scripts/release-publish.sh docs-screenshots \
+            "Refresh the user guide's screenshots" \
+            "Captured from $GITHUB_SHA by the User guide screenshots workflow."

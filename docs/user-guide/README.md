@@ -10,9 +10,10 @@ version of the site shows. Optional fields:
 
 - `steps`: ordered steps.
 - `code`: a code block.
-- `images`: screenshots, each with `src`, `alt`, and `caption`. `src` is a
-  repository path to a PNG under `docs/user-guide/images/`, such as
-  `docs/user-guide/images/07-automations.png`.
+- `images`: screenshots, each with `alt`, `caption`, and the `screen` it
+  shows from `screens.json`, which CI captures into
+  `docs/user-guide/images/<screen>.png` (STYLE.md). A `src` path to a PNG
+  under `docs/user-guide/images/` still works for older sections.
 
 A detailed section adds `summary`, `kind` (`task`, `concept`, or
 `reference`), and `blocks`: headings, paragraphs, steps, lists, notes,
@@ -31,6 +32,11 @@ A core release freezes a new snapshot from the tagged `guide.json` after the
 packages publish, and pushes it to `main` with the release deploy key. The
 publisher refuses to change an existing snapshot. The site polls the index
 with five-minute server-side revalidation.
+
+Screenshots: `scripts/capture-docs-screenshots.sh` captures every screen in
+`screens.json`, as the User guide screenshots workflow does on pull
+requests, and on `main`, where it commits them with the `DOCS_DEPLOY_KEY`
+deploy key.
 
 Checks, which CI runs:
 
