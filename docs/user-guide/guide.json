@@ -279,6 +279,127 @@
       ]
     },
     {
+      "id": "thinking-off",
+      "title": "Answer without thinking first",
+      "kind": "task",
+      "summary": "Ask a reasoning model to answer straight away, which is much faster for questions that don't need careful thought.",
+      "paragraphs": [
+        "Some models think before they answer: they work through a problem first, then write the answer. That helps with math, logic, and plans with several steps, but it makes every answer slower to start, even a simple one.",
+        "From the API and from toskarctl, you can ask a reasoning model to skip its thinking for one request. It answers straight away. A model that doesn't think is unaffected."
+      ],
+      "blocks": [
+        {
+          "type": "list",
+          "title": "What you need",
+          "items": [
+            "Toskar 1.11.2 or later.",
+            "A reasoning model, such as a Qwen 3 or a DeepSeek R1 distill. Models marks them Reasoning, and [Choose and manage models](#models) explains how to install one.",
+            "For the API from another computer, an API key, as [Connect another app through the API](#api) explains."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "When to turn thinking off"
+        },
+        {
+          "type": "table",
+          "columns": [
+            "Turn it off for",
+            "Leave it on for"
+          ],
+          "rows": [
+            [
+              "Quick facts, short rewrites, and replies",
+              "Math, logic, and puzzles"
+            ],
+            [
+              "Labeling or sorting text in a script or CI",
+              "Plans and decisions with several steps"
+            ],
+            [
+              "Anything where waiting matters more than depth",
+              "Questions where a wrong answer is costly"
+            ]
+          ]
+        },
+        {
+          "type": "note",
+          "tone": "tip",
+          "text": "In the app, Model Auto already keeps quick questions off reasoning models. Thinking off is for when you've chosen one, or call one from your own code."
+        },
+        {
+          "type": "heading",
+          "text": "From the command line"
+        },
+        {
+          "type": "paragraph",
+          "text": "Add `--no-thinking` to `toskarctl ask`."
+        },
+        {
+          "type": "code",
+          "language": "sh",
+          "code": "toskarctl ask --no-thinking \"What is 17 times 23?\"",
+          "test": "thinking-off-ask"
+        },
+        {
+          "type": "heading",
+          "text": "From the API"
+        },
+        {
+          "type": "paragraph",
+          "text": "Send `\"reasoning_effort\": \"none\"` with a request to `/v1/chat/completions`. It also sets Effort to Fast. In `model`, put a reasoning model's id from `/v1/models`, or a profile, as here."
+        },
+        {
+          "type": "code",
+          "language": "sh",
+          "code": "curl -s http://127.0.0.1:7331/v1/chat/completions \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\n    \"model\": \"profile:general-assistant\",\n    \"reasoning_effort\": \"none\",\n    \"messages\": [{\"role\": \"user\", \"content\": \"What is 17 times 23?\"}]\n  }'",
+          "test": "thinking-off-api",
+          "output": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"…\",\"role\":\"assistant\"}}],…\"object\":\"chat.completion\",…\"completion_tokens_details\":{\"reasoning_tokens\":0}…}"
+        },
+        {
+          "type": "paragraph",
+          "text": "The answer is in `choices[0].message.content`. `reasoning_tokens` is 0 when the model didn't think."
+        },
+        {
+          "type": "paragraph",
+          "text": "Toskar uses the model's own switch for thinking where its chat template has one, as Qwen 3's does. Otherwise it gives the model no room to think, as for DeepSeek R1's distills, which always think. It works the same when the model runs on a paired computer."
+        },
+        {
+          "type": "heading",
+          "text": "Troubleshooting"
+        },
+        {
+          "type": "table",
+          "columns": [
+            "What you see",
+            "What to do"
+          ],
+          "rows": [
+            [
+              "flag provided but not defined: -no-thinking",
+              "Update Toskar to 1.11.2 or later."
+            ],
+            [
+              "Answers are no faster",
+              "The model may not be a reasoning model, so there was no thinking to skip. Or it was loading into memory, which happens once."
+            ],
+            [
+              "The answer is wrong on a harder question",
+              "Leave thinking on for that question. [Get more careful answers](#careful-answers) has other ways to give it more care."
+            ]
+          ]
+        },
+        {
+          "type": "related",
+          "sections": [
+            "careful-answers",
+            "api",
+            "models"
+          ]
+        }
+      ]
+    },
+    {
       "id": "memory",
       "title": "Memory",
       "paragraphs": [
