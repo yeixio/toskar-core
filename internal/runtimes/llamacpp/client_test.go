@@ -2,6 +2,7 @@ package llamacpp
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -95,7 +96,7 @@ func TestReasoningContentIsKeptApart(t *testing.T) {
 	}, "\n\n") + "\n\n"
 	resp := &http.Response{Body: io.NopCloser(strings.NewReader(frames))}
 	ch := make(chan pluginapi.ChatChunk, 16)
-	go NewClient().readStream(resp, ch, time.Now(), nil)
+	go NewClient().readStream(resp, ch, time.Now(), nil, false)
 	var content, thinking strings.Builder
 	for c := range ch {
 		content.WriteString(c.Content)
@@ -107,7 +108,7 @@ func TestReasoningContentIsKeptApart(t *testing.T) {
 
 	body := `{"choices":[{"message":{"content":"391","reasoning_content":"17 times 23"}}]}`
 	ch = make(chan pluginapi.ChatChunk, 4)
-	go NewClient().readNonStream(&http.Response{Body: io.NopCloser(strings.NewReader(body))}, ch, time.Now(), nil)
+	go NewClient().readNonStream(&http.Response{Body: io.NopCloser(strings.NewReader(body))}, ch, time.Now(), nil, false)
 	content.Reset()
 	thinking.Reset()
 	for c := range ch {
@@ -227,6 +228,80 @@ func TestFinishReasonAndReasoningTokens(t *testing.T) {
 		}
 		if m == nil || m.FinishReason != "length" || m.ReasoningTokens != want {
 			t.Errorf("stream=%v: metrics %+v", stream, m)
+		}
+	}
+}
+
+// Thinking off (#840): the template's switch and a thinking budget of none
+// are sent, and the </think> llama.cpp ends the skipped thinking with is
+// dropped from the answer, whole or streamed in any pieces.
+func TestNoThinking(t *testing.T) {
+	for _, stream := range []bool{false, true} {
+		var sent map[string]any
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			_ = json.NewDecoder(r.Body).Decode(&sent)
+			if stream {
+				for _, piece := range []string{"\n", "\n</th", "ink>", "\n\n", "17 × 23", " = 391"} {
+					fmt.Fprintf(w, "data: {\"choices\":[{\"delta\":{\"content\":%q}}]}\n\n", piece)
+				}
+				fmt.Fprint(w, "data: {\"choices\":[{\"delta\":{},\"finish_reason\":\"stop\"}]}\n\n")
+				return
+			}
+			fmt.Fprint(w, `{"choices":[{"message":{"content":"\n\n</think>\n\n17 × 23 = 391"},"finish_reason":"stop"}]}`)
+		}))
+		ch, err := NewClient().Chat(context.Background(), pluginapi.ChatRequest{ModelEndpoint: srv.URL, Stream: stream, NoThinking: true, Messages: []pluginapi.ChatMessage{{Role: "user", Content: "17×23?"}}})
+		if err != nil {
+			t.Fatal(err)
+		}
+		content := ""
+		for c := range ch {
+			content += c.Content
+		}
+		srv.Close()
+		if content != "17 × 23 = 391" {
+			t.Errorf("stream=%v: content %q", stream, content)
+		}
+		kwargs, _ := sent["chat_template_kwargs"].(map[string]any)
+		if kwargs["enable_thinking"] != false || sent["thinking_budget_tokens"] != float64(0) {
+			t.Errorf("stream=%v: sent %v", stream, sent)
+		}
+	}
+	// Thinking on sends neither, and keeps the answer as it came.
+	var sent map[string]any
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_ = json.NewDecoder(r.Body).Decode(&sent)
+		fmt.Fprint(w, `{"choices":[{"message":{"content":"Hi"},"finish_reason":"stop"}]}`)
+	}))
+	defer srv.Close()
+	ch, _ := NewClient().Chat(context.Background(), pluginapi.ChatRequest{ModelEndpoint: srv.URL, Messages: []pluginapi.ChatMessage{{Role: "user", Content: "hi"}}})
+	for range ch {
+	}
+	if _, ok := sent["chat_template_kwargs"]; ok {
+		t.Errorf("sent %v", sent)
+	}
+}
+
+func TestClosedThink(t *testing.T) {
+	for _, c := range []struct {
+		pieces []string
+		want   string
+	}{
+		{[]string{"</think>", "Hi"}, "Hi"},
+		{[]string{"\n\n</", "think>\n", "\nHi"}, "Hi"},
+		{[]string{"Hi", " there"}, "Hi there"},
+		{[]string{"<", "b>bold</b>"}, "<b>bold</b>"},
+		{[]string{"\n", "Answer"}, "\nAnswer"},
+		{[]string{"</think>"}, ""},
+		{[]string{"  ", "</thi"}, "  </thi"},
+	} {
+		l := &closedThink{}
+		got := ""
+		for _, p := range c.pieces {
+			got += l.feed(p)
+		}
+		got += l.flush()
+		if got != c.want {
+			t.Errorf("%q: %q, want %q", c.pieces, got, c.want)
 		}
 	}
 }

@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Toskar Control Plane API
-  version: "1.59"
+  version: "1.60"
   description: >-
     Local AI control plane API for Toskar, its OpenAI-compatible routes, and its MCP server.
     On the default loopback bind no key is needed. When the daemon listens on any other address,
@@ -2818,7 +2818,8 @@ paths:
                   description: OpenAI's newer name for max_tokens; wins when both are sent.
                 reasoning_effort:
                   type: string
-                  enum: [low, medium, high]
+                  enum: [none, minimal, low, medium, high]
+                  description: "Effort: minimal and low give Fast, medium Balanced, and high Thorough. none answers at Fast, and a reasoning model answers without thinking first (#840, contract 1.60)."
                 include_reasoning:
                   type: boolean
                   description: "A reasoning model's thinking as reasoning_content, on the message or as stream deltas before the answer (#701, contract 1.43). Off by default."

@@ -56,6 +56,13 @@ func (c *Client) chat(ctx context.Context, req pluginapi.ChatRequest, again func
 		// valid JSON of that shape (§27).
 		body["response_format"] = map[string]any{"type": "json_object", "schema": req.ResponseSchema}
 	}
+	if req.NoThinking {
+		// Thinking off (#840): the chat template's own switch where it has
+		// one (Qwen 3), and a thinking budget of none for the rest, such as
+		// DeepSeek R1's distills, whose templates always open a <think>.
+		body["chat_template_kwargs"] = map[string]any{"enable_thinking": false}
+		body["thinking_budget_tokens"] = 0
+	}
 	lora, err := loraScales(req.ModelEndpoint, req.Adapter)
 	if err != nil {
 		return nil, err
@@ -91,10 +98,10 @@ func (c *Client) chat(ctx context.Context, req pluginapi.ChatRequest, again func
 
 	ch := make(chan pluginapi.ChatChunk, 16)
 	if !req.Stream {
-		go c.readNonStream(resp, ch, started, again)
+		go c.readNonStream(resp, ch, started, again, req.NoThinking)
 		return ch, nil
 	}
-	go c.readStream(resp, ch, started, again)
+	go c.readStream(resp, ch, started, again, req.NoThinking)
 	return ch, nil
 }
 
@@ -149,7 +156,7 @@ func pipe(ch chan<- pluginapi.ChatChunk, again func() (<-chan pluginapi.ChatChun
 	}
 }
 
-func (c *Client) readNonStream(resp *http.Response, ch chan<- pluginapi.ChatChunk, started time.Time, again func() (<-chan pluginapi.ChatChunk, error)) {
+func (c *Client) readNonStream(resp *http.Response, ch chan<- pluginapi.ChatChunk, started time.Time, again func() (<-chan pluginapi.ChatChunk, error), noThinking bool) {
 	defer close(ch)
 	defer resp.Body.Close()
 	body, err := io.ReadAll(resp.Body)
@@ -184,6 +191,9 @@ func (c *Client) readNonStream(resp *http.Response, ch chan<- pluginapi.ChatChun
 	content, finish, thought := "", "", ""
 	if len(out.Choices) > 0 {
 		content, finish, thought = out.Choices[0].Message.Content, out.Choices[0].FinishReason, out.Choices[0].Message.Reasoning
+		if noThinking {
+			content = dropClosedThink(content)
+		}
 		if thought != "" {
 			ch <- pluginapi.ChatChunk{Reasoning: thought}
 		}
@@ -196,7 +206,7 @@ func (c *Client) readNonStream(resp *http.Response, ch chan<- pluginapi.ChatChun
 	ch <- pluginapi.ChatChunk{Content: content, Done: true, Metrics: metrics}
 }
 
-func (c *Client) readStream(resp *http.Response, ch chan<- pluginapi.ChatChunk, started time.Time, again func() (<-chan pluginapi.ChatChunk, error)) {
+func (c *Client) readStream(resp *http.Response, ch chan<- pluginapi.ChatChunk, started time.Time, again func() (<-chan pluginapi.ChatChunk, error), noThinking bool) {
 	defer close(ch)
 	defer resp.Body.Close()
 	scanner := bufio.NewScanner(resp.Body)
@@ -210,6 +220,9 @@ func (c *Client) readStream(resp *http.Response, ch chan<- pluginapi.ChatChunk, 
 	// llama-server streams a token a chunk, so the thinking's chunks are
 	// its tokens.
 	finish, thoughtTokens := "", 0
+	// With thinking off, the answer can start with the </think> that ended
+	// the thinking it skipped; it's held back until it's clear.
+	lead := &closedThink{done: !noThinking}
 
 	flushDone := func() {
 		if sentDone {
@@ -228,6 +241,10 @@ func (c *Client) readStream(resp *http.Response, ch chan<- pluginapi.ChatChunk, 
 		}
 		data := strings.TrimPrefix(line, "data: ")
 		if data == "[DONE]" {
+			if rest := lead.flush(); rest != "" {
+				content.WriteString(rest)
+				ch <- pluginapi.ChatChunk{Content: rest}
+			}
 			flushDone()
 			return
 		}
@@ -276,7 +293,7 @@ func (c *Client) readStream(resp *http.Response, ch chan<- pluginapi.ChatChunk, 
 			thoughtTokens++
 			ch <- pluginapi.ChatChunk{Reasoning: thought}
 		}
-		if delta != "" {
+		if delta = lead.feed(delta); delta != "" {
 			if firstToken.IsZero() {
 				firstToken = time.Now()
 			}
@@ -284,6 +301,10 @@ func (c *Client) readStream(resp *http.Response, ch chan<- pluginapi.ChatChunk, 
 			ch <- pluginapi.ChatChunk{Content: delta}
 		}
 		if done {
+			if rest := lead.flush(); rest != "" {
+				content.WriteString(rest)
+				ch <- pluginapi.ChatChunk{Content: rest}
+			}
 			flushDone()
 			return
 		}
@@ -431,4 +452,56 @@ func reasoningTokens(resp *http.Response, thought string) int {
 		}
 	}
 	return estimateTokens(thought)
+}
+
+// thinkEnd is how a reasoning model ends its thinking.
+const thinkEnd = "</think>"
+
+// dropClosedThink is an answer without the </think> it can start with when
+// thinking is off: llama.cpp ends the skipped thinking with it.
+func dropClosedThink(content string) string {
+	trimmed := strings.TrimLeft(content, " \t\r\n")
+	if strings.HasPrefix(trimmed, thinkEnd) {
+		return strings.TrimLeft(trimmed[len(thinkEnd):], " \t\r\n")
+	}
+	return content
+}
+
+// closedThink drops that </think> from a streamed answer: the answer's
+// start is held back until it's clearly the tag or clearly not.
+type closedThink struct {
+	pending string
+	done    bool
+}
+
+// feed is what to send of delta now.
+func (l *closedThink) feed(delta string) string {
+	if l.done {
+		return delta
+	}
+	l.pending += delta
+	trimmed := strings.TrimLeft(l.pending, " \t\r\n")
+	switch {
+	case trimmed == "", strings.HasPrefix(thinkEnd, trimmed):
+		// Only space so far, or the start of the tag: wait.
+		return ""
+	case strings.HasPrefix(trimmed, thinkEnd):
+		rest := strings.TrimLeft(trimmed[len(thinkEnd):], " \t\r\n")
+		if rest == "" {
+			return ""
+		}
+		l.done = true
+		return rest
+	}
+	l.done = true
+	return l.pending
+}
+
+// flush is whatever is still held back when the answer ends.
+func (l *closedThink) flush() string {
+	if l.done {
+		return ""
+	}
+	l.done = true
+	return dropClosedThink(l.pending)
 }

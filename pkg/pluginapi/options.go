@@ -12,6 +12,9 @@ import "context"
 type GenerateOptions struct {
 	Temperature float64
 	MaxTokens   int
+	// NoThinking asks a reasoning model to answer without thinking first
+	// (#840), as reasoning_effort "none" does on the OpenAI-compatible API.
+	NoThinking bool
 }
 
 // GreedyTemperature is GenerateOptions.Temperature for temperature 0,

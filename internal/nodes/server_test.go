@@ -362,6 +362,7 @@ func TestRemoteChatStream(t *testing.T) {
 		ModelID:        "m1",
 		Messages:       []pluginapi.ChatMessage{{Role: "user", Content: "hi"}},
 		ResponseSchema: json.RawMessage(`{"type":"object"}`),
+		NoThinking:     true,
 	})
 	req := httptest.NewRequest(http.MethodPost, "/internal/v1/chat", bytes.NewReader(body))
 	req.Header.Set("Authorization", "Bearer "+peer.AuthToken("local-node"))
@@ -381,6 +382,10 @@ func TestRemoteChatStream(t *testing.T) {
 	// A structured answer's schema reaches the paired computer (#865).
 	if string(lastChat.ResponseSchema) != `{"type":"object"}` {
 		t.Fatalf("schema = %s", lastChat.ResponseSchema)
+	}
+	// So does thinking off (#840).
+	if !lastChat.NoThinking {
+		t.Fatal("no_thinking didn't reach the paired computer")
 	}
 }
 

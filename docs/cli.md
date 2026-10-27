@@ -68,6 +68,7 @@ Text piped in, or from `--file`, is sent as data to work on, apart from the prom
 | `--json-schema path` | Answer with JSON that fits this JSON Schema. Toskar checks the answer, and asks the model once more with what was wrong when it doesn't fit |
 | `--max-tokens n` | The longest answer, in tokens |
 | `--temperature t` | Sampling temperature, such as `0` for the steadiest answers |
+| `--no-thinking` | A reasoning model answers without thinking first: much faster, for a job that doesn't need it |
 | `--timeout d` | How long to wait for the answer: 5 minutes unless set, such as `--timeout 20m` for a long log on a small computer |
 | `--memory` | Let the answer use and add to memory. Off unless given, so a CI job never reads or writes a person's memories |
 | `--knowledge` | Let the answer use connected knowledge. Off unless given |
