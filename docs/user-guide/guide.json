@@ -199,13 +199,233 @@
     {
       "id": "chat",
       "title": "Chat",
+      "kind": "task",
+      "summary": "Ask Toskar a question, work with files, and come back to a conversation later, all on your own computer.",
       "paragraphs": [
-        "The composer has the profile, the model, Run on, Effort, and Memory. Model Auto picks an installed model for each message: a quick question stays on a model that is already loaded, coding goes to a coding model, a question about current information or a task on this computer goes to a model that can use tools, and a question about your files or knowledge prefers a larger model. A question about what one of your specialized AIs was trained for goes to that AI. Choose a model yourself to keep it for the chat.",
-        "Effort sets how much care an answer gets. Fast answers in one go. Balanced plans requests with several parts and reads a page for each look-up. Thorough reads more, checks figures twice, and uses the largest model that fits. Auto keeps quick questions fast and gives questions about your data, and requests with several parts, more care. Your choice is remembered. Get more careful answers covers Effort with reasoning models, a profile's Reasoning level, and comparing drafts.",
-        "Attach documents (including Word documents and PowerPoint decks), spreadsheets, PDFs, and code files with the paperclip, by dropping them on the message box, or by pasting. The answer cites the file, and later questions in the chat can still use it. Pictures and video are shown to a model that can see, and audio can be transcribed. Ask for a file, such as a spreadsheet of prices, a Word document, or a page saved as hours.html, and the answer comes with a download; spreadsheets are real .xlsx workbooks. A scanned PDF is read with text recognition, which takes a moment after you attach it, the first time only.",
-        "Under each answer, Sources lists the web pages, knowledge passages, files, and memories it used, and What I did lists the model that answered and why, the searches and pages read, and anything that went wrong. A request with several parts, such as comparing three products, shows a checklist while its parts run. Figures are checked against the sources before you see the answer, and a figure that could not be confirmed is called out below it. A notice also appears when a small model answered a question about your data, or when the model that answered is smaller than the one that failed.",
-        "Stop ends everything working on the answer, including web look-ups and paired computers, and keeps what was already written. The context ring beside Send shows how much of the model's window the conversation uses. When a long chat passes half the window, older messages are summarized after the reply; they stay saved.",
-        "History lists your chats by date; each one's menu renames, pins, or deletes it. To delete several, choose Select, tick the chats (Shift-click picks a range, and Cmd- or Ctrl-click a chat to start choosing), and choose Delete. Select all takes the chats a search shows. One confirmation covers them all, and Undo brings them back for 10 seconds. Settings → History deletes chats last used more than 30, 90, or 365 days ago, keeping pinned ones, and shows how many before you confirm."
+        "Chat is where you talk to the AI on your computer. You type a question, and an installed model writes the answer while you watch. Your questions and its answers stay on your computer.",
+        "Toskar picks a model for each message unless you choose one. Answers list their sources, a chat remembers files you attached, and every chat is saved in History until you delete it."
+      ],
+      "blocks": [
+        {
+          "type": "list",
+          "title": "What you need",
+          "items": [
+            "Toskar running on this computer, or on another computer you connected to it.",
+            "An installed model. With none, sending your first message asks before downloading the recommended one. [Choose and manage models](#models) explains how to pick one."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Ask a question"
+        },
+        {
+          "type": "steps",
+          "items": [
+            "Choose Chat in the sidebar, or New chat to start a fresh conversation.",
+            "Type your question where it says Ask Toskar anything…, and press Enter. Shift-Enter starts a new line instead.",
+            "Read the answer as it's written. Stop ends it, and any web look-ups for it, and keeps what was already written."
+          ]
+        },
+        {
+          "type": "image",
+          "screen": "chat",
+          "alt": "A chat planning a hike loop: two questions, the answers, and Sources under the last answer listing trail notes and a memory",
+          "caption": "Each answer lists its Sources. The 2 / 2 under the first answer means it has two versions."
+        },
+        {
+          "type": "heading",
+          "text": "Choose the model, profile, and effort"
+        },
+        {
+          "type": "paragraph",
+          "text": "Model Auto picks an installed model for each message. A quick question stays on a model that's already loaded. Coding goes to a coding model. A question about current information, or a task on this computer, goes to a model that can use tools. A question about your files or knowledge prefers a larger model."
+        },
+        {
+          "type": "paragraph",
+          "text": "Choose a model in the Model menu to keep it for the whole chat. The button beside it opens the chat's options: Profile, Run on, Effort, and Memory."
+        },
+        {
+          "type": "image",
+          "screen": "chat-options",
+          "alt": "The chat options open above the message box, showing Profile, Run on, Effort, and Memory on",
+          "caption": "Chat options. Run on Automatic lets Toskar use any of your connected computers; This computer keeps the chat here."
+        },
+        {
+          "type": "table",
+          "columns": [
+            "Effort",
+            "What it does"
+          ],
+          "rows": [
+            [
+              "Auto",
+              "Keeps quick questions fast, and gives questions about your data, and requests with several parts, more care."
+            ],
+            [
+              "Fast",
+              "Answers in one go, on a model that's already loaded."
+            ],
+            [
+              "Balanced",
+              "Plans requests with several parts, and reads a page for each look-up."
+            ],
+            [
+              "Thorough",
+              "Reads more pages, checks figures twice, and uses the largest model that fits."
+            ]
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Your choice of effort is remembered. More care makes answers slower. [Get more careful answers](#careful-answers) covers reasoning models and comparing drafts."
+        },
+        {
+          "type": "heading",
+          "text": "Attach files and pictures"
+        },
+        {
+          "type": "paragraph",
+          "text": "Attach a file with the paperclip, by dropping it on the message box, or by pasting it. Toskar reads documents (including Word and PowerPoint), spreadsheets, PDFs, and code. Each file can be up to 25 MB."
+        },
+        {
+          "type": "paragraph",
+          "text": "The answer cites the file, and later questions in the chat can still use it. Pictures and video go to a model that can see, and audio can be transcribed. A scanned PDF is read with text recognition, which takes a moment the first time."
+        },
+        {
+          "type": "note",
+          "tone": "tip",
+          "text": "Ask for a file, such as a spreadsheet of prices or a Word document, and the answer comes with a download. Spreadsheets are real .xlsx workbooks."
+        },
+        {
+          "type": "heading",
+          "text": "Check where an answer came from"
+        },
+        {
+          "type": "paragraph",
+          "text": "Under each answer, Sources lists the web pages, knowledge passages, files, and memories it used. What I did lists the model that answered and why, the searches and pages it read, and anything that went wrong."
+        },
+        {
+          "type": "paragraph",
+          "text": "Figures are checked against the sources before you see the answer. A figure that couldn't be confirmed is called out below it. A request with several parts, such as comparing three products, shows a checklist while its parts run."
+        },
+        {
+          "type": "heading",
+          "text": "Try again, or edit your question"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Try again, under an answer, writes a new version of it. Another model… tries again with the model you pick.",
+            "Edit, under your own message, lets you change it. Sending makes a new version of the conversation from that point.",
+            "When there's more than one version, ‹ 1 / 2 › switches between them. The earlier versions stay."
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "These controls appear when you point at a message, and are always shown on a touch screen."
+        },
+        {
+          "type": "heading",
+          "text": "Long chats"
+        },
+        {
+          "type": "paragraph",
+          "text": "The ring beside Send shows how much of the model's context window the chat uses: how much it can read at once. When a chat passes about half of it, older messages are summarized after the reply, and every message stays saved. [Long chats and auto-compact](#auto-compact) explains how to read or correct the summary."
+        },
+        {
+          "type": "heading",
+          "text": "Find, pin, and delete chats"
+        },
+        {
+          "type": "paragraph",
+          "text": "History lists your chats by date, with a search box at the top. Each chat's menu renames, pins, or deletes it. Pinned chats stay at the top."
+        },
+        {
+          "type": "steps",
+          "items": [
+            "To delete several chats, open History and choose Select.",
+            "Tick the chats. Shift-click selects a range, and Cmd-click or Ctrl-click adds one. Select all takes every chat the search shows.",
+            "Choose Delete and confirm once. Undo brings them back for 10 seconds."
+          ]
+        },
+        {
+          "type": "image",
+          "screen": "chat-select",
+          "alt": "History in Select mode with two older chats ticked, and Delete 2 at the bottom",
+          "caption": "Two chats chosen for deleting. One confirmation covers them all."
+        },
+        {
+          "type": "note",
+          "tone": "tip",
+          "text": "Settings › History deletes chats last used more than 30, 90, or 365 days ago. It keeps pinned chats, and says how many it will delete before you confirm."
+        },
+        {
+          "type": "heading",
+          "text": "From the command line or your own code"
+        },
+        {
+          "type": "paragraph",
+          "text": "`toskarctl ask` asks a question from a terminal and prints the answer."
+        },
+        {
+          "type": "code",
+          "language": "sh",
+          "code": "toskarctl ask \"Plan a three-day trip to Juneau\"",
+          "test": "chat-ask"
+        },
+        {
+          "type": "paragraph",
+          "text": "The Python SDK streams the same answer a piece at a time. [Connect another app through the API](#api) covers the other languages and API keys."
+        },
+        {
+          "type": "code",
+          "language": "python",
+          "code": "from toskar import Toskar\n\nwith Toskar() as toskar:\n    for event in toskar.chat_stream(\"Plan a three-day trip to Juneau\"):\n        if event.type == \"token\":\n            print(event.content, end=\"\", flush=True)\n    print()\n",
+          "test": "chat-python"
+        },
+        {
+          "type": "heading",
+          "text": "Troubleshooting"
+        },
+        {
+          "type": "table",
+          "columns": [
+            "What you see",
+            "What to do"
+          ],
+          "rows": [
+            [
+              "No model installed yet",
+              "Choose Open Models and install one, or send your message and accept the download."
+            ],
+            [
+              "The first answer takes a while to start",
+              "The model is loading into memory, which happens once. Effort Fast keeps quick questions on a model that's already loaded."
+            ],
+            [
+              "Toskar can't read this type of file yet",
+              "Save it as a PDF, Word document, spreadsheet, or text file, and attach that instead."
+            ],
+            [
+              "Files can be up to 25 MB",
+              "Split the file, or attach only the pages you need."
+            ],
+            [
+              "A figure is called out as not confirmed",
+              "Open Sources to check it, or set Effort to Thorough and ask again."
+            ]
+          ]
+        },
+        {
+          "type": "related",
+          "sections": [
+            "models",
+            "careful-answers",
+            "auto-compact",
+            "knowledge",
+            "memory"
+          ]
+        }
       ]
     },
     {
@@ -228,6 +448,127 @@
         "A profile's Reasoning level is the effort its chats use when Effort is left on Auto. Set it to Thorough on a profile you use for careful work, such as Research, and its chats get that care without choosing it each time. It's under Orchestration, in the profile's Strategy and computers tab in Profiles & Orchestration.",
         "When one draft isn't enough, a profile can draft each answer three times, independently, and compare them before you see one. See Compare independent drafts. It catches slips a single draft makes, such as a wrong step in a word problem, and takes longer and uses more of your computers.",
         "More care costs time and memory. Thorough and larger models take longer to load and to answer, a reasoning model writes its thinking before the answer, and compared drafts run three times. A larger model needs more memory, and a reasoning model's thinking takes room in its context window while it answers."
+      ]
+    },
+    {
+      "id": "thinking-off",
+      "title": "Answer without thinking first",
+      "kind": "task",
+      "summary": "Ask a reasoning model to answer straight away, which is much faster for questions that don't need careful thought.",
+      "paragraphs": [
+        "Some models think before they answer: they work through a problem first, then write the answer. That helps with math, logic, and plans with several steps, but it makes every answer slower to start, even a simple one.",
+        "From the API and from toskarctl, you can ask a reasoning model to skip its thinking for one request. It answers straight away. A model that doesn't think is unaffected."
+      ],
+      "blocks": [
+        {
+          "type": "list",
+          "title": "What you need",
+          "items": [
+            "Toskar 1.11.2 or later.",
+            "A reasoning model, such as a Qwen 3 or a DeepSeek R1 distill. Models marks them Reasoning, and [Choose and manage models](#models) explains how to install one.",
+            "For the API from another computer, an API key, as [Connect another app through the API](#api) explains."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "When to turn thinking off"
+        },
+        {
+          "type": "table",
+          "columns": [
+            "Turn it off for",
+            "Leave it on for"
+          ],
+          "rows": [
+            [
+              "Quick facts, short rewrites, and replies",
+              "Math, logic, and puzzles"
+            ],
+            [
+              "Labeling or sorting text in a script or CI",
+              "Plans and decisions with several steps"
+            ],
+            [
+              "Anything where waiting matters more than depth",
+              "Questions where a wrong answer is costly"
+            ]
+          ]
+        },
+        {
+          "type": "note",
+          "tone": "tip",
+          "text": "In the app, Model Auto already keeps quick questions off reasoning models. Thinking off is for when you've chosen one, or call one from your own code."
+        },
+        {
+          "type": "heading",
+          "text": "From the command line"
+        },
+        {
+          "type": "paragraph",
+          "text": "Add `--no-thinking` to `toskarctl ask`."
+        },
+        {
+          "type": "code",
+          "language": "sh",
+          "code": "toskarctl ask --no-thinking \"What is 17 times 23?\"",
+          "test": "thinking-off-ask"
+        },
+        {
+          "type": "heading",
+          "text": "From the API"
+        },
+        {
+          "type": "paragraph",
+          "text": "Send `\"reasoning_effort\": \"none\"` with a request to `/v1/chat/completions`. It also sets Effort to Fast. In `model`, put a reasoning model's id from `/v1/models`, or a profile, as here."
+        },
+        {
+          "type": "code",
+          "language": "sh",
+          "code": "curl -s http://127.0.0.1:7331/v1/chat/completions \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\n    \"model\": \"profile:general-assistant\",\n    \"reasoning_effort\": \"none\",\n    \"messages\": [{\"role\": \"user\", \"content\": \"What is 17 times 23?\"}]\n  }'",
+          "test": "thinking-off-api",
+          "output": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"…\",\"role\":\"assistant\"}}],…\"object\":\"chat.completion\",…\"completion_tokens_details\":{\"reasoning_tokens\":0}…}"
+        },
+        {
+          "type": "paragraph",
+          "text": "The answer is in `choices[0].message.content`. `reasoning_tokens` is 0 when the model didn't think."
+        },
+        {
+          "type": "paragraph",
+          "text": "Toskar uses the model's own switch for thinking where its chat template has one, as Qwen 3's does. Otherwise it gives the model no room to think, as for DeepSeek R1's distills, which always think. It works the same when the model runs on a paired computer."
+        },
+        {
+          "type": "heading",
+          "text": "Troubleshooting"
+        },
+        {
+          "type": "table",
+          "columns": [
+            "What you see",
+            "What to do"
+          ],
+          "rows": [
+            [
+              "flag provided but not defined: -no-thinking",
+              "Update Toskar to 1.11.2 or later."
+            ],
+            [
+              "Answers are no faster",
+              "The model may not be a reasoning model, so there was no thinking to skip. Or it was loading into memory, which happens once."
+            ],
+            [
+              "The answer is wrong on a harder question",
+              "Leave thinking on for that question. [Get more careful answers](#careful-answers) has other ways to give it more care."
+            ]
+          ]
+        },
+        {
+          "type": "related",
+          "sections": [
+            "careful-answers",
+            "api",
+            "models"
+          ]
+        }
       ]
     },
     {

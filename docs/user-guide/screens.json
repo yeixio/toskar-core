@@ -19,6 +19,52 @@
       "readyText": "Notify when the price is below $500"
     },
     {
+      "id": "chat",
+      "path": "/chat",
+      "query": "c=conv-local",
+      "readyText": "ridge above the reservoir"
+    },
+    {
+      "id": "chat-options",
+      "path": "/chat",
+      "query": "c=conv-local",
+      "readyText": "ridge above the reservoir",
+      "actions": [
+        {
+          "click": "Chat options"
+        },
+        {
+          "wait": "Effort"
+        }
+      ]
+    },
+    {
+      "id": "chat-select",
+      "path": "/chat",
+      "query": "c=conv-local",
+      "readyText": "ridge above the reservoir",
+      "actions": [
+        {
+          "click": "History"
+        },
+        {
+          "wait": "Search"
+        },
+        {
+          "click": "Select"
+        },
+        {
+          "click": "Letter to the landlord about the heating"
+        },
+        {
+          "click": "Compare three heat pumps"
+        },
+        {
+          "wait": "2 selected"
+        }
+      ]
+    },
+    {
       "path": "/chat",
       "query": "c=conv-local",
       "readyText": "ridge above the reservoir",
