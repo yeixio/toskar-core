@@ -8,6 +8,23 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Thi
 
 Changes waiting for the next release are in [changes/unreleased/](changes/unreleased/), one file per pull request. `scripts/changelog.py preview` shows them together, and `scripts/changelog.py release <version>` writes them here when the release is cut.
 
+## [1.11.2] - 2026-10-27
+
+### Added
+
+- A reasoning model can answer without thinking first, which is much
+  faster for a question that doesn't need it: `reasoning_effort: "none"`
+  on `/v1/chat/completions` (contract 1.60) and `toskarctl ask
+  --no-thinking`. Toskar uses the model's own switch where its chat
+  template has one, such as Qwen 3's, and otherwise a thinking budget of
+  none, as for DeepSeek R1's distills, which always think. It also works
+  on a paired computer, and a model that doesn't think is unaffected.
+
+### Changed
+
+- `toskarctl ask` and the Go examples use the official Go SDK 0.2.0, built
+  for client contract 1.59.
+
 ## [1.11.1] - 2026-10-26
 
 ### Added
