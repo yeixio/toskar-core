@@ -62,7 +62,12 @@ def plain_text(value: str) -> str:
 
 
 def check(guide: dict, root: Path = ROOT) -> tuple[list[str], list[str]]:
-    """Problems that fail the check, and sections not yet detailed."""
+    """Problems that fail the check, and sections not yet detailed.
+
+    Screenshots a page names come from docs/user-guide/screens.json; a screen
+    no page uses, or a PNG in docs/user-guide/images that no page shows, is
+    left over and fails too.
+    """
     problems: list[str] = []
     try:
         publisher.validate(guide)
@@ -70,6 +75,10 @@ def check(guide: dict, root: Path = ROOT) -> tuple[list[str], list[str]]:
         return [f"guide.json: {error}"], []
     tests: dict[str, str] = {}
     waiting: list[str] = []
+    screens_file = root / "docs" / "user-guide" / "screens.json"
+    screens = {s["id"] for s in json.loads(screens_file.read_text())["screens"]} if screens_file.is_file() else set()
+    used_screens: set[str] = set()
+    used_files: set[str] = set()
     for section in guide["sections"]:
         sid = section["id"]
         where = f"{sid}:"
@@ -78,6 +87,14 @@ def check(guide: dict, root: Path = ROOT) -> tuple[list[str], list[str]]:
                 problems.append(f"{where} says {found.group(0)!r}; say this device, phone, tablet, TV, or watch")
         images = section.get("images", []) + [b for b in section.get("blocks", []) if b["type"] == "image"]
         for image in images:
+            used_files.add(image["src"])
+            if "screen" in image:
+                used_screens.add(image["screen"])
+                if image["screen"] not in screens:
+                    problems.append(f"{where} screen {image['screen']!r} isn't in docs/user-guide/screens.json")
+                    continue
+            elif section.get("blocks"):
+                problems.append(f"{where} {image['src']} is hand-made; a detailed page's screenshots name a screen in screens.json, so CI captures them")
             path = root / image["src"]
             if not path.is_file():
                 problems.append(f"{where} {image['src']} is missing")
@@ -121,6 +138,14 @@ def check(guide: dict, root: Path = ROOT) -> tuple[list[str], list[str]]:
                 problems.append(f"{where} a {words(sentence)}-word sentence; split it: {sentence.strip()[:80]}…")
         if sentences and sum(map(words, sentences)) / len(sentences) > AVERAGE_SENTENCE:
             problems.append(f"{where} sentences average over {AVERAGE_SENTENCE} words; write shorter ones")
+    for screen in sorted(screens - used_screens):
+        problems.append(f"screens.json: {screen!r} isn't shown on any page; remove it or use it")
+    images_dir = root / "docs" / "user-guide" / "images"
+    if images_dir.is_dir():
+        for png in sorted(images_dir.rglob("*.png")):
+            relative = png.relative_to(root).as_posix()
+            if relative not in used_files:
+                problems.append(f"{relative} isn't shown on any page; remove it")
     return problems, waiting
 
 

@@ -73,12 +73,7 @@ if command -v magick >/dev/null 2>&1 || command -v convert >/dev/null 2>&1; then
 fi
 
 echo "README screenshots: docs/screenshots"
-mkdir -p docs/user-guide/images
-for name in 07-automations.png 08-automations-create.png; do
-  if [[ -f "docs/screenshots/$name" ]]; then
-    cp "docs/screenshots/$name" docs/user-guide/images/
-  fi
-done
+# The user guide's screenshots are captured by capture-docs-screenshots.sh.
 if [[ "${STORE_ONLY:-}" == "1" ]]; then
   echo "App Store screenshots: screenshots/appstore"
 fi

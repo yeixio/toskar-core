@@ -117,14 +117,14 @@
       "code": "toskarctl automations create --name \"Morning price\" --prompt \"Check the price\" \\\n  --profile general-assistant --model MODEL_ID --schedule daily --at 08:00 --zone America/Los_Angeles\n\nyggctl automations list\nyggctl automations run AUTOMATION_ID\nyggctl automations pause AUTOMATION_ID",
       "images": [
         {
-          "src": "docs/user-guide/images/07-automations.png",
+          "screen": "automations",
           "alt": "Automations list with a morning price check selected, its next run, and a history entry that was notified",
           "caption": "The list shows the schedule, last result, and next run. The detail keeps Run now, Pause, Edit, Delete, and the history."
         },
         {
-          "src": "docs/user-guide/images/08-automations-create.png",
+          "screen": "automations-create",
           "alt": "New automation form filled from the sentence about checking a price below $500 every morning at 8:00 AM",
-          "caption": "Set up automation turns that sentence into a daily 8:00 AM task and a price notification. The task stays in ordinary language."
+          "caption": "Fill in the details turns that sentence into a daily 8:00 AM task and a price notification. The task stays in ordinary language."
         }
       ]
     },

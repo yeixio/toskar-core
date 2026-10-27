@@ -116,6 +116,18 @@ class PublisherTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'Kind'):
             self.publish()
 
+    def test_a_screen_becomes_its_screenshot_path(self):
+        self.detailed(blocks=[{'type': 'image', 'screen': 'automations-create', 'alt': 'Form', 'caption': 'Filled in.'}])
+        self.publish()
+        block = json.loads((self.dest / 'docs/1.0.0.json').read_text())['sections'][0]['blocks'][0]
+        self.assertEqual(block['src'], 'docs/user-guide/images/automations-create.png')
+        self.assertEqual(block['screen'], 'automations-create')
+        for image, error in (({'screen': 'Bad Id'}, 'screen id'), ({'screen': 'chat', 'src': 'docs/user-guide/images/other.png'}, 'not both')):
+            with self.subTest(image=image):
+                self.detailed(blocks=[{'type': 'image', 'alt': 'x', 'caption': 'x', **image}])
+                with self.assertRaisesRegex(ValueError, error):
+                    publisher.publish(self.source, self.dest, '1.2.0', 'c' * 40)
+
     def test_links_go_to_sections_or_https_pages(self):
         for paragraph, error in (('See [Gone](#gone).', 'missing section'), ('See [x](javascript:alert(1)).', 'https'), ('See [x](http://example.com).', 'https')):
             with self.subTest(paragraph=paragraph):

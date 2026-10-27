@@ -1,4 +1,5 @@
 import importlib.util
+import json
 import struct
 import tempfile
 import unittest
@@ -23,10 +24,13 @@ class CheckTests(unittest.TestCase):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
         self.root = Path(self.temp.name)
-        images = self.root / 'docs/user-guide/images'
-        images.mkdir(parents=True)
-        (images / 'chat.png').write_bytes(png(1280))
-        (images / 'small.png').write_bytes(png(300))
+        self.images = self.root / 'docs/user-guide/images'
+        self.images.mkdir(parents=True)
+        (self.images / 'chat.png').write_bytes(png(1280))
+        self.screens(['chat'])
+
+    def screens(self, ids):
+        (self.root / 'docs/user-guide/screens.json').write_text(json.dumps({'screens': [{'id': i} for i in ids]}))
 
     def section(self, **extra):
         section = {
@@ -35,7 +39,7 @@ class CheckTests(unittest.TestCase):
             'blocks': [
                 {'type': 'list', 'title': 'What you need', 'items': ['A model, from [Models](#models).']},
                 {'type': 'steps', 'items': ['Open Chat.', 'Type a question.', 'Press Send.']},
-                {'type': 'image', 'src': 'docs/user-guide/images/chat.png', 'alt': 'Chat', 'caption': 'An answer with its sources.'},
+                {'type': 'image', 'screen': 'chat', 'alt': 'Chat', 'caption': 'An answer with its sources.'},
                 {'type': 'heading', 'text': 'Troubleshooting'},
                 {'type': 'paragraph', 'text': 'No answer? Check that a model is installed.'},
             ],
@@ -67,21 +71,41 @@ class CheckTests(unittest.TestCase):
 
     def test_an_untested_code_block_doesnt_count_but_a_tested_one_does(self):
         blocks = [b for b in self.section()['sections'][0]['blocks'] if b['type'] != 'image']
+        self.screens([])
+        (self.images / 'chat.png').unlink()
         untested = self.section(blocks=blocks + [{'type': 'code', 'language': 'sh', 'code': 'toskarctl ask hi'}])
         self.assertTrue(any('tested example' in p for p in self.check(untested)[0]))
         tested = self.section(blocks=blocks + [{'type': 'code', 'language': 'sh', 'code': 'toskarctl ask hi', 'test': 'ask'}])
         self.assertEqual(self.check(tested)[0], [])
 
-    def test_images_must_exist_be_png_and_wide_enough(self):
-        for src, error in (('docs/user-guide/images/gone.png', 'missing'), ('docs/user-guide/images/small.png', 'px wide')):
-            guide = self.section()
-            guide['sections'][0]['blocks'][2]['src'] = src
-            problems, _ = self.check(guide)
-            self.assertTrue(any(error in p for p in problems), problems)
-        (self.root / 'docs/user-guide/images/fake.png').write_text('not a png')
+    def legacy_image(self, src):
         guide = self.section()
-        guide['sections'][0]['blocks'][2]['src'] = 'docs/user-guide/images/fake.png'
-        self.assertTrue(any("isn't a PNG" in p for p in self.check(guide)[0]))
+        guide['sections'][1]['images'] = [{'src': src, 'alt': 'Models', 'caption': 'The list.'}]
+        return self.check(guide)[0]
+
+    def test_images_must_exist_be_png_and_wide_enough(self):
+        self.assertTrue(any('missing' in p for p in self.legacy_image('docs/user-guide/images/gone.png')))
+        (self.images / 'small.png').write_bytes(png(300))
+        self.assertTrue(any('px wide' in p for p in self.legacy_image('docs/user-guide/images/small.png')))
+        (self.images / 'fake.png').write_text('not a png')
+        self.assertTrue(any("isn't a PNG" in p for p in self.legacy_image('docs/user-guide/images/fake.png')))
+
+    def test_a_detailed_page_names_its_screens(self):
+        guide = self.section()
+        guide['sections'][0]['blocks'][2]['screen'] = 'nowhere'
+        self.assertTrue(any("'nowhere' isn't in docs/user-guide/screens.json" in p for p in self.check(guide)[0]))
+        guide = self.section()
+        image = guide['sections'][0]['blocks'][2]
+        del image['screen']
+        image['src'] = 'docs/user-guide/images/chat.png'
+        self.assertTrue(any('hand-made' in p for p in self.check(guide)[0]))
+
+    def test_leftover_screens_and_images_fail(self):
+        self.screens(['chat', 'unused'])
+        (self.images / 'old.png').write_bytes(png(1280))
+        problems = self.check(self.section())[0]
+        self.assertTrue(any("'unused' isn't shown" in p for p in problems), problems)
+        self.assertTrue(any('old.png isn\'t shown' in p for p in problems), problems)
 
     def test_long_sentences_fail(self):
         long = ' '.join(['word'] * 50) + '.'

@@ -86,12 +86,33 @@ HTML, bold, or italics.
 
 ## Screenshots
 
-Screenshots are PNGs under `docs/user-guide/images/`, at least 640 pixels
-wide, each with `alt` (what it shows, for someone who can't see it) and a
-`caption` (what to notice). They're captured from the real app in CI from
-Core's screenshot mode, not taken by hand, so they change with the UI
-(#882). Show the result of the steps, with realistic data and no personal
-details.
+Screenshots are captured from the real web UI with demo data, never taken by
+hand, so they follow the interface. A detailed page's `image` block names a
+`screen` instead of a file:
+
+```json
+{ "type": "image", "screen": "automations-create",
+  "alt": "New automation form filled in from a sentence",
+  "caption": "Fill in the details turns the sentence into a schedule and a task." }
+```
+
+Each screen is in `docs/user-guide/screens.json`:
+- `path` and `query` open it in screenshot mode.
+- `readyText` is on the page once it has loaded.
+- `actions` (`click`, `fill`, `wait`) reach the state the page describes, such
+  as a dialog open.
+
+The demo data is in `internal/screenshot`. Add what a page needs there.
+`scripts/capture-docs-screenshots.sh` (or `DOCS_SCREENS=<id>` for one screen)
+saves `docs/user-guide/images/<screen>.png`, and CI does the same on every
+pull request that touches the UI. It lists the screenshots that changed, and
+on `main` it commits them, so the guide at a release tag shows that
+release's interface.
+
+Show the result of the steps, with realistic data and no personal details.
+`alt` says what the screenshot shows, for someone who can't see it, and
+`caption` says what to notice. A screen no page uses, or an image no page
+shows, fails the check.
 
 ## Examples
 
