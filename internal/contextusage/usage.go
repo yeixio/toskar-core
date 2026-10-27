@@ -13,8 +13,29 @@ import (
 	"github.com/yeixio/toskar-core/pkg/pluginapi"
 )
 
-// ReplyReserveTokens leaves room for the model's answer when older messages are kept.
+// ReplyReserveTokens is the least room left for the model's answer when
+// older messages are kept.
 const ReplyReserveTokens = 512
+
+// ReplyReserve is how much of a window of limit tokens to leave for the
+// answer (#840). A request's max_tokens is what it asked for. Otherwise a
+// sixteenth of the window, from 512 to 4,096 tokens, or, for a model that
+// thinks before it answers, a quarter, from 2,048 to 16,384, since its
+// thinking fills the same room first. It is never more than half the
+// window, so the conversation keeps the other half.
+func ReplyReserve(limit, maxTokens int, thinking bool) int {
+	if limit <= 0 {
+		limit = DefaultWindow
+	}
+	if maxTokens > 0 {
+		return min(maxTokens, limit)
+	}
+	reserve := min(max(ReplyReserveTokens, limit/16), 4096)
+	if thinking {
+		reserve = min(max(2048, limit/4), 16384)
+	}
+	return min(reserve, limit/2)
+}
 
 // DefaultWindow is the token window a local model runs with when its catalog
 // window is missing or larger. It matches the llama.cpp start default.
@@ -181,9 +202,10 @@ func WithoutCurrentTurn(stored []contracts.Message, prompt string) []pluginapi.C
 }
 
 // Room is how many tokens of older chat can still fit in a window of
-// limitTokens beside the reserved pieces and the reply.
-func Room(limitTokens int, count Counter, reserved ...string) int {
-	room := limitTokens - ReplyReserveTokens
+// limitTokens beside the reserved pieces and replyTokens for the answer
+// (ReplyReserve).
+func Room(limitTokens, replyTokens int, count Counter, reserved ...string) int {
+	room := limitTokens - replyTokens
 	for _, text := range reserved {
 		n, _ := count.Count(text)
 		room -= n

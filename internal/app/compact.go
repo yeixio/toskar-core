@@ -57,6 +57,22 @@ func (a *App) windowFor(ctx context.Context, modelID string) int {
 	return llamacpp.ContextWindow(catalog)
 }
 
+// knownWindow is a model's context window when it's known: its real one
+// while it runs here, or the catalog's. A model the catalog doesn't know,
+// such as one on the external server, is 0, so nothing is refused on a
+// guess (#840).
+func (a *App) knownWindow(ctx context.Context, modelID string) int {
+	if window, _, ok := a.localContext(ctx, modelID); ok {
+		return window
+	}
+	if a.Models != nil {
+		if entry, ok := a.Models.Catalog().Get(modelID); ok && entry.Context > 0 {
+			return llamacpp.ContextWindow(entry.Context)
+		}
+	}
+	return 0
+}
+
 // compactModel is the model that summarizes a chat outside a turn: the
 // chat's own, else the one that wrote its last summary, else the default.
 func (a *App) compactModel(ctx context.Context, conversationID string) (string, error) {

@@ -87,13 +87,13 @@ func TestMeasureIsEstimatedWhenTheTokenizerFails(t *testing.T) {
 
 func TestRoomAndFitCountTokens(t *testing.T) {
 	// 600 tokens of window: 512 for the reply, 3 for the reserved text.
-	if got := Room(600, words, "one two three"); got != 85 {
+	if got := Room(600, ReplyReserveTokens, words, "one two three"); got != 85 {
 		t.Fatalf("room %d", got)
 	}
-	if got := Room(700, nil, strings.Repeat("x", 400)); got != 700-512-100 {
+	if got := Room(700, ReplyReserveTokens, nil, strings.Repeat("x", 400)); got != 700-512-100 {
 		t.Fatalf("estimated room %d", got)
 	}
-	if got := Room(600, nil, strings.Repeat("x", 400)); got != 0 {
+	if got := Room(600, ReplyReserveTokens, nil, strings.Repeat("x", 400)); got != 0 {
 		t.Fatalf("a full window has no room, got %d", got)
 	}
 	prior := []pluginapi.ChatMessage{
@@ -127,5 +127,31 @@ func TestEstimateByScript(t *testing.T) {
 	prose := strings.Repeat("The quick brown fox jumps over the lazy dog and runs into the forest ", 6)
 	if n, old := Estimate(prose), utf8.RuneCountInString(prose)/4; n < old || n > old+old/10 {
 		t.Errorf("English: %d tokens, want close to the old estimate %d", n, old)
+	}
+}
+
+// The answer's room grows with the window, and more for a model that
+// thinks first (#840), but never past half the window.
+func TestReplyReserve(t *testing.T) {
+	for _, tc := range []struct {
+		limit, maxTokens int
+		thinking         bool
+		want             int
+	}{
+		{8192, 0, false, 512},
+		{8192, 0, true, 2048},
+		{32768, 0, false, 2048},
+		{32768, 0, true, 8192},
+		{131072, 0, false, 4096},
+		{131072, 0, true, 16384},
+		{4096, 0, true, 2048},
+		{2048, 0, true, 1024},
+		{8192, 3000, false, 3000},
+		{8192, 20000, true, 8192},
+		{0, 0, false, 512},
+	} {
+		if got := ReplyReserve(tc.limit, tc.maxTokens, tc.thinking); got != tc.want {
+			t.Errorf("ReplyReserve(%d, %d, %v) = %d, want %d", tc.limit, tc.maxTokens, tc.thinking, got, tc.want)
+		}
 	}
 }

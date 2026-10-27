@@ -504,6 +504,13 @@ func New(opts Options) (*App, error) {
 		Auth:     a.openAIAuth,
 		// Chat completions also learn what the key may ask of the assistant (§62).
 		Permissions: a.openAIPermissions,
+		// A request that can't fit its model's window is refused before it
+		// runs, and a chat that overflows answers 400 with its code (#840).
+		Window: a.knownWindow,
+		ErrorCode: func(text string) string {
+			code, _ := chatErrorCode(text)
+			return code
+		},
 	}
 
 	webRoot := opts.WebRoot

@@ -1250,6 +1250,24 @@ func (e *chatExecEnv) ContextLimit() int {
 	return llamacpp.ContextWindow(catalog)
 }
 
+// ReplyReserve is the room this turn leaves for its answer (#840): what the
+// request asked for with max_tokens, or more for a model that thinks first,
+// unless thinking is off for the turn.
+func (e *chatExecEnv) ReplyReserve(ctx context.Context) int {
+	opts := pluginapi.AnswerOptionsFrom(ctx)
+	id := e.modelOverride
+	if id == "" {
+		id = e.modelID()
+	}
+	thinking := false
+	if !opts.NoThinking && id != "" && e.app != nil && e.app.Models != nil {
+		if entry, ok := e.app.Models.Catalog().Get(id); ok {
+			thinking = slices.Contains(entry.Tags, "reasoning")
+		}
+	}
+	return contextusage.ReplyReserve(e.ContextLimit(), opts.MaxTokens, thinking)
+}
+
 // TokenCounter counts with the tokenizer of the model a role uses, while it
 // runs on this computer, and estimates otherwise (§66).
 func (e *chatExecEnv) TokenCounter(ctx context.Context, role string) contextusage.Counter {
@@ -1324,7 +1342,7 @@ func (e *chatExecEnv) overflows(ctx context.Context, prior []pluginapi.ChatMessa
 		n, _ := count.Count(m.Content)
 		used += n
 	}
-	return used > int(overflowShare*float64(contextusage.Room(limit, count, e.turnPrompt)))
+	return used > int(overflowShare*float64(contextusage.Room(limit, e.ReplyReserve(ctx), count, e.turnPrompt)))
 }
 
 // compactNow summarizes the chat before this turn's answer, saying so in

@@ -2,6 +2,7 @@ package openai
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"io"
 	"net/http"
@@ -295,5 +296,90 @@ func TestReasoningEffortNone(t *testing.T) {
 	h.HandleChatCompletions(rec, httptest.NewRequest(http.MethodPost, "/v1/chat/completions", strings.NewReader(`{"model":"profile:general","messages":[{"role":"user","content":"hi"}],"reasoning_effort":"none"}`)))
 	if chat.effort != huginn.EffortFast {
 		t.Errorf("none: effort %q, want fast", chat.effort)
+	}
+}
+
+// A request that can't fit its model's window is refused before it runs,
+// as OpenAI refuses one (#840), naming the field to change; one that may
+// fit, a model whose window isn't known, and auto all run.
+func TestContextTooLongBeforeRunning(t *testing.T) {
+	h := testHandler(t)
+	h.Window = func(_ context.Context, model string) int {
+		if model == "small-8k" {
+			return 8192
+		}
+		return 0
+	}
+	long := strings.Repeat("word ", 40000) // about 50,000 tokens
+	for _, tc := range []struct {
+		name, body string
+		status     int
+		param      string
+	}{
+		{"max_tokens alone", `{"model":"small-8k","max_tokens":9000,"messages":[{"role":"user","content":"hi"}]}`, 400, "max_tokens"},
+		{"messages and max_tokens", `{"model":"small-8k","max_tokens":4000,"messages":[{"role":"user","content":"` + strings.Repeat("word ", 4000) + `"}]}`, 400, "messages"},
+		{"messages alone", `{"model":"small-8k","messages":[{"role":"user","content":"` + long + `"}]}`, 400, "messages"},
+		{"fits", `{"model":"small-8k","max_tokens":2000,"messages":[{"role":"user","content":"hi"}]}`, 200, ""},
+		{"window unknown", `{"model":"ext:big","max_tokens":9000,"messages":[{"role":"user","content":"` + long + `"}]}`, 200, ""},
+		{"auto", `{"model":"auto","max_tokens":9000,"messages":[{"role":"user","content":"hi"}]}`, 200, ""},
+	} {
+		chat := &scriptChat{chunks: []pluginapi.ChatChunk{{Content: "ok", Done: true}}}
+		h.Chat = chat
+		rec := httptest.NewRecorder()
+		h.HandleChatCompletions(rec, httptest.NewRequest(http.MethodPost, "/v1/chat/completions", strings.NewReader(tc.body)))
+		if rec.Code != tc.status {
+			t.Errorf("%s: %d %s", tc.name, rec.Code, rec.Body)
+			continue
+		}
+		if tc.status != 400 {
+			continue
+		}
+		var got struct {
+			Error struct {
+				Type  string  `json:"type"`
+				Code  string  `json:"code"`
+				Param *string `json:"param"`
+			} `json:"error"`
+		}
+		_ = json.Unmarshal(rec.Body.Bytes(), &got)
+		if got.Error.Code != "CONTEXT_TOO_LONG" || got.Error.Type != "invalid_request_error" || got.Error.Param == nil || *got.Error.Param != tc.param {
+			t.Errorf("%s: %s", tc.name, rec.Body)
+		}
+		if chat.opts != nil {
+			t.Errorf("%s: the turn ran", tc.name)
+		}
+	}
+}
+
+// A chat that fails gets its stable code, and an overflow found while it
+// runs is a 400 the caller can fix, streamed or not (#840).
+func TestChatFailureCodes(t *testing.T) {
+	h := testHandler(t)
+	h.ErrorCode = func(text string) string {
+		if strings.Contains(text, "n_ctx") {
+			return "CONTEXT_TOO_LONG"
+		}
+		return ""
+	}
+	for _, tc := range []struct {
+		chunk  pluginapi.ChatChunk
+		status int
+		code   string
+	}{
+		{pluginapi.ChatChunk{Error: "the request exceeds the available context size (n_ctx 8192)"}, 400, "CONTEXT_TOO_LONG"},
+		{pluginapi.ChatChunk{Error: "boom"}, 500, "CHAT_FAILED"},
+		{pluginapi.ChatChunk{Error: "the computer is gone", Code: "COMPUTER_OFFLINE"}, 500, "COMPUTER_OFFLINE"},
+	} {
+		h.Chat = &scriptChat{chunks: []pluginapi.ChatChunk{tc.chunk}}
+		rec := httptest.NewRecorder()
+		h.HandleChatCompletions(rec, httptest.NewRequest(http.MethodPost, "/v1/chat/completions", strings.NewReader(`{"model":"profile:general","messages":[{"role":"user","content":"hi"}]}`)))
+		if rec.Code != tc.status || !strings.Contains(rec.Body.String(), `"code":"`+tc.code+`"`) {
+			t.Errorf("%s: %d %s", tc.chunk.Error, rec.Code, rec.Body)
+		}
+		rec = httptest.NewRecorder()
+		h.HandleChatCompletions(rec, httptest.NewRequest(http.MethodPost, "/v1/chat/completions", strings.NewReader(`{"model":"profile:general","stream":true,"messages":[{"role":"user","content":"hi"}]}`)))
+		if !strings.Contains(rec.Body.String(), `"code":"`+tc.code+`"`) {
+			t.Errorf("streamed %s: %s", tc.chunk.Error, rec.Body)
+		}
 	}
 }

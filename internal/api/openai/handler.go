@@ -12,6 +12,7 @@ import (
 
 	"github.com/yeixio/toskar-core/internal/artifacts"
 	"github.com/yeixio/toskar-core/internal/auth"
+	"github.com/yeixio/toskar-core/internal/contextusage"
 	"github.com/yeixio/toskar-core/internal/events"
 	"github.com/yeixio/toskar-core/internal/huginn"
 	"github.com/yeixio/toskar-core/internal/profiles"
@@ -45,6 +46,12 @@ type Handler struct {
 	// internet-only client.
 	Pictures      PictureStore
 	PictureClient *http.Client
+	// Window is a model's context window in tokens, or 0 when unknown, for
+	// checking a request fits before generating (#840).
+	Window func(ctx context.Context, modelID string) int
+	// ErrorCode is the stable code for a chat error's text, as chat streams
+	// give it (#588), such as CONTEXT_TOO_LONG, or "".
+	ErrorCode func(text string) string
 }
 
 type chatCompletionRequest struct {
@@ -271,6 +278,17 @@ func (h *Handler) HandleChatCompletions(w http.ResponseWriter, r *http.Request) 
 		opts.ExactModel = true
 	}
 
+	// That model's window must hold the messages and the answer asked for:
+	// a request that can't fit is refused now, not by the runtime partway
+	// (#840). The count is an estimate, so only what's clearly too long is
+	// refused here; the runtime still catches the rest.
+	if opts.ExactModel && h.Window != nil {
+		if msg, param := tooLong(req, sampling.MaxTokens, h.Window(r.Context(), modelID)); msg != "" {
+			writeErrorParam(w, http.StatusBadRequest, "CONTEXT_TOO_LONG", msg, param)
+			return
+		}
+	}
+
 	// The last user message's pictures, attached as the web chat attaches
 	// them (#830), and removed once the answer is done.
 	pictures, removePictures, err := h.savePictures(r.Context(), lastUserPictures(req.Messages))
@@ -342,11 +360,12 @@ func (h *Handler) HandleChatCompletions(w http.ResponseWriter, r *http.Request) 
 	}
 	stream, err := h.Chat.RunChat(ctx, profileID, "", message, req.Stream, modelID, execution)
 	if err != nil {
+		status, code := h.failure("", err.Error())
 		if req.Stream {
-			streamError(sw, http.StatusInternalServerError, "CHAT_FAILED", err.Error())
+			streamError(sw, status, code, err.Error())
 			return
 		}
-		writeError(w, http.StatusInternalServerError, "CHAT_FAILED", err.Error())
+		writeError(w, status, code, err.Error())
 		return
 	}
 	extension := func() map[string]any {
@@ -370,7 +389,8 @@ func (h *Handler) writeNonStream(w http.ResponseWriter, stream <-chan pluginapi.
 	var metrics *pluginapi.GenerationMetrics
 	for chunk := range stream {
 		if chunk.Error != "" {
-			writeError(w, http.StatusInternalServerError, "CHAT_FAILED", chunk.Error)
+			status, code := h.failure(chunk.Code, chunk.Error)
+			writeError(w, status, code, chunk.Error)
 			return
 		}
 		content.WriteString(chunk.Content)
@@ -398,7 +418,8 @@ func (h *Handler) writeStream(sw *streamWriter, r *http.Request, stream <-chan p
 	var metrics *pluginapi.GenerationMetrics
 	for chunk := range stream {
 		if chunk.Error != "" {
-			streamError(sw, http.StatusInternalServerError, "CHAT_FAILED", chunk.Error)
+			status, code := h.failure(chunk.Code, chunk.Error)
+			streamError(sw, status, code, chunk.Error)
 			return
 		}
 		if chunk.Metrics != nil {
@@ -604,6 +625,58 @@ func withExtension(out, ext map[string]any) map[string]any {
 func writeJSON(w http.ResponseWriter, v any) {
 	w.Header().Set("Content-Type", "application/json")
 	_ = json.NewEncoder(w).Encode(v)
+}
+
+// failure is the status and stable code for a chat that failed: the code
+// it came with, or the one its text is recognized as, as chat streams give
+// it (#588), else CHAT_FAILED. A conversation too long for the model is the
+// caller's to shorten, so it's a 400, as OpenAI answers one.
+func (h *Handler) failure(code, text string) (int, string) {
+	if code == "" && h.ErrorCode != nil {
+		code = h.ErrorCode(text)
+	}
+	if code == "" {
+		code = "CHAT_FAILED"
+	}
+	if code == "CONTEXT_TOO_LONG" {
+		return http.StatusBadRequest, code
+	}
+	return http.StatusInternalServerError, code
+}
+
+// tooLong says why a request can't fit a model's window of window tokens,
+// and which field to change, or "" when it may fit. The messages are
+// estimated, so only a request clearly over is refused.
+func tooLong(req chatCompletionRequest, maxTokens, window int) (msg, param string) {
+	if window <= 0 {
+		return "", ""
+	}
+	if maxTokens >= window {
+		return fmt.Sprintf("max_tokens is %d, but this model's context window is %d tokens, which holds the messages and the answer together; ask for fewer", maxTokens, window), "max_tokens"
+	}
+	prompt := 0
+	for _, m := range req.Messages {
+		prompt += contextusage.Estimate(m.Content)
+	}
+	if prompt+maxTokens > window {
+		if maxTokens > 0 {
+			return fmt.Sprintf("the messages are about %d tokens and max_tokens is %d, more than this model's context window of %d tokens; shorten the messages or ask for fewer", prompt, maxTokens, window), "messages"
+		}
+		return fmt.Sprintf("the messages are about %d tokens, more than this model's context window of %d tokens; shorten them", prompt, window), "messages"
+	}
+	return "", ""
+}
+
+// writeErrorParam is writeError naming the request field it's about.
+func writeErrorParam(w http.ResponseWriter, status int, code, msg, param string) {
+	body := errorBody(status, code, msg)
+	if e, ok := body["error"].(openAIError); ok {
+		e.Param = &param
+		body["error"] = e
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+	_ = json.NewEncoder(w).Encode(body)
 }
 
 // writeError answers OpenAI's error shape (#832): message, type, param,

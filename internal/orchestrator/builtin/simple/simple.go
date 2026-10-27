@@ -693,7 +693,12 @@ func priorMessages(ctx context.Context, env pluginapi.ExecutionEnvironment, coun
 	if limit <= 0 {
 		limit = contextusage.DefaultWindow
 	}
-	room := contextusage.Room(limit, count, reserved, prompt)
+	// The answer's room: more for a model that thinks first (#840).
+	reply := contextusage.ReplyReserve(limit, 0, false)
+	if r, ok := env.(interface{ ReplyReserve(context.Context) int }); ok {
+		reply = r.ReplyReserve(ctx)
+	}
+	room := contextusage.Room(limit, reply, count, reserved, prompt)
 	if share > 0 {
 		room = min(room, int(share*float64(limit)))
 	}
