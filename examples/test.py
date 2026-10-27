@@ -33,6 +33,7 @@ from pathlib import Path
 from typing import Callable
 
 HERE = Path(__file__).resolve().parent
+GUIDE = HERE.parent / "docs" / "user-guide" / "guide.json"
 MESSAGE = "Plan a three-day trip to Juneau"
 ANSWER = "You said: " + MESSAGE
 
@@ -47,6 +48,7 @@ def main() -> int:
     ap.add_argument("--sdks", required=True, help="a toskar-sdks checkout, with typescript/ built")
     ap.add_argument("--python", default=sys.executable, help="a Python with the toskar package installed")
     ap.add_argument("--go-sdk-from-checkout", action="store_true", help="build the Go examples with the checkout's SDK")
+    ap.add_argument("--guide", default=str(GUIDE), help="the user guide whose tested examples run too")
     args = ap.parse_args()
 
     # The examples run from other folders, so paths are made absolute.
@@ -100,6 +102,7 @@ def main() -> int:
                     (f"{lang} events", lambda cmd=cmd: events(runner, core, cmd)),
                     (f"{lang} pair", lambda cmd=cmd, cwd=cwd: pair(runner, core, cmd, cwd)),
                 ]
+            cases += guide_cases(runner, Path(args.guide), tmp, stubs, js, python, core.url)
             for name, case in cases:
                 started = time.time()
                 try:
@@ -434,6 +437,71 @@ def ci_forgejo_triage(run: Runner, stubs: Path, tmp: Path) -> None:
     finally:
         SUGGEST[:] = ["bug"]
 
+
+
+# The user guide's tested examples (docs/user-guide/STYLE.md, #882): every
+# code block with a test id runs as written, against this Core, and prints
+# what its output says. A reader's address, 127.0.0.1:7331, is this Core's;
+# toskarctl answers with the scripted model, as for the CI examples.
+
+READER_ADDRESS = re.compile(r"(?:127\.0\.0\.1|localhost):7331")
+
+
+def guide_examples(guide: Path) -> list[tuple[str, dict]]:
+    sections = json.loads(guide.read_text())["sections"]
+    return [(f"guide {block['test']}", block) for section in sections
+            for block in section.get("blocks", []) if block.get("type") == "code" and "test" in block]
+
+
+def output_matches(expected: str, actual: str) -> bool:
+    """The whole output, with … standing for anything that changes, such as
+    an id, a time, or a model's words."""
+    pattern = "".join(".*?" if part == "…" else re.escape(part) for part in re.split(r"(…)", expected.strip()))
+    tidy = "\n".join(line.rstrip() for line in actual.strip().splitlines())
+    return re.fullmatch(pattern, tidy, re.DOTALL) is not None
+
+
+def guide_cases(run: Runner, guide: Path, tmp: Path, stubs: Path, js: Path, python: str,
+                url: str) -> list[tuple[str, Callable[[], None]]]:
+    address = url.removeprefix("http://")
+    work = tmp / "guide"
+    work.mkdir()
+    # toskarctl as the CI examples have it, and the real curl.
+    bin_dir = work / "bin"
+    bin_dir.mkdir()
+    (bin_dir / "toskarctl").symlink_to(stubs / "toskarctl")
+    go_module = work / "go"
+    shutil.copytree(HERE / "go", go_module, ignore=shutil.ignore_patterns("chat", "events", "pair"))
+
+    def case(test: str, block: dict) -> Callable[[], None]:
+        def check() -> None:
+            code = READER_ADDRESS.sub(address, block["code"])
+            lang = block["language"]
+            if lang == "sh":
+                # Nothing piped in, as at a reader's terminal: toskarctl ask reads stdin otherwise.
+                out = run(["sh", "-e", "-c", code], cwd=work, stdin="",
+                          env={"PATH": f"{bin_dir}{os.pathsep}{run.env.get('PATH', '')}"})
+            elif lang == "python":
+                path = work / f"{test}.py"
+                path.write_text(code)
+                out = run([python, str(path)], cwd=work)
+            elif lang == "typescript":
+                # Beside the SDK built in the checkout, as npm install leaves it.
+                path = js / f"guide-{test}.mts"
+                path.write_text(code)
+                out = run(["node", "--experimental-strip-types", "--no-warnings", str(path)], cwd=js)
+            elif lang == "go":
+                folder = go_module / test
+                folder.mkdir()
+                (folder / "main.go").write_text(code)
+                out = run(["go", "run", f"./{test}"], cwd=go_module)
+            else:
+                raise Failed(f"a {lang} block can't be run; a tested example is sh, python, typescript, or go")
+            if "output" in block:
+                expect(output_matches(block["output"], out), f"the output the guide shows:\n{block['output']}\n", out)
+        return check
+
+    return [(name, case(block["test"], block)) for name, block in guide_examples(guide)]
 
 if __name__ == "__main__":
     sys.exit(main())

@@ -42,6 +42,8 @@ LONGEST_SENTENCE = 45
 AVERAGE_SENTENCE = 25
 MIN_IMAGE_WIDTH = 640
 NO_DOCS_LABEL = "no-user-docs"
+# The languages examples/test.py runs a tested example in.
+RUNNABLE = ("sh", "python", "typescript", "go")
 
 
 def png_size(path: Path) -> tuple[int, int] | None:
@@ -110,6 +112,8 @@ def check(guide: dict, root: Path = ROOT) -> tuple[list[str], list[str]]:
                 if block["test"] in tests:
                     problems.append(f"{where} example {block['test']!r} is also in {tests[block['test']]}")
                 tests[block["test"]] = sid
+                if block["language"] not in RUNNABLE:
+                    problems.append(f"{where} example {block['test']!r} is {block['language']}; examples/test.py runs {', '.join(RUNNABLE)}")
         if not blocks:
             waiting.append(sid)
             continue
