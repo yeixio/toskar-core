@@ -1,0 +1,31 @@
+name: User docs
+
+# A pull request that adds a feature (an ### Added changelog fragment)
+# changes the user guide too, or has the no-user-docs label saying why
+# (docs/user-guide/STYLE.md, #882). It runs on every pull request, with no
+# path filter, because a fragment alone is Markdown that CI skips, and again
+# when a label changes.
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: user-docs-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  feature-has-docs:
+    runs-on: ${{ fromJSON(vars.CI_RUNS_ON || '"ubuntu-latest"') }}
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: A feature ships its page
+        env:
+          BASE: origin/${{ github.base_ref }}
+          LABELS: ${{ join(github.event.pull_request.labels.*.name, ',') }}
+        run: python3 scripts/check-user-guide.py pr --base "$BASE"

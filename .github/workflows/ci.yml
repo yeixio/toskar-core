@@ -54,6 +54,8 @@ jobs:
       - name: User guide
         run: |
           python3 scripts/test_publish_docs.py
+          python3 scripts/test_check_user_guide.py
+          python3 scripts/check-user-guide.py
           python3 scripts/publish-docs.py --destination "$RUNNER_TEMP/docs-validation" --version 0.0.0-test --commit "$GITHUB_SHA"
       - name: Changelog fragments
         run: |
