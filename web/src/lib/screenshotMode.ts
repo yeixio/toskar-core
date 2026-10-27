@@ -18,6 +18,9 @@ const routes: Record<string, string> = {
   memory: '/memory',
   tools: '/tools',
   profiles: '/profiles',
+  // The user guide's Install page shows first launch (#885).
+  onboarding: '/onboarding',
+  'onboarding-recommend': '/onboarding',
 }
 
 export function screenshotPath(screen: string): string {
