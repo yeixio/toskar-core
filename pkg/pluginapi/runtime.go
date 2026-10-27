@@ -146,6 +146,9 @@ type ChatRequest struct {
 	// ResponseSchema, when set, constrains the reply to JSON matching this
 	// JSON Schema, where the runtime supports it.
 	ResponseSchema json.RawMessage `json:"response_schema,omitempty"`
+	// NoThinking asks a reasoning model to answer without thinking first
+	// (#840). A model that doesn't think is unaffected.
+	NoThinking bool `json:"no_thinking,omitempty"`
 }
 
 // ChatMessage is a single chat turn.

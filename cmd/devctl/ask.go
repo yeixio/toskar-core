@@ -35,6 +35,7 @@ flags:
   --json-schema path  answer with JSON that fits this JSON Schema
   --max-tokens n      the longest answer, in tokens
   --temperature t     sampling temperature, such as 0 for the steadiest answers
+  --no-thinking       a reasoning model answers without thinking first: faster
   --timeout d         how long to wait for the answer (default 5m)
   --memory            let the answer use and add to memory
   --knowledge         let the answer use connected knowledge`
@@ -64,6 +65,7 @@ func askCommand(args []string, streams askIO, client askClient) error {
 	schemaPath := fs.String("json-schema", "", "")
 	maxTokens := fs.Int("max-tokens", 0, "")
 	temperature := fs.Float64("temperature", -1, "")
+	noThinking := fs.Bool("no-thinking", false, "")
 	timeout := fs.Duration("timeout", 5*time.Minute, "")
 	memory := fs.Bool("memory", false, "")
 	knowledge := fs.Bool("knowledge", false, "")
@@ -108,6 +110,10 @@ func askCommand(args []string, streams askIO, client askClient) error {
 	}
 	if *temperature >= 0 {
 		body["temperature"] = *temperature
+	}
+	if *noThinking {
+		// A reasoning model answers without thinking first (#840).
+		body["reasoning_effort"] = "none"
 	}
 	if *schemaPath != "" {
 		raw, err := os.ReadFile(*schemaPath)

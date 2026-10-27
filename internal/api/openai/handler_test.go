@@ -273,3 +273,27 @@ func TestNamedModelAnswersOrFails(t *testing.T) {
 		}
 	}
 }
+
+// reasoning_effort "none" answers without thinking (#840), at Fast effort;
+// the other values leave thinking on.
+func TestReasoningEffortNone(t *testing.T) {
+	h := testHandler(t)
+	chat := &scriptChat{chunks: []pluginapi.ChatChunk{{Content: "ok", Done: true}}}
+	h.Chat = chat
+	for effort, want := range map[string]bool{`"none"`: true, `"NONE"`: true, `"low"`: false, `"high"`: false, `""`: false} {
+		rec := httptest.NewRecorder()
+		body := `{"model":"profile:general","messages":[{"role":"user","content":"hi"}],"reasoning_effort":` + effort + `}`
+		h.HandleChatCompletions(rec, httptest.NewRequest(http.MethodPost, "/v1/chat/completions", strings.NewReader(body)))
+		if rec.Code != http.StatusOK {
+			t.Fatalf("%s: %d %s", effort, rec.Code, rec.Body)
+		}
+		if chat.sampling.NoThinking != want {
+			t.Errorf("%s: no thinking = %v", effort, chat.sampling.NoThinking)
+		}
+	}
+	rec := httptest.NewRecorder()
+	h.HandleChatCompletions(rec, httptest.NewRequest(http.MethodPost, "/v1/chat/completions", strings.NewReader(`{"model":"profile:general","messages":[{"role":"user","content":"hi"}],"reasoning_effort":"none"}`)))
+	if chat.effort != huginn.EffortFast {
+		t.Errorf("none: effort %q, want fast", chat.effort)
+	}
+}

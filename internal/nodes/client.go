@@ -236,6 +236,9 @@ type RemoteChatRequest struct {
 	// computer's llama.cpp constrains the reply to it (#865). A computer
 	// from before it ignores it, and Core checks the answer either way.
 	ResponseSchema json.RawMessage `json:"response_schema,omitempty"`
+	// NoThinking asks a reasoning model to answer without thinking first
+	// (#840); a computer from before it ignores it.
+	NoThinking bool `json:"no_thinking,omitempty"`
 }
 
 func (c *Client) Chat(ctx context.Context, req RemoteChatRequest) (<-chan pluginapi.ChatChunk, error) {

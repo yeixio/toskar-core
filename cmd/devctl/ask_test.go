@@ -81,6 +81,20 @@ func TestAskSendsThePromptWithPipedDataApart(t *testing.T) {
 	if (*sent)["model"] != "auto" || (*sent)["max_tokens"] != 200.0 || (*sent)["temperature"] != 0.0 {
 		t.Fatalf("model, max_tokens, temperature: %v", *sent)
 	}
+	if _, ok := (*sent)["reasoning_effort"]; ok {
+		t.Fatalf("thinking is on unless asked: %v", *sent)
+	}
+}
+
+// --no-thinking asks a reasoning model to answer without thinking (#840).
+func TestAskWithoutThinking(t *testing.T) {
+	client, sent := fakeCompletions(t, "ok", http.StatusOK, "")
+	if _, err := runAsk(t, client, "", "--no-thinking", "What is 2+2?"); err != nil {
+		t.Fatal(err)
+	}
+	if (*sent)["reasoning_effort"] != "none" {
+		t.Fatalf("sent %v", *sent)
+	}
 }
 
 func TestAskTakesDataAloneAsThePrompt(t *testing.T) {

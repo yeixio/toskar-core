@@ -62,7 +62,7 @@ type chatCompletionRequest struct {
 	StreamOptions *struct {
 		IncludeUsage bool `json:"include_usage"`
 	} `json:"stream_options"`
-	// ReasoningEffort is OpenAI's low, medium, or high.
+	// ReasoningEffort is OpenAI's none, minimal, low, medium, or high.
 	ReasoningEffort string `json:"reasoning_effort"`
 	// IncludeReasoning returns a reasoning model's thinking as
 	// reasoning_content beside the answer (#701), as OpenRouter's
@@ -173,6 +173,9 @@ func (req chatCompletionRequest) sampling() (pluginapi.GenerateOptions, error) {
 	if o.MaxTokens < 0 || req.MaxCompletionTokens < 0 {
 		return o, errors.New("max_tokens must be positive")
 	}
+	// reasoning_effort "none": a reasoning model answers without thinking
+	// first (#840), as OpenAI's reasoning models do.
+	o.NoThinking = strings.EqualFold(req.ReasoningEffort, "none")
 	return o, nil
 }
 
@@ -516,7 +519,7 @@ func turnOptions(req chatCompletionRequest, perms auth.APIKeyPermissions) (*turn
 	effort := y.Effort
 	if effort == "" {
 		switch strings.ToLower(req.ReasoningEffort) {
-		case "minimal", "low":
+		case "none", "minimal", "low":
 			effort = "fast"
 		case "medium":
 			effort = "balanced"
