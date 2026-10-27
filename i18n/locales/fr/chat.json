@@ -51,6 +51,7 @@
     "models": "Modèles",
     "specialized": "IA spécialisées",
     "effort": "Effort",
+    "thinking": "Réflexion",
     "options": "Options de la conversation",
     "send": "Envoyer",
     "stop": "Arrêter",
@@ -80,6 +81,16 @@
     "thorough": {
       "label": "Approfondi",
       "hint": "Lit plus de pages, utilise le plus grand modèle qui tient en mémoire et vérifie les chiffres deux fois."
+    }
+  },
+  "thinking": {
+    "on": {
+      "label": "Activée",
+      "hint": "Réfléchit avant de répondre : démarre plus lentement, meilleur en maths, en logique et pour les plans."
+    },
+    "off": {
+      "label": "Désactivée",
+      "hint": "Répond tout de suite : bien plus rapide, pour les questions qui ne demandent pas de réflexion poussée."
     }
   },
   "memory": {

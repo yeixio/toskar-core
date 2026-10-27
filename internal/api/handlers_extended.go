@@ -19,6 +19,7 @@ import (
 	"github.com/yeixio/toskar-core/internal/locale"
 	"github.com/yeixio/toskar-core/internal/runlog"
 	"github.com/yeixio/toskar-core/pkg/contracts"
+	"github.com/yeixio/toskar-core/pkg/pluginapi"
 )
 
 func (s *Server) handleRecommendModels(w http.ResponseWriter, r *http.Request) {
@@ -359,6 +360,10 @@ func (s *Server) handleChat(w http.ResponseWriter, r *http.Request) {
 		Attachments []string `json:"attachments"`
 		// Effort is auto, fast, balanced, or thorough (spec §15).
 		Effort string `json:"effort"`
+		// Thinking "off" asks a reasoning model to answer without thinking
+		// first (#840), as reasoning_effort "none" does on the API; "on" or
+		// empty leaves it as the model does.
+		Thinking string `json:"thinking"`
 		// TimeZone is the person's IANA time zone, from their browser.
 		TimeZone string `json:"time_zone"`
 		// ParentID answers from that point in the chat; RetryOf asks an
@@ -426,6 +431,13 @@ func (s *Server) handleChat(w http.ResponseWriter, r *http.Request) {
 		}
 		body.ModelID = ""
 		ctx = turnopts.With(ctx, &turnopts.Options{Memory: true, Knowledge: true, FixedProfile: true})
+	}
+	if body.Thinking != "" && body.Thinking != "on" && body.Thinking != "off" {
+		writeErr(w, http.StatusBadRequest, "BAD_REQUEST", `thinking is "on" or "off"`, map[string]any{"detail": `thinking is "on" or "off"`})
+		return
+	}
+	if body.Thinking == "off" {
+		ctx = pluginapi.WithAnswerOptions(ctx, pluginapi.GenerateOptions{NoThinking: true})
 	}
 	ctx = turnopts.WithBranch(ctx, turnopts.Branch{ParentID: body.ParentID, RetryOf: body.RetryOf, EditOf: body.EditOf})
 	ctx = runlog.WithOrigin(ctx, runlog.Origin{Client: body.Client, Remote: remoteRequest(r) || !auth.FromLocalNetwork(r)})

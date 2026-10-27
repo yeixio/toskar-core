@@ -51,6 +51,7 @@
     "models": "Modelos",
     "specialized": "IA especializadas",
     "effort": "Esfuerzo",
+    "thinking": "Razonamiento",
     "options": "Opciones del chat",
     "send": "Enviar",
     "stop": "Detener",
@@ -80,6 +81,16 @@
     "thorough": {
       "label": "Minucioso",
       "hint": "Lee más páginas, usa el modelo más grande que quepa y comprueba las cifras dos veces."
+    }
+  },
+  "thinking": {
+    "on": {
+      "label": "Activado",
+      "hint": "Razona antes de responder: tarda más en empezar, mejor en matemáticas, lógica y planes."
+    },
+    "off": {
+      "label": "Desactivado",
+      "hint": "Responde enseguida: mucho más rápido, para preguntas que no necesitan pensarse mucho."
     }
   },
   "memory": {

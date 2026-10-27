@@ -242,7 +242,7 @@
         },
         {
           "type": "paragraph",
-          "text": "Choose a model in the Model menu to keep it for the whole chat. The button beside it opens the chat's options: Profile, Run on, Effort, and Memory."
+          "text": "Choose a model in the Model menu to keep it for the whole chat. The button beside it opens the chat's options: Profile, Run on, Effort, and Memory, and Thinking when the model thinks before it answers. [Answer without thinking first](#thinking-off) covers that one."
         },
         {
           "type": "image",
@@ -454,17 +454,17 @@
       "id": "thinking-off",
       "title": "Answer without thinking first",
       "kind": "task",
-      "summary": "Ask a reasoning model to answer straight away, which is much faster for questions that don't need careful thought.",
+      "summary": "Ask a reasoning model to answer straight away, in a chat or from your own code. It's much faster for questions that don't need careful thought.",
       "paragraphs": [
         "Some models think before they answer: they work through a problem first, then write the answer. That helps with math, logic, and plans with several steps, but it makes every answer slower to start, even a simple one.",
-        "From the API and from toskarctl, you can ask a reasoning model to skip its thinking for one request. It answers straight away. A model that doesn't think is unaffected."
+        "In a chat, and from the API and toskarctl, you can ask a reasoning model to skip its thinking. It answers straight away. A model that doesn't think is unaffected."
       ],
       "blocks": [
         {
           "type": "list",
           "title": "What you need",
           "items": [
-            "Toskar 1.11.2 or later.",
+            "Toskar 1.12 or later in a chat; 1.11.2 or later from the API and toskarctl.",
             "A reasoning model, such as a Qwen 3 or a DeepSeek R1 distill. Models marks them Reasoning, and [Choose and manage models](#models) explains how to install one.",
             "For the API from another computer, an API key, as [Connect another app through the API](#api) explains."
           ]
@@ -498,6 +498,24 @@
           "type": "note",
           "tone": "tip",
           "text": "In the app, Model Auto already keeps quick questions off reasoning models. Thinking off is for when you've chosen one, or call one from your own code."
+        },
+        {
+          "type": "heading",
+          "text": "In a chat"
+        },
+        {
+          "type": "steps",
+          "items": [
+            "Choose a reasoning model in the Model menu, such as a Qwen 3.",
+            "Open the chat's options with the button beside the Model menu.",
+            "Set Thinking to Off. Toskar remembers your choice for the chats you start next."
+          ]
+        },
+        {
+          "type": "image",
+          "screen": "chat-thinking",
+          "alt": "The chat options with Qwen3 8B chosen as the model, showing Thinking set to Off below Effort",
+          "caption": "Thinking appears in the chat options only when the chat's model thinks before it answers."
         },
         {
           "type": "heading",

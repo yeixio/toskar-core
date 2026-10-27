@@ -51,6 +51,7 @@
     "models": "Modelos",
     "specialized": "IAs especializadas",
     "effort": "Esforço",
+    "thinking": "Raciocínio",
     "options": "Opções da conversa",
     "send": "Enviar",
     "stop": "Parar",
@@ -80,6 +81,16 @@
     "thorough": {
       "label": "Minucioso",
       "hint": "Lê mais páginas, usa o maior modelo que couber e verifica os números duas vezes."
+    }
+  },
+  "thinking": {
+    "on": {
+      "label": "Ativado",
+      "hint": "Raciocina antes de responder: demora mais para começar, melhor em matemática, lógica e planos."
+    },
+    "off": {
+      "label": "Desativado",
+      "hint": "Responde na hora: muito mais rápido, para perguntas que não exigem reflexão cuidadosa."
     }
   },
   "memory": {
