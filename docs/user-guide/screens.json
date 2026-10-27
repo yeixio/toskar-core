@@ -1,5 +1,5 @@
 {
-  "about": "The user guide's screenshots, captured from the web UI with demo data (internal/screenshot) by scripts/capture-docs-screenshots.sh into docs/user-guide/images/<id>.png. A guide image names its screen. path and query open it in screenshot mode; readyText is on the page once it has loaded; actions (click, fill, wait) reach the state the page describes. viewport, deviceScaleFactor, theme (dark or light), and form (phone or tablet) can be set per screen.",
+  "about": "The user guide's screenshots, captured from the web UI with demo data (internal/screenshot) by scripts/capture-docs-screenshots.sh into docs/user-guide/images/<id>.png. A guide image names its screen. path and query open it in screenshot mode; readyText is on the page once it has loaded; actions (click, fill, wait) reach the state the page describes. viewport, deviceScaleFactor, theme (dark or light), and form (phone or tablet) can be set per screen. api answers API paths with the given JSON instead of the demo data's, for a state the demo doesn't have; desktopApp shows the page as the desktop app does, with unlockPrice (the store's price) and startTrial (the Mac's trial).",
   "viewport": {
     "width": 1440,
     "height": 900
@@ -61,6 +61,80 @@
         },
         {
           "wait": "2 selected"
+        }
+      ]
+    },
+    {
+      "path": "/chat",
+      "query": "c=conv-local",
+      "readyText": "ridge above the reservoir",
+      "id": "pro-trial-offer",
+      "api": {
+        "/api/v1/license": {
+          "kind": "available",
+          "store": "mac",
+          "limited": true
+        }
+      },
+      "desktopApp": {
+        "unlockPrice": "$24.99",
+        "startTrial": true
+      },
+      "actions": [
+        {
+          "wait": "Start free trial"
+        },
+        {
+          "wait": "$24.99"
+        }
+      ]
+    },
+    {
+      "path": "/chat",
+      "query": "c=conv-local",
+      "readyText": "ridge above the reservoir",
+      "id": "pro-trial-days",
+      "api": {
+        "/api/v1/license": {
+          "kind": "trial",
+          "store": "mac",
+          "limited": false,
+          "days_left": 9,
+          "trial_ends": "2026-11-05T09:00:00Z"
+        }
+      },
+      "desktopApp": {
+        "unlockPrice": "$24.99",
+        "startTrial": true
+      },
+      "actions": [
+        {
+          "wait": "9 days left"
+        }
+      ]
+    },
+    {
+      "path": "/chat",
+      "query": "c=conv-local",
+      "readyText": "ridge above the reservoir",
+      "id": "pro-trial-ended",
+      "api": {
+        "/api/v1/license": {
+          "kind": "ended",
+          "store": "mac",
+          "limited": true
+        }
+      },
+      "desktopApp": {
+        "unlockPrice": "$24.99",
+        "startTrial": true
+      },
+      "actions": [
+        {
+          "wait": "trial has ended"
+        },
+        {
+          "wait": "$24.99"
         }
       ]
     }
