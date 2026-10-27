@@ -95,10 +95,34 @@ details.
 
 ## Examples
 
-A `code` block with a `test` id runs in CI against a throwaway Core, and its
-`output`, when given, is compared (#882). An example without a `test` id
-doesn't count toward the bar. Use one only for something CI can't run, such
-as a command for another operating system, and say so in the text.
+A `code` block with a `test` id runs in CI as written, against a throwaway
+Core, with the other examples (`examples/test.py`, in the Examples workflow).
+The language decides how:
+
+| `language` | Runs as |
+|---|---|
+| `sh` | `sh -e`, with the real `curl` and `toskarctl` |
+| `python` | a script, with the Python SDK installed |
+| `typescript` | a module, beside the TypeScript SDK (`import { Toskar } from 'toskar'`) |
+| `go` | `package main` in a module that requires the Go SDK |
+
+Write the example as a reader would type it. The reader's address,
+`127.0.0.1:7331`, points at the throwaway Core. Core answers with a
+scripted model, which replies "You said: " and the message. Nothing is
+piped into a shell example, as at a terminal.
+
+`output` is what the reader sees, compared with the whole output. `…` stands
+for anything that changes, such as an id, a time, or a model's words:
+
+```json
+{ "type": "code", "language": "sh", "test": "ask-a-question",
+  "code": "toskarctl ask \"Plan a three-day trip to Juneau\"",
+  "output": "…Juneau…" }
+```
+
+An example without a `test` id doesn't count toward the bar. Use one only
+for something CI can't run, such as a command for another operating system,
+and say so in the text. A `json` or `text` block can't have a `test` id.
 
 ## Before you open the pull request
 

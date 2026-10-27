@@ -94,6 +94,11 @@ class CheckTests(unittest.TestCase):
         guide['sections'][0]['blocks'] += [code, dict(code)]
         self.assertTrue(any("'same' is also in" in p for p in self.check(guide)[0]))
 
+    def test_a_tested_example_is_in_a_language_ci_runs(self):
+        guide = self.section()
+        guide['sections'][0]['blocks'].append({'type': 'code', 'language': 'json', 'code': '{}', 'test': 'shape'})
+        self.assertTrue(any("'shape' is json" in p for p in self.check(guide)[0]))
+
     def test_structural_errors_come_from_the_publisher(self):
         problems, _ = self.check({'schemaVersion': 1, 'sections': []})
         self.assertEqual(len(problems), 1)
