@@ -101,6 +101,10 @@ Each screen is in `docs/user-guide/screens.json`:
 - `readyText` is on the page once it has loaded.
 - `actions` (`click`, `fill`, `wait`) reach the state the page describes, such
   as a dialog open.
+- `api` answers API paths with JSON in place of the demo data's, for a state
+  the demo doesn't have, such as a Toskar Pro trial with 9 days left.
+- `desktopApp` shows the page as the desktop app does, with the store's
+  `unlockPrice` and the Mac's `startTrial`.
 
 The demo data is in `internal/screenshot`. Add what a page needs there.
 `scripts/capture-docs-screenshots.sh` (or `DOCS_SCREENS=<id>` for one screen)

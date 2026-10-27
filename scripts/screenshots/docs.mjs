@@ -57,6 +57,24 @@ try {
       colorScheme: screen.theme || config.theme || 'dark',
     })
     if (screen.form) await context.addInitScript((name) => { document.documentElement.dataset.form = name }, screen.form)
+    // api: an answer in place of the demo data's, for a state the demo
+    // doesn't have, such as a Toskar Pro trial.
+    for (const [apiPath, body] of Object.entries(screen.api || {})) {
+      await context.route((url) => url.pathname === apiPath, (route) => route.fulfill({ json: body }))
+    }
+    // desktopApp: the page as the desktop app shows it, with what the app
+    // gives it (desktop/app.go's bindings), such as the store's price.
+    if (screen.desktopApp) {
+      await context.addInitScript((app) => {
+        const outcome = (value) => async () => value
+        window.go = { main: { App: {
+          ProUnlockPrice: outcome(app.unlockPrice || ''),
+          ProUnlock: outcome('cancelled'),
+          ProRestore: outcome('none'),
+          ...(app.startTrial ? { ProStartTrial: outcome('cancelled') } : {}),
+        } } }
+      }, screen.desktopApp)
+    }
     const page = await context.newPage()
     const log = watchPage(page)
     console.log(`Capturing ${screen.id}`)
