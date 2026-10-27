@@ -264,7 +264,7 @@ func TestFilesQuality(t *testing.T) {
 	}
 	t.Logf("files: %d of %d cases passed (%.0f%%) with the %s model", passed, len(report), rate*100, d.Name())
 	if path := config.Env("QUALITY_FILES_REPORT"); path != "" {
-		md := strings.Replace(markdownReport(d.Name(), report, rate, minPass(d.Name())), "# Chat quality:", "# Files quality:", 1)
+		md := strings.Replace(markdownReport(d.Name(), report, summarizeRows(report), minPass(d.Name())), "# Chat quality:", "# Files quality:", 1)
 		writeReport(t, d, build, path, md)
 	}
 	if rate < minPass(d.Name()) {

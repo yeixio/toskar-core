@@ -33,6 +33,24 @@ import (
 type stubDriver struct {
 	// model is an OpenAI-compatible server, such as llama-server, or "".
 	model string
+	// sampling is the served model's seed and temperature for this run of
+	// a case (#834).
+	sampling sampling
+}
+
+// sampling is how a served model samples: a seed per repeat, and a
+// temperature. One run of the set samples greedily (temperature 0, seed 1),
+// so it repeats as closely as the server allows; repeats sample at
+// TOSKAR_QUALITY_TEMPERATURE, so each seed can answer differently.
+type sampling struct {
+	Seed        int
+	Temperature float64
+}
+
+// withSampling is the driver for one repeat of a case.
+func (d stubDriver) withSampling(s sampling) Driver {
+	d.sampling = s
+	return d
 }
 
 func (d stubDriver) Name() string {
@@ -42,10 +60,9 @@ func (d stubDriver) Name() string {
 	return "stub"
 }
 
-// served sends one model call to an OpenAI-compatible server, at
-// temperature 0 with a fixed seed so a run repeats as closely as the
-// server allows.
-func served(base string, messages []pluginapi.ChatMessage) (string, error) {
+// served sends one model call to an OpenAI-compatible server, with the
+// run's seed and temperature.
+func served(base string, messages []pluginapi.ChatMessage, s sampling) (string, error) {
 	type msg struct {
 		Role    string `json:"role"`
 		Content string `json:"content"`
@@ -69,7 +86,11 @@ func served(base string, messages []pluginapi.ChatMessage) (string, error) {
 	for i := range out {
 		out[i].Content = pluginapi.EscapeChatMarkers(out[i].Content)
 	}
-	body, _ := json.Marshal(map[string]any{"messages": out, "temperature": 0, "seed": 1, "max_tokens": 768})
+	seed := s.Seed
+	if seed == 0 {
+		seed = 1
+	}
+	body, _ := json.Marshal(map[string]any{"messages": out, "temperature": s.Temperature, "seed": seed, "max_tokens": 768})
 	resp, err := (&http.Client{Timeout: 10 * time.Minute}).Post(base+"/v1/chat/completions", "application/json", bytes.NewReader(body))
 	if err != nil {
 		return "", err
@@ -126,7 +147,7 @@ func (d stubDriver) Run(t *testing.T, c Case) Result {
 		defer mu.Unlock()
 		prompts = append(prompts, append([]pluginapi.ChatMessage(nil), messages...))
 		if d.model != "" {
-			reply, err := served(d.model, messages)
+			reply, err := served(d.model, messages, d.sampling)
 			if err != nil {
 				t.Errorf("model: %v", err)
 			}
@@ -201,17 +222,25 @@ func (d stubDriver) Run(t *testing.T, c Case) Result {
 	if err != nil {
 		t.Fatal(err)
 	}
+	// A real model's turn that fails, such as one that writes no answer,
+	// is one failed case in its pass rate, not the end of the run (#834).
+	// The stub's scripted turns never fail.
 	var answer strings.Builder
+	var turnFailed string
 	for chunk := range stream {
 		if chunk.Error != "" {
-			t.Fatalf("turn failed: %s", chunk.Error)
+			if d.model == "" {
+				t.Fatalf("turn failed: %s", chunk.Error)
+			}
+			turnFailed = "turn failed: " + chunk.Error
+			continue
 		}
 		answer.WriteString(chunk.Content)
 	}
 	// A follow-up in the same chat, with nothing attached: what the case
 	// checks is its answer and the prompts the model got for it.
 	followFrom := 0
-	if c.FollowUp != "" {
+	if c.FollowUp != "" && turnFailed == "" {
 		mu.Lock()
 		followFrom = len(prompts)
 		mu.Unlock()
@@ -222,7 +251,11 @@ func (d stubDriver) Run(t *testing.T, c Case) Result {
 		answer.Reset()
 		for chunk := range stream {
 			if chunk.Error != "" {
-				t.Fatalf("follow-up failed: %s", chunk.Error)
+				if d.model == "" {
+					t.Fatalf("follow-up failed: %s", chunk.Error)
+				}
+				turnFailed = "follow-up failed: " + chunk.Error
+				continue
 			}
 			answer.WriteString(chunk.Content)
 		}
@@ -235,7 +268,7 @@ func (d stubDriver) Run(t *testing.T, c Case) Result {
 	<-done
 
 	mu.Lock()
-	r := Result{Answer: answer.String(), Prompts: prompts[followFrom:]}
+	r := Result{Answer: answer.String(), Prompts: prompts[followFrom:], Failed: turnFailed}
 	mu.Unlock()
 	evMu.Lock()
 	r.Events = got
