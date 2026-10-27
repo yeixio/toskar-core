@@ -32,7 +32,15 @@ RAM/VRAM:
 
 ## Security implications
 
-## Documentation updated
+## User docs
+
+Every feature ships its page in `docs/user-guide/guide.json`, with screenshots or tested examples ([STYLE.md](../docs/user-guide/STYLE.md)).
+
+- [ ] The user guide covers this change, and `python3 scripts/check-user-guide.py` passes
+- [ ] No user-facing change
+- [ ] No page needed (label `no-user-docs`), because:
+
+## Other documentation updated
 
 ## Checklist
 

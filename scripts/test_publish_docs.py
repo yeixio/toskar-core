@@ -70,5 +70,58 @@ class PublisherTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'docs/user-guide/images'):
             publisher.publish(self.source, self.dest, '1.2.0', 'c' * 40)
 
+    def detailed(self, **extra):
+        section = {
+            'id': 'install', 'title': 'Install', 'paragraphs': ['Install {{version}}'],
+            'summary': 'Get Toskar running.', 'kind': 'task',
+            'blocks': [
+                {'type': 'list', 'title': 'What you need', 'items': ['A computer with 16 GB of memory']},
+                {'type': 'heading', 'text': 'Steps'},
+                {'type': 'steps', 'items': ['Open the app.', 'Choose a model, as [Models](#models) explains.']},
+                {'type': 'note', 'tone': 'tip', 'text': 'See [the releases](https://github.com/yeixio/toskar-core/releases).'},
+                {'type': 'image', 'src': 'docs/user-guide/images/07-automations.png', 'alt': 'Automations', 'caption': 'The list.'},
+                {'type': 'code', 'language': 'sh', 'code': 'toskarctl ask "hi"', 'test': 'ask-hi', 'output': 'Hello'},
+                {'type': 'table', 'columns': ['Memory', 'Model'], 'rows': [['16 GB', 'Small']]},
+                {'type': 'related', 'sections': ['models']},
+            ],
+        }
+        section.update(extra)
+        models = {'id': 'models', 'title': 'Models', 'paragraphs': ['Pick one.']}
+        self.source.write_text(json.dumps({'schemaVersion': 1, 'sections': [section, models]}))
+
+    def test_detailed_sections_publish_their_blocks(self):
+        self.detailed()
+        self.publish()
+        section = json.loads((self.dest / 'docs/1.0.0.json').read_text())['sections'][0]
+        self.assertEqual(section['kind'], 'task')
+        self.assertEqual([b['type'] for b in section['blocks']], ['list', 'heading', 'steps', 'note', 'image', 'code', 'table', 'related'])
+
+    def test_malformed_blocks_do_not_publish(self):
+        bad = [
+            {'type': 'script', 'text': 'x'},
+            {'type': 'heading', 'text': ' '},
+            {'type': 'note', 'tone': 'danger', 'text': 'x'},
+            {'type': 'code', 'language': 'html', 'code': '<b>'},
+            {'type': 'code', 'language': 'sh', 'code': 'ls', 'test': 'Bad Id'},
+            {'type': 'table', 'columns': ['A', 'B'], 'rows': [['only one']]},
+            {'type': 'image', 'src': 'https://example.com/x.png', 'alt': 'x', 'caption': 'x'},
+            {'type': 'related', 'sections': ['nowhere']},
+        ]
+        for block in bad:
+            with self.subTest(block=block):
+                self.detailed(blocks=[block])
+                with self.assertRaises(ValueError):
+                    self.publish()
+        self.detailed(kind='tutorial')
+        with self.assertRaisesRegex(ValueError, 'Kind'):
+            self.publish()
+
+    def test_links_go_to_sections_or_https_pages(self):
+        for paragraph, error in (('See [Gone](#gone).', 'missing section'), ('See [x](javascript:alert(1)).', 'https'), ('See [x](http://example.com).', 'https')):
+            with self.subTest(paragraph=paragraph):
+                self.detailed(paragraphs=[paragraph])
+                with self.assertRaisesRegex(ValueError, error):
+                    self.publish()
+
 if __name__ == '__main__':
     unittest.main()

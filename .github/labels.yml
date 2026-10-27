@@ -13,6 +13,10 @@
   color: 0075ca
   description: Documentation changes or improvements
 
+- name: no-user-docs
+  color: c5def5
+  description: Adds a feature with no user guide page; the PR says why
+
 - name: security
   color: b60205
   description: Security-related work
