@@ -81,6 +81,20 @@ moveStored('ygg.chat.effort', EFFORT_KEY)
 // The efforts, in order; their names and hints are chat:effort.<id> in the catalog.
 const EFFORTS: Effort[] = ['auto', 'fast', 'balanced', 'thorough']
 
+/** Whether a reasoning model thinks before it answers (#840): on, or off to answer straight away. */
+type Thinking = 'on' | 'off'
+const THINKING_KEY = 'toskar.chat.thinking'
+// Their names and hints are chat:thinking.<id> in the catalog.
+const THINKINGS: Thinking[] = ['on', 'off']
+
+function savedThinking(): Thinking {
+  try {
+    return localStorage.getItem(THINKING_KEY) === 'off' ? 'off' : 'on'
+  } catch {
+    return 'on'
+  }
+}
+
 function savedEffort(): Effort {
   try {
     const v = localStorage.getItem(EFFORT_KEY)
@@ -254,6 +268,15 @@ export function ChatPage() {
     setEffortState(next)
     try {
       localStorage.setItem(EFFORT_KEY, next)
+    } catch {
+      // Remembering the choice is a convenience; the chat works without it.
+    }
+  }
+  const [thinking, setThinkingState] = useState<Thinking>(savedThinking)
+  const setThinking = (next: Thinking) => {
+    setThinkingState(next)
+    try {
+      localStorage.setItem(THINKING_KEY, next)
     } catch {
       // Remembering the choice is a convenience; the chat works without it.
     }
@@ -524,6 +547,8 @@ export function ChatPage() {
 
   const chatModel =
     [...(modelsQuery.data ?? []), ...specializedModels].find((model) => model.id === shownModelId) ?? null
+  // Thinking is a choice only with a model that thinks before it answers (#840).
+  const chatModelThinks = chatModel?.tags?.includes('reasoning') ?? false
   const activeProfile =
     sortedProfiles.find((p) => p.id === profileIdForChat) ?? null
   const terminalAllowed = activeProfile?.tools?.find((tool) => tool.tool_id === 'terminal')?.policy !== 'deny'
@@ -1285,6 +1310,7 @@ export function ChatPage() {
           stream: true,
           execution: effectiveRunMode,
           effort,
+          thinking: chatModelThinks && thinking === 'off' ? 'off' : undefined,
           attachments: attachments.length > 0 ? attachments.map((f) => f.id) : undefined,
           retry_of: branch?.retryOf,
           edit_of: branch?.editOf,
@@ -1796,6 +1822,18 @@ export function ChatPage() {
                     ))}
                   </select>
                 </label>
+                {chatModelThinks ? (
+                  <label className="composer-select" title={t(`thinking.${thinking}.hint`)}>
+                    <span className="composer-select-label">{t('composer.thinking')}</span>
+                    <select value={thinking} disabled={isSending} onChange={(event) => setThinking(event.target.value as Thinking)}>
+                      {THINKINGS.map((v) => (
+                        <option key={v} value={v} title={t(`thinking.${v}.hint`)}>
+                          {t(`thinking.${v}.label`)}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                ) : null}
                 <MemoryToggle
                   memoryEnabled={settingsQuery.data?.memory_enabled !== false}
                   off={memoryOff}

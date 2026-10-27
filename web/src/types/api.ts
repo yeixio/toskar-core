@@ -898,6 +898,8 @@ export interface ChatRequest {
   attachments?: string[]
   /** How much work the message gets: auto (default), fast, balanced, or thorough. */
   effort?: 'auto' | 'fast' | 'balanced' | 'thorough'
+  /** off asks a reasoning model to answer without thinking first (#840); left out, it thinks as it does. */
+  thinking?: 'on' | 'off'
   /** The person's IANA time zone, for the date and time the answer uses; set by the api client. */
   time_zone?: string
   /** Answer from this message, as a new version of the point after it (#447). */

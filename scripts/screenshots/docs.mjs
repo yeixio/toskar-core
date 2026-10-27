@@ -30,6 +30,11 @@ async function act(page, action) {
     await target.click()
   } else if (action.fill) {
     await page.getByLabel(action.fill.label).first().fill(action.fill.text)
+  } else if (action.select) {
+    // A menu's name starts with its label and goes on with its choice, such
+    // as "Model Gemma 4 E4B", so it's found by how it starts.
+    const starts = new RegExp('^' + action.select.label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+    await page.getByRole('combobox', { name: starts }).first().selectOption({ label: action.select.option })
   } else if (action.wait) {
     await waitForText(page, action.wait)
   } else {

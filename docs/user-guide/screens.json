@@ -1,5 +1,5 @@
 {
-  "about": "The user guide's screenshots, captured from the web UI with demo data (internal/screenshot) by scripts/capture-docs-screenshots.sh into docs/user-guide/images/<id>.png. A guide image names its screen. path and query open it in screenshot mode; readyText is on the page once it has loaded; actions (click, fill, wait) reach the state the page describes. viewport, deviceScaleFactor, theme (dark or light), and form (phone or tablet) can be set per screen. api answers API paths with the given JSON instead of the demo data's, for a state the demo doesn't have; desktopApp shows the page as the desktop app does, with unlockPrice (the store's price) and startTrial (the Mac's trial).",
+  "about": "The user guide's screenshots, captured from the web UI with demo data (internal/screenshot) by scripts/capture-docs-screenshots.sh into docs/user-guide/images/<id>.png. A guide image names its screen. path and query open it in screenshot mode; readyText is on the page once it has loaded; actions (click, fill, select, wait) reach the state the page describes. viewport, deviceScaleFactor, theme (dark or light), and form (phone or tablet) can be set per screen. api answers API paths with the given JSON instead of the demo data's, for a state the demo doesn't have; desktopApp shows the page as the desktop app does, with unlockPrice (the store's price) and startTrial (the Mac's trial).",
   "viewport": {
     "width": 1440,
     "height": 900
@@ -135,6 +135,100 @@
         },
         {
           "wait": "$24.99"
+        }
+      ]
+    },
+    {
+      "id": "chat-thinking",
+      "path": "/chat",
+      "query": "c=conv-local",
+      "readyText": "ridge above the reservoir",
+      "api": {
+        "/api/v1/models": [
+          {
+            "id": "gemma-4-e4b",
+            "display_name": "Gemma 4 E4B",
+            "summary": "General assistant that fits on this Mac.",
+            "family": "Gemma",
+            "parameters": "4B",
+            "size_bytes": 3200000000,
+            "memory_needed_bytes": 4500000000,
+            "context": 8192,
+            "capabilities": {
+              "tool_calling": true,
+              "vision": false,
+              "coding": true
+            },
+            "purpose": [
+              "general",
+              "coding"
+            ],
+            "installed": true,
+            "installed_on": [
+              {
+                "node_id": "local",
+                "node_name": "This Mac"
+              }
+            ],
+            "status": "ready",
+            "runtime": [
+              "llamacpp"
+            ]
+          },
+          {
+            "id": "qwen3-8b",
+            "display_name": "Qwen3 8B",
+            "summary": "Thinks before it answers.",
+            "family": "Qwen",
+            "parameters": "8B",
+            "size_bytes": 5000000000,
+            "memory_needed_bytes": 6500000000,
+            "context": 32768,
+            "capabilities": {
+              "tool_calling": true,
+              "vision": false,
+              "coding": true
+            },
+            "purpose": [
+              "general",
+              "reasoning"
+            ],
+            "tags": [
+              "reasoning",
+              "general"
+            ],
+            "installed": true,
+            "installed_on": [
+              {
+                "node_id": "local",
+                "node_name": "This Mac"
+              }
+            ],
+            "status": "ready",
+            "runtime": [
+              "llamacpp"
+            ]
+          }
+        ]
+      },
+      "actions": [
+        {
+          "select": {
+            "label": "Model",
+            "option": "Qwen3 8B"
+          }
+        },
+        {
+          "click": "Chat options"
+        },
+        {
+          "wait": "Thinking"
+        },
+        {
+          "select": {
+            "label": "Thinking",
+            "option": "Off"
+          }
         }
       ]
     }
