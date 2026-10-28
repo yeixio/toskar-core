@@ -227,7 +227,14 @@ func startArgs(cfg pluginapi.ModelStartConfig, port int) []string {
 	if cfg.Projector != "" {
 		args = append(args, "--mmproj", cfg.Projector)
 	}
-	return append(args, "--ctx-size", fmt.Sprintf("%d", defaultContext(cfg.Context)))
+	// One request at a time, each with the whole window. By default
+	// llama-server runs four slots that share one window's worth of memory,
+	// yet tells each it has all of it, so two requests at once (a chat's
+	// turn and its summary, or Deliberate's drafts) that add up to more than
+	// the window both fail with "Context size has been exceeded" (#834).
+	// Every room and compaction decision here counts on the whole window.
+	// Requests to the same model queue in llama-server instead.
+	return append(args, "--ctx-size", fmt.Sprintf("%d", defaultContext(cfg.Context)), "--parallel", "1")
 }
 
 // supportContext is the window for embedding and reranking models. Mimir

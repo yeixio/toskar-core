@@ -80,11 +80,18 @@ func TestSummarizerRunsFromSourceAndIsApplied(t *testing.T) {
 	if len(prompts) < 2 {
 		t.Fatalf("calls = %d", len(prompts))
 	}
-	if !strings.Contains(prompts[0][0].Content, "Keep facts, decisions") || !strings.HasPrefix(prompts[0][1].Content, "Conversation:\n\nUser: question 0") {
+	if !strings.Contains(prompts[0][0].Content, "Keep facts, decisions") || !strings.HasPrefix(prompts[0][1].Content, "Conversation:\n<conversation>\nUser: question 0") {
 		t.Fatalf("first prompt = %.120q", prompts[0][1].Content)
 	}
 	if !strings.HasPrefix(prompts[1][1].Content, "Earlier summary:\nThe user asked") {
 		t.Fatalf("second prompt = %.120q", prompts[1][1].Content)
+	}
+	// Each request ends by asking for the summary, so a transcript that ends
+	// on a question isn't answered instead (#834).
+	for i, p := range prompts {
+		if !strings.HasSuffix(p[1].Content, summaryAsk) {
+			t.Fatalf("prompt %d ends %q", i, p[1].Content[max(0, len(p[1].Content)-120):])
+		}
 	}
 	got, ok, err := s.GetSummary(ctx, conv)
 	if err != nil || !ok || got.MessageCount == 0 || got.ModelID != "m" {

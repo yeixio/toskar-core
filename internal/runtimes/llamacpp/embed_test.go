@@ -20,6 +20,10 @@ func TestStartArgsForSupportingModes(t *testing.T) {
 	if slices.Contains(chat, "--embedding") || !slices.Contains(chat, "8192") {
 		t.Fatalf("chat args: %v", chat)
 	}
+	// One slot, so every request has the window it's told it has (#834).
+	if !strings.Contains(strings.Join(chat, " "), "--parallel 1") {
+		t.Fatalf("chat args: %v", chat)
+	}
 	emb := strings.Join(startArgs(pluginapi.ModelStartConfig{ModelPath: "e.gguf", Mode: pluginapi.ModeEmbedding, Context: 8192}, 9000), " ")
 	for _, want := range []string{"--embedding", "--ctx-size 2048", "--ubatch-size 2048"} {
 		if !strings.Contains(emb, want) {
