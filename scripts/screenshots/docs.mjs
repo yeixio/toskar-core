@@ -35,6 +35,11 @@ async function act(page, action) {
     // as "Model Gemma 4 E4B", so it's found by how it starts.
     const starts = new RegExp('^' + action.select.label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
     await page.getByRole('combobox', { name: starts }).first().selectOption({ label: action.select.option })
+  } else if (action.scroll) {
+    // Brings part of a long form into view, such as how an automation runs.
+    const exact = page.getByText(action.scroll, { exact: true })
+    const target = (await exact.count()) ? exact.first() : page.getByText(action.scroll).first()
+    await target.evaluate((el) => el.scrollIntoView({ block: 'center' }))
   } else if (action.wait) {
     await waitForText(page, action.wait)
   } else {

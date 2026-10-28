@@ -1,5 +1,5 @@
 {
-  "about": "The user guide's screenshots, captured from the web UI with demo data (internal/screenshot) by scripts/capture-docs-screenshots.sh into docs/user-guide/images/<id>.png. A guide image names its screen. path and query open it in screenshot mode; readyText is on the page once it has loaded; actions (click, fill, select, wait) reach the state the page describes. viewport, deviceScaleFactor, theme (dark or light), and form (phone or tablet) can be set per screen. api answers API paths with the given JSON instead of the demo data's, for a state the demo doesn't have; desktopApp shows the page as the desktop app does, with unlockPrice (the store's price) and startTrial (the Mac's trial).",
+  "about": "The user guide's screenshots, captured from the web UI with demo data (internal/screenshot) by scripts/capture-docs-screenshots.sh into docs/user-guide/images/<id>.png. A guide image names its screen. path and query open it in screenshot mode; readyText is on the page once it has loaded; actions (click, fill, select, scroll, wait) reach the state the page describes. viewport, deviceScaleFactor, theme (dark or light), and form (phone or tablet) can be set per screen. api answers API paths with the given JSON instead of the demo data's, for a state the demo doesn't have; desktopApp shows the page as the desktop app does, with unlockPrice (the store's price) and startTrial (the Mac's trial).",
   "viewport": {
     "width": 1440,
     "height": 900
@@ -322,6 +322,37 @@
         },
         {
           "wait": "From another app"
+        }
+      ]
+    },
+    {
+      "id": "automations-trigger",
+      "path": "/automations",
+      "query": "compose=1",
+      "readyText": "Runs",
+      "actions": [
+        {
+          "select": {
+            "label": "Runs",
+            "option": "When a web page changes"
+          }
+        },
+        {
+          "scroll": "Runs"
+        }
+      ]
+    },
+    {
+      "id": "notifications-bell",
+      "path": "/chat",
+      "query": "c=conv-local",
+      "readyText": "ridge above the reservoir",
+      "actions": [
+        {
+          "click": "Notifications"
+        },
+        {
+          "wait": "Mark all read"
         }
       ]
     }
