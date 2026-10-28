@@ -4,6 +4,9 @@
 #   scripts/quality-model.sh serve   start llama-server with the model, in the foreground
 #   scripts/quality-model.sh run     start it, run core's cases against it, and stop it
 #
+# TOSKAR_QUALITY_RUN picks the tests `run` runs (go test -run); the default
+# is the quality set alone, as a release runs it.
+#
 # llama.cpp comes from its GitHub release LLAMA_CPP_TAG (gh must be signed
 # in), and the model from QUALITY_MODEL_GGUF_URL, both kept in
 # QUALITY_CACHE. The default model is Llama 3.2 1B, the smallest the
@@ -83,7 +86,7 @@ case "${1:-run}" in
     cd "$ROOT"
     TOSKAR_QUALITY_MODEL_URL="http://127.0.0.1:$PORT" \
       TOSKAR_QUALITY_REPORT="${TOSKAR_QUALITY_REPORT:-$CACHE/quality-report.md}" \
-      go test ./tests/quality -run TestQualitySet -count=1 -v -timeout 120m
+      go test ./tests/quality -run "${TOSKAR_QUALITY_RUN:-TestQualitySet}" -count=1 -v -timeout 120m
     ;;
   *)
     echo "usage: $0 serve|wait|run" >&2

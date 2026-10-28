@@ -43,6 +43,9 @@ jobs:
   # the pass rate with a 95% interval and names the flaky cases, and the
   # saved runs (quality-runs.jsonl) can be rescored after a check changes.
   # It fails when fewer than 90% of runs pass; the report lists every answer.
+  # The prompt cache (#838) is checked against the same model: how much of a
+  # chat's later turn comes from the cache, and that a warm answer matches a
+  # cold one.
   served-model:
     runs-on: ${{ fromJSON(vars.TRUSTED_RUNS_ON || '"ubuntu-latest"') }}
     timeout-minutes: 150
@@ -66,13 +69,17 @@ jobs:
           TOSKAR_QUALITY_REPORT: ${{ runner.temp }}/quality-report.md
           TOSKAR_QUALITY_REPEATS: ${{ inputs.repeats || '3' }}
           TOSKAR_QUALITY_SAVE: ${{ runner.temp }}/quality-runs.jsonl
+          TOSKAR_QUALITY_RUN: TestQualitySet|TestPromptCache
+          TOSKAR_QUALITY_CACHE_REPORT: ${{ runner.temp }}/cache-report.md
         run: scripts/quality-model.sh run
       - name: Report
         if: always()
         run: |
-          if [ -f "$RUNNER_TEMP/quality-report.md" ]; then
-            head -c 60000 "$RUNNER_TEMP/quality-report.md" >> "$GITHUB_STEP_SUMMARY"
-          fi
+          for f in quality-report.md cache-report.md; do
+            if [ -f "$RUNNER_TEMP/$f" ]; then
+              head -c 60000 "$RUNNER_TEMP/$f" >> "$GITHUB_STEP_SUMMARY"
+            fi
+          done
       - uses: actions/upload-artifact@v7
         if: always()
         continue-on-error: true
@@ -81,6 +88,7 @@ jobs:
           path: |
             ${{ runner.temp }}/quality-report.md
             ${{ runner.temp }}/quality-runs.jsonl
+            ${{ runner.temp }}/cache-report.md
           if-no-files-found: ignore
 
   # The quality set against the daemon built from the commit under test,
