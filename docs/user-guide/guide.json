@@ -813,13 +813,189 @@
     {
       "id": "models",
       "title": "Choose and manage models",
+      "kind": "task",
+      "summary": "Find a model that fits your computer, install it, add ones you already have, and see what's running.",
       "paragraphs": [
-        "Models separates discovery, installed models, and running models. Choose the target computer before installing or managing models. A downloaded model uses disk space; a running model also needs memory.",
-        "In this release, fit labels are Excellent, Good, Tight, May run slowly, and Unsupported. Runtime memory estimates account for the model file, quantization, and configured context. Tight memory is a warning; installation is blocked only for an unsupported machine or backend. Close other applications if free memory is low.",
-        "Model details distinguish Estimated speed from Measured performance. A model card is a planning estimate until that model has actually run on your computer. Start with a smaller model if loading fails or responses are too slow.",
-        "Browse all models searches Hugging Face for GGUF models, and a model can also be installed from a URL. Embedding and reranker models are supporting models: they help Knowledge search and never answer chats, so the chat menus leave them out. A loaded model is unloaded after 15 minutes without use, unless Settings sets the model lifecycle to manual or another time. Settings also sets the most disk space models may use.",
-        "Add a model on the Models page adds one that isn't in the list. From a file sends a GGUF file from this browser, or takes the location of one on this computer and either copies it into Toskar or uses it where it is, with no copy. From another app lists the models LM Studio, Ollama, llama.cpp, and GPT4All already downloaded, and adds them where they are, so they take no more space. From a link downloads a GGUF file from its address. Every file is checked before it's added, and its name, size, and context length come from the file. Deleting a model that's used where it is leaves the file alone.",
-        "After an answer, Toskar may offer a model that would have answered it better: one that writes code better, reads your files more reliably than a small model, writes your language better, thinks through math and logic, or reads a longer chat at once. It says why, how big the download is, and how well it fits this computer. Install and answer again installs it and answers the same question with it, as a new version you can switch with the first answer. Each kind is offered once in a chat, only to Admins and the Owner, and only for a model this computer runs well. Settings › History › Suggest better models turns it off for you."
+        "A model is the AI that writes the answers. Bigger models are more capable and need more memory. Models shows which ones fit each of your computers, installs them, and lets you add models you already downloaded elsewhere.",
+        "A downloaded model uses disk space. A running model also uses memory, and Toskar unloads it after a while without use."
+      ],
+      "blocks": [
+        {
+          "type": "list",
+          "title": "What you need",
+          "items": [
+            "Toskar running on this computer, or on another computer you connected to it.",
+            "Disk space for the model. Each one shows its download size before you install it."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Pick a model that fits"
+        },
+        {
+          "type": "paragraph",
+          "text": "Open Models in the sidebar. Choose the computer in Models for, since a model is installed on one computer and fits its memory. Recommended lists curated picks for that computer, purpose first, each labeled by how well it fits."
+        },
+        {
+          "type": "image",
+          "screen": "models",
+          "alt": "The Models page recommending Gemma 4 E4B as Best overall, with an Excellent fit label, about 4.2 GB, and an estimated speed",
+          "caption": "Each recommendation says how well it fits, how much memory it needs, and about how fast it answers."
+        },
+        {
+          "type": "table",
+          "columns": [
+            "Fit",
+            "What it means"
+          ],
+          "rows": [
+            [
+              "Excellent",
+              "It fits with room to spare."
+            ],
+            [
+              "Good",
+              "It fits."
+            ],
+            [
+              "Tight",
+              "It fits, but with little memory left. Close other apps if answers slow down."
+            ],
+            [
+              "May run slowly",
+              "It runs, but slowly on this computer."
+            ],
+            [
+              "Unsupported",
+              "This computer or its runtime can't run it, so it can't be installed here."
+            ]
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "The memory estimate counts the model file, its quantization, and its context. A speed is an estimate until the model has run on your computer. Then Details shows the measured speed."
+        },
+        {
+          "type": "heading",
+          "text": "Install, run, and remove a model"
+        },
+        {
+          "type": "steps",
+          "items": [
+            "Choose Install on a model and wait for the download. Installed lists what's on the chosen computer.",
+            "Use the model in a chat: choose it in the Model menu, or leave Model on Auto to let Toskar pick.",
+            "Running shows the models in memory now, with the memory they use and their speed. Stop unloads one."
+          ]
+        },
+        {
+          "type": "image",
+          "screen": "models-running",
+          "alt": "The Running tab with Gemma 4 E4B running on this Mac on the GPU, using 4.2 GB of 48 GB, at 58 tokens a second, with Open Chat and Stop",
+          "caption": "Running shows where each model runs, which [Is my model using the GPU?](#gpu) explains."
+        },
+        {
+          "type": "paragraph",
+          "text": "A loaded model is unloaded after 15 minutes without use, unless Settings sets the model lifecycle to manual or another time. Settings also sets the most disk space models may use."
+        },
+        {
+          "type": "heading",
+          "text": "Find more models"
+        },
+        {
+          "type": "paragraph",
+          "text": "Browse all models searches Hugging Face for GGUF models, the format Toskar runs. Install from there shows the download as it happens. Embedding and reranker models are supporting models: they help Knowledge search and never answer chats, so the chat menus leave them out."
+        },
+        {
+          "type": "heading",
+          "text": "Add a model you already have"
+        },
+        {
+          "type": "paragraph",
+          "text": "Add a model adds one that isn't in the lists, in three ways."
+        },
+        {
+          "type": "list",
+          "items": [
+            "From a file: drop a .gguf file, or give the location of one on this computer. Copy it into Toskar, or use it where it is with no copy.",
+            "From another app: the models LM Studio, Ollama, llama.cpp, and GPT4All already downloaded, added where they are so they take no more space.",
+            "From a link: a GGUF file's web address, which Toskar downloads."
+          ]
+        },
+        {
+          "type": "image",
+          "screen": "models-add",
+          "alt": "Add a model open on From a file, with a place to drop a .gguf file, a field for a file's location, and the choice to copy it into Toskar or use it where it is",
+          "caption": "Toskar checks every file before adding it, and reads its name, size, and context length from the file."
+        },
+        {
+          "type": "note",
+          "tone": "warning",
+          "text": "A model used where it is depends on that file. Deleting the model in Toskar leaves the file alone, and moving or deleting the file stops the model working."
+        },
+        {
+          "type": "heading",
+          "text": "When Toskar suggests a better model"
+        },
+        {
+          "type": "paragraph",
+          "text": "After an answer, Toskar may offer a model that would have answered it better. It might write code better, read your files more reliably, write your language better, think through math and logic, or read a longer chat at once."
+        },
+        {
+          "type": "paragraph",
+          "text": "It says why, how big the download is, and how well it fits. Install and answer again installs it and answers the same question with it, as a new version beside the first answer. Each kind is offered once in a chat, only to Admins and the Owner, and only for a model this computer runs well. Settings › History › Suggest better models turns it off for you."
+        },
+        {
+          "type": "heading",
+          "text": "From the API"
+        },
+        {
+          "type": "paragraph",
+          "text": "`GET /api/v1/models` lists the catalog with what's installed, and each model's fit and capabilities."
+        },
+        {
+          "type": "code",
+          "language": "sh",
+          "code": "curl -s http://127.0.0.1:7331/api/v1/models",
+          "test": "models-list"
+        },
+        {
+          "type": "heading",
+          "text": "Troubleshooting"
+        },
+        {
+          "type": "table",
+          "columns": [
+            "What you see",
+            "What to do"
+          ],
+          "rows": [
+            [
+              "The model fails to load, or answers slowly",
+              "Choose a smaller model, or a smaller version of the same one."
+            ],
+            [
+              "Tight",
+              "Close other apps to free memory, or choose a model labeled Good or Excellent."
+            ],
+            [
+              "The download stops because the disk is full",
+              "Remove a model you don't use, or raise the limit in Settings."
+            ],
+            [
+              "A model from another app stopped working",
+              "Its file was moved or deleted. Add it again from its new place."
+            ]
+          ]
+        },
+        {
+          "type": "related",
+          "sections": [
+            "gpu",
+            "install",
+            "chat",
+            "computers"
+          ]
+        }
       ]
     },
     {
@@ -1102,17 +1278,96 @@
     {
       "id": "gpu",
       "title": "Is my model using the GPU?",
+      "kind": "task",
+      "summary": "See whether a model runs on your graphics card, why it doesn't when it could, and how to fix that.",
       "paragraphs": [
-        "Each running model shows where it runs, on Models › Running and on the Performance overview. Toskar reads this from llama.cpp when it loads the model, so it shows what actually happened, not what the hardware could do.",
-        "GPU (green) means the whole model is on the graphics card. Partly on GPU (amber) means it doesn't fit in the GPU's memory, so some of it runs on the slower CPU; a smaller model, or a smaller version of the same one, fits completely. CPU only (red) means this computer has a GPU that isn't being used. CPU (grey) means the computer has no GPU Toskar can use, which is expected.",
-        "Select the status to see the device, how many of the model's layers are on the GPU, and the GPU memory it uses. When a model isn't fully on the GPU, it also says why and what to do. Diagnostics has a GPU acceleration row with the same states.",
-        "The Performance overview shows each computer's live CPU and memory, and each graphics card's use, video memory, temperature, and power, with the last hour as a line. A Mac doesn't report GPU temperature or power without administrator rights, and Windows reports them only for NVIDIA cards, so those figures are left out there rather than shown as zero. Activity marks each reply GPU or CPU and can filter by it."
+        "A model answers much faster on a graphics card (GPU) than on the processor (CPU). Toskar shows where each running model actually runs, as llama.cpp reported when it loaded the model, not what the hardware could do."
       ],
-      "steps": [
-        "If a model shows CPU only, open Diagnostics and read the reason under GPU acceleration.",
-        "If the installed llama.cpp runs on the CPU only, stop your models, then quit and reopen Toskar. It installs the GPU build when no model is running.",
-        "If llama.cpp couldn't use the GPU, install or update the graphics driver. On Linux with an AMD or Intel card, also install the Vulkan drivers (on Ubuntu and Debian, mesa-vulkan-drivers and libvulkan1).",
-        "Start the model again and check its status."
+      "blocks": [
+        {
+          "type": "list",
+          "title": "What you need",
+          "items": [
+            "A running model. Sending a chat message starts one."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Where to look"
+        },
+        {
+          "type": "paragraph",
+          "text": "Each running model shows a status on Models › Running and on the Performance overview. Select it to see the device, how many of the model's layers are on the GPU, and the GPU memory it uses. Diagnostics has a GPU acceleration row with the same states."
+        },
+        {
+          "type": "image",
+          "screen": "models-running",
+          "alt": "The Running tab with Gemma 4 E4B running on this Mac, marked GPU in green",
+          "caption": "GPU, in green: the whole model is on the graphics card."
+        },
+        {
+          "type": "table",
+          "columns": [
+            "Status",
+            "What it means"
+          ],
+          "rows": [
+            [
+              "GPU (green)",
+              "The whole model is on the graphics card."
+            ],
+            [
+              "Partly on GPU (amber)",
+              "It doesn't fit in the GPU's memory, so some of it runs on the slower CPU. A smaller model, or a smaller version of this one, fits completely."
+            ],
+            [
+              "CPU only (red)",
+              "This computer has a GPU that isn't being used. The steps below fix it."
+            ],
+            [
+              "CPU (grey)",
+              "This computer has no GPU Toskar can use, which is expected."
+            ]
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Watch it live"
+        },
+        {
+          "type": "paragraph",
+          "text": "The Performance overview shows each computer's CPU and memory, and each graphics card's use, video memory, temperature, and power, with the last hour as a line. Activity marks each reply GPU or CPU and can filter by it."
+        },
+        {
+          "type": "note",
+          "tone": "tip",
+          "text": "A Mac doesn't report GPU temperature or power without administrator rights, and Windows reports them only for NVIDIA cards. Toskar leaves those figures out there rather than showing zero."
+        },
+        {
+          "type": "heading",
+          "text": "Troubleshooting"
+        },
+        {
+          "type": "paragraph",
+          "text": "When a model shows CPU only:"
+        },
+        {
+          "type": "steps",
+          "items": [
+            "If a model shows CPU only, open Diagnostics and read the reason under GPU acceleration.",
+            "If the installed llama.cpp runs on the CPU only, stop your models, then quit and reopen Toskar. It installs the GPU build when no model is running.",
+            "If llama.cpp couldn't use the GPU, install or update the graphics driver. On Linux with an AMD or Intel card, also install the Vulkan drivers (on Ubuntu and Debian, mesa-vulkan-drivers and libvulkan1).",
+            "Start the model again and check its status."
+          ]
+        },
+        {
+          "type": "related",
+          "sections": [
+            "models",
+            "diagnostics",
+            "server"
+          ]
+        }
       ]
     },
     {

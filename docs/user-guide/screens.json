@@ -298,6 +298,32 @@
       "id": "models",
       "path": "/models",
       "readyText": "Best overall"
+    },
+    {
+      "id": "models-running",
+      "path": "/models",
+      "readyText": "Best overall",
+      "actions": [
+        {
+          "click": "Running"
+        },
+        {
+          "wait": "Gemma 4 E4B"
+        }
+      ]
+    },
+    {
+      "id": "models-add",
+      "path": "/models",
+      "readyText": "Best overall",
+      "actions": [
+        {
+          "click": "Add a model"
+        },
+        {
+          "wait": "From another app"
+        }
+      ]
     }
   ]
 }

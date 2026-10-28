@@ -18,9 +18,6 @@ const routes: Record<string, string> = {
   memory: '/memory',
   tools: '/tools',
   profiles: '/profiles',
-  // The user guide's Install page shows first launch (#885).
-  onboarding: '/onboarding',
-  'onboarding-recommend': '/onboarding',
 }
 
 export function screenshotPath(screen: string): string {
@@ -42,5 +39,9 @@ export function readScreenshotLaunch(): ScreenshotLaunch | null {
     return null
   }
   const screen = params.get('screen') || 'chat'
-  return { enabled: true, screen, path: screenshotPath(screen) }
+  // A screen of the user guide's own (docs/user-guide/screens.json, #882)
+  // opens on the page its address names, such as /onboarding.
+  const here = window.location.pathname
+  const path = screen in routes || here === '/' ? screenshotPath(screen) : here
+  return { enabled: true, screen, path }
 }
