@@ -1001,32 +1001,239 @@
     {
       "id": "automations",
       "title": "Schedule an automation",
+      "kind": "task",
+      "summary": "Have Toskar check something on a schedule, or when something changes, and tell you only when it matters.",
       "paragraphs": [
-        "An automation is a prompt that the daemon runs on a schedule. Price checks, stock checks, release summaries, and one-time research are the same kind of task: a name, a profile, a schedule, a prompt, and a rule for when to notify you. Open Automations in the sidebar. With none yet, the page explains the three parts of an automation (when it runs, what Toskar does, and when you hear about it) and offers ideas to start from: a morning news brief, a price watch, a back-in-stock check, weekly release notes, and a page watch. With some, How it works shows the same. The list shows whether each task is enabled or paused, the schedule, the latest status and result, and the next run. The daemon keeps that schedule. Closing the web page does not stop it. The desktop app stops the daemon when you quit unless Settings keeps Toskar running in the background.",
-        "Create a task by describing it in ordinary language, or by choosing an idea, then choose Fill in the details. Toskar fills the name, task, schedule, and notification from that description. These descriptions work: every morning at 8:00 AM with a price below or above an amount; every six hours, and notify only when an item is back in stock; every Friday, with the time defaulting to 8:00 AM when you do not name one; and once tomorrow at 9:00 AM. Write the description in English or in the App language, with times such as 18:30 and prices in your currency, such as 500 € or 5万円. A price check asks for the price in that currency, and you can change the currency next to the amount. The task stays in ordinary language. Toskar uses the price, availability, or significance in the result to decide whether to notify you. Adjust any field before you save. The Summary above Create automation says, in plain words, when it runs, what it does, and when you hear about it. The profile, model, time zone, and tools stay under Advanced. Model Auto picks a model for each run. Save stays disabled until an installed model is available. With no tools selected, a run can use the read-only tools the profile allows without asking. Tools you select are approved when you save, including tools that change things, which the form lists apart. A run that reaches a tool you did not approve skips it, finishes, and sends an approval notification naming the tool, instead of waiting for a closed window. Automations use memories and connected knowledge the same way chat does.",
-        "Notifications are separate from the run. Every time sends a notice after every success. On change stores the first success as a baseline and notifies only when a later result differs. A condition notifies when the price is below or above the amount you set, when an item becomes available, or when the result is significant. History says why a notice was or was not sent, such as a price that was not below the amount. Only when it fails notifies only when a run fails. Don't notify me stores the result. Notices appear on this computer. Turning off task-finish notifications in Settings turns every automation notice off. Failures are recorded without using those success rules. A timeout or a dropped connection retries the same occurrence up to three times, after one minute and then five minutes. A model that cannot start, an out-of-memory failure, a tool failure, or any other error stays failed. You are notified when those retries are used up or the next occurrence fails too.",
-        "Run now starts one occurrence immediately and leaves a paused task paused. If the scheduled time is already due, that occurrence is the one that runs. Otherwise the daemon runs a new occurrence at the current time and still keeps the next scheduled slot, such as tomorrow morning. Pause and Resume turn the task off and on and recompute the next time. Edit changes the stored task. Delete removes the task and its history. History lists each occurrence newest first, with the scheduled time, start, finish, status, result, whether a notice was sent, the model and computer used, and the error when one exists. After a restart, a missed daily or weekly slot runs once for the latest missed time rather than replaying every skipped day. A finished one-time task does not run again.",
-        "toskarctl talks to the local daemon for the same actions. The address is http://127.0.0.1:7331 unless TOSKAR_URL is set. A daemon that is not limited to this computer needs TOSKAR_API_KEY.",
-        "An automation waits while you chat, and for 20 seconds after, so it does not load a model between your messages. An automation that runs out of memory twice in a row is paused, and its notification says why."
+        "An automation is a task Toskar runs for you: a price watch, a back-in-stock check, a morning news brief, a page that might change. You describe it in ordinary words. Toskar fills in when it runs, what it does, and when to tell you.",
+        "Toskar runs it in the background, even with the window closed. The desktop app stops when you quit, unless Settings keeps Toskar running in the background."
       ],
-      "steps": [
-        "Open Automations and choose New automation, or choose an idea.",
-        "Describe when it should run and what it should check. Choose Fill in the details, then read the task, schedule, notification, and Summary. Change the time, day, or threshold if the guess is not the one you want.",
-        "Choose Test run to try it once without saving it. Create automation stores it.",
-        "The list shows the next run in the task’s time zone.",
-        "Use Run now to try it, then open History for the result. Pause stops later scheduled runs until you resume."
-      ],
-      "code": "toskarctl automations create --name \"Morning price\" --prompt \"Check the price\" \\\n  --profile general-assistant --model MODEL_ID --schedule daily --at 08:00 --zone America/Los_Angeles\n\nyggctl automations list\nyggctl automations run AUTOMATION_ID\nyggctl automations pause AUTOMATION_ID",
-      "images": [
+      "blocks": [
         {
-          "screen": "automations",
-          "alt": "Automations list with a morning price check selected, its next run, and a history entry that was notified",
-          "caption": "The list shows the schedule, last result, and next run. The detail keeps Run now, Pause, Edit, Delete, and the history."
+          "type": "list",
+          "title": "What you need",
+          "items": [
+            "An installed model. Saving waits until one is installed. See [Choose and manage models](#models).",
+            "For a device trigger or cameras, Home Assistant connected under Tools. See [Tools, permissions, and connected services](#tools)."
+          ]
         },
         {
+          "type": "heading",
+          "text": "Create an automation"
+        },
+        {
+          "type": "steps",
+          "items": [
+            "Open Automations and choose New automation, or pick an idea such as Price watch or Morning news brief.",
+            "Describe it in a sentence, such as: every morning at 8:00 AM, check this product and tell me if the price is below $500. Choose Fill in the details.",
+            "Read the name, task, schedule, and notification Toskar filled in, and the Summary above Create automation. Change anything it guessed wrong.",
+            "Choose Test run to try it once without saving, then Create automation."
+          ]
+        },
+        {
+          "type": "image",
           "screen": "automations-create",
-          "alt": "New automation form filled from the sentence about checking a price below $500 every morning at 8:00 AM",
-          "caption": "Fill in the details turns that sentence into a daily 8:00 AM task and a price notification. The task stays in ordinary language."
+          "alt": "New automation form filled in from the sentence about checking a price below $500 every morning at 8:00 AM",
+          "caption": "Fill in the details turns the sentence into a daily 8:00 AM task and a price notification. The task stays in ordinary words."
+        },
+        {
+          "type": "paragraph",
+          "text": "Toskar understands schedules such as every morning at 8:00 AM, every six hours, every Friday (at 8:00 AM unless you name a time), and once tomorrow at 9:00 AM. Write in English or the App language, with times such as 18:30 and prices in your currency, such as 500 € or 5万円."
+        },
+        {
+          "type": "paragraph",
+          "text": "The profile, model, time zone, and tools are under Advanced. Model Auto picks a model for each run. Automations use memories and connected knowledge as chat does."
+        },
+        {
+          "type": "heading",
+          "text": "When it runs"
+        },
+        {
+          "type": "table",
+          "columns": [
+            "Runs",
+            "What starts it"
+          ],
+          "rows": [
+            [
+              "On its schedule",
+              "A time: once, daily, weekly, monthly, every few hours, or a cron expression."
+            ],
+            [
+              "When a web page changes",
+              "Toskar checks the page on a schedule and runs only when it changed, telling the task what changed."
+            ],
+            [
+              "When a feed has new posts",
+              "New posts on a site's feed, checked on a schedule."
+            ],
+            [
+              "When a file or folder changes",
+              "A change to a file or folder on this computer."
+            ],
+            [
+              "When another service calls its link (webhook)",
+              "A POST to the automation's link. Its body, up to 64 KB, is given to the task as data."
+            ],
+            [
+              "When a device changes",
+              "A Home Assistant device, such as a door contact or a person sensor, changing, or changing to a state you choose."
+            ],
+            [
+              "After another automation",
+              "Another automation finishing, or only when it notifies. It gets that automation's result."
+            ]
+          ]
+        },
+        {
+          "type": "image",
+          "screen": "automations-trigger",
+          "alt": "The automation form with Runs set to When a web page changes, a Link field, how often to check, and the Notify me choices",
+          "caption": "A trigger that watches a page: Toskar checks it hourly and runs the task only when it changed."
+        },
+        {
+          "type": "paragraph",
+          "text": "Look at cameras starts each run with a picture from up to a few Home Assistant cameras, shown to a model that can see. A webhook's link is shown once, when you make it on the automation's page, and anyone with the link can start the automation."
+        },
+        {
+          "type": "heading",
+          "text": "When you hear about it"
+        },
+        {
+          "type": "table",
+          "columns": [
+            "Notify me",
+            "When"
+          ],
+          "rows": [
+            [
+              "When the condition is true",
+              "The price is below or above your amount, an item becomes available, or the result is significant."
+            ],
+            [
+              "When the result changes",
+              "A result differs from the last one. The first run is the baseline."
+            ],
+            [
+              "Every time it runs",
+              "After every successful run."
+            ],
+            [
+              "Only when it fails",
+              "A run fails."
+            ],
+            [
+              "Don't notify me",
+              "Never. The result is kept in its history."
+            ]
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "History says why a notice was or wasn't sent, such as a price that wasn't below your amount. Notices go to the bell, and to the places [Notifications](#notifications) describes."
+        },
+        {
+          "type": "heading",
+          "text": "Run, pause, and history"
+        },
+        {
+          "type": "image",
+          "screen": "automations",
+          "alt": "Automations list with a morning price check selected, its next run, and a history entry that was notified",
+          "caption": "The list shows each automation's schedule, last result, and next run. The detail keeps Run now, Pause, Edit, Delete, and the history."
+        },
+        {
+          "type": "list",
+          "items": [
+            "Run now runs it once right away, and keeps its next scheduled run. A paused automation stays paused.",
+            "Pause and Resume turn it off and on. Edit changes it, and Delete removes it and its history.",
+            "History lists each run, newest first: when it ran, its result, whether you were told, and the model and computer it used.",
+            "After a restart, a missed daily or weekly run happens once, not once for every missed day."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Tools and approvals"
+        },
+        {
+          "type": "paragraph",
+          "text": "With no tools chosen, a run can use the read-only tools the profile allows. Tools you choose are approved when you save, and ones that change things are listed apart. A run that reaches a tool you didn't approve skips it, finishes, and sends a notification naming the tool."
+        },
+        {
+          "type": "heading",
+          "text": "From the command line"
+        },
+        {
+          "type": "paragraph",
+          "text": "`toskarctl automations` does the same from a terminal: list, create, run, pause, resume, and more. `parse` shows how Toskar reads a sentence, without saving anything."
+        },
+        {
+          "type": "code",
+          "language": "sh",
+          "code": "toskarctl automations parse \"every friday at 9:00 AM, summarize this week's releases\"",
+          "test": "automations-parse",
+          "output": "{\n  \"name\": \"…\",\n  \"prompt\": \"Summarize this week's releases.\",\n  \"schedule\": {\n    \"kind\": \"weekly\",\n…\"hour\": 9,\n    \"weekday\": 5\n  },\n…}"
+        },
+        {
+          "type": "paragraph",
+          "text": "It read a weekly schedule at 9:00 on weekday 5, Friday (Sunday is 0), in this computer's time zone. `create` with `--request` and the same sentence saves it."
+        },
+        {
+          "type": "code",
+          "language": "sh",
+          "code": "toskarctl automations create --name \"Morning brief\" --prompt \"Summarize today's AI news in five lines\" --schedule daily --at 08:00",
+          "test": "automations-create",
+          "output": "{\n  \"id\": \"…\",\n  \"name\": \"Morning brief\",\n  \"enabled\": true,\n  \"schedule\": {\n    \"kind\": \"daily\",\n…\"next_run_at\": \"…\"…}"
+        },
+        {
+          "type": "paragraph",
+          "text": "It talks to http://127.0.0.1:7331 unless TOSKAR_URL is set, and a Toskar on another computer needs TOSKAR_API_KEY."
+        },
+        {
+          "type": "heading",
+          "text": "Troubleshooting"
+        },
+        {
+          "type": "table",
+          "columns": [
+            "What you see",
+            "What to do"
+          ],
+          "rows": [
+            [
+              "Create automation stays unavailable",
+              "Install a model first. Saving waits for one."
+            ],
+            [
+              "It didn't run at its time",
+              "Toskar wasn't running then. In the desktop app, have Settings keep Toskar running in the background. A missed run happens once when it starts again."
+            ],
+            [
+              "A run timed out or lost its connection",
+              "Toskar tries the same run again up to three times, after one minute and then five. You're told if those fail too."
+            ],
+            [
+              "It paused itself",
+              "It ran out of memory twice in a row. Choose a smaller model under Advanced, then Resume."
+            ],
+            [
+              "A notification names a tool it skipped",
+              "Edit the automation and approve that tool, if you want it to use it."
+            ]
+          ]
+        },
+        {
+          "type": "note",
+          "tone": "tip",
+          "text": "An automation waits while you chat, and for 20 seconds after, so it doesn't load a model between your messages."
+        },
+        {
+          "type": "related",
+          "sections": [
+            "notifications",
+            "tools",
+            "models",
+            "knowledge"
+          ]
         }
       ]
     },
@@ -1088,12 +1295,100 @@
     {
       "id": "notifications",
       "title": "Notifications",
+      "kind": "task",
+      "summary": "See what Toskar finished or needs, and have it reach you by email, on your phone, or on a service you run.",
       "paragraphs": [
         "The bell next to the Toskar name shows unread notifications: finished and failed automations, tools an automation skipped, finished or failed model downloads, finished or failed exports, deployed AIs, newly paired computers, paired computers that go offline and come back, and models that keep crashing. Choose one to go to it, or filter by category. Mark all read clears the count, and Dismiss removes one. A notice that repeats within 10 minutes is counted on the first one, such as \"failed · 3 times\".",
-        "Notifications are kept by the daemon, so ones that arrived while the window was closed are waiting. Finished and failed automations also post a desktop notice, unless Settings turns task-finish notifications off.",
-        "Settings → Email, push, and webhooks sends notifications to your email, through your own SMTP server, to your phone or computer with ntfy, or to a webhook on a service you run. Choose which categories each one receives and how important they must be, such as errors only. Test sends one right away and says what is wrong if it fails. A webhook's signing secret is shown once when you add it. A delivery that fails is tried again after 1, 5, and 30 minutes; a problem retrying cannot fix, such as a wrong password, stops at once, and the bell says the notification was not delivered everywhere.",
-        "For push, install the free ntfy app on your phone (or open ntfy.sh in a browser), choose Add push (ntfy), and subscribe to the topic it shows. On the public ntfy.sh server anyone who knows a topic can read it, so the topic is random and only \"You have a new Toskar notification\" is sent unless you choose Title and text. You can also run your own ntfy server. Set Open notifications at to this Toskar's address to open a notification by tapping it.",
-        "Quiet hours hold desktop notices, email, push, and webhooks overnight, and send them when quiet hours end. Errors still go out unless you choose Hold everything. The bell shows every notification at once."
+        "Notifications are kept by the daemon, so ones that arrived while the window was closed are waiting. Finished and failed automations also post a desktop notice, unless Settings turns task-finish notifications off."
+      ],
+      "blocks": [
+        {
+          "type": "list",
+          "title": "What you need",
+          "items": [
+            "For email, your own SMTP server's details. For push, the free ntfy app, or your own ntfy server. For a webhook, a service you run."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "In the app"
+        },
+        {
+          "type": "image",
+          "screen": "notifications-bell",
+          "alt": "The bell's Notifications list open, with two automation notices, Morning price and Friday releases, each with a Dismiss button, and Mark all read",
+          "caption": "The bell next to the Toskar name. Notifications that arrived while the window was closed are waiting here."
+        },
+        {
+          "type": "list",
+          "items": [
+            "Choose a notification to go to it, or filter by category.",
+            "Mark all read clears the count, and Dismiss removes one.",
+            "A notice that repeats within 10 minutes is counted on the first one, such as \"failed · 3 times\"."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Send them elsewhere"
+        },
+        {
+          "type": "steps",
+          "items": [
+            "Open Settings › Email, push, and webhooks.",
+            "Add email, push (ntfy), or a webhook, and choose which categories it gets and how important they must be, such as errors only.",
+            "Choose Test. It sends one right away, and says what's wrong if it fails."
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "For push, install the free ntfy app on your phone (or open ntfy.sh in a browser), choose Add push (ntfy), and subscribe to the topic it shows. On the public ntfy.sh server anyone who knows a topic can read it, so the topic is random and only \"You have a new Toskar notification\" is sent unless you choose Title and text. You can also run your own ntfy server. Set Open notifications at to this Toskar's address to open a notification by tapping it."
+        },
+        {
+          "type": "note",
+          "tone": "warning",
+          "text": "A webhook's signing secret is shown once, when you add it. Copy it then."
+        },
+        {
+          "type": "heading",
+          "text": "Quiet hours"
+        },
+        {
+          "type": "paragraph",
+          "text": "Quiet hours hold desktop notices, email, push, and webhooks overnight, and send them when quiet hours end. Errors still go out unless you choose Hold everything. The bell shows every notification at once."
+        },
+        {
+          "type": "heading",
+          "text": "Troubleshooting"
+        },
+        {
+          "type": "table",
+          "columns": [
+            "What you see",
+            "What to do"
+          ],
+          "rows": [
+            [
+              "Not delivered everywhere",
+              "A delivery failed. Toskar tries again after 1, 5, and 30 minutes. A problem retrying can't fix, such as a wrong password, stops at once: fix it, then choose Test."
+            ],
+            [
+              "No desktop notice for a finished automation",
+              "Settings turns task-finish notifications off. They're still in the bell."
+            ],
+            [
+              "A push shows only You have a new Toskar notification",
+              "That's the default on the public ntfy.sh server, where anyone who knows a topic can read it. Choose Title and text to send more."
+            ]
+          ]
+        },
+        {
+          "type": "related",
+          "sections": [
+            "automations",
+            "phone",
+            "settings"
+          ]
+        }
       ]
     },
     {
