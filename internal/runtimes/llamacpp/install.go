@@ -33,6 +33,10 @@ type Runtime struct {
 	goos, goarch string
 	// releases lists llama.cpp releases, newest first.
 	releases func(ctx context.Context) ([]ghRelease, error)
+	// releasePage lists a page of older releases, for a hold (hold.go).
+	releasePage func(ctx context.Context, page int) ([]ghRelease, error)
+	// hold reads which releases the llama.cpp canary holds back.
+	hold func(ctx context.Context) (releaseHold, error)
 	// vulkan reports whether the Vulkan build would use a GPU here.
 	vulkan     func(ctx context.Context) bool
 	vulkanOnce sync.Once
@@ -47,6 +51,8 @@ func New(runtimesDir, logsDir string) *Runtime {
 		goos:        runtime.GOOS,
 		goarch:      runtime.GOARCH,
 		releases:    githubReleases,
+		releasePage: githubReleasePage,
+		hold:        fetchHold,
 		vulkan:      hostVulkanProbe().usable,
 	}
 }
@@ -71,6 +77,9 @@ func (r *Runtime) wantBuilds(ctx context.Context) []string {
 func (r *Runtime) chooseAsset(ctx context.Context) (assetInfo, error) {
 	rels, err := r.releases(ctx)
 	if err != nil {
+		return assetInfo{}, fmt.Errorf("%w. %s", err, r.byHand())
+	}
+	if rels, err = r.holdReleases(ctx, rels); err != nil {
 		return assetInfo{}, fmt.Errorf("%w. %s", err, r.byHand())
 	}
 	a, err := pickAsset(rels, r.wantBuilds(ctx))
@@ -338,7 +347,11 @@ type assetInfo struct {
 var releasesURL = "https://api.github.com/repos/ggml-org/llama.cpp/releases?per_page=20"
 
 func githubReleases(ctx context.Context) ([]ghRelease, error) {
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, releasesURL, nil)
+	return listReleases(ctx, releasesURL)
+}
+
+func listReleases(ctx context.Context, url string) ([]ghRelease, error) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
 		return nil, err
 	}

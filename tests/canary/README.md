@@ -71,6 +71,21 @@ runs it each night on the home runners: Metal and the CPU on the Mac, Vulkan
 on Linux. A failure opens an issue with the numbers, or comments on the open
 one.
 
+## Holding installs back
+
+When a release fails the release or CPU check (not a golden miss alone,
+which is the machine changing), the workflow's hold job writes it to
+[runtimes/llama-cpp.json](../../runtimes/llama-cpp.json) as `hold_from`.
+The daemon reads that file from main before it installs llama.cpp, and takes
+the newest release before the hold (`internal/runtimes/llamacpp/hold.go`).
+Later failing nights keep the first release held; the first night the newest
+release passes on every lane lifts it. A run by hand for one tag, or a
+refresh, leaves the hold alone.
+
+With the repository secret `CANARY_DEPLOY_KEY`, the private half of a write
+deploy key titled "llama.cpp canary", the change goes straight to main, as
+the Release workflow's do; without it, it opens a pull request to approve.
+
 ## Changing the goldens
 
 Goldens change only through this script and a reviewed pull request. To

@@ -24,6 +24,8 @@ Install looks up recent GitHub releases of `ggml-org/llama.cpp` and downloads on
 
 The binary is stored under the data directory `runtimes/llamacpp/` unless a macOS build finds a `llama-server` placed beside the daemon. A usable GPU is a Vulkan loader that finds a graphics card (`vulkaninfo`, or the loader, a GPU driver, and a detected card). A CPU install on a computer where the Vulkan build would run is replaced at the next start with no model running. Capability reporting lists `cpu` and the GPU backends of the installed build (`metal` on macOS, `vulkan` when the Vulkan build is installed). CUDA and ROCm are names the hardware inventory can attach to a GPU it sees; they are not a separate installer path. Whether a running model is actually on the GPU is read from llama-server's log; see [GPU acceleration](gpu.md).
 
+It takes the newest release with that build, unless a release is held back. Each night the [llama.cpp canary](../tests/canary/README.md) checks that the newest release computes what a known-good one does, on Metal, Vulkan and the CPU. When one doesn't, it names that release in [runtimes/llama-cpp.json](../runtimes/llama-cpp.json) on main, and installs take the newest release before it until a newer one passes (#833). Install reads that file first; when it can't, it installs the newest release, as before holds.
+
 On a Mac App Store build, the sandbox cannot `fork` a binary downloaded into the container. Those builds are expected to ship a signed `llama-server` next to the daemon. That packaging is outside this repository.
 
 ### Installing llama-server by hand
