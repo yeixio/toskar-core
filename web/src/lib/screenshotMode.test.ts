@@ -32,3 +32,18 @@ describe('readScreenshotLaunch', () => {
     expect(readScreenshotLaunch()).toEqual({ enabled: true, screen: 'computers', path: '/nodes' })
   })
 })
+
+describe('readScreenshotLaunch from an address', () => {
+  afterEach(() => window.history.replaceState(null, '', '/'))
+
+  // The user guide's screens have ids of their own and open on the page
+  // their address names (#882); the store screens keep their routes.
+  it('keeps the page for a screen it has no route for', () => {
+    window.history.replaceState(null, '', '/onboarding?screenshot=1&screen=onboarding-recommend')
+    expect(readScreenshotLaunch()).toEqual({ enabled: true, screen: 'onboarding-recommend', path: '/onboarding' })
+    window.history.replaceState(null, '', '/models?screenshot=1&screen=computers')
+    expect(readScreenshotLaunch()?.path).toBe('/nodes')
+    window.history.replaceState(null, '', '/?screenshot=1&screen=unknown')
+    expect(readScreenshotLaunch()?.path).toBe('/chat')
+  })
+})
