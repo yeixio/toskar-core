@@ -269,6 +269,7 @@
       "automatic": "Automático",
       "automaticHint": "O Toskar escolhe o melhor computador disponível para cada mensagem.",
       "effort": "Esforço",
+      "thinking": "Raciocínio",
       "memoryOn": "Memória ativada",
       "memoryOff": "Memória desativada",
       "memoryOffHint": "A memória está desativada neste chat. As memórias salvas não são usadas aqui e não são apagadas.",
@@ -440,6 +441,16 @@
     "thorough": {
       "label": "Minucioso",
       "hint": "Lê mais páginas, usa o maior modelo que couber e verifica os números duas vezes."
+    }
+  },
+  "thinking": {
+    "on": {
+      "label": "Ativado",
+      "hint": "Raciocina antes de responder: demora mais para começar, melhor em matemática, lógica e planos."
+    },
+    "off": {
+      "label": "Desativado",
+      "hint": "Responde na hora: muito mais rápido, para perguntas que não exigem reflexão cuidadosa."
     }
   },
   "answer": {

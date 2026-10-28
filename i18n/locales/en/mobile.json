@@ -269,6 +269,7 @@
       "automatic": "Automatic",
       "automaticHint": "Toskar picks the best available computer for each message.",
       "effort": "Effort",
+      "thinking": "Thinking",
       "memoryOn": "Memory on",
       "memoryOff": "Memory off",
       "memoryOffHint": "Memory is off for this chat. Saved memories are not used here and are not deleted.",
@@ -437,6 +438,16 @@
     "thorough": {
       "label": "Thorough",
       "hint": "Reads more pages, uses the largest model that fits, and checks figures twice."
+    }
+  },
+  "thinking": {
+    "on": {
+      "label": "On",
+      "hint": "Think before answering: slower to start, better at math, logic, and plans."
+    },
+    "off": {
+      "label": "Off",
+      "hint": "Answer straight away: much faster, for questions that don't need careful thought."
     }
   },
   "answer": {
