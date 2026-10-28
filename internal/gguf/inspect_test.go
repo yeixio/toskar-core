@@ -2,6 +2,7 @@ package gguf_test
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
@@ -42,5 +43,36 @@ func TestInspect(t *testing.T) {
 	}
 	if _, err := gguf.Inspect(notGGUF); err == nil || err.Error() != "not a GGUF file" {
 		t.Errorf("text file: %v", err)
+	}
+}
+
+// A model that thinks before it answers is known by its chat template, or,
+// for DeepSeek R1's distills, whose templates don't say, by its name (#840).
+// tests/thinking checks the real files of each family.
+func TestInspectThinks(t *testing.T) {
+	dir := t.TempDir()
+	for i, tc := range []struct {
+		name, template string
+		want           bool
+	}{
+		{"Qwen3 8B", "{%- if enable_thinking is defined and enable_thinking is false %}{{- '<think>\\n\\n</think>\\n\\n' }}{%- endif %}", true},
+		{"gpt-oss-20b", "{{- '<|start|>assistant<|channel|>analysis<|message|>' }}", true},
+		{"DeepSeek R1 Distill Qwen 1.5B", "{{'<｜Assistant｜>'}}", true},
+		{"QwQ 32B", "", true},
+		{"Qwen2.5 32B Instruct", "{{- '<|im_start|>assistant\\n' }}", false},
+		{"Llama 3.2 1B Instruct", "{{- '<|start_header_id|>assistant<|end_header_id|>' }}", false},
+		{"Reasoning Helper 7B", "", false},
+	} {
+		path := gguftest.Write(t, dir, fmt.Sprintf("m%d.gguf", i), gguftest.Options{Name: tc.name, ChatTemplate: tc.template})
+		d, err := gguf.Inspect(path)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if d.Thinks != tc.want {
+			t.Errorf("%s: thinks = %v, want %v", tc.name, d.Thinks, tc.want)
+		}
+		if d.ChatTemplate != (tc.template != "") {
+			t.Errorf("%s: chat template = %v", tc.name, d.ChatTemplate)
+		}
 	}
 }

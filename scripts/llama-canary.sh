@@ -5,6 +5,7 @@
 #   scripts/llama-canary.sh run       compare the newest release (or CANARY_NEW_TAG) with the good tag
 #   scripts/llama-canary.sh refresh   write this lane's golden to tests/canary/goldens.json, for a reviewed PR
 #   scripts/llama-canary.sh newest    print the newest release with this build
+#   scripts/llama-canary.sh thinking  check thinking on and off per model family on the newest release (tests/thinking)
 #
 # CANARY_LANE names the lane in goldens.json, such as metal-arm64; CANARY_BUILD
 # is the release build to test, as Toskar picks it (macos-arm64,
@@ -78,6 +79,26 @@ model() {
   echo "$file"
 }
 
+# thinking_models downloads tests/thinking/families.json's models into
+# $CACHE/thinking, checked by SHA-256, and prints that folder.
+thinking_models() {
+  local dir="$CACHE/thinking" file url sum
+  mkdir -p "$dir"
+  while IFS=' ' read -r file url sum; do
+    if [[ ! -s "$dir/$file" ]]; then
+      curl -fL --retry 3 -o "$dir/$file.part" "$url" >&2
+      if [[ "$(sha256 "$dir/$file.part")" != "$sum" ]]; then
+        rm -f "$dir/$file.part"
+        echo "$file's SHA-256 isn't families.json's" >&2
+        return 1
+      fi
+      mv "$dir/$file.part" "$dir/$file"
+    fi
+  done < <(python3 -c 'import json, sys
+for f in json.load(open(sys.argv[1]))["families"]: print(f["file"], f["url"], f["sha256"])' "$ROOT/tests/thinking/families.json")
+  echo "$dir"
+}
+
 canary() {
   TOSKAR_CANARY_GOOD="$(fetch "$(golden good_tag)")"
   TOSKAR_CANARY_MODEL="$(model)"
@@ -102,8 +123,17 @@ case "${1:-run}" in
   newest)
     newest
     ;;
+  thinking)
+    tag="${CANARY_NEW_TAG:-$(newest)}"
+    echo "Thinking per family on llama.cpp $tag"
+    TOSKAR_THINKING_LLAMA="$(fetch "$tag")"
+    TOSKAR_THINKING_MODELS="$(thinking_models)"
+    export TOSKAR_THINKING_LLAMA TOSKAR_THINKING_MODELS
+    cd "$ROOT"
+    go test ./tests/thinking -run TestThinkingFamilies -count=1 -v -timeout 30m
+    ;;
   *)
-    echo "usage: $0 run|refresh|newest" >&2
+    echo "usage: $0 run|refresh|newest|thinking" >&2
     exit 2
     ;;
 esac

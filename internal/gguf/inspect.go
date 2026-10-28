@@ -32,6 +32,9 @@ type Details struct {
 	Quantization string
 	// ChatTemplate is set when the file carries tokenizer.chat_template.
 	ChatTemplate bool
+	// Thinks is set for a model that thinks before it answers (#840), by
+	// its chat template or its name (thinks).
+	Thinks bool
 	// License is general.license, when stated.
 	License string
 	// Tensors is how many tensors it has.
@@ -42,6 +45,27 @@ type Details struct {
 // describes pictures to a model and can't chat by itself.
 func (d Details) Projector() bool {
 	return d.Type == "mmproj" || d.Architecture == "clip"
+}
+
+// thinkingMarks are what a chat template has when its model thinks before
+// it answers: a thinking block (Qwen 3, QwQ, Seed-OSS, Magistral), the
+// switch that turns it off, a past turn's thinking, or gpt-oss's channels.
+var thinkingMarks = []string{"<think>", "enable_thinking", "reasoning_content", "<|channel|>", "<seed:think>", "[THINK]"}
+
+// thinkingName is a model that thinks whose template doesn't say so, such as
+// DeepSeek R1's distills: their templates are their base model's, and
+// llama.cpp opens the thinking itself.
+var thinkingName = regexp.MustCompile(`(?i)\bR1\b|\bQwQ\b|thinking|reasoner`)
+
+// thinks reports a model that thinks before it answers, from its name and
+// chat template.
+func thinks(name, template string) bool {
+	for _, mark := range thinkingMarks {
+		if strings.Contains(template, mark) {
+			return true
+		}
+	}
+	return thinkingName.MatchString(name)
 }
 
 // Limits on a header, far above any real model, so a damaged or hostile
@@ -113,6 +137,7 @@ func inspect(d *decoder, size uint64, offset func() uint64) (Details, error) {
 	out.Tensors = tensors
 	alignment := uint64(32)
 	ints := map[string]uint64{}
+	var template string
 	for n := uint64(0); n < count && d.err == nil; n++ {
 		key := d.str()
 		typ := d.u32()
@@ -131,9 +156,9 @@ func inspect(d *decoder, size uint64, offset func() uint64) (Details, error) {
 			case "general.license":
 				out.License = v
 			}
-		case key == "tokenizer.chat_template":
+		case key == "tokenizer.chat_template" && typ == typeString:
 			out.ChatTemplate = true
-			d.skip(typ, 0)
+			template = d.str()
 		case key == "general.alignment" || key == "general.file_type" || strings.HasSuffix(key, ".context_length"):
 			if v, ok := d.number(typ); ok {
 				ints[key] = v
@@ -152,6 +177,7 @@ func inspect(d *decoder, size uint64, offset func() uint64) (Details, error) {
 		alignment = a
 	}
 	out.ContextLength = ints[out.Architecture+".context_length"]
+	out.Thinks = thinks(out.Name, template)
 	if ft, ok := ints["general.file_type"]; ok {
 		out.Quantization = fileTypes[ft]
 	}
