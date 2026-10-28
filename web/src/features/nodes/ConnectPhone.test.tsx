@@ -62,4 +62,22 @@ describe('ConnectPhone', () => {
     expect(await screen.findByText('The code expired.', {}, { timeout: 4000 })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Show a new code' })).toBeInTheDocument()
   })
+
+  // Encrypted with the computer's certificate, it isn't plain HTTP (#213).
+  it('warns about plain HTTP only without encryption', async () => {
+    vi.mocked(api.getSettings).mockResolvedValue({ lan_api_enabled: true, node_name: 'Studio' } as SettingsView)
+    vi.mocked(api.startDevicePairing).mockResolvedValue({ ...shown, tls_short: '7F3A·C21E' })
+    renderIt()
+    fireEvent.click(await screen.findByRole('button', { name: 'Show a code' }))
+    expect(await screen.findByText(/shows 7F3A·C21E in Settings/)).toBeInTheDocument()
+    expect(screen.queryByText(/Over plain HTTP/)).toBeNull()
+  })
+
+  it('warns about plain HTTP without the certificate', async () => {
+    vi.mocked(api.getSettings).mockResolvedValue({ lan_api_enabled: true, node_name: 'Studio' } as SettingsView)
+    renderIt()
+    fireEvent.click(await screen.findByRole('button', { name: 'Show a code' }))
+    await screen.findByText('123 456')
+    expect(screen.getByText(/Over plain HTTP/)).toBeInTheDocument()
+  })
 })
