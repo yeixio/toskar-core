@@ -187,7 +187,8 @@
             "capabilities": {
               "tool_calling": true,
               "vision": false,
-              "coding": true
+              "coding": true,
+              "thinks": true
             },
             "purpose": [
               "general",

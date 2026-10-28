@@ -8,6 +8,7 @@ import (
 
 	"github.com/yeixio/toskar-core/internal/contextusage"
 	"github.com/yeixio/toskar-core/internal/models"
+	"github.com/yeixio/toskar-core/pkg/contracts"
 	"github.com/yeixio/toskar-core/pkg/pluginapi"
 )
 
@@ -21,8 +22,11 @@ func TestReplyReserveByModel(t *testing.T) {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() { _ = a.DB.Close() })
-	a.Models.Catalog().Upsert(models.CatalogEntry{ID: "thinker", DisplayName: "Thinker", Tags: []string{"reasoning", "general"}, Context: 8192})
+	a.Models.Catalog().Upsert(models.CatalogEntry{ID: "thinker", DisplayName: "Thinker", Tags: []string{"general"}, Capabilities: contracts.ModelCapabilities{Thinks: true}, Context: 8192})
 	a.Models.Catalog().Upsert(models.CatalogEntry{ID: "plain", DisplayName: "Plain", Tags: []string{"general"}, Context: 8192})
+	// Tagged for reasoning well, as Qwen 2.5 32B is, but it doesn't think
+	// out loud first.
+	a.Models.Catalog().Upsert(models.CatalogEntry{ID: "reasons", DisplayName: "Reasons", Tags: []string{"general", "reasoning"}, Context: 8192})
 	ctx := context.Background()
 	for _, tc := range []struct {
 		model string
@@ -32,6 +36,7 @@ func TestReplyReserveByModel(t *testing.T) {
 		{"thinker", pluginapi.GenerateOptions{}, contextusage.ReplyReserve(8192, 0, true)},
 		{"thinker", pluginapi.GenerateOptions{NoThinking: true}, contextusage.ReplyReserve(8192, 0, false)},
 		{"plain", pluginapi.GenerateOptions{}, contextusage.ReplyReserve(8192, 0, false)},
+		{"reasons", pluginapi.GenerateOptions{}, contextusage.ReplyReserve(8192, 0, false)},
 		{"plain", pluginapi.GenerateOptions{MaxTokens: 3000}, 3000},
 	} {
 		env := &chatExecEnv{app: a, ctx: ctx, modelOverride: tc.model}

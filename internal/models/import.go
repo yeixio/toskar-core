@@ -252,6 +252,7 @@ func importEntry(req ImportRequest, d gguf.Details, filename string, size uint64
 		Source:            contracts.ModelSource{Format: "gguf"},
 		Purpose:           []string{"general", "assistant"},
 		Tags:              tags,
+		Capabilities:      contracts.ModelCapabilities{Thinks: d.Thinks},
 		Runtime:           []string{"llamacpp"},
 		Dynamic:           true,
 	}

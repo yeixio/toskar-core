@@ -37,6 +37,7 @@ type Manager struct {
 
 	mu          sync.Mutex
 	downloading map[string]struct{}
+	thinkers    thinksCache
 }
 
 // NewManager constructs a model manager.
@@ -88,7 +89,8 @@ func (m *Manager) List(ctx context.Context) ([]contracts.Model, error) {
 	lastUsed, _ := m.storage.ListLastUsed(ctx)
 	var out []contracts.Model
 	for _, e := range m.catalog.List() {
-		_, ok := installed[e.ID]
+		path, ok := installed[e.ID]
+		e.Capabilities.Thinks = m.thinks(e, path)
 		status := "available"
 		if m.isDownloading(e.ID) {
 			status = "downloading"

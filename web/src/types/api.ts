@@ -77,6 +77,8 @@ export interface ModelCapabilities {
   tool_calling: boolean
   vision: boolean
   coding: boolean
+  /** Thinks before it answers, such as Qwen 3, DeepSeek R1's distills, or gpt-oss (#840, contract 1.63). */
+  thinks?: boolean
 }
 
 export interface ModelSource {

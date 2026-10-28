@@ -548,7 +548,7 @@ export function ChatPage() {
   const chatModel =
     [...(modelsQuery.data ?? []), ...specializedModels].find((model) => model.id === shownModelId) ?? null
   // Thinking is a choice only with a model that thinks before it answers (#840).
-  const chatModelThinks = chatModel?.tags?.includes('reasoning') ?? false
+  const chatModelThinks = chatModel?.capabilities?.thinks ?? false
   const activeProfile =
     sortedProfiles.find((p) => p.id === profileIdForChat) ?? null
   const terminalAllowed = activeProfile?.tools?.find((tool) => tool.tool_id === 'terminal')?.policy !== 'deny'

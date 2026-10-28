@@ -702,7 +702,7 @@
           "type": "image",
           "screen": "chat-thinking",
           "alt": "The chat options with Qwen3 8B chosen as the model, showing Thinking set to Off below Effort",
-          "caption": "Thinking appears in the chat options only when the chat's model thinks before it answers."
+          "caption": "Thinking appears in the chat options only when the chat's model thinks before it answers, such as Qwen 3, DeepSeek R1's distills, or gpt-oss. Toskar tells from the model file, so one you added yourself counts too."
         },
         {
           "type": "heading",

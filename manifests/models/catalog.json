@@ -432,7 +432,7 @@
       "size_bytes": 1100000000,
       "memory_needed_bytes": 2200000000,
       "context": 32768,
-      "capabilities": { "tool_calling": false, "vision": false, "coding": false },
+      "capabilities": { "tool_calling": false, "vision": false, "coding": false, "thinks": true },
       "source": {
         "url": "https://huggingface.co/bartowski/DeepSeek-R1-Distill-Qwen-1.5B-GGUF/resolve/main/DeepSeek-R1-Distill-Qwen-1.5B-Q4_K_M.gguf",
         "format": "gguf"
@@ -467,7 +467,7 @@
       "size_bytes": 4700000000,
       "memory_needed_bytes": 6400000000,
       "context": 32768,
-      "capabilities": { "tool_calling": false, "vision": false, "coding": false },
+      "capabilities": { "tool_calling": false, "vision": false, "coding": false, "thinks": true },
       "source": {
         "url": "https://huggingface.co/bartowski/DeepSeek-R1-Distill-Qwen-7B-GGUF/resolve/main/DeepSeek-R1-Distill-Qwen-7B-Q4_K_M.gguf",
         "format": "gguf"

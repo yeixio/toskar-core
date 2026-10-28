@@ -3,8 +3,10 @@ name: llama.cpp canary
 # Checks each night that the newest llama.cpp release, the one Toskar would
 # install, computes what the known-good tag does on the backends people run
 # (#833, tests/canary): Metal on the home Mac, Vulkan on the home Linux box's
-# AMD card, and the CPU on both. A failure opens an issue with the numbers
-# (or adds them to the open one).
+# AMD card, and the CPU on both. On the Mac it also checks that thinking
+# comes apart from the answer and turns off, for a model of each family
+# that thinks first (#840, tests/thinking). A failure opens an issue with
+# the numbers (or adds them to the open one).
 #
 # Run it by hand with "refresh" to measure each lane's golden on the good
 # tag. The run shows the goldens.json change; it goes in through a reviewed
@@ -113,6 +115,17 @@ jobs:
           if [ "${{ inputs.refresh }}" = true ]; then
             { echo '### goldens.json'; echo; echo '```diff'; git diff tests/canary/goldens.json; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
           fi
+          exit "$status"
+      - name: Thinking per family
+        # gpt-oss-20b needs about 13 GB, which the Mac has to spare. A
+        # failure opens the issue but doesn't hold installs back: thinking
+        # that won't turn off is slower, not wrong.
+        if: ${{ !cancelled() && matrix.host == 'mac' && inputs.refresh != true }}
+        run: |
+          report="$RUNNER_TEMP/canary-thinking.md"
+          status=0
+          CANARY_BUILD=macos-arm64 TOSKAR_THINKING_REPORT="$report" scripts/llama-canary.sh thinking || status=1
+          if [ -f "$report" ]; then cat "$report" >> "$GITHUB_STEP_SUMMARY"; fi
           exit "$status"
       - name: Open an issue
         if: failure() && inputs.refresh != true

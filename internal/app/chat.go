@@ -1261,9 +1261,7 @@ func (e *chatExecEnv) ReplyReserve(ctx context.Context) int {
 	}
 	thinking := false
 	if !opts.NoThinking && id != "" && e.app != nil && e.app.Models != nil {
-		if entry, ok := e.app.Models.Catalog().Get(id); ok {
-			thinking = slices.Contains(entry.Tags, "reasoning")
-		}
+		thinking = e.app.Models.Thinks(ctx, id)
 	}
 	return contextusage.ReplyReserve(e.ContextLimit(), opts.MaxTokens, thinking)
 }

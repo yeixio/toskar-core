@@ -27,6 +27,8 @@ type Options struct {
 	// tokens (tokenizer.ggml.token_type 3; the rest are 1, normal).
 	Vocab   []string
 	Control map[string]bool
+	// ChatTemplate is tokenizer.chat_template; empty leaves it out.
+	ChatTemplate string
 }
 
 // Bytes is the file's content.
@@ -66,6 +68,9 @@ func Bytes(o Options) []byte {
 	}
 	if o.Context != 0 {
 		put(o.Architecture+".context_length", func() { u32(typeUint32); u32(o.Context) })
+	}
+	if o.ChatTemplate != "" {
+		put("tokenizer.chat_template", func() { u32(typeString); str(o.ChatTemplate) })
 	}
 	if len(o.Vocab) > 0 {
 		put("tokenizer.ggml.tokens", func() {

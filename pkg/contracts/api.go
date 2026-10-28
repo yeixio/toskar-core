@@ -123,6 +123,10 @@ type ModelCapabilities struct {
 	ToolCallSupport string `json:"tool_call_support,omitempty"` // native | compatible | limited | unsupported
 	Vision          bool   `json:"vision"`
 	Coding          bool   `json:"coding"`
+	// Thinks is set for a model that thinks before it answers (#840), such
+	// as Qwen 3, DeepSeek R1's distills, or gpt-oss: its answer needs room
+	// for the thinking too, and a request can turn the thinking off.
+	Thinks bool `json:"thinks,omitempty"`
 }
 
 // LanguageCapability is how well a model writes a language (multilingual
