@@ -64,8 +64,18 @@ try {
     if (screen.form) await context.addInitScript((name) => { document.documentElement.dataset.form = name }, screen.form)
     // api: an answer in place of the demo data's, for a state the demo
     // doesn't have, such as a Toskar Pro trial.
+    // "{{in:600}}" in an answer is the time 600 seconds from the capture,
+    // for something that counts down, such as a pairing code's expiry.
+    const timed = (value) =>
+      typeof value === 'string'
+        ? value.replace(/\{\{in:(-?\d+)\}\}/g, (_, s) => new Date(Date.now() + Number(s) * 1000).toISOString())
+        : Array.isArray(value)
+          ? value.map(timed)
+          : value && typeof value === 'object'
+            ? Object.fromEntries(Object.entries(value).map(([k, v]) => [k, timed(v)]))
+            : value
     for (const [apiPath, body] of Object.entries(screen.api || {})) {
-      await context.route((url) => url.pathname === apiPath, (route) => route.fulfill({ json: body }))
+      await context.route((url) => url.pathname === apiPath, (route) => route.fulfill({ json: timed(body) }))
     }
     // desktopApp: the page as the desktop app shows it, with what the app
     // gives it (desktop/app.go's bindings), such as the store's price.

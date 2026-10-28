@@ -167,7 +167,8 @@ export function ConnectPhone({ onClose }: { onClose: () => void }) {
               </button>
             </div>
           </div>
-          <p className="text-xs text-ink-faint">{t('phone.http')}</p>
+          {/* Only a connection without the certificate is plain HTTP (#213). */}
+          {shown.tls_short ? null : <p className="text-xs text-ink-faint">{t('phone.http')}</p>}
         </div>
       ) : (
         <div className="space-y-2">
