@@ -196,11 +196,16 @@ the set confirms the license for that run.
   a chat's next turn reads only what's new. `TestPromptCache` sends a fixed
   six-turn chat of about 2,300 tokens to the served model
   (`TOSKAR_QUALITY_MODEL_URL`, skipped without one), with the model writing
-  its own answers, and checks two things:
+  its own answers, and checks three things:
   - **Reuse:** at least 80% of the last turn's prompt comes from the cache
     (`TOSKAR_QUALITY_CACHE_MIN_REUSE`). The chat is longer than Gemma 3's
     1,024-token sliding window, where a model with sliding-window layers can
     lose what it read and read everything again.
+  - **New chats:** after a chat with another system prompt, a new chat with
+    the first one reads at least 80% from the cache. llama-server keeps
+    recent prompts in memory (`--cache-ram`, 8 GB by default), so a
+    profile's long instructions are read once, not per chat; with Qwen 2.5
+    7B that's 88 ms instead of 1.6 s for 2,100 tokens.
   - **Equivalence:** the last turn asked warm and cold (`cache_prompt` off),
     at temperature 0, writes the same tokens, with top-5 probabilities within
     0.05 (`TOSKAR_QUALITY_CACHE_TOLERANCE`). Probabilities, not log
