@@ -353,3 +353,30 @@ func TestMakeIsntAlwaysAShellCommand(t *testing.T) {
 		}
 	}
 }
+
+func TestAboutThemselves(t *testing.T) {
+	for _, message := range []string{
+		"Where does my sister live?",
+		"What's my dog's name?",
+		"When is my wife's birthday?",
+		"Who is my boss?",
+		"Where do I live?",
+		"What did I tell you about the trip?",
+		"How old is my son?",
+	} {
+		if !AboutThemselves(message) {
+			t.Errorf("not caught: %q", message)
+		}
+	}
+	for _, message := range []string{
+		"What should I feed my dog?",
+		"Where can I buy a gift for my sister?",
+		"What's the weather where my parents are?",
+		"Where does the president live?",
+		"How do I fix my laptop?",
+	} {
+		if AboutThemselves(message) {
+			t.Errorf("caught: %q", message)
+		}
+	}
+}

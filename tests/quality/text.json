@@ -1422,6 +1422,56 @@
       "want": true
     }
   ],
+  "about_themselves": [
+    {
+      "in": "Where does my sister live?",
+      "want": true
+    },
+    {
+      "in": "What's my dog's name?",
+      "want": true
+    },
+    {
+      "in": "When is my wife's birthday?",
+      "want": true
+    },
+    {
+      "in": "Who is my boss?",
+      "want": true
+    },
+    {
+      "in": "How old is my son?",
+      "want": true
+    },
+    {
+      "in": "Where do I live?",
+      "want": true
+    },
+    {
+      "in": "What did I tell you about the trip?",
+      "want": true
+    },
+    {
+      "in": "What should I feed my dog?",
+      "want": false
+    },
+    {
+      "in": "Where can I buy a gift for my sister?",
+      "want": false
+    },
+    {
+      "in": "What's the weather where my parents are?",
+      "want": false
+    },
+    {
+      "in": "Where does the president live?",
+      "want": false
+    },
+    {
+      "in": "How do I fix my laptop?",
+      "want": false
+    }
+  ],
   "clean_query": [
     {
       "in": "Search query: best e-bike under $2000",

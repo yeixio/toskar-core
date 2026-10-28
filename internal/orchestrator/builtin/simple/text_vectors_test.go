@@ -16,15 +16,16 @@ import (
 // the same file against its copy, so a change here that the phone has not
 // followed fails there.
 type textVectors struct {
-	About          string         `json:"about"`
-	NeedsLiveWeb   []boolVector   `json:"needs_live_web"`
-	Classify       []stringVector `json:"classify"`
-	SmallTalk      []boolVector   `json:"small_talk"`
-	LookupQuery    []stringVector `json:"lookup_query"`
-	Deflects       []boolVector   `json:"deflects"`
-	CleanQuery     []stringVector `json:"clean_query"`
-	MemoryCommand  []memoryVector `json:"memory_command"`
-	CaptureRequest []stringVector `json:"capture_request"`
+	About           string         `json:"about"`
+	NeedsLiveWeb    []boolVector   `json:"needs_live_web"`
+	Classify        []stringVector `json:"classify"`
+	SmallTalk       []boolVector   `json:"small_talk"`
+	LookupQuery     []stringVector `json:"lookup_query"`
+	Deflects        []boolVector   `json:"deflects"`
+	AboutThemselves []boolVector   `json:"about_themselves"`
+	CleanQuery      []stringVector `json:"clean_query"`
+	MemoryCommand   []memoryVector `json:"memory_command"`
+	CaptureRequest  []stringVector `json:"capture_request"`
 }
 
 type boolVector struct {
@@ -82,6 +83,7 @@ func TestTextVectors(t *testing.T) {
 	checkBool("MessageNeedsLiveWeb", v.NeedsLiveWeb, tools.MessageNeedsLiveWeb)
 	checkBool("SmallTalk", v.SmallTalk, huginn.SmallTalk)
 	checkBool("Deflects", v.Deflects, huginn.Deflects)
+	checkBool("AboutThemselves", v.AboutThemselves, huginn.AboutThemselves)
 	checkString("lookupQuery", v.LookupQuery, lookupQuery)
 	checkString("cleanQuery", v.CleanQuery, cleanQuery)
 	checkString("CaptureRequest", v.CaptureRequest, func(s string) string {
