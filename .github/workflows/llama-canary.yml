@@ -49,6 +49,9 @@ jobs:
     if: github.repository == 'yeixio/toskar-core'
     runs-on: ${{ fromJSON(matrix.runs-on) }}
     timeout-minutes: 60
+    outputs:
+      held_mac: ${{ steps.canary.outputs.held_mac }}
+      held_linux: ${{ steps.canary.outputs.held_linux }}
     env:
       GH_TOKEN: ${{ github.token }}
       CANARY_NEW_TAG: ${{ inputs.tag }}
@@ -86,6 +89,7 @@ jobs:
           echo "GPUs the canary can use:"
           docker run --rm --device /dev/dri toskar-canary-vulkan vulkaninfo --summary 2>/dev/null | grep -E "deviceName|deviceType" || echo "::warning::No Vulkan device; the Vulkan lane will fail."
       - name: Canary
+        id: canary
         run: |
           status=0
           for lane in ${{ matrix.lanes }}; do
@@ -95,8 +99,14 @@ jobs:
               CANARY_LANE="$name" CANARY_BUILD="$build" CANARY_GPU="$gpu" TOSKAR_CANARY_REPORT="$report" \
                 scripts/llama-canary.sh refresh || status=1
             else
-              CANARY_LANE="$name" CANARY_BUILD="$build" CANARY_GPU="$gpu" TOSKAR_CANARY_REPORT="$report" \
+              tag="${CANARY_NEW_TAG:-$(CANARY_BUILD="$build" scripts/llama-canary.sh newest)}"
+              CANARY_LANE="$name" CANARY_BUILD="$build" CANARY_GPU="$gpu" TOSKAR_CANARY_REPORT="$report" CANARY_NEW_TAG="$tag" \
                 scripts/llama-canary.sh run || status=1
+              # A release that computes differently is held back (the hold
+              # job); a golden miss alone is this machine changing.
+              if grep -qE '^### .*failed \(.*(release|cpu)' "$report" 2>/dev/null; then
+                echo "held_${{ matrix.host }}=$tag" >> "$GITHUB_OUTPUT"
+              fi
             fi
             if [ -f "$report" ]; then cat "$report" >> "$GITHUB_STEP_SUMMARY"; fi
           done
@@ -121,4 +131,69 @@ jobs:
             gh issue comment "$open" -R "$GITHUB_REPOSITORY" --body-file "$body"
           else
             gh issue create -R "$GITHUB_REPOSITORY" --title "$title" --body-file "$body"
+          fi
+
+  # Holds installs back when a release computes differently (#833):
+  # runtimes/llama-cpp.json names the first release held, and the daemon
+  # installs the newest release before it (internal/runtimes/llamacpp/hold.go).
+  # The hold stays on through later failing nights, and comes off the first
+  # night the newest release passes everywhere. A run by hand for one tag,
+  # or a refresh, leaves it as it is.
+  hold:
+    needs: canary
+    if: always() && github.repository == 'yeixio/toskar-core' && inputs.refresh != true && inputs.tag == ''
+    runs-on: ${{ fromJSON(vars.CI_RUNS_ON || '"ubuntu-latest"') }}
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      # A write deploy key for this workflow alone puts the hold straight on
+      # main; without it, the hold opens a pull request (scripts/release-publish.sh).
+      RELEASE_DEPLOY_KEY: ${{ secrets.CANARY_DEPLOY_KEY }}
+      HELD: ${{ needs.canary.outputs.held_mac || needs.canary.outputs.held_linux }}
+      PASSED: ${{ needs.canary.result == 'success' }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: main
+      - name: Set or lift the hold
+        run: |
+          set -euo pipefail
+          file=runtimes/llama-cpp.json
+          current="$(python3 -c 'import json, sys; print(json.load(open(sys.argv[1])).get("hold_from", ""))' "$file")"
+          run="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          if [ -n "$HELD" ] && [ -z "$current" ]; then
+            from="$HELD"
+            reason="the llama.cpp canary found $HELD computes differently from the known-good release ($run)"
+            title="Hold llama.cpp installs before $HELD"
+          elif [ "$PASSED" = true ] && [ -n "$current" ]; then
+            from=""
+            reason=""
+            title="Lift the llama.cpp hold from $current"
+          else
+            echo "The hold stays as it is: ${current:-none}."
+            exit 0
+          fi
+          python3 - "$file" "$from" "$reason" <<'EOF'
+          import json, sys
+          path, held, reason = sys.argv[1:]
+          data = json.load(open(path))
+          data["hold_from"], data["reason"] = held, reason
+          open(path, "w").write(json.dumps(data, indent=2, ensure_ascii=False) + "\n")
+          EOF
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -am "$title." -m "From the llama.cpp canary: $run (#833)."
+          scripts/release-publish.sh llama-cpp-hold "$title" "From the [llama.cpp canary]($run) (#833). The daemon reads runtimes/llama-cpp.json before it installs llama.cpp."
+          echo "$title" >> "$GITHUB_STEP_SUMMARY"
+          open="$(gh issue list -R "$GITHUB_REPOSITORY" --state open --search '"llama.cpp canary failed" in:title' --json number -q '.[0].number')"
+          if [ -n "$open" ]; then
+            if [ -n "$from" ]; then
+              gh issue comment "$open" -R "$GITHUB_REPOSITORY" --body "Installs are held at the releases before $from until a newer release passes."
+            else
+              gh issue comment "$open" -R "$GITHUB_REPOSITORY" --body "The newest release passes on every lane, so installs are no longer held back."
+            fi
           fi

@@ -14,5 +14,7 @@ func TestMain(m *testing.M) {
 		runFakeLlama()
 		return
 	}
+	// No test reads the canary's real hold from GitHub; hold_test.go sets its own.
+	holdURL = ""
 	leakcheck.Main(m)
 }

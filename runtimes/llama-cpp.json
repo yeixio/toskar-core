@@ -1,0 +1,5 @@
+{
+  "about": "Which llama.cpp releases Toskar installs (#833). When the llama.cpp canary (.github/workflows/llama-canary.yml) finds a release computes differently from the known-good one, hold_from names it, and Toskar installs the newest release before it until a newer one passes. The daemon reads this file from main (internal/runtimes/llamacpp/hold.go).",
+  "hold_from": "",
+  "reason": ""
+}
