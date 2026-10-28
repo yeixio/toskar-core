@@ -43,9 +43,9 @@ jobs:
   # the pass rate with a 95% interval and names the flaky cases, and the
   # saved runs (quality-runs.jsonl) can be rescored after a check changes.
   # It fails when fewer than 90% of runs pass; the report lists every answer.
-  # The prompt cache (#838) is checked against the same model: how much of a
-  # chat's later turn comes from the cache, and that a warm answer matches a
-  # cold one.
+  # The prompt cache (#838) is checked against the same model and against
+  # Gemma 3 4B, which has a sliding window: how much of a chat's later turn
+  # comes from the cache, and that a warm answer matches a cold one.
   served-model:
     runs-on: ${{ fromJSON(vars.TRUSTED_RUNS_ON || '"ubuntu-latest"') }}
     timeout-minutes: 150
@@ -62,7 +62,7 @@ jobs:
       - uses: actions/cache@v6
         with:
           path: .quality-cache
-          key: quality-model-b11174-llama-3.2-1b-q4km
+          key: quality-model-b11174-llama-3.2-1b-q4km-gemma-3-4b-q4km
       - name: Quality set with a real model
         env:
           GH_TOKEN: ${{ github.token }}
@@ -72,10 +72,24 @@ jobs:
           TOSKAR_QUALITY_RUN: TestQualitySet|TestPromptCache
           TOSKAR_QUALITY_CACHE_REPORT: ${{ runner.temp }}/cache-report.md
         run: scripts/quality-model.sh run
+      # Gemma 3's sliding window (1,024 tokens) is where a llama.cpp update
+      # is likeliest to stop reusing the cache (#838).
+      - name: Prompt cache with a sliding-window model
+        if: ${{ !cancelled() }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          QUALITY_MODEL_GGUF_URL: https://huggingface.co/ggml-org/gemma-3-4b-it-GGUF/resolve/main/gemma-3-4b-it-Q4_K_M.gguf
+          QUALITY_MODEL_PORT: "8090"
+          TOSKAR_QUALITY_RUN: TestPromptCache
+          TOSKAR_QUALITY_CACHE_REPORT: ${{ runner.temp }}/cache-report-gemma.md
+          # Gemma 3 can write another word warm than cold at a near-tie,
+          # however the cache is set up, so its equivalence is reported.
+          TOSKAR_QUALITY_CACHE_EQUIVALENCE: measure
+        run: scripts/quality-model.sh run
       - name: Report
         if: always()
         run: |
-          for f in quality-report.md cache-report.md; do
+          for f in quality-report.md cache-report.md cache-report-gemma.md; do
             if [ -f "$RUNNER_TEMP/$f" ]; then
               head -c 60000 "$RUNNER_TEMP/$f" >> "$GITHUB_STEP_SUMMARY"
             fi
@@ -89,6 +103,7 @@ jobs:
             ${{ runner.temp }}/quality-report.md
             ${{ runner.temp }}/quality-runs.jsonl
             ${{ runner.temp }}/cache-report.md
+            ${{ runner.temp }}/cache-report-gemma.md
           if-no-files-found: ignore
 
   # The quality set against the daemon built from the commit under test,

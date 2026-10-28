@@ -194,14 +194,32 @@ the set confirms the license for that run.
   test.
 - **The prompt cache (#838):** llama-server keeps the last prompt's work, so
   a chat's next turn reads only what's new. `TestPromptCache` sends a fixed
-  six-turn chat to the served model (`TOSKAR_QUALITY_MODEL_URL`, skipped
-  without one) and checks two things:
+  six-turn chat of about 2,300 tokens to the served model
+  (`TOSKAR_QUALITY_MODEL_URL`, skipped without one), with the model writing
+  its own answers, and checks two things:
   - **Reuse:** at least 80% of the last turn's prompt comes from the cache
-    (`TOSKAR_QUALITY_CACHE_MIN_REUSE`). A model whose attention defeats the
-    cache, such as one with sliding-window layers, falls well short.
+    (`TOSKAR_QUALITY_CACHE_MIN_REUSE`). The chat is longer than Gemma 3's
+    1,024-token sliding window, where a model with sliding-window layers can
+    lose what it read and read everything again.
   - **Equivalence:** the last turn asked warm and cold (`cache_prompt` off),
-    at temperature 0, writes the same tokens, with top-5 log probabilities
-    within 0.05 (`TOSKAR_QUALITY_CACHE_TOLERANCE`).
+    at temperature 0, writes the same tokens, with top-5 probabilities within
+    0.05 (`TOSKAR_QUALITY_CACHE_TOLERANCE`). Probabilities, not log
+    probabilities: the warm turn reads the prompt in two parts, which moves
+    an unlikely token's log probability by rounding alone. Measured on
+    llama.cpp b11149, warm and cold were at most 0.0075 apart for Llama,
+    Qwen, and Gemma 2, and up to 0.038 for Gemma 3, the same inside its
+    sliding window as beyond it.
+
+  The weekly job runs it twice: with Llama 3.2 1B, beside the quality set,
+  and with Gemma 3 4B, whose sliding window is the catalog's smallest, so a
+  llama.cpp update that stops reusing such a model's cache fails it. Gemma 3
+  reads a split prompt less exactly: at a near-tie it can write another word
+  warm than cold, inside its window as much as beyond it and with or without
+  flash attention. Its run is held to reuse and reports equivalence
+  (`TOSKAR_QUALITY_CACHE_EQUIVALENCE=measure`).
+  Measured on b11149, both reuse 97–99% of the last turn, and `--swa-full`
+  (a full-size cache for the sliding-window layers) adds nothing, so Toskar
+  doesn't use it.
 
   `TOSKAR_QUALITY_CACHE_REPORT` writes the tokens read and cached each turn.
   `TOSKAR_QUALITY_RUN='TestQualitySet|TestPromptCache' scripts/quality-model.sh
