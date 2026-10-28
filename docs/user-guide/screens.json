@@ -1,5 +1,5 @@
 {
-  "about": "The user guide's screenshots, captured from the web UI with demo data (internal/screenshot) by scripts/capture-docs-screenshots.sh into docs/user-guide/images/<id>.png. A guide image names its screen. path and query open it in screenshot mode; readyText is on the page once it has loaded; actions (click, fill, select, scroll, wait) reach the state the page describes. viewport, deviceScaleFactor, theme (dark or light), and form (phone or tablet) can be set per screen. api answers API paths with the given JSON instead of the demo data's, for a state the demo doesn't have; desktopApp shows the page as the desktop app does, with unlockPrice (the store's price) and startTrial (the Mac's trial).",
+  "about": "The user guide's screenshots, captured from the web UI with demo data (internal/screenshot) by scripts/capture-docs-screenshots.sh into docs/user-guide/images/<id>.png. A guide image names its screen. path and query open it in screenshot mode; readyText is on the page once it has loaded; actions (click, fill, select, scroll, wait) reach the state the page describes. viewport, deviceScaleFactor, theme (dark or light), and form (phone or tablet) can be set per screen. api answers API paths with the given JSON instead of the demo data's, for a state the demo doesn't have, where \"{{in:600}}\" is the time 600 seconds from the capture; desktopApp shows the page as the desktop app does, with unlockPrice (the store's price) and startTrial (the Mac's trial).",
   "viewport": {
     "width": 1440,
     "height": 900
@@ -322,6 +322,32 @@
         },
         {
           "wait": "From another app"
+        }
+      ]
+    },
+    {
+      "id": "connect-device",
+      "path": "/nodes",
+      "readyText": "Studio",
+      "api": {
+        "/api/v1/devices/pairing": {
+          "code": "482915",
+          "expires_at": "{{in:595}}",
+          "state": "waiting",
+          "address": "192.168.1.20:7331",
+          "reachable": true,
+          "tls_short": "7F3A\u00b7C21E"
+        }
+      },
+      "actions": [
+        {
+          "click": "Connect a device"
+        },
+        {
+          "click": "Show a code"
+        },
+        {
+          "wait": "482 915"
         }
       ]
     },

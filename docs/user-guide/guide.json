@@ -1459,16 +1459,122 @@
     },
     {
       "id": "phone",
-      "title": "Use Toskar on your phone, tablet, or TV",
+      "title": "Use Toskar on your phone, tablet, TV, or watch",
+      "kind": "task",
+      "summary": "Chat with the AI on your computer from your phone, tablet, TV, or watch, and ask Toskar about text in any app.",
       "paragraphs": [
-        "The Toskar apps for phones, tablets, and TVs chat with the models on your computer, with your chats, memory, and knowledge. The device and the computer need to be on the same network.",
-        "Each device gets a key of its own when you connect it. That key can chat, see your conversations, and read lists such as models and computers, but it can't change settings, models, or keys on the computer. Disconnect a device any time under API Access → Devices, and it will need a new code to connect again.",
-        "On plain HTTP, someone else on the same network could see the code and the device's key. Connect devices on a network you trust."
+        "The Toskar app for phones, tablets, TVs, and watches uses the models on your computer, with your chats, memory, and knowledge. You connect each device to your computer once, with a code the computer shows.",
+        "A phone or tablet can also run a small model on the device itself, and a TV has a demo you can try without a computer."
       ],
-      "steps": [
-        "On the computer, open Computers and choose Connect a device (it's also under API Access → Devices). If local network access is off, choose Allow and show a code: it turns on at once, with no restart.",
-        "On the phone, tablet, or TV, open Toskar and choose your computer under On this network. If it isn't listed, enter the address the computer shows.",
-        "Type the 6-digit code. It works once, for 10 minutes. The computer shows the device's name when it connects."
+      "blocks": [
+        {
+          "type": "list",
+          "title": "What you need",
+          "items": [
+            "Toskar running on a computer: Toskar Pro, or Toskar Core. See [Install and start your first chat](#install).",
+            "The Toskar app from your device's app store.",
+            "The device and the computer on the same network to connect. Away from home, [Reach Toskar away from home](#anywhere) keeps it working."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Connect a device"
+        },
+        {
+          "type": "steps",
+          "items": [
+            "On the computer, open Computers and choose Connect a device. If network access is off, choose Allow and show a code. It turns on at once, with no restart.",
+            "On the device, open Toskar and choose your computer under On this network. If it isn't listed, enter the address the computer shows.",
+            "Type the 6-digit code. It works once, for 10 minutes. The computer shows the device's name when it connects."
+          ]
+        },
+        {
+          "type": "image",
+          "screen": "connect-device",
+          "alt": "Connect a device on the Computers page, showing the code 482 915, the steps, the computer's address, the encryption check code 7F3A·C21E, and Expires in 9:55",
+          "caption": "The code works once, for 10 minutes. The check code below it is what the device should show in its Settings."
+        },
+        {
+          "type": "note",
+          "tone": "tip",
+          "text": "The connection is encrypted. Once the device connects, it shows a short check code in its Settings. If it doesn't match the one the computer showed, disconnect the device and connect it again."
+        },
+        {
+          "type": "heading",
+          "text": "What a connected device can do"
+        },
+        {
+          "type": "paragraph",
+          "text": "Each device gets a key of its own. That key can chat, see your conversations, and read lists such as models and computers. It can't change settings, models, or keys on the computer."
+        },
+        {
+          "type": "paragraph",
+          "text": "Disconnect a device any time in Settings, under Your devices. An Admin can also disconnect any device in API Access, under Devices. A disconnected device needs a new code to connect again."
+        },
+        {
+          "type": "heading",
+          "text": "Ask Toskar about text in any app"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Select text in another app, then choose Ask Toskar from the share sheet or the text menu. Toskar can fix, rewrite, translate, explain, summarize, or reply to it. From the text menu, Replace puts the answer in place of the text.",
+            "Where the device has them, Fix, Rewrite, Translate, Summarize, and Explain with Toskar are also in Shortcuts, Spotlight, and Siri."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "On your TV and watch"
+        },
+        {
+          "type": "list",
+          "items": [
+            "On a TV, ask with the microphone on the remote, or type. Without a computer connected, the TV app's demo answers a few suggested questions with sample answers, and nothing leaves the TV.",
+            "On a watch, ask from the app or your watch face. The watch asks your computer directly, at home or away, and asks through your phone when it can't."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Troubleshooting"
+        },
+        {
+          "type": "table",
+          "columns": [
+            "What you see",
+            "What to do"
+          ],
+          "rows": [
+            [
+              "That code has expired",
+              "Choose Show a new code on the computer, and type the new one."
+            ],
+            [
+              "The code was cancelled after too many wrong tries",
+              "Choose Show a new code, and type it carefully."
+            ],
+            [
+              "The computer isn't under On this network",
+              "Enter the address the computer shows instead. Check that the device and the computer are on the same network."
+            ],
+            [
+              "Toskar may not look for computers on your network",
+              "Allow Toskar to use the local network in the device's privacy settings."
+            ],
+            [
+              "Can't reach your computer away from home",
+              "The computer may be off or asleep, or access from anywhere may be off on it. See [Reach Toskar away from home](#anywhere)."
+            ]
+          ]
+        },
+        {
+          "type": "related",
+          "sections": [
+            "anywhere",
+            "notifications",
+            "install",
+            "people"
+          ]
+        }
       ]
     },
     {
