@@ -109,7 +109,24 @@ jobs:
           set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add docs/user-guide/images
+          # main may have moved while the screens were captured, even with
+          # these same screenshots, as when a refresh merged meanwhile. A
+          # rebase can't merge two PNGs, so the screenshots go on top of
+          # the newest main instead, and nothing is committed if it has
+          # them already. A change to the interface since then starts
+          # another run, which captures it.
+          shots="$RUNNER_TEMP/user-guide-images"
+          rm -rf "$shots"
+          cp -R docs/user-guide/images "$shots"
+          git fetch origin main
+          git checkout -f -B docs-screenshots origin/main
+          rm -rf docs/user-guide/images
+          cp -R "$shots" docs/user-guide/images
+          git add -A docs/user-guide/images
+          if git diff --cached --quiet; then
+            echo "main already has these screenshots"
+            exit 0
+          fi
           git commit -m "docs: refresh the user guide's screenshots"
           scripts/release-publish.sh docs-screenshots \
             "Refresh the user guide's screenshots" \
