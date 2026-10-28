@@ -23,6 +23,10 @@ import (
 //   - Reuse: on a chat's later turns, most of the prompt comes from the
 //     cache. Some models, such as those with sliding-window attention, can
 //     defeat it, and a long chat then re-reads everything each turn.
+//   - New chats: a new chat with the same system prompt reads it from the
+//     cache, even after a chat with another one. llama-server keeps recent
+//     prompts in memory (--cache-ram), so a profile's long instructions are
+//     read once, not per chat.
 //   - Equivalence: an answer from a warm cache is the one a cold read gives.
 //     At temperature 0 the warm and cold turn write the same tokens, with the
 //     same top-5 probabilities within a tolerance.
@@ -57,6 +61,11 @@ var cacheChat = struct {
 
 // cacheAnswerTokens is how long each earlier answer may be.
 const cacheAnswerTokens = 64
+
+// otherSystem starts a chat with another assistant, between the store's
+// chats, as a person switching profiles does.
+var otherSystem = "You are a patient tutor for high school chemistry. " + strings.Repeat(
+	"Explain each step, check units, and ask a question back when the student's question is unclear. ", 60)
 
 // cacheQuestion is turn N, asked warm and cold.
 const cacheQuestion = "Summarize what I need to buy for 30 feet of gutter, with the aisle for each item."
@@ -197,11 +206,19 @@ func TestPromptCache(t *testing.T) {
 	warm := askServed(t, base, messages, 32, true)
 	cold := askServed(t, base, messages, 32, false)
 
+	// Another assistant's chat, then a new chat with the store's.
+	askServed(t, base, []map[string]string{{"role": "system", "content": otherSystem}, {"role": "user", "content": "What is a mole?"}}, 1, true)
+	newChat := askServed(t, base, []map[string]string{{"role": "system", "content": cacheChat.System}, {"role": "user", "content": "Where are the snow shovels?"}}, 1, true).Timings
+	t.Logf("a new chat: %d of %d prompt tokens from the cache (%.0f%%)", newChat.CacheN, newChat.CacheN+newChat.PromptN, reuse(newChat)*100)
+	if reuse(newChat) < minReuse {
+		t.Errorf("only %.0f%% of a new chat's prompt came from the cache, after a chat with another system prompt; at least %.0f%% should", reuse(newChat)*100, minReuse*100)
+	}
+
 	got := reuse(warm.Timings)
 	t.Logf("turn %d: %d of %d prompt tokens from the cache (%.0f%%)", len(cacheChat.Questions)+1, warm.Timings.CacheN, warm.Timings.CacheN+warm.Timings.PromptN, got*100)
 	diff, worst := sameAnswer(warm.Logprobs, cold.Logprobs, tolerance)
 	if path := config.Env("QUALITY_CACHE_REPORT"); path != "" {
-		writeCacheReport(t, path, turns, warm, cold, got, minReuse, tolerance, worst, diff)
+		writeCacheReport(t, path, turns, warm, cold, newChat, got, minReuse, tolerance, worst, diff)
 	}
 	if got < minReuse {
 		t.Errorf("only %.0f%% of turn %d's prompt came from the cache; at least %.0f%% should", got*100, len(cacheChat.Questions)+1, minReuse*100)
@@ -222,7 +239,7 @@ func TestPromptCache(t *testing.T) {
 	}
 }
 
-func writeCacheReport(t *testing.T, path string, turns []servedTiming, warm, cold servedTurn, got, minReuse, tolerance, worst float64, diff string) {
+func writeCacheReport(t *testing.T, path string, turns []servedTiming, warm, cold servedTurn, newChat servedTiming, got, minReuse, tolerance, worst float64, diff string) {
 	var b strings.Builder
 	b.WriteString("# Prompt cache (#838)\n\n")
 	fmt.Fprintf(&b, "Turn %d read **%.0f%%** of its prompt from the cache (%d of %d tokens); at least %.0f%% should.\n\n",
@@ -232,6 +249,7 @@ func writeCacheReport(t *testing.T, path string, turns []servedTiming, warm, col
 		fmt.Fprintf(&b, "| %d | %d | %d |\n", i+1, tm.CacheN, tm.PromptN)
 	}
 	fmt.Fprintf(&b, "| %d (warm) | %d | %d |\n| %d (cold) | %d | %d |\n\n", len(turns)+1, warm.Timings.CacheN, warm.Timings.PromptN, len(turns)+1, cold.Timings.CacheN, cold.Timings.PromptN)
+	fmt.Fprintf(&b, "A new chat with the same system prompt, after a chat with another, read **%.0f%%** from the cache (%d of %d tokens).\n\n", reuse(newChat)*100, newChat.CacheN, newChat.CacheN+newChat.PromptN)
 	if diff == "" {
 		fmt.Fprintf(&b, "The warm and cold answers match: the same %d tokens, top-5 probabilities at most %.4f apart (%.2f allowed).\n", len(warm.Logprobs), worst, tolerance)
 	} else {
