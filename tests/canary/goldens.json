@@ -1,0 +1,28 @@
+{
+  "good_tag": "b11174",
+  "model": {
+    "url": "https://huggingface.co/bartowski/Llama-3.2-1B-Instruct-GGUF/resolve/067b946cf014b7c697f3654f621d577a3e3afd1c/Llama-3.2-1B-Instruct-Q4_K_M.gguf",
+    "sha256": "6f85a640a97cf2bf5b8e764087b1e83da0fdb51d7c9fab7d0fece9385611df83"
+  },
+  "context": 1024,
+  "release": {
+    "mean_kld": 0.005,
+    "same_top": 0.97,
+    "ppl": 0.005
+  },
+  "cpu": {
+    "mean_kld": 0.01,
+    "same_top": 0.95,
+    "ppl": 0.01
+  },
+  "lanes": {
+    "cpu-arm64": {
+      "ppl": 15.6073,
+      "what": "CPU on an M5 Pro, macOS 27 (home-mac)"
+    },
+    "metal-arm64": {
+      "ppl": 15.5741,
+      "what": "Metal on an M5 Pro, macOS 27 (home-mac)"
+    }
+  }
+}
