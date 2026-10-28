@@ -223,9 +223,12 @@ func TestLlamaCanary(t *testing.T) {
 	}
 	base := filepath.Join(work, "base.kld")
 	defer os.Remove(base)
-	ngl := "0"
+	// On the CPU, no device at all: with no layers on a GPU, llama.cpp
+	// still sends large batches to it (op offload), as it did on Vulkan.
+	cpuOnly := []string{"-ngl", "0", "--device", "none"}
+	backend := cpuOnly
 	if gpu {
-		ngl = "99"
+		backend = []string{"-ngl", "99"}
 	}
 	common := []string{"-m", model, "-f", text, "-c", strconv.Itoa(g.Context)}
 
@@ -239,7 +242,7 @@ func TestLlamaCanary(t *testing.T) {
 	}()
 
 	// The good tag, on this lane's backend, is the base for both checks.
-	out := perplexity(t, good, append(common, "-ngl", ngl, "--kl-divergence-base", base)...)
+	out := perplexity(t, good, append(append(common, backend...), "--kl-divergence-base", base)...)
 	ppl, err := parseBase(out)
 	if err != nil {
 		t.Fatalf("%v\n%s", err, tail(out, 40))
@@ -276,7 +279,7 @@ func TestLlamaCanary(t *testing.T) {
 	kld := append(common, "--kl-divergence-base", base, "--kl-divergence")
 
 	if next != "" {
-		out := perplexity(t, next, append(kld, "-ngl", ngl)...)
+		out := perplexity(t, next, append(kld, backend...)...)
 		s, err := parseKLD(out)
 		if err != nil {
 			t.Fatalf("%v\n%s", err, tail(out, 40))
@@ -291,7 +294,7 @@ func TestLlamaCanary(t *testing.T) {
 		if next != "" {
 			tag, dir = r.NewTag, next
 		}
-		out := perplexity(t, dir, append(kld, "-ngl", "0")...)
+		out := perplexity(t, dir, append(kld, cpuOnly...)...)
 		s, err := parseKLD(out)
 		if err != nil {
 			t.Fatalf("%v\n%s", err, tail(out, 40))
