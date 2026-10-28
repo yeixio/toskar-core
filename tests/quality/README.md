@@ -192,6 +192,21 @@ the set confirms the license for that run.
   one where the model wrote no answer, is a failed case in the pass rate, not
   the end of the run. With the stub, whose replies are scripted, it fails the
   test.
+- **The prompt cache (#838):** llama-server keeps the last prompt's work, so
+  a chat's next turn reads only what's new. `TestPromptCache` sends a fixed
+  six-turn chat to the served model (`TOSKAR_QUALITY_MODEL_URL`, skipped
+  without one) and checks two things:
+  - **Reuse:** at least 80% of the last turn's prompt comes from the cache
+    (`TOSKAR_QUALITY_CACHE_MIN_REUSE`). A model whose attention defeats the
+    cache, such as one with sliding-window layers, falls well short.
+  - **Equivalence:** the last turn asked warm and cold (`cache_prompt` off),
+    at temperature 0, writes the same tokens, with top-5 log probabilities
+    within 0.05 (`TOSKAR_QUALITY_CACHE_TOLERANCE`).
+
+  `TOSKAR_QUALITY_CACHE_REPORT` writes the tokens read and cached each turn.
+  `TOSKAR_QUALITY_RUN='TestQualitySet|TestPromptCache' scripts/quality-model.sh
+  run` runs it with the quality set, as the weekly served-model job does; a
+  release runs the quality set alone.
 - **Real models on a daemon:** start a daemon with models installed, and with
   `TOSKAR_WEB_FIXTURES=tests/quality/web.json` so its web tools read the
   pages above instead of the internet (it logs a warning when they do), then run
