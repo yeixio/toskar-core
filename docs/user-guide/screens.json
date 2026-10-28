@@ -231,6 +231,73 @@
           }
         }
       ]
+    },
+    {
+      "id": "onboarding",
+      "path": "/onboarding",
+      "readyText": "What would you like your AI to do?"
+    },
+    {
+      "id": "onboarding-recommend",
+      "path": "/onboarding",
+      "readyText": "What would you like your AI to do?",
+      "actions": [
+        {
+          "click": "General Assistant"
+        },
+        {
+          "click": "Continue"
+        },
+        {
+          "wait": "Install recommended setup"
+        }
+      ],
+      "api": {
+        "/api/v1/models/recommend": {
+          "purpose": "general",
+          "roles": [
+            {
+              "role": "assistant",
+              "model_id": "gemma-4-e4b",
+              "required": true
+            }
+          ],
+          "models": [
+            {
+              "id": "gemma-4-e4b",
+              "display_name": "Gemma 4 E4B",
+              "summary": "General assistant that fits on this Mac.",
+              "family": "Gemma",
+              "parameters": "4B",
+              "size_bytes": 3200000000,
+              "memory_needed_bytes": 4500000000,
+              "context": 8192,
+              "capabilities": {
+                "tool_calling": true,
+                "vision": false,
+                "coding": true
+              },
+              "purpose": [
+                "general",
+                "coding"
+              ],
+              "installed": false,
+              "status": "available",
+              "runtime": [
+                "llamacpp"
+              ]
+            }
+          ],
+          "reason": "Fits comfortably in this Mac's 48 GB, and answers quickly for everyday questions.",
+          "estimated_storage_bytes": 3200000000,
+          "estimated_vram_bytes": 4500000000
+        }
+      }
+    },
+    {
+      "id": "models",
+      "path": "/models",
+      "readyText": "Best overall"
     }
   ]
 }

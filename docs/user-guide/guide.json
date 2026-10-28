@@ -6,22 +6,209 @@
       "paragraphs": [
         "Toskar runs AI models on computers you already own. Toskar Pro is the packaged app for your computer, and Toskar the app for your phone, tablet, watch, and TV. Toskar Core is the open-source engine behind them: a daemon, a local web UI, and an HTTP API. You do not need a hosted model account, and your chats, files, and knowledge stay on your computers unless you use a feature that goes online.",
         "Chat answers with sources you can check, remembers what you ask it to, and looks things up on the web when a question needs current information. It reads files you attach and makes documents and spreadsheets you ask for. Knowledge connects your own files, folders, databases, and web APIs, so answers use current prices, stock, and policies without retraining. Automations run prompts on a schedule. Train builds a specialized AI for one job. Computers lets several of your machines share the work.",
-        "This Core release publishes headless archives, Linux deb and rpm packages, and a Homebrew formula. They are not the Desktop application, and they are not code-signed. Mobile apps are separate products."
+        "This Core release publishes headless archives, Linux deb and rpm packages, and a Homebrew formula, which aren't code-signed. Toskar Pro, the app, comes from the Mac App Store and the Microsoft Store, and the Toskar app for phones, tablets, and TVs from their app stores."
       ]
     },
     {
       "id": "install",
       "title": "Install and start your first chat",
+      "kind": "task",
+      "summary": "Get Toskar on your computer, install a model that fits it, and ask your first question.",
       "paragraphs": [
-        "Toskar Pro is distributed separately from this Core release. The release files are Toskar Core. Verify them against SHA256SUMS.txt. Core archives are not code-signed.",
-        "On macOS, Homebrew installs Core: brew tap yeixio/toskar https://github.com/yeixio/toskar-core, then brew install yeixio/toskar/toskar, then run toskar. On Debian and Ubuntu, add the apt repository shown in the release notes and install the toskar package. RPM packages for x86_64 and aarch64 are attached to each release. The deb and rpm packages install a system service that starts Toskar at boot. Windows and other systems use the headless archive.",
-        "The daemon serves the web UI at http://127.0.0.1:7331. Only this computer can reach it until you turn on local network access."
+        "Toskar Pro is the app for your Mac or Windows computer, from the Mac App Store and the Microsoft Store. Toskar Core is the free, open-source service behind it, for servers, Linux, and anyone who wants it without the app.",
+        "Either way, the first time you open Toskar it looks at your computer, suggests an AI model that fits it, and downloads it. Then you can chat."
       ],
-      "steps": [
-        "Open http://127.0.0.1:7331, or open Toskar Pro if you installed it. Follow the hardware and model setup. The first model and runtime download need internet access and enough disk space.",
-        "Open Models and install a model the fit label recommends for this computer. Wait for the download to finish.",
-        "Open Chat and send a short message. New chats use Auto, which picks an installed model for each message. The first answer can take longer while the model loads.",
-        "Find your version in the sidebar or Settings, and match it to the documentation version above."
+      "blocks": [
+        {
+          "type": "list",
+          "title": "What you need",
+          "items": [
+            "A Mac with Apple silicon, or a Windows computer, for Toskar Pro. Toskar Core also runs on Linux.",
+            "Memory for the model. More memory runs larger, more capable models, and Toskar shows which ones fit.",
+            "Internet access and a few gigabytes of disk space for the first model download. After that, chats work offline."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Choose how to install"
+        },
+        {
+          "type": "table",
+          "columns": [
+            "For",
+            "Get"
+          ],
+          "rows": [
+            [
+              "A Mac",
+              "Toskar Pro from the Mac App Store. It's free to try; see [Toskar Pro's free trial and Unlock](#pro-trial)."
+            ],
+            [
+              "A Windows computer",
+              "Toskar Pro from the Microsoft Store, with a free trial."
+            ],
+            [
+              "A server or a Linux computer",
+              "Toskar Core, with the install script below. It runs as a service that starts when the computer does."
+            ],
+            [
+              "A Mac, without the app",
+              "Toskar Core with Homebrew."
+            ],
+            [
+              "Your phone, tablet, TV, or watch",
+              "The Toskar app, which uses the AI on your computer. See [Use Toskar on your phone, tablet, or TV](#phone)."
+            ]
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Install Toskar Pro"
+        },
+        {
+          "type": "steps",
+          "items": [
+            "Open the Mac App Store or the Microsoft Store and search for Toskar Pro.",
+            "Install it, then open it from your Applications folder or the Start menu."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Install Toskar Core"
+        },
+        {
+          "type": "paragraph",
+          "text": "On Linux, the install script adds the release's package, checks it against the release's SHA256SUMS.txt, and starts Toskar as a service. On a Mac it installs the release's files and starts them with launchd."
+        },
+        {
+          "type": "code",
+          "language": "sh",
+          "code": "curl -fsSL https://github.com/yeixio/toskar-core/releases/latest/download/install.sh | sh"
+        },
+        {
+          "type": "paragraph",
+          "text": "With Homebrew on a Mac:"
+        },
+        {
+          "type": "code",
+          "language": "sh",
+          "code": "brew tap yeixio/toskar https://github.com/yeixio/toskar-core\nbrew install yeixio/toskar/toskar\ntoskar"
+        },
+        {
+          "type": "note",
+          "tone": "tip",
+          "text": "These install system-wide, so CI runs the install script on a fresh Ubuntu computer instead of here. [Run without a desktop](#server) covers the Linux packages, the service, and running Toskar Core yourself."
+        },
+        {
+          "type": "heading",
+          "text": "Set up on first launch"
+        },
+        {
+          "type": "steps",
+          "items": [
+            "Open Toskar Pro, or go to http://127.0.0.1:7331 in a browser on the computer running Toskar Core. Only that computer can reach it at first.",
+            "Toskar shows what this computer has for running AI. Choose what you'd like your AI to do, such as General Assistant, then choose Continue.",
+            "Toskar recommends a setup that fits this computer. Choose Install recommended setup and wait for the download."
+          ]
+        },
+        {
+          "type": "image",
+          "screen": "onboarding",
+          "alt": "The Welcome screen showing this computer's processor, memory, graphics, and system, and a choice of General Assistant, Programming, Research, or Custom",
+          "caption": "First launch: Toskar looks at your computer, then asks what you'd like your AI to do."
+        },
+        {
+          "type": "image",
+          "screen": "onboarding-recommend",
+          "alt": "The recommended setup for General Assistant: Gemma 4 E4B, a 3 GB download, with Install recommended setup, Skip for now, and Back",
+          "caption": "The recommended setup, with its download size and the memory it will use."
+        },
+        {
+          "type": "heading",
+          "text": "Ask your first question"
+        },
+        {
+          "type": "steps",
+          "items": [
+            "Choose Chat in the sidebar, type a question, and press Enter.",
+            "The first answer can take a little longer while the model loads into memory. Later ones start sooner."
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Models shows more models, each labeled by how well it fits this computer. [Choose and manage models](#models) explains them, and [Chat](#chat) covers everything a chat can do."
+        },
+        {
+          "type": "image",
+          "screen": "models",
+          "alt": "The Models page recommending Gemma 4 E4B as Best overall, with an Excellent fit label, about 4.2 GB, and an estimated speed",
+          "caption": "Models labels each recommendation by how well it fits, with the memory it needs."
+        },
+        {
+          "type": "heading",
+          "text": "Check your version, and that Toskar is running"
+        },
+        {
+          "type": "paragraph",
+          "text": "From a terminal, `toskarctl version` shows the version of Toskar Core installed on this computer. Match it to the version of these docs."
+        },
+        {
+          "type": "code",
+          "language": "sh",
+          "code": "toskarctl version",
+          "test": "install-version",
+          "output": "Toskar Core …"
+        },
+        {
+          "type": "paragraph",
+          "text": "To check that it's running, ask it. A running Toskar answers with its status."
+        },
+        {
+          "type": "code",
+          "language": "sh",
+          "code": "curl -s http://127.0.0.1:7331/api/v1/health",
+          "test": "install-health",
+          "output": "{…\"status\":\"ok\"…}"
+        },
+        {
+          "type": "heading",
+          "text": "Troubleshooting"
+        },
+        {
+          "type": "table",
+          "columns": [
+            "What you see",
+            "What to do"
+          ],
+          "rows": [
+            [
+              "Could not get a recommendation",
+              "Toskar couldn't read this computer's hardware. Choose Skip for now, then pick a model in Models."
+            ],
+            [
+              "Model download failed",
+              "Check the internet connection and free disk space, then try again from Models."
+            ],
+            [
+              "The page at 127.0.0.1:7331 doesn't open",
+              "Toskar Core isn't running. On Linux, `systemctl status toskar` shows why. With Homebrew, run `toskar` in a terminal."
+            ],
+            [
+              "The first answer is slow",
+              "The model is loading into memory, which happens once. A smaller model loads and answers faster."
+            ]
+          ]
+        },
+        {
+          "type": "related",
+          "sections": [
+            "pro-trial",
+            "models",
+            "chat",
+            "server",
+            "phone"
+          ]
+        }
       ]
     },
     {
@@ -879,7 +1066,7 @@
         "Behind a reverse proxy that signs people in, such as Authelia, Authentik, Cloudflare Access, or Tailscale, set TOSKAR_TRUSTED_PROXIES to the proxy's address. Toskar then takes the person from the proxy's Remote-User header, makes them the first time, and gives them a role from their groups: TOSKAR_PROXY_ADMIN_GROUPS and TOSKAR_PROXY_MEMBER_GROUPS, with TOSKAR_PROXY_DEFAULT_ROLE for everyone else. TOSKAR_PROXY_OWNER_USER is your own name there. Only the listed address is believed. With the proxy on the same computer, everything from that computer counts as the proxy's, so open Toskar through the proxy there too.",
         "To let people sign in with Google, Microsoft, Okta, Authentik, Keycloak, or another OpenID Connect provider, register Toskar there with its address followed by /api/v1/oidc/callback, then set TOSKAR_OIDC_ISSUER, TOSKAR_OIDC_CLIENT_ID, and TOSKAR_OIDC_CLIENT_SECRET. The sign-in screen then shows Sign in with that provider. Groups become roles with TOSKAR_OIDC_ADMIN_GROUPS and TOSKAR_OIDC_MEMBER_GROUPS, and TOSKAR_OIDC_OWNER_EMAIL is your own address there."
       ],
-      "code": "tar -xzf yggdrasil-{{version}}-linux-amd64-headless.tar.gz\ncd yggdrasil-{{version}}-linux-amd64-headless\n./toskar"
+      "code": "tar -xzf toskar-{{version}}-linux-amd64-headless.tar.gz\ncd toskar-{{version}}-linux-amd64-headless\n./toskar"
     },
     {
       "id": "privacy",
