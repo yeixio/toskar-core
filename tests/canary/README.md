@@ -25,24 +25,30 @@ backend on one kind of hardware, and can have its own tolerances.
 
 ## Measurements
 
-On an M5 Pro, b11946 against b11174 (2026-10-28):
+b11946 against b11174 on the home runners (2026-10-28):
 
-| Run | Mean KLD | Same top | PPL change |
-| --- | --- | --- | --- |
-| b11174 against itself, Metal | 0.000000 | 100% | +0.086% |
-| b11946, Metal | 0.000002 | 99.95% | +0.087% |
-| b11946, CPU against CPU | 0.000000 | 99.98% | +0.087% |
-| b11946 on the CPU against b11174 on Metal | 0.0025 | 97.49% | +0.299% |
-| b11946, Metal, 8-bit KV cache | 0.0002 | 99.22% | +0.105% |
-| b11946, Metal, 4-bit KV cache | 0.067 | 86.50% | +5.69% |
+| Lane | Run | Mean KLD | Same top | PPL change |
+| --- | --- | --- | --- | --- |
+| Metal (M5 Pro) | b11174 against itself | 0.000000 | 100% | +0.086% |
+| Metal | b11946 | 0.000002 | 99.95% | +0.087% |
+| Metal | b11946 on the CPU against b11174 on Metal | 0.0025 | 97.49% | +0.299% |
+| CPU (M5 Pro) | b11946 | 0.000000 | 99.98% | +0.087% |
+| Vulkan (RX 7900 XTX) | b11946 | 0.0008 | 98.33% | +0.176% |
+| Vulkan | b11946 on the CPU against b11174 on Vulkan | 0.0026 | 97.44% | +0.415% |
+| CPU (Ryzen, x64) | b11946 | 0.0028 | 97.24% | +0.167% |
+| Metal | b11946, 8-bit KV cache | 0.0002 | 99.22% | +0.105% |
+| Metal | b11946, 4-bit KV cache | 0.067 | 86.50% | +5.69% |
 
 The perplexity of a run against its own base is about 0.09% higher because
 the base's probabilities are saved compressed. A 4-bit KV cache stands in
 for a broken kernel: it fails all three gates, and the 8-bit cache passes.
-The release tolerance (mean KLD 0.005, 97% same top, 0.5% perplexity) is
-twice what Metal and the CPU differ by, and a thirteenth of the 4-bit cache's
-KL divergence. The CPU tolerance is twice as loose again, since Metal and the
-CPU round differently.
+
+A release can change how a kernel rounds without being wrong: b11946 on the
+x64 CPU differs from b11174 about as much as a GPU differs from the CPU.
+The release tolerance (mean KLD 0.005, 96% same top, 0.5% perplexity)
+leaves room for that, and is still a thirteenth of the 4-bit cache's KL
+divergence. The CPU tolerance (0.01, 95%, 1%) is looser, since a GPU and the
+CPU round differently on every release.
 
 ## Running it
 

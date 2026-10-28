@@ -7,7 +7,7 @@
   "context": 1024,
   "release": {
     "mean_kld": 0.005,
-    "same_top": 0.97,
+    "same_top": 0.96,
     "ppl": 0.005
   },
   "cpu": {
