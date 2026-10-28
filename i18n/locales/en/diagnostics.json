@@ -230,5 +230,14 @@
       "other": "Other app",
       "unnamed": "Older apps and API"
     }
+  },
+  "promptCache": {
+    "title": "Reusing the chat so far",
+    "description": "On a chat's later turns, a model can skip the part it already read. This is how much it skipped over the last week, for models on this computer that were already running. More is faster.",
+    "model": "Model",
+    "reused": "Skipped",
+    "detail_one": "{{count}} turn · {{cached}} of {{prompt}} tokens",
+    "detail_other": "{{count}} turns · {{cached}} of {{prompt}} tokens",
+    "low": "Low: this model reads most of a long chat again each turn, so its answers start slowly."
   }
 }

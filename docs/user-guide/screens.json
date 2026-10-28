@@ -336,7 +336,7 @@
           "state": "waiting",
           "address": "192.168.1.20:7331",
           "reachable": true,
-          "tls_short": "7F3A\u00b7C21E"
+          "tls_short": "7F3A·C21E"
         }
       },
       "actions": [
@@ -379,6 +379,16 @@
         },
         {
           "wait": "Mark all read"
+        }
+      ]
+    },
+    {
+      "id": "diagnostics-prompt-cache",
+      "path": "/diagnostics",
+      "readyText": "Reusing the chat so far",
+      "actions": [
+        {
+          "scroll": "Reusing the chat so far"
         }
       ]
     }

@@ -167,6 +167,11 @@ func screenshotGET(path string) (string, bool) {
 			`{"client":"web","cold":false,"runs":63,"first_word_ms":410,"first_word_p90_ms":900},` +
 			`{"client":"web","cold":true,"runs":3,"first_word_ms":6900,"first_word_p90_ms":8100,"load_ms":5800},` +
 			`{"client":"","cold":false,"runs":12,"first_word_ms":530,"first_word_p90_ms":1100}]}`, true
+	// A week of later chat turns: Gemma reuses its cache, Qwen Coder doesn't.
+	case path == "/api/v1/diagnostics/prompt-cache":
+		return `{"since":"2026-10-01T00:00:00Z","models":[` +
+			`{"model_id":"gemma-4-e4b","turns":48,"prompt_tokens":96400,"cached_tokens":88900,"reuse":0.922},` +
+			`{"model_id":"qwen-coder-7b","turns":9,"prompt_tokens":21300,"cached_tokens":2100,"reuse":0.099,"low":true}]}`, true
 	// Setup status is an object, never a list: the Tools page reads its models.
 	// Images are set up, so the Tools page shows a working setup; video isn't.
 	case path == "/api/v1/images/setup":

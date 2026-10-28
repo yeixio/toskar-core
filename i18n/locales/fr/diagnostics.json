@@ -248,5 +248,15 @@
       "other": "Autre app",
       "unnamed": "Anciennes apps et API"
     }
+  },
+  "promptCache": {
+    "title": "Réutiliser la conversation",
+    "description": "Aux tours suivants d'une conversation, un modèle peut sauter ce qu'il a déjà lu. Voici ce qu'il a sauté la semaine dernière, pour les modèles de cet ordinateur déjà en marche. Plus, c'est plus rapide.",
+    "model": "Modèle",
+    "reused": "Sauté",
+    "detail_one": "{{count}} tour · {{cached}} sur {{prompt}} tokens",
+    "detail_many": "{{count}} tours · {{cached}} sur {{prompt}} tokens",
+    "detail_other": "{{count}} tours · {{cached}} sur {{prompt}} tokens",
+    "low": "Faible : ce modèle relit presque toute une longue conversation à chaque tour, ses réponses commencent donc lentement."
   }
 }

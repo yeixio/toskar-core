@@ -1,6 +1,7 @@
 import type {
   ModelURLPreview,
   FirstAnswers,
+  PromptCache,
   ConversationSummary,
   Capabilities,
   Capability,
@@ -1567,6 +1568,7 @@ export const api = {
   sendReport: (body: { product: 'core'; app: string; where: string; code?: string; error: string; note?: string; email?: string; details: boolean }) =>
     request<{ status: 'created' | 'added'; number: number }>('/api/v1/diagnostics/report', { method: 'POST', body: JSON.stringify(body) }),
   getFirstAnswers: (days = 7) => request<FirstAnswers>(`/api/v1/diagnostics/first-answers?days=${days}`),
+  getPromptCache: (days = 7) => request<PromptCache>(`/api/v1/diagnostics/prompt-cache?days=${days}`),
   /** Each computer's live CPU, memory, and GPU figures, this one first (#317). */
   getLiveFigures: () => request<LiveFigures[]>('/api/v1/performance/live'),
   /** What this computer still needs for Toskar to use its GPU (#317). */

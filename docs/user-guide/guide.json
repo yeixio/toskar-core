@@ -1772,6 +1772,94 @@
       ]
     },
     {
+      "id": "long-chats",
+      "title": "Why do answers in a long chat start slowly?",
+      "kind": "task",
+      "summary": "See how much of a chat each model skips reading again, and what to do when one reads it all every turn.",
+      "paragraphs": [
+        "Before a model answers, it reads the whole chat so far. On a chat's later turns, it can skip the part it already read, kept in its prompt cache, and read only your new message. A model that can't skip reads a long chat from the start every turn, so its answers start later as the chat grows."
+      ],
+      "blocks": [
+        {
+          "type": "list",
+          "title": "What you need",
+          "items": [
+            "A few chats of more than one turn from the last week, with models running on this computer."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Where to look"
+        },
+        {
+          "type": "paragraph",
+          "text": "Open Diagnostics. Reusing the chat so far lists each model with the share of its later turns' prompts it skipped, and how many turns and tokens that covers."
+        },
+        {
+          "type": "image",
+          "screen": "diagnostics-prompt-cache",
+          "alt": "Diagnostics listing Gemma 4 E4B at 92% skipped and Qwen Coder 7B at 10%, marked low",
+          "caption": "Gemma 4 E4B skipped 92% of what it had read before; Qwen Coder 7B is marked low."
+        },
+        {
+          "type": "table",
+          "columns": [
+            "What it shows",
+            "What it means"
+          ],
+          "rows": [
+            [
+              "80% or more",
+              "Normal. Each turn reads little more than your new message."
+            ],
+            [
+              "Low, under 50%",
+              "Over at least five turns, the model read most of each chat again. Its answers slow down as a chat grows."
+            ],
+            [
+              "No panel",
+              "No chat had a second turn this week, or your models ran on another computer or app, which don't report this."
+            ]
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Only turns after a chat's first are counted, and only when the model was already running. A model that just started has nothing to skip. Models on paired computers and in other apps, such as Ollama, don't report it, so they aren't listed."
+        },
+        {
+          "type": "note",
+          "tone": "tip",
+          "text": "Toskar's weekly tests hold a small model to 80% or more, and check that an answer from the cache matches one read from scratch, word for word."
+        },
+        {
+          "type": "heading",
+          "text": "Troubleshooting"
+        },
+        {
+          "type": "paragraph",
+          "text": "When a model is marked low:"
+        },
+        {
+          "type": "steps",
+          "items": [
+            "Switch between chats less while you wait for answers. Each chat you send to the same model can push the others out of its cache.",
+            "Try a different model for long chats. Some models, such as those with sliding-window attention, can't skip as much.",
+            "Let a long chat be shortened. Auto-compact summarizes older turns, so there's less to read again.",
+            "If a model stays low, report it from Diagnostics, so Toskar can tune how it runs that model."
+          ]
+        },
+        {
+          "type": "related",
+          "sections": [
+            "auto-compact",
+            "gpu",
+            "diagnostics",
+            "report"
+          ]
+        }
+      ]
+    },
+    {
       "id": "troubleshooting",
       "title": "Troubleshooting",
       "paragraphs": [

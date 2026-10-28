@@ -248,5 +248,15 @@
       "other": "Altra app",
       "unnamed": "App meno recenti e API"
     }
+  },
+  "promptCache": {
+    "title": "Riutilizzo della chat finora",
+    "description": "Nei turni successivi di una chat, un modello può saltare ciò che ha già letto. Ecco quanto ha saltato nell'ultima settimana, per i modelli su questo computer già in esecuzione. Di più è più veloce.",
+    "model": "Modello",
+    "reused": "Saltato",
+    "detail_one": "{{count}} turno · {{cached}} di {{prompt}} token",
+    "detail_many": "{{count}} turni · {{cached}} di {{prompt}} token",
+    "detail_other": "{{count}} turni · {{cached}} di {{prompt}} token",
+    "low": "Basso: questo modello rilegge quasi tutta una chat lunga a ogni turno, quindi le sue risposte iniziano lentamente."
   }
 }

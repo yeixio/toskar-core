@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Toskar Control Plane API
-  version: "1.61"
+  version: "1.62"
   description: >-
     Local AI control plane API for Toskar, its OpenAI-compatible routes, and its MCP server.
     On the default loopback bind no key is needed. When the daemon listens on any other address,
@@ -2758,6 +2758,27 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/FirstAnswers"
+  /api/v1/diagnostics/prompt-cache:
+    get:
+      summary: How much of chats' later turns each model read from its prompt cache
+      description: >-
+        Per model, the prompt and cached tokens of chat turns after a chat's first, where the model ran
+        on this computer and was already running (#838). Automations are left out.
+      operationId: getPromptCache
+      tags: [Diagnostics]
+      parameters:
+        - name: days
+          in: query
+          description: How many days back to look; 7 by default, 90 at most.
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Prompt cache reuse
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PromptCache"
   /v1/models:
     get:
       summary: OpenAI-compatible model list
@@ -8255,6 +8276,26 @@ components:
         first_word_ms: {type: number, description: The median wait from the request to the first token; FirstWordP90Ms is the wait nine in ten answers beat.}
         first_word_p90_ms: {type: number}
         load_ms: {type: number, description: The median time spent loading models; 0 when warm.}
+    PromptCache:
+      type: object
+      description: How much of each chat turn's prompt the models on this computer read from their prompt cache instead of processing again (#838), over chats' later turns.
+      required: [models, since]
+      properties:
+        since: {type: string, format: date-time}
+        models:
+          type: array
+          items: {$ref: '#/components/schemas/PromptCacheModel'}
+    PromptCacheModel:
+      type: object
+      description: One model's later turns.
+      required: [cached_tokens, model_id, prompt_tokens, reuse, turns]
+      properties:
+        model_id: {type: string}
+        turns: {type: integer, description: The later turns of chats the model answered, already running.}
+        prompt_tokens: {type: integer}
+        cached_tokens: {type: integer}
+        reuse: {type: number, description: cached_tokens over prompt_tokens, 0 to 1.}
+        low: {type: boolean, description: Set when, over at least 5 turns, under half the prompt came from the cache.}
     MessageMeta:
       type: object
       description: What an assistant answer used and did.
