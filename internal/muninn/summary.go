@@ -187,8 +187,26 @@ type Generate func(ctx context.Context, messages []pluginapi.ChatMessage) (strin
 
 const summaryInstructions = "You summarize a conversation so an assistant can continue it later. " +
 	"Keep facts, decisions, commitments, names, numbers, preferences, and open questions. " +
+	"Above all keep what the user said about themselves and the people and places in their life, " +
+	"however early or briefly they said it. " +
 	"Write at most 200 words of plain sentences about what the user and the assistant said. " +
 	"Do not add anything that was not said, and do not address the user."
+
+// summaryAsk follows the transcript. A small model given a transcript that
+// ends on a question answers that question instead of summarizing (Qwen
+// 2.5 7B wrote a packing list, and lost the facts before it; #834), so the
+// request says again, after it, what to write.
+const summaryAsk = "\n</conversation>\n\nNow write the summary of the conversation above, as the instructions say. " +
+	"Don't answer or continue it: its last message is part of what you summarize."
+
+// summaryBody is the summarizer's request for a chunk of the conversation,
+// with the earlier summary it continues, if any.
+func summaryBody(earlier, text string, chunk []contracts.Message) string {
+	if text != "" {
+		return earlier + text + "\n\nThe conversation since then:\n<conversation>\n" + transcript(chunk) + summaryAsk
+	}
+	return "Conversation:\n<conversation>\n" + transcript(chunk) + summaryAsk
+}
 
 func transcript(msgs []contracts.Message) string {
 	var b strings.Builder
@@ -281,9 +299,9 @@ func (s *Summarizer) run(ctx context.Context, conversationID string, stored []co
 		earlier = "Earlier summary, which the person corrected (keep their corrections):\n"
 	}
 	for _, chunk := range chunks(source[start:], tokens(windowTokens, sourceFits), s.Count) {
-		body := corrected + "Conversation:\n\n" + transcript(chunk)
-		if text != "" {
-			body = earlier + text + "\n\nConversation since then:\n\n" + transcript(chunk)
+		body := summaryBody(earlier, text, chunk)
+		if text == "" {
+			body = corrected + body
 		}
 		text, err = s.Generate(ctx, []pluginapi.ChatMessage{
 			{Role: "system", Content: summaryInstructions},
