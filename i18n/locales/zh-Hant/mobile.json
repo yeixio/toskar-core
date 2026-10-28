@@ -269,6 +269,7 @@
       "automatic": "自動",
       "automaticHint": "Toskar 會為每則訊息選擇最合適的可用電腦。",
       "effort": "投入程度",
+      "thinking": "思考",
       "memoryOn": "記憶已開啟",
       "memoryOff": "記憶已關閉",
       "memoryOffHint": "這個聊天的記憶已關閉。已儲存的記憶不會在這裡使用，也不會被刪除。",
@@ -434,6 +435,16 @@
     "thorough": {
       "label": "徹底",
       "hint": "閱讀更多網頁，使用可容納的最大模型，並檢查兩次數據。"
+    }
+  },
+  "thinking": {
+    "on": {
+      "label": "開",
+      "hint": "先思考再回答：開始得慢一些，更擅長數學、邏輯和計畫。"
+    },
+    "off": {
+      "label": "關",
+      "hint": "直接回答：快得多，適合不需要仔細思考的問題。"
     }
   },
   "answer": {

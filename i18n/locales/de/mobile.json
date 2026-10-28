@@ -269,6 +269,7 @@
       "automatic": "Automatisch",
       "automaticHint": "Toskar wählt für jede Nachricht den besten verfügbaren Computer.",
       "effort": "Aufwand",
+      "thinking": "Nachdenken",
       "memoryOn": "Gedächtnis an",
       "memoryOff": "Gedächtnis aus",
       "memoryOffHint": "Das Gedächtnis ist für diesen Chat aus. Gespeicherte Erinnerungen werden hier nicht genutzt und nicht gelöscht.",
@@ -437,6 +438,16 @@
     "thorough": {
       "label": "Gründlich",
       "hint": "Liest mehr Seiten, nutzt das größte passende Modell und prüft Zahlen zweimal."
+    }
+  },
+  "thinking": {
+    "on": {
+      "label": "An",
+      "hint": "Erst nachdenken, dann antworten: startet langsamer, besser bei Mathe, Logik und Plänen."
+    },
+    "off": {
+      "label": "Aus",
+      "hint": "Sofort antworten: viel schneller, für Fragen ohne viel Überlegung."
     }
   },
   "answer": {

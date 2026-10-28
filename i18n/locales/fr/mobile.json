@@ -269,6 +269,7 @@
       "automatic": "Automatique",
       "automaticHint": "Toskar choisit le meilleur ordinateur disponible pour chaque message.",
       "effort": "Effort",
+      "thinking": "Réflexion",
       "memoryOn": "Mémoire activée",
       "memoryOff": "Mémoire désactivée",
       "memoryOffHint": "La mémoire est désactivée pour cette discussion. Les souvenirs enregistrés ne sont pas utilisés ici et ne sont pas supprimés.",
@@ -440,6 +441,16 @@
     "thorough": {
       "label": "Approfondi",
       "hint": "Lit plus de pages, utilise le plus grand modèle qui tient en mémoire et vérifie les chiffres deux fois."
+    }
+  },
+  "thinking": {
+    "on": {
+      "label": "Activée",
+      "hint": "Réfléchit avant de répondre : démarre plus lentement, meilleur en maths, en logique et pour les plans."
+    },
+    "off": {
+      "label": "Désactivée",
+      "hint": "Répond tout de suite : bien plus rapide, pour les questions qui ne demandent pas de réflexion poussée."
     }
   },
   "answer": {

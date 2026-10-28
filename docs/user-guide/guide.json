@@ -699,6 +699,10 @@
           ]
         },
         {
+          "type": "paragraph",
+          "text": "In the app on your phone or tablet, a chat with your computer has the same choice: tap the button beside the model to open the chat's options, and Thinking is below Effort when the chat's model thinks before it answers."
+        },
+        {
           "type": "image",
           "screen": "chat-thinking",
           "alt": "The chat options with Qwen3 8B chosen as the model, showing Thinking set to Off below Effort",
