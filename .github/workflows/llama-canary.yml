@@ -1,0 +1,123 @@
+name: llama.cpp canary
+
+# Checks each night that the newest llama.cpp release, the one Toskar would
+# install, computes what the known-good tag does on the backends people run
+# (#833, tests/canary): Metal on the home Mac, Vulkan on the home Linux box's
+# AMD card, and the CPU on both. A failure opens an issue with the numbers
+# (or adds them to the open one).
+#
+# Run it by hand with "refresh" to measure each lane's golden on the good
+# tag. The run shows the goldens.json change; it goes in through a reviewed
+# pull request, never from the workflow.
+
+on:
+  schedule:
+    - cron: "41 9 * * *"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: The llama.cpp release to check, such as b11946. Blank for the newest.
+        default: ""
+      refresh:
+        description: Measure the goldens on the good tag instead of checking a release.
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: llama-canary
+  cancel-in-progress: false
+
+jobs:
+  canary:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - host: mac
+            runs-on: ${{ vars.MAC_RUNS_ON }}
+            lanes: metal-arm64:macos-arm64:1 cpu-arm64:macos-arm64:0
+          - host: linux
+            runs-on: ${{ vars.TRUSTED_RUNS_ON }}
+            lanes: vulkan-x64:ubuntu-vulkan-x64:1 cpu-x64:ubuntu-x64:0
+    name: canary (${{ matrix.host }})
+    # The lanes need the home runners' GPUs; GitHub's runners have none.
+    if: vars.MAC_RUNS_ON != '' && vars.TRUSTED_RUNS_ON != ''
+    runs-on: ${{ fromJSON(matrix.runs-on) }}
+    timeout-minutes: 60
+    env:
+      GH_TOKEN: ${{ github.token }}
+      CANARY_NEW_TAG: ${{ inputs.tag }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@v7
+        with:
+          go-version: "1.26.x"
+          check-latest: true
+          # Self-hosted runners keep Go's caches on disk.
+          cache: false
+      - name: Cache
+        run: |
+          # Builds and the model stay on the runner between nights; builds
+          # unused for two weeks go.
+          echo "CANARY_CACHE=$RUNNER_TOOL_CACHE/toskar-canary" >> "$GITHUB_ENV"
+          mkdir -p "$RUNNER_TOOL_CACHE/toskar-canary"
+          find "$RUNNER_TOOL_CACHE/toskar-canary" -mindepth 1 -maxdepth 1 -name 'llama.cpp-*' -mtime +14 -exec rm -rf {} +
+      - name: Vulkan image
+        if: matrix.host == 'linux'
+        run: |
+          # llama.cpp's Linux builds run in Debian 13 with Mesa's drivers,
+          # as the daemon's GPU image does (Dockerfile, target gpu), with the
+          # card passed in.
+          docker build -t toskar-canary-vulkan - <<'EOF'
+          FROM debian:trixie-slim
+          RUN apt-get update && apt-get install -y --no-install-recommends \
+                ca-certificates libgomp1 libcurl4t64 libvulkan1 mesa-vulkan-drivers vulkan-tools \
+           && rm -rf /var/lib/apt/lists/*
+          EOF
+          exec="docker run --rm --device /dev/dri -e LD_LIBRARY_PATH -v $CANARY_CACHE:$CANARY_CACHE -v $PWD:$PWD -w $PWD toskar-canary-vulkan"
+          echo "TOSKAR_CANARY_EXEC=$exec" >> "$GITHUB_ENV"
+          echo "GPUs the canary can use:"
+          docker run --rm --device /dev/dri toskar-canary-vulkan vulkaninfo --summary 2>/dev/null | grep -E "deviceName|deviceType" || echo "::warning::No Vulkan device; the Vulkan lane will fail."
+      - name: Canary
+        run: |
+          status=0
+          for lane in ${{ matrix.lanes }}; do
+            IFS=: read -r name build gpu <<<"$lane"
+            report="$RUNNER_TEMP/canary-$name.md"
+            if [ "${{ inputs.refresh }}" = true ]; then
+              CANARY_LANE="$name" CANARY_BUILD="$build" CANARY_GPU="$gpu" TOSKAR_CANARY_REPORT="$report" \
+                scripts/llama-canary.sh refresh || status=1
+            else
+              CANARY_LANE="$name" CANARY_BUILD="$build" CANARY_GPU="$gpu" TOSKAR_CANARY_REPORT="$report" \
+                scripts/llama-canary.sh run || status=1
+            fi
+            if [ -f "$report" ]; then cat "$report" >> "$GITHUB_STEP_SUMMARY"; fi
+          done
+          if [ "${{ inputs.refresh }}" = true ]; then
+            { echo '### goldens.json'; echo; echo '```diff'; git diff tests/canary/goldens.json; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+          fi
+          exit "$status"
+      - name: Open an issue
+        if: failure() && inputs.refresh != true
+        run: |
+          # One open issue holds a regression's nights, so a release that
+          # stays broken doesn't open one a day.
+          title="llama.cpp canary failed"
+          body="$RUNNER_TEMP/issue.md"
+          {
+            echo "The [llama.cpp canary]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID) failed on the ${{ matrix.host }} runner (#833)."
+            echo
+            cat "$RUNNER_TEMP"/canary-*.md 2>/dev/null || echo "It stopped before it measured anything; see the run's log."
+          } > "$body"
+          open="$(gh issue list -R "$GITHUB_REPOSITORY" --state open --search "\"$title\" in:title" --json number -q '.[0].number')"
+          if [ -n "$open" ]; then
+            gh issue comment "$open" -R "$GITHUB_REPOSITORY" --body-file "$body"
+          else
+            gh issue create -R "$GITHUB_REPOSITORY" --title "$title" --body-file "$body"
+          fi

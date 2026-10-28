@@ -1,0 +1,40 @@
+====== Perplexity statistics ======
+Mean PPL(Q)                   :  15.607327 ±   0.618801
+Mean PPL(base)                :  15.560783 ±   0.616643
+Cor(ln(PPL(Q)), ln(PPL(base))):  99.95%
+Mean ln(PPL(Q)/PPL(base))     :   0.002987 ±   0.001219
+Mean PPL(Q)/PPL(base)         :   1.002991 ±   0.001222
+Mean PPL(Q)-PPL(base)         :   0.046545 ±   0.019113
+
+====== KL divergence statistics ======
+Mean    KLD:   0.002451 ±   0.000048
+Maximum KLD:   0.066882
+99.9%   KLD:   0.042149
+99.0%   KLD:   0.017440
+95.0%   KLD:   0.007025
+90.0%   KLD:   0.004842
+Median  KLD:   0.001718
+10.0%   KLD:   0.000066
+ 5.0%   KLD:   0.000009
+ 1.0%   KLD:  -0.000001
+ 0.1%   KLD:  -0.000018
+Minimum KLD:  -0.000039
+
+====== Token probability statistics ======
+Mean    Δp: -0.091 ± 0.016 %
+Maximum Δp: 11.126%
+99.9%   Δp:  7.464%
+99.0%   Δp:  3.571%
+95.0%   Δp:  1.447%
+90.0%   Δp:  0.719%
+75.0%   Δp:  0.098%
+Median  Δp: -0.001%
+25.0%   Δp: -0.231%
+10.0%   Δp: -1.068%
+ 5.0%   Δp: -1.823%
+ 1.0%   Δp: -4.103%
+ 0.1%   Δp: -8.432%
+Minimum Δp: -13.244%
+RMS Δp    :  1.192 ± 0.035 %
+Same top p: 97.492 ± 0.209 %
+

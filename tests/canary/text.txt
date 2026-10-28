@@ -1,0 +1,772 @@
+# Privacy
+
+Toskar Core does not send usage telemetry by default.
+
+A search of this repository found no analytics or crash-reporting client (no Sentry, PostHog, Mixpanel, Amplitude, Google Analytics, or a metrics upload). The `internal/tools/plausible.go` file checks whether a tool call looks like a real path or command. It is not the Plausible analytics product. Metrics stored by the daemon stay in the local SQLite database.
+
+If that changes, this document should name what is collected, where it is sent, the default, and how to turn it off.
+
+## What is stored on this computer
+
+Everything Toskar keeps is in the data directory. [Configuration](configuration.md#data-directory) lists every path. In short:
+
+| Path | Contents |
+| --- | --- |
+| `toskar.db` (`yggdrasil.db` in an install from before the rename) | The audit of tool calls (what each was about, never file contents), chats and their messages, summaries of long conversations, memories, profiles, settings, model start and crash counts for community ratings (kept 90 days), automations and their results, specialized AIs and their examples, knowledge indexes and vectors, run records (traces, task history, what left this computer), notifications, API key hashes, paired computers, and join token records (a proof key and when each was used, never the token). |
+| `artifacts/` | Files attached to chats and files the assistant made, one folder per chat. Deleting a chat deletes its files. |
+| `knowledge/` | Copies of content you pasted or uploaded as knowledge, and the recognized text of scanned PDFs. Linked files, folders, databases, and web APIs stay where they are. |
+| `training/` | Trained adapters, exported GGUF files, and downloaded training weights. |
+| `models/`, `runtimes/` | Model files, llama.cpp, and the Python environments for training and text recognition. |
+| `logs/` | JSON logs. They are not sent anywhere. |
+| `secrets/` | This computer's identity, and credentials for connected services, MCP tool sources, database and API knowledge, and notification destinations (SMTP passwords, ntfy access tokens, and webhook signing secrets). Directory mode `0700`, files `0600`. API keys are stored as bcrypt hashes in the database, never as plaintext. |
+
+What you can see and remove:
+
+- **Chats:** saved while `save_chat_history` is on (the default). Delete a chat from the chat list.
+- **Memories:** listed on the Memory page, where you can edit, pause, mark **This computer only**, or delete them, or turn memory off. A secret such as a password, key, or card number is never saved as a memory.
+- **Run records:** prompts and tool results of past runs. They are kept for 30 days by default and removed daily. Settings → **What left this computer** sets **Keep run records for** (7, 30, or 90 days, or **Keep them**) and has **Delete run records now**. Deleting them also clears cached web searches and pages. Chats are not run records and are not deleted with them.
+- **Files outside chats:** a file that belongs to no chat, made by an automation run, the API, or an MCP client, or uploaded and never sent, is removed a week after it was made. Files in a chat stay until the chat is deleted.
+- **Knowledge, files, specialized AIs:** each has a delete action. Deleting a specialized AI deletes its adapters and exports.
+
+The diagnostic bundle is written to omit secrets, private keys, and API key material. Its `runtime.json` and `profiles/` describe the daemon's memory and goroutines: function names, counts, and sizes, with no prompts, files, or credentials. Do not assume a log file has been redacted. Remove tokens and personal text before you paste a log into an issue.
+
+## Encryption
+
+Toskar does not encrypt its own files, and encryption is not required to use it.
+
+- **At rest:** the database, `artifacts/`, `knowledge/`, and the other files above are plain files on disk. `secrets/` is readable only by your user account (`0700`/`0600`), and API keys are bcrypt hashes. Turn on full-disk encryption to keep everything encrypted while the computer is off or locked: FileVault on macOS, BitLocker or Device Encryption on Windows, and LUKS on Linux. Settings → **Your data stays private** checks it for the disk holding the data folder (#213): "Your disk is encrypted with FileVault", or, when it's off, where to turn it on. macOS reads `fdesetup status`; Windows reads the drive's BitLocker protection, which needs no administrator; Linux looks for a LUKS (`crypt`) layer under the data folder's device with `findmnt` and `lsblk`. Other setups, such as ZFS encryption or a network folder, show the general advice. `GET /api/v1/privacy` returns it as `disk_encryption` (`state`: `on`, `off`, `encrypting`, or `unknown`; `method`), and the diagnostics bundle's hardware file includes it.
+- **To the internet:** web search, page reads, model and runtime downloads, community ratings, and the built-in services use HTTPS. Addresses you enter, such as an external server, a webhook, an MCP server, or your own map services, are encrypted when they use `https://`. Email requires TLS or STARTTLS except for a mail server on this computer.
+- **Between your computers:** Bifrost (port 7332) uses TLS, checked against the key each computer paired with, so a chat placed on a paired computer, its answer, tool jobs, and training runs are encrypted. A paired computer running an older Toskar is still reached over plain HTTP, and the Computers page marks it **Not encrypted** until it's updated. See [encryption between computers](clustering.md#encryption).
+- **Local network access:** the API on port 7331 answers HTTPS, with a certificate whose fingerprint API Access shows, and plain HTTP for phones on an older app. Use `https://` from other devices. See [API exposure](#api-exposure).
+
+Use paired computers and local network access on a network you trust. Settings → **Your data stays private** states the same in the app.
+
+## What can leave the machine
+
+Nothing leaves because the daemon started. Traffic is sent only when a feature that talks to the network is used:
+
+| Action | Where data goes |
+| --- | --- |
+| Install or update llama.cpp | `api.github.com` and the GitHub release download for `ggml-org/llama.cpp` |
+| Search or install a Hugging Face model | Hugging Face Hub |
+| Install a model from a URL | The host in that URL |
+| Places and directions (`places.search`, `places.details`, `maps.route`, `maps.distance`) | OpenStreetMap's public services, or your own (see `places_*` in configuration): Nominatim with the place or address asked about, Overpass with the kind of place and the point searched around, and the router with the two points. They run only when the profile allows the Internet capability. Each request is recorded; a repeat within the hour is answered from memory and sends nothing. |
+| Browser (`browser.*`) | The sites you or the assistant open, and the resources their pages load, from an isolated browser with a fresh profile. Nothing on this computer or the local network can be reached. Each page opened and each download is recorded. Clicking, typing, and downloading ask first. |
+| Web search and page reads (`internet.search`, `internet.open`) | DuckDuckGo's public HTML search, then the pages opened. They run only when the profile allows them. Only public addresses are opened: a page on this computer or the local network, such as the daemon's own API or a router's admin page, is refused, even when another page redirects to it. A repeat within 15 minutes (searches) or 30 minutes (pages) is answered from the cache and sends nothing. |
+| Connected services (GitHub, Home Assistant, Email, Calendar) | That service, with the credential you stored, when one of its tools runs. Email and Calendar talk only to the mail and CalDAV servers you entered. |
+| MCP tool sources | That server, when one of its tools runs |
+| Database and web API knowledge | The database or URL you connected, when it is refreshed |
+| First training run | The `astral-sh/uv` GitHub release, Python builds uv fetches, and pinned packages from PyPI |
+| Training a base model the first time | Hugging Face Hub, for the base model's training weights. Your examples are not uploaded. |
+| Training on a paired computer | That computer receives the training examples and the AI's instructions over Bifrost, and returns the adapter. It deletes its copy when the job ends. |
+| First code run (`code.execute`) | PyPI, for numpy, pandas, matplotlib, and openpyxl. The code itself has no network. |
+| First use of speech (`speech.transcribe`, `speech.synthesize`, Read aloud) | PyPI, for faster-whisper and Piper, then Hugging Face for each Whisper model and Piper voice the first time it is used. The audio and text stay on this computer. |
+| Image and video generation setup | GitHub, for the pinned stable-diffusion.cpp release (and, for video, the TAEHV decoder), and Hugging Face, for the model's files. Only when you set it up. Prompts, images, and clips stay on this computer. |
+| First scanned PDF in Knowledge | PyPI, for the text-recognition packages (about 110 MB). The PDF itself is read on this computer. |
+| A chat placed on a paired computer | That computer receives the prompt and context over Bifrost |
+| An image or speech tool run on a paired computer | That computer receives the tool's arguments, such as the prompt, and the chat file it needs, such as the image to edit or the audio to transcribe, over Bifrost. It returns the result and keeps nothing. Each job is recorded. |
+| Email, push, and webhook notifications | Your SMTP server, the ntfy server (ntfy.sh or your own), or the webhook address, with each notification's title and text; push to ntfy.sh sends only a generic notice unless you choose full content. Only for destinations you add, and only for the categories and severities you choose |
+| Community ratings | Only when you choose. With **Show community ratings** on (off by default), the public ratings summary is downloaded once a day from the ratings service, or from GitHub when it cannot be reached, while you browse models; nothing about you is sent. A rating is sent only when you tick **Share this rating with the community**: the stars and reasons, the model, the computer's class (such as Apple M4 Max with 32–64 GB of unified memory), a random rating ID, and the app version. With **Include how it runs here** also ticked, the model's median speed and time to first token on this computer, how many of its starts worked, whether it crashed or ran out of memory, and how much context it used; the dialog shows the numbers first. Never prompts, chats, file names, the computer's name, your user name, or an address; the service does not store IP addresses. Each download, rating shared, and rating withdrawn is recorded. |
+| External server (`external-openai`) | Only for a chat where you choose one of its models: the prompt and conversation, with the API key you stored, to the base URL you set. Auto, fallback, offline profiles, and chats using memories or knowledge marked This computer only never send anything there. Listing its models sends the API key to `/v1/models`. Each chat is recorded. |
+| Bifrost discovery and pairing | Other computers on the local network, or the static peers you listed |
+| Joining a network (`toskarctl join`) | The computer that made the join command: this computer's name, ID, public key, and Bifrost address. The token itself is never sent; only a proof made from it. Leaving tells each paired computer. Both are recorded. |
+| LAN API | Any client that can reach port 7331 after you turn on local network access |
+
+## What left this computer
+
+Each run records what it sent off this computer: the query of each web search, the address of each page read, the prompt and context sent to a paired computer (or the training examples), a chat sent to an external server, and what a connected service was asked. Long text, such as the body of a comment posted to GitHub, is left out of the record.
+
+Settings → **What left this computer** lists the records, newest first, and counts them for the last 30 days. `GET /api/v1/egress` returns the same list. The records are run records, so the retention period and **Delete run records now** apply to them.
+
+## Keeping data on this computer
+
+Memories and knowledge sources can be marked **This computer only**. A turn that uses one runs on this computer, even when placement would have chosen a paired computer, and the answer's steps say so.
+
+Text recognition for scanned PDFs, meaning search with an embedding model, and training on Apple Silicon run on this computer. Training on a paired computer sends the examples there, and the plan shows which computer before you start.
+
+## Personalization and permissions
+
+Personalization (Settings → **Personalization**) shapes how answers look: length, tone, format, units, and two short notes about you. It never grants a permission. A personalization note or a memory that tries to, such as "you can always push without asking", is refused. What a tool may do comes only from profiles and Settings.
+
+## LAN behavior
+
+- Port 7331 stays on `127.0.0.1` until local network access is turned on (API Access → **Local network access**).
+- Discovery defaults to on. Bifrost (port 7332) is then bound on all interfaces so peers can connect.
+- mDNS advertises the node on the local link.
+- Pairing routes on port 7332 answer before a peer is trusted. Other Bifrost routes require a token from a paired node.
+
+## API exposure
+
+On the default loopback bind, the control API and the OpenAI-compatible API do not require a key. That is safe only while the port is not reachable from other machines.
+
+Any other bind requires `Authorization: Bearer YOUR_API_KEY` on `/api/v1/*` and `/v1/*`. The daemon will not start that listener unless a key exists. Enabling local network access stores `0.0.0.0` and refuses the change when no key exists. The new socket applies the next time the daemon starts. The key check follows the configured host, so it applies as soon as the setting is saved.
+
+The Docker image listens on `0.0.0.0`. Set `TOSKAR_API_KEY` or the process exits before it accepts connections. See [API](api.md).
+
+The API answers HTTPS on the same port, with a certificate Toskar makes or your own, so other devices can reach it encrypted. An API key on plain HTTP limits who can call the API but doesn't encrypt traffic. See [HTTPS](api.md#https).
+
+## Logging
+
+Logs are JSON on stdout and in `logs/daemon.log`. They include startup fields such as the node id, data directory, and listen addresses. They are not shipped anywhere by this code.
+
+## Secrets
+
+API keys use the prefix `ygg_`, and join tokens `ygj_`. Both stay after the rename to Toskar: existing keys and paired computers rely on them, and secret scanners already recognize them. The database stores a bcrypt hash and a prefix. The secret is returned once when the key is created or rotated and is not written to disk. Node certificates and pairing material live under `secrets/`. Do not commit a data directory, and do not attach `secrets/` to a bug report.
+# GPU acceleration
+
+A model answers several times faster on a graphics card than on the CPU. Toskar uses the GPU when one is usable, and shows whether each model actually runs on it.
+
+## Check whether a model is on the GPU
+
+Each running model has a status on **Models › Running** and on the **Performance** overview:
+
+| Status | Meaning |
+| --- | --- |
+| **GPU** (green) | The whole model is on the graphics card. |
+| **Partly on GPU** (amber) | The model doesn't fit in the GPU's memory, so part of it runs on the slower CPU. A smaller model, or a smaller version of the same one, fits completely. |
+| **CPU only** (red) | This computer has a GPU that isn't being used. See [Troubleshooting](#troubleshooting). |
+| **CPU** (grey) | This computer has no GPU Toskar can use. That's expected, not an error. |
+
+Select the status to see the device, how many of the model's layers are on the GPU, and the GPU memory it uses. Toskar reads all of this from llama.cpp's own report when it loads the model, so it shows what happened, not what the hardware could do.
+
+**Diagnostics** has a **GPU acceleration** row with the same states. When something this computer needs for its GPU is missing, such as the Vulkan drivers, NVIDIA's driver, or permission to use the card, the row lists each piece with the command that fixes it here, ready to copy. `GET /api/v1/health` gives the same summary in `acceleration`, and `GET /api/v1/models/running` gives the details for each model (see [the API](api.md#gpu-acceleration)).
+
+The **Performance** overview also shows each computer's live CPU and memory, and each GPU's use, video memory, temperature, and power, with the last hour as a line. **Activity** marks each reply GPU or CPU.
+
+## What each computer needs
+
+| Computer | GPU support | What Toskar installs | What you install |
+| --- | --- | --- | --- |
+| Mac with Apple silicon | Metal, built in | Everything | Nothing |
+| Mac with Intel and an AMD card | Metal, built in | Everything | Nothing |
+| Linux with AMD or Intel graphics | Vulkan | The `.deb` and `.rpm` recommend the Vulkan loader, Mesa's Vulkan drivers, `vulkan-tools`, and `pciutils`, so apt and dnf install them; the service user joins the `render` and `video` groups | Nothing, unless your package manager skips recommended packages |
+| Linux with an NVIDIA card | Vulkan, through NVIDIA's driver | Everything else | NVIDIA's driver (the installer prints the command for your distribution) |
+| Windows | Vulkan, through the card maker's driver | Everything else | The card maker's driver, if Windows is still using its basic display driver (the installer says so) |
+| Docker | Vulkan, with the card passed in | Nothing | Build the `gpu` image and pass the card in ([below](#docker)) |
+
+llama.cpp, which runs the models, is downloaded the first time a model starts. On Linux and Windows Toskar picks its Vulkan build when it finds a usable GPU, and its CPU build otherwise. If a GPU becomes usable later, such as after installing a driver, Toskar switches to the Vulkan build the next time it starts with no model running.
+
+Image and video generation (stable-diffusion.cpp; models and what each needs in [Image and video models](media-models.md)) choose their build the same way, with the same check: Metal on a Mac, Vulkan on Linux and Windows when a GPU has a Vulkan driver, and the CPU build otherwise. The Vulkan builds are 30–37 MB, so they're used rather than the CUDA (about 900 MB on Windows) and ROCm (200–280 MB) builds.
+- **Falling back:** a Vulkan build that can't start on the GPU, such as when no device is found or the driver won't load, is replaced by the CPU build, which makes the picture or clip. The computer keeps the CPU build after that. Other errors, such as running out of memory, don't switch builds.
+- **Switching:** the Tools page says which build makes them, with **Use the GPU build** or **Use the CPU build** to switch. Images and video share the program, so switching changes both.
+- **Upgrading an older setup:** a setup from before GPU builds on Linux or Windows keeps the CPU build until **Use the GPU build** is pressed.
+
+### Linux: AMD and Intel
+
+The packages take care of this. To check, or to set it up by hand where recommended packages were skipped:
+
+```bash
+sudo apt-get install libvulkan1 mesa-vulkan-drivers vulkan-tools pciutils
+```
+
+On Fedora: `sudo dnf install vulkan-loader mesa-vulkan-drivers vulkan-tools pciutils`. On Arch: `sudo pacman -S vulkan-icd-loader vulkan-radeon vulkan-intel vulkan-tools pciutils`.
+
+The card should appear as a GPU here:
+
+```bash
+vulkaninfo --summary | grep -E "deviceName|deviceType"
+```
+
+The system service runs as the `yggdrasil` user, which needs the `render` group to open the card. The package adds it; to check:
+
+```bash
+id -nG yggdrasil
+```
+
+If `render` is missing, add it and restart:
+
+```bash
+sudo usermod -a -G render,video yggdrasil && sudo systemctl restart toskar
+```
+
+Toskar run from your own login, such as the desktop app, already has access to the card.
+
+### Linux: NVIDIA
+
+Install NVIDIA's driver, then restart the computer:
+
+- Ubuntu: `sudo ubuntu-drivers install`
+- Fedora: `sudo dnf install akmod-nvidia`, from [RPM Fusion](https://rpmfusion.org/Howto/NVIDIA)
+- Debian: `sudo apt-get install nvidia-driver`, from [non-free-firmware](https://wiki.debian.org/NvidiaGraphicsDrivers)
+
+`nvidia-smi` should then list the card. The driver brings Vulkan with it, which Toskar uses.
+
+### Windows
+
+The card maker's driver provides Vulkan (`C:\Windows\System32\vulkan-1.dll`). Windows' basic display driver doesn't. If the installer says the card needs its driver, get it from [NVIDIA](https://www.nvidia.com/Download/index.aspx), [AMD](https://www.amd.com/en/support/download/drivers.html), or [Intel](https://www.intel.com/content/www/us/en/download-center/home.html), then restart Toskar.
+
+### Docker
+
+The default image runs on the CPU. For an AMD or Intel card, build the `gpu` target, which adds Vulkan and Mesa's drivers, and pass the card in:
+
+```bash
+docker build --target gpu -t toskar:gpu .
+```
+
+```bash
+docker run -d -p 7331:7331 -e TOSKAR_API_KEY=… -v toskar-data:/data \
+  --device /dev/dri --group-add "$(getent group render | cut -d: -f3)" toskar:gpu
+```
+
+For an NVIDIA card, install the [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html) and replace the device options with `--gpus all -e NVIDIA_DRIVER_CAPABILITIES=compute,utility,graphics`.
+
+Rootless Docker drops your supplementary groups inside the container, so `--group-add` doesn't help there. Let every user on the computer open render devices instead (they give GPU compute and rendering, not the display):
+
+```bash
+echo 'SUBSYSTEM=="drm", KERNEL=="renderD*", MODE="0666"' | sudo tee /etc/udev/rules.d/70-render-nodes.rules
+sudo udevadm control --reload && sudo udevadm trigger --subsystem-match=drm
+```
+
+A model's status says whether the card was found inside the container. Without the card, the daemon doesn't count it, so it doesn't recommend models sized for memory it can't use.
+
+## Troubleshooting
+
+When a model isn't fully on the GPU, its status says why. Diagnostics shows the same reason.
+
+**The installed llama.cpp runs on the CPU only** (`cpu_build`). It was installed before a usable GPU was found, such as before a driver was installed. Stop your models, then quit and reopen Toskar: it installs the Vulkan build when it starts with no model running.
+
+**The model doesn't fit in the GPU's memory** (`gpu_memory`). Part of it runs on the CPU. Choose a smaller model, or a smaller version (a lower quantization) of the same one. Closing other programs that use the GPU, such as games, frees memory too. Models shows how well each model fits.
+
+**llama.cpp couldn't use the GPU** (`gpu_unavailable`). The Vulkan build found no GPU it could use. On Linux, check the [Vulkan packages](#linux-amd-and-intel) and the [render group](#linux-amd-and-intel), or install [NVIDIA's driver](#linux-nvidia). On Windows, install the [card maker's driver](#windows). Then restart Toskar.
+
+**This computer has no GPU Toskar can use** (`no_gpu`). Models run on the CPU, which works; smaller models answer faster. A computer with a GPU can join this one ([Connect your computers](clustering.md)) and run the models for it.
+# Troubleshooting
+
+Start with the answer itself. Under each answer, **What I did** lists the model that answered and why, the searches and pages read, the knowledge and memories used, and anything that went wrong. In advanced mode, **Run details** adds timings, tokens, tools, and the computer that ran each part. Diagnostics shows the health of every part of Toskar and what it can do right now.
+
+## The web UI does not load
+
+The daemon serves the UI only when it finds a directory containing `index.html`. Packages and archives include it. From a clone, build it first:
+
+```bash
+make start
+```
+
+Then open `http://127.0.0.1:7331`. `GET /api/v1/health` still works if the UI was not built.
+
+## A model runs on the CPU, not the GPU
+
+Its status on Models › Running says why: the CPU-only llama.cpp is installed, the model doesn't fit in the GPU's memory, or llama.cpp couldn't use the GPU (a missing driver or Vulkan). Diagnostics shows the same reason. [GPU acceleration](gpu.md#troubleshooting) has the fix for each, and what each kind of computer needs.
+
+## Port already in use
+
+The API defaults to `7331` and Bifrost to `7332`. Stop the other process, or change `api_port` and `internal_port` in `config.json` in the data directory and restart. A second daemon needs its own data directory (`-data-dir`) as well.
+
+## Where are the logs?
+
+`toskarctl paths` prints the log directory. The daemon appends JSON to `logs/daemon.log` and to standard output. With the deb or rpm package, the service's output is in `journalctl -u toskar`. llama-server writes its own log next to `daemon.log`.
+
+Remove API keys, tokens, personal data, private URLs, and credentials before you paste a log into an issue.
+
+## apt-get install toskar doesn't run
+
+If `sudo apt-get update && sudo apt-get install toskar` stops after the update, look for a line starting with `E:` that names another repository, such as a PPA with no build for your Ubuntu release (`does not have a Release file`). apt stops when any repository fails, so the install never runs. Remove or fix that repository's file in `/etc/apt/sources.list.d/`, then run both commands again.
+
+## A model will not start
+
+- The file must be a GGUF. `POST /api/v1/models/install-from-url` rejects other URLs.
+- llama.cpp must be installed. Onboarding installs it, and **Start** sets it up when it's missing, such as for a model added From a link (#610); so does the first chat that needs the model. `POST /api/v1/runtimes/llamacpp/install` does it too. Setting it up needs a network path to GitHub, and a failure says why (`RUNTIME_SETUP_FAILED`). Every start, and how it ended, is in the daemon log (`starting model`, `model started`, or `model did not start` with the error).
+- A model whose `llama-server` exits while loading, for example a damaged file or one that does not fit, fails at once with the reason.
+- On Windows the installer uses the CPU llama.cpp build (`bin-win-cpu-x64`). A GPU listed in hardware detection does not by itself select a GPU build.
+- Out of memory: close other apps or choose a smaller model. While training uses the computer, the error says so, with about how long training has left.
+
+## Auto chose a model I did not expect
+
+The first line of **What I did** says which model answered and why: a quick question, a short one that needs the web, and anything asked from the watch stay on a model that is already loaded, coding goes to a coding model, current information needs a model that can use tools, and a question about your files or knowledge prefers a larger model. A question about what a specialized AI was trained for goes to that AI. Choose a model in the composer instead of Auto to keep one model for the chat.
+
+Embedding and reranker models never answer chats. They help Knowledge search.
+
+## The answer did not use the web
+
+Web look-ups need Internet allowed in the profile. A plain question is answered without tools; ask for a search ("look up…", "search for…") or ask about something current. The same search within 15 minutes, or page within 30 minutes, is answered from the cache. Settings → What left this computer → **Delete run records now** clears it.
+
+## The answer did not use my knowledge or memories
+
+- **Knowledge:** a chat uses the knowledge sources of its profile, and those you attach to it. Knowledge → **Try a question** shows which passages a question finds. Without an embedding model, search matches words, so a question phrased differently may find nothing. Install an embedding model (Nomic Embed Text v1.5 is in the catalog) to search by meaning.
+- **Memories:** memory may be off for this chat, or in Settings. API requests use memories only when they ask (`yggdrasil.memory: true`) or their API key is set to always.
+
+## A knowledge source failed
+
+The source shows **Failed** with the reason.
+
+- **A file or folder:** check that it still exists and is a supported type.
+- **A scanned PDF:** the first one installs text recognition (about 110 MB from PyPI), which needs a network connection. A copy of Toskar from the Mac App Store reads scanned PDFs only if the app includes text recognition.
+- **A database or web API:** the reason names the connection or HTTP error, with credentials removed. Search keeps using the last data that was fetched. Fix the settings and choose **Reindex**.
+
+A scanned PDF attached to a chat is refused: connect it on the Knowledge page instead, which reads scanned pages once.
+
+## An answer says "Nothing was changed"
+
+The answer said it did something, such as committing or sending, but no tool that changes things ran. Ask again, and check that the profile allows the tool. In advanced mode, Tools shows each tool's permission.
+
+## An automation did not notify, or skipped a tool
+
+- History says why a notice was or was not sent, such as a price that was not below the amount.
+- A tool the automation was not approved to use is skipped, the run continues, and an **approval** notification names the tool. Edit the automation to approve it.
+- An automation that runs out of memory twice in a row is paused, and its notification says why. Choose a smaller model or another time, then resume it.
+- Automations wait for a chat to finish, and for 20 seconds after one, before they load a model.
+
+## Training is not available
+
+- Training needs a Mac with Apple Silicon or a computer with an NVIDIA GPU. The plan shows each computer and why it can or cannot train.
+- Another computer can train for this one: pair it, and choose it in the plan's Review step.
+- A copy of Toskar from the Mac App Store cannot run the Python it would download. It trains on a paired computer, unless the app includes the training environment.
+- Training waits for chat, automations, and benchmarks before it starts, and the job shows what it is waiting for.
+
+## Export as a GGUF file failed
+
+The export needs about the base model's size in free disk space, and the revision's adapter and base model on this computer. It also needs `llama-export-lora`, which comes with llama.cpp from the Runtimes installer but not with the Mac App Store app.
+
+## Another computer does not appear
+
+- Discovery defaults to on. Both daemons need to be running.
+- Bifrost must be reachable on port 7332. On macOS, allow Local Network for the process.
+- mDNS does not cross every Docker or VPN boundary. Set `TOSKAR_STATIC_PEERS` or `static_peers` to `host:7332`.
+- After you enable discovery on a daemon that already bound Bifrost to loopback, restart it.
+
+## Pairing fails
+
+Approve the offer on the second computer. Protected Bifrost routes answer `401` until that pairing is stored. Health and pairing routes are the ones that answer before trust exists.
+
+## A connected service or MCP tool source stops working
+
+- **Connected services:** Tools → Connected services → **Check** tests the stored credential. A blank secret field keeps the stored one when you change other values.
+- **MCP tool sources:** a source that signs in with a browser says "needs you to sign in again" when its sign-in expires. Open Tools and choose **Sign in**. Tools also shows each source's log.
+
+## A device can't reach this computer away from home
+
+See [Access from anywhere: Troubleshooting](remote-access.md#troubleshooting). It goes by what API Access → Access from anywhere says after **Check now**: not listening, reachable through the relay, a relay that isn't connected, another computer or web server answering on the port, or a device that can't connect though the card is green.
+
+## API calls return 401 or 403
+
+- **401:** the daemon is not bound to loopback, and the request has no `Authorization: Bearer YOUR_API_KEY` header. `/api/v1`, `/v1`, and `/mcp` all use that check. On the default loopback bind, none requires a key.
+- **403:** the request asked for something its key does not allow, such as memory, a tool, or a placement. The message says what was refused. API Access shows each key's permissions.
+
+Do not paste a real key into a bug report, and do not put one in a URL.
+
+## The API says no model is installed
+
+`/v1/chat/completions` does not download a model. Install one, then use `auto`, a profile, or a model id.
+
+## Toskar uses more and more memory
+
+Note how long Toskar has been running and what it was doing (chats, automations, models loading and unloading, tool sources). Then:
+
+1. Export a diagnostic bundle (Diagnostics → **Export diagnostics**). It includes `runtime.json` (goroutines, heap size, collections) and `profiles/goroutines.txt` and `profiles/heap.pb.gz`, which show where memory and background work go. They hold function names, counts, and sizes, not prompts or files.
+2. If it keeps growing, export a second bundle an hour later. Two snapshots show what grew.
+3. Attach both to an issue.
+
+To look yourself, start the daemon with `TOSKAR_PPROF=127.0.0.1:6060` and run `go tool pprof http://127.0.0.1:6060/debug/pprof/heap`, or open `http://127.0.0.1:6060/debug/pprof/goroutine?debug=1`.
+
+Stopping a model, a tool source, or Toskar itself ends every process it started, including helpers such as the `node` process `npx` runs. If one is left behind, note its command line (`ps -ef | grep llama-server`) in the issue.
+
+## Reset
+
+`POST /api/v1/settings/reset` (Settings → **Reset application**) clears application state. Pass `delete_models=true` only when you also want model files removed. This is local and not reversible.
+package llamacpp
+
+import (
+	"context"
+	"fmt"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"runtime"
+	"strings"
+
+	"github.com/yeixio/toskar-core/internal/hardware"
+)
+
+// llama.cpp loads its GPU backends from libraries beside llama-server, such
+// as libggml-vulkan.so or ggml-vulkan.dll. Which ones are there says which
+// build is installed.
+var gpuBackendLibs = map[string]string{
+	"vulkan": "vulkan",
+	"cuda":   "cuda",
+	"hip":    "rocm",
+	"sycl":   "sycl",
+}
+
+// installedGPUBackends lists the GPU backends whose libraries sit in dir.
+func installedGPUBackends(dir string) []string {
+	var out []string
+	for _, lib := range []string{"vulkan", "cuda", "hip", "sycl"} {
+		for _, name := range []string{"libggml-" + lib + ".so", "ggml-" + lib + ".dll"} {
+			if st, err := os.Stat(filepath.Join(dir, name)); err == nil && !st.IsDir() {
+				out = append(out, gpuBackendLibs[lib])
+				break
+			}
+		}
+	}
+	return out
+}
+
+// isBackendLib reports whether name is one of llama.cpp's ggml backend
+// libraries, which llama-server loads by scanning its own folder.
+func isBackendLib(name string) bool {
+	lower := strings.ToLower(name)
+	if !strings.HasPrefix(lower, "libggml-") && !strings.HasPrefix(lower, "ggml-") {
+		return false
+	}
+	return strings.HasSuffix(lower, ".so") || strings.HasSuffix(lower, ".dll")
+}
+
+// platformBuilds lists the release builds that run on goos/goarch, best
+// first. The names are what follows "-bin-" in an asset such as
+// llama-b11429-bin-ubuntu-vulkan-x64.tar.gz.
+func platformBuilds(goos, goarch string, vulkan bool) []string {
+	var gpu, cpu string
+	switch {
+	case goos == "darwin" && goarch == "arm64":
+		cpu = "macos-arm64"
+	case goos == "darwin" && goarch == "amd64":
+		cpu = "macos-x64"
+	case goos == "linux" && goarch == "amd64":
+		gpu, cpu = "ubuntu-vulkan-x64", "ubuntu-x64"
+	case goos == "linux" && goarch == "arm64":
+		gpu, cpu = "ubuntu-vulkan-arm64", "ubuntu-arm64"
+	case goos == "windows" && goarch == "amd64":
+		gpu, cpu = "win-vulkan-x64", "win-cpu-x64"
+	case goos == "windows" && goarch == "arm64":
+		gpu, cpu = "win-vulkan-arm64", "win-cpu-arm64"
+	default:
+		return []string{goos + "-" + goarch}
+	}
+	if vulkan && gpu != "" {
+		return []string{gpu, cpu}
+	}
+	return []string{cpu}
+}
+
+// buildHasGPU reports whether a platformBuilds name is a GPU build.
+func buildHasGPU(build string) bool {
+	return strings.Contains(build, "-vulkan-")
+}
+
+// assetBuild returns the build an asset name carries, such as
+// "ubuntu-vulkan-x64" for llama-b11429-bin-ubuntu-vulkan-x64.tar.gz. Only the
+// main llama-* archives count, never cudart-* runtime packs.
+func assetBuild(name string) (string, bool) {
+	lower := strings.ToLower(name)
+	if !strings.HasPrefix(lower, "llama-") {
+		return "", false
+	}
+	switch {
+	case strings.HasSuffix(lower, ".tar.gz"):
+		lower = strings.TrimSuffix(lower, ".tar.gz")
+	case strings.HasSuffix(lower, ".tgz"):
+		lower = strings.TrimSuffix(lower, ".tgz")
+	case strings.HasSuffix(lower, ".zip"):
+		lower = strings.TrimSuffix(lower, ".zip")
+	default:
+		return "", false
+	}
+	i := strings.Index(lower, "-bin-")
+	if i < 0 {
+		return "", false
+	}
+	return lower[i+len("-bin-"):], true
+}
+
+// pickAsset returns the best build in the newest release that has one of
+// builds. A newer release without the GPU build still wins over an older one
+// with it, falling back to its CPU build.
+func pickAsset(rels []ghRelease, builds []string) (assetInfo, error) {
+	for _, rel := range rels {
+		found := map[string]assetInfo{}
+		for _, a := range rel.Assets {
+			if b, ok := assetBuild(a.Name); ok {
+				found[b] = assetInfo{Name: a.Name, URL: a.BrowserDownloadURL, Build: b}
+			}
+		}
+		for _, b := range builds {
+			if a, ok := found[b]; ok {
+				return a, nil
+			}
+		}
+	}
+	// Which builds were looked for, and in which releases (#64).
+	checked := "no releases"
+	switch n := len(rels); {
+	case n == 1:
+		checked = "release " + rels[0].Tag
+	case n > 1:
+		checked = fmt.Sprintf("the %d newest releases, %s to %s", n, rels[n-1].Tag, rels[0].Tag)
+	}
+	return assetInfo{}, fmt.Errorf("no llama.cpp build for this computer (looked for %s in %s)", strings.Join(builds, " or "), checked)
+}
+
+// vulkanProbe decides whether llama.cpp's Vulkan build would use a GPU here.
+// Its fields are the host lookups, so tests can stand in for them.
+type vulkanProbe struct {
+	goos string
+	// exists reports whether a file is there.
+	exists func(path string) bool
+	// glob lists files matching a pattern.
+	glob func(pattern string) []string
+	// vulkaninfo runs `vulkaninfo --summary`; an error means it could not run.
+	vulkaninfo func(ctx context.Context) (string, error)
+	// hasGPU reports whether the hardware inventory found a graphics card.
+	hasGPU func(ctx context.Context) bool
+}
+
+// VulkanUsable reports whether a Vulkan build would use a GPU here: the
+// loader is installed and finds a GPU, not a software renderer. Image and
+// video generation choose their build by it too (#154).
+func VulkanUsable(ctx context.Context) bool { return hostVulkanProbe().usable(ctx) }
+
+func hostVulkanProbe() vulkanProbe {
+	return vulkanProbe{
+		goos: runtime.GOOS,
+		exists: func(path string) bool {
+			st, err := os.Stat(path)
+			return err == nil && !st.IsDir()
+		},
+		glob: func(pattern string) []string {
+			m, _ := filepath.Glob(pattern)
+			return m
+		},
+		vulkaninfo: func(ctx context.Context) (string, error) {
+			path, err := exec.LookPath("vulkaninfo")
+			if err != nil {
+				return "", err
+			}
+			out, err := exec.CommandContext(ctx, path, "--summary").Output()
+			return string(out), err
+		},
+		hasGPU: func(ctx context.Context) bool {
+			inv, err := (&hardware.Detector{}).Detect(ctx)
+			if err != nil {
+				return false
+			}
+			for _, a := range inv.Accelerators {
+				if a.Kind == "gpu" && !softwareAdapter(a.Model) {
+					return true
+				}
+			}
+			return false
+		},
+	}
+}
+
+// softwareAdapter reports display adapters that are not a GPU, such as the
+// one Windows uses before a driver is installed or over Remote Desktop.
+func softwareAdapter(model string) bool {
+	lower := strings.ToLower(model)
+	return strings.Contains(lower, "basic display") || strings.Contains(lower, "basic render") ||
+		strings.Contains(lower, "remote display")
+}
+
+// usable reports whether the Vulkan loader is installed and finds a GPU.
+func (p vulkanProbe) usable(ctx context.Context) bool {
+	if !p.loader() {
+		return false
+	}
+	// vulkaninfo, when installed, knows best: it lists the devices the
+	// loader finds, and a software renderer like llvmpipe reports a CPU.
+	if out, err := p.vulkaninfo(ctx); err == nil {
+		return summaryHasGPU(out)
+	}
+	if p.goos == "linux" && !p.gpuDriver() {
+		return false
+	}
+	return p.hasGPU(ctx)
+}
+
+// loader reports whether the Vulkan loader library can be found.
+func (p vulkanProbe) loader() bool {
+	switch p.goos {
+	case "linux":
+		for _, dir := range []string{
+			"/usr/lib/x86_64-linux-gnu", "/usr/lib/aarch64-linux-gnu",
+			"/usr/lib64", "/usr/lib", "/lib/x86_64-linux-gnu", "/lib/aarch64-linux-gnu", "/lib64",
+			"/usr/local/lib",
+		} {
+			if p.exists(filepath.Join(dir, "libvulkan.so.1")) {
+				return true
+			}
+		}
+		return false
+	case "windows":
+		root := os.Getenv("SystemRoot")
+		if root == "" {
+			root = `C:\Windows`
+		}
+		return p.exists(filepath.Join(root, "System32", "vulkan-1.dll"))
+	}
+	return false
+}
+
+// gpuDriver reports whether a Vulkan driver for a GPU is registered. Mesa's
+// lavapipe (lvp) renders on the CPU, so it does not count.
+func (p vulkanProbe) gpuDriver() bool {
+	for _, dir := range []string{"/usr/share/vulkan/icd.d", "/etc/vulkan/icd.d", "/usr/local/share/vulkan/icd.d"} {
+		for _, f := range p.glob(filepath.Join(dir, "*.json")) {
+			if !strings.HasPrefix(strings.ToLower(filepath.Base(f)), "lvp_") {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+// summaryHasGPU reports whether `vulkaninfo --summary` lists a GPU device.
+func summaryHasGPU(out string) bool {
+	for _, line := range strings.Split(out, "\n") {
+		if !strings.Contains(line, "deviceType") {
+			continue
+		}
+		for _, t := range []string{"DISCRETE_GPU", "INTEGRATED_GPU", "VIRTUAL_GPU"} {
+			if strings.Contains(line, t) {
+				return true
+			}
+		}
+	}
+	return false
+}
+package runlog
+
+import (
+	"sort"
+	"time"
+)
+
+// PromptCache is how much of each chat turn's prompt the models on this
+// computer read from their prompt cache instead of processing again (#838),
+// over chats' later turns. A model that reuses little re-reads a whole long
+// chat every turn, which is slow; models with sliding-window attention can
+// do this.
+type PromptCache struct {
+	Since  time.Time          `json:"since"`
+	Models []PromptCacheModel `json:"models"`
+}
+
+// PromptCacheModel is one model's later turns.
+type PromptCacheModel struct {
+	ModelID string `json:"model_id"`
+	// Turns counts the later turns of chats the model answered, already
+	// running.
+	Turns        int `json:"turns"`
+	PromptTokens int `json:"prompt_tokens"`
+	CachedTokens int `json:"cached_tokens"`
+	// Reuse is CachedTokens over PromptTokens, 0 to 1.
+	Reuse float64 `json:"reuse"`
+	// Low is set when, over at least PromptCacheMinTurns turns, under
+	// PromptCacheLowReuse of the prompt came from the cache.
+	Low bool `json:"low,omitempty"`
+}
+
+// A model is flagged when fewer than half its later turns' prompts came from
+// the cache, over enough turns to say. The weekly quality run holds its
+// model to 80% (tests/quality/cache_test.go); a person's chats mix in
+// other chats between turns, which can push a turn out of the cache.
+const (
+	PromptCacheLowReuse = 0.5
+	PromptCacheMinTurns = 5
+)
+
+// SummarizePromptCache adds up, per model, the prompt and cached tokens of
+// the completed runs that weren't the first in their chat within the
+// window. A model counts only where it ran on this computer (it has a
+// backend, as llama.cpp reports) and was already running: other runtimes
+// and paired computers don't report their cache, and a model that just
+// loaded starts cold. Models are ordered by turns, most first.
+func SummarizePromptCache(since time.Time, runs []Run) PromptCache {
+	byChat := map[string][]Run{}
+	for _, r := range runs {
+		if r.Status == StatusCompleted && r.ConversationID != "" {
+			byChat[r.ConversationID] = append(byChat[r.ConversationID], r)
+		}
+	}
+	by := map[string]*PromptCacheModel{}
+	for _, chat := range byChat {
+		sort.Slice(chat, func(i, j int) bool { return chat[i].StartedAt.Before(chat[j].StartedAt) })
+		for _, r := range chat[1:] {
+			for _, m := range r.Models {
+				if m.Backend == "" || m.LoadMs > 0 || m.PromptTokens <= 0 {
+					continue
+				}
+				p := by[m.ModelID]
+				if p == nil {
+					p = &PromptCacheModel{ModelID: m.ModelID}
+					by[m.ModelID] = p
+				}
+				p.Turns++
+				p.PromptTokens += m.PromptTokens
+				p.CachedTokens += min(m.CachedTokens, m.PromptTokens)
+			}
+		}
+	}
+	out := PromptCache{Since: since.UTC(), Models: []PromptCacheModel{}}
+	for _, p := range by {
+		p.Reuse = float64(p.CachedTokens) / float64(p.PromptTokens)
+		p.Low = p.Turns >= PromptCacheMinTurns && p.Reuse < PromptCacheLowReuse
+		out.Models = append(out.Models, *p)
+	}
+	sort.Slice(out.Models, func(i, j int) bool {
+		a, b := out.Models[i], out.Models[j]
+		if a.Turns != b.Turns {
+			return a.Turns > b.Turns
+		}
+		return a.ModelID < b.ModelID
+	})
+	return out
+}
+import { useQuery } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
+import { api } from '@/lib/api'
+import { formatNumber, formatPercent } from '@/i18n/format'
+import { modelDisplayName } from '@/features/performance/performanceFormat'
+
+/**
+ * How much of a chat's later turns each model on this computer skipped
+ * reading again, from its prompt cache, over the last week (#838). A model
+ * that skips little re-reads a whole long chat every turn, which is slow.
+ */
+export function PromptCachePanel() {
+  const { t } = useTranslation('diagnostics')
+  const query = useQuery({ queryKey: ['prompt-cache'], queryFn: () => api.getPromptCache(), refetchInterval: 60_000 })
+  const modelsQuery = useQuery({ queryKey: ['models'], queryFn: () => api.getModels(), retry: false })
+  // An older daemon, or a week with no later turns, has nothing to show.
+  const models = Array.isArray(query.data?.models) ? query.data.models : []
+  if (models.length === 0) return null
+  return (
+    <section className="card space-y-3" aria-labelledby="prompt-cache-title">
+      <div>
+        <h2 id="prompt-cache-title" className="section-title">
+          {t('promptCache.title')}
+        </h2>
+        <p className="mt-1 text-sm text-ink-muted">{t('promptCache.description')}</p>
+      </div>
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead className="text-ink-muted">
+            <tr>
+              <th scope="col" className="py-1 pe-4 text-start font-normal">{t('promptCache.model')}</th>
+              <th scope="col" className="py-1 pe-4 text-start font-normal">{t('promptCache.reused')}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {models.map((m) => (
+              <tr key={m.model_id} className="border-t border-line/50 align-top">
+                <th scope="row" className="py-2 pe-4 text-start font-medium text-ink">
+                  {modelDisplayName(modelsQuery.data ?? [], m.model_id)}
+                </th>
+                <td className="py-2 pe-4">
+                  <span className={`tabular-nums ${m.low ? 'text-warning' : 'text-ink'}`}>{formatPercent(m.reuse)}</span>
+                  <span className="block text-xs text-ink-muted">
+                    {t('promptCache.detail', { count: m.turns, cached: formatNumber(m.cached_tokens), prompt: formatNumber(m.prompt_tokens) })}
+                  </span>
+                  {m.low && <span className="block text-xs text-warning">{t('promptCache.low')}</span>}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  )
+}
+
+
+
