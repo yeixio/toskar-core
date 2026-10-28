@@ -20,9 +20,17 @@
       "ppl": 15.6073,
       "what": "CPU on an M5 Pro, macOS 27 (home-mac)"
     },
+    "cpu-x64": {
+      "ppl": 15.6178,
+      "what": "CPU on a 32-thread AMD Ryzen, Ubuntu 26.04 (linux-rig)"
+    },
     "metal-arm64": {
       "ppl": 15.5741,
       "what": "Metal on an M5 Pro, macOS 27 (home-mac)"
+    },
+    "vulkan-x64": {
+      "ppl": 15.5791,
+      "what": "Vulkan on an AMD Radeon RX 7900 XTX (RADV, Mesa in Debian 13), Ubuntu 26.04 (linux-rig)"
     }
   }
 }
