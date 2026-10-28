@@ -212,5 +212,14 @@
       "other": "其他应用",
       "unnamed": "旧版应用和 API"
     }
+  },
+  "promptCache": {
+    "title": "复用已有的对话",
+    "description": "在对话的后续轮次中，模型可以跳过已经读过的部分。这是过去一周它跳过的比例，仅统计这台电脑上已在运行的模型。越高越快。",
+    "model": "模型",
+    "reused": "已跳过",
+    "detail_one": "{{count}} 轮 · {{prompt}} 个词元中的 {{cached}}",
+    "detail_other": "{{count}} 轮 · {{prompt}} 个词元中的 {{cached}}",
+    "low": "偏低：这个模型每轮几乎都要重读整段长对话，所以回答开始得慢。"
   }
 }

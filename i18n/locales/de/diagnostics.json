@@ -230,5 +230,14 @@
       "other": "Andere App",
       "unnamed": "Ältere Apps und API"
     }
+  },
+  "promptCache": {
+    "title": "Bisherigen Chat wiederverwenden",
+    "description": "In späteren Runden eines Chats kann ein Modell überspringen, was es schon gelesen hat. So viel hat es in der letzten Woche übersprungen, für Modelle auf diesem Computer, die schon liefen. Mehr ist schneller.",
+    "model": "Modell",
+    "reused": "Übersprungen",
+    "detail_one": "{{count}} Runde · {{cached}} von {{prompt}} Tokens",
+    "detail_other": "{{count}} Runden · {{cached}} von {{prompt}} Tokens",
+    "low": "Niedrig: Dieses Modell liest einen langen Chat jede Runde fast ganz neu, daher beginnen seine Antworten langsam."
   }
 }

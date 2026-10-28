@@ -18,6 +18,7 @@ import { Ratatoskr } from '@/components/ui/Ratatoskr'
 import { formatRelativeTime } from '@/i18n/format'
 import { MemoryPanel } from './MemoryPanel'
 import { FirstAnswersPanel } from './FirstAnswersPanel'
+import { PromptCachePanel } from './PromptCachePanel'
 import { GPUSetupList } from './GPUSetupList'
 import { ReportProblem } from '@/components/ui/ReportProblem'
 import { shownError } from '@/components/ui/ShownError'
@@ -572,6 +573,7 @@ export function DiagnosticsPage() {
       <CapabilityPanel />
       <ToolProvidersPanel />
       <FirstAnswersPanel />
+      <PromptCachePanel />
       <MemoryPanel />
 
       {advancedMode && <ToolActivityPanel />}

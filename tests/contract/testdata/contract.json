@@ -1,5 +1,5 @@
 {
-  "version": "1.61",
+  "version": "1.62",
   "types": {
     "ActivityStep": [
       "kind",
@@ -207,6 +207,18 @@
       "source_type",
       "title",
       "url"
+    ],
+    "PromptCache": [
+      "models",
+      "since"
+    ],
+    "PromptCacheModel": [
+      "cached_tokens",
+      "low",
+      "model_id",
+      "prompt_tokens",
+      "reuse",
+      "turns"
     ],
     "Run": [
       "cache_hits",

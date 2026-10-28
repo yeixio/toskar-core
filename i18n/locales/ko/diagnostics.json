@@ -212,5 +212,14 @@
       "other": "기타 앱",
       "unnamed": "이전 앱 및 API"
     }
+  },
+  "promptCache": {
+    "title": "지금까지의 채팅 재사용",
+    "description": "채팅의 이후 턴에서 모델은 이미 읽은 부분을 건너뛸 수 있습니다. 지난 일주일 동안 이 컴퓨터에서 이미 실행 중이던 모델이 건너뛴 비율입니다. 높을수록 빠릅니다.",
+    "model": "모델",
+    "reused": "건너뜀",
+    "detail_one": "{{count}}턴 · {{prompt}} 토큰 중 {{cached}}",
+    "detail_other": "{{count}}턴 · {{prompt}} 토큰 중 {{cached}}",
+    "low": "낮음: 이 모델은 긴 채팅을 매 턴 거의 다시 읽어서 답변이 늦게 시작됩니다."
   }
 }

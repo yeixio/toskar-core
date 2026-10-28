@@ -2637,6 +2637,24 @@ export interface FirstAnswersGroup {
   load_ms?: number
 }
 
+/** How much of chats' later turns each model read from its prompt cache (#838). */
+export interface PromptCache {
+  since: string
+  models: PromptCacheModel[]
+}
+
+export interface PromptCacheModel {
+  model_id: string
+  /** Later turns of chats the model answered, already running, on this computer. */
+  turns: number
+  prompt_tokens: number
+  cached_tokens: number
+  /** cached_tokens over prompt_tokens, 0 to 1. */
+  reuse: number
+  /** Under half reused over at least 5 turns. */
+  low?: boolean
+}
+
 /** One piece of AI news from toskar.ai (#750). */
 export interface NewsItem {
   id: string

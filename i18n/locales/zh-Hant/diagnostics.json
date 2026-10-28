@@ -212,5 +212,14 @@
       "other": "其他應用程式",
       "unnamed": "舊版應用程式和 API"
     }
+  },
+  "promptCache": {
+    "title": "重複使用既有的對話",
+    "description": "在對話的後續輪次中，模型可以略過已經讀過的部分。這是過去一週它略過的比例，僅統計這台電腦上已在執行的模型。越高越快。",
+    "model": "模型",
+    "reused": "已略過",
+    "detail_one": "{{count}} 輪 · {{prompt}} token 中的 {{cached}}",
+    "detail_other": "{{count}} 輪 · {{prompt}} token 中的 {{cached}}",
+    "low": "偏低：這個模型每輪幾乎都要重讀整段長對話，所以回答開始得慢。"
   }
 }

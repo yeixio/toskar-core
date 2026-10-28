@@ -25,6 +25,7 @@ func (s *Server) runRoutes(api *mux.Router) {
 	api.HandleFunc("/runs", s.handleListRuns).Methods(http.MethodGet)
 	api.HandleFunc("/runs/{id}", s.handleGetRun).Methods(http.MethodGet)
 	api.HandleFunc("/diagnostics/first-answers", s.handleFirstAnswers).Methods(http.MethodGet, http.MethodOptions)
+	api.HandleFunc("/diagnostics/prompt-cache", s.handlePromptCache).Methods(http.MethodGet, http.MethodOptions)
 	api.HandleFunc("/diagnostics/report", s.handleReport).Methods(http.MethodGet, http.MethodOptions)
 	api.HandleFunc("/diagnostics/report", s.handleSendReport).Methods(http.MethodPost)
 }
@@ -32,9 +33,28 @@ func (s *Server) runRoutes(api *mux.Router) {
 // handleFirstAnswers summarizes how long answers took to start (#498), by
 // app and cold or warm, over the last ?days= days (7 by default, 90 at most).
 func (s *Server) handleFirstAnswers(w http.ResponseWriter, r *http.Request) {
+	since, runs, ok := s.recentRuns(w, r)
+	if ok {
+		writeJSON(w, http.StatusOK, runlog.SummarizeFirstAnswers(since, runs))
+	}
+}
+
+// handlePromptCache summarizes how much of chats' later turns each model
+// read from its prompt cache (#838), over the last ?days= days, as
+// handleFirstAnswers.
+func (s *Server) handlePromptCache(w http.ResponseWriter, r *http.Request) {
+	since, runs, ok := s.recentRuns(w, r)
+	if ok {
+		writeJSON(w, http.StatusOK, runlog.SummarizePromptCache(since, runs))
+	}
+}
+
+// recentRuns reads the chat runs of the last ?days= days (7 by default, 90
+// at most), or writes the error and returns false.
+func (s *Server) recentRuns(w http.ResponseWriter, r *http.Request) (time.Time, []runlog.Run, bool) {
 	if s.runs == nil {
 		writeErr(w, http.StatusNotImplemented, "NOT_IMPLEMENTED", "Run traces are not available.", nil)
-		return
+		return time.Time{}, nil, false
 	}
 	days, _ := strconv.Atoi(r.URL.Query().Get("days"))
 	if days <= 0 {
@@ -45,9 +65,9 @@ func (s *Server) handleFirstAnswers(w http.ResponseWriter, r *http.Request) {
 	runs, err := s.runs.Since(r.Context(), since)
 	if err != nil {
 		writeErrFrom(w, http.StatusInternalServerError, "RUNS_FAILED", err)
-		return
+		return time.Time{}, nil, false
 	}
-	writeJSON(w, http.StatusOK, runlog.SummarizeFirstAnswers(since, runs))
+	return since, runs, true
 }
 
 // handleListRuns lists recent runs, newest first. ?conversation_id= narrows

@@ -39,6 +39,8 @@ var covered = map[string]any{
 	"ToolUse":              runlog.ToolUse{},
 	"FirstAnswers":         runlog.FirstAnswers{},
 	"FirstAnswersGroup":    runlog.FirstAnswersGroup{},
+	"PromptCache":          runlog.PromptCache{},
+	"PromptCacheModel":     runlog.PromptCacheModel{},
 	"Message":              contracts.Message{},
 	"MessageMeta":          contracts.MessageMeta{},
 	"Citation":             contracts.Citation{},

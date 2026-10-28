@@ -248,5 +248,15 @@
       "other": "Outro app",
       "unnamed": "Apps antigos e API"
     }
+  },
+  "promptCache": {
+    "title": "Reaproveitar a conversa até aqui",
+    "description": "Nos turnos seguintes de uma conversa, um modelo pode pular o que já leu. Isto é quanto ele pulou na última semana, para modelos deste computador que já estavam rodando. Mais é mais rápido.",
+    "model": "Modelo",
+    "reused": "Pulado",
+    "detail_one": "{{count}} turno · {{cached}} de {{prompt}} tokens",
+    "detail_many": "{{count}} turnos · {{cached}} de {{prompt}} tokens",
+    "detail_other": "{{count}} turnos · {{cached}} de {{prompt}} tokens",
+    "low": "Baixo: este modelo relê quase toda uma conversa longa a cada turno, então as respostas demoram a começar."
   }
 }
