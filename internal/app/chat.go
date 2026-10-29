@@ -1426,10 +1426,18 @@ func (e *chatExecEnv) Generate(ctx context.Context, role string, messages []plug
 		e.app.noteDeviceUse(modelID)
 	}
 	started := time.Now()
+	ranOn := nodeID
+	if ranOn == "" {
+		ranOn = e.app.Config.Get().NodeID
+	}
+	if p := e.app.previousTurn(e.conversationID); p != nil && p.NodeID == ranOn && p.ModelID == modelID {
+		ctx = withFollowUp(ctx)
+	}
 	ch, err := e.app.generateOnNode(ctx, nodeID, modelID, role, e.adapter, messages)
 	if err != nil {
 		return nil, err
 	}
+	ch = e.app.rememberTurnPlace(ch, e.conversationID, ranOn, modelID)
 	e.app.Bus.Publish(events.New(events.ModelLoadCompleted, map[string]any{
 		"model_id": modelID, "node_id": nodeID, "role": role,
 		"node_name": e.app.nodeDisplayName(nodeID),
@@ -1674,7 +1682,7 @@ func (e *chatExecEnv) NodeForRole(role string) (string, error) {
 	e.mu.Lock()
 	excluded := append([]string(nil), e.excluded...)
 	e.mu.Unlock()
-	nodeID, err := e.app.placeRoleWith(e.ctx, e.profile, role, modelID, avoid, excluded, false)
+	nodeID, err := e.app.placeRoleWith(e.placementContext(), e.profile, role, modelID, avoid, excluded, false)
 	if err != nil {
 		return "", err
 	}
@@ -1697,6 +1705,22 @@ func (e *chatExecEnv) NodeForRole(role string) (string, error) {
 	e.mu.Unlock()
 	return nodeID, nil
 }
+
+// placementContext tells placement this turn's estimated size and where
+// the chat's last turn ran (#836): the chat so far, which that computer has
+// cached, and the new message, with room for the instructions around it.
+func (e *chatExecEnv) placementContext() context.Context {
+	prev := e.app.previousTurn(e.conversationID)
+	tokens := tokensOf(e.turnPrompt) + promptOverhead
+	if prev != nil {
+		tokens += prev.Tokens
+	}
+	return withPlacementRequest(e.ctx, placementRequest{promptTokens: tokens, previous: prev})
+}
+
+// promptOverhead is the tokens a turn's instructions and reference
+// material are assumed to add to its message.
+const promptOverhead = 1000
 
 func (e *chatExecEnv) modelForRole(role string) string {
 	if id := profiles.RoleModel(e.profile, role); id != "" {

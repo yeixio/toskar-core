@@ -219,6 +219,7 @@ func (a *App) placeRoleWith(ctx context.Context, profile profiles.Profile, role,
 	}
 	installed := a.buildInstalledMap(ctx, nodeList, modelID)
 	candidates := scheduler.BuildCandidates(nodeList, installed, nil)
+	req := placementRequestFrom(ctx)
 	decision, err := a.Scheduler.PlaceRole(ctx, scheduler.ScoreInput{
 		Role: role, ModelID: modelID, Profile: profile, Nodes: candidates,
 		AvoidNodeIDs:   a.rememberUnstable(profile.NodePolicy.Mode, modelID, avoidNodeIDs),
@@ -226,6 +227,10 @@ func (a *App) placeRoleWith(ctx context.Context, profile profiles.Profile, role,
 		RequireModel:   requireModel,
 		ActiveTasks:    a.activeWork(),
 		Training:       a.Nodes.TrainingNodes(),
+		Speeds:         &a.speeds,
+		PromptTokens:   req.promptTokens,
+		InFlightTokens: a.inFlightTokens(),
+		Previous:       req.previous,
 	})
 	if err != nil {
 		return "", err
@@ -273,7 +278,8 @@ func (a *App) generateOnNode(ctx context.Context, nodeID, modelID, role, adapter
 		if err != nil {
 			return nil, err
 		}
-		return countWork(ctx, a.guardLocalChat(ctx, endpoint, ch), a.beginWork(cfg.NodeID)), nil
+		return countWorkMeasured(ctx, a.guardLocalChat(ctx, endpoint, ch), a.beginWorkOf(cfg.NodeID, promptTokens(messages)),
+			func(m *pluginapi.GenerationMetrics) { a.observeSpeed(ctx, cfg.NodeID, modelID, m) }), nil
 	}
 	n, err := a.findPairedNode(ctx, nodeID)
 	if err != nil {
@@ -309,19 +315,26 @@ func (a *App) generateOnNode(ctx context.Context, nodeID, modelID, role, adapter
 	if err != nil {
 		return nil, remoteUnreachableErr(n, err)
 	}
-	return countWork(ctx, wrapRemoteChat(ch, n), a.beginWork(n.ID)), nil
+	return countWorkMeasured(ctx, wrapRemoteChat(ch, n), a.beginWorkOf(n.ID, promptTokens(messages)),
+		func(m *pluginapi.GenerationMetrics) { a.observeSpeed(ctx, n.ID, modelID, m) }), nil
 }
 
 // beginWork counts a turn streaming on a computer until the returned
 // function is called, so placement can prefer a computer that isn't busy
 // (#111).
-func (a *App) beginWork(nodeID string) func() {
+func (a *App) beginWork(nodeID string) func() { return a.beginWorkOf(nodeID, 0) }
+
+// beginWorkOf counts a turn of tokens prompt tokens, which placement weighs
+// as work in flight on that computer (#836).
+func (a *App) beginWorkOf(nodeID string, tokens int) func() {
 	a.workMu.Lock()
 	defer a.workMu.Unlock()
 	if a.work == nil {
 		a.work = map[string]int{}
+		a.workTokens = map[string]int{}
 	}
 	a.work[nodeID]++
+	a.workTokens[nodeID] += tokens
 	var once sync.Once
 	return func() {
 		once.Do(func() {
@@ -329,6 +342,9 @@ func (a *App) beginWork(nodeID string) func() {
 			defer a.workMu.Unlock()
 			if a.work[nodeID]--; a.work[nodeID] <= 0 {
 				delete(a.work, nodeID)
+			}
+			if a.workTokens[nodeID] -= tokens; a.workTokens[nodeID] <= 0 {
+				delete(a.workTokens, nodeID)
 			}
 		})
 	}
@@ -345,14 +361,39 @@ func (a *App) activeWork() map[string]int {
 	return out
 }
 
+// inFlightTokens is the prompt tokens of the turns streaming on each
+// computer.
+func (a *App) inFlightTokens() map[string]int {
+	a.workMu.Lock()
+	defer a.workMu.Unlock()
+	out := make(map[string]int, len(a.workTokens))
+	for k, v := range a.workTokens {
+		out[k] = v
+	}
+	return out
+}
+
 // countWork passes a turn's chunks through and ends its count when the
 // stream closes or the turn ends.
 func countWork(ctx context.Context, in <-chan pluginapi.ChatChunk, done func()) <-chan pluginapi.ChatChunk {
+	return countWorkMeasured(ctx, in, done, nil)
+}
+
+// countWorkMeasured is countWork that also hands measured what the runtime
+// reported, once the stream ends.
+func countWorkMeasured(ctx context.Context, in <-chan pluginapi.ChatChunk, done func(), measured func(*pluginapi.GenerationMetrics)) <-chan pluginapi.ChatChunk {
 	out := make(chan pluginapi.ChatChunk, cap(in))
 	go func() {
 		defer close(out)
 		defer done()
+		var metrics *pluginapi.GenerationMetrics
+		if measured != nil {
+			defer func() { measured(metrics) }()
+		}
 		for c := range in {
+			if c.Metrics != nil {
+				metrics = c.Metrics
+			}
 			select {
 			case out <- c:
 			case <-ctx.Done():

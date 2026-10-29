@@ -26,6 +26,23 @@ type ScoreInput struct {
 	// Training are the computers training an AI now, by node ID. Work goes
 	// to another computer that has the model when there is one (#111).
 	Training map[string]bool
+
+	// Speeds, when set, predicts each computer's time to answer from what
+	// it measured before (#836). PromptTokens is the request's estimated
+	// size, InFlightTokens the prompt tokens each computer is working on
+	// now, and Previous where the chat's last turn ran.
+	Speeds         *Speeds
+	PromptTokens   int
+	InFlightTokens map[string]int // nodeID -> tokens
+	Previous       *PreviousTurn
+}
+
+// PreviousTurn is where a chat's last turn ran: that computer has the chat
+// in its prompt cache, about Tokens of it, while it runs ModelID.
+type PreviousTurn struct {
+	NodeID  string
+	ModelID string
+	Tokens  int
 }
 
 // trainingPenalty sends work away from a computer that is training: an idle
@@ -154,5 +171,6 @@ func Score(input ScoreInput) []ScoredNode {
 
 		out = append(out, s)
 	}
+	predict(input, out)
 	return out
 }

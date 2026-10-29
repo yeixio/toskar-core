@@ -95,7 +95,7 @@ Discovery is on by default. When it is on and the internal bind address is still
 
 ## Norn
 
-Norn is a deterministic placer. Given the computers the daemon knows about, which models they have, and a role, it picks a computer and records a `scheduler.placement` event. It does not split one model across computers. Cross-machine work is placement of whole roles: a plan's workers (each part has its own worker slot), the planner and reviewer, automations, and training jobs.
+Norn is a deterministic placer. Given the computers the daemon knows about, which models they have, and a role, it picks a computer and records a `scheduler.placement` event. It weighs which computer has the model and has it loaded, the profile's rules, the predicted time to answer from each computer's measured speeds and the work in flight there, and where a chat's prompt cache is (see [Clustering](clustering.md#placement)). It does not split one model across computers. Cross-machine work is placement of whole roles: a plan's workers (each part has its own worker slot), the planner and reviewer, automations, and training jobs.
 
 ## Strategies
 
