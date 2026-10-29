@@ -112,6 +112,14 @@ def check(guide: dict, root: Path = ROOT) -> tuple[list[str], list[str]]:
                 if block["test"] in tests:
                     problems.append(f"{where} example {block['test']!r} is also in {tests[block['test']]}")
                 tests[block["test"]] = sid
+                # An install example runs in the test that installs, not in
+                # examples/test.py: that script must exist and run it.
+                if "runs_in" in block:
+                    runner = root / block["runs_in"]
+                    if not runner.is_file() or not any("guide-example.py" in line and re.search(rf"\b{re.escape(block['test'])}\b", line)
+                                                       for line in runner.read_text().splitlines()):
+                        problems.append(f"{where} example {block['test']!r} runs in {block['runs_in']}, which doesn't run it with scripts/guide-example.py")
+                    continue
                 if block["language"] not in RUNNABLE:
                     problems.append(f"{where} example {block['test']!r} is {block['language']}; examples/test.py runs {', '.join(RUNNABLE)}")
         if not blocks:

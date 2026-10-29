@@ -30,6 +30,48 @@
         },
         {
           "type": "heading",
+          "text": "What your computer can run"
+        },
+        {
+          "type": "paragraph",
+          "text": "A model has to fit in memory to answer quickly. More memory runs larger models, which write better answers and follow longer instructions. Here's what fits well, by memory:"
+        },
+        {
+          "type": "table",
+          "columns": [
+            "Memory",
+            "Models that fit well",
+            "For example"
+          ],
+          "rows": [
+            [
+              "8 GB",
+              "Small models, up to about 3 GB",
+              "Llama 3.2 3B, Qwen 2.5 3B, Phi 3.5 Mini"
+            ],
+            [
+              "16 GB",
+              "Up to about 9 GB",
+              "Qwen 2.5 7B, Gemma 2 9B"
+            ],
+            [
+              "24 to 32 GB",
+              "Up to about 10 GB, the 14B models",
+              "Qwen 2.5 14B"
+            ],
+            [
+              "64 GB or more",
+              "The 30B models, about 21 GB",
+              "Qwen 2.5 32B"
+            ]
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "On a Mac, the graphics use part of the computer's memory, and the table counts that part. A graphics card on a Windows or Linux computer brings its own memory, so larger models run there too. You don't need to work this out yourself: Toskar checks this computer and labels every model by how well it fits."
+        },
+        {
+          "type": "heading",
           "text": "Choose how to install"
         },
         {
@@ -78,12 +120,29 @@
         },
         {
           "type": "paragraph",
-          "text": "On Linux, the install script adds the release's package, checks it against the release's SHA256SUMS.txt, and starts Toskar as a service. On a Mac it installs the release's files and starts them with launchd."
+          "text": "On Linux, the install script adds the release's package, checks it against the release's SHA256SUMS.txt, and starts Toskar as a service. On a Mac it installs the release's files and starts them with launchd. CI runs this line on a fresh Ubuntu computer."
         },
         {
           "type": "code",
           "language": "sh",
-          "code": "curl -fsSL https://github.com/yeixio/toskar-core/releases/latest/download/install.sh | sh"
+          "code": "curl -fsSL https://github.com/yeixio/toskar-core/releases/latest/download/install.sh | sh",
+          "test": "install-script",
+          "runs_in": "scripts/test-install.sh"
+        },
+        {
+          "type": "paragraph",
+          "text": "On Debian or Ubuntu, you can add Toskar's apt repository instead. It's signed, and apt checks every update against its key. The release tests these lines on a fresh Ubuntu computer."
+        },
+        {
+          "type": "code",
+          "language": "sh",
+          "test": "install-apt",
+          "runs_in": "scripts/build/test-apt-repo.sh",
+          "code": "sudo install -d -m 0755 /etc/apt/keyrings\ncurl -fsSL https://toskar.ai/apt/toskar.asc | sudo tee /etc/apt/keyrings/toskar.asc > /dev/null\necho \"deb [signed-by=/etc/apt/keyrings/toskar.asc] https://raw.githubusercontent.com/yeixio/toskar-core/apt stable main\" | sudo tee /etc/apt/sources.list.d/toskar.list\nsudo apt-get update\nsudo apt-get install toskar"
+        },
+        {
+          "type": "paragraph",
+          "text": "Other Linux computers get the release's rpm package, which the install script uses too. There's no published container image yet."
         },
         {
           "type": "paragraph",
@@ -97,7 +156,7 @@
         {
           "type": "note",
           "tone": "tip",
-          "text": "These install system-wide, so CI runs the install script on a fresh Ubuntu computer instead of here. [Run without a desktop](#server) covers the Linux packages, the service, and running Toskar Core yourself."
+          "text": "The install script and the apt lines are tested on a fresh Ubuntu computer. The Homebrew lines aren't tested yet, because they install on the computer that runs them. [Run without a desktop](#server) covers the service and updates."
         },
         {
           "type": "heading",
@@ -108,7 +167,8 @@
           "items": [
             "Open Toskar Pro, or go to http://127.0.0.1:7331 in a browser on the computer running Toskar Core. Only that computer can reach it at first.",
             "Toskar shows what this computer has for running AI. Choose what you'd like your AI to do, such as General Assistant, then choose Continue.",
-            "Toskar recommends a setup that fits this computer. Choose Install recommended setup and wait for the download."
+            "Toskar recommends a setup that fits this computer. Choose Install recommended setup and wait for the download.",
+            "Keep the window open while it downloads. It shows how far it has got. When it says You are ready, choose Start chatting."
           ]
         },
         {
@@ -124,6 +184,12 @@
           "caption": "The recommended setup, with its download size and the memory it will use."
         },
         {
+          "type": "image",
+          "screen": "onboarding-ready",
+          "alt": "The You are ready screen saying the recommended setup is installed, with a Start chatting button",
+          "caption": "Once the download is done, Start chatting opens your first chat."
+        },
+        {
           "type": "heading",
           "text": "Ask your first question"
         },
@@ -133,6 +199,12 @@
             "Choose Chat in the sidebar, type a question, and press Enter.",
             "The first answer can take a little longer while the model loads into memory. Later ones start sooner."
           ]
+        },
+        {
+          "type": "image",
+          "screen": "chat",
+          "alt": "A chat with a question about a hike and Toskar's answer, with the model's name under it",
+          "caption": "An answer, with the model that wrote it."
         },
         {
           "type": "paragraph",
@@ -1647,7 +1719,178 @@
         "Behind a reverse proxy that signs people in, such as Authelia, Authentik, Cloudflare Access, or Tailscale, set TOSKAR_TRUSTED_PROXIES to the proxy's address. Toskar then takes the person from the proxy's Remote-User header, makes them the first time, and gives them a role from their groups: TOSKAR_PROXY_ADMIN_GROUPS and TOSKAR_PROXY_MEMBER_GROUPS, with TOSKAR_PROXY_DEFAULT_ROLE for everyone else. TOSKAR_PROXY_OWNER_USER is your own name there. Only the listed address is believed. With the proxy on the same computer, everything from that computer counts as the proxy's, so open Toskar through the proxy there too.",
         "To let people sign in with Google, Microsoft, Okta, Authentik, Keycloak, or another OpenID Connect provider, register Toskar there with its address followed by /api/v1/oidc/callback, then set TOSKAR_OIDC_ISSUER, TOSKAR_OIDC_CLIENT_ID, and TOSKAR_OIDC_CLIENT_SECRET. The sign-in screen then shows Sign in with that provider. Groups become roles with TOSKAR_OIDC_ADMIN_GROUPS and TOSKAR_OIDC_MEMBER_GROUPS, and TOSKAR_OIDC_OWNER_EMAIL is your own address there."
       ],
-      "code": "tar -xzf toskar-{{version}}-linux-amd64-headless.tar.gz\ncd toskar-{{version}}-linux-amd64-headless\n./toskar"
+      "code": "tar -xzf toskar-{{version}}-linux-amd64-headless.tar.gz\ncd toskar-{{version}}-linux-amd64-headless\n./toskar",
+      "kind": "task",
+      "summary": "Run Toskar Core on a computer without a screen, such as a home server, and use it from a browser on your own computer.",
+      "blocks": [
+        {
+          "type": "list",
+          "title": "What you need",
+          "items": [
+            "A Linux computer you can sign in to from a terminal, with Toskar Core installed. [Install and start your first chat](#install) has the install script and the apt lines.",
+            "Memory and disk space for a model, as on any computer. The same table on that page applies.",
+            "Your own computer, with a browser and SSH, to use it from."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "The service"
+        },
+        {
+          "type": "paragraph",
+          "text": "The Linux packages run Toskar as the system service toskar, which starts when the computer does. It runs as the user yggdrasil, and keeps its data in /var/lib/yggdrasil/.local/share/toskar. Install the packages with sudo, since they set up the service."
+        },
+        {
+          "type": "paragraph",
+          "text": "Check it, restart it, or read its log with systemd's usual commands. These need a Linux computer with the service, so they aren't run in CI."
+        },
+        {
+          "type": "code",
+          "language": "sh",
+          "code": "systemctl status toskar\nsudo systemctl restart toskar\njournalctl -u toskar"
+        },
+        {
+          "type": "heading",
+          "text": "Open Toskar from your own computer"
+        },
+        {
+          "type": "paragraph",
+          "text": "At first, Toskar answers only on the server itself, at 127.0.0.1:7331. An SSH tunnel brings that address to your own computer, and nothing is opened to the network."
+        },
+        {
+          "type": "steps",
+          "items": [
+            "On your own computer, open a terminal and run ssh -L 7331:127.0.0.1:7331 you@server, with your username and the server's name. Leave it open.",
+            "Open http://127.0.0.1:7331 in a browser on your own computer.",
+            "The first time, set up a model as on any computer: choose what you'd like your AI to do, then Install recommended setup."
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Through the tunnel, Toskar answers as it would on the server. This check, from your own computer, shows that it's running:"
+        },
+        {
+          "type": "code",
+          "language": "sh",
+          "test": "server-health",
+          "code": "curl -s http://127.0.0.1:7331/api/v1/health",
+          "output": "{…\"status\":\"ok\"…}"
+        },
+        {
+          "type": "note",
+          "tone": "tip",
+          "text": "If your own computer runs Toskar too, 7331 is taken there. Use another port on your side, such as ssh -L 7400:127.0.0.1:7331 you@server, and open http://127.0.0.1:7400."
+        },
+        {
+          "type": "heading",
+          "text": "You're the Owner"
+        },
+        {
+          "type": "paragraph",
+          "text": "Whoever installed Toskar is its Owner, and uses it from the server without signing in. A tunnel arrives as the server, so you're the Owner through it too. To add other people, or to sign in from another device, see [People and sign-in](#people)."
+        },
+        {
+          "type": "heading",
+          "text": "Update"
+        },
+        {
+          "type": "paragraph",
+          "text": "Once a day, Toskar asks toskar.ai for the latest version number, and nothing else. When there's a newer one, Settings shows it under About, such as Toskar 1.13.0 is available. Update the way you installed:"
+        },
+        {
+          "type": "table",
+          "columns": [
+            "Installed with",
+            "Update with"
+          ],
+          "rows": [
+            [
+              "The apt repository, or the install script on Debian or Ubuntu",
+              "`sudo apt-get update`, then `sudo apt-get upgrade`"
+            ],
+            [
+              "An rpm package",
+              "The new release's rpm, with `sudo dnf install` and its file name"
+            ],
+            [
+              "Homebrew",
+              "`brew upgrade toskar`"
+            ]
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Running the install script again doesn't update: it says Toskar is already installed and running. A Linux package restarts the service on the new version by itself."
+        },
+        {
+          "type": "heading",
+          "text": "Settings for a server"
+        },
+        {
+          "type": "paragraph",
+          "text": "config.json in the data directory sets ports, addresses, discovery, and static peers, and TOSKAR_* environment variables override them for containers. The toskarctl command lists, creates, runs, and pauses automations from a terminal, and prints shell completion."
+        },
+        {
+          "type": "paragraph",
+          "text": "The headless archive doesn't install a service. Extract it, run toskar from its folder with the web folder beside it, and stop it with Ctrl+C. Its --data-dir option keeps the data somewhere else."
+        },
+        {
+          "type": "code",
+          "language": "sh",
+          "code": "tar -xzf toskar-{{version}}-linux-amd64-headless.tar.gz\ncd toskar-{{version}}-linux-amd64-headless\n./toskar"
+        },
+        {
+          "type": "heading",
+          "text": "Sign in through a proxy or your organization's accounts"
+        },
+        {
+          "type": "paragraph",
+          "text": "Behind a reverse proxy that signs people in, such as Authelia, Authentik, Cloudflare Access, or Tailscale, set TOSKAR_TRUSTED_PROXIES to the proxy's address. Toskar then takes the person from the proxy's Remote-User header, makes them the first time, and gives them a role from their groups: TOSKAR_PROXY_ADMIN_GROUPS and TOSKAR_PROXY_MEMBER_GROUPS, with TOSKAR_PROXY_DEFAULT_ROLE for everyone else. TOSKAR_PROXY_OWNER_USER is your own name there. Only the listed address is believed. With the proxy on the same computer, everything from that computer counts as the proxy's, so open Toskar through the proxy there too."
+        },
+        {
+          "type": "paragraph",
+          "text": "To let people sign in with Google, Microsoft, Okta, Authentik, Keycloak, or another OpenID Connect provider, register Toskar there with its address followed by /api/v1/oidc/callback, then set TOSKAR_OIDC_ISSUER, TOSKAR_OIDC_CLIENT_ID, and TOSKAR_OIDC_CLIENT_SECRET. The sign-in screen then shows Sign in with that provider. Groups become roles with TOSKAR_OIDC_ADMIN_GROUPS and TOSKAR_OIDC_MEMBER_GROUPS, and TOSKAR_OIDC_OWNER_EMAIL is your own address there."
+        },
+        {
+          "type": "heading",
+          "text": "Troubleshooting"
+        },
+        {
+          "type": "table",
+          "columns": [
+            "What you see",
+            "What to do"
+          ],
+          "rows": [
+            [
+              "The browser can't reach 127.0.0.1:7331",
+              "Check that the tunnel's terminal is still open. On the server, `systemctl status toskar` says whether Toskar is running."
+            ],
+            [
+              "bind: Address already in use, when you start the tunnel",
+              "Something on your own computer has port 7331. Use another port on your side, as in the tip above."
+            ],
+            [
+              "The service stopped after an update",
+              "`journalctl -u toskar` shows why. Restart it with `sudo systemctl restart toskar`."
+            ],
+            [
+              "Settings doesn't say when there's an update",
+              "The update check is off, or the server can't reach toskar.ai. Turn on Check for updates under About."
+            ]
+          ]
+        },
+        {
+          "type": "related",
+          "sections": [
+            "install",
+            "people",
+            "models",
+            "computers",
+            "privacy"
+          ]
+        }
+      ]
     },
     {
       "id": "privacy",

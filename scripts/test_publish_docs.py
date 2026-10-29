@@ -103,6 +103,7 @@ class PublisherTests(unittest.TestCase):
             {'type': 'note', 'tone': 'danger', 'text': 'x'},
             {'type': 'code', 'language': 'html', 'code': '<b>'},
             {'type': 'code', 'language': 'sh', 'code': 'ls', 'test': 'Bad Id'},
+            {'type': 'code', 'language': 'sh', 'code': 'ls', 'runs_in': 'scripts/test-install.sh'},
             {'type': 'table', 'columns': ['A', 'B'], 'rows': [['only one']]},
             {'type': 'image', 'src': 'https://example.com/x.png', 'alt': 'x', 'caption': 'x'},
             {'type': 'related', 'sections': ['nowhere']},

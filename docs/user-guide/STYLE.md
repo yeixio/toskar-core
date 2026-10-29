@@ -145,6 +145,13 @@ for anything that changes, such as an id, a time, or a model's words:
   "output": "…Juneau…" }
 ```
 
+An install example can't run against the throwaway Core: it installs on
+the computer that runs it. Give it a `test` id and `runs_in`, the script
+that installs on a fresh computer in CI, such as `scripts/test-install.sh`.
+That script prints the example with `scripts/guide-example.py <test id>`,
+puts its own addresses in place of the public ones, and runs it. The check
+fails if the script doesn't.
+
 An example without a `test` id doesn't count toward the bar. Use one only
 for something CI can't run, such as a command for another operating system,
 and say so in the text. A `json` or `text` block can't have a `test` id.
