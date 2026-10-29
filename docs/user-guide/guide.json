@@ -1686,6 +1686,31 @@
         },
         {
           "type": "heading",
+          "text": "Chat on the device itself"
+        },
+        {
+          "type": "paragraph",
+          "text": "A phone or tablet can also run a small model of its own, for when your computer is off or out of reach. Open Models in the app and choose Install on one under On this device. These are the smaller models from the Toskar catalog, and the file stays on the device."
+        },
+        {
+          "type": "list",
+          "items": [
+            "To chat on the device, choose a model under On this device in the chat's model menu. Auto there picks the best installed one for each message.",
+            "When the computer can't be reached, the error offers Chat on this device, which sends the same message to the device's model.",
+            "Nothing you write leaves the device. With Look up current information on, in Settings under Chat on this device, a question about the weather or news searches the web: only the search words leave the device, and the answer lists its sources.",
+            "If a model can't load or runs out of memory, a smaller one answers instead, and the answer says so."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Notifications on the device"
+        },
+        {
+          "type": "paragraph",
+          "text": "Turn on Notifications from your computer in the app's Settings, under Notifications on this device. Your computer's notices, such as an automation's result, then arrive even when Toskar is closed or you're away from home. Choose what they say in Settings › Notifications on the computer, and see them all in the app's Activity tab. [Notifications](#notifications) covers which notices there are."
+        },
+        {
+          "type": "heading",
           "text": "Ask Toskar about text in any app"
         },
         {
@@ -1736,6 +1761,14 @@
             [
               "Can't reach your computer away from home",
               "The computer may be off or asleep, or access from anywhere may be off on it. See [Reach Toskar away from home](#anywhere)."
+            ],
+            [
+              "Notifications are off for Toskar in this device's settings",
+              "Choose Open Settings, turn notifications on for Toskar, and come back."
+            ],
+            [
+              "Update Toskar on your computer to get notifications here",
+              "Update Toskar on the computer, then turn notifications on again."
             ]
           ]
         },
