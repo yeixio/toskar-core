@@ -497,7 +497,3 @@ func otherLoaded(e CatalogEntry, names []string) []string {
 func formatGiB(n uint64) string {
 	return fmt.Sprintf("%.1f GB", float64(n)/(1024*1024*1024))
 }
-
-func runnableFit(label contracts.FitLabel) bool {
-	return label != contracts.FitUnsupported && label != contracts.FitTooLarge
-}
