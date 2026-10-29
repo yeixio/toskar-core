@@ -265,7 +265,7 @@ toskarctl paths
 toskarctl automations list
 ```
 
-`toskarctl version` and `toskarctl about` print the version, the AGPL license, the source URL, and the commit. `toskar -version` prints that notice and exits. `toskarctl paths` prints the data, model, runtime, log, and database directories. Status, nodes, and models are HTTP routes under `/api/v1/`. `toskar -data-dir /path/to/dir` overrides the data directory. Every command and flag is in [docs/cli.md](docs/cli.md).
+`toskarctl version` and `toskarctl about` print the version, the AGPL license, the source URL, and the commit. `toskar -version` prints that notice and exits. `toskarctl paths` prints the data, model, runtime, log, and database directories. `toskarctl models list` and `toskarctl models install <id>` list and install models; status and nodes are HTTP routes under `/api/v1/`. `toskar -data-dir /path/to/dir` overrides the data directory. Every command and flag is in [docs/cli.md](docs/cli.md).
 
 ### Shell completion
 

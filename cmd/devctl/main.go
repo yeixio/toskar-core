@@ -47,6 +47,8 @@ func main() {
 		info, _ := os.Stdin.Stat()
 		terminal := info != nil && info.Mode()&os.ModeCharDevice != 0
 		exit(peopleCommand(os.Args[2:], newDaemon(), peopleIO{in: os.Stdin, out: os.Stdout, prompt: os.Stderr, terminal: terminal}))
+	case "models":
+		exit(modelsCommand(os.Args[2:], newDaemon(), os.Stdout))
 	case "ask":
 		info, _ := os.Stdin.Stat()
 		piped := info != nil && info.Mode()&os.ModeCharDevice == 0
@@ -63,7 +65,7 @@ func main() {
 }
 
 func usage() {
-	fmt.Fprintf(os.Stderr, "usage: toskarctl <version|about|paths|ask|automations|mcp|join|join-token|network|leave|people|completion>\n")
+	fmt.Fprintf(os.Stderr, "usage: toskarctl <version|about|paths|ask|models|automations|mcp|join|join-token|network|leave|people|completion>\n")
 }
 
 // exit ends with err's message and exit status: 2 for usage, 1 otherwise.

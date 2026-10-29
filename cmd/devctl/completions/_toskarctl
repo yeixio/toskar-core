@@ -8,6 +8,7 @@ _toskarctl() {
     'about:print the version, license, and source URL'
     'paths:print the data, model, runtime, log, and database directories'
     'ask:send one prompt and print the answer, for scripts and CI'
+    'models:list models, and install one with its progress'
     'automations:manage scheduled automations on the daemon'
     'mcp:connect an app such as Claude Desktop to Yggdrasil over MCP'
     'join:join this computer to a Yggdrasil network with a join command'
@@ -62,6 +63,16 @@ _toskarctl() {
       ;;
     network|leave)
       _arguments '--output[output format]:format:(text json)'
+      ;;
+    models)
+      if (( CURRENT == 3 )); then
+        _values 'models command' list install
+        return
+      fi
+      case "${words[3]}" in
+        list) _arguments '--installed[only installed models]' '--json[print JSON]' ;;
+        install) _arguments '--node[the computer to install it on]:node:' ;;
+      esac
       ;;
     automations)
       if (( CURRENT == 3 )); then

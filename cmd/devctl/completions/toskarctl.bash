@@ -6,7 +6,7 @@ _toskarctl() {
   prev="${COMP_WORDS[COMP_CWORD-1]}"
 
   if [[ ${COMP_CWORD} -eq 1 ]]; then
-    COMPREPLY=($(compgen -W "version about paths ask automations mcp join join-token network leave people completion" -- "$cur"))
+    COMPREPLY=($(compgen -W "version about paths ask models automations mcp join join-token network leave people completion" -- "$cur"))
     return
   fi
 
@@ -50,6 +50,15 @@ _toskarctl() {
     completion)
       if [[ ${COMP_CWORD} -eq 2 ]]; then
         COMPREPLY=($(compgen -W "bash zsh fish" -- "$cur"))
+      fi
+      ;;
+    models)
+      if [[ ${COMP_CWORD} -eq 2 ]]; then
+        COMPREPLY=($(compgen -W "list install" -- "$cur"))
+      elif [[ "${COMP_WORDS[2]}" == list ]]; then
+        COMPREPLY=($(compgen -W "--installed --json" -- "$cur"))
+      elif [[ "${COMP_WORDS[2]}" == install && "$cur" == -* ]]; then
+        COMPREPLY=($(compgen -W "--node" -- "$cur"))
       fi
       ;;
     automations)
