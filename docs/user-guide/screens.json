@@ -405,15 +405,128 @@
       ]
     },
     {
-      "id": "models-add",
+      "id": "models-add-apps",
       "path": "/models",
       "readyText": "Best overall",
+      "api": {
+        "/api/v1/models/import/found": {
+          "models": [
+            {
+              "app": "lmstudio",
+              "path": "/Users/you/.lmstudio/models/lmstudio-community/gemma-3-12b-it-GGUF/gemma-3-12b-it-Q4_K_M.gguf",
+              "name": "Gemma 3 12B IT",
+              "size_bytes": 7300574528,
+              "architecture": "gemma3",
+              "parameters": "12B",
+              "quantization": "Q4_K_M"
+            },
+            {
+              "app": "ollama",
+              "path": "/Users/you/.ollama/models/blobs/sha256-6a0746a1ec1aef3e7ec53868f220ff6e389f6f8ef87a01d77c96807de94ca2aa",
+              "name": "llama3.1:8b",
+              "size_bytes": 4920753328,
+              "architecture": "llama",
+              "parameters": "8.0B",
+              "quantization": "Q4_K_M"
+            },
+            {
+              "app": "ollama",
+              "path": "/Users/you/.ollama/models/blobs/sha256-2bada8a7450677000f678be90653b85d364de7db25eb5ea54136ada5f3933730",
+              "name": "qwen2.5-coder:7b",
+              "size_bytes": 4683087520,
+              "architecture": "qwen2",
+              "parameters": "7.6B",
+              "quantization": "Q4_K_M",
+              "model_id": "ollama-qwen2.5-coder-7b"
+            }
+          ]
+        }
+      },
       "actions": [
         {
           "click": "Add a model"
         },
         {
-          "wait": "From another app"
+          "click": "From another app"
+        },
+        {
+          "wait": "Gemma 3 12B IT"
+        }
+      ]
+    },
+    {
+      "id": "models-browse",
+      "path": "/models",
+      "readyText": "Best overall",
+      "api": {
+        "/api/v1/models/browse": [
+          {
+            "id": "hf-qwen2.5-7b-instruct-q4_k_m",
+            "display_name": "Qwen2.5 7B Instruct",
+            "summary": "Qwen/Qwen2.5-7B-Instruct-GGUF",
+            "repo_id": "Qwen/Qwen2.5-7B-Instruct-GGUF",
+            "filename": "qwen2.5-7b-instruct-q4_k_m.gguf",
+            "source_url": "https://huggingface.co/Qwen/Qwen2.5-7B-Instruct-GGUF/resolve/main/qwen2.5-7b-instruct-q4_k_m.gguf",
+            "size_bytes": 4683073952,
+            "parameters": "7B",
+            "variant": "Q4_K_M",
+            "downloads": 412000,
+            "tags": [
+              "gguf",
+              "instruct"
+            ]
+          },
+          {
+            "id": "hf-mistral-nemo-instruct-q4_k_m",
+            "display_name": "Mistral Nemo Instruct",
+            "summary": "bartowski/Mistral-Nemo-Instruct-2407-GGUF",
+            "repo_id": "bartowski/Mistral-Nemo-Instruct-2407-GGUF",
+            "filename": "Mistral-Nemo-Instruct-2407-Q4_K_M.gguf",
+            "source_url": "https://huggingface.co/bartowski/Mistral-Nemo-Instruct-2407-GGUF/resolve/main/Mistral-Nemo-Instruct-2407-Q4_K_M.gguf",
+            "size_bytes": 7477208160,
+            "parameters": "12B",
+            "variant": "Q4_K_M",
+            "downloads": 198000,
+            "tags": [
+              "gguf",
+              "instruct"
+            ]
+          },
+          {
+            "id": "hf-smollm2-1.7b-instruct-q4_k_m",
+            "display_name": "SmolLM2 1.7B Instruct",
+            "summary": "HuggingFaceTB/SmolLM2-1.7B-Instruct-GGUF",
+            "repo_id": "HuggingFaceTB/SmolLM2-1.7B-Instruct-GGUF",
+            "filename": "smollm2-1.7b-instruct-q4_k_m.gguf",
+            "source_url": "https://huggingface.co/HuggingFaceTB/SmolLM2-1.7B-Instruct-GGUF/resolve/main/smollm2-1.7b-instruct-q4_k_m.gguf",
+            "size_bytes": 1055609824,
+            "parameters": "1.7B",
+            "variant": "Q4_K_M",
+            "downloads": 86000,
+            "tags": [
+              "gguf",
+              "instruct"
+            ]
+          }
+        ],
+        "/api/v1/models/install-from-url": {
+          "status": "started",
+          "model_id": "hf-qwen2.5-7b-instruct-q4_k_m"
+        }
+      },
+      "actions": [
+        {
+          "click": "Browse all models"
+        },
+        {
+          "wait": "Mistral Nemo Instruct"
+        },
+        {
+          "click": "Install",
+          "exact": true
+        },
+        {
+          "wait": "Downloading"
         }
       ]
     },

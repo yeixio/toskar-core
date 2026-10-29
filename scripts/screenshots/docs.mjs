@@ -25,8 +25,10 @@ await mkdir(outDir, { recursive: true })
 // would find them.
 async function act(page, action) {
   if (action.click) {
-    const byRole = page.getByRole('button', { name: action.click }).or(page.getByRole('link', { name: action.click })).or(page.getByRole('tab', { name: action.click }))
-    const target = (await byRole.count()) ? byRole.first() : page.getByText(action.click, { exact: false }).first()
+    // exact: the whole name, so Install isn't the Installed tab.
+    const named = { name: action.click, exact: Boolean(action.exact) }
+    const byRole = page.getByRole('button', named).or(page.getByRole('link', named)).or(page.getByRole('tab', named))
+    const target = (await byRole.count()) ? byRole.first() : page.getByText(action.click, { exact: Boolean(action.exact) }).first()
     await target.click()
   } else if (action.fill) {
     await page.getByLabel(action.fill.label).first().fill(action.fill.text)

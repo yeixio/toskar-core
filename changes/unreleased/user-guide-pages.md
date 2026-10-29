@@ -19,3 +19,8 @@
   from the web and what they need, and which version of an answer a chat
   continues from, with a generated screenshot of an attached spreadsheet
   read, cited, and answered with a made spreadsheet (#886).
+- Choose and manage models explains what each kind of model is for,
+  community ratings and exactly what sharing one sends, new models in the
+  News, that a model needing more than the graphics card is tight, and
+  `toskarctl models`. New generated screenshots show Browse all models with
+  a download under way and Add a model › From another app (#887).

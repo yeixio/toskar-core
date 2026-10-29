@@ -36,6 +36,8 @@ How it is started depends on how it was installed:
 | `toskarctl version` (or `about`) | Version, license, and corresponding source |
 | `toskarctl paths` | Default data, model, runtime, log, and database paths |
 | `toskarctl ask [flags] [prompt]` | Send one prompt and print the answer, for scripts and CI jobs (below) |
+| `toskarctl models list [--installed] [--json]` | The models, smallest first, with download size, fit on this computer, and whether each is installed |
+| `toskarctl models install <id> [--node <id>]` | Download a model and wait until it's installed, printing its progress every tenth of the way |
 | `toskarctl automations …` | Manage scheduled automations (below) |
 | `toskarctl mcp` | Let an app that starts MCP servers as programs, such as Claude Desktop, use Toskar (below) |
 | `toskarctl join-token create [--ttl 15m]` | Make a one-time join token and print the command that adds a computer to this network ([Clustering](clustering.md#joining-with-one-command)) |

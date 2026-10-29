@@ -22,13 +22,13 @@ func TestCompletionPrintsEachShell(t *testing.T) {
 		if !bytes.Equal(out.Bytes(), want) {
 			t.Fatalf("%s: printed script does not match %s", shell, path)
 		}
-		for _, cmd := range []string{"version", "about", "paths", "ask", "automations", "mcp", "join", "join-token", "network", "leave", "completion"} {
+		for _, cmd := range []string{"version", "about", "paths", "ask", "models", "automations", "mcp", "join", "join-token", "network", "leave", "completion"} {
 			if !strings.Contains(out.String(), cmd) {
 				t.Fatalf("%s script does not offer %q", shell, cmd)
 			}
 		}
-		// Status, nodes, and models are HTTP routes, not toskarctl commands.
-		for _, word := range []string{"status", "nodes", "models"} {
+		// Status and nodes are HTTP routes, not toskarctl commands.
+		for _, word := range []string{"status", "nodes"} {
 			if strings.Contains(out.String(), word) {
 				t.Fatalf("%s script offers %q, which is not a toskarctl command", shell, word)
 			}
@@ -71,13 +71,15 @@ func TestBashCompletionCandidates(t *testing.T) {
 		line string
 		want string
 	}{
-		{"toskarctl ''", "version about paths ask automations mcp join join-token network leave people completion"},
+		{"toskarctl ''", "version about paths ask models automations mcp join join-token network leave people completion"},
 		{"toskarctl j", "join join-token"},
 		{"toskarctl join-token ''", "create list revoke"},
 		{"toskarctl join --f", "--fingerprint"},
 		{"toskarctl a", "about ask automations"},
 		{"toskarctl ask --json", "--json-schema"},
 		{"toskarctl completion ''", "bash zsh fish"},
+		{"toskarctl models ''", "list install"},
+		{"toskarctl models list --i", "--installed"},
 		{"toskarctl automations p", "pause"},
 		{"toskarctl automations create --schedule ''", "once daily weekly monthly interval cron manual"},
 		{"toskarctl automations update abc --noti", "--notify"},

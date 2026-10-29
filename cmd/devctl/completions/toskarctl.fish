@@ -6,6 +6,7 @@ complete -c toskarctl -n __fish_use_subcommand -a version -d 'Print the version,
 complete -c toskarctl -n __fish_use_subcommand -a about -d 'Print the version, license, and source URL'
 complete -c toskarctl -n __fish_use_subcommand -a paths -d 'Print the data, model, runtime, log, and database directories'
 complete -c toskarctl -n __fish_use_subcommand -a ask -d 'Send one prompt and print the answer, for scripts and CI'
+complete -c toskarctl -n __fish_use_subcommand -a models -d 'List models, and install one with its progress'
 complete -c toskarctl -n __fish_use_subcommand -a automations -d 'Manage scheduled automations on the daemon'
 complete -c toskarctl -n __fish_use_subcommand -a mcp -d 'Connect an app such as Claude Desktop to Yggdrasil over MCP'
 complete -c toskarctl -n __fish_use_subcommand -a join -d 'Join this computer to a Yggdrasil network'
@@ -34,6 +35,11 @@ complete -c toskarctl -n '__fish_seen_subcommand_from join' -l wait -r -d 'Wait 
 complete -c toskarctl -n '__fish_seen_subcommand_from join-token; and not __fish_seen_subcommand_from create list revoke' -a 'create list revoke'
 complete -c toskarctl -n '__fish_seen_subcommand_from join-token' -l ttl -r -d 'How long the token lasts, such as 15m'
 complete -c toskarctl -n '__fish_seen_subcommand_from join join-token network leave' -l output -x -a 'text json' -d 'Output format'
+
+complete -c toskarctl -n '__fish_seen_subcommand_from models; and not __fish_seen_subcommand_from list install' -a 'list install'
+complete -c toskarctl -n '__fish_seen_subcommand_from models; and __fish_seen_subcommand_from list' -l installed -d 'Only installed models'
+complete -c toskarctl -n '__fish_seen_subcommand_from models; and __fish_seen_subcommand_from list' -l json -d 'Print JSON'
+complete -c toskarctl -n '__fish_seen_subcommand_from models; and __fish_seen_subcommand_from install' -l node -r -d 'The computer to install it on'
 
 set -l ygg_automation_cmds list get create update delete run pause resume hook
 complete -c toskarctl -n "__fish_seen_subcommand_from automations; and not __fish_seen_subcommand_from $ygg_automation_cmds" -a "$ygg_automation_cmds"

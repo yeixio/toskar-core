@@ -965,7 +965,7 @@
             ],
             [
               "Tight",
-              "It fits, but with little memory left. Close other apps if answers slow down."
+              "It fits, but with little memory left, or it needs more than the graphics card has, so part of it runs on the processor, more slowly. Close other apps if answers slow down."
             ],
             [
               "May run slowly",
@@ -979,7 +979,32 @@
         },
         {
           "type": "paragraph",
-          "text": "The memory estimate counts the model file, its quantization, and its context. A speed is an estimate until the model has run on your computer. Then Details shows the measured speed."
+          "text": "The memory estimate counts the model file, its quantization, and its context. On a computer without unified memory, about 2 GB is kept for the operating system. A speed is an estimate until the model has run on your computer. Then Details shows the measured speed. Badges such as Best overall and Best coding go to models labeled Good or Excellent when one qualifies."
+        },
+        {
+          "type": "heading",
+          "text": "What each kind of model is for"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Chat models answer in chats. Some also write code, think before they answer, or see pictures; Auto sends each request to one that can.",
+            "Embedding and reranker models are supporting models: they help Knowledge search and never answer chats.",
+            "Picture and clip models make pictures and video. They're set up on the Tools page or from a chat's offer, and [What pictures and clips need](#media) lists them with the memory each wants.",
+            "Speech models transcribe audio and read answers aloud. Toskar downloads them the first time you use either, so they aren't on this page."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Ratings"
+        },
+        {
+          "type": "paragraph",
+          "text": "A model's card can show community ratings from computers like yours: the stars, how many ratings there are, and how it runs, such as how soon answers start. A badge chosen with them says Chosen with ratings from computers like yours."
+        },
+        {
+          "type": "paragraph",
+          "text": "Rate, on an installed model, saves your own stars and reasons on this computer. Share this rating with the community is your choice. Exactly what is shared lists what's sent: the stars and reasons, the model, the kind of computer and its memory, the language if you give one, how it runs here if you choose Include how it runs here, and a random ID. It never sends your prompts, chats, file names, computer name, user name, or network address."
         },
         {
           "type": "heading",
@@ -1012,6 +1037,12 @@
           "text": "Browse all models searches Hugging Face for GGUF models, the format Toskar runs. Install from there shows the download as it happens. Embedding and reranker models are supporting models: they help Knowledge search and never answer chats, so the chat menus leave them out."
         },
         {
+          "type": "image",
+          "screen": "models-browse",
+          "alt": "Browse all models with three results from Hugging Face, the first downloading and the others offering Install",
+          "caption": "Browse all models. The download goes on if you close the panel; Installed shows its progress."
+        },
+        {
           "type": "heading",
           "text": "Add a model you already have"
         },
@@ -1029,9 +1060,9 @@
         },
         {
           "type": "image",
-          "screen": "models-add",
-          "alt": "Add a model open on From a file, with a place to drop a .gguf file, a field for a file's location, and the choice to copy it into Toskar or use it where it is",
-          "caption": "Toskar checks every file before adding it, and reads its name, size, and context length from the file."
+          "screen": "models-add-apps",
+          "alt": "Add a model on From another app, listing a model from LM Studio and two from Ollama, one already added",
+          "caption": "From another app lists what other apps on this computer already downloaded. Add uses the file where it is."
         },
         {
           "type": "note",
@@ -1052,7 +1083,39 @@
         },
         {
           "type": "heading",
-          "text": "From the API"
+          "text": "New models in the news"
+        },
+        {
+          "type": "paragraph",
+          "text": "News lists new AI models as they come out. One that Toskar can run shows its fit for your computer, and an Admin can install it from there. While it downloads, Installing… see Models opens Models."
+        },
+        {
+          "type": "heading",
+          "text": "From the command line or the API"
+        },
+        {
+          "type": "paragraph",
+          "text": "`toskarctl models list` lists the models, smallest first, with their download size and fit on the computer it talks to. `--installed` shows only installed ones, and `--json` prints everything."
+        },
+        {
+          "type": "code",
+          "language": "sh",
+          "code": "toskarctl models list",
+          "test": "models-cli-list",
+          "output": "ID…NAME…SIZE…FIT…INSTALLED\n…llama-3.2-1b-q4…Llama 3.2 1B…800 MB…"
+        },
+        {
+          "type": "paragraph",
+          "text": "`toskarctl models install` downloads a model by its ID and waits until it's installed, showing how far it has got. On a computer without a desktop, it's the quickest way to add one."
+        },
+        {
+          "type": "code",
+          "language": "sh",
+          "code": "toskarctl models install llama-3.2-3b-q4"
+        },
+        {
+          "type": "paragraph",
+          "text": "It prints a line such as Downloading Llama 3.2 3B: 40% (840 MB of 2.1 GB) every tenth of the way, then Installed Llama 3.2 3B."
         },
         {
           "type": "paragraph",
@@ -1082,6 +1145,10 @@
             [
               "Tight",
               "Close other apps to free memory, or choose a model labeled Good or Excellent."
+            ],
+            [
+              "Tight, because it needs more than the graphics card has",
+              "Part of the model runs on the processor. Choose one that fits on the card for full speed."
             ],
             [
               "The download stops because the disk is full",
