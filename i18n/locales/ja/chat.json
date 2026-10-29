@@ -496,6 +496,7 @@
     "firstToken": "最初のトークン {{time}}",
     "inOut": "入力{{in}} / 出力{{out}}",
     "cached": "キャッシュ{{count}}件",
+    "guessed": "先読み{{count}}件中{{kept}}件を採用",
     "toolFailures": "{{count}}件失敗",
     "notes": {
       "team": "チーム：プランナーが依頼を分割し、ワーカーが各パートを処理し、レビュアーが回答を確認",

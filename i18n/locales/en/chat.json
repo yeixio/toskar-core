@@ -513,6 +513,7 @@
     "firstToken": "first token {{time}}",
     "inOut": "{{in}} in / {{out}} out",
     "cached": "{{count}} cached",
+    "guessed": "{{kept}} of {{count}} guessed ahead kept",
     "toolFailures": "{{count}} failed",
     "notes": {
       "team": "Team: a planner splits the request, workers do the parts, and a reviewer checks the answer",

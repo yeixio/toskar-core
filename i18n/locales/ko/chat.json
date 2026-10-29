@@ -496,6 +496,7 @@
     "firstToken": "첫 토큰 {{time}}",
     "inOut": "입력 {{in}} / 출력 {{out}}",
     "cached": "{{count}}개 캐시됨",
+    "guessed": "미리 추측한 {{count}}개 중 {{kept}}개 사용",
     "toolFailures": "{{count}}개 실패",
     "notes": {
       "team": "팀: 플래너가 요청을 나누고, 워커가 각 부분을 처리하며, 검토자가 답변을 확인",

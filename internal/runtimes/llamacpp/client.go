@@ -331,6 +331,10 @@ type timingsPayload struct {
 	PredictedPerSecond float64 `json:"predicted_per_second"`
 	// CacheN is how many prompt tokens came from the cache.
 	CacheN int `json:"cache_n"`
+	// DraftN is how many tokens speculation guessed, and DraftNAccepted how
+	// many the model kept (#835).
+	DraftN         int `json:"draft_n"`
+	DraftNAccepted int `json:"draft_n_accepted"`
 }
 
 func mergeServerMetrics(
@@ -375,6 +379,7 @@ func mergeServerMetrics(
 			m.EvalTokPerSec = timings.PredictedPerSecond
 		}
 		m.CachedTokens = timings.CacheN
+		m.DraftTokens, m.DraftAccepted = timings.DraftN, timings.DraftNAccepted
 	}
 	if usage != nil {
 		if usage.PromptTokens > 0 {

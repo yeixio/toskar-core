@@ -530,6 +530,7 @@
     "firstToken": "primer token {{time}}",
     "inOut": "{{in}} de entrada / {{out}} de salida",
     "cached": "{{count}} en caché",
+    "guessed": "{{kept}} de {{count}} adelantados aceptados",
     "toolFailures": "{{count}} fallidas",
     "notes": {
       "team": "Equipo: un planificador divide la solicitud, los trabajadores hacen las partes y un revisor comprueba la respuesta",

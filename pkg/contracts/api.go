@@ -933,6 +933,11 @@ type GenerationMetrics struct {
 	// CachedTokens are prompt tokens reused from the model's cache instead
 	// of processed again, when the runtime reports them.
 	CachedTokens int `json:"cached_tokens,omitempty"`
+	// DraftTokens are tokens guessed ahead by speculative decoding, and
+	// DraftAccepted the ones the model kept (contract 1.64, #835); zero
+	// when nothing was guessed.
+	DraftTokens   int `json:"draft_tokens,omitempty"`
+	DraftAccepted int `json:"draft_accepted,omitempty"`
 	// FinishReason is why the model stopped (contract 1.58, #832): stop, or
 	// length when it reached its token limit, so a cut-off answer can be
 	// told from a finished one. Empty when the runtime didn't say.

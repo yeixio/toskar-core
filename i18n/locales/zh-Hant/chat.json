@@ -496,6 +496,7 @@
     "firstToken": "首個 token {{time}}",
     "inOut": "輸入 {{in}} / 輸出 {{out}}",
     "cached": "{{count}} 個已快取",
+    "guessed": "預先猜測 {{count}} 個，保留 {{kept}} 個",
     "toolFailures": "{{count}} 個失敗",
     "notes": {
       "team": "團隊：規劃者拆分請求，工作者處理各個部分，審查者檢查回答",

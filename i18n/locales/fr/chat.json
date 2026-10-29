@@ -530,6 +530,7 @@
     "firstToken": "premier token {{time}}",
     "inOut": "{{in}} en entrée / {{out}} en sortie",
     "cached": "{{count}} en cache",
+    "guessed": "{{kept}} sur {{count}} anticipés gardés",
     "toolFailures": "{{count}} en échec",
     "notes": {
       "team": "Équipe : un planificateur découpe la demande, des exécutants traitent les parties et un relecteur vérifie la réponse",

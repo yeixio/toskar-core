@@ -128,6 +128,7 @@ func (r *Runtime) StartModel(ctx context.Context, cfg pluginapi.ModelStartConfig
 	if gpuLayers > 0 {
 		args = append(args, "-ngl", fmt.Sprintf("%d", gpuLayers))
 	}
+	args = append(args, speculativeArgs(cfg, cfg.Mode == "" && supportsSpeculation(ctx, det.Path))...)
 	for _, a := range cfg.Adapters {
 		args = append(args, "--lora", a.Path)
 	}

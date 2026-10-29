@@ -1,5 +1,5 @@
 {
-  "version": "1.63",
+  "version": "1.64",
   "types": {
     "ActivityStep": [
       "kind",
@@ -132,6 +132,8 @@
     "GenerationMetrics": [
       "cached_tokens",
       "completion_tokens",
+      "draft_accepted",
+      "draft_tokens",
       "eval_ms",
       "eval_tok_per_sec",
       "finish_reason",
@@ -175,6 +177,8 @@
       "calls",
       "completion_tokens",
       "device",
+      "draft_accepted",
+      "draft_tokens",
       "first_token_ms",
       "load_ms",
       "model_id",

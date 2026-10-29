@@ -2244,6 +2244,9 @@ export interface RunTrace {
     prompt_tokens: number
     completion_tokens: number
     cached_tokens: number
+    /** Tokens speculative decoding guessed ahead, and the ones the model kept (contract 1.64, #835). */
+    draft_tokens?: number
+    draft_accepted?: number
     tok_per_sec?: number
     backend?: string
     device?: string

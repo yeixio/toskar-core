@@ -513,6 +513,7 @@
     "firstToken": "erstes Token {{time}}",
     "inOut": "{{in}} rein / {{out}} raus",
     "cached": "{{count}} aus Cache",
+    "guessed": "{{kept}} von {{count}} vorausgeschätzten behalten",
     "toolFailures": "{{count}} fehlgeschlagen",
     "notes": {
       "team": "Team: Ein Planer teilt die Anfrage auf, Helfer erledigen die Teile, und ein Prüfer kontrolliert die Antwort",
