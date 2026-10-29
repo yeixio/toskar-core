@@ -24,3 +24,6 @@
   News, that a model needing more than the graphics card is tight, and
   `toskarctl models`. New generated screenshots show Browse all models with
   a download under way and Add a model › From another app (#887).
+- Use Toskar on your phone, tablet, TV, or watch covers chatting with a
+  model on the device itself, when it's offered, and what leaves the
+  device, and turning on notifications from your computer (#888).
