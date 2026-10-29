@@ -38,6 +38,7 @@ func traceGeneration(c *runlog.Collector, in <-chan pluginapi.ChatChunk, modelID
 			m = &runlog.GenerationMetrics{
 				TTFTMs: metrics.TTFTMs, PromptTokens: metrics.PromptTokens, CompletionTokens: metrics.CompletionTokens,
 				CachedTokens: metrics.CachedTokens, TokPerSec: metrics.EvalTokPerSec,
+				DraftTokens: metrics.DraftTokens, DraftAccepted: metrics.DraftAccepted,
 			}
 			m.Backend, m.Device = accelerationLabel(acc)
 		}

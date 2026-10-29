@@ -75,6 +75,7 @@ export function RunDetails({ runId }: { runId: string }) {
                 {m.tok_per_sec ? ` · ${formatTokensPerSecond(m.tok_per_sec)}` : ''} ·{' '}
                 {t('run.inOut', { in: m.prompt_tokens, out: m.completion_tokens })}
                 {m.cached_tokens ? ` · ${t('run.cached', { count: m.cached_tokens })}` : ''}
+                {m.draft_tokens ? ` · ${t('run.guessed', { kept: m.draft_accepted ?? 0, count: m.draft_tokens })}` : ''}
               </Row>
             ))}
           {run.models.length > 1 && (

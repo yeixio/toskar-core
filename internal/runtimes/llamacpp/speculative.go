@@ -1,0 +1,78 @@
+package llamacpp
+
+import (
+	"context"
+	"os"
+	"os/exec"
+	"strings"
+	"sync"
+	"time"
+
+	"github.com/yeixio/toskar-core/internal/config"
+	"github.com/yeixio/toskar-core/pkg/pluginapi"
+)
+
+// speculativeType is llama-server's n-gram speculation (#835): it guesses
+// the next tokens from text already in the chat, and the model checks a few
+// at once. It needs no draft model and no memory. Measured on Qwen 2.5 7B
+// on Apple silicon at temperature 0, it answered every prompt the same as
+// without it, was 0 to 7% faster on new text, and 42% faster editing code
+// and 99% faster editing a letter the person pasted in. ngram-cache, the
+// other kind that needs no model, was up to 16% slower on new text.
+const speculativeType = "ngram-mod"
+
+// speculativeArgs are the flags that turn speculation on for a chat model,
+// or none: for embedding and reranking, for a model that sees pictures
+// (not measured with a projector yet), when this llama-server doesn't have
+// it, or when TOSKAR_SPECULATIVE is off.
+func speculativeArgs(cfg pluginapi.ModelStartConfig, supported bool) []string {
+	if cfg.Mode != "" || cfg.Projector != "" || !supported {
+		return nil
+	}
+	switch strings.ToLower(strings.TrimSpace(config.Env("SPECULATIVE"))) {
+	case "off", "0", "false", "no":
+		return nil
+	}
+	return []string{"--spec-type", speculativeType}
+}
+
+// specSupport remembers, per llama-server binary, whether it has
+// speculativeType: a build from before it would refuse to start with it.
+var specSupport struct {
+	sync.Mutex
+	known map[string]specProbe
+}
+
+type specProbe struct {
+	modTime   time.Time
+	supported bool
+}
+
+// specHelp prints a llama-server's help; a variable so tests can stand in.
+var specHelp = func(ctx context.Context, path string) ([]byte, error) {
+	ctx, cancel := context.WithTimeout(ctx, 20*time.Second)
+	defer cancel()
+	return exec.CommandContext(ctx, path, "--help").CombinedOutput()
+}
+
+// supportsSpeculation reports whether the llama-server at path lists
+// speculativeType in its help. It asks once per binary, and again when the
+// binary is replaced by an update.
+func supportsSpeculation(ctx context.Context, path string) bool {
+	st, err := os.Stat(path)
+	if err != nil {
+		return false
+	}
+	specSupport.Lock()
+	defer specSupport.Unlock()
+	if p, ok := specSupport.known[path]; ok && p.modTime.Equal(st.ModTime()) {
+		return p.supported
+	}
+	out, _ := specHelp(ctx, path)
+	supported := strings.Contains(string(out), "--spec-type") && strings.Contains(string(out), speculativeType)
+	if specSupport.known == nil {
+		specSupport.known = map[string]specProbe{}
+	}
+	specSupport.known[path] = specProbe{modTime: st.ModTime(), supported: supported}
+	return supported
+}

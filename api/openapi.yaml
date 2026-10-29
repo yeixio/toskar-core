@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Toskar Control Plane API
-  version: "1.63"
+  version: "1.64"
   description: >-
     Local AI control plane API for Toskar, its OpenAI-compatible routes, and its MCP server.
     On the default loopback bind no key is needed. When the daemon listens on any other address,
@@ -8244,6 +8244,8 @@ components:
         prompt_tokens: {type: integer}
         completion_tokens: {type: integer}
         cached_tokens: {type: integer}
+        draft_tokens: {type: integer, description: Tokens speculative decoding guessed ahead (contract 1.64).}
+        draft_accepted: {type: integer, description: The guessed tokens the model kept (contract 1.64).}
         tok_per_sec: {type: number}
         backend: {type: string, description: '`backend` and Device ran the model, such as vulkan and "AMD Radeon RX 7900 XTX" (#317); empty when not known, such as on a paired computer.'}
         device: {type: string}
@@ -8575,6 +8577,8 @@ components:
         prompt_tok_per_sec: {type: number}
         eval_tok_per_sec: {type: number}
         cached_tokens: {type: integer, description: 'Prompt tokens reused from the model''s cache instead of processed again, when the runtime reports them.'}
+        draft_tokens: {type: integer, description: Tokens speculative decoding guessed ahead (contract 1.64).}
+        draft_accepted: {type: integer, description: The guessed tokens the model kept (contract 1.64).}
         finish_reason: {type: string, description: "Why the model stopped (contract 1.58): stop, or length when it reached its token limit; absent when the runtime didn't say"}
         reasoning_tokens: {type: integer, description: "Tokens a reasoning model thought before it answered, part of completion_tokens (contract 1.58)"}
     Recommendation:

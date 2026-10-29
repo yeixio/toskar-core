@@ -496,6 +496,7 @@
     "firstToken": "首个词元 {{time}}",
     "inOut": "输入 {{in}} / 输出 {{out}}",
     "cached": "{{count}} 个已缓存",
+    "guessed": "预先猜测 {{count}} 个，保留 {{kept}} 个",
     "toolFailures": "{{count}} 个失败",
     "notes": {
       "team": "团队：规划者拆分请求，执行者完成各部分，审核者检查回答",
