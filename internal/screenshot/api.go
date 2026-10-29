@@ -122,6 +122,8 @@ func screenshotGET(path string) (string, bool) {
 			`"check":{"at":"` + at + `","tried":"` + at + `","relay":{"ok":true,"ms":84},"direct":[{"address":"198.51.100.24:7333","ok":false,"reason":"timeout","ms":8003}]}}`, true
 	case path == "/api/v1/conversations":
 		return screenshotConversations(), true
+	case path == "/api/v1/conversations/conv-budget/messages":
+		return screenshotBudgetMessages, true
 	case strings.HasPrefix(path, "/api/v1/conversations/") && strings.HasSuffix(path, "/messages"):
 		return screenshotMessages, true
 	case path == "/api/v1/api-keys":
@@ -462,6 +464,40 @@ const screenshotMessages = `[
       "context": {"prompt_tokens": 3140, "limit": 8192, "instructions": 920, "tools": 1180, "conversation": 760, "tool_results": 280}
     },
     "created_at": "2026-09-24T15:03:30Z"
+  }
+]`
+
+// screenshotBudgetMessages is a chat with an attached spreadsheet, an
+// answer that read it and the web, and a spreadsheet made for the answer,
+// for the user guide's attachments screenshot (#886).
+const screenshotBudgetMessages = `[
+  {
+    "id": "b1",
+    "conversation_id": "conv-budget",
+    "role": "user",
+    "content": "Here's this month's budget. Where am I over, and is the electricity bill normal for this time of year?",
+    "meta": {"files": [{"id": "file-budget", "name": "October budget.xlsx", "mime_type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "kind": "spreadsheet", "size_bytes": 18432, "producer": "user"}]},
+    "created_at": "2026-09-24T12:01:00Z"
+  },
+  {
+    "id": "b2",
+    "conversation_id": "conv-budget",
+    "role": "assistant",
+    "content": "You're over in two places:\n\n| Category | Budget | Spent | Over by |\n|---|---|---|---|\n| Groceries | $520 | $611 | $91 |\n| Eating out | $150 | $204 | $54 |\n\nThe electricity bill, $96, is about normal. October bills here usually run a little above summer ones as heating starts, and yours is close to the utility's typical $90 to $110 for a small home.\n\nI added a sheet that totals each category against its budget.",
+    "meta": {
+      "files": [{"id": "file-budget-summary", "name": "October budget summary.xlsx", "mime_type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "kind": "spreadsheet", "size_bytes": 9216, "producer": "assistant"}],
+      "sources": [
+        {"kind": "file", "title": "October budget.xlsx", "artifact_id": "file-budget", "snippet": "Groceries 611.40; Eating out 204.15; Electricity 96.20"},
+        {"kind": "web", "title": "Typical monthly bills for small homes", "url": "https://www.example.org/energy/typical-bills", "snippet": "A typical small home uses $90 to $110 of electricity in October."}
+      ],
+      "steps": [
+        {"kind": "file", "text": "Read October budget.xlsx"},
+        {"kind": "search", "text": "Searched the web for “typical October electricity bill small home”"},
+        {"kind": "read", "text": "Read “Typical monthly bills for small homes”"},
+        {"kind": "file", "text": "Created October budget summary.xlsx"}
+      ]
+    },
+    "created_at": "2026-09-24T12:01:40Z"
   }
 ]`
 

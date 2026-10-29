@@ -39,6 +39,20 @@
       ]
     },
     {
+      "id": "chat-attachments",
+      "path": "/chat",
+      "query": "c=conv-budget",
+      "readyText": "Where am I over",
+      "actions": [
+        {
+          "click": "What I did"
+        },
+        {
+          "wait": "Created October budget summary.xlsx"
+        }
+      ]
+    },
+    {
       "id": "chat-select",
       "path": "/chat",
       "query": "c=conv-local",
