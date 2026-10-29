@@ -50,7 +50,8 @@ func TestSupportsSpeculationAsksOncePerBinary(t *testing.T) {
 	t.Cleanup(func() { specHelp = saved })
 
 	ctx := context.Background()
-	if supportsSpeculation(ctx, bin) || supportsSpeculation(ctx, bin) || asked != 1 {
+	first, again := supportsSpeculation(ctx, bin), supportsSpeculation(ctx, bin)
+	if first || again || asked != 1 {
 		t.Fatalf("old build: asked %d", asked)
 	}
 	// An update replaces the binary.
