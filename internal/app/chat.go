@@ -1462,6 +1462,8 @@ func (e *chatExecEnv) ExecuteTool(ctx context.Context, toolID string, args map[s
 		return nil, err
 	}
 	args = withMediaQuality(e.profile.Orchestration.MediaQuality, toolID, args)
+	// A clip length the person asked for, whatever the model passed (#789).
+	args = withAskedLength(e.turnPrompt, toolID, args)
 	// A picture or clip says how far it has got while it's made here (#706).
 	ctx = imagegen.WithProgress(ctx, func(p imagegen.Progress) {
 		e.Emit(events.ToolProgress, map[string]any{

@@ -118,7 +118,7 @@
     },
     {
       "id": "make_video_short",
-      "what": "A one-second clip, the shortest the video tool makes, is that short and comes out clean, not as noise: DPM++ 2M turned the shortest Wan 2.2 5B clips into noise, which no other case caught (#758). It fails on length until the asked-for length reaches the tool (#789).",
+      "what": "A one-second clip, the shortest the video tool makes, is that short and comes out clean, not as noise: DPM++ 2M turned the shortest Wan 2.2 5B clips into noise, which no other case caught (#758). The length asked for reaches the tool from the message, whatever the model passes (#789).",
       "real_only": true,
       "message": "Make a video of waves rolling onto a beach, just one second long.",
       "expect": {
@@ -134,6 +134,25 @@
         "moves": true,
         "clean": true,
         "max_frames": 17
+      }
+    },
+    {
+      "id": "make_video_too_long",
+      "what": "A clip asked for longer than clips can be is made at the most, and the person is told it was shortened (#789).",
+      "real_only": true,
+      "message": "Make a 1-minute video of a parade going down a street.",
+      "expect": {
+        "tools_run": [
+          "video.generate"
+        ],
+        "notice_matches": "up to 5 s long for now, so this one is 5 s instead of the 60 s asked for",
+        "answer_lacks": "(?i)(can'?t|cannot|unable to|not able to) (draw|create|make|generate|produce|edit)|as an ai|text-based|language model"
+      },
+      "judge": {
+        "kind": "video",
+        "ext": ".webm",
+        "shows": "a parade on a street",
+        "moves": true
       }
     },
     {
