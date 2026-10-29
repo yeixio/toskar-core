@@ -548,12 +548,34 @@
         },
         {
           "type": "paragraph",
-          "text": "The answer cites the file, and later questions in the chat can still use it. Pictures and video go to a model that can see, and audio can be transcribed. A scanned PDF is read with text recognition, which takes a moment the first time."
+          "text": "The answer cites the file, and later questions in the chat can still use it. A scanned PDF is read with text recognition, which takes a moment the first time. Audio is transcribed, and a video is read from its sound and from pictures of it."
+        },
+        {
+          "type": "paragraph",
+          "text": "Pictures go to a model that can see, even when you chose another model for the chat. If none is installed, the answer offers one to set up, with its download size, and answers once it's ready."
+        },
+        {
+          "type": "image",
+          "screen": "chat-attachments",
+          "alt": "A chat with an attached budget spreadsheet: the answer has a table of overspending, a spreadsheet it made under Files, Sources listing the spreadsheet and a web page, and What I did open with four steps",
+          "caption": "An attached spreadsheet, read and cited. The answer also searched the web, and made a summary spreadsheet to download."
         },
         {
           "type": "note",
           "tone": "tip",
           "text": "Ask for a file, such as a spreadsheet of prices or a Word document, and the answer comes with a download. Spreadsheets are real .xlsx workbooks."
+        },
+        {
+          "type": "heading",
+          "text": "Answers from the web"
+        },
+        {
+          "type": "paragraph",
+          "text": "When a question needs current information, such as today's weather, a price, or the news, Toskar searches the web and reads the pages it finds. The question is sent to the search, and the pages are read on your computer. Web under the message box means the chat's profile allows it."
+        },
+        {
+          "type": "paragraph",
+          "text": "Searching needs a model that can use tools, and Auto picks one. If the model you chose can't, a note says so when you send, and lists models that can, with Use this model. If the chat's profile has web access turned off, the note says live web access isn't available, and an Admin can choose Enable Internet to turn it on for that profile."
         },
         {
           "type": "heading",
@@ -581,7 +603,7 @@
         },
         {
           "type": "paragraph",
-          "text": "These controls appear when you point at a message, and are always shown on a touch screen."
+          "text": "The version showing is the one the chat continues from, and the one it opens to next time. These controls appear when you point at a message, and are always shown on a touch screen."
         },
         {
           "type": "heading",
@@ -664,6 +686,14 @@
             [
               "Toskar can't read this type of file yet",
               "Save it as a PDF, Word document, spreadsheet, or text file, and attach that instead."
+            ],
+            [
+              "A model cannot use tools, so it cannot look that up",
+              "Choose Use this model beside one of the models listed, or set Model to Auto."
+            ],
+            [
+              "I can't see pictures yet",
+              "Choose Set it up to download a model that can see. The answer comes once it's ready."
             ],
             [
               "Files can be up to 25 MB",

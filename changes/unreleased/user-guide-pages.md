@@ -15,3 +15,7 @@
   and troubleshooting. The install script and apt lines on the page are
   the ones CI runs on a fresh Ubuntu computer: an example can name the
   test that runs it with `runs_in` (#885).
+- Chat covers what each model can read when you attach a picture, answers
+  from the web and what they need, and which version of an answer a chat
+  continues from, with a generated screenshot of an attached spreadsheet
+  read, cited, and answered with a made spreadsheet (#886).
