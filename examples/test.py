@@ -450,7 +450,7 @@ READER_ADDRESS = re.compile(r"(?:127\.0\.0\.1|localhost):7331")
 def guide_examples(guide: Path) -> list[tuple[str, dict]]:
     sections = json.loads(guide.read_text())["sections"]
     return [(f"guide {block['test']}", block) for section in sections
-            for block in section.get("blocks", []) if block.get("type") == "code" and "test" in block]
+            for block in section.get("blocks", []) if block.get("type") == "code" and "test" in block and "runs_in" not in block]
 
 
 def output_matches(expected: str, actual: str) -> bool:

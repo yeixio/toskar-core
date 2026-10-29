@@ -62,7 +62,8 @@ def check_block(block):
     elif kind == 'code':
         ok = (block.get('language') in LANGUAGES and text(block.get('code'))
               and ('test' not in block or (isinstance(block['test'], str) and SECTION_ID.fullmatch(block['test'])))
-              and ('output' not in block or text(block['output'])))
+              and ('output' not in block or text(block['output']))
+              and ('runs_in' not in block or ('test' in block and text(block['runs_in']))))
     elif kind == 'table':
         columns, rows = block.get('columns'), block.get('rows')
         ok = texts(columns) and isinstance(rows, list) and len(rows) > 0 and all(

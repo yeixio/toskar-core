@@ -16,6 +16,7 @@ work="$(mktemp -d)"
 cleanup() {
 	if [[ -f "$work/ci/toskar.pid" ]]; then kill "$(cat "$work/ci/toskar.pid")" 2>/dev/null || true; fi
 	if [[ -n "${http_pid:-}" ]]; then kill "$http_pid" 2>/dev/null || true; fi
+	if [[ -n "${script_pid:-}" ]]; then kill "$script_pid" 2>/dev/null || true; fi
 	if [[ -n "${issuer_pid:-}" ]]; then kill "$issuer_pid" 2>/dev/null || true; fi
 }
 trap cleanup EXIT
@@ -28,7 +29,20 @@ for _ in $(seq 1 20); do curl -fsS -o /dev/null http://127.0.0.1:18090/SHA256SUM
 export YGGDRASIL_RELEASE_URL=http://127.0.0.1:18090
 
 echo "== install"
-sh scripts/install.sh
+# The user guide's own line (install-script in docs/user-guide/guide.json),
+# with this test's local release in place of GitHub's (#885).
+cp scripts/install.sh "$work/install.sh"
+guide="$(python3 scripts/guide-example.py install-script)"
+line="${guide//https:\/\/github.com\/yeixio\/toskar-core\/releases\/latest\/download\/install.sh/http://127.0.0.1:18091/install.sh}"
+if [[ "$line" == "$guide" || "$line" == *https://* ]]; then
+	echo "The guide's install line changed: point this test at its new address." >&2
+	exit 1
+fi
+python3 -m http.server 18091 --bind 127.0.0.1 --directory "$work" >"$work/script-http.log" 2>&1 &
+script_pid=$!
+for _ in $(seq 1 20); do curl -fsS -o /dev/null http://127.0.0.1:18091/install.sh && break; sleep 0.5; done
+sh -c "$line"
+kill "$script_pid"
 systemctl is-active --quiet toskar.service || { sudo journalctl -u toskar --no-pager | tail -50; exit 1; }
 # The name from before the rename is an alias (#237).
 systemctl is-active --quiet yggdrasil.service

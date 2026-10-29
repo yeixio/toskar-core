@@ -123,6 +123,18 @@ class CheckTests(unittest.TestCase):
         guide['sections'][0]['blocks'].append({'type': 'code', 'language': 'json', 'code': '{}', 'test': 'shape'})
         self.assertTrue(any("'shape' is json" in p for p in self.check(guide)[0]))
 
+    def test_an_install_example_runs_in_the_script_it_names(self):
+        code = {'type': 'code', 'language': 'sh', 'code': 'sudo apt-get install toskar', 'test': 'install-apt',
+                'runs_in': 'scripts/test-apt.sh'}
+        guide = self.section()
+        guide['sections'][0]['blocks'].append(code)
+        self.assertTrue(any("doesn't run it" in p for p in self.check(guide)[0]))
+        (self.root / 'scripts').mkdir()
+        (self.root / 'scripts/test-apt.sh').write_text('lines="$(python3 scripts/guide-example.py install-other)"\n')
+        self.assertTrue(any("doesn't run it" in p for p in self.check(guide)[0]))
+        (self.root / 'scripts/test-apt.sh').write_text('lines="$(python3 "$ROOT/scripts/guide-example.py" install-apt)"\n')
+        self.assertEqual(self.check(guide)[0], [])
+
     def test_structural_errors_come_from_the_publisher(self):
         problems, _ = self.check({'schemaVersion': 1, 'sections': []})
         self.assertEqual(len(problems), 1)
