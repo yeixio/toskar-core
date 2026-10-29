@@ -268,7 +268,8 @@ type ModelFit struct {
 	// Short is what a model is short of when that holds it back: "shared"
 	// on Apple silicon, where the graphics may use only part of memory, with
 	// NeedBytes what it needs and HaveBytes what the graphics may use
-	// (contract 1.46, #751).
+	// (contract 1.46, #751); "graphics" when it needs more than the graphics
+	// card has, with HaveBytes the card's memory (#932).
 	Short     string `json:"short,omitempty"`
 	NeedBytes uint64 `json:"need_bytes,omitempty"`
 	HaveBytes uint64 `json:"have_bytes,omitempty"`

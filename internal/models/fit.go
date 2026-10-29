@@ -49,6 +49,11 @@ func estimateTokPerSec(e CatalogEntry, hw contracts.HardwareInventory, runtimeBy
 			}
 		}
 	}
+	// A model larger than the graphics card runs partly on the processor,
+	// at about the processor's speed (#932).
+	if card := cardMemory(hw); card > 0 && need > card {
+		accelBoost = 1.0
+	}
 	if capacity > 0 && need > 0 {
 		headroom := float64(capacity) / float64(need)
 		if headroom < 1 {
@@ -61,7 +66,10 @@ func estimateTokPerSec(e CatalogEntry, hw contracts.HardwareInventory, runtimeBy
 }
 
 // PickWinners selects category recommendation badges for Discover.
-// Only models that can run on this machine are eligible. Heavy fits stay eligible.
+// Only models that can run on this machine are eligible. Each badge goes to
+// a model that fits well (good or excellent) when one qualifies, and falls
+// back to a tight fit only when none does (#932): Best overall on an 8 GB
+// Mac was a 7B model that barely fit. A heavy fit gets no badge.
 // Within a preset's preferred models, community ratings can move a well
 // rated model ahead of the curated first choice (see pickByCommunity).
 func PickWinners(catalog *Catalog, fits []contracts.ModelFit, presets *[]PurposePreset, community map[string]CommunitySignal) []contracts.CategoryWinner {
@@ -75,7 +83,10 @@ func PickWinners(catalog *Catalog, fits []contracts.ModelFit, presets *[]Purpose
 	entries := chatEntries(catalog.List())
 	eligible := func(e CatalogEntry) bool {
 		f, ok := fitMap[e.ID]
-		return ok && runnableFit(f.Label) && !e.Supporting()
+		return ok && fitRank(f.Label) >= fitRank(contracts.FitTight) && !e.Supporting()
+	}
+	fitsWell := func(e CatalogEntry) bool {
+		return eligible(e) && fitRank(fitMap[e.ID].Label) >= fitRank(contracts.FitGood)
 	}
 
 	var winners []contracts.CategoryWinner
@@ -100,11 +111,17 @@ func PickWinners(catalog *Catalog, fits []contracts.ModelFit, presets *[]Purpose
 	// Prefer preset order when available, weighed against community
 	// ratings.
 	preferFirstFit := func(category string, ids []string) string {
-		var ok []string
+		var ok, well []string
 		for _, id := range ids {
 			if e, found := catalog.Get(id); found && eligible(e) {
 				ok = append(ok, id)
+				if fitsWell(e) {
+					well = append(well, id)
+				}
 			}
+		}
+		if len(well) > 0 {
+			ok = well
 		}
 		i, byCommunity := pickByCommunity(ok, community)
 		if i < 0 {
@@ -127,30 +144,30 @@ func PickWinners(catalog *Catalog, fits []contracts.ModelFit, presets *[]Purpose
 		}
 	}
 
-	var smallest, largest, bestCoding, bestVision *CatalogEntry
-	for i := range entries {
-		e := &entries[i]
-		if !eligible(*e) {
-			continue
-		}
-		if smallest == nil || e.MemoryNeededBytes < smallest.MemoryNeededBytes {
-			smallest = e
-		}
-		if largest == nil || e.MemoryNeededBytes > largest.MemoryNeededBytes {
-			largest = e
-		}
-		if e.Capabilities.Coding || hasTag(*e, "coding") {
-			if bestCoding == nil || e.MemoryNeededBytes > bestCoding.MemoryNeededBytes {
-				// Prefer mid-large coding that still fits for quality; override with preset if set.
-				bestCoding = e
+	// pick is the model a test chooses among those that fit well, or among
+	// all that run when none fits well.
+	pick := func(match func(e CatalogEntry) bool, better func(e, than *CatalogEntry) bool) *CatalogEntry {
+		for _, ok := range []func(CatalogEntry) bool{fitsWell, eligible} {
+			var best *CatalogEntry
+			for i := range entries {
+				e := &entries[i]
+				if ok(*e) && match(*e) && (best == nil || better(e, best)) {
+					best = e
+				}
+			}
+			if best != nil {
+				return best
 			}
 		}
-		if e.Capabilities.Vision || hasTag(*e, "vision") {
-			if bestVision == nil || e.MemoryNeededBytes > bestVision.MemoryNeededBytes {
-				bestVision = e
-			}
-		}
+		return nil
 	}
+	everyModel := func(CatalogEntry) bool { return true }
+	smaller := func(e, than *CatalogEntry) bool { return e.MemoryNeededBytes < than.MemoryNeededBytes }
+	larger := func(e, than *CatalogEntry) bool { return e.MemoryNeededBytes > than.MemoryNeededBytes }
+	smallest, largest := pick(everyModel, smaller), pick(everyModel, larger)
+	// Prefer mid-large coding that still fits for quality; override with preset if set.
+	bestCoding := pick(func(e CatalogEntry) bool { return e.Capabilities.Coding || hasTag(e, "coding") }, larger)
+	bestVision := pick(func(e CatalogEntry) bool { return e.Capabilities.Vision || hasTag(e, "vision") }, larger)
 
 	if smallest != nil {
 		add("fastest", "Fastest", smallest.ID)

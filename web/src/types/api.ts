@@ -141,8 +141,8 @@ export interface ModelFit {
   recommendations?: string[]
   gpu_note?: string
   known_to_run?: boolean
-  /** On Apple silicon, what holds it back: `shared`, the part of memory the graphics may use, with what it needs and what there is (contract 1.46). */
-  short?: 'shared'
+  /** What holds it back, with what it needs and what there is: `shared`, the part of memory a Mac's graphics may use (contract 1.46), or `graphics`, a graphics card's own memory (#932). */
+  short?: 'shared' | 'graphics'
   need_bytes?: number
   have_bytes?: number
 }

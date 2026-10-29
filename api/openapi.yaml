@@ -10172,7 +10172,7 @@ components:
           items: {type: string}
         gpu_note: {type: string}
         known_to_run: {type: boolean}
-        short: {type: string, description: 'What a model is short of when that holds it back: "shared" on Apple silicon, where the graphics may use only part of memory, with NeedBytes what it needs and HaveBytes what the graphics may use (contract 1.46, #751).'}
+        short: {type: string, description: 'What a model is short of when that holds it back: "shared" on Apple silicon, where the graphics may use only part of memory, with NeedBytes what it needs and HaveBytes what the graphics may use (contract 1.46, #751); "graphics" when it needs more than the graphics card has, with HaveBytes the card''s memory (#932).'}
         need_bytes: {type: integer, format: int64}
         have_bytes: {type: integer, format: int64}
     CategoryWinner:

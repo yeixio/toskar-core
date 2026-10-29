@@ -265,3 +265,94 @@ func TestFitHoldsMacsToTheirGraphicsShare(t *testing.T) {
 		t.Errorf("Muse Glimmer with a 24 GB card: %s %q short=%q", fit.Label, fit.Reason, fit.Short)
 	}
 }
+
+// A graphics card's own memory holds a model back as a Mac's graphics share
+// does (#932): a 32B model on an 8 GB card runs mostly on the processor, so
+// it isn't an excellent fit however much system memory there is. And on a
+// computer without unified memory, the operating system keeps some.
+func TestFitHoldsCardsToTheirMemory(t *testing.T) {
+	catalog, err := NewCatalogEmbedded()
+	if err != nil {
+		t.Fatal(err)
+	}
+	qwen32b, _ := catalog.Get("qwen2.5-32b-q4")
+	qwen7b, _ := catalog.Get("qwen2.5-7b-q4")
+	gemma9b, _ := catalog.Get("gemma-2-9b-q4")
+	card := func(vram float64, backends ...string) contracts.HardwareInventory {
+		return contracts.HardwareInventory{
+			Memory:       contracts.MemoryInfo{TotalBytes: gib(32), AvailableBytes: gib(28)},
+			Accelerators: []contracts.Accelerator{{Kind: "gpu", Vendor: "NVIDIA", DedicatedVRAM: gib(vram), Backends: backends}},
+		}
+	}
+
+	fit := ClassifyFit(qwen32b, card(8, "cuda", "cpu"), "n", "PC", FitOptions{})
+	if fitRank(fit.Label) > fitRank(contracts.FitTight) || fit.Short != "graphics" || fit.HaveBytes != gib(8) || fit.NeedBytes <= fit.HaveBytes {
+		t.Errorf("32B on an 8 GB card: %s short=%q need %d have %d", fit.Label, fit.Short, fit.NeedBytes, fit.HaveBytes)
+	}
+	if !strings.Contains(fit.Reason, "graphics card has 8.0 GB") {
+		t.Errorf("reason %q", fit.Reason)
+	}
+	if fit := ClassifyFit(qwen7b, card(8, "cuda", "cpu"), "n", "PC", FitOptions{}); fit.Label != contracts.FitExcellent || fit.Short != "" {
+		t.Errorf("7B on an 8 GB card: %s short=%q", fit.Label, fit.Short)
+	}
+	// A card no backend can use doesn't hold the model.
+	if fit := ClassifyFit(qwen32b, card(8, "cpu"), "n", "PC", FitOptions{}); fit.Short != "" {
+		t.Errorf("32B with an unused card: short=%q", fit.Short)
+	}
+	// A model known to run keeps its label.
+	if fit := ClassifyFit(qwen32b, card(8, "cuda"), "n", "PC", FitOptions{Proven: map[string]bool{qwen32b.ID: true}}); fit.Short != "" {
+		t.Errorf("proven 32B: %s short=%q", fit.Label, fit.Short)
+	}
+
+	cpu8 := contracts.HardwareInventory{Memory: contracts.MemoryInfo{TotalBytes: gib(8), AvailableBytes: gib(6.4)}}
+	if fit := ClassifyFit(gemma9b, cpu8, "n", "PC", FitOptions{}); fitRank(fit.Label) > fitRank(contracts.FitTight) {
+		t.Errorf("Gemma 2 9B on 8 GB: %s", fit.Label)
+	}
+}
+
+// Badges go to models that fit well, and Best overall is what onboarding
+// picks (#932). On an 8 GB Mac, Best overall was Qwen 2.5 7B, which barely
+// fits, while onboarding picked Llama 3.2 3B.
+func TestWinnersFitWell(t *testing.T) {
+	catalog, err := NewCatalogEmbedded()
+	if err != nil {
+		t.Fatal(err)
+	}
+	presets, err := LoadPresetsEmbedded()
+	if err != nil {
+		t.Fatal(err)
+	}
+	machines := map[string]contracts.HardwareInventory{
+		"8 GB Mac":      apple(gib(8), gib(5)),
+		"16 GB Mac":     apple(gib(16), gib(10)),
+		"8 GB computer": {Memory: contracts.MemoryInfo{TotalBytes: gib(8), AvailableBytes: gib(6.4)}},
+		"8 GB card": {
+			Memory:       contracts.MemoryInfo{TotalBytes: gib(32), AvailableBytes: gib(28)},
+			Accelerators: []contracts.Accelerator{{Kind: "gpu", DedicatedVRAM: gib(8), Backends: []string{"cuda", "cpu"}}},
+		},
+	}
+	for name, hw := range machines {
+		resp := BuildFitResponse(catalog, hw, "n", name, presets, FitOptions{})
+		labels := map[string]contracts.FitLabel{}
+		for _, f := range resp.Fits {
+			labels[f.ModelID] = f.Label
+		}
+		rec, err := RecommendWithPresets(catalog, presets, RecommendInput{Purpose: "general", Hardware: hw})
+		if err != nil {
+			t.Fatal(err)
+		}
+		for _, w := range resp.Winners {
+			if l := labels[w.ModelID]; fitRank(l) < fitRank(contracts.FitTight) {
+				t.Errorf("%s: %s is %s, which is %s", name, w.Label, w.ModelID, l)
+			}
+			if w.Category == "best_overall" {
+				if l := labels[w.ModelID]; fitRank(l) < fitRank(contracts.FitGood) {
+					t.Errorf("%s: Best overall is %s, which is %s", name, w.ModelID, l)
+				}
+				if w.ModelID != rec.Models[0].ID {
+					t.Errorf("%s: Best overall is %s, onboarding picks %s", name, w.ModelID, rec.Models[0].ID)
+				}
+			}
+		}
+	}
+}

@@ -11,9 +11,11 @@ import (
 // Runtime-memory thresholds and buffers live here so the model cards and the
 // recommendation path do not each invent a multiplier.
 //
-// Headroom is total machine capacity divided by the low runtime estimate.
-// Capacity is unified memory on Apple Silicon, or system RAM everywhere else.
-// Dedicated VRAM is not added on top of system RAM.
+// Headroom is the memory a model may use divided by the low runtime
+// estimate. That's unified memory on Apple Silicon, or system RAM less
+// systemReserveBytes everywhere else. Dedicated VRAM is not added on top of
+// system RAM; a model that needs more than the card has is tight at best
+// (cardFit).
 //
 //	>= 1.50  excellent
 //	>= 1.20  good
@@ -56,6 +58,11 @@ const (
 	// of it can't run there: llama.cpp's Metal backend stops with "out of
 	// memory" however much memory the Mac has (#751).
 	graphicsTightShare = 0.85
+
+	// systemReserveBytes is what the operating system and other apps keep
+	// on a computer without unified memory (#932). Without it, 6.5 GB on
+	// an 8 GB computer was a good fit.
+	systemReserveBytes = 2 << 30
 )
 
 // FitOptions carries measurements and the context window the daemon actually runs.
@@ -141,13 +148,19 @@ func ClassifyFit(e CatalogEntry, hw contracts.HardwareInventory, nodeID, nodeNam
 	fit.RuntimeMemoryLowBytes = low
 	fit.RuntimeMemoryHighBytes = high
 	fit.ExpectedMemoryBytes = low
-	fit.Headroom = float64(capacity) / float64(low)
+	usable := capacity
+	if kind == "system" && capacity > 2*systemReserveBytes {
+		usable -= systemReserveBytes
+	}
+	fit.Headroom = float64(usable) / float64(low)
 	fit.Label = labelForHeadroom(fit.Headroom)
 	fit.Reason = reasonForLabel(fit.Label)
 	fit.EstTokPerSec = estimateTokPerSec(e, hw, low, capacity)
 	fit.GPUNote = gpuNote(hw, low)
 	if kind == "unified" && !opts.Proven[e.ID] && !hasMeasured {
 		graphicsFit(&fit, low, SharedGraphics(capacity))
+	} else if card := cardMemory(hw); card > 0 && !opts.Proven[e.ID] && !hasMeasured {
+		cardFit(&fit, low, card)
 	}
 	fit.InstallAllowed = fit.Label != contracts.FitUnsupported
 	fit.Recommendations = recommendationsFor(fit.Label, kind)
@@ -208,6 +221,42 @@ func graphicsFit(fit *contracts.ModelFit, need, share uint64) {
 		fit.Reason = reasonForLabel(fit.Label)
 	}
 	fit.Short, fit.NeedBytes, fit.HaveBytes = "shared", need, share
+}
+
+// cardFit holds a model to a graphics card's own memory (#932): one that
+// needs more runs partly on the processor, far slower than a good fit
+// promises, so it's tight at best, and short says so.
+func cardFit(fit *contracts.ModelFit, need, card uint64) {
+	if need <= card {
+		return
+	}
+	if fitRank(fit.Label) > fitRank(contracts.FitTight) {
+		fit.Label = contracts.FitTight
+	}
+	if fit.Label == contracts.FitTight {
+		fit.Reason = fmt.Sprintf("Needs about %s; this computer's graphics card has %s, so the rest runs on the processor, more slowly.", formatGiB(need), formatGiB(card))
+	}
+	fit.Short, fit.NeedBytes, fit.HaveBytes = "graphics", need, card
+}
+
+// cardMemory is the memory of the graphics cards a model can run on: ones
+// with their own memory and a graphics backend.
+func cardMemory(hw contracts.HardwareInventory) uint64 {
+	var total uint64
+cards:
+	for _, a := range hw.Accelerators {
+		if a.DedicatedVRAM == 0 {
+			continue
+		}
+		for _, b := range a.Backends {
+			switch strings.ToLower(b) {
+			case "cuda", "hip", "rocm", "vulkan", "sycl":
+				total += a.DedicatedVRAM
+				continue cards
+			}
+		}
+	}
+	return total
 }
 
 // fitRank orders labels from unsupported (0) to excellent.
