@@ -326,6 +326,12 @@ func EscapeToken(tok string) string {
 	return tok
 }
 
+// ChatMarkerIndex is the start and end of every common chat-template marker
+// in text, in order, as regexp's FindAllStringIndex gives them.
+func ChatMarkerIndex(text string) [][]int {
+	return chatMarkers.FindAllStringIndex(text, -1)
+}
+
 // EscapeChatMarkers escapes every common chat-template marker in text,
 // such as <|im_start|>, so text that spells one stays text in the prompt.
 func EscapeChatMarkers(text string) string {

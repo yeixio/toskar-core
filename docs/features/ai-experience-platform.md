@@ -1411,6 +1411,7 @@ Web pages, files, Mimir passages, tool results, memories, and connector data can
 - Untrusted content is never placed in the system role. It is delimited, labelled with its source, and introduced as reference material.
 - A tool call that follows untrusted content is held to the stricter permission: an Allow tool that would act externally (send, write, execute, purchase) becomes Ask for that call.
 - Tool results that contain instructions are passed through as data; the model is told they are data.
+- Labelling isn't enough for small local models, which follow an instruction on a page however it's framed (#938). Before a model reads untrusted text, Toskar leaves out forged chat turns (text after a chat-template marker such as `<|im_start|>` or `[INST]`) and sentences that give orders to an AI ("ignore previous instructions", "note for AI assistants"), with a note where the text was. The sentence filter is English only and can miss an instruction, so the stricter permission above still applies.
 
 ## 59. Permission Requests When Nobody Is Watching
 

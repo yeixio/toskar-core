@@ -9,6 +9,7 @@ import (
 	"github.com/yeixio/toskar-core/internal/huginn"
 	"github.com/yeixio/toskar-core/internal/muninn"
 	"github.com/yeixio/toskar-core/internal/tools"
+	"github.com/yeixio/toskar-core/internal/untrusted"
 )
 
 // textVectors is tests/quality/text.json: inputs and core's outputs for the
@@ -26,6 +27,7 @@ type textVectors struct {
 	CleanQuery      []stringVector `json:"clean_query"`
 	MemoryCommand   []memoryVector `json:"memory_command"`
 	CaptureRequest  []stringVector `json:"capture_request"`
+	Untrusted       []stringVector `json:"untrusted"`
 }
 
 type boolVector struct {
@@ -92,6 +94,8 @@ func TestTextVectors(t *testing.T) {
 		}
 		return "none"
 	})
+
+	checkString("untrusted.Text", v.Untrusted, untrusted.Text)
 
 	// The phone has no local kind: it has no files or commands to act on.
 	var classify []stringVector

@@ -14,6 +14,7 @@ import (
 	"github.com/yeixio/toskar-core/internal/mimir"
 	"github.com/yeixio/toskar-core/internal/structured"
 	"github.com/yeixio/toskar-core/internal/tools"
+	"github.com/yeixio/toskar-core/internal/untrusted"
 	"github.com/yeixio/toskar-core/pkg/contracts"
 	"github.com/yeixio/toskar-core/pkg/pluginapi"
 )
@@ -369,14 +370,14 @@ func (o *Orchestrator) Run(
 						resultNote += "\n" + declinedNote
 					}
 				} else {
-					raw, _ := json.Marshal(map[string]any{"ok": true, "result": result})
+					raw, _ := json.Marshal(map[string]any{"ok": true, "result": untrusted.Value(result)})
 					resultNote = "Tool result for you, not for the user. " + untrustedNote + "\n" + string(raw)
 				}
 				followUp := answerAfterTools
 				if err == nil && parsed.Call.ID == "internet.search" && calls < budget.MaxToolCalls {
 					if page, opened := followLiveSearch(ctx, env, profile, task.Prompt, parsed.Call.Args, result); opened {
 						calls++
-						raw, _ := json.Marshal(map[string]any{"ok": true, "result": page})
+						raw, _ := json.Marshal(map[string]any{"ok": true, "result": untrusted.Value(page)})
 						resultNote += "\n\nPage for you, not for the user. " + untrustedNote + "\n" + string(raw)
 						followUp = answerFromPage
 					}

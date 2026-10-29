@@ -45,7 +45,7 @@ Tool source tools join the catalog as `<source>.<tool>`, such as `linear.list_is
 
 - **Selection.** Huginn offers a source's tools when a message names it or its subject. Gallery entries come with their subjects, such as tickets and backlog for Linear. You can add your own words. **Offer it in every chat** offers a source with every request.
 - **Permissions.** Tools that only read run without asking. Tools that change something ask first. A server's own `readOnlyHint` and `destructiveHint` annotations decide which is which. Without them, names such as `get_…`, `list_…`, and `search_…` read. You can switch **Ask first** for any tool, and turn any tool off.
-- **Untrusted data.** What a tool returns is data, not instructions (§58). After a turn reads it, a tool that changes something asks first even if it is allowed. Links in results become the answer's sources.
+- **Untrusted data.** What a tool returns is data, not instructions (§58). Text in it written as chat turns, or giving orders to an AI, is left out before the model reads it, with a note where it was. After a turn reads it, a tool that changes something asks first even if it is allowed. Links in results become the answer's sources.
 - **Results.** The model sees the text, small structured data, and links. Images and audio are left out with a note, and long text is cut at 24,000 characters.
 - **Resources.** A server that offers resources gets two more read tools, `<source>.list_resources` and `<source>.read_resource`.
 - **Prompts.** A server's ready-made prompts are listed on its card. **Start a chat with it** fills one in and opens a chat with it ready to send.
