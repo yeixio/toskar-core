@@ -87,9 +87,14 @@ func TestSummarizerRunsFromSourceAndIsApplied(t *testing.T) {
 		t.Fatalf("second prompt = %.120q", prompts[1][1].Content)
 	}
 	// Each request ends by asking for the summary, so a transcript that ends
-	// on a question isn't answered instead (#834).
+	// on a question isn't answered instead, and one that continues an earlier
+	// summary asks to keep it (#834).
 	for i, p := range prompts {
-		if !strings.HasSuffix(p[1].Content, summaryAsk) {
+		ask := summaryFoldAsk
+		if i == 0 {
+			ask = summaryAsk
+		}
+		if !strings.HasSuffix(p[1].Content, ask) {
 			t.Fatalf("prompt %d ends %q", i, p[1].Content[max(0, len(p[1].Content)-120):])
 		}
 	}

@@ -199,11 +199,18 @@ const summaryInstructions = "You summarize a conversation so an assistant can co
 const summaryAsk = "\n</conversation>\n\nNow write the summary of the conversation above, as the instructions say. " +
 	"Don't answer or continue it: its last message is part of what you summarize."
 
+// summaryFoldAsk follows the conversation since an earlier summary. Asked
+// only to summarize, a small model summarized the new part and dropped the
+// earlier summary's facts (#834), so it's told to keep them.
+const summaryFoldAsk = "\n</conversation>\n\nNow write one summary of the whole conversation, as the instructions say: " +
+	"keep everything in the earlier summary, and add what was said since. " +
+	"Don't answer or continue it: its last message is part of what you summarize."
+
 // summaryBody is the summarizer's request for a chunk of the conversation,
 // with the earlier summary it continues, if any.
 func summaryBody(earlier, text string, chunk []contracts.Message) string {
 	if text != "" {
-		return earlier + text + "\n\nThe conversation since then:\n<conversation>\n" + transcript(chunk) + summaryAsk
+		return earlier + text + "\n\nThe conversation since then:\n<conversation>\n" + transcript(chunk) + summaryFoldAsk
 	}
 	return "Conversation:\n<conversation>\n" + transcript(chunk) + summaryAsk
 }

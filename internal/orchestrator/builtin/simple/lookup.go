@@ -320,3 +320,16 @@ func readableItem(item any) string {
 	raw, _ := json.Marshal(m)
 	return string(raw)
 }
+
+// recallAgain asks once more for a personal question's answer from the
+// chat: it may be in an earlier message or the summary of the earlier part.
+const recallAgain = "Look again: the answer may be earlier in this conversation, or in the summary of its earlier part. Answer from it directly. If it really isn't there, say you don't know and ask."
+
+// unknownRe matches an answer that says it doesn't know or has no
+// information, or asks the person to say.
+var unknownRe = regexp.MustCompile(`(?i)\b(I (don't|do not) (have|know)\b.{0,40}\b(information|details|record|idea|access)|I (don't|do not) know|I'm not sure|I am not sure|(could|can) you (provide|tell me|share|let me know))`)
+
+// saysUnknown reports an answer that says it doesn't know.
+func saysUnknown(answer string) bool {
+	return unknownRe.MatchString(answer)
+}

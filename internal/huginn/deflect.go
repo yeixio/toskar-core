@@ -56,3 +56,20 @@ func SmallTalk(message string) bool {
 	}
 	return seen
 }
+
+// people are who and what a person's life has in it, as in "my sister".
+const people = `(sister|brother|sibling|mom|mum|mother|dad|father|parents?|wife|husband|partner|spouse|girlfriend|boyfriend|fianc[eé]e?|son|daughter|kids?|children|child|baby|grand(ma|pa|mother|father|son|daughter|parents?|kids?|children)|aunt|uncle|cousin|niece|nephew|family|friend|best friend|neighbou?r|roommate|boss|coworker|colleague|dog|cat|pet|puppy|kitten)s?`
+
+// aboutThemselvesRe matches a question about a fact in the person's own
+// life: where someone in it lives or works, their name or birthday, or what
+// the person said before. "Where does my sister live?" (#834).
+var aboutThemselvesRe = regexp.MustCompile(`(?i)(\b(where|what|when|which|how old)\b.*\b(my|our) ` + people + `\b.*\b(live|lives|living|work|works|name|named|called|birthday|born|age|old|from)\b` +
+	`|\b(who|how old) (is|are|was)\b.*\b(my|our) ` + people + `\b` +
+	`|\b(what'?s|what is|what was) my (name|birthday|address|job)\b|\bwhere do (i|we) (live|work)\b|\bwhat did i (say|tell you|mention)\b)`)
+
+// AboutThemselves reports a question about the person's own life, which the
+// web can't answer: the conversation, its summary, or memory can. An answer
+// that deflects one isn't looked up; it's written again from the chat.
+func AboutThemselves(message string) bool {
+	return aboutThemselvesRe.MatchString(message)
+}

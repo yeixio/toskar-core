@@ -285,6 +285,9 @@ func (o *Orchestrator) Run(
 		// run was asked for again in plain text.
 		retriedEmpty := false
 		retriedLookup := false
+		// retriedRecall records that a personal question's answer was asked
+		// for again from the chat.
+		retriedRecall := false
 		retriedFile := false
 		triedMedia := false
 		// retriedHandover records that an answer handing over a destructive
@@ -441,11 +444,25 @@ func (o *Orchestrator) Run(
 				)
 				continue
 			}
-			// An answer that sends the person off to search, or pretends to,
-			// is looked up and written again from what the web says (§21).
-			// Core tells the model not to; a small model still does. Small talk
-			// ("as an AI, I don't have feelings") is not looked up.
-			if !lookedUp && !retriedLookup && !jsonOnly && !huginn.SmallTalk(task.Prompt) && huginn.Deflects(parsed.Text) && webAllowed(webProfile) {
+			// A question about the person's own life ("Where does my sister
+			// live?") isn't on the web. An answer that says it doesn't know,
+			// or deflects, is asked for once more from the chat, whose summary
+			// a small model can pass over (#834).
+			if huginn.AboutThemselves(task.Prompt) {
+				if !retriedRecall && !jsonOnly && len(prior) > 0 && (huginn.Deflects(parsed.Text) || saysUnknown(parsed.Text)) {
+					retriedRecall = true
+					messages = append(messages,
+						pluginapi.ChatMessage{Role: "assistant", Content: content},
+						pluginapi.ChatMessage{Role: "user", Content: recallAgain},
+					)
+					continue
+				}
+			} else if !lookedUp && !retriedLookup && !jsonOnly && !huginn.SmallTalk(task.Prompt) && huginn.Deflects(parsed.Text) && webAllowed(webProfile) {
+				// An answer that sends the person off to search, or pretends
+				// to, is looked up and written again from what the web says
+				// (§21). Core tells the model not to; a small model still does.
+				// Small talk ("as an AI, I don't have feelings") is not looked
+				// up.
 				retriedLookup = true
 				if found, ok := lookUp(ctx, env, webProfile, searchQuery(ctx, env, role, task.Prompt), task.Prompt, budget.Pages); ok {
 					lookedUp = true

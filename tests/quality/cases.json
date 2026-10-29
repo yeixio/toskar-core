@@ -235,6 +235,32 @@
       }
     },
     {
+      "id": "personal_question_not_in_chat",
+      "what": "A question about the person's own life that the chat doesn't answer gets an honest \"I don't know\", not a web search (#834).",
+      "history": [
+        {
+          "role": "user",
+          "content": "My sister Maribel lives in Sitka."
+        },
+        {
+          "role": "assistant",
+          "content": "Nice, Sitka is a beautiful town."
+        }
+      ],
+      "message": "Where does my brother live?",
+      "stub": [
+        "I don't know where your brother lives. You haven't told me. Where does he live?",
+        "I don't know where your brother lives. You haven't told me. Where does he live?"
+      ],
+      "expect": {
+        "lookup": false,
+        "no_tools_run": true,
+        "answer_matches": "(?i)(don'?t|do not) (know|have)|not sure|(haven'?t|have not|didn'?t|did not) (told|tell|mentioned|mention|said|say|provided|provide|shared|share|given|give|specified|specify)|no (information|record|details)|where does he|(could|can) you (tell|share|let|provide|give|specify)|(provide|give|share) (me )?more (details|information)",
+        "answer_real_only": true,
+        "answer_lacks": "(?i)(^|[.!] )(based on [^.]*, )?your brother (also )?lives in sitka"
+      }
+    },
+    {
       "id": "current_question_is_looked_up",
       "what": "A question about current information looks the web up before answering and cites what it read.",
       "setup": {

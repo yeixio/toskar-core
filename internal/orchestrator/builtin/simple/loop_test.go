@@ -505,3 +505,38 @@ func TestOlderMessagesFitByTheModelsTokenizer(t *testing.T) {
 		t.Fatalf("context=%v", usage)
 	}
 }
+
+// A question about the person's own life that the model says it can't
+// answer is asked again from the chat, not looked up on the web (#834).
+func TestPersonalQuestionIsAnsweredFromTheChat(t *testing.T) {
+	env := &memoryEnv{
+		scriptedEnv: scriptedEnv{replies: []string{
+			"I don't have access to personal information about your sister. Could you provide more details?",
+			"Your sister Maribel lives in Sitka.",
+		}},
+		prior: []pluginapi.ChatMessage{
+			{Role: "user", Content: "Summary of the earlier part of this conversation (the full messages are saved):\nThe user's sister Maribel lives in Sitka."},
+			{Role: "assistant", Content: "Thanks. I have the earlier context."},
+		},
+		limit: 8192,
+	}
+	events, err := New().Run(context.Background(), contracts.Task{Prompt: "Where does my sister live?"}, contracts.AIProfile{
+		Roles: []contracts.ModelRole{{Role: "assistant", ModelID: "m"}},
+		Tools: []contracts.ToolPolicy{{ToolID: "internet.search", Policy: "allow"}},
+	}, env)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var text string
+	for evt := range events {
+		if evt.Type == "agent.message" {
+			text += evt.Content
+		}
+	}
+	if env.tools != 0 || !strings.Contains(text, "Sitka") || len(env.seen) != 2 {
+		t.Fatalf("tools=%d calls=%d text=%q", env.tools, len(env.seen), text)
+	}
+	if last := env.seen[1][len(env.seen[1])-1]; last.Content != recallAgain {
+		t.Fatalf("retry asked %q", last.Content)
+	}
+}
