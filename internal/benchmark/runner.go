@@ -39,6 +39,9 @@ type Runner struct {
 	// is using this computer (spec §60). Each model is admitted on its own,
 	// because loading it unloads the others.
 	Admit func(ctx context.Context, waiting func(reason string)) (release func(), err error)
+	// Measured, when set, gets every measured sample, so placement learns
+	// this computer's speeds from benchmarks too (#836).
+	Measured func(contracts.BenchmarkSample)
 
 	mu   sync.Mutex
 	jobs map[string]*contracts.BenchmarkJob
@@ -363,6 +366,9 @@ func (r *Runner) runOnce(
 }
 
 func (r *Runner) appendSample(jobID string, sample contracts.BenchmarkSample) {
+	if r.Measured != nil && !sample.Warmup && sample.Error == "" {
+		r.Measured(sample)
+	}
 	r.patch(jobID, func(j *contracts.BenchmarkJob) {
 		j.Samples = append(j.Samples, sample)
 		j.Summaries = summarize(j.Samples)

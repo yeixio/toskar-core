@@ -217,6 +217,14 @@ type App struct {
 	// work counts turns streaming on each computer, by node ID.
 	workMu sync.Mutex
 	work   map[string]int
+	// workTokens are the prompt tokens of the turns in work, by computer,
+	// and speeds what each computer measured: placement predicts time to
+	// answer from them (#836). chatPlaces is where each chat's last turn
+	// ran, whose prompt cache has it.
+	workTokens map[string]int
+	speeds     scheduler.Speeds
+	placesMu   sync.Mutex
+	chatPlaces map[string]chatPlace
 	// Speech transcribes audio and reads text aloud (Gungnir §18–19).
 	Speech *speech.Engine
 	// frames keeps recent videos' sampled frames (#191).
@@ -483,6 +491,12 @@ func New(opts Options) (*App, error) {
 		return rtMgr.ListRunning(ctx, "llamacpp")
 	}
 	bench.Chat = rtMgr.Chat
+	bench.Measured = func(m contracts.BenchmarkSample) {
+		a.speeds.Observe(cfg.NodeID, m.ModelID, scheduler.Sample{
+			PromptTokens: m.PromptTokens, CompletionTokens: m.CompletionTokens,
+			PrefillPerSec: m.PromptTokPerSec, DecodePerSec: m.EvalTokPerSec,
+		})
+	}
 	a.Benchmarks = bench
 
 	a.Nodes = nodes.NewManager(db.SQL, bus, pairing, cfg.NodeID, cfg.NodeName, a.detectHardware)
