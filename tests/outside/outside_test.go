@@ -774,7 +774,7 @@ func TestSDKs(t *testing.T) {
 			l := newLab(t, router{mode: c.mode})
 			l.anywhere(true, "")
 			l.settled(true)
-			for _, sdk := range []string{"go", "python", "node"} {
+			for _, sdk := range []string{"go", "python", "node", "kotlin"} {
 				t.Run(sdk, func(t *testing.T) {
 					l.t = t
 					dir := t.TempDir()
