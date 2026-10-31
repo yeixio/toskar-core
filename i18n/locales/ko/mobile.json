@@ -736,7 +736,8 @@
       "attachments": "이 기기 채팅의 사진과 파일",
       "web": "이 기기 채팅의 웹 검색",
       "memory": "이 기기의 메모리",
-      "watch": "워치에서 질문하기"
+      "watch": "워치에서 질문하기",
+      "car": "차에서 묻기"
     },
     "reasons": {
       "models": "이 기기의 무료 모델은 {{model}}이에요. 더 많은 모델은 Toskar Unlock으로 사용할 수 있어요.",
@@ -744,7 +745,8 @@
       "attachments": "이 기기 채팅의 사진과 파일은 Toskar Unlock으로 사용할 수 있어요. 컴퓨터의 채팅에서는 무료로 사용해요.",
       "web": "이 기기 채팅의 웹 검색은 Toskar Unlock으로 사용할 수 있어요. 컴퓨터의 채팅에서는 무료로 검색해요.",
       "memory": "이 기기의 메모리는 Toskar Unlock으로 사용할 수 있어요. 컴퓨터의 메모리는 무료예요.",
-      "watch": "워치에서 질문하기는 Toskar Unlock으로 사용할 수 있어요."
+      "watch": "워치에서 질문하기는 Toskar Unlock으로 사용할 수 있어요.",
+      "car": "차에서 묻기는 Toskar Unlock에 포함돼요."
     },
     "buy": "{{price}}에 잠금 해제",
     "restore": "구매 복원",

@@ -750,7 +750,8 @@
       "attachments": "Foto e file nelle chat su questo dispositivo",
       "web": "Ricerche sul web nelle chat su questo dispositivo",
       "memory": "Memoria su questo dispositivo",
-      "watch": "Chiedere dall'orologio"
+      "watch": "Chiedere dall'orologio",
+      "car": "Chiedere dalla tua auto"
     },
     "reasons": {
       "models": "Il modello gratuito di questo dispositivo è {{model}}. Altri modelli arrivano con Toskar Unlock.",
@@ -758,7 +759,8 @@
       "attachments": "Foto e file nelle chat su questo dispositivo arrivano con Toskar Unlock. Le chat sul tuo computer li usano gratis.",
       "web": "Le ricerche sul web nelle chat su questo dispositivo arrivano con Toskar Unlock. Le chat sul tuo computer cercano gratis.",
       "memory": "La memoria su questo dispositivo arriva con Toskar Unlock. La memoria del tuo computer è gratuita.",
-      "watch": "Chiedere dall'orologio arriva con Toskar Unlock."
+      "watch": "Chiedere dall'orologio arriva con Toskar Unlock.",
+      "car": "Chiedere dalla tua auto è incluso in Toskar Unlock."
     },
     "buy": "Sblocca per {{price}}",
     "restore": "Ripristina acquisto",

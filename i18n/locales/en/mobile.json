@@ -841,7 +841,8 @@
       "attachments": "Photos and files in chats on this device",
       "web": "Web lookups in chats on this device",
       "memory": "Memory on this device",
-      "watch": "Asking from your watch"
+      "watch": "Asking from your watch",
+      "car": "Asking from your car"
     },
     "reasons": {
       "models": "This device's free model is {{model}}. More models come with Toskar Unlock.",
@@ -849,7 +850,8 @@
       "attachments": "Photos and files in chats on this device come with Toskar Unlock. Chats on your computer use them for free.",
       "web": "Web lookups in chats on this device come with Toskar Unlock. Chats on your computer look things up for free.",
       "memory": "Memory on this device comes with Toskar Unlock. Your computer's memory is free.",
-      "watch": "Asking from your watch comes with Toskar Unlock."
+      "watch": "Asking from your watch comes with Toskar Unlock.",
+      "car": "Asking from your car comes with Toskar Unlock."
     },
     "buy": "Unlock for {{price}}",
     "restore": "Restore purchase",

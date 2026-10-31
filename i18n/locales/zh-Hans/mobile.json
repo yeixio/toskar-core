@@ -736,7 +736,8 @@
       "attachments": "此设备聊天中的照片和文件",
       "web": "此设备聊天中的网页查询",
       "memory": "此设备上的记忆",
-      "watch": "从手表提问"
+      "watch": "从手表提问",
+      "car": "在车上提问"
     },
     "reasons": {
       "models": "此设备的免费模型是 {{model}}。更多模型随 Toskar Unlock 提供。",
@@ -744,7 +745,8 @@
       "attachments": "此设备聊天中的照片和文件随 Toskar Unlock 提供。你电脑上的聊天可免费使用。",
       "web": "此设备聊天中的网页查询随 Toskar Unlock 提供。你电脑上的聊天可免费查询。",
       "memory": "此设备上的记忆随 Toskar Unlock 提供。你电脑的记忆免费。",
-      "watch": "从手表提问随 Toskar Unlock 提供。"
+      "watch": "从手表提问随 Toskar Unlock 提供。",
+      "car": "在车上提问包含在 Toskar Unlock 中。"
     },
     "buy": "以 {{price}} 解锁",
     "restore": "恢复购买",

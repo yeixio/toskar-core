@@ -743,7 +743,8 @@
       "attachments": "Fotos und Dateien in Chats auf diesem Gerät",
       "web": "Websuche in Chats auf diesem Gerät",
       "memory": "Gedächtnis auf diesem Gerät",
-      "watch": "Fragen von deiner Uhr"
+      "watch": "Fragen von deiner Uhr",
+      "car": "Fragen aus deinem Auto"
     },
     "reasons": {
       "models": "Das kostenlose Modell auf diesem Gerät ist {{model}}. Weitere Modelle gibt es mit Toskar Unlock.",
@@ -751,7 +752,8 @@
       "attachments": "Fotos und Dateien in Chats auf diesem Gerät gibt es mit Toskar Unlock. Chats auf deinem Computer nutzen sie kostenlos.",
       "web": "Websuche in Chats auf diesem Gerät gibt es mit Toskar Unlock. Chats auf deinem Computer suchen kostenlos im Web.",
       "memory": "Gedächtnis auf diesem Gerät gibt es mit Toskar Unlock. Das Gedächtnis deines Computers ist kostenlos.",
-      "watch": "Fragen von deiner Uhr gibt es mit Toskar Unlock."
+      "watch": "Fragen von deiner Uhr gibt es mit Toskar Unlock.",
+      "car": "Fragen aus deinem Auto gibt es mit Toskar Unlock."
     },
     "buy": "Freischalten für {{price}}",
     "restore": "Kauf wiederherstellen",
