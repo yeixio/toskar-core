@@ -35,6 +35,9 @@ on:
       repeats:
         description: How many times the served model runs each case, sampling with a seed each time (#834).
         default: "3"
+      speculation:
+        description: 'Instead of the quality sets, measure speculative decoding on the self-hosted runner (#835): a JSON list of {"model": a catalog id, "draft_url": a small GGUF of its family}. Blank for the quality sets.'
+        default: ""
 
 jobs:
   # The quality set with a real model on CPU (Llama 3.2 1B through
@@ -47,6 +50,7 @@ jobs:
   # Gemma 3 4B, which has a sliding window: how much of a chat's later turn
   # comes from the cache, and that a warm answer matches a cold one.
   served-model:
+    if: ${{ !inputs.speculation }}
     runs-on: ${{ fromJSON(vars.TRUSTED_RUNS_ON || '"ubuntu-latest"') }}
     timeout-minutes: 150
     steps:
@@ -127,7 +131,7 @@ jobs:
   # time on the one GPU: "recommended" is what the daemon picks for a new
   # user; a catalog id, such as qwen2.5-32b-q4, tests that model.
   real-models:
-    if: vars.QUALITY_RUNNER == 'docker'
+    if: vars.QUALITY_RUNNER == 'docker' && !inputs.speculation
     runs-on: [self-hosted, toskar-models]
     timeout-minutes: 480
     strategy:
@@ -340,6 +344,98 @@ jobs:
             echo "::error::The daemon ran out of its $MEMORY of memory. Raise QUALITY_MEMORY or have it pick a smaller model."
           fi
           docker logs --tail 200 "$NAME" 2>&1 || true
+      - name: Clean up
+        if: always()
+        run: |
+          docker rm -f "$NAME" >/dev/null 2>&1 || true
+          docker network rm "$NAME" >/dev/null 2>&1 || true
+          docker image rm "$NAME" >/dev/null 2>&1 || true
+
+  # Speculative decoding on this runner's hardware (#835): for each model
+  # and draft, cmd/specbench in the daemon's image has the daemon install
+  # llama.cpp and the model, downloads the draft, and runs llama-server
+  # plain, guessing from the chat, with the draft, and with both. It
+  # reports the speed, the guesses kept, and whether each answer is the
+  # plain one's or differs only at a near-tie. Measured, not gated.
+  speculation:
+    if: vars.QUALITY_RUNNER == 'docker' && inputs.speculation
+    runs-on: [self-hosted, toskar-models]
+    timeout-minutes: 240
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        pair: ${{ fromJSON(inputs.speculation) }}
+    name: speculation (${{ matrix.pair.model }})
+    env:
+      NAME: toskar-quality-${{ github.run_id }}-${{ github.run_attempt }}-${{ strategy.job-index }}
+      MEMORY: ${{ vars.QUALITY_MEMORY || '32g' }}
+      CPUS: ${{ vars.QUALITY_CPUS }}
+      GPU: ${{ vars.QUALITY_GPU }}
+      MODEL: ${{ matrix.pair.model }}
+      DRAFT_URL: ${{ matrix.pair.draft_url }}
+    steps:
+      - name: Remove what an interrupted run left
+        run: |
+          docker ps -aq --filter name=toskar-quality- | xargs -r docker rm -f
+          docker network ls -q --filter name=toskar-quality- | xargs -r docker network rm
+          docker images -q --filter reference='toskar-quality-*' | xargs -r docker image rm -f
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.ref || github.ref }}
+          persist-credentials: false
+      - name: Build the daemon
+        run: |
+          target=runtime
+          if [ "$GPU" = vulkan ]; then target=gpu; fi
+          docker build --pull --target "$target" --build-arg COMMIT="$(git rev-parse --short HEAD)" -t "$NAME" .
+      - name: Start the daemon
+        run: |
+          docker network create "$NAME"
+          cpus="${CPUS:-$(( $(nproc) * 3 / 4 ))}"
+          gpu=()
+          if [ "$GPU" = vulkan ]; then gpu=(--device /dev/dri); fi
+          docker run -d --name "$NAME" --network "$NAME" \
+            --cap-drop ALL --security-opt no-new-privileges \
+            --memory "$MEMORY" --memory-swap "$MEMORY" --cpus "$cpus" \
+            --oom-score-adj 1000 --pids-limit 4096 "${gpu[@]}" \
+            -v toskar-quality-models:/data/models \
+            -v toskar-quality-runtimes:/data/runtimes \
+            -e TOSKAR_DISCOVERY_ENABLED=false \
+            -e TOSKAR_INTERNAL_HOST=127.0.0.1 \
+            ${{ vars.QUALITY_DOCKER_FLAGS }} \
+            "$NAME"
+          if [ "$GPU" = vulkan ]; then
+            docker exec "$NAME" vulkaninfo --summary 2>/dev/null | grep -E "deviceName|deviceType" || echo "::warning::No Vulkan device in the container; this measures the CPU."
+          fi
+          for _ in $(seq 60); do docker exec "$NAME" specbench -h >/dev/null 2>&1 && break; sleep 1; done
+      - name: Measure
+        run: |
+          mkdir -p .quality
+          # The daemon answers on its own loopback without a key.
+          docker exec "$NAME" specbench -toskar http://127.0.0.1:7331 -data /data -install "$MODEL" \
+            -draft "/data/models/drafts/$(basename "$DRAFT_URL")" -draft-url "$DRAFT_URL" \
+            -out /tmp/speculation.md -json /tmp/speculation.json
+          docker cp "$NAME:/tmp/speculation.md" .quality/speculation.md
+          docker cp "$NAME:/tmp/speculation.json" .quality/speculation.json
+      - name: Report
+        if: always()
+        run: |
+          if [ -f .quality/speculation.md ]; then
+            { echo "Runner: $GPU"; cat .quality/speculation.md; } >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - uses: actions/upload-artifact@v7
+        if: always()
+        continue-on-error: true
+        with:
+          name: speculation-${{ matrix.pair.model }}
+          path: |
+            .quality/speculation.md
+            .quality/speculation.json
+          if-no-files-found: ignore
+      - name: Daemon log
+        if: failure()
+        run: docker logs --tail 200 "$NAME" 2>&1 || true
       - name: Clean up
         if: always()
         run: |
