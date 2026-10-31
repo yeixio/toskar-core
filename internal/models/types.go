@@ -37,6 +37,11 @@ type CatalogEntry struct {
 	// Languages are how well the model writes each language it has a level
 	// for (multilingual spec §13–14), with confidence and sources.
 	Languages []contracts.LanguageCapability `json:"languages,omitempty"`
+	// Generation is the model's release in its family, such as 2.5 in qwen
+	// (#593). Supersedes names the entries of the same family that this one
+	// replaces, size for size.
+	Generation string   `json:"generation,omitempty"`
+	Supersedes []string `json:"supersedes,omitempty"`
 }
 
 // Supporting reports an embedding, reranker, or classifier model. It serves
