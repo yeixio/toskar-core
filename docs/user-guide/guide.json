@@ -2114,7 +2114,7 @@
         },
         {
           "type": "paragraph",
-          "text": "The Performance overview shows each computer's CPU and memory, and each graphics card's use, video memory, temperature, and power, with the last hour as a line. Activity marks each reply GPU or CPU and can filter by it."
+          "text": "The Performance overview shows each computer's CPU and memory, and each graphics card's use, video memory, temperature, and power, with the last hour as a line. Activity marks each reply GPU or CPU and can filter by it. With Advanced mode on, a reply's details also say how many words the model guessed ahead and how many it kept, and Activity shows the share kept across the replies shown; filter by a model to see its own. More kept means faster answers."
         },
         {
           "type": "note",

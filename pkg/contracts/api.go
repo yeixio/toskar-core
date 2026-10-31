@@ -1019,6 +1019,10 @@ type GenerationRun struct {
 	// a reply from a paired computer.
 	Backend string `json:"backend,omitempty"`
 	Device  string `json:"device,omitempty"`
+	// DraftTokens are tokens speculative decoding guessed ahead for the
+	// reply, and DraftAccepted the ones the model kept (#835, contract 1.66).
+	DraftTokens   int `json:"draft_tokens,omitempty"`
+	DraftAccepted int `json:"draft_accepted,omitempty"`
 }
 
 // BenchmarkPrompt is one prompt inside a workload category.

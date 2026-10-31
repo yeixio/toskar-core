@@ -2,6 +2,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { fireEvent, render, screen } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import { api } from '@/lib/api'
+import { useUIStore } from '@/stores/uiStore'
 import type { GenerationRun } from '@/types/api'
 import { ActivityPanel } from './ActivityPanel'
 import { RanOnTag } from './RanOnTag'
@@ -77,5 +78,24 @@ describe('ActivityPanel', () => {
     )
     expect(await screen.findByText('Chat c')).toBeInTheDocument()
     expect(screen.queryByRole('combobox', { name: 'Filter by GPU or CPU' })).not.toBeInTheDocument()
+  })
+
+  it('says how many of the guesses ahead each reply kept, and over the replies shown', async () => {
+    useUIStore.setState({ advancedMode: true })
+    vi.mocked(api.getModels).mockResolvedValue([])
+    vi.mocked(api.getPerformance).mockResolvedValue([
+      run('a', { draft_tokens: 100, draft_accepted: 30 }),
+      run('b', { draft_tokens: 100, draft_accepted: 50 }),
+      run('c', {}),
+    ])
+    render(
+      <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
+        <ActivityPanel />
+      </QueryClientProvider>,
+    )
+    fireEvent.click(await screen.findByText('Chat a'))
+    expect(screen.getByText('30 of 100 kept (30%)')).toBeInTheDocument()
+    expect(screen.getByText('Guesses kept').nextSibling).toHaveTextContent('40%')
+    useUIStore.setState({ advancedMode: false })
   })
 })

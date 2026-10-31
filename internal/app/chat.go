@@ -896,6 +896,8 @@ func (a *App) recordGeneration(
 		run.TotalMs = metrics.TotalMs
 		run.PromptTokPerSec = metrics.PromptTokPerSec
 		run.EvalTokPerSec = metrics.EvalTokPerSec
+		run.DraftTokens = metrics.DraftTokens
+		run.DraftAccepted = metrics.DraftAccepted
 	}
 	// Tag the reply with the device that produced it, when every step ran
 	// on this computer.

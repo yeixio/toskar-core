@@ -1286,6 +1286,9 @@ export interface GenerationRun {
   /** The backend and device that produced the reply (#317). */
   backend?: string
   device?: string
+  /** Tokens speculative decoding guessed ahead, and the ones the model kept (#835, contract 1.66). */
+  draft_tokens?: number
+  draft_accepted?: number
 }
 
 export interface BenchmarkPrompt {
