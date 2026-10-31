@@ -31,6 +31,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"time"
 )
@@ -109,6 +110,9 @@ func main() {
 		}
 		if *llama == "" {
 			*llama = filepath.Join(*dataDir, "runtimes", "llamacpp", "llama-server")
+			if runtime.GOOS == "windows" {
+				*llama += ".exe"
+			}
 		}
 		if *model == "" {
 			*model = filepath.Join(*dataDir, "models", *install+".gguf")
