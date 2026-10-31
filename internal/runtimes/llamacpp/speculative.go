@@ -40,9 +40,10 @@ func speculativeArgs(cfg pluginapi.ModelStartConfig, supported bool) []string {
 
 // draftType is llama-server's speculation with a draft model: a small model
 // of the same family writes ahead and the big one checks its guesses. On an
-// RX 7900 XTX with Qwen 2.5 and its 0.5B draft, it made the 32B 98% faster,
-// the 14B 50%, and the 7B 13%; with speculativeType as well, 105%, 57%, and
-// 19%. Every build that has speculativeType has it.
+// RX 7900 XTX with Qwen 2.5 and its 0.5B draft, with speculativeType as
+// well, it made the 32B 87% faster on average, the 14B 56%, and the 7B 20%,
+// and changed answers no more than the GPU changes them between two plain
+// runs. Every build that has speculativeType has it.
 const draftType = "draft-simple"
 
 // draftFor is the draft a model starts with: cfg.Draft when it speculates.
