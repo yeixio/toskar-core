@@ -380,7 +380,7 @@ func prepare(base, id string) error {
 			break
 		}
 		if time.Now().After(deadline) {
-			return fmt.Errorf("Toskar at %s didn't answer in 3 minutes: %w", base, err)
+			return fmt.Errorf("the daemon at %s didn't answer in 3 minutes: %w", base, err)
 		}
 	}
 	log.Printf("installing llama.cpp")
