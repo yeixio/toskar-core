@@ -146,7 +146,7 @@ func (m *Manager) Install(ctx context.Context, modelID string, wait bool) error 
 	}
 	if installed, _, err := m.storage.IsInstalled(ctx, modelID); err != nil {
 		return err
-	} else if installed && (entry.Projector == nil || m.storage.HasProjector(modelID)) {
+	} else if installed && m.hasFiles(entry) {
 		return nil
 	}
 	if err := m.storage.UpsertCatalogEntry(ctx, entry); err != nil {
@@ -164,7 +164,7 @@ func (m *Manager) Install(ctx context.Context, modelID string, wait bool) error 
 				return ctx.Err()
 			case <-time.After(500 * time.Millisecond):
 				if !m.isDownloading(modelID) {
-					if installed, _, _ := m.storage.IsInstalled(ctx, modelID); installed && (entry.Projector == nil || m.storage.HasProjector(modelID)) {
+					if installed, _, _ := m.storage.IsInstalled(ctx, modelID); installed && m.hasFiles(entry) {
 						return nil
 					}
 					return fmt.Errorf("download of %q ended without installing", modelID)
@@ -330,6 +330,23 @@ func (m *Manager) ProjectorPath(modelID string) string {
 		return ""
 	}
 	return m.storage.ProjectorPath(modelID)
+}
+
+// DraftPath returns an installed model's draft, or "" when it has none
+// here.
+func (m *Manager) DraftPath(modelID string) string {
+	entry, ok := m.catalog.Get(modelID)
+	if !ok || entry.Draft == nil || !m.storage.HasDraft(modelID) {
+		return ""
+	}
+	return m.storage.DraftPath(modelID)
+}
+
+// hasFiles reports that the files a model needs besides its weights, its
+// projector and draft, are here.
+func (m *Manager) hasFiles(entry CatalogEntry) bool {
+	return (entry.Projector == nil || m.storage.HasProjector(entry.ID)) &&
+		(entry.Draft == nil || m.storage.HasDraft(entry.ID))
 }
 
 // SeesImages reports an installed model that can see pictures here: a vision

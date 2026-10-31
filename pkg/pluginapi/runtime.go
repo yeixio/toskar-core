@@ -69,6 +69,9 @@ type ModelStartConfig struct {
 	// NoSpeculation starts the model without speculative decoding, as the
 	// person chose for it (#835).
 	NoSpeculation bool `json:"no_speculation,omitempty"`
+	// Draft is a small model of the same family that guesses the next
+	// words for the model to check (#835); empty for none.
+	Draft string `json:"draft,omitempty"`
 }
 
 // Supporting model modes (AI experience spec §61). A model started in one of
@@ -97,6 +100,8 @@ type RunningModel struct {
 	Mode string `json:"mode,omitempty"`
 	// Projector is the image encoder it was started with, if any.
 	Projector string `json:"projector,omitempty"`
+	// Draft is the draft model it was started with, if any.
+	Draft string `json:"draft,omitempty"`
 	// Acceleration is where the instance runs, from the runtime's own
 	// report when it loaded the model; nil when it is not known.
 	Acceleration *Acceleration `json:"acceleration,omitempty"`

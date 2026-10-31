@@ -48,6 +48,21 @@ func (s *Storage) HasProjector(modelID string) bool {
 	return err == nil && st.Mode().IsRegular()
 }
 
+// DraftPath is where a model's draft (CatalogEntry.Draft) is kept, beside it.
+func (s *Storage) DraftPath(modelID string) string {
+	return filepath.Join(s.modelsDir, modelID+".draft.gguf")
+}
+
+func (s *Storage) DraftTempPath(modelID string) string {
+	return filepath.Join(s.modelsDir, ".partial", modelID+".draft.gguf.part")
+}
+
+// HasDraft reports a downloaded draft for modelID.
+func (s *Storage) HasDraft(modelID string) bool {
+	st, err := os.Stat(s.DraftPath(modelID))
+	return err == nil && st.Mode().IsRegular()
+}
+
 func (s *Storage) UpsertCatalogEntry(ctx context.Context, e CatalogEntry) error {
 	caps, _ := json.Marshal(e.Capabilities)
 	src, _ := json.Marshal(e.Source)
@@ -146,6 +161,7 @@ func (s *Storage) DeleteInstalled(ctx context.Context, modelID string) error {
 		_ = os.Remove(path)
 	}
 	_ = os.Remove(s.ProjectorPath(modelID))
+	_ = os.Remove(s.DraftPath(modelID))
 	_, err = s.db.ExecContext(ctx, `DELETE FROM installed_models WHERE model_id = ?`, modelID)
 	return err
 }
