@@ -196,7 +196,7 @@ the set confirms the license for that run.
   a chat's next turn reads only what's new. `TestPromptCache` sends a fixed
   six-turn chat of about 2,300 tokens to the served model
   (`TOSKAR_QUALITY_MODEL_URL`, skipped without one), with the model writing
-  its own answers, and checks three things:
+  its own answers, and checks four things:
   - **Reuse:** at least 80% of the last turn's prompt comes from the cache
     (`TOSKAR_QUALITY_CACHE_MIN_REUSE`). The chat is longer than Gemma 3's
     1,024-token sliding window, where a model with sliding-window layers can
@@ -208,27 +208,32 @@ the set confirms the license for that run.
     7B that's 88 ms instead of 1.6 s for 2,100 tokens.
   - **Equivalence:** the last turn asked warm and cold (`cache_prompt` off),
     at temperature 0, writes the same tokens, each with the same probability
-    within 0.2 (`TOSKAR_QUALITY_CACHE_TOLERANCE`). Probabilities, not log
-    probabilities: an unlikely token's log probability moves by rounding
-    alone. The warm and cold turns read the prompt in different batches, and
-    on a CPU that alone moves probabilities: with Llama 3.2 1B on llama.cpp
-    b11174, a cold read in batches of 32 instead of 512, no cache involved,
-    moved a written token's probability by up to 0.12 and another top-5
-    token's by up to 0.15. Those other tokens' gaps are reported, not failed
-    on, since they change nothing the model writes. A cache that lost part
-    of the chat shows in the tokens instead: simulated losses (a turn, the
-    system prompt or half of it, half the last answer) changed the last
-    turn's answer 8 times in 10, and batching never did. On a Mac's GPU
-    (b11149), warm and cold were at most 0.0075 apart for Llama, Qwen, and
-    Gemma 2, and up to 0.038 for Gemma 3, the same inside its sliding window
-    as beyond it.
+    within 0.2 (`TOSKAR_QUALITY_CACHE_TOLERANCE`), until the answers part at
+    a near-tie, if they do: each read has both tokens in its top 5 and
+    neither moved by more than 0.2. Nothing after that is compared.
+    Probabilities, not log probabilities: an unlikely token's log
+    probability moves by rounding alone. The warm and cold turns read the
+    prompt in different batches, and on a CPU that alone moves
+    probabilities: with Llama 3.2 1B on llama.cpp b11174, a cold read in
+    batches of 32 instead of 512, no cache involved, moved a written token's
+    probability by up to 0.12 and another top-5 token's by up to 0.15, and at
+    a near-tie changed the word. Other tokens' gaps are reported, not failed
+    on. On a Mac's GPU (b11149), warm and cold were at most 0.0075 apart for
+    Llama, Qwen, and Gemma 2, and up to 0.038 for Gemma 3.
+  - **Recall:** asked warm and cold which city the store is in, which only
+    the chat's first sentence says, the warm turn answers Juneau whenever
+    the cold one does. Simulated losses of the start of the chat (its first
+    sentence, the first half of the system prompt, all of it) answer
+    Chicago; batching never changed the answer. A small loss elsewhere in
+    the chat moves probabilities no more than batching does, so no
+    tolerance tells it apart on a CPU.
 
   The weekly job runs it twice: with Llama 3.2 1B, beside the quality set,
   and with Gemma 3 4B, whose sliding window is the catalog's smallest, so a
   llama.cpp update that stops reusing such a model's cache fails it. Gemma 3
   reads a split prompt less exactly: at a near-tie it can write another word
   warm than cold, inside its window as much as beyond it and with or without
-  flash attention. Its run is held to reuse and reports equivalence
+  flash attention. Its run is held to reuse and recall and reports equivalence
   (`TOSKAR_QUALITY_CACHE_EQUIVALENCE=measure`).
   Measured on b11149, both reuse 97–99% of the last turn, and `--swa-full`
   (a full-size cache for the sliding-window layers) adds nothing, so Toskar
