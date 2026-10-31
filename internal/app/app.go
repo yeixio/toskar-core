@@ -478,7 +478,7 @@ func New(opts Options) (*App, error) {
 		return rtMgr.StartModel(ctx, "llamacpp", pluginapi.ModelStartConfig{
 			ModelID: modelID, ModelPath: modelPath, Adapters: a.localAdapters(ctx, modelID),
 			Projector: modelMgr.ProjectorPath(modelID), NoSpeculation: a.speculationOff(ctx, modelID),
-			Draft: modelMgr.DraftPath(modelID),
+			Draft: a.draftPath(ctx, modelID),
 		})
 	}
 	bench.Admit = func(ctx context.Context, waiting func(string)) (func(), error) {

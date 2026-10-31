@@ -509,7 +509,7 @@ func (a *App) ensureLocalModelWith(ctx context.Context, modelID string, adapters
 	loaded := a.loadingModel(modelID)
 	running, err := a.Runtimes.StartModel(ctx, "llamacpp", pluginapi.ModelStartConfig{
 		ModelID: modelID, ModelPath: path, Adapters: adapters, Projector: a.Models.ProjectorPath(modelID),
-		Draft:         a.Models.DraftPath(modelID),
+		Draft:         a.draftPath(ctx, modelID),
 		NoSpeculation: a.speculationOff(ctx, modelID),
 	})
 	loaded()
