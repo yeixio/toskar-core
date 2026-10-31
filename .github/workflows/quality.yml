@@ -401,6 +401,7 @@ jobs:
             --oom-score-adj 1000 --pids-limit 4096 "${gpu[@]}" \
             -v toskar-quality-models:/data/models \
             -v toskar-quality-runtimes:/data/runtimes \
+            -e TOSKAR_API_HOST=127.0.0.1 \
             -e TOSKAR_DISCOVERY_ENABLED=false \
             -e TOSKAR_INTERNAL_HOST=127.0.0.1 \
             ${{ vars.QUALITY_DOCKER_FLAGS }} \
@@ -411,7 +412,8 @@ jobs:
       - name: Measure
         run: |
           mkdir -p .quality
-          # The daemon answers on its own loopback without a key.
+          # specbench runs in the daemon's container, so the daemon listens
+          # on its loopback only, where it needs no key.
           docker exec "$NAME" specbench -toskar http://127.0.0.1:7331 -data /data -install "$MODEL" \
             -draft "/data/models/drafts/$(basename "$DRAFT_URL")" -draft-url "$DRAFT_URL" \
             -out /tmp/speculation.md -json /tmp/speculation.json
