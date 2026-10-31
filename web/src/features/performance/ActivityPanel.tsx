@@ -6,6 +6,7 @@ import { api } from '@/lib/api'
 import { useUIStore } from '@/stores/uiStore'
 import type { GenerationRun, Model } from '@/types/api'
 import {
+  formatKept,
   formatMs,
   formatRate,
   formatRoleLabel,
@@ -142,6 +143,18 @@ function ActivityRow({
                     {run.completion_tokens > 0 ? run.completion_tokens : '—'}
                   </dd>
                 </div>
+                {run.draft_tokens ? (
+                  <div className="flex justify-between gap-2 text-sm">
+                    <dt className="text-ink-muted">{t('activity.guessedAhead')}</dt>
+                    <dd className="tabular-nums text-ink">
+                      {t('activity.guessesKeptOf', {
+                        kept: run.draft_accepted ?? 0,
+                        count: run.draft_tokens,
+                        percent: formatKept(run.draft_tokens, run.draft_accepted ?? 0),
+                      })}
+                    </dd>
+                  </div>
+                ) : null}
               </>
             )}
           </dl>
@@ -272,13 +285,17 @@ export function ActivityPanel() {
       avgSpeed: avg((r) => r.eval_tok_per_sec),
       avgTtft: avg((r) => r.ttft_ms),
       avgTotal: avg((r) => r.total_ms),
+      // Speculative decoding's guesses the model kept, over every reply
+      // that had some (#835): filter by model to see one model's.
+      drafted: filtered.reduce((sum, r) => sum + (r.draft_tokens ?? 0), 0),
+      kept: filtered.reduce((sum, r) => sum + (r.draft_accepted ?? 0), 0),
     }
   }, [filtered])
 
   return (
     <div className="space-y-6 animate-fade">
       {summary && (
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+        <div className={['grid gap-3 sm:grid-cols-2', advanced && summary.drafted > 0 ? 'lg:grid-cols-6' : 'lg:grid-cols-5'].join(' ')}>
           <SummaryCard label={t('activity.runs')} value={String(summary.count)} />
           <SummaryCard label={t('activity.averageOf', { metric: labels.speed })} value={formatTokPerSec(summary.avgSpeed)} />
           <SummaryCard
@@ -293,6 +310,9 @@ export function ActivityPanel() {
             label={advanced ? t('activity.crossMachine') : t('activity.teamRuns')}
             value={String(summary.teamRuns)}
           />
+          {advanced && summary.drafted > 0 && (
+            <SummaryCard label={t('activity.guessesKept')} value={formatKept(summary.drafted, summary.kept)} />
+          )}
         </div>
       )}
 

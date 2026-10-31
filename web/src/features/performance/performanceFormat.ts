@@ -1,10 +1,19 @@
 import i18n from '@/i18n'
-import { formatDate, formatDecimal, formatMilliseconds, formatSequence, formatTokensPerSecond } from '@/i18n/format'
+import { formatDate, formatDecimal, formatMilliseconds, formatPercent, formatSequence, formatTokensPerSecond } from '@/i18n/format'
 import type { GenerationRun, GenerationRoleStep, Model } from '@/types/api'
 
 export function formatMs(ms: number): string {
   if (!ms || ms <= 0) return '—'
   return formatMilliseconds(ms)
+}
+
+/**
+ * The share of the tokens speculative decoding guessed ahead that the model
+ * kept (#835), such as "35%"; empty when nothing was guessed.
+ */
+export function formatKept(drafted: number, kept: number): string {
+  if (drafted <= 0) return ''
+  return formatPercent(Math.min(kept, drafted) / drafted)
 }
 
 export function formatRate(n: number): string {

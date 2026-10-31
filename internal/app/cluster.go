@@ -617,6 +617,8 @@ func (a *App) recordClusterServe(req nodes.RemoteChatRequest, metrics *pluginapi
 		TotalMs:           metrics.TotalMs,
 		PromptTokPerSec:   metrics.PromptTokPerSec,
 		EvalTokPerSec:     metrics.EvalTokPerSec,
+		DraftTokens:       metrics.DraftTokens,
+		DraftAccepted:     metrics.DraftAccepted,
 		CrossMachine:      true,
 		RoleSteps: []contracts.GenerationRoleStep{{
 			Role:             role,
