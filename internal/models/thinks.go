@@ -2,6 +2,7 @@ package models
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"sync"
 	"time"
@@ -64,4 +65,26 @@ func (m *Manager) Thinks(ctx context.Context, modelID string) bool {
 	}
 	_, path, _ := m.storage.IsInstalled(ctx, modelID)
 	return m.thinks(e, path)
+}
+
+// ThinkingOff reports whether a call runs modelID without thinking: the
+// call says so (#840), or the model answers first by default and the call
+// didn't ask it to think (#593).
+func (m *Manager) ThinkingOff(modelID string, noThinking, thinking bool) bool {
+	if noThinking {
+		return true
+	}
+	e, ok := m.catalog.Get(modelID)
+	return !thinking && ok && e.Thinking == ThinkingWhenAsked
+}
+
+// thinkingErrors is each catalog entry whose Thinking isn't one Core knows.
+func thinkingErrors(list []CatalogEntry) []error {
+	var errs []error
+	for _, e := range list {
+		if e.Thinking != "" && e.Thinking != ThinkingWhenAsked {
+			errs = append(errs, fmt.Errorf("%s: thinking %q is empty or %q", e.ID, e.Thinking, ThinkingWhenAsked))
+		}
+	}
+	return errs
 }

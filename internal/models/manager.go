@@ -91,6 +91,7 @@ func (m *Manager) List(ctx context.Context) ([]contracts.Model, error) {
 	for _, e := range m.catalog.List() {
 		path, ok := installed[e.ID]
 		e.Capabilities.Thinks = m.thinks(e, path)
+		e.Capabilities.AnswersFirst = e.Thinking == ThinkingWhenAsked
 		status := "available"
 		if m.isDownloading(e.ID) {
 			status = "downloading"

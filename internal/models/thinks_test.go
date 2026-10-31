@@ -57,3 +57,43 @@ func TestModelsThink(t *testing.T) {
 		t.Error("an unknown model thinks")
 	}
 }
+
+// A model that answers first thinks only when the turn asks (#593); the
+// others think unless the turn says not to (#840).
+func TestThinkingOff(t *testing.T) {
+	m, _, _ := importManager(t)
+	m.catalog.Upsert(CatalogEntry{ID: "first", DisplayName: "First", Thinking: ThinkingWhenAsked})
+	m.catalog.Upsert(CatalogEntry{ID: "thinks", DisplayName: "Thinks"})
+	cases := []struct {
+		model             string
+		noThinking, asked bool
+		want              bool
+	}{
+		{"first", false, false, true},
+		{"first", false, true, false},
+		{"first", true, false, true},
+		{"thinks", false, false, false},
+		{"thinks", true, false, true},
+		{"thinks", false, true, false},
+		{"unknown", false, false, false},
+	}
+	for _, tc := range cases {
+		if got := m.ThinkingOff(tc.model, tc.noThinking, tc.asked); got != tc.want {
+			t.Errorf("%s no thinking %v asked %v: off = %v, want %v", tc.model, tc.noThinking, tc.asked, got, tc.want)
+		}
+	}
+}
+
+// Every catalog model's thinking is one Core knows.
+func TestCatalogThinking(t *testing.T) {
+	c, err := NewCatalogEmbedded()
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, err := range thinkingErrors(c.List()) {
+		t.Error(err)
+	}
+	if errs := thinkingErrors([]CatalogEntry{{ID: "x", Thinking: "sometimes"}}); len(errs) != 1 {
+		t.Errorf("thinking %q passed", "sometimes")
+	}
+}

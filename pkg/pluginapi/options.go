@@ -15,6 +15,10 @@ type GenerateOptions struct {
 	// NoThinking asks a reasoning model to answer without thinking first
 	// (#840), as reasoning_effort "none" does on the OpenAI-compatible API.
 	NoThinking bool
+	// Thinking asks a model that answers first by default to think before
+	// it answers (#593), as thinking "on" or a reasoning_effort other than
+	// none does.
+	Thinking bool
 }
 
 // GreedyTemperature is GenerateOptions.Temperature for temperature 0,

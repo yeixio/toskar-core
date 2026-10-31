@@ -183,6 +183,9 @@ func (req chatCompletionRequest) sampling() (pluginapi.GenerateOptions, error) {
 	// reasoning_effort "none": a reasoning model answers without thinking
 	// first (#840), as OpenAI's reasoning models do.
 	o.NoThinking = strings.EqualFold(req.ReasoningEffort, "none")
+	// Any other effort asks a model that answers first by default to
+	// think (#593).
+	o.Thinking = req.ReasoningEffort != "" && !o.NoThinking
 	return o, nil
 }
 

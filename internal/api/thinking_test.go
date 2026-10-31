@@ -11,7 +11,8 @@ import (
 )
 
 // POST /chat with thinking "off" asks a reasoning model to answer without
-// thinking first (#840), as reasoning_effort "none" does on the API.
+// thinking first (#840), as reasoning_effort "none" does on the API; "on"
+// asks one that answers first by default to think (#593).
 func TestChatThinkingOff(t *testing.T) {
 	mgr, err := config.NewManager(t.TempDir())
 	if err != nil {
@@ -35,13 +36,13 @@ func TestChatThinkingOff(t *testing.T) {
 		srv.Handler().ServeHTTP(rec, r)
 		return rec.Code
 	}
-	for body, want := range map[string]bool{
-		`{"message":"hi","thinking":"off"}`: true,
-		`{"message":"hi","thinking":"on"}`:  false,
-		`{"message":"hi"}`:                  false,
+	for body, want := range map[string]pluginapi.GenerateOptions{
+		`{"message":"hi","thinking":"off"}`: {NoThinking: true},
+		`{"message":"hi","thinking":"on"}`:  {Thinking: true},
+		`{"message":"hi"}`:                  {},
 	} {
-		if code := call(body); code != http.StatusOK || !ran || got.NoThinking != want {
-			t.Errorf("%s: %d, no thinking %v", body, code, got.NoThinking)
+		if code := call(body); code != http.StatusOK || !ran || got != want {
+			t.Errorf("%s: %d, options %+v", body, code, got)
 		}
 	}
 	if code := call(`{"message":"hi","thinking":"maybe"}`); code != http.StatusBadRequest || ran {

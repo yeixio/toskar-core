@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState, type MouseEvent } from 'react'
+import { thinkingToSend, type Thinking } from './thinking'
 import { Trans, useTranslation } from 'react-i18next'
 import { Link, useLocation, useSearchParams } from 'react-router-dom'
 import i18n from '@/i18n'
@@ -81,17 +82,19 @@ moveStored('ygg.chat.effort', EFFORT_KEY)
 // The efforts, in order; their names and hints are chat:effort.<id> in the catalog.
 const EFFORTS: Effort[] = ['auto', 'fast', 'balanced', 'thorough']
 
-/** Whether a reasoning model thinks before it answers (#840): on, or off to answer straight away. */
-type Thinking = 'on' | 'off'
 const THINKING_KEY = 'toskar.chat.thinking'
+// A model that answers first (#593) starts with thinking off, and its
+// choice is remembered apart from the others'.
+const ANSWERS_FIRST_THINKING_KEY = 'toskar.chat.thinking.answers_first'
 // Their names and hints are chat:thinking.<id> in the catalog.
 const THINKINGS: Thinking[] = ['on', 'off']
 
-function savedThinking(): Thinking {
+function savedThinking(key: string, fallback: Thinking): Thinking {
   try {
-    return localStorage.getItem(THINKING_KEY) === 'off' ? 'off' : 'on'
+    const saved = localStorage.getItem(key)
+    return saved === 'on' || saved === 'off' ? saved : fallback
   } catch {
-    return 'on'
+    return fallback
   }
 }
 
@@ -272,15 +275,10 @@ export function ChatPage() {
       // Remembering the choice is a convenience; the chat works without it.
     }
   }
-  const [thinking, setThinkingState] = useState<Thinking>(savedThinking)
-  const setThinking = (next: Thinking) => {
-    setThinkingState(next)
-    try {
-      localStorage.setItem(THINKING_KEY, next)
-    } catch {
-      // Remembering the choice is a convenience; the chat works without it.
-    }
-  }
+  const [thinkingFirst, setThinkingFirst] = useState<Thinking>(() => savedThinking(THINKING_KEY, 'on'))
+  const [answerFirstThinking, setAnswerFirstThinking] = useState<Thinking>(() =>
+    savedThinking(ANSWERS_FIRST_THINKING_KEY, 'off'),
+  )
   // Files added to the composer for the next message.
   const [pendingFiles, setPendingFiles] = useState<PendingFile[]>([])
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -549,6 +547,17 @@ export function ChatPage() {
     [...(modelsQuery.data ?? []), ...specializedModels].find((model) => model.id === shownModelId) ?? null
   // Thinking is a choice only with a model that thinks before it answers (#840).
   const chatModelThinks = chatModel?.capabilities?.thinks ?? false
+  const chatModelAnswersFirst = chatModel?.capabilities?.answers_first ?? false
+  const thinking = chatModelAnswersFirst ? answerFirstThinking : thinkingFirst
+  const setThinking = (next: Thinking) => {
+    if (chatModelAnswersFirst) setAnswerFirstThinking(next)
+    else setThinkingFirst(next)
+    try {
+      localStorage.setItem(chatModelAnswersFirst ? ANSWERS_FIRST_THINKING_KEY : THINKING_KEY, next)
+    } catch {
+      // Remembering the choice is a convenience; the chat works without it.
+    }
+  }
   const activeProfile =
     sortedProfiles.find((p) => p.id === profileIdForChat) ?? null
   const terminalAllowed = activeProfile?.tools?.find((tool) => tool.tool_id === 'terminal')?.policy !== 'deny'
@@ -1310,7 +1319,7 @@ export function ChatPage() {
           stream: true,
           execution: effectiveRunMode,
           effort,
-          thinking: chatModelThinks && thinking === 'off' ? 'off' : undefined,
+          thinking: thinkingToSend(chatModelThinks, chatModelAnswersFirst, thinking),
           attachments: attachments.length > 0 ? attachments.map((f) => f.id) : undefined,
           retry_of: branch?.retryOf,
           edit_of: branch?.editOf,

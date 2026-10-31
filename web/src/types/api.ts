@@ -79,6 +79,8 @@ export interface ModelCapabilities {
   coding: boolean
   /** Thinks before it answers, such as Qwen 3, DeepSeek R1's distills, or gpt-oss (#840, contract 1.63). */
   thinks?: boolean
+  /** Thinks only when a chat asks it to, such as Qwen 3.5 (#593, contract 1.68). */
+  answers_first?: boolean
 }
 
 export interface ModelSource {
@@ -902,7 +904,7 @@ export interface ChatRequest {
   attachments?: string[]
   /** How much work the message gets: auto (default), fast, balanced, or thorough. */
   effort?: 'auto' | 'fast' | 'balanced' | 'thorough'
-  /** off asks a reasoning model to answer without thinking first (#840); left out, it thinks as it does. */
+  /** off asks a reasoning model to answer without thinking first (#840); on asks one that answers first to think (#593); left out, it does as the model does. */
   thinking?: 'on' | 'off'
   /** The person's IANA time zone, for the date and time the answer uses; set by the api client. */
   time_zone?: string

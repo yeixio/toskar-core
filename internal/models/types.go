@@ -42,7 +42,16 @@ type CatalogEntry struct {
 	// replaces, size for size.
 	Generation string   `json:"generation,omitempty"`
 	Supersedes []string `json:"supersedes,omitempty"`
+	// Thinking "when_asked" is a model that thinks before it answers but
+	// answers first unless the turn asks it to think (#593): a long think
+	// leaves a small model's window no room for the answer. Empty leaves
+	// the model as its chat template makes it.
+	Thinking string `json:"thinking,omitempty"`
 }
+
+// ThinkingWhenAsked is CatalogEntry.Thinking for a model that answers
+// without thinking unless the turn asks it to.
+const ThinkingWhenAsked = "when_asked"
 
 // Supporting reports an embedding, reranker, or classifier model. It serves
 // Yggdrasil and never chats, so it is never recommended for chat.
