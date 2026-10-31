@@ -89,3 +89,35 @@ func TestMetricsKeepTheDevice(t *testing.T) {
 		t.Errorf("unknown reply: %q %q", u.Backend, u.Device)
 	}
 }
+
+// A reply keeps what speculative decoding guessed ahead and how much of it
+// the model kept (#835); one without speculation reads back zero.
+func TestMetricsKeepTheDrafts(t *testing.T) {
+	db, err := store.Open(filepath.Join(t.TempDir(), "test.db"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer db.Close()
+	repo := repositories.NewMetricsRepo(db.SQL)
+	ctx := context.Background()
+	if _, err := repo.Insert(ctx, contracts.GenerationRun{ModelID: "guessed", DraftTokens: 120, DraftAccepted: 42}); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := repo.Insert(ctx, contracts.GenerationRun{ModelID: "plain"}); err != nil {
+		t.Fatal(err)
+	}
+	items, err := repo.List(ctx, repositories.ListFilter{Limit: 10})
+	if err != nil {
+		t.Fatal(err)
+	}
+	got := map[string]contracts.GenerationRun{}
+	for _, it := range items {
+		got[it.ModelID] = it
+	}
+	if g := got["guessed"]; g.DraftTokens != 120 || g.DraftAccepted != 42 {
+		t.Errorf("guessed reply: %d %d", g.DraftTokens, g.DraftAccepted)
+	}
+	if p := got["plain"]; p.DraftTokens != 0 || p.DraftAccepted != 0 {
+		t.Errorf("plain reply: %d %d", p.DraftTokens, p.DraftAccepted)
+	}
+}

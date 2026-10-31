@@ -52,14 +52,16 @@ func (r *MetricsRepo) Insert(ctx context.Context, run contracts.GenerationRun) (
 			id, conversation_id, conversation_title, message_id, profile_id, profile_name,
 			model_id, runtime_id, prompt_tokens, completion_tokens, total_tokens,
 			ttft_ms, prompt_ms, eval_ms, total_ms, prompt_tok_per_sec, eval_tok_per_sec,
-			role_steps_json, cross_machine, node_count, created_at, backend, device
-		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+			role_steps_json, cross_machine, node_count, created_at, backend, device,
+			draft_tokens, draft_accepted
+		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 		run.ID, nullIfEmpty(run.ConversationID), nullIfEmpty(run.ConversationTitle),
 		nullIfEmpty(run.MessageID), nullIfEmpty(run.ProfileID), nullIfEmpty(run.ProfileName),
 		run.ModelID, run.RuntimeID, run.PromptTokens, run.CompletionTokens, run.TotalTokens,
 		run.TTFTMs, run.PromptMs, run.EvalMs, run.TotalMs, run.PromptTokPerSec, run.EvalTokPerSec,
 		string(stepsJSON), cross, run.NodeCount,
 		run.CreatedAt.Format(time.RFC3339Nano), nullIfEmpty(run.Backend), nullIfEmpty(run.Device),
+		run.DraftTokens, run.DraftAccepted,
 	)
 	return run, err
 }
@@ -117,7 +119,7 @@ func (r *MetricsRepo) List(ctx context.Context, filter ListFilter) ([]contracts.
 			prompt_tokens, completion_tokens, total_tokens,
 			ttft_ms, prompt_ms, eval_ms, total_ms, prompt_tok_per_sec, eval_tok_per_sec,
 			COALESCE(role_steps_json,'[]'), COALESCE(cross_machine,0), COALESCE(node_count,0), created_at,
-			COALESCE(backend,''), COALESCE(device,'')
+			COALESCE(backend,''), COALESCE(device,''), draft_tokens, draft_accepted
 		FROM generation_metrics
 		ORDER BY %s %s
 		LIMIT ?`, sortCol, order)
@@ -140,7 +142,7 @@ func (r *MetricsRepo) List(ctx context.Context, filter ListFilter) ([]contracts.
 			&run.TTFTMs, &run.PromptMs, &run.EvalMs, &run.TotalMs,
 			&run.PromptTokPerSec, &run.EvalTokPerSec,
 			&stepsJSON, &cross, &run.NodeCount, &created,
-			&run.Backend, &run.Device,
+			&run.Backend, &run.Device, &run.DraftTokens, &run.DraftAccepted,
 		); err != nil {
 			return nil, err
 		}
