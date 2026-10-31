@@ -51,6 +51,10 @@ jobs:
         with:
           go-version: "1.26.x"
           check-latest: true
+          # Self-hosted runners keep Go's caches on disk. Saving them to
+          # GitHub took 18-21 minutes after under a minute of work, and ran
+          # the job past its limit (#970, #971).
+          cache: false
       # Each job gets its own pnpm: self-hosted runners share a home folder,
       # and two jobs installing into ~/setup-pnpm at once break each other.
       - uses: pnpm/action-setup@v6
