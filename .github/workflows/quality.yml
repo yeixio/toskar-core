@@ -154,7 +154,13 @@ jobs:
       - name: Remove what an interrupted run left
         run: |
           # A run cut off by a crash or a runner restart never cleans up, and
-          # its daemon would keep holding memory.
+          # its daemon would keep holding memory. The test containers have no
+          # name (docker run --rm), and a cancelled job leaves them running on
+          # its network, so they go by the network they're on; otherwise the
+          # network can't be removed and every later job fails here.
+          for net in $(docker network ls -q --filter name=toskar-quality-); do
+            docker ps -aq --filter network="$net" | xargs -r docker rm -f
+          done
           docker ps -aq --filter name=toskar-quality- | xargs -r docker rm -f
           docker network ls -q --filter name=toskar-quality- | xargs -r docker network rm
           docker images -q --filter reference='toskar-quality-*' | xargs -r docker image rm -f
@@ -382,6 +388,9 @@ jobs:
     steps:
       - name: Remove what an interrupted run left
         run: |
+          for net in $(docker network ls -q --filter name=toskar-quality-); do
+            docker ps -aq --filter network="$net" | xargs -r docker rm -f
+          done
           docker ps -aq --filter name=toskar-quality- | xargs -r docker rm -f
           docker network ls -q --filter name=toskar-quality- | xargs -r docker network rm
           docker images -q --filter reference='toskar-quality-*' | xargs -r docker image rm -f
