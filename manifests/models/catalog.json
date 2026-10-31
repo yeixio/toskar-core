@@ -808,6 +808,7 @@
       "size_bytes": 3413361504,
       "memory_needed_bytes": 5000000000,
       "context": 262144,
+      "thinking": "when_asked",
       "capabilities": {
         "tool_calling": true,
         "vision": true,
@@ -971,6 +972,7 @@
       "size_bytes": 6598688544,
       "memory_needed_bytes": 8500000000,
       "context": 262144,
+      "thinking": "when_asked",
       "capabilities": {
         "tool_calling": true,
         "vision": true,
@@ -1134,6 +1136,7 @@
       "size_bytes": 19603117536,
       "memory_needed_bytes": 23000000000,
       "context": 262144,
+      "thinking": "when_asked",
       "capabilities": {
         "tool_calling": true,
         "vision": true,
