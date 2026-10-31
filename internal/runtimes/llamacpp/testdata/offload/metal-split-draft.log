@@ -1,0 +1,20 @@
+0.00.869.811 I llama_prepare_model_devices: using device MTL0 (Apple M5 Pro) (unknown id) - 18185 MiB free
+0.04.675.158 I load_tensors: offloaded 50/65 layers to GPU
+0.04.675.161 I load_tensors:   CPU_Mapped model buffer size =  4548.34 MiB
+0.04.675.164 I load_tensors:   CPU_REPACK model buffer size =  4284.38 MiB
+0.04.675.164 I load_tensors:  MTL0_Mapped model buffer size = 14222.98 MiB
+0.17.491.227 I ggml_metal_init: found device: Apple M5 Pro
+0.17.492.724 I llama_context:        CPU  output buffer size =     2.32 MiB
+0.17.510.032 I llama_kv_cache:        CPU KV buffer size =   480.00 MiB
+0.17.716.773 I llama_kv_cache:       MTL0 KV buffer size =  1568.00 MiB
+0.17.913.151 I sched_reserve:       MTL0 compute buffer size =   190.01 MiB
+0.17.913.154 I sched_reserve:        CPU compute buffer size =   210.01 MiB
+0.30.289.188 I llama_prepare_model_devices: using device MTL0 (Apple M5 Pro) (unknown id) - 1595 MiB free
+0.31.649.513 I load_tensors: offloaded 17/17 layers to GPU
+0.31.655.227 I load_tensors:   CPU_Mapped model buffer size =   205.49 MiB
+0.31.655.236 I load_tensors:  MTL0_Mapped model buffer size =   762.81 MiB
+0.31.684.488 I ggml_metal_init: found device: Apple M5 Pro
+0.31.685.435 I llama_context:        CPU  output buffer size =     1.96 MiB
+0.31.714.103 I llama_kv_cache:       MTL0 KV buffer size =   256.00 MiB
+0.31.744.900 I sched_reserve:       MTL0 compute buffer size =    64.01 MiB
+0.31.744.902 I sched_reserve:        CPU compute buffer size =    16.01 MiB

@@ -2109,6 +2109,10 @@
           ]
         },
         {
+          "type": "paragraph",
+          "text": "A model bigger than your graphics card still runs. Toskar puts as many of its layers as fit in the card's free memory there, and the rest in the computer's memory, where the processor runs them, so it shows Partly on GPU. A mixture-of-experts model, such as one marked A3B, keeps its experts in the computer's memory first, since each word uses only a few of them. In Toskar 1.11 and earlier, a model that didn't fit on the card stopped while loading instead."
+        },
+        {
           "type": "heading",
           "text": "Watch it live"
         },

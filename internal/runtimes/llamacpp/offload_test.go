@@ -45,6 +45,14 @@ func TestParseAcceleration(t *testing.T) {
 			Backend: "metal", Devices: []string{"Apple M5 Pro"},
 			LayersOffloaded: 17, LayersTotal: 17, GPUMemoryBytes: mb(762.81) + mb(4096) + mb(413.45),
 		}},
+		// b11149 on an Apple M5 Pro: Qwen 2.5 32B split by --fit (#955),
+		// then its draft. The layers are the chat model's, the first
+		// loaded; the memory is both.
+		{"metal-split-draft.log", &pluginapi.Acceleration{
+			Backend: "metal", Devices: []string{"Apple M5 Pro"},
+			LayersOffloaded: 50, LayersTotal: 65,
+			GPUMemoryBytes: mb(14222.98) + mb(1568) + mb(190.01) + mb(762.81) + mb(256) + mb(64.01),
+		}},
 		{"cpu.log", &pluginapi.Acceleration{Backend: "cpu"}},
 		{"vulkan-no-offload.log", &pluginapi.Acceleration{Backend: "cpu", LayersTotal: 29}},
 		{"before-load.log", nil},

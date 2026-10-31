@@ -3,11 +3,7 @@ package llamacpp
 import (
 	"context"
 	"fmt"
-	"os"
-	"os/exec"
 	"strings"
-	"sync"
-	"time"
 
 	"github.com/yeixio/toskar-core/internal/config"
 	"github.com/yeixio/toskar-core/pkg/pluginapi"
@@ -65,43 +61,10 @@ func speculates(cfg pluginapi.ModelStartConfig, supported bool) bool {
 	return true
 }
 
-// specSupport remembers, per llama-server binary, whether it has
-// speculativeType: a build from before it would refuse to start with it.
-var specSupport struct {
-	sync.Mutex
-	known map[string]specProbe
-}
-
-type specProbe struct {
-	modTime   time.Time
-	supported bool
-}
-
-// specHelp prints a llama-server's help; a variable so tests can stand in.
-var specHelp = func(ctx context.Context, path string) ([]byte, error) {
-	ctx, cancel := context.WithTimeout(ctx, 20*time.Second)
-	defer cancel()
-	return exec.CommandContext(ctx, path, "--help").CombinedOutput()
-}
-
 // supportsSpeculation reports whether the llama-server at path lists
-// speculativeType in its help. It asks once per binary, and again when the
-// binary is replaced by an update.
+// speculativeType in its help: a build from before it would refuse to
+// start with it.
 func supportsSpeculation(ctx context.Context, path string) bool {
-	st, err := os.Stat(path)
-	if err != nil {
-		return false
-	}
-	specSupport.Lock()
-	defer specSupport.Unlock()
-	if p, ok := specSupport.known[path]; ok && p.modTime.Equal(st.ModTime()) {
-		return p.supported
-	}
-	out, _ := specHelp(ctx, path)
-	supported := strings.Contains(string(out), "--spec-type") && strings.Contains(string(out), speculativeType)
-	if specSupport.known == nil {
-		specSupport.known = map[string]specProbe{}
-	}
-	specSupport.known[path] = specProbe{modTime: st.ModTime(), supported: supported}
-	return supported
+	help := serverHelp(ctx, path)
+	return strings.Contains(help, "--spec-type") && strings.Contains(help, speculativeType)
 }

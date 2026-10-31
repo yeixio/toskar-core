@@ -124,13 +124,7 @@ func (r *Runtime) StartModel(ctx context.Context, cfg pluginapi.ModelStartConfig
 	}
 
 	args := startArgs(cfg, port)
-	gpuLayers := cfg.GPULayers
-	if gpuLayers == 0 {
-		gpuLayers = defaultGPULayers()
-	}
-	if gpuLayers > 0 {
-		args = append(args, "-ngl", fmt.Sprintf("%d", gpuLayers))
-	}
+	args = append(args, gpuLayerArgs(cfg.GPULayers, supportsFit(ctx, det.Path))...)
 	args = append(args, speculativeArgs(cfg, supported)...)
 	for _, a := range cfg.Adapters {
 		args = append(args, "--lora", a.Path)
@@ -416,6 +410,28 @@ func ContextWindow(catalog int) int {
 		return running
 	}
 	return catalog
+}
+
+// gpuLayerArgs puts the model on the graphics card (#955). A build with
+// --fit places as many layers as fit the card's free memory, a draft's
+// too, and keeps the rest in system memory, so a model bigger than the
+// card runs instead of failing to load. It keeps the -c Core sets. Setting -ngl turns that
+// off, so it's set only when the start asks for a number, or for an older
+// build without --fit, which gets every layer on the card as before.
+func gpuLayerArgs(layers int, fits bool) []string {
+	if layers > 0 {
+		return []string{"-ngl", fmt.Sprintf("%d", layers)}
+	}
+	if fits {
+		return nil
+	}
+	return []string{"-ngl", fmt.Sprintf("%d", defaultGPULayers())}
+}
+
+// supportsFit reports whether the llama-server at path fits a model to the
+// card's free memory by itself (#955).
+func supportsFit(ctx context.Context, path string) bool {
+	return strings.Contains(serverHelp(ctx, path), "--fit-target")
 }
 
 func defaultGPULayers() int {
