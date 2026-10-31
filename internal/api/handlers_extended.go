@@ -361,8 +361,9 @@ func (s *Server) handleChat(w http.ResponseWriter, r *http.Request) {
 		// Effort is auto, fast, balanced, or thorough (spec §15).
 		Effort string `json:"effort"`
 		// Thinking "off" asks a reasoning model to answer without thinking
-		// first (#840), as reasoning_effort "none" does on the API; "on" or
-		// empty leaves it as the model does.
+		// first (#840), as reasoning_effort "none" does on the API; "on"
+		// asks one that answers first by default to think (#593); empty
+		// leaves it as the model does.
 		Thinking string `json:"thinking"`
 		// TimeZone is the person's IANA time zone, from their browser.
 		TimeZone string `json:"time_zone"`
@@ -436,8 +437,11 @@ func (s *Server) handleChat(w http.ResponseWriter, r *http.Request) {
 		writeErr(w, http.StatusBadRequest, "BAD_REQUEST", `thinking is "on" or "off"`, map[string]any{"detail": `thinking is "on" or "off"`})
 		return
 	}
-	if body.Thinking == "off" {
+	switch body.Thinking {
+	case "off":
 		ctx = pluginapi.WithAnswerOptions(ctx, pluginapi.GenerateOptions{NoThinking: true})
+	case "on":
+		ctx = pluginapi.WithAnswerOptions(ctx, pluginapi.GenerateOptions{Thinking: true})
 	}
 	ctx = turnopts.WithBranch(ctx, turnopts.Branch{ParentID: body.ParentID, RetryOf: body.RetryOf, EditOf: body.EditOf})
 	ctx = runlog.WithOrigin(ctx, runlog.Origin{Client: body.Client, Remote: remoteRequest(r) || !auth.FromLocalNetwork(r)})

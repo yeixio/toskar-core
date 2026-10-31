@@ -276,7 +276,7 @@ func TestNamedModelAnswersOrFails(t *testing.T) {
 }
 
 // reasoning_effort "none" answers without thinking (#840), at Fast effort;
-// the other values leave thinking on.
+// the other values ask a model that answers first to think (#593).
 func TestReasoningEffortNone(t *testing.T) {
 	h := testHandler(t)
 	chat := &scriptChat{chunks: []pluginapi.ChatChunk{{Content: "ok", Done: true}}}
@@ -290,6 +290,9 @@ func TestReasoningEffortNone(t *testing.T) {
 		}
 		if chat.sampling.NoThinking != want {
 			t.Errorf("%s: no thinking = %v", effort, chat.sampling.NoThinking)
+		}
+		if asked := effort != `""` && !want; chat.sampling.Thinking != asked {
+			t.Errorf("%s: thinking asked = %v", effort, chat.sampling.Thinking)
 		}
 	}
 	rec := httptest.NewRecorder()

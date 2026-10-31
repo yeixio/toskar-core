@@ -247,6 +247,7 @@ func (a *App) generateOnNode(ctx context.Context, nodeID, modelID, role, adapter
 	// A temperature or a token cap set for this call, such as a draft's
 	// (#459), goes with it to whichever computer runs it.
 	opts := pluginapi.GenerateOptionsFrom(ctx)
+	opts.NoThinking = a.thinkingOff(modelID, opts)
 	cfg := a.Config.Get()
 	if adapter != "" && nodeID != "" && nodeID != cfg.NodeID {
 		return nil, fmt.Errorf("specialized AIs run on the computer that trained them")
@@ -679,4 +680,14 @@ func (a *App) alternateNode(ctx context.Context, profile profiles.Profile, role,
 		return "", false
 	}
 	return nodeID, true
+}
+
+// thinkingOff reports whether a call with opts runs modelID without
+// thinking: the call says so (#840), or the model answers first by default
+// and the call didn't ask it to think (#593).
+func (a *App) thinkingOff(modelID string, opts pluginapi.GenerateOptions) bool {
+	if a.Models == nil {
+		return opts.NoThinking
+	}
+	return a.Models.ThinkingOff(modelID, opts.NoThinking, opts.Thinking)
 }

@@ -789,6 +789,11 @@
           "text": "In the app, Model Auto already keeps quick questions off reasoning models. Thinking off is for when you've chosen one, or call one from your own code."
         },
         {
+          "type": "note",
+          "tone": "tip",
+          "text": "Some smaller reasoning models in the catalog, such as Qwen 3.5, start with Thinking off: a long think can leave them no room to write the answer. Set Thinking to On in the chat's options when you want one to think, and Toskar remembers that choice for those models separately. From the API, any `reasoning_effort` other than `none` asks them to think."
+        },
+        {
           "type": "heading",
           "text": "In a chat"
         },

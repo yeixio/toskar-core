@@ -1262,7 +1262,7 @@ func (e *chatExecEnv) ReplyReserve(ctx context.Context) int {
 		id = e.modelID()
 	}
 	thinking := false
-	if !opts.NoThinking && id != "" && e.app != nil && e.app.Models != nil {
+	if id != "" && e.app != nil && e.app.Models != nil && !e.app.thinkingOff(id, opts) {
 		thinking = e.app.Models.Thinks(ctx, id)
 	}
 	return contextusage.ReplyReserve(e.ContextLimit(), opts.MaxTokens, thinking)

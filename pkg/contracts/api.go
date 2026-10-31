@@ -127,6 +127,10 @@ type ModelCapabilities struct {
 	// as Qwen 3, DeepSeek R1's distills, or gpt-oss: its answer needs room
 	// for the thinking too, and a request can turn the thinking off.
 	Thinks bool `json:"thinks,omitempty"`
+	// AnswersFirst is set for a model that thinks only when a chat asks it
+	// to (#593, contract 1.68), such as Qwen 3.5: a long think leaves a
+	// small model's window no room for the answer.
+	AnswersFirst bool `json:"answers_first,omitempty"`
 }
 
 // LanguageCapability is how well a model writes a language (multilingual
