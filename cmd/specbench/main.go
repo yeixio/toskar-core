@@ -61,10 +61,14 @@ var prompts = []prompt{
 }
 
 type answer struct {
-	Text    string  `json:"text"`
-	TokSec  float64 `json:"tok_per_sec"`
-	Drafted int     `json:"drafted"`
-	Kept    int     `json:"kept"`
+	Text   string  `json:"text"`
+	TokSec float64 `json:"tok_per_sec"`
+	// Repeat is the plain run's answer to its other ask, to see whether
+	// it agrees with itself: on some GPUs it doesn't, even at
+	// temperature 0, and that's the noise speculation is judged against.
+	Repeat  string `json:"repeat,omitempty"`
+	Drafted int    `json:"drafted"`
+	Kept    int    `json:"kept"`
 	tokens  []token
 }
 
@@ -153,7 +157,9 @@ func main() {
 
 // run starts llama-server with c, asks every prompt, and stops it. The
 // plain run also asks for each token's top two choices, which llama-server
-// answers without guessing ahead, so speed comes from a separate ask.
+// answers without guessing ahead, so speed comes from a separate ask. That
+// answer, with its choices, is what the others are compared with, and the
+// speed ask's answer is kept as Repeat.
 func run(llama, model string, port, ctxSize int, ngl string, maxTokens int, c config) (map[string]answer, error) {
 	args := append([]string{"-m", model, "--port", fmt.Sprint(port), "--ctx-size", fmt.Sprint(ctxSize),
 		"--parallel", "1", "-ngl", ngl, "--jinja"}, c.args...)
@@ -182,7 +188,7 @@ func run(llama, model string, port, ctxSize int, ngl string, maxTokens int, c co
 			if err != nil {
 				return nil, fmt.Errorf("%s: %w", p.id, err)
 			}
-			a.tokens = probed.tokens
+			a.Repeat, a.Text, a.tokens = a.Text, probed.Text, probed.tokens
 		}
 		log.Printf("%s %s: %.1f tok/s, kept %d of %d", c.name, p.id, a.TokSec, a.Kept, a.Drafted)
 		got[p.id] = a
@@ -211,6 +217,9 @@ func ask(base, text string, maxTokens int, probs bool) (answer, error) {
 	body := map[string]any{
 		"messages":    []map[string]string{{"role": "user", "content": text}},
 		"temperature": 0, "max_tokens": maxTokens, "seed": 1,
+		// Every ask from scratch: an answer computed on a cached prompt can
+		// differ from a fresh one on some GPUs.
+		"cache_prompt": false,
 	}
 	if probs {
 		body["logprobs"], body["top_logprobs"] = true, 2
@@ -281,7 +290,7 @@ func write(model, draft string, configs []config, results map[string]map[string]
 	if draft != "" {
 		fmt.Fprintf(&b, ", draft `%s`", baseName(draft))
 	}
-	fmt.Fprintf(&b, ". Temperature 0, one ask per prompt after a warm-up. Each cell is tokens per second, the change from off, guesses kept of those made, and how the answer compares with off: same, a near-tie (the first changed word was within %.2f nats of the one off wrote), or **different**.\n\n", tieNats)
+	fmt.Fprintf(&b, ". Temperature 0, one ask per prompt after a warm-up, with no prompt cache. Each cell is tokens per second, the change from off, guesses kept of those made, and how the answer compares with off: same, a near-tie (the first changed word was within %.2f nats of the one off wrote), or **different**. Off asks each prompt twice, and its cell says whether its two answers agree: where off differs from itself, a change there isn't speculation's.\n\n", tieNats)
 	b.WriteString("| Prompt |")
 	for _, c := range configs {
 		fmt.Fprintf(&b, " %s |", c.name)
@@ -296,13 +305,24 @@ func write(model, draft string, configs []config, results map[string]map[string]
 		logSpeed       float64
 		n, ties, diffs int
 	}
-	sums := map[string]*sum{}
+	sums := map[string]*sum{"off": {}}
+	how := func(v verdict, s *sum) string {
+		switch {
+		case v.NearTie:
+			s.ties++
+			return fmt.Sprintf("near-tie (%.3f)", v.Gap)
+		case !v.Same:
+			s.diffs++
+			return "**different**"
+		}
+		return "same"
+	}
 	for _, p := range prompts {
 		fmt.Fprintf(&b, "| %s |", p.id)
 		for _, c := range configs {
 			a := results[c.name][p.id]
 			if c.name == "off" {
-				fmt.Fprintf(&b, " %.1f |", a.TokSec)
+				fmt.Fprintf(&b, " %.1f, %s |", a.TokSec, how(compare(a, a.Repeat), sums["off"]))
 				continue
 			}
 			s := sums[c.name]
@@ -316,21 +336,16 @@ func write(model, draft string, configs []config, results map[string]map[string]
 				s.logSpeed += math.Log(a.TokSec / off[p.id].TokSec)
 				s.n++
 			}
-			v := compare(off[p.id], a.Text)
-			how := "same"
-			switch {
-			case v.NearTie:
-				how = fmt.Sprintf("near-tie (%.3f)", v.Gap)
-				s.ties++
-			case !v.Same:
-				how = "**different**"
-				s.diffs++
-			}
-			fmt.Fprintf(&b, " %.1f (%+.0f%%), %d/%d, %s |", a.TokSec, change*100, a.Kept, a.Drafted, how)
+			fmt.Fprintf(&b, " %.1f (%+.0f%%), %d/%d, %s |", a.TokSec, change*100, a.Kept, a.Drafted, how(compare(off[p.id], a.Text), s))
 		}
 		b.WriteString("\n")
 	}
 	b.WriteString("\n")
+	if s := sums["off"]; s.ties+s.diffs > 0 {
+		fmt.Fprintf(&b, "- **off against itself**: %d near-ties, %d different. Changes up to this many are this GPU's, not speculation's.\n", s.ties, s.diffs)
+	} else {
+		b.WriteString("- **off against itself**: the same every time.\n")
+	}
 	for _, c := range configs[1:] {
 		s := sums[c.name]
 		if s == nil || s.n == 0 {
