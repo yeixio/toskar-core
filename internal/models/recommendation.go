@@ -363,11 +363,13 @@ func RecommendWithPresets(catalog *Catalog, presets []PurposePreset, input Recom
 }
 
 func entryToContract(e CatalogEntry, installed bool) contracts.Model {
+	// The family as people know it, such as qwen 2.5 (#593).
+	family := strings.TrimSpace(e.Family + " " + e.Generation)
 	m := contracts.Model{
 		ID:           e.ID,
 		DisplayName:  e.DisplayName,
 		Summary:      e.Summary,
-		Family:       e.Family,
+		Family:       family,
 		Variant:      e.Variant,
 		Parameters:   e.Parameters,
 		SizeBytes:    e.SizeBytes,
