@@ -66,6 +66,9 @@ type ModelStartConfig struct {
 	// Projector is a vision model's image encoder (llama.cpp's mmproj), so
 	// the model can see pictures; empty for a model that reads text only.
 	Projector string `json:"projector,omitempty"`
+	// NoSpeculation starts the model without speculative decoding, as the
+	// person chose for it (#835).
+	NoSpeculation bool `json:"no_speculation,omitempty"`
 }
 
 // Supporting model modes (AI experience spec §61). A model started in one of

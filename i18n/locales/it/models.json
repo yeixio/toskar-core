@@ -193,7 +193,10 @@
     "installing": "Installazione…",
     "moreActions": "Altre azioni per {{model}}",
     "stop": "Arresta",
-    "remove": "Rimuovi"
+    "remove": "Rimuovi",
+    "guessAhead": "Indovina in anticipo",
+    "guessAheadHint": "Risposte più rapide: il modello indovina le parole successive dalla chat e ne verifica diverse insieme. Disattivalo se questo modello risponde peggio così.",
+    "guessAheadNextStart": "Dal prossimo avvio"
   },
   "runningTab": {
     "empty": "Al momento non è caricato nessun modello. La chat ne avvierà uno automaticamente quando serve.",

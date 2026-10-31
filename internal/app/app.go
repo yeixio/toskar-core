@@ -477,7 +477,7 @@ func New(opts Options) (*App, error) {
 	bench.StartModel = func(ctx context.Context, modelID, modelPath string) (pluginapi.RunningModel, error) {
 		return rtMgr.StartModel(ctx, "llamacpp", pluginapi.ModelStartConfig{
 			ModelID: modelID, ModelPath: modelPath, Adapters: a.localAdapters(ctx, modelID),
-			Projector: modelMgr.ProjectorPath(modelID),
+			Projector: modelMgr.ProjectorPath(modelID), NoSpeculation: a.speculationOff(ctx, modelID),
 		})
 	}
 	bench.Admit = func(ctx context.Context, waiting func(string)) (func(), error) {
@@ -660,6 +660,7 @@ func New(opts Options) (*App, error) {
 		PreviewModelURL:       a.Models.PreviewURL,
 		UpdateAddedModel:      a.Models.UpdateAdded,
 		SetModelProjector:     a.Models.SetProjector,
+		SetModelSpeculation:   a.setModelSpeculation,
 		ListRunningModels:     a.listRunningAll,
 		Acceleration:          a.healthAcceleration,
 		StartModel: func(ctx context.Context, id, nodeID string) (contracts.RunningModelView, error) {

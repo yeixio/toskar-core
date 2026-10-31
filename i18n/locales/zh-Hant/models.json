@@ -189,7 +189,10 @@
     "installing": "正在安裝…",
     "moreActions": "{{model}} 的更多動作",
     "stop": "停止",
-    "remove": "移除"
+    "remove": "移除",
+    "guessAhead": "提前猜測",
+    "guessAheadHint": "回答更快：模型根據聊天內容猜測接下來的詞，並一次檢查多個。如果這個模型因此回答變差，請關閉。",
+    "guessAheadNextStart": "從下次啟動起"
   },
   "runningTab": {
     "empty": "目前沒有載入任何模型。需要時，聊天會自動啟動一個模型。",

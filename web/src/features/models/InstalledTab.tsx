@@ -17,6 +17,7 @@ import { formatPercent } from '@/i18n/format'
 import { rovingKeyDown, useMenu } from '@/lib/roving'
 import { searchItems } from '@/lib/search'
 import { ShownError, type Shown } from '@/components/ui/ShownError'
+import { useUIStore } from '@/stores/uiStore'
 
 export function InstalledTab({
   models,
@@ -32,6 +33,7 @@ export function InstalledTab({
   onStart,
   onStop,
   onDelete,
+  onSpeculation,
   onInstallElsewhere,
   installingId,
   startingId,
@@ -52,6 +54,8 @@ export function InstalledTab({
   onStart: (id: string) => void
   onStop: (id: string, instanceId: string) => void
   onDelete: (id: string) => void
+  /** Turns guessing ahead (speculative decoding) Auto or Off for a model (#835). */
+  onSpeculation?: (id: string, speculation: 'auto' | 'off') => void
   onInstallElsewhere?: (id: string) => void
   installingId?: string | null
   /** The model starting now, which may first set up llama.cpp (#610). */
@@ -62,6 +66,7 @@ export function InstalledTab({
   onDiscover?: () => void
 }) {
   const { t } = useTranslation('models')
+  const advancedMode = useUIStore((s) => s.advancedMode)
   const [menuOpenId, setMenuOpenId] = useState<string | null>(null)
   const menuRef = useMenu(menuOpenId, () => setMenuOpenId(null))
   // Typos forgiven (#451); exact matches first.
@@ -213,6 +218,25 @@ export function InstalledTab({
                           }}
                         >
                           {t('installedTab.stop')}
+                        </button>
+                      )}
+                      {advancedMode && model.speculation && onSpeculation && (
+                        <button
+                          type="button"
+                          role="menuitemcheckbox"
+                          aria-checked={model.speculation === 'auto'}
+                          className="menu-item"
+                          title={t('installedTab.guessAheadHint')}
+                          onClick={() => {
+                            setMenuOpenId(null)
+                            onSpeculation(model.id, model.speculation === 'auto' ? 'off' : 'auto')
+                          }}
+                        >
+                          <span aria-hidden className="inline-block w-4">
+                            {model.speculation === 'auto' ? '✓' : ''}
+                          </span>
+                          {t('installedTab.guessAhead')}
+                          {live ? <span className="block text-xs text-ink-muted">{t('installedTab.guessAheadNextStart')}</span> : null}
                         </button>
                       )}
                       <button

@@ -193,7 +193,10 @@
     "installing": "Installation…",
     "moreActions": "Autres actions pour {{model}}",
     "stop": "Arrêter",
-    "remove": "Supprimer"
+    "remove": "Supprimer",
+    "guessAhead": "Deviner à l’avance",
+    "guessAheadHint": "Réponses plus rapides : le modèle devine les mots suivants à partir du chat et en vérifie plusieurs à la fois. Désactivez-le si ce modèle répond moins bien ainsi.",
+    "guessAheadNextStart": "À son prochain démarrage"
   },
   "runningTab": {
     "empty": "Aucun modèle n'est chargé pour le moment. Discussion en démarrera un automatiquement quand vous en aurez besoin.",

@@ -175,6 +175,10 @@ export function ModelsPage() {
       queryClient.invalidateQueries({ queryKey: ['models'] })
     },
   })
+  const speculationMutation = useMutation({
+    mutationFn: ({ id, speculation }: { id: string; speculation: 'auto' | 'off' }) => api.setModelSpeculation(id, speculation),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['models'] }),
+  })
   const deleteMutation = useMutation({
     mutationFn: (id: string) => api.deleteModel(id),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['models'] }),
@@ -412,6 +416,7 @@ export function ModelsPage() {
             stopMutation.mutate({ id, instanceId, nodeId: live?.node_id })
           }}
           onDelete={(id) => deleteMutation.mutate(id)}
+          onSpeculation={(id, speculation) => speculationMutation.mutate({ id, speculation })}
           onDiscover={() => setTab('discover')}
         />
       )}

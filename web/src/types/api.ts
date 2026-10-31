@@ -113,6 +113,8 @@ export interface Model {
   dynamic?: boolean
   /** Set for a model that helps Yggdrasil instead of chatting. */
   support_role?: 'embedding' | 'reranker' | 'classifier'
+  /** auto or off for a chat model installed on this computer: whether it guesses ahead (#835, contract 1.67). */
+  speculation?: 'auto' | 'off'
 }
 
 export type FitLabel = 'excellent' | 'good' | 'tight' | 'heavy' | 'unsupported' | 'too_large'

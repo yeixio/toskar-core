@@ -197,3 +197,26 @@ type modelVision struct {
 	ModelID string `json:"model_id"`
 	Vision  bool   `json:"vision"`
 }
+
+// handleSetModelSpeculation turns speculative decoding Auto or Off for a
+// chat model on this computer (#835). A loaded model changes when it next
+// loads.
+func (s *Server) handleSetModelSpeculation(w http.ResponseWriter, r *http.Request) {
+	if s.deps.SetModelSpeculation == nil {
+		writeErr(w, http.StatusNotImplemented, "NOT_IMPLEMENTED", "Changing speculation is not available.", nil)
+		return
+	}
+	var body struct {
+		Speculation string `json:"speculation"`
+	}
+	if err := json.NewDecoder(http.MaxBytesReader(w, r.Body, 16<<10)).Decode(&body); err != nil {
+		writeErr(w, http.StatusBadRequest, "INVALID_JSON", "Request body must be valid JSON.", nil)
+		return
+	}
+	id := mux.Vars(r)["id"]
+	if err := s.deps.SetModelSpeculation(r.Context(), id, body.Speculation); err != nil {
+		writeErrFrom(w, http.StatusBadRequest, "MODEL_UPDATE_FAILED", err)
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]string{"model_id": id, "speculation": body.Speculation})
+}

@@ -189,7 +189,10 @@
     "installing": "インストール中…",
     "moreActions": "{{model}}のその他の操作",
     "stop": "停止",
-    "remove": "削除"
+    "remove": "削除",
+    "guessAhead": "先読み",
+    "guessAheadHint": "回答が速くなります：モデルがチャットから次の言葉を予測し、まとめて確認します。このモデルの回答が悪くなる場合はオフにしてください。",
+    "guessAheadNextStart": "次回の起動から"
   },
   "runningTab": {
     "empty": "現在読み込まれているモデルはありません。必要なときにチャットが自動で起動します。",

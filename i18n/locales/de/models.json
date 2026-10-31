@@ -191,7 +191,10 @@
     "installing": "Wird installiert …",
     "moreActions": "Weitere Aktionen für {{model}}",
     "stop": "Stoppen",
-    "remove": "Entfernen"
+    "remove": "Entfernen",
+    "guessAhead": "Vorausraten",
+    "guessAheadHint": "Schnellere Antworten: Das Modell rät die nächsten Wörter aus dem Chat und prüft mehrere auf einmal. Schalte es aus, wenn dieses Modell damit schlechter antwortet.",
+    "guessAheadNextStart": "Ab dem nächsten Start"
   },
   "runningTab": {
     "empty": "Derzeit sind keine Modelle geladen. Der Chat startet bei Bedarf automatisch eines.",
