@@ -21,7 +21,10 @@ type CatalogEntry struct {
 	NoSystemRole bool `json:"no_system_role,omitempty"`
 	// Projector is a vision model's image encoder (llama.cpp's mmproj),
 	// downloaded with it. Without it the model reads text only (#191).
-	Projector        *ModelFile `json:"projector,omitempty"`
+	Projector *ModelFile `json:"projector,omitempty"`
+	// Draft is a small model of the same family, downloaded with it, that
+	// guesses ahead for it to check: the same answers, faster (#835).
+	Draft            *ModelFile `json:"draft,omitempty"`
 	Purpose          []string   `json:"purpose,omitempty"`
 	Tags             []string   `json:"tags,omitempty"`
 	Runtime          []string   `json:"runtime,omitempty"`

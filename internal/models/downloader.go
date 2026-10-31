@@ -43,7 +43,8 @@ func NewDownloader(storage *Storage, bus *events.Bus, db *sql.DB) *Downloader {
 }
 
 // Download starts or resumes a model download. A vision model's projector
-// is downloaded first, and alone when the model itself is already here.
+// and a model's draft are downloaded first, and alone when the model itself
+// is already here.
 func (d *Downloader) Download(ctx context.Context, entry CatalogEntry) error {
 	if err := d.storage.EnsureDirs(); err != nil {
 		return err
@@ -56,14 +57,23 @@ func (d *Downloader) Download(ctx context.Context, entry CatalogEntry) error {
 	if p := entry.Projector; p != nil && !d.storage.HasProjector(entry.ID) {
 		projector = p
 	}
-	if installed && projector == nil {
+	var draft *ModelFile
+	if f := entry.Draft; f != nil && !d.storage.HasDraft(entry.ID) {
+		draft = f
+	}
+	if installed && projector == nil && draft == nil {
 		return nil
 	}
 
-	// A vision model's size includes its projector.
+	// A model's size includes its projector and draft.
 	need := entry.SizeBytes
-	if installed && projector != nil {
-		need = projector.SizeBytes
+	if installed {
+		need = 0
+		for _, f := range []*ModelFile{projector, draft} {
+			if f != nil {
+				need += f.SizeBytes
+			}
+		}
 	}
 	if need == 0 {
 		need = 1
@@ -101,6 +111,14 @@ func (d *Downloader) Download(ctx context.Context, entry CatalogEntry) error {
 			return d.fail(ctx, entry.ID, downloadID, err)
 		}
 		done = n
+	}
+	if draft != nil {
+		_, n, err := d.fetch(ctx, dctx, entry.ID, draft.URL, draft.SHA256,
+			d.storage.DraftTempPath(entry.ID), d.storage.DraftPath(entry.ID), done, need)
+		if err != nil {
+			return d.fail(ctx, entry.ID, downloadID, err)
+		}
+		done += n
 	}
 	if !installed {
 		finalPath = d.storage.ModelPath(entry.ID)

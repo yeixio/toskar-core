@@ -132,8 +132,9 @@ func ClassifyFit(e CatalogEntry, hw contracts.HardwareInventory, nodeID, nodeNam
 	kvLow := uint64(billions * ctx * kvBytesPerTokenPerBillionLow)
 	kvHigh := uint64(billions * ctx * kvBytesPerTokenPerBillionHigh)
 	vision := visionBytes(e)
-	low := weights + vision + kvLow + runtimeScratchBytes
-	high := weights + vision + kvHigh + runtimeScratchBytes + uint64(float64(weights)*runtimeOverheadFraction)
+	draftLow, draftHigh := draftBytes(e, ctx)
+	low := weights + vision + draftLow + kvLow + runtimeScratchBytes
+	high := weights + vision + draftHigh + kvHigh + runtimeScratchBytes + uint64(float64(weights)*runtimeOverheadFraction)
 	if high < low {
 		high = low
 	}
@@ -281,6 +282,16 @@ func visionBytes(e CatalogEntry) uint64 {
 		return 0
 	}
 	return uint64(e.Projector.SizeBytes) + visionComputeBytes
+}
+
+// draftBytes is what a model's draft adds besides its weights, which
+// SizeBytes counts: its own window of ctx tokens.
+func draftBytes(e CatalogEntry, ctx float64) (low, high uint64) {
+	if e.Draft == nil || e.Draft.SizeBytes <= 0 {
+		return 0, 0
+	}
+	billions := float64(e.Draft.SizeBytes) / (quantBytesPerParam(e.Variant) * 1e9)
+	return uint64(billions * ctx * kvBytesPerTokenPerBillionLow), uint64(billions * ctx * kvBytesPerTokenPerBillionHigh)
 }
 
 func labelForHeadroom(headroom float64) contracts.FitLabel {

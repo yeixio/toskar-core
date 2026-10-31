@@ -79,3 +79,29 @@ func (a *App) withSpeculation(ctx context.Context, list []contracts.Model) {
 		}
 	}
 }
+
+// draftPath is the draft a model starts with: its draft when the model,
+// draft and all, fits this computer well. On one where it fits only tightly,
+// such as a graphics card too small for all of it, the draft would take
+// memory the model needs, so it guesses from the chat alone.
+func (a *App) draftPath(ctx context.Context, modelID string) string {
+	path := a.Models.DraftPath(modelID)
+	if path == "" {
+		return ""
+	}
+	hw, err := a.detectHardware(ctx)
+	if err != nil {
+		return ""
+	}
+	cfg := a.Config.Get()
+	running, _ := a.listRunningAll(ctx)
+	for _, f := range a.Models.Fit(hw, cfg.NodeID, cfg.NodeName, a.fitOptions(ctx, cfg.NodeID, true, running)).Fits {
+		if f.ModelID == modelID {
+			if f.Label == contracts.FitExcellent || f.Label == contracts.FitGood {
+				return path
+			}
+			return ""
+		}
+	}
+	return ""
+}

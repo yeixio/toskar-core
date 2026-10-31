@@ -35,6 +35,7 @@ type managedProcess struct {
 	adapters    []string
 	mode        string
 	projector   string
+	draft       string
 	logFile     *os.File
 	logPath     string
 	intentional bool
@@ -85,14 +86,16 @@ func (r *Runtime) StartModel(ctx context.Context, cfg pluginapi.ModelStartConfig
 	// fixed when llama-server starts, so an instance without the requested
 	// adapters is replaced.
 	wantAdapters := adapterIDs(cfg.Adapters)
+	supported := cfg.Mode == "" && supportsSpeculation(ctx, det.Path)
+	wantDraft := draftFor(cfg, supported)
 	if running, err := r.ListRunning(ctx); err == nil {
 		for _, m := range running {
 			if m.ModelID != cfg.ModelID || m.Status != "running" {
 				continue
 			}
-			// A projector is loaded at start too: a vision model started
-			// before its projector was downloaded is started again with it.
-			if m.Mode == cfg.Mode && m.Projector == cfg.Projector && sameAdapters(m.Adapters, wantAdapters) {
+			// A projector and a draft are loaded at start too: a model
+			// started before either was downloaded is started again with it.
+			if m.Mode == cfg.Mode && m.Projector == cfg.Projector && m.Draft == wantDraft && sameAdapters(m.Adapters, wantAdapters) {
 				return m, nil
 			}
 			_ = r.StopModel(ctx, m.ID)
@@ -128,7 +131,7 @@ func (r *Runtime) StartModel(ctx context.Context, cfg pluginapi.ModelStartConfig
 	if gpuLayers > 0 {
 		args = append(args, "-ngl", fmt.Sprintf("%d", gpuLayers))
 	}
-	args = append(args, speculativeArgs(cfg, cfg.Mode == "" && supportsSpeculation(ctx, det.Path))...)
+	args = append(args, speculativeArgs(cfg, supported)...)
 	for _, a := range cfg.Adapters {
 		args = append(args, "--lora", a.Path)
 	}
@@ -160,6 +163,7 @@ func (r *Runtime) StartModel(ctx context.Context, cfg pluginapi.ModelStartConfig
 		adapters:  wantAdapters,
 		mode:      cfg.Mode,
 		projector: cfg.Projector,
+		draft:     wantDraft,
 		logFile:   logFile,
 		logPath:   logPath,
 		exited:    make(chan struct{}),
@@ -196,6 +200,7 @@ func (r *Runtime) StartModel(ctx context.Context, cfg pluginapi.ModelStartConfig
 		Adapters:     wantAdapters,
 		Mode:         cfg.Mode,
 		Projector:    cfg.Projector,
+		Draft:        wantDraft,
 		Acceleration: acc,
 	}, nil
 }
@@ -282,6 +287,7 @@ func (r *Runtime) ListRunning(ctx context.Context) ([]pluginapi.RunningModel, er
 			Adapters:     append([]string(nil), p.adapters...),
 			Mode:         p.mode,
 			Projector:    p.projector,
+			Draft:        p.draft,
 			Acceleration: p.acceleration,
 		})
 	}

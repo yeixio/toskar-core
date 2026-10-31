@@ -38,6 +38,24 @@ func TestSpeculativeArgs(t *testing.T) {
 	}
 }
 
+// A model with a draft guesses with it and with the chat; turned off, it
+// starts without the draft too.
+func TestSpeculativeArgsWithDraft(t *testing.T) {
+	cfg := pluginapi.ModelStartConfig{ModelPath: "m.gguf", Draft: "m.draft.gguf"}
+	got := speculativeArgs(cfg, true)
+	want := []string{"-md", "m.draft.gguf", "-ngld", "99", "--spec-type", "draft-simple,ngram-mod"}
+	if !slices.Equal(got, want) || draftFor(cfg, true) != "m.draft.gguf" {
+		t.Errorf("draft: %v", got)
+	}
+	cfg.NoSpeculation = true
+	if got := speculativeArgs(cfg, true); got != nil || draftFor(cfg, true) != "" {
+		t.Errorf("turned off: %v", got)
+	}
+	if draftFor(pluginapi.ModelStartConfig{ModelPath: "m.gguf", Draft: "d.gguf"}, false) != "" {
+		t.Error("an old llama-server has no draft")
+	}
+}
+
 // Support is read from the binary's help once, and again after an update.
 func TestSupportsSpeculationAsksOncePerBinary(t *testing.T) {
 	bin := filepath.Join(t.TempDir(), "llama-server")
