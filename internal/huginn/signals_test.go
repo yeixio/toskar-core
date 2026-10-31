@@ -128,6 +128,7 @@ func TestBrief(t *testing.T) {
 		{Research, "compare these two plans", "", false},
 		{Research, "compare these two plans", "watch", true},
 		{Coding, "write a python script", "watch", true},
+		{Research, "compare these two plans", "car", true},
 		{Chat, "hi", "", false}, // already quick
 	}
 	for _, c := range cases {

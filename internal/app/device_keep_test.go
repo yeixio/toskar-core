@@ -31,6 +31,7 @@ func TestFromDevice(t *testing.T) {
 		want bool
 	}{
 		{runlog.Origin{Client: "watch"}, true},
+		{runlog.Origin{Client: "car"}, true},
 		{runlog.Origin{Client: "tv"}, true},
 		{runlog.Origin{Client: "web"}, false},
 		{runlog.Origin{Client: "desktop"}, false},

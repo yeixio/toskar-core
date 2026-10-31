@@ -688,6 +688,24 @@
     "alwaysPhoneHint": "Le risposte aspettano questo telefono, che potrebbe essere in standby.",
     "failed": "Impossibile collegare l'orologio al computer: {{detail}}"
   },
+  "car": {
+    "ask": "Chiedi a Toskar",
+    "continue": "Continua la conversazione",
+    "listening": "In ascolto…",
+    "thinking": "Sto pensando…",
+    "answering": "Sto rispondendo…",
+    "newChat": "Nuova conversazione",
+    "stop": "Ferma",
+    "end": "Termina",
+    "notHeard": "Non ho capito. Chiedi di nuovo o tocca Termina.",
+    "more": "La risposta completa è in Toskar sul tuo telefono.",
+    "askBetter": "Per una risposta migliore, chiedi di nuovo sul telefono quando hai parcheggiato.",
+    "noModel": "Toskar sul tuo telefono non ha ancora un modello. Aggiungine uno quando hai parcheggiato.",
+    "failed": "Non ha funzionato. Riprova.",
+    "locked": "Toskar in auto è incluso in Toskar Unlock. Ottienilo sul telefono quando hai parcheggiato.",
+    "permission": "Toskar ha bisogno del microfono e del riconoscimento vocale. Consentili sul telefono quando hai parcheggiato.",
+    "unavailable": "Il riconoscimento vocale non è disponibile per la tua lingua su questo telefono."
+  },
   "anywhere": {
     "title": "Usa Toskar fuori casa",
     "body": "Raggiungi il tuo computer ovunque, senza configurare il router. Tutto resta cifrato da questo dispositivo al tuo computer.",

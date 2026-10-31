@@ -674,6 +674,24 @@
     "alwaysPhoneHint": "这样回答会等待这部手机，而它可能处于休眠状态。",
     "failed": "无法将你的手表连接到电脑：{{detail}}"
   },
+  "car": {
+    "ask": "问 Toskar",
+    "continue": "继续对话",
+    "listening": "正在聆听…",
+    "thinking": "正在思考…",
+    "answering": "正在回答…",
+    "newChat": "新对话",
+    "stop": "停止",
+    "end": "结束",
+    "notHeard": "没听清。请再问一次，或轻点“结束”。",
+    "more": "完整回答在你手机上的 Toskar 里。",
+    "askBetter": "想要更好的回答，请停车后在手机上再问一次。",
+    "noModel": "你手机上的 Toskar 还没有模型。停车后请添加一个。",
+    "failed": "没有成功。请再试一次。",
+    "locked": "车上的 Toskar 包含在 Toskar Unlock 中。停车后请在手机上获取。",
+    "permission": "Toskar 需要麦克风和语音识别。停车后请在手机上允许。",
+    "unavailable": "这部手机不支持你所用语言的语音识别。"
+  },
   "anywhere": {
     "title": "在外使用 Toskar",
     "body": "无需设置路由器，随处连接你的电脑。从此设备到你的电脑，一切都保持加密。",

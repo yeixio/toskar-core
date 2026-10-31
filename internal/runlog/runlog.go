@@ -137,7 +137,7 @@ type Origin struct {
 }
 
 // Clients are the apps a request can name.
-var Clients = []string{"phone", "tablet", "watch", "tv", "desktop", "web"}
+var Clients = []string{"phone", "tablet", "watch", "car", "tv", "desktop", "web"}
 
 // ClientName is client when it is one of Clients, "" when empty, and
 // "other" otherwise, so a trace never keeps text a client made up.

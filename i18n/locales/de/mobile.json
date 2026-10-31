@@ -681,6 +681,24 @@
     "alwaysPhoneHint": "Antworten warten dann auf dieses Telefon, das vielleicht schläft.",
     "failed": "Deine Uhr konnte nicht mit dem Computer verbunden werden: {{detail}}"
   },
+  "car": {
+    "ask": "Toskar fragen",
+    "continue": "Gespräch fortsetzen",
+    "listening": "Hört zu…",
+    "thinking": "Denkt nach…",
+    "answering": "Antwortet…",
+    "newChat": "Neues Gespräch",
+    "stop": "Stopp",
+    "end": "Beenden",
+    "notHeard": "Das habe ich nicht verstanden. Frag noch einmal oder tippe auf Beenden.",
+    "more": "Die ganze Antwort steht in Toskar auf deinem Telefon.",
+    "askBetter": "Für eine bessere Antwort frag noch einmal auf deinem Telefon, sobald du parkst.",
+    "noModel": "Toskar auf deinem Telefon hat noch kein Modell. Füge eines hinzu, sobald du parkst.",
+    "failed": "Das hat nicht geklappt. Versuche es erneut.",
+    "locked": "Toskar im Auto gibt es mit Toskar Unlock. Hol es dir auf deinem Telefon, sobald du parkst.",
+    "permission": "Toskar braucht das Mikrofon und die Spracherkennung. Erlaube beides auf deinem Telefon, sobald du parkst.",
+    "unavailable": "Die Spracherkennung ist für deine Sprache auf diesem Telefon nicht verfügbar."
+  },
   "anywhere": {
     "title": "Toskar unterwegs nutzen",
     "body": "Erreiche deinen Computer von überall, ohne Einstellungen am Router. Alles bleibt von diesem Gerät bis zu deinem Computer verschlüsselt.",
