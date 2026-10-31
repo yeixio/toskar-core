@@ -38,6 +38,11 @@ on:
       speculation:
         description: 'Instead of the quality sets, measure speculative decoding on the self-hosted runner (#835): a JSON list of {"model": a catalog id, "draft_url": a small GGUF of its family}. Blank for the quality sets.'
         default: ""
+      speculation_runner:
+        description: 'Where to measure speculation: the GPU rig (docker) or the home Windows runner with an NVIDIA card (windows).'
+        default: docker
+        type: choice
+        options: [docker, windows]
 
 jobs:
   # The quality set with a real model on CPU (Llama 3.2 1B through
@@ -358,7 +363,7 @@ jobs:
   # reports the speed, the guesses kept, and whether each answer is the
   # plain one's or differs only at a near-tie. Measured, not gated.
   speculation:
-    if: vars.QUALITY_RUNNER == 'docker' && inputs.speculation
+    if: vars.QUALITY_RUNNER == 'docker' && inputs.speculation && inputs.speculation_runner != 'windows'
     runs-on: [self-hosted, toskar-models]
     timeout-minutes: 240
     strategy:
@@ -443,3 +448,82 @@ jobs:
           docker rm -f "$NAME" >/dev/null 2>&1 || true
           docker network rm "$NAME" >/dev/null 2>&1 || true
           docker image rm "$NAME" >/dev/null 2>&1 || true
+
+  # The same measurement on the home Windows runner's NVIDIA card (#835).
+  # A daemon built from the checkout installs llama.cpp's CUDA build and the
+  # model into its own data folder, kept between runs so models download
+  # once, on ports clear of a Toskar the computer runs itself (7331, 7332).
+  speculation-windows:
+    if: inputs.speculation && inputs.speculation_runner == 'windows'
+    runs-on: [self-hosted, toskar-windows]
+    timeout-minutes: 240
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        pair: ${{ fromJSON(inputs.speculation) }}
+    name: speculation-windows (${{ matrix.pair.model }})
+    env:
+      MODEL: ${{ matrix.pair.model }}
+      DRAFT_URL: ${{ matrix.pair.draft_url }}
+      TOSKAR_API_HOST: 127.0.0.1
+      TOSKAR_API_PORT: "7471"
+      TOSKAR_INTERNAL_HOST: 127.0.0.1
+      TOSKAR_INTERNAL_PORT: "7472"
+      TOSKAR_DISCOVERY_ENABLED: "false"
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.ref || github.ref }}
+          persist-credentials: false
+      - uses: actions/setup-go@v7
+        with:
+          go-version: "1.26.x"
+          check-latest: true
+      - name: Build
+        run: |
+          go build -o "$RUNNER_TEMP/toskard.exe" ./cmd/daemon
+          go build -o "$RUNNER_TEMP/specbench.exe" ./cmd/specbench
+      - name: Start the daemon
+        run: |
+          data="$RUNNER_TOOL_CACHE/toskar-speculation"
+          mkdir -p "$data"
+          echo "DATA=$data" >> "$GITHUB_ENV"
+          nvidia-smi --query-gpu=name,memory.total --format=csv,noheader || echo "::warning::No NVIDIA card found; this measures what llama.cpp picks instead."
+          "$RUNNER_TEMP/toskard.exe" -data-dir "$data" > "$RUNNER_TEMP/daemon.log" 2>&1 &
+          echo $! > "$RUNNER_TEMP/daemon.pid"
+      - name: Measure
+        run: |
+          mkdir -p .quality
+          "$RUNNER_TEMP/specbench.exe" -toskar http://127.0.0.1:7471 -data "$DATA" -install "$MODEL" \
+            -port 7473 -draft "$DATA/models/drafts/$(basename "$DRAFT_URL")" -draft-url "$DRAFT_URL" \
+            -out .quality/speculation.md -json .quality/speculation.json
+      - name: Report
+        if: always()
+        run: |
+          if [ -f .quality/speculation.md ]; then
+            { echo "Runner: $(nvidia-smi --query-gpu=name --format=csv,noheader 2>/dev/null || echo windows)"; cat .quality/speculation.md; } >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - uses: actions/upload-artifact@v7
+        if: always()
+        continue-on-error: true
+        with:
+          name: speculation-windows-${{ matrix.pair.model }}
+          path: |
+            .quality/speculation.md
+            .quality/speculation.json
+          if-no-files-found: ignore
+      - name: Daemon log
+        if: failure()
+        run: tail -n 200 "$RUNNER_TEMP/daemon.log" || true
+      - name: Stop the daemon
+        if: always()
+        run: |
+          # Its llama-servers with it (/T), and only its: the computer's own
+          # Toskar keeps running.
+          pid="$(cat "$RUNNER_TEMP/daemon.pid" 2>/dev/null)" || exit 0
+          winpid="$(cat "/proc/$pid/winpid" 2>/dev/null)" || exit 0
+          taskkill //F //T //PID "$winpid" || true
