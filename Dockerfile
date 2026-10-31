@@ -8,7 +8,8 @@ COPY . .
 # The commit the image was built from, for /api/v1/version.
 ARG COMMIT=""
 RUN CGO_ENABLED=0 go build -ldflags "-X github.com/yeixio/toskar-core/internal/version.Commit=${COMMIT}" -o /out/toskar ./cmd/daemon \
- && CGO_ENABLED=0 go build -o /out/clustercheck ./cmd/clustercheck
+ && CGO_ENABLED=0 go build -o /out/clustercheck ./cmd/clustercheck \
+ && CGO_ENABLED=0 go build -o /out/specbench ./cmd/specbench
 
 # The image for an AMD or Intel GPU (docker build --target gpu): Vulkan and
 # Mesa's drivers on Debian 13, whose Mesa supports current cards, and
@@ -22,6 +23,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY --from=build /out/toskar /usr/local/bin/toskar
 RUN ln -s toskar /usr/local/bin/yggdrasil-daemon
 COPY --from=build /out/clustercheck /usr/local/bin/clustercheck
+# Measures speculative decoding with this image's llama.cpp (#835).
+COPY --from=build /out/specbench /usr/local/bin/specbench
 ENV YGGDRASIL_API_HOST=0.0.0.0 \
     YGGDRASIL_INTERNAL_HOST=0.0.0.0 \
     YGGDRASIL_DISCOVERY_ENABLED=true
@@ -39,6 +42,8 @@ COPY --from=build /out/toskar /usr/local/bin/toskar
 # The name from before the rename, for setups that run it by path (#237).
 RUN ln -s toskar /usr/local/bin/yggdrasil-daemon
 COPY --from=build /out/clustercheck /usr/local/bin/clustercheck
+# Measures speculative decoding with this image's llama.cpp (#835).
+COPY --from=build /out/specbench /usr/local/bin/specbench
 # The image listens beyond loopback, so the daemon refuses to start until
 # TOSKAR_API_KEY is set or an API key already exists in the data directory.
 # These defaults keep the names from before the rename, so `docker run -e`
