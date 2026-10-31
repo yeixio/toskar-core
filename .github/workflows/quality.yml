@@ -44,6 +44,14 @@ on:
         type: choice
         options: [docker, windows]
 
+# One run at a time: the rig takes its models one after another, and the
+# home box it shares runs CI too, so runs started together slowed CI past
+# its limits (2026-10-31). A run started while one is going waits for it.
+# GitHub keeps only one waiting: starting a third replaces the one waiting.
+concurrency:
+  group: quality
+  cancel-in-progress: false
+
 jobs:
   # The quality set with a real model on CPU (Llama 3.2 1B through
   # llama-server), the web answered from tests/quality/web.json. Each case
