@@ -688,6 +688,24 @@
     "alwaysPhoneHint": "Le risposte aspettano questo telefono, che potrebbe essere in standby.",
     "failed": "Impossibile collegare l'orologio al computer: {{detail}}"
   },
+  "car": {
+    "ask": "Chiedi a Toskar",
+    "continue": "Continua la conversazione",
+    "listening": "In ascolto…",
+    "thinking": "Sto pensando…",
+    "answering": "Sto rispondendo…",
+    "newChat": "Nuova conversazione",
+    "stop": "Ferma",
+    "end": "Termina",
+    "notHeard": "Non ho capito. Chiedi di nuovo o tocca Termina.",
+    "more": "La risposta completa è in Toskar sul tuo telefono.",
+    "askBetter": "Per una risposta migliore, chiedi di nuovo sul telefono quando hai parcheggiato.",
+    "noModel": "Toskar sul tuo telefono non ha ancora un modello. Aggiungine uno quando hai parcheggiato.",
+    "failed": "Non ha funzionato. Riprova.",
+    "locked": "Toskar in auto è incluso in Toskar Unlock. Ottienilo sul telefono quando hai parcheggiato.",
+    "permission": "Toskar ha bisogno del microfono e del riconoscimento vocale. Consentili sul telefono quando hai parcheggiato.",
+    "unavailable": "Il riconoscimento vocale non è disponibile per la tua lingua su questo telefono."
+  },
   "anywhere": {
     "title": "Usa Toskar fuori casa",
     "body": "Raggiungi il tuo computer ovunque, senza configurare il router. Tutto resta cifrato da questo dispositivo al tuo computer.",
@@ -732,7 +750,8 @@
       "attachments": "Foto e file nelle chat su questo dispositivo",
       "web": "Ricerche sul web nelle chat su questo dispositivo",
       "memory": "Memoria su questo dispositivo",
-      "watch": "Chiedere dall'orologio"
+      "watch": "Chiedere dall'orologio",
+      "car": "Chiedere dalla tua auto"
     },
     "reasons": {
       "models": "Il modello gratuito di questo dispositivo è {{model}}. Altri modelli arrivano con Toskar Unlock.",
@@ -740,7 +759,8 @@
       "attachments": "Foto e file nelle chat su questo dispositivo arrivano con Toskar Unlock. Le chat sul tuo computer li usano gratis.",
       "web": "Le ricerche sul web nelle chat su questo dispositivo arrivano con Toskar Unlock. Le chat sul tuo computer cercano gratis.",
       "memory": "La memoria su questo dispositivo arriva con Toskar Unlock. La memoria del tuo computer è gratuita.",
-      "watch": "Chiedere dall'orologio arriva con Toskar Unlock."
+      "watch": "Chiedere dall'orologio arriva con Toskar Unlock.",
+      "car": "Chiedere dalla tua auto è incluso in Toskar Unlock."
     },
     "buy": "Sblocca per {{price}}",
     "restore": "Ripristina acquisto",

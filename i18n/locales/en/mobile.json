@@ -779,6 +779,24 @@
     "alwaysPhoneHint": "Answers then wait for this phone, which may be asleep.",
     "failed": "Couldn't connect your watch to the computer: {{detail}}"
   },
+  "car": {
+    "ask": "Ask Toskar",
+    "continue": "Continue the conversation",
+    "listening": "Listening…",
+    "thinking": "Thinking…",
+    "answering": "Answering…",
+    "newChat": "New conversation",
+    "stop": "Stop",
+    "end": "End",
+    "notHeard": "I didn't catch that. Ask again, or tap End.",
+    "more": "The full answer is in Toskar on your phone.",
+    "askBetter": "For a better answer, ask again on your phone once you're parked.",
+    "noModel": "Toskar on your phone has no model yet. Add one once you're parked.",
+    "failed": "That didn't work. Try again.",
+    "locked": "Toskar in the car comes with Toskar Unlock. Get it on your phone once you're parked.",
+    "permission": "Toskar needs the microphone and speech recognition. Allow them on your phone once you're parked.",
+    "unavailable": "Speech recognition isn't available for your language on this phone."
+  },
   "anywhere": {
     "title": "Use Toskar away from home",
     "body": "Reach your computer from anywhere, with no setup on your router. Everything stays encrypted from this device to your computer.",
@@ -823,7 +841,8 @@
       "attachments": "Photos and files in chats on this device",
       "web": "Web lookups in chats on this device",
       "memory": "Memory on this device",
-      "watch": "Asking from your watch"
+      "watch": "Asking from your watch",
+      "car": "Asking from your car"
     },
     "reasons": {
       "models": "This device's free model is {{model}}. More models come with Toskar Unlock.",
@@ -831,7 +850,8 @@
       "attachments": "Photos and files in chats on this device come with Toskar Unlock. Chats on your computer use them for free.",
       "web": "Web lookups in chats on this device come with Toskar Unlock. Chats on your computer look things up for free.",
       "memory": "Memory on this device comes with Toskar Unlock. Your computer's memory is free.",
-      "watch": "Asking from your watch comes with Toskar Unlock."
+      "watch": "Asking from your watch comes with Toskar Unlock.",
+      "car": "Asking from your car comes with Toskar Unlock."
     },
     "buy": "Unlock for {{price}}",
     "restore": "Restore purchase",

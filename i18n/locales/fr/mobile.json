@@ -688,6 +688,24 @@
     "alwaysPhoneHint": "Les réponses attendent alors ce téléphone, qui peut être en veille.",
     "failed": "Impossible de connecter votre montre à l'ordinateur : {{detail}}"
   },
+  "car": {
+    "ask": "Demander à Toskar",
+    "continue": "Poursuivre la conversation",
+    "listening": "À l’écoute…",
+    "thinking": "Réflexion…",
+    "answering": "Réponse…",
+    "newChat": "Nouvelle conversation",
+    "stop": "Arrêter",
+    "end": "Terminer",
+    "notHeard": "Je n’ai pas compris. Redemandez ou touchez Terminer.",
+    "more": "La réponse complète est dans Toskar sur votre téléphone.",
+    "askBetter": "Pour une meilleure réponse, redemandez sur votre téléphone une fois garé.",
+    "noModel": "Toskar sur votre téléphone n’a pas encore de modèle. Ajoutez-en un une fois garé.",
+    "failed": "Cela n’a pas fonctionné. Réessayez.",
+    "locked": "Toskar en voiture est inclus dans Toskar Unlock. Obtenez-le sur votre téléphone une fois garé.",
+    "permission": "Toskar a besoin du micro et de la reconnaissance vocale. Autorisez-les sur votre téléphone une fois garé.",
+    "unavailable": "La reconnaissance vocale n’est pas disponible pour votre langue sur ce téléphone."
+  },
   "anywhere": {
     "title": "Utiliser Toskar hors de la maison",
     "body": "Joignez votre ordinateur de partout, sans rien régler sur votre box. Tout reste chiffré de cet appareil jusqu'à votre ordinateur.",
@@ -732,7 +750,8 @@
       "attachments": "Photos et fichiers dans les chats sur cet appareil",
       "web": "Recherches sur le web dans les chats sur cet appareil",
       "memory": "La mémoire sur cet appareil",
-      "watch": "Demander depuis votre montre"
+      "watch": "Demander depuis votre montre",
+      "car": "Poser des questions depuis votre voiture"
     },
     "reasons": {
       "models": "Le modèle gratuit de cet appareil est {{model}}. D'autres modèles viennent avec Toskar Unlock.",
@@ -740,7 +759,8 @@
       "attachments": "Les photos et fichiers dans les chats sur cet appareil viennent avec Toskar Unlock. Les chats sur votre ordinateur les utilisent gratuitement.",
       "web": "Les recherches sur le web dans les chats sur cet appareil viennent avec Toskar Unlock. Les chats sur votre ordinateur cherchent gratuitement.",
       "memory": "La mémoire sur cet appareil vient avec Toskar Unlock. La mémoire de votre ordinateur est gratuite.",
-      "watch": "Demander depuis votre montre vient avec Toskar Unlock."
+      "watch": "Demander depuis votre montre vient avec Toskar Unlock.",
+      "car": "Poser des questions depuis votre voiture est inclus dans Toskar Unlock."
     },
     "buy": "Débloquer pour {{price}}",
     "restore": "Restaurer l'achat",

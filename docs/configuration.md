@@ -107,7 +107,7 @@ Settings are stored in `toskar.db`. The app's Settings page shows them, and `GET
 | `assistant_language` | empty | The language answers are written in with `assistant_language_mode` `language`, as a BCP 47 tag such as `de`. |
 | `advanced_mode` | `false` | Shows Profiles, Tools, and API Access, per-tool permissions, and run details |
 | `model_lifecycle` | `automatic` | `automatic` unloads models that sit idle; `manual` leaves them loaded until you stop them |
-| `idle_unload_minutes` | `15` | Minutes before an idle model is unloaded; `0` never unloads. Settings calls it **Keep models ready** (15 minutes, 1 hour, 4 hours, or Until I stop them). A model the phone, tablet, watch, or TV app used or warmed up in the last hour stays loaded regardless, so the next question from that device starts at once (#498). |
+| `idle_unload_minutes` | `15` | Minutes before an idle model is unloaded; `0` never unloads. Settings calls it **Keep models ready** (15 minutes, 1 hour, 4 hours, or Until I stop them). A model the phone, tablet, watch, car, or TV app used or warmed up in the last hour stays loaded regardless, so the next question from that device starts at once (#498). |
 | `keep_running_in_background` | `false` | Keep the daemon running when the desktop window closes. Saving a schedule turns it on. |
 | `launch_at_login` | `false` | Start the desktop app at sign-in |
 | `default_profile_id` | empty | Profile for new chats |

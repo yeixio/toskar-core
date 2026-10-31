@@ -674,6 +674,24 @@
     "alwaysPhoneHint": "這樣回答會等待這支手機，而它可能處於休眠狀態。",
     "failed": "無法將你的手錶連線到電腦：{{detail}}"
   },
+  "car": {
+    "ask": "問 Toskar",
+    "continue": "繼續對話",
+    "listening": "正在聆聽…",
+    "thinking": "正在思考…",
+    "answering": "正在回答…",
+    "newChat": "新對話",
+    "stop": "停止",
+    "end": "結束",
+    "notHeard": "沒聽清楚。請再問一次，或點一下「結束」。",
+    "more": "完整回答在你手機上的 Toskar 裡。",
+    "askBetter": "想要更好的回答，請停車後在手機上再問一次。",
+    "noModel": "你手機上的 Toskar 還沒有模型。停車後請新增一個。",
+    "failed": "沒有成功。請再試一次。",
+    "locked": "車上的 Toskar 包含在 Toskar Unlock 中。停車後請在手機上取得。",
+    "permission": "Toskar 需要麥克風和語音辨識。停車後請在手機上允許。",
+    "unavailable": "這支手機不支援你所用語言的語音辨識。"
+  },
   "anywhere": {
     "title": "在外使用 Toskar",
     "body": "無需設定路由器，隨處連線你的電腦。從此裝置到你的電腦，一切都保持加密。",
@@ -718,7 +736,8 @@
       "attachments": "此裝置聊天中的照片和檔案",
       "web": "此裝置聊天中的網頁查詢",
       "memory": "此裝置上的記憶",
-      "watch": "從手錶提問"
+      "watch": "從手錶提問",
+      "car": "在車上提問"
     },
     "reasons": {
       "models": "此裝置的免費模型是 {{model}}。更多模型隨 Toskar Unlock 提供。",
@@ -726,7 +745,8 @@
       "attachments": "此裝置聊天中的照片和檔案隨 Toskar Unlock 提供。你電腦上的聊天可免費使用。",
       "web": "此裝置聊天中的網頁查詢隨 Toskar Unlock 提供。你電腦上的聊天可免費查詢。",
       "memory": "此裝置上的記憶隨 Toskar Unlock 提供。你電腦的記憶免費。",
-      "watch": "從手錶提問隨 Toskar Unlock 提供。"
+      "watch": "從手錶提問隨 Toskar Unlock 提供。",
+      "car": "在車上提問包含在 Toskar Unlock 中。"
     },
     "buy": "以 {{price}} 解鎖",
     "restore": "回復購買",

@@ -53,12 +53,13 @@ const briefLength = 120
 
 // Brief reports whether a request wants a short answer soon, whatever model
 // would answer it best: a short question that needs the web or this
-// computer, or any question from a watch, where every second of loading
-// shows (#498). client is the app that asked, as in runlog.Origin. A quick
-// chat question is already quick, and coding and research are never brief
-// but from a watch.
+// computer, or any question from a watch or a car, where every second of
+// loading shows (#498) and a car speaks the answer aloud (toskar-apps#142).
+// client is the app that asked, as in runlog.Origin. A quick chat question
+// is already quick, and coding and research are never brief but from a
+// watch or a car.
 func Brief(k Kind, message, client string) bool {
-	if client == "watch" {
+	if client == "watch" || client == "car" {
 		return true
 	}
 	return (k == Current || k == Local) && utf8.RuneCountInString(strings.TrimSpace(message)) <= briefLength

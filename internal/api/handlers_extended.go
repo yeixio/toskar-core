@@ -372,8 +372,8 @@ func (s *Server) handleChat(w http.ResponseWriter, r *http.Request) {
 		ParentID string `json:"parent_id"`
 		RetryOf  string `json:"retry_of"`
 		EditOf   string `json:"edit_of"`
-		// Client is the app asking: phone, tablet, watch, tv, desktop, or
-		// web. Its run is traced with it, to measure first answers (#498).
+		// Client is the app asking: phone, tablet, watch, car, tv, desktop,
+		// or web. Its run is traced with it, to measure first answers (#498).
 		Client string `json:"client"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {

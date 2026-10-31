@@ -16,7 +16,7 @@ func TestOriginIsKeptAndNamed(t *testing.T) {
 	if r := c.Finish(StatusCompleted, nil); r.Client != "phone" || !r.Remote {
 		t.Fatalf("run = %+v", r)
 	}
-	for in, want := range map[string]string{"": "", "watch": "watch", "my-toaster": "other"} {
+	for in, want := range map[string]string{"": "", "watch": "watch", "car": "car", "my-toaster": "other"} {
 		if got := ClientName(in); got != want {
 			t.Errorf("ClientName(%q) = %q, want %q", in, got, want)
 		}
