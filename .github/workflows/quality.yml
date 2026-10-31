@@ -408,7 +408,6 @@ jobs:
           if [ "$GPU" = vulkan ]; then
             docker exec "$NAME" vulkaninfo --summary 2>/dev/null | grep -E "deviceName|deviceType" || echo "::warning::No Vulkan device in the container; this measures the CPU."
           fi
-          for _ in $(seq 60); do docker exec "$NAME" specbench -h >/dev/null 2>&1 && break; sleep 1; done
       - name: Measure
         run: |
           mkdir -p .quality
