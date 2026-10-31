@@ -29,13 +29,16 @@ type ProcessSupervisor struct {
 }
 
 type managedProcess struct {
-	cmd         *exec.Cmd
-	endpoint    string
-	modelID     string
-	adapters    []string
-	mode        string
-	projector   string
-	draft       string
+	cmd       *exec.Cmd
+	endpoint  string
+	modelID   string
+	adapters  []string
+	mode      string
+	projector string
+	draft     string
+	// context is the chat window it was started with; 0 for embedding
+	// and reranking.
+	context     int
 	logFile     *os.File
 	logPath     string
 	intentional bool
@@ -95,7 +98,7 @@ func (r *Runtime) StartModel(ctx context.Context, cfg pluginapi.ModelStartConfig
 			}
 			// A projector and a draft are loaded at start too: a model
 			// started before either was downloaded is started again with it.
-			if m.Mode == cfg.Mode && m.Projector == cfg.Projector && m.Draft == wantDraft && sameAdapters(m.Adapters, wantAdapters) {
+			if m.Mode == cfg.Mode && m.Projector == cfg.Projector && m.Draft == wantDraft && sameAdapters(m.Adapters, wantAdapters) && sameContext(m, cfg) {
 				return m, nil
 			}
 			_ = r.StopModel(ctx, m.ID)
@@ -164,6 +167,7 @@ func (r *Runtime) StartModel(ctx context.Context, cfg pluginapi.ModelStartConfig
 		mode:      cfg.Mode,
 		projector: cfg.Projector,
 		draft:     wantDraft,
+		context:   chatContext(cfg),
 		logFile:   logFile,
 		logPath:   logPath,
 		exited:    make(chan struct{}),
@@ -288,6 +292,7 @@ func (r *Runtime) ListRunning(ctx context.Context) ([]pluginapi.RunningModel, er
 			Mode:         p.mode,
 			Projector:    p.projector,
 			Draft:        p.draft,
+			Context:      p.context,
 			Acceleration: p.acceleration,
 		})
 	}
@@ -400,6 +405,21 @@ func freePort() int {
 	return ln.Addr().(*net.TCPAddr).Port
 }
 
+// chatContext is the window a chat model starts with: the one asked for
+// (#962), else 8192. Embedding and reranking size theirs in startArgs.
+func chatContext(cfg pluginapi.ModelStartConfig) int {
+	if cfg.Mode != "" {
+		return 0
+	}
+	return defaultContext(cfg.Context)
+}
+
+// sameContext reports whether a running instance has the window a start
+// asks for. A start that asks for none takes it as it runs.
+func sameContext(m pluginapi.RunningModel, cfg pluginapi.ModelStartConfig) bool {
+	return cfg.Context <= 0 || cfg.Mode != "" || m.Context == chatContext(cfg)
+}
+
 func defaultContext(c int) int {
 	if c <= 0 {
 		return 8192
@@ -407,9 +427,10 @@ func defaultContext(c int) int {
 	return c
 }
 
-// ContextWindow is the token window a local model is actually running with.
-// llama-server is started at 8192 unless a smaller catalog context is set.
-// The model-fit estimator uses the same window (models runningContextTokens).
+// ContextWindow is the window to count on for a model that isn't running
+// here: 8192, or its catalog window when that's smaller. One that runs here
+// reports its real window (Window), which Auto may have made bigger (#962);
+// one on a paired computer picks its own there, so this stays the floor.
 func ContextWindow(catalog int) int {
 	running := defaultContext(0)
 	if catalog <= 0 || catalog > running {
