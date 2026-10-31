@@ -373,6 +373,16 @@ func prepare(base, id string) error {
 		}
 		return nil
 	}
+	// The daemon may still be starting, as just after its container.
+	for deadline := time.Now().Add(3 * time.Minute); ; time.Sleep(2 * time.Second) {
+		err := call(http.MethodGet, "/api/v1/health", nil)
+		if err == nil {
+			break
+		}
+		if time.Now().After(deadline) {
+			return fmt.Errorf("Toskar at %s didn't answer in 3 minutes: %w", base, err)
+		}
+	}
 	log.Printf("installing llama.cpp")
 	if err := call(http.MethodPost, "/api/v1/runtimes/llamacpp/install", nil); err != nil {
 		return err
