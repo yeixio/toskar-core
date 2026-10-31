@@ -797,6 +797,497 @@
         { "language": "fi", "level": "good", "confidence": "medium", "sources": ["model_card", "benchmark"] },
         { "language": "cs", "level": "good", "confidence": "medium", "sources": ["model_card", "benchmark"] }
       ]
+    },
+    {
+      "id": "qwen3.5-4b-q4",
+      "display_name": "Qwen 3.5 4B",
+      "summary": "Small and quick everyday assistant that also sees pictures.",
+      "family": "qwen",
+      "variant": "Q4_K_M",
+      "parameters": "4B",
+      "size_bytes": 3413361504,
+      "memory_needed_bytes": 5000000000,
+      "context": 262144,
+      "capabilities": {
+        "tool_calling": true,
+        "vision": true,
+        "coding": false
+      },
+      "source": {
+        "url": "https://huggingface.co/unsloth/Qwen3.5-4B-GGUF/resolve/main/Qwen3.5-4B-Q4_K_M.gguf",
+        "sha256": "00fe7986ff5f6b463e62455821146049db6f9313603938a70800d1fb69ef11a4",
+        "format": "gguf"
+      },
+      "projector": {
+        "url": "https://huggingface.co/unsloth/Qwen3.5-4B-GGUF/resolve/main/mmproj-F16.gguf",
+        "sha256": "cd88edcf8d031894960bb0c9c5b9b7e1fea6ebee02b9f7ce925a00d12891f864",
+        "size_bytes": 672423616
+      },
+      "purpose": [
+        "assistant",
+        "general"
+      ],
+      "tags": [
+        "general",
+        "vision",
+        "fast"
+      ],
+      "runtime": [
+        "llamacpp"
+      ],
+      "recommended_roles": [
+        "assistant",
+        "worker"
+      ],
+      "languages": [
+        {
+          "language": "en",
+          "level": "excellent",
+          "confidence": "high",
+          "sources": [
+            "model_card"
+          ]
+        },
+        {
+          "language": "zh-Hans",
+          "level": "excellent",
+          "confidence": "high",
+          "sources": [
+            "model_card"
+          ]
+        },
+        {
+          "language": "fr",
+          "level": "good",
+          "confidence": "medium",
+          "sources": [
+            "model_card",
+            "maintainer"
+          ]
+        },
+        {
+          "language": "es",
+          "level": "good",
+          "confidence": "medium",
+          "sources": [
+            "model_card",
+            "maintainer"
+          ]
+        },
+        {
+          "language": "pt",
+          "level": "good",
+          "confidence": "medium",
+          "sources": [
+            "model_card",
+            "maintainer"
+          ]
+        },
+        {
+          "language": "de",
+          "level": "good",
+          "confidence": "medium",
+          "sources": [
+            "model_card",
+            "maintainer"
+          ]
+        },
+        {
+          "language": "it",
+          "level": "good",
+          "confidence": "medium",
+          "sources": [
+            "model_card",
+            "maintainer"
+          ]
+        },
+        {
+          "language": "ru",
+          "level": "good",
+          "confidence": "medium",
+          "sources": [
+            "model_card",
+            "maintainer"
+          ]
+        },
+        {
+          "language": "ja",
+          "level": "good",
+          "confidence": "medium",
+          "sources": [
+            "model_card",
+            "maintainer"
+          ]
+        },
+        {
+          "language": "ko",
+          "level": "good",
+          "confidence": "medium",
+          "sources": [
+            "model_card",
+            "maintainer"
+          ]
+        },
+        {
+          "language": "vi",
+          "level": "good",
+          "confidence": "medium",
+          "sources": [
+            "model_card",
+            "maintainer"
+          ]
+        },
+        {
+          "language": "th",
+          "level": "good",
+          "confidence": "medium",
+          "sources": [
+            "model_card",
+            "maintainer"
+          ]
+        },
+        {
+          "language": "ar",
+          "level": "good",
+          "confidence": "medium",
+          "sources": [
+            "model_card",
+            "maintainer"
+          ]
+        }
+      ],
+      "generation": "3.5",
+      "supersedes": [
+        "qwen2.5-3b-q4"
+      ]
+    },
+    {
+      "id": "qwen3.5-9b-q4",
+      "display_name": "Qwen 3.5 9B",
+      "summary": "Strong everyday assistant that also sees pictures.",
+      "family": "qwen",
+      "variant": "Q4_K_M",
+      "parameters": "9B",
+      "size_bytes": 6598688544,
+      "memory_needed_bytes": 8500000000,
+      "context": 262144,
+      "capabilities": {
+        "tool_calling": true,
+        "vision": true,
+        "coding": false
+      },
+      "source": {
+        "url": "https://huggingface.co/unsloth/Qwen3.5-9B-GGUF/resolve/main/Qwen3.5-9B-Q4_K_M.gguf",
+        "sha256": "03b74727a860a56338e042c4420bb3f04b2fec5734175f4cb9fa853daf52b7e8",
+        "format": "gguf"
+      },
+      "projector": {
+        "url": "https://huggingface.co/unsloth/Qwen3.5-9B-GGUF/resolve/main/mmproj-F16.gguf",
+        "sha256": "f70dc3509053962b0d0d3ee8a7eacebf5d60aa560cad78254ae8698516ae029f",
+        "size_bytes": 918166080
+      },
+      "purpose": [
+        "assistant",
+        "general"
+      ],
+      "tags": [
+        "general",
+        "vision"
+      ],
+      "runtime": [
+        "llamacpp"
+      ],
+      "recommended_roles": [
+        "assistant",
+        "coordinator"
+      ],
+      "languages": [
+        {
+          "language": "en",
+          "level": "excellent",
+          "confidence": "high",
+          "sources": [
+            "model_card"
+          ]
+        },
+        {
+          "language": "zh-Hans",
+          "level": "excellent",
+          "confidence": "high",
+          "sources": [
+            "model_card"
+          ]
+        },
+        {
+          "language": "fr",
+          "level": "good",
+          "confidence": "medium",
+          "sources": [
+            "model_card",
+            "maintainer"
+          ]
+        },
+        {
+          "language": "es",
+          "level": "good",
+          "confidence": "medium",
+          "sources": [
+            "model_card",
+            "maintainer"
+          ]
+        },
+        {
+          "language": "pt",
+          "level": "good",
+          "confidence": "medium",
+          "sources": [
+            "model_card",
+            "maintainer"
+          ]
+        },
+        {
+          "language": "de",
+          "level": "good",
+          "confidence": "medium",
+          "sources": [
+            "model_card",
+            "maintainer"
+          ]
+        },
+        {
+          "language": "it",
+          "level": "good",
+          "confidence": "medium",
+          "sources": [
+            "model_card",
+            "maintainer"
+          ]
+        },
+        {
+          "language": "ru",
+          "level": "good",
+          "confidence": "medium",
+          "sources": [
+            "model_card",
+            "maintainer"
+          ]
+        },
+        {
+          "language": "ja",
+          "level": "good",
+          "confidence": "medium",
+          "sources": [
+            "model_card",
+            "maintainer"
+          ]
+        },
+        {
+          "language": "ko",
+          "level": "good",
+          "confidence": "medium",
+          "sources": [
+            "model_card",
+            "maintainer"
+          ]
+        },
+        {
+          "language": "vi",
+          "level": "good",
+          "confidence": "medium",
+          "sources": [
+            "model_card",
+            "maintainer"
+          ]
+        },
+        {
+          "language": "th",
+          "level": "good",
+          "confidence": "medium",
+          "sources": [
+            "model_card",
+            "maintainer"
+          ]
+        },
+        {
+          "language": "ar",
+          "level": "good",
+          "confidence": "medium",
+          "sources": [
+            "model_card",
+            "maintainer"
+          ]
+        }
+      ],
+      "generation": "3.5",
+      "supersedes": [
+        "qwen2.5-7b-q4",
+        "qwen2.5-vl-7b-q4"
+      ]
+    },
+    {
+      "id": "qwen3.8-27b-q4",
+      "display_name": "Qwen 3.8 27B",
+      "summary": "The most capable everyday assistant, for computers with plenty of memory. Sees pictures too.",
+      "family": "qwen",
+      "variant": "Q4_K_M",
+      "parameters": "27B",
+      "size_bytes": 19603117536,
+      "memory_needed_bytes": 23000000000,
+      "context": 262144,
+      "capabilities": {
+        "tool_calling": true,
+        "vision": true,
+        "coding": false
+      },
+      "source": {
+        "url": "https://huggingface.co/ggml-org/Qwen3.8-27B-GGUF/resolve/main/Qwen3.8-27B-Q4_K_M.gguf",
+        "sha256": "c600de0300ae8a0eb3a6c0b8b5561b8b96f16bd2c863c2a66c42de29d391a747",
+        "format": "gguf"
+      },
+      "projector": {
+        "url": "https://huggingface.co/ggml-org/Qwen3.8-27B-GGUF/resolve/main/mmproj-Qwen3.8-27B-Q8_0.gguf",
+        "sha256": "2e968a6af97ce35d8971890b257b9b7edabf20ad91450501fa53162a19ee33eb",
+        "size_bytes": 629247008
+      },
+      "purpose": [
+        "assistant",
+        "general",
+        "research"
+      ],
+      "tags": [
+        "general",
+        "vision"
+      ],
+      "runtime": [
+        "llamacpp"
+      ],
+      "recommended_roles": [
+        "assistant",
+        "coordinator",
+        "reviewer"
+      ],
+      "languages": [
+        {
+          "language": "en",
+          "level": "excellent",
+          "confidence": "high",
+          "sources": [
+            "model_card"
+          ]
+        },
+        {
+          "language": "zh-Hans",
+          "level": "excellent",
+          "confidence": "high",
+          "sources": [
+            "model_card"
+          ]
+        },
+        {
+          "language": "fr",
+          "level": "good",
+          "confidence": "medium",
+          "sources": [
+            "model_card",
+            "maintainer"
+          ]
+        },
+        {
+          "language": "es",
+          "level": "good",
+          "confidence": "medium",
+          "sources": [
+            "model_card",
+            "maintainer"
+          ]
+        },
+        {
+          "language": "pt",
+          "level": "good",
+          "confidence": "medium",
+          "sources": [
+            "model_card",
+            "maintainer"
+          ]
+        },
+        {
+          "language": "de",
+          "level": "good",
+          "confidence": "medium",
+          "sources": [
+            "model_card",
+            "maintainer"
+          ]
+        },
+        {
+          "language": "it",
+          "level": "good",
+          "confidence": "medium",
+          "sources": [
+            "model_card",
+            "maintainer"
+          ]
+        },
+        {
+          "language": "ru",
+          "level": "good",
+          "confidence": "medium",
+          "sources": [
+            "model_card",
+            "maintainer"
+          ]
+        },
+        {
+          "language": "ja",
+          "level": "good",
+          "confidence": "medium",
+          "sources": [
+            "model_card",
+            "maintainer"
+          ]
+        },
+        {
+          "language": "ko",
+          "level": "good",
+          "confidence": "medium",
+          "sources": [
+            "model_card",
+            "maintainer"
+          ]
+        },
+        {
+          "language": "vi",
+          "level": "good",
+          "confidence": "medium",
+          "sources": [
+            "model_card",
+            "maintainer"
+          ]
+        },
+        {
+          "language": "th",
+          "level": "good",
+          "confidence": "medium",
+          "sources": [
+            "model_card",
+            "maintainer"
+          ]
+        },
+        {
+          "language": "ar",
+          "level": "good",
+          "confidence": "medium",
+          "sources": [
+            "model_card",
+            "maintainer"
+          ]
+        }
+      ],
+      "generation": "3.8",
+      "supersedes": [
+        "qwen2.5-32b-q4",
+        "qwen2.5-14b-q4"
+      ]
     }
   ]
 }
