@@ -207,13 +207,21 @@ the set confirms the license for that run.
     profile's long instructions are read once, not per chat; with Qwen 2.5
     7B that's 88 ms instead of 1.6 s for 2,100 tokens.
   - **Equivalence:** the last turn asked warm and cold (`cache_prompt` off),
-    at temperature 0, writes the same tokens, with top-5 probabilities within
-    0.05 (`TOSKAR_QUALITY_CACHE_TOLERANCE`). Probabilities, not log
-    probabilities: the warm turn reads the prompt in two parts, which moves
-    an unlikely token's log probability by rounding alone. Measured on
-    llama.cpp b11149, warm and cold were at most 0.0075 apart for Llama,
-    Qwen, and Gemma 2, and up to 0.038 for Gemma 3, the same inside its
-    sliding window as beyond it.
+    at temperature 0, writes the same tokens, each with the same probability
+    within 0.2 (`TOSKAR_QUALITY_CACHE_TOLERANCE`). Probabilities, not log
+    probabilities: an unlikely token's log probability moves by rounding
+    alone. The warm and cold turns read the prompt in different batches, and
+    on a CPU that alone moves probabilities: with Llama 3.2 1B on llama.cpp
+    b11174, a cold read in batches of 32 instead of 512, no cache involved,
+    moved a written token's probability by up to 0.12 and another top-5
+    token's by up to 0.15. Those other tokens' gaps are reported, not failed
+    on, since they change nothing the model writes. A cache that lost part
+    of the chat shows in the tokens instead: simulated losses (a turn, the
+    system prompt or half of it, half the last answer) changed the last
+    turn's answer 8 times in 10, and batching never did. On a Mac's GPU
+    (b11149), warm and cold were at most 0.0075 apart for Llama, Qwen, and
+    Gemma 2, and up to 0.038 for Gemma 3, the same inside its sliding window
+    as beyond it.
 
   The weekly job runs it twice: with Llama 3.2 1B, beside the quality set,
   and with Gemma 3 4B, whose sliding window is the catalog's smallest, so a
