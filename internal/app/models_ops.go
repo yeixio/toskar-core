@@ -207,7 +207,7 @@ func (a *App) startModelLocal(ctx context.Context, modelID string) (contracts.Ru
 	loaded := a.loadingModel(modelID)
 	running, err := a.Runtimes.StartModel(ctx, "llamacpp", pluginapi.ModelStartConfig{
 		ModelID: modelID, ModelPath: path, Adapters: a.localAdapters(ctx, modelID),
-		Projector: a.Models.ProjectorPath(modelID),
+		Projector: a.Models.ProjectorPath(modelID), NoSpeculation: a.speculationOff(ctx, modelID),
 	})
 	loaded()
 	if err != nil {
@@ -379,6 +379,7 @@ func (a *App) listModelsCluster(ctx context.Context) ([]contracts.Model, error) 
 	if err != nil {
 		return nil, err
 	}
+	a.withSpeculation(ctx, local)
 	cfg := a.Config.Get()
 	presence := map[string][]contracts.ModelOnNode{}
 	for _, m := range local {

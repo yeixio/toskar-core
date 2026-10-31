@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Toskar Control Plane API
-  version: "1.65"
+  version: "1.67"
   description: >-
     Local AI control plane API for Toskar, its OpenAI-compatible routes, and its MCP server.
     On the default loopback bind no key is needed. When the daemon listens on any other address,
@@ -3611,6 +3611,38 @@ paths:
                 $ref: "#/components/schemas/ModelVision"
         "400":
           description: MODEL_FILE_INVALID, MODEL_FILE_NOT_PROJECTOR, MODEL_NOT_INSTALLED, or MODEL_NOT_FOUND
+  /api/v1/models/{id}/speculation:
+    put:
+      summary: Turn guessing ahead Auto or Off for a model
+      description: 'Speculative decoding for a chat model installed on this computer: auto (on where this llama-server has it) or off. A loaded model changes when it next starts (#835, contract 1.67).'
+      operationId: setModelSpeculation
+      tags: [Models]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [speculation]
+              properties:
+                speculation:
+                  type: string
+                  enum: [auto, off]
+      responses:
+        "200":
+          description: The choice is kept
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ModelSpeculation"
+        "400":
+          description: MODEL_UPDATE_FAILED, such as for a model that isn't installed here or doesn't chat
   /api/v1/models/{id}:
     patch:
       summary: Rename or retag an added model
@@ -7281,6 +7313,7 @@ components:
         fit: {$ref: '#/components/schemas/ModelFit'}
         dynamic: {type: boolean, description: installed from browse-all / URL}
         support_role: {type: string, description: '`support_role` marks a model that serves Yggdrasil instead of chatting: SupportEmbedding, SupportReranker, or SupportClassifier. Empty for chat models.'}
+        speculation: {type: string, enum: [auto, off], description: 'Whether a chat model installed on this computer guesses the next words ahead and checks several at once (#835, contract 1.67). Empty for other models.'}
         languages:
           type: array
           description: How well the model writes each language it has a level for (§13–14, §31), best first.
@@ -8714,6 +8747,13 @@ components:
         tags:
           type: array
           items: {type: string}
+    ModelSpeculation:
+      type: object
+      description: A model's guess-ahead choice (#835).
+      required: [model_id, speculation]
+      properties:
+        model_id: {type: string}
+        speculation: {type: string, enum: [auto, off]}
     ModelVision:
       type: object
       description: Says a model sees pictures now, with its projector set.

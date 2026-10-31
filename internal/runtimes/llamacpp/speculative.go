@@ -24,9 +24,10 @@ const speculativeType = "ngram-mod"
 // speculativeArgs are the flags that turn speculation on for a chat model,
 // or none: for embedding and reranking, for a model that sees pictures
 // (not measured with a projector yet), when this llama-server doesn't have
-// it, or when TOSKAR_SPECULATIVE is off.
+// it, when TOSKAR_SPECULATIVE is off, or when the person turned it off for
+// the model.
 func speculativeArgs(cfg pluginapi.ModelStartConfig, supported bool) []string {
-	if cfg.Mode != "" || cfg.Projector != "" || !supported {
+	if cfg.Mode != "" || cfg.Projector != "" || cfg.NoSpeculation || !supported {
 		return nil
 	}
 	switch strings.ToLower(strings.TrimSpace(config.Env("SPECULATIVE"))) {

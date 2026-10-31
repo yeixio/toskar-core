@@ -188,6 +188,10 @@ type Model struct {
 	// Languages are how well the model writes each language it has a level
 	// for (§13–14, §31), best first.
 	Languages []LanguageCapability `json:"languages,omitempty"`
+	// Speculation is auto or off for a chat model installed on this
+	// computer: whether it guesses the next words ahead and checks several
+	// at once (#835, contract 1.67). Empty for other models.
+	Speculation string `json:"speculation,omitempty"`
 }
 
 // Supporting model roles (spec §61).

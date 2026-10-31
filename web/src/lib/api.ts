@@ -861,6 +861,13 @@ export const api = {
     }),
 
   /** Gives an added model its vision projector, a file on this computer (#467). */
+  /** Speculative decoding for a model on this computer: auto or off, from its next start (#835). */
+  setModelSpeculation: (id: string, speculation: 'auto' | 'off') =>
+    request<{ model_id: string; speculation: string }>(`/api/v1/models/${encodeURIComponent(id)}/speculation`, {
+      method: 'PUT',
+      body: JSON.stringify({ speculation }),
+    }),
+
   setModelProjector: (id: string, path: string) =>
     request<{ model_id: string; vision: boolean }>(`/api/v1/models/${encodeURIComponent(id)}/projector`, {
       method: 'PUT',

@@ -76,8 +76,11 @@ type Dependencies struct {
 	// link; SetModelProjector gives it a vision projector (#467).
 	UpdateAddedModel  func(ctx context.Context, id string, displayName *string, tags []string) (models.CatalogEntry, error)
 	SetModelProjector func(ctx context.Context, id, path string) error
-	DeleteModel       func(ctx context.Context, id string, nodeID string) error
-	ListRunningModels func(ctx context.Context) ([]contracts.RunningModelView, error)
+	// SetModelSpeculation turns speculative decoding Auto or Off for a
+	// model on this computer (#835).
+	SetModelSpeculation func(ctx context.Context, id, choice string) error
+	DeleteModel         func(ctx context.Context, id string, nodeID string) error
+	ListRunningModels   func(ctx context.Context) ([]contracts.RunningModelView, error)
 	// Acceleration sums up where this computer's loaded models run, for
 	// health (#317).
 	Acceleration func(ctx context.Context) string
@@ -335,6 +338,7 @@ func (s *Server) routes() {
 	api.HandleFunc("/models/{id}", s.handleDeleteModel).Methods(http.MethodDelete)
 	api.HandleFunc("/models/{id}", s.handleUpdateAddedModel).Methods(http.MethodPatch)
 	api.HandleFunc("/models/{id}/projector", s.handleSetModelProjector).Methods(http.MethodPut)
+	api.HandleFunc("/models/{id}/speculation", s.handleSetModelSpeculation).Methods(http.MethodPut)
 	api.HandleFunc("/runtimes", s.handleListRuntimes).Methods(http.MethodGet, http.MethodOptions)
 	api.HandleFunc("/runtimes/{id}/install", s.handleInstallRuntime).Methods(http.MethodPost)
 	api.HandleFunc("/profiles", s.handleProfiles).Methods(http.MethodGet, http.MethodOptions)

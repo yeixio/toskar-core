@@ -189,7 +189,10 @@
     "installing": "설치하는 중…",
     "moreActions": "{{model}}에 대한 추가 작업",
     "stop": "중지",
-    "remove": "제거"
+    "remove": "제거",
+    "guessAhead": "미리 추측",
+    "guessAheadHint": "더 빠른 답변: 모델이 채팅에서 다음 단어를 추측하고 여러 개를 한 번에 확인해요. 이 모델의 답변이 나빠지면 끄세요.",
+    "guessAheadNextStart": "다음 시작부터"
   },
   "runningTab": {
     "empty": "지금 불러온 모델이 없어요. 필요할 때 채팅에서 자동으로 시작해요.",

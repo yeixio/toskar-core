@@ -26,6 +26,7 @@ func TestSpeculativeArgs(t *testing.T) {
 		"embedding":   {pluginapi.ModelStartConfig{ModelPath: "e.gguf", Mode: pluginapi.ModeEmbedding}, true},
 		"reranking":   {pluginapi.ModelStartConfig{ModelPath: "r.gguf", Mode: pluginapi.ModeReranking}, true},
 		"projector":   {pluginapi.ModelStartConfig{ModelPath: "v.gguf", Projector: "v.mmproj.gguf"}, true},
+		"turned off":  {pluginapi.ModelStartConfig{ModelPath: "m.gguf", NoSpeculation: true}, true},
 	} {
 		if got := speculativeArgs(c.cfg, c.supported); got != nil {
 			t.Errorf("%s: %v", name, got)
