@@ -21,7 +21,7 @@ async function shown(response: Response) {
   let text = ''
   const seen: string[] = []
   await streamChat({
-    body: { message: 'Hi' },
+    body: { conversation_id: 'c1', message: 'Hi' },
     onToken: (content) => {
       text += content
       seen.push(text)
