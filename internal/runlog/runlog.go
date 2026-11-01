@@ -137,8 +137,8 @@ type Origin struct {
 }
 
 // Clients are the apps a request can name; terminal is toskarctl chat
-// (#959, contract 1.74).
-var Clients = []string{"phone", "tablet", "watch", "car", "tv", "desktop", "web", "terminal"}
+// (#959, contract 1.74), and editor is @toskar in VS Code (#960, 1.75).
+var Clients = []string{"phone", "tablet", "watch", "car", "tv", "desktop", "web", "terminal", "editor"}
 
 // ClientName is client when it is one of Clients, "" when empty, and
 // "other" otherwise, so a trace never keeps text a client made up.
