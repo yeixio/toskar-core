@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"slices"
+	"time"
 
 	"github.com/yeixio/toskar-core/internal/models"
 	"github.com/yeixio/toskar-core/pkg/contracts"
@@ -34,6 +35,20 @@ func (a *App) startWindow(ctx context.Context, modelID string) int {
 	if !ok {
 		return 0
 	}
+	base := a.baseWindow(ctx, modelID, entry)
+	if r, ok := a.raisedWindows.Load(modelID); ok {
+		raised := r.(raisedWindow)
+		if raised.tokens > base && (time.Since(raised.at) < raiseGrace || a.runningWith(ctx, modelID, raised.tokens)) {
+			return raised.tokens
+		}
+		a.raisedWindows.Delete(modelID)
+	}
+	return base
+}
+
+// baseWindow is the window a model starts with when no request has asked
+// for more: the person's choice, else Auto.
+func (a *App) baseWindow(ctx context.Context, modelID string, entry models.CatalogEntry) int {
 	if n := a.contextChoices(ctx)[modelID]; n > 0 {
 		return min(n, ownWindow(entry))
 	}
@@ -47,6 +62,77 @@ func (a *App) startWindow(ctx context.Context, modelID string) int {
 	n := models.AutoContext(entry, hw)
 	a.startWindows.Store(modelID, n)
 	return n
+}
+
+// raisedWindow is a bigger window a request asked a model for (#962), and
+// when.
+type raisedWindow struct {
+	tokens int
+	at     time.Time
+}
+
+// raiseGrace is how long a raised window holds before the model has started
+// again with it. After that it holds while the model runs with it, and once
+// the model stops, it starts with its own window again.
+const raiseGrace = 2 * time.Minute
+
+// growWindow raises a model installed here to the smallest size that holds
+// need tokens, up to its own window, at which it still fits this computer,
+// tightly at worst: the request asked for it, so it's worth the memory
+// (#962). The model starts again with it on its next request. It returns
+// the new window, or 0 when no size fits.
+func (a *App) growWindow(ctx context.Context, modelID string, need int) int {
+	if a.Models == nil || need <= 0 {
+		return 0
+	}
+	entry, ok := a.Models.Catalog().Get(modelID)
+	if !ok {
+		return 0
+	}
+	if _, err := a.Models.Path(ctx, modelID); err != nil {
+		return 0
+	}
+	hw, ok := a.steadyHardware(ctx)
+	if !ok {
+		return 0
+	}
+	current := a.startWindow(ctx, modelID)
+	if current >= need {
+		return 0
+	}
+	for _, n := range contextSizes {
+		if n < need {
+			continue
+		}
+		if n > ownWindow(entry) {
+			break
+		}
+		switch models.ClassifyFit(entry, hw, "", "", models.FitOptions{ContextTokens: n}).Label {
+		case contracts.FitExcellent, contracts.FitGood, contracts.FitTight:
+			a.raisedWindows.Store(modelID, raisedWindow{tokens: n, at: time.Now()})
+			return n
+		}
+		return 0
+	}
+	return 0
+}
+
+// runningWith reports whether modelID runs here with a window of at least
+// tokens.
+func (a *App) runningWith(ctx context.Context, modelID string, tokens int) bool {
+	if a.Runtimes == nil {
+		return false
+	}
+	list, err := a.Runtimes.ListRunning(ctx, "llamacpp")
+	if err != nil {
+		return false
+	}
+	for _, m := range list {
+		if m.ModelID == modelID && m.Status == "running" && m.Context >= tokens {
+			return true
+		}
+	}
+	return false
 }
 
 // ownWindow is the most a model may use: its own window, or unknownWindow.

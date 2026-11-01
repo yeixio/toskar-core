@@ -19,7 +19,7 @@ import (
 // tests/contract checks that no field in the contract is removed or renamed.
 // api/openapi.yaml's info.version is this version too, so the SDKs
 // generated from it say which contract they were built for (#666).
-const ContractVersion = "1.69"
+const ContractVersion = "1.70"
 
 // Headers that carry the contract version. Each has a name from before the
 // Toskar rename that is still sent and accepted, so clients and computers

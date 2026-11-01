@@ -179,6 +179,9 @@ type App struct {
 	// startWindows keeps the window each chat model starts with here
 	// (model id -> tokens, #962), worked out once from the hardware.
 	startWindows sync.Map
+	// raisedWindows keeps a bigger window a request asked a model for
+	// (model id -> raisedWindow, #962).
+	raisedWindows sync.Map
 	// steadyHW is this computer's hardware, detected once (steadyHardware).
 	steadyHW struct {
 		sync.Mutex
@@ -531,6 +534,7 @@ func New(opts Options) (*App, error) {
 		// A request that can't fit its model's window is refused before it
 		// runs, and a chat that overflows answers 400 with its code (#840).
 		Window: a.knownWindow,
+		Grow:   a.growWindow,
 		ErrorCode: func(text string) string {
 			code, _ := chatErrorCode(text)
 			return code

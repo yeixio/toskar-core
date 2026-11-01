@@ -386,3 +386,49 @@ func TestChatFailureCodes(t *testing.T) {
 		}
 	}
 }
+
+// A request that needs more than the model runs with gets a bigger window
+// where one fits (#962), or asks for one up front; one that no size holds
+// is refused, naming the field (#962).
+func TestContextWindowGrowsForARequest(t *testing.T) {
+	h := testHandler(t)
+	h.Window = func(context.Context, string) int { return 8192 }
+	var asked []int
+	h.Grow = func(_ context.Context, _ string, need int) int {
+		asked = append(asked, need)
+		if need <= 32768 {
+			return 32768
+		}
+		return 0
+	}
+	mid := strings.Repeat("word ", 16000)  // about 20,000 tokens
+	long := strings.Repeat("word ", 80000) // about 100,000 tokens
+	for _, tc := range []struct {
+		name, body string
+		status     int
+		param      string
+		grew       bool
+	}{
+		{"fits as it runs", `{"model":"m","messages":[{"role":"user","content":"hi"}]}`, 200, "", false},
+		{"grows to fit", `{"model":"m","messages":[{"role":"user","content":"` + mid + `"}]}`, 200, "", true},
+		{"asks up front", `{"model":"m","toskar":{"context_window":32768},"messages":[{"role":"user","content":"hi"}]}`, 200, "", true},
+		{"no size holds it", `{"model":"m","messages":[{"role":"user","content":"` + long + `"}]}`, 400, "messages", true},
+		{"asks for too much", `{"model":"m","toskar":{"context_window":131072},"messages":[{"role":"user","content":"hi"}]}`, 400, "toskar.context_window", true},
+	} {
+		asked = nil
+		chat := &scriptChat{chunks: []pluginapi.ChatChunk{{Content: "ok", Done: true}}}
+		h.Chat = chat
+		rec := httptest.NewRecorder()
+		h.HandleChatCompletions(rec, httptest.NewRequest(http.MethodPost, "/v1/chat/completions", strings.NewReader(tc.body)))
+		if rec.Code != tc.status {
+			t.Errorf("%s: %d %s", tc.name, rec.Code, rec.Body)
+			continue
+		}
+		if grew := len(asked) > 0; grew != tc.grew {
+			t.Errorf("%s: asked to grow %v (%v)", tc.name, grew, asked)
+		}
+		if tc.status == 400 && !strings.Contains(rec.Body.String(), `"param":"`+tc.param+`"`) {
+			t.Errorf("%s: %s", tc.name, rec.Body)
+		}
+	}
+}

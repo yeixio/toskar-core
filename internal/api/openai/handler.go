@@ -49,6 +49,9 @@ type Handler struct {
 	// Window is a model's context window in tokens, or 0 when unknown, for
 	// checking a request fits before generating (#840).
 	Window func(ctx context.Context, modelID string) int
+	// Grow raises a model installed here to a window of at least need
+	// tokens when one fits, and returns it, or 0 (#962).
+	Grow func(ctx context.Context, modelID string, need int) int
 	// ErrorCode is the stable code for a chat error's text, as chat streams
 	// give it (#588), such as CONTEXT_TOO_LONG, or "".
 	ErrorCode func(text string) string
@@ -107,6 +110,11 @@ type assistantOptions struct {
 	// Fallback lets another model answer when the model the request names
 	// can't (#871). Off, a named model answers or the request fails.
 	Fallback bool `json:"fallback"`
+	// ContextWindow is the least window, in tokens, the request wants the
+	// model to run with (#962), such as a coding agent's before its first
+	// long request: the model starts again with a bigger one if it fits
+	// (contract 1.70).
+	ContextWindow int `json:"context_window"`
 }
 
 // HandleModels lists profiles as OpenAI models.
@@ -285,9 +293,27 @@ func (h *Handler) HandleChatCompletions(w http.ResponseWriter, r *http.Request) 
 	// a request that can't fit is refused now, not by the runtime partway
 	// (#840). The count is an estimate, so only what's clearly too long is
 	// refused here; the runtime still catches the rest.
+	// One that needs more than the model runs with gets a bigger window
+	// where one fits this computer (#962), and the model starts again with
+	// it; the request can ask for a least window too.
 	if opts.ExactModel && h.Window != nil {
-		if msg, param := tooLong(req, sampling.MaxTokens, h.Window(r.Context(), modelID)); msg != "" {
+		window := h.Window(r.Context(), modelID)
+		least := 0
+		if o := req.assistant(); o != nil {
+			least = o.ContextWindow
+		}
+		if need := max(neededWindow(req, sampling.MaxTokens), least); window > 0 && need > window && h.Grow != nil {
+			if grown := h.Grow(r.Context(), modelID, need); grown > 0 {
+				window = grown
+			}
+		}
+		if msg, param := tooLong(req, sampling.MaxTokens, window); msg != "" {
 			writeErrorParam(w, http.StatusBadRequest, "CONTEXT_TOO_LONG", msg, param)
+			return
+		}
+		if window > 0 && least > window {
+			writeErrorParam(w, http.StatusBadRequest, "CONTEXT_TOO_LONG",
+				fmt.Sprintf("toskar.context_window asks for %d tokens, but this model runs with at most %d on this computer", least, window), "toskar.context_window")
 			return
 		}
 	}
@@ -645,6 +671,23 @@ func (h *Handler) failure(code, text string) (int, string) {
 		return http.StatusBadRequest, code
 	}
 	return http.StatusInternalServerError, code
+}
+
+// answerRoom is the room a request without max_tokens is given for its
+// answer when its window is sized (#962).
+const answerRoom = 2048
+
+// neededWindow is about how many tokens a request's messages and answer take
+// together: the messages, estimated, and max_tokens or answerRoom.
+func neededWindow(req chatCompletionRequest, maxTokens int) int {
+	prompt := 0
+	for _, m := range req.Messages {
+		prompt += contextusage.Estimate(m.Content)
+	}
+	if maxTokens <= 0 {
+		maxTokens = answerRoom
+	}
+	return prompt + maxTokens
 }
 
 // tooLong says why a request can't fit a model's window of window tokens,
