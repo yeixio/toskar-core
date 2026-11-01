@@ -47,6 +47,12 @@ type CatalogEntry struct {
 	// leaves a small model's window no room for the answer. Empty leaves
 	// the model as its chat template makes it.
 	Thinking string `json:"thinking,omitempty"`
+	// FullAttentionInterval is for a model whose layers are mostly
+	// recurrent (linear attention) and keep a fixed state, with every Nth
+	// a full attention layer that keeps a cache for the whole window, as in
+	// Qwen 3.5 and 3.8 (4; #962). Its cache costs 1/N of a model's of its
+	// size, so a long window fits. 0 or 1 is every layer.
+	FullAttentionInterval int `json:"full_attention_interval,omitempty"`
 }
 
 // ThinkingWhenAsked is CatalogEntry.Thinking for a model that answers

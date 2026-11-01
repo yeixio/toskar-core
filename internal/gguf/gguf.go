@@ -30,6 +30,12 @@ type Info struct {
 	// states them; otherwise Embedding / HeadCount.
 	KeyLength   uint64
 	ValueLength uint64
+	// AttentionLayers are the layers that keep a key/value cache, when the
+	// model's other layers are recurrent (linear attention, as in Qwen 3.5
+	// and 3.8, #962): {arch}.attention.recurrent_layers, else every
+	// {arch}.full_attention_interval-th layer, as llama.cpp reads them.
+	// 0 means every layer.
+	AttentionLayers uint64
 }
 
 // KVCacheBytes is about how much memory llama.cpp reserves for a window of
@@ -56,7 +62,11 @@ func (i Info) KVCacheBytes(window int, bytesPerElement int) uint64 {
 	if value == 0 {
 		value = key
 	}
-	return i.Layers * uint64(window) * kvHeads * (key + value) * uint64(bytesPerElement)
+	layers := i.Layers
+	if i.AttentionLayers > 0 && i.AttentionLayers < layers {
+		layers = i.AttentionLayers
+	}
+	return layers * uint64(window) * kvHeads * (key + value) * uint64(bytesPerElement)
 }
 
 // GGUF metadata value types.
@@ -103,6 +113,9 @@ func readInfo(r *bufio.Reader) (Info, error) {
 		return Info{}, d.err
 	}
 	ints := map[string]uint64{}
+	// cached is how many layers {arch}.attention.recurrent_layers marks as
+	// keeping a cache, by key.
+	cached := map[string]uint64{}
 	var info Info
 	for n := uint64(0); n < count && d.err == nil; n++ {
 		key := d.str()
@@ -110,6 +123,10 @@ func readInfo(r *bufio.Reader) (Info, error) {
 		switch {
 		case key == "general.architecture" && typ == typeString:
 			info.Architecture = d.str()
+		case strings.HasSuffix(key, ".attention.recurrent_layers") && typ == typeArray:
+			if n, ok := d.falses(); ok {
+				cached[key] = n
+			}
 		case wanted(key):
 			if v, ok := d.number(typ); ok {
 				ints[key] = v
@@ -128,12 +145,17 @@ func readInfo(r *bufio.Reader) (Info, error) {
 	info.Embedding = field("embedding_length")
 	info.KeyLength = field("attention.key_length")
 	info.ValueLength = field("attention.value_length")
+	if n, ok := cached[info.Architecture+".attention.recurrent_layers"]; ok {
+		info.AttentionLayers = n
+	} else if every := field("full_attention_interval"); every > 1 {
+		info.AttentionLayers = info.Layers / every
+	}
 	return info, nil
 }
 
 // wanted is a key whose number ReadInfo keeps, for any architecture.
 func wanted(key string) bool {
-	for _, suffix := range []string{".block_count", ".attention.head_count", ".attention.head_count_kv", ".embedding_length", ".attention.key_length", ".attention.value_length"} {
+	for _, suffix := range []string{".block_count", ".attention.head_count", ".attention.head_count_kv", ".embedding_length", ".attention.key_length", ".attention.value_length", ".full_attention_interval"} {
 		if strings.HasSuffix(key, suffix) {
 			return true
 		}
@@ -237,6 +259,42 @@ func (d *decoder) number(typ uint32) (uint64, bool) {
 		d.skip(typ, 0)
 		return 0, false
 	}
+}
+
+// falses reads a bool array and counts its false values: for
+// recurrent_layers, the layers that aren't recurrent. Another array is
+// skipped.
+func (d *decoder) falses() (uint64, bool) {
+	elem := d.u32()
+	n := d.u64()
+	if d.err != nil {
+		return 0, false
+	}
+	if elem != typeBool {
+		if size := fixedSize(elem); size > 0 {
+			d.discard(n * size)
+		} else {
+			for i := uint64(0); i < n && d.err == nil; i++ {
+				d.skip(elem, 1)
+			}
+		}
+		return 0, false
+	}
+	if n > 1<<16 {
+		d.discard(n)
+		return 0, false
+	}
+	b := d.bytes(int(n))
+	if d.err != nil {
+		return 0, false
+	}
+	var count uint64
+	for _, v := range b {
+		if v == 0 {
+			count++
+		}
+	}
+	return count, true
 }
 
 // skip passes over a value of the given type.

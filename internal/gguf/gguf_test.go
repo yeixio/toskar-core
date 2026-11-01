@@ -11,6 +11,7 @@ import (
 // header writes a GGUF v3 header with the given metadata, in order.
 type header struct{ buf bytes.Buffer }
 
+func (h *header) u8(v uint8)   { h.buf.WriteByte(v) }
 func (h *header) u32(v uint32) { _ = binary.Write(&h.buf, binary.LittleEndian, v) }
 func (h *header) u64(v uint64) { _ = binary.Write(&h.buf, binary.LittleEndian, v) }
 func (h *header) str(s string) { h.u64(uint64(len(s))); h.buf.WriteString(s) }
@@ -119,5 +120,69 @@ func TestNotGGUF(t *testing.T) {
 	_ = os.WriteFile(path, []byte("nope, not a model"), 0o600)
 	if _, err := ReadInfo(path); err == nil {
 		t.Fatal("want an error for a file that isn't GGUF")
+	}
+}
+
+// A hybrid model keeps a cache only in its attention layers (#962): the
+// layers recurrent_layers marks false, else every full_attention_interval-th
+// one, as llama.cpp reads them for Qwen 3.5 and 3.8.
+func TestHybridAttentionLayers(t *testing.T) {
+	base := func(h *header) {
+		h.str("general.architecture")
+		h.u32(typeString)
+		h.str("qwen35")
+		h.str("qwen35.block_count")
+		h.u32(typeUint32)
+		h.u32(8)
+		h.str("qwen35.attention.head_count")
+		h.u32(typeUint32)
+		h.u32(16)
+		h.str("qwen35.attention.head_count_kv")
+		h.u32(typeUint32)
+		h.u32(4)
+		h.str("qwen35.attention.key_length")
+		h.u32(typeUint32)
+		h.u32(256)
+	}
+	interval := writeGGUF(t, func(h *header) int {
+		base(h)
+		h.str("qwen35.full_attention_interval")
+		h.u32(typeUint32)
+		h.u32(4)
+		return 6
+	})
+	listed := writeGGUF(t, func(h *header) int {
+		base(h)
+		// Listed layers win over the interval: three keep a cache.
+		h.str("qwen35.attention.recurrent_layers")
+		h.u32(typeArray)
+		h.u32(typeBool)
+		h.u64(8)
+		for _, recurrent := range []bool{true, true, false, true, true, false, true, false} {
+			if recurrent {
+				h.u8(1)
+			} else {
+				h.u8(0)
+			}
+		}
+		h.str("qwen35.full_attention_interval")
+		h.u32(typeUint32)
+		h.u32(4)
+		return 7
+	})
+	for _, c := range []struct {
+		path string
+		want uint64
+	}{{interval, 2}, {listed, 3}} {
+		info, err := ReadInfo(c.path)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if info.AttentionLayers != c.want || info.Layers != 8 {
+			t.Fatalf("info = %+v, want %d attention layers", info, c.want)
+		}
+		if got := info.KVCacheBytes(100, 2); got != c.want*100*4*512*2 {
+			t.Errorf("KV cache = %d", got)
+		}
 	}
 }
