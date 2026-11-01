@@ -268,13 +268,14 @@ func TestQualitySet(t *testing.T) {
 	}
 	runs.save(t, report)
 	sum := summarizeRuns(report, planned)
-	t.Logf("quality: %s with the %s model", sum.line(), d.Name())
+	v := gate(sum, minPass(d.Name()), baselineSummary(t, file.Cases, planned, deflection))
+	t.Logf("quality: %s with the %s model. %s", sum.line(), d.Name(), v.note)
 	if path := config.Env("QUALITY_REPORT"); path != "" {
-		md := markdownReport(d.Name(), report, sum, minPass(d.Name()))
+		md := markdownReport(d.Name(), report, sum, minPass(d.Name()), v)
 		writeReport(t, d, build, path, md)
 	}
-	if sum.rate < minPass(d.Name()) {
-		t.Errorf("%.0f%% of runs passed; at least %.0f%% must", sum.rate*100, minPass(d.Name())*100)
+	if v.fail {
+		t.Errorf("%s %s", sum.sentence(), v.note)
 	}
 }
 
@@ -397,10 +398,10 @@ type reportRow struct {
 // markdownReport gives the pass rate with its interval, then every case,
 // failures first, with each run's answer, so a release can be read and not
 // only scored.
-func markdownReport(driver string, rows []reportRow, sum summary, min float64) string {
+func markdownReport(driver string, rows []reportRow, sum summary, min float64, v verdict) string {
 	var b strings.Builder
 	fmt.Fprintf(&b, "# Chat quality: core, %s model\n\n", driver)
-	fmt.Fprintf(&b, "%s; at least %.0f%% must pass.\n\n", sum.sentence(), min*100)
+	fmt.Fprintf(&b, "%s; at least %.0f%% must pass. %s\n\n", sum.sentence(), min*100, v.note)
 	sum.details(&b)
 	sorted := slices.Clone(rows)
 	slices.SortStableFunc(sorted, func(a, b reportRow) int { return len(b.Failures) - len(a.Failures) })

@@ -165,9 +165,9 @@ the set confirms the license for that run.
   llama.cpp (`LLAMA_CPP_TAG`, with `gh`) and Llama 3.2 1B
   (`QUALITY_MODEL_GGUF_URL`), starts llama-server, and runs the cases in-process
   with every model call sent to it (`TOSKAR_QUALITY_MODEL_URL`) and the web
-  answered from `web.json`. At least 90% of runs must pass
-  (`TOSKAR_QUALITY_MIN_PASS`); `TOSKAR_QUALITY_REPORT` writes every answer to a
-  Markdown report. The Release workflow runs this before it publishes, and the
+  answered from `web.json`. The bar is 90% of runs
+  (`TOSKAR_QUALITY_MIN_PASS`), held as the gate below says;
+  `TOSKAR_QUALITY_REPORT` writes every answer to a Markdown report. The Release workflow runs this before it publishes, and the
   Quality workflow runs it on pull requests that change how chat decides.
 - **Running each case more than once (#834):** one run per case can swing a
   real model's pass rate by a case either way. `TOSKAR_QUALITY_REPEATS=3` runs
@@ -182,7 +182,18 @@ the set confirms the license for that run.
 
   It also says whether the run covered every case. A run that stopped
   partway isn't a full run to compare with another. The weekly served-model
-  job runs three repeats. A release runs one, and is held to 90% of it.
+  job runs three repeats. A release runs one.
+- **The gate (#834):** a pass rate varies from run to run, so a set fails
+  only when its interval says so. At or above the bar passes. Below it, but
+  with the interval reaching it, passes with a note in the report and log
+  ("within run-to-run noise; more repeats would tell"). The whole interval
+  under the bar fails. With `TOSKAR_QUALITY_BASELINE=runs.jsonl`, a run saved
+  before (such as the last release's or main's), the set is also compared
+  with it: the baseline's answers are checked with today's checks, so a
+  changed check isn't a regression, and the set fails only on a significant
+  drop (a one-sided two-proportion test, p < 0.05). The chat, files, and
+  media sets use it. The stub, whose replies are scripted, must still pass
+  every case.
 - **Saving and rescoring:** `TOSKAR_QUALITY_SAVE=runs.jsonl` saves every run's
   answer and what it did (sources, steps, the run trace, files). After a check
   changes, `TOSKAR_QUALITY_RESCORE=runs.jsonl go test ./tests/quality -run

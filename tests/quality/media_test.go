@@ -658,13 +658,15 @@ func TestMediaQuality(t *testing.T) {
 			min = v
 		}
 	}
-	t.Logf("media: %d of %d cases passed (%.0f%%) with the %s model", passed, len(report), rate*100, d.Name())
+	sum := summarizeRows(report)
+	v := gate(sum, min, nil)
+	t.Logf("media: %d of %d cases passed (%.0f%%) with the %s model. %s", passed, len(report), rate*100, d.Name(), v.note)
 	seen, sees := visionScore(report)
 	if sees > 0 {
 		t.Logf("sees: %d of %d", seen, sees)
 	}
 	if path := config.Env("QUALITY_MEDIA_REPORT"); path != "" {
-		md := strings.Replace(markdownReport(d.Name(), report, summarizeRows(report), min), "# Chat quality:", "# Media quality:", 1)
+		md := strings.Replace(markdownReport(d.Name(), report, sum, min, v), "# Chat quality:", "# Media quality:", 1)
 		models := ""
 		if isReal {
 			models = fmt.Sprintf("Picture model: %s. Clip model: %s.", orDefault(config.Env("QUALITY_MEDIA_IMAGE_MODEL"), "flux2-klein-4b"), orDefault(config.Env("QUALITY_MEDIA_VIDEO_MODEL"), "wan2.2-ti2v-5b"))
@@ -675,8 +677,8 @@ func TestMediaQuality(t *testing.T) {
 		md += memoryTable(models, peaks)
 		writeReport(t, d, build, path, md)
 	}
-	if rate < min {
-		t.Errorf("%.0f%% of cases passed; at least %.0f%% must", rate*100, min*100)
+	if v.fail {
+		t.Errorf("%s %s", sum.sentence(), v.note)
 	}
 }
 
