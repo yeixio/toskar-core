@@ -388,3 +388,13 @@ func TestParseCritique(t *testing.T) {
 		t.Fatal("parsed nothing")
 	}
 }
+
+// The answer checks read the answer Deliberate chose, and don't go back to
+// the turn's first draft (#1009).
+func TestDeliberateAnswerSurvivesChecks(t *testing.T) {
+	env := newRoleEnv(map[string]string{"assistant": "Final answer: $30", "drafter:2": "Mixing sets and singles.\nFinal answer: $26", "drafter:3": "Final answer: 26"})
+	text := runDeliberate(t, env, muffins, contracts.OrchestrationPolicy{Deliberate: DeliberateAlways})
+	if !strings.Contains(text, "Mixing sets and singles") {
+		t.Fatalf("kept %q, want the draft the vote chose", text)
+	}
+}
