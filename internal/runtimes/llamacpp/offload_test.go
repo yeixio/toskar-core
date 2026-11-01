@@ -53,6 +53,13 @@ func TestParseAcceleration(t *testing.T) {
 			LayersOffloaded: 50, LayersTotal: 65,
 			GPUMemoryBytes: mb(14222.98) + mb(1568) + mb(190.01) + mb(762.81) + mb(256) + mb(64.01),
 		}},
+		// A Vulkan build on Windows names the device's PCI address after
+		// its name (#955); the shape of the 32B's start on an RTX 3080 Ti
+		// Laptop GPU, 16 GB.
+		{"vulkan-nvidia-pci.log", &pluginapi.Acceleration{
+			Backend: "vulkan", Devices: []string{"NVIDIA GeForce RTX 3080 Ti Laptop GPU"},
+			LayersOffloaded: 42, LayersTotal: 65, GPUMemoryBytes: mb(12000),
+		}},
 		{"cpu.log", &pluginapi.Acceleration{Backend: "cpu"}},
 		{"vulkan-no-offload.log", &pluginapi.Acceleration{Backend: "cpu", LayersTotal: 29}},
 		{"before-load.log", nil},
