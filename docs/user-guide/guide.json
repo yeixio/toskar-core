@@ -482,7 +482,7 @@
           "items": [
             "Choose Chat in the sidebar, or New chat to start a fresh conversation.",
             "Type your question where it says Ask Toskar anything…, and press Enter. Shift-Enter starts a new line instead.",
-            "Read the answer as it's written. Stop ends it, and any web look-ups for it, and keeps what was already written."
+            "Read the answer as it's written. The text can change or start over before it finishes, when Toskar looks something up or corrects a figure. Stop ends it, and any web look-ups for it, and keeps what was already written."
           ]
         },
         {

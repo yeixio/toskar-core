@@ -1167,6 +1167,8 @@ export interface ModelDownloadProgressPayload {
 export interface ChatTokenPayload {
   conversation_id: string
   content: string
+  /** content takes the place of everything so far, empty to take it back (#1006). */
+  replace?: boolean
 }
 
 export interface OrchestrationRolePayload {

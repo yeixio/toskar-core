@@ -1011,7 +1011,9 @@ export function ChatPage() {
           }
           if (payload.conversation_id === completedConvRef.current) return
           setStatusMessage(null)
-          if (payload.content) {
+          if (payload.replace) {
+            setStreamingContent(payload.content || null)
+          } else if (payload.content) {
             setStreamingContent((current) => (current ?? '') + payload.content)
           }
         }
@@ -1331,6 +1333,12 @@ export function ChatPage() {
           setToolFailure(null)
           streamingTextRef.current += content
           setStreamingContent((current) => (current ?? '') + content)
+        },
+        // What was shown changed, or was taken back for a tool call (#1006).
+        onReplace: (content) => {
+          if (streamingConvRef.current !== conversationId) return
+          streamingTextRef.current = content
+          setStreamingContent(content || null)
         },
         onDone: () => {
           if (streamingConvRef.current !== conversationId) return
