@@ -1656,9 +1656,9 @@
     },
     {
       "id": "phone",
-      "title": "Use Toskar on your phone, tablet, TV, or watch",
+      "title": "Use Toskar on your phone, tablet, TV, watch, or in the car",
       "kind": "task",
-      "summary": "Chat with the AI on your computer from your phone, tablet, TV, or watch, and ask Toskar about text in any app.",
+      "summary": "Chat with the AI on your computer from your phone, tablet, TV, or watch, talk with it in the car, and ask Toskar about text in any app.",
       "paragraphs": [
         "The Toskar app for phones, tablets, TVs, and watches uses the models on your computer, with your chats, memory, and knowledge. You connect each device to your computer once, with a code the computer shows.",
         "A phone or tablet can also run a small model on the device itself, and a TV has a demo you can try without a computer."
@@ -1746,13 +1746,14 @@
         },
         {
           "type": "heading",
-          "text": "On your TV and watch"
+          "text": "On your TV, your watch, and in the car"
         },
         {
           "type": "list",
           "items": [
             "On a TV, ask with the microphone on the remote, or type. Without a computer connected, the TV app's demo answers a few suggested questions with sample answers, and nothing leaves the TV.",
-            "On a watch, ask from the app or your watch face. The watch asks your computer directly, at home or away, and asks through your phone when it can't."
+            "On a watch, ask from the app or your watch face. The watch asks your computer directly, at home or away, and asks through your phone when it can't.",
+            "In the car, open Toskar on the car's screen (CarPlay) and ask out loud: it listens as soon as it opens, and speaks its answer a sentence at a time, without showing it. Then it listens again, for a follow-up in the same chat. New conversation starts over, Stop ends the answer, and End closes it. The chat is in the app afterwards. Toskar in the car comes with Toskar Unlock."
           ]
         },
         {
@@ -1793,6 +1794,14 @@
             [
               "Update Toskar on your computer to get notifications here",
               "Update Toskar on the computer, then turn notifications on again."
+            ],
+            [
+              "In the car: Toskar needs the microphone and speech recognition",
+              "Once you're parked, allow both for Toskar in the phone's privacy settings."
+            ],
+            [
+              "In the car: I didn't catch that",
+              "Ask again. If nothing is heard twice in a row, the conversation ends; open Toskar on the car's screen to start again."
             ]
           ]
         },
