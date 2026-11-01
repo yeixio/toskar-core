@@ -19,6 +19,8 @@ A phone gets its own key with a 6-digit code instead of a copied secret:
 1. **The computer shows a code.** Its own UI calls `POST /api/v1/devices/pairing`, which returns `code`, `expires_at` (10 minutes on), `address` (where a phone reaches this computer, such as `192.168.1.20:7331`), and `reachable` (false while the API answers only on this computer). With `{"enable_lan": true}` it first turns on local network access, without the key that setting otherwise needs, since pairing makes the phone's key; if no phone or key ever uses it, the next start turns it off again instead of refusing to start. A new code replaces the last one. `GET /api/v1/devices/pairing` returns the same without the code, plus `state` (`waiting`, `connected`, `expired`, or `cancelled`) and `device`, the key a phone connected with. `DELETE` stops showing the code.
 2. **The phone sends it.** `POST /api/v1/devices/pair` with `{"code": "123456", "device_name": "Sam's iPhone"}` needs no key. It answers `201` with `api_key`, shown once, and `key`, its record, named after the phone, with `kind` `device`.
 
+An editor, such as Toskar for VS Code, connects the same way and adds `"raw": true` (#960, contract 1.76). Its coding agents drive a model directly, which needs raw access. The key gets it when the person who showed the code is an Admin or the Owner, who could give it in API Access anyway, and `key.permissions.raw` says whether it did. Otherwise the key is like a phone's: the editor can chat with Toskar's assistant, but its model picker can't use the models.
+
 Rules for the exchange:
 - **Local network only:** the exchange answers only from this computer's network (private, link-local, and 100.64/10 addresses). A request through a proxy (`Forwarded`, `X-Forwarded-For`, `X-Real-IP`) is refused with `PAIRING_NOT_LOCAL`.
 - **Single use:** a code works once.
@@ -253,7 +255,7 @@ Control-plane routes are under `/api/v1`. The OpenAI-compatible routes are under
 | GET | `/tools/runs` | Audited tool calls, newest first; `?tool_id=`, `?conversation_id=`, `?limit=` |
 | POST | `/tools/{id}/enabled` | Turn a tool on or off everywhere |
 | POST | `/tools/{id}/test` | Run a tool with `args` and return its result |
-| POST | `/tools/decide` | Answer an Ask approval: `request_id`, `allow`, and `allow_session` |
+| POST | `/tools/decide` | Answer an Ask approval: `request_id`, `allow`, and `allow_session`, which lets that tool run in the same chat without asking again until Toskar restarts. It never reaches other chats or people, and a tool that asks because the chat read someone else's writing asks each time (#959) |
 | GET | `/tools/activity` | Recent tool calls, kept in memory for this process |
 | GET | `/tools/providers` | Each computer's providers for image and speech tools, which can run on any paired computer: state (healthy, installing, failed, unavailable), what runs it, whether a GPU does the work, and the `languages` it works in (`auto_detect` when it tells the language itself) |
 | GET | `/connectors` | Connected services and their status |
@@ -922,12 +924,47 @@ Errors have OpenAI's shape, with Toskar's stable code as `code`:
 
 ### Known differences
 
+These are for the assistant. A raw request (below) has none of them.
+
 - `tool` messages and assistant `tool_calls` in the history are skipped.
 - Tool definitions in the OpenAI request are not passed through. Tool use is controlled by the Toskar profile.
 - `finish_reason` is `stop` or `length`: `content_filter` and `tool_calls` aren't sent.
 - A model must already be installed and startable. The HTTP call does not download one for you.
 
 Examples that match this behavior are in [examples/](../examples/).
+
+### Raw models, for coding agents (#843)
+
+Coding agents and editors run their own tools: they send `tools`, expect `tool_calls` back, and send the results as `tool` messages. `"model": "raw:<model id>"` gives them the model itself, without Toskar's assistant:
+
+- **As sent:** the request goes to the model's llama-server unchanged (`messages` with `tool` turns and assistant `tool_calls`, `tools`, `tool_choice`, `stop`, `logprobs`, `response_format`, sampling, and the rest), less the `toskar` object. The answer comes back as llama-server gives it, streamed or not, with `tool_calls` and `finish_reason: tool_calls`, and `model` set to `raw:<model id>`. There is no memory, knowledge, look-up, plan, answer check, or run log.
+- **Where:** a chat model installed on this computer, started if it isn't running. A paired computer's models aren't reachable this way. The window is sized as for other requests that name a model (#962): one that needs more than the model runs with raises it where a size fits, and `toskar.context_window` asks up front. Otherwise it answers `400 CONTEXT_TOO_LONG`. A model that isn't here answers `404 MODEL_NOT_FOUND`.
+- **Who:** a key with the `raw` permission (contract 1.71), which only Admins can give, in API Access, under the key's permissions. A key pinned to a profile can't have it. A request on this computer without a key has it, as the Owner's. Any other request answers `403 RAW_NOT_ALLOWED`.
+- **Listed:** `GET /v1/models` lists `raw:<model id>` for each chat model installed here, for a key that may use them.
+- **Many tools (#843):** an agent can send more tool definitions than a local model's window holds, such as one with MCP servers. When a raw request's tools take more than a quarter of the model's window, the model gets only the tools most likely to be wanted, within that quarter. Those are the tools the conversation already called, then those sharing the most words with the latest request, then the agent's own order. It also gets `tools_search`, which finds the rest by what they do. Toskar answers `tools_search` itself, adds up to five matching tools, and asks the model again, up to three times. The agent only sees the answer, with calls to its own tools. Such an answer isn't streamed token by token: it comes whole, in the format the request asked for, streamed or not. `usage` counts every round. Only up to 8,192 tokens of tools count toward sizing the window, so a long tool list doesn't make a request too long for the model. The same holds for `/v1/messages` and `/v1/responses`.
+
+### Anthropic's Messages format (#843)
+
+`POST /v1/messages` serves agents that speak Anthropic's format, such as tools built for Claude, with a model on this computer. It is always raw, with the same permission and window sizing as `raw:<model>`, and `model` is the model's id, with or without `raw:` (contract 1.72). Point the agent's base URL at Toskar, such as `http://127.0.0.1:7331`, and its model at the id.
+
+- **In:** `system` (a string or text blocks), `messages` with `text`, `image` (base64 or URL), `tool_use`, and `tool_result` blocks, `tools` with `input_schema`, `tool_choice` (`auto`, `any`, `tool` with a `name`, `none`), `stop_sequences`, `temperature`, `top_p`, and `top_k`. They're converted to the model's Chat Completions: a turn's `tool_result` blocks become `tool` messages ahead of its text, and `tool_use` becomes `tool_calls`. Thinking blocks and `metadata` are ignored.
+- **Out:** `content` with `text` and `tool_use` blocks, `stop_reason` (`end_turn`, `max_tokens`, `tool_use`), and `usage`. With `"stream": true`, Anthropic's events: `message_start`, then for each text run or tool call `content_block_start`, its `text_delta` or `input_json_delta` deltas, and `content_block_stop`, then `message_delta` with the stop reason and output tokens, and `message_stop`.
+- **The key** may come as `x-api-key`, as Anthropic's clients send it. `anthropic-version` is accepted and ignored. Errors use Anthropic's shape: `{"type": "error", "error": {"type": "invalid_request_error", "message": "..."}}`, with `permission_error` (403, no raw access), `not_found_error` (404, not on this computer), and `authentication_error` (401).
+- **`POST /v1/messages/count_tokens`** takes the same body and answers `{"input_tokens": n}`, an estimate, which agents ask for before they send.
+
+### OpenAI's Responses format (#843)
+
+`POST /v1/responses` serves agents that speak OpenAI's newer format, such as Codex-style tools, with a model on this computer. Like `/v1/messages`, it is always raw, with the same permission and window sizing, and `model` is the model's id, with or without `raw:` (contract 1.73).
+
+- **In:** `instructions`, and `input`: a string, or a list of items. Those are messages (`user`, `assistant`, `system`, or `developer`, with `input_text`, `input_image`, and `output_text` parts), `function_call` items, and `function_call_output` items. `reasoning` items are left out. Also `tools` of type `function`, `tool_choice` (`auto`, `required`, `none`, or `{"type": "function", "name": ...}`), `max_output_tokens`, `temperature`, `top_p`, and `parallel_tool_calls`. A run of `function_call` items becomes one assistant turn's `tool_calls`, with the assistant's text just before them.
+- **No stored responses:** Toskar keeps no responses, so `previous_response_id` answers `400`. Send the whole conversation as `input`, as agents do with `"store": false`.
+- **Out:** a `response` with `output` items, `message` with `output_text` and `function_call` with its `call_id`, `status` (`completed`, or `incomplete` with `incomplete_details.reason` `max_output_tokens`), and `usage`. With `"stream": true`:
+  - `response.created` and `response.in_progress`;
+  - for each output item, `response.output_item.added`, then `response.content_part.added`, `response.output_text.delta`, `.done`, and `response.content_part.done` for text, or `response.function_call_arguments.delta` and `.done` for a call, then `response.output_item.done`;
+  - `response.completed`, or `response.incomplete`.
+
+  Each event has a `sequence_number`.
+- Errors use OpenAI's shape, as `/v1/chat/completions` does.
 
 ## GPU acceleration
 

@@ -75,4 +75,44 @@ describe('KeyPermissions', () => {
       }),
     )
   })
+
+  // Raw model access is the Admin's to give a key, for coding agents (#843),
+  // and not for a key pinned to a profile.
+  it('lets a key drive models directly', async () => {
+    vi.mocked(api.setApiKeyPermissions).mockResolvedValue(null)
+    const { rerender } = render(
+      <QueryClientProvider client={new QueryClient()}>
+        <KeyPermissions
+          apiKey={{ id: 'k4', name: 'editor', prefix: 'ygg_ghi', created_at: '2026-10-01T00:00:00Z', revoked: false }}
+        />
+      </QueryClientProvider>,
+    )
+    fireEvent.click(screen.getByLabelText('Drive models directly, for coding agents'))
+    await waitFor(() =>
+      expect(api.setApiKeyPermissions).toHaveBeenCalledWith('k4', {
+        memory: 'on_request',
+        knowledge: 'always',
+        tools: 'profile',
+        placement: true,
+        raw: true,
+      }),
+    )
+    rerender(
+      <QueryClientProvider client={new QueryClient()}>
+        <KeyPermissions
+          apiKey={{
+            id: 'k5',
+            name: 'site',
+            prefix: 'ygg_jkl',
+            created_at: '2026-10-01T00:00:00Z',
+            revoked: false,
+            permissions: { memory: 'never', knowledge: 'never', tools: 'none', placement: false, profile: 'tires', raw: true },
+          }}
+        />
+      </QueryClientProvider>,
+    )
+    const box = screen.getByLabelText('Drive models directly, for coding agents')
+    expect(box).toBeDisabled()
+    expect(box).not.toBeChecked()
+  })
 })

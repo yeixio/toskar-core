@@ -214,12 +214,17 @@ func (r *Registry) Execute(ctx context.Context, toolID string, args map[string]a
 		r.audit(ctx, toolID, RunRefused, "", activitySummary(args), time.Time{}, err, meta)
 		return nil, err
 	}
-	allowed, needsPrompt, err := r.policy.Decide(toolID, policy)
+	scope := SessionScope(meta)
+	allowed, needsPrompt, err := r.policy.Decide(toolID, policy, scope)
 	if err != nil {
 		r.audit(ctx, toolID, RunDenied, "", activitySummary(args), time.Time{}, err, meta)
 		return nil, err
 	}
 	approval := ApprovedByProfile
+	if allowed && policy != PolicyAllow {
+		// Allowed for this chat by an earlier answer.
+		approval = ApprovedSession
+	}
 	if needsPrompt {
 		decision, err := r.requestApproval(ctx, toolID, args, reason, meta)
 		if err != nil {
@@ -232,8 +237,8 @@ func (r *Registry) Execute(ctx context.Context, toolID string, args map[string]a
 			return nil, err
 		}
 		approval = ApprovedByYou
-		if decision.AllowSession {
-			r.policy.AllowSession(toolID)
+		if decision.AllowSession && policy != PolicyAskEachTime {
+			r.policy.AllowSession(scope, toolID)
 			approval = ApprovedSession
 		}
 	} else if !allowed {

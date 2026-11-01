@@ -36,6 +36,8 @@ How it is started depends on how it was installed:
 | `toskarctl version` (or `about`) | Version, license, and corresponding source |
 | `toskarctl paths` | Default data, model, runtime, log, and database paths |
 | `toskarctl ask [flags] [prompt]` | Send one prompt and print the answer, for scripts and CI jobs (below) |
+| `toskarctl chat [flags] [message]` | Chat in the terminal, in the same chats as the apps (below) |
+| `toskarctl connect <agent> [--model id] [--write]` | Print, or write, the settings for a coding agent to use a model on Toskar (below) |
 | `toskarctl models list [--installed] [--json]` | The models, smallest first, with download size, fit on this computer, and whether each is installed |
 | `toskarctl models install <id> [--node <id>]` | Download a model and wait until it's installed, printing its progress every tenth of the way |
 | `toskarctl automations …` | Manage scheduled automations (below) |
@@ -82,6 +84,65 @@ Exit status: 0 for an answer, 1 for a model or connection error, 2 for a usage e
 A CI runner with no Toskar nearby can run one: [Toskar in CI](ci.md).
 
 `ask` reads standard input whenever it isn't a terminal. Where it's an open pipe that never ends, such as some job runners and `ssh` without a command, give it `< /dev/null`.
+
+### Chat in the terminal
+
+`toskarctl chat` holds a conversation with Toskar in the terminal (#959). It's one of your chats, as in the apps: one begun here shows in History on your phone, and `--resume` continues one begun there. Answers stream as they're written, and each ends with its speed in tokens a second.
+
+```bash
+toskarctl chat
+toskarctl chat "What's a good first car for a teenager?"
+toskarctl chat --model qwen2.5-7b-q4 --file notes.md "Turn these into an agenda"
+toskarctl chat --resume
+toskarctl chat --resume 3f2a9c1e
+```
+
+| Flag | What it does |
+| --- | --- |
+| `--resume [id]` | Continue a chat. Without an id, it lists your 10 most recent chats to pick from, then shows the last exchange |
+| `--model id` | A model, or `auto` (the default) |
+| `--profile id` | Answer as this profile |
+| `--file path` | Data to work on, sent with the first message |
+
+While chatting, `/new` starts a new chat, `/model id` and `/profile id` change who answers the next message, `/attach path` sends a file as data with the next message, `/help` lists these, and `/exit` or Ctrl-D leaves.
+
+**Tools that ask first.** When the model wants a tool that asks before it runs, such as running code in the general assistant, `chat` shows the tool, why, what it would run, and, when Toskar is on another computer, which one it runs on, and waits: `y` runs it once, `n` doesn't, and `a` lets that tool run for the rest of this chat without asking. Your answer goes to Toskar the same way an app's does.
+
+**Piped in,** `chat` answers once, with what's piped as data to work on, and prints the command that continues the chat on standard error:
+
+```bash
+make 2>&1 | toskarctl chat "Why did this fail?"
+```
+
+With no one at the terminal to answer, a tool that asks first isn't run. Run traces mark these chats with the client `terminal` ([api.md](api.md)).
+
+### Connect a coding agent
+
+`toskarctl connect <agent>` prints the settings a coding agent needs to use a model on Toskar directly, with the agent's own tools (#959, #843). `--write` writes them instead. It writes only the agent's Toskar settings and keeps everything else in the file.
+
+| Agent | Format it speaks | `--write` writes |
+| --- | --- | --- |
+| `claude-code` | Anthropic's Messages (`/v1/messages`) | `.claude/settings.local.json` in this folder, which Claude Code keeps out of git: `ANTHROPIC_BASE_URL`, `ANTHROPIC_AUTH_TOKEN`, and the model for `ANTHROPIC_MODEL` and its Opus, Sonnet, and Haiku defaults, so background work reaches Toskar too |
+| `codex` | OpenAI's Responses (`/v1/responses`) | A `toskar` provider in `~/.codex/config.toml` (or `$CODEX_HOME`), and a `toskar` profile, `toskar.config.toml` beside it, as Codex 0.134 and later read profiles. Run `codex --profile toskar`; your default stays as it was. A `[profiles.toskar]` table from before is removed, since Codex refuses one now |
+| `opencode` | Chat Completions, as `raw:<model>` | A `toskar` provider in `opencode.json` in this folder, using `@ai-sdk/openai-compatible`, and the default `model` |
+| `aider` | Chat Completions, as `raw:<model>` | Nothing: Aider reads `OPENAI_API_BASE` and `OPENAI_API_KEY` from the environment, so put the printed lines in your shell profile |
+
+Editors' agents and AI features take an OpenAI-compatible endpoint, so their model is `raw:<model>` (#960). Most keep it in their own settings screens, so `connect` prints what to enter there, and `--write` explains that:
+
+| Editor | What it prints |
+| --- | --- |
+| `continue` | A `models:` entry for `~/.continue/config.yaml`: `provider: openai`, `apiBase`, `apiKey`, chat, edit, and apply roles, and `tool_use` |
+| `cline`, `roo-code` | The "OpenAI Compatible" provider's base URL, API key, model ID, and context window |
+| `zed` | A `language_models.openai_compatible` provider for `settings.json`, whose model's `max_tokens` is the window it runs with on Toskar |
+| `jetbrains` | AI Assistant's third-party "OpenAI-compatible" provider: URL, key, and model |
+| `copilot` | Copilot Chat's own-model option: "Chat: Manage Language Models", "OpenAI Compatible", base URL, and key. Copilot lists the models from `/v1/models`, which shows `raw:` models to a key that may use them |
+
+The editors' settings follow their docs as of November 2026, but they weren't checked in a running editor, as Claude Code and Codex were.
+
+- **The model:** `--model`, or the best installed one for an agent: one that calls tools, then one made for code, then one that fits Excellent or Good, then the largest.
+- **The key:** on this computer none is needed, so agents get the stand-in `toskar-local`. For another computer, set `TOSKAR_URL` and `TOSKAR_API_KEY` to a key with raw access ("Drive models directly, for coding agents" in API Access). Printed settings name the variable instead of showing the key.
+- **Window:** agents send long instructions and many tools, so a model gets a bigger window when it needs one and one fits (#962). When the tools take more than a quarter of the window, such as an agent with MCP servers, the model gets the most relevant ones and finds the rest with `tools_search`, which Toskar answers itself ([api.md](api.md), #843).
+- **Checked by hand on Apple silicon with Qwen 2.5 7B:** Claude Code 2.1.310 read a file with its Read tool, and Codex CLI 0.138 ran `cat` with its `exec_command` tool, each answering from the file. A model this small can answer without using a tool when the request doesn't ask for one. With the MCP servers of a Claude Code setup loaded (about 17,000 tokens of tools), the tools were narrowed and the request ran, but the 7B mis-copied a long path into its Read call. A larger model does better at both.
 
 ### Automations
 

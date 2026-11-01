@@ -921,7 +921,7 @@ export interface ChatRequest {
   /** Send message in place of this one, as a new version of it. */
   edit_of?: string
   /** The app asking; set by the api client (#498). */
-  client?: 'phone' | 'tablet' | 'watch' | 'car' | 'tv' | 'desktop' | 'web'
+  client?: 'phone' | 'tablet' | 'watch' | 'car' | 'tv' | 'desktop' | 'web' | 'terminal' | 'editor'
 }
 
 export interface StopChatResponse {
@@ -1120,6 +1120,8 @@ export interface APIKeyPermissions {
   profile?: string
   /** chat for a key that only asks, such as a CI job's (#455); empty reaches whatever its person may. */
   routes?: 'chat'
+  /** Drives a model directly as raw:<model>, with the request's own tools, for coding agents (#843). */
+  raw?: boolean
 }
 
 export interface CreateAPIKeyResponse {
@@ -2644,7 +2646,7 @@ export interface FirstAnswers {
 }
 
 export interface FirstAnswersGroup {
-  /** phone, tablet, watch, car, tv, desktop, web, or other; '' when the request didn't say. */
+  /** phone, tablet, watch, car, tv, desktop, web, terminal, editor, or other; '' when the request didn't say. */
   client: string
   /** A model loaded before the answer started. */
   cold: boolean

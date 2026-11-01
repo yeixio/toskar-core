@@ -456,9 +456,17 @@ func (s *Server) routes() {
 	if s.deps.OpenAI != nil {
 		s.router.HandleFunc("/v1/models", s.deps.OpenAI.HandleModels).Methods(http.MethodGet, http.MethodOptions)
 		s.router.HandleFunc("/v1/chat/completions", s.deps.OpenAI.HandleChatCompletions).Methods(http.MethodPost, http.MethodOptions)
+		// Anthropic's Messages format, for coding agents (#843).
+		s.router.HandleFunc("/v1/messages", s.deps.OpenAI.HandleMessages).Methods(http.MethodPost, http.MethodOptions)
+		s.router.HandleFunc("/v1/messages/count_tokens", s.deps.OpenAI.HandleCountTokens).Methods(http.MethodPost, http.MethodOptions)
+		// OpenAI's Responses format, for coding agents (#843).
+		s.router.HandleFunc("/v1/responses", s.deps.OpenAI.HandleResponses).Methods(http.MethodPost, http.MethodOptions)
 	} else {
 		s.router.HandleFunc("/v1/models", s.handleOpenAIModels).Methods(http.MethodGet, http.MethodOptions)
 		s.router.HandleFunc("/v1/chat/completions", s.handleOpenAIChat).Methods(http.MethodPost, http.MethodOptions)
+		s.router.HandleFunc("/v1/messages", s.handleOpenAIChat).Methods(http.MethodPost, http.MethodOptions)
+		s.router.HandleFunc("/v1/messages/count_tokens", s.handleOpenAIChat).Methods(http.MethodPost, http.MethodOptions)
+		s.router.HandleFunc("/v1/responses", s.handleOpenAIChat).Methods(http.MethodPost, http.MethodOptions)
 	}
 
 	if s.deps.WebRoot != nil {

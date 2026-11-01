@@ -132,6 +132,8 @@
       "chat": "Chat seulement, pour les tâches CI"
     },
     "placement": "Peut choisir où s'exécutent les requêtes",
+    "raw": "Piloter les modèles directement, pour les agents de code",
+    "rawHint": "Les requêtes peuvent indiquer raw:<modèle> et utiliser le modèle avec leurs propres outils, sans la mémoire, les connaissances, les outils ni les vérifications de l'assistant. Pour les agents de code et éditeurs de confiance. Pas avec un profil imposé.",
     "note": "Les requêtes peuvent demander moins, jamais plus. Sur le réseau, ces limites s'appliquent toujours ; sur cet ordinateur, elles s'appliquent lorsque l'app envoie cette clé.",
     "saveFailed": "Impossible d'enregistrer.",
     "profile": "Répond avec",
