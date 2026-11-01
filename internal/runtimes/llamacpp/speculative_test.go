@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 	"path/filepath"
+	"reflect"
 	"slices"
 	"testing"
 	"time"
@@ -64,9 +65,9 @@ func TestSupportsSpeculationAsksOncePerBinary(t *testing.T) {
 	}
 	help := "--spec-type none,draft-simple"
 	asked := 0
-	saved := specHelp
-	specHelp = func(context.Context, string) ([]byte, error) { asked++; return []byte(help), nil }
-	t.Cleanup(func() { specHelp = saved })
+	saved := runHelp
+	runHelp = func(context.Context, string) ([]byte, error) { asked++; return []byte(help), nil }
+	t.Cleanup(func() { runHelp = saved })
 
 	ctx := context.Background()
 	first, again := supportsSpeculation(ctx, bin), supportsSpeculation(ctx, bin)
@@ -93,5 +94,43 @@ func TestDraftCountsInMetrics(t *testing.T) {
 	m := mergeServerMetrics(nil, &timingsPayload{PredictedN: 200, DraftN: 128, DraftNAccepted: 85}, now, now, now, "")
 	if m.DraftTokens != 128 || m.DraftAccepted != 85 {
 		t.Fatalf("draft %d accepted %d", m.DraftTokens, m.DraftAccepted)
+	}
+}
+
+// A build with --fit places the layers itself (#955); a number asked for,
+// or an older build, gets -ngl.
+func TestGPULayerArgs(t *testing.T) {
+	for _, c := range []struct {
+		layers int
+		fits   bool
+		want   []string
+	}{
+		{0, true, nil},
+		{0, false, []string{"-ngl", "99"}},
+		{20, true, []string{"-ngl", "20"}},
+		{20, false, []string{"-ngl", "20"}},
+	} {
+		if got := gpuLayerArgs(c.layers, c.fits); !reflect.DeepEqual(got, c.want) {
+			t.Errorf("layers %d fits %v: %v, want %v", c.layers, c.fits, got, c.want)
+		}
+	}
+}
+
+// --fit is read from the binary's help, like speculation.
+func TestSupportsFit(t *testing.T) {
+	bin := filepath.Join(t.TempDir(), "llama-server")
+	if err := os.WriteFile(bin, []byte("new"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	saved := runHelp
+	runHelp = func(context.Context, string) ([]byte, error) {
+		return []byte("-fit,  --fit [on|off]\n-fitt, --fit-target MiB0,MiB1,MiB2,..."), nil
+	}
+	t.Cleanup(func() { runHelp = saved })
+	if !supportsFit(context.Background(), bin) {
+		t.Error("a build with --fit-target fits")
+	}
+	if supportsFit(context.Background(), filepath.Join(t.TempDir(), "missing")) {
+		t.Error("a missing binary fits nothing")
 	}
 }

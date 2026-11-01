@@ -89,9 +89,13 @@ func parseAcceleration(log string) *pluginapi.Acceleration {
 			add(&found, metalDeviceRe.FindStringSubmatch(line)[1])
 			known = true
 		case offloadedRe.MatchString(line):
-			m := offloadedRe.FindStringSubmatch(line)
-			a.LayersOffloaded, _ = strconv.Atoi(m[1])
-			a.LayersTotal, _ = strconv.Atoi(m[2])
+			// The chat model loads first; a draft's layers come after it
+			// (#835) and aren't the model's.
+			if a.LayersTotal == 0 {
+				m := offloadedRe.FindStringSubmatch(line)
+				a.LayersOffloaded, _ = strconv.Atoi(m[1])
+				a.LayersTotal, _ = strconv.Atoi(m[2])
+			}
 			known = true
 		case bufferRe.MatchString(line):
 			m := bufferRe.FindStringSubmatch(line)
