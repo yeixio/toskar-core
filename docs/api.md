@@ -949,6 +949,20 @@ Coding agents and editors run their own tools: they send `tools`, expect `tool_c
 - **The key** may come as `x-api-key`, as Anthropic's clients send it. `anthropic-version` is accepted and ignored. Errors use Anthropic's shape: `{"type": "error", "error": {"type": "invalid_request_error", "message": "..."}}`, with `permission_error` (403, no raw access), `not_found_error` (404, not on this computer), and `authentication_error` (401).
 - **`POST /v1/messages/count_tokens`** takes the same body and answers `{"input_tokens": n}`, an estimate, which agents ask for before they send.
 
+### OpenAI's Responses format (#843)
+
+`POST /v1/responses` serves agents that speak OpenAI's newer format, such as Codex-style tools, with a model on this computer. Like `/v1/messages`, it is always raw, with the same permission and window sizing, and `model` is the model's id, with or without `raw:` (contract 1.73).
+
+- **In:** `instructions`, and `input`: a string, or a list of items. Those are messages (`user`, `assistant`, `system`, or `developer`, with `input_text`, `input_image`, and `output_text` parts), `function_call` items, and `function_call_output` items. `reasoning` items are left out. Also `tools` of type `function`, `tool_choice` (`auto`, `required`, `none`, or `{"type": "function", "name": ...}`), `max_output_tokens`, `temperature`, `top_p`, and `parallel_tool_calls`. A run of `function_call` items becomes one assistant turn's `tool_calls`, with the assistant's text just before them.
+- **No stored responses:** Toskar keeps no responses, so `previous_response_id` answers `400`. Send the whole conversation as `input`, as agents do with `"store": false`.
+- **Out:** a `response` with `output` items, `message` with `output_text` and `function_call` with its `call_id`, `status` (`completed`, or `incomplete` with `incomplete_details.reason` `max_output_tokens`), and `usage`. With `"stream": true`:
+  - `response.created` and `response.in_progress`;
+  - for each output item, `response.output_item.added`, then `response.content_part.added`, `response.output_text.delta`, `.done`, and `response.content_part.done` for text, or `response.function_call_arguments.delta` and `.done` for a call, then `response.output_item.done`;
+  - `response.completed`, or `response.incomplete`.
+
+  Each event has a `sequence_number`.
+- Errors use OpenAI's shape, as `/v1/chat/completions` does.
+
 ## GPU acceleration
 
 When llama-server loads a model, it logs which devices it found, how many of the model's layers it put on a GPU, and the memory it took there. The daemon reads that log, so `GET /models/running` reports each model's `acceleration`:

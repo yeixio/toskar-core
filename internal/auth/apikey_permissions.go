@@ -69,6 +69,7 @@ var chatRoutes = map[string]bool{
 	// Anthropic's format, which only a key with raw access can use (#843).
 	"POST /v1/messages":              true,
 	"POST /v1/messages/count_tokens": true,
+	"POST /v1/responses":             true,
 	"GET /v1/models":                 true,
 	"GET /api/v1/health":             true,
 	"GET /api/v1/version":            true,

@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Toskar Control Plane API
-  version: "1.72"
+  version: "1.73"
   description: >-
     Local AI control plane API for Toskar, its OpenAI-compatible routes, and its MCP server.
     On the default loopback bind no key is needed. When the daemon listens on any other address,
@@ -2866,6 +2866,56 @@ paths:
       responses:
         "200":
           description: "{\"input_tokens\": n}"
+  /v1/responses:
+    post:
+      summary: OpenAI Responses, for coding agents
+      description: >-
+        OpenAI's Responses format, driving a chat model on this computer directly with the request's
+        own tools, as raw:<model> does on /v1/chat/completions (#843, contract 1.73). model is a model
+        id, with or without raw:. instructions, input (a string, or messages with input_text,
+        input_image, and output_text parts, function_call, and function_call_output items; reasoning
+        items are left out), function tools, tool_choice, max_output_tokens, temperature, top_p, and
+        parallel_tool_calls are converted to the model's Chat Completions and back. Toskar keeps no
+        responses, so previous_response_id is refused: send the whole conversation, as with store
+        set to false. With stream, the answer comes as the response.* events, each with a
+        sequence_number. Needs raw access, as raw:<model> does.
+      operationId: openaiResponses
+      tags: [OpenAI-compatible]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [model, input]
+              properties:
+                model: {type: string}
+                instructions: {type: string}
+                input: {description: A string or a list of input items}
+                tools:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      type: {type: string, enum: [function]}
+                      name: {type: string}
+                      description: {type: string}
+                      parameters: {type: object}
+                tool_choice: {description: 'auto, required, none, or {"type":"function","name"}'}
+                max_output_tokens: {type: integer}
+                temperature: {type: number}
+                top_p: {type: number}
+                parallel_tool_calls: {type: boolean}
+                stream: {type: boolean}
+      responses:
+        "200":
+          description: A response with message and function_call output items, status (completed, or incomplete at max_output_tokens), and usage; or, streamed, the response.* events
+        "400":
+          description: invalid_request_error, such as previous_response_id, an input item Toskar doesn't read, or a request no window of the model holds
+        "403":
+          description: RAW_NOT_ALLOWED, a key without raw access
+        "404":
+          description: MODEL_NOT_FOUND, a model not installed on this computer
   /v1/chat/completions:
     post:
       summary: OpenAI-compatible chat completions
