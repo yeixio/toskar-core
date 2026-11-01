@@ -195,7 +195,10 @@ func TestMessagesFromClaudeCode(t *testing.T) {
 		return auth.APIKeyPermissions{Raw: true}, r.Context(), nil
 	}
 	var need int
-	h.Raw = func(_ context.Context, _ string, n int) (string, func(), error) { need = n; return model.URL, func() {}, nil }
+	h.Raw = func(_ context.Context, _ string, n int) (string, func(), error) {
+		need = n
+		return model.URL, func() {}, nil
+	}
 	body := `{"model":"qwen2.5-7b-q4","max_tokens":32000,"thinking":{"type":"adaptive"},"context_management":{"edits":[]},"output_config":{"effort":"high"},
 	  "system":[{"type":"text","text":"You are Claude Code."}],
 	  "tools":[{"name":"Read","description":"Read a file","input_schema":{"type":"object"}}],
