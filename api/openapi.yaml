@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Toskar Control Plane API
-  version: "1.76"
+  version: "1.77"
   description: >-
     Local AI control plane API for Toskar, its OpenAI-compatible routes, and its MCP server.
     On the default loopback bind no key is needed. When the daemon listens on any other address,
@@ -4057,6 +4057,9 @@ paths:
                   description: Where the turn runs, such as local
                 stream:
                   type: boolean
+                live:
+                  type: boolean
+                  description: "With stream, send the answer as it's written, with a replace event when what was shown changes (#1006, contract 1.77). Without it, the answer comes whole when it's ready. Some turns stay whole anyway: topic-enforcing profiles, portals, Deliberate, Team, and answers that must be JSON."
               required: [message]
       responses:
         "200":
@@ -4070,6 +4073,7 @@ paths:
                 type: string
               x-events:
                 token: {$ref: "#/components/schemas/ChatToken"}
+                replace: {$ref: "#/components/schemas/ChatToken", description: "With live: content takes the place of everything sent so far, empty to take it all back. The saved message is always the final text."}
                 done: {$ref: "#/components/schemas/ChatDone"}
                 error_code: {$ref: "#/components/schemas/ErrorBody"}
                 error: {type: string, description: "The error's message, as plain text, after error_code; for clients from before error codes"}

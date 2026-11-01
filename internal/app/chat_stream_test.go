@@ -99,3 +99,25 @@ func TestChatStreamDoneWaitsForTheEnd(t *testing.T) {
 		t.Fatalf("stream: %q", out)
 	}
 }
+
+// A replace goes out as its own event, even an empty one, which takes back
+// what was shown (#1006).
+func TestChatStreamReplace(t *testing.T) {
+	ch := make(chan pluginapi.ChatChunk, 4)
+	ch <- pluginapi.ChatChunk{Content: "Let me check."}
+	ch <- pluginapi.ChatChunk{Replace: true}
+	ch <- pluginapi.ChatChunk{Content: "Clean."}
+	ch <- pluginapi.ChatChunk{Replace: true, Content: "All clean."}
+	close(ch)
+	rec := httptest.NewRecorder()
+	if err := writeChatStream(rec, ch); err != nil {
+		t.Fatal(err)
+	}
+	want := "event: token\ndata: {\"content\":\"Let me check.\"}\n\n" +
+		"event: replace\ndata: {\"content\":\"\"}\n\n" +
+		"event: token\ndata: {\"content\":\"Clean.\"}\n\n" +
+		"event: replace\ndata: {\"content\":\"All clean.\"}\n\n"
+	if out := rec.Body.String(); !strings.HasPrefix(out, want) {
+		t.Fatalf("stream: %q", out)
+	}
+}

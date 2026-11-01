@@ -84,3 +84,17 @@ func BranchFrom(ctx context.Context) Branch {
 	b, _ := ctx.Value(branchKey{}).(Branch)
 	return b
 }
+
+type liveKey struct{}
+
+// WithLive asks for the answer as it's written, with replace chunks when
+// what was shown changes (#1006).
+func WithLive(ctx context.Context) context.Context {
+	return context.WithValue(ctx, liveKey{}, true)
+}
+
+// LiveFrom says the turn's caller reads live text.
+func LiveFrom(ctx context.Context) bool {
+	live, _ := ctx.Value(liveKey{}).(bool)
+	return live
+}

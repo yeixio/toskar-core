@@ -14,6 +14,7 @@ import (
 	"github.com/yeixio/toskar-core/internal/mimir"
 	"github.com/yeixio/toskar-core/internal/structured"
 	"github.com/yeixio/toskar-core/internal/tools"
+	"github.com/yeixio/toskar-core/internal/turnopts"
 	"github.com/yeixio/toskar-core/internal/untrusted"
 	"github.com/yeixio/toskar-core/pkg/contracts"
 	"github.com/yeixio/toskar-core/pkg/pluginapi"
@@ -296,11 +297,19 @@ func (o *Orchestrator) Run(
 		// a tool (#557).
 		retriedHandover := false
 		declined := false
+		// live shows the answer as it's written, when nothing that runs after
+		// the model makes showing it early wrong (#1006).
+		var live *liveAnswer
+		if turnopts.LiveFrom(ctx) && !deliberate && !strat.team && mayShowEarly(ctx, env) {
+			live = &liveAnswer{ch: ch, role: role, nodeID: nodeID}
+		}
 
 		for {
-			content, m, err := generate(answerCtx, env, role, messages, true)
+			// Every way around this loop is a new attempt at the answer.
+			live.takeBack()
+			content, m, err := generateLive(answerCtx, env, role, messages, true, live.feed)
 			if err != nil {
-				if content != "" {
+				if content != "" && !live.settle(tools.VisibleText(content)) {
 					ch <- pluginapi.OrchestrationEvent{Type: "agent.message", Role: role, NodeID: nodeID, Content: content}
 				}
 				ch <- pluginapi.OrchestrationEvent{Type: "agent.error", Role: role, Error: err.Error(), Done: true}
@@ -343,7 +352,7 @@ func (o *Orchestrator) Run(
 			}
 			if parsed.Call != nil && toolsOn && toolEnabled(profile, parsed.Call.ID) {
 				if calls >= budget.MaxToolCalls {
-					streamText(ch, role, nodeID, "I stopped after "+fmt.Sprint(budget.MaxToolCalls)+" tool calls so this request would not loop.", metrics, usage)
+					live.finish(ch, role, nodeID, "I stopped after "+fmt.Sprint(budget.MaxToolCalls)+" tool calls so this request would not loop.", metrics, usage)
 					return
 				}
 				calls++
@@ -425,7 +434,7 @@ func (o *Orchestrator) Run(
 					if m != nil {
 						promptTokens = m.PromptTokens
 					}
-					streamText(ch, role, nodeID, reply, m, contextusage.Measure(count, plainSys, toolPrompt, messages, promptTokens))
+					live.finish(ch, role, nodeID, reply, m, contextusage.Measure(count, plainSys, toolPrompt, messages, promptTokens))
 					return
 				}
 			}
@@ -544,7 +553,7 @@ func (o *Orchestrator) Run(
 			if !changed && huginn.ClaimsAction(answer) {
 				env.Emit(EventUnconfirmedAction, map[string]any{})
 			}
-			streamText(ch, role, nodeID, answer, metrics, usage)
+			live.finish(ch, role, nodeID, answer, metrics, usage)
 			return
 		}
 	}()
@@ -576,6 +585,19 @@ func generate(
 	role string,
 	messages []pluginapi.ChatMessage,
 	answer bool,
+) (string, *pluginapi.GenerationMetrics, error) {
+	return generateLive(ctx, env, role, messages, answer, nil)
+}
+
+// generateLive is generate, passing each piece of the answer to onText as
+// the model writes it.
+func generateLive(
+	ctx context.Context,
+	env pluginapi.ExecutionEnvironment,
+	role string,
+	messages []pluginapi.ChatMessage,
+	answer bool,
+	onText func(string),
 ) (string, *pluginapi.GenerationMetrics, error) {
 	stream, err := env.Generate(ctx, role, messages)
 	if err != nil {
@@ -624,6 +646,9 @@ func generate(
 		if chunk.Content != "" {
 			endThinking()
 			b.WriteString(chunk.Content)
+			if onText != nil {
+				onText(chunk.Content)
+			}
 		}
 		if chunk.Done {
 			break
@@ -638,6 +663,10 @@ func streamText(ch chan<- pluginapi.OrchestrationEvent, role, nodeID, content st
 	if visible != "" {
 		ch <- pluginapi.OrchestrationEvent{Type: "agent.message", Role: role, NodeID: nodeID, Content: visible}
 	}
+	completeText(ch, role, nodeID, visible, metrics, usage)
+}
+
+func completeText(ch chan<- pluginapi.OrchestrationEvent, role, nodeID, visible string, metrics *pluginapi.GenerationMetrics, usage contextusage.Usage) {
 	ch <- pluginapi.OrchestrationEvent{
 		Type:    "agent.completed",
 		Role:    role,

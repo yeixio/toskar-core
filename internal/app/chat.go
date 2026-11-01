@@ -643,6 +643,27 @@ func (a *App) RunChat(ctx context.Context, profileID, conversationID, message st
 				if copied := copyContextUsage(evt.Payload); copied != nil {
 					contextUsage = copied
 				}
+				// The answer as it's written, and what takes its place (#1006).
+				// The orchestrator has already taken out what isn't for show.
+				if evt.Type == "agent.delta" || evt.Type == "agent.replace" {
+					if full == "" && env.trace != nil && evt.Content != "" {
+						if thinking := env.trace.thinking(); thinking != "" {
+							ch <- pluginapi.ChatChunk{Reasoning: thinking}
+						}
+					}
+					replace := evt.Type == "agent.replace"
+					if replace {
+						full = ""
+					}
+					full += evt.Content
+					ch <- pluginapi.ChatChunk{Content: evt.Content, Replace: replace}
+					a.publish(ctx, events.New(events.ChatToken, map[string]any{
+						"conversation_id": conversationID,
+						"content":         evt.Content,
+						"replace":         replace,
+					}))
+					continue
+				}
 				if evt.Content != "" && evt.Type != "agent.completed" {
 					visible := tools.VisibleText(evt.Content)
 					if visible == "" {
@@ -1001,7 +1022,11 @@ func writeChatStream(w http.ResponseWriter, ch <-chan pluginapi.ChatChunk) error
 			flusher.Flush()
 			return nil
 		}
-		if chunk.Content != "" {
+		if chunk.Replace {
+			data, _ := json.Marshal(contracts.ChatToken{Content: chunk.Content})
+			fmt.Fprintf(w, "event: replace\ndata: %s\n\n", data)
+			flusher.Flush()
+		} else if chunk.Content != "" {
 			data, _ := json.Marshal(contracts.ChatToken{Content: chunk.Content})
 			fmt.Fprintf(w, "event: token\ndata: %s\n\n", data)
 			flusher.Flush()

@@ -446,6 +446,12 @@ If the model fails before it shows or changes anything, the turn runs once more:
 
 ### Effort, plans, checks, and Stop
 
+**Answers as they're written (#1006, contract 1.77).** `POST /api/v1/chat` with `"stream": true` sends the answer whole when it's ready, as a `token` event, after its checks have run. Add `"live": true` to get the text as the model writes it:
+
+- `token` events carry the next piece of text. Tool-call wrappers are never sent.
+- A `replace` event's `content` takes the place of everything sent so far, and empty content takes it all back. It comes when a tool call, a retry, or a check changes what was shown. The saved message is always the final text.
+- Some turns stay whole even with `live`, because early text would be wrong or isn't the answer: profiles that enforce a topic, portals, Deliberate, Team, and answers that must be JSON.
+
 `POST /chat` takes `effort`: `auto` (the default), `fast`, `balanced`, or `thorough`. Effort sets a budget, not a number of calls the client sees:
 
 - **Fast** answers in one go. It doesn't plan, a look-up uses search results without reading pages, figures are checked but not sent back for correction, and a turn may make 3 tool calls.
