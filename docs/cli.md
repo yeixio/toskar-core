@@ -36,6 +36,7 @@ How it is started depends on how it was installed:
 | `toskarctl version` (or `about`) | Version, license, and corresponding source |
 | `toskarctl paths` | Default data, model, runtime, log, and database paths |
 | `toskarctl ask [flags] [prompt]` | Send one prompt and print the answer, for scripts and CI jobs (below) |
+| `toskarctl chat [flags] [message]` | Chat in the terminal, in the same chats as the apps (below) |
 | `toskarctl connect <agent> [--model id] [--write]` | Print, or write, the settings for a coding agent to use a model on Toskar (below) |
 | `toskarctl models list [--installed] [--json]` | The models, smallest first, with download size, fit on this computer, and whether each is installed |
 | `toskarctl models install <id> [--node <id>]` | Download a model and wait until it's installed, printing its progress every tenth of the way |
@@ -83,6 +84,37 @@ Exit status: 0 for an answer, 1 for a model or connection error, 2 for a usage e
 A CI runner with no Toskar nearby can run one: [Toskar in CI](ci.md).
 
 `ask` reads standard input whenever it isn't a terminal. Where it's an open pipe that never ends, such as some job runners and `ssh` without a command, give it `< /dev/null`.
+
+### Chat in the terminal
+
+`toskarctl chat` holds a conversation with Toskar in the terminal (#959). It's one of your chats, as in the apps: one begun here shows in History on your phone, and `--resume` continues one begun there. Answers stream as they're written, and each ends with its speed in tokens a second.
+
+```bash
+toskarctl chat
+toskarctl chat "What's a good first car for a teenager?"
+toskarctl chat --model qwen2.5-7b-q4 --file notes.md "Turn these into an agenda"
+toskarctl chat --resume
+toskarctl chat --resume 3f2a9c1e
+```
+
+| Flag | What it does |
+| --- | --- |
+| `--resume [id]` | Continue a chat. Without an id, it lists your 10 most recent chats to pick from, then shows the last exchange |
+| `--model id` | A model, or `auto` (the default) |
+| `--profile id` | Answer as this profile |
+| `--file path` | Data to work on, sent with the first message |
+
+While chatting, `/new` starts a new chat, `/model id` and `/profile id` change who answers the next message, `/attach path` sends a file as data with the next message, `/help` lists these, and `/exit` or Ctrl-D leaves.
+
+**Tools that ask first.** When the model wants a tool that asks before it runs, such as running code in the general assistant, `chat` shows the tool, why, what it would run, and, when Toskar is on another computer, which one it runs on, and waits for `y` to run it or `n` not to. Your answer goes to Toskar the same way an app's does.
+
+**Piped in,** `chat` answers once, with what's piped as data to work on, and prints the command that continues the chat on standard error:
+
+```bash
+make 2>&1 | toskarctl chat "Why did this fail?"
+```
+
+With no one at the terminal to answer, a tool that asks first isn't run. Run traces mark these chats with the client `terminal` ([api.md](api.md)).
 
 ### Connect a coding agent
 

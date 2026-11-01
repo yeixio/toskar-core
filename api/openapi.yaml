@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Toskar Control Plane API
-  version: "1.73"
+  version: "1.74"
   description: >-
     Local AI control plane API for Toskar, its OpenAI-compatible routes, and its MCP server.
     On the default loopback bind no key is needed. When the daemon listens on any other address,
@@ -4042,8 +4042,8 @@ paths:
                   description: Send message in place of this one, as a new version of it
                 client:
                   type: string
-                  enum: [phone, tablet, watch, car, tv, desktop, web]
-                  description: The app asking; its run is traced with it, to measure how long answers take to start. car is the phone app in CarPlay (contract 1.65).
+                  enum: [phone, tablet, watch, car, tv, desktop, web, terminal]
+                  description: The app asking; its run is traced with it, to measure how long answers take to start. car is the phone app in CarPlay (contract 1.65); terminal is toskarctl chat (#959, contract 1.74).
                 attachments:
                   type: array
                   items:
@@ -8398,7 +8398,7 @@ components:
         conversation_id: {type: string}
         profile_id: {type: string}
         source: {type: string}
-        client: {type: string, description: 'The app that asked: phone, tablet, watch, car, tv, desktop, or web, or other; empty when it didn''t say, such as an API call (#498).'}
+        client: {type: string, description: 'The app that asked: phone, tablet, watch, car, tv, desktop, web, or terminal, or other; empty when it didn''t say, such as an API call (#498).'}
         remote: {type: boolean, description: Set when the request came from outside the home network.}
         strategy:
           type: array
