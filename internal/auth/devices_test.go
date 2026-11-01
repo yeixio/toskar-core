@@ -219,3 +219,34 @@ func TestDevicePairingIsItsStartersOwn(t *testing.T) {
 		t.Fatalf("sam's code after sam's cancel: %+v", st)
 	}
 }
+
+// An editor asks for raw access when it pairs (#960): it gets it when an
+// Admin or the Owner showed the code, and only when it asks.
+func TestDevicePairingRaw(t *testing.T) {
+	ctx := context.Background()
+	for _, c := range []struct {
+		role auth.Role
+		ask  bool
+		want bool
+	}{
+		{auth.RoleOwner, true, true},
+		{auth.RoleAdmin, true, true},
+		{auth.RoleMember, true, false},
+		{auth.RoleAdmin, false, false},
+	} {
+		p, keys, _ := newPairer(t)
+		p.SetPermissions = keys.SetPermissions
+		shown, err := p.StartFor(auth.Person{ID: auth.OwnerID, Name: "Sam", Role: c.role})
+		if err != nil {
+			t.Fatal(err)
+		}
+		rec, secret, err := p.PairWith(ctx, shown.Code, "VS Code on rig", "192.168.1.20", c.ask)
+		if err != nil {
+			t.Fatal(err)
+		}
+		verified, err := keys.Verify(ctx, secret)
+		if err != nil || rec.Permissions.Raw != c.want || verified.Permissions.Raw != c.want || verified.Kind != auth.KindDevice {
+			t.Errorf("%s asking=%v: answer raw=%v, stored %+v %v; want raw=%v", c.role, c.ask, rec.Permissions.Raw, verified.Permissions, err, c.want)
+		}
+	}
+}
