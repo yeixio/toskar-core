@@ -523,7 +523,7 @@ func (o *Orchestrator) Run(
 				answer = deliberateAnswer(ctx, env, ch, profile, task.Prompt, messages, plainSys, answer, role, nodeID)
 			}
 			if budget.Verify {
-				answer = verifyAnswer(ctx, env, reviewerRole(profile, role), messages, parsed.Text, evidence, task.Prompt, budget.Corrections)
+				answer = verifyAnswer(ctx, env, reviewerRole(profile, role), messages, answer, evidence, task.Prompt, budget.Corrections)
 				answer = checkCode(ctx, env, reviewerRole(profile, role), messages, answer, budget.Corrections)
 				answer = checkLinks(ctx, env, reviewerRole(profile, role), messages, answer, evidence, budget.Corrections)
 				if budget.Effort == huginn.EffortThorough && budget.Corrections > 0 {
