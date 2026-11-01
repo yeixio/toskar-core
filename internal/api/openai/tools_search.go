@@ -244,9 +244,7 @@ func rawSend(ctx context.Context, endpoint string, body []byte, window int) (*ht
 			results = append(results, map[string]any{"role": "tool", "tool_call_id": c.ID, "content": foundText(found)})
 		}
 		messages = append(messages, map[string]any{"role": "assistant", "content": msg.Content, "tool_calls": calls})
-		for _, r := range results {
-			messages = append(messages, r)
-		}
+		messages = append(messages, results...)
 	}
 	answer.Usage.PromptTokens, answer.Usage.CompletionTokens = spentIn, spentOut
 	if stream {
