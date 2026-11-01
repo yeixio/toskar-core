@@ -1,0 +1,45 @@
+event: response.created
+data: {"response":{"created_at":1700000000,"error":null,"id":"resp_ID","incomplete_details":null,"model":"raw:qwen2.5-7b-q4","object":"response","output":[],"status":"in_progress"},"sequence_number":0,"type":"response.created"}
+
+event: response.in_progress
+data: {"response":{"created_at":1700000000,"error":null,"id":"resp_ID","incomplete_details":null,"model":"raw:qwen2.5-7b-q4","object":"response","output":[],"status":"in_progress"},"sequence_number":1,"type":"response.in_progress"}
+
+event: response.output_item.added
+data: {"item":{"content":[],"id":"msg_ID","role":"assistant","status":"in_progress","type":"message"},"output_index":0,"sequence_number":2,"type":"response.output_item.added"}
+
+event: response.content_part.added
+data: {"content_index":0,"item_id":"msg_ID","output_index":0,"part":{"annotations":[],"text":"","type":"output_text"},"sequence_number":3,"type":"response.content_part.added"}
+
+event: response.output_text.delta
+data: {"content_index":0,"delta":"I'll ","item_id":"msg_ID","output_index":0,"sequence_number":4,"type":"response.output_text.delta"}
+
+event: response.output_text.delta
+data: {"content_index":0,"delta":"read it.","item_id":"msg_ID","output_index":0,"sequence_number":5,"type":"response.output_text.delta"}
+
+event: response.output_text.done
+data: {"content_index":0,"item_id":"msg_ID","output_index":0,"sequence_number":6,"text":"I'll read it.","type":"response.output_text.done"}
+
+event: response.content_part.done
+data: {"content_index":0,"item_id":"msg_ID","output_index":0,"part":{"annotations":[],"text":"I'll read it.","type":"output_text"},"sequence_number":7,"type":"response.content_part.done"}
+
+event: response.output_item.done
+data: {"item":{"content":[{"annotations":[],"text":"I'll read it.","type":"output_text"}],"id":"msg_ID","role":"assistant","status":"completed","type":"message"},"output_index":0,"sequence_number":8,"type":"response.output_item.done"}
+
+event: response.output_item.added
+data: {"item":{"arguments":"","call_id":"call_7","id":"fc_ID","name":"read_file","status":"in_progress","type":"function_call"},"output_index":1,"sequence_number":9,"type":"response.output_item.added"}
+
+event: response.function_call_arguments.delta
+data: {"delta":"{\"pa","item_id":"fc_ID","output_index":1,"sequence_number":10,"type":"response.function_call_arguments.delta"}
+
+event: response.function_call_arguments.delta
+data: {"delta":"th\":\"go.mod\"}","item_id":"fc_ID","output_index":1,"sequence_number":11,"type":"response.function_call_arguments.delta"}
+
+event: response.function_call_arguments.done
+data: {"arguments":"{\"path\":\"go.mod\"}","item_id":"fc_ID","output_index":1,"sequence_number":12,"type":"response.function_call_arguments.done"}
+
+event: response.output_item.done
+data: {"item":{"arguments":"{\"path\":\"go.mod\"}","call_id":"call_7","id":"fc_ID","name":"read_file","status":"completed","type":"function_call"},"output_index":1,"sequence_number":13,"type":"response.output_item.done"}
+
+event: response.completed
+data: {"response":{"created_at":1700000000,"error":null,"id":"resp_ID","incomplete_details":null,"model":"raw:qwen2.5-7b-q4","object":"response","output":[{"content":[{"annotations":[],"text":"I'll read it.","type":"output_text"}],"id":"msg_ID","role":"assistant","status":"completed","type":"message"},{"arguments":"{\"path\":\"go.mod\"}","call_id":"call_7","id":"fc_ID","name":"read_file","status":"completed","type":"function_call"}],"status":"completed","usage":{"input_tokens":120,"output_tokens":18,"total_tokens":138}},"sequence_number":14,"type":"response.completed"}
+

@@ -324,24 +324,33 @@ func (h *Handler) HandleCountTokens(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, map[string]int{"input_tokens": req.estimate()})
 }
 
-// messagesAuth is the request's permissions, as for chat completions.
+// messagesAuth is the request's permissions, as for chat completions, or
+// false after writing Anthropic's error.
 func (h *Handler) messagesAuth(w http.ResponseWriter, r *http.Request) (auth.APIKeyPermissions, *http.Request, bool) {
-	perms := auth.APIKeyPermissions{}
+	perms, r, err := h.permissionsFor(r)
+	if err != nil {
+		anthropicError(w, http.StatusUnauthorized, "authentication_error", err.Error())
+		return perms, r, false
+	}
+	return perms, r, true
+}
+
+// permissionsFor is what a raw format's request may do, and the request
+// carrying whose it is, as for chat completions.
+func (h *Handler) permissionsFor(r *http.Request) (auth.APIKeyPermissions, *http.Request, error) {
 	if h.Permissions != nil {
 		p, ctx, err := h.Permissions(r)
 		if err != nil {
-			anthropicError(w, http.StatusUnauthorized, "authentication_error", err.Error())
-			return perms, r, false
+			return auth.APIKeyPermissions{}, r, err
 		}
-		return p, r.WithContext(ctx), true
+		return p, r.WithContext(ctx), nil
 	}
 	if h.Auth != nil {
 		if err := h.Auth(r); err != nil {
-			anthropicError(w, http.StatusUnauthorized, "authentication_error", err.Error())
-			return perms, r, false
+			return auth.APIKeyPermissions{}, r, err
 		}
 	}
-	return perms, r, true
+	return auth.APIKeyPermissions{}, r, nil
 }
 
 // chatAnswer is the part of a Chat Completions answer a Messages answer
