@@ -103,10 +103,26 @@ func main() {
 	install := flag.String("install", "", "with -toskar: the catalog model to install and measure")
 	dataDir := flag.String("data", "/data", "with -install: the daemon's data folder, for llama-server and the model's file")
 	draftURL := flag.String("draft-url", "", "download the draft from here when -draft isn't there yet")
+	fit := flag.Bool("fit", false, "with -toskar and -install: start the model through Toskar, as a chat would, and report where Toskar says it runs and how fast it answers (#955), instead of measuring speculation")
 	flag.Parse()
 	if *toskar != "" && *install != "" {
 		if err := prepare(*toskar, *install); err != nil {
 			log.Fatal(err)
+		}
+		if *fit {
+			report, err := fitCheck(*toskar, *install, *maxTokens)
+			if report != "" {
+				fmt.Print(report)
+				if *out != "" {
+					if werr := os.WriteFile(*out, []byte(report), 0o644); werr != nil {
+						log.Fatal(werr)
+					}
+				}
+			}
+			if err != nil {
+				log.Fatal(err)
+			}
+			return
 		}
 		if *llama == "" {
 			*llama = filepath.Join(*dataDir, "runtimes", "llamacpp", "llama-server")
@@ -372,25 +388,42 @@ func tail(s string, n int) string {
 
 // prepare has the daemon at base install llama.cpp and the model, and
 // waits for the model's download.
-func prepare(base, id string) error {
-	call := func(method, path string, out any) error {
-		req, _ := http.NewRequest(method, base+path, nil)
-		if key := os.Getenv("TOSKAR_API_KEY"); key != "" {
-			req.Header.Set("Authorization", "Bearer "+key)
-		}
-		r, err := http.DefaultClient.Do(req)
+// toskarCall sends a request to the Toskar daemon at base, with
+// TOSKAR_API_KEY when it's set, and decodes its answer into out.
+func toskarCall(base, method, path string, body, out any) error {
+	var in io.Reader
+	if body != nil {
+		b, err := json.Marshal(body)
 		if err != nil {
 			return err
 		}
-		defer r.Body.Close()
-		raw, _ := io.ReadAll(r.Body)
-		if r.StatusCode >= 300 {
-			return fmt.Errorf("%s %s: %s: %s", method, path, r.Status, tail(string(raw), 300))
-		}
-		if out != nil {
-			return json.Unmarshal(raw, out)
-		}
-		return nil
+		in = bytes.NewReader(b)
+	}
+	req, _ := http.NewRequest(method, base+path, in)
+	if body != nil {
+		req.Header.Set("Content-Type", "application/json")
+	}
+	if key := os.Getenv("TOSKAR_API_KEY"); key != "" {
+		req.Header.Set("Authorization", "Bearer "+key)
+	}
+	r, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return err
+	}
+	defer r.Body.Close()
+	raw, _ := io.ReadAll(r.Body)
+	if r.StatusCode >= 300 {
+		return fmt.Errorf("%s %s: %s: %s", method, path, r.Status, tail(string(raw), 300))
+	}
+	if out != nil {
+		return json.Unmarshal(raw, out)
+	}
+	return nil
+}
+
+func prepare(base, id string) error {
+	call := func(method, path string, out any) error {
+		return toskarCall(base, method, path, nil, out)
 	}
 	// The daemon may still be starting, as just after its container.
 	for deadline := time.Now().Add(3 * time.Minute); ; time.Sleep(2 * time.Second) {
