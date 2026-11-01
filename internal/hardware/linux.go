@@ -133,7 +133,7 @@ func platformAccelerators(ctx context.Context) ([]contracts.Accelerator, error) 
 			}
 			lspciLines = append(lspciLines, line)
 			if slot, _, ok := strings.Cut(line, " "); ok {
-				names[slot] = strings.TrimSpace(line)
+				names[slot] = lspciName(line)
 			}
 		}
 	}
@@ -152,7 +152,7 @@ func platformAccelerators(ctx context.Context) ([]contracts.Accelerator, error) 
 				accels = append(accels, contracts.Accelerator{
 					ID:       "amd" + strconv.Itoa(i),
 					Vendor:   "AMD",
-					Model:    strings.TrimSpace(line),
+					Model:    lspciName(line),
 					Kind:     "gpu",
 					Backends: backends,
 				})
@@ -160,7 +160,7 @@ func platformAccelerators(ctx context.Context) ([]contracts.Accelerator, error) 
 				accels = append(accels, contracts.Accelerator{
 					ID:       "intel" + strconv.Itoa(i),
 					Vendor:   "Intel",
-					Model:    strings.TrimSpace(line),
+					Model:    lspciName(line),
 					Kind:     "gpu",
 					Backends: []string{"vulkan", "cpu"},
 				})

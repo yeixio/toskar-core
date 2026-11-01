@@ -78,6 +78,39 @@ func hasRenderNode(device, dev string) bool {
 	return false
 }
 
+// lspciName is a card's name from its lspci line, as people know it:
+// "AMD Radeon RX 7900 XT/7900 XTX" for "03:00.0 VGA compatible controller:
+// Advanced Micro Devices, Inc. [AMD/ATI] Navi 31 [Radeon RX 7900 XT/7900
+// XTX] (rev c8)". The marketing name is the last bracket; without one, the
+// line past its class, without the revision.
+func lspciName(line string) string {
+	line = strings.TrimSpace(line)
+	if _, rest, ok := strings.Cut(line, ": "); ok {
+		line = rest
+	}
+	if i := strings.LastIndex(line, " (rev "); i >= 0 {
+		line = line[:i]
+	}
+	vendor := ""
+	switch lower := strings.ToLower(line); {
+	case strings.Contains(lower, "advanced micro devices") || strings.Contains(lower, "[amd"):
+		vendor = "AMD"
+	case strings.HasPrefix(lower, "intel"):
+		vendor = "Intel"
+	case strings.HasPrefix(lower, "nvidia"):
+		vendor = "NVIDIA"
+	}
+	open, end := strings.LastIndex(line, "["), strings.LastIndex(line, "]")
+	if vendor == "" || open < 0 || end != len(line)-1 {
+		return line
+	}
+	name := line[open+1 : end]
+	if strings.HasPrefix(strings.ToLower(name), strings.ToLower(vendor)) {
+		return name
+	}
+	return vendor + " " + name
+}
+
 // shortSlot is a PCI address as lspci prints it: "03:00.0" for
 // "0000:03:00.0".
 func shortSlot(slot string) string {

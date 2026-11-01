@@ -82,12 +82,12 @@ func TestDRMGPUs(t *testing.T) {
 func TestDRMAccelerators(t *testing.T) {
 	sys, dev := fakeSys(t)
 	cards := drmGPUs(sys, dev)
-	names := map[string]string{"03:00.0": "03:00.0 VGA compatible controller: Advanced Micro Devices, Inc. [AMD/ATI] Navi 31 [Radeon RX 7900 XT/7900 XTX] (rev c8)"}
+	names := map[string]string{"03:00.0": lspciName("03:00.0 VGA compatible controller: Advanced Micro Devices, Inc. [AMD/ATI] Navi 31 [Radeon RX 7900 XT/7900 XTX] (rev c8)")}
 	got := drmAccelerators(cards, names, false, 0)
 	if len(got) != 2 {
 		t.Fatalf("got %+v", got)
 	}
-	if got[0].Model != names["03:00.0"] || got[0].DedicatedVRAM != 25753026560 || got[0].Backends[0] != "vulkan" {
+	if got[0].Model != "AMD Radeon RX 7900 XT/7900 XTX" || got[0].DedicatedVRAM != 25753026560 || got[0].Backends[0] != "vulkan" {
 		t.Errorf("the card lspci names: %+v", got[0])
 	}
 	if got[1].Model != "AMD GPU (1002:13c0)" || got[1].DedicatedVRAM != 536870912 {
@@ -102,5 +102,21 @@ func TestDRMAccelerators(t *testing.T) {
 	}
 	if got := drmAccelerators(intel, nil, false, 1); len(got) != 0 {
 		t.Errorf("Intel beside an NVIDIA card: %+v", got)
+	}
+}
+
+// A card is named as people know it, not by its lspci line (#955).
+func TestLSPCIName(t *testing.T) {
+	for line, want := range map[string]string{
+		"03:00.0 VGA compatible controller: Advanced Micro Devices, Inc. [AMD/ATI] Navi 31 [Radeon RX 7900 XT/7900 XTX/7900 GRE/7900M] (rev c8)": "AMD Radeon RX 7900 XT/7900 XTX/7900 GRE/7900M",
+		"00:02.0 VGA compatible controller: Intel Corporation Raptor Lake-S GT1 [UHD Graphics 770] (rev 04)":                                     "Intel UHD Graphics 770",
+		"00:02.0 VGA compatible controller: Intel Corporation Alder Lake-P GT2 (rev 0c)":                                                         "Intel Corporation Alder Lake-P GT2",
+		"01:00.0 VGA compatible controller: NVIDIA Corporation AD104 [GeForce RTX 4070] (rev a1)":                                                "NVIDIA GeForce RTX 4070",
+		"c1:00.0 Display controller: Advanced Micro Devices, Inc. [AMD/ATI] Strix Halo [Radeon 8060S]":                                           "AMD Radeon 8060S",
+		"05:00.0 3D controller: Some Vendor Accelerator X":                                                                                       "Some Vendor Accelerator X",
+	} {
+		if got := lspciName(line); got != want {
+			t.Errorf("lspciName(%q) = %q, want %q", line, got, want)
+		}
 	}
 }
