@@ -97,8 +97,8 @@ A CI runner with no Toskar nearby can run one: [Toskar in CI](ci.md).
 
 - **The model:** `--model`, or the best installed one for an agent: one that calls tools, then one made for code, then one that fits Excellent or Good, then the largest.
 - **The key:** on this computer none is needed, so agents get the stand-in `toskar-local`. For another computer, set `TOSKAR_URL` and `TOSKAR_API_KEY` to a key with raw access ("Drive models directly, for coding agents" in API Access). Printed settings name the variable instead of showing the key.
-- **Window:** agents send long instructions and many tools, so a model gets a bigger window when it needs one and one fits (#962). Many tools, such as an agent with MCP servers, can need more than a small model holds. Then the request answers `CONTEXT_TOO_LONG`. Choose a bigger model or fewer tools.
-- **Checked by hand on Apple silicon with Qwen 2.5 7B:** Claude Code 2.1.310 read a file with its Read tool, and Codex CLI 0.138 ran `cat` with its `exec_command` tool, each answering from the file. A model this small can answer without using a tool when the request doesn't ask for one.
+- **Window:** agents send long instructions and many tools, so a model gets a bigger window when it needs one and one fits (#962). When the tools take more than a quarter of the window, such as an agent with MCP servers, the model gets the most relevant ones and finds the rest with `tools_search`, which Toskar answers itself ([api.md](api.md), #843).
+- **Checked by hand on Apple silicon with Qwen 2.5 7B:** Claude Code 2.1.310 read a file with its Read tool, and Codex CLI 0.138 ran `cat` with its `exec_command` tool, each answering from the file. A model this small can answer without using a tool when the request doesn't ask for one. With the MCP servers of a Claude Code setup loaded (about 17,000 tokens of tools), the tools were narrowed and the request ran, but the 7B mis-copied a long path into its Read call. A larger model does better at both.
 
 ### Automations
 

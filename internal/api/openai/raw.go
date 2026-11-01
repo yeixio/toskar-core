@@ -51,7 +51,13 @@ func (h *Handler) handleRaw(w http.ResponseWriter, r *http.Request, perms auth.A
 	if o := req.assistant(); o != nil {
 		least = o.ContextWindow
 	}
-	endpoint, done, fail := h.rawReady(r.Context(), perms, strings.TrimPrefix(req.Model, RawPrefix), max(neededWindow(req, min(maxTokens, rawAnswerRoom)), least))
+	forward, err := rawBody(body)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "INVALID_JSON", "invalid request body")
+		return
+	}
+	need := neededWindow(req, min(maxTokens, rawAnswerRoom)) + min(toolTokens(forward), rawToolRoom)
+	endpoint, window, done, fail := h.rawReady(r.Context(), perms, strings.TrimPrefix(req.Model, RawPrefix), max(need, least))
 	if fail != nil {
 		if fail.param != "" {
 			writeErrorParam(w, fail.status, fail.code, fail.message, fail.param)
@@ -62,12 +68,7 @@ func (h *Handler) handleRaw(w http.ResponseWriter, r *http.Request, perms auth.A
 	}
 	defer done()
 
-	forward, err := rawBody(body)
-	if err != nil {
-		writeError(w, http.StatusBadRequest, "INVALID_JSON", "invalid request body")
-		return
-	}
-	resp, err := rawPost(r.Context(), endpoint, forward)
+	resp, err := rawSend(r.Context(), endpoint, forward, window)
 	if err != nil {
 		if r.Context().Err() != nil {
 			return
@@ -116,27 +117,27 @@ type rawFailure struct {
 // with a window of at least need tokens: the part every raw format shares
 // (#843). It returns the model's llama-server and a func to call when the
 // request is done, or why it can't run.
-func (h *Handler) rawReady(ctx context.Context, perms auth.APIKeyPermissions, modelID string, need int) (string, func(), *rawFailure) {
+func (h *Handler) rawReady(ctx context.Context, perms auth.APIKeyPermissions, modelID string, need int) (string, int, func(), *rawFailure) {
 	if !perms.Raw || perms.Profile != "" {
-		return "", nil, &rawFailure{status: http.StatusForbidden, code: "RAW_NOT_ALLOWED", message: "this key can't drive a model directly; an Admin can allow raw model access for it in API Access"}
+		return "", 0, nil, &rawFailure{status: http.StatusForbidden, code: "RAW_NOT_ALLOWED", message: "this key can't drive a model directly; an Admin can allow raw model access for it in API Access"}
 	}
 	if modelID == "" {
-		return "", nil, &rawFailure{status: http.StatusBadRequest, code: "INVALID_REQUEST", message: "name the model, such as raw:qwen2.5-7b-q4", param: "model"}
+		return "", 0, nil, &rawFailure{status: http.StatusBadRequest, code: "INVALID_REQUEST", message: "name the model, such as raw:qwen2.5-7b-q4", param: "model"}
 	}
 	if h.Raw == nil {
-		return "", nil, &rawFailure{status: http.StatusNotImplemented, code: "NOT_IMPLEMENTED", message: "raw model access isn't available"}
+		return "", 0, nil, &rawFailure{status: http.StatusNotImplemented, code: "NOT_IMPLEMENTED", message: "raw model access isn't available"}
 	}
-	endpoint, done, err := h.Raw(ctx, modelID, need)
+	endpoint, window, done, err := h.Raw(ctx, modelID, need)
 	switch {
 	case errors.Is(err, ErrRawNotHere):
-		return "", nil, &rawFailure{status: http.StatusNotFound, code: "MODEL_NOT_FOUND", message: modelID + ": " + err.Error(), param: "model"}
+		return "", 0, nil, &rawFailure{status: http.StatusNotFound, code: "MODEL_NOT_FOUND", message: modelID + ": " + err.Error(), param: "model"}
 	case errors.Is(err, ErrRawTooLong):
-		return "", nil, &rawFailure{status: http.StatusBadRequest, code: "CONTEXT_TOO_LONG", message: strings.TrimPrefix(err.Error(), "CONTEXT_TOO_LONG: "), param: "messages"}
+		return "", 0, nil, &rawFailure{status: http.StatusBadRequest, code: "CONTEXT_TOO_LONG", message: strings.TrimPrefix(err.Error(), "CONTEXT_TOO_LONG: "), param: "messages"}
 	case err != nil:
 		status, code := h.failure("", err.Error())
-		return "", nil, &rawFailure{status: status, code: code, message: err.Error()}
+		return "", 0, nil, &rawFailure{status: status, code: code, message: err.Error()}
 	}
-	return endpoint, done, nil
+	return endpoint, window, done, nil
 }
 
 // rawBody is the request as llama-server takes it: as sent, less Toskar's

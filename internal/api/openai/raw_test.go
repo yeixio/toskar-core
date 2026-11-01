@@ -37,15 +37,15 @@ func TestRawModel(t *testing.T) {
 	perms := auth.APIKeyPermissions{Raw: true}
 	h.Permissions = func(r *http.Request) (auth.APIKeyPermissions, context.Context, error) { return perms, r.Context(), nil }
 	var asked int
-	h.Raw = func(_ context.Context, model string, need int) (string, func(), error) {
+	h.Raw = func(_ context.Context, model string, need int) (string, int, func(), error) {
 		asked = need
 		switch model {
 		case "here":
-			return server.URL, func() {}, nil
+			return server.URL, 32768, func() {}, nil
 		case "huge":
-			return "", nil, fmt.Errorf("%w: the request is about 900000 tokens", ErrRawTooLong)
+			return "", 0, nil, fmt.Errorf("%w: the request is about 900000 tokens", ErrRawTooLong)
 		}
-		return "", nil, ErrRawNotHere
+		return "", 0, nil, ErrRawNotHere
 	}
 	h.RawModels = func(context.Context) []string { return []string{"here"} }
 	call := func(body string) *httptest.ResponseRecorder {

@@ -262,6 +262,21 @@ func (m messagesRequest) tools() []anthropicTool {
 
 // estimate is about how many tokens m's messages take, for its window.
 func (m messagesRequest) estimate() int {
+	return m.promptEstimate() + m.toolEstimate()
+}
+
+// toolEstimate is about how many tokens m's tools take.
+func (m messagesRequest) toolEstimate() int {
+	n := 0
+	for _, t := range m.tools() {
+		n += contextusage.Estimate(t.Name+" "+t.Description) + contextusage.Estimate(string(t.InputSchema))
+	}
+	return n
+}
+
+// promptEstimate is about how many tokens m's system prompt and messages
+// take, without its tools.
+func (m messagesRequest) promptEstimate() int {
 	n := 0
 	if sys, err := blocks(m.System); err == nil {
 		n += contextusage.Estimate(blockText(sys))
@@ -275,9 +290,6 @@ func (m messagesRequest) estimate() int {
 				n += contextusage.Estimate(blockText(c))
 			}
 		}
-	}
-	for _, t := range m.tools() {
-		n += contextusage.Estimate(t.Name+" "+t.Description) + contextusage.Estimate(string(t.InputSchema))
 	}
 	return n
 }
@@ -302,17 +314,17 @@ func (h *Handler) HandleMessages(w http.ResponseWriter, r *http.Request) {
 		anthropicError(w, http.StatusBadRequest, "invalid_request_error", err.Error())
 		return
 	}
-	need := req.estimate() + min(req.MaxTokens, rawAnswerRoom)
+	need := req.promptEstimate() + min(req.toolEstimate(), rawToolRoom) + min(req.MaxTokens, rawAnswerRoom)
 	if req.Toskar != nil {
 		need = max(need, req.Toskar.ContextWindow)
 	}
-	endpoint, done, fail := h.rawReady(r.Context(), perms, strings.TrimPrefix(req.Model, RawPrefix), need)
+	endpoint, window, done, fail := h.rawReady(r.Context(), perms, strings.TrimPrefix(req.Model, RawPrefix), need)
 	if fail != nil {
 		anthropicError(w, fail.status, anthropicType(fail.status), fail.message)
 		return
 	}
 	defer done()
-	resp, err := rawPost(r.Context(), endpoint, body)
+	resp, err := rawSend(r.Context(), endpoint, body, window)
 	if err != nil {
 		if r.Context().Err() == nil {
 			anthropicError(w, http.StatusBadGateway, "api_error", "the model didn't answer: "+err.Error())
