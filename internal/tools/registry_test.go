@@ -167,8 +167,10 @@ func TestRegistryAllowForSessionIsPerChat(t *testing.T) {
 	if !run("b", PolicyAsk) {
 		t.Error("another chat asks")
 	}
-	if !run("c", PolicyAskEachTime) || !run("c", PolicyAskEachTime) {
-		t.Error("after untrusted content, each call asks, and a yes for the session isn't kept")
+	for i := range 2 {
+		if !run("c", PolicyAskEachTime) {
+			t.Errorf("call %d: after untrusted content, each call asks, and a yes for the session isn't kept", i+1)
+		}
 	}
 	if !run("c", PolicyAsk) {
 		t.Error("a yes under ask-each-time isn't kept, so c still asks")
