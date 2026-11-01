@@ -95,6 +95,18 @@ A CI runner with no Toskar nearby can run one: [Toskar in CI](ci.md).
 | `opencode` | Chat Completions, as `raw:<model>` | A `toskar` provider in `opencode.json` in this folder, using `@ai-sdk/openai-compatible`, and the default `model` |
 | `aider` | Chat Completions, as `raw:<model>` | Nothing: Aider reads `OPENAI_API_BASE` and `OPENAI_API_KEY` from the environment, so put the printed lines in your shell profile |
 
+Editors' agents and AI features take an OpenAI-compatible endpoint, so their model is `raw:<model>` (#960). Most keep it in their own settings screens, so `connect` prints what to enter there, and `--write` explains that:
+
+| Editor | What it prints |
+| --- | --- |
+| `continue` | A `models:` entry for `~/.continue/config.yaml`: `provider: openai`, `apiBase`, `apiKey`, chat, edit, and apply roles, and `tool_use` |
+| `cline`, `roo-code` | The "OpenAI Compatible" provider's base URL, API key, model ID, and context window |
+| `zed` | A `language_models.openai_compatible` provider for `settings.json`, whose model's `max_tokens` is the window it runs with on Toskar |
+| `jetbrains` | AI Assistant's third-party "OpenAI-compatible" provider: URL, key, and model |
+| `copilot` | Copilot Chat's own-model option: "Chat: Manage Language Models", "OpenAI Compatible", base URL, and key. Copilot lists the models from `/v1/models`, which shows `raw:` models to a key that may use them |
+
+The editors' settings follow their docs as of November 2026, but they weren't checked in a running editor, as Claude Code and Codex were.
+
 - **The model:** `--model`, or the best installed one for an agent: one that calls tools, then one made for code, then one that fits Excellent or Good, then the largest.
 - **The key:** on this computer none is needed, so agents get the stand-in `toskar-local`. For another computer, set `TOSKAR_URL` and `TOSKAR_API_KEY` to a key with raw access ("Drive models directly, for coding agents" in API Access). Printed settings name the variable instead of showing the key.
 - **Window:** agents send long instructions and many tools, so a model gets a bigger window when it needs one and one fits (#962). When the tools take more than a quarter of the window, such as an agent with MCP servers, the model gets the most relevant ones and finds the rest with `tools_search`, which Toskar answers itself ([api.md](api.md), #843).
