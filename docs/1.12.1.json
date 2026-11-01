@@ -1,0 +1,2399 @@
+{
+  "sections": [
+    {
+      "id": "overview",
+      "title": "What Toskar does",
+      "paragraphs": [
+        "Toskar runs AI models on computers you already own. Toskar Pro is the packaged app for your computer, and Toskar the app for your phone, tablet, watch, and TV. Toskar Core is the open-source engine behind them: a daemon, a local web UI, and an HTTP API. You do not need a hosted model account, and your chats, files, and knowledge stay on your computers unless you use a feature that goes online.",
+        "Chat answers with sources you can check, remembers what you ask it to, and looks things up on the web when a question needs current information. It reads files you attach and makes documents and spreadsheets you ask for. Knowledge connects your own files, folders, databases, and web APIs, so answers use current prices, stock, and policies without retraining. Automations run prompts on a schedule. Train builds a specialized AI for one job. Computers lets several of your machines share the work.",
+        "This Core release publishes headless archives, Linux deb and rpm packages, and a Homebrew formula, which aren't code-signed. Toskar Pro, the app, comes from the Mac App Store and the Microsoft Store, and the Toskar app for phones, tablets, and TVs from their app stores."
+      ]
+    },
+    {
+      "id": "install",
+      "title": "Install and start your first chat",
+      "kind": "task",
+      "summary": "Get Toskar on your computer, install a model that fits it, and ask your first question.",
+      "paragraphs": [
+        "Toskar Pro is the app for your Mac or Windows computer, from the Mac App Store and the Microsoft Store. Toskar Core is the free, open-source service behind it, for servers, Linux, and anyone who wants it without the app.",
+        "Either way, the first time you open Toskar it looks at your computer, suggests an AI model that fits it, and downloads it. Then you can chat."
+      ],
+      "blocks": [
+        {
+          "type": "list",
+          "title": "What you need",
+          "items": [
+            "A Mac with Apple silicon, or a Windows computer, for Toskar Pro. Toskar Core also runs on Linux.",
+            "Memory for the model. More memory runs larger, more capable models, and Toskar shows which ones fit.",
+            "Internet access and a few gigabytes of disk space for the first model download. After that, chats work offline."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "What your computer can run"
+        },
+        {
+          "type": "paragraph",
+          "text": "A model has to fit in memory to answer quickly. More memory runs larger models, which write better answers and follow longer instructions. Here's what fits well, by memory:"
+        },
+        {
+          "type": "table",
+          "columns": [
+            "Memory",
+            "Models that fit well",
+            "For example"
+          ],
+          "rows": [
+            [
+              "8 GB",
+              "Small models, up to about 3.5 GB",
+              "Llama 3.2 3B, Qwen 3.5 4B, Phi 3.5 Mini"
+            ],
+            [
+              "16 GB",
+              "Up to about 9 GB",
+              "Qwen 3.5 9B, Qwen 2.5 7B, Gemma 2 9B"
+            ],
+            [
+              "24 to 32 GB",
+              "Up to about 10 GB, the 14B models",
+              "Qwen 2.5 14B"
+            ],
+            [
+              "64 GB or more",
+              "The 30B models, about 21 GB",
+              "Qwen 3.8 27B, Qwen 2.5 32B"
+            ]
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "On a Mac, the graphics use part of the computer's memory, and the table counts that part. A graphics card on a Windows or Linux computer brings its own memory, so larger models run there too. You don't need to work this out yourself: Toskar checks this computer and labels every model by how well it fits."
+        },
+        {
+          "type": "heading",
+          "text": "Choose how to install"
+        },
+        {
+          "type": "table",
+          "columns": [
+            "For",
+            "Get"
+          ],
+          "rows": [
+            [
+              "A Mac",
+              "Toskar Pro from the Mac App Store. It's free to try; see [Toskar Pro's free trial and Unlock](#pro-trial)."
+            ],
+            [
+              "A Windows computer",
+              "Toskar Pro from the Microsoft Store, with a free trial."
+            ],
+            [
+              "A server or a Linux computer",
+              "Toskar Core, with the install script below. It runs as a service that starts when the computer does."
+            ],
+            [
+              "A Mac, without the app",
+              "Toskar Core with Homebrew."
+            ],
+            [
+              "Your phone, tablet, TV, or watch",
+              "The Toskar app, which uses the AI on your computer. See [Use Toskar on your phone, tablet, or TV](#phone)."
+            ]
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Install Toskar Pro"
+        },
+        {
+          "type": "steps",
+          "items": [
+            "Open the Mac App Store or the Microsoft Store and search for Toskar Pro.",
+            "Install it, then open it from your Applications folder or the Start menu."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Install Toskar Core"
+        },
+        {
+          "type": "paragraph",
+          "text": "On Linux, the install script adds the release's package, checks it against the release's SHA256SUMS.txt, and starts Toskar as a service. On a Mac it installs the release's files and starts them with launchd. CI runs this line on a fresh Ubuntu computer."
+        },
+        {
+          "type": "code",
+          "language": "sh",
+          "code": "curl -fsSL https://github.com/yeixio/toskar-core/releases/latest/download/install.sh | sh",
+          "test": "install-script",
+          "runs_in": "scripts/test-install.sh"
+        },
+        {
+          "type": "paragraph",
+          "text": "On Debian or Ubuntu, you can add Toskar's apt repository instead. It's signed, and apt checks every update against its key. The release tests these lines on a fresh Ubuntu computer."
+        },
+        {
+          "type": "code",
+          "language": "sh",
+          "test": "install-apt",
+          "runs_in": "scripts/build/test-apt-repo.sh",
+          "code": "sudo install -d -m 0755 /etc/apt/keyrings\ncurl -fsSL https://toskar.ai/apt/toskar.asc | sudo tee /etc/apt/keyrings/toskar.asc > /dev/null\necho \"deb [signed-by=/etc/apt/keyrings/toskar.asc] https://raw.githubusercontent.com/yeixio/toskar-core/apt stable main\" | sudo tee /etc/apt/sources.list.d/toskar.list\nsudo apt-get update\nsudo apt-get install toskar"
+        },
+        {
+          "type": "paragraph",
+          "text": "Other Linux computers get the release's rpm package, which the install script uses too. There's no published container image yet."
+        },
+        {
+          "type": "paragraph",
+          "text": "With Homebrew on a Mac:"
+        },
+        {
+          "type": "code",
+          "language": "sh",
+          "code": "brew tap yeixio/toskar https://github.com/yeixio/toskar-core\nbrew install yeixio/toskar/toskar\ntoskar"
+        },
+        {
+          "type": "note",
+          "tone": "tip",
+          "text": "The install script and the apt lines are tested on a fresh Ubuntu computer. The Homebrew lines aren't tested yet, because they install on the computer that runs them. [Run without a desktop](#server) covers the service and updates."
+        },
+        {
+          "type": "heading",
+          "text": "Set up on first launch"
+        },
+        {
+          "type": "steps",
+          "items": [
+            "Open Toskar Pro, or go to http://127.0.0.1:7331 in a browser on the computer running Toskar Core. Only that computer can reach it at first.",
+            "Toskar shows what this computer has for running AI. Choose what you'd like your AI to do, such as General Assistant, then choose Continue.",
+            "Toskar recommends a setup that fits this computer. Choose Install recommended setup and wait for the download.",
+            "Keep the window open while it downloads. It shows how far it has got. When it says You are ready, choose Start chatting."
+          ]
+        },
+        {
+          "type": "image",
+          "screen": "onboarding",
+          "alt": "The Welcome screen showing this computer's processor, memory, graphics, and system, and a choice of General Assistant, Programming, Research, or Custom",
+          "caption": "First launch: Toskar looks at your computer, then asks what you'd like your AI to do.",
+          "src": "docs/user-guide/images/onboarding.png"
+        },
+        {
+          "type": "image",
+          "screen": "onboarding-recommend",
+          "alt": "The recommended setup for General Assistant: Gemma 4 E4B, a 3 GB download, with Install recommended setup, Skip for now, and Back",
+          "caption": "The recommended setup, with its download size and the memory it will use.",
+          "src": "docs/user-guide/images/onboarding-recommend.png"
+        },
+        {
+          "type": "image",
+          "screen": "onboarding-ready",
+          "alt": "The You are ready screen saying the recommended setup is installed, with a Start chatting button",
+          "caption": "Once the download is done, Start chatting opens your first chat.",
+          "src": "docs/user-guide/images/onboarding-ready.png"
+        },
+        {
+          "type": "heading",
+          "text": "Ask your first question"
+        },
+        {
+          "type": "steps",
+          "items": [
+            "Choose Chat in the sidebar, type a question, and press Enter.",
+            "The first answer can take a little longer while the model loads into memory. Later ones start sooner."
+          ]
+        },
+        {
+          "type": "image",
+          "screen": "chat",
+          "alt": "A chat with a question about a hike and Toskar's answer, with the model's name under it",
+          "caption": "An answer, with the model that wrote it.",
+          "src": "docs/user-guide/images/chat.png"
+        },
+        {
+          "type": "paragraph",
+          "text": "Models shows more models, each labeled by how well it fits this computer. [Choose and manage models](#models) explains them, and [Chat](#chat) covers everything a chat can do."
+        },
+        {
+          "type": "image",
+          "screen": "models",
+          "alt": "The Models page recommending Gemma 4 E4B as Best overall, with an Excellent fit label, about 4.2 GB, and an estimated speed",
+          "caption": "Models labels each recommendation by how well it fits, with the memory it needs.",
+          "src": "docs/user-guide/images/models.png"
+        },
+        {
+          "type": "heading",
+          "text": "Check your version, and that Toskar is running"
+        },
+        {
+          "type": "paragraph",
+          "text": "From a terminal, `toskarctl version` shows the version of Toskar Core installed on this computer. Match it to the version of these docs."
+        },
+        {
+          "type": "code",
+          "language": "sh",
+          "code": "toskarctl version",
+          "test": "install-version",
+          "output": "Toskar Core \u2026"
+        },
+        {
+          "type": "paragraph",
+          "text": "To check that it's running, ask it. A running Toskar answers with its status."
+        },
+        {
+          "type": "code",
+          "language": "sh",
+          "code": "curl -s http://127.0.0.1:7331/api/v1/health",
+          "test": "install-health",
+          "output": "{\u2026\"status\":\"ok\"\u2026}"
+        },
+        {
+          "type": "heading",
+          "text": "Troubleshooting"
+        },
+        {
+          "type": "table",
+          "columns": [
+            "What you see",
+            "What to do"
+          ],
+          "rows": [
+            [
+              "Could not get a recommendation",
+              "Toskar couldn't read this computer's hardware. Choose Skip for now, then pick a model in Models."
+            ],
+            [
+              "Model download failed",
+              "Check the internet connection and free disk space, then try again from Models."
+            ],
+            [
+              "The page at 127.0.0.1:7331 doesn't open",
+              "Toskar Core isn't running. On Linux, `systemctl status toskar` shows why. With Homebrew, run `toskar` in a terminal."
+            ],
+            [
+              "The first answer is slow",
+              "The model is loading into memory, which happens once. A smaller model loads and answers faster."
+            ]
+          ]
+        },
+        {
+          "type": "related",
+          "sections": [
+            "pro-trial",
+            "models",
+            "chat",
+            "server",
+            "phone"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pro-trial",
+      "title": "Toskar Pro's free trial and Unlock",
+      "kind": "task",
+      "summary": "Try Toskar Pro free for two weeks, then unlock it once to keep adding models, automations, and people.",
+      "paragraphs": [
+        "Toskar Pro, the app for your computer, comes from the Mac App Store and the Microsoft Store. You can try all of it free first. After the trial, everything you set up keeps working. Adding more needs a one-time Unlock.",
+        "Toskar Core, the free open-source service you install with Homebrew, a Linux package, or Docker, has no trial and is never limited."
+      ],
+      "blocks": [
+        {
+          "type": "list",
+          "title": "What you need",
+          "items": [
+            "Toskar Pro 1.11.2 or later, from the Mac App Store or the Microsoft Store.",
+            "Your Apple Account or Microsoft account, signed in to the store on this computer."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Start the trial on a Mac"
+        },
+        {
+          "type": "paragraph",
+          "text": "Toskar Pro is a free download on the Mac App Store. Until you start the trial, a banner at the top of every page says how long it lasts and what the Unlock costs."
+        },
+        {
+          "type": "steps",
+          "items": [
+            "Open Toskar Pro. The banner offers Start free trial, Unlock, and Restore purchase.",
+            "Choose Start free trial, and confirm the $0 purchase the App Store shows.",
+            "Everything is open for 14 days. The banner counts the days left."
+          ]
+        },
+        {
+          "type": "image",
+          "screen": "pro-trial-offer",
+          "alt": "The banner at the top of Toskar Pro offering Start free trial, Unlock for $24.99, and Restore purchase",
+          "caption": "Before the trial. Installing models, creating automations, and adding people wait until you start it or unlock.",
+          "src": "docs/user-guide/images/pro-trial-offer.png"
+        },
+        {
+          "type": "image",
+          "screen": "pro-trial-days",
+          "alt": "The banner saying Toskar Pro trial: 9 days left, with Unlock for $24.99 and Restore purchase",
+          "caption": "During the trial, the banner counts down. You can unlock at any time.",
+          "src": "docs/user-guide/images/pro-trial-days.png"
+        },
+        {
+          "type": "heading",
+          "text": "The trial on Windows"
+        },
+        {
+          "type": "paragraph",
+          "text": "On the Microsoft Store, Toskar Pro costs $24.99, and the Store's Free trial button gives you 15 days. Buying it in the Store or from the banner ends the trial and keeps everything open."
+        },
+        {
+          "type": "heading",
+          "text": "After the trial"
+        },
+        {
+          "type": "table",
+          "columns": [
+            "Keeps working",
+            "Needs the Unlock"
+          ],
+          "rows": [
+            [
+              "Chatting, with the models you installed",
+              "Installing or importing a model"
+            ],
+            [
+              "Your automations, on their schedules",
+              "Creating an automation"
+            ],
+            [
+              "The people you added, and their sign-ins",
+              "Adding a person"
+            ],
+            [
+              "Knowledge, memory, and your settings",
+              ""
+            ]
+          ]
+        },
+        {
+          "type": "image",
+          "screen": "pro-trial-ended",
+          "alt": "The banner saying the Toskar Pro trial has ended and what still works, with Unlock for $24.99 and Restore purchase",
+          "caption": "After the trial. Nothing you set up stops working.",
+          "src": "docs/user-guide/images/pro-trial-ended.png"
+        },
+        {
+          "type": "heading",
+          "text": "Unlock Toskar Pro"
+        },
+        {
+          "type": "steps",
+          "items": [
+            "Choose Unlock in the banner. It shows the price in your store's currency.",
+            "Confirm the purchase in the store. The banner goes away, and everything stays open."
+          ]
+        },
+        {
+          "type": "list",
+          "items": [
+            "The Unlock is a one-time purchase, $24.99 in the United States. There's no subscription.",
+            "On a Mac, Family Sharing shares the Unlock with the people in your family group.",
+            "Restore purchase, on a Mac, brings an Unlock bought with the same Apple Account to this computer."
+          ]
+        },
+        {
+          "type": "note",
+          "tone": "tip",
+          "text": "Bought Toskar Pro on the Mac App Store before it was free? It stays unlocked. You won't see a trial or be asked to buy anything."
+        },
+        {
+          "type": "heading",
+          "text": "From the API"
+        },
+        {
+          "type": "paragraph",
+          "text": "`GET /api/v1/license` says where the purchase stands: `kind` is `available` (trial not started), `trial`, `ended`, `unlocked`, or empty when nothing is limited, as on Toskar Core."
+        },
+        {
+          "type": "code",
+          "language": "sh",
+          "code": "curl -s http://127.0.0.1:7331/api/v1/license",
+          "test": "pro-trial-license",
+          "output": "{\"kind\":\"\",\"limited\":false}"
+        },
+        {
+          "type": "paragraph",
+          "text": "When something needs the Unlock, the API answers 403 with the code `TRIAL_NOT_STARTED` or `UNLOCK_REQUIRED`."
+        },
+        {
+          "type": "heading",
+          "text": "Troubleshooting"
+        },
+        {
+          "type": "table",
+          "columns": [
+            "What you see",
+            "What to do"
+          ],
+          "rows": [
+            [
+              "No model installs, and the banner offers the trial",
+              "Start the free trial, or unlock. A Mac copy needs one of them before adding models, automations, or people."
+            ],
+            [
+              "You bought the Unlock, but the banner is still there",
+              "Choose Restore purchase, and check that the store is signed in with the account that bought it."
+            ],
+            [
+              "Waiting for the purchase to be approved",
+              "The store is waiting to approve the purchase, usually a family member's Ask to Buy. The banner updates once it's approved."
+            ],
+            [
+              "No Unlock was found for the store account",
+              "The store is signed in with another account. Sign in with the one that bought the Unlock, then choose Restore purchase."
+            ]
+          ]
+        },
+        {
+          "type": "related",
+          "sections": [
+            "install",
+            "models",
+            "people",
+            "automations"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "chat",
+      "title": "Chat",
+      "kind": "task",
+      "summary": "Ask Toskar a question, work with files, and come back to a conversation later, all on your own computer.",
+      "paragraphs": [
+        "Chat is where you talk to the AI on your computer. You type a question, and an installed model writes the answer while you watch. Your questions and its answers stay on your computer.",
+        "Toskar picks a model for each message unless you choose one. Answers list their sources, a chat remembers files you attached, and every chat is saved in History until you delete it."
+      ],
+      "blocks": [
+        {
+          "type": "list",
+          "title": "What you need",
+          "items": [
+            "Toskar running on this computer, or on another computer you connected to it.",
+            "An installed model. With none, sending your first message asks before downloading the recommended one. [Choose and manage models](#models) explains how to pick one."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Ask a question"
+        },
+        {
+          "type": "steps",
+          "items": [
+            "Choose Chat in the sidebar, or New chat to start a fresh conversation.",
+            "Type your question where it says Ask Toskar anything\u2026, and press Enter. Shift-Enter starts a new line instead.",
+            "Read the answer as it's written. The text can change or start over before it finishes, when Toskar looks something up or corrects a figure. Stop ends it, and any web look-ups for it, and keeps what was already written."
+          ]
+        },
+        {
+          "type": "image",
+          "screen": "chat",
+          "alt": "A chat planning a hike loop: two questions, the answers, and Sources under the last answer listing trail notes and a memory",
+          "caption": "Each answer lists its Sources. The 2 / 2 under the first answer means it has two versions.",
+          "src": "docs/user-guide/images/chat.png"
+        },
+        {
+          "type": "heading",
+          "text": "Choose the model, profile, and effort"
+        },
+        {
+          "type": "paragraph",
+          "text": "Model Auto picks an installed model for each message. A quick question stays on a model that's already loaded. Coding goes to a coding model. A question about current information, or a task on this computer, goes to a model that can use tools. A question about your files or knowledge prefers a larger model."
+        },
+        {
+          "type": "paragraph",
+          "text": "Choose a model in the Model menu to keep it for the whole chat. The button beside it opens the chat's options: Profile, Run on, Effort, and Memory, and Thinking when the model thinks before it answers. [Answer without thinking first](#thinking-off) covers that one."
+        },
+        {
+          "type": "image",
+          "screen": "chat-options",
+          "alt": "The chat options open above the message box, showing Profile, Run on, Effort, and Memory on",
+          "caption": "Chat options. Run on Automatic lets Toskar use any of your connected computers; This computer keeps the chat here.",
+          "src": "docs/user-guide/images/chat-options.png"
+        },
+        {
+          "type": "table",
+          "columns": [
+            "Effort",
+            "What it does"
+          ],
+          "rows": [
+            [
+              "Auto",
+              "Keeps quick questions fast, and gives questions about your data, and requests with several parts, more care."
+            ],
+            [
+              "Fast",
+              "Answers in one go, on a model that's already loaded."
+            ],
+            [
+              "Balanced",
+              "Plans requests with several parts, and reads a page for each look-up."
+            ],
+            [
+              "Thorough",
+              "Reads more pages, checks figures twice, and uses the largest model that fits."
+            ]
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Your choice of effort is remembered. More care makes answers slower. [Get more careful answers](#careful-answers) covers reasoning models and comparing drafts."
+        },
+        {
+          "type": "heading",
+          "text": "Attach files and pictures"
+        },
+        {
+          "type": "paragraph",
+          "text": "Attach a file with the paperclip, by dropping it on the message box, or by pasting it. Toskar reads documents (including Word and PowerPoint), spreadsheets, PDFs, and code. Each file can be up to 25 MB."
+        },
+        {
+          "type": "paragraph",
+          "text": "The answer cites the file, and later questions in the chat can still use it. A scanned PDF is read with text recognition, which takes a moment the first time. Audio is transcribed, and a video is read from its sound and from pictures of it."
+        },
+        {
+          "type": "paragraph",
+          "text": "Pictures go to a model that can see, even when you chose another model for the chat. If none is installed, the answer offers one to set up, with its download size, and answers once it's ready."
+        },
+        {
+          "type": "image",
+          "screen": "chat-attachments",
+          "alt": "A chat with an attached budget spreadsheet: the answer has a table of overspending, a spreadsheet it made under Files, Sources listing the spreadsheet and a web page, and What I did open with four steps",
+          "caption": "An attached spreadsheet, read and cited. The answer also searched the web, and made a summary spreadsheet to download.",
+          "src": "docs/user-guide/images/chat-attachments.png"
+        },
+        {
+          "type": "note",
+          "tone": "tip",
+          "text": "Ask for a file, such as a spreadsheet of prices or a Word document, and the answer comes with a download. Spreadsheets are real .xlsx workbooks."
+        },
+        {
+          "type": "heading",
+          "text": "Answers from the web"
+        },
+        {
+          "type": "paragraph",
+          "text": "When a question needs current information, such as today's weather, a price, or the news, Toskar searches the web and reads the pages it finds. The question is sent to the search, and the pages are read on your computer. Web under the message box means the chat's profile allows it."
+        },
+        {
+          "type": "paragraph",
+          "text": "Searching needs a model that can use tools, and Auto picks one. If the model you chose can't, a note says so when you send, and lists models that can, with Use this model. If the chat's profile has web access turned off, the note says live web access isn't available, and an Admin can choose Enable Internet to turn it on for that profile."
+        },
+        {
+          "type": "heading",
+          "text": "Check where an answer came from"
+        },
+        {
+          "type": "paragraph",
+          "text": "Under each answer, Sources lists the web pages, knowledge passages, files, and memories it used. What I did lists the model that answered and why, the searches and pages it read, and anything that went wrong."
+        },
+        {
+          "type": "paragraph",
+          "text": "Figures are checked against the sources before you see the answer. A figure that couldn't be confirmed is called out below it. A request with several parts, such as comparing three products, shows a checklist while its parts run."
+        },
+        {
+          "type": "heading",
+          "text": "Try again, or edit your question"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Try again, under an answer, writes a new version of it. Another model\u2026 tries again with the model you pick.",
+            "Edit, under your own message, lets you change it. Sending makes a new version of the conversation from that point.",
+            "When there's more than one version, \u2039 1 / 2 \u203a switches between them. The earlier versions stay."
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "The version showing is the one the chat continues from, and the one it opens to next time. These controls appear when you point at a message, and are always shown on a touch screen."
+        },
+        {
+          "type": "heading",
+          "text": "Long chats"
+        },
+        {
+          "type": "paragraph",
+          "text": "The ring beside Send shows how much of the model's context window the chat uses: how much it can read at once. When a chat passes about half of it, older messages are summarized after the reply, and every message stays saved. [Long chats and auto-compact](#auto-compact) explains how to read or correct the summary."
+        },
+        {
+          "type": "heading",
+          "text": "Find, pin, and delete chats"
+        },
+        {
+          "type": "paragraph",
+          "text": "History lists your chats by date, with a search box at the top. Each chat's menu renames, pins, or deletes it. Pinned chats stay at the top."
+        },
+        {
+          "type": "steps",
+          "items": [
+            "To delete several chats, open History and choose Select.",
+            "Tick the chats. Shift-click selects a range, and Cmd-click or Ctrl-click adds one. Select all takes every chat the search shows.",
+            "Choose Delete and confirm once. Undo brings them back for 10 seconds."
+          ]
+        },
+        {
+          "type": "image",
+          "screen": "chat-select",
+          "alt": "History in Select mode with two older chats ticked, and Delete 2 at the bottom",
+          "caption": "Two chats chosen for deleting. One confirmation covers them all.",
+          "src": "docs/user-guide/images/chat-select.png"
+        },
+        {
+          "type": "note",
+          "tone": "tip",
+          "text": "Settings \u203a History deletes chats last used more than 30, 90, or 365 days ago. It keeps pinned chats, and says how many it will delete before you confirm."
+        },
+        {
+          "type": "heading",
+          "text": "From the command line or your own code"
+        },
+        {
+          "type": "paragraph",
+          "text": "`toskarctl ask` asks a question from a terminal and prints the answer."
+        },
+        {
+          "type": "code",
+          "language": "sh",
+          "code": "toskarctl ask \"Plan a three-day trip to Juneau\"",
+          "test": "chat-ask"
+        },
+        {
+          "type": "paragraph",
+          "text": "`toskarctl chat` holds a whole conversation in the terminal. Answers stream as they're written. A tool that asks first shows what it would do and waits for your yes. The chats are the same ones the apps show, so `toskarctl chat --resume` picks up one you began on your phone. Piped in, it answers once about what's piped, as in `make 2>&1 | toskarctl chat \"Why did this fail?\"`."
+        },
+        {
+          "type": "paragraph",
+          "text": "The Python SDK streams the same answer a piece at a time. [Connect another app through the API](#api) covers the other languages and API keys."
+        },
+        {
+          "type": "code",
+          "language": "python",
+          "code": "from toskar import Toskar\n\nwith Toskar() as toskar:\n    for event in toskar.chat_stream(\"Plan a three-day trip to Juneau\"):\n        if event.type == \"token\":\n            print(event.content, end=\"\", flush=True)\n    print()\n",
+          "test": "chat-python"
+        },
+        {
+          "type": "heading",
+          "text": "Troubleshooting"
+        },
+        {
+          "type": "table",
+          "columns": [
+            "What you see",
+            "What to do"
+          ],
+          "rows": [
+            [
+              "No model installed yet",
+              "Choose Open Models and install one, or send your message and accept the download."
+            ],
+            [
+              "The first answer takes a while to start",
+              "The model is loading into memory, which happens once. Effort Fast keeps quick questions on a model that's already loaded."
+            ],
+            [
+              "Toskar can't read this type of file yet",
+              "Save it as a PDF, Word document, spreadsheet, or text file, and attach that instead."
+            ],
+            [
+              "A model cannot use tools, so it cannot look that up",
+              "Choose Use this model beside one of the models listed, or set Model to Auto."
+            ],
+            [
+              "I can't see pictures yet",
+              "Choose Set it up to download a model that can see. The answer comes once it's ready."
+            ],
+            [
+              "Files can be up to 25 MB",
+              "Split the file, or attach only the pages you need."
+            ],
+            [
+              "A figure is called out as not confirmed",
+              "Open Sources to check it, or set Effort to Thorough and ask again."
+            ]
+          ]
+        },
+        {
+          "type": "related",
+          "sections": [
+            "models",
+            "careful-answers",
+            "auto-compact",
+            "knowledge",
+            "memory"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "auto-compact",
+      "title": "Long chats and auto-compact",
+      "paragraphs": [
+        "A model can read only so much at once: its context window. When a chat grows long, Toskar's auto-compact sends the older messages to the model as a summary, and the newest ones word for word. Every message stays saved, and the summary is rebuilt from the original messages, not from an earlier summary.",
+        "How big the window is depends on the model and your computer. A token is about three quarters of a word. Toskar starts each model with 8,192 tokens, or with 16,384 or 32,768 when it still fits your computer's memory with plenty to spare and stays on the graphics card, and never more than the model was made for. So a small model on a computer with lots of memory reads about four times as much at once, and a large model that only just fits keeps 8,192, the most it had in Toskar 1.11 and earlier. A bigger window holds memory while the model runs, and Models counts it in each model's memory estimate. The ring beside Send shows the window of the model that's running.",
+        "Auto-compact starts when a chat fills about half the model's window, after an answer, without delaying it. Settings \u203a Chat sets when: Early (40%), Normal (50%), or Late (70%). When one long message or a big lookup wouldn't fit, Toskar compacts first and says \"Compacting earlier messages\u2026\", instead of leaving the oldest messages out.",
+        "The context gauge under a chat says when its older messages are a summary. From there you can read the summary and correct it (later summaries keep your corrections), compact now, for example before pasting something long, start a new chat that begins with the summary, or keep the chat verbatim, which turns auto-compact off for that chat only."
+      ]
+    },
+    {
+      "id": "careful-answers",
+      "title": "Get more careful answers",
+      "paragraphs": [
+        "Toskar has four ways to give a question more care: Effort in the chat, a reasoning model, a profile's Reasoning level, and comparing independent drafts. Each makes answers slower, and some need more memory, so save them for questions that need it, such as math, logic, plans with several steps, and questions about your data.",
+        "Effort, in the chat's options, sets how much work goes into an answer. Fast answers in one go, on a model that's already loaded. Balanced plans requests with several parts, reads a page for each look-up, and corrects figures once. Thorough reads more pages, checks figures twice, and uses the largest model that fits, even for a quick question. Auto keeps quick questions fast and gives questions about your data, and requests with several parts, more care. Your choice is remembered. When an answer missed something, ask again with Thorough.",
+        "Some models think before they answer: they work through the problem first, then write the answer. Models marks them Reasoning, and Recommended suggests one as Best for careful reasoning. They do better at math, logic, and puzzles, and take longer to start answering. Model Auto doesn't pick one, even at Thorough, unless no other installed model fits, so a quick question never waits on one. To use one, choose it in the chat's model menu; the chat keeps it until you choose another.",
+        "While a reasoning model thinks, the chat says Reasoning\u2026 with how long it has taken, on the web and in the Toskar app. Under the answer, What I did says how long it thought, and Thinking opens what it thought, folded away until you want it.",
+        "A profile's Reasoning level is the effort its chats use when Effort is left on Auto. Set it to Thorough on a profile you use for careful work, such as Research, and its chats get that care without choosing it each time. It's under Orchestration, in the profile's Strategy and computers tab in Profiles & Orchestration.",
+        "When one draft isn't enough, a profile can draft each answer three times, independently, and compare them before you see one. See Compare independent drafts. It catches slips a single draft makes, such as a wrong step in a word problem, and takes longer and uses more of your computers.",
+        "More care costs time and memory. Thorough and larger models take longer to load and to answer, a reasoning model writes its thinking before the answer, and compared drafts run three times. A larger model needs more memory, and a reasoning model's thinking takes room in its context window while it answers."
+      ]
+    },
+    {
+      "id": "thinking-off",
+      "title": "Answer without thinking first",
+      "kind": "task",
+      "summary": "Ask a reasoning model to answer straight away, in a chat or from your own code. It's much faster for questions that don't need careful thought.",
+      "paragraphs": [
+        "Some models think before they answer: they work through a problem first, then write the answer. That helps with math, logic, and plans with several steps, but it makes every answer slower to start, even a simple one.",
+        "In a chat, and from the API and toskarctl, you can ask a reasoning model to skip its thinking. It answers straight away. A model that doesn't think is unaffected."
+      ],
+      "blocks": [
+        {
+          "type": "list",
+          "title": "What you need",
+          "items": [
+            "Toskar 1.12 or later in a chat; 1.11.2 or later from the API and toskarctl.",
+            "A reasoning model, such as a Qwen 3 or a DeepSeek R1 distill. Models marks them Reasoning, and [Choose and manage models](#models) explains how to install one.",
+            "For the API from another computer, an API key, as [Connect another app through the API](#api) explains."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "When to turn thinking off"
+        },
+        {
+          "type": "table",
+          "columns": [
+            "Turn it off for",
+            "Leave it on for"
+          ],
+          "rows": [
+            [
+              "Quick facts, short rewrites, and replies",
+              "Math, logic, and puzzles"
+            ],
+            [
+              "Labeling or sorting text in a script or CI",
+              "Plans and decisions with several steps"
+            ],
+            [
+              "Anything where waiting matters more than depth",
+              "Questions where a wrong answer is costly"
+            ]
+          ]
+        },
+        {
+          "type": "note",
+          "tone": "tip",
+          "text": "In the app, Model Auto already keeps quick questions off reasoning models. Thinking off is for when you've chosen one, or call one from your own code."
+        },
+        {
+          "type": "note",
+          "tone": "tip",
+          "text": "Some smaller reasoning models in the catalog, such as Qwen 3.5, start with Thinking off: a long think can leave them no room to write the answer. Set Thinking to On in the chat's options when you want one to think, and Toskar remembers that choice for those models separately. From the API, any `reasoning_effort` other than `none` asks them to think."
+        },
+        {
+          "type": "heading",
+          "text": "In a chat"
+        },
+        {
+          "type": "steps",
+          "items": [
+            "Choose a reasoning model in the Model menu, such as a Qwen 3.",
+            "Open the chat's options with the button beside the Model menu.",
+            "Set Thinking to Off. Toskar remembers your choice for the chats you start next."
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "In the app on your phone or tablet, a chat with your computer has the same choice: tap the button beside the model to open the chat's options, and Thinking is below Effort when the chat's model thinks before it answers."
+        },
+        {
+          "type": "image",
+          "screen": "chat-thinking",
+          "alt": "The chat options with Qwen3 8B chosen as the model, showing Thinking set to Off below Effort",
+          "caption": "Thinking appears in the chat options only when the chat's model thinks before it answers, such as Qwen 3, DeepSeek R1's distills, or gpt-oss. Toskar tells from the model file, so one you added yourself counts too.",
+          "src": "docs/user-guide/images/chat-thinking.png"
+        },
+        {
+          "type": "heading",
+          "text": "From the command line"
+        },
+        {
+          "type": "paragraph",
+          "text": "Add `--no-thinking` to `toskarctl ask`."
+        },
+        {
+          "type": "code",
+          "language": "sh",
+          "code": "toskarctl ask --no-thinking \"What is 17 times 23?\"",
+          "test": "thinking-off-ask"
+        },
+        {
+          "type": "heading",
+          "text": "From the API"
+        },
+        {
+          "type": "paragraph",
+          "text": "Send `\"reasoning_effort\": \"none\"` with a request to `/v1/chat/completions`. It also sets Effort to Fast. In `model`, put a reasoning model's id from `/v1/models`, or a profile, as here."
+        },
+        {
+          "type": "code",
+          "language": "sh",
+          "code": "curl -s http://127.0.0.1:7331/v1/chat/completions \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\n    \"model\": \"profile:general-assistant\",\n    \"reasoning_effort\": \"none\",\n    \"messages\": [{\"role\": \"user\", \"content\": \"What is 17 times 23?\"}]\n  }'",
+          "test": "thinking-off-api",
+          "output": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"\u2026\",\"role\":\"assistant\"}}],\u2026\"object\":\"chat.completion\",\u2026\"completion_tokens_details\":{\"reasoning_tokens\":0}\u2026}"
+        },
+        {
+          "type": "paragraph",
+          "text": "The answer is in `choices[0].message.content`. `reasoning_tokens` is 0 when the model didn't think."
+        },
+        {
+          "type": "paragraph",
+          "text": "Toskar uses the model's own switch for thinking where its chat template has one, as Qwen 3's does. Otherwise it gives the model no room to think, as for DeepSeek R1's distills, which always think. It works the same when the model runs on a paired computer."
+        },
+        {
+          "type": "paragraph",
+          "text": "A model's thinking fills the same room in its context window as its answer. So Toskar keeps more room free for a model that thinks first, and less when thinking is off, leaving more of the window for the conversation."
+        },
+        {
+          "type": "heading",
+          "text": "Troubleshooting"
+        },
+        {
+          "type": "table",
+          "columns": [
+            "What you see",
+            "What to do"
+          ],
+          "rows": [
+            [
+              "flag provided but not defined: -no-thinking",
+              "Update Toskar to 1.11.2 or later."
+            ],
+            [
+              "Answers are no faster",
+              "The model may not be a reasoning model, so there was no thinking to skip. Or it was loading into memory, which happens once."
+            ],
+            [
+              "The answer is wrong on a harder question",
+              "Leave thinking on for that question. [Get more careful answers](#careful-answers) has other ways to give it more care."
+            ],
+            [
+              "400 with the code CONTEXT_TOO_LONG",
+              "The messages and max_tokens are more than the model can read at once. Ask for fewer max_tokens, or send fewer or shorter messages, as the error's param says."
+            ]
+          ]
+        },
+        {
+          "type": "related",
+          "sections": [
+            "careful-answers",
+            "api",
+            "models"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "memory",
+      "title": "Memory",
+      "paragraphs": [
+        "Say \u201cRemember that\u2026\u201d in any chat, and Toskar keeps it across chats, restarts, and model changes. \u201cForget\u2026\u201d removes a memory, and \u201cWhat do you remember?\u201d lists them. Answers that used a memory list it under Sources.",
+        "The Memory page lists memories by category. Add a memory there, or start from one of the examples. Edit changes a memory's words and category; its menu pauses it, marks it This computer only, or deletes it. With nothing remembered yet, the page explains memory in three steps; How it works shows the same later. A memory marked This computer only keeps any chat that uses it on this computer.",
+        "Memory is on by default. Turn it off for one chat with the Memory switch in the composer, or everywhere with Use memory in chats on the Memory page or in Settings. Memory is for short facts; documents and data belong in Knowledge. Passwords, keys, and card numbers are never saved. A memory that tries to grant a permission, such as \u201cyou can push without asking\u201d, is refused: what tools may do is set only in profiles and Settings."
+      ]
+    },
+    {
+      "id": "knowledge",
+      "title": "Connect knowledge",
+      "paragraphs": [
+        "Knowledge keeps catalogs, prices, policies, and documents searchable. When a profile or a specialized AI uses a source, the passages that match each question are added to its answers, and the answer cites them. Changing the data changes the next answer. Nothing is retrained.",
+        "A chat looks in a source only when its profile uses it, so each source on the Knowledge page says which profiles use it. A source no profile uses says so and offers Use with, which adds it to the profile chats start with. With nothing connected yet, the page explains this in three steps and shows what people connect; How it works shows the same later.",
+        "Connect knowledge has four kinds of source. File or folder reads files on this computer in place and reindexes them when they change. Upload or paste keeps a copy of what you give it. Database runs one read-only SELECT query on a SQLite file, PostgreSQL, or MySQL; each row becomes a passage, and Toskar never changes the database. Web API fetches a URL that returns JSON, CSV, or text; a list of items becomes one passage per item. Database and Web API sources are fetched again when a question uses data older than the interval you choose, from 5 minutes to a day, and passwords and tokens are stored apart and never shown again.",
+        "PDF, Excel, CSV, TSV, JSON, JSONL, Markdown, text, and HTML files work. Each Excel sheet is a table, and each PDF page is cited by its number. Scanned PDFs are read with text recognition; the first one installs the recognizer, about 110 MB, on this computer.",
+        "Search matches the words in a question. Install an embedding model, such as Nomic Embed Text v1.5 from Models, and it also matches meaning, so a question about a warranty finds a passage about a guarantee. A source then says when it is searchable by meaning. Try a question shows which passages a question would bring into a chat. Mark a source This computer only to keep chats that use it on this computer. Reindex reads a source again now."
+      ],
+      "steps": [
+        "Open Knowledge and choose the kind of source in Connect knowledge, or choose an example under What people connect.",
+        "Choose the file, folder, or database, paste the content, or enter the URL.",
+        "Under Use it in chats with, keep the profiles whose chats should look in it. The profile chats start with is checked already. Then Connect.",
+        "Use Try a question to check what it finds. To add a source to a profile later, use Use with on the Knowledge page or open Profiles; to add it to a specialized AI, use the Train page."
+      ]
+    },
+    {
+      "id": "models",
+      "title": "Choose and manage models",
+      "kind": "task",
+      "summary": "Find a model that fits your computer, install it, add ones you already have, and see what's running.",
+      "paragraphs": [
+        "A model is the AI that writes the answers. Bigger models are more capable and need more memory. Models shows which ones fit each of your computers, installs them, and lets you add models you already downloaded elsewhere.",
+        "A downloaded model uses disk space. A running model also uses memory, and Toskar unloads it after a while without use."
+      ],
+      "blocks": [
+        {
+          "type": "list",
+          "title": "What you need",
+          "items": [
+            "Toskar running on this computer, or on another computer you connected to it.",
+            "Disk space for the model. Each one shows its download size before you install it."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Pick a model that fits"
+        },
+        {
+          "type": "paragraph",
+          "text": "Open Models in the sidebar. Choose the computer in Models for, since a model is installed on one computer and fits its memory. Recommended lists curated picks for that computer, purpose first, each labeled by how well it fits."
+        },
+        {
+          "type": "image",
+          "screen": "models",
+          "alt": "The Models page recommending Gemma 4 E4B as Best overall, with an Excellent fit label, about 4.2 GB, and an estimated speed",
+          "caption": "Each recommendation says how well it fits, how much memory it needs, and about how fast it answers.",
+          "src": "docs/user-guide/images/models.png"
+        },
+        {
+          "type": "table",
+          "columns": [
+            "Fit",
+            "What it means"
+          ],
+          "rows": [
+            [
+              "Excellent",
+              "It fits with room to spare."
+            ],
+            [
+              "Good",
+              "It fits."
+            ],
+            [
+              "Tight",
+              "It fits, but with little memory left, or it needs more than the graphics card has, so part of it runs on the processor, more slowly. Close other apps if answers slow down."
+            ],
+            [
+              "May run slowly",
+              "It runs, but slowly on this computer."
+            ],
+            [
+              "Unsupported",
+              "This computer or its runtime can't run it, so it can't be installed here."
+            ]
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "The memory estimate counts the model file, its quantization, and its context. On a computer without unified memory, about 2 GB is kept for the operating system. A speed is an estimate until the model has run on your computer. Then Details shows the measured speed. Answers that repeat or edit text already in the chat, such as fixing code you pasted, come faster: the model guesses the next words from the chat and checks several at once. This is on by default. The largest models also come with a small draft model from the same family, about 0.5 GB, downloaded with them. On a computer the model fits with a Good or Excellent label, the draft writes ahead and the large model checks its guesses, so it answers up to about twice as fast, just as well. Where it fits only tightly, the draft would take memory the model needs, so it isn't used. With Advanced mode on, turn guessing off for one model, draft and all, from that model's More actions menu, under Guess ahead; it changes the next time the model starts. Badges such as Best overall and Best coding go to models labeled Good or Excellent when one qualifies."
+        },
+        {
+          "type": "paragraph",
+          "text": "A model's context window is how much it reads at once: the conversation, files, and lookups, plus its answer, counted in tokens of about three quarters of a word. Toskar picks it for you, as Auto: 8K, 16K, or 32K, the most at which the model still fits your computer with room to spare. With Advanced mode on, choose another size for one model from its More actions menu, under Context window. Pick a bigger one, up to what the model was made for, for long documents or coding tools that send a lot at once. Pick a smaller one to free memory. Each size says how well the model fits at it, and one it won't fit at can't be chosen. A model that's running reloads with the new size on its next message."
+        },
+        {
+          "type": "image",
+          "screen": "models-context-window",
+          "alt": "The More actions menu for Gemma 3 4B on the Installed tab, with Guess ahead checked and Context window set to Auto, 32K, above sizes from 4K to 128K, where 128K is marked Tight fit",
+          "caption": "Auto picks 32K for Gemma 3 4B on this computer. Bigger sizes say how well the model fits at them.",
+          "src": "docs/user-guide/images/models-context-window.png"
+        },
+        {
+          "type": "heading",
+          "text": "What each kind of model is for"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Chat models answer in chats. Some also write code, think before they answer, or see pictures; Auto sends each request to one that can.",
+            "Embedding and reranker models are supporting models: they help Knowledge search and never answer chats.",
+            "Picture and clip models make pictures and video. They're set up on the Tools page or from a chat's offer, and [What pictures and clips need](#media) lists them with the memory each wants.",
+            "Speech models transcribe audio and read answers aloud. Toskar downloads them the first time you use either, so they aren't on this page."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Ratings"
+        },
+        {
+          "type": "paragraph",
+          "text": "A model's card can show community ratings from computers like yours: the stars, how many ratings there are, and how it runs, such as how soon answers start. A badge chosen with them says Chosen with ratings from computers like yours."
+        },
+        {
+          "type": "paragraph",
+          "text": "Rate, on an installed model, saves your own stars and reasons on this computer. Share this rating with the community is your choice. Exactly what is shared lists what's sent: the stars and reasons, the model, the kind of computer and its memory, the language if you give one, how it runs here if you choose Include how it runs here, and a random ID. It never sends your prompts, chats, file names, computer name, user name, or network address."
+        },
+        {
+          "type": "heading",
+          "text": "Install, run, and remove a model"
+        },
+        {
+          "type": "steps",
+          "items": [
+            "Choose Install on a model and wait for the download. Installed lists what's on the chosen computer.",
+            "Use the model in a chat: choose it in the Model menu, or leave Model on Auto to let Toskar pick.",
+            "Running shows the models in memory now, with the memory they use and their speed. Stop unloads one."
+          ]
+        },
+        {
+          "type": "image",
+          "screen": "models-running",
+          "alt": "The Running tab with Gemma 4 E4B running on this Mac on the GPU, using 4.2 GB of 48 GB, at 58 tokens a second, with Open Chat and Stop",
+          "caption": "Running shows where each model runs, which [Is my model using the GPU?](#gpu) explains.",
+          "src": "docs/user-guide/images/models-running.png"
+        },
+        {
+          "type": "paragraph",
+          "text": "A loaded model is unloaded after 15 minutes without use, unless Settings sets the model lifecycle to manual or another time. Settings also sets the most disk space models may use."
+        },
+        {
+          "type": "heading",
+          "text": "Find more models"
+        },
+        {
+          "type": "paragraph",
+          "text": "Browse all models searches Hugging Face for GGUF models, the format Toskar runs. Install from there shows the download as it happens. Embedding and reranker models are supporting models: they help Knowledge search and never answer chats, so the chat menus leave them out."
+        },
+        {
+          "type": "image",
+          "screen": "models-browse",
+          "alt": "Browse all models with three results from Hugging Face, the first downloading and the others offering Install",
+          "caption": "Browse all models. The download goes on if you close the panel; Installed shows its progress.",
+          "src": "docs/user-guide/images/models-browse.png"
+        },
+        {
+          "type": "heading",
+          "text": "Add a model you already have"
+        },
+        {
+          "type": "paragraph",
+          "text": "Add a model adds one that isn't in the lists, in three ways."
+        },
+        {
+          "type": "list",
+          "items": [
+            "From a file: drop a .gguf file, or give the location of one on this computer. Copy it into Toskar, or use it where it is with no copy.",
+            "From another app: the models LM Studio, Ollama, llama.cpp, and GPT4All already downloaded, added where they are so they take no more space.",
+            "From a link: a GGUF file's web address, which Toskar downloads."
+          ]
+        },
+        {
+          "type": "image",
+          "screen": "models-add-apps",
+          "alt": "Add a model on From another app, listing a model from LM Studio and two from Ollama, one already added",
+          "caption": "From another app lists what other apps on this computer already downloaded. Add uses the file where it is.",
+          "src": "docs/user-guide/images/models-add-apps.png"
+        },
+        {
+          "type": "note",
+          "tone": "warning",
+          "text": "A model used where it is depends on that file. Deleting the model in Toskar leaves the file alone, and moving or deleting the file stops the model working."
+        },
+        {
+          "type": "heading",
+          "text": "When Toskar suggests a better model"
+        },
+        {
+          "type": "paragraph",
+          "text": "After an answer, Toskar may offer a model that would have answered it better. It might write code better, read your files more reliably, write your language better, think through math and logic, or read a longer chat at once."
+        },
+        {
+          "type": "paragraph",
+          "text": "It says why, how big the download is, and how well it fits. Install and answer again installs it and answers the same question with it, as a new version beside the first answer. Each kind is offered once in a chat, only to Admins and the Owner, and only for a model this computer runs well. Settings \u203a History \u203a Suggest better models turns it off for you."
+        },
+        {
+          "type": "heading",
+          "text": "New models in the news"
+        },
+        {
+          "type": "paragraph",
+          "text": "News lists new AI models as they come out. One that Toskar can run shows its fit for your computer, and an Admin can install it from there. While it downloads, Installing\u2026 see Models opens Models."
+        },
+        {
+          "type": "heading",
+          "text": "From the command line or the API"
+        },
+        {
+          "type": "paragraph",
+          "text": "`toskarctl models list` lists the models, smallest first, with their download size and fit on the computer it talks to. `--installed` shows only installed ones, and `--json` prints everything."
+        },
+        {
+          "type": "code",
+          "language": "sh",
+          "code": "toskarctl models list",
+          "test": "models-cli-list",
+          "output": "ID\u2026NAME\u2026SIZE\u2026FIT\u2026INSTALLED\n\u2026llama-3.2-1b-q4\u2026Llama 3.2 1B\u2026800 MB\u2026"
+        },
+        {
+          "type": "paragraph",
+          "text": "`toskarctl models install` downloads a model by its ID and waits until it's installed, showing how far it has got. On a computer without a desktop, it's the quickest way to add one."
+        },
+        {
+          "type": "code",
+          "language": "sh",
+          "code": "toskarctl models install llama-3.2-3b-q4"
+        },
+        {
+          "type": "paragraph",
+          "text": "It prints a line such as Downloading Llama 3.2 3B: 40% (840 MB of 2.1 GB) every tenth of the way, then Installed Llama 3.2 3B."
+        },
+        {
+          "type": "paragraph",
+          "text": "`GET /api/v1/models` lists the catalog with what's installed, and each model's fit and capabilities."
+        },
+        {
+          "type": "code",
+          "language": "sh",
+          "code": "curl -s http://127.0.0.1:7331/api/v1/models",
+          "test": "models-list"
+        },
+        {
+          "type": "heading",
+          "text": "Troubleshooting"
+        },
+        {
+          "type": "table",
+          "columns": [
+            "What you see",
+            "What to do"
+          ],
+          "rows": [
+            [
+              "The model fails to load, or answers slowly",
+              "Choose a smaller model, or a smaller version of the same one."
+            ],
+            [
+              "Tight",
+              "Close other apps to free memory, or choose a model labeled Good or Excellent."
+            ],
+            [
+              "Tight, because it needs more than the graphics card has",
+              "Part of the model runs on the processor. Choose one that fits on the card for full speed."
+            ],
+            [
+              "The download stops because the disk is full",
+              "Remove a model you don't use, or raise the limit in Settings."
+            ],
+            [
+              "A model from another app stopped working",
+              "Its file was moved or deleted. Add it again from its new place."
+            ]
+          ]
+        },
+        {
+          "type": "related",
+          "sections": [
+            "gpu",
+            "install",
+            "chat",
+            "computers"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "automations",
+      "title": "Schedule an automation",
+      "kind": "task",
+      "summary": "Have Toskar check something on a schedule, or when something changes, and tell you only when it matters.",
+      "paragraphs": [
+        "An automation is a task Toskar runs for you: a price watch, a back-in-stock check, a morning news brief, a page that might change. You describe it in ordinary words. Toskar fills in when it runs, what it does, and when to tell you.",
+        "Toskar runs it in the background, even with the window closed. The desktop app stops when you quit, unless Settings keeps Toskar running in the background."
+      ],
+      "blocks": [
+        {
+          "type": "list",
+          "title": "What you need",
+          "items": [
+            "An installed model. Saving waits until one is installed. See [Choose and manage models](#models).",
+            "For a device trigger or cameras, Home Assistant connected under Tools. See [Tools, permissions, and connected services](#tools)."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Create an automation"
+        },
+        {
+          "type": "steps",
+          "items": [
+            "Open Automations and choose New automation, or pick an idea such as Price watch or Morning news brief.",
+            "Describe it in a sentence, such as: every morning at 8:00 AM, check this product and tell me if the price is below $500. Choose Fill in the details.",
+            "Read the name, task, schedule, and notification Toskar filled in, and the Summary above Create automation. Change anything it guessed wrong.",
+            "Choose Test run to try it once without saving, then Create automation."
+          ]
+        },
+        {
+          "type": "image",
+          "screen": "automations-create",
+          "alt": "New automation form filled in from the sentence about checking a price below $500 every morning at 8:00 AM",
+          "caption": "Fill in the details turns the sentence into a daily 8:00 AM task and a price notification. The task stays in ordinary words.",
+          "src": "docs/user-guide/images/automations-create.png"
+        },
+        {
+          "type": "paragraph",
+          "text": "Toskar understands schedules such as every morning at 8:00 AM, every six hours, every Friday (at 8:00 AM unless you name a time), and once tomorrow at 9:00 AM. Write in English or the App language, with times such as 18:30 and prices in your currency, such as 500 \u20ac or 5\u4e07\u5186."
+        },
+        {
+          "type": "paragraph",
+          "text": "The profile, model, time zone, and tools are under Advanced. Model Auto picks a model for each run. Automations use memories and connected knowledge as chat does."
+        },
+        {
+          "type": "heading",
+          "text": "When it runs"
+        },
+        {
+          "type": "table",
+          "columns": [
+            "Runs",
+            "What starts it"
+          ],
+          "rows": [
+            [
+              "On its schedule",
+              "A time: once, daily, weekly, monthly, every few hours, or a cron expression."
+            ],
+            [
+              "When a web page changes",
+              "Toskar checks the page on a schedule and runs only when it changed, telling the task what changed."
+            ],
+            [
+              "When a feed has new posts",
+              "New posts on a site's feed, checked on a schedule."
+            ],
+            [
+              "When a file or folder changes",
+              "A change to a file or folder on this computer."
+            ],
+            [
+              "When another service calls its link (webhook)",
+              "A POST to the automation's link. Its body, up to 64 KB, is given to the task as data."
+            ],
+            [
+              "When a device changes",
+              "A Home Assistant device, such as a door contact or a person sensor, changing, or changing to a state you choose."
+            ],
+            [
+              "After another automation",
+              "Another automation finishing, or only when it notifies. It gets that automation's result."
+            ]
+          ]
+        },
+        {
+          "type": "image",
+          "screen": "automations-trigger",
+          "alt": "The automation form with Runs set to When a web page changes, a Link field, how often to check, and the Notify me choices",
+          "caption": "A trigger that watches a page: Toskar checks it hourly and runs the task only when it changed.",
+          "src": "docs/user-guide/images/automations-trigger.png"
+        },
+        {
+          "type": "paragraph",
+          "text": "Look at cameras starts each run with a picture from up to a few Home Assistant cameras, shown to a model that can see. A webhook's link is shown once, when you make it on the automation's page, and anyone with the link can start the automation."
+        },
+        {
+          "type": "heading",
+          "text": "When you hear about it"
+        },
+        {
+          "type": "table",
+          "columns": [
+            "Notify me",
+            "When"
+          ],
+          "rows": [
+            [
+              "When the condition is true",
+              "The price is below or above your amount, an item becomes available, or the result is significant."
+            ],
+            [
+              "When the result changes",
+              "A result differs from the last one. The first run is the baseline."
+            ],
+            [
+              "Every time it runs",
+              "After every successful run."
+            ],
+            [
+              "Only when it fails",
+              "A run fails."
+            ],
+            [
+              "Don't notify me",
+              "Never. The result is kept in its history."
+            ]
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "History says why a notice was or wasn't sent, such as a price that wasn't below your amount. Notices go to the bell, and to the places [Notifications](#notifications) describes."
+        },
+        {
+          "type": "heading",
+          "text": "Run, pause, and history"
+        },
+        {
+          "type": "image",
+          "screen": "automations",
+          "alt": "Automations list with a morning price check selected, its next run, and a history entry that was notified",
+          "caption": "The list shows each automation's schedule, last result, and next run. The detail keeps Run now, Pause, Edit, Delete, and the history.",
+          "src": "docs/user-guide/images/automations.png"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Run now runs it once right away, and keeps its next scheduled run. A paused automation stays paused.",
+            "Pause and Resume turn it off and on. Edit changes it, and Delete removes it and its history.",
+            "History lists each run, newest first: when it ran, its result, whether you were told, and the model and computer it used.",
+            "After a restart, a missed daily or weekly run happens once, not once for every missed day."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Tools and approvals"
+        },
+        {
+          "type": "paragraph",
+          "text": "With no tools chosen, a run can use the read-only tools the profile allows. Tools you choose are approved when you save, and ones that change things are listed apart. A run that reaches a tool you didn't approve skips it, finishes, and sends a notification naming the tool."
+        },
+        {
+          "type": "heading",
+          "text": "From the command line"
+        },
+        {
+          "type": "paragraph",
+          "text": "`toskarctl automations` does the same from a terminal: list, create, run, pause, resume, and more. `parse` shows how Toskar reads a sentence, without saving anything."
+        },
+        {
+          "type": "code",
+          "language": "sh",
+          "code": "toskarctl automations parse \"every friday at 9:00 AM, summarize this week's releases\"",
+          "test": "automations-parse",
+          "output": "{\n  \"name\": \"\u2026\",\n  \"prompt\": \"Summarize this week's releases.\",\n  \"schedule\": {\n    \"kind\": \"weekly\",\n\u2026\"hour\": 9,\n    \"weekday\": 5\n  },\n\u2026}"
+        },
+        {
+          "type": "paragraph",
+          "text": "It read a weekly schedule at 9:00 on weekday 5, Friday (Sunday is 0), in this computer's time zone. `create` with `--request` and the same sentence saves it."
+        },
+        {
+          "type": "code",
+          "language": "sh",
+          "code": "toskarctl automations create --name \"Morning brief\" --prompt \"Summarize today's AI news in five lines\" --schedule daily --at 08:00",
+          "test": "automations-create",
+          "output": "{\n  \"id\": \"\u2026\",\n  \"name\": \"Morning brief\",\n  \"enabled\": true,\n  \"schedule\": {\n    \"kind\": \"daily\",\n\u2026\"next_run_at\": \"\u2026\"\u2026}"
+        },
+        {
+          "type": "paragraph",
+          "text": "It talks to http://127.0.0.1:7331 unless TOSKAR_URL is set, and a Toskar on another computer needs TOSKAR_API_KEY."
+        },
+        {
+          "type": "heading",
+          "text": "Troubleshooting"
+        },
+        {
+          "type": "table",
+          "columns": [
+            "What you see",
+            "What to do"
+          ],
+          "rows": [
+            [
+              "Create automation stays unavailable",
+              "Install a model first. Saving waits for one."
+            ],
+            [
+              "It didn't run at its time",
+              "Toskar wasn't running then. In the desktop app, have Settings keep Toskar running in the background. A missed run happens once when it starts again."
+            ],
+            [
+              "A run timed out or lost its connection",
+              "Toskar tries the same run again up to three times, after one minute and then five. You're told if those fail too."
+            ],
+            [
+              "It paused itself",
+              "It ran out of memory twice in a row. Choose a smaller model under Advanced, then Resume."
+            ],
+            [
+              "A notification names a tool it skipped",
+              "Edit the automation and approve that tool, if you want it to use it."
+            ]
+          ]
+        },
+        {
+          "type": "note",
+          "tone": "tip",
+          "text": "An automation waits while you chat, and for 20 seconds after, so it doesn't load a model between your messages."
+        },
+        {
+          "type": "related",
+          "sections": [
+            "notifications",
+            "tools",
+            "models",
+            "knowledge"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "train",
+      "title": "Train your own AI",
+      "paragraphs": [
+        "Train builds a small assistant that is good at one job. Training teaches your AI how to do its job. Connected knowledge gives it the current information it needs to do that job.",
+        "Use examples of good answers, such as chat transcripts or question and answer pairs, to train behavior: the questions it asks, its terminology, its steps, and its tone. Connect data that changes or must stay exact, such as inventory, prices, SKUs, catalogs, and policies, as knowledge. Editing connected knowledge never requires retraining.",
+        "Training runs on this computer or a paired one. It needs a Mac with Apple Silicon or a computer with an NVIDIA GPU. The first run downloads the trainer (about 450 MB on a Mac, about 4 GB with NVIDIA's libraries) and the base model's training weights. The base model is not changed, and it stays available on its own.",
+        "The plan shows each computer's training fit: the memory training needs, downloads, disk space, and how long it takes. Another computer can train for this one; choose it in the Review step, and the trained AI comes back to this computer. Training waits for chats, automations, and benchmarks to finish before it starts, and a chat during training is still answered, with a note about how long training has left.",
+        "A deployed AI can also be exported as one GGUF file from the Deploy step, for LM Studio, Ollama, llama.cpp, and other GGUF tools. The file is a little larger than the base model. Its instructions and connected knowledge stay in Toskar; copy the instructions shown with the file to use as the system prompt elsewhere. A copy of Toskar from the Mac App Store trains on a paired computer unless the app includes the trainer."
+      ],
+      "steps": [
+        "To see how it works first, choose Try an example. It sets up a sample tire shop assistant with example chats, an inventory, and a policy document, and explains each step. Nothing trains until you press Train.",
+        "Open Train and choose Build a new AI. Describe the job in a sentence or two.",
+        "Choose a base model. Toskar recommends one for the job and shows its license, the memory training needs, and how long it takes.",
+        "Add material. For each file or paste, Toskar recommends Training, Knowledge, or Both and explains why. Review the recommendation before you add it.",
+        "Review the examples. Fix or exclude flagged examples. At least 10 usable examples are required; about 50 teach a workflow reliably.",
+        "Review the plan, pick Quick, Balanced, or Highest quality, and start training. You can cancel at any time.",
+        "Compare base and specialized answers on the test prompts. Evaluation is required before deploying.",
+        "Deploy. The AI appears in the Chat model menu and in the API as sai:<name>. Retraining creates a new revision; the deployed one keeps answering until you deploy the new one."
+      ]
+    },
+    {
+      "id": "tools",
+      "title": "Tools, permissions, and connected services",
+      "paragraphs": [
+        "Profiles control which tools a model may use. Turning on a capability allows its tools. In advanced mode, each tool has a permission: Always allow runs it, Ask each time and Ask once per session ask in chat first, and Deny never runs it. Settings sets the defaults for the terminal, file writes, and Git. A tool turned off on the Tools screen cannot run anywhere.",
+        "The Tools page has three tabs: Your tools lists every tool, built in or added, with search and filters, and turning one off keeps it out of every chat; Add more connects services and adds tool sources; Images and video sets up making images and clips. How it works explains that tools are built in or added, and that each profile chooses which tools its chats may use.",
+        "Internet searches DuckDuckGo and reads public pages. Files finds, reads, and writes workspace files. Terminal runs commands. Git inspects a repository, commits, and pushes. Files you can download are made with files.create, which writes only to Toskar's own file store. After an answer reads a web page or a file, a tool that changes something asks first even when the profile allows it, because retrieved content is data, not instructions. Text on a page or in a file that gives orders to an AI, such as \u201cignore your instructions\u201d, is left out before the model reads it.",
+        "Each message is offered only the tools it needs: web search for current questions, files for a file or folder, the terminal for \u201crun\u201d or \u201cinstall\u201d, Git for \u201ccommit\u201d. A plain question gets no tools. The model cannot call a tool it was not offered. How many tool calls a message may make depends on effort: 3 on Fast, 10 on Balanced, and 16 on Thorough.",
+        "Connected services add tools for GitHub, Home Assistant, email, and your calendar. Connect them on the Tools page, on the Add more tab under Connected services, with a token, or for email and calendar your mail server, CalDAV address, and an app password from your provider (Fastmail, iCloud, Proton Mail Bridge, Nextcloud, or your own server; Gmail and Outlook if they allow app passwords). Then ask \"Anything from Sam this week?\" or \"Am I free Thursday afternoon?\"; Toskar asks before sending, archiving, or changing an event; Toskar checks it, stores it apart from the database, and adds it only when a tool runs, so it is never shown to the model. Reading is allowed and changes ask first unless a profile says otherwise.",
+        "MCP servers add more tools. On the Tools page, the Add more tab's Add tools offers a gallery of servers, servers already set up in your other apps, pasted configuration, or a custom server. Tool sources lists each server, its tools, its log, and a Sign in action for servers that sign in with a browser. Other AI apps can use Toskar too: API Access \u2192 Use Toskar in other AI apps shows what to paste into Claude Desktop, Claude Code, Cursor, VS Code, and other apps.",
+        "Ask for a Word document, a PDF, or a spreadsheet and Toskar makes it, ready to download: documents and PDFs from formatted text with headings, lists, and tables, and spreadsheets with several sheets and formulas. Attach a spreadsheet and ask about it, such as \"What is the total by region?\", and Toskar reads the whole file, not just the part that fits in the prompt.",
+        "In advanced mode, the Tools page shows each tool's level (1 is low risk on this computer, 4 runs commands or code), what it returns, its time limit, whether it is ready, and its recent calls: what each was about, how it was allowed, and how it ended.",
+        "Ask Toskar to calculate, analyze, or chart something, such as \"Plot monthly sales from sales.xlsx\", and it can write and run Python in a sandbox: it has no internet, sees only the files from the chat it is given, and stops after 90 seconds. Charts and files it makes are attached to the answer. It asks before running unless the profile allows it, and the first run installs Python with numpy, pandas, and matplotlib. On macOS it uses the built-in sandbox; on Linux it needs bubblewrap; on Windows it is not available yet.",
+        "For pages that need clicking or typing, Toskar can use a browser: \"Go to the library's site and find this week's events\". It runs the Chrome, Edge, Chromium, or Brave already on your computer in a fresh, separate profile, never your own sign-ins, and it can't reach anything on your own network. It asks before clicking, typing, or downloading, never types passwords or payment details, and can attach a screenshot so you see what it sees.",
+        "Ask about places, such as \"Coffee near the Juneau library\", \"How far is the airport from downtown?\", or \"Walking directions from the ferry terminal to the capitol\", and Toskar looks them up with OpenStreetMap: names, addresses, opening hours, distances in your units, and turn-by-turn directions. Each lookup appears in What left this computer.",
+        "Attach a voice memo or recording and ask what it says, and Toskar transcribes it on this computer. Answers have a Read aloud button, and you can ask for something to be read aloud as an audio file. Audio plays right in the chat. The first time, Toskar installs speech and downloads a voice or speech model; after that it works offline.",
+        "Toskar can make images on this computer, and change them: ask for \"a watercolor of a lighthouse at dusk\", or attach a photo and ask to \"make it night\". Set it up once, from the chat when you first ask for an image or from the Tools page's Images and video tab: it recommends a model for your computer (a 5.2 GB download for most) and shows the download as it goes. After that, images are made offline, and nothing is sent anywhere. It works on Macs with Apple silicon; on Linux and Windows it runs on the processor, which is much slower. With a paired computer that has it set up, such as a Mac Studio, a laptop without it can ask for images too: the work runs there, and Diagnostics shows which computer can run what.",
+        "Toskar can make short video clips too: ask for \"a short video of waves rolling onto a beach\", or attach a photo and ask to bring it to life. Set it up once, from the chat or the Tools page's Images and video tab (an 8.5 GB download, for computers with 16 GB of memory or more). A clip of a few seconds takes several minutes, and it plays right in the chat."
+      ]
+    },
+    {
+      "id": "media",
+      "title": "What pictures and clips need",
+      "paragraphs": [
+        "Toskar makes pictures and clips on your own computers; the prompt and what it makes aren't sent anywhere. Each model needs enough memory: system memory, or unified memory on Apple silicon, and graphics memory on a computer with its own graphics card. Better hardware makes a model faster or lets a larger one run; it doesn't change what a given model can draw.",
+        "Pictures. FLUX.2 [klein] 4B makes and edits pictures and is comfortable with 12 GB of memory (a 5.2 GB download, about 10 to 22 seconds a picture on a 24 GB graphics card); its high-quality build wants 20 GB. Z-Image-Turbo makes photorealistic pictures with clear text in them and wants about 14 GB (6.7 GB download, about 35 to 40 seconds). Qwen-Image-Edit-2511 only edits, keeping what you didn't ask to change, and wants 32 GB (19.5 GB download, about 80 seconds an edit).",
+        "Clips. Wan 2.2 TI2V 5B makes clips from a description or a picture and is comfortable with 16 GB (8.5 GB download; about a minute for 2 seconds on a 24 GB graphics card, about 3\u00bd minutes on a 24 GB Apple silicon Mac). Wan 2.1 T2V 1.3B fits smaller computers, about 10 GB, at about 3 minutes for 2 seconds. Wan 2.2 T2V A14B makes higher-quality clips much more slowly and wants 48 GB, about 13 minutes for 2 seconds.",
+        "Each model gets a verdict for the computer it would run on, on the Tools page and in a chat's offer to set it up: Works well; May be slow or tight, which says what it needs and what the computer has, and is set up only when you agree; or Not supported here. A model not yet measured on real hardware is labeled untested and never recommended. On Apple silicon, the graphics can use about two thirds of the computer's memory (three quarters above 36 GB), so a model comfortable with 24 GB may be tight on a 24 GB Mac.",
+        "When memory is short, Toskar unloads chat models in its way while a picture or clip is made. If it still runs out, the answer says so and suggests a smaller picture, a shorter or smaller clip, a lighter model, or a paired computer with more memory, which can make it for this one.",
+        "Pictures are up to 1536 pixels on a side, and clips 2 seconds unless you ask for more, up to 5 seconds at about 832\u00d7480; asking for more makes the most the model allows, and the answer says so. Slow pictures or clips usually mean the CPU is making them: the Tools page says which, and on Linux and Windows the GPU needs a Vulkan driver (see Is my model using the GPU?). The Mac App Store build can't make pictures or clips, since its sandbox can't run a program Toskar downloads; use Toskar from outside the Mac App Store, or a paired computer.",
+        "Some models, such as FLUX.2 [klein] 9B, have a non-commercial license. Toskar sets one up only when you bring your own: accept the license on Hugging Face, add a Hugging Face read token on the Tools page, and confirm your license covers your use. Every other model and part is Apache 2.0 or MIT, needs no account, and is checked against its published checksum.",
+        "While a picture or clip is made on this computer, the chat says whether the model is loading, which step it's on, and about how long is left, with a frame where it will appear. On a long wait, a line says what Ratatoskr is up to."
+      ]
+    },
+    {
+      "id": "notifications",
+      "title": "Notifications",
+      "kind": "task",
+      "summary": "See what Toskar finished or needs, and have it reach you by email, on your phone, or on a service you run.",
+      "paragraphs": [
+        "The bell next to the Toskar name shows unread notifications: finished and failed automations, tools an automation skipped, finished or failed model downloads, finished or failed exports, deployed AIs, newly paired computers, paired computers that go offline and come back, and models that keep crashing. Choose one to go to it, or filter by category. Mark all read clears the count, and Dismiss removes one. A notice that repeats within 10 minutes is counted on the first one, such as \"failed \u00b7 3 times\".",
+        "Notifications are kept by the daemon, so ones that arrived while the window was closed are waiting. Finished and failed automations also post a desktop notice, unless Settings turns task-finish notifications off."
+      ],
+      "blocks": [
+        {
+          "type": "list",
+          "title": "What you need",
+          "items": [
+            "For email, your own SMTP server's details. For push, the free ntfy app, or your own ntfy server. For a webhook, a service you run."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "In the app"
+        },
+        {
+          "type": "image",
+          "screen": "notifications-bell",
+          "alt": "The bell's Notifications list open, with two automation notices, Morning price and Friday releases, each with a Dismiss button, and Mark all read",
+          "caption": "The bell next to the Toskar name. Notifications that arrived while the window was closed are waiting here.",
+          "src": "docs/user-guide/images/notifications-bell.png"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Choose a notification to go to it, or filter by category.",
+            "Mark all read clears the count, and Dismiss removes one.",
+            "A notice that repeats within 10 minutes is counted on the first one, such as \"failed \u00b7 3 times\"."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Send them elsewhere"
+        },
+        {
+          "type": "steps",
+          "items": [
+            "Open Settings \u203a Email, push, and webhooks.",
+            "Add email, push (ntfy), or a webhook, and choose which categories it gets and how important they must be, such as errors only.",
+            "Choose Test. It sends one right away, and says what's wrong if it fails."
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "For push, install the free ntfy app on your phone (or open ntfy.sh in a browser), choose Add push (ntfy), and subscribe to the topic it shows. On the public ntfy.sh server anyone who knows a topic can read it, so the topic is random and only \"You have a new Toskar notification\" is sent unless you choose Title and text. You can also run your own ntfy server. Set Open notifications at to this Toskar's address to open a notification by tapping it."
+        },
+        {
+          "type": "note",
+          "tone": "warning",
+          "text": "A webhook's signing secret is shown once, when you add it. Copy it then."
+        },
+        {
+          "type": "heading",
+          "text": "Quiet hours"
+        },
+        {
+          "type": "paragraph",
+          "text": "Quiet hours hold desktop notices, email, push, and webhooks overnight, and send them when quiet hours end. Errors still go out unless you choose Hold everything. The bell shows every notification at once."
+        },
+        {
+          "type": "heading",
+          "text": "Troubleshooting"
+        },
+        {
+          "type": "table",
+          "columns": [
+            "What you see",
+            "What to do"
+          ],
+          "rows": [
+            [
+              "Not delivered everywhere",
+              "A delivery failed. Toskar tries again after 1, 5, and 30 minutes. A problem retrying can't fix, such as a wrong password, stops at once: fix it, then choose Test."
+            ],
+            [
+              "No desktop notice for a finished automation",
+              "Settings turns task-finish notifications off. They're still in the bell."
+            ],
+            [
+              "A push shows only You have a new Toskar notification",
+              "That's the default on the public ntfy.sh server, where anyone who knows a topic can read it. Choose Title and text to send more."
+            ]
+          ]
+        },
+        {
+          "type": "related",
+          "sections": [
+            "automations",
+            "phone",
+            "settings"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "profiles",
+      "title": "Profiles & Orchestration",
+      "paragraphs": [
+        "A profile is a saved assistant: how it works through requests, its models, tools, memory, and the computers it runs on. General Assistant decides everything for you. Programming uses the Team strategy. Research focuses on looking things up. In advanced mode, Profiles & Orchestration in the sidebar lets you create, rename, duplicate, and edit them, and its editor opens across the page with the profile's name and four tabs: Models, Tools, Knowledge and memory, and Strategy and computers. Models shows the roles in use, with Show all roles for the rest; Tools has a switch for each kind of tool, with Per-tool permissions below. A tool a profile doesn't list stays off. Built-in profiles cannot be deleted; More actions \u2192 Reset to defaults puts one back to how Toskar ships it.",
+        "Strategy is how the profile works: Auto (quick questions get one model, bigger requests are planned and checked), Single model, Planner + workers (requests with several parts are always worked through in parts), or Team (a planner splits each request, workers do the parts, and a reviewer checks the answer; quick questions are still answered directly).",
+        "Models assigns a model, and optionally a computer, to each role: Primary writes the answer, Fast and Coding answer quick and coding requests when the chat is on Auto, and Planner, Worker, and Reviewer do their part of a plan. Automatic uses the model chosen in the chat. Fallback order lists the models to try, in order, when the answering model fails.",
+        "Capabilities turn tool groups on and off, and each tool has its own permission. A profile can list knowledge sources that every chat with it searches. Computer selection can be Automatic or Prefer this computer; Only this computer keeps every turn here, and each paired computer can be Preferred or Never use.",
+        "Orchestration tunes how the profile works: Reasoning level (its effort when a chat leaves effort on Auto), Planning (when a request has parts, always, or never), Workers and Parallelism (how many parts, and side by side or one at a time), Verification (check and report, or check and correct once or twice), Tool calls, Memory (off for this profile), Context budget (how much of the model's window earlier messages may use), Fallback (show the failure instead of answering on another model), Retries (how many times a failed turn is tried again, first on another computer with the same model), and Time limit. Empty fields keep the defaults."
+      ]
+    },
+    {
+      "id": "computers",
+      "title": "Connect your computers",
+      "paragraphs": [
+        "Computers discovers other Toskar instances on the local network. Pairing establishes trust between computers; it is separate from enabling LAN access to the OpenAI-compatible API.",
+        "While this is the only computer, the Computers page explains how to add another in three steps; with more, How to add a computer shows the same. A computer on the same network appears under Available to add. For a server, or a computer you reach over SSH, Add by command makes a one-time command to run there. Remove from team, in a computer's menu, asks first: a removed computer needs a new approval to join again.",
+        "Run on in the composer, and Run chats on in Settings, choose where chats run: Automatic lets Toskar pick an online paired computer that has the model: the one it expects to answer soonest, from how fast each has answered before and how much it's working on now. A chat's next message stays on the computer that answered the last one, which already has the chat loaded, unless another would be much faster. This computer keeps them here. A chat that uses a memory or knowledge source marked This computer only always runs here. Each computer gives chat priority over automations, background knowledge indexing, benchmarks, and training."
+      ],
+      "steps": [
+        "Run Toskar on both computers on the same LAN. Turn on Find other computers on the Computers page, under Network & access.",
+        "In Computers, find the other machine and choose Add to team. Approve the incoming request on the other computer; use the displayed pairing code when needed.",
+        "Confirm both machines appear paired and online. Install the required model on each computer that will run a role.",
+        "If discovery fails, check network isolation, discovery settings, and firewalls. An offline or revoked computer cannot accept a pinned role."
+      ]
+    },
+    {
+      "id": "team",
+      "title": "Run a Team profile",
+      "paragraphs": [
+        "Programming uses the Team strategy: a planner splits your request into parts, a worker writes notes for each part, the answer is written from them with the usual tools, memory, and knowledge, and a reviewer checks it before you see it. Each part has its own worker, so with paired computers the parts run on different machines at the same time. Quick questions skip the team and are answered directly."
+      ],
+      "steps": [
+        "Install the same model on both paired computers for an easy first run.",
+        "Select Programming in Chat and choose a model, or Auto. Roles without their own model use it.",
+        "To choose models or computers per role, enable Advanced mode and edit the profile's Models, such as Worker on your second machine. Set Strategy to Team on any profile to work the same way.",
+        "Send a request with some substance, such as a comparison or a plan. The chat timeline shows the planner, each worker, and the reviewer with the computer each ran on. In advanced mode, Run details under the answer shows each role's model, computer, and timing."
+      ]
+    },
+    {
+      "id": "deliberate",
+      "title": "Compare independent drafts",
+      "paragraphs": [
+        "A profile can have its answers drafted three times, independently, and compared before you see one. Small models make reasoning slips, such as a wrong step in a word problem, and a second and third draft that don't see the first often catch them. The extra drafts run on paired computers when there are any, at different settings, so they don't simply repeat each other.",
+        "When the drafts' final answers are short, such as a number, a date, or a name, they are compared: when most agree, that answer is kept and nothing more runs. When they disagree, or the answers are too long to compare, each draft is checked against the others, and a judge writes the answer from the drafts and the checks, saying where they still disagree. If anything fails along the way, the answer you would have had without drafts stands.",
+        "It's off by default. It makes answers slower and uses more of your computers, and it helps most with math, logic, and questions that take several steps. Team profiles have their own reviewer and don't compare drafts. Small talk, pictures, and answers that must be in a fixed format are answered once."
+      ],
+      "steps": [
+        "Open Profiles & Orchestration, edit a profile, and open Strategy and computers.",
+        "Set Compare independent drafts to Always, and save.",
+        "To choose the models, open Models, choose Show all roles, and set Drafter and Judge. Without them, the drafts use the profile's model and the judge uses its Reviewer, or its model.",
+        "Under an answer, the drafts line, such as 3 drafts \u00b7 they agreed, opens to each draft's model, computer, and final answer, the checks, and the judge. The steps say how it went. The phone app shows the same."
+      ]
+    },
+    {
+      "id": "api",
+      "title": "Connect another app through the API",
+      "paragraphs": [
+        "Open API Access to copy the endpoint and run Test API. The default base URL is http://127.0.0.1:7331/v1. Use GET /v1/models to find a model ID, such as auto or a profile, then POST /v1/chat/completions. The API gets the same assistant as chat: Auto, web look-ups, connected services, answer checks, personalization, and specialized AIs. It is an OpenAI-compatible subset, not every hosted API feature.",
+        "With local network access off, the default endpoint on this computer needs no API key. With it on, an app or script on another device needs a key for every request; apps on this computer still need none, and people sign in with their password in a browser instead. Create a named key in API Access and copy its secret when it is shown; you can rotate or revoke it there. Send it as Authorization: Bearer YOUR_KEY.",
+        "Each key has permissions a request can only narrow: whether it may use memories and connected knowledge (never, on request, or always), which tools (the profile's, read-only, or none), and whether it may choose where it runs. API requests use memories only when they ask, unless the key says always. A request can ask for JSON with response_format, and Toskar checks and repairs the result.",
+        "A request that names a model gets the room it needs. When its messages and answer are more than the model's context window on this computer, Toskar starts the model again with a bigger one, up to what the model was made for, if it still fits. Coding tools that send a lot at once can ask up front, with toskar.context_window set to the tokens they need. When no size fits, the request fails with CONTEXT_TOO_LONG, and nothing is cut off.",
+        "Coding agents and editors that run their own tools can use a model directly. Name the model as raw: and its ID, such as raw:qwen2.5-7b-q4, and the request goes straight to the model with the agent's tools, and the model's tool calls come back to the agent. It skips Toskar's assistant: no memories, knowledge, look-ups, or answer checks. A request from this computer can do this without a key. For another device, an Admin turns on Drive models directly, for coding agents, in that key's permissions in API Access. GET /v1/models lists the raw: models a key may use. Agents built for Anthropic's format work too: point them at Toskar's address, such as http://127.0.0.1:7331, and set their model to the model's ID. They reach POST /v1/messages, which works the same way. So do agents built for OpenAI's Responses format, through POST /v1/responses: send the whole conversation each time, since Toskar doesn't keep earlier responses.",
+        "toskarctl connect sets these up for you. Run toskarctl connect claude-code, codex, opencode, or aider to print the settings that agent needs, or add --write to save them: for Claude Code and OpenCode in the project folder you're in, and for Codex as a toskar profile you run with codex --profile toskar. Your agent's usual settings stay as they were. Pick the model with --model, or let it choose the best installed model for coding. For editors, toskarctl connect continue, cline, roo-code, zed, jetbrains, or copilot prints what to enter in that editor's settings, since they keep it there. An agent with many tools, such as one with MCP servers, works too: when its tools would take more than a quarter of what the model reads at once, the model gets the ones the request most likely needs and searches for the rest as it goes. The agent never notices.",
+        "The Toskar extension for VS Code lists Toskar's models in Copilot Chat's model picker and adds @toskar, Toskar's assistant, to Copilot Chat. On this computer it needs no setup. For Toskar on another computer, run Toskar: Connect to Another Computer in VS Code. Type the address Toskar shows, check that the code VS Code shows matches the encryption check code under Connect a device, then type the 6-digit code. VS Code then trusts only that computer's certificate, and it's listed under Devices, where you can disconnect it. The model picker drives models directly, so it works only when an Admin or the Owner showed the code; with a Member's code, @toskar works and the picker doesn't.",
+        "For another computer, use the LAN endpoint shown in API Access rather than localhost. Keep LAN access on a trusted network; the displayed HTTP endpoint does not itself provide public-internet TLS protection.",
+        "Apps that speak MCP, such as Claude Desktop, Claude Code, Cursor, and VS Code, can ask your local AI questions, list its models, and search your connected knowledge. API Access \u2192 Use Toskar in other AI apps shows what to paste into each."
+      ],
+      "code": "curl http://127.0.0.1:7331/v1/models\n\ncurl http://127.0.0.1:7331/v1/chat/completions \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"model\":\"MODEL_ID_FROM_LIST\",\"messages\":[{\"role\":\"user\",\"content\":\"Hello\"}],\"stream\":false}'"
+    },
+    {
+      "id": "phone",
+      "title": "Use Toskar on your phone, tablet, TV, watch, or in the car",
+      "kind": "task",
+      "summary": "Chat with the AI on your computer from your phone, tablet, TV, or watch, talk with it in the car, and ask Toskar about text in any app.",
+      "paragraphs": [
+        "The Toskar app for phones, tablets, TVs, and watches uses the models on your computer, with your chats, memory, and knowledge. You connect each device to your computer once, with a code the computer shows.",
+        "A phone or tablet can also run a small model on the device itself, and a TV has a demo you can try without a computer."
+      ],
+      "blocks": [
+        {
+          "type": "list",
+          "title": "What you need",
+          "items": [
+            "Toskar running on a computer: Toskar Pro, or Toskar Core. See [Install and start your first chat](#install).",
+            "The Toskar app from your device's app store.",
+            "The device and the computer on the same network to connect. Away from home, [Reach Toskar away from home](#anywhere) keeps it working."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Connect a device"
+        },
+        {
+          "type": "steps",
+          "items": [
+            "On the computer, open Computers and choose Connect a device. If network access is off, choose Allow and show a code. It turns on at once, with no restart.",
+            "On the device, open Toskar and choose your computer under On this network. If it isn't listed, enter the address the computer shows.",
+            "Type the 6-digit code. It works once, for 10 minutes. The computer shows the device's name when it connects."
+          ]
+        },
+        {
+          "type": "image",
+          "screen": "connect-device",
+          "alt": "Connect a device on the Computers page, showing the code 482 915, the steps, the computer's address, the encryption check code 7F3A\u00b7C21E, and Expires in 9:55",
+          "caption": "The code works once, for 10 minutes. The check code below it is what the device should show in its Settings.",
+          "src": "docs/user-guide/images/connect-device.png"
+        },
+        {
+          "type": "note",
+          "tone": "tip",
+          "text": "The connection is encrypted. Once the device connects, it shows a short check code in its Settings. If it doesn't match the one the computer showed, disconnect the device and connect it again."
+        },
+        {
+          "type": "heading",
+          "text": "What a connected device can do"
+        },
+        {
+          "type": "paragraph",
+          "text": "Each device gets a key of its own. That key can chat, see your conversations, and read lists such as models and computers. It can't change settings, models, or keys on the computer."
+        },
+        {
+          "type": "paragraph",
+          "text": "Disconnect a device any time in Settings, under Your devices. An Admin can also disconnect any device in API Access, under Devices. A disconnected device needs a new code to connect again."
+        },
+        {
+          "type": "heading",
+          "text": "Chat on the device itself"
+        },
+        {
+          "type": "paragraph",
+          "text": "A phone or tablet can also run a small model of its own, for when your computer is off or out of reach. Open Models in the app and choose Install on one under On this device. These are the smaller models from the Toskar catalog, and the file stays on the device."
+        },
+        {
+          "type": "list",
+          "items": [
+            "To chat on the device, choose a model under On this device in the chat's model menu. Auto there picks the best installed one for each message.",
+            "When the computer can't be reached, the error offers Chat on this device, which sends the same message to the device's model.",
+            "Nothing you write leaves the device. With Look up current information on, in Settings under Chat on this device, a question about the weather or news searches the web: only the search words leave the device, and the answer lists its sources.",
+            "If a model can't load or runs out of memory, a smaller one answers instead, and the answer says so."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Notifications on the device"
+        },
+        {
+          "type": "paragraph",
+          "text": "Turn on Notifications from your computer in the app's Settings, under Notifications on this device. Your computer's notices, such as an automation's result, then arrive even when Toskar is closed or you're away from home. Choose what they say in Settings \u203a Notifications on the computer, and see them all in the app's Activity tab. [Notifications](#notifications) covers which notices there are."
+        },
+        {
+          "type": "heading",
+          "text": "Ask Toskar about text in any app"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Select text in another app, then choose Ask Toskar from the share sheet or the text menu. Toskar can fix, rewrite, translate, explain, summarize, or reply to it. From the text menu, Replace puts the answer in place of the text.",
+            "Where the device has them, Fix, Rewrite, Translate, Summarize, and Explain with Toskar are also in Shortcuts, Spotlight, and Siri."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "On your TV and your watch"
+        },
+        {
+          "type": "list",
+          "items": [
+            "On a TV, ask with the microphone on the remote, or type. Without a computer connected, the TV app's demo answers a few suggested questions with sample answers, and nothing leaves the TV.",
+            "On a watch, ask from the app or your watch face. The watch asks your computer directly, at home or away, and asks through your phone when it can't."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "In the car"
+        },
+        {
+          "type": "paragraph",
+          "text": "Talk with Toskar out loud on the car's screen (CarPlay). It speaks its answers and doesn't show them, so your eyes stay on the road. Set it up while you're parked."
+        },
+        {
+          "type": "list",
+          "items": [
+            "Toskar Unlock, on this phone.",
+            "Something to answer: a [computer you've connected](#phone), or a model on this phone.",
+            "The microphone and speech recognition allowed for Toskar. Open Toskar on the phone once to be asked."
+          ]
+        },
+        {
+          "type": "steps",
+          "items": [
+            "Connect the phone to your car, and open Toskar on the car's screen. It starts listening right away.",
+            "Ask your question. A short pause tells Toskar you've finished.",
+            "Listen to the answer. It's spoken a sentence at a time.",
+            "Ask a follow-up in the next 5 seconds, and it continues the same chat. Say nothing, and it ends quietly and your music comes back."
+          ]
+        },
+        {
+          "type": "list",
+          "items": [
+            "New conversation starts over, Stop ends the answer, and End closes Toskar. Continue the conversation on the car's screen picks up where you left off.",
+            "If you open it and say nothing for 8 seconds, it closes on its own.",
+            "The chat is in the app afterwards, on whichever device answered."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Who answers in the car"
+        },
+        {
+          "type": "paragraph",
+          "text": "The computer answers when the Chat tab is set to it. If the computer can't be reached, the model on this phone answers instead, so it still works with no signal. A follow-up that moves to the phone starts a new chat, because the earlier messages are on the computer."
+        },
+        {
+          "type": "paragraph",
+          "text": "With the phone locked, it can only use its processor and has little time, so a phone model answering in the car uses your smallest one. A connected computer answers instead when it can be reached quickly. A small model is the best fit for the car, and long answers may be cut short."
+        },
+        {
+          "type": "heading",
+          "text": "Make the voice sound better"
+        },
+        {
+          "type": "paragraph",
+          "text": "Toskar uses the best voice on your phone for the language it's speaking. Most phones start with a basic one that sounds robotic, and apps can't download voices themselves. To get a more natural one, open the phone's Settings, go to Accessibility, Read & Speak, Voices, choose your language, and download a voice marked Premium or Enhanced. Toskar uses it the next time it speaks."
+        },
+        {
+          "type": "heading",
+          "text": "Troubleshooting"
+        },
+        {
+          "type": "table",
+          "columns": [
+            "What you see",
+            "What to do"
+          ],
+          "rows": [
+            [
+              "That code has expired",
+              "Choose Show a new code on the computer, and type the new one."
+            ],
+            [
+              "The code was cancelled after too many wrong tries",
+              "Choose Show a new code, and type it carefully."
+            ],
+            [
+              "The computer isn't under On this network",
+              "Enter the address the computer shows instead. Check that the device and the computer are on the same network."
+            ],
+            [
+              "Toskar may not look for computers on your network",
+              "Allow Toskar to use the local network in the device's privacy settings."
+            ],
+            [
+              "Can't reach your computer away from home",
+              "The computer may be off or asleep, or access from anywhere may be off on it. See [Reach Toskar away from home](#anywhere)."
+            ],
+            [
+              "Notifications are off for Toskar in this device's settings",
+              "Choose Open Settings, turn notifications on for Toskar, and come back."
+            ],
+            [
+              "Update Toskar on your computer to get notifications here",
+              "Update Toskar on the computer, then turn notifications on again."
+            ],
+            [
+              "In the car: Toskar needs the microphone and speech recognition",
+              "Once you're parked, allow both for Toskar in the phone's privacy settings."
+            ],
+            [
+              "In the car: Toskar isn't on the car's screen",
+              "While parked, check the car's app list in the phone's Settings, under General, CarPlay, and add Toskar. Update Toskar if it's an older version."
+            ],
+            [
+              "In the car: Toskar in the car comes with Toskar Unlock",
+              "Get Toskar Unlock on your phone once you're parked."
+            ],
+            [
+              "In the car: Toskar on your phone has no model yet",
+              "No computer could answer, and this phone has no model. Add a small one once you're parked, in Models on the phone."
+            ],
+            [
+              "In the car: That didn't work",
+              "The computer stopped answering partway, or the phone ran out of time. Try again. With the phone locked, a smaller model is more likely to finish."
+            ],
+            [
+              "In the car: it stops listening too soon",
+              "It stops after 8 seconds of silence when it opens, and 5 seconds after an answer. Choose Ask Toskar or Continue the conversation on the car's screen to start again."
+            ]
+          ]
+        },
+        {
+          "type": "related",
+          "sections": [
+            "anywhere",
+            "notifications",
+            "install",
+            "people"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "anywhere",
+      "title": "Reach Toskar away from home",
+      "paragraphs": [
+        "Access from anywhere lets the phones, tablets, and other devices you paired reach Toskar when they're away from home. It's off until you turn it on in API Access. It answers only paired devices' keys, over HTTPS, and only what those devices use: no sign-in page, no settings, and nothing for other apps' keys.",
+        "While it's on, Toskar asks your router to open its port (7333 unless you change it), keeps it open, and closes it when you turn access from anywhere off or quit Toskar. The line under the switch says how Toskar can be reached: at the router's address, over IPv6, at an address you entered, through a relay, or why not, such as an internet provider that shares one address among many homes.",
+        "If the router won't open a port, there are free ways around it. Forward the port in your router's settings and enter the address it's reached at under Forwarded address. Or use Tailscale: install it here and on your device, and pair the device while both are on Tailscale. The device then reaches Toskar wherever it is, with no port open at all.",
+        "When none of that works, Toskar's relay does. Subscribe under Toskar's relay in API Access, for $4.99 a month or $39.99 a year, or in the Toskar app on your phone or tablet. One subscription covers Toskar here and every device paired with it, and it turns on by itself a few seconds after you pay. Manage billing changes the card or cancels; one bought in the app is managed in your device's store.",
+        "If your organization runs its own Toskar relay, open Your organization's relay in API Access and enter the relay's name and the enrollment secret your IT team gave you. Toskar then keeps a line open to the relay, so devices get through even when nothing more direct works.",
+        "A device takes the most direct way that works: at home first, then directly, then through the relay. Settings on the device shows which. Traffic is encrypted all the way to Toskar, to the certificate the device saved when it was paired, so a router or relay in between can't read it or answer in Toskar's place.",
+        "A device paired before access from anywhere learns the way the next time it's home."
+      ],
+      "steps": [
+        "Open API Access and turn on Access from anywhere.",
+        "Check the line under the switch. If it says Toskar isn't reachable yet, forward the port and enter the address, use Tailscale, subscribe to Toskar's relay, or set up your organization's relay.",
+        "Take a paired device off your home Wi-Fi and open Toskar. Its Settings say how it got through."
+      ]
+    },
+    {
+      "id": "people",
+      "title": "Share Toskar with other people",
+      "paragraphs": [
+        "Everyone in your home or team can use the same Toskar, each with their own chats, memories, files, and automations. Nobody sees anyone else's, not even the Owner. Models, tools, knowledge, and profiles are shared.",
+        "Whoever installed Toskar is the Owner and uses it on this computer without signing in. Admins manage models, tools, knowledge, computers, settings, and people other than Admins and the Owner. Members chat and have their own memories and automations. Visitors only chat. Each person sees only the pages their role can use.",
+        "Everyone chooses their own App language, the language answers are written in, and Personalization in Settings. Until they do, they have the Owner's.",
+        "Who signs in how, from another computer or device: people sign in with their username and password, in any browser. Phones, tablets, watches, and TVs connect with a 6-digit code, under Connect a device. Apps and scripts, such as one using the OpenAI-compatible API, use an API key from API Access. People never need a key. The Owner uses this computer without signing in; to sign in from another device, the Owner makes a sign-in link on People and chooses a password.",
+        "Everyone can connect their own phone, tablet, or TV under Settings \u2192 Your devices, and disconnect it there. Local network access has to be on first, which an Admin or the Owner turns on.",
+        "The People page under Administer lists everyone. Change someone's role there, make them a new password link, or disable them, which signs them out everywhere and stops their keys and automations."
+      ],
+      "steps": [
+        "Open People, type the person's name, choose a role, and choose Add.",
+        "If local network access is off, choose Turn on network access under the link, so other devices can open it. No API key is needed: the person signs in with a password.",
+        "Copy the link and send it to them. It works once, for a week.",
+        "They open it, choose a username and password, and are signed in. Next time, they sign in at the same address.",
+        "Forgot a password? Choose New password link next to their name and send them the new link."
+      ]
+    },
+    {
+      "id": "portals",
+      "title": "Open a chat page for the people you serve",
+      "paragraphs": [
+        "A chat portal is a page with only a chat on it, in your own name, logo, and colours, for customers, students, or anyone you help. It answers with the profile you choose, and none of Toskar's other pages show.",
+        "Each visitor's chats are their own: no other visitor, and none of your own chats, memories, or knowledge sources, appear to them, and their chats never reach your memory or knowledge. A portal starts with no tools and no memory; you can allow tools that only read, or the profile's own.",
+        "Each portal has limits: how many messages a visitor may send an hour, how long a message may be, and how many of its chats run at once. Portal chats wait for your own and for other people's who use Toskar, so a busy portal never slows you down.",
+        "Turning a portal off under Administer \u2192 Portals stops it at once, even for someone in the middle of a chat.",
+        "To put a portal on your own website, list the website's address under Embedding in the portal's editor, such as https://shop.example.com, then copy the chat button or the frame snippet onto your pages. Only the websites you list can show it.",
+        "Conversations, next to each portal, lists its visitors' chats for you to read, and the portal page tells visitors that the people who run it can read them. Each portal shows how many visitors wrote and how many messages they sent this month, and keeps visitors' chats for the time you choose, 30 days to start. A Members only portal's chats stay each Member's own."
+      ],
+      "steps": [
+        "Open Administer \u2192 Portals.",
+        "Under Add a portal, type a name; the address fills in from it. Choose who can chat: anyone with a passcode you set, anyone on your network, the Members who sign in to this Toskar, or only people you invite. For invited portals, invite each person by name in the portal's editor and send them their link.",
+        "Choose the profile, tools, and language, and how it looks: heading, logo, accent colour, theme, welcome message, suggested prompts, and footer. The preview shows the page as visitors will see it.",
+        "Copy the link and share it. Local network access has to be on for other devices to open it."
+      ]
+    },
+    {
+      "id": "server",
+      "title": "Run without a desktop",
+      "paragraphs": [
+        "Extract the matching Linux headless archive and run the daemon from the extracted directory. Keep the bundled web directory alongside it. Open http://127.0.0.1:7331 on that computer.",
+        "For a remote server, an SSH tunnel lets you reach the loopback UI: ssh -L 7331:127.0.0.1:7331 user@server. Then open http://127.0.0.1:7331 on your own computer, using a different local port if it is already occupied.",
+        "The deb and rpm packages run Toskar as the system service toskar.service (also reachable as yggdrasil.service), as the user yggdrasil, with its data in /var/lib/yggdrasil/.local/share/toskar (.local/share/yggdrasil for an install from before the rename to Toskar). Use systemctl status, restart, and stop, and journalctl -u toskar for its log. The headless archive does not install a service: the daemon accepts --data-dir for a custom data location, and Ctrl+C stops it in a terminal.",
+        "config.json in the data directory sets ports, addresses, discovery, and static peers, and TOSKAR_* environment variables override them for containers. The toskarctl command lists, creates, runs, and pauses automations from a terminal, and prints shell completion.",
+        "Behind a reverse proxy that signs people in, such as Authelia, Authentik, Cloudflare Access, or Tailscale, set TOSKAR_TRUSTED_PROXIES to the proxy's address. Toskar then takes the person from the proxy's Remote-User header, makes them the first time, and gives them a role from their groups: TOSKAR_PROXY_ADMIN_GROUPS and TOSKAR_PROXY_MEMBER_GROUPS, with TOSKAR_PROXY_DEFAULT_ROLE for everyone else. TOSKAR_PROXY_OWNER_USER is your own name there. Only the listed address is believed. With the proxy on the same computer, everything from that computer counts as the proxy's, so open Toskar through the proxy there too.",
+        "To let people sign in with Google, Microsoft, Okta, Authentik, Keycloak, or another OpenID Connect provider, register Toskar there with its address followed by /api/v1/oidc/callback, then set TOSKAR_OIDC_ISSUER, TOSKAR_OIDC_CLIENT_ID, and TOSKAR_OIDC_CLIENT_SECRET. The sign-in screen then shows Sign in with that provider. Groups become roles with TOSKAR_OIDC_ADMIN_GROUPS and TOSKAR_OIDC_MEMBER_GROUPS, and TOSKAR_OIDC_OWNER_EMAIL is your own address there."
+      ],
+      "code": "tar -xzf toskar-1.12.1-linux-amd64-headless.tar.gz\ncd toskar-1.12.1-linux-amd64-headless\n./toskar",
+      "kind": "task",
+      "summary": "Run Toskar Core on a computer without a screen, such as a home server, and use it from a browser on your own computer.",
+      "blocks": [
+        {
+          "type": "list",
+          "title": "What you need",
+          "items": [
+            "A Linux computer you can sign in to from a terminal, with Toskar Core installed. [Install and start your first chat](#install) has the install script and the apt lines.",
+            "Memory and disk space for a model, as on any computer. The same table on that page applies.",
+            "Your own computer, with a browser and SSH, to use it from."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "The service"
+        },
+        {
+          "type": "paragraph",
+          "text": "The Linux packages run Toskar as the system service toskar, which starts when the computer does. It runs as the user yggdrasil, and keeps its data in /var/lib/yggdrasil/.local/share/toskar. Install the packages with sudo, since they set up the service."
+        },
+        {
+          "type": "paragraph",
+          "text": "Check it, restart it, or read its log with systemd's usual commands. These need a Linux computer with the service, so they aren't run in CI."
+        },
+        {
+          "type": "code",
+          "language": "sh",
+          "code": "systemctl status toskar\nsudo systemctl restart toskar\njournalctl -u toskar"
+        },
+        {
+          "type": "heading",
+          "text": "Open Toskar from your own computer"
+        },
+        {
+          "type": "paragraph",
+          "text": "At first, Toskar answers only on the server itself, at 127.0.0.1:7331. An SSH tunnel brings that address to your own computer, and nothing is opened to the network."
+        },
+        {
+          "type": "steps",
+          "items": [
+            "On your own computer, open a terminal and run ssh -L 7331:127.0.0.1:7331 you@server, with your username and the server's name. Leave it open.",
+            "Open http://127.0.0.1:7331 in a browser on your own computer.",
+            "The first time, set up a model as on any computer: choose what you'd like your AI to do, then Install recommended setup."
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Through the tunnel, Toskar answers as it would on the server. This check, from your own computer, shows that it's running:"
+        },
+        {
+          "type": "code",
+          "language": "sh",
+          "test": "server-health",
+          "code": "curl -s http://127.0.0.1:7331/api/v1/health",
+          "output": "{\u2026\"status\":\"ok\"\u2026}"
+        },
+        {
+          "type": "note",
+          "tone": "tip",
+          "text": "If your own computer runs Toskar too, 7331 is taken there. Use another port on your side, such as ssh -L 7400:127.0.0.1:7331 you@server, and open http://127.0.0.1:7400."
+        },
+        {
+          "type": "heading",
+          "text": "You're the Owner"
+        },
+        {
+          "type": "paragraph",
+          "text": "Whoever installed Toskar is its Owner, and uses it from the server without signing in. A tunnel arrives as the server, so you're the Owner through it too. To add other people, or to sign in from another device, see [People and sign-in](#people)."
+        },
+        {
+          "type": "heading",
+          "text": "Update"
+        },
+        {
+          "type": "paragraph",
+          "text": "Once a day, Toskar asks toskar.ai for the latest version number, and nothing else. When there's a newer one, Settings shows it under About, such as Toskar 1.13.0 is available. Update the way you installed:"
+        },
+        {
+          "type": "table",
+          "columns": [
+            "Installed with",
+            "Update with"
+          ],
+          "rows": [
+            [
+              "The apt repository, or the install script on Debian or Ubuntu",
+              "`sudo apt-get update`, then `sudo apt-get upgrade`"
+            ],
+            [
+              "An rpm package",
+              "The new release's rpm, with `sudo dnf install` and its file name"
+            ],
+            [
+              "Homebrew",
+              "`brew upgrade toskar`"
+            ]
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Running the install script again doesn't update: it says Toskar is already installed and running. A Linux package restarts the service on the new version by itself."
+        },
+        {
+          "type": "heading",
+          "text": "Settings for a server"
+        },
+        {
+          "type": "paragraph",
+          "text": "config.json in the data directory sets ports, addresses, discovery, and static peers, and TOSKAR_* environment variables override them for containers. The toskarctl command lists, creates, runs, and pauses automations from a terminal, and prints shell completion."
+        },
+        {
+          "type": "paragraph",
+          "text": "The headless archive doesn't install a service. Extract it, run toskar from its folder with the web folder beside it, and stop it with Ctrl+C. Its --data-dir option keeps the data somewhere else."
+        },
+        {
+          "type": "code",
+          "language": "sh",
+          "code": "tar -xzf toskar-1.12.1-linux-amd64-headless.tar.gz\ncd toskar-1.12.1-linux-amd64-headless\n./toskar"
+        },
+        {
+          "type": "heading",
+          "text": "Sign in through a proxy or your organization's accounts"
+        },
+        {
+          "type": "paragraph",
+          "text": "Behind a reverse proxy that signs people in, such as Authelia, Authentik, Cloudflare Access, or Tailscale, set TOSKAR_TRUSTED_PROXIES to the proxy's address. Toskar then takes the person from the proxy's Remote-User header, makes them the first time, and gives them a role from their groups: TOSKAR_PROXY_ADMIN_GROUPS and TOSKAR_PROXY_MEMBER_GROUPS, with TOSKAR_PROXY_DEFAULT_ROLE for everyone else. TOSKAR_PROXY_OWNER_USER is your own name there. Only the listed address is believed. With the proxy on the same computer, everything from that computer counts as the proxy's, so open Toskar through the proxy there too."
+        },
+        {
+          "type": "paragraph",
+          "text": "To let people sign in with Google, Microsoft, Okta, Authentik, Keycloak, or another OpenID Connect provider, register Toskar there with its address followed by /api/v1/oidc/callback, then set TOSKAR_OIDC_ISSUER, TOSKAR_OIDC_CLIENT_ID, and TOSKAR_OIDC_CLIENT_SECRET. The sign-in screen then shows Sign in with that provider. Groups become roles with TOSKAR_OIDC_ADMIN_GROUPS and TOSKAR_OIDC_MEMBER_GROUPS, and TOSKAR_OIDC_OWNER_EMAIL is your own address there."
+        },
+        {
+          "type": "heading",
+          "text": "Troubleshooting"
+        },
+        {
+          "type": "table",
+          "columns": [
+            "What you see",
+            "What to do"
+          ],
+          "rows": [
+            [
+              "The browser can't reach 127.0.0.1:7331",
+              "Check that the tunnel's terminal is still open. On the server, `systemctl status toskar` says whether Toskar is running."
+            ],
+            [
+              "bind: Address already in use, when you start the tunnel",
+              "Something on your own computer has port 7331. Use another port on your side, as in the tip above."
+            ],
+            [
+              "The service stopped after an update",
+              "`journalctl -u toskar` shows why. Restart it with `sudo systemctl restart toskar`."
+            ],
+            [
+              "Settings doesn't say when there's an update",
+              "The update check is off, or the server can't reach toskar.ai. Turn on Check for updates under About."
+            ]
+          ]
+        },
+        {
+          "type": "related",
+          "sections": [
+            "install",
+            "people",
+            "models",
+            "computers",
+            "privacy"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "privacy",
+      "title": "Privacy, encryption, and what left this computer",
+      "paragraphs": [
+        "Are my chats private? Yes. Your chats, memories, knowledge, and files stay on this computer. Only people who can sign in to your account on it, and apps you give an API key, can see them; a chat answered by one of your paired computers is sent to that computer. There is no Toskar account or cloud, and nobody at Toskar can see your chats or data.",
+        "Toskar does not send usage telemetry. Chats, memories, knowledge, files, and specialized AIs are stored in the data directory on this computer. Something leaves only when a feature that goes online is used: a web search or page read, a connected service or MCP server, a database or web API you connected, a model or runtime download, a paired computer that answers a chat or trains, or an external server you configured.",
+        "Settings \u2192 What left this computer lists each of those, newest first: the search queries, page addresses, what was sent to a paired computer or an external server, and what a connected service was asked. It counts them for the last 30 days.",
+        "Run records hold the prompts and tool results of past runs, including that list. Keep run records for sets how long they are kept: 7, 30, or 90 days, or Keep them. Delete run records now removes them at once, and clears cached web searches and pages. Chats are not run records; History in Settings decides whether chats are saved.",
+        "Memories and knowledge sources marked This computer only keep every chat that uses them on this computer. Text recognition, meaning search, and training on this computer never send your data elsewhere.",
+        "Is my data encrypted? Toskar doesn't encrypt its own files, and encryption isn't required to use it. Turn on your computer's disk encryption to keep chats, memories, knowledge, and files encrypted while the computer is off or locked: FileVault on macOS (System Settings \u2192 Privacy & Security), BitLocker or Device Encryption on Windows, and LUKS on Linux. Passwords and keys for connected services are kept in the secrets folder, readable only by your user account.",
+        "Websites, model downloads, and online services are reached over encrypted HTTPS connections. Addresses you enter yourself, such as an external server, a webhook, or an MCP server, are encrypted when they start with https://. Traffic between your own paired computers, and from other devices on your network to this computer (local network access), is not encrypted yet; it is protected by pairing and API keys, so use those features on a network you trust, such as your home or office network. Settings \u2192 Your data stays private sums this up."
+      ]
+    },
+    {
+      "id": "settings",
+      "title": "Settings and storage",
+      "paragraphs": [
+        "Settings controls appearance, the default profile, where chats run, model lifecycle and storage, downloads, notifications, history, tool permissions, personalization, and what left this computer. Finding other computers and the external server are on the Computers page, and connected services are on the Tools page. The sidebar groups pages into Use (Chat, Automations, Knowledge, Memory), Customize (Models, Tools, Profiles & Orchestration), and Administer (Train, Computers, API Access, Performance, Diagnostics), with Settings at the bottom. Administer is closed until you open it. Advanced mode shows expert controls inside pages: editing profiles, per-tool permissions, and run details under answers. Desktop settings also keep Toskar running in the background and launch it at login. Saving an automation's schedule turns on Keep running in background, because schedules stop when the daemon stops.",
+        "Personalization shapes how answers look in every chat, automation, and API request: length (brief, balanced, or detailed), tone (friendly, neutral, or direct), format (prose or lists), units (metric or imperial), and two short notes, about you and how to answer. It never changes what tools may do.",
+        "Default data locations are ~/Library/Application Support/Toskar on macOS, %LOCALAPPDATA%\\Toskar on Windows, and ~/.local/share/toskar on Linux. An install from before the rename keeps its Yggdrasil folder (yggdrasil on Linux), and nothing is moved. Settings shows the actual data, model, runtime, and log directories. SQLite state, model files, and runtime files live under the data tree.",
+        "Before replacing an installation or resetting the app, stop the app and daemon and back up the data directory if you need its state. Review the reset dialog carefully. Install updates from the matching release archive and restart the app."
+      ]
+    },
+    {
+      "id": "diagnostics",
+      "title": "Diagnostics and performance",
+      "paragraphs": [
+        "Diagnostics shows the health of the control service, the model runtime, the database, networking, storage, and the API, with a plain status for each. What Toskar can do lists every ability, such as looking things up, reading files, or training, with how it works or what would make it possible. Chat answers questions like \u201cCan you generate an image?\u201d from the same list. Tool activity shows recent tool calls. Export diagnostics writes a troubleshooting bundle without secrets.",
+        "Performance shows what your AI is doing right now and recent runs with their speed. Compare models runs the same benchmark on several models, and Recent benchmarks keeps the results. In advanced mode, Run details under an answer shows how it was handled: the models and computers used, load time, time to first token, tokens per second, tool calls, and retries."
+      ]
+    },
+    {
+      "id": "gpu",
+      "title": "Is my model using the GPU?",
+      "kind": "task",
+      "summary": "See whether a model runs on your graphics card, why it doesn't when it could, and how to fix that.",
+      "paragraphs": [
+        "A model answers much faster on a graphics card (GPU) than on the processor (CPU). Toskar shows where each running model actually runs, as llama.cpp reported when it loaded the model, not what the hardware could do."
+      ],
+      "blocks": [
+        {
+          "type": "list",
+          "title": "What you need",
+          "items": [
+            "A running model. Sending a chat message starts one."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Where to look"
+        },
+        {
+          "type": "paragraph",
+          "text": "Each running model shows a status on Models \u203a Running and on the Performance overview. Select it to see the device, how many of the model's layers are on the GPU, and the GPU memory it uses. Diagnostics has a GPU acceleration row with the same states."
+        },
+        {
+          "type": "image",
+          "screen": "models-running",
+          "alt": "The Running tab with Gemma 4 E4B running on this Mac, marked GPU in green",
+          "caption": "GPU, in green: the whole model is on the graphics card.",
+          "src": "docs/user-guide/images/models-running.png"
+        },
+        {
+          "type": "table",
+          "columns": [
+            "Status",
+            "What it means"
+          ],
+          "rows": [
+            [
+              "GPU (green)",
+              "The whole model is on the graphics card."
+            ],
+            [
+              "Partly on GPU (amber)",
+              "It doesn't fit in the GPU's memory, so some of it runs on the slower CPU. A smaller model, or a smaller version of this one, fits completely."
+            ],
+            [
+              "CPU only (red)",
+              "This computer has a GPU that isn't being used. The steps below fix it."
+            ],
+            [
+              "CPU (grey)",
+              "This computer has no GPU Toskar can use, which is expected."
+            ]
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "A model bigger than your graphics card still runs. Toskar puts as many of its layers as fit in the card's free memory there, and the rest in the computer's memory, where the processor runs them, so it shows Partly on GPU. A mixture-of-experts model, such as one marked A3B, keeps its experts in the computer's memory first, since each word uses only a few of them. In Toskar 1.11 and earlier, a model that didn't fit on the card stopped while loading instead."
+        },
+        {
+          "type": "heading",
+          "text": "Watch it live"
+        },
+        {
+          "type": "paragraph",
+          "text": "The Performance overview shows each computer's CPU and memory, and each graphics card's use, video memory, temperature, and power, with the last hour as a line. Activity marks each reply GPU or CPU and can filter by it. With Advanced mode on, a reply's details also say how many words the model guessed ahead and how many it kept, and Activity shows the share kept across the replies shown; filter by a model to see its own. More kept means faster answers."
+        },
+        {
+          "type": "note",
+          "tone": "tip",
+          "text": "A Mac doesn't report GPU temperature or power without administrator rights, and Windows reports them only for NVIDIA cards. Toskar leaves those figures out there rather than showing zero."
+        },
+        {
+          "type": "heading",
+          "text": "Troubleshooting"
+        },
+        {
+          "type": "paragraph",
+          "text": "When a model shows CPU only:"
+        },
+        {
+          "type": "steps",
+          "items": [
+            "If a model shows CPU only, open Diagnostics and read the reason under GPU acceleration.",
+            "If the installed llama.cpp runs on the CPU only, stop your models, then quit and reopen Toskar. It installs the GPU build when no model is running.",
+            "If llama.cpp couldn't use the GPU, install or update the graphics driver. On Linux with an AMD or Intel card, also install the Vulkan drivers (on Ubuntu and Debian, mesa-vulkan-drivers and libvulkan1).",
+            "Start the model again and check its status."
+          ]
+        },
+        {
+          "type": "related",
+          "sections": [
+            "models",
+            "diagnostics",
+            "server"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "long-chats",
+      "title": "Why do answers in a long chat start slowly?",
+      "kind": "task",
+      "summary": "See how much of a chat each model skips reading again, and what to do when one reads it all every turn.",
+      "paragraphs": [
+        "Before a model answers, it reads the whole chat so far. On a chat's later turns, it can skip the part it already read, kept in its prompt cache, and read only your new message. A model that can't skip reads a long chat from the start every turn, so its answers start later as the chat grows."
+      ],
+      "blocks": [
+        {
+          "type": "list",
+          "title": "What you need",
+          "items": [
+            "A few chats of more than one turn from the last week, with models running on this computer."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Where to look"
+        },
+        {
+          "type": "paragraph",
+          "text": "Open Diagnostics. Reusing the chat so far lists each model with the share of its later turns' prompts it skipped, and how many turns and tokens that covers."
+        },
+        {
+          "type": "image",
+          "screen": "diagnostics-prompt-cache",
+          "alt": "Diagnostics listing Gemma 4 E4B at 92% skipped and Qwen Coder 7B at 10%, marked low",
+          "caption": "Gemma 4 E4B skipped 92% of what it had read before; Qwen Coder 7B is marked low.",
+          "src": "docs/user-guide/images/diagnostics-prompt-cache.png"
+        },
+        {
+          "type": "table",
+          "columns": [
+            "What it shows",
+            "What it means"
+          ],
+          "rows": [
+            [
+              "80% or more",
+              "Normal. Each turn reads little more than your new message."
+            ],
+            [
+              "Low, under 50%",
+              "Over at least five turns, the model read most of each chat again. Its answers slow down as a chat grows."
+            ],
+            [
+              "No panel",
+              "No chat had a second turn this week, or your models ran on another computer or app, which don't report this."
+            ]
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Only turns after a chat's first are counted, and only when the model was already running. A model that just started has nothing to skip. Models on paired computers and in other apps, such as Ollama, don't report it, so they aren't listed."
+        },
+        {
+          "type": "note",
+          "tone": "tip",
+          "text": "Toskar's weekly tests hold a small model to 80% or more, and check that an answer from the cache matches one read from scratch, word for word."
+        },
+        {
+          "type": "heading",
+          "text": "Troubleshooting"
+        },
+        {
+          "type": "paragraph",
+          "text": "When a model is marked low:"
+        },
+        {
+          "type": "steps",
+          "items": [
+            "Switch between chats less while you wait for answers. Each chat you send to the same model can push the others out of its cache.",
+            "Try a different model for long chats. Some models, such as those with sliding-window attention, can't skip as much.",
+            "Let a long chat be shortened. Auto-compact summarizes older turns, so there's less to read again.",
+            "If a model stays low, report it from Diagnostics, so Toskar can tune how it runs that model."
+          ]
+        },
+        {
+          "type": "related",
+          "sections": [
+            "auto-compact",
+            "gpu",
+            "diagnostics",
+            "report"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "troubleshooting",
+      "title": "Troubleshooting",
+      "paragraphs": [
+        "Start with What I did under the answer: it names the model that answered and why, and what went wrong. No reply or a model load failure: confirm the installation finished, check the selected computer is online, close memory-heavy applications, or try a smaller model. A model that cannot load fails at once with the reason.",
+        "No live web answer: check that Internet is allowed in the profile, and ask for a search or about something current; a plain question is answered without tools. The same search within 15 minutes is answered from the cache.",
+        "An answer did not use your knowledge or memories: use Try a question on the Knowledge page, install an embedding model so search matches meaning, and check that memory is on for the chat. A knowledge source that failed shows the reason; database and web API sources keep answering from the last data fetched.",
+        "API connection refused: confirm the daemon is running and copy the current endpoint from API Access. A 401 with local network access on means a request from an app on another device needs a valid API key (people signing in in a browser use their password instead), and a 403 means the key does not allow what the request asked for. Run Test API after changing settings.",
+        "To tell the Toskar team about a problem, use Report this beside the error (see Report a problem). For the public issue tracker, include the app version, OS and processor, model, profile, steps to reproduce, and relevant diagnostics, and remove secrets and private prompt or file content before posting."
+      ]
+    },
+    {
+      "id": "report",
+      "title": "Report a problem",
+      "paragraphs": [
+        "Most errors have Report this beside them: in the app and the desktop app, on the phone and tablet, and on the TV. It opens the report so you see everything it sends before it goes, with room to say what you were doing. Nothing is sent until you send it.",
+        "A report says what went wrong and where: the error and its code, the page or screen, the app and its version, and the device's system. When you're connected to a computer, it adds that computer's Toskar version, its operating system, processor, memory, and graphics. An Admin's report also has the computer's last 40 warnings and errors from its log; a Member's doesn't, and a Visitor's leaves out the computer entirely.",
+        "Before you see it, the report has email addresses, keys and tokens, and the name in home-folder paths taken out, and internet addresses replaced by their kind, such as public IPv4; the computer's part also has the computer's name taken out. Addresses on your home network stay, since they help and say nothing about where you are, and so do IDs that match the report to a log. Read it before sending; take out anything else you'd rather not share.",
+        "In the app and the desktop app, Send gives the report to the Toskar team through your computer, and it becomes an issue they can fix, kept private. If others hit the same error in the same version, yours is added to theirs, and the report says so. Include details, on unless you turn it off, adds the computer's part; an email address you add, for a reply, goes only to the Toskar team, never into the issue. Each report sent is listed in What left this computer.",
+        "When it can't be sent that way, such as with no internet connection, Send by email opens your own email app with the same report to info@yeix.io, and you can always choose Or send it by email instead. The phone, tablet, and TV send by email for now. A long report drops its oldest log lines to fit in an email.",
+        "The TV has no email app, so its report shows a code: scan it with your phone's camera and the email opens there. On the watch, Report on phone hands the problem to the phone, and the report shows the next time you open Toskar there.",
+        "Toskar doesn't send reports, crash data, or usage data on its own. A report leaves only when you send it, and only what it showed you. An Admin can turn off sending reports to Toskar in Settings, under Problem reports; then Report this only copies the report, to give to whoever runs Toskar.",
+        "To report an answer rather than a problem, such as a wrong or offensive one, use Report this answer under it on the phone or tablet. It works the same way: your email app opens with the report."
+      ]
+    }
+  ],
+  "schemaVersion": 1,
+  "version": "1.12.1",
+  "sourceTag": "v1.12.1",
+  "sourceCommit": "ddb14ff0b2fdc1b2b01cfa38f5635e66b9ec3b50"
+}
