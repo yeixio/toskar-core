@@ -161,3 +161,23 @@ func TestChatContextWindow(t *testing.T) {
 		t.Error("chat context defaults")
 	}
 }
+
+// TOSKAR_KV_CACHE sets a chat model's cache type while it's measured
+// (#962); embedding and reranking, and an unknown type, keep the default.
+func TestKVCacheType(t *testing.T) {
+	t.Setenv("TOSKAR_KV_CACHE", "q8_0")
+	chat := strings.Join(startArgs(pluginapi.ModelStartConfig{ModelPath: "m.gguf"}, 9000), " ")
+	if !strings.Contains(chat, "--cache-type-k q8_0 --cache-type-v q8_0") {
+		t.Errorf("chat args %q", chat)
+	}
+	emb := strings.Join(startArgs(pluginapi.ModelStartConfig{ModelPath: "e.gguf", Mode: pluginapi.ModeEmbedding}, 9000), " ")
+	if strings.Contains(emb, "--cache-type") {
+		t.Errorf("embedding args %q", emb)
+	}
+	for _, v := range []string{"", "f16", "fast"} {
+		t.Setenv("TOSKAR_KV_CACHE", v)
+		if args := strings.Join(startArgs(pluginapi.ModelStartConfig{ModelPath: "m.gguf"}, 9000), " "); strings.Contains(args, "--cache-type") {
+			t.Errorf("%q: args %q", v, args)
+		}
+	}
+}
