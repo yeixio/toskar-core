@@ -1746,15 +1746,67 @@
         },
         {
           "type": "heading",
-          "text": "On your TV, your watch, and in the car"
+          "text": "On your TV and your watch"
         },
         {
           "type": "list",
           "items": [
             "On a TV, ask with the microphone on the remote, or type. Without a computer connected, the TV app's demo answers a few suggested questions with sample answers, and nothing leaves the TV.",
-            "On a watch, ask from the app or your watch face. The watch asks your computer directly, at home or away, and asks through your phone when it can't.",
-            "In the car, open Toskar on the car's screen (CarPlay) and ask out loud: it listens as soon as it opens, and speaks its answer a sentence at a time, without showing it. Then it listens again, for a follow-up in the same chat. New conversation starts over, Stop ends the answer, and End closes it. The chat is in the app afterwards. Toskar in the car comes with Toskar Unlock."
+            "On a watch, ask from the app or your watch face. The watch asks your computer directly, at home or away, and asks through your phone when it can't."
           ]
+        },
+        {
+          "type": "heading",
+          "text": "In the car"
+        },
+        {
+          "type": "paragraph",
+          "text": "Talk with Toskar out loud on the car's screen (CarPlay). It speaks its answers and doesn't show them, so your eyes stay on the road. Set it up while you're parked."
+        },
+        {
+          "type": "list",
+          "items": [
+            "Toskar Unlock, on this phone.",
+            "Something to answer: a [computer you've connected](#phone), or a model on this phone.",
+            "The microphone and speech recognition allowed for Toskar. Open Toskar on the phone once to be asked."
+          ]
+        },
+        {
+          "type": "steps",
+          "items": [
+            "Connect the phone to your car, and open Toskar on the car's screen. It starts listening right away.",
+            "Ask your question. A short pause tells Toskar you've finished.",
+            "Listen to the answer. It's spoken a sentence at a time.",
+            "Ask a follow-up in the next 5 seconds, and it continues the same chat. Say nothing, and it ends quietly and your music comes back."
+          ]
+        },
+        {
+          "type": "list",
+          "items": [
+            "New conversation starts over, Stop ends the answer, and End closes Toskar. Continue the conversation on the car's screen picks up where you left off.",
+            "If you open it and say nothing for 8 seconds, it closes on its own.",
+            "The chat is in the app afterwards, on whichever device answered."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Who answers in the car"
+        },
+        {
+          "type": "paragraph",
+          "text": "The computer answers when the Chat tab is set to it. If the computer can't be reached, the model on this phone answers instead, so it still works with no signal. A follow-up that moves to the phone starts a new chat, because the earlier messages are on the computer."
+        },
+        {
+          "type": "paragraph",
+          "text": "With the phone locked, it can only use its processor and has little time, so a phone model answering in the car uses your smallest one. A connected computer answers instead when it can be reached quickly. A small model is the best fit for the car, and long answers may be cut short."
+        },
+        {
+          "type": "heading",
+          "text": "Make the voice sound better"
+        },
+        {
+          "type": "paragraph",
+          "text": "Toskar uses the best voice on your phone for the language it's speaking. Most phones start with a basic one that sounds robotic, and apps can't download voices themselves. To get a more natural one, open the phone's Settings, go to Accessibility, Read & Speak, Voices, choose your language, and download a voice marked Premium or Enhanced. Toskar uses it the next time it speaks."
         },
         {
           "type": "heading",
@@ -1800,8 +1852,24 @@
               "Once you're parked, allow both for Toskar in the phone's privacy settings."
             ],
             [
-              "In the car: I didn't catch that",
-              "Ask again. If nothing is heard twice in a row, the conversation ends; open Toskar on the car's screen to start again."
+              "In the car: Toskar isn't on the car's screen",
+              "While parked, check the car's app list in the phone's Settings, under General, CarPlay, and add Toskar. Update Toskar if it's an older version."
+            ],
+            [
+              "In the car: Toskar in the car comes with Toskar Unlock",
+              "Get Toskar Unlock on your phone once you're parked."
+            ],
+            [
+              "In the car: Toskar on your phone has no model yet",
+              "No computer could answer, and this phone has no model. Add a small one once you're parked, in Models on the phone."
+            ],
+            [
+              "In the car: That didn't work",
+              "The computer stopped answering partway, or the phone ran out of time. Try again. With the phone locked, a smaller model is more likely to finish."
+            ],
+            [
+              "In the car: it stops listening too soon",
+              "It stops after 8 seconds of silence when it opens, and 5 seconds after an answer. Choose Ask Toskar or Continue the conversation on the car's screen to start again."
             ]
           ]
         },
