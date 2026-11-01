@@ -53,6 +53,14 @@ func main() {
 		info, _ := os.Stdin.Stat()
 		piped := info != nil && info.Mode()&os.ModeCharDevice == 0
 		exit(askCommand(os.Args[2:], askIO{stdin: os.Stdin, stdinPiped: piped, out: os.Stdout}, newAskClient))
+	case "chat":
+		inInfo, _ := os.Stdin.Stat()
+		outInfo, _ := os.Stdout.Stat()
+		exit(chatCommand(os.Args[2:], chatIO{
+			in: os.Stdin, inTerminal: inInfo != nil && inInfo.Mode()&os.ModeCharDevice != 0,
+			out: os.Stdout, outTerminal: outInfo != nil && outInfo.Mode()&os.ModeCharDevice != 0,
+			errOut: os.Stderr,
+		}, newDaemonChat))
 	case "connect":
 		dir, _ := os.Getwd()
 		home, _ := os.UserHomeDir()
@@ -69,7 +77,7 @@ func main() {
 }
 
 func usage() {
-	fmt.Fprintf(os.Stderr, "usage: toskarctl <version|about|paths|ask|connect|models|automations|mcp|join|join-token|network|leave|people|completion>\n")
+	fmt.Fprintf(os.Stderr, "usage: toskarctl <version|about|paths|ask|chat|connect|models|automations|mcp|join|join-token|network|leave|people|completion>\n")
 }
 
 // exit ends with err's message and exit status: 2 for usage, 1 otherwise.

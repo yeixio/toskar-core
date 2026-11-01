@@ -136,8 +136,9 @@ type Origin struct {
 	Remote bool
 }
 
-// Clients are the apps a request can name.
-var Clients = []string{"phone", "tablet", "watch", "car", "tv", "desktop", "web"}
+// Clients are the apps a request can name; terminal is toskarctl chat
+// (#959, contract 1.74).
+var Clients = []string{"phone", "tablet", "watch", "car", "tv", "desktop", "web", "terminal"}
 
 // ClientName is client when it is one of Clients, "" when empty, and
 // "other" otherwise, so a trace never keeps text a client made up.

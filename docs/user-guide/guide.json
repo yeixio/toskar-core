@@ -656,6 +656,10 @@
         },
         {
           "type": "paragraph",
+          "text": "`toskarctl chat` holds a whole conversation in the terminal. Answers stream as they're written. A tool that asks first shows what it would do and waits for your yes. The chats are the same ones the apps show, so `toskarctl chat --resume` picks up one you began on your phone. Piped in, it answers once about what's piped, as in `make 2>&1 | toskarctl chat \"Why did this fail?\"`."
+        },
+        {
+          "type": "paragraph",
           "text": "The Python SDK streams the same answer a piece at a time. [Connect another app through the API](#api) covers the other languages and API keys."
         },
         {
