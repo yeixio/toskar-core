@@ -239,3 +239,51 @@ func TestDeviceDisconnectsItself(t *testing.T) {
 		t.Fatalf("registrations left %+v", left)
 	}
 }
+
+// An editor pairs asking for raw access (#960); the Owner showed the code
+// here, so its key has it.
+func TestConnectAnEditor(t *testing.T) {
+	dir := t.TempDir()
+	mgr, err := config.NewManager(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := mgr.Update(func(c *config.Config) { c.APIHost = "0.0.0.0" }); err != nil {
+		t.Fatal(err)
+	}
+	db, err := store.Open(filepath.Join(dir, "t.db"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = db.Close() })
+	keys := auth.NewAPIKeyManager(db.SQL, auth.NewSecretStore(dir))
+	srv := NewServer(Dependencies{
+		Config:       mgr,
+		VerifyAPIKey: keys.Verify,
+		Devices:      &auth.DevicePairer{CreateKey: keys.CreateDevice, SetPermissions: keys.SetPermissions},
+	})
+	do := func(r *http.Request) *httptest.ResponseRecorder {
+		rec := httptest.NewRecorder()
+		srv.Handler().ServeHTTP(rec, r)
+		return rec
+	}
+	start := do(localRequest(http.MethodPost, "/api/v1/devices/pairing", nil))
+	var shown struct {
+		Code string `json:"code"`
+	}
+	_ = json.Unmarshal(start.Body.Bytes(), &shown)
+	r := httptest.NewRequest(http.MethodPost, "/api/v1/devices/pair", strings.NewReader(`{"code":"`+shown.Code+`","device_name":"VS Code on rig","raw":true}`))
+	r.RemoteAddr = "192.168.1.20:5000"
+	paired := do(r)
+	var got struct {
+		APIKey string            `json:"api_key"`
+		Key    auth.APIKeyRecord `json:"key"`
+	}
+	_ = json.Unmarshal(paired.Body.Bytes(), &got)
+	if paired.Code != http.StatusCreated || !got.Key.Permissions.Raw || got.Key.Kind != auth.KindDevice {
+		t.Fatalf("pair: %d %s", paired.Code, paired.Body.String())
+	}
+	if rec, err := keys.Verify(context.Background(), got.APIKey); err != nil || !rec.Permissions.Raw {
+		t.Fatalf("stored = %+v %v", rec, err)
+	}
+}

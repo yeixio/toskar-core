@@ -65,6 +65,9 @@ type DevicePairer struct {
 	CreateCompanion func(ctx context.Context, name, parentID string) (APIKeyRecord, string, error)
 	// Companions lists a device's companions' keys; *APIKeyManager.Companions.
 	Companions func(ctx context.Context, parentID string) ([]string, error)
+	// SetPermissions gives an editor's key raw access (#960);
+	// *APIKeyManager.SetPermissions. Without it, no key gets raw access.
+	SetPermissions func(ctx context.Context, id string, p APIKeyPermissions) (APIKeyRecord, error)
 	// Now is the clock; tests replace it.
 	Now func() time.Time
 
@@ -150,6 +153,14 @@ func (p *DevicePairer) CancelFor(person string) {
 // Pair exchanges a code for a key named after the phone. address is where
 // the request came from, for the per-address limit.
 func (p *DevicePairer) Pair(ctx context.Context, code, deviceName, address string) (APIKeyRecord, string, error) {
+	return p.PairWith(ctx, code, deviceName, address, false)
+}
+
+// PairWith is Pair for a device that may ask for raw access, such as an
+// editor whose coding agent drives a model itself (#960): the key gets it
+// when the person who showed the code is an Admin or the Owner, who could
+// give it in API Access anyway, and not otherwise.
+func (p *DevicePairer) PairWith(ctx context.Context, code, deviceName, address string, raw bool) (APIKeyRecord, string, error) {
 	code = strings.Map(func(r rune) rune {
 		if unicode.IsDigit(r) {
 			return r
@@ -196,6 +207,15 @@ func (p *DevicePairer) Pair(ctx context.Context, code, deviceName, address strin
 	if err != nil {
 		p.state = "cancelled"
 		return APIKeyRecord{}, "", err
+	}
+	if raw && (starter.Role == RoleOwner || starter.Role == RoleAdmin) && p.SetPermissions != nil {
+		perms := rec.Permissions
+		perms.Raw = true
+		// The key works without raw access, so a failure here leaves it
+		// connected; the answer's permissions say which it has.
+		if withRaw, err := p.SetPermissions(AsPerson(ctx, starter), rec.ID, perms); err == nil {
+			rec = withRaw
+		}
 	}
 	p.state, p.device = "connected", &rec
 	return rec, secret, nil

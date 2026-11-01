@@ -751,7 +751,7 @@ func New(opts Options) (*App, error) {
 		Invites:              auth.NewInvites(db.SQL),
 		PeopleActivity:       auth.NewActivity(db.SQL),
 		RemovePerson:         a.RemovePerson,
-		Devices:              &auth.DevicePairer{CreateKey: apiKeyMgr.CreateDevice, CreateCompanion: apiKeyMgr.CreateCompanion, Companions: apiKeyMgr.Companions},
+		Devices:              &auth.DevicePairer{CreateKey: apiKeyMgr.CreateDevice, CreateCompanion: apiKeyMgr.CreateCompanion, Companions: apiKeyMgr.Companions, SetPermissions: apiKeyMgr.SetPermissions},
 		PhoneAddress:         a.phoneAddress,
 		EnableLANForPhone:    a.enableLANForPhone,
 		StopChat:             a.StopChat,
