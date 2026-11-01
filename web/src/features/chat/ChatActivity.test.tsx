@@ -1,10 +1,14 @@
 import { act, render, screen } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
+import { stillMascot } from '@/test/stillMascot'
 import { ChatActivity } from './ChatActivity'
 import { formatElapsed } from '@/lib/elapsed'
 
 describe('ChatActivity', () => {
-  afterEach(() => vi.useRealTimers())
+  afterEach(() => {
+    vi.useRealTimers()
+    vi.unstubAllGlobals()
+  })
 
   it('announces that a reply is in progress', () => {
     render(<ChatActivity label="Searching the web…" />)
@@ -13,6 +17,7 @@ describe('ChatActivity', () => {
   })
 
   it('shows the time on one step after 15 seconds, and counts again on the next step (#705)', () => {
+    stillMascot()
     vi.useFakeTimers()
     const { rerender } = render(<ChatActivity label="Making the picture…" />)
     act(() => vi.advanceTimersByTime(14_000))
