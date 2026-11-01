@@ -31,7 +31,7 @@ const chatUsage = `usage: toskarctl chat [flags] [message]
   Chats with Toskar in the terminal (#959): the same chats as the apps, so
   one begun here continues on the phone and back. Answers stream as they're
   written. A tool that asks first, such as running code, shows what it
-  would do and waits for y (yes) or n (no).
+  would do and waits for y (yes), n (no), or a (always, in this chat).
 
   Piped in, it answers once, with what's piped as data to work on:
     make 2>&1 | toskarctl chat "Why did this fail?"
@@ -57,7 +57,7 @@ type chatAPI interface {
 	messages(id string) ([]contracts.Message, error)
 	stream(ctx context.Context, req api.ChatJSONRequestBody) iter.Seq2[toskar.ChatStreamEvent, error]
 	events(ctx context.Context) iter.Seq2[api.Event, error]
-	decide(requestID string, allow bool) error
+	decide(requestID string, allow, forChat bool) error
 	// computer is the Toskar computer's name when it isn't this one, where
 	// a tool such as the terminal runs.
 	computer() string
@@ -137,8 +137,8 @@ func (d daemonChat) events(ctx context.Context) iter.Seq2[api.Event, error] {
 	return d.sdk.Events(ctx)
 }
 
-func (d daemonChat) decide(requestID string, allow bool) error {
-	return d.rest.request(http.MethodPost, "/tools/decide", map[string]any{"request_id": requestID, "allow": allow}, nil)
+func (d daemonChat) decide(requestID string, allow, forChat bool) error {
+	return d.rest.request(http.MethodPost, "/tools/decide", map[string]any{"request_id": requestID, "allow": allow, "allow_session": forChat}, nil)
 }
 
 // chatSession is one terminal chat.
@@ -479,17 +479,21 @@ func (s *chatSession) ask(a toolAsk) {
 	if raw, err := json.MarshalIndent(a.args, "  ", "  "); err == nil && len(a.args) > 0 {
 		fmt.Fprintf(s.io.out, "  %s\n", raw)
 	}
-	allow := false
+	allow, forChat := false, false
 	if !s.io.inTerminal {
 		fmt.Fprintln(s.io.out, "Not allowed: there's no one at the terminal to ask. Chat without a pipe to answer.")
 	} else {
-		fmt.Fprint(s.io.out, "Allow? [y]es, [n]o: ")
+		fmt.Fprint(s.io.out, "Allow? [y]es, [n]o, [a]lways in this chat: ")
 		if s.lines.Scan() {
-			answer := strings.ToLower(strings.TrimSpace(s.lines.Text()))
-			allow = answer == "y" || answer == "yes"
+			switch strings.ToLower(strings.TrimSpace(s.lines.Text())) {
+			case "y", "yes":
+				allow = true
+			case "a", "always":
+				allow, forChat = true, true
+			}
 		}
 	}
-	if err := s.api.decide(a.requestID, allow); err != nil {
+	if err := s.api.decide(a.requestID, allow, forChat); err != nil {
 		fmt.Fprintln(s.io.errOut, err)
 	}
 }

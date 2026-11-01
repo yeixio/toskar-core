@@ -557,14 +557,15 @@ func (t *turnTrace) serviceSources(result map[string]any) {
 }
 
 // effectivePolicy applies §58: after a turn has read untrusted content, a
-// tool that changes something asks first even when the profile allows it.
+// tool that changes something asks first even when the profile allows it,
+// every time, so an earlier "allow for session" doesn't stand in.
 // Read-only tools and Deny are unchanged.
 func effectivePolicy(policy, toolID string, untrusted bool) string {
 	if policy != tools.PolicyAllow || !untrusted {
 		return policy
 	}
 	if def, ok := tools.Lookup(toolID); !ok || !tools.Contained(def.Risk) {
-		return tools.PolicyAsk
+		return tools.PolicyAskEachTime
 	}
 	return policy
 }
