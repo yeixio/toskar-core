@@ -20,9 +20,11 @@ import (
 var (
 	// "llama_model_load_from_file_impl: using device Vulkan0 (AMD Radeon RX
 	// 7900 XTX (RADV NAVI31)) - 24560 MiB free"; newer builds add the
-	// device's id: "using device MTL0 (Apple M5 Pro) (unknown id) - …".
+	// device's id: "using device MTL0 (Apple M5 Pro) (unknown id) - …", or
+	// its PCI address: "using device Vulkan0 (NVIDIA GeForce RTX 3080 Ti
+	// Laptop GPU) (0000:01:00.0) - …" (#955).
 	usingDeviceRe = regexp.MustCompile(`using device ([A-Za-z_]+?)\d* \((.+)\) - \d+ MiB free`)
-	deviceIDRe    = regexp.MustCompile(`\) \([^()]*\bid\b[^()]*$`)
+	deviceIDRe    = regexp.MustCompile(`\) \((?:[^()]*\bid\b[^()]*|[0-9a-fA-F]{4}:[0-9a-fA-F]{2}:[0-9a-fA-F]{2}\.[0-9a-fA-F])$`)
 	// "ggml_vulkan: 0 = AMD Radeon RX 7900 XTX (RADV NAVI31) (radv) | uma: 0 | ..."
 	vulkanDeviceRe = regexp.MustCompile(`ggml_vulkan: \d+ = (.+?) \([^()]*\) \|`)
 	// "ggml_cuda_init: found 1 ROCm devices:" then "  Device 0: NVIDIA GeForce RTX 4090, compute capability 8.9, VMM: yes"

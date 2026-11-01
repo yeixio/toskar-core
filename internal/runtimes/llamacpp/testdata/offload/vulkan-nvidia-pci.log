@@ -1,0 +1,4 @@
+0.00.512.000 I llama_prepare_model_devices: using device Vulkan0 (NVIDIA GeForce RTX 3080 Ti Laptop GPU) (0000:01:00.0) - 15671 MiB free
+0.04.100.000 I load_tensors: offloaded 42/65 layers to GPU
+0.04.100.001 I load_tensors:      Vulkan0 model buffer size = 12000.00 MiB
+0.04.100.002 I load_tensors:   CPU_Mapped model buffer size =  6000.00 MiB

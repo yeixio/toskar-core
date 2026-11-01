@@ -48,13 +48,18 @@ on:
         default: docker
         type: choice
         options: [docker, windows]
+      fit_check:
+        description: 'Instead of the quality sets, start each of these catalog models through Toskar on the home Windows runner with an NVIDIA card, and report where it runs and how fast (#955): a JSON list, such as ["qwen2.5-32b-q4"]. Blank for the quality sets.'
+        default: ""
 
 # One run at a time: the rig takes its models one after another, and the
 # home box it shares runs CI too, so runs started together slowed CI past
 # its limits (2026-10-31). A run started while one is going waits for it.
 # GitHub keeps only one waiting: starting a third replaces the one waiting.
+# Runs only on the Windows laptop, a fit check or speculation measured
+# there, are one at a time among themselves, apart from the rig's (#955).
 concurrency:
-  group: quality
+  group: ${{ (inputs.fit_check || (inputs.speculation && inputs.speculation_runner == 'windows')) && 'quality-windows' || 'quality' }}
   cancel-in-progress: false
 
 jobs:
@@ -68,7 +73,7 @@ jobs:
   # Gemma 3 4B, which has a sliding window: how much of a chat's later turn
   # comes from the cache, and that a warm answer matches a cold one.
   served-model:
-    if: ${{ !inputs.speculation }}
+    if: ${{ !inputs.speculation && !inputs.fit_check }}
     runs-on: ${{ fromJSON(vars.TRUSTED_RUNS_ON || '"ubuntu-latest"') }}
     timeout-minutes: 150
     steps:
@@ -149,7 +154,7 @@ jobs:
   # time on the one GPU: "recommended" is what the daemon picks for a new
   # user; a catalog id, such as qwen2.5-32b-q4, tests that model.
   real-models:
-    if: vars.QUALITY_RUNNER == 'docker' && !inputs.speculation
+    if: vars.QUALITY_RUNNER == 'docker' && !inputs.speculation && !inputs.fit_check
     runs-on: [self-hosted, toskar-models]
     timeout-minutes: 480
     strategy:
@@ -542,6 +547,75 @@ jobs:
             .quality/speculation.md
             .quality/speculation.json
           if-no-files-found: ignore
+      - name: Daemon log
+        if: failure()
+        run: tail -n 200 "$RUNNER_TEMP/daemon.log" || true
+      - name: Stop the daemon
+        if: always()
+        run: |
+          # Its llama-servers with it (/T), and only its: the computer's own
+          # Toskar keeps running.
+          pid="$(cat "$RUNNER_TEMP/daemon.pid" 2>/dev/null)" || exit 0
+          winpid="$(cat "/proc/$pid/winpid" 2>/dev/null)" || exit 0
+          taskkill //F //T //PID "$winpid" || true
+
+  # A model through Toskar on the NVIDIA laptop (#955): Toskar starts it as a
+  # chat would, letting llama-server fit it to the card, and the report says
+  # how much of it is on the card and how fast it answers. A model bigger
+  # than the card runs partly on the processor instead of failing to load.
+  fit-windows:
+    if: inputs.fit_check
+    runs-on: [self-hosted, toskar-windows]
+    timeout-minutes: 240
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        model: ${{ fromJSON(inputs.fit_check) }}
+    name: fit-windows (${{ matrix.model }})
+    env:
+      MODEL: ${{ matrix.model }}
+      TOSKAR_API_HOST: 127.0.0.1
+      TOSKAR_API_PORT: "7471"
+      TOSKAR_INTERNAL_HOST: 127.0.0.1
+      TOSKAR_INTERNAL_PORT: "7472"
+      TOSKAR_DISCOVERY_ENABLED: "false"
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.ref || github.ref }}
+          persist-credentials: false
+      - uses: actions/setup-go@v7
+        with:
+          go-version: "1.26.x"
+          check-latest: true
+          # Self-hosted runners keep Go's caches on disk.
+          cache: false
+      - name: Build
+        run: |
+          go build -o "$RUNNER_TEMP/toskard.exe" ./cmd/daemon
+          go build -o "$RUNNER_TEMP/specbench.exe" ./cmd/specbench
+      - name: Start the daemon
+        run: |
+          # The speculation runs' folder, so models they downloaded are reused.
+          data="$RUNNER_TOOL_CACHE/toskar-speculation"
+          mkdir -p "$data"
+          nvidia-smi --query-gpu=name,memory.total --format=csv,noheader || echo "::warning::No NVIDIA card found."
+          "$RUNNER_TEMP/toskard.exe" -data-dir "$data" > "$RUNNER_TEMP/daemon.log" 2>&1 &
+          echo $! > "$RUNNER_TEMP/daemon.pid"
+      - name: Start the model through Toskar
+        run: |
+          mkdir -p .quality
+          "$RUNNER_TEMP/specbench.exe" -toskar http://127.0.0.1:7471 -install "$MODEL" -fit -out .quality/fit.md
+      - name: Report
+        if: always()
+        run: |
+          if [ -f .quality/fit.md ]; then
+            { echo "Runner: $(nvidia-smi --query-gpu=name,memory.total --format=csv,noheader 2>/dev/null || echo windows)"; cat .quality/fit.md; } >> "$GITHUB_STEP_SUMMARY"
+          fi
       - name: Daemon log
         if: failure()
         run: tail -n 200 "$RUNNER_TEMP/daemon.log" || true

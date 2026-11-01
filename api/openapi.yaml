@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Toskar Control Plane API
-  version: "1.70"
+  version: "1.71"
   description: >-
     Local AI control plane API for Toskar, its OpenAI-compatible routes, and its MCP server.
     On the default loopback bind no key is needed. When the daemon listens on any other address,
@@ -2400,6 +2400,9 @@ paths:
                   enum: [profile, read_only, none]
                 placement:
                   type: boolean
+                raw:
+                  type: boolean
+                  description: "Lets requests name raw:<model> and drive the model directly with their own tools (#843, contract 1.71); not with a pinned profile"
       responses:
         "200":
           description: The key, with its permissions
@@ -2812,7 +2815,7 @@ paths:
               properties:
                 model:
                   type: string
-                  description: auto, profile:<id>, sai:<slug>, or a model id
+                  description: auto, profile:<id>, sai:<slug>, a model id, or raw:<model id> to drive a model on this computer directly, with the request's own tools (#843, contract 1.71)
                 messages:
                   type: array
                   items:
@@ -7855,6 +7858,7 @@ components:
             placement: {type: boolean}
             profile: {type: string, description: "The one profile the key is pinned to (#345); absent lets each request choose"}
             routes: {type: string, enum: [chat], description: "chat for a key that only asks (#455, contract 1.57): POST /v1/chat/completions, GET /v1/models, and health and version, and 403 KEY_CHAT_ONLY anywhere else; absent reaches whatever its person may"}
+            raw: {type: boolean, description: "May name raw:<model> on /v1/chat/completions, driving the model directly with the request's own tools, without the assistant (#843, contract 1.71). Only Admins manage keys, so only they can allow it"}
         kind: {type: string, enum: [device], description: "device for a key a phone or other device got by pairing (#216); absent for one made in API Access"}
         person_id: {type: string}
     Notification:

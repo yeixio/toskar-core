@@ -1120,6 +1120,8 @@ export interface APIKeyPermissions {
   profile?: string
   /** chat for a key that only asks, such as a CI job's (#455); empty reaches whatever its person may. */
   routes?: 'chat'
+  /** Drives a model directly as raw:<model>, with the request's own tools, for coding agents (#843). */
+  raw?: boolean
 }
 
 export interface CreateAPIKeyResponse {
