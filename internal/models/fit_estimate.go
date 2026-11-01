@@ -133,8 +133,8 @@ func ClassifyFit(e CatalogEntry, hw contracts.HardwareInventory, nodeID, nodeNam
 		fit.Approximate = true
 	}
 	ctx := float64(fit.ContextTokens)
-	kvLow := uint64(billions * ctx * kvBytesPerTokenPerBillionLow)
-	kvHigh := uint64(billions * ctx * kvBytesPerTokenPerBillionHigh)
+	kvLow := uint64(billions * ctx * kvBytesPerTokenPerBillionLow / attentionShare(e))
+	kvHigh := uint64(billions * ctx * kvBytesPerTokenPerBillionHigh / attentionShare(e))
 	vision := visionBytes(e)
 	draftLow, draftHigh := draftBytes(e, ctx)
 	low := weights + vision + draftLow + kvLow + runtimeScratchBytes
@@ -296,6 +296,15 @@ func draftBytes(e CatalogEntry, ctx float64) (low, high uint64) {
 	}
 	billions := float64(e.Draft.SizeBytes) / (quantBytesPerParam(e.Variant) * 1e9)
 	return uint64(billions * ctx * kvBytesPerTokenPerBillionLow), uint64(billions * ctx * kvBytesPerTokenPerBillionHigh)
+}
+
+// attentionShare is how many layers there are for each one that keeps a
+// key/value cache: 1, or a hybrid model's FullAttentionInterval (#962).
+func attentionShare(e CatalogEntry) float64 {
+	if e.FullAttentionInterval > 1 {
+		return float64(e.FullAttentionInterval)
+	}
+	return 1
 }
 
 func labelForHeadroom(headroom float64) contracts.FitLabel {
