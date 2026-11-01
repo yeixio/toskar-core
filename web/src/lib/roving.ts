@@ -1,6 +1,6 @@
 import { useEffect, useRef, type KeyboardEvent } from 'react'
 
-const items = '[role="tab"], [role="radio"], [role="menuitem"], [role="menuitemcheckbox"]'
+const items = '[role="tab"], [role="radio"], [role="menuitem"], [role="menuitemcheckbox"], [role="menuitemradio"]'
 
 /**
  * Arrow keys for a tab list, radio group, or menu (WAI-ARIA patterns): put it

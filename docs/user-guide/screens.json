@@ -405,6 +405,89 @@
       ]
     },
     {
+      "id": "models-context-window",
+      "path": "/settings",
+      "readyText": "Advanced mode",
+      "api": {
+        "/api/v1/models": [
+          {
+            "id": "gemma-3-4b-q4",
+            "display_name": "Gemma 3 4B",
+            "summary": "Small model that reads long documents.",
+            "family": "gemma 3",
+            "parameters": "4B",
+            "size_bytes": 2489757856,
+            "memory_needed_bytes": 4000000000,
+            "context": 131072,
+            "capabilities": {
+              "tool_calling": true,
+              "vision": true,
+              "coding": false
+            },
+            "purpose": [
+              "general"
+            ],
+            "installed": true,
+            "installed_on": [
+              {
+                "node_id": "local",
+                "node_name": "This Mac"
+              }
+            ],
+            "status": "ready",
+            "runtime": [
+              "llamacpp"
+            ],
+            "speculation": "auto",
+            "context_window": 32768,
+            "context_options": [
+              {
+                "tokens": 4096,
+                "fit": "excellent"
+              },
+              {
+                "tokens": 8192,
+                "fit": "excellent"
+              },
+              {
+                "tokens": 16384,
+                "fit": "excellent"
+              },
+              {
+                "tokens": 32768,
+                "fit": "excellent"
+              },
+              {
+                "tokens": 65536,
+                "fit": "good"
+              },
+              {
+                "tokens": 131072,
+                "fit": "tight"
+              }
+            ]
+          }
+        ]
+      },
+      "actions": [
+        {
+          "click": "Models"
+        },
+        {
+          "click": "Installed"
+        },
+        {
+          "wait": "Gemma 3 4B"
+        },
+        {
+          "click": "More actions for Gemma 3 4B"
+        },
+        {
+          "wait": "Context window"
+        }
+      ]
+    },
+    {
       "id": "models-add-apps",
       "path": "/models",
       "readyText": "Best overall",

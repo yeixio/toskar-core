@@ -196,7 +196,12 @@
     "remove": "Rimuovi",
     "guessAhead": "Indovina in anticipo",
     "guessAheadHint": "Risposte più rapide: il modello indovina le parole successive dalla chat e ne verifica diverse insieme. Disattivalo se questo modello risponde peggio così.",
-    "guessAheadNextStart": "Dal prossimo avvio"
+    "guessAheadNextStart": "Dal prossimo avvio",
+    "contextWindow": "Finestra di contesto",
+    "contextWindowHint": "Quanto legge il modello alla volta, in token (circa ¾ di parola ciascuno). Auto sceglie la più grande che sta bene su questo computer; una finestra più grande occupa più memoria mentre il modello è in esecuzione.",
+    "contextWindowNextMessage": "si ricarica al prossimo messaggio",
+    "contextAuto": "Auto",
+    "contextAutoSize": "Auto · {{size}}"
   },
   "runningTab": {
     "empty": "Al momento non è caricato nessun modello. La chat ne avvierà uno automaticamente quando serve.",

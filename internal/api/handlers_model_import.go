@@ -220,3 +220,26 @@ func (s *Server) handleSetModelSpeculation(w http.ResponseWriter, r *http.Reques
 	}
 	writeJSON(w, http.StatusOK, map[string]string{"model_id": id, "speculation": body.Speculation})
 }
+
+// handleSetModelContext sets the context window for a chat model on this
+// computer (#962): one of the sizes it can take, or 0 for Auto. A loaded
+// model starts again with it on its next request.
+func (s *Server) handleSetModelContext(w http.ResponseWriter, r *http.Request) {
+	if s.deps.SetModelContext == nil {
+		writeErr(w, http.StatusNotImplemented, "NOT_IMPLEMENTED", "Changing the context window is not available.", nil)
+		return
+	}
+	var body struct {
+		ContextWindow *int `json:"context_window"`
+	}
+	if err := json.NewDecoder(http.MaxBytesReader(w, r.Body, 16<<10)).Decode(&body); err != nil || body.ContextWindow == nil {
+		writeErr(w, http.StatusBadRequest, "INVALID_JSON", "Request body must be JSON with context_window: 0 for Auto, or a size in tokens.", nil)
+		return
+	}
+	id := mux.Vars(r)["id"]
+	if err := s.deps.SetModelContext(r.Context(), id, *body.ContextWindow); err != nil {
+		writeErrFrom(w, http.StatusBadRequest, "MODEL_UPDATE_FAILED", err)
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]any{"model_id": id, "context_window": *body.ContextWindow})
+}

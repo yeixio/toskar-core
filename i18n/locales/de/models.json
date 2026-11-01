@@ -194,7 +194,12 @@
     "remove": "Entfernen",
     "guessAhead": "Vorausraten",
     "guessAheadHint": "Schnellere Antworten: Das Modell rät die nächsten Wörter aus dem Chat und prüft mehrere auf einmal. Schalte es aus, wenn dieses Modell damit schlechter antwortet.",
-    "guessAheadNextStart": "Ab dem nächsten Start"
+    "guessAheadNextStart": "Ab dem nächsten Start",
+    "contextWindow": "Kontextfenster",
+    "contextWindowHint": "Wie viel das Modell auf einmal liest, in Tokens (je etwa ¾ eines Wortes). Auto wählt das größte, das gut auf diesen Computer passt; ein größeres Fenster belegt mehr Speicher, solange das Modell läuft.",
+    "contextWindowNextMessage": "lädt bei der nächsten Nachricht neu",
+    "contextAuto": "Auto",
+    "contextAutoSize": "Auto · {{size}}"
   },
   "runningTab": {
     "empty": "Derzeit sind keine Modelle geladen. Der Chat startet bei Bedarf automatisch eines.",
