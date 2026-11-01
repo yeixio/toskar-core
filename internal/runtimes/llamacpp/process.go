@@ -16,6 +16,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/yeixio/toskar-core/internal/config"
 	"github.com/yeixio/toskar-core/pkg/contracts"
 	"github.com/yeixio/toskar-core/pkg/pluginapi"
 )
@@ -238,7 +239,22 @@ func startArgs(cfg pluginapi.ModelStartConfig, port int) []string {
 	// the window both fail with "Context size has been exceeded" (#834).
 	// Every room and compaction decision here counts on the whole window.
 	// Requests to the same model queue in llama-server instead.
+	args = append(args, kvCacheArgs()...)
 	return append(args, "--ctx-size", fmt.Sprintf("%d", defaultContext(cfg.Context)), "--parallel", "1")
+}
+
+// kvCacheArgs set a chat model's key/value cache type from TOSKAR_KV_CACHE
+// (#962), for measuring a cheaper cache with the quality set before it's a
+// default: q8_0 holds a window in about half the memory of the default f16
+// (on an Apple M5 Pro, Llama 3.2 1B's 32K cache was 544 MiB, not 1,024), and
+// llama-server turns flash attention on for it. Empty or f16 leaves
+// llama-server's default.
+func kvCacheArgs() []string {
+	switch t := strings.ToLower(strings.TrimSpace(config.Env("KV_CACHE"))); t {
+	case "q8_0", "q4_0":
+		return []string{"--cache-type-k", t, "--cache-type-v", t}
+	}
+	return nil
 }
 
 // supportContext is the window for embedding and reranking models. Mimir

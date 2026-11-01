@@ -35,6 +35,11 @@ on:
       repeats:
         description: How many times the served model runs each case, sampling with a seed each time (#834).
         default: "3"
+      kv_cache:
+        description: 'The key/value cache type the self-hosted run uses for chat models (#962): f16, llama.cpp''s default, or q8_0, about half the memory.'
+        type: choice
+        options: [f16, q8_0]
+        default: f16
       speculation:
         description: 'Instead of the quality sets, measure speculative decoding on the self-hosted runner (#835): a JSON list of {"model": a catalog id, "draft_url": a small GGUF of its family}. Blank for the quality sets.'
         default: ""
@@ -158,6 +163,8 @@ jobs:
       MEMORY: ${{ vars.QUALITY_MEMORY || '32g' }}
       CPUS: ${{ vars.QUALITY_CPUS }}
       GPU: ${{ vars.QUALITY_GPU }}
+      # The weekly run uses llama.cpp's default cache (#962).
+      KV_CACHE: ${{ inputs.kv_cache || 'f16' }}
     steps:
       - name: Remove what an interrupted run left
         run: |
@@ -206,8 +213,10 @@ jobs:
             -e TOSKAR_API_KEY="$key" \
             -e TOSKAR_DISCOVERY_ENABLED=false \
             -e TOSKAR_INTERNAL_HOST=127.0.0.1 \
+            -e TOSKAR_KV_CACHE="$KV_CACHE" \
             ${{ vars.QUALITY_DOCKER_FLAGS }} \
             "$NAME"
+          echo "Chat models' key/value cache: $KV_CACHE" | tee -a "$GITHUB_STEP_SUMMARY"
           if [ "$GPU" = vulkan ]; then
             echo "GPUs the daemon can use:"
             docker exec "$NAME" vulkaninfo --summary 2>/dev/null | grep -E "deviceName|deviceType" || echo "::warning::No Vulkan device in the container; the run will use the CPU."
