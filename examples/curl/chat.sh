@@ -8,7 +8,13 @@ base="${TOSKAR_URL:-http://127.0.0.1:7331}"
 model="${TOSKAR_MODEL:-auto}"
 message="${1:-Hello}"
 
-body=$(printf '{"model":"%s","stream":true,"messages":[{"role":"user","content":"%s"}]}' "$model" "$message")
+# A JSON string: backslashes and quotes escaped, tabs and newlines as \t and \n.
+json() {
+  printf '%s' "$1" | sed -e 's/\\/\\\\/g' -e 's/"/\\"/g' -e 's/	/\\t/g' |
+    awk 'NR > 1 { printf "\\n" } { printf "%s", $0 }'
+}
+
+body=$(printf '{"model":"%s","stream":true,"messages":[{"role":"user","content":"%s"}]}' "$(json "$model")" "$(json "$message")")
 
 if [ -n "${TOSKAR_API_KEY:-}" ]; then
   exec curl -fsSN "$base/v1/chat/completions" \
