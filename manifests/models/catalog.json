@@ -809,6 +809,7 @@
       "memory_needed_bytes": 5000000000,
       "context": 262144,
       "thinking": "when_asked",
+      "full_attention_interval": 4,
       "capabilities": {
         "tool_calling": true,
         "vision": true,
@@ -973,6 +974,7 @@
       "memory_needed_bytes": 8500000000,
       "context": 262144,
       "thinking": "when_asked",
+      "full_attention_interval": 4,
       "capabilities": {
         "tool_calling": true,
         "vision": true,
@@ -1137,6 +1139,7 @@
       "memory_needed_bytes": 23000000000,
       "context": 262144,
       "thinking": "when_asked",
+      "full_attention_interval": 4,
       "capabilities": {
         "tool_calling": true,
         "vision": true,
