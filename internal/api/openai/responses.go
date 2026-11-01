@@ -243,11 +243,7 @@ func chatToolChoice(raw json.RawMessage) (any, bool) {
 
 // estimate is about how many tokens q's input takes, for its window.
 func (q responsesRequest) estimate() int {
-	n := contextusage.Estimate(q.Instructions) + contextusage.Estimate(string(q.Input))
-	for _, t := range q.Tools {
-		n += contextusage.Estimate(t.Name+" "+t.Description) + contextusage.Estimate(string(t.Parameters))
-	}
-	return n
+	return contextusage.Estimate(q.Instructions) + contextusage.Estimate(string(q.Input))
 }
 
 // HandleResponses serves POST /v1/responses (#843).
@@ -275,17 +271,17 @@ func (h *Handler) HandleResponses(w http.ResponseWriter, r *http.Request) {
 	if out <= 0 {
 		out = answerRoom
 	}
-	need := req.estimate() + min(out, rawAnswerRoom)
+	need := req.estimate() + min(toolTokens(body), rawToolRoom) + min(out, rawAnswerRoom)
 	if req.Toskar != nil {
 		need = max(need, req.Toskar.ContextWindow)
 	}
-	endpoint, done, fail := h.rawReady(r.Context(), perms, strings.TrimPrefix(req.Model, RawPrefix), need)
+	endpoint, window, done, fail := h.rawReady(r.Context(), perms, strings.TrimPrefix(req.Model, RawPrefix), need)
 	if fail != nil {
 		writeResponsesError(w, fail.status, fail.code, fail.message, fail.param)
 		return
 	}
 	defer done()
-	resp, err := rawPost(r.Context(), endpoint, body)
+	resp, err := rawSend(r.Context(), endpoint, body, window)
 	if err != nil {
 		if r.Context().Err() == nil {
 			writeResponsesError(w, http.StatusBadGateway, "RUNTIME_ERROR", "the model didn't answer: "+err.Error(), "")

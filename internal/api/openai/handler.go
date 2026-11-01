@@ -53,10 +53,10 @@ type Handler struct {
 	// tokens when one fits, and returns it, or 0 (#962).
 	Grow func(ctx context.Context, modelID string, need int) int
 	// Raw readies a model on this computer for a raw:<model> request, with
-	// a window of at least need tokens, and returns its llama-server and a
-	// func to call when the request is done (#843). It returns
-	// ErrRawNotHere or ErrRawTooLong for those.
-	Raw func(ctx context.Context, modelID string, need int) (endpoint string, done func(), err error)
+	// a window of at least need tokens, and returns its llama-server, the
+	// window it runs with, and a func to call when the request is done
+	// (#843). It returns ErrRawNotHere or ErrRawTooLong for those.
+	Raw func(ctx context.Context, modelID string, need int) (endpoint string, window int, done func(), err error)
 	// RawModels are the chat models installed on this computer, which a key
 	// with raw access sees in /v1/models as raw:<id> (#843).
 	RawModels func(ctx context.Context) []string

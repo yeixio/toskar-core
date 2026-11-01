@@ -119,12 +119,12 @@ func TestMessages(t *testing.T) {
 	perms := auth.APIKeyPermissions{Raw: true}
 	h.Permissions = func(r *http.Request) (auth.APIKeyPermissions, context.Context, error) { return perms, r.Context(), nil }
 	var need int
-	h.Raw = func(_ context.Context, id string, n int) (string, func(), error) {
+	h.Raw = func(_ context.Context, id string, n int) (string, int, func(), error) {
 		need = n
 		if id != "qwen2.5-7b-q4" {
-			return "", nil, ErrRawNotHere
+			return "", 0, nil, ErrRawNotHere
 		}
-		return model.URL, func() {}, nil
+		return model.URL, 32768, func() {}, nil
 	}
 	call := func(body string) *httptest.ResponseRecorder {
 		rec := httptest.NewRecorder()
@@ -195,9 +195,9 @@ func TestMessagesFromClaudeCode(t *testing.T) {
 		return auth.APIKeyPermissions{Raw: true}, r.Context(), nil
 	}
 	var need int
-	h.Raw = func(_ context.Context, _ string, n int) (string, func(), error) {
+	h.Raw = func(_ context.Context, _ string, n int) (string, int, func(), error) {
 		need = n
-		return model.URL, func() {}, nil
+		return model.URL, 32768, func() {}, nil
 	}
 	body := `{"model":"qwen2.5-7b-q4","max_tokens":32000,"thinking":{"type":"adaptive"},"context_management":{"edits":[]},"output_config":{"effort":"high"},
 	  "system":[{"type":"text","text":"You are Claude Code."}],

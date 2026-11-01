@@ -47,11 +47,11 @@ func TestResponses(t *testing.T) {
 	h := testHandler(t)
 	perms := auth.APIKeyPermissions{Raw: true}
 	h.Permissions = func(r *http.Request) (auth.APIKeyPermissions, context.Context, error) { return perms, r.Context(), nil }
-	h.Raw = func(_ context.Context, id string, _ int) (string, func(), error) {
+	h.Raw = func(_ context.Context, id string, _ int) (string, int, func(), error) {
 		if id != "qwen2.5-7b-q4" {
-			return "", nil, ErrRawNotHere
+			return "", 0, nil, ErrRawNotHere
 		}
-		return model.URL, func() {}, nil
+		return model.URL, 32768, func() {}, nil
 	}
 	call := func(body string) *httptest.ResponseRecorder {
 		rec := httptest.NewRecorder()
@@ -75,7 +75,7 @@ func TestResponses(t *testing.T) {
 	// A string input is a user message; the answer cut at the token limit
 	// is incomplete.
 	cut := fakeModel(t, &sent, `{"choices":[{"finish_reason":"length","message":{"content":"Partial"}}],"usage":{"prompt_tokens":3,"completion_tokens":1}}`, "")
-	h.Raw = func(context.Context, string, int) (string, func(), error) { return cut.URL, func() {}, nil }
+	h.Raw = func(context.Context, string, int) (string, int, func(), error) { return cut.URL, 32768, func() {}, nil }
 	rec = call(`{"model":"qwen2.5-7b-q4","input":"Hi","max_output_tokens":1}`)
 	if !strings.Contains(rec.Body.String(), `"status":"incomplete"`) || !strings.Contains(rec.Body.String(), `"reason":"max_output_tokens"`) || !strings.Contains(string(sent), `"role":"user"`) {
 		t.Errorf("incomplete: %s, sent %s", rec.Body, sent)
