@@ -275,7 +275,7 @@ func (h *Handler) HandleResponses(w http.ResponseWriter, r *http.Request) {
 	if out <= 0 {
 		out = answerRoom
 	}
-	need := req.estimate() + out
+	need := req.estimate() + min(out, rawAnswerRoom)
 	if req.Toskar != nil {
 		need = max(need, req.Toskar.ContextWindow)
 	}

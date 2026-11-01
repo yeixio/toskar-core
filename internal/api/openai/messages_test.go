@@ -156,7 +156,7 @@ func TestMessages(t *testing.T) {
 	}{
 		{"no max_tokens", `{"model":"raw:qwen2.5-7b-q4","messages":[{"role":"user","content":"hi"}]}`, http.StatusBadRequest, "invalid_request_error"},
 		{"not here", `{"model":"other","max_tokens":10,"messages":[{"role":"user","content":"hi"}]}`, http.StatusNotFound, "not_found_error"},
-		{"bad role", `{"model":"qwen2.5-7b-q4","max_tokens":10,"messages":[{"role":"system","content":"hi"}]}`, http.StatusBadRequest, "invalid_request_error"},
+		{"bad role", `{"model":"qwen2.5-7b-q4","max_tokens":10,"messages":[{"role":"tool","content":"hi"}]}`, http.StatusBadRequest, "invalid_request_error"},
 	} {
 		rec := call(c.body)
 		if rec.Code != c.status || !strings.Contains(rec.Body.String(), `"type":"`+c.kind+`"`) {
@@ -180,5 +180,58 @@ func TestCountTokens(t *testing.T) {
 	_ = json.Unmarshal(rec.Body.Bytes(), &got)
 	if rec.Code != http.StatusOK || got.InputTokens < 20 {
 		t.Errorf("%d %s", rec.Code, rec.Body)
+	}
+}
+
+// Claude Code sends a system turn partway, whose tool_addition blocks add
+// tools, and asks for 32,000 max_tokens as a ceiling (#959): the turn's
+// text becomes instructions, its tools join the request's, and the window
+// is sized for the prompt and a bounded answer, not 32,000 more.
+func TestMessagesFromClaudeCode(t *testing.T) {
+	var sent []byte
+	model := fakeModel(t, &sent, chatAnswerJSON, chatStream)
+	h := testHandler(t)
+	h.Permissions = func(r *http.Request) (auth.APIKeyPermissions, context.Context, error) {
+		return auth.APIKeyPermissions{Raw: true}, r.Context(), nil
+	}
+	var need int
+	h.Raw = func(_ context.Context, _ string, n int) (string, func(), error) {
+		need = n
+		return model.URL, func() {}, nil
+	}
+	body := `{"model":"qwen2.5-7b-q4","max_tokens":32000,"thinking":{"type":"adaptive"},"context_management":{"edits":[]},"output_config":{"effort":"high"},
+	  "system":[{"type":"text","text":"You are Claude Code."}],
+	  "tools":[{"name":"Read","description":"Read a file","input_schema":{"type":"object"}}],
+	  "messages":[
+	    {"role":"user","content":[{"type":"text","text":"What's in main.go?"}]},
+	    {"role":"system","content":[{"type":"text","text":"# Environment"},{"type":"tool_addition","tool":{"type":"tool_definition","definition":{"name":"Grep","description":"Search files","input_schema":{"type":"object"}}}}]}
+	  ]}`
+	rec := httptest.NewRecorder()
+	h.HandleMessages(rec, httptest.NewRequest(http.MethodPost, "/v1/messages", strings.NewReader(body)))
+	if rec.Code != http.StatusOK {
+		t.Fatalf("%d %s", rec.Code, rec.Body)
+	}
+	var got struct {
+		Messages []struct {
+			Role    string `json:"role"`
+			Content any    `json:"content"`
+		} `json:"messages"`
+		Tools []struct {
+			Function struct {
+				Name string `json:"name"`
+			} `json:"function"`
+		} `json:"tools"`
+	}
+	if err := json.Unmarshal(sent, &got); err != nil {
+		t.Fatal(err)
+	}
+	if len(got.Messages) != 3 || got.Messages[2].Role != "system" || got.Messages[2].Content != "# Environment" {
+		t.Errorf("messages: %+v", got.Messages)
+	}
+	if len(got.Tools) != 2 || got.Tools[1].Function.Name != "Grep" {
+		t.Errorf("tools: %+v", got.Tools)
+	}
+	if need > rawAnswerRoom+1000 {
+		t.Errorf("sized a window of %d for a short prompt", need)
 	}
 }

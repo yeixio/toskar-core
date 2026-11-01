@@ -55,6 +55,11 @@ type anthropicBlock struct {
 	ToolUseID string          `json:"tool_use_id,omitempty"`
 	Content   json.RawMessage `json:"content,omitempty"`
 	IsError   bool            `json:"is_error,omitempty"`
+	// tool_addition, a tool added partway, as Claude Code sends in a
+	// system turn
+	Tool *struct {
+		Definition anthropicTool `json:"definition"`
+	} `json:"tool,omitempty"`
 	// image
 	Source *struct {
 		Type      string `json:"type"`
@@ -165,8 +170,15 @@ func (m messagesRequest) chatMessages() ([]map[string]any, error) {
 				msg["tool_calls"] = calls
 			}
 			out = append(out, msg)
+		case "system":
+			// A system turn partway, as Claude Code sends one: its text is
+			// instructions, and its tool_addition blocks are tools (added to
+			// the request's in tools()).
+			if text := blockText(bs); text != "" {
+				out = append(out, map[string]any{"role": "system", "content": text})
+			}
 		default:
-			return nil, fmt.Errorf("messages[%d].role must be user or assistant", i)
+			return nil, fmt.Errorf("messages[%d].role must be user, assistant, or system", i)
 		}
 	}
 	return out, nil
@@ -207,9 +219,9 @@ func (m messagesRequest) chatBody() ([]byte, error) {
 	if m.TopK != nil {
 		body["top_k"] = *m.TopK
 	}
-	if len(m.Tools) > 0 && (m.ToolChoice == nil || m.ToolChoice.Type != "none") {
+	if all := m.tools(); len(all) > 0 && (m.ToolChoice == nil || m.ToolChoice.Type != "none") {
 		var tools []map[string]any
-		for _, t := range m.Tools {
+		for _, t := range all {
 			params := t.InputSchema
 			if len(params) == 0 {
 				params = json.RawMessage(`{"type":"object"}`)
@@ -231,6 +243,23 @@ func (m messagesRequest) chatBody() ([]byte, error) {
 	return json.Marshal(body)
 }
 
+// tools are the request's tools and those its system turns add.
+func (m messagesRequest) tools() []anthropicTool {
+	out := append([]anthropicTool(nil), m.Tools...)
+	for _, turn := range m.Messages {
+		if turn.Role != "system" {
+			continue
+		}
+		bs, _ := blocks(turn.Content)
+		for _, b := range bs {
+			if b.Type == "tool_addition" && b.Tool != nil && b.Tool.Definition.Name != "" {
+				out = append(out, b.Tool.Definition)
+			}
+		}
+	}
+	return out
+}
+
 // estimate is about how many tokens m's messages take, for its window.
 func (m messagesRequest) estimate() int {
 	n := 0
@@ -247,7 +276,7 @@ func (m messagesRequest) estimate() int {
 			}
 		}
 	}
-	for _, t := range m.Tools {
+	for _, t := range m.tools() {
 		n += contextusage.Estimate(t.Name+" "+t.Description) + contextusage.Estimate(string(t.InputSchema))
 	}
 	return n
@@ -273,7 +302,7 @@ func (h *Handler) HandleMessages(w http.ResponseWriter, r *http.Request) {
 		anthropicError(w, http.StatusBadRequest, "invalid_request_error", err.Error())
 		return
 	}
-	need := req.estimate() + req.MaxTokens
+	need := req.estimate() + min(req.MaxTokens, rawAnswerRoom)
 	if req.Toskar != nil {
 		need = max(need, req.Toskar.ContextWindow)
 	}
