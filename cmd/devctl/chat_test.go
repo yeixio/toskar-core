@@ -92,9 +92,9 @@ func (f *fakeChat) eventsSeq(ctx context.Context) iter.Seq2[api.Event, error] {
 	}
 }
 
-func (f *fakeChat) decide(requestID string, allow bool) error {
+func (f *fakeChat) decide(requestID string, allow, forChat bool) error {
 	f.mu.Lock()
-	f.decisions = append(f.decisions, requestID+map[bool]string{true: " allow", false: " deny"}[allow])
+	f.decisions = append(f.decisions, requestID+map[bool]string{true: " allow", false: " deny"}[allow]+map[bool]string{true: " in this chat", false: ""}[forChat])
 	f.mu.Unlock()
 	f.decided <- struct{}{}
 	return nil
@@ -122,7 +122,7 @@ func TestChatSession(t *testing.T) {
 	if err != nil {
 		t.Fatalf("%v\n%s", err, errOut)
 	}
-	for _, want := range []string{"Answer 1", "Let me look.", "wants to run shell.run on rig.local, to list the files", `"command": "ls"`, "Allow? [y]es, [n]o:", "Answer 2", "Answer 3"} {
+	for _, want := range []string{"Answer 1", "Let me look.", "wants to run shell.run on rig.local, to list the files", `"command": "ls"`, "Allow? [y]es, [n]o, [a]lways in this chat:", "Answer 2", "Answer 3"} {
 		if !strings.Contains(out, want) {
 			t.Errorf("no %q in:\n%s", want, out)
 		}
@@ -196,5 +196,16 @@ func TestChatComputer(t *testing.T) {
 		if got := (daemonChat{rest: daemonClient{base: base}}).computer(); got != want {
 			t.Errorf("%s: %q, want %q", base, got, want)
 		}
+	}
+}
+
+// a allows the tool for the rest of the chat (#959).
+func TestChatAlways(t *testing.T) {
+	f := newFakeChat()
+	if _, _, err := runChat(t, f, nil, "please run ls\na\n/exit\n", true); err != nil {
+		t.Fatal(err)
+	}
+	if len(f.decisions) != 1 || f.decisions[0] != "req1 allow in this chat" {
+		t.Errorf("decisions %v", f.decisions)
 	}
 }

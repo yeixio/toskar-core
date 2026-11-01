@@ -253,7 +253,7 @@ Control-plane routes are under `/api/v1`. The OpenAI-compatible routes are under
 | GET | `/tools/runs` | Audited tool calls, newest first; `?tool_id=`, `?conversation_id=`, `?limit=` |
 | POST | `/tools/{id}/enabled` | Turn a tool on or off everywhere |
 | POST | `/tools/{id}/test` | Run a tool with `args` and return its result |
-| POST | `/tools/decide` | Answer an Ask approval: `request_id`, `allow`, and `allow_session` |
+| POST | `/tools/decide` | Answer an Ask approval: `request_id`, `allow`, and `allow_session`, which lets that tool run in the same chat without asking again until Toskar restarts. It never reaches other chats or people, and a tool that asks because the chat read someone else's writing asks each time (#959) |
 | GET | `/tools/activity` | Recent tool calls, kept in memory for this process |
 | GET | `/tools/providers` | Each computer's providers for image and speech tools, which can run on any paired computer: state (healthy, installing, failed, unavailable), what runs it, whether a GPU does the work, and the `languages` it works in (`auto_detect` when it tells the language itself) |
 | GET | `/connectors` | Connected services and their status |
