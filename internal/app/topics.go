@@ -15,6 +15,7 @@ import (
 	"github.com/yeixio/toskar-core/internal/runlog"
 	"github.com/yeixio/toskar-core/internal/tools"
 	"github.com/yeixio/toskar-core/internal/topiclog"
+	"github.com/yeixio/toskar-core/internal/turnopts"
 	"github.com/yeixio/toskar-core/pkg/contracts"
 	"github.com/yeixio/toskar-core/pkg/pluginapi"
 	"regexp"
@@ -338,6 +339,17 @@ func (e *chatExecEnv) CheckAnswer(ctx context.Context, role, prompt, answer stri
 	run.Note("topicReplaced", nil)
 	e.recordAttempt(ctx, topiclog.Replaced)
 	return e.offTopicReply(ctx, v)
+}
+
+// MayShowEarly says the answer may be seen before its checks (#1006): not
+// on a profile that enforces its topic, where an off-topic answer must never
+// show, and not in a portal, whose visitors only see what's been checked.
+func (e *chatExecEnv) MayShowEarly(ctx context.Context) bool {
+	if enforcing(e.profile.Topics) {
+		return false
+	}
+	o := turnopts.From(ctx)
+	return o == nil || o.Portal == ""
 }
 
 // errNoAllowedProfile is a pinned person none of whose profiles exist.

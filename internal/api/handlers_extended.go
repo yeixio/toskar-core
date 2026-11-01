@@ -376,6 +376,9 @@ func (s *Server) handleChat(w http.ResponseWriter, r *http.Request) {
 		// Client is the app asking: phone, tablet, watch, car, tv, desktop,
 		// or web. Its run is traced with it, to measure first answers (#498).
 		Client string `json:"client"`
+		// Live sends the answer as it's written, with stream, and a replace
+		// event when what was shown changes (#1006, contract 1.77).
+		Live bool `json:"live"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		writeErr(w, http.StatusBadRequest, "INVALID_JSON", "invalid body", nil)
@@ -444,6 +447,9 @@ func (s *Server) handleChat(w http.ResponseWriter, r *http.Request) {
 		ctx = pluginapi.WithAnswerOptions(ctx, pluginapi.GenerateOptions{Thinking: true})
 	}
 	ctx = turnopts.WithBranch(ctx, turnopts.Branch{ParentID: body.ParentID, RetryOf: body.RetryOf, EditOf: body.EditOf})
+	if body.Live && body.Stream {
+		ctx = turnopts.WithLive(ctx)
+	}
 	ctx = runlog.WithOrigin(ctx, runlog.Origin{Client: body.Client, Remote: remoteRequest(r) || !auth.FromLocalNetwork(r)})
 	r = r.WithContext(locale.WithTimeZone(ctx, body.TimeZone))
 	if err := s.deps.Chat(w, r, body.ConversationID, body.ProfileID, body.ModelID, body.Message, body.Stream, body.Execution); err != nil {

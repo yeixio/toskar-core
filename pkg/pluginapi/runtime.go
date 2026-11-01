@@ -273,6 +273,10 @@ func (m *ChatMessage) UnmarshalJSON(data []byte) error {
 // ChatChunk is a streaming generation fragment.
 type ChatChunk struct {
 	Content string `json:"content,omitempty"`
+	// Replace says Content takes the place of everything sent so far, empty
+	// to take it all back (#1006). Only a turn that asked for live text
+	// gets one.
+	Replace bool `json:"replace,omitempty"`
 	// Reasoning is what a reasoning model thinks before it answers
 	// (#701): llama-server's delta.reasoning_content. It is never part of
 	// the answer.

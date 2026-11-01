@@ -848,6 +848,12 @@ Built-in profile ids include `general-assistant`, `programming`, and `research`.
 
 `model` may be `profile:<id>`, `auto`, or a bare id. A bare id is used as a profile id when that profile exists, and otherwise as a model override. `auto` picks an installed model for each request, as in chat.
 
+**Answers as they're written (#1006, contract 1.77).** `POST /api/v1/chat` with `"stream": true` sends the answer whole when it's ready, as a `token` event, after its checks have run. Add `"live": true` to get the text as the model writes it:
+
+- `token` events carry the next piece of text. Tool-call wrappers are never sent.
+- A `replace` event's `content` takes the place of everything sent so far, and empty content takes it all back. It comes when a tool call, a retry, or a check changes what was shown. The saved message is always the final text.
+- Some turns stay whole even with `live`, because early text would be wrong or isn't the answer: profiles that enforce a topic, portals, Deliberate, Team, and answers that must be JSON.
+
 The API gets the same assistant as chat: planning, web look-ups, connected services, answer checks, personalization, and specialized AIs.
 - **Messages:** the whole `messages` array is used. The last `user` message is the turn, and earlier `user` and `assistant` messages are its history. `system` (and `developer`) messages are the calling app's instructions. They cannot change what tools may do.
 - **Effort:** `reasoning_effort` maps to effort. `minimal` and `low` give Fast, `medium` gives Balanced, and `high` gives Thorough. `none` gives Fast, and a reasoning model (DeepSeek R1's distills, Qwen 3) answers without thinking first: much faster, for questions that don't need it (#840). Toskar turns the model's thinking off with its chat template's switch where it has one, and otherwise a thinking budget of none; a model that doesn't think is unaffected. Some reasoning models in the catalog, such as Qwen 3.5, answer first by default, because a long think leaves a small model's window no room for the answer (#593); any other `reasoning_effort` asks them to think. What each one does, and other ways to get more careful answers, are in the user guide's Get more careful answers.
