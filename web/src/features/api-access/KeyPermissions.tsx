@@ -13,7 +13,8 @@ const USE_OPTIONS: APIKeyPermissions['memory'][] = ['never', 'on_request', 'alwa
 /**
  * What an API key may ask of the assistant (spec §62): memory, connected
  * knowledge, tools, and placement, the profile it answers with (#345), and
- * whether it only asks, as a CI job's key does (#455).
+ * whether it only asks, as a CI job's key does (#455), and whether it may
+ * drive a model directly, for coding agents (#843).
  * Requests can narrow it, never widen it.
  */
 export function KeyPermissions({ apiKey }: { apiKey: APIKeyRecord }) {
@@ -120,6 +121,21 @@ export function KeyPermissions({ apiKey }: { apiKey: APIKeyRecord }) {
           />
           <span className="text-ink-muted">{t('permissions.placement')}</span>
         </label>
+        <div className="sm:col-span-2">
+          <label className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={Boolean(current.raw) && !current.profile}
+              disabled={save.isPending || Boolean(current.profile)}
+              aria-describedby={`raw-hint-${apiKey.id}`}
+              onChange={(e) => change({ raw: e.target.checked || undefined })}
+            />
+            <span className="text-ink-muted">{t('permissions.raw')}</span>
+          </label>
+          <p id={`raw-hint-${apiKey.id}`} className="mt-1 text-ink-faint">
+            {t('permissions.rawHint')}
+          </p>
+        </div>
       </div>
       <p className="mt-2 text-ink-faint">{t('permissions.note')}</p>
       {error && <ShownError {...error} className="mt-1 text-danger" />}
