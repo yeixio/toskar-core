@@ -187,7 +187,8 @@ func TestGate(t *testing.T) {
 		s.lo, s.hi = wilson(passes, runs)
 		return s
 	}
-	base := sum(180, 200) // 90%
+	base := sum(180, 200)   // 90%
+	strong := sum(195, 200) // 97.5%
 	for _, c := range []struct {
 		name string
 		run  summary
@@ -200,7 +201,7 @@ func TestGate(t *testing.T) {
 		{"clearly under", sum(150, 200), nil, true, "whole interval"},
 		{"the same as the baseline", sum(182, 200), &base, false, "No clear change"},
 		{"a few worse, not clearly", sum(176, 200), &base, false, "No clear change"},
-		{"clearly worse than the baseline", sum(165, 200), &base, true, "Worse than the baseline"},
+		{"above the bar, but clearly down from a strong baseline", sum(182, 200), &strong, true, "Worse than the baseline"},
 		{"the stub misses one", sum(62, 63), nil, true, "Every case must pass"},
 	} {
 		bar := 0.9
