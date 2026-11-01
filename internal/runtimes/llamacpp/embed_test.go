@@ -131,3 +131,33 @@ func TestStartArgsWithProjector(t *testing.T) {
 		t.Fatal("a text model was given a projector")
 	}
 }
+
+// A chat model starts with the window it's given (#962), and a running one
+// with another window is started again; a start that asks for none takes
+// it as it runs.
+func TestChatContextWindow(t *testing.T) {
+	args := strings.Join(startArgs(pluginapi.ModelStartConfig{ModelPath: "m.gguf", Context: 32768}, 9000), " ")
+	if !strings.Contains(args, "--ctx-size 32768 --parallel 1") {
+		t.Errorf("args %q", args)
+	}
+	running := pluginapi.RunningModel{Context: 32768}
+	for _, c := range []struct {
+		cfg  pluginapi.ModelStartConfig
+		same bool
+	}{
+		{pluginapi.ModelStartConfig{Context: 32768}, true},
+		{pluginapi.ModelStartConfig{Context: 16384}, false},
+		{pluginapi.ModelStartConfig{}, true},
+		{pluginapi.ModelStartConfig{Context: 8192, Mode: pluginapi.ModeEmbedding}, true},
+	} {
+		if got := sameContext(running, c.cfg); got != c.same {
+			t.Errorf("%+v: same %v", c.cfg, got)
+		}
+	}
+	if !sameContext(pluginapi.RunningModel{Context: 8192}, pluginapi.ModelStartConfig{Context: 8192}) {
+		t.Error("8K running, 8K asked")
+	}
+	if chatContext(pluginapi.ModelStartConfig{}) != 8192 || chatContext(pluginapi.ModelStartConfig{Mode: pluginapi.ModeReranking}) != 0 {
+		t.Error("chat context defaults")
+	}
+}

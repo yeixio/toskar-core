@@ -30,8 +30,9 @@ const (
 	headroomTight     = 0.95
 	headroomHeavy     = 0.75
 
-	// runningContextTokens matches llamacpp.ContextWindow: the server starts
-	// at 8192 unless the catalog window is smaller.
+	// runningContextTokens is the window a chat model starts with when
+	// nothing bigger fits well (AutoContext, #962), and what llamacpp
+	// starts one with when it's given none.
 	runningContextTokens = 8192
 
 	// Weights are memory-mapped. The low estimate is the file plus KV cache
@@ -67,8 +68,8 @@ const (
 
 // FitOptions carries measurements and the context window the daemon actually runs.
 type FitOptions struct {
-	// ContextTokens overrides the running window. Zero uses runningContextTokens,
-	// capped by the catalog window when that window is smaller.
+	// ContextTokens overrides the running window. Zero uses the window the
+	// model starts with on this hardware (AutoContext, #962).
 	ContextTokens    int
 	Proven           map[string]bool
 	Measured         map[string]MeasuredRun
@@ -105,7 +106,10 @@ func ClassifyFit(e CatalogEntry, hw contracts.HardwareInventory, nodeID, nodeNam
 	fit.TotalMemoryBytes = capacity
 	fit.AvailableMemoryBytes = hw.Memory.AvailableBytes
 	fit.MemoryKind = kind
-	fit.ContextTokens = configuredContext(e.Context, opts.ContextTokens)
+	fit.ContextTokens = opts.ContextTokens
+	if fit.ContextTokens <= 0 {
+		fit.ContextTokens = AutoContext(e, hw)
+	}
 
 	weights, approx := weightBytes(e)
 	fit.WeightBytes = weights
@@ -337,16 +341,6 @@ func recommendationsFor(label contracts.FitLabel, kind string) []string {
 		out = append([]string{"Expect macOS to use swap"}, out...)
 	}
 	return out
-}
-
-func configuredContext(catalog, override int) int {
-	if override > 0 {
-		return override
-	}
-	if catalog <= 0 || catalog > runningContextTokens {
-		return runningContextTokens
-	}
-	return catalog
 }
 
 func machineCapacity(hw contracts.HardwareInventory) (uint64, string) {

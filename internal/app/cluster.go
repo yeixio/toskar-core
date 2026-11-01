@@ -512,6 +512,7 @@ func (a *App) ensureLocalModelWith(ctx context.Context, modelID string, adapters
 		ModelID: modelID, ModelPath: path, Adapters: adapters, Projector: a.Models.ProjectorPath(modelID),
 		Draft:         a.draftPath(ctx, modelID),
 		NoSpeculation: a.speculationOff(ctx, modelID),
+		Context:       a.startWindow(ctx, modelID),
 	})
 	loaded()
 	if err != nil {

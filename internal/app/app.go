@@ -176,6 +176,9 @@ type App struct {
 	// for the context gauge (#230).
 	windows sync.Map
 	shapes  sync.Map
+	// startWindows keeps the window each chat model starts with here
+	// (model id -> tokens, #962), worked out once from the hardware.
+	startWindows sync.Map
 	// window reads a running model's window; tests replace it.
 	window func(ctx context.Context, endpoint string) (int, error)
 	// sampler keeps a day of the daemon's memory and goroutines (#231).
@@ -478,7 +481,7 @@ func New(opts Options) (*App, error) {
 		return rtMgr.StartModel(ctx, "llamacpp", pluginapi.ModelStartConfig{
 			ModelID: modelID, ModelPath: modelPath, Adapters: a.localAdapters(ctx, modelID),
 			Projector: modelMgr.ProjectorPath(modelID), NoSpeculation: a.speculationOff(ctx, modelID),
-			Draft: a.draftPath(ctx, modelID),
+			Draft: a.draftPath(ctx, modelID), Context: a.startWindow(ctx, modelID),
 		})
 	}
 	bench.Admit = func(ctx context.Context, waiting func(string)) (func(), error) {

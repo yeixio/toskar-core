@@ -54,9 +54,11 @@ func (e loadFailed) Unwrap() []error { return []error{e.err, ErrLoadFailed} }
 type ModelStartConfig struct {
 	ModelID   string `json:"model_id"`
 	ModelPath string `json:"model_path"`
-	Context   int    `json:"context,omitempty"`
-	GPULayers int    `json:"gpu_layers,omitempty"`
-	Port      int    `json:"port,omitempty"`
+	// Context is the chat window to start with (#962); 0 for the
+	// runtime's default.
+	Context   int `json:"context,omitempty"`
+	GPULayers int `json:"gpu_layers,omitempty"`
+	Port      int `json:"port,omitempty"`
 	// Adapters are LoRA adapters loaded next to the base weights. They are
 	// inactive unless a request names one.
 	Adapters []Adapter `json:"adapters,omitempty"`
@@ -102,6 +104,9 @@ type RunningModel struct {
 	Projector string `json:"projector,omitempty"`
 	// Draft is the draft model it was started with, if any.
 	Draft string `json:"draft,omitempty"`
+	// Context is the chat window it was started with (#962); 0 for
+	// embedding and reranking, or when the runtime doesn't say.
+	Context int `json:"context,omitempty"`
 	// Acceleration is where the instance runs, from the runtime's own
 	// report when it loaded the model; nil when it is not known.
 	Acceleration *Acceleration `json:"acceleration,omitempty"`
