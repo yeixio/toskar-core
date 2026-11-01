@@ -36,6 +36,7 @@ How it is started depends on how it was installed:
 | `toskarctl version` (or `about`) | Version, license, and corresponding source |
 | `toskarctl paths` | Default data, model, runtime, log, and database paths |
 | `toskarctl ask [flags] [prompt]` | Send one prompt and print the answer, for scripts and CI jobs (below) |
+| `toskarctl connect <agent> [--model id] [--write]` | Print, or write, the settings for a coding agent to use a model on Toskar (below) |
 | `toskarctl models list [--installed] [--json]` | The models, smallest first, with download size, fit on this computer, and whether each is installed |
 | `toskarctl models install <id> [--node <id>]` | Download a model and wait until it's installed, printing its progress every tenth of the way |
 | `toskarctl automations …` | Manage scheduled automations (below) |
@@ -82,6 +83,22 @@ Exit status: 0 for an answer, 1 for a model or connection error, 2 for a usage e
 A CI runner with no Toskar nearby can run one: [Toskar in CI](ci.md).
 
 `ask` reads standard input whenever it isn't a terminal. Where it's an open pipe that never ends, such as some job runners and `ssh` without a command, give it `< /dev/null`.
+
+### Connect a coding agent
+
+`toskarctl connect <agent>` prints the settings a coding agent needs to use a model on Toskar directly, with the agent's own tools (#959, #843). `--write` writes them instead. It writes only the agent's Toskar settings and keeps everything else in the file.
+
+| Agent | Format it speaks | `--write` writes |
+| --- | --- | --- |
+| `claude-code` | Anthropic's Messages (`/v1/messages`) | `.claude/settings.local.json` in this folder, which Claude Code keeps out of git: `ANTHROPIC_BASE_URL`, `ANTHROPIC_AUTH_TOKEN`, and the model for `ANTHROPIC_MODEL` and its Opus, Sonnet, and Haiku defaults, so background work reaches Toskar too |
+| `codex` | OpenAI's Responses (`/v1/responses`) | A `toskar` provider in `~/.codex/config.toml` (or `$CODEX_HOME`), and a `toskar` profile, `toskar.config.toml` beside it, as Codex 0.134 and later read profiles. Run `codex --profile toskar`; your default stays as it was. A `[profiles.toskar]` table from before is removed, since Codex refuses one now |
+| `opencode` | Chat Completions, as `raw:<model>` | A `toskar` provider in `opencode.json` in this folder, using `@ai-sdk/openai-compatible`, and the default `model` |
+| `aider` | Chat Completions, as `raw:<model>` | Nothing: Aider reads `OPENAI_API_BASE` and `OPENAI_API_KEY` from the environment, so put the printed lines in your shell profile |
+
+- **The model:** `--model`, or the best installed one for an agent: one that calls tools, then one made for code, then one that fits Excellent or Good, then the largest.
+- **The key:** on this computer none is needed, so agents get the stand-in `toskar-local`. For another computer, set `TOSKAR_URL` and `TOSKAR_API_KEY` to a key with raw access ("Drive models directly, for coding agents" in API Access). Printed settings name the variable instead of showing the key.
+- **Window:** agents send long instructions and many tools, so a model gets a bigger window when it needs one and one fits (#962). Many tools, such as an agent with MCP servers, can need more than a small model holds. Then the request answers `CONTEXT_TOO_LONG`. Choose a bigger model or fewer tools.
+- **Checked by hand on Apple silicon with Qwen 2.5 7B:** Claude Code 2.1.310 read a file with its Read tool, and Codex CLI 0.138 ran `cat` with its `exec_command` tool, each answering from the file. A model this small can answer without using a tool when the request doesn't ask for one.
 
 ### Automations
 
