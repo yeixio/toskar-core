@@ -133,8 +133,8 @@ func ClassifyFit(e CatalogEntry, hw contracts.HardwareInventory, nodeID, nodeNam
 		fit.Approximate = true
 	}
 	ctx := float64(fit.ContextTokens)
-	kvLow := uint64(billions * ctx * kvBytesPerTokenPerBillionLow / attentionShare(e))
-	kvHigh := uint64(billions * ctx * kvBytesPerTokenPerBillionHigh / attentionShare(e))
+	kvLow := uint64(billions * ctx * kvBytesPerTokenPerBillionLow / attentionShare(e) * cacheShare(fit.ContextTokens))
+	kvHigh := uint64(billions * ctx * kvBytesPerTokenPerBillionHigh / attentionShare(e) * cacheShare(fit.ContextTokens))
 	vision := visionBytes(e)
 	draftLow, draftHigh := draftBytes(e, ctx)
 	low := weights + vision + draftLow + kvLow + runtimeScratchBytes
@@ -296,6 +296,18 @@ func draftBytes(e CatalogEntry, ctx float64) (low, high uint64) {
 	}
 	billions := float64(e.Draft.SizeBytes) / (quantBytesPerParam(e.Variant) * 1e9)
 	return uint64(billions * ctx * kvBytesPerTokenPerBillionLow), uint64(billions * ctx * kvBytesPerTokenPerBillionHigh)
+}
+
+// longWindow is llamacpp.LongWindow: past it, a chat model's cache is q8_0,
+// 17/32 of the default f16's size (#962).
+const longWindow = 32768
+
+// cacheShare is the size of a window's cache against an f16 one.
+func cacheShare(window int) float64 {
+	if window > longWindow {
+		return 17.0 / 32
+	}
+	return 1
 }
 
 // attentionShare is how many layers there are for each one that keeps a

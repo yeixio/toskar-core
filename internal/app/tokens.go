@@ -135,6 +135,10 @@ func (a *App) localContext(ctx context.Context, modelID string) (window int, mem
 				a.shapes.Store(path, info)
 			}
 			memory = info.KVCacheBytes(window, kvBytesPerElement)
+			if window > llamacpp.LongWindow {
+				// A q8_0 cache: 34 bytes for every 32 entries (#962).
+				memory = memory * 17 / 32
+			}
 		}
 	}
 	return window, memory, true

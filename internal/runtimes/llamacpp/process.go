@@ -239,20 +239,31 @@ func startArgs(cfg pluginapi.ModelStartConfig, port int) []string {
 	// the window both fail with "Context size has been exceeded" (#834).
 	// Every room and compaction decision here counts on the whole window.
 	// Requests to the same model queue in llama-server instead.
-	args = append(args, kvCacheArgs()...)
-	return append(args, "--ctx-size", fmt.Sprintf("%d", defaultContext(cfg.Context)), "--parallel", "1")
+	window := defaultContext(cfg.Context)
+	args = append(args, kvCacheArgs(window)...)
+	return append(args, "--ctx-size", fmt.Sprintf("%d", window), "--parallel", "1")
 }
 
-// kvCacheArgs set a chat model's key/value cache type from TOSKAR_KV_CACHE
-// (#962), for measuring a cheaper cache with the quality set before it's a
-// default: q8_0 holds a window in about half the memory of the default f16
-// (on an Apple M5 Pro, Llama 3.2 1B's 32K cache was 544 MiB, not 1,024), and
-// llama-server turns flash attention on for it. Empty or f16 leaves
-// llama-server's default.
-func kvCacheArgs() []string {
+// LongWindow is the largest window a chat model's key/value cache stays in
+// llama.cpp's default f16 for. Past it, the cache is q8_0 (#962), which holds
+// a window in 17/32 of the memory (on an Apple M5 Pro, Llama 3.2 1B's 32K
+// cache was 544 MiB, not 1,024), with flash attention, which llama-server
+// turns on for it, and answers as well in the quality set. models'
+// fit estimate counts the same.
+const LongWindow = 32768
+
+// kvCacheArgs set a chat model's key/value cache type: q8_0 past LongWindow,
+// else llama-server's default f16. TOSKAR_KV_CACHE sets one for every window,
+// for measuring: q8_0 or q4_0, or f16 to keep the default even past it.
+func kvCacheArgs(window int) []string {
 	switch t := strings.ToLower(strings.TrimSpace(config.Env("KV_CACHE"))); t {
 	case "q8_0", "q4_0":
 		return []string{"--cache-type-k", t, "--cache-type-v", t}
+	case "f16":
+		return nil
+	}
+	if window > LongWindow {
+		return []string{"--cache-type-k", "q8_0", "--cache-type-v", "q8_0"}
 	}
 	return nil
 }
