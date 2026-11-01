@@ -1,36 +1,41 @@
 {
   "schemaVersion": 1,
-  "version": "1.11",
+  "version": "1.12",
   "items": [
     {
-      "realm": "Huginn",
-      "title": "AI news, a few lines each",
-      "text": "New open models, runtime releases, and AI labs' announcements, from the news toskar.ai writes every morning. A model in Toskar's catalog shows how well it fits this computer, and Admins can install it from there. Turn it off in Settings."
-    },
-    {
-      "realm": "Valgrind",
-      "title": "Toskar in your CI",
-      "text": "Ask your own AI from a CI job: summarize a bug, suggest labels, read a failing log. A key for a CI job can only ask, with no memories, knowledge, or tools. Use toskarctl ask, install.sh ci, or the Ask Toskar action for GitHub."
-    },
-    {
-      "realm": "Bifrost",
-      "title": "Official SDKs for Python, JavaScript, and Go",
-      "text": "Build on Toskar with the official SDKs, from PyPI, npm, and Go modules: stream answers, watch events, and connect as a device at home or from anywhere. Every example is tested against Core on each change."
+      "realm": "Ymir",
+      "title": "Newer Qwen models that also see pictures",
+      "text": "Qwen 3.5 4B and 9B and Qwen 3.8 27B join the catalog. They answer first and think only when asked. Qwen 3.5 4B is the new small everyday pick: it got all 39 of our reasoning questions right, where Qwen 2.5 3B got 28."
     },
     {
       "realm": "Ratatoskr",
-      "title": "A truer OpenAI-compatible API",
-      "text": "Pictures reach the model, a JSON Schema is used whole, and answers carry their own id, token usage, and why they stopped, so OpenAI libraries and tools work with Toskar as they do elsewhere."
+      "title": "Models read four times as much at once",
+      "text": "Chat models start with up to a 32K context window where it fits, not 8K. A request that needs more gets more, and with Advanced mode on you can choose a model's window. Windows past 32K use a cache half the size, so they fit more computers."
     },
     {
-      "realm": "Heimdall",
-      "title": "Text can't pose as the model's own turn",
-      "text": "A web page, a file, or a visitor's message that spells a model's control tokens can no longer start a turn of its own. Everything a model reads is escaped on its way in."
+      "realm": "Sleipnir",
+      "title": "Faster answers by guessing ahead",
+      "text": "Models guess the next words and check several at once, with the same answers. Editing pasted code is 42% faster, and Qwen 2.5 32B and 14B come with a small draft model that made them about 1.9× and 1.6× as fast on a 24 GB graphics card."
     },
     {
       "realm": "Ymir",
-      "title": "Models you copied in show up",
-      "text": "A model file put in Toskar's models folder by hand now appears on the Models page, and Add model › From another app adds it where it is, without a copy."
+      "title": "Models bigger than your graphics card run",
+      "text": "A model too big for the graphics card now runs partly on the processor instead of failing to load. Each model's fit says how well it will run on this computer, not just whether it fits."
+    },
+    {
+      "realm": "Valgrind",
+      "title": "Your coding agents and editors, on your own models",
+      "text": "Claude Code, Codex, OpenCode, Aider, and editors such as Continue and Zed can use a model on your computer: toskarctl connect sets them up. Anthropic's Messages and OpenAI's Responses formats work too, and toskarctl chat chats in the terminal."
+    },
+    {
+      "realm": "Heimdall",
+      "title": "Web pages and files can't give your AI orders",
+      "text": "Text that tells the AI what to do, on a web page, in a file, or in a tool's result, is left out before the model reads it. A 7B model followed such an instruction every time before; now it never does."
+    },
+    {
+      "realm": "Muninn",
+      "title": "Questions about your life stay in the chat",
+      "text": "A question such as \"Where does my sister live?\" is answered from your chat and its summary, never looked up on the web. Long chats summarized twice keep what was said early on."
     }
   ]
 }
