@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Toskar Control Plane API
-  version: "1.71"
+  version: "1.72"
   description: >-
     Local AI control plane API for Toskar, its OpenAI-compatible routes, and its MCP server.
     On the default loopback bind no key is needed. When the daemon listens on any other address,
@@ -2795,6 +2795,77 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/OpenAIModelList"
+  /v1/messages:
+    post:
+      summary: Anthropic-compatible messages, for coding agents
+      description: >-
+        Anthropic's Messages format, driving a chat model on this computer directly with the
+        request's own tools, as raw:<model> does on /v1/chat/completions (#843, contract 1.72).
+        model is a model id, with or without raw:. Text, image, tool_use, and tool_result blocks,
+        tools with input_schema, tool_choice (auto, any, tool, none), stop_sequences, and sampling
+        are converted to the model's Chat Completions and back. With stream, the answer comes as
+        Anthropic's events (message_start, content_block_start, content_block_delta with
+        text_delta or input_json_delta, content_block_stop, message_delta, message_stop). The key
+        may also come as x-api-key, and needs raw access, as raw:<model> does. Errors use
+        Anthropic's shape, {"type":"error","error":{"type","message"}}.
+      operationId: anthropicMessages
+      tags: [OpenAI-compatible]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [model, max_tokens, messages]
+              properties:
+                model: {type: string}
+                max_tokens: {type: integer}
+                system: {description: A string or text blocks}
+                messages:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      role: {type: string, enum: [user, assistant]}
+                      content: {description: A string or a list of blocks}
+                tools:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      name: {type: string}
+                      description: {type: string}
+                      input_schema: {type: object}
+                tool_choice:
+                  type: object
+                  properties:
+                    type: {type: string, enum: [auto, any, tool, none]}
+                    name: {type: string}
+                stop_sequences:
+                  type: array
+                  items: {type: string}
+                temperature: {type: number}
+                top_p: {type: number}
+                top_k: {type: integer}
+                stream: {type: boolean}
+      responses:
+        "200":
+          description: A message with text and tool_use blocks, stop_reason (end_turn, max_tokens, tool_use), and usage; or, streamed, Anthropic's events
+        "400":
+          description: invalid_request_error, such as no max_tokens, or a request no window of the model holds
+        "403":
+          description: permission_error, a key without raw access
+        "404":
+          description: not_found_error, a model not installed on this computer
+  /v1/messages/count_tokens:
+    post:
+      summary: About how many tokens a Messages request's input takes
+      description: The same body as /v1/messages; answers {"input_tokens"} from an estimate (#843, contract 1.72).
+      operationId: anthropicCountTokens
+      tags: [OpenAI-compatible]
+      responses:
+        "200":
+          description: "{\"input_tokens\": n}"
   /v1/chat/completions:
     post:
       summary: OpenAI-compatible chat completions

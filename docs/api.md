@@ -940,6 +940,15 @@ Coding agents and editors run their own tools: they send `tools`, expect `tool_c
 - **Who:** a key with the `raw` permission (contract 1.71), which only Admins can give, in API Access, under the key's permissions. A key pinned to a profile can't have it. A request on this computer without a key has it, as the Owner's. Any other request answers `403 RAW_NOT_ALLOWED`.
 - **Listed:** `GET /v1/models` lists `raw:<model id>` for each chat model installed here, for a key that may use them.
 
+### Anthropic's Messages format (#843)
+
+`POST /v1/messages` serves agents that speak Anthropic's format, such as tools built for Claude, with a model on this computer. It is always raw, with the same permission and window sizing as `raw:<model>`, and `model` is the model's id, with or without `raw:` (contract 1.72). Point the agent's base URL at Toskar, such as `http://127.0.0.1:7331`, and its model at the id.
+
+- **In:** `system` (a string or text blocks), `messages` with `text`, `image` (base64 or URL), `tool_use`, and `tool_result` blocks, `tools` with `input_schema`, `tool_choice` (`auto`, `any`, `tool` with a `name`, `none`), `stop_sequences`, `temperature`, `top_p`, and `top_k`. They're converted to the model's Chat Completions: a turn's `tool_result` blocks become `tool` messages ahead of its text, and `tool_use` becomes `tool_calls`. Thinking blocks and `metadata` are ignored.
+- **Out:** `content` with `text` and `tool_use` blocks, `stop_reason` (`end_turn`, `max_tokens`, `tool_use`), and `usage`. With `"stream": true`, Anthropic's events: `message_start`, then for each text run or tool call `content_block_start`, its `text_delta` or `input_json_delta` deltas, and `content_block_stop`, then `message_delta` with the stop reason and output tokens, and `message_stop`.
+- **The key** may come as `x-api-key`, as Anthropic's clients send it. `anthropic-version` is accepted and ignored. Errors use Anthropic's shape: `{"type": "error", "error": {"type": "invalid_request_error", "message": "..."}}`, with `permission_error` (403, no raw access), `not_found_error` (404, not on this computer), and `authentication_error` (401).
+- **`POST /v1/messages/count_tokens`** takes the same body and answers `{"input_tokens": n}`, an estimate, which agents ask for before they send.
+
 ## GPU acceleration
 
 When llama-server loads a model, it logs which devices it found, how many of the model's layers it put on a GPU, and the memory it took there. The daemon reads that log, so `GET /models/running` reports each model's `acceleration`:
