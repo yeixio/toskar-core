@@ -8,6 +8,267 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Thi
 
 Changes waiting for the next release are in [changes/unreleased/](changes/unreleased/), one file per pull request. `scripts/changelog.py preview` shows them together, and `scripts/changelog.py release <version>` writes them here when the release is cut.
 
+## [1.12.0] - 2026-10-31
+
+### Added
+
+- The phone app in CarPlay asks as `client: car` (contract 1.65). Like the watch, it gets a short answer from whatever model would answer best, and a model it used stays loaded for an hour, so the next question starts at once. The phone app's CarPlay text, and its line in Toskar Unlock, are in all ten languages (yeixio/toskar-apps#142).
+- A chat can turn a reasoning model's thinking off, for answers that start
+  straight away. With a model that thinks before it answers, the chat's
+  options have Thinking, On or Off, and the choice is remembered. `POST
+  /chat` takes `"thinking": "off"`, as `/v1/chat/completions` takes
+  `reasoning_effort: "none"` (contract 1.61, #840).
+- A request that needs a bigger context window gets one. On
+  `/v1/chat/completions`, a request that names a model and needs more than
+  the model runs with makes it start again with the smallest size that
+  holds it, up to its own window, if it still fits. Coding tools can ask up
+  front with `toskar.context_window`. When nothing fits, the request answers
+  `400 CONTEXT_TOO_LONG` naming the field. The model goes back to its usual
+  window once it stops (contract 1.70, #962).
+- Choose a model's context window. With Advanced mode on, a model's More
+  actions menu has Context window: Auto, or a size from 4K up to what the
+  model was made for, each marked with how well the model fits at it. A
+  bigger window suits long documents and coding tools; a smaller one frees
+  memory. A running model reloads with it on its next message.
+  `PUT /models/{id}/context` sets it, and models list `context_window`,
+  `context_choice`, and `context_options` (contract 1.69, #962).
+- `TOSKAR_KV_CACHE=q8_0` starts chat models with an 8-bit key/value cache,
+  about half the memory for the same context window, so the quality set
+  can measure it before it's a default (#962).
+- A nightly llama.cpp canary checks that the newest release, the one Toskar
+  installs, computes what the known-good tag does: Metal and the CPU on a
+  Mac, Vulkan and the CPU on Linux. It compares next-token probabilities
+  over a fixed text (KL divergence, top-token agreement, perplexity) and
+  opens an issue with the numbers when a release drifts (#833).
+- On the Mac, the canary also checks a model of each family that thinks
+  before it answers (Qwen 3, DeepSeek R1's distills, gpt-oss): the thinking
+  comes apart from the answer, and turns off when asked (#840).
+- Diagnostics shows how much of a chat's later turns each model skipped
+  reading again, from its prompt cache, over the last week. A model that
+  reads most of a long chat again every turn is marked low, since its
+  answers start later as a chat grows. `GET /diagnostics/prompt-cache`
+  gives the same per model (contract 1.62). The user guide's new page, Why
+  do answers in a long chat start slowly?, explains it (#838).
+- Draft models: a catalog model can name a small model of its family as its `draft`, downloaded and deleted with it and counted in its memory fit. Core starts the model with the draft and guessing from the chat together when the model fits the computer well (Good or Excellent), and Guess ahead isn't off for it. Qwen 2.5 32B and 14B come with Qwen 2.5 0.5B, which made them about 1.9× and 1.6× as fast on an RX 7900 XTX, changing answers no more than the GPU does between two plain runs (#835).
+- Guess ahead, Auto or Off for each model: with Advanced mode on, a model's More actions menu on Models turns speculative decoding off for that model, from its next start. `PUT /api/v1/models/{id}/speculation` sets it, and each chat model installed on the computer says `speculation` (#835, contract 1.67).
+- Performance shows how often speculative decoding's guesses pay off: with Advanced mode on, a reply's details say how many words the model guessed ahead and kept, and Activity shows the share kept across the replies shown, per model when filtered by one. `GET /api/v1/performance` has each reply's `draft_tokens` and `draft_accepted` (#835, contract 1.66).
+- `toskarctl models list` lists the models, smallest first, with their
+  download size, fit on the computer, and whether each is installed
+  (`--installed`, `--json`). `toskarctl models install <id>` downloads one
+  and waits until it's installed, printing its progress, so a computer
+  without a desktop can add a model from a terminal (#887).
+
+### Changed
+
+- A model that thinks before it answers gets more room for its answer when
+  a chat's earlier messages are fitted into its window: a quarter of the
+  window (2,048 to 16,384 tokens) instead of a flat 512, or what the
+  request's `max_tokens` asks for, and the usual room when thinking is off.
+  Other models get a sixteenth of the window (512 to 4,096) (#840).
+- Toskar knows a model thinks before it answers from the model file: its
+  chat template, or its name for DeepSeek R1's distills. A Qwen 3 or gpt-oss
+  added from a file or from Hugging Face counts, and a model that's only
+  good at reasoning, such as Qwen 2.5 32B, doesn't. Models carry `thinks`
+  in their capabilities (contract 1.63, #840).
+- `/v1/chat/completions` checks that a request naming a model fits it
+  before running: `max_tokens` as large as the model's window, or messages
+  and `max_tokens` clearly larger, answer `400` with `CONTEXT_TOO_LONG` and
+  the field to change, without starting the model (#840).
+- A catalog model can answer first: it thinks only when a chat asks it to.
+  Smaller reasoning models such as Qwen 3.5 spent their whole window
+  thinking and wrote no answer. For these models the chat's Thinking
+  option starts Off, and the choice is remembered apart from the other
+  models'. `POST /chat` takes `"thinking": "on"`, and any
+  `reasoning_effort` other than `none` asks them to think. Model
+  capabilities have `answers_first` (contract 1.68, #593).
+- Catalog: each model names its `family` (its line, such as qwen) and its `generation` (such as 2.5), and can name the entries it `supersedes`, size for size. A test fails when a model has no family or generation, or supersedes one of another family, the same generation, a different job, or itself by way of others. Models still show their family as before, such as qwen 2.5 (#593).
+- Chat models start with a bigger context window where it fits. Toskar
+  used 8,192 tokens for every model; now each starts with 8,192, 16,384,
+  or 32,768, the largest at which it's still an excellent fit and stays
+  in graphics memory, and never past the model's own window. Small models
+  on most computers get 32,768, so they read about four times as much at
+  once, and a reasoning model has room to think. A model that only just
+  fits keeps 8,192. The fit estimate in Models counts the bigger window,
+  and a model running with another window is started again (#962).
+- When the nightly llama.cpp canary finds a release computes differently
+  from the known-good one, new installs take the newest release before it
+  until a newer one passes (`runtimes/llama-cpp.json`). When the hold can't
+  be read, installs take the newest release, as before (#833).
+- With paired computers, a chat goes to the computer expected to answer
+  soonest. Toskar learns how fast each one reads prompts and writes answers
+  with each model from the answers it gives and from benchmarks, and counts
+  the work in flight on each, so a long request goes where prompts are read
+  fastest and a short one where answers are written fastest. A chat's next
+  message stays on the computer that has the chat loaded unless another
+  would be much faster. The placement reason shows each part (#836).
+- The prompt cache check also asks, warm and cold, which city the store is
+  in, which only the chat's first sentence says. A cache that lost the
+  start of a chat answers another city, so this catches it on every model,
+  Gemma 3's sliding window included (#838).
+- The weekly prompt cache check also checks that a new chat reads its
+  system prompt from the cache, even after a chat with another one, as
+  llama-server's in-memory prompt cache allows. A profile's long
+  instructions are read once, not per chat: with Qwen 2.5 7B, 88 ms
+  instead of 1.6 s for 2,100 tokens (#838).
+- The weekly prompt cache check also runs Gemma 3 4B, whose sliding window
+  is the catalog's smallest, so a llama.cpp update that stops reusing such a
+  model's cache fails it. Its chat is now about 2,300 tokens, longer than
+  that window, with the model writing its own answers, and warm and cold
+  answers are compared by probability (within 0.05) rather than log
+  probability, which rounding moves for unlikely words. Measured on
+  llama.cpp b11149, every catalog model tried reused 97–99% of a long chat,
+  and `--swa-full` added nothing, so Toskar doesn't turn it on (#838).
+- The weekly quality run checks the prompt cache against a real model:
+  how much of a chat's later turn comes from the cache (at least 80%), and
+  that an answer from a warm cache matches a cold one, token for token,
+  with top-5 log probabilities within 0.05. The report gives the tokens
+  read and cached each turn. `TOSKAR_QUALITY_RUN` picks the tests
+  `scripts/quality-model.sh run` runs (#838).
+- The quality sets fail only when their pass rate's interval says so: the
+  whole 95% interval under the bar, or, given a baseline run with
+  `TOSKAR_QUALITY_BASELINE`, a significant drop from it (p < 0.05). A rate
+  just under the bar but within run-to-run noise passes with a note (#834).
+- The quality set can run each case more than once and say how sure its
+  pass rate is. `TOSKAR_QUALITY_REPEATS` runs each case with a seed per
+  run, and the report gives the pass rate with a 95% interval, the flaky
+  cases, and, from three or more runs, pass@3 and majority of 3.
+  `TOSKAR_QUALITY_SAVE` keeps every answer, and `TOSKAR_QUALITY_RESCORE`
+  checks them again after a check changes, without a model. A report says
+  when a run didn't cover every case. The weekly real-model run uses three
+  repeats (#834).
+- Answers that repeat or edit text already in the chat come faster: chat
+  models guess the next words from the chat and check several at once
+  (llama.cpp's n-gram speculation), when the installed llama.cpp has it.
+  On a 7B model on a Mac, editing pasted code was 42% faster and editing a
+  pasted letter 99% faster, other answers 0 to 7% faster, and every answer
+  was the same as before. It needs no extra model or memory. A run's
+  details show how many guessed words were kept, and `TOSKAR_SPECULATIVE=off`
+  turns it off (#835).
+- The user guide's code examples are tested. A code block with a test id
+  runs in CI against a throwaway Core, with the repository's other examples,
+  in sh (with the real curl and toskarctl), Python, TypeScript, or Go. Its
+  output must match what the page shows, with `…` for what changes. A test
+  id on a block CI can't run fails the user guide check (#882).
+- The user guide holds detailed pages. A section can add a summary, a
+  kind (task, concept, or reference), and blocks: subheadings, steps,
+  "What you need" lists, tips and warnings, tables, screenshots, code
+  examples, and related sections. `scripts/check-user-guide.py` holds a
+  detailed section to the bar in `docs/user-guide/STYLE.md`: a screenshot
+  or a tested example, plain sentences, and no device brand names. A pull
+  request that adds a feature changes the guide too, or has the
+  `no-user-docs` label saying why (#882).
+- Install and start your first chat says what each amount of memory runs,
+  adds the apt repository, and shows the download finishing and a first
+  answer. Run without a desktop is a full page: the service, opening
+  Toskar from your own computer through SSH, being the Owner, updating,
+  and troubleshooting. The install script and apt lines on the page are
+  the ones CI runs on a fresh Ubuntu computer: an example can name the
+  test that runs it with `runs_in` (#885).
+- Chat covers what each model can read when you attach a picture, answers
+  from the web and what they need, and which version of an answer a chat
+  continues from, with a generated screenshot of an attached spreadsheet
+  read, cited, and answered with a made spreadsheet (#886).
+- Choose and manage models explains what each kind of model is for,
+  community ratings and exactly what sharing one sends, new models in the
+  News, that a model needing more than the graphics card is tight, and
+  `toskarctl models`. New generated screenshots show Browse all models with
+  a download under way and Add a model › From another app (#887).
+- Use Toskar on your phone, tablet, TV, or watch covers chatting with a
+  model on the device itself, when it's offered, and what leaves the
+  device, and turning on notifications from your computer (#888).
+- The user guide's screenshots are captured from the web UI with demo data
+  instead of by hand. A page names a screen from
+  `docs/user-guide/screens.json`, and `scripts/capture-docs-screenshots.sh`
+  saves it. CI captures them on every pull request that touches the
+  interface, says which ones changed, and commits them on `main`, so the
+  guide at a release shows that release's interface (#882).
+
+### Fixed
+
+- `/v1/chat/completions` answered every failure while answering as `500
+  CHAT_FAILED` with the runtime's text. It now gives the stable code, as chat
+  streams do, and a conversation too long for the model is a `400
+  CONTEXT_TOO_LONG` the caller can fix (#840).
+- A clip's length now comes from what you asked for. "Just one second
+  long" made two seconds when the model left the length out or passed the
+  default. Toskar reads the length from your message, such as "one
+  second", "3s", "half a minute", "zwei Sekunden", or "3秒", and a clip
+  asked for longer than clips can be is made as long as they can be, with
+  a note saying so (#789).
+- Connect a device warned that over plain HTTP others on the network could
+  see the code, even when the connection was encrypted and the dialog said
+  so on the line above. The warning now shows only for a connection without
+  the computer's certificate (#213).
+- A request to a model that wasn't running was checked against 8,192
+  tokens, though the model would start with a bigger window (#962).
+- A model bigger than the graphics card runs, partly on the processor,
+  instead of stopping while it loads. Toskar no longer asks llama-server to
+  put every layer on the card; llama-server fits as many as the card's free
+  memory holds, a draft's too, and keeps the rest in system memory, a
+  mixture-of-experts model's experts first. An older llama-server without
+  this still gets every layer on the card (#955).
+- With a draft model, Performance showed the draft's layers on the
+  graphics card instead of the chat model's (#955).
+- A model's fit on the Models page now says how well it runs. A model that
+  needs more than the graphics card's own memory runs partly on the
+  processor, so it's tight at best and says so, where a 32B model was an
+  excellent fit for an 8 GB card. On a computer without unified memory,
+  some memory is kept for the operating system, so a 9B model is no longer
+  a good fit with 8 GB. Best overall, Best quality, and the other badges go
+  to models that fit well, and Best overall is the model setup recommends
+  (#932).
+- Models like Qwen 3.5 and 3.8, which keep a full cache in only one layer
+  in four, no longer have their memory overestimated. The catalog's
+  `full_attention_interval`, or the model file's own layer list, counts
+  the cache only for those layers, so the fit, the context gauge's memory,
+  and the Auto window are right for them: a Qwen 3.8 27B gets a 32K window
+  on a 24 GB card instead of 8K (#962).
+- A question about your own life, such as "Where does my sister live?",
+  could be searched on the web when the model first said it didn't know,
+  and answered from pages that had nothing to do with you. Toskar now asks
+  the model once more to answer from the chat and its summary, and to say
+  it doesn't know if it isn't there. Such a question is never looked up
+  (#834).
+- When a long chat was summarized a second time, the new summary could
+  cover only what was said since the first one, and lose everything before
+  it. The summary now keeps the earlier summary's facts (#834).
+- The weekly prompt cache check no longer fails when a CPU reads the warm
+  and cold prompts in different batches. Warm and cold must write the same
+  tokens, each with the same probability within 0.2, until they part at a
+  near-tie that batching can tip; gaps on tokens neither writes are
+  reported, not failed on. Batching alone moves probabilities by up to 0.15
+  on a CPU and, at a near-tie, the word written (#838).
+- A real model's turn that failed, such as one where it wrote no answer,
+  failed the whole quality run even when enough cases passed. The 1.11.2
+  release stopped this way at 64 of 70 (91%), over its 90% bar. It now
+  counts as one failed case (#834).
+- A long chat could fail with "Context size has been exceeded" when two
+  requests to its model ran at once, such as a turn and the chat's summary,
+  or Deliberate's drafts. llama-server ran four requests sharing one
+  window's room while telling each it had all of it. A model now takes one
+  request at a time with the whole window, and the others wait their turn.
+  The weekly runs caught it on Qwen 2.5 7B and 32B (#834).
+- A long chat's summary could be an answer to its last question instead of
+  a summary, so it lost what was said earlier, such as where the person's
+  sister lives. The summary request now asks for the summary after the
+  conversation, and to keep what the person said about themselves and the
+  people and places in their life (#834).
+- On Windows with an NVIDIA card, where llama.cpp names the card with its
+  PCI address, Performance and the model's GPU status showed the name with
+  part of the address, such as "RTX 3080 Ti Laptop GPU) (0000:01:00.0" (#955).
+
+### Security
+
+- Text on a web page, in a file, in a Knowledge passage, or in a tool's
+  result that gives orders to the AI is left out before the model reads
+  it: forged chat turns written in a model's markers (`<|im_start|>`,
+  `[INST]`, and the like), and sentences such as "ignore previous
+  instructions" or "note for AI assistants". A note stands where the text
+  was. Labelling that text as data wasn't enough: a 7B model followed a
+  page's instruction to end its answer with a word every time, and now
+  never does. The sentence filter is English only, so a tool that changes
+  something still asks first after an answer reads untrusted text (#938).
+
 ## [1.11.2] - 2026-10-27
 
 ### Added

@@ -1,36 +1,36 @@
 {
   "schemaVersion": 1,
-  "version": "1.11",
+  "version": "1.12",
   "items": [
     {
-      "realm": "Huginn",
-      "title": "AI news, a few lines each",
-      "text": "New open models, runtime releases, and AI labs' announcements, from the news toskar.ai writes every morning. A model in Toskar's catalog shows how well it fits this computer, and Admins can install it from there. Turn it off in Settings."
-    },
-    {
-      "realm": "Valgrind",
-      "title": "Toskar in your CI",
-      "text": "Ask your own AI from a CI job: summarize a bug, suggest labels, read a failing log. A key for a CI job can only ask, with no memories, knowledge, or tools. Use toskarctl ask, install.sh ci, or the Ask Toskar action for GitHub."
-    },
-    {
-      "realm": "Bifrost",
-      "title": "Official SDKs for Python, JavaScript, and Go",
-      "text": "Build on Toskar with the official SDKs, from PyPI, npm, and Go modules: stream answers, watch events, and connect as a device at home or from anywhere. Every example is tested against Core on each change."
+      "realm": "Ymir",
+      "title": "Models bigger than your graphics card run",
+      "text": "A model that needs more than the card's memory now runs with as much of it on the card as fits and the rest in the computer's memory, where it used to stop while loading. A mixture-of-experts model keeps its experts in memory first. Its GPU status says how much is on the card."
     },
     {
       "realm": "Ratatoskr",
-      "title": "A truer OpenAI-compatible API",
-      "text": "Pictures reach the model, a JSON Schema is used whole, and answers carry their own id, token usage, and why they stopped, so OpenAI libraries and tools work with Toskar as they do elsewhere."
+      "title": "A bigger context window where it fits",
+      "text": "Each model reads as much at once as fits your computer well: 8K, 16K, or 32K tokens, so a small model on a computer with plenty of memory reads about four times as much. Choose a size per model, up to what it was made for, and an API request that needs more gets it when it fits."
+    },
+    {
+      "realm": "Sleipnir",
+      "title": "Answers that guess ahead",
+      "text": "Toskar guesses the next words from the chat and checks several at once, so answers that repeat or edit your text come faster. The largest models bring a small draft model that writes ahead, for answers up to about twice as fast, just as good."
+    },
+    {
+      "realm": "Sleipnir",
+      "title": "Follow-ups start sooner",
+      "text": "A chat's next turn reuses the work the model already did on the conversation, so it starts answering sooner, and a new chat reuses what every chat shares. Diagnostics shows how much each turn reused."
     },
     {
       "realm": "Heimdall",
-      "title": "Text can't pose as the model's own turn",
-      "text": "A web page, a file, or a visitor's message that spells a model's control tokens can no longer start a turn of its own. Everything a model reads is escaped on its way in."
+      "title": "Orders hidden in pages are left out",
+      "text": "Text on a web page, in a file, in your knowledge, or in a tool's result that tells the AI what to do is removed before the model reads it, including forged chat turns written in a model's own markers."
     },
     {
-      "realm": "Ymir",
-      "title": "Models you copied in show up",
-      "text": "A model file put in Toskar's models folder by hand now appears on the Models page, and Add model › From another app adds it where it is, without a copy."
+      "realm": "Bifrost",
+      "title": "The fastest computer answers",
+      "text": "With computers connected, a chat goes to the one expected to answer soonest. Toskar learns how fast each reads and writes with each model, and counts the work already running on it."
     }
   ]
 }
