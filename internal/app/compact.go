@@ -58,12 +58,24 @@ func (a *App) windowFor(ctx context.Context, modelID string) int {
 }
 
 // knownWindow is a model's context window when it's known: its real one
-// while it runs here, or the catalog's. A model the catalog doesn't know,
-// such as one on the external server, is 0, so nothing is refused on a
-// guess (#840).
+// while it runs here, the one it starts with here when it's installed here
+// (Auto, a choice, or a raise, #962), or the catalog's. A model the catalog
+// doesn't know, such as one on the external server, is 0, so nothing is
+// refused on a guess (#840).
 func (a *App) knownWindow(ctx context.Context, modelID string) int {
 	if window, _, ok := a.localContext(ctx, modelID); ok {
+		if start := a.startWindow(ctx, modelID); start > window {
+			// A raise asked for more; the model starts again with it.
+			return start
+		}
 		return window
+	}
+	if a.Models != nil {
+		if _, err := a.Models.Path(ctx, modelID); err == nil {
+			if n := a.startWindow(ctx, modelID); n > 0 {
+				return n
+			}
+		}
 	}
 	if a.Models != nil {
 		if entry, ok := a.Models.Catalog().Get(modelID); ok && entry.Context > 0 {

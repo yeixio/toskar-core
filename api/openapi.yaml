@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Toskar Control Plane API
-  version: "1.69"
+  version: "1.70"
   description: >-
     Local AI control plane API for Toskar, its OpenAI-compatible routes, and its MCP server.
     On the default loopback bind no key is needed. When the daemon listens on any other address,
@@ -7010,6 +7010,9 @@ components:
         fallback:
           type: boolean
           description: When the model the request names can't answer, let another model answer instead. Off unless set, a named model answers or the request fails; auto and profiles always fall back (#871, contract 1.59)
+        context_window:
+          type: integer
+          description: The least context window, in tokens, the request wants the named model to run with on this computer. When it runs with less, it starts again with the smallest size that holds it and still fits, else the request answers 400 CONTEXT_TOO_LONG with param toskar.context_window (#962, contract 1.70).
     RuntimeSample:
       type: object
       properties:
