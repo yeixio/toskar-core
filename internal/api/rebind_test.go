@@ -3,6 +3,7 @@ package api
 import (
 	"io"
 	"log/slog"
+	"net"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -37,7 +38,9 @@ func TestRebindMovesTheAPI(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := srv.Rebind("127.0.0.1:0"); err != nil {
+	// A named free port, not :0: Rebind closes the old listener first, and
+	// the kernel may hand that same port back for :0.
+	if err := srv.Rebind(otherFreeAddr(t, first)); err != nil {
 		t.Fatal(err)
 	}
 	second := srv.Addr()
@@ -94,4 +97,22 @@ func TestLoopbackAPIRefusesOtherDevices(t *testing.T) {
 	if rec.Code != http.StatusOK {
 		t.Fatalf("this computer: %d", rec.Code)
 	}
+}
+
+// otherFreeAddr is a loopback address with a free port other than not's.
+func otherFreeAddr(t *testing.T, not string) string {
+	t.Helper()
+	for range 10 {
+		ln, err := net.Listen("tcp", "127.0.0.1:0")
+		if err != nil {
+			t.Fatal(err)
+		}
+		addr := ln.Addr().String()
+		_ = ln.Close()
+		if addr != not {
+			return addr
+		}
+	}
+	t.Fatal("no free port other than " + not)
+	return ""
 }
