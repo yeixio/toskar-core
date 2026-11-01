@@ -10,7 +10,9 @@ import (
 	"fmt"
 	"io"
 	"iter"
+	"net"
 	"net/http"
+	"net/url"
 	"os"
 	"sort"
 	"strconv"
@@ -56,6 +58,9 @@ type chatAPI interface {
 	stream(ctx context.Context, req api.ChatJSONRequestBody) iter.Seq2[toskar.ChatStreamEvent, error]
 	events(ctx context.Context) iter.Seq2[api.Event, error]
 	decide(requestID string, allow bool) error
+	// computer is the Toskar computer's name when it isn't this one, where
+	// a tool such as the terminal runs.
+	computer() string
 }
 
 // chatIO is where chat reads and writes. Piped input is data for one
@@ -82,6 +87,21 @@ func newDaemonChat() (chatAPI, error) {
 		return nil, err
 	}
 	return daemonChat{rest: d, sdk: sdk}, nil
+}
+
+func (d daemonChat) computer() string {
+	u, err := url.Parse(d.rest.base)
+	if err != nil {
+		return ""
+	}
+	host := u.Hostname()
+	if host == "localhost" {
+		return ""
+	}
+	if ip := net.ParseIP(host); ip != nil && ip.IsLoopback() {
+		return ""
+	}
+	return host
 }
 
 func (d daemonChat) createConversation(profile, model string) (contracts.Conversation, error) {
@@ -448,6 +468,9 @@ func (s *chatSession) turn(ctx context.Context, text string) error {
 // ask shows a tool waiting for permission, and sends the answer.
 func (s *chatSession) ask(a toolAsk) {
 	fmt.Fprintf(s.io.out, "%s wants to run %s", "Toskar", a.tool)
+	if where := s.api.computer(); where != "" {
+		fmt.Fprintf(s.io.out, " on %s", where)
+	}
 	// A chat's own tool calls all give the same reason, which says nothing.
 	if a.reason != "" && a.reason != "chat requested tool" {
 		fmt.Fprintf(s.io.out, ", %s", a.reason)

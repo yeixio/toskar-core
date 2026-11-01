@@ -28,6 +28,7 @@ type fakeChat struct {
 	decided   chan struct{}
 	convs     []contracts.Conversation
 	msgs      map[string][]contracts.Message
+	where     string
 }
 
 func newFakeChat() *fakeChat {
@@ -41,6 +42,8 @@ func (f *fakeChat) createConversation(profile, model string) (contracts.Conversa
 	f.created = append(f.created, profile+"|"+model)
 	return contracts.Conversation{ID: id}, nil
 }
+
+func (f *fakeChat) computer() string { return f.where }
 
 func (f *fakeChat) conversations() ([]contracts.Conversation, error) { return f.convs, nil }
 
@@ -110,15 +113,16 @@ func runChat(t *testing.T, f *fakeChat, args []string, input string, terminal bo
 	return out.String(), errOut.String(), err
 }
 
-// A chat in the terminal: answers stream, a tool that asks first waits for
-// y, and /model changes the model for the next message (#959).
+// A chat in the terminal: answers stream, a tool that asks first says
+// which computer it runs on and waits for y, and /model changes the model for the next message (#959).
 func TestChatSession(t *testing.T) {
 	f := newFakeChat()
+	f.where = "rig.local"
 	out, errOut, err := runChat(t, f, []string{"--model", "qwen2.5-7b-q4", "hello"}, "please run ls\ny\n/model auto\nthanks\n/exit\n", true)
 	if err != nil {
 		t.Fatalf("%v\n%s", err, errOut)
 	}
-	for _, want := range []string{"Answer 1", "Let me look.", "wants to run shell.run, to list the files", `"command": "ls"`, "Allow? [y]es, [n]o:", "Answer 2", "Answer 3"} {
+	for _, want := range []string{"Answer 1", "Let me look.", "wants to run shell.run on rig.local, to list the files", `"command": "ls"`, "Allow? [y]es, [n]o:", "Answer 2", "Answer 3"} {
 		if !strings.Contains(out, want) {
 			t.Errorf("no %q in:\n%s", want, out)
 		}
@@ -183,5 +187,14 @@ func TestChatResume(t *testing.T) {
 	}
 	if got, id := resumeArg([]string{"--resume", "tell me a joke"}); id != "" || len(got) != 2 {
 		t.Errorf("a message after --resume isn't an id: %v %q", got, id)
+	}
+}
+
+// The prompt names the Toskar computer only when it's another one (#959).
+func TestChatComputer(t *testing.T) {
+	for base, want := range map[string]string{"http://127.0.0.1:7331": "", "http://localhost:7331": "", "http://[::1]:7331": "", "https://rig.local:7331": "rig.local", "https://10.0.0.5:7331": "10.0.0.5"} {
+		if got := (daemonChat{rest: daemonClient{base: base}}).computer(); got != want {
+			t.Errorf("%s: %q, want %q", base, got, want)
+		}
 	}
 }

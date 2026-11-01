@@ -106,7 +106,7 @@ toskarctl chat --resume 3f2a9c1e
 
 While chatting, `/new` starts a new chat, `/model id` and `/profile id` change who answers the next message, `/attach path` sends a file as data with the next message, `/help` lists these, and `/exit` or Ctrl-D leaves.
 
-**Tools that ask first.** When the model wants a tool that asks before it runs, such as running code in the general assistant, `chat` shows the tool, why, and what it would run, and waits for `y` to run it or `n` not to. Your answer goes to Toskar the same way an app's does.
+**Tools that ask first.** When the model wants a tool that asks before it runs, such as running code in the general assistant, `chat` shows the tool, why, what it would run, and, when Toskar is on another computer, which one it runs on, and waits for `y` to run it or `n` not to. Your answer goes to Toskar the same way an app's does.
 
 **Piped in,** `chat` answers once, with what's piped as data to work on, and prints the command that continues the chat on standard error:
 
