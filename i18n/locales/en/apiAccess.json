@@ -129,6 +129,8 @@
       "chat": "Chat only, for CI jobs"
     },
     "placement": "May choose where requests run",
+    "raw": "Drive models directly, for coding agents",
+    "rawHint": "Requests can name raw:<model> and use the model with their own tools, without the assistant's memory, knowledge, tools, or checks. For coding agents and editors you trust. Not with a pinned profile.",
     "note": "Requests can ask for less, never more. Over the network these limits always apply; on this computer they apply when the app sends this key.",
     "saveFailed": "Could not save.",
     "profile": "Answers with",

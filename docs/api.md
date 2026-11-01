@@ -922,12 +922,23 @@ Errors have OpenAI's shape, with Toskar's stable code as `code`:
 
 ### Known differences
 
+These are for the assistant. A raw request (below) has none of them.
+
 - `tool` messages and assistant `tool_calls` in the history are skipped.
 - Tool definitions in the OpenAI request are not passed through. Tool use is controlled by the Toskar profile.
 - `finish_reason` is `stop` or `length`: `content_filter` and `tool_calls` aren't sent.
 - A model must already be installed and startable. The HTTP call does not download one for you.
 
 Examples that match this behavior are in [examples/](../examples/).
+
+### Raw models, for coding agents (#843)
+
+Coding agents and editors run their own tools: they send `tools`, expect `tool_calls` back, and send the results as `tool` messages. `"model": "raw:<model id>"` gives them the model itself, without Toskar's assistant:
+
+- **As sent:** the request goes to the model's llama-server unchanged (`messages` with `tool` turns and assistant `tool_calls`, `tools`, `tool_choice`, `stop`, `logprobs`, `response_format`, sampling, and the rest), less the `toskar` object. The answer comes back as llama-server gives it, streamed or not, with `tool_calls` and `finish_reason: tool_calls`, and `model` set to `raw:<model id>`. There is no memory, knowledge, look-up, plan, answer check, or run log.
+- **Where:** a chat model installed on this computer, started if it isn't running. A paired computer's models aren't reachable this way. The window is sized as for other requests that name a model (#962): one that needs more than the model runs with raises it where a size fits, and `toskar.context_window` asks up front. Otherwise it answers `400 CONTEXT_TOO_LONG`. A model that isn't here answers `404 MODEL_NOT_FOUND`.
+- **Who:** a key with the `raw` permission (contract 1.71), which only Admins can give, in API Access, under the key's permissions. A key pinned to a profile can't have it. A request on this computer without a key has it, as the Owner's. Any other request answers `403 RAW_NOT_ALLOWED`.
+- **Listed:** `GET /v1/models` lists `raw:<model id>` for each chat model installed here, for a key that may use them.
 
 ## GPU acceleration
 

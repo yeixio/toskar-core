@@ -132,6 +132,8 @@
       "chat": "Solo chat, per i job di CI"
     },
     "placement": "Può scegliere dove eseguire le richieste",
+    "raw": "Usare i modelli direttamente, per gli agenti di codice",
+    "rawHint": "Le richieste possono indicare raw:<modello> e usare il modello con i propri strumenti, senza memoria, conoscenze, strumenti o controlli dell'assistente. Per agenti di codice ed editor di cui ti fidi. Non con un profilo fisso.",
     "note": "Le richieste possono chiedere di meno, mai di più. In rete questi limiti valgono sempre; su questo computer valgono quando l'app invia questa chiave.",
     "saveFailed": "Impossibile salvare.",
     "profile": "Risponde con",

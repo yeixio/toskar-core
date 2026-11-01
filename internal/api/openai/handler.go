@@ -52,6 +52,14 @@ type Handler struct {
 	// Grow raises a model installed here to a window of at least need
 	// tokens when one fits, and returns it, or 0 (#962).
 	Grow func(ctx context.Context, modelID string, need int) int
+	// Raw readies a model on this computer for a raw:<model> request, with
+	// a window of at least need tokens, and returns its llama-server and a
+	// func to call when the request is done (#843). It returns
+	// ErrRawNotHere or ErrRawTooLong for those.
+	Raw func(ctx context.Context, modelID string, need int) (endpoint string, done func(), err error)
+	// RawModels are the chat models installed on this computer, which a key
+	// with raw access sees in /v1/models as raw:<id> (#843).
+	RawModels func(ctx context.Context) []string
 	// ErrorCode is the stable code for a chat error's text, as chat streams
 	// give it (#588), such as CONTEXT_TOO_LONG, or "".
 	ErrorCode func(text string) string
@@ -165,6 +173,11 @@ func (h *Handler) HandleModels(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	}
+	if perms.Raw && h.RawModels != nil {
+		for _, id := range h.RawModels(r.Context()) {
+			data = append(data, map[string]any{"id": RawPrefix + id, "object": "model", "owned_by": "yggdrasil"})
+		}
+	}
 	writeJSON(w, map[string]any{"object": "list", "data": data})
 }
 
@@ -215,14 +228,24 @@ func (h *Handler) HandleChatCompletions(w http.ResponseWriter, r *http.Request) 
 			return
 		}
 	}
+	// The body is kept as it came, for a raw request to pass on (#843).
+	body, err := io.ReadAll(http.MaxBytesReader(w, r.Body, maxRequestBytes))
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "INVALID_JSON", "invalid request body")
+		return
+	}
 	var req chatCompletionRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	if err := json.Unmarshal(body, &req); err != nil {
 		writeError(w, http.StatusBadRequest, "INVALID_JSON", "invalid request body")
 		return
 	}
 	sampling, err := req.sampling()
 	if err != nil {
 		writeError(w, http.StatusBadRequest, "INVALID_REQUEST", err.Error())
+		return
+	}
+	if strings.HasPrefix(req.Model, RawPrefix) {
+		h.handleRaw(w, r, perms, req, body, sampling.MaxTokens)
 		return
 	}
 	profileID := ""
