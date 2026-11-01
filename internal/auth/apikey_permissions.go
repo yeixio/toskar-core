@@ -66,9 +66,12 @@ func CIAPIKeyPermissions() APIKeyPermissions {
 // which saves no conversation, and what a client checks first.
 var chatRoutes = map[string]bool{
 	"POST /v1/chat/completions": true,
-	"GET /v1/models":            true,
-	"GET /api/v1/health":        true,
-	"GET /api/v1/version":       true,
+	// Anthropic's format, which only a key with raw access can use (#843).
+	"POST /v1/messages":              true,
+	"POST /v1/messages/count_tokens": true,
+	"GET /v1/models":                 true,
+	"GET /api/v1/health":             true,
+	"GET /api/v1/version":            true,
 }
 
 // ChatKeyMayReach reports whether a chat-only key may make a request, by

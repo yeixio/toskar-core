@@ -1,0 +1,78 @@
+{
+  "max_tokens": 512,
+  "messages": [
+    {
+      "content": "You are a coding agent.\nUse the tools.",
+      "role": "system"
+    },
+    {
+      "content": [
+        {
+          "text": "What's in main.go?",
+          "type": "text"
+        }
+      ],
+      "role": "user"
+    },
+    {
+      "content": "Let me look.",
+      "role": "assistant",
+      "tool_calls": [
+        {
+          "function": {
+            "arguments": "{\"path\": \"main.go\"}",
+            "name": "read_file"
+          },
+          "id": "toolu_01",
+          "type": "function"
+        }
+      ]
+    },
+    {
+      "content": "package main",
+      "role": "tool",
+      "tool_call_id": "toolu_01"
+    },
+    {
+      "content": [
+        {
+          "text": "And this screenshot?",
+          "type": "text"
+        },
+        {
+          "image_url": {
+            "url": "data:image/png;base64,iVBORw0KGgo="
+          },
+          "type": "image_url"
+        }
+      ],
+      "role": "user"
+    }
+  ],
+  "stop": [
+    "\u003c/done\u003e"
+  ],
+  "stream": false,
+  "temperature": 0.2,
+  "tool_choice": "required",
+  "tools": [
+    {
+      "function": {
+        "description": "Read a file",
+        "name": "read_file",
+        "parameters": {
+          "properties": {
+            "path": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "path"
+          ],
+          "type": "object"
+        }
+      },
+      "type": "function"
+    }
+  ]
+}
