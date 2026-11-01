@@ -64,3 +64,28 @@ func TestFitUsesTheAutoWindow(t *testing.T) {
 		t.Errorf("auto %d tokens, %d bytes (8K %d), %s", auto.ContextTokens, auto.RuntimeMemoryLowBytes, at8k.RuntimeMemoryLowBytes, auto.Label)
 	}
 }
+
+// A hybrid model keeps a cache in only its full attention layers (#962),
+// so a long window costs it a quarter as much: a 27B like Qwen 3.8 gets
+// 32K on a 24 GB card, where one with a cache in every layer stays at 8K.
+func TestHybridAttentionFitsLongerWindows(t *testing.T) {
+	hybrid := CatalogEntry{ID: "q27", Parameters: "27B", Variant: "Q4_K_M", SizeBytes: 18973870528, Context: 262144, FullAttentionInterval: 4, Runtime: []string{"llamacpp"}}
+	dense := hybrid
+	dense.FullAttentionInterval = 0
+	rig := contracts.HardwareInventory{
+		Memory:       contracts.MemoryInfo{TotalBytes: gib(64)},
+		Accelerators: []contracts.Accelerator{{Kind: "gpu", DedicatedVRAM: gib(24), Backends: []string{"vulkan"}}},
+	}
+	if got := AutoContext(hybrid, rig); got != 32768 {
+		t.Errorf("hybrid 27B: %d, want 32768", got)
+	}
+	if got := AutoContext(dense, rig); got != 8192 {
+		t.Errorf("dense 27B: %d, want 8192", got)
+	}
+	h := ClassifyFit(hybrid, rig, "", "", FitOptions{ContextTokens: 32768})
+	d := ClassifyFit(dense, rig, "", "", FitOptions{ContextTokens: 32768})
+	cache := func(f contracts.ModelFit) uint64 { return f.RuntimeMemoryLowBytes - hybrid.SizeBytes }
+	if got, want := cache(h), cache(d); got*3 > want {
+		t.Errorf("hybrid cache and scratch %d, dense %d", got, want)
+	}
+}
