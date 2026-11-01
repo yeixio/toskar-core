@@ -18,6 +18,17 @@ func TestBearerToken(t *testing.T) {
 		t.Fatalf("bearer: %q %v", got, err)
 	}
 
+	// Anthropic's clients send x-api-key; Authorization wins when both come.
+	req = httptest.NewRequest(httpMethod, "/v1/messages", nil)
+	req.Header.Set("X-Api-Key", "ygg_anthropic")
+	if got, err := BearerToken(req); err != nil || got != "ygg_anthropic" {
+		t.Fatalf("x-api-key: %q %v", got, err)
+	}
+	req.Header.Set("Authorization", "Bearer ygg_test")
+	if got, _ := BearerToken(req); got != "ygg_test" {
+		t.Fatalf("both: %q", got)
+	}
+
 	req = httptest.NewRequest(httpMethod, "/api/v1/health?api_key=ygg_test", nil)
 	req.Header.Set("Authorization", "Bearer ygg_test")
 	_, err = BearerToken(req)

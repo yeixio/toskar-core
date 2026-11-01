@@ -136,9 +136,12 @@ describe('AutomationsPage', () => {
         </MemoryRouter>
       </QueryClientProvider>,
     )
-    fireEvent.click(await screen.findByRole('button', { name: /Price below \$500/ }))
-    fireEvent.click(await screen.findByRole('button', { name: 'Continue in chat' }))
-    expect(await screen.findByText('chat conv-9')).toBeInTheDocument()
+    // The first page a test file renders is cold: on a busy runner it has
+    // taken over a second, past findBy's default wait.
+    const cold = { timeout: 5000 }
+    fireEvent.click(await screen.findByRole('button', { name: /Price below \$500/ }, cold))
+    fireEvent.click(await screen.findByRole('button', { name: 'Continue in chat' }, cold))
+    expect(await screen.findByText('chat conv-9', {}, cold)).toBeInTheDocument()
     expect(api.continueAutomationRun).toHaveBeenCalledWith('auto-1', 'run-1')
   })
 

@@ -89,3 +89,17 @@ func TestHybridAttentionFitsLongerWindows(t *testing.T) {
 		t.Errorf("hybrid cache and scratch %d, dense %d", got, want)
 	}
 }
+
+// Past 32K the cache is q8_0, 17/32 of an f16 one's size (#962), so a 64K
+// window costs about as much as 34K would in f16.
+func TestLongWindowsCountAQuantizedCache(t *testing.T) {
+	e := CatalogEntry{ID: "m", Parameters: "8B", Variant: "Q4_K_M", SizeBytes: 5 << 30, Context: 131072, Runtime: []string{"llamacpp"}}
+	hw := apple(gib(64), gib(48))
+	cache := func(n int) float64 {
+		f := ClassifyFit(e, hw, "", "", FitOptions{ContextTokens: n})
+		return float64(f.RuntimeMemoryLowBytes - e.SizeBytes - runtimeScratchBytes)
+	}
+	if got, want := cache(65536)/cache(32768), 2*17.0/32; got < want-0.01 || got > want+0.01 {
+		t.Errorf("64K over 32K: %.3f, want %.3f", got, want)
+	}
+}

@@ -15,7 +15,8 @@ var ErrAPIKeyRequired = contracts.NewError("API_KEY_REQUIRED", nil, errors.New("
 // ErrAPIKeyInURL means the caller put a credential in the request URL.
 var ErrAPIKeyInURL = contracts.NewError("API_KEY_IN_URL", nil, errors.New("send the API key as Authorization: Bearer, not in the URL"))
 
-// BearerToken reads an API key from the Authorization header.
+// BearerToken reads an API key from the Authorization header, or, without
+// one, from x-api-key, as Anthropic's clients send it (#843).
 // Keys in the query string are rejected and are not accepted as credentials.
 func BearerToken(r *http.Request) (string, error) {
 	q := r.URL.Query()
@@ -26,6 +27,12 @@ func BearerToken(r *http.Request) (string, error) {
 	}
 	header := strings.TrimSpace(r.Header.Get("Authorization"))
 	const prefix = "Bearer "
+	if header == "" {
+		// Anthropic's clients send the key as x-api-key (#843).
+		if key := strings.TrimSpace(r.Header.Get("X-Api-Key")); key != "" {
+			return key, nil
+		}
+	}
 	if !strings.HasPrefix(header, prefix) {
 		return "", fmt.Errorf("authorization required")
 	}

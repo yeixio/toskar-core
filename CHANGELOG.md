@@ -8,7 +8,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Thi
 
 Changes waiting for the next release are in [changes/unreleased/](changes/unreleased/), one file per pull request. `scripts/changelog.py preview` shows them together, and `scripts/changelog.py release <version>` writes them here when the release is cut.
 
-## [1.12.0] - 2026-10-31
+## [1.12.0] - 2026-11-01
 
 ### Added
 
@@ -18,6 +18,10 @@ Changes waiting for the next release are in [changes/unreleased/](changes/unrele
   options have Thinking, On or Off, and the choice is remembered. `POST
   /chat` takes `"thinking": "off"`, as `/v1/chat/completions` takes
   `reasoning_effort: "none"` (contract 1.61, #840).
+- `toskarctl connect` also covers editors: `continue`, `cline`, `roo-code`,
+  `zed`, `jetbrains`, and `copilot` print what to enter in that editor's
+  settings for its agent or AI features to use a model on Toskar, with
+  Zed and Cline told the model's context window (#960).
 - A request that needs a bigger context window gets one. On
   `/v1/chat/completions`, a request that names a model and needs more than
   the model runs with makes it start again with the smallest size that
@@ -32,6 +36,8 @@ Changes waiting for the next release are in [changes/unreleased/](changes/unrele
   memory. A running model reloads with it on its next message.
   `PUT /models/{id}/context` sets it, and models list `context_window`,
   `context_choice`, and `context_options` (contract 1.69, #962).
+- Run traces mark chats from @toskar in VS Code with the new `editor`
+  client (contract 1.75) (#960).
 - `TOSKAR_KV_CACHE=q8_0` starts chat models with an 8-bit key/value cache,
   about half the memory for the same context window, so the quality set
   can measure it before it's a default (#962).
@@ -43,15 +49,59 @@ Changes waiting for the next release are in [changes/unreleased/](changes/unrele
 - On the Mac, the canary also checks a model of each family that thinks
   before it answers (Qwen 3, DeepSeek R1's distills, gpt-oss): the thinking
   comes apart from the answer, and turns off when asked (#840).
+- Coding agents that speak Anthropic's Messages format can use a model on
+  this computer. `POST /v1/messages` converts their system prompt, tool
+  calls, tool results, pictures, and tools to the model's format and the
+  answer back, streamed as Anthropic's events or not, and
+  `POST /v1/messages/count_tokens` estimates a request. It's raw, with the
+  same permission as `raw:<model>`, and takes the key as `x-api-key` too
+  (contract 1.72, #843).
+- Models: Qwen 3.5 4B, Qwen 3.5 9B, and Qwen 3.8 27B, which also see pictures. They answer first and think only when asked. Qwen 3.5 4B replaces Qwen 2.5 3B in the General Assistant's choices: on the rig it got 39 of 39 reasoning questions right, against 28 (#593).
+- An editor can connect like a device, with the code from Connect a
+  device, and ask for raw access for its coding agents (`"raw": true` on
+  `POST /devices/pair`, contract 1.76). It gets it when an Admin or the
+  Owner showed the code (#960).
 - Diagnostics shows how much of a chat's later turns each model skipped
   reading again, from its prompt cache, over the last week. A model that
   reads most of a long chat again every turn is marked low, since its
   answers start later as a chat grows. `GET /diagnostics/prompt-cache`
   gives the same per model (contract 1.62). The user guide's new page, Why
   do answers in a long chat start slowly?, explains it (#838).
+- Coding agents and editors can drive a model directly. On
+  `/v1/chat/completions`, `"model": "raw:<model id>"` sends the request to
+  a model on this computer as it came, with the agent's own `tools`,
+  `tool_choice`, `stop`, and `logprobs`, and returns the model's
+  `tool_calls`, streamed or not, without Toskar's assistant. Its window is
+  sized as other requests' are. A request from this computer may do this
+  without a key; for a key, an Admin turns on Drive models directly, for
+  coding agents, in its permissions (contract 1.71, #843).
+- Coding agents that speak OpenAI's Responses format can use a model on
+  this computer. `POST /v1/responses` converts their instructions, input
+  items, function calls and their outputs, pictures, and function tools to
+  the model's format, and the answer back as output items, streamed as the
+  `response.*` events or not. It's raw, with the same permission as
+  `raw:<model>`. Toskar keeps no responses, so an agent sends the whole
+  conversation each time (contract 1.73, #843).
 - Draft models: a catalog model can name a small model of its family as its `draft`, downloaded and deleted with it and counted in its memory fit. Core starts the model with the draft and guessing from the chat together when the model fits the computer well (Good or Excellent), and Guess ahead isn't off for it. Qwen 2.5 32B and 14B come with Qwen 2.5 0.5B, which made them about 1.9× and 1.6× as fast on an RX 7900 XTX, changing answers no more than the GPU does between two plain runs (#835).
 - Guess ahead, Auto or Off for each model: with Advanced mode on, a model's More actions menu on Models turns speculative decoding off for that model, from its next start. `PUT /api/v1/models/{id}/speculation` sets it, and each chat model installed on the computer says `speculation` (#835, contract 1.67).
 - Performance shows how often speculative decoding's guesses pay off: with Advanced mode on, a reply's details say how many words the model guessed ahead and kept, and Activity shows the share kept across the replies shown, per model when filtered by one. `GET /api/v1/performance` has each reply's `draft_tokens` and `draft_accepted` (#835, contract 1.66).
+- A coding agent with many tools, such as one with MCP servers, works with a
+  local model. When a raw request's tools take more than a quarter of the
+  model's window, the model gets the most relevant ones and a
+  `tools_search` tool to find the rest; Toskar answers it, adds what it
+  found, and asks again, so the agent sees only calls to its own tools. A
+  long tool list no longer makes a request too long for the model (#843).
+- `toskarctl chat` chats with Toskar in the terminal, in the same chats as
+  the apps: answers stream, `--resume` continues a recent chat, a tool that
+  asks first waits for y or n, and piped input is answered once as
+  data. Run traces mark these chats with the new `terminal` client
+  (contract 1.74) (#959).
+- `toskarctl connect claude-code`, `codex`, `opencode`, or `aider` prints the
+  settings for that coding agent to use a model on Toskar, with its own
+  tools, and `--write` saves them: for Claude Code and OpenCode in the
+  project folder, and for Codex as a `toskar` profile, so the agent's usual
+  settings stay. It picks the best installed model for coding unless
+  `--model` names one (#959).
 - `toskarctl models list` lists the models, smallest first, with their
   download size, fit on the computer, and whether each is installed
   (`--installed`, `--json`). `toskarctl models install <id>` downloads one
@@ -124,6 +174,10 @@ Changes waiting for the next release are in [changes/unreleased/](changes/unrele
   with top-5 log probabilities within 0.05. The report gives the tokens
   read and cached each turn. `TOSKAR_QUALITY_RUN` picks the tests
   `scripts/quality-model.sh run` runs (#838).
+- Context windows past 32K tokens use an 8-bit key/value cache, about half
+  the memory, which answered as well in the quality set. Choosing 64K or
+  128K for a model, or an API request that needs it, now fits more
+  computers, and the memory estimate counts the smaller cache (#962).
 - The quality sets fail only when their pass rate's interval says so: the
   whole 95% interval under the bar, or, given a baseline run with
   `TOSKAR_QUALITY_BASELINE`, a significant drop from it (p < 0.05). A rate
@@ -185,6 +239,12 @@ Changes waiting for the next release are in [changes/unreleased/](changes/unrele
 
 ### Fixed
 
+- "Allow for session" on a tool's approval now lets that tool run for the
+  rest of the chat without asking again. It was ignored for tools set to
+  Ask, and where it did apply it covered every chat and person until
+  Toskar restarted. A tool that asks because the chat read someone else's
+  writing still asks each time. `toskarctl chat` offers it as
+  `[a]lways in this chat` (#959).
 - `/v1/chat/completions` answered every failure while answering as `500
   CHAT_FAILED` with the runtime's text. It now gives the stable code, as chat
   streams do, and a conversation too long for the model is a `400
@@ -201,6 +261,7 @@ Changes waiting for the next release are in [changes/unreleased/](changes/unrele
   the computer's certificate (#213).
 - A request to a model that wasn't running was checked against 8,192
   tokens, though the model would start with a bigger window (#962).
+- When a model ended its turn without writing anything, the chat failed at once with "The model didn't write an answer". Toskar now asks the model once more, quietly, and shows that error only if it writes nothing again. It doesn't ask again after a tool has acted (#1001).
 - A model bigger than the graphics card runs, partly on the processor,
   instead of stopping while it loads. Toskar no longer asks llama-server to
   put every layer on the card; llama-server fits as many as the card's free
@@ -253,9 +314,18 @@ Changes waiting for the next release are in [changes/unreleased/](changes/unrele
   sister lives. The summary request now asks for the summary after the
   conversation, and to keep what the person said about themselves and the
   people and places in their life (#834).
+- Claude Code's requests to `/v1/messages` were refused: a system turn
+  partway through the conversation now becomes instructions, and the tools
+  it adds join the request's. A raw request's window counts at most 8,192
+  tokens of its `max_tokens`, since agents ask for 32,000 as a ceiling, and a
+  model with a 32K window was refused (#959).
 - On Windows with an NVIDIA card, where llama.cpp names the card with its
   PCI address, Performance and the model's GPU status showed the name with
   part of the address, such as "RTX 3080 Ti Laptop GPU) (0000:01:00.0" (#955).
+- On Linux, an AMD or Intel card's name was lspci's whole line, such as
+  "03:00.0 VGA compatible controller: Advanced Micro Devices, Inc. [AMD/ATI]
+  Navi 31 [Radeon RX 7900 XT/7900 XTX] (rev c8)". It's now the name people
+  know, such as "AMD Radeon RX 7900 XT/7900 XTX" (#955).
 
 ### Security
 

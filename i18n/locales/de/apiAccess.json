@@ -129,6 +129,8 @@
       "chat": "Nur Chat, für CI-Jobs"
     },
     "placement": "Darf wählen, wo Anfragen laufen",
+    "raw": "Modelle direkt ansteuern, für Coding-Agenten",
+    "rawHint": "Anfragen können raw:<Modell> nennen und das Modell mit eigenen Werkzeugen nutzen, ohne Gedächtnis, Wissen, Werkzeuge oder Prüfungen des Assistenten. Für Coding-Agenten und Editoren, denen du vertraust. Nicht mit festem Profil.",
     "note": "Anfragen können weniger verlangen, nie mehr. Über das Netzwerk gelten diese Grenzen immer; auf diesem Computer gelten sie, wenn die App diesen Schlüssel sendet.",
     "saveFailed": "Konnte nicht gespeichert werden.",
     "profile": "Antwortet mit",

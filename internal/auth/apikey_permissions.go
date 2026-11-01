@@ -47,6 +47,12 @@ type APIKeyPermissions struct {
 	// Routes is what the key reaches: empty for whatever its person may,
 	// or chat for only asking (#455), as a CI job needs. See ChatKeyMayReach.
 	Routes string `json:"routes,omitempty"`
+	// Raw lets a request name raw:<model> and drive the model itself, with
+	// the request's own tools and none of the assistant's (#843): for coding
+	// agents and editors, which run their tools themselves. Only Admins
+	// manage keys, so only they can allow it; a request on this computer
+	// without a key has it (contract 1.71).
+	Raw bool `json:"raw,omitempty"`
 }
 
 // CIAPIKeyPermissions is the For a CI job preset (#455): it only asks, with
@@ -60,9 +66,13 @@ func CIAPIKeyPermissions() APIKeyPermissions {
 // which saves no conversation, and what a client checks first.
 var chatRoutes = map[string]bool{
 	"POST /v1/chat/completions": true,
-	"GET /v1/models":            true,
-	"GET /api/v1/health":        true,
-	"GET /api/v1/version":       true,
+	// Anthropic's format, which only a key with raw access can use (#843).
+	"POST /v1/messages":              true,
+	"POST /v1/messages/count_tokens": true,
+	"POST /v1/responses":             true,
+	"GET /v1/models":                 true,
+	"GET /api/v1/health":             true,
+	"GET /api/v1/version":            true,
 }
 
 // ChatKeyMayReach reports whether a chat-only key may make a request, by

@@ -180,4 +180,16 @@ func TestKVCacheType(t *testing.T) {
 			t.Errorf("%q: args %q", v, args)
 		}
 	}
+	// Past LongWindow the cache is q8_0 by default; f16 keeps it as it was.
+	for v, want := range map[string]bool{"": true, "fast": true, "f16": false} {
+		t.Setenv("TOSKAR_KV_CACHE", v)
+		args := strings.Join(startArgs(pluginapi.ModelStartConfig{ModelPath: "m.gguf", Context: 65536}, 9000), " ")
+		if got := strings.Contains(args, "--cache-type-k q8_0 --cache-type-v q8_0"); got != want {
+			t.Errorf("%q at 64K: args %q", v, args)
+		}
+	}
+	t.Setenv("TOSKAR_KV_CACHE", "")
+	if args := strings.Join(startArgs(pluginapi.ModelStartConfig{ModelPath: "m.gguf", Context: LongWindow}, 9000), " "); strings.Contains(args, "--cache-type") {
+		t.Errorf("at 32K: args %q", args)
+	}
 }

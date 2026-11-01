@@ -65,11 +65,11 @@ func TestEffectivePolicyAsksAfterUntrustedContent(t *testing.T) {
 		want         string
 	}{
 		{tools.PolicyAllow, "terminal", false, tools.PolicyAllow},
-		{tools.PolicyAllow, "terminal", true, tools.PolicyAsk},
-		{tools.PolicyAllow, "filesystem.write", true, tools.PolicyAsk},
-		{tools.PolicyAllow, "git.push", true, tools.PolicyAsk},
+		{tools.PolicyAllow, "terminal", true, tools.PolicyAskEachTime},
+		{tools.PolicyAllow, "filesystem.write", true, tools.PolicyAskEachTime},
+		{tools.PolicyAllow, "git.push", true, tools.PolicyAskEachTime},
 		{tools.PolicyAllow, "internet.open", true, tools.PolicyAllow},
-		{tools.PolicyAllow, "unknown.tool", true, tools.PolicyAsk},
+		{tools.PolicyAllow, "unknown.tool", true, tools.PolicyAskEachTime},
 		{tools.PolicyDeny, "terminal", true, tools.PolicyDeny},
 	}
 	for _, c := range cases {

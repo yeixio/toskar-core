@@ -1,12 +1,17 @@
 import { act, render, screen } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
+import { stillMascot } from '@/test/stillMascot'
 import { MediaProgress } from './MediaProgress'
 import { mediaKindOf, mediaProgressFrom } from './mediaProgressState'
 
 describe('MediaProgress (#706)', () => {
-  afterEach(() => vi.useRealTimers())
+  afterEach(() => {
+    vi.useRealTimers()
+    vi.unstubAllGlobals()
+  })
 
   it('says the step and time left, shows how far it has got, and only later what Ratatoskr is up to', () => {
+    stillMascot()
     vi.useFakeTimers()
     render(
       <MediaProgress kind="image" progress={{ stage: 'drawing', step: 2, steps: 4, secondsLeft: 3 }} label="Making the picture…" />,

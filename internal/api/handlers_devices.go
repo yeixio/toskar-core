@@ -123,12 +123,14 @@ func (s *Server) handlePairDevice(w http.ResponseWriter, r *http.Request) {
 	var body struct {
 		Code       string `json:"code"`
 		DeviceName string `json:"device_name"`
+		// Raw asks for raw access, as an editor does (#960).
+		Raw bool `json:"raw"`
 	}
 	if err := json.NewDecoder(io.LimitReader(r.Body, 4096)).Decode(&body); err != nil {
 		writeErr(w, http.StatusBadRequest, "INVALID_JSON", "invalid body", nil)
 		return
 	}
-	rec, secret, err := s.deps.Devices.Pair(r.Context(), body.Code, body.DeviceName, remoteIP(r))
+	rec, secret, err := s.deps.Devices.PairWith(r.Context(), body.Code, body.DeviceName, remoteIP(r), body.Raw)
 	if err != nil {
 		status := http.StatusBadRequest
 		switch {

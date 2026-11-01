@@ -535,6 +535,9 @@ func New(opts Options) (*App, error) {
 		// runs, and a chat that overflows answers 400 with its code (#840).
 		Window: a.knownWindow,
 		Grow:   a.growWindow,
+		// raw:<model> drives a model on this computer directly (#843).
+		Raw:       a.rawModel,
+		RawModels: a.rawModels,
 		ErrorCode: func(text string) string {
 			code, _ := chatErrorCode(text)
 			return code
@@ -748,7 +751,7 @@ func New(opts Options) (*App, error) {
 		Invites:              auth.NewInvites(db.SQL),
 		PeopleActivity:       auth.NewActivity(db.SQL),
 		RemovePerson:         a.RemovePerson,
-		Devices:              &auth.DevicePairer{CreateKey: apiKeyMgr.CreateDevice, CreateCompanion: apiKeyMgr.CreateCompanion, Companions: apiKeyMgr.Companions},
+		Devices:              &auth.DevicePairer{CreateKey: apiKeyMgr.CreateDevice, CreateCompanion: apiKeyMgr.CreateCompanion, Companions: apiKeyMgr.Companions, SetPermissions: apiKeyMgr.SetPermissions},
 		PhoneAddress:         a.phoneAddress,
 		EnableLANForPhone:    a.enableLANForPhone,
 		StopChat:             a.StopChat,
@@ -1056,9 +1059,13 @@ func (a *App) openAIPermissions(r *http.Request) (auth.APIKeyPermissions, contex
 		}
 	}
 	ownerCtx := auth.WithPrincipal(r.Context(), owner)
+	// A request on this computer without a key is the Owner's, so it may
+	// drive a model directly too (#843).
+	local := auth.DefaultAPIKeyPermissions()
+	local.Raw = true
 	token, err := auth.BearerToken(r)
 	if err != nil || token == "" {
-		return auth.DefaultAPIKeyPermissions(), ownerCtx, nil
+		return local, ownerCtx, nil
 	}
 	rec, err := a.APIKeys.Verify(r.Context(), token)
 	if err != nil {
@@ -1066,7 +1073,7 @@ func (a *App) openAIPermissions(r *http.Request) (auth.APIKeyPermissions, contex
 			return auth.APIKeyPermissions{}, nil, err
 		}
 		// On this computer a key is optional; a wrong one gets the defaults.
-		return auth.DefaultAPIKeyPermissions(), ownerCtx, nil
+		return local, ownerCtx, nil
 	}
 	principal := auth.Principal{Person: auth.Person{ID: rec.PersonID, Role: auth.RoleOwner}, Via: auth.ViaAPIKey, KeyID: rec.ID, KeyProfile: rec.Permissions.Profile}
 	if a.People != nil {
