@@ -413,6 +413,7 @@ export interface StreamChatOptions {
   body: ChatRequest
   signal?: AbortSignal
   onToken: (content: string) => void
+  onReplace?: (content: string) => void
   onDone?: () => void
   /** The error's text, and its stable code when the service sent one (error_code, contract 1.3). */
   onError?: (message: string, code?: string) => void
@@ -454,6 +455,7 @@ export async function streamChat({
   body,
   signal,
   onToken,
+  onReplace,
   onDone,
   onError,
 }: StreamChatOptions): Promise<void> {
@@ -461,7 +463,7 @@ export async function streamChat({
   // on Windows the response below arrives only once it ends, so its tokens
   // would show all at once. The response still says when the reply is done.
   const relayed = hasEventRelay() && Boolean(body.conversation_id)
-  if (!relayed) return readChatStream({ body, signal, onToken, onDone, onError })
+  if (!relayed) return readChatStream({ body, signal, onToken, onReplace, onDone, onError })
   // The daemon publishes chat.complete after a reply's last token, and the
   // relay keeps their order, so once it arrives every token has.
   let finished = () => {}
@@ -469,14 +471,15 @@ export async function streamChat({
     finished = resolve
   })
   const stopRelay = onRelayedEvent((json) => {
-    let event: { type?: string; payload?: { conversation_id?: string; content?: string } }
+    let event: { type?: string; payload?: { conversation_id?: string; content?: string; replace?: boolean } }
     try {
       event = JSON.parse(json)
     } catch {
       return
     }
     if (event.payload?.conversation_id !== body.conversation_id) return
-    if (event.type === 'chat.token' && event.payload.content) onToken(event.payload.content)
+    if (event.type === 'chat.token' && event.payload.replace) onReplace?.(event.payload.content ?? '')
+    else if (event.type === 'chat.token' && event.payload.content) onToken(event.payload.content)
     if (event.type === 'chat.complete' || event.type === 'chat.stopped') finished()
   })
   let done = false
@@ -508,6 +511,7 @@ async function readChatStream({
   body,
   signal,
   onToken,
+  onReplace,
   onDone,
   onError,
 }: StreamChatOptions): Promise<void> {
@@ -521,7 +525,8 @@ async function readChatStream({
         'Content-Type': 'application/json',
         ...authHeaders(),
       },
-      body: JSON.stringify({ time_zone: localTimeZone(), client: clientKind(), ...body, stream: true }),
+      // live: the answer as it's written, and what replaces it if that changes (#1006).
+      body: JSON.stringify({ time_zone: localTimeZone(), client: clientKind(), ...body, stream: true, live: true }),
       signal,
     })
   } catch (err) {
@@ -590,6 +595,13 @@ async function readChatStream({
           }
         } catch {
           // ignore malformed token payloads
+        }
+      }
+      if (currentEvent === 'replace') {
+        try {
+          onReplace?.((JSON.parse(data) as { content?: string }).content ?? '')
+        } catch {
+          // ignore malformed payloads: the saved answer shows when the reply ends
         }
       }
       if (currentEvent === 'done') {

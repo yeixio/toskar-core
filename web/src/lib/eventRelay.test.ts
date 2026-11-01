@@ -69,6 +69,24 @@ describe('subscribeEvents', () => {
 })
 
 describe('streamChat with the relay', () => {
+  it('takes back text when the relay says to (#1006)', async () => {
+    const relay = shell()
+    vi.stubGlobal('fetch', chatResponse('event: done\ndata: {}\n\n'))
+    const seen: string[] = []
+    let text = ''
+    const finished = streamChat({
+      body: { conversation_id: 'c1', message: 'Hi' },
+      onToken: (content) => seen.push((text += content)),
+      onReplace: (content) => seen.push((text = content)),
+    })
+    relay.send(token('c1', 'Let me check.'))
+    relay.send({ type: 'chat.token', payload: { conversation_id: 'c1', content: '', replace: true } })
+    relay.send(token('c1', 'Clean.'))
+    relay.send({ type: 'chat.complete', payload: { conversation_id: 'c1' } })
+    await finished
+    expect(seen).toEqual(['Let me check.', '', 'Clean.'])
+  })
+
   it('takes the reply’s text from the relay and finishes after chat.complete', async () => {
     const relay = shell()
     // The response repeats the text; with the relay it only says when the reply is done.
