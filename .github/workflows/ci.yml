@@ -91,9 +91,12 @@ jobs:
         uses: golangci/golangci-lint-action@v9
         # The action unpacks golangci-lint into $HOME, which the home
         # runners share: two jobs at once failed with "Text file busy". Each
-        # job's own temp folder keeps them apart.
+        # job's own temp folder keeps them apart. golangci-lint's lock is in
+        # TMPDIR, also shared: two at once stopped with "parallel
+        # golangci-lint is running" (#973).
         env:
           HOME: ${{ runner.temp }}
+          TMPDIR: ${{ runner.temp }}
         with:
           version: v2.14.0
       # Coverage feeds only the badge, published from main.
