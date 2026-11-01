@@ -192,7 +192,12 @@
     "remove": "제거",
     "guessAhead": "미리 추측",
     "guessAheadHint": "더 빠른 답변: 모델이 채팅에서 다음 단어를 추측하고 여러 개를 한 번에 확인해요. 이 모델의 답변이 나빠지면 끄세요.",
-    "guessAheadNextStart": "다음 시작부터"
+    "guessAheadNextStart": "다음 시작부터",
+    "contextWindow": "컨텍스트 창",
+    "contextWindowHint": "모델이 한 번에 읽는 양(토큰 단위, 토큰 하나는 약 ¾ 단어). 자동은 이 컴퓨터에 여유 있게 맞는 가장 큰 크기를 고릅니다. 창이 클수록 모델이 실행되는 동안 메모리를 더 씁니다.",
+    "contextWindowNextMessage": "다음 메시지에서 다시 불러옴",
+    "contextAuto": "자동",
+    "contextAutoSize": "자동 · {{size}}"
   },
   "runningTab": {
     "empty": "지금 불러온 모델이 없어요. 필요할 때 채팅에서 자동으로 시작해요.",

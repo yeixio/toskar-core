@@ -192,7 +192,12 @@
     "remove": "移除",
     "guessAhead": "提前猜測",
     "guessAheadHint": "回答更快：模型根據聊天內容猜測接下來的詞，並一次檢查多個。如果這個模型因此回答變差，請關閉。",
-    "guessAheadNextStart": "從下次啟動起"
+    "guessAheadNextStart": "從下次啟動起",
+    "contextWindow": "上下文視窗",
+    "contextWindowHint": "模型一次能讀多少，以詞元計（每個約為 ¾ 個詞）。自動會選擇能寬裕地放進這台電腦的最大視窗；視窗越大，模型執行時佔用的記憶體越多。",
+    "contextWindowNextMessage": "下一則訊息時重新載入",
+    "contextAuto": "自動",
+    "contextAutoSize": "自動 · {{size}}"
   },
   "runningTab": {
     "empty": "目前沒有載入任何模型。需要時，聊天會自動啟動一個模型。",

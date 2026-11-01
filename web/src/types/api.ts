@@ -117,6 +117,12 @@ export interface Model {
   support_role?: 'embedding' | 'reranker' | 'classifier'
   /** auto or off for a chat model installed on this computer: whether it guesses ahead (#835, contract 1.67). */
   speculation?: 'auto' | 'off'
+  /** The context window, in tokens, a chat model installed here starts with (#962, contract 1.69). */
+  context_window?: number
+  /** The size the person chose for it; 0 or absent is Auto. */
+  context_choice?: number
+  /** The sizes it can take, up to its own window, with how well it fits at each. */
+  context_options?: { tokens: number; fit: FitLabel }[]
 }
 
 export type FitLabel = 'excellent' | 'good' | 'tight' | 'heavy' | 'unsupported' | 'too_large'

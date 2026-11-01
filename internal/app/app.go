@@ -179,6 +179,12 @@ type App struct {
 	// startWindows keeps the window each chat model starts with here
 	// (model id -> tokens, #962), worked out once from the hardware.
 	startWindows sync.Map
+	// steadyHW is this computer's hardware, detected once (steadyHardware).
+	steadyHW struct {
+		sync.Mutex
+		inv   contracts.HardwareInventory
+		known bool
+	}
 	// window reads a running model's window; tests replace it.
 	window func(ctx context.Context, endpoint string) (int, error)
 	// sampler keeps a day of the daemon's memory and goroutines (#231).
@@ -665,6 +671,7 @@ func New(opts Options) (*App, error) {
 		UpdateAddedModel:      a.Models.UpdateAdded,
 		SetModelProjector:     a.Models.SetProjector,
 		SetModelSpeculation:   a.setModelSpeculation,
+		SetModelContext:       a.setModelContext,
 		ListRunningModels:     a.listRunningAll,
 		Acceleration:          a.healthAcceleration,
 		StartModel: func(ctx context.Context, id, nodeID string) (contracts.RunningModelView, error) {

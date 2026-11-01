@@ -196,6 +196,20 @@ type Model struct {
 	// computer: whether it guesses the next words ahead and checks several
 	// at once (#835, contract 1.67). Empty for other models.
 	Speculation string `json:"speculation,omitempty"`
+	// ContextWindow is the window a chat model installed on this computer
+	// starts with, in tokens; ContextChoice the size the person chose for
+	// it, 0 for Auto; ContextOptions the sizes it can take, up to its own
+	// window, with how well it fits at each (#962, contract 1.69).
+	ContextWindow  int             `json:"context_window,omitempty"`
+	ContextChoice  int             `json:"context_choice,omitempty"`
+	ContextOptions []ContextOption `json:"context_options,omitempty"`
+}
+
+// ContextOption is a context window a model can take, and how well the model
+// fits this computer at it (#962).
+type ContextOption struct {
+	Tokens int      `json:"tokens"`
+	Fit    FitLabel `json:"fit"`
 }
 
 // Supporting model roles (spec §61).

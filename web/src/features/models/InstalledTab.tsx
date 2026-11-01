@@ -34,6 +34,7 @@ export function InstalledTab({
   onStop,
   onDelete,
   onSpeculation,
+  onContextWindow,
   onInstallElsewhere,
   installingId,
   startingId,
@@ -56,6 +57,8 @@ export function InstalledTab({
   onDelete: (id: string) => void
   /** Turns guessing ahead (speculative decoding) Auto or Off for a model (#835). */
   onSpeculation?: (id: string, speculation: 'auto' | 'off') => void
+  /** Sets a model's context window in tokens, or 0 for Auto (#962). */
+  onContextWindow?: (id: string, contextWindow: number) => void
   onInstallElsewhere?: (id: string) => void
   installingId?: string | null
   /** The model starting now, which may first set up llama.cpp (#610). */
@@ -239,6 +242,45 @@ export function InstalledTab({
                           {live ? <span className="block text-xs text-ink-muted">{t('installedTab.guessAheadNextStart')}</span> : null}
                         </button>
                       )}
+                      {advancedMode && model.context_options && model.context_options.length > 0 && onContextWindow && (
+                        <div role="group" aria-label={t('installedTab.contextWindow')} title={t('installedTab.contextWindowHint')}>
+                          <p className="px-3 pt-2 text-xs text-ink-muted">
+                            {t('installedTab.contextWindow')}
+                            {live ? ` · ${t('installedTab.contextWindowNextMessage')}` : ''}
+                          </p>
+                          {[0, ...model.context_options.map((o) => o.tokens)].map((tokens) => {
+                            const option = model.context_options?.find((o) => o.tokens === tokens)
+                            const chosen = (model.context_choice ?? 0) === tokens
+                            const wontFit = option?.fit === 'unsupported' || option?.fit === 'too_large'
+                            const label =
+                              tokens === 0
+                                ? model.context_choice
+                                  ? t('installedTab.contextAuto')
+                                  : t('installedTab.contextAutoSize', { size: tokenSize(model.context_window ?? 0) })
+                                : tokenSize(tokens)
+                            const note = option && option.fit !== 'excellent' && option.fit !== 'good' ? t(`fit.${option.fit}`) : ''
+                            return (
+                              <button
+                                key={tokens}
+                                type="button"
+                                role="menuitemradio"
+                                aria-checked={chosen}
+                                disabled={wontFit}
+                                className="menu-item"
+                                onClick={() => {
+                                  setMenuOpenId(null)
+                                  if (!chosen) onContextWindow(model.id, tokens)
+                                }}
+                              >
+                                <span aria-hidden className="inline-block w-4">
+                                  {chosen ? '✓' : ''}
+                                </span>
+                                {note ? `${label} · ${note}` : label}
+                              </button>
+                            )
+                          })}
+                        </div>
+                      )}
                       <button
                         type="button"
                         role="menuitem"
@@ -263,4 +305,9 @@ export function InstalledTab({
       })}
     </ul>
   )
+}
+
+/** A context window as people say it: 32768 tokens is 32K. */
+function tokenSize(tokens: number): string {
+  return tokens >= 1024 ? `${Math.round(tokens / 1024)}K` : String(tokens)
 }
