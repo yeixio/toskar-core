@@ -8,6 +8,31 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Thi
 
 Changes waiting for the next release are in [changes/unreleased/](changes/unreleased/), one file per pull request. `scripts/changelog.py preview` shows them together, and `scripts/changelog.py release <version>` writes them here when the release is cut.
 
+## [1.12.1] - 2026-11-01
+
+### Added
+
+- The chat API can send an answer as it's written. A client that sends
+  `"live": true` with `"stream": true` gets the text as the model writes it,
+  and a `replace` event when a tool call, a retry, or a check changes what was
+  shown. Without it, the answer still comes whole (contract 1.77).
+
+### Changed
+
+- Chat on the web and in Toskar Pro shows an answer as it's written, instead of
+  all at once when it's ready. The text can change or start over before it
+  finishes, when Toskar looks something up or corrects a figure.
+
+### Fixed
+
+- The curl chat example sends messages with quotes, backslashes, tabs, or
+  several lines; it used to send invalid JSON for them.
+- Deliberate's chosen answer is what you get. With answer checks on, which is
+  the default, the turn's first draft was shown instead.
+- Wan 2.1 T2V 1.3B makes clean 2-second clips on Apple silicon. At its old
+  settings they came out with harsh color or broken frames. A clip takes about
+  half as long again as it did.
+
 ## [1.12.0] - 2026-11-01
 
 ### Added
