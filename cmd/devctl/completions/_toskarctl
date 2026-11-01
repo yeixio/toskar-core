@@ -8,6 +8,7 @@ _toskarctl() {
     'about:print the version, license, and source URL'
     'paths:print the data, model, runtime, log, and database directories'
     'ask:send one prompt and print the answer, for scripts and CI'
+    'connect:print or write the settings for a coding agent to use Toskar'
     'models:list models, and install one with its progress'
     'automations:manage scheduled automations on the daemon'
     'mcp:connect an app such as Claude Desktop to Yggdrasil over MCP'
@@ -73,6 +74,13 @@ _toskarctl() {
         list) _arguments '--installed[only installed models]' '--json[print JSON]' ;;
         install) _arguments '--node[the computer to install it on]:node:' ;;
       esac
+      ;;
+    connect)
+      if (( CURRENT == 3 )); then
+        _values 'agent' claude-code codex opencode aider
+        return
+      fi
+      _arguments '--model[the model]:model:' '--write[write the settings instead of printing them]'
       ;;
     automations)
       if (( CURRENT == 3 )); then

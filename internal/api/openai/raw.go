@@ -16,6 +16,11 @@ import (
 // RawPrefix names a model driven directly (#843): raw:<model id>.
 const RawPrefix = "raw:"
 
+// rawAnswerRoom is the most of a raw request's max_tokens counted in sizing
+// its window: agents ask for 32,000 or more as a ceiling, not an answer
+// that long, and llama-server stops at the window anyway (#959).
+const rawAnswerRoom = 8192
+
 // maxRequestBytes is the most a chat completion's body may be: room for a
 // coding agent's long conversation and pictures sent as data URLs.
 const maxRequestBytes = 64 << 20
@@ -46,7 +51,7 @@ func (h *Handler) handleRaw(w http.ResponseWriter, r *http.Request, perms auth.A
 	if o := req.assistant(); o != nil {
 		least = o.ContextWindow
 	}
-	endpoint, done, fail := h.rawReady(r.Context(), perms, strings.TrimPrefix(req.Model, RawPrefix), max(neededWindow(req, maxTokens), least))
+	endpoint, done, fail := h.rawReady(r.Context(), perms, strings.TrimPrefix(req.Model, RawPrefix), max(neededWindow(req, min(maxTokens, rawAnswerRoom)), least))
 	if fail != nil {
 		if fail.param != "" {
 			writeErrorParam(w, fail.status, fail.code, fail.message, fail.param)
