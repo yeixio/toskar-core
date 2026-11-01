@@ -27,6 +27,14 @@ agents:
   opencode      OpenCode, through Chat Completions
   aider         Aider, through Chat Completions
 
+editors (#960), through Chat Completions; these print what to enter:
+  continue      Continue, its config.yaml
+  cline         Cline's OpenAI Compatible provider
+  roo-code      Roo Code's OpenAI Compatible provider
+  zed           Zed's settings.json
+  jetbrains     JetBrains AI Assistant's third-party provider
+  copilot       GitHub Copilot Chat in VS Code, its own-model option
+
 flags:
   --model id    the model; by default, the best installed one for coding
                 agents: it calls tools, is made for code, and fits well
@@ -53,6 +61,9 @@ type connectTarget struct {
 	// keyFromEnv says key came from TOSKAR_API_KEY, so settings can name
 	// the variable rather than hold the secret.
 	keyFromEnv bool
+	// window is the context window the model starts with on Toskar, for an
+	// editor that's told it (#962), or 8192 when it isn't known.
+	window int
 }
 
 // connectAgent prints an agent's settings and, for most, writes them.
@@ -67,6 +78,15 @@ var connectAgents = map[string]connectAgent{
 	"codex":       {name: "Codex CLI", print: codexPrint, write: codexWrite},
 	"opencode":    {name: "OpenCode", print: openCodePrint, write: openCodeWrite},
 	"aider":       {name: "Aider", print: aiderPrint},
+	// Editors (#960): their agents and AI features take an OpenAI-compatible
+	// endpoint, so the model is raw:<id>. Most keep it in their own settings
+	// screens, so these print what to enter.
+	"continue":  {name: "Continue", print: continuePrint},
+	"cline":     {name: "Cline", print: func(t connectTarget) string { return compatibleSteps("Cline", t) }},
+	"roo-code":  {name: "Roo Code", print: func(t connectTarget) string { return compatibleSteps("Roo Code", t) }},
+	"zed":       {name: "Zed", print: zedPrint},
+	"jetbrains": {name: "JetBrains AI Assistant", print: jetBrainsPrint},
+	"copilot":   {name: "GitHub Copilot in VS Code", print: copilotPrint},
 }
 
 // localKey is the key agents send to Toskar on this computer, which needs
@@ -96,13 +116,19 @@ func connectCommand(args []string, client daemonClient, out io.Writer, dir, home
 		}
 		t.key = localKey
 	}
+	models, err := listModels(client)
+	if err != nil && t.model == "" {
+		return err
+	}
 	if t.model == "" {
-		models, err := listModels(client)
-		if err != nil {
-			return err
-		}
 		if t.model = agentModel(models); t.model == "" {
 			return fmt.Errorf("no chat model is installed for the agent to use; install one made for code, such as: toskarctl models install qwen2.5-coder-7b-q4")
+		}
+	}
+	t.window = 8192
+	for _, m := range models {
+		if m.ID == t.model && m.ContextWindow > 0 {
+			t.window = m.ContextWindow
 		}
 	}
 	if !*write {
@@ -110,7 +136,10 @@ func connectCommand(args []string, client daemonClient, out io.Writer, dir, home
 		return err
 	}
 	if agent.write == nil {
-		return fmt.Errorf("%s reads its settings from the environment, so there's no file to write: add these to your shell profile\n\n%s", agent.name, agent.print(t))
+		if args[0] == "aider" {
+			return fmt.Errorf("%s reads its settings from the environment, so there's no file to write: add these to your shell profile\n\n%s", agent.name, agent.print(t))
+		}
+		return fmt.Errorf("%s keeps these in its own settings, so toskarctl doesn't write them: enter them there\n\n%s", agent.name, agent.print(t))
 	}
 	path, err := agent.write(t, dir, home)
 	if err != nil {
@@ -357,6 +386,89 @@ export OPENAI_API_BASE=%s
 export OPENAI_API_KEY=%s
 aider --model openai/raw:%s
 `, t.model, t.base+"/v1", shellKey(t), t.model)
+}
+
+// continuePrint is Continue's config.yaml model entry.
+func continuePrint(t connectTarget) string {
+	key := t.key
+	if t.keyFromEnv {
+		key = "<your TOSKAR_API_KEY>"
+	}
+	return fmt.Sprintf(`# Continue with %[1]s on Toskar, through Chat Completions.
+# Add under models: in ~/.continue/config.yaml.
+models:
+  - name: %[1]s on Toskar
+    provider: openai
+    model: raw:%[1]s
+    apiBase: %[2]s/v1
+    apiKey: %[3]s
+    roles:
+      - chat
+      - edit
+      - apply
+    capabilities:
+      - tool_use
+`, t.model, t.base, key)
+}
+
+// compatibleSteps are the steps for an editor agent whose settings screen
+// takes an OpenAI-compatible provider, as Cline's and Roo Code's do.
+func compatibleSteps(name string, t connectTarget) string {
+	key := t.key
+	if t.keyFromEnv {
+		key = "your TOSKAR_API_KEY"
+	}
+	return fmt.Sprintf(`# %[1]s with %[2]s on Toskar, through Chat Completions.
+# In %[1]s's settings, choose the API provider "OpenAI Compatible", then:
+Base URL: %[3]s/v1
+API key:  %[4]s
+Model ID: raw:%[2]s
+Context window: %[5]d
+`, name, t.model, t.base, key, t.window)
+}
+
+// zedPrint is Zed's settings.json provider.
+func zedPrint(t connectTarget) string {
+	cfg := map[string]any{"language_models": map[string]any{"openai_compatible": map[string]any{"Toskar": map[string]any{
+		"api_url": t.base + "/v1",
+		"available_models": []map[string]any{{
+			"name": "raw:" + t.model, "display_name": t.model + " on Toskar", "max_tokens": t.window,
+			"capabilities": map[string]any{"tools": true, "images": false, "parallel_tool_calls": false, "prompt_cache_key": false},
+		}},
+	}}}}
+	raw, _ := json.MarshalIndent(cfg, "", "  ")
+	keyNote := "On this computer Toskar needs no key; if Zed asks for one, enter " + t.key + "."
+	if t.keyFromEnv {
+		keyNote = "Enter your TOSKAR_API_KEY as the Toskar provider's API key in Zed's agent settings."
+	}
+	return fmt.Sprintf("# Zed with %s on Toskar, through Chat Completions.\n# Merge into Zed's settings.json (zed: open settings). %s\n%s\n", t.model, keyNote, raw)
+}
+
+func jetBrainsPrint(t connectTarget) string {
+	key := t.key
+	if t.keyFromEnv {
+		key = "your TOSKAR_API_KEY"
+	}
+	return fmt.Sprintf(`# JetBrains AI Assistant with %[1]s on Toskar, through Chat Completions.
+# Settings > Tools > AI Assistant > Models: add a third-party provider,
+# "OpenAI-compatible", then:
+URL:     %[2]s/v1
+API key: %[3]s
+Model:   raw:%[1]s
+`, t.model, t.base, key)
+}
+
+func copilotPrint(t connectTarget) string {
+	key := t.key
+	if t.keyFromEnv {
+		key = "your TOSKAR_API_KEY"
+	}
+	return fmt.Sprintf(`# GitHub Copilot Chat in VS Code with %[1]s on Toskar, through Chat Completions.
+# Run "Chat: Manage Language Models", add the "OpenAI Compatible" provider, then:
+Base URL: %[2]s/v1
+API key:  %[3]s
+# Copilot lists the models from %[2]s/v1/models; pick raw:%[1]s in the chat's model picker.
+`, t.model, t.base, key)
 }
 
 // readJSONObject reads a JSON settings file, or an empty one when there's

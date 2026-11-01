@@ -25,7 +25,7 @@ _toskarctl() {
       ;;
     connect)
       if [[ ${COMP_CWORD} -eq 2 ]]; then
-        COMPREPLY=($(compgen -W "claude-code codex opencode aider" -- "$cur"))
+        COMPREPLY=($(compgen -W "claude-code codex opencode aider continue cline roo-code zed jetbrains copilot" -- "$cur"))
       elif [[ "$cur" == -* ]]; then
         COMPREPLY=($(compgen -W "--model --write" -- "$cur"))
       fi

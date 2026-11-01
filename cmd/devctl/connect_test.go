@@ -21,7 +21,7 @@ func connectDaemon(t *testing.T) daemonClient {
 	t.Helper()
 	models := []contracts.Model{
 		{ID: "big-chat", SizeBytes: 9e9, Installed: true, Capabilities: contracts.ModelCapabilities{ToolCalling: true}, Fit: &contracts.ModelFit{Label: contracts.FitTight}},
-		{ID: "qwen2.5-coder-7b-q4", SizeBytes: 4e9, Installed: true, Capabilities: contracts.ModelCapabilities{ToolCalling: true, Coding: true}, Fit: &contracts.ModelFit{Label: contracts.FitExcellent}},
+		{ID: "qwen2.5-coder-7b-q4", SizeBytes: 4e9, Installed: true, ContextWindow: 32768, Capabilities: contracts.ModelCapabilities{ToolCalling: true, Coding: true}, Fit: &contracts.ModelFit{Label: contracts.FitExcellent}},
 		{ID: "tiny-no-tools", SizeBytes: 1e9, Installed: true, Fit: &contracts.ModelFit{Label: contracts.FitExcellent}},
 		{ID: "not-installed-coder", SizeBytes: 3e9, Capabilities: contracts.ModelCapabilities{ToolCalling: true, Coding: true}},
 		{ID: "nomic-embed", SupportRole: "embedding", Installed: true},
@@ -51,6 +51,12 @@ func TestConnectPrints(t *testing.T) {
 		"codex":       {"[model_providers.toskar]", `base_url = "` + client.base + `/v1"`, `wire_api = "responses"`, `env_key = "TOSKAR_API_KEY"`, "toskar.config.toml", `model = "qwen2.5-coder-7b-q4"`, `model_provider = "toskar"`, "codex --profile toskar", "export TOSKAR_API_KEY=toskar-local"},
 		"opencode":    {`"npm": "@ai-sdk/openai-compatible"`, `"baseURL": "` + client.base + `/v1"`, `"raw:qwen2.5-coder-7b-q4"`, `"model": "toskar/raw:qwen2.5-coder-7b-q4"`},
 		"aider":       {"OPENAI_API_BASE=" + client.base + "/v1", "aider --model openai/raw:qwen2.5-coder-7b-q4"},
+		"continue":    {"provider: openai", "model: raw:qwen2.5-coder-7b-q4", "apiBase: " + client.base + "/v1", "- tool_use"},
+		"cline":       {`"OpenAI Compatible"`, "Base URL: " + client.base + "/v1", "Model ID: raw:qwen2.5-coder-7b-q4", "Context window: 32768"},
+		"roo-code":    {"Roo Code", "Model ID: raw:qwen2.5-coder-7b-q4"},
+		"zed":         {`"openai_compatible"`, `"api_url": "` + client.base + `/v1"`, `"name": "raw:qwen2.5-coder-7b-q4"`, `"max_tokens": 32768`, `"tools": true`},
+		"jetbrains":   {"OpenAI-compatible", "Model:   raw:qwen2.5-coder-7b-q4"},
+		"copilot":     {"Chat: Manage Language Models", "Base URL: " + client.base + "/v1", "raw:qwen2.5-coder-7b-q4"},
 	} {
 		var out bytes.Buffer
 		if err := connectCommand([]string{agent}, client, &out, t.TempDir(), t.TempDir()); err != nil {
@@ -137,6 +143,9 @@ func TestConnectWrites(t *testing.T) {
 	var out bytes.Buffer
 	if err := connectCommand([]string{"aider", "--write"}, client, &out, dir, home); err == nil || !strings.Contains(err.Error(), "OPENAI_API_BASE") {
 		t.Errorf("aider --write: %v", err)
+	}
+	if err := connectCommand([]string{"zed", "--write"}, client, &out, dir, home); err == nil || !strings.Contains(err.Error(), "own settings") || !strings.Contains(err.Error(), "openai_compatible") {
+		t.Errorf("zed --write: %v", err)
 	}
 }
 

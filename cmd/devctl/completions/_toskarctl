@@ -77,7 +77,7 @@ _toskarctl() {
       ;;
     connect)
       if (( CURRENT == 3 )); then
-        _values 'agent' claude-code codex opencode aider
+        _values 'agent' claude-code codex opencode aider continue cline roo-code zed jetbrains copilot
         return
       fi
       _arguments '--model[the model]:model:' '--write[write the settings instead of printing them]'

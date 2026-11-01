@@ -7,7 +7,7 @@ complete -c toskarctl -n __fish_use_subcommand -a about -d 'Print the version, l
 complete -c toskarctl -n __fish_use_subcommand -a paths -d 'Print the data, model, runtime, log, and database directories'
 complete -c toskarctl -n __fish_use_subcommand -a ask -d 'Send one prompt and print the answer, for scripts and CI'
 complete -c toskarctl -n __fish_use_subcommand -a connect -d 'Print or write the settings for a coding agent to use Toskar'
-complete -c toskarctl -n '__fish_seen_subcommand_from connect; and not __fish_seen_subcommand_from claude-code codex opencode aider' -a 'claude-code codex opencode aider'
+complete -c toskarctl -n '__fish_seen_subcommand_from connect; and not __fish_seen_subcommand_from claude-code codex opencode aider continue cline roo-code zed jetbrains copilot' -a 'claude-code codex opencode aider continue cline roo-code zed jetbrains copilot'
 complete -c toskarctl -n '__fish_seen_subcommand_from connect' -l model -r -d 'The model'
 complete -c toskarctl -n '__fish_seen_subcommand_from connect' -l write -d 'Write the settings instead of printing them'
 complete -c toskarctl -n __fish_use_subcommand -a models -d 'List models, and install one with its progress'
