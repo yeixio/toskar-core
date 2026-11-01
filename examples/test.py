@@ -87,7 +87,8 @@ def main() -> int:
             }
             cases: list[tuple[str, Callable[[], None]]] = [
                 ("curl models", lambda: curl_models(runner)),
-                ("curl chat", lambda: curl_chat(runner)),
+                ("curl chat", lambda: curl_chat(runner, MESSAGE)),
+                ("curl chat with quotes and a newline", lambda: curl_chat(runner, 'Say "hi" \\ to\n\tJuneau')),
                 ("ci github triage", lambda: ci_github_triage(runner, stubs, tmp)),
                 ("ci github log", lambda: ci_github_log(runner, stubs, tmp)),
                 ("ci gitlab log", lambda: ci_gitlab_log(runner, stubs, tmp)),
@@ -174,11 +175,15 @@ def curl_models(run: Runner) -> None:
     expect('"auto"' in out and "profile:general-assistant" in out, "auto and the profiles are listed", out)
 
 
-def curl_chat(run: Runner) -> None:
+def curl_chat(run: Runner, message: str) -> None:
     # auto never picks an external model, so ask for the profile.
-    out = run(["sh", "curl/chat.sh", MESSAGE], env={"TOSKAR_MODEL": "profile:general-assistant"})
-    pieces = "".join(re.findall(r'"content":"([^"]*)"', out))
-    expect(pieces == ANSWER and "data: [DONE]" in out, "the answer streams, ending with [DONE]", out)
+    out = run(["sh", "curl/chat.sh", message], env={"TOSKAR_MODEL": "profile:general-assistant"})
+    pieces = ""
+    for line in out.splitlines():
+        if line.startswith("data: {"):
+            for choice in json.loads(line[len("data: "):]).get("choices", []):
+                pieces += choice.get("delta", {}).get("content") or ""
+    expect(pieces == "You said: " + message and "data: [DONE]" in out, "the answer streams, ending with [DONE]", out)
 
 
 def chat(run: Runner, cmd: list[str]) -> None:
