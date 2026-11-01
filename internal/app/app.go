@@ -179,6 +179,15 @@ type App struct {
 	// startWindows keeps the window each chat model starts with here
 	// (model id -> tokens, #962), worked out once from the hardware.
 	startWindows sync.Map
+	// raisedWindows keeps a bigger window a request asked a model for
+	// (model id -> raisedWindow, #962).
+	raisedWindows sync.Map
+	// steadyHW is this computer's hardware, detected once (steadyHardware).
+	steadyHW struct {
+		sync.Mutex
+		inv   contracts.HardwareInventory
+		known bool
+	}
 	// window reads a running model's window; tests replace it.
 	window func(ctx context.Context, endpoint string) (int, error)
 	// sampler keeps a day of the daemon's memory and goroutines (#231).
@@ -525,6 +534,7 @@ func New(opts Options) (*App, error) {
 		// A request that can't fit its model's window is refused before it
 		// runs, and a chat that overflows answers 400 with its code (#840).
 		Window: a.knownWindow,
+		Grow:   a.growWindow,
 		ErrorCode: func(text string) string {
 			code, _ := chatErrorCode(text)
 			return code
@@ -665,6 +675,7 @@ func New(opts Options) (*App, error) {
 		UpdateAddedModel:      a.Models.UpdateAdded,
 		SetModelProjector:     a.Models.SetProjector,
 		SetModelSpeculation:   a.setModelSpeculation,
+		SetModelContext:       a.setModelContext,
 		ListRunningModels:     a.listRunningAll,
 		Acceleration:          a.healthAcceleration,
 		StartModel: func(ctx context.Context, id, nodeID string) (contracts.RunningModelView, error) {

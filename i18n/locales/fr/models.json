@@ -196,7 +196,12 @@
     "remove": "Supprimer",
     "guessAhead": "Deviner à l’avance",
     "guessAheadHint": "Réponses plus rapides : le modèle devine les mots suivants à partir du chat et en vérifie plusieurs à la fois. Désactivez-le si ce modèle répond moins bien ainsi.",
-    "guessAheadNextStart": "À son prochain démarrage"
+    "guessAheadNextStart": "À son prochain démarrage",
+    "contextWindow": "Fenêtre de contexte",
+    "contextWindowHint": "Ce que le modèle lit d'un coup, en jetons (environ ¾ de mot chacun). Auto choisit la plus grande qui tient bien sur cet ordinateur ; une fenêtre plus grande occupe plus de mémoire tant que le modèle tourne.",
+    "contextWindowNextMessage": "se recharge au prochain message",
+    "contextAuto": "Auto",
+    "contextAutoSize": "Auto · {{size}}"
   },
   "runningTab": {
     "empty": "Aucun modèle n'est chargé pour le moment. Discussion en démarrera un automatiquement quand vous en aurez besoin.",

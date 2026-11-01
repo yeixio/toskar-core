@@ -196,7 +196,12 @@
     "remove": "Remover",
     "guessAhead": "Adivinhar adiante",
     "guessAheadHint": "Respostas mais rápidas: o modelo adivinha as próximas palavras a partir do chat e confere várias de uma vez. Desative se este modelo responder pior assim.",
-    "guessAheadNextStart": "A partir do próximo início"
+    "guessAheadNextStart": "A partir do próximo início",
+    "contextWindow": "Janela de contexto",
+    "contextWindowHint": "Quanto o modelo lê de uma vez, em tokens (cerca de ¾ de palavra cada). Auto escolhe a maior que cabe bem neste computador; uma janela maior ocupa mais memória enquanto o modelo está rodando.",
+    "contextWindowNextMessage": "recarrega na próxima mensagem",
+    "contextAuto": "Auto",
+    "contextAutoSize": "Auto · {{size}}"
   },
   "runningTab": {
     "empty": "Nenhum modelo está carregado no momento. O Chat vai iniciar um automaticamente quando você precisar.",

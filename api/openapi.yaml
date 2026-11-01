@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Toskar Control Plane API
-  version: "1.68"
+  version: "1.70"
   description: >-
     Local AI control plane API for Toskar, its OpenAI-compatible routes, and its MCP server.
     On the default loopback bind no key is needed. When the daemon listens on any other address,
@@ -3643,6 +3643,39 @@ paths:
                 $ref: "#/components/schemas/ModelSpeculation"
         "400":
           description: MODEL_UPDATE_FAILED, such as for a model that isn't installed here or doesn't chat
+  /api/v1/models/{id}/context:
+    put:
+      summary: Set a model's context window
+      description: 'The context window a chat model installed on this computer starts with: 0 for Auto (the largest of 8K, 16K, or 32K at which it is still an excellent fit), or one of its context_options. A loaded model starts again with it on its next request (#962, contract 1.69).'
+      operationId: setModelContext
+      tags: [Models]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [context_window]
+              properties:
+                context_window:
+                  type: integer
+                  enum: [0, 4096, 8192, 16384, 32768, 65536, 131072, 262144]
+                  description: Tokens, up to the model's own window; 0 for Auto.
+      responses:
+        "200":
+          description: The choice is kept
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ModelContext"
+        "400":
+          description: INVALID_JSON, or MODEL_UPDATE_FAILED, such as for a size past the model's own window, or a model that isn't installed here or doesn't chat
   /api/v1/models/{id}:
     patch:
       summary: Rename or retag an added model
@@ -6977,6 +7010,9 @@ components:
         fallback:
           type: boolean
           description: When the model the request names can't answer, let another model answer instead. Off unless set, a named model answers or the request fails; auto and profiles always fall back (#871, contract 1.59)
+        context_window:
+          type: integer
+          description: The least context window, in tokens, the request wants the named model to run with on this computer. When it runs with less, it starts again with the smallest size that holds it and still fits, else the request answers 400 CONTEXT_TOO_LONG with param toskar.context_window (#962, contract 1.70).
     RuntimeSample:
       type: object
       properties:
@@ -7315,6 +7351,18 @@ components:
         dynamic: {type: boolean, description: installed from browse-all / URL}
         support_role: {type: string, description: '`support_role` marks a model that serves Yggdrasil instead of chatting: SupportEmbedding, SupportReranker, or SupportClassifier. Empty for chat models.'}
         speculation: {type: string, enum: [auto, off], description: 'Whether a chat model installed on this computer guesses the next words ahead and checks several at once (#835, contract 1.67). Empty for other models.'}
+        context_window: {type: integer, description: 'The context window, in tokens, a chat model installed on this computer starts with (#962, contract 1.69).'}
+        context_choice: {type: integer, description: 'The context window the person chose for the model; 0 or absent for Auto (#962, contract 1.69).'}
+        context_options:
+          type: array
+          description: The context windows the model can take, up to its own, with how well it fits this computer at each (#962, contract 1.69).
+          items:
+            type: object
+            description: A context window a model can take, and how well it fits this computer at it (#962).
+            required: [fit, tokens]
+            properties:
+              fit: {type: string, enum: [excellent, good, tight, heavy, unsupported]}
+              tokens: {type: integer}
         languages:
           type: array
           description: How well the model writes each language it has a level for (§13–14, §31), best first.
@@ -8748,6 +8796,13 @@ components:
         tags:
           type: array
           items: {type: string}
+    ModelContext:
+      type: object
+      description: A model's context window choice (#962).
+      required: [model_id, context_window]
+      properties:
+        model_id: {type: string}
+        context_window: {type: integer, description: 0 for Auto}
     ModelSpeculation:
       type: object
       description: A model's guess-ahead choice (#835).

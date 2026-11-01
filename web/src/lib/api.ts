@@ -868,6 +868,13 @@ export const api = {
       body: JSON.stringify({ speculation }),
     }),
 
+  /** A model's context window on this computer, in tokens, or 0 for Auto; a loaded model reloads with it on its next request (#962). */
+  setModelContext: (id: string, contextWindow: number) =>
+    request<{ model_id: string; context_window: number }>(`/api/v1/models/${encodeURIComponent(id)}/context`, {
+      method: 'PUT',
+      body: JSON.stringify({ context_window: contextWindow }),
+    }),
+
   setModelProjector: (id: string, path: string) =>
     request<{ model_id: string; vision: boolean }>(`/api/v1/models/${encodeURIComponent(id)}/projector`, {
       method: 'PUT',

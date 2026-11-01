@@ -194,7 +194,12 @@
     "remove": "Remove",
     "guessAhead": "Guess ahead",
     "guessAheadHint": "Faster answers: the model guesses the next words from the chat and checks several at once. Turn it off if this model answers worse with it.",
-    "guessAheadNextStart": "From its next start"
+    "guessAheadNextStart": "From its next start",
+    "contextWindow": "Context window",
+    "contextWindowHint": "How much the model reads at once, in tokens (about ¾ of a word each). Auto picks the most that fits this computer well; a bigger window holds more memory while the model runs.",
+    "contextWindowNextMessage": "reloads on its next message",
+    "contextAuto": "Auto",
+    "contextAutoSize": "Auto · {{size}}"
   },
   "runningTab": {
     "empty": "No models are loaded right now. Chat will start one automatically when you need it.",

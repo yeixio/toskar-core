@@ -988,6 +988,16 @@
           "text": "The memory estimate counts the model file, its quantization, and its context. On a computer without unified memory, about 2 GB is kept for the operating system. A speed is an estimate until the model has run on your computer. Then Details shows the measured speed. Answers that repeat or edit text already in the chat, such as fixing code you pasted, come faster: the model guesses the next words from the chat and checks several at once. This is on by default. The largest models also come with a small draft model from the same family, about 0.5 GB, downloaded with them. On a computer the model fits with a Good or Excellent label, the draft writes ahead and the large model checks its guesses, so it answers up to about twice as fast, just as well. Where it fits only tightly, the draft would take memory the model needs, so it isn't used. With Advanced mode on, turn guessing off for one model, draft and all, from that model's More actions menu, under Guess ahead; it changes the next time the model starts. Badges such as Best overall and Best coding go to models labeled Good or Excellent when one qualifies."
         },
         {
+          "type": "paragraph",
+          "text": "A model's context window is how much it reads at once: the conversation, files, and lookups, plus its answer, counted in tokens of about three quarters of a word. Toskar picks it for you, as Auto: 8K, 16K, or 32K, the most at which the model still fits your computer with room to spare. With Advanced mode on, choose another size for one model from its More actions menu, under Context window. Pick a bigger one, up to what the model was made for, for long documents or coding tools that send a lot at once. Pick a smaller one to free memory. Each size says how well the model fits at it, and one it won't fit at can't be chosen. A model that's running reloads with the new size on its next message."
+        },
+        {
+          "type": "image",
+          "screen": "models-context-window",
+          "alt": "The More actions menu for Gemma 3 4B on the Installed tab, with Guess ahead checked and Context window set to Auto, 32K, above sizes from 4K to 128K, where 128K is marked Tight fit",
+          "caption": "Auto picks 32K for Gemma 3 4B on this computer. Bigger sizes say how well the model fits at them."
+        },
+        {
           "type": "heading",
           "text": "What each kind of model is for"
         },
@@ -1631,6 +1641,7 @@
         "Open API Access to copy the endpoint and run Test API. The default base URL is http://127.0.0.1:7331/v1. Use GET /v1/models to find a model ID, such as auto or a profile, then POST /v1/chat/completions. The API gets the same assistant as chat: Auto, web look-ups, connected services, answer checks, personalization, and specialized AIs. It is an OpenAI-compatible subset, not every hosted API feature.",
         "With local network access off, the default endpoint on this computer needs no API key. With it on, an app or script on another device needs a key for every request; apps on this computer still need none, and people sign in with their password in a browser instead. Create a named key in API Access and copy its secret when it is shown; you can rotate or revoke it there. Send it as Authorization: Bearer YOUR_KEY.",
         "Each key has permissions a request can only narrow: whether it may use memories and connected knowledge (never, on request, or always), which tools (the profile's, read-only, or none), and whether it may choose where it runs. API requests use memories only when they ask, unless the key says always. A request can ask for JSON with response_format, and Toskar checks and repairs the result.",
+        "A request that names a model gets the room it needs. When its messages and answer are more than the model's context window on this computer, Toskar starts the model again with a bigger one, up to what the model was made for, if it still fits. Coding tools that send a lot at once can ask up front, with toskar.context_window set to the tokens they need. When no size fits, the request fails with CONTEXT_TOO_LONG, and nothing is cut off.",
         "For another computer, use the LAN endpoint shown in API Access rather than localhost. Keep LAN access on a trusted network; the displayed HTTP endpoint does not itself provide public-internet TLS protection.",
         "Apps that speak MCP, such as Claude Desktop, Claude Code, Cursor, and VS Code, can ask your local AI questions, list its models, and search your connected knowledge. API Access → Use Toskar in other AI apps shows what to paste into each."
       ],

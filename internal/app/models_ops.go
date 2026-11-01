@@ -381,6 +381,7 @@ func (a *App) listModelsCluster(ctx context.Context) ([]contracts.Model, error) 
 		return nil, err
 	}
 	a.withSpeculation(ctx, local)
+	a.withContextWindows(ctx, local)
 	cfg := a.Config.Get()
 	presence := map[string][]contracts.ModelOnNode{}
 	for _, m := range local {
