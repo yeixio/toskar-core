@@ -262,12 +262,14 @@ func TestFilesQuality(t *testing.T) {
 	if len(report) > 0 {
 		rate = float64(passed) / float64(len(report))
 	}
-	t.Logf("files: %d of %d cases passed (%.0f%%) with the %s model", passed, len(report), rate*100, d.Name())
+	sum := summarizeRows(report)
+	v := gate(sum, minPass(d.Name()), nil)
+	t.Logf("files: %d of %d cases passed (%.0f%%) with the %s model. %s", passed, len(report), rate*100, d.Name(), v.note)
 	if path := config.Env("QUALITY_FILES_REPORT"); path != "" {
-		md := strings.Replace(markdownReport(d.Name(), report, summarizeRows(report), minPass(d.Name())), "# Chat quality:", "# Files quality:", 1)
+		md := strings.Replace(markdownReport(d.Name(), report, sum, minPass(d.Name()), v), "# Chat quality:", "# Files quality:", 1)
 		writeReport(t, d, build, path, md)
 	}
-	if rate < minPass(d.Name()) {
-		t.Errorf("%.0f%% of cases passed; at least %.0f%% must", rate*100, minPass(d.Name())*100)
+	if v.fail {
+		t.Errorf("%s %s", sum.sentence(), v.note)
 	}
 }

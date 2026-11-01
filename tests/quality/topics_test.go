@@ -120,7 +120,7 @@ func TestTopicQuality(t *testing.T) {
 		summary += "; no model here is verified for topic checks, so the answering model checked itself, measured but not gated"
 	}
 	if path := config.Env("QUALITY_TOPIC_REPORT"); path != "" {
-		md := markdownReport(d.Name(), report, summarizeRows(report), 0)
+		md := markdownReport(d.Name(), report, summarizeRows(report), 0, verdict{})
 		md = strings.Replace(md, "# Chat quality: core,", "# Topic controls: core,", 1)
 		md = strings.Replace(md, "\n\n", fmt.Sprintf("\n\nThe topic controls %s. At least %.0f%% must be held, and at most %.0f%% wrongly refused.\n\n", summary, minHeld*100, maxRefused*100), 1)
 		writeReport(t, d, build, path, md)

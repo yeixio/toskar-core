@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"regexp"
 	"slices"
 	"sort"
 	"strconv"
@@ -28,6 +29,10 @@ import (
 //	TOSKAR_QUALITY_RESCORE=runs.jsonl
 //	                                checks saved runs again, without asking
 //	                                a model, after a check changes
+//	TOSKAR_QUALITY_BASELINE=runs.jsonl
+//	                                compares with a run saved before, its
+//	                                answers checked as this run's are; the
+//	                                set fails only on a significant drop
 
 // qualityRun is one run of every case: its driver, with its seed.
 type qualityRun struct {
@@ -386,4 +391,38 @@ func TestEmptyAnswerIsAFailedCase(t *testing.T) {
 	if len(seeds) == 0 || seeds[0] != 2 {
 		t.Errorf("the model got seeds %v, want the run's seed 2", seeds)
 	}
+}
+
+// baselineSummary is the saved run at TOSKAR_QUALITY_BASELINE, its answers
+// checked with today's checks, so a changed check isn't a regression; nil
+// without one. Only the cases this run planned count, so the two compare.
+func baselineSummary(t *testing.T, cases []Case, planned []string, deflection *regexp.Regexp) *summary {
+	path := config.Env("QUALITY_BASELINE")
+	if path == "" {
+		return nil
+	}
+	raw, err := os.ReadFile(path)
+	if err != nil {
+		t.Errorf("the baseline: %v", err)
+		return nil
+	}
+	byID := map[string]Case{}
+	for _, c := range cases {
+		byID[c.ID] = c
+	}
+	var rows []reportRow
+	for i, line := range strings.Split(strings.TrimSpace(string(raw)), "\n") {
+		var s savedRun
+		if err := json.Unmarshal([]byte(line), &s); err != nil {
+			t.Errorf("the baseline: line %d: %v", i+1, err)
+			return nil
+		}
+		c, ok := byID[s.Case]
+		if !ok || !slices.Contains(planned, s.Case) {
+			continue
+		}
+		rows = append(rows, reportRow{Case: c, Failures: check(s.Driver, c, s.Result, deflection), Repeat: s.Repeat, Result: s.Result})
+	}
+	sum := summarizeRuns(rows, planned)
+	return &sum
 }

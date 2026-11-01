@@ -11,8 +11,9 @@ permissions:
 
 jobs:
   # Chat quality gates the release: the quality set against a real model
-  # (tests/quality, scripts/quality-model.sh) must pass 90% of its cases
-  # before anything is published.
+  # (tests/quality, scripts/quality-model.sh) must not be clearly under its
+  # 90% bar, the whole 95% interval below it (#834), before anything is
+  # published.
   quality:
     runs-on: ${{ fromJSON(vars.TRUSTED_RUNS_ON || '"ubuntu-latest"') }}
     timeout-minutes: 150

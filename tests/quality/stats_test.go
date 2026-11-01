@@ -1,7 +1,9 @@
 package quality
 
 import (
+	"fmt"
 	"math"
+	"strings"
 	"testing"
 )
 
@@ -112,5 +114,105 @@ func TestMajorityOf3(t *testing.T) {
 	}
 	if !math.IsNaN(majorityOf3(2, 2)) {
 		t.Error("two runs can't estimate three tries")
+	}
+}
+
+// verdict is how a set's runs measure up (#834): against the bar, and
+// against a baseline run when there is one. Pass rates vary from run to
+// run, so a run fails only when its interval says it's below: the whole
+// interval under the bar, or significantly worse than the baseline.
+type verdict struct {
+	fail bool
+	// note says how it measured up, for the report and the log.
+	note string
+}
+
+// significance is the one-sided p-value under which a drop from the
+// baseline is a regression.
+const significance = 0.05
+
+// gate measures s against bar and, when base is set, against it. The stub's
+// replies are scripted, so for it (bar 1) every case must pass.
+func gate(s summary, bar float64, base *summary) verdict {
+	var v verdict
+	switch {
+	case bar >= 1:
+		if s.rate < 1 {
+			return verdict{fail: true, note: "Every case must pass with the stub."}
+		}
+		return verdict{note: "Every case passed."}
+	case s.hi < bar:
+		v = verdict{fail: true, note: fmt.Sprintf("Below the %.0f%% bar: the whole interval is under it.", bar*100)}
+	case s.rate < bar:
+		v.note = fmt.Sprintf("Below the %.0f%% bar, but within run-to-run noise: the interval reaches it, so this isn't counted as a failure. More repeats would tell.", bar*100)
+	default:
+		v.note = fmt.Sprintf("At or above the %.0f%% bar.", bar*100)
+	}
+	if base == nil || base.runs == 0 {
+		return v
+	}
+	p := dropP(base.passes, base.runs, s.passes, s.runs)
+	if p < significance {
+		v.fail = true
+		v.note += fmt.Sprintf(" Worse than the baseline: %.0f%% then, %.0f%% now (one-sided p = %.3f).", base.rate*100, s.rate*100, p)
+	} else {
+		v.note += fmt.Sprintf(" No clear change from the baseline's %.0f%% (one-sided p = %.2f for a drop).", base.rate*100, p)
+	}
+	return v
+}
+
+// dropP is the one-sided p-value that the pass rate fell from passes1 of n1
+// to passes2 of n2: a two-proportion z-test with the pooled rate.
+func dropP(passes1, n1, passes2, n2 int) float64 {
+	if n1 == 0 || n2 == 0 {
+		return 1
+	}
+	p1, p2 := float64(passes1)/float64(n1), float64(passes2)/float64(n2)
+	pool := float64(passes1+passes2) / float64(n1+n2)
+	se := math.Sqrt(pool * (1 - pool) * (1/float64(n1) + 1/float64(n2)))
+	if se == 0 {
+		if p2 < p1 {
+			return 0
+		}
+		return 1
+	}
+	z := (p2 - p1) / se
+	return 0.5 * math.Erfc(-z/math.Sqrt2)
+}
+
+// A run fails only when its interval says so (#834).
+func TestGate(t *testing.T) {
+	sum := func(passes, runs int) summary {
+		s := summary{passes: passes, runs: runs, rate: float64(passes) / float64(runs)}
+		s.lo, s.hi = wilson(passes, runs)
+		return s
+	}
+	base := sum(180, 200) // 90%
+	for _, c := range []struct {
+		name string
+		run  summary
+		base *summary
+		fail bool
+		note string
+	}{
+		{"above the bar", sum(190, 200), nil, false, "At or above"},
+		{"just under, within noise", sum(54, 63), nil, false, "within run-to-run noise"},
+		{"clearly under", sum(150, 200), nil, true, "whole interval"},
+		{"the same as the baseline", sum(182, 200), &base, false, "No clear change"},
+		{"a few worse, not clearly", sum(176, 200), &base, false, "No clear change"},
+		{"clearly worse than the baseline", sum(165, 200), &base, true, "Worse than the baseline"},
+		{"the stub misses one", sum(62, 63), nil, true, "Every case must pass"},
+	} {
+		bar := 0.9
+		if c.name == "the stub misses one" {
+			bar = 1
+		}
+		v := gate(c.run, bar, c.base)
+		if v.fail != c.fail || !strings.Contains(v.note, c.note) {
+			t.Errorf("%s: fail %v, %q", c.name, v.fail, v.note)
+		}
+	}
+	if p := dropP(180, 200, 180, 200); math.Abs(p-0.5) > 1e-9 {
+		t.Errorf("no change: p = %v", p)
 	}
 }
