@@ -59,6 +59,8 @@ type chatAPI interface {
 	createConversation(profile, model string) (contracts.Conversation, error)
 	conversations() ([]contracts.Conversation, error)
 	messages(id string) ([]contracts.Message, error)
+	// models are the models Toskar offers, with what's installed.
+	models() ([]contracts.Model, error)
 	// runs are the tool calls in a chat, newest first.
 	runs(id string) ([]toolRun, error)
 	stream(ctx context.Context, req api.ChatJSONRequestBody) iter.Seq2[toskar.ChatStreamEvent, error]
@@ -161,6 +163,12 @@ func (d daemonChat) runs(id string) ([]toolRun, error) {
 	return list, err
 }
 
+func (d daemonChat) models() ([]contracts.Model, error) {
+	var list []contracts.Model
+	err := d.rest.request(http.MethodGet, "/models", nil, &list)
+	return list, err
+}
+
 func (d daemonChat) stream(ctx context.Context, req api.ChatJSONRequestBody) iter.Seq2[toskar.ChatStreamEvent, error] {
 	return d.sdk.ChatStream(ctx, req)
 }
@@ -235,6 +243,9 @@ func chatCommand(args []string, streams chatIO, newAPI func() (chatAPI, error)) 
 
 	client, err := newAPI()
 	if err != nil {
+		return err
+	}
+	if err := checkModelInstalled(client, *model); err != nil {
 		return err
 	}
 	s := &chatSession{api: client, io: streams, lines: bufio.NewScanner(streams.in), model: *model, profile: *profile, asks: make(chan toolAsk, 4), status: make(chan string, 8)}
@@ -410,6 +421,9 @@ func (s *chatSession) command(line string) (done bool, err error) {
 		if arg == "" {
 			return false, errors.New("/model needs a model id, or auto")
 		}
+		if err := checkModelInstalled(s.api, arg); err != nil {
+			return false, err
+		}
 		s.model = arg
 		s.note("Answering with " + arg + ".")
 	case "profile":
@@ -431,6 +445,38 @@ func (s *chatSession) command(line string) (done bool, err error) {
 		return false, fmt.Errorf("there's no /%s; /help lists the commands", name)
 	}
 	return false, nil
+}
+
+// showNotice says what the answer's notice says, such as that another model
+// answered because the one asked for couldn't. It goes to standard error, so a
+// pipe still gets only the answer.
+func (s *chatSession) showNotice() {
+	msgs, err := s.api.messages(s.conv)
+	if err != nil || len(msgs) == 0 {
+		return
+	}
+	if last := msgs[len(msgs)-1]; last.Role == "assistant" && last.Meta != nil && last.Meta.Notice != "" {
+		fmt.Fprintln(s.io.errOut, s.dim(last.Meta.Notice))
+	}
+}
+
+// checkModelInstalled refuses a model Toskar has but hasn't installed: asked
+// for one, you'd otherwise get an answer from another and not know it. Models
+// it doesn't list, such as an external server's, are for it to find or refuse.
+func checkModelInstalled(api chatAPI, id string) error {
+	if id == "" || id == "auto" {
+		return nil
+	}
+	list, err := api.models()
+	if err != nil {
+		return nil
+	}
+	for _, m := range list {
+		if m.ID == id && !m.Installed {
+			return &exitError{code: 2, msg: fmt.Sprintf("%s isn't installed. Install it with: toskarctl models install %s", id, id)}
+		}
+	}
+	return nil
 }
 
 // log prints what ran in this chat, oldest first (#1017).
@@ -540,6 +586,7 @@ func (s *chatSession) turn(ctx context.Context, text string) error {
 				if wrote {
 					fmt.Fprintln(s.io.out)
 				}
+				s.showNotice()
 				if m := it.e.Metrics; m != nil && s.io.outTerminal && m.EvalTokPerSec > 0 {
 					fmt.Fprintln(s.io.out, s.dim(fmt.Sprintf("%.0f tokens/s", m.EvalTokPerSec)))
 				}

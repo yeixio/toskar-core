@@ -30,6 +30,7 @@ type fakeChat struct {
 	msgs      map[string][]contracts.Message
 	where     string
 	ran       []toolRun
+	offered   []contracts.Model
 }
 
 func newFakeChat() *fakeChat {
@@ -51,6 +52,8 @@ func (f *fakeChat) conversations() ([]contracts.Conversation, error) { return f.
 func (f *fakeChat) messages(id string) ([]contracts.Message, error) { return f.msgs[id], nil }
 
 func (f *fakeChat) runs(string) ([]toolRun, error) { return f.ran, nil }
+
+func (f *fakeChat) models() ([]contracts.Model, error) { return f.offered, nil }
 
 func (f *fakeChat) stream(ctx context.Context, req api.ChatJSONRequestBody) iter.Seq2[toskar.ChatStreamEvent, error] {
 	f.mu.Lock()
@@ -359,5 +362,46 @@ func TestChatLog(t *testing.T) {
 			t.Fatalf("no %q in order in:\n%s", w, out)
 		}
 		at += i
+	}
+}
+
+// Asked for a model that isn't installed, chat says so rather than have another
+// answer. One it doesn't list is for Toskar to find, or refuse.
+func TestChatModelMustBeInstalled(t *testing.T) {
+	f := newFakeChat()
+	f.offered = []contracts.Model{{ID: "big"}, {ID: "small", Installed: true}}
+	_, _, err := runChat(t, f, []string{"--model", "big", "hello"}, "/exit\n", true)
+	var e *exitError
+	if !errors.As(err, &e) || e.code != 2 || !strings.Contains(e.msg, "toskarctl models install big") {
+		t.Fatalf("err %v", err)
+	}
+	if len(f.sent) != 0 {
+		t.Fatalf("sent %v", f.sent)
+	}
+	for _, args := range [][]string{{"--model", "small", "hello"}, {"--model", "ext:echo", "hello"}, {"--model", "auto", "hello"}} {
+		if _, _, err := runChat(t, newFakeWith(f.offered), args, "/exit\n", true); err != nil {
+			t.Fatalf("%v: %v", args, err)
+		}
+	}
+	g := newFakeWith(f.offered)
+	out, errOut, err := runChat(t, g, []string{"hello"}, "/model big\n/exit\n", true)
+	if err != nil || !strings.Contains(errOut, "isn't installed") || strings.Contains(out, "Answering with big") {
+		t.Fatalf("%v\n%s\n%s", err, out, errOut)
+	}
+}
+
+func newFakeWith(offered []contracts.Model) *fakeChat {
+	f := newFakeChat()
+	f.offered = offered
+	return f
+}
+
+// The answer's notice says when another model answered.
+func TestChatShowsTheNotice(t *testing.T) {
+	f := newFakeChat()
+	f.msgs["0000000a"] = []contracts.Message{{Role: "assistant", Meta: &contracts.MessageMeta{Notice: "Answered with Small because Big ran out of memory."}}}
+	out, errOut, err := runChat(t, f, []string{"hello"}, "/exit\n", true)
+	if err != nil || !strings.Contains(errOut, "Answered with Small") || strings.Contains(out, "Answered with Small") {
+		t.Fatalf("%v\nout: %s\nerr: %s", err, out, errOut)
 	}
 }

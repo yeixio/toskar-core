@@ -10,6 +10,7 @@ import (
 	"strings"
 	"sync"
 	"testing"
+	"time"
 
 	"github.com/yeixio/toskar-core/pkg/contracts"
 )
@@ -133,5 +134,29 @@ func TestModelsInstallChecksTheModel(t *testing.T) {
 		} else if !errors.As(err, &e) || e.code != 2 {
 			t.Errorf("%v: exit %v", args, err)
 		}
+	}
+}
+
+// A download outlasts the client's usual timeout, and that isn't a failure.
+func TestModelsInstallWaitsForTheDownload(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch {
+		case r.URL.Path == "/api/v1/models":
+			_ = json.NewEncoder(w).Encode([]contracts.Model{{ID: "big", DisplayName: "Big"}})
+		case strings.HasSuffix(r.URL.Path, "/install"):
+			time.Sleep(300 * time.Millisecond)
+			_ = json.NewEncoder(w).Encode(map[string]string{"status": "installed"})
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer srv.Close()
+	client := daemonClient{base: srv.URL, client: &http.Client{Timeout: 100 * time.Millisecond}}
+	var out bytes.Buffer
+	if err := installModel(client, "big", "", &out); err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(out.String(), "Installed Big.") {
+		t.Fatalf("%s", out.String())
 	}
 }
