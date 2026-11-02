@@ -12,6 +12,7 @@ import (
 	"github.com/yeixio/toskar-core/internal/events"
 	"github.com/yeixio/toskar-core/internal/huginn"
 	"github.com/yeixio/toskar-core/internal/mimir"
+	"github.com/yeixio/toskar-core/internal/runlog"
 	"github.com/yeixio/toskar-core/internal/structured"
 	"github.com/yeixio/toskar-core/internal/tools"
 	"github.com/yeixio/toskar-core/internal/turnopts"
@@ -123,6 +124,13 @@ func (o *Orchestrator) Run(
 		// Offer only the tools this request needs (spec §16). The profile
 		// still decides what is allowed; this decides what is shown.
 		offered := huginn.ToolsFor(kind, task.Prompt, enabledIDs(profile))
+		// Work asked for in the terminal goes on until it's done or stuck,
+		// with what it may turn out to need (#1017).
+		isTask := !jsonOnly && len(images) == 0 && huginn.IsTask(kind, task.Prompt, runlog.OriginFrom(ctx).Client)
+		if isTask {
+			budget = budget.TaskBudget(profile.Orchestration.MaxToolCalls)
+			offered = huginn.TaskTools(kind, task.Prompt, enabledIDs(profile))
+		}
 		// An attached audio file is transcribed, and an attached image can
 		// be edited, when the profile allows it, whatever the message says
 		// ("summarize this", "make it brighter").
@@ -279,6 +287,7 @@ func (o *Orchestrator) Run(
 			return
 		}
 		calls := 0
+		tracker := taskTracker{start: len(messages)}
 		malformed := 0
 		// changed records that a tool that changes things ran.
 		changed := false
@@ -338,6 +347,11 @@ func (o *Orchestrator) Run(
 			if parsed.Call != nil {
 				parsed.Call.ID = tools.Canonical(parsed.Call.ID)
 			}
+			// Told to stop and sum up, it called a tool anyway: say what ran.
+			if tracker.stopped != "" && (parsed.Call != nil || strings.TrimSpace(parsed.Text) == "") {
+				live.finish(ch, role, nodeID, tracker.report(), metrics, usage)
+				return
+			}
 			if parsed.Call != nil && !toolEnabled(profile, parsed.Call.ID) && malformed < 2 {
 				// A tool that was not offered is refused, whatever the profile
 				// allows: the model cannot widen its own tools (spec §17).
@@ -351,6 +365,14 @@ func (o *Orchestrator) Run(
 				continue
 			}
 			if parsed.Call != nil && toolsOn && toolEnabled(profile, parsed.Call.ID) {
+				if isTask && calls >= budget.MaxToolCalls {
+					toolsOn = false
+					tracker.stopped = "it reached the limit of " + fmt.Sprint(budget.MaxToolCalls) + " steps"
+					messages[0] = pluginapi.ChatMessage{Role: "system", Content: plainSys}
+					messages = append(messages, pluginapi.ChatMessage{Role: "assistant", Content: content},
+						pluginapi.ChatMessage{Role: "user", Content: fmt.Sprintf(taskStopped, tracker.stopped)})
+					continue
+				}
 				if calls >= budget.MaxToolCalls {
 					live.finish(ch, role, nodeID, "I stopped after "+fmt.Sprint(budget.MaxToolCalls)+" tool calls so this request would not loop.", metrics, usage)
 					return
@@ -383,6 +405,17 @@ func (o *Orchestrator) Run(
 					resultNote = "Tool result for you, not for the user. " + untrustedNote + "\n" + string(raw)
 				}
 				followUp := answerAfterTools
+				if isTask {
+					followUp = taskFollowUp
+					resultNote = shortenResult(resultNote)
+					tracker.ran(parsed.Call.ID, parsed.Call.Args, err)
+					if tracker.repeated(parsed.Call.ID, parsed.Call.Args, resultNote) {
+						toolsOn = false
+						tracker.stopped = "the same step keeps giving the same result"
+						messages[0] = pluginapi.ChatMessage{Role: "system", Content: plainSys}
+						followUp = fmt.Sprintf(taskStopped, tracker.stopped)
+					}
+				}
 				if err == nil && parsed.Call.ID == "internet.search" && calls < budget.MaxToolCalls {
 					if page, opened := followLiveSearch(ctx, env, profile, task.Prompt, parsed.Call.Args, result); opened {
 						calls++
@@ -398,6 +431,9 @@ func (o *Orchestrator) Run(
 					pluginapi.ChatMessage{Role: "assistant", Content: content},
 					pluginapi.ChatMessage{Role: "user", Content: resultNote + followUp},
 				)
+				if isTask {
+					messages = foldOlderSteps(messages, tracker.start)
+				}
 				continue
 			}
 			if toolsOn && parsed.Malformed && malformed < 2 && calls < budget.MaxToolCalls {
