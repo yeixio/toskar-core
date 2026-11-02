@@ -29,6 +29,7 @@ type fakeChat struct {
 	convs     []contracts.Conversation
 	msgs      map[string][]contracts.Message
 	where     string
+	ran       []toolRun
 }
 
 func newFakeChat() *fakeChat {
@@ -48,6 +49,8 @@ func (f *fakeChat) computer() string { return f.where }
 func (f *fakeChat) conversations() ([]contracts.Conversation, error) { return f.convs, nil }
 
 func (f *fakeChat) messages(id string) ([]contracts.Message, error) { return f.msgs[id], nil }
+
+func (f *fakeChat) runs(string) ([]toolRun, error) { return f.ran, nil }
 
 func (f *fakeChat) stream(ctx context.Context, req api.ChatJSONRequestBody) iter.Seq2[toskar.ChatStreamEvent, error] {
 	f.mu.Lock()
@@ -328,5 +331,33 @@ func TestChatDestructiveAlwaysAsks(t *testing.T) {
 	}
 	if len(f.decisions) != 1 || !strings.Contains(f.decisions[0], "deny") {
 		t.Errorf("decisions %v", f.decisions)
+	}
+}
+
+// /log says what ran, its result, and who allowed it, oldest first (#1017).
+func TestChatLog(t *testing.T) {
+	f := newFakeChat()
+	out, _, err := runChat(t, f, nil, "/log\n/exit\n", true)
+	if err != nil || strings.Contains(out, "you said") {
+		t.Fatalf("%v\n%s", err, out)
+	}
+	f = newFakeChat()
+	f.ran = []toolRun{
+		{ToolID: "terminal", Status: "denied", Approval: "you", Summary: "rm -rf build", Error: "denied by user"},
+		{ToolID: "terminal", Status: "failed", Approval: "session", Summary: "go test ./...", Error: "exit 1"},
+		{ToolID: "terminal", Status: "completed", Approval: "you", Summary: "git status"},
+	}
+	out, _, err = runChat(t, f, nil, "/log\n/exit\n", true)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := []string{"git status", "completed, you said yes", "go test ./...", "failed: exit 1, you said always", "rm -rf build", "not run: you said no"}
+	at := 0
+	for _, w := range want {
+		i := strings.Index(out[at:], w)
+		if i < 0 {
+			t.Fatalf("no %q in order in:\n%s", w, out)
+		}
+		at += i
 	}
 }

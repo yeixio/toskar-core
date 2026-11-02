@@ -2071,6 +2071,10 @@
           "test": "cli-help",
           "code": "toskarctl help",
           "output": "toskarctl talks to Toskar from a terminal or a script…Docs: https://toskar.ai/docs"
+        },
+        {
+          "type": "paragraph",
+          "text": "In `toskarctl chat`, `/log` shows what ran in that chat, how it ended, and who allowed it."
         }        ,
         {
           "type": "paragraph",

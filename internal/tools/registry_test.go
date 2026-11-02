@@ -3,10 +3,13 @@ package tools
 import (
 	"context"
 	"errors"
+	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
 	"github.com/yeixio/toskar-core/internal/events"
+	"github.com/yeixio/toskar-core/internal/store"
 )
 
 type stubTool struct {
@@ -262,5 +265,73 @@ func TestRegistryDestructiveAlwaysAsks(t *testing.T) {
 	}
 	if _, err := r.Execute(context.Background(), "terminal", map[string]any{"command": "git status"}, PolicyAllow, "r", map[string]any{"automation_id": "a1"}); err != nil {
 		t.Fatalf("automation, known command: %v", err)
+	}
+}
+
+// What ran, its result, and who said yes are kept with the chat (#1017).
+func TestRegistryRecordsCommands(t *testing.T) {
+	db, err := store.Open(filepath.Join(t.TempDir(), "test.db"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = db.Close() })
+	r := &Registry{
+		tools:    map[string]Tool{"terminal": exitTool{code: 3}},
+		policy:   NewPolicyEngine(),
+		pending:  map[string]*PendingCall{},
+		bus:      events.NewBus(8),
+		auditLog: NewAuditLog(db.SQL),
+	}
+	long := "go test " + strings.Repeat("./x ", 100)
+	if _, err := r.Execute(context.Background(), "terminal", map[string]any{"command": long}, PolicyAllow, "r", map[string]any{"conversation_id": "c1"}); err != nil {
+		t.Fatal(err)
+	}
+	runs, err := r.auditLog.List(context.Background(), AuditFilter{ConversationID: "c1"})
+	if err != nil || len(runs) != 1 {
+		t.Fatalf("%v %v", runs, err)
+	}
+	run := runs[0]
+	if run.Summary != strings.TrimSpace(long) || run.Status != RunFailed || run.Error != "exit 3" || run.Approval != ApprovedByProfile {
+		t.Fatalf("%+v", run)
+	}
+}
+
+type exitTool struct{ code int }
+
+func (e exitTool) ID() string          { return "terminal" }
+func (e exitTool) DisplayName() string { return "Terminal" }
+func (e exitTool) Description() string { return "stub" }
+func (e exitTool) Execute(context.Context, map[string]any) (map[string]any, error) {
+	return map[string]any{"stdout": "", "exit": e.code}, nil
+}
+
+// After reading something from outside, the prompt says so (#1017).
+func TestRegistrySaysWhyAfterOutside(t *testing.T) {
+	bus := events.NewBus(8)
+	subID, ch := bus.Subscribe()
+	defer bus.Unsubscribe(subID)
+	r := &Registry{tools: map[string]Tool{"terminal": stubTool{id: "terminal"}}, policy: NewPolicyEngine(), pending: map[string]*PendingCall{}, bus: bus}
+	done := make(chan error, 1)
+	go func() {
+		_, err := r.Execute(context.Background(), "terminal", map[string]any{"command": "git status"}, PolicyAskEachTime, "r", map[string]any{"conversation_id": "c1"})
+		done <- err
+	}()
+	for {
+		select {
+		case err := <-done:
+			if err != nil {
+				t.Fatal(err)
+			}
+			return
+		case e := <-ch:
+			if e.Type == events.ToolRequested {
+				if e.Payload["always_asks"] != true || e.Payload["after_outside"] != true {
+					t.Errorf("payload %v", e.Payload)
+				}
+				_ = r.Decide(e.Payload["request_id"].(string), true, true)
+			}
+		case <-time.After(5 * time.Second):
+			t.Fatal("didn't finish")
+		}
 	}
 }

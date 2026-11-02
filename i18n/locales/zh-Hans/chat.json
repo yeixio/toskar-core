@@ -241,6 +241,7 @@
     "allowSession": "本次会话允许",
     "cantUndo": "此操作无法撤销。即使你已允许此工具,每次仍会询问。",
     "alwaysAsks": "Toskar 无法判断此命令是否无害,因此每次都会询问。",
+    "afterOutside": "此聊天刚读取了外部内容(例如网页),因此每次都会询问。请确认这是你要求的操作。",
     "deny": "拒绝",
     "decideFailed": "无法记录工具权限选择。",
     "failed": "{{tool}} 失败",

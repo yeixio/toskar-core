@@ -249,6 +249,7 @@
     "allowSession": "Consenti per la sessione",
     "cantUndo": "Non si può annullare. Toskar chiede ogni volta, anche se hai consentito questo strumento.",
     "alwaysAsks": "Toskar non può sapere se questo comando è innocuo, quindi chiede ogni volta.",
+    "afterOutside": "Questa chat ha appena letto qualcosa dall'esterno, come una pagina web, quindi Toskar chiede ogni volta. Controlla che sia ciò che hai chiesto.",
     "deny": "Nega",
     "decideFailed": "Impossibile registrare la scelta sul permesso dello strumento.",
     "failed": "{{tool}} non riuscito",

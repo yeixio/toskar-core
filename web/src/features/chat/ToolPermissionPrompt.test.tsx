@@ -33,6 +33,13 @@ describe('ToolPermissionPrompt', () => {
     expect(onDecide).toHaveBeenCalledWith(true, false)
   })
 
+  it('says when it asks because the chat read something from outside', () => {
+    renderIt({ ...base, command: 'git status', alwaysAsks: true, afterOutside: true })
+    expect(screen.getByText(/just read something from outside/)).toBeInTheDocument()
+    expect(screen.queryByText(/can't tell this command is harmless/)).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Allow for session' })).not.toBeInTheDocument()
+  })
+
   it("says why a command it can't vouch for asks each time", () => {
     renderIt({ ...base, command: 'unknown-tool', alwaysAsks: true })
     expect(screen.getByText(/can't tell this command is harmless/)).toBeInTheDocument()
