@@ -82,9 +82,11 @@ jobs:
       - name: Installer scripts
         # shellcheck and pwsh come with the Ubuntu runner.
         run: |
-          shellcheck --shell=sh scripts/install.sh
+          shellcheck --shell=sh scripts/install.sh scripts/benchmark.sh
           sh -n scripts/install.sh
+          sh -n scripts/benchmark.sh
           pwsh -NoProfile -Command '$errors = $null; [System.Management.Automation.Language.Parser]::ParseFile("scripts/install.ps1", [ref]$null, [ref]$errors) | Out-Null; if ($errors) { $errors | ForEach-Object { Write-Error $_.ToString() }; exit 1 }'
+          pwsh -NoProfile -Command '$errors = $null; [System.Management.Automation.Language.Parser]::ParseFile("scripts/benchmark.ps1", [ref]$null, [ref]$errors) | Out-Null; if ($errors) { $errors | ForEach-Object { Write-Error $_.ToString() }; exit 1 }'
       # Lint runs govet (the standard linters in .golangci.yml), so there is
       # no separate go vet step.
       - name: Lint

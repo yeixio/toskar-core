@@ -142,6 +142,8 @@ jobs:
             dist/SHA256SUMS.txt
             scripts/install.sh
             scripts/install.ps1
+            scripts/benchmark.sh
+            scripts/benchmark.ps1
       # Homebrew and apt serve stable releases. A pre-release (a tag with a
       # suffix such as -beta.1) must not replace what their users install.
       - name: Publish the Homebrew formula

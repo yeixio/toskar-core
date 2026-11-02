@@ -1,0 +1,107 @@
+name: Benchmark script
+
+# Runs the one-line benchmark for real on each system (#1037): the scripts people
+# paste, against a local copy of what a release has, with a tiny model and a single
+# case, so a change that breaks them fails here and not on someone's computer.
+on:
+  pull_request:
+    paths:
+      - scripts/benchmark.*
+      - scripts/test-benchmark.sh
+      - cmd/qualityrun/**
+      - internal/qualityscore/**
+      - tests/quality/**
+      - internal/tools/terminal/**
+      - .github/workflows/benchmark-script.yml
+  schedule:
+    - cron: "41 7 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# The home runners share ports, and one model download at a time is plenty.
+concurrency:
+  group: benchmark-script
+  cancel-in-progress: false
+
+env:
+  TOSKAR_RELEASE_URL: http://127.0.0.1:7370
+  # A tiny model; one case; speed still measured.
+  TOSKAR_BENCHMARK_ARGS: --model llama-3.2-1b-q4 --yes --sets reasoning --only math-muffins
+
+jobs:
+  unix:
+    strategy:
+      fail-fast: false
+      matrix:
+        runner:
+          - ${{ vars.CI_RUNS_ON || '"ubuntu-latest"' }}
+          - ${{ vars.MAC_RUNS_ON || '"macos-latest"' }}
+    runs-on: ${{ fromJSON(matrix.runner) }}
+    timeout-minutes: 40
+    env:
+      TOSKAR_BENCHMARK_DIR: ${{ runner.temp }}/toskar-benchmark
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version: "1.26.x"
+          check-latest: true
+      - name: Serve a local release
+        env:
+          RELEASE: ${{ runner.temp }}/release
+        run: |
+          rm -rf "$RELEASE" "$TOSKAR_BENCHMARK_DIR"
+          scripts/test-benchmark.sh "$RELEASE" 7370 > "$RUNNER_TEMP/serve.log" 2>&1 &
+          for _ in $(seq 1 300); do
+            curl -sf "$TOSKAR_RELEASE_URL/SHA256SUMS.txt" >/dev/null && exit 0
+            sleep 2
+          done
+          cat "$RUNNER_TEMP/serve.log"
+          exit 1
+      # As curl | sh does: the script on standard input.
+      - name: Run the script
+        run: sh < scripts/benchmark.sh
+      - name: It measured and reported
+        run: |
+          set -eu
+          folder="$(find "$TOSKAR_BENCHMARK_DIR/results" -type d -name 'quality-score-*')"
+          grep -q '1 of 1 right\|0 of 1 right' "$folder/reasoning.md"
+          grep -q '"tokens_per_second"' "$folder/performance.json"
+      - name: Stop the server
+        if: always()
+        run: pkill -f 'http.server 7370' || true
+
+  # Windows stays on GitHub's runners.
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version: "1.26.x"
+          check-latest: true
+      - name: Serve a local release
+        shell: bash
+        run: |
+          scripts/test-benchmark.sh "$RUNNER_TEMP/release" 7370 > "$RUNNER_TEMP/serve.log" 2>&1 &
+          for _ in $(seq 1 300); do
+            curl -sf "$TOSKAR_RELEASE_URL/SHA256SUMS.txt" >/dev/null && exit 0
+            sleep 2
+          done
+          cat "$RUNNER_TEMP/serve.log"
+          exit 1
+      # As irm | iex does, in Windows PowerShell, which every computer has.
+      - name: Run the script
+        shell: powershell
+        run: |
+          $env:TOSKAR_BENCHMARK_DIR = Join-Path $env:RUNNER_TEMP 'toskar-benchmark'
+          Get-Content -Raw scripts\benchmark.ps1 | Invoke-Expression
+      - name: It measured and reported
+        shell: powershell
+        run: |
+          $folder = Get-ChildItem (Join-Path $env:RUNNER_TEMP 'toskar-benchmark\results') -Directory -Filter 'quality-score-*'
+          if (-not (Select-String -Path (Join-Path $folder.FullName 'reasoning.md') -Pattern 'of 1 right' -Quiet)) { throw 'no reasoning score' }
+          if (-not (Select-String -Path (Join-Path $folder.FullName 'performance.json') -Pattern 'tokens_per_second' -Quiet)) { throw 'no performance figures' }

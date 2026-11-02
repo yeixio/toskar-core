@@ -41,6 +41,8 @@ type Row struct {
 	Date               string            `json:"date"`
 	Hardware           string            `json:"hardware"`
 	MethodVersion      int               `json:"method_version"`
+	Submitted          bool              `json:"submitted,omitempty"`
+	SubmittedBy        string            `json:"submitted_by,omitempty"`
 	Source             string            `json:"source,omitempty"`
 	Scores             map[string]Passed `json:"scores"`
 	SecondsPerQuestion float64           `json:"seconds_per_question,omitempty"`
@@ -183,3 +185,9 @@ func Score(scores map[string]Passed) (int, bool) {
 func Describe(score, version int) string {
 	return fmt.Sprintf("%d (v%d)", score, version)
 }
+
+var creditName = regexp.MustCompile(`^[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,37}[a-zA-Z0-9])?$`)
+
+// ValidCredit is whether a name can be a GitHub username: only that, so nobody can
+// put a message in the data.
+func ValidCredit(name string) bool { return creditName.MatchString(name) }
