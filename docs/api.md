@@ -795,7 +795,7 @@ A chat that fails while streaming sends `event: error_code` with the same `code`
 | `chat.effort`, `chat.lookup`, `chat.verifying`, `chat.making_file`, `chat.making_media`, `chat.summarized` | Effort is set, the web is looked up first, figures are being checked, a requested file is being made, a requested picture or clip is being made (`kind` is `image`, `edit`, or `video`), or older messages were summarized |
 | `plan.created`, `plan.step` | A request with several parts is planned, and each part runs |
 | `verify.action`, `verify.done`, `verify.code`, `verify.consistency` | The answer checks: figures, claimed actions, code, and contradictions |
-| `tool.requested`, `tool.started`, `tool.completed`, `tool.failed`, `tool.parsed` | A tool call waits for approval, runs, finishes, fails (with `kind`), or is read from text |
+| `tool.requested`, `tool.started`, `tool.completed`, `tool.failed`, `tool.parsed` | A tool call waits for approval, runs, finishes, fails (with `kind`), or is read from text. On `tool.requested`, `always_asks` says no earlier answer covers this command, so don't offer to allow it for the session (`allow_session` is ignored), and `cant_undo` says it can't be undone |
 | `knowledge.retrieved`, `knowledge.failed` | Knowledge passages are added to a turn, or the search fails |
 | `memory.saved`, `memory.deleted` | A memory is saved or forgotten from a chat |
 | `orchestration.role` | A planner, worker, or reviewer starts, with the computer it runs on |

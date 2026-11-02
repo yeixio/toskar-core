@@ -239,6 +239,8 @@
     "permissionReason": "어시스턴트가 계속하려면 로컬 도구를 사용해야 해요.",
     "allowOnce": "한 번 허용",
     "allowSession": "세션 동안 허용",
+    "cantUndo": "되돌릴 수 없습니다. 이 도구를 허용했더라도 매번 확인합니다.",
+    "alwaysAsks": "이 명령이 안전한지 판단할 수 없어 매번 확인합니다.",
     "deny": "거부",
     "decideFailed": "도구 권한 선택을 기록할 수 없어요.",
     "failed": "{{tool}} 실패",

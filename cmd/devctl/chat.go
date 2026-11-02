@@ -165,6 +165,9 @@ type chatSession struct {
 type toolAsk struct {
 	requestID, tool, reason string
 	args                    map[string]any
+	// alwaysAsks is a command no earlier yes covers, and cantUndo says it
+	// can't be undone (#1017).
+	alwaysAsks, cantUndo bool
 }
 
 func chatCommand(args []string, streams chatIO, newAPI func() (chatAPI, error)) error {
@@ -554,17 +557,25 @@ func (s *chatSession) ask(a toolAsk) {
 	if raw, err := json.MarshalIndent(a.args, "  ", "  "); err == nil && len(a.args) > 0 {
 		fmt.Fprintf(s.io.out, "  %s\n", raw)
 	}
+	if a.cantUndo {
+		fmt.Fprintln(s.io.out, "This can't be undone.")
+	}
 	allow, forChat := false, false
 	if !s.io.inTerminal {
 		fmt.Fprintln(s.io.out, "Not allowed: there's no one at the terminal to ask. Chat without a pipe to answer.")
 	} else {
-		fmt.Fprint(s.io.out, "Allow? [y]es, [n]o, [a]lways in this chat: ")
+		if a.alwaysAsks {
+			fmt.Fprint(s.io.out, "Allow? [y]es, [n]o (this one asks every time): ")
+		} else {
+			fmt.Fprint(s.io.out, "Allow? [y]es, [n]o, [a]lways in this chat: ")
+		}
 		if s.lines.Scan() {
 			switch strings.ToLower(strings.TrimSpace(s.lines.Text())) {
 			case "y", "yes":
 				allow = true
 			case "a", "always":
-				allow, forChat = true, true
+				// An "a" where it isn't offered isn't a yes.
+				allow, forChat = !a.alwaysAsks, !a.alwaysAsks
 			}
 		}
 	}
@@ -594,6 +605,8 @@ func (s *chatSession) watch(ctx context.Context) {
 			a.tool, _ = p["tool_id"].(string)
 			a.reason, _ = p["reason"].(string)
 			a.args, _ = p["args"].(map[string]any)
+			a.alwaysAsks, _ = p["always_asks"].(bool)
+			a.cantUndo, _ = p["cant_undo"].(bool)
 			if a.requestID != "" {
 				s.asks <- a
 			}

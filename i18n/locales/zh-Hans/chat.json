@@ -239,6 +239,8 @@
     "permissionReason": "助手需要使用一个本地工具才能继续。",
     "allowOnce": "允许一次",
     "allowSession": "本次会话允许",
+    "cantUndo": "此操作无法撤销。即使你已允许此工具,每次仍会询问。",
+    "alwaysAsks": "Toskar 无法判断此命令是否无害,因此每次都会询问。",
     "deny": "拒绝",
     "decideFailed": "无法记录工具权限选择。",
     "failed": "{{tool}} 失败",

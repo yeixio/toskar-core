@@ -66,6 +66,20 @@ func (f *fakeChat) stream(ctx context.Context, req api.ChatJSONRequestBody) iter
 			}
 			return
 		}
+		if strings.Contains(req.Message, "wipe it") {
+			payload := map[string]any{"conversation_id": *req.ConversationId, "request_id": "req2", "tool_id": "terminal", "reason": "it can delete", "args": map[string]any{"command": "rm -rf build"}, "always_asks": true, "cant_undo": true}
+			f.events <- api.Event{Type: "tool.requested", Payload: &payload}
+			select {
+			case <-f.decided:
+			case <-time.After(5 * time.Second):
+				yield(toskar.ChatStreamEvent{}, errors.New("no decision"))
+				return
+			case <-ctx.Done():
+				return
+			}
+			yield(toskar.ChatStreamEvent{Type: "done"}, nil)
+			return
+		}
 		if strings.Contains(req.Message, "run ls") {
 			if !yield(toskar.ChatStreamEvent{Type: "token", Content: "Let me look. "}, nil) {
 				return
@@ -293,5 +307,26 @@ func TestRowsOf(t *testing.T) {
 		if got := rowsOf(c.text, c.cols); got != c.want {
 			t.Errorf("rowsOf(%q, %d) = %d, want %d", c.text, c.cols, got, c.want)
 		}
+	}
+}
+
+// A command that can't be undone says so, offers no "always", and takes an
+// "a" as a no (#1017).
+func TestChatDestructiveAlwaysAsks(t *testing.T) {
+	f := newFakeChat()
+	out, errOut, err := runChat(t, f, nil, "wipe it\na\n/exit\n", true)
+	if err != nil {
+		t.Fatalf("%v\n%s", err, errOut)
+	}
+	for _, want := range []string{"rm -rf build", "This can't be undone.", "[n]o (this one asks every time)"} {
+		if !strings.Contains(out, want) {
+			t.Errorf("no %q in:\n%s", want, out)
+		}
+	}
+	if strings.Contains(out, "[a]lways") {
+		t.Errorf("offered always:\n%s", out)
+	}
+	if len(f.decisions) != 1 || !strings.Contains(f.decisions[0], "deny") {
+		t.Errorf("decisions %v", f.decisions)
 	}
 }

@@ -1186,6 +1186,9 @@ export interface ToolRequestedPayload {
   reason?: string
   conversation_id?: string
   task_id?: string
+  /** This command asks every time: "allow for session" won't cover it. */
+  always_asks?: boolean
+  cant_undo?: boolean
 }
 
 export interface SettingsPatch {

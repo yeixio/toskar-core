@@ -247,6 +247,8 @@
     "permissionReason": "L'assistente vuole usare uno strumento locale per continuare.",
     "allowOnce": "Consenti una volta",
     "allowSession": "Consenti per la sessione",
+    "cantUndo": "Non si può annullare. Toskar chiede ogni volta, anche se hai consentito questo strumento.",
+    "alwaysAsks": "Toskar non può sapere se questo comando è innocuo, quindi chiede ogni volta.",
     "deny": "Nega",
     "decideFailed": "Impossibile registrare la scelta sul permesso dello strumento.",
     "failed": "{{tool}} non riuscito",

@@ -2,6 +2,7 @@ package tools
 
 import (
 	"context"
+	"errors"
 	"testing"
 	"time"
 
@@ -174,5 +175,92 @@ func TestRegistryAllowForSessionIsPerChat(t *testing.T) {
 	}
 	if !run("c", PolicyAsk) {
 		t.Error("a yes under ask-each-time isn't kept, so c still asks")
+	}
+}
+
+// A command that always asks does so whatever a profile or an earlier "always"
+// says, and an automation, with no one to ask, doesn't run it (#1017).
+func TestRegistryDestructiveAlwaysAsks(t *testing.T) {
+	bus := events.NewBus(64)
+	subID, ch := bus.Subscribe()
+	defer bus.Unsubscribe(subID)
+	r := &Registry{
+		tools:   map[string]Tool{"terminal": stubTool{id: "terminal"}},
+		policy:  NewPolicyEngine(),
+		pending: map[string]*PendingCall{},
+		bus:     bus,
+	}
+	meta := map[string]any{"conversation_id": "c1"}
+	run := func(command, policy string, answer func(p map[string]any)) error {
+		t.Helper()
+		done := make(chan error, 1)
+		go func() {
+			_, err := r.Execute(context.Background(), "terminal", map[string]any{"command": command}, policy, "reason", meta)
+			done <- err
+		}()
+		for {
+			select {
+			case err := <-done:
+				return err
+			case e := <-ch:
+				if e.Type == events.ToolRequested {
+					if answer == nil {
+						t.Errorf("%q asked: %v", command, e.Payload)
+						_ = r.Decide(e.Payload["request_id"].(string), false, false)
+						continue
+					}
+					answer(e.Payload)
+				}
+			case <-time.After(5 * time.Second):
+				t.Fatalf("%q didn't finish", command)
+			}
+		}
+	}
+	// "Always in this chat", on a known command, then a destructive one.
+	always := func(p map[string]any) { _ = r.Decide(p["request_id"].(string), true, true) }
+	if err := run("git status", PolicyAsk, always); err != nil {
+		t.Fatal(err)
+	}
+	if err := run("go test ./...", PolicyAsk, nil); err != nil {
+		t.Fatalf("always in this chat should cover a known command: %v", err)
+	}
+	asked := 0
+	for _, policy := range []string{PolicyAsk, PolicyAllow} {
+		// Answering "always" each time mustn't stick.
+		for range 2 {
+			err := run("sh -c 'rm -rf .'", policy, func(p map[string]any) {
+				asked++
+				if p["always_asks"] != true || p["cant_undo"] != true {
+					t.Errorf("payload %v", p)
+				}
+				_ = r.Decide(p["request_id"].(string), true, true)
+			})
+			if err != nil {
+				t.Fatal(err)
+			}
+		}
+	}
+	if asked != 4 {
+		t.Fatalf("asked %d times", asked)
+	}
+	err := run("unknown-tool", PolicyAllow, func(p map[string]any) {
+		if p["always_asks"] != true || p["cant_undo"] != false {
+			t.Errorf("payload %v", p)
+		}
+		_ = r.Decide(p["request_id"].(string), false, false)
+	})
+	if err == nil {
+		t.Fatal("a no should stop it")
+	}
+	if _, err := r.Execute(context.Background(), "terminal", map[string]any{"command": "rm x"}, PolicyDeny, "r", meta); err == nil {
+		t.Fatal("deny should still deny")
+	}
+	// An automation has no one to ask.
+	_, err = r.Execute(context.Background(), "terminal", map[string]any{"command": "rm x"}, PolicyAllow, "r", map[string]any{"automation_id": "a1"})
+	if !errors.Is(err, ErrNeedsApproval) {
+		t.Fatalf("automation: %v", err)
+	}
+	if _, err := r.Execute(context.Background(), "terminal", map[string]any{"command": "git status"}, PolicyAllow, "r", map[string]any{"automation_id": "a1"}); err != nil {
+		t.Fatalf("automation, known command: %v", err)
 	}
 }

@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState, type MouseEvent } from 'react'
+import { ToolPermissionPrompt, type PendingToolPrompt } from './ToolPermissionPrompt'
 import { thinkingToSend, type Thinking } from './thinking'
 import { Trans, useTranslation } from 'react-i18next'
 import { Link, useLocation, useSearchParams } from 'react-router-dom'
@@ -63,14 +64,6 @@ type TeamStep = {
   role: string
   nodeId?: string
   nodeName?: string
-}
-
-type PendingToolPrompt = {
-  requestId: string
-  toolId: string
-  reason?: string
-  argsSummary: string
-  rawArgs?: string
 }
 
 type RunMode = 'automatic' | 'local'
@@ -788,6 +781,9 @@ export function ChatPage() {
             reason: payload.reason,
             argsSummary: friendlyToolDetail(payload.args) || t('tools.noDetails'),
             rawArgs: formatToolArgs(payload.args),
+            command: typeof payload.args?.command === 'string' ? payload.args.command : undefined,
+            alwaysAsks: payload.always_asks,
+            cantUndo: payload.cant_undo,
           })
           setStatusMessage(t('status.waitingForPermission', { tool: toolDisplayName(payload.tool_id) }))
         }
@@ -2442,46 +2438,13 @@ export function ChatPage() {
           aria-labelledby="tool-permission-title"
         >
           <div className="card w-full max-w-md space-y-4 shadow-panel">
-            <div>
-              <h2
-                id="tool-permission-title"
-                className="font-display text-lg font-semibold text-ink"
-              >
-                {t('tools.permissionTitle', { tool: toolDisplayName(pendingTool.toolId) })}
-              </h2>
-              <p className="mt-1 text-sm text-ink-muted">{pendingTool.reason || t('tools.permissionReason')}</p>
-            </div>
-            <p className="break-words text-sm text-ink">{pendingTool.argsSummary}</p>
-            {advancedMode && pendingTool.rawArgs && (
-              <pre className="log-panel max-h-40">{pendingTool.rawArgs}</pre>
-            )}
-            <div className="flex flex-wrap gap-2">
-              <button
-                type="button"
-                className="btn-primary"
-                disabled={toolDeciding}
-                onClick={() => void decidePendingTool(true, false)}
-              >
-                {t('tools.allowOnce')}
-              </button>
-              <button
-                type="button"
-                className="btn-secondary"
-                disabled={toolDeciding}
-                onClick={() => void decidePendingTool(true, true)}
-              >
-                {t('tools.allowSession')}
-              </button>
-              <button
-                type="button"
-                className="btn-secondary"
-                data-autofocus
-                disabled={toolDeciding}
-                onClick={() => void decidePendingTool(false)}
-              >
-                {t('tools.deny')}
-              </button>
-            </div>
+            <ToolPermissionPrompt
+              tool={pendingTool}
+              toolName={toolDisplayName(pendingTool.toolId)}
+              showRawArgs={advancedMode}
+              deciding={toolDeciding}
+              onDecide={(allow, allowSession) => void decidePendingTool(allow, allowSession)}
+            />
           </div>
         </div>
       )}
