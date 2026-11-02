@@ -13,23 +13,21 @@ import (
 
 const reportFolderPrefix = "quality-report-real-models-"
 
-// weeklySets are read from a weekly run's reports, when the results file lists them.
-var weeklySets = append(append([]Set{}, Sets...), Set{Name: "triage", Report: "triage.md"})
-
 // Publish adds a scheduled run's scores to results.json. The reports folder
 // holds a quality-report-real-models-<model> folder per model, as the Quality
 // workflow uploads them. A model gets a row only when its reports say they
 // tested that model: "recommended" stands for several, and a report naming
-// another means the run didn't test the one it was asked to. Publishing the
-// same run again adds nothing. It says what it did on log.
+// another means the run didn't test the one it was asked to. Only a complete
+// row is published, with a score from every one of Sets, so every row can be
+// compared and has a Score. Publishing the same run again adds nothing. It says
+// what it did on log.
 func Publish(reports, resultsPath string, version int, names map[string]string, source string, now time.Time, log func(string)) error {
 	raw, err := os.ReadFile(resultsPath)
 	if err != nil {
 		return err
 	}
 	var results struct {
-		Suites  map[string]any `json:"suites"`
-		Results []Row          `json:"results"`
+		Results []Row `json:"results"`
 	}
 	if err := json.Unmarshal(raw, &results); err != nil {
 		return fmt.Errorf("%s: %w", resultsPath, err)
@@ -55,7 +53,7 @@ func Publish(reports, resultsPath string, version int, names map[string]string, 
 		if name == "" {
 			name = model
 		}
-		row, why := weeklyRow(model, folder, results.Suites)
+		row, why := weeklyRow(model, folder)
 		if why != "" {
 			log(fmt.Sprintf("No row for %s: %s.", model, why))
 			continue
@@ -82,12 +80,9 @@ func Publish(reports, resultsPath string, version int, names map[string]string, 
 }
 
 // weeklyRow is a model's row, without what its folder doesn't say, or why it has none.
-func weeklyRow(model, folder string, suites map[string]any) (Row, string) {
+func weeklyRow(model, folder string) (Row, string) {
 	row := Row{Model: model, Scores: map[string]Passed{}}
-	for _, set := range weeklySets {
-		if _, listed := suites[set.Name]; !listed {
-			continue
-		}
+	for _, set := range Sets {
 		raw, err := os.ReadFile(filepath.Join(folder, set.Report))
 		if err != nil {
 			continue
@@ -109,10 +104,18 @@ func weeklyRow(model, folder string, suites map[string]any) (Row, string) {
 			row.SecondsPerQuestion = SecondsPerQuestion(string(raw))
 		}
 	}
-	if len(row.Scores) == 0 {
-		return row, "no scores in its reports"
+	if _, complete := Score(row.Scores); !complete {
+		return row, "its reports don't have a score from all of " + setNames()
 	}
 	return row, ""
+}
+
+func setNames() string {
+	names := make([]string, len(Sets))
+	for i, set := range Sets {
+		names[i] = set.Name
+	}
+	return strings.Join(names, ", ")
 }
 
 // RowLine is a row in the results file's own style: one line, with spaces after

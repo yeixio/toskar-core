@@ -106,6 +106,10 @@ func TestPublishAddsWeeklyRows(t *testing.T) {
 	write("gemma-2-9b-q4", "media.md", gemma+"22 of 23 cases passed.\n")
 	write("gemma-2-9b-q4", "reasoning.md", gemma+"32 of 39 right (82%), 1.0 s and 388 tokens a question on average.\n")
 	write("gemma-2-9b-q4", "triage.md", gemma+"type right on 26 of 30, precision 62%.\n")
+	// A row missing a set stays out, and so do sets a Score doesn't count.
+	partial := fmt.Sprintf(onCard, "partial-model")
+	write("partial-model", "report.md", partial+"60 of 64 cases passed.\n")
+	write("partial-model", "topics.md", partial+"20 of 22 cases passed.\n")
 	write("recommended", "report.md", fmt.Sprintf(onCard, "the recommended models")+"60 of 64 cases passed.\n")
 	// The fallback that ran a smaller model under another's name was a real bug (#1033).
 	write("qwen2.5-14b-q4", "report.md", fmt.Sprintf(onCard, "qwen2.5-coder-7b-q4")+"60 of 64 cases passed.\n")
@@ -114,7 +118,7 @@ func TestPublishAddsWeeklyRows(t *testing.T) {
 	results := filepath.Join(t.TempDir(), "results.json")
 	before := `{
   "schema": 1,
-  "suites": {"quality": "q", "topics": "t", "files": "f", "reasoning": "r", "triage": "i"},
+  "suites": {"quality": "q", "topics": "t", "files": "f", "reasoning": "r"},
   "results": [
     {"model": "old", "name": "Old", "date": "2026-10-31", "hardware": "x", "method_version": 0, "scores": {"files": {"passed": 1, "of": 1}}}
   ]
@@ -134,7 +138,7 @@ func TestPublishAddsWeeklyRows(t *testing.T) {
 		}
 	}
 	publish()
-	if out := strings.Join(said, "\n"); !strings.Contains(out, "qwen2.5-coder-7b-q4") || !strings.Contains(out, "the recommended models") {
+	if out := strings.Join(said, "\n"); !strings.Contains(out, "qwen2.5-coder-7b-q4") || !strings.Contains(out, "the recommended models") || !strings.Contains(out, "No row for partial-model") {
 		t.Errorf("what it skipped isn't said:\n%s", out)
 	}
 	raw, err := os.ReadFile(results)
@@ -160,9 +164,9 @@ func TestPublishAddsWeeklyRows(t *testing.T) {
 	if row.Model != "gemma-2-9b-q4" || row.Name != "Gemma 2 9B" || row.Date != "2026-11-02" || row.MethodVersion != 1 || row.Source != run || row.SecondsPerQuestion != 1.0 {
 		t.Errorf("%+v", row)
 	}
-	want := map[string]Passed{"quality": {60, 64}, "topics": {20, 22}, "files": {20, 21}, "reasoning": {32, 39}, "triage": {26, 30}}
+	want := map[string]Passed{"quality": {60, 64}, "topics": {20, 22}, "files": {20, 21}, "reasoning": {32, 39}}
 	if len(row.Scores) != len(want) {
-		t.Errorf("scores %+v, want only the sets the file lists", row.Scores)
+		t.Errorf("scores %+v, want only the sets a Score counts", row.Scores)
 	}
 	for set, w := range want {
 		if row.Scores[set] != w {
