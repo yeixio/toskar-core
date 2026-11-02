@@ -1139,7 +1139,7 @@
       "capabilities": {
         "tool_calling": true,
         "vision": true,
-        "coding": false
+        "coding": true
       },
       "source": {
         "url": "https://huggingface.co/ggml-org/Qwen3.8-27B-GGUF/resolve/main/Qwen3.8-27B-Q4_K_M.gguf",
@@ -1151,7 +1151,7 @@
         "sha256": "2e968a6af97ce35d8971890b257b9b7edabf20ad91450501fa53162a19ee33eb",
         "size_bytes": 629247008
       },
-      "purpose": [
+      "purpose": ["coding", 
         "assistant",
         "general",
         "research"
@@ -1159,7 +1159,7 @@
       "tags": [
         "general",
         "vision"
-      ],
+      , "coding", "tasks"],
       "runtime": [
         "llamacpp"
       ],
