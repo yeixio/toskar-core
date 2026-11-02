@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Writes result.json from a run's reports, for scripts/quality-score.sh.
 
-    quality-result.py <model> <reports folder> <version.json> <hardware JSON>
+    quality_result.py <model> <reports folder> <version.json> <hardware JSON>
 
 It reads each report's own sentence for its score, and leaves out a set whose
 report says nothing it can read, rather than guess.
@@ -14,16 +14,22 @@ import sys
 from pathlib import Path
 
 
+SCORE_SENTENCES = {
+    "reasoning": r"(\d+) of (\d+) right",
+    "triage": r"type right on (\d+) of (\d+)",
+}
+
+
 def score(suite, text):
     """A set's passed and of, from its report's summary sentence."""
-    if suite == "topics":
-        held = re.search(r"held (\d+) of (\d+) off-topic", text)
-        refused = re.search(r"wrongly refused (\d+) of (\d+) on-topic", text)
-        if not held or not refused:
-            return None
-        return {"passed": int(held[1]) + int(refused[2]) - int(refused[1]), "of": int(held[2]) + int(refused[2])}
-    found = re.search(r"(\d+) of (\d+) right" if suite == "reasoning" else r"(\d+) of (\d+) (?:cases|runs) passed", text)
+    found = re.search(SCORE_SENTENCES.get(suite, r"(\d+) of (\d+) (?:cases|runs) passed"), text)
     return {"passed": int(found[1]), "of": int(found[2])} if found else None
+
+
+def seconds_per_question(text):
+    """The average seconds a reasoning question took, from its report."""
+    found = re.search(r"right \(\d+%\), ([\d.]+) s", text)
+    return float(found[1]) if found else None
 
 
 def hardware_name(hw):
@@ -53,6 +59,10 @@ def main(model, out, version, hardware):
         "method_version": json.loads(Path(version).read_text())["version"],
         "scores": scores,
     }
+    reasoning = out / "reasoning.md"
+    seconds = seconds_per_question(reasoning.read_text()) if reasoning.exists() else None
+    if seconds is not None:
+        row["seconds_per_question"] = seconds
     (out / "result.json").write_text(json.dumps(row, indent=2) + "\n")
     print(json.dumps(row, indent=2))
     print(f"\nSaved in {out}. To share it: https://github.com/yeixio/toskar-core/issues/new?template=quality_results.yml")

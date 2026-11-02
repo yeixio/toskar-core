@@ -44,7 +44,7 @@ Web pages are fixed copies, so an answer that has the right facts got them from 
 
 ## Where it runs
 
-Quality runs every week on our own computers, a few models at a time, and each results row names the computer and date. **Scores from different computers or dates aren't the same test,** so compare rows with care. Speed depends on the computer. Model scores can move too, as Toskar changes.
+Quality runs every week on our own computers, a few models at a time, and each run adds its scores to the results on its own. Each row names the computer and date. **Scores from different computers or dates aren't the same test,** so compare rows with care. Speed depends on the computer. Model scores can move too, as Toskar changes.
 
 ## What we know is weak
 
