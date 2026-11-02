@@ -3,6 +3,7 @@ package terminal
 import (
 	"context"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 
@@ -17,11 +18,11 @@ func TestExecuteRequiresCommand(t *testing.T) {
 
 func TestExecuteReportsOutputAndExit(t *testing.T) {
 	tool := New()
-	ok, err := tool.Execute(context.Background(), map[string]any{"command": "printf hi"})
+	ok, err := tool.Execute(context.Background(), map[string]any{"command": "echo hi"})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if ok["stdout"] != "hi" || ok["exit"] != 0 {
+	if strings.TrimSpace(ok["stdout"].(string)) != "hi" || ok["exit"] != 0 {
 		t.Fatalf("result=%v", ok)
 	}
 
@@ -42,11 +43,27 @@ func TestExecuteRunsInTheProject(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	got, err := New().Execute(turnopts.WithProject(context.Background(), dir), map[string]any{"command": "pwd"})
+	pwd := "pwd"
+	if runtime.GOOS == "windows" {
+		pwd = "(Get-Location).Path"
+	}
+	got, err := New().Execute(turnopts.WithProject(context.Background(), dir), map[string]any{"command": pwd})
 	if err != nil {
 		t.Fatal(err)
 	}
 	if strings.TrimSpace(got["stdout"].(string)) != dir {
 		t.Fatalf("ran in %v, want %s", got["stdout"], dir)
+	}
+}
+
+// A model's command reaches PowerShell whole on Windows: quotes, pipes, and
+// words outside English, in UTF-8.
+func TestExecuteKeepsQuotesAndUnicode(t *testing.T) {
+	got, err := New().Execute(context.Background(), map[string]any{"command": `echo "héllo wörld" | sort`})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.TrimSpace(got["stdout"].(string)) != "héllo wörld" || got["exit"] != 0 {
+		t.Fatalf("result=%v", got)
 	}
 }

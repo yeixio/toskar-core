@@ -1,6 +1,7 @@
 package tools
 
 import (
+	"runtime"
 	"sort"
 	"strings"
 	"sync"
@@ -115,7 +116,7 @@ func BuiltinCatalog() []Definition {
 		{ID: "code.execute", Name: "Run Code", Description: "Run Python in a sandbox for calculations, data analysis, and charts, with numpy, pandas, and matplotlib. It has no network and sees only files you list from this chat (\"files\": [\"sales.xlsx\"]), read from its working folder. Print results; files it saves there (.png, .csv, .xlsx, .pdf, and so on) are attached to the answer. Use matplotlib's savefig for charts.", Capability: CapCode, Source: "builtin", Schema: `{"code":"string","files":"array"}`, DefaultPolicy: PolicyAsk, Risk: RiskWrite,
 			Level: LevelHighImpact, Runtime: "python", Outputs: []string{OutputText, OutputFile}},
 		{ID: "automations.schedule", Name: "Schedule Task", Description: "Set up a task that runs on a schedule, such as \"every morning at 8, summarize the news\" or \"check this price every day and tell me if it drops below $500\". \"request\" is what to do and when, in the user's words and language. It shows the user a card to confirm; nothing is scheduled until they press Create, so tell them to check it.", Capability: CapAutomations, Source: "builtin", Schema: `{"request":"string"}`, DefaultPolicy: PolicyAllow, Risk: RiskRead},
-		{ID: "terminal", Name: "Terminal", Description: "Run a shell command on this computer.", Capability: CapShell, Source: "builtin", Schema: `{"command":"string"}`, DefaultPolicy: PolicyAllow, Risk: "write"},
+		{ID: "terminal", Name: "Terminal", Description: TerminalDescription(runtime.GOOS), Capability: CapShell, Source: "builtin", Schema: `{"command":"string"}`, DefaultPolicy: PolicyAllow, Risk: "write"},
 		{ID: "git.status", Name: "Git Status", Description: "Show changed files in the workspace.", Capability: CapGit, Source: "builtin", Schema: `{}`, DefaultPolicy: PolicyAllow, Risk: "read"},
 		{ID: "git.diff", Name: "Git Diff", Description: "Show the current git diff.", Capability: CapGit, Source: "builtin", Schema: `{"path":"string"}`, DefaultPolicy: PolicyAllow, Risk: "read"},
 		{ID: "git.log", Name: "Git Log", Description: "Show recent commits.", Capability: CapGit, Source: "builtin", Schema: `{"path":"string"}`, DefaultPolicy: PolicyAllow, Risk: "read"},
@@ -270,4 +271,13 @@ func MergeMissingTools(existing, additions []contracts.ToolPolicy) []contracts.T
 		seen[tool.ToolID] = struct{}{}
 	}
 	return out
+}
+
+// TerminalDescription tells the model what its commands run in, so it writes
+// them for that shell.
+func TerminalDescription(goos string) string {
+	if goos == "windows" {
+		return "Run a PowerShell command on this computer."
+	}
+	return "Run a shell command on this computer."
 }

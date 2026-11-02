@@ -19,6 +19,7 @@ func TestClassifyCommandNeverTrustsTheseWithoutAsking(t *testing.T) {
 		"git reset --hard", "git clean -fdx", "git rebase main", "git filter-branch x", "git branch -D main", "git checkout -- .", "git checkout -f", "git restore .", "git stash drop", "git -c core.pager=evil log", "git diff --output=x",
 		"grep kill x; rm y", "cat rm > x", "echo hi | sh", "go run x.go", "go generate ./...", "npm exec x", "npx x", "cargo run", "tail -f x", "unknown-tool", "echo 'open quote",
 		":(){ :|:& };:", "del /s x", "Remove-Item -Recurse x", "format c:",
+		"ri x", "ls | Remove-Item", "Set-Content x y", "Out-File x", "Stop-Computer", "Clear-Disk 1",
 	} {
 		if risk, why := ClassifyCommand(c); !risk.AlwaysAsks() || why == "" {
 			t.Errorf("%q was taken for harmless", c)
