@@ -16,6 +16,11 @@ describe('ToolPermissionPrompt', () => {
     await applyLanguage('en')
   })
 
+  it('says allowing the terminal for the session trusts the project', () => {
+    renderIt(base)
+    expect(screen.getByText(/run the project's own code/)).toBeInTheDocument()
+  })
+
   it('offers to allow a tool for the session', () => {
     const onDecide = renderIt(base)
     fireEvent.click(screen.getByRole('button', { name: 'Allow for session' }))

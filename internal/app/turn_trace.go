@@ -422,7 +422,15 @@ func (t *turnTrace) tool(toolID string, args, result map[string]any) {
 			t.step("create", key, map[string]any{"model": model})
 		}
 	case "terminal":
-		t.untrusted = true
+		// A known command's output doesn't stop "always in this chat", or a
+		// fix-and-test loop would ask at every step. What it could lead to
+		// without asking is more known commands; anything else always asks.
+		// Trusting a project this far is what the prompt for "always" says.
+		// Output of a command it can't vouch for counts as outside (#1017).
+		command, _ := args["command"].(string)
+		if risk, _ := tools.ClassifyCommand(command); risk.AlwaysAsks() {
+			t.untrusted = true
+		}
 		t.step("command", "ranCommand", nil)
 	case "browser.open", "browser.click", "browser.type", "browser.extract", "browser.download", "browser.screenshot":
 		// Pages are written by other people, so they are data, not

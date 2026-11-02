@@ -250,6 +250,7 @@
     "cantUndo": "Esto no se puede deshacer. Toskar pregunta cada vez, aunque hayas permitido esta herramienta.",
     "alwaysAsks": "Toskar no puede saber si este comando es inofensivo, así que pregunta cada vez.",
     "afterOutside": "Este chat acaba de leer algo de fuera, como una página web, así que Toskar pregunta cada vez. Comprueba que es lo que pediste.",
+    "sessionTrustsProject": "Permitir en esta sesión también deja continuar comandos conocidos como make y npm run, que ejecutan el código del propio proyecto. Elígelo solo para un proyecto de confianza.",
     "deny": "Denegar",
     "decideFailed": "No se pudo registrar tu decisión sobre el permiso de la herramienta.",
     "failed": "Falló {{tool}}",

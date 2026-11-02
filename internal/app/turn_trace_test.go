@@ -119,3 +119,28 @@ func TestTurnTraceAttachesMadeFiles(t *testing.T) {
 		t.Fatalf("chart = %+v", meta.Files[2])
 	}
 }
+
+// A known command's output doesn't stop "always in this chat"; a page's, or the
+// output of a command it can't vouch for, does (#1017).
+func TestKnownCommandOutputStaysTrusted(t *testing.T) {
+	for _, c := range []struct {
+		tool    string
+		args    map[string]any
+		outside bool
+	}{
+		{"terminal", map[string]any{"command": "go test ./..."}, false},
+		{"terminal", map[string]any{"command": "cat notes.txt"}, false},
+		{"terminal", map[string]any{"command": "./run.sh"}, true},
+		{"terminal", map[string]any{"command": "curl http://example.com"}, true},
+		{"terminal", map[string]any{"command": "rm x"}, true},
+		{"terminal", map[string]any{}, true},
+		{"internet.open", map[string]any{"url": "http://example.com"}, true},
+		{"filesystem.read", map[string]any{"path": "x"}, true},
+	} {
+		tr := &turnTrace{}
+		tr.tool(c.tool, c.args, map[string]any{})
+		if tr.sawUntrusted() != c.outside {
+			t.Errorf("%s %v: outside=%v", c.tool, c.args, tr.sawUntrusted())
+		}
+	}
+}

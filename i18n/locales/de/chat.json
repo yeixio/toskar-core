@@ -246,6 +246,7 @@
     "cantUndo": "Das lässt sich nicht rückgängig machen. Toskar fragt jedes Mal, auch wenn du dieses Werkzeug erlaubt hast.",
     "alwaysAsks": "Toskar kann nicht erkennen, ob dieser Befehl harmlos ist, und fragt deshalb jedes Mal.",
     "afterOutside": "Dieser Chat hat gerade etwas von außen gelesen, zum Beispiel eine Webseite, deshalb fragt Toskar jedes Mal. Prüfe, ob das ist, worum du gebeten hast.",
+    "sessionTrustsProject": "„Für diese Sitzung erlauben“ lässt auch bekannte Befehle wie make und npm run weiterlaufen, und diese führen den Code des Projekts aus. Wähle es nur bei einem Projekt, dem du vertraust.",
     "deny": "Ablehnen",
     "decideFailed": "Die Wahl zur Werkzeugberechtigung konnte nicht gespeichert werden.",
     "failed": "{{tool}} fehlgeschlagen",
