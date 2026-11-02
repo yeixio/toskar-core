@@ -133,6 +133,12 @@ func run(args []string) error {
 	if err := os.MkdirAll(*out, 0o755); err != nil {
 		return err
 	}
+	// Toskar's log goes with the reports, for whoever has to read why a run failed.
+	defer func() {
+		if raw, err := os.ReadFile(filepath.Join(logs, "toskar.log")); err == nil {
+			_ = os.WriteFile(filepath.Join(*out, "toskar.log"), raw, 0o644)
+		}
+	}()
 
 	test := filepath.Join(*harness, "quality.test")
 	if runtime.GOOS == "windows" {
@@ -181,7 +187,8 @@ func run(args []string) error {
 		}
 	}
 	if len(row.Scores) == 0 {
-		return fmt.Errorf("no scores; see %s", logFile.Name())
+		raw, _ := os.ReadFile(logFile.Name())
+		return fmt.Errorf("no scores. The end of %s:\n%s", logFile.Name(), tail(string(raw), 3000))
 	}
 	// Reading a long prompt takes a while on a slow computer, so this says so.
 	fmt.Println("performance: running...")

@@ -327,3 +327,20 @@ func TestClosedThink(t *testing.T) {
 		}
 	}
 }
+
+// The token goes to GitHub and nowhere else: the address could be another host.
+func TestListReleasesSendsTheTokenOnlyToGitHub(t *testing.T) {
+	var got string
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		got = r.Header.Get("Authorization")
+		_, _ = w.Write([]byte(`[]`))
+	}))
+	defer server.Close()
+	t.Setenv("GITHUB_TOKEN", "secret")
+	if _, err := listReleases(context.Background(), server.URL); err != nil {
+		t.Fatal(err)
+	}
+	if got != "" {
+		t.Errorf("sent %q to another host", got)
+	}
+}

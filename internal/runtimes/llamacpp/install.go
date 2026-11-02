@@ -357,6 +357,11 @@ func listReleases(ctx context.Context, url string) ([]ghRelease, error) {
 	}
 	req.Header.Set("Accept", "application/vnd.github+json")
 	req.Header.Set("User-Agent", "toskar-daemon")
+	// GitHub limits who doesn't sign in, by address, and shared addresses such as
+	// CI runners' hit that. It's only ever sent to GitHub's own API.
+	if token := os.Getenv("GITHUB_TOKEN"); token != "" && req.URL.Host == "api.github.com" {
+		req.Header.Set("Authorization", "Bearer "+token)
+	}
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("list llama.cpp releases on GitHub: %w", err)

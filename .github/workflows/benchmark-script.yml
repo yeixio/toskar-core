@@ -29,6 +29,8 @@ env:
   TOSKAR_RELEASE_URL: http://127.0.0.1:7370
   # A tiny model; one case; speed still measured.
   TOSKAR_BENCHMARK_ARGS: --model llama-3.2-1b-q4 --yes --sets reasoning --only math-muffins
+  # Toskar looks up llama.cpp's release, and shared runners hit GitHub's limit without this.
+  GITHUB_TOKEN: ${{ github.token }}
 
 jobs:
   unix:
@@ -40,14 +42,18 @@ jobs:
           - ${{ vars.MAC_RUNS_ON || '"macos-latest"' }}
     runs-on: ${{ fromJSON(matrix.runner) }}
     timeout-minutes: 40
-    env:
-      TOSKAR_BENCHMARK_DIR: ${{ runner.temp }}/toskar-benchmark
     steps:
+      # The runner context doesn't exist yet where a job's env is read.
+      - name: Choose the folder
+        run: echo "TOSKAR_BENCHMARK_DIR=$RUNNER_TEMP/toskar-benchmark" >> "$GITHUB_ENV"
       - uses: actions/checkout@v7
       - uses: actions/setup-go@v7
         with:
           go-version: "1.26.x"
           check-latest: true
+          # Self-hosted runners keep Go's caches on disk; uploading them there
+          # held a finished job for over 20 minutes.
+          cache: ${{ runner.environment == 'github-hosted' }}
       - name: Serve a local release
         env:
           RELEASE: ${{ runner.temp }}/release
@@ -69,6 +75,9 @@ jobs:
           folder="$(find "$TOSKAR_BENCHMARK_DIR/results" -type d -name 'quality-score-*')"
           grep -q '1 of 1 right\|0 of 1 right' "$folder/reasoning.md"
           grep -q '"tokens_per_second"' "$folder/performance.json"
+      - name: What Toskar logged
+        if: failure()
+        run: cat "$TOSKAR_BENCHMARK_DIR"/results/*/toskar.log || true
       - name: Stop the server
         if: always()
         run: pkill -f 'http.server 7370' || true
@@ -83,6 +92,9 @@ jobs:
         with:
           go-version: "1.26.x"
           check-latest: true
+          # Self-hosted runners keep Go's caches on disk; uploading them there
+          # held a finished job for over 20 minutes.
+          cache: ${{ runner.environment == 'github-hosted' }}
       - name: Serve a local release
         shell: bash
         run: |
@@ -105,3 +117,7 @@ jobs:
           $folder = Get-ChildItem (Join-Path $env:RUNNER_TEMP 'toskar-benchmark\results') -Directory -Filter 'quality-score-*'
           if (-not (Select-String -Path (Join-Path $folder.FullName 'reasoning.md') -Pattern 'of 1 right' -Quiet)) { throw 'no reasoning score' }
           if (-not (Select-String -Path (Join-Path $folder.FullName 'performance.json') -Pattern 'tokens_per_second' -Quiet)) { throw 'no performance figures' }
+      - name: What Toskar logged
+        if: failure()
+        shell: powershell
+        run: Get-Content (Join-Path $env:RUNNER_TEMP 'toskar-benchmark\results\*\toskar.log') -ErrorAction SilentlyContinue
