@@ -386,9 +386,11 @@ New here? Start with a [good first issue](https://github.com/yeixio/toskar-core/
 
 ## Support Toskar Core
 
-If Toskar Core is useful to you, you can support continued development through [GitHub Sponsors](https://github.com/sponsors/gopherstein). Contributions, testing, bug reports, documentation, and hardware compatibility reports are also valuable ways to support the project.
+If Toskar Core is useful to you, you can support continued development with a [donation](https://yeix.io/donate/toskar), once or monthly, by card, or through [GitHub Sponsors](https://github.com/sponsors/gopherstein). Contributions, testing, bug reports, documentation, and hardware compatibility reports are also valuable ways to support the project.
 
 Nothing in the software is gated on a donation.
+
+[![Donate to Toskar](https://img.shields.io/badge/Donate-Support_Toskar-ff6a55?style=for-the-badge&logo=stripe&logoColor=white)](https://yeix.io/donate/toskar)
 
 ## Toskar Pro and Toskar
 
