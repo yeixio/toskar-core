@@ -52,6 +52,9 @@ export function ToolPermissionPrompt({
         </p>
       )}
       {tool.cantUndo && tool.afterOutside && <p className="text-sm text-ink-muted">{t('tools.afterOutside')}</p>}
+      {tool.toolId === 'terminal' && !tool.alwaysAsks && (
+        <p className="text-sm text-ink-muted">{t('tools.sessionTrustsProject')}</p>
+      )}
       {showRawArgs && tool.rawArgs && (
         <pre className="log-panel max-h-40">{tool.rawArgs}</pre>
       )}

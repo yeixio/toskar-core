@@ -242,6 +242,7 @@
     "cantUndo": "此操作无法撤销。即使你已允许此工具,每次仍会询问。",
     "alwaysAsks": "Toskar 无法判断此命令是否无害,因此每次都会询问。",
     "afterOutside": "此聊天刚读取了外部内容(例如网页),因此每次都会询问。请确认这是你要求的操作。",
+    "sessionTrustsProject": "在此会话中允许后,make 和 npm run 等已知命令也会继续运行,它们会执行项目自身的代码。请仅对你信任的项目选择此项。",
     "deny": "拒绝",
     "decideFailed": "无法记录工具权限选择。",
     "failed": "{{tool}} 失败",

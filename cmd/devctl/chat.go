@@ -634,6 +634,9 @@ func (s *chatSession) ask(a toolAsk) {
 		if a.alwaysAsks {
 			fmt.Fprint(s.io.out, "Allow? [y]es, [n]o (this one asks every time): ")
 		} else {
+			if a.tool == "terminal" {
+				s.note("Always also lets known commands such as make and npm run keep going, and those run the project's own code. Choose it only for a project you trust.")
+			}
 			fmt.Fprint(s.io.out, "Allow? [y]es, [n]o, [a]lways in this chat: ")
 		}
 		if s.lines.Scan() {

@@ -250,6 +250,7 @@
     "cantUndo": "Non si può annullare. Toskar chiede ogni volta, anche se hai consentito questo strumento.",
     "alwaysAsks": "Toskar non può sapere se questo comando è innocuo, quindi chiede ogni volta.",
     "afterOutside": "Questa chat ha appena letto qualcosa dall'esterno, come una pagina web, quindi Toskar chiede ogni volta. Controlla che sia ciò che hai chiesto.",
+    "sessionTrustsProject": "Consentire per la sessione lascia proseguire anche comandi noti come make e npm run, che eseguono il codice del progetto. Sceglilo solo per un progetto di cui ti fidi.",
     "deny": "Nega",
     "decideFailed": "Impossibile registrare la scelta sul permesso dello strumento.",
     "failed": "{{tool}} non riuscito",
