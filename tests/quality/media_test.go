@@ -8,9 +8,11 @@ import (
 	"fmt"
 	"image"
 	"image/png"
+	"math"
 	"math/bits"
 	"net/http"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"regexp"
 	"runtime"
@@ -299,13 +301,18 @@ func judgeFailures(t *testing.T, d realDriver, j *Judge, r Result) []string {
 			return []string{fmt.Sprintf("the judge says %s doesn't show %s: %.200q", name, j.Shows, answer)}
 		}
 		if j.Kind == "video" && j.Moves {
-			const question = "Do these frames of a video change from one to the next, with something moving, or are they all the same picture? Answer yes if something moves or changes, or no if they're the same, on the first line."
-			// Still only when a judge says no: "The frames show a person
-			// walking, so there is movement" isn't a no (#758).
-			if why, err := d.bothSay(t, name, data, question, saysNo); err != nil {
-				return []string{err.Error()}
-			} else if why != "" {
-				return []string{fmt.Sprintf("the judges say nothing moves in %s: %s", name, why)}
+			if _, err := exec.LookPath("ffmpeg"); err != nil {
+				t.Logf("no ffmpeg to measure movement in %s, so the judges are asked", name)
+				const question = "Do these frames of a video change from one to the next, with something moving, or are they all the same picture? Answer yes if something moves or changes, or no if they're the same."
+				if why, err := d.bothSay(t, name, data, question, saysNo); err != nil {
+					return []string{err.Error()}
+				} else if why != "" {
+					return []string{fmt.Sprintf("the judges say nothing moves in %s: %s", name, why)}
+				}
+			} else if moved, err := clipMovement(data); err != nil {
+				return []string{fmt.Sprintf("couldn't measure movement in %s: %v", name, err)}
+			} else if moved < minClipMovement {
+				return []string{fmt.Sprintf("nothing moves in %s: frames differ by %.2f of 255 on average", name, moved)}
 			}
 		}
 		if j.Clean {
@@ -342,6 +349,36 @@ func cleanQuestion(kind string) string {
 	}
 	return "Look closely at this picture. Is any part of it garbled or corrupted, with blocks of solid or wrong color, noise, stripes, " +
 		"smears, or a scrambled area, or is it washed out, overexposed or faded so that most of it is close to white? Answer no on the first line if it looks clean; otherwise answer yes and say where and what's wrong."
+}
+
+// minClipMovement is how much a clip's frames must differ, on average, out of
+// 255: a clip with cars crossing it measured about 4, and a still one 0.
+const minClipMovement = 0.5
+
+// clipMovement measures how much a clip's frames differ from the next, on
+// average, out of 255. It's measured because it can be: asked, Qwen 2.5 VL
+// said of cars crossing a street that the frames were all the same picture,
+// and gemma-3-4b answered both ways for the same clip (#792).
+func clipMovement(clip []byte) (float64, error) {
+	const w, h = 64, 36
+	cmd := exec.Command("ffmpeg", "-v", "error", "-i", "pipe:0", "-vf", fmt.Sprintf("scale=%d:%d,format=gray", w, h), "-f", "rawvideo", "pipe:1")
+	cmd.Stdin = bytes.NewReader(clip)
+	var out, errOut bytes.Buffer
+	cmd.Stdout, cmd.Stderr = &out, &errOut
+	if err := cmd.Run(); err != nil {
+		return 0, fmt.Errorf("ffmpeg: %v: %s", err, errOut.String())
+	}
+	frames := out.Len() / (w * h)
+	if frames < 2 {
+		return 0, fmt.Errorf("%d frames", frames)
+	}
+	raw, total := out.Bytes(), 0.0
+	for f := 1; f < frames; f++ {
+		for i := range w * h {
+			total += math.Abs(float64(raw[f*w*h+i]) - float64(raw[(f-1)*w*h+i]))
+		}
+	}
+	return total / float64((frames-1)*w*h), nil
 }
 
 // judgeModel is the model that sees, asked about pictures and clips.
@@ -412,6 +449,16 @@ func (d realDriver) askAbout(t *testing.T, model, name string, data []byte, ques
 	}
 	for i := len(msgs) - 1; i >= 0; i-- {
 		if msgs[i].Role == "assistant" {
+			// A judge that made something answered another question: asked
+			// about a clip, it made a new one, and its "Here is the clip"
+			// passed as finding no fault.
+			if m := msgs[i].Meta; m != nil {
+				for _, f := range m.Files {
+					if f.Producer == "assistant" {
+						return "", fmt.Errorf("%s made %s instead of answering", model, f.Name)
+					}
+				}
+			}
 			return msgs[i].Content, nil
 		}
 	}
@@ -510,6 +557,32 @@ func (d realDriver) installMedia(t *testing.T) {
 	d.installModel(t, confirmModel())
 	// Speech installs on first use; one sentence now keeps that out of the cases.
 	_ = d.recording(t, "Getting ready.")
+}
+
+func TestClipMovement(t *testing.T) {
+	if _, err := exec.LookPath("ffmpeg"); err != nil {
+		t.Skip("ffmpeg is not installed")
+	}
+	clip := func(source string) []byte {
+		t.Helper()
+		path := filepath.Join(t.TempDir(), "clip.webm")
+		if out, err := exec.Command("ffmpeg", "-v", "error", "-f", "lavfi", "-i", source, "-t", "1", "-c:v", "libvpx", path).CombinedOutput(); err != nil {
+			t.Skipf("ffmpeg can't make a clip here: %v: %s", err, out)
+		}
+		data, err := os.ReadFile(path)
+		if err != nil {
+			t.Fatal(err)
+		}
+		return data
+	}
+	still, err := clipMovement(clip("color=c=blue:s=160x90:r=16"))
+	if err != nil || still >= minClipMovement {
+		t.Errorf("a still clip measured %.2f, %v", still, err)
+	}
+	moving, err := clipMovement(clip("testsrc=s=160x90:r=16"))
+	if err != nil || moving < minClipMovement {
+		t.Errorf("a moving clip measured %.2f, %v", moving, err)
+	}
 }
 
 // TestMediaCasesValid checks the set: attachments build, judges name a

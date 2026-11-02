@@ -49,17 +49,25 @@ var (
 	// "make" is the build tool only as one: "make test", a Makefile, or
 	// "run make" (which "run" covers). "Make a picture of a dog" isn't a
 	// shell command (#391 follow-up).
-	cueShell    = regexp.MustCompile(`(?i)\b(run|execute|install|build|compile|terminal|command|shell|script|npm|pnpm|pip|brew|go test|go build|makefile|make (test|build|install|clean|all|check|lint|dev|ci|release|run))\b`)
-	cueGit      = regexp.MustCompile(`(?i)\b(git|commit|branch|diff|merge|rebase|staged|push|pull request)\b`)
-	cueGitW     = regexp.MustCompile(`(?i)\b(commit|stage|push)\b`)
-	cueMake     = regexp.MustCompile(`(?i)\b(make|create|write|generate|export|save|build)\b.{0,40}\b(files?|spreadsheets?|documents?|docs?|csv|xlsx|pdf|tables?|reports?|lists?)\b`)
-	cueCode     = regexp.MustCompile(`(?i)\b(calculat\w*|comput\w*|analy[sz]\w*|plot\w*|charts?|graphs?|python|statistic\w*|regression|correlat\w*|simulat\w*|forecast\w*|average|median|percentiles?|run (this|the|my) code)\b`)
-	cueListen   = regexp.MustCompile(`(?i)\b(transcri\w*|recordings?|voice (notes?|memos?|messages?)|audio|podcasts?|what (does|did) (it|she|he|they) say)\b`)
-	cueSpeak    = regexp.MustCompile(`(?i)(\b(read (it|this|that|them)?\s*(aloud|out loud)|out loud|aloud|text to speech|narrat\w*|voice ?over|audio version|say it)\b)`)
-	cueDraw     = regexp.MustCompile(`(?i)(\b(draw|paint|sketch|illustrat\w*|render)\b|\b(make|create|generate|design|produce|give me)\b.{0,40}\b(images?|pictures?|photos?|illustrations?|drawings?|paintings?|logos?|icons?|wallpapers?|artwork|portraits?|posters?)\b)`)
-	cueRetouch  = regexp.MustCompile(`(?i)\b(edit|change|retouch|recolou?r|remove|replace|turn|make|add)\b.{0,40}\b(images?|pictures?|photos?|backgrounds?|\w+\.(png|jpe?g))\b`)
-	cuePlaces   = regexp.MustCompile(`(?i)(\b(near (me|here|by)|nearby|nearest|closest|directions?|route (from|between)|how (far|long does it take)|distance (from|to|between)|drive (from|to)|walk (from|to)|get (from|to)|address (of|for)|open now|opening hours|restaurants?|caf[eé]s?|pharmac(y|ies)|gas stations?)\b)`)
-	cueFilm     = regexp.MustCompile(`(?i)\b(videos?|clips?|animat\w*|movies?|footage|gifs?|bring (it|this|that|the|my)( \w+)? to life|make (it|this) move)\b`)
+	cueShell   = regexp.MustCompile(`(?i)\b(run|execute|install|build|compile|terminal|command|shell|script|npm|pnpm|pip|brew|go test|go build|makefile|make (test|build|install|clean|all|check|lint|dev|ci|release|run))\b`)
+	cueGit     = regexp.MustCompile(`(?i)\b(git|commit|branch|diff|merge|rebase|staged|push|pull request)\b`)
+	cueGitW    = regexp.MustCompile(`(?i)\b(commit|stage|push)\b`)
+	cueMake    = regexp.MustCompile(`(?i)\b(make|create|write|generate|export|save|build)\b.{0,40}\b(files?|spreadsheets?|documents?|docs?|csv|xlsx|pdf|tables?|reports?|lists?)\b`)
+	cueCode    = regexp.MustCompile(`(?i)\b(calculat\w*|comput\w*|analy[sz]\w*|plot\w*|charts?|graphs?|python|statistic\w*|regression|correlat\w*|simulat\w*|forecast\w*|average|median|percentiles?|run (this|the|my) code)\b`)
+	cueListen  = regexp.MustCompile(`(?i)\b(transcri\w*|recordings?|voice (notes?|memos?|messages?)|audio|podcasts?|what (does|did) (it|she|he|they) say)\b`)
+	cueSpeak   = regexp.MustCompile(`(?i)(\b(read (it|this|that|them)?\s*(aloud|out loud)|out loud|aloud|text to speech|narrat\w*|voice ?over|audio version|say it)\b)`)
+	cueDraw    = regexp.MustCompile(`(?i)(\b(draw|paint|sketch|illustrat\w*|render)\b|\b(make|create|generate|design|produce|give me)\b.{0,40}\b(images?|pictures?|photos?|illustrations?|drawings?|paintings?|logos?|icons?|wallpapers?|artwork|portraits?|posters?)\b)`)
+	cueRetouch = regexp.MustCompile(`(?i)\b(edit|change|retouch|recolou?r|remove|replace|turn|make|add)\b.{0,40}\b(images?|pictures?|photos?|backgrounds?|\w+\.(png|jpe?g))\b`)
+	cuePlaces  = regexp.MustCompile(`(?i)(\b(near (me|here|by)|nearby|nearest|closest|directions?|route (from|between)|how (far|long does it take)|distance (from|to|between)|drive (from|to)|walk (from|to)|get (from|to)|address (of|for)|open now|opening hours|restaurants?|caf[eé]s?|pharmac(y|ies)|gas stations?)\b)`)
+	cueFilm    = regexp.MustCompile(`(?i)\b(videos?|clips?|animat\w*|movies?|footage|gifs?|bring (it|this|that|the|my)( \w+)? to life|make (it|this) move)\b`)
+	// A clip's frames are about a clip that exists, whatever else is said.
+	cueFrames = regexp.MustCompile(`(?i)\bframes? of\b`)
+	// A clip that's already there: this video, the attached clip.
+	cueClipThere = regexp.MustCompile(`(?i)\b(this|that|these|those|the|my|your|attached)( \w+){0,2} (videos?|clips?|movies?|footage|gifs?)\b`)
+	// A question, by its first word.
+	cueQuestion = regexp.MustCompile(`(?i)^\W*(do|does|did|is|are|was|were|has|have|what|what's|whats|which|who|where|when|why|how|should|will)\b`)
+	// Asks to make one, even in a question: "Can you make a video?", "Do a clip of rain".
+	cueClipMake = regexp.MustCompile(`(?i)\b(make|create|generate|produce|film|shoot|render)\b|^\W*do (a|an|me)\b`)
 	cueBrowse   = regexp.MustCompile(`(?i)(\b(browser|click|fill (in|out)|sign up|add to (my )?cart|on (the|that|their) (site|page|website)|log ?in to|screenshot|navigate to)\b|\bgo to \S+\.\w{2,}\b)`)
 	cueSheet    = regexp.MustCompile(`(?i)\b(spreadsheets?|xlsx|csv|excel|workbooks?|sheets?)\b`)
 	cueSchedule = regexp.MustCompile(`(?i)\b(remind me|automat(e|ion|ions)|recurring|on a schedule|schedule (a|an|this|that|it|the) (task|job|check|summary|report|reminder))\b`)
@@ -70,6 +78,22 @@ var (
 // groups its kind needs, plus any the message asks for, limited to the
 // tools the profile has. Offering fewer tools keeps small models from
 // reaching for the wrong one, and keeps the prompt short.
+// AsksForClip reports a message that wants a clip made, not one that only
+// talks about one. "Do these frames of a video change?" made a new clip,
+// minutes of work and no answer. The words for a clip are much the same in many
+// languages, so this keeps cueFilm's reach and only leaves out what's clearly
+// about a clip that's already there, or an English question that doesn't ask
+// to make one.
+func AsksForClip(message string) bool {
+	switch {
+	case !cueFilm.MatchString(message), cueFrames.MatchString(message):
+		return false
+	case cueClipMake.MatchString(message):
+		return true
+	}
+	return !cueClipThere.MatchString(message) && !cueQuestion.MatchString(message)
+}
+
 func ToolsFor(k Kind, message string, available []string) []string {
 	want := map[string]bool{}
 	for _, g := range kindGroups[k] {
@@ -114,7 +138,7 @@ func ToolsFor(k Kind, message string, available []string) []string {
 	if cueBrowse.MatchString(message) {
 		want["browse"] = true
 	}
-	if cueFilm.MatchString(message) {
+	if AsksForClip(message) {
 		want["film"] = true
 	}
 	if cueDraw.MatchString(message) {

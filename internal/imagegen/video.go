@@ -245,9 +245,14 @@ func (t *VideoTool) Run(ctx context.Context, job remotetools.Job) (remotetools.O
 		return remotetools.Output{}, err
 	}
 	name, _ := job.Args["name"].(string)
+	if !nameable(name) {
+		name = ""
+	}
 	name = artifacts.CleanName(strings.TrimSpace(name))
 	if name == "" || name == "file" {
-		name = nameFrom(prompt)
+		if name = nameFrom(prompt); name == "image" {
+			name = "clip"
+		}
 	}
 	name = strings.TrimSuffix(name, filepath.Ext(name)) + ".webm"
 	result := map[string]any{"width": res.Width, "height": res.Height, "frames": res.Frames, "length_seconds": res.Length,

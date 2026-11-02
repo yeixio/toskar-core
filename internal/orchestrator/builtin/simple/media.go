@@ -6,6 +6,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/yeixio/toskar-core/internal/huginn"
 	"github.com/yeixio/toskar-core/pkg/contracts"
 	"github.com/yeixio/toskar-core/pkg/pluginapi"
 )
@@ -62,7 +63,7 @@ func askedForMedia(prompt, reference string) (mediaRequest, bool) {
 		}
 	}
 	switch {
-	case videoAskRe.MatchString(prompt):
+	case videoAskRe.MatchString(prompt) && huginn.AsksForClip(prompt):
 		req := mediaRequest{Tool: "video.generate"}
 		if attached != "" && refersRe.MatchString(prompt) {
 			req.File = attached
