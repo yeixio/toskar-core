@@ -29,6 +29,8 @@ type Client struct {
 
 	// Cache keeps recent search results (§36).
 	Cache *cache.Cache[[]contracts.BrowseModel]
+	// StoreCache keeps the store's listings.
+	StoreCache *cache.Cache[[]contracts.StoreModel]
 }
 
 // CachePolicy is the Hub search cache's policy.

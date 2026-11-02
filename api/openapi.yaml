@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Toskar Control Plane API
-  version: "1.78"
+  version: "1.79"
   description: >-
     Local AI control plane API for Toskar, its OpenAI-compatible routes, and its MCP server.
     On the default loopback bind no key is needed. When the daemon listens on any other address,
@@ -3146,6 +3146,19 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/ModelsFit"
+  /api/v1/models/store:
+    get:
+      summary: The model store's front page for this computer
+      description: "Shelves of models: Hugging Face's rankings, left out what doesn't run here, and the models tested with Toskar. Reads from Hugging Face, kept for an hour; without it, live is false and only tested models are there (#593, contract 1.79)."
+      operationId: modelStore
+      tags: [Models]
+      responses:
+        "200":
+          description: The store
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ModelStore"
   /api/v1/models/browse:
     get:
       summary: Search Hugging Face for GGUF models
@@ -8839,6 +8852,34 @@ components:
         winners:
           type: array
           items: {$ref: '#/components/schemas/CategoryWinner'}
+    ModelStore:
+      type: object
+      required: [shelves, live]
+      properties:
+        shelves:
+          type: array
+          items: {$ref: "#/components/schemas/StoreShelf"}
+        live: {type: boolean, description: "Hugging Face answered. When false, only models Toskar already knows are there."}
+    StoreShelf:
+      type: object
+      required: [id, models]
+      properties:
+        id: {type: string, description: "What it's for. Known values: `popular`, `top_rated`, `new`, `code`, `sees`, `small`, `tested`; others may be added."}
+        models:
+          type: array
+          items: {$ref: "#/components/schemas/StoreModel"}
+    StoreModel:
+      allOf:
+        - $ref: "#/components/schemas/BrowseModel"
+        - type: object
+          properties:
+            likes: {type: integer}
+            created_at: {type: string, format: date-time}
+            license: {type: string, description: "The license Hugging Face lists, such as apache-2.0"}
+            details_url: {type: string, description: "The model's page"}
+            fit: {$ref: "#/components/schemas/ModelFit"}
+            catalog_id: {type: string, description: "Its entry in Toskar's catalog, tested with Toskar, installed by this ID. Empty for everything else."}
+            installed: {type: boolean}
     BrowseModel:
       type: object
       description: A Hugging Face browse-all hit (GGUF filtered).

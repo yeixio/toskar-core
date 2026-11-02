@@ -70,6 +70,19 @@ func (s *Server) handleBrowseModels(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, items)
 }
 
+func (s *Server) handleModelStore(w http.ResponseWriter, r *http.Request) {
+	if s.deps.ModelStore == nil {
+		writeJSON(w, http.StatusOK, contracts.ModelStore{Shelves: []contracts.StoreShelf{}})
+		return
+	}
+	store, err := s.deps.ModelStore(r.Context())
+	if err != nil {
+		writeErrFrom(w, http.StatusInternalServerError, "MODELS_LIST_FAILED", err)
+		return
+	}
+	writeJSON(w, http.StatusOK, store)
+}
+
 func (s *Server) handleListRunningModels(w http.ResponseWriter, r *http.Request) {
 	if s.deps.ListRunningModels == nil {
 		writeJSON(w, http.StatusOK, []contracts.RunningModelView{})
