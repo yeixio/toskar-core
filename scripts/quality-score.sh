@@ -49,4 +49,4 @@ TOSKAR_QUALITY_URL="$url" TOSKAR_QUALITY_MODEL="$model" \
   >"$out/run.log" 2>&1 || true
 
 hardware="$(curl -s "$url/api/v1/hardware")"
-python3 "$root/scripts/quality-result.py" "$model" "$out" "$root/tests/quality/version.json" "$hardware"
+python3 "$root/scripts/quality_result.py" "$model" "$out" "$root/tests/quality/version.json" "$hardware"

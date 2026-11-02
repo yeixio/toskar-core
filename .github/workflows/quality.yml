@@ -384,6 +384,52 @@ jobs:
           docker network rm "$NAME" >/dev/null 2>&1 || true
           docker image rm "$NAME" >/dev/null 2>&1 || true
 
+  # Adds the scheduled run's scores to the public results: toskar-model-data's
+  # quality/results.json, which the app and toskar.ai read. Only the schedule,
+  # since a run started by hand can hold some of the cases or a model on trial.
+  # It pushes with a deploy key of that repository, and without one says what it
+  # would have added, as the reports stay in the run's artifacts.
+  publish-results:
+    needs: real-models
+    if: ${{ !cancelled() && github.event_name == 'schedule' && needs.real-models.result != 'skipped' }}
+    runs-on: ${{ fromJSON(vars.TRUSTED_RUNS_ON || '"ubuntu-latest"') }}
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: quality-report-real-models-*
+          path: ${{ runner.temp }}/quality-reports
+      - name: Add the scores
+        env:
+          DEPLOY_KEY: ${{ secrets.QUALITY_RESULTS_DEPLOY_KEY }}
+          REPORTS: ${{ runner.temp }}/quality-reports
+          DATA: ${{ runner.temp }}/toskar-model-data
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          rm -rf "$DATA"
+          git clone -q --depth 1 https://github.com/yeixio/toskar-model-data.git "$DATA"
+          python3 scripts/quality_publish.py "$REPORTS" "$DATA/quality/results.json" \
+            tests/quality/version.json manifests/models/catalog.json "$RUN_URL" | tee -a "$GITHUB_STEP_SUMMARY"
+          cd "$DATA"
+          if git diff --quiet; then
+            echo "No new scores."
+            exit 0
+          fi
+          if [ -z "$DEPLOY_KEY" ]; then
+            echo "::warning::QUALITY_RESULTS_DEPLOY_KEY isn't set, so these scores weren't published."
+            exit 0
+          fi
+          key="$(mktemp)"
+          trap 'rm -f "$key"' EXIT
+          (umask 077 && printf '%s\n' "$DEPLOY_KEY" > "$key")
+          export GIT_SSH_COMMAND="ssh -i $key -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -qam "Add this week's quality results." -m "From $RUN_URL"
+          git push -q git@github.com:yeixio/toskar-model-data.git HEAD:main
+
   # Speculative decoding on this runner's hardware (#835): for each model
   # and draft, cmd/specbench in the daemon's image has the daemon install
   # llama.cpp and the model, downloads the draft, and runs llama-server
