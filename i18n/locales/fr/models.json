@@ -17,7 +17,8 @@
   "tabs": {
     "discover": "Boutique",
     "installed": "Installés",
-    "running": "En cours"
+    "running": "En cours",
+    "results": "Résultats"
   },
   "target": {
     "label": "Modèles pour :",
@@ -478,5 +479,33 @@
       "close": "Fermer"
     },
     "bestOverall": "Meilleur choix"
+  },
+  "results": {
+    "loading": "Chargement des résultats…",
+    "offline": "Impossible de lire les résultats. Vérifiez votre connexion et réessayez.",
+    "title": "Résultats de qualité",
+    "intro": "Ce que nos tests ont mesuré jusqu'ici, à parcourir. Nous ne les classons pas et n'en tirons pas de conclusions, et nous en ajoutons à chaque nouveau test.",
+    "method": "Comment c'est mesuré",
+    "suggest": "Suggérer un changement",
+    "contribute": "Ajouter les résultats de votre ordinateur",
+    "computer": "Ordinateur",
+    "allComputers": "Tous les ordinateurs",
+    "notSameTest": "Les scores d'ordinateurs ou de versions de la méthode différents ne sont pas le même test : comparez-les avec prudence.",
+    "model": "Modèle",
+    "seconds": "Secondes par question",
+    "date": "Date",
+    "version": "Méthode",
+    "source": "Source",
+    "sourceLink": "Test",
+    "community": "Communauté",
+    "score": "{{passed}} sur {{of}}",
+    "suites": {
+      "quality": "Qualité",
+      "topics": "Sujets",
+      "files": "Fichiers",
+      "reasoning": "Raisonnement",
+      "triage": "Tri",
+      "fix_test": "Corriger un test"
+    }
   }
 }

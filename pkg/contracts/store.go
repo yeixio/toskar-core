@@ -33,3 +33,33 @@ type ModelStore struct {
 	Shelves []StoreShelf `json:"shelves"`
 	Live    bool         `json:"live"`
 }
+
+// QualityScore is how many cases a set passed.
+type QualityScore struct {
+	Passed int `json:"passed"`
+	Of     int `json:"of"`
+}
+
+// QualityResult is one model, on one computer, on one date, as measured.
+type QualityResult struct {
+	Model              string                  `json:"model"`
+	Name               string                  `json:"name"`
+	Date               string                  `json:"date"`
+	Hardware           string                  `json:"hardware"`
+	MethodVersion      int                     `json:"method_version"`
+	Submitted          bool                    `json:"submitted,omitempty"`
+	SubmittedBy        string                  `json:"submitted_by,omitempty"`
+	Source             string                  `json:"source,omitempty"`
+	Scores             map[string]QualityScore `json:"scores"`
+	SecondsPerQuestion float64                 `json:"seconds_per_question,omitempty"`
+}
+
+// QualityResults are Toskar's public quality results (#593). They draw no
+// conclusions. Live says they could be read: when not, Results is empty.
+type QualityResults struct {
+	Live    bool              `json:"live"`
+	Note    string            `json:"note,omitempty"`
+	Method  string            `json:"method,omitempty"`
+	Suites  map[string]string `json:"suites,omitempty"`
+	Results []QualityResult   `json:"results"`
+}

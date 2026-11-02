@@ -286,6 +286,29 @@ export interface ModelStore {
   live: boolean
 }
 
+/** One model, on one computer, on one date, as measured. */
+export interface QualityResult {
+  model: string
+  name: string
+  date: string
+  hardware: string
+  /** 0 is before versions existed. */
+  method_version: number
+  submitted?: boolean
+  submitted_by?: string
+  source?: string
+  scores: Record<string, { passed: number; of: number }>
+  seconds_per_question?: number
+}
+
+export interface QualityResults {
+  live: boolean
+  note?: string
+  method?: string
+  suites?: Record<string, string>
+  results: QualityResult[]
+}
+
 export interface InstallFromURLRequest {
   source_url: string
   display_name?: string

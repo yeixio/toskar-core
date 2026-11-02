@@ -65,3 +65,18 @@ func (a *App) modelStore(ctx context.Context) (contracts.ModelStore, error) {
 	shelves := models.StoreShelves(listings, models.TestedEntries(a.Models.Catalog().List()), installed, best, hw, opts, time.Now())
 	return contracts.ModelStore{Shelves: shelves, Live: live}, nil
 }
+
+// qualityResults are the public quality results. Not being able to read them
+// isn't an error: the page says so.
+func (a *App) qualityResults(ctx context.Context) contracts.QualityResults {
+	empty := contracts.QualityResults{Results: []contracts.QualityResult{}}
+	if a.Ratings == nil {
+		return empty
+	}
+	got, err := a.Ratings.QualityResults(ctx)
+	if err != nil {
+		a.Logger.Warn("quality results", "error", err)
+		return empty
+	}
+	return got
+}

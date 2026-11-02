@@ -446,6 +446,8 @@ If the model fails before it shows or changes anything, the turn runs once more:
 
 ### Effort, plans, checks, and Stop
 
+**Quality results (#593, contract 1.80).** `GET /api/v1/models/results` returns what Toskar's test runs measured, per model, computer, and date, from the public dataset. There's no ranking or overall score, and scores are comparable within one `method_version`. Without the dataset, `live` is false and `results` is empty.
+
 **The model store (#593, contract 1.79).** `GET /api/v1/models/store` returns shelves of models for this computer: `picks` (a tested model, then the most popular that run well here), `popular`, `top_rated`, `new`, `everyday`, `code`, `sees`, `small`, and `tested`. Rankings come from Hugging Face and are kept for an hour, so opening the store asks Hugging Face for them. A model that won't run here is left out, and so are gated models and re-uploads with their safeguards removed. `catalog_id` is set for a model tested with Toskar, which installs by that ID; others install through `POST /api/v1/models/install-from-url`. Without Hugging Face, `live` is false and only tested models are there.
 
 **The folder a client is working in (#1017, contract 1.78).** On `POST /api/v1/chat`, the `X-Toskar-Project` header, path-escaped, names the folder a client on this computer is working in: a turn's commands run there, and its file tools reach only that folder. It's ignored from any other computer, and when it isn't a folder.
@@ -770,6 +772,7 @@ Every cache declares its policy: `key`, `ttl`, `invalidation`, `scope`, and `pri
 | `capabilities` | one inventory snapshot | 30 s | a model downloads, loads, or unloads; a computer pairs or goes on- or offline; a tool is turned on or off | public |
 | `model_search` | Hugging Face search text and limit | 5 min | age | public |
 | `model_store` | the store listing's sort and search | 1 hour | age | public |
+| `quality_results` | one list | 1 hour | age | public |
 | `knowledge_index` | source and passage (on disk) | until invalidated | files change; reindex; source removed | personal |
 
 A repeat web search or page read is answered from the cache. The tool does not run, nothing leaves this computer (so no egress record is written), and the run trace counts it in `cache_hits`. In-memory caches are bounded, dropping the least recently used entry first, and can be cleared one at a time. "Delete run records now" also clears every personal in-memory cache.

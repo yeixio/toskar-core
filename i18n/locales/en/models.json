@@ -16,7 +16,8 @@
   "tabs": {
     "discover": "Store",
     "installed": "Installed",
-    "running": "Running"
+    "running": "Running",
+    "results": "Results"
   },
   "target": {
     "label": "Models for:",
@@ -470,5 +471,33 @@
       "close": "Close"
     },
     "bestOverall": "Best overall"
+  },
+  "results": {
+    "loading": "Loading results…",
+    "offline": "Couldn't read the results. Check your connection and try again.",
+    "title": "Quality results",
+    "intro": "What our test runs have measured so far, to sort through. We don't rank these or draw conclusions, and we add to them as more runs happen.",
+    "method": "How this is measured",
+    "suggest": "Suggest a change",
+    "contribute": "Add your computer's results",
+    "computer": "Computer",
+    "allComputers": "All computers",
+    "notSameTest": "Scores from different computers or method versions aren't the same test, so compare them with care.",
+    "model": "Model",
+    "seconds": "Seconds a question",
+    "date": "Date",
+    "version": "Method",
+    "source": "Source",
+    "sourceLink": "Run",
+    "community": "Community",
+    "score": "{{passed}} of {{of}}",
+    "suites": {
+      "quality": "Quality",
+      "topics": "Topics",
+      "files": "Files",
+      "reasoning": "Reasoning",
+      "triage": "Triage",
+      "fix_test": "Fix a test"
+    }
   }
 }

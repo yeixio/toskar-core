@@ -83,6 +83,14 @@ func (s *Server) handleModelStore(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, store)
 }
 
+func (s *Server) handleQualityResults(w http.ResponseWriter, r *http.Request) {
+	if s.deps.QualityResults == nil {
+		writeJSON(w, http.StatusOK, contracts.QualityResults{Results: []contracts.QualityResult{}})
+		return
+	}
+	writeJSON(w, http.StatusOK, s.deps.QualityResults(r.Context()))
+}
+
 func (s *Server) handleListRunningModels(w http.ResponseWriter, r *http.Request) {
 	if s.deps.ListRunningModels == nil {
 		writeJSON(w, http.StatusOK, []contracts.RunningModelView{})

@@ -15,7 +15,8 @@
   "tabs": {
     "discover": "商店",
     "installed": "已安裝",
-    "running": "執行中"
+    "running": "執行中",
+    "results": "結果"
   },
   "target": {
     "label": "模型適用於：",
@@ -462,5 +463,33 @@
       "close": "關閉"
     },
     "bestOverall": "綜合最佳"
+  },
+  "results": {
+    "loading": "正在載入結果…",
+    "offline": "無法讀取結果。請檢查網路連線後再試一次。",
+    "title": "品質結果",
+    "intro": "我們的測試目前測得的結果,供你查看。我們不做排名,也不下結論,並會隨著測試持續增加。",
+    "method": "測量方式",
+    "suggest": "建議修改",
+    "contribute": "新增你的電腦的結果",
+    "computer": "電腦",
+    "allComputers": "所有電腦",
+    "notSameTest": "不同電腦或不同方法版本的分數並非同一測試,比較時請留意。",
+    "model": "模型",
+    "seconds": "每題秒數",
+    "date": "日期",
+    "version": "方法",
+    "source": "來源",
+    "sourceLink": "執行記錄",
+    "community": "社群",
+    "score": "{{passed}} / {{of}}",
+    "suites": {
+      "quality": "品質",
+      "topics": "主題",
+      "files": "檔案",
+      "reasoning": "推理",
+      "triage": "分類",
+      "fix_test": "修正測試"
+    }
   }
 }

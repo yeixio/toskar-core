@@ -661,7 +661,8 @@ func New(opts Options) (*App, error) {
 			}
 			return a.HF.Search(ctx, query, limit)
 		},
-		ModelStore: a.modelStore,
+		ModelStore:     a.modelStore,
+		QualityResults: a.qualityResults,
 		InstallModel: func(ctx context.Context, id string, wait bool, nodeID string) error {
 			return a.installModelOn(ctx, id, nodeID, wait)
 		},
