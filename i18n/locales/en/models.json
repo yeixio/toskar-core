@@ -14,7 +14,7 @@
     "looseFilesAdd": "Add it"
   },
   "tabs": {
-    "discover": "Discover",
+    "discover": "Store",
     "installed": "Installed",
     "running": "Running"
   },
@@ -398,6 +398,72 @@
       "visionOffer": "Image support was found with it, so it can see pictures:",
       "visionAdd": "Add image support",
       "visionOn": "Image support added: it can see pictures."
+    }
+  },
+  "store": {
+    "loading": "Loading the store…",
+    "offline": "Couldn't reach Hugging Face, so only models tested by Toskar are here.",
+    "source": "Likes, downloads, and rankings are from Hugging Face. Models here run on this computer.",
+    "install": "Install",
+    "tested": "Tested by Toskar",
+    "likes": "Likes on Hugging Face",
+    "downloads": "Downloads on Hugging Face",
+    "installFailed": "That model couldn't be installed. Try again, or choose another.",
+    "shelves": {
+      "popular": {
+        "title": "Popular now",
+        "hint": "What people are trying this week."
+      },
+      "top_rated": {
+        "title": "Top rated",
+        "hint": "The most liked models that run here."
+      },
+      "new": {
+        "title": "New",
+        "hint": "Released in the last two months."
+      },
+      "everyday": {
+        "title": "Everyday",
+        "hint": "For questions, writing, and getting things done."
+      },
+      "code": {
+        "title": "Good for code",
+        "hint": "Models that write and fix code."
+      },
+      "sees": {
+        "title": "Sees pictures",
+        "hint": "Models that can read images and screenshots."
+      },
+      "small": {
+        "title": "Small and fast",
+        "hint": "3 GB or less, for quick answers."
+      },
+      "tested": {
+        "title": "Tested by Toskar",
+        "hint": "Models we've checked with Toskar."
+      },
+      "media": {
+        "title": "Pictures and clips",
+        "hint": "Pictures and clips are set up in Tools.",
+        "action": "Open Tools"
+      }
+    },
+    "purpose": {
+      "coding": "Code",
+      "vision": "Sees pictures",
+      "reasoning": "Reasoning",
+      "general": "Everyday"
+    },
+    "details": {
+      "fit": "On this computer",
+      "license": "License",
+      "licenseUnknown": "Not listed",
+      "added": "Added",
+      "from": "From",
+      "tested": "Tested with Toskar.",
+      "untested": "From Hugging Face. It hasn't been tested with Toskar, so it may not work as well, or at all. Check its license before using it for work.",
+      "link": "View on Hugging Face",
+      "close": "Close"
     }
   }
 }

@@ -87,6 +87,8 @@ func StoreShelves(listings StoreListings, catalog []CatalogEntry, installed map[
 		return m.Likes >= newLikes && !m.CreatedAt.IsZero() && now.Sub(m.CreatedAt) < newFor
 	})
 	slices.SortStableFunc(fresh, func(a, b contracts.StoreModel) int { return b.CreatedAt.Compare(a.CreatedAt) })
+	everyday := filterStore(everything, func(m contracts.StoreModel) bool { return slices.Contains(m.Tags, "general") })
+	slices.SortStableFunc(everyday, byLikes)
 	sees := filterStore(everything, func(m contracts.StoreModel) bool { return slices.Contains(m.Tags, "vision") })
 	slices.SortStableFunc(sees, byLikes)
 	small := filterStore(everything, func(m contracts.StoreModel) bool { return m.SizeBytes > 0 && m.SizeBytes <= smallSize })
@@ -96,6 +98,7 @@ func StoreShelves(listings StoreListings, catalog []CatalogEntry, installed map[
 		{ID: "popular", Models: trending},
 		{ID: "top_rated", Models: liked},
 		{ID: "new", Models: fresh},
+		{ID: "everyday", Models: everyday},
 		{ID: "code", Models: slices.Concat(finishes, rankedCode, testedCode)},
 		{ID: "sees", Models: sees},
 		{ID: "small", Models: small},

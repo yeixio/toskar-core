@@ -18,6 +18,7 @@ import {
 } from './ModelsTargetBar'
 import { needsTightFitInstallWarning } from './modelPresentation'
 import { RunningTab } from './RunningTab'
+import { StoreShelves } from './StoreShelves'
 import { TightFitDialog } from './TightFitDialog'
 import { RatingDialogHost } from './ratings'
 import { RealmKicker } from '@/components/ui/Realm'
@@ -394,6 +395,19 @@ export function ModelsPage() {
           installingId={installingId}
           onBrowseAll={() => setBrowseOpen(true)}
           onInstall={installForPageTarget}
+          store={
+            <StoreShelves
+              models={models}
+              progress={downloadProgress}
+              search={search}
+              installTarget={resolveInstallNodeId(target)}
+              isOtherComputer={target !== 'local'}
+              onInstallTested={installForPageTarget}
+              onInstalled={() => {
+                queryClient.invalidateQueries({ queryKey: ['models'] })
+              }}
+            />
+          }
         />
       )}
 

@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import type {
   CategoryWinner,
@@ -10,6 +11,8 @@ import { ModelCard } from './ModelCard'
 import { CATEGORY_SECTIONS, largerAlternative } from './modelPresentation'
 import { searchItems } from '@/lib/search'
 
+const TOP_PICKS = 3
+
 export function DiscoverTab({
   models,
   fits,
@@ -20,6 +23,7 @@ export function DiscoverTab({
   onInstall,
   onBrowseAll,
   installingId,
+  store,
 }: {
   models: Model[]
   fits: Record<string, ModelFit>
@@ -30,6 +34,8 @@ export function DiscoverTab({
   onInstall: (id: string) => void
   onBrowseAll: () => void
   installingId?: string | null
+  /** The store's shelves, under the recommendations. */
+  store?: ReactNode
 }) {
   const { t } = useTranslation('models')
   // Typos forgiven (#451): "lama" finds Llama. Exact matches first.
@@ -53,11 +59,14 @@ export function DiscoverTab({
     .map((w) => filtered.find((m) => m.id === w.model_id))
     .filter(Boolean) as Model[]
   const seen = new Set<string>()
-  const uniqueRecommended = recommended.filter((m) => {
-    if (seen.has(m.id)) return false
-    seen.add(m.id)
-    return true
-  })
+  const uniqueRecommended = recommended
+    .filter((m) => {
+      if (seen.has(m.id)) return false
+      seen.add(m.id)
+      return true
+    })
+    // A few picks, then the store: searching looks through all of them.
+    .slice(0, search ? undefined : TOP_PICKS)
 
   return (
     <div className="space-y-8">
@@ -98,37 +107,41 @@ export function DiscoverTab({
         )}
       </section>
 
-      {CATEGORY_SECTIONS.map((section) => {
-        const list = filtered.filter(
-          (m) => section.match(m) && !uniqueRecommended.some((r) => r.id === m.id),
-        )
-        if (list.length === 0) return null
-        return (
-          <section key={section.id} className="space-y-3">
-            <h2 className="section-title">{t(`categories.${section.id}`)}</h2>
-            <ul className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-              {list.map((model) => (
-                <li key={`${section.id}-${model.id}`}>
-                  <ModelCard
-                    model={model}
-                    fit={fits[model.id]}
-                  peerFits={peerFits?.[model.id]}
-                    progress={progress[model.id]}
-                    installing={installingId === model.id}
-                    onInstall={() => onInstall(model.id)}
-                    alternative={alternative}
-                    onInstallAlternative={onInstall}
-                  />
-                </li>
-              ))}
-            </ul>
-          </section>
-        )
-      })}
+      {store}
 
-      {filtered.length === 0 && (
-        <p className="text-sm text-ink-muted">{t('discover.noMatches')}</p>
-      )}
+      {/* Everything in the catalog, only when looking for something: the shelves are the store. */}
+      {search ? (
+        <>
+      {CATEGORY_SECTIONS.map((section) => {
+          const list = filtered.filter(
+            (m) => section.match(m) && !uniqueRecommended.some((r) => r.id === m.id),
+          )
+          if (list.length === 0) return null
+          return (
+            <section key={section.id} className="space-y-3">
+              <h2 className="section-title">{t(`categories.${section.id}`)}</h2>
+              <ul className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                {list.map((model) => (
+                  <li key={`${section.id}-${model.id}`}>
+                    <ModelCard
+                      model={model}
+                      fit={fits[model.id]}
+                    peerFits={peerFits?.[model.id]}
+                      progress={progress[model.id]}
+                      installing={installingId === model.id}
+                      onInstall={() => onInstall(model.id)}
+                      alternative={alternative}
+                      onInstallAlternative={onInstall}
+                    />
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )
+        })}
+        </>
+      ) : null}
+
     </div>
   )
 }

@@ -13,7 +13,7 @@
     "looseFilesAdd": "添加"
   },
   "tabs": {
-    "discover": "发现",
+    "discover": "商店",
     "installed": "已安装",
     "running": "正在运行"
   },
@@ -390,6 +390,72 @@
       "visionOffer": "在它旁边找到了图片支持文件，添加后它就能看图片：",
       "visionAdd": "添加图片支持",
       "visionOn": "已添加图片支持：它可以看图片了。"
+    }
+  },
+  "store": {
+    "loading": "正在加载商店…",
+    "offline": "无法连接 Hugging Face,因此这里只显示经 Toskar 测试的模型。",
+    "source": "点赞、下载量和排名来自 Hugging Face。这里的模型可在此电脑上运行。",
+    "install": "安装",
+    "tested": "经 Toskar 测试",
+    "likes": "Hugging Face 点赞",
+    "downloads": "Hugging Face 下载量",
+    "installFailed": "无法安装该模型。请重试,或选择其他模型。",
+    "shelves": {
+      "popular": {
+        "title": "当前热门",
+        "hint": "大家本周正在试用的模型。"
+      },
+      "top_rated": {
+        "title": "最受好评",
+        "hint": "可在此运行且点赞最多的模型。"
+      },
+      "new": {
+        "title": "新上架",
+        "hint": "最近两个月发布。"
+      },
+      "everyday": {
+        "title": "日常使用",
+        "hint": "适合提问、写作和处理事务。"
+      },
+      "code": {
+        "title": "适合写代码",
+        "hint": "能编写和修复代码的模型。"
+      },
+      "sees": {
+        "title": "能看图片",
+        "hint": "能读取图片和截图的模型。"
+      },
+      "small": {
+        "title": "小而快",
+        "hint": "不超过 3 GB,回答迅速。"
+      },
+      "tested": {
+        "title": "经 Toskar 测试",
+        "hint": "我们用 Toskar 检查过的模型。"
+      },
+      "media": {
+        "title": "图片和短片",
+        "hint": "图片和短片在“工具”中设置。",
+        "action": "打开“工具”"
+      }
+    },
+    "purpose": {
+      "coding": "代码",
+      "vision": "能看图片",
+      "reasoning": "推理",
+      "general": "日常"
+    },
+    "details": {
+      "fit": "在此电脑上",
+      "license": "许可证",
+      "licenseUnknown": "未列出",
+      "added": "添加日期",
+      "from": "来源",
+      "tested": "已用 Toskar 测试。",
+      "untested": "来自 Hugging Face。它未经 Toskar 测试,可能效果较差或无法运行。用于工作前请查看其许可证。",
+      "link": "在 Hugging Face 上查看",
+      "close": "关闭"
     }
   }
 }

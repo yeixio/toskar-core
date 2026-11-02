@@ -15,7 +15,7 @@
     "looseFilesAdd": "Ajouter"
   },
   "tabs": {
-    "discover": "Découvrir",
+    "discover": "Boutique",
     "installed": "Installés",
     "running": "En cours"
   },
@@ -406,6 +406,72 @@
       "visionOffer": "Une prise en charge des images a été trouvée avec lui, pour qu'il puisse voir les images :",
       "visionAdd": "Ajouter la prise en charge des images",
       "visionOn": "Prise en charge des images ajoutée : il peut voir les images."
+    }
+  },
+  "store": {
+    "loading": "Chargement de la boutique…",
+    "offline": "Hugging Face est injoignable : seuls les modèles testés par Toskar sont affichés.",
+    "source": "Les j'aime, les téléchargements et les classements viennent de Hugging Face. Les modèles affichés fonctionnent sur cet ordinateur.",
+    "install": "Installer",
+    "tested": "Testé par Toskar",
+    "likes": "J'aime sur Hugging Face",
+    "downloads": "Téléchargements sur Hugging Face",
+    "installFailed": "Impossible d'installer ce modèle. Réessayez ou choisissez-en un autre.",
+    "shelves": {
+      "popular": {
+        "title": "Populaires",
+        "hint": "Ce que les gens essaient cette semaine."
+      },
+      "top_rated": {
+        "title": "Les mieux notés",
+        "hint": "Les modèles les plus aimés qui fonctionnent ici."
+      },
+      "new": {
+        "title": "Nouveautés",
+        "hint": "Sortis ces deux derniers mois."
+      },
+      "everyday": {
+        "title": "Au quotidien",
+        "hint": "Pour les questions, la rédaction et les tâches courantes."
+      },
+      "code": {
+        "title": "Pour le code",
+        "hint": "Des modèles qui écrivent et corrigent du code."
+      },
+      "sees": {
+        "title": "Voit les images",
+        "hint": "Des modèles qui lisent les images et les captures d'écran."
+      },
+      "small": {
+        "title": "Petits et rapides",
+        "hint": "3 Go ou moins, pour des réponses rapides."
+      },
+      "tested": {
+        "title": "Testés par Toskar",
+        "hint": "Les modèles que nous avons vérifiés avec Toskar."
+      },
+      "media": {
+        "title": "Images et clips",
+        "hint": "Les images et les clips se configurent dans Outils.",
+        "action": "Ouvrir Outils"
+      }
+    },
+    "purpose": {
+      "coding": "Code",
+      "vision": "Voit les images",
+      "reasoning": "Raisonnement",
+      "general": "Quotidien"
+    },
+    "details": {
+      "fit": "Sur cet ordinateur",
+      "license": "Licence",
+      "licenseUnknown": "Non indiquée",
+      "added": "Ajouté",
+      "from": "Source",
+      "tested": "Testé avec Toskar.",
+      "untested": "Vient de Hugging Face. Il n'a pas été testé avec Toskar : il peut moins bien fonctionner, voire pas du tout. Vérifiez sa licence avant de l'utiliser au travail.",
+      "link": "Voir sur Hugging Face",
+      "close": "Fermer"
     }
   }
 }

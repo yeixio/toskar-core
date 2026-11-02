@@ -36,10 +36,10 @@ func TestStoreShelves(t *testing.T) {
 	const day = 24 * time.Hour
 	listings := StoreListings{
 		Trending: []contracts.StoreModel{
-			storeItem("org/Fresh", 2_000_000_000, 100, 5*day),
+			storeItem("org/Fresh", 2_000_000_000, 100, 5*day, "general"),
 			storeItem("org/Unnoticed", 2_000_000_000, 1, 1*day),
 			storeItem("org/Huge", 90_000_000_000, 900, 5*day),
-			storeItem("org/Old", 5_000_000_000, 500, 400*day),
+			storeItem("org/Old", 5_000_000_000, 500, 400*day, "general"),
 			storeItem("other/Old-GGUF", 5_000_000_000, 40, 400*day),
 			storeItem("org/Split", 0, 900, 5*day),
 		},
@@ -73,6 +73,7 @@ func TestStoreShelves(t *testing.T) {
 	equal("top_rated", shelfOf(shelves, "top_rated"), "org/Sees")
 	// Measured to finish tasks first, then what's named for code.
 	equal("code", shelfOf(shelves, "code"), "task", "org/Coder-7B", "coder")
+	equal("everyday", shelfOf(shelves, "everyday"), "org/Old", "org/Fresh")
 	equal("sees", shelfOf(shelves, "sees"), "org/Sees")
 	equal("small", shelfOf(shelves, "small"), "org/Fresh", "org/Unnoticed")
 	equal("tested", shelfOf(shelves, "tested"), "coder", "task")
@@ -108,5 +109,18 @@ func TestStoreShelves(t *testing.T) {
 	got = StoreShelves(same, catalog, map[string]bool{"task": true}, hw, FitOptions{}, now)
 	if m := got[0].Models[0]; m.CatalogID != "task" || !m.Installed {
 		t.Errorf("%+v", m)
+	}
+}
+
+// A model someone added is in the catalog, and isn't tested for being there.
+func TestTestedEntriesLeaveOutAddedModels(t *testing.T) {
+	shipped, err := NewCatalogEmbedded()
+	if err != nil {
+		t.Fatal(err)
+	}
+	real := shipped.List()[0]
+	got := TestedEntries([]CatalogEntry{real, {ID: "liquidai-lfm3-1-7b-gguf-q4-k-m"}})
+	if len(got) != 1 || got[0].ID != real.ID {
+		t.Fatalf("%+v", got)
 	}
 }

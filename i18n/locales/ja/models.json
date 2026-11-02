@@ -13,7 +13,7 @@
     "looseFilesAdd": "追加"
   },
   "tabs": {
-    "discover": "見つける",
+    "discover": "ストア",
     "installed": "インストール済み",
     "running": "実行中"
   },
@@ -390,6 +390,72 @@
       "visionOffer": "画像対応ファイルが一緒に見つかりました。追加すると画像を見られます:",
       "visionAdd": "画像対応を追加",
       "visionOn": "画像対応を追加しました。画像を見られます。"
+    }
+  },
+  "store": {
+    "loading": "ストアを読み込んでいます…",
+    "offline": "Hugging Face に接続できないため、Toskar でテスト済みのモデルのみ表示しています。",
+    "source": "いいね、ダウンロード数、ランキングは Hugging Face のものです。ここにあるモデルはこのコンピューターで動作します。",
+    "install": "インストール",
+    "tested": "Toskar でテスト済み",
+    "likes": "Hugging Face のいいね",
+    "downloads": "Hugging Face のダウンロード数",
+    "installFailed": "このモデルをインストールできませんでした。もう一度試すか、別のモデルを選んでください。",
+    "shelves": {
+      "popular": {
+        "title": "人気",
+        "hint": "今週よく試されているモデル。"
+      },
+      "top_rated": {
+        "title": "高評価",
+        "hint": "ここで動作する、いいねの多いモデル。"
+      },
+      "new": {
+        "title": "新着",
+        "hint": "この2か月以内に公開。"
+      },
+      "everyday": {
+        "title": "普段使い",
+        "hint": "質問、文章作成、日々の作業に。"
+      },
+      "code": {
+        "title": "コード向け",
+        "hint": "コードを書いて修正するモデル。"
+      },
+      "sees": {
+        "title": "画像を理解",
+        "hint": "画像やスクリーンショットを読めるモデル。"
+      },
+      "small": {
+        "title": "小さくて速い",
+        "hint": "3 GB 以下で、すばやく回答。"
+      },
+      "tested": {
+        "title": "Toskar でテスト済み",
+        "hint": "Toskar で確認したモデル。"
+      },
+      "media": {
+        "title": "画像とクリップ",
+        "hint": "画像とクリップはツールで設定します。",
+        "action": "ツールを開く"
+      }
+    },
+    "purpose": {
+      "coding": "コード",
+      "vision": "画像を理解",
+      "reasoning": "推論",
+      "general": "普段使い"
+    },
+    "details": {
+      "fit": "このコンピューターでは",
+      "license": "ライセンス",
+      "licenseUnknown": "記載なし",
+      "added": "追加日",
+      "from": "提供元",
+      "tested": "Toskar でテスト済みです。",
+      "untested": "Hugging Face のモデルです。Toskar ではテストしていないため、うまく動かない場合や動作しない場合があります。業務で使う前にライセンスを確認してください。",
+      "link": "Hugging Face で見る",
+      "close": "閉じる"
     }
   }
 }

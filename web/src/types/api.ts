@@ -263,6 +263,29 @@ export interface BrowseModel {
   tags?: string[]
 }
 
+/** A model on a shelf of the store (#593). */
+export interface StoreModel extends BrowseModel {
+  likes?: number
+  created_at?: string
+  license?: string
+  details_url?: string
+  fit?: ModelFit
+  /** Tested with Toskar, and installs by this ID. Empty for everything else. */
+  catalog_id?: string
+  installed?: boolean
+}
+
+export interface StoreShelf {
+  id: string
+  models: StoreModel[]
+}
+
+export interface ModelStore {
+  shelves: StoreShelf[]
+  /** Hugging Face answered. Without it, only tested models are there. */
+  live: boolean
+}
+
 export interface InstallFromURLRequest {
   source_url: string
   display_name?: string

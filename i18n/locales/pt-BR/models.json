@@ -15,7 +15,7 @@
     "looseFilesAdd": "Adicionar"
   },
   "tabs": {
-    "discover": "Descobrir",
+    "discover": "Loja",
     "installed": "Instalados",
     "running": "Em execução"
   },
@@ -406,6 +406,72 @@
       "visionOffer": "Foi encontrado suporte a imagens junto com ele, para que veja imagens:",
       "visionAdd": "Adicionar suporte a imagens",
       "visionOn": "Suporte a imagens adicionado: ele pode ver imagens."
+    }
+  },
+  "store": {
+    "loading": "Carregando a loja…",
+    "offline": "Não foi possível acessar o Hugging Face, então só os modelos testados pelo Toskar aparecem aqui.",
+    "source": "Curtidas, downloads e classificações vêm do Hugging Face. Os modelos aqui funcionam neste computador.",
+    "install": "Instalar",
+    "tested": "Testado pelo Toskar",
+    "likes": "Curtidas no Hugging Face",
+    "downloads": "Downloads no Hugging Face",
+    "installFailed": "Não foi possível instalar esse modelo. Tente de novo ou escolha outro.",
+    "shelves": {
+      "popular": {
+        "title": "Populares agora",
+        "hint": "O que as pessoas estão testando nesta semana."
+      },
+      "top_rated": {
+        "title": "Mais bem avaliados",
+        "hint": "Os modelos mais curtidos que funcionam aqui."
+      },
+      "new": {
+        "title": "Novos",
+        "hint": "Lançados nos últimos dois meses."
+      },
+      "everyday": {
+        "title": "Para o dia a dia",
+        "hint": "Para perguntas, textos e tarefas."
+      },
+      "code": {
+        "title": "Bons para código",
+        "hint": "Modelos que escrevem e corrigem código."
+      },
+      "sees": {
+        "title": "Veem imagens",
+        "hint": "Modelos que leem imagens e capturas de tela."
+      },
+      "small": {
+        "title": "Pequenos e rápidos",
+        "hint": "3 GB ou menos, para respostas rápidas."
+      },
+      "tested": {
+        "title": "Testados pelo Toskar",
+        "hint": "Modelos que verificamos com o Toskar."
+      },
+      "media": {
+        "title": "Imagens e clipes",
+        "hint": "Imagens e clipes são configurados em Ferramentas.",
+        "action": "Abrir Ferramentas"
+      }
+    },
+    "purpose": {
+      "coding": "Código",
+      "vision": "Vê imagens",
+      "reasoning": "Raciocínio",
+      "general": "Dia a dia"
+    },
+    "details": {
+      "fit": "Neste computador",
+      "license": "Licença",
+      "licenseUnknown": "Não informada",
+      "added": "Adicionado",
+      "from": "De",
+      "tested": "Testado com o Toskar.",
+      "untested": "Do Hugging Face. Não foi testado com o Toskar, então pode funcionar pior ou nem funcionar. Confira a licença antes de usar no trabalho.",
+      "link": "Ver no Hugging Face",
+      "close": "Fechar"
     }
   }
 }

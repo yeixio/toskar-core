@@ -950,7 +950,7 @@
         },
         {
           "type": "paragraph",
-          "text": "Open Models in the sidebar. Choose the computer in Models for, since a model is installed on one computer and fits its memory. Recommended lists curated picks for that computer, purpose first, each labeled by how well it fits."
+          "text": "Open Models in the sidebar. Choose the computer in Models for, since a model is installed on one computer and fits its memory. Recommended lists curated picks for that computer, purpose first, each labeled by how well it fits. Under them, the Store has shelves of models that run on your computer: popular now, top rated, new, everyday, good for code, sees pictures, small and fast, and tested by Toskar. Choose a model's name for its license and a link to its page on Hugging Face."
         },
         {
           "type": "image",
@@ -1054,7 +1054,7 @@
         },
         {
           "type": "paragraph",
-          "text": "Browse all models searches Hugging Face for GGUF models, the format Toskar runs. Install from there shows the download as it happens. Embedding and reranker models are supporting models: they help Knowledge search and never answer chats, so the chat menus leave them out."
+          "text": "The shelves' likes, downloads, and rankings come from Hugging Face, so opening Models asks Hugging Face for them. They show what's popular, not how well a model works with Toskar. Models marked Tested by Toskar are the ones we've tested. Models with their safeguards removed aren't on the shelves. Without an internet connection, only tested models are there. Browse all models searches Hugging Face for GGUF models, the format Toskar runs. Install from there shows the download as it happens. Embedding and reranker models are supporting models: they help Knowledge search and never answer chats, so the chat menus leave them out."
         },
         {
           "type": "image",
