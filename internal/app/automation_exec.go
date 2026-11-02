@@ -285,6 +285,15 @@ func (e *automationEnv) ExecuteTool(ctx context.Context, toolID string, args map
 	result, err := e.base.app.Tools.Execute(ctx, toolID, args, policy, "scheduled automation", map[string]any{
 		"automation_id": e.base.taskID,
 	})
+	// A command that always asks, with no one here to answer (#1017).
+	if errors.Is(err, tools.ErrNeedsApproval) {
+		e.mu.Lock()
+		if !slices.Contains(e.skipped, toolID) {
+			e.skipped = append(e.skipped, toolID)
+		}
+		e.mu.Unlock()
+		return nil, fmt.Errorf("skipped: %w; continue without it", err)
+	}
 	if err == nil {
 		e.sources.add(toolID, args, result)
 	}

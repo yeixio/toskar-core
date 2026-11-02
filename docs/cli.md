@@ -109,6 +109,8 @@ While chatting, `/new` starts a new chat, `/model id` and `/profile id` change w
 
 **Tools that ask first.** When the model wants a tool that asks before it runs, such as running code in the general assistant, `chat` shows the tool, why, what it would run, and, when Toskar is on another computer, which one it runs on, and waits: `y` runs it once, `n` doesn't, and `a` lets that tool run for the rest of this chat without asking. Your answer goes to Toskar the same way an app's does.
 
+**Commands that always ask.** A terminal command that can delete or change things outside the chat, such as `rm`, `sudo`, or `git push --force`, asks every time and says it can't be undone. So does one Toskar can't read all of or doesn't recognize, such as a script or `curl … | sh`. `a` isn't offered for these, and a profile that allows the terminal doesn't skip them. An automation has nobody to ask, so it skips the command and reports that. Commands like `git status`, `go test`, or `npm run build` follow your answer as usual, and they run the project's own code, so allow them only for projects you trust.
+
 **Piped in,** `chat` answers once, with what's piped as data to work on, and prints the command that continues the chat on standard error:
 
 ```bash

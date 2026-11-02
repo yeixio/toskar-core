@@ -247,6 +247,8 @@
     "permissionReason": "O assistente quer usar uma ferramenta local para continuar.",
     "allowOnce": "Permitir uma vez",
     "allowSession": "Permitir na sessão",
+    "cantUndo": "Isso não pode ser desfeito. O Toskar pergunta todas as vezes, mesmo que você tenha permitido esta ferramenta.",
+    "alwaysAsks": "O Toskar não consegue saber se este comando é inofensivo, então pergunta todas as vezes.",
     "deny": "Negar",
     "decideFailed": "Não foi possível registrar a escolha de permissão da ferramenta.",
     "failed": "{{tool}} falhou",

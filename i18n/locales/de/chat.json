@@ -243,6 +243,8 @@
     "permissionReason": "Der Assistent möchte ein lokales Werkzeug nutzen, um weiterzumachen.",
     "allowOnce": "Einmal erlauben",
     "allowSession": "Für Sitzung erlauben",
+    "cantUndo": "Das lässt sich nicht rückgängig machen. Toskar fragt jedes Mal, auch wenn du dieses Werkzeug erlaubt hast.",
+    "alwaysAsks": "Toskar kann nicht erkennen, ob dieser Befehl harmlos ist, und fragt deshalb jedes Mal.",
     "deny": "Ablehnen",
     "decideFailed": "Die Wahl zur Werkzeugberechtigung konnte nicht gespeichert werden.",
     "failed": "{{tool}} fehlgeschlagen",

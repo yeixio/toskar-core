@@ -239,6 +239,8 @@
     "permissionReason": "助理需要使用本機工具才能繼續。",
     "allowOnce": "允許一次",
     "allowSession": "在本次工作階段允許",
+    "cantUndo": "此操作無法復原。即使你已允許此工具,每次仍會詢問。",
+    "alwaysAsks": "Toskar 無法判斷此命令是否無害,因此每次都會詢問。",
     "deny": "拒絕",
     "decideFailed": "無法記錄工具權限的選擇。",
     "failed": "{{tool}} 失敗",

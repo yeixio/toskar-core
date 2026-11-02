@@ -225,6 +225,24 @@ func (r *Registry) Execute(ctx context.Context, toolID string, args map[string]a
 		// Allowed for this chat by an earlier answer.
 		approval = ApprovedSession
 	}
+	// What a command does decides over any earlier yes (#1017): a command
+	// that can't be undone, or can't be read, asks each time, and with nobody
+	// to ask it doesn't run.
+	var always CommandRisk
+	if toolID == "terminal" {
+		command, _ := args["command"].(string)
+		var why string
+		if always, why = ClassifyCommand(command); always.AlwaysAsks() {
+			if nobodyToAsk(meta) {
+				err := fmt.Errorf("tool %q: %s: %w", toolID, why, ErrNeedsApproval)
+				r.audit(ctx, toolID, RunDenied, "", activitySummary(args), time.Time{}, err, meta)
+				return nil, err
+			}
+			allowed, needsPrompt = false, true
+			reason = why
+			meta = mergeMeta(meta, map[string]any{"always_asks": true, "cant_undo": always == CommandDestructive})
+		}
+	}
 	if needsPrompt {
 		decision, err := r.requestApproval(ctx, toolID, args, reason, meta)
 		if err != nil {
@@ -237,7 +255,7 @@ func (r *Registry) Execute(ctx context.Context, toolID string, args map[string]a
 			return nil, err
 		}
 		approval = ApprovedByYou
-		if decision.AllowSession && policy != PolicyAskEachTime {
+		if decision.AllowSession && policy != PolicyAskEachTime && !always.AlwaysAsks() {
 			r.policy.AllowSession(scope, toolID)
 			approval = ApprovedSession
 		}
@@ -295,6 +313,14 @@ func (r *Registry) Execute(ctx context.Context, toolID string, args map[string]a
 	})))
 	r.audit(ctx, toolID, RunCompleted, approval, summary, started, nil, meta)
 	return result, nil
+}
+
+// nobodyToAsk reports a call with no one there to answer: an automation, or
+// the settings page's test of a tool.
+func nobodyToAsk(meta map[string]any) bool {
+	_, automation := meta["automation_id"]
+	_, test := meta["test"]
+	return automation || test
 }
 
 func activitySummary(args map[string]any) string {

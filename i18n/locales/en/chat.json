@@ -243,6 +243,8 @@
     "permissionReason": "The assistant wants to use a local tool to continue.",
     "allowOnce": "Allow once",
     "allowSession": "Allow for session",
+    "cantUndo": "This can't be undone. It asks every time, even if you've allowed this tool.",
+    "alwaysAsks": "Toskar can't tell this command is harmless, so it asks every time.",
     "deny": "Deny",
     "decideFailed": "Could not record the tool permission choice.",
     "failed": "{{tool}} failed",
