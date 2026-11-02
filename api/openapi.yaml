@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Toskar Control Plane API
-  version: "1.80"
+  version: "1.81"
   description: >-
     Local AI control plane API for Toskar, its OpenAI-compatible routes, and its MCP server.
     On the default loopback bind no key is needed. When the daemon listens on any other address,
@@ -8897,6 +8897,22 @@ components:
               passed: {type: integer}
               of: {type: integer}
         seconds_per_question: {type: number}
+        performance:
+          type: object
+          description: "How the model ran on that computer, from a long prompt new each run. Never part of a score (contract 1.81)"
+          required: [prompt_tokens, prompt_tokens_per_second, tokens_per_second, first_token_ms, effective_tokens_per_second, gpu_layers, gpu_layers_total]
+          properties:
+            prompt_tokens: {type: integer, description: "The prompt it was measured with"}
+            prompt_tokens_per_second: {type: number, description: "How fast it read the prompt"}
+            tokens_per_second: {type: number, description: "How fast it wrote the answer"}
+            first_token_ms: {type: number, description: "From sending to the first token"}
+            effective_tokens_per_second: {type: number, description: "The answer's tokens over the time from sending to the last one"}
+            gpu_layers: {type: integer}
+            gpu_layers_total: {type: integer}
+            gpu_memory_bytes: {type: integer, format: int64}
+            memory_bytes: {type: integer, format: int64}
+            context_window: {type: integer}
+            quantization: {type: string}
     ModelStore:
       type: object
       required: [shelves, live]

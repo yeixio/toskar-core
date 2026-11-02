@@ -299,6 +299,22 @@ export interface QualityResult {
   source?: string
   scores: Record<string, { passed: number; of: number }>
   seconds_per_question?: number
+  /** How it ran on that computer, for rows measured that way (contract 1.81). */
+  performance?: QualityPerformance
+}
+
+export interface QualityPerformance {
+  prompt_tokens: number
+  prompt_tokens_per_second: number
+  tokens_per_second: number
+  first_token_ms: number
+  effective_tokens_per_second: number
+  gpu_layers: number
+  gpu_layers_total: number
+  gpu_memory_bytes?: number
+  memory_bytes?: number
+  context_window?: number
+  quantization?: string
 }
 
 export interface QualityResults {

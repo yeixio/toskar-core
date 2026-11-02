@@ -484,7 +484,7 @@
     "loading": "Caricamento dei risultati…",
     "offline": "Non è stato possibile leggere i risultati. Controlla la connessione e riprova.",
     "title": "Risultati di qualità",
-    "intro": "Quello che i nostri test hanno misurato finora, da consultare. Non facciamo classifiche né traiamo conclusioni, e ne aggiungiamo con ogni nuovo test.",
+    "intro": "Ciò che i nostri test hanno misurato finora, da esplorare. Ogni risultato ha un punteggio, non scegliamo un vincitore e ne aggiungiamo man mano che si fanno altri test.",
     "method": "Come viene misurato",
     "suggest": "Suggerisci una modifica",
     "contribute": "Aggiungi i risultati del tuo computer",
@@ -492,7 +492,7 @@
     "allComputers": "Tutti i computer",
     "notSameTest": "I punteggi di computer o versioni del metodo diversi non sono lo stesso test, quindi confrontali con cautela.",
     "model": "Modello",
-    "seconds": "Secondi per domanda",
+    "seconds": "{{seconds}} s",
     "date": "Data",
     "version": "Metodo",
     "source": "Fonte",
@@ -506,6 +506,11 @@
       "reasoning": "Ragionamento",
       "triage": "Classificazione",
       "fix_test": "Correggi un test"
-    }
+    },
+    "overall": "Punteggio",
+    "overallValue": "{{score}} (v{{version}})",
+    "writes": "Scrive (tok/s)",
+    "reads": "Legge (tok/s)",
+    "firstToken": "Primo token"
   }
 }
