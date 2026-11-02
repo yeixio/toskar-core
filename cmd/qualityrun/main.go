@@ -249,7 +249,7 @@ func startToskar(ctx context.Context, toskar, harness, out, data string, port in
 		}
 	}
 	stop()
-	return nil, fmt.Errorf("Toskar didn't start; see %s", logFile.Name())
+	return nil, fmt.Errorf("the throwaway Toskar didn't start; see %s", logFile.Name())
 }
 
 // hardwareName is the graphics card or chip, and memory. Nothing that identifies the computer.
