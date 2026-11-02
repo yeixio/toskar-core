@@ -320,6 +320,7 @@ The control API and the OpenAI-compatible API require a bearer token from other 
 | [GPU acceleration](docs/gpu.md) | Whether a model runs on the GPU, what each computer needs, and fixes |
 | [Configuration](docs/configuration.md) | Data directory, `config.json`, environment variables, settings |
 | [CLI](docs/cli.md) | `toskar` and `toskarctl` |
+| [How quality is measured](docs/quality.md) | The tests behind the quality results, how they're scored, and how to suggest changes |
 | [Toskar in CI](docs/ci.md) | Ask Toskar as a CI job's step, with `toskarctl ask`, a CI key, and `install.sh ci` |
 | [Capabilities](docs/capabilities.md) | Internet, Files, Shell, Git, connected services, and MCP |
 | [Tools](docs/tools.md) | Tool registry, permissions, and which tools a turn is offered |
