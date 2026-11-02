@@ -12,6 +12,8 @@ import (
 const (
 	// shelfSize is how many models a shelf shows.
 	shelfSize = 8
+	// picksSize is how many models are recommended first.
+	picksSize = 3
 	// smallSize is the largest model on the small and fast shelf.
 	smallSize = 3_000_000_000
 	// newFor is how long a model counts as new.
@@ -41,7 +43,7 @@ type StoreListings struct {
 // StoreShelves arranges the store's front page: Hugging Face's rankings for
 // this computer, and Toskar's tested models. What doesn't fit here is left out,
 // so anything on a shelf can be installed and run. now is for the new shelf.
-func StoreShelves(listings StoreListings, catalog []CatalogEntry, installed map[string]bool, hw contracts.HardwareInventory, opts FitOptions, now time.Time) []contracts.StoreShelf {
+func StoreShelves(listings StoreListings, catalog []CatalogEntry, installed map[string]bool, bestOverall string, hw contracts.HardwareInventory, opts FitOptions, now time.Time) []contracts.StoreShelf {
 	source := map[string]string{}
 	for _, e := range catalog {
 		source[entryRepo(e)] = e.ID
@@ -95,6 +97,7 @@ func StoreShelves(listings StoreListings, catalog []CatalogEntry, installed map[
 	slices.SortStableFunc(small, byLikes)
 
 	shelves := []contracts.StoreShelf{
+		{ID: "picks", Models: storePicks(tested, trending, bestOverall)},
 		{ID: "popular", Models: trending},
 		{ID: "top_rated", Models: liked},
 		{ID: "new", Models: fresh},
@@ -112,6 +115,26 @@ func StoreShelves(listings StoreListings, catalog []CatalogEntry, installed map[
 		}
 	}
 	return out
+}
+
+// storePicks are the store's first recommendations: one model we've tested, so
+// there's always a safe choice, then what's most popular that runs well here.
+func storePicks(tested, trending []contracts.StoreModel, bestOverall string) []contracts.StoreModel {
+	var picks []contracts.StoreModel
+	for _, m := range tested {
+		if m.ID == bestOverall {
+			picks = append(picks, m)
+		}
+	}
+	for _, m := range trending {
+		if len(picks) == picksSize {
+			break
+		}
+		if m.Fit != nil && (m.Fit.Label == contracts.FitExcellent || m.Fit.Label == contracts.FitGood) {
+			picks = append(picks, m)
+		}
+	}
+	return picks
 }
 
 func byLikes(a, b contracts.StoreModel) int { return b.Likes - a.Likes }

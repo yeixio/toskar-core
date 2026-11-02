@@ -20,7 +20,7 @@ type StoreModel struct {
 	Installed bool   `json:"installed,omitempty"`
 }
 
-// StoreShelf is a row of the store. ID says what it's for: popular, top_rated,
+// StoreShelf is a row of the store. ID says what it's for: picks, popular, top_rated,
 // new, everyday, code, sees, small, or tested; others may be added.
 type StoreShelf struct {
 	ID     string       `json:"id"`

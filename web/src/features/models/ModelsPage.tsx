@@ -402,6 +402,7 @@ export function ModelsPage() {
               search={search}
               installTarget={resolveInstallNodeId(target)}
               isOtherComputer={target !== 'local'}
+              onBrowseAll={() => setBrowseOpen(true)}
               onInstallTested={installForPageTarget}
               onInstalled={() => {
                 queryClient.invalidateQueries({ queryKey: ['models'] })
