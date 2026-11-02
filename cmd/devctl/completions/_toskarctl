@@ -19,6 +19,7 @@ _toskarctl() {
     'leave:leave the network and forget paired computers'
     'people:add, change, and remove the people who use this Toskar'
     'completion:print a shell completion script'
+    'help:show help for any command'
   )
 
   if (( CURRENT == 2 )); then
@@ -89,7 +90,7 @@ _toskarctl() {
       ;;
     automations)
       if (( CURRENT == 3 )); then
-        _values 'automations command' list get create update delete run pause resume hook
+        _values 'automations command' list get parse create update delete run pause resume hook
         return
       fi
       case "${words[3]}" in

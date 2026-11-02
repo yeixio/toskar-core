@@ -2063,6 +2063,17 @@
         },
         {
           "type": "paragraph",
+          "text": "`toskarctl help` lists every command by what it's for, and `toskarctl help models install`, or `--help` after any command, explains one, with its flags and examples."
+        },
+        {
+          "type": "code",
+          "language": "sh",
+          "test": "cli-help",
+          "code": "toskarctl help",
+          "output": "toskarctl talks to Toskar from a terminal or a script…Docs: https://toskar.ai/docs"
+        }        ,
+        {
+          "type": "paragraph",
           "text": "The headless archive doesn't install a service. Extract it, run toskar from its folder with the web folder beside it, and stop it with Ctrl+C. Its --data-dir option keeps the data somewhere else."
         },
         {

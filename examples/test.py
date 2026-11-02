@@ -104,6 +104,7 @@ def main() -> int:
                     (f"{lang} pair", lambda cmd=cmd, cwd=cwd: pair(runner, core, cmd, cwd)),
                 ]
             cases += guide_cases(runner, Path(args.guide), tmp, stubs, js, python, core.url)
+            cases += help_cases(runner, stubs, tmp)
             for name, case in cases:
                 started = time.time()
                 try:
@@ -278,6 +279,7 @@ def ci_stubs(tmp: Path) -> Path:
     scripts = {
         "toskarctl": f'''#!/bin/sh
 if [ "$1" = ask ]; then shift; exec "{toskarctl}" ask --model profile:general-assistant "$@"; fi
+if [ "$1" = chat ]; then shift; exec "{toskarctl}" chat --model ext:echo "$@"; fi
 exec "{toskarctl}" "$@"
 ''',
         "gh": '''#!/bin/sh
@@ -442,6 +444,57 @@ def ci_forgejo_triage(run: Runner, stubs: Path, tmp: Path) -> None:
     finally:
         SUGGEST[:] = ["bug"]
 
+
+
+# toskarctl's help (#1016): every example it shows runs as written, against
+# this Core, in a folder and a home of their own.
+
+
+def help_examples(run: Runner, stubs: Path) -> dict[str, list[str]]:
+    """Each example in toskarctl help, by the help it's in, following the
+    commands each help lists."""
+    env = {"PATH": f"{stubs}{os.pathsep}{run.env.get('PATH', '')}"}
+    found: dict[str, list[str]] = {}
+    topics: list[str] = [""]
+    while topics:
+        topic = topics.pop()
+        text = run(["sh", "-c", f"toskarctl help {topic}"], env=env, stdin="")
+        found[f"toskarctl help {topic}".strip()] = help_section(text, "Examples")
+        names = help_section(text, "Commands") if topic else [
+            line for title, lines in help_groups(text) for line in lines]
+        topics += [f"{topic} {line.split()[0]}".strip() for line in names
+                   if line.split()[0] != "help" or topic]
+    return found
+
+
+def help_groups(text: str) -> list[tuple[str, list[str]]]:
+    """The titled lists in the top help, other than its usage and examples."""
+    groups = []
+    for block in text.split("\n\n"):
+        title, _, rest = block.partition(":\n")
+        if rest and title not in ("Usage", "Examples", "Environment"):
+            groups.append((title, [line.strip() for line in rest.splitlines()]))
+    return groups
+
+
+def help_section(text: str, title: str) -> list[str]:
+    for block in text.split("\n\n"):
+        if block.startswith(title + ":\n"):
+            return [line.strip() for line in block.splitlines()[1:]]
+    return []
+
+
+def help_cases(run: Runner, stubs: Path, tmp: Path) -> list[tuple[str, Callable[[], None]]]:
+    work = tmp / "help"
+    work.mkdir()
+    env = {"PATH": f"{stubs}{os.pathsep}{run.env.get('PATH', '')}", "HOME": str(work)}
+    examples = {example for found in help_examples(run, stubs).values() for example in found}
+    expect(len(examples) > 15, "toskarctl help should show its examples", "\n".join(sorted(examples)))
+
+    def case(example: str) -> Callable[[], None]:
+        return lambda: run(["sh", "-e", "-c", example], cwd=work, stdin="", env=env)  # type: ignore[return-value]
+
+    return [(f"help: {example}", case(example)) for example in sorted(examples)]
 
 
 # The user guide's tested examples (docs/user-guide/STYLE.md, #882): every

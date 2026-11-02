@@ -33,6 +33,7 @@ How it is started depends on how it was installed:
 
 | Command | What it does |
 | --- | --- |
+| `toskarctl help [command]` | What each command does, with its flags and examples. `toskarctl <command> --help` is the same |
 | `toskarctl version` (or `about`) | Version, license, and corresponding source |
 | `toskarctl paths` | Default data, model, runtime, log, and database paths |
 | `toskarctl ask [flags] [prompt]` | Send one prompt and print the answer, for scripts and CI jobs (below) |
