@@ -290,6 +290,11 @@ func (c *Client) readStream(resp *http.Response, ch chan<- pluginapi.ChatChunk, 
 			finish = *chunk.Choices[0].FinishReason
 		}
 		if thought := chunk.Choices[0].Delta.Reasoning; thought != "" {
+			// Thinking counts as the first token: a reply that's only
+			// thinking would otherwise report it took no time to start.
+			if firstToken.IsZero() {
+				firstToken = time.Now()
+			}
 			thoughtTokens++
 			ch <- pluginapi.ChatChunk{Reasoning: thought}
 		}
