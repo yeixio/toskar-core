@@ -6,6 +6,8 @@ Every case, check, and threshold is public, in [`tests/quality`](../tests/qualit
 
 **See something wrong or missing? [Suggest a change](https://github.com/yeixio/toskar-core/issues/new?template=quality_suggestion.yml).** A case we should add, a check that's unfair, or a better way to score are all welcome, and so is a pull request.
 
+**Have a computer we don't? [Run it and send us your results](#add-your-computers-results).** We only have a couple of computers, and every result helps people with hardware like yours.
+
 ## What's measured
 
 Each set is a fixed list of requests, each with what it must do. The model answers through Toskar, the same way it does in a chat, so these measure a model working in Toskar, not the model alone.
@@ -53,6 +55,37 @@ Quality runs every week on our own computers, a few models at a time, and each r
 - **Real tasks.** "Fix a failing test" is one small task, run with a script that isn't in `tests/quality` yet. It's a first look, and [#1034](https://github.com/yeixio/toskar-core/issues/1034) adds a proper set.
 - **Passing isn't the same as good.** These check what we thought to check. They say little about writing style, or how much you'd enjoy using a model.
 
-## Run it yourself
+## Add your computer's results
 
-`make quality` runs the sets with a scripted stand-in for a model, which tests Toskar and needs no download. To measure a real model, the [README](../tests/quality/README.md#running-it) has the commands. [#1037](https://github.com/yeixio/toskar-core/issues/1037) is about making this one step, with results you can choose to share.
+Our results come from very few computers. If you have a different graphics card, a laptop, or a model we haven't measured, your run shows people something we can't.
+
+You'll need a checkout of this repository, Go, and Python. Then:
+
+```sh
+scripts/quality-score.sh qwen2.5-7b-q4
+```
+
+`toskarctl models list` shows the model IDs. It downloads the model if it needs to. It can take from minutes to hours, so an evening or overnight is a good time.
+
+**What it does to your computer.** It runs its own Toskar, with its own data folder and ports, in an empty folder, so your everyday Toskar and chats aren't touched. Web lookups read fixed test pages. A real model does run, with real tools: every tool that asks first gets no, and that includes destructive commands, which always ask. Known commands, such as `ls` or `git status`, do run, in that empty folder. On a computer you can't risk, use a virtual machine or a container, as we do.
+
+A run of a small model took about 25 minutes on an M5 Pro with 24 GB. A large model takes much longer.
+
+**To send your results,** [open the results form](https://github.com/yeixio/toskar-core/issues/new?template=quality_results.yml) and paste `result.json` from the `quality-score-<model>` folder. Reports with every answer are there too. **What you share is public:** `result.json` has your model, scores, date, graphics card or processor, and memory. Look before you paste, since the reports hold the model's answers and the log has paths from your computer.
+
+We read each one and add it to the results, marked as submitted by the community, with the quality version it ran. A result can be left out if it looks wrong or doesn't match its reports. We can't check how a run was done, so treat these as what they are: one person's run. [#1037](https://github.com/yeixio/toskar-core/issues/1037) is about making this one step, inside Toskar.
+
+To check Toskar itself, with no model and no download, `make quality` runs the sets with a scripted stand-in. The [README](../tests/quality/README.md#running-it) has every other way to run it.
+
+## Versions
+
+Each result says which version of this method measured it (`method_version`). **Compare scores within one version:** a new version can move every score without any model changing.
+
+The version is in [`version.json`](../tests/quality/version.json). It goes up when a score could change: a case is added, changed, or removed, a check or how a set is scored changes, or the fixed web pages change. A test fails if a set changes without a new version. A check changed in code can't be caught that way, so that's on us, and you can hold us to it.
+
+Older results stay, with their version. We don't rescale them. If saved answers exist, we can check them again under a new version.
+
+| Version | Since | What changed |
+|---|---|---|
+| 1 | November 2026 | The first version named, as this page describes it |
+| 0 | Before that | Results measured before versions existed. Sets and checks changed during this time, including how clips are judged (#1027), so don't treat these as one test |

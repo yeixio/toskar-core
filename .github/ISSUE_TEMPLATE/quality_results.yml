@@ -1,0 +1,30 @@
+name: Quality results
+description: Send your computer's quality results, to add to Toskar's public results.
+title: "[Results]: "
+labels: ["tests"]
+body:
+  - type: markdown
+    attributes:
+      value: "Thank you. How to run it: [docs/quality.md](https://github.com/yeixio/toskar-core/blob/main/docs/quality.md#add-your-computers-results). **What you post here is public,** and may be added to [the public results](https://github.com/yeixio/toskar-model-data/blob/main/quality/results.json) under CC0."
+  - type: textarea
+    id: result
+    attributes:
+      label: result.json
+      description: Paste it from the quality-score-<model> folder. Check it first.
+      render: json
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Anything we should know?
+      description: Such as other work running at the same time, or anything that went wrong. Attaching the reports helps us check it. They hold the model's answers, so look before you attach.
+    validations:
+      required: false
+  - type: checkboxes
+    id: agree
+    attributes:
+      label: Sharing
+      options:
+        - label: I ran this myself, and it can be published under CC0.
+          required: true

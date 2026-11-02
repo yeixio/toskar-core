@@ -7,6 +7,8 @@ A fixed set of representative requests, each with the behavior it must have
 all change answers; these cases check that changes keep the behavior people
 rely on.
 
+`version.json` is the version of how quality is measured. A set that changes needs a new one, as [docs/quality.md](../../docs/quality.md#versions) says, and `TestVersionCoversTheSets` fails without it.
+
 `cases.json` holds the cases. Each has a `message` (and optional `history`
 and `setup`: knowledge files and tool policies), what it checks (`what`), the
 `platforms` it runs on (`core`, `phone`, or both; core when absent), and
@@ -163,6 +165,7 @@ the set confirms the license for that run.
 
 ## Running it
 
+- **On your own computer, with results to send:** `scripts/quality-score.sh <model id>` runs a throwaway Toskar and the sets. See [docs/quality.md](../../docs/quality.md#add-your-computers-results).
 - **Stub model:** `make quality`, also part of `go test ./...` in CI. It runs
   in-process with the web replaced by fixed pages, so it needs no model and no
   network.
