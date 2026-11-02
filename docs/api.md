@@ -769,6 +769,7 @@ Every cache declares its policy: `key`, `ttl`, `invalidation`, `scope`, and `pri
 | `web_pages` | the page address | 30 min | age; run records deleted | personal |
 | `capabilities` | one inventory snapshot | 30 s | a model downloads, loads, or unloads; a computer pairs or goes on- or offline; a tool is turned on or off | public |
 | `model_search` | Hugging Face search text and limit | 5 min | age | public |
+| `model_store` | the store listing's sort and search | 1 hour | age | public |
 | `knowledge_index` | source and passage (on disk) | until invalidated | files change; reindex; source removed | personal |
 
 A repeat web search or page read is answered from the cache. The tool does not run, nothing leaves this computer (so no egress record is written), and the run trace counts it in `cache_hits`. In-memory caches are bounded, dropping the least recently used entry first, and can be cleared one at a time. "Delete run records now" also clears every personal in-memory cache.

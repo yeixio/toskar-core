@@ -77,7 +77,7 @@ func (s *Server) handleModelStore(w http.ResponseWriter, r *http.Request) {
 	}
 	store, err := s.deps.ModelStore(r.Context())
 	if err != nil {
-		writeErrFrom(w, http.StatusInternalServerError, "STORE_FAILED", err)
+		writeErrFrom(w, http.StatusInternalServerError, "MODELS_LIST_FAILED", err)
 		return
 	}
 	writeJSON(w, http.StatusOK, store)
