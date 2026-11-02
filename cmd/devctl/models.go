@@ -160,7 +160,10 @@ func installModel(client daemonClient, id, node string, out io.Writer) error {
 	if node != "" {
 		body["node_id"] = node
 	}
-	err = client.call(http.MethodPost, "/models/"+id+"/install", body, nil)
+	// The answer comes when the download ends, however long that takes.
+	waiting := client
+	waiting.client = &http.Client{}
+	err = waiting.call(http.MethodPost, "/models/"+id+"/install", body, nil)
 	// The last progress can still be on its way when the install answers.
 	select {
 	case <-done:
