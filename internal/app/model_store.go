@@ -54,7 +54,15 @@ func (a *App) modelStore(ctx context.Context) (contracts.ModelStore, error) {
 	}
 	cfg := a.Config.Get()
 	running, _ := a.listRunningAll(ctx)
-	shelves := models.StoreShelves(listings, models.TestedEntries(a.Models.Catalog().List()), installed, hw, a.fitOptions(ctx, cfg.NodeID, true, running), time.Now())
+	opts := a.fitOptions(ctx, cfg.NodeID, true, running)
+	best := ""
+	for _, w := range a.Models.Fit(hw, cfg.NodeID, cfg.NodeName, opts).Winners {
+		if w.Category == "general" || w.Category == "best_overall" {
+			best = w.ModelID
+			break
+		}
+	}
+	shelves := models.StoreShelves(listings, models.TestedEntries(a.Models.Catalog().List()), installed, best, hw, opts, time.Now())
 	return contracts.ModelStore{Shelves: shelves, Live: live}, nil
 }
 

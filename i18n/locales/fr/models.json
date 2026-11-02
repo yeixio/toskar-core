@@ -419,6 +419,10 @@
     "downloads": "Téléchargements sur Hugging Face",
     "installFailed": "Impossible d'installer ce modèle. Réessayez ou choisissez-en un autre.",
     "shelves": {
+      "picks": {
+        "title": "Recommandés",
+        "hint": "Un modèle que nous avons testé, puis les plus populaires qui fonctionnent bien sur cet ordinateur."
+      },
       "popular": {
         "title": "Populaires",
         "hint": "Ce que les gens essaient cette semaine."
@@ -473,7 +477,8 @@
       "untested": "Vient de Hugging Face. Il n'a pas été testé avec Toskar : il peut moins bien fonctionner, voire pas du tout. Vérifiez sa licence avant de l'utiliser au travail.",
       "link": "Voir sur Hugging Face",
       "close": "Fermer"
-    }
+    },
+    "bestOverall": "Meilleur choix"
   },
   "results": {
     "loading": "Chargement des résultats…",

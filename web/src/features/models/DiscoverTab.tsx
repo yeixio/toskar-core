@@ -1,5 +1,7 @@
 import type { ReactNode } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
+import { api } from '@/lib/api'
 import type {
   CategoryWinner,
   FitLabel,
@@ -53,6 +55,10 @@ export function DiscoverTab({
     if (w.community_chosen) chosenByCommunity.add(w.model_id)
   }
 
+  // The store's picks take this section's place, when it has them.
+  const store_ = useQuery({ queryKey: ['models-store'], queryFn: () => api.getModelStore(), retry: false, staleTime: 10 * 60_000 })
+  const storePicks = !search && Boolean(store_.data?.shelves.some((s) => s.id === 'picks' && s.models.length > 0))
+
   const alternative = largerAlternative(models, fits)
 
   const recommended = winners
@@ -70,7 +76,7 @@ export function DiscoverTab({
 
   return (
     <div className="space-y-8">
-      <section className="space-y-3">
+      <section className="space-y-3" hidden={storePicks}>
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
             <h2 className="section-title">{t('discover.recommended')}</h2>

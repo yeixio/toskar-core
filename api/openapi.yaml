@@ -8909,7 +8909,7 @@ components:
       type: object
       required: [id, models]
       properties:
-        id: {type: string, description: "What it's for. Known values: `popular`, `top_rated`, `new`, `everyday`, `code`, `sees`, `small`, `tested`; others may be added."}
+        id: {type: string, description: "What it's for. Known values: `picks`, `popular`, `top_rated`, `new`, `everyday`, `code`, `sees`, `small`, `tested`; others may be added."}
         models:
           type: array
           items: {$ref: "#/components/schemas/StoreModel"}

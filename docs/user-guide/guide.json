@@ -950,7 +950,7 @@
         },
         {
           "type": "paragraph",
-          "text": "Open Models in the sidebar. Choose the computer in Models for, since a model is installed on one computer and fits its memory. Recommended lists curated picks for that computer, purpose first, each labeled by how well it fits. Under them, the Store has shelves of models that run on your computer: popular now, top rated, new, everyday, good for code, sees pictures, small and fast, and tested by Toskar. Choose a model's name for its license and a link to its page on Hugging Face."
+          "text": "Open Models in the sidebar. Choose the computer in Models for, since a model is installed on one computer and fits its memory. Recommended starts with a model we've tested, marked Best overall, then the most popular models on Hugging Face that run well on that computer. Under them, the Store has shelves of models that run on your computer: popular now, top rated, new, everyday, good for code, sees pictures, small and fast, and tested by Toskar. Choose a model's name for its license and a link to its page on Hugging Face."
         },
         {
           "type": "image",

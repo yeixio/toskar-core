@@ -403,6 +403,10 @@
     "downloads": "Hugging Face 下載次數",
     "installFailed": "無法安裝此模型。請再試一次,或選擇其他模型。",
     "shelves": {
+      "picks": {
+        "title": "推薦",
+        "hint": "一個我們測試過的模型,以及能在這部電腦上順暢執行的熱門模型。"
+      },
       "popular": {
         "title": "目前熱門",
         "hint": "大家本週正在試用的模型。"
@@ -457,7 +461,8 @@
       "untested": "來自 Hugging Face。它未經 Toskar 測試,可能效果較差或無法執行。用於工作前請查看其授權。",
       "link": "在 Hugging Face 上查看",
       "close": "關閉"
-    }
+    },
+    "bestOverall": "綜合最佳"
   },
   "results": {
     "loading": "正在載入結果…",

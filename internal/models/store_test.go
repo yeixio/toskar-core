@@ -52,7 +52,7 @@ func TestStoreShelves(t *testing.T) {
 		{ID: "embed", DisplayName: "Embed", SizeBytes: 1_000_000, SupportRole: "embedding", Runtime: []string{"llamacpp"}},
 		{ID: "giant", DisplayName: "Giant", SizeBytes: 90_000_000_000, MemoryNeededBytes: 100_000_000_000, Runtime: []string{"llamacpp"}},
 	}
-	shelves := StoreShelves(listings, catalog, map[string]bool{"org/Sees": true}, hw, FitOptions{}, now)
+	shelves := StoreShelves(listings, catalog, map[string]bool{"org/Sees": true}, "task", hw, FitOptions{}, now)
 
 	equal := func(name string, got []string, want ...string) {
 		t.Helper()
@@ -68,6 +68,8 @@ func TestStoreShelves(t *testing.T) {
 		}
 	}
 	// Doesn't fit: gone. Another upload of one model: one kept.
+	// A tested model first, then what's popular and fits well.
+	equal("picks", shelfOf(shelves, "picks"), "task", "org/Fresh", "org/Unnoticed")
 	equal("popular", shelfOf(shelves, "popular"), "org/Fresh", "org/Unnoticed", "org/Old")
 	equal("new", shelfOf(shelves, "new"), "org/Fresh")
 	equal("top_rated", shelfOf(shelves, "top_rated"), "org/Sees")
@@ -91,8 +93,8 @@ func TestStoreShelves(t *testing.T) {
 		}
 	}
 	// Without Hugging Face, Toskar's own models are still there.
-	offline := StoreShelves(StoreListings{}, catalog, nil, hw, FitOptions{}, now)
-	if len(offline) != 2 || offline[0].ID != "code" || offline[1].ID != "tested" {
+	offline := StoreShelves(StoreListings{}, catalog, nil, "task", hw, FitOptions{}, now)
+	if len(offline) != 3 || offline[0].ID != "picks" || offline[1].ID != "code" || offline[2].ID != "tested" {
 		t.Errorf("offline: %+v", offline)
 	}
 	// Qwen2.5 and Qwen 2.5 are one model, on one shelf.
@@ -100,13 +102,13 @@ func TestStoreShelves(t *testing.T) {
 	spaced.DisplayName = "Qwen2.5 Coder 7B"
 	other := storeItem("b/Qwen-2.5-Coder-7B", 4_000_000_000, 5, 5*day)
 	other.DisplayName = "Qwen 2.5 Coder 7B"
-	got := StoreShelves(StoreListings{Trending: []contracts.StoreModel{spaced, other}}, nil, nil, hw, FitOptions{}, now)
+	got := StoreShelves(StoreListings{Trending: []contracts.StoreModel{spaced, other}}, nil, nil, "", hw, FitOptions{}, now)
 	if len(got[0].Models) != 1 {
 		t.Errorf("%+v", got[0].Models)
 	}
 	// A listed model from a catalog repository is that entry.
 	same := StoreListings{Trending: []contracts.StoreModel{storeItem("cat/Task-GGUF", 5_000_000_000, 10, 5*day)}}
-	got = StoreShelves(same, catalog, map[string]bool{"task": true}, hw, FitOptions{}, now)
+	got = StoreShelves(same, catalog, map[string]bool{"task": true}, "", hw, FitOptions{}, now)
 	if m := got[0].Models[0]; m.CatalogID != "task" || !m.Installed {
 		t.Errorf("%+v", m)
 	}
