@@ -54,6 +54,6 @@ func (a *App) modelStore(ctx context.Context) (contracts.ModelStore, error) {
 	}
 	cfg := a.Config.Get()
 	running, _ := a.listRunningAll(ctx)
-	shelves := models.StoreShelves(listings, a.Models.Catalog().List(), installed, hw, a.fitOptions(ctx, cfg.NodeID, true, running), time.Now())
+	shelves := models.StoreShelves(listings, models.TestedEntries(a.Models.Catalog().List()), installed, hw, a.fitOptions(ctx, cfg.NodeID, true, running), time.Now())
 	return contracts.ModelStore{Shelves: shelves, Live: live}, nil
 }

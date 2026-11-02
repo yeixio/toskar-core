@@ -16,7 +16,7 @@ import (
 	"github.com/yeixio/toskar-core/pkg/contracts"
 )
 
-var preferredQuants = []string{"q4_k_m", "q5_k_m", "q4_k_s", "q8_0", "q4_0"}
+var preferredQuants = []string{"q4_k_m", "q4_k_xl", "q5_k_m", "q5_k_xl", "q4_k_s", "q8_0", "q4_0"}
 
 var splitPart = regexp.MustCompile(`-\d{5}-of-\d{5}\.gguf$`)
 
@@ -198,7 +198,8 @@ func pickGGUF(files []hfFile) (name string, size int64, variant string) {
 		}
 		// A draft head for speculative decoding (MTP) and one part of a
 		// split model can't run alone.
-		if strings.Contains(path.Base(low), "mtp") || splitPart.MatchString(low) {
+		if strings.Contains(path.Base(low), "mtp") || strings.Contains(path.Base(low), "dflash") || strings.Contains(path.Base(low), "draft") ||
+			strings.Contains(path.Base(low), "imatrix") || splitPart.MatchString(low) {
 			continue
 		}
 		quant := detectQuant(low)

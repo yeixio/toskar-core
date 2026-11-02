@@ -13,7 +13,7 @@
     "looseFilesAdd": "추가"
   },
   "tabs": {
-    "discover": "찾아보기",
+    "discover": "스토어",
     "installed": "설치됨",
     "running": "실행 중"
   },
@@ -390,6 +390,72 @@
       "visionOffer": "함께 있는 이미지 지원 파일을 찾았습니다. 추가하면 이미지를 볼 수 있습니다:",
       "visionAdd": "이미지 지원 추가",
       "visionOn": "이미지 지원을 추가했습니다. 이미지를 볼 수 있습니다."
+    }
+  },
+  "store": {
+    "loading": "스토어를 불러오는 중…",
+    "offline": "Hugging Face에 연결할 수 없어 Toskar에서 테스트한 모델만 표시합니다.",
+    "source": "좋아요, 다운로드, 순위는 Hugging Face의 정보입니다. 여기 있는 모델은 이 컴퓨터에서 실행됩니다.",
+    "install": "설치",
+    "tested": "Toskar에서 테스트함",
+    "likes": "Hugging Face 좋아요",
+    "downloads": "Hugging Face 다운로드",
+    "installFailed": "이 모델을 설치할 수 없습니다. 다시 시도하거나 다른 모델을 선택하세요.",
+    "shelves": {
+      "popular": {
+        "title": "지금 인기",
+        "hint": "이번 주에 사람들이 사용해 보는 모델."
+      },
+      "top_rated": {
+        "title": "최고 평점",
+        "hint": "여기서 실행되는 좋아요가 많은 모델."
+      },
+      "new": {
+        "title": "신규",
+        "hint": "최근 두 달 안에 출시."
+      },
+      "everyday": {
+        "title": "일상용",
+        "hint": "질문, 글쓰기, 일상 작업에 적합."
+      },
+      "code": {
+        "title": "코드에 적합",
+        "hint": "코드를 작성하고 고치는 모델."
+      },
+      "sees": {
+        "title": "이미지 인식",
+        "hint": "이미지와 스크린샷을 읽을 수 있는 모델."
+      },
+      "small": {
+        "title": "작고 빠름",
+        "hint": "3 GB 이하로 빠르게 답변."
+      },
+      "tested": {
+        "title": "Toskar에서 테스트함",
+        "hint": "Toskar에서 확인한 모델."
+      },
+      "media": {
+        "title": "이미지와 클립",
+        "hint": "이미지와 클립은 도구에서 설정합니다.",
+        "action": "도구 열기"
+      }
+    },
+    "purpose": {
+      "coding": "코드",
+      "vision": "이미지 인식",
+      "reasoning": "추론",
+      "general": "일상용"
+    },
+    "details": {
+      "fit": "이 컴퓨터에서",
+      "license": "라이선스",
+      "licenseUnknown": "표시되지 않음",
+      "added": "추가일",
+      "from": "출처",
+      "tested": "Toskar에서 테스트했습니다.",
+      "untested": "Hugging Face의 모델입니다. Toskar에서 테스트하지 않아 잘 작동하지 않거나 작동하지 않을 수 있습니다. 업무에 사용하기 전에 라이선스를 확인하세요.",
+      "link": "Hugging Face에서 보기",
+      "close": "닫기"
     }
   }
 }

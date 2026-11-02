@@ -67,3 +67,24 @@ func TestListingSaysWhenHuggingFaceFails(t *testing.T) {
 		t.Fatal("no error")
 	}
 }
+
+// A draft head or a calibration file can't run alone, whatever its size says.
+func TestListingPicksTheModelFile(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if strings.Contains(r.URL.Path, "/tree/") {
+			_ = json.NewEncoder(w).Encode([]map[string]any{{"type": "file", "path": "Bolt-UD-Q4_K_XL.gguf", "size": 5_000_000_000}})
+			return
+		}
+		_ = json.NewEncoder(w).Encode([]map[string]any{{"id": "org/Bolt-GGUF", "siblings": []map[string]any{
+			{"rfilename": "dflash-Bolt-Q8_0.gguf"}, {"rfilename": "imatrix_org.gguf"}, {"rfilename": "Bolt-draft-Q4_K_M.gguf"},
+			{"rfilename": "Bolt-BF16.gguf"}, {"rfilename": "Bolt-UD-Q4_K_XL.gguf"}, {"rfilename": "mmproj-Q8_0.gguf"},
+		}}})
+	}))
+	defer srv.Close()
+	c := hfclient.New()
+	c.BaseURL = srv.URL
+	got, err := c.Listing(context.Background(), "likes", "", 8)
+	if err != nil || len(got) != 1 || got[0].Filename != "Bolt-UD-Q4_K_XL.gguf" || got[0].SizeBytes != 5_000_000_000 {
+		t.Fatalf("%+v %v", got, err)
+	}
+}

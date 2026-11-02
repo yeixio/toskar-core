@@ -15,6 +15,7 @@ import type {
   MyDevice,
   DevicePairing,
   BrowseModel,
+  ModelStore,
   ChatRequest,
   ChatResponse,
   Conversation,
@@ -831,6 +832,8 @@ export const api = {
     request<Recommendation>(`/api/v1/models/recommend?purpose=${encodeURIComponent(purpose)}`),
 
   getModelsFit: () => request<ModelsFitResponse[]>('/api/v1/models/fit'),
+
+  getModelStore: () => request<ModelStore>('/api/v1/models/store'),
 
   browseModels: (q = '', limit = 24) => {
     const params = new URLSearchParams()

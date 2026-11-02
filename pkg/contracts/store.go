@@ -21,7 +21,7 @@ type StoreModel struct {
 }
 
 // StoreShelf is a row of the store. ID says what it's for: popular, top_rated,
-// new, code, sees, small, or tested; others may be added.
+// new, everyday, code, sees, small, or tested; others may be added.
 type StoreShelf struct {
 	ID     string       `json:"id"`
 	Models []StoreModel `json:"models"`
