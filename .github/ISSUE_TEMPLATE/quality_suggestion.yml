@@ -1,7 +1,7 @@
 name: Quality tests
 description: Suggest a change to how Toskar measures quality, or question a result.
 title: "[Quality]: "
-labels: ["quality"]
+labels: ["tests"]
 body:
   - type: markdown
     attributes:
