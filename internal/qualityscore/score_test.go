@@ -47,11 +47,11 @@ func TestSecondsPerQuestion(t *testing.T) {
 
 func TestTestedOn(t *testing.T) {
 	for line, want := range map[string]Tested{
-		fmt.Sprintf(onCard, "gemma-2-9b-q4"): {"gemma-2-9b-q4", "AMD RX 7900 XTX, Vulkan"},
-		"Tested Toskar 0.1.0-dev (unknown) on Apple M5 Pro, with lfm3; the model ran on the GPU (Metal, 25 of 25 layers).\n": {"lfm3", "Apple M5 Pro, Metal"},
-		"Tested Toskar 1 (a) on Some CPU (8 GB), with m; the model ran on the CPU.\n":                                        {"m", "Some CPU, CPU"},
+		fmt.Sprintf(onCard, "gemma-2-9b-q4"): {"gemma-2-9b-q4", "AMD RX 7900 XTX, 24 GB"},
+		"Tested Toskar 0.1.0-dev (unknown) on Apple M5 Pro, with lfm3; the model ran on the GPU (Metal, 25 of 25 layers).\n": {"lfm3", "Apple M5 Pro"},
+		"Tested Toskar 1 (a) on Some CPU (8 GB), with m; the model ran on the CPU.\n":                                        {"m", "Some CPU, 8 GB"},
 		"Tested Toskar 1 (a) on Some Card, with m.\n":                                                                        {"m", "Some Card"},
-		fmt.Sprintf(onCard, "the recommended models"):                                                                        {"the recommended models", "AMD RX 7900 XTX, Vulkan"},
+		fmt.Sprintf(onCard, "the recommended models"):                                                                        {"the recommended models", "AMD RX 7900 XTX, 24 GB"},
 	} {
 		if got, ok := TestedOn(line); !ok || got != want {
 			t.Errorf("%q: %+v, want %+v", line, got, want)
@@ -156,7 +156,7 @@ func TestPublishAddsWeeklyRows(t *testing.T) {
 	if !strings.HasPrefix(string(raw), strings.TrimSuffix(before, "\n  ]\n}\n")) {
 		t.Errorf("rewrote what was there:\n%s", raw)
 	}
-	if !strings.Contains(string(raw), `"hardware": "AMD RX 7900 XTX, Vulkan", "method_version": 1`) {
+	if !strings.Contains(string(raw), `"hardware": "AMD RX 7900 XTX, 24 GB", "method_version": 1`) {
 		t.Errorf("not in the file's style:\n%s", raw)
 	}
 	var got struct {

@@ -64,6 +64,7 @@ type QualityPerformance struct {
 	TokensPerSecond          float64 `json:"tokens_per_second"`
 	FirstTokenMs             float64 `json:"first_token_ms"`
 	EffectiveTokensPerSecond float64 `json:"effective_tokens_per_second"`
+	Backend                  string  `json:"backend,omitempty"`
 	GPULayers                int     `json:"gpu_layers"`
 	GPULayersTotal           int     `json:"gpu_layers_total"`
 	GPUMemoryBytes           uint64  `json:"gpu_memory_bytes,omitempty"`

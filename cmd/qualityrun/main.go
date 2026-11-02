@@ -18,6 +18,7 @@ import (
 	"os/exec"
 	"os/signal"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"strconv"
 	"strings"
@@ -334,20 +335,31 @@ func readHardware(url string) (hardware, error) {
 	return hw, err
 }
 
-// label is the graphics card or chip, and memory. Nothing that identifies the computer.
+// virtualAdapter is a display adapter that isn't a graphics card, as a virtual
+// machine has.
+var virtualAdapter = regexp.MustCompile(`(?i)hyper-v|basic display|basic render|vmware|virtualbox|llvmpipe|virtio`)
+
+// label is the graphics card with the most memory, or the chip, and the memory a
+// model can use there. Nothing that identifies the computer.
 func (hw hardware) label() string {
-	chip := hw.CPU.Model
+	chip, memory, card := hw.CPU.Model, hw.Memory.TotalBytes, uint64(0)
+	found := false
 	for _, a := range hw.Accelerators {
 		name := a.Name
 		if name == "" {
 			name = a.Model
 		}
-		if name != "" {
-			chip = name
-			break
+		if name == "" || virtualAdapter.MatchString(name) {
+			continue
+		}
+		if !found || a.DedicatedVRAM > card {
+			chip, card, found = name, a.DedicatedVRAM, true
 		}
 	}
-	return fmt.Sprintf("%s, %d GB", chip, (hw.Memory.TotalBytes+1<<29)>>30)
+	if card > 0 {
+		memory = card
+	}
+	return qualityscore.Hardware(chip, (memory+1<<29)>>30)
 }
 
 func hardwareName(url string) (string, error) {
