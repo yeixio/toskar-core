@@ -1054,7 +1054,7 @@
         },
         {
           "type": "paragraph",
-          "text": "The shelves' likes, downloads, and rankings come from Hugging Face, so opening Models asks Hugging Face for them. They show what's popular, not how well a model works with Toskar. Models marked Tested by Toskar are the ones we've tested. Models with their safeguards removed aren't on the shelves. Without an internet connection, only tested models are there. Browse all models searches Hugging Face for GGUF models, the format Toskar runs. Install from there shows the download as it happens. Embedding and reranker models are supporting models: they help Knowledge search and never answer chats, so the chat menus leave them out."
+          "text": "The shelves' likes, downloads, and rankings come from Hugging Face, so opening Models asks Hugging Face for them. They show what's popular, not how well a model works with Toskar. Models marked Tested by Toskar are the ones we've tested. Models with their safeguards removed aren't on the shelves. Without an internet connection, only tested models are there. Results lists what our test runs have measured so far, per model, computer, and date, to sort through. It doesn't rank them or draw conclusions, it links to how each is measured, and you can add your own. Scores from different computers or method versions aren't the same test. Browse all models searches Hugging Face for GGUF models, the format Toskar runs. Install from there shows the download as it happens. Embedding and reranker models are supporting models: they help Knowledge search and never answer chats, so the chat menus leave them out."
         },
         {
           "type": "image",

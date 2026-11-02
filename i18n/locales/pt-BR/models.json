@@ -17,7 +17,8 @@
   "tabs": {
     "discover": "Loja",
     "installed": "Instalados",
-    "running": "Em execução"
+    "running": "Em execução",
+    "results": "Resultados"
   },
   "target": {
     "label": "Modelos para:",
@@ -472,6 +473,34 @@
       "untested": "Do Hugging Face. Não foi testado com o Toskar, então pode funcionar pior ou nem funcionar. Confira a licença antes de usar no trabalho.",
       "link": "Ver no Hugging Face",
       "close": "Fechar"
+    }
+  },
+  "results": {
+    "loading": "Carregando resultados…",
+    "offline": "Não foi possível ler os resultados. Verifique sua conexão e tente de novo.",
+    "title": "Resultados de qualidade",
+    "intro": "O que nossos testes mediram até agora, para você explorar. Não fazemos ranking nem tiramos conclusões, e adicionamos mais a cada teste.",
+    "method": "Como é medido",
+    "suggest": "Sugerir uma mudança",
+    "contribute": "Adicionar os resultados do seu computador",
+    "computer": "Computador",
+    "allComputers": "Todos os computadores",
+    "notSameTest": "Pontuações de computadores ou versões do método diferentes não são o mesmo teste, então compare com cuidado.",
+    "model": "Modelo",
+    "seconds": "Segundos por pergunta",
+    "date": "Data",
+    "version": "Método",
+    "source": "Fonte",
+    "sourceLink": "Teste",
+    "community": "Comunidade",
+    "score": "{{passed}} de {{of}}",
+    "suites": {
+      "quality": "Qualidade",
+      "topics": "Tópicos",
+      "files": "Arquivos",
+      "reasoning": "Raciocínio",
+      "triage": "Triagem",
+      "fix_test": "Corrigir um teste"
     }
   }
 }

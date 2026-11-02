@@ -88,6 +88,8 @@ type Stats struct {
 type Client struct {
 	ServiceURL string
 	SummaryURL string
+	// QualityURL is where the quality results are, for a test.
+	QualityURL string
 	HTTP       *http.Client
 	UserAgent  string
 }

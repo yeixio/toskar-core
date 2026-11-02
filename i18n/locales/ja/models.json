@@ -15,7 +15,8 @@
   "tabs": {
     "discover": "ストア",
     "installed": "インストール済み",
-    "running": "実行中"
+    "running": "実行中",
+    "results": "結果"
   },
   "target": {
     "label": "対象：",
@@ -456,6 +457,34 @@
       "untested": "Hugging Face のモデルです。Toskar ではテストしていないため、うまく動かない場合や動作しない場合があります。業務で使う前にライセンスを確認してください。",
       "link": "Hugging Face で見る",
       "close": "閉じる"
+    }
+  },
+  "results": {
+    "loading": "結果を読み込んでいます…",
+    "offline": "結果を読み込めませんでした。接続を確認して、もう一度お試しください。",
+    "title": "品質の結果",
+    "intro": "これまでのテストで測定した内容です。順位付けや結論づけはしません。テストを重ねるごとに追加していきます。",
+    "method": "測定方法",
+    "suggest": "変更を提案",
+    "contribute": "あなたのコンピューターの結果を追加",
+    "computer": "コンピューター",
+    "allComputers": "すべてのコンピューター",
+    "notSameTest": "コンピューターや測定方法のバージョンが異なるスコアは同じテストではないため、比較には注意してください。",
+    "model": "モデル",
+    "seconds": "1問あたりの秒数",
+    "date": "日付",
+    "version": "測定方法",
+    "source": "出典",
+    "sourceLink": "実行",
+    "community": "コミュニティ",
+    "score": "{{of}}中{{passed}}",
+    "suites": {
+      "quality": "品質",
+      "topics": "トピック",
+      "files": "ファイル",
+      "reasoning": "推論",
+      "triage": "分類",
+      "fix_test": "テストの修正"
     }
   }
 }

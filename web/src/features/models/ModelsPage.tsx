@@ -17,6 +17,7 @@ import {
   type ModelsTarget,
 } from './ModelsTargetBar'
 import { needsTightFitInstallWarning } from './modelPresentation'
+import { ResultsTab } from './ResultsTab'
 import { RunningTab } from './RunningTab'
 import { StoreShelves } from './StoreShelves'
 import { TightFitDialog } from './TightFitDialog'
@@ -29,7 +30,7 @@ import { LoadError } from '@/components/ui/LoadError'
 import { Skeleton } from '@/components/ui/Skeleton'
 import { shownError, type Shown } from '@/components/ui/ShownError'
 
-type Tab = 'discover' | 'installed' | 'running'
+type Tab = 'discover' | 'installed' | 'running' | 'results'
 
 function pickFitBundle(
   bundles: ModelsFitResponse[] | undefined,
@@ -283,6 +284,7 @@ export function ModelsPage() {
             { id: 'discover', label: t('tabs.discover') },
             { id: 'installed', label: t('tabs.installed') },
             { id: 'running', label: t('tabs.running') },
+            { id: 'results', label: t('tabs.results') },
           ] as const
         ).map((option) => (
           <button
@@ -446,6 +448,8 @@ export function ModelsPage() {
           <p className="text-sm text-ink">{externalModels.map((m) => m.display_name || m.id).join(', ')}</p>
         </section>
       ) : null}
+
+      {tab === 'results' ? <ResultsTab /> : null}
 
       {tab === 'running' && runningQuery.isLoading && <Skeleton label={t('tabs.running')} shape="rows" count={2} />}
       {tab === 'running' && runningQuery.isError && !runningQuery.data && (

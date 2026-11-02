@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Toskar Control Plane API
-  version: "1.79"
+  version: "1.80"
   description: >-
     Local AI control plane API for Toskar, its OpenAI-compatible routes, and its MCP server.
     On the default loopback bind no key is needed. When the daemon listens on any other address,
@@ -3146,6 +3146,19 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/ModelsFit"
+  /api/v1/models/results:
+    get:
+      summary: Toskar's public quality results
+      description: "What Toskar's test runs have measured, per model, computer, and date, from the public dataset, kept for an hour. No ranking or overall score. Scores are comparable within one method_version. Without the dataset, live is false and results is empty (#593, contract 1.80)."
+      operationId: qualityResults
+      tags: [Models]
+      responses:
+        "200":
+          description: The results
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QualityResults"
   /api/v1/models/store:
     get:
       summary: The model store's front page for this computer
@@ -8852,6 +8865,38 @@ components:
         winners:
           type: array
           items: {$ref: '#/components/schemas/CategoryWinner'}
+    QualityResults:
+      type: object
+      required: [live, results]
+      properties:
+        live: {type: boolean}
+        note: {type: string}
+        method: {type: string, description: "How the results are measured"}
+        suites: {type: object, additionalProperties: {type: string}}
+        results:
+          type: array
+          items: {$ref: "#/components/schemas/QualityResult"}
+    QualityResult:
+      type: object
+      required: [model, name, date, hardware, method_version, scores]
+      properties:
+        model: {type: string}
+        name: {type: string}
+        date: {type: string}
+        hardware: {type: string}
+        method_version: {type: integer, description: "0 is before versions existed"}
+        submitted: {type: boolean, description: "Sent by someone outside the project"}
+        submitted_by: {type: string}
+        source: {type: string, description: "Where the run can be read"}
+        scores:
+          type: object
+          additionalProperties:
+            type: object
+            required: [passed, of]
+            properties:
+              passed: {type: integer}
+              of: {type: integer}
+        seconds_per_question: {type: number}
     ModelStore:
       type: object
       required: [shelves, live]
