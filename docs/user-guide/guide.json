@@ -1950,7 +1950,18 @@
         "Behind a reverse proxy that signs people in, such as Authelia, Authentik, Cloudflare Access, or Tailscale, set TOSKAR_TRUSTED_PROXIES to the proxy's address. Toskar then takes the person from the proxy's Remote-User header, makes them the first time, and gives them a role from their groups: TOSKAR_PROXY_ADMIN_GROUPS and TOSKAR_PROXY_MEMBER_GROUPS, with TOSKAR_PROXY_DEFAULT_ROLE for everyone else. TOSKAR_PROXY_OWNER_USER is your own name there. Only the listed address is believed. With the proxy on the same computer, everything from that computer counts as the proxy's, so open Toskar through the proxy there too.",
         "To let people sign in with Google, Microsoft, Okta, Authentik, Keycloak, or another OpenID Connect provider, register Toskar there with its address followed by /api/v1/oidc/callback, then set TOSKAR_OIDC_ISSUER, TOSKAR_OIDC_CLIENT_ID, and TOSKAR_OIDC_CLIENT_SECRET. The sign-in screen then shows Sign in with that provider. Groups become roles with TOSKAR_OIDC_ADMIN_GROUPS and TOSKAR_OIDC_MEMBER_GROUPS, and TOSKAR_OIDC_OWNER_EMAIL is your own address there."
       ],
-      "code": "tar -xzf toskar-{{version}}-linux-amd64-headless.tar.gz\ncd toskar-{{version}}-linux-amd64-headless\n./toskar",
+      "code": "tar -xzf toskar-{{version},
+        {
+          "type": "paragraph",
+          "text": "`toskarctl help` lists every command by what it's for, and `toskarctl help models install`, or `--help` after any command, explains one, with its flags and examples."
+        },
+        {
+          "type": "code",
+          "language": "sh",
+          "test": "cli-help",
+          "code": "toskarctl help",
+          "output": "toskarctl talks to Toskar from a terminal or a script…Docs: https://toskar.ai/docs"
+        }}-linux-amd64-headless.tar.gz\ncd toskar-{{version}}-linux-amd64-headless\n./toskar",
       "kind": "task",
       "summary": "Run Toskar Core on a computer without a screen, such as a home server, and use it from a browser on your own computer.",
       "blocks": [
