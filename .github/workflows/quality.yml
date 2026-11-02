@@ -153,15 +153,42 @@ jobs:
   # It runs once per model in QUALITY_MODELS (or the models input), one at a
   # time on the one GPU: "recommended" is what the daemon picks for a new
   # user; a catalog id, such as qwen2.5-32b-q4, tests that model.
+  # What a scheduled run measures: the default models, and the next few from the
+  # public list, whichever have gone longest without a result. A run started by
+  # hand names its own.
+  pick-models:
+    if: vars.QUALITY_RUNNER == 'docker' && github.event_name == 'schedule'
+    runs-on: ${{ fromJSON(vars.TRUSTED_RUNS_ON || '"ubuntu-latest"') }}
+    timeout-minutes: 10
+    outputs:
+      models: ${{ steps.pick.outputs.models }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version: "1.26.x"
+      - name: Pick
+        id: pick
+        env:
+          DATA: ${{ runner.temp }}/toskar-model-data
+        run: |
+          set -euo pipefail
+          rm -rf "$DATA"
+          git clone -q --depth 1 https://github.com/yeixio/toskar-model-data.git "$DATA"
+          next="$(go run ./cmd/qualityrun next "$DATA/quality/models.json" "$DATA/quality/results.json" tests/quality/version.json 3)"
+          echo "models=[\"recommended\",${next:1}" >> "$GITHUB_OUTPUT"
+
   real-models:
-    if: vars.QUALITY_RUNNER == 'docker' && !inputs.speculation && !inputs.fit_check
+    needs: pick-models
+    # Without a pick, the repository's own list still runs.
+    if: ${{ !cancelled() && vars.QUALITY_RUNNER == 'docker' && !inputs.speculation && !inputs.fit_check }}
     runs-on: [self-hosted, toskar-models]
     timeout-minutes: 480
     strategy:
       fail-fast: false
       max-parallel: 1
       matrix:
-        model: ${{ fromJSON(inputs.models || vars.QUALITY_MODELS || '["recommended"]') }}
+        model: ${{ fromJSON(inputs.models || needs.pick-models.outputs.models || vars.QUALITY_MODELS || '["recommended"]') }}
     name: real-models (${{ matrix.model }})
     env:
       NAME: toskar-quality-${{ github.run_id }}-${{ github.run_attempt }}-${{ strategy.job-index }}
@@ -433,7 +460,7 @@ jobs:
           rm -rf "$DATA"
           git clone -q --depth 1 https://github.com/yeixio/toskar-model-data.git "$DATA"
           go run ./cmd/qualityrun publish "$REPORTS" "$DATA/quality/results.json" \
-            tests/quality/version.json manifests/models/catalog.json "$RUN_URL" | tee -a "$GITHUB_STEP_SUMMARY"
+            tests/quality/version.json manifests/models/catalog.json "$DATA/quality/models.json" "$RUN_URL" | tee -a "$GITHUB_STEP_SUMMARY"
           cd "$DATA"
           if git diff --quiet; then
             echo "No new scores."

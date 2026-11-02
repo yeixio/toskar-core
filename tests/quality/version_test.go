@@ -4,10 +4,13 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"testing"
 
 	"github.com/yeixio/toskar-core/internal/config"
+	"github.com/yeixio/toskar-core/pkg/contracts"
 )
 
 // qualityVersion is version.json: the version of how quality is measured, and
@@ -62,5 +65,32 @@ func TestVersionCoversTheSets(t *testing.T) {
 		if err := os.WriteFile("version.json", append(out, '\n'), 0o644); err != nil {
 			t.Fatal(err)
 		}
+	}
+}
+
+// A model on the public list that isn't in the catalog installs from its exact file.
+func TestInstallModelFromTheList(t *testing.T) {
+	var asked contracts.InstallFromURLRequest
+	daemon := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch {
+		case r.URL.Path == "/api/v1/models/install-from-url":
+			_ = json.NewDecoder(r.Body).Decode(&asked)
+			_, _ = w.Write([]byte(`{"status":"started"}`))
+		case r.URL.Path == "/api/v1/models" && asked.SourceURL != "":
+			_ = json.NewEncoder(w).Encode([]contracts.Model{{ID: "listed", Installed: true}})
+		default:
+			_, _ = w.Write([]byte(`[]`))
+		}
+	}))
+	defer daemon.Close()
+	list := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		_, _ = w.Write([]byte(`{"models":[{"id":"listed","source_url":"https://huggingface.co/a/b/resolve/main/c.gguf"},{"id":"catalog-only"}]}`))
+	}))
+	defer list.Close()
+	t.Setenv("TOSKAR_QUALITY_MODEL_LIST", list.URL)
+
+	newRealDriver(daemon.URL).installModel(t, "listed")
+	if asked.SourceURL != "https://huggingface.co/a/b/resolve/main/c.gguf" || asked.ID != "listed" {
+		t.Errorf("asked to install %+v", asked)
 	}
 }
