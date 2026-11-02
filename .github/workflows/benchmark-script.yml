@@ -29,6 +29,8 @@ env:
   TOSKAR_RELEASE_URL: http://127.0.0.1:7370
   # A tiny model; one case; speed still measured.
   TOSKAR_BENCHMARK_ARGS: --model llama-3.2-1b-q4 --yes --sets reasoning --only math-muffins
+  # Toskar looks up llama.cpp's release, and shared runners hit GitHub's limit without this.
+  GITHUB_TOKEN: ${{ github.token }}
 
 jobs:
   unix:
