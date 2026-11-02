@@ -3,7 +3,8 @@
 // run's scores to the public results (docs/quality.md, #1037).
 //
 //	toskar-quality run --model <id> --toskar <toskar binary>
-//	toskar-quality publish <reports> <results.json> <version.json> <catalog.json> <run URL>
+//	toskar-quality publish <reports> <results.json> <version.json> <catalog.json> <models.json> <run URL>
+//	toskar-quality next <models.json> <results.json> <version.json> <count>
 package main
 
 import (
@@ -37,6 +38,8 @@ func main() {
 		err = run(os.Args[2:])
 	case "publish":
 		err = publish(os.Args[2:])
+	case "next":
+		err = next(os.Args[2:])
 	default:
 		usage()
 	}
@@ -48,7 +51,8 @@ func main() {
 
 func usage() {
 	fmt.Fprintln(os.Stderr, "usage: toskar-quality run --model <id> --toskar <toskar binary> [--harness <folder>] [--out <folder>] [--data <folder>] [--port <port>] [--sets quality,topics,files,reasoning]")
-	fmt.Fprintln(os.Stderr, "       toskar-quality publish <reports> <results.json> <version.json> <catalog.json> <run URL>")
+	fmt.Fprintln(os.Stderr, "       toskar-quality publish <reports> <results.json> <version.json> <catalog.json> <models.json> <run URL>")
+	fmt.Fprintln(os.Stderr, "       toskar-quality next <models.json> <results.json> <version.json> <count>")
 	os.Exit(2)
 }
 
@@ -310,8 +314,37 @@ func hardwareLabel(cpu string, memoryBytes int64, accelerators []string) string 
 	return fmt.Sprintf("%s, %d GB", chip, (memoryBytes+1<<29)>>30)
 }
 
+// next prints what a scheduled run measures, as JSON for a workflow's matrix.
+func next(args []string) error {
+	if len(args) != 4 {
+		usage()
+	}
+	list, err := qualityscore.ReadModelList(args[0])
+	if err != nil {
+		return err
+	}
+	results, err := qualityscore.ReadResults(args[1])
+	if err != nil {
+		return err
+	}
+	version, err := readVersion(args[2])
+	if err != nil {
+		return err
+	}
+	count, err := strconv.Atoi(args[3])
+	if err != nil {
+		return fmt.Errorf("count: %w", err)
+	}
+	raw, err := json.Marshal(qualityscore.NextModels(list, results, version, count))
+	if err != nil {
+		return err
+	}
+	fmt.Println(string(raw))
+	return nil
+}
+
 func publish(args []string) error {
-	if len(args) != 5 {
+	if len(args) != 6 {
 		usage()
 	}
 	version, err := readVersion(args[2])
@@ -335,7 +368,15 @@ func publish(args []string) error {
 	for _, m := range catalog.Models {
 		names[m.ID] = m.DisplayName
 	}
-	return qualityscore.Publish(args[0], args[1], version, names, args[4], time.Now(), func(line string) { fmt.Println(line) })
+	// A model on the list that isn't in the catalog has its name there.
+	list, err := qualityscore.ReadModelList(args[4])
+	if err != nil {
+		return err
+	}
+	for _, m := range list {
+		names[m.ID] = m.Name
+	}
+	return qualityscore.Publish(args[0], args[1], version, names, args[5], time.Now(), func(line string) { fmt.Println(line) })
 }
 
 func readVersion(path string) (int, error) {

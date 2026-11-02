@@ -232,3 +232,21 @@ func TestReadPerformance(t *testing.T) {
 		t.Error("a missing report was read")
 	}
 }
+
+func TestNextModels(t *testing.T) {
+	list := []ListedModel{{ID: "a"}, {ID: "b"}, {ID: "c"}, {ID: "d"}}
+	const run = "https://github.com/yeixio/toskar-core/actions/runs/1"
+	results := []Row{
+		{Model: "a", MethodVersion: 1, Date: "2026-11-02", Source: run},
+		{Model: "c", MethodVersion: 1, Date: "2026-10-26", Source: run},
+		// These don't count: an older version, and a hand-run result.
+		{Model: "b", MethodVersion: 0, Date: "2026-11-02", Source: run},
+		{Model: "d", MethodVersion: 1, Date: "2026-11-02", Source: "https://github.com/yeixio/toskar-core/pull/1"},
+	}
+	if got := strings.Join(NextModels(list, results, 1, 3), " "); got != "b d c" {
+		t.Errorf("%q: the unmeasured first, in the list's order, then the oldest", got)
+	}
+	if got := NextModels(list, results, 1, 10); len(got) != 4 {
+		t.Errorf("%v", got)
+	}
+}

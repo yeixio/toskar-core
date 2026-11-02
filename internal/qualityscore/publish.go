@@ -149,3 +149,65 @@ func RowLine(row Row) (string, error) {
 	}
 	return out.String(), nil
 }
+
+// ListedModel is one of the models quality runs work through (quality/models.json).
+type ListedModel struct {
+	ID        string `json:"id"`
+	Name      string `json:"name"`
+	SourceURL string `json:"source_url,omitempty"`
+}
+
+// ReadModelList reads quality/models.json.
+func ReadModelList(path string) ([]ListedModel, error) {
+	raw, err := os.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+	var list struct {
+		Models []ListedModel `json:"models"`
+	}
+	if err := json.Unmarshal(raw, &list); err != nil {
+		return nil, fmt.Errorf("%s: %w", path, err)
+	}
+	return list.Models, nil
+}
+
+// NextModels picks what a scheduled run measures: the list's models with no
+// result from a scheduled run at this version, in the list's order, and then
+// the ones whose result is oldest. So a few a week slowly cover the list, and
+// then keep it fresh.
+func NextModels(list []ListedModel, results []Row, version, count int) []string {
+	const scheduled = "/actions/runs/"
+	latest := map[string]string{}
+	for _, r := range results {
+		if r.MethodVersion == version && strings.Contains(r.Source, scheduled) && r.Date > latest[r.Model] {
+			latest[r.Model] = r.Date
+		}
+	}
+	ordered := make([]ListedModel, len(list))
+	copy(ordered, list)
+	sort.SliceStable(ordered, func(i, j int) bool { return latest[ordered[i].ID] < latest[ordered[j].ID] })
+	next := []string{}
+	for _, m := range ordered {
+		if len(next) == count {
+			break
+		}
+		next = append(next, m.ID)
+	}
+	return next
+}
+
+// ReadResults reads the rows of quality/results.json.
+func ReadResults(path string) ([]Row, error) {
+	raw, err := os.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+	var results struct {
+		Results []Row `json:"results"`
+	}
+	if err := json.Unmarshal(raw, &results); err != nil {
+		return nil, fmt.Errorf("%s: %w", path, err)
+	}
+	return results.Results, nil
+}

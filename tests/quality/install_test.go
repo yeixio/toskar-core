@@ -1,11 +1,13 @@
 package quality
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"testing"
 	"time"
 
+	"github.com/yeixio/toskar-core/internal/config"
 	"github.com/yeixio/toskar-core/pkg/contracts"
 )
 
@@ -36,7 +38,63 @@ func (d realDriver) installModel(t *testing.T, id string) {
 			return
 		}
 	}
-	t.Fatalf("%s is not in the daemon's catalog", id)
+	d.installListed(t, id)
+}
+
+// modelListURL is the models quality runs work through, some of them not in the
+// catalog. TOSKAR_QUALITY_MODEL_LIST reads another.
+const modelListURL = "https://raw.githubusercontent.com/yeixio/toskar-model-data/main/quality/models.json"
+
+// installListed installs a model from its exact file on the list.
+func (d realDriver) installListed(t *testing.T, id string) {
+	t.Helper()
+	url := config.Env("QUALITY_MODEL_LIST")
+	if url == "" {
+		url = modelListURL
+	}
+	resp, err := http.Get(url)
+	if err != nil {
+		t.Fatalf("%s is not in the daemon's catalog, and the model list can't be read: %v", id, err)
+	}
+	defer resp.Body.Close()
+	var list struct {
+		Models []struct {
+			ID        string `json:"id"`
+			SourceURL string `json:"source_url"`
+		} `json:"models"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&list); err != nil {
+		t.Fatalf("%s is not in the daemon's catalog, and the model list can't be read: %v", id, err)
+	}
+	source := ""
+	for _, m := range list.Models {
+		if m.ID == id {
+			source = m.SourceURL
+		}
+	}
+	if source == "" {
+		t.Fatalf("%s is not in the daemon's catalog or on the model list", id)
+	}
+	t.Logf("installing %s from %s", id, source)
+	if status := d.do(t, http.MethodPost, "/api/v1/models/install-from-url", contracts.InstallFromURLRequest{SourceURL: source, ID: id}, nil); status >= 300 {
+		t.Fatalf("installing %s: status %d", id, status)
+	}
+	for deadline := time.Now().Add(installWithin); time.Now().Before(deadline); time.Sleep(2 * time.Second) {
+		var models []contracts.Model
+		d.do(t, http.MethodGet, "/api/v1/models", nil, &models)
+		for _, m := range models {
+			switch {
+			case m.ID != id:
+			case m.Installed:
+				d.installRuntimes(t, []contracts.Model{m})
+				t.Logf("installed %s", id)
+				return
+			case m.Status == "error":
+				t.Fatalf("installing %s failed", id)
+			}
+		}
+	}
+	t.Fatalf("%s wasn't installed in time", id)
 }
 
 // installModels installs models and their runtimes and waits until they
