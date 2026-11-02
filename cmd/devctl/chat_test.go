@@ -55,6 +55,17 @@ func (f *fakeChat) stream(ctx context.Context, req api.ChatJSONRequestBody) iter
 	n := len(f.sent)
 	f.mu.Unlock()
 	return func(yield func(toskar.ChatStreamEvent, error) bool) {
+		if strings.Contains(req.Message, "change it") {
+			for _, e := range []toskar.ChatStreamEvent{
+				{Type: "token", Content: "Let me "}, {Type: "token", Content: "check."}, {Type: "replace"},
+				{Type: "token", Content: "Clean."}, {Type: "replace", Content: "All clean."}, {Type: "done"},
+			} {
+				if !yield(e, nil) {
+					return
+				}
+			}
+			return
+		}
 		if strings.Contains(req.Message, "run ls") {
 			if !yield(toskar.ChatStreamEvent{Type: "token", Content: "Let me look. "}, nil) {
 				return
@@ -207,5 +218,80 @@ func TestChatAlways(t *testing.T) {
 	}
 	if len(f.decisions) != 1 || f.decisions[0] != "req1 allow in this chat" {
 		t.Errorf("decisions %v", f.decisions)
+	}
+}
+
+func TestChatLive(t *testing.T) {
+	chat := func(input string, size func() (int, int)) (string, *fakeChat) {
+		t.Helper()
+		f := newFakeChat()
+		var out, errOut bytes.Buffer
+		streams := chatIO{in: strings.NewReader(input), inTerminal: true, out: &out, outTerminal: true, errOut: &errOut, size: size}
+		if err := chatCommand(nil, streams, func() (chatAPI, error) { return eventsFake{f}, nil }); err != nil {
+			t.Fatal(err)
+		}
+		return out.String(), f
+	}
+	big := func() (int, int) { return 80, 24 }
+
+	got, f := chat("change it\n/exit\n", big)
+	if f.sent[0].Live == nil || !*f.sent[0].Live {
+		t.Fatalf("a terminal should ask for a live answer: %+v", f.sent[0])
+	}
+	want := "Let me check.\r\x1b[JClean.\r\x1b[JAll clean.\n"
+	if !strings.Contains(got, want) {
+		t.Fatalf("replaces should erase what they replace:\n%q", got)
+	}
+
+	// A terminal that can't say its size can't erase: the new text goes below.
+	got, _ = chat("change it\n/exit\n", func() (int, int) { return 0, 0 })
+	if !strings.Contains(got, "Let me check.\nClean.\nAll clean.\n") || strings.Contains(got, "\x1b[J") {
+		t.Fatalf("no size: %q", got)
+	}
+
+	// Nor can one where the text no longer fits on the screen.
+	got, _ = chat("change it\n/exit\n", func() (int, int) { return 4, 3 })
+	if strings.Contains(got, "Let me check.\r") {
+		t.Fatalf("erased text that had scrolled away: %q", got)
+	}
+
+	// What's above a tool's question stays, and the answer goes below it.
+	got, _ = chat("run ls\ny\n/exit\n", big)
+	if strings.Contains(got, "\x1b[J") || !strings.Contains(got, "Let me look. \n") {
+		t.Fatalf("question: %q", got)
+	}
+}
+
+func TestChatPipedIsWhole(t *testing.T) {
+	f := newFakeChat()
+	var out, errOut bytes.Buffer
+	streams := chatIO{in: strings.NewReader("data"), out: &out, errOut: &errOut}
+	if err := chatCommand([]string{"Why?"}, streams, func() (chatAPI, error) { return eventsFake{f}, nil }); err != nil {
+		t.Fatal(err)
+	}
+	if f.sent[0].Live != nil {
+		t.Fatalf("a pipe can't take text back, so it shouldn't ask for live: %+v", f.sent[0])
+	}
+}
+
+func TestRowsOf(t *testing.T) {
+	for _, c := range []struct {
+		text string
+		cols int
+		want int
+	}{
+		{"", 10, 1},
+		{"short", 10, 1},
+		{"exactly 10", 10, 1},
+		{"eleven cols", 10, 2},
+		{"one\ntwo", 10, 2},
+		{"one\n", 10, 2},
+		{"\u3053\u3093\u306b\u3061\u306f\u4e16\u754c", 10, 2},
+		{"e\u0301e\u0301e\u0301e\u0301e\u0301e\u0301e\u0301e\u0301e\u0301e\u0301", 10, 1},
+		{"\tx", 8, 2},
+	} {
+		if got := rowsOf(c.text, c.cols); got != c.want {
+			t.Errorf("rowsOf(%q, %d) = %d, want %d", c.text, c.cols, got, c.want)
+		}
 	}
 }

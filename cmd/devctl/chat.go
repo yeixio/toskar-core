@@ -18,9 +18,11 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"unicode"
 
 	toskar "github.com/yeixio/toskar-sdks/go"
 	"github.com/yeixio/toskar-sdks/go/api"
+	"golang.org/x/text/width"
 
 	"github.com/yeixio/toskar-core/internal/askdata"
 	"github.com/yeixio/toskar-core/internal/config"
@@ -71,6 +73,8 @@ type chatIO struct {
 	out         io.Writer
 	outTerminal bool
 	errOut      io.Writer
+	// size is the terminal's columns and rows, zero when it can't say.
+	size func() (cols, rows int)
 }
 
 // daemonChat is chatAPI on the daemon: its REST routes, and the SDK for
@@ -402,6 +406,11 @@ func (s *chatSession) turn(ctx context.Context, text string) error {
 		s.pending = nil
 	}
 	req := api.ChatJSONRequestBody{Message: text, ConversationId: &s.conv, Client: ptrTo("terminal"), TimeZone: ptrTo(time.Local.String())}
+	// Someone reading sees the answer as it's written (#1006). A pipe gets it
+	// whole, since text can't be taken back from a file.
+	if s.io.outTerminal {
+		req.Live = ptrTo(true)
+	}
 	if s.model != "" {
 		req.ModelId = ptrTo(s.model)
 	}
@@ -426,6 +435,8 @@ func (s *chatSession) turn(ctx context.Context, text string) error {
 		}
 	}()
 	wrote := false
+	// shown is the answer so far that can still be erased from the screen.
+	shown := ""
 	for {
 		select {
 		case it, ok := <-items:
@@ -441,7 +452,15 @@ func (s *chatSession) turn(ctx context.Context, text string) error {
 			switch it.e.Type {
 			case "token":
 				fmt.Fprint(s.io.out, it.e.Content)
+				shown += it.e.Content
 				wrote = true
+			case "replace":
+				if !s.erase(shown) && wrote {
+					fmt.Fprintln(s.io.out)
+				}
+				fmt.Fprint(s.io.out, it.e.Content)
+				shown = it.e.Content
+				wrote = it.e.Content != ""
 			case "done":
 				if wrote {
 					fmt.Fprintln(s.io.out)
@@ -456,6 +475,8 @@ func (s *chatSession) turn(ctx context.Context, text string) error {
 				fmt.Fprintln(s.io.out)
 				wrote = false
 			}
+			// What's above the question stays, as the reason for it.
+			shown = ""
 			s.ask(a)
 		case st := <-s.status:
 			if s.io.outTerminal && !wrote {
@@ -463,6 +484,60 @@ func (s *chatSession) turn(ctx context.Context, text string) error {
 			}
 		}
 	}
+}
+
+// erase clears text just written from the screen, and says whether it could:
+// not when the terminal can't say its size, or some of it has scrolled away.
+func (s *chatSession) erase(text string) bool {
+	if text == "" || s.io.size == nil {
+		return false
+	}
+	cols, rows := s.io.size()
+	if cols <= 0 || rows <= 0 {
+		return false
+	}
+	n := rowsOf(text, cols)
+	if n >= rows {
+		return false
+	}
+	fmt.Fprint(s.io.out, "\r")
+	if n > 1 {
+		fmt.Fprintf(s.io.out, "\x1b[%dA", n-1)
+	}
+	fmt.Fprint(s.io.out, "\x1b[J")
+	return true
+}
+
+// rowsOf is how many rows text takes on a terminal this many columns wide.
+func rowsOf(text string, cols int) int {
+	n := 0
+	for _, line := range strings.Split(text, "\n") {
+		n += max(1, (cellsOf(line)+cols-1)/cols)
+	}
+	return n
+}
+
+// cellsOf is how many columns a line takes: two for wide characters such as
+// Japanese, and none for marks that combine with the one before.
+func cellsOf(line string) int {
+	n := 0
+	for _, r := range line {
+		switch {
+		case r == '\t':
+			n += 8 - n%8
+		case unicode.Is(unicode.Mn, r) || unicode.Is(unicode.Me, r) || unicode.Is(unicode.Cf, r):
+		case isWide(r):
+			n += 2
+		default:
+			n++
+		}
+	}
+	return n
+}
+
+func isWide(r rune) bool {
+	k := width.LookupRune(r).Kind()
+	return k == width.EastAsianWide || k == width.EastAsianFullwidth
 }
 
 // ask shows a tool waiting for permission, and sends the answer.

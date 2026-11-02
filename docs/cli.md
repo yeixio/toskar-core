@@ -87,7 +87,7 @@ A CI runner with no Toskar nearby can run one: [Toskar in CI](ci.md).
 
 ### Chat in the terminal
 
-`toskarctl chat` holds a conversation with Toskar in the terminal (#959). It's one of your chats, as in the apps: one begun here shows in History on your phone, and `--resume` continues one begun there. Answers stream as they're written, and each ends with its speed in tokens a second.
+`toskarctl chat` holds a conversation with Toskar in the terminal (#959). It's one of your chats, as in the apps: one begun here shows in History on your phone, and `--resume` continues one begun there. Answers show as they're written, and each ends with its speed in tokens a second. When Toskar changes what it showed, such as taking back a sentence before it uses a tool, `chat` rewrites it. If that text has scrolled out of view, the new text goes below it instead.
 
 ```bash
 toskarctl chat

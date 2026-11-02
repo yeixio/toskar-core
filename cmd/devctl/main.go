@@ -6,6 +6,8 @@ import (
 	"os"
 	"time"
 
+	"golang.org/x/term"
+
 	"github.com/yeixio/toskar-core/internal/config"
 	"github.com/yeixio/toskar-core/internal/version"
 )
@@ -60,6 +62,13 @@ func main() {
 			in: os.Stdin, inTerminal: inInfo != nil && inInfo.Mode()&os.ModeCharDevice != 0,
 			out: os.Stdout, outTerminal: outInfo != nil && outInfo.Mode()&os.ModeCharDevice != 0,
 			errOut: os.Stderr,
+			size: func() (int, int) {
+				cols, rows, err := term.GetSize(int(os.Stdout.Fd()))
+				if err != nil {
+					return 0, 0
+				}
+				return cols, rows
+			},
 		}, newDaemonChat))
 	case "connect":
 		dir, _ := os.Getwd()
