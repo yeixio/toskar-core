@@ -10,6 +10,7 @@ export type PendingToolPrompt = {
   /** No earlier answer covers this command, so "allow for session" isn't offered. */
   alwaysAsks?: boolean
   cantUndo?: boolean
+  afterOutside?: boolean
 }
 
 /** What a tool wants to do, and the answers to it. */
@@ -47,9 +48,10 @@ export function ToolPermissionPrompt({
       )}
       {tool.alwaysAsks && (
         <p className={tool.cantUndo ? 'text-sm font-medium text-danger' : 'text-sm text-ink-muted'}>
-          {t(tool.cantUndo ? 'tools.cantUndo' : 'tools.alwaysAsks')}
+          {t(tool.cantUndo ? 'tools.cantUndo' : tool.afterOutside ? 'tools.afterOutside' : 'tools.alwaysAsks')}
         </p>
       )}
+      {tool.cantUndo && tool.afterOutside && <p className="text-sm text-ink-muted">{t('tools.afterOutside')}</p>}
       {showRawArgs && tool.rawArgs && (
         <pre className="log-panel max-h-40">{tool.rawArgs}</pre>
       )}

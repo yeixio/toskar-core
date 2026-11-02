@@ -14,6 +14,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -49,6 +50,7 @@ while chatting:
   /model id       answer with another model (auto to let Toskar pick)
   /profile id     answer as another profile
   /attach path    send a file as data with the next message
+  /log            what ran in this chat, its result, and who allowed it
   /help           this help
   /exit           leave (or Ctrl-D)`
 
@@ -57,12 +59,24 @@ type chatAPI interface {
 	createConversation(profile, model string) (contracts.Conversation, error)
 	conversations() ([]contracts.Conversation, error)
 	messages(id string) ([]contracts.Message, error)
+	// runs are the tool calls in a chat, newest first.
+	runs(id string) ([]toolRun, error)
 	stream(ctx context.Context, req api.ChatJSONRequestBody) iter.Seq2[toskar.ChatStreamEvent, error]
 	events(ctx context.Context) iter.Seq2[api.Event, error]
 	decide(requestID string, allow, forChat bool) error
 	// computer is the Toskar computer's name when it isn't this one, where
 	// a tool such as the terminal runs.
 	computer() string
+}
+
+// toolRun is one tool call on record.
+type toolRun struct {
+	At       time.Time `json:"at"`
+	ToolID   string    `json:"tool_id"`
+	Status   string    `json:"status"`
+	Approval string    `json:"approval"`
+	Summary  string    `json:"summary"`
+	Error    string    `json:"error"`
 }
 
 // chatIO is where chat reads and writes. Piped input is data for one
@@ -133,6 +147,12 @@ func (d daemonChat) messages(id string) ([]contracts.Message, error) {
 	return list, err
 }
 
+func (d daemonChat) runs(id string) ([]toolRun, error) {
+	var list []toolRun
+	err := d.rest.request(http.MethodGet, "/tools/runs?limit=500&conversation_id="+url.QueryEscape(id), nil, &list)
+	return list, err
+}
+
 func (d daemonChat) stream(ctx context.Context, req api.ChatJSONRequestBody) iter.Seq2[toskar.ChatStreamEvent, error] {
 	return d.sdk.ChatStream(ctx, req)
 }
@@ -168,6 +188,9 @@ type toolAsk struct {
 	// alwaysAsks is a command no earlier yes covers, and cantUndo says it
 	// can't be undone (#1017).
 	alwaysAsks, cantUndo bool
+	// afterOutside says it asks because the chat just read something from
+	// outside, such as a web page.
+	afterOutside bool
 }
 
 func chatCommand(args []string, streams chatIO, newAPI func() (chatAPI, error)) error {
@@ -394,10 +417,51 @@ func (s *chatSession) command(line string) (done bool, err error) {
 		}
 		s.pending = append(s.pending, string(raw))
 		s.note(fmt.Sprintf("Attached %s; it goes with your next message.", arg))
+	case "log":
+		return false, s.log()
 	default:
 		return false, fmt.Errorf("there's no /%s; /help lists the commands", name)
 	}
 	return false, nil
+}
+
+// log prints what ran in this chat, oldest first (#1017).
+func (s *chatSession) log() error {
+	runs, err := s.api.runs(s.conv)
+	if err != nil {
+		return err
+	}
+	if len(runs) == 0 {
+		s.note("Nothing has run in this chat yet.")
+		return nil
+	}
+	for _, r := range slices.Backward(runs) {
+		line := fmt.Sprintf("%s  %s", r.At.Local().Format("15:04:05"), r.ToolID)
+		if r.Summary != "" {
+			line += "  " + r.Summary
+		}
+		fmt.Fprintln(s.io.out, line)
+		fmt.Fprintln(s.io.out, s.dim("  "+runOutcome(r)))
+	}
+	return nil
+}
+
+// runOutcome says how a call ended and who allowed it.
+func runOutcome(r toolRun) string {
+	result := r.Status
+	switch {
+	case r.Status == "denied" && r.Approval == "you":
+		return "not run: you said no"
+	case r.Status == "denied":
+		return "not run: " + r.Error
+	case r.Error != "":
+		result = "failed: " + r.Error
+	}
+	who := map[string]string{"profile": "allowed by the profile", "you": "you said yes", "session": "you said always"}[r.Approval]
+	if who == "" {
+		return result
+	}
+	return result + ", " + who
 }
 
 // turn sends one message and streams its answer. A tool that asks first
@@ -560,6 +624,9 @@ func (s *chatSession) ask(a toolAsk) {
 	if a.cantUndo {
 		fmt.Fprintln(s.io.out, "This can't be undone.")
 	}
+	if a.afterOutside {
+		fmt.Fprintln(s.io.out, "This chat just read something from outside, such as a web page. Check that this is what you asked for.")
+	}
 	allow, forChat := false, false
 	if !s.io.inTerminal {
 		fmt.Fprintln(s.io.out, "Not allowed: there's no one at the terminal to ask. Chat without a pipe to answer.")
@@ -607,6 +674,7 @@ func (s *chatSession) watch(ctx context.Context) {
 			a.args, _ = p["args"].(map[string]any)
 			a.alwaysAsks, _ = p["always_asks"].(bool)
 			a.cantUndo, _ = p["cant_undo"].(bool)
+			a.afterOutside, _ = p["after_outside"].(bool)
 			if a.requestID != "" {
 				s.asks <- a
 			}

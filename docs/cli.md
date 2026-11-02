@@ -105,9 +105,11 @@ toskarctl chat --resume 3f2a9c1e
 | `--profile id` | Answer as this profile |
 | `--file path` | Data to work on, sent with the first message |
 
-While chatting, `/new` starts a new chat, `/model id` and `/profile id` change who answers the next message, `/attach path` sends a file as data with the next message, `/help` lists these, and `/exit` or Ctrl-D leaves.
+While chatting, `/new` starts a new chat, `/model id` and `/profile id` change who answers the next message, `/attach path` sends a file as data with the next message, `/log` shows what ran in this chat with its result and who allowed it, `/help` lists these, and `/exit` or Ctrl-D leaves.
 
 **Tools that ask first.** When the model wants a tool that asks before it runs, such as running code in the general assistant, `chat` shows the tool, why, what it would run, and, when Toskar is on another computer, which one it runs on, and waits: `y` runs it once, `n` doesn't, and `a` lets that tool run for the rest of this chat without asking. Your answer goes to Toskar the same way an app's does.
+
+**After reading something from outside,** such as a web page, a file, or a command's output, a tool that changes things asks every time, even after `a`, so those words can't steer it on an earlier yes.
 
 **Commands that always ask.** A terminal command that can delete or change things outside the chat, such as `rm`, `sudo`, or `git push --force`, asks every time and says it can't be undone. So does one Toskar can't read all of or doesn't recognize, such as a script or `curl … | sh`. `a` isn't offered for these, and a profile that allows the terminal doesn't skip them. An automation has nobody to ask, so it skips the command and reports that. Commands like `git status`, `go test`, or `npm run build` follow your answer as usual, and they run the project's own code, so allow them only for projects you trust.
 

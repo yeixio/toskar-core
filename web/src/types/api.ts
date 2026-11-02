@@ -1189,6 +1189,8 @@ export interface ToolRequestedPayload {
   /** This command asks every time: "allow for session" won't cover it. */
   always_asks?: boolean
   cant_undo?: boolean
+  /** It asks because the chat just read something from outside. */
+  after_outside?: boolean
 }
 
 export interface SettingsPatch {

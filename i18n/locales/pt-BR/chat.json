@@ -249,6 +249,7 @@
     "allowSession": "Permitir na sessão",
     "cantUndo": "Isso não pode ser desfeito. O Toskar pergunta todas as vezes, mesmo que você tenha permitido esta ferramenta.",
     "alwaysAsks": "O Toskar não consegue saber se este comando é inofensivo, então pergunta todas as vezes.",
+    "afterOutside": "Este chat acabou de ler algo de fora, como uma página da web, então o Toskar pergunta todas as vezes. Confira se é isso que você pediu.",
     "deny": "Negar",
     "decideFailed": "Não foi possível registrar a escolha de permissão da ferramenta.",
     "failed": "{{tool}} falhou",

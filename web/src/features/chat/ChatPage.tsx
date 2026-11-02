@@ -784,6 +784,7 @@ export function ChatPage() {
             command: typeof payload.args?.command === 'string' ? payload.args.command : undefined,
             alwaysAsks: payload.always_asks,
             cantUndo: payload.cant_undo,
+            afterOutside: payload.after_outside,
           })
           setStatusMessage(t('status.waitingForPermission', { tool: toolDisplayName(payload.tool_id) }))
         }

@@ -71,6 +71,12 @@ func TestEffectivePolicyAsksAfterUntrustedContent(t *testing.T) {
 		{tools.PolicyAllow, "internet.open", true, tools.PolicyAllow},
 		{tools.PolicyAllow, "unknown.tool", true, tools.PolicyAskEachTime},
 		{tools.PolicyDeny, "terminal", true, tools.PolicyDeny},
+		// "Always in this chat" is only checked under these two (#1017).
+		{tools.PolicyAsk, "terminal", true, tools.PolicyAskEachTime},
+		{tools.PolicyAllowForSession, "terminal", true, tools.PolicyAskEachTime},
+		{tools.PolicyAsk, "terminal", false, tools.PolicyAsk},
+		{tools.PolicyAsk, "internet.open", true, tools.PolicyAsk},
+		{"", "terminal", true, tools.PolicyAskEachTime},
 	}
 	for _, c := range cases {
 		if got := effectivePolicy(c.policy, c.tool, c.untrusted); got != c.want {

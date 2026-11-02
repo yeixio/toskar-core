@@ -54,7 +54,7 @@ var helpGroups = []helpGroup{
 		},
 		{
 			name: "chat", summary: "Hold a conversation in the terminal, in the same chats as the apps",
-			about: "Chats with Toskar in the terminal: one begun here continues on your phone and back. A tool that asks first, such as running code, shows what it would do and waits for y, n, or a (always, in this chat). Piped in, it answers once, with what's piped as data to work on.\n\nWhile chatting: /new, /model id, /profile id, /attach path, /help, and /exit (or Ctrl-D).",
+			about: "Chats with Toskar in the terminal: one begun here continues on your phone and back. A tool that asks first, such as running code, shows what it would do and waits for y, n, or a (always, in this chat). Piped in, it answers once, with what's piped as data to work on.\n\nWhile chatting: /new, /model id, /profile id, /attach path, /log, /help, and /exit (or Ctrl-D).",
 			usage: []string{"toskarctl chat [flags] [message]"},
 			flags: []helpFlag{
 				{"--resume [id]", "continue a chat: its id, or pick from recent ones"},

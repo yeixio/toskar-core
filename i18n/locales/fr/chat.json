@@ -249,6 +249,7 @@
     "allowSession": "Autoriser pour la session",
     "cantUndo": "Cette action est irréversible. Toskar demande à chaque fois, même si vous avez autorisé cet outil.",
     "alwaysAsks": "Toskar ne peut pas savoir si cette commande est sans danger : il demande donc à chaque fois.",
+    "afterOutside": "Cette discussion vient de lire un contenu externe, comme une page web : Toskar demande donc à chaque fois. Vérifiez que c'est bien ce que vous avez demandé.",
     "deny": "Refuser",
     "decideFailed": "Impossible d'enregistrer votre choix d'autorisation de l'outil.",
     "failed": "Échec de {{tool}}",

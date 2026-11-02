@@ -235,7 +235,7 @@ func (r *Registry) Execute(ctx context.Context, toolID string, args map[string]a
 		if always, why = ClassifyCommand(command); always.AlwaysAsks() {
 			if nobodyToAsk(meta) {
 				err := fmt.Errorf("tool %q: %s: %w", toolID, why, ErrNeedsApproval)
-				r.audit(ctx, toolID, RunDenied, "", activitySummary(args), time.Time{}, err, meta)
+				r.audit(ctx, toolID, RunDenied, "", recordOf(args), time.Time{}, err, meta)
 				return nil, err
 			}
 			allowed, needsPrompt = false, true
@@ -243,15 +243,18 @@ func (r *Registry) Execute(ctx context.Context, toolID string, args map[string]a
 			meta = mergeMeta(meta, map[string]any{"always_asks": true, "cant_undo": always == CommandDestructive})
 		}
 	}
+	if policy == PolicyAskEachTime {
+		meta = mergeMeta(meta, map[string]any{"always_asks": true, "after_outside": true})
+	}
 	if needsPrompt {
 		decision, err := r.requestApproval(ctx, toolID, args, reason, meta)
 		if err != nil {
-			r.audit(ctx, toolID, RunDenied, "", activitySummary(args), time.Time{}, err, meta)
+			r.audit(ctx, toolID, RunDenied, "", recordOf(args), time.Time{}, err, meta)
 			return nil, err
 		}
 		if !decision.Allow {
 			err := fmt.Errorf("tool %q denied by user", toolID)
-			r.audit(ctx, toolID, RunDenied, ApprovedByYou, activitySummary(args), time.Time{}, err, meta)
+			r.audit(ctx, toolID, RunDenied, ApprovedByYou, recordOf(args), time.Time{}, err, meta)
 			return nil, err
 		}
 		approval = ApprovedByYou
@@ -261,7 +264,7 @@ func (r *Registry) Execute(ctx context.Context, toolID string, args map[string]a
 		}
 	} else if !allowed {
 		err := fmt.Errorf("tool %q not allowed", toolID)
-		r.audit(ctx, toolID, RunDenied, "", activitySummary(args), time.Time{}, err, meta)
+		r.audit(ctx, toolID, RunDenied, "", recordOf(args), time.Time{}, err, meta)
 		return nil, err
 	}
 
@@ -279,7 +282,7 @@ func (r *Registry) Execute(ctx context.Context, toolID string, args map[string]a
 				"tool_id": toolID, "duration_ms": int64(0), "summary": summary, "cached": true,
 			})))
 			runlog.From(ctx).CacheHit(toolID)
-			r.audit(ctx, toolID, RunCached, approval, summary, started, nil, meta)
+			r.audit(ctx, toolID, RunCached, approval, recordOf(args), started, nil, meta)
 			return result, nil
 		}
 	}
@@ -301,7 +304,7 @@ func (r *Registry) Execute(ctx context.Context, toolID string, args map[string]a
 		r.bus.PublishFor(ctx, events.New(events.ToolFailed, mergeMeta(meta, map[string]any{
 			"tool_id": toolID, "error": err.Error(), "kind": ErrorKind(err), "duration_ms": elapsed, "summary": summary,
 		})))
-		r.audit(ctx, toolID, RunFailed, approval, summary, started, err, meta)
+		r.audit(ctx, toolID, RunFailed, approval, recordOf(args), started, err, meta)
 		return nil, err
 	}
 	if cache != nil {
@@ -311,7 +314,12 @@ func (r *Registry) Execute(ctx context.Context, toolID string, args map[string]a
 	r.bus.PublishFor(ctx, events.New(events.ToolCompleted, mergeMeta(meta, map[string]any{
 		"tool_id": toolID, "duration_ms": elapsed, "summary": summary,
 	})))
-	r.audit(ctx, toolID, RunCompleted, approval, summary, started, nil, meta)
+	// A command that ran and failed: a tool that worked, and a result to keep.
+	if code, ok := result["exit"].(int); ok && code != 0 {
+		r.audit(ctx, toolID, RunFailed, approval, recordOf(args), started, fmt.Errorf("exit %d", code), meta)
+		return result, nil
+	}
+	r.audit(ctx, toolID, RunCompleted, approval, recordOf(args), started, nil, meta)
 	return result, nil
 }
 
@@ -321,6 +329,18 @@ func nobodyToAsk(meta map[string]any) bool {
 	_, automation := meta["automation_id"]
 	_, test := meta["test"]
 	return automation || test
+}
+
+// recordOf is what the audit log keeps of a call: as activitySummary, with a
+// command whole, since what ran is the point of the record (#1017).
+func recordOf(args map[string]any) string {
+	if command, ok := args["command"].(string); ok && strings.TrimSpace(command) != "" {
+		if r := []rune(strings.TrimSpace(command)); len(r) > 2000 {
+			return string(r[:2000]) + "…"
+		}
+		return strings.TrimSpace(command)
+	}
+	return activitySummary(args)
 }
 
 func activitySummary(args map[string]any) string {
