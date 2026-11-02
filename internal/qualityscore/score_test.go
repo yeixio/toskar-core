@@ -106,6 +106,14 @@ func TestPublishAddsWeeklyRows(t *testing.T) {
 	write("gemma-2-9b-q4", "media.md", gemma+"22 of 23 cases passed.\n")
 	write("gemma-2-9b-q4", "reasoning.md", gemma+"32 of 39 right (82%), 1.0 s and 388 tokens a question on average.\n")
 	write("gemma-2-9b-q4", "triage.md", gemma+"type right on 26 of 30, precision 62%.\n")
+	write("gemma-2-9b-q4", PerformanceFile, `{"model":"gemma-2-9b-q4","prompt_tokens":4000,"prompt_tokens_per_second":900.5,"tokens_per_second":50.5,"first_token_ms":4400,"effective_tokens_per_second":21.5,"gpu_layers":43,"gpu_layers_total":43,"quantization":"Q4_K_M"}`)
+	// Reports for this model, and figures for another, are no row.
+	mixed := fmt.Sprintf(onCard, "mixed-model")
+	write("mixed-model", "report.md", mixed+"60 of 64 cases passed.\n")
+	write("mixed-model", "topics.md", mixed+"20 of 22 cases passed.\n")
+	write("mixed-model", "files.md", mixed+"20 of 21 cases passed.\n")
+	write("mixed-model", "reasoning.md", mixed+"32 of 39 right (82%), 1.0 s and 388 tokens a question on average.\n")
+	write("mixed-model", PerformanceFile, `{"model":"another","prompt_tokens":4000,"prompt_tokens_per_second":1,"tokens_per_second":1,"first_token_ms":1,"effective_tokens_per_second":1}`)
 	// A row missing a set stays out, and so do sets a Score doesn't count.
 	partial := fmt.Sprintf(onCard, "partial-model")
 	write("partial-model", "report.md", partial+"60 of 64 cases passed.\n")
@@ -138,7 +146,7 @@ func TestPublishAddsWeeklyRows(t *testing.T) {
 		}
 	}
 	publish()
-	if out := strings.Join(said, "\n"); !strings.Contains(out, "qwen2.5-coder-7b-q4") || !strings.Contains(out, "the recommended models") || !strings.Contains(out, "No row for partial-model") {
+	if out := strings.Join(said, "\n"); !strings.Contains(out, "qwen2.5-coder-7b-q4") || !strings.Contains(out, "the recommended models") || !strings.Contains(out, "No row for partial-model") || !strings.Contains(out, "No row for mixed-model") {
 		t.Errorf("what it skipped isn't said:\n%s", out)
 	}
 	raw, err := os.ReadFile(results)
@@ -163,6 +171,9 @@ func TestPublishAddsWeeklyRows(t *testing.T) {
 	row := got.Results[1]
 	if row.Model != "gemma-2-9b-q4" || row.Name != "Gemma 2 9B" || row.Date != "2026-11-02" || row.MethodVersion != 1 || row.Source != run || row.SecondsPerQuestion != 1.0 {
 		t.Errorf("%+v", row)
+	}
+	if p := row.Performance; p == nil || p.PromptTokensPerSecond != 900.5 || p.TokensPerSecond != 50.5 || p.FirstTokenMs != 4400 || p.EffectiveTokensPerSecond != 21.5 || p.GPULayers != 43 || p.Quantization != "Q4_K_M" {
+		t.Errorf("performance %+v", row.Performance)
 	}
 	want := map[string]Passed{"quality": {60, 64}, "topics": {20, 22}, "files": {20, 21}, "reasoning": {32, 39}}
 	if len(row.Scores) != len(want) {
@@ -196,5 +207,28 @@ func TestRowLineLeavesStringsAlone(t *testing.T) {
 	}
 	if back.Model != `a:b,"c"` || back.Name != "<n>" || !strings.Contains(line, `"files": {"passed": 1, "of": 2}`) {
 		t.Errorf("%s", line)
+	}
+}
+
+func TestReadPerformance(t *testing.T) {
+	path := filepath.Join(t.TempDir(), PerformanceFile)
+	for name, c := range map[string]struct {
+		body string
+		ok   bool
+	}{
+		"complete": {`{"model":"m","prompt_tokens_per_second":1,"tokens_per_second":1,"first_token_ms":1,"effective_tokens_per_second":1}`, true},
+		"zero":     {`{"model":"m","prompt_tokens_per_second":1,"tokens_per_second":1,"first_token_ms":0,"effective_tokens_per_second":1}`, false},
+		"other":    {`{"model":"x","prompt_tokens_per_second":1,"tokens_per_second":1,"first_token_ms":1,"effective_tokens_per_second":1}`, false},
+		"not JSON": {`nope`, false},
+	} {
+		if err := os.WriteFile(path, []byte(c.body), 0o600); err != nil {
+			t.Fatal(err)
+		}
+		if _, err := ReadPerformance(path, "m"); (err == nil) != c.ok {
+			t.Errorf("%s: %v", name, err)
+		}
+	}
+	if _, err := ReadPerformance(path+".missing", "m"); err == nil {
+		t.Error("a missing report was read")
 	}
 }

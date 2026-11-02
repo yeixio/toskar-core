@@ -365,7 +365,7 @@ Uploads send `text`, or `content_base64` for binary files such as `.xlsx` and `.
 | POST, GET, DELETE | `/devices/pairing` | Show a code a phone connects with, see whether one has, or stop ([Connecting a phone](#connecting-a-phone)) |
 | POST | `/devices/pair` | A phone exchanges the code for its own key; no key needed, local network only |
 | GET, POST | `/benchmarks` | Benchmark runs, or start one |
-| GET | `/benchmarks/workloads` | The workloads a benchmark can run, including `quick`: one short prompt, to check that a model loads and answers, and how fast (#467) |
+| GET | `/benchmarks/workloads` | The workloads a benchmark can run, including `quick`: one short prompt, to check that a model loads and answers, and how fast (#467), and `long_prompt`: a long document, new each run, to measure reading it and the wait before the answer (#1037) |
 | GET | `/benchmarks/{id}` | One benchmark. `POST /benchmarks/{id}/cancel` stops it. |
 
 ## Chat turns

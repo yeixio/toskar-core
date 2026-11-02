@@ -4,8 +4,10 @@
 package qualityscore
 
 import (
+	"encoding/json"
 	"fmt"
 	"math"
+	"os"
 	"regexp"
 	"strconv"
 	"strings"
@@ -42,6 +44,53 @@ type Row struct {
 	Source             string            `json:"source,omitempty"`
 	Scores             map[string]Passed `json:"scores"`
 	SecondsPerQuestion float64           `json:"seconds_per_question,omitempty"`
+	Performance        *Performance      `json:"performance,omitempty"`
+}
+
+// PerformanceFile is the report of how a model ran, beside the sets' reports.
+const PerformanceFile = "performance.json"
+
+// Performance is how a model ran on the computer, as TestPerformance measures
+// it: reading a long prompt apart from writing the answer, the wait from sending
+// to the last token, and where it ran. It's beside a Score and never in it.
+type Performance struct {
+	PromptTokens             int     `json:"prompt_tokens"`
+	PromptTokensPerSecond    float64 `json:"prompt_tokens_per_second"`
+	TokensPerSecond          float64 `json:"tokens_per_second"`
+	FirstTokenMs             float64 `json:"first_token_ms"`
+	EffectiveTokensPerSecond float64 `json:"effective_tokens_per_second"`
+	GPULayers                int     `json:"gpu_layers"`
+	GPULayersTotal           int     `json:"gpu_layers_total"`
+	GPUMemoryBytes           uint64  `json:"gpu_memory_bytes,omitempty"`
+	MemoryBytes              uint64  `json:"memory_bytes,omitempty"`
+	ContextWindow            int     `json:"context_window,omitempty"`
+	Quantization             string  `json:"quantization,omitempty"`
+}
+
+// ReadPerformance reads a report, and says why when it can't be used: one for
+// another model, or one that measured nothing, doesn't go in a row.
+func ReadPerformance(path, model string) (*Performance, error) {
+	raw, err := os.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+	var named struct {
+		Model string `json:"model"`
+	}
+	var p Performance
+	if err := json.Unmarshal(raw, &named); err != nil {
+		return nil, fmt.Errorf("%s: %w", path, err)
+	}
+	if err := json.Unmarshal(raw, &p); err != nil {
+		return nil, fmt.Errorf("%s: %w", path, err)
+	}
+	if named.Model != model {
+		return nil, fmt.Errorf("%s measured %s and not %s", path, named.Model, model)
+	}
+	if p.TokensPerSecond <= 0 || p.PromptTokensPerSecond <= 0 || p.FirstTokenMs <= 0 || p.EffectiveTokensPerSecond <= 0 {
+		return nil, fmt.Errorf("%s has figures missing", path)
+	}
+	return &p, nil
 }
 
 // A report's own summary sentence, and not the first numbers in it: "25 of 25

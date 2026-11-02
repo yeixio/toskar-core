@@ -44,6 +44,22 @@ Web pages are fixed copies, so an answer that has the right facts got them from 
 
 **Media** is judged like this. A file must first be whole and the right size. Another model that sees then says whether it shows what was asked and whether any part is corrupted. A picture or clip fails as corrupted only if a second, larger model agrees. Whether a clip moves is measured from how much its frames differ, because the models asked got that wrong. A judge that makes a file instead of answering fails the case.
 
+## How fast it ran
+
+Speed is measured apart from quality, and never counts toward a Score. New rows have all of these, from three runs of a document of about 4,000 tokens, new each run so nothing comes from a cache:
+
+| Figure | What it tells you |
+|---|---|
+| **Reads**, in tokens a second | How fast it takes in a long chat or document. Often the real wait, and very different between computers |
+| **Writes**, in tokens a second | How fast the answer appears once it starts |
+| **First token** | How long you wait after sending, with that long prompt |
+| **Start to finish**, in tokens a second | The answer's tokens over the whole wait, which is lower than Writes, and closer to how it feels |
+| **GPU layers**, such as 15 of 65 | How much of the model ran on the graphics card. Partly on the card is much slower |
+| **Memory** | What the model took, on the graphics card and in all |
+| **Quantization and context window** | Which file of the model ran, and how much it could hold in mind |
+
+A Score stays comparable because the same cases run each time. Speed depends on the computer, what else it's doing, and these settings.
+
 ## Where it runs
 
 Quality runs every week on our own computers, a few models at a time, and each run adds its scores to the results on its own. Each row names the computer and date. **Scores from different computers or dates aren't the same test,** so compare rows with care. Speed depends on the computer. Model scores can move too, as Toskar changes.

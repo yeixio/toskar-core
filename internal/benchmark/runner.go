@@ -332,6 +332,11 @@ func (r *Runner) runOnce(
 	if text == "" {
 		return sample, fmt.Errorf("prompt missing")
 	}
+	// A prompt the model has just read comes from its cache in no time, which
+	// is the very thing this workload is there to measure.
+	if workloadID == LongPromptWorkload {
+		text = fmt.Sprintf("Log %d of %s.\n", runIndex, time.Now().Format(time.RFC3339Nano)) + text
+	}
 
 	ch, err := r.Chat(ctx, pluginapi.ChatRequest{
 		ModelEndpoint: endpoint,
