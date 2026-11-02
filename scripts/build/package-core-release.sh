@@ -46,6 +46,22 @@ build_binaries() {
   cp cmd/devctl/completions/* "$dest/completions/"
 }
 
+# The quality sets, to run on a person's computer without Go or a checkout (#1037).
+package_quality() {
+  local goos="$1" goarch="$2" ext=""
+  local name="toskar-quality-${VERSION}-${goos}-${goarch}"
+  local dest="dist/${name}"
+  if [ "$goos" = windows ]; then ext=".exe"; fi
+  mkdir -p "$dest"
+  CGO_ENABLED=0 GOOS="$goos" GOARCH="$goarch" go build -trimpath -ldflags "$LDFLAGS" \
+    -o "$dest/toskar-quality${ext}" ./cmd/qualityrun
+  CGO_ENABLED=0 GOOS="$goos" GOARCH="$goarch" go test -c -trimpath -ldflags "$LDFLAGS" \
+    -o "$dest/quality.test${ext}" ./tests/quality
+  cp tests/quality/*.json LICENSE "$dest/"
+  tar -C dist -czf "dist/${name}.tar.gz" "$name"
+  rm -rf "$dest"
+}
+
 # The apt repository's public key, armored in the repository and binary in
 # the package (#599). Empty until the repository has one.
 KEYRING=""
@@ -229,6 +245,11 @@ if want linux-amd64 || want linux-arm64; then package_transitional; fi
 if want darwin-arm64; then package_darwin arm64; fi
 if want darwin-amd64; then package_darwin amd64; fi
 if want windows-amd64; then package_windows amd64; fi
+if want linux-amd64; then package_quality linux amd64; fi
+if want linux-arm64; then package_quality linux arm64; fi
+if want darwin-arm64; then package_quality darwin arm64; fi
+if want darwin-amd64; then package_quality darwin amd64; fi
+if want windows-amd64; then package_quality windows amd64; fi
 
 (
   cd dist

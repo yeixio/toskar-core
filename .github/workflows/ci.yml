@@ -148,6 +148,9 @@ jobs:
           if [ "$GOOS" = "windows" ]; then ext=".exe"; fi
           go build -o "bin/${GOOS}-${GOARCH}/toskar${ext}" ./cmd/daemon
           go build -o "bin/${GOOS}-${GOARCH}/toskarctl${ext}" ./cmd/devctl
+          # What a release ships for people to measure on their own computers.
+          go build -o "bin/${GOOS}-${GOARCH}/toskar-quality${ext}" ./cmd/qualityrun
+          go test -c -o "bin/${GOOS}-${GOARCH}/quality.test${ext}" ./tests/quality
       # Tests run only on Linux and macOS runners; vet type-checks them for
       # each target too, so a Unix-only call in a shared test file fails here.
       - name: Type-check tests
