@@ -246,6 +246,26 @@ func TestToolsFor(t *testing.T) {
 			t.Errorf("%q offered %v", msg, got)
 		}
 	}
+	for _, msg := range []string{"Short clip of a dog running", "Can you make a video of the ocean?", "Haz un video de olas en la playa", "Erstelle ein Video von einem Hund", "How would you make a clip of rain?", "Do a clip of rain", "Make the clip longer"} {
+		if got := ToolsFor(Chat, msg, film); !has(got, "video.generate") {
+			t.Errorf("%q offered %v", msg, got)
+		}
+	}
+	// Talking about a clip isn't asking for one: offered the tool for the
+	// first of these, a model made a new clip instead of answering.
+	for _, msg := range []string{
+		"Do these frames of a video change from one to the next, with something moving, or are they all the same picture?",
+		"Look closely at each of these frames of a video. Is any frame garbled or corrupted?",
+		"Does this video show a street or market with signs?",
+		"Summarize this video",
+		"What's a good video editor?",
+		"Is the attached clip too dark?",
+		"Transcribe my video",
+	} {
+		if got := ToolsFor(Chat, msg, film); slices.Contains(got, "video.generate") {
+			t.Errorf("%q offered %v", msg, got)
+		}
+	}
 	mailCal := []string{"email.search", "email.read", "email.send", "calendar.search", "calendar.availability", "calendar.create"}
 	for msg, want := range map[string]string{
 		"Anything new in my inbox from Sam?":    "email.search",

@@ -18,6 +18,8 @@ func TestAskedForMedia(t *testing.T) {
 		"Paint a lighthouse at dusk":                                         {"", "image.generate", ""},
 		"Make a logo for my tire shop":                                       {"", "image.generate", ""},
 		"Make a short video of waves on a beach":                             {"", "video.generate", ""},
+		"Do a video of waves on a beach":                                     {"", "video.generate", ""},
+		"Make the clip longer":                                               {"", "video.generate", ""},
 		"Bring this photo to life":                                           {edit, "video.generate", "dog.png"},
 		"Make it night":                                                      {edit, "image.edit", "dog.png"},
 		"Remove the background":                                              {edit, "image.edit", "dog.png"},
@@ -42,6 +44,7 @@ func TestAskedForMedia(t *testing.T) {
 		"Make a log of the errors",
 		"Give me a postcard address",
 		"Create an imaginary friend",
+		"Do these frames of a video change from one to the next, with something moving, or are they all the same picture?",
 	} {
 		if got, ok := askedForMedia(msg, ""); ok {
 			t.Errorf("%q is not a request to make one: %+v", msg, got)

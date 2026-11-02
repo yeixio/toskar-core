@@ -145,6 +145,9 @@ func findImage(ctx context.Context, store *artifacts.Store, ref string) (artifac
 
 // output is a made image as a file named for the request.
 func output(res Result, name, prompt string, askedW, askedH int) remotetools.Output {
+	if !nameable(name) {
+		name = ""
+	}
 	name = artifacts.CleanName(strings.TrimSpace(name))
 	if name == "" || name == "file" {
 		name = nameFrom(prompt)
@@ -211,12 +214,16 @@ func finish(ctx context.Context, store *artifacts.Store, out remotetools.Output)
 	return res, nil
 }
 
+// nameable reports text fit for a file name. A model can write its tool call
+// into a name or a prompt, and {"tool_call":{"id":"video.generate" isn't one.
+func nameable(s string) bool { return !strings.ContainsAny(s, `{}"`) }
+
 // nameFrom makes a file name from the first words of a prompt.
 func nameFrom(prompt string) string {
 	var words []string
 	for _, w := range strings.Fields(strings.ToLower(prompt)) {
 		w = strings.Trim(w, ".,;:!?\"'()[]")
-		if w == "" {
+		if w == "" || !nameable(w) {
 			continue
 		}
 		words = append(words, w)

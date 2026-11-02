@@ -385,3 +385,20 @@ func TestStartReportsFailure(t *testing.T) {
 		t.Fatalf("status %+v", st)
 	}
 }
+
+// A model can write its tool call into a name or a prompt (#792).
+func TestNameFromLeavesOutToolCalls(t *testing.T) {
+	call := `{"tool_call":{"id":"video.generate","args":{}}}`
+	for prompt, want := range map[string]string{
+		"A slow pan across a busy market street": "a-slow-pan-across-a",
+		call:                                     "image",
+		call + " waves on a beach":               "waves-on-a-beach",
+	} {
+		if got := nameFrom(prompt); got != want {
+			t.Errorf("nameFrom(%q) = %q, want %q", prompt, got, want)
+		}
+	}
+	if out := output(Result{}, call, "a red apple", 0, 0); out.Files[0].Name != "a-red-apple.png" {
+		t.Errorf("name %q", out.Files[0].Name)
+	}
+}

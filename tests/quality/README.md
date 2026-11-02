@@ -110,15 +110,18 @@ real daemon; a WAV must be whole and at least half a second long. Against a
 real daemon, a model that sees (`TOSKAR_QUALITY_JUDGE_MODEL`, gemma-3-4b by
 default) is then asked whether the picture, or the clip's sampled frames,
 shows `shows`, and speech is transcribed back and compared with `says` by
-word error rate (`max_wer`, 25% by default). `moves` asks whether a
-clip's frames change, so a frozen clip fails, and `clean` whether any part
+word error rate (`max_wer`, 25% by default). `moves` measures how much a
+clip's frames differ with ffmpeg, or asks the judges without it, so a frozen clip
+fails, and `clean` whether any part
 of a picture, or any frame, is garbled or corrupted (blocks of wrong color,
 noise, stripes, smears), washed out until most of it is near white, or a frame flashes or jumps apart from its
 neighbors, so a broken decode fails even when it shows the right thing
-(#553). Before a picture or clip fails as corrupted or still, a larger model
+(#553). Before a picture or clip fails as corrupted, a larger model
 that sees (`TOSKAR_QUALITY_JUDGE_CONFIRM_MODEL`, Qwen 2.5 VL 7B by default)
 is asked the same question; it fails only when both find fault, with both
-answers (#758). `os` runs a case only on that system: `make_video_mac_decode` is
+answers (#758). A judge that makes a file instead of answering fails the case: Toskar
+once made a new clip for a question about one, and its "Here is the clip"
+passed as finding no fault (#792). `os` runs a case only on that system: `make_video_mac_decode` is
 the regression case for Apple's video decode path, run with the media set
 on a Mac. `make: png` draws an
 attachment from a description, such as `size=512 bg=white shape=square
