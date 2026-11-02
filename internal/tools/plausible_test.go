@@ -116,10 +116,13 @@ func TestPlausibleArguments(t *testing.T) {
 
 // A model on Windows writes PowerShell.
 func TestPowerShellCommandsArePlausible(t *testing.T) {
-	for _, command := range []string{"Get-ChildItem -Recurse", "Get-Content sum.go | Select-String total", "go test ./...", `.\run.ps1`} {
+	for _, command := range []string{"Get-ChildItem -Recurse", "Get-Content sum.go | Select-String total", "go test ./...", `.\run.ps1`, `C:\tools\run.exe --help`} {
 		if !plausibleCommand(command) {
 			t.Errorf("%q wasn't plausible", command)
 		}
+	}
+	if plausibleCommand("Note: run the tests") {
+		t.Error("prose with a colon was taken for a command")
 	}
 }
 
