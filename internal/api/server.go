@@ -59,6 +59,7 @@ type Dependencies struct {
 	RecommendModels     func(ctx context.Context, purpose string) (contracts.Recommendation, error)
 	ModelsFit           func(ctx context.Context) ([]contracts.ModelsFitResponse, error)
 	BrowseModels        func(ctx context.Context, query string, limit int) ([]contracts.BrowseModel, error)
+	ModelStore          func(ctx context.Context) (contracts.ModelStore, error)
 	InstallModel        func(ctx context.Context, id string, wait bool, nodeID string) error
 	InstallModelFromURL func(ctx context.Context, req contracts.InstallFromURLRequest, wait bool) (string, error)
 	// ImportModel adds a GGUF file on this computer as a model;
@@ -329,6 +330,7 @@ func (s *Server) routes() {
 	api.HandleFunc("/models/recommend", s.handleRecommendModels).Methods(http.MethodGet, http.MethodOptions)
 	api.HandleFunc("/models/fit", s.handleModelsFit).Methods(http.MethodGet, http.MethodOptions)
 	api.HandleFunc("/models/browse", s.handleBrowseModels).Methods(http.MethodGet, http.MethodOptions)
+	api.HandleFunc("/models/store", s.handleModelStore).Methods(http.MethodGet, http.MethodOptions)
 	api.HandleFunc("/models/running", s.handleListRunningModels).Methods(http.MethodGet, http.MethodOptions)
 	api.HandleFunc("/models/warm", s.handleWarmModel).Methods(http.MethodPost, http.MethodOptions)
 	api.HandleFunc("/models/install-from-url", s.handleInstallFromURL).Methods(http.MethodPost)
