@@ -2,7 +2,7 @@
 // quality sets on this computer, in a throwaway Toskar, and adds a scheduled
 // run's scores to the public results (docs/quality.md, #1037).
 //
-//	toskar-quality run --model <id> --toskar <toskar binary>
+//	toskar-quality run --toskar <toskar binary> [--model <id>]
 //	toskar-quality publish <reports> <results.json> <version.json> <catalog.json> <models.json> <run URL>
 //	toskar-quality next <models.json> <results.json> <version.json> <count>
 package main
@@ -50,7 +50,7 @@ func main() {
 }
 
 func usage() {
-	fmt.Fprintln(os.Stderr, "usage: toskar-quality run --model <id> --toskar <toskar binary> [--harness <folder>] [--out <folder>] [--data <folder>] [--port <port>] [--sets quality,topics,files,reasoning]")
+	fmt.Fprintln(os.Stderr, "usage: toskar-quality run --toskar <toskar binary> [--model <id>] [--yes] [--harness <folder>] [--out <folder>] [--data <folder>] [--port <port>] [--sets quality,topics,files,reasoning] [--only <case>]")
 	fmt.Fprintln(os.Stderr, "       toskar-quality publish <reports> <results.json> <version.json> <catalog.json> <models.json> <run URL>")
 	fmt.Fprintln(os.Stderr, "       toskar-quality next <models.json> <results.json> <version.json> <count>")
 	os.Exit(2)
@@ -81,14 +81,13 @@ func run(args []string) error {
 	data := fs.String("data", filepath.Join(cacheDir, "toskar-quality"), "the throwaway Toskar's data folder, which keeps its models between runs")
 	port := fs.Int("port", 7361, "the throwaway Toskar's port")
 	only := fs.String("sets", "", "only these sets, comma-separated; a run without all of them gets no Score")
+	onlyCase := fs.String("only", "", "only the cases matching this, for checking this program")
+	yes := fs.Bool("yes", false, "ask nothing: take the suggested model, and don't offer to share")
 	_ = fs.Parse(args)
-	if *model == "" || *toskar == "" {
+	if *toskar == "" {
 		usage()
 	}
-	if *out == "" {
-		*out = "quality-score-" + *model
-	}
-	for _, p := range []*string{toskar, harness, out, data} {
+	for _, p := range []*string{toskar, harness, data} {
 		abs, err := filepath.Abs(*p)
 		if err != nil {
 			return err
@@ -99,9 +98,12 @@ func run(args []string) error {
 	if err != nil {
 		return err
 	}
-	if err := os.MkdirAll(*out, 0o755); err != nil {
+	// The folder for reports is made once the model is known; Toskar's log waits in here.
+	logs, err := os.MkdirTemp("", "toskar-quality-logs-")
+	if err != nil {
 		return err
 	}
+	defer os.RemoveAll(logs)
 	if err := os.MkdirAll(*data, 0o755); err != nil {
 		return err
 	}
@@ -109,11 +111,28 @@ func run(args []string) error {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer stop()
 	url := fmt.Sprintf("http://127.0.0.1:%d", *port)
-	stopToskar, err := startToskar(ctx, *toskar, *harness, *out, *data, *port, url)
+	stopToskar, err := startToskar(ctx, *toskar, *harness, logs, *data, *port, url)
 	if err != nil {
 		return err
 	}
 	defer stopToskar()
+
+	ask := newAsker(*yes)
+	defer ask.close()
+	if *model == "" {
+		if *model, err = chooseModel(url, ask); err != nil {
+			return err
+		}
+	}
+	if *out == "" {
+		*out = "quality-score-" + *model
+	}
+	if *out, err = filepath.Abs(*out); err != nil {
+		return err
+	}
+	if err := os.MkdirAll(*out, 0o755); err != nil {
+		return err
+	}
 
 	test := filepath.Join(*harness, "quality.test")
 	if runtime.GOOS == "windows" {
@@ -139,7 +158,11 @@ func run(args []string) error {
 		fmt.Printf("%s: running...\n", set.Name)
 		report := filepath.Join(*out, set.Report)
 		_ = os.Remove(report)
-		cmd := exec.CommandContext(ctx, test, "-test.run", "^"+setTests[set.Name][0]+"$", "-test.count=1", "-test.v", "-test.timeout=600m")
+		pattern := "^" + setTests[set.Name][0] + "$"
+		if *onlyCase != "" {
+			pattern += "/" + *onlyCase
+		}
+		cmd := exec.CommandContext(ctx, test, "-test.run", pattern, "-test.count=1", "-test.v", "-test.timeout=600m")
 		cmd.Dir = *harness
 		cmd.Stdout, cmd.Stderr = logFile, logFile
 		cmd.Env = append(os.Environ(), "TOSKAR_QUALITY_URL="+url, "TOSKAR_QUALITY_MODEL="+*model, setTests[set.Name][1]+"="+report)
@@ -200,7 +223,9 @@ func run(args []string) error {
 	if err := os.WriteFile(filepath.Join(*out, "result.json"), append(raw, '\n'), 0o644); err != nil {
 		return err
 	}
-	fmt.Printf("\nSaved in %s. To share it: %s\n", *out, resultsForm)
+	fmt.Printf("\nSaved in %s.\n", *out)
+	fmt.Printf("Models stay in %s for your next run. Delete that folder to get the space back.\n", *data)
+	offerToShare(row, ask, *out)
 	return nil
 }
 
@@ -227,7 +252,7 @@ func readSet(row *qualityscore.Row, set qualityscore.Set, report, model string) 
 // startToskar runs its own Toskar, with its own data folder and port, in an empty
 // folder, so a person's everyday Toskar and its chats aren't touched. Web lookups
 // answer from the set's fixed pages, and every tool that asks first is answered no.
-func startToskar(ctx context.Context, toskar, harness, out, data string, port int, url string) (func(), error) {
+func startToskar(ctx context.Context, toskar, harness, logs, data string, port int, url string) (func(), error) {
 	if conn, err := net.DialTimeout("tcp", net.JoinHostPort("127.0.0.1", strconv.Itoa(port)), time.Second); err == nil {
 		conn.Close()
 		return nil, fmt.Errorf("something already answers on port %d; choose another with --port", port)
@@ -236,7 +261,7 @@ func startToskar(ctx context.Context, toskar, harness, out, data string, port in
 	if err != nil {
 		return nil, err
 	}
-	logFile, err := os.Create(filepath.Join(out, "toskar.log"))
+	logFile, err := os.Create(filepath.Join(logs, "toskar.log"))
 	if err != nil {
 		return nil, err
 	}
@@ -275,43 +300,55 @@ func startToskar(ctx context.Context, toskar, harness, out, data string, port in
 			}
 		}
 	}
+	raw, _ := os.ReadFile(logFile.Name())
 	stop()
-	return nil, fmt.Errorf("the throwaway Toskar didn't start; see %s", logFile.Name())
+	return nil, fmt.Errorf("the throwaway Toskar didn't start:\n%s", tail(string(raw), 2000))
 }
 
-// hardwareName is the graphics card or chip, and memory. Nothing that identifies the computer.
-func hardwareName(url string) (string, error) {
-	resp, err := http.Get(url + "/api/v1/hardware")
-	if err != nil {
-		return "", err
-	}
-	defer resp.Body.Close()
-	var hw struct {
-		CPU    struct{ Model string } `json:"cpu"`
-		Memory struct {
-			TotalBytes int64 `json:"total_bytes"`
-		} `json:"memory"`
-		Accelerators []struct{ Name, Model string } `json:"accelerators"`
-	}
-	if err := json.NewDecoder(resp.Body).Decode(&hw); err != nil {
-		return "", err
-	}
-	var cards []string
+// hardware is what the daemon says about this computer, keeping out what could
+// identify it.
+type hardware struct {
+	CPU struct {
+		Model string `json:"model"`
+	} `json:"cpu"`
+	Memory struct {
+		TotalBytes uint64 `json:"total_bytes"`
+	} `json:"memory"`
+	Accelerators []struct {
+		Name          string `json:"name"`
+		Model         string `json:"model"`
+		DedicatedVRAM uint64 `json:"dedicated_vram_bytes"`
+	} `json:"accelerators"`
+}
+
+func readHardware(url string) (hardware, error) {
+	var hw hardware
+	err := readJSON(url+"/api/v1/hardware", &hw)
+	return hw, err
+}
+
+// label is the graphics card or chip, and memory. Nothing that identifies the computer.
+func (hw hardware) label() string {
+	chip := hw.CPU.Model
 	for _, a := range hw.Accelerators {
-		cards = append(cards, a.Name, a.Model)
-	}
-	return hardwareLabel(hw.CPU.Model, hw.Memory.TotalBytes, cards), nil
-}
-
-func hardwareLabel(cpu string, memoryBytes int64, accelerators []string) string {
-	chip := cpu
-	for _, a := range accelerators {
-		if a != "" {
-			chip = a
+		name := a.Name
+		if name == "" {
+			name = a.Model
+		}
+		if name != "" {
+			chip = name
 			break
 		}
 	}
-	return fmt.Sprintf("%s, %d GB", chip, (memoryBytes+1<<29)>>30)
+	return fmt.Sprintf("%s, %d GB", chip, (hw.Memory.TotalBytes+1<<29)>>30)
+}
+
+func hardwareName(url string) (string, error) {
+	hw, err := readHardware(url)
+	if err != nil {
+		return "", err
+	}
+	return hw.label(), nil
 }
 
 // next prints what a scheduled run measures, as JSON for a workflow's matrix.

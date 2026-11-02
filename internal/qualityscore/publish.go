@@ -154,6 +154,7 @@ func RowLine(row Row) (string, error) {
 type ListedModel struct {
 	ID        string `json:"id"`
 	Name      string `json:"name"`
+	SizeBytes uint64 `json:"size_bytes"`
 	SourceURL string `json:"source_url,omitempty"`
 }
 

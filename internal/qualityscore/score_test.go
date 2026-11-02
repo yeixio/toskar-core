@@ -250,3 +250,36 @@ func TestNextModels(t *testing.T) {
 		t.Errorf("%v", got)
 	}
 }
+
+func TestSuggest(t *testing.T) {
+	const gb = 1 << 30
+	list := []ListedModel{{ID: "big", SizeBytes: 20 * gb}, {ID: "a", SizeBytes: 2 * gb}, {ID: "b", SizeBytes: 3 * gb}}
+	results := []Row{{Model: "a", Hardware: "Mine"}, {Model: "b", Hardware: "Theirs"}}
+	if m, ok := Suggest(list, results, "Mine", 8*gb); !ok || m.ID != "b" {
+		t.Errorf("%+v %v: want the first that fits with no result from this hardware", m, ok)
+	}
+	if m, ok := Suggest(list, results, "Mine", 26*gb); !ok || m.ID != "big" {
+		t.Errorf("%+v %v", m, ok)
+	}
+	all := append(results, Row{Model: "b", Hardware: "Mine"})
+	if m, ok := Suggest(list, all, "Mine", 8*gb); !ok || m.ID != "a" {
+		t.Errorf("%+v %v: with everything measured, the first that fits", m, ok)
+	}
+	if _, ok := Suggest(list, nil, "Mine", 2*gb); ok {
+		t.Error("suggested a model that doesn't fit")
+	}
+	if got := RoomFor(24*gb, 32*gb); got != 24*gb {
+		t.Errorf("a card's own memory: %d", got/gb)
+	}
+	if got := RoomFor(0, 30*gb); got != 18*gb {
+		t.Errorf("shared memory: %d", got/gb)
+	}
+}
+
+func TestCreditName(t *testing.T) {
+	for name, ok := range map[string]bool{"octo-cat": true, "a": true, "bad name": false, "-x": false, "x-": false, "<b>": false, "": false, strings.Repeat("a", 40): false} {
+		if ValidCredit(name) != ok {
+			t.Errorf("%q: %v", name, !ok)
+		}
+	}
+}
