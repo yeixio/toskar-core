@@ -18,8 +18,8 @@ const reportFolderPrefix = "quality-report-real-models-"
 // workflow uploads them. A model gets a row only when its reports say they
 // tested that model: "recommended" stands for several, and a report naming
 // another means the run didn't test the one it was asked to. Only a complete
-// row is published, with a score from every one of Sets, so every row can be
-// compared and has a Score. Publishing the same run again adds nothing. It says
+// row is published, with a score from every one of Sets and its performance,
+// so every row can be compared and has a Score. Publishing the same run again adds nothing. It says
 // what it did on log.
 func Publish(reports, resultsPath string, version int, names map[string]string, source string, now time.Time, log func(string)) error {
 	raw, err := os.ReadFile(resultsPath)
@@ -107,6 +107,11 @@ func weeklyRow(model, folder string) (Row, string) {
 	if _, complete := Score(row.Scores); !complete {
 		return row, "its reports don't have a score from all of " + setNames()
 	}
+	performance, err := ReadPerformance(filepath.Join(folder, PerformanceFile), model)
+	if err != nil {
+		return row, "no performance figures: " + err.Error()
+	}
+	row.Performance = performance
 	return row, ""
 }
 

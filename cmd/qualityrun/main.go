@@ -156,17 +156,36 @@ func run(args []string) error {
 	if len(row.Scores) == 0 {
 		return fmt.Errorf("no scores; see %s", logFile.Name())
 	}
+	// Reading a long prompt takes a while on a slow computer, so this says so.
+	fmt.Println("performance: running...")
+	report := filepath.Join(*out, qualityscore.PerformanceFile)
+	_ = os.Remove(report)
+	cmd := exec.CommandContext(ctx, test, "-test.run", "^TestPerformance$", "-test.count=1", "-test.v", "-test.timeout=70m")
+	cmd.Dir = *harness
+	cmd.Stdout, cmd.Stderr = logFile, logFile
+	cmd.Env = append(os.Environ(), "TOSKAR_QUALITY_URL="+url, "TOSKAR_QUALITY_MODEL="+*model, "TOSKAR_QUALITY_PERFORMANCE_REPORT="+report)
+	_ = cmd.Run()
+	if ctx.Err() != nil {
+		return ctx.Err()
+	}
+	performance, perfErr := qualityscore.ReadPerformance(report, *model)
+	if perfErr != nil {
+		fmt.Printf("performance: not measured. See %s.\n", logFile.Name())
+	}
+	row.Performance = performance
 	if row.Hardware, err = hardwareName(url); err != nil {
 		return err
 	}
 	fmt.Printf("\n%s on %s\n", row.Model, row.Hardware)
-	if row.SecondsPerQuestion > 0 {
-		fmt.Printf("Speed: %.1f s a question\n", row.SecondsPerQuestion)
+	if p := row.Performance; p != nil {
+		fmt.Printf("Writes %.1f tokens a second. Reads %.0f tokens a second.\n", p.TokensPerSecond, p.PromptTokensPerSecond)
+		fmt.Printf("With a prompt of %d tokens, it starts in %.1f s and averages %.1f tokens a second from start to finish.\n", p.PromptTokens, p.FirstTokenMs/1000, p.EffectiveTokensPerSecond)
+		fmt.Printf("%d of %d layers on the GPU.\n", p.GPULayers, p.GPULayersTotal)
 	}
 	score, complete := qualityscore.Score(row.Scores)
-	if !complete {
+	if !complete || row.Performance == nil {
 		// Only a complete row is published, so this has nothing to share.
-		fmt.Printf("\nThis run didn't finish all the sets, so it has no Score and nothing to share. Its reports are in %s.\n", *out)
+		fmt.Printf("\nThis run didn't finish everything, so it has nothing to share. Its reports are in %s.\n", *out)
 		return nil
 	}
 	fmt.Printf("Score: %s\n", qualityscore.Describe(score, version))

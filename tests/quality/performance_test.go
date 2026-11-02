@@ -9,24 +9,34 @@ import (
 	"testing"
 	"time"
 
+	"github.com/yeixio/toskar-core/internal/benchmark"
 	"github.com/yeixio/toskar-core/internal/config"
 	"github.com/yeixio/toskar-core/pkg/contracts"
 )
 
-// performance is how a model ran on this computer: toskar's benchmark for its
-// speed, and the runtime's own report for where it ran. It's beside a row's
-// Score and never in it (#1037).
+// performance is how a model ran on this computer, in the terms people running
+// models compare: reading a long prompt apart from writing the answer, the wait
+// from sending to the last word, the model's exact file and window, and where it
+// ran. It's beside a row's Score and never in it (#1037).
 type performance struct {
-	TokensPerSecond float64 `json:"tokens_per_second"`
-	FirstTokenMs    float64 `json:"first_token_ms"`
-	LoadMs          float64 `json:"load_ms,omitempty"`
-	GPULayers       int     `json:"gpu_layers"`
-	GPULayersTotal  int     `json:"gpu_layers_total"`
-	MemoryBytes     uint64  `json:"memory_bytes,omitempty"`
+	Model string `json:"model"`
+	// PromptTokens is the prompt these were measured with.
+	PromptTokens          int     `json:"prompt_tokens"`
+	PromptTokensPerSecond float64 `json:"prompt_tokens_per_second"`
+	TokensPerSecond       float64 `json:"tokens_per_second"`
+	FirstTokenMs          float64 `json:"first_token_ms"`
+	// EffectiveTokensPerSecond counts from sending to the last token, wait included.
+	EffectiveTokensPerSecond float64 `json:"effective_tokens_per_second"`
+	GPULayers                int     `json:"gpu_layers"`
+	GPULayersTotal           int     `json:"gpu_layers_total"`
+	GPUMemoryBytes           uint64  `json:"gpu_memory_bytes,omitempty"`
+	MemoryBytes              uint64  `json:"memory_bytes,omitempty"`
+	ContextWindow            int     `json:"context_window,omitempty"`
+	Quantization             string  `json:"quantization,omitempty"`
 }
 
-// TestPerformance measures TOSKAR_QUALITY_MODEL with the quick benchmark, and
-// writes TOSKAR_QUALITY_PERFORMANCE_REPORT.
+// TestPerformance measures TOSKAR_QUALITY_MODEL with the long prompt benchmark,
+// and writes TOSKAR_QUALITY_PERFORMANCE_REPORT.
 func TestPerformance(t *testing.T) {
 	path, url := config.Env("QUALITY_PERFORMANCE_REPORT"), config.Env("QUALITY_URL")
 	model := config.Env("QUALITY_MODEL")
@@ -38,11 +48,11 @@ func TestPerformance(t *testing.T) {
 	d.installModel(t, model)
 
 	var job contracts.BenchmarkJob
-	req := contracts.BenchmarkRequest{ModelIDs: []string{model}, WorkloadIDs: []string{"quick"}, Runs: 3}
+	req := contracts.BenchmarkRequest{ModelIDs: []string{model}, WorkloadIDs: []string{benchmark.LongPromptWorkload}, Runs: 3}
 	if status := d.do(t, http.MethodPost, "/api/v1/benchmarks", req, &job); status >= 300 {
 		t.Fatalf("starting the benchmark: status %d", status)
 	}
-	for deadline := time.Now().Add(30 * time.Minute); ; time.Sleep(2 * time.Second) {
+	for deadline := time.Now().Add(60 * time.Minute); ; time.Sleep(2 * time.Second) {
 		if time.Now().After(deadline) {
 			t.Fatalf("the benchmark didn't finish: %+v", job.Progress)
 		}
@@ -58,14 +68,30 @@ func TestPerformance(t *testing.T) {
 	if summary.ModelID != model {
 		t.Fatalf("the benchmark measured %s and not %s", summary.ModelID, model)
 	}
-	// A figure that wasn't measured doesn't get published as zero.
-	if summary.AvgEvalTokPerSec <= 0 || summary.AvgTTFTMs <= 0 {
-		t.Fatalf("the benchmark measured nothing: %+v", summary)
-	}
 	got := performance{
-		TokensPerSecond: round1(summary.AvgEvalTokPerSec),
-		FirstTokenMs:    math.Round(summary.AvgTTFTMs),
-		LoadMs:          math.Round(summary.LoadMs),
+		Model:                 model,
+		PromptTokensPerSecond: round1(summary.AvgPromptTokPerSec),
+		TokensPerSecond:       round1(summary.AvgEvalTokPerSec),
+		FirstTokenMs:          math.Round(summary.AvgTTFTMs),
+	}
+	completion, total := 0, 0.0
+	for _, s := range job.Samples {
+		if s.Warmup {
+			continue
+		}
+		if s.Error != "" {
+			t.Fatalf("a run failed: %s", s.Error)
+		}
+		got.PromptTokens = s.PromptTokens
+		completion += s.CompletionTokens
+		total += s.TotalMs
+	}
+	if total > 0 {
+		got.EffectiveTokensPerSecond = round1(float64(completion) / (total / 1000))
+	}
+	// A figure that wasn't measured doesn't get published as zero.
+	if got.TokensPerSecond <= 0 || got.PromptTokensPerSecond <= 0 || got.FirstTokenMs <= 0 || got.EffectiveTokensPerSecond <= 0 {
+		t.Fatalf("the benchmark didn't measure it all: %+v", got)
 	}
 
 	var running []contracts.RunningModelView
@@ -77,6 +103,14 @@ func TestPerformance(t *testing.T) {
 		got.MemoryBytes = r.MemoryBytes
 		if r.Acceleration != nil {
 			got.GPULayers, got.GPULayersTotal = r.Acceleration.LayersOffloaded, r.Acceleration.LayersTotal
+			got.GPUMemoryBytes = r.Acceleration.GPUMemoryBytes
+		}
+	}
+	var models []contracts.Model
+	d.do(t, http.MethodGet, "/api/v1/models", nil, &models)
+	for _, m := range models {
+		if m.ID == model {
+			got.ContextWindow, got.Quantization = m.ContextWindow, m.Variant
 		}
 	}
 	raw, err := json.MarshalIndent(got, "", "  ")

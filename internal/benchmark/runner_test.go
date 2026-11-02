@@ -119,3 +119,58 @@ func TestSamplesKeepTheDevice(t *testing.T) {
 	}
 	t.Fatal("timeout")
 }
+
+// A cached prompt starts in no time, so every run of this one has to differ from
+// its first word.
+func TestLongPromptIsNewEachRun(t *testing.T) {
+	w, ok := benchmark.WorkloadByID(benchmark.LongPromptWorkload)
+	if !ok || len(w.Prompts) != 1 {
+		t.Fatalf("%+v", w)
+	}
+	// About 4,000 tokens, at a rough four characters a token.
+	if n := len(w.Prompts[0].Text); n < 10000 || n > 16000 {
+		t.Errorf("%d characters", n)
+	}
+	r := benchmark.NewRunner()
+	r.ModelPath = func(context.Context, string) (string, error) { return "/tmp/m.gguf", nil }
+	r.ListRunning = func(context.Context) ([]pluginapi.RunningModel, error) { return nil, nil }
+	r.StopModel = func(context.Context, string) error { return nil }
+	r.StartModel = func(_ context.Context, modelID, _ string) (pluginapi.RunningModel, error) {
+		return pluginapi.RunningModel{ID: "inst", ModelID: modelID, Endpoint: "http://127.0.0.1:1"}, nil
+	}
+	starts := make(chan string, 8)
+	r.Chat = func(_ context.Context, req pluginapi.ChatRequest) (<-chan pluginapi.ChatChunk, error) {
+		starts <- req.Messages[0].Content[:60]
+		ch := make(chan pluginapi.ChatChunk, 1)
+		ch <- pluginapi.ChatChunk{Done: true, Metrics: &pluginapi.GenerationMetrics{EvalTokPerSec: 1}}
+		close(ch)
+		return ch, nil
+	}
+	job, err := r.Start(context.Background(), contracts.BenchmarkRequest{
+		ModelIDs: []string{"m"}, WorkloadIDs: []string{benchmark.LongPromptWorkload}, Runs: 3,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	for deadline := time.Now().Add(5 * time.Second); ; time.Sleep(20 * time.Millisecond) {
+		got, err := r.Get(job.ID)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if got.Status == contracts.BenchmarkCompleted {
+			break
+		}
+		if got.Status == contracts.BenchmarkFailed || time.Now().After(deadline) {
+			t.Fatalf("%s: %s", got.Status, got.Error)
+		}
+	}
+	close(starts)
+	seen := map[string]bool{}
+	for start := range starts {
+		seen[start] = true
+	}
+	// Three measured runs, and the warm-up before them.
+	if len(seen) != 4 {
+		t.Errorf("%d different starts in 4 runs", len(seen))
+	}
+}

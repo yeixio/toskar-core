@@ -1,6 +1,11 @@
 package benchmark
 
-import "github.com/yeixio/toskar-core/pkg/contracts"
+import (
+	"fmt"
+	"strings"
+
+	"github.com/yeixio/toskar-core/pkg/contracts"
+)
 
 // Workloads returns the built-in workload catalog.
 func Workloads() []contracts.BenchmarkWorkload {
@@ -132,7 +137,40 @@ Yggdrasil is a local AI control plane that installs runtimes, downloads GGUF mod
 				},
 			},
 		},
+		{
+			// How long a person waits with a long chat or document: what a short
+			// prompt can't show, and the wait people running models ask about
+			// most (#1037). Each run is new to the model, as runOnce says.
+			ID:          LongPromptWorkload,
+			Name:        "Long prompt",
+			Description: "A document of about 4,000 tokens, new each run: how long the model takes to read it and start answering.",
+			Prompts: []contracts.BenchmarkPrompt{
+				{
+					ID:    "long-document",
+					Label: "Answer from a long document",
+					Text:  longDocument(),
+				},
+			},
+		},
 	}
+}
+
+// LongPromptWorkload is the workload that measures reading a long prompt.
+const LongPromptWorkload = "long_prompt"
+
+// longDocument is the same text every time, and long enough to take real work
+// to read: about 4,000 tokens.
+func longDocument() string {
+	var b strings.Builder
+	places := []string{"Juneau", "Sitka", "Ketchikan", "Haines", "Skagway", "Petersburg", "Wrangell"}
+	goods := []string{"salmon", "cedar", "copper wire", "rope", "diesel", "flour", "tools"}
+	b.WriteString("Below is a shipping log. Read it, then answer the question after it.\n\n")
+	for i := 1; i <= 160; i++ {
+		fmt.Fprintf(&b, "Shipment %d left %s with %d crates of %s, and reached %s after %d days.\n",
+			i, places[i%len(places)], i*7%90+10, goods[i*3%len(goods)], places[(i+3)%len(places)], i%6+1)
+	}
+	b.WriteString("\nIn two sentences, which town do the most shipments leave from, and why might that be?")
+	return b.String()
 }
 
 // WorkloadByID returns a workload or false.
