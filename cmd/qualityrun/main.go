@@ -159,19 +159,23 @@ func run(args []string) error {
 	if row.Hardware, err = hardwareName(url); err != nil {
 		return err
 	}
+	fmt.Printf("\n%s on %s\n", row.Model, row.Hardware)
+	if row.SecondsPerQuestion > 0 {
+		fmt.Printf("Speed: %.1f s a question\n", row.SecondsPerQuestion)
+	}
+	score, complete := qualityscore.Score(row.Scores)
+	if !complete {
+		// Only a complete row is published, so this has nothing to share.
+		fmt.Printf("\nThis run didn't finish all the sets, so it has no Score and nothing to share. Its reports are in %s.\n", *out)
+		return nil
+	}
+	fmt.Printf("Score: %s\n", qualityscore.Describe(score, version))
 	raw, err := json.MarshalIndent(row, "", "  ")
 	if err != nil {
 		return err
 	}
 	if err := os.WriteFile(filepath.Join(*out, "result.json"), append(raw, '\n'), 0o644); err != nil {
 		return err
-	}
-	fmt.Printf("\n%s on %s\n", row.Model, row.Hardware)
-	if score, ok := qualityscore.Score(row.Scores); ok {
-		fmt.Printf("Score: %s\n", qualityscore.Describe(score, version))
-	}
-	if row.SecondsPerQuestion > 0 {
-		fmt.Printf("Speed: %.1f s a question\n", row.SecondsPerQuestion)
 	}
 	fmt.Printf("\nSaved in %s. To share it: %s\n", *out, resultsForm)
 	return nil
