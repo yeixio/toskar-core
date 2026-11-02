@@ -65,7 +65,7 @@ export function ResultsTab() {
         <button
           type="button"
           className="hover:text-ink"
-          onClick={() => setSort({ key, descending: active ? !sort.descending : key !== 'name' && key !== 'hardware' && key !== 'seconds' })}
+          onClick={() => setSort({ key, descending: active ? !sort.descending : key !== 'name' && key !== 'hardware' && key !== 'first_token' })}
         >
           {label}
           {active ? <span aria-hidden> {sort.descending ? '↓' : '↑'}</span> : null}
