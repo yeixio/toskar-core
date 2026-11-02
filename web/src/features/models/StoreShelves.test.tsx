@@ -39,6 +39,7 @@ function show(opts: { search?: string; models?: Model[]; progress?: Record<strin
           isOtherComputer={opts.other ?? false}
           onInstallTested={opts.onInstallTested ?? vi.fn()}
           onInstalled={vi.fn()}
+          onBrowseAll={vi.fn()}
         />
       </QueryClientProvider>
     </MemoryRouter>,
@@ -62,6 +63,14 @@ describe('StoreShelves', () => {
     expect(screen.getAllByText('Good fit').length).toBeGreaterThan(0)
     // A shelf this build doesn't know isn't shown under a raw key.
     expect(screen.queryByText(/someday/)).not.toBeInTheDocument()
+  })
+
+  it('recommends a tested model first, marked as the safe choice, then what is popular', async () => {
+    vi.mocked(api.getModelStore).mockResolvedValue({ live: true, shelves: [{ id: 'picks', models: [tested, fromHF] }] } as unknown as ModelStore)
+    show()
+    expect(await screen.findByRole('heading', { name: 'Recommended' })).toBeInTheDocument()
+    expect(screen.getAllByText('★ Best overall')).toHaveLength(1)
+    expect(screen.getByRole('button', { name: /Browse all models/ })).toBeInTheDocument()
   })
 
   it('installs a Hugging Face model from its file, and a tested one by its catalog ID', async () => {

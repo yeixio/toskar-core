@@ -796,6 +796,10 @@ func screenshotTopicAttempts() string {
 
 // screenshotModelStore is the store as it looks with Hugging Face answering.
 const screenshotModelStore = `{"live":true,"shelves":[
+{"id":"picks","models":[
+{"id":"gemma-4-e4b","display_name":"Gemma 4 E4B","repo_id":"google/gemma-4-e4b-GGUF","filename":"","source_url":"https://huggingface.co/google/gemma-4-e4b-GGUF/resolve/main/gemma-4-e4b.gguf","size_bytes":3200000000,"variant":"Q4_K_M","details_url":"https://huggingface.co/google/gemma-4-e4b-GGUF","catalog_id":"gemma-4-e4b","tags":["general"],"fit":{"model_id":"gemma-4-e4b","label":"excellent"}},
+{"id":"hf-lfm3","display_name":"LFM3 1.7B","repo_id":"LiquidAI/LFM3-1.7B-GGUF","filename":"LFM3-1.7B-Q4_K_M.gguf","source_url":"https://huggingface.co/LiquidAI/LFM3-1.7B-GGUF/resolve/main/LFM3-1.7B-Q4_K_M.gguf","size_bytes":1100000000,"variant":"Q4_K_M","downloads":174177,"likes":195,"license":"other","details_url":"https://huggingface.co/LiquidAI/LFM3-1.7B-GGUF","tags":["general"],"fit":{"model_id":"hf-lfm3","label":"excellent"}}
+]},
 {"id":"popular","models":[
 {"id":"hf-lfm3","display_name":"LFM3 1.7B","repo_id":"LiquidAI/LFM3-1.7B-GGUF","filename":"LFM3-1.7B-Q4_K_M.gguf","source_url":"https://huggingface.co/LiquidAI/LFM3-1.7B-GGUF/resolve/main/LFM3-1.7B-Q4_K_M.gguf","size_bytes":1100000000,"variant":"Q4_K_M","downloads":174177,"likes":195,"license":"other","details_url":"https://huggingface.co/LiquidAI/LFM3-1.7B-GGUF","tags":["general"],"fit":{"model_id":"hf-lfm3","label":"excellent"}},
 {"id":"hf-ornith","display_name":"Ornith 1.5 9B","repo_id":"ornith-ai/Ornith-1.5-9B-GGUF","filename":"Ornith-1.5-9B-Q4_K_M.gguf","source_url":"https://huggingface.co/ornith-ai/Ornith-1.5-9B-GGUF/resolve/main/Ornith-1.5-9B-Q4_K_M.gguf","size_bytes":5800000000,"variant":"Q4_K_M","downloads":5435094,"likes":622,"license":"mit","details_url":"https://huggingface.co/ornith-ai/Ornith-1.5-9B-GGUF","tags":["vision"],"fit":{"model_id":"hf-ornith","label":"excellent"}}

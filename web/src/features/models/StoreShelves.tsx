@@ -11,7 +11,7 @@ import type { Model, ModelDownloadProgressPayload, StoreModel } from '@/types/ap
 import { fitLabelText, fitTone } from './modelPresentation'
 
 /** Shelves in the order they're shown; one this build doesn't know is left out. */
-const SHELF_ORDER = ['popular', 'top_rated', 'new', 'everyday', 'code', 'sees', 'small', 'tested']
+const SHELF_ORDER = ['picks', 'popular', 'top_rated', 'new', 'everyday', 'code', 'sees', 'small', 'tested']
 
 function compact(value: number): string {
   return formatNumber(value, { notation: 'compact', maximumFractionDigits: 1 })
@@ -28,6 +28,7 @@ export function StoreShelves({
   isOtherComputer,
   onInstallTested,
   onInstalled,
+  onBrowseAll,
 }: {
   models: Model[]
   progress: Record<string, ModelDownloadProgressPayload>
@@ -37,6 +38,7 @@ export function StoreShelves({
   isOtherComputer: boolean
   onInstallTested: (id: string) => void
   onInstalled: () => void
+  onBrowseAll: () => void
 }) {
   const { t } = useTranslation('models')
   const [open, setOpen] = useState<StoreModel | null>(null)
@@ -96,16 +98,33 @@ export function StoreShelves({
       {store.data?.live ? <p className="text-xs text-ink-faint">{t('store.source')}</p> : null}
       {shelves.map((shelf) => (
         <section key={shelf.id} className="space-y-3" aria-labelledby={`shelf-${shelf.id}`}>
-          <div>
-            <h2 id={`shelf-${shelf.id}`} className="section-title">
-              {t(`store.shelves.${shelf.id}.title`)}
-            </h2>
-            <p className="mt-1 text-sm text-ink-muted">{t(`store.shelves.${shelf.id}.hint`)}</p>
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <h2 id={`shelf-${shelf.id}`} className="section-title">
+                {t(`store.shelves.${shelf.id}.title`)}
+              </h2>
+              <p className="mt-1 text-sm text-ink-muted">{t(`store.shelves.${shelf.id}.hint`)}</p>
+            </div>
+            {shelf.id === 'picks' ? (
+              <button type="button" className="btn-secondary gap-1.5" onClick={onBrowseAll}>
+                {t('discover.browseAll')}{' '}
+                <span className="inline-block rtl:-scale-x-100" aria-hidden>
+                  →
+                </span>
+              </button>
+            ) : null}
           </div>
           <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {shelf.models.map((m) => (
               <li key={`${shelf.id}-${m.id}`}>
-                <StoreCard model={m} row={rowOf(m)} showFit={!isOtherComputer} onOpen={() => setOpen(m)} onInstall={() => installOne(m)} />
+                <StoreCard
+                  model={m}
+                  row={rowOf(m)}
+                  showFit={!isOtherComputer}
+                  badge={shelf.id === 'picks' && m.catalog_id ? t('store.bestOverall') : undefined}
+                  onOpen={() => setOpen(m)}
+                  onInstall={() => installOne(m)}
+                />
               </li>
             ))}
           </ul>
@@ -188,18 +207,21 @@ function StoreCard({
   model,
   row,
   showFit,
+  badge,
   onOpen,
   onInstall,
 }: {
   model: StoreModel
   row: Row
   showFit: boolean
+  badge?: string
   onOpen: () => void
   onInstall: () => void
 }) {
   const { t } = useTranslation('models')
   return (
     <article className="card flex h-full min-w-0 flex-col gap-2">
+      {badge ? <span className="badge-preferred self-start">★ {badge}</span> : null}
       <h3 className="min-w-0 break-words font-display text-base font-semibold tracking-tight text-ink">
         <button type="button" className="text-start hover:underline" onClick={onOpen}>
           {model.display_name}
