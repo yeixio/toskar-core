@@ -1,6 +1,8 @@
 package app
 
 import (
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -141,6 +143,35 @@ func TestKnownCommandOutputStaysTrusted(t *testing.T) {
 		tr.tool(c.tool, c.args, map[string]any{})
 		if tr.sawUntrusted() != c.outside {
 			t.Errorf("%s %v: outside=%v", c.tool, c.args, tr.sawUntrusted())
+		}
+	}
+}
+
+// A file of the project's counts as its own; any other, or one in a project as
+// wide as the home folder, counts as outside (#1017).
+func TestProjectFilesStayTrusted(t *testing.T) {
+	home, err := filepath.EvalSymlinks(t.TempDir())
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("HOME", home)
+	project := filepath.Join(home, "app")
+	if err := os.MkdirAll(project, 0o700); err != nil {
+		t.Fatal(err)
+	}
+	for _, c := range []struct {
+		project, path string
+		outside       bool
+	}{
+		{project, filepath.Join(project, "a.go"), false},
+		{project, filepath.Join(home, "mail.txt"), true},
+		{home, filepath.Join(home, "mail.txt"), true},
+		{"", filepath.Join(project, "a.go"), true},
+	} {
+		tr := &turnTrace{project: c.project}
+		tr.tool("filesystem.read", map[string]any{"path": "a"}, map[string]any{"path": c.path})
+		if tr.sawUntrusted() != c.outside {
+			t.Errorf("%+v: outside=%v", c, tr.sawUntrusted())
 		}
 	}
 }

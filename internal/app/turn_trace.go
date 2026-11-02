@@ -14,6 +14,7 @@ import (
 	"github.com/yeixio/toskar-core/internal/mimir"
 	"github.com/yeixio/toskar-core/internal/muninn"
 	"github.com/yeixio/toskar-core/internal/tools"
+	"github.com/yeixio/toskar-core/internal/turnopts"
 	"github.com/yeixio/toskar-core/internal/weblink"
 	"github.com/yeixio/toskar-core/pkg/contracts"
 )
@@ -34,6 +35,8 @@ type turnTrace struct {
 	files     []contracts.FileRef
 	notice    string
 	untrusted bool
+	// project is the folder the turn works in.
+	project string
 	// ownFiles is set when the answer read files attached to or made in
 	// this chat.
 	ownFiles bool
@@ -393,7 +396,11 @@ func (t *turnTrace) tool(toolID string, args, result map[string]any) {
 		}
 		t.addSource(contracts.Citation{Kind: "web", Title: title, URL: u, Snippet: snippet(str(result, "content"))})
 	case "filesystem.read":
-		t.untrusted = true
+		// A file of the project's counts as a known command's output does:
+		// "always" trusts the project, and says so (#1017).
+		if !turnopts.TrustsFilesIn(t.project) || !turnopts.InProject(t.project, str(result, "path")) {
+			t.untrusted = true
+		}
 		p := str(args, "path")
 		t.step("file", "read", map[string]any{"name": p})
 		t.addSource(contracts.Citation{Kind: "file", Title: p, Source: p})
@@ -576,6 +583,12 @@ func effectivePolicy(policy, toolID string, untrusted bool) string {
 		return tools.PolicyAskEachTime
 	}
 	return policy
+}
+
+func (t *turnTrace) setProject(dir string) {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	t.project = dir
 }
 
 func (t *turnTrace) sawUntrusted() bool {

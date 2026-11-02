@@ -6,6 +6,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/yeixio/toskar-core/internal/turnopts"
 )
 
 type readTool struct {
@@ -23,7 +25,7 @@ func (t *readTool) Execute(ctx context.Context, args map[string]any) (map[string
 	if path == "" {
 		return nil, fmt.Errorf("path required")
 	}
-	full, err := t.resolve(path)
+	full, err := t.resolve(ctx, path)
 	if err != nil {
 		return nil, err
 	}
@@ -54,7 +56,7 @@ func (t *writeTool) Execute(ctx context.Context, args map[string]any) (map[strin
 	if path == "" {
 		return nil, fmt.Errorf("path required")
 	}
-	full, err := t.resolve(path)
+	full, err := t.resolve(ctx, path)
 	if err != nil {
 		return nil, err
 	}
@@ -83,7 +85,7 @@ func (t *searchTool) Execute(ctx context.Context, args map[string]any) (map[stri
 	if query == "" {
 		return nil, fmt.Errorf("query required")
 	}
-	root := t.workspace
+	root := workspaceFor(ctx, t.workspace)
 	if root == "" {
 		root = "."
 	}
@@ -114,8 +116,21 @@ func (t *searchTool) Execute(ctx context.Context, args map[string]any) (map[stri
 	return map[string]any{"matches": matches}, nil
 }
 
-func (t *readTool) resolve(path string) (string, error)  { return resolveWorkspace(t.workspace, path) }
-func (t *writeTool) resolve(path string) (string, error) { return resolveWorkspace(t.workspace, path) }
+func (t *readTool) resolve(ctx context.Context, path string) (string, error) {
+	return resolveWorkspace(workspaceFor(ctx, t.workspace), path)
+}
+
+func (t *writeTool) resolve(ctx context.Context, path string) (string, error) {
+	return resolveWorkspace(workspaceFor(ctx, t.workspace), path)
+}
+
+// workspaceFor is the folder a turn works in, or the tool's own.
+func workspaceFor(ctx context.Context, workspace string) string {
+	if project := turnopts.ProjectFrom(ctx); project != "" {
+		return project
+	}
+	return workspace
+}
 
 func resolveWorkspace(workspace, path string) (string, error) {
 	if workspace == "" {

@@ -6,6 +6,9 @@ package turnopts
 
 import (
 	"context"
+	"os"
+	"path/filepath"
+	"strings"
 
 	"github.com/yeixio/toskar-core/pkg/contracts"
 	"github.com/yeixio/toskar-core/pkg/pluginapi"
@@ -97,4 +100,62 @@ func WithLive(ctx context.Context) context.Context {
 func LiveFrom(ctx context.Context) bool {
 	live, _ := ctx.Value(liveKey{}).(bool)
 	return live
+}
+
+type projectKey struct{}
+
+// WithProject sets the folder a turn works in: where its commands run, and
+// what its file tools reach (#1017).
+func WithProject(ctx context.Context, dir string) context.Context {
+	return context.WithValue(ctx, projectKey{}, dir)
+}
+
+// ProjectFrom is the folder a turn works in, or "".
+func ProjectFrom(ctx context.Context) string {
+	dir, _ := ctx.Value(projectKey{}).(string)
+	return dir
+}
+
+// Project reads a folder a client on this computer named: its real, absolute
+// path, or "" when it isn't one.
+func Project(dir string) string {
+	if !filepath.IsAbs(dir) {
+		return ""
+	}
+	real, err := filepath.EvalSymlinks(dir)
+	if err != nil {
+		return ""
+	}
+	if info, err := os.Stat(real); err != nil || !info.IsDir() {
+		return ""
+	}
+	return real
+}
+
+// TrustsFilesIn reports whether what's read from a file in dir counts as the
+// project's own. The home folder or the whole disk holds downloads and mail,
+// other people's words, so being in one of those proves nothing.
+func TrustsFilesIn(dir string) bool {
+	if dir == "" || filepath.Dir(dir) == dir {
+		return false
+	}
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return false
+	}
+	if real, err := filepath.EvalSymlinks(home); err == nil {
+		home = real
+	}
+	// The home folder, or a folder that holds it.
+	rel, err := filepath.Rel(dir, home)
+	return err != nil || strings.HasPrefix(rel, "..")
+}
+
+// InProject reports a path inside dir, following links.
+func InProject(dir, path string) bool {
+	if real, err := filepath.EvalSymlinks(path); err == nil {
+		path = real
+	}
+	rel, err := filepath.Rel(dir, path)
+	return err == nil && rel != ".." && !strings.HasPrefix(rel, ".."+string(filepath.Separator))
 }

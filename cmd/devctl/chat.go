@@ -100,11 +100,19 @@ type daemonChat struct {
 
 func newDaemonChat() (chatAPI, error) {
 	d := newDaemon()
-	sdk, err := toskar.New(toskar.WithURL(d.base), toskar.WithKey(config.Env("API_KEY")), toskar.WithTimeout(0))
+	options := []toskar.Option{toskar.WithURL(d.base), toskar.WithKey(config.Env("API_KEY")), toskar.WithTimeout(0)}
+	chat := daemonChat{rest: d}
+	// On this computer, Toskar works in the folder you're in. On another,
+	// this folder means nothing there.
+	if dir, err := os.Getwd(); err == nil && chat.computer() == "" {
+		options = append(options, toskar.WithHeader(contracts.ProjectHeader, url.PathEscape(dir)))
+	}
+	sdk, err := toskar.New(options...)
 	if err != nil {
 		return nil, err
 	}
-	return daemonChat{rest: d, sdk: sdk}, nil
+	chat.sdk = sdk
+	return chat, nil
 }
 
 func (d daemonChat) computer() string {

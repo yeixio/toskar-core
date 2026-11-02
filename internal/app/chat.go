@@ -1528,6 +1528,7 @@ func (e *chatExecEnv) ExecuteTool(ctx context.Context, toolID string, args map[s
 	}
 	runlog.From(ctx).ToolCall(tools.Canonical(toolID), time.Since(toolStarted), err != nil)
 	if err == nil && e.trace != nil {
+		e.trace.setProject(turnopts.ProjectFrom(ctx))
 		e.trace.tool(toolID, args, result)
 		// A picture or clip smaller or shorter than asked is said under
 		// the answer, so nothing is cut back silently (#529).

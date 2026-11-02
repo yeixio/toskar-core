@@ -47,7 +47,7 @@ func (l *LiveText) Shown() string { return l.shown }
 var (
 	// A fence that may still turn out empty, with a call taken out of it.
 	// The parser removes an empty one from the answer.
-	liveFence = regexp.MustCompile("(?i)(?:^|\n)[ \t]*`{1,3}(?:j|js|jso|json)?\\s*`{0,3}$")
+	liveFence = regexp.MustCompile("(?i)(?:^|\n)[ \t]*`{1,3}(?:j|js|jso|json|t[a-z_]*)?\\s*`{0,3}$")
 	// A tool's name written out, which may be a call in prose (looseCallRe).
 	liveToolName = regexp.MustCompile(`[a-z]+\.[a-z_]+\s*$`)
 )

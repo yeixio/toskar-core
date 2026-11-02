@@ -53,6 +53,7 @@ func ParseModelOutput(content string) ModelOutput {
 	text := removeSpans(content, spans)
 	text = controlTokens.ReplaceAllString(text, "")
 	text = emptyFence.ReplaceAllString(text, "")
+	text = openCallFence.ReplaceAllString(text, "")
 	if call != nil {
 		text = suppressToolNarration(text)
 	}
@@ -78,7 +79,9 @@ type span struct {
 
 var (
 	controlTokens = regexp.MustCompile(`(?i)<\|(?:im_start|im_end|eot_id|endoftext|end|start_header_id|end_header_id)\|>(?:.*?<\|(?:im_end|eot_id)\|>)?|\[/?INST\]`)
-	emptyFence    = regexp.MustCompile("(?s)```(?:json|JSON)?\\s*```")
+	// openCallFence is a call's fence with nothing after it: the model stopped.
+	openCallFence = regexp.MustCompile("(?s)```(?:tool_call|tool_code)\\s*$")
+	emptyFence    = regexp.MustCompile("(?s)```(?:json|JSON|tool_call|tool_code)?\\s*```")
 	narration     = regexp.MustCompile(`(?i)(?:thank you for clarifying[.!]?\s*)?(?:i will now|i am going to|i'm going to|let me)\b[^.\n]{0,180}\b(?:tool call|tools?|function call|web tool)\b[^.\n]*[.!?]?`)
 )
 

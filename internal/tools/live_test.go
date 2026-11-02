@@ -88,3 +88,36 @@ func TestLiveTextNarrationShowsUntilTheCall(t *testing.T) {
 		t.Fatalf("shown %q", live.Shown())
 	}
 }
+
+// A model can fence its call as tool_call: that never shows (#1017).
+func TestLiveHoldsAToolCallFence(t *testing.T) {
+	var l LiveText
+	shown := ""
+	for _, piece := range []string{"I fix", " it.\n\n", "``", "`to", "ol_ca", "ll\n", `{"tool_call":{"id":"terminal","args":{}}}`, "\n```"} {
+		shown += l.Feed(piece)
+	}
+	if shown != "I fix it." {
+		t.Fatalf("shown %q", shown)
+	}
+	// A fence with something in it shows.
+	var code LiveText
+	shown = ""
+	for _, piece := range []string{"Like this:\n", "```text\n", "hello\n", "```\n", "Done."} {
+		shown += code.Feed(piece)
+	}
+	if !strings.Contains(shown, "```text\nhello") {
+		t.Fatalf("shown %q", shown)
+	}
+}
+
+func TestEmptyToolCallFenceIsNoText(t *testing.T) {
+	if p := ParseModelOutput("```tool_call\n\n```"); strings.TrimSpace(p.Text) != "" || p.Call != nil {
+		t.Fatalf("%+v", p)
+	}
+	if p := ParseModelOutput("I'll run it.\n\n```tool_call\n"); strings.TrimSpace(p.Text) != "I'll run it." {
+		t.Fatalf("%q", p.Text)
+	}
+	if p := ParseModelOutput("I updated it.\n\n```tool_call\n\n```"); strings.TrimSpace(p.Text) != "I updated it." {
+		t.Fatalf("%q", p.Text)
+	}
+}

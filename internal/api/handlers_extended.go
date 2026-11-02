@@ -8,6 +8,7 @@ import (
 	"github.com/yeixio/toskar-core/internal/turnopts"
 	"net"
 	"net/http"
+	"net/url"
 	"strconv"
 	"unicode/utf8"
 
@@ -451,6 +452,13 @@ func (s *Server) handleChat(w http.ResponseWriter, r *http.Request) {
 		ctx = turnopts.WithLive(ctx)
 	}
 	ctx = runlog.WithOrigin(ctx, runlog.Origin{Client: body.Client, Remote: remoteRequest(r) || !auth.FromLocalNetwork(r)})
+	// The folder a client on this computer is working in (#1017). From
+	// anywhere else, a path would name a folder here it may never have seen.
+	if name, err := url.PathUnescape(r.Header.Get(contracts.ProjectHeader)); err == nil && name != "" && remoteIsLoopback(r) && !remoteRequest(r) {
+		if project := turnopts.Project(name); project != "" {
+			ctx = turnopts.WithProject(ctx, project)
+		}
+	}
 	r = r.WithContext(locale.WithTimeZone(ctx, body.TimeZone))
 	if err := s.deps.Chat(w, r, body.ConversationID, body.ProfileID, body.ModelID, body.Message, body.Stream, body.Execution); err != nil {
 		status := http.StatusInternalServerError
