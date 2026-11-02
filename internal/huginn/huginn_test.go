@@ -400,3 +400,19 @@ func TestAboutThemselves(t *testing.T) {
 		}
 	}
 }
+
+func TestIsTask(t *testing.T) {
+	for _, msg := range []string{"Fix the failing test", "Set up this project", "Find and clear what's using disk space", "please run the tests", "Install the dependencies", "Clean up my downloads"} {
+		if !IsTask(Classify(msg), msg, "terminal") {
+			t.Errorf("%q isn't a task", msg)
+		}
+		if IsTask(Classify(msg), msg, "web") {
+			t.Errorf("%q is a task from the web", msg)
+		}
+	}
+	for _, msg := range []string{"What's a good first car?", "hi there", "Write a poem about rain", "Make a picture of a dog"} {
+		if IsTask(Classify(msg), msg, "terminal") {
+			t.Errorf("%q is a task", msg)
+		}
+	}
+}
