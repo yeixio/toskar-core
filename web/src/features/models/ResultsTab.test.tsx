@@ -79,4 +79,30 @@ describe('ResultsTab', () => {
     show()
     expect(await screen.findByText(/Couldn't read the results/)).toBeInTheDocument()
   })
+
+  it('gives a complete row a Score and shows how fast it ran', async () => {
+    vi.mocked(api.getQualityResults).mockResolvedValue({
+      live: true,
+      results: [
+        {
+          model: 'd',
+          name: 'Delta',
+          date: '2026-11-02',
+          hardware: 'Card',
+          method_version: 1,
+          scores: { quality: { passed: 60, of: 64 }, topics: { passed: 20, of: 22 }, files: { passed: 20, of: 21 }, reasoning: { passed: 32, of: 39 } },
+          performance: { prompt_tokens: 4000, prompt_tokens_per_second: 2112.4, tokens_per_second: 41.3, first_token_ms: 2270, effective_tokens_per_second: 21.5, gpu_layers: 15, gpu_layers_total: 65 },
+        },
+        { model: 'e', name: 'Echo', date: '2026-11-01', hardware: 'Card', method_version: 1, scores: { quality: { passed: 60, of: 64 } } },
+      ],
+    })
+    show()
+    const delta = within((await screen.findByRole('rowheader', { name: 'Delta' })).closest('tr')!)
+    expect(delta.getByText('90 (v1)')).toBeInTheDocument()
+    expect(delta.getByText('41.3')).toBeInTheDocument()
+    expect(delta.getByText('2,112')).toBeInTheDocument()
+    expect(delta.getByText('2.3 s')).toBeInTheDocument()
+    const echo = within(screen.getByRole('rowheader', { name: 'Echo' }).closest('tr')!)
+    expect(echo.queryByText(/\(v1\)/)).not.toBeInTheDocument()
+  })
 })

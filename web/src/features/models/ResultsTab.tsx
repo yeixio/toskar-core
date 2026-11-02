@@ -3,7 +3,7 @@ import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { formatDate, formatDecimal, formatPercent } from '@/i18n/format'
 import { api } from '@/lib/api'
-import { compareAlphabetical } from './resultsSort'
+import { compareAlphabetical, overallScore } from './resultsSort'
 import type { QualityResult } from '@/types/api'
 
 /** A set's name, when this build has one; a new set still shows, by its key. */
@@ -13,12 +13,15 @@ const METHOD_URL = 'https://github.com/yeixio/toskar-core/blob/main/docs/quality
 const SUGGEST_URL = 'https://github.com/yeixio/toskar-core/issues/new?template=quality_suggestion.yml'
 const CONTRIBUTE_URL = `${METHOD_URL}#add-your-computers-results`
 
-type SortKey = 'name' | 'hardware' | 'date' | 'method_version' | 'seconds' | `suite:${string}`
+type SortKey = 'name' | 'hardware' | 'date' | 'method_version' | 'overall' | 'writes' | 'reads' | 'first_token' | `suite:${string}`
 
 function valueOf(row: QualityResult, key: SortKey): string | number | null {
   if (key === 'name' || key === 'hardware' || key === 'date') return row[key]
   if (key === 'method_version') return row.method_version
-  if (key === 'seconds') return row.seconds_per_question ?? null
+  if (key === 'overall') return overallScore(row.scores)
+  if (key === 'writes') return row.performance?.tokens_per_second ?? null
+  if (key === 'reads') return row.performance?.prompt_tokens_per_second ?? null
+  if (key === 'first_token') return row.performance?.first_token_ms ?? null
   const score = row.scores[key.slice('suite:'.length)]
   return score ? score.passed / score.of : null
 }
@@ -62,7 +65,7 @@ export function ResultsTab() {
         <button
           type="button"
           className="hover:text-ink"
-          onClick={() => setSort({ key, descending: active ? !sort.descending : key !== 'name' && key !== 'hardware' && key !== 'seconds' })}
+          onClick={() => setSort({ key, descending: active ? !sort.descending : key !== 'name' && key !== 'hardware' && key !== 'first_token' })}
         >
           {label}
           {active ? <span aria-hidden> {sort.descending ? '↓' : '↑'}</span> : null}
@@ -76,6 +79,8 @@ export function ResultsTab() {
 
   const versions = new Set(rows.map((r) => r.method_version))
   const machines = new Set(rows.map((r) => r.hardware))
+  const none = <span className="text-ink-muted">–</span>
+  const speed = (tokens?: number) => (tokens ? formatDecimal(tokens, tokens >= 100 ? 0 : 1) : none)
 
   return (
     <div className="space-y-4">
@@ -113,8 +118,11 @@ export function ResultsTab() {
           <thead className="text-ink-muted">
             <tr className="border-b border-line">
               {heading('name', t('results.model'))}
+              {heading('overall', t('results.overall'))}
               {suites.map((s) => heading(`suite:${s}`, suiteName(s)))}
-              {heading('seconds', t('results.seconds'))}
+              {heading('writes', t('results.writes'))}
+              {heading('reads', t('results.reads'))}
+              {heading('first_token', t('results.firstToken'))}
               {heading('hardware', t('results.computer'))}
               {heading('date', t('results.date'))}
               {heading('method_version', t('results.version'))}
@@ -132,6 +140,9 @@ export function ResultsTab() {
                     <span className="ms-2 text-xs font-normal text-ink-muted">{r.submitted_by || t('results.community')}</span>
                   ) : null}
                 </th>
+                <td className="whitespace-nowrap px-3 py-2 font-medium tabular-nums">
+                  {overallScore(r.scores) === null ? none : t('results.overallValue', { score: overallScore(r.scores), version: r.method_version })}
+                </td>
                 {suites.map((s) => {
                   const score = r.scores[s]
                   return (
@@ -140,8 +151,10 @@ export function ResultsTab() {
                     </td>
                   )
                 })}
+                <td className="whitespace-nowrap px-3 py-2 tabular-nums">{speed(r.performance?.tokens_per_second)}</td>
+                <td className="whitespace-nowrap px-3 py-2 tabular-nums">{speed(r.performance?.prompt_tokens_per_second)}</td>
                 <td className="whitespace-nowrap px-3 py-2 tabular-nums">
-                  {r.seconds_per_question ? formatDecimal(r.seconds_per_question, 1) : <span className="text-ink-faint">–</span>}
+                  {r.performance ? t('results.seconds', { seconds: formatDecimal(r.performance.first_token_ms / 1000, 1) }) : none}
                 </td>
                 <td className="whitespace-nowrap px-3 py-2">{r.hardware}</td>
                 <td className="whitespace-nowrap px-3 py-2">{formatDate(`${r.date}T12:00:00`)}</td>

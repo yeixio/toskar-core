@@ -476,7 +476,7 @@
     "loading": "Ergebnisse werden geladen…",
     "offline": "Die Ergebnisse konnten nicht gelesen werden. Prüfe deine Verbindung und versuche es erneut.",
     "title": "Qualitätsergebnisse",
-    "intro": "Was unsere Testläufe bisher gemessen haben, zum Durchsehen. Wir erstellen keine Rangliste und ziehen keine Schlüsse, und mit neuen Läufen kommt mehr hinzu.",
+    "intro": "Was unsere Testläufe bisher gemessen haben, zum Durchsehen. Jedes Ergebnis hat eine Wertung, wir küren keinen Sieger, und mit weiteren Läufen kommen neue hinzu.",
     "method": "So wird gemessen",
     "suggest": "Änderung vorschlagen",
     "contribute": "Ergebnisse deines Computers beitragen",
@@ -484,7 +484,7 @@
     "allComputers": "Alle Computer",
     "notSameTest": "Werte von verschiedenen Computern oder Methodenversionen sind nicht derselbe Test. Vergleiche sie also mit Vorsicht.",
     "model": "Modell",
-    "seconds": "Sekunden pro Frage",
+    "seconds": "{{seconds}} s",
     "date": "Datum",
     "version": "Methode",
     "source": "Quelle",
@@ -498,6 +498,11 @@
       "reasoning": "Logik",
       "triage": "Triage",
       "fix_test": "Test beheben"
-    }
+    },
+    "overall": "Wertung",
+    "overallValue": "{{score}} (v{{version}})",
+    "writes": "Schreibt (Tok./s)",
+    "reads": "Liest (Tok./s)",
+    "firstToken": "Erstes Token"
   }
 }

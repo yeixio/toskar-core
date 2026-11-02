@@ -468,7 +468,7 @@
     "loading": "正在加载结果…",
     "offline": "无法读取结果。请检查网络连接后重试。",
     "title": "质量结果",
-    "intro": "我们的测试目前测得的结果,供你查看。我们不做排名,也不下结论,并会随着测试不断增加。",
+    "intro": "这是我们的测试到目前为止测得的内容，可排序查看。每个结果都有得分，但我们不评选优胜者，并会随着测试增加持续添加。",
     "method": "测量方法",
     "suggest": "建议修改",
     "contribute": "添加你的电脑的结果",
@@ -476,7 +476,7 @@
     "allComputers": "所有电脑",
     "notSameTest": "不同电脑或不同方法版本的分数并非同一测试,比较时请注意。",
     "model": "模型",
-    "seconds": "每题秒数",
+    "seconds": "{{seconds}} 秒",
     "date": "日期",
     "version": "方法",
     "source": "来源",
@@ -490,6 +490,11 @@
       "reasoning": "推理",
       "triage": "分类",
       "fix_test": "修复测试"
-    }
+    },
+    "overall": "得分",
+    "overallValue": "{{score}} (v{{version}})",
+    "writes": "写入 (词元/秒)",
+    "reads": "读取 (词元/秒)",
+    "firstToken": "首个词元"
   }
 }

@@ -52,6 +52,24 @@ type QualityResult struct {
 	Source             string                  `json:"source,omitempty"`
 	Scores             map[string]QualityScore `json:"scores"`
 	SecondsPerQuestion float64                 `json:"seconds_per_question,omitempty"`
+	// Performance is how the model ran on that computer, for rows measured
+	// that way (contract 1.81). It's never part of a score.
+	Performance *QualityPerformance `json:"performance,omitempty"`
+}
+
+// QualityPerformance is how a model ran, from a long prompt new each run.
+type QualityPerformance struct {
+	PromptTokens             int     `json:"prompt_tokens"`
+	PromptTokensPerSecond    float64 `json:"prompt_tokens_per_second"`
+	TokensPerSecond          float64 `json:"tokens_per_second"`
+	FirstTokenMs             float64 `json:"first_token_ms"`
+	EffectiveTokensPerSecond float64 `json:"effective_tokens_per_second"`
+	GPULayers                int     `json:"gpu_layers"`
+	GPULayersTotal           int     `json:"gpu_layers_total"`
+	GPUMemoryBytes           uint64  `json:"gpu_memory_bytes,omitempty"`
+	MemoryBytes              uint64  `json:"memory_bytes,omitempty"`
+	ContextWindow            int     `json:"context_window,omitempty"`
+	Quantization             string  `json:"quantization,omitempty"`
 }
 
 // QualityResults are Toskar's public quality results (#593). They draw no
