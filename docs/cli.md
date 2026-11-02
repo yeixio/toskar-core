@@ -109,6 +109,8 @@ While chatting, `/new` starts a new chat, `/model id` and `/profile id` change w
 
 **Tools that ask first.** When the model wants a tool that asks before it runs, such as running code in the general assistant, `chat` shows the tool, why, what it would run, and, when Toskar is on another computer, which one it runs on, and waits: `y` runs it once, `n` doesn't, and `a` lets that tool run for the rest of this chat without asking. Your answer goes to Toskar the same way an app's does.
 
+**The model matters most for this work.** Small models often can't finish a task, and some claim they did. When nothing installed does well at it, `chat` says which model would and how to install it, or says this computer can't run it.
+
 **Your project.** On the computer Toskar runs on, `chat` works in the folder you started it in: commands run there, and its file tools reach only that folder. It follows the project's own notes in `AGENTS.md`, `TOSKAR.md`, or `CLAUDE.md`, the first one it finds. Those set conventions, not permissions. When Toskar is on another computer, it uses its own folder there.
 
 **Work goes on until it's done.** Asked to do something rather than asked a question, such as "Fix the failing test" or "Set up this project", `chat` works step by step: it runs something, reads the result, fixes what failed, and tries again. It stops when it's finished, when the same step keeps giving the same result, or after 100 steps, and then says what it did and what's left. A profile's own limit on tool calls still applies.

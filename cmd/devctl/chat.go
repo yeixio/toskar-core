@@ -316,6 +316,7 @@ func (s *chatSession) newChat() error {
 	}
 	s.conv = c.ID
 	s.note("New chat. /help for commands.")
+	s.suggestTaskModel()
 	return nil
 }
 
@@ -459,6 +460,43 @@ func (s *chatSession) showNotice() {
 		fmt.Fprintln(s.io.errOut, s.dim(last.Meta.Notice))
 	}
 }
+
+// suggestTaskModel says when nothing installed does well at work such as fixing
+// code, and which model would: the difference is large (#1017). A person who
+// named a model has chosen.
+func (s *chatSession) suggestTaskModel() {
+	if s.model != "" || !s.io.outTerminal {
+		return
+	}
+	list, err := s.api.models()
+	if err != nil {
+		return
+	}
+	var best *contracts.Model
+	for i, m := range list {
+		if !slices.Contains(m.Tags, taskModelTag) {
+			continue
+		}
+		if m.Installed {
+			return
+		}
+		if best == nil {
+			best = &list[i]
+		}
+	}
+	if best == nil {
+		return
+	}
+	switch fit := best.Fit; {
+	case fit == nil || fit.Label == "" || fit.Label == contracts.FitTooLarge || fit.Label == contracts.FitUnsupported:
+		s.note(fmt.Sprintf("Work such as fixing code goes much better with %s, which needs more than this computer has. Smaller models often can't finish it. A connected computer may run it.", best.DisplayName))
+	default:
+		s.note(fmt.Sprintf("Work such as fixing code goes much better with %s (%s, %s here). Install it with: toskarctl models install %s", best.DisplayName, sizeText(best.SizeBytes), fit.Label, best.ID))
+	}
+}
+
+// taskModelTag marks a catalog model measured to finish tasks (#1034).
+const taskModelTag = "tasks"
 
 // checkModelInstalled refuses a model Toskar has but hasn't installed: asked
 // for one, you'd otherwise get an answer from another and not know it. Models

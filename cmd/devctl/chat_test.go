@@ -405,3 +405,39 @@ func TestChatShowsTheNotice(t *testing.T) {
 		t.Fatalf("%v\nout: %s\nerr: %s", err, out, errOut)
 	}
 }
+
+// Nothing installed does well at tasks: chat says which would (#1017).
+func TestChatSuggestsATaskModel(t *testing.T) {
+	task := contracts.Model{ID: "big", DisplayName: "Big", SizeBytes: 20_000_000_000, Tags: []string{"tasks"}, Fit: &contracts.ModelFit{Label: contracts.FitGood}}
+	run := func(args []string, offered ...contracts.Model) string {
+		t.Helper()
+		f := newFakeChat()
+		f.offered = offered
+		var out, errOut bytes.Buffer
+		streams := chatIO{in: strings.NewReader("/exit\n"), inTerminal: true, out: &out, outTerminal: true, errOut: &errOut}
+		if err := chatCommand(args, streams, func() (chatAPI, error) { return eventsFake{f}, nil }); err != nil {
+			t.Fatal(err)
+		}
+		return out.String()
+	}
+	if got := run(nil, contracts.Model{ID: "small", Installed: true}, task); !strings.Contains(got, "toskarctl models install big") || !strings.Contains(got, "20.0 GB, good here") {
+		t.Errorf("no suggestion: %q", got)
+	}
+	installed := task
+	installed.Installed = true
+	if got := run(nil, installed); strings.Contains(got, "goes much better") {
+		t.Errorf("already installed: %q", got)
+	}
+	tooBig := task
+	tooBig.Fit = &contracts.ModelFit{Label: contracts.FitTooLarge}
+	if got := run(nil, tooBig); !strings.Contains(got, "more than this computer has") || strings.Contains(got, "models install") {
+		t.Errorf("too large: %q", got)
+	}
+	tooBig.Fit = &contracts.ModelFit{Label: contracts.FitUnsupported}
+	if got := run(nil, tooBig); !strings.Contains(got, "more than this computer has") {
+		t.Errorf("unsupported: %q", got)
+	}
+	if got := run([]string{"--model", "small"}, contracts.Model{ID: "small", Installed: true}, task); strings.Contains(got, "goes much better") {
+		t.Errorf("a person who chose a model: %q", got)
+	}
+}
