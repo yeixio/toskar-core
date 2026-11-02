@@ -40,9 +40,10 @@ jobs:
           - ${{ vars.MAC_RUNS_ON || '"macos-latest"' }}
     runs-on: ${{ fromJSON(matrix.runner) }}
     timeout-minutes: 40
-    env:
-      TOSKAR_BENCHMARK_DIR: ${{ runner.temp }}/toskar-benchmark
     steps:
+      # The runner context doesn't exist yet where a job's env is read.
+      - name: Choose the folder
+        run: echo "TOSKAR_BENCHMARK_DIR=$RUNNER_TEMP/toskar-benchmark" >> "$GITHUB_ENV"
       - uses: actions/checkout@v7
       - uses: actions/setup-go@v7
         with:
