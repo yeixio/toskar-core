@@ -120,6 +120,28 @@ func TestReasoningContentIsKeptApart(t *testing.T) {
 	}
 }
 
+// A reply that's only thinking, as when a benchmark's few tokens run out before
+// the answer, still has a time to its first token.
+func TestFirstTokenCountsThinking(t *testing.T) {
+	frames := strings.Join([]string{
+		`data: {"choices":[{"finish_reason":null,"index":0,"delta":{"reasoning_content":"To"}}]}`,
+		`data: {"choices":[{"finish_reason":"length","index":0,"delta":{}}]}`,
+		`data: [DONE]`,
+	}, "\n\n") + "\n\n"
+	resp := &http.Response{Body: io.NopCloser(strings.NewReader(frames))}
+	ch := make(chan pluginapi.ChatChunk, 16)
+	go NewClient().readStream(resp, ch, time.Now().Add(-time.Second), nil, false)
+	var metrics *pluginapi.GenerationMetrics
+	for c := range ch {
+		if c.Metrics != nil {
+			metrics = c.Metrics
+		}
+	}
+	if metrics == nil || metrics.TTFTMs < 1000 {
+		t.Fatalf("metrics %+v", metrics)
+	}
+}
+
 // A reply llama.cpp can't read, as when Muse Glimmer calls places.search in
 // a turn with no tools, is asked for once more with a note in the person's
 // message, and that answer comes back in its place (#755): streamed, where

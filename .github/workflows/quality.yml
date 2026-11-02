@@ -328,6 +328,24 @@ jobs:
             -e TOSKAR_QUALITY_REASONING_JSON=/src/.quality/reasoning.json \
             golang:1.26-bookworm \
             go test ./tests/quality -run 'TestReasoning' -count=1 -v -timeout 240m
+      # How the model ran on this computer: its speed, memory, and how much of
+      # it was on the GPU (#1037). Measured, not gated, and skipped for
+      # "recommended", which stands for several models.
+      - name: Performance
+        if: ${{ !cancelled() }}
+        run: |
+          mkdir -p .quality
+          docker run --rm --network "$NAME" \
+            --cap-drop ALL --security-opt no-new-privileges \
+            --memory 4g --memory-swap 4g --cpus 2 \
+            -v "$PWD:/src" -w /src \
+            -v toskar-quality-go:/go \
+            -e TOSKAR_QUALITY_URL="http://$NAME:7331" \
+            -e TOSKAR_QUALITY_KEY="$QUALITY_KEY" \
+            -e TOSKAR_QUALITY_MODEL="${{ matrix.model }}" \
+            -e TOSKAR_QUALITY_PERFORMANCE_REPORT=/src/.quality/performance.json \
+            golang:1.26-bookworm \
+            go test ./tests/quality -run '^TestPerformance$' -count=1 -v -timeout 40m
       # The triage set (#455): issues of this repository labeled the way
       # the Triage workflow asks. Measured, not gated: precision, recall,
       # and how often the type was right.
@@ -367,6 +385,7 @@ jobs:
             .quality/media.md
             .quality/reasoning.md
             .quality/reasoning.json
+            .quality/performance.json
             .quality/triage.md
             .quality/triage.json
           if-no-files-found: ignore
