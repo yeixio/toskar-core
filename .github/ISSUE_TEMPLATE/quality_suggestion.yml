@@ -1,0 +1,34 @@
+name: Quality tests
+description: Suggest a change to how Toskar measures quality, or question a result.
+title: "[Quality]: "
+labels: ["tests"]
+body:
+  - type: markdown
+    attributes:
+      value: "How it works: [docs/quality.md](https://github.com/yeixio/toskar-core/blob/main/docs/quality.md). A case that should exist, a check that's unfair, or a result that looks wrong are all useful."
+  - type: dropdown
+    id: kind
+    attributes:
+      label: What's this about?
+      options:
+        - A case we should add
+        - A case or check that's unfair or wrong
+        - How results are scored or shown
+        - A result that looks wrong
+        - Something else
+    validations:
+      required: true
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: Your suggestion
+      description: The set or case, if you know it, and what you'd change.
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Why
+      description: What it would measure better, or what you saw. Your hardware and model help, if a result looks wrong.
+    validations:
+      required: false

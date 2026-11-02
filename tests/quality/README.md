@@ -1,5 +1,7 @@
 # Quality test set
 
+[How Toskar measures quality](../../docs/quality.md) explains this without the code.
+
 A fixed set of representative requests, each with the behavior it must have
 (spec §64). Routing, retrieval, planning, verification, approvals, and history
 all change answers; these cases check that changes keep the behavior people
