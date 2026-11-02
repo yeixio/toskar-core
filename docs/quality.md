@@ -27,7 +27,8 @@ Web pages are fixed copies, so an answer that has the right facts got them from 
 
 ## How it's scored
 
-- **A score is cases passed, out of cases run,** per set. There's no weighting, and no overall number.
+- **Each set's score is cases passed, out of cases run.** There's no weighting.
+- **A row's Score is the plain average of the pass rates of Quality, Topics, Files, and Reasoning,** from 0 to 100, shown with the method's version, such as 95 (v1). A row missing any of the four has no Score. Speed stays beside it and not in it, since a fast wrong answer shouldn't beat a slow right one. It's a score for these sets and not a verdict on the best model: they're easy enough that good models bunch near the top, and a small model can pass a large one.
 - **A model's answers vary from run to run.** Run more than once, a set reports its pass rate with a 95% interval (Wilson) and which cases were flaky.
 - **A set only fails when the numbers say so.** Below the bar, but with the interval reaching it, passes with a note saying more runs would tell. These bars decide whether a release or a change passes, not how a model looks in the results.
 - **Measured without a bar:** reasoning and triage. Their numbers are only reported.
@@ -59,7 +60,7 @@ Quality runs every week on our own computers, a few models at a time, and each r
 
 Our results come from very few computers. If you have a different graphics card, a laptop, or a model we haven't measured, your run shows people something we can't.
 
-You'll need a checkout of this repository, Go, and Python. Then:
+You'll need a checkout of this repository and Go. Then:
 
 ```sh
 scripts/quality-score.sh qwen2.5-7b-q4

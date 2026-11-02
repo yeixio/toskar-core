@@ -1,0 +1,136 @@
+// Package qualityscore reads the quality set's reports into the results rows
+// people compare (docs/quality.md): the weekly run's, and those from a person's
+// own computer (#1037).
+package qualityscore
+
+import (
+	"fmt"
+	"math"
+	"regexp"
+	"strconv"
+	"strings"
+)
+
+// Sets are the four a Score averages, and that a run on a person's computer
+// measures, by the file each one's report is in.
+var Sets = []Set{
+	{Name: "quality", Report: "report.md"},
+	{Name: "topics", Report: "topics.md"},
+	{Name: "files", Report: "files.md"},
+	{Name: "reasoning", Report: "reasoning.md"},
+}
+
+// Set is a set of cases and the report it writes.
+type Set struct {
+	Name   string
+	Report string
+}
+
+// Passed is a set's score.
+type Passed struct {
+	Passed int `json:"passed"`
+	Of     int `json:"of"`
+}
+
+// Row is one model on one computer on one date, as quality/results.json holds it.
+type Row struct {
+	Model              string            `json:"model"`
+	Name               string            `json:"name"`
+	Date               string            `json:"date"`
+	Hardware           string            `json:"hardware"`
+	MethodVersion      int               `json:"method_version"`
+	Source             string            `json:"source,omitempty"`
+	Scores             map[string]Passed `json:"scores"`
+	SecondsPerQuestion float64           `json:"seconds_per_question,omitempty"`
+}
+
+// A report's own summary sentence, and not the first numbers in it: "25 of 25
+// layers" read as a perfect score once.
+var (
+	casesPassed   = regexp.MustCompile(`(\d+) of (\d+) (?:cases|runs) passed`)
+	scoreSentence = map[string]*regexp.Regexp{
+		"reasoning": regexp.MustCompile(`(\d+) of (\d+) right`),
+		"triage":    regexp.MustCompile(`type right on (\d+) of (\d+)`),
+	}
+	secondsSentence = regexp.MustCompile(`right \(\d+%\), ([\d.]+) s`)
+	testedLine      = regexp.MustCompile(`(?m)^Tested Toskar .*? on (.+?), with ([^;\n]+?)(?:; (.*))?\.?$`)
+	memoryNote      = regexp.MustCompile(` \(\d+ GB\)$`)
+	ranOnBackend    = regexp.MustCompile(`GPU \((\w+)`)
+)
+
+// ScoreOf reads a set's score from its report, and false when it doesn't say.
+func ScoreOf(set, report string) (Passed, bool) {
+	sentence, ok := scoreSentence[set]
+	if !ok {
+		sentence = casesPassed
+	}
+	found := sentence.FindStringSubmatch(report)
+	if found == nil {
+		return Passed{}, false
+	}
+	passed, _ := strconv.Atoi(found[1])
+	of, _ := strconv.Atoi(found[2])
+	return Passed{Passed: passed, Of: of}, true
+}
+
+// SecondsPerQuestion reads the average from a reasoning report, or 0.
+func SecondsPerQuestion(report string) float64 {
+	found := secondsSentence.FindStringSubmatch(report)
+	if found == nil {
+		return 0
+	}
+	seconds, _ := strconv.ParseFloat(found[1], 64)
+	return seconds
+}
+
+// Tested is what a report says it ran on.
+type Tested struct {
+	Model string
+	// Hardware is the chip or card, with how the model ran on it when the report says.
+	Hardware string
+}
+
+// A graphics card's driver name lists its whole family.
+var cardNames = map[string]string{
+	"AMD Radeon RX 7900 XT/7900 XTX/7900 GRE/7900M": "AMD RX 7900 XTX",
+}
+
+// TestedOn reads a report's first line, and false when it has none. A run can
+// end up with another model than it asked for, so a row is only as good as this.
+func TestedOn(report string) (Tested, bool) {
+	found := testedLine.FindStringSubmatch(report)
+	if found == nil {
+		return Tested{}, false
+	}
+	chip := memoryNote.ReplaceAllString(found[1], "")
+	if name, ok := cardNames[chip]; ok {
+		chip = name
+	}
+	if backend := ranOnBackend.FindStringSubmatch(found[3]); backend != nil {
+		chip += ", " + backend[1]
+	} else if strings.Contains(found[3], "on the CPU") {
+		chip += ", CPU"
+	}
+	return Tested{Model: found[2], Hardware: chip}, true
+}
+
+// Score is a row's overall score: the plain average of the pass rates of the
+// four Sets, from 0 to 100, and false for a row missing any. It's worked out
+// when shown and not stored, so a new formula rewrites no data. Speed stays
+// beside it: a fast wrong answer shouldn't beat a slow right one.
+func Score(scores map[string]Passed) (int, bool) {
+	total := 0.0
+	for _, set := range Sets {
+		s, ok := scores[set.Name]
+		if !ok || s.Of == 0 {
+			return 0, false
+		}
+		total += float64(s.Passed) / float64(s.Of)
+	}
+	return int(math.Round(100 * total / float64(len(Sets)))), true
+}
+
+// Describe is a row's score as a person reads it, such as "95 (v1)".
+func Describe(score, version int) string {
+	return fmt.Sprintf("%d (v%d)", score, version)
+}
