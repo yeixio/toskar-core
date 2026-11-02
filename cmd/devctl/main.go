@@ -11,9 +11,11 @@ import (
 )
 
 func main() {
-	if len(os.Args) < 2 {
-		usage()
-		os.Exit(2)
+	if words, ok := askedForHelp(os.Args[1:]); ok {
+		text, err := helpTopic(words)
+		exit(err)
+		fmt.Print(text)
+		return
 	}
 	switch os.Args[1] {
 	case "version", "about":
@@ -71,13 +73,8 @@ func main() {
 			os.Exit(2)
 		}
 	default:
-		usage()
-		os.Exit(2)
+		exit(unknownCommand("", os.Args[1], helpEntries()))
 	}
-}
-
-func usage() {
-	fmt.Fprintf(os.Stderr, "usage: toskarctl <version|about|paths|ask|chat|connect|models|automations|mcp|join|join-token|network|leave|people|completion>\n")
 }
 
 // exit ends with err's message and exit status: 2 for usage, 1 otherwise.

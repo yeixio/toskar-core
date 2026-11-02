@@ -23,6 +23,7 @@ complete -c toskarctl -n __fish_use_subcommand -a join-token -d 'Make, list, or 
 complete -c toskarctl -n __fish_use_subcommand -a network -d "Show this computer's network and paired computers"
 complete -c toskarctl -n __fish_use_subcommand -a leave -d 'Leave the network and forget paired computers'
 complete -c toskarctl -n __fish_use_subcommand -a completion -d 'Print a shell completion script'
+complete -c toskarctl -n __fish_use_subcommand -a help -d 'Show help for any command'
 
 complete -c toskarctl -n '__fish_seen_subcommand_from completion' -a 'bash zsh fish'
 complete -c toskarctl -n '__fish_seen_subcommand_from mcp' -l url -r -d 'Yggdrasil address'
@@ -50,7 +51,7 @@ complete -c toskarctl -n '__fish_seen_subcommand_from models; and __fish_seen_su
 complete -c toskarctl -n '__fish_seen_subcommand_from models; and __fish_seen_subcommand_from list' -l json -d 'Print JSON'
 complete -c toskarctl -n '__fish_seen_subcommand_from models; and __fish_seen_subcommand_from install' -l node -r -d 'The computer to install it on'
 
-set -l ygg_automation_cmds list get create update delete run pause resume hook
+set -l ygg_automation_cmds list get parse create update delete run pause resume hook
 complete -c toskarctl -n "__fish_seen_subcommand_from automations; and not __fish_seen_subcommand_from $ygg_automation_cmds" -a "$ygg_automation_cmds"
 
 set -l ygg_edit '__fish_seen_subcommand_from automations; and __fish_seen_subcommand_from create update'

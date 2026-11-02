@@ -71,7 +71,7 @@ func TestBashCompletionCandidates(t *testing.T) {
 		line string
 		want string
 	}{
-		{"toskarctl ''", "version about paths ask chat connect models automations mcp join join-token network leave people completion"},
+		{"toskarctl ''", "version about paths ask chat connect models automations mcp join join-token network leave people completion help"},
 		{"toskarctl chat --", "--resume --model --profile --file"},
 		{"toskarctl connect c", "claude-code codex continue cline copilot"},
 		{"toskarctl connect codex --w", "--write"},
@@ -83,7 +83,7 @@ func TestBashCompletionCandidates(t *testing.T) {
 		{"toskarctl completion ''", "bash zsh fish"},
 		{"toskarctl models ''", "list install"},
 		{"toskarctl models list --i", "--installed"},
-		{"toskarctl automations p", "pause"},
+		{"toskarctl automations p", "parse pause"},
 		{"toskarctl automations create --schedule ''", "once daily weekly monthly interval cron manual"},
 		{"toskarctl automations update abc --noti", "--notify"},
 		{"toskarctl paths ''", ""},

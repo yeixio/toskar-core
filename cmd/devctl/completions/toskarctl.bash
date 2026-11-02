@@ -6,7 +6,7 @@ _toskarctl() {
   prev="${COMP_WORDS[COMP_CWORD-1]}"
 
   if [[ ${COMP_CWORD} -eq 1 ]]; then
-    COMPREPLY=($(compgen -W "version about paths ask chat connect models automations mcp join join-token network leave people completion" -- "$cur"))
+    COMPREPLY=($(compgen -W "version about paths ask chat connect models automations mcp join join-token network leave people completion help" -- "$cur"))
     return
   fi
 
@@ -77,7 +77,7 @@ _toskarctl() {
       ;;
     automations)
       if [[ ${COMP_CWORD} -eq 2 ]]; then
-        COMPREPLY=($(compgen -W "list get create update delete run pause resume hook" -- "$cur"))
+        COMPREPLY=($(compgen -W "list get parse create update delete run pause resume hook" -- "$cur"))
         return
       fi
       case "${COMP_WORDS[2]}" in
