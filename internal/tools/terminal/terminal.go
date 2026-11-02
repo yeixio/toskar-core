@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os/exec"
 	"strings"
+
+	"github.com/yeixio/toskar-core/internal/turnopts"
 )
 
 // Tool runs shell commands (ask by default via policy).
@@ -22,6 +24,7 @@ func (t *Tool) Execute(ctx context.Context, args map[string]any) (map[string]any
 		return nil, fmt.Errorf("command required")
 	}
 	cmd := exec.CommandContext(ctx, "sh", "-c", cmdStr)
+	cmd.Dir = turnopts.ProjectFrom(ctx)
 	out, err := cmd.CombinedOutput()
 	result := map[string]any{
 		"stdout": string(out),

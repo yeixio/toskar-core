@@ -19,7 +19,11 @@ import (
 // tests/contract checks that no field in the contract is removed or renamed.
 // api/openapi.yaml's info.version is this version too, so the SDKs
 // generated from it say which contract they were built for (#666).
-const ContractVersion = "1.77"
+const ContractVersion = "1.78"
+
+// ProjectHeader names the folder a client on this computer is working in, on a
+// chat request, path-escaped. Ignored from anywhere else (1.78, #1017).
+const ProjectHeader = "X-Toskar-Project"
 
 // Headers that carry the contract version. Each has a name from before the
 // Toskar rename that is still sent and accepted, so clients and computers

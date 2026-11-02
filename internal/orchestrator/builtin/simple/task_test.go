@@ -3,10 +3,13 @@ package simple
 import (
 	"context"
 	"fmt"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
 	"github.com/yeixio/toskar-core/internal/runlog"
+	"github.com/yeixio/toskar-core/internal/turnopts"
 	"github.com/yeixio/toskar-core/pkg/contracts"
 	"github.com/yeixio/toskar-core/pkg/pluginapi"
 )
@@ -114,6 +117,48 @@ func TestTaskReportsWhenTheModelWont(t *testing.T) {
 	}
 }
 
+// A reply with nothing in it, such as an empty tool call, doesn't end a task.
+func TestTaskGoesOnAfterAnEmptyReply(t *testing.T) {
+	env, answer, _ := runTask(t, "terminal", "Fix the failing test", taskProfile(),
+		call("go test"), "```tool_call\n\n```", call("go test ./x"), "The tests pass now.")
+	if len(env.ran) != 2 || !strings.Contains(answer, "pass now") {
+		t.Fatalf("ran %v, answered %q", env.ran, answer)
+	}
+	// Twice, it's asked to sum up; with nothing still, Toskar says what ran.
+	env, answer, _ = runTask(t, "terminal", "Fix the failing test", taskProfile(),
+		call("go test"), "```tool_call\n\n```", "```tool_call\n\n```", "```tool_call\n\n```", "```tool_call\n\n```")
+	if len(env.ran) != 1 || !strings.Contains(answer, "without saying where things stand") || !strings.Contains(answer, "- go test") {
+		t.Fatalf("ran %v, answered %q", env.ran, answer)
+	}
+}
+
+// Saying what's next and stopping isn't finishing.
+func TestTaskGoesOnAfterSayingWhatsNext(t *testing.T) {
+	env, answer, _ := runTask(t, "terminal", "Fix the failing test", taskProfile(),
+		call("go test"), "The code is wrong.\n\nI need to fix the sum.go file.", call("make fix"), "Fixed. The tests pass.")
+	if len(env.ran) != 2 || !strings.Contains(answer, "tests pass") {
+		t.Fatalf("ran %v, answered %q", env.ran, answer)
+	}
+	// It doesn't go on forever.
+	env, answer, _ = runTask(t, "terminal", "Fix the failing test", taskProfile(),
+		call("go test"), "I will fix it.", "I will fix it.", "I will fix it.", "I will fix it.", "I will fix it.")
+	if len(env.ran) != 1 || !strings.Contains(answer, "I will fix it") {
+		t.Fatalf("ran %v, answered %q", env.ran, answer)
+	}
+	for text, want := range map[string]bool{
+		"I'll run the tests.":                true,
+		"First I fixed it. Now let's test.":  true,
+		"I fixed it. The tests pass.":        false,
+		"I will fix it. Then it passed.":     false,
+		"Done: what's left is nothing.":      false,
+		"I updated the file, and it passes.": false,
+	} {
+		if got := soundsUnfinished(text); got != want {
+			t.Errorf("%q: %v", text, got)
+		}
+	}
+}
+
 // At the limit it stops the same way, not with a stock sentence.
 func TestTaskStopsAtTheLimit(t *testing.T) {
 	var replies []string
@@ -150,5 +195,29 @@ func TestShortenResultKeepsTheEnd(t *testing.T) {
 	got := shortenResult(long)
 	if len(got) > maxResult+40 || !strings.HasPrefix(got, "start") || !strings.HasSuffix(got, "the error") {
 		t.Fatalf("%d", len(got))
+	}
+}
+
+// A task knows its folder and follows the project's notes, which can't change
+// what needs approval (#1017).
+func TestTaskGuidanceHasTheProject(t *testing.T) {
+	if got := taskGuidance(context.Background()); strings.Contains(got, "project folder") {
+		t.Fatalf("no project: %q", got)
+	}
+	dir := t.TempDir()
+	if err := os.WriteFile(filepath.Join(dir, "CLAUDE.md"), []byte("second choice"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(dir, "AGENTS.md"), []byte("Use make test."), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	got := taskGuidance(turnopts.WithProject(context.Background(), dir))
+	for _, want := range []string{dir, "Use make test.", "from AGENTS.md", "don't change what you're allowed"} {
+		if !strings.Contains(got, want) {
+			t.Errorf("no %q in %q", want, got)
+		}
+	}
+	if strings.Contains(got, "second choice") {
+		t.Errorf("read both: %q", got)
 	}
 }

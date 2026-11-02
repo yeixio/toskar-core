@@ -446,6 +446,8 @@ If the model fails before it shows or changes anything, the turn runs once more:
 
 ### Effort, plans, checks, and Stop
 
+**The folder a client is working in (#1017, contract 1.78).** On `POST /api/v1/chat`, the `X-Toskar-Project` header, path-escaped, names the folder a client on this computer is working in: a turn's commands run there, and its file tools reach only that folder. It's ignored from any other computer, and when it isn't a folder.
+
 **Answers as they're written (#1006, contract 1.77).** `POST /api/v1/chat` with `"stream": true` sends the answer whole when it's ready, as a `token` event, after its checks have run. Add `"live": true` to get the text as the model writes it:
 
 - `token` events carry the next piece of text. Tool-call wrappers are never sent.

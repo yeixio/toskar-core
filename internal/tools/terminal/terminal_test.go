@@ -2,8 +2,11 @@ package terminal
 
 import (
 	"context"
+	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/yeixio/toskar-core/internal/turnopts"
 )
 
 func TestExecuteRequiresCommand(t *testing.T) {
@@ -31,5 +34,19 @@ func TestExecuteReportsOutputAndExit(t *testing.T) {
 	}
 	if !strings.Contains(failed["error"].(string), "exit status 3") {
 		t.Fatalf("error=%v", failed["error"])
+	}
+}
+
+func TestExecuteRunsInTheProject(t *testing.T) {
+	dir, err := filepath.EvalSymlinks(t.TempDir())
+	if err != nil {
+		t.Fatal(err)
+	}
+	got, err := New().Execute(turnopts.WithProject(context.Background(), dir), map[string]any{"command": "pwd"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.TrimSpace(got["stdout"].(string)) != dir {
+		t.Fatalf("ran in %v, want %s", got["stdout"], dir)
 	}
 }

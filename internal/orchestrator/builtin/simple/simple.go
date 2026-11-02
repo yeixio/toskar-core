@@ -215,6 +215,9 @@ func (o *Orchestrator) Run(
 		reference = transcribeFirst(ctx, env, profile, reference)
 		// evidence is what the answer may draw figures from, for the check.
 		evidence := reference
+		if isTask {
+			instructions += "\n" + taskGuidance(ctx)
+		}
 		toolPrompt := tools.PromptFor(profile)
 		if jsonOnly || profile.ModelCallsNoTools {
 			toolPrompt = ""
@@ -561,6 +564,25 @@ func (o *Orchestrator) Run(
 					pluginapi.ChatMessage{Role: "assistant", Content: content},
 					pluginapi.ChatMessage{Role: "user", Content: "That tool can't be used now. Answer in plain text from what you already have."},
 				)
+				continue
+			}
+			// A task can't end on nothing: asked once to go on, in case it
+			// meant to call a tool, then to say where things stand (#1017).
+			if isTask && strings.TrimSpace(parsed.Text) == "" {
+				note := taskEmpty
+				if tracker.empty++; tracker.empty > 1 {
+					toolsOn = false
+					tracker.stopped = "the model stopped without saying where things stand"
+					messages[0] = pluginapi.ChatMessage{Role: "system", Content: plainSys}
+					note = fmt.Sprintf(taskStopped, tracker.stopped)
+				}
+				messages = append(messages, pluginapi.ChatMessage{Role: "assistant", Content: "(nothing)"}, pluginapi.ChatMessage{Role: "user", Content: note})
+				continue
+			}
+			// "I need to fix it" isn't finished: go on and do it.
+			if isTask && tracker.stopped == "" && parsed.Call == nil && soundsUnfinished(parsed.Text) && tracker.nudged < maxNudges {
+				tracker.nudged++
+				messages = append(messages, pluginapi.ChatMessage{Role: "assistant", Content: content}, pluginapi.ChatMessage{Role: "user", Content: taskGoOn})
 				continue
 			}
 			answer := parsed.Text

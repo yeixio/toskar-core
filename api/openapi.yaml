@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Toskar Control Plane API
-  version: "1.77"
+  version: "1.78"
   description: >-
     Local AI control plane API for Toskar, its OpenAI-compatible routes, and its MCP server.
     On the default loopback bind no key is needed. When the daemon listens on any other address,
@@ -4008,6 +4008,12 @@ paths:
       description: "Without stream, returns {content, metrics}. With stream, a server-sent event stream of token events, then done; an error event ends it early."
       operationId: chat
       tags: [Chat]
+      parameters:
+        - name: X-Toskar-Project
+          in: header
+          required: false
+          schema: {type: string}
+          description: "The folder a client on this computer is working in, path-escaped: where a turn's commands run and what its file tools reach. Ignored from another computer."
       requestBody:
         required: true
         content:
