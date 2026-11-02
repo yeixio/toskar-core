@@ -120,8 +120,12 @@ func commandToken(token string) bool {
 	if token == "" {
 		return false
 	}
+	// A Windows path: C:\tools\run.exe, .\run.ps1.
+	if len(token) > 2 && token[1] == ':' && token[2] == '\\' {
+		token = token[2:]
+	}
 	for _, r := range token {
-		if unicode.IsLetter(r) || unicode.IsDigit(r) || strings.ContainsRune("._/~+-", r) {
+		if unicode.IsLetter(r) || unicode.IsDigit(r) || strings.ContainsRune(`._/~+-\`, r) {
 			continue
 		}
 		return false

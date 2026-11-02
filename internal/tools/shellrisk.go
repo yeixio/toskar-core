@@ -32,7 +32,7 @@ func (r CommandRisk) AlwaysAsks() bool { return r != CommandKnown }
 var destructiveWords = regexp.MustCompile(`(?i)` + strings.Join([]string{
 	`\b(rm|rmdir|unlink|shred|wipefs|mkfs(\.\w+)?|dd|fdisk|sfdisk|parted|gparted|diskutil|diskpart|format|truncate)\b`,
 	`\b(sudo|doas|su|pkexec|runas)\b`,
-	`\b(del|erase|rd|remove-item|clear-content|format-volume)\b`,
+	`\b(del|erase|rd|ri|remove-item|clear-content|clear-disk|format-volume|set-content|out-file|stop-process|stop-computer|restart-computer)\b`,
 	`\b(systemctl|launchctl|service|sysctl|defaults write|reg (add|delete)|nvram|csrutil|setx|shutdown|reboot|halt|poweroff|kill|pkill|killall|crontab|iptables|ufw|mount|umount|useradd|userdel|passwd)\b`,
 	`\b(chmod|chown|chattr|chflags)\b`,
 	`-delete\b`,

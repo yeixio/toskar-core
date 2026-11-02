@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os/exec"
+	"runtime"
 	"strings"
 
 	"github.com/yeixio/toskar-core/internal/turnopts"
@@ -23,7 +24,7 @@ func (t *Tool) Execute(ctx context.Context, args map[string]any) (map[string]any
 	if strings.TrimSpace(cmdStr) == "" {
 		return nil, fmt.Errorf("command required")
 	}
-	cmd := exec.CommandContext(ctx, "sh", "-c", cmdStr)
+	cmd := shellCommand(ctx, cmdStr)
 	cmd.Dir = turnopts.ProjectFrom(ctx)
 	out, err := cmd.CombinedOutput()
 	result := map[string]any{
@@ -37,4 +38,21 @@ func (t *Tool) Execute(ctx context.Context, args map[string]any) (map[string]any
 		}
 	}
 	return result, nil
+}
+
+// powerShellSetup keeps progress bars out of the output and has it in UTF-8,
+// which Windows PowerShell doesn't by default.
+const powerShellSetup = "$ProgressPreference='SilentlyContinue';[Console]::OutputEncoding=[Text.Encoding]::UTF8;"
+
+// shellCommand runs a command in sh, or on Windows, where sh is often missing,
+// in PowerShell. tools.TerminalDescription tells the model which it's writing for.
+func shellCommand(ctx context.Context, command string) *exec.Cmd {
+	if runtime.GOOS != "windows" {
+		return exec.CommandContext(ctx, "sh", "-c", command)
+	}
+	shell := "powershell"
+	if _, err := exec.LookPath("pwsh"); err == nil {
+		shell = "pwsh"
+	}
+	return exec.CommandContext(ctx, shell, "-NoProfile", "-NonInteractive", "-Command", powerShellSetup+command)
 }

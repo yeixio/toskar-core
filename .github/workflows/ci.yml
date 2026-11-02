@@ -159,6 +159,20 @@ jobs:
           export GOOS="${TARGET%/*}" GOARCH="${TARGET#*/}"
           go vet ./...
 
+  # The terminal tool runs in PowerShell on Windows, and only a real Windows
+  # can say a command gets there whole. On GitHub's runners, with no variable to
+  # move it, since the home runners have no spare Windows.
+  windows-terminal:
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version: "1.26.x"
+          check-latest: true
+      - run: go test ./internal/tools/terminal -count=1 -v
+
   installer:
     # install.sh on a real Ubuntu with systemd: the .deb from a local
     # release, the service, and install-and-join with a join token (#40).

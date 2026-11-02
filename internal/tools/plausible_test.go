@@ -2,6 +2,7 @@ package tools
 
 import (
 	"context"
+	"strings"
 	"testing"
 	"time"
 
@@ -110,5 +111,26 @@ func TestPlausibleArguments(t *testing.T) {
 		if err := implausibleCall(tc.id, tc.args); err == nil {
 			t.Errorf("%s %v was treated as a real request", tc.id, tc.args)
 		}
+	}
+}
+
+// A model on Windows writes PowerShell.
+func TestPowerShellCommandsArePlausible(t *testing.T) {
+	for _, command := range []string{"Get-ChildItem -Recurse", "Get-Content sum.go | Select-String total", "go test ./...", `.\run.ps1`, `C:\tools\run.exe --help`} {
+		if !plausibleCommand(command) {
+			t.Errorf("%q wasn't plausible", command)
+		}
+	}
+	if plausibleCommand("Note: run the tests") {
+		t.Error("prose with a colon was taken for a command")
+	}
+}
+
+func TestTerminalSaysWhichShell(t *testing.T) {
+	if got := TerminalDescription("windows"); !strings.Contains(got, "PowerShell") {
+		t.Errorf("windows: %q", got)
+	}
+	if got := TerminalDescription("linux"); strings.Contains(got, "PowerShell") {
+		t.Errorf("linux: %q", got)
 	}
 }
