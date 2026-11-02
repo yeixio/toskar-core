@@ -1,1 +1,4 @@
+# The Sponsor button on GitHub: donations by card go through Yeix's Stripe
+# checkout, and GitHub Sponsors stays as a second way to give.
+custom: ["https://yeix.io/donate/toskar"]
 github: [gopherstein]
