@@ -60,7 +60,7 @@ func (a Attachment) Bytes() ([]byte, error) {
 		return dialogPNG(a.Content)
 	case "file":
 		// A file kept in the repository, by its path from tests/quality.
-		return os.ReadFile(filepath.FromSlash(a.Content))
+		return readFixture(filepath.FromSlash(a.Content))
 	case "":
 		return []byte(a.Content), nil
 	}
@@ -272,4 +272,16 @@ func TestFilesQuality(t *testing.T) {
 	if v.fail {
 		t.Errorf("%s %s", sum.sentence(), v.note)
 	}
+}
+
+// readFixture reads a file a case names. Outside a checkout, as when the tests
+// ship with a release, a file from elsewhere in the repository is in fixtures.
+func readFixture(path string) ([]byte, error) {
+	raw, err := os.ReadFile(path)
+	if err != nil && errors.Is(err, os.ErrNotExist) {
+		if copied, copyErr := os.ReadFile(filepath.Join("fixtures", filepath.Base(path))); copyErr == nil {
+			return copied, nil
+		}
+	}
+	return raw, err
 }

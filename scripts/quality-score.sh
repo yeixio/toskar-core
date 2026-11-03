@@ -27,6 +27,8 @@ go build -o "$work/toskar" ./cmd/daemon
 go build -o "$work/toskar-quality" ./cmd/qualityrun
 go test -c -o "$work/harness/quality.test" ./tests/quality
 cp tests/quality/*.json "$work/harness/"
+cp -R tests/quality/fixtures "$work/harness/fixtures"
+cp internal/mimir/testdata/scanned.pdf "$work/harness/fixtures/"
 cd "$start"
 "$work/toskar-quality" run --model "$model" --toskar "$work/toskar" --harness "$work/harness" \
   --out "$start/quality-score-$model" --data "$data" --port "$port"
