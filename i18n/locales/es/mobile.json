@@ -1211,7 +1211,7 @@
     "title": "Prueba de velocidad",
     "blurb": "Mira a qué velocidad este dispositivo ejecuta un modelo de IA local y compáralo con otros.",
     "what": "Descarga {{model}} ({{size}}) si no está y le hace leer un documento largo varias veces. Unos 5 a 15 minutos. Conéctalo si puedes y mantén Toskar abierto. Tus chats no se tocan.",
-    "removed": "Sin Toskar Unlock, el modelo se elimina después.",
+    "removed": "El modelo se elimina después, así que se descarga cada vez.",
     "start": "Hacer la prueba de velocidad",
     "stop": "Detener",
     "downloading": "Descargando el modelo… {{percent}} %",
@@ -1233,6 +1233,8 @@
     "share": "Compartir en los resultados públicos",
     "shareWhat": "Esto envía el modelo y la memoria del dispositivo, y estos resultados, mediante un formulario que tú revisas y envías. Nada de tus chats.",
     "results": "Ver todos los resultados",
-    "again": "Repetir"
+    "again": "Repetir",
+    "credit": "Un usuario de GitHub para el crédito (opcional)",
+    "creditHint": "Sin él aparece como Community. Pídenos quitarlo, o quitar el resultado, cuando quieras."
   }
 }
