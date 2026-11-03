@@ -8907,6 +8907,7 @@ components:
             tokens_per_second: {type: number, description: "How fast it wrote the answer"}
             first_token_ms: {type: number, description: "From sending to the first token"}
             effective_tokens_per_second: {type: number, description: "The answer's tokens over the time from sending to the last one"}
+            backend: {type: string, description: "What it ran on, such as vulkan, metal, cuda, or cpu"}
             gpu_layers: {type: integer}
             gpu_layers_total: {type: integer}
             gpu_memory_bytes: {type: integer, format: int64}

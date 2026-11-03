@@ -27,6 +27,7 @@ type performance struct {
 	FirstTokenMs          float64 `json:"first_token_ms"`
 	// EffectiveTokensPerSecond counts from sending to the last token, wait included.
 	EffectiveTokensPerSecond float64 `json:"effective_tokens_per_second"`
+	Backend                  string  `json:"backend,omitempty"`
 	GPULayers                int     `json:"gpu_layers"`
 	GPULayersTotal           int     `json:"gpu_layers_total"`
 	GPUMemoryBytes           uint64  `json:"gpu_memory_bytes,omitempty"`
@@ -103,7 +104,7 @@ func TestPerformance(t *testing.T) {
 		got.MemoryBytes = r.MemoryBytes
 		if r.Acceleration != nil {
 			got.GPULayers, got.GPULayersTotal = r.Acceleration.LayersOffloaded, r.Acceleration.LayersTotal
-			got.GPUMemoryBytes = r.Acceleration.GPUMemoryBytes
+			got.GPUMemoryBytes, got.Backend = r.Acceleration.GPUMemoryBytes, r.Acceleration.Backend
 		}
 	}
 	var models []contracts.Model

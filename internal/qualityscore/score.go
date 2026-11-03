@@ -10,7 +10,6 @@ import (
 	"os"
 	"regexp"
 	"strconv"
-	"strings"
 )
 
 // Sets are the four a Score averages, and that a run on a person's computer
@@ -61,6 +60,7 @@ type Performance struct {
 	TokensPerSecond          float64 `json:"tokens_per_second"`
 	FirstTokenMs             float64 `json:"first_token_ms"`
 	EffectiveTokensPerSecond float64 `json:"effective_tokens_per_second"`
+	Backend                  string  `json:"backend,omitempty"`
 	GPULayers                int     `json:"gpu_layers"`
 	GPULayersTotal           int     `json:"gpu_layers_total"`
 	GPUMemoryBytes           uint64  `json:"gpu_memory_bytes,omitempty"`
@@ -104,9 +104,8 @@ var (
 		"triage":    regexp.MustCompile(`type right on (\d+) of (\d+)`),
 	}
 	secondsSentence = regexp.MustCompile(`right \(\d+%\), ([\d.]+) s`)
-	testedLine      = regexp.MustCompile(`(?m)^Tested Toskar .*? on (.+?), with ([^;\n]+?)(?:; (.*))?\.?$`)
-	memoryNote      = regexp.MustCompile(` \(\d+ GB\)$`)
-	ranOnBackend    = regexp.MustCompile(`GPU \((\w+)`)
+	testedLine      = regexp.MustCompile(`(?m)^Tested Toskar .*? on (.+?), with ([^;\n]+?)(?:;.*|\.)?$`)
+	memoryNote      = regexp.MustCompile(` \((\d+) GB\)$`)
 )
 
 // ScoreOf reads a set's score from its report, and false when it doesn't say.
@@ -137,13 +136,28 @@ func SecondsPerQuestion(report string) float64 {
 // Tested is what a report says it ran on.
 type Tested struct {
 	Model string
-	// Hardware is the chip or card, with how the model ran on it when the report says.
+	// Hardware is the chip or card, with its memory when the report says.
 	Hardware string
 }
 
 // A graphics card's driver name lists its whole family.
 var cardNames = map[string]string{
 	"AMD Radeon RX 7900 XT/7900 XTX/7900 GRE/7900M": "AMD RX 7900 XTX",
+}
+
+// CardName is the name results use for a graphics card or chip, so a computer's
+// rows read the same whichever run made them.
+func CardName(name string) string {
+	if short, ok := cardNames[name]; ok {
+		return short
+	}
+	return name
+}
+
+// Hardware is how a row names a computer: its graphics card or chip, and the
+// memory a model can use there.
+func Hardware(chip string, memoryGB uint64) string {
+	return fmt.Sprintf("%s, %d GB", CardName(chip), memoryGB)
 }
 
 // TestedOn reads a report's first line, and false when it has none. A run can
@@ -153,16 +167,11 @@ func TestedOn(report string) (Tested, bool) {
 	if found == nil {
 		return Tested{}, false
 	}
-	chip := memoryNote.ReplaceAllString(found[1], "")
-	if name, ok := cardNames[chip]; ok {
-		chip = name
+	if memory := memoryNote.FindStringSubmatch(found[1]); memory != nil {
+		gb, _ := strconv.ParseUint(memory[1], 10, 64)
+		return Tested{Model: found[2], Hardware: Hardware(memoryNote.ReplaceAllString(found[1], ""), gb)}, true
 	}
-	if backend := ranOnBackend.FindStringSubmatch(found[3]); backend != nil {
-		chip += ", " + backend[1]
-	} else if strings.Contains(found[3], "on the CPU") {
-		chip += ", CPU"
-	}
-	return Tested{Model: found[2], Hardware: chip}, true
+	return Tested{Model: found[2], Hardware: CardName(found[1])}, true
 }
 
 // Score is a row's overall score: the plain average of the pass rates of the

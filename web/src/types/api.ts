@@ -309,6 +309,7 @@ export interface QualityPerformance {
   tokens_per_second: number
   first_token_ms: number
   effective_tokens_per_second: number
+  backend?: string
   gpu_layers: number
   gpu_layers_total: number
   gpu_memory_bytes?: number
