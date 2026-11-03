@@ -25,11 +25,13 @@ const (
 )
 
 // asker asks a person questions, on the terminal itself: with curl | sh, standard
-// input is the script. yes means nobody's there, and each answer is the default.
+// input is the script. yes means nobody's meant to be there, and each answer is
+// the default. Otherwise an answer nobody could give is not a yes: closed says so.
 type asker struct {
-	yes  bool
-	file *os.File
-	in   *bufio.Reader
+	yes    bool
+	closed bool
+	file   *os.File
+	in     *bufio.Reader
 }
 
 func newAsker(yes bool) *asker {
@@ -37,9 +39,15 @@ func newAsker(yes bool) *asker {
 	if yes {
 		return a
 	}
-	// /dev/tty on Linux and macOS; CONIN$ on Windows.
+	// A terminal on standard input, as on Windows, where irm | iex leaves it alone.
+	if info, err := os.Stdin.Stat(); err == nil && info.Mode()&os.ModeCharDevice != 0 {
+		a.in = bufio.NewReader(os.Stdin)
+		return a
+	}
+	// /dev/tty on Linux and macOS; CONIN$ on Windows, which has to be opened for
+	// writing too, or reading it ends straight away.
 	for _, name := range []string{"/dev/tty", "CONIN$"} {
-		if file, err := os.Open(name); err == nil {
+		if file, err := os.OpenFile(name, os.O_RDWR, 0); err == nil {
 			a.file, a.in = file, bufio.NewReader(file)
 			return a
 		}
@@ -54,7 +62,7 @@ func (a *asker) close() {
 	}
 }
 
-// ask returns a trimmed answer, or "" when nobody answers.
+// ask returns a trimmed answer, or "" when nobody answers, and then closed is true.
 func (a *asker) ask(question string) string {
 	if a.yes {
 		return ""
@@ -62,10 +70,15 @@ func (a *asker) ask(question string) string {
 	fmt.Print(question + " ")
 	line, err := a.in.ReadString('\n')
 	if err != nil && line == "" {
+		a.closed = true
+		fmt.Println()
 		return ""
 	}
 	return strings.TrimSpace(line)
 }
+
+// errNoAnswer stops a run that would otherwise take silence for a yes, and download gigabytes.
+var errNoAnswer = errors.New("couldn't read your answer here, so nothing was downloaded. Run this in a terminal, or choose ahead of time with --model <id>, or --yes for the most popular that fits")
 
 func readJSON(address string, into any) error {
 	client := http.Client{Timeout: 30 * time.Second}
@@ -198,6 +211,9 @@ func chooseModel(toskarURL string, ask *asker) (runPlan, error) {
 	}
 	fmt.Println("A small model took about 25 minutes on a recent laptop. Larger models and slower computers can take hours.")
 	answer := ask.ask("Enter a number, or n to stop. [1]")
+	if ask.closed {
+		return runPlan{}, errNoAnswer
+	}
 	if answer == "" {
 		answer = "1"
 	}
@@ -222,6 +238,9 @@ func chooseEvery(fits []qualityscore.ListedModel, ask *asker) (runPlan, error) {
 	fmt.Printf("  1  Speed only: a few minutes each, plus the downloads. Its results have speed and no quality scores.\n")
 	fmt.Printf("  2  Everything: from about 15 minutes to hours each, so this could take a day or more.\n")
 	answer := ask.ask("Enter a number, or n to stop. [1]")
+	if ask.closed {
+		return runPlan{}, errNoAnswer
+	}
 	if answer != "" && answer != "1" && answer != "2" {
 		return runPlan{}, errors.New("stopped; nothing was downloaded")
 	}
@@ -255,6 +274,9 @@ func chooseLink(toskarURL, link string, ask *asker, room uint64) (chosenModel, e
 		fmt.Printf("It may not fit: %s, with %s for a model here. If it runs out of memory, that's a result too.\n", gigabytes(preview.SizeBytes), gigabytes(room))
 	}
 	answer := strings.ToLower(ask.ask(fmt.Sprintf("Measure %s, a %s download? [Y/n]", preview.ModelID, gigabytes(preview.SizeBytes))))
+	if ask.closed {
+		return chosenModel{}, errNoAnswer
+	}
 	if answer == "n" || answer == "no" {
 		return chosenModel{}, errors.New("stopped; nothing was downloaded")
 	}
