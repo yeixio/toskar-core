@@ -39,9 +39,11 @@ type Row struct {
 	Name               string            `json:"name"`
 	Date               string            `json:"date"`
 	Hardware           string            `json:"hardware"`
+	OS                 string            `json:"os,omitempty"`
 	MethodVersion      int               `json:"method_version"`
 	Submitted          bool              `json:"submitted,omitempty"`
 	SubmittedBy        string            `json:"submitted_by,omitempty"`
+	OffList            bool              `json:"off_list,omitempty"`
 	Source             string            `json:"source,omitempty"`
 	Runs               string            `json:"runs,omitempty"`
 	Why                string            `json:"why,omitempty"`
@@ -71,6 +73,7 @@ type Performance struct {
 	Runs                     string  `json:"-"`
 	Why                      string  `json:"-"`
 	Hardware                 string  `json:"-"`
+	OS                       string  `json:"-"`
 	PromptTokens             int     `json:"prompt_tokens"`
 	PromptTokensPerSecond    float64 `json:"prompt_tokens_per_second"`
 	TokensPerSecond          float64 `json:"tokens_per_second"`
@@ -96,6 +99,7 @@ func ReadPerformance(path, model string) (*Performance, error) {
 		Runs     string `json:"runs"`
 		Why      string `json:"why"`
 		Hardware string `json:"hardware"`
+		OS       string `json:"os"`
 	}
 	var p Performance
 	if err := json.Unmarshal(raw, &named); err != nil {
@@ -107,7 +111,7 @@ func ReadPerformance(path, model string) (*Performance, error) {
 	if named.Model != model {
 		return nil, fmt.Errorf("%s measured %s and not %s", path, named.Model, model)
 	}
-	p.Runs, p.Why = named.Runs, named.Why
+	p.Runs, p.Why, p.OS = named.Runs, named.Why, osName(named.OS)
 	if named.Hardware != "" {
 		p.Hardware = hardwareFrom(named.Hardware)
 	}
@@ -192,6 +196,19 @@ func Hardware(chip string, memoryGB uint64) string {
 	return fmt.Sprintf("%s, %d GB", CardName(chip), memoryGB)
 }
 
+// osName is how results name an operating system.
+func osName(goos string) string {
+	switch goos {
+	case "darwin":
+		return "macOS"
+	case "linux":
+		return "Linux"
+	case "windows":
+		return "Windows"
+	}
+	return goos
+}
+
 // hardwareFrom names a computer from a report's words, such as "Some Card (24 GB)".
 func hardwareFrom(name string) string {
 	if memory := memoryNote.FindStringSubmatch(name); memory != nil {
@@ -225,6 +242,20 @@ func Score(scores map[string]Passed) (int, bool) {
 		total += float64(s.Passed) / float64(s.Of)
 	}
 	return int(math.Round(100 * total / float64(len(Sets)))), true
+}
+
+// ReferenceModel is the model every computer's speed is compared on. It has to load
+// on the phones' llama.cpp too, whose architectures are older than a computer's.
+const ReferenceModel = "qwen2.5-3b-q4"
+
+// ToskarScore is how fast a computer is for local AI, with no ceiling: its reading
+// and writing speed on ReferenceModel against an M5 Pro with 24 GB at 1,000, as
+// toskar.ai shows it. False for another model, whose speed is about that model too.
+func ToskarScore(model string, p *Performance) (int, bool) {
+	if model != ReferenceModel || p == nil {
+		return 0, false
+	}
+	return int(math.Round(math.Sqrt(p.TokensPerSecond/104.3*(p.PromptTokensPerSecond/2732.2)) * 1000)), true
 }
 
 // Describe is a row's score as a person reads it, such as "95 (v1)".

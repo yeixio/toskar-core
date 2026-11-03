@@ -51,7 +51,7 @@ func main() {
 }
 
 func usage() {
-	fmt.Fprintln(os.Stderr, "usage: toskar-quality run --toskar <toskar binary> [--model <id>] [--yes] [--harness <folder>] [--out <folder>] [--data <folder>] [--port <port>] [--sets quality,topics,files,reasoning] [--only <case>]")
+	fmt.Fprintln(os.Stderr, "usage: toskar-quality run --toskar <toskar binary> [--model <id>] [--yes] [--harness <folder>] [--out <folder>] [--data <folder>] [--port <port>] [--sets quality,topics,files,reasoning] [--only <case>] [--speed-only] [--all] [--most <n>]")
 	fmt.Fprintln(os.Stderr, "       toskar-quality publish <reports> <results.json> <version.json> <catalog.json> <models.json> <run URL>")
 	fmt.Fprintln(os.Stderr, "       toskar-quality next <models.json> <results.json> <version.json> <count>")
 	os.Exit(2)
@@ -75,7 +75,7 @@ func run(args []string) error {
 		return err
 	}
 	fs := flag.NewFlagSet("run", flag.ExitOnError)
-	model := fs.String("model", "", "the model to measure")
+	model := fs.String("model", "", "the model to measure: its ID, or a link to its .gguf file on Hugging Face")
 	toskar := fs.String("toskar", "", "the Toskar binary to run")
 	harness := fs.String("harness", filepath.Dir(self), "the folder with the test binary and sets")
 	out := fs.String("out", "", "where reports go (default: quality-score-<model> in this folder)")
@@ -83,7 +83,10 @@ func run(args []string) error {
 	port := fs.Int("port", 7361, "the throwaway Toskar's port")
 	only := fs.String("sets", "", "only these sets, comma-separated; a run without all of them gets no Score")
 	onlyCase := fs.String("only", "", "only the cases matching this, for checking this program")
-	yes := fs.Bool("yes", false, "ask nothing: take the suggested model, and don't offer to share")
+	yes := fs.Bool("yes", false, "ask nothing: take the most popular model that fits, and don't offer to share")
+	speedOnly := fs.Bool("speed-only", false, "only how fast it runs, which takes minutes, with no quality sets")
+	all := fs.Bool("all", false, "every listed model that fits this computer, removing each one it downloaded")
+	most := fs.Int("most", 0, "with --all, at most this many models, smallest first")
 	_ = fs.Parse(args)
 	if *toskar == "" {
 		usage()
@@ -120,138 +123,348 @@ func run(args []string) error {
 
 	ask := newAsker(*yes)
 	defer ask.close()
-	if *model == "" {
-		if *model, err = chooseModel(url, ask); err != nil {
-			return err
-		}
+	defer keepAwake()()
+	w := &work{
+		ctx: ctx, url: url, test: filepath.Join(*harness, "quality.test"), harness: *harness, logs: logs, version: version,
+		only: *only, onlyCase: *onlyCase, out: *out, speedOnly: *speedOnly,
 	}
-	if *out == "" {
-		*out = "quality-score-" + *model
-	}
-	if *out, err = filepath.Abs(*out); err != nil {
-		return err
-	}
-	if err := os.MkdirAll(*out, 0o755); err != nil {
-		return err
-	}
-	// Toskar's log goes with the reports, for whoever has to read why a run failed.
-	defer func() {
-		if raw, err := os.ReadFile(filepath.Join(logs, "toskar.log")); err == nil {
-			_ = os.WriteFile(filepath.Join(*out, "toskar.log"), raw, 0o644)
-		}
-	}()
-
-	test := filepath.Join(*harness, "quality.test")
 	if runtime.GOOS == "windows" {
-		test += ".exe"
+		w.test += ".exe"
 	}
-	logFile, err := os.Create(filepath.Join(*out, "run.log"))
-	if err != nil {
-		return err
-	}
-	defer logFile.Close()
-
-	row := qualityscore.Row{
-		Model: *model, Name: *model, MethodVersion: version,
-		Date:   time.Now().UTC().Format("2006-01-02"),
-		Scores: map[string]qualityscore.Passed{},
-	}
-	fmt.Printf("Measuring %s. This can take a long time, and logs go to %s.\n", *model, logFile.Name())
-	// How it runs comes first: there's no use in hours of cases for a model that won't load.
-	fmt.Println("speed: running...")
-	report := filepath.Join(*out, qualityscore.PerformanceFile)
-	_ = os.Remove(report)
-	cmd := exec.CommandContext(ctx, test, "-test.run", "^TestPerformance$", "-test.count=1", "-test.v", "-test.timeout=70m")
-	cmd.Dir = *harness
-	cmd.Stdout, cmd.Stderr = logFile, logFile
-	cmd.Env = append(os.Environ(), "TOSKAR_QUALITY_URL="+url, "TOSKAR_QUALITY_MODEL="+*model, "TOSKAR_QUALITY_PERFORMANCE_REPORT="+report)
-	_ = cmd.Run()
-	if ctx.Err() != nil {
-		return ctx.Err()
-	}
-	performance, perfErr := qualityscore.ReadPerformance(report, *model)
-	if perfErr != nil {
-		fmt.Printf("speed: not measured. See %s.\n", logFile.Name())
-	} else {
-		row.Runs, row.Why = performance.Runs, performance.Why
-	}
-	if performance != nil && performance.Runs == qualityscore.RunsNo {
-		if row.Hardware, err = hardwareName(url); err != nil {
-			return err
-		}
-		fmt.Printf("\n%s doesn't run on %s: %s.\n", row.Model, row.Hardware, performance.Why)
-		raw, err := json.MarshalIndent(row, "", "  ")
+	chosen := []chosenModel{{ID: *model, Name: displayName(url, *model)}}
+	switch {
+	case *all:
+		listed, room, err := fitting(url)
 		if err != nil {
 			return err
 		}
-		if err := os.WriteFile(filepath.Join(*out, "result.json"), append(raw, '\n'), 0o644); err != nil {
+		chosen = everyModel(listed, room, *most)
+		w.many = true
+	case qualityscore.ModelLink(*model):
+		one, err := chooseLink(url, *model, ask, ^uint64(0))
+		if err != nil {
 			return err
 		}
-		offerToShare(row, ask, *out)
-		return nil
-	}
-	row.Performance = performance
-	for _, set := range qualityscore.Sets {
-		if *only != "" && !contains(strings.Split(*only, ","), set.Name) {
-			continue
-		}
-		started := time.Now()
-		fmt.Printf("%s: running...\n", set.Name)
-		report = filepath.Join(*out, set.Report)
-		_ = os.Remove(report)
-		pattern := "^" + setTests[set.Name][0] + "$"
-		if *onlyCase != "" {
-			pattern += "/" + *onlyCase
-		}
-		cmd = exec.CommandContext(ctx, test, "-test.run", pattern, "-test.count=1", "-test.v", "-test.timeout=600m")
-		cmd.Dir = *harness
-		cmd.Stdout, cmd.Stderr = logFile, logFile
-		cmd.Env = append(os.Environ(), "TOSKAR_QUALITY_URL="+url, "TOSKAR_QUALITY_MODEL="+*model, setTests[set.Name][1]+"="+report)
-		// A set below its bar still has a result to report, so its failure doesn't stop this.
-		_ = cmd.Run()
-		if ctx.Err() != nil {
-			return ctx.Err()
-		}
-		if err := readSet(&row, set, report, *model); err != nil {
+		chosen = []chosenModel{one}
+	case *model == "":
+		plan, err := chooseModel(url, ask)
+		if err != nil {
 			return err
 		}
-		if s, ok := row.Scores[set.Name]; ok {
-			fmt.Printf("%s: %d of %d, in %s\n", set.Name, s.Passed, s.Of, time.Since(started).Round(time.Second))
-		} else {
-			fmt.Printf("%s: no score. See %s.\n", set.Name, report)
-		}
+		chosen, w.many = plan.Models, plan.Many
+		w.speedOnly = w.speedOnly || plan.SpeedOnly
 	}
-	if len(row.Scores) == 0 {
-		raw, _ := os.ReadFile(logFile.Name())
-		return fmt.Errorf("no scores. The end of %s:\n%s", logFile.Name(), tail(string(raw), 3000))
+	if w.many {
+		return w.measureMany(chosen, ask, *data)
 	}
-	if row.Hardware, err = hardwareName(url); err != nil {
+	row, folder, err := w.measure(chosen[0])
+	if err != nil {
 		return err
 	}
-	fmt.Printf("\n%s on %s\n", row.Model, row.Hardware)
-	if p := row.Performance; p != nil {
-		fmt.Printf("Writes %.1f tokens a second. Reads %.0f tokens a second.\n", p.TokensPerSecond, p.PromptTokensPerSecond)
-		fmt.Printf("With a prompt of %d tokens, it starts in %.1f s and averages %.1f tokens a second from start to finish.\n", p.PromptTokens, p.FirstTokenMs/1000, p.EffectiveTokensPerSecond)
-		fmt.Printf("%s: %d of %d layers on the GPU.\n", map[string]string{qualityscore.RunsFull: "Runs fully", qualityscore.RunsPartial: "Runs partly, with the rest in system memory", qualityscore.RunsCPU: "Runs on the processor"}[row.Runs], p.GPULayers, p.GPULayersTotal)
+	w.report(row)
+	fmt.Printf("\nSaved in %s.\n", folder)
+	fmt.Printf("Models stay in %s for your next run. Delete that folder to get the space back.\n", *data)
+	if w.shareable(row) {
+		offerToShare(row, ask, folder)
+	} else {
+		fmt.Println("This run didn't finish everything, so it has nothing to share.")
 	}
-	score, complete := qualityscore.Score(row.Scores)
-	if !complete || row.Performance == nil {
-		// Only a complete row is published, so this has nothing to share.
-		fmt.Printf("\nThis run didn't finish everything, so it has nothing to share. Its reports are in %s.\n", *out)
-		return nil
+	return nil
+}
+
+// work is what every measured model in a run has in common.
+type work struct {
+	ctx                context.Context
+	url, test, harness string
+	logs, out          string
+	only, onlyCase     string
+	version            int
+	speedOnly, many    bool
+}
+
+// measure runs one model, and writes result.json beside its reports when the run
+// is whole. How it runs comes first: there's no use in hours of cases for a model
+// that won't load.
+func (w *work) measure(m chosenModel) (qualityscore.Row, string, error) {
+	row := qualityscore.Row{
+		Model: m.ID, Name: m.Name, MethodVersion: w.version, OffList: m.Source != "",
+		Date:   time.Now().UTC().Format("2006-01-02"),
+		Scores: map[string]qualityscore.Passed{},
 	}
-	fmt.Printf("Score: %s\n", qualityscore.Describe(score, version))
+	folder := w.out
+	if folder == "" || w.many {
+		folder = filepath.Join(w.out, "quality-score-"+m.ID)
+	}
+	folder, err := filepath.Abs(folder)
+	if err != nil {
+		return row, folder, err
+	}
+	if err := os.MkdirAll(folder, 0o755); err != nil {
+		return row, folder, err
+	}
+	// Toskar's log goes with the reports, for whoever has to read why a run failed.
+	defer func() {
+		if raw, err := os.ReadFile(filepath.Join(w.logs, "toskar.log")); err == nil {
+			_ = os.WriteFile(filepath.Join(folder, "toskar.log"), raw, 0o644)
+		}
+	}()
+	logFile, err := os.Create(filepath.Join(folder, "run.log"))
+	if err != nil {
+		return row, folder, err
+	}
+	defer logFile.Close()
+	// A file from outside the list: the tests install it from its link.
+	env := append(os.Environ(), "TOSKAR_QUALITY_URL="+w.url, "TOSKAR_QUALITY_MODEL="+m.ID)
+	if m.Source != "" {
+		env = append(env, "TOSKAR_QUALITY_MODEL_SOURCE="+m.Source)
+	}
+	runTest := func(pattern, timeout, reportVar, report string) {
+		_ = os.Remove(report)
+		cmd := exec.CommandContext(w.ctx, w.test, "-test.run", pattern, "-test.count=1", "-test.v", "-test.timeout="+timeout)
+		cmd.Dir = w.harness
+		cmd.Stdout, cmd.Stderr = logFile, logFile
+		cmd.Env = append(env[:len(env):len(env)], reportVar+"="+report)
+		// A set below its bar still has a result to report, so its failure doesn't stop this.
+		_ = cmd.Run()
+	}
+
+	fmt.Printf("Measuring %s. Logs go to %s.\n", m.Name, logFile.Name())
+	fmt.Println("speed: running...")
+	runTest("^TestPerformance$", "70m", "TOSKAR_QUALITY_PERFORMANCE_REPORT", filepath.Join(folder, qualityscore.PerformanceFile))
+	if w.ctx.Err() != nil {
+		return row, folder, w.ctx.Err()
+	}
+	performance, perfErr := qualityscore.ReadPerformance(filepath.Join(folder, qualityscore.PerformanceFile), m.ID)
+	if perfErr != nil {
+		fmt.Printf("speed: not measured. See %s.\n", logFile.Name())
+		if w.speedOnly || w.many {
+			raw, _ := os.ReadFile(logFile.Name())
+			return row, folder, fmt.Errorf("couldn't measure %s. The end of its log:\n%s", m.Name, tail(string(raw), 1500))
+		}
+	} else {
+		row.Runs, row.Why, row.OS = performance.Runs, performance.Why, performance.OS
+	}
+	if row.Hardware, err = hardwareName(w.url); err != nil {
+		return row, folder, err
+	}
+	if performance != nil && performance.Runs == qualityscore.RunsNo {
+		return row, folder, writeResult(row, folder)
+	}
+	row.Performance = performance
+	if !w.speedOnly {
+		for _, set := range qualityscore.Sets {
+			if w.only != "" && !contains(strings.Split(w.only, ","), set.Name) {
+				continue
+			}
+			started := time.Now()
+			fmt.Printf("%s: running...\n", set.Name)
+			report := filepath.Join(folder, set.Report)
+			pattern := "^" + setTests[set.Name][0] + "$"
+			if w.onlyCase != "" {
+				pattern += "/" + w.onlyCase
+			}
+			runTest(pattern, "600m", setTests[set.Name][1], report)
+			if w.ctx.Err() != nil {
+				return row, folder, w.ctx.Err()
+			}
+			if err := readSet(&row, set, report, m.ID); err != nil {
+				return row, folder, err
+			}
+			if s, ok := row.Scores[set.Name]; ok {
+				fmt.Printf("%s: %d of %d, in %s\n", set.Name, s.Passed, s.Of, time.Since(started).Round(time.Second))
+			} else {
+				fmt.Printf("%s: no score. See %s.\n", set.Name, report)
+			}
+		}
+		if len(row.Scores) == 0 {
+			raw, _ := os.ReadFile(logFile.Name())
+			return row, folder, fmt.Errorf("no scores. The end of %s:\n%s", logFile.Name(), tail(string(raw), 3000))
+		}
+	}
+	if w.shareable(row) {
+		return row, folder, writeResult(row, folder)
+	}
+	return row, folder, nil
+}
+
+// shareable is whether a row is one the results take: all the sets with its
+// figures, a speed test, or a model that doesn't run.
+func (w *work) shareable(row qualityscore.Row) bool {
+	if row.Runs == qualityscore.RunsNo {
+		return true
+	}
+	if row.Performance == nil {
+		return false
+	}
+	if w.speedOnly {
+		return len(row.Scores) == 0
+	}
+	_, complete := qualityscore.Score(row.Scores)
+	return complete
+}
+
+func writeResult(row qualityscore.Row, folder string) error {
 	raw, err := json.MarshalIndent(row, "", "  ")
 	if err != nil {
 		return err
 	}
-	if err := os.WriteFile(filepath.Join(*out, "result.json"), append(raw, '\n'), 0o644); err != nil {
-		return err
+	return os.WriteFile(filepath.Join(folder, "result.json"), append(raw, '\n'), 0o644)
+}
+
+// report shows a person a row's numbers.
+func (w *work) report(row qualityscore.Row) {
+	fmt.Printf("\n%s on %s\n", row.Name, row.Hardware)
+	if row.Runs == qualityscore.RunsNo {
+		fmt.Printf("It doesn't run here: %s.\n", row.Why)
+		return
 	}
-	fmt.Printf("\nSaved in %s.\n", *out)
-	fmt.Printf("Models stay in %s for your next run. Delete that folder to get the space back.\n", *data)
-	offerToShare(row, ask, *out)
+	if p := row.Performance; p != nil {
+		if score, ok := qualityscore.ToskarScore(row.Model, p); ok {
+			fmt.Printf("Toskar Score: %d\n", score)
+		}
+		fmt.Printf("Writes %.1f tokens a second. Reads %.0f tokens a second.\n", p.TokensPerSecond, p.PromptTokensPerSecond)
+		fmt.Printf("With a prompt of %d tokens, it starts in %.1f s and averages %.1f tokens a second from start to finish.\n", p.PromptTokens, p.FirstTokenMs/1000, p.EffectiveTokensPerSecond)
+		fmt.Printf("%s: %d of %d layers on the GPU.\n", map[string]string{qualityscore.RunsFull: "Runs fully", qualityscore.RunsPartial: "Runs partly, with the rest in system memory", qualityscore.RunsCPU: "Runs on the processor"}[row.Runs], p.GPULayers, p.GPULayersTotal)
+	}
+	if score, ok := qualityscore.Score(row.Scores); ok {
+		fmt.Printf("Quality score: %s\n", qualityscore.Describe(score, row.MethodVersion))
+	}
+}
+
+// measureMany runs each model in turn. One failing doesn't stop the rest, what's
+// already measured is skipped, so a run that stopped picks up where it left off,
+// and each model it downloaded is removed to make room for the next.
+func (w *work) measureMany(models []chosenModel, ask *asker, data string) error {
+	var rows []qualityscore.Row
+	var failed []string
+	for i, m := range models {
+		fmt.Printf("\n[%d of %d] %s\n", i+1, len(models), m.Name)
+		folder := filepath.Join(w.out, "quality-score-"+m.ID)
+		if row, ok := finished(folder, w.version, w.speedOnly); ok {
+			fmt.Println("Already measured, so this is skipped.")
+			rows = append(rows, row)
+			continue
+		}
+		if m.SizeBytes > 0 {
+			if free, err := freeBytes(w.url); err == nil && free < m.SizeBytes+m.SizeBytes/10+1<<30 {
+				fmt.Printf("Skipped: it needs %s, and %s is free.\n", gigabytes(m.SizeBytes), gigabytes(free))
+				failed = append(failed, m.Name+": not enough disk space")
+				continue
+			}
+		}
+		had := installed(w.url, m.ID)
+		row, _, err := w.measure(m)
+		if !had {
+			removeModel(w.url, m.ID)
+		}
+		if w.ctx.Err() != nil {
+			fmt.Printf("\nStopped. Run the same line again to pick up from %s.\n", m.Name)
+			return w.ctx.Err()
+		}
+		if err != nil {
+			fmt.Println(err)
+			failed = append(failed, m.Name)
+			continue
+		}
+		w.report(row)
+		if w.shareable(row) {
+			rows = append(rows, row)
+		}
+	}
+	fmt.Printf("\nDone: %d measured", len(rows))
+	if len(failed) > 0 {
+		fmt.Printf(", %d didn't finish: %s", len(failed), strings.Join(failed, "; "))
+	}
+	fmt.Printf(".\nReports are in %s. Delete %s to get the space back.\n", absOr(w.out), data)
+	offerToShareAll(rows, ask)
 	return nil
+}
+
+func absOr(path string) string {
+	if path == "" {
+		path = "."
+	}
+	if abs, err := filepath.Abs(path); err == nil {
+		return abs
+	}
+	return path
+}
+
+// finished is a result this mode already has, at this method version.
+func finished(folder string, version int, speedOnly bool) (qualityscore.Row, bool) {
+	var row qualityscore.Row
+	raw, err := os.ReadFile(filepath.Join(folder, "result.json"))
+	if err != nil || json.Unmarshal(raw, &row) != nil || row.MethodVersion != version {
+		return row, false
+	}
+	if row.Runs == qualityscore.RunsNo {
+		return row, true
+	}
+	if speedOnly {
+		return row, row.Performance != nil
+	}
+	_, complete := qualityscore.Score(row.Scores)
+	return row, complete
+}
+
+// displayName is a model's name in Toskar's catalog or on the list, or else its ID.
+func displayName(url, id string) string {
+	var models []struct {
+		ID          string `json:"id"`
+		DisplayName string `json:"display_name"`
+	}
+	if readJSON(url+"/api/v1/models", &models) == nil {
+		for _, m := range models {
+			if m.ID == id && m.DisplayName != "" {
+				return m.DisplayName
+			}
+		}
+	}
+	var listed struct {
+		Models []qualityscore.ListedModel `json:"models"`
+	}
+	if readJSON(modelListURL, &listed) == nil {
+		for _, m := range listed.Models {
+			if m.ID == id {
+				return m.Name
+			}
+		}
+	}
+	return id
+}
+
+// installed is whether Toskar already has a model, so it's not removed after.
+func installed(url, id string) bool {
+	var models []struct {
+		ID        string `json:"id"`
+		Installed bool   `json:"installed"`
+	}
+	if readJSON(url+"/api/v1/models", &models) != nil {
+		return true
+	}
+	for _, m := range models {
+		if m.ID == id {
+			return m.Installed
+		}
+	}
+	return false
+}
+
+func removeModel(url, id string) {
+	req, err := http.NewRequest(http.MethodDelete, url+"/api/v1/models/"+id, nil)
+	if err != nil {
+		return
+	}
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return
+	}
+	resp.Body.Close()
+}
+
+func freeBytes(url string) (uint64, error) {
+	hw, err := readHardware(url)
+	return hw.Disk.AvailableBytes, err
 }
 
 // readSet adds a set's report to the row. A report naming another model is a
@@ -339,6 +552,9 @@ type hardware struct {
 	Memory struct {
 		TotalBytes uint64 `json:"total_bytes"`
 	} `json:"memory"`
+	Disk struct {
+		AvailableBytes uint64 `json:"available_bytes"`
+	} `json:"disk"`
 	Accelerators []struct {
 		Name          string `json:"name"`
 		Model         string `json:"model"`

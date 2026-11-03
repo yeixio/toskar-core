@@ -48,6 +48,11 @@ const modelListURL = "https://raw.githubusercontent.com/yeixio/toskar-model-data
 // installListed installs a model from its exact file on the list.
 func (d realDriver) installListed(t *testing.T, id string) {
 	t.Helper()
+	// A model someone chose by its link, from outside the list.
+	if source := config.Env("QUALITY_MODEL_SOURCE"); source != "" {
+		d.installFrom(t, id, source)
+		return
+	}
 	url := config.Env("QUALITY_MODEL_LIST")
 	if url == "" {
 		url = modelListURL
@@ -75,6 +80,12 @@ func (d realDriver) installListed(t *testing.T, id string) {
 	if source == "" {
 		t.Fatalf("%s is not in the daemon's catalog or on the model list", id)
 	}
+	d.installFrom(t, id, source)
+}
+
+// installFrom installs a model from one exact file.
+func (d realDriver) installFrom(t *testing.T, id, source string) {
+	t.Helper()
 	t.Logf("installing %s from %s", id, source)
 	if status := d.do(t, http.MethodPost, "/api/v1/models/install-from-url", contracts.InstallFromURLRequest{SourceURL: source, ID: id}, nil); status >= 300 {
 		t.Fatalf("installing %s: status %d", id, status)

@@ -87,7 +87,7 @@ func weeklyRow(model, folder string) (Row, string) {
 	if err != nil {
 		return row, "no performance figures: " + err.Error()
 	}
-	row.Runs, row.Why = performance.Runs, performance.Why
+	row.Runs, row.Why, row.OS = performance.Runs, performance.Why, performance.OS
 	// A model that doesn't run has no scores to compare: this is its whole result.
 	if performance.Runs == RunsNo {
 		row.Hardware = performance.Hardware
@@ -165,6 +165,7 @@ type ListedModel struct {
 	ID        string `json:"id"`
 	Name      string `json:"name"`
 	SizeBytes uint64 `json:"size_bytes"`
+	Downloads int64  `json:"downloads"`
 	SourceURL string `json:"source_url,omitempty"`
 }
 

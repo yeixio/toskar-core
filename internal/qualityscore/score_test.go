@@ -106,7 +106,7 @@ func TestPublishAddsWeeklyRows(t *testing.T) {
 	write("gemma-2-9b-q4", "media.md", gemma+"22 of 23 cases passed.\n")
 	write("gemma-2-9b-q4", "reasoning.md", gemma+"32 of 39 right (82%), 1.0 s and 388 tokens a question on average.\n")
 	write("gemma-2-9b-q4", "triage.md", gemma+"type right on 26 of 30, precision 62%.\n")
-	write("gemma-2-9b-q4", PerformanceFile, `{"model":"gemma-2-9b-q4","runs":"partial","prompt_tokens":4000,"prompt_tokens_per_second":900.5,"tokens_per_second":50.5,"first_token_ms":4400,"effective_tokens_per_second":21.5,"gpu_layers":43,"gpu_layers_total":43,"quantization":"Q4_K_M"}`)
+	write("gemma-2-9b-q4", PerformanceFile, `{"model":"gemma-2-9b-q4","os":"linux","runs":"partial","prompt_tokens":4000,"prompt_tokens_per_second":900.5,"tokens_per_second":50.5,"first_token_ms":4400,"effective_tokens_per_second":21.5,"gpu_layers":43,"gpu_layers_total":43,"quantization":"Q4_K_M"}`)
 	// Reports for this model, and figures for another, are no row.
 	mixed := fmt.Sprintf(onCard, "mixed-model")
 	write("mixed-model", "report.md", mixed+"60 of 64 cases passed.\n")
@@ -176,6 +176,9 @@ func TestPublishAddsWeeklyRows(t *testing.T) {
 	no := got.Results[2]
 	if no.Model != "too-big" || no.Runs != RunsNo || no.Why != "out_of_memory" || no.Hardware != "AMD RX 7900 XTX, 24 GB" || len(no.Scores) != 0 || no.Performance != nil {
 		t.Errorf("a model that doesn't run: %+v", no)
+	}
+	if row.OS != "Linux" {
+		t.Errorf("os %q", row.OS)
 	}
 	if row.Runs != RunsPartial {
 		t.Errorf("runs %q", row.Runs)
@@ -265,21 +268,30 @@ func TestNextModels(t *testing.T) {
 	}
 }
 
-func TestSuggest(t *testing.T) {
+func TestPopularAndUnmeasured(t *testing.T) {
 	const gb = 1 << 30
-	list := []ListedModel{{ID: "big", SizeBytes: 20 * gb}, {ID: "a", SizeBytes: 2 * gb}, {ID: "b", SizeBytes: 3 * gb}}
-	results := []Row{{Model: "a", Hardware: "Mine"}, {Model: "b", Hardware: "Theirs"}}
-	if m, ok := Suggest(list, results, "Mine", 8*gb); !ok || m.ID != "b" {
-		t.Errorf("%+v %v: want the first that fits with no result from this hardware", m, ok)
+	list := []ListedModel{
+		{ID: "big", SizeBytes: 20 * gb, Downloads: 900},
+		{ID: "small-quiet", SizeBytes: gb, Downloads: 10},
+		{ID: "small-popular", SizeBytes: 2 * gb, Downloads: 500},
+		{ID: "small-new", SizeBytes: 3 * gb, Downloads: 200},
 	}
-	if m, ok := Suggest(list, results, "Mine", 26*gb); !ok || m.ID != "big" {
+	if m, ok := Popular(list, 8*gb); !ok || m.ID != "small-popular" {
+		t.Errorf("%+v %v: want the most downloaded that fits", m, ok)
+	}
+	if m, ok := Popular(list, 26*gb); !ok || m.ID != "big" {
 		t.Errorf("%+v %v", m, ok)
 	}
-	all := append(results, Row{Model: "b", Hardware: "Mine"})
-	if m, ok := Suggest(list, all, "Mine", 8*gb); !ok || m.ID != "a" {
-		t.Errorf("%+v %v: with everything measured, the first that fits", m, ok)
+	// On any computer: a model with a row elsewhere has data.
+	results := []Row{{Model: "small-popular", Hardware: "Theirs"}}
+	if m, ok := Unmeasured(list, results, 8*gb); !ok || m.ID != "small-new" {
+		t.Errorf("%+v %v: want the most downloaded with no result anywhere", m, ok)
 	}
-	if _, ok := Suggest(list, nil, "Mine", 2*gb); ok {
+	all := []Row{{Model: "small-popular"}, {Model: "small-new"}, {Model: "small-quiet"}}
+	if m, ok := Unmeasured(list, all, 8*gb); ok {
+		t.Errorf("%+v with everything measured", m)
+	}
+	if _, ok := Popular(list, gb); ok {
 		t.Error("suggested a model that doesn't fit")
 	}
 	if got := RoomFor(24*gb, 32*gb); got != 24*gb {
@@ -287,6 +299,34 @@ func TestSuggest(t *testing.T) {
 	}
 	if got := RoomFor(0, 30*gb); got != 18*gb {
 		t.Errorf("shared memory: %d", got/gb)
+	}
+}
+
+func TestToskarScore(t *testing.T) {
+	if got, ok := ToskarScore(ReferenceModel, &Performance{TokensPerSecond: 208.6, PromptTokensPerSecond: 5464.4}); !ok || got != 2000 {
+		t.Errorf("%d %v, want what toskar.ai shows", got, ok)
+	}
+	if _, ok := ToskarScore("other", &Performance{TokensPerSecond: 1, PromptTokensPerSecond: 1}); ok {
+		t.Error("scored another model")
+	}
+	if _, ok := ToskarScore(ReferenceModel, nil); ok {
+		t.Error("scored nothing")
+	}
+}
+
+func TestModelLink(t *testing.T) {
+	for link, ok := range map[string]bool{
+		"https://huggingface.co/a/b/resolve/main/c.gguf":         true,
+		"https://huggingface.co/a/b/resolve/main/sub/c.gguf?x=1": true,
+		"https://huggingface.co/a/b/blob/main/c.gguf":            false,
+		"http://huggingface.co/a/b/resolve/main/c.gguf":          false,
+		"https://example.com/a/b/resolve/main/c.gguf":            false,
+		"https://huggingface.co/a/b/resolve/main/c.safetensors":  false,
+		"qwen3.5-4b-q4": false,
+	} {
+		if ModelLink(link) != ok {
+			t.Errorf("%q: %v", link, !ok)
+		}
 	}
 }
 
