@@ -1,0 +1,29 @@
+name: A result looks wrong
+description: Tell us a model's test result on toskar.ai doesn't look right.
+title: "[Results]: "
+labels: ["tests"]
+body:
+  - type: markdown
+    attributes:
+      value: "Thank you. Results come from one run on one computer, so they can be off, and we'd rather hear it. How they're measured: [docs/quality.md](https://github.com/yeixio/toskar-core/blob/main/docs/quality.md)."
+  - type: textarea
+    id: result
+    attributes:
+      label: Which result?
+      description: The model, the computer, and the date, or a link to the result's page.
+    validations:
+      required: true
+  - type: textarea
+    id: wrong
+    attributes:
+      label: What looks wrong?
+      description: Such as a speed that can't be right, or a model that does run on that computer.
+    validations:
+      required: true
+  - type: textarea
+    id: saw
+    attributes:
+      label: What did you see instead?
+      description: If you tried it, your computer, the model file, and what you measured. Please leave out anything you'd rather not make public.
+    validations:
+      required: false
