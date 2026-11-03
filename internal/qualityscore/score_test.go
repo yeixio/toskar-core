@@ -303,7 +303,7 @@ func TestPopularAndUnmeasured(t *testing.T) {
 }
 
 func TestToskarScore(t *testing.T) {
-	if got, ok := ToskarScore(ReferenceModel, &Performance{TokensPerSecond: 149.1, PromptTokensPerSecond: 4390.8}); !ok || got != 2034 {
+	if got, ok := ToskarScore(ReferenceModel, &Performance{TokensPerSecond: 208.6, PromptTokensPerSecond: 5464.4}); !ok || got != 2000 {
 		t.Errorf("%d %v, want what toskar.ai shows", got, ok)
 	}
 	if _, ok := ToskarScore("other", &Performance{TokensPerSecond: 1, PromptTokensPerSecond: 1}); ok {
