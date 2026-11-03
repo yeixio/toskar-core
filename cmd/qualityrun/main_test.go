@@ -47,8 +47,16 @@ func TestAskerWithNobodyThere(t *testing.T) {
 	if got := a.ask("?"); got != "y" {
 		t.Errorf("%q", got)
 	}
-	if got := a.ask("?"); got != "" {
-		t.Errorf("after the input ended: %q", got)
+	if a.closed {
+		t.Error("closed before the input ended")
+	}
+	if got := a.ask("?"); got != "" || !a.closed {
+		t.Errorf("after the input ended: %q, closed %v", got, a.closed)
+	}
+	// An empty line is a person pressing Enter, which takes the default.
+	enter := &asker{in: bufio.NewReader(strings.NewReader("\n"))}
+	if got := enter.ask("?"); got != "" || enter.closed {
+		t.Errorf("Enter: %q, closed %v", got, enter.closed)
 	}
 }
 
