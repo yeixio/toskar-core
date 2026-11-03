@@ -244,8 +244,9 @@ func Score(scores map[string]Passed) (int, bool) {
 	return int(math.Round(100 * total / float64(len(Sets)))), true
 }
 
-// ReferenceModel is the model every computer's speed is compared on.
-const ReferenceModel = "qwen3.5-4b-q4"
+// ReferenceModel is the model every computer's speed is compared on. It has to load
+// on the phones' llama.cpp too, whose architectures are older than a computer's.
+const ReferenceModel = "qwen2.5-3b-q4"
 
 // ToskarScore is how fast a computer is for local AI, with no ceiling: its reading
 // and writing speed on ReferenceModel against an M5 Pro with 24 GB at 1,000, as
@@ -254,7 +255,7 @@ func ToskarScore(model string, p *Performance) (int, bool) {
 	if model != ReferenceModel || p == nil {
 		return 0, false
 	}
-	return int(math.Round(math.Sqrt(p.TokensPerSecond/74*(p.PromptTokensPerSecond/2138.7)) * 1000)), true
+	return int(math.Round(math.Sqrt(p.TokensPerSecond/104.3*(p.PromptTokensPerSecond/2732.2)) * 1000)), true
 }
 
 // Describe is a row's score as a person reads it, such as "95 (v1)".
