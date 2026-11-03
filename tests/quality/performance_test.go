@@ -11,6 +11,7 @@ import (
 
 	"github.com/yeixio/toskar-core/internal/benchmark"
 	"github.com/yeixio/toskar-core/internal/config"
+	health "github.com/yeixio/toskar-core/internal/models/health"
 	"github.com/yeixio/toskar-core/pkg/contracts"
 )
 
@@ -20,6 +21,11 @@ import (
 // ran. It's beside a row's Score and never in it (#1037).
 type performance struct {
 	Model string `json:"model"`
+	// Runs is full, partial, cpu, or no; Why says why it's short of full.
+	Runs string `json:"runs"`
+	Why  string `json:"why,omitempty"`
+	// Hardware is here for a model that doesn't run, with no report to name it.
+	Hardware string `json:"hardware,omitempty"`
 	// PromptTokens is the prompt these were measured with.
 	PromptTokens          int     `json:"prompt_tokens"`
 	PromptTokensPerSecond float64 `json:"prompt_tokens_per_second"`
@@ -31,7 +37,6 @@ type performance struct {
 	GPULayers                int     `json:"gpu_layers"`
 	GPULayersTotal           int     `json:"gpu_layers_total"`
 	GPUMemoryBytes           uint64  `json:"gpu_memory_bytes,omitempty"`
-	MemoryBytes              uint64  `json:"memory_bytes,omitempty"`
 	ContextWindow            int     `json:"context_window,omitempty"`
 	Quantization             string  `json:"quantization,omitempty"`
 }
@@ -61,6 +66,12 @@ func TestPerformance(t *testing.T) {
 		if job.Status != contracts.BenchmarkPending && job.Status != contracts.BenchmarkRunning {
 			break
 		}
+	}
+	// Running out of memory is this model's result on this computer. Anything
+	// else that stops it is a failed run, which says nothing about the model.
+	if failure := benchmarkFailure(job); failure != "" && health.OutOfMemory(failure) {
+		writePerformance(t, path, performance{Model: model, Runs: "no", Why: "out_of_memory", Hardware: d.hardware(t)})
+		return
 	}
 	if job.Status != contracts.BenchmarkCompleted || len(job.Summaries) == 0 {
 		t.Fatalf("the benchmark ended %s: %s", job.Status, job.Error)
@@ -101,8 +112,8 @@ func TestPerformance(t *testing.T) {
 		if r.ModelID != model || r.Mode != "" {
 			continue
 		}
-		got.MemoryBytes = r.MemoryBytes
 		if r.Acceleration != nil {
+			got.Runs, got.Why = runsFrom(r.Acceleration)
 			got.GPULayers, got.GPULayersTotal = r.Acceleration.LayersOffloaded, r.Acceleration.LayersTotal
 			got.GPUMemoryBytes, got.Backend = r.Acceleration.GPUMemoryBytes, r.Acceleration.Backend
 		}
@@ -114,6 +125,36 @@ func TestPerformance(t *testing.T) {
 			got.ContextWindow, got.Quantization = m.ContextWindow, m.Variant
 		}
 	}
+	writePerformance(t, path, got)
+}
+
+// benchmarkFailure is why a benchmark or any of its runs failed, or "".
+func benchmarkFailure(job contracts.BenchmarkJob) string {
+	if job.Error != "" {
+		return job.Error
+	}
+	for _, s := range job.Samples {
+		if s.Error != "" {
+			return s.Error
+		}
+	}
+	return ""
+}
+
+// runsFrom says how a model ran from the runtime's own report.
+func runsFrom(a *contracts.Acceleration) (string, string) {
+	switch a.State {
+	case contracts.AccelerationGPU:
+		return "full", ""
+	case contracts.AccelerationPartial:
+		return "partial", a.Reason
+	default:
+		return "cpu", a.Reason
+	}
+}
+
+func writePerformance(t *testing.T, path string, got performance) {
+	t.Helper()
 	raw, err := json.MarshalIndent(got, "", "  ")
 	if err != nil {
 		t.Fatal(err)
@@ -125,3 +166,14 @@ func TestPerformance(t *testing.T) {
 }
 
 func round1(v float64) float64 { return math.Round(v*10) / 10 }
+
+func TestRunsFromTheRuntimesReport(t *testing.T) {
+	for state, want := range map[string]string{
+		contracts.AccelerationGPU: "full", contracts.AccelerationPartial: "partial",
+		contracts.AccelerationCPU: "cpu", contracts.AccelerationCPUExpected: "cpu",
+	} {
+		if got, _ := runsFrom(&contracts.Acceleration{State: state}); got != want {
+			t.Errorf("%s: %s, want %s", state, got, want)
+		}
+	}
+}

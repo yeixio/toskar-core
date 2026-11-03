@@ -299,6 +299,9 @@ export interface QualityResult {
   source?: string
   scores: Record<string, { passed: number; of: number }>
   seconds_per_question?: number
+  /** How it ran on that computer; a row that says no has no scores (contract 1.82). */
+  runs?: 'full' | 'partial' | 'cpu' | 'no'
+  why?: string
   /** How it ran on that computer, for rows measured that way (contract 1.81). */
   performance?: QualityPerformance
 }
@@ -313,7 +316,6 @@ export interface QualityPerformance {
   gpu_layers: number
   gpu_layers_total: number
   gpu_memory_bytes?: number
-  memory_bytes?: number
   context_window?: number
   quantization?: string
 }

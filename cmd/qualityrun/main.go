@@ -157,19 +157,53 @@ func run(args []string) error {
 		Scores: map[string]qualityscore.Passed{},
 	}
 	fmt.Printf("Measuring %s. This can take a long time, and logs go to %s.\n", *model, logFile.Name())
+	// How it runs comes first: there's no use in hours of cases for a model that won't load.
+	fmt.Println("speed: running...")
+	report := filepath.Join(*out, qualityscore.PerformanceFile)
+	_ = os.Remove(report)
+	cmd := exec.CommandContext(ctx, test, "-test.run", "^TestPerformance$", "-test.count=1", "-test.v", "-test.timeout=70m")
+	cmd.Dir = *harness
+	cmd.Stdout, cmd.Stderr = logFile, logFile
+	cmd.Env = append(os.Environ(), "TOSKAR_QUALITY_URL="+url, "TOSKAR_QUALITY_MODEL="+*model, "TOSKAR_QUALITY_PERFORMANCE_REPORT="+report)
+	_ = cmd.Run()
+	if ctx.Err() != nil {
+		return ctx.Err()
+	}
+	performance, perfErr := qualityscore.ReadPerformance(report, *model)
+	if perfErr != nil {
+		fmt.Printf("speed: not measured. See %s.\n", logFile.Name())
+	} else {
+		row.Runs, row.Why = performance.Runs, performance.Why
+	}
+	if performance != nil && performance.Runs == qualityscore.RunsNo {
+		if row.Hardware, err = hardwareName(url); err != nil {
+			return err
+		}
+		fmt.Printf("\n%s doesn't run on %s: %s.\n", row.Model, row.Hardware, performance.Why)
+		raw, err := json.MarshalIndent(row, "", "  ")
+		if err != nil {
+			return err
+		}
+		if err := os.WriteFile(filepath.Join(*out, "result.json"), append(raw, '\n'), 0o644); err != nil {
+			return err
+		}
+		offerToShare(row, ask, *out)
+		return nil
+	}
+	row.Performance = performance
 	for _, set := range qualityscore.Sets {
 		if *only != "" && !contains(strings.Split(*only, ","), set.Name) {
 			continue
 		}
 		started := time.Now()
 		fmt.Printf("%s: running...\n", set.Name)
-		report := filepath.Join(*out, set.Report)
+		report = filepath.Join(*out, set.Report)
 		_ = os.Remove(report)
 		pattern := "^" + setTests[set.Name][0] + "$"
 		if *onlyCase != "" {
 			pattern += "/" + *onlyCase
 		}
-		cmd := exec.CommandContext(ctx, test, "-test.run", pattern, "-test.count=1", "-test.v", "-test.timeout=600m")
+		cmd = exec.CommandContext(ctx, test, "-test.run", pattern, "-test.count=1", "-test.v", "-test.timeout=600m")
 		cmd.Dir = *harness
 		cmd.Stdout, cmd.Stderr = logFile, logFile
 		cmd.Env = append(os.Environ(), "TOSKAR_QUALITY_URL="+url, "TOSKAR_QUALITY_MODEL="+*model, setTests[set.Name][1]+"="+report)
@@ -191,23 +225,6 @@ func run(args []string) error {
 		raw, _ := os.ReadFile(logFile.Name())
 		return fmt.Errorf("no scores. The end of %s:\n%s", logFile.Name(), tail(string(raw), 3000))
 	}
-	// Reading a long prompt takes a while on a slow computer, so this says so.
-	fmt.Println("performance: running...")
-	report := filepath.Join(*out, qualityscore.PerformanceFile)
-	_ = os.Remove(report)
-	cmd := exec.CommandContext(ctx, test, "-test.run", "^TestPerformance$", "-test.count=1", "-test.v", "-test.timeout=70m")
-	cmd.Dir = *harness
-	cmd.Stdout, cmd.Stderr = logFile, logFile
-	cmd.Env = append(os.Environ(), "TOSKAR_QUALITY_URL="+url, "TOSKAR_QUALITY_MODEL="+*model, "TOSKAR_QUALITY_PERFORMANCE_REPORT="+report)
-	_ = cmd.Run()
-	if ctx.Err() != nil {
-		return ctx.Err()
-	}
-	performance, perfErr := qualityscore.ReadPerformance(report, *model)
-	if perfErr != nil {
-		fmt.Printf("performance: not measured. See %s.\n", logFile.Name())
-	}
-	row.Performance = performance
 	if row.Hardware, err = hardwareName(url); err != nil {
 		return err
 	}
@@ -215,7 +232,7 @@ func run(args []string) error {
 	if p := row.Performance; p != nil {
 		fmt.Printf("Writes %.1f tokens a second. Reads %.0f tokens a second.\n", p.TokensPerSecond, p.PromptTokensPerSecond)
 		fmt.Printf("With a prompt of %d tokens, it starts in %.1f s and averages %.1f tokens a second from start to finish.\n", p.PromptTokens, p.FirstTokenMs/1000, p.EffectiveTokensPerSecond)
-		fmt.Printf("%d of %d layers on the GPU.\n", p.GPULayers, p.GPULayersTotal)
+		fmt.Printf("%s: %d of %d layers on the GPU.\n", map[string]string{qualityscore.RunsFull: "Runs fully", qualityscore.RunsPartial: "Runs partly, with the rest in system memory", qualityscore.RunsCPU: "Runs on the processor"}[row.Runs], p.GPULayers, p.GPULayersTotal)
 	}
 	score, complete := qualityscore.Score(row.Scores)
 	if !complete || row.Performance == nil {

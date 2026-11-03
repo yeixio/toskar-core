@@ -52,6 +52,10 @@ type QualityResult struct {
 	Source             string                  `json:"source,omitempty"`
 	Scores             map[string]QualityScore `json:"scores"`
 	SecondsPerQuestion float64                 `json:"seconds_per_question,omitempty"`
+	// Runs is how the model ran on that computer: full, partial, cpu, or no, when
+	// the row has no scores; Why says why it's short of full (contract 1.82).
+	Runs string `json:"runs,omitempty"`
+	Why  string `json:"why,omitempty"`
 	// Performance is how the model ran on that computer, for rows measured
 	// that way (contract 1.81). It's never part of a score.
 	Performance *QualityPerformance `json:"performance,omitempty"`
@@ -68,7 +72,6 @@ type QualityPerformance struct {
 	GPULayers                int     `json:"gpu_layers"`
 	GPULayersTotal           int     `json:"gpu_layers_total"`
 	GPUMemoryBytes           uint64  `json:"gpu_memory_bytes,omitempty"`
-	MemoryBytes              uint64  `json:"memory_bytes,omitempty"`
 	ContextWindow            int     `json:"context_window,omitempty"`
 	Quantization             string  `json:"quantization,omitempty"`
 }
