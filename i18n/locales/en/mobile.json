@@ -1187,5 +1187,35 @@
       "fix": "Fix with Toskar",
       "text": "Text"
     }
+  },
+  "speedTest": {
+    "title": "Speed test",
+    "blurb": "See how fast this device runs a local AI model, and compare it with others.",
+    "what": "Downloads {{model}} ({{size}}), then has it read a long document a few times. About 5 to 15 minutes. Plug in if you can, and keep Toskar open. Your chats aren't touched.",
+    "removed": "The model is removed afterward, so it's downloaded each time.",
+    "start": "Run the speed test",
+    "stop": "Stop",
+    "downloading": "Downloading the model… {{percent}}%",
+    "running": "Measuring… {{step}} of {{total}}",
+    "stopped": "The test stopped. Keep Toskar open while it runs, and try again.",
+    "failed": "The test didn't finish: {{message}}",
+    "score": "Toskar Score",
+    "writes": "Writes",
+    "reads": "Reads",
+    "firstToken": "First token",
+    "startToFinish": "Start to finish",
+    "speed": "{{speed}} tokens a second",
+    "gpu": "On the GPU",
+    "gpuLayers": "{{layers}} of {{total}} layers",
+    "onCpu": "On the processor",
+    "doesntRun": "This model doesn't run on this device.",
+    "doesntRunShort": "It needs more memory than this device has.",
+    "doesntRunCrash": "It closed Toskar while loading.",
+    "share": "Share in the public results",
+    "shareWhat": "This sends the device's model and memory, and these results, through a form you check and send yourself. Nothing from your chats.",
+    "results": "See all results",
+    "again": "Run again",
+    "credit": "A GitHub username to credit (optional)",
+    "creditHint": "Shows as Community without one. Ask us to remove it, or the result, any time."
   }
 }

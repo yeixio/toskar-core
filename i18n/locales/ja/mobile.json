@@ -1169,5 +1169,35 @@
       "fix": "Toskar で修正",
       "text": "テキスト"
     }
+  },
+  "speedTest": {
+    "title": "速度テスト",
+    "blurb": "このデバイスでローカルAIモデルがどれだけ速く動くかを確認し、他と比較できます。",
+    "what": "{{model}}({{size}})がなければダウンロードし、長い文書を数回読ませます。約5〜15分かかります。できれば充電しながら、Toskarを開いたままにしてください。チャットには影響しません。",
+    "removed": "モデルは終了後に削除されるため、毎回ダウンロードされます。",
+    "start": "速度テストを実行",
+    "stop": "停止",
+    "downloading": "モデルをダウンロード中… {{percent}}%",
+    "running": "測定中… {{step}}/{{total}}",
+    "stopped": "テストが止まりました。実行中はToskarを開いたままにして、もう一度お試しください。",
+    "failed": "テストを完了できませんでした: {{message}}",
+    "score": "Toskar Score",
+    "writes": "書き込み",
+    "reads": "読み込み",
+    "firstToken": "最初のトークン",
+    "startToFinish": "開始から完了まで",
+    "speed": "毎秒{{speed}}トークン",
+    "gpu": "GPU上",
+    "gpuLayers": "{{total}}層中{{layers}}層",
+    "onCpu": "プロセッサのみ",
+    "doesntRun": "このモデルはこのデバイスでは動作しません。",
+    "doesntRunShort": "このデバイスのメモリでは足りません。",
+    "doesntRunCrash": "読み込み中にToskarが終了しました。",
+    "share": "公開結果で共有",
+    "shareWhat": "デバイスの機種とメモリ、この結果を、ご自身で確認して送信するフォームで送ります。チャットの内容は含まれません。",
+    "results": "すべての結果を見る",
+    "again": "もう一度",
+    "credit": "クレジットするGitHubユーザー名(任意)",
+    "creditHint": "なければCommunityと表示されます。名前や結果の削除はいつでもご依頼いただけます。"
   }
 }

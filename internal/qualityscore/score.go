@@ -43,10 +43,22 @@ type Row struct {
 	Submitted          bool              `json:"submitted,omitempty"`
 	SubmittedBy        string            `json:"submitted_by,omitempty"`
 	Source             string            `json:"source,omitempty"`
+	Runs               string            `json:"runs,omitempty"`
+	Why                string            `json:"why,omitempty"`
 	Scores             map[string]Passed `json:"scores"`
 	SecondsPerQuestion float64           `json:"seconds_per_question,omitempty"`
 	Performance        *Performance      `json:"performance,omitempty"`
 }
+
+// How a model runs on a computer: all on its graphics card or chip; partly, with
+// the rest in system memory, as a mixture-of-experts model's experts can be; on
+// the processor alone; or not at all, which is a result worth publishing too.
+const (
+	RunsFull    = "full"
+	RunsPartial = "partial"
+	RunsCPU     = "cpu"
+	RunsNo      = "no"
+)
 
 // PerformanceFile is the report of how a model ran, beside the sets' reports.
 const PerformanceFile = "performance.json"
@@ -55,6 +67,10 @@ const PerformanceFile = "performance.json"
 // it: reading a long prompt apart from writing the answer, the wait from sending
 // to the last token, and where it ran. It's beside a Score and never in it.
 type Performance struct {
+	// Runs and Why say how it ran, and Hardware where, for the row.
+	Runs                     string  `json:"-"`
+	Why                      string  `json:"-"`
+	Hardware                 string  `json:"-"`
 	PromptTokens             int     `json:"prompt_tokens"`
 	PromptTokensPerSecond    float64 `json:"prompt_tokens_per_second"`
 	TokensPerSecond          float64 `json:"tokens_per_second"`
@@ -64,7 +80,6 @@ type Performance struct {
 	GPULayers                int     `json:"gpu_layers"`
 	GPULayersTotal           int     `json:"gpu_layers_total"`
 	GPUMemoryBytes           uint64  `json:"gpu_memory_bytes,omitempty"`
-	MemoryBytes              uint64  `json:"memory_bytes,omitempty"`
 	ContextWindow            int     `json:"context_window,omitempty"`
 	Quantization             string  `json:"quantization,omitempty"`
 }
@@ -77,7 +92,10 @@ func ReadPerformance(path, model string) (*Performance, error) {
 		return nil, err
 	}
 	var named struct {
-		Model string `json:"model"`
+		Model    string `json:"model"`
+		Runs     string `json:"runs"`
+		Why      string `json:"why"`
+		Hardware string `json:"hardware"`
 	}
 	var p Performance
 	if err := json.Unmarshal(raw, &named); err != nil {
@@ -88,6 +106,20 @@ func ReadPerformance(path, model string) (*Performance, error) {
 	}
 	if named.Model != model {
 		return nil, fmt.Errorf("%s measured %s and not %s", path, named.Model, model)
+	}
+	p.Runs, p.Why = named.Runs, named.Why
+	if named.Hardware != "" {
+		p.Hardware = hardwareFrom(named.Hardware)
+	}
+	switch p.Runs {
+	case RunsNo:
+		if p.Why == "" {
+			return nil, fmt.Errorf("%s says the model doesn't run, and not why", path)
+		}
+		return &p, nil
+	case RunsFull, RunsPartial, RunsCPU:
+	default:
+		return nil, fmt.Errorf("%s doesn't say how the model ran", path)
 	}
 	if p.TokensPerSecond <= 0 || p.PromptTokensPerSecond <= 0 || p.FirstTokenMs <= 0 || p.EffectiveTokensPerSecond <= 0 {
 		return nil, fmt.Errorf("%s has figures missing", path)
@@ -160,6 +192,18 @@ func Hardware(chip string, memoryGB uint64) string {
 	return fmt.Sprintf("%s, %d GB", CardName(chip), memoryGB)
 }
 
+<<<<<<< HEAD
+=======
+// hardwareFrom names a computer from a report's words, such as "Some Card (24 GB)".
+func hardwareFrom(name string) string {
+	if memory := memoryNote.FindStringSubmatch(name); memory != nil {
+		gb, _ := strconv.ParseUint(memory[1], 10, 64)
+		return Hardware(memoryNote.ReplaceAllString(name, ""), gb)
+	}
+	return CardName(name)
+}
+
+>>>>>>> yeixio/main
 // TestedOn reads a report's first line, and false when it has none. A run can
 // end up with another model than it asked for, so a row is only as good as this.
 func TestedOn(report string) (Tested, bool) {
@@ -167,11 +211,15 @@ func TestedOn(report string) (Tested, bool) {
 	if found == nil {
 		return Tested{}, false
 	}
+<<<<<<< HEAD
 	if memory := memoryNote.FindStringSubmatch(found[1]); memory != nil {
 		gb, _ := strconv.ParseUint(memory[1], 10, 64)
 		return Tested{Model: found[2], Hardware: Hardware(memoryNote.ReplaceAllString(found[1], ""), gb)}, true
 	}
 	return Tested{Model: found[2], Hardware: CardName(found[1])}, true
+=======
+	return Tested{Model: found[2], Hardware: hardwareFrom(found[1])}, true
+>>>>>>> yeixio/main
 }
 
 // Score is a row's overall score: the plain average of the pass rates of the

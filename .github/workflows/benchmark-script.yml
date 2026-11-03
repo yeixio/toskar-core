@@ -42,7 +42,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        runner: [toskar-mac, toskar-windows]
+        runner: [toskar-windows]
     runs-on: [self-hosted, "${{ matrix.runner }}"]
     timeout-minutes: 480
     steps:

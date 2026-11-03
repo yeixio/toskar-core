@@ -1206,5 +1206,35 @@
       "fix": "Corrigir com o Toskar",
       "text": "Texto"
     }
+  },
+  "speedTest": {
+    "title": "Teste de velocidade",
+    "blurb": "Veja a que velocidade este dispositivo roda um modelo de IA local e compare com outros.",
+    "what": "Baixa {{model}} ({{size}}) se ainda não estiver aqui e faz o modelo ler um documento longo algumas vezes. Cerca de 5 a 15 minutos. Conecte à energia se puder e mantenha o Toskar aberto. Suas conversas não são tocadas.",
+    "removed": "O modelo é removido depois, então é baixado a cada vez.",
+    "start": "Fazer o teste de velocidade",
+    "stop": "Parar",
+    "downloading": "Baixando o modelo… {{percent}}%",
+    "running": "Medindo… {{step}} de {{total}}",
+    "stopped": "O teste parou. Mantenha o Toskar aberto durante o teste e tente de novo.",
+    "failed": "O teste não terminou: {{message}}",
+    "score": "Toskar Score",
+    "writes": "Escreve",
+    "reads": "Lê",
+    "firstToken": "Primeiro token",
+    "startToFinish": "Do início ao fim",
+    "speed": "{{speed}} tokens por segundo",
+    "gpu": "Na GPU",
+    "gpuLayers": "{{layers}} de {{total}} camadas",
+    "onCpu": "No processador",
+    "doesntRun": "Este modelo não roda neste dispositivo.",
+    "doesntRunShort": "Ele precisa de mais memória do que este dispositivo tem.",
+    "doesntRunCrash": "Ele fechou o Toskar ao carregar.",
+    "share": "Compartilhar nos resultados públicos",
+    "shareWhat": "Isso envia o modelo e a memória do dispositivo, e estes resultados, por um formulário que você confere e envia. Nada das suas conversas.",
+    "results": "Ver todos os resultados",
+    "again": "Repetir",
+    "credit": "Um usuário do GitHub para o crédito (opcional)",
+    "creditHint": "Sem ele, aparece como Community. Peça para removê-lo, ou remover o resultado, quando quiser."
   }
 }

@@ -495,6 +495,13 @@
     "overallValue": "{{score}} (v{{version}})",
     "writes": "書き込み (トークン/秒)",
     "reads": "読み込み (トークン/秒)",
-    "firstToken": "最初のトークン"
+    "firstToken": "最初のトークン",
+    "runs": "動作",
+    "runsValue": {
+      "full": "完全",
+      "partial": "一部",
+      "cpu": "プロセッサのみ",
+      "no": "動作しない"
+    }
   }
 }

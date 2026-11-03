@@ -28,7 +28,7 @@ Web pages are fixed copies, so an answer that has the right facts got them from 
 ## How it's scored
 
 - **Each set's score is cases passed, out of cases run.** There's no weighting.
-- **Only complete results are published.** A row has all of Quality, Topics, Files, and Reasoning. Other sets, such as Media and Triage, are measured for our own checks and stay out of the results.
+- **Only complete results are published.** A row has all of Quality, Topics, Files, and Reasoning, or says the model doesn't run on that computer. Other sets, such as Media and Triage, are measured for our own checks and stay out of the results.
 - **A row's Score is the plain average of the pass rates of those four,** from 0 to 100, shown with the method's version, such as 95 (v1). Speed stays beside it and not in it, since a fast wrong answer shouldn't beat a slow right one. It's a score for these sets and not a verdict on the best model: they're easy enough that good models bunch near the top, and a small model can pass a large one.
 - **A model's answers vary from run to run.** Run more than once, a set reports its pass rate with a 95% interval (Wilson) and which cases were flaky.
 - **A set only fails when the numbers say so.** Below the bar, but with the interval reaching it, passes with a note saying more runs would tell. These bars decide whether a release or a change passes, not how a model looks in the results.
@@ -44,6 +44,17 @@ Web pages are fixed copies, so an answer that has the right facts got them from 
 
 **Media** is judged like this. A file must first be whole and the right size. Another model that sees then says whether it shows what was asked and whether any part is corrupted. A picture or clip fails as corrupted only if a second, larger model agrees. Whether a clip moves is measured from how much its frames differ, because the models asked got that wrong. A judge that makes a file instead of answering fails the case.
 
+## Whether it runs
+
+Each new row says how the model ran on that computer, from the runtime's own report:
+
+| Runs | What it means |
+|---|---|
+| **Fully** | Every layer on the graphics card or chip |
+| **Partly** | Some layers on the card and the rest in system memory, as a large model or a mixture-of-experts model's experts can be. It works, usually slower |
+| **On the processor** | Nothing on a graphics card |
+| **Doesn't run** | It ran out of memory loading or answering. The row has no scores, and says so. Any other failure says nothing about the model, so it isn't published |
+
 ## How fast it ran
 
 Speed is measured apart from quality, and never counts toward a Score. New rows have all of these, from three runs of a document of about 4,000 tokens, new each run so nothing comes from a cache:
@@ -55,7 +66,7 @@ Speed is measured apart from quality, and never counts toward a Score. New rows 
 | **First token** | How long you wait after sending, with that long prompt |
 | **Start to finish**, in tokens a second | The answer's tokens over the whole wait, which is lower than Writes, and closer to how it feels |
 | **GPU layers**, such as 15 of 65 | How much of the model ran on the graphics card. Partly on the card is much slower |
-| **Memory** | What the model took, on the graphics card and in all |
+| **Memory** | What the model took on the graphics card |
 | **Quantization and context window** | Which file of the model ran, and how much it could hold in mind |
 
 A Score stays comparable because the same cases run each time. Speed depends on the computer, what else it's doing, and these settings.
@@ -91,7 +102,7 @@ A run of a small model took about 25 minutes on an M5 Pro with 24 GB. A large mo
 
 **To send your results,** [open the results form](https://github.com/yeixio/toskar-core/issues/new?template=quality_results.yml) and paste `result.json` from the `quality-score-<model>` folder. Reports with every answer are there too. **What you share is public:** `result.json` has your model, scores, date, graphics card or processor, and memory. Look before you paste, since the reports hold the model's answers and the log has paths from your computer.
 
-We read each one and add it to the results, marked as submitted by the community, with the quality version it ran. A result can be left out if it looks wrong or doesn't match its reports. We can't check how a run was done, so treat these as what they are: one person's run. [#1037](https://github.com/yeixio/toskar-core/issues/1037) is about making this one step, inside Toskar.
+We read each one and add it to the results, with the quality version it ran. Every row says who ran it: Toskar for our own runs, your GitHub username if you give one, or Community. A username shows only if it matches who sent the form, so nobody can post as someone else. A result can be left out if it looks wrong or doesn't match its reports. We can't check how a run was done, so treat these as what they are: one person's run. [#1037](https://github.com/yeixio/toskar-core/issues/1037) is about making this one step, inside Toskar.
 
 To check Toskar itself, with no model and no download, `make quality` runs the sets with a scripted stand-in. The [README](../tests/quality/README.md#running-it) has every other way to run it.
 

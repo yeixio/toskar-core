@@ -13,12 +13,13 @@ const METHOD_URL = 'https://github.com/yeixio/toskar-core/blob/main/docs/quality
 const SUGGEST_URL = 'https://github.com/yeixio/toskar-core/issues/new?template=quality_suggestion.yml'
 const CONTRIBUTE_URL = `${METHOD_URL}#add-your-computers-results`
 
-type SortKey = 'name' | 'hardware' | 'date' | 'method_version' | 'overall' | 'writes' | 'reads' | 'first_token' | `suite:${string}`
+type SortKey = 'name' | 'hardware' | 'date' | 'method_version' | 'overall' | 'runs' | 'writes' | 'reads' | 'first_token' | `suite:${string}`
 
 function valueOf(row: QualityResult, key: SortKey): string | number | null {
   if (key === 'name' || key === 'hardware' || key === 'date') return row[key]
   if (key === 'method_version') return row.method_version
   if (key === 'overall') return overallScore(row.scores)
+  if (key === 'runs') return row.runs ?? null
   if (key === 'writes') return row.performance?.tokens_per_second ?? null
   if (key === 'reads') return row.performance?.prompt_tokens_per_second ?? null
   if (key === 'first_token') return row.performance?.first_token_ms ?? null
@@ -118,6 +119,7 @@ export function ResultsTab() {
           <thead className="text-ink-muted">
             <tr className="border-b border-line">
               {heading('name', t('results.model'))}
+              {heading('runs', t('results.runs'))}
               {heading('overall', t('results.overall'))}
               {suites.map((s) => heading(`suite:${s}`, suiteName(s)))}
               {heading('writes', t('results.writes'))}
@@ -140,6 +142,7 @@ export function ResultsTab() {
                     <span className="ms-2 text-xs font-normal text-ink-muted">{r.submitted_by || t('results.community')}</span>
                   ) : null}
                 </th>
+                <td className="whitespace-nowrap px-3 py-2">{r.runs ? t(`results.runsValue.${r.runs}`) : none}</td>
                 <td className="whitespace-nowrap px-3 py-2 font-medium tabular-nums">
                   {overallScore(r.scores) === null ? none : t('results.overallValue', { score: overallScore(r.scores), version: r.method_version })}
                 </td>

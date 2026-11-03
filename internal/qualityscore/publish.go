@@ -19,7 +19,8 @@ const reportFolderPrefix = "quality-report-real-models-"
 // tested that model: "recommended" stands for several, and a report naming
 // another means the run didn't test the one it was asked to. Only a complete
 // row is published, with a score from every one of Sets and its performance,
-// so every row can be compared and has a Score. Publishing the same run again adds nothing. It says
+// so every row can be compared and has a Score, or a model that didn't run at all,
+// which says so and why. Publishing the same run again adds nothing. It says
 // what it did on log.
 func Publish(reports, resultsPath string, version int, names map[string]string, source string, now time.Time, log func(string)) error {
 	raw, err := os.ReadFile(resultsPath)
@@ -82,6 +83,19 @@ func Publish(reports, resultsPath string, version int, names map[string]string, 
 // weeklyRow is a model's row, without what its folder doesn't say, or why it has none.
 func weeklyRow(model, folder string) (Row, string) {
 	row := Row{Model: model, Scores: map[string]Passed{}}
+	performance, err := ReadPerformance(filepath.Join(folder, PerformanceFile), model)
+	if err != nil {
+		return row, "no performance figures: " + err.Error()
+	}
+	row.Runs, row.Why = performance.Runs, performance.Why
+	// A model that doesn't run has no scores to compare: this is its whole result.
+	if performance.Runs == RunsNo {
+		row.Hardware = performance.Hardware
+		if row.Hardware == "" {
+			return row, "its report doesn't name the computer"
+		}
+		return row, ""
+	}
 	for _, set := range Sets {
 		raw, err := os.ReadFile(filepath.Join(folder, set.Report))
 		if err != nil {
@@ -106,10 +120,6 @@ func weeklyRow(model, folder string) (Row, string) {
 	}
 	if _, complete := Score(row.Scores); !complete {
 		return row, "its reports don't have a score from all of " + setNames()
-	}
-	performance, err := ReadPerformance(filepath.Join(folder, PerformanceFile), model)
-	if err != nil {
-		return row, "no performance figures: " + err.Error()
 	}
 	row.Performance = performance
 	return row, ""

@@ -1169,5 +1169,35 @@
       "fix": "Toskar로 고치기",
       "text": "텍스트"
     }
+  },
+  "speedTest": {
+    "title": "속도 테스트",
+    "blurb": "이 기기에서 로컬 AI 모델이 얼마나 빠르게 실행되는지 확인하고 다른 기기와 비교해 보세요.",
+    "what": "{{model}}({{size}})이 없으면 다운로드한 뒤 긴 문서를 몇 번 읽게 합니다. 약 5~15분 걸립니다. 가능하면 충전기를 연결하고 Toskar를 열어 두세요. 채팅에는 영향을 주지 않습니다.",
+    "removed": "모델은 끝난 뒤 삭제되므로 매번 다운로드됩니다.",
+    "start": "속도 테스트 실행",
+    "stop": "중지",
+    "downloading": "모델 다운로드 중… {{percent}}%",
+    "running": "측정 중… {{total}}개 중 {{step}}",
+    "stopped": "테스트가 중지되었습니다. 실행 중에는 Toskar를 열어 두고 다시 시도하세요.",
+    "failed": "테스트를 마치지 못했습니다: {{message}}",
+    "score": "Toskar Score",
+    "writes": "쓰기",
+    "reads": "읽기",
+    "firstToken": "첫 토큰",
+    "startToFinish": "시작부터 끝까지",
+    "speed": "초당 {{speed}}토큰",
+    "gpu": "GPU에서",
+    "gpuLayers": "{{total}}개 중 {{layers}}개 레이어",
+    "onCpu": "프로세서에서",
+    "doesntRun": "이 모델은 이 기기에서 실행되지 않습니다.",
+    "doesntRunShort": "이 기기의 메모리보다 더 많이 필요합니다.",
+    "doesntRunCrash": "로드 중에 Toskar가 닫혔습니다.",
+    "share": "공개 결과에 공유",
+    "shareWhat": "기기 모델과 메모리, 이 결과를 직접 확인하고 보내는 양식으로 전송합니다. 채팅 내용은 포함되지 않습니다.",
+    "results": "모든 결과 보기",
+    "again": "다시 실행",
+    "credit": "크레딧에 표시할 GitHub 사용자 이름(선택)",
+    "creditHint": "없으면 Community로 표시됩니다. 이름이나 결과 삭제는 언제든 요청할 수 있습니다."
   }
 }

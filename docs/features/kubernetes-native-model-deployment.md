@@ -252,7 +252,7 @@ GPU: NVIDIA RTX 4090
 GPU count: 1
 GPU memory: 24 GB
 Labels:
-  yggdrasil.ai/workload=model
+  toskar.ai/workload=model
 Status: Ready
 ```
 
@@ -281,7 +281,7 @@ If introduced, deploy it as a DaemonSet.
 
 ```text
 DaemonSet
-└── yggdrasil-node-agent
+└── toskar-node-agent
     └── one Pod per eligible node
 ```
 
@@ -687,7 +687,7 @@ Model workloads should ideally live in a dedicated namespace.
 Suggested default:
 
 ```text
-Namespace: yggdrasil
+Namespace: toskar
 ```
 
 ---
@@ -699,7 +699,7 @@ V1 should support a configured namespace.
 Default:
 
 ```text
-yggdrasil
+toskar
 ```
 
 Possible future support:
@@ -918,7 +918,7 @@ helm install toskar ./charts/toskar-core
 Future:
 
 ```bash
-helm repo add yggdrasil ...
+helm repo add toskar ...
 helm install toskar toskar/toskar-core
 ```
 
@@ -1179,16 +1179,16 @@ Advanced details can expose:
 Potential commands:
 
 ```text
-yggdrasilctl kubernetes status
-yggdrasilctl kubernetes nodes
-yggdrasilctl model deploy MODEL --target kubernetes
-yggdrasilctl model deployments
-yggdrasilctl model stop DEPLOYMENT
+toskarctl kubernetes status
+toskarctl kubernetes nodes
+toskarctl model deploy MODEL --target kubernetes
+toskarctl model deployments
+toskarctl model stop DEPLOYMENT
 ```
 
 Exact commands should follow the existing CLI structure.
 
-Do not introduce a separate `kubectl-yggdrasil` tool for V1 unless a compelling need emerges.
+Do not introduce a separate `kubectl-toskar` tool for V1 unless a compelling need emerges.
 
 ---
 

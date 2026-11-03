@@ -7,68 +7,26 @@
   </picture>
 </p>
 
-> **Local AI should be as easy to use as SaaS AI.**
+<h3 align="center">Run local AI on every computer you own.</h3>
+<p align="center">Toskar runs open models like Llama, Qwen, Gemma, Mistral, and DeepSeek <b>on your own Macs, PCs, and Linux machines</b>, not in the cloud.<br>It picks a model that fits, runs it on the computer that can handle it, and lets you manage models and access for everyone on your network.</p>
 
-**An open-source control plane that makes local AI feel like a hosted AI service.**
+<p align="center">
+  <a href="#quick-start"><b>Install</b></a> · <a href="#what-it-does">What it does</a> ·
+  <a href="#run-it-for-your-household-or-team">For your network</a> ·
+  <a href="#works-with-your-tools">Works with</a> · <a href="#supported-hardware">Hardware</a> ·
+  <a href="#documentation">Docs</a> · <a href="CONTRIBUTING.md">Contribute</a>
+</p>
 
-Toskar Core is built around one goal: make running AI on hardware you own feel as simple as using a hosted service.
+<p align="center">
+  <a href="https://github.com/yeixio/toskar-core/releases/latest"><img src="https://img.shields.io/github/v/release/yeixio/toskar-core?label=download&color=0ab887" alt="Download Toskar Core"></a>
+  <a href="https://github.com/yeixio/toskar-core/actions/workflows/ci.yml"><img src="https://github.com/yeixio/toskar-core/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="https://github.com/yeixio/toskar-core/actions/workflows/security.yml"><img src="https://github.com/yeixio/toskar-core/actions/workflows/security.yml/badge.svg" alt="Security"></a>
+  <a href="https://github.com/yeixio/toskar-core/actions/workflows/ci.yml"><img src="https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Fyeixio%2Ftoskar-core%2Fcoverage%2Fcoverage.json" alt="Coverage"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-AGPL--3.0--or--later-blue.svg" alt="License: AGPL-3.0-or-later"></a>
+  <a href="https://glama.ai/mcp/servers/yeixio/toskar-core"><img src="https://glama.ai/mcp/servers/yeixio/toskar-core/badges/score.svg" alt="Toskar on Glama" height="20"></a>
+</p>
 
-You should not need to understand model formats, runtimes, GPU backends, memory limits, networking, or cluster scheduling just to use local AI.
-
-Toskar detects your hardware, recommends and manages models, starts the right runtime, uses other computers when needed, and exposes a consistent API to your applications. It manages models, runtimes, hardware, and multiple computers behind that API.
-
-**Your computers. Your models. Your AI.**
-
-The daemon (`toskar`), the local web UI, and the HTTP API are in this repository. Toskar Pro (the app for your computer) and Toskar (the app for phones, tablets, watches, and TVs) are separate clients, developed outside this repository.
-
-**Status:** Stable. See the latest [GitHub Release](https://github.com/yeixio/toskar-core/releases).
-
-[Quick start](#quick-start) · [Documentation](#documentation) · [Roadmap](ROADMAP.md) · [Contributing](CONTRIBUTING.md)
-
-[![CI](https://github.com/yeixio/toskar-core/actions/workflows/ci.yml/badge.svg)](https://github.com/yeixio/toskar-core/actions/workflows/ci.yml)
-[![Security](https://github.com/yeixio/toskar-core/actions/workflows/security.yml/badge.svg)](https://github.com/yeixio/toskar-core/actions/workflows/security.yml)
-[![Coverage](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Fyeixio%2Ftoskar-core%2Fcoverage%2Fcoverage.json)](https://github.com/yeixio/toskar-core/actions/workflows/ci.yml)
-[![License: AGPL-3.0-or-later](https://img.shields.io/badge/license-AGPL--3.0--or--later-blue.svg)](LICENSE)
-
-## Design principle
-
-Toskar is not trying to expose every local-AI knob.
-
-It is trying to make those knobs unnecessary.
-
-The default experience should be:
-
-**Choose AI → Use AI**
-
-Advanced controls should exist when needed, but users should not have to become AI infrastructure engineers to run models locally.
-
-## Why Toskar?
-
-Hosted AI is easy:
-
-1. Pick a model.
-2. Send a request.
-3. Get an answer.
-
-Local AI often is not.
-
-Before you can ask a question, you may need to understand model formats, quantization, runtime backends, GPU support, memory requirements, context sizes, ports, APIs, and which machine can actually run the model.
-
-Toskar's goal is to hide that complexity.
-
-You choose what AI you want to use. Toskar figures out how to run it on the hardware you own.
-
-To make that possible, Core:
-
-- detects the CPU, memory, storage, and accelerators available
-- determines which models fit
-- installs and manages model runtimes
-- downloads and manages models
-- starts and stops models when they are needed, and unloads them after they sit idle
-- discovers other Toskar computers
-- places workloads on machines that can run them
-- monitors model and node health
-- exposes one consistent OpenAI-compatible API
+**Free and open source. No cloud, no account, and no usage telemetry by default.** By default, your prompts and files go to models on your hardware, never to an AI company; web search and outside services are there only if you turn them on. The daemon (`toskar`), the local web UI, and the HTTP API are in this repository.
 
 <p align="center">
   <a href="docs/screenshots/demo.mp4">
@@ -76,9 +34,54 @@ To make that possible, Core:
   </a>
 </p>
 
+## What it does
+
+Hosted AI is easy: pick a model, send a request, get an answer. Local AI usually means learning model formats, quantization, GPU backends, memory limits, ports, and which machine can run what. Toskar handles that part.
+
+- **Picks models that fit.** It detects your CPU, GPU, and memory, shows which GGUF models fit, installs llama.cpp, downloads the model, starts it when needed, and unloads it when it sits idle.
+- **Uses all your computers.** It finds other Toskar computers on your network, pairs with them after you agree, and sends each job to the machine that can run it: a model, the workers of a multi-step plan, an automation, or a training run. (Each model runs whole on one computer. Toskar does not split one model across machines.)
+- **Manages AI for everyone on your network.** Like Rancher, but for AI models: one admin decides which models, profiles, and tools each person gets, and everyone else just signs in and chats. See [Run it for your household or team](#run-it-for-your-household-or-team).
+- **Chooses a model per request.** With **Auto**, quick questions, coding, current information, and detailed work each go to a model suited to them, with a retry on another model when one fails.
+- **Does more than chat.** Persistent memory, knowledge from your files, PDFs, and databases, tools with Allow / Ask / Deny permissions, MCP servers, scheduled automations, and LoRA training on your own examples.
+- **Speaks your language.** The web UI comes in 10 languages: English, Deutsch, Español, Français, Italiano, Português, 日本語, 한국어, 简体中文, and 繁體中文.
+
+## Run it for your household or team
+
+One computer can serve AI to everyone on your network, whether that's a family, a home lab, or a small office. Toskar keeps their chats separate and lets you control what each person can use:
+
+- **People and roles.** Add people as Owner, Admin, Member, or Visitor. They sign in with a password or invite link, your OpenID Connect provider, or a reverse proxy such as Authelia, Authentik, Cloudflare Access, or Tailscale.
+- **Private by person.** Each person's chats, memories, files, and automations are theirs alone.
+- **Control what people use.** Admins pin people or roles to specific profiles, and turn files, the web, making pictures or video, and tools that change things on or off for each one.
+- **Keep assistants on topic.** A profile can stick to its subject and decline anything else.
+- **Chat portals.** Publish a branded chat page at `/p/<name>`, with its own profile, passcode, and message limits, for people who shouldn't see the rest of the app.
+- **Keys and devices.** Per-key API permissions, phones and TVs that connect with a 6-digit code, and a log of who added or changed which people.
+
+How it works is in [docs/people.md](docs/people.md) and [docs/api.md](docs/api.md#people).
+
+## Works with your tools
+
+Toskar is not a gateway to OpenAI or Anthropic. It speaks the same API formats they do, so apps built for them can use the models on your own computers instead, with no account or API key from either company. Point the app at `http://127.0.0.1:7331`:
+
+| API | For |
+| --- | --- |
+| OpenAI `/v1/chat/completions` and `/v1/models` | Apps, scripts, and SDKs built for OpenAI |
+| Anthropic `/v1/messages` | Coding agents built for Claude's API, such as Claude Code |
+| OpenAI `/v1/responses` | Agents that use OpenAI's Responses format, such as Codex-style tools |
+| MCP (`/mcp`, or `toskarctl mcp` over stdio) | AI apps that add MCP servers, so they can use your local models and knowledge |
+
+Details and limits are in [docs/api.md](docs/api.md) and [docs/mcp.md](docs/mcp.md).
+
 ## Quick start
 
-Open `http://127.0.0.1:7331` after the daemon is running. The API listens on `127.0.0.1:7331`. The first page can install a runtime and a GGUF model.
+On Linux or macOS, one line installs it and starts it as a service:
+
+```bash
+curl -fsSL https://github.com/yeixio/toskar-core/releases/latest/download/install.sh | sh
+```
+
+Then open `http://127.0.0.1:7331`. The first page installs a runtime and a model that fits your computer. The API listens on `127.0.0.1:7331`. The script checks each download against the release's `SHA256SUMS.txt`. On Linux it installs the `.deb` or `.rpm`; on macOS, the headless archive run by launchd.
+
+Prefer a package manager, or on Windows? Use the steps below.
 
 ### macOS
 
@@ -239,7 +242,9 @@ curl http://127.0.0.1:7331/v1/chat/completions \
 
 ## Supported hardware
 
-The daemon inventories the host on macOS, Windows, and Linux, including NVIDIA, AMD, Intel, and Apple GPUs when the platform probes succeed. Detection is not a promise that inference has been measured on every combination. The matrix is in [docs/compatibility.md](docs/compatibility.md). A hardware report is a useful contribution.
+The daemon inventories the host on macOS, Windows, and Linux, including NVIDIA, AMD, Intel, and Apple GPUs when the platform probes succeed. Detection is not a promise that inference has been measured on every combination. The matrix is in [docs/compatibility.md](docs/compatibility.md).
+
+What has been measured so far: the weekly quality runs use an AMD Radeon RX 7900 XTX on Linux through Vulkan, with Qwen 2.5 7B, 14B, and 32B fully on the GPU, and with a small draft model those 32B and 14B models answered about 1.9× and 1.6× as fast. Training with MLX has been run end to end on an Apple M5 Pro. Everything else is detected and should work, but hasn't been measured yet. Results people have shared from their own machines are on [toskar.ai/models/results](https://toskar.ai/models/results). **If you run Toskar on other hardware, a [hardware report](https://github.com/yeixio/toskar-core/issues/new?template=hardware_compatibility.yml) is one of the most useful contributions you can make.** It needs no code.
 
 Each running model shows whether it runs on the GPU, partly, or on the CPU, read from llama.cpp's own report, and the Performance page shows live GPU use, memory, temperature, and power. What each computer needs for its GPU, what the installers set up, and how to fix a model stuck on the CPU are in [docs/gpu.md](docs/gpu.md).
 
@@ -393,11 +398,20 @@ Nothing in the software is gated on a donation.
 
 [![Donate to Toskar](https://img.shields.io/badge/Donate-Support_Toskar-ff6a55?style=for-the-badge&logo=stripe&logoColor=white)](https://yeix.io/donate/toskar)
 
-## Toskar Pro and Toskar
+## What's free, and what the apps add
 
-Toskar Core is the open-source engine. You can run the daemon and the web UI in this repository directly.
+Everything in this repository is free and open source under the AGPL, and nothing in it needs the paid apps. The apps are separate products built outside this repository.
 
-Toskar Pro and Toskar are separate products. Toskar Pro is the packaged app for your computer, on the Mac App Store; Toskar is the app for phones, tablets, watches, and TVs, on the App Store. This repository does not contain their source, and their release artifacts are built outside this tree. The public site describes both products at [toskar.ai](https://toskar.ai).
+| | Toskar Core (this repository) | Toskar Pro | Toskar |
+| --- | --- | --- | --- |
+| **What it is** | The engine: the `toskar` daemon, the local web UI, `toskarctl`, and the API | The app for your computer, the hub your other devices connect to | The app for phones, tablets, watches, and TVs |
+| **Price** | Free, AGPL-3.0-or-later | One price, no subscription | Paid app |
+| **Where to get it** | Homebrew, apt, rpm, release archives, or a source build | Mac App Store and Microsoft Store | App Store and Google Play |
+| **Models, chat, memory, knowledge, tools, automations** | Included, in the web UI and API | Included, in a desktop app | Uses a computer running Core or Pro |
+| **Several computers on your network** | Included | Included | Connects to them with a 6-digit code |
+| **People and roles, MCP, OpenAI and Anthropic APIs** | Included | See [toskar.ai/desktop](https://toskar.ai/desktop) | Not applicable |
+
+On your own network nothing costs money. Reaching your computer from away from home through Toskar's relay is an optional subscription. Details are at [toskar.ai](https://toskar.ai).
 
 ## License
 

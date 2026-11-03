@@ -1169,5 +1169,35 @@
       "fix": "用 Toskar 修正",
       "text": "文字"
     }
+  },
+  "speedTest": {
+    "title": "速度测试",
+    "blurb": "看看这台设备运行本地 AI 模型有多快,并与其他设备比较。",
+    "what": "如果没有 {{model}}({{size}})就下载,然后让它读几遍一份长文档。大约需要 5 到 15 分钟。尽量接上电源,并保持 Toskar 打开。不会影响你的聊天。",
+    "removed": "模型会在结束后删除,因此每次都要下载。",
+    "start": "运行速度测试",
+    "stop": "停止",
+    "downloading": "正在下载模型… {{percent}}%",
+    "running": "正在测量… {{step}}/{{total}}",
+    "stopped": "测试已停止。运行时请保持 Toskar 打开,然后重试。",
+    "failed": "测试未完成:{{message}}",
+    "score": "Toskar Score",
+    "writes": "写入",
+    "reads": "读取",
+    "firstToken": "首个词元",
+    "startToFinish": "从开始到结束",
+    "speed": "每秒 {{speed}} 个词元",
+    "gpu": "在 GPU 上",
+    "gpuLayers": "{{total}} 层中的 {{layers}} 层",
+    "onCpu": "仅处理器",
+    "doesntRun": "此模型无法在这台设备上运行。",
+    "doesntRunShort": "它需要的内存超过了这台设备的内存。",
+    "doesntRunCrash": "加载时 Toskar 被关闭了。",
+    "share": "分享到公开结果",
+    "shareWhat": "这会通过你亲自检查并发送的表单,发送设备型号、内存和这些结果。不包含你的聊天内容。",
+    "results": "查看所有结果",
+    "again": "再次运行",
+    "credit": "用于署名的 GitHub 用户名(可选)",
+    "creditHint": "不填则显示为 Community。你可以随时要求我们删除署名或结果。"
   }
 }
