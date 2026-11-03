@@ -42,7 +42,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        runner: [toskar-models, toskar-mac, toskar-windows]
+        runner: [toskar-mac, toskar-windows]
     runs-on: [self-hosted, "${{ matrix.runner }}"]
     timeout-minutes: 480
     steps:
@@ -66,6 +66,8 @@ jobs:
           go build -o "$work/toskar-quality$ext" ./cmd/qualityrun
           go test -c -o "$work/harness/quality.test$ext" ./tests/quality
           cp tests/quality/*.json "$work/harness/"
+          cp -R tests/quality/fixtures "$work/harness/fixtures"
+          cp internal/mimir/testdata/scanned.pdf "$work/harness/fixtures/"
           "$work/toskar-quality$ext" run --yes --model "$MODEL" --toskar "$work/toskar$ext" --harness "$work/harness" \
             --out "$work/out" --data "$HOME/.cache/toskar-quality" --port 7361
       - uses: actions/upload-artifact@v7
