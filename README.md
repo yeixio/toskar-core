@@ -8,10 +8,11 @@
 </p>
 
 <h3 align="center">Run local AI on every computer you own.</h3>
-<p align="center">One OpenAI- and Anthropic-compatible API for your Macs, PCs, and Linux boxes.<br>Toskar picks a model that fits and runs it on the computer that can handle it, all on your own hardware.</p>
+<p align="center">One OpenAI- and Anthropic-compatible API for your Macs, PCs, and Linux boxes.<br>Toskar picks a model that fits, runs it on the computer that can handle it, and lets you manage models and access for everyone on your network.</p>
 
 <p align="center">
   <a href="#quick-start"><b>Install</b></a> · <a href="#what-it-does">What it does</a> ·
+  <a href="#run-it-for-your-household-or-team">For your network</a> ·
   <a href="#works-with-your-tools">Works with</a> · <a href="#supported-hardware">Hardware</a> ·
   <a href="#documentation">Docs</a> · <a href="CONTRIBUTING.md">Contribute</a>
 </p>
@@ -39,9 +40,23 @@ Hosted AI is easy: pick a model, send a request, get an answer. Local AI usually
 
 - **Picks models that fit.** It detects your CPU, GPU, and memory, shows which GGUF models fit, installs llama.cpp, downloads the model, starts it when needed, and unloads it when it sits idle.
 - **Uses all your computers.** It finds other Toskar computers on your network, pairs with them after you agree, and sends each job to the machine that can run it: a model, the workers of a multi-step plan, an automation, or a training run. (Each model runs whole on one computer. Toskar does not split one model across machines.)
+- **Manages AI for everyone on your network.** Like Rancher, but for AI models: one admin decides which models, profiles, and tools each person gets, and everyone else just signs in and chats. See [Run it for your household or team](#run-it-for-your-household-or-team).
 - **Chooses a model per request.** With **Auto**, quick questions, coding, current information, and detailed work each go to a model suited to them, with a retry on another model when one fails.
 - **Does more than chat.** Persistent memory, knowledge from your files, PDFs, and databases, tools with Allow / Ask / Deny permissions, MCP servers, scheduled automations, and LoRA training on your own examples.
 - **Speaks your language.** The web UI comes in 10 languages: English, Deutsch, Español, Français, Italiano, Português, 日本語, 한국어, 简体中文, and 繁體中文.
+
+## Run it for your household or team
+
+One computer can serve AI to everyone on your network, whether that's a family, a home lab, or a small office. Toskar keeps their chats separate and lets you control what each person can use:
+
+- **People and roles.** Add people as Owner, Admin, Member, or Visitor. They sign in with a password or invite link, your OpenID Connect provider, or a reverse proxy such as Authelia, Authentik, Cloudflare Access, or Tailscale.
+- **Private by person.** Each person's chats, memories, files, and automations are theirs alone.
+- **Control what people use.** Admins pin people or roles to specific profiles, and turn files, the web, making pictures or video, and tools that change things on or off for each one.
+- **Keep assistants on topic.** A profile can stick to its subject and decline anything else.
+- **Chat portals.** Publish a branded chat page at `/p/<name>`, with its own profile, passcode, and message limits, for people who shouldn't see the rest of the app.
+- **Keys and devices.** Per-key API permissions, phones and TVs that connect with a 6-digit code, and a log of who added or changed which people.
+
+How it works is in [docs/people.md](docs/people.md) and [docs/api.md](docs/api.md#people).
 
 ## Works with your tools
 
