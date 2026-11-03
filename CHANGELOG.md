@@ -8,6 +8,49 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Thi
 
 Changes waiting for the next release are in [changes/unreleased/](changes/unreleased/), one file per pull request. `scripts/changelog.py preview` shows them together, and `scripts/changelog.py release <version>` writes them here when the release is cut.
 
+## [1.12.2] - 2026-11-03
+
+### Added
+
+- `toskarctl chat` has `/log`: what ran in this chat, its result, and who allowed it. The record keeps a command whole, and a command that fails counts as failed.
+- `curl -fsSL https://toskar.ai/benchmark.sh | sh`, or `irm https://toskar.ai/benchmark.ps1 | iex` on Windows, measures a model on your own computer, with nothing else to install. It suggests a model that fits, shows a Score and how fast it ran, and you choose whether to share it.
+- `toskarctl help` lists every command by what it's for, and `toskarctl help <command>` or `--help` explains each one, with its flags and examples that are tested. A mistyped command suggests the nearest one.
+- `GET /api/v1/models/store`: the model store's shelves for this computer, from Hugging Face's rankings and the models tested with Toskar.
+- `docs/quality.md` explains how quality is measured, and how to suggest changes. Results now name the version of the method that measured them.
+- `scripts/quality-score.sh` measures a model on your own computer, in a throwaway Toskar, and writes a result you can send us.
+- The benchmark has a Long prompt workload: a document of about 4,000 tokens, new each run, to show how long a model takes to read it and start answering.
+- Models has a Results tab: what Toskar's test runs have measured so far, per model, computer, and date, to sort through. It links to how it's measured, and how to add your own.
+- `toskarctl chat` works in the folder you start it in, on the computer Toskar runs on: commands run there, its file tools reach only that folder, and it follows the project's notes in `AGENTS.md`, `TOSKAR.md`, or `CLAUDE.md`. Reading a file in the project no longer makes the next known command ask after "always".
+- In `toskarctl chat`, work you ask for now goes on until it's done or stuck, instead of stopping after a few tool calls, with the tools it may turn out to need. It says what it did and what's left when it stops.
+
+### Changed
+
+- Terminal commands that can delete or change things outside the chat, or that Toskar can't read or doesn't recognize, now ask every time. This holds even for a profile that allows the terminal and after "always in this chat", and automations skip them and report it. A command that can't be undone says so.
+- `toskarctl chat` shows answers as they're written, and rewrites what it showed when Toskar changes it, such as taking back a sentence before using a tool. Piped output still gets the whole answer.
+- After "always in this chat", output from a known command such as `go test` no longer makes the next known command ask, so a fix-and-test loop can keep going. Web pages, files, and commands Toskar can't vouch for still make it ask, and the prompt says what "always" trusts.
+- The Models page is now a store: shelves of popular, top rated, and new models from Hugging Face, plus everyday, code, pictures, small, and tested by Toskar, all of which run on your computer. Choose a model for its license and a link to its Hugging Face page.
+- The public model results only hold complete rows, with all of Quality, Topics, Files, and Reasoning, so every row can be compared.
+- Model results name a computer the same way in every run: its graphics card or chip, and the memory a model can use there. They also record what a model ran on, such as Vulkan or Metal.
+- Releases include `toskar-quality`, which measures a model on your own computer without Go, Python, or a checkout. Its result now has a Score: the average of the four sets' pass rates, shown with the method's version.
+- The weekly quality run works through a public list of popular models, a few each week, so the results slowly cover what people use.
+- Model results record how a model ran: reading and writing speed, first token, start-to-finish speed, GPU layers, GPU memory, quantization, and context window.
+- Model results say whether a model runs fully, partly, on the processor alone, or not at all on that computer. A model that doesn't run gets a row of its own, with no scores.
+- Each weekly quality run adds its scores to the public results by itself.
+- The Results tab on Models shows each result's Score, and how fast the model read and wrote.
+- Recommended on the Models page now shows a model we've tested, then the most popular models that run well on your computer.
+- Qwen 3.8 27B now counts as good for code, so recommendations and `toskarctl connect` can pick it. In tests it fixed a failing test where the smaller coding models mostly couldn't.
+- `toskarctl chat` says which model to install when nothing installed does well at work such as fixing code.
+
+### Fixed
+
+- After a chat reads something from outside, such as a web page, a tool that changes things asks again even if you answered "always in this chat". Before, only a profile that allowed the tool outright was held to this.
+- `toskarctl models install` no longer gives up after a minute while a large model is still downloading.
+- `toskarctl chat --model` and `/model` say when a model isn't installed, rather than let another model answer without saying so, and a chat shows the answer's notice when another model answered.
+- A benchmark of a model that thinks first reports its real time to the first token, not zero.
+- Asking about a video, such as whether its frames change, no longer makes a new clip instead of answering, and someone who can't make videos can ask about one. A clip's file name no longer picks up the model's tool call text.
+- A quality score counts every Topics case as its report does, so a wrong refusal lowers it.
+- The terminal tool works on Windows without `sh`: commands run in PowerShell, and the model is told so.
+
 ## [1.12.1] - 2026-11-01
 
 ### Added
