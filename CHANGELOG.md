@@ -8,6 +8,24 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Thi
 
 Changes waiting for the next release are in [changes/unreleased/](changes/unreleased/), one file per pull request. `scripts/changelog.py preview` shows them together, and `scripts/changelog.py release <version>` writes them here when the release is cut.
 
+## [1.12.3] - 2026-11-03
+
+### Added
+
+- Text for the phone and tablet app's speed test, in every language.
+
+### Changed
+
+- The one-line benchmark can measure every model that fits, or only a computer's Toskar Score, in minutes. It keeps the computer awake, picks up where it stopped, and removes each model it downloaded.
+- The one-line benchmark offers the most popular model that fits, one nobody has measured yet, anything else on the list, or any model by its Hugging Face link.
+- The one-line benchmark can send its result with no GitHub account. Results also say which operating system they ran on.
+- Results people send are checked automatically: the ones that pass can go in the public results, and anything unusual waits for a person.
+- The Toskar Score is measured on Qwen 2.5 3B, which phones and tablets can run too.
+
+### Fixed
+
+- The one-line benchmark asks before downloading on Windows. It could take no answer for a yes, and start by itself.
+
 ## [1.12.2] - 2026-11-03
 
 ### Added
