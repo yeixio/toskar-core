@@ -1169,5 +1169,33 @@
       "fix": "用 Toskar 修正",
       "text": "文字"
     }
+  },
+  "speedTest": {
+    "title": "速度測試",
+    "blurb": "看看這台裝置執行本機 AI 模型有多快,並與其他裝置比較。",
+    "what": "如果沒有 {{model}}({{size}})就下載,然後讓它讀幾遍一份長文件。大約需要 5 到 15 分鐘。盡量接上電源,並保持 Toskar 開啟。不會影響你的聊天。",
+    "removed": "沒有 Toskar Unlock 時,模型會在結束後刪除。",
+    "start": "執行速度測試",
+    "stop": "停止",
+    "downloading": "正在下載模型… {{percent}}%",
+    "running": "正在測量… {{step}}/{{total}}",
+    "stopped": "測試已停止。執行時請保持 Toskar 開啟,然後重試。",
+    "failed": "測試未完成:{{message}}",
+    "score": "Toskar Score",
+    "writes": "寫入",
+    "reads": "讀取",
+    "firstToken": "第一個詞元",
+    "startToFinish": "從開始到結束",
+    "speed": "每秒 {{speed}} 個詞元",
+    "gpu": "在 GPU 上",
+    "gpuLayers": "{{total}} 層中的 {{layers}} 層",
+    "onCpu": "僅處理器",
+    "doesntRun": "此模型無法在這台裝置上執行。",
+    "doesntRunShort": "它需要的記憶體超過了這台裝置的記憶體。",
+    "doesntRunCrash": "載入時 Toskar 被關閉了。",
+    "share": "分享到公開結果",
+    "shareWhat": "這會透過你親自檢查並傳送的表單,傳送裝置型號、記憶體和這些結果。不包含你的聊天內容。",
+    "results": "查看所有結果",
+    "again": "再次執行"
   }
 }

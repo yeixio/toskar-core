@@ -1206,5 +1206,33 @@
       "fix": "Corriger avec Toskar",
       "text": "Texte"
     }
+  },
+  "speedTest": {
+    "title": "Test de vitesse",
+    "blurb": "Voyez à quelle vitesse cet appareil exécute un modèle d'IA local, et comparez avec d'autres.",
+    "what": "Télécharge {{model}} ({{size}}) s'il n'est pas là, puis lui fait lire un long document plusieurs fois. Environ 5 à 15 minutes. Branchez l'appareil si possible et gardez Toskar ouvert. Vos conversations ne sont pas touchées.",
+    "removed": "Sans Toskar Unlock, le modèle est supprimé ensuite.",
+    "start": "Lancer le test de vitesse",
+    "stop": "Arrêter",
+    "downloading": "Téléchargement du modèle… {{percent}} %",
+    "running": "Mesure… {{step}} sur {{total}}",
+    "stopped": "Le test s'est arrêté. Gardez Toskar ouvert pendant le test et réessayez.",
+    "failed": "Le test n'a pas abouti : {{message}}",
+    "score": "Toskar Score",
+    "writes": "Écrit",
+    "reads": "Lit",
+    "firstToken": "Premier token",
+    "startToFinish": "Du début à la fin",
+    "speed": "{{speed}} tokens par seconde",
+    "gpu": "Sur le GPU",
+    "gpuLayers": "{{layers}} couches sur {{total}}",
+    "onCpu": "Sur le processeur",
+    "doesntRun": "Ce modèle ne fonctionne pas sur cet appareil.",
+    "doesntRunShort": "Il lui faut plus de mémoire que cet appareil n'en a.",
+    "doesntRunCrash": "Il a fermé Toskar pendant le chargement.",
+    "share": "Partager dans les résultats publics",
+    "shareWhat": "Cela envoie le modèle et la mémoire de l'appareil, et ces résultats, via un formulaire que vous vérifiez et envoyez vous-même. Rien de vos conversations.",
+    "results": "Voir tous les résultats",
+    "again": "Relancer"
   }
 }
