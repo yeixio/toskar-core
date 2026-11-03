@@ -1230,11 +1230,14 @@
     "doesntRun": "Este modelo não roda neste dispositivo.",
     "doesntRunShort": "Ele precisa de mais memória do que este dispositivo tem.",
     "doesntRunCrash": "Ele fechou o Toskar ao carregar.",
-    "share": "Compartilhar nos resultados públicos",
-    "shareWhat": "Isso envia o modelo e a memória do dispositivo, e estes resultados, por um formulário que você confere e envia. Nada das suas conversas.",
+    "share": "Enviar com crédito, pelo GitHub",
+    "shareWhat": "Isso envia o modelo e a memória do dispositivo, o sistema operacional e estes resultados. Nada das suas conversas. Os resultados são públicos.",
     "results": "Ver todos os resultados",
     "again": "Repetir",
     "credit": "Um usuário do GitHub para o crédito (opcional)",
-    "creditHint": "Sem ele, aparece como Community. Peça para removê-lo, ou remover o resultado, quando quiser."
+    "creditHint": "Sem ele, aparece como Community. Peça para removê-lo, ou remover o resultado, quando quiser.",
+    "send": "Enviar, sem conta",
+    "sent": "Enviado. Conferimos cada resultado antes de incluí-lo nos resultados públicos.",
+    "sendFailed": "Não foi possível enviar. Você pode enviar pelo GitHub."
   }
 }

@@ -2,6 +2,9 @@ package main
 
 import (
 	"bufio"
+	"io"
+	"net/http"
+	"net/http/httptest"
 	"strings"
 	"testing"
 )
@@ -44,5 +47,30 @@ func TestAskerWithNobodyThere(t *testing.T) {
 	}
 	if got := a.ask("?"); got != "" {
 		t.Errorf("after the input ended: %q", got)
+	}
+}
+
+func TestSendResult(t *testing.T) {
+	var got string
+	ok := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		raw, _ := io.ReadAll(r.Body)
+		got = string(raw)
+		_, _ = w.Write([]byte(`{"status":"received","number":7,"url":"https://github.com/o/r/issues/7"}`))
+	}))
+	defer ok.Close()
+	link, err := sendResult(ok.URL, []byte(`{"model":"m"}`))
+	if err != nil || link != "https://github.com/o/r/issues/7" || got != `{"model":"m"}` {
+		t.Errorf("%q %v, sent %q", link, err, got)
+	}
+	refused := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusTooManyRequests)
+		_, _ = w.Write([]byte(`{"error":{"code":"RESULTS_RATE_LIMITED","message":"Too many results"}}`))
+	}))
+	defer refused.Close()
+	if _, err := sendResult(refused.URL, nil); err == nil || !strings.Contains(err.Error(), "Too many results") {
+		t.Errorf("refused: %v", err)
+	}
+	if !strings.Contains(formLink([]byte(`{"a":1}`)), "result=%7B%22a%22") {
+		t.Error(formLink([]byte(`{"a":1}`)))
 	}
 }

@@ -1193,11 +1193,14 @@
     "doesntRun": "此模型无法在这台设备上运行。",
     "doesntRunShort": "它需要的内存超过了这台设备的内存。",
     "doesntRunCrash": "加载时 Toskar 被关闭了。",
-    "share": "分享到公开结果",
-    "shareWhat": "这会通过你亲自检查并发送的表单,发送设备型号、内存和这些结果。不包含你的聊天内容。",
+    "share": "署名并通过 GitHub 发送",
+    "shareWhat": "这会发送设备型号和内存、操作系统以及这些结果。不包含你的聊天内容。结果是公开的。",
     "results": "查看所有结果",
     "again": "再次运行",
     "credit": "用于署名的 GitHub 用户名(可选)",
-    "creditHint": "不填则显示为 Community。你可以随时要求我们删除署名或结果。"
+    "creditHint": "不填则显示为 Community。你可以随时要求我们删除署名或结果。",
+    "send": "发送(无需账号)",
+    "sent": "已发送。每个结果在加入公开结果前都会经过我们检查。",
+    "sendFailed": "无法发送。你可以改为通过 GitHub 发送。"
   }
 }

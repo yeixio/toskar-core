@@ -19,6 +19,8 @@ import (
 const (
 	modelListURL = "https://raw.githubusercontent.com/yeixio/toskar-model-data/main/quality/models.json"
 	resultsURL   = "https://raw.githubusercontent.com/yeixio/toskar-model-data/main/quality/results.json"
+	// resultsEndpoint takes a result from someone with no GitHub account.
+	resultsEndpoint = "https://toskar.ai/api/results"
 )
 
 // asker asks a person questions, on the terminal itself: with curl | sh, standard
@@ -202,29 +204,73 @@ func hardwareRoom(toskarURL string) (string, uint64, error) {
 
 func gigabytes(bytes uint64) string { return fmt.Sprintf("%.1f GB", float64(bytes)/(1<<30)) }
 
-// offerToShare shows exactly what would be sent, and gives a link that fills in
-// the results form. Nothing leaves this computer unless the person sends the form.
+// offerToShare shows exactly what would be sent, then sends it, with no account
+// needed, or gives a link that fills in the results form, for credit. Nothing
+// leaves this computer unless the person chooses one.
 func offerToShare(row qualityscore.Row, ask *asker, out string) {
 	if ask.yes {
 		return
 	}
-	if !strings.HasPrefix(strings.ToLower(ask.ask("\nShare this result in the public results? It's a form you check and send yourself. [y/N]")), "y") {
-		return
-	}
 	row.Submitted = true
-	name := strings.TrimPrefix(ask.ask("A GitHub username to credit, or Enter to show as Community. We remove it, or the row, if you ask:"), "@")
-	if qualityscore.ValidCredit(name) {
-		row.SubmittedBy = name
-	} else if name != "" {
-		fmt.Println("That isn't a GitHub username, so this shows as Community.")
-	}
 	raw, err := json.MarshalIndent(row, "", "  ")
 	if err != nil {
 		return
 	}
-	_ = os.WriteFile(out+string(os.PathSeparator)+"result.json", append(raw, '\n'), 0o644)
-	fmt.Printf("\nThis is everything it sends, and nothing names your computer:\n\n%s\n\n", raw)
-	fmt.Printf("Open this to check and send it:\n%s&result=%s\n", resultsForm, url.QueryEscape(string(raw)))
+	fmt.Printf("\nShare this in the public results? This is everything it sends, and nothing names your computer:\n\n%s\n\n", raw)
+	fmt.Println("  1  Send it, no account needed. It shows as Community.")
+	fmt.Println("  2  Send with credit: a form on GitHub, filled in, that you check and send.")
+	fmt.Println("We check each result before it goes in, and remove your credit or the row if you ask.")
+	switch ask.ask("Enter a number, or Enter to keep it to yourself.") {
+	case "1":
+		link, err := sendResult(resultsEndpoint, raw)
+		if err != nil {
+			fmt.Printf("Couldn't send it: %v\nYou can send it with the form instead:\n%s\n", err, formLink(raw))
+			return
+		}
+		fmt.Printf("Sent. Follow it here: %s\n", link)
+	case "2":
+		name := strings.TrimPrefix(ask.ask("Your GitHub username, or Enter to show as Community:"), "@")
+		if qualityscore.ValidCredit(name) {
+			row.SubmittedBy = name
+		} else if name != "" {
+			fmt.Println("That isn't a GitHub username, so this shows as Community.")
+		}
+		if raw, err = json.MarshalIndent(row, "", "  "); err != nil {
+			return
+		}
+		_ = os.WriteFile(out+string(os.PathSeparator)+"result.json", append(raw, '\n'), 0o644)
+		fmt.Printf("Open this to check and send it:\n%s\n", formLink(raw))
+	}
+}
+
+func formLink(raw []byte) string {
+	return resultsForm + "&result=" + url.QueryEscape(string(raw))
+}
+
+// sendResult posts a result to toskar.ai, which files it for review, and returns where to follow it.
+func sendResult(endpoint string, raw []byte) (string, error) {
+	client := http.Client{Timeout: 30 * time.Second}
+	resp, err := client.Post(endpoint, "application/json", bytes.NewReader(raw))
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+	var answer struct {
+		URL   string `json:"url"`
+		Error struct {
+			Message string `json:"message"`
+		} `json:"error"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&answer); err != nil {
+		return "", fmt.Errorf("status %d", resp.StatusCode)
+	}
+	if resp.StatusCode != http.StatusOK || answer.URL == "" {
+		if answer.Error.Message != "" {
+			return "", errors.New(answer.Error.Message)
+		}
+		return "", fmt.Errorf("status %d", resp.StatusCode)
+	}
+	return answer.URL, nil
 }
 
 func tail(text string, most int) string {

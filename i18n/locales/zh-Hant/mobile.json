@@ -1193,11 +1193,14 @@
     "doesntRun": "此模型無法在這台裝置上執行。",
     "doesntRunShort": "它需要的記憶體超過了這台裝置的記憶體。",
     "doesntRunCrash": "載入時 Toskar 被關閉了。",
-    "share": "分享到公開結果",
-    "shareWhat": "這會透過你親自檢查並傳送的表單,傳送裝置型號、記憶體和這些結果。不包含你的聊天內容。",
+    "share": "署名並透過 GitHub 傳送",
+    "shareWhat": "這會傳送裝置型號和記憶體、作業系統以及這些結果。不包含你的聊天內容。結果是公開的。",
     "results": "查看所有結果",
     "again": "再次執行",
     "credit": "用於署名的 GitHub 使用者名稱(選填)",
-    "creditHint": "不填則顯示為 Community。你可以隨時要求我們刪除署名或結果。"
+    "creditHint": "不填則顯示為 Community。你可以隨時要求我們刪除署名或結果。",
+    "send": "傳送(無需帳號)",
+    "sent": "已傳送。每個結果在加入公開結果前都會經過我們檢查。",
+    "sendFailed": "無法傳送。你可以改為透過 GitHub 傳送。"
   }
 }
