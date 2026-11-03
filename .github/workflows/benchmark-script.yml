@@ -16,6 +16,10 @@ on:
   schedule:
     - cron: "41 7 * * 1"
   workflow_dispatch:
+    inputs:
+      model:
+        description: 'Run every set with this model on the Linux, Mac, and Windows home runners'
+        required: false
 
 permissions:
   contents: read
@@ -33,7 +37,48 @@ env:
   GITHUB_TOKEN: ${{ github.token }}
 
 jobs:
+  full:
+    if: ${{ inputs.model != '' && inputs.model != null }}
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [toskar-windows]
+    runs-on: [self-hosted, "${{ matrix.runner }}"]
+    timeout-minutes: 480
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version: "1.26.x"
+          cache: false
+      - name: Run every set
+        shell: bash
+        env:
+          MODEL: ${{ inputs.model }}
+        run: |
+          set -eu
+          ext=""
+          case "$RUNNER_OS" in Windows) ext=".exe" ;; esac
+          work="$RUNNER_TEMP/full-bench"
+          rm -rf "$work"
+          mkdir -p "$work/harness"
+          go build -o "$work/toskar$ext" ./cmd/daemon
+          go build -o "$work/toskar-quality$ext" ./cmd/qualityrun
+          go test -c -o "$work/harness/quality.test$ext" ./tests/quality
+          cp tests/quality/*.json "$work/harness/"
+          cp -R tests/quality/fixtures "$work/harness/fixtures"
+          cp internal/mimir/testdata/scanned.pdf "$work/harness/fixtures/"
+          "$work/toskar-quality$ext" run --yes --model "$MODEL" --toskar "$work/toskar$ext" --harness "$work/harness" \
+            --out "$work/out" --data "$HOME/.cache/toskar-quality" --port 7361
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: full-bench-${{ matrix.runner }}
+          path: ${{ runner.temp }}/full-bench/out
+          if-no-files-found: warn
+
   unix:
+    if: ${{ inputs.model == '' || inputs.model == null }}
     strategy:
       fail-fast: false
       matrix:
@@ -84,6 +129,7 @@ jobs:
 
   # Windows stays on GitHub's runners.
   windows:
+    if: ${{ inputs.model == '' || inputs.model == null }}
     runs-on: windows-latest
     timeout-minutes: 40
     steps:
