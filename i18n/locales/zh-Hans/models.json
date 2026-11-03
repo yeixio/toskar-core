@@ -495,6 +495,13 @@
     "overallValue": "{{score}} (v{{version}})",
     "writes": "写入 (词元/秒)",
     "reads": "读取 (词元/秒)",
-    "firstToken": "首个词元"
+    "firstToken": "首个词元",
+    "runs": "运行",
+    "runsValue": {
+      "full": "完全",
+      "partial": "部分",
+      "cpu": "仅处理器",
+      "no": "无法运行"
+    }
   }
 }

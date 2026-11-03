@@ -106,14 +106,17 @@ func TestPublishAddsWeeklyRows(t *testing.T) {
 	write("gemma-2-9b-q4", "media.md", gemma+"22 of 23 cases passed.\n")
 	write("gemma-2-9b-q4", "reasoning.md", gemma+"32 of 39 right (82%), 1.0 s and 388 tokens a question on average.\n")
 	write("gemma-2-9b-q4", "triage.md", gemma+"type right on 26 of 30, precision 62%.\n")
-	write("gemma-2-9b-q4", PerformanceFile, `{"model":"gemma-2-9b-q4","prompt_tokens":4000,"prompt_tokens_per_second":900.5,"tokens_per_second":50.5,"first_token_ms":4400,"effective_tokens_per_second":21.5,"gpu_layers":43,"gpu_layers_total":43,"quantization":"Q4_K_M"}`)
+	write("gemma-2-9b-q4", PerformanceFile, `{"model":"gemma-2-9b-q4","runs":"partial","prompt_tokens":4000,"prompt_tokens_per_second":900.5,"tokens_per_second":50.5,"first_token_ms":4400,"effective_tokens_per_second":21.5,"gpu_layers":43,"gpu_layers_total":43,"quantization":"Q4_K_M"}`)
 	// Reports for this model, and figures for another, are no row.
 	mixed := fmt.Sprintf(onCard, "mixed-model")
 	write("mixed-model", "report.md", mixed+"60 of 64 cases passed.\n")
 	write("mixed-model", "topics.md", mixed+"20 of 22 cases passed.\n")
 	write("mixed-model", "files.md", mixed+"20 of 21 cases passed.\n")
 	write("mixed-model", "reasoning.md", mixed+"32 of 39 right (82%), 1.0 s and 388 tokens a question on average.\n")
-	write("mixed-model", PerformanceFile, `{"model":"another","prompt_tokens":4000,"prompt_tokens_per_second":1,"tokens_per_second":1,"first_token_ms":1,"effective_tokens_per_second":1}`)
+	write("mixed-model", PerformanceFile, `{"model":"another","runs":"full","prompt_tokens":4000,"prompt_tokens_per_second":1,"tokens_per_second":1,"first_token_ms":1,"effective_tokens_per_second":1}`)
+	// A model that doesn't run is a result, with no scores, even with reports beside it.
+	write("too-big", "report.md", fmt.Sprintf(onCard, "too-big")+"0 of 64 cases passed.\n")
+	write("too-big", PerformanceFile, `{"model":"too-big","runs":"no","why":"out_of_memory","hardware":"AMD Radeon RX 7900 XT/7900 XTX/7900 GRE/7900M (24 GB)"}`)
 	// A row missing a set stays out, and so do sets a Score doesn't count.
 	partial := fmt.Sprintf(onCard, "partial-model")
 	write("partial-model", "report.md", partial+"60 of 64 cases passed.\n")
@@ -121,6 +124,7 @@ func TestPublishAddsWeeklyRows(t *testing.T) {
 	write("recommended", "report.md", fmt.Sprintf(onCard, "the recommended models")+"60 of 64 cases passed.\n")
 	// The fallback that ran a smaller model under another's name was a real bug (#1033).
 	write("qwen2.5-14b-q4", "report.md", fmt.Sprintf(onCard, "qwen2.5-coder-7b-q4")+"60 of 64 cases passed.\n")
+	write("qwen2.5-14b-q4", PerformanceFile, `{"model":"qwen2.5-14b-q4","runs":"full","prompt_tokens":1,"prompt_tokens_per_second":1,"tokens_per_second":1,"first_token_ms":1,"effective_tokens_per_second":1}`)
 	write("qwen2.5-32b-q4", "report.md", "The run stopped before any case.\n")
 
 	results := filepath.Join(t.TempDir(), "results.json")
@@ -146,7 +150,7 @@ func TestPublishAddsWeeklyRows(t *testing.T) {
 		}
 	}
 	publish()
-	if out := strings.Join(said, "\n"); !strings.Contains(out, "qwen2.5-coder-7b-q4") || !strings.Contains(out, "the recommended models") || !strings.Contains(out, "No row for partial-model") || !strings.Contains(out, "No row for mixed-model") {
+	if out := strings.Join(said, "\n"); !strings.Contains(out, "qwen2.5-coder-7b-q4") || !strings.Contains(out, "No row for recommended") || !strings.Contains(out, "No row for partial-model") || !strings.Contains(out, "No row for mixed-model") {
 		t.Errorf("what it skipped isn't said:\n%s", out)
 	}
 	raw, err := os.ReadFile(results)
@@ -165,10 +169,17 @@ func TestPublishAddsWeeklyRows(t *testing.T) {
 	if err := json.Unmarshal(raw, &got); err != nil {
 		t.Fatalf("%v\n%s", err, raw)
 	}
-	if len(got.Results) != 2 {
+	if len(got.Results) != 3 {
 		t.Fatalf("%d rows:\n%s", len(got.Results), raw)
 	}
 	row := got.Results[1]
+	no := got.Results[2]
+	if no.Model != "too-big" || no.Runs != RunsNo || no.Why != "out_of_memory" || no.Hardware != "AMD RX 7900 XTX, 24 GB" || len(no.Scores) != 0 || no.Performance != nil {
+		t.Errorf("a model that doesn't run: %+v", no)
+	}
+	if row.Runs != RunsPartial {
+		t.Errorf("runs %q", row.Runs)
+	}
 	if row.Model != "gemma-2-9b-q4" || row.Name != "Gemma 2 9B" || row.Date != "2026-11-02" || row.MethodVersion != 1 || row.Source != run || row.SecondsPerQuestion != 1.0 {
 		t.Errorf("%+v", row)
 	}
@@ -216,10 +227,13 @@ func TestReadPerformance(t *testing.T) {
 		body string
 		ok   bool
 	}{
-		"complete": {`{"model":"m","prompt_tokens_per_second":1,"tokens_per_second":1,"first_token_ms":1,"effective_tokens_per_second":1}`, true},
-		"zero":     {`{"model":"m","prompt_tokens_per_second":1,"tokens_per_second":1,"first_token_ms":0,"effective_tokens_per_second":1}`, false},
-		"other":    {`{"model":"x","prompt_tokens_per_second":1,"tokens_per_second":1,"first_token_ms":1,"effective_tokens_per_second":1}`, false},
-		"not JSON": {`nope`, false},
+		"complete":  {`{"model":"m","runs":"full","prompt_tokens_per_second":1,"tokens_per_second":1,"first_token_ms":1,"effective_tokens_per_second":1}`, true},
+		"no runs":   {`{"model":"m","prompt_tokens_per_second":1,"tokens_per_second":1,"first_token_ms":1,"effective_tokens_per_second":1}`, false},
+		"won't run": {`{"model":"m","runs":"no","why":"out_of_memory"}`, true},
+		"no why":    {`{"model":"m","runs":"no"}`, false},
+		"zero":      {`{"model":"m","prompt_tokens_per_second":1,"tokens_per_second":1,"first_token_ms":0,"effective_tokens_per_second":1}`, false},
+		"other":     {`{"model":"x","prompt_tokens_per_second":1,"tokens_per_second":1,"first_token_ms":1,"effective_tokens_per_second":1}`, false},
+		"not JSON":  {`nope`, false},
 	} {
 		if err := os.WriteFile(path, []byte(c.body), 0o600); err != nil {
 			t.Fatal(err)

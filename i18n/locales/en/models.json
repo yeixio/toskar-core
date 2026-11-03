@@ -503,6 +503,13 @@
     "overallValue": "{{score}} (v{{version}})",
     "writes": "Writes (tok/s)",
     "reads": "Reads (tok/s)",
-    "firstToken": "First token"
+    "firstToken": "First token",
+    "runs": "Runs",
+    "runsValue": {
+      "full": "Fully",
+      "partial": "Partly",
+      "cpu": "On the processor",
+      "no": "Doesn't run"
+    }
   }
 }

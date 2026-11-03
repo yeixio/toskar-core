@@ -511,6 +511,13 @@
     "overallValue": "{{score}} (v{{version}})",
     "writes": "Escreve (tok/s)",
     "reads": "Lê (tok/s)",
-    "firstToken": "Primeiro token"
+    "firstToken": "Primeiro token",
+    "runs": "Funciona",
+    "runsValue": {
+      "full": "Totalmente",
+      "partial": "Em parte",
+      "cpu": "No processador",
+      "no": "Não funciona"
+    }
   }
 }
