@@ -1,18 +1,18 @@
-# Yggdrasil Grid — Distributed Single-Model Inference Research
+# Toskar Grid — Distributed Single-Model Inference Research
 
 ## Research Status
 
 **Status:** Research / post-MVP  
 **Commitment:** None  
-**Primary question:** Can Yggdrasil evolve its current multi-computer team functionality into a grid that allows one model instance to run across multiple physical computers?
+**Primary question:** Can Toskar evolve its current multi-computer team functionality into a grid that allows one model instance to run across multiple physical computers?
 
-This document is intentionally a research brief rather than a feature specification. It records the opportunity, current technical approaches, risks, experiments, and architectural questions that should be answered before Yggdrasil commits to implementation.
+This document is intentionally a research brief rather than a feature specification. It records the opportunity, current technical approaches, risks, experiments, and architectural questions that should be answered before Toskar commits to implementation.
 
 ---
 
 ## 1. Vision
 
-Today, Yggdrasil teams can place complete models and jobs on different computers.
+Today, Toskar teams can place complete models and jobs on different computers.
 
 The long-term idea is different:
 
@@ -32,7 +32,7 @@ Physical computers
         │
         ▼
 ┌─────────────────────────────┐
-│       Yggdrasil Grid        │
+│       Toskar Grid        │
 │                             │
 │  Logical distributed model │
 │  execution environment      │
@@ -70,7 +70,7 @@ rather than:
 
 ### Current team model
 
-Yggdrasil currently treats each model execution as belonging to one machine.
+Toskar currently treats each model execution as belonging to one machine.
 
 ```text
 Request A -> Computer 1 -> Model A
@@ -123,13 +123,13 @@ Current examples:
 - vLLM supports multi-node single-model inference using tensor parallelism and pipeline parallelism, although its multi-node deployment model is primarily aimed at GPU server environments with consistent execution environments.
 - DeepSpeed supports model-parallel inference for models that do not fit on one GPU.
 
-Therefore the fundamental idea is proven. The research question for Yggdrasil is whether it can make this reliable, secure, performant, and simple across consumer hardware.
+Therefore the fundamental idea is proven. The research question for Toskar is whether it can make this reliable, secure, performant, and simple across consumer hardware.
 
 ---
 
 ## 4. Candidate Parallelism Strategies
 
-Yggdrasil should not assume that one distributed strategy will work for every hardware/network combination.
+Toskar should not assume that one distributed strategy will work for every hardware/network combination.
 
 ### 4.1 Pipeline / Layer Parallelism
 
@@ -170,7 +170,7 @@ Output
 - Heterogeneous compute speeds make balancing difficult.
 - Failure of one node breaks the model instance.
 
-This is likely one of the most important approaches for Yggdrasil to research first.
+This is likely one of the most important approaches for Toskar to research first.
 
 ---
 
@@ -206,7 +206,7 @@ Layer N+1
 - Commodity Wi-Fi or 1 Gb Ethernet may make it slower than using a smaller model on one machine.
 - Heterogeneous GPU architectures may complicate or prevent efficient tensor parallelism.
 
-Tensor parallelism may be valuable for high-end homogeneous Yggdrasil grids, but it should not be assumed to be the default consumer strategy.
+Tensor parallelism may be valuable for high-end homogeneous Toskar grids, but it should not be assumed to be the default consumer strategy.
 
 ---
 
@@ -218,9 +218,9 @@ A coordinator can run `llama-server` or `llama-cli` while remote machines run `g
 
 The upstream documentation states that model weights and KV cache are distributed across available local and remote devices in proportion to available memory, with manual tensor split options available.
 
-This is highly relevant because Yggdrasil already treats llama.cpp as an important local inference backend.
+This is highly relevant because Toskar already treats llama.cpp as an important local inference backend.
 
-Potential Yggdrasil architecture:
+Potential Toskar architecture:
 
 ```text
 Norn
@@ -240,9 +240,9 @@ Norn
 
 The llama.cpp project currently describes the RPC backend as proof-of-concept, fragile, and insecure for open or sensitive networks.
 
-Yggdrasil should not expose raw llama.cpp RPC directly as a trusted cluster protocol without additional isolation/security design.
+Toskar should not expose raw llama.cpp RPC directly as a trusted cluster protocol without additional isolation/security design.
 
-The RPC backend should initially be treated as an experiment and possible execution backend rather than the permanent Yggdrasil Grid protocol.
+The RPC backend should initially be treated as an experiment and possible execution backend rather than the permanent Toskar Grid protocol.
 
 ---
 
@@ -250,7 +250,7 @@ The RPC backend should initially be treated as an experiment and possible execut
 
 Projects such as exo demonstrate a different model: peer devices form a distributed network and run portions of a model based on memory/capability.
 
-This approach is especially interesting for Yggdrasil because the product goal is heterogeneous consumer devices rather than datacenter-only clusters.
+This approach is especially interesting for Toskar because the product goal is heterogeneous consumer devices rather than datacenter-only clusters.
 
 Potential lessons to research:
 
@@ -262,7 +262,7 @@ Potential lessons to research:
 - handling nodes joining/leaving,
 - local API abstraction over a distributed model.
 
-Yggdrasil does not necessarily need to embed exo. It may instead use it as a reference architecture, integration backend, or source of design lessons.
+Toskar does not necessarily need to embed exo. It may instead use it as a reference architecture, integration backend, or source of design lessons.
 
 ---
 
@@ -280,7 +280,7 @@ However, this introduces additional routing and network requirements and should 
 
 ## 5. Network Performance Is a First-Class Resource
 
-For Grid mode, Yggdrasil cannot schedule based only on:
+For Grid mode, Toskar cannot schedule based only on:
 
 - RAM,
 - VRAM,
@@ -326,9 +326,9 @@ but:
 
 ## 6. Heterogeneous Hardware
 
-This is where Yggdrasil could differentiate itself from conventional distributed inference systems.
+This is where Toskar could differentiate itself from conventional distributed inference systems.
 
-A home/office Yggdrasil team might look like:
+A home/office Toskar team might look like:
 
 ```text
 M4 Max MacBook      48 GB unified memory
@@ -359,7 +359,7 @@ Research questions:
 
 ---
 
-## 7. Proposed Yggdrasil Abstraction
+## 7. Proposed Toskar Abstraction
 
 Do not make the user configure distributed inference terminology.
 
@@ -367,7 +367,7 @@ Introduce a logical resource:
 
 ## Grid
 
-A Grid is a set of Yggdrasil nodes that can cooperate to host one model.
+A Grid is a set of Toskar nodes that can cooperate to host one model.
 
 Conceptually:
 
@@ -428,7 +428,7 @@ The user should not need to know whether the backend chose pipeline parallelism,
 
 ---
 
-## 8. Relationship to Existing Yggdrasil Subsystems
+## 8. Relationship to Existing Toskar Subsystems
 
 ### Norn
 
@@ -491,13 +491,13 @@ type DistributedRuntime interface {
 }
 ```
 
-This lets Yggdrasil experiment with:
+This lets Toskar experiment with:
 
 - llama.cpp RPC,
 - exo,
 - vLLM/Ray,
 - future MLX distributed runtimes,
-- custom Yggdrasil execution.
+- custom Toskar execution.
 
 ---
 
@@ -562,7 +562,7 @@ Research questions:
 
 ### Can a failed shard move?
 
-If Node B disappears, can Yggdrasil relocate its layers to Node C without restarting the entire model?
+If Node B disappears, can Toskar relocate its layers to Node C without restarting the entire model?
 
 Likely answer for early implementations: no.
 
@@ -588,7 +588,7 @@ Later systems might support shard replication or migration.
 
 Preserve partial output, mark the response interrupted, clean up the model, and explain which Grid member was lost.
 
-This should integrate with the model health-monitoring work already planned for Yggdrasil.
+This should integrate with the model health-monitoring work already planned for Toskar.
 
 ---
 
@@ -649,22 +649,22 @@ Therefore:
 Kubernetes:
 "Which machine should run this workload?"
 
-Yggdrasil Team:
+Toskar Team:
 "Which machine should run this model/request?"
 
-Yggdrasil Grid:
+Toskar Grid:
 "How should this single computation be partitioned across machines?"
 ```
 
 Grid planning is therefore closer to HPC/model-parallel scheduling than ordinary container placement.
 
-Yggdrasil's opportunity is to make that complexity feel Kubernetes-like from the user's perspective even though the implementation is substantially more coupled.
+Toskar's opportunity is to make that complexity feel Kubernetes-like from the user's perspective even though the implementation is substantially more coupled.
 
 ---
 
 ## 13. Security Requirements
 
-Distributed inference should not weaken Yggdrasil's local-first security model.
+Distributed inference should not weaken Toskar's local-first security model.
 
 Requirements to investigate:
 
@@ -677,7 +677,7 @@ Requirements to investigate:
 - no accidental Internet exposure,
 - clear trust boundary for third-party runtime backends.
 
-The current llama.cpp RPC documentation explicitly warns that its RPC backend is proof-of-concept and insecure for open/sensitive networks. Yggdrasil should therefore wrap or isolate such mechanisms rather than exposing them directly as the user-facing trust model.
+The current llama.cpp RPC documentation explicitly warns that its RPC backend is proof-of-concept and insecure for open/sensitive networks. Toskar should therefore wrap or isolate such mechanisms rather than exposing them directly as the user-facing trust model.
 
 ---
 
@@ -691,7 +691,7 @@ Research should verify:
 - whether remote-node distribution counts as redistribution in particular scenarios,
 - whether model files must exist on every node,
 - whether shards can be cached remotely,
-- whether downloaded models can be transferred between Yggdrasil nodes.
+- whether downloaded models can be transferred between Toskar nodes.
 
 Do not assume all Hugging Face model licenses permit identical behavior.
 
@@ -710,8 +710,8 @@ Before implementation, answer:
 5. Should mixed OS/hardware clusters be supported initially?
 6. Which runtime becomes the first Grid backend?
 7. Should model discovery show "Fits on team" before Grid is enabled?
-8. Should Yggdrasil automatically benchmark inter-node links?
-9. When should Yggdrasil recommend a smaller single-node model instead?
+8. Should Toskar automatically benchmark inter-node links?
+9. When should Toskar recommend a smaller single-node model instead?
 10. How much slower than local inference is still considered acceptable?
 
 ---
@@ -753,7 +753,7 @@ Questions:
 - What is the network traffic pattern?
 - How much slower is token generation?
 - What happens when the remote node disappears?
-- Can Yggdrasil safely supervise the RPC processes?
+- Can Toskar safely supervise the RPC processes?
 
 Do not expose this as a production feature.
 
@@ -783,7 +783,7 @@ Measure heterogeneous device behavior.
 
 Test a homogeneous NVIDIA/Linux environment.
 
-Determine whether it makes sense as an advanced/server-class Yggdrasil Grid backend.
+Determine whether it makes sense as an advanced/server-class Toskar Grid backend.
 
 ### Phase R5 — Norn Grid planner prototype
 
@@ -843,7 +843,7 @@ Models should include:
 - a model that does not fit on either machine but fits in aggregate,
 - progressively larger context lengths.
 
-This allows Yggdrasil to distinguish **distributed overhead** from **distributed necessity**.
+This allows Toskar to distinguish **distributed overhead** from **distributed necessity**.
 
 ---
 
@@ -851,14 +851,14 @@ This allows Yggdrasil to distinguish **distributed overhead** from **distributed
 
 Do not turn Grid into a committed feature until research demonstrates:
 
-1. A model can reliably run across at least two Yggdrasil nodes.
+1. A model can reliably run across at least two Toskar nodes.
 2. The model can be larger than what either individual node can run safely.
 3. Startup and cleanup can be supervised automatically.
 4. A node failure is detected and cleaned up without leaving orphan processes.
 5. Network suitability can be measured before model launch.
-6. Yggdrasil can predict memory placement reasonably well.
+6. Toskar can predict memory placement reasonably well.
 7. At least one supported networking tier provides acceptable generation performance.
-8. The distributed backend can be secured behind Yggdrasil's trust model.
+8. The distributed backend can be secured behind Toskar's trust model.
 9. The UX can hide backend-specific configuration from normal users.
 10. Distributed execution provides meaningful value over simply selecting a smaller local model.
 
@@ -877,7 +877,7 @@ Do not initially attempt:
 - perfect heterogeneous tensor parallelism,
 - Kubernetes integration itself.
 
-The objective is to determine whether a small trusted LAN of Yggdrasil computers can act as one useful inference resource.
+The objective is to determine whether a small trusted LAN of Toskar computers can act as one useful inference resource.
 
 ---
 
@@ -927,22 +927,22 @@ Normal users should never need to configure shards, ranks, RPC ports, tensor spl
 
 ## 21. Strategic Value
 
-Grid mode could become a major Yggdrasil differentiator.
+Grid mode could become a major Toskar differentiator.
 
 Many local-AI products answer:
 
 > "What model can this computer run?"
 
-Yggdrasil could eventually answer:
+Toskar could eventually answer:
 
 > "What model can all of your computers run together?"
 
-That aligns strongly with the existing product vision: Yggdrasil should turn hardware the user already owns into a managed local AI platform.
+That aligns strongly with the existing product vision: Toskar should turn hardware the user already owns into a managed local AI platform.
 
 The existing Team functionality is the natural foundation. Team routing can evolve into two complementary execution modes:
 
 ```text
-Yggdrasil Team
+Toskar Team
 
 Mode A — Workload Grid
 Different models/jobs run on different computers.
@@ -959,7 +959,7 @@ The user sees one team. Norn chooses the appropriate execution model.
 
 ### llama.cpp RPC
 
-Relevant because Yggdrasil already targets local GGUF/llama.cpp workflows.
+Relevant because Toskar already targets local GGUF/llama.cpp workflows.
 
 Current upstream RPC documentation:
 https://github.com/ggml-org/llama.cpp/blob/master/tools/rpc/README.md
@@ -1018,11 +1018,11 @@ Relevant characteristics:
 
 Do not build Grid yet.
 
-Create a small engineering research spike around **llama.cpp RPC on two known Yggdrasil nodes**.
+Create a small engineering research spike around **llama.cpp RPC on two known Toskar nodes**.
 
 The spike should answer one concrete question:
 
-> Can Yggdrasil automatically start a model that does not fit on either machine independently, split it across both machines, generate a useful response, measure the performance, and clean everything up afterward?
+> Can Toskar automatically start a model that does not fit on either machine independently, split it across both machines, generate a useful response, measure the performance, and clean everything up afterward?
 
 If yes, capture:
 
@@ -1063,6 +1063,6 @@ The desired end state is not merely "distributed inference."
 
 The desired end state is:
 
-> **Yggdrasil presents all compatible computers as a managed AI grid, and Norn determines whether a request should run on one computer or whether one model should span several computers.**
+> **Toskar presents all compatible computers as a managed AI grid, and Norn determines whether a request should run on one computer or whether one model should span several computers.**
 
 The infrastructure may be complex. The product experience should not be.
