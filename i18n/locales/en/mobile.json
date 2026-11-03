@@ -1191,8 +1191,8 @@
   "speedTest": {
     "title": "Speed test",
     "blurb": "See how fast this device runs a local AI model, and compare it with others.",
-    "what": "Downloads {{model}} ({{size}}) if it's not here, then has it read a long document a few times. About 5 to 15 minutes. Plug in if you can, and keep Toskar open. Your chats aren't touched.",
-    "removed": "Without Toskar Unlock, the model is removed afterward.",
+    "what": "Downloads {{model}} ({{size}}), then has it read a long document a few times. About 5 to 15 minutes. Plug in if you can, and keep Toskar open. Your chats aren't touched.",
+    "removed": "The model is removed afterward, so it's downloaded each time.",
     "start": "Run the speed test",
     "stop": "Stop",
     "downloading": "Downloading the model… {{percent}}%",

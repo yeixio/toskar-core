@@ -1211,7 +1211,7 @@
     "title": "Test di velocità",
     "blurb": "Scopri quanto velocemente questo dispositivo esegue un modello di IA locale e confrontalo con altri.",
     "what": "Scarica {{model}} ({{size}}) se manca, poi gli fa leggere più volte un lungo documento. Circa 5-15 minuti. Collega il dispositivo se puoi e tieni aperto Toskar. Le tue chat non vengono toccate.",
-    "removed": "Senza Toskar Unlock, il modello viene rimosso dopo.",
+    "removed": "Il modello viene rimosso dopo, quindi viene scaricato ogni volta.",
     "start": "Avvia il test di velocità",
     "stop": "Interrompi",
     "downloading": "Download del modello… {{percent}}%",

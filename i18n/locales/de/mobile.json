@@ -1192,7 +1192,7 @@
     "title": "Geschwindigkeitstest",
     "blurb": "Sieh, wie schnell dieses Gerät ein lokales KI-Modell ausführt, und vergleiche es mit anderen.",
     "what": "Lädt {{model}} ({{size}}) herunter, falls es fehlt, und lässt es dann mehrmals ein langes Dokument lesen. Etwa 5 bis 15 Minuten. Schließe das Gerät wenn möglich an und lass Toskar geöffnet. Deine Chats bleiben unberührt.",
-    "removed": "Ohne Toskar Unlock wird das Modell danach entfernt.",
+    "removed": "Das Modell wird danach entfernt und bei jedem Test neu geladen.",
     "start": "Geschwindigkeitstest starten",
     "stop": "Stoppen",
     "downloading": "Modell wird geladen … {{percent}} %",
