@@ -58,6 +58,8 @@ package_quality() {
   CGO_ENABLED=0 GOOS="$goos" GOARCH="$goarch" go test -c -trimpath -ldflags "$LDFLAGS" \
     -o "$dest/quality.test${ext}" ./tests/quality
   cp tests/quality/*.json LICENSE "$dest/"
+  cp -R tests/quality/fixtures "$dest/fixtures"
+  cp internal/mimir/testdata/scanned.pdf "$dest/fixtures/"
   tar -C dist -czf "dist/${name}.tar.gz" "$name"
   rm -rf "$dest"
 }
