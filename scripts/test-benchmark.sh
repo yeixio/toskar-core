@@ -21,6 +21,8 @@ go build -o "$stage/toskar${ext}" ./cmd/daemon
 go build -o "$quality/toskar-quality${ext}" ./cmd/qualityrun
 go test -c -o "$quality/quality.test${ext}" ./tests/quality
 cp tests/quality/*.json "$quality/"
+cp -R tests/quality/fixtures "$quality/fixtures"
+cp internal/mimir/testdata/scanned.pdf "$quality/fixtures/"
 (
   cd "$out"
   tar -czf "${stage##*/}.tar.gz" "${stage##*/}"
