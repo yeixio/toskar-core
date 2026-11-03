@@ -7,6 +7,8 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/yeixio/toskar-core/internal/qualityscore"
 )
 
 func TestHardwareLabelNamesNoComputer(t *testing.T) {
@@ -72,5 +74,57 @@ func TestSendResult(t *testing.T) {
 	}
 	if !strings.Contains(formLink([]byte(`{"a":1}`)), "result=%7B%22a%22") {
 		t.Error(formLink([]byte(`{"a":1}`)))
+	}
+}
+
+func TestEveryModelSmallestFirst(t *testing.T) {
+	fits := []qualityscore.ListedModel{{ID: "big", SizeBytes: 9}, {ID: "small", SizeBytes: 1, SourceURL: "https://x"}, {ID: "mid", SizeBytes: 5}}
+	got := everyModel(fits, 0, 2)
+	if len(got) != 2 || got[0].ID != "small" || got[0].Source != "" || got[1].ID != "mid" {
+		t.Errorf("%+v", got)
+	}
+}
+
+func TestFinishedPicksUpWhereItStopped(t *testing.T) {
+	folder := t.TempDir()
+	write := func(row qualityscore.Row) {
+		t.Helper()
+		if err := writeResult(row, folder); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if _, ok := finished(folder, 1, true); ok {
+		t.Error("nothing there, yet it's finished")
+	}
+	speed := qualityscore.Row{MethodVersion: 1, Runs: "full", Performance: &qualityscore.Performance{TokensPerSecond: 1}}
+	write(speed)
+	if _, ok := finished(folder, 1, true); !ok {
+		t.Error("a speed test counts for a speed run")
+	}
+	if _, ok := finished(folder, 1, false); ok {
+		t.Error("a speed test doesn't count for a full run")
+	}
+	if _, ok := finished(folder, 2, true); ok {
+		t.Error("an older method version counts")
+	}
+	write(qualityscore.Row{MethodVersion: 1, Runs: "no", Why: "out_of_memory"})
+	if _, ok := finished(folder, 1, false); !ok {
+		t.Error("a model that doesn't run is finished")
+	}
+}
+
+func TestShareableRows(t *testing.T) {
+	speed := qualityscore.Row{Runs: "full", Performance: &qualityscore.Performance{}, Scores: map[string]qualityscore.Passed{}}
+	if !(&work{speedOnly: true}).shareable(speed) {
+		t.Error("a speed test")
+	}
+	if (&work{}).shareable(speed) {
+		t.Error("a full run with no sets")
+	}
+	if !(&work{}).shareable(qualityscore.Row{Runs: "no"}) {
+		t.Error("a model that doesn't run")
+	}
+	if (&work{speedOnly: true}).shareable(qualityscore.Row{Runs: "full"}) {
+		t.Error("no figures")
 	}
 }

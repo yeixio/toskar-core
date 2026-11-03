@@ -302,6 +302,18 @@ func TestPopularAndUnmeasured(t *testing.T) {
 	}
 }
 
+func TestToskarScore(t *testing.T) {
+	if got, ok := ToskarScore(ReferenceModel, &Performance{TokensPerSecond: 149.1, PromptTokensPerSecond: 4390.8}); !ok || got != 2034 {
+		t.Errorf("%d %v, want what toskar.ai shows", got, ok)
+	}
+	if _, ok := ToskarScore("other", &Performance{TokensPerSecond: 1, PromptTokensPerSecond: 1}); ok {
+		t.Error("scored another model")
+	}
+	if _, ok := ToskarScore(ReferenceModel, nil); ok {
+		t.Error("scored nothing")
+	}
+}
+
 func TestModelLink(t *testing.T) {
 	for link, ok := range map[string]bool{
 		"https://huggingface.co/a/b/resolve/main/c.gguf":         true,
