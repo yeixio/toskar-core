@@ -1233,6 +1233,8 @@
     "share": "Compartilhar nos resultados públicos",
     "shareWhat": "Isso envia o modelo e a memória do dispositivo, e estes resultados, por um formulário que você confere e envia. Nada das suas conversas.",
     "results": "Ver todos os resultados",
-    "again": "Repetir"
+    "again": "Repetir",
+    "credit": "Um usuário do GitHub para o crédito (opcional)",
+    "creditHint": "Sem ele, aparece como Community. Peça para removê-lo, ou remover o resultado, quando quiser."
   }
 }

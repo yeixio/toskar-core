@@ -1214,6 +1214,8 @@
     "share": "Share in the public results",
     "shareWhat": "This sends the device's model and memory, and these results, through a form you check and send yourself. Nothing from your chats.",
     "results": "See all results",
-    "again": "Run again"
+    "again": "Run again",
+    "credit": "A GitHub username to credit (optional)",
+    "creditHint": "Shows as Community without one. Ask us to remove it, or the result, any time."
   }
 }

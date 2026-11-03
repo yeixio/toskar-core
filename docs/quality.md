@@ -102,7 +102,7 @@ A run of a small model took about 25 minutes on an M5 Pro with 24 GB. A large mo
 
 **To send your results,** [open the results form](https://github.com/yeixio/toskar-core/issues/new?template=quality_results.yml) and paste `result.json` from the `quality-score-<model>` folder. Reports with every answer are there too. **What you share is public:** `result.json` has your model, scores, date, graphics card or processor, and memory. Look before you paste, since the reports hold the model's answers and the log has paths from your computer.
 
-We read each one and add it to the results, marked as submitted by the community, with the quality version it ran. A result can be left out if it looks wrong or doesn't match its reports. We can't check how a run was done, so treat these as what they are: one person's run. [#1037](https://github.com/yeixio/toskar-core/issues/1037) is about making this one step, inside Toskar.
+We read each one and add it to the results, with the quality version it ran. Every row says who ran it: Toskar for our own runs, your GitHub username if you give one, or Community. A username shows only if it matches who sent the form, so nobody can post as someone else. A result can be left out if it looks wrong or doesn't match its reports. We can't check how a run was done, so treat these as what they are: one person's run. [#1037](https://github.com/yeixio/toskar-core/issues/1037) is about making this one step, inside Toskar.
 
 To check Toskar itself, with no model and no download, `make quality` runs the sets with a scripted stand-in. The [README](../tests/quality/README.md#running-it) has every other way to run it.
 

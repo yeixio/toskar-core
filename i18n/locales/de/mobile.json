@@ -1214,6 +1214,8 @@
     "share": "In den öffentlichen Ergebnissen teilen",
     "shareWhat": "Damit werden Gerätemodell, Speicher und diese Ergebnisse über ein Formular gesendet, das du selbst prüfst und abschickst. Nichts aus deinen Chats.",
     "results": "Alle Ergebnisse ansehen",
-    "again": "Noch einmal"
+    "again": "Noch einmal",
+    "credit": "GitHub-Benutzername für die Nennung (optional)",
+    "creditHint": "Ohne Namen erscheint „Community“. Du kannst jederzeit die Entfernung des Namens oder Ergebnisses verlangen."
   }
 }
