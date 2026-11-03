@@ -75,7 +75,7 @@ func run(args []string) error {
 		return err
 	}
 	fs := flag.NewFlagSet("run", flag.ExitOnError)
-	model := fs.String("model", "", "the model to measure")
+	model := fs.String("model", "", "the model to measure: its ID, or a link to its .gguf file on Hugging Face")
 	toskar := fs.String("toskar", "", "the Toskar binary to run")
 	harness := fs.String("harness", filepath.Dir(self), "the folder with the test binary and sets")
 	out := fs.String("out", "", "where reports go (default: quality-score-<model> in this folder)")
@@ -83,7 +83,7 @@ func run(args []string) error {
 	port := fs.Int("port", 7361, "the throwaway Toskar's port")
 	only := fs.String("sets", "", "only these sets, comma-separated; a run without all of them gets no Score")
 	onlyCase := fs.String("only", "", "only the cases matching this, for checking this program")
-	yes := fs.Bool("yes", false, "ask nothing: take the suggested model, and don't offer to share")
+	yes := fs.Bool("yes", false, "ask nothing: take the most popular model that fits, and don't offer to share")
 	_ = fs.Parse(args)
 	if *toskar == "" {
 		usage()
@@ -120,10 +120,21 @@ func run(args []string) error {
 
 	ask := newAsker(*yes)
 	defer ask.close()
-	if *model == "" {
-		if *model, err = chooseModel(url, ask); err != nil {
+	chosen := chosenModel{ID: *model, Name: *model}
+	if qualityscore.ModelLink(*model) {
+		if chosen, err = chooseLink(url, *model, ask, ^uint64(0)); err != nil {
 			return err
 		}
+	} else if *model == "" {
+		if chosen, err = chooseModel(url, ask); err != nil {
+			return err
+		}
+	}
+	*model = chosen.ID
+	// A file from outside the list: the tests install it from its link.
+	testEnv := append(os.Environ(), "TOSKAR_QUALITY_URL="+url, "TOSKAR_QUALITY_MODEL="+*model)
+	if chosen.Source != "" {
+		testEnv = append(testEnv, "TOSKAR_QUALITY_MODEL_SOURCE="+chosen.Source)
 	}
 	if *out == "" {
 		*out = "quality-score-" + *model
@@ -152,7 +163,7 @@ func run(args []string) error {
 	defer logFile.Close()
 
 	row := qualityscore.Row{
-		Model: *model, Name: *model, MethodVersion: version,
+		Model: *model, Name: chosen.Name, MethodVersion: version, OffList: chosen.Source != "",
 		Date:   time.Now().UTC().Format("2006-01-02"),
 		Scores: map[string]qualityscore.Passed{},
 	}
@@ -164,7 +175,7 @@ func run(args []string) error {
 	cmd := exec.CommandContext(ctx, test, "-test.run", "^TestPerformance$", "-test.count=1", "-test.v", "-test.timeout=70m")
 	cmd.Dir = *harness
 	cmd.Stdout, cmd.Stderr = logFile, logFile
-	cmd.Env = append(os.Environ(), "TOSKAR_QUALITY_URL="+url, "TOSKAR_QUALITY_MODEL="+*model, "TOSKAR_QUALITY_PERFORMANCE_REPORT="+report)
+	cmd.Env = append(testEnv[:len(testEnv):len(testEnv)], "TOSKAR_QUALITY_PERFORMANCE_REPORT="+report)
 	_ = cmd.Run()
 	if ctx.Err() != nil {
 		return ctx.Err()
@@ -206,7 +217,7 @@ func run(args []string) error {
 		cmd = exec.CommandContext(ctx, test, "-test.run", pattern, "-test.count=1", "-test.v", "-test.timeout=600m")
 		cmd.Dir = *harness
 		cmd.Stdout, cmd.Stderr = logFile, logFile
-		cmd.Env = append(os.Environ(), "TOSKAR_QUALITY_URL="+url, "TOSKAR_QUALITY_MODEL="+*model, setTests[set.Name][1]+"="+report)
+		cmd.Env = append(testEnv[:len(testEnv):len(testEnv)], setTests[set.Name][1]+"="+report)
 		// A set below its bar still has a result to report, so its failure doesn't stop this.
 		_ = cmd.Run()
 		if ctx.Err() != nil {

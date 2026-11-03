@@ -42,6 +42,7 @@ type Row struct {
 	MethodVersion      int               `json:"method_version"`
 	Submitted          bool              `json:"submitted,omitempty"`
 	SubmittedBy        string            `json:"submitted_by,omitempty"`
+	OffList            bool              `json:"off_list,omitempty"`
 	Source             string            `json:"source,omitempty"`
 	Runs               string            `json:"runs,omitempty"`
 	Why                string            `json:"why,omitempty"`

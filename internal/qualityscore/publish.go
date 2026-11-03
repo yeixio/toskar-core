@@ -165,6 +165,7 @@ type ListedModel struct {
 	ID        string `json:"id"`
 	Name      string `json:"name"`
 	SizeBytes uint64 `json:"size_bytes"`
+	Downloads int64  `json:"downloads"`
 	SourceURL string `json:"source_url,omitempty"`
 }
 

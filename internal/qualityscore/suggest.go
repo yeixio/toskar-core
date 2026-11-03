@@ -1,27 +1,42 @@
 package qualityscore
 
-// Suggest picks the model a person on this computer measures: the first on the
-// list, which is in rough order of what's most worth measuring, that fits and
-// has no result from this hardware yet. So each run adds something new. It falls
-// back to the first that fits, and false when none does.
-func Suggest(list []ListedModel, results []Row, hardware string, roomBytes uint64) (ListedModel, bool) {
+import "regexp"
+
+// Popular is the most downloaded listed model that fits, and false when none does.
+func Popular(list []ListedModel, roomBytes uint64) (ListedModel, bool) {
+	var best ListedModel
+	found := false
+	for _, m := range Fitting(list, roomBytes) {
+		if !found || m.Downloads > best.Downloads {
+			best, found = m, true
+		}
+	}
+	return best, found
+}
+
+// Unmeasured is the most downloaded listed model that fits and that nobody has a
+// result for yet, on any computer, and false when there's none.
+func Unmeasured(list []ListedModel, results []Row, roomBytes uint64) (ListedModel, bool) {
 	done := map[string]bool{}
 	for _, r := range results {
-		if r.Hardware == hardware {
-			done[r.Model] = true
-		}
+		done[r.Model] = true
 	}
-	fits := Fitting(list, roomBytes)
-	for _, m := range fits {
+	var open []ListedModel
+	for _, m := range list {
 		if !done[m.ID] {
-			return m, true
+			open = append(open, m)
 		}
 	}
-	if len(fits) > 0 {
-		return fits[0], true
-	}
-	return ListedModel{}, false
+	return Popular(open, roomBytes)
 }
+
+// ModelLink is a link to one model file a person can measure: a GGUF file on
+// Hugging Face, as Toskar's own install from a link takes.
+func ModelLink(link string) bool {
+	return modelLink.MatchString(link)
+}
+
+var modelLink = regexp.MustCompile(`^https://huggingface\.co/[^/\s]+/[^/\s]+/resolve/[^\s]+\.gguf(\?[^\s]*)?$`)
 
 // Fitting are the listed models this much memory can hold: a model takes more
 // than its file once it's running, so each needs a quarter more room.
