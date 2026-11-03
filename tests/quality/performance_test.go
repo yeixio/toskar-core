@@ -26,6 +26,8 @@ type performance struct {
 	Why  string `json:"why,omitempty"`
 	// Hardware is here for a model that doesn't run, with no report to name it.
 	Hardware string `json:"hardware,omitempty"`
+	// OS is the system it ran on, as the daemon names it.
+	OS string `json:"os,omitempty"`
 	// PromptTokens is the prompt these were measured with.
 	PromptTokens          int     `json:"prompt_tokens"`
 	PromptTokensPerSecond float64 `json:"prompt_tokens_per_second"`
@@ -52,6 +54,8 @@ func TestPerformance(t *testing.T) {
 	d := newRealDriver(strings.TrimRight(url, "/"))
 	d.model = model
 	d.installModel(t, model)
+	var inventory contracts.HardwareInventory
+	d.do(t, http.MethodGet, "/api/v1/hardware", nil, &inventory)
 
 	var job contracts.BenchmarkJob
 	req := contracts.BenchmarkRequest{ModelIDs: []string{model}, WorkloadIDs: []string{benchmark.LongPromptWorkload}, Runs: 3}
@@ -70,7 +74,7 @@ func TestPerformance(t *testing.T) {
 	// Running out of memory is this model's result on this computer. Anything
 	// else that stops it is a failed run, which says nothing about the model.
 	if failure := benchmarkFailure(job); failure != "" && health.OutOfMemory(failure) {
-		writePerformance(t, path, performance{Model: model, Runs: "no", Why: "out_of_memory", Hardware: d.hardware(t)})
+		writePerformance(t, path, performance{Model: model, Runs: "no", Why: "out_of_memory", Hardware: d.hardware(t), OS: inventory.OS})
 		return
 	}
 	if job.Status != contracts.BenchmarkCompleted || len(job.Summaries) == 0 {
@@ -82,6 +86,7 @@ func TestPerformance(t *testing.T) {
 	}
 	got := performance{
 		Model:                 model,
+		OS:                    inventory.OS,
 		PromptTokensPerSecond: round1(summary.AvgPromptTokPerSec),
 		TokensPerSecond:       round1(summary.AvgEvalTokPerSec),
 		FirstTokenMs:          math.Round(summary.AvgTTFTMs),

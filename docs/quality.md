@@ -73,7 +73,7 @@ A Score stays comparable because the same cases run each time. Speed depends on 
 
 ## Where it runs
 
-Quality runs every week on our own computers, and each run adds its scores to the results on its own. It works through [one public list](https://github.com/yeixio/toskar-model-data/blob/main/quality/models.json), a few at a time, whichever have gone longest without a result. The list is about 15 models, popular on Hugging Face and in Toskar's catalog, with a spread of sizes. We check it by hand about monthly, so popularity alone doesn't send everyone's time to an odd fine-tune. Each row names the computer and date. **Scores from different computers or dates aren't the same test,** so compare rows with care. Speed depends on the computer. Model scores can move too, as Toskar changes.
+Quality runs every week on our own computers, and each run adds its scores to the results on its own. It works through [one public list](https://github.com/yeixio/toskar-model-data/blob/main/quality/models.json), a few at a time, whichever have gone longest without a result. The list is about 15 models, popular on Hugging Face and in Toskar's catalog, with a spread of sizes. We check it by hand about monthly, so popularity alone doesn't send everyone's time to an odd fine-tune. Each row names the computer, its operating system, and the date. **Scores from different computers or dates aren't the same test,** so compare rows with care. Speed depends on the computer. Model scores can move too, as Toskar changes.
 
 ## What we know is weak
 

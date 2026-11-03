@@ -106,7 +106,7 @@ func TestPublishAddsWeeklyRows(t *testing.T) {
 	write("gemma-2-9b-q4", "media.md", gemma+"22 of 23 cases passed.\n")
 	write("gemma-2-9b-q4", "reasoning.md", gemma+"32 of 39 right (82%), 1.0 s and 388 tokens a question on average.\n")
 	write("gemma-2-9b-q4", "triage.md", gemma+"type right on 26 of 30, precision 62%.\n")
-	write("gemma-2-9b-q4", PerformanceFile, `{"model":"gemma-2-9b-q4","runs":"partial","prompt_tokens":4000,"prompt_tokens_per_second":900.5,"tokens_per_second":50.5,"first_token_ms":4400,"effective_tokens_per_second":21.5,"gpu_layers":43,"gpu_layers_total":43,"quantization":"Q4_K_M"}`)
+	write("gemma-2-9b-q4", PerformanceFile, `{"model":"gemma-2-9b-q4","os":"linux","runs":"partial","prompt_tokens":4000,"prompt_tokens_per_second":900.5,"tokens_per_second":50.5,"first_token_ms":4400,"effective_tokens_per_second":21.5,"gpu_layers":43,"gpu_layers_total":43,"quantization":"Q4_K_M"}`)
 	// Reports for this model, and figures for another, are no row.
 	mixed := fmt.Sprintf(onCard, "mixed-model")
 	write("mixed-model", "report.md", mixed+"60 of 64 cases passed.\n")
@@ -176,6 +176,9 @@ func TestPublishAddsWeeklyRows(t *testing.T) {
 	no := got.Results[2]
 	if no.Model != "too-big" || no.Runs != RunsNo || no.Why != "out_of_memory" || no.Hardware != "AMD RX 7900 XTX, 24 GB" || len(no.Scores) != 0 || no.Performance != nil {
 		t.Errorf("a model that doesn't run: %+v", no)
+	}
+	if row.OS != "Linux" {
+		t.Errorf("os %q", row.OS)
 	}
 	if row.Runs != RunsPartial {
 		t.Errorf("runs %q", row.Runs)

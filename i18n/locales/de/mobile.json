@@ -1211,11 +1211,14 @@
     "doesntRun": "Dieses Modell läuft auf diesem Gerät nicht.",
     "doesntRunShort": "Es braucht mehr Speicher, als dieses Gerät hat.",
     "doesntRunCrash": "Es hat Toskar beim Laden geschlossen.",
-    "share": "In den öffentlichen Ergebnissen teilen",
-    "shareWhat": "Damit werden Gerätemodell, Speicher und diese Ergebnisse über ein Formular gesendet, das du selbst prüfst und abschickst. Nichts aus deinen Chats.",
+    "share": "Mit Nennung über GitHub senden",
+    "shareWhat": "Damit werden Gerätemodell, Speicher, Betriebssystem und diese Ergebnisse gesendet. Nichts aus deinen Chats. Ergebnisse sind öffentlich.",
     "results": "Alle Ergebnisse ansehen",
     "again": "Noch einmal",
     "credit": "GitHub-Benutzername für die Nennung (optional)",
-    "creditHint": "Ohne Namen erscheint „Community“. Du kannst jederzeit die Entfernung des Namens oder Ergebnisses verlangen."
+    "creditHint": "Ohne Namen erscheint „Community“. Du kannst jederzeit die Entfernung des Namens oder Ergebnisses verlangen.",
+    "send": "Senden, ohne Konto",
+    "sent": "Gesendet. Wir prüfen jedes Ergebnis, bevor es in die öffentlichen Ergebnisse kommt.",
+    "sendFailed": "Senden fehlgeschlagen. Du kannst es stattdessen über GitHub senden."
   }
 }

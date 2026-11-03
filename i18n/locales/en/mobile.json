@@ -1211,11 +1211,14 @@
     "doesntRun": "This model doesn't run on this device.",
     "doesntRunShort": "It needs more memory than this device has.",
     "doesntRunCrash": "It closed Toskar while loading.",
-    "share": "Share in the public results",
-    "shareWhat": "This sends the device's model and memory, and these results, through a form you check and send yourself. Nothing from your chats.",
+    "share": "Send with credit, through GitHub",
+    "shareWhat": "This sends the device's model and memory, its operating system, and these results. Nothing from your chats. Results are public.",
     "results": "See all results",
     "again": "Run again",
     "credit": "A GitHub username to credit (optional)",
-    "creditHint": "Shows as Community without one. Ask us to remove it, or the result, any time."
+    "creditHint": "Shows as Community without one. Ask us to remove it, or the result, any time.",
+    "send": "Send it, no account needed",
+    "sent": "Sent. We check each result before it goes in the public results.",
+    "sendFailed": "Couldn't send it. You can send it through GitHub instead."
   }
 }

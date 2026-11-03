@@ -184,7 +184,7 @@ func run(args []string) error {
 	if perfErr != nil {
 		fmt.Printf("speed: not measured. See %s.\n", logFile.Name())
 	} else {
-		row.Runs, row.Why = performance.Runs, performance.Why
+		row.Runs, row.Why, row.OS = performance.Runs, performance.Why, performance.OS
 	}
 	if performance != nil && performance.Runs == qualityscore.RunsNo {
 		if row.Hardware, err = hardwareName(url); err != nil {
