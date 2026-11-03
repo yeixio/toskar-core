@@ -1,0 +1,86 @@
+name: Quality result intake
+
+# Checks each result sent as an issue, from the one-line benchmark, the apps, or
+# the form (#1037). It labels the issue and says what it found. Rows that pass are
+# added to the public results only when the repository variable
+# QUALITY_INTAKE_PUBLISH is "on"; otherwise this only labels, so its rules can be
+# watched first. The issue's text comes from anyone: it's read as data from a
+# file, and never put into a command.
+on:
+  issues:
+    types: [opened]
+  workflow_dispatch:
+    inputs:
+      issue:
+        description: "An issue to check again"
+        required: true
+
+permissions:
+  contents: read
+  issues: write
+
+# One at a time: each push builds on the last.
+concurrency:
+  group: quality-intake
+  cancel-in-progress: false
+
+jobs:
+  check:
+    if: ${{ github.event_name == 'workflow_dispatch' || startsWith(github.event.issue.title, '[Results]:') }}
+    runs-on: ${{ fromJSON(vars.TRUSTED_RUNS_ON || '"ubuntu-latest"') }}
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version: "1.26.x"
+          cache: false
+      - name: Check it
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NUMBER: ${{ github.event.issue.number || inputs.issue }}
+          REPOSITORY: ${{ github.repository }}
+          DEPLOY_KEY: ${{ secrets.QUALITY_INTAKE_DEPLOY_KEY }}
+          PUBLISH: ${{ vars.QUALITY_INTAKE_PUBLISH }}
+          DATA: ${{ runner.temp }}/toskar-model-data
+          WORK: ${{ runner.temp }}/intake
+        run: |
+          set -euo pipefail
+          rm -rf "$DATA" "$WORK"
+          mkdir -p "$WORK"
+          gh label create results-passed --repo "$REPOSITORY" --color 0E8A16 --description "A result that passed the automatic checks" --force
+          gh label create needs-review --repo "$REPOSITORY" --color FBCA04 --description "A result a person needs to check" --force
+          gh api "repos/$REPOSITORY/issues/$NUMBER" > "$WORK/issue.json"
+          jq -r '.body // ""' "$WORK/issue.json" > "$WORK/body.md"
+          author="$(jq -r '.user.login' "$WORK/issue.json")"
+          url="$(jq -r '.html_url' "$WORK/issue.json")"
+          git clone -q --depth 1 https://github.com/yeixio/toskar-model-data.git "$DATA"
+          flag=""
+          if [ "$PUBLISH" = on ] && [ -n "$DEPLOY_KEY" ]; then flag="--publish"; fi
+          go run ./cmd/qualityrun intake "$WORK/body.md" "$author" "$url" "$DATA/quality/models.json" \
+            "$DATA/quality/results.json" tests/quality/version.json $flag > "$WORK/verdict.json"
+          if [ "$(jq -r '.passed' "$WORK/verdict.json")" != true ]; then
+            gh issue edit "$NUMBER" --repo "$REPOSITORY" --add-label needs-review
+            {
+              echo "This result needs a person to check it before it goes in the public results:"
+              echo
+              jq -r '.why[] | "- " + .' "$WORK/verdict.json"
+            } > "$WORK/comment.md"
+            gh issue comment "$NUMBER" --repo "$REPOSITORY" --body-file "$WORK/comment.md"
+            exit 0
+          fi
+          gh issue edit "$NUMBER" --repo "$REPOSITORY" --add-label results-passed
+          if [ -z "$flag" ]; then
+            gh issue comment "$NUMBER" --repo "$REPOSITORY" --body "This result passed the automatic checks. Results aren't added automatically yet, so a person will add it."
+            exit 0
+          fi
+          key="$(mktemp)"
+          trap 'rm -f "$key"' EXIT
+          (umask 077 && printf '%s\n' "$DEPLOY_KEY" > "$key")
+          export GIT_SSH_COMMAND="ssh -i $key -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new"
+          git -C "$DATA" config user.name 'github-actions[bot]'
+          git -C "$DATA" config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git -C "$DATA" commit -qam "Add a result from an issue." -m "$url"
+          git -C "$DATA" push -q git@github.com:yeixio/toskar-model-data.git HEAD:main
+          gh issue comment "$NUMBER" --repo "$REPOSITORY" --body "This result passed the automatic checks and is in the public results: https://toskar.ai/models/results. It shows as Community unless you opened this issue and named yourself. Ask here, or with the link on its page, and we'll remove it."
+          gh issue close "$NUMBER" --repo "$REPOSITORY"

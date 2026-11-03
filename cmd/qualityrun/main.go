@@ -41,6 +41,8 @@ func main() {
 		err = publish(os.Args[2:])
 	case "next":
 		err = next(os.Args[2:])
+	case "intake":
+		err = intake(os.Args[2:])
 	default:
 		usage()
 	}
@@ -54,6 +56,7 @@ func usage() {
 	fmt.Fprintln(os.Stderr, "usage: toskar-quality run --toskar <toskar binary> [--model <id>] [--yes] [--harness <folder>] [--out <folder>] [--data <folder>] [--port <port>] [--sets quality,topics,files,reasoning] [--only <case>] [--speed-only] [--all] [--most <n>]")
 	fmt.Fprintln(os.Stderr, "       toskar-quality publish <reports> <results.json> <version.json> <catalog.json> <models.json> <run URL>")
 	fmt.Fprintln(os.Stderr, "       toskar-quality next <models.json> <results.json> <version.json> <count>")
+	fmt.Fprintln(os.Stderr, "       toskar-quality intake <issue body> <author> <issue URL> <models.json> <results.json> <version.json> [--publish]")
 	os.Exit(2)
 }
 
@@ -630,6 +633,38 @@ func next(args []string) error {
 	}
 	fmt.Println(string(raw))
 	return nil
+}
+
+// intake checks a result sent as an issue, says what it found as JSON for the
+// workflow, and with --publish adds rows that pass to the results file. Nothing in
+// the issue is trusted: it's only read as data.
+func intake(args []string) error {
+	if len(args) < 6 {
+		usage()
+	}
+	raw, err := os.ReadFile(args[0])
+	if err != nil {
+		return err
+	}
+	list, err := qualityscore.ReadModelList(args[3])
+	if err != nil {
+		return err
+	}
+	published, err := qualityscore.ReadResults(args[4])
+	if err != nil {
+		return err
+	}
+	version, err := readVersion(args[5])
+	if err != nil {
+		return err
+	}
+	verdict := qualityscore.Intake(string(raw), args[1], args[2], list, published, version, time.Now())
+	if len(args) > 6 && args[6] == "--publish" && verdict.Passed {
+		if err := qualityscore.AddRows(args[4], verdict.Rows); err != nil {
+			return err
+		}
+	}
+	return json.NewEncoder(os.Stdout).Encode(verdict)
 }
 
 func publish(args []string) error {
