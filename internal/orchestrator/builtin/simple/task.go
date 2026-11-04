@@ -42,6 +42,7 @@ const maxProjectNotes = 8000
 // taskGuidance tells a task where it is and how the project works (#1017).
 func taskGuidance(ctx context.Context) string {
 	guidance := "You are doing a task on this computer, step by step. Use the tools to look, act, and check that it worked."
+	guidance += "\nA command can run for up to 30 minutes, and the person sees its output. Run anything that doesn't end by itself, such as a server, in the background."
 	project := turnopts.ProjectFrom(ctx)
 	if project == "" {
 		return guidance

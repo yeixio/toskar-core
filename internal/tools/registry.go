@@ -10,6 +10,7 @@ import (
 	"github.com/yeixio/toskar-core/internal/egress"
 	"github.com/yeixio/toskar-core/internal/events"
 	"github.com/yeixio/toskar-core/internal/runlog"
+	"github.com/yeixio/toskar-core/internal/turnopts"
 	"time"
 
 	"github.com/yeixio/toskar-core/internal/tools/filesystem"
@@ -289,7 +290,12 @@ func (r *Registry) Execute(ctx context.Context, toolID string, args map[string]a
 	r.record(Activity{ToolID: toolID, Status: "started", Summary: summary, At: started})
 	r.bus.PublishFor(ctx, events.New(events.ToolStarted, mergeMeta(meta, map[string]any{"tool_id": toolID, "summary": summary})))
 	// Every call has a time limit; cancelling the turn stops it sooner.
-	callCtx, cancel := context.WithTimeout(ctx, Timeout(toolID))
+	callCtx, cancel := context.WithTimeout(ctx, TurnTimeout(ctx, toolID))
+	if turnopts.LongCommandsFrom(ctx) {
+		callCtx = turnopts.WithCommandOutput(callCtx, func(text string) {
+			r.bus.PublishFor(ctx, events.New(events.ToolOutput, mergeMeta(meta, map[string]any{"tool_id": toolID, "text": text})))
+		})
+	}
 	r.mu.Lock()
 	observe := r.observe
 	r.mu.Unlock()

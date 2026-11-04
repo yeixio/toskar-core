@@ -129,6 +129,7 @@ func (o *Orchestrator) Run(
 		isTask := !jsonOnly && len(images) == 0 && huginn.IsTask(kind, task.Prompt, runlog.OriginFrom(ctx).Client)
 		if isTask {
 			budget = budget.TaskBudget(profile.Orchestration.MaxToolCalls)
+			ctx = turnopts.WithLongCommands(ctx)
 			offered = huginn.TaskTools(kind, task.Prompt, enabledIDs(profile))
 		}
 		// An attached audio file is transcribed, and an attached image can

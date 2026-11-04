@@ -2074,7 +2074,7 @@
         },
         {
           "type": "paragraph",
-          "text": "On the computer Toskar runs on, `toskarctl chat` works in the folder you start it in, and follows the project's notes in AGENTS.md, TOSKAR.md, or CLAUDE.md. In `toskarctl chat`, ask for work to be done, such as Fix the failing test, and it goes on step by step until it's finished or stuck, then says what it did and what's left. `/log` shows what ran in that chat, how it ended, and who allowed it."
+          "text": "On the computer Toskar runs on, `toskarctl chat` works in the folder you start it in, and follows the project's notes in AGENTS.md, TOSKAR.md, or CLAUDE.md. In `toskarctl chat`, ask for work to be done, such as Fix the failing test, and it goes on step by step until it's finished or stuck, then says what it did and what's left. `/log` shows what ran in that chat, how it ended, and who allowed it. A command in a task can run for up to 30 minutes, with its output showing as it comes. Ctrl-C stops the work and stays in the chat."
         }        ,
         {
           "type": "paragraph",

@@ -110,6 +110,33 @@ func WithProject(ctx context.Context, dir string) context.Context {
 	return context.WithValue(ctx, projectKey{}, dir)
 }
 
+// WithLongCommands has the turn's commands run as long as work needs, with
+// their output sent on as it comes (#1017).
+func WithLongCommands(ctx context.Context) context.Context {
+	return context.WithValue(ctx, longCommandsKey{}, true)
+}
+
+// LongCommandsFrom says the turn's commands may run long.
+func LongCommandsFrom(ctx context.Context) bool {
+	long, _ := ctx.Value(longCommandsKey{}).(bool)
+	return long
+}
+
+type longCommandsKey struct{}
+
+// WithCommandOutput has a command pass on its output as it comes.
+func WithCommandOutput(ctx context.Context, show func(string)) context.Context {
+	return context.WithValue(ctx, commandOutputKey{}, show)
+}
+
+// CommandOutputFrom is where a command's output goes as it comes, or nil.
+func CommandOutputFrom(ctx context.Context) func(string) {
+	show, _ := ctx.Value(commandOutputKey{}).(func(string))
+	return show
+}
+
+type commandOutputKey struct{}
+
 // ProjectFrom is the folder a turn works in, or "".
 func ProjectFrom(ctx context.Context) string {
 	dir, _ := ctx.Value(projectKey{}).(string)
