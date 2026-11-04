@@ -41,6 +41,7 @@ import (
 	"github.com/yeixio/toskar-core/internal/speech"
 	"github.com/yeixio/toskar-core/internal/tools"
 	"github.com/yeixio/toskar-core/internal/training"
+	"github.com/yeixio/toskar-core/internal/turnopts"
 	"github.com/yeixio/toskar-core/internal/version"
 	"github.com/yeixio/toskar-core/pkg/contracts"
 )
@@ -120,7 +121,9 @@ type Dependencies struct {
 	RevokeNode            func(ctx context.Context, nodeID string) error
 	ListConversations     func(ctx context.Context) ([]contracts.Conversation, error)
 	CreateConversation    func(ctx context.Context, title, profileID, modelID string) (contracts.Conversation, error)
-	UpdateConversation    func(ctx context.Context, id string, title, profileID, modelID *string, memoryOff *bool) (contracts.Conversation, error)
+	// SetConversationProject sets the folder a chat works in (#1017).
+	SetConversationProject func(ctx context.Context, id, project string) error
+	UpdateConversation     func(ctx context.Context, id string, title, profileID, modelID *string, memoryOff *bool) (contracts.Conversation, error)
 	// Compact is auto-compact (#342).
 	Compact            *Compacter
 	DeleteConversation func(ctx context.Context, id string) error
@@ -1266,10 +1269,34 @@ func (s *Server) handleUpdateConversation(w http.ResponseWriter, r *http.Request
 		MemoryOff *bool   `json:"memory_off"`
 		// CompactOff keeps the chat verbatim (#342).
 		CompactOff *bool `json:"compact_off"`
+		// Project is the folder the chat works in, "" for none (#1017).
+		Project *string `json:"project"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		writeErr(w, http.StatusBadRequest, "INVALID_JSON", "Request body must be JSON.", nil)
 		return
+	}
+	if body.Project != nil {
+		// A folder lets a chat run things on this computer.
+		if !auth.PrincipalFrom(r.Context()).Person.Role.AtLeast(auth.RoleAdmin) {
+			writeErr(w, http.StatusForbidden, "ROLE_REQUIRED", "choosing a folder for a chat needs the admin role", map[string]any{"role": "admin"})
+			return
+		}
+		dir := ""
+		if *body.Project != "" {
+			if dir = turnopts.Project(*body.Project); dir == "" {
+				writeErr(w, http.StatusBadRequest, "NOT_A_FOLDER", "There's no folder at that path on this computer. Use its full path.", nil)
+				return
+			}
+		}
+		if s.deps.SetConversationProject == nil {
+			writeErr(w, http.StatusNotImplemented, "NOT_IMPLEMENTED", "Conversations are not available yet.", nil)
+			return
+		}
+		if err := s.deps.SetConversationProject(r.Context(), id, dir); err != nil {
+			writeErrFrom(w, http.StatusBadRequest, "CONVERSATION_UPDATE_FAILED", err)
+			return
+		}
 	}
 	if body.CompactOff != nil && s.deps.Compact != nil && s.deps.Compact.SetOff != nil {
 		if err := s.deps.Compact.SetOff(r.Context(), id, *body.CompactOff); err != nil {

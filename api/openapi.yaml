@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Toskar Control Plane API
-  version: "1.84"
+  version: "1.85"
   description: >-
     Local AI control plane API for Toskar, its OpenAI-compatible routes, and its MCP server.
     On the default loopback bind no key is needed. When the daemon listens on any other address,
@@ -1793,6 +1793,9 @@ paths:
                 memory_off:
                   type: boolean
                   description: Turn memory off for this chat
+                project:
+                  type: string
+                  description: The full path of a folder on the Toskar computer for this chat to work in, or empty for none. Needs the admin role (contract 1.85).
       responses:
         "200":
           description: OK
@@ -7572,6 +7575,7 @@ components:
         profile_id: {type: string}
         model_id: {type: string}
         memory_off: {type: boolean, description: '`memory_off` keeps persistent memory out of this conversation.'}
+        project: {type: string, description: The folder on the Toskar computer this chat works in. Work asked for in it goes on until it's done, on the terminal, web, and desktop (contract 1.85).}
         compact_off: {type: boolean, description: '`compact_off` keeps this conversation verbatim: auto-compact never sends its older messages as a summary (contract 1.35, #342).'}
         created_at: {type: string, format: date-time}
         updated_at: {type: string, format: date-time}

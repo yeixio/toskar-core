@@ -566,6 +566,9 @@ func New(opts Options) (*App, error) {
 		},
 		Compact: &api.Compacter{Summary: a.ConversationSummary, Edit: a.EditConversationSummary, Now: a.CompactConversation,
 			NewChat: a.ConversationFromSummary, SetOff: a.Conversations.SetCompactOff},
+		SetConversationProject: func(ctx context.Context, id, project string) error {
+			return a.Conversations.SetProject(ctx, id, project)
+		},
 		UpdateConversation: func(ctx context.Context, id string, title, profileID, modelID *string, memoryOff *bool) (contracts.Conversation, error) {
 			return convRepo.Update(ctx, id, repositories.ConversationPatch{
 				Title:     title,

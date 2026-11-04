@@ -51,6 +51,7 @@ func (a *App) RunChat(ctx context.Context, profileID, conversationID, message st
 			if modelID == "" {
 				modelID = conv.ModelID
 			}
+			ctx = a.chatFolder(ctx, conv)
 		}
 	}
 	// A retry asks its answer's question again (#447).

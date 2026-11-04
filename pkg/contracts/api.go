@@ -655,8 +655,11 @@ type Conversation struct {
 	MemoryOff bool `json:"memory_off"`
 	// CompactOff keeps this conversation verbatim: auto-compact never
 	// sends its older messages as a summary (contract 1.35, #342).
-	CompactOff bool      `json:"compact_off"`
-	CreatedAt  time.Time `json:"created_at"`
+	CompactOff bool `json:"compact_off"`
+	// Project is the folder on the Toskar computer this chat works in, where
+	// work asked for goes on until it's done (contract 1.85, #1017).
+	Project   string    `json:"project,omitempty"`
+	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt  time.Time `json:"updated_at"`
 }
 
