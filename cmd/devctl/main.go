@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"os/signal"
 	"time"
 
 	"golang.org/x/term"
@@ -60,8 +61,12 @@ func main() {
 	case "chat":
 		inInfo, _ := os.Stdin.Stat()
 		outInfo, _ := os.Stdout.Stat()
+		// Ctrl-C stops the work, not the chat. At the prompt it leaves.
+		interrupts := make(chan os.Signal, 1)
+		signal.Notify(interrupts, os.Interrupt)
 		exit(chatCommand(os.Args[2:], chatIO{
-			in: os.Stdin, inTerminal: inInfo != nil && inInfo.Mode()&os.ModeCharDevice != 0,
+			interrupts: interrupts,
+			in:         os.Stdin, inTerminal: inInfo != nil && inInfo.Mode()&os.ModeCharDevice != 0,
 			out: os.Stdout, outTerminal: outInfo != nil && outInfo.Mode()&os.ModeCharDevice != 0,
 			errOut: os.Stderr,
 			size: func() (int, int) {

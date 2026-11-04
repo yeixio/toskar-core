@@ -14,6 +14,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"regexp"
 	"slices"
 	"sort"
 	"strconv"
@@ -66,6 +67,8 @@ type chatAPI interface {
 	stream(ctx context.Context, req api.ChatJSONRequestBody) iter.Seq2[toskar.ChatStreamEvent, error]
 	events(ctx context.Context) iter.Seq2[api.Event, error]
 	decide(requestID string, allow, forChat bool) error
+	// stop ends a chat's running turn and the commands in it.
+	stop(id string) error
 	// computer is the Toskar computer's name when it isn't this one, where
 	// a tool such as the terminal runs.
 	computer() string
@@ -91,6 +94,8 @@ type chatIO struct {
 	errOut      io.Writer
 	// size is the terminal's columns and rows, zero when it can't say.
 	size func() (cols, rows int)
+	// interrupts are Ctrl-C.
+	interrupts <-chan os.Signal
 }
 
 // daemonChat is chatAPI on the daemon: its REST routes, and the SDK for
@@ -157,6 +162,10 @@ func (d daemonChat) messages(id string) ([]contracts.Message, error) {
 	return list, err
 }
 
+func (d daemonChat) stop(id string) error {
+	return d.rest.request(http.MethodPost, "/chat/stop", map[string]string{"conversation_id": id}, nil)
+}
+
 func (d daemonChat) runs(id string) ([]toolRun, error) {
 	var list []toolRun
 	err := d.rest.request(http.MethodGet, "/tools/runs?limit=500&conversation_id="+url.QueryEscape(id), nil, &list)
@@ -195,6 +204,14 @@ type chatSession struct {
 	asks chan toolAsk
 	// status is a tool's progress for the running turn.
 	status chan string
+	// commandOutput is what a running command writes, and outputLine what's
+	// come of a line it hasn't finished.
+	commandOutput chan string
+	outputLine    string
+	// typed are the lines typed, closed at the end of input.
+	typed chan string
+	// stopping says Ctrl-C has asked the running turn to stop.
+	stopping bool
 }
 
 // toolAsk is a tool waiting for a yes or no (tool.requested).
@@ -252,6 +269,9 @@ func chatCommand(args []string, streams chatIO, newAPI func() (chatAPI, error)) 
 	s.lines.Buffer(make([]byte, 0, 64<<10), 1<<20)
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
+	s.commandOutput = make(chan string, 64)
+	s.typed = make(chan string)
+	go s.readInput(ctx)
 	go s.watch(ctx)
 
 	switch {
@@ -339,10 +359,11 @@ func (s *chatSession) resume(id string) error {
 				fmt.Fprintf(s.io.out, "%2d. %s  %s\n", i+1, titleOf(c), s.dim(c.UpdatedAt.Local().Format("Jan 2 15:04")))
 			}
 			fmt.Fprint(s.io.out, "Continue which? ")
-			if !s.lines.Scan() {
+			line, ok, _ := s.readLine()
+			if !ok {
 				return io.EOF
 			}
-			n, err := strconv.Atoi(strings.TrimSpace(s.lines.Text()))
+			n, err := strconv.Atoi(strings.TrimSpace(line))
 			if err != nil || n < 1 || n > len(list) {
 				return fmt.Errorf("pick a number from 1 to %d", len(list))
 			}
@@ -382,12 +403,18 @@ func titleOf(c contracts.Conversation) string {
 // loop reads messages and commands until /exit or the end of input.
 func (s *chatSession) loop(ctx context.Context) error {
 	for {
+		// A Ctrl-C that came as a turn ended isn't for the prompt.
+		select {
+		case <-s.io.interrupts:
+		default:
+		}
 		fmt.Fprint(s.io.out, s.prompt())
-		if !s.lines.Scan() {
+		typed, ok, _ := s.readLine()
+		if !ok {
 			fmt.Fprintln(s.io.out)
 			return s.lines.Err()
 		}
-		line := strings.TrimSpace(s.lines.Text())
+		line := strings.TrimSpace(typed)
 		if line == "" {
 			continue
 		}
@@ -560,6 +587,7 @@ func runOutcome(r toolRun) string {
 // waits for a yes or no here, read in this goroutine with the rest of the
 // input, so the question and the next message never share a line.
 func (s *chatSession) turn(ctx context.Context, text string) error {
+	s.stopping = false
 	if len(s.pending) > 0 {
 		text = askdata.Message(text, strings.Join(s.pending, "\n\n"))
 		s.pending = nil
@@ -608,6 +636,7 @@ func (s *chatSession) turn(ctx context.Context, text string) error {
 				}
 				return it.err
 			}
+			s.endOutputLine()
 			switch it.e.Type {
 			case "token":
 				fmt.Fprint(s.io.out, it.e.Content)
@@ -635,14 +664,121 @@ func (s *chatSession) turn(ctx context.Context, text string) error {
 				fmt.Fprintln(s.io.out)
 				wrote = false
 			}
+			s.endOutputLine()
 			// What's above the question stays, as the reason for it.
 			shown = ""
 			s.ask(a)
 		case st := <-s.status:
+			s.endOutputLine()
 			if s.io.outTerminal && !wrote {
 				fmt.Fprintln(s.io.out, s.dim("· "+st))
 			}
+		case text := <-s.commandOutput:
+			if !s.io.outTerminal {
+				continue
+			}
+			if wrote {
+				fmt.Fprintln(s.io.out)
+				wrote = false
+			}
+			shown = ""
+			s.showOutput(text)
+		case <-s.io.interrupts:
+			// A second Ctrl-C doesn't wait for the turn to end.
+			if s.stopping {
+				s.endOutputLine()
+				return nil
+			}
+			if wrote {
+				fmt.Fprintln(s.io.out)
+				wrote = false
+			}
+			shown = ""
+			s.stopTurn()
 		}
+	}
+}
+
+// stopTurn asks Toskar to stop this chat's running turn and its commands. The
+// turn ends with what was written, and the chat stays open.
+func (s *chatSession) stopTurn() {
+	s.stopping = true
+	s.endOutputLine()
+	s.note("Stopping. Press Ctrl-C again not to wait.")
+	go func() {
+		if err := s.api.stop(s.conv); err != nil {
+			fmt.Fprintln(s.io.errOut, err)
+		}
+	}()
+}
+
+// controlCodes are a terminal's codes for color and moving around, which a
+// command's output has no business sending to this screen.
+var controlCodes = regexp.MustCompile(`\x1b\[[0-?]*[ -/]*[@-~]|\x1b\][^\x07\x1b]*(?:\x07|\x1b\\\\)|\x1b.`)
+
+// showOutput shows what a command wrote, faintly and a line at a time.
+func (s *chatSession) showOutput(text string) {
+	s.outputLine += text
+	for {
+		line, rest, found := strings.Cut(s.outputLine, "\n")
+		if !found {
+			return
+		}
+		s.outputLine = rest
+		s.printOutputLine(line)
+	}
+}
+
+// endOutputLine shows a line the command hasn't finished, before anything else
+// goes on the screen.
+func (s *chatSession) endOutputLine() {
+	if s.outputLine != "" {
+		s.printOutputLine(s.outputLine)
+		s.outputLine = ""
+	}
+}
+
+func (s *chatSession) printOutputLine(line string) {
+	fmt.Fprintln(s.io.out, s.dim("  "+plainOutput(line)))
+}
+
+// plainOutput is a line of a command's output with its control codes taken
+// out. A progress bar rewrites its line with returns, and only its last state
+// is kept.
+func plainOutput(line string) string {
+	line = controlCodes.ReplaceAllString(line, "")
+	line = strings.TrimRight(line, "\r")
+	if i := strings.LastIndexByte(line, '\r'); i >= 0 {
+		line = line[i+1:]
+	}
+	return strings.Map(func(r rune) rune {
+		if r != '\t' && unicode.IsControl(r) {
+			return -1
+		}
+		return r
+	}, line)
+}
+
+// readInput passes on what's typed, so that waiting for it can be interrupted.
+func (s *chatSession) readInput(ctx context.Context) {
+	defer close(s.typed)
+	for s.lines.Scan() {
+		select {
+		case s.typed <- s.lines.Text():
+		case <-ctx.Done():
+			return
+		}
+	}
+}
+
+// readLine waits for a line. ok is false at the end of input or on Ctrl-C,
+// and interrupted says which.
+func (s *chatSession) readLine() (line string, ok, interrupted bool) {
+	select {
+	case line, ok = <-s.typed:
+		return line, ok, false
+	case <-s.io.interrupts:
+		return "", false, true
 	}
 }
 
@@ -732,14 +868,19 @@ func (s *chatSession) ask(a toolAsk) {
 			}
 			fmt.Fprint(s.io.out, "Allow? [y]es, [n]o, [a]lways in this chat: ")
 		}
-		if s.lines.Scan() {
-			switch strings.ToLower(strings.TrimSpace(s.lines.Text())) {
+		line, ok, interrupted := s.readLine()
+		if ok {
+			switch strings.ToLower(strings.TrimSpace(line)) {
 			case "y", "yes":
 				allow = true
 			case "a", "always":
 				// An "a" where it isn't offered isn't a yes.
 				allow, forChat = !a.alwaysAsks, !a.alwaysAsks
 			}
+		}
+		if interrupted {
+			fmt.Fprintln(s.io.out)
+			s.stopTurn()
 		}
 	}
 	if err := s.api.decide(a.requestID, allow, forChat); err != nil {
@@ -782,6 +923,13 @@ func (s *chatSession) watch(ctx context.Context) {
 			select {
 			case s.status <- summary:
 			default:
+			}
+		case "tool.output":
+			if text, _ := p["text"].(string); text != "" {
+				select {
+				case s.commandOutput <- text:
+				default:
+				}
 			}
 		}
 	}

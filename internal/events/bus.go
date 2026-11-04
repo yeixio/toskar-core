@@ -97,8 +97,11 @@ const (
 	// ToolProgress is how far a picture or clip has got (#706): stage, step
 	// and steps, and seconds_left.
 	ToolProgress = "tool.progress"
-	ToolFailed   = "tool.failed"
-	ToolParsed   = "tool.parsed"
+	// ToolOutput is what a command in a task has written so far (#1017):
+	// text, which can stop partway through a line.
+	ToolOutput = "tool.output"
+	ToolFailed = "tool.failed"
+	ToolParsed = "tool.parsed"
 
 	NodeDiscovered = "node.discovered"
 	NodePaired     = "node.paired"

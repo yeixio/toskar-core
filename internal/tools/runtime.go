@@ -5,6 +5,8 @@ import (
 	"errors"
 	"strings"
 	"time"
+
+	"github.com/yeixio/toskar-core/internal/turnopts"
 )
 
 // aliases map capability names that models and clients often use to the
@@ -70,6 +72,10 @@ var timeouts = map[string]time.Duration{
 
 const defaultTimeout = time.Minute
 
+// longCommand is the limit on one command in a task, where builds and
+// installs run long (#1017). Ctrl-C stops one sooner.
+const longCommand = 30 * time.Minute
+
 // mcpTimeout is longer: a tool source on this computer may need to start
 // first, and some, such as a browser, take a while per step.
 const mcpTimeout = 3 * time.Minute
@@ -85,6 +91,14 @@ func Timeout(id string) time.Duration {
 		}
 	}
 	return defaultTimeout
+}
+
+// TurnTimeout is the longest a tool's call may run in this turn.
+func TurnTimeout(ctx context.Context, id string) time.Duration {
+	if def, ok := Lookup(id); ok && def.Capability == CapShell && turnopts.LongCommandsFrom(ctx) {
+		return longCommand
+	}
+	return Timeout(id)
 }
 
 // Error kinds a tool call can end with, so callers and the model see the

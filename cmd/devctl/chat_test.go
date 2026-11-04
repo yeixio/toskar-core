@@ -4,7 +4,10 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"fmt"
+	"io"
 	"iter"
+	"os"
 	"strings"
 	"sync"
 	"testing"
@@ -31,10 +34,12 @@ type fakeChat struct {
 	where     string
 	ran       []toolRun
 	offered   []contracts.Model
+	stopped   []string
+	stops     chan struct{}
 }
 
 func newFakeChat() *fakeChat {
-	return &fakeChat{events: make(chan api.Event, 4), decided: make(chan struct{}, 4), msgs: map[string][]contracts.Message{}}
+	return &fakeChat{stops: make(chan struct{}, 4), events: make(chan api.Event, 4), decided: make(chan struct{}, 4), msgs: map[string][]contracts.Message{}}
 }
 
 func (f *fakeChat) createConversation(profile, model string) (contracts.Conversation, error) {
@@ -53,6 +58,14 @@ func (f *fakeChat) messages(id string) ([]contracts.Message, error) { return f.m
 
 func (f *fakeChat) runs(string) ([]toolRun, error) { return f.ran, nil }
 
+func (f *fakeChat) stop(id string) error {
+	f.mu.Lock()
+	f.stopped = append(f.stopped, id)
+	f.mu.Unlock()
+	f.stops <- struct{}{}
+	return nil
+}
+
 func (f *fakeChat) models() ([]contracts.Model, error) { return f.offered, nil }
 
 func (f *fakeChat) stream(ctx context.Context, req api.ChatJSONRequestBody) iter.Seq2[toskar.ChatStreamEvent, error] {
@@ -69,6 +82,21 @@ func (f *fakeChat) stream(ctx context.Context, req api.ChatJSONRequestBody) iter
 				if !yield(e, nil) {
 					return
 				}
+			}
+			return
+		}
+		if strings.Contains(req.Message, "long build") {
+			for _, text := range []string{"\x1b[32mcompiling\x1b[0m a\n", "linking", " b\n", "10%\r20%\r30%"} {
+				payload := map[string]any{"conversation_id": *req.ConversationId, "tool_id": "terminal", "text": text}
+				f.events <- api.Event{Type: "tool.output", Payload: &payload}
+			}
+			select {
+			case <-f.stops:
+				yield(toskar.ChatStreamEvent{Type: "token", Content: "Stopped."}, nil)
+				yield(toskar.ChatStreamEvent{Type: "done"}, nil)
+			case <-time.After(5 * time.Second):
+				yield(toskar.ChatStreamEvent{}, errors.New("not stopped"))
+			case <-ctx.Done():
 			}
 			return
 		}
@@ -439,5 +467,121 @@ func TestChatSuggestsATaskModel(t *testing.T) {
 	}
 	if got := run([]string{"--model", "small"}, contracts.Model{ID: "small", Installed: true}, task); strings.Contains(got, "goes much better") {
 		t.Errorf("a person who chose a model: %q", got)
+	}
+}
+
+// A long command shows its output as it comes, without its control codes, and
+// Ctrl-C stops the work and leaves the chat open (#1017).
+func TestChatLongCommand(t *testing.T) {
+	f := newFakeChat()
+	var out, errOut bytes.Buffer
+	in, typing := io.Pipe()
+	interrupts := make(chan os.Signal, 1)
+	streams := chatIO{in: in, inTerminal: true, out: &out, outTerminal: true, errOut: &errOut, interrupts: interrupts}
+	done := make(chan error, 1)
+	go func() { done <- chatCommand(nil, streams, func() (chatAPI, error) { return eventsFake{f}, nil }) }()
+
+	fmt.Fprintln(typing, "long build")
+	// The output arrives before anyone stops it.
+	time.Sleep(200 * time.Millisecond)
+	interrupts <- os.Interrupt
+	time.Sleep(200 * time.Millisecond)
+	fmt.Fprintln(typing, "and next")
+	time.Sleep(200 * time.Millisecond)
+	fmt.Fprintln(typing, "/exit")
+	select {
+	case err := <-done:
+		if err != nil {
+			t.Fatal(err)
+		}
+	case <-time.After(5 * time.Second):
+		t.Fatal("the chat didn't end")
+	}
+	got := out.String()
+	for _, want := range []string{"  compiling a", "  linking b", "  30%", "Stopped."} {
+		if !strings.Contains(got, want) {
+			t.Errorf("missing %q in %q", want, got)
+		}
+	}
+	if strings.Contains(got, "[32m") || strings.Contains(got, "10%") {
+		t.Errorf("control codes or an old progress state shown: %q", got)
+	}
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	if len(f.stopped) != 1 {
+		t.Errorf("stopped %v", f.stopped)
+	}
+	if len(f.sent) != 2 || f.sent[1].Message != "and next" {
+		t.Errorf("the chat should go on after Ctrl-C: %d messages", len(f.sent))
+	}
+}
+
+// Ctrl-C at a question says no and stops the turn, rather than waiting for a
+// line nobody will type.
+func TestChatInterruptAtQuestion(t *testing.T) {
+	f := newFakeChat()
+	var out, errOut bytes.Buffer
+	in, typing := io.Pipe()
+	interrupts := make(chan os.Signal, 1)
+	streams := chatIO{in: in, inTerminal: true, out: &out, outTerminal: true, errOut: &errOut, interrupts: interrupts}
+	done := make(chan error, 1)
+	go func() { done <- chatCommand(nil, streams, func() (chatAPI, error) { return eventsFake{f}, nil }) }()
+	fmt.Fprintln(typing, "wipe it")
+	time.Sleep(200 * time.Millisecond)
+	interrupts <- os.Interrupt
+	time.Sleep(200 * time.Millisecond)
+	fmt.Fprintln(typing, "/exit")
+	select {
+	case err := <-done:
+		if err != nil {
+			t.Fatal(err)
+		}
+	case <-time.After(5 * time.Second):
+		t.Fatal("the chat didn't end")
+	}
+	if len(f.decisions) != 1 || !strings.Contains(f.decisions[0], "deny") {
+		t.Errorf("decisions %v", f.decisions)
+	}
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	if len(f.stopped) != 1 {
+		t.Errorf("stopped %v", f.stopped)
+	}
+}
+
+// Ctrl-C at the prompt leaves.
+func TestChatInterruptAtPrompt(t *testing.T) {
+	f := newFakeChat()
+	var out, errOut bytes.Buffer
+	in, _ := io.Pipe()
+	interrupts := make(chan os.Signal, 1)
+	streams := chatIO{in: in, inTerminal: true, out: &out, outTerminal: true, errOut: &errOut, interrupts: interrupts}
+	done := make(chan error, 1)
+	go func() { done <- chatCommand(nil, streams, func() (chatAPI, error) { return eventsFake{f}, nil }) }()
+	time.Sleep(200 * time.Millisecond)
+	interrupts <- os.Interrupt
+	select {
+	case err := <-done:
+		if err != nil {
+			t.Fatal(err)
+		}
+	case <-time.After(5 * time.Second):
+		t.Fatal("Ctrl-C at the prompt should leave")
+	}
+}
+
+func TestPlainOutput(t *testing.T) {
+	for in, want := range map[string]string{
+		"plain":                    "plain",
+		"\x1b[1;31mred\x1b[0m":     "red",
+		"\x1b]0;title\x07text":     "text",
+		"10%\r50%\rdone\r":         "done",
+		"tab\there":                "tab\there",
+		"bell\x07 and \x08back":    "bell and back",
+		"\x1b[2J\x1b[Hscreen wipe": "screen wipe",
+	} {
+		if got := plainOutput(in); got != want {
+			t.Errorf("plainOutput(%q) = %q, want %q", in, got, want)
+		}
 	}
 }

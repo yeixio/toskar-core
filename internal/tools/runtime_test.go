@@ -3,6 +3,7 @@ package tools
 import (
 	"context"
 	"errors"
+	"github.com/yeixio/toskar-core/internal/turnopts"
 	"testing"
 	"time"
 
@@ -60,5 +61,19 @@ func TestExecuteStopsWithTheTurn(t *testing.T) {
 	_, err := r.Execute(ctx, "web.search", map[string]any{"query": "x"}, PolicyAllow, "test", nil)
 	if ErrorKind(err) != ErrKindCancelled {
 		t.Fatalf("err = %v", err)
+	}
+}
+
+// Only a command in a task runs long (#1017).
+func TestTurnTimeout(t *testing.T) {
+	long := turnopts.WithLongCommands(context.Background())
+	if got := TurnTimeout(long, "terminal"); got != longCommand {
+		t.Errorf("terminal in a task: %v", got)
+	}
+	if got := TurnTimeout(context.Background(), "terminal"); got != 2*time.Minute {
+		t.Errorf("terminal in a chat: %v", got)
+	}
+	if got := TurnTimeout(long, "internet.search"); got != 45*time.Second {
+		t.Errorf("search in a task: %v", got)
 	}
 }
