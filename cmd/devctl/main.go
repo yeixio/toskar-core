@@ -59,15 +59,13 @@ func main() {
 		piped := info != nil && info.Mode()&os.ModeCharDevice == 0
 		exit(askCommand(os.Args[2:], askIO{stdin: os.Stdin, stdinPiped: piped, out: os.Stdout}, newAskClient))
 	case "chat":
-		inInfo, _ := os.Stdin.Stat()
-		outInfo, _ := os.Stdout.Stat()
 		// Ctrl-C stops the work, not the chat. At the prompt it leaves.
 		interrupts := make(chan os.Signal, 1)
 		signal.Notify(interrupts, os.Interrupt)
 		exit(chatCommand(os.Args[2:], chatIO{
 			interrupts: interrupts,
-			in:         os.Stdin, inTerminal: inInfo != nil && inInfo.Mode()&os.ModeCharDevice != 0,
-			out: os.Stdout, outTerminal: outInfo != nil && outInfo.Mode()&os.ModeCharDevice != 0,
+			in:         os.Stdin, inTerminal: term.IsTerminal(int(os.Stdin.Fd())),
+			out: os.Stdout, outTerminal: term.IsTerminal(int(os.Stdout.Fd())),
 			errOut: os.Stderr,
 			size: func() (int, int) {
 				cols, rows, err := term.GetSize(int(os.Stdout.Fd()))

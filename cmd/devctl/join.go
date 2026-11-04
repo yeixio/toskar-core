@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"runtime"
 	"strings"
 	"text/tabwriter"
 	"time"
@@ -53,7 +54,12 @@ func newDaemon() daemonClient {
 type notRunningError struct{ base string }
 
 func (e *notRunningError) Error() string {
-	return fmt.Sprintf("Toskar isn't running on this computer (%s). Start it, for example with systemctl start toskar, and try again", e.base)
+	how := "for example with systemctl start toskar"
+	switch runtime.GOOS {
+	case "darwin", "windows":
+		how = "by opening Toskar Pro, or running toskar"
+	}
+	return fmt.Sprintf("Toskar isn't running on this computer (%s). Start it, %s, and try again", e.base, how)
 }
 
 // waitRunning waits up to d for the daemon to answer, as a provisioning

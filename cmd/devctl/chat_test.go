@@ -35,6 +35,8 @@ type fakeChat struct {
 	ran       []toolRun
 	offered   []contracts.Model
 	stopped   []string
+	installed []string
+	picked    string
 	stops     chan struct{}
 }
 
@@ -57,6 +59,15 @@ func (f *fakeChat) conversations() ([]contracts.Conversation, error) { return f.
 func (f *fakeChat) messages(id string) ([]contracts.Message, error) { return f.msgs[id], nil }
 
 func (f *fakeChat) runs(string) ([]toolRun, error) { return f.ran, nil }
+
+func (f *fakeChat) recommended() string { return f.picked }
+
+func (f *fakeChat) install(id string, out io.Writer) error {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	f.installed = append(f.installed, id)
+	return nil
+}
 
 func (f *fakeChat) stop(id string) error {
 	f.mu.Lock()
@@ -458,11 +469,12 @@ func TestChatSuggestsATaskModel(t *testing.T) {
 	}
 	tooBig := task
 	tooBig.Fit = &contracts.ModelFit{Label: contracts.FitTooLarge}
-	if got := run(nil, tooBig); !strings.Contains(got, "more than this computer has") || strings.Contains(got, "models install") {
+	small := contracts.Model{ID: "small", Installed: true}
+	if got := run(nil, small, tooBig); !strings.Contains(got, "more than this computer has") || strings.Contains(got, "models install") {
 		t.Errorf("too large: %q", got)
 	}
 	tooBig.Fit = &contracts.ModelFit{Label: contracts.FitUnsupported}
-	if got := run(nil, tooBig); !strings.Contains(got, "more than this computer has") {
+	if got := run(nil, small, tooBig); !strings.Contains(got, "more than this computer has") {
 		t.Errorf("unsupported: %q", got)
 	}
 	if got := run([]string{"--model", "small"}, contracts.Model{ID: "small", Installed: true}, task); strings.Contains(got, "goes much better") {
@@ -582,6 +594,109 @@ func TestPlainOutput(t *testing.T) {
 	} {
 		if got := plainOutput(in); got != want {
 			t.Errorf("plainOutput(%q) = %q, want %q", in, got, want)
+		}
+	}
+}
+
+func fit(label contracts.FitLabel) *contracts.ModelFit { return &contracts.ModelFit{Label: label} }
+
+func TestFirstModel(t *testing.T) {
+	small := contracts.Model{ID: "small", SizeBytes: 1, Fit: fit(contracts.FitGood)}
+	tight := contracts.Model{ID: "tight", SizeBytes: 1, Fit: fit("tight")}
+	tasks := contracts.Model{ID: "tasks", SizeBytes: 9, Fit: fit(contracts.FitGood), Tags: []string{taskModelTag}}
+	tooBig := contracts.Model{ID: "big", SizeBytes: 9, Tags: []string{taskModelTag}, Fit: fit(contracts.FitTooLarge)}
+	unsure := contracts.Model{ID: "unsure", SizeBytes: 1}
+	coder := contracts.Model{ID: "coder", SizeBytes: 5, Fit: fit(contracts.FitGood)}
+	for name, c := range map[string]struct {
+		list []contracts.Model
+		want string
+	}{
+		"tasks first":     {[]contracts.Model{small, tasks}, "tasks"},
+		"tasks must fit":  {[]contracts.Model{small, tooBig}, "small"},
+		"fits well first": {[]contracts.Model{tight, small}, "small"},
+		"any that runs":   {[]contracts.Model{tight, tooBig}, "tight"},
+		"recommended":     {[]contracts.Model{small, coder}, "coder"},
+		"tasks over it":   {[]contracts.Model{coder, tasks}, "tasks"},
+		"none":            {[]contracts.Model{tooBig, unsure}, ""},
+	} {
+		got := ""
+		if m := firstModel(c.list, "coder"); m != nil {
+			got = m.ID
+		}
+		if got != c.want {
+			t.Errorf("%s: %q", name, got)
+		}
+	}
+}
+
+// Starting from nothing: it says what it would install, and only with a yes.
+func TestChatNoModelYet(t *testing.T) {
+	offer := []contracts.Model{{ID: "small", DisplayName: "Small", SizeBytes: 1 << 30, Fit: fit(contracts.FitGood)}}
+
+	f := newFakeWith(offer)
+	out, _, err := runChat(t, f, nil, "y\n/exit\n", true)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(out, "Toskar has no model yet") || !strings.Contains(out, "Small (") || len(f.installed) != 1 || f.installed[0] != "small" {
+		t.Errorf("out %q, installed %v", out, f.installed)
+	}
+
+	f = newFakeWith(offer)
+	if _, _, err = runChat(t, f, nil, "n\n", true); err == nil || !strings.Contains(err.Error(), "Nothing was installed") {
+		t.Errorf("no: %v", err)
+	}
+	if len(f.installed) != 0 {
+		t.Errorf("installed without a yes: %v", f.installed)
+	}
+
+	// Nobody to ask: the command to run, and nothing installed.
+	f = newFakeWith(offer)
+	if _, _, err = runChat(t, f, []string{"hello"}, "", false); err == nil || !strings.Contains(err.Error(), "toskarctl models install small") {
+		t.Errorf("piped: %v", err)
+	}
+	if len(f.installed) != 0 {
+		t.Errorf("installed with nobody to ask: %v", f.installed)
+	}
+
+	f = newFakeWith([]contracts.Model{{ID: "big", Fit: fit(contracts.FitTooLarge)}})
+	if _, _, err = runChat(t, f, nil, "", true); err == nil || !strings.Contains(err.Error(), "can't run any") {
+		t.Errorf("too large: %v", err)
+	}
+
+	// A model named, or one there already, isn't asked about.
+	f = newFakeWith([]contracts.Model{{ID: "here", Installed: true}, {ID: "small", Fit: fit(contracts.FitGood)}})
+	if out, _, err = runChat(t, f, nil, "/exit\n", true); err != nil || strings.Contains(out, "no model yet") {
+		t.Errorf("installed: %q %v", out, err)
+	}
+}
+
+func TestStepLines(t *testing.T) {
+	for _, c := range [][3]string{
+		{"terminal", "go test ./...", "Running go test ./..."},
+		{"filesystem.read", "sum.go", "Reading sum.go"},
+		{"filesystem.write", "sum.go", "Writing sum.go"},
+		{"internet.search", "weather", "Searching the web for weather"},
+		{"git.status", "", "Checking what changed"},
+		{"files.create", "", "Making a file"},
+		{"mcp.thing", "did it", "did it"},
+		{"mcp.thing", "", "mcp.thing"},
+	} {
+		if got := stepLine(c[0], c[1]); got != c[2] {
+			t.Errorf("%v: %q", c, got)
+		}
+	}
+	for _, c := range []struct {
+		p    map[string]any
+		want string
+	}{
+		{map[string]any{"duration_ms": 100.0}, ""},
+		{map[string]any{"duration_ms": 12000.0}, "That took 12s"},
+		{map[string]any{"exit": 1.0, "duration_ms": 100.0}, "That failed with exit code 1"},
+		{map[string]any{"exit": 2.0, "duration_ms": 7000.0}, "That failed with exit code 2, after 7s"},
+	} {
+		if got := stepEnded(c.p); got != c.want {
+			t.Errorf("%v: %q", c.p, got)
 		}
 	}
 }
