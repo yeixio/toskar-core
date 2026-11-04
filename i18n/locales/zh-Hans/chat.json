@@ -100,6 +100,20 @@
     "offHint": "此聊天的记忆已关闭。已保存的记忆不会在这里使用，也不会被删除。",
     "disabledHint": "所有聊天的记忆都已关闭。请在“记忆”页面开启。"
   },
+  "folder": {
+    "on": "文件夹:{{name}}",
+    "off": "无文件夹",
+    "label": "Toskar 电脑上的文件夹",
+    "placeholder": "文件夹的完整路径",
+    "hint": "指定文件夹后,Toskar 可以在其中运行命令,并持续工作直到完成。更改任何内容前都会先询问。",
+    "save": "保存",
+    "remove": "移除"
+  },
+  "task": {
+    "output": "命令输出",
+    "elsewhere": "这是在其他应用或窗口中开始的。你可以在这里查看进度、回答问题或停止。",
+    "workingIn": "工作位置:{{path}}"
+  },
   "send": {
     "waitForFiles": "请等文件添加完成后再发送。",
     "summarizeFile_other": "总结这些文件。",

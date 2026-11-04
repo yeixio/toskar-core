@@ -577,8 +577,20 @@ export interface Conversation {
   memory_off?: boolean
   /** Kept verbatim: auto-compact never sends its older messages as a summary (#342). */
   compact_off?: boolean
+  /** The folder this chat works in (#1017). */
+  project?: string
   created_at: string
   updated_at: string
+}
+
+/** What a chat's running turn has done so far, for opening it midway (#1017). */
+export interface ChatTurn {
+  running: boolean
+  started_at?: string
+  steps?: { tool_id: string; summary?: string; status: 'running' | 'completed' | 'failed' }[]
+  output?: string
+  text?: string
+  waiting?: ToolRequestedPayload[]
 }
 
 /** What the model sees in place of a long chat's older messages (#342); every message stays saved. */
@@ -1010,6 +1022,8 @@ export interface UpdateConversationRequest {
   model_id?: string
   memory_off?: boolean
   compact_off?: boolean
+  /** The folder this chat works in, "" for none. Needs the admin role. */
+  project?: string
 }
 
 export type MemoryCategory = 'identity' | 'preferences' | 'projects' | 'technical' | 'interests' | 'people' | 'other'

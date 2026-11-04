@@ -100,6 +100,20 @@
     "offHint": "La memoria è disattivata per questa chat. I ricordi salvati non vengono usati qui e non vengono eliminati.",
     "disabledHint": "La memoria è disattivata per tutte le chat. Attivala dalla pagina Memoria."
   },
+  "folder": {
+    "on": "Cartella: {{name}}",
+    "off": "Nessuna cartella",
+    "label": "Cartella sul computer con Toskar",
+    "placeholder": "Percorso completo della cartella",
+    "hint": "Con una cartella, Toskar può eseguire comandi al suo interno e continuare fino al termine del lavoro. Chiede prima di modificare qualcosa.",
+    "save": "Salva",
+    "remove": "Rimuovi"
+  },
+  "task": {
+    "output": "Output del comando",
+    "elsewhere": "È stato avviato in un’altra app o finestra. Qui puoi seguirlo, rispondere alle sue domande o fermarlo.",
+    "workingIn": "Al lavoro in {{path}}"
+  },
   "send": {
     "waitForFiles": "Attendi che i file finiscano di essere aggiunti, poi invia.",
     "summarizeFile_one": "Riassumi questo file.",

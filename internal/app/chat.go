@@ -54,6 +54,11 @@ func (a *App) RunChat(ctx context.Context, profileID, conversationID, message st
 			ctx = a.chatFolder(ctx, conv)
 		}
 	}
+	// Where a task could run, changes ask however the message is worded, and
+	// commands show their output (#1017).
+	if huginn.WorksOnComputer(runlog.OriginFrom(ctx).Client, turnopts.ProjectFrom(ctx)) {
+		ctx = turnopts.WithLongCommands(ctx)
+	}
 	// A retry asks its answer's question again (#447).
 	branch := turnopts.BranchFrom(ctx)
 	if conversationID == "" {

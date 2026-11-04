@@ -528,6 +528,21 @@ func (s *Server) handleConversationMessages(w http.ResponseWriter, r *http.Reque
 	writeJSON(w, http.StatusOK, msgs)
 }
 
+// handleChatTurn is what a chat's running turn has done so far, for an app
+// that opens the chat in the middle of it (#1017).
+func (s *Server) handleChatTurn(w http.ResponseWriter, r *http.Request) {
+	if s.deps.ChatTurn == nil {
+		writeJSON(w, http.StatusOK, contracts.ChatTurn{})
+		return
+	}
+	turn, err := s.deps.ChatTurn(r.Context(), mux.Vars(r)["id"])
+	if err != nil {
+		writeErrFrom(w, http.StatusNotFound, "NOT_FOUND", err)
+		return
+	}
+	writeJSON(w, http.StatusOK, turn)
+}
+
 func (s *Server) handleListTasks(w http.ResponseWriter, r *http.Request) {
 	if s.deps.ListTasks == nil {
 		writeJSON(w, http.StatusOK, []contracts.Task{})

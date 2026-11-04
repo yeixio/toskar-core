@@ -222,6 +222,8 @@ type chatSession struct {
 	pending []string
 	// asks are the tool approvals this chat's turns wait on.
 	asks chan toolAsk
+	// decided are the tool approvals answered, here or in another app.
+	decided chan string
 	// status is a tool's progress for the running turn.
 	status chan string
 	// commandOutput is what a running command writes, and outputLine what's
@@ -285,7 +287,7 @@ func chatCommand(args []string, streams chatIO, newAPI func() (chatAPI, error)) 
 	if err := checkModelInstalled(client, *model); err != nil {
 		return err
 	}
-	s := &chatSession{api: client, io: streams, lines: bufio.NewScanner(streams.in), model: *model, profile: *profile, asks: make(chan toolAsk, 4), status: make(chan string, 8)}
+	s := &chatSession{api: client, io: streams, lines: bufio.NewScanner(streams.in), model: *model, profile: *profile, asks: make(chan toolAsk, 4), decided: make(chan string, 8), status: make(chan string, 8)}
 	s.lines.Buffer(make([]byte, 0, 64<<10), 1<<20)
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -885,6 +887,22 @@ func (s *chatSession) readLine() (line string, ok, interrupted bool) {
 	}
 }
 
+// readAnswer waits for a line, or for another app to answer this question.
+func (s *chatSession) readAnswer(requestID string) (line string, ok, interrupted, elsewhere bool) {
+	for {
+		select {
+		case line, ok = <-s.typed:
+			return line, ok, false, false
+		case <-s.io.interrupts:
+			return "", false, true, false
+		case id := <-s.decided:
+			if id == requestID {
+				return "", false, false, true
+			}
+		}
+	}
+}
+
 // erase clears text just written from the screen, and says whether it could:
 // not when the terminal can't say its size, or some of it has scrolled away.
 func (s *chatSession) erase(text string) bool {
@@ -971,7 +989,12 @@ func (s *chatSession) ask(a toolAsk) {
 			}
 			fmt.Fprint(s.io.out, "Allow? [y]es, [n]o, [a]lways in this chat: ")
 		}
-		line, ok, interrupted := s.readLine()
+		line, ok, interrupted, elsewhere := s.readAnswer(a.requestID)
+		if elsewhere {
+			fmt.Fprintln(s.io.out)
+			s.note("Answered in another app.")
+			return
+		}
 		if ok {
 			switch strings.ToLower(strings.TrimSpace(line)) {
 			case "y", "yes":
@@ -1017,6 +1040,22 @@ func (s *chatSession) watch(ctx context.Context) {
 			a.afterOutside, _ = p["after_outside"].(bool)
 			if a.requestID != "" {
 				s.asks <- a
+			}
+		case "tool.decided":
+			if id, _ := p["request_id"].(string); id != "" {
+				select {
+				case s.decided <- id:
+				default:
+					// Nobody has been asked for a while: older answers can go.
+					select {
+					case <-s.decided:
+					default:
+					}
+					select {
+					case s.decided <- id:
+					default:
+					}
+				}
 			}
 		case "tool.started":
 			summary, _ := p["summary"].(string)

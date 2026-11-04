@@ -663,6 +663,30 @@ type Conversation struct {
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
+// ChatTurn is what a chat's turn has done so far, for an app that opens the
+// chat while it's running (contract 1.86, #1017). Events carry it on from
+// here. Not running, the rest is empty: the saved messages have it all.
+type ChatTurn struct {
+	Running   bool       `json:"running"`
+	StartedAt *time.Time `json:"started_at,omitempty"`
+	Steps     []TurnStep `json:"steps,omitempty"`
+	// Output is the end of what the running command has written, which can
+	// hold terminal control codes.
+	Output string `json:"output,omitempty"`
+	// Text is the answer written so far.
+	Text string `json:"text,omitempty"`
+	// Waiting is each tool.requested still waiting for an answer.
+	Waiting []map[string]any `json:"waiting,omitempty"`
+}
+
+// TurnStep is one tool call in a turn.
+type TurnStep struct {
+	ToolID  string `json:"tool_id"`
+	Summary string `json:"summary,omitempty"`
+	// Status is running, completed, or failed.
+	Status string `json:"status"`
+}
+
 // ConversationsDeleteRequest is POST /api/v1/conversations/delete: chats to
 // delete at once (#452, contract 1.25).
 type ConversationsDeleteRequest struct {

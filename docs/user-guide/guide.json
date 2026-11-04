@@ -642,6 +642,35 @@
         },
         {
           "type": "heading",
+          "text": "Give a chat a folder to work in"
+        },
+        {
+          "type": "paragraph",
+          "text": "An Admin can give a chat a folder on the computer Toskar runs on. In that chat, work you ask for keeps going until it's done: Toskar runs commands there, reads the results, fixes what failed, and says what it did and what's left. A chat with no folder stays an ordinary chat."
+        },
+        {
+          "type": "steps",
+          "items": [
+            "Open a chat, or start a new one, and open the composer's options.",
+            "Choose No folder, type the folder's full path, and choose Save. A new chat starts for the folder if you didn't have one open. A path with no folder there says so and changes nothing.",
+            "Ask for the work, such as: Fix the failing test and run the tests again. The chat shows Working in, with the folder, above where you type.",
+            "Watch the command's output as it's written. Toskar asks before changing anything, and shows the exact command. Stop ends the task, including the running command."
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Commands that delete or overwrite ask every time, and a chat that has just read a web page or a file from outside asks again before changing anything. Only an Admin can choose a folder, and it stops working for someone whose role changes. On a phone, tablet, watch, TV, or car, the same chat answers as an ordinary chat."
+        },
+        {
+          "type": "heading",
+          "text": "Follow a task from another app"
+        },
+        {
+          "type": "paragraph",
+          "text": "A task started in `toskarctl chat`, the desktop app, or the browser can be opened from any of the others on the same account. Open the chat from History: it shows the steps so far, what the command is writing, and the answer as it's written. Any question waiting for you shows too, and whichever app answers first puts it away in the others. Stop works from any of them. Sending a new message waits until the task ends or you stop it."
+        },
+        {
+          "type": "heading",
           "text": "From the command line or your own code"
         },
         {
@@ -2075,7 +2104,7 @@
         {
           "type": "paragraph",
           "text": "On the computer Toskar runs on, `toskarctl chat` works in the folder you start it in, and follows the project's notes in AGENTS.md, TOSKAR.md, or CLAUDE.md. In `toskarctl chat`, ask for work to be done, such as Fix the failing test, and it goes on step by step until it's finished or stuck, then says what it did and what's left. `/log` shows what ran in that chat, how it ended, and who allowed it. It reads and runs tests freely, and asks before it changes anything. A command in a task can run for up to 30 minutes, with its output showing as it comes. Ctrl-C stops the work and stays in the chat. If a check failed, or nothing checked a change, or test files changed, it says so under the answer as \"Toskar noticed\", whatever the model claims."
-        }        ,
+        },
         {
           "type": "paragraph",
           "text": "The headless archive doesn't install a service. Extract it, run toskar from its folder with the web folder beside it, and stop it with Ctrl+C. Its --data-dir option keeps the data somewhere else."

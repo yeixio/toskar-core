@@ -100,6 +100,20 @@
     "offHint": "A memória está desativada neste chat. As memórias salvas não são usadas aqui e não são apagadas.",
     "disabledHint": "A memória está desativada em todos os chats. Ative-a na página Memória."
   },
+  "folder": {
+    "on": "Pasta: {{name}}",
+    "off": "Sem pasta",
+    "label": "Pasta no computador com Toskar",
+    "placeholder": "Caminho completo da pasta",
+    "hint": "Com uma pasta, o Toskar pode executar comandos nela e continuar até terminar o trabalho. Ele pergunta antes de alterar qualquer coisa.",
+    "save": "Salvar",
+    "remove": "Remover"
+  },
+  "task": {
+    "output": "Saída do comando",
+    "elsewhere": "Isso começou em outro app ou janela. Aqui você pode acompanhar, responder às perguntas ou parar.",
+    "workingIn": "Trabalhando em {{path}}"
+  },
   "send": {
     "waitForFiles": "Aguarde os arquivos terminarem de ser adicionados e depois envie.",
     "summarizeFile_one": "Resuma este arquivo.",

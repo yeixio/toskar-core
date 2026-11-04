@@ -165,7 +165,9 @@ type Dependencies struct {
 	ShowVersion        func(ctx context.Context, conversationID, messageID string) ([]contracts.Message, error)
 	Chat               func(w http.ResponseWriter, r *http.Request, conversationID, profileID, modelID, message string, stream bool, execution string) error
 	// StopChat stops a conversation's running turn and reports whether one was running.
-	StopChat           func(conversationID string) bool
+	StopChat func(conversationID string) bool
+	// ChatTurn is what a chat's running turn has done so far (#1017).
+	ChatTurn           func(ctx context.Context, conversationID string) (contracts.ChatTurn, error)
 	ListTasks          func(ctx context.Context) ([]contracts.Task, error)
 	CreateTask         func(ctx context.Context, profileID, conversationID, prompt string) (contracts.Task, error)
 	GetTask            func(ctx context.Context, id string) (contracts.Task, error)
@@ -364,6 +366,7 @@ func (s *Server) routes() {
 	api.HandleFunc("/chat", s.handleChat).Methods(http.MethodPost)
 	api.HandleFunc("/chat/stop", s.handleStopChat).Methods(http.MethodPost)
 	api.HandleFunc("/conversations/{id}/messages", s.handleConversationMessages).Methods(http.MethodGet, http.MethodOptions)
+	api.HandleFunc("/conversations/{id}/turn", s.handleChatTurn).Methods(http.MethodGet, http.MethodOptions)
 	api.HandleFunc("/conversations/{id}/messages/{mid}/shown", s.handleShowVersion).Methods(http.MethodPut)
 	api.HandleFunc("/tasks", s.handleListTasks).Methods(http.MethodGet, http.MethodOptions)
 	api.HandleFunc("/tasks", s.handleCreateTask).Methods(http.MethodPost)
