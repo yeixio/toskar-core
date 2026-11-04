@@ -15,10 +15,10 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-# A self-hosted runner keeps these in a folder that outlasts the job, so it
+# A self-hosted computer keeps these in one folder for all its runners, so it
 # downloads each one once (#1081). GitHub's machines restore .quality-cache.
-if [[ "${RUNNER_ENVIRONMENT:-}" == "self-hosted" && -n "${RUNNER_TOOL_CACHE:-}" ]]; then
-  CACHE="${QUALITY_CACHE:-$RUNNER_TOOL_CACHE/toskar-quality-model}"
+if [[ "${RUNNER_ENVIRONMENT:-}" == "self-hosted" ]]; then
+  CACHE="${QUALITY_CACHE:-$HOME/.cache/toskar-quality-model}"
 else
   CACHE="${QUALITY_CACHE:-$ROOT/.quality-cache}"
 fi
@@ -30,6 +30,7 @@ mkdir -p "$CACHE"
 # What no run has used for a while: an older llama.cpp, a model no longer tested.
 find "$CACHE" -mindepth 1 -maxdepth 1 -name 'llama.cpp-*' ! -name "llama.cpp-$TAG" -mtime +14 -exec rm -rf {} +
 find "$CACHE" -mindepth 1 -maxdepth 1 \( -name '*.gguf' -o -name '*.gguf.sha256' \) -mtime +30 -exec rm -f {} +
+find "$CACHE" -mindepth 1 -maxdepth 1 -name '*.part' -mtime +2 -exec rm -f {} +
 
 sha256() {
   if command -v sha256sum >/dev/null 2>&1; then
@@ -44,17 +45,23 @@ llama_server() {
   local bin
   bin="$(find "$dir" -type f -name llama-server 2>/dev/null | head -n 1 || true)"
   if [[ -z "$bin" ]]; then
-    rm -rf "$dir"
-    mkdir -p "$dir"
-    gh release download "$TAG" -R ggml-org/llama.cpp -p "*bin-ubuntu-x64.*" -D "$dir" >&2
-    for archive in "$dir"/*; do
+    # Unpacked beside the folder and moved in whole, since another runner on
+    # this computer may be doing the same.
+    local work="$dir.$$"
+    rm -rf "$work"
+    mkdir -p "$work"
+    gh release download "$TAG" -R ggml-org/llama.cpp -p "*bin-ubuntu-x64.*" -D "$work" >&2
+    for archive in "$work"/*; do
       case "$archive" in
-        *.zip) unzip -q "$archive" -d "$dir" ;;
-        *.tar.gz | *.tgz) tar -xzf "$archive" -C "$dir" ;;
+        *.zip) unzip -q "$archive" -d "$work" ;;
+        *.tar.gz | *.tgz) tar -xzf "$archive" -C "$work" ;;
       esac
     done
+    chmod +x "$(find "$work" -type f -name llama-server | head -n 1)"
+    # rename(2) refuses a folder that's already there, so the first one in wins;
+    # mv would move this one inside it.
+    perl -e 'exit !rename($ARGV[0], $ARGV[1])' "$work" "$dir" || rm -rf "$work"
     bin="$(find "$dir" -type f -name llama-server | head -n 1)"
-    chmod +x "$bin"
   fi
   touch "$dir"
   echo "$bin"
@@ -68,11 +75,14 @@ model() {
     rm -f "$file" "$file.sha256"
   fi
   if [[ ! -s "$file" ]]; then
-    curl -fL --retry 3 -o "$file.part" "$MODEL_URL" >&2
-    mv "$file.part" "$file"
+    curl -fL --retry 3 -o "$file.$$.part" "$MODEL_URL" >&2
+    mv "$file.$$.part" "$file"
     rm -f "$file.sha256"
   fi
-  [[ -s "$file.sha256" ]] || sha256 "$file" > "$file.sha256"
+  if [[ ! -s "$file.sha256" ]]; then
+    sha256 "$file" > "$file.sha256.$$"
+    mv "$file.sha256.$$" "$file.sha256"
+  fi
   touch "$file" "$file.sha256"
   echo "$file"
 }

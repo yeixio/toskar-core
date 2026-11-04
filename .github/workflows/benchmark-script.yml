@@ -43,10 +43,10 @@ jobs:
     runs-on: ${{ fromJSON(matrix.runner) }}
     timeout-minutes: 40
     steps:
-      # The runner context doesn't exist yet where a job's env is read. A folder
-      # that outlasts the job, so a home runner downloads the model once (#1081).
+      # One folder for all of a computer's runners, so it downloads the model
+      # once (#1081). This workflow's concurrency group keeps them from sharing it at once.
       - name: Choose the folder
-        run: echo "TOSKAR_BENCHMARK_DIR=$RUNNER_TOOL_CACHE/toskar-benchmark" >> "$GITHUB_ENV"
+        run: echo "TOSKAR_BENCHMARK_DIR=$HOME/.cache/toskar-benchmark" >> "$GITHUB_ENV"
       - uses: actions/checkout@v7
       - uses: actions/setup-go@v7
         with:

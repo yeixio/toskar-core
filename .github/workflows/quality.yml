@@ -93,7 +93,7 @@ jobs:
           path: .quality-cache
           key: quality-model-b11174-llama-3.2-1b-q4km-gemma-3-4b-q4km
       - name: Note the network counters
-        run: scripts/ci-traffic.sh start "$RUNNER_TOOL_CACHE/toskar-quality-model"
+        run: scripts/ci-traffic.sh start "$HOME/.cache/toskar-quality-model"
       - name: Quality set with a real model
         env:
           GH_TOKEN: ${{ github.token }}
