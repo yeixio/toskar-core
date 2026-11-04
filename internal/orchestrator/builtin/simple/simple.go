@@ -126,7 +126,7 @@ func (o *Orchestrator) Run(
 		offered := huginn.ToolsFor(kind, task.Prompt, enabledIDs(profile))
 		// Work asked for in the terminal goes on until it's done or stuck,
 		// with what it may turn out to need (#1017).
-		isTask := !jsonOnly && len(images) == 0 && huginn.IsTask(kind, task.Prompt, runlog.OriginFrom(ctx).Client)
+		isTask := !jsonOnly && len(images) == 0 && huginn.IsTask(kind, task.Prompt, runlog.OriginFrom(ctx).Client, turnopts.ProjectFrom(ctx))
 		if isTask {
 			budget = budget.TaskBudget(profile.Orchestration.MaxToolCalls)
 			ctx = turnopts.WithLongCommands(ctx)

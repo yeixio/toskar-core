@@ -30,7 +30,7 @@ type ConversationPatch struct {
 
 func (r *ConversationRepo) List(ctx context.Context) ([]contracts.Conversation, error) {
 	rows, err := r.db.QueryContext(ctx, `
-		SELECT id, COALESCE(title,''), COALESCE(profile_id,''), COALESCE(model_id,''), memory_off, compact_off, created_at, updated_at
+		SELECT id, COALESCE(title,''), COALESCE(profile_id,''), COALESCE(model_id,''), memory_off, compact_off, project, created_at, updated_at
 		FROM conversations WHERE person_id = ? ORDER BY updated_at DESC`, auth.PersonID(ctx))
 	if err != nil {
 		return nil, err
@@ -52,7 +52,7 @@ func (r *ConversationRepo) List(ctx context.Context) ([]contracts.Conversation, 
 
 func (r *ConversationRepo) Get(ctx context.Context, id string) (contracts.Conversation, error) {
 	row := r.db.QueryRowContext(ctx, `
-		SELECT id, COALESCE(title,''), COALESCE(profile_id,''), COALESCE(model_id,''), memory_off, compact_off, created_at, updated_at
+		SELECT id, COALESCE(title,''), COALESCE(profile_id,''), COALESCE(model_id,''), memory_off, compact_off, project, created_at, updated_at
 		FROM conversations WHERE id = ? AND person_id = ?`, id, auth.PersonID(ctx))
 	c, err := scanConversation(row)
 	if err == sql.ErrNoRows {
@@ -117,6 +117,18 @@ func (r *ConversationRepo) Update(ctx context.Context, id string, patch Conversa
 		return contracts.Conversation{}, err
 	}
 	return existing, nil
+}
+
+// SetProject sets the folder a conversation works in, "" for none (#1017).
+func (r *ConversationRepo) SetProject(ctx context.Context, id, project string) error {
+	res, err := r.db.ExecContext(ctx, `UPDATE conversations SET project = ? WHERE id = ? AND person_id = ?`, project, id, auth.PersonID(ctx))
+	if err != nil {
+		return err
+	}
+	if n, _ := res.RowsAffected(); n == 0 {
+		return fmt.Errorf("conversation %q not found", id)
+	}
+	return nil
 }
 
 // SetCompactOff keeps a conversation verbatim, or lets auto-compact
@@ -191,7 +203,7 @@ func scanConversation(s conversationScanner) (contracts.Conversation, error) {
 	var c contracts.Conversation
 	var created, updated string
 	var memoryOff, compactOff int
-	if err := s.Scan(&c.ID, &c.Title, &c.ProfileID, &c.ModelID, &memoryOff, &compactOff, &created, &updated); err != nil {
+	if err := s.Scan(&c.ID, &c.Title, &c.ProfileID, &c.ModelID, &memoryOff, &compactOff, &c.Project, &created, &updated); err != nil {
 		return contracts.Conversation{}, err
 	}
 	c.MemoryOff, c.CompactOff = memoryOff != 0, compactOff != 0

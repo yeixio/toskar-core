@@ -1,5 +1,5 @@
 {
-  "version": "1.84",
+  "version": "1.85",
   "types": {
     "ActivityStep": [
       "kind",
@@ -72,6 +72,7 @@
       "memory_off",
       "model_id",
       "profile_id",
+      "project",
       "title",
       "updated_at"
     ],

@@ -92,6 +92,7 @@
   "NOTIFICATIONS_FAILED": "{{detail}}",
   "NOTIFICATION_NOT_FOUND": "Esa notificación se eliminó.",
   "NOT_A_DEVICE": "Solo un dispositivo conectado puede desconectarse a sí mismo.",
+  "NOT_A_FOLDER": "No hay ninguna carpeta en esa ruta en este ordenador. Usa la ruta completa.",
   "NOT_FOUND": "{{detail}}",
   "NOT_IMPLEMENTED": "{{detail}}",
   "NO_MODEL_ASSIGNED": "No hay ningún modelo elegido para esto. Instala uno en Modelos o elige uno en el perfil.",
