@@ -50,3 +50,29 @@ func TestClassifyCommandKnowsEverydayWork(t *testing.T) {
 		}
 	}
 }
+
+// A task reads and tests freely, and asks before it changes anything (#1017).
+func TestRunsFreelyInTask(t *testing.T) {
+	for _, c := range []string{
+		"ls", "cat main.go", "grep -n Add sum.go", "git status", "git diff HEAD", "git log -3", "go test ./...", "go build ./...", "go vet ./...",
+		"go version", "npm test", "cargo test", "pytest -q", "ls && git status", "find . -name x", "cat a.go | head -5",
+	} {
+		if !RunsFreelyInTask(c, "/p") {
+			t.Errorf("%q should run freely", c)
+		}
+	}
+	for _, c := range []string{
+		"git add .", "git commit -m x", "git switch main", "git pull", "git fetch", "git branch new", "go fmt ./...", "go mod tidy",
+		"npm install", "npm run build", "pnpm run x", "npm ci", "make", "make test", "mkdir x", "touch x", "cargo fmt",
+		"cat /etc/passwd", "cat ~/.ssh/id_rsa", "cat ../secret", "ls /", "grep -r key ~", "git status; make",
+		"rm x", "./run.sh", "python x.py",
+	} {
+		if RunsFreelyInTask(c, "/p") {
+			t.Errorf("%q should ask", c)
+		}
+	}
+	// With no project known, there's no outside of it to tell.
+	if !RunsFreelyInTask("cat /etc/hosts", "") {
+		t.Error("no project")
+	}
+}

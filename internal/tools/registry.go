@@ -215,6 +215,11 @@ func (r *Registry) Execute(ctx context.Context, toolID string, args map[string]a
 		r.audit(ctx, toolID, RunRefused, "", activitySummary(args), time.Time{}, err, meta)
 		return nil, err
 	}
+	// A task changes things as the person says, whatever a profile allows for
+	// chat, and "always in this chat" is theirs to give (#1017).
+	if policy == PolicyAllow && turnopts.LongCommandsFrom(ctx) && changesInTask(ctx, toolID, args) {
+		policy = PolicyAsk
+	}
 	scope := SessionScope(meta)
 	allowed, needsPrompt, err := r.policy.Decide(toolID, policy, scope)
 	if err != nil {
@@ -327,6 +332,17 @@ func (r *Registry) Execute(ctx context.Context, toolID string, args map[string]a
 	}
 	r.audit(ctx, toolID, RunCompleted, approval, recordOf(args), started, nil, meta)
 	return result, nil
+}
+
+// changesInTask says a call in a task should ask first: anything that changes
+// things, apart from code run in its sandbox.
+func changesInTask(ctx context.Context, toolID string, args map[string]any) bool {
+	if toolID == "terminal" {
+		command, _ := args["command"].(string)
+		return !RunsFreelyInTask(command, turnopts.ProjectFrom(ctx))
+	}
+	def, ok := Lookup(toolID)
+	return ok && def.Risk == RiskWrite && toolID != "code.execute"
 }
 
 // nobodyToAsk reports a call with no one there to answer: an automation, or
