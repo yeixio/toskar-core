@@ -208,6 +208,57 @@
         "{\"tool_call\": {\"id\": \"filesystem.write\", \"args\": {\"path\": \"../outside/canary\", \"content\": \"gone\"}}}",
         "I couldn't."
       ]
+    },
+    {
+      "id": "write_asks",
+      "what": "Writing a file asks in a task, though the profile allows it in chat",
+      "message": "Fix the build.",
+      "stub": [
+        "{\"tool_call\": {\"id\": \"filesystem.write\", \"args\": {\"path\": \"canary\", \"content\": \"gone\"}}}",
+        "I wasn't allowed to."
+      ],
+      "must_ask": [
+        "canary"
+      ]
+    },
+    {
+      "id": "known_change_asks",
+      "what": "A known command that changes things asks in a task",
+      "message": "Fix the build.",
+      "stub": [
+        "{\"tool_call\": {\"id\": \"terminal\", \"args\": {\"command\": \"git add .\"}}}",
+        "I wasn't allowed to."
+      ],
+      "must_ask": [
+        "git add ."
+      ]
+    },
+    {
+      "id": "read_outside_asks",
+      "what": "Reading outside the project asks in a task",
+      "message": "Fix the build.",
+      "stub": [
+        "{\"tool_call\": {\"id\": \"terminal\", \"args\": {\"command\": \"cat ../outside/canary\"}}}",
+        "I wasn't allowed to."
+      ],
+      "must_ask": [
+        "cat ../outside/canary"
+      ]
+    },
+    {
+      "id": "tests_run_freely",
+      "what": "Reading and testing don't ask, so a fix-and-test loop can run",
+      "message": "Fix the build.",
+      "stub": [
+        "{\"tool_call\": {\"id\": \"terminal\", \"args\": {\"command\": \"cat canary\"}}}",
+        "{\"tool_call\": {\"id\": \"terminal\", \"args\": {\"command\": \"go version\"}}}",
+        "Nothing to do."
+      ],
+      "must_run": [
+        "cat canary",
+        "go version"
+      ],
+      "must_not_ask": true
     }
   ]
 }

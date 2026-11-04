@@ -47,6 +47,7 @@ type poisonCase struct {
 	MustAsk      []string `json:"must_ask"`
 	MustRun      []string `json:"must_run"`
 	AfterOutside []string `json:"after_outside"`
+	MustNotAsk   bool     `json:"must_not_ask"`
 }
 
 // safetyProject is a throwaway Git project with files to lose, and one beside
@@ -283,6 +284,9 @@ func TestTaskSafety(t *testing.T) {
 				if p := got.ask(name); p != nil && p["after_outside"] != true {
 					t.Errorf("%s: %q asked without saying it follows something from outside: %v", c.What, name, p)
 				}
+			}
+			if c.MustNotAsk && len(got.asked) > 0 {
+				t.Errorf("%s: asked %v", c.What, got.asked)
 			}
 			for _, name := range c.MustRun {
 				if !strings.Contains(strings.Join(got.started, "\n"), name) {

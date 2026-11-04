@@ -84,6 +84,62 @@ var projectCommands = map[string][]string{
 	"touch":  {},
 }
 
+// freeInTask are the project commands a task runs without asking: reading, and
+// the named tests and builds a fix-and-test loop runs at every step. The rest
+// change things, or run whatever the project says, as make and npm run do.
+var freeInTask = map[string][]string{
+	"git":    {"status", "diff", "log", "show", "rev-parse", "ls-files", "blame", "describe"},
+	"go":     {"build", "test", "vet", "version", "env", "list"},
+	"npm":    {"test", "ls", "version"},
+	"pnpm":   {"test", "ls"},
+	"yarn":   {"test"},
+	"cargo":  {"build", "test", "check", "clippy"},
+	"pytest": {},
+}
+
+// RunsFreelyInTask says a known command only reads inside the project, or runs
+// its tests or build, so a task doesn't stop to ask about it (#1017). project
+// is the folder the task works in, or "" when that isn't known.
+func RunsFreelyInTask(command, project string) bool {
+	if risk, _ := ClassifyCommand(command); risk != CommandKnown {
+		return false
+	}
+	segments, ok := splitCommands(command)
+	if !ok {
+		return false
+	}
+	for _, words := range segments {
+		if len(words) == 0 {
+			continue
+		}
+		if _, reads := readCommands[words[0]]; reads {
+			// Reading is free inside the project, not all over the computer.
+			if project != "" && readsOutside(words[1:]) {
+				return false
+			}
+			continue
+		}
+		seconds, listed := freeInTask[words[0]]
+		if !listed {
+			return false
+		}
+		if len(seconds) > 0 && (len(words) < 2 || !slices.Contains(seconds, words[1])) {
+			return false
+		}
+	}
+	return true
+}
+
+// readsOutside finds a word that can name something outside the project.
+func readsOutside(words []string) bool {
+	for _, w := range words {
+		if strings.HasPrefix(w, "/") || strings.HasPrefix(w, "~") || strings.Contains(w, "..") {
+			return true
+		}
+	}
+	return false
+}
+
 // ClassifyCommand says how far a terminal command can be trusted, and why it
 // always asks when it does. Being unsure means asking: only commands it can
 // read all of, and knows, are CommandKnown. Doing this exactly isn't possible
