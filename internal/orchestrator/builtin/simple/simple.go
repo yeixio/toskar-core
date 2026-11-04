@@ -292,6 +292,9 @@ func (o *Orchestrator) Run(
 		}
 		calls := 0
 		tracker := taskTracker{start: len(messages)}
+		if isTask {
+			tracker.check = newTaskCheck(ctx)
+		}
 		malformed := 0
 		// changed records that a tool that changes things ran.
 		changed := false
@@ -353,7 +356,7 @@ func (o *Orchestrator) Run(
 			}
 			// Told to stop and sum up, it called a tool anyway: say what ran.
 			if tracker.stopped != "" && (parsed.Call != nil || strings.TrimSpace(parsed.Text) == "") {
-				live.finish(ch, role, nodeID, tracker.report(), metrics, usage)
+				live.finish(ch, role, nodeID, tracker.report()+tracker.check.footer(ctx), metrics, usage)
 				return
 			}
 			if parsed.Call != nil && !toolEnabled(profile, parsed.Call.ID) && malformed < 2 {
@@ -413,6 +416,7 @@ func (o *Orchestrator) Run(
 					followUp = taskFollowUp
 					resultNote = shortenResult(resultNote)
 					tracker.ran(parsed.Call.ID, parsed.Call.Args, err)
+					tracker.check.step(ctx, parsed.Call.ID, parsed.Call.Args, result, err)
 					if tracker.repeated(parsed.Call.ID, parsed.Call.Args, resultNote) {
 						toolsOn = false
 						tracker.stopped = "the same step keeps giving the same result"
@@ -586,6 +590,14 @@ func (o *Orchestrator) Run(
 				messages = append(messages, pluginapi.ChatMessage{Role: "assistant", Content: content}, pluginapi.ChatMessage{Role: "user", Content: taskGoOn})
 				continue
 			}
+			// "It's fixed" with a failed check, or with nothing run, gets one
+			// chance to check. What's still in doubt goes under the answer.
+			if isTask && toolsOn && tracker.stopped == "" && calls < budget.MaxToolCalls {
+				if back := tracker.check.sendBack(ctx); back != "" {
+					messages = append(messages, pluginapi.ChatMessage{Role: "assistant", Content: content}, pluginapi.ChatMessage{Role: "user", Content: back})
+					continue
+				}
+			}
 			answer := parsed.Text
 			if deliberate {
 				answer = deliberateAnswer(ctx, env, ch, profile, task.Prompt, messages, plainSys, answer, role, nodeID)
@@ -611,6 +623,9 @@ func (o *Orchestrator) Run(
 			// changes things ran, is called out (§24; found by §64).
 			if !changed && huginn.ClaimsAction(answer) {
 				env.Emit(EventUnconfirmedAction, map[string]any{})
+			}
+			if isTask {
+				answer += tracker.check.footer(ctx)
 			}
 			live.finish(ch, role, nodeID, answer, metrics, usage)
 			return

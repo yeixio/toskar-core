@@ -88,6 +88,8 @@ type taskTracker struct {
 	empty int
 	// nudged counts replies sent back for saying what's next and stopping.
 	nudged int
+	// check is what the task checked and changed.
+	check *taskCheck
 }
 
 // ran notes a step for the report.

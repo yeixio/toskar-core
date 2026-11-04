@@ -29,6 +29,34 @@ func call(command string) string {
 	return fmt.Sprintf(`{"tool_call":{"id":"terminal","args":{"command":%q}}}`, command)
 }
 
+// exitEnv runs every command, and each one fails.
+type exitEnv struct{ *roleEnv }
+
+func (e *exitEnv) ExecuteTool(context.Context, string, map[string]any) (map[string]any, error) {
+	return map[string]any{"stdout": "FAIL", "exit": 1}, nil
+}
+
+func runTaskWith(t *testing.T, env *exitEnv, prompt string, profile contracts.AIProfile, replies ...string) (*exitEnv, string, []string) {
+	t.Helper()
+	inner := newRoleEnv(map[string]string{"assistant": replies[0]})
+	inner.sequence["assistant"] = replies[1:]
+	env.roleEnv = inner
+	ctx := runlog.WithOrigin(context.Background(), runlog.Origin{Client: "terminal"})
+	events, err := New().Run(ctx, contracts.Task{Prompt: prompt}, profile, env)
+	if err != nil {
+		t.Fatal(err)
+	}
+	answer := ""
+	for e := range events {
+		if e.Type == "agent.message" {
+			answer += e.Content
+		}
+	}
+	inner.mu.Lock()
+	defer inner.mu.Unlock()
+	return env, answer, inner.prompts["assistant"]
+}
+
 func runTask(t *testing.T, client, prompt string, profile contracts.AIProfile, replies ...string) (*taskEnv, string, []string) {
 	t.Helper()
 	inner := newRoleEnv(map[string]string{"assistant": replies[0]})
