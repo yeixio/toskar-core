@@ -41,6 +41,7 @@ jobs:
           # The newest patch release, not one a runner has cached: patches
           # fix security problems in the standard library that builds ship.
           check-latest: true
+          cache: ${{ runner.environment == 'github-hosted' }}
       # Each job gets its own pnpm: self-hosted runners share a home folder,
       # and two jobs installing into ~/setup-pnpm at once break each other.
       - uses: pnpm/action-setup@v6
@@ -49,7 +50,7 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: "22"
-          cache: pnpm
+          cache: ${{ runner.environment == 'github-hosted' && 'pnpm' || '' }}
           cache-dependency-path: |
             web/pnpm-lock.yaml
             scripts/screenshots/pnpm-lock.yaml

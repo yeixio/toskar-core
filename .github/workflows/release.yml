@@ -25,15 +25,22 @@ jobs:
           # The newest patch release, not one a runner has cached: patches
           # fix security problems in the standard library that builds ship.
           check-latest: true
+          cache: ${{ runner.environment == 'github-hosted' }}
       - uses: actions/cache@v6
+        if: runner.environment == 'github-hosted'
         with:
           path: .quality-cache
           key: quality-model-b11174-llama-3.2-1b-q4km
+      - name: Note the network counters
+        run: scripts/ci-traffic.sh start "$RUNNER_TOOL_CACHE/toskar-quality-model"
       - name: Quality set with a real model
         env:
           GH_TOKEN: ${{ github.token }}
           TOSKAR_QUALITY_REPORT: ${{ runner.temp }}/quality-report.md
         run: scripts/quality-model.sh run
+      - name: Network use
+        if: always()
+        run: scripts/ci-traffic.sh report
       - name: Report
         if: always()
         run: |
@@ -60,6 +67,7 @@ jobs:
           # The newest patch release, not one a runner has cached: patches
           # fix security problems in the standard library that builds ship.
           check-latest: true
+          cache: ${{ runner.environment == 'github-hosted' }}
       # Each job gets its own pnpm: self-hosted runners share a home folder,
       # and two jobs installing into ~/setup-pnpm at once break each other.
       - uses: pnpm/action-setup@v6
@@ -68,7 +76,7 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: "22"
-          cache: pnpm
+          cache: ${{ runner.environment == 'github-hosted' && 'pnpm' || '' }}
           cache-dependency-path: web/pnpm-lock.yaml
       - name: Install packaging tools
         run: |
