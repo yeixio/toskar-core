@@ -47,6 +47,9 @@ var gitDestructive = regexp.MustCompile(`(?i)` + strings.Join([]string{
 	`\bgit\s+(\S+\s+)*push\s+(\S+\s+)*(--force\S*|-[a-z]*f[a-z]*|\+\S+|--delete|--mirror|-d)(\s|$)`,
 	`\bgit\s+(\S+\s+)*(reset\s+(\S+\s+)*--(hard|merge|keep)|clean|filter-branch|filter-repo|rebase|reflog\s+(expire|delete)|gc\s+--prune|update-ref|replace|restore|stash\s+(drop|clear))\b`,
 	`\bgit\s+(\S+\s+)*branch\s+(\S+\s+)*-[a-z]*[dD]\b`,
+	`\bgit\s+(\S+\s+)*switch\s+(\S+\s+)*(-f|--force|--discard-changes|-C|--force-create)(\s|$)`,
+	`\bgit\s+(\S+\s+)*commit\s+(\S+\s+)*--amend(\s|$)`,
+	`\bgit\s+(\S+\s+)*(pull|fetch)\s+(\S+\s+)*(--rebase\S*|--force|--prune\S*|-[a-z]*[rfp][a-z]*)(\s|$)`,
 	`\bgit\s+(\S+\s+)*checkout\s+(\S+\s+)*(--|-f|--force)(\s|$)`,
 }, "|"))
 
@@ -69,7 +72,7 @@ var readCommands = map[string][]string{
 // projectCommands are ordinary project work, by first and second word; an
 // empty list is any second word.
 var projectCommands = map[string][]string{
-	"git":    {"status", "diff", "log", "show", "branch", "rev-parse", "ls-files", "blame", "describe", "add", "commit", "fetch", "pull", "switch", "stash"},
+	"git":    {"status", "diff", "log", "show", "branch", "rev-parse", "ls-files", "blame", "describe", "add", "commit", "fetch", "pull", "switch"},
 	"go":     {"build", "test", "vet", "fmt", "mod", "version", "env", "list"},
 	"make":   {},
 	"npm":    {"test", "run", "ci", "install", "ls", "version"},

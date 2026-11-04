@@ -100,7 +100,7 @@ jobs:
           TOSKAR_QUALITY_REPORT: ${{ runner.temp }}/quality-report.md
           TOSKAR_QUALITY_REPEATS: ${{ inputs.repeats || '3' }}
           TOSKAR_QUALITY_SAVE: ${{ runner.temp }}/quality-runs.jsonl
-          TOSKAR_QUALITY_RUN: TestQualitySet|TestPromptCache
+          TOSKAR_QUALITY_RUN: TestQualitySet|TestPromptCache|TestTaskSafety
           TOSKAR_QUALITY_CACHE_REPORT: ${{ runner.temp }}/cache-report.md
         run: scripts/quality-model.sh run
       # Gemma 3's sliding window (1,024 tokens) is where a llama.cpp update
