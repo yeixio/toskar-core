@@ -15,12 +15,29 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-CACHE="${QUALITY_CACHE:-$ROOT/.quality-cache}"
+# A self-hosted runner keeps these in a folder that outlasts the job, so it
+# downloads each one once (#1081). GitHub's machines restore .quality-cache.
+if [[ "${RUNNER_ENVIRONMENT:-}" == "self-hosted" && -n "${RUNNER_TOOL_CACHE:-}" ]]; then
+  CACHE="${QUALITY_CACHE:-$RUNNER_TOOL_CACHE/toskar-quality-model}"
+else
+  CACHE="${QUALITY_CACHE:-$ROOT/.quality-cache}"
+fi
 TAG="${LLAMA_CPP_TAG:-b11174}"
 MODEL_URL="${QUALITY_MODEL_GGUF_URL:-https://huggingface.co/bartowski/Llama-3.2-1B-Instruct-GGUF/resolve/main/Llama-3.2-1B-Instruct-Q4_K_M.gguf}"
 PORT="${QUALITY_MODEL_PORT:-8089}"
 CTX="${QUALITY_MODEL_CTX:-4096}"
 mkdir -p "$CACHE"
+# What no run has used for a while: an older llama.cpp, a model no longer tested.
+find "$CACHE" -mindepth 1 -maxdepth 1 -name 'llama.cpp-*' ! -name "llama.cpp-$TAG" -mtime +14 -exec rm -rf {} +
+find "$CACHE" -mindepth 1 -maxdepth 1 \( -name '*.gguf' -o -name '*.gguf.sha256' \) -mtime +30 -exec rm -f {} +
+
+sha256() {
+  if command -v sha256sum >/dev/null 2>&1; then
+    sha256sum "$1" | awk '{print $1}'
+  else
+    shasum -a 256 "$1" | awk '{print $1}'
+  fi
+}
 
 llama_server() {
   local dir="$CACHE/llama.cpp-$TAG"
@@ -39,15 +56,24 @@ llama_server() {
     bin="$(find "$dir" -type f -name llama-server | head -n 1)"
     chmod +x "$bin"
   fi
+  touch "$dir"
   echo "$bin"
 }
 
 model() {
   local file="$CACHE/$(basename "${MODEL_URL%%\?*}")"
+  # A kept file that no longer matches its checksum is downloaded again.
+  if [[ -s "$file" && -s "$file.sha256" && "$(sha256 "$file")" != "$(cat "$file.sha256")" ]]; then
+    echo "$(basename "$file") doesn't match its checksum, so it's downloaded again." >&2
+    rm -f "$file" "$file.sha256"
+  fi
   if [[ ! -s "$file" ]]; then
     curl -fL --retry 3 -o "$file.part" "$MODEL_URL" >&2
     mv "$file.part" "$file"
+    rm -f "$file.sha256"
   fi
+  [[ -s "$file.sha256" ]] || sha256 "$file" > "$file.sha256"
+  touch "$file" "$file.sha256"
   echo "$file"
 }
 

@@ -43,9 +43,10 @@ jobs:
     runs-on: ${{ fromJSON(matrix.runner) }}
     timeout-minutes: 40
     steps:
-      # The runner context doesn't exist yet where a job's env is read.
+      # The runner context doesn't exist yet where a job's env is read. A folder
+      # that outlasts the job, so a home runner downloads the model once (#1081).
       - name: Choose the folder
-        run: echo "TOSKAR_BENCHMARK_DIR=$RUNNER_TEMP/toskar-benchmark" >> "$GITHUB_ENV"
+        run: echo "TOSKAR_BENCHMARK_DIR=$RUNNER_TOOL_CACHE/toskar-benchmark" >> "$GITHUB_ENV"
       - uses: actions/checkout@v7
       - uses: actions/setup-go@v7
         with:
@@ -58,7 +59,17 @@ jobs:
         env:
           RELEASE: ${{ runner.temp }}/release
         run: |
-          rm -rf "$RELEASE" "$TOSKAR_BENCHMARK_DIR"
+          rm -rf "$RELEASE"
+          # The weekly run starts empty, as a new person's does, to check the real
+          # download. Others keep only the model and engine: each still starts a new Toskar.
+          if [ "$GITHUB_EVENT_NAME" = schedule ]; then
+            rm -rf "$TOSKAR_BENCHMARK_DIR"
+          else
+            rm -rf "$TOSKAR_BENCHMARK_DIR/results"
+            if [ -d "$TOSKAR_BENCHMARK_DIR/data" ]; then
+              find "$TOSKAR_BENCHMARK_DIR/data" -mindepth 1 -maxdepth 1 ! -name models ! -name runtimes -exec rm -rf {} +
+            fi
+          fi
           scripts/test-benchmark.sh "$RELEASE" 7370 > "$RUNNER_TEMP/serve.log" 2>&1 &
           for _ in $(seq 1 300); do
             curl -sf "$TOSKAR_RELEASE_URL/SHA256SUMS.txt" >/dev/null && exit 0
@@ -66,6 +77,8 @@ jobs:
           done
           cat "$RUNNER_TEMP/serve.log"
           exit 1
+      - name: Note the network counters
+        run: scripts/ci-traffic.sh start "$TOSKAR_BENCHMARK_DIR/data/models" "$TOSKAR_BENCHMARK_DIR/data/runtimes"
       # As curl | sh does: the script on standard input.
       - name: Run the script
         run: sh < scripts/benchmark.sh
@@ -78,6 +91,9 @@ jobs:
       - name: What Toskar logged
         if: failure()
         run: cat "$TOSKAR_BENCHMARK_DIR"/results/*/toskar.log || true
+      - name: Network use
+        if: always()
+        run: scripts/ci-traffic.sh report
       - name: Stop the server
         if: always()
         run: pkill -f 'http.server 7370' || true
