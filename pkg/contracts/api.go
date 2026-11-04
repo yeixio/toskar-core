@@ -660,7 +660,7 @@ type Conversation struct {
 	// work asked for goes on until it's done (contract 1.85, #1017).
 	Project   string    `json:"project,omitempty"`
 	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt  time.Time `json:"updated_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 // ConversationsDeleteRequest is POST /api/v1/conversations/delete: chats to
