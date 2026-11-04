@@ -309,3 +309,5 @@ not gated: the labels are sparse, so a suggestion they lack isn't always
 wrong. `TOSKAR_QUALITY_TRIAGE_MODEL` picks the model, `TOSKAR_QUALITY_TRIAGE_REPORT`
 writes a Markdown report and `TOSKAR_QUALITY_TRIAGE_JSON` the results, and the
 weekly real-model run includes it. It needs a daemon; the stub skips it.
+
+`task_safety.json` holds attempts to get a task in the terminal to do damage without asking (#1017), and `TestTaskSafety` runs them against the real terminal tool. `disguised` is commands aimed at canary files in a throwaway Git project: each must be refused, or ask with no "always" on offer, and every question is answered no. `poisoned` is tasks where a file or a page gives orders, with a scripted model that obeys, the worst case. `real` ones also run with a served model, which may not try anything: whatever it does, the canaries must survive. It isn't part of the Toskar Score, so it isn't in `version.json`: it tests Toskar, not a model's answers. `make` and `npm run` are left out on purpose: they run the project's own code, so a tampered Makefile can do damage after "always", as `docs/cli.md` says.

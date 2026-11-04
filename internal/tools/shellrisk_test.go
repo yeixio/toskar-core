@@ -5,6 +5,8 @@ import "testing"
 // Disguised and wrapped commands: none may be taken for harmless (#1017).
 func TestClassifyCommandNeverTrustsTheseWithoutAsking(t *testing.T) {
 	for _, c := range []string{
+		"git stash", "git stash -u", "git stash drop", "git switch -f main", "git switch --discard-changes main", "git switch -C main",
+		"git commit --amend -m x", "git commit -a --amend --no-edit", "git pull --rebase", "git pull -r", "git pull --force", "git fetch --prune", "git fetch -p",
 		"rm -rf /", "rm file.txt", `r\m -rf .`, "'rm' -rf .", "\"r\"m -rf .", "/bin/rm -rf .", "command rm x", `\rm x`,
 		"sh -c 'rm -rf .'", "bash -c \"rm -rf .\"", "eval rm -rf .", "exec rm x", "busybox rm x",
 		"find . -delete", "find . -exec rm {} +", `find . -name x -ok mv {} y \;`, "ls | xargs rm",
@@ -39,8 +41,7 @@ func TestClassifyCommandSaysWhatCantBeUndone(t *testing.T) {
 func TestClassifyCommandKnowsEverydayWork(t *testing.T) {
 	for _, c := range []string{
 		"ls -la", "pwd", "cat go.mod", "head -20 main.go", "tail -n 5 x", "wc -l x", "grep -rn foo .", "rg foo", "find . -name '*.go'", "du -sh .", "df -h",
-		"git status", "git diff", "git log --oneline -5", "git add .", "git commit -m 'fix: thing'", "git fetch", "git pull", "git switch main", "git stash",
-		"go test ./...", "go build ./...", "go vet ./...", "make test", "npm test", "npm run build", "npm ci", "pytest -q", "cargo test", "mkdir -p x", "touch x",
+		"git status", "git diff", "git log --oneline -5", "git add .", "git commit -m 'fix: thing'", "git fetch", "git pull", "git switch main", "go test ./...", "go build ./...", "go vet ./...", "make test", "npm test", "npm run build", "npm ci", "pytest -q", "cargo test", "mkdir -p x", "touch x",
 		"git log --format=%h", "grep -rn kill main.go", "git commit -m 'rm the old format'", "echo format", "cat format.go",
 		"ls | wc -l", "grep foo x | sort | uniq", "go test ./... 2>&1", "make test >/dev/null 2>&1", "git status && git diff", "echo done",
 	} {
