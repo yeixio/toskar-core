@@ -322,9 +322,11 @@ func (r *Registry) Execute(ctx context.Context, toolID string, args map[string]a
 		cache.Store(toolID, args, result)
 	}
 	r.record(Activity{ToolID: toolID, Status: "completed", Summary: summary, DurationMS: elapsed, At: time.Now()})
-	r.bus.PublishFor(ctx, events.New(events.ToolCompleted, mergeMeta(meta, map[string]any{
-		"tool_id": toolID, "duration_ms": elapsed, "summary": summary,
-	})))
+	completed := map[string]any{"tool_id": toolID, "duration_ms": elapsed, "summary": summary}
+	if code, ok := result["exit"].(int); ok && code != 0 {
+		completed["exit"] = code
+	}
+	r.bus.PublishFor(ctx, events.New(events.ToolCompleted, mergeMeta(meta, completed)))
 	// A command that ran and failed: a tool that worked, and a result to keep.
 	if code, ok := result["exit"].(int); ok && code != 0 {
 		r.audit(ctx, toolID, RunFailed, approval, recordOf(args), started, fmt.Errorf("exit %d", code), meta)

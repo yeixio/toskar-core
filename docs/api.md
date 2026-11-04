@@ -804,6 +804,7 @@ A chat that fails while streaming sends `event: error_code` with the same `code`
 | `plan.created`, `plan.step` | A request with several parts is planned, and each part runs |
 | `verify.action`, `verify.done`, `verify.code`, `verify.consistency` | The answer checks: figures, claimed actions, code, and contradictions |
 | `tool.requested`, `tool.started`, `tool.completed`, `tool.failed`, `tool.parsed` | A tool call waits for approval, runs, finishes, fails (with `kind`), or is read from text. On `tool.requested`, `always_asks` says no earlier answer covers this command, so don't offer to allow it for the session (`allow_session` is ignored), and `cant_undo` says it can't be undone |
+| `tool.completed` `exit` | A command that ended with a nonzero exit code says which (#1017, contract 1.84). |
 | `tool.output` | What a command in a terminal task has written so far (#1017, contract 1.83): `text`, sent about five times a second, which can stop partway through a line and hold terminal control codes. Ordinary chats don't send it. |
 | `knowledge.retrieved`, `knowledge.failed` | Knowledge passages are added to a turn, or the search fails |
 | `memory.saved`, `memory.deleted` | A memory is saved or forgotten from a chat |

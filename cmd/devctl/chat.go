@@ -69,6 +69,10 @@ type chatAPI interface {
 	decide(requestID string, allow, forChat bool) error
 	// stop ends a chat's running turn and the commands in it.
 	stop(id string) error
+	// recommended is the model Toskar picks for code on this computer, or "".
+	recommended() string
+	// install sets up what answering needs, and a model, showing how it goes.
+	install(id string, out io.Writer) error
 	// computer is the Toskar computer's name when it isn't this one, where
 	// a tool such as the terminal runs.
 	computer() string
@@ -162,6 +166,24 @@ func (d daemonChat) messages(id string) ([]contracts.Message, error) {
 	return list, err
 }
 
+func (d daemonChat) recommended() string {
+	var r contracts.Recommendation
+	if d.rest.request(http.MethodGet, "/models/recommend?purpose=coding", nil, &r) != nil || len(r.Models) == 0 {
+		return ""
+	}
+	return r.Models[0].ID
+}
+
+func (d daemonChat) install(id string, out io.Writer) error {
+	// Answers come when it's there, however long that takes.
+	waiting := d.rest
+	waiting.client = &http.Client{}
+	if err := waiting.call(http.MethodPost, "/runtimes/llamacpp/install", nil, nil); err != nil {
+		return err
+	}
+	return installModel(d.rest, id, "", out)
+}
+
 func (d daemonChat) stop(id string) error {
 	return d.rest.request(http.MethodPost, "/chat/stop", map[string]string{"conversation_id": id}, nil)
 }
@@ -173,9 +195,7 @@ func (d daemonChat) runs(id string) ([]toolRun, error) {
 }
 
 func (d daemonChat) models() ([]contracts.Model, error) {
-	var list []contracts.Model
-	err := d.rest.request(http.MethodGet, "/models", nil, &list)
-	return list, err
+	return listModels(d.rest)
 }
 
 func (d daemonChat) stream(ctx context.Context, req api.ChatJSONRequestBody) iter.Seq2[toskar.ChatStreamEvent, error] {
@@ -273,6 +293,11 @@ func chatCommand(args []string, streams chatIO, newAPI func() (chatAPI, error)) 
 	s.typed = make(chan string)
 	go s.readInput(ctx)
 	go s.watch(ctx)
+	if *model == "" {
+		if err := s.ensureModel(); err != nil {
+			return err
+		}
+	}
 
 	switch {
 	case *resume:
@@ -488,6 +513,79 @@ func (s *chatSession) showNotice() {
 	}
 }
 
+// firstModel is the model to start with on this computer, nil when none would
+// run: one measured to finish tasks if it fits well, or the one Toskar
+// recommends, or the smallest that fits well, or the smallest that runs at all.
+func firstModel(list []contracts.Model, recommended string) *contracts.Model {
+	runs := func(m contracts.Model) bool {
+		return contracts.SupportRoleOf(m) == "" && m.Fit != nil && m.Fit.Label != "" &&
+			m.Fit.Label != contracts.FitTooLarge && m.Fit.Label != contracts.FitUnsupported
+	}
+	fitsWell := func(m contracts.Model) bool {
+		return runs(m) && (m.Fit.Label == contracts.FitExcellent || m.Fit.Label == contracts.FitGood)
+	}
+	smallest := func(ok func(contracts.Model) bool) *contracts.Model {
+		var best *contracts.Model
+		for i, m := range list {
+			if ok(m) && (best == nil || m.SizeBytes < best.SizeBytes) {
+				best = &list[i]
+			}
+		}
+		return best
+	}
+	if m := smallest(func(m contracts.Model) bool { return fitsWell(m) && slices.Contains(m.Tags, taskModelTag) }); m != nil {
+		return m
+	}
+	if m := smallest(func(m contracts.Model) bool { return m.ID == recommended && runs(m) }); m != nil {
+		return m
+	}
+	if m := smallest(fitsWell); m != nil {
+		return m
+	}
+	return smallest(runs)
+}
+
+// ensureModel sets Toskar up to answer when it has no model yet: it says so in
+// a sentence, and offers the one that suits this computer (#1017).
+func (s *chatSession) ensureModel() error {
+	list, err := s.api.models()
+	if err != nil || len(list) == 0 {
+		return nil
+	}
+	for _, m := range list {
+		if m.Installed && contracts.SupportRoleOf(m) == "" {
+			return nil
+		}
+	}
+	pick := firstModel(list, s.api.recommended())
+	if pick == nil {
+		return &exitError{code: 2, msg: "Toskar has no model yet, and this computer can't run any of them well. toskarctl models list shows what each needs."}
+	}
+	name := pick.DisplayName
+	if name == "" {
+		name = pick.ID
+	}
+	if !s.io.inTerminal {
+		return &exitError{code: 2, msg: fmt.Sprintf("Toskar has no model yet. Install one with: toskarctl models install %s", pick.ID)}
+	}
+	fmt.Fprintf(s.io.out, "Toskar has no model yet, and needs one to answer. %s (%s, %s here) suits this computer. Install it now? [y]es, [n]o: ", name, sizeText(pick.SizeBytes), pick.Fit.Label)
+	line, ok, interrupted := s.readLine()
+	if interrupted {
+		fmt.Fprintln(s.io.out)
+	}
+	if answer := strings.ToLower(strings.TrimSpace(line)); !ok || (answer != "y" && answer != "yes") {
+		return &exitError{code: 2, msg: fmt.Sprintf("Nothing was installed. toskarctl models list shows the models, and toskarctl models install %s installs this one.", pick.ID)}
+	}
+	done := make(chan error, 1)
+	go func() { done <- s.api.install(pick.ID, s.io.out) }()
+	select {
+	case err := <-done:
+		return err
+	case <-s.io.interrupts:
+		return &exitError{code: 130, msg: "Stopped waiting. The download goes on in Toskar: toskarctl models list shows when it's there."}
+	}
+}
+
 // suggestTaskModel says when nothing installed does well at work such as fixing
 // code, and which model would: the difference is large (#1017). A person who
 // named a model has chosen.
@@ -670,7 +768,12 @@ func (s *chatSession) turn(ctx context.Context, text string) error {
 			s.ask(a)
 		case st := <-s.status:
 			s.endOutputLine()
-			if s.io.outTerminal && !wrote {
+			if s.io.outTerminal {
+				if wrote {
+					fmt.Fprintln(s.io.out)
+					wrote = false
+				}
+				shown = ""
 				fmt.Fprintln(s.io.out, s.dim("· "+st))
 			}
 		case text := <-s.commandOutput:
@@ -917,12 +1020,17 @@ func (s *chatSession) watch(ctx context.Context) {
 			}
 		case "tool.started":
 			summary, _ := p["summary"].(string)
-			if summary == "" {
-				summary, _ = p["tool_id"].(string)
-			}
+			tool, _ := p["tool_id"].(string)
 			select {
-			case s.status <- summary:
+			case s.status <- stepLine(tool, summary):
 			default:
+			}
+		case "tool.completed":
+			if line := stepEnded(p); line != "" {
+				select {
+				case s.status <- line:
+				default:
+				}
 			}
 		case "tool.output":
 			if text, _ := p["text"].(string); text != "" {
@@ -933,6 +1041,43 @@ func (s *chatSession) watch(ctx context.Context) {
 			}
 		}
 	}
+}
+
+// stepLine says in plain words what a task is doing (#1017). /log has the rest.
+func stepLine(tool, summary string) string {
+	verbs := map[string]string{
+		"terminal": "Running", "filesystem.read": "Reading", "filesystem.write": "Writing", "filesystem.search": "Looking for",
+		"internet.search": "Searching the web for", "internet.open": "Opening", "git.status": "Checking what changed",
+		"git.diff": "Reading the changes", "git.log": "Reading the history", "git.show": "Reading a commit",
+		"git.add": "Staging", "git.commit": "Committing", "git.push": "Pushing", "files.create": "Making a file", "code.execute": "Running code",
+	}
+	verb, known := verbs[tool]
+	switch {
+	case !known && summary == "":
+		return tool
+	case !known:
+		return summary
+	case summary == "" || tool == "code.execute" || strings.HasPrefix(tool, "git.status"):
+		return verb
+	}
+	return verb + " " + summary
+}
+
+// stepEnded says how a step ended, when there's something to say: a command
+// that failed, or one that took a while.
+func stepEnded(p map[string]any) string {
+	exit, _ := p["exit"].(float64)
+	took, _ := p["duration_ms"].(float64)
+	seconds := int(took / 1000)
+	switch {
+	case exit != 0 && seconds >= 5:
+		return fmt.Sprintf("That failed with exit code %d, after %ds", int(exit), seconds)
+	case exit != 0:
+		return fmt.Sprintf("That failed with exit code %d", int(exit))
+	case seconds >= 5:
+		return fmt.Sprintf("That took %ds", seconds)
+	}
+	return ""
 }
 
 func (s *chatSession) prompt() string {
