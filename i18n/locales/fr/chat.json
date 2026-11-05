@@ -100,6 +100,20 @@
     "offHint": "La mémoire est désactivée pour cette discussion. Les souvenirs enregistrés ne sont pas utilisés ici et ne sont pas supprimés.",
     "disabledHint": "La mémoire est désactivée pour toutes les discussions. Activez-la depuis la page Mémoire."
   },
+  "folder": {
+    "on": "Dossier : {{name}}",
+    "off": "Aucun dossier",
+    "label": "Dossier sur l’ordinateur Toskar",
+    "placeholder": "Chemin complet du dossier",
+    "hint": "Avec un dossier, Toskar peut y exécuter des commandes et continuer jusqu’à ce que le travail soit terminé. Il demande avant de modifier quoi que ce soit.",
+    "save": "Enregistrer",
+    "remove": "Retirer"
+  },
+  "task": {
+    "output": "Sortie de la commande",
+    "elsewhere": "Cela a démarré dans une autre app ou fenêtre. Vous pouvez le suivre, répondre à ses questions ou l’arrêter ici.",
+    "workingIn": "Travaille dans {{path}}"
+  },
   "send": {
     "waitForFiles": "Attendez la fin de l'ajout des fichiers, puis envoyez.",
     "summarizeFile_one": "Résume ce fichier.",

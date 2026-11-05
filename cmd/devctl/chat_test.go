@@ -700,3 +700,20 @@ func TestStepLines(t *testing.T) {
 		}
 	}
 }
+
+// Another app's answer ends the wait for this question, and only this one's
+// (#1017).
+func TestReadAnswerElsewhere(t *testing.T) {
+	s := &chatSession{typed: make(chan string), decided: make(chan string, 2)}
+	s.decided <- "older"
+	s.decided <- "this"
+	if _, ok, _, elsewhere := s.readAnswer("this"); ok || !elsewhere {
+		t.Errorf("ok %v, elsewhere %v", ok, elsewhere)
+	}
+	typed := make(chan string, 1)
+	typed <- "y"
+	s = &chatSession{typed: typed, decided: make(chan string, 1)}
+	if line, ok, _, elsewhere := s.readAnswer("this"); line != "y" || !ok || elsewhere {
+		t.Errorf("line %q, ok %v, elsewhere %v", line, ok, elsewhere)
+	}
+}

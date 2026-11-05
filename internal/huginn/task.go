@@ -19,10 +19,16 @@ var taskRe = regexp.MustCompile(`(?i)^\W*(please\s+)?(can you\s+|could you\s+)?(
 // by step (#1017): from the terminal, or in a chat that has a folder to work in. A question stays a question, and small
 // models offered tools for one reach for them.
 func IsTask(k Kind, message, client, project string) bool {
-	if client != "terminal" && project == "" {
+	if !WorksOnComputer(client, project) {
 		return false
 	}
 	return k == Local || k == Coding || taskRe.MatchString(strings.TrimSpace(message))
+}
+
+// WorksOnComputer reports a turn that can work on this computer as a task can:
+// from the terminal, or in a chat with a folder.
+func WorksOnComputer(client, project string) bool {
+	return client == "terminal" || project != ""
 }
 
 // TaskBudget is the budget for a task: one long loop of doing and checking, so

@@ -7,6 +7,7 @@ import (
 	"sync"
 
 	"github.com/google/uuid"
+	"github.com/yeixio/toskar-core/internal/auth"
 	"github.com/yeixio/toskar-core/internal/egress"
 	"github.com/yeixio/toskar-core/internal/events"
 	"github.com/yeixio/toskar-core/internal/runlog"
@@ -26,6 +27,10 @@ type PendingCall struct {
 	Args     map[string]any
 	Reason   string
 	Response chan Decision
+	// Asked is what tool.requested said, for an app that opens the chat later.
+	Asked map[string]any
+	// Person is who was asked.
+	Person string
 }
 
 // Decision is the user's tool permission choice.
@@ -439,7 +444,13 @@ func (r *Registry) record(item Activity) {
 func (r *Registry) requestApproval(ctx context.Context, toolID string, args map[string]any, reason string, meta map[string]any) (Decision, error) {
 	id := uuid.NewString()
 	resp := make(chan Decision, 1)
-	pc := &PendingCall{ID: id, ToolID: toolID, Args: args, Reason: reason, Response: resp}
+	payload := mergeMeta(meta, map[string]any{
+		"request_id": id,
+		"tool_id":    toolID,
+		"args":       sanitizeArgs(args),
+		"reason":     reason,
+	})
+	pc := &PendingCall{ID: id, ToolID: toolID, Args: args, Reason: reason, Response: resp, Asked: payload, Person: auth.PersonID(ctx)}
 	r.mu.Lock()
 	r.pending[id] = pc
 	r.mu.Unlock()
@@ -449,12 +460,6 @@ func (r *Registry) requestApproval(ctx context.Context, toolID string, args map[
 		r.mu.Unlock()
 	}()
 
-	payload := mergeMeta(meta, map[string]any{
-		"request_id": id,
-		"tool_id":    toolID,
-		"args":       sanitizeArgs(args),
-		"reason":     reason,
-	})
 	r.bus.PublishFor(ctx, events.New(events.ToolRequested, payload))
 
 	select {
@@ -475,10 +480,32 @@ func (r *Registry) Decide(requestID string, allow, allowSession bool) error {
 	}
 	select {
 	case pc.Response <- Decision{Allow: allow, AllowSession: allowSession}:
+		evt := events.New(events.ToolDecided, map[string]any{
+			"request_id":      requestID,
+			"tool_id":         pc.ToolID,
+			"allow":           allow,
+			"conversation_id": pc.Asked["conversation_id"],
+		})
+		evt.Person = pc.Person
+		r.bus.Publish(evt)
 		return nil
 	default:
 		return fmt.Errorf("request %q already resolved", requestID)
 	}
+}
+
+// Waiting is what a chat's tools are waiting to hear from this person, as
+// tool.requested said it (#1017).
+func (r *Registry) Waiting(conversationID, person string) []map[string]any {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	var asked []map[string]any
+	for _, pc := range r.pending {
+		if pc.Person == person && pc.Asked["conversation_id"] == conversationID {
+			asked = append(asked, pc.Asked)
+		}
+	}
+	return asked
 }
 
 func mergeMeta(meta, base map[string]any) map[string]any {

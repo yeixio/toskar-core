@@ -2,6 +2,7 @@ import type {
   ModelURLPreview,
   FirstAnswers,
   PromptCache,
+  ChatTurn,
   ConversationSummary,
   Capabilities,
   Capability,
@@ -1103,6 +1104,15 @@ export const api = {
     }),
 
   /** A chat's auto-compact summary, or null before it's compacted (#342). */
+  // A Core from before contract 1.86 can't say, so nothing shows as running.
+  getChatTurn: async (id: string): Promise<ChatTurn> => {
+    try {
+      return (await request<ChatTurn>(`/api/v1/conversations/${encodeURIComponent(id)}/turn`)) ?? { running: false }
+    } catch {
+      return { running: false }
+    }
+  },
+
   getConversationSummary: async (id: string): Promise<ConversationSummary | null> => {
     try {
       const sum = await request<ConversationSummary>(`/api/v1/conversations/${encodeURIComponent(id)}/summary`)

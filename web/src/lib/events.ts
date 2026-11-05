@@ -38,6 +38,9 @@ export const KNOWN_EVENT_TYPES = [
   'tool.progress',
   'tool.completed',
   'tool.failed',
+  // What a task's command is writing, and a question answered in any app (#1017).
+  'tool.output',
+  'tool.decided',
   'tool.parsed',
   'chat.model_routed',
   'chat.lookup',

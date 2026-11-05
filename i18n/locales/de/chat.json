@@ -100,6 +100,20 @@
     "offHint": "Das Gedächtnis ist für diesen Chat aus. Gespeicherte Erinnerungen werden hier nicht genutzt und nicht gelöscht.",
     "disabledHint": "Das Gedächtnis ist für alle Chats aus. Schalte es auf der Seite „Gedächtnis“ ein."
   },
+  "folder": {
+    "on": "Ordner: {{name}}",
+    "off": "Kein Ordner",
+    "label": "Ordner auf dem Toskar-Computer",
+    "placeholder": "Vollständiger Pfad zum Ordner",
+    "hint": "Mit einem Ordner kann Toskar dort Befehle ausführen und weiterarbeiten, bis die Aufgabe erledigt ist. Vor jeder Änderung wird gefragt.",
+    "save": "Speichern",
+    "remove": "Entfernen"
+  },
+  "task": {
+    "output": "Befehlsausgabe",
+    "elsewhere": "Das wurde in einer anderen App oder einem anderen Fenster gestartet. Du kannst es hier verfolgen, Fragen beantworten oder es stoppen.",
+    "workingIn": "Arbeitet in {{path}}"
+  },
   "send": {
     "waitForFiles": "Warte, bis die Dateien hinzugefügt sind, und sende dann.",
     "summarizeFile_one": "Fasse diese Datei zusammen.",

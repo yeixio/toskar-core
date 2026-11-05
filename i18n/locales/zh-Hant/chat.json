@@ -100,6 +100,20 @@
     "offHint": "這個聊天的記憶已關閉。已儲存的記憶不會在這裡使用，也不會被刪除。",
     "disabledHint": "所有聊天的記憶都已關閉。請在「記憶」頁面中開啟。"
   },
+  "folder": {
+    "on": "資料夾:{{name}}",
+    "off": "無資料夾",
+    "label": "Toskar 電腦上的資料夾",
+    "placeholder": "資料夾的完整路徑",
+    "hint": "指定資料夾後,Toskar 可以在其中執行命令,並持續工作直到完成。變更任何內容前都會先詢問。",
+    "save": "儲存",
+    "remove": "移除"
+  },
+  "task": {
+    "output": "命令輸出",
+    "elsewhere": "這是在其他應用程式或視窗中開始的。你可以在這裡查看進度、回答問題或停止。",
+    "workingIn": "工作位置:{{path}}"
+  },
   "send": {
     "waitForFiles": "請等檔案加入完成後再傳送。",
     "summarizeFile_other": "請摘要這些檔案。",

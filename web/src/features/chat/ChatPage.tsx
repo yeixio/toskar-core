@@ -37,6 +37,9 @@ import { ChatHistoryDrawer, useCanPinChatHistory } from './ChatHistoryDrawer'
 import { AnswerDetails } from './AnswerDetails'
 import { FileChip, PendingFileChip, type PendingFile } from './FileChips'
 import { MemoryToggle } from './MemoryToggle'
+import { ChatFolder } from './ChatFolder'
+import { CommandOutput } from './CommandOutput'
+import { addOutput, folderName } from './outputText'
 import { AnswerActions, EditAction, VersionSwitch } from './MessageActions'
 import { ReadAloudButton, SystemReadAloudButton } from './ReadAloud'
 import { hasSystemSpeech } from './speakableText'
@@ -58,6 +61,7 @@ import { Skeleton } from '@/components/ui/Skeleton'
 import { YggdrasilMark } from '@/components/ui/YggdrasilMark'
 import { moveStored } from '@/lib/storage'
 import { shownError, type Shown } from '@/components/ui/ShownError'
+import { errorText } from '@/lib/errorText'
 import { LoadError } from '@/components/ui/LoadError'
 
 type TeamStep = {
@@ -161,6 +165,21 @@ function friendlyToolDetail(args: Record<string, unknown> | undefined): string {
     if (typeof value === 'string' && value.trim()) return value.trim()
   }
   return ''
+}
+
+/** The question a waiting tool puts to the person. */
+function promptFor(payload: ToolRequestedPayload): PendingToolPrompt {
+  return {
+    requestId: payload.request_id,
+    toolId: payload.tool_id,
+    reason: payload.reason,
+    argsSummary: friendlyToolDetail(payload.args) || i18n.getFixedT(null, 'chat')('tools.noDetails'),
+    rawArgs: formatToolArgs(payload.args),
+    command: typeof payload.args?.command === 'string' ? payload.args.command : undefined,
+    alwaysAsks: payload.always_asks,
+    cantUndo: payload.cant_undo,
+    afterOutside: payload.after_outside,
+  }
 }
 
 function formatToolArgs(args: Record<string, unknown> | undefined): string {
@@ -281,7 +300,13 @@ export function ChatPage() {
   // The model Auto (or a fallback) used for the latest turn in a chat.
   const [routedModel, setRoutedModel] = useState<{ chatId: string; modelId: string } | null>(null)
   const [streamingContent, setStreamingContent] = useState<string | null>(null)
-  const [isSending, setIsSending] = useState(false)
+  const [sendingHere, setIsSending] = useState(false)
+  // A chat whose running turn came from another app or window (#1017). It
+  // shows and stops as one sent here does.
+  const [watchedChat, setWatchedChat] = useState<string | null>(null)
+  const watching = !sendingHere && !!selectedId && watchedChat === selectedId
+  const isSending = sendingHere || watching
+  const [commandOutput, setCommandOutput] = useState('')
   const [statusMessage, setStatusMessage] = useState<string | null>(null)
   const [sendError, setSendError] = useState<string | null>(null)
   // The stable code of the error in sendError, kept with its text so a later error never takes it.
@@ -349,6 +374,12 @@ export function ChatPage() {
   const [toolFailure, setToolFailure] = useState<string | null>(null)
   const [contextUsage, setContextUsage] = useState<ContextUsage | null>(null)
   const streamingConvRef = useRef<string | null>(null)
+  const watchedRef = useRef(watchedChat)
+  watchedRef.current = watchedChat
+  // The chat whose turn has been read in, once for each turn followed.
+  const turnShownRef = useRef<string | null>(null)
+  // Questions answered, which a slower reply about the turn can still list.
+  const answeredRef = useRef(new Set<string>())
   // The picture or clip being made takes minutes here (chat.making_media).
   const mediaSlowRef = useRef(false)
   // A picture or clip being made, and how far it has got (#706).
@@ -716,6 +747,7 @@ export function ChatPage() {
     if (!pendingTool || toolDeciding) return
     setToolDeciding(true)
     try {
+      answeredRef.current.add(pendingTool.requestId)
       await api.decideTool({
         request_id: pendingTool.requestId,
         allow,
@@ -754,6 +786,70 @@ export function ChatPage() {
     if (!toolDeciding) void decidePendingTool(false)
   })
 
+  const clearWatched = useCallback(() => {
+    setWatchedChat(null)
+    turnShownRef.current = null
+    setStreamingContent(null)
+    setStatusMessage(null)
+    setPendingTool(null)
+    setToolTraces([])
+    setPlanSteps([])
+  }, [])
+
+  // A turn running from elsewhere when this chat opens, and while it's
+  // followed, in case the event for its end was missed.
+  const turnQuery = useQuery({
+    queryKey: ['turn', selectedId],
+    queryFn: () => api.getChatTurn(selectedId!),
+    enabled: !!selectedId && !sendingHere,
+    retry: false,
+    refetchInterval: watching ? 5000 : false,
+  })
+  const turn = turnQuery.data
+  useEffect(() => {
+    if (!selectedId || !turn || sendingHere || streamingConvRef.current === selectedId) return
+    if (!turn.running) {
+      if (watchedRef.current === selectedId) {
+        clearWatched()
+        void queryClient.invalidateQueries({ queryKey: ['messages', selectedId] })
+      }
+      return
+    }
+    setWatchedChat(selectedId)
+    if (turnShownRef.current !== selectedId) {
+      turnShownRef.current = selectedId
+      const steps = turn.steps ?? []
+      setToolTraces(
+        steps.map((step) => ({
+          label: toolDisplayName(step.tool_id),
+          detail: step.summary || '',
+          status:
+            step.status === 'running' ? 'running' : step.status === 'failed' ? t('tools.traceFailed') : t('tools.completed'),
+        })),
+      )
+      setCommandOutput(turn.output ?? '')
+      setStreamingContent(turn.text || null)
+      const last = steps[steps.length - 1]
+      setStatusMessage(last?.status === 'running' ? toolProgress(last.tool_id, last.summary) : null)
+    }
+    const waiting = turn.waiting?.find((ask) => !answeredRef.current.has(ask.request_id))
+    if (waiting) {
+      setPendingTool((current) => current ?? promptFor(waiting))
+      setStatusMessage(t('status.waitingForPermission', { tool: toolDisplayName(waiting.tool_id) }))
+    }
+    // t and queryClient are stable; dataUpdatedAt brings each new answer here.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedId, turn, turnQuery.dataUpdatedAt, sendingHere, clearWatched])
+
+  // A followed turn belongs to its chat, and output ends with its turn.
+  useEffect(() => {
+    if (watchedRef.current && watchedRef.current !== selectedId) clearWatched()
+    setCommandOutput('')
+  }, [selectedId, clearWatched])
+  useEffect(() => {
+    if (!isSending) setCommandOutput('')
+  }, [isSending])
+
   // The event stream is opened once. Its handler reads the current chat,
   // model locations, and completion handler from this ref; depending on
   // them reopened the stream on nearly every render and dropped events.
@@ -764,6 +860,36 @@ export function ChatPage() {
     const unsubscribe = subscribeEvents({
       onEvent: (event) => {
         const { selectedId, handleChatComplete, modelLocations } = eventContext.current
+        const eventChat = event.payload?.conversation_id as string | undefined
+        const inView = !eventChat || eventChat === selectedId || eventChat === streamingConvRef.current
+        // A chat that's new here, such as one just started in the terminal.
+        if (eventChat && !inView && (event.type === 'tool.started' || event.type === 'chat.complete')) {
+          void queryClient.invalidateQueries({ queryKey: ['conversations'] })
+        }
+        // Work in this chat that wasn't sent from here: follow it (#1017).
+        if (
+          eventChat &&
+          eventChat === selectedId &&
+          eventChat !== streamingConvRef.current &&
+          eventChat !== watchedRef.current &&
+          (event.type === 'tool.requested' || event.type === 'tool.started' || event.type === 'tool.output')
+        ) {
+          completedConvRef.current = null
+          setWatchedChat(eventChat)
+          void queryClient.invalidateQueries({ queryKey: ['messages', eventChat] })
+          void queryClient.invalidateQueries({ queryKey: ['turn', eventChat] })
+        }
+        if (event.type === 'tool.decided') {
+          const requestId = event.payload?.request_id as string | undefined
+          if (requestId) {
+            answeredRef.current.add(requestId)
+            setPendingTool((current) => (current?.requestId === requestId ? null : current))
+          }
+        }
+        if (event.type === 'tool.output') {
+          const text = event.payload?.text as string | undefined
+          if (inView && text) setCommandOutput((current) => addOutput(current, text))
+        }
         if (event.type === 'tool.requested') {
           const payload = event.payload as ToolRequestedPayload | undefined
           if (!payload?.request_id || !payload.tool_id) return
@@ -775,20 +901,12 @@ export function ChatPage() {
           ) {
             return
           }
-          setPendingTool({
-            requestId: payload.request_id,
-            toolId: payload.tool_id,
-            reason: payload.reason,
-            argsSummary: friendlyToolDetail(payload.args) || t('tools.noDetails'),
-            rawArgs: formatToolArgs(payload.args),
-            command: typeof payload.args?.command === 'string' ? payload.args.command : undefined,
-            alwaysAsks: payload.always_asks,
-            cantUndo: payload.cant_undo,
-            afterOutside: payload.after_outside,
-          })
+          setPendingTool(promptFor(payload))
           setStatusMessage(t('status.waitingForPermission', { tool: toolDisplayName(payload.tool_id) }))
         }
         if (event.type === 'tool.started') {
+          if (!inView) return
+          setCommandOutput('')
           const toolId = event.payload?.tool_id as string | undefined
           const summary = event.payload?.summary as string | undefined
           setStatusMessage(toolProgress(toolId, summary, mediaSlowRef.current))
@@ -808,6 +926,7 @@ export function ChatPage() {
           const progress = mediaProgressFrom(event.payload)
           if (kind && progress) setMedia({ kind, progress })
         }
+        if ((event.type === 'tool.completed' || event.type === 'tool.failed') && !inView) return
         if (event.type === 'tool.completed' || event.type === 'tool.failed') {
           setMedia(null)
         }
@@ -927,6 +1046,11 @@ export function ChatPage() {
             setStatusMessage(null)
             setPendingTool(null)
             setPlanSteps([])
+          } else if (conversationId === watchedRef.current) {
+            clearWatched()
+          }
+          if (conversationId !== streamingConvRef.current && conversationId === completedConvRef.current) {
+            completedConvRef.current = null
           }
         }
         if (event.type === 'chat.making_file') {
@@ -1044,6 +1168,7 @@ export function ChatPage() {
               completedConvRef.current = null
             }
             handleChatComplete(conversationId)
+            if (conversationId === watchedRef.current) clearWatched()
             // The answer is saved by now; the stream's end can come first,
             // and a fetch then would show the version it replaced (#447).
             if (conversationId === selectedId) {
@@ -1066,6 +1191,8 @@ export function ChatPage() {
           )
         }
         if (event.type === 'chat.error') {
+          if (!inView) return
+          if (eventChat && eventChat === watchedRef.current) clearWatched()
           setIsSending(false)
           setStreamingContent(null)
           streamingConvRef.current = null
@@ -1077,7 +1204,7 @@ export function ChatPage() {
     })
     return unsubscribe
     // queryClient and t are stable; everything else is read through eventContext.
-  }, [queryClient, t])
+  }, [queryClient, t, clearWatched])
 
   const setProfile = (profileId: string) => {
     setDraftProfileId(profileId)
@@ -1401,6 +1528,31 @@ export function ChatPage() {
     }
   }
 
+  // A folder needs a chat to belong to, and Core to check it, so a new chat
+  // starts here, named for the folder until it's renamed.
+  const chooseFolder = async (project: string) => {
+    let created: string | null = null
+    try {
+      let id = selectedId
+      if (!id) {
+        const chat = await api.createConversation({
+          title: folderName(project),
+          profile_id: profileIdForChat,
+          model_id: modelIdForChat,
+        })
+        if (!chat?.id) throw new Error(t('send.startFailed'))
+        id = created = chat.id
+      }
+      await api.updateConversation(id, { project })
+      await queryClient.invalidateQueries({ queryKey: ['conversations'] })
+      if (id !== selectedId) setSelectedId(id)
+    } catch (err) {
+      if (created) await api.deleteConversation(created).catch(() => undefined)
+      const shown = shownError(err)
+      throw new Error(errorText(shown.code, shown.error, shown.details), { cause: err })
+    }
+  }
+
   const handleStop = () => {
     stoppedRef.current = true
     // Stop the run on the computer too, not only this window's stream (§67).
@@ -1408,6 +1560,11 @@ export function ChatPage() {
     if (running) void api.stopChat(running).catch(() => undefined)
     abortRef.current?.abort()
     setIsSending(false)
+    setWatchedChat(null)
+    turnShownRef.current = null
+    completedConvRef.current = running
+    // The saved answer carries its steps.
+    setToolTraces([])
     setStreamingContent(null)
     streamingConvRef.current = null
     setStatusMessage(null)
@@ -1847,6 +2004,13 @@ export function ChatPage() {
                       ))}
                     </select>
                   </label>
+                ) : null}
+                {admin ? (
+                  <ChatFolder
+                    folder={selectedConversation?.project ?? ''}
+                    disabled={isSending}
+                    onChange={chooseFolder}
+                  />
                 ) : null}
                 <MemoryToggle
                   memoryEnabled={settingsQuery.data?.memory_enabled !== false}
@@ -2321,6 +2485,17 @@ export function ChatPage() {
                     <ChatActivity label={statusMessage} mascot={replyMascot} />
                   )}
                 </div>
+              ) : null}
+              {isSending && commandOutput ? (
+                <div className="mb-3 px-1">
+                  <CommandOutput text={commandOutput} />
+                </div>
+              ) : null}
+              {watching ? <p className="mb-2 px-1 text-xs text-ink-muted">{t('task.elsewhere')}</p> : null}
+              {admin && selectedConversation?.project ? (
+                <p className="mb-2 truncate px-1 text-xs text-ink-muted" title={selectedConversation.project}>
+                  {t('task.workingIn', { path: selectedConversation.project })}
+                </p>
               ) : null}
               {composer}
               {showLanding ? suggestions : null}

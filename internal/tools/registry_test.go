@@ -335,3 +335,32 @@ func TestRegistrySaysWhyAfterOutside(t *testing.T) {
 		}
 	}
 }
+
+// An app opening a chat later can answer what's waiting, but only its own
+// person's; and any app showing the question hears it was answered (#1017).
+func TestWaitingAndDecided(t *testing.T) {
+	bus := events.NewBus(8)
+	_, ch := bus.Subscribe()
+	r := NewRegistry(t.TempDir(), bus)
+	r.mu.Lock()
+	r.pending["a"] = &PendingCall{ID: "a", ToolID: "terminal", Response: make(chan Decision, 1), Person: "p1",
+		Asked: map[string]any{"request_id": "a", "conversation_id": "c1"}}
+	r.mu.Unlock()
+
+	if got := r.Waiting("c1", "p1"); len(got) != 1 || got[0]["request_id"] != "a" {
+		t.Fatalf("waiting = %v", got)
+	}
+	if got := r.Waiting("c1", "p2"); len(got) != 0 {
+		t.Errorf("another person sees %v", got)
+	}
+	if got := r.Waiting("c2", "p1"); len(got) != 0 {
+		t.Errorf("another chat sees %v", got)
+	}
+	if err := r.Decide("a", true, false); err != nil {
+		t.Fatal(err)
+	}
+	evt := <-ch
+	if evt.Type != events.ToolDecided || evt.Person != "p1" || evt.Payload["request_id"] != "a" || evt.Payload["allow"] != true || evt.Payload["conversation_id"] != "c1" {
+		t.Errorf("event = %+v", evt)
+	}
+}

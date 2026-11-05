@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Toskar Control Plane API
-  version: "1.85"
+  version: "1.86"
   description: >-
     Local AI control plane API for Toskar, its OpenAI-compatible routes, and its MCP server.
     On the default loopback bind no key is needed. When the daemon listens on any other address,
@@ -4272,6 +4272,26 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Message"
+  /api/v1/conversations/{id}/turn:
+    get:
+      summary: What the chat's running turn has done so far
+      operationId: getChatTurn
+      tags: [Conversations]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: The turn; only `running` when none is running
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChatTurn"
+        "404":
+          description: No such chat for this person
   /api/v1/conversations/{id}/artifacts:
     get:
       summary: Files attached to or made in a conversation
@@ -7609,6 +7629,40 @@ components:
         node_id:
           type: string
       required: [source_url]
+    ChatTurn:
+      type: object
+      required: [running]
+      properties:
+        running:
+          type: boolean
+        started_at:
+          type: string
+          format: date-time
+        steps:
+          type: array
+          items:
+            type: object
+            required: [tool_id, status]
+            properties:
+              tool_id:
+                type: string
+              summary:
+                type: string
+              status:
+                type: string
+                enum: [running, completed, failed]
+        output:
+          type: string
+          description: The end of what the running command has written, which can hold terminal control codes.
+        text:
+          type: string
+          description: The answer written so far.
+        waiting:
+          type: array
+          description: Each tool.requested still waiting for an answer.
+          items:
+            type: object
+            additionalProperties: true
     Message:
       type: object
       description: A chat message.

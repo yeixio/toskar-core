@@ -100,8 +100,11 @@ const (
 	// ToolOutput is what a command in a task has written so far (#1017):
 	// text, which can stop partway through a line.
 	ToolOutput = "tool.output"
-	ToolFailed = "tool.failed"
-	ToolParsed = "tool.parsed"
+	// ToolDecided is a waiting tool getting its answer (#1017), so any other
+	// app showing the question can put it away: request_id and allow.
+	ToolDecided = "tool.decided"
+	ToolFailed  = "tool.failed"
+	ToolParsed  = "tool.parsed"
 
 	NodeDiscovered = "node.discovered"
 	NodePaired     = "node.paired"
@@ -199,8 +202,19 @@ func (b *Bus) PublishFor(ctx context.Context, evt Event) {
 	}
 	if ctx != nil {
 		evt.Person = auth.PersonID(ctx)
+		if note, _ := ctx.Value(noteKey{}).(func(Event)); note != nil {
+			note(evt)
+		}
 	}
 	b.Publish(evt)
+}
+
+type noteKey struct{}
+
+// WithNote has note hear what ctx's work publishes, however busy the bus is:
+// a chat's turn keeps what an app opening it later needs to see (#1017).
+func WithNote(ctx context.Context, note func(Event)) context.Context {
+	return context.WithValue(ctx, noteKey{}, note)
 }
 
 // New creates an Event with the given type and optional payload.

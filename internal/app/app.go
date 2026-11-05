@@ -760,6 +760,7 @@ func New(opts Options) (*App, error) {
 		PhoneAddress:         a.phoneAddress,
 		EnableLANForPhone:    a.enableLANForPhone,
 		StopChat:             a.StopChat,
+		ChatTurn:             a.ChatTurn,
 		Chat: func(w http.ResponseWriter, r *http.Request, conversationID, profileID, modelID, message string, stream bool, execution string) error {
 			return a.HandleHTTPChat(w, r, conversationID, profileID, modelID, message, stream, execution)
 		},
