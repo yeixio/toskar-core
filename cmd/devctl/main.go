@@ -62,7 +62,7 @@ func main() {
 		// Ctrl-C stops the work, not the chat. At the prompt it leaves.
 		interrupts := make(chan os.Signal, 1)
 		signal.Notify(interrupts, os.Interrupt)
-		exit(chatCommand(os.Args[2:], chatIO{
+		streams := chatIO{
 			interrupts: interrupts,
 			in:         os.Stdin, inTerminal: term.IsTerminal(int(os.Stdin.Fd())),
 			out: os.Stdout, outTerminal: term.IsTerminal(int(os.Stdout.Fd())),
@@ -74,7 +74,13 @@ func main() {
 				}
 				return cols, rows
 			},
-		}, newDaemonChat))
+		}
+		exit(chatCommand(os.Args[2:], streams, func() (chatAPI, error) {
+			if err := startCore(newDaemon(), streams, thisComputer(), time.Minute); err != nil {
+				return nil, err
+			}
+			return newDaemonChat()
+		}))
 	case "connect":
 		dir, _ := os.Getwd()
 		home, _ := os.UserHomeDir()

@@ -2107,7 +2107,11 @@
         },
         {
           "type": "paragraph",
-          "text": "The headless archive doesn't install a service. Extract it, run toskar from its folder with the web folder beside it, and stop it with Ctrl+C. Its --data-dir option keeps the data somewhere else."
+          "text": "If Toskar isn't running on this computer, toskarctl chat starts it and tells you how to stop it. Toskar then stays running in the background after the chat, so the next one opens right away and a long task doesn't depend on the terminal. If Toskar isn't installed, it asks first, shows the download's size, and runs the installer. On Linux, a stopped service needs an administrator, so it gives you the command to run."
+        },
+        {
+          "type": "paragraph",
+          "text": "The headless archive doesn't install a service. Extract it, run toskar from its folder with the web folder beside it, and stop it with Ctrl+C, or let toskarctl chat start it. Its --data-dir option keeps the data somewhere else."
         },
         {
           "type": "code",

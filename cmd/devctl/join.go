@@ -42,12 +42,22 @@ type exitError struct {
 
 func (e *exitError) Error() string { return e.msg }
 
-func newDaemon() daemonClient {
-	base := strings.TrimRight(config.Env("URL"), "/")
-	if base == "" {
-		base = "http://" + config.DefaultConfig().APIAddr()
+// daemonBase is TOSKAR_URL, or Toskar on this computer at the port the same
+// environment gives it, since chat may be the one starting it. The host stays
+// the default: an address to listen on, such as 0.0.0.0, isn't one to call.
+func daemonBase() string {
+	if base := strings.TrimRight(config.Env("URL"), "/"); base != "" {
+		return base
 	}
-	return daemonClient{base: base, key: config.Env("API_KEY"), client: &http.Client{Timeout: 60 * time.Second}}
+	cfg := config.DefaultConfig()
+	host := cfg.APIHost
+	config.ApplyEnvOverrides(&cfg)
+	cfg.APIHost = host
+	return "http://" + cfg.APIAddr()
+}
+
+func newDaemon() daemonClient {
+	return daemonClient{base: daemonBase(), key: config.Env("API_KEY"), client: &http.Client{Timeout: 60 * time.Second}}
 }
 
 // notRunningError is a daemon that didn't answer at all.
