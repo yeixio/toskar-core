@@ -40,6 +40,9 @@ const chatUsage = `usage: toskarctl chat [flags] [message]
   Piped in, it answers once, with what's piped as data to work on:
     make 2>&1 | toskarctl chat "Why did this fail?"
 
+  If Toskar isn't running on this computer, it starts it, and says how to
+  stop it. Toskar stays running after the chat.
+
 flags:
   --resume [id]   continue a chat: its id, or pick from recent ones
   --model id      a model, or auto (the default)

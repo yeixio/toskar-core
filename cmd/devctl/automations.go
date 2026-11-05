@@ -37,12 +37,8 @@ The daemon address is TOSKAR_URL, or 127.0.0.1:7331. A remote daemon uses TOSKAR
 var runPoll = time.Second
 
 func automationsCommand(args []string, out io.Writer) error {
-	base := strings.TrimRight(config.Env("URL"), "/")
-	if base == "" {
-		base = "http://" + config.DefaultConfig().APIAddr()
-	}
 	return runAutomations(args, daemonClient{
-		base:   base,
+		base:   daemonBase(),
 		key:    config.Env("API_KEY"),
 		client: &http.Client{},
 	}, out)
