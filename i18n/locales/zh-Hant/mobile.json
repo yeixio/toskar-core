@@ -724,7 +724,10 @@
     "manage": "管理訂閱",
     "throughComputer": "透過這台電腦的訂閱啟用",
     "throughComputerBody": "與這台電腦配對的每台裝置都在使用它。在購買的地方管理：訂閱的那台裝置，或電腦上 Toskar 的設定。",
-    "boughtInSettings": "在電腦上 Toskar 的設定中購買。可在那裡的「API 存取」中更換信用卡或取消。"
+    "boughtInSettings": "在電腦上 Toskar 的設定中購買。可在那裡的「API 存取」中更換信用卡或取消。",
+    "coveredTitle": "由另一台裝置的訂閱涵蓋",
+    "coveredBody": "這台電腦已有一個在另一台裝置上購買的訂閱。在家連接一次你的電腦，這台裝置就會取得它。",
+    "extraSubscription": "這台電腦有多個訂閱，但只需要一個。你可以在「管理訂閱」中取消你的訂閱，另一個會繼續涵蓋它。"
   },
   "unlock": {
     "title": "Toskar Unlock",

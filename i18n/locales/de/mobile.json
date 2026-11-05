@@ -731,7 +731,10 @@
     "manage": "Abo verwalten",
     "throughComputer": "Aktiv über das Abo dieses Computers",
     "throughComputerBody": "Jedes mit diesem Computer gekoppelte Gerät nutzt es. Verwaltet wird es dort, wo es abgeschlossen wurde: auf dem Gerät, das es abonniert hat, oder in den Einstellungen von Toskar auf dem Computer.",
-    "boughtInSettings": "In den Einstellungen von Toskar auf dem Computer abgeschlossen. Karte ändern oder kündigen kannst du dort unter API-Zugriff."
+    "boughtInSettings": "In den Einstellungen von Toskar auf dem Computer abgeschlossen. Karte ändern oder kündigen kannst du dort unter API-Zugriff.",
+    "coveredTitle": "Über das Abo eines anderen Geräts abgedeckt",
+    "coveredBody": "Dieser Computer hat schon ein Abo, abgeschlossen auf einem anderen Gerät. Verbinde dich einmal zu Hause mit deinem Computer, dann übernimmt dieses Gerät es.",
+    "extraSubscription": "Dieser Computer hat mehr als ein Abo, braucht aber nur eins. Du kannst deins unter „Abo verwalten“ kündigen, das andere deckt ihn weiter ab."
   },
   "unlock": {
     "title": "Toskar Unlock",

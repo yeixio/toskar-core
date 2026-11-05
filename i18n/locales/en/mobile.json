@@ -829,7 +829,10 @@
     "manage": "Manage subscription",
     "throughComputer": "Active through this computer's subscription",
     "throughComputerBody": "Every device paired with this computer uses it. It's managed where it was bought: on the device that subscribed, or in Toskar's settings on the computer.",
-    "boughtInSettings": "Bought in Toskar's settings on the computer. Change the card or cancel there, under API Access."
+    "boughtInSettings": "Bought in Toskar's settings on the computer. Change the card or cancel there, under API Access.",
+    "coveredTitle": "Covered by another device's subscription",
+    "coveredBody": "This computer already has a subscription, bought on another device. Connect to your computer at home once, and this device picks it up.",
+    "extraSubscription": "This computer has more than one subscription, and it needs only one. You can cancel yours in Manage subscription, and the other keeps it covered."
   },
   "unlock": {
     "title": "Toskar Unlock",

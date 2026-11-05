@@ -738,7 +738,10 @@
     "manage": "Gestisci abbonamento",
     "throughComputer": "Attivo tramite l'abbonamento di questo computer",
     "throughComputerBody": "Ogni dispositivo associato a questo computer lo usa. Si gestisce dove è stato acquistato: sul dispositivo che si è abbonato o nelle impostazioni di Toskar sul computer.",
-    "boughtInSettings": "Acquistato nelle impostazioni di Toskar sul computer. Cambia carta o annulla lì, in Accesso API."
+    "boughtInSettings": "Acquistato nelle impostazioni di Toskar sul computer. Cambia carta o annulla lì, in Accesso API.",
+    "coveredTitle": "Coperto dall'abbonamento di un altro dispositivo",
+    "coveredBody": "Questo computer ha già un abbonamento, acquistato su un altro dispositivo. Collegati una volta al computer da casa e questo dispositivo lo riceverà.",
+    "extraSubscription": "Questo computer ha più di un abbonamento, ma gliene serve uno solo. Puoi annullare il tuo in Gestisci abbonamento: l'altro continua a coprirlo."
   },
   "unlock": {
     "title": "Toskar Unlock",
