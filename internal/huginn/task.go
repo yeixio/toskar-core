@@ -15,6 +15,10 @@ const StuckAfter = 3
 // taskRe asks for work to be done, by its first word.
 var taskRe = regexp.MustCompile(`(?i)^\W*(please\s+)?(can you\s+|could you\s+)?(fix|debug|set up|setup|install|build|update|upgrade|refactor|add|implement|migrate|port|rename|clean( up)?|clear|find and|free up|run|execute|get (it|this|the \w+) (working|running|passing)|configure|deploy|test)\b`)
 
+// goOnRe goes on with work asked for before, such as "go ahead and make that
+// fix" after an answer that said what to change (#1111): it isn't a question.
+var goOnRe = regexp.MustCompile(`(?i)^\W*((ok(ay)?|alright|great|thanks|good)\b[\s,.!]*)?(please\s+)?(yes|yep|yeah|sure|go ahead|go on|go for it|do it|do that|do so|proceed|continue|carry on|keep going|try again|apply|make (that|the|this|those|these|it)\b|change it|finish|let'?s do)\b`)
+
 // IsTask reports a message that asks for work to be done on this computer, step
 // by step (#1017): from the terminal, or in a chat that has a folder to work in. A question stays a question, and small
 // models offered tools for one reach for them.
@@ -22,7 +26,8 @@ func IsTask(k Kind, message, client, project string) bool {
 	if !WorksOnComputer(client, project) {
 		return false
 	}
-	return k == Local || k == Coding || taskRe.MatchString(strings.TrimSpace(message))
+	msg := strings.TrimSpace(message)
+	return k == Local || k == Coding || taskRe.MatchString(msg) || goOnRe.MatchString(msg)
 }
 
 // WorksOnComputer reports a turn that can work on this computer as a task can:
