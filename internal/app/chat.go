@@ -326,7 +326,7 @@ func (a *App) RunChat(ctx context.Context, profileID, conversationID, message st
 			opts.Progress(events.ChatModelRouted, routed)
 		}
 	}
-	profile = a.withModelTools(profile, modelID)
+	profile = a.withModelTools(ctx, profile, modelID)
 	orch, err := a.OrchRegistry.Get(profile.OrchestratorID)
 	if err != nil {
 		return nil, err
@@ -587,7 +587,7 @@ func (a *App) RunChat(ctx context.Context, profileID, conversationID, message st
 							a.Logger.Warn("chat model failed; retrying on another model", "failed", failedID, "next", next.ID, "error", evt.Error)
 							a.noteModelFailed(failedID)
 							env.trace.recovered(step, notice)
-							profile = a.withModelTools(applyExecutionPolicy(withChatModel(profile, next.ID), execution), next.ID)
+							profile = a.withModelTools(ctx, applyExecutionPolicy(withChatModel(profile, next.ID), execution), next.ID)
 							env.switchModel(profile, next.ID)
 							a.publish(ctx, events.New(events.ChatModelRouted, map[string]any{
 								"conversation_id": conversationID,
@@ -1941,10 +1941,13 @@ func (e *chatExecEnv) switchModel(profile profiles.Profile, modelID string) {
 // allowed, so the look-ups Toskar runs itself still give it the web; it is
 // only not asked to call any. Denying them all, as before, left such a model
 // answering current questions from memory.
-func (a *App) withModelTools(profile profiles.Profile, modelID string) profiles.Profile {
+//
+// A model added from a file can call tools when its chat template takes
+// them, whatever was stored when it was added (#1101).
+func (a *App) withModelTools(ctx context.Context, profile profiles.Profile, modelID string) profiles.Profile {
 	profile.ModelCallsNoTools = false
 	if modelID != "" && a.Models != nil {
-		if entry, ok := a.Models.Catalog().Get(modelID); ok && toolCallSupport(entry.Capabilities) == "unsupported" {
+		if entry, ok := a.Models.Catalog().Get(modelID); ok && toolCallSupport(entry.Capabilities) == "unsupported" && !a.Models.TemplateTakesTools(ctx, modelID) {
 			profile.ModelCallsNoTools = true
 		}
 	}

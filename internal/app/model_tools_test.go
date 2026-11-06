@@ -1,6 +1,7 @@
 package app
 
 import (
+	"context"
 	"io"
 	"log/slog"
 	"testing"
@@ -20,14 +21,14 @@ func TestWithModelToolsKeepsLookUps(t *testing.T) {
 	t.Cleanup(func() { _ = a.DB.Close() })
 	profile := contracts.AIProfile{Tools: []contracts.ToolPolicy{{ToolID: "internet.search", Policy: tools.PolicyAllow}}}
 
-	gemma := a.withModelTools(profile, "gemma-2-9b-q4")
+	gemma := a.withModelTools(context.Background(), profile, "gemma-2-9b-q4")
 	if !gemma.ModelCallsNoTools {
 		t.Error("gemma-2-9b-q4 cannot call tools")
 	}
 	if tools.PolicyForProfile(gemma, "internet.search") != tools.PolicyAllow {
 		t.Error("web search was taken away, so Toskar can't look anything up for it")
 	}
-	if qwen := a.withModelTools(gemma, "qwen2.5-7b-q4"); qwen.ModelCallsNoTools {
+	if qwen := a.withModelTools(context.Background(), gemma, "qwen2.5-7b-q4"); qwen.ModelCallsNoTools {
 		t.Error("qwen2.5-7b-q4 calls tools; switching to it should clear the mark")
 	}
 }

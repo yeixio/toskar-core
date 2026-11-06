@@ -21,7 +21,10 @@ const (
 	useTheTerminal   = "You were asked to do this, not to explain how. Use the terminal tool to do it: the person is asked to approve the command before it runs. Do not give them a command, code, or steps to run themselves."
 	notDoneHere      = "You were asked to do this, and you can't do it here. Say in one or two sentences that it wasn't done and why. Do not give a command, code, or steps to do it themselves."
 	answerAfterTools = "\n\nAnswer the user in plain text. Do not mention tool names, function-call syntax, or JSON."
-	answerFromPage   = "\n\nAnswer the user's question from the page text. State the facts and include the page link. Do not reply with a list of websites. Do not mention tool names, function-call syntax, or JSON."
+	// questionLimit asks a question that used all its tool calls to answer
+	// from what they found (#1101).
+	questionLimit  = "Don't call any more tools. Answer the question in plain text from what the tool results so far show, and say what you couldn't check."
+	answerFromPage = "\n\nAnswer the user's question from the page text. State the facts and include the page link. Do not reply with a list of websites. Do not mention tool names, function-call syntax, or JSON."
 )
 
 const maxPagesToRead = 3

@@ -35,6 +35,9 @@ type Details struct {
 	// Thinks is set for a model that thinks before it answers (#840), by
 	// its chat template or its name (thinks).
 	Thinks bool
+	// Tools is set when its chat template takes a list of tools, as Qwen's,
+	// Llama's, and gpt-oss's do, so it can call them (#1101).
+	Tools bool
 	// Harmony is set for a chat template in gpt-oss's harmony format, whose
 	// tool calls llama.cpp reads only when the request offers the tools
 	// itself (#1099).
@@ -55,6 +58,9 @@ func (d Details) Projector() bool {
 // it answers: a thinking block (Qwen 3, QwQ, Seed-OSS, Magistral), the
 // switch that turns it off, a past turn's thinking, or gpt-oss's channels.
 var thinkingMarks = []string{"<think>", "enable_thinking", "reasoning_content", "<|channel|>", "<seed:think>", "[THINK]"}
+
+// templateTools is a chat template that renders the request's tools.
+var templateTools = regexp.MustCompile(`\btools\b`)
 
 // thinkingName is a model that thinks whose template doesn't say so, such as
 // DeepSeek R1's distills: their templates are their base model's, and
@@ -182,6 +188,7 @@ func inspect(d *decoder, size uint64, offset func() uint64) (Details, error) {
 	}
 	out.ContextLength = ints[out.Architecture+".context_length"]
 	out.Thinks = thinks(out.Name, template)
+	out.Tools = templateTools.MatchString(template)
 	out.Harmony = strings.Contains(template, "<|channel|>")
 	if ft, ok := ints["general.file_type"]; ok {
 		out.Quantization = fileTypes[ft]

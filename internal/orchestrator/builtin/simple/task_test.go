@@ -249,3 +249,21 @@ func TestTaskGuidanceHasTheProject(t *testing.T) {
 		t.Errorf("read both: %q", got)
 	}
 }
+
+// A question that uses all its tool calls is answered from what they found,
+// not left without an answer (#1101); one that still won't stops as before.
+func TestQuestionAnswersAtItsLimit(t *testing.T) {
+	env, answer, prompts := runTask(t, "terminal", "Which shell command lists hidden files?", taskProfile(),
+		call("ls"), call("ls -a"), call("ls -la"), call("ls -R"), "ls -a lists them.")
+	if len(env.ran) != 3 || answer != "ls -a lists them." {
+		t.Fatalf("ran %v, answered %q", env.ran, answer)
+	}
+	if last := prompts[len(prompts)-1]; !strings.Contains(last, "Don't call any more tools") {
+		t.Fatalf("last prompt %q", last)
+	}
+	_, answer, _ = runTask(t, "terminal", "Which shell command lists hidden files?", taskProfile(),
+		call("ls"), call("ls -a"), call("ls -la"), call("ls -R"), call("ls -R /"))
+	if !strings.Contains(answer, "stopped after 3 tool calls") {
+		t.Fatalf("answered %q", answer)
+	}
+}
