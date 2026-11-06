@@ -232,6 +232,34 @@ func TestStartCoreNotInstalled(t *testing.T) {
 			t.Fatalf("doesn't say how to stop it: %q", out)
 		}
 	})
+	// Where nothing can start a service, as in a container or WSL without
+	// systemd, the installer puts Toskar in place and then fails waiting for
+	// it: chat starts it itself.
+	t.Run("an install that only fails to start it is started here", func(t *testing.T) {
+		c := &coreDaemon{}
+		f := newFakeHost("linux", "")
+		installed := ""
+		f.find = func() string { return installed }
+		f.attached = func(name string, args ...string) error {
+			installed = "/usr/bin/toskar"
+			return errors.New("exit status 1")
+		}
+		f.spawn = func(path string) (<-chan error, error) {
+			f.spawned = append(f.spawned, path)
+			c.start()
+			return make(chan error), nil
+		}
+		out, err := runStartCore(t, c, f.coreHost, true, "y\n")
+		if err != nil {
+			t.Fatal(err)
+		}
+		if len(f.spawned) != 1 || f.spawned[0] != "/usr/bin/toskar" {
+			t.Fatalf("spawned %v", f.spawned)
+		}
+		if !strings.Contains(out, "installer couldn't start it") || !strings.Contains(out, "pkill -x toskar") {
+			t.Fatalf("doesn't say what happened: %q", out)
+		}
+	})
 	t.Run("an install that fails says so", func(t *testing.T) {
 		f := newFakeHost("darwin", "")
 		f.spawn = noSpawn(t)

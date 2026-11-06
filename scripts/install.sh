@@ -210,9 +210,15 @@ quietly() {
 	fi
 }
 
+# systemd is running here. A container, or WSL without systemd, may have
+# systemctl but nothing to start a service.
+has_systemd() {
+	command -v systemctl >/dev/null 2>&1 && [ -d /run/systemd/system ]
+}
+
 start_service_linux() {
 	[ "$TOSKAR_NO_SERVICE" = "1" ] && return 0
-	if command -v systemctl >/dev/null 2>&1; then
+	if has_systemd; then
 		as_root systemctl daemon-reload || true
 		# toskar.service, or yggdrasil.service from an older release.
 		unit="toskar.service"
@@ -463,7 +469,12 @@ else
 	elif [ "$os" = "Linux" ]; then
 		YGGCTL="toskarctl"
 	fi
-	if [ "$TOSKAR_NO_SERVICE" != "1" ] || [ "$joining" -eq 1 ]; then
+	if [ "$os" = "Linux" ] && [ "$TOSKAR_NO_SERVICE" != "1" ] && [ "$joining" -eq 0 ] && ! has_systemd; then
+		# Nothing here starts a service, so there's none to wait for.
+		say "There's no systemd here to keep Toskar running. Start it with: toskar"
+		say "Or run ${YGGCTL##*/} chat, which starts it in the background."
+		not_running=1
+	elif [ "$TOSKAR_NO_SERVICE" != "1" ] || [ "$joining" -eq 1 ]; then
 		say "Waiting for Toskar to start..."
 		wait_healthy || die "Toskar didn't start within a minute; see its log (journalctl -u toskar on Linux, the logs folder in ~/Library/Application Support/Toskar, or Yggdrasil for an install from before the rename, on macOS) and try again"
 		ok "Toskar Core is running"
@@ -474,4 +485,4 @@ fi
 if [ "$joining" -eq 1 ]; then
 	TOSKAR_URL="$API" YGGDRASIL_URL="$API" exec "$YGGCTL" join "$@"
 fi
-say "Open ${API} or run ${YGGCTL##*/} to use it."
+[ "${not_running:-0}" -eq 1 ] || say "Open ${API} or run ${YGGCTL##*/} to use it."
