@@ -4,13 +4,14 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"slices"
 	"strconv"
 	"time"
 )
 
 // fakeLlamaEnv, when set, makes the test binary act as llama-server: the
-// value is a file to write the pid of a child it starts, so a test can check
-// that stopping the model ends the child too.
+// value is a file it adds the pid of each child it starts to, a line each,
+// so a test can check that every one ends.
 const fakeLlamaEnv = "YGG_FAKE_LLAMA"
 
 // runFakeLlama serves /health on --port and starts a child process, as a
@@ -18,6 +19,12 @@ const fakeLlamaEnv = "YGG_FAKE_LLAMA"
 func runFakeLlama() {
 	if os.Getenv("YGG_FAKE_CHILD") == "1" {
 		time.Sleep(time.Hour)
+		os.Exit(0)
+	}
+	// Core reads the build's help before starting it, to know which flags
+	// it takes: a real one prints it and exits, and starts nothing.
+	if slices.Contains(os.Args[1:], "--help") {
+		_, _ = os.Stdout.WriteString("usage: llama-server [options]\n")
 		os.Exit(0)
 	}
 	port := ""
@@ -31,7 +38,10 @@ func runFakeLlama() {
 	if err := child.Start(); err != nil {
 		os.Exit(2)
 	}
-	_ = os.WriteFile(os.Getenv(fakeLlamaEnv), []byte(strconv.Itoa(child.Process.Pid)), 0o600)
+	if f, err := os.OpenFile(os.Getenv(fakeLlamaEnv), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o600); err == nil {
+		_, _ = f.WriteString(strconv.Itoa(child.Process.Pid) + "\n")
+		_ = f.Close()
+	}
 	mux := http.NewServeMux()
 	mux.HandleFunc("/health", func(w http.ResponseWriter, _ *http.Request) { _, _ = w.Write([]byte(`{"status":"ok"}`)) })
 	_ = http.ListenAndServe("127.0.0.1:"+port, mux)
