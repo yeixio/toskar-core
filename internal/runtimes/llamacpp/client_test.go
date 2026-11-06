@@ -96,7 +96,7 @@ func TestReasoningContentIsKeptApart(t *testing.T) {
 	}, "\n\n") + "\n\n"
 	resp := &http.Response{Body: io.NopCloser(strings.NewReader(frames))}
 	ch := make(chan pluginapi.ChatChunk, 16)
-	go NewClient().readStream(resp, ch, time.Now(), nil, false)
+	go NewClient().readStream(resp, ch, time.Now(), nil, false, nil)
 	var content, thinking strings.Builder
 	for c := range ch {
 		content.WriteString(c.Content)
@@ -108,7 +108,7 @@ func TestReasoningContentIsKeptApart(t *testing.T) {
 
 	body := `{"choices":[{"message":{"content":"391","reasoning_content":"17 times 23"}}]}`
 	ch = make(chan pluginapi.ChatChunk, 4)
-	go NewClient().readNonStream(&http.Response{Body: io.NopCloser(strings.NewReader(body))}, ch, time.Now(), nil, false)
+	go NewClient().readNonStream(&http.Response{Body: io.NopCloser(strings.NewReader(body))}, ch, time.Now(), nil, false, nil)
 	content.Reset()
 	thinking.Reset()
 	for c := range ch {
@@ -130,7 +130,7 @@ func TestFirstTokenCountsThinking(t *testing.T) {
 	}, "\n\n") + "\n\n"
 	resp := &http.Response{Body: io.NopCloser(strings.NewReader(frames))}
 	ch := make(chan pluginapi.ChatChunk, 16)
-	go NewClient().readStream(resp, ch, time.Now().Add(-time.Second), nil, false)
+	go NewClient().readStream(resp, ch, time.Now().Add(-time.Second), nil, false, nil)
 	var metrics *pluginapi.GenerationMetrics
 	for c := range ch {
 		if c.Metrics != nil {

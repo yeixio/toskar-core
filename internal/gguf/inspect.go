@@ -35,6 +35,10 @@ type Details struct {
 	// Thinks is set for a model that thinks before it answers (#840), by
 	// its chat template or its name (thinks).
 	Thinks bool
+	// Harmony is set for a chat template in gpt-oss's harmony format, whose
+	// tool calls llama.cpp reads only when the request offers the tools
+	// itself (#1099).
+	Harmony bool
 	// License is general.license, when stated.
 	License string
 	// Tensors is how many tensors it has.
@@ -178,6 +182,7 @@ func inspect(d *decoder, size uint64, offset func() uint64) (Details, error) {
 	}
 	out.ContextLength = ints[out.Architecture+".context_length"]
 	out.Thinks = thinks(out.Name, template)
+	out.Harmony = strings.Contains(template, "<|channel|>")
 	if ft, ok := ints["general.file_type"]; ok {
 		out.Quantization = fileTypes[ft]
 	}

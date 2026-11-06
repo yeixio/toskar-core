@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/yeixio/toskar-core/internal/gguf"
@@ -70,6 +71,9 @@ func TestInspectThinks(t *testing.T) {
 		}
 		if d.Thinks != tc.want {
 			t.Errorf("%s: thinks = %v, want %v", tc.name, d.Thinks, tc.want)
+		}
+		if d.Harmony != strings.Contains(tc.name, "gpt-oss") {
+			t.Errorf("%s: harmony = %v", tc.name, d.Harmony)
 		}
 		if d.ChatTemplate != (tc.template != "") {
 			t.Errorf("%s: chat template = %v", tc.name, d.ChatTemplate)

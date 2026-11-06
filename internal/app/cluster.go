@@ -20,6 +20,7 @@ import (
 	"github.com/yeixio/toskar-core/internal/scheduler"
 	"github.com/yeixio/toskar-core/internal/share"
 	"github.com/yeixio/toskar-core/internal/structured"
+	"github.com/yeixio/toskar-core/internal/tools"
 	"github.com/yeixio/toskar-core/pkg/contracts"
 	"github.com/yeixio/toskar-core/pkg/pluginapi"
 )
@@ -266,7 +267,7 @@ func (a *App) generateOnNode(ctx context.Context, nodeID, modelID, role, adapter
 		if d := time.Since(loadStarted); d >= minLoad {
 			runlog.From(ctx).Loaded(modelID, d)
 		}
-		ch, err := a.Runtimes.Chat(ctx, pluginapi.ChatRequest{
+		ch, err := a.Runtimes.Chat(ctx, a.withNativeTools(ctx, modelID, pluginapi.ChatRequest{
 			ModelEndpoint:  endpoint,
 			Messages:       a.forTemplate(modelID, messages),
 			Stream:         true,
@@ -275,7 +276,7 @@ func (a *App) generateOnNode(ctx context.Context, nodeID, modelID, role, adapter
 			Temperature:    opts.Temperature,
 			MaxTokens:      opts.MaxTokens,
 			NoThinking:     opts.NoThinking,
-		})
+		}))
 		if err != nil {
 			return nil, err
 		}
@@ -478,6 +479,20 @@ func wrapRemoteChat(in <-chan pluginapi.ChatChunk, n contracts.Node) <-chan plug
 // forTemplate shapes messages for the model's chat template: a model with
 // no system role, such as Gemma, gets the instructions marked in the first
 // user message.
+// withNativeTools offers a model the tools its system prompt lists in the
+// request itself too, when that's the only way its calls come back, as for
+// gpt-oss (#1099); the call is turned into Toskar's own protocol, so the
+// turn reads it as any other.
+func (a *App) withNativeTools(ctx context.Context, modelID string, req pluginapi.ChatRequest) pluginapi.ChatRequest {
+	if a.Models == nil || len(req.Messages) == 0 || req.Messages[0].Role != "system" || !a.Models.NativeTools(ctx, modelID) {
+		return req
+	}
+	if native := tools.NativeFromPrompt(req.Messages[0].Content); native != nil {
+		req.Tools, req.ToolCallText = native, tools.CallText
+	}
+	return req
+}
+
 func (a *App) forTemplate(modelID string, messages []pluginapi.ChatMessage) []pluginapi.ChatMessage {
 	if a.Models != nil && a.Models.NoSystemRole(modelID) {
 		return pluginapi.FoldSystem(messages)
@@ -556,7 +571,7 @@ func (a *App) internalChatStream(ctx context.Context, req nodes.RemoteChatReques
 		if err2 != nil {
 			return nil, err2
 		}
-		ch, err = a.Runtimes.Chat(ctx, pluginapi.ChatRequest{
+		ch, err = a.Runtimes.Chat(ctx, a.withNativeTools(ctx, req.ModelID, pluginapi.ChatRequest{
 			ModelEndpoint:  endpoint,
 			Messages:       a.forTemplate(req.ModelID, req.Messages),
 			Stream:         true,
@@ -564,7 +579,7 @@ func (a *App) internalChatStream(ctx context.Context, req nodes.RemoteChatReques
 			MaxTokens:      req.MaxTokens,
 			ResponseSchema: req.ResponseSchema,
 			NoThinking:     req.NoThinking,
-		})
+		}))
 		if err != nil {
 			return nil, err
 		}
