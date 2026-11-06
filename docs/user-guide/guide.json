@@ -1864,12 +1864,269 @@
         "Each key has permissions a request can only narrow: whether it may use memories and connected knowledge (never, on request, or always), which tools (the profile's, read-only, or none), and whether it may choose where it runs. API requests use memories only when they ask, unless the key says always. A request can ask for JSON with response_format, and Toskar checks and repairs the result.",
         "A request that names a model gets the room it needs. When its messages and answer are more than the model's context window on this computer, Toskar starts the model again with a bigger one, up to what the model was made for, if it still fits. Coding tools that send a lot at once can ask up front, with toskar.context_window set to the tokens they need. When no size fits, the request fails with CONTEXT_TOO_LONG, and nothing is cut off.",
         "Coding agents and editors that run their own tools can use a model directly. Name the model as raw: and its ID, such as raw:qwen2.5-7b-q4, and the request goes straight to the model with the agent's tools, and the model's tool calls come back to the agent. It skips Toskar's assistant: no memories, knowledge, look-ups, or answer checks. A request from this computer can do this without a key. For another device, an Admin turns on Drive models directly, for coding agents, in that key's permissions in API Access. GET /v1/models lists the raw: models a key may use. Agents built for Anthropic's format work too: point them at Toskar's address, such as http://127.0.0.1:7331, and set their model to the model's ID. They reach POST /v1/messages, which works the same way. So do agents built for OpenAI's Responses format, through POST /v1/responses: send the whole conversation each time, since Toskar doesn't keep earlier responses.",
-        "toskarctl connect sets these up for you. Run toskarctl connect claude-code, codex, opencode, or aider to print the settings that agent needs, or add --write to save them: for Claude Code and OpenCode in the project folder you're in, and for Codex as a toskar profile you run with codex --profile toskar. Your agent's usual settings stay as they were. Pick the model with --model, or let it choose the best installed model for coding. For editors, toskarctl connect continue, cline, roo-code, zed, jetbrains, or copilot prints what to enter in that editor's settings, since they keep it there. An agent with many tools, such as one with MCP servers, works too: when its tools would take more than a quarter of what the model reads at once, the model gets the ones the request most likely needs and searches for the rest as it goes. The agent never notices.",
+        "toskarctl connect sets these up for you. Run toskarctl connect claude-code, codex, opencode, or aider to print the settings that agent needs, or add --write to save them: for Claude Code and OpenCode in the project folder you're in, and for Codex as a toskar profile you run with codex --profile toskar. Your agent's usual settings stay as they were. Pick the model with --model, or let it choose the best installed model for coding. For editors, toskarctl connect continue, cline, roo-code, zed, jetbrains, or copilot prints what to enter in that editor's settings, since they keep it there. An agent with many tools, such as one with MCP servers, works too. When its tools would take more than a quarter of what the model reads at once, the model gets the ones the request most likely needs, and searches for the rest as it goes. The agent never notices.",
         "The Toskar extension for VS Code lists Toskar's models in Copilot Chat's model picker and adds @toskar, Toskar's assistant, to Copilot Chat. See [Use Toskar in VS Code](#vscode).",
         "For another computer, use the LAN endpoint shown in API Access rather than localhost. Keep LAN access on a trusted network; the displayed HTTP endpoint does not itself provide public-internet TLS protection.",
         "Apps that speak MCP, such as Claude Desktop, Claude Code, Cursor, and VS Code, can ask your local AI questions, list its models, and search your connected knowledge. API Access → Use Toskar in other AI apps shows what to paste into each."
       ],
-      "code": "curl http://127.0.0.1:7331/v1/models\n\ncurl http://127.0.0.1:7331/v1/chat/completions \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"model\":\"MODEL_ID_FROM_LIST\",\"messages\":[{\"role\":\"user\",\"content\":\"Hello\"}],\"stream\":false}'"
+      "code": "curl http://127.0.0.1:7331/v1/models\n\ncurl http://127.0.0.1:7331/v1/chat/completions \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"model\":\"MODEL_ID_FROM_LIST\",\"messages\":[{\"role\":\"user\",\"content\":\"Hello\"}],\"stream\":false}'",
+      "kind": "task",
+      "summary": "Connect your own apps, scripts, and CI jobs to Toskar: its OpenAI-compatible API, API keys, the SDKs, and toskarctl.",
+      "blocks": [
+        {
+          "type": "list",
+          "title": "What you need",
+          "items": [
+            "Toskar running, with a model installed ([Models](#models)).",
+            "For an app on another device: local network access on, and an API key. Only an Admin can make keys ([People](#people))."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Find your endpoint"
+        },
+        {
+          "type": "steps",
+          "items": [
+            "Open API Access.",
+            "Under Service, copy the Endpoint. On this computer it's `http://127.0.0.1:7331/v1`.",
+            "Choose Test API to check that it answers."
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Any app or library that speaks OpenAI's Chat Completions can use that address. Ask which models it may use:"
+        },
+        {
+          "type": "code",
+          "language": "sh",
+          "test": "api-models",
+          "code": "curl -s http://127.0.0.1:7331/v1/models",
+          "output": "{\"data\":[{\"id\":\"auto\"…\"profile:general-assistant\"…}],\"object\":\"list\"}"
+        },
+        {
+          "type": "paragraph",
+          "text": "`auto` lets Toskar pick a model for each request. `profile:` and a profile's id answers as that profile ([Profiles](#profiles)), and a model's own id uses that model. Then ask a question:"
+        },
+        {
+          "type": "code",
+          "language": "sh",
+          "test": "api-chat",
+          "code": "curl -s http://127.0.0.1:7331/v1/chat/completions \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"model\": \"profile:general-assistant\", \"messages\": [{\"role\": \"user\", \"content\": \"Plan a three-day trip to Juneau\"}]}'",
+          "output": "{…\"choices\":[{…\"message\":{…\"content\":\"…Juneau…\"…}…}]…}"
+        },
+        {
+          "type": "paragraph",
+          "text": "The answer comes from Toskar's assistant, as in chat: Auto, web look-ups, connected services, and answer checks. Add `\"stream\": true` to get it as it's written. It's a subset of OpenAI's API, not every feature of a hosted one."
+        },
+        {
+          "type": "heading",
+          "text": "Use an API key"
+        },
+        {
+          "type": "paragraph",
+          "text": "On this computer, with local network access off, no key is needed. An app on another device needs a key with every request, sent as `Authorization: Bearer` and the key."
+        },
+        {
+          "type": "steps",
+          "items": [
+            "Open API Access, and under API keys choose Create API key.",
+            "Give it a name you'll recognize, such as the app that uses it, and choose Create key.",
+            "Copy the secret straight away. It isn't shown again.",
+            "Open What this key may use to narrow what it can do."
+          ]
+        },
+        {
+          "type": "image",
+          "screen": "api-access",
+          "alt": "API Access, with two API keys, Editor and Notes app, each with Rotate and Revoke buttons, under a Create API key button",
+          "caption": "Each key shows when it was made and last used. Rotate gives it a new secret, and Revoke ends it."
+        },
+        {
+          "type": "table",
+          "columns": [
+            "What this key may use",
+            "Choices",
+            "What it means"
+          ],
+          "rows": [
+            [
+              "Memories and connected knowledge",
+              "Never, on request, or always",
+              "A request uses them only when it asks, unless the key says always"
+            ],
+            [
+              "Tools",
+              "The profile's, read-only, or none",
+              "What the assistant may do while it answers"
+            ],
+            [
+              "Where it runs",
+              "On or off",
+              "Whether a request may choose which computer answers"
+            ],
+            [
+              "Drive models directly, for coding agents",
+              "On or off",
+              "Whether the key may use `raw:` models, for agents that run their own tools"
+            ]
+          ]
+        },
+        {
+          "type": "note",
+          "tone": "tip",
+          "text": "For a CI job, choose For a CI job: chat only when you make the key. That key only asks: no memories, knowledge, or tools, whatever the job sends."
+        },
+        {
+          "type": "heading",
+          "text": "Use an SDK"
+        },
+        {
+          "type": "paragraph",
+          "text": "The SDKs talk to Toskar's own API, with streaming, typed errors, and retries. On this computer they need no setup. Elsewhere, set `TOSKAR_URL` and `TOSKAR_API_KEY`."
+        },
+        {
+          "type": "table",
+          "columns": [
+            "Language",
+            "Install"
+          ],
+          "rows": [
+            [
+              "Python",
+              "`pip install toskar`"
+            ],
+            [
+              "TypeScript and JavaScript",
+              "`npm install toskar`"
+            ],
+            [
+              "Go",
+              "`go get github.com/yeixio/toskar-sdks/go`"
+            ]
+          ]
+        },
+        {
+          "type": "code",
+          "language": "python",
+          "test": "api-python",
+          "code": "from toskar import Toskar\n\nwith Toskar() as toskar:\n    for event in toskar.chat_stream(\"Plan a three-day trip to Juneau\"):\n        if event.type == \"token\":\n            print(event.content, end=\"\", flush=True)\n    print()\n",
+          "output": "…Juneau…"
+        },
+        {
+          "type": "code",
+          "language": "typescript",
+          "test": "api-typescript",
+          "code": "import { Toskar } from 'toskar'\n\nconst toskar = new Toskar()\nfor await (const event of toskar.chatStream({ message: 'Plan a three-day trip to Juneau' })) {\n  if (event.type === 'token') process.stdout.write(event.content)\n}\nconsole.log()\n",
+          "output": "…Juneau…"
+        },
+        {
+          "type": "code",
+          "language": "go",
+          "test": "api-go",
+          "code": "package main\n\nimport (\n\t\"context\"\n\t\"fmt\"\n\t\"log\"\n\n\ttoskar \"github.com/yeixio/toskar-sdks/go\"\n\t\"github.com/yeixio/toskar-sdks/go/api\"\n)\n\nfunc main() {\n\tc, err := toskar.New()\n\tif err != nil {\n\t\tlog.Fatal(err)\n\t}\n\tfor e, err := range c.ChatStream(context.Background(), api.ChatJSONRequestBody{Message: \"Plan a three-day trip to Juneau\"}) {\n\t\tif err != nil {\n\t\t\tlog.Fatal(err)\n\t\t}\n\t\tif e.Type == \"token\" {\n\t\t\tfmt.Print(e.Content)\n\t\t}\n\t}\n\tfmt.Println()\n}\n",
+          "output": "…Juneau…"
+        },
+        {
+          "type": "paragraph",
+          "text": "Each SDK release is built for a version of Toskar's client contract, and sends it with every request. Toskar refuses a client built for another major version with `CONTRACT_MISMATCH`. A Toskar older than the SDK may lack its newest fields, so update Toskar first. To see the contract a Toskar speaks:"
+        },
+        {
+          "type": "code",
+          "language": "sh",
+          "test": "api-version",
+          "code": "curl -s http://127.0.0.1:7331/api/v1/version",
+          "output": "{\"version\":\"…\"…\"contract\":{\"version\":\"…\",\"major\":1}}"
+        },
+        {
+          "type": "heading",
+          "text": "Use it from a script"
+        },
+        {
+          "type": "paragraph",
+          "text": "`toskarctl ask` asks one question and prints the answer, for scripts and CI. Text piped in is sent as data to work on, apart from the question, and the model is told to follow only the question. Memory, knowledge, and tools are off."
+        },
+        {
+          "type": "code",
+          "language": "sh",
+          "test": "api-ask-pipe",
+          "code": "printf 'error: missing semicolon on line 12\\n' | toskarctl ask \"What failed?\"",
+          "output": "…"
+        },
+        {
+          "type": "paragraph",
+          "text": "`--json-schema` with a JSON Schema file answers with JSON that fits it, for a later step to read. Where the input is an open pipe that never ends, such as some job runners, add `< /dev/null`."
+        },
+        {
+          "type": "heading",
+          "text": "Use it in CI"
+        },
+        {
+          "type": "paragraph",
+          "text": "A CI job can ask Toskar as one of its steps, such as summarizing a bug report or reading a failing log. It runs on your own runners and models, so issue text, code, and logs never go to a hosted AI. In GitHub Actions, the [Ask Toskar action](https://github.com/yeixio/toskar-action) does it in one step:"
+        },
+        {
+          "type": "code",
+          "language": "text",
+          "code": "- uses: yeixio/toskar-action@v1\n  id: toskar\n  with:\n    prompt: What's the first real error in this log, and its likely cause?\n    input-file: build.log"
+        },
+        {
+          "type": "paragraph",
+          "text": "The answer is the step's `answer` output, for a later step to use. Without a `url`, the action starts Toskar on the runner and installs a small model, cached between runs. With `url` and `api-key`, it asks a Toskar the runner can reach. For other CI systems, see [Toskar in CI](https://github.com/yeixio/toskar-core/blob/main/docs/ci.md)."
+        },
+        {
+          "type": "list",
+          "title": "Limits",
+          "items": [
+            "The API is an OpenAI-compatible subset, not every feature of a hosted API.",
+            "A `raw:` model skips Toskar's assistant: no memories, knowledge, look-ups, or answer checks.",
+            "The local network endpoint is plain HTTP. Keep local network access on a network you trust, or use [Reach Toskar away from home](#anywhere).",
+            "A small model on a runner with no graphics card answers much more slowly than one on a computer with one."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Troubleshooting"
+        },
+        {
+          "type": "table",
+          "columns": [
+            "What you see",
+            "What to do"
+          ],
+          "rows": [
+            [
+              "`UNAUTHORIZED`: \"This Toskar needs an API key\"",
+              "Send a key as `Authorization: Bearer` and the key, or check that it hasn't been revoked"
+            ],
+            [
+              "\"No model is installed yet\"",
+              "Install one in Models, or name a model or profile that has one"
+            ],
+            [
+              "`CONTEXT_TOO_LONG`",
+              "The request is more than the model can read at once, even in a bigger window. Send less, or use a model made for longer text"
+            ],
+            [
+              "`CONTRACT_MISMATCH`",
+              "The SDK was built for another major version of Toskar. Update Toskar and the SDK to releases that match"
+            ],
+            [
+              "An app on another device can't connect",
+              "Turn on local network access in API Access, and use the address it shows, not `127.0.0.1`"
+            ]
+          ]
+        },
+        {
+          "type": "related",
+          "sections": [
+            "terminal",
+            "vscode",
+            "server",
+            "anywhere"
+          ]
+        }
+      ]
     },
     {
       "id": "vscode",
