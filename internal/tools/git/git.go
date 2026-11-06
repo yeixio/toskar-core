@@ -5,10 +5,21 @@ import (
 	"fmt"
 	"os/exec"
 	"strings"
+
+	"github.com/yeixio/toskar-core/internal/turnopts"
 )
 
 type base struct {
 	workspace string
+}
+
+// dir is where a call runs: the folder the turn works in, as the file tools
+// and the terminal use (#1017, #1110), or the tool's own workspace.
+func (b base) dir(ctx context.Context) string {
+	if project := turnopts.ProjectFrom(ctx); project != "" {
+		return project
+	}
+	return b.workspace
 }
 
 func runGit(ctx context.Context, dir string, args ...string) (string, error) {
@@ -28,7 +39,7 @@ func (t *statusTool) ID() string             { return "git.status" }
 func (t *statusTool) DisplayName() string    { return "Git Status" }
 func (t *statusTool) Description() string    { return "Show git status" }
 func (t *statusTool) Execute(ctx context.Context, args map[string]any) (map[string]any, error) {
-	out, err := runGit(ctx, t.workspace, "status", "--short")
+	out, err := runGit(ctx, t.dir(ctx), "status", "--short")
 	if err != nil {
 		return nil, err
 	}
@@ -47,7 +58,7 @@ func (t *diffTool) Execute(ctx context.Context, args map[string]any) (map[string
 	if path != "" {
 		gitArgs = append(gitArgs, path)
 	}
-	out, err := runGit(ctx, t.workspace, gitArgs...)
+	out, err := runGit(ctx, t.dir(ctx), gitArgs...)
 	if err != nil {
 		return nil, err
 	}
@@ -65,7 +76,7 @@ func (t *addTool) Execute(ctx context.Context, args map[string]any) (map[string]
 	if path == "" {
 		path = "."
 	}
-	out, err := runGit(ctx, t.workspace, "add", path)
+	out, err := runGit(ctx, t.dir(ctx), "add", path)
 	if err != nil {
 		return nil, err
 	}
@@ -83,7 +94,7 @@ func (t *commitTool) Execute(ctx context.Context, args map[string]any) (map[stri
 	if strings.TrimSpace(msg) == "" {
 		return nil, fmt.Errorf("message required")
 	}
-	out, err := runGit(ctx, t.workspace, "commit", "-m", msg)
+	out, err := runGit(ctx, t.dir(ctx), "commit", "-m", msg)
 	if err != nil {
 		return nil, err
 	}
@@ -101,7 +112,7 @@ func (t *logTool) Execute(ctx context.Context, args map[string]any) (map[string]
 	if path, _ := args["path"].(string); strings.TrimSpace(path) != "" {
 		gitArgs = append(gitArgs, "--", path)
 	}
-	out, err := runGit(ctx, t.workspace, gitArgs...)
+	out, err := runGit(ctx, t.dir(ctx), gitArgs...)
 	if err != nil {
 		return nil, err
 	}
@@ -119,7 +130,7 @@ func (t *showTool) Execute(ctx context.Context, args map[string]any) (map[string
 	if strings.TrimSpace(revision) == "" {
 		revision = "HEAD"
 	}
-	out, err := runGit(ctx, t.workspace, "show", "--stat", revision)
+	out, err := runGit(ctx, t.dir(ctx), "show", "--stat", revision)
 	if err != nil {
 		return nil, err
 	}
@@ -150,7 +161,7 @@ func (t *pushTool) Execute(ctx context.Context, args map[string]any) (map[string
 	if strings.TrimSpace(branch) != "" {
 		gitArgs = append(gitArgs, branch)
 	}
-	out, err := runGit(ctx, t.workspace, gitArgs...)
+	out, err := runGit(ctx, t.dir(ctx), gitArgs...)
 	if err != nil {
 		return nil, err
 	}

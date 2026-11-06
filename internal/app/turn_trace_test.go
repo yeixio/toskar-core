@@ -175,3 +175,39 @@ func TestProjectFilesStayTrusted(t *testing.T) {
 		}
 	}
 }
+
+// Git in the turn's project counts as its own files do; with no project, or
+// one as wide as the home folder, it's outside content (#1110).
+func TestProjectGitStaysTrusted(t *testing.T) {
+	home, err := filepath.EvalSymlinks(t.TempDir())
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("HOME", home)
+	project := filepath.Join(home, "app")
+	if err := os.MkdirAll(project, 0o700); err != nil {
+		t.Fatal(err)
+	}
+	for _, c := range []struct {
+		project, tool string
+		outside       bool
+	}{
+		{project, "git.status", false},
+		{project, "git.log", false},
+		{home, "git.status", true},
+		{"", "git.status", true},
+	} {
+		tr := &turnTrace{project: c.project}
+		tr.tool(c.tool, nil, map[string]any{"output": " M a.go"})
+		if tr.sawUntrusted() != c.outside {
+			t.Errorf("%+v: outside=%v", c, tr.sawUntrusted())
+		}
+	}
+	// Reading a page first still makes a later change ask.
+	tr := &turnTrace{project: project}
+	tr.tool("internet.open", map[string]any{"url": "http://example.com"}, map[string]any{})
+	tr.tool("git.status", nil, map[string]any{"output": ""})
+	if !tr.sawUntrusted() {
+		t.Error("a page read before git stopped counting as outside")
+	}
+}
