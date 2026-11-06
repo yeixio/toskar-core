@@ -51,7 +51,7 @@ func TestConnectPrints(t *testing.T) {
 		"codex":       {"[model_providers.toskar]", `base_url = "` + client.base + `/v1"`, `wire_api = "responses"`, `env_key = "TOSKAR_API_KEY"`, "toskar.config.toml", `model = "qwen2.5-coder-7b-q4"`, `model_provider = "toskar"`, "codex --profile toskar", "export TOSKAR_API_KEY=toskar-local"},
 		"opencode":    {`"npm": "@ai-sdk/openai-compatible"`, `"baseURL": "` + client.base + `/v1"`, `"raw:qwen2.5-coder-7b-q4"`, `"model": "toskar/raw:qwen2.5-coder-7b-q4"`},
 		"aider":       {"OPENAI_API_BASE=" + client.base + "/v1", "aider --model openai/raw:qwen2.5-coder-7b-q4"},
-		"continue":    {"provider: openai", "model: raw:qwen2.5-coder-7b-q4", "apiBase: " + client.base + "/v1", "- tool_use"},
+		"continue":    {"provider: openai", "model: raw:qwen2.5-coder-7b-q4", "apiBase: " + client.base + "/v1", "- tool_use", "useLegacyCompletionsEndpoint: false"},
 		"cline":       {`"OpenAI Compatible"`, "Base URL: " + client.base + "/v1", "Model ID: raw:qwen2.5-coder-7b-q4", "Context window: 32768"},
 		"roo-code":    {"Roo Code", "Model ID: raw:qwen2.5-coder-7b-q4"},
 		"zed":         {`"openai_compatible"`, `"api_url": "` + client.base + `/v1"`, `"name": "raw:qwen2.5-coder-7b-q4"`, `"max_tokens": 32768`, `"tools": true`},
@@ -77,6 +77,14 @@ func TestConnectPrints(t *testing.T) {
 	}
 	if strings.Contains(out.String(), "ygg_secret") || !strings.Contains(out.String(), `ANTHROPIC_AUTH_TOKEN="$TOSKAR_API_KEY"`) || !strings.Contains(out.String(), "ANTHROPIC_MODEL=big-chat") {
 		t.Errorf("with a key:\n%s", out.String())
+	}
+	// Continue reads it from its own secrets file (#1061).
+	out.Reset()
+	if err := connectCommand([]string{"continue"}, client, &out, t.TempDir(), t.TempDir()); err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(out.String(), "ygg_secret") || !strings.Contains(out.String(), "apiKey: ${{ secrets.TOSKAR_API_KEY }}") || !strings.Contains(out.String(), "~/.continue/.env") {
+		t.Errorf("continue with a key:\n%s", out.String())
 	}
 }
 
@@ -166,5 +174,29 @@ func TestConnectRefuses(t *testing.T) {
 		if !errors.As(err, &e) || e.code != 2 {
 			t.Errorf("%v: %v", args, err)
 		}
+	}
+}
+
+// The Continue guide's config.yaml is what connect prints, with the three
+// lines a new file starts with, so the tested example can't drift (#1061).
+func TestContinueGuideMatchesConnect(t *testing.T) {
+	raw, err := os.ReadFile(filepath.Join("..", "..", "docs", "integrations", "continue.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, block, ok := strings.Cut(string(raw), "   ```yaml\n")
+	block, _, ok2 := strings.Cut(block, "   ```\n")
+	if !ok || !ok2 {
+		t.Fatal("no yaml block in the guide")
+	}
+	var guide []string
+	for _, line := range strings.Split(strings.TrimSuffix(block, "\n"), "\n") {
+		guide = append(guide, strings.TrimPrefix(line, "   "))
+	}
+	printed := continuePrint(connectTarget{base: "http://127.0.0.1:7331", model: "qwen2.5-7b-q4", key: "toskar-local"})
+	_, entry, _ := strings.Cut(printed, "\nmodels:\n")
+	want := "name: Toskar\nversion: 1.0.0\nschema: v1\nmodels:\n" + strings.TrimSuffix(entry, "\n")
+	if got := strings.Join(guide, "\n"); got != want {
+		t.Errorf("the guide's config.yaml:\n%s\nconnect prints:\n%s", got, want)
 	}
 }
