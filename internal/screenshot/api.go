@@ -504,8 +504,8 @@ const screenshotBudgetMessages = `[
 ]`
 
 const screenshotAPIKeys = `[
-  {"id": "key-1", "name": "Editor", "prefix": "ygk_3f91", "created_at": "2026-09-01T00:00:00Z", "last_used_at": "2026-09-24T14:00:00Z", "revoked": false},
-  {"id": "key-2", "name": "Notes app", "prefix": "ygk_88ab", "created_at": "2026-08-12T00:00:00Z", "revoked": false}
+  {"id": "key-1", "name": "Editor", "prefix": "ygg_3f91", "created_at": "2026-09-01T00:00:00Z", "last_used_at": "2026-09-24T14:00:00Z", "revoked": false},
+  {"id": "key-2", "name": "Notes app", "prefix": "ygg_88ab", "created_at": "2026-08-12T00:00:00Z", "revoked": false}
 ]`
 
 const screenshotRuntimes = `[{
