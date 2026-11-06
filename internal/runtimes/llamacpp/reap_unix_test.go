@@ -34,6 +34,18 @@ func waitGone(t *testing.T, pid int, what string) {
 	}
 }
 
+// pids are the children a fake llama-server recorded, a line each.
+func pids(file string) []int {
+	b, _ := os.ReadFile(file)
+	var out []int
+	for _, line := range strings.Fields(string(b)) {
+		if pid, err := strconv.Atoi(line); err == nil {
+			out = append(out, pid)
+		}
+	}
+	return out
+}
+
 // Stopping a model ends llama-server and every process it started, so a
 // daemon that loads and unloads models for weeks leaves nothing behind
 // (#231). StopAll at shutdown stops each model the same way.
@@ -64,20 +76,23 @@ func TestStoppingAModelLeavesNoProcess(t *testing.T) {
 		r.sup.mu.Lock()
 		server := r.sup.procs[running.ID].cmd.Process.Pid
 		r.sup.mu.Unlock()
-		var child int
-		for deadline := time.Now().Add(5 * time.Second); child == 0 && time.Now().Before(deadline); time.Sleep(20 * time.Millisecond) {
-			b, _ := os.ReadFile(pidFile)
-			child, _ = strconv.Atoi(strings.TrimSpace(string(b)))
+		var children []int
+		for deadline := time.Now().Add(5 * time.Second); len(children) == 0 && time.Now().Before(deadline); time.Sleep(20 * time.Millisecond) {
+			children = pids(pidFile)
 		}
-		if child == 0 || !alive(server) || !alive(child) {
-			t.Fatalf("fake llama-server %d and child %d should be running", server, child)
+		if len(children) == 0 || !alive(server) {
+			t.Fatalf("fake llama-server %d and its child should be running", server)
 		}
 
 		if err := r.StopModel(context.Background(), running.ID); err != nil {
 			t.Fatal(err)
 		}
 		waitGone(t, server, "llama-server")
-		waitGone(t, child, "llama-server's child")
+		// Every child any llama-server started, including one run only to
+		// read its help, ends too.
+		for _, child := range pids(pidFile) {
+			waitGone(t, child, "a child of llama-server")
+		}
 	}
 	if list, _ := r.ListRunning(context.Background()); len(list) != 0 {
 		t.Fatalf("still listed as running: %v", list)
