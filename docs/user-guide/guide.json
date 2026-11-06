@@ -1880,11 +1880,11 @@
         {
           "type": "code",
           "language": "text",
-          "code": "- uses: yeixio/toskar-action@v1\n  id: toskar\n  with:\n    prompt: Summarize this bug in two sentences\n    input: ${{ github.event.issue.body }}\n- run: echo \"$ANSWER\"\n  env:\n    ANSWER: ${{ steps.toskar.outputs.answer }}"
+          "code": "- uses: yeixio/toskar-action@v1\n  id: toskar\n  with:\n    prompt: What's the first real error in this log, and its likely cause?\n    input-file: build.log"
         },
         {
           "type": "paragraph",
-          "text": "Without a `url`, the action starts Toskar on the runner and installs a small model, cached between runs. With `url` and `api-key`, it asks a Toskar the runner can reach. For other CI systems, see [Toskar in CI](https://github.com/yeixio/toskar-core/blob/main/docs/ci.md)."
+          "text": "The answer is the step's `answer` output, for a later step to use. Without a `url`, the action starts Toskar on the runner and installs a small model, cached between runs. With `url` and `api-key`, it asks a Toskar the runner can reach. For other CI systems, see [Toskar in CI](https://github.com/yeixio/toskar-core/blob/main/docs/ci.md)."
         },
         {
           "type": "list",
