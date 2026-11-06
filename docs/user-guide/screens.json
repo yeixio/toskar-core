@@ -681,6 +681,16 @@
       ]
     },
     {
+      "id": "api-access",
+      "path": "/api-access",
+      "readyText": "Notes app",
+      "actions": [
+        {
+          "scroll": "Credentials for apps and devices that talk to Toskar."
+        }
+      ]
+    },
+    {
       "id": "knowledge",
       "path": "/knowledge",
       "readyText": "Trail notes"
