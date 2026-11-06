@@ -171,6 +171,9 @@ type Result struct {
 	Prompts [][]pluginapi.ChatMessage
 	// Files are the files the assistant made in the turn, by name.
 	Files map[string][]byte
+	// Project is the folder the chat worked in, from Setup.Project, for a
+	// check of what the turn left there (#1017).
+	Project string `json:",omitempty"`
 	// Failed is why a real model's turn failed, such as writing no answer:
 	// a failed case, counted in the pass rate (#834).
 	Failed string `json:",omitempty"`

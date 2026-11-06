@@ -5,13 +5,25 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/yeixio/toskar-core/internal/config"
 )
 
 // projectFolder writes a case's project files to a folder of its own, and
-// gives its real path: macOS's temp folder is behind a link.
+// gives its real path: macOS's temp folder is behind a link. With
+// TOSKAR_QUALITY_PROJECTS, it's made there: a folder a daemon in another
+// container sees at the same path.
 func projectFolder(t *testing.T, files map[string]string) string {
 	t.Helper()
-	dir := filepath.Join(t.TempDir(), "project")
+	base := config.Env("QUALITY_PROJECTS")
+	if base == "" {
+		base = t.TempDir()
+	}
+	dir, err := os.MkdirTemp(base, "project-")
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = os.RemoveAll(dir) })
 	for name, content := range files {
 		path := filepath.Join(dir, filepath.FromSlash(name))
 		if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {

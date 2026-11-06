@@ -257,9 +257,10 @@ func (d realDriver) Run(t *testing.T, c Case) Result {
 	d.do(t, http.MethodPost, "/api/v1/conversations", map[string]any{"title": "Quality " + c.ID, "profile_id": created.ID, "model_id": d.modelID()}, &conv)
 	// A folder to work in, as the web app gives a chat one: the daemon is
 	// on this computer, so it reaches the folder.
-	client := ""
+	client, project := "", ""
 	if len(c.Setup.Project) > 0 {
-		d.do(t, http.MethodPatch, "/api/v1/conversations/"+conv.ID, map[string]any{"project": projectFolder(t, c.Setup.Project)}, nil)
+		project = projectFolder(t, c.Setup.Project)
+		d.do(t, http.MethodPatch, "/api/v1/conversations/"+conv.ID, map[string]any{"project": project}, nil)
 		client = "web"
 	}
 	chat := func(message string, attachments ...string) {
@@ -301,7 +302,7 @@ func (d realDriver) Run(t *testing.T, c Case) Result {
 	if c.FollowUp != "" {
 		chat(c.FollowUp)
 	}
-	r := Result{Events: events()}
+	r := Result{Events: events(), Project: project}
 	cancel()
 
 	var listed json.RawMessage
