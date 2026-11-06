@@ -76,7 +76,7 @@ type streamed struct {
 
 func readSplit(parts []string, noThinking bool) streamed {
 	ch := make(chan pluginapi.ChatChunk, 1024)
-	go NewClient().readStream(&http.Response{Body: io.NopCloser(&pieces{parts: parts})}, ch, time.Now(), nil, noThinking)
+	go NewClient().readStream(&http.Response{Body: io.NopCloser(&pieces{parts: parts})}, ch, time.Now(), nil, noThinking, nil)
 	var content, thinking strings.Builder
 	for c := range ch {
 		content.WriteString(c.Content)

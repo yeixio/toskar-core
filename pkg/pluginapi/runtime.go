@@ -162,6 +162,10 @@ type ChatRequest struct {
 	// NoThinking asks a reasoning model to answer without thinking first
 	// (#840). A model that doesn't think is unaffected.
 	NoThinking bool `json:"no_thinking,omitempty"`
+	// ToolCallText, with Tools, turns the first tool call the model makes
+	// into the answer's text, as the caller's own protocol writes a call
+	// (#1099). Without it, calls in the reply are ignored.
+	ToolCallText func(name, arguments string) string `json:"-"`
 }
 
 // ChatMessage is a single chat turn.

@@ -98,10 +98,10 @@ func (c *Client) chat(ctx context.Context, req pluginapi.ChatRequest, again func
 
 	ch := make(chan pluginapi.ChatChunk, 16)
 	if !req.Stream {
-		go c.readNonStream(resp, ch, started, again, req.NoThinking)
+		go c.readNonStream(resp, ch, started, again, req.NoThinking, req.ToolCallText)
 		return ch, nil
 	}
-	go c.readStream(resp, ch, started, again, req.NoThinking)
+	go c.readStream(resp, ch, started, again, req.NoThinking, req.ToolCallText)
 	return ch, nil
 }
 
@@ -156,7 +156,7 @@ func pipe(ch chan<- pluginapi.ChatChunk, again func() (<-chan pluginapi.ChatChun
 	}
 }
 
-func (c *Client) readNonStream(resp *http.Response, ch chan<- pluginapi.ChatChunk, started time.Time, again func() (<-chan pluginapi.ChatChunk, error), noThinking bool) {
+func (c *Client) readNonStream(resp *http.Response, ch chan<- pluginapi.ChatChunk, started time.Time, again func() (<-chan pluginapi.ChatChunk, error), noThinking bool, callText func(name, arguments string) string) {
 	defer close(ch)
 	defer resp.Body.Close()
 	body, err := io.ReadAll(resp.Body)
@@ -177,7 +177,8 @@ func (c *Client) readNonStream(resp *http.Response, ch chan<- pluginapi.ChatChun
 			Message struct {
 				Content string `json:"content"`
 				// What a reasoning model thought first (#701).
-				Reasoning string `json:"reasoning_content"`
+				Reasoning string     `json:"reasoning_content"`
+				ToolCalls []toolCall `json:"tool_calls"`
 			} `json:"message"`
 			FinishReason string `json:"finish_reason"`
 		} `json:"choices"`
@@ -197,6 +198,9 @@ func (c *Client) readNonStream(resp *http.Response, ch chan<- pluginapi.ChatChun
 		if thought != "" {
 			ch <- pluginapi.ChatChunk{Reasoning: thought}
 		}
+		if calls := out.Choices[0].Message.ToolCalls; callText != nil && len(calls) > 0 && strings.TrimSpace(content) == "" {
+			content = callText(calls[0].Function.Name, calls[0].Function.Arguments)
+		}
 	}
 	metrics := mergeServerMetrics(out.Usage, out.Timings, started, time.Time{}, time.Now(), content)
 	metrics.FinishReason = finish
@@ -206,7 +210,7 @@ func (c *Client) readNonStream(resp *http.Response, ch chan<- pluginapi.ChatChun
 	ch <- pluginapi.ChatChunk{Content: content, Done: true, Metrics: metrics}
 }
 
-func (c *Client) readStream(resp *http.Response, ch chan<- pluginapi.ChatChunk, started time.Time, again func() (<-chan pluginapi.ChatChunk, error), noThinking bool) {
+func (c *Client) readStream(resp *http.Response, ch chan<- pluginapi.ChatChunk, started time.Time, again func() (<-chan pluginapi.ChatChunk, error), noThinking bool, callText func(name, arguments string) string) {
 	defer close(ch)
 	defer resp.Body.Close()
 	scanner := bufio.NewScanner(resp.Body)
@@ -224,11 +228,19 @@ func (c *Client) readStream(resp *http.Response, ch chan<- pluginapi.ChatChunk, 
 	// the thinking it skipped; it's held back until it's clear.
 	lead := &closedThink{done: !noThinking}
 
+	// The first tool call, streamed in pieces: its name, then its
+	// arguments (#1099).
+	var call toolCall
 	flushDone := func() {
 		if sentDone {
 			return
 		}
 		sentDone = true
+		if callText != nil && call.Function.Name != "" && strings.TrimSpace(content.String()) == "" {
+			text := callText(call.Function.Name, call.Function.Arguments)
+			content.WriteString(text)
+			ch <- pluginapi.ChatChunk{Content: text}
+		}
 		metrics := mergeServerMetrics(usage, timings, started, firstToken, time.Now(), content.String())
 		metrics.FinishReason, metrics.ReasoningTokens = finish, thoughtTokens
 		ch <- pluginapi.ChatChunk{Done: true, Metrics: metrics}
@@ -264,7 +276,8 @@ func (c *Client) readStream(resp *http.Response, ch chan<- pluginapi.ChatChunk, 
 				Delta struct {
 					Content string `json:"content"`
 					// What a reasoning model thinks first (#701).
-					Reasoning string `json:"reasoning_content"`
+					Reasoning string     `json:"reasoning_content"`
+					ToolCalls []toolCall `json:"tool_calls"`
 				} `json:"delta"`
 				FinishReason *string `json:"finish_reason"`
 			} `json:"choices"`
@@ -283,6 +296,12 @@ func (c *Client) readStream(resp *http.Response, ch chan<- pluginapi.ChatChunk, 
 		if len(chunk.Choices) == 0 {
 			// Some llama.cpp builds emit a final timings-only frame.
 			continue
+		}
+		for _, piece := range chunk.Choices[0].Delta.ToolCalls {
+			if piece.Index == 0 {
+				call.Function.Name += piece.Function.Name
+				call.Function.Arguments += piece.Function.Arguments
+			}
 		}
 		delta := chunk.Choices[0].Delta.Content
 		done := chunk.Choices[0].FinishReason != nil
@@ -319,6 +338,15 @@ func (c *Client) readStream(resp *http.Response, ch chan<- pluginapi.ChatChunk, 
 		return
 	}
 	flushDone()
+}
+
+// toolCall is one of a reply's tool_calls, or a streamed piece of one.
+type toolCall struct {
+	Index    int `json:"index"`
+	Function struct {
+		Name      string `json:"name"`
+		Arguments string `json:"arguments"`
+	} `json:"function"`
 }
 
 type usagePayload struct {

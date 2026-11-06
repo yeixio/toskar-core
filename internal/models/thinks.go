@@ -22,28 +22,34 @@ type thinksFile struct {
 	size   int64
 	mod    time.Time
 	thinks bool
+	// harmony is gpt-oss's chat format (#1099).
+	harmony bool
 }
 
 func (c *thinksCache) at(path string) bool {
+	return c.file(path).thinks
+}
+
+func (c *thinksCache) file(path string) thinksFile {
 	st, err := os.Stat(path)
 	if err != nil {
-		return false
+		return thinksFile{}
 	}
 	c.mu.Lock()
 	f, ok := c.files[path]
 	c.mu.Unlock()
 	if ok && f.size == st.Size() && f.mod.Equal(st.ModTime()) {
-		return f.thinks
+		return f
 	}
 	d, err := gguf.Inspect(path)
-	f = thinksFile{size: st.Size(), mod: st.ModTime(), thinks: err == nil && d.Thinks}
+	f = thinksFile{size: st.Size(), mod: st.ModTime(), thinks: err == nil && d.Thinks, harmony: err == nil && d.Harmony}
 	c.mu.Lock()
 	if c.files == nil {
 		c.files = map[string]thinksFile{}
 	}
 	c.files[path] = f
 	c.mu.Unlock()
-	return f.thinks
+	return f
 }
 
 // thinks reports a model that thinks before it answers: the catalog says
@@ -65,6 +71,14 @@ func (m *Manager) Thinks(ctx context.Context, modelID string) bool {
 	}
 	_, path, _ := m.storage.IsInstalled(ctx, modelID)
 	return m.thinks(e, path)
+}
+
+// NativeTools reports whether a model's tool calls come back only when the
+// request offers its tools natively: gpt-oss, whose harmony format puts a
+// call in a message llama.cpp drops otherwise (#1099).
+func (m *Manager) NativeTools(ctx context.Context, modelID string) bool {
+	_, path, _ := m.storage.IsInstalled(ctx, modelID)
+	return path != "" && m.thinkers.file(path).harmony
 }
 
 // ThinkingOff reports whether a call runs modelID without thinking: the
