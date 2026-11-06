@@ -388,27 +388,34 @@ aider --model openai/raw:%s
 `, t.model, t.base+"/v1", shellKey(t), t.model)
 }
 
-// continuePrint is Continue's config.yaml model entry.
+// continuePrint is Continue's config.yaml model entry. Continue edits files
+// and applies code blocks through /v1/completions unless the model says it
+// has none, and Toskar has none, so the entry says so (#1061).
 func continuePrint(t connectTarget) string {
-	key := t.key
+	key, keyNote := t.key, ""
 	if t.keyFromEnv {
-		key = "<your TOSKAR_API_KEY>"
+		key = "${{ secrets.TOSKAR_API_KEY }}"
+		keyNote = "\n# Put TOSKAR_API_KEY=<your key> in ~/.continue/.env, where Continue keeps secrets."
 	}
 	return fmt.Sprintf(`# Continue with %[1]s on Toskar, through Chat Completions.
-# Add under models: in ~/.continue/config.yaml.
+# Add under models: in ~/.continue/config.yaml. A new file starts with
+# name: Toskar, version: 1.0.0, and schema: v1.%[4]s
 models:
   - name: %[1]s on Toskar
     provider: openai
     model: raw:%[1]s
     apiBase: %[2]s/v1
     apiKey: %[3]s
+    # Toskar has no /v1/completions, so edits and Apply go through chat.
+    env:
+      useLegacyCompletionsEndpoint: false
     roles:
       - chat
       - edit
       - apply
     capabilities:
       - tool_use
-`, t.model, t.base, key)
+`, t.model, t.base, key, keyNote)
 }
 
 // compatibleSteps are the steps for an editor agent whose settings screen

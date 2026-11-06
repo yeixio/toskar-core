@@ -2740,7 +2740,7 @@
         {
           "type": "note",
           "tone": "tip",
-          "text": "For an editor's own AI features, such as Continue, Cline, Zed, or Copilot Chat, `toskarctl connect continue` and the like print what to enter in its settings. In VS Code, the Toskar extension sets this up for you ([Use Toskar in VS Code](#vscode))."
+          "text": "For an editor's own AI features, such as Continue, Cline, Zed, or Copilot Chat, `toskarctl connect continue` and the like print what to enter in its settings. For Continue, a [step-by-step guide](https://github.com/yeixio/toskar-core/blob/main/docs/integrations/continue.md) covers it. In VS Code, the Toskar extension sets this up for you ([Use Toskar in VS Code](#vscode))."
         },
         {
           "type": "heading",

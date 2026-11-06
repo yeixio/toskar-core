@@ -150,13 +150,13 @@ Editors' agents and AI features take an OpenAI-compatible endpoint, so their mod
 
 | Editor | What it prints |
 | --- | --- |
-| `continue` | A `models:` entry for `~/.continue/config.yaml`: `provider: openai`, `apiBase`, `apiKey`, chat, edit, and apply roles, and `tool_use` |
+| `continue` | A `models:` entry for `~/.continue/config.yaml`: `provider: openai`, `apiBase`, `apiKey` (from `~/.continue/.env` when `TOSKAR_API_KEY` is set), chat, edit, and apply roles, `tool_use`, and `useLegacyCompletionsEndpoint: false`, since Continue edits through `/v1/completions` otherwise. Checked in VS Code: [Continue guide](integrations/continue.md) |
 | `cline`, `roo-code` | The "OpenAI Compatible" provider's base URL, API key, model ID, and context window |
 | `zed` | A `language_models.openai_compatible` provider for `settings.json`, whose model's `max_tokens` is the window it runs with on Toskar |
 | `jetbrains` | AI Assistant's third-party "OpenAI-compatible" provider: URL, key, and model |
 | `copilot` | Copilot Chat's own-model option: "Chat: Manage Language Models", "OpenAI Compatible", base URL, and key. Copilot lists the models from `/v1/models`, which shows `raw:` models to a key that may use them |
 
-The editors' settings follow their docs as of November 2026, but they weren't checked in a running editor, as Claude Code and Codex were.
+The editors' settings follow their docs as of November 2026. Continue's were checked in VS Code ([guide](integrations/continue.md)); the others weren't checked in a running editor, as Claude Code and Codex were.
 
 - **The model:** `--model`, or the best installed one for an agent: one that calls tools, then one made for code, then one that fits Excellent or Good, then the largest.
 - **The key:** on this computer none is needed, so agents get the stand-in `toskar-local`. For another computer, set `TOSKAR_URL` and `TOSKAR_API_KEY` to a key with raw access ("Drive models directly, for coding agents" in API Access). Printed settings name the variable instead of showing the key.

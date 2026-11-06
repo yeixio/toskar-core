@@ -71,6 +71,12 @@ Toskar is not a gateway to OpenAI or Anthropic. It speaks the same API formats t
 
 Details and limits are in [docs/api.md](docs/api.md) and [docs/mcp.md](docs/mcp.md).
 
+Step-by-step guides, each run for real against a released Toskar:
+
+| Tool | Guide |
+| --- | --- |
+| Continue (VS Code) | [docs/integrations/continue.md](docs/integrations/continue.md) |
+
 ## Quick start
 
 On Linux or macOS, one line installs it and starts it as a service:
