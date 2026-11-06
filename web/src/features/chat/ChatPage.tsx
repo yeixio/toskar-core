@@ -505,6 +505,13 @@ export function ChatPage() {
   }, [conversationsQuery.data, hiddenIds])
   const selectedConversation =
     conversations.find((c) => c.id === selectedId) ?? null
+  // Each computer's fit, for the model a chat's folder work goes better with.
+  const modelsFitQuery = useQuery({
+    queryKey: ['models-fit'],
+    queryFn: () => api.getModelsFit(),
+    retry: false,
+    enabled: admin && !!selectedConversation?.project,
+  })
   // Embedding, reranker, and classifier models help Yggdrasil but cannot chat.
   const installedModels = (modelsQuery.data ?? []).filter(
     (m) => (m.installed || (m.installed_on?.length ?? 0) > 0) && canChat(m),
@@ -2498,7 +2505,7 @@ export function ChatPage() {
                   {t('task.workingIn', { path: selectedConversation.project })}
                 </p>
               ) : null}
-              {admin && selectedConversation?.project && modelsQuery.data ? <TaskModelHint models={modelsQuery.data} /> : null}
+              {admin && selectedConversation?.project && modelsQuery.data ? <TaskModelHint models={modelsQuery.data} fits={modelsFitQuery.data} /> : null}
               {composer}
               {showLanding ? suggestions : null}
               {!selectedId && capabilityNotice ? (
