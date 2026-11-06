@@ -953,6 +953,206 @@
         "Choose the file, folder, or database, paste the content, or enter the URL.",
         "Under Use it in chats with, keep the profiles whose chats should look in it. The profile chats start with is checked already. Then Connect.",
         "Use Try a question to check what it finds. To add a source to a profile later, use Use with on the Knowledge page or open Profiles; to add it to a specialized AI, use the Train page."
+      ],
+      "kind": "task",
+      "summary": "Give Toskar your own files and data, such as price lists, policies, notes, a database, or a web API, so its answers use them and show where they came from.",
+      "blocks": [
+        {
+          "type": "list",
+          "title": "What you need",
+          "items": [
+            "An Admin account to connect or change sources. Everyone can ask questions that use them ([People](#people)).",
+            "The files on the computer Toskar runs on, or a database or web address that computer can reach.",
+            "Optional: an embedding model, so search matches meaning and not only words ([Models](#models))."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Connect a file or folder"
+        },
+        {
+          "type": "steps",
+          "items": [
+            "Open Knowledge.",
+            "Under Connect knowledge, choose File or folder, and enter its path on this computer. Upload or paste keeps a copy of what you give it instead.",
+            "Under Use it in chats with, keep the profiles whose chats should look in it. The profile chats start with is checked already.",
+            "Choose Connect. The source shows how many passages it has, and when it was read."
+          ]
+        },
+        {
+          "type": "image",
+          "screen": "knowledge",
+          "alt": "The Knowledge page listing Trail notes, Returns policy.pdf, Household budget.xlsx, and Shop orders, each with Reindex, This computer only, and Disconnect, beside the Connect knowledge form",
+          "caption": "Each source says how many passages it has and which profiles' chats use it. Shop orders isn't used by any profile yet, so it offers Use with General."
+        },
+        {
+          "type": "paragraph",
+          "text": "PDF, Excel, CSV, TSV, JSON, JSONL, Markdown, text, and HTML files work. Each Excel sheet is a table, and each PDF page is cited by its number. A scanned PDF is read with text recognition, which installs itself the first time, about 110 MB."
+        },
+        {
+          "type": "heading",
+          "text": "See it in an answer"
+        },
+        {
+          "type": "paragraph",
+          "text": "A chat looks in a source only when its profile uses it. The passages that match each question go into the answer, and the answer lists them under Sources."
+        },
+        {
+          "type": "image",
+          "screen": "chat",
+          "alt": "A chat answer planning a trail loop, with Trail notes and Memory listed under Sources",
+          "caption": "Sources names the knowledge, and the memories, an answer used."
+        },
+        {
+          "type": "paragraph",
+          "text": "Try a question, at the bottom of the Knowledge page, shows which passages a question would bring into a chat, without asking a model."
+        },
+        {
+          "type": "heading",
+          "text": "Connect a database"
+        },
+        {
+          "type": "steps",
+          "items": [
+            "Under Connect knowledge, choose Database.",
+            "Choose SQLite file and enter the file's path, or choose PostgreSQL or MySQL and enter the connection string.",
+            "Enter one SELECT query. Each row it returns becomes a passage.",
+            "Choose how often to fetch it again, from 5 minutes to a day, then Connect."
+          ]
+        },
+        {
+          "type": "image",
+          "screen": "knowledge-database",
+          "alt": "The Connect knowledge form on its Database tab, with SQLite file chosen, a file path, a SELECT query, and Fetch again when older than 1 hour",
+          "caption": "The query runs read-only, so Toskar never changes the database."
+        },
+        {
+          "type": "note",
+          "tone": "tip",
+          "text": "Give Toskar a database account that can only read, and a query that returns only what answers need. Passwords are stored apart from Toskar's database and never shown again."
+        },
+        {
+          "type": "heading",
+          "text": "Connect a web API"
+        },
+        {
+          "type": "paragraph",
+          "text": "A web API source fetches an address that returns JSON, CSV, or text, such as a product catalog or a status page. A list of items becomes one passage per item. If the list is inside the response, give its path, such as `data.products`. Headers, such as one with a key, are stored apart and never shown again."
+        },
+        {
+          "type": "paragraph",
+          "text": "You can connect one through the API too. Here's one built from Toskar's own list of models, so you can try it on any computer:"
+        },
+        {
+          "type": "code",
+          "language": "sh",
+          "test": "knowledge-api-add",
+          "code": "curl -s http://127.0.0.1:7331/api/v1/knowledge/sources \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"kind\": \"api\", \"name\": \"Models\", \"remote\": {\"url\": \"http://127.0.0.1:7331/v1/models\", \"items\": \"data\", \"refresh_minutes\": 60}}'",
+          "output": "{…\"name\":\"Models\",\"kind\":\"api\",\"status\":\"ready\",\"chunk_count\":…}"
+        },
+        {
+          "type": "paragraph",
+          "text": "Then search it, as Try a question does:"
+        },
+        {
+          "type": "code",
+          "language": "sh",
+          "test": "knowledge-api-search",
+          "code": "curl -s http://127.0.0.1:7331/api/v1/knowledge/search \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"query\": \"research\"}'",
+          "output": "[{…\"source_name\":\"Models\"…\"body\":\"id: profile:research…\"…}]"
+        },
+        {
+          "type": "paragraph",
+          "text": "A source made this way is used by no profile until you add it, with Use with on the Knowledge page, or `profile_ids` when you make it."
+        },
+        {
+          "type": "heading",
+          "text": "Keep it fresh"
+        },
+        {
+          "type": "table",
+          "columns": [
+            "Source",
+            "When Toskar reads it again"
+          ],
+          "rows": [
+            [
+              "File or folder",
+              "When the files change, by itself"
+            ],
+            [
+              "Upload or paste",
+              "When you change it on the Knowledge page"
+            ],
+            [
+              "Database or web API",
+              "When a question uses data older than the interval you chose"
+            ],
+            [
+              "Any source",
+              "When you choose Reindex"
+            ]
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Changing the data changes the next answer, and nothing is retrained. The index stays on this computer until a source changes, is reindexed, or is disconnected. Disconnect removes the source and its passages, and leaves your files and database as they were."
+        },
+        {
+          "type": "paragraph",
+          "text": "This computer only keeps the chats that use a source on this computer, never on a paired one ([Computers](#computers))."
+        },
+        {
+          "type": "list",
+          "title": "Limits",
+          "items": [
+            "Without an embedding model, search matches the words in a question, not their meaning.",
+            "A database source runs one query, and a web API source one address. Make another source for more.",
+            "A passage is part of a file, so a question that needs a whole long document at once may miss parts of it."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Troubleshooting"
+        },
+        {
+          "type": "table",
+          "columns": [
+            "What you see",
+            "What to do"
+          ],
+          "rows": [
+            [
+              "\"No profile uses this yet, so Chat doesn't look in it\"",
+              "Choose Use with on the source, or add it in Profiles"
+            ],
+            [
+              "An answer doesn't use a source",
+              "Use Try a question to see what it finds, and check that the chat's profile uses the source"
+            ],
+            [
+              "A question about a guarantee doesn't find a passage about a warranty",
+              "Install an embedding model, such as Nomic Embed Text v1.5, so search matches meaning"
+            ],
+            [
+              "A database source won't connect",
+              "Check the path or connection string, and that the query is one SELECT"
+            ],
+            [
+              "The data in answers is out of date",
+              "Choose Reindex, or a shorter interval for a database or web API source"
+            ]
+          ]
+        },
+        {
+          "type": "related",
+          "sections": [
+            "profiles",
+            "train",
+            "chat",
+            "privacy"
+          ]
+        }
       ]
     },
     {

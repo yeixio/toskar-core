@@ -724,6 +724,25 @@
           ]
         }
       }
+    },
+    {
+      "id": "knowledge",
+      "path": "/knowledge",
+      "readyText": "Trail notes"
+    },
+    {
+      "id": "knowledge-database",
+      "path": "/knowledge",
+      "readyText": "Trail notes",
+      "actions": [
+        {
+          "click": "Database",
+          "exact": true
+        },
+        {
+          "wait": "File on this computer"
+        }
+      ]
     }
   ]
 }
