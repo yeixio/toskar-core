@@ -267,3 +267,19 @@ func TestQuestionAnswersAtItsLimit(t *testing.T) {
 		t.Fatalf("answered %q", answer)
 	}
 }
+
+// A follow-up that goes on with the work, such as "go ahead and make that
+// fix", is offered the task's tools, writing files included (#1111).
+func TestGoingOnIsATask(t *testing.T) {
+	profile := taskProfile()
+	profile.Tools = append(profile.Tools, contracts.ToolPolicy{ToolID: "filesystem.write", Policy: "ask"})
+	env, _, _ := runTask(t, "terminal", "Go ahead and make that fix in tally.go.", profile, "Done.")
+	if !strings.Contains(env.systems["assistant"], "filesystem.write") {
+		t.Fatal("the follow-up wasn't offered filesystem.write")
+	}
+	// A question in the same place still gets only what it needs.
+	env, _, _ = runTask(t, "terminal", "What does Sum do?", profile, "It adds the numbers.")
+	if strings.Contains(env.systems["assistant"], "filesystem.write") {
+		t.Fatal("a question was offered filesystem.write")
+	}
+}

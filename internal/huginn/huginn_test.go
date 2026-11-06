@@ -418,4 +418,19 @@ func TestIsTask(t *testing.T) {
 			t.Errorf("%q is a task", msg)
 		}
 	}
+	// Going on with work asked for before stays a task (#1111); a question
+	// in the same chat stays a question.
+	for _, msg := range []string{"Go ahead and make that fix in tally.go.", "go ahead", "Yes, do it", "OK, make the change", "Please continue", "try again", "Great, apply it"} {
+		if !IsTask(Classify(msg), msg, "web", "/p") {
+			t.Errorf("%q in a chat with a folder should go on as a task", msg)
+		}
+		if IsTask(Classify(msg), msg, "web", "") {
+			t.Errorf("%q is a task in a chat with no folder", msg)
+		}
+	}
+	for _, msg := range []string{"What does Sum do?", "Why does the test fail?", "Is this the right approach?", "Yesterday's build was fine, why not today?"} {
+		if IsTask(Classify(msg), msg, "web", "/p") {
+			t.Errorf("%q is a question, not a task", msg)
+		}
+	}
 }
