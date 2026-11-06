@@ -679,6 +679,16 @@
           "scroll": "Reusing the chat so far"
         }
       ]
+    },
+    {
+      "id": "api-access",
+      "path": "/api-access",
+      "readyText": "Notes app",
+      "actions": [
+        {
+          "scroll": "Credentials for apps and devices that talk to Toskar."
+        }
+      ]
     }
   ]
 }
