@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/yeixio/toskar-core/internal/turnopts"
 )
 
 func TestStatusAndDiff(t *testing.T) {
@@ -92,5 +94,34 @@ func gitCmd(t *testing.T, dir string, args ...string) {
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		t.Fatalf("git %v: %v\n%s", args, err, out)
+	}
+}
+
+// In a turn with a folder, Git runs there, as the file tools and the
+// terminal do, not in the tool's own workspace (#1110).
+func TestGitRunsInTheTurnsFolder(t *testing.T) {
+	if _, err := exec.LookPath("git"); err != nil {
+		t.Skip("git is not installed")
+	}
+	workspace, project := t.TempDir(), t.TempDir()
+	for dir, file := range map[string]string{workspace: "workspace.txt", project: "project.txt"} {
+		gitCmd(t, dir, "init")
+		if err := os.WriteFile(filepath.Join(dir, file), []byte("x\n"), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	status, err := NewStatus(workspace).Execute(turnopts.WithProject(context.Background(), project), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if out := status["output"].(string); !strings.Contains(out, "project.txt") || strings.Contains(out, "workspace.txt") {
+		t.Fatalf("status in the turn's folder = %q", out)
+	}
+	status, err = NewStatus(workspace).Execute(context.Background(), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if out := status["output"].(string); !strings.Contains(out, "workspace.txt") {
+		t.Fatalf("status with no folder = %q", out)
 	}
 }

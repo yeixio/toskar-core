@@ -474,7 +474,12 @@ func (t *turnTrace) tool(toolID string, args, result map[string]any) {
 		}
 	default:
 		if strings.HasPrefix(toolID, "git.") {
-			t.untrusted = true
+			// Git in the project the turn works in counts as reading its
+			// files does: "always" trusts the project (#1110). Anywhere
+			// else, such as Toskar's own workspace, it's outside content.
+			if !turnopts.TrustsFilesIn(t.project) {
+				t.untrusted = true
+			}
 			t.step("git", "git", map[string]any{"action": strings.TrimPrefix(toolID, "git.")})
 			return
 		}
