@@ -675,7 +675,7 @@
         },
         {
           "type": "paragraph",
-          "text": "`toskarctl ask` asks a question from a terminal and prints the answer."
+          "text": "`toskarctl ask` asks a question from a terminal and prints the answer. For a whole conversation in the terminal, see [Use Toskar in the terminal](#terminal)."
         },
         {
           "type": "code",
@@ -1865,6 +1865,255 @@
             "api",
             "computers",
             "models"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "terminal",
+      "title": "Use Toskar in the terminal",
+      "paragraphs": [
+        "`toskarctl chat` holds a conversation with Toskar in any terminal, on this computer or over SSH. It's one of your chats, so it shows in History in the apps, and a chat begun on your phone continues here.",
+        "Asked to do something in a folder, such as fixing a failing test, it works step by step and asks before it changes anything. `toskarctl connect` points a coding agent, such as Claude Code or Codex, at a model on Toskar."
+      ],
+      "kind": "task",
+      "summary": "Chat with Toskar in a terminal, hand it files and command output, have it work in a folder, and point a coding agent at its models.",
+      "blocks": [
+        {
+          "type": "list",
+          "title": "What you need",
+          "items": [
+            "Toskar on this computer. If it isn't running, `toskarctl chat` starts it, and if it isn't installed, it offers to install it ([Install Toskar](#install)).",
+            "A model. When there's none, `chat` names the one that suits this computer, with its size, and installs it if you say yes ([Models](#models)).",
+            "For Toskar on another computer: its address and an API key ([The API](#api))."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Chat"
+        },
+        {
+          "type": "steps",
+          "items": [
+            "Open a terminal.",
+            "Run `toskarctl chat`.",
+            "Type a message and press Return. The answer shows as it's written, and ends with its speed.",
+            "Type `/exit` or press Ctrl-D to leave. The chat stays in History."
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "With a message after `chat`, it answers that and leaves, then prints the command that continues the chat:"
+        },
+        {
+          "type": "code",
+          "language": "sh",
+          "test": "terminal-chat",
+          "code": "toskarctl chat \"Plan a three-day trip to Juneau\"",
+          "output": "…Juneau…\nContinue this chat: toskarctl chat --resume …"
+        },
+        {
+          "type": "table",
+          "columns": [
+            "While chatting",
+            "What it does"
+          ],
+          "rows": [
+            [
+              "`/new`",
+              "Starts a new chat"
+            ],
+            [
+              "`/model id`",
+              "Changes the model for the next message, or `auto` to let Toskar choose"
+            ],
+            [
+              "`/profile id`",
+              "Answers as another profile ([Profiles](#profiles))"
+            ],
+            [
+              "`/attach path`",
+              "Sends a file as data with the next message"
+            ],
+            [
+              "`/log`",
+              "Shows what ran in this chat, its result, and who allowed it"
+            ],
+            [
+              "`/help`",
+              "Lists these"
+            ],
+            [
+              "`/exit` or Ctrl-D",
+              "Leaves"
+            ]
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "`toskarctl chat --resume` lists your 10 most recent chats to pick from, including ones from the apps. `--resume` with a chat's id continues that one. `--model` and `--profile` choose who answers from the start."
+        },
+        {
+          "type": "heading",
+          "text": "Hand it a file or a command's output"
+        },
+        {
+          "type": "paragraph",
+          "text": "`--file` sends a file as data with the first message. Toskar sends it as something to work on, and tells the model to follow your message, not instructions inside the file."
+        },
+        {
+          "type": "code",
+          "language": "sh",
+          "test": "terminal-file",
+          "code": "printf 'Buy milk\\nCall the dentist\\n' > notes.md\ntoskarctl chat --file notes.md \"Turn these into a to-do list\"",
+          "output": "…\nContinue this chat: toskarctl chat --resume …"
+        },
+        {
+          "type": "paragraph",
+          "text": "Pipe a command's output into `chat` to ask about it. It answers once, with what you piped as the data:"
+        },
+        {
+          "type": "code",
+          "language": "sh",
+          "test": "terminal-pipe",
+          "code": "printf 'FAIL: TestSum: got 7, want 9\\n' | toskarctl chat \"Why did this fail?\"",
+          "output": "…\nContinue this chat: toskarctl chat --resume …"
+        },
+        {
+          "type": "heading",
+          "text": "Have it work in a folder"
+        },
+        {
+          "type": "paragraph",
+          "text": "`chat` works in the folder you start it in, on the computer Toskar runs on. Commands run there, and its file tools reach only that folder. It follows the project's notes in `AGENTS.md`, `TOSKAR.md`, or `CLAUDE.md`, the first one it finds."
+        },
+        {
+          "type": "paragraph",
+          "text": "Ask it to do something rather than ask a question, such as \"Fix the failing test\" or \"Set up this project\", and it works step by step. It runs something, reads the result, fixes what failed, and tries again. It stops when it's finished, when the same step keeps giving the same result, or after 100 steps. Then it says what it did and what's left."
+        },
+        {
+          "type": "list",
+          "title": "What asks first",
+          "items": [
+            "Reading inside the project, and running known tests and builds such as `go test` or `npm test`, don't ask.",
+            "Changes ask: writing a file, `git commit`, installs, `make`, and `npm run`, which run whatever the project says.",
+            "When it asks, it shows the exact command. Type `y` to run it once, `n` to say no, or `a` to let that tool run for the rest of this chat.",
+            "A command that can't be undone, such as `rm`, `sudo`, or `git push --force`, asks every time, and `a` isn't offered for it."
+          ]
+        },
+        {
+          "type": "note",
+          "tone": "warning",
+          "text": "Tests and builds run the project's own code. Don't start a task in a project you don't trust, and choose `a` only for one you do."
+        },
+        {
+          "type": "paragraph",
+          "text": "Toskar keeps its own record of which checks ran and how they ended. When the last test failed, or a change came after it, the model goes back once to deal with it. Anything still in doubt shows under the answer as \"Toskar noticed\". The model matters most here: small models often can't finish a task, and `chat` says which model would do better."
+        },
+        {
+          "type": "heading",
+          "text": "Use Toskar on another computer"
+        },
+        {
+          "type": "paragraph",
+          "text": "Set `TOSKAR_URL` to the other computer's address and `TOSKAR_API_KEY` to an API key, then run `toskarctl chat` as usual. This works over SSH too, with no screen needed. Commands and files are then on the Toskar computer, not this one, and an approval says which computer a command runs on."
+        },
+        {
+          "type": "heading",
+          "text": "Connect a coding agent"
+        },
+        {
+          "type": "paragraph",
+          "text": "A coding agent such as Claude Code or Codex can use a model on Toskar directly, with the agent's own tools. `toskarctl connect` prints the settings it needs: the address, a key, and the model. Add `--write` to save them where the agent reads them, without changing its other settings."
+        },
+        {
+          "type": "code",
+          "language": "sh",
+          "test": "terminal-connect-claude-code",
+          "code": "toskarctl connect claude-code",
+          "output": "# Claude Code with … on Toskar, through Anthropic's Messages format.\n# Set these, then run claude; or write them for this folder: toskarctl connect claude-code --write\nexport ANTHROPIC_BASE_URL=http://127.0.0.1:…\nexport ANTHROPIC_AUTH_TOKEN=toskar-local\nexport ANTHROPIC_MODEL=…\nexport ANTHROPIC_DEFAULT_OPUS_MODEL=…\nexport ANTHROPIC_DEFAULT_SONNET_MODEL=…\nexport ANTHROPIC_DEFAULT_HAIKU_MODEL=…"
+        },
+        {
+          "type": "code",
+          "language": "sh",
+          "test": "terminal-connect-codex",
+          "code": "toskarctl connect codex",
+          "output": "# Codex CLI with … on Toskar, through OpenAI's Responses format.\n…\n[model_providers.toskar]\n…\nwire_api = \"responses\"\n…\nmodel_provider = \"toskar\""
+        },
+        {
+          "type": "table",
+          "columns": [
+            "Agent",
+            "What --write saves"
+          ],
+          "rows": [
+            [
+              "`claude-code`",
+              "`.claude/settings.local.json` in this folder, which Claude Code keeps out of Git"
+            ],
+            [
+              "`codex`",
+              "A `toskar` provider in `~/.codex/config.toml`, and a `toskar` profile beside it. Run `codex --profile toskar`, and your default stays as it was"
+            ],
+            [
+              "`opencode`",
+              "A `toskar` provider in `opencode.json` in this folder"
+            ],
+            [
+              "`aider`",
+              "Nothing: put the printed lines in your shell profile"
+            ]
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Without `--model`, `connect` picks the best installed model for an agent: one that calls tools, then one made for code, then one that fits this computer well. On this computer no key is needed, so agents get the stand-in `toskar-local`. For another computer, the key needs raw access, \"Drive models directly, for coding agents\" in API Access."
+        },
+        {
+          "type": "note",
+          "tone": "tip",
+          "text": "For an editor's own AI features, such as Continue, Cline, Zed, or Copilot Chat, `toskarctl connect continue` and the like print what to enter in its settings. In VS Code, the Toskar extension sets this up for you ([Use Toskar in VS Code](#vscode))."
+        },
+        {
+          "type": "heading",
+          "text": "Troubleshooting"
+        },
+        {
+          "type": "table",
+          "columns": [
+            "What you see",
+            "What to do"
+          ],
+          "rows": [
+            [
+              "\"Toskar has no model yet\"",
+              "Say yes to the model `chat` suggests, or install one in Models"
+            ],
+            [
+              "\"Starting its service here needs an administrator\"",
+              "Run the command it gives, such as `sudo systemctl start toskar`, then try again"
+            ],
+            [
+              "A tool that asks first doesn't run when you pipe into `chat`",
+              "Nobody can answer the question then. Run `chat` without a pipe to approve it"
+            ],
+            [
+              "`toskarctl` can't reach Toskar on another computer",
+              "Check `TOSKAR_URL` and `TOSKAR_API_KEY`, or unset them to use Toskar on this computer"
+            ],
+            [
+              "A task stops without finishing",
+              "Read what it says is left, and try a larger model with `/model`"
+            ]
+          ]
+        },
+        {
+          "type": "related",
+          "sections": [
+            "chat",
+            "vscode",
+            "api",
+            "server"
           ]
         }
       ]
