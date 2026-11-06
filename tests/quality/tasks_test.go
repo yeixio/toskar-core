@@ -73,27 +73,43 @@ func unchanged(dir, name, want string) bool {
 }
 
 // proposed copies the project and applies the files the turn asked to write
-// there, in order, as they would have been on a yes. Paths outside the
-// project are left out.
+// there, in order, as they would have been on a yes. A plain `cp a b` in the
+// terminal counts too, since copying a file is as good a way to write it.
+// Paths outside the project are left out.
 func proposed(t *testing.T, r Result) string {
 	t.Helper()
 	dir := filepath.Join(t.TempDir(), "proposed")
 	if err := os.CopyFS(dir, os.DirFS(r.Project)); err != nil {
 		t.Fatal(err)
 	}
+	inside := func(name string) (string, bool) {
+		path := filepath.Join(dir, filepath.FromSlash(strings.TrimPrefix(name, r.Project+"/")))
+		rel, err := filepath.Rel(dir, path)
+		return path, err == nil && !strings.HasPrefix(rel, "..")
+	}
 	for _, e := range r.Events {
-		if e.Type != "tool.requested" || e.Payload["tool_id"] != "filesystem.write" {
+		if e.Type != "tool.requested" {
 			continue
 		}
 		args, _ := e.Payload["args"].(map[string]any)
-		name, _ := args["path"].(string)
-		content, _ := args["content"].(string)
-		path := filepath.Join(dir, filepath.FromSlash(strings.TrimPrefix(name, r.Project+"/")))
-		if rel, err := filepath.Rel(dir, path); err != nil || strings.HasPrefix(rel, "..") {
-			continue
+		switch e.Payload["tool_id"] {
+		case "filesystem.write":
+			name, _ := args["path"].(string)
+			content, _ := args["content"].(string)
+			if path, ok := inside(name); ok {
+				_ = os.MkdirAll(filepath.Dir(path), 0o755)
+				_ = os.WriteFile(path, []byte(content), 0o644)
+			}
+		case "terminal":
+			command, _ := args["command"].(string)
+			if f := strings.Fields(command); len(f) == 3 && f[0] == "cp" && !strings.ContainsAny(command, ";&|<>$`*") {
+				from, ok1 := inside(f[1])
+				to, ok2 := inside(f[2])
+				if b, err := os.ReadFile(from); ok1 && ok2 && err == nil {
+					_ = os.WriteFile(to, b, 0o644)
+				}
+			}
 		}
-		_ = os.MkdirAll(filepath.Dir(path), 0o755)
-		_ = os.WriteFile(path, []byte(content), 0o644)
 	}
 	return dir
 }
@@ -126,12 +142,12 @@ func TestGreeting(t *testing.T) {
 		t.Fatal("config.json is missing: copy config.example.json to config.json")
 	}
 	var config struct {
-		Name string ` + "`json:\"name\"`" + `
+		Greeting string ` + "`json:\"greeting\"`" + `
 	}
-	if err := json.Unmarshal(raw, &config); err != nil || config.Name == "" || config.Name == "YOUR NAME" {
-		t.Fatal("put your name in config.json")
+	if err := json.Unmarshal(raw, &config); err != nil || config.Greeting == "" {
+		t.Fatal("config.json needs a greeting, as in config.example.json")
 	}
-	if got := Greeting(config.Name); got != "Hello, "+config.Name+"!" {
+	if got := Greeting(config.Greeting, "Sam"); got != config.Greeting+", Sam!" {
 		t.Fatalf("Greeting = %q", got)
 	}
 }
@@ -139,10 +155,10 @@ func TestGreeting(t *testing.T) {
 
 var greeterProject = map[string]string{
 	"go.mod":              "module example.com/greeter\n\ngo 1.22\n",
-	"greeter.go":          "package greeter\n\n// Greeting greets someone by name.\nfunc Greeting(name string) string {\n\treturn \"Hello, \" + name + \"!\"\n}\n",
+	"greeter.go":          "package greeter\n\n// Greeting greets someone by name.\nfunc Greeting(greeting, name string) string {\n\treturn greeting + \", \" + name + \"!\"\n}\n",
 	"greeter_test.go":     greeterTest,
-	"config.example.json": "{\"name\": \"YOUR NAME\"}\n",
-	"README.md":           "# Greeter\n\nTo set up: copy config.example.json to config.json, and put your name in it. Then `go test ./...` passes.\n",
+	"config.example.json": "{\"greeting\": \"Hello\"}\n",
+	"README.md":           "# Greeter\n\nTo set up: copy config.example.json to config.json. Then `go test ./...` passes.\n",
 }
 
 // fullProject is a folder whose space goes to a build cache that's safe to
@@ -214,8 +230,8 @@ func longTasks() []longTask {
 			Stub: []string{
 				toolCall("filesystem.read", map[string]any{"path": "README.md"}),
 				toolCall("filesystem.read", map[string]any{"path": "config.example.json"}),
-				toolCall("filesystem.write", map[string]any{"path": "config.json", "content": "{\"name\": \"Sam\"}\n"}),
-				"To set it up, I asked to make config.json with a name, as the README says. With it, go test ./... passes.",
+				toolCall("terminal", map[string]any{"command": "cp config.example.json config.json"}),
+				"To set it up, I asked to copy config.example.json to config.json, as the README says. With it, go test ./... passes.",
 			},
 			Done: func(r Result, dir string) (bool, string) {
 				if !unchanged(dir, "greeter_test.go", greeterTest) {
@@ -253,6 +269,14 @@ func TestLongTasks(t *testing.T) {
 		}
 		t.Run(task.ID, func(t *testing.T) {
 			r := d.Run(t, c)
+			// What it asked to do, all answered no, so the log shows why a
+			// task wasn't done.
+			for _, e := range r.Events {
+				if e.Type == "tool.requested" {
+					args, _ := json.Marshal(e.Payload["args"])
+					t.Logf("asked: %v %.300s", e.Payload["tool_id"], args)
+				}
+			}
 			res := taskResult{ID: task.ID}
 			if r.Failed != "" {
 				res.Why = r.Failed
