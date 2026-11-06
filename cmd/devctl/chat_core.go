@@ -197,12 +197,22 @@ func startCore(d daemonClient, streams chatIO, h coreHost, wait time.Duration) e
 			return &exitError{code: 1, msg: "Toskar isn't running, and starting its service here needs an administrator. Run this, then try again: " + service.manual}
 		}
 	case h.find() == "":
-		if err := installCore(streams, h); err != nil {
-			return err
+		installErr := installCore(streams, h)
+		// The installer may put Toskar here and fail only to start it, as
+		// where there's no systemd (a container, or WSL without it): then
+		// chat starts it, as it would any Toskar that isn't running.
+		if installErr != nil && h.find() == "" {
+			return installErr
+		}
+		if installErr != nil {
+			fmt.Fprintln(streams.errOut, "Toskar is installed, but the installer couldn't start it. Starting it here...")
 		}
 		// The installer starts the service it registers.
 		if service := h.service(); service != nil {
 			stop = service.stop
+			if installErr != nil && (service.start == nil || service.start() != nil) {
+				return &exitError{code: 1, msg: "Toskar is installed, but its service didn't start. Run this, then try again: " + service.manual}
+			}
 		} else if path := h.find(); path != "" {
 			var err error
 			if died, err = h.spawn(path); err != nil {
