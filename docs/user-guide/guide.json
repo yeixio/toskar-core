@@ -1005,7 +1005,7 @@
         },
         {
           "type": "paragraph",
-          "text": "Try a question, at the bottom of the Knowledge page, shows which passages a question would bring into a chat, without asking a model."
+          "text": "Try a question, below your sources on the Knowledge page, shows which passages a question would bring into a chat, without asking a model."
         },
         {
           "type": "heading",
@@ -1096,7 +1096,7 @@
         },
         {
           "type": "paragraph",
-          "text": "Changing the data changes the next answer, and nothing is retrained. The index stays on this computer until a source changes, is reindexed, or is disconnected. Disconnect removes the source and its passages, and leaves your files and database as they were."
+          "text": "Changing the data changes the next answer, and nothing is retrained. The index stays on this computer until a source changes, is reindexed, or is disconnected. Disconnect asks first, then removes the source and its passages, and leaves your files and database as they were."
         },
         {
           "type": "paragraph",
@@ -1719,7 +1719,7 @@
           "items": [
             "Open Tools.",
             "Your tools lists every tool, built in or added. Search, or choose Built-in, Added, or Disabled to narrow the list.",
-            "Turn a tool off to keep it out of every chat, whatever a profile allows."
+            "Choose a tool to see its details, then Disable to keep it out of every chat, whatever a profile allows."
           ]
         },
         {
@@ -2089,8 +2089,8 @@
           "type": "steps",
           "items": [
             "Open API Access.",
-            "Under Service, copy the Endpoint. On this computer it's `http://127.0.0.1:7331/v1`.",
-            "Choose Test API to check that it answers."
+            "Under Service, copy the Endpoint. On this computer it's `http://localhost:7331/v1`.",
+            "Choose Test API. API service then says Running."
           ]
         },
         {
@@ -2151,17 +2151,32 @@
           ],
           "rows": [
             [
-              "Memories and connected knowledge",
-              "Never, on request, or always",
-              "A request uses them only when it asks, unless the key says always"
+              "Answers with",
+              "The profile each request names, or one profile",
+              "Pins the key to one profile, or lets each request choose"
+            ],
+            [
+              "Your memories",
+              "Never, When the request asks, or Always",
+              "A request uses them only when it asks, unless the key says Always"
+            ],
+            [
+              "Connected knowledge",
+              "Never, When the request asks, or Always",
+              "The same, for connected knowledge"
             ],
             [
               "Tools",
-              "The profile's, read-only, or none",
+              "What the profile allows, Read-only tools, or No tools",
               "What the assistant may do while it answers"
             ],
             [
-              "Where it runs",
+              "Reaches",
+              "Everything its person may, or Chat only, for CI jobs",
+              "Chat only answers through the OpenAI-compatible API, with no memories, knowledge, or tools"
+            ],
+            [
+              "May choose where requests run",
               "On or off",
               "Whether a request may choose which computer answers"
             ],
@@ -2171,6 +2186,10 @@
               "Whether the key may use `raw:` models, for agents that run their own tools"
             ]
           ]
+        },
+        {
+          "type": "paragraph",
+          "text": "A request can ask for less than its key allows, never more. Over the network these limits always apply. On this computer, which needs no key, they apply when an app sends this key."
         },
         {
           "type": "note",
@@ -2300,7 +2319,7 @@
           ],
           "rows": [
             [
-              "`UNAUTHORIZED`: \"This Toskar needs an API key\"",
+              "An app on another device gets `UNAUTHORIZED`: \"This Toskar needs an API key\"",
               "Send a key as `Authorization: Bearer` and the key, or check that it hasn't been revoked"
             ],
             [
