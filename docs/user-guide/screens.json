@@ -691,6 +691,41 @@
       ]
     },
     {
+      "id": "tools",
+      "path": "/tools",
+      "readyText": "Web Search"
+    },
+    {
+      "id": "chat-approval",
+      "path": "/chat",
+      "query": "c=conv-budget",
+      "readyText": "Allow once",
+      "api": {
+        "/api/v1/conversations/conv-budget/turn": {
+          "running": true,
+          "steps": [
+            {
+              "tool_id": "spreadsheet.analyze",
+              "summary": "budget.xlsx",
+              "status": "completed"
+            }
+          ],
+          "waiting": [
+            {
+              "request_id": "req-demo",
+              "tool_id": "filesystem.write",
+              "conversation_id": "conv-budget",
+              "reason": "Save the monthly totals so you can open them in your spreadsheet app.",
+              "args": {
+                "path": "budget-by-month.csv",
+                "content": "Month,Spent\nAugust,2410\nSeptember,2655\nOctober,2898\n"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
       "id": "knowledge",
       "path": "/knowledge",
       "readyText": "Trail notes"
