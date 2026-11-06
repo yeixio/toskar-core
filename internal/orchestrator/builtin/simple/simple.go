@@ -313,6 +313,9 @@ func (o *Orchestrator) Run(
 		// a tool (#557).
 		retriedHandover := false
 		declined := false
+		// limited records that a question reached its tool calls and was
+		// asked to answer from what they found (#1101).
+		limited := false
 		// live shows the answer as it's written, when nothing that runs after
 		// the model makes showing it early wrong (#1006).
 		var live *liveAnswer
@@ -354,6 +357,11 @@ func (o *Orchestrator) Run(
 			if parsed.Call != nil {
 				parsed.Call.ID = tools.Canonical(parsed.Call.ID)
 			}
+			// Asked to answer from what it found, it still didn't.
+			if limited && (parsed.Call != nil || strings.TrimSpace(parsed.Text) == "") {
+				live.finish(ch, role, nodeID, "I stopped after "+fmt.Sprint(budget.MaxToolCalls)+" tool calls so this request would not loop.", metrics, usage)
+				return
+			}
 			// Told to stop and sum up, it called a tool anyway: say what ran.
 			if tracker.stopped != "" && (parsed.Call != nil || strings.TrimSpace(parsed.Text) == "") {
 				live.finish(ch, role, nodeID, tracker.report()+tracker.check.footer(ctx), metrics, usage)
@@ -380,9 +388,15 @@ func (o *Orchestrator) Run(
 						pluginapi.ChatMessage{Role: "user", Content: fmt.Sprintf(taskStopped, tracker.stopped)})
 					continue
 				}
+				// A question at its limit is answered from what the calls so
+				// far found, as a reading question that looked a file up
+				// before reading it was (#1101), rather than not at all.
 				if calls >= budget.MaxToolCalls {
-					live.finish(ch, role, nodeID, "I stopped after "+fmt.Sprint(budget.MaxToolCalls)+" tool calls so this request would not loop.", metrics, usage)
-					return
+					toolsOn, limited = false, true
+					messages[0] = pluginapi.ChatMessage{Role: "system", Content: plainSys}
+					messages = append(messages, pluginapi.ChatMessage{Role: "assistant", Content: content},
+						pluginapi.ChatMessage{Role: "user", Content: questionLimit})
+					continue
 				}
 				calls++
 				env.Emit(events.ToolParsed, map[string]any{

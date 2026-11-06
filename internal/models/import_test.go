@@ -253,3 +253,39 @@ func TestImportRecognizesCatalogModels(t *testing.T) {
 		t.Fatal("another architecture matched")
 	}
 }
+
+// A file whose chat template takes tools can call them (#1101): it's added
+// so, and one added before Core read it from the file is read from it now.
+func TestImportReadsToolSupport(t *testing.T) {
+	m, storage, dir := importManager(t)
+	ctx := context.Background()
+	takes := gguftest.Write(t, filepath.Join(dir, "a"), "model.gguf", gguftest.Options{Name: "Takes Tools", ChatTemplate: "{%- if tools %}{{- tools | tojson }}{%- endif %}"})
+	plain := gguftest.Write(t, filepath.Join(dir, "b"), "model.gguf", gguftest.Options{Name: "Plain", ChatTemplate: "{{- '<|im_start|>assistant' }}"})
+	a, err := m.ImportFile(ctx, ImportRequest{Path: takes, InPlace: true})
+	if err != nil {
+		t.Fatal(err)
+	}
+	b, err := m.ImportFile(ctx, ImportRequest{Path: plain, InPlace: true})
+	if err != nil {
+		t.Fatal(err)
+	}
+	waitInstalled(t, storage, a.ID)
+	waitInstalled(t, storage, b.ID)
+	if entry, _ := m.catalog.Get(a.ID); !entry.Capabilities.ToolCalling {
+		t.Error("a template that takes tools was added as unable to call them")
+	}
+	if entry, _ := m.catalog.Get(b.ID); entry.Capabilities.ToolCalling {
+		t.Error("a template without tools was added as able to call them")
+	}
+	// As stored by a Core from before #1101.
+	old, _ := m.catalog.Get(a.ID)
+	old.Capabilities.ToolCalling = false
+	m.catalog.Upsert(old)
+	if !m.TemplateTakesTools(ctx, a.ID) || m.TemplateTakesTools(ctx, b.ID) {
+		t.Errorf("from the file: %v, %v", m.TemplateTakesTools(ctx, a.ID), m.TemplateTakesTools(ctx, b.ID))
+	}
+	// A catalog model isn't second-guessed by its file.
+	if m.TemplateTakesTools(ctx, "qwen2.5-7b-q4") {
+		t.Error("a catalog model's capabilities come from the catalog")
+	}
+}

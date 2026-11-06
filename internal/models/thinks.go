@@ -24,6 +24,8 @@ type thinksFile struct {
 	thinks bool
 	// harmony is gpt-oss's chat format (#1099).
 	harmony bool
+	// tools is a chat template that takes tools (#1101).
+	tools bool
 }
 
 func (c *thinksCache) at(path string) bool {
@@ -42,7 +44,7 @@ func (c *thinksCache) file(path string) thinksFile {
 		return f
 	}
 	d, err := gguf.Inspect(path)
-	f = thinksFile{size: st.Size(), mod: st.ModTime(), thinks: err == nil && d.Thinks, harmony: err == nil && d.Harmony}
+	f = thinksFile{size: st.Size(), mod: st.ModTime(), thinks: err == nil && d.Thinks, harmony: err == nil && d.Harmony, tools: err == nil && d.Tools}
 	c.mu.Lock()
 	if c.files == nil {
 		c.files = map[string]thinksFile{}
@@ -79,6 +81,18 @@ func (m *Manager) Thinks(ctx context.Context, modelID string) bool {
 func (m *Manager) NativeTools(ctx context.Context, modelID string) bool {
 	_, path, _ := m.storage.IsInstalled(ctx, modelID)
 	return path != "" && m.thinkers.file(path).harmony
+}
+
+// TemplateTakesTools reports whether a model added from a file has a chat
+// template that takes tools, for one imported before Core read it from the
+// file (#1101): its stored capabilities say it can't call any.
+func (m *Manager) TemplateTakesTools(ctx context.Context, modelID string) bool {
+	e, ok := m.catalog.Get(modelID)
+	if !ok || !e.Dynamic {
+		return false
+	}
+	_, path, _ := m.storage.IsInstalled(ctx, modelID)
+	return path != "" && m.thinkers.file(path).tools
 }
 
 // ThinkingOff reports whether a call runs modelID without thinking: the

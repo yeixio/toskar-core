@@ -61,6 +61,7 @@ func TestInspectThinks(t *testing.T) {
 		{"DeepSeek R1 Distill Qwen 1.5B", "{{'<｜Assistant｜>'}}", true},
 		{"QwQ 32B", "", true},
 		{"Qwen2.5 32B Instruct", "{{- '<|im_start|>assistant\\n' }}", false},
+		{"Qwen2.5 7B Instruct", "{%- if tools %}{{- '<|im_start|>system' }}{%- endif %}", false},
 		{"Llama 3.2 1B Instruct", "{{- '<|start_header_id|>assistant<|end_header_id|>' }}", false},
 		{"Reasoning Helper 7B", "", false},
 	} {
@@ -71,6 +72,9 @@ func TestInspectThinks(t *testing.T) {
 		}
 		if d.Thinks != tc.want {
 			t.Errorf("%s: thinks = %v, want %v", tc.name, d.Thinks, tc.want)
+		}
+		if d.Tools != strings.Contains(tc.template, "tools") {
+			t.Errorf("%s: tools = %v", tc.name, d.Tools)
 		}
 		if d.Harmony != strings.Contains(tc.name, "gpt-oss") {
 			t.Errorf("%s: harmony = %v", tc.name, d.Harmony)
