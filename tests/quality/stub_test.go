@@ -19,6 +19,7 @@ import (
 	"github.com/yeixio/toskar-core/internal/imagegen"
 	"github.com/yeixio/toskar-core/internal/mimir"
 	"github.com/yeixio/toskar-core/internal/models"
+	"github.com/yeixio/toskar-core/internal/turnopts"
 	"github.com/yeixio/toskar-core/internal/webfixtures"
 	"github.com/yeixio/toskar-core/pkg/contracts"
 	"github.com/yeixio/toskar-core/pkg/pluginapi"
@@ -129,6 +130,10 @@ func (d stubDriver) Run(t *testing.T, c Case) Result {
 	webfixtures.Register(a.Tools, web)
 	webfixtures.RegisterMedia(a.Tools, a.Artifacts)
 	ctx := context.Background()
+	// A folder to work in, named as a terminal on this computer names one.
+	if len(c.Setup.Project) > 0 {
+		ctx = turnopts.WithProject(ctx, projectFolder(t, c.Setup.Project))
+	}
 	// A picture attached needs a model that sees: the stub, with a
 	// projector, so the picture is sent with the message (#510).
 	for _, f := range c.Attach {
