@@ -89,6 +89,8 @@ def main() -> int:
                 ("curl models", lambda: curl_models(runner)),
                 ("curl chat", lambda: curl_chat(runner, MESSAGE)),
                 ("curl chat with quotes and a newline", lambda: curl_chat(runner, 'Say "hi" \\ to\n\tJuneau')),
+                ("curl hardware", lambda: curl_hardware(runner)),
+                ("curl events", lambda: events(runner, core, ["sh", "curl/{}.sh"])),
                 ("ci github triage", lambda: ci_github_triage(runner, stubs, tmp)),
                 ("ci github log", lambda: ci_github_log(runner, stubs, tmp)),
                 ("ci gitlab log", lambda: ci_gitlab_log(runner, stubs, tmp)),
@@ -174,6 +176,12 @@ def fill(cmd: list[str], example: str) -> list[str]:
 def curl_models(run: Runner) -> None:
     out = run(["sh", "curl/models.sh"])
     expect('"auto"' in out and "profile:general-assistant" in out, "auto and the profiles are listed", out)
+
+
+def curl_hardware(run: Runner) -> None:
+    hardware = json.loads(run(["sh", "curl/hardware.sh"]))
+    expect(all(k in hardware for k in ("cpu", "memory", "disk", "accelerators")) and hardware["memory"]["total_bytes"] > 0,
+           "the CPU, memory, disk, and accelerators", json.dumps(hardware))
 
 
 def curl_chat(run: Runner, message: str) -> None:

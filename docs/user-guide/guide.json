@@ -2239,6 +2239,10 @@
           "output": "{\"version\":\"…\"…\"contract\":{\"version\":\"…\",\"major\":1}}"
         },
         {
+          "type": "paragraph",
+          "text": "More examples, each checked in CI, are in [the examples folder](https://github.com/yeixio/toskar-core/tree/main/examples): chat, the events stream, and pairing in each SDK, and curl scripts for the models, a chat, the events stream, and this computer's hardware."
+        },
+        {
           "type": "heading",
           "text": "Use it from a script"
         },
