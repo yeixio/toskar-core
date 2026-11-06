@@ -255,11 +255,22 @@ func (d realDriver) Run(t *testing.T, c Case) Result {
 		ID string `json:"id"`
 	}
 	d.do(t, http.MethodPost, "/api/v1/conversations", map[string]any{"title": "Quality " + c.ID, "profile_id": created.ID, "model_id": d.modelID()}, &conv)
+	// A folder to work in, as the web app gives a chat one: the daemon is
+	// on this computer, so it reaches the folder.
+	client := ""
+	if len(c.Setup.Project) > 0 {
+		d.do(t, http.MethodPatch, "/api/v1/conversations/"+conv.ID, map[string]any{"project": projectFolder(t, c.Setup.Project)}, nil)
+		client = "web"
+	}
 	chat := func(message string, attachments ...string) {
-		d.do(t, http.MethodPost, "/api/v1/chat", map[string]any{
+		body := map[string]any{
 			"conversation_id": conv.ID, "profile_id": created.ID, "model_id": d.modelID(), "message": message, "stream": false,
 			"attachments": attachments,
-		}, nil)
+		}
+		if client != "" {
+			body["client"] = client
+		}
+		d.do(t, http.MethodPost, "/api/v1/chat", body, nil)
 	}
 	// Attachments are uploaded as the apps upload them (#510).
 	var attached []string

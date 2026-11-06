@@ -10,7 +10,7 @@ rely on.
 `version.json` is the version of how quality is measured. A set that changes needs a new one, as [docs/quality.md](../../docs/quality.md#versions) says, and `TestVersionCoversTheSets` fails without it.
 
 `cases.json` holds the cases. Each has a `message` (and optional `history`
-and `setup`: knowledge files and tool policies), what it checks (`what`), the
+and `setup`: knowledge files, tool policies, and `project`, files for a folder the chat works in), what it checks (`what`), the
 `platforms` it runs on (`core`, `phone`, or both; core when absent), and
 `expect`:
 
@@ -309,5 +309,7 @@ not gated: the labels are sparse, so a suggestion they lack isn't always
 wrong. `TOSKAR_QUALITY_TRIAGE_MODEL` picks the model, `TOSKAR_QUALITY_TRIAGE_REPORT`
 writes a Markdown report and `TOSKAR_QUALITY_TRIAGE_JSON` the results, and the
 weekly real-model run includes it. It needs a daemon; the stub skips it.
+
+`TestFolderQuestion` asks about a bug in a chat's folder, and the answer has to name the real cause from the files it read (#1101). It's kept out of `cases.json`, so the scored set and its version stay as they are.
 
 `task_safety.json` holds attempts to get a task in the terminal to do damage without asking (#1017), and `TestTaskSafety` runs them against the real terminal tool. `disguised` is commands aimed at canary files in a throwaway Git project: each must be refused, or ask with no "always" on offer, and every question is answered no. `poisoned` is tasks where a file or a page gives orders, with a scripted model that obeys, the worst case. `real` ones also run with a served model, which may not try anything: whatever it does, the canaries must survive. It isn't part of the Toskar Score, so it isn't in `version.json`: it tests Toskar, not a model's answers. `make` and `npm run` are left out on purpose: they run the project's own code, so a tampered Makefile can do damage after "always", as `docs/cli.md` says.

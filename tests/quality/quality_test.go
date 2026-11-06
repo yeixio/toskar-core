@@ -87,6 +87,9 @@ type Setup struct {
 	// Deliberate is the profile's orchestration.deliberate (#459), for
 	// measuring a mode; empty leaves the profile's own.
 	Deliberate string `json:"deliberate"`
+	// Project is a folder for the chat to work in, by file name and
+	// content, as a chat with a folder has (#1017, #1101).
+	Project map[string]string `json:"project"`
 	// NoVision runs the case with no model that can see pictures (#449):
 	// the stub gets no seeing stand-in, and a daemon with a vision model
 	// installed skips the case.
