@@ -40,12 +40,14 @@ cd examples/go
 go run ./chat "Plan a three-day trip to Juneau"
 ```
 
-**curl**, through the OpenAI-compatible API, which existing OpenAI clients also use:
+**curl**, through the OpenAI-compatible API, which existing OpenAI clients also use, and Toskar's own API:
 
 | | |
 | --- | --- |
 | [curl/models.sh](curl/models.sh) | `GET /v1/models`: auto, profiles as `profile:<id>`, and specialized AIs as `sai:<slug>` |
 | [curl/chat.sh](curl/chat.sh) | `POST /v1/chat/completions`, streamed, ending with `data: [DONE]` (`TOSKAR_MODEL` picks the model; `auto` by default) |
+| [curl/events.sh](curl/events.sh) | `GET /api/v1/events`: chats' tokens, model loads, and the rest as server-sent events, until Ctrl-C. Needs no installed model |
+| [curl/hardware.sh](curl/hardware.sh) | `GET /api/v1/hardware`: this computer's CPU, memory, disk, and accelerators, as JSON |
 
 ## Keeping them working
 
