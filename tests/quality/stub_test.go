@@ -131,8 +131,10 @@ func (d stubDriver) Run(t *testing.T, c Case) Result {
 	webfixtures.RegisterMedia(a.Tools, a.Artifacts)
 	ctx := context.Background()
 	// A folder to work in, named as a terminal on this computer names one.
+	project := ""
 	if len(c.Setup.Project) > 0 {
-		ctx = turnopts.WithProject(ctx, projectFolder(t, c.Setup.Project))
+		project = projectFolder(t, c.Setup.Project)
+		ctx = turnopts.WithProject(ctx, project)
 	}
 	// A picture attached needs a model that sees: the stub, with a
 	// projector, so the picture is sent with the message (#510).
@@ -273,7 +275,7 @@ func (d stubDriver) Run(t *testing.T, c Case) Result {
 	<-done
 
 	mu.Lock()
-	r := Result{Answer: answer.String(), Prompts: prompts[followFrom:], Failed: turnFailed}
+	r := Result{Answer: answer.String(), Prompts: prompts[followFrom:], Failed: turnFailed, Project: project}
 	mu.Unlock()
 	evMu.Lock()
 	r.Events = got

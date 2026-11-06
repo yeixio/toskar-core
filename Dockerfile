@@ -32,7 +32,8 @@ EXPOSE 7331 7332
 ENTRYPOINT ["/usr/local/bin/toskar"]
 CMD ["--data-dir", "/data"]
 
-# The default image: last, so a plain docker build makes it.
+# The default image. The last stage below names it again, so a plain docker
+# build makes it.
 FROM debian:bookworm-slim AS runtime
 # libgomp1 and libcurl4 are for the llama.cpp release the daemon installs
 # when a model is first started.
@@ -54,3 +55,20 @@ ENV YGGDRASIL_API_HOST=0.0.0.0 \
 EXPOSE 7331 7332
 ENTRYPOINT ["/usr/local/bin/toskar"]
 CMD ["--data-dir", "/data"]
+
+# The quality run's images (#1017): the daemon's, with Go and Git, so its long
+# tasks can build and test the Go projects they're given. Not published.
+FROM runtime AS quality
+RUN apt-get update && apt-get install -y --no-install-recommends git \
+ && rm -rf /var/lib/apt/lists/*
+COPY --from=build /usr/local/go /usr/local/go
+ENV PATH=/usr/local/go/bin:$PATH GOTOOLCHAIN=local GOPROXY=off
+
+FROM gpu AS quality-gpu
+RUN apt-get update && apt-get install -y --no-install-recommends git \
+ && rm -rf /var/lib/apt/lists/*
+COPY --from=build /usr/local/go /usr/local/go
+ENV PATH=/usr/local/go/bin:$PATH GOTOOLCHAIN=local GOPROXY=off
+
+# The default image, last, so a plain docker build makes it.
+FROM runtime

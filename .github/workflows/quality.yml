@@ -229,8 +229,9 @@ jobs:
         run: |
           # QUALITY_GPU=vulkan builds the image with Vulkan and Mesa's
           # drivers for an AMD or Intel card (the Dockerfile's gpu target).
-          target=runtime
-          if [ "$GPU" = vulkan ]; then target=gpu; fi
+          # The quality targets add Go and Git for the long tasks (#1017).
+          target=quality
+          if [ "$GPU" = vulkan ]; then target=quality-gpu; fi
           docker build --pull --target "$target" --build-arg COMMIT="$(git rev-parse --short HEAD)" -t "$NAME" .
       - name: Start the daemon
         run: |
@@ -250,6 +251,7 @@ jobs:
             --oom-score-adj 1000 --pids-limit 4096 "${gpu[@]}" \
             -v toskar-quality-models:/data/models \
             -v toskar-quality-runtimes:/data/runtimes \
+            -v toskar-quality-projects:/projects \
             -v "$PWD/tests/quality/web.json:/fixtures/web.json:ro" \
             -e TOSKAR_WEB_FIXTURES=/fixtures/web.json \
             -e TOSKAR_API_KEY="$key" \
@@ -278,6 +280,27 @@ jobs:
             -e TOSKAR_QUALITY_REPORT=/src/.quality/report.md \
             golang:1.26-bookworm \
             go test ./tests/quality -run TestQualitySet -count=1 -v -timeout 280m
+      # Long tasks (#1017): real work in a project folder, scored by what the
+      # model asked to change. The projects are made where the daemon sees
+      # them too.
+      - name: Long tasks
+        if: ${{ !cancelled() }}
+        run: |
+          mkdir -p .quality
+          docker run --rm --network "$NAME" \
+            --cap-drop ALL --security-opt no-new-privileges \
+            --memory 4g --memory-swap 4g --cpus 2 \
+            -v "$PWD:/src" -w /src \
+            -v toskar-quality-go:/go \
+            -v toskar-quality-projects:/projects \
+            -e TOSKAR_QUALITY_URL="http://$NAME:7331" \
+            -e TOSKAR_QUALITY_KEY="$QUALITY_KEY" \
+            -e TOSKAR_QUALITY_INSTALL=recommended \
+            -e TOSKAR_QUALITY_MODEL="${{ matrix.model }}" \
+            -e TOSKAR_QUALITY_PROJECTS=/projects \
+            -e TOSKAR_QUALITY_TASKS_REPORT=/src/.quality/tasks.md \
+            golang:1.26-bookworm \
+            go test ./tests/quality -run TestLongTasks -count=1 -v -timeout 60m
       # Topic controls (#345): the share of off-topic cases held and of
       # on-topic ones wrongly refused, with the same models.
       - name: Topic controls
@@ -409,7 +432,7 @@ jobs:
       - name: Report
         if: always()
         run: |
-          for f in .quality/report.md .quality/topics.md .quality/files.md .quality/media.md .quality/reasoning.md .quality/triage.md; do
+          for f in .quality/report.md .quality/tasks.md .quality/topics.md .quality/files.md .quality/media.md .quality/reasoning.md .quality/triage.md; do
             if [ -f "$f" ]; then
               head -c 60000 "$f" >> "$GITHUB_STEP_SUMMARY"
             fi
@@ -420,6 +443,7 @@ jobs:
           name: quality-report-real-models-${{ matrix.model }}
           path: |
             .quality/report.md
+            .quality/tasks.md
             .quality/topics.md
             .quality/files.md
             .quality/media.md
