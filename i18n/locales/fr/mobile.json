@@ -738,7 +738,10 @@
     "manage": "Gérer l’abonnement",
     "throughComputer": "Actif grâce à l'abonnement de cet ordinateur",
     "throughComputerBody": "Chaque appareil associé à cet ordinateur l'utilise. Il se gère là où il a été souscrit : sur l'appareil qui s'est abonné, ou dans les réglages de Toskar sur l'ordinateur.",
-    "boughtInSettings": "Souscrit dans les réglages de Toskar sur l'ordinateur. Changez de carte ou résiliez-le là-bas, dans Accès API."
+    "boughtInSettings": "Souscrit dans les réglages de Toskar sur l'ordinateur. Changez de carte ou résiliez-le là-bas, dans Accès API.",
+    "coveredTitle": "Couvert par l'abonnement d'un autre appareil",
+    "coveredBody": "Cet ordinateur a déjà un abonnement, souscrit sur un autre appareil. Connectez-vous une fois à votre ordinateur à la maison, et cet appareil le récupère.",
+    "extraSubscription": "Cet ordinateur a plus d'un abonnement, alors qu'un seul suffit. Vous pouvez résilier le vôtre dans Gérer l’abonnement, l'autre continue de le couvrir."
   },
   "unlock": {
     "title": "Toskar Unlock",

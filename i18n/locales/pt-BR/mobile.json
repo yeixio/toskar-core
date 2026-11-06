@@ -738,7 +738,10 @@
     "manage": "Gerenciar assinatura",
     "throughComputer": "Ativo pela assinatura deste computador",
     "throughComputerBody": "Todos os dispositivos pareados com este computador a usam. Ela é gerenciada onde foi comprada: no dispositivo que assinou ou nas configurações do Toskar no computador.",
-    "boughtInSettings": "Comprada nas configurações do Toskar no computador. Troque o cartão ou cancele lá, em Acesso à API."
+    "boughtInSettings": "Comprada nas configurações do Toskar no computador. Troque o cartão ou cancele lá, em Acesso à API.",
+    "coveredTitle": "Coberto pela assinatura de outro dispositivo",
+    "coveredBody": "Este computador já tem uma assinatura, comprada em outro dispositivo. Conecte-se ao seu computador em casa uma vez, e este dispositivo passa a usá-la.",
+    "extraSubscription": "Este computador tem mais de uma assinatura, mas precisa de só uma. Você pode cancelar a sua em Gerenciar assinatura, e a outra continua cobrindo."
   },
   "unlock": {
     "title": "Toskar Unlock",
