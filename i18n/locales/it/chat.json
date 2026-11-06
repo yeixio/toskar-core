@@ -112,7 +112,10 @@
   "task": {
     "output": "Output del comando",
     "elsewhere": "È stato avviato in un’altra app o finestra. Qui puoi seguirlo, rispondere alle sue domande o fermarlo.",
-    "workingIn": "Al lavoro in {{path}}"
+    "workingIn": "Al lavoro in {{path}}",
+    "betterModel": "Un lavoro così riesce molto meglio con {{name}} ({{size}}, {{fit}} qui). I modelli più piccoli spesso non lo portano a termine.",
+    "betterModelTooLarge": "Un lavoro così riesce molto meglio con {{name}}, che richiede più di quanto abbia questo computer. I modelli più piccoli spesso non lo portano a termine. Un computer collegato potrebbe eseguirlo.",
+    "installOnModels": "Installalo dalla pagina Modelli"
   },
   "send": {
     "waitForFiles": "Attendi che i file finiscano di essere aggiunti, poi invia.",

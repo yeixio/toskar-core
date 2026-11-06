@@ -112,7 +112,10 @@
   "task": {
     "output": "Befehlsausgabe",
     "elsewhere": "Das wurde in einer anderen App oder einem anderen Fenster gestartet. Du kannst es hier verfolgen, Fragen beantworten oder es stoppen.",
-    "workingIn": "Arbeitet in {{path}}"
+    "workingIn": "Arbeitet in {{path}}",
+    "betterModel": "Arbeit wie diese gelingt mit {{name}} viel besser ({{size}}, hier {{fit}}). Kleinere Modelle schaffen sie oft nicht.",
+    "betterModelTooLarge": "Arbeit wie diese gelingt mit {{name}} viel besser, doch es braucht mehr, als dieser Computer hat. Kleinere Modelle schaffen sie oft nicht. Ein verbundener Computer kann es vielleicht ausführen.",
+    "installOnModels": "Auf der Seite „Modelle“ installieren"
   },
   "send": {
     "waitForFiles": "Warte, bis die Dateien hinzugefügt sind, und sende dann.",

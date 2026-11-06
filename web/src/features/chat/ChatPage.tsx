@@ -38,6 +38,7 @@ import { AnswerDetails } from './AnswerDetails'
 import { FileChip, PendingFileChip, type PendingFile } from './FileChips'
 import { MemoryToggle } from './MemoryToggle'
 import { ChatFolder } from './ChatFolder'
+import { TaskModelHint } from './TaskModelHint'
 import { CommandOutput } from './CommandOutput'
 import { addOutput, folderName } from './outputText'
 import { AnswerActions, EditAction, VersionSwitch } from './MessageActions'
@@ -2497,6 +2498,7 @@ export function ChatPage() {
                   {t('task.workingIn', { path: selectedConversation.project })}
                 </p>
               ) : null}
+              {admin && selectedConversation?.project && modelsQuery.data ? <TaskModelHint models={modelsQuery.data} /> : null}
               {composer}
               {showLanding ? suggestions : null}
               {!selectedId && capabilityNotice ? (

@@ -662,6 +662,11 @@
           "text": "Commands that delete or overwrite ask every time, and a chat that has just read a web page or a file from outside asks again before changing anything. Only an Admin can choose a folder, and it stops working for someone whose role changes. On a phone, tablet, watch, TV, or car, the same chat answers as an ordinary chat."
         },
         {
+          "type": "note",
+          "tone": "tip",
+          "text": "Smaller models often can't finish work like this. Until a model measured to finish tasks is installed, such as Qwen 3.8 27B, the chat names it under Working in, with its size and how well it fits this computer, and a link to the Models page. When it needs more than this computer has, the chat says so: a connected computer may run it ([Computers](#computers))."
+        },
+        {
           "type": "heading",
           "text": "Follow a task from another app"
         },
