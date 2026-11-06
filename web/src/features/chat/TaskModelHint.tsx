@@ -6,7 +6,7 @@ import type { Model, ModelsFitResponse } from '@/types/api'
 import { taskModelSuggestion } from './taskModel'
 
 /** Says which model does work like this well, under the chat's folder. */
-export function TaskModelHint({ models, fits }: { models: Model[]; fits?: ModelsFitResponse[] }) {
+export function TaskModelHint({ models, fits }: { models: Model[]; fits?: ModelsFitResponse[] | null }) {
   const { t } = useTranslation('chat')
   const suggestion = taskModelSuggestion(models, fits)
   if (!suggestion) return null

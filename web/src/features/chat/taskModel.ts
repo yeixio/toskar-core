@@ -11,7 +11,7 @@ const taskModelTag = 'tasks'
  */
 export function taskModelSuggestion(
   models: Model[],
-  fits: ModelsFitResponse[] | undefined,
+  fits: ModelsFitResponse[] | null | undefined,
 ): { model: Model; fit?: FitLabel; runsHere: boolean } | null {
   const tagged = models.filter((m) => m.tags?.includes(taskModelTag))
   if (tagged.length === 0 || tagged.some((m) => m.installed)) return null
