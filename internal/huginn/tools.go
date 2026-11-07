@@ -114,7 +114,9 @@ func ToolsFor(k Kind, message string, available []string) []string {
 			want["gitw"] = true
 		}
 	}
-	if cueWeb.MatchString(message) || tools.MessageAsksToFind(message) {
+	// A request for places is looked up on the web first (#1126), so it
+	// needs web search offered.
+	if cueWeb.MatchString(message) || tools.MessageAsksToFind(message) || tools.MessageAsksForPlaces(message) {
 		want["web"] = true
 	}
 	if cueMake.MatchString(message) {
