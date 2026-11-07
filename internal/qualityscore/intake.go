@@ -71,13 +71,12 @@ func Check(row Row, list []ListedModel, published []Row, version int, now time.T
 	var why []string
 	hold := func(format string, args ...any) { why = append(why, fmt.Sprintf(format, args...)) }
 
+	// The name shown is the list's (Intake sets it), so what was sent as a
+	// name is never checked or shown.
 	listed := false
 	for _, m := range list {
 		if m.ID == row.Model {
 			listed = true
-			if row.Name != m.Name {
-				hold("its name, %q, isn't the listed model's", row.Name)
-			}
 		}
 	}
 	if !listed {
@@ -243,8 +242,20 @@ func Intake(body, author, source string, list []ListedModel, published []Row, ve
 	}
 	verdict := Verdict{Passed: true}
 	for _, row := range rows {
+		// The listed model's name, whatever was sent: a name the sender
+		// wrote would be shown on the public results, and an app that didn't
+		// know the model's name yet sends its id (#1087).
+		for _, m := range list {
+			if m.ID == row.Model {
+				row.Name = m.Name
+			}
+		}
 		for _, why := range Check(row, list, published, version, now) {
-			verdict.Why = append(verdict.Why, plainReason(row.Name+": "+why))
+			label := row.Name
+			if label == "" {
+				label = row.Model
+			}
+			verdict.Why = append(verdict.Why, plainReason(label+": "+why))
 		}
 		row.Submitted, row.Source = true, source
 		if !strings.EqualFold(row.SubmittedBy, author) || !ValidCredit(row.SubmittedBy) {

@@ -41,7 +41,6 @@ func TestCheckPassesRealResults(t *testing.T) {
 func TestCheckHoldsWhatsUnusual(t *testing.T) {
 	for name, change := range map[string]func(*Row){
 		"not on the list":       func(r *Row) { r.Model = "made-up" },
-		"another name":          func(r *Row) { r.Name = "Best Model Ever" },
 		"off the list":          func(r *Row) { r.OffList = true },
 		"rude computer":         func(r *Row) { r.Hardware = "Buy my crypto, 8 GB" },
 		"link as a computer":    func(r *Row) { r.Hardware = "Apple https://evil.example, 8 GB" },
@@ -98,6 +97,14 @@ func TestIntakeReadsIssuesAndChecksCredit(t *testing.T) {
 	mine := Intake(strings.ReplaceAll(body, "someone-else", "octo-cat"), "Octo-Cat", "s", intakeList, nil, 1, intakeNow)
 	if mine.Rows[0].SubmittedBy != "octo-cat" {
 		t.Errorf("%+v: who opened the issue keeps their credit", mine.Rows[0])
+	}
+	// The name shown is the list's, whatever was sent: an id, as an app that
+	// didn't know the name yet sent (#1087), or words of the sender's own.
+	for _, sent := range []string{"qwen2.5-3b-q4", "Best Model Ever", ""} {
+		v := Intake(strings.Replace(body, `"name":"Qwen 2.5 3B"`, `"name":"`+sent+`"`, 1), "a", "s", intakeList, nil, 1, intakeNow)
+		if !v.Passed || v.Rows[0].Name != "Qwen 2.5 3B" {
+			t.Errorf("sent %q: %+v", sent, v)
+		}
 	}
 	// A run's results come as a list, and one bad row holds them all.
 	many := "```json\n[" + strings.Split(strings.Split(body, "```json\n")[1], "\n```")[0] + `,{"model":"made-up","name":"x"}]` + "\n```"
