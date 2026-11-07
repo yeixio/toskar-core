@@ -8,6 +8,91 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Thi
 
 Changes waiting for the next release are in [changes/unreleased/](changes/unreleased/), one file per pull request. `scripts/changelog.py preview` shows them together, and `scripts/changelog.py release <version>` writes them here when the release is cut.
 
+## [1.13.0] - 2026-11-07
+
+### Added
+
+- Text for the app's Access from anywhere card when another device's subscription already covers the computer, and when a computer has more than one subscription (yeixio/toskar-apps#388).
+- Toskar Pro from the Mac App Store sells access from anywhere in API Access, as an App Store subscription at the App Store's prices, with Restore purchase and Manage subscription (yeixio/toskar-apps#245). Toskar Pro from the Microsoft Store, like every other copy, keeps the checkout billed by Yeix.io LLC.
+- A chat can have a folder on the Toskar computer to work in. In one, work asked
+  for goes on until it's done on the web and desktop too, as it does in the
+  terminal, and a task started in the terminal keeps its folder when it goes on
+  elsewhere. Choosing one needs the admin role (contract 1.85, #1017).
+- Ask for the AI news or your automations' latest results in any chat, such as
+  "read me today's AI news" or "what's in my briefing" in the car, in any of
+  the app's ten languages. Each person hears only their own automations, and
+  with AI news off, chat says it's off in Settings (toskar-apps#142).
+- `toskarctl chat` starts Toskar when it isn't running on this computer, through its service if it has one, and says how to stop it. Toskar stays running after the chat. If Toskar isn't installed, chat asks first, shows the download's size, and runs the installer. With `TOSKAR_URL` set, it starts nothing.
+- A step-by-step guide for Claude Code and Codex CLI with Toskar as their model provider, on this computer and from another one with a key, tested with Qwen 3.5 9B (`docs/integrations/coding-agents.md`, #1060), linked from the user guide's Terminal page.
+- A step-by-step guide for Continue in VS Code with Toskar as its model provider, on this computer and on another one with a key, tested with Continue 2.0.0 (`docs/integrations/continue.md`, #1061), linked from the user guide's Terminal page.
+- curl examples for following Toskar's events (`examples/curl/events.sh`) and reading this computer's hardware (`examples/curl/hardware.sh`), checked with the other examples (#816).
+- Profiles marks the profile new chats start with, and More actions → Use for new chats makes another one the default. Settings' Default profile shows the same, with no Automatic choice.
+- The user guide's API page is a full how-to: finding the endpoint, API keys and what each may use, the Python, TypeScript, and Go SDKs and the client contract, `toskarctl ask` in scripts, and the GitHub Action for CI, with a screenshot of API Access and examples CI runs (#898).
+- The user guide's Knowledge page is a full how-to: connecting a file or folder, seeing sources in an answer, connecting a database or a web API, and keeping knowledge fresh, with screenshots of the Knowledge page and the database form, and examples CI runs (#890).
+- A user guide page, Use Toskar in the terminal: `toskarctl chat`, handing it files and command output, working in a folder with approvals, Toskar on another computer, and `toskarctl connect` for coding agents, with examples CI runs (#959).
+- The user guide's Tools page is a full how-to: seeing your tools, choosing when each asks first, answering a tool that asks, adding tools from an MCP server, and using Toskar from other AI apps, with screenshots of the Tools page and an approval in chat, and an example CI runs (#892).
+- The Toskar extension is on the Visual Studio Marketplace and Open VSX, and the user guide has a page for it: Use Toskar in VS Code.
+- A task in the terminal now keeps its own record of what it checked and
+  changed. If the last check failed, nothing ran to check a change, or test
+  files changed, the model is sent back once, and whatever is still in doubt
+  shows under the answer (#1017).
+- Web and desktop chats can do long tasks. An Admin chooses a folder for a chat
+  from the composer's options, and the chat then shows each command's output as
+  it's written. A task started in any app shows in the others: its steps, its
+  output, and its questions, which any of them can answer, and any can stop it
+  (#1017).
+- `GET /conversations/{id}/turn` says what a running turn has done so far, and
+  `tool.decided` says a waiting tool was answered (contract 1.86, #1017).
+- A chat with a folder names the model measured to finish tasks, such as Qwen 3.8 27B, under Working in until one is installed, with its size, how well it fits, and a link to the Models page, as `toskarctl chat` already did. On the quality runs, Qwen 2.5 7B and Gemma 2 9B finished none of the long tasks, and Qwen 2.5 32B most (#1017).
+- Text for a TV that can buy Toskar Unlock itself, saying it can be unlocked there or on a phone or tablet (yeixio/toskar-apps#134).
+
+### Changed
+
+- In the car, someone without Toskar Unlock hears what it adds, and that the phone will offer it once they're parked (yeixio/toskar-apps#398).
+- `toskarctl chat` with no model installed now offers the one that suits this
+  computer and installs it, instead of an error. While a task works, each step
+  is a line in plain words, with a line when a command fails or takes a while
+  (contract 1.84, #1017).
+- Toskar recommends Qwen 3.5 9B on most computers with 16 GB or more, and Qwen 3.5 4B with an 8 GB graphics card, instead of Qwen 2.5 7B. On the long tasks, Qwen 3.5 9B finished all three, where Qwen 2.5 7B finished at most one. Onboarding also skips a model that only just fits, as Best overall does, so 8 GB computers keep Llama 3.2 3B.
+- A task in the terminal now asks before it changes anything, whatever the
+  profile allows for chat: writing files, `git add` and `git commit`, installs,
+  `make` and `npm run`, and reading outside the project. Reading in the project
+  and running named tests and builds still don't ask (#1017).
+- In a terminal task, a command can run for up to 30 minutes, with its output
+  showing as it comes. Ctrl-C stops the work and stays in the chat. Stopping a
+  command now stops what it started too, and something left running in the
+  background no longer holds up the answer (contract 1.83, #1017).
+- The user guide's Terminal page shows a recorded session: Qwen 3.5 9B finding a failing test's cause and asking before it changes the file. CI runs a whole `toskarctl chat` session against a real Toskar with the scripted model (#959).
+
+### Fixed
+
+- `toskarctl` looks for Toskar at `TOSKAR_API_PORT` when that's set, the same port Toskar itself uses.
+- Claude Code and Codex work with Qwen 3.5. Toskar passed their system messages on where they were sent, partway through the conversation, and Qwen 3.5's chat template refused them, so every request failed with "System message must be at the beginning". They now reach the model as one system message at the start (#1060).
+- `toskarctl connect continue` adds `useLegacyCompletionsEndpoint: false` to the model it prints, so Continue's edit tool and Apply go through chat instead of `/v1/completions`, which Toskar doesn't have. Before this, they failed. With `TOSKAR_API_KEY` set, the key is read from Continue's `~/.continue/.env` (#1061).
+- New chats start with the default profile, General Assistant unless you choose another. A profile used once with Use in Chat, or opened in another chat, no longer carries over to every new chat, and a paired computer no longer switches new chats to a Team profile. Chats started without a profile, from the phone, another app, or the API, use the default too.
+- Profiles can't share a name. Setup now fills in the built-in profile for its purpose rather than making a second General Assistant, and profiles that shared a name are renamed once, such as General Assistant (2), with none deleted.
+- In a chat with a folder, or a task in the terminal, Git works in that folder, as the file tools and commands do. It used Toskar's own workspace, so a commit could land in the wrong place. Git's view of the project no longer counts as outside content either, so a task that checks `git status` first doesn't ask before every later step (#1110).
+- gpt-oss can use tools and do tasks. Its calls come back from llama.cpp only when the request offers the tools itself, so a chat with a folder, a web search, or any other tool stopped before doing anything. Toskar now offers them that way to models in gpt-oss's chat format, and reads the call as any other (#1099).
+- The user guide says that traffic between paired computers, and from devices on your network, is encrypted. It still said "not encrypted yet".
+- A model added from a file can use tools when its chat template takes them, as gpt-oss, Qwen, and Llama do. It was treated as unable to call any, so its answers to ordinary questions, such as one about a file in the chat's folder, could only guess. Models added before this are read from their file, with nothing to add again (#1101).
+- A question that uses all its tool calls is answered from what they found, instead of "I stopped after 3 tool calls so this request would not loop".
+- On Linux without systemd, such as a container or WSL without it, the install script no longer waits a minute and reports a failed install that worked: it says nothing keeps Toskar running there and how to start it. `toskarctl chat` starts Toskar itself when the installer it ran put Toskar in place but couldn't start it.
+- A request for places of a kind, such as "Find a cafe in downtown Juneau", is looked up on the web before the model answers. Models that don't search by themselves, such as Qwen 3.5, made up names and addresses (#1126).
+- Qwen 3.5 models use tools. They put their own label for a call in its id, such as `terminal_1` or `run_test_001`, so every call was refused and they answered without tools. Toskar now reads such a call as the tool it names, or the one tool its arguments fit, and asks again by the tools' ids when it can't tell. On the long tasks, Qwen 3.5 4B went from none done to 2 of 3 (#1124).
+- Benchmark results sent from the app go into the public results by themselves again, when their model's name was sent as its id. The results page now shows each model under its name from the model list, never one a sender wrote, and the benchmark sends the list's name for a model installed from Hugging Face (#1087).
+- Home CI runners download each model once and keep it, and stop sending caches to and from GitHub. Jobs report their network use in the summary.
+- In a chat with a folder, or the terminal, a follow-up that goes on with the work, such as "go ahead and make that fix", "yes, do it", or "try again", works as a task, with the task's tools. It was answered as a question, so the model could only describe the change again (#1111).
+- In the terminal and in a chat with a folder, a change now asks however the
+  message is worded. A message that didn't read as a task, such as "Use the
+  terminal tool to...", ran known commands such as `touch` without asking when
+  the profile allowed them (#1017).
+- `git stash`, `git switch -f` and `--discard-changes`, `git commit --amend`,
+  `git pull --rebase` and `--force`, and `git fetch --prune` no longer run
+  without asking in a chat that allows known commands. A new set of attempts to
+  get around the terminal's safeguards runs in CI and found them (#1017).
+- Qwen 3.5 can change files in a task. Writing a whole file, it closed its call one brace short, so Toskar dropped the request without asking, and the model said it had made the change. A call left open at its end is now closed, unless it was cut off partway (#959).
+- Finding files understands patterns such as `*test*` or `*.go`, as models write them. Before, it looked for those characters in the name and found nothing (#959).
+
 ## [1.12.3] - 2026-11-03
 
 ### Added
