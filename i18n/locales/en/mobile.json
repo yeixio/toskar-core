@@ -793,7 +793,7 @@
     "askBetter": "For a better answer, ask again on your phone once you're parked.",
     "noModel": "Toskar on your phone has no model yet. Add one once you're parked.",
     "failed": "That didn't work. Try again.",
-    "locked": "Toskar in the car comes with Toskar Unlock. Get it on your phone once you're parked.",
+    "locked": "Toskar in the car comes with Toskar Unlock, which also adds more models, web lookups, and memory on your phone. Toskar will offer it on your phone once you're parked.",
     "permission": "Toskar needs the microphone and speech recognition. Allow them on your phone once you're parked.",
     "unavailable": "Speech recognition isn't available for your language on this phone."
   },

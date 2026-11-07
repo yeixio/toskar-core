@@ -688,7 +688,7 @@
     "askBetter": "더 나은 답변을 원하면 주차한 뒤 휴대폰에서 다시 물어보세요.",
     "noModel": "휴대폰의 Toskar에 아직 모델이 없어요. 주차한 뒤 추가하세요.",
     "failed": "실패했어요. 다시 시도하세요.",
-    "locked": "차에서 쓰는 Toskar는 Toskar Unlock에 포함돼요. 주차한 뒤 휴대폰에서 받으세요.",
+    "locked": "차에서 쓰는 Toskar는 Toskar Unlock에 포함돼요. Unlock이 있으면 휴대폰에서 더 많은 모델, 웹 검색, 메모리도 쓸 수 있어요. 주차하면 휴대폰의 Toskar에서 안내해 드릴게요.",
     "permission": "Toskar에는 마이크와 음성 인식이 필요해요. 주차한 뒤 휴대폰에서 허용하세요.",
     "unavailable": "이 휴대폰에서는 사용 중인 언어의 음성 인식을 쓸 수 없어요."
   },
