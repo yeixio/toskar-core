@@ -680,6 +680,7 @@
       "off": "An Admin turned off sending reports to Toskar."
     },
     "locked": "Toskar on TV comes with Toskar Unlock. Unlock it in Toskar on your phone or tablet.",
+    "lockedHere": "Toskar on TV comes with Toskar Unlock. Unlock it here, or in Toskar on your phone or tablet.",
     "demo": {
       "label": "Demo: sample answers, nothing leaves this TV",
       "leave": "Leave the demo",

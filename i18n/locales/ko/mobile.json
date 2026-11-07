@@ -575,6 +575,7 @@
       "off": "관리자가 Toskar로 보고를 보내는 기능을 껐어요."
     },
     "locked": "TV의 Toskar는 Toskar Unlock으로 사용할 수 있어요. 휴대폰이나 태블릿의 Toskar에서 잠금 해제하세요.",
+    "lockedHere": "TV의 Toskar는 Toskar Unlock으로 사용할 수 있어요. 여기서, 또는 휴대폰이나 태블릿의 Toskar에서 잠금 해제하세요.",
     "demo": {
       "label": "데모: 예시 답변이며, 이 TV에서 아무것도 전송되지 않아요",
       "leave": "데모 나가기",

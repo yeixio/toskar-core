@@ -589,6 +589,7 @@
       "off": "Un amministratore ha disattivato l'invio delle segnalazioni a Toskar."
     },
     "locked": "Toskar sulla TV arriva con Toskar Unlock. Sbloccalo in Toskar sul telefono o sul tablet.",
+    "lockedHere": "Toskar sulla TV arriva con Toskar Unlock. Sbloccalo qui, oppure in Toskar sul telefono o sul tablet.",
     "demo": {
       "label": "Demo: risposte di esempio, niente esce da questa TV",
       "leave": "Esci dalla demo",

@@ -575,6 +575,7 @@
       "off": "管理员已关闭向 Toskar 发送报告。"
     },
     "locked": "电视上的 Toskar 随 Toskar Unlock 提供。请在手机或平板上的 Toskar 中解锁。",
+    "lockedHere": "电视上的 Toskar 随 Toskar Unlock 提供。请在这里，或在手机或平板上的 Toskar 中解锁。",
     "demo": {
       "label": "演示：示例回答，不会从这台电视发送任何内容",
       "leave": "退出演示",

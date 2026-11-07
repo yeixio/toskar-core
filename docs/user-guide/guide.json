@@ -2907,6 +2907,7 @@
           "type": "list",
           "items": [
             "On a TV, ask with the microphone on the remote, or type. Without a computer connected, the TV app's demo answers a few suggested questions with sample answers, and nothing leaves the TV.",
+            "Asking from a TV comes with Toskar Unlock. Unlock it on the TV itself, where its store sells it, or in Toskar on your phone or tablet, with the same store account. Move between answers and screens with the remote's arrows, and Back to go back.",
             "On a watch, ask from the app or your watch face. The watch asks your computer directly, at home or away, and asks through your phone when it can't."
           ]
         },
