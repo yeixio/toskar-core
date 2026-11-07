@@ -418,7 +418,9 @@ func displayName(url, id string) string {
 	}
 	if readJSON(url+"/api/v1/models", &models) == nil {
 		for _, m := range models {
-			if m.ID == id && m.DisplayName != "" {
+			// A model installed from Hugging Face can have its id for a
+			// name here; the list's name is the one to show then (#1087).
+			if m.ID == id && m.DisplayName != "" && m.DisplayName != id {
 				return m.DisplayName
 			}
 		}
