@@ -56,7 +56,7 @@ func lookupQuery(prompt string) string {
 // It runs only when the profile allows web search without asking, and
 // returns the material to give the model as data.
 func lookUpFirst(ctx context.Context, env pluginapi.ExecutionEnvironment, profile contracts.AIProfile, role, prompt string, pages int) (string, bool) {
-	if !tools.MessageNeedsLiveWeb(prompt) && !tools.MessageAsksToFind(prompt) {
+	if !tools.MessageNeedsLiveWeb(prompt) && !tools.MessageAsksToFind(prompt) && !tools.MessageAsksForPlaces(prompt) {
 		return "", false
 	}
 	if !webAllowed(profile) {

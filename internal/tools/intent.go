@@ -33,3 +33,17 @@ var askFindRe = regexp.MustCompile(`(?i)\b(recommend\w*|suggest (a|an|some)\b.{0
 func MessageAsksToFind(message string) bool {
 	return askFindRe.MatchString(message) || askFindRe.MatchString(askFindWords.Fix(message))
 }
+
+// askPlacesRe matches a request for a kind of place: "Find a cafe in
+// downtown Juneau", "best pizza places near the harbor". Models that don't
+// look it up themselves, such as Qwen 3.5, make up names and addresses, so
+// Toskar looks it up first (#1126). It needs a word that asks, so "a story
+// set in a cafe" isn't looked up.
+var askPlacesRe = regexp.MustCompile(`(?i)\b(find|where('s| is| are| can i)|best|recommend\w*|suggest|looking for|is there|are there|list)\b.{0,40}\b(caf[eé]s?|coffee (shops?|houses?)|restaurants?|diners?|pizza( places)?|bars?|pubs?|breweries|brewery|bakeries|bakery|pharmac(y|ies)|gas stations?|hotels?|motels?|grocery( stores?)?|groceries|supermarkets?|museums?|gyms?|hospitals?|clinics?|urgent care|vets?|libraries|library|post offices?|laundromats?|campgrounds?|trailheads?)\b`)
+
+var askPlacesWords = typo.FromPatterns(askPlacesRe.String())
+
+// MessageAsksForPlaces reports a request for places of a kind, to look up.
+func MessageAsksForPlaces(message string) bool {
+	return askPlacesRe.MatchString(message) || askPlacesRe.MatchString(askPlacesWords.Fix(message))
+}
