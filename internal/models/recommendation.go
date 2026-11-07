@@ -306,6 +306,19 @@ func RecommendWithPresets(catalog *Catalog, presets []PurposePreset, input Recom
 		return contracts.Recommendation{}, fmt.Errorf("no models in catalog")
 	}
 
+	// Of those, the ones that fit well, as Best overall takes (#932): a
+	// model that only just fits, such as Qwen 3.5 4B on 8 GB with no card,
+	// answers slowly.
+	var well []CatalogEntry
+	for _, c := range fits {
+		if fitRank(ClassifyFit(c, input.Hardware, "", "", FitOptions{}).Label) >= fitRank(contracts.FitGood) {
+			well = append(well, c)
+		}
+	}
+	if len(well) > 0 {
+		fits = well
+	}
+
 	primary, byCommunity := choosePrimary(purpose, fits, input.Community)
 
 	secondary := primary
