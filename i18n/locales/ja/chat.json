@@ -641,6 +641,8 @@
     "saved": "{{path}}を保存しました",
     "created": "{{name}}を作成しました",
     "draftedAutomation": "オートメーション「{{name}}」の下書きを作成しました",
+    "readNews": "今日のAIニュースを読みました",
+    "readAutomationResults": "オートメーションの最新の結果を読みました",
     "ranCommand": "このコンピュータでコマンドを実行しました",
     "browserOpened": "ブラウザで{{page}}を開きました",
     "browserClicked": "ページをクリックしました。現在のページは{{page}}です",

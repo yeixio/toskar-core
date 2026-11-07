@@ -19,13 +19,14 @@ import (
 // capabilityTools are the tools each capability gives; a tool is left out
 // of a turn when its capability is off.
 var capabilityTools = map[auth.Capability][]string{
-	auth.CapWeb: {"internet.search", "internet.open", "places.search", "places.details", "maps.route", "maps.distance",
+	// news.read reads toskar.ai, so it's web too.
+	auth.CapWeb: {"internet.search", "internet.open", "news.read", "places.search", "places.details", "maps.route", "maps.distance",
 		"browser.open", "browser.extract", "browser.screenshot", "browser.close", "browser.click", "browser.type", "browser.download"},
 	auth.CapMakePictures: {"image.generate", "image.edit"},
 	auth.CapMakeVideo:    {"video.generate"},
 	auth.CapVoice:        {"speech.transcribe", "speech.synthesize"},
 	auth.CapFiles:        {"filesystem.search", "filesystem.read", "filesystem.write", "files.create", "spreadsheet.analyze"},
-	auth.CapAutomations:  {"automations.schedule"},
+	auth.CapAutomations:  {"automations.schedule", "automations.results"},
 }
 
 // personCapabilities is what the request's person may use now, read

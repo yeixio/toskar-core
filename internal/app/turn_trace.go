@@ -421,6 +421,23 @@ func (t *turnTrace) tool(toolID string, args, result map[string]any) {
 			t.automation = draft
 			t.step("automation", "draftedAutomation", map[string]any{"name": draft.Name})
 		}
+	case "news.read":
+		// The news summarizes what others wrote, so it is data, not
+		// instructions (§58). Each item read is a source.
+		t.untrusted = true
+		t.step("news", "readNews", nil)
+		if items, ok := result["items"].([]any); ok {
+			for _, raw := range items {
+				it, _ := raw.(map[string]any)
+				if u := str(it, "url"); u != "" {
+					t.addSource(contracts.Citation{Kind: "web", Title: firstNonEmpty(str(it, "title"), hostOf(u)), URL: u, Snippet: snippet(str(it, "summary"))})
+				}
+			}
+		}
+	case "automations.results":
+		// A result may quote the pages its run read (§58).
+		t.untrusted = true
+		t.step("automation", "readAutomationResults", nil)
 	case "image.generate", "image.edit", "video.generate":
 		// Which model made it, so a picture or clip can be made again the
 		// same way (#549).

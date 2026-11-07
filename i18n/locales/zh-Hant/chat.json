@@ -641,6 +641,8 @@
     "saved": "儲存了 {{path}}",
     "created": "建立了 {{name}}",
     "draftedAutomation": "已草擬自動化「{{name}}」",
+    "readNews": "已閱讀今天的 AI 新聞",
+    "readAutomationResults": "已閱讀你的自動化的最新結果",
     "ranCommand": "在這台電腦上執行了一個指令",
     "browserOpened": "在瀏覽器中打開了 {{page}}",
     "browserClicked": "在頁面上點擊，現在位於 {{page}}",

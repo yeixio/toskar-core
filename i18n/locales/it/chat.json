@@ -705,6 +705,8 @@
     "saved": "Ho salvato {{path}}",
     "created": "Ho creato {{name}}",
     "draftedAutomation": "Bozza dell’automazione «{{name}}»",
+    "readNews": "Ho letto le notizie sull'IA di oggi",
+    "readAutomationResults": "Ho letto gli ultimi risultati delle tue automazioni",
     "ranCommand": "Ho eseguito un comando su questo computer",
     "browserOpened": "Ho aperto {{page}} nel browser",
     "browserClicked": "Ho fatto clic sulla pagina, ora su {{page}}",

@@ -13,6 +13,7 @@ export const CAPABILITIES: {
     tools: [
       { id: 'internet.search', on: 'allow' },
       { id: 'internet.open', on: 'allow' },
+      { id: 'news.read', on: 'allow' },
       { id: 'places.search', on: 'allow' },
       { id: 'places.details', on: 'allow' },
       { id: 'maps.route', on: 'allow' },
@@ -63,7 +64,10 @@ export const CAPABILITIES: {
   },
   {
     id: 'automations',
-    tools: [{ id: 'automations.schedule', on: 'allow' }],
+    tools: [
+      { id: 'automations.schedule', on: 'allow' },
+      { id: 'automations.results', on: 'allow' },
+    ],
   },
   {
     id: 'shell',
