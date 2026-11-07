@@ -2447,9 +2447,9 @@
           "type": "steps",
           "items": [
             "On the computer that runs Toskar, open Computers and choose Connect a device. If network access is off, choose Allow and show a code.",
-            "In VS Code, run Toskar: Connect to Another Computer from the Command Palette, and type the address Toskar shows.",
-            "Check that the code VS Code shows matches the encryption check code in Toskar.",
-            "Type the 6-digit code."
+            "In VS Code, click Toskar: connect in the status bar, or run Toskar: Connect to Another Computer from the Command Palette. If Toskar isn't running on your computer, VS Code offers this the first time it starts.",
+            "Choose the computer from the list: VS Code finds the Toskar computers on your network. If yours isn't there, choose Enter an address and type the address Toskar shows.",
+            "Check that the encryption check code VS Code shows matches the one in Toskar, then type the 6-digit code."
           ]
         },
         {
