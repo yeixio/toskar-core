@@ -1,0 +1,171 @@
+name: MoE bench
+
+# Measures a mixture-of-experts model with its experts in system memory on
+# the GPU rig (#984): Avalon, a llama.cpp fork built for Qwen3.8-Flash-Next
+# with a cache of the busiest experts on the card, against stock llama.cpp
+# on the same machine. Avalon's own numbers come from a 7900 XT like the
+# rig's, and they aren't ours until they're measured here.
+#
+# probe looks at the rig without downloading anything: memory, the card's
+# free memory, and whether ROCm can reach it from a container. Run it first:
+# bench downloads about 186 GB (Avalon's model and draft, 91 GiB; Unsloth's
+# UD-IQ4_XS, 87 GiB, for stock llama.cpp, which can't read Avalon's types;
+# and ROCm's build image, 7.4 GB), kept in a volume for later runs.
+
+on:
+  workflow_dispatch:
+    inputs:
+      step:
+        description: probe (nothing downloaded) or bench (about 186 GB the first time).
+        type: choice
+        options: [probe, bench]
+        default: probe
+      avalon_ref:
+        description: Avalon's branch, tag, or commit.
+        default: main
+      llama_ref:
+        description: The llama.cpp release to compare with, as Toskar ships it.
+        default: b12167
+
+# The rig runs one measurement at a time, the quality runs included.
+concurrency:
+  group: quality
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    if: inputs.step == 'probe'
+    runs-on: [self-hosted, toskar-models]
+    timeout-minutes: 10
+    steps:
+      - name: Look at the rig
+        run: |
+          {
+            echo "## The rig, for a model with its experts in memory"
+            echo
+            echo '```text'
+            echo "Memory:"; free -g
+            echo; echo "Processor: $(nproc) threads, $(grep -m1 'model name' /proc/cpuinfo | cut -d: -f2-)"
+            echo; echo "Disk where Docker keeps volumes:"; df -h "$(docker info -f '{{.DockerRootDir}}' 2>/dev/null || echo /)" | tail -1
+            echo; echo "Docker: $(docker info -f 'rootless={{.SecurityOptions}} runtime={{.DefaultRuntime}}' 2>/dev/null)"
+            echo; echo "Devices (ROCm needs /dev/kfd as well as /dev/dri):"
+            ls -l /dev/kfd /dev/dri/ 2>&1
+            echo; echo "This user: $(id)"
+            echo; echo "Graphics cards (vendor 0x1002 is AMD):"
+            for d in /sys/class/drm/card*/device; do
+              [ -r "$d/vendor" ] || continue
+              total=$(cat "$d/mem_info_vram_total" 2>/dev/null || echo 0)
+              used=$(cat "$d/mem_info_vram_used" 2>/dev/null || echo 0)
+              echo "$(basename "$(dirname "$d")") vendor=$(cat "$d/vendor") memory=$((total / 1048576)) MiB used=$((used / 1048576)) MiB free=$(((total - used) / 1048576)) MiB"
+            done
+            echo; echo "What has the card open:"
+            (fuser -v /dev/dri/* /dev/kfd 2>&1 || true) | head -20
+            echo '```'
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+
+  bench:
+    if: inputs.step == 'bench'
+    runs-on: [self-hosted, toskar-models]
+    timeout-minutes: 600
+    env:
+      MEMORY: ${{ vars.QUALITY_MEMORY || '32g' }}
+      AVALON_REF: ${{ inputs.avalon_ref }}
+      LLAMA_REF: ${{ inputs.llama_ref }}
+      ROCM_IMAGE: rocm/dev-ubuntu-24.04:7.2.4-complete
+    steps:
+      - name: ROCm can reach the card
+        run: |
+          if [ ! -e /dev/kfd ]; then
+            echo "::error::There's no /dev/kfd on the rig, so ROCm can't use the card, and Avalon runs only on ROCm or CUDA. Run the probe."
+            exit 1
+          fi
+
+      - name: Download the models
+        run: |
+          # Kept in a volume: a later run downloads nothing again.
+          docker volume create toskar-moe-models >/dev/null
+          docker run --rm -v toskar-moe-models:/models python:3.12-slim sh -c '
+            set -e
+            pip install --quiet "huggingface_hub==0.36.0"
+            hf download freriadoc/Qwen3.8-Flash-Next-Avalon-GGUF --local-dir /models/avalon
+            hf download unsloth/Qwen3.8-Flash-Next-GGUF --include "UD-IQ4_XS/*" --local-dir /models/unsloth
+            du -sh /models/avalon /models/unsloth'
+
+      - name: Build Avalon and llama.cpp for the card
+        run: |
+          build() { # name repo ref
+            docker build -t "toskar-moe-$1" --build-arg REPO="$2" --build-arg REF="$3" --build-arg BASE="$ROCM_IMAGE" -f - . <<'EOF'
+          ARG BASE
+          FROM ${BASE}
+          ARG REPO
+          ARG REF
+          RUN apt-get update && apt-get install -y --no-install-recommends cmake git curl && rm -rf /var/lib/apt/lists/*
+          RUN git clone --filter=blob:none "$REPO" /src && cd /src && git checkout "$REF" && \
+              cmake -B build -DGGML_HIP=ON -DAMDGPU_TARGETS=gfx1100 -DCMAKE_BUILD_TYPE=Release \
+                -DCMAKE_C_COMPILER=/opt/rocm/bin/amdclang -DCMAKE_CXX_COMPILER=/opt/rocm/bin/amdclang++ && \
+              cmake --build build -j"$(nproc)" --target llama-server
+          EOF
+          }
+          build avalon https://github.com/freriadoc/Avalon "$AVALON_REF"
+          build llamacpp https://github.com/ggml-org/llama.cpp "$LLAMA_REF"
+
+      - name: Measure
+        run: |
+          mkdir -p .moe
+          # One server at a time, on the same card and memory: three answers
+          # of 512 tokens, greedy, to a short prompt, and the prompt speed of
+          # an 8,000-token one.
+          measure() { # label image args...
+            label=$1 image=$2; shift 2
+            docker run --rm --device /dev/kfd --device /dev/dri --security-opt seccomp=unconfined \
+              --memory "$MEMORY" --memory-swap "$MEMORY" -v toskar-moe-models:/models:ro \
+              -e LABEL="$label" "$image" bash -c '
+                /src/build/bin/llama-server --host 127.0.0.1 --port 8080 "$@" > /tmp/server.log 2>&1 &
+                for i in $(seq 1 900); do curl -sf 127.0.0.1:8080/health >/dev/null && break; sleep 2; done
+                if ! curl -sf 127.0.0.1:8080/health >/dev/null; then tail -40 /tmp/server.log; exit 1; fi
+                ask() { curl -s 127.0.0.1:8080/completion -H "Content-Type: application/json" -d "$1"; }
+                short=$(printf "%s" "Explain, step by step, how a hash map handles collisions, and when to choose one over a balanced tree.")
+                long=$(for i in $(seq 1 400); do printf "Paragraph %d of the notes: the ferry leaves the dock at seven, the tide turns at noon, and the trail to the glacier is muddy after rain. " "$i"; done)
+                for n in 1 2 3; do
+                  ask "{\"prompt\": \"$short\", \"n_predict\": 512, \"temperature\": 0, \"cache_prompt\": false}" |
+                    python3 -c "import json,sys,os; t=json.load(sys.stdin)[\"timings\"]; print(json.dumps({\"engine\": os.environ[\"LABEL\"], \"case\": \"short\", \"tokens_per_second\": round(t[\"predicted_per_second\"],1), \"prompt_per_second\": round(t[\"prompt_per_second\"],1)}))"
+                done
+                ask "{\"prompt\": \"$long\", \"n_predict\": 64, \"temperature\": 0, \"cache_prompt\": false}" |
+                  python3 -c "import json,sys,os; t=json.load(sys.stdin)[\"timings\"]; print(json.dumps({\"engine\": os.environ[\"LABEL\"], \"case\": \"long\", \"prompt_tokens\": t[\"prompt_n\"], \"prompt_per_second\": round(t[\"prompt_per_second\"],1), \"tokens_per_second\": round(t[\"predicted_per_second\"],1)}))"
+                grep -i -E "expert cache|offload|fit|VRAM|buffer size" /tmp/server.log | tail -8 >&2
+              ' bash "$@" | tee -a .moe/results.jsonl
+          }
+          avalon=/models/avalon/Qwen3.8-Flash-Next-Avalon-IQ3KS-00001-of-00033.gguf
+          mtp=/models/avalon/MTP/mtp-Qwen3.8-Flash-Next-shared-IQ3K-IQ4NL-FR65k.gguf
+          stock=$(docker run --rm -v toskar-moe-models:/models python:3.12-slim sh -c 'ls /models/unsloth/UD-IQ4_XS/*00001-of-*.gguf')
+          common=(-c 32768 -fa on -ctk q8_0 -ctv q4_0 --jinja --parallel 1)
+          measure "llama.cpp $LLAMA_REF, UD-IQ4_XS" toskar-moe-llamacpp -m "$stock" "${common[@]}"
+          measure "Avalon, IQ3_KS" toskar-moe-avalon -m "$avalon" "${common[@]}" -b 9536 -ub 9536
+          measure "Avalon, IQ3_KS, MTP" toskar-moe-avalon -m "$avalon" "${common[@]}" -b 9536 -ub 9536 \
+            -md "$mtp" --spec-type draft-mtp --spec-draft-n-max 2 -ubd 256 -ctkd q8_0 -ctvd q8_0
+
+      - name: Summary
+        if: always()
+        run: |
+          [ -s .moe/results.jsonl ] || exit 0
+          python3 - <<'EOF' | tee -a "$GITHUB_STEP_SUMMARY"
+          import json, statistics
+          rows = [json.loads(l) for l in open(".moe/results.jsonl") if l.strip().startswith("{")]
+          print("## Qwen3.8-Flash-Next with its experts in memory, on the rig\n")
+          print("| Engine | Answer, tokens/s (median of 3) | Prompt of about 8,000 tokens, tokens/s |")
+          print("| --- | --- | --- |")
+          for engine in dict.fromkeys(r["engine"] for r in rows):
+              short = [r["tokens_per_second"] for r in rows if r["engine"] == engine and r["case"] == "short"]
+              long = [r["prompt_per_second"] for r in rows if r["engine"] == engine and r["case"] == "long"]
+              print(f"| {engine} | {statistics.median(short) if short else '-'} | {long[0] if long else '-'} |")
+          EOF
+
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: moe-bench
+          path: .moe/
+          retention-days: 7
