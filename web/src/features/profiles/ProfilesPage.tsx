@@ -17,6 +17,8 @@ import {
   createStartOptions,
   filterProfiles,
   isBuiltInProfile,
+  defaultProfileIdOf,
+  freeProfileName,
   isTeamProfile,
   MODEL_ROLES,
   purposeIcon,
@@ -103,7 +105,6 @@ export function ProfilesPage() {
   const queryClient = useQueryClient()
   const navigate = useNavigate()
   const advancedMode = useUIStore((s) => s.advancedMode)
-  const setActiveProfileId = useUIStore((s) => s.setActiveProfileId)
   const [startFrom, setStartFrom] = useState<CreateStartFrom>('general')
   const [showCreate, setShowCreate] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -132,6 +133,22 @@ export function ProfilesPage() {
     retry: false,
   })
 
+  const settingsQuery = useQuery({
+    queryKey: ['settings'],
+    queryFn: () => api.getSettings(),
+    retry: false,
+  })
+
+  // New chats start with this profile (#959 follow-up): chosen here, or
+  // General Assistant.
+  const setDefaultMutation = useMutation({
+    mutationFn: (id: string) => api.updateSettings({ default_profile_id: id }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['settings'] })
+      setMenuOpenId(null)
+    },
+  })
+
   useEffect(() => {
     if (!menuOpenId) return
     const close = () => setMenuOpenId(null)
@@ -141,10 +158,8 @@ export function ProfilesPage() {
 
   const createMutation = useMutation({
     mutationFn: () => {
-      if (startFrom === 'blank') {
-        return api.createProfile(blankProfileTemplate())
-      }
-      return api.createProfile(profileTemplateFromPurpose(startFrom))
+      const template = startFrom === 'blank' ? blankProfileTemplate() : profileTemplateFromPurpose(startFrom)
+      return api.createProfile({ ...template, name: freeProfileName(template.name, profilesQuery.data ?? []) })
     },
     onSuccess: (created) => {
       queryClient.invalidateQueries({ queryKey: ['profiles'] })
@@ -159,7 +174,7 @@ export function ProfilesPage() {
   const duplicateMutation = useMutation({
     mutationFn: (profile: AIProfile) =>
       api.createProfile({
-        name: t('create.copyName', { name: profile.name }),
+        name: freeProfileName(t('create.copyName', { name: profile.name }), profilesQuery.data ?? []),
         purpose: profile.purpose,
         orchestrator_id: profile.orchestrator_id,
         node_policy: profile.node_policy,
@@ -201,6 +216,8 @@ export function ProfilesPage() {
     mutationFn: (id: string) => api.deleteProfile(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['profiles'] })
+      // Deleting the default puts new chats back on General Assistant.
+      queryClient.invalidateQueries({ queryKey: ['settings'] })
       setMenuOpenId(null)
       setEditingId(null)
       setDetailsId(null)
@@ -208,6 +225,7 @@ export function ProfilesPage() {
   })
 
   const allProfiles = sortProfilesForDisplay(profilesQuery.data ?? [])
+  const defaultId = defaultProfileIdOf(settingsQuery.data?.default_profile_id, profilesQuery.data ?? [])
   const profiles = filterProfiles(allProfiles, filter)
   const installedModels = (modelsQuery.data ?? []).filter(
     (m) => m.installed || (m.installed_on?.length ?? 0) > 0,
@@ -218,7 +236,6 @@ export function ProfilesPage() {
     startOptions.find((option) => option.id === startFrom) ?? startOptions[0]
 
   const openProfileInChat = (profileId: string) => {
-    setActiveProfileId(profileId)
     navigate(`/chat?profile=${encodeURIComponent(profileId)}&new=1`)
   }
 
@@ -404,6 +421,9 @@ export function ProfilesPage() {
                       <span className="label-caps">
                         {builtIn ? t('card.builtin') : t('card.custom')}
                       </span>
+                      {profile.id === defaultId ? (
+                        <span className="label-caps text-norn">{t('card.default')}</span>
+                      ) : null}
                     </div>
                     <p className="mt-0.5 text-sm text-ink-muted">
                       {purposeLabel(profile.purpose)}
@@ -550,6 +570,14 @@ export function ProfilesPage() {
                           {t('menu.duplicate')}
                         </MenuItem>
                         <MenuItem onClick={() => beginRename(profile)}>{t('menu.rename')}</MenuItem>
+                        {profile.id !== defaultId ? (
+                          <MenuItem
+                            onClick={() => setDefaultMutation.mutate(profile.id)}
+                            disabled={setDefaultMutation.isPending}
+                          >
+                            {t('menu.makeDefault')}
+                          </MenuItem>
+                        ) : null}
                         {builtIn && (
                           <MenuItem
                             disabled={resetMutation.isPending}

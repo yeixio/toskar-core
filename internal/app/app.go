@@ -711,7 +711,7 @@ func New(opts Options) (*App, error) {
 			}
 			return profileMgr.Get(ctx, p.ID)
 		},
-		DeleteProfile: profileMgr.Delete,
+		DeleteProfile: a.deleteProfile,
 		ResetProfile:  profileMgr.ResetPreset,
 		ListRuntimes:  rtMgr.List,
 		InstallRuntime: func(ctx context.Context, id string) error {
@@ -1610,6 +1610,11 @@ func (a *App) applySettingsPatch(ctx context.Context, patch map[string]any) erro
 		}
 	}
 	if v, ok := patch["default_profile_id"].(string); ok {
+		if v != "" {
+			if _, err := a.Profiles.Get(ctx, v); err != nil {
+				return contracts.Errorf("PROFILE_NOT_FOUND", map[string]any{"profile_id": v}, "there's no profile %q to start new chats with", v)
+			}
+		}
 		if err := a.Settings.Set(ctx, "default_profile_id", v); err != nil {
 			return err
 		}

@@ -164,6 +164,7 @@
   "PIN_INVALID": "No se puede guardar esa asignación. Solo se asignan Miembros y Visitantes, y solo a perfiles que existan.",
   "PINS_FAILED": "No se pudo leer a qué perfiles están asignadas las personas.",
   "PROFILE_NOT_FOUND": "Ese perfil no existe.",
+  "PROFILE_NAME_TAKEN": "Ya hay un perfil llamado {{name}}. Elige otro nombre.",
   "TRIAL_FAILED": "No se pudo probar ese mensaje. Revisa los controles de tema y que haya un modelo listo.",
   "ATTEMPT_NOT_FOUND": "Ese intento ya no está.",
   "EXAMPLES_FULL": "El perfil tiene 20 preguntas de ejemplo. Quita una para añadir esta.",

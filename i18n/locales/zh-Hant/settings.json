@@ -86,8 +86,7 @@
   },
   "defaultProfile": {
     "title": "預設設定檔",
-    "description": "開始新聊天時使用。",
-    "automatic": "自動"
+    "description": "開始新聊天時使用。"
   },
   "runOn": {
     "title": "聊天執行位置",

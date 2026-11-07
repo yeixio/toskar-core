@@ -164,6 +164,7 @@
   "PIN_INVALID": "Impossible d'enregistrer cette attribution. Seuls les Membres et les Visiteurs sont attribués, et seulement à des profils existants.",
   "PINS_FAILED": "Impossible de lire les profils attribués aux personnes.",
   "PROFILE_NOT_FOUND": "Ce profil n'existe pas.",
+  "PROFILE_NAME_TAKEN": "Un profil s'appelle déjà {{name}}. Choisissez un autre nom.",
   "TRIAL_FAILED": "Impossible d'essayer ce message. Vérifiez les contrôles de sujet et qu'un modèle est prêt.",
   "ATTEMPT_NOT_FOUND": "Cette tentative n'existe plus.",
   "EXAMPLES_FULL": "Le profil a 20 questions d'exemple. Retirez-en une pour ajouter celle-ci.",

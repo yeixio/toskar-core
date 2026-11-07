@@ -86,8 +86,7 @@
   },
   "defaultProfile": {
     "title": "默认配置",
-    "description": "开始新聊天时使用。",
-    "automatic": "自动"
+    "description": "开始新聊天时使用。"
   },
   "runOn": {
     "title": "聊天运行位置",

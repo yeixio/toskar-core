@@ -248,7 +248,7 @@ Control-plane routes are under `/api/v1`. The OpenAI-compatible routes are under
 
 | Method | Path | Purpose |
 | --- | --- | --- |
-| GET, POST | `/profiles` | List or create profiles |
+| GET, POST | `/profiles` | List or create profiles. Names are unique, ignoring capitals and spaces at the ends: creating or renaming onto a taken name answers `400` `PROFILE_NAME_TAKEN` with `name` |
 | GET, PATCH, DELETE | `/profiles/{id}` | Read, change, or delete a profile, including its roles, tools, `knowledge_sources`, and `orchestration` |
 | POST | `/profiles/{id}/reset` | Put a built-in profile back to how Toskar ships it. Other profiles are refused with 400 |
 | GET | `/tools` | Every tool's descriptor (level, input schema, outputs, requirements, time limit, provider), with whether it is enabled, its `health`, and the profiles that allow it |

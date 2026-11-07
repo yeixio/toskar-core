@@ -1051,16 +1051,38 @@ func writeChatStream(w http.ResponseWriter, ch <-chan pluginapi.ChatChunk) error
 	return nil
 }
 
+// deleteProfile removes a profile, and when it started new chats, they go
+// back to General Assistant rather than a profile that's gone.
+func (a *App) deleteProfile(ctx context.Context, id string) error {
+	if err := a.Profiles.Delete(ctx, id); err != nil {
+		return err
+	}
+	if def, _ := a.Settings.GetString(ctx, "default_profile_id", ""); def == id {
+		_ = a.Settings.Set(ctx, "default_profile_id", "")
+	}
+	return nil
+}
+
+// defaultProfileID is the profile a chat gets when none is named: the one
+// chosen for new chats, or else General Assistant.
 func (a *App) defaultProfileID(ctx context.Context) string {
 	items, err := a.Profiles.List(ctx)
 	if err != nil || len(items) == 0 {
 		return ""
 	}
-	preferred := []string{profiles.PresetGeneral, profiles.PresetProgramming, profiles.PresetResearch}
 	byID := make(map[string]profiles.Profile, len(items))
 	for _, p := range items {
 		byID[p.ID] = p
 	}
+	// The profile chosen for new chats, when it's still there.
+	if a.Settings != nil {
+		if id, _ := a.Settings.GetString(ctx, "default_profile_id", ""); id != "" {
+			if _, ok := byID[id]; ok {
+				return id
+			}
+		}
+	}
+	preferred := []string{profiles.PresetGeneral, profiles.PresetProgramming, profiles.PresetResearch}
 	for _, id := range preferred {
 		if p, ok := byID[id]; ok && len(p.Roles) > 0 {
 			return p.ID

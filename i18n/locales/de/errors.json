@@ -164,6 +164,7 @@
   "PIN_INVALID": "Diese Zuordnung kann nicht gespeichert werden. Nur Mitglieder und Gäste werden zugeordnet, und nur zu vorhandenen Profilen.",
   "PINS_FAILED": "Die Profilzuordnungen konnten nicht gelesen werden.",
   "PROFILE_NOT_FOUND": "Dieses Profil gibt es nicht.",
+  "PROFILE_NAME_TAKEN": "Ein Profil heißt bereits {{name}}. Wähle einen anderen Namen.",
   "TRIAL_FAILED": "Die Nachricht konnte nicht ausprobiert werden. Prüfe die Themenregeln und ob ein Modell bereit ist.",
   "ATTEMPT_NOT_FOUND": "Dieser Versuch ist nicht mehr da.",
   "EXAMPLES_FULL": "Das Profil hat 20 Beispielfragen. Entferne eine, um diese hinzuzufügen.",

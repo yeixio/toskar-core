@@ -164,6 +164,7 @@
   "PIN_INVALID": "無法儲存此指定。只能為成員和訪客指定，且只能指定已存在的設定檔。",
   "PINS_FAILED": "無法讀取為使用者指定的設定檔。",
   "PROFILE_NOT_FOUND": "沒有這個設定檔。",
+  "PROFILE_NAME_TAKEN": "已有名為「{{name}}」的設定檔。請換一個名稱。",
   "TRIAL_FAILED": "無法試用這則訊息。請檢查主題控制，並確認有可用的模型。",
   "ATTEMPT_NOT_FOUND": "這則嘗試已不存在。",
   "EXAMPLES_FULL": "該設定檔已有 20 個範例問題。請先刪除一個再新增。",

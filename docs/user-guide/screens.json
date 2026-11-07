@@ -375,9 +375,40 @@
           "status": "installed",
           "model_id": "gemma-4-e4b"
         },
-        "/api/v1/profiles": {
+        "/api/v1/profiles": [
+          {
+            "id": "general-assistant",
+            "name": "General Assistant",
+            "purpose": "general",
+            "orchestrator_id": "simple",
+            "node_policy": {
+              "mode": "automatic"
+            },
+            "roles": [
+              {
+                "role": "assistant",
+                "required": false
+              }
+            ],
+            "tools": []
+          }
+        ],
+        "/api/v1/profiles/general-assistant": {
           "id": "general-assistant",
-          "name": "General Assistant"
+          "name": "General Assistant",
+          "purpose": "general",
+          "orchestrator_id": "simple",
+          "node_policy": {
+            "mode": "automatic"
+          },
+          "roles": [
+            {
+              "role": "assistant",
+              "model_id": "gemma-4-e4b",
+              "required": true
+            }
+          ],
+          "tools": []
         },
         "/api/v1/conversations": {
           "id": "conv-first",

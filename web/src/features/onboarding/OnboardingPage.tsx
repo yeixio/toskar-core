@@ -11,6 +11,7 @@ import { subscribeEvents } from '@/lib/events'
 import { bytesToGb, formatBytes } from '@/lib/format'
 import {
   buildProfileFromRecommendation,
+  presetIdForPurpose,
   presetOptions,
   purposeToApiQuery,
 } from '@/lib/profilePresets'
@@ -32,7 +33,6 @@ export function OnboardingPage() {
   const { t } = useTranslation('onboarding')
   const navigate = useNavigate()
   const setOnboardingComplete = useUIStore((s) => s.setOnboardingComplete)
-  const setActiveProfileId = useUIStore((s) => s.setActiveProfileId)
 
   const [step, setStep] = useState<OnboardingStep>('setup')
   const [selectedPurpose, setSelectedPurpose] = useState<Purpose>('general')
@@ -115,12 +115,17 @@ export function OnboardingPage() {
 
       setPhase('profile')
       setPhaseDetail(t('install.profile'))
-      const profileBody = buildProfileFromRecommendation(selectedPurpose, rec)
-      const profile = await api.createProfile(profileBody)
+      // The built-in profile for the purpose gets the recommended models and
+      // starts new chats; a new one would share its name.
+      const presetId = presetIdForPurpose(selectedPurpose)
+      const preset = ((await api.getProfiles()) ?? []).find((p) => p.id === presetId)
+      const profile = preset
+        ? await api.updateProfile(preset.id, { ...preset, roles: rec.roles })
+        : await api.createProfile(buildProfileFromRecommendation(selectedPurpose, rec))
       if (!profile?.id) {
         throw new Error(t('install.noProfileId'))
       }
-      setActiveProfileId(profile.id)
+      await api.updateSettings({ default_profile_id: profile.id })
 
       setPhase('conversation')
       setPhaseDetail(t('install.conversation'))

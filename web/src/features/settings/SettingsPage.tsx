@@ -31,6 +31,7 @@ import { formatGigabytes } from '@/i18n/format'
 import { AutomationDigestSetting } from './AutomationDigest'
 import { ShownError, shownOr, type Shown } from '@/components/ui/ShownError'
 import { LoadError } from '@/components/ui/LoadError'
+import { defaultProfileIdOf } from '@/features/profiles/profilePresentation'
 
 /** How long models stay loaded, in minutes; 0 keeps them until stopped (#498). */
 const KEEP_READY = [15, 60, 240, 0]
@@ -340,11 +341,10 @@ export function SettingsPage() {
               <select
                 className="field w-full"
                 aria-labelledby="default-profile-title"
-                value={settings?.default_profile_id ?? ''}
+                value={defaultProfileIdOf(settings?.default_profile_id, profiles)}
                 disabled={busy}
                 onChange={(e) => patch({ default_profile_id: e.target.value })}
               >
-                <option value="">{t('defaultProfile.automatic')}</option>
                 {profiles.map((p) => (
                   <option key={p.id} value={p.id}>
                     {p.name}

@@ -86,8 +86,7 @@
   },
   "defaultProfile": {
     "title": "Default profile",
-    "description": "Used when you start a new chat.",
-    "automatic": "Automatic"
+    "description": "Used when you start a new chat."
   },
   "runOn": {
     "title": "Run chats on",

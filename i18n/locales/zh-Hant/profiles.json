@@ -69,7 +69,8 @@
     "computerSelection": "電腦選擇",
     "selectionDetail": "{{title}}。{{detail}}",
     "strategy": "策略：<strong>{{strategy}}</strong>",
-    "thisMachine": "{{name}}（這台機器）"
+    "thisMachine": "{{name}}（這台機器）",
+    "default": "新聊天的預設設定檔"
   },
   "menu": {
     "duplicate": "複製",
@@ -77,7 +78,8 @@
     "confirmReset": "要將「{{name}}」重置為 Toskar 的原始設定嗎？你對它所做的變更將會遺失。",
     "reset": "重置為預設值",
     "confirmDelete": "要刪除「{{name}}」嗎？這個動作無法復原。",
-    "delete": "刪除"
+    "delete": "刪除",
+    "makeDefault": "用於新聊天"
   },
   "strategies": {
     "auto": {

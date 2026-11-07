@@ -2,6 +2,7 @@ package profiles_test
 
 import (
 	"context"
+	"fmt"
 	"path/filepath"
 	"testing"
 	"time"
@@ -22,7 +23,7 @@ func TestListDoesNotDeadlockWithSingleConn(t *testing.T) {
 	ctx := context.Background()
 	for i := 0; i < 3; i++ {
 		if _, err := mgr.Create(ctx, profiles.Profile{
-			Name:           "Profile",
+			Name:           fmt.Sprintf("Profile %d", i),
 			Purpose:        "general",
 			OrchestratorID: "simple",
 			Roles: []contracts.ModelRole{
@@ -181,7 +182,7 @@ func TestCustomProfilesGainLocalTools(t *testing.T) {
 	if err := mgr.EnsurePresets(ctx); err != nil {
 		t.Fatal(err)
 	}
-	made, err := mgr.Create(ctx, profiles.Profile{Name: "General Assistant", OrchestratorID: "simple",
+	made, err := mgr.Create(ctx, profiles.Profile{Name: "My assistant", OrchestratorID: "simple",
 		Roles: []contracts.ModelRole{{Role: "assistant"}},
 		Tools: []contracts.ToolPolicy{{ToolID: "internet.search", Policy: "allow"}, {ToolID: "video.generate", Policy: "deny"}}})
 	if err != nil {
@@ -220,5 +221,68 @@ func TestCustomProfilesGainLocalTools(t *testing.T) {
 	}
 	if got, _ := mgr.Get(ctx, none.ID); len(got.Tools) != 0 {
 		t.Fatalf("a profile with no tools gained %v", got.Tools)
+	}
+}
+
+// Two profiles can't share a name (one with different case or spaces is the
+// same name), and duplicates from before are renamed at start, built-in and
+// oldest first, with nothing deleted.
+func TestProfileNamesAreUnique(t *testing.T) {
+	db, err := store.Open(filepath.Join(t.TempDir(), "test.db"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = db.Close() })
+	mgr := profiles.NewManager(db.SQL)
+	ctx := context.Background()
+	if err := mgr.EnsurePresets(ctx); err != nil {
+		t.Fatal(err)
+	}
+	mk := func(name string) (profiles.Profile, error) {
+		return mgr.Create(ctx, profiles.Profile{Name: name, OrchestratorID: "simple", Roles: []contracts.ModelRole{{Role: "assistant"}}})
+	}
+	for _, name := range []string{"General Assistant", " general assistant "} {
+		if _, err := mk(name); err == nil {
+			t.Fatalf("%q: made a second", name)
+		} else if code, _ := contracts.ErrorCode(err); code != "PROFILE_NAME_TAKEN" {
+			t.Fatalf("%q: %v", name, err)
+		}
+	}
+	shop, err := mk("Shop help")
+	if err != nil {
+		t.Fatal(err)
+	}
+	other, err := mk("Other")
+	if err != nil {
+		t.Fatal(err)
+	}
+	other.Name = "Shop Help"
+	if err := mgr.Update(ctx, other); err == nil {
+		t.Fatal("renamed onto another's name")
+	}
+	shop.Name = "Shop help"
+	if err := mgr.Update(ctx, shop); err != nil {
+		t.Fatalf("keeping its own name: %v", err)
+	}
+
+	// Duplicates made before names were checked, as setup made them.
+	for _, id := range []string{"copy-a", "copy-b"} {
+		if _, err := db.SQL.ExecContext(ctx, `INSERT INTO profiles (id, name, purpose, orchestrator_id, node_policy_json, tools_json) VALUES (?, 'General Assistant', 'general', 'simple', '{"mode":"automatic"}', '[]')`, id); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := mgr.EnsurePresets(ctx); err != nil {
+		t.Fatal(err)
+	}
+	names := map[string]string{}
+	for _, id := range []string{profiles.PresetGeneral, "copy-a", "copy-b"} {
+		p, err := mgr.Get(ctx, id)
+		if err != nil {
+			t.Fatalf("%s: %v", id, err)
+		}
+		names[id] = p.Name
+	}
+	if names[profiles.PresetGeneral] != "General Assistant" || names["copy-a"] != "General Assistant (2)" || names["copy-b"] != "General Assistant (3)" {
+		t.Errorf("names %v", names)
 	}
 }

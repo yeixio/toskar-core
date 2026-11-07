@@ -164,6 +164,7 @@
   "PIN_INVALID": "Impossibile salvare questa assegnazione. Si assegnano solo Membri e Ospiti, e solo a profili esistenti.",
   "PINS_FAILED": "Impossibile leggere a quali profili sono assegnate le persone.",
   "PROFILE_NOT_FOUND": "Questo profilo non esiste.",
+  "PROFILE_NAME_TAKEN": "Esiste già un profilo chiamato {{name}}. Scegli un altro nome.",
   "TRIAL_FAILED": "Impossibile provare questo messaggio. Controlla i controlli sugli argomenti e che un modello sia pronto.",
   "ATTEMPT_NOT_FOUND": "Questo tentativo non c'è più.",
   "EXAMPLES_FULL": "Il profilo ha 20 domande di esempio. Rimuovine una per aggiungere questa.",

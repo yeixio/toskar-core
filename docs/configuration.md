@@ -111,7 +111,7 @@ Settings are stored in `toskar.db`. The app's Settings page shows them, and `GET
 | `idle_unload_minutes` | `15` | Minutes before an idle model is unloaded; `0` never unloads. Settings calls it **Keep models ready** (15 minutes, 1 hour, 4 hours, or Until I stop them). A model the phone, tablet, watch, car, or TV app used or warmed up in the last hour stays loaded regardless, so the next question from that device starts at once (#498). |
 | `keep_running_in_background` | `false` | Keep the daemon running when the desktop window closes. Saving a schedule turns it on. |
 | `launch_at_login` | `false` | Start the desktop app at sign-in |
-| `default_profile_id` | empty | Profile for new chats |
+| `default_profile_id` | empty | Profile new chats start with, in the apps and for a chat the API starts without one. Empty, or a profile that's gone, is General Assistant. Setting one that doesn't exist answers `PROFILE_NOT_FOUND` |
 | `default_execution` | `automatic` | **Run chats on**: `automatic` (Norn picks a computer), `local` (this computer), or `ask` (ask each time) |
 | `download_behavior` | `ask` | `ask` before downloading a model, or `automatic` |
 | `model_storage_limit_gb` | `0` | Most disk space models may use; `0` is unlimited |

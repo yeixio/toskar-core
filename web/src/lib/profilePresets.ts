@@ -59,6 +59,20 @@ export function purposeToApiQuery(purpose: Purpose): string {
   return purpose
 }
 
+/** The built-in profile for a purpose, which setup fills in rather than copies: a copy left two General Assistants. */
+export function presetIdForPurpose(purpose: Purpose): string {
+  switch (purpose) {
+    case 'coding':
+      return 'programming'
+    case 'research':
+      return 'research'
+    case 'custom':
+      return 'custom'
+    default:
+      return 'general-assistant'
+  }
+}
+
 export function buildProfileFromRecommendation(
   purpose: Purpose,
   recommendation: Recommendation,

@@ -69,7 +69,8 @@
     "computerSelection": "컴퓨터 선택",
     "selectionDetail": "{{title}}. {{detail}}",
     "strategy": "전략: <strong>{{strategy}}</strong>",
-    "thisMachine": "{{name}}(이 컴퓨터)"
+    "thisMachine": "{{name}}(이 컴퓨터)",
+    "default": "새 채팅 기본값"
   },
   "menu": {
     "duplicate": "복제",
@@ -77,7 +78,8 @@
     "confirmReset": "“{{name}}”을(를) Toskar 기본 상태로 재설정할까요? 변경한 내용은 사라져요.",
     "reset": "기본값으로 재설정",
     "confirmDelete": "“{{name}}”을(를) 삭제할까요? 이 작업은 되돌릴 수 없어요.",
-    "delete": "삭제"
+    "delete": "삭제",
+    "makeDefault": "새 채팅에 사용"
   },
   "strategies": {
     "auto": {

@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/google/uuid"
 	"github.com/yeixio/toskar-core/internal/tools"
@@ -62,7 +63,80 @@ func (m *Manager) EnsurePresets(ctx context.Context) error {
 	if err := m.migrateTeamProfiles(ctx); err != nil {
 		return err
 	}
+	if err := m.renameDuplicates(ctx); err != nil {
+		return err
+	}
 	return m.mergeBuiltinTools(ctx)
+}
+
+// nameFree refuses a name another profile has, ignoring case and spaces at
+// the ends: two profiles called General Assistant left people unsure which
+// one a chat used.
+func (m *Manager) nameFree(ctx context.Context, name, id string) error {
+	var other string
+	err := m.db.QueryRowContext(ctx, `SELECT id FROM profiles WHERE lower(trim(name)) = lower(trim(?)) AND id != ? LIMIT 1`, name, id).Scan(&other)
+	if err == sql.ErrNoRows {
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+	return contracts.Errorf("PROFILE_NAME_TAKEN", map[string]any{"name": strings.TrimSpace(name)}, "a profile is already called %q; choose another name", strings.TrimSpace(name))
+}
+
+// renameDuplicates gives each profile that shares a name with another a name
+// of its own, as "General Assistant (2)": setup used to copy the built-in
+// profile under its name. Built-in profiles keep theirs, then the oldest
+// does. Nothing is deleted, since chats belong to these profiles.
+func (m *Manager) renameDuplicates(ctx context.Context) error {
+	rows, err := m.db.QueryContext(ctx, `SELECT id, name FROM profiles ORDER BY created_at, rowid`)
+	if err != nil {
+		return err
+	}
+	type named struct{ id, name string }
+	var all []named
+	for rows.Next() {
+		var n named
+		if err := rows.Scan(&n.id, &n.name); err != nil {
+			rows.Close()
+			return err
+		}
+		all = append(all, n)
+	}
+	rows.Close()
+	if err := rows.Err(); err != nil {
+		return err
+	}
+	key := func(name string) string { return strings.ToLower(strings.TrimSpace(name)) }
+	taken := map[string]bool{}
+	var later []named
+	for _, n := range all {
+		if IsPreset(n.id) {
+			taken[key(n.name)] = true
+		}
+	}
+	for _, n := range all {
+		if IsPreset(n.id) {
+			continue
+		}
+		if taken[key(n.name)] {
+			later = append(later, n)
+			continue
+		}
+		taken[key(n.name)] = true
+	}
+	for _, n := range later {
+		base := strings.TrimSpace(n.name)
+		name := base
+		for i := 2; taken[key(name)]; i++ {
+			name = fmt.Sprintf("%s (%d)", base, i)
+		}
+		taken[key(name)] = true
+		if _, err := m.db.ExecContext(ctx, `UPDATE profiles SET name = ?, updated_at = datetime('now') WHERE id = ?`, name, n.id); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // migrateTeamProfiles rewrites profiles saved for the old Team orchestrator,
@@ -225,6 +299,11 @@ func (m *Manager) Create(ctx context.Context, p Profile) (Profile, error) {
 	if err := Validate(p); err != nil {
 		return Profile{}, err
 	}
+	if !IsPreset(p.ID) {
+		if err := m.nameFree(ctx, p.Name, p.ID); err != nil {
+			return Profile{}, err
+		}
+	}
 	nodePolicy, _ := json.Marshal(p.NodePolicy)
 	tools, _ := json.Marshal(p.Tools)
 	tx, err := m.db.BeginTx(ctx, nil)
@@ -251,6 +330,9 @@ func (m *Manager) Create(ctx context.Context, p Profile) (Profile, error) {
 func (m *Manager) Update(ctx context.Context, p Profile) error {
 	p = Normalize(p)
 	if err := Validate(p); err != nil {
+		return err
+	}
+	if err := m.nameFree(ctx, p.Name, p.ID); err != nil {
 		return err
 	}
 	nodePolicy, _ := json.Marshal(p.NodePolicy)

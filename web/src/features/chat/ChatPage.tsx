@@ -245,8 +245,6 @@ export function ChatPage() {
   const member = role === undefined || atLeast('member')
   const queryClient = useQueryClient()
   const [searchParams, setSearchParams] = useSearchParams()
-  const activeProfileId = useUIStore((s) => s.activeProfileId)
-  const setActiveProfileId = useUIStore((s) => s.setActiveProfileId)
   const advancedMode = useUIStore((s) => s.advancedMode)
   const chatHistoryPinned = useUIStore((s) => s.chatHistoryPinned)
   const setChatHistoryPinned = useUIStore((s) => s.setChatHistoryPinned)
@@ -483,8 +481,9 @@ export function ChatPage() {
       setSelectedId(fromQuery)
     }
     if (profileFromQuery) {
-      setActiveProfileId(profileFromQuery)
       setDraftProfileId(profileFromQuery)
+    } else if (startNew) {
+      setDraftProfileId(null)
     }
     if (startNew) {
       setSelectedId(null)
@@ -496,7 +495,7 @@ export function ChatPage() {
       setListError(null)
     }
     setSearchParams({}, { replace: true })
-  }, [searchParams, setSearchParams, setActiveProfileId])
+  }, [searchParams, setSearchParams])
 
   const conversations = conversationsQuery.data ?? []
   const visibleConversations = useMemo(() => {
@@ -527,26 +526,16 @@ export function ChatPage() {
   }, [profilesQuery.data, allowedProfiles])
   const mayUse = (id?: string | null) => (id && (!allowedProfiles || allowedProfiles.includes(id)) ? id : null)
 
-  const hasCluster = useMemo(() => {
-    const nodes = nodesQuery.data ?? []
-    const online = nodes.filter((n) => n.status === 'online')
-    if (online.length > 1) return true
-    return nodes.some((n) => !n.is_local && (n.paired || n.status === 'online'))
-  }, [nodesQuery.data])
-
   const preferredProfileId = settingsQuery.data?.default_profile_id
   const preferredExists = preferredProfileId
     ? sortedProfiles.some((p) => p.id === preferredProfileId)
     : false
 
+  // A new chat starts with the profile chosen for new chats, or General
+  // Assistant. A profile picked once, in Profiles or another chat, doesn't
+  // carry over to the next new chat: a test profile did, in a demo.
   const defaultProfileId =
-    mayUse(activeProfileId) ||
-    (preferredExists ? preferredProfileId : null) ||
-    (hasCluster
-      ? sortedProfiles.find((p) => isTeamProfile(p))?.id ||
-        sortedProfiles.find((p) => p.id === 'programming')?.id ||
-        sortedProfiles.find((p) => p.purpose === 'coding')?.id
-      : null) ||
+    mayUse(preferredExists ? preferredProfileId : null) ||
     sortedProfiles.find((p) => p.id === 'general-assistant')?.id ||
     sortedProfiles.find((p) => p.purpose === 'general')?.id ||
     sortedProfiles[0]?.id ||
@@ -1638,6 +1627,8 @@ export function ChatPage() {
 
   const startNewChat = () => {
     setSelectedId(null)
+    // A new chat starts with the default profile, not the last one used.
+    setDraftProfileId(null)
     setSendError(null)
     setCapabilityNotice(null)
     setToolFailure(null)
