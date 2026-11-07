@@ -688,7 +688,7 @@
     "askBetter": "想要更好的回答，請停車後在手機上再問一次。",
     "noModel": "你手機上的 Toskar 還沒有模型。停車後請新增一個。",
     "failed": "沒有成功。請再試一次。",
-    "locked": "車上的 Toskar 包含在 Toskar Unlock 中。停車後請在手機上取得。",
+    "locked": "車上的 Toskar 包含在 Toskar Unlock 中，它還會在手機上帶來更多模型、網頁查詢和記憶功能。停車後，Toskar 會在手機上為你提供。",
     "permission": "Toskar 需要麥克風和語音辨識。停車後請在手機上允許。",
     "unavailable": "這支手機不支援你所用語言的語音辨識。"
   },

@@ -702,7 +702,7 @@
     "askBetter": "Pour une meilleure réponse, redemandez sur votre téléphone une fois garé.",
     "noModel": "Toskar sur votre téléphone n’a pas encore de modèle. Ajoutez-en un une fois garé.",
     "failed": "Cela n’a pas fonctionné. Réessayez.",
-    "locked": "Toskar en voiture est inclus dans Toskar Unlock. Obtenez-le sur votre téléphone une fois garé.",
+    "locked": "Toskar en voiture est inclus dans Toskar Unlock, qui ajoute aussi plus de modèles, les recherches sur le web et la mémoire sur votre téléphone. Toskar vous le proposera sur votre téléphone une fois garé.",
     "permission": "Toskar a besoin du micro et de la reconnaissance vocale. Autorisez-les sur votre téléphone une fois garé.",
     "unavailable": "La reconnaissance vocale n’est pas disponible pour votre langue sur ce téléphone."
   },
