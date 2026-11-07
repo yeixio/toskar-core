@@ -29,6 +29,10 @@ var toolGroups = map[string][]string{
 	"gitw":    {"git.add", "git.commit", "git.push"},
 	// schedule drafts an automation the person confirms (#204).
 	"schedule": {"automations.schedule"},
+	// news reads the AI news, and results the latest results of the
+	// person's automations, such as a morning briefing (toskar-apps#142).
+	"news":    {"news.read"},
+	"results": {"automations.results"},
 }
 
 // Groups each kind of request gets before cues in the message add more.
@@ -153,6 +157,14 @@ func ToolsFor(k Kind, message string, available []string) []string {
 	// schedule, such as "every morning" or "jeden Montag".
 	if cueSchedule.MatchString(message) || automations.Recurring(message) {
 		want["schedule"] = true
+	}
+	// Words in each of the app's languages ask for the AI news or an
+	// automation's latest result (i18n/lookups).
+	if AsksForNews(message) {
+		want["news"] = true
+	}
+	if AsksForResults(message) {
+		want["results"] = true
 	}
 	var out []string
 	for _, id := range available {

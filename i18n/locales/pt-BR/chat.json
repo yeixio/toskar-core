@@ -705,6 +705,8 @@
     "saved": "Salvei {{path}}",
     "created": "Criei {{name}}",
     "draftedAutomation": "Rascunho da automação “{{name}}”",
+    "readNews": "Li as notícias de IA de hoje",
+    "readAutomationResults": "Li os resultados mais recentes das suas automações",
     "ranCommand": "Executei um comando neste computador",
     "browserOpened": "Abri {{page}} no navegador",
     "browserClicked": "Cliquei na página, agora em {{page}}",

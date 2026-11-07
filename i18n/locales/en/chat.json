@@ -673,6 +673,8 @@
     "saved": "Saved {{path}}",
     "created": "Created {{name}}",
     "draftedAutomation": "Drafted the automation “{{name}}”",
+    "readNews": "Read today's AI news",
+    "readAutomationResults": "Read your latest automation results",
     "ranCommand": "Ran a command on this computer",
     "browserOpened": "Opened {{page}} in the browser",
     "browserClicked": "Clicked on the page, now {{page}}",

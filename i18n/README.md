@@ -18,6 +18,9 @@ i18n/
     onboarding.json         the first-run setup
   requests/<language>.json  the words automation requests are read with, such as
                             "every morning at 8" (format: requests/README.md)
+  lookups/<language>.json   the words that offer chat the AI news or an automation's
+                            latest result, such as "what's in my briefing"
+                            (format: lookups/README.md)
     memory.json             the Memory page
     models.json             the Models page and what Chat says about a model
     computers.json          the Computers page

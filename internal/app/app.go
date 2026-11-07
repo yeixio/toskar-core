@@ -976,6 +976,10 @@ func New(opts Options) (*App, error) {
 	a.Tools.Register(&artifacts.CreateTool{Store: a.Artifacts, Fonts: &artifacts.Fonts{Dir: filepath.Join(cfg.DataDir, "fonts")}})
 	a.Tools.Register(&artifacts.AnalyzeTool{Store: a.Artifacts})
 	a.Tools.Register(&scheduleTool{app: a})
+	// The AI news and the person's own automation results, to read out in
+	// any chat, such as in the car (toskar-apps#142).
+	a.Tools.Register(&newsTool{news: a.News})
+	a.Tools.Register(&resultsTool{store: a.Automations})
 	a.API.BindArtifacts(a.Artifacts)
 	a.API.BindKnowledge(a.Mimir)
 	// A media.json in the data folder replaces the built-in picture and

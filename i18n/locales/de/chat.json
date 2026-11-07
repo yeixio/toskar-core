@@ -673,6 +673,8 @@
     "saved": "{{path}} gespeichert",
     "created": "{{name}} erstellt",
     "draftedAutomation": "Automation „{{name}}“ entworfen",
+    "readNews": "Die heutigen KI-Nachrichten gelesen",
+    "readAutomationResults": "Die neuesten Ergebnisse deiner Automationen gelesen",
     "ranCommand": "Einen Befehl auf diesem Computer ausgeführt",
     "browserOpened": "{{page}} im Browser geöffnet",
     "browserClicked": "Auf die Seite geklickt, jetzt {{page}}",

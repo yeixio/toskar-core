@@ -39,6 +39,20 @@ The capability names `document.create`, `pdf.create`, and `spreadsheet.create` r
 
 `spreadsheet.analyze` summarizes a spreadsheet (`.xlsx`, `.csv`, or `.tsv`) attached to or made in the chat, by name or id. For each sheet it returns the number of rows and the first five. For each column it returns the type (number, date, text, or empty), how many cells are filled, and, for numbers, the minimum, maximum, average, and total; for other columns, how many distinct values there are and the most common ones. It reads up to 10 sheets, 50 columns, and 200,000 rows, so an answer can use a whole file that would not fit in the prompt. It is offered when a message mentions a spreadsheet, CSV, Excel, a workbook, or a sheet.
 
+## The AI news and automation results
+
+Two read-only tools read out what Toskar already keeps, in any chat, such as "read me today's AI news" or "what's in my briefing" said in the car (yeixio/toskar-apps#142).
+
+| Tool | What it returns | Capability |
+| --- | --- | --- |
+| `news.read` | The AI news that News shows, newest first: up to `count` items (default 5, at most 10), each with its title, a one-line summary, its source, and its date. With the AI news setting off it returns `enabled: false` and a status saying so, not an error. When toskar.ai can't be reached, the copy kept on this computer is used. | Internet (person: web) |
+| `automations.results` | The latest successful result of each of the person's own automations, most recent first, up to five: its name, when it ran (`ran_at`, and `when`, such as "today at 07:30"), and its text, up to 3,000 characters. `name` narrows it to automations whose name contains it; when none does, all are returned with a note. A newest run that failed is named. | Automations |
+
+- **Who sees what:** results come from the request's person's automations only, the same list `GET /automations` returns for them (#206). A chat portal's guest and a Visitor get none, and neither reads the AI news, as the routes for News and Automations need a Member. A person whose web or automations capability is off isn't offered the tool.
+- **When they're offered:** words in `i18n/lookups/<language>.json` offer them, in all ten languages ("ai news", "ki-nachrichten", "aiニュース"; "my briefing", "mis automatizaciones", "自动化结果"). Like a connected service's read tool, they're marked `prefetch`, so a message that asks is answered from their data rather than from a web search.
+- **Trust:** the news and an automation's result may quote other people's pages, so after either, a tool that changes something asks first. Each news item read is listed as a source.
+- **Profiles:** both are in the built-in profiles. `news.read` reaches toskar.ai, so it's off in offline profiles; `automations.results` stays on.
+
 ## Browser
 
 The browser tools use web pages that need JavaScript or interaction, in an isolated browser. For simply reading a page, `internet.open` is faster. They are the Browser capability, and are not in offline profiles.

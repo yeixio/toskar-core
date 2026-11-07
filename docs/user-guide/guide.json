@@ -1587,6 +1587,14 @@
         },
         {
           "type": "heading",
+          "text": "Hear the latest result in chat"
+        },
+        {
+          "type": "paragraph",
+          "text": "Ask in any chat, on the computer, your phone, or in the car: \"What's in my briefing?\", \"What did my automations say today?\", or \"What did my automation Price watch find?\". Toskar reads out each automation's latest result and when it ran. You only ever hear your own automations. [In the car](#phone) covers asking out loud."
+        },
+        {
+          "type": "heading",
           "text": "From the command line"
         },
         {
@@ -2933,6 +2941,33 @@
             "New conversation starts over, Stop ends the answer, and End closes Toskar. Continue the conversation on the car's screen picks up where you left off.",
             "If you open it and say nothing for 8 seconds, it closes on its own.",
             "The chat is in the app afterwards, on whichever device answered."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Ask for the AI news or your briefing"
+        },
+        {
+          "type": "paragraph",
+          "text": "Toskar can read out what it already keeps for you: today's AI news, and the latest results of your automations, such as a morning briefing you set up at home. Ask for them the way you'd ask a person, in any of the app's languages."
+        },
+        {
+          "type": "list",
+          "title": "Things to ask",
+          "items": [
+            "\"Read me today's AI news.\" You hear a few of the newest items, each with a one-line summary and where it's from.",
+            "\"What's in my briefing?\" or \"What did my automations say?\" You hear each automation's latest result, newest first, and when it ran.",
+            "\"What did my automation Price watch find?\" Naming an automation reads just that one.",
+            "\"Read your last answer again.\" A follow-up stays in the same chat, so Toskar can repeat or shorten what it said."
+          ]
+        },
+        {
+          "type": "list",
+          "title": "Limits",
+          "items": [
+            "You hear only your own automations, never another person's. Guests of a chat page get neither the news nor any results.",
+            "If AI news is off in Settings, Toskar says so instead of reading it.",
+            "Long results are cut short in the car. The whole result stays in the automation's history."
           ]
         },
         {
