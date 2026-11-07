@@ -464,7 +464,7 @@ func (o *Orchestrator) Run(
 				env.Emit(events.ToolFailed, map[string]any{"malformed": true, "error": "invalid tool call"})
 				messages = append(messages,
 					pluginapi.ChatMessage{Role: "assistant", Content: content},
-					pluginapi.ChatMessage{Role: "user", Content: "That tool call was not valid and was not run. Reply with one JSON object {\"tool_call\":{\"id\":\"...\",\"args\":{}}} using a listed tool, or answer in plain text."},
+					pluginapi.ChatMessage{Role: "user", Content: invalidCallNote(offered)},
 				)
 				continue
 			}
@@ -879,4 +879,15 @@ func PickRole(roles []contracts.ModelRole) string {
 // declinedByPerson reports a tool call the person declined when asked.
 func declinedByPerson(err error) bool {
 	return strings.Contains(err.Error(), "denied by user")
+}
+
+// invalidCallNote asks again for a call that wasn't valid, naming the tools
+// by id: models such as Qwen 3.5 put their own label for the call there
+// otherwise, and repeat it (#1124).
+func invalidCallNote(offered []string) string {
+	note := "That tool call was not valid and was not run. Reply with one JSON object {\"tool_call\":{\"id\":\"...\",\"args\":{}}}, where id is the tool's id exactly"
+	if len(offered) > 0 {
+		note += ", one of: " + strings.Join(offered, ", ")
+	}
+	return note + "; and args is an object with that tool's arguments. Or answer in plain text."
 }

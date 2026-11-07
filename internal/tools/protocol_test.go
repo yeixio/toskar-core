@@ -97,3 +97,38 @@ func TestTaggedAndFunctionCallFormats(t *testing.T) {
 		t.Fatalf("function %+v %q", fn.Call, fn.Text)
 	}
 }
+
+// Calls as Qwen 3.5 wrote them, with its own label for the call in id, or
+// the arguments as a bare string, run as the tool they name (#1124).
+func TestCallsWithALabelForIDRunAsTheTool(t *testing.T) {
+	for _, tc := range []struct{ raw, id, arg, value string }{
+		{`{"tool_call":{"id":"terminal_1","args":{"command":"go test ./..."}}}`, "terminal", "command", "go test ./..."},
+		{`{"tool_call":{"id":"run_test_001","args":{"command":"go test ./..."}}}`, "terminal", "command", "go test ./..."},
+		{`{"tool_call":{"id":"terminal_1","args":"du -ah --max-depth=2 | sort -hr"}}`, "terminal", "command", "du -ah --max-depth=2 | sort -hr"},
+		{`{"tool_call":{"id":"read_readme","args":{"path":"README.md"}}}`, "filesystem.read", "path", "README.md"},
+		{`{"tool_call":{"id":"filesystem.read-2","args":{"path":"README.md"}}}`, "filesystem.read", "path", "README.md"},
+	} {
+		out := ParseModelOutput(tc.raw)
+		if out.Call == nil || out.Call.ID != tc.id || out.Call.Args[tc.arg] != tc.value || len(out.Call.Args) != 1 {
+			t.Errorf("%s: call=%+v malformed=%v", tc.raw, out.Call, out.Malformed)
+		}
+	}
+}
+
+// What a call asks for is never guessed: arguments that fit several tools,
+// or none, and a bare string for a tool with no single argument, stay
+// invalid, and the model is asked again.
+func TestUnclearCallsStayInvalid(t *testing.T) {
+	for _, raw := range []string{
+		`{"tool_call":{"id":"look_it_up","args":{"query":"Juneau weather"}}}`,
+		`{"tool_call":{"id":"fs_search_1","args":{"query":"*","path":"./"}}}`,
+		`{"tool_call":{"id":"run_tests","args":"go test ./..."}}`,
+		`{"tool_call":{"id":"filesystem.write_1","args":"hello"}}`,
+		`{"tool_call":{"id":"terminal","args":"   "}}`,
+	} {
+		out := ParseModelOutput(raw)
+		if out.Call != nil || !out.Malformed {
+			t.Errorf("%s: call=%+v malformed=%v", raw, out.Call, out.Malformed)
+		}
+	}
+}

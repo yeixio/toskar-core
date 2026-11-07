@@ -258,8 +258,11 @@ func decodeCall(raw string) (*ModelCall, bool, bool) {
 	sawWrapper := strings.Contains(raw, "tool_call")
 	for _, candidate := range candidates {
 		if call, ok := unmarshalCall(candidate); ok {
-			if validCall(call.ID, call.Args) {
+			if _, plain := call.Args[plainArgs]; !plain && validCall(call.ID, call.Args) {
 				return call, true, false
+			}
+			if repaired, ok := repairCall(call); ok {
+				return repaired, true, false
 			}
 			return nil, false, true
 		}
@@ -339,7 +342,11 @@ func unmarshalCall(raw string) (*ModelCall, bool) {
 	argsRaw := firstRaw(body.Args, body.Arguments, body.Parameters)
 	args, ok := decodeArgs(string(argsRaw))
 	if !ok && len(argsRaw) > 0 {
-		return nil, false
+		var text string
+		if json.Unmarshal(argsRaw, &text) != nil || strings.TrimSpace(text) == "" {
+			return nil, false
+		}
+		args = map[string]any{plainArgs: text}
 	}
 	if args == nil {
 		args = map[string]any{}
@@ -385,6 +392,74 @@ func firstNonEmpty(values ...string) string {
 		}
 	}
 	return ""
+}
+
+// plainArgs holds arguments a model gave as a bare string, such as a command,
+// until the call's tool says which argument that is.
+const plainArgs = "\x00plain"
+
+// callNumber is a number a model added to a tool's id to label the call, as
+// in terminal_1.
+var callNumber = regexp.MustCompile(`[_-]\d+$`)
+
+// repairCall mends how a call is written, never what it asks for, as models
+// such as Qwen 3.5 write them: an id that numbers the call, such as
+// terminal_1, is the tool; an id that names no tool, such as run_tests, is the
+// one tool whose required arguments are exactly the ones given; and arguments
+// given as a bare string are the tool's one required argument. Whether the
+// tool may run is decided later, as for any call.
+func repairCall(call *ModelCall) (*ModelCall, bool) {
+	args := call.Args
+	text, plain := args[plainArgs].(string)
+	id := call.ID
+	if !KnownTool(id) {
+		switch trimmed := callNumber.ReplaceAllString(id, ""); {
+		case trimmed != id && KnownTool(trimmed):
+			id = trimmed
+		case !plain:
+			id = toolForArgs(args)
+		default:
+			return nil, false
+		}
+	}
+	id = Canonical(id)
+	if plain {
+		required := requiredArgs(id)
+		if len(required) != 1 || len(args) != 1 {
+			return nil, false
+		}
+		args = map[string]any{required[0]: text}
+	}
+	if id == "" || !validCall(id, args) {
+		return nil, false
+	}
+	return &ModelCall{ID: id, Args: args}, true
+}
+
+// toolForArgs is the one tool whose required arguments are exactly these, or
+// "" when none or several are.
+func toolForArgs(args map[string]any) string {
+	found := ""
+	for _, def := range Catalog() {
+		required := requiredArgs(def.ID)
+		if len(required) == 0 || len(required) != len(args) {
+			continue
+		}
+		matches := true
+		for _, key := range required {
+			if _, ok := args[key]; !ok {
+				matches = false
+			}
+		}
+		if !matches || !validCall(def.ID, args) {
+			continue
+		}
+		if found != "" {
+			return ""
+		}
+		found = def.ID
+	}
+	return found
 }
 
 func KnownTool(id string) bool {
