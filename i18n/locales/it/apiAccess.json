@@ -288,7 +288,21 @@
       "endedInApp": "L'accesso ovunque è terminato il {{date}}. Abbonati di nuovo nell'app Toskar sul telefono o tablet, e varrà anche per questo computer.",
       "error": "Impossibile verificare l'abbonamento con il relay di Toskar ({{code}}). Toskar riprova da solo.",
       "noPage": "La pagina di fatturazione non si è aperta. Riprova.",
-      "inAppOnly": "Questa copia di Toskar viene dall'App Store: abbonati nell'app Toskar sul telefono o tablet e gestisci l'abbonamento nello store di quel dispositivo. Una volta acquistato lì, vale anche per questo computer."
+      "inAppOnly": "Questa copia di Toskar viene dall'App Store: abbonati nell'app Toskar sul telefono o tablet e gestisci l'abbonamento nello store di quel dispositivo. Una volta acquistato lì, vale anche per questo computer.",
+      "activeHere": "Abbonamento attivo nell'App Store su questo computer. Il relay di Toskar raggiunge questo computer quando nient'altro ci riesce.",
+      "manageAppStore": "Gestisci abbonamento",
+      "restore": "Ripristina acquisto",
+      "restoring": "Ripristino…",
+      "buying": "In attesa dell'App Store…",
+      "appStoreBilling": "Addebitato dall'App Store sul tuo account. Puoi annullare in qualsiasi momento nelle impostazioni degli abbonamenti dell'App Store.",
+      "askToBuy": "L'acquisto è in attesa di approvazione. L'accesso ovunque si attiva qui appena viene approvato.",
+      "restoreNone": "Questo account App Store non ha abbonamenti da ripristinare.",
+      "alreadyCovered": "L'abbonamento di un altro dispositivo copre già questo computer, quindi qui non c'è nulla da acquistare.",
+      "inUse": "Il tuo abbonamento è in uso su un altro computer. Spostalo qui e quel computer smetterà di usare il relay di Toskar.",
+      "moveHere": "Spostalo su questo computer",
+      "moveTooSoon": "Un abbonamento può essere spostato su un altro computer una volta al giorno. Riprova domani.",
+      "renewalNotYet": "L'App Store non ha ancora confermato il rinnovo. Scegli Ripristina acquisto tra qualche minuto.",
+      "storeFailed": "L'acquisto non è andato a buon fine: {{message}}"
     }
   }
 }

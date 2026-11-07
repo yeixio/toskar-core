@@ -285,7 +285,21 @@
       "endedInApp": "Access from anywhere ended on {{date}}. Subscribe again in the Toskar app on your phone or tablet, and it covers this computer too.",
       "error": "Couldn't check the subscription with Toskar's relay ({{code}}). Toskar tries again on its own.",
       "noPage": "The billing page didn't open. Try again.",
-      "inAppOnly": "This copy of Toskar is from the App Store, so subscribe in the Toskar app on your phone or tablet, and manage it in that device's store. Once it's bought there, it covers this computer too."
+      "inAppOnly": "This copy of Toskar is from the App Store, so subscribe in the Toskar app on your phone or tablet, and manage it in that device's store. Once it's bought there, it covers this computer too.",
+      "activeHere": "Subscribed in the App Store on this computer. Toskar's relay reaches this computer when nothing else does.",
+      "manageAppStore": "Manage subscription",
+      "restore": "Restore purchase",
+      "restoring": "Restoring…",
+      "buying": "Waiting for the App Store…",
+      "appStoreBilling": "Billed by the App Store to your account. Cancel any time in the App Store's subscription settings.",
+      "askToBuy": "The purchase is waiting for approval. Access from anywhere turns on here once it's approved.",
+      "restoreNone": "This App Store account has no subscription to restore.",
+      "alreadyCovered": "Another device's subscription already covers this computer, so there's nothing to buy here.",
+      "inUse": "Your subscription is in use on another computer. Move it here, and that computer stops using Toskar's relay.",
+      "moveHere": "Move it to this computer",
+      "moveTooSoon": "A subscription can move to another computer once a day. Try again tomorrow.",
+      "renewalNotYet": "The App Store hasn't confirmed your renewal yet. Choose Restore purchase in a few minutes.",
+      "storeFailed": "The purchase didn't go through: {{message}}"
     }
   }
 }

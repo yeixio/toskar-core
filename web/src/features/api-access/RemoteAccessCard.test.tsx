@@ -1,6 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { api } from '@/lib/api'
 import { RemoteAccessCard } from './RemoteAccessCard'
 
@@ -341,6 +341,111 @@ describe('RemoteAccessCard (#456)', () => {
       expect(await screen.findByText('Access from anywhere', { selector: 'h2' })).toBeInTheDocument()
       await waitFor(() => expect(api.getRemoteAccess).toHaveBeenCalled())
       expect(screen.queryByText("Toskar's relay", { selector: 'h3' })).not.toBeInTheDocument()
+    })
+  })
+
+  describe("Toskar's relay in Toskar Pro from the Mac App Store (toskar-apps#245)", () => {
+    const plans = [
+      { id: 'pro.anywhere.monthly', title: 'Monthly', price: '€5,49', period: 'month' },
+      { id: 'pro.anywhere.yearly', title: 'Yearly', price: '€43,99', period: 'year' },
+    ]
+    const shell = (overrides: Record<string, unknown> = {}) => {
+      const app = {
+        AnywherePlans: vi.fn().mockResolvedValue(plans),
+        AnywhereSubscribe: vi.fn().mockResolvedValue('active'),
+        AnywhereRestore: vi.fn().mockResolvedValue('none'),
+        AnywhereOwnedHere: vi.fn().mockResolvedValue(false),
+        AnywhereManage: vi.fn().mockResolvedValue(undefined),
+        ...overrides,
+      }
+      ;(window as unknown as { go?: unknown }).go = { main: { App: app } }
+      return app
+    }
+    afterEach(() => {
+      delete (window as unknown as { go?: unknown }).go
+    })
+    const renderCard = (subscription: object) => {
+      vi.mocked(api.getSettings).mockResolvedValue({ remote_access_enabled: false, remote_access_port: 7333, remote_access_relay: '' } as never)
+      vi.mocked(api.getRemoteAccess).mockResolvedValue({ enabled: false, port: 7333, subscription } as never)
+      return render(
+        <QueryClientProvider client={new QueryClient()}>
+          <RemoteAccessCard />
+        </QueryClientProvider>,
+      )
+    }
+
+    it("sells the App Store's plans at the App Store's prices, and never Stripe", async () => {
+      const app = shell()
+      vi.mocked(api.startSubscriptionCheckout).mockClear()
+      renderCard({ state: 'none', open: true, in_app_only: true })
+      fireEvent.click(await screen.findByRole('button', { name: 'Subscribe for €43,99 a year' }))
+      await waitFor(() => expect(app.AnywhereSubscribe).toHaveBeenCalledWith('pro.anywhere.yearly'))
+      // Exactly the method's own arguments: the desktop app refuses more.
+      expect(app.AnywherePlans).toHaveBeenCalledWith()
+      expect(app.AnywhereSubscribe.mock.calls[0]).toHaveLength(1)
+      expect(screen.getByRole('button', { name: 'Subscribe for €5,49 a month' })).toBeInTheDocument()
+      expect(screen.getByText(/Billed by the App Store/)).toBeInTheDocument()
+      expect(screen.queryByText(/Yeix\.io|Stripe/)).not.toBeInTheDocument()
+      expect(screen.queryByText(/Toskar app on your phone/)).not.toBeInTheDocument()
+      expect(api.startSubscriptionCheckout).not.toHaveBeenCalled()
+    })
+
+    it('restores, and says when there is nothing to restore', async () => {
+      const app = shell()
+      renderCard({ state: 'ended', in_app_only: true })
+      fireEvent.click(await screen.findByRole('button', { name: 'Restore purchase' }))
+      await waitFor(() => expect(app.AnywhereRestore).toHaveBeenCalledWith(false))
+      expect(await screen.findByText('This App Store account has no subscription to restore.')).toBeInTheDocument()
+    })
+
+    it('offers to move a subscription in use on another computer', async () => {
+      const app = shell({ AnywhereSubscribe: vi.fn().mockRejectedValue('SUBSCRIPTION_IN_USE: the subscription is tied to another route') })
+      app.AnywhereRestore.mockResolvedValue('active')
+      renderCard({ state: 'none', open: true, in_app_only: true })
+      fireEvent.click(await screen.findByRole('button', { name: 'Subscribe for €5,49 a month' }))
+      expect(await screen.findByText(/Your subscription is in use on another computer/)).toBeInTheDocument()
+      fireEvent.click(screen.getByRole('button', { name: 'Move it to this computer' }))
+      await waitFor(() => expect(app.AnywhereRestore).toHaveBeenCalledWith(true))
+    })
+
+    it("says what the App Store answered for any other refusal, and that Ask to Buy waits", async () => {
+      shell({ AnywhereSubscribe: vi.fn().mockRejectedValue('STORE_FAILED: You are not connected to the internet.') })
+      const { unmount } = renderCard({ state: 'none', open: true, in_app_only: true })
+      fireEvent.click(await screen.findByRole('button', { name: 'Subscribe for €5,49 a month' }))
+      expect(await screen.findByText("The purchase didn't go through: You are not connected to the internet.")).toBeInTheDocument()
+      unmount()
+      shell({ AnywhereSubscribe: vi.fn().mockResolvedValue('pending') })
+      renderCard({ state: 'none', open: true, in_app_only: true })
+      fireEvent.click(await screen.findByRole('button', { name: 'Subscribe for €5,49 a month' }))
+      expect(await screen.findByText(/waiting for approval/)).toBeInTheDocument()
+    })
+
+    it("manages one bought on this computer in the App Store, and only names the phone for one bought there", async () => {
+      const app = shell({ AnywhereOwnedHere: vi.fn().mockResolvedValue(true) })
+      const { unmount } = renderCard({ state: 'active', store: 'app', in_app_only: true })
+      expect(await screen.findByText(/Subscribed in the App Store on this computer/)).toBeInTheDocument()
+      fireEvent.click(screen.getByRole('button', { name: 'Manage subscription' }))
+      await waitFor(() => expect(app.AnywhereManage).toHaveBeenCalled())
+      unmount()
+      shell()
+      renderCard({ state: 'active', store: 'app', in_app_only: true })
+      expect(await screen.findByText(/Subscribed in the Toskar app/)).toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: 'Manage subscription' })).not.toBeInTheDocument()
+    })
+
+    it('points to the Toskar app while the App Store has no plans', async () => {
+      shell({ AnywherePlans: vi.fn().mockResolvedValue([]) })
+      renderCard({ state: 'none', in_app_only: true })
+      expect(await screen.findByText(/This copy of Toskar is from the App Store, so subscribe in the Toskar app/)).toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: /Subscribe for/ })).not.toBeInTheDocument()
+    })
+
+    it("keeps Stripe in every other copy, the Microsoft Store's too", async () => {
+      const app = shell()
+      renderCard({ state: 'none', open: true })
+      expect(await screen.findByRole('button', { name: 'Subscribe for $4.99 a month' })).toBeInTheDocument()
+      expect(screen.getByText('Billed by Yeix.io LLC. Cancel any time.')).toBeInTheDocument()
+      expect(app.AnywherePlans).not.toHaveBeenCalled()
     })
   })
 })

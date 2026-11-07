@@ -3,8 +3,9 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { api, type AnywhereSubscription } from '@/lib/api'
 import { formatCurrency, formatDate } from '@/i18n/format'
-import { isDesktopShell, openExternal } from '@/lib/desktopBridge'
+import { desktopAnywhere, isDesktopShell, openExternal } from '@/lib/desktopBridge'
 import { ShownError, shownError, type Shown } from '@/components/ui/ShownError'
+import { AppStoreSubscription } from './AppStoreSubscription'
 
 /** What access from anywhere costs, as the stores and Stripe charge it, in US dollars. */
 const anywherePrices = { monthly: 4.99, yearly: 39.99 } as const
@@ -36,12 +37,24 @@ function blankTab(): Window | null {
 }
 
 /**
- * Toskar's relay, bought here (#639): Subscribe while there's none, a note
+ * Toskar's relay, bought here. The Mac App Store's copy sells it with the
+ * App Store's in-app purchase when the desktop app can (toskar-apps#245);
+ * every other copy, the Microsoft Store's too (its policy 10.8.1 lets a
+ * non-game app take its own payment), with Stripe.
+ */
+export function ToskarSubscription({ subscription }: { subscription: AnywhereSubscription }) {
+  const store = subscription.in_app_only ? desktopAnywhere() : undefined
+  if (store) return <AppStoreSubscription subscription={subscription} store={store} />
+  return <StripeSubscription subscription={subscription} />
+}
+
+/**
+ * Toskar's relay with Stripe (#639): Subscribe while there's none, a note
  * while the checkout is open (it turns on by itself once paid), and Manage
  * for one bought here. One bought in the Toskar app is managed in the
  * device's store.
  */
-export function ToskarSubscription({ subscription }: { subscription: AnywhereSubscription }) {
+function StripeSubscription({ subscription }: { subscription: AnywhereSubscription }) {
   const { t } = useTranslation('apiAccess')
   const queryClient = useQueryClient()
   const [error, setError] = useState<Shown | null>(null)

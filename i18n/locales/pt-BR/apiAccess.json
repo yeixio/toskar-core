@@ -288,7 +288,21 @@
       "endedInApp": "O acesso de qualquer lugar terminou em {{date}}. Assine de novo no app Toskar do seu celular ou tablet, e ele vale para este computador também.",
       "error": "Não foi possível verificar a assinatura com o relay do Toskar ({{code}}). O Toskar tenta de novo sozinho.",
       "noPage": "A página de cobrança não abriu. Tente de novo.",
-      "inAppOnly": "Esta cópia do Toskar é da App Store: assine no app Toskar do seu celular ou tablet e gerencie na loja desse dispositivo. Depois de comprada lá, a assinatura também vale para este computador."
+      "inAppOnly": "Esta cópia do Toskar é da App Store: assine no app Toskar do seu celular ou tablet e gerencie na loja desse dispositivo. Depois de comprada lá, a assinatura também vale para este computador.",
+      "activeHere": "Assinado na App Store neste computador. O relay do Toskar chega a este computador quando nada mais chega.",
+      "manageAppStore": "Gerenciar assinatura",
+      "restore": "Restaurar compra",
+      "restoring": "Restaurando…",
+      "buying": "Aguardando a App Store…",
+      "appStoreBilling": "Cobrado pela App Store na sua conta. Cancele quando quiser nos ajustes de assinaturas da App Store.",
+      "askToBuy": "A compra está aguardando aprovação. O acesso de qualquer lugar é ativado aqui assim que ela for aprovada.",
+      "restoreNone": "Esta conta da App Store não tem nenhuma assinatura para restaurar.",
+      "alreadyCovered": "A assinatura de outro dispositivo já cobre este computador, então não há nada para comprar aqui.",
+      "inUse": "Sua assinatura está em uso em outro computador. Mova-a para cá, e aquele computador deixa de usar o relay do Toskar.",
+      "moveHere": "Mover para este computador",
+      "moveTooSoon": "Uma assinatura pode mudar de computador uma vez por dia. Tente novamente amanhã.",
+      "renewalNotYet": "A App Store ainda não confirmou sua renovação. Escolha Restaurar compra daqui a alguns minutos.",
+      "storeFailed": "A compra não foi concluída: {{message}}"
     }
   }
 }

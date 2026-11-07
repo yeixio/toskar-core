@@ -288,7 +288,21 @@
       "endedInApp": "L'accès de partout a pris fin le {{date}}. Réabonnez-vous dans l'app Toskar sur votre téléphone ou tablette, et cet ordinateur sera couvert aussi.",
       "error": "Impossible de vérifier l'abonnement auprès du relais de Toskar ({{code}}). Toskar réessaie de lui-même.",
       "noPage": "La page de facturation ne s'est pas ouverte. Réessayez.",
-      "inAppOnly": "Cette copie de Toskar vient de l'App Store : abonnez-vous dans l'app Toskar sur votre téléphone ou tablette, et gérez l'abonnement dans la boutique de cet appareil. Une fois souscrit là-bas, il couvre aussi cet ordinateur."
+      "inAppOnly": "Cette copie de Toskar vient de l'App Store : abonnez-vous dans l'app Toskar sur votre téléphone ou tablette, et gérez l'abonnement dans la boutique de cet appareil. Une fois souscrit là-bas, il couvre aussi cet ordinateur.",
+      "activeHere": "Abonné dans l'App Store sur cet ordinateur. Le relais de Toskar atteint cet ordinateur quand rien d'autre n'y parvient.",
+      "manageAppStore": "Gérer l'abonnement",
+      "restore": "Restaurer l'achat",
+      "restoring": "Restauration…",
+      "buying": "En attente de l'App Store…",
+      "appStoreBilling": "Facturé par l'App Store sur votre compte. Résiliable à tout moment dans les réglages d'abonnement de l'App Store.",
+      "askToBuy": "L'achat attend une approbation. L'accès depuis n'importe où s'active ici dès qu'il est approuvé.",
+      "restoreNone": "Ce compte App Store n'a aucun abonnement à restaurer.",
+      "alreadyCovered": "L'abonnement d'un autre appareil couvre déjà cet ordinateur : il n'y a rien à acheter ici.",
+      "inUse": "Votre abonnement est utilisé sur un autre ordinateur. Déplacez-le ici, et cet ordinateur cessera d'utiliser le relais de Toskar.",
+      "moveHere": "Le déplacer sur cet ordinateur",
+      "moveTooSoon": "Un abonnement peut changer d'ordinateur une fois par jour. Réessayez demain.",
+      "renewalNotYet": "L'App Store n'a pas encore confirmé votre renouvellement. Choisissez Restaurer l'achat dans quelques minutes.",
+      "storeFailed": "L'achat n'a pas abouti : {{message}}"
     }
   }
 }
