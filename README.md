@@ -75,6 +75,7 @@ Step-by-step guides, each run for real against a released Toskar:
 
 | Tool | Guide |
 | --- | --- |
+| Claude Code and Codex CLI | [docs/integrations/coding-agents.md](docs/integrations/coding-agents.md) |
 | Continue (VS Code) | [docs/integrations/continue.md](docs/integrations/continue.md) |
 
 ## Quick start

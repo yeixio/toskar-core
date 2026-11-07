@@ -225,7 +225,8 @@ func TestMessagesFromClaudeCode(t *testing.T) {
 	if err := json.Unmarshal(sent, &got); err != nil {
 		t.Fatal(err)
 	}
-	if len(got.Messages) != 3 || got.Messages[2].Role != "system" || got.Messages[2].Content != "# Environment" {
+	// The system turn partway joins the system prompt, first (#1060).
+	if len(got.Messages) != 2 || got.Messages[0].Role != "system" || got.Messages[0].Content != "You are Claude Code.\n\n# Environment" || got.Messages[1].Role != "user" {
 		t.Errorf("messages: %+v", got.Messages)
 	}
 	if len(got.Tools) != 2 || got.Tools[1].Function.Name != "Grep" {

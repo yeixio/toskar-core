@@ -153,12 +153,81 @@ func rawBody(body []byte) ([]byte, error) {
 }
 
 func rawPost(ctx context.Context, endpoint string, body []byte) (*http.Response, error) {
+	body = systemFirst(body)
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, strings.TrimRight(endpoint, "/")+"/v1/chat/completions", bytes.NewReader(body))
 	if err != nil {
 		return nil, err
 	}
 	req.Header.Set("Content-Type", "application/json")
 	return rawClient.Do(req)
+}
+
+// systemFirst moves every system message's text into one at the start.
+// Agents send system turns partway, as Claude Code does, and so may a
+// Responses request's developer messages; Qwen 3.5's chat template refuses
+// a system message anywhere but first, and the request fails with a 500
+// (#1060). A body without messages, or with one system message already
+// first, passes as it is.
+func systemFirst(body []byte) []byte {
+	var m map[string]json.RawMessage
+	if json.Unmarshal(body, &m) != nil {
+		return body
+	}
+	var msgs []map[string]any
+	if json.Unmarshal(m["messages"], &msgs) != nil {
+		return body
+	}
+	var system []string
+	rest := make([]map[string]any, 0, len(msgs))
+	moved := false
+	for i, msg := range msgs {
+		if msg["role"] != "system" {
+			rest = append(rest, msg)
+			continue
+		}
+		if i != len(system) {
+			moved = true
+		}
+		if text := messageText(msg["content"]); text != "" {
+			system = append(system, text)
+		}
+	}
+	if !moved && len(system) <= 1 {
+		return body
+	}
+	out := rest
+	if len(system) > 0 {
+		out = append([]map[string]any{{"role": "system", "content": strings.Join(system, "\n\n")}}, rest...)
+	}
+	raw, err := json.Marshal(out)
+	if err != nil {
+		return body
+	}
+	m["messages"] = raw
+	merged, err := json.Marshal(m)
+	if err != nil {
+		return body
+	}
+	return merged
+}
+
+// messageText is a message's content as text: a string, or its text parts.
+func messageText(content any) string {
+	switch c := content.(type) {
+	case string:
+		return c
+	case []any:
+		var parts []string
+		for _, p := range c {
+			if part, ok := p.(map[string]any); ok {
+				if text, ok := part["text"].(string); ok {
+					parts = append(parts, text)
+				}
+			}
+		}
+		return strings.Join(parts, "\n")
+	}
+	return ""
 }
 
 // renamed is a llama-server answer or chunk with its model named as the

@@ -2,11 +2,7 @@
   "max_tokens": 512,
   "messages": [
     {
-      "content": "You are a coding agent.",
-      "role": "system"
-    },
-    {
-      "content": "Use the tools.",
+      "content": "You are a coding agent.\n\nUse the tools.",
       "role": "system"
     },
     {
