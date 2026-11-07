@@ -1,41 +1,36 @@
 {
   "schemaVersion": 1,
-  "version": "1.12",
+  "version": "1.13",
   "items": [
     {
-      "realm": "Ymir",
-      "title": "Newer Qwen models that also see pictures",
-      "text": "Qwen 3.5 4B and 9B and Qwen 3.8 27B join the catalog. They answer first and think only when asked. Qwen 3.5 4B is the new small everyday pick: it got all 39 of our reasoning questions right, where Qwen 2.5 3B got 28."
-    },
-    {
       "realm": "Ratatoskr",
-      "title": "Models read four times as much at once",
-      "text": "Chat models start with up to a 32K context window where it fits, not 8K. A request that needs more gets more, and with Advanced mode on you can choose a model's window. Windows past 32K use a cache half the size, so they fit more computers."
-    },
-    {
-      "realm": "Sleipnir",
-      "title": "Faster answers by guessing ahead",
-      "text": "Models guess the next words and check several at once, with the same answers. Editing pasted code is 42% faster, and Qwen 2.5 32B and 14B come with a small draft model that made them about 1.9× and 1.6× as fast on a 24 GB graphics card."
+      "title": "Chats that finish the job",
+      "text": "Give a chat a folder on your computer, and work you ask for goes on until it's done: it runs commands, shows their output as it's written, and asks before it changes anything. A task started in the terminal, web, or desktop shows in the others, and any of them can stop it."
     },
     {
       "realm": "Ymir",
-      "title": "Models bigger than your graphics card run",
-      "text": "A model too big for the graphics card now runs partly on the processor instead of failing to load. Each model's fit says how well it will run on this computer, not just whether it fits."
+      "title": "Qwen 3.5 is the new everyday pick",
+      "text": "Toskar recommends Qwen 3.5 9B on most computers with 16 GB or more. On our long tasks it finished all three, where Qwen 2.5 7B finished at most one. Qwen 3.5 and gpt-oss now call tools reliably, so they can search, read files, and do tasks."
     },
     {
       "realm": "Valgrind",
-      "title": "Your coding agents and editors, on your own models",
-      "text": "Claude Code, Codex, OpenCode, Aider, and editors such as Continue and Zed can use a model on your computer: toskarctl connect sets them up. Anthropic's Messages and OpenAI's Responses formats work too, and toskarctl chat chats in the terminal."
+      "title": "Toskar in your terminal and in VS Code",
+      "text": "toskarctl chat chats in any terminal, and starts Toskar if it isn't running. The VS Code extension is on the Marketplace and Open VSX. Step-by-step guides cover Claude Code, Codex, and Continue on your own models."
     },
     {
-      "realm": "Heimdall",
-      "title": "Web pages and files can't give your AI orders",
-      "text": "Text that tells the AI what to do, on a web page, in a file, or in a tool's result, is left out before the model reads it. A 7B model followed such an instruction every time before; now it never does."
+      "realm": "Gungnir",
+      "title": "The AI news and your briefing, on request",
+      "text": "Ask any chat to read today's AI news or what your automations found, such as \"what's in my briefing\", in any of ten languages. It works in the car too. Each person hears only their own automations."
     },
     {
-      "realm": "Muninn",
-      "title": "Questions about your life stay in the chat",
-      "text": "A question such as \"Where does my sister live?\" is answered from your chat and its summary, never looked up on the web. Long chats summarized twice keep what was said early on."
+      "realm": "Huginn",
+      "title": "Places are looked up, not made up",
+      "text": "A request such as \"Find a cafe in downtown Juneau\" is looked up on the web before the model answers, so the names and addresses are real ones."
+    },
+    {
+      "realm": "Ratatoskr",
+      "title": "New chats start with your default profile",
+      "text": "New chats use General Assistant unless you pick another default on the Profiles page. A profile used once no longer carries over to every new chat, and profiles can't share a name."
     }
   ]
 }
