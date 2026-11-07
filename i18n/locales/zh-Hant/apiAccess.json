@@ -282,7 +282,21 @@
       "endedInApp": "隨處存取已於 {{date}} 結束。在手機或平板上的 Toskar 應用程式中重新訂閱，這台電腦也會一併適用。",
       "error": "無法透過 Toskar 中繼核對訂閱（{{code}}）。Toskar 會自動重試。",
       "noPage": "帳單頁面沒有開啟。請再試一次。",
-      "inAppOnly": "這份 Toskar 來自 App Store。請在手機或平板上的 Toskar 應用程式中訂閱，並在該裝置的商店中管理。在那裡購買後，也適用於這台電腦。"
+      "inAppOnly": "這份 Toskar 來自 App Store。請在手機或平板上的 Toskar 應用程式中訂閱，並在該裝置的商店中管理。在那裡購買後，也適用於這台電腦。",
+      "activeHere": "已在這台電腦的 App Store 中訂閱。其他方式都無法連線時，Toskar 中繼會連到這台電腦。",
+      "manageAppStore": "管理訂閱",
+      "restore": "回復購買",
+      "restoring": "正在回復…",
+      "buying": "正在等待 App Store…",
+      "appStoreBilling": "由 App Store 向你的帳號收費。可隨時在 App Store 的訂閱設定中取消。",
+      "askToBuy": "這筆購買正在等待核准。核准後，這裡會開啟隨處存取。",
+      "restoreNone": "這個 App Store 帳號沒有可回復的訂閱。",
+      "alreadyCovered": "另一部裝置的訂閱已涵蓋這台電腦，不需要在這裡購買。",
+      "inUse": "你的訂閱正在另一台電腦上使用。移到這裡後，那台電腦將不再使用 Toskar 中繼。",
+      "moveHere": "移到這台電腦",
+      "moveTooSoon": "訂閱每天只能移到其他電腦一次。請明天再試。",
+      "renewalNotYet": "App Store 尚未確認你的續訂。請過幾分鐘後選擇「回復購買」。",
+      "storeFailed": "購買未完成：{{message}}"
     }
   }
 }

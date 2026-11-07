@@ -285,7 +285,21 @@
       "endedInApp": "Der Zugriff von überall endete am {{date}}. Abonniere erneut in der Toskar-App auf deinem Smartphone oder Tablet, dann gilt es auch für diesen Computer.",
       "error": "Das Abo konnte beim Relay von Toskar nicht geprüft werden ({{code}}). Toskar versucht es selbst erneut.",
       "noPage": "Die Abrechnungsseite wurde nicht geöffnet. Versuch es noch einmal.",
-      "inAppOnly": "Diese Kopie von Toskar stammt aus dem App Store. Abonniere daher in der Toskar-App auf deinem Smartphone oder Tablet und verwalte das Abo im Store dieses Geräts. Dort abgeschlossen, gilt es auch für diesen Computer."
+      "inAppOnly": "Diese Kopie von Toskar stammt aus dem App Store. Abonniere daher in der Toskar-App auf deinem Smartphone oder Tablet und verwalte das Abo im Store dieses Geräts. Dort abgeschlossen, gilt es auch für diesen Computer.",
+      "activeHere": "Im App Store auf diesem Computer abonniert. Das Relay von Toskar erreicht diesen Computer, wenn nichts anderes es tut.",
+      "manageAppStore": "Abo verwalten",
+      "restore": "Kauf wiederherstellen",
+      "restoring": "Wird wiederhergestellt…",
+      "buying": "Warte auf den App Store…",
+      "appStoreBilling": "Abgerechnet über den App Store auf dein Konto. Jederzeit kündbar in den Abo-Einstellungen des App Store.",
+      "askToBuy": "Der Kauf wartet auf eine Bestätigung. Zugriff von überall wird hier aktiviert, sobald er bestätigt ist.",
+      "restoreNone": "Dieses App-Store-Konto hat kein Abo, das wiederhergestellt werden kann.",
+      "alreadyCovered": "Das Abo eines anderen Geräts gilt bereits für diesen Computer. Hier musst du nichts kaufen.",
+      "inUse": "Dein Abo wird auf einem anderen Computer genutzt. Verschiebe es hierher, dann nutzt jener Computer das Relay von Toskar nicht mehr.",
+      "moveHere": "Auf diesen Computer verschieben",
+      "moveTooSoon": "Ein Abo kann einmal am Tag auf einen anderen Computer verschoben werden. Versuch es morgen noch einmal.",
+      "renewalNotYet": "Der App Store hat deine Verlängerung noch nicht bestätigt. Wähle in ein paar Minuten „Kauf wiederherstellen“.",
+      "storeFailed": "Der Kauf hat nicht geklappt: {{message}}"
     }
   }
 }

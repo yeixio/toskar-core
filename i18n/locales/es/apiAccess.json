@@ -288,7 +288,21 @@
       "endedInApp": "El acceso desde cualquier lugar terminó el {{date}}. Vuelve a suscribirte en la app de Toskar de tu teléfono o tableta, y también cubrirá esta computadora.",
       "error": "No se pudo comprobar la suscripción con el relé de Toskar ({{code}}). Toskar lo vuelve a intentar por su cuenta.",
       "noPage": "La página de facturación no se abrió. Vuelve a intentarlo.",
-      "inAppOnly": "Esta copia de Toskar es de la App Store, así que suscríbete en la app de Toskar de tu teléfono o tableta y adminístralo en la tienda de ese dispositivo. Una vez comprada allí, también cubre esta computadora."
+      "inAppOnly": "Esta copia de Toskar es de la App Store, así que suscríbete en la app de Toskar de tu teléfono o tableta y adminístralo en la tienda de ese dispositivo. Una vez comprada allí, también cubre esta computadora.",
+      "activeHere": "Suscrito en la App Store en esta computadora. El relé de Toskar llega a esta computadora cuando nada más lo hace.",
+      "manageAppStore": "Gestionar suscripción",
+      "restore": "Restaurar compra",
+      "restoring": "Restaurando…",
+      "buying": "Esperando a la App Store…",
+      "appStoreBilling": "La App Store lo cobra a tu cuenta. Cancela cuando quieras en los ajustes de suscripciones de la App Store.",
+      "askToBuy": "La compra está esperando aprobación. El acceso desde cualquier lugar se activa aquí en cuanto se apruebe.",
+      "restoreNone": "Esta cuenta de la App Store no tiene ninguna suscripción que restaurar.",
+      "alreadyCovered": "La suscripción de otro dispositivo ya cubre esta computadora, así que no hace falta comprar nada aquí.",
+      "inUse": "Tu suscripción se está usando en otra computadora. Muévela aquí y esa computadora dejará de usar el relé de Toskar.",
+      "moveHere": "Moverla a esta computadora",
+      "moveTooSoon": "Una suscripción puede moverse a otra computadora una vez al día. Inténtalo de nuevo mañana.",
+      "renewalNotYet": "La App Store aún no ha confirmado tu renovación. Elige Restaurar compra dentro de unos minutos.",
+      "storeFailed": "La compra no se completó: {{message}}"
     }
   }
 }

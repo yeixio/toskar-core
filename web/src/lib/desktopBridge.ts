@@ -26,7 +26,20 @@ type WailsApp = {
   ProUnlock?: () => Promise<string>
   /** Brings the store's purchases to this computer (the Mac); 'unlocked' or 'none'. */
   ProRestore?: () => Promise<string>
+  /** Access from anywhere as the Mac App Store sells it (toskar-apps#245), monthly first; [] where this copy doesn't sell it. */
+  AnywherePlans?: () => Promise<DesktopAnywherePlan[]>
+  /** Buys a plan and turns access from anywhere on: 'active', 'cancelled', or 'pending'. A refusal starts with its code. */
+  AnywhereSubscribe?: (id: string) => Promise<string>
+  /** Brings back this person's App Store subscription: 'active' or 'none'. With move, one tied to another computer moves here. */
+  AnywhereRestore?: (move: boolean) => Promise<string>
+  /** Whether this computer's App Store account pays for the subscription. */
+  AnywhereOwnedHere?: () => Promise<boolean>
+  /** Opens the App Store's subscriptions page. */
+  AnywhereManage?: () => Promise<void>
 }
+
+/** A subscription to Toskar's relay on sale in the Mac App Store, with its price as the App Store shows it. */
+export type DesktopAnywherePlan = { id: string; title: string; price: string; period: string }
 
 type WailsRuntime = {
   EventsOn?: (eventName: string, callback: (...data: unknown[]) => void) => () => void
@@ -298,4 +311,26 @@ export function desktopProUnlock():
   const app = wailsGoApp()
   if (!app?.ProUnlock || !app.ProUnlockPrice) return undefined
   return { price: app.ProUnlockPrice, unlock: app.ProUnlock, restore: app.ProRestore, startTrial: app.ProStartTrial }
+}
+
+/** The Mac App Store's subscription to Toskar's relay (toskar-apps#245), when the desktop app sells it; undefined in a browser or an older app. */
+export function desktopAnywhere():
+  | {
+      plans: () => Promise<DesktopAnywherePlan[]>
+      subscribe: (id: string) => Promise<string>
+      restore: (move: boolean) => Promise<string>
+      ownedHere: () => Promise<boolean>
+      manage: () => Promise<void>
+    }
+  | undefined {
+  const app = wailsGoApp()
+  if (!app?.AnywherePlans || !app.AnywhereSubscribe || !app.AnywhereRestore || !app.AnywhereOwnedHere || !app.AnywhereManage) return undefined
+  return { plans: app.AnywherePlans, subscribe: app.AnywhereSubscribe, restore: app.AnywhereRestore, ownedHere: app.AnywhereOwnedHere, manage: app.AnywhereManage }
+}
+
+/** A desktop call's refusal as {code, message}: the app's errors start with a code, such as SOLD_OUT: …. */
+export function desktopError(err: unknown): { code: string; message: string } {
+  const text = typeof err === 'string' ? err : err instanceof Error ? err.message : String(err)
+  const match = /^([A-Z][A-Z_]+)(?::\s*(.*))?$/s.exec(text.trim())
+  return match ? { code: match[1], message: match[2] ?? '' } : { code: '', message: text }
 }
