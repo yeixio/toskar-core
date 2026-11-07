@@ -85,3 +85,24 @@ func TestSearchSkipsDependencyDirs(t *testing.T) {
 		t.Fatal("empty query was accepted")
 	}
 }
+
+// A search finds words anywhere in a path, and patterns as models write
+// them: *test* found nothing before (#959).
+func TestNameMatches(t *testing.T) {
+	for _, tc := range []struct {
+		query, rel string
+		want       bool
+	}{
+		{"tally", "pkg/tally.go", true},
+		{"*test*", "tally_test.go", true},
+		{"*test*", "pkg/tally_test.go", true},
+		{"*.go", "pkg/tally.go", true},
+		{"*.test.ts *_test.go", "tally_test.go", true},
+		{"*test*", "tally.go", false},
+		{"*.py", "tally.go", false},
+	} {
+		if got := nameMatches(tc.query, tc.rel); got != tc.want {
+			t.Errorf("%q on %q: %v", tc.query, tc.rel, got)
+		}
+	}
+}

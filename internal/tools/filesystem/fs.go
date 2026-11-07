@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 
@@ -105,7 +106,7 @@ func (t *searchTool) Execute(ctx context.Context, args map[string]any) (map[stri
 		if relErr != nil {
 			rel = path
 		}
-		if strings.Contains(strings.ToLower(rel), query) {
+		if nameMatches(query, rel) {
 			matches = append(matches, rel)
 		}
 		if len(matches) >= 30 {
@@ -114,6 +115,25 @@ func (t *searchTool) Execute(ctx context.Context, args map[string]any) (map[stri
 		return nil
 	})
 	return map[string]any{"matches": matches}, nil
+}
+
+// nameMatches says whether a file's path matches a search: words anywhere
+// in it, or, with *, ? or [ in them, patterns such as *test* or *.go that
+// models write (#959). Several, separated by spaces, match any of them.
+func nameMatches(query, rel string) bool {
+	rel = strings.ToLower(filepath.ToSlash(rel))
+	if !strings.ContainsAny(query, "*?[") {
+		return strings.Contains(rel, query)
+	}
+	for _, pattern := range strings.Fields(query) {
+		if ok, _ := path.Match(pattern, rel); ok {
+			return true
+		}
+		if ok, _ := path.Match(pattern, path.Base(rel)); ok {
+			return true
+		}
+	}
+	return false
 }
 
 func (t *readTool) resolve(ctx context.Context, path string) (string, error) {
