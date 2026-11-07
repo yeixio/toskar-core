@@ -1,6 +1,7 @@
 package tools
 
 import (
+	"encoding/json"
 	"strings"
 	"testing"
 )
@@ -129,6 +130,29 @@ func TestUnclearCallsStayInvalid(t *testing.T) {
 		out := ParseModelOutput(raw)
 		if out.Call != nil || !out.Malformed {
 			t.Errorf("%s: call=%+v malformed=%v", raw, out.Call, out.Malformed)
+		}
+	}
+}
+
+// A call one brace short, as Qwen 3.5 wrote a whole file, runs; one cut off
+// inside its text, or missing what the tool needs, doesn't (#959).
+func TestCallLeftOpenIsClosed(t *testing.T) {
+	content := "package tally\n\nfunc Sum(nums []int) int {\n\ttotal := 0\n\tfor i := 0; i < len(nums); i++ {\n\t\ttotal += nums[i]\n\t}\n\treturn total\n}\n"
+	quoted, _ := json.Marshal(content)
+	short := "I'll fix it.\n\n" + `{"tool_call":{"id":"filesystem.write","args":{"content": ` + string(quoted) + `,"path":"tally.go"}}`
+	out := ParseModelOutput(short)
+	if out.Call == nil || out.Call.ID != "filesystem.write" || out.Call.Args["path"] != "tally.go" || out.Call.Args["content"] != content {
+		t.Fatalf("call=%+v malformed=%v", out.Call, out.Malformed)
+	}
+	if out.Text != "I'll fix it." {
+		t.Errorf("visible %q", out.Text)
+	}
+	for _, raw := range []string{
+		`{"tool_call":{"id":"filesystem.write","args":{"path":"tally.go","content":"package tal`,
+		`{"tool_call":{"id":"filesystem.write","args":{"path":"tally.go"`,
+	} {
+		if out := ParseModelOutput(raw); out.Call != nil {
+			t.Errorf("%s: ran %+v", raw, out.Call)
 		}
 	}
 }

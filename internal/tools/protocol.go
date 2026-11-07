@@ -254,7 +254,8 @@ func decodeFunctionCall(raw string) (*ModelCall, bool, bool) {
 }
 
 func decodeCall(raw string) (*ModelCall, bool, bool) {
-	candidates := []string{raw, repairJSONEscapes(raw), stripTrailingCommas(repairJSONEscapes(raw))}
+	fixed := stripTrailingCommas(repairJSONEscapes(raw))
+	candidates := []string{raw, repairJSONEscapes(raw), fixed, closeOpen(fixed)}
 	sawWrapper := strings.Contains(raw, "tool_call")
 	for _, candidate := range candidates {
 		if call, ok := unmarshalCall(candidate); ok {
@@ -712,6 +713,43 @@ func isHex(s string) bool {
 		}
 	}
 	return true
+}
+
+// closeOpen closes the objects and arrays a call left open at its end, as
+// Qwen 3.5 writes a long write call one brace short (#959). Text that ends
+// inside a string, or closes what wasn't opened, is left as it is.
+func closeOpen(raw string) string {
+	var open []byte
+	inString, escaped := false, false
+	for i := 0; i < len(raw); i++ {
+		c := raw[i]
+		switch {
+		case escaped:
+			escaped = false
+		case inString && c == '\\':
+			escaped = true
+		case c == '"':
+			inString = !inString
+		case inString:
+		case c == '{':
+			open = append(open, '}')
+		case c == '[':
+			open = append(open, ']')
+		case c == '}' || c == ']':
+			if len(open) == 0 || open[len(open)-1] != c {
+				return raw
+			}
+			open = open[:len(open)-1]
+		}
+	}
+	if inString || len(open) == 0 {
+		return raw
+	}
+	out := strings.TrimRight(raw, " \t\r\n")
+	for i := len(open) - 1; i >= 0; i-- {
+		out += string(open[i])
+	}
+	return out
 }
 
 func stripTrailingCommas(raw string) string {

@@ -2665,6 +2665,15 @@
           "text": "Ask it to do something rather than ask a question, such as \"Fix the failing test\" or \"Set up this project\", and it works step by step. It runs something, reads the result, fixes what failed, and tries again. It stops when it's finished, when the same step keeps giving the same result, or after 100 steps. Then it says what it did and what's left."
         },
         {
+          "type": "paragraph",
+          "text": "Here is a real session, recorded with Qwen 3.5 9B in a small Go project whose test fails. Toskar looked around, read the code, found the bug, and asked before changing the file. The answer here was n, so nothing changed:"
+        },
+        {
+          "type": "code",
+          "language": "text",
+          "code": "› Fix the failing test\nI need to see the failing test and the project structure to help fix it. Let me start by exploring the workspace to find the test files and understand the current state of the codebase.\n· Looking for *test*\nThe search returned no matches, which is strange. Let me check the git status to see if there are any modified files, including tests, and also list the files in the current directory to understand the structure.\n· Checking what changed\nIt seems the workspace is not a git repository. Let me list the files in the current directory to find the test files and understand the project structure.\n· Looking for .\nI found three files: `go.mod`, `tally.go`, and `tally_test.go`. Let me read the test file first to see what's failing.\n· Reading tally_test.go\nNow let me read the implementation file `tally.go` to see what the `Sum` function currently does.\n· Reading tally.go\nThe test is failing because the `Sum` function in `tally.go` skips the first element of the slice. It starts the loop at `i := 1` instead of `i := 0`, so it never adds `nums[0]` to the total.\n\n**The Fix:**\nChange `for i := 1;` to `for i := 0;` in `tally.go` to include the first element.\nToskar wants to run filesystem.write:\n  {\n    \"content\": \"package tally\\n\\n// Sum adds up the numbers.\\nfunc Sum(nums []int) int {\\n\\ttotal := 0\\n\\tfor i := 0; i \\u003c len(nums); i++ {\\n\\t\\ttotal += nums[i]\\n\\t}\\n\\treturn total\\n}\\n\",\n    \"path\": \"tally.go\"\n  }\nAllow? [y]es, [n]o, [a]lways in this chat: n\nI identified the issue in `tally.go`: the loop starts at index 1 instead of 0, skipping the first number. I attempted to fix it by updating the code, but you declined the change. To fix the test, you need to change `for i := 1;` to `for i := 0;` in `tally.go`.\n37 tokens/s\n› /exit"
+        },
+        {
           "type": "list",
           "title": "What asks first",
           "items": [
