@@ -113,3 +113,34 @@ func TestRawModelsListed(t *testing.T) {
 		}
 	}
 }
+
+// System turns partway, as Claude Code sends them, reach the model as one
+// system message first: Qwen 3.5's template refuses any other (#1060).
+func TestSystemFirst(t *testing.T) {
+	in := `{"model":"m","messages":[{"role":"system","content":"Be terse."},{"role":"user","content":"hi"},{"role":"system","content":[{"type":"text","text":"Tools changed."}]},{"role":"assistant","content":"ok"}],"stream":true}`
+	var got struct {
+		Model    string           `json:"model"`
+		Stream   bool             `json:"stream"`
+		Messages []map[string]any `json:"messages"`
+	}
+	if err := json.Unmarshal(systemFirst([]byte(in)), &got); err != nil {
+		t.Fatal(err)
+	}
+	roles := []string{}
+	for _, m := range got.Messages {
+		roles = append(roles, m["role"].(string))
+	}
+	if strings.Join(roles, ",") != "system,user,assistant" || got.Messages[0]["content"] != "Be terse.\n\nTools changed." || got.Model != "m" || !got.Stream {
+		t.Fatalf("got %+v", got)
+	}
+	// One system message first, or none, is left exactly as sent.
+	for _, same := range []string{
+		`{"messages":[{"role":"system","content":"a"},{"role":"user","content":"b"}]}`,
+		`{"messages":[{"role":"user","content":"b"}]}`,
+		`{"prompt":"x"}`,
+	} {
+		if out := string(systemFirst([]byte(same))); out != same {
+			t.Errorf("%s became %s", same, out)
+		}
+	}
+}

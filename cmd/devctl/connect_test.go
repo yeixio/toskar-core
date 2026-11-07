@@ -200,3 +200,36 @@ func TestContinueGuideMatchesConnect(t *testing.T) {
 		t.Errorf("the guide's config.yaml:\n%s\nconnect prints:\n%s", got, want)
 	}
 }
+
+// The coding agents guide shows what connect prints for Claude Code and
+// Codex, so its tested settings can't drift (#1060).
+func TestCodingAgentsGuideMatchesConnect(t *testing.T) {
+	raw, err := os.ReadFile(filepath.Join("..", "..", "docs", "integrations", "coding-agents.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	guide := string(raw)
+	target := connectTarget{base: "http://127.0.0.1:7331", model: "qwen3.5-9b-q4", key: "toskar-local"}
+	var exports []string
+	for _, line := range strings.Split(claudeCodePrint(target), "\n") {
+		if strings.HasPrefix(line, "export ") {
+			exports = append(exports, "   "+line)
+		}
+	}
+	indent := func(s string) string {
+		var out []string
+		for _, line := range strings.Split(strings.TrimSuffix(s, "\n"), "\n") {
+			out = append(out, "   "+line)
+		}
+		return strings.Join(out, "\n")
+	}
+	for name, want := range map[string]string{
+		"Claude Code's settings": strings.Join(exports, "\n"),
+		"Codex's provider":       indent(codexProvider(target)),
+		"Codex's profile":        indent(codexProfile(target)),
+	} {
+		if !strings.Contains(guide, "```\n"+want+"\n   ```") && !strings.Contains(guide, want+"\n   ```") {
+			t.Errorf("the guide doesn't show %s as connect prints them:\n%s", name, want)
+		}
+	}
+}
