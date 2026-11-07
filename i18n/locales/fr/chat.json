@@ -112,7 +112,10 @@
   "task": {
     "output": "Sortie de la commande",
     "elsewhere": "Cela a démarré dans une autre app ou fenêtre. Vous pouvez le suivre, répondre à ses questions ou l’arrêter ici.",
-    "workingIn": "Travaille dans {{path}}"
+    "workingIn": "Travaille dans {{path}}",
+    "betterModel": "Ce genre de travail se passe bien mieux avec {{name}} ({{size}}, {{fit}} ici). Les modèles plus petits n'arrivent souvent pas au bout.",
+    "betterModelTooLarge": "Ce genre de travail se passe bien mieux avec {{name}}, qui demande plus que ce que cet ordinateur a. Les modèles plus petits n'arrivent souvent pas au bout. Un ordinateur connecté peut peut-être le faire tourner.",
+    "installOnModels": "L'installer depuis la page Modèles"
   },
   "send": {
     "waitForFiles": "Attendez la fin de l'ajout des fichiers, puis envoyez.",

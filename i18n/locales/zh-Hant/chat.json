@@ -112,7 +112,10 @@
   "task": {
     "output": "命令輸出",
     "elsewhere": "這是在其他應用程式或視窗中開始的。你可以在這裡查看進度、回答問題或停止。",
-    "workingIn": "工作位置:{{path}}"
+    "workingIn": "工作位置:{{path}}",
+    "betterModel": "這類工作用 {{name}}({{size}},在這台電腦上{{fit}})效果好得多。較小的模型常常無法完成。",
+    "betterModelTooLarge": "這類工作用 {{name}} 效果好得多,但它需要的資源超出了這台電腦。較小的模型常常無法完成。已連線的電腦也許能執行它。",
+    "installOnModels": "在「模型」頁面安裝"
   },
   "send": {
     "waitForFiles": "請等檔案加入完成後再傳送。",
