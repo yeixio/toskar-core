@@ -71,7 +71,8 @@
     "computerSelection": "Selección de computadoras",
     "selectionDetail": "{{title}}. {{detail}}",
     "strategy": "Estrategia: <strong>{{strategy}}</strong>",
-    "thisMachine": "{{name}} (esta máquina)"
+    "thisMachine": "{{name}} (esta máquina)",
+    "default": "Predeterminado para chats nuevos"
   },
   "menu": {
     "duplicate": "Duplicar",
@@ -79,7 +80,8 @@
     "confirmReset": "¿Restablecer “{{name}}” a como viene en Toskar? Se perderán los cambios que le hiciste.",
     "reset": "Restablecer valores predeterminados",
     "confirmDelete": "¿Eliminar “{{name}}”? Esta acción no se puede deshacer.",
-    "delete": "Eliminar"
+    "delete": "Eliminar",
+    "makeDefault": "Usar para chats nuevos"
   },
   "strategies": {
     "auto": {

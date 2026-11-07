@@ -71,7 +71,8 @@
     "computerSelection": "Seleção de computadores",
     "selectionDetail": "{{title}}. {{detail}}",
     "strategy": "Estratégia: <strong>{{strategy}}</strong>",
-    "thisMachine": "{{name}} (esta máquina)"
+    "thisMachine": "{{name}} (esta máquina)",
+    "default": "Padrão para novos chats"
   },
   "menu": {
     "duplicate": "Duplicar",
@@ -79,7 +80,8 @@
     "confirmReset": "Restaurar “{{name}}” para o padrão do Toskar? Suas alterações nele serão perdidas.",
     "reset": "Restaurar padrões",
     "confirmDelete": "Apagar “{{name}}”? Isso não pode ser desfeito.",
-    "delete": "Apagar"
+    "delete": "Apagar",
+    "makeDefault": "Usar em novos chats"
   },
   "strategies": {
     "auto": {

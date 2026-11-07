@@ -71,7 +71,8 @@
     "computerSelection": "Selezione dei computer",
     "selectionDetail": "{{title}}. {{detail}}",
     "strategy": "Strategia: <strong>{{strategy}}</strong>",
-    "thisMachine": "{{name}} (questa macchina)"
+    "thisMachine": "{{name}} (questa macchina)",
+    "default": "Predefinito per le nuove chat"
   },
   "menu": {
     "duplicate": "Duplica",
@@ -79,7 +80,8 @@
     "confirmReset": "Ripristinare “{{name}}” come fornito da Toskar? Le modifiche che hai fatto andranno perse.",
     "reset": "Ripristina predefiniti",
     "confirmDelete": "Eliminare “{{name}}”? L'operazione non può essere annullata.",
-    "delete": "Elimina"
+    "delete": "Elimina",
+    "makeDefault": "Usa per le nuove chat"
   },
   "strategies": {
     "auto": {

@@ -86,8 +86,7 @@
   },
   "defaultProfile": {
     "title": "Profil par défaut",
-    "description": "Utilisé lorsque vous commencez une nouvelle discussion.",
-    "automatic": "Automatique"
+    "description": "Utilisé lorsque vous commencez une nouvelle discussion."
   },
   "runOn": {
     "title": "Exécuter les discussions sur",

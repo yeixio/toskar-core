@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -336,13 +337,17 @@ func installSeeingStub(t *testing.T, ctx context.Context, a *app.App) {
 	}
 }
 
+// stubProfiles numbers the profiles cases make.
+var stubProfiles atomic.Int64
+
 func setupProfile(t *testing.T, ctx context.Context, a *app.App, s Setup) string {
 	t.Helper()
 	p, err := a.Profiles.Get(ctx, "general-assistant")
 	if err != nil {
 		t.Fatal(err)
 	}
-	p.ID, p.Name = "", "Quality"
+	// Each case's profile has a name of its own: two can't share one.
+	p.ID, p.Name = "", fmt.Sprintf("Quality %d", stubProfiles.Add(1))
 	for _, k := range s.Knowledge {
 		src, err := a.Mimir.Create(ctx, mimir.CreateInput{Kind: mimir.KindText, Filename: k.Filename, Text: k.Text})
 		if err != nil {

@@ -164,6 +164,7 @@
   "PIN_INVALID": "无法保存此指定。只能为成员和访客指定，且只能指定已存在的配置。",
   "PINS_FAILED": "无法读取为用户指定的配置。",
   "PROFILE_NOT_FOUND": "没有这个配置。",
+  "PROFILE_NAME_TAKEN": "已有名为“{{name}}”的配置文件。请换一个名称。",
   "TRIAL_FAILED": "无法试用这条消息。请检查主题控制，并确认有可用的模型。",
   "ATTEMPT_NOT_FOUND": "这条尝试已不存在。",
   "EXAMPLES_FULL": "该配置已有 20 个示例问题。请先删除一个再添加。",

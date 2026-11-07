@@ -164,6 +164,7 @@
   "PIN_INVALID": "Não foi possível salvar essa atribuição. Só Membros e Visitantes são atribuídos, e só a perfis que existem.",
   "PINS_FAILED": "Não foi possível ler a quais perfis as pessoas estão atribuídas.",
   "PROFILE_NOT_FOUND": "Esse perfil não existe.",
+  "PROFILE_NAME_TAKEN": "Já existe um perfil chamado {{name}}. Escolha outro nome.",
   "TRIAL_FAILED": "Não foi possível testar essa mensagem. Confira os controles de tema e se há um modelo pronto.",
   "ATTEMPT_NOT_FOUND": "Essa tentativa não existe mais.",
   "EXAMPLES_FULL": "O perfil tem 20 perguntas de exemplo. Remova uma para adicionar esta.",

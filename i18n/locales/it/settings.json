@@ -86,8 +86,7 @@
   },
   "defaultProfile": {
     "title": "Profilo predefinito",
-    "description": "Usato quando inizi una nuova chat.",
-    "automatic": "Automatico"
+    "description": "Usato quando inizi una nuova chat."
   },
   "runOn": {
     "title": "Esegui le chat su",

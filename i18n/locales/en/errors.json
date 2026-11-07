@@ -164,6 +164,7 @@
   "PIN_INVALID": "That pin can't be saved. Only Members and Visitors are pinned, and only to profiles that exist.",
   "PINS_FAILED": "Couldn't read which profiles people are pinned to.",
   "PROFILE_NOT_FOUND": "There's no such profile.",
+  "PROFILE_NAME_TAKEN": "A profile is already called {{name}}. Choose another name.",
   "TRIAL_FAILED": "Couldn't try that message. Check the topic controls and that a model is ready.",
   "ATTEMPT_NOT_FOUND": "That attempt is gone.",
   "EXAMPLES_FULL": "The profile has 20 example questions. Remove one to add this.",

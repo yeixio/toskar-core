@@ -9,7 +9,6 @@ const defaultUIState = {
   advancedMode: false,
   theme: 'dark' as ThemePreference,
   onboardingComplete: false,
-  activeProfileId: null as string | null,
   chatHistoryPinned: false,
   pinnedConversationIds: [] as string[],
   administerOpen: false,
@@ -26,7 +25,6 @@ interface UIState {
   advancedMode: boolean
   theme: ThemePreference
   onboardingComplete: boolean
-  activeProfileId: string | null
   chatHistoryPinned: boolean
   pinnedConversationIds: string[]
   /** The sidebar's Administer group is open (#203); collapsed by default. */
@@ -38,7 +36,6 @@ interface UIState {
   setAdvancedMode: (enabled: boolean) => void
   setTheme: (theme: ThemePreference) => void
   setOnboardingComplete: (complete: boolean) => void
-  setActiveProfileId: (id: string | null) => void
   setChatHistoryPinned: (pinned: boolean) => void
   togglePinnedConversation: (id: string) => void
   resetToDefaults: () => void
@@ -77,7 +74,6 @@ export const useUIStore = create<UIState>()(
         set({ theme })
       },
       setOnboardingComplete: (complete) => set({ onboardingComplete: complete }),
-      setActiveProfileId: (id) => set({ activeProfileId: id }),
       setChatHistoryPinned: (pinned) => set({ chatHistoryPinned: pinned }),
       setAdministerOpen: (open) => set({ administerOpen: open }),
       setLastChat: (chat) => set({ lastChat: chat }),

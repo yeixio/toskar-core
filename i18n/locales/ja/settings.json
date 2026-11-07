@@ -86,8 +86,7 @@
   },
   "defaultProfile": {
     "title": "デフォルトのプロファイル",
-    "description": "新しいチャットを始めるときに使われます。",
-    "automatic": "自動"
+    "description": "新しいチャットを始めるときに使われます。"
   },
   "runOn": {
     "title": "チャットの実行場所",

@@ -69,7 +69,8 @@
     "computerSelection": "コンピュータの選択",
     "selectionDetail": "{{title}}。{{detail}}",
     "strategy": "戦略：<strong>{{strategy}}</strong>",
-    "thisMachine": "{{name}}（このマシン）"
+    "thisMachine": "{{name}}（このマシン）",
+    "default": "新しいチャットの既定"
   },
   "menu": {
     "duplicate": "複製",
@@ -77,7 +78,8 @@
     "confirmReset": "「{{name}}」をToskarの出荷時の状態に戻しますか？加えた変更は失われます。",
     "reset": "デフォルトに戻す",
     "confirmDelete": "「{{name}}」を削除しますか？この操作は取り消せません。",
-    "delete": "削除"
+    "delete": "削除",
+    "makeDefault": "新しいチャットで使う"
   },
   "strategies": {
     "auto": {

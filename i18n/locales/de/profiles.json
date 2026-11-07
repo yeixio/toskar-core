@@ -70,7 +70,8 @@
     "computerSelection": "Computerwahl",
     "selectionDetail": "{{title}}. {{detail}}",
     "strategy": "Strategie: <strong>{{strategy}}</strong>",
-    "thisMachine": "{{name}} (dieses Gerät)"
+    "thisMachine": "{{name}} (dieses Gerät)",
+    "default": "Standard für neue Chats"
   },
   "menu": {
     "duplicate": "Duplizieren",
@@ -78,7 +79,8 @@
     "confirmReset": "„{{name}}“ auf den Auslieferungszustand von Toskar zurücksetzen? Deine Änderungen daran gehen verloren.",
     "reset": "Auf Standard zurücksetzen",
     "confirmDelete": "„{{name}}“ löschen? Das kann nicht rückgängig gemacht werden.",
-    "delete": "Löschen"
+    "delete": "Löschen",
+    "makeDefault": "Für neue Chats verwenden"
   },
   "strategies": {
     "auto": {

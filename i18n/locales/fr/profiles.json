@@ -71,7 +71,8 @@
     "computerSelection": "Sélection des ordinateurs",
     "selectionDetail": "{{title}}. {{detail}}",
     "strategy": "Stratégie : <strong>{{strategy}}</strong>",
-    "thisMachine": "{{name}} (cette machine)"
+    "thisMachine": "{{name}} (cette machine)",
+    "default": "Par défaut pour les nouvelles discussions"
   },
   "menu": {
     "duplicate": "Dupliquer",
@@ -79,7 +80,8 @@
     "confirmReset": "Rétablir « {{name}} » tel que fourni avec Toskar ? Vos modifications seront perdues.",
     "reset": "Rétablir les valeurs par défaut",
     "confirmDelete": "Supprimer « {{name}} » ? Cette action est irréversible.",
-    "delete": "Supprimer"
+    "delete": "Supprimer",
+    "makeDefault": "Utiliser pour les nouvelles discussions"
   },
   "strategies": {
     "auto": {

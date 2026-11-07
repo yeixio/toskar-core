@@ -70,7 +70,8 @@
     "computerSelection": "Computer selection",
     "selectionDetail": "{{title}}. {{detail}}",
     "strategy": "Strategy: <strong>{{strategy}}</strong>",
-    "thisMachine": "{{name}} (this machine)"
+    "thisMachine": "{{name}} (this machine)",
+    "default": "Default for new chats"
   },
   "menu": {
     "duplicate": "Duplicate",
@@ -78,7 +79,8 @@
     "confirmReset": "Reset “{{name}}” to how Toskar ships it? Your changes to it are lost.",
     "reset": "Reset to defaults",
     "confirmDelete": "Delete “{{name}}”? This cannot be undone.",
-    "delete": "Delete"
+    "delete": "Delete",
+    "makeDefault": "Use for new chats"
   },
   "strategies": {
     "auto": {

@@ -189,3 +189,24 @@ export function createStartOptions(): {
     description: i18n.t(`profiles:create.options.${id}.description`),
   }))
 }
+
+/**
+ * A name no other profile has: the name itself, or "name (2)", "name (3)".
+ * Core refuses a name that's taken, ignoring case, since two profiles called
+ * General Assistant left people unsure which one a chat used.
+ */
+export function freeProfileName(name: string, profiles: Pick<AIProfile, 'name'>[]): string {
+  const taken = new Set(profiles.map((p) => p.name.trim().toLowerCase()))
+  const base = name.trim()
+  let candidate = base
+  for (let i = 2; taken.has(candidate.toLowerCase()); i++) {
+    candidate = `${base} (${i})`
+  }
+  return candidate
+}
+
+/** The profile new chats start with: the one chosen, while it exists, or General Assistant. */
+export function defaultProfileIdOf(chosen: string | undefined, profiles: Pick<AIProfile, 'id'>[]): string {
+  if (chosen && profiles.some((p) => p.id === chosen)) return chosen
+  return 'general-assistant'
+}
