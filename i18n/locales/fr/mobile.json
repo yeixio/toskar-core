@@ -589,6 +589,7 @@
       "off": "Un administrateur a désactivé l'envoi des signalements à Toskar."
     },
     "locked": "Toskar sur la TV vient avec Toskar Unlock. Débloquez-le dans Toskar sur votre téléphone ou votre tablette.",
+    "lockedHere": "Toskar sur la TV vient avec Toskar Unlock. Débloquez-le ici, ou dans Toskar sur votre téléphone ou votre tablette.",
     "demo": {
       "label": "Démo : réponses d’exemple, rien ne quitte ce téléviseur",
       "leave": "Quitter la démo",

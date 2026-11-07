@@ -589,6 +589,7 @@
       "off": "Um administrador desativou o envio de relatórios ao Toskar."
     },
     "locked": "O Toskar na TV vem com o Toskar Unlock. Desbloqueie no Toskar do seu celular ou tablet.",
+    "lockedHere": "O Toskar na TV vem com o Toskar Unlock. Desbloqueie aqui ou no Toskar do seu celular ou tablet.",
     "demo": {
       "label": "Demo: respostas de exemplo, nada sai desta TV",
       "leave": "Sair da demo",

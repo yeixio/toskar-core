@@ -575,6 +575,7 @@
       "off": "管理員已關閉向 Toskar 傳送回報。"
     },
     "locked": "電視上的 Toskar 隨 Toskar Unlock 提供。請在手機或平板上的 Toskar 中解鎖。",
+    "lockedHere": "電視上的 Toskar 隨 Toskar Unlock 提供。請在這裡，或在手機或平板上的 Toskar 中解鎖。",
     "demo": {
       "label": "示範：範例回答，不會從這台電視傳送任何內容",
       "leave": "離開示範",

@@ -575,6 +575,7 @@
       "off": "管理者が Toskar への報告の送信をオフにしています。"
     },
     "locked": "テレビの Toskar は Toskar Unlock で使えます。スマートフォンかタブレットの Toskar でロック解除してください。",
+    "lockedHere": "テレビの Toskar は Toskar Unlock で使えます。ここで、またはスマートフォンかタブレットの Toskar でロック解除してください。",
     "demo": {
       "label": "デモ：サンプルの回答です。このテレビから何も送信されません",
       "leave": "デモを終了",

@@ -582,6 +582,7 @@
       "off": "Ein Admin hat das Senden von Berichten an Toskar ausgeschaltet."
     },
     "locked": "Toskar auf dem Fernseher gibt es mit Toskar Unlock. Schalte es in Toskar auf deinem Telefon oder Tablet frei.",
+    "lockedHere": "Toskar auf dem Fernseher gibt es mit Toskar Unlock. Schalte es hier frei oder in Toskar auf deinem Telefon oder Tablet.",
     "demo": {
       "label": "Demo: Beispielantworten, nichts verlässt diesen Fernseher",
       "leave": "Demo beenden",
