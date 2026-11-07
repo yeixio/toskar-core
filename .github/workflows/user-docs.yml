@@ -12,8 +12,12 @@ on:
 permissions:
   contents: read
 
+# A new push cancels the run it replaces. Opening a pull request with a
+# label sends opened and labeled at once, and cancelling one of those left a
+# cancelled check on the pull request (#1125, #1127, #1128), so each kind of
+# event has its own group.
 concurrency:
-  group: user-docs-${{ github.event.pull_request.number }}
+  group: user-docs-${{ github.event.pull_request.number }}-${{ github.event.action }}
   cancel-in-progress: true
 
 jobs:
