@@ -2408,7 +2408,7 @@
           "type": "steps",
           "items": [
             "Open Copilot Chat.",
-            "Open the model picker at the bottom of the chat box, and choose your Toskar model. If it isn't listed, look under Manage Models.",
+            "Open the model picker at the bottom of the chat box, and choose your Toskar model. If it isn't listed, look under Manage Models. In Agent mode, the picker lists only models that can use tools.",
             "Ask your question. The answer comes from the model on your computer."
           ]
         },
@@ -2472,6 +2472,14 @@
           "text": "VS Code then uses HTTPS, and trusts only that computer's certificate. The model picker works only when an Admin or the Owner showed the code. With a Member's code, @toskar works and the picker doesn't."
         },
         {
+          "type": "paragraph",
+          "text": "To stop using that computer, open Toskar: Manage and choose Disconnect. VS Code goes back to Toskar on this computer. To remove its key from the other computer too, disconnect it under Devices in Toskar."
+        },
+        {
+          "type": "paragraph",
+          "text": "Where nobody can type a code, as in an editor on a remote server, use a key from API Access instead. Set where Toskar runs with Toskar: Manage, then run Toskar: Use an API Key Instead, and check the encryption check code it shows. For the model picker, turn on Drive models directly, for coding agents in the key's permissions. See [Use the API](#api)."
+        },
+        {
           "type": "heading",
           "text": "What leaves this computer"
         },
@@ -2529,11 +2537,15 @@
             ],
             [
               "Your model isn't in the picker",
-              "Check that Toskar is running and has a chat model installed. Then run Toskar: Refresh Models, and look under Manage Models."
+              "Check that Toskar is running and has a chat model installed. Then run Toskar: Refresh Models, and look under Manage Models. In Agent mode, only models that can use tools are listed. Update Toskar if a model you installed from Hugging Face is missing there: earlier versions didn't record whether it can use tools."
             ],
             [
-              "A model on another computer isn't in the picker",
-              "The picker lists only models installed on the computer you connected to. If you used a Member's code, connect again with a code from an Admin or the Owner."
+              "A model on another computer isn't in the picker, or says it isn't installed on this computer",
+              "The picker runs models installed on the computer VS Code is connected to. Connect to the computer that has the model. If you used a Member's code, connect again with a code from an Admin or the Owner."
+            ],
+            [
+              "VS Code says Toskar's certificate isn't the one it connected with, right after you enter the code",
+              "Update the Toskar extension. Earlier versions couldn't use the certificate Toskar makes for itself in VS Code. If you set Toskar up again on that computer since, connect again."
             ],
             [
               "An answer in Agent mode ignores your files or tools",
