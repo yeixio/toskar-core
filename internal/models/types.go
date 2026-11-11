@@ -30,6 +30,10 @@ type CatalogEntry struct {
 	Runtime          []string   `json:"runtime,omitempty"`
 	RecommendedRoles []string   `json:"recommended_roles,omitempty"`
 	Dynamic          bool       `json:"dynamic,omitempty"`
+	// HeaderRead marks a dynamic entry whose installed file's header Core
+	// has read for what its address didn't say: family, window, size, and
+	// whether it calls tools or thinks. The header is read once.
+	HeaderRead bool `json:"header_read,omitempty"`
 	// SupportRole marks an embedding, reranker, or classifier model.
 	SupportRole string `json:"support_role,omitempty"`
 	// Training is set when the model can be specialized with LoRA training.

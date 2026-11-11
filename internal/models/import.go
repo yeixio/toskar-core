@@ -235,17 +235,13 @@ func importEntry(req ImportRequest, d gguf.Details, filename string, size uint64
 	if len(tags) == 0 {
 		tags = []string{"general"}
 	}
-	params := d.SizeLabel
-	if params == "" && d.Parameters > 0 {
-		params = parameterLabel(d.Parameters)
-	}
 	return CatalogEntry{
 		ID:                id,
 		DisplayName:       name,
 		Summary:           "Added from a file",
 		Family:            d.Architecture,
 		Variant:           d.Quantization,
-		Parameters:        params,
+		Parameters:        headerParameters(d),
 		SizeBytes:         size,
 		MemoryNeededBytes: estimateMemory(size),
 		Context:           int(min(d.ContextLength, 1<<31-1)),
@@ -255,7 +251,16 @@ func importEntry(req ImportRequest, d gguf.Details, filename string, size uint64
 		Capabilities:      contracts.ModelCapabilities{Thinks: d.Thinks, ToolCalling: d.Tools},
 		Runtime:           []string{"llamacpp"},
 		Dynamic:           true,
+		HeaderRead:        true,
 	}
+}
+
+// headerParameters is the model's size as its header gives it: 8B, 1.5B.
+func headerParameters(d gguf.Details) string {
+	if d.SizeLabel == "" && d.Parameters > 0 {
+		return parameterLabel(d.Parameters)
+	}
+	return d.SizeLabel
 }
 
 // parameterLabel is a count as people write it: 8B, 1.5B, 350M.
