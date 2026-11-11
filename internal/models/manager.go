@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/yeixio/toskar-core/internal/events"
+	"github.com/yeixio/toskar-core/internal/gguf"
 	"github.com/yeixio/toskar-core/pkg/contracts"
 )
 
@@ -148,6 +149,7 @@ func (m *Manager) Install(ctx context.Context, modelID string, wait bool) error 
 	if installed, _, err := m.storage.IsInstalled(ctx, modelID); err != nil {
 		return err
 	} else if installed && m.hasFiles(entry) {
+		m.readHeader(ctx, modelID)
 		return nil
 	}
 	if err := m.storage.UpsertCatalogEntry(ctx, entry); err != nil {
@@ -182,7 +184,11 @@ func (m *Manager) Install(ctx context.Context, modelID string, wait bool) error 
 			delete(m.downloading, modelID)
 			m.mu.Unlock()
 		}()
-		return m.downloader.Download(ctx, entry)
+		if err := m.downloader.Download(ctx, entry); err != nil {
+			return err
+		}
+		m.readHeader(ctx, modelID)
+		return nil
 	}
 
 	go func() {
@@ -191,7 +197,9 @@ func (m *Manager) Install(ctx context.Context, modelID string, wait bool) error 
 			delete(m.downloading, modelID)
 			m.mu.Unlock()
 		}()
-		_ = m.downloader.Download(context.Background(), entry)
+		if m.downloader.Download(context.Background(), entry) == nil {
+			m.readHeader(context.Background(), modelID)
+		}
 	}()
 	return nil
 }
@@ -249,6 +257,51 @@ func (m *Manager) InstallFromURL(ctx context.Context, req contracts.InstallFromU
 		return id, err
 	}
 	return id, nil
+}
+
+// ReadHeaders reads, once, the header of each installed model added from an
+// address before Core read it there, so one that calls tools says so.
+func (m *Manager) ReadHeaders(ctx context.Context) {
+	for _, e := range m.catalog.List() {
+		if e.Dynamic && !e.HeaderRead {
+			m.readHeader(ctx, e.ID)
+		}
+	}
+}
+
+// readHeader fills what a model installed from an address lacks from its
+// file's header: family, window, size, and whether it calls tools or
+// thinks. What the catalog or the request set stays; a curated entry is
+// left alone. Only the header is read, never the whole file.
+func (m *Manager) readHeader(ctx context.Context, modelID string) {
+	e, ok := m.catalog.Get(modelID)
+	if !ok || !e.Dynamic || e.HeaderRead {
+		return
+	}
+	installed, path, err := m.storage.IsInstalled(ctx, modelID)
+	if err != nil || !installed {
+		return
+	}
+	d, err := gguf.Inspect(path)
+	if err != nil {
+		return
+	}
+	if e.Family == "" {
+		e.Family = d.Architecture
+	}
+	if e.Context == 0 {
+		e.Context = int(min(d.ContextLength, 1<<31-1))
+	}
+	if e.Parameters == "" {
+		e.Parameters = headerParameters(d)
+	}
+	e.Capabilities.ToolCalling = e.Capabilities.ToolCalling || d.Tools
+	e.Capabilities.Thinks = e.Capabilities.Thinks || d.Thinks
+	e.HeaderRead = true
+	if err := m.storage.UpsertCatalogEntry(ctx, e); err != nil {
+		return
+	}
+	m.catalog.Upsert(e)
 }
 
 // resolveFiles fills in what the repository says about a model installed

@@ -365,6 +365,7 @@ func New(opts Options) (*App, error) {
 		modelMgr.SetPresets(presets)
 	}
 	modelMgr.SyncDynamic(context.Background())
+	modelMgr.ReadHeaders(context.Background())
 
 	llamaClient := llamacpp.NewClient()
 	rtRegistry := runtimes.NewRegistry()
