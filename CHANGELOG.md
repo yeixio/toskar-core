@@ -8,6 +8,17 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Thi
 
 Changes waiting for the next release are in [changes/unreleased/](changes/unreleased/), one file per pull request. `scripts/changelog.py preview` shows them together, and `scripts/changelog.py release <version>` writes them here when the release is cut.
 
+## [1.13.1] - 2026-11-11
+
+### Fixed
+
+- The guide's Use Toskar in VS Code covers disconnecting, a key from API Access where nobody can type a code, models that Agent mode leaves out, and the certificate error earlier versions of the extension showed after the code.
+- Models installed from Hugging Face or by address now say whether they
+  call tools and think, with their family and context window, read from
+  the model file. Models already installed this way are read once at
+  start, so a model such as Qwen 3.8 shows up in editor model pickers that
+  list only models that call tools.
+
 ## [1.13.0] - 2026-11-07
 
 ### Added
