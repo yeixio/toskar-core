@@ -275,5 +275,8 @@
   "SHELL_ONLY": "只有此電腦上的 Toskar Pro 應用程式可以變更此項。",
   "UNLOCK_REQUIRED": "你的 Toskar Pro 試用已結束。解鎖 Toskar Pro 才能新增模型、自動化或人員。",
   "TRIAL_NOT_STARTED": "開始 Toskar Pro 的 14 天免費試用，才能新增模型、自動化或人員。",
-  "NEWS_UNAVAILABLE": "無法從 toskar.ai 讀取 AI 新聞。請檢查網路連線後再試一次。"
+  "NEWS_UNAVAILABLE": "無法從 toskar.ai 讀取 AI 新聞。請檢查網路連線後再試一次。",
+  "PROJECT_FILE_NOT_FOUND": "專案中沒有該檔案。",
+  "PROJECT_NAME_REQUIRED": "請為專案命名。",
+  "PROJECT_NOT_FOUND": "該專案已被刪除。"
 }

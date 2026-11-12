@@ -123,7 +123,10 @@ type Dependencies struct {
 	CreateConversation    func(ctx context.Context, title, profileID, modelID string) (contracts.Conversation, error)
 	// SetConversationProject sets the folder a chat works in (#1017).
 	SetConversationProject func(ctx context.Context, id, project string) error
-	UpdateConversation     func(ctx context.Context, id string, title, profileID, modelID *string, memoryOff *bool) (contracts.Conversation, error)
+	// SetConversationProjectID puts a chat in a project, or "" takes it out
+	// (#1136). The project is checked to be the caller's first.
+	SetConversationProjectID func(ctx context.Context, id, projectID string) error
+	UpdateConversation       func(ctx context.Context, id string, title, profileID, modelID *string, memoryOff *bool) (contracts.Conversation, error)
 	// Compact is auto-compact (#342).
 	Compact            *Compacter
 	DeleteConversation func(ctx context.Context, id string) error
@@ -270,6 +273,7 @@ type Server struct {
 	remote remoteListener
 
 	knowledge   KnowledgeService
+	projects    ProjectService
 	memory      *muninn.Store
 	artifacts   *artifacts.Store
 	speech      *speech.Engine
@@ -429,6 +433,7 @@ func (s *Server) routes() {
 	s.compactRoutes(api)
 	api.HandleFunc("/events", s.handleSSE).Methods(http.MethodGet, http.MethodOptions)
 	s.knowledgeRoutes(api)
+	s.projectRoutes(api)
 	s.memoryRoutes(api)
 	s.artifactRoutes(api)
 	s.deviceRoutes(api)
@@ -1238,6 +1243,16 @@ func (s *Server) handleListConversations(w http.ResponseWriter, r *http.Request)
 		writeErr(w, http.StatusInternalServerError, "CONVERSATIONS_LIST_FAILED", "Could not list conversations.", map[string]any{"cause": err.Error()})
 		return
 	}
+	// One project's chats (#1136).
+	if q := r.URL.Query(); q.Has("project_id") {
+		in := []contracts.Conversation{}
+		for _, c := range items {
+			if c.ProjectID == q.Get("project_id") {
+				in = append(in, c)
+			}
+		}
+		items = in
+	}
 	writeJSON(w, http.StatusOK, items)
 }
 
@@ -1246,6 +1261,8 @@ func (s *Server) handleCreateConversation(w http.ResponseWriter, r *http.Request
 		Title     string `json:"title"`
 		ProfileID string `json:"profile_id"`
 		ModelID   string `json:"model_id"`
+		// ProjectID starts the chat in one of the caller's projects (#1136).
+		ProjectID string `json:"project_id"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		writeErr(w, http.StatusBadRequest, "INVALID_JSON", "Request body must be JSON.", nil)
@@ -1255,10 +1272,20 @@ func (s *Server) handleCreateConversation(w http.ResponseWriter, r *http.Request
 		writeErr(w, http.StatusNotImplemented, "NOT_IMPLEMENTED", "Conversations are not available yet.", nil)
 		return
 	}
+	if !s.checkProjectID(w, r, body.ProjectID) {
+		return
+	}
 	conv, err := s.deps.CreateConversation(r.Context(), body.Title, body.ProfileID, body.ModelID)
 	if err != nil {
 		writeErr(w, http.StatusInternalServerError, "CONVERSATION_CREATE_FAILED", "Could not create conversation.", map[string]any{"cause": err.Error()})
 		return
+	}
+	if body.ProjectID != "" && s.deps.SetConversationProjectID != nil {
+		if err := s.deps.SetConversationProjectID(r.Context(), conv.ID, body.ProjectID); err != nil {
+			writeErr(w, http.StatusInternalServerError, "CONVERSATION_CREATE_FAILED", "Could not create conversation.", map[string]any{"cause": err.Error()})
+			return
+		}
+		conv.ProjectID = body.ProjectID
 	}
 	writeJSON(w, http.StatusCreated, conv)
 }
@@ -1274,6 +1301,9 @@ func (s *Server) handleUpdateConversation(w http.ResponseWriter, r *http.Request
 		CompactOff *bool `json:"compact_off"`
 		// Project is the folder the chat works in, "" for none (#1017).
 		Project *string `json:"project"`
+		// ProjectID moves the chat into one of the caller's projects, or ""
+		// out of its project (#1136).
+		ProjectID *string `json:"project_id"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		writeErr(w, http.StatusBadRequest, "INVALID_JSON", "Request body must be JSON.", nil)
@@ -1297,6 +1327,19 @@ func (s *Server) handleUpdateConversation(w http.ResponseWriter, r *http.Request
 			return
 		}
 		if err := s.deps.SetConversationProject(r.Context(), id, dir); err != nil {
+			writeErrFrom(w, http.StatusBadRequest, "CONVERSATION_UPDATE_FAILED", err)
+			return
+		}
+	}
+	if body.ProjectID != nil {
+		if !s.checkProjectID(w, r, *body.ProjectID) {
+			return
+		}
+		if s.deps.SetConversationProjectID == nil {
+			writeErr(w, http.StatusNotImplemented, "NOT_IMPLEMENTED", "Conversations are not available yet.", nil)
+			return
+		}
+		if err := s.deps.SetConversationProjectID(r.Context(), id, *body.ProjectID); err != nil {
 			writeErrFrom(w, http.StatusBadRequest, "CONVERSATION_UPDATE_FAILED", err)
 			return
 		}

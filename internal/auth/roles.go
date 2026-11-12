@@ -60,6 +60,15 @@ var visitorRoutes = map[string]bool{
 	"DELETE /api/v1/conversations/{id}":       true,
 	"POST /api/v1/conversations/delete":       true,
 	"GET /api/v1/conversations/{id}/messages": true,
+	// One's own projects, as one's own chats (#1136); a project's folder
+	// needs an Admin, which the handler checks.
+	"GET /api/v1/projects":                      true,
+	"POST /api/v1/projects":                     true,
+	"GET /api/v1/projects/{id}":                 true,
+	"PATCH /api/v1/projects/{id}":               true,
+	"DELETE /api/v1/projects/{id}":              true,
+	"POST /api/v1/projects/{id}/files":          true,
+	"DELETE /api/v1/projects/{id}/files/{name}": true,
 	// Auto-compact, for one's own chats (#342).
 	"GET /api/v1/conversations/{id}/summary":              true,
 	"PUT /api/v1/conversations/{id}/summary":              true,

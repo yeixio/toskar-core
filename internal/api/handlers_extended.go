@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/yeixio/toskar-core/internal/portals"
+	"github.com/yeixio/toskar-core/internal/projects"
 	"github.com/yeixio/toskar-core/internal/turnopts"
 	"net"
 	"net/http"
@@ -401,6 +402,8 @@ func (s *Server) handleChat(w http.ResponseWriter, r *http.Request) {
 		// Live sends the answer as it's written, with stream, and a replace
 		// event when what was shown changes (#1006, contract 1.77).
 		Live bool `json:"live"`
+		// ProjectID is the caller's project a new chat starts in (#1136).
+		ProjectID string `json:"project_id"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		writeErr(w, http.StatusBadRequest, "INVALID_JSON", "invalid body", nil)
@@ -467,6 +470,12 @@ func (s *Server) handleChat(w http.ResponseWriter, r *http.Request) {
 		ctx = pluginapi.WithAnswerOptions(ctx, pluginapi.GenerateOptions{NoThinking: true})
 	case "on":
 		ctx = pluginapi.WithAnswerOptions(ctx, pluginapi.GenerateOptions{Thinking: true})
+	}
+	if body.ProjectID != "" {
+		if !s.checkProjectID(w, r, body.ProjectID) {
+			return
+		}
+		ctx = projects.WithID(ctx, body.ProjectID)
 	}
 	ctx = turnopts.WithBranch(ctx, turnopts.Branch{ParentID: body.ParentID, RetryOf: body.RetryOf, EditOf: body.EditOf})
 	if body.Live && body.Stream {

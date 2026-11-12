@@ -394,11 +394,12 @@ func (s *Store) Get(ctx context.Context, id string) (Source, error) {
 	return src, err
 }
 
-// List returns every source, newest first.
+// List returns every source, newest first. A project's files are the
+// project's, so they aren't listed (#1136).
 func (s *Store) List(ctx context.Context) ([]Source, error) {
 	rows, err := s.db.QueryContext(ctx, `
 		SELECT `+sourceColumns+`
-		FROM knowledge_sources ORDER BY created_at DESC`)
+		FROM knowledge_sources WHERE project_id = '' ORDER BY created_at DESC`)
 	if err != nil {
 		return nil, err
 	}

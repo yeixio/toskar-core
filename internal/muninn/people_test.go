@@ -23,10 +23,10 @@ func TestMemoriesArePrivate(t *testing.T) {
 	if list, _ := s.List(owner); len(list) != 0 {
 		t.Fatalf("the owner lists %+v", list)
 	}
-	if got, _ := s.Relevant(owner, "what tea do I prefer, Sam?"); len(got) != 0 {
+	if got, _ := s.Relevant(owner, "what tea do I prefer, Sam?", ""); len(got) != 0 {
 		t.Fatalf("sam's memory reached the owner's turn: %+v", got)
 	}
-	if got, _ := s.Relevant(sam, "what tea do I prefer?"); len(got) == 0 {
+	if got, _ := s.Relevant(sam, "what tea do I prefer?", ""); len(got) == 0 {
 		t.Fatal("sam's own memory didn't reach their turn")
 	}
 	if _, ok, _ := s.Find(owner, "Sam prefer tea"); ok {

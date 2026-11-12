@@ -191,10 +191,10 @@ Control-plane routes are under `/api/v1`. The OpenAI-compatible routes are under
 
 | Method | Path | Purpose |
 | --- | --- | --- |
-| POST | `/chat` | Send a message through a profile. Takes `conversation_id`, `message`, `profile_id`, `model_id` (`auto` for Auto), `effort`, `attachments` (artifact ids), `execution` (where it runs), `time_zone` (the person's IANA time zone, such as `America/Juneau`; the app sends the browser's), `client` (the app asking: `phone`, `tablet`, `watch`, `car` (the phone app in CarPlay, contract 1.65), `tv`, `desktop`, or `web`; its run is traced with it, contract 1.30), and `stream`. Every turn is told the current date and time in that zone, or this computer's when it is empty or unknown; an automation's run uses its schedule's zone. Progress arrives on `/events`. |
+| POST | `/chat` | Send a message through a profile. Takes `conversation_id`, `message`, `profile_id`, `model_id` (`auto` for Auto), `effort`, `attachments` (artifact ids), `execution` (where it runs), `time_zone` (the person's IANA time zone, such as `America/Juneau`; the app sends the browser's), `client` (the app asking: `phone`, `tablet`, `watch`, `car` (the phone app in CarPlay, contract 1.65), `tv`, `desktop`, or `web`; its run is traced with it, contract 1.30), `project_id` (one of the caller's [projects](#projects): a chat not yet in a project joins it, and without `conversation_id` the turn uses it without saving a chat; contract 1.87), and `stream`. Every turn is told the current date and time in that zone, or this computer's when it is empty or unknown; an automation's run uses its schedule's zone. Progress arrives on `/events`. |
 | POST | `/chat/stop` | Stop a conversation's running turn: `{"conversation_id": "..."}` returns `{"stopped": true}` when one was running |
-| GET, POST | `/conversations` | List or create chats |
-| PATCH, DELETE | `/conversations/{id}` | Change a chat's `title`, `profile_id`, `model_id`, `memory_off`, `compact_off` (keep it verbatim: auto-compact never summarizes it, #342), or `project` (the full path of a folder on this computer for it to work in, or empty for none; Admins, #1017, contract 1.85), or delete it with its files |
+| GET, POST | `/conversations` | List or create chats. `?project_id=` lists one project's chats, and a new chat takes `project_id` to start in one of the caller's projects (contract 1.87, `404 PROJECT_NOT_FOUND` for another person's) |
+| PATCH, DELETE | `/conversations/{id}` | Change a chat's `title`, `profile_id`, `model_id`, `memory_off`, `compact_off` (keep it verbatim: auto-compact never summarizes it, #342), `project` (the full path of a folder on this computer for it to work in, or empty for none; Admins, #1017, contract 1.85), or `project_id` (move it into one of the caller's projects, or empty to take it out; contract 1.87), or delete it with its files |
 | POST | `/conversations/delete` | Delete several chats at once, with their messages and files (#452, contract 1.25): `{"ids": [...]}`, 1 to 1,000. Answers `{"deleted": [...], "skipped": [{"id", "reason"}]}`; a chat that isn't the caller's, or doesn't exist, is skipped as `not_found`. Allowed wherever a single delete is: people, paired devices, and portal guests, each for their own chats. `INVALID_CONVERSATION_IDS` for none or too many |
 | GET | `/conversations/{id}/turn` | What the chat's running turn has done so far, for an app that opens it midway (#1017, contract 1.86): `running`, `started_at`, `steps` (`tool_id`, `summary`, `status`), the end of the running command's `output`, the answer's `text` so far, and `waiting`, each `tool.requested` still unanswered. Not running, only `running: false`; the messages have the rest. |
 | GET | `/conversations/{id}/messages` | A chat's messages as shown, with each answer's `meta` and, where a retry or an edit made more than one, `versions` |
@@ -284,6 +284,17 @@ Control-plane routes are under `/api/v1`. The OpenAI-compatible routes are under
 | POST | `/knowledge/search` | Passages that match a question |
 
 Uploads send `text`, or `content_base64` for binary files such as `.xlsx` and `.pdf`. The same field works for `/training/classify` and `/training/ais/{id}/materials`.
+
+### Projects
+
+| Method | Path | Purpose |
+| --- | --- | --- |
+| GET, POST | `/projects` | The caller's projects, newest activity first, with `chat_count`; or make one: `name`, and optionally `instructions`, `profile_id`, `model_id`, `memory_off`, `knowledge` (source ids to link; Members and up), and `folder` (Admins) |
+| GET, PATCH, DELETE | `/projects/{id}` | Read, change, or delete a project. Fields left out stay as they are. `folder` is the full path of a folder on this computer, or empty for none; it needs an Admin (`ROLE_REQUIRED`) and must be a folder (`NOT_A_FOLDER`). Delete removes its files and its memories; its chats move out of it unless `?chats=delete`, which deletes them too |
+| POST | `/projects/{id}/files` | Add a file to the project's knowledge: `filename` plus `text`, or `content_base64`. A file with that name is replaced; one Toskar can't read is refused. Answers the project with its `files` |
+| DELETE | `/projects/{id}/files/{name}` | Remove a file (`PROJECT_FILE_NOT_FOUND` for one it doesn't have) |
+
+Visitors and up use their own projects (contract 1.87, #1136); another person's reads as `404 PROJECT_NOT_FOUND`. A phone's key lists them (`GET /projects`, `GET /projects/{id}`) and starts chats in them; a portal's guests have none.
 
 ### Training
 
@@ -511,6 +522,16 @@ Knowledge search matches words (BM25). When an embedding model is installed (one
 A source's `language` is the language most of its passages are written in, and `languages` lists every language found with how many passages are in it (multilingual spec §19). Both are detected on this computer when the source is indexed. With a multilingual embedding model, a question finds passages by meaning in any language, such as a Spanish question finding an English policy, and the answer is written in the answer language, not the document's.
 
 Word and meaning matches are combined with reciprocal rank fusion. A passage found only by meaning must be similar enough to the question, and close to the best match. When words found something, it must also be at least as similar to the question as the best word match, so a question that names one product does not bring in every similar row. When a reranker model is installed (`support_role` `reranker`), it reorders the top 16 passages. Each hit from `POST /knowledge/search` has `match`: `keyword`, `semantic`, or `both`. `score` orders hits within one search only: BM25 for word-only search, the fused rank when meaning is used, and the reranker's score for passages it ordered. A knowledge source reports `embedded_count` and `embedding_model`. With no embedding model installed, if it cannot start, or while training is using the computer, search uses words only.
+
+## Projects
+
+A project keeps related chats together with what they share (#1136): `instructions`, files, an optional `folder` on this computer, a default `profile_id` and `model_id`, and a memory of its own. It belongs to the person who made it. A chat is in one project at most (`project_id`); its `project` field is still its own folder. In a chat in a project:
+
+- **Profile and model:** the request's, else the chat's, else the project's, else the person's default.
+- **Instructions:** the project's come after the profile's topic rules and a specialized AI's instructions, and before the person's personalization. Text the chat reads, such as the project's files, pages, and tool results, is reference material and can't add to them.
+- **Knowledge:** the project's files and its linked sources are searched as well as the profile's, as reference material. The files are one knowledge source with the project's id, made with the first file and removed with the last; it isn't listed by `GET /knowledge/sources` and is deleted with the project.
+- **Folder:** the `X-Toskar-Project` header's folder, else the chat's `project`, else the project's `folder`, under the same rule as a chat's: for an Admin, on the web, desktop, and terminal.
+- **Memory:** with the project's memory on (`memory_off: false`, the default), the chat recalls the person's memories and the project's, and "Remember that…" saves to the project. Memories have `project_id`. Other chats never recall a project's memories. With it off, the project's chats neither read nor save project memory. The person's own memory follows the chat's `memory_off`, as before; with it off, "Remember that…" saves to the person's own memory.
 
 ## Training and export
 

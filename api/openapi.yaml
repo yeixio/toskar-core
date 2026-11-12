@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Toskar Control Plane API
-  version: "1.86"
+  version: "1.87"
   description: >-
     Local AI control plane API for Toskar, its OpenAI-compatible routes, and its MCP server.
     On the default loopback bind no key is needed. When the daemon listens on any other address,
@@ -25,6 +25,8 @@ tags:
     description: "Documents, folders, and sources the assistant searches."
   - name: Memory
     description: "What the assistant remembers, and how it writes to you."
+  - name: Projects
+    description: "Chats kept together with their instructions, files, folder, default profile and model, and memory."
   - name: Profiles
     description: "Assistants with their own models, tools, and topics, and who may use them."
   - name: Automations
@@ -1706,6 +1708,12 @@ paths:
       summary: List conversations
       operationId: listConversations
       tags: [Conversations]
+      parameters:
+        - name: project_id
+          in: query
+          required: false
+          schema: {type: string}
+          description: Only the chats in this project (contract 1.87, #1136).
       responses:
         "200":
           description: OK
@@ -1731,6 +1739,9 @@ paths:
                   type: string
                 model_id:
                   type: string
+                project_id:
+                  type: string
+                  description: Start the chat in one of the caller's projects (contract 1.87, #1136).
       responses:
         "201":
           description: Created
@@ -1738,6 +1749,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Conversation"
+        "404":
+          description: PROJECT_NOT_FOUND for a project that isn't the caller's
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
   /api/v1/conversations/delete:
     post:
       summary: Delete several conversations
@@ -1796,6 +1813,9 @@ paths:
                 project:
                   type: string
                   description: The full path of a folder on the Toskar computer for this chat to work in, or empty for none. Needs the admin role (contract 1.85).
+                project_id:
+                  type: string
+                  description: Move the chat into one of the caller's projects, or empty to take it out of its project (contract 1.87, #1136).
       responses:
         "200":
           description: OK
@@ -1803,6 +1823,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Conversation"
+        "404":
+          description: PROJECT_NOT_FOUND for a project that isn't the caller's
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
     delete:
       summary: Delete conversation
       operationId: deleteConversation
@@ -4095,6 +4121,9 @@ paths:
                 live:
                   type: boolean
                   description: "With stream, send the answer as it's written, with a replace event when what was shown changes (#1006, contract 1.77). Without it, the answer comes whole when it's ready. Some turns stay whole anyway: topic-enforcing profiles, portals, Deliberate, Team, and answers that must be JSON."
+                project_id:
+                  type: string
+                  description: "One of the caller's projects for the turn (contract 1.87, #1136): a chat not yet in a project joins it, and without conversation_id the turn uses it without saving a chat. A chat already in a project stays in its own."
               required: [message]
       responses:
         "200":
@@ -4856,6 +4885,216 @@ paths:
           description: Deleted
         "404":
           description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/v1/projects:
+    get:
+      summary: The caller's projects
+      description: Newest activity first, with how many chats each has (contract 1.87, #1136).
+      operationId: listProjects
+      tags: [Projects]
+      responses:
+        "200":
+          description: Projects
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Project"
+    post:
+      summary: Make a project
+      operationId: createProject
+      tags: [Projects]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProjectInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Project"
+        "400":
+          description: PROJECT_NAME_REQUIRED, NOT_A_FOLDER, KNOWLEDGE_SOURCE_NOT_FOUND, or another invalid field
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: ROLE_REQUIRED, for a folder without the admin role, or knowledge without the member role
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/v1/projects/{id}:
+    get:
+      summary: One project
+      operationId: getProject
+      tags: [Projects]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Project
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Project"
+        "404":
+          description: PROJECT_NOT_FOUND, also for another person's project
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    patch:
+      summary: Change a project
+      description: Fields left out stay as they are. folder needs the admin role and must be a folder on the Toskar computer.
+      operationId: updateProject
+      tags: [Projects]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProjectInput"
+      responses:
+        "200":
+          description: Project
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Project"
+        "400":
+          description: NOT_A_FOLDER, KNOWLEDGE_SOURCE_NOT_FOUND, or another invalid field
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: ROLE_REQUIRED, for a folder without the admin role, or knowledge without the member role
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: PROJECT_NOT_FOUND
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    delete:
+      summary: Delete a project
+      description: Deletes the project with its files and its memories. Its chats move out of it, keeping their own folder, unless chats is delete.
+      operationId: deleteProject
+      tags: [Projects]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: chats
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [keep, delete]
+          description: delete deletes the project's chats too, with their files.
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: PROJECT_NOT_FOUND
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/v1/projects/{id}/files:
+    post:
+      summary: Add a file to a project
+      description: The file joins the project's knowledge, which its chats search. A file with the same name is replaced. One that can't be read is refused.
+      operationId: addProjectFile
+      tags: [Projects]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [filename]
+              properties:
+                filename:
+                  type: string
+                  description: Its name; the extension picks the reader, such as .md, .csv, or .pdf
+                text:
+                  type: string
+                  description: A text file's content
+                content_base64:
+                  type: string
+                  description: Another file's bytes, such as a PDF's, in place of text
+      responses:
+        "201":
+          description: The project with its files
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Project"
+        "400":
+          description: An empty, unreadable, or unsupported file
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: PROJECT_NOT_FOUND
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/v1/projects/{id}/files/{name}:
+    delete:
+      summary: Remove a file from a project
+      operationId: removeProjectFile
+      tags: [Projects]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Removed
+        "404":
+          description: PROJECT_NOT_FOUND or PROJECT_FILE_NOT_FOUND
           content:
             application/json:
               schema:
@@ -7596,6 +7835,7 @@ components:
         model_id: {type: string}
         memory_off: {type: boolean, description: '`memory_off` keeps persistent memory out of this conversation.'}
         project: {type: string, description: The folder on the Toskar computer this chat works in. Work asked for in it goes on until it's done, on the terminal, web, and desktop (contract 1.85).}
+        project_id: {type: string, description: 'The project the chat is in, if any: a chat is in one project at most (contract 1.87, #1136).'}
         compact_off: {type: boolean, description: '`compact_off` keeps this conversation verbatim: auto-compact never sends its older messages as a summary (contract 1.35, #342).'}
         created_at: {type: string, format: date-time}
         updated_at: {type: string, format: date-time}
@@ -7750,6 +7990,50 @@ components:
           type: object
           description: How it was made, such as a picture's model, seed, and prompt (#553).
           additionalProperties: {}
+    Project:
+      type: object
+      description: 'Related chats kept together with what they share: instructions, files, a folder on the Toskar computer, a default profile and model, and a memory of their own (contract 1.87, #1136). It belongs to the person who made it.'
+      required: [chat_count, created_at, files, id, instructions, knowledge, memory_off, name, updated_at]
+      properties:
+        id: {type: string}
+        name: {type: string}
+        instructions: {type: string, description: 'The person''s own instructions for every chat in the project. They come after a profile''s and before the person''s style.'}
+        folder: {type: string, description: Where the project's chats work on the Toskar computer, unless a chat names its own. Only an Admin sets it.}
+        profile_id: {type: string}
+        model_id: {type: string}
+        memory_off: {type: boolean, description: '`memory_off` keeps the project''s chats from saving or reading the project''s own memory. The person''s memory follows each chat''s Memory control.'}
+        knowledge:
+          type: array
+          description: The ids of knowledge sources linked to the project, which its chats search as well as its files.
+          items: {type: string}
+        files:
+          type: array
+          description: The files added to the project's knowledge.
+          items: {$ref: "#/components/schemas/ProjectFile"}
+        chat_count: {type: integer, description: How many chats are in the project.}
+        created_at: {type: string, format: date-time}
+        updated_at: {type: string, format: date-time, description: 'The project''s last activity: a change to it, or to one of its chats.'}
+    ProjectInput:
+      type: object
+      description: A project's fields; one left out stays as it is.
+      properties:
+        name: {type: string}
+        instructions: {type: string}
+        folder: {type: string, description: 'The full path of a folder on the Toskar computer for the project''s chats to work in, or empty for none. Needs the admin role.'}
+        profile_id: {type: string}
+        model_id: {type: string}
+        memory_off: {type: boolean}
+        knowledge:
+          type: array
+          description: Knowledge source ids to link. Needs the member role.
+          items: {type: string}
+    ProjectFile:
+      type: object
+      description: One file in a project's knowledge.
+      required: [name, size]
+      properties:
+        name: {type: string}
+        size: {type: integer, format: int64}
     Memory:
       type: object
       description: One durable fact or preference.
@@ -7763,6 +8047,7 @@ components:
         enabled: {type: boolean}
         local_only: {type: boolean, description: '`local_only` keeps the memory on this computer: work that uses it is never sent to a paired computer (§63).'}
         language: {type: string, description: 'The language the memory is written in, as a BCP 47 tag detected on this computer (multilingual spec §18), or "" when it is too short to tell. A memory is found in any language; this says which one its text is in.'}
+        project_id: {type: string, description: 'The project the memory belongs to, learned in one of its chats, or "" for the person''s own memory (#1136).'}
         created_at: {type: string, format: date-time}
         updated_at: {type: string, format: date-time}
     KnowledgeSource:

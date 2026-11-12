@@ -275,5 +275,8 @@
   "SHELL_ONLY": "Das kann nur die Toskar Pro App auf diesem Computer ändern.",
   "UNLOCK_REQUIRED": "Deine Testphase von Toskar Pro ist vorbei. Schalte Toskar Pro frei, um Modelle, Automatisierungen oder Personen hinzuzufügen.",
   "TRIAL_NOT_STARTED": "Starte die kostenlose 14-tägige Testphase von Toskar Pro, um Modelle, Automatisierungen oder Personen hinzuzufügen.",
-  "NEWS_UNAVAILABLE": "Die KI-Neuigkeiten konnten nicht von toskar.ai gelesen werden. Prüfe die Internetverbindung und versuche es erneut."
+  "NEWS_UNAVAILABLE": "Die KI-Neuigkeiten konnten nicht von toskar.ai gelesen werden. Prüfe die Internetverbindung und versuche es erneut.",
+  "PROJECT_FILE_NOT_FOUND": "Diese Datei ist nicht im Projekt.",
+  "PROJECT_NAME_REQUIRED": "Gib dem Projekt einen Namen.",
+  "PROJECT_NOT_FOUND": "Dieses Projekt wurde entfernt."
 }

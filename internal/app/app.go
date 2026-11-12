@@ -57,6 +57,7 @@ import (
 	"github.com/yeixio/toskar-core/internal/portals"
 	"github.com/yeixio/toskar-core/internal/portmap"
 	"github.com/yeixio/toskar-core/internal/profiles"
+	"github.com/yeixio/toskar-core/internal/projects"
 	"github.com/yeixio/toskar-core/internal/push"
 	"github.com/yeixio/toskar-core/internal/pyenv"
 	"github.com/yeixio/toskar-core/internal/ratings"
@@ -119,6 +120,8 @@ type App struct {
 	Health           *modelhealth.Monitor
 	Mimir            *mimir.Store
 	Muninn           *muninn.Store
+	// Projects keep chats together with what they share (#1136).
+	Projects *projects.Service
 	// portKeeper keeps the router port access from anywhere uses (#456).
 	portKeeper portmap.Keeper
 	// relay is the relay client while access from anywhere is on (#456).
@@ -570,6 +573,9 @@ func New(opts Options) (*App, error) {
 		SetConversationProject: func(ctx context.Context, id, project string) error {
 			return a.Conversations.SetProject(ctx, id, project)
 		},
+		SetConversationProjectID: func(ctx context.Context, id, projectID string) error {
+			return a.Conversations.SetProjectID(ctx, id, projectID)
+		},
 		UpdateConversation: func(ctx context.Context, id string, title, profileID, modelID *string, memoryOff *bool) (contracts.Conversation, error) {
 			return convRepo.Update(ctx, id, repositories.ConversationPatch{
 				Title:     title,
@@ -983,6 +989,12 @@ func New(opts Options) (*App, error) {
 	a.Tools.Register(&resultsTool{store: a.Automations})
 	a.API.BindArtifacts(a.Artifacts)
 	a.API.BindKnowledge(a.Mimir)
+	a.Projects = &projects.Service{Store: projects.NewStore(db.SQL), Files: a.Mimir, Memories: a.Muninn,
+		DeleteChats: func(ctx context.Context, ids []string) error {
+			_, err := a.deleteConversations(ctx, ids)
+			return err
+		}}
+	a.API.BindProjects(a.Projects)
 	// A media.json in the data folder replaces the built-in picture and
 	// clip models (#551); one that isn't fully pinned is refused.
 	if path := filepath.Join(cfg.DataDir, "manifests", "models", "media.json"); fileExists(path) {
