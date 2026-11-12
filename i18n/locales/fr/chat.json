@@ -107,7 +107,25 @@
     "placeholder": "Chemin complet du dossier",
     "hint": "Avec un dossier, Toskar peut y exécuter des commandes et continuer jusqu’à ce que le travail soit terminé. Il demande avant de modifier quoi que ce soit.",
     "save": "Enregistrer",
-    "remove": "Retirer"
+    "remove": "Retirer",
+    "fromProject": "Du projet : {{name}}",
+    "projectHint": "Cette discussion travaille dans le dossier de son projet, {{path}}, sauf si vous en choisissez un autre pour elle."
+  },
+  "projectLine": {
+    "in": "Dans le projet <go>{{name}}</go>",
+    "newIn": "Nouvelle discussion dans le projet <go>{{name}}</go>",
+    "move": "Déplacer vers un projet",
+    "remove": "Retirer du projet"
+  },
+  "moveDialog": {
+    "title": "Déplacer vers un projet",
+    "body": "Choisissez un projet pour « {{title}} ». Dès son prochain message, elle suit les instructions du projet et cherche dans ses fichiers.",
+    "none": "Aucun projet pour l’instant. Donnez-lui un nom ci-dessous pour en créer un.",
+    "newLabel": "Nouveau projet",
+    "newPlaceholder": "Nom du nouveau projet",
+    "create": "Créer et déplacer",
+    "cancel": "Annuler",
+    "failed": "Le projet n’a pas pu être créé. Réessayez."
   },
   "task": {
     "output": "Sortie de la commande",
@@ -354,7 +372,12 @@
       "week": "7 derniers jours",
       "month": "30 derniers jours",
       "older": "Plus anciennes"
-    }
+    },
+    "projects": "Projets",
+    "newProject": "Nouveau projet",
+    "openProject": "Ouvrir {{name}}",
+    "projectEmpty": "Aucune discussion pour l’instant",
+    "moveToProject": "Déplacer vers un projet…"
   },
   "errors": {
     "tryAgain": "Réessayer",

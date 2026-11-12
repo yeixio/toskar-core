@@ -1,0 +1,81 @@
+{
+  "new": {
+    "title": "Neues Projekt",
+    "body": "Ein Projekt hält zusammengehörige Chats beisammen, mit allem, was sie teilen: Anweisungen, Dateien und ein eigenes Gedächtnis.",
+    "name": "Name",
+    "placeholder": "Küchenumbau",
+    "create": "Projekt anlegen",
+    "cancel": "Abbrechen"
+  },
+  "page": {
+    "loading": "Projekt wird geladen…",
+    "notFound": "Dieses Projekt gibt es nicht. Vielleicht wurde es gelöscht.",
+    "back": "Alle Chats",
+    "description": "Die Chats in diesem Projekt teilen seine Anweisungen, Dateien und sein Gedächtnis.",
+    "newChat": "Neuer Chat",
+    "rename": "Umbenennen",
+    "name": "Projektname",
+    "save": "Speichern",
+    "cancel": "Abbrechen"
+  },
+  "chats": {
+    "title": "Chats",
+    "loading": "Chats werden geladen…",
+    "empty": "Noch keine Chats in diesem Projekt. Beginne einen mit Neuer Chat.",
+    "untitled": "Ohne Titel"
+  },
+  "instructions": {
+    "title": "Anweisungen",
+    "hint": "Jeder Chat in diesem Projekt folgt ihnen, nach denen des Profils. Sag, für wen die Antworten sind, worauf es ankommt oder wie geschrieben werden soll.",
+    "placeholder": "Zum Beispiel: Die Antworten sind für eine kleine Bäckerei. Halte sie kurz und nutze metrische Einheiten.",
+    "save": "Anweisungen speichern",
+    "discard": "Änderungen verwerfen"
+  },
+  "files": {
+    "title": "Dateien",
+    "hint": "Die Chats des Projekts durchsuchen diese Dateien, wenn sie bei der Antwort helfen. Sie bleiben auf dem Toskar-Computer.",
+    "empty": "Noch keine Dateien.",
+    "add": "Datei hinzufügen",
+    "adding": "Wird hinzugefügt…",
+    "remove": "Entfernen",
+    "removeName": "{{name}} entfernen",
+    "tooBig": "{{name}} ist größer als {{size}}, die maximale Dateigröße."
+  },
+  "knowledge": {
+    "title": "Wissen",
+    "hint": "Wissensquellen, die die Chats des Projekts ebenfalls durchsuchen, etwa ein Ordner mit Dokumenten. Sie werden verknüpft, nicht kopiert."
+  },
+  "folder": {
+    "title": "Ordner",
+    "hint": "Die Chats des Projekts arbeiten in diesem Ordner auf dem Toskar-Computer, sofern ein Chat keinen eigenen wählt. Toskar kann dort Befehle ausführen und fragt vor jeder Änderung.",
+    "label": "Ordner auf dem Toskar-Computer",
+    "placeholder": "Vollständiger Pfad zum Ordner",
+    "save": "Speichern",
+    "remove": "Entfernen"
+  },
+  "defaults": {
+    "title": "Profil und Modell",
+    "hint": "Neue Chats in diesem Projekt beginnen damit.",
+    "profile": "Profil",
+    "model": "Modell",
+    "yourDefault": "Dein Standard",
+    "auto": "Automatisch"
+  },
+  "memory": {
+    "title": "Gedächtnis",
+    "hint": "Was die Chats des Projekts lernen, wird für seine anderen Chats gemerkt, nicht für deine übrigen. Ausgeschaltet speichern und lesen sie das Gedächtnis des Projekts nicht.",
+    "toggle": "Projektgedächtnis"
+  },
+  "delete": {
+    "title": "Projekt löschen",
+    "hint": "Seine Dateien und was es sich gemerkt hat, werden gelöscht. Seine Chats bleiben in deinem Verlauf, sofern du sie nicht ebenfalls löschst.",
+    "button": "Projekt löschen",
+    "confirmTitle": "„{{name}}“ löschen?",
+    "body": "Seine Dateien und was es sich gemerkt hat, werden gelöscht. Seine Chats verlassen das Projekt und bleiben in deinem Verlauf.",
+    "bodyChats": "Seine Dateien, was es sich gemerkt hat, und seine Chats werden gelöscht. Das lässt sich nicht rückgängig machen.",
+    "alsoChats_one": "Auch seinen Chat löschen",
+    "alsoChats_other": "Auch seine {{count}} Chats löschen",
+    "cancel": "Abbrechen",
+    "confirm": "Projekt löschen"
+  }
+}

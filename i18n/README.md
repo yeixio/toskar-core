@@ -22,6 +22,7 @@ i18n/
                             latest result, such as "what's in my briefing"
                             (format: lookups/README.md)
     memory.json             the Memory page
+    projects.json           a project's page, and making one
     models.json             the Models page and what Chat says about a model
     computers.json          the Computers page
     performance.json        the Performance page

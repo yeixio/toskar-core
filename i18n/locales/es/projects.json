@@ -1,0 +1,82 @@
+{
+  "new": {
+    "title": "Nuevo proyecto",
+    "body": "Un proyecto reúne chats relacionados con lo que comparten: instrucciones, archivos y una memoria propia.",
+    "name": "Nombre",
+    "placeholder": "Reforma de la cocina",
+    "create": "Crear proyecto",
+    "cancel": "Cancelar"
+  },
+  "page": {
+    "loading": "Cargando el proyecto…",
+    "notFound": "Este proyecto no está aquí. Puede que se haya eliminado.",
+    "back": "Todos los chats",
+    "description": "Los chats de este proyecto comparten sus instrucciones, archivos y memoria.",
+    "newChat": "Nuevo chat",
+    "rename": "Cambiar nombre",
+    "name": "Nombre del proyecto",
+    "save": "Guardar",
+    "cancel": "Cancelar"
+  },
+  "chats": {
+    "title": "Chats",
+    "loading": "Cargando chats…",
+    "empty": "Aún no hay chats en este proyecto. Empieza uno con Nuevo chat.",
+    "untitled": "Sin título"
+  },
+  "instructions": {
+    "title": "Instrucciones",
+    "hint": "Cada chat de este proyecto las sigue, después de las del perfil. Di para quién son las respuestas, en qué centrarse o cómo escribir.",
+    "placeholder": "Por ejemplo: las respuestas son para una pequeña panadería. Que sean breves y usen unidades métricas.",
+    "save": "Guardar instrucciones",
+    "discard": "Descartar cambios"
+  },
+  "files": {
+    "title": "Archivos",
+    "hint": "Los chats del proyecto buscan en estos archivos cuando ayudan a responder. Se quedan en el ordenador con Toskar.",
+    "empty": "Aún no hay archivos.",
+    "add": "Añadir un archivo",
+    "adding": "Añadiendo…",
+    "remove": "Quitar",
+    "removeName": "Quitar {{name}}",
+    "tooBig": "{{name}} ocupa más de {{size}}, el máximo para un archivo."
+  },
+  "knowledge": {
+    "title": "Conocimiento",
+    "hint": "Fuentes de conocimiento en las que también buscan los chats del proyecto, como una carpeta de documentos. Se enlazan, no se copian."
+  },
+  "folder": {
+    "title": "Carpeta",
+    "hint": "Los chats del proyecto trabajan en esta carpeta del ordenador con Toskar, salvo que un chat elija la suya. Toskar puede ejecutar comandos en ella y pregunta antes de cambiar nada.",
+    "label": "Carpeta en el ordenador con Toskar",
+    "placeholder": "Ruta completa de la carpeta",
+    "save": "Guardar",
+    "remove": "Quitar"
+  },
+  "defaults": {
+    "title": "Perfil y modelo",
+    "hint": "Los nuevos chats de este proyecto empiezan con estos.",
+    "profile": "Perfil",
+    "model": "Modelo",
+    "yourDefault": "Tu predeterminado",
+    "auto": "Automático"
+  },
+  "memory": {
+    "title": "Memoria",
+    "hint": "Lo que aprenden los chats del proyecto se recuerda para sus otros chats, no para los demás tuyos. Desactivada, ni guardan ni leen la memoria del proyecto.",
+    "toggle": "Memoria del proyecto"
+  },
+  "delete": {
+    "title": "Eliminar proyecto",
+    "hint": "Se eliminan sus archivos y lo que recordaba. Sus chats se quedan en tu historial, salvo que elijas eliminarlos también.",
+    "button": "Eliminar proyecto",
+    "confirmTitle": "¿Eliminar «{{name}}»?",
+    "body": "Se eliminan sus archivos y lo que recordaba. Sus chats salen del proyecto y se quedan en tu historial.",
+    "bodyChats": "Se eliminan sus archivos, lo que recordaba y sus chats. No se puede deshacer.",
+    "alsoChats_one": "Eliminar también su chat",
+    "alsoChats_many": "Eliminar también sus {{count}} chats",
+    "alsoChats_other": "Eliminar también sus {{count}} chats",
+    "cancel": "Cancelar",
+    "confirm": "Eliminar proyecto"
+  }
+}

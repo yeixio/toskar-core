@@ -1,6 +1,7 @@
 package screenshot
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"strings"
@@ -36,6 +37,11 @@ func serveScreenshotAPI(w http.ResponseWriter, r *http.Request) {
 	}
 	if r.Method != http.MethodGet {
 		writeJSON(w, http.StatusOK, `{}`)
+		return
+	}
+	// One project's chats, for its page (#1136).
+	if path == "/api/v1/conversations" && r.URL.Query().Has("project_id") {
+		writeJSON(w, http.StatusOK, screenshotProjectConversations(r.URL.Query().Get("project_id")))
 		return
 	}
 	if body, ok := screenshotGET(path); ok {
@@ -124,6 +130,11 @@ func screenshotGET(path string) (string, bool) {
 			`"check":{"at":"` + at + `","tried":"` + at + `","relay":{"ok":true,"ms":84},"direct":[{"address":"198.51.100.24:7333","ok":false,"reason":"timeout","ms":8003}]}}`, true
 	case path == "/api/v1/conversations":
 		return screenshotConversations(), true
+	// Projects (#1136): one, with two of the chats in it.
+	case path == "/api/v1/projects":
+		return `[` + screenshotProject() + `]`, true
+	case path == "/api/v1/projects/proj-house":
+		return screenshotProject(), true
 	case path == "/api/v1/conversations/conv-budget/messages":
 		return screenshotBudgetMessages, true
 	case strings.HasPrefix(path, "/api/v1/conversations/") && strings.HasSuffix(path, "/messages"):
@@ -421,12 +432,37 @@ func screenshotConversations() string {
 	).Replace(screenshotConversationsTemplate)
 }
 
+// screenshotProjectConversations is the chats in one project, as
+// ?project_id= lists them.
+func screenshotProjectConversations(projectID string) string {
+	var all []map[string]any
+	if err := json.Unmarshal([]byte(screenshotConversations()), &all); err != nil {
+		return `[]`
+	}
+	in := []map[string]any{}
+	for _, c := range all {
+		if c["project_id"] == projectID {
+			in = append(in, c)
+		}
+	}
+	out, _ := json.Marshal(in)
+	return string(out)
+}
+
+// screenshotProject is a project that two of the demo chats are in.
+func screenshotProject() string {
+	at := time.Now().UTC().Add(-4 * 24 * time.Hour).Format(time.RFC3339)
+	return `{"id":"proj-house","name":"Warmer house","instructions":"Answers are for a small two-story house in a cold, wet climate. Keep costs in US dollars and say when a contractor is needed.",` +
+		`"profile_id":"research","model_id":"auto","memory_off":false,"knowledge":[],"files":[{"name":"energy-bills-2026.csv","size":3172},{"name":"floor-plan-notes.md","size":1840}],` +
+		`"chat_count":2,"created_at":"2026-10-02T18:00:00Z","updated_at":"` + at + `"}`
+}
+
 const screenshotConversationsTemplate = `[
   {"id": "conv-local", "title": "Plan a weekend trail loop", "profile_id": "general-assistant", "model_id": "gemma-4-e4b", "created_at": "{{now}}", "updated_at": "{{now}}"},
   {"id": "conv-budget", "title": "Sort out the monthly budget spreadsheet", "profile_id": "general-assistant", "model_id": "gemma-4-e4b", "created_at": "{{earlier}}", "updated_at": "{{earlier}}"},
   {"id": "conv-code", "title": "Why does the build fail on Linux only?", "profile_id": "programming", "model_id": "gemma-4-e4b", "created_at": "{{yesterday}}", "updated_at": "{{yesterday}}"},
-  {"id": "conv-letter", "title": "Letter to the landlord about the heating", "profile_id": "general-assistant", "model_id": "gemma-4-e4b", "created_at": "{{days}}", "updated_at": "{{days}}"},
-  {"id": "conv-research", "title": "Compare three heat pumps for a small house", "profile_id": "research", "model_id": "gemma-4-e4b", "created_at": "{{weeks}}", "updated_at": "{{weeks}}"}
+  {"id": "conv-letter", "title": "Letter to the landlord about the heating", "profile_id": "general-assistant", "model_id": "gemma-4-e4b", "project_id": "proj-house", "created_at": "{{days}}", "updated_at": "{{days}}"},
+  {"id": "conv-research", "title": "Compare three heat pumps for a small house", "profile_id": "research", "model_id": "gemma-4-e4b", "project_id": "proj-house", "created_at": "{{weeks}}", "updated_at": "{{weeks}}"}
 ]`
 
 const screenshotMessages = `[

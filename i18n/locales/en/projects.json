@@ -1,0 +1,81 @@
+{
+  "new": {
+    "title": "New project",
+    "body": "A project keeps related chats together with what they share: instructions, files, and a memory of its own.",
+    "name": "Name",
+    "placeholder": "Kitchen remodel",
+    "create": "Make project",
+    "cancel": "Cancel"
+  },
+  "page": {
+    "loading": "Loading the project…",
+    "notFound": "This project isn't here. It may have been deleted.",
+    "back": "All chats",
+    "description": "Chats in this project share its instructions, files, and memory.",
+    "newChat": "New chat",
+    "rename": "Rename",
+    "name": "Project name",
+    "save": "Save",
+    "cancel": "Cancel"
+  },
+  "chats": {
+    "title": "Chats",
+    "loading": "Loading chats…",
+    "empty": "No chats in this project yet. Start one with New chat.",
+    "untitled": "Untitled"
+  },
+  "instructions": {
+    "title": "Instructions",
+    "hint": "Every chat in this project follows these, after the profile's own. Say who the answers are for, what to focus on, or how to write.",
+    "placeholder": "For example: Answers are for a small bakery. Keep them short and use metric units.",
+    "save": "Save instructions",
+    "discard": "Discard changes"
+  },
+  "files": {
+    "title": "Files",
+    "hint": "The project's chats search these files when they help answer. They stay on the Toskar computer.",
+    "empty": "No files yet.",
+    "add": "Add a file",
+    "adding": "Adding…",
+    "remove": "Remove",
+    "removeName": "Remove {{name}}",
+    "tooBig": "{{name}} is larger than {{size}}, the most a file can be."
+  },
+  "knowledge": {
+    "title": "Knowledge",
+    "hint": "Knowledge sources the project's chats search too, such as a folder of documents. They're linked, not copied."
+  },
+  "folder": {
+    "title": "Folder",
+    "hint": "The project's chats work in this folder on the Toskar computer, unless a chat chooses its own. Toskar can run commands there, and asks before changing anything.",
+    "label": "Folder on the Toskar computer",
+    "placeholder": "Full path to the folder",
+    "save": "Save",
+    "remove": "Remove"
+  },
+  "defaults": {
+    "title": "Profile and model",
+    "hint": "New chats in this project start with these.",
+    "profile": "Profile",
+    "model": "Model",
+    "yourDefault": "Your default",
+    "auto": "Auto"
+  },
+  "memory": {
+    "title": "Memory",
+    "hint": "What the project's chats learn is remembered for its other chats, not your others. Turned off, they neither save nor read the project's memory.",
+    "toggle": "Project memory"
+  },
+  "delete": {
+    "title": "Delete project",
+    "hint": "Its files and what it remembered are deleted. Its chats stay in your history unless you choose to delete them too.",
+    "button": "Delete project",
+    "confirmTitle": "Delete “{{name}}”?",
+    "body": "Its files and what it remembered are deleted. Its chats move out of the project and stay in your history.",
+    "bodyChats": "Its files, what it remembered, and its chats are deleted. This can't be undone.",
+    "alsoChats_one": "Also delete its chat",
+    "alsoChats_other": "Also delete its {{count}} chats",
+    "cancel": "Cancel",
+    "confirm": "Delete project"
+  }
+}

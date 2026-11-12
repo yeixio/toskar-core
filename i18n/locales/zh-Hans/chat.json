@@ -107,7 +107,25 @@
     "placeholder": "文件夹的完整路径",
     "hint": "指定文件夹后,Toskar 可以在其中运行命令,并持续工作直到完成。更改任何内容前都会先询问。",
     "save": "保存",
-    "remove": "移除"
+    "remove": "移除",
+    "fromProject": "来自项目:{{name}}",
+    "projectHint": "除非你为这个聊天另选文件夹,否则它在项目的文件夹 {{path}} 中工作。"
+  },
+  "projectLine": {
+    "in": "在项目 <go>{{name}}</go> 中",
+    "newIn": "项目 <go>{{name}}</go> 中的新聊天",
+    "move": "移到项目",
+    "remove": "移出项目"
+  },
+  "moveDialog": {
+    "title": "移到项目",
+    "body": "为“{{title}}”选择一个项目。从下一条消息起,它会遵循项目的说明并搜索项目的文件。",
+    "none": "还没有项目。在下方输入名称即可新建。",
+    "newLabel": "新建项目",
+    "newPlaceholder": "新项目名称",
+    "create": "新建并移动",
+    "cancel": "取消",
+    "failed": "无法新建项目。请重试。"
   },
   "task": {
     "output": "命令输出",
@@ -332,7 +350,12 @@
       "week": "过去 7 天",
       "month": "过去 30 天",
       "older": "更早"
-    }
+    },
+    "projects": "项目",
+    "newProject": "新建项目",
+    "openProject": "打开{{name}}",
+    "projectEmpty": "还没有聊天",
+    "moveToProject": "移到项目…"
   },
   "errors": {
     "tryAgain": "重试",

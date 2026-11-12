@@ -7,17 +7,21 @@ import { ShownError, shownError } from '@/components/ui/ShownError'
 import { LoadError } from '@/components/ui/LoadError'
 
 /**
- * Chooses which Mimir sources a profile or specialized AI searches. It can
- * attach an existing source or connect a new file or folder in place.
+ * Chooses which Mimir sources a profile, specialized AI, or project
+ * searches. It can attach an existing source or, with canConnect, connect a
+ * new file or folder in place.
  */
 export function KnowledgePicker({
   selected,
   onChange,
   disabled = false,
+  canConnect = true,
 }: {
   selected: string[]
   onChange: (ids: string[]) => void
   disabled?: boolean
+  /** Connecting a new source and managing them are an Admin's; a project's Members link existing ones (#1136). */
+  canConnect?: boolean
 }) {
   const { t } = useTranslation('knowledge')
   const queryClient = useQueryClient()
@@ -81,32 +85,36 @@ export function KnowledgePicker({
           ))}
         </select>
       )}
-      <form
-        className="flex gap-2"
-        onSubmit={(e) => {
-          e.preventDefault()
-          if (path.trim()) connect.mutate()
-        }}
-      >
-        <input
-          className="field min-w-0 flex-1 font-mono text-xs"
-          value={path}
-          disabled={disabled}
-          onChange={(e) => setPath(e.target.value)}
-          placeholder={t('picker.pathPlaceholder')}
-          aria-label={t('picker.path')}
-        />
-        <button type="submit" className="btn-secondary px-3 py-1 text-xs" disabled={disabled || !path.trim() || connect.isPending}>
-          {connect.isPending ? t('picker.indexing') : t('picker.connect')}
-        </button>
-      </form>
-      {connect.error && <ShownError {...shownError(connect.error)} className="text-xs text-danger" />}
-      {connect.data?.status === 'failed' && (
-        <ShownError error={connect.data.error ?? ''} code={connect.data.error_code} details={connect.data.error_details} className="text-xs text-danger" />
-      )}
-      <p className="text-xs text-ink-faint">
-        <Trans t={t} i18nKey="picker.manage" components={{ go: <Link to="/knowledge" className="underline" /> }} />
-      </p>
+      {canConnect ? (
+        <>
+          <form
+            className="flex gap-2"
+            onSubmit={(e) => {
+              e.preventDefault()
+              if (path.trim()) connect.mutate()
+            }}
+          >
+            <input
+              className="field min-w-0 flex-1 font-mono text-xs"
+              value={path}
+              disabled={disabled}
+              onChange={(e) => setPath(e.target.value)}
+              placeholder={t('picker.pathPlaceholder')}
+              aria-label={t('picker.path')}
+            />
+            <button type="submit" className="btn-secondary px-3 py-1 text-xs" disabled={disabled || !path.trim() || connect.isPending}>
+              {connect.isPending ? t('picker.indexing') : t('picker.connect')}
+            </button>
+          </form>
+          {connect.error && <ShownError {...shownError(connect.error)} className="text-xs text-danger" />}
+          {connect.data?.status === 'failed' && (
+            <ShownError error={connect.data.error ?? ''} code={connect.data.error_code} details={connect.data.error_details} className="text-xs text-danger" />
+          )}
+          <p className="text-xs text-ink-faint">
+            <Trans t={t} i18nKey="picker.manage" components={{ go: <Link to="/knowledge" className="underline" /> }} />
+          </p>
+        </>
+      ) : null}
     </div>
   )
 }

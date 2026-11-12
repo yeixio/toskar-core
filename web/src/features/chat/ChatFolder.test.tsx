@@ -31,3 +31,18 @@ describe('ChatFolder', () => {
     await waitFor(() => expect(onChange).toHaveBeenCalledWith(''))
   })
 })
+
+describe('ChatFolder in a project (#1136)', () => {
+  it("says the folder comes from the project when the chat has none of its own", () => {
+    render(<ChatFolder folder="" projectFolder="/work/site" onChange={vi.fn()} />)
+    fireEvent.click(screen.getByRole('button', { name: 'From the project: site' }))
+    expect(screen.getByText(/works in its project's folder, \/work\/site/)).toBeInTheDocument()
+    // Nothing of the chat's own to remove.
+    expect(screen.queryByRole('button', { name: 'Remove' })).toBeNull()
+  })
+
+  it("names the chat's own folder over the project's", () => {
+    render(<ChatFolder folder="/work/app" projectFolder="/work/site" onChange={vi.fn()} />)
+    expect(screen.getByRole('button', { name: 'Folder: app' })).toBeInTheDocument()
+  })
+})

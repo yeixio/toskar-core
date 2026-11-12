@@ -42,12 +42,15 @@ const administerNav = [
 /** A nav entry: the rune, then the label in the UI language. */
 function NavItem({ to, label }: { to: string; label: string }) {
   const realm = realms[to]
+  // A project's page belongs to Chat (#1136).
+  const { pathname } = useLocation()
+  const alsoActive = to === '/chat' && pathname.startsWith('/projects/')
   return (
     <NavLink
       to={to}
       title={realm ? `${label} · ${realm.norse}` : undefined}
       className={({ isActive }) =>
-        ['nav-link', isActive ? 'nav-link-active' : ''].filter(Boolean).join(' ')
+        ['nav-link', isActive || alsoActive ? 'nav-link-active' : ''].filter(Boolean).join(' ')
       }
     >
       {realm ? <Rune id={realm.rune} className="nav-rune h-4 w-2.5" /> : null}

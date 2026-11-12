@@ -2,10 +2,11 @@ import { useEffect, useMemo, useState, type KeyboardEvent, type MouseEvent } fro
 import { useTranslation } from 'react-i18next'
 import { useDialog } from '@/lib/useDialog'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
-import type { Conversation } from '@/types/api'
+import type { Conversation, Project } from '@/types/api'
 import { rovingKeyDown, useMenu } from '@/lib/roving'
 import { searchItems } from '@/lib/search'
 import { LoadError } from '@/components/ui/LoadError'
+import { ProjectIcon } from './ChatProjectLine'
 
 const PIN_MIN_WIDTH = 1100
 
@@ -104,6 +105,11 @@ type ChatHistoryDrawerProps = {
   onRenameValueChange: (value: string) => void
   onCommitRename: () => void
   onCancelRename: () => void
+  /** The person's projects (#1136), listed above the dated groups; left out, there are none to show. */
+  projects?: Project[]
+  onOpenProject?: (id: string) => void
+  onNewProject?: () => void
+  onMoveToProject?: (conversation: Conversation) => void
 }
 
 export function ChatHistoryDrawer({
@@ -132,6 +138,10 @@ export function ChatHistoryDrawer({
   onRenameValueChange,
   onCommitRename,
   onCancelRename,
+  projects,
+  onOpenProject,
+  onNewProject,
+  onMoveToProject,
 }: ChatHistoryDrawerProps) {
   const { t } = useTranslation('chat')
   const [search, setSearch] = useState('')
@@ -152,6 +162,29 @@ export function ChatHistoryDrawer({
   }
   // Escape leaves select mode first, then closes the drawer.
   const panelRef = useDialog<HTMLElement>(open && overlay, () => (selecting ? leaveSelect() : onClose()))
+
+  // Projects open to their chats; the open chat's project opens with it.
+  const [openProjects, setOpenProjects] = useState<Set<string>>(() => new Set())
+  const selectedProject = conversations.find((c) => c.id === selectedId)?.project_id
+  useEffect(() => {
+    if (selectedProject) setOpenProjects((current) => (current.has(selectedProject) ? current : new Set([...current, selectedProject])))
+  }, [selectedProject])
+  const toggleProject = (id: string) =>
+    setOpenProjects((current) => {
+      const next = new Set(current)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  // Each project's chats, newest first, as the list comes.
+  const chatsByProject = useMemo(() => {
+    const map = new Map<string, Conversation[]>()
+    for (const c of conversations) {
+      if (!c.project_id) continue
+      map.set(c.project_id, [...(map.get(c.project_id) ?? []), c])
+    }
+    return map
+  }, [conversations])
 
   const filtered = useMemo(() => {
     // Typos forgiven (#451); exact matches first.
@@ -326,6 +359,92 @@ export function ChatHistoryDrawer({
           </p>
         )}
 
+        {/* Projects come first; a search or select mode shows chats only. */}
+        {projects && !selecting && !search.trim() ? (
+          <div className="mb-4">
+            <div className="mb-1 flex items-center justify-between gap-2 px-2.5">
+              <p className="label-caps">{t('history.projects')}</p>
+              {onNewProject ? (
+                <button type="button" className="text-xs font-medium text-primary-active hover:underline" onClick={onNewProject}>
+                  {t('history.newProject')}
+                </button>
+              ) : null}
+            </div>
+            <ul className="space-y-0.5">
+              {projects.map((project) => {
+                const expanded = openProjects.has(project.id)
+                const chats = chatsByProject.get(project.id) ?? []
+                return (
+                  <li key={project.id} className="group relative">
+                    <button
+                      type="button"
+                      className="flex w-full items-center gap-1.5 rounded-lg py-2 ps-2.5 pe-9 text-start text-sm text-ink hover:bg-raised/80"
+                      aria-expanded={expanded}
+                      title={project.name}
+                      onClick={() => toggleProject(project.id)}
+                    >
+                      <svg
+                        viewBox="0 0 16 16"
+                        className={['h-3 w-3 shrink-0 text-ink-faint transition rtl:-scale-x-100', expanded ? 'rotate-90' : ''].join(' ')}
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth={1.6}
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        aria-hidden
+                      >
+                        <path d="m6 3.5 4.5 4.5L6 12.5" />
+                      </svg>
+                      <ProjectIcon />
+                      <span className="min-w-0 truncate">{project.name}</span>
+                    </button>
+                    {onOpenProject ? (
+                      <button
+                        type="button"
+                        className="absolute end-1 top-1 inline-flex h-7 w-7 items-center justify-center rounded-md text-ink-faint opacity-0 transition hover:bg-raised hover:text-ink focus:opacity-100 group-hover:opacity-100"
+                        title={t('history.openProject', { name: project.name })}
+                        aria-label={t('history.openProject', { name: project.name })}
+                        onClick={() => onOpenProject(project.id)}
+                      >
+                        <svg viewBox="0 0 16 16" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth={1.4} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                          <circle cx="8" cy="8" r="2" />
+                          <path d="M8 1.8v1.7M8 12.5v1.7M1.8 8h1.7M12.5 8h1.7M3.6 3.6l1.2 1.2M11.2 11.2l1.2 1.2M3.6 12.4l1.2-1.2M11.2 4.8l1.2-1.2" />
+                        </svg>
+                      </button>
+                    ) : null}
+                    {expanded ? (
+                      chats.length === 0 ? (
+                        <p className="py-1.5 ps-9 pe-2.5 text-xs text-ink-faint">{t('history.projectEmpty')}</p>
+                      ) : (
+                        <ul className="space-y-0.5 ps-5">
+                          {chats.map((chat) => (
+                            <li key={chat.id}>
+                              <button
+                                type="button"
+                                title={chat.title}
+                                aria-current={selectedId === chat.id ? 'true' : undefined}
+                                className={[
+                                  'w-full truncate rounded-lg px-2.5 py-1.5 text-start text-sm transition',
+                                  selectedId === chat.id
+                                    ? 'bg-primary-soft font-medium text-primary-active'
+                                    : 'text-ink-muted hover:bg-raised/80 hover:text-ink',
+                                ].join(' ')}
+                                onClick={() => onSelect(chat.id)}
+                              >
+                                {chat.title || t('history.untitled')}
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                      )
+                    ) : null}
+                  </li>
+                )
+              })}
+            </ul>
+          </div>
+        ) : null}
+
         {!loading && !loadError && conversations.length === 0 && (
           <div className="px-2 py-6 text-center">
             <p className="text-sm text-ink-muted">{t('history.empty')}</p>
@@ -466,6 +585,20 @@ export function ChatHistoryDrawer({
                               >
                                 {isPinned ? t('history.unpin') : t('history.pin')}
                               </button>
+                              {onMoveToProject ? (
+                                <button
+                                  type="button"
+                                  role="menuitem"
+                                  className="block w-full rounded-lg px-3 py-1.5 text-start text-sm text-ink hover:bg-raised"
+                                  onClick={(e) => {
+                                    setMenuOpenId(null)
+                                    onMoveToProject(conversation)
+                                    e.stopPropagation()
+                                  }}
+                                >
+                                  {t('history.moveToProject')}
+                                </button>
+                              ) : null}
                               <button
                                 type="button"
                                 role="menuitem"

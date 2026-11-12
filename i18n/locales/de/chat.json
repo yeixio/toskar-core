@@ -107,7 +107,25 @@
     "placeholder": "Vollständiger Pfad zum Ordner",
     "hint": "Mit einem Ordner kann Toskar dort Befehle ausführen und weiterarbeiten, bis die Aufgabe erledigt ist. Vor jeder Änderung wird gefragt.",
     "save": "Speichern",
-    "remove": "Entfernen"
+    "remove": "Entfernen",
+    "fromProject": "Aus dem Projekt: {{name}}",
+    "projectHint": "Dieser Chat arbeitet im Ordner seines Projekts, {{path}}, sofern du für diesen Chat keinen anderen wählst."
+  },
+  "projectLine": {
+    "in": "Im Projekt <go>{{name}}</go>",
+    "newIn": "Neuer Chat im Projekt <go>{{name}}</go>",
+    "move": "In Projekt verschieben",
+    "remove": "Aus Projekt entfernen"
+  },
+  "moveDialog": {
+    "title": "In Projekt verschieben",
+    "body": "Wähle ein Projekt für „{{title}}“. Ab der nächsten Nachricht folgt der Chat den Anweisungen des Projekts und durchsucht seine Dateien.",
+    "none": "Noch keine Projekte. Gib unten einen Namen ein, um eines anzulegen.",
+    "newLabel": "Neues Projekt",
+    "newPlaceholder": "Name des neuen Projekts",
+    "create": "Anlegen und verschieben",
+    "cancel": "Abbrechen",
+    "failed": "Das Projekt konnte nicht angelegt werden. Versuche es noch einmal."
   },
   "task": {
     "output": "Befehlsausgabe",
@@ -343,7 +361,12 @@
       "week": "Letzte 7 Tage",
       "month": "Letzte 30 Tage",
       "older": "Älter"
-    }
+    },
+    "projects": "Projekte",
+    "newProject": "Neues Projekt",
+    "openProject": "{{name}} öffnen",
+    "projectEmpty": "Noch keine Chats",
+    "moveToProject": "In Projekt verschieben…"
   },
   "errors": {
     "tryAgain": "Erneut versuchen",

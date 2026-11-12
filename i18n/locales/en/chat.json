@@ -107,7 +107,25 @@
     "placeholder": "Full path to the folder",
     "hint": "With a folder, Toskar can run commands there and keep going until the work is done. It asks before changing anything.",
     "save": "Save",
-    "remove": "Remove"
+    "remove": "Remove",
+    "fromProject": "From the project: {{name}}",
+    "projectHint": "This chat works in its project's folder, {{path}}, unless you choose another for this chat."
+  },
+  "projectLine": {
+    "in": "In project <go>{{name}}</go>",
+    "newIn": "New chat in project <go>{{name}}</go>",
+    "move": "Move to project",
+    "remove": "Remove from project"
+  },
+  "moveDialog": {
+    "title": "Move to project",
+    "body": "Choose a project for “{{title}}”. From its next message, it follows the project's instructions and searches its files.",
+    "none": "No projects yet. Name one below to make it.",
+    "newLabel": "New project",
+    "newPlaceholder": "New project name",
+    "create": "Make and move",
+    "cancel": "Cancel",
+    "failed": "The project couldn't be made. Try again."
   },
   "task": {
     "output": "Command output",
@@ -343,7 +361,12 @@
       "week": "Previous 7 days",
       "month": "Previous 30 days",
       "older": "Older"
-    }
+    },
+    "projects": "Projects",
+    "newProject": "New project",
+    "openProject": "Open {{name}}",
+    "projectEmpty": "No chats yet",
+    "moveToProject": "Move to project…"
   },
   "errors": {
     "tryAgain": "Try again",
