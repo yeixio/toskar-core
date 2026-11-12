@@ -82,7 +82,7 @@ ALTER TABLE memories ADD COLUMN project_id TEXT NOT NULL DEFAULT '';
 
 ## Terminal
 
-- `toskarctl chat --project <name or id>` starts or resumes in a project. Without `--folder`, the current folder is still sent as today, so a code project's chats work where you are.
+- `toskarctl chat --project <name or id>` starts or resumes in a project. The current folder is still sent as today, and it comes before the project's, so a code project's chats work where you are.
 - `/project` in a chat shows the project; `/project <name>` moves the chat into one.
 - `toskarctl projects` lists them.
 
