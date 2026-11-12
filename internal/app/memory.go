@@ -33,8 +33,9 @@ func (a *App) memoryOn(ctx context.Context, conversationID string) bool {
 // handleMemoryCommand answers "Remember that …", "Forget that …", and "What
 // do you remember about me?" without a model, so they work the same with any
 // model and even when none is installed. It returns false for any other
-// message.
-func (a *App) handleMemoryCommand(ctx context.Context, conversationID, message string) (<-chan pluginapi.ChatChunk, bool) {
+// message. In a chat in a project with its memory on, projectID is the
+// project, whose memory a new one goes to (#1136).
+func (a *App) handleMemoryCommand(ctx context.Context, conversationID, message, projectID string) (<-chan pluginapi.ChatChunk, bool) {
 	if a.Muninn == nil {
 		return nil, false
 	}
@@ -43,11 +44,15 @@ func (a *App) handleMemoryCommand(ctx context.Context, conversationID, message s
 		return nil, false
 	}
 	on := a.memoryOn(ctx, conversationID)
+	if !on {
+		// With the chat's Memory off, it's the person's own, as before.
+		projectID = ""
+	}
 	var reply string
 	var step *contracts.ActivityStep
 	switch cmd.Kind {
 	case muninn.CommandRemember:
-		m, created, err := a.Muninn.Add(ctx, cmd.Text, "", muninn.SourceExplicit, conversationID)
+		m, created, err := a.Muninn.AddIn(ctx, projectID, cmd.Text, "", muninn.SourceExplicit, conversationID)
 		switch {
 		case errors.Is(err, muninn.ErrSensitive):
 			reply = "I didn't save that because it looks like a password, key, or card number. A password manager is the safer place for those."
@@ -57,6 +62,10 @@ func (a *App) handleMemoryCommand(ctx context.Context, conversationID, message s
 			reply = "I couldn't save that: " + err.Error() + "."
 		case !created:
 			reply = fmt.Sprintf("I already remember that: “%s”.", m.Content)
+		case projectID != "":
+			reply = fmt.Sprintf("Got it. I'll remember it in this project: “%s”.", m.Content)
+			step = &contracts.ActivityStep{Kind: "memory", Text: "Saved to the project's memory: " + m.Content}
+			a.publish(ctx, events.New("memory.saved", map[string]any{"memory": m, "conversation_id": conversationID}))
 		default:
 			reply = fmt.Sprintf("Got it. I'll remember: “%s”.", m.Content)
 			step = &contracts.ActivityStep{Kind: "memory", Text: "Saved to memory: " + m.Content}
@@ -66,7 +75,7 @@ func (a *App) handleMemoryCommand(ctx context.Context, conversationID, message s
 			reply += " Memory is off for this chat, so I'll use it in your other chats."
 		}
 	case muninn.CommandForget:
-		m, ok, err := a.Muninn.Find(ctx, cmd.Text)
+		m, ok, err := a.Muninn.Find(ctx, cmd.Text, projectID)
 		switch {
 		case err != nil:
 			reply = "I couldn't look through my memories: " + err.Error() + "."
@@ -82,7 +91,7 @@ func (a *App) handleMemoryCommand(ctx context.Context, conversationID, message s
 			}
 		}
 	case muninn.CommandList:
-		reply = a.describeMemories(ctx, on)
+		reply = a.describeMemories(ctx, on, projectID)
 	}
 
 	var meta *contracts.MessageMeta
@@ -115,14 +124,15 @@ func (a *App) replyDirectly(ctx context.Context, conversationID, message, reply 
 	return ch
 }
 
-func (a *App) describeMemories(ctx context.Context, on bool) string {
+func (a *App) describeMemories(ctx context.Context, on bool, projectID string) string {
 	all, err := a.Muninn.List(ctx)
 	if err != nil {
 		return "I couldn't read my memories: " + err.Error() + "."
 	}
 	var enabled []muninn.Memory
 	for _, m := range all {
-		if m.Enabled {
+		// A project's memories are told in its own chats.
+		if m.Enabled && (m.ProjectID == "" || m.ProjectID == projectID) {
 			enabled = append(enabled, m)
 		}
 	}

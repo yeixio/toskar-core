@@ -1,5 +1,5 @@
 {
-  "version": "1.86",
+  "version": "1.87",
   "types": {
     "ActivityStep": [
       "kind",
@@ -73,6 +73,7 @@
       "model_id",
       "profile_id",
       "project",
+      "project_id",
       "title",
       "updated_at"
     ],
@@ -212,6 +213,24 @@
       "source_type",
       "title",
       "url"
+    ],
+    "Project": [
+      "chat_count",
+      "created_at",
+      "files",
+      "folder",
+      "id",
+      "instructions",
+      "knowledge",
+      "memory_off",
+      "model_id",
+      "name",
+      "profile_id",
+      "updated_at"
+    ],
+    "ProjectFile": [
+      "name",
+      "size"
     ],
     "PromptCache": [
       "models",

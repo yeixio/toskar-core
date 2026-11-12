@@ -35,14 +35,14 @@ func TestChatFolder(t *testing.T) {
 		"no client named": {as(auth.RoleOwner, ""), dir, ""},
 		"folder gone":     {as(auth.RoleOwner, "web"), dir + "/gone", ""},
 	} {
-		got := turnopts.ProjectFrom(a.chatFolder(c.ctx, contracts.Conversation{ID: conv.ID, Project: c.project}))
+		got := turnopts.ProjectFrom(a.chatFolder(c.ctx, contracts.Conversation{ID: conv.ID, Project: c.project}, nil))
 		if got != c.want {
 			t.Errorf("%s: %q, want %q", name, got, c.want)
 		}
 	}
 	// A terminal says where it is, and the chat remembers.
 	named := turnopts.WithProject(as(auth.RoleOwner, "terminal"), dir)
-	if got := turnopts.ProjectFrom(a.chatFolder(named, conv)); got != dir {
+	if got := turnopts.ProjectFrom(a.chatFolder(named, conv, nil)); got != dir {
 		t.Fatalf("named: %q", got)
 	}
 	saved, err := a.Conversations.Get(ctx, conv.ID)

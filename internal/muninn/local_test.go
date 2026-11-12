@@ -16,7 +16,7 @@ func TestMemoryThisComputerOnly(t *testing.T) {
 	if m, err = s.Update(ctx, m.ID, Patch{LocalOnly: &on}); err != nil || !m.LocalOnly {
 		t.Fatalf("update = %+v, %v", m, err)
 	}
-	rel, err := s.Relevant(ctx, "Where do I work?")
+	rel, err := s.Relevant(ctx, "Where do I work?", "")
 	if err != nil || len(rel) == 0 || !rel[0].LocalOnly {
 		t.Fatalf("relevant = %+v, %v", rel, err)
 	}

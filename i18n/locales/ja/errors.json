@@ -275,5 +275,8 @@
   "SHELL_ONLY": "これを変更できるのは、このコンピューターの Toskar Pro アプリだけです。",
   "UNLOCK_REQUIRED": "Toskar Pro の試用期間が終了しました。モデル、オートメーション、人を追加するには Toskar Pro のロックを解除してください。",
   "TRIAL_NOT_STARTED": "モデル、オートメーション、人を追加するには、Toskar Pro の 14 日間無料試用を開始してください。",
-  "NEWS_UNAVAILABLE": "toskar.ai から AI ニュースを読み込めませんでした。インターネット接続を確認して、もう一度お試しください。"
+  "NEWS_UNAVAILABLE": "toskar.ai から AI ニュースを読み込めませんでした。インターネット接続を確認して、もう一度お試しください。",
+  "PROJECT_FILE_NOT_FOUND": "そのファイルはプロジェクトにありません。",
+  "PROJECT_NAME_REQUIRED": "プロジェクトに名前を付けてください。",
+  "PROJECT_NOT_FOUND": "このプロジェクトは削除されました。"
 }

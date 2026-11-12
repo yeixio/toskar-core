@@ -36,7 +36,7 @@ func memoryApp(t *testing.T) (*App, string) {
 
 func reply(t *testing.T, a *App, convID, msg string) (string, bool) {
 	t.Helper()
-	ch, ok := a.handleMemoryCommand(context.Background(), convID, msg)
+	ch, ok := a.handleMemoryCommand(context.Background(), convID, msg, "")
 	if !ok {
 		return "", false
 	}

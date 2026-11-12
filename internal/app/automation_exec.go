@@ -151,7 +151,7 @@ func (e automationExecutor) execute(ctx context.Context, automation automations.
 	}
 	if e.app.Muninn != nil && e.app.Settings != nil {
 		if on, _ := e.app.Settings.GetBool(ctx, "memory_enabled", true); on {
-			if mems, err := e.app.Muninn.Relevant(ctx, automation.Prompt); err == nil {
+			if mems, err := e.app.Muninn.Relevant(ctx, automation.Prompt, ""); err == nil {
 				env.base.memories = mems
 			}
 		}

@@ -275,5 +275,8 @@
   "SHELL_ONLY": "Solo la app Toskar Pro en esta computadora puede cambiar esto.",
   "UNLOCK_REQUIRED": "Tu prueba de Toskar Pro terminó. Desbloquea Toskar Pro para agregar modelos, automatizaciones o personas.",
   "TRIAL_NOT_STARTED": "Empieza la prueba gratis de 14 días de Toskar Pro para agregar modelos, automatizaciones o personas.",
-  "NEWS_UNAVAILABLE": "No se pudieron leer las noticias de IA de toskar.ai. Revisa la conexión a internet e inténtalo de nuevo."
+  "NEWS_UNAVAILABLE": "No se pudieron leer las noticias de IA de toskar.ai. Revisa la conexión a internet e inténtalo de nuevo.",
+  "PROJECT_FILE_NOT_FOUND": "Ese archivo no está en el proyecto.",
+  "PROJECT_NAME_REQUIRED": "Ponle un nombre al proyecto.",
+  "PROJECT_NOT_FOUND": "Ese proyecto se eliminó."
 }

@@ -43,15 +43,46 @@ import (
 // execution is automatic | local (empty keeps the profile node policy).
 func (a *App) RunChat(ctx context.Context, profileID, conversationID, message string, stream bool, modelID, execution string) (<-chan pluginapi.ChatChunk, error) {
 	turnStart := time.Now()
-	if fixed := turnopts.From(ctx); conversationID != "" && (fixed == nil || !fixed.FixedProfile) {
-		if conv, err := a.Conversations.Get(ctx, conversationID); err == nil {
+	// The chat's project, when it's in one (#1136).
+	var project *contracts.Project
+	if fixed := turnopts.From(ctx); fixed == nil || !fixed.FixedProfile {
+		conv, inChat := contracts.Conversation{}, false
+		if conversationID != "" {
+			if c, err := a.Conversations.Get(ctx, conversationID); err == nil {
+				conv, inChat = c, true
+			}
+		}
+		if conversationID == "" || inChat {
+			project = a.chatProject(ctx, &conv)
+		}
+		// The request's profile and model, else the chat's, else the
+		// project's; the person's default comes below.
+		if profileID == "" {
+			profileID = conv.ProfileID
+		}
+		if modelID == "" {
+			modelID = conv.ModelID
+		}
+		if project != nil {
 			if profileID == "" {
-				profileID = conv.ProfileID
+				profileID = project.ProfileID
 			}
 			if modelID == "" {
-				modelID = conv.ModelID
+				modelID = project.ModelID
 			}
-			ctx = a.chatFolder(ctx, conv)
+		}
+		if inChat || project != nil {
+			ctx = a.chatFolder(ctx, conv, project)
+		}
+	}
+	// What the project's chats learn is the project's, unless its memory
+	// is off. Its files are searched in its chats alone: a profile or a
+	// request naming another project's files finds nothing there.
+	memoryProject := ""
+	if project != nil {
+		ctx = mimir.WithProject(ctx, project.ID)
+		if !project.MemoryOff {
+			memoryProject = project.ID
 		}
 	}
 	// Where a task could run, changes ask however the message is worded, and
@@ -149,7 +180,7 @@ func (a *App) RunChat(ctx context.Context, profileID, conversationID, message st
 	// An API caller changes memories only when it opted into memory (§62).
 	if (opts != nil && !opts.Memory) || topical || branch.Any() {
 		// Fall through: "Remember …" is an ordinary message for this caller.
-	} else if ch, ok := a.handleMemoryCommand(ctx, conversationID, message); ok {
+	} else if ch, ok := a.handleMemoryCommand(ctx, conversationID, message, memoryProject); ok {
 		return ch, nil
 	}
 	profile, err := a.Profiles.Get(ctx, profileID)
@@ -189,6 +220,11 @@ func (a *App) RunChat(ctx context.Context, profileID, conversationID, message st
 			profile.KnowledgeSources = nil
 		}
 		profile.KnowledgeSources = append(append([]string(nil), profile.KnowledgeSources...), opts.KnowledgeSources...)
+	}
+	// A project's files and linked knowledge are searched as well as the
+	// profile's, as reference material (#1136).
+	if project != nil && a.Projects != nil && (opts == nil || opts.Knowledge) {
+		profile.KnowledgeSources = append(append([]string(nil), profile.KnowledgeSources...), a.Projects.KnowledgeIDs(ctx, *project)...)
 	}
 	attached, err := a.resolveAttachments(ctx, conversationID, artifacts.AttachmentsFrom(ctx))
 	if err != nil {
@@ -467,6 +503,9 @@ func (a *App) RunChat(ctx context.Context, profileID, conversationID, message st
 			attachments:    attached,
 			pictures:       shown,
 		}
+		if project != nil {
+			env.projectInstructions = project.Instructions
+		}
 		if routeReason != "" {
 			env.trace.routed(routeReason)
 		}
@@ -494,7 +533,7 @@ func (a *App) RunChat(ctx context.Context, profileID, conversationID, message st
 			env.trace.sharing(locale.T(appLang, "chat:steps.guide", map[string]any{"sections": listIn(appLang, sections)}))
 		}
 		if a.memoryOn(ctx, conversationID) && (opts == nil || opts.Memory) && profile.Orchestration.Memory != "off" {
-			if mems, err := a.Muninn.Relevant(ctx, message); err == nil {
+			if mems, err := a.Muninn.Relevant(ctx, message, memoryProject); err == nil {
 				env.memories = mems
 				env.trace.memories(mems)
 				for _, m := range mems {
@@ -1243,6 +1282,9 @@ type chatExecEnv struct {
 	adapter      string
 	instructions string
 	knowledge    []string
+	// projectInstructions are the person's own for the chat's project
+	// (#1136).
+	projectInstructions string
 	// trace records sources and steps for the answer.
 	trace *turnTrace
 	// memories are the persistent memories relevant to this turn.
@@ -1835,6 +1877,12 @@ func (e *chatExecEnv) TurnInstructions(ctx context.Context, prompt string) strin
 	}
 	if s := strings.TrimSpace(e.instructions); s != "" {
 		parts = append(parts, s)
+	}
+	// The person wrote the project's instructions, so they're trusted like
+	// their style (#1136). Files, pages, and tool results the chat reads are
+	// reference material, never added here.
+	if s := strings.TrimSpace(e.projectInstructions); s != "" {
+		parts = append(parts, projectInstructionsHeading+s)
 	}
 	// How the person likes answers (§38): style only, never permission.
 	if e.app != nil {

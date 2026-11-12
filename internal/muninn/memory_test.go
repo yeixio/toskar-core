@@ -99,7 +99,7 @@ func TestRelevantIsSmallAndFocused(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	got, err := s.Relevant(ctx, "Which database does the project use?")
+	got, err := s.Relevant(ctx, "Which database does the project use?", "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -132,7 +132,7 @@ func TestUpdateAndDelete(t *testing.T) {
 	if err != nil || got.Content != text {
 		t.Fatalf("update = %+v %v", got, err)
 	}
-	if rel, _ := s.Relevant(ctx, "weather in Seattle"); len(rel) != 1 {
+	if rel, _ := s.Relevant(ctx, "weather in Seattle", ""); len(rel) != 1 {
 		t.Fatalf("updated text not searchable: %+v", rel)
 	}
 	if err := s.Delete(ctx, m.ID); err != nil {
@@ -141,7 +141,7 @@ func TestUpdateAndDelete(t *testing.T) {
 	if _, err := s.Get(ctx, m.ID); !errors.Is(err, ErrNotFound) {
 		t.Fatalf("get after delete: %v", err)
 	}
-	if rel, _ := s.Relevant(ctx, "weather in Seattle"); len(rel) != 0 {
+	if rel, _ := s.Relevant(ctx, "weather in Seattle", ""); len(rel) != 0 {
 		t.Fatalf("deleted memory still found: %+v", rel)
 	}
 }

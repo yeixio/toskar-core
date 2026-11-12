@@ -275,5 +275,8 @@
   "SHELL_ONLY": "Only the Toskar Pro app on this computer can change this.",
   "UNLOCK_REQUIRED": "Your Toskar Pro trial has ended. Unlock Toskar Pro to add models, automations, or people.",
   "TRIAL_NOT_STARTED": "Start Toskar Pro's free 14-day trial to add models, automations, or people.",
-  "NEWS_UNAVAILABLE": "The AI news couldn't be read from toskar.ai. Check the internet connection and try again."
+  "NEWS_UNAVAILABLE": "The AI news couldn't be read from toskar.ai. Check the internet connection and try again.",
+  "PROJECT_FILE_NOT_FOUND": "That file isn't in the project.",
+  "PROJECT_NAME_REQUIRED": "Name the project.",
+  "PROJECT_NOT_FOUND": "That project was removed."
 }

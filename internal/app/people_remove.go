@@ -13,7 +13,7 @@ var ErrTransferToSelf = errors.New("their data can't be given to the person bein
 
 // ownedTables hold rows that belong to a person (person_id), which a
 // removal gives to someone else.
-var ownedTables = []string{"conversations", "memories", "automations", "artifacts", "notifications", "topic_attempts"}
+var ownedTables = []string{"conversations", "memories", "automations", "artifacts", "notifications", "topic_attempts", "projects"}
 
 // RemovePerson removes a person (#592): their keys and devices are revoked,
 // their own settings removed, and their chats, memories, automations,
@@ -90,6 +90,19 @@ func (a *App) RemovePerson(ctx context.Context, id, transferTo string) error {
 			for _, m := range list {
 				if err := a.Muninn.Delete(theirs, m.ID); err != nil {
 					return fmt.Errorf("delete memories: %w", err)
+				}
+			}
+		}
+		// Their projects, with their files (#1136); their chats and
+		// memories went above.
+		if a.Projects != nil {
+			list, err := a.Projects.Store.List(theirs)
+			if err != nil {
+				return err
+			}
+			for _, p := range list {
+				if err := a.Projects.Delete(theirs, p.ID, false); err != nil {
+					return fmt.Errorf("delete projects: %w", err)
 				}
 			}
 		}

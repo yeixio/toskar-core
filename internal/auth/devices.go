@@ -330,6 +330,10 @@ var deviceRoutes = map[string]bool{
 	"DELETE /api/v1/conversations/{id}":       true,
 	"POST /api/v1/conversations/delete":       true,
 	"GET /api/v1/conversations/{id}/messages": true,
+	// The person's projects, to list them and their chats and start a chat
+	// in one (#1136); changing a project is on the computer.
+	"GET /api/v1/projects":      true,
+	"GET /api/v1/projects/{id}": true,
 	// Auto-compact, for the phone's computer chats (#342).
 	"GET /api/v1/conversations/{id}/summary":       true,
 	"PUT /api/v1/conversations/{id}/summary":       true,

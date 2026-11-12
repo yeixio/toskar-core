@@ -65,7 +65,10 @@ type Memory struct {
 	// detected on this computer (multilingual spec §18), or "" when it is
 	// too short to tell. A memory is found in any language; this says which
 	// one its text is in.
-	Language  string    `json:"language,omitempty"`
+	Language string `json:"language,omitempty"`
+	// ProjectID is the project the memory belongs to, learned in one of its
+	// chats, or "" for the person's own memory (#1136).
+	ProjectID string    `json:"project_id,omitempty"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }
@@ -118,6 +121,13 @@ func validCategory(c string) bool {
 // Add stores a memory. An empty category is inferred from the text. A memory
 // that repeats an existing one updates it instead of adding a copy.
 func (s *Store) Add(ctx context.Context, content, category, sourceType, sourceRef string) (Memory, bool, error) {
+	return s.AddIn(ctx, "", content, category, sourceType, sourceRef)
+}
+
+// AddIn stores a memory in a project's memory, or the person's own for ""
+// (#1136). One the project's chats already recall, the person's or the
+// project's, isn't added again.
+func (s *Store) AddIn(ctx context.Context, projectID, content, category, sourceType, sourceRef string) (Memory, bool, error) {
 	content, err := clean(content)
 	if err != nil {
 		return Memory{}, false, err
@@ -128,21 +138,21 @@ func (s *Store) Add(ctx context.Context, content, category, sourceType, sourceRe
 	if !validCategory(category) {
 		return Memory{}, false, fmt.Errorf("unknown category %q", category)
 	}
-	if dup, ok := s.duplicate(ctx, content); ok {
+	if dup, ok := s.duplicate(ctx, projectID, content); ok {
 		dup.Enabled = true
 		_, err := s.db.ExecContext(ctx, `UPDATE memories SET enabled = 1, updated_at = ? WHERE id = ? AND person_id = ?`, ts(s.now()), dup.ID, auth.PersonID(ctx))
 		return dup, false, err
 	}
 	m := Memory{ID: uuid.NewString(), Content: content, Category: category, SourceType: sourceType, SourceRef: sourceRef,
-		Enabled: true, Language: languageOf(content), CreatedAt: s.now().UTC(), UpdatedAt: s.now().UTC()}
+		Enabled: true, Language: languageOf(content), ProjectID: projectID, CreatedAt: s.now().UTC(), UpdatedAt: s.now().UTC()}
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
 		return Memory{}, false, err
 	}
 	defer func() { _ = tx.Rollback() }()
 	if _, err := tx.ExecContext(ctx, `
-		INSERT INTO memories (id, content, category, source_type, source_ref, enabled, language, created_at, updated_at, person_id)
-		VALUES (?, ?, ?, ?, ?, 1, ?, ?, ?, ?)`, m.ID, m.Content, m.Category, m.SourceType, nullable(m.SourceRef), nullable(m.Language), ts(m.CreatedAt), ts(m.UpdatedAt), auth.PersonID(ctx)); err != nil {
+		INSERT INTO memories (id, content, category, source_type, source_ref, enabled, language, created_at, updated_at, person_id, project_id)
+		VALUES (?, ?, ?, ?, ?, 1, ?, ?, ?, ?, ?)`, m.ID, m.Content, m.Category, m.SourceType, nullable(m.SourceRef), nullable(m.Language), ts(m.CreatedAt), ts(m.UpdatedAt), auth.PersonID(ctx), m.ProjectID); err != nil {
 		return Memory{}, false, err
 	}
 	if _, err := tx.ExecContext(ctx, `INSERT INTO memories_fts (content, memory_id) VALUES (?, ?)`, m.Content, m.ID); err != nil {
@@ -151,15 +161,16 @@ func (s *Store) Add(ctx context.Context, content, category, sourceType, sourceRe
 	return m, true, tx.Commit()
 }
 
-// duplicate finds a memory with the same normalized text.
-func (s *Store) duplicate(ctx context.Context, content string) (Memory, bool) {
+// duplicate finds a memory with the same normalized text among those a
+// project's chats recall: the person's own, and the project's.
+func (s *Store) duplicate(ctx context.Context, projectID, content string) (Memory, bool) {
 	all, err := s.List(ctx)
 	if err != nil {
 		return Memory{}, false
 	}
 	key := normalize(content)
 	for _, m := range all {
-		if normalize(m.Content) == key {
+		if recalledIn(m, projectID) && normalize(m.Content) == key {
 			return m, true
 		}
 	}
@@ -248,13 +259,36 @@ func (s *Store) Delete(ctx context.Context, id string) error {
 	return tx.Commit()
 }
 
-const columns = `id, content, category, source_type, COALESCE(source_ref, ''), enabled, local_only, COALESCE(language, ''), created_at, updated_at`
+// DeleteProject removes a project's memories (#1136).
+func (s *Store) DeleteProject(ctx context.Context, projectID string) error {
+	if projectID == "" {
+		return nil
+	}
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = tx.Rollback() }()
+	person := auth.PersonID(ctx)
+	for _, q := range []string{
+		`DELETE FROM memories_fts WHERE memory_id IN (SELECT id FROM memories WHERE project_id = ? AND person_id = ?)`,
+		`DELETE FROM memory_vectors WHERE memory_id IN (SELECT id FROM memories WHERE project_id = ? AND person_id = ?)`,
+		`DELETE FROM memories WHERE project_id = ? AND person_id = ?`,
+	} {
+		if _, err := tx.ExecContext(ctx, q, projectID, person); err != nil {
+			return err
+		}
+	}
+	return tx.Commit()
+}
+
+const columns = `id, content, category, source_type, COALESCE(source_ref, ''), enabled, local_only, COALESCE(language, ''), project_id, created_at, updated_at`
 
 func scan(row interface{ Scan(...any) error }) (Memory, error) {
 	var m Memory
 	var enabled, localOnly int
 	var created, updated string
-	if err := row.Scan(&m.ID, &m.Content, &m.Category, &m.SourceType, &m.SourceRef, &enabled, &localOnly, &m.Language, &created, &updated); err != nil {
+	if err := row.Scan(&m.ID, &m.Content, &m.Category, &m.SourceType, &m.SourceRef, &enabled, &localOnly, &m.Language, &m.ProjectID, &created, &updated); err != nil {
 		return Memory{}, err
 	}
 	m.Enabled = enabled != 0
@@ -306,13 +340,26 @@ var stop = map[string]bool{"the": true, "a": true, "an": true, "and": true, "or"
 	"of": true, "in": true, "on": true, "for": true, "with": true, "what": true, "how": true, "do": true, "does": true, "i": true,
 	"me": true, "my": true, "you": true, "your": true, "it": true, "this": true, "that": true, "can": true, "please": true}
 
+// recalledIn reports whether a chat in projectID recalls m: the person's own
+// memories everywhere, and a project's in its chats alone (#1136).
+func recalledIn(m Memory, projectID string) bool {
+	return m.ProjectID == "" || m.ProjectID == projectID
+}
+
 // Relevant returns enabled memories for a turn: a few core facts about the
 // person, then memories that share words with the message. It never returns
-// the whole store.
-func (s *Store) Relevant(ctx context.Context, message string) ([]Memory, error) {
-	all, err := s.List(ctx)
+// the whole store. In a chat in a project with its memory on, projectID
+// adds the project's memories to the person's.
+func (s *Store) Relevant(ctx context.Context, message, projectID string) ([]Memory, error) {
+	stored, err := s.List(ctx)
 	if err != nil {
 		return nil, err
+	}
+	all := stored[:0:0]
+	for _, m := range stored {
+		if recalledIn(m, projectID) {
+			all = append(all, m)
+		}
 	}
 	var out []Memory
 	seen := map[string]bool{}
@@ -341,7 +388,7 @@ func (s *Store) Relevant(ctx context.Context, message string) ([]Memory, error) 
 	}
 	rel := 0
 	if len(terms) > 0 {
-		n, err := s.byWords(ctx, terms, add)
+		n, err := s.byWords(ctx, terms, projectID, add)
 		if err != nil {
 			return nil, err
 		}
@@ -361,12 +408,12 @@ func (s *Store) Relevant(ctx context.Context, message string) ([]Memory, error) 
 
 // byWords adds the enabled memories that share words with the message, best
 // first, and says how many it added.
-func (s *Store) byWords(ctx context.Context, terms []string, add func(Memory) bool) (int, error) {
+func (s *Store) byWords(ctx context.Context, terms []string, projectID string, add func(Memory) bool) (int, error) {
 	rows, err := s.db.QueryContext(ctx, `
-		SELECT m.id, m.content, m.category, m.source_type, COALESCE(m.source_ref, ''), m.enabled, m.local_only, COALESCE(m.language, ''), m.created_at, m.updated_at
+		SELECT m.id, m.content, m.category, m.source_type, COALESCE(m.source_ref, ''), m.enabled, m.local_only, COALESCE(m.language, ''), m.project_id, m.created_at, m.updated_at
 		FROM memories_fts f JOIN memories m ON m.id = f.memory_id
-		WHERE memories_fts MATCH ? AND m.enabled = 1 AND m.person_id = ?
-		ORDER BY bm25(memories_fts) LIMIT ?`, strings.Join(terms, " OR "), auth.PersonID(ctx), maxRelevant*2)
+		WHERE memories_fts MATCH ? AND m.enabled = 1 AND m.person_id = ? AND (m.project_id = '' OR m.project_id = ?)
+		ORDER BY bm25(memories_fts) LIMIT ?`, strings.Join(terms, " OR "), auth.PersonID(ctx), projectID, maxRelevant*2)
 	if err != nil {
 		return 0, err
 	}
@@ -456,15 +503,17 @@ func boolInt(b bool) int {
 
 // Find returns the memory a "Forget that …" request means: an exact match
 // after normalizing, or the best memory containing every word of the
-// request. It returns false rather than guess.
-func (s *Store) Find(ctx context.Context, text string) (Memory, bool, error) {
+// request. It returns false rather than guess. It looks where recall does:
+// the person's own memories, and in a chat in a project with its memory on,
+// projectID's (#1136).
+func (s *Store) Find(ctx context.Context, text, projectID string) (Memory, bool, error) {
 	all, err := s.List(ctx)
 	if err != nil {
 		return Memory{}, false, err
 	}
 	key := normalize(text)
 	for _, m := range all {
-		if normalize(m.Content) == key {
+		if recalledIn(m, projectID) && normalize(m.Content) == key {
 			return m, true, nil
 		}
 	}
@@ -478,9 +527,10 @@ func (s *Store) Find(ctx context.Context, text string) (Memory, bool, error) {
 		return Memory{}, false, nil
 	}
 	rows, err := s.db.QueryContext(ctx, `
-		SELECT m.id, m.content, m.category, m.source_type, COALESCE(m.source_ref, ''), m.enabled, m.local_only, COALESCE(m.language, ''), m.created_at, m.updated_at
+		SELECT m.id, m.content, m.category, m.source_type, COALESCE(m.source_ref, ''), m.enabled, m.local_only, COALESCE(m.language, ''), m.project_id, m.created_at, m.updated_at
 		FROM memories_fts f JOIN memories m ON m.id = f.memory_id
-		WHERE memories_fts MATCH ? AND m.person_id = ? ORDER BY bm25(memories_fts) LIMIT 1`, strings.Join(terms, " AND "), auth.PersonID(ctx))
+		WHERE memories_fts MATCH ? AND m.person_id = ? AND (m.project_id = '' OR m.project_id = ?)
+		ORDER BY bm25(memories_fts) LIMIT 1`, strings.Join(terms, " AND "), auth.PersonID(ctx), projectID)
 	if err != nil {
 		return Memory{}, false, err
 	}

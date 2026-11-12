@@ -658,9 +658,50 @@ type Conversation struct {
 	CompactOff bool `json:"compact_off"`
 	// Project is the folder on the Toskar computer this chat works in, where
 	// work asked for goes on until it's done (contract 1.85, #1017).
-	Project   string    `json:"project,omitempty"`
+	Project string `json:"project,omitempty"`
+	// ProjectID is the project the chat is in, if any: a chat is in one
+	// project at most (contract 1.87, #1136).
+	ProjectID string    `json:"project_id,omitempty"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
+}
+
+// Project keeps related chats together with what they share: instructions,
+// files, a folder on the Toskar computer, a default profile and model, and a
+// memory of its own (contract 1.87, #1136). It belongs to the person who
+// made it.
+type Project struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+	// Instructions are the person's own for every chat in the project. They
+	// come after a profile's and before the person's style.
+	Instructions string `json:"instructions"`
+	// Folder is where the project's chats work on the Toskar computer, unless
+	// a chat names its own. Only an Admin sets it.
+	Folder    string `json:"folder,omitempty"`
+	ProfileID string `json:"profile_id,omitempty"`
+	ModelID   string `json:"model_id,omitempty"`
+	// MemoryOff keeps the project's chats from saving or reading the
+	// project's own memory. The person's memory follows each chat's Memory
+	// control.
+	MemoryOff bool `json:"memory_off"`
+	// Knowledge are the ids of knowledge sources linked to the project, which
+	// its chats search as well as its files.
+	Knowledge []string `json:"knowledge"`
+	// Files are the files added to the project's knowledge.
+	Files []ProjectFile `json:"files"`
+	// ChatCount is how many chats are in the project.
+	ChatCount int       `json:"chat_count"`
+	CreatedAt time.Time `json:"created_at"`
+	// UpdatedAt is the project's last activity: a change to it, or to one of
+	// its chats.
+	UpdatedAt time.Time `json:"updated_at"`
+}
+
+// ProjectFile is one file in a project's knowledge.
+type ProjectFile struct {
+	Name string `json:"name"`
+	Size int64  `json:"size"`
 }
 
 // ChatTurn is what a chat's turn has done so far, for an app that opens the

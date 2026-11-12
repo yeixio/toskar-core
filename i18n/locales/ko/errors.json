@@ -275,5 +275,8 @@
   "SHELL_ONLY": "이 컴퓨터의 Toskar Pro 앱만 이것을 바꿀 수 있어요.",
   "UNLOCK_REQUIRED": "Toskar Pro 체험판이 끝났어요. 모델, 자동화, 사람을 추가하려면 Toskar Pro 잠금을 해제하세요.",
   "TRIAL_NOT_STARTED": "모델, 자동화, 사람을 추가하려면 Toskar Pro 14일 무료 체험을 시작하세요.",
-  "NEWS_UNAVAILABLE": "toskar.ai에서 AI 뉴스를 읽어 올 수 없습니다. 인터넷 연결을 확인하고 다시 시도하세요."
+  "NEWS_UNAVAILABLE": "toskar.ai에서 AI 뉴스를 읽어 올 수 없습니다. 인터넷 연결을 확인하고 다시 시도하세요.",
+  "PROJECT_FILE_NOT_FOUND": "그 파일은 프로젝트에 없습니다.",
+  "PROJECT_NAME_REQUIRED": "프로젝트 이름을 입력하세요.",
+  "PROJECT_NOT_FOUND": "이 프로젝트는 삭제되었습니다."
 }

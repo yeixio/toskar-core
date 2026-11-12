@@ -89,7 +89,7 @@ func TestMemoryAcrossLanguages(t *testing.T) {
 	const question = "What language does my project use?"
 
 	// By words alone, the English question can't find it.
-	got, _ := s.Relevant(ctx, question)
+	got, _ := s.Relevant(ctx, question, "")
 	if has(got, m.Content) {
 		t.Fatalf("found without meaning: %v", ids(got))
 	}
@@ -97,14 +97,14 @@ func TestMemoryAcrossLanguages(t *testing.T) {
 	// By meaning, it can, and the unrelated memory stays out.
 	emb := &conceptEmbedder{model: "multilingual"}
 	s.SetEmbedder(func(context.Context) (Embedder, error) { return emb, nil })
-	got, _ = s.Relevant(ctx, question)
+	got, _ = s.Relevant(ctx, question, "")
 	if !has(got, m.Content) || has(got, "Mi perro se llama Toby.") {
 		t.Fatalf("by meaning: %v", ids(got))
 	}
 
 	// Vectors are kept: a second question embeds nothing new.
 	before := emb.docs
-	_, _ = s.Relevant(ctx, "Which project uses Go?")
+	_, _ = s.Relevant(ctx, "Which project uses Go?", "")
 	if emb.docs != before {
 		t.Fatalf("re-embedded %d memories", emb.docs-before)
 	}
@@ -113,13 +113,13 @@ func TestMemoryAcrossLanguages(t *testing.T) {
 	if _, err := s.Update(ctx, m.ID, Patch{Content: &edited}); err != nil {
 		t.Fatal(err)
 	}
-	_, _ = s.Relevant(ctx, question)
+	_, _ = s.Relevant(ctx, question, "")
 	if emb.docs != before+1 {
 		t.Fatalf("after an edit, embedded %d", emb.docs-before)
 	}
 	other := &conceptEmbedder{model: "other"}
 	s.SetEmbedder(func(context.Context) (Embedder, error) { return other, nil })
-	_, _ = s.Relevant(ctx, question)
+	_, _ = s.Relevant(ctx, question, "")
 	if other.docs != 2 {
 		t.Fatalf("a new model embedded %d memories", other.docs)
 	}
@@ -142,7 +142,7 @@ func TestMemoryWithoutEmbeddings(t *testing.T) {
 		t.Fatal(err)
 	}
 	s.SetEmbedder(func(context.Context) (Embedder, error) { return nil, nil })
-	if got, err := s.Relevant(ctx, "Which project uses Go?"); err != nil || !has(got, "My project uses Go.") {
+	if got, err := s.Relevant(ctx, "Which project uses Go?", ""); err != nil || !has(got, "My project uses Go.") {
 		t.Fatalf("by words: %v %v", ids(got), err)
 	}
 }

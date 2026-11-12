@@ -51,6 +51,8 @@ var covered = map[string]any{
 	"AutomationRun":        contracts.AutomationRunRef{},
 	"ContextUsage":         contracts.ContextUsage{},
 	"Conversation":         contracts.Conversation{},
+	"Project":              contracts.Project{},
+	"ProjectFile":          contracts.ProjectFile{},
 	"ConversationsDeleted": contracts.ConversationsDeleted{},
 	"ConversationSkipped":  contracts.ConversationSkipped{},
 	"ModelWarmRequest":     contracts.ModelWarmRequest{},
