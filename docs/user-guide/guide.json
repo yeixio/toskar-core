@@ -953,7 +953,8 @@
         "Profile and model set what a new chat in the project starts with; you can still change them in the chat. With Project memory on, what the project's chats learn is remembered for its other chats, not your others. Turn it off and they neither save nor read the project's memory. Your own memory still follows each chat's Memory switch.",
         "An Admin can give a project a folder on this computer. Its chats work there, as a chat with its own folder does, unless a chat chooses another. In such a chat, the folder button says From the project and the folder's name.",
         "A chat in a project says so under its title, with links to the project, Move to project, and Remove from project. To put any chat in a project, open its menu in History and choose Move to project, then pick a project or name a new one.",
-        "Delete project on its page deletes its files and what it remembered. Its chats move out of it and stay in your history, unless you tick the box to delete them too."
+        "Delete project on its page deletes its files and what it remembered. Its chats move out of it and stay in your history, unless you tick the box to delete them too.",
+        "In the terminal, `toskarctl projects` lists your projects, and `toskarctl chat --project` starts or continues a chat in one ([Use Toskar in the terminal](#terminal))."
       ]
     },
     {
@@ -2637,7 +2638,7 @@
           "rows": [
             [
               "`/new`",
-              "Starts a new chat"
+              "Starts a new chat, in the same project"
             ],
             [
               "`/model id`",
@@ -2650,6 +2651,10 @@
             [
               "`/attach path`",
               "Sends a file as data with the next message"
+            ],
+            [
+              "`/project name`",
+              "Moves this chat into one of your projects, or `none` to take it out. Alone, `/project` says which project the chat is in"
             ],
             [
               "`/log`",
@@ -2668,6 +2673,30 @@
         {
           "type": "paragraph",
           "text": "`toskarctl chat --resume` lists your 10 most recent chats to pick from, including ones from the apps. `--resume` with a chat's id continues that one. `--model` and `--profile` choose who answers from the start."
+        },
+        {
+          "type": "heading",
+          "text": "Chat in a project"
+        },
+        {
+          "type": "paragraph",
+          "text": "A project keeps related chats together with their instructions, files, and memory ([Projects](#projects)). Make and change projects in the web or desktop app. `toskarctl projects` lists yours, with how many chats are in each."
+        },
+        {
+          "type": "steps",
+          "items": [
+            "Run `toskarctl projects` to see your projects' names.",
+            "Run `toskarctl chat --project \"Kitchen remodel\"`, with your project's name. Upper and lower case don't matter.",
+            "Chat as usual. The answers follow the project's instructions and search its files."
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "With `--resume`, `chat --project` lists only the project's chats. When two of your projects share a name, use the id that `toskarctl projects` shows. In a chat, `/project` says which project it's in, `/project` with a name moves the chat there, and `/project none` takes it out."
+        },
+        {
+          "type": "paragraph",
+          "text": "On the computer Toskar runs on, a project's chat still works in the folder you started `chat` in, even when the project has a folder of its own. So a project for your code works from wherever you are."
         },
         {
           "type": "heading",

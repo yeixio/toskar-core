@@ -38,6 +38,7 @@ How it is started depends on how it was installed:
 | `toskarctl paths` | Default data, model, runtime, log, and database paths |
 | `toskarctl ask [flags] [prompt]` | Send one prompt and print the answer, for scripts and CI jobs (below) |
 | `toskarctl chat [flags] [message]` | Chat in the terminal, in the same chats as the apps (below) |
+| `toskarctl projects [--output json]` | Your projects, most recently used first, with each one's id and how many chats are in it. `chat --project` chats in one (below) |
 | `toskarctl connect <agent> [--model id] [--write]` | Print, or write, the settings for a coding agent to use a model on Toskar (below) |
 | `toskarctl models list [--installed] [--json]` | The models, smallest first, with download size, fit on this computer, and whether each is installed |
 | `toskarctl models install <id> [--node <id>]` | Download a model and wait until it's installed, printing its progress every tenth of the way |
@@ -96,6 +97,7 @@ toskarctl chat "What's a good first car for a teenager?"
 toskarctl chat --model qwen2.5-7b-q4 --file notes.md "Turn these into an agenda"
 toskarctl chat --resume
 toskarctl chat --resume 3f2a9c1e
+toskarctl chat --project "Kitchen remodel"
 ```
 
 | Flag | What it does |
@@ -104,8 +106,9 @@ toskarctl chat --resume 3f2a9c1e
 | `--model id` | A model, or `auto` (the default) |
 | `--profile id` | Answer as this profile |
 | `--file path` | Data to work on, sent with the first message |
+| `--project name` | Start in one of your projects, by its name in any case or its id. With `--resume`, pick from the project's chats; a chat named by id moves into the project |
 
-While chatting, `/new` starts a new chat, `/model id` and `/profile id` change who answers the next message, `/attach path` sends a file as data with the next message, `/log` shows what ran in this chat with its result and who allowed it, `/help` lists these, and `/exit` or Ctrl-D leaves.
+While chatting, `/new` starts a new chat, in the same project, `/model id` and `/profile id` change who answers the next message, `/attach path` sends a file as data with the next message, `/project` says which project the chat is in, `/project name` moves it into one, `/project none` takes it out, `/log` shows what ran in this chat with its result and who allowed it, `/help` lists these, and `/exit` or Ctrl-D leaves.
 
 **Tools that ask first.** When the model wants a tool that asks before it runs, such as running code in the general assistant, `chat` shows the tool, why, what it would run, and, when Toskar is on another computer, which one it runs on, and waits: `y` runs it once, `n` doesn't, and `a` lets that tool run for the rest of this chat without asking. Your answer goes to Toskar the same way an app's does.
 
@@ -118,6 +121,8 @@ While chatting, `/new` starts a new chat, `/model id` and `/profile id` change w
 **Toskar keeps its own record of a task.** A model can say something works when it doesn't. So Toskar notes which checks actually ran, such as `go test` or `npm test`, how they ended, and what changed, from the tools and from Git. If the last check failed, nothing ran to check a change, a change came after the last check, or test files changed, the model is sent back once to deal with it. Whatever's still in doubt then shows under the answer as "Toskar noticed", where the model can't leave it out. This recognizes common test and build commands, not every project's own, and it's in English for now. Outside a Git project, it only sees files changed with the file tool. No note doesn't prove the work is right: it means the checks Toskar could see passed.
 
 **The model matters most for this work.** Small models often can't finish a task, and some claim they did. When nothing installed does well at it, `chat` says which model would and how to install it, or says this computer can't run it.
+
+**Projects.** A project keeps related chats together with their instructions, files, default profile and model, and memory ([Projects](features/projects.md)). `toskarctl projects` lists yours, and `chat --project` starts or continues in one, so its chats follow the project's instructions and search its files. A name two of your projects share needs the id; `toskarctl projects` shows it. Make and change projects in the web or desktop app. On the computer Toskar runs on, the chat still works in the folder you started it in, before the project's folder, so a code project's chats work where you are. From another computer, the project's folder applies, for an Admin.
 
 **Your project.** On the computer Toskar runs on, `chat` works in the folder you started it in: commands run there, and its file tools reach only that folder. It follows the project's own notes in `AGENTS.md`, `TOSKAR.md`, or `CLAUDE.md`, the first one it finds. Those set conventions, not permissions. When Toskar is on another computer, it uses its own folder there.
 

@@ -82,9 +82,9 @@ ALTER TABLE memories ADD COLUMN project_id TEXT NOT NULL DEFAULT '';
 
 ## Terminal
 
-- `toskarctl chat --project <name or id>` starts or resumes in a project. The current folder is still sent as today, and it comes before the project's, so a code project's chats work where you are.
-- `/project` in a chat shows the project; `/project <name>` moves the chat into one.
-- `toskarctl projects` lists them.
+- `toskarctl chat --project <name or id>` starts or resumes in a project. The current folder is still sent as today, and it comes before the project's, so a code project's chats work where you are. Names match in any case, found client-side from `GET /projects`; a name two projects share needs the id. With `--resume` it picks from the project's chats (`project_id` on `GET /conversations`), and a chat named by id moves into the project.
+- `/project` in a chat shows the project, and whether it has instructions and a folder; `/project <name>` moves the chat into one, and `/project none` takes it out. `/new` starts in the chat's project.
+- `toskarctl projects` lists them: id, name, and chat count, or `--output json`.
 
 ## Phone, tablet, TV and car
 
