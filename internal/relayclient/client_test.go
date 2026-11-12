@@ -86,6 +86,14 @@ type fakeRelay struct {
 	noCheck bool
 	// asked counts the calls that sent a token.
 	asked int
+	// renewal is how POST /v1/routes/{route}/renew answers: "" as a relay
+	// from before it (404), "ok" with a token until renewUntil, or
+	// "ended"; renewed counts the calls and renewedWith holds the last
+	// token sent (toskar-relay#65).
+	renewal     string
+	renewUntil  time.Time
+	renewed     int
+	renewedWith string
 }
 
 func newFakeRelay(t *testing.T) *fakeRelay {
@@ -169,6 +177,28 @@ func newFakeRelay(t *testing.T) *fakeRelay {
 		}
 		_ = json.NewDecoder(r.Body).Decode(&f.checked)
 		_, _ = io.WriteString(w, `{"relay":{"ok":true,"ms":80},"direct":[{"address":"203.0.113.7:7333","ok":false,"reason":"timeout","ms":8000}]}`)
+	})
+	mux.HandleFunc("POST /v1/routes/{route}/renew", func(w http.ResponseWriter, r *http.Request) {
+		tok, _ := strings.CutPrefix(r.Header.Get("Authorization"), "Bearer ")
+		f.mu.Lock()
+		defer f.mu.Unlock()
+		f.renewed++
+		f.renewedWith = tok
+		route, _, ok := ParseToken(tok)
+		switch {
+		case f.renewal == "":
+			http.NotFound(w, r)
+		case !ok || route != r.PathValue("route"):
+			w.WriteHeader(http.StatusForbidden)
+			_, _ = io.WriteString(w, `{"error":{"code":"ROUTE_MISMATCH"}}`)
+		case f.renewal == "ended":
+			w.WriteHeader(http.StatusPaymentRequired)
+			_, _ = io.WriteString(w, `{"error":{"code":"SUBSCRIPTION_ENDED","message":"The computer's subscription has ended."}}`)
+		default:
+			fresh := fakeToken(route, f.renewUntil)
+			f.tokens[fresh] = true
+			_ = json.NewEncoder(w).Encode(map[string]any{"token": fresh, "expires": f.renewUntil.Unix()})
+		}
 	})
 	f.srv = httptest.NewUnstartedServer(mux)
 	f.srv.StartTLS()
@@ -410,6 +440,159 @@ func TestTokenRanOut(t *testing.T) {
 	f.mu.Unlock()
 	_ = store.Write(TokenName, fresh)
 	waitFor(t, "connected", func() bool { return c.Status().State == "connected" })
+}
+
+// A subscription's token renews from Toskar's relay itself
+// (toskar-relay#65): once it has run out, and near its end at most every
+// few hours. An ended subscription, or a relay from before renewing, leaves
+// the token as it was.
+func TestRenew(t *testing.T) {
+	f := newFakeRelay(t)
+	c, _, store := f.client(t, "", func(net.Conn) bool { return false })
+	c.Renew = true
+	renewed := make(chan string, 4)
+	c.Renewed = func(tok string) { renewed <- tok }
+	ctx := context.Background()
+	reset := func(tok, mode string, until time.Time) {
+		_ = store.Write(TokenName, tok)
+		f.mu.Lock()
+		f.renewal, f.renewUntil, f.renewed = mode, until, 0
+		f.mu.Unlock()
+		c.tokenMu.Lock()
+		c.nextRenew = time.Time{}
+		c.tokenMu.Unlock()
+	}
+	calls := func() (int, string) {
+		f.mu.Lock()
+		defer f.mu.Unlock()
+		return f.renewed, f.renewedWith
+	}
+	until := time.Now().Add(30 * 24 * time.Hour).Truncate(time.Second)
+
+	// Run out: renewed with the expired token, kept, and heard.
+	expired := fakeToken(c.Route(), time.Now().Add(-time.Hour))
+	reset(expired, "ok", until)
+	tok, err := c.token(ctx, false)
+	if n, with := calls(); err != nil || n != 1 || with != expired || !tokenExpiry(tok).Equal(until) {
+		t.Fatalf("expired: %v, %d renewals with %q", err, n, with)
+	}
+	if kept, _ := store.Read(TokenName); kept != tok {
+		t.Fatal("the renewed token isn't kept")
+	}
+	select {
+	case got := <-renewed:
+		if got != tok {
+			t.Fatal("heard another token")
+		}
+	case <-time.After(5 * time.Second):
+		t.Fatal("the renewal wasn't heard")
+	}
+	// A fresh token isn't renewed.
+	if again, _ := c.token(ctx, false); again != tok {
+		t.Fatal("renewed a fresh token")
+	}
+	if n, _ := calls(); n != 1 {
+		t.Fatalf("renewed a fresh token: %d", n)
+	}
+
+	// Near its end: renewed, then not again for a few hours, even when
+	// the period didn't move (a cancelled subscription's last days), which
+	// isn't heard.
+	soon := fakeToken(c.Route(), time.Now().Add(2*24*time.Hour))
+	reset(soon, "ok", until)
+	if tok, err := c.token(ctx, false); err != nil || !tokenExpiry(tok).Equal(until) {
+		t.Fatalf("near the end: %v", err)
+	}
+	<-renewed
+	last := time.Now().Add(24 * time.Hour).Truncate(time.Second)
+	reset(fakeToken(c.Route(), last), "ok", last)
+	if _, err := c.token(ctx, false); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := c.token(ctx, false); err != nil {
+		t.Fatal(err)
+	}
+	if n, _ := calls(); n != 1 {
+		t.Fatalf("renewed %d times within a few hours", n)
+	}
+	select {
+	case <-renewed:
+		t.Fatal("heard a renewal that didn't last longer")
+	case <-time.After(100 * time.Millisecond):
+	}
+
+	// The subscription ended: a token near its end is still used, one
+	// that ran out ends, and the relay isn't asked again soon.
+	reset(soon, "ended", until)
+	if tok, err := c.token(ctx, false); err != nil || tok != soon {
+		t.Fatalf("ended, near the end: %v", err)
+	}
+	reset(expired, "ended", until)
+	if _, err := c.token(ctx, false); !errors.Is(err, errEnded) || CheckCode(err) != "TOKEN_EXPIRED" {
+		t.Fatalf("ended, expired: %v", err)
+	}
+	if _, err := c.token(ctx, false); !errors.Is(err, errEnded) {
+		t.Fatal(err)
+	}
+	if n, _ := calls(); n != 1 {
+		t.Fatalf("asked %d times after it ended", n)
+	}
+	if kept, _ := store.Read(TokenName); kept != expired {
+		t.Fatal("an ended subscription changed the token")
+	}
+
+	// A relay from before renewing answers 404: no error, tried later.
+	reset(soon, "", until)
+	if tok, err := c.token(ctx, false); err != nil || tok != soon {
+		t.Fatalf("404, near the end: %v", err)
+	}
+	reset(expired, "", until)
+	if _, err := c.token(ctx, false); !errors.Is(err, errEnded) {
+		t.Fatalf("404, expired: %v", err)
+	}
+	c.tokenMu.Lock()
+	later := c.nextRenew
+	c.tokenMu.Unlock()
+	if time.Until(later) < renewRetry-time.Minute {
+		t.Fatalf("tries again at %v", later)
+	}
+
+	// Without Renew (an organization's relay), nothing is asked.
+	c.Renew = false
+	reset(expired, "ok", until)
+	if _, err := c.token(ctx, false); !errors.Is(err, errEnded) {
+		t.Fatal(err)
+	}
+	if n, _ := calls(); n != 0 {
+		t.Fatalf("renewed without Renew: %d", n)
+	}
+}
+
+// A computer that restarted after its token ran out, with its subscription
+// renewed and no device opening the app, renews and connects
+// (toskar-relay#65).
+func TestRenewConnects(t *testing.T) {
+	f := newFakeRelay(t)
+	c, _, store := f.client(t, "", func(net.Conn) bool { return false })
+	c.Renew = true
+	expired := fakeToken(c.Route(), time.Now().Add(-time.Hour))
+	_ = store.Write(TokenName, expired)
+	f.mu.Lock()
+	f.renewal, f.renewUntil = "ok", time.Now().Add(30*24*time.Hour)
+	f.mu.Unlock()
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	go c.Run(ctx)
+	waitFor(t, "connected", func() bool { return c.Status().State == "connected" })
+	waitFor(t, "registered", func() bool { return !c.Status().Registered.IsZero() })
+	if kept, _ := store.Read(TokenName); kept == expired {
+		t.Fatal("still the expired token")
+	}
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	if f.renewed != 1 {
+		t.Fatalf("renewed %d times", f.renewed)
+	}
 }
 
 func TestStatusBeforeRun(t *testing.T) {

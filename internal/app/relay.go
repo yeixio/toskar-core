@@ -101,10 +101,14 @@ func (a *App) applyRelay() {
 		a.Logger.Warn("relay off: no route secret", "error", err)
 		return
 	}
+	// Toskar's relay renews a subscription's token itself
+	// (toskar-relay#65); an organization's relay enrolls instead.
 	c := &relayclient.Client{
 		Relay:        relayName(cfg),
 		Secret:       routeSecret,
 		EnrollSecret: enrollSecret(cfg, secrets),
+		Renew:        cfg.RemoteAccess.Relay == "",
+		Renewed:      a.relayRenewed,
 		Name:         func() string { return a.Config.Get().NodeName },
 		Version:      strings.TrimPrefix(version.CurrentOffer().Version, "v"),
 		Store:        secrets,
@@ -234,6 +238,14 @@ func (a *App) expiredRelayToken() time.Time {
 		return exp
 	}
 	return time.Time{}
+}
+
+// relayRenewed keeps a token the relay renewed for this computer
+// (toskar-relay#65) as one from the app is kept, and reconnects with it.
+func (a *App) relayRenewed(tok string) {
+	if _, err := a.setRelayToken(context.Background(), tok, false); err != nil {
+		a.Logger.Warn("couldn't use the renewed relay token", "error", err)
+	}
 }
 
 // setRelayToken keeps the route token the app got for this computer from a
