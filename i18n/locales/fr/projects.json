@@ -1,0 +1,82 @@
+{
+  "new": {
+    "title": "Nouveau projet",
+    "body": "Un projet regroupe des discussions liées avec ce qu’elles partagent : des instructions, des fichiers et une mémoire à lui.",
+    "name": "Nom",
+    "placeholder": "Rénovation de la cuisine",
+    "create": "Créer le projet",
+    "cancel": "Annuler"
+  },
+  "page": {
+    "loading": "Chargement du projet…",
+    "notFound": "Ce projet n’est pas ici. Il a peut-être été supprimé.",
+    "back": "Toutes les discussions",
+    "description": "Les discussions de ce projet partagent ses instructions, ses fichiers et sa mémoire.",
+    "newChat": "Nouvelle discussion",
+    "rename": "Renommer",
+    "name": "Nom du projet",
+    "save": "Enregistrer",
+    "cancel": "Annuler"
+  },
+  "chats": {
+    "title": "Discussions",
+    "loading": "Chargement des discussions…",
+    "empty": "Aucune discussion dans ce projet pour l’instant. Commencez-en une avec Nouvelle discussion.",
+    "untitled": "Sans titre"
+  },
+  "instructions": {
+    "title": "Instructions",
+    "hint": "Chaque discussion de ce projet les suit, après celles du profil. Dites à qui s’adressent les réponses, sur quoi se concentrer ou comment écrire.",
+    "placeholder": "Par exemple : les réponses sont pour une petite boulangerie. Restez bref et utilisez les unités métriques.",
+    "save": "Enregistrer les instructions",
+    "discard": "Annuler les modifications"
+  },
+  "files": {
+    "title": "Fichiers",
+    "hint": "Les discussions du projet cherchent dans ces fichiers quand ils aident à répondre. Ils restent sur l’ordinateur Toskar.",
+    "empty": "Aucun fichier pour l’instant.",
+    "add": "Ajouter un fichier",
+    "adding": "Ajout…",
+    "remove": "Retirer",
+    "removeName": "Retirer {{name}}",
+    "tooBig": "{{name}} dépasse {{size}}, la taille maximale d’un fichier."
+  },
+  "knowledge": {
+    "title": "Connaissances",
+    "hint": "Des sources de connaissances où les discussions du projet cherchent aussi, comme un dossier de documents. Elles sont liées, pas copiées."
+  },
+  "folder": {
+    "title": "Dossier",
+    "hint": "Les discussions du projet travaillent dans ce dossier sur l’ordinateur Toskar, sauf si une discussion choisit le sien. Toskar peut y exécuter des commandes, et demande avant de modifier quoi que ce soit.",
+    "label": "Dossier sur l’ordinateur Toskar",
+    "placeholder": "Chemin complet du dossier",
+    "save": "Enregistrer",
+    "remove": "Retirer"
+  },
+  "defaults": {
+    "title": "Profil et modèle",
+    "hint": "Les nouvelles discussions de ce projet commencent avec ceux-ci.",
+    "profile": "Profil",
+    "model": "Modèle",
+    "yourDefault": "Votre choix par défaut",
+    "auto": "Auto"
+  },
+  "memory": {
+    "title": "Mémoire",
+    "hint": "Ce qu’apprennent les discussions du projet est retenu pour ses autres discussions, pas pour vos autres. Désactivée, elles n’enregistrent ni ne lisent la mémoire du projet.",
+    "toggle": "Mémoire du projet"
+  },
+  "delete": {
+    "title": "Supprimer le projet",
+    "hint": "Ses fichiers et ce qu’il a retenu sont supprimés. Ses discussions restent dans votre historique, sauf si vous choisissez de les supprimer aussi.",
+    "button": "Supprimer le projet",
+    "confirmTitle": "Supprimer « {{name}} » ?",
+    "body": "Ses fichiers et ce qu’il a retenu sont supprimés. Ses discussions sortent du projet et restent dans votre historique.",
+    "bodyChats": "Ses fichiers, ce qu’il a retenu et ses discussions sont supprimés. C’est irréversible.",
+    "alsoChats_one": "Supprimer aussi sa discussion",
+    "alsoChats_many": "Supprimer aussi ses {{count}} discussions",
+    "alsoChats_other": "Supprimer aussi ses {{count}} discussions",
+    "cancel": "Annuler",
+    "confirm": "Supprimer le projet"
+  }
+}

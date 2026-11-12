@@ -152,3 +152,32 @@ func TestChatFixturesHaveTheMessageShape(t *testing.T) {
 		}
 	}
 }
+
+// The demo has a project (#1136), with its page and its chats.
+func TestProjectFixtures(t *testing.T) {
+	body, ok := screenshotGET("/api/v1/projects")
+	if !ok {
+		t.Fatal("no projects fixture")
+	}
+	var list []contracts.Project
+	if err := json.Unmarshal([]byte(body), &list); err != nil || len(list) != 1 {
+		t.Fatalf("projects: %v %s", err, body)
+	}
+	one, ok := screenshotGET("/api/v1/projects/" + list[0].ID)
+	if !ok {
+		t.Fatal("no project page fixture")
+	}
+	var project contracts.Project
+	if err := json.Unmarshal([]byte(one), &project); err != nil || project.Name == "" || len(project.Files) == 0 {
+		t.Fatalf("project: %v %s", err, one)
+	}
+	var chats []contracts.Conversation
+	if err := json.Unmarshal([]byte(screenshotProjectConversations(project.ID)), &chats); err != nil || len(chats) != project.ChatCount {
+		t.Fatalf("project chats: %v %d, want %d", err, len(chats), project.ChatCount)
+	}
+	for _, c := range chats {
+		if c.ProjectID != project.ID {
+			t.Fatalf("chat %s is in %q", c.ID, c.ProjectID)
+		}
+	}
+}

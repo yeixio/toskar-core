@@ -107,7 +107,25 @@
     "placeholder": "資料夾的完整路徑",
     "hint": "指定資料夾後,Toskar 可以在其中執行命令,並持續工作直到完成。變更任何內容前都會先詢問。",
     "save": "儲存",
-    "remove": "移除"
+    "remove": "移除",
+    "fromProject": "來自專案:{{name}}",
+    "projectHint": "除非你為這個聊天另選資料夾,否則它會在專案的資料夾 {{path}} 中工作。"
+  },
+  "projectLine": {
+    "in": "在專案 <go>{{name}}</go> 中",
+    "newIn": "專案 <go>{{name}}</go> 中的新聊天",
+    "move": "移到專案",
+    "remove": "移出專案"
+  },
+  "moveDialog": {
+    "title": "移到專案",
+    "body": "為「{{title}}」選擇一個專案。從下一則訊息起,它會遵循專案的說明並搜尋專案的檔案。",
+    "none": "還沒有專案。在下方輸入名稱即可新增。",
+    "newLabel": "新增專案",
+    "newPlaceholder": "新專案名稱",
+    "create": "新增並移動",
+    "cancel": "取消",
+    "failed": "無法新增專案。請再試一次。"
   },
   "task": {
     "output": "命令輸出",
@@ -332,7 +350,12 @@
       "week": "過去 7 天",
       "month": "過去 30 天",
       "older": "更早"
-    }
+    },
+    "projects": "專案",
+    "newProject": "新增專案",
+    "openProject": "開啟{{name}}",
+    "projectEmpty": "還沒有聊天",
+    "moveToProject": "移到專案…"
   },
   "errors": {
     "tryAgain": "再試一次",

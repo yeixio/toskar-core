@@ -1,0 +1,82 @@
+{
+  "new": {
+    "title": "Nuovo progetto",
+    "body": "Un progetto tiene insieme chat correlate con ciò che condividono: istruzioni, file e una memoria propria.",
+    "name": "Nome",
+    "placeholder": "Ristrutturazione della cucina",
+    "create": "Crea progetto",
+    "cancel": "Annulla"
+  },
+  "page": {
+    "loading": "Caricamento del progetto…",
+    "notFound": "Questo progetto non c'è. Forse è stato eliminato.",
+    "back": "Tutte le chat",
+    "description": "Le chat di questo progetto ne condividono istruzioni, file e memoria.",
+    "newChat": "Nuova chat",
+    "rename": "Rinomina",
+    "name": "Nome del progetto",
+    "save": "Salva",
+    "cancel": "Annulla"
+  },
+  "chats": {
+    "title": "Chat",
+    "loading": "Caricamento delle chat…",
+    "empty": "Ancora nessuna chat in questo progetto. Iniziane una con Nuova chat.",
+    "untitled": "Senza titolo"
+  },
+  "instructions": {
+    "title": "Istruzioni",
+    "hint": "Ogni chat di questo progetto le segue, dopo quelle del profilo. Di' a chi sono rivolte le risposte, su cosa concentrarsi o come scrivere.",
+    "placeholder": "Per esempio: le risposte sono per un piccolo panificio. Tienile brevi e usa le unità metriche.",
+    "save": "Salva istruzioni",
+    "discard": "Annulla modifiche"
+  },
+  "files": {
+    "title": "File",
+    "hint": "Le chat del progetto cercano in questi file quando aiutano a rispondere. Restano sul computer con Toskar.",
+    "empty": "Ancora nessun file.",
+    "add": "Aggiungi un file",
+    "adding": "Aggiunta…",
+    "remove": "Rimuovi",
+    "removeName": "Rimuovi {{name}}",
+    "tooBig": "{{name}} supera {{size}}, la dimensione massima di un file."
+  },
+  "knowledge": {
+    "title": "Conoscenza",
+    "hint": "Fonti di conoscenza in cui cercano anche le chat del progetto, come una cartella di documenti. Sono collegate, non copiate."
+  },
+  "folder": {
+    "title": "Cartella",
+    "hint": "Le chat del progetto lavorano in questa cartella sul computer con Toskar, a meno che una chat non ne scelga una propria. Toskar può eseguire comandi lì e chiede prima di modificare qualcosa.",
+    "label": "Cartella sul computer con Toskar",
+    "placeholder": "Percorso completo della cartella",
+    "save": "Salva",
+    "remove": "Rimuovi"
+  },
+  "defaults": {
+    "title": "Profilo e modello",
+    "hint": "Le nuove chat di questo progetto iniziano con questi.",
+    "profile": "Profilo",
+    "model": "Modello",
+    "yourDefault": "Il tuo predefinito",
+    "auto": "Automatico"
+  },
+  "memory": {
+    "title": "Memoria",
+    "hint": "Ciò che imparano le chat del progetto viene ricordato per le sue altre chat, non per le tue altre. Se disattivata, non salvano né leggono la memoria del progetto.",
+    "toggle": "Memoria del progetto"
+  },
+  "delete": {
+    "title": "Elimina progetto",
+    "hint": "I suoi file e ciò che ricordava vengono eliminati. Le sue chat restano nella cronologia, a meno che tu non scelga di eliminarle.",
+    "button": "Elimina progetto",
+    "confirmTitle": "Eliminare «{{name}}»?",
+    "body": "I suoi file e ciò che ricordava vengono eliminati. Le sue chat escono dal progetto e restano nella cronologia.",
+    "bodyChats": "I suoi file, ciò che ricordava e le sue chat vengono eliminati. Non si può annullare.",
+    "alsoChats_one": "Elimina anche la sua chat",
+    "alsoChats_many": "Elimina anche le sue {{count}} chat",
+    "alsoChats_other": "Elimina anche le sue {{count}} chat",
+    "cancel": "Annulla",
+    "confirm": "Elimina progetto"
+  }
+}

@@ -577,10 +577,54 @@ export interface Conversation {
   memory_off?: boolean
   /** Kept verbatim: auto-compact never sends its older messages as a summary (#342). */
   compact_off?: boolean
-  /** The folder this chat works in (#1017). */
+  /** The folder this chat works in (#1017). Not its project: that's project_id. */
   project?: string
+  /** The project the chat is in, if any (#1136). */
+  project_id?: string
   created_at: string
   updated_at: string
+}
+
+/** A file in a project's knowledge (#1136). */
+export interface ProjectFile {
+  name: string
+  size: number
+}
+
+/**
+ * A project (#1136): related chats with what they share. It belongs to the
+ * person who made it, as their chats do.
+ */
+export interface Project {
+  id: string
+  name: string
+  /** The person's own instructions for every chat in the project. */
+  instructions: string
+  /** Where the project's chats work on the Toskar computer, unless a chat names its own. Set by Admins. */
+  folder?: string
+  profile_id?: string
+  model_id?: string
+  /** The project's chats neither save nor read the project's own memory. */
+  memory_off: boolean
+  /** Knowledge sources linked to the project, by id. */
+  knowledge: string[]
+  files: ProjectFile[]
+  chat_count: number
+  created_at: string
+  /** The last change to the project or one of its chats. */
+  updated_at: string
+}
+
+/** A project's fields to set; one left out stays as it is. */
+export interface ProjectInput {
+  name?: string
+  instructions?: string
+  /** A full path on the Toskar computer, "" for none. Needs the admin role. */
+  folder?: string
+  profile_id?: string
+  model_id?: string
+  memory_off?: boolean
+  knowledge?: string[]
 }
 
 /** What a chat's running turn has done so far, for opening it midway (#1017). */
@@ -1014,6 +1058,8 @@ export interface CreateConversationRequest {
   title?: string
   profile_id?: string
   model_id?: string
+  /** Starts the chat in one of the person's projects (#1136). */
+  project_id?: string
 }
 
 export interface UpdateConversationRequest {
@@ -1024,6 +1070,8 @@ export interface UpdateConversationRequest {
   compact_off?: boolean
   /** The folder this chat works in, "" for none. Needs the admin role. */
   project?: string
+  /** Moves the chat into one of the person's projects, "" to take it out (#1136). */
+  project_id?: string
 }
 
 export type MemoryCategory = 'identity' | 'preferences' | 'projects' | 'technical' | 'interests' | 'people' | 'other'

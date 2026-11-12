@@ -3,7 +3,7 @@ import { Fragment, useCallback, useEffect, useMemo, useRef, useState, type Mouse
 import { ToolPermissionPrompt, type PendingToolPrompt } from './ToolPermissionPrompt'
 import { thinkingToSend, type Thinking } from './thinking'
 import { Trans, useTranslation } from 'react-i18next'
-import { Link, useLocation, useSearchParams } from 'react-router-dom'
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import i18n from '@/i18n'
 import { formatNumber } from '@/i18n/format'
 import { RealmKicker } from '@/components/ui/Realm'
@@ -38,6 +38,9 @@ import { AnswerDetails } from './AnswerDetails'
 import { FileChip, PendingFileChip, type PendingFile } from './FileChips'
 import { MemoryToggle } from './MemoryToggle'
 import { ChatFolder } from './ChatFolder'
+import { ChatProjectLine } from './ChatProjectLine'
+import { MoveToProjectDialog } from '@/features/projects/MoveToProjectDialog'
+import { NewProjectDialog } from '@/features/projects/NewProjectDialog'
 import { TaskModelHint } from './TaskModelHint'
 import { CommandOutput } from './CommandOutput'
 import { addOutput, folderName } from './outputText'
@@ -328,6 +331,11 @@ export function ChatPage() {
   // The chats a confirmation asks about: one from its menu, or several from
   // select mode (#452).
   const [pendingDelete, setPendingDelete] = useState<Conversation[] | null>(null)
+  // Projects (#1136): the project a new chat starts in, the chat being
+  // moved into one, and New project from the history.
+  const [draftProjectId, setDraftProjectId] = useState<string | null>(null)
+  const [movingChat, setMovingChat] = useState<Conversation | null>(null)
+  const [newProjectOpen, setNewProjectOpen] = useState(false)
   // A confirmed delete waits UNDO_MS for Undo before it's sent; its chats
   // are hidden meanwhile. reopen is the chat that was open, for Undo.
   const [undoable, setUndoable] = useState<{ ids: string[]; reopen: string | null } | null>(null)
@@ -399,6 +407,13 @@ export function ChatPage() {
     queryFn: () => api.getConversations(),
     retry: false,
   })
+  // A Core from before projects answers with an error: the history has none.
+  const projectsQuery = useQuery({
+    queryKey: ['projects'],
+    queryFn: () => api.listProjects(),
+    retry: false,
+  })
+  const navigate = useNavigate()
 
   const profilesQuery = useQuery({
     queryKey: ['profiles'],
@@ -475,6 +490,8 @@ export function ChatPage() {
     const fromQuery = searchParams.get('c')
     const profileFromQuery = searchParams.get('profile')
     const startNew = searchParams.get('new') === '1'
+    // New chat on a project's page starts the chat in it.
+    const projectFromQuery = searchParams.get('project')
     if (!fromQuery && !profileFromQuery && !startNew) return
 
     if (fromQuery) {
@@ -487,6 +504,7 @@ export function ChatPage() {
     }
     if (startNew) {
       setSelectedId(null)
+      setDraftProjectId(projectFromQuery || null)
       setSendError(null)
       setStreamingContent(null)
       setTeamSteps([])
@@ -504,6 +522,9 @@ export function ChatPage() {
   }, [conversationsQuery.data, hiddenIds])
   const selectedConversation =
     conversations.find((c) => c.id === selectedId) ?? null
+  // The project the open chat is in, or the one a new chat will start in.
+  const chatProjectId = selectedId ? (selectedConversation?.project_id ?? '') : (draftProjectId ?? '')
+  const chatProject = chatProjectId ? projectsQuery.data?.find((p) => p.id === chatProjectId) : undefined
   // Each computer's fit, for the model a chat's folder work goes better with.
   const modelsFitQuery = useQuery({
     queryKey: ['models-fit'],
@@ -620,6 +641,20 @@ export function ChatPage() {
       setDraftModelId(AUTO_MODEL_ID)
     }
   }, [draftModelId, installedModels])
+
+  // A new chat in a project starts with the project's profile and model,
+  // once the project is known; the person can still change them.
+  const draftProject = !selectedId && draftProjectId ? chatProject : undefined
+  useEffect(() => {
+    if (!draftProject) return
+    if (draftProject.profile_id) setDraftProfileId(draftProject.profile_id)
+    if (draftProject.model_id) {
+      setModelChoice(null)
+      setDraftModelId(draftProject.model_id)
+    }
+    // Only a different project, or its defaults changing, sets them again.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [draftProject?.id, draftProject?.profile_id, draftProject?.model_id])
 
   useEffect(() => {
     composerRef.current?.focus()
@@ -1396,6 +1431,7 @@ export function ChatPage() {
           title: message.length > 48 ? `${message.slice(0, 48)}…` : message,
           profile_id: profileIdForChat,
           model_id: modelId,
+          project_id: draftProjectId || undefined,
         })
         if (!created?.id) {
           throw new Error(t('send.startFailed'))
@@ -1536,6 +1572,7 @@ export function ChatPage() {
           title: folderName(project),
           profile_id: profileIdForChat,
           model_id: modelIdForChat,
+          project_id: draftProjectId || undefined,
         })
         if (!chat?.id) throw new Error(t('send.startFailed'))
         id = created = chat.id
@@ -1549,6 +1586,21 @@ export function ChatPage() {
       throw new Error(errorText(shown.code, shown.error, shown.details), { cause: err })
     }
   }
+
+  // Moves the open chat out of its project, or a new chat out of the one
+  // it was going to start in.
+  const removeFromProject = useMutation({
+    mutationFn: (id: string) => api.updateConversation(id, { project_id: '' }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['conversations'] })
+      void queryClient.invalidateQueries({ queryKey: ['projects'] })
+    },
+    // Shown in the chat, where Remove from project was chosen.
+    onError: (err) => {
+      const shown = shownError(err)
+      setSendError(errorText(shown.code, shown.error, shown.details))
+    },
+  })
 
   const handleStop = () => {
     stoppedRef.current = true
@@ -1627,6 +1679,8 @@ export function ChatPage() {
 
   const startNewChat = () => {
     setSelectedId(null)
+    // New chat in the header or history starts outside any project.
+    setDraftProjectId(null)
     // A new chat starts with the default profile, not the last one used.
     setDraftProfileId(null)
     setSendError(null)
@@ -1745,6 +1799,10 @@ export function ChatPage() {
         setListError(null)
         setPendingDelete(chats)
       }}
+      projects={projectsQuery.isSuccess ? projectsQuery.data : undefined}
+      onOpenProject={(id) => navigate(`/projects/${encodeURIComponent(id)}`)}
+      onNewProject={() => setNewProjectOpen(true)}
+      onMoveToProject={setMovingChat}
       onToggleDrawerPinned={() => {
         const next = !chatHistoryPinned
         setChatHistoryPinned(next)
@@ -2007,6 +2065,7 @@ export function ChatPage() {
                 {admin ? (
                   <ChatFolder
                     folder={selectedConversation?.project ?? ''}
+                    projectFolder={chatProject?.folder}
                     disabled={isSending}
                     onChange={chooseFolder}
                   />
@@ -2203,6 +2262,17 @@ export function ChatPage() {
               <span className="sr-only sm:hidden">{t('header.newChat')}</span>
             </button>
           </div>
+
+          {chatProjectId ? (
+            <ChatProjectLine
+              projectId={chatProjectId}
+              name={chatProject?.name}
+              draft={!selectedId}
+              busy={removeFromProject.isPending}
+              onMove={() => selectedConversation && setMovingChat(selectedConversation)}
+              onRemove={() => (selectedId ? removeFromProject.mutate(selectedId) : setDraftProjectId(null))}
+            />
+          ) : null}
 
           {!showPinnedSidebar && historyMode === 'overlay' ? historyDrawer : null}
 
@@ -2590,6 +2660,14 @@ export function ChatPage() {
           </div>
         </div>
       )}
+
+      {movingChat ? <MoveToProjectDialog conversation={movingChat} onClose={() => setMovingChat(null)} /> : null}
+      {newProjectOpen ? (
+        <NewProjectDialog
+          onClose={() => setNewProjectOpen(false)}
+          onCreated={(project) => navigate(`/projects/${encodeURIComponent(project.id)}`)}
+        />
+      ) : null}
 
       {undoable && (
         <div className="pointer-events-none fixed inset-x-0 bottom-4 z-40 flex justify-center px-4">

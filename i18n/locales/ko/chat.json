@@ -107,7 +107,25 @@
     "placeholder": "폴더의 전체 경로",
     "hint": "폴더를 지정하면 Toskar가 그곳에서 명령을 실행하고 작업이 끝날 때까지 계속합니다. 변경하기 전에 먼저 묻습니다.",
     "save": "저장",
-    "remove": "제거"
+    "remove": "제거",
+    "fromProject": "프로젝트에서: {{name}}",
+    "projectHint": "이 채팅에 다른 폴더를 고르지 않으면 프로젝트의 폴더 {{path}}에서 작업합니다."
+  },
+  "projectLine": {
+    "in": "<go>{{name}}</go> 프로젝트에 있음",
+    "newIn": "<go>{{name}}</go> 프로젝트의 새 채팅",
+    "move": "프로젝트로 이동",
+    "remove": "프로젝트에서 빼기"
+  },
+  "moveDialog": {
+    "title": "프로젝트로 이동",
+    "body": "\"{{title}}\"을(를) 넣을 프로젝트를 고르세요. 다음 메시지부터 프로젝트의 지침을 따르고 프로젝트 파일을 검색합니다.",
+    "none": "아직 프로젝트가 없습니다. 아래에 이름을 입력해 만드세요.",
+    "newLabel": "새 프로젝트",
+    "newPlaceholder": "새 프로젝트 이름",
+    "create": "만들고 이동",
+    "cancel": "취소",
+    "failed": "프로젝트를 만들지 못했습니다. 다시 시도하세요."
   },
   "task": {
     "output": "명령 출력",
@@ -332,7 +350,12 @@
       "week": "지난 7일",
       "month": "지난 30일",
       "older": "이전"
-    }
+    },
+    "projects": "프로젝트",
+    "newProject": "새 프로젝트",
+    "openProject": "{{name}} 열기",
+    "projectEmpty": "아직 채팅이 없습니다",
+    "moveToProject": "프로젝트로 이동…"
   },
   "errors": {
     "tryAgain": "다시 시도",

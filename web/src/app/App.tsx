@@ -15,6 +15,7 @@ import { readScreenshotLaunch } from '@/lib/screenshotMode'
 import { AutomationsPage } from '@/features/automations/AutomationsPage'
 import { ApiAccessPage } from '@/features/api-access/ApiAccessPage'
 import { ChatPage } from '@/features/chat/ChatPage'
+import { ProjectPage } from '@/features/projects/ProjectPage'
 import { DiagnosticsPage } from '@/features/diagnostics/DiagnosticsPage'
 import { ModelsPage } from '@/features/models/ModelsPage'
 import { NodesPage } from '@/features/nodes/NodesPage'
@@ -93,6 +94,9 @@ export function App() {
               >
                 <Route index element={<Navigate to="/chat" replace />} />
                 <Route path="chat" element={<ChatPage />} />
+                {/* A project's page (#1136); the projects themselves are listed in Chat's history. */}
+                <Route path="projects/:id" element={<ProjectPage />} />
+                <Route path="projects" element={<Navigate to="/chat" replace />} />
                 <Route path="automations" element={<RequireRole min="member"><AutomationsPage /></RequireRole>} />
                 <Route path="models" element={<RequireRole min="admin"><ModelsPage /></RequireRole>} />
                 <Route path="train" element={<RequireRole min="admin"><TrainPage /></RequireRole>} />

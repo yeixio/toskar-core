@@ -107,7 +107,25 @@
     "placeholder": "Caminho completo da pasta",
     "hint": "Com uma pasta, o Toskar pode executar comandos nela e continuar até terminar o trabalho. Ele pergunta antes de alterar qualquer coisa.",
     "save": "Salvar",
-    "remove": "Remover"
+    "remove": "Remover",
+    "fromProject": "Do projeto: {{name}}",
+    "projectHint": "Este chat trabalha na pasta do projeto, {{path}}, a menos que você escolha outra para este chat."
+  },
+  "projectLine": {
+    "in": "No projeto <go>{{name}}</go>",
+    "newIn": "Novo chat no projeto <go>{{name}}</go>",
+    "move": "Mover para um projeto",
+    "remove": "Tirar do projeto"
+  },
+  "moveDialog": {
+    "title": "Mover para um projeto",
+    "body": "Escolha um projeto para “{{title}}”. A partir da próxima mensagem, ele segue as instruções do projeto e pesquisa nos arquivos dele.",
+    "none": "Nenhum projeto ainda. Digite um nome abaixo para criar um.",
+    "newLabel": "Novo projeto",
+    "newPlaceholder": "Nome do novo projeto",
+    "create": "Criar e mover",
+    "cancel": "Cancelar",
+    "failed": "Não foi possível criar o projeto. Tente de novo."
   },
   "task": {
     "output": "Saída do comando",
@@ -354,7 +372,12 @@
       "week": "Últimos 7 dias",
       "month": "Últimos 30 dias",
       "older": "Mais antigos"
-    }
+    },
+    "projects": "Projetos",
+    "newProject": "Novo projeto",
+    "openProject": "Abrir {{name}}",
+    "projectEmpty": "Nenhum chat ainda",
+    "moveToProject": "Mover para um projeto…"
   },
   "errors": {
     "tryAgain": "Tentar novamente",

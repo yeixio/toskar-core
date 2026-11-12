@@ -139,6 +139,8 @@ import type {
   PortalVisitorLink,
   PortalConversation,
   PortalMessage,
+  Project,
+  ProjectInput,
   PortalUsage,
 } from '@/types/api'
 import type { Upload } from '@/lib/upload'
@@ -1096,6 +1098,29 @@ export const api = {
     }),
 
   getConversations: () => request<Conversation[]>('/api/v1/conversations'),
+  /** One project's chats, newest first (#1136). */
+  getProjectConversations: async (projectId: string) =>
+    (await request<Conversation[]>(`/api/v1/conversations?project_id=${encodeURIComponent(projectId)}`)) ?? [],
+
+  /** The person's projects, newest activity first (#1136). */
+  listProjects: async () => (await request<Project[]>('/api/v1/projects')) ?? [],
+  /** One project, or null when there's none with that id. */
+  getProject: (id: string) => request<Project>(`/api/v1/projects/${encodeURIComponent(id)}`),
+  createProject: (body: ProjectInput & { name: string }) =>
+    request<Project>('/api/v1/projects', { method: 'POST', body: JSON.stringify(body) }),
+  updateProject: (id: string, body: ProjectInput) =>
+    request<Project>(`/api/v1/projects/${encodeURIComponent(id)}`, { method: 'PATCH', body: JSON.stringify(body) }),
+  /** Deletes a project with its files and memories; its chats move out of it, or are deleted too. */
+  deleteProject: (id: string, opts?: { deleteChats?: boolean }) =>
+    request<null>(`/api/v1/projects/${encodeURIComponent(id)}${opts?.deleteChats ? '?chats=delete' : ''}`, { method: 'DELETE' }),
+  /** Adds a file to a project's knowledge, replacing one with the same name. */
+  addProjectFile: (id: string, upload: Upload) =>
+    request<Project>(`/api/v1/projects/${encodeURIComponent(id)}/files`, {
+      method: 'POST',
+      body: JSON.stringify({ filename: upload.filename, text: upload.text, content_base64: upload.contentBase64 }),
+    }),
+  removeProjectFile: (id: string, name: string) =>
+    request<null>(`/api/v1/projects/${encodeURIComponent(id)}/files/${encodeURIComponent(name)}`, { method: 'DELETE' }),
 
   createConversation: (body: CreateConversationRequest) =>
     request<Conversation>('/api/v1/conversations', {

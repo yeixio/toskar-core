@@ -107,7 +107,25 @@
     "placeholder": "Percorso completo della cartella",
     "hint": "Con una cartella, Toskar può eseguire comandi al suo interno e continuare fino al termine del lavoro. Chiede prima di modificare qualcosa.",
     "save": "Salva",
-    "remove": "Rimuovi"
+    "remove": "Rimuovi",
+    "fromProject": "Dal progetto: {{name}}",
+    "projectHint": "Questa chat lavora nella cartella del suo progetto, {{path}}, a meno che tu non ne scelga un'altra per questa chat."
+  },
+  "projectLine": {
+    "in": "Nel progetto <go>{{name}}</go>",
+    "newIn": "Nuova chat nel progetto <go>{{name}}</go>",
+    "move": "Sposta in un progetto",
+    "remove": "Togli dal progetto"
+  },
+  "moveDialog": {
+    "title": "Sposta in un progetto",
+    "body": "Scegli un progetto per «{{title}}». Dal prossimo messaggio segue le istruzioni del progetto e cerca nei suoi file.",
+    "none": "Ancora nessun progetto. Scrivi un nome qui sotto per crearne uno.",
+    "newLabel": "Nuovo progetto",
+    "newPlaceholder": "Nome del nuovo progetto",
+    "create": "Crea e sposta",
+    "cancel": "Annulla",
+    "failed": "Non è stato possibile creare il progetto. Riprova."
   },
   "task": {
     "output": "Output del comando",
@@ -354,7 +372,12 @@
       "week": "Ultimi 7 giorni",
       "month": "Ultimi 30 giorni",
       "older": "Meno recenti"
-    }
+    },
+    "projects": "Progetti",
+    "newProject": "Nuovo progetto",
+    "openProject": "Apri {{name}}",
+    "projectEmpty": "Ancora nessuna chat",
+    "moveToProject": "Sposta in un progetto…"
   },
   "errors": {
     "tryAgain": "Riprova",

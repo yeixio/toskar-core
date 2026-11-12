@@ -36,6 +36,9 @@ const allPages = [
   // People and Portals (#206, #205), added after the audit's first passes.
   '/people',
   '/portals',
+  // A project's page, and a chat in it with the line naming it (#1136).
+  '/projects/proj-house',
+  '/chat?c=conv-research',
 ]
 const only = (process.env.A11Y_PAGES || '').split(',').map((p) => p.trim()).filter(Boolean)
 const pages = only.length ? allPages.filter((p) => only.includes(p)) : allPages

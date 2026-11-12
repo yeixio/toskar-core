@@ -107,7 +107,25 @@
     "placeholder": "Ruta completa de la carpeta",
     "hint": "Con una carpeta, Toskar puede ejecutar comandos en ella y seguir hasta terminar el trabajo. Pregunta antes de cambiar nada.",
     "save": "Guardar",
-    "remove": "Quitar"
+    "remove": "Quitar",
+    "fromProject": "Del proyecto: {{name}}",
+    "projectHint": "Este chat trabaja en la carpeta de su proyecto, {{path}}, salvo que elijas otra para este chat."
+  },
+  "projectLine": {
+    "in": "En el proyecto <go>{{name}}</go>",
+    "newIn": "Nuevo chat en el proyecto <go>{{name}}</go>",
+    "move": "Mover a un proyecto",
+    "remove": "Quitar del proyecto"
+  },
+  "moveDialog": {
+    "title": "Mover a un proyecto",
+    "body": "Elige un proyecto para «{{title}}». Desde su próximo mensaje, sigue las instrucciones del proyecto y busca en sus archivos.",
+    "none": "Aún no hay proyectos. Escribe un nombre abajo para crear uno.",
+    "newLabel": "Nuevo proyecto",
+    "newPlaceholder": "Nombre del nuevo proyecto",
+    "create": "Crear y mover",
+    "cancel": "Cancelar",
+    "failed": "No se pudo crear el proyecto. Inténtalo de nuevo."
   },
   "task": {
     "output": "Salida del comando",
@@ -354,7 +372,12 @@
       "week": "Últimos 7 días",
       "month": "Últimos 30 días",
       "older": "Anteriores"
-    }
+    },
+    "projects": "Proyectos",
+    "newProject": "Nuevo proyecto",
+    "openProject": "Abrir {{name}}",
+    "projectEmpty": "Aún no hay chats",
+    "moveToProject": "Mover a un proyecto…"
   },
   "errors": {
     "tryAgain": "Reintentar",
