@@ -190,6 +190,9 @@ type Patch struct {
 	Enabled  *bool   `json:"enabled,omitempty"`
 	// LocalOnly marks the memory this computer only.
 	LocalOnly *bool `json:"local_only,omitempty"`
+	// ProjectID "" moves a project's memory to the person's own (#1136).
+	// A memory can't be moved into a project.
+	ProjectID *string `json:"project_id,omitempty"`
 }
 
 // Update applies a patch.
@@ -218,13 +221,28 @@ func (s *Store) Update(ctx context.Context, id string, p Patch) (Memory, error) 
 	if p.LocalOnly != nil {
 		m.LocalOnly = *p.LocalOnly
 	}
+	if p.ProjectID != nil {
+		if *p.ProjectID != "" && *p.ProjectID != m.ProjectID {
+			return Memory{}, errors.New("a memory can only move to personal memory")
+		}
+		if *p.ProjectID == "" && m.ProjectID != "" {
+			// Already in personal memory: keep that one, not a copy.
+			if dup, ok := s.duplicate(ctx, "", m.Content); ok && dup.ID != id {
+				if err := s.Delete(ctx, id); err != nil {
+					return Memory{}, err
+				}
+				return dup, nil
+			}
+		}
+		m.ProjectID = *p.ProjectID
+	}
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
 		return Memory{}, err
 	}
 	defer func() { _ = tx.Rollback() }()
-	if _, err := tx.ExecContext(ctx, `UPDATE memories SET content=?, category=?, enabled=?, local_only=?, language=?, updated_at=? WHERE id=? AND person_id=?`,
-		m.Content, m.Category, boolInt(m.Enabled), boolInt(m.LocalOnly), nullable(m.Language), ts(s.now()), id, auth.PersonID(ctx)); err != nil {
+	if _, err := tx.ExecContext(ctx, `UPDATE memories SET content=?, category=?, enabled=?, local_only=?, language=?, project_id=?, updated_at=? WHERE id=? AND person_id=?`,
+		m.Content, m.Category, boolInt(m.Enabled), boolInt(m.LocalOnly), nullable(m.Language), m.ProjectID, ts(s.now()), id, auth.PersonID(ctx)); err != nil {
 		return Memory{}, err
 	}
 	if _, err := tx.ExecContext(ctx, `UPDATE memories_fts SET content=? WHERE memory_id=?`, m.Content, id); err != nil {

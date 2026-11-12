@@ -137,6 +137,8 @@ func screenshotGET(path string) (string, bool) {
 		return screenshotProject(), true
 	case path == "/api/v1/conversations/conv-budget/messages":
 		return screenshotBudgetMessages, true
+	case path == "/api/v1/conversations/conv-letter/messages":
+		return screenshotLetterMessages, true
 	case strings.HasPrefix(path, "/api/v1/conversations/") && strings.HasSuffix(path, "/messages"):
 		return screenshotMessages, true
 	case path == "/api/v1/api-keys":
@@ -502,6 +504,25 @@ const screenshotMessages = `[
       "context": {"prompt_tokens": 3140, "limit": 8192, "instructions": 920, "tools": 1180, "conversation": 760, "tool_results": 280}
     },
     "created_at": "2026-09-24T15:03:30Z"
+  }
+]`
+
+// screenshotLetterMessages is a chat in the demo project, which follows the
+// project's instructions, for the user guide's Projects page (#1136).
+const screenshotLetterMessages = `[
+  {
+    "id": "l1",
+    "conversation_id": "conv-letter",
+    "role": "user",
+    "content": "Write a short, polite letter to my landlord. The heating has been off and on for two weeks, and the bedrooms stay below 60°F at night.",
+    "created_at": "2026-09-20T18:10:00Z"
+  },
+  {
+    "id": "l2",
+    "conversation_id": "conv-letter",
+    "role": "assistant",
+    "content": "Hello,\n\nFor the past two weeks the heating in the house has been cutting out, and the upstairs bedrooms drop below 60°F at night. Could you arrange for a heating contractor to look at the furnace this week? I'm home most afternoons and can let them in.\n\nThank you,\n[Your name]\n\nA furnace that cycles on and off often needs a contractor rather than a new thermostat, so I asked for one.",
+    "created_at": "2026-09-20T18:10:25Z"
   }
 ]`
 

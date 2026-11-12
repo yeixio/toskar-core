@@ -3,7 +3,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { describe, expect, it, vi } from 'vitest'
 import { api } from '@/lib/api'
-import type { MemoryItem, SettingsView } from '@/types/api'
+import type { MemoryItem, Project, SettingsView } from '@/types/api'
 import { MemoryToggle } from '@/features/chat/MemoryToggle'
 import { AnswerDetails } from '@/features/chat/AnswerDetails'
 import { MemoryPage } from './MemoryPage'
@@ -12,7 +12,7 @@ vi.mock('@/lib/api', async () => {
   const actual = await vi.importActual<typeof import('@/lib/api')>('@/lib/api')
   return {
     ...actual,
-    api: { ...actual.api, listMemory: vi.fn(), addMemory: vi.fn(), updateMemory: vi.fn(), deleteMemory: vi.fn(), getSettings: vi.fn(), updateSettings: vi.fn() },
+    api: { ...actual.api, listMemory: vi.fn(), listProjects: vi.fn(), addMemory: vi.fn(), updateMemory: vi.fn(), deleteMemory: vi.fn(), getSettings: vi.fn(), updateSettings: vi.fn() },
   }
 })
 
@@ -50,6 +50,38 @@ describe('MemoryPage', () => {
     fireEvent.click(screen.getAllByRole('button', { name: 'More actions for this memory' })[1])
     fireEvent.click(screen.getByRole('menuitem', { name: 'Delete memory: This project uses Go' }))
     await waitFor(() => expect(api.deleteMemory).toHaveBeenCalledWith('2'))
+  })
+})
+
+describe('MemoryPage, projects', () => {
+  it("lists a project's memories under it and moves one to personal memory", async () => {
+    vi.mocked(api.listMemory).mockResolvedValue({
+      memories: [
+        mem('1', 'I prefer metric units', 'preferences'),
+        { ...mem('2', 'The garden soil is clay', 'projects'), project_id: 'proj-house' },
+        { ...mem('3', 'Old idea', 'other'), project_id: 'proj-gone' },
+      ],
+      categories: ['identity', 'preferences', 'projects', 'technical', 'interests', 'people', 'other'],
+    })
+    vi.mocked(api.getSettings).mockResolvedValue({ memory_enabled: true } as SettingsView)
+    vi.mocked(api.listProjects).mockResolvedValue([{ id: 'proj-house', name: 'House', instructions: '', memory_off: false, knowledge: [] } as unknown as Project])
+    vi.mocked(api.updateMemory).mockResolvedValue({ ...mem('2', 'The garden soil is clay', 'projects') })
+    wrap(<MemoryPage />)
+    const house = await screen.findByRole('link', { name: 'Project: House' })
+    expect(house).toHaveAttribute('href', '/projects/proj-house')
+    // A project's memory isn't among the person's own.
+    expect(screen.queryByRole('heading', { name: 'Projects' })).toBeNull()
+    const section = screen.getByRole('region', { name: 'Project: House' })
+    expect(section).toHaveTextContent('The garden soil is clay')
+    // A project that's gone still shows its memories, to move or delete.
+    expect(screen.getByRole('heading', { name: 'Project: A project' })).toBeInTheDocument()
+
+    // Only a project's memory can move.
+    fireEvent.click(screen.getAllByRole('button', { name: 'More actions for this memory' })[0])
+    expect(screen.queryByRole('menuitem', { name: 'Move to personal memory' })).toBeNull()
+    fireEvent.click(screen.getAllByRole('button', { name: 'More actions for this memory' })[1])
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Move to personal memory' }))
+    await waitFor(() => expect(api.updateMemory).toHaveBeenCalledWith('2', { project_id: '' }))
   })
 })
 

@@ -70,5 +70,12 @@
     "deleteLabel": "Supprimer le souvenir : {{content}}",
     "more": "Plus d'actions pour ce souvenir",
     "paused": "En pause"
+  },
+  "project": {
+    "heading": "Projet : {{name}}",
+    "hint": "Seules les discussions de ce projet les utilisent.",
+    "unknown": "Un projet",
+    "toPersonal": "Déplacer vers la mémoire personnelle",
+    "toPersonalHint": "Toutes vos discussions pourront alors l’utiliser, pas seulement celles de ce projet."
   }
 }

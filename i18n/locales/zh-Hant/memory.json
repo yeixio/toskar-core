@@ -70,5 +70,12 @@
     "deleteLabel": "刪除記憶：{{content}}",
     "more": "此記憶的更多動作",
     "paused": "已暫停"
+  },
+  "project": {
+    "heading": "專案：{{name}}",
+    "hint": "只有這個專案的聊天會使用這些記憶。",
+    "unknown": "一個專案",
+    "toPersonal": "移到個人記憶",
+    "toPersonalHint": "移動後，你的所有聊天都能使用它，而不只是這個專案的聊天。"
   }
 }

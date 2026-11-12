@@ -774,6 +774,48 @@
           "wait": "File on this computer"
         }
       ]
+    },
+    {
+      "id": "projects-history",
+      "path": "/chat",
+      "query": "c=conv-local",
+      "readyText": "ridge above the reservoir",
+      "actions": [
+        {
+          "click": "History"
+        },
+        {
+          "wait": "New project"
+        },
+        {
+          "click": "Warmer house",
+          "exact": true
+        },
+        {
+          "wait": "Compare three heat pumps"
+        }
+      ]
+    },
+    {
+      "id": "projects-page",
+      "path": "/projects/proj-house",
+      "readyText": "energy-bills-2026.csv"
+    },
+    {
+      "id": "projects-chat",
+      "path": "/chat",
+      "query": "c=conv-letter",
+      "readyText": "Remove from project"
+    },
+    {
+      "id": "projects-memory",
+      "path": "/memory",
+      "readyText": "The furnace is a 2009 gas model",
+      "actions": [
+        {
+          "scroll": "The furnace is a 2009 gas model in the basement."
+        }
+      ]
     }
   ]
 }

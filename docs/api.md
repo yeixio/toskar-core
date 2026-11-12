@@ -211,7 +211,7 @@ Control-plane routes are under `/api/v1`. The OpenAI-compatible routes are under
 | DELETE | `/video/models/{id}` | Delete an installed video model |
 | GET, DELETE | `/artifacts/{id}` | A file's details, or delete it. `GET /artifacts/{id}/content` returns the bytes as a download. |
 | GET, POST | `/memory` | Memories (Muninn). GET returns `memories` and `categories`. |
-| PATCH, DELETE | `/memory/{id}` | Change a memory's `content`, `category`, `enabled`, or `local_only`, or delete it |
+| PATCH, DELETE | `/memory/{id}` | Change a memory's `content`, `category`, `enabled`, or `local_only`, or move a [project's](#projects) memory to the person's own with `project_id` empty (one they already have is kept instead and returned; contract 1.87), or delete it. A memory's `project_id` names the project it belongs to, or is left out for the person's own |
 | GET, PUT | `/personalization` | How answers should look: `length`, `tone`, `format`, `units`, `about_me`, `instructions` |
 | GET | `/runs` | Run traces, newest first. `?conversation_id=`, `?limit=`. `GET /runs/{id}` returns one. A run has `client` (as sent, `other` for an app it doesn't know, empty when not sent) and `remote` when it came from outside the home network. |
 | GET, POST | `/tasks` | Orchestration tasks. `GET /tasks/{id}` returns one with its steps. |

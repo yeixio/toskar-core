@@ -70,5 +70,12 @@
     "deleteLabel": "Elimina ricordo: {{content}}",
     "more": "Altre azioni per questo ricordo",
     "paused": "In pausa"
+  },
+  "project": {
+    "heading": "Progetto: {{name}}",
+    "hint": "Solo le chat di questo progetto li usano.",
+    "unknown": "Un progetto",
+    "toPersonal": "Sposta nella memoria personale",
+    "toPersonalHint": "Così tutte le tue chat potranno usarlo, non solo quelle di questo progetto."
   }
 }

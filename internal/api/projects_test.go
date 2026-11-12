@@ -302,3 +302,35 @@ func TestKnowledgeRoutesHideProjectFiles(t *testing.T) {
 		t.Fatalf("list: %d %s", code, body)
 	}
 }
+
+// The Memory page moves a project's memory to the person's own with
+// PATCH /memory/{id} and project_id "" (#1136).
+func TestPatchMemoryToPersonal(t *testing.T) {
+	db, err := store.Open(filepath.Join(t.TempDir(), "t.db"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = db.Close() })
+	memories := muninn.NewStore(db.SQL)
+	srv := NewServer(Dependencies{})
+	srv.BindMemory(memories)
+	ctx := auth.WithPrincipal(context.Background(), auth.Principal{Person: auth.Person{ID: "vee", Role: auth.RoleMember}})
+	m, _, err := memories.AddIn(ctx, "garden", "The garden soil is clay", "", muninn.SourceExplicit, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	id := map[string]string{"id": m.ID}
+	if code, body := call(srv.handleListMemory, "vee", auth.RoleMember, http.MethodGet, "/", nil, nil); code != http.StatusOK || !strings.Contains(body, `"project_id":"garden"`) {
+		t.Fatalf("list: %d %s", code, body)
+	}
+	if code, body := call(srv.handlePatchMemory, "vee", auth.RoleMember, http.MethodPatch, "/", id, map[string]any{"project_id": "taxes"}); code != http.StatusBadRequest {
+		t.Fatalf("into a project: %d %s", code, body)
+	}
+	if code, body := call(srv.handlePatchMemory, "sam", auth.RoleMember, http.MethodPatch, "/", id, map[string]any{"project_id": ""}); code != http.StatusNotFound {
+		t.Fatalf("another person's: %d %s", code, body)
+	}
+	code, body := call(srv.handlePatchMemory, "vee", auth.RoleMember, http.MethodPatch, "/", id, map[string]any{"project_id": ""})
+	if code != http.StatusOK || strings.Contains(body, "project_id") {
+		t.Fatalf("moved: %d %s", code, body)
+	}
+}

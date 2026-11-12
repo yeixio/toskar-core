@@ -70,5 +70,12 @@
     "deleteLabel": "Apagar memória: {{content}}",
     "more": "Mais ações para esta memória",
     "paused": "Pausada"
+  },
+  "project": {
+    "heading": "Projeto: {{name}}",
+    "hint": "Só os chats deste projeto usam estas memórias.",
+    "unknown": "Um projeto",
+    "toPersonal": "Mover para a memória pessoal",
+    "toPersonalHint": "Assim todos os seus chats poderão usá-la, não só os deste projeto."
   }
 }
