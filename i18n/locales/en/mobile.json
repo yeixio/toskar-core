@@ -255,6 +255,10 @@
     "deleteChat": "Delete chat",
     "computer": "Computer",
     "newOnComputer": "New chat on this computer",
+    "projects": "Projects",
+    "projectEmpty": "No chats yet",
+    "newInProject": "New chat in this project",
+    "inProject": "In project {{name}}",
     "untitled": "Chat",
     "model": "Model",
     "chooseModel": "Choose a model",
@@ -660,6 +664,7 @@
     "enterAddress": "Enter an address",
     "askHint": "Press the microphone on the remote, or type.",
     "tryAsking": "Try asking",
+    "projectsHint": "Continue a chat in one of your projects.",
     "disconnect": "Disconnect",
     "emptyHint": "Answers come from the models on your computer. Nothing you ask goes to a hosted AI service.",
     "suggest": {
@@ -783,6 +788,8 @@
   "car": {
     "ask": "Ask Toskar",
     "continue": "Continue the conversation",
+    "projects": "Projects",
+    "projectEmpty": "No chats yet",
     "listening": "Listening…",
     "thinking": "Thinking…",
     "answering": "Answering…",

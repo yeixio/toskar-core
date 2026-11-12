@@ -255,6 +255,10 @@
     "deleteChat": "Eliminar chat",
     "computer": "Computadora",
     "newOnComputer": "Nuevo chat en esta computadora",
+    "projects": "Proyectos",
+    "projectEmpty": "Aún no hay chats",
+    "newInProject": "Nuevo chat en este proyecto",
+    "inProject": "En el proyecto {{name}}",
     "untitled": "Chat",
     "model": "Modelo",
     "chooseModel": "Elegir un modelo",
@@ -569,6 +573,7 @@
     "enterAddress": "Introducir una dirección",
     "askHint": "Pulsa el micrófono del control remoto o escribe.",
     "tryAsking": "Prueba a preguntar",
+    "projectsHint": "Continúa un chat de uno de tus proyectos.",
     "disconnect": "Desconectar",
     "emptyHint": "Las respuestas vienen de los modelos de tu computadora. Nada de lo que preguntas va a un servicio de IA alojado.",
     "suggest": {
@@ -692,6 +697,8 @@
   "car": {
     "ask": "Preguntar a Toskar",
     "continue": "Continuar la conversación",
+    "projects": "Proyectos",
+    "projectEmpty": "Aún no hay chats",
     "listening": "Escuchando…",
     "thinking": "Pensando…",
     "answering": "Respondiendo…",

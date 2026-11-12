@@ -255,6 +255,10 @@
     "deleteChat": "刪除聊天",
     "computer": "電腦",
     "newOnComputer": "在這台電腦上開始新聊天",
+    "projects": "專案",
+    "projectEmpty": "還沒有聊天",
+    "newInProject": "在此專案中開始新聊天",
+    "inProject": "在專案 {{name}} 中",
     "untitled": "聊天",
     "model": "模型",
     "chooseModel": "選擇模型",
@@ -555,6 +559,7 @@
     "enterAddress": "輸入位址",
     "askHint": "按遙控器上的麥克風，或直接輸入。",
     "tryAsking": "試著問問",
+    "projectsHint": "繼續你某個專案中的聊天。",
     "disconnect": "中斷連線",
     "emptyHint": "回答來自你電腦上的模型。你問的內容不會傳送到託管的 AI 服務。",
     "suggest": {
@@ -678,6 +683,8 @@
   "car": {
     "ask": "問 Toskar",
     "continue": "繼續對話",
+    "projects": "專案",
+    "projectEmpty": "還沒有聊天",
     "listening": "正在聆聽…",
     "thinking": "正在思考…",
     "answering": "正在回答…",

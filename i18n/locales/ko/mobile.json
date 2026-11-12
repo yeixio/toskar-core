@@ -255,6 +255,10 @@
     "deleteChat": "채팅 삭제",
     "computer": "컴퓨터",
     "newOnComputer": "이 컴퓨터에서 새 채팅",
+    "projects": "프로젝트",
+    "projectEmpty": "아직 채팅이 없습니다",
+    "newInProject": "이 프로젝트에서 새 채팅",
+    "inProject": "{{name}} 프로젝트에 있음",
     "untitled": "채팅",
     "model": "모델",
     "chooseModel": "모델 선택",
@@ -555,6 +559,7 @@
     "enterAddress": "주소 입력",
     "askHint": "리모컨의 마이크를 누르거나 입력하세요.",
     "tryAsking": "이렇게 물어보세요",
+    "projectsHint": "프로젝트의 채팅을 이어서 합니다.",
     "disconnect": "연결 해제",
     "emptyHint": "답은 컴퓨터의 모델에서 나와요. 묻는 내용은 호스팅된 AI 서비스로 전송되지 않아요.",
     "suggest": {
@@ -678,6 +683,8 @@
   "car": {
     "ask": "Toskar에게 묻기",
     "continue": "대화 계속하기",
+    "projects": "프로젝트",
+    "projectEmpty": "아직 채팅이 없습니다",
     "listening": "듣는 중…",
     "thinking": "생각하는 중…",
     "answering": "답하는 중…",
