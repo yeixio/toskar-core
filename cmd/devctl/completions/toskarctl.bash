@@ -6,7 +6,7 @@ _toskarctl() {
   prev="${COMP_WORDS[COMP_CWORD-1]}"
 
   if [[ ${COMP_CWORD} -eq 1 ]]; then
-    COMPREPLY=($(compgen -W "version about paths ask chat connect models automations mcp join join-token network leave people completion help" -- "$cur"))
+    COMPREPLY=($(compgen -W "version about paths ask chat projects connect models automations mcp join join-token network leave people completion help" -- "$cur"))
     return
   fi
 
@@ -25,9 +25,16 @@ _toskarctl() {
       ;;
     chat)
       if [[ "$cur" == -* ]]; then
-        COMPREPLY=($(compgen -W "--resume --model --profile --file" -- "$cur"))
+        COMPREPLY=($(compgen -W "--resume --model --profile --file --project" -- "$cur"))
       elif [[ "$prev" == --file ]]; then
         COMPREPLY=($(compgen -f -- "$cur"))
+      fi
+      ;;
+    projects)
+      if [[ ${COMP_CWORD} -eq 2 && "$cur" != -* ]]; then
+        COMPREPLY=($(compgen -W "list" -- "$cur"))
+      elif [[ "$cur" == -* ]]; then
+        COMPREPLY=($(compgen -W "--output" -- "$cur"))
       fi
       ;;
     connect)

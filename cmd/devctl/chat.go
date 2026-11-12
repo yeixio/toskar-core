@@ -48,20 +48,28 @@ flags:
   --model id      a model, or auto (the default)
   --profile id    answer as this profile
   --file path     data to work on with the first message
+  --project name  start or continue in a project: its name or id
 
 while chatting:
-  /new            start a new chat
+  /new            start a new chat, in the same project
   /model id       answer with another model (auto to let Toskar pick)
   /profile id     answer as another profile
   /attach path    send a file as data with the next message
+  /project name   move this chat into a project, or none to take it out;
+                  alone, says which project it's in
   /log            what ran in this chat, its result, and who allowed it
   /help           this help
   /exit           leave (or Ctrl-D)`
 
 // chatAPI is what chat asks of Toskar; a test stands in for it.
 type chatAPI interface {
-	createConversation(profile, model string) (contracts.Conversation, error)
+	// createConversation starts a chat, in a project unless project is "".
+	createConversation(profile, model, project string) (contracts.Conversation, error)
 	conversations() ([]contracts.Conversation, error)
+	// projects are the person's own projects (#1136).
+	projects() ([]contracts.Project, error)
+	// moveConversation puts a chat in a project, or "" takes it out.
+	moveConversation(id, project string) error
 	messages(id string) ([]contracts.Message, error)
 	// models are the models Toskar offers, with what's installed.
 	models() ([]contracts.Model, error)
@@ -144,11 +152,14 @@ func (d daemonChat) computer() string {
 	return host
 }
 
-func (d daemonChat) createConversation(profile, model string) (contracts.Conversation, error) {
+func (d daemonChat) createConversation(profile, model, project string) (contracts.Conversation, error) {
 	var c contracts.Conversation
 	body := map[string]string{"title": "Terminal chat"}
 	if profile != "" {
 		body["profile_id"] = profile
+	}
+	if project != "" {
+		body["project_id"] = project
 	}
 	if model != "" && model != "auto" {
 		body["model_id"] = model
@@ -161,6 +172,16 @@ func (d daemonChat) conversations() ([]contracts.Conversation, error) {
 	var list []contracts.Conversation
 	err := d.rest.request(http.MethodGet, "/conversations", nil, &list)
 	return list, err
+}
+
+func (d daemonChat) projects() ([]contracts.Project, error) {
+	var list []contracts.Project
+	err := d.rest.request(http.MethodGet, "/projects", nil, &list)
+	return list, err
+}
+
+func (d daemonChat) moveConversation(id, project string) error {
+	return d.rest.request(http.MethodPatch, "/conversations/"+url.PathEscape(id), map[string]string{"project_id": project}, nil)
 }
 
 func (d daemonChat) messages(id string) ([]contracts.Message, error) {
@@ -221,6 +242,9 @@ type chatSession struct {
 	conv    string
 	model   string
 	profile string
+	// project is the project new chats start in, and projectName its name:
+	// the one asked for, or the one of the chat continued (#1136).
+	project, projectName string
 	// pending is data from /attach for the next message.
 	pending []string
 	// asks are the tool approvals this chat's turns wait on.
@@ -257,6 +281,7 @@ func chatCommand(args []string, streams chatIO, newAPI func() (chatAPI, error)) 
 	model := fs.String("model", "", "")
 	profile := fs.String("profile", "", "")
 	file := fs.String("file", "", "")
+	project := fs.String("project", "", "")
 	resume := fs.Bool("resume", false, "")
 	flagArgs, resumeID := resumeArg(args)
 	if err := fs.Parse(flagArgs); err != nil {
@@ -291,6 +316,17 @@ func chatCommand(args []string, streams chatIO, newAPI func() (chatAPI, error)) 
 		return err
 	}
 	s := &chatSession{api: client, io: streams, lines: bufio.NewScanner(streams.in), model: *model, profile: *profile, asks: make(chan toolAsk, 4), decided: make(chan string, 8), status: make(chan string, 8)}
+	if *project != "" {
+		list, err := client.projects()
+		if err != nil {
+			return err
+		}
+		p, err := findProject(list, *project)
+		if err != nil {
+			return err
+		}
+		s.project, s.projectName = p.ID, p.Name
+	}
 	s.lines.Buffer(make([]byte, 0, 64<<10), 1<<20)
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -360,22 +396,34 @@ func looksLikeID(s string) bool {
 }
 
 func (s *chatSession) newChat() error {
-	c, err := s.api.createConversation(s.profile, s.model)
+	c, err := s.api.createConversation(s.profile, s.model, s.project)
 	if err != nil {
 		return err
 	}
 	s.conv = c.ID
-	s.note("New chat. /help for commands.")
+	if s.project != "" {
+		s.note("New chat in " + s.projectName + ". /help for commands.")
+	} else {
+		s.note("New chat. /help for commands.")
+	}
 	s.suggestTaskModel()
 	return nil
 }
 
-// resume picks up a chat: id, or one picked from the recent ones.
+// resume picks up a chat: id, or one picked from the recent ones. With a
+// project, the recent ones are the project's, and a chat named by id moves
+// into it.
 func (s *chatSession) resume(id string) error {
 	if id == "" {
 		list, err := s.api.conversations()
 		if err != nil {
 			return err
+		}
+		if s.project != "" {
+			list = slices.DeleteFunc(list, func(c contracts.Conversation) bool { return c.ProjectID != s.project })
+			if len(list) == 0 {
+				return fmt.Errorf("there are no chats in %s to continue yet: run toskarctl chat --project %q to start one", s.projectName, s.projectName)
+			}
 		}
 		if len(list) == 0 {
 			return fmt.Errorf("there are no chats to continue yet: run toskarctl chat to start one")
@@ -401,6 +449,9 @@ func (s *chatSession) resume(id string) error {
 		}
 	}
 	s.conv = id
+	if err := s.joinProject(); err != nil {
+		return err
+	}
 	msgs, err := s.api.messages(id)
 	if err != nil {
 		return err
@@ -419,7 +470,151 @@ func (s *chatSession) resume(id string) error {
 		}
 		fmt.Fprintf(s.io.out, "%s %s\n", s.dim(who+":"), text)
 	}
-	s.note("Continuing. /help for commands.")
+	if s.project != "" {
+		s.note("Continuing in " + s.projectName + ". /help for commands.")
+	} else {
+		s.note("Continuing. /help for commands.")
+	}
+	return nil
+}
+
+// joinProject settles the project of a chat being continued: one asked for
+// with --project, which the chat moves into, or else the chat's own, so /new
+// starts there too.
+func (s *chatSession) joinProject() error {
+	in, err := s.chatProject()
+	if err != nil {
+		return err
+	}
+	if s.project == "" {
+		if in == "" {
+			return nil
+		}
+		list, err := s.api.projects()
+		if err != nil {
+			return err
+		}
+		for _, p := range list {
+			if p.ID == in {
+				s.project, s.projectName = p.ID, p.Name
+			}
+		}
+		return nil
+	}
+	if in == s.project {
+		return nil
+	}
+	if err := s.api.moveConversation(s.conv, s.project); err != nil {
+		return err
+	}
+	s.note("Moved this chat to " + s.projectName + ".")
+	return nil
+}
+
+// chatProject is the id of the project this chat is in, as Toskar has it now:
+// another app may have moved it. "" is none.
+func (s *chatSession) chatProject() (string, error) {
+	list, err := s.api.conversations()
+	if err != nil {
+		return "", err
+	}
+	for _, c := range list {
+		if c.ID == s.conv {
+			return c.ProjectID, nil
+		}
+	}
+	return "", nil
+}
+
+// findProject is the project ref names: its id, or its name in any case.
+func findProject(list []contracts.Project, ref string) (contracts.Project, error) {
+	var named []contracts.Project
+	for _, p := range list {
+		if p.ID == ref {
+			return p, nil
+		}
+		if strings.EqualFold(strings.TrimSpace(p.Name), strings.TrimSpace(ref)) {
+			named = append(named, p)
+		}
+	}
+	switch len(named) {
+	case 0:
+		return contracts.Project{}, fmt.Errorf("you have no project called %q; toskarctl projects lists yours", ref)
+	case 1:
+		return named[0], nil
+	}
+	ids := make([]string, len(named))
+	for i, p := range named {
+		ids[i] = p.ID
+	}
+	return contracts.Project{}, fmt.Errorf("more than one of your projects is called %q; use its id: %s", ref, strings.Join(ids, ", "))
+}
+
+// projectCommand is /project: alone, it says which project this chat is in;
+// with a name or id, it moves the chat there; with none, out of its project.
+func (s *chatSession) projectCommand(arg string) error {
+	in, err := s.chatProject()
+	if err != nil {
+		return err
+	}
+	list, err := s.api.projects()
+	if err != nil {
+		return err
+	}
+	var current *contracts.Project
+	for i, p := range list {
+		if p.ID == in {
+			current = &list[i]
+		}
+	}
+	switch {
+	case arg == "":
+		if current == nil {
+			fmt.Fprintln(s.io.out, "This chat isn't in a project. /project name moves it into one; toskarctl projects lists yours.")
+			return nil
+		}
+		fmt.Fprintf(s.io.out, "This chat is in %s.\n", current.Name)
+		instructions := "none"
+		if strings.TrimSpace(current.Instructions) != "" {
+			instructions = "yes, every chat in it follows them"
+		}
+		fmt.Fprintln(s.io.out, "  Instructions: "+instructions)
+		folder := "none"
+		if current.Folder != "" {
+			folder = current.Folder
+			// Toskar works in the folder a terminal on its own computer is in,
+			// before the project's.
+			if s.api.computer() == "" {
+				folder += ", though here the chat works in this terminal's folder"
+			}
+		}
+		fmt.Fprintln(s.io.out, "  Folder: "+folder)
+		return nil
+	case strings.EqualFold(arg, "none"):
+		if current == nil {
+			s.note("This chat isn't in a project.")
+			return nil
+		}
+		if err := s.api.moveConversation(s.conv, ""); err != nil {
+			return err
+		}
+		s.project, s.projectName = "", ""
+		s.note("Took this chat out of " + current.Name + ".")
+		return nil
+	}
+	p, err := findProject(list, arg)
+	if err != nil {
+		return err
+	}
+	s.project, s.projectName = p.ID, p.Name
+	if current != nil && current.ID == p.ID {
+		s.note("This chat is already in " + p.Name + ".")
+		return nil
+	}
+	if err := s.api.moveConversation(s.conv, p.ID); err != nil {
+		return err
+	}
+	s.note("Moved this chat to " + p.Name + ".")
 	return nil
 }
 
@@ -499,6 +694,8 @@ func (s *chatSession) command(line string) (done bool, err error) {
 		s.note(fmt.Sprintf("Attached %s; it goes with your next message.", arg))
 	case "log":
 		return false, s.log()
+	case "project":
+		return false, s.projectCommand(arg)
 	default:
 		return false, fmt.Errorf("there's no /%s; /help lists the commands", name)
 	}

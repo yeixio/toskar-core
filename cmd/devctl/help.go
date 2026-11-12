@@ -54,15 +54,23 @@ var helpGroups = []helpGroup{
 		},
 		{
 			name: "chat", summary: "Hold a conversation in the terminal, in the same chats as the apps",
-			about: "Chats with Toskar in the terminal: one begun here continues on your phone and back. A tool that asks first, such as running code, shows what it would do and waits for y, n, or a (always, in this chat). Piped in, it answers once, with what's piped as data to work on. If Toskar isn't running on this computer, it starts it, and Toskar stays running after the chat.\n\nWhile chatting: /new, /model id, /profile id, /attach path, /log, /help, and /exit (or Ctrl-D).",
+			about: "Chats with Toskar in the terminal: one begun here continues on your phone and back. A tool that asks first, such as running code, shows what it would do and waits for y, n, or a (always, in this chat). Piped in, it answers once, with what's piped as data to work on. If Toskar isn't running on this computer, it starts it, and Toskar stays running after the chat. With --project, it starts or continues in one of your projects, and still works in the folder you're in.\n\nWhile chatting: /new, /model id, /profile id, /attach path, /project name (none to take the chat out; alone, it says which), /log, /help, and /exit (or Ctrl-D).",
 			usage: []string{"toskarctl chat [flags] [message]"},
 			flags: []helpFlag{
 				{"--resume [id]", "continue a chat: its id, or pick from recent ones"},
 				{"--model id", "a model, or auto (default auto)"},
 				{"--profile id", "answer as this profile"},
 				{"--file path", "data to work on with the first message"},
+				{"--project name", "start or continue in a project: its name or id"},
 			},
 			examples: []string{`echo "Build failed on line 12" | toskarctl chat "Why did this fail?"`},
+		},
+		{
+			name: "projects", summary: "List your projects, to chat in one with chat --project",
+			about:    "Lists your projects, most recently used first: each one's id, name, and how many chats are in it. toskarctl chat --project name starts or continues a chat in one. Make and change projects in the web or desktop app.",
+			usage:    []string{"toskarctl projects [list] [--output json]"},
+			flags:    []helpFlag{{"--output json", outputFlagAbout}},
+			examples: []string{"toskarctl projects"},
 		},
 	}},
 	{"Models", []helpEntry{

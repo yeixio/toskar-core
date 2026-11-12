@@ -8,6 +8,7 @@ import (
 	"io"
 	"iter"
 	"os"
+	"slices"
 	"strings"
 	"sync"
 	"testing"
@@ -38,23 +39,48 @@ type fakeChat struct {
 	installed []string
 	picked    string
 	stops     chan struct{}
+	projs     []contracts.Project
+	moved     []string
 }
 
 func newFakeChat() *fakeChat {
 	return &fakeChat{stops: make(chan struct{}, 4), events: make(chan api.Event, 4), decided: make(chan struct{}, 4), msgs: map[string][]contracts.Message{}}
 }
 
-func (f *fakeChat) createConversation(profile, model string) (contracts.Conversation, error) {
+func (f *fakeChat) createConversation(profile, model, project string) (contracts.Conversation, error) {
 	f.mu.Lock()
 	defer f.mu.Unlock()
 	id := "0000000" + string(rune('a'+len(f.created)))
-	f.created = append(f.created, profile+"|"+model)
-	return contracts.Conversation{ID: id}, nil
+	if project != "" {
+		f.created = append(f.created, profile+"|"+model+"|"+project)
+	} else {
+		f.created = append(f.created, profile+"|"+model)
+	}
+	f.convs = append(f.convs, contracts.Conversation{ID: id, ProjectID: project})
+	return contracts.Conversation{ID: id, ProjectID: project}, nil
+}
+
+func (f *fakeChat) projects() ([]contracts.Project, error) { return f.projs, nil }
+
+func (f *fakeChat) moveConversation(id, project string) error {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	f.moved = append(f.moved, id+">"+project)
+	for i := range f.convs {
+		if f.convs[i].ID == id {
+			f.convs[i].ProjectID = project
+		}
+	}
+	return nil
 }
 
 func (f *fakeChat) computer() string { return f.where }
 
-func (f *fakeChat) conversations() ([]contracts.Conversation, error) { return f.convs, nil }
+func (f *fakeChat) conversations() ([]contracts.Conversation, error) {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	return slices.Clone(f.convs), nil
+}
 
 func (f *fakeChat) messages(id string) ([]contracts.Message, error) { return f.msgs[id], nil }
 

@@ -81,6 +81,8 @@ func main() {
 			}
 			return newDaemonChat()
 		}))
+	case "projects":
+		exit(projectsCommand(os.Args[2:], newDaemon(), os.Stdout))
 	case "connect":
 		dir, _ := os.Getwd()
 		home, _ := os.UserHomeDir()
