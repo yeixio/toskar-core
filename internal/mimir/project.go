@@ -22,6 +22,57 @@ import (
 // and profile pickers don't show it, and searching every source leaves it
 // out; a project's chats name it.
 
+type projectKey struct{}
+
+// WithProject lets a chat in a project, or the project's own routes, reach
+// its files' source. Without it, Get, Search, and everything that takes a
+// source id treat a project's files as not found.
+func WithProject(ctx context.Context, projectID string) context.Context {
+	if projectID == "" {
+		return ctx
+	}
+	return context.WithValue(ctx, projectKey{}, projectID)
+}
+
+func projectFrom(ctx context.Context) string {
+	id, _ := ctx.Value(projectKey{}).(string)
+	return id
+}
+
+// visible keeps the ids ctx may search: every source on the Knowledge page,
+// and the files of the project ctx is in. Others are left out, as an
+// unknown id is.
+func (s *Store) visible(ctx context.Context, ids []string) ([]string, error) {
+	if len(ids) == 0 {
+		return nil, nil
+	}
+	rows, err := s.db.QueryContext(ctx, `SELECT id FROM knowledge_sources WHERE id IN (`+marks(len(ids))+`) AND (project_id = '' OR project_id = ?)`,
+		append(anySlice(ids), projectFrom(ctx))...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	ok := map[string]bool{}
+	for rows.Next() {
+		var id string
+		if err := rows.Scan(&id); err != nil {
+			return nil, err
+		}
+		ok[id] = true
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	out := []string{}
+	for _, id := range ids {
+		if ok[id] {
+			out = append(out, id)
+			delete(ok, id)
+		}
+	}
+	return out, nil
+}
+
 // ErrProjectFileNotFound is a file the project doesn't have.
 var ErrProjectFileNotFound = contracts.NewError("PROJECT_FILE_NOT_FOUND", nil, errors.New("the project has no file by that name"))
 
@@ -53,6 +104,7 @@ func projectFileName(name string) (string, error) {
 // with its name, and indexes it. A file that can't be read is taken back
 // out, and the error says why.
 func (s *Store) AddProjectFile(ctx context.Context, projectID, name string, content []byte) error {
+	ctx = WithProject(ctx, projectID)
 	name, err := projectFileName(name)
 	if err != nil {
 		return err
@@ -107,6 +159,7 @@ func (s *Store) AddProjectFile(ctx context.Context, projectID, name string, cont
 
 // RemoveProjectFile takes a file out of a project's knowledge.
 func (s *Store) RemoveProjectFile(ctx context.Context, projectID, name string) error {
+	ctx = WithProject(ctx, projectID)
 	id, err := s.ProjectSourceID(ctx, projectID)
 	if err != nil {
 		return err
@@ -161,6 +214,7 @@ func (s *Store) ProjectFiles(ctx context.Context, projectID string) ([]contracts
 
 // DeleteProjectFiles removes a project's files and their source.
 func (s *Store) DeleteProjectFiles(ctx context.Context, projectID string) error {
+	ctx = WithProject(ctx, projectID)
 	id, err := s.ProjectSourceID(ctx, projectID)
 	if err != nil || id == "" {
 		return err

@@ -92,8 +92,11 @@ func (s *Store) Search(ctx context.Context, in SearchInput) ([]Hit, error) {
 	if match == "" && (models == nil || query == "") {
 		return []Hit{}, nil
 	}
-	ids := in.SourceIDs
-	if len(ids) == 0 {
+	ids, err := s.visible(ctx, in.SourceIDs)
+	if err != nil {
+		return nil, err
+	}
+	if len(in.SourceIDs) == 0 {
 		all, err := s.List(ctx)
 		if err != nil {
 			return nil, err

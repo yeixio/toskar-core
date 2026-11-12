@@ -382,11 +382,12 @@ func (s *Store) Delete(ctx context.Context, id string) error {
 	return nil
 }
 
-// Get returns one source.
+// Get returns one source. A project's files are found only within that
+// project (WithProject); anywhere else they read as not found (#1136).
 func (s *Store) Get(ctx context.Context, id string) (Source, error) {
 	row := s.db.QueryRowContext(ctx, `
 		SELECT `+sourceColumns+`
-		FROM knowledge_sources WHERE id = ?`, id)
+		FROM knowledge_sources WHERE id = ? AND (project_id = '' OR project_id = ?)`, id, projectFrom(ctx))
 	src, err := scanSource(row)
 	if errors.Is(err, sql.ErrNoRows) {
 		return Source{}, ErrNotFound

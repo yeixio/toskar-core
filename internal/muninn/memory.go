@@ -503,15 +503,17 @@ func boolInt(b bool) int {
 
 // Find returns the memory a "Forget that …" request means: an exact match
 // after normalizing, or the best memory containing every word of the
-// request. It returns false rather than guess.
-func (s *Store) Find(ctx context.Context, text string) (Memory, bool, error) {
+// request. It returns false rather than guess. It looks where recall does:
+// the person's own memories, and in a chat in a project with its memory on,
+// projectID's (#1136).
+func (s *Store) Find(ctx context.Context, text, projectID string) (Memory, bool, error) {
 	all, err := s.List(ctx)
 	if err != nil {
 		return Memory{}, false, err
 	}
 	key := normalize(text)
 	for _, m := range all {
-		if normalize(m.Content) == key {
+		if recalledIn(m, projectID) && normalize(m.Content) == key {
 			return m, true, nil
 		}
 	}
@@ -527,7 +529,8 @@ func (s *Store) Find(ctx context.Context, text string) (Memory, bool, error) {
 	rows, err := s.db.QueryContext(ctx, `
 		SELECT m.id, m.content, m.category, m.source_type, COALESCE(m.source_ref, ''), m.enabled, m.local_only, COALESCE(m.language, ''), m.project_id, m.created_at, m.updated_at
 		FROM memories_fts f JOIN memories m ON m.id = f.memory_id
-		WHERE memories_fts MATCH ? AND m.person_id = ? ORDER BY bm25(memories_fts) LIMIT 1`, strings.Join(terms, " AND "), auth.PersonID(ctx))
+		WHERE memories_fts MATCH ? AND m.person_id = ? AND (m.project_id = '' OR m.project_id = ?)
+		ORDER BY bm25(memories_fts) LIMIT 1`, strings.Join(terms, " AND "), auth.PersonID(ctx), projectID)
 	if err != nil {
 		return Memory{}, false, err
 	}

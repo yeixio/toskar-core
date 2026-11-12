@@ -76,10 +76,14 @@ func (a *App) RunChat(ctx context.Context, profileID, conversationID, message st
 		}
 	}
 	// What the project's chats learn is the project's, unless its memory
-	// is off.
+	// is off. Its files are searched in its chats alone: a profile or a
+	// request naming another project's files finds nothing there.
 	memoryProject := ""
-	if project != nil && !project.MemoryOff {
-		memoryProject = project.ID
+	if project != nil {
+		ctx = mimir.WithProject(ctx, project.ID)
+		if !project.MemoryOff {
+			memoryProject = project.ID
+		}
 	}
 	// Where a task could run, changes ask however the message is worded, and
 	// commands show their output (#1017).

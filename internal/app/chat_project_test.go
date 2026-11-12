@@ -313,3 +313,77 @@ func lastRunProfile(t *testing.T, a *App, conversationID string) string {
 	t.Fatal("no run saved")
 	return ""
 }
+
+// A project's files are searched only in its own chats: a profile that names
+// their source finds nothing in a chat outside the project or in another
+// project's chat.
+func TestProjectFilesStayInTheProject(t *testing.T) {
+	p := newProjectTurns(t)
+	ctx := context.Background()
+	garden, taxes := "Garden", "Taxes"
+	proj, err := p.Projects.Create(ctx, projects.Fields{Name: &garden})
+	if err != nil {
+		t.Fatal(err)
+	}
+	other, err := p.Projects.Create(ctx, projects.Fields{Name: &taxes})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := p.Projects.AddFile(ctx, proj.ID, "beds.md", []byte("# Beds\n\nThe tomato bed gets morning sun.")); err != nil {
+		t.Fatal(err)
+	}
+	source, err := p.Mimir.ProjectSourceID(ctx, proj.ID)
+	if err != nil || source == "" {
+		t.Fatalf("source %q %v", source, err)
+	}
+	profile, err := p.Profiles.Create(ctx, profiles.Profile{Name: "Linked", OrchestratorID: "simple", KnowledgeSources: []string{source},
+		Roles: []contracts.ModelRole{{Role: "assistant"}}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	chat := func(projectID string) string {
+		c, err := p.Conversations.Create(ctx, "c", profile.ID, "")
+		if err != nil {
+			t.Fatal(err)
+		}
+		if projectID != "" {
+			if err := p.Conversations.SetProjectID(ctx, c.ID, projectID); err != nil {
+				t.Fatal(err)
+			}
+		}
+		return c.ID
+	}
+	for name, projectID := range map[string]string{"outside a project": "", "in another project": other.ID} {
+		if _, rest := p.ask(t, ctx, chat(projectID), "What does the tomato bed get?"); strings.Contains(rest, "morning sun") {
+			t.Errorf("%s, the profile reached the project's file", name)
+		}
+	}
+	if _, rest := p.ask(t, ctx, chat(proj.ID), "What does the tomato bed get?"); !strings.Contains(rest, "morning sun") {
+		t.Fatal("the project's own chat didn't find its file")
+	}
+}
+
+// "Forget that …" outside a project leaves the project's memories alone.
+func TestForgetInProjectChats(t *testing.T) {
+	p := newProjectTurns(t)
+	ctx := context.Background()
+	name := "Garden"
+	proj, err := p.Projects.Create(ctx, projects.Fields{Name: &name})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, _, err := p.Muninn.AddIn(ctx, proj.ID, "The garden soil is clay", "", muninn.SourceExplicit, ""); err != nil {
+		t.Fatal(err)
+	}
+	outside, _ := p.Conversations.Create(ctx, "out", "", "")
+	p.ask(t, ctx, outside.ID, "Forget that the garden soil is clay")
+	if list, _ := p.Muninn.List(ctx); len(list) != 1 {
+		t.Fatal("a chat outside the project forgot the project's memory")
+	}
+	inside, _ := p.Conversations.Create(ctx, "in", "", "")
+	_ = p.Conversations.SetProjectID(ctx, inside.ID, proj.ID)
+	p.ask(t, ctx, inside.ID, "Forget that the garden soil is clay")
+	if list, _ := p.Muninn.List(ctx); len(list) != 0 {
+		t.Fatalf("the project's chat didn't forget it: %+v", list)
+	}
+}

@@ -165,7 +165,7 @@ func TestDeleteProject(t *testing.T) {
 		case !withChats && (err != nil || got.ProjectID != ""):
 			t.Fatalf("the chat: %+v %v", got, err)
 		}
-		if _, err := f.mimir.Get(ctx, source); !errors.Is(err, mimir.ErrNotFound) {
+		if _, err := f.mimir.Get(mimir.WithProject(ctx, p.ID), source); !errors.Is(err, mimir.ErrNotFound) {
 			t.Fatalf("the files' source: %v", err)
 		}
 		memories, _ := f.memory.List(ctx)
@@ -202,7 +202,7 @@ func TestProjectFiles(t *testing.T) {
 	if len(ids) != 1 {
 		t.Fatalf("knowledge ids %v", ids)
 	}
-	hits, err := f.mimir.Search(ctx, mimir.SearchInput{Query: "basil seeds", SourceIDs: ids})
+	hits, err := f.mimir.Search(mimir.WithProject(ctx, p.ID), mimir.SearchInput{Query: "basil seeds", SourceIDs: ids})
 	if err != nil || len(hits) == 0 {
 		t.Fatalf("search: %+v %v", hits, err)
 	}

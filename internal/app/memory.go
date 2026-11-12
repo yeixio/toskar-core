@@ -75,7 +75,7 @@ func (a *App) handleMemoryCommand(ctx context.Context, conversationID, message, 
 			reply += " Memory is off for this chat, so I'll use it in your other chats."
 		}
 	case muninn.CommandForget:
-		m, ok, err := a.Muninn.Find(ctx, cmd.Text)
+		m, ok, err := a.Muninn.Find(ctx, cmd.Text, projectID)
 		switch {
 		case err != nil:
 			reply = "I couldn't look through my memories: " + err.Error() + "."

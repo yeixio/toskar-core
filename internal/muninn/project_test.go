@@ -58,3 +58,32 @@ func TestProjectMemory(t *testing.T) {
 		}
 	}
 }
+
+// "Forget that …" finds what the chat recalls: in a project, the person's
+// own memories and the project's; outside one, only the person's.
+func TestForgetIsScopedLikeRecall(t *testing.T) {
+	s := newStore(t)
+	ctx := as("ana")
+	garden, _, err := s.AddIn(ctx, "garden", "The garden soil is clay", "", SourceExplicit, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	mine, _, err := s.Add(ctx, "I water on Sundays", "", SourceExplicit, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, text := range []string{"The garden soil is clay", "garden soil clay"} {
+		if m, ok, _ := s.Find(ctx, text, "taxes"); ok {
+			t.Errorf("%q in another project found %+v", text, m)
+		}
+		if m, ok, _ := s.Find(ctx, text, ""); ok {
+			t.Errorf("%q outside a project found %+v", text, m)
+		}
+		if m, ok, err := s.Find(ctx, text, "garden"); !ok || err != nil || m.ID != garden.ID {
+			t.Errorf("%q in the project: %+v %v %v", text, m, ok, err)
+		}
+	}
+	if m, ok, _ := s.Find(ctx, "water Sundays", "garden"); !ok || m.ID != mine.ID {
+		t.Fatalf("the person's own memory in a project: %+v %v", m, ok)
+	}
+}

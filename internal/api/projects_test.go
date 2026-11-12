@@ -256,3 +256,49 @@ func TestProjectRoutesRoles(t *testing.T) {
 		}
 	}
 }
+
+// The knowledge routes treat a project's files as not found, whoever asks
+// (#1136): they're reached through the project.
+func TestKnowledgeRoutesHideProjectFiles(t *testing.T) {
+	db, err := store.Open(filepath.Join(t.TempDir(), "t.db"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = db.Close() })
+	kb := mimir.NewStore(db.SQL, filepath.Join(t.TempDir(), "knowledge"))
+	srv := NewServer(Dependencies{})
+	srv.BindKnowledge(kb)
+	if err := kb.AddProjectFile(context.Background(), "garden", "beds.md", []byte("# Beds\n\nThe tomato bed gets morning sun.")); err != nil {
+		t.Fatal(err)
+	}
+	source, _ := kb.ProjectSourceID(context.Background(), "garden")
+	vars := map[string]string{"id": source}
+	for name, try := range map[string]func() (int, string){
+		"get": func() (int, string) {
+			return call(srv.handleGetKnowledge, "o", auth.RoleOwner, http.MethodGet, "/", vars, nil)
+		},
+		"update": func() (int, string) {
+			return call(srv.handleUpdateKnowledge, "o", auth.RoleOwner, http.MethodPatch, "/", vars, map[string]any{"name": "x"})
+		},
+		"content": func() (int, string) {
+			return call(srv.handleKnowledgeContent, "o", auth.RoleOwner, http.MethodGet, "/", vars, nil)
+		},
+		"refresh": func() (int, string) {
+			return call(srv.handleRefreshKnowledge, "o", auth.RoleOwner, http.MethodPost, "/", vars, nil)
+		},
+		"delete": func() (int, string) {
+			return call(srv.handleDeleteKnowledge, "o", auth.RoleOwner, http.MethodDelete, "/", vars, nil)
+		},
+	} {
+		if code, body := try(); code != http.StatusNotFound {
+			t.Errorf("%s: %d %s", name, code, body)
+		}
+	}
+	code, body := call(srv.handleSearchKnowledge, "o", auth.RoleOwner, http.MethodPost, "/", nil, map[string]any{"query": "tomato bed morning sun", "source_ids": []string{source}})
+	if code != http.StatusOK || strings.Contains(body, "morning sun") {
+		t.Fatalf("search: %d %s", code, body)
+	}
+	if code, body := call(srv.handleListKnowledge, "o", auth.RoleOwner, http.MethodGet, "/", nil, nil); code != http.StatusOK || body != "[]\n" {
+		t.Fatalf("list: %d %s", code, body)
+	}
+}
