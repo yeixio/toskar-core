@@ -1288,7 +1288,11 @@ export const api = {
   addMemory: (content: string, category?: MemoryCategory) =>
     request<MemoryItem>('/api/v1/memory', { method: 'POST', body: JSON.stringify({ content, category }) }),
 
-  updateMemory: (id: string, body: { content?: string; category?: MemoryCategory; enabled?: boolean; local_only?: boolean }) =>
+  updateMemory: (
+    id: string,
+    /** project_id '' moves a project's memory to personal memory; one already there is kept and returned instead. */
+    body: { content?: string; category?: MemoryCategory; enabled?: boolean; local_only?: boolean; project_id?: '' },
+  ) =>
     request<MemoryItem>(`/api/v1/memory/${id}`, { method: 'PATCH', body: JSON.stringify(body) }),
 
   deleteMemory: (id: string) => request<null>(`/api/v1/memory/${id}`, { method: 'DELETE' }),

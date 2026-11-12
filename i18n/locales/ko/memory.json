@@ -70,5 +70,12 @@
     "deleteLabel": "메모리 삭제: {{content}}",
     "more": "이 메모리의 다른 작업",
     "paused": "일시 중지됨"
+  },
+  "project": {
+    "heading": "프로젝트: {{name}}",
+    "hint": "이 프로젝트의 채팅에서만 사용해요.",
+    "unknown": "프로젝트",
+    "toPersonal": "개인 메모리로 이동",
+    "toPersonalHint": "이동하면 이 프로젝트의 채팅뿐 아니라 모든 채팅에서 사용해요."
   }
 }

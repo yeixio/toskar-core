@@ -70,5 +70,12 @@
     "deleteLabel": "Delete memory: {{content}}",
     "more": "More actions for this memory",
     "paused": "Paused"
+  },
+  "project": {
+    "heading": "Project: {{name}}",
+    "hint": "Only this project's chats use these.",
+    "unknown": "A project",
+    "toPersonal": "Move to personal memory",
+    "toPersonalHint": "Then all your chats can use it, not only this project's."
   }
 }

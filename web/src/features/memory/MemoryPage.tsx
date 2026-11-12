@@ -8,7 +8,7 @@ import { useRole } from '@/lib/role'
 import { api } from '@/lib/api'
 import { rovingKeyDown, useMenu } from '@/lib/roving'
 import { subscribeEvents } from '@/lib/events'
-import type { MemoryCategory, MemoryItem } from '@/types/api'
+import type { MemoryCategory, MemoryItem, Project } from '@/types/api'
 import { RealmKicker } from '@/components/ui/Realm'
 import { formatDate } from '@/i18n/format'
 import { nameInItself } from '@/i18n/answerLanguages'
@@ -51,10 +51,19 @@ export function MemoryPage() {
     onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['settings'] }),
   })
 
-  const items = memory.data?.memories ?? []
+  const all = memory.data?.memories ?? []
+  // A project's memories are listed under the project, after the person's own (#1136).
+  const items = all.filter((m) => !m.project_id)
+  const projectIDs = [...new Set(all.map((m) => m.project_id).filter((id): id is string => !!id))]
+  const projects = useQuery({
+    queryKey: ['projects'],
+    queryFn: () => api.listProjects(),
+    enabled: projectIDs.length > 0,
+    retry: false,
+  })
   const categories = memory.data?.categories ?? CATEGORIES
   const on = settings.data?.memory_enabled !== false
-  const empty = !memory.isLoading && !memory.isError && items.length === 0
+  const empty = !memory.isLoading && !memory.isError && all.length === 0
   const [showIntro, setShowIntro] = useState(false)
   // Text an example puts in the Add box, for the person to adjust and add.
   const [example, setExample] = useState<{ text: string } | null>(null)
@@ -68,7 +77,7 @@ export function MemoryPage() {
           <p className="page-subtitle mt-1">{t('page.description')}</p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
-          {items.length > 0 ? (
+          {all.length > 0 ? (
             <button
               type="button"
               className="btn-secondary"
@@ -141,7 +150,55 @@ export function MemoryPage() {
           </section>
         )
       })}
+      {projectIDs.map((id) => (
+        <ProjectMemories
+          key={id}
+          project={projects.data?.find((p) => p.id === id)}
+          projectID={id}
+          memories={all.filter((m) => m.project_id === id)}
+          categories={categories}
+          onChanged={refresh}
+        />
+      ))}
     </div>
+  )
+}
+
+function ProjectMemories({
+  project,
+  projectID,
+  memories,
+  categories,
+  onChanged,
+}: {
+  project?: Project
+  projectID: string
+  memories: MemoryItem[]
+  categories: MemoryCategory[]
+  onChanged: () => void
+}) {
+  const { t } = useTranslation('memory')
+  const name = project?.name || t('project.unknown')
+  return (
+    <section className="space-y-2" aria-labelledby={`memory-project-${projectID}`}>
+      <div>
+        <h2 id={`memory-project-${projectID}`} className="label-caps">
+          {project ? (
+            <Link to={`/projects/${projectID}`} className="hover:underline">
+              {t('project.heading', { name })}
+            </Link>
+          ) : (
+            t('project.heading', { name })
+          )}
+        </h2>
+        <p className="mt-0.5 text-xs text-ink-faint">{t('project.hint')}</p>
+      </div>
+      <ul className="space-y-2">
+        {memories.map((m) => (
+          <MemoryRow key={m.id} memory={m} categories={categories} onChanged={onChanged} />
+        ))}
+      </ul>
+    </section>
   )
 }
 
@@ -227,7 +284,7 @@ function MemoryRow({ memory, categories, onChanged }: { memory: MemoryItem; cate
   const categoryLabel = useCategoryLabel()
   const [draft, setDraft] = useState<string | null>(null)
   const update = useMutation({
-    mutationFn: (body: { content?: string; category?: MemoryCategory; enabled?: boolean; local_only?: boolean }) => api.updateMemory(memory.id, body),
+    mutationFn: (body: Parameters<typeof api.updateMemory>[1]) => api.updateMemory(memory.id, body),
     onSuccess: () => {
       setDraft(null)
       onChanged()
@@ -354,6 +411,21 @@ function MemoryRow({ memory, categories, onChanged }: { memory: MemoryItem; cate
                   >
                     {memory.local_only ? t('row.localOnlyOn') : t('row.localOnly')}
                   </button>
+                  {memory.project_id ? (
+                    <button
+                      type="button"
+                      role="menuitem"
+                      className="menu-item"
+                      title={t('project.toPersonalHint')}
+                      disabled={update.isPending}
+                      onClick={() => {
+                        setMenuOpen(false)
+                        update.mutate({ project_id: '' })
+                      }}
+                    >
+                      {t('project.toPersonal')}
+                    </button>
+                  ) : null}
                   <button
                     type="button"
                     role="menuitem"

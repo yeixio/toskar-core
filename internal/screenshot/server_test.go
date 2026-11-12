@@ -141,7 +141,7 @@ func TestAutomationParseFixtureHasTheParsedShape(t *testing.T) {
 // Each demo chat's messages have the contract's shape, so a screen that
 // opens one doesn't show "Toskar couldn't load this".
 func TestChatFixturesHaveTheMessageShape(t *testing.T) {
-	for _, path := range []string{"/api/v1/conversations/conv-local/messages", "/api/v1/conversations/conv-budget/messages"} {
+	for _, path := range []string{"/api/v1/conversations/conv-local/messages", "/api/v1/conversations/conv-budget/messages", "/api/v1/conversations/conv-letter/messages"} {
 		body, ok := screenshotGET(path)
 		if !ok {
 			t.Fatalf("no fixture for %s", path)

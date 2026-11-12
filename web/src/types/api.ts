@@ -1087,6 +1087,8 @@ export interface MemoryItem {
   local_only?: boolean
   /** The language the memory is written in, detected on the computer; found in any language (spec §18). */
   language?: string
+  /** The project the memory belongs to, learned in one of its chats; absent for personal memory (#1136). */
+  project_id?: string
   created_at: string
   updated_at: string
 }

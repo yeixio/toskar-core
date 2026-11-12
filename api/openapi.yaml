@@ -4851,6 +4851,9 @@ paths:
                   type: boolean
                 local_only:
                   type: boolean
+                project_id:
+                  type: string
+                  description: 'Empty moves a project''s memory to the person''s own (contract 1.87, #1136). One the person already has is kept instead, and that one is returned. A memory can''t be moved into a project.'
       responses:
         "200":
           description: Memory

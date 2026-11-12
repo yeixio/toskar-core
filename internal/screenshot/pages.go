@@ -99,14 +99,17 @@ const screenshotKnowledge = `[
   }
 ]`
 
-// A handful of memories, one kept on this computer only.
+// A handful of memories, one kept on this computer only, and two the demo
+// project's chats learned (#1136).
 const screenshotMemory = `{
   "memories": [
     {"id": "mem-1", "content": "I prefer metric units for weather, and miles for hikes.", "category": "preferences", "source_type": "explicit", "enabled": true, "language": "en", "created_at": "2026-09-08T08:12:00Z", "updated_at": "2026-09-08T08:12:00Z"},
     {"id": "mem-2", "content": "My shop sells hand-dyed yarn and ships from Juneau.", "category": "projects", "source_type": "explicit", "enabled": true, "language": "en", "created_at": "2026-09-11T10:30:00Z", "updated_at": "2026-09-11T10:30:00Z"},
     {"id": "mem-3", "content": "The shop's website is built with Go and React.", "category": "technical", "source_type": "manual", "enabled": true, "language": "en", "created_at": "2026-09-14T17:05:00Z", "updated_at": "2026-09-14T17:05:00Z"},
     {"id": "mem-4", "content": "Our budget review is the first Sunday of each month.", "category": "other", "source_type": "explicit", "enabled": true, "local_only": true, "language": "en", "created_at": "2026-09-18T20:00:00Z", "updated_at": "2026-09-18T20:00:00Z"},
-    {"id": "mem-5", "content": "Maya runs the shop's photos and social posts.", "category": "people", "source_type": "explicit", "enabled": true, "language": "en", "created_at": "2026-09-20T09:45:00Z", "updated_at": "2026-09-20T09:45:00Z"}
+    {"id": "mem-5", "content": "Maya runs the shop's photos and social posts.", "category": "people", "source_type": "explicit", "enabled": true, "language": "en", "created_at": "2026-09-20T09:45:00Z", "updated_at": "2026-09-20T09:45:00Z"},
+    {"id": "mem-6", "content": "The furnace is a 2009 gas model in the basement.", "category": "projects", "source_type": "explicit", "enabled": true, "language": "en", "project_id": "proj-house", "created_at": "2026-10-03T19:20:00Z", "updated_at": "2026-10-03T19:20:00Z"},
+    {"id": "mem-7", "content": "The upstairs bedrooms are the coldest rooms.", "category": "other", "source_type": "explicit", "enabled": true, "language": "en", "project_id": "proj-house", "created_at": "2026-10-04T08:40:00Z", "updated_at": "2026-10-04T08:40:00Z"}
   ],
   "categories": ["identity", "preferences", "projects", "technical", "interests", "people", "other"]
 }`

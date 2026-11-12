@@ -70,5 +70,12 @@
     "deleteLabel": "删除记忆：{{content}}",
     "more": "此记忆的更多操作",
     "paused": "已暂停"
+  },
+  "project": {
+    "heading": "项目：{{name}}",
+    "hint": "只有这个项目的聊天会使用这些记忆。",
+    "unknown": "一个项目",
+    "toPersonal": "移到个人记忆",
+    "toPersonalHint": "移动后，你的所有聊天都能使用它，而不只是这个项目的聊天。"
   }
 }

@@ -87,3 +87,46 @@ func TestForgetIsScopedLikeRecall(t *testing.T) {
 		t.Fatalf("the person's own memory in a project: %+v %v", m, ok)
 	}
 }
+
+// A project's memory can move to the person's own, and is then recalled
+// everywhere. One the person already has isn't kept twice, and a memory
+// can't be moved into a project (#1136).
+func TestMoveProjectMemoryToPersonal(t *testing.T) {
+	s := newStore(t)
+	ctx := as("ana")
+	soil, _, err := s.AddIn(ctx, "garden", "The garden soil is clay", "", SourceExplicit, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	none := ""
+	if _, err := s.Update(as("sam"), soil.ID, Patch{ProjectID: &none}); err == nil {
+		t.Fatal("another person moved it")
+	}
+	taxes := "taxes"
+	if _, err := s.Update(ctx, soil.ID, Patch{ProjectID: &taxes}); err == nil {
+		t.Fatal("moved into another project")
+	}
+	moved, err := s.Update(ctx, soil.ID, Patch{ProjectID: &none})
+	if err != nil || moved.ProjectID != "" || moved.ID != soil.ID {
+		t.Fatalf("moved %+v %v", moved, err)
+	}
+	if out, _ := s.Relevant(ctx, "what soil is the garden?", ""); len(out) == 0 || out[0].ID != soil.ID {
+		t.Fatalf("not recalled outside the project: %+v", out)
+	}
+
+	again, _, err := s.AddIn(ctx, "taxes", "Receipts go in the blue box", "", SourceExplicit, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	mine, _, err := s.Add(ctx, "receipts go in the blue box.", "", SourceExplicit, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	kept, err := s.Update(ctx, again.ID, Patch{ProjectID: &none})
+	if err != nil || kept.ID != mine.ID {
+		t.Fatalf("kept %+v %v, want the person's %s", kept, err, mine.ID)
+	}
+	if _, err := s.Get(ctx, again.ID); err != ErrNotFound {
+		t.Fatalf("the project's copy stayed: %v", err)
+	}
+}
