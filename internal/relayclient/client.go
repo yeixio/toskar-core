@@ -42,6 +42,13 @@ const (
 	// replacedWait is how long to stay off after another copy of this
 	// computer took the route.
 	replacedWait = time.Minute
+	// renewWithin is how near its end a subscription token is renewed
+	// from Toskar's relay (toskar-relay#65), and renewEvery how often at
+	// most while it's that near; a renewal that failed is tried again
+	// after renewRetry.
+	renewWithin = 3 * 24 * time.Hour
+	renewEvery  = 4 * time.Hour
+	renewRetry  = 30 * time.Minute
 )
 
 // endedWait is how often a computer whose token ran out looks for a new
@@ -67,6 +74,14 @@ type Client struct {
 	Secret []byte
 	// EnrollSecret, when set, is traded for a token (a self-hosted relay).
 	EnrollSecret string
+	// Renew, for Toskar's relay, renews a subscription's token from the
+	// relay while the subscription lasts (toskar-relay#65), so the computer
+	// stays on when it renews though no device that bought it opened its
+	// app.
+	Renew bool
+	// Renewed, when set, hears a renewed token that lasts longer than the
+	// one before, after it's kept in Store.
+	Renewed func(tok string)
 	// Name is this computer's name, such as "linix-rig", sent when the
 	// tunnel opens so the relay's operator can tell computers apart on its
 	// dashboard (#602). It never reaches devices or the address record.
@@ -97,6 +112,9 @@ type Client struct {
 	// tokenMu lets one caller at a time read or renew the token, so
 	// registration and the tunnel starting together enroll once.
 	tokenMu sync.Mutex
+	// nextRenew is when the token may next be renewed from the relay;
+	// under tokenMu.
+	nextRenew time.Time
 }
 
 // Status is how the relay connection is doing, for Settings.
@@ -190,7 +208,9 @@ var errNoToken = errors.New("no relay token")
 var errEnded = errors.New("the relay token has run out")
 
 // token is the token to use: the one kept, renewed by enrolling when it's
-// near its end and an enrollment secret is set.
+// near its end and an enrollment secret is set, or from Toskar's relay
+// with Renew, when it's run out or near its end. renew asks for a new one
+// now, as when the relay refused the one kept.
 func (c *Client) token(ctx context.Context, renew bool) (string, error) {
 	c.tokenMu.Lock()
 	defer c.tokenMu.Unlock()
@@ -207,6 +227,11 @@ func (c *Client) token(ctx context.Context, renew bool) (string, error) {
 	}
 	if tok == "" {
 		return "", errNoToken
+	}
+	if c.EnrollSecret == "" && c.Renew && !exp.IsZero() && (renew || time.Until(exp) < renewWithin) && !time.Now().Before(c.nextRenew) {
+		if fresh, freshExp, ok := c.renewToken(ctx, tok, exp); ok {
+			tok, exp = fresh, freshExp
+		}
 	}
 	c.mu.Lock()
 	c.status.Expires = exp
@@ -259,6 +284,63 @@ func ParseToken(tok string) (route string, exp time.Time, ok bool) {
 		return "", time.Time{}, false
 	}
 	return c.Route, time.Unix(c.Exp, 0), true
+}
+
+// errRenewUnavailable is a relay without POST /v1/routes/{route}/renew,
+// as Toskar's was before toskar-relay#65: not an error, tried again later.
+var errRenewUnavailable = errors.New("the relay doesn't renew tokens")
+
+// renewToken asks the relay for a new token for the one kept, which may
+// have run out, and keeps it. ok is false when there's none: the relay
+// doesn't renew yet, the subscription ended (SUBSCRIPTION_ENDED), or the
+// relay couldn't be asked; the token kept stays, and it's tried again
+// after renewRetry. Under tokenMu.
+func (c *Client) renewToken(ctx context.Context, tok string, exp time.Time) (string, time.Time, bool) {
+	fresh, err := c.renew(ctx, tok)
+	freshExp := tokenExpiry(fresh)
+	if err == nil && freshExp.IsZero() {
+		err = errors.New("the relay's renewal answer had no token")
+	}
+	if err == nil {
+		err = c.Store.Write(TokenName, fresh)
+	}
+	if err != nil {
+		c.nextRenew = time.Now().Add(renewRetry)
+		switch code := errorCode(err); {
+		case errors.Is(err, errRenewUnavailable):
+		case code == "SUBSCRIPTION_ENDED":
+			c.logger().Info("the relay didn't renew the token: the subscription has ended", "relay", c.Relay, "expires", exp)
+		default:
+			c.logger().Warn("couldn't renew the relay token", "relay", c.Relay, "err", err)
+		}
+		return "", time.Time{}, false
+	}
+	c.nextRenew = time.Now().Add(renewEvery)
+	c.logger().Info("renewed the relay token", "relay", c.Relay, "expires", freshExp)
+	if freshExp.After(exp) && c.Renewed != nil {
+		go c.Renewed(fresh)
+	}
+	return fresh, freshExp, true
+}
+
+// renew is POST /v1/routes/{route}/renew, with the token kept.
+func (c *Client) renew(ctx context.Context, tok string) (string, error) {
+	resp, err := c.do(ctx, http.MethodPost, "/v1/routes/"+c.Route()+"/renew", tok, nil)
+	var ae *apiError
+	if errors.As(err, &ae) && (ae.Status == http.StatusNotFound || ae.Status == http.StatusMethodNotAllowed) {
+		return "", errRenewUnavailable
+	}
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+	var out struct {
+		Token string `json:"token"`
+	}
+	if err := json.NewDecoder(io.LimitReader(resp.Body, 8<<10)).Decode(&out); err != nil {
+		return "", err
+	}
+	return out.Token, nil
 }
 
 func (c *Client) enroll(ctx context.Context) (string, error) {
@@ -350,7 +432,7 @@ func (c *Client) register(ctx context.Context) error {
 		return err
 	}
 	resp, err := c.do(ctx, http.MethodPut, "/v1/routes/"+c.Route()+"/record", tok, bytes.NewReader(blob))
-	if isExpired(err) && c.EnrollSecret != "" {
+	if isExpired(err) && (c.EnrollSecret != "" || c.Renew) {
 		if tok, err = c.token(ctx, true); err == nil {
 			resp, err = c.do(ctx, http.MethodPut, "/v1/routes/"+c.Route()+"/record", tok, bytes.NewReader(blob))
 		}
@@ -477,7 +559,7 @@ func (c *Client) tunnel(ctx context.Context) (string, error) {
 		}
 		_ = json.NewDecoder(io.LimitReader(resp.Body, 8<<10)).Decode(&e)
 		err := &apiError{Status: resp.StatusCode, Code: e.Error.Code}
-		if isExpired(err) && c.EnrollSecret != "" {
+		if isExpired(err) && (c.EnrollSecret != "" || c.Renew) {
 			_, _ = c.token(ctx, true)
 		}
 		return "", err
@@ -519,7 +601,7 @@ func (c *Client) tunnel(ctx context.Context) (string, error) {
 			case "open":
 				go c.dialBack(ctx, tok, ev.Stream, ev.Client)
 			case "end":
-				if isExpired(&apiError{Code: ev.Reason}) && c.EnrollSecret != "" {
+				if isExpired(&apiError{Code: ev.Reason}) && (c.EnrollSecret != "" || c.Renew) {
 					_, _ = c.token(ctx, true)
 				}
 				return ev.Reason, nil

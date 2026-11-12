@@ -236,6 +236,13 @@ func TestSetRelayToken(t *testing.T) {
 	if _, err := a.setRelayToken(ctx, good, true); err != nil || !a.Config.Get().RemoteAccess.Enabled {
 		t.Fatalf("enable: %v", err)
 	}
+	// A token the relay renewed for this computer is kept the same way
+	// (toskar-relay#65).
+	renewed := mint(route, time.Now().Add(60*24*time.Hour))
+	a.relayRenewed(renewed)
+	if got := a.relayToken(); got != renewed {
+		t.Fatalf("after renewal, devices get %q", got)
+	}
 	if err := a.applySettingsPatch(ctx, map[string]any{"remote_access_relay": "relay.example.com"}); err != nil {
 		t.Fatal(err)
 	}
