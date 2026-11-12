@@ -255,6 +255,10 @@
     "deleteChat": "Chat löschen",
     "computer": "Computer",
     "newOnComputer": "Neuer Chat auf diesem Computer",
+    "projects": "Projekte",
+    "projectEmpty": "Noch keine Chats",
+    "newInProject": "Neuer Chat in diesem Projekt",
+    "inProject": "Im Projekt {{name}}",
     "untitled": "Chat",
     "model": "Modell",
     "chooseModel": "Modell wählen",
@@ -562,6 +566,7 @@
     "enterAddress": "Adresse eingeben",
     "askHint": "Drücke das Mikrofon auf der Fernbedienung oder tippe.",
     "tryAsking": "Frag zum Beispiel",
+    "projectsHint": "Setze einen Chat in einem deiner Projekte fort.",
     "disconnect": "Trennen",
     "emptyHint": "Antworten kommen von den Modellen auf deinem Computer. Nichts, was du fragst, geht an einen gehosteten KI-Dienst.",
     "suggest": {
@@ -685,6 +690,8 @@
   "car": {
     "ask": "Toskar fragen",
     "continue": "Gespräch fortsetzen",
+    "projects": "Projekte",
+    "projectEmpty": "Noch keine Chats",
     "listening": "Hört zu…",
     "thinking": "Denkt nach…",
     "answering": "Antwortet…",

@@ -255,6 +255,10 @@
     "deleteChat": "Supprimer la discussion",
     "computer": "Ordinateur",
     "newOnComputer": "Nouvelle discussion sur cet ordinateur",
+    "projects": "Projets",
+    "projectEmpty": "Aucune discussion pour l’instant",
+    "newInProject": "Nouvelle discussion dans ce projet",
+    "inProject": "Dans le projet {{name}}",
     "untitled": "Discussion",
     "model": "Modèle",
     "chooseModel": "Choisir un modèle",
@@ -569,6 +573,7 @@
     "enterAddress": "Saisir une adresse",
     "askHint": "Appuyez sur le micro de la télécommande, ou tapez.",
     "tryAsking": "Essayez de demander",
+    "projectsHint": "Poursuivez une discussion de l’un de vos projets.",
     "disconnect": "Déconnecter",
     "emptyHint": "Les réponses viennent des modèles de votre ordinateur. Rien de ce que vous demandez ne part vers un service d’IA hébergé.",
     "suggest": {
@@ -692,6 +697,8 @@
   "car": {
     "ask": "Demander à Toskar",
     "continue": "Poursuivre la conversation",
+    "projects": "Projets",
+    "projectEmpty": "Aucune discussion pour l’instant",
     "listening": "À l’écoute…",
     "thinking": "Réflexion…",
     "answering": "Réponse…",

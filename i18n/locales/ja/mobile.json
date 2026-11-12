@@ -255,6 +255,10 @@
     "deleteChat": "チャットを削除",
     "computer": "コンピュータ",
     "newOnComputer": "このコンピュータで新しいチャット",
+    "projects": "プロジェクト",
+    "projectEmpty": "チャットはまだありません",
+    "newInProject": "このプロジェクトで新しいチャット",
+    "inProject": "プロジェクト {{name}} 内",
     "untitled": "チャット",
     "model": "モデル",
     "chooseModel": "モデルを選択",
@@ -555,6 +559,7 @@
     "enterAddress": "アドレスを入力",
     "askHint": "リモコンのマイクボタンを押すか、入力してください。",
     "tryAsking": "質問の例",
+    "projectsHint": "プロジェクトのチャットを続けます。",
     "disconnect": "接続を解除",
     "emptyHint": "答えはあなたのコンピュータのモデルから届きます。質問がホスト型 AI サービスに送られることはありません。",
     "suggest": {
@@ -678,6 +683,8 @@
   "car": {
     "ask": "Toskarに聞く",
     "continue": "会話を続ける",
+    "projects": "プロジェクト",
+    "projectEmpty": "チャットはまだありません",
     "listening": "聞いています…",
     "thinking": "考えています…",
     "answering": "回答しています…",
