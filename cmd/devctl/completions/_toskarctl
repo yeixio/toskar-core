@@ -9,6 +9,7 @@ _toskarctl() {
     'paths:print the data, model, runtime, log, and database directories'
     'ask:send one prompt and print the answer, for scripts and CI'
     'chat:chat with Toskar in the terminal, in the same chats as the apps'
+    'projects:list your projects, to chat in one with chat --project'
     'connect:print or write the settings for a coding agent to use Toskar'
     'models:list models, and install one with its progress'
     'automations:manage scheduled automations on the daemon'
@@ -79,7 +80,11 @@ _toskarctl() {
       ;;
     chat)
       _arguments '--resume[continue a chat: its id, or pick from recent ones]' '--model[a model, or auto]:model:' \
-        '--profile[answer as this profile]:profile:' '--file[data to work on with the first message]:file:_files' '*:message:'
+        '--profile[answer as this profile]:profile:' '--file[data to work on with the first message]:file:_files' \
+        '--project[start or continue in a project: its name or id]:project:' '*:message:'
+      ;;
+    projects)
+      _arguments '--output[output format]:format:(text json)' '1:command:(list)'
       ;;
     connect)
       if (( CURRENT == 3 )); then

@@ -120,6 +120,7 @@ func TestHelpNamesEveryFlag(t *testing.T) {
 	for name, usage := range map[string]string{
 		"ask": askUsage, "chat": chatUsage, "connect": connectUsage, "models": modelsUsage, "automations": automationsUsage,
 		"join": joinUsage, "join-token": joinTokenUsage, "network": networkUsage, "leave": leaveUsage, "people": peopleUsage,
+		"projects": projectsUsage,
 	} {
 		entry, ok := findEntry(helpEntries(), name)
 		if !ok {
