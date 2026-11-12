@@ -1,7 +1,7 @@
 package tools
 
 import (
-	"reflect"
+	"encoding/json"
 	"testing"
 
 	"github.com/yeixio/toskar-core/pkg/contracts"
@@ -28,9 +28,8 @@ func TestNativeFromPromptMatchesThePrompt(t *testing.T) {
 		}
 	}
 	read := nativeOf(t, native, "filesystem.read")
-	want := map[string]any{"type": "object", "properties": map[string]any{"path": map[string]any{"type": "string"}}}
-	if !reflect.DeepEqual(read["parameters"], want) {
-		t.Errorf("filesystem.read parameters = %v", read["parameters"])
+	if got := string(read["parameters"].(json.RawMessage)); got != `{"type":"object","properties":{"path":{"type":"string"}}}` {
+		t.Errorf("filesystem.read parameters = %s", got)
 	}
 	if NativeFromPrompt("Be helpful.") != nil {
 		t.Error("tools from a prompt that lists none")
@@ -49,18 +48,24 @@ func nativeOf(t *testing.T, native []map[string]any, name string) map[string]any
 }
 
 func TestNativeParameters(t *testing.T) {
-	short := nativeParameters([]byte(`{"repo":"owner/name","number":"integer","submit":"boolean"}`))
-	props := short["properties"].(map[string]any)
-	if props["number"].(map[string]any)["type"] != "integer" || props["submit"].(map[string]any)["type"] != "boolean" {
-		t.Errorf("types: %v", props)
+	short := string(nativeParameters([]byte(`{"repo":"owner/name","number":"integer","submit":"boolean"}`)))
+	want := `{"type":"object","properties":{"repo":{"description":"owner/name","type":"string"},"number":{"type":"integer"},"submit":{"type":"boolean"}}}`
+	if short != want {
+		t.Errorf("short form:\n got %s\nwant %s", short, want)
 	}
-	if repo := props["repo"].(map[string]any); repo["type"] != "string" || repo["description"] != "owner/name" {
-		t.Errorf("a shape is a string described by it: %v", repo)
+	// The properties keep the prompt's order: llama.cpp holds a call to it,
+	// and gpt-oss's write calls lost their content with path after content
+	// (#1112).
+	if write := string(nativeParameters([]byte(`{"path":"string","content":"string"}`))); write != `{"type":"object","properties":{"path":{"type":"string"},"content":{"type":"string"}}}` {
+		t.Errorf("filesystem.write: %s", write)
 	}
-	// An MCP tool's full JSON Schema is kept as it is.
-	full := nativeParameters([]byte(`{"type":"object","properties":{"q":{"type":"string","minLength":1}},"required":["q"]}`))
-	if full["required"] == nil || full["properties"].(map[string]any)["q"].(map[string]any)["minLength"] != 1.0 {
-		t.Errorf("full schema changed: %v", full)
+	// An MCP tool's full JSON Schema is kept as it is, byte for byte.
+	schema := `{"type":"object","properties":{"z":{"type":"string","minLength":1},"a":{"type":"integer"}},"required":["z"]}`
+	if full := string(nativeParameters([]byte(" " + schema + "\n"))); full != schema {
+		t.Errorf("full schema changed: %s", full)
+	}
+	if empty := string(nativeParameters([]byte(`not json`))); empty != `{"type":"object","properties":{}}` {
+		t.Errorf("no schema: %s", empty)
 	}
 }
 
