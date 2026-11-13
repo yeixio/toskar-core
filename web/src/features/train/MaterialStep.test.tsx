@@ -57,6 +57,8 @@ function renderStep() {
   )
 }
 
+const settled = { timeout: 4000 }
+
 describe('MaterialStep', () => {
   beforeEach(() => {
     vi.mocked(api.classifyMaterial).mockReset()
@@ -74,11 +76,13 @@ describe('MaterialStep', () => {
     expect(screen.getByText('Connect what your AI knows')).toBeInTheDocument()
 
     fireEvent.change(screen.getByLabelText('Material'), { target: { value: 'sku,price\nA1,9.99\n' } })
-    await waitFor(() => expect(screen.getByText(/not conversation examples/)).toBeInTheDocument())
+    // Classifying waits 400 ms after typing stops, which a busy runner can
+    // stretch past waitFor's default second.
+    await waitFor(() => expect(screen.getByText(/not conversation examples/)).toBeInTheDocument(), settled)
     expect(screen.getByRole('button', { name: 'Add material' })).toBeEnabled()
 
     fireEvent.click(screen.getByRole('radio', { name: 'Training' }))
-    await waitFor(() => expect(screen.getByText(/no training examples were found/)).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText(/no training examples were found/)).toBeInTheDocument(), settled)
     expect(screen.getByRole('button', { name: 'Add material' })).toBeDisabled()
   })
 
@@ -87,7 +91,7 @@ describe('MaterialStep', () => {
     vi.mocked(api.addMaterial).mockResolvedValue(null)
     renderStep()
     fireEvent.change(screen.getByLabelText('Material'), { target: { value: 'sku,price\nA1,9.99\n' } })
-    await waitFor(() => expect(screen.getByRole('button', { name: 'Add material' })).toBeEnabled())
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Add material' })).toBeEnabled(), settled)
     fireEvent.click(screen.getByRole('button', { name: 'Add material' }))
     await waitFor(() =>
       expect(api.addMaterial).toHaveBeenCalledWith('ai-1', { filename: 'pasted.txt', text: 'sku,price\nA1,9.99\n', use: 'knowledge' }),
