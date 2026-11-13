@@ -153,72 +153,88 @@ func TestChatFixturesHaveTheMessageShape(t *testing.T) {
 	}
 }
 
-// The demo has a project (#1136), with its page and its chats.
+// The demo has projects (#1136), each with its page and its chats.
 func TestProjectFixtures(t *testing.T) {
 	body, ok := screenshotGET("/api/v1/projects")
 	if !ok {
 		t.Fatal("no projects fixture")
 	}
 	var list []contracts.Project
-	if err := json.Unmarshal([]byte(body), &list); err != nil || len(list) != 1 {
+	if err := json.Unmarshal([]byte(body), &list); err != nil || len(list) == 0 {
 		t.Fatalf("projects: %v %s", err, body)
 	}
-	one, ok := screenshotGET("/api/v1/projects/" + list[0].ID)
-	if !ok {
-		t.Fatal("no project page fixture")
-	}
-	var project contracts.Project
-	if err := json.Unmarshal([]byte(one), &project); err != nil || project.Name == "" || len(project.Files) == 0 {
-		t.Fatalf("project: %v %s", err, one)
-	}
-	var chats []contracts.Conversation
-	if err := json.Unmarshal([]byte(screenshotProjectConversations(project.ID)), &chats); err != nil || len(chats) != project.ChatCount {
-		t.Fatalf("project chats: %v %d, want %d", err, len(chats), project.ChatCount)
-	}
-	for _, c := range chats {
-		if c.ProjectID != project.ID {
-			t.Fatalf("chat %s is in %q", c.ID, c.ProjectID)
+	for _, listed := range list {
+		one, ok := screenshotGET("/api/v1/projects/" + listed.ID)
+		if !ok {
+			t.Fatalf("no page fixture for project %s", listed.ID)
+		}
+		var project contracts.Project
+		if err := json.Unmarshal([]byte(one), &project); err != nil || project.Name == "" || project.ID != listed.ID {
+			t.Fatalf("project: %v %s", err, one)
+		}
+		var chats []contracts.Conversation
+		if err := json.Unmarshal([]byte(screenshotProjectConversations(project.ID)), &chats); err != nil || len(chats) != project.ChatCount {
+			t.Fatalf("project %s chats: %v %d, want %d", project.ID, err, len(chats), project.ChatCount)
+		}
+		for _, c := range chats {
+			if c.ProjectID != project.ID {
+				t.Fatalf("chat %s is in %q", c.ID, c.ProjectID)
+			}
 		}
 	}
 }
 
-// The demo has a swarm (#1135): its record, read by id and in its project's
-// list, with agents whose chats ?swarm_id= lists.
+// The demo has swarms (#1135): each record, read by id and in the list,
+// with agents whose chats ?swarm_id= lists, and its coordinator chat in
+// history. The task swarm has a folder, a branch, checks, and was applied.
 func TestSwarmFixtures(t *testing.T) {
-	body, ok := screenshotGET("/api/v1/swarms/swarm-heat")
+	listed, ok := screenshotGET("/api/v1/swarms")
 	if !ok {
-		t.Fatal("no swarm fixture")
+		t.Fatal("no swarms fixture")
 	}
-	var sw contracts.Swarm
-	if err := json.Unmarshal([]byte(body), &sw); err != nil || len(sw.Agents) == 0 {
-		t.Fatalf("swarm: %v %s", err, body)
-	}
-	listed, _ := screenshotGET("/api/v1/swarms")
 	var list []contracts.Swarm
-	if err := json.Unmarshal([]byte(listed), &list); err != nil || len(list) != 1 || list[0].ID != sw.ID {
+	if err := json.Unmarshal([]byte(listed), &list); err != nil || len(list) != 2 {
 		t.Fatalf("swarms: %v %s", err, listed)
-	}
-	var chats []contracts.Conversation
-	if err := json.Unmarshal([]byte(screenshotSwarmConversations(sw.ID)), &chats); err != nil {
-		t.Fatal(err)
-	}
-	for _, ag := range sw.Agents {
-		found := false
-		for _, c := range chats {
-			found = found || (c.ID == ag.ConversationID && c.SwarmRole == ag.Role && c.SwarmID == sw.ID)
-		}
-		if !found {
-			t.Errorf("agent %d's chat %s isn't listed", ag.Agent, ag.ConversationID)
-		}
 	}
 	var all []contracts.Conversation
 	if err := json.Unmarshal([]byte(screenshotConversations()), &all); err != nil {
 		t.Fatal(err)
 	}
-	for _, c := range all {
-		if c.ID == sw.ConversationID && c.SwarmID == sw.ID {
-			return
+	task := false
+	for _, item := range list {
+		body, ok := screenshotGET("/api/v1/swarms/" + item.ID)
+		if !ok {
+			t.Fatalf("no fixture for swarm %s", item.ID)
+		}
+		var sw contracts.Swarm
+		if err := json.Unmarshal([]byte(body), &sw); err != nil || len(sw.Agents) == 0 || sw.ID != item.ID {
+			t.Fatalf("swarm: %v %s", err, body)
+		}
+		if sw.Folder != "" {
+			task = sw.Branch != "" && sw.Checks == "passed" && sw.Applied
+		}
+		var chats []contracts.Conversation
+		if err := json.Unmarshal([]byte(screenshotSwarmConversations(sw.ID)), &chats); err != nil {
+			t.Fatal(err)
+		}
+		for _, ag := range sw.Agents {
+			found := false
+			for _, c := range chats {
+				found = found || (c.ID == ag.ConversationID && c.SwarmRole == ag.Role && c.SwarmID == sw.ID)
+			}
+			if !found {
+				t.Errorf("agent %d's chat %s isn't listed", ag.Agent, ag.ConversationID)
+			}
+		}
+		coordinator := false
+		for _, c := range all {
+			coordinator = coordinator || (c.ID == sw.ConversationID && c.SwarmID == sw.ID && c.ProjectID == sw.ProjectID)
+		}
+		if !coordinator {
+			t.Errorf("no coordinator chat %s with swarm_id %s", sw.ConversationID, sw.ID)
 		}
 	}
-	t.Errorf("no coordinator chat %s with swarm_id %s", sw.ConversationID, sw.ID)
+	if !task {
+		t.Error("no task swarm with a branch, passing checks, and its change applied")
+	}
 }

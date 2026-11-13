@@ -830,6 +830,288 @@
           "wait": "Cold weather"
         }
       ]
+    },
+    {
+      "id": "swarms-use",
+      "path": "/chat",
+      "query": "c=conv-local",
+      "readyText": "ridge above the reservoir",
+      "actions": [
+        {
+          "click": "Chat options"
+        },
+        {
+          "wait": "Use a swarm"
+        },
+        {
+          "select": {
+            "label": "Use a swarm",
+            "option": "Split"
+          }
+        },
+        {
+          "fill": {
+            "label": "Message",
+            "text": "Compare three rain tents"
+          }
+        },
+        {
+          "wait": "Swarm: Split"
+        }
+      ]
+    },
+    {
+      "id": "swarms-profile",
+      "path": "/settings",
+      "readyText": "Advanced mode",
+      "api": {
+        "/api/v1/profiles": [
+          {
+            "id": "coding-swarm",
+            "name": "Coding swarm",
+            "purpose": "coding",
+            "orchestrator_id": "simple",
+            "roles": [
+              {
+                "role": "assistant",
+                "model_id": "qwen-coder-7b",
+                "node_id": "studio",
+                "required": true
+              }
+            ],
+            "node_policy": {
+              "mode": "automatic"
+            },
+            "orchestration": {
+              "strategy": "swarm",
+              "swarm": {
+                "mode": "split",
+                "models": [
+                  "qwen-coder-7b",
+                  "gemma-4-e4b"
+                ],
+                "agents": 3,
+                "minutes": 20
+              }
+            },
+            "tools": [
+              {
+                "tool_id": "filesystem.read",
+                "policy": "allow"
+              },
+              {
+                "tool_id": "terminal",
+                "policy": "ask"
+              }
+            ]
+          }
+        ]
+      },
+      "actions": [
+        {
+          "click": "Profiles & Orchestration"
+        },
+        {
+          "wait": "Coding swarm"
+        },
+        {
+          "click": "Edit",
+          "exact": true
+        },
+        {
+          "click": "Strategy and computers"
+        },
+        {
+          "wait": "Most agents at once"
+        },
+        {
+          "scroll": "Split: agents do parts of the job at once. Race: each model does the whole request, and the best answer wins."
+        }
+      ]
+    },
+    {
+      "id": "swarms-task",
+      "path": "/chat",
+      "query": "c=conv-tests",
+      "readyText": "uncommitted changes",
+      "actions": [
+        {
+          "click": "worked with 2 agents"
+        },
+        {
+          "wait": "Applied to your folder"
+        }
+      ]
+    },
+    {
+      "id": "swarms-approval",
+      "path": "/chat",
+      "query": "c=conv-tests",
+      "readyText": "Allow for this agent",
+      "api": {
+        "/api/v1/swarms": [
+          {
+            "id": "swarm-tests",
+            "project_id": "proj-shop",
+            "conversation_id": "conv-tests",
+            "mode": "split",
+            "status": "running",
+            "request": "The checkout tests fail since the discount change. Fix them, and add a test for a 100% discount.",
+            "budget": {
+              "agents": 4,
+              "tokens": 400000,
+              "minutes": 30
+            },
+            "agents": [
+              {
+                "agent": 1,
+                "conversation_id": "conv-tests-1",
+                "role": "agent:1",
+                "part": "Fix the discount rounding",
+                "model_id": "qwen-coder-7b",
+                "node_id": "studio",
+                "status": "running",
+                "paths": [
+                  "checkout/discount.go"
+                ],
+                "branch": "toskar/swarm/7c2e91d4/agent-1"
+              },
+              {
+                "agent": 2,
+                "conversation_id": "conv-tests-2",
+                "role": "agent:2",
+                "part": "Test a 100% discount",
+                "model_id": "gemma-4-e4b",
+                "node_id": "local",
+                "status": "running",
+                "paths": [
+                  "checkout/discount_test.go"
+                ],
+                "branch": "toskar/swarm/7c2e91d4/agent-2"
+              }
+            ],
+            "folder": "/Users/you/code/shop",
+            "tokens": 12400,
+            "seconds": 96,
+            "created_at": "{{in:-96}}",
+            "waiting": [
+              {
+                "request_id": "req-agent-2",
+                "tool_id": "terminal",
+                "args": {
+                  "command": "go test ./checkout/..."
+                },
+                "conversation_id": "conv-tests-2",
+                "swarm_id": "swarm-tests",
+                "agent": "Agent 2: Test a 100% discount",
+                "agent_number": 2
+              }
+            ]
+          }
+        ],
+        "/api/v1/swarms/swarm-tests": {
+          "id": "swarm-tests",
+          "project_id": "proj-shop",
+          "conversation_id": "conv-tests",
+          "mode": "split",
+          "status": "running",
+          "request": "The checkout tests fail since the discount change. Fix them, and add a test for a 100% discount.",
+          "budget": {
+            "agents": 4,
+            "tokens": 400000,
+            "minutes": 30
+          },
+          "agents": [
+            {
+              "agent": 1,
+              "conversation_id": "conv-tests-1",
+              "role": "agent:1",
+              "part": "Fix the discount rounding",
+              "model_id": "qwen-coder-7b",
+              "node_id": "studio",
+              "status": "running",
+              "paths": [
+                "checkout/discount.go"
+              ],
+              "branch": "toskar/swarm/7c2e91d4/agent-1"
+            },
+            {
+              "agent": 2,
+              "conversation_id": "conv-tests-2",
+              "role": "agent:2",
+              "part": "Test a 100% discount",
+              "model_id": "gemma-4-e4b",
+              "node_id": "local",
+              "status": "running",
+              "paths": [
+                "checkout/discount_test.go"
+              ],
+              "branch": "toskar/swarm/7c2e91d4/agent-2"
+            }
+          ],
+          "folder": "/Users/you/code/shop",
+          "tokens": 12400,
+          "seconds": 96,
+          "created_at": "{{in:-96}}",
+          "waiting": [
+            {
+              "request_id": "req-agent-2",
+              "tool_id": "terminal",
+              "args": {
+                "command": "go test ./checkout/..."
+              },
+              "conversation_id": "conv-tests-2",
+              "swarm_id": "swarm-tests",
+              "agent": "Agent 2: Test a 100% discount",
+              "agent_number": 2
+            }
+          ]
+        },
+        "/api/v1/conversations/conv-tests/messages": [
+          {
+            "id": "t1",
+            "conversation_id": "conv-tests",
+            "role": "user",
+            "content": "The checkout tests fail since the discount change. Fix them, and add a test for a 100% discount. Use a swarm.",
+            "created_at": "{{in:-100}}"
+          }
+        ]
+      }
+    },
+    {
+      "id": "swarms-agents-at-once",
+      "path": "/settings",
+      "readyText": "Advanced mode",
+      "actions": [
+        {
+          "click": "Models"
+        },
+        {
+          "click": "Installed"
+        },
+        {
+          "wait": "Gemma 4 E4B"
+        },
+        {
+          "click": "More actions for Gemma 4 E4B"
+        },
+        {
+          "wait": "Agents at once"
+        }
+      ]
+    },
+    {
+      "id": "swarms-project",
+      "path": "/projects/proj-house",
+      "readyText": "energy-bills-2026.csv",
+      "actions": [
+        {
+          "click": "3 agents"
+        },
+        {
+          "wait": "Agent 2: Cold weather"
+        }
+      ]
     }
   ]
 }

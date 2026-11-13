@@ -118,6 +118,8 @@ Claude Code starts subagents for parts of a job, often several at a time. On one
 
 Each subagent request brings Claude Code's tools, so it goes as it is to the least busy of the profile's computers and models, and its answer comes back unchanged. Two subagents started together run at the same time on different ones. Toskar's log names the computer and model for each.
 
+The user guide's Swarms page (on [toskar.ai/docs](https://toskar.ai/docs)) explains swarms for everyone, with the same steps, which keys and roles each way needs, and tested examples for the Messages and Responses formats and MCP's `run_swarm`.
+
 Any agent can use `swarm:<profile>` as a model name in the same way, such as Codex's `model` in its `toskar` profile, or an OpenAI-compatible agent's model field with `swarm:` in place of `raw:`. Requests that bring tools are spread. A request without tools runs a whole swarm on its last message, which takes longer, and answers with the swarm's answer, with the agents' progress as its reasoning. That's why `--swarm` leaves the fast model alone: its requests, such as naming a chat, have no tools. On another computer, the key needs raw access for spread requests, and a whole swarm needs a Member or an Admin ([API](../api.md#swarms-from-editor-agents-1135)).
 
 ## Choosing a model

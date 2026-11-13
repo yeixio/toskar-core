@@ -39,6 +39,8 @@ const allPages = [
   // A project's page, and a chat in it with the line naming it (#1136).
   '/projects/proj-house',
   '/chat?c=conv-research',
+  // A task swarm's lanes, with its branches, checks, and applied change (#1135).
+  '/chat?c=conv-tests',
 ]
 const only = (process.env.A11Y_PAGES || '').split(',').map((p) => p.trim()).filter(Boolean)
 const pages = only.length ? allPages.filter((p) => only.includes(p)) : allPages
