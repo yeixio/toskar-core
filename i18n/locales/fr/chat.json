@@ -869,5 +869,54 @@
         "acorns": "Ratatoskr rassemble assez de glands pour tout un clip."
       }
     }
+  },
+  "swarm": {
+    "label": "Essaim",
+    "modes": {
+      "split": "Répartir",
+      "race": "Course"
+    },
+    "working_one": "{{mode}} · {{count}} agent au travail",
+    "working_many": "{{mode}} · {{count}} agents au travail",
+    "working_other": "{{mode}} · {{count}} agents au travail",
+    "worked_one": "{{mode}} · {{count}} agent a travaillé",
+    "worked_many": "{{mode}} · {{count}} agents ont travaillé",
+    "worked_other": "{{mode}} · {{count}} agents ont travaillé",
+    "agent": "Agent {{n}}",
+    "anAgent": "Un agent",
+    "agentPart": "Agent {{n}} : {{part}}",
+    "status": {
+      "queued": "En attente",
+      "running": "Au travail",
+      "done": "Terminé",
+      "failed": "Échec",
+      "stopped": "Arrêté",
+      "out_of_budget": "Budget épuisé"
+    },
+    "winner": "Choisi",
+    "steps": "Dernières étapes",
+    "stop": "Arrêter",
+    "stopAgent": "Arrêter {{agent}}",
+    "open": "Ouvrir",
+    "openAgent": "Ouvrir la discussion de {{agent}}",
+    "merging": "Fusion du travail des agents…",
+    "mergingAgent": "Fusion des modifications de l'agent {{n}}…",
+    "conflict": "Les modifications de l'agent {{n}} sont en conflit dans {{files}} : elles n'ont pas été fusionnées. Elles restent sur {{branch}}.",
+    "stoppedAll": "L'essaim a été arrêté.",
+    "failedAll": "L'essaim n'a pas pu terminer.",
+    "branch": "Résultat sur la branche {{branch}}",
+    "checksPassed": "Les vérifications du projet ont réussi.",
+    "checksFailed": "Les vérifications du projet ont échoué.",
+    "applied": "Appliqué à votre dossier comme modifications non validées.",
+    "notApplied": "Non appliqué à votre dossier. Pour l'utiliser, fusionnez {{branch}} avec Git.",
+    "approvals": "Questions des agents",
+    "allowAgent": "Autoriser pour cet agent",
+    "allowAgentHint": "« Autoriser pour cet agent » ne concerne que {{agent}}. Les autres agents demandent toujours.",
+    "use": "Utiliser un essaim",
+    "off": "Non",
+    "useHint": "Plusieurs agents travaillent à la fois sur votre prochain message. Répartir le divise en parties ; en Course, chaque modèle le traite en entier.",
+    "chip": "Essaim : {{mode}}",
+    "chipRemove": "Ne pas utiliser d’essaim",
+    "agentLine": "Agent {{n}} d’un essaim · <go>Ouvrir la discussion principale</go>"
   }
 }

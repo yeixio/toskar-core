@@ -15,7 +15,7 @@ import { ShownError, shownError } from '@/components/ui/ShownError'
 import { KnowledgePicker } from '@/features/knowledge/KnowledgePicker'
 import { canChat } from '@/features/models/modelPresentation'
 import { sortProfilesForDisplay } from '@/features/profiles/profilePresentation'
-import type { Project, ProjectInput } from '@/types/api'
+import type { Project, ProjectInput, Swarm } from '@/types/api'
 
 /** The model id that lets Toskar choose per message. */
 const AUTO_MODEL_ID = 'auto'
@@ -39,6 +39,12 @@ export function ProjectPage() {
   const chats = useQuery({
     queryKey: ['conversations', 'project', id],
     queryFn: () => api.getProjectConversations(id),
+    retry: false,
+  })
+  // The project's swarms, so a chat that started one shows its agents' chats, folded (#1135).
+  const swarms = useQuery({
+    queryKey: ['swarms', 'project', id],
+    queryFn: () => api.listSwarms(id),
     retry: false,
   })
   const update = useMutation({
@@ -113,6 +119,7 @@ export function ProjectPage() {
                       <span className="min-w-0 flex-1 truncate">{chat.title || t('chats.untitled')}</span>
                       <span className="shrink-0 text-xs text-ink-faint">{formatRelativeTime(chat.updated_at || chat.created_at)}</span>
                     </Link>
+                    <SwarmAgents swarms={(swarms.data ?? []).filter((s) => s.conversation_id === chat.id)} />
                   </li>
                 ))}
               </ul>
@@ -459,6 +466,56 @@ function DeleteProjectDialog({ project, onClose, onDeleted }: { project: Project
           </button>
         </div>
       </div>
+    </div>
+  )
+}
+
+/**
+ * A chat's swarms' agents (#1135): history leaves their chats out, so the
+ * chat that started a swarm shows "N agents", which opens to them.
+ */
+function SwarmAgents({ swarms }: { swarms: Swarm[] }) {
+  const { t } = useTranslation('projects')
+  const [open, setOpen] = useState(false)
+  const withAgents = swarms.filter((s) => (s.agents ?? []).length > 0)
+  const count = withAgents.reduce((n, s) => n + (s.agents ?? []).length, 0)
+  const agentChats = useQuery({
+    queryKey: ['conversations', 'swarms', withAgents.map((s) => s.id).join(',')],
+    queryFn: async () => (await Promise.all(withAgents.map((s) => api.getSwarmConversations(s.id)))).flat().filter((c) => c.swarm_role),
+    enabled: open,
+    retry: false,
+  })
+  if (count === 0) return null
+  return (
+    <div className="ms-2 ps-2">
+      <button
+        type="button"
+        className="inline-flex min-h-6 items-center gap-1 text-xs text-ink-muted underline-offset-2 hover:text-ink hover:underline"
+        aria-expanded={open}
+        onClick={() => setOpen((v) => !v)}
+      >
+        {t('chats.agents', { count })} <span aria-hidden>{open ? '▾' : '▸'}</span>
+      </button>
+      {open ? (
+        agentChats.isError ? (
+          <LoadError compact error={agentChats.error} onRetry={() => void agentChats.refetch()} retrying={agentChats.isFetching} />
+        ) : agentChats.isLoading ? (
+          <p className="text-xs text-ink-muted">{t('chats.agentsLoading')}</p>
+        ) : (
+          <ul className="mb-1 space-y-0.5 border-s-2 border-norn/30 ps-2">
+            {(agentChats.data ?? []).map((chat) => (
+              <li key={chat.id}>
+                <Link
+                  to={`/chat?c=${encodeURIComponent(chat.id)}`}
+                  className="flex items-baseline gap-3 rounded-lg px-2 py-1 text-sm text-ink-muted hover:bg-raised hover:text-ink"
+                >
+                  <span className="min-w-0 flex-1 truncate">{chat.title || t('chats.untitled')}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )
+      ) : null}
     </div>
   )
 }

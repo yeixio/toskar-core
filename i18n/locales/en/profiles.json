@@ -99,6 +99,10 @@
       "label": "Team",
       "detail": "A planner splits each request, workers do the parts (on other computers when they can), and a reviewer checks the answer. Quick questions are still answered directly."
     },
+    "swarm": {
+      "label": "Swarm",
+      "detail": "Several agents work at once, each in a chat of its own and on other computers when they can. Split divides a job into parts; Race has several models each do the whole request. Quick questions are still answered directly."
+    },
     "teamTitle": "AI team",
     "automaticTitle": "Automatic",
     "withStrategy": "{{title}} · Strategy: {{strategy}}"
@@ -465,5 +469,34 @@
     },
     "noVerifiedModel": "No installed model is verified to check topics, so Enforce checks with this profile's own model, which may let more through. Gemma 3 4B is verified.",
     "installVerified": "Install it"
+  },
+  "swarm": {
+    "title": "Swarm",
+    "mode": {
+      "label": "Mode",
+      "help": "Split: agents do parts of the job at once. Race: each model does the whole request, and the best answer wins.",
+      "split": "Split",
+      "race": "Race"
+    },
+    "models": {
+      "label": "Models",
+      "help": "In order, one agent each. A race needs at least two; a split takes them in turn, and without any uses the profile's models.",
+      "add": "Add a model",
+      "up": "Move {{model}} up",
+      "remove": "Remove {{model}}",
+      "raceNeedsTwo": "A race needs at least two models."
+    },
+    "agents": {
+      "label": "Agents",
+      "help": "Most agents at once (2–8). Empty uses Workers, or 4."
+    },
+    "tokens": {
+      "label": "Tokens",
+      "help": "Most tokens the whole swarm may use (10,000–4,000,000). Empty is 400,000."
+    },
+    "minutes": {
+      "label": "Minutes",
+      "help": "Longest a swarm may run (1–240). Empty is 5 for a question and 30 for a task."
+    }
   }
 }

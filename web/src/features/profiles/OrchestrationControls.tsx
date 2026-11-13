@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import type { OrchestrationPolicy } from '@/types/api'
+import { cleanSwarm } from './orchestrationKeys'
 
 // Each control's label and help, and each option's name, are
 // profiles:controls.<key> in the catalog; '' is the default.
@@ -27,6 +28,11 @@ const NUMBERS: { key: keyof OrchestrationPolicy; min: number; max: number; step?
 export function cleanOrchestration(o: OrchestrationPolicy): OrchestrationPolicy | undefined {
   const out: Record<string, unknown> = {}
   for (const [k, v] of Object.entries(o)) {
+    if (k === 'swarm') {
+      const swarm = cleanSwarm(o.swarm)
+      if (swarm) out.swarm = swarm
+      continue
+    }
     if (Array.isArray(v) && v.length === 0) continue
     if (v !== '' && v !== undefined && v !== 0 && !(typeof v === 'number' && Number.isNaN(v))) out[k] = v
   }

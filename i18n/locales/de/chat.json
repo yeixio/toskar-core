@@ -825,5 +825,52 @@
         "acorns": "Ratatoskr sammelt genug Eicheln für einen ganzen Clip."
       }
     }
+  },
+  "swarm": {
+    "label": "Schwarm",
+    "modes": {
+      "split": "Aufteilen",
+      "race": "Wettlauf"
+    },
+    "working_one": "{{mode}} · {{count}} Agent arbeitet",
+    "working_other": "{{mode}} · {{count}} Agenten arbeiten",
+    "worked_one": "{{mode}} · mit {{count}} Agenten gearbeitet",
+    "worked_other": "{{mode}} · mit {{count}} Agenten gearbeitet",
+    "agent": "Agent {{n}}",
+    "anAgent": "Ein Agent",
+    "agentPart": "Agent {{n}}: {{part}}",
+    "status": {
+      "queued": "Wartet",
+      "running": "Arbeitet",
+      "done": "Fertig",
+      "failed": "Fehlgeschlagen",
+      "stopped": "Angehalten",
+      "out_of_budget": "Budget aufgebraucht"
+    },
+    "winner": "Gewählt",
+    "steps": "Letzte Schritte",
+    "stop": "Stoppen",
+    "stopAgent": "{{agent}} stoppen",
+    "open": "Öffnen",
+    "openAgent": "Chat von {{agent}} öffnen",
+    "merging": "Die Arbeit der Agenten wird zusammengeführt…",
+    "mergingAgent": "Änderungen von Agent {{n}} werden zusammengeführt…",
+    "conflict": "Die Änderungen von Agent {{n}} kollidieren in {{files}} und wurden nicht zusammengeführt. Sie bleiben auf {{branch}}.",
+    "stoppedAll": "Der Schwarm wurde angehalten.",
+    "failedAll": "Der Schwarm konnte nicht fertig werden.",
+    "branch": "Ergebnis auf dem Branch {{branch}}",
+    "checksPassed": "Die Prüfungen des Projekts waren erfolgreich.",
+    "checksFailed": "Die Prüfungen des Projekts sind fehlgeschlagen.",
+    "applied": "Als nicht committete Änderungen in deinen Ordner übernommen.",
+    "notApplied": "Nicht in deinen Ordner übernommen. Um es zu nutzen, führe {{branch}} mit Git zusammen.",
+    "approvals": "Fragen der Agenten",
+    "allowAgent": "Für diesen Agenten erlauben",
+    "allowAgentHint": "„Für diesen Agenten erlauben“ gilt nur für {{agent}}. Die anderen Agenten fragen weiterhin.",
+    "use": "Schwarm nutzen",
+    "off": "Aus",
+    "useHint": "Mehrere Agenten arbeiten gleichzeitig an deiner nächsten Nachricht. Aufteilen zerlegt sie in Teile; beim Wettlauf erledigt jedes Modell alles.",
+    "chip": "Schwarm: {{mode}}",
+    "chipRemove": "Keinen Schwarm verwenden",
+    "agentLine": "Agent {{n}} eines Schwarms · <go>Hauptchat öffnen</go>"
   }
 }

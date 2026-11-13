@@ -20,19 +20,25 @@ export function ToolPermissionPrompt({
   showRawArgs,
   deciding,
   onDecide,
+  agent,
+  titleId = 'tool-permission-title',
 }: {
   tool: PendingToolPrompt
   toolName: string
   showRawArgs: boolean
   deciding: boolean
   onDecide: (allow: boolean, allowSession: boolean) => void
+  /** A swarm agent asking, such as "Agent 2: tests" (#1135). Its session is its own chat. */
+  agent?: string
+  titleId?: string
 }) {
   const { t } = useTranslation('chat')
   return (
     <>
       <div>
+        {agent ? <p className="text-xs font-medium text-norn">{agent}</p> : null}
         <h2
-          id="tool-permission-title"
+          id={titleId}
           className="font-display text-lg font-semibold text-ink"
         >
           {t('tools.permissionTitle', { tool: toolName })}
@@ -52,9 +58,10 @@ export function ToolPermissionPrompt({
         </p>
       )}
       {tool.cantUndo && tool.afterOutside && <p className="text-sm text-ink-muted">{t('tools.afterOutside')}</p>}
-      {tool.toolId === 'terminal' && !tool.alwaysAsks && (
+      {tool.toolId === 'terminal' && !tool.alwaysAsks && !agent && (
         <p className="text-sm text-ink-muted">{t('tools.sessionTrustsProject')}</p>
       )}
+      {agent && !tool.alwaysAsks && <p className="text-sm text-ink-muted">{t('swarm.allowAgentHint', { agent })}</p>}
       {showRawArgs && tool.rawArgs && (
         <pre className="log-panel max-h-40">{tool.rawArgs}</pre>
       )}
@@ -74,7 +81,7 @@ export function ToolPermissionPrompt({
             disabled={deciding}
             onClick={() => onDecide(true, true)}
           >
-            {t('tools.allowSession')}
+            {agent ? t('swarm.allowAgent') : t('tools.allowSession')}
           </button>
         )}
         <button

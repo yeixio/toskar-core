@@ -473,7 +473,7 @@ export interface TopicPolicy {
 }
 
 export interface OrchestrationPolicy {
-  strategy?: '' | 'single' | 'planned' | 'team'
+  strategy?: '' | 'single' | 'planned' | 'team' | 'swarm'
   effort?: '' | 'fast' | 'balanced' | 'thorough'
   planning?: '' | 'on' | 'off' | 'always'
   max_workers?: number
@@ -490,6 +490,82 @@ export interface OrchestrationPolicy {
   media_quality?: '' | 'fast' | 'balanced' | 'best'
   retries?: number
   timeout_seconds?: number
+  /** How the swarm strategy works: its mode, its models, and its budgets (#1135, contract 1.88). */
+  swarm?: SwarmPolicy
+}
+
+export type SwarmMode = 'split' | 'race'
+
+/** A profile's swarm controls (#1135). Every field is optional; empty keeps the default. */
+export interface SwarmPolicy {
+  /** split (the default) or race. */
+  mode?: '' | SwarmMode
+  /** A race's models, one agent each, in order; a split's agents take them in turn. */
+  models?: string[]
+  /** The most agents (2–8). Empty is the profile's max_workers, or 4. */
+  agents?: number
+  /** The most the whole swarm may use (10,000–4,000,000). Empty is 400,000. */
+  tokens?: number
+  /** The most it may run (1–240). Empty is 5 for a question and 30 for a task. */
+  minutes?: number
+}
+
+/** An agent's status in a swarm. */
+export type SwarmAgentStatus = 'queued' | 'running' | 'done' | 'failed' | 'stopped' | 'out_of_budget'
+
+/** One agent in a swarm (#1135). */
+export interface SwarmAgent {
+  agent: number
+  /** The agent's own chat, which can be opened and continued. */
+  conversation_id: string
+  /** agent:N */
+  role: string
+  /** What it was asked to do: its part, or in a race the whole request. */
+  part: string
+  model_id?: string
+  node_id?: string
+  status: SwarmAgentStatus | string
+  /** The start of its answer. */
+  summary?: string
+  tokens: number
+  seconds: number
+  paths?: string[]
+  branch?: string
+  checks?: 'passed' | 'failed' | string
+}
+
+/** An agent's change that couldn't be merged with the others' (#1135). */
+export interface SwarmConflict {
+  agent: number
+  branch: string
+  files: string[]
+}
+
+/** Several agents working at once on one request (#1135, contract 1.88). */
+export interface Swarm {
+  id: string
+  project_id: string
+  /** The coordinator's chat, where the merged answer goes. */
+  conversation_id: string
+  mode: SwarmMode | string
+  /** running, merging, done, stopped, or failed. */
+  status: string
+  request: string
+  budget: { agents: number; tokens: number; minutes: number }
+  agents: SwarmAgent[] | null
+  winner?: number
+  note?: string
+  tokens: number
+  seconds: number
+  folder?: string
+  branch?: string
+  checks?: 'passed' | 'failed' | string
+  conflicts?: SwarmConflict[]
+  applied?: boolean
+  /** Each tool.requested its agents are still waiting on. */
+  waiting?: ToolRequestedPayload[]
+  created_at: string
+  finished_at?: string
 }
 
 export type NodeStatus = 'online' | 'offline' | 'unknown'
@@ -581,6 +657,10 @@ export interface Conversation {
   project?: string
   /** The project the chat is in, if any (#1136). */
   project_id?: string
+  /** The swarm the chat belongs to: as its coordinator's chat, or one of its agents' (#1135). */
+  swarm_id?: string
+  /** agent:N for an agent's chat; empty for the coordinator's or a chat in no swarm. */
+  swarm_role?: string
   created_at: string
   updated_at: string
 }
@@ -1043,6 +1123,8 @@ export interface ChatRequest {
   edit_of?: string
   /** The app asking; set by the api client (#498). */
   client?: 'phone' | 'tablet' | 'watch' | 'car' | 'tv' | 'desktop' | 'web' | 'terminal' | 'editor'
+  /** Run this turn as a swarm (#1135); Members and up. */
+  swarm?: SwarmMode
 }
 
 export interface StopChatResponse {
@@ -1320,6 +1402,10 @@ export interface ToolRequestedPayload {
   cant_undo?: boolean
   /** It asks because the chat just read something from outside. */
   after_outside?: boolean
+  /** A swarm agent's question: its swarm, and which agent asks, such as "Agent 2: tests" (#1135). */
+  swarm_id?: string
+  agent?: string
+  agent_number?: number
 }
 
 export interface SettingsPatch {

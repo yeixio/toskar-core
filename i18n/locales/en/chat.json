@@ -825,5 +825,52 @@
         "acorns": "Ratatoskr is gathering enough acorns for a whole clip."
       }
     }
+  },
+  "swarm": {
+    "label": "Swarm",
+    "modes": {
+      "split": "Split",
+      "race": "Race"
+    },
+    "working_one": "{{mode}} · {{count}} agent working",
+    "working_other": "{{mode}} · {{count}} agents working",
+    "worked_one": "{{mode}} · worked with {{count}} agent",
+    "worked_other": "{{mode}} · worked with {{count}} agents",
+    "agent": "Agent {{n}}",
+    "anAgent": "An agent",
+    "agentPart": "Agent {{n}}: {{part}}",
+    "status": {
+      "queued": "Queued",
+      "running": "Working",
+      "done": "Done",
+      "failed": "Failed",
+      "stopped": "Stopped",
+      "out_of_budget": "Out of budget"
+    },
+    "winner": "Chosen",
+    "steps": "Latest steps",
+    "stop": "Stop",
+    "stopAgent": "Stop {{agent}}",
+    "open": "Open",
+    "openAgent": "Open the chat for {{agent}}",
+    "merging": "Merging the agents' work…",
+    "mergingAgent": "Merging agent {{n}}'s changes…",
+    "conflict": "Agent {{n}}'s changes conflict in {{files}}, so they weren't merged. They're kept on {{branch}}.",
+    "stoppedAll": "The swarm was stopped.",
+    "failedAll": "The swarm couldn't finish.",
+    "branch": "Result on branch {{branch}}",
+    "checksPassed": "The project's checks passed.",
+    "checksFailed": "The project's checks failed.",
+    "applied": "Applied to your folder as uncommitted changes.",
+    "notApplied": "Not applied to your folder. To use it, merge {{branch}} with Git.",
+    "approvals": "Agents' questions",
+    "allowAgent": "Allow for this agent",
+    "allowAgentHint": "Allow for this agent covers only {{agent}}. The other agents still ask.",
+    "use": "Use a swarm",
+    "off": "Off",
+    "useHint": "Several agents work on your next message at once. Split divides it into parts; Race has each model do all of it.",
+    "chip": "Swarm: {{mode}}",
+    "chipRemove": "Don't use a swarm",
+    "agentLine": "Agent {{n}} of a swarm · <go>Open the main chat</go>"
   }
 }

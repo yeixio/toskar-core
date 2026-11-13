@@ -26,10 +26,10 @@ export function isTeamProfile(profile: Pick<AIProfile, 'orchestrator_id' | 'orch
   return profile.orchestration?.strategy === 'team' || profile.orchestrator_id === 'team'
 }
 
-export type StrategyValue = '' | 'single' | 'planned' | 'team'
+export type StrategyValue = '' | 'single' | 'planned' | 'team' | 'swarm'
 
 /** The strategies, in order; each is profiles:strategies.<value, or "auto"> in the catalog. */
-export const STRATEGY_VALUES: StrategyValue[] = ['', 'single', 'planned', 'team']
+export const STRATEGY_VALUES: StrategyValue[] = ['', 'single', 'planned', 'team', 'swarm']
 
 export function strategyOption(value: StrategyValue): { label: string; detail: string } {
   const key = value || 'auto'

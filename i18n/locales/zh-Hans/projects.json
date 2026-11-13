@@ -22,7 +22,9 @@
     "title": "聊天",
     "loading": "正在加载聊天…",
     "empty": "这个项目还没有聊天。用“新聊天”开始一个。",
-    "untitled": "未命名"
+    "untitled": "未命名",
+    "agents_other": "{{count}} 个智能体",
+    "agentsLoading": "正在加载智能体…"
   },
   "instructions": {
     "title": "说明",

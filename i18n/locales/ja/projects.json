@@ -22,7 +22,9 @@
     "title": "チャット",
     "loading": "チャットを読み込んでいます…",
     "empty": "このプロジェクトにはまだチャットがありません。「新しいチャット」で始めましょう。",
-    "untitled": "無題"
+    "untitled": "無題",
+    "agents_other": "エージェント {{count}} 個",
+    "agentsLoading": "エージェントを読み込んでいます…"
   },
   "instructions": {
     "title": "指示",

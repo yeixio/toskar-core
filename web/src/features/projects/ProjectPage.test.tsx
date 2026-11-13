@@ -3,7 +3,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom'
 import { api } from '@/lib/api'
-import type { Conversation, Principal, Project, Role } from '@/types/api'
+import type { Conversation, Principal, Project, Role, Swarm } from '@/types/api'
 import { ProjectPage } from './ProjectPage'
 import { NewProjectDialog } from './NewProjectDialog'
 import { MoveToProjectDialog } from './MoveToProjectDialog'
@@ -27,6 +27,8 @@ vi.mock('@/lib/api', async () => {
       getProfiles: vi.fn(),
       getModels: vi.fn(),
       listKnowledge: vi.fn(),
+      listSwarms: vi.fn(),
+      getSwarmConversations: vi.fn(),
     },
   }
 })
@@ -84,6 +86,30 @@ describe('ProjectPage (#1136)', () => {
     vi.mocked(api.getProfiles).mockResolvedValue([])
     vi.mocked(api.getModels).mockResolvedValue([])
     vi.mocked(api.listKnowledge).mockResolvedValue([])
+    vi.mocked(api.listSwarms).mockResolvedValue([])
+  })
+
+  it("folds a swarm's agents' chats under the chat that started it (#1135)", async () => {
+    const agent = (n: number) => ({ agent: n, conversation_id: `a${n}`, role: `agent:${n}`, part: '', status: 'done', tokens: 0, seconds: 0 })
+    const swarm = { id: 's1', conversation_id: 'c1', project_id: 'kitchen', agents: [agent(1), agent(2)] } as unknown as Swarm
+    vi.mocked(api.listSwarms).mockResolvedValue([swarm])
+    vi.mocked(api.getSwarmConversations).mockResolvedValue([
+      { ...chats[0], swarm_id: 's1' },
+      { id: 'a1', title: 'Agent 1: Measure', project_id: 'kitchen', swarm_id: 's1', swarm_role: 'agent:1', created_at: now, updated_at: now },
+      { id: 'a2', title: 'Agent 2: Price', project_id: 'kitchen', swarm_id: 's1', swarm_role: 'agent:2', created_at: now, updated_at: now },
+    ])
+    renderPage()
+    const fold = await screen.findByRole('button', { name: /2 agents/ })
+    expect(fold).toHaveAttribute('aria-expanded', 'false')
+    // Only the chat that started the swarm has agents.
+    expect(screen.getAllByRole('button', { name: /agents/ })).toHaveLength(1)
+    expect(screen.queryByRole('link', { name: 'Agent 1: Measure' })).toBeNull()
+    fireEvent.click(fold)
+    expect(await screen.findByRole('link', { name: 'Agent 1: Measure' })).toHaveAttribute('href', '/chat?c=a1')
+    expect(screen.getByRole('link', { name: 'Agent 2: Price' })).toHaveAttribute('href', '/chat?c=a2')
+    expect(api.getSwarmConversations).toHaveBeenCalledWith('s1')
+    // The coordinator's own chat isn't listed again under itself.
+    expect(screen.getAllByRole('link', { name: /Cabinet quotes/ })).toHaveLength(1)
   })
 
   it('shows its chats, instructions, files, and settings', async () => {

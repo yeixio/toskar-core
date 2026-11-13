@@ -869,5 +869,54 @@
         "acorns": "Ratatoskr raccoglie abbastanza ghiande per una clip intera."
       }
     }
+  },
+  "swarm": {
+    "label": "Sciame",
+    "modes": {
+      "split": "Dividi",
+      "race": "Gara"
+    },
+    "working_one": "{{mode}} · {{count}} agente al lavoro",
+    "working_many": "{{mode}} · {{count}} agenti al lavoro",
+    "working_other": "{{mode}} · {{count}} agenti al lavoro",
+    "worked_one": "{{mode}} · ha lavorato con {{count}} agente",
+    "worked_many": "{{mode}} · ha lavorato con {{count}} agenti",
+    "worked_other": "{{mode}} · ha lavorato con {{count}} agenti",
+    "agent": "Agente {{n}}",
+    "anAgent": "Un agente",
+    "agentPart": "Agente {{n}}: {{part}}",
+    "status": {
+      "queued": "In coda",
+      "running": "Al lavoro",
+      "done": "Fatto",
+      "failed": "Non riuscito",
+      "stopped": "Interrotto",
+      "out_of_budget": "Budget esaurito"
+    },
+    "winner": "Scelto",
+    "steps": "Ultimi passaggi",
+    "stop": "Interrompi",
+    "stopAgent": "Interrompi {{agent}}",
+    "open": "Apri",
+    "openAgent": "Apri la chat di {{agent}}",
+    "merging": "Unione del lavoro degli agenti…",
+    "mergingAgent": "Unione delle modifiche dell'agente {{n}}…",
+    "conflict": "Le modifiche dell'agente {{n}} sono in conflitto in {{files}}, quindi non sono state unite. Restano su {{branch}}.",
+    "stoppedAll": "Lo sciame è stato interrotto.",
+    "failedAll": "Lo sciame non è riuscito a finire.",
+    "branch": "Risultato sul branch {{branch}}",
+    "checksPassed": "I controlli del progetto sono passati.",
+    "checksFailed": "I controlli del progetto non sono passati.",
+    "applied": "Applicato alla tua cartella come modifiche non salvate in un commit.",
+    "notApplied": "Non applicato alla tua cartella. Per usarlo, unisci {{branch}} con Git.",
+    "approvals": "Domande degli agenti",
+    "allowAgent": "Consenti per questo agente",
+    "allowAgentHint": "«Consenti per questo agente» vale solo per {{agent}}. Gli altri agenti continuano a chiedere.",
+    "use": "Usa uno sciame",
+    "off": "No",
+    "useHint": "Più agenti lavorano insieme al tuo prossimo messaggio. Dividi lo separa in parti; in Gara ogni modello lo fa per intero.",
+    "chip": "Sciame: {{mode}}",
+    "chipRemove": "Non usare uno sciame",
+    "agentLine": "Agente {{n}} di uno sciame · <go>Apri la chat principale</go>"
   }
 }

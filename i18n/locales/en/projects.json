@@ -22,7 +22,10 @@
     "title": "Chats",
     "loading": "Loading chats…",
     "empty": "No chats in this project yet. Start one with New chat.",
-    "untitled": "Untitled"
+    "untitled": "Untitled",
+    "agents_one": "{{count}} agent",
+    "agents_other": "{{count}} agents",
+    "agentsLoading": "Loading agents…"
   },
   "instructions": {
     "title": "Instructions",

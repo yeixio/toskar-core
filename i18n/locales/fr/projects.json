@@ -22,7 +22,11 @@
     "title": "Discussions",
     "loading": "Chargement des discussions…",
     "empty": "Aucune discussion dans ce projet pour l’instant. Commencez-en une avec Nouvelle discussion.",
-    "untitled": "Sans titre"
+    "untitled": "Sans titre",
+    "agents_one": "{{count}} agent",
+    "agents_many": "{{count}} agents",
+    "agents_other": "{{count}} agents",
+    "agentsLoading": "Chargement des agents…"
   },
   "instructions": {
     "title": "Instructions",

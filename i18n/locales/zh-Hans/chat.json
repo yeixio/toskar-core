@@ -782,5 +782,50 @@
         "acorns": "拉塔托斯克正在攒够一整段短片的橡果。"
       }
     }
+  },
+  "swarm": {
+    "label": "智能体群",
+    "modes": {
+      "split": "拆分",
+      "race": "竞赛"
+    },
+    "working_other": "{{mode}} · {{count}} 个智能体正在工作",
+    "worked_other": "{{mode}} · 由 {{count}} 个智能体完成",
+    "agent": "智能体 {{n}}",
+    "anAgent": "一个智能体",
+    "agentPart": "智能体 {{n}}：{{part}}",
+    "status": {
+      "queued": "排队中",
+      "running": "工作中",
+      "done": "完成",
+      "failed": "失败",
+      "stopped": "已停止",
+      "out_of_budget": "预算用尽"
+    },
+    "winner": "已选用",
+    "steps": "最近步骤",
+    "stop": "停止",
+    "stopAgent": "停止{{agent}}",
+    "open": "打开",
+    "openAgent": "打开{{agent}}的聊天",
+    "merging": "正在合并智能体的工作…",
+    "mergingAgent": "正在合并智能体 {{n}} 的更改…",
+    "conflict": "智能体 {{n}} 的更改在 {{files}} 中冲突，因此没有合并。它们保留在 {{branch}} 上。",
+    "stoppedAll": "智能体群已停止。",
+    "failedAll": "智能体群未能完成。",
+    "branch": "结果在分支 {{branch}} 上",
+    "checksPassed": "项目检查已通过。",
+    "checksFailed": "项目检查未通过。",
+    "applied": "已作为未提交的更改应用到你的文件夹。",
+    "notApplied": "未应用到你的文件夹。如需使用，请用 Git 合并 {{branch}}。",
+    "approvals": "智能体的请求",
+    "allowAgent": "允许此智能体",
+    "allowAgentHint": "“允许此智能体”只适用于{{agent}}。其他智能体仍会询问。",
+    "use": "使用智能体群",
+    "off": "关闭",
+    "useHint": "多个智能体同时处理你的下一条消息。拆分会把它分成几部分；竞赛中每个模型都完成全部内容。",
+    "chip": "智能体群：{{mode}}",
+    "chipRemove": "不使用智能体群",
+    "agentLine": "智能体群的智能体 {{n}} · <go>打开主聊天</go>"
   }
 }

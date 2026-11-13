@@ -99,6 +99,10 @@
       "label": "Team",
       "detail": "Ein Planer teilt jede Anfrage auf, Helfer erledigen die Teile (wenn möglich auf anderen Computern) und ein Prüfer kontrolliert die Antwort. Kurze Fragen werden weiterhin direkt beantwortet."
     },
+    "swarm": {
+      "label": "Schwarm",
+      "detail": "Mehrere Agenten arbeiten gleichzeitig, jeder in einem eigenen Chat und wenn möglich auf anderen Computern. Aufteilen zerlegt eine Aufgabe in Teile; beim Wettlauf erledigen mehrere Modelle jeweils die ganze Anfrage. Kurze Fragen werden weiterhin direkt beantwortet."
+    },
     "teamTitle": "KI-Team",
     "automaticTitle": "Automatisch",
     "withStrategy": "{{title}} · Strategie: {{strategy}}"
@@ -465,5 +469,34 @@
     },
     "noVerifiedModel": "Kein installiertes Modell ist für Themenprüfungen bestätigt, daher prüft Durchsetzen mit dem eigenen Modell dieses Profils, das mehr durchlassen kann. Gemma 3 4B ist bestätigt.",
     "installVerified": "Installieren"
+  },
+  "swarm": {
+    "title": "Schwarm",
+    "mode": {
+      "label": "Modus",
+      "help": "Aufteilen: Agenten erledigen Teile der Aufgabe gleichzeitig. Wettlauf: Jedes Modell erledigt die ganze Anfrage, und die beste Antwort gewinnt.",
+      "split": "Aufteilen",
+      "race": "Wettlauf"
+    },
+    "models": {
+      "label": "Modelle",
+      "help": "Der Reihe nach, je ein Agent. Ein Wettlauf braucht mindestens zwei; beim Aufteilen werden sie abwechselnd genutzt, und ohne Auswahl die Modelle des Profils.",
+      "add": "Modell hinzufügen",
+      "up": "{{model}} nach oben",
+      "remove": "{{model}} entfernen",
+      "raceNeedsTwo": "Ein Wettlauf braucht mindestens zwei Modelle."
+    },
+    "agents": {
+      "label": "Agenten",
+      "help": "Höchstens so viele Agenten gleichzeitig (2–8). Leer nimmt Helfer, sonst 4."
+    },
+    "tokens": {
+      "label": "Tokens",
+      "help": "Höchstens so viele Tokens für den ganzen Schwarm (10.000–4.000.000). Leer ist 400.000."
+    },
+    "minutes": {
+      "label": "Minuten",
+      "help": "Längste Laufzeit eines Schwarms (1–240). Leer ist 5 für eine Frage und 30 für eine Aufgabe."
+    }
   }
 }

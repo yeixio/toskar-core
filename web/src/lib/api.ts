@@ -21,6 +21,7 @@ import type {
   ChatRequest,
   ChatResponse,
   Conversation,
+  Swarm,
   ConversationsDeleted,
   FoundModel,
   ModelImportResult,
@@ -1101,6 +1102,15 @@ export const api = {
   /** One project's chats, newest first (#1136). */
   getProjectConversations: async (projectId: string) =>
     (await request<Conversation[]>(`/api/v1/conversations?project_id=${encodeURIComponent(projectId)}`)) ?? [],
+
+  /** A swarm's chats: its coordinator's and its agents' (#1135). */
+  getSwarmConversations: async (swarmId: string) =>
+    (await request<Conversation[]>(`/api/v1/conversations?swarm_id=${encodeURIComponent(swarmId)}`)) ?? [],
+  /** The person's swarms, newest first, or one project's (#1135). */
+  listSwarms: async (projectId?: string) =>
+    (await request<Swarm[]>(`/api/v1/swarms${projectId ? `?project_id=${encodeURIComponent(projectId)}` : ''}`)) ?? [],
+  /** One swarm, with its agents and the approvals they wait on (#1135). */
+  getSwarm: (id: string) => request<Swarm>(`/api/v1/swarms/${encodeURIComponent(id)}`),
 
   /** The person's projects, newest activity first (#1136). */
   listProjects: async () => (await request<Project[]>('/api/v1/projects')) ?? [],

@@ -782,5 +782,50 @@
         "acorns": "拉塔托斯克正在收集夠一整段短片的橡實。"
       }
     }
+  },
+  "swarm": {
+    "label": "代理群",
+    "modes": {
+      "split": "拆分",
+      "race": "競賽"
+    },
+    "working_other": "{{mode}} · {{count}} 個代理正在工作",
+    "worked_other": "{{mode}} · 由 {{count}} 個代理完成",
+    "agent": "代理 {{n}}",
+    "anAgent": "一個代理",
+    "agentPart": "代理 {{n}}：{{part}}",
+    "status": {
+      "queued": "排隊中",
+      "running": "工作中",
+      "done": "完成",
+      "failed": "失敗",
+      "stopped": "已停止",
+      "out_of_budget": "預算用盡"
+    },
+    "winner": "已採用",
+    "steps": "最近步驟",
+    "stop": "停止",
+    "stopAgent": "停止{{agent}}",
+    "open": "開啟",
+    "openAgent": "開啟{{agent}}的聊天",
+    "merging": "正在合併代理的工作…",
+    "mergingAgent": "正在合併代理 {{n}} 的變更…",
+    "conflict": "代理 {{n}} 的變更在 {{files}} 中衝突，因此沒有合併。它們保留在 {{branch}} 上。",
+    "stoppedAll": "代理群已停止。",
+    "failedAll": "代理群未能完成。",
+    "branch": "結果在分支 {{branch}} 上",
+    "checksPassed": "專案檢查已通過。",
+    "checksFailed": "專案檢查未通過。",
+    "applied": "已作為未提交的變更套用到你的資料夾。",
+    "notApplied": "未套用到你的資料夾。如需使用，請用 Git 合併 {{branch}}。",
+    "approvals": "代理的請求",
+    "allowAgent": "允許此代理",
+    "allowAgentHint": "「允許此代理」只適用於{{agent}}。其他代理仍會詢問。",
+    "use": "使用代理群",
+    "off": "關閉",
+    "useHint": "多個代理同時處理你的下一則訊息。拆分會把它分成幾部分；競賽中每個模型都完成全部內容。",
+    "chip": "代理群：{{mode}}",
+    "chipRemove": "不使用代理群",
+    "agentLine": "代理群的代理 {{n}} · <go>開啟主聊天</go>"
   }
 }

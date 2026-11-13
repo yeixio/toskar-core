@@ -100,6 +100,10 @@
       "label": "Team",
       "detail": "Un pianificatore divide ogni richiesta, gli esecutori svolgono le parti (su altri computer quando possibile) e un revisore controlla la risposta. Alle domande rapide si risponde comunque direttamente."
     },
+    "swarm": {
+      "label": "Sciame",
+      "detail": "Più agenti lavorano insieme, ognuno in una chat propria e su altri computer quando possono. Dividi separa un lavoro in parti; in Gara più modelli fanno ciascuno l'intera richiesta. Alle domande rapide si risponde ancora direttamente."
+    },
     "teamTitle": "Team di IA",
     "automaticTitle": "Automatica",
     "withStrategy": "{{title}} · Strategia: {{strategy}}"
@@ -470,5 +474,34 @@
     },
     "noVerifiedModel": "Nessun modello installato è verificato per controllare gli argomenti, quindi Imponi controlla con il modello di questo profilo, che può lasciar passare di più. Gemma 3 4B è verificato.",
     "installVerified": "Installalo"
+  },
+  "swarm": {
+    "title": "Sciame",
+    "mode": {
+      "label": "Modalità",
+      "help": "Dividi: gli agenti fanno parti del lavoro insieme. Gara: ogni modello fa l'intera richiesta e vince la risposta migliore.",
+      "split": "Dividi",
+      "race": "Gara"
+    },
+    "models": {
+      "label": "Modelli",
+      "help": "In ordine, un agente ciascuno. Una gara ne richiede almeno due; Dividi li usa a turno e, senza modelli scelti, usa quelli del profilo.",
+      "add": "Aggiungi un modello",
+      "up": "Sposta su {{model}}",
+      "remove": "Rimuovi {{model}}",
+      "raceNeedsTwo": "Una gara richiede almeno due modelli."
+    },
+    "agents": {
+      "label": "Agenti",
+      "help": "Numero massimo di agenti insieme (2–8). Vuoto usa Esecutori, oppure 4."
+    },
+    "tokens": {
+      "label": "Token",
+      "help": "Numero massimo di token per l'intero sciame (10.000–4.000.000). Vuoto è 400.000."
+    },
+    "minutes": {
+      "label": "Minuti",
+      "help": "Durata massima di uno sciame (1–240). Vuoto è 5 per una domanda e 30 per un'attività."
+    }
   }
 }
