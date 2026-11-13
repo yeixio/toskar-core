@@ -14,8 +14,12 @@ import (
 func TestOrchestrationControls(t *testing.T) {
 	for _, bad := range []contracts.OrchestrationPolicy{
 		{Effort: "maximum"}, {Planning: "maybe"}, {Verification: "twice"}, {MaxWorkers: 1}, {MaxWorkers: 20},
-		{MaxToolCalls: 99}, {TimeoutSeconds: 5}, {ContextShare: 0.95}, {Memory: "on"}, {Strategy: "swarm"},
+		{MaxToolCalls: 99}, {TimeoutSeconds: 5}, {ContextShare: 0.95}, {Memory: "on"}, {Strategy: "hive"},
 		{FallbackModels: []string{""}}, {Deliberate: "sometimes"},
+		// Swarm controls (#1135), with their ranges.
+		{Swarm: &contracts.SwarmPolicy{Mode: "relay"}}, {Swarm: &contracts.SwarmPolicy{Agents: 1}}, {Swarm: &contracts.SwarmPolicy{Agents: 9}},
+		{Swarm: &contracts.SwarmPolicy{Tokens: 9_999}}, {Swarm: &contracts.SwarmPolicy{Tokens: 4_000_001}},
+		{Swarm: &contracts.SwarmPolicy{Minutes: 241}}, {Swarm: &contracts.SwarmPolicy{Models: []string{"a", " "}}},
 	} {
 		if err := ValidateOrchestration(bad); err == nil || !strings.HasPrefix(err.Error(), "orchestration.") {
 			t.Errorf("%+v accepted (%v)", bad, err)
@@ -28,6 +32,11 @@ func TestOrchestrationControls(t *testing.T) {
 	t.Cleanup(func() { _ = db.Close() })
 	m := NewManager(db.SQL)
 	ctx := context.Background()
+	swarmed := contracts.OrchestrationPolicy{Strategy: StrategySwarm, Swarm: &contracts.SwarmPolicy{Mode: SwarmRace,
+		Models: []string{"a", "b"}, Agents: 8, Tokens: 10_000, Minutes: 240}}
+	if err := ValidateOrchestration(swarmed); err != nil {
+		t.Errorf("swarm controls refused: %v", err)
+	}
 	o := contracts.OrchestrationPolicy{Strategy: StrategyTeam, Effort: "thorough", Planning: "always", MaxWorkers: 4, Parallel: "off",
 		Verification: "correct", MaxToolCalls: 6, Memory: "off", ContextShare: 0.3, Fallback: "off",
 		FallbackModels: []string{"qwen2.5-7b", "llama3.2-3b"}, TimeoutSeconds: 120}

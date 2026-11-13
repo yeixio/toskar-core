@@ -278,5 +278,7 @@
   "NEWS_UNAVAILABLE": "Die KI-Neuigkeiten konnten nicht von toskar.ai gelesen werden. Prüfe die Internetverbindung und versuche es erneut.",
   "PROJECT_FILE_NOT_FOUND": "Diese Datei ist nicht im Projekt.",
   "PROJECT_NAME_REQUIRED": "Gib dem Projekt einen Namen.",
-  "PROJECT_NOT_FOUND": "Dieses Projekt wurde entfernt."
+  "PROJECT_NOT_FOUND": "Dieses Projekt wurde entfernt.",
+  "SWARM_NOT_FOUND": "Dieser Schwarm wurde entfernt.",
+  "SWARM_RUNNING": "Dieser Schwarm läuft noch. Halte ihn zuerst an."
 }

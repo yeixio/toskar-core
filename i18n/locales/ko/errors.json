@@ -278,5 +278,7 @@
   "NEWS_UNAVAILABLE": "toskar.ai에서 AI 뉴스를 읽어 올 수 없습니다. 인터넷 연결을 확인하고 다시 시도하세요.",
   "PROJECT_FILE_NOT_FOUND": "그 파일은 프로젝트에 없습니다.",
   "PROJECT_NAME_REQUIRED": "프로젝트 이름을 입력하세요.",
-  "PROJECT_NOT_FOUND": "이 프로젝트는 삭제되었습니다."
+  "PROJECT_NOT_FOUND": "이 프로젝트는 삭제되었습니다.",
+  "SWARM_NOT_FOUND": "해당 스웜이 삭제되었습니다.",
+  "SWARM_RUNNING": "이 스웜은 아직 실행 중입니다. 먼저 중지하세요."
 }

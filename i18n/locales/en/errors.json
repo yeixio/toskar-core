@@ -278,5 +278,7 @@
   "NEWS_UNAVAILABLE": "The AI news couldn't be read from toskar.ai. Check the internet connection and try again.",
   "PROJECT_FILE_NOT_FOUND": "That file isn't in the project.",
   "PROJECT_NAME_REQUIRED": "Name the project.",
-  "PROJECT_NOT_FOUND": "That project was removed."
+  "PROJECT_NOT_FOUND": "That project was removed.",
+  "SWARM_NOT_FOUND": "That swarm was removed.",
+  "SWARM_RUNNING": "This swarm is still running. Stop it first."
 }

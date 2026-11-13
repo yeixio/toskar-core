@@ -486,6 +486,9 @@ func (r *Registry) Decide(requestID string, allow, allowSession bool) error {
 			"allow":           allow,
 			"conversation_id": pc.Asked["conversation_id"],
 		})
+		if id, ok := pc.Asked["swarm_id"]; ok {
+			evt.Payload["swarm_id"] = id
+		}
 		evt.Person = pc.Person
 		r.bus.Publish(evt)
 		return nil
@@ -502,6 +505,24 @@ func (r *Registry) Waiting(conversationID, person string) []map[string]any {
 	var asked []map[string]any
 	for _, pc := range r.pending {
 		if pc.Person == person && pc.Asked["conversation_id"] == conversationID {
+			asked = append(asked, pc.Asked)
+		}
+	}
+	return asked
+}
+
+// WaitingInSwarm is what every agent of a swarm is waiting to hear from this
+// person (#1135), so one place can show each question. Each carries its
+// agent, for clients to group them by.
+func (r *Registry) WaitingInSwarm(swarmID, person string) []map[string]any {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	asked := []map[string]any{}
+	if swarmID == "" {
+		return asked
+	}
+	for _, pc := range r.pending {
+		if pc.Person == person && pc.Asked["swarm_id"] == swarmID {
 			asked = append(asked, pc.Asked)
 		}
 	}

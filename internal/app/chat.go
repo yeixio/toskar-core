@@ -32,6 +32,7 @@ import (
 	"github.com/yeixio/toskar-core/internal/runtimes/llamacpp"
 	"github.com/yeixio/toskar-core/internal/share"
 	"github.com/yeixio/toskar-core/internal/structured"
+	"github.com/yeixio/toskar-core/internal/swarm"
 	"github.com/yeixio/toskar-core/internal/tools"
 	"github.com/yeixio/toskar-core/internal/turnopts"
 	"github.com/yeixio/toskar-core/pkg/contracts"
@@ -1333,6 +1334,10 @@ type chatExecEnv struct {
 	roleNodes       map[string]string
 	roleModels      map[string]string
 	usedNodes       []string
+	// agentModels are a swarm's agents' models, by role, such as a race's
+	// (#1135); swarm is the turn's swarm while its agents run.
+	agentModels map[string]string
+	swarm       *swarmState
 }
 
 func (e *chatExecEnv) modelID() string {
@@ -1571,6 +1576,13 @@ func (e *chatExecEnv) ExecuteTool(ctx context.Context, toolID string, args map[s
 	if e.taskID != "" {
 		meta["task_id"] = e.taskID
 	}
+	// A swarm's agent asks as its own chat does, saying which swarm and
+	// agent asks (#1135). Allow for this session stays with its chat.
+	if ref, ok := swarm.AgentFrom(e.ctx); ok {
+		meta["swarm_id"] = ref.SwarmID
+		meta["agent"] = ref.Label
+		meta["agent_number"] = ref.N
+	}
 	ctx = artifacts.WithConversation(ctx, e.conversationID)
 	ctx = withChatProfile(ctx, e.profile.ID)
 	// A heavy tool may run on another computer, as the profile allows.
@@ -1718,6 +1730,11 @@ func (e *chatExecEnv) Emit(eventType string, payload map[string]any) {
 				}
 			}
 			e.trace.deliberated(outcome, final, drafts, agreeing, judge)
+		case swarm.EventNote:
+			// A swarm that ran as one agent says why under the answer (#1135).
+			if code, _ := payload["reason"].(string); code != "" {
+				e.trace.noticeIfNone(swarmNotice(e.trace.lang, code))
+			}
 		case simple.EventConsistency:
 			found, _ := payload["found"].(int)
 			fixed, _ := payload["fixed"].(int)
@@ -1777,9 +1794,18 @@ func (e *chatExecEnv) NodeForRole(role string) (string, error) {
 		return local, nil
 	}
 	avoid := append([]string(nil), e.usedNodes...)
+	excludedHere := slices.Clone(e.excluded)
 	e.mu.Unlock()
 
 	modelID := e.modelForRole(role)
+	// A swarm's agent runs where the coordinator placed it (#1135), unless
+	// its model failed there.
+	if ref, ok := swarm.AgentFrom(e.ctx); ok && ref.NodeID != "" && ref.ModelID == modelID && !slices.Contains(excludedHere, ref.NodeID) {
+		e.mu.Lock()
+		e.roleNodes[role], e.roleModels[role], e.lastModel = ref.NodeID, modelID, modelID
+		e.mu.Unlock()
+		return ref.NodeID, nil
+	}
 	// A model on the external server runs there, chosen explicitly, never
 	// for a profile or a chat that keeps work here (#111).
 	if external.IsModel(modelID) {
@@ -1836,6 +1862,9 @@ func (e *chatExecEnv) placementContext() context.Context {
 const promptOverhead = 1000
 
 func (e *chatExecEnv) modelForRole(role string) string {
+	if id := e.agentModel(role); id != "" {
+		return id
+	}
 	if id := profiles.RoleModel(e.profile, role); id != "" {
 		return id
 	}

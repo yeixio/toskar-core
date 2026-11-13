@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Toskar Control Plane API
-  version: "1.87"
+  version: "1.88"
   description: >-
     Local AI control plane API for Toskar, its OpenAI-compatible routes, and its MCP server.
     On the default loopback bind no key is needed. When the daemon listens on any other address,
@@ -27,6 +27,8 @@ tags:
     description: "What the assistant remembers, and how it writes to you."
   - name: Projects
     description: "Chats kept together with their instructions, files, folder, default profile and model, and memory."
+  - name: Swarms
+    description: "Several agents working at once on one request, each in a chat of its own."
   - name: Profiles
     description: "Assistants with their own models, tools, and topics, and who may use them."
   - name: Automations
@@ -1714,6 +1716,11 @@ paths:
           required: false
           schema: {type: string}
           description: Only the chats in this project (contract 1.87, #1136).
+        - name: swarm_id
+          in: query
+          required: false
+          schema: {type: string}
+          description: "A swarm's chats: its coordinator's and its agents' (contract 1.88, #1135). Without it, agents' chats are left out."
       responses:
         "200":
           description: OK
@@ -4124,6 +4131,10 @@ paths:
                 project_id:
                   type: string
                   description: "One of the caller's projects for the turn (contract 1.87, #1136): a chat not yet in a project joins it, and without conversation_id the turn uses it without saving a chat. A chat already in a project stays in its own."
+                swarm:
+                  type: string
+                  enum: [split, race]
+                  description: "Run this turn as a swarm (contract 1.88, #1135): agents in chats of their own work at once, and the answer merges what they found. Needs the member role and a conversation_id. A task in a folder runs as one for now. Progress arrives as swarm.* events on /events."
               required: [message]
       responses:
         "200":
@@ -5098,6 +5109,152 @@ paths:
           description: Removed
         "404":
           description: PROJECT_NOT_FOUND or PROJECT_FILE_NOT_FOUND
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/v1/swarms:
+    get:
+      summary: The caller's swarms
+      description: Newest first (contract 1.88, #1135).
+      operationId: listSwarms
+      tags: [Swarms]
+      parameters:
+        - name: project_id
+          in: query
+          required: false
+          schema: {type: string}
+          description: Only this project's swarms.
+      responses:
+        "200":
+          description: Swarms
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Swarm"
+        "404":
+          description: PROJECT_NOT_FOUND
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    post:
+      summary: Start a swarm
+      description: "Runs prompt as a swarm turn in conversation_id, or a new chat, in the background (contract 1.88, #1135). Returns the swarm at once; its agents fill in when the coordinator has planned them, and swarm.* events on /events follow it. A chat with no project gets one named after the job. Questions only for now: a task in a folder runs as one. Needs the member role."
+      operationId: startSwarm
+      tags: [Swarms]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [prompt]
+              properties:
+                prompt: {type: string}
+                mode: {type: string, enum: [split, race], description: "Empty is the profile's, or split."}
+                project_id: {type: string, description: One of the caller's projects for a chat not yet in one.}
+                conversation_id: {type: string, description: The caller's chat to run it in; empty starts one.}
+                budget: {$ref: "#/components/schemas/SwarmPolicy"}
+      responses:
+        "202":
+          description: Started
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Swarm"
+        "400":
+          description: An empty prompt, an unknown mode, or a budget out of range
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: ROLE_REQUIRED, for a Visitor; PORTAL_MEMBERS, for a portal's guest
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: PROJECT_NOT_FOUND, or NOT_FOUND for another person's chat
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/v1/swarms/{id}:
+    get:
+      summary: One swarm
+      description: With its agents, their status, and what they're waiting on.
+      operationId: getSwarm
+      tags: [Swarms]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Swarm
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Swarm"
+        "404":
+          description: SWARM_NOT_FOUND, also for another person's swarm
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    delete:
+      summary: Delete a swarm
+      description: Deletes the record. Its chats stay, as ordinary chats in its project. A running swarm is stopped first.
+      operationId: deleteSwarm
+      tags: [Swarms]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: SWARM_NOT_FOUND
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "409":
+          description: SWARM_RUNNING
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/v1/swarms/{id}/stop:
+    post:
+      summary: Stop a swarm
+      description: Stops every agent and the coordinator's turn. What they wrote stays in their chats. To stop one agent, stop its chat with POST /api/v1/chat/stop; the others go on.
+      operationId: stopSwarm
+      tags: [Swarms]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Whether anything was running to stop
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChatStopped"
+        "404":
+          description: SWARM_NOT_FOUND
           content:
             application/json:
               schema:
@@ -7839,6 +7996,8 @@ components:
         memory_off: {type: boolean, description: '`memory_off` keeps persistent memory out of this conversation.'}
         project: {type: string, description: The folder on the Toskar computer this chat works in. Work asked for in it goes on until it's done, on the terminal, web, and desktop (contract 1.85).}
         project_id: {type: string, description: 'The project the chat is in, if any: a chat is in one project at most (contract 1.87, #1136).'}
+        swarm_id: {type: string, description: 'The swarm the chat belongs to: its coordinator''s chat, or one of its agents'' (contract 1.88, #1135).'}
+        swarm_role: {type: string, description: agent:N for an agent's chat; empty for the coordinator's or a chat in no swarm.}
         compact_off: {type: boolean, description: '`compact_off` keeps this conversation verbatim: auto-compact never sends its older messages as a summary (contract 1.35, #342).'}
         created_at: {type: string, format: date-time}
         updated_at: {type: string, format: date-time}
@@ -8037,6 +8196,69 @@ components:
       properties:
         name: {type: string}
         size: {type: integer, format: int64}
+    Swarm:
+      type: object
+      description: 'Several agents working at once on one request, each in a chat of its own in the coordinator chat''s project (contract 1.88, #1135). It belongs to the person who started it.'
+      required: [agents, budget, conversation_id, created_at, id, mode, project_id, request, seconds, status, tokens]
+      properties:
+        id: {type: string}
+        project_id: {type: string}
+        conversation_id: {type: string, description: 'The coordinator''s chat, where the merged answer goes.'}
+        mode: {type: string, enum: [split, race]}
+        status: {type: string, enum: [running, merging, done, stopped, failed]}
+        request: {type: string}
+        budget: {$ref: '#/components/schemas/SwarmBudget'}
+        agents:
+          type: array
+          description: The swarm's agents, in order. Empty until the coordinator has planned the parts.
+          items: {$ref: '#/components/schemas/SwarmAgent'}
+        winner: {type: integer, description: 'A race''s winning agent, 0 when the answers were merged or it''s not a race.'}
+        note: {type: string, description: '`note` says why the swarm ran differently than asked, such as running as one agent.'}
+        tokens: {type: integer, description: Every agent's tokens so far.}
+        seconds: {type: number}
+        waiting:
+          type: array
+          description: Each tool.requested from its agents still waiting for an answer, each with its agent, for clients to group them by.
+          items:
+            type: object
+            additionalProperties: {}
+        created_at: {type: string, format: date-time}
+        finished_at: {type: string, format: date-time}
+    SwarmAgent:
+      type: object
+      description: 'One agent in a swarm: its part, where it runs, and how it went (contract 1.88, #1135).'
+      required: [agent, conversation_id, part, role, seconds, status, tokens]
+      properties:
+        agent: {type: integer, description: 'Its number, from 1.'}
+        conversation_id: {type: string, description: 'The agent''s own chat, which can be opened and continued.'}
+        role: {type: string, description: 'agent:N.'}
+        part: {type: string, description: 'What it was asked to do: its part, or in a race the whole request.'}
+        model_id: {type: string}
+        node_id: {type: string}
+        status: {type: string, enum: [queued, running, done, failed, stopped, out_of_budget]}
+        summary: {type: string, description: The start of its answer.}
+        tokens: {type: integer}
+        seconds: {type: number}
+    SwarmBudget:
+      type: object
+      description: 'What a swarm may use (contract 1.88, #1135).'
+      required: [agents, minutes, tokens]
+      properties:
+        agents: {type: integer, description: The most agents it has.}
+        tokens: {type: integer, description: The most the whole swarm may use.}
+        minutes: {type: integer, description: The most it may run.}
+    SwarmPolicy:
+      type: object
+      description: 'Swarm controls (contract 1.88, #1135): a profile''s orchestration.swarm, or one swarm''s budget. Every field is optional; empty keeps the default.'
+      properties:
+        mode: {type: string, enum: [split, race], description: 'split: a coordinator splits the job into parts that agents do at once. race: agents on different models each do the whole request, and the best answer wins or they''re merged. Empty is split.'}
+        models:
+          type: array
+          description: A race's models, one agent each, in order.
+          items: {type: string}
+        agents: {type: integer, minimum: 2, maximum: 8, description: The most agents. Empty is the profile's max_workers, or 4.}
+        tokens: {type: integer, minimum: 10000, maximum: 4000000, description: The most the whole swarm may use. Empty is 400000.}
+        minutes: {type: integer, minimum: 1, maximum: 240, description: The most a swarm may run. Empty is 5 for a question.}
     Memory:
       type: object
       description: One durable fact or preference.

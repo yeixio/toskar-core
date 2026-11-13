@@ -334,6 +334,12 @@ var deviceRoutes = map[string]bool{
 	// in one (#1136); changing a project is on the computer.
 	"GET /api/v1/projects":      true,
 	"GET /api/v1/projects/{id}": true,
+	// Swarms (#1135): start a question swarm, and read and stop its lanes;
+	// deleting one is on the computer. The person's role still applies.
+	"GET /api/v1/swarms":            true,
+	"POST /api/v1/swarms":           true,
+	"GET /api/v1/swarms/{id}":       true,
+	"POST /api/v1/swarms/{id}/stop": true,
 	// Auto-compact, for the phone's computer chats (#342).
 	"GET /api/v1/conversations/{id}/summary":       true,
 	"PUT /api/v1/conversations/{id}/summary":       true,

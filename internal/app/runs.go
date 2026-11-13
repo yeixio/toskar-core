@@ -107,6 +107,17 @@ func (a *App) StopChat(conversationID string) bool {
 	return true
 }
 
+// StopChatFor stops a conversation's running turn for the person asking:
+// another person's chat, such as an agent of their swarm (#1135), reads as
+// not running.
+func (a *App) StopChatFor(ctx context.Context, conversationID string) bool {
+	v, ok := a.runs.Load(conversationID)
+	if !ok || v.(*run).person != auth.PersonID(ctx) {
+		return false
+	}
+	return a.StopChat(conversationID)
+}
+
 // ChatTurn is what a conversation's turn has done so far (#1017). A chat
 // that isn't this person's is an error, even while it's running.
 func (a *App) ChatTurn(ctx context.Context, conversationID string) (contracts.ChatTurn, error) {

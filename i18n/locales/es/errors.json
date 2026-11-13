@@ -278,5 +278,7 @@
   "NEWS_UNAVAILABLE": "No se pudieron leer las noticias de IA de toskar.ai. Revisa la conexión a internet e inténtalo de nuevo.",
   "PROJECT_FILE_NOT_FOUND": "Ese archivo no está en el proyecto.",
   "PROJECT_NAME_REQUIRED": "Ponle un nombre al proyecto.",
-  "PROJECT_NOT_FOUND": "Ese proyecto se eliminó."
+  "PROJECT_NOT_FOUND": "Ese proyecto se eliminó.",
+  "SWARM_NOT_FOUND": "Ese enjambre se eliminó.",
+  "SWARM_RUNNING": "Este enjambre sigue en marcha. Detenlo primero."
 }

@@ -278,5 +278,7 @@
   "NEWS_UNAVAILABLE": "Non è stato possibile leggere le notizie sull’IA da toskar.ai. Controlla la connessione a Internet e riprova.",
   "PROJECT_FILE_NOT_FOUND": "Questo file non è nel progetto.",
   "PROJECT_NAME_REQUIRED": "Dai un nome al progetto.",
-  "PROJECT_NOT_FOUND": "Questo progetto è stato rimosso."
+  "PROJECT_NOT_FOUND": "Questo progetto è stato rimosso.",
+  "SWARM_NOT_FOUND": "Quello sciame è stato rimosso.",
+  "SWARM_RUNNING": "Questo sciame è ancora in esecuzione. Fermalo prima."
 }

@@ -629,6 +629,13 @@
     "capabilityOff": {
       "make_pictures": "Criar imagens está desativado para sua conta. Peça a {{admin}} ou a outro Admin para ativar.",
       "make_video": "Criar vídeos está desativado para sua conta. Peça a {{admin}} ou a outro Admin para ativar."
+    },
+    "swarm": {
+      "oneAtATime": "Um agente: este computador não consegue executar mais de um por vez com este modelo.",
+      "onePart": "Um agente: esta solicitação não se divide em partes que possam ser feitas separadamente.",
+      "oneModel": "Um agente: uma corrida precisa de pelo menos dois modelos para comparar.",
+      "taskLater": "Um agente: por enquanto, os enxames trabalham com perguntas. Um enxame para tarefas em uma pasta virá em uma versão futura.",
+      "noChat": "Um agente: um enxame mantém seus agentes em conversas, e esta solicitação não está salva em nenhuma."
     }
   },
   "steps": {

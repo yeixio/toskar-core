@@ -191,9 +191,9 @@ Control-plane routes are under `/api/v1`. The OpenAI-compatible routes are under
 
 | Method | Path | Purpose |
 | --- | --- | --- |
-| POST | `/chat` | Send a message through a profile. Takes `conversation_id`, `message`, `profile_id`, `model_id` (`auto` for Auto), `effort`, `attachments` (artifact ids), `execution` (where it runs), `time_zone` (the person's IANA time zone, such as `America/Juneau`; the app sends the browser's), `client` (the app asking: `phone`, `tablet`, `watch`, `car` (the phone app in CarPlay, contract 1.65), `tv`, `desktop`, or `web`; its run is traced with it, contract 1.30), `project_id` (one of the caller's [projects](#projects): a chat not yet in a project joins it, and without `conversation_id` the turn uses it without saving a chat; contract 1.87), and `stream`. Every turn is told the current date and time in that zone, or this computer's when it is empty or unknown; an automation's run uses its schedule's zone. Progress arrives on `/events`. |
-| POST | `/chat/stop` | Stop a conversation's running turn: `{"conversation_id": "..."}` returns `{"stopped": true}` when one was running |
-| GET, POST | `/conversations` | List or create chats. `?project_id=` lists one project's chats, and a new chat takes `project_id` to start in one of the caller's projects (contract 1.87, `404 PROJECT_NOT_FOUND` for another person's) |
+| POST | `/chat` | Send a message through a profile. Takes `conversation_id`, `message`, `profile_id`, `model_id` (`auto` for Auto), `effort`, `attachments` (artifact ids), `execution` (where it runs), `time_zone` (the person's IANA time zone, such as `America/Juneau`; the app sends the browser's), `client` (the app asking: `phone`, `tablet`, `watch`, `car` (the phone app in CarPlay, contract 1.65), `tv`, `desktop`, or `web`; its run is traced with it, contract 1.30), `project_id` (one of the caller's [projects](#projects): a chat not yet in a project joins it, and without `conversation_id` the turn uses it without saving a chat; contract 1.87), `swarm` (`split` or `race`: run the turn as a [swarm](#swarms); Members and up, contract 1.88), and `stream`. Every turn is told the current date and time in that zone, or this computer's when it is empty or unknown; an automation's run uses its schedule's zone. Progress arrives on `/events`. |
+| POST | `/chat/stop` | Stop a conversation's running turn: `{"conversation_id": "..."}` returns `{"stopped": true}` when one was running. Another person's chat reads as not running |
+| GET, POST | `/conversations` | List or create chats. A swarm's agents' chats are left out unless `?swarm_id=` names the swarm, which lists its coordinator's chat and its agents' (contract 1.88); a chat has `swarm_id` and `swarm_role` (`agent:N` for an agent's). `?project_id=` lists one project's chats, and a new chat takes `project_id` to start in one of the caller's projects (contract 1.87, `404 PROJECT_NOT_FOUND` for another person's) |
 | PATCH, DELETE | `/conversations/{id}` | Change a chat's `title`, `profile_id`, `model_id`, `memory_off`, `compact_off` (keep it verbatim: auto-compact never summarizes it, #342), `project` (the full path of a folder on this computer for it to work in, or empty for none; Admins, #1017, contract 1.85), or `project_id` (move it into one of the caller's projects, or empty to take it out; contract 1.87), or delete it with its files |
 | POST | `/conversations/delete` | Delete several chats at once, with their messages and files (#452, contract 1.25): `{"ids": [...]}`, 1 to 1,000. Answers `{"deleted": [...], "skipped": [{"id", "reason"}]}`; a chat that isn't the caller's, or doesn't exist, is skipped as `not_found`. Allowed wherever a single delete is: people, paired devices, and portal guests, each for their own chats. `INVALID_CONVERSATION_IDS` for none or too many |
 | GET | `/conversations/{id}/turn` | What the chat's running turn has done so far, for an app that opens it midway (#1017, contract 1.86): `running`, `started_at`, `steps` (`tool_id`, `summary`, `status`), the end of the running command's `output`, the answer's `text` so far, and `waiting`, each `tool.requested` still unanswered. Not running, only `running: false`; the messages have the rest. |
@@ -295,6 +295,16 @@ Uploads send `text`, or `content_base64` for binary files such as `.xlsx` and `.
 | DELETE | `/projects/{id}/files/{name}` | Remove a file (`PROJECT_FILE_NOT_FOUND` for one it doesn't have) |
 
 Visitors and up use their own projects (contract 1.87, #1136); another person's reads as `404 PROJECT_NOT_FOUND`. A phone's key lists them (`GET /projects`, `GET /projects/{id}`) and starts chats in them; a portal's guests have none.
+
+### Swarms
+
+| Method | Path | Purpose |
+| --- | --- | --- |
+| GET, POST | `/swarms` | The caller's swarms, newest first, `?project_id=` for one project's; or start one: `prompt`, and optionally `mode` (`split` or `race`), `conversation_id` (the caller's chat to run it in; empty starts one), `project_id` (for a chat not yet in a project), and `budget` (`agents`, `tokens`, `minutes`, and a race's `models`, as `orchestration.swarm`). Answers `202` with the swarm at once; its `agents` fill in when the coordinator has planned them |
+| GET, DELETE | `/swarms/{id}` | One swarm, with its `agents` (`agent`, `conversation_id`, `role`, `part`, `model_id`, `node_id`, `status`, `summary`, `tokens`, `seconds`), `status`, `winner` (a race's), `note`, totals, and `waiting`, each `tool.requested` its agents are still waiting on; or delete a finished one's record (`409 SWARM_RUNNING` while it runs). Its chats stay, as ordinary chats in its project |
+| POST | `/swarms/{id}/stop` | Stop every agent and the coordinator's turn: `{"stopped": true}` when anything was running. To stop one agent, stop its chat with `POST /chat/stop`; the others go on |
+
+Members and up start swarms (contract 1.88, #1135); a Visitor gets `403 ROLE_REQUIRED`, and a portal's guest `403 PORTAL_MEMBERS`. Another person's swarm reads as `404 SWARM_NOT_FOUND`. A phone's key lists and reads swarms, starts one, and stops one; deleting one is on the computer.
 
 ### Training
 
@@ -533,6 +543,19 @@ A project keeps related chats together with what they share (#1136): `instructio
 - **Folder:** the `X-Toskar-Project` header's folder, else the chat's `project`, else the project's `folder`, under the same rule as a chat's: for an Admin, on the web, desktop, and terminal.
 - **Memory:** with the project's memory on (`memory_off: false`, the default), the chat recalls the person's memories and the project's, and "Remember that…" saves to the project. Memories have `project_id`. Other chats never recall a project's memories, and "Forget…" looks where recall does. With it off, the project's chats neither read nor save project memory. The person's own memory follows the chat's `memory_off`, as before; with it off, "Remember that…" saves to the person's own memory.
 
+## Swarms
+
+A swarm is several agents working on one request at once (#1135, [features/swarms.md](features/swarms.md)). This version runs swarms on questions; a task in a folder, or from the terminal, runs as one task, and says a swarm for tasks comes in a later version.
+
+- **Asking for one:** `POST /chat` with `swarm`, `POST /swarms`, a profile whose `orchestration.strategy` is `swarm`, or a message that says "use a swarm" or "use N agents" (in English). Auto never chooses one. A profile's swarm, like Team, leaves a quick question to be answered directly.
+- **Split** (the default): the coordinator's planner splits the request into parts, each with a title and instructions, up to the swarm's agents. **Race:** each of `orchestration.swarm.models` does the whole request.
+- **Agents are chats:** each agent's turn is an ordinary chat turn in a chat of its own, in the coordinator chat's project, with `swarm_id` and `swarm_role` `agent:N`. A chat with no project gets one named after the job and moves into it. The agent's first message is the whole request, its part, and what the other agents are doing. Its tools ask as any chat's do; the chat can be opened and continued.
+- **Placement:** agents are placed one at a time as `agent:N` (a race's on its model). Agents on different computers, or on different models, run at once; agents that share a computer and a model run one after another there, since a model answers one request at a time. When nothing could run at once, the turn answers as one agent and says why under the answer: "One agent: this computer can't run more than one at a time with this model."
+- **Merge:** a split's finished answers are reference material for the coordinator's answer. A race's are compared as Deliberate's drafts are: a short final answer most agree on wins (`winner`); otherwise each is checked by another agent's model and the judge writes the answer.
+- **Budgets:** `orchestration.swarm.agents` (2–8; the profile's `max_workers`, else 4), `tokens` (10,000–4,000,000 for the whole swarm; 400,000), and `minutes` (1–240; 5 for a question). At a budget, agents still running stop, those queued don't start, both are `out_of_budget`, and the merge uses what finished.
+- **Approvals:** an agent's `tool.requested` has `swarm_id`, `agent` (such as "Agent 2: Reviews"), and `agent_number`. "Allow for this session" applies to that agent's chat alone.
+- **Stopping:** stopping an agent's chat stops that agent, and the merge goes on without it; stopping the coordinator's chat, or `POST /swarms/{id}/stop`, stops them all.
+
 ## Training and export
 
 See [Train Your Own AI](features/train-your-own-ai.md) for the workflow.
@@ -720,7 +743,7 @@ A profile's `orchestration` object holds its advanced controls. Every field is o
 
 | Field | Values | Effect |
 | --- | --- | --- |
-| `strategy` | `single`, `planned`, `team` | How a request is worked through. Empty is Auto. `single`: one model, no plan. `planned`: a request with several parts is always worked through in parts. `team`: a planner splits the request, workers do the parts, and a reviewer checks the answer; quick questions are still answered directly |
+| `strategy` | `single`, `planned`, `team`, `swarm` | How a request is worked through. Empty is Auto. `single`: one model, no plan. `planned`: a request with several parts is always worked through in parts. `team`: a planner splits the request, workers do the parts, and a reviewer checks the answer; quick questions are still answered directly. `swarm`: agents in chats of their own work at once ([Swarms](#swarms), contract 1.88); quick questions are still answered directly |
 | `effort` | `fast`, `balanced`, `thorough` | The profile's effort when a chat leaves effort on Auto |
 | `planning` | `on`, `off`, `always` | `on` works through requests with several parts in parts, whatever the effort; `always` also asks the planner model to split a request with no obvious parts |
 | `max_workers` | 2–8 | Most parts in a plan |
@@ -734,6 +757,7 @@ A profile's `orchestration` object holds its advanced controls. Every field is o
 | `fallback_models` | up to 8 model ids | Tried in order when the answering model fails, before Toskar picks another installed model |
 | `retries` | 1–3 | Tries after a model fails before showing anything (default 1). Each try first runs the same model on another online computer that has it, then another model |
 | `timeout_seconds` | 10–3600 | Stops a turn that runs longer; the answer so far is kept and says it reached the time limit |
+| `swarm` | `{mode, models, agents, tokens, minutes}` | A swarm's controls ([Swarms](#swarms), contract 1.88): `mode` `split` or `race` (empty is `split`), `models` a race's models in order (up to 8), `agents` 2–8, `tokens` 10,000–4,000,000, `minutes` 1–240 |
 
 Invalid values are refused with 400. In advanced mode, the profile editor has an Orchestration section, alongside model roles, tools, knowledge, and placement.
 
@@ -747,6 +771,7 @@ A profile's `roles` assign models, and optionally computers, to these roles. A r
 | `planner` | Splitting a request into parts |
 | `worker` | Each part of a plan. With the Team strategy or a worker model, each part gets its own slot (`worker:1`, `worker:2`, …) that Norn can place on another computer, and parts on different computers are written at the same time |
 | `reviewer` | Checking the answer |
+| `agent` | A swarm's agents (`agent:1`, `agent:2`, …), each placed on its own. A race uses `orchestration.swarm.models` in order instead |
 
 A profile's `node_policy` holds its placement rules:
 
@@ -815,7 +840,7 @@ A chat that fails while streaming sends `event: error_code` with the same `code`
 
 ## Events
 
-`GET /api/v1/events` is a server-sent event stream. Each event has `type`, `payload`, a timestamp, and `contract`. Clients should ignore types they do not know. Each person hears only their own chats, tasks, tool calls, memories, automations, and notifications (`chat.*`, `task.*`, `tool.*`, `agent.*`, `plan.*`, `orchestration.*`, `memory.*`, `automation.*`, `notification.*`, `artifact.*`); events about the computers and models go to everyone (#206).
+`GET /api/v1/events` is a server-sent event stream. Each event has `type`, `payload`, a timestamp, and `contract`. Clients should ignore types they do not know. Each person hears only their own chats, tasks, tool calls, memories, automations, and notifications (`chat.*`, `task.*`, `tool.*`, `agent.*`, `plan.*`, `orchestration.*`, `memory.*`, `automation.*`, `notification.*`, `artifact.*`, `swarm.*`); events about the computers and models go to everyone (#206).
 
 | Type | Sent when |
 | --- | --- |
@@ -827,13 +852,16 @@ A chat that fails while streaming sends `event: error_code` with the same `code`
 | `verify.action`, `verify.done`, `verify.code`, `verify.consistency` | The answer checks: figures, claimed actions, code, and contradictions |
 | `tool.requested`, `tool.started`, `tool.completed`, `tool.failed`, `tool.parsed` | A tool call waits for approval, runs, finishes, fails (with `kind`), or is read from text. On `tool.requested`, `always_asks` says no earlier answer covers this command, so don't offer to allow it for the session (`allow_session` is ignored), and `cant_undo` says it can't be undone |
 | `tool.completed` `exit` | A command that ended with a nonzero exit code says which (#1017, contract 1.84). |
-| `tool.decided` | A waiting tool was answered, from any app (#1017, contract 1.86): `request_id`, `tool_id`, `allow`, `conversation_id`. An app showing that question can put it away. |
+| `tool.decided` | A waiting tool was answered, from any app (#1017, contract 1.86): `request_id`, `tool_id`, `allow`, `conversation_id`, and a swarm agent's `swarm_id`. An app showing that question can put it away. |
+| `tool.requested` `swarm_id`, `agent` | A swarm agent's question says which swarm and agent asks (#1135, contract 1.88): `swarm_id`, `agent` (such as "Agent 2: Reviews"), and `agent_number`. |
 | `tool.output` | What a command in a task has written so far (#1017, contract 1.83): `text`, sent about five times a second, which can stop partway through a line and hold terminal control codes. Ordinary chats don't send it. |
 | `knowledge.retrieved`, `knowledge.failed` | Knowledge passages are added to a turn, or the search fails |
 | `memory.saved`, `memory.deleted` | A memory is saved or forgotten from a chat |
 | `orchestration.role` | A planner, worker, or reviewer starts, with the computer it runs on |
 | `plan.planner`, `answer.reviewed` | The planner split a request (`parts`); the reviewer checked an answer (`changed`) |
 | `deliberate.draft`, `deliberate.critique`, `deliberate.done` | Deliberate (#459): a draft starts (`status: running`) and finishes (`done` or `failed`, with `final`, `text`, and `chosen`), with `index`, `role`, and `node_id`; a draft is checked (`draft`, `critic`, `claims`, `disagreements`, `likely_errors`, `failed`); the drafts are settled (`drafts`, `agreeing`, `outcome`, `final`, and either `chosen` or `judged` with `judge_role` and `judge_node`) |
+| `swarm.started`, `swarm.agent.started`, `swarm.agent.progress`, `swarm.agent.finished`, `swarm.merging`, `swarm.finished` | A swarm (#1135, contract 1.88), each with `swarm_id` and the coordinator chat's `conversation_id`: it starts (`mode`, `budget`, and `agents`, each with `agent`, `conversation_id`, `part`, `role`, `model`, `node_id`, and `status` `running` or `queued`); an agent starts (`agent`, `agent_conversation_id`, `node_id`, `model`); an agent calls a tool (`agent`, `step`, `tool`, `summary`); an agent finishes (`agent`, `agent_conversation_id`, `status` `done`, `failed`, `stopped`, or `out_of_budget`, `summary`, `tokens`, `seconds`); the answers are merged (`mode`, `agents`); and it ends (`status`, `winner` for a race, `tokens`, `seconds`) |
+| `swarm.note` | A swarm asked for ran as one agent, with `reason` (`oneAtATime`, `onePart`, `oneModel`, `taskLater`, or `noChat`) and `note`, the line in English; the answer says it in the person's language |
 | `task.created`, `task.started`, `task.completed`, `task.failed` | An orchestration task changes state |
 | `scheduler.placement` | Norn places work on a computer |
 | `work.waiting` | Work waits for higher-priority work, with `class`, `label`, and `reason` |

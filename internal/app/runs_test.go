@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/yeixio/toskar-core/internal/auth"
 	"github.com/yeixio/toskar-core/internal/events"
 )
 
@@ -25,6 +26,22 @@ func TestStopChatCancelsTheRun(t *testing.T) {
 	}
 	if a.StopChat("other") {
 		t.Fatal("nothing runs in another chat")
+	}
+}
+
+// Stop from the API reaches the caller's own chats alone, such as a swarm's
+// agents (#1135): another person's reads as not running.
+func TestStopChatForIsThePersons(t *testing.T) {
+	a := &App{}
+	vee := auth.WithPrincipal(context.Background(), auth.Principal{Person: auth.Person{ID: "vee", Role: auth.RoleMember}})
+	sam := auth.WithPrincipal(context.Background(), auth.Principal{Person: auth.Person{ID: "sam", Role: auth.RoleAdmin}})
+	ctx, _, end := a.startRun(vee, "c1")
+	defer end()
+	if a.StopChatFor(sam, "c1") || ctx.Err() != nil {
+		t.Fatal("sam stopped vee's turn")
+	}
+	if !a.StopChatFor(vee, "c1") || ctx.Err() == nil {
+		t.Fatal("vee couldn't stop their own turn")
 	}
 }
 

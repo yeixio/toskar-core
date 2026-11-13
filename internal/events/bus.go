@@ -36,7 +36,7 @@ func (e Event) For(person string) Event {
 // asked, what was said, and what was done for them.
 var personalTypes = []string{
 	"chat.", "task.", "tool.", "agent.", "plan.", "orchestration.",
-	"memory.", "automation.", "notification.", "artifact.",
+	"memory.", "automation.", "notification.", "artifact.", "swarm.",
 }
 
 // Personal reports whether events of this type belong to someone.
@@ -213,7 +213,16 @@ type noteKey struct{}
 
 // WithNote has note hear what ctx's work publishes, however busy the bus is:
 // a chat's turn keeps what an app opening it later needs to see (#1017).
+// A note already on ctx, such as a swarm's for its agent's turn (#1135),
+// hears it too.
 func WithNote(ctx context.Context, note func(Event)) context.Context {
+	if outer, _ := ctx.Value(noteKey{}).(func(Event)); outer != nil {
+		inner := note
+		note = func(e Event) {
+			inner(e)
+			outer(e)
+		}
+	}
 	return context.WithValue(ctx, noteKey{}, note)
 }
 

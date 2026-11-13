@@ -126,6 +126,13 @@ var memberRoutes = map[string]bool{
 	"GET /api/v1/knowledge/sources/{id}/content": true,
 	"POST /api/v1/knowledge/search":              true,
 
+	// Swarms (#1135): Members and up start them, and use their own.
+	"GET /api/v1/swarms":            true,
+	"POST /api/v1/swarms":           true,
+	"GET /api/v1/swarms/{id}":       true,
+	"DELETE /api/v1/swarms/{id}":    true,
+	"POST /api/v1/swarms/{id}/stop": true,
+
 	"GET /api/v1/tools/{id}":      true,
 	"GET /api/v1/tools/providers": true,
 	"GET /api/v1/capabilities":    true,

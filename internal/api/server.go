@@ -167,8 +167,9 @@ type Dependencies struct {
 	ManageSubscription func(ctx context.Context) (url string, err error)
 	ShowVersion        func(ctx context.Context, conversationID, messageID string) ([]contracts.Message, error)
 	Chat               func(w http.ResponseWriter, r *http.Request, conversationID, profileID, modelID, message string, stream bool, execution string) error
-	// StopChat stops a conversation's running turn and reports whether one was running.
-	StopChat func(conversationID string) bool
+	// StopChat stops the caller's conversation's running turn and reports
+	// whether one was running. Another person's reads as not running.
+	StopChat func(ctx context.Context, conversationID string) bool
 	// ChatTurn is what a chat's running turn has done so far (#1017).
 	ChatTurn           func(ctx context.Context, conversationID string) (contracts.ChatTurn, error)
 	ListTasks          func(ctx context.Context) ([]contracts.Task, error)
@@ -274,6 +275,7 @@ type Server struct {
 
 	knowledge   KnowledgeService
 	projects    ProjectService
+	swarms      SwarmService
 	memory      *muninn.Store
 	artifacts   *artifacts.Store
 	speech      *speech.Engine
@@ -434,6 +436,7 @@ func (s *Server) routes() {
 	api.HandleFunc("/events", s.handleSSE).Methods(http.MethodGet, http.MethodOptions)
 	s.knowledgeRoutes(api)
 	s.projectRoutes(api)
+	s.swarmRoutes(api)
 	s.memoryRoutes(api)
 	s.artifactRoutes(api)
 	s.deviceRoutes(api)
@@ -1242,6 +1245,25 @@ func (s *Server) handleListConversations(w http.ResponseWriter, r *http.Request)
 	if err != nil {
 		writeErr(w, http.StatusInternalServerError, "CONVERSATIONS_LIST_FAILED", "Could not list conversations.", map[string]any{"cause": err.Error()})
 		return
+	}
+	// A swarm's agents' chats are listed with swarm_id (#1135); otherwise
+	// only its coordinator's is, as history shows.
+	if q := r.URL.Query(); q.Has("swarm_id") {
+		in := []contracts.Conversation{}
+		for _, c := range items {
+			if c.SwarmID == q.Get("swarm_id") && q.Get("swarm_id") != "" {
+				in = append(in, c)
+			}
+		}
+		items = in
+	} else {
+		in := []contracts.Conversation{}
+		for _, c := range items {
+			if c.SwarmRole == "" {
+				in = append(in, c)
+			}
+		}
+		items = in
 	}
 	// One project's chats (#1136).
 	if q := r.URL.Query(); q.Has("project_id") {

@@ -278,5 +278,7 @@
   "NEWS_UNAVAILABLE": "Impossible de lire les actualités de l’IA sur toskar.ai. Vérifiez la connexion Internet et réessayez.",
   "PROJECT_FILE_NOT_FOUND": "Ce fichier n'est pas dans le projet.",
   "PROJECT_NAME_REQUIRED": "Donnez un nom au projet.",
-  "PROJECT_NOT_FOUND": "Ce projet a été supprimé."
+  "PROJECT_NOT_FOUND": "Ce projet a été supprimé.",
+  "SWARM_NOT_FOUND": "Cet essaim a été supprimé.",
+  "SWARM_RUNNING": "Cet essaim est toujours en cours. Arrêtez-le d'abord."
 }
