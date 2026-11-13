@@ -26,7 +26,7 @@ import (
 type fakeChat struct {
 	mu        sync.Mutex
 	created   []string
-	sent      []api.ChatJSONRequestBody
+	sent      []chatRequest
 	decisions []string
 	events    chan api.Event
 	decided   chan struct{}
@@ -41,6 +41,8 @@ type fakeChat struct {
 	stops     chan struct{}
 	projs     []contracts.Project
 	moved     []string
+	swarms    map[string]contracts.Swarm
+	computers []contracts.Node
 }
 
 func newFakeChat() *fakeChat {
@@ -105,12 +107,28 @@ func (f *fakeChat) stop(id string) error {
 
 func (f *fakeChat) models() ([]contracts.Model, error) { return f.offered, nil }
 
-func (f *fakeChat) stream(ctx context.Context, req api.ChatJSONRequestBody) iter.Seq2[toskar.ChatStreamEvent, error] {
+func (f *fakeChat) swarm(id string) (contracts.Swarm, error) {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	s, ok := f.swarms[id]
+	if !ok {
+		return contracts.Swarm{}, errors.New("SWARM_NOT_FOUND")
+	}
+	return s, nil
+}
+
+func (f *fakeChat) nodes() ([]contracts.Node, error) { return f.computers, nil }
+
+func (f *fakeChat) stream(ctx context.Context, req chatRequest) iter.Seq2[toskar.ChatStreamEvent, error] {
 	f.mu.Lock()
 	f.sent = append(f.sent, req)
 	n := len(f.sent)
 	f.mu.Unlock()
 	return func(yield func(toskar.ChatStreamEvent, error) bool) {
+		if req.Swarm != "" && strings.Contains(req.Message, "fix the sums") {
+			f.swarmTurn(ctx, *req.ConversationId, yield)
+			return
+		}
 		if strings.Contains(req.Message, "change it") {
 			for _, e := range []toskar.ChatStreamEvent{
 				{Type: "token", Content: "Let me "}, {Type: "token", Content: "check."}, {Type: "replace"},

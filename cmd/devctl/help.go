@@ -54,7 +54,7 @@ var helpGroups = []helpGroup{
 		},
 		{
 			name: "chat", summary: "Hold a conversation in the terminal, in the same chats as the apps",
-			about: "Chats with Toskar in the terminal: one begun here continues on your phone and back. A tool that asks first, such as running code, shows what it would do and waits for y, n, or a (always, in this chat). Piped in, it answers once, with what's piped as data to work on. If Toskar isn't running on this computer, it starts it, and Toskar stays running after the chat. With --project, it starts or continues in one of your projects, and still works in the folder you're in.\n\nWhile chatting: /new, /model id, /profile id, /attach path, /project name (none to take the chat out; alone, it says which), /log, /help, and /exit (or Ctrl-D).",
+			about: "Chats with Toskar in the terminal: one begun here continues on your phone and back. A tool that asks first, such as running code, shows what it would do and waits for y, n, or a (always, in this chat). Piped in, it answers once, with what's piped as data to work on. If Toskar isn't running on this computer, it starts it, and Toskar stays running after the chat. With --project, it starts or continues in one of your projects, and still works in the folder you're in. With --swarm, several agents work on each message at once, each shown as a line updated in place, then the answer comes.\n\nWhile chatting: /new, /model id, /profile id, /attach path, /project name (none to take the chat out; alone, it says which), /swarm [split|race|off] (a swarm for the next message), /agents (the last swarm's agents), /open N (continue agent N's chat), /back, /log, /help, and /exit (or Ctrl-D).",
 			usage: []string{"toskarctl chat [flags] [message]"},
 			flags: []helpFlag{
 				{"--resume [id]", "continue a chat: its id, or pick from recent ones"},
@@ -62,6 +62,7 @@ var helpGroups = []helpGroup{
 				{"--profile id", "answer as this profile"},
 				{"--file path", "data to work on with the first message"},
 				{"--project name", "start or continue in a project: its name or id"},
+				{"--swarm [split|race]", "send each message to a swarm of agents (default split)"},
 			},
 			examples: []string{`echo "Build failed on line 12" | toskarctl chat "Why did this fail?"`},
 		},

@@ -72,7 +72,8 @@ func TestBashCompletionCandidates(t *testing.T) {
 		want string
 	}{
 		{"toskarctl ''", "version about paths ask chat projects connect models automations mcp join join-token network leave people completion help"},
-		{"toskarctl chat --", "--resume --model --profile --file --project"},
+		{"toskarctl chat --", "--resume --model --profile --file --project --swarm"},
+		{"toskarctl chat --swarm ''", "split race"},
 		{"toskarctl p", "paths projects people"},
 		{"toskarctl projects ''", "list"},
 		{"toskarctl projects --o", "--output"},
