@@ -166,8 +166,8 @@ These are on the event stream with `swarm_id`:
     - `raw:` keeps its meaning: this computer, one model.
   - **`swarm:<profile>` without client tools:** a full swarm run (Split, or Race when the profile says so). It returns the coordinator's answer, and streams progress as reasoning text where the format has it.
 - **`POST /api/v1/swarms`** is for apps that want the lanes. It takes `{prompt, mode, project_id?, conversation_id?, budget?}` and returns the swarm with its agents. `GET /api/v1/swarms/{id}` returns the current state.
-- **MCP:** a `run_swarm` tool in `/mcp` (`internal/mcp/server.go`), so `toskarctl mcp` has it too. It takes `{prompt, mode?}` and returns the answer and a link to the coordinator chat.
-- **`toskarctl connect`** gains a choice that sets the agent's subagent or fast model to `swarm:<profile>`.
+- **MCP:** a `run_swarm` tool in `/mcp` (`internal/mcp/server.go`), so `toskarctl mcp` has it too. It takes `{prompt, mode?, profile?}` and returns the answer and a link to the coordinator chat.
+- **`toskarctl connect`** gains `--swarm <profile>`, which sets the agent's subagent model to `swarm:<profile>`: Claude Code's `CLAUDE_CODE_SUBAGENT_MODEL`. Its fast model stays the agent's, since its background requests have no tools and would each run a whole swarm.
 
 ## Chat and tasks
 

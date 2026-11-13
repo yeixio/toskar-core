@@ -103,6 +103,23 @@ toskarctl connect claude-code --write
 
 Printed settings name `$TOSKAR_API_KEY` rather than showing the key. With `--write`, Claude Code's settings hold the key itself, in `.claude/settings.local.json`, which stays out of git. Codex always reads it from the environment. Both agents were checked this way, from this Mac's own network address with a key, and answered as above.
 
+## Subagents at once, with a swarm
+
+Claude Code starts subagents for parts of a job, often several at a time. On one model on one computer they wait for each other. A profile's swarm spreads them over your computers and models instead (#1135):
+
+1. In Profiles & Orchestration, give a profile the Swarm strategy and its models, ideally on more than one computer, or more than one model.
+2. Point the subagents at it, by the profile's id or its name with dashes, such as `coding-swarm`:
+
+   ```sh
+   toskarctl connect claude-code --swarm coding-swarm --write
+   ```
+
+   This adds `CLAUDE_CODE_SUBAGENT_MODEL=swarm:coding-swarm`. Claude Code's own model, and its fast model for background requests, stay as they were.
+
+Each subagent request brings Claude Code's tools, so it goes as it is to the least busy of the profile's computers and models, and its answer comes back unchanged. Two subagents started together run at the same time on different ones. Toskar's log names the computer and model for each.
+
+Any agent can use `swarm:<profile>` as a model name in the same way, such as Codex's `model` in its `toskar` profile, or an OpenAI-compatible agent's model field with `swarm:` in place of `raw:`. Requests that bring tools are spread. A request without tools runs a whole swarm on its last message, which takes longer, and answers with the swarm's answer, with the agents' progress as its reasoning. That's why `--swarm` leaves the fast model alone: its requests, such as naming a chat, have no tools. On another computer, the key needs raw access for spread requests, and a whole swarm needs a Member or an Admin ([API](../api.md#swarms-from-editor-agents-1135)).
+
 ## Choosing a model
 
 - **Give the model's id, not a profile or `auto`.** Agents send their own tools and instructions, and Toskar passes them straight to the model.

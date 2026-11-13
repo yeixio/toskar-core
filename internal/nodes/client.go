@@ -289,6 +289,54 @@ func (c *Client) Chat(ctx context.Context, req RemoteChatRequest) (<-chan plugin
 	return ch, nil
 }
 
+// RemoteRawRequest asks a paired computer to send a raw request (#843) to
+// its own runtime for an installed model: Spread, an editor agent's
+// subagent request on swarm:<profile> (#1135). Body is the Chat Completions
+// body llama-server takes, as the agent sent it; Need is the least window,
+// in tokens, the request wants.
+type RemoteRawRequest struct {
+	ModelID           string          `json:"model_id"`
+	Need              int             `json:"need,omitempty"`
+	Body              json.RawMessage `json:"body"`
+	RequesterNodeID   string          `json:"requester_node_id,omitempty"`
+	RequesterNodeName string          `json:"requester_node_name,omitempty"`
+}
+
+// RawForwardedHeader marks a raw answer that came from the paired
+// computer's runtime, whatever its status, so the caller passes it on as
+// the runtime gave it. An answer without it is the paired computer's own
+// error.
+const RawForwardedHeader = "Toskar-Raw-Forwarded"
+
+// Raw sends a raw request to the paired computer's runtime and returns the
+// runtime's answer as it streams, for the caller to close. The paired
+// computer's own refusals, such as a model it doesn't have, come back as
+// errors with its code.
+func (c *Client) Raw(ctx context.Context, req RemoteRawRequest) (*http.Response, error) {
+	body, err := json.Marshal(req)
+	if err != nil {
+		return nil, err
+	}
+	httpReq, err := http.NewRequestWithContext(ctx, http.MethodPost, c.baseURL+"/internal/v1/raw", bytes.NewReader(body))
+	if err != nil {
+		return nil, err
+	}
+	httpReq.Header.Set("Content-Type", "application/json")
+	httpReq.Header.Set("Accept", "application/json")
+	c.applyAuth(httpReq)
+	// An answer streams for as long as it takes; the context ends it.
+	resp, err := (&http.Client{Timeout: 0, Transport: c.http.Transport}).Do(httpReq)
+	if err != nil {
+		return nil, err
+	}
+	if resp.Header.Get(RawForwardedHeader) == "" && resp.StatusCode >= 400 {
+		b, _ := io.ReadAll(resp.Body)
+		resp.Body.Close()
+		return nil, responseError(resp.StatusCode, b, false)
+	}
+	return resp, nil
+}
+
 func (c *Client) getJSON(ctx context.Context, path string, v any, auth bool) error {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, c.baseURL+path, nil)
 	if err != nil {

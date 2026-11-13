@@ -13,6 +13,7 @@ import (
 	"github.com/yeixio/toskar-core/internal/huginn"
 	"github.com/yeixio/toskar-core/internal/mcp"
 	"github.com/yeixio/toskar-core/internal/mimir"
+	"github.com/yeixio/toskar-core/internal/swarm"
 	"github.com/yeixio/toskar-core/internal/turnopts"
 	"github.com/yeixio/toskar-core/internal/version"
 	"github.com/yeixio/toskar-core/pkg/pluginapi"
@@ -25,6 +26,7 @@ func (a *App) mcpBackend() mcp.Backend {
 		Ask:       a.mcpAsk,
 		Models:    a.mcpModels,
 		Search:    a.mcpSearch,
+		RunSwarm:  a.mcpRunSwarm,
 		Authorize: a.mcpAuthorize,
 		Version:   version.Version,
 	}
@@ -101,6 +103,52 @@ func (a *App) mcpAsk(ctx context.Context, prompt, model string) (string, error) 
 		return "", errors.New("the local AI did not answer")
 	}
 	return answer, nil
+}
+
+// mcpRunSwarm runs a question swarm for another app (#1135), within its
+// key's permissions as mcpAsk does: its agents only read, and a key pinned
+// to a profile runs it with that profile alone. Starting one needs the
+// member role, as POST /swarms does.
+func (a *App) mcpRunSwarm(ctx context.Context, prompt, mode, profile string) (mcp.SwarmAnswer, error) {
+	perms := mcpPerms(ctx)
+	if perms.Profile != "" {
+		if profile != "" && profile != perms.Profile {
+			return mcp.SwarmAnswer{}, auth.ErrProfilePinned
+		}
+		profile = perms.Profile
+	}
+	opts := &turnopts.Options{
+		Memory:        perms.Memory == auth.UseAlways,
+		Knowledge:     perms.Knowledge != auth.UseNever,
+		ReadOnlyTools: true,
+	}
+	if perms.Tools == auth.ToolsNone {
+		opts.Tools = []string{}
+	}
+	ctx = swarm.WithMode(turnopts.With(ctx, opts), mode)
+	stream, conversationID, err := a.swarmTurn(ctx, profile, prompt)
+	if err != nil {
+		return mcp.SwarmAnswer{}, err
+	}
+	var b strings.Builder
+	var failure string
+	for chunk := range stream {
+		if chunk.Error != "" {
+			failure = chunk.Error
+		}
+		if chunk.Replace {
+			b.Reset()
+		}
+		b.WriteString(chunk.Content)
+	}
+	if failure != "" {
+		return mcp.SwarmAnswer{}, errors.New(failure)
+	}
+	answer := strings.TrimSpace(b.String())
+	if answer == "" {
+		return mcp.SwarmAnswer{}, errors.New("the swarm did not answer")
+	}
+	return mcp.SwarmAnswer{Answer: answer, ConversationID: conversationID}, nil
 }
 
 func (a *App) mcpModels(ctx context.Context) ([]mcp.ModelInfo, error) {

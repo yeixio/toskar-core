@@ -304,6 +304,8 @@ Visitors and up use their own projects (contract 1.87, #1136); another person's 
 | GET, DELETE | `/swarms/{id}` | One swarm, with its `agents` (`agent`, `conversation_id`, `role`, `part`, `model_id`, `node_id`, `status`, `summary`, `tokens`, `seconds`, and in a task `paths`, `branch`, and a race's `checks`), `status`, `winner` (a race's), `note`, totals, `waiting`, each `tool.requested` its agents are still waiting on, and in a task `folder`, `branch`, `checks`, `conflicts` (`agent`, `branch`, `files`), and `applied` ([Tasks in a folder](#tasks-in-a-folder)); or delete a finished one's record and the branches it kept (`409 SWARM_RUNNING` while it runs). Its chats stay, as ordinary chats in its project |
 | POST | `/swarms/{id}/stop` | Stop every agent and the coordinator's turn: `{"stopped": true}` when anything was running. To stop one agent, stop its chat with `POST /chat/stop`; the others go on |
 
+Editor agents reach a swarm through the raw formats as `swarm:<profile>` ([Swarms from editor agents](#swarms-from-editor-agents-1135)), and other apps through MCP's `run_swarm`.
+
 Members and up start swarms (contract 1.88, #1135); a Visitor gets `403 ROLE_REQUIRED`, and a portal's guest `403 PORTAL_MEMBERS`. Another person's swarm reads as `404 SWARM_NOT_FOUND`. A phone's key lists and reads swarms, starts one, and stops one; deleting one is on the computer.
 
 ### Training
@@ -917,7 +919,7 @@ Returns `auto` and profiles, not raw files on disk:
 }
 ```
 
-Built-in profile ids include `general-assistant`, `programming`, and `research`. `owned_by` stays `yggdrasil` for contract 1.x, since clients may match on it.
+Built-in profile ids include `general-assistant`, `programming`, and `research`. A profile whose strategy is swarm is listed as `swarm:<id>` too ([Swarms from editor agents](#swarms-from-editor-agents-1135)). `owned_by` stays `yggdrasil` for contract 1.x, since clients may match on it.
 
 ### `POST /v1/chat/completions`
 
@@ -1048,6 +1050,28 @@ Coding agents and editors run their own tools: they send `tools`, expect `tool_c
 
   Each event has a `sequence_number`.
 - Errors use OpenAI's shape, as `/v1/chat/completions` does.
+
+### Swarms from editor agents (#1135)
+
+An editor agent, such as Claude Code or Codex, starts subagents that send their requests at the same time. With one model on one computer they wait on each other. `"model": "swarm:<profile>"` on any of the three formats, `/v1/chat/completions`, `/v1/messages`, and `/v1/responses`, puts a profile's swarm behind them instead (contract 1.88). `<profile>` is the profile's id, or its name as a slug, such as `coding-swarm` for "Coding swarm". The profile's strategy doesn't have to be swarm; its swarm controls apply, with their defaults when it has none. A name that isn't a profile answers `404 MODEL_NOT_FOUND`.
+
+- **Spread, with the agent's tools:** a request that sends `tools`, or whose conversation has tool calls or results, goes to the least busy of the profile's swarm models and computers that fits. The models are `orchestration.swarm.models`, else the profile's roles' models. Norn scores each computer that's on and has one of them installed, by fit and load, as it places a chat, and a computer and model with a free slot comes first. A model on a computer answers as many requests at once as it has slots; with every one busy, the request waits for the shortest line. The body goes as it came, as `raw:<model>` would send it, to this computer's runtime or a paired computer's, over the same signed, pinned link chat uses. The answer comes back as the runtime gave it, in the request's format, streamed or not, with `model` set to `swarm:<profile>`. Spread follows raw's rules: the key needs the `raw` permission, and a key pinned to a profile can't. None of the profile's models on a computer that's on answers `404 MODEL_NOT_FOUND`.
+- **A full swarm, without tools:** a request with no tools runs a question swarm on its last user message, with its earlier messages as the conversation, in the mode the profile says (Split unless it says Race). It answers with the coordinator's answer, in the request's format. Its progress comes first, as reasoning: when it starts, which agents run on which models, which wait for a slot, each agent's steps and results, and the merge.
+  - Chat Completions: `reasoning_content`, on the message or streamed as deltas before the answer. The coordinator's chat is `toskar.conversation_id`.
+  - Messages: a `thinking` block before the `text`, streamed as `thinking_delta`s.
+  - Responses: a `reasoning` item with a `summary_text`, before the `message`, streamed as `response.reasoning_summary_text.delta`s.
+
+  A swarm keeps its agents in chats, so the coordinator's is a new chat, with the request's earlier messages, in a project named after the job, as `POST /api/v1/swarms` makes one. Its first progress line links it, `/chat?c=<id>`. A full swarm follows `profile:`'s rules: a key pinned to a profile may name only its own, and it needs the member role (`403 ROLE_REQUIRED`). A chat-only key saves no chats, so it answers `403 KEY_CHAT_ONLY`.
+- **Listed:** `GET /v1/models` lists `swarm:<id>` for each profile whose strategy is swarm.
+- **Where it ran:** each Spread request is logged with its computer and model.
+
+`toskarctl connect claude-code --swarm <profile>` points Claude Code's subagents at it ([Command line](cli.md#connect-a-coding-agent)), and MCP's `run_swarm` runs a full swarm from another app ([MCP](mcp.md)).
+
+```sh
+curl -s http://127.0.0.1:7331/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{"model": "swarm:general-assistant", "messages": [{"role": "user", "content": "Plan a three-day trip to Juneau"}]}'
+```
 
 ## GPU acceleration
 

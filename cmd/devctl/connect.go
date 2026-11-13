@@ -6,11 +6,13 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"net/http"
 	"net/url"
 	"os"
 	"path/filepath"
 	"sort"
 	"strings"
+	"unicode"
 
 	"github.com/yeixio/toskar-core/internal/config"
 	"github.com/yeixio/toskar-core/pkg/contracts"
@@ -38,6 +40,12 @@ editors (#960), through Chat Completions; these print what to enter:
 flags:
   --model id    the model; by default, the best installed one for coding
                 agents: it calls tools, is made for code, and fits well
+  --swarm profile
+                point the agent's subagents at swarm:<profile> (#1135), so
+                the requests they send at once run at once, spread across
+                the profile's swarm models and computers (Spread); the
+                agent's own model stays as it is. For agents with a separate
+                subagent model: claude-code (CLAUDE_CODE_SUBAGENT_MODEL)
   --write       write the settings instead of printing them:
                   claude-code  .claude/settings.local.json in this folder
                   opencode     opencode.json in this folder
@@ -64,6 +72,9 @@ type connectTarget struct {
 	// window is the context window the model starts with on Toskar, for an
 	// editor that's told it (#962), or 8192 when it isn't known.
 	window int
+	// swarm is the profile the agent's subagents use, as swarm:<profile>
+	// (#1135), or "".
+	swarm string
 }
 
 // connectAgent prints an agent's settings and, for most, writes them.
@@ -71,10 +82,13 @@ type connectAgent struct {
 	name  string
 	print func(t connectTarget) string
 	write func(t connectTarget, dir, home string) (string, error)
+	// subagents says the agent has a model setting of its own for its
+	// subagents, which --swarm sets.
+	subagents bool
 }
 
 var connectAgents = map[string]connectAgent{
-	"claude-code": {name: "Claude Code", print: claudeCodePrint, write: claudeCodeWrite},
+	"claude-code": {name: "Claude Code", print: claudeCodePrint, write: claudeCodeWrite, subagents: true},
 	"codex":       {name: "Codex CLI", print: codexPrint, write: codexWrite},
 	"opencode":    {name: "OpenCode", print: openCodePrint, write: openCodeWrite},
 	"aider":       {name: "Aider", print: aiderPrint},
@@ -105,10 +119,21 @@ func connectCommand(args []string, client daemonClient, out io.Writer, dir, home
 	fs.SetOutput(io.Discard)
 	model := fs.String("model", "", "")
 	write := fs.Bool("write", false, "")
+	swarmProfile := fs.String("swarm", "", "")
 	if err := fs.Parse(args[1:]); err != nil || fs.NArg() > 0 {
 		return &exitError{code: 2, msg: connectUsage}
 	}
 	t := connectTarget{base: client.base, model: strings.TrimPrefix(*model, "raw:"), key: config.Env("API_KEY")}
+	if *swarmProfile != "" {
+		if !agent.subagents {
+			return fmt.Errorf("%s has no model setting of its own for subagents, so --swarm can't point them at a swarm; to spread all its requests instead, use swarm:%s as its model in place of raw:<model>", agent.name, strings.TrimPrefix(*swarmProfile, "swarm:"))
+		}
+		profile, err := swarmProfileID(client, strings.TrimPrefix(*swarmProfile, "swarm:"))
+		if err != nil {
+			return err
+		}
+		t.swarm = profile
+	}
 	t.keyFromEnv = t.key != ""
 	if t.key == "" {
 		if !onThisComputer(t.base) {
@@ -146,6 +171,9 @@ func connectCommand(args []string, client daemonClient, out io.Writer, dir, home
 		return err
 	}
 	fmt.Fprintf(out, "Wrote %s's Toskar settings to %s, with %s.\n", agent.name, path, t.model)
+	if t.swarm != "" {
+		fmt.Fprintf(out, "Its subagents use swarm:%s: the requests they send at once run at once across that profile's models and computers.\n", t.swarm)
+	}
 	if args[0] == "codex" {
 		fmt.Fprintln(out, "Run: codex --profile toskar")
 	}
@@ -156,6 +184,44 @@ func connectCommand(args []string, client daemonClient, out io.Writer, dir, home
 		fmt.Fprintln(out, "It holds your API key: Claude Code keeps settings.local.json out of git, so keep it that way.")
 	}
 	return nil
+}
+
+// swarmProfileID is the profile --swarm names, by id or by its name as a
+// slug, such as code-review for "Code review", as swarm:<profile> takes
+// it. A profile Toskar doesn't have is an error that lists those it has.
+func swarmProfileID(client daemonClient, ref string) (string, error) {
+	var list []contracts.AIProfile
+	if err := client.call(http.MethodGet, "/profiles", nil, &list); err != nil {
+		// A key that can't list profiles can still name one.
+		return ref, nil
+	}
+	var names []string
+	for _, p := range list {
+		if p.ID == ref || profileSlug(p.Name) == strings.ToLower(ref) {
+			return p.ID, nil
+		}
+		names = append(names, p.ID)
+	}
+	return "", fmt.Errorf("Toskar has no profile %q; its profiles are: %s", ref, strings.Join(names, ", ")) //nolint:staticcheck // ST1005: a sentence
+}
+
+// profileSlug is a profile's name as a model name takes it: lower case,
+// with dashes between words, as Core matches swarm:<profile>.
+func profileSlug(name string) string {
+	var b strings.Builder
+	dash := false
+	for _, r := range strings.ToLower(name) {
+		if unicode.IsLetter(r) || unicode.IsDigit(r) {
+			if dash && b.Len() > 0 {
+				b.WriteByte('-')
+			}
+			b.WriteRune(r)
+			dash = false
+			continue
+		}
+		dash = true
+	}
+	return b.String()
 }
 
 // onThisComputer reports a Toskar address on this computer.
@@ -214,8 +280,14 @@ func shellKey(t connectTarget) string {
 // claudeEnv is what Claude Code reads to use Toskar: its address (Claude
 // Code adds /v1/messages), the key, and the model for every role it might
 // pick, so background and subagent work reaches Toskar too.
+//
+// With --swarm, its subagents use swarm:<profile> (#1135). They always send
+// their tools, so each request is spread to the least busy of the
+// profile's models and computers, and the subagents run at once. The fast
+// model stays the agent's: its background requests, such as a title, have
+// no tools, and swarm:<profile> would run a whole swarm for each.
 func claudeEnv(t connectTarget, key string) [][2]string {
-	return [][2]string{
+	env := [][2]string{
 		{"ANTHROPIC_BASE_URL", t.base},
 		{"ANTHROPIC_AUTH_TOKEN", key},
 		{"ANTHROPIC_MODEL", t.model},
@@ -223,11 +295,18 @@ func claudeEnv(t connectTarget, key string) [][2]string {
 		{"ANTHROPIC_DEFAULT_SONNET_MODEL", t.model},
 		{"ANTHROPIC_DEFAULT_HAIKU_MODEL", t.model},
 	}
+	if t.swarm != "" {
+		env = append(env, [2]string{"CLAUDE_CODE_SUBAGENT_MODEL", "swarm:" + t.swarm})
+	}
+	return env
 }
 
 func claudeCodePrint(t connectTarget) string {
 	var b strings.Builder
 	fmt.Fprintf(&b, "# Claude Code with %s on Toskar, through Anthropic's Messages format.\n", t.model)
+	if t.swarm != "" {
+		fmt.Fprintf(&b, "# Its subagents use swarm:%s: those it starts at once run at once, across that profile's models and computers.\n", t.swarm)
+	}
 	b.WriteString("# Set these, then run claude; or write them for this folder: toskarctl connect claude-code --write\n")
 	for _, kv := range claudeEnv(t, shellKey(t)) {
 		fmt.Fprintf(&b, "export %s=%s\n", kv[0], kv[1])

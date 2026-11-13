@@ -60,6 +60,18 @@ type Handler struct {
 	// RawModels are the chat models installed on this computer, which a key
 	// with raw access sees in /v1/models as raw:<id> (#843).
 	RawModels func(ctx context.Context) []string
+	// Spread readies a swarm:<profile> request that brings its own tools
+	// (#1135): on the least busy of the profile's swarm models and computers
+	// that fits, on this computer or a paired one. It returns ErrSwarmProfile
+	// for a profile there isn't, ErrRawNotHere when no computer has one of its
+	// models, and ErrRawTooLong when none fits the request.
+	Spread func(ctx context.Context, profile string, need int) (RawRoute, error)
+	// Swarm runs a full swarm for a swarm:<profile> request without tools
+	// (#1135), on prompt, the request's last user message, with the turn
+	// options in ctx (the earlier messages, the key's permissions, and
+	// progress). It returns the coordinator's answer as it streams and its
+	// chat's id, or ErrSwarmProfile.
+	Swarm func(ctx context.Context, profile, prompt string) (<-chan pluginapi.ChatChunk, string, error)
 	// ErrorCode is the stable code for a chat error's text, as chat streams
 	// give it (#588), such as CONTEXT_TOO_LONG, or "".
 	ErrorCode func(text string) string
@@ -144,9 +156,11 @@ func (h *Handler) HandleModels(w http.ResponseWriter, r *http.Request) {
 	}
 	// A key pinned to a profile sees only it (#345).
 	if perms.Profile != "" {
-		writeJSON(w, map[string]any{"object": "list", "data": []map[string]any{
-			{"id": "profile:" + perms.Profile, "object": "model", "owned_by": "yggdrasil"},
-		}})
+		data := []map[string]any{{"id": "profile:" + perms.Profile, "object": "model", "owned_by": "yggdrasil"}}
+		if p, err := h.Profiles.Get(r.Context(), perms.Profile); err == nil && p.Orchestration.Strategy == profiles.StrategySwarm {
+			data = append(data, map[string]any{"id": SwarmPrefix + p.ID, "object": "model", "owned_by": "yggdrasil"})
+		}
+		writeJSON(w, map[string]any{"object": "list", "data": data})
 		return
 	}
 	items, err := h.Profiles.List(r.Context())
@@ -165,6 +179,13 @@ func (h *Handler) HandleModels(w http.ResponseWriter, r *http.Request) {
 			"object":   "model",
 			"owned_by": "yggdrasil",
 		})
+	}
+	// A profile whose strategy is swarm is a model editor agents can point
+	// their subagents at (#1135).
+	for _, p := range items {
+		if p.Orchestration.Strategy == profiles.StrategySwarm {
+			data = append(data, map[string]any{"id": SwarmPrefix + p.ID, "object": "model", "owned_by": "yggdrasil"})
+		}
 	}
 	if h.Specialized != nil {
 		if deployed, err := h.Specialized(r.Context()); err == nil {
@@ -246,6 +267,17 @@ func (h *Handler) HandleChatCompletions(w http.ResponseWriter, r *http.Request) 
 	}
 	if strings.HasPrefix(req.Model, RawPrefix) {
 		h.handleRaw(w, r, perms, req, body, sampling.MaxTokens)
+		return
+	}
+	// swarm:<profile> (#1135): an editor agent's request with its own tools
+	// is spread across the profile's models and computers, as raw; one
+	// without them runs a full swarm.
+	if strings.HasPrefix(req.Model, SwarmPrefix) {
+		if forward, err := rawBody(body); err == nil && clientTools(forward) {
+			h.handleRaw(w, r, perms, req, body, sampling.MaxTokens)
+			return
+		}
+		h.handleSwarm(w, r, perms, req, sampling)
 		return
 	}
 	profileID := ""

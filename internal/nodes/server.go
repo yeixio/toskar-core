@@ -47,6 +47,10 @@ type InternalDeps struct {
 	StartModel     func(ctx context.Context, modelID string) (contracts.RunningModelView, error)
 	StopModel      func(ctx context.Context, instanceID string) error
 	Chat           func(ctx context.Context, req RemoteChatRequest) (<-chan pluginapi.ChatChunk, error)
+	// Raw sends a raw request to this computer's runtime for an installed
+	// model and returns the runtime's answer, for Spread (#1135). Its
+	// errors carry a code: MODEL_NOT_FOUND or CONTEXT_TOO_LONG.
+	Raw func(ctx context.Context, req RemoteRawRequest) (*http.Response, error)
 
 	// The pairing routes answer before trust exists. Each checks the
 	// other computer's signature and limits attempts by source address.
@@ -104,6 +108,7 @@ func NewInternalServer(deps InternalDeps) *InternalServer {
 	api.HandleFunc("/models/{id}/start", s.handleStartModel).Methods(http.MethodPost)
 	api.HandleFunc("/models/instances/{id}/stop", s.handleStopModel).Methods(http.MethodPost)
 	api.HandleFunc("/chat", s.handleChat).Methods(http.MethodPost)
+	api.HandleFunc("/raw", s.handleRaw).Methods(http.MethodPost)
 	api.HandleFunc("/pairing/offer", s.handlePairingOffer).Methods(http.MethodPost)
 	api.HandleFunc("/pairing/complete", s.handlePairingComplete).Methods(http.MethodPost)
 	api.HandleFunc("/pairing/outbound/{code}", s.handlePairingOutbound).Methods(http.MethodGet)
@@ -449,6 +454,62 @@ func (s *InternalServer) handleChat(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 }
+
+// handleRaw passes a raw request to this computer's runtime and its answer
+// back as the runtime gives it, streamed or not (Spread, #1135).
+func (s *InternalServer) handleRaw(w http.ResponseWriter, r *http.Request) {
+	if s.deps.Raw == nil {
+		peerError(w, r, http.StatusNotImplemented, "PEER_UNAVAILABLE", errors.New("unavailable"))
+		return
+	}
+	var req RemoteRawRequest
+	if err := json.NewDecoder(io.LimitReader(r.Body, maxRawBody)).Decode(&req); err != nil {
+		peerError(w, r, http.StatusBadRequest, "INVALID_BODY", errors.New("invalid body"))
+		return
+	}
+	if req.ModelID == "" || len(req.Body) == 0 {
+		peerError(w, r, http.StatusBadRequest, "BAD_REQUEST", errors.New("model_id and body required"))
+		return
+	}
+	resp, err := s.deps.Raw(r.Context(), req)
+	if err != nil {
+		status := http.StatusBadGateway
+		switch code, _ := contracts.ErrorCode(err); code {
+		case "MODEL_NOT_FOUND":
+			status = http.StatusNotFound
+		case "CONTEXT_TOO_LONG":
+			status = http.StatusBadRequest
+		}
+		peerError(w, r, status, "PEER_FAILED", err)
+		return
+	}
+	defer resp.Body.Close()
+	if ct := resp.Header.Get("Content-Type"); ct != "" {
+		w.Header().Set("Content-Type", ct)
+	}
+	w.Header().Set(RawForwardedHeader, "1")
+	w.WriteHeader(resp.StatusCode)
+	flusher, _ := w.(http.Flusher)
+	buf := make([]byte, 32<<10)
+	for {
+		n, err := resp.Body.Read(buf)
+		if n > 0 {
+			if _, werr := w.Write(buf[:n]); werr != nil {
+				return
+			}
+			if flusher != nil {
+				flusher.Flush()
+			}
+		}
+		if err != nil {
+			return
+		}
+	}
+}
+
+// maxRawBody is the most a raw request may be: a coding agent's long
+// conversation and pictures sent as data URLs, as /v1 takes.
+const maxRawBody = 64 << 20
 
 func (s *InternalServer) handlePairingOffer(w http.ResponseWriter, r *http.Request) {
 	if s.deps.ReceiveOffer == nil {

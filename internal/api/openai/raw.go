@@ -57,7 +57,7 @@ func (h *Handler) handleRaw(w http.ResponseWriter, r *http.Request, perms auth.A
 		return
 	}
 	need := neededWindow(req, min(maxTokens, rawAnswerRoom)) + min(toolTokens(forward), rawToolRoom)
-	endpoint, window, done, fail := h.rawReady(r.Context(), perms, strings.TrimPrefix(req.Model, RawPrefix), max(need, least))
+	route, fail := h.route(r.Context(), perms, req.Model, max(need, least))
 	if fail != nil {
 		if fail.param != "" {
 			writeErrorParam(w, fail.status, fail.code, fail.message, fail.param)
@@ -66,9 +66,9 @@ func (h *Handler) handleRaw(w http.ResponseWriter, r *http.Request, perms auth.A
 		}
 		return
 	}
-	defer done()
+	defer route.Done()
 
-	resp, err := rawSend(r.Context(), endpoint, forward, window)
+	resp, err := route.Send(r.Context(), forward)
 	if err != nil {
 		if r.Context().Err() != nil {
 			return
@@ -113,31 +113,82 @@ type rawFailure struct {
 	param string
 }
 
+// RawRoute is where a raw request's Chat Completions body goes: a model's
+// runtime on this computer, or, for Spread, on a paired computer (#1135).
+type RawRoute struct {
+	// Send sends the body and returns the runtime's answer as it gave it.
+	Send func(ctx context.Context, body []byte) (*http.Response, error)
+	// Done ends the request's share of the computer; call it once the
+	// answer is read.
+	Done func()
+	// NodeID and ModelID are where it runs.
+	NodeID, ModelID string
+}
+
+// route readies where a raw format's request runs: swarm:<profile> spreads
+// it across the profile's models and computers (#1135), and anything else
+// drives a model on this computer, with or without raw: (#843).
+func (h *Handler) route(ctx context.Context, perms auth.APIKeyPermissions, model string, need int) (RawRoute, *rawFailure) {
+	if profile, ok := strings.CutPrefix(model, SwarmPrefix); ok {
+		return h.spreadReady(ctx, perms, profile, need)
+	}
+	return h.rawReady(ctx, perms, strings.TrimPrefix(model, RawPrefix), need)
+}
+
 // rawReady checks a raw request may drive modelID and readies the model
 // with a window of at least need tokens: the part every raw format shares
-// (#843). It returns the model's llama-server and a func to call when the
+// (#843). It returns where the request goes and a func to call when the
 // request is done, or why it can't run.
-func (h *Handler) rawReady(ctx context.Context, perms auth.APIKeyPermissions, modelID string, need int) (string, int, func(), *rawFailure) {
-	if !perms.Raw || perms.Profile != "" {
-		return "", 0, nil, &rawFailure{status: http.StatusForbidden, code: "RAW_NOT_ALLOWED", message: "this key can't drive a model directly; an Admin can allow raw model access for it in API Access"}
+func (h *Handler) rawReady(ctx context.Context, perms auth.APIKeyPermissions, modelID string, need int) (RawRoute, *rawFailure) {
+	if fail := rawAllowed(perms); fail != nil {
+		return RawRoute{}, fail
 	}
 	if modelID == "" {
-		return "", 0, nil, &rawFailure{status: http.StatusBadRequest, code: "INVALID_REQUEST", message: "name the model, such as raw:qwen2.5-7b-q4", param: "model"}
+		return RawRoute{}, &rawFailure{status: http.StatusBadRequest, code: "INVALID_REQUEST", message: "name the model, such as raw:qwen2.5-7b-q4", param: "model"}
 	}
 	if h.Raw == nil {
-		return "", 0, nil, &rawFailure{status: http.StatusNotImplemented, code: "NOT_IMPLEMENTED", message: "raw model access isn't available"}
+		return RawRoute{}, &rawFailure{status: http.StatusNotImplemented, code: "NOT_IMPLEMENTED", message: "raw model access isn't available"}
 	}
 	endpoint, window, done, err := h.Raw(ctx, modelID, need)
-	switch {
-	case errors.Is(err, ErrRawNotHere):
-		return "", 0, nil, &rawFailure{status: http.StatusNotFound, code: "MODEL_NOT_FOUND", message: modelID + ": " + err.Error(), param: "model"}
-	case errors.Is(err, ErrRawTooLong):
-		return "", 0, nil, &rawFailure{status: http.StatusBadRequest, code: "CONTEXT_TOO_LONG", message: strings.TrimPrefix(err.Error(), "CONTEXT_TOO_LONG: "), param: "messages"}
-	case err != nil:
-		status, code := h.failure("", err.Error())
-		return "", 0, nil, &rawFailure{status: status, code: code, message: err.Error()}
+	if err != nil {
+		return RawRoute{}, h.rawError(modelID, err)
 	}
-	return endpoint, window, done, nil
+	return RawRoute{
+		Send: func(ctx context.Context, body []byte) (*http.Response, error) {
+			return rawSend(ctx, endpoint, body, window)
+		},
+		Done:    done,
+		ModelID: modelID,
+	}, nil
+}
+
+// rawAllowed is why a key can't drive a model directly, or nil: it needs
+// raw access, and a key pinned to a profile can't have it.
+func rawAllowed(perms auth.APIKeyPermissions) *rawFailure {
+	if !perms.Raw || perms.Profile != "" {
+		return &rawFailure{status: http.StatusForbidden, code: "RAW_NOT_ALLOWED", message: "this key can't drive a model directly; an Admin can allow raw model access for it in API Access"}
+	}
+	return nil
+}
+
+// rawError is the failure for a raw request's error readying name.
+func (h *Handler) rawError(name string, err error) *rawFailure {
+	switch {
+	case errors.Is(err, ErrRawNotHere), errors.Is(err, ErrSwarmProfile):
+		return &rawFailure{status: http.StatusNotFound, code: "MODEL_NOT_FOUND", message: name + ": " + err.Error(), param: "model"}
+	case errors.Is(err, ErrRawTooLong):
+		return &rawFailure{status: http.StatusBadRequest, code: "CONTEXT_TOO_LONG", message: strings.TrimPrefix(err.Error(), "CONTEXT_TOO_LONG: "), param: "messages"}
+	}
+	status, code := h.failure("", err.Error())
+	return &rawFailure{status: status, code: code, message: err.Error()}
+}
+
+// SendRaw sends a raw request's Chat Completions body to the llama-server
+// at endpoint, whose model runs with a window of window tokens, as a raw
+// request on this computer does: for a paired computer's Spread request
+// (#1135).
+func SendRaw(ctx context.Context, endpoint string, body []byte, window int) (*http.Response, error) {
+	return rawSend(ctx, endpoint, body, window)
 }
 
 // rawBody is the request as llama-server takes it: as sent, less Toskar's

@@ -267,6 +267,11 @@ func (h *Handler) HandleResponses(w http.ResponseWriter, r *http.Request) {
 		writeResponsesError(w, http.StatusBadRequest, "invalid_request_error", err.Error(), "input")
 		return
 	}
+	// swarm:<profile> without the agent's tools is a full swarm (#1135).
+	if strings.HasPrefix(req.Model, SwarmPrefix) && !clientTools(body) {
+		h.responsesSwarm(w, r, perms, req, body)
+		return
+	}
 	out := req.MaxOutputTokens
 	if out <= 0 {
 		out = answerRoom
@@ -275,13 +280,13 @@ func (h *Handler) HandleResponses(w http.ResponseWriter, r *http.Request) {
 	if req.Toskar != nil {
 		need = max(need, req.Toskar.ContextWindow)
 	}
-	endpoint, window, done, fail := h.rawReady(r.Context(), perms, strings.TrimPrefix(req.Model, RawPrefix), need)
+	route, fail := h.route(r.Context(), perms, req.Model, need)
 	if fail != nil {
 		writeResponsesError(w, fail.status, fail.code, fail.message, fail.param)
 		return
 	}
-	defer done()
-	resp, err := rawSend(r.Context(), endpoint, body, window)
+	defer route.Done()
+	resp, err := route.Send(r.Context(), body)
 	if err != nil {
 		if r.Context().Err() == nil {
 			writeResponsesError(w, http.StatusBadGateway, "RUNTIME_ERROR", "the model didn't answer: "+err.Error(), "")
@@ -359,6 +364,26 @@ func (b *responseBuilder) text(t string) {
 	b.send("response.output_text.delta", map[string]any{"item_id": item["id"], "output_index": b.open, "content_index": 0, "delta": t})
 }
 
+// reason adds text to the reasoning item being written, opening one first:
+// a full swarm's progress (#1135), as a summary of what it's doing.
+func (b *responseBuilder) reason(t string) {
+	if t == "" {
+		return
+	}
+	if b.open < 0 || b.items[b.open]["type"] != "reasoning" {
+		b.close()
+		item := map[string]any{"type": "reasoning", "id": "rs_" + randomHex(12), "summary": []any{}}
+		b.items = append(b.items, item)
+		b.open = len(b.items) - 1
+		b.send("response.output_item.added", map[string]any{"output_index": b.open, "item": item})
+		b.send("response.reasoning_summary_part.added", map[string]any{"item_id": item["id"], "output_index": b.open, "summary_index": 0, "part": map[string]any{"type": "summary_text", "text": ""}})
+		item["text"] = ""
+	}
+	item := b.items[b.open]
+	item["text"] = item["text"].(string) + t
+	b.send("response.reasoning_summary_text.delta", map[string]any{"item_id": item["id"], "output_index": b.open, "summary_index": 0, "delta": t})
+}
+
 // call adds to the function call item for the answer's index-th tool
 // call, opening one when it's new.
 func (b *responseBuilder) call(index int, id, name, args string) {
@@ -396,6 +421,13 @@ func (b *responseBuilder) close() {
 		item["content"] = []any{part}
 		b.send("response.output_text.done", map[string]any{"item_id": item["id"], "output_index": b.open, "content_index": 0, "text": text})
 		b.send("response.content_part.done", map[string]any{"item_id": item["id"], "output_index": b.open, "content_index": 0, "part": part})
+	case "reasoning":
+		text, _ := item["text"].(string)
+		delete(item, "text")
+		part := map[string]any{"type": "summary_text", "text": text}
+		item["summary"] = []any{part}
+		b.send("response.reasoning_summary_text.done", map[string]any{"item_id": item["id"], "output_index": b.open, "summary_index": 0, "text": text})
+		b.send("response.reasoning_summary_part.done", map[string]any{"item_id": item["id"], "output_index": b.open, "summary_index": 0, "part": part})
 	case "function_call":
 		b.send("response.function_call_arguments.done", map[string]any{"item_id": item["id"], "output_index": b.open, "arguments": item["arguments"]})
 	}
@@ -438,22 +470,7 @@ func (b *responseBuilder) done() map[string]any {
 // .done events; then response.completed, or response.incomplete at the
 // token limit. Each event carries a sequence_number.
 func streamResponses(w http.ResponseWriter, body io.Reader, b *responseBuilder) {
-	w.Header().Set("Content-Type", "text/event-stream")
-	w.Header().Set("Cache-Control", "no-cache")
-	w.WriteHeader(http.StatusOK)
-	flusher, _ := w.(http.Flusher)
-	seq := 0
-	b.emit = func(event string, data map[string]any) {
-		data["sequence_number"] = seq
-		seq++
-		raw, _ := json.Marshal(data)
-		fmt.Fprintf(w, "event: %s\ndata: %s\n\n", event, raw)
-		if flusher != nil {
-			flusher.Flush()
-		}
-	}
-	b.send("response.created", map[string]any{"response": b.response("in_progress")})
-	b.send("response.in_progress", map[string]any{"response": b.response("in_progress")})
+	startResponses(w, b)
 	sc := bufio.NewScanner(body)
 	sc.Buffer(make([]byte, 0, 64<<10), 8<<20)
 	for sc.Scan() {
@@ -490,6 +507,34 @@ func streamResponses(w http.ResponseWriter, body io.Reader, b *responseBuilder) 
 			}
 		}
 	}
+	finishResponses(b)
+}
+
+// startResponses starts a response's event stream: each event b sends is
+// written with its sequence_number, after response.created and
+// response.in_progress.
+func startResponses(w http.ResponseWriter, b *responseBuilder) {
+	w.Header().Set("Content-Type", "text/event-stream")
+	w.Header().Set("Cache-Control", "no-cache")
+	w.WriteHeader(http.StatusOK)
+	flusher, _ := w.(http.Flusher)
+	seq := 0
+	b.emit = func(event string, data map[string]any) {
+		data["sequence_number"] = seq
+		seq++
+		raw, _ := json.Marshal(data)
+		fmt.Fprintf(w, "event: %s\ndata: %s\n\n", event, raw)
+		if flusher != nil {
+			flusher.Flush()
+		}
+	}
+	b.send("response.created", map[string]any{"response": b.response("in_progress")})
+	b.send("response.in_progress", map[string]any{"response": b.response("in_progress")})
+}
+
+// finishResponses ends a response's event stream: response.completed, or
+// response.incomplete at the token limit.
+func finishResponses(b *responseBuilder) {
 	final := b.done()
 	event := "response.completed"
 	if final["status"] == "incomplete" {
