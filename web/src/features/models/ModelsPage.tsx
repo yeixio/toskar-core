@@ -185,6 +185,14 @@ export function ModelsPage() {
     mutationFn: ({ id, contextWindow }: { id: string; contextWindow: number }) => api.setModelContext(id, contextWindow),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['models'] }),
   })
+  // A refused number says why, under the model: each agent would get too
+  // little context, or they wouldn't fit in memory (#1135).
+  const slotsMutation = useMutation({
+    mutationFn: ({ id, slots }: { id: string; slots: number }) => api.setModelSlots(id, slots),
+    onMutate: () => setStartError(null),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['models'] }),
+    onError: (err, { id }) => setStartError({ id, ...shownError(err) }),
+  })
   const deleteMutation = useMutation({
     mutationFn: (id: string) => api.deleteModel(id),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['models'] }),
@@ -439,6 +447,7 @@ export function ModelsPage() {
           onDelete={(id) => deleteMutation.mutate(id)}
           onSpeculation={(id, speculation) => speculationMutation.mutate({ id, speculation })}
           onContextWindow={(id, contextWindow) => contextMutation.mutate({ id, contextWindow })}
+          onSlots={(id, slots) => slotsMutation.mutate({ id, slots })}
           onDiscover={() => setTab('discover')}
         />
       )}

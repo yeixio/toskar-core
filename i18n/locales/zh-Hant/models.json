@@ -198,7 +198,9 @@
     "contextWindowHint": "模型一次能讀多少，以詞元計（每個約為 ¾ 個詞）。自動會選擇能寬裕地放進這台電腦的最大視窗；視窗越大，模型執行時佔用的記憶體越多。",
     "contextWindowNextMessage": "下一則訊息時重新載入",
     "contextAuto": "自動",
-    "contextAutoSize": "自動 · {{size}}"
+    "contextAutoSize": "自動 · {{size}}",
+    "agentsAtOnce": "同時執行的代理",
+    "agentsAtOnceHint": "讓代理群在此模型上同時執行這麼多代理。每個代理平分它的上下文，並且會佔用更多記憶體。"
   },
   "runningTab": {
     "empty": "目前沒有載入任何模型。需要時，聊天會自動啟動一個模型。",

@@ -202,7 +202,9 @@
     "contextWindowHint": "Ce que le modèle lit d'un coup, en jetons (environ ¾ de mot chacun). Auto choisit la plus grande qui tient bien sur cet ordinateur ; une fenêtre plus grande occupe plus de mémoire tant que le modèle tourne.",
     "contextWindowNextMessage": "se recharge au prochain message",
     "contextAuto": "Auto",
-    "contextAutoSize": "Auto · {{size}}"
+    "contextAutoSize": "Auto · {{size}}",
+    "agentsAtOnce": "Agents en même temps",
+    "agentsAtOnceHint": "Permet à un essaim de faire tourner autant d'agents en même temps sur ce modèle. Chacun reçoit une part égale de son contexte, et cela utilise plus de mémoire."
   },
   "runningTab": {
     "empty": "Aucun modèle n'est chargé pour le moment. Discussion en démarrera un automatiquement quand vous en aurez besoin.",

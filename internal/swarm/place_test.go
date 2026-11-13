@@ -14,7 +14,7 @@ func agentsOn(places ...[2]string) []Agent {
 // that share a computer and a model wait their turn there.
 func TestGroup(t *testing.T) {
 	agents := agentsOn([2]string{"pc-1", "qwen"}, [2]string{"pc-2", "qwen"}, [2]string{"pc-1", "qwen"}, [2]string{"pc-1", "gemma"})
-	lanes := Group(agents)
+	lanes := Group(agents, nil)
 	if len(lanes) != 3 {
 		t.Fatalf("lanes = %+v, want 3", lanes)
 	}
@@ -36,22 +36,22 @@ func TestGroup(t *testing.T) {
 // (docs/features/swarms.md, Decision 4).
 func TestSingle(t *testing.T) {
 	same := agentsOn([2]string{"pc-1", "qwen"}, [2]string{"pc-1", "qwen"}, [2]string{"pc-1", "qwen"})
-	if code := Single(ModeSplit, same, Group(same)); code != OneAtATime {
+	if code := Single(ModeSplit, same, Group(same, nil)); code != OneAtATime {
 		t.Errorf("one computer, one model: %q", code)
 	}
 	if Reason(OneAtATime) != "One agent: this computer can't run more than one at a time with this model." {
 		t.Errorf("the one-line reason changed: %q", Reason(OneAtATime))
 	}
 	one := agentsOn([2]string{"pc-1", "qwen"})
-	if code := Single(ModeSplit, one, Group(one)); code != OnePart {
+	if code := Single(ModeSplit, one, Group(one, nil)); code != OnePart {
 		t.Errorf("one part: %q", code)
 	}
-	if code := Single(ModeRace, one, Group(one)); code != OneModel {
+	if code := Single(ModeRace, one, Group(one, nil)); code != OneModel {
 		t.Errorf("a race of one: %q", code)
 	}
 	// Two models on one computer race at once.
 	two := agentsOn([2]string{"pc-1", "qwen"}, [2]string{"pc-1", "gemma"})
-	if code := Single(ModeRace, two, Group(two)); code != "" {
+	if code := Single(ModeRace, two, Group(two, nil)); code != "" {
 		t.Errorf("two models: %q", code)
 	}
 	for _, code := range []string{OneAtATime, OnePart, OneModel, NoChat, NoFolder, NotGit, RaceNeedsGit} {
@@ -61,18 +61,26 @@ func TestSingle(t *testing.T) {
 	}
 }
 
-// The slots setting comes later; SlotsFor is where it plugs in, and two
-// slots let two agents share a model.
-func TestSlotsSeam(t *testing.T) {
-	if SlotsFor("pc-1", "qwen") != 1 {
-		t.Fatal("slots are 1 until the setting comes")
-	}
-	old := SlotsFor
-	t.Cleanup(func() { SlotsFor = old })
-	SlotsFor = func(string, string) int { return 2 }
+// A model's slots on a computer set how many of its agents run at once
+// there: with two, a split on one computer and model runs, and the third
+// agent waits. Without a slots func, each model takes one.
+func TestSlots(t *testing.T) {
 	same := agentsOn([2]string{"pc-1", "qwen"}, [2]string{"pc-1", "qwen"}, [2]string{"pc-1", "qwen"})
-	lanes := Group(same)
-	if code := Single(ModeSplit, same, lanes); code != "" || AtOnce(lanes) != 2 || !Queued(lanes, 2) {
+	if lanes := Group(same, nil); lanes[0].Slots != 1 || Single(ModeSplit, same, lanes) != OneAtATime {
+		t.Fatalf("no slots func: %+v", lanes)
+	}
+	slots := func(node, model string) int {
+		if node == "pc-1" && model == "qwen" {
+			return 2
+		}
+		return 1
+	}
+	lanes := Group(same, slots)
+	if code := Single(ModeSplit, same, lanes); code != "" || AtOnce(lanes) != 2 || Queued(lanes, 1) || !Queued(lanes, 2) {
 		t.Errorf("two slots: single %q, at once %d", code, AtOnce(lanes))
+	}
+	other := agentsOn([2]string{"pc-2", "qwen"}, [2]string{"pc-2", "qwen"})
+	if code := Single(ModeSplit, other, Group(other, slots)); code != OneAtATime {
+		t.Errorf("another computer's one slot: %q", code)
 	}
 }

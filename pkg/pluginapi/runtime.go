@@ -56,7 +56,11 @@ type ModelStartConfig struct {
 	ModelPath string `json:"model_path"`
 	// Context is the chat window to start with (#962); 0 for the
 	// runtime's default.
-	Context   int `json:"context,omitempty"`
+	Context int `json:"context,omitempty"`
+	// Slots is how many requests a chat model answers at once (#1135),
+	// each with the whole Context: 1 for one at a time, or 0 to take a
+	// running instance as it is and start one with 1.
+	Slots     int `json:"slots,omitempty"`
 	GPULayers int `json:"gpu_layers,omitempty"`
 	Port      int `json:"port,omitempty"`
 	// Adapters are LoRA adapters loaded next to the base weights. They are
@@ -107,6 +111,9 @@ type RunningModel struct {
 	// Context is the chat window it was started with (#962); 0 for
 	// embedding and reranking, or when the runtime doesn't say.
 	Context int `json:"context,omitempty"`
+	// Slots is how many requests it answers at once, each with the whole
+	// Context (#1135); 0 when the runtime doesn't say.
+	Slots int `json:"slots,omitempty"`
 	// Acceleration is where the instance runs, from the runtime's own
 	// report when it loaded the model; nil when it is not known.
 	Acceleration *Acceleration `json:"acceleration,omitempty"`

@@ -108,8 +108,11 @@ New package `internal/swarm`, called from the orchestrator. A swarm is a strateg
 - The coordinator places agents one at a time with `NodeForRole("agent:N")`, so each sees where the others went (as `plan.go` does). Norn scores by fit as it does now.
 - **Concurrency per computer:** each placed model has a number of slots, and agents beyond a model's slots on that computer wait for one to free up.
   - The number is the llama-server `--parallel` value, which stays 1 by default.
-  - A new per-model setting, `slots` (1–4), raises it. llama.cpp splits the context between slots, so each slot gets `context / slots`, and Core refuses a setting that leaves a slot less than the task context.
-  - Changing it reloads the model.
+  - A new per-model setting, `slots` (1–4), raises it: `PUT /api/v1/models/{id}/slots`, and "Agents at once" in a model's More actions on Models (Advanced mode).
+  - llama.cpp splits `--ctx-size` between slots, so each gets `context / slots` (with `--parallel` set, it doesn't use a unified cache). Core starts llama-server with `--ctx-size` set to the window times the slots, so each slot keeps the whole window a chat counts on. The cache takes that many times the memory, and the fit estimate and Auto's window count it.
+  - Core refuses a setting that leaves a slot less than the task context, 8K (`MODEL_SLOTS_CONTEXT`), or that doesn't fit the computer, tightly at worst, with every slot's cache (`MODEL_SLOTS_MEMORY`).
+  - Changing it reloads the model on its next request, as a context window change does.
+  - A paired computer says each model's slots in its models list. A computer from before slots counts as 1.
 - **Where things run:** tools always run on the computer Core runs on, where the folder is. Only generation moves to other computers, as it does for Team's workers today.
 
 ### Folders

@@ -198,7 +198,9 @@
     "contextWindowHint": "模型一次能读多少，以词元计（每个约为 ¾ 个词）。自动会选择能宽裕地装进这台电脑的最大窗口；窗口越大，模型运行时占用的内存越多。",
     "contextWindowNextMessage": "下一条消息时重新加载",
     "contextAuto": "自动",
-    "contextAutoSize": "自动 · {{size}}"
+    "contextAutoSize": "自动 · {{size}}",
+    "agentsAtOnce": "同时运行的智能体",
+    "agentsAtOnceHint": "让智能体群在此模型上同时运行这么多智能体。每个智能体平分它的上下文，并且会占用更多内存。"
   },
   "runningTab": {
     "empty": "目前没有加载任何模型。需要时，聊天会自动启动一个。",

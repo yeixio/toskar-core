@@ -78,9 +78,7 @@ func newTaskSwarm(t *testing.T, parts string) *taskSwarm {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() { _ = a.DB.Close() })
-	old := swarm.SlotsFor
-	swarm.SlotsFor = func(string, string) int { return 2 }
-	t.Cleanup(func() { swarm.SlotsFor = old })
+	a.SwarmSlots = func(string, string) int { return 2 }
 	s := &taskSwarm{App: a, t: t, parts: parts, scripts: map[int][]string{}, during: map[int]func(string){},
 		once: map[int]*sync.Once{}, folders: map[int]string{}, declined: map[string]bool{}}
 	a.StubReply = s.reply

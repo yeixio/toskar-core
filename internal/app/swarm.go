@@ -140,7 +140,7 @@ func (e *chatExecEnv) RunSwarm(ctx context.Context, req swarm.Request) (swarm.Ou
 		}
 		agents[i] = swarm.Agent{N: n, Role: role, Part: part, ModelID: e.modelForRole(role), NodeID: node}
 	}
-	lanes := swarm.Group(agents)
+	lanes := swarm.Group(agents, a.swarmSlots)
 	code := swarm.Single(req.Mode, agents, lanes)
 	// A task's folder outside Git has no copies to give the agents: they
 	// take turns in it, which doesn't need them to run at once. A race

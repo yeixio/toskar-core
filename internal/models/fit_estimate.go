@@ -70,7 +70,11 @@ const (
 type FitOptions struct {
 	// ContextTokens overrides the running window. Zero uses the window the
 	// model starts with on this hardware (AutoContext, #962).
-	ContextTokens    int
+	ContextTokens int
+	// Slots is how many requests each model answers at once, by model ID
+	// (#1135): each keeps the whole window, so its cache is that many
+	// times the size. A model that isn't listed answers one at a time.
+	Slots            map[string]int
 	Proven           map[string]bool
 	Measured         map[string]MeasuredRun
 	LoadedModelNames []string
@@ -108,7 +112,7 @@ func ClassifyFit(e CatalogEntry, hw contracts.HardwareInventory, nodeID, nodeNam
 	fit.MemoryKind = kind
 	fit.ContextTokens = opts.ContextTokens
 	if fit.ContextTokens <= 0 {
-		fit.ContextTokens = AutoContext(e, hw)
+		fit.ContextTokens = AutoContextSlots(e, hw, opts.Slots[e.ID])
 	}
 
 	weights, approx := weightBytes(e)
@@ -132,11 +136,14 @@ func ClassifyFit(e CatalogEntry, hw contracts.HardwareInventory, nodeID, nodeNam
 		billions = float64(weights) / (bpp * 1e9)
 		fit.Approximate = true
 	}
+	// Each slot has a window of its own (#1135), and the cache type follows
+	// one slot's window, as llamacpp sets it.
+	slots := max(1, opts.Slots[e.ID])
 	ctx := float64(fit.ContextTokens)
-	kvLow := uint64(billions * ctx * kvBytesPerTokenPerBillionLow / attentionShare(e) * cacheShare(fit.ContextTokens))
-	kvHigh := uint64(billions * ctx * kvBytesPerTokenPerBillionHigh / attentionShare(e) * cacheShare(fit.ContextTokens))
+	kvLow := uint64(billions*ctx*kvBytesPerTokenPerBillionLow/attentionShare(e)*cacheShare(fit.ContextTokens)) * uint64(slots)
+	kvHigh := uint64(billions*ctx*kvBytesPerTokenPerBillionHigh/attentionShare(e)*cacheShare(fit.ContextTokens)) * uint64(slots)
 	vision := visionBytes(e)
-	draftLow, draftHigh := draftBytes(e, ctx)
+	draftLow, draftHigh := draftBytes(e, ctx*float64(slots))
 	low := weights + vision + draftLow + kvLow + runtimeScratchBytes
 	high := weights + vision + draftHigh + kvHigh + runtimeScratchBytes + uint64(float64(weights)*runtimeOverheadFraction)
 	if high < low {
@@ -145,8 +152,10 @@ func ClassifyFit(e CatalogEntry, hw contracts.HardwareInventory, nodeID, nodeNam
 
 	measured, hasMeasured := opts.Measured[e.ID]
 	if hasMeasured && measured.PeakMemoryBytes > 0 {
-		low = measured.PeakMemoryBytes
-		high = measured.PeakMemoryBytes
+		// A run is measured with one slot; more add their caches to it.
+		extra := kvLow / uint64(slots) * uint64(slots-1)
+		low = measured.PeakMemoryBytes + extra
+		high = measured.PeakMemoryBytes + extra
 		fit.Approximate = false
 	}
 

@@ -15,6 +15,13 @@ var autoContextSizes = []int{runningContextTokens, 16384, 32768}
 // stays there, as before; one whose own window is smaller runs at that; one
 // whose window isn't known gets 8K.
 func AutoContext(e CatalogEntry, hw contracts.HardwareInventory) int {
+	return AutoContextSlots(e, hw, 1)
+}
+
+// AutoContextSlots is AutoContext for a model that answers slots requests
+// at once, each with the window (#1135): the largest size at which all of
+// their caches together still fit as well. It's never below 8K.
+func AutoContextSlots(e CatalogEntry, hw contracts.HardwareInventory, slots int) int {
 	own := e.Context
 	if own > 0 && own < runningContextTokens {
 		return own
@@ -27,7 +34,11 @@ func AutoContext(e CatalogEntry, hw contracts.HardwareInventory) int {
 		if n > own {
 			break
 		}
-		fit := ClassifyFit(e, hw, "", "", FitOptions{ContextTokens: n})
+		opts := FitOptions{ContextTokens: n}
+		if slots > 1 {
+			opts.Slots = map[string]int{e.ID: slots}
+		}
+		fit := ClassifyFit(e, hw, "", "", opts)
 		if fit.Label != contracts.FitExcellent || !graphicsRoom(fit, hw) {
 			break
 		}

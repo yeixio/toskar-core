@@ -39,7 +39,9 @@ type managedProcess struct {
 	draft     string
 	// context is the chat window it was started with; 0 for embedding
 	// and reranking.
-	context     int
+	context int
+	// slots is how many requests it answers at once (#1135).
+	slots       int
 	logFile     *os.File
 	logPath     string
 	intentional bool
@@ -86,6 +88,11 @@ func (r *Runtime) StartModel(ctx context.Context, cfg pluginapi.ModelStartConfig
 		return pluginapi.RunningModel{}, fmt.Errorf("model path required")
 	}
 
+	// Requests for one model wait for each other's start, so two at once
+	// don't each start a llama-server.
+	unlock := r.starts.lock(cfg.ModelID)
+	defer unlock()
+
 	// Reuse an already-running instance for the same model. LoRA adapters are
 	// fixed when llama-server starts, so an instance without the requested
 	// adapters is replaced.
@@ -99,7 +106,7 @@ func (r *Runtime) StartModel(ctx context.Context, cfg pluginapi.ModelStartConfig
 			}
 			// A projector and a draft are loaded at start too: a model
 			// started before either was downloaded is started again with it.
-			if m.Mode == cfg.Mode && m.Projector == cfg.Projector && m.Draft == wantDraft && sameAdapters(m.Adapters, wantAdapters) && sameContext(m, cfg) {
+			if m.Mode == cfg.Mode && m.Projector == cfg.Projector && m.Draft == wantDraft && sameAdapters(m.Adapters, wantAdapters) && sameContext(m, cfg) && sameSlots(m, cfg) {
 				return m, nil
 			}
 			_ = r.StopModel(ctx, m.ID)
@@ -163,16 +170,18 @@ func (r *Runtime) StartModel(ctx context.Context, cfg pluginapi.ModelStartConfig
 		projector: cfg.Projector,
 		draft:     wantDraft,
 		context:   chatContext(cfg),
+		slots:     chatSlots(cfg),
 		logFile:   logFile,
 		logPath:   logPath,
 		exited:    make(chan struct{}),
 	}
-	exited := r.sup.procs[instanceID].exited
+	proc := r.sup.procs[instanceID]
+	exited := proc.exited
 	r.sup.mu.Unlock()
 	registerAdapters(endpoint, wantAdapters)
 	registerControl(endpoint, cfg.ModelPath)
 
-	go r.sup.watch(instanceID)
+	go r.sup.watch(instanceID, proc)
 
 	if err := waitReady(ctx, endpoint, 120*time.Second, exited); err != nil {
 		_ = r.StopModel(ctx, instanceID)
@@ -232,16 +241,41 @@ func startArgs(cfg pluginapi.ModelStartConfig, port int) []string {
 	if cfg.Projector != "" {
 		args = append(args, "--mmproj", cfg.Projector)
 	}
-	// One request at a time, each with the whole window. By default
-	// llama-server runs four slots that share one window's worth of memory,
+	// Each request gets the whole window. Left to choose, llama-server runs
+	// four slots that share one window's worth of memory (a unified cache),
 	// yet tells each it has all of it, so two requests at once (a chat's
 	// turn and its summary, or Deliberate's drafts) that add up to more than
 	// the window both fail with "Context size has been exceeded" (#834).
 	// Every room and compaction decision here counts on the whole window.
-	// Requests to the same model queue in llama-server instead.
+	//
+	// So the slots are set: 1 unless the person raised the model's slots
+	// for swarms (#1135). With --parallel set, llama-server doesn't unify
+	// the cache, and gives each slot --ctx-size / --parallel, so the size
+	// is the window times the slots: each slot keeps the whole window, and
+	// the cache takes that many times the memory, as models' fit estimate
+	// counts. Requests past the slots queue in llama-server.
 	window := defaultContext(cfg.Context)
+	slots := chatSlots(cfg)
 	args = append(args, kvCacheArgs(window)...)
-	return append(args, "--ctx-size", fmt.Sprintf("%d", window), "--parallel", "1")
+	return append(args, "--ctx-size", fmt.Sprintf("%d", window*slots), "--parallel", fmt.Sprintf("%d", slots))
+}
+
+// MaxSlots is the most requests a chat model answers at once (#1135).
+const MaxSlots = 4
+
+// chatSlots is how many requests a chat model answers at once: the slots
+// asked for, from 1 to MaxSlots. Embedding and reranking take one.
+func chatSlots(cfg pluginapi.ModelStartConfig) int {
+	if cfg.Mode != "" || cfg.Slots <= 1 {
+		return 1
+	}
+	return min(cfg.Slots, MaxSlots)
+}
+
+// sameSlots reports whether a running instance answers as many requests at
+// once as a start asks for. A start that asks for none takes it as it runs.
+func sameSlots(m pluginapi.RunningModel, cfg pluginapi.ModelStartConfig) bool {
+	return cfg.Slots <= 0 || cfg.Mode != "" || max(1, m.Slots) == chatSlots(cfg)
 }
 
 // LongWindow is the largest window a chat model's key/value cache stays in
@@ -284,7 +318,7 @@ func (r *Runtime) StopModel(ctx context.Context, id string) error {
 	if !ok {
 		return fmt.Errorf("instance %q not found", id)
 	}
-	stopLlamaProcess(p.cmd, 1500*time.Millisecond)
+	stopLlamaProcess(p.cmd, p.exited, 1500*time.Millisecond)
 	registerAdapters(p.endpoint, nil)
 	forgetControl(p.endpoint)
 	if p.logFile != nil {
@@ -299,9 +333,13 @@ func (r *Runtime) ListRunning(ctx context.Context) ([]pluginapi.RunningModel, er
 	defer r.sup.mu.Unlock()
 	out := make([]pluginapi.RunningModel, 0, len(r.sup.procs))
 	for id, p := range r.sup.procs {
+		// The watch's Wait sets the process state; exited says it ended
+		// without reading the state as Wait writes it.
 		status := "running"
-		if p.cmd.ProcessState != nil && p.cmd.ProcessState.Exited() {
+		select {
+		case <-p.exited:
 			status = "exited"
+		default:
 		}
 		out = append(out, pluginapi.RunningModel{
 			ID:           id,
@@ -314,6 +352,7 @@ func (r *Runtime) ListRunning(ctx context.Context) ([]pluginapi.RunningModel, er
 			Projector:    p.projector,
 			Draft:        p.draft,
 			Context:      p.context,
+			Slots:        p.slots,
 			Acceleration: p.acceleration,
 		})
 	}
@@ -331,13 +370,10 @@ func (r *Runtime) Health(ctx context.Context) error {
 	return nil
 }
 
-func (ps *ProcessSupervisor) watch(instanceID string) {
-	ps.mu.Lock()
-	p, ok := ps.procs[instanceID]
-	ps.mu.Unlock()
-	if !ok {
-		return
-	}
+// watch waits for p's llama-server to end; it's the only Wait, so a stop
+// waits on p.exited. It's given p, since a stop may already have taken it
+// out of procs.
+func (ps *ProcessSupervisor) watch(instanceID string, p *managedProcess) {
 	err := p.cmd.Wait()
 	code := 0
 	if p.cmd.ProcessState != nil {

@@ -19,7 +19,7 @@ func TestRunLanes(t *testing.T) {
 	var mu sync.Mutex
 	spans := make([]span, len(agents))
 	var order []string
-	results := Run(context.Background(), agents, Group(agents), Budget{Tokens: 1000, Time: time.Minute},
+	results := Run(context.Background(), agents, Group(agents, nil), Budget{Tokens: 1000, Time: time.Minute},
 		func(ctx context.Context, a Agent, used func(int)) Result {
 			from := time.Now()
 			time.Sleep(60 * time.Millisecond)
@@ -79,7 +79,7 @@ func TestRunTokenBudget(t *testing.T) {
 	agents := agentsOn([2]string{"pc-1", "qwen"}, [2]string{"pc-2", "qwen"}, [2]string{"pc-1", "qwen"})
 	var mu sync.Mutex
 	started, over := 0, ""
-	results := Run(context.Background(), agents, Group(agents), Budget{Tokens: 100, Time: time.Minute}, waitForStop(60), Hooks{
+	results := Run(context.Background(), agents, Group(agents, nil), Budget{Tokens: 100, Time: time.Minute}, waitForStop(60), Hooks{
 		Started: func(int, Agent) { mu.Lock(); started++; mu.Unlock() },
 		Over:    func(what string) { over = what },
 	})
@@ -96,7 +96,7 @@ func TestRunTokenBudget(t *testing.T) {
 func TestRunTimeBudget(t *testing.T) {
 	agents := agentsOn([2]string{"pc-1", "qwen"}, [2]string{"pc-2", "qwen"})
 	started := time.Now()
-	results := Run(context.Background(), agents, Group(agents), Budget{Tokens: 1000, Time: 50 * time.Millisecond}, waitForStop(1), Hooks{})
+	results := Run(context.Background(), agents, Group(agents, nil), Budget{Tokens: 1000, Time: 50 * time.Millisecond}, waitForStop(1), Hooks{})
 	if time.Since(started) > 3*time.Second {
 		t.Fatal("the time budget didn't stop the agents")
 	}
@@ -111,7 +111,7 @@ func TestRunTimeBudget(t *testing.T) {
 // the swarm stops them all, and that's not the budget.
 func TestRunStop(t *testing.T) {
 	agents := agentsOn([2]string{"pc-1", "qwen"}, [2]string{"pc-2", "qwen"}, [2]string{"pc-3", "qwen"})
-	results := Run(context.Background(), agents, Group(agents), Budget{Tokens: 1000, Time: time.Minute},
+	results := Run(context.Background(), agents, Group(agents, nil), Budget{Tokens: 1000, Time: time.Minute},
 		func(ctx context.Context, a Agent, used func(int)) Result {
 			if a.N == 2 {
 				return Result{Status: AgentStopped, Answer: "half"}
@@ -125,10 +125,43 @@ func TestRunStop(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	go func() { time.Sleep(30 * time.Millisecond); cancel() }()
 	queued := agentsOn([2]string{"pc-1", "qwen"}, [2]string{"pc-1", "qwen"})
-	results = Run(ctx, queued, Group(queued), Budget{Tokens: 1000, Time: time.Minute}, waitForStop(1), Hooks{})
+	results = Run(ctx, queued, Group(queued, nil), Budget{Tokens: 1000, Time: time.Minute}, waitForStop(1), Hooks{})
 	for i, r := range results {
 		if r.Status != AgentStopped {
 			t.Errorf("stopping all, agent %d: %s", i+1, r.Status)
 		}
+	}
+}
+
+// A model with two slots runs two of its agents at once; the third waits for
+// one of them to finish.
+func TestRunTwoSlots(t *testing.T) {
+	agents := agentsOn([2]string{"pc-1", "qwen"}, [2]string{"pc-1", "qwen"}, [2]string{"pc-1", "qwen"})
+	lanes := Group(agents, func(string, string) int { return 2 })
+	var mu sync.Mutex
+	spans := make([]span, len(agents))
+	running, most := 0, 0
+	Run(context.Background(), agents, lanes, Budget{Tokens: 1000, Time: time.Minute},
+		func(ctx context.Context, a Agent, used func(int)) Result {
+			mu.Lock()
+			running++
+			most = max(most, running)
+			mu.Unlock()
+			from := time.Now()
+			time.Sleep(60 * time.Millisecond)
+			mu.Lock()
+			running--
+			spans[a.N-1] = span{from, time.Now()}
+			mu.Unlock()
+			return Result{Answer: "answer", Tokens: 1}
+		}, Hooks{})
+	if most != 2 {
+		t.Errorf("%d agents ran at once, want 2", most)
+	}
+	if !spans[0].overlaps(spans[1]) {
+		t.Errorf("the first two didn't run together: %+v", spans)
+	}
+	if spans[2].from.Before(spans[0].to) && spans[2].from.Before(spans[1].to) {
+		t.Errorf("the third started before a slot was free: %+v", spans)
 	}
 }

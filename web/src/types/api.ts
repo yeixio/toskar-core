@@ -123,6 +123,8 @@ export interface Model {
   context_choice?: number
   /** The sizes it can take, up to its own window, with how well it fits at each. */
   context_options?: { tokens: number; fit: FitLabel }[]
+  /** How many requests a chat model installed here answers at once, 1 to 4, so a swarm can run that many agents on it (#1135, contract 1.88). */
+  slots?: number
 }
 
 export type FitLabel = 'excellent' | 'good' | 'tight' | 'heavy' | 'unsupported' | 'too_large'
