@@ -388,6 +388,49 @@ func TestTaskSwarmSplit(t *testing.T) {
 	}
 }
 
+// A merged change whose checks failed always asks before it's applied, though
+// the profile allows writes, and the question and the answer say the checks
+// failed. A no leaves the folder as it was, and the answer names the branch.
+func TestTaskSwarmFailedChecksAsk(t *testing.T) {
+	for _, allow := range []bool{true, false} {
+		t.Run(fmt.Sprintf("allow=%v", allow), func(t *testing.T) {
+			folder := repo(t, map[string]string{"go.mod": goMod, "greet.go": "package greet\n"})
+			s := newTaskSwarm(t, `{"parts": [{"title": "Hello", "instructions": "Add Hello.", "paths": ["hello.go"]}, {"title": "Test", "instructions": "Test it.", "paths": ["hello_test.go"]}]}`)
+			s.scripts[1] = []string{writeStep("hello.go", "package greet\n\nfunc Hello() string { return \"hi\" }\n")}
+			s.scripts[2] = []string{writeStep("hello_test.go", "package greet\n\nimport \"testing\"\n\nfunc TestHello(t *testing.T) {\n\tif Hello() != \"hello\" {\n\t\tt.Fatal(Hello())\n\t}\n}\n")}
+			s.declined[swarm.ApplyAction] = !allow
+			ctx, cancel := context.WithCancel(context.Background())
+			defer cancel()
+			s.approve(ctx)
+			answer, sw := s.run(ctx, s.profile(ctx, tools.PolicyAllow, tools.PolicyAllow), swarm.ModeSplit, folder, "Add Hello and a test for it.")
+			if sw.Checks != swarm.ChecksFailed {
+				t.Fatalf("checks = %q, answer %q", sw.Checks, answer)
+			}
+			applies := s.questions(swarm.ApplyAction)
+			want := "Apply the swarm's changes to " + folder + ": 2 files. The project's checks failed on them: go test ./...."
+			if len(applies) != 1 || applies[0]["reason"] != want {
+				t.Fatalf("apply questions = %+v", applies)
+			}
+			if !strings.Contains(answer, "`go test ./...`, failed") {
+				t.Errorf("the answer doesn't say the checks failed: %q", answer)
+			}
+			_, err := os.Stat(filepath.Join(folder, "hello.go"))
+			if allow {
+				if err != nil || !sw.Applied || !strings.Contains(answer, "only because you chose to") {
+					t.Errorf("applied %v, file %v, answer %q", sw.Applied, err, answer)
+				}
+				return
+			}
+			if !os.IsNotExist(err) || sw.Applied || gitIn(t, folder, "status", "--porcelain") != "" {
+				t.Errorf("the folder changed: applied %v, status %q", sw.Applied, gitIn(t, folder, "status", "--porcelain"))
+			}
+			if !strings.Contains(answer, "wasn't applied: its checks failed") || !strings.Contains(answer, "`"+sw.Branch+"`") || sw.Branch == "" {
+				t.Errorf("the answer doesn't name the branch: %q", answer)
+			}
+		})
+	}
+}
+
 // Two agents changing the same lines conflict; the fix-up agent settles it,
 // or, when it can't, the conflict is reported with the branch named and the
 // other change is still applied.

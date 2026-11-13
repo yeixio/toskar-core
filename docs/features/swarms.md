@@ -92,7 +92,7 @@ New package `internal/swarm`, called from the orchestrator. A swarm is a strateg
 5. **Deliver.**
    - A question's answer goes in the coordinator chat.
    - A task's merged change is applied to the person's folder as uncommitted changes. Each agent's branch stays, so its work can be looked at alone.
-   - Applying the change goes through the same approval that a task's writes do.
+   - Applying the change goes through the same approval that a task's writes do. A change whose checks failed (or timed out) always asks, whatever the profile allows, and the question and the answer's footer say the checks failed.
 
 ### An agent
 

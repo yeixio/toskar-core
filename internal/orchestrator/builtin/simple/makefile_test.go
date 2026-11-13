@@ -5,6 +5,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/yeixio/toskar-core/internal/swarm"
+	"github.com/yeixio/toskar-core/internal/turnopts"
 	"github.com/yeixio/toskar-core/pkg/contracts"
 	"github.com/yeixio/toskar-core/pkg/pluginapi"
 )
@@ -157,5 +159,54 @@ func TestMakeItYourselfIsAskedAgain(t *testing.T) {
 	// The message didn't ask for a file, so files.create is offered for the retry.
 	if strings.Contains(env.seen[0][0].Content, "files.create") || !strings.Contains(env.seen[1][0].Content, "files.create") {
 		t.Fatal("files.create should be offered only for the retry")
+	}
+}
+
+// toolIDEnv records which tools a turn ran.
+type toolIDEnv struct {
+	*roleEnv
+	ran []string
+}
+
+func (e *toolIDEnv) ExecuteTool(_ context.Context, toolID string, _ map[string]any) (map[string]any, error) {
+	e.ran = append(e.ran, toolID)
+	return map[string]any{"ok": true}, nil
+}
+
+// A task, or a swarm agent's part, that names a file writes it in the folder
+// with the task's tools, not as a chat attachment; an ordinary chat still
+// makes the file (#1135).
+func TestTaskWritesANamedFileInItsFolder(t *testing.T) {
+	const prompt = "Write Reverse in strs/strs.go"
+	profile := contracts.AIProfile{
+		Roles: []contracts.ModelRole{{Role: "assistant", ModelID: "m"}},
+		Tools: []contracts.ToolPolicy{{ToolID: "files.create", Policy: "allow"}, {ToolID: "filesystem.write", Policy: "allow"}, {ToolID: "filesystem.read", Policy: "allow"}},
+	}
+	write := `<tool_call>{"name":"filesystem.write","arguments":{"path":"strs/strs.go","content":"package strs"}}</tool_call>`
+	run := func(ctx context.Context, prompt string) []string {
+		t.Helper()
+		inner := newRoleEnv(map[string]string{"assistant": write})
+		inner.sequence["assistant"] = []string{"Done: wrote Reverse in strs/strs.go.", "Done.", "Done."}
+		env := &toolIDEnv{roleEnv: inner}
+		events, err := New().Run(ctx, contracts.Task{Prompt: prompt}, profile, env)
+		if err != nil {
+			t.Fatal(err)
+		}
+		for range events {
+		}
+		return env.ran
+	}
+	folder := t.TempDir()
+	task := turnopts.WithProject(context.Background(), folder)
+	if ran := strings.Join(run(task, prompt), ","); ran != "filesystem.write" {
+		t.Errorf("a task ran %q", ran)
+	}
+	agent := swarm.WithAgent(task, swarm.AgentRef{SwarmID: "s1", N: 1, Task: true})
+	if ran := strings.Join(run(agent, prompt), ","); ran != "filesystem.write" {
+		t.Errorf("an agent ran %q", ran)
+	}
+	// An ordinary chat with no folder still makes the file.
+	if ran := strings.Join(run(context.Background(), "Write a Go program that sorts lines, as sort.go"), ","); ran != "files.create" {
+		t.Errorf("a chat ran %q", ran)
 	}
 }
