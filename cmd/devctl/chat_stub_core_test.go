@@ -95,3 +95,25 @@ func TestChatSessionAgainstCore(t *testing.T) {
 		t.Errorf("the command didn't run in this folder: %v", err)
 	}
 }
+
+// --swarm reaches Core in POST /chat's body (#1135): a race with one model
+// runs as one agent, and the answer's notice says why.
+func TestChatSwarmAgainstCore(t *testing.T) {
+	if testing.Short() {
+		t.Skip("starts a Core")
+	}
+	stubCore(t, func([]pluginapi.ChatMessage) string { return "Three days in Juneau." })
+	t.Chdir(t.TempDir())
+	var out, errOut bytes.Buffer
+	streams := chatIO{in: strings.NewReader(""), out: &out, errOut: &errOut}
+	if err := chatCommand([]string{"--swarm", "race", "Plan a trip"}, streams, newDaemonChat); err != nil {
+		t.Fatalf("%v\n%s\n%s", err, out.String(), errOut.String())
+	}
+	t.Logf("stdout:\n%s\nstderr:\n%s", out.String(), errOut.String())
+	if !strings.Contains(out.String(), "Three days in Juneau.") {
+		t.Errorf("no answer")
+	}
+	if !strings.Contains(errOut.String(), "One agent: a race needs at least two models to compare.") {
+		t.Errorf("no note that the race ran as one agent")
+	}
+}

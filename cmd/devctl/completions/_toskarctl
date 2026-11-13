@@ -81,7 +81,8 @@ _toskarctl() {
     chat)
       _arguments '--resume[continue a chat: its id, or pick from recent ones]' '--model[a model, or auto]:model:' \
         '--profile[answer as this profile]:profile:' '--file[data to work on with the first message]:file:_files' \
-        '--project[start or continue in a project: its name or id]:project:' '*:message:'
+        '--project[start or continue in a project: its name or id]:project:' \
+        '--swarm[send each message to a swarm of agents]::mode:(split race)' '*:message:'
       ;;
     projects)
       _arguments '--output[output format]:format:(text json)' '1:command:(list)'

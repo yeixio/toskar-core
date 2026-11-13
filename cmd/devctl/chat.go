@@ -49,6 +49,8 @@ flags:
   --profile id    answer as this profile
   --file path     data to work on with the first message
   --project name  start or continue in a project: its name or id
+  --swarm [mode]  send each message to a swarm of agents: split (the
+                  default) or race
 
 while chatting:
   /new            start a new chat, in the same project
@@ -57,6 +59,10 @@ while chatting:
   /attach path    send a file as data with the next message
   /project name   move this chat into a project, or none to take it out;
                   alone, says which project it's in
+  /swarm [mode]   send the next message to a swarm: split (the default) or
+                  race; off stops the swarms --swarm asked for
+  /agents         the last swarm's agents: part, how it went, and chat
+  /open N         continue agent N's chat; /back returns
   /log            what ran in this chat, its result, and who allowed it
   /help           this help
   /exit           leave (or Ctrl-D)`
@@ -75,7 +81,7 @@ type chatAPI interface {
 	models() ([]contracts.Model, error)
 	// runs are the tool calls in a chat, newest first.
 	runs(id string) ([]toolRun, error)
-	stream(ctx context.Context, req api.ChatJSONRequestBody) iter.Seq2[toskar.ChatStreamEvent, error]
+	stream(ctx context.Context, req chatRequest) iter.Seq2[toskar.ChatStreamEvent, error]
 	events(ctx context.Context) iter.Seq2[api.Event, error]
 	decide(requestID string, allow, forChat bool) error
 	// stop ends a chat's running turn and the commands in it.
@@ -87,6 +93,10 @@ type chatAPI interface {
 	// computer is the Toskar computer's name when it isn't this one, where
 	// a tool such as the terminal runs.
 	computer() string
+	// swarm is one of the person's swarms, with its agents (#1135).
+	swarm(id string) (contracts.Swarm, error)
+	// nodes are the computers Toskar knows, to name a swarm's.
+	nodes() ([]contracts.Node, error)
 }
 
 // toolRun is one tool call on record.
@@ -122,7 +132,9 @@ type daemonChat struct {
 
 func newDaemonChat() (chatAPI, error) {
 	d := newDaemon()
-	options := []toskar.Option{toskar.WithURL(d.base), toskar.WithKey(config.Env("API_KEY")), toskar.WithTimeout(0)}
+	// A chat's swarm goes in its request's body (swarmField).
+	hc := &http.Client{Transport: swarmField{next: http.DefaultTransport.(*http.Transport).Clone()}}
+	options := []toskar.Option{toskar.WithURL(d.base), toskar.WithKey(config.Env("API_KEY")), toskar.WithTimeout(0), toskar.WithHTTP(hc)}
 	chat := daemonChat{rest: d}
 	// On this computer, Toskar works in the folder you're in. On another,
 	// this folder means nothing there.
@@ -222,8 +234,20 @@ func (d daemonChat) models() ([]contracts.Model, error) {
 	return listModels(d.rest)
 }
 
-func (d daemonChat) stream(ctx context.Context, req api.ChatJSONRequestBody) iter.Seq2[toskar.ChatStreamEvent, error] {
-	return d.sdk.ChatStream(ctx, req)
+func (d daemonChat) stream(ctx context.Context, req chatRequest) iter.Seq2[toskar.ChatStreamEvent, error] {
+	return d.sdk.ChatStream(withSwarm(ctx, req.Swarm), req.ChatJSONRequestBody)
+}
+
+func (d daemonChat) swarm(id string) (contracts.Swarm, error) {
+	var s contracts.Swarm
+	err := d.rest.request(http.MethodGet, "/swarms/"+url.PathEscape(id), nil, &s)
+	return s, err
+}
+
+func (d daemonChat) nodes() ([]contracts.Node, error) {
+	var list []contracts.Node
+	err := d.rest.request(http.MethodGet, "/nodes", nil, &list)
+	return list, err
 }
 
 func (d daemonChat) events(ctx context.Context) iter.Seq2[api.Event, error] {
@@ -261,6 +285,21 @@ type chatSession struct {
 	typed chan string
 	// stopping says Ctrl-C has asked the running turn to stop.
 	stopping bool
+	// swarmMode is the swarm --swarm asked for on every message, and
+	// nextSwarm the one /swarm asked for on the next (#1135).
+	swarmMode, nextSwarm string
+	// swarm is the latest swarm in this chat, and swarmChanged says it has
+	// something new to show.
+	swarm        swarmView
+	swarmChanged chan struct{}
+	// lanesShown is how many rows of the swarm's lines are at the bottom of
+	// the screen, to redraw in place, and lanesDrawn what they say.
+	lanesShown int
+	lanesDrawn []string
+	// names are the computers' names by id.
+	names map[string]string
+	// coordinator is the swarm's chat while /open continues an agent's.
+	coordinator string
 }
 
 // toolAsk is a tool waiting for a yes or no (tool.requested).
@@ -273,6 +312,8 @@ type toolAsk struct {
 	// afterOutside says it asks because the chat just read something from
 	// outside, such as a web page.
 	afterOutside bool
+	// agent names a swarm's agent that asks, such as "Agent 2: tests".
+	agent string
 }
 
 func chatCommand(args []string, streams chatIO, newAPI func() (chatAPI, error)) error {
@@ -284,6 +325,10 @@ func chatCommand(args []string, streams chatIO, newAPI func() (chatAPI, error)) 
 	project := fs.String("project", "", "")
 	resume := fs.Bool("resume", false, "")
 	flagArgs, resumeID := resumeArg(args)
+	flagArgs, swarmMode, err := swarmArg(flagArgs)
+	if err != nil {
+		return &exitError{code: 2, msg: err.Error() + "\n" + chatUsage}
+	}
 	if err := fs.Parse(flagArgs); err != nil {
 		return &exitError{code: 2, msg: chatUsage}
 	}
@@ -315,7 +360,8 @@ func chatCommand(args []string, streams chatIO, newAPI func() (chatAPI, error)) 
 	if err := checkModelInstalled(client, *model); err != nil {
 		return err
 	}
-	s := &chatSession{api: client, io: streams, lines: bufio.NewScanner(streams.in), model: *model, profile: *profile, asks: make(chan toolAsk, 4), decided: make(chan string, 8), status: make(chan string, 8)}
+	s := &chatSession{api: client, io: streams, lines: bufio.NewScanner(streams.in), model: *model, profile: *profile, asks: make(chan toolAsk, 4), decided: make(chan string, 8), status: make(chan string, 8),
+		swarmMode: swarmMode, swarmChanged: make(chan struct{}, 1)}
 	if *project != "" {
 		list, err := client.projects()
 		if err != nil {
@@ -400,7 +446,7 @@ func (s *chatSession) newChat() error {
 	if err != nil {
 		return err
 	}
-	s.conv = c.ID
+	s.conv, s.coordinator = c.ID, ""
 	if s.project != "" {
 		s.note("New chat in " + s.projectName + ". /help for commands.")
 	} else {
@@ -448,15 +494,27 @@ func (s *chatSession) resume(id string) error {
 			id = list[n-1].ID
 		}
 	}
-	s.conv = id
+	s.conv, s.coordinator = id, ""
 	if err := s.joinProject(); err != nil {
 		return err
 	}
+	if err := s.showLast(id); err != nil {
+		return err
+	}
+	if s.project != "" {
+		s.note("Continuing in " + s.projectName + ". /help for commands.")
+	} else {
+		s.note("Continuing. /help for commands.")
+	}
+	return nil
+}
+
+// showLast shows a chat's last exchange, so it picks up where it was.
+func (s *chatSession) showLast(id string) error {
 	msgs, err := s.api.messages(id)
 	if err != nil {
 		return err
 	}
-	// The last exchange, so the chat picks up where it was.
 	for _, m := range msgs[max(0, len(msgs)-2):] {
 		who := "You"
 		if m.Role == "assistant" {
@@ -469,11 +527,6 @@ func (s *chatSession) resume(id string) error {
 			}
 		}
 		fmt.Fprintf(s.io.out, "%s %s\n", s.dim(who+":"), text)
-	}
-	if s.project != "" {
-		s.note("Continuing in " + s.projectName + ". /help for commands.")
-	} else {
-		s.note("Continuing. /help for commands.")
 	}
 	return nil
 }
@@ -696,6 +749,14 @@ func (s *chatSession) command(line string) (done bool, err error) {
 		return false, s.log()
 	case "project":
 		return false, s.projectCommand(arg)
+	case "swarm":
+		return false, s.swarmCommand(arg)
+	case "agents":
+		return false, s.agents()
+	case "open":
+		return false, s.openAgent(arg)
+	case "back":
+		return false, s.back()
 	default:
 		return false, fmt.Errorf("there's no /%s; /help lists the commands", name)
 	}
@@ -892,7 +953,8 @@ func (s *chatSession) turn(ctx context.Context, text string) error {
 		text = askdata.Message(text, strings.Join(s.pending, "\n\n"))
 		s.pending = nil
 	}
-	req := api.ChatJSONRequestBody{Message: text, ConversationId: &s.conv, Client: ptrTo("terminal"), TimeZone: ptrTo(time.Local.String())}
+	conv := s.conv
+	req := api.ChatJSONRequestBody{Message: text, ConversationId: &conv, Client: ptrTo("terminal"), TimeZone: ptrTo(time.Local.String())}
 	// Someone reading sees the answer as it's written (#1006). A pipe gets it
 	// whole, since text can't be taken back from a file.
 	if s.io.outTerminal {
@@ -904,6 +966,25 @@ func (s *chatSession) turn(ctx context.Context, text string) error {
 	if s.profile != "" {
 		req.ProfileId = ptrTo(s.profile)
 	}
+	// /swarm asks for the next message; --swarm for each, though not in an
+	// agent's own chat, which is one agent's work.
+	mode := s.nextSwarm
+	if mode == "" && s.coordinator == "" {
+		mode = s.swarmMode
+	}
+	s.nextSwarm = ""
+	// A swarm started in this turn when the count passes startSeq; settled
+	// says its lines are final, once the answer comes.
+	startSeq, _, _ := s.swarm.current()
+	settled := false
+	s.lanesShown, s.lanesDrawn = 0, nil
+	settle := func() {
+		if seq, id, conv := s.swarm.current(); !settled && seq > startSeq && conv == s.conv {
+			settled = true
+			s.finishSwarm(id)
+			s.lanesShown = 0
+		}
+	}
 	type item struct {
 		e   toskar.ChatStreamEvent
 		err error
@@ -913,7 +994,7 @@ func (s *chatSession) turn(ctx context.Context, text string) error {
 	defer cancel()
 	go func() {
 		defer close(items)
-		for e, err := range s.api.stream(turnCtx, req) {
+		for e, err := range s.api.stream(turnCtx, chatRequest{ChatJSONRequestBody: req, Swarm: mode}) {
 			select {
 			case items <- item{e, err}:
 			case <-turnCtx.Done():
@@ -937,6 +1018,11 @@ func (s *chatSession) turn(ctx context.Context, text string) error {
 				return it.err
 			}
 			s.endOutputLine()
+			if it.e.Content != "" || it.e.Type == "done" {
+				// The swarm's lines stand above its answer.
+				settle()
+			}
+			s.lanesShown = 0
 			switch it.e.Type {
 			case "token":
 				fmt.Fprint(s.io.out, it.e.Content)
@@ -959,7 +1045,23 @@ func (s *chatSession) turn(ctx context.Context, text string) error {
 				}
 				return nil
 			}
+		case <-s.swarmChanged:
+			if settled && s.io.outTerminal {
+				// Under the answer, the lines would only get in its way.
+				s.swarm.take()
+				continue
+			}
+			if s.io.outTerminal {
+				if wrote {
+					fmt.Fprintln(s.io.out)
+					wrote = false
+				}
+				shown = ""
+				s.endOutputLine()
+			}
+			s.showSwarm()
 		case a := <-s.asks:
+			s.lanesShown = 0
 			if wrote {
 				fmt.Fprintln(s.io.out)
 				wrote = false
@@ -971,6 +1073,7 @@ func (s *chatSession) turn(ctx context.Context, text string) error {
 		case st := <-s.status:
 			s.endOutputLine()
 			if s.io.outTerminal {
+				s.lanesShown = 0
 				if wrote {
 					fmt.Fprintln(s.io.out)
 					wrote = false
@@ -987,6 +1090,7 @@ func (s *chatSession) turn(ctx context.Context, text string) error {
 				wrote = false
 			}
 			shown = ""
+			s.lanesShown = 0
 			s.showOutput(text)
 		case <-s.io.interrupts:
 			// A second Ctrl-C doesn't wait for the turn to end.
@@ -999,6 +1103,7 @@ func (s *chatSession) turn(ctx context.Context, text string) error {
 				wrote = false
 			}
 			shown = ""
+			s.lanesShown = 0
 			s.stopTurn()
 		}
 	}
@@ -1009,7 +1114,12 @@ func (s *chatSession) turn(ctx context.Context, text string) error {
 func (s *chatSession) stopTurn() {
 	s.stopping = true
 	s.endOutputLine()
-	s.note("Stopping. Press Ctrl-C again not to wait.")
+	// Stopping the swarm's chat stops its agents too.
+	if _, id, conv := s.swarm.current(); id != "" && conv == s.conv && s.swarm.running() {
+		s.note("Stopping the swarm and its agents. Press Ctrl-C again not to wait.")
+	} else {
+		s.note("Stopping. Press Ctrl-C again not to wait.")
+	}
 	go func() {
 		if err := s.api.stop(s.conv); err != nil {
 			fmt.Fprintln(s.io.errOut, err)
@@ -1159,17 +1269,30 @@ func isWide(r rune) bool {
 
 // ask shows a tool waiting for permission, and sends the answer.
 func (s *chatSession) ask(a toolAsk) {
-	fmt.Fprintf(s.io.out, "%s wants to run %s", "Toskar", a.tool)
-	if where := s.api.computer(); where != "" {
-		fmt.Fprintf(s.io.out, " on %s", where)
+	who := "Toskar"
+	if a.agent != "" {
+		// Allowing always is for this agent's chat alone.
+		who = a.agent
 	}
-	// A chat's own tool calls all give the same reason, which says nothing.
-	if a.reason != "" && a.reason != "chat requested tool" {
-		fmt.Fprintf(s.io.out, ", %s", a.reason)
-	}
-	fmt.Fprintln(s.io.out, ":")
-	if raw, err := json.MarshalIndent(a.args, "  ", "  "); err == nil && len(a.args) > 0 {
-		fmt.Fprintf(s.io.out, "  %s\n", raw)
+	switch {
+	case a.tool == swarmApply && a.reason != "":
+		// A task swarm's change, for the person's folder: the reason says
+		// where, and how many files. It asks each time.
+		a.alwaysAsks = true
+		fmt.Fprintln(s.io.out, a.reason+".")
+	default:
+		fmt.Fprintf(s.io.out, "%s wants to run %s", who, a.tool)
+		if where := s.api.computer(); where != "" {
+			fmt.Fprintf(s.io.out, " on %s", where)
+		}
+		// A chat's own tool calls all give the same reason, which says nothing.
+		if a.reason != "" && a.reason != "chat requested tool" {
+			fmt.Fprintf(s.io.out, ", %s", a.reason)
+		}
+		fmt.Fprintln(s.io.out, ":")
+		if raw, err := json.MarshalIndent(a.args, "  ", "  "); err == nil && len(a.args) > 0 {
+			fmt.Fprintf(s.io.out, "  %s\n", raw)
+		}
 	}
 	if a.cantUndo {
 		fmt.Fprintln(s.io.out, "This can't be undone.")
@@ -1187,7 +1310,11 @@ func (s *chatSession) ask(a toolAsk) {
 			if a.tool == "terminal" {
 				s.note("Always also lets known commands such as make and npm run keep going, and those run the project's own code. Choose it only for a project you trust.")
 			}
-			fmt.Fprint(s.io.out, "Allow? [y]es, [n]o, [a]lways in this chat: ")
+			if a.agent != "" {
+				fmt.Fprint(s.io.out, "Allow? [y]es, [n]o, [a]lways for this agent: ")
+			} else {
+				fmt.Fprint(s.io.out, "Allow? [y]es, [n]o, [a]lways in this chat: ")
+			}
 		}
 		line, ok, interrupted, elsewhere := s.readAnswer(a.requestID)
 		if elsewhere {
@@ -1226,9 +1353,15 @@ func (s *chatSession) watch(ctx context.Context) {
 			p = *e.Payload
 		}
 		if conv, _ := p["conversation_id"].(string); conv != "" && conv != s.conv {
-			continue
+			// A swarm's agents ask in chats of their own (#1135).
+			if (e.Type != "tool.requested" && e.Type != "tool.decided") || !s.swarm.inSwarm(p) {
+				continue
+			}
 		}
 		switch e.Type {
+		case "swarm.started", "swarm.agent.started", "swarm.agent.progress", "swarm.agent.finished",
+			"swarm.merging", "swarm.finished", "swarm.note":
+			s.noteSwarmEvent(e.Type, p)
 		case "tool.requested":
 			a := toolAsk{}
 			a.requestID, _ = p["request_id"].(string)
@@ -1238,6 +1371,12 @@ func (s *chatSession) watch(ctx context.Context) {
 			a.alwaysAsks, _ = p["always_asks"].(bool)
 			a.cantUndo, _ = p["cant_undo"].(bool)
 			a.afterOutside, _ = p["after_outside"].(bool)
+			if n := int(number(p, "agent_number")); n > 0 {
+				a.agent, _ = p["agent"].(string)
+				if a.agent == "" {
+					a.agent = fmt.Sprintf("Agent %d", n)
+				}
+			}
 			if a.requestID != "" {
 				s.asks <- a
 			}

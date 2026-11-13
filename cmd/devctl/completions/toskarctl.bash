@@ -25,9 +25,11 @@ _toskarctl() {
       ;;
     chat)
       if [[ "$cur" == -* ]]; then
-        COMPREPLY=($(compgen -W "--resume --model --profile --file --project" -- "$cur"))
+        COMPREPLY=($(compgen -W "--resume --model --profile --file --project --swarm" -- "$cur"))
       elif [[ "$prev" == --file ]]; then
         COMPREPLY=($(compgen -f -- "$cur"))
+      elif [[ "$prev" == --swarm ]]; then
+        COMPREPLY=($(compgen -W "split race" -- "$cur"))
       fi
       ;;
     projects)

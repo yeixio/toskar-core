@@ -12,6 +12,7 @@ complete -c toskarctl -n '__fish_seen_subcommand_from chat' -l model -r -d 'A mo
 complete -c toskarctl -n '__fish_seen_subcommand_from chat' -l profile -r -d 'Answer as this profile'
 complete -c toskarctl -n '__fish_seen_subcommand_from chat' -l file -r -F -d 'Data to work on with the first message'
 complete -c toskarctl -n '__fish_seen_subcommand_from chat' -l project -r -d 'Start or continue in a project: its name or id'
+complete -c toskarctl -n '__fish_seen_subcommand_from chat' -l swarm -a 'split race' -d 'Send each message to a swarm of agents'
 complete -c toskarctl -n __fish_use_subcommand -a projects -d 'List your projects, to chat in one with chat --project'
 complete -c toskarctl -n '__fish_seen_subcommand_from projects; and not __fish_seen_subcommand_from list' -a list -d 'List your projects'
 complete -c toskarctl -n '__fish_seen_subcommand_from projects' -l output -x -a 'text json' -d 'Output format'

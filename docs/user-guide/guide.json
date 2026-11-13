@@ -2945,6 +2945,18 @@
               "Moves this chat into one of your projects, or `none` to take it out. Alone, `/project` says which project the chat is in"
             ],
             [
+              "`/swarm`",
+              "Sends the next message to a swarm of agents. `/swarm race` sends it to a race, and `/swarm off` stops what `--swarm` asked for"
+            ],
+            [
+              "`/agents`",
+              "Lists the last swarm's agents: each one's part, how it did, and its chat"
+            ],
+            [
+              "`/open N`",
+              "Continues agent N's chat here. `/back` returns to the swarm's chat"
+            ],
+            [
               "`/log`",
               "Shows what ran in this chat, its result, and who allowed it"
             ],
@@ -3051,6 +3063,40 @@
         {
           "type": "paragraph",
           "text": "Toskar keeps its own record of which checks ran and how they ended. When the last test failed, or a change came after it, the model goes back once to deal with it. Anything still in doubt shows under the answer as \"Toskar noticed\". The model matters most here: small models often can't finish a task, and `chat` says which model would do better."
+        },
+        {
+          "type": "heading",
+          "text": "Use a swarm"
+        },
+        {
+          "type": "paragraph",
+          "text": "A swarm has several agents work on your message at once, each in a chat of its own, and the answer is written from what they did ([Run a swarm](#swarms)). `toskarctl chat --swarm` sends every message in the chat to one, and `/swarm` sends just the next. In a split, the default, the job is split into parts; `--swarm race` has each of the profile's swarm models do the whole job, and the best result is kept."
+        },
+        {
+          "type": "steps",
+          "items": [
+            "Open a terminal in your project's folder.",
+            "Run `toskarctl chat --swarm`.",
+            "Ask for the work, such as \"Fix the failing test and add a test for Max\".",
+            "Watch the agents. Each has one line, updated as it works: its part, computer, model, how it's doing, and its latest step.",
+            "Answer an agent's question about a tool as usual. It says which agent asks, and `a` allows that tool for that agent alone.",
+            "Read the answer. For work in a folder, the line above it says the branch with the change, whether the project's tests passed, and whether the change is in your folder."
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Work in a folder needs an Admin, as a folder does. When the change isn't in your folder, run `git merge` with the branch it names. Ctrl-C stops the whole swarm. With one model on one computer, a swarm runs as one agent, and the line under the answer says why:"
+        },
+        {
+          "type": "code",
+          "language": "sh",
+          "test": "terminal-swarm-race",
+          "code": "toskarctl chat --swarm race \"Plan a three-day trip to Juneau\"",
+          "output": "…Juneau…\nOne agent: a race needs at least two models to compare.\nContinue this chat: toskarctl chat --resume …"
+        },
+        {
+          "type": "paragraph",
+          "text": "Afterwards, `/agents` lists the agents with their part, how each did, and its chat id. `/open 2` continues agent 2's chat right there, to ask it more, and `/back` returns to the swarm's chat. When the output isn't a terminal, each change is a plain line on standard error instead, so a pipe still gets only the answer."
         },
         {
           "type": "heading",
