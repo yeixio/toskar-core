@@ -137,9 +137,11 @@ func screenshotGET(path string) (string, bool) {
 		return screenshotConversations(), true
 	// Projects (#1136): one, with two of the chats in it.
 	case path == "/api/v1/projects":
-		return `[` + screenshotProject() + `]`, true
+		return `[` + screenshotProject() + `,` + screenshotShopProject() + `]`, true
 	case path == "/api/v1/projects/proj-house":
 		return screenshotProject(), true
+	case path == "/api/v1/projects/proj-shop":
+		return screenshotShopProject(), true
 	case path == "/api/v1/conversations/conv-budget/messages":
 		return screenshotBudgetMessages, true
 	case path == "/api/v1/conversations/conv-letter/messages":
@@ -148,9 +150,15 @@ func screenshotGET(path string) (string, bool) {
 	case path == "/api/v1/conversations/conv-research/messages":
 		return screenshotHeatPumpMessages, true
 	case path == "/api/v1/swarms":
-		return `[` + screenshotSwarm + `]`, true
+		return `[` + screenshotTaskSwarm + `,` + screenshotSwarm + `]`, true
 	case path == "/api/v1/swarms/swarm-heat":
 		return screenshotSwarm, true
+	// A swarm that fixed tests in a folder: its branch, checks, and the
+	// change applied to the folder (#1135).
+	case path == "/api/v1/conversations/conv-tests/messages":
+		return screenshotTaskSwarmMessages, true
+	case path == "/api/v1/swarms/swarm-tests":
+		return screenshotTaskSwarm, true
 	case strings.HasPrefix(path, "/api/v1/conversations/") && strings.HasSuffix(path, "/messages"):
 		return screenshotMessages, true
 	case path == "/api/v1/api-keys":
@@ -272,7 +280,8 @@ const screenshotModels = `[
     "installed": true,
     "installed_on": [{"node_id": "local", "node_name": "This Mac"}],
     "status": "ready",
-    "runtime": ["llamacpp"]
+    "runtime": ["llamacpp"],
+    "slots": 2
   },
   {
     "id": "qwen-coder-7b",
@@ -288,7 +297,8 @@ const screenshotModels = `[
     "installed": true,
     "installed_on": [{"node_id": "studio", "node_name": "Studio"}],
     "status": "ready",
-    "runtime": ["llamacpp"]
+    "runtime": ["llamacpp"],
+    "slots": 1
   }
 ]`
 
@@ -463,6 +473,14 @@ func screenshotProjectConversations(projectID string) string {
 	return string(out)
 }
 
+// screenshotShopProject is a project with a folder, made for the chat a
+// task swarm worked in (#1135).
+func screenshotShopProject() string {
+	at := time.Now().UTC().Add(-4 * 24 * time.Hour).Format(time.RFC3339)
+	return `{"id":"proj-shop","name":"Shop website","instructions":"","profile_id":"programming","model_id":"auto","folder":"/Users/you/code/shop","memory_off":false,"knowledge":[],"files":[],` +
+		`"chat_count":1,"created_at":"` + at + `","updated_at":"` + at + `"}`
+}
+
 // screenshotProject is a project that two of the demo chats are in.
 func screenshotProject() string {
 	at := time.Now().UTC().Add(-4 * 24 * time.Hour).Format(time.RFC3339)
@@ -475,6 +493,7 @@ const screenshotConversationsTemplate = `[
   {"id": "conv-local", "title": "Plan a weekend trail loop", "profile_id": "general-assistant", "model_id": "gemma-4-e4b", "created_at": "{{now}}", "updated_at": "{{now}}"},
   {"id": "conv-budget", "title": "Sort out the monthly budget spreadsheet", "profile_id": "general-assistant", "model_id": "gemma-4-e4b", "created_at": "{{earlier}}", "updated_at": "{{earlier}}"},
   {"id": "conv-code", "title": "Why does the build fail on Linux only?", "profile_id": "programming", "model_id": "gemma-4-e4b", "created_at": "{{yesterday}}", "updated_at": "{{yesterday}}"},
+  {"id": "conv-tests", "title": "Fix the failing checkout tests", "profile_id": "programming", "model_id": "auto", "project": "/Users/you/code/shop", "project_id": "proj-shop", "swarm_id": "swarm-tests", "created_at": "{{days}}", "updated_at": "{{days}}"},
   {"id": "conv-letter", "title": "Letter to the landlord about the heating", "profile_id": "general-assistant", "model_id": "gemma-4-e4b", "project_id": "proj-house", "created_at": "{{days}}", "updated_at": "{{days}}"},
   {"id": "conv-research", "title": "Compare three heat pumps for a small house", "profile_id": "research", "model_id": "gemma-4-e4b", "project_id": "proj-house", "swarm_id": "swarm-heat", "created_at": "{{weeks}}", "updated_at": "{{weeks}}"}
 ]`
@@ -578,8 +597,62 @@ const screenshotSwarm = `{
   "finished_at": "2026-10-20T17:06:40Z"
 }`
 
+// screenshotTaskSwarmMessages is a chat in a folder whose failing tests a
+// swarm of two agents fixed (#1135).
+const screenshotTaskSwarmMessages = `[
+  {
+    "id": "t1",
+    "conversation_id": "conv-tests",
+    "role": "user",
+    "content": "The checkout tests fail since the discount change. Fix them, and add a test for a 100% discount. Use a swarm.",
+    "created_at": "2026-11-09T16:00:00Z"
+  },
+  {
+    "id": "t2",
+    "conversation_id": "conv-tests",
+    "role": "assistant",
+    "content": "The checkout tests pass again. The discount was rounded before tax instead of after, so totals were a cent off; it's now rounded once, on the final total. There's a new test for a 100% discount, which checks that the total is $0.00 and that shipping is still charged.\n\nThe change is in your folder as uncommitted changes, in checkout/discount.go and checkout/discount_test.go.",
+    "created_at": "2026-11-09T16:09:30Z"
+  }
+]`
+
+// screenshotTaskSwarm is the swarm that fixed the tests: two agents, each on
+// its own branch, merged, checked, and applied to the folder (#1135).
+const screenshotTaskSwarm = `{
+  "id": "swarm-tests",
+  "project_id": "proj-shop",
+  "conversation_id": "conv-tests",
+  "mode": "split",
+  "status": "done",
+  "request": "The checkout tests fail since the discount change. Fix them, and add a test for a 100% discount.",
+  "budget": {"agents": 4, "tokens": 400000, "minutes": 30},
+  "agents": [
+    {"agent": 1, "conversation_id": "conv-tests-1", "role": "agent:1", "part": "Fix the discount rounding", "model_id": "qwen-coder-7b", "node_id": "studio", "status": "done", "summary": "Rounded the discount once, on the final total. The three failing checkout tests pass.", "tokens": 31200, "seconds": 301, "paths": ["checkout/discount.go"], "branch": "toskar/swarm/7c2e91d4/agent-1"},
+    {"agent": 2, "conversation_id": "conv-tests-2", "role": "agent:2", "part": "Test a 100% discount", "model_id": "gemma-4-e4b", "node_id": "local", "status": "done", "summary": "Added TestFullDiscount: the total is $0.00 and shipping is still charged.", "tokens": 14800, "seconds": 174, "paths": ["checkout/discount_test.go"], "branch": "toskar/swarm/7c2e91d4/agent-2"}
+  ],
+  "folder": "/Users/you/code/shop",
+  "branch": "toskar/swarm/7c2e91d4/merged",
+  "checks": "passed",
+  "applied": true,
+  "tokens": 46000,
+  "seconds": 562,
+  "created_at": "2026-11-09T16:00:04Z",
+  "finished_at": "2026-11-09T16:09:30Z"
+}`
+
 // screenshotSwarmConversations is a swarm's chats, as ?swarm_id= lists them.
 func screenshotSwarmConversations(swarmID string) string {
+	if swarmID == "swarm-tests" {
+		at := time.Now().UTC().Add(-4 * 24 * time.Hour).Format(time.RFC3339)
+		chat := func(id, title, role string) string {
+			return `{"id":"` + id + `","title":"` + title + `","profile_id":"programming","model_id":"auto","project":"/Users/you/code/shop","project_id":"proj-shop","swarm_id":"swarm-tests","swarm_role":"` + role + `","created_at":"` + at + `","updated_at":"` + at + `"}`
+		}
+		return `[` + strings.Join([]string{
+			chat("conv-tests", "Fix the failing checkout tests", ""),
+			chat("conv-tests-1", "Agent 1: Fix the discount rounding", "agent:1"),
+			chat("conv-tests-2", "Agent 2: Test a 100% discount", "agent:2"),
+		}, ",") + `]`
+	}
 	if swarmID != "swarm-heat" {
 		return `[]`
 	}

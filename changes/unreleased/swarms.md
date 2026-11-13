@@ -16,6 +16,14 @@
   session applies to that agent's chat alone. Stopping an agent's chat
   stops that agent; stopping the swarm stops them all (contract 1.88,
   #1135).
+- The user guide's Swarms page is a full how-to: split and race and when
+  each helps, starting one from Chat, a profile, a message, the terminal,
+  VS Code, coding agents, MCP, and the API, the lanes, tasks in a folder
+  with their branches, checks, and applying, agents' approvals, budgets,
+  Agents at once, which keys and roles each way needs, and what the phone,
+  tablet, TV, car, and watch show. It has screenshots of Use a swarm, a
+  profile's swarm, the lanes, a task's result, an agent's approval, Agents
+  at once, and a project's agents, and examples CI runs (#1135).
 
 ### Fixed
 

@@ -2360,28 +2360,513 @@
     },
     {
       "id": "swarms",
-      "title": "Run a swarm",
+      "title": "Swarms",
+      "kind": "task",
+      "summary": "Have several agents work on one request at the same time, on your computers and models, and get one answer or one change back.",
       "paragraphs": [
-        "A swarm is several agents working on one question at the same time, each in a chat of its own. In a split, Toskar splits your question into parts, each agent answers one part, and the answer is written from all of theirs. In a race, agents on different models each answer the whole question, and the best answer is kept, or the answers are combined.",
-        "Agents run at the same time only where they really can: on different computers, on different models, or on a model set to run more than one agent at once. One computer with one model answers one request at a time unless you raise that model's Agents at once on Models ([Models](#models)), so there a swarm runs as one agent, and the answer says so. With it at 2, two agents run on that model together and the rest wait their turn; a paired computer's model runs as many as it's set to there. A swarm uses more of your computers and takes longer than one answer, so it only runs when you ask for one.",
-        "A swarm also does tasks in a chat's folder, such as fix the failing tests, use a swarm. Toskar looks at the folder first, then gives each agent a part and the files it expects to change. In a Git folder each agent works in a copy of its own, on its own branch, starting from your uncommitted changes, and Toskar merges their work, runs the project's tests, and asks before it puts the change in your folder as uncommitted changes. If the tests failed on it, Toskar always asks, whatever your profile allows, and says so in the question and the answer. Your branch and staged changes are never touched. If two agents changed the same lines, a fix-up agent settles it; one it can't is named in the answer with its branch. In a folder that isn't in Git, the agents take turns in it, and the answer says so.",
-        "While a swarm works, Chat shows a lane for each agent: its part, the computer and model it runs on, whether it's queued, working, done, failed, stopped, or out of budget, its latest steps, and a summary of its result when it finishes. Then you see the merge, any changes that conflicted, and in a folder the result's branch, how the project's tests went, and whether the change was put in your folder. The answer comes last, as usual. Afterward the lanes stay above the answer, folded into one line that opens them again.",
-        "Each agent's chat is kept in the chat's project, or in a new project named after your question. History shows only the chat you started the swarm in; on the project's page, that chat has a line such as 3 agents that opens to the agents' chats. An agent's chat says which agent it is, with a link back to the main chat, and you can read and continue it like any other. Members and Admins can start a swarm, and a swarm in a folder needs an Admin, as a folder does."
+        "A swarm is several agents working on one request at the same time, each in a chat of its own. An agent is the AI working on its own part of the job, with its own model, tools, and notes. Toskar hands out the parts, watches the agents work, and puts their work together into one answer.",
+        "In a split, Toskar splits your request into parts, and each agent does one part. In a race, agents on different models each do the whole request, and Toskar keeps the best result or combines them.",
+        "Agents only run at the same time where they really can: on different computers, on different models, or on a model set to run more than one agent at once. With one model on one computer, a swarm runs as one agent and says why. Swarms are off until you ask for one, because they use more of your computers and take longer than a single answer.",
+        "Ask for one with Use a swarm in Chat options, by saying use a swarm in your message, or with a profile whose strategy is Swarm. The terminal, VS Code, coding agents, and the API can start one too.",
+        "In a chat with a folder, an Admin can give a swarm a task, such as fixing failing tests. Each agent works in its own copy of the folder, and Toskar merges their changes, runs the project's tests, and asks before it puts the change in your folder.",
+        "While a swarm works, Chat shows a lane for each agent, with Stop and Open. Each agent's chat is kept, in the chat's project, so you can read and continue it later."
       ],
-      "steps": [
-        "To ask for one in Chat, open Chat options, set Use a swarm to Split or Race, and send your message. A Swarm chip shows above your message until you send it, and only that message uses a swarm; choose × on the chip to change your mind. You can also end your message with use a swarm, or use 3 agents for three of them.",
-        "To have a profile always use one, open Profiles & Orchestration, edit the profile, open Strategy and computers, and set Strategy to Swarm. Then choose Split or Race, the models in order (a race needs at least two, one agent each), and if you like the most agents (2–8), tokens, and minutes a swarm may use. Quick questions are still answered directly.",
-        "Watch the lanes while the agents work. Stop under a lane stops that agent alone, and the others go on; Open opens its chat. Stop beside the message box stops every agent. What they finished is kept in their chats.",
-        "From another app, send swarm with split or race to POST /api/v1/chat, or start one with POST /api/v1/swarms and follow it with GET /api/v1/swarms/{id}. GET /api/v1/conversations?swarm_id= lists the agents' chats, and stopping one agent's chat stops that agent alone.",
-        "From a coding agent, such as Claude Code, use `swarm:` and the profile's id as its subagents' model, or run `toskarctl connect claude-code --swarm` and the profile ([Use Toskar in the terminal](#terminal)). Their requests run at once across the profile's computers and models. From an app that speaks MCP, the run_swarm tool runs a swarm and returns its answer and a link to its chat.",
-        "An agent's tools ask first, as any chat's do. Its questions show in the chat you started the swarm in, under the lanes, each with the agent that asks, such as Agent 2: tests. Allow for this agent covers that agent's chat only; the other agents still ask. In a folder, each agent's changes ask as a task's do, and so does putting the swarm's change in your folder. The API page lists the budgets: how many agents, tokens, and minutes a swarm may use.",
-        "If the answer says the change wasn't applied, run git merge with the branch it names in your folder. A swarm's branches are kept for a week; deleting the swarm deletes them sooner."
-      ],
-      "images": [
+      "blocks": [
         {
+          "type": "list",
+          "title": "What you need",
+          "items": [
+            "An installed model that calls tools ([Choose and manage models](#models)).",
+            "A Member or Admin account. Visitors and the guests of a chat page can't start a swarm ([Share Toskar with other people](#people)).",
+            "For agents that really run at once: a second computer ([Connect your computers](#computers)), a second model, or Agents at once raised on a model (below).",
+            "For a task in a folder: an Admin account, and a folder, ideally one in Git, chosen for the chat or its project ([Projects](#projects)).",
+            "To change a profile's swarm, or Agents at once: Advanced mode, in Settings."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Split or race"
+        },
+        {
+          "type": "paragraph",
+          "text": "A swarm is like handing a job to a small team instead of one person. Split it when the job has parts that don't depend on each other. Race it when you want a second opinion, or two tries at a hard problem."
+        },
+        {
+          "type": "table",
+          "columns": [
+            "Question",
+            "Split",
+            "Race"
+          ],
+          "rows": [
+            [
+              "What each agent does",
+              "One part of the request, such as running costs, cold weather, or noise",
+              "The whole request, each on a different model"
+            ],
+            [
+              "What you get",
+              "One answer, or one change, written from every agent's work",
+              "The best answer, or the answers combined. In a folder, the best change"
+            ],
+            [
+              "Helps with",
+              "Research with several questions in it, and work on separate files",
+              "Hard questions and fixes where a second try often does better"
+            ],
+            [
+              "Doesn't help with",
+              "A quick question, or a request that can't be split. It runs as one agent",
+              "One model. A race needs at least two"
+            ]
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "A swarm costs more than one answer: every agent reads the request and does its own work, and Toskar merges at the end. It finishes sooner only when the agents really run at the same time. One computer with one model answers one request at a time, so there a swarm runs as one agent, and the line under the answer says: One agent: this computer can't run more than one at a time with this model."
+        },
+        {
+          "type": "note",
+          "tone": "tip",
+          "text": "Auto never picks a swarm, and a swarm profile still answers quick questions directly. A swarm runs only when you ask for one."
+        },
+        {
+          "type": "heading",
+          "text": "Start a swarm in Chat"
+        },
+        {
+          "type": "steps",
+          "items": [
+            "Open Chat and type your request.",
+            "Choose Chat options, and set Use a swarm to Split or Race.",
+            "Check that a Swarm chip shows above your message, then send it."
+          ]
+        },
+        {
+          "type": "image",
+          "screen": "swarms-use",
+          "alt": "Chat options open above the message box, with Use a swarm set to Split. Above the message, a chip says Swarm: Split, with a button to remove it",
+          "caption": "The Swarm chip shows that the next message goes to a swarm. Choose × on the chip to change your mind."
+        },
+        {
+          "type": "paragraph",
+          "text": "Only that message uses a swarm; the next one is answered as usual. You can also say it in the message itself: end it with use a swarm, or with use 3 agents to name how many (2 to 8). Toskar understands this in English."
+        },
+        {
+          "type": "heading",
+          "text": "Make a profile that always uses one"
+        },
+        {
+          "type": "steps",
+          "items": [
+            "In Settings, turn on Advanced mode.",
+            "Open Profiles & Orchestration, and choose Edit on a profile.",
+            "Open Strategy and computers, and set Strategy to Swarm.",
+            "Choose Split or Race under Mode.",
+            "Under Models, add the models the agents use, in order. A race needs at least two, one agent each. A split takes them in turn.",
+            "If you like, set the most Agents, Tokens, and Minutes a swarm may use, then choose Save profile."
+          ]
+        },
+        {
+          "type": "image",
+          "screen": "swarms-profile",
+          "alt": "A profile named Coding swarm being edited. Strategy is Swarm. In its Swarm controls, Mode is Split, the Models are Qwen Coder 7B then Gemma 4 E4B, Agents is 3, Tokens is empty, and Minutes is 20",
+          "caption": "A profile's swarm: Split, two models, at most 3 agents and 20 minutes. Empty boxes keep the defaults."
+        },
+        {
+          "type": "paragraph",
+          "text": "Choose models on different computers, or more than one model, so agents can run at the same time. Chats with this profile use a swarm for real work, and still answer a quick question directly."
+        },
+        {
+          "type": "heading",
+          "text": "Watch the agents"
+        },
+        {
+          "type": "paragraph",
+          "text": "While a swarm works, Chat shows a lane for each agent above the answer. Each lane shows the agent's part, the computer and model it runs on, and how it's doing: Queued, Working, Done, Failed, Stopped, or Out of budget. A working agent shows its latest steps, and a finished one a short summary. In a race, the winner says Chosen."
+        },
+        {
+          "type": "image",
           "screen": "swarms-lanes",
           "alt": "A chat answered by a swarm: above the answer, three agents' lanes, each with its part, its computer and model, Done, a summary of its result, and Open",
-          "caption": "A swarm's lanes, opened above the answer they made."
+          "caption": "Three agents split the question across two computers. The lanes fold above the answer when it's done; choose the heading to open them again."
+        },
+        {
+          "type": "list",
+          "items": [
+            "Stop under a lane stops that agent alone. The others go on, and the answer uses what it finished.",
+            "Stop beside the message box stops every agent.",
+            "Open opens the agent's own chat. It says which agent it is, with a link back to the main chat, and you can read and continue it like any chat.",
+            "History lists only the chat you started the swarm in. The agents' chats are in its project: on the project's page, that chat has a line such as 3 agents, which opens to them."
+          ]
+        },
+        {
+          "type": "image",
+          "screen": "swarms-project",
+          "alt": "The Warmer house project page. Under the chat Compare three heat pumps for a small house, a 3 agents line is open, listing Agent 1: Running costs, Agent 2: Cold weather, and Agent 3: Noise",
+          "caption": "A project's page folds a swarm's agents under the chat that started it."
+        },
+        {
+          "type": "paragraph",
+          "text": "A swarm keeps its agents in chats, so it needs a project. When its agents start, a chat that isn't in one moves into a new project named after the request, and the line under the chat's title says so."
+        },
+        {
+          "type": "heading",
+          "text": "Tasks in a folder"
+        },
+        {
+          "type": "paragraph",
+          "text": "In a chat with a folder, a request for work on its files is a task, such as fix the failing tests ([Use Toskar in the terminal](#terminal)). A swarm can do a task too, for an Admin, on the web, the desktop app, or in the terminal. Before it plans, Toskar looks at the folder's files, reading only. It gives each agent a part and the files it expects to change, and parts that would change the same files go to one agent."
+        },
+        {
+          "type": "paragraph",
+          "text": "In a Git folder, each agent works in its own copy, called a worktree, on its own branch. Every copy starts from your folder as it is, including changes you haven't committed and new files Git doesn't ignore. Your branch, your staged changes, and your stashes are never touched."
+        },
+        {
+          "type": "steps",
+          "items": [
+            "Each agent does its part in its own copy, and its work is saved on its branch, such as toskar/swarm/7c2e91d4/agent-1.",
+            "Toskar merges the branches one at a time. If two agents changed the same lines, a fix-up agent settles it. If it can't, that agent's work is left out, and the lanes name its branch and files.",
+            "Toskar runs the project's checks on the merge: go test, cargo test, npm test, pytest, or make test, whichever the project has.",
+            "Toskar asks before it puts the change in your folder, unless your profile lets it write files without asking. When the checks failed, it always asks, and the question says so.",
+            "The change goes in your folder as uncommitted changes, so you can look it over before you commit it."
+          ]
+        },
+        {
+          "type": "image",
+          "screen": "swarms-task",
+          "alt": "A chat titled Fix the failing checkout tests, answered by a split of 2 agents. Each lane shows its branch. Below them: Result on branch toskar/swarm/7c2e91d4/merged, The project's checks passed, and Applied to your folder as uncommitted changes",
+          "caption": "Under the lanes: the merged branch, how the checks went, and whether the change is in your folder."
+        },
+        {
+          "type": "list",
+          "items": [
+            "Nothing is forced. If your folder changed while the agents worked, so the change no longer fits, it isn't applied, and the answer names the branch. Run `git merge` with that branch in your folder to bring it in.",
+            "In a race, each agent does the whole task in its own copy, and the checks run in each. An agent whose checks fail can't win over one whose checks pass.",
+            "A folder that isn't in Git can't be copied safely, so the agents take turns in the folder itself. The answer says: Not a Git folder: the agents worked one after another in it. A race there runs as one agent.",
+            "The copies are removed when the swarm ends. The branches are kept for 7 days, or until you delete the swarm with the API."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Approve an agent's tools"
+        },
+        {
+          "type": "paragraph",
+          "text": "An agent's tools ask first, as any chat's do. In a task, its changes and commands ask as a task's do, whatever the profile allows in chat. Each question shows in the chat you started the swarm in, under the lanes, and starts with the agent that asks."
+        },
+        {
+          "type": "image",
+          "screen": "swarms-approval",
+          "alt": "Two agents working, each with Stop and Open. Below them, a question from Agent 2: Test a 100% discount, asking to allow Terminal to run go test ./checkout/..., with Allow once, Allow for this agent, and Deny",
+          "caption": "Allow for this agent covers that agent's chat only. The other agents still ask."
+        },
+        {
+          "type": "list",
+          "items": [
+            "Allow once lets this one call run.",
+            "Allow for this agent lets that tool run for the rest of that agent's chat. It never covers the whole swarm, so another agent's call still asks.",
+            "A destructive command, such as deleting files, always asks, and doesn't offer Allow for this agent.",
+            "With nobody there to answer, such as from another app, a call that has to ask is refused."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Limits on a swarm"
+        },
+        {
+          "type": "paragraph",
+          "text": "A swarm has a budget, so it can't run on without end. Set it in the profile's Swarm controls, or per swarm through the API."
+        },
+        {
+          "type": "table",
+          "columns": [
+            "Budget",
+            "Default",
+            "What it limits"
+          ],
+          "rows": [
+            [
+              "Agents",
+              "The profile's Workers, or 4",
+              "How many agents a swarm uses, 2 to 8"
+            ],
+            [
+              "Tokens",
+              "400,000",
+              "Everything all the agents read and write together, 10,000 to 4,000,000. A token is about three quarters of a word"
+            ],
+            [
+              "Minutes",
+              "5 for a question, 30 for a task",
+              "How long a swarm may run, 1 to 240"
+            ],
+            [
+              "Tool calls",
+              "As for a task or a question",
+              "How many tools each agent may use"
+            ]
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "When a swarm reaches its budget, agents still working stop, and those waiting don't start; their lanes say Out of budget. Toskar then merges what the others finished."
+        },
+        {
+          "type": "heading",
+          "text": "Agents at once on one model"
+        },
+        {
+          "type": "paragraph",
+          "text": "A model on a computer answers one request at a time, so agents that share it take turns. Agents at once lets up to 4 agents use one model at the same time."
+        },
+        {
+          "type": "steps",
+          "items": [
+            "In Settings, turn on Advanced mode.",
+            "Open Models, then Installed.",
+            "Open More actions beside the model, and choose a number under Agents at once."
+          ]
+        },
+        {
+          "type": "image",
+          "screen": "swarms-agents-at-once",
+          "alt": "The Installed models list with the More actions menu open for Gemma 4 E4B. Under Agents at once, 2 is ticked, between 1, 3, and 4",
+          "caption": "Agents at once is 1 until you raise it. A running model picks up the new number on its next message."
+        },
+        {
+          "type": "list",
+          "items": [
+            "Each agent keeps the model's whole context window, so the model needs more memory: about one more context window's worth for each extra agent.",
+            "Toskar refuses a number that would leave an agent less than 8K of context, or that wouldn't fit your computer's memory, and says which.",
+            "Agents that share a model each answer a little slower than one agent alone, but together they usually finish sooner.",
+            "A model on a paired computer runs as many agents as it's set to on that computer."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "From the terminal and VS Code"
+        },
+        {
+          "type": "paragraph",
+          "text": "`toskarctl chat --swarm` sends every message in the chat to a swarm, and `--swarm race` to a race. While chatting, `/swarm` sends just the next message. Each agent has a line that updates as it works, then the answer comes. `/agents` lists the agents, and `/open 2` continues agent 2's chat ([Use Toskar in the terminal](#terminal))."
+        },
+        {
+          "type": "paragraph",
+          "text": "In VS Code, `@toskar /swarm` sends your question to a swarm, and `@toskar /swarm race` to a race. The chat shows each agent's steps, then the answer, with a summary of the agents and a link to the swarm's chat ([Use Toskar in VS Code](#vscode)). From VS Code a swarm answers questions; start a task in a folder from Toskar or the terminal. `/swarm` comes in the extension's next release after 0.4.0."
+        },
+        {
+          "type": "heading",
+          "text": "Coding agents and other apps"
+        },
+        {
+          "type": "paragraph",
+          "text": "Coding agents, such as Claude Code or Codex, start helpers called subagents, often several at a time. With one model on one computer, they wait for each other. A swarm profile spreads them out instead. Use `swarm:` and the profile's id as the model name, on any of Toskar's OpenAI and Anthropic formats. The profile's name with dashes between the words works too, such as `swarm:coding-swarm` for Coding swarm."
+        },
+        {
+          "type": "table",
+          "columns": [
+            "The request",
+            "What Toskar does"
+          ],
+          "rows": [
+            [
+              "Brings the agent's own tools, as subagents' requests do",
+              "Spread: sends the request as it is to the least busy of the profile's computers and models, and returns the answer unchanged. Requests sent together run at the same time on different ones"
+            ],
+            [
+              "Has no tools",
+              "Runs a whole swarm on the last message, and answers with the swarm's answer. The agents' progress comes first, as the answer's reasoning"
+            ]
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "For Claude Code, `toskarctl connect claude-code --swarm` and a profile point only its subagents at the swarm. Its own model, and its quick background requests, stay as they were, since those have no tools and would each run a whole swarm ([Use Toskar in the terminal](#terminal))."
+        },
+        {
+          "type": "paragraph",
+          "text": "A request with no tools in Anthropic's Messages format gets the agents' progress as a thinking block, then the answer:"
+        },
+        {
+          "type": "code",
+          "language": "sh",
+          "test": "swarms-messages",
+          "code": "curl -s http://127.0.0.1:7331/v1/messages \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"model\": \"swarm:general-assistant\", \"max_tokens\": 1024, \"messages\": [{\"role\": \"user\", \"content\": \"Plan a three-day trip to Juneau\"}]}'",
+          "output": "{\"content\":[{…\"thinking\":\"…\",\"type\":\"thinking\"},{\"text\":\"…Juneau…\",\"type\":\"text\"}],…\"model\":\"swarm:general-assistant\",…}"
+        },
+        {
+          "type": "paragraph",
+          "text": "In OpenAI's Responses format, the progress is a reasoning item before the message:"
+        },
+        {
+          "type": "code",
+          "language": "sh",
+          "test": "swarms-responses",
+          "code": "curl -s http://127.0.0.1:7331/v1/responses \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"model\": \"swarm:general-assistant\", \"input\": \"Plan a three-day trip to Juneau\"}'",
+          "output": "{…\"model\":\"swarm:general-assistant\",…\"type\":\"reasoning\"},{\"content\":[{…\"text\":\"…Juneau…\",\"type\":\"output_text\"}]…}"
+        },
+        {
+          "type": "paragraph",
+          "text": "In OpenAI's Chat Completions format, it's the message's `reasoning_content` ([Connect another app through the API](#api)). Here, with one model on one computer, the reasoning says why the swarm ran as one agent."
+        },
+        {
+          "type": "paragraph",
+          "text": "Apps that speak MCP, such as Claude Desktop or Cursor, get a `run_swarm` tool from Toskar's MCP server. It takes the request, and optionally `mode` (split or race) and `profile`. It returns the swarm's answer and a link to its chat:"
+        },
+        {
+          "type": "code",
+          "language": "sh",
+          "test": "swarms-mcp",
+          "code": "curl -s http://127.0.0.1:7331/mcp \\\n  -H \"Content-Type: application/json\" \\\n  -H \"Accept: application/json, text/event-stream\" \\\n  -d '{\"jsonrpc\": \"2.0\", \"id\": 1, \"method\": \"tools/call\", \"params\": {\"name\": \"run_swarm\", \"arguments\": {\"prompt\": \"Plan a three-day trip to Juneau\"}}}'",
+          "output": "{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":{\"content\":[{\"text\":\"…Juneau…\\n\\nCoordinator chat: … (open it in Toskar at /chat?c=…)\",\"type\":\"text\"}],\"isError\":false}}"
+        },
+        {
+          "type": "paragraph",
+          "text": "Who can do what, from another computer with a key from API Access:"
+        },
+        {
+          "type": "table",
+          "columns": [
+            "What",
+            "Who or which key"
+          ],
+          "rows": [
+            [
+              "Start a swarm in any way",
+              "A Member or an Admin. A Visitor's key, or a chat page's guest, is refused"
+            ],
+            [
+              "A task in a folder",
+              "An Admin, on the web, the desktop app, or in the terminal"
+            ],
+            [
+              "`swarm:` requests that bring tools",
+              "A key with Drive models directly, for coding agents, as for the agent's own model. A key limited to one profile can't"
+            ],
+            [
+              "`swarm:` requests without tools, and `run_swarm`",
+              "A Member or an Admin. A key limited to one profile can name only that profile, and a chat-only key can't, since a swarm saves chats"
+            ]
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "With the API"
+        },
+        {
+          "type": "paragraph",
+          "text": "Apps that want the lanes use `/api/v1/swarms`. Start one with your request, and optionally `mode`, `conversation_id` (a chat of yours to run it in), and `budget` (`agents`, `tokens`, `minutes`). Toskar answers at once, while the agents work:"
+        },
+        {
+          "type": "code",
+          "language": "sh",
+          "test": "swarms-api-start",
+          "code": "curl -s http://127.0.0.1:7331/api/v1/swarms \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"prompt\": \"Plan a three-day trip to Juneau: where to stay, what to do, and what to pack\", \"mode\": \"split\"}'",
+          "output": "{\"id\":\"…\",…\"mode\":\"split\",\"status\":\"running\",…}"
+        },
+        {
+          "type": "paragraph",
+          "text": "Then read it back by its id. This starts one, waits until it has finished, and reads it. The record has each agent's part, computer, model, status, and summary, and a `note` when it ran as one agent:"
+        },
+        {
+          "type": "code",
+          "language": "sh",
+          "test": "swarms-api-get",
+          "code": "swarm=$(curl -s http://127.0.0.1:7331/api/v1/swarms \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"prompt\": \"Plan a three-day trip to Juneau\"}' | grep -o '\"id\":\"[^\"]*\"' | head -1 | cut -d '\"' -f 4)\nuntil curl -s http://127.0.0.1:7331/api/v1/swarms/$swarm | grep -q finished_at; do sleep 2; done\ncurl -s http://127.0.0.1:7331/api/v1/swarms/$swarm",
+          "output": "{\"id\":\"…\",…\"status\":\"done\",…\"agents\":[…],…\"finished_at\":\"…\"}"
+        },
+        {
+          "type": "paragraph",
+          "text": "`POST /api/v1/swarms/{id}/stop` stops every agent, and stopping one agent's chat with `POST /api/v1/chat/stop` stops that agent alone. `GET /api/v1/conversations?swarm_id=` lists a swarm's chats. `DELETE /api/v1/swarms/{id}` deletes a finished swarm's record and the branches it kept; its chats stay. `POST /api/v1/chat` also takes `swarm`, `split` or `race`, for one message."
+        },
+        {
+          "type": "heading",
+          "text": "On your phone, tablet, TV, car, and watch"
+        },
+        {
+          "type": "paragraph",
+          "text": "The Toskar apps don't show a swarm's lanes yet. Where an app lists your computer's chats, the chat you started a swarm in shows with its answer, like any other answer, and the agents' own chats aren't listed. Start and watch a swarm on the computer: on the web, in the desktop app, in the terminal, or in VS Code."
+        },
+        {
+          "type": "list",
+          "title": "Limits",
+          "items": [
+            "Agents run at the same time only on different computers, on different models, or on a model with Agents at once above 1. Otherwise a swarm runs as one agent.",
+            "Use a swarm and use 3 agents in a message are understood in English only.",
+            "A task in a folder needs an Admin, and is started on the web, the desktop app, or in the terminal.",
+            "A race needs at least two models, and a race on a task needs a Git folder.",
+            "The apps on your phone, tablet, TV, car, and watch show a swarm's answer, but not its lanes."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Troubleshooting"
+        },
+        {
+          "type": "table",
+          "columns": [
+            "What you see",
+            "What to do"
+          ],
+          "rows": [
+            [
+              "One agent: this computer can't run more than one at a time with this model",
+              "Pair another computer, add a second model to the profile's swarm, or raise Agents at once on the model"
+            ],
+            [
+              "One agent: this request doesn't split into parts that can be done separately",
+              "Name the parts in your request, or use a race"
+            ],
+            [
+              "One agent: a race needs at least two models to compare",
+              "Add a second model under the profile's swarm Models"
+            ],
+            [
+              "One agent: a swarm works on a task in a folder, and this task has none",
+              "Choose a folder for the chat, or for its project"
+            ],
+            [
+              "One agent: a race on a task needs a Git folder, so each agent has its own copy",
+              "Use a split, or put the folder in Git with `git init`"
+            ],
+            [
+              "Not applied to your folder. To use it, merge the branch with Git",
+              "In your folder, run `git merge` with the branch it names"
+            ],
+            [
+              "An agent's changes conflict, so they weren't merged",
+              "They're kept on the branch the line names. Merge it with Git and settle the conflict yourself"
+            ],
+            [
+              "Use a swarm isn't in Chat options",
+              "Swarms need a Member or an Admin account"
+            ],
+            [
+              "Agents at once, or Edit on a profile, isn't there",
+              "Turn on Advanced mode in Settings"
+            ],
+            [
+              "A coding agent gets `404` `MODEL_NOT_FOUND` for a `swarm:` model",
+              "Check the profile's id or name. Then check that one of the profile's swarm models is installed on a computer that's on"
+            ],
+            [
+              "A coding agent gets `403` \"this key can't drive a model directly\"",
+              "Give the key Drive models directly, for coding agents, in API Access"
+            ]
+          ]
+        },
+        {
+          "type": "related",
+          "sections": [
+            "profiles",
+            "projects",
+            "models",
+            "computers",
+            "terminal",
+            "vscode",
+            "api"
+          ]
         }
       ]
     },
@@ -2452,7 +2937,7 @@
         },
         {
           "type": "paragraph",
-          "text": "`swarm:` and a profile's id has a swarm of agents answer ([Run a swarm](#swarms)). The answer is the swarm's, and its `reasoning_content` says what the agents did. With one model on one computer, it runs as one agent and says why. Coding agents' requests that bring their own tools are spread across the profile's computers and models instead ([Use Toskar in the terminal](#terminal))."
+          "text": "`swarm:` and a profile's id has a swarm of agents answer ([Swarms](#swarms)). The answer is the swarm's, and its `reasoning_content` says what the agents did. With one model on one computer, it runs as one agent and says why. Coding agents' requests that bring their own tools are spread across the profile's computers and models instead ([Use Toskar in the terminal](#terminal))."
         },
         {
           "type": "code",
@@ -3095,7 +3580,7 @@
         },
         {
           "type": "paragraph",
-          "text": "A swarm has several agents work on your message at once, each in a chat of its own, and the answer is written from what they did ([Run a swarm](#swarms)). `toskarctl chat --swarm` sends every message in the chat to one, and `/swarm` sends just the next. In a split, the default, the job is split into parts; `--swarm race` has each of the profile's swarm models do the whole job, and the best result is kept."
+          "text": "A swarm has several agents work on your message at once, each in a chat of its own, and the answer is written from what they did ([Swarms](#swarms)). `toskarctl chat --swarm` sends every message in the chat to one, and `/swarm` sends just the next. In a split, the default, the job is split into parts; `--swarm race` has each of the profile's swarm models do the whole job, and the best result is kept."
         },
         {
           "type": "steps",
@@ -3193,7 +3678,7 @@
         },
         {
           "type": "paragraph",
-          "text": "Claude Code starts subagents for parts of a job, often several at the same time. With one model on one computer, they wait for each other. `--swarm` points the subagents at a profile's swarm instead: each of their requests goes to the least busy of the profile's swarm models and computers, so they run at once ([Run a swarm](#swarms)). The agent's own model stays as it was."
+          "text": "Claude Code starts subagents for parts of a job, often several at the same time. With one model on one computer, they wait for each other. `--swarm` points the subagents at a profile's swarm instead: each of their requests goes to the least busy of the profile's swarm models and computers, so they run at once ([Swarms](#swarms)). The agent's own model stays as it was."
         },
         {
           "type": "code",
