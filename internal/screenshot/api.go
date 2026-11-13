@@ -552,7 +552,7 @@ const screenshotHeatPumpMessages = `[
     "id": "h2",
     "conversation_id": "conv-research",
     "role": "assistant",
-    "content": "For a small two-story house in a cold, wet climate, a cold-climate ducted heat pump is the best fit.\n\n| | Running cost a year | Below 0°F | Noise outside |\n| --- | --- | --- | --- |\n| Cold-climate ducted | about $1,150 | full heat to -13°F | 56 dB |\n| Ductless, three heads | about $1,050 | full heat to -5°F | 52 dB |\n| Standard ducted | about $1,300 | backup heat below 5°F | 58 dB |\n\nThe ductless system costs least to run but needs a head in each bedroom. Have a contractor do a load calculation before choosing a size.",
+    "content": "For a small two-story house in a cold, wet climate, a cold-climate ducted heat pump is the best fit.\n\n| Heat pump | Running cost a year | Below 0°F | Noise outside |\n| --- | --- | --- | --- |\n| Cold-climate ducted | about $1,150 | full heat to -13°F | 56 dB |\n| Ductless, three heads | about $1,050 | full heat to -5°F | 52 dB |\n| Standard ducted | about $1,300 | backup heat below 5°F | 58 dB |\n\nThe ductless system costs least to run but needs a head in each bedroom. Have a contractor do a load calculation before choosing a size.",
     "created_at": "2026-10-20T17:06:40Z"
   }
 ]`
