@@ -677,11 +677,14 @@ func (s *chatSession) openAgent(arg string) error {
 		if a.Agent != n || a.ConversationID == "" {
 			continue
 		}
+		// Shown first, so a chat that can't be read leaves the session where it was.
+		if err := s.showLast(a.ConversationID); err != nil {
+			return err
+		}
 		if s.coordinator == "" {
 			s.coordinator = s.conv
 		}
 		s.conv = a.ConversationID
-		s.showLast(s.conv)
 		label := fmt.Sprintf("agent %d's chat", n)
 		if part := s.swarm.partTitle(id, n); part != "" {
 			label += " (" + part + ")"
