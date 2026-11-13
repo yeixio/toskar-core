@@ -203,6 +203,11 @@ type Model struct {
 	ContextWindow  int             `json:"context_window,omitempty"`
 	ContextChoice  int             `json:"context_choice,omitempty"`
 	ContextOptions []ContextOption `json:"context_options,omitempty"`
+	// Slots is how many requests a chat model installed on this computer
+	// answers at once, from 1 to 4, so a swarm can run that many agents on
+	// it together (#1135, contract 1.88). Each keeps the whole context
+	// window. Absent for other models.
+	Slots int `json:"slots,omitempty"`
 }
 
 // ContextOption is a context window a model can take, and how well the model

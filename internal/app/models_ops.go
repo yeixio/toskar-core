@@ -209,6 +209,7 @@ func (a *App) startModelLocal(ctx context.Context, modelID string) (contracts.Ru
 		ModelID: modelID, ModelPath: path, Adapters: a.localAdapters(ctx, modelID),
 		Projector: a.Models.ProjectorPath(modelID), NoSpeculation: a.speculationOff(ctx, modelID),
 		Draft: a.draftPath(ctx, modelID), Context: a.startWindow(ctx, modelID),
+		Slots: a.modelSlots(ctx, modelID),
 	})
 	loaded()
 	if err != nil {
@@ -382,6 +383,7 @@ func (a *App) listModelsCluster(ctx context.Context) ([]contracts.Model, error) 
 	}
 	a.withSpeculation(ctx, local)
 	a.withContextWindows(ctx, local)
+	a.withSlots(ctx, local)
 	cfg := a.Config.Get()
 	presence := map[string][]contracts.ModelOnNode{}
 	for _, m := range local {
@@ -403,6 +405,7 @@ func (a *App) listModelsCluster(ctx context.Context) ([]contracts.Model, error) 
 				if err != nil {
 					continue
 				}
+				a.noteRemoteSlots(n.ID, remote)
 				for _, rm := range remote {
 					if !rm.Installed {
 						continue
@@ -527,6 +530,8 @@ func (a *App) fitOptions(ctx context.Context, nodeID string, local bool, running
 				}
 			}
 		}
+		// A model with more slots keeps more caches (#1135).
+		opts.Slots = a.slotChoices(ctx)
 	}
 	for _, view := range running {
 		if nodeID != "" && view.NodeID != "" && view.NodeID != nodeID {

@@ -13,7 +13,7 @@ import { formatBytes } from '@/lib/format'
 import { formatLastUsed, largerAlternative } from './modelPresentation'
 import { SmallModelNote } from './SmallModelNote'
 import { CommunityScore, RateButton } from './ratings'
-import { formatPercent } from '@/i18n/format'
+import { formatNumber, formatPercent } from '@/i18n/format'
 import { rovingKeyDown, useMenu } from '@/lib/roving'
 import { searchItems } from '@/lib/search'
 import { ShownError, type Shown } from '@/components/ui/ShownError'
@@ -35,6 +35,7 @@ export function InstalledTab({
   onDelete,
   onSpeculation,
   onContextWindow,
+  onSlots,
   onInstallElsewhere,
   installingId,
   startingId,
@@ -59,6 +60,8 @@ export function InstalledTab({
   onSpeculation?: (id: string, speculation: 'auto' | 'off') => void
   /** Sets a model's context window in tokens, or 0 for Auto (#962). */
   onContextWindow?: (id: string, contextWindow: number) => void
+  /** Sets how many of a swarm's agents a model runs at once, 1 to 4 (#1135). */
+  onSlots?: (id: string, slots: number) => void
   onInstallElsewhere?: (id: string) => void
   installingId?: string | null
   /** The model starting now, which may first set up llama.cpp (#610). */
@@ -281,6 +284,36 @@ export function InstalledTab({
                           })}
                         </div>
                       )}
+                      {advancedMode && model.slots && onSlots && (
+                        <div role="group" aria-label={t('installedTab.agentsAtOnce')}>
+                          <p className="px-3 pt-2 text-xs text-ink-muted">
+                            {t('installedTab.agentsAtOnce')}
+                            {live ? ` · ${t('installedTab.contextWindowNextMessage')}` : ''}
+                          </p>
+                          <p className="px-3 text-xs text-ink-muted">{t('installedTab.agentsAtOnceHint')}</p>
+                          {AGENTS_AT_ONCE.map((slots) => {
+                            const chosen = model.slots === slots
+                            return (
+                              <button
+                                key={slots}
+                                type="button"
+                                role="menuitemradio"
+                                aria-checked={chosen}
+                                className="menu-item"
+                                onClick={() => {
+                                  setMenuOpenId(null)
+                                  if (!chosen) onSlots(model.id, slots)
+                                }}
+                              >
+                                <span aria-hidden className="inline-block w-4">
+                                  {chosen ? '✓' : ''}
+                                </span>
+                                {formatNumber(slots)}
+                              </button>
+                            )
+                          })}
+                        </div>
+                      )}
                       <button
                         type="button"
                         role="menuitem"
@@ -306,6 +339,9 @@ export function InstalledTab({
     </ul>
   )
 }
+
+/** How many agents at once a model can run for a swarm (#1135). */
+const AGENTS_AT_ONCE = [1, 2, 3, 4]
 
 /** A context window as people say it: 32768 tokens is 32K. */
 function tokenSize(tokens: number): string {

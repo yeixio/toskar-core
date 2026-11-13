@@ -84,7 +84,10 @@ type Dependencies struct {
 	SetModelSpeculation func(ctx context.Context, id, choice string) error
 	// SetModelContext sets a model's context window on this computer, 0
 	// for Auto (#962).
-	SetModelContext   func(ctx context.Context, id string, tokens int) error
+	SetModelContext func(ctx context.Context, id string, tokens int) error
+	// SetModelSlots sets how many requests a model on this computer
+	// answers at once, 1 to 4, for swarms (#1135).
+	SetModelSlots     func(ctx context.Context, id string, slots int) error
 	DeleteModel       func(ctx context.Context, id string, nodeID string) error
 	ListRunningModels func(ctx context.Context) ([]contracts.RunningModelView, error)
 	// Acceleration sums up where this computer's loaded models run, for
@@ -358,6 +361,7 @@ func (s *Server) routes() {
 	api.HandleFunc("/models/{id}/projector", s.handleSetModelProjector).Methods(http.MethodPut)
 	api.HandleFunc("/models/{id}/speculation", s.handleSetModelSpeculation).Methods(http.MethodPut)
 	api.HandleFunc("/models/{id}/context", s.handleSetModelContext).Methods(http.MethodPut)
+	api.HandleFunc("/models/{id}/slots", s.handleSetModelSlots).Methods(http.MethodPut)
 	api.HandleFunc("/runtimes", s.handleListRuntimes).Methods(http.MethodGet, http.MethodOptions)
 	api.HandleFunc("/runtimes/{id}/install", s.handleInstallRuntime).Methods(http.MethodPost)
 	api.HandleFunc("/profiles", s.handleProfiles).Methods(http.MethodGet, http.MethodOptions)

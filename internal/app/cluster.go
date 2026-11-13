@@ -189,6 +189,7 @@ func (a *App) buildInstalledMap(ctx context.Context, nodeList []contracts.Node, 
 		if err != nil {
 			continue
 		}
+		a.noteRemoteSlots(n.ID, models)
 		for _, m := range models {
 			if m.ID == modelID && m.Installed {
 				installed[n.ID] = []string{modelID}
@@ -528,6 +529,7 @@ func (a *App) ensureLocalModelWith(ctx context.Context, modelID string, adapters
 		Draft:         a.draftPath(ctx, modelID),
 		NoSpeculation: a.speculationOff(ctx, modelID),
 		Context:       a.startWindow(ctx, modelID),
+		Slots:         a.modelSlots(ctx, modelID),
 	})
 	loaded()
 	if err != nil {

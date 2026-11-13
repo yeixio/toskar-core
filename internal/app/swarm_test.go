@@ -37,9 +37,7 @@ func newSwarmApp(t *testing.T, hold ...int) *swarmApp {
 	}
 	t.Cleanup(func() { _ = a.DB.Close() })
 	// Two slots, so two agents on this computer's one model run at once.
-	old := swarm.SlotsFor
-	swarm.SlotsFor = func(string, string) int { return 2 }
-	t.Cleanup(func() { swarm.SlotsFor = old })
+	a.SwarmSlots = func(string, string) int { return 2 }
 	s := &swarmApp{App: a, hold: map[int]chan struct{}{}, started: map[int]chan struct{}{}, once: map[int]*sync.Once{}}
 	for _, n := range hold {
 		s.hold[n], s.started[n], s.once[n] = make(chan struct{}), make(chan struct{}), &sync.Once{}
@@ -221,7 +219,7 @@ func TestSwarmStopAll(t *testing.T) {
 // One computer and one model with one slot runs as one agent and says why.
 func TestSwarmOneAtATime(t *testing.T) {
 	s := newSwarmApp(t)
-	swarm.SlotsFor = func(string, string) int { return 1 }
+	s.SwarmSlots = func(string, string) int { return 1 }
 	ctx := context.Background()
 	answer, coord := s.ask(t, ctx, swarm.ModeSplit, nil)
 	if answer != "Merged." {

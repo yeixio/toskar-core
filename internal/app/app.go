@@ -183,8 +183,14 @@ type App struct {
 	windows sync.Map
 	shapes  sync.Map
 	// startWindows keeps the window each chat model starts with here
-	// (model id -> tokens, #962), worked out once from the hardware.
+	// (autoKey -> tokens, #962), worked out once from the hardware.
 	startWindows sync.Map
+	// remoteSlots keeps how many requests each paired computer's models
+	// answer at once (remoteSlotKey -> slots, #1135), as they last said.
+	remoteSlots sync.Map
+	// SwarmSlots, when set, stands in for the slots a swarm counts on for
+	// a model on a computer (tests).
+	SwarmSlots func(nodeID, modelID string) int
 	// raisedWindows keeps a bigger window a request asked a model for
 	// (model id -> raisedWindow, #962).
 	raisedWindows sync.Map
@@ -504,6 +510,7 @@ func New(opts Options) (*App, error) {
 			ModelID: modelID, ModelPath: modelPath, Adapters: a.localAdapters(ctx, modelID),
 			Projector: modelMgr.ProjectorPath(modelID), NoSpeculation: a.speculationOff(ctx, modelID),
 			Draft: a.draftPath(ctx, modelID), Context: a.startWindow(ctx, modelID),
+			Slots: a.modelSlots(ctx, modelID),
 		})
 	}
 	bench.Admit = func(ctx context.Context, waiting func(string)) (func(), error) {
@@ -704,6 +711,7 @@ func New(opts Options) (*App, error) {
 		SetModelProjector:     a.Models.SetProjector,
 		SetModelSpeculation:   a.setModelSpeculation,
 		SetModelContext:       a.setModelContext,
+		SetModelSlots:         a.setModelSlots,
 		ListRunningModels:     a.listRunningAll,
 		Acceleration:          a.healthAcceleration,
 		StartModel: func(ctx context.Context, id, nodeID string) (contracts.RunningModelView, error) {
@@ -1049,7 +1057,7 @@ func New(opts Options) (*App, error) {
 		Pairing:         pairing,
 		Hardware:        a.detectHardware,
 		Live:            a.localLive,
-		ListModels:      modelMgr.List,
+		ListModels:      a.listModelsForPeers,
 		InstallModel:    modelMgr.Install,
 		InstallFromURL:  modelMgr.InstallFromURL,
 		DeleteModel:     modelMgr.Delete,

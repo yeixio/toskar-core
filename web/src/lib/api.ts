@@ -897,6 +897,13 @@ export const api = {
       body: JSON.stringify({ context_window: contextWindow }),
     }),
 
+  /** How many of a swarm's agents a model on this computer runs at once, 1 to 4; it reloads on its next message (#1135). */
+  setModelSlots: (id: string, slots: number) =>
+    request<{ model_id: string; slots: number }>(`/api/v1/models/${encodeURIComponent(id)}/slots`, {
+      method: 'PUT',
+      body: JSON.stringify({ slots }),
+    }),
+
   setModelProjector: (id: string, path: string) =>
     request<{ model_id: string; vision: boolean }>(`/api/v1/models/${encodeURIComponent(id)}/projector`, {
       method: 'PUT',

@@ -113,3 +113,40 @@ describe('InstalledTab context window', () => {
     expect(screen.queryByRole('menuitemradio')).not.toBeInTheDocument()
   })
 })
+
+// Agents at once is 1 to 4 per model, in Advanced mode only, with a line
+// that says what it does; a model on its way to answering shows that it
+// reloads (#1135).
+describe('InstalledTab agents at once', () => {
+  afterEach(() => useUIStore.setState({ advancedMode: false }))
+
+  it('picks how many agents a swarm runs on the model at once', () => {
+    useUIStore.setState({ advancedMode: true })
+    const onSlots = vi.fn()
+    renderTab({ models: [{ ...qwen, slots: 1 }], onSlots })
+    fireEvent.click(screen.getByRole('button', { name: 'More actions for Qwen3.5 35B' }))
+    const group = screen.getByRole('group', { name: 'Agents at once' })
+    expect(group).toHaveTextContent('Lets a swarm run this many agents on this model at the same time.')
+    expect(screen.getAllByRole('menuitemradio').map((b) => b.textContent)).toEqual(['✓1', '2', '3', '4'])
+    expect(screen.getByRole('menuitemradio', { name: '1' })).toHaveAttribute('aria-checked', 'true')
+    fireEvent.click(screen.getByRole('menuitemradio', { name: '2' }))
+    expect(onSlots).toHaveBeenCalledWith('qwen3.5-35b', 2)
+  })
+
+  it('says a loaded model reloads, and does nothing for the number it has', () => {
+    useUIStore.setState({ advancedMode: true })
+    const onSlots = vi.fn()
+    const running = [{ model_id: 'qwen3.5-35b', instance_id: 'i1', status: 'running' }] as Parameters<typeof InstalledTab>[0]['running']
+    renderTab({ models: [{ ...qwen, slots: 2 }], running, onSlots })
+    fireEvent.click(screen.getByRole('button', { name: 'More actions for Qwen3.5 35B' }))
+    expect(screen.getByRole('group', { name: 'Agents at once' })).toHaveTextContent('reloads on its next message')
+    fireEvent.click(screen.getByRole('menuitemradio', { name: '2' }))
+    expect(onSlots).not.toHaveBeenCalled()
+  })
+
+  it('has no such choice outside Advanced mode', () => {
+    renderTab({ models: [{ ...qwen, slots: 1 }], onSlots: vi.fn() })
+    fireEvent.click(screen.getByRole('button', { name: 'More actions for Qwen3.5 35B' }))
+    expect(screen.queryByRole('group', { name: 'Agents at once' })).not.toBeInTheDocument()
+  })
+})

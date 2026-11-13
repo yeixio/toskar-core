@@ -200,7 +200,9 @@
     "contextWindowHint": "How much the model reads at once, in tokens (about ¾ of a word each). Auto picks the most that fits this computer well; a bigger window holds more memory while the model runs.",
     "contextWindowNextMessage": "reloads on its next message",
     "contextAuto": "Auto",
-    "contextAutoSize": "Auto · {{size}}"
+    "contextAutoSize": "Auto · {{size}}",
+    "agentsAtOnce": "Agents at once",
+    "agentsAtOnceHint": "Lets a swarm run this many agents on this model at the same time. Each gets an equal share of its context and it uses more memory."
   },
   "runningTab": {
     "empty": "No models are loaded right now. Chat will start one automatically when you need it.",

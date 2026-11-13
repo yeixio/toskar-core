@@ -243,3 +243,27 @@ func (s *Server) handleSetModelContext(w http.ResponseWriter, r *http.Request) {
 	}
 	writeJSON(w, http.StatusOK, map[string]any{"model_id": id, "context_window": *body.ContextWindow})
 }
+
+// handleSetModelSlots sets how many requests a chat model on this computer
+// answers at once, 1 to 4, so a swarm can run that many agents on it
+// together (#1135). Each keeps the model's whole context window. A loaded
+// model starts again with it on its next request.
+func (s *Server) handleSetModelSlots(w http.ResponseWriter, r *http.Request) {
+	if s.deps.SetModelSlots == nil {
+		writeErr(w, http.StatusNotImplemented, "NOT_IMPLEMENTED", "Changing a model's slots is not available.", nil)
+		return
+	}
+	var body struct {
+		Slots *int `json:"slots"`
+	}
+	if err := json.NewDecoder(http.MaxBytesReader(w, r.Body, 16<<10)).Decode(&body); err != nil || body.Slots == nil {
+		writeErr(w, http.StatusBadRequest, "INVALID_JSON", "Request body must be JSON with slots: 1 to 4.", nil)
+		return
+	}
+	id := mux.Vars(r)["id"]
+	if err := s.deps.SetModelSlots(r.Context(), id, *body.Slots); err != nil {
+		writeErrFrom(w, http.StatusBadRequest, "MODEL_UPDATE_FAILED", err)
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]any{"model_id": id, "slots": *body.Slots})
+}

@@ -29,6 +29,10 @@ type Runtime struct {
 	// installMu keeps a model from starting while its files are replaced.
 	installMu sync.RWMutex
 
+	// starts keeps one start at a time per model, so agents asking for the
+	// same model at once share one llama-server (#1135).
+	starts keyedMutex
+
 	// goos and goarch pick the release build; they are the host's.
 	goos, goarch string
 	// releases lists llama.cpp releases, newest first.

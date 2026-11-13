@@ -30,15 +30,19 @@ type Lane struct {
 	Agents []int
 }
 
-// SlotsFor is how many requests a model on a computer answers at once.
-// llama-server runs with --parallel 1 (#834), so it's 1 until the per-model
-// slots setting comes (docs/features/swarms.md#placement); that change
-// belongs here.
-var SlotsFor = func(nodeID, modelID string) int { return 1 }
+// SlotsFor is how many requests a model on a computer answers at once: its
+// slots setting there, llama-server's --parallel (docs/features/swarms.md,
+// Placement). Core passes its own, which reads this computer's setting and
+// what paired computers say of theirs.
+type SlotsFor func(nodeID, modelID string) int
 
 // Group puts placed agents into lanes by computer and model, in the order
-// each lane's first agent was placed.
-func Group(agents []Agent) []Lane {
+// each lane's first agent was placed. Each lane runs as many of its agents
+// at once as slots says its model has; with nil slots, one.
+func Group(agents []Agent, slots SlotsFor) []Lane {
+	if slots == nil {
+		slots = func(string, string) int { return 1 }
+	}
 	var lanes []Lane
 	at := map[[2]string]int{}
 	for i, a := range agents {
@@ -47,7 +51,7 @@ func Group(agents []Agent) []Lane {
 		if !ok {
 			k = len(lanes)
 			at[key] = k
-			lanes = append(lanes, Lane{NodeID: a.NodeID, ModelID: a.ModelID, Slots: max(1, SlotsFor(a.NodeID, a.ModelID))})
+			lanes = append(lanes, Lane{NodeID: a.NodeID, ModelID: a.ModelID, Slots: max(1, slots(a.NodeID, a.ModelID))})
 		}
 		lanes[k].Agents = append(lanes[k].Agents, i)
 	}
@@ -94,7 +98,8 @@ func Queued(lanes []Lane, i int) bool {
 const (
 	// OneAtATime: everything was placed on one computer and one model with
 	// one slot, so nothing would run at once (docs/features/swarms.md,
-	// Decision 4).
+	// Decision 4). A model with more slots runs that many at once, and
+	// doesn't say this.
 	OneAtATime = "oneAtATime"
 	// OnePart: the coordinator couldn't split the request.
 	OnePart = "onePart"

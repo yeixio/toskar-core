@@ -202,7 +202,9 @@
     "contextWindowHint": "Quanto legge il modello alla volta, in token (circa ¾ di parola ciascuno). Auto sceglie la più grande che sta bene su questo computer; una finestra più grande occupa più memoria mentre il modello è in esecuzione.",
     "contextWindowNextMessage": "si ricarica al prossimo messaggio",
     "contextAuto": "Auto",
-    "contextAutoSize": "Auto · {{size}}"
+    "contextAutoSize": "Auto · {{size}}",
+    "agentsAtOnce": "Agenti alla volta",
+    "agentsAtOnceHint": "Permette a uno sciame di eseguire questo numero di agenti alla volta su questo modello. Ognuno riceve una parte uguale del suo contesto, e usa più memoria."
   },
   "runningTab": {
     "empty": "Al momento non è caricato nessun modello. La chat ne avvierà uno automaticamente quando serve.",

@@ -49,19 +49,33 @@ func (a *App) startWindow(ctx context.Context, modelID string) int {
 // baseWindow is the window a model starts with when no request has asked
 // for more: the person's choice, else Auto.
 func (a *App) baseWindow(ctx context.Context, modelID string, entry models.CatalogEntry) int {
+	return a.windowWithSlots(ctx, modelID, entry, a.modelSlots(ctx, modelID))
+}
+
+// windowWithSlots is the window each of a model's slots starts with when it
+// answers slots requests at once (#1135): the person's choice, else Auto for
+// that many.
+func (a *App) windowWithSlots(ctx context.Context, modelID string, entry models.CatalogEntry, slots int) int {
 	if n := a.contextChoices(ctx)[modelID]; n > 0 {
 		return min(n, ownWindow(entry))
 	}
-	if v, ok := a.startWindows.Load(modelID); ok {
+	key := autoKey{modelID, max(1, slots)}
+	if v, ok := a.startWindows.Load(key); ok {
 		return v.(int)
 	}
 	hw, ok := a.steadyHardware(ctx)
 	if !ok {
 		return 0
 	}
-	n := models.AutoContext(entry, hw)
-	a.startWindows.Store(modelID, n)
+	n := models.AutoContextSlots(entry, hw, key.slots)
+	a.startWindows.Store(key, n)
 	return n
+}
+
+// autoKey is a model and its slots, for the Auto window they start with.
+type autoKey struct {
+	modelID string
+	slots   int
 }
 
 // raisedWindow is a bigger window a request asked a model for (#962), and
@@ -107,7 +121,7 @@ func (a *App) growWindow(ctx context.Context, modelID string, need int) int {
 		if n > ownWindow(entry) {
 			break
 		}
-		switch models.ClassifyFit(entry, hw, "", "", models.FitOptions{ContextTokens: n}).Label {
+		switch models.ClassifyFit(entry, hw, "", "", a.slotFit(ctx, modelID, n)).Label {
 		case contracts.FitExcellent, contracts.FitGood, contracts.FitTight:
 			a.raisedWindows.Store(modelID, raisedWindow{tokens: n, at: time.Now()})
 			return n
@@ -233,7 +247,7 @@ func (a *App) withContextWindows(ctx context.Context, list []contracts.Model) {
 			if n > ownWindow(entry) {
 				break
 			}
-			fit := models.ClassifyFit(entry, hw, "", "", models.FitOptions{ContextTokens: n})
+			fit := models.ClassifyFit(entry, hw, "", "", a.slotFit(ctx, m.ID, n))
 			list[i].ContextOptions = append(list[i].ContextOptions, contracts.ContextOption{Tokens: n, Fit: fit.Label})
 		}
 	}
