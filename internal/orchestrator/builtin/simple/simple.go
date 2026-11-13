@@ -355,13 +355,19 @@ func (o *Orchestrator) Run(
 				return
 			}
 		}
-		if reply, m, made := makeFileFirst(ctx, env, profile, role, messages, task.Prompt); made {
-			promptTokens := 0
-			if m != nil {
-				promptTokens = m.PromptTokens
+		// A task, a swarm's report and a swarm agent's part change files in
+		// the folder with the task's tools: a file they name is the work, not
+		// an attachment (#1135).
+		_, isAgent := swarm.AgentFrom(ctx)
+		if !isTask && !swarmed && !isAgent {
+			if reply, m, made := makeFileFirst(ctx, env, profile, role, messages, task.Prompt); made {
+				promptTokens := 0
+				if m != nil {
+					promptTokens = m.PromptTokens
+				}
+				streamText(ch, role, nodeID, reply, m, contextusage.Measure(count, plainSys, toolPrompt, messages, promptTokens))
+				return
 			}
-			streamText(ch, role, nodeID, reply, m, contextusage.Measure(count, plainSys, toolPrompt, messages, promptTokens))
-			return
 		}
 		calls := 0
 		tracker := taskTracker{start: len(messages)}

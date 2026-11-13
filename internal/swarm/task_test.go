@@ -57,6 +57,19 @@ func TestTaskFooter(t *testing.T) {
 	if got := race.Footer(); !strings.Contains(got, "Agent 2's change was kept, and its checks passed") {
 		t.Errorf("race: %s", got)
 	}
+	// A change whose checks failed says so, and that the person chose.
+	failed := TaskOutcome{Folder: "/src/app", Git: true, Branch: "b", Files: []string{"a"}, Check: "go test ./...", Checks: ChecksFailed, Applied: true}
+	if got := failed.Footer(); !strings.Contains(got, "`go test ./...`, failed") || !strings.Contains(got, "only because you chose to") {
+		t.Errorf("failed, applied: %s", got)
+	}
+	failed.Applied, failed.NotApplied = false, NotAppliedDeclined
+	if got := failed.Footer(); !strings.Contains(got, "wasn't applied: its checks failed") || !strings.Contains(got, "`git merge b`") {
+		t.Errorf("failed, declined: %s", got)
+	}
+	failed.Winner = 2
+	if got := failed.Footer(); !strings.Contains(got, "Agent 2's change was kept, though its checks, `go test ./...`, failed") {
+		t.Errorf("failed race: %s", got)
+	}
 }
 
 // The coordinator's look lists a Git folder's files, new ones that aren't

@@ -434,3 +434,49 @@ func TestIsTask(t *testing.T) {
 		}
 	}
 }
+
+// Work asked for after a statement, or code to make or change, is a task in
+// the terminal or with a folder; a question about a failure stays a question
+// (#1135).
+func TestIsTaskAnywhereInTheMessage(t *testing.T) {
+	for _, msg := range []string{
+		"The test in sum_test.go fails. Fix Sum so it passes.",
+		"Write Reverse in strs/strs.go",
+		"Make the tests for price/price.go pass",
+		"The build is broken. Please fix it.",
+		"go test fails on parser_test.go, fix it",
+		"TestSum fails - can you fix it?",
+		"I added a test. Make it pass by changing sum.go.",
+		"Here's the problem: the tests fail. Fix the code, not the tests.",
+		"Change Add in calc/calc.go to return an error",
+		"The CI check fails on main, so fix whatever broke it.",
+		"Rewrite parse.go to use bufio.",
+	} {
+		if !IsTask(Classify(msg), msg, "terminal", "") {
+			t.Errorf("%q isn't a task", msg)
+		}
+		if !IsTask(Classify(msg), msg, "web", "/p") {
+			t.Errorf("%q in a chat with a folder should be a task", msg)
+		}
+		if IsTask(Classify(msg), msg, "web", "") {
+			t.Errorf("%q is a task from the web", msg)
+		}
+	}
+	for _, msg := range []string{
+		"Why does my test fail?",
+		"Why does the build fail on CI?",
+		"How do I fix a failing test?",
+		"Why does my test fail, and how do I fix it?",
+		"The tests fail sometimes. Is that normal?",
+		"Explain what strs.go does.",
+		"Is it possible to make tests faster?",
+		"What would you change in sum.go?",
+		"My build failed yesterday. What usually causes that?",
+		"Which shell command lists hidden files?",
+		"What does Sum do?",
+	} {
+		if IsTask(Classify(msg), msg, "terminal", "/p") {
+			t.Errorf("%q is a question, not a task", msg)
+		}
+	}
+}

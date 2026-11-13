@@ -88,8 +88,11 @@ func (t TaskOutcome) Footer() string {
 	}
 	if t.Winner > 0 {
 		line := fmt.Sprintf("Agent %d's change was kept", t.Winner)
-		if t.Checks == ChecksPassed {
+		switch t.Checks {
+		case ChecksPassed:
 			line += ", and its checks passed"
+		case ChecksFailed:
+			line += ", though its checks, `" + t.Check + "`, failed"
 		}
 		lines = append(lines, line+".")
 	}
@@ -104,8 +107,13 @@ func (t TaskOutcome) Footer() string {
 			lines = append(lines, "The checks, `"+t.Check+"`, failed on the merged change.")
 		}
 	}
+	failed := t.Checks == ChecksFailed
 	switch {
 	case !t.Git:
+	case t.Applied && failed:
+		lines = append(lines, fmt.Sprintf("Its checks failed, and Toskar applied the change to %s only because you chose to, as uncommitted changes: %s. It's also on the branch `%s`.", t.Folder, files(len(t.Files)), t.Branch))
+	case t.NotApplied == NotAppliedDeclined && failed:
+		lines = append(lines, fmt.Sprintf("The change wasn't applied: its checks failed, and it wasn't allowed. It's on the branch `%s`; run `git merge %s` in the folder to bring it in.", t.Branch, t.Branch))
 	case t.Applied:
 		lines = append(lines, fmt.Sprintf("Toskar applied the change to %s as uncommitted changes: %s. It's also on the branch `%s`.", t.Folder, files(len(t.Files)), t.Branch))
 	case t.NotApplied == NotAppliedChanged:

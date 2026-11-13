@@ -304,12 +304,16 @@ func (e *chatExecEnv) pickRace(ctx context.Context, st *swarmState, req swarm.Re
 }
 
 // runCheck runs the project's check command in dir, through the terminal tool
-// as a task's command runs, and says how it went: passed, failed, or "" when
-// it couldn't run, such as when the profile doesn't allow the terminal.
+// as a task's command runs, and says how it went: passed, failed (or timed
+// out), or "" when it couldn't run, such as when the profile doesn't allow the terminal.
 func (e *chatExecEnv) runCheck(ctx context.Context, dir, command string) string {
 	checkCtx := turnopts.WithProject(turnopts.WithLongCommands(ctx), dir)
 	result, err := e.ExecuteTool(checkCtx, "terminal", map[string]any{"command": command})
 	if err != nil {
+		// Checks that ran past the time limit didn't pass.
+		if tools.ErrorKind(err) == tools.ErrKindTimeout {
+			return swarm.ChecksFailed
+		}
 		return ""
 	}
 	switch code := result["exit"].(type) {
@@ -327,8 +331,9 @@ func (e *chatExecEnv) runCheck(ctx context.Context, dir, command string) string 
 
 // deliver applies the swarm's change to the person's folder as uncommitted
 // changes, after the same approval a task's writes have: the person allows
-// it, unless their profile allows writes outside tasks. A folder that changed
-// since the swarm started, so the change no longer applies, isn't forced.
+// it, unless their profile allows writes outside tasks. A change whose checks
+// failed always asks, and says so. A folder that changed since the swarm
+// started, so the change no longer applies, isn't forced.
 func (e *chatExecEnv) deliver(ctx context.Context, st *swarmState, ws *swarm.Workspace, t *swarm.TaskOutcome) {
 	t.Files = ws.Files(ctx, t.Branch)
 	if len(t.Files) == 0 {
@@ -343,8 +348,12 @@ func (e *chatExecEnv) deliver(ctx context.Context, st *swarmState, ws *swarm.Wor
 		t.NotApplied = swarm.NotAppliedChanged
 		return
 	}
+	failed := t.Checks == swarm.ChecksFailed
 	policy := tools.PolicyAsk
-	if tools.PolicyForProfile(e.profile, "filesystem.write") == tools.PolicyAllow {
+	switch {
+	case failed:
+		policy = tools.PolicyAskEachTime
+	case tools.PolicyForProfile(e.profile, "filesystem.write") == tools.PolicyAllow:
 		policy = tools.PolicyAllow
 	}
 	files := fmt.Sprintf("%d files", len(t.Files))
@@ -360,6 +369,9 @@ func (e *chatExecEnv) deliver(ctx context.Context, st *swarmState, ws *swarm.Wor
 	}
 	args := map[string]any{"path": t.Folder, "files": len(t.Files), "branch": t.Branch}
 	reason := fmt.Sprintf("Apply the swarm's changes to %s: %s", t.Folder, files)
+	if failed {
+		reason += fmt.Sprintf(". The project's checks failed on them: %s.", t.Check)
+	}
 	if err := e.app.Tools.Confirm(ctx, swarm.ApplyAction, args, policy, reason, meta); err != nil {
 		t.NotApplied = swarm.NotAppliedDeclined
 		return
