@@ -39,6 +39,11 @@ func serveScreenshotAPI(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, http.StatusOK, `{}`)
 		return
 	}
+	// A swarm's chats: its coordinator's and its agents' (#1135).
+	if path == "/api/v1/conversations" && r.URL.Query().Has("swarm_id") {
+		writeJSON(w, http.StatusOK, screenshotSwarmConversations(r.URL.Query().Get("swarm_id")))
+		return
+	}
 	// One project's chats, for its page (#1136).
 	if path == "/api/v1/conversations" && r.URL.Query().Has("project_id") {
 		writeJSON(w, http.StatusOK, screenshotProjectConversations(r.URL.Query().Get("project_id")))
@@ -139,6 +144,13 @@ func screenshotGET(path string) (string, bool) {
 		return screenshotBudgetMessages, true
 	case path == "/api/v1/conversations/conv-letter/messages":
 		return screenshotLetterMessages, true
+	// A swarm that compared heat pumps, with its agents' lanes (#1135).
+	case path == "/api/v1/conversations/conv-research/messages":
+		return screenshotHeatPumpMessages, true
+	case path == "/api/v1/swarms":
+		return `[` + screenshotSwarm + `]`, true
+	case path == "/api/v1/swarms/swarm-heat":
+		return screenshotSwarm, true
 	case strings.HasPrefix(path, "/api/v1/conversations/") && strings.HasSuffix(path, "/messages"):
 		return screenshotMessages, true
 	case path == "/api/v1/api-keys":
@@ -464,7 +476,7 @@ const screenshotConversationsTemplate = `[
   {"id": "conv-budget", "title": "Sort out the monthly budget spreadsheet", "profile_id": "general-assistant", "model_id": "gemma-4-e4b", "created_at": "{{earlier}}", "updated_at": "{{earlier}}"},
   {"id": "conv-code", "title": "Why does the build fail on Linux only?", "profile_id": "programming", "model_id": "gemma-4-e4b", "created_at": "{{yesterday}}", "updated_at": "{{yesterday}}"},
   {"id": "conv-letter", "title": "Letter to the landlord about the heating", "profile_id": "general-assistant", "model_id": "gemma-4-e4b", "project_id": "proj-house", "created_at": "{{days}}", "updated_at": "{{days}}"},
-  {"id": "conv-research", "title": "Compare three heat pumps for a small house", "profile_id": "research", "model_id": "gemma-4-e4b", "project_id": "proj-house", "created_at": "{{weeks}}", "updated_at": "{{weeks}}"}
+  {"id": "conv-research", "title": "Compare three heat pumps for a small house", "profile_id": "research", "model_id": "gemma-4-e4b", "project_id": "proj-house", "swarm_id": "swarm-heat", "created_at": "{{weeks}}", "updated_at": "{{weeks}}"}
 ]`
 
 const screenshotMessages = `[
@@ -525,6 +537,63 @@ const screenshotLetterMessages = `[
     "created_at": "2026-09-20T18:10:25Z"
   }
 ]`
+
+// screenshotHeatPumpMessages is the demo project's research chat, answered
+// by a swarm of three agents, for the user guide's swarm lanes (#1135).
+const screenshotHeatPumpMessages = `[
+  {
+    "id": "h1",
+    "conversation_id": "conv-research",
+    "role": "user",
+    "content": "Compare three heat pumps for our house: running cost, how they do below 0°F, and noise. Use a swarm.",
+    "created_at": "2026-10-20T17:00:00Z"
+  },
+  {
+    "id": "h2",
+    "conversation_id": "conv-research",
+    "role": "assistant",
+    "content": "For a small two-story house in a cold, wet climate, a cold-climate ducted heat pump is the best fit.\n\n| | Running cost a year | Below 0°F | Noise outside |\n| --- | --- | --- | --- |\n| Cold-climate ducted | about $1,150 | full heat to -13°F | 56 dB |\n| Ductless, three heads | about $1,050 | full heat to -5°F | 52 dB |\n| Standard ducted | about $1,300 | backup heat below 5°F | 58 dB |\n\nThe ductless system costs least to run but needs a head in each bedroom. Have a contractor do a load calculation before choosing a size.",
+    "created_at": "2026-10-20T17:06:40Z"
+  }
+]`
+
+// screenshotSwarm is the swarm that answered the research chat: three
+// agents split across two computers (#1135).
+const screenshotSwarm = `{
+  "id": "swarm-heat",
+  "project_id": "proj-house",
+  "conversation_id": "conv-research",
+  "mode": "split",
+  "status": "done",
+  "request": "Compare three heat pumps for our house: running cost, how they do below 0°F, and noise.",
+  "budget": {"agents": 4, "tokens": 400000, "minutes": 5},
+  "agents": [
+    {"agent": 1, "conversation_id": "conv-swarm-1", "role": "agent:1", "part": "Running costs", "model_id": "gemma-4-e4b", "node_id": "local", "status": "done", "summary": "At this house's rates, the ductless system costs about $1,050 a year to run, the cold-climate ducted one $1,150, and the standard one $1,300.", "tokens": 18400, "seconds": 142},
+    {"agent": 2, "conversation_id": "conv-swarm-2", "role": "agent:2", "part": "Cold weather", "model_id": "qwen-coder-7b", "node_id": "studio", "status": "done", "summary": "The cold-climate ducted model keeps full output to -13°F; the standard model needs backup heat below 5°F.", "tokens": 21900, "seconds": 188},
+    {"agent": 3, "conversation_id": "conv-swarm-3", "role": "agent:3", "part": "Noise", "model_id": "gemma-4-e4b", "node_id": "local", "status": "done", "summary": "Outdoor units range from 52 dB for the ductless system to 58 dB for the standard one, measured at 3 feet.", "tokens": 9600, "seconds": 97}
+  ],
+  "tokens": 49900,
+  "seconds": 384,
+  "created_at": "2026-10-20T17:00:05Z",
+  "finished_at": "2026-10-20T17:06:40Z"
+}`
+
+// screenshotSwarmConversations is a swarm's chats, as ?swarm_id= lists them.
+func screenshotSwarmConversations(swarmID string) string {
+	if swarmID != "swarm-heat" {
+		return `[]`
+	}
+	at := time.Now().UTC().Add(-15 * 24 * time.Hour).Format(time.RFC3339)
+	chat := func(id, title, role string) string {
+		return `{"id":"` + id + `","title":"` + title + `","profile_id":"research","model_id":"gemma-4-e4b","project_id":"proj-house","swarm_id":"swarm-heat","swarm_role":"` + role + `","created_at":"` + at + `","updated_at":"` + at + `"}`
+	}
+	return `[` + strings.Join([]string{
+		chat("conv-research", "Compare three heat pumps for a small house", ""),
+		chat("conv-swarm-1", "Agent 1: Running costs", "agent:1"),
+		chat("conv-swarm-2", "Agent 2: Cold weather", "agent:2"),
+		chat("conv-swarm-3", "Agent 3: Noise", "agent:3"),
+	}, ",") + `]`
+}
 
 // screenshotBudgetMessages is a chat with an attached spreadsheet, an
 // answer that read it and the web, and a spreadsheet made for the answer,

@@ -2361,14 +2361,23 @@
         "A swarm is several agents working on one question at the same time, each in a chat of its own. In a split, Toskar splits your question into parts, each agent answers one part, and the answer is written from all of theirs. In a race, agents on different models each answer the whole question, and the best answer is kept, or the answers are combined.",
         "Agents run at the same time only where they really can: on different computers, or on different models. One computer with one model answers one request at a time, so there a swarm runs as one agent, and the answer says so. A swarm uses more of your computers and takes longer than one answer, so it only runs when you ask for one.",
         "A swarm also does tasks in a chat's folder, such as fix the failing tests, use a swarm. Toskar looks at the folder first, then gives each agent a part and the files it expects to change. In a Git folder each agent works in a copy of its own, on its own branch, starting from your uncommitted changes, and Toskar merges their work, runs the project's tests, and asks before it puts the change in your folder as uncommitted changes. Your branch and staged changes are never touched. If two agents changed the same lines, a fix-up agent settles it; one it can't is named in the answer with its branch. In a folder that isn't in Git, the agents take turns in it, and the answer says so.",
-        "Each agent's chat is kept in the chat's project, or in a new project named after your question. The apps don't show the agents' chats yet; the API lists them. Members and Admins can start a swarm, and a swarm in a folder needs an Admin, as a folder does."
+        "While a swarm works, Chat shows a lane for each agent: its part, the computer and model it runs on, whether it's queued, working, done, failed, stopped, or out of budget, its latest steps, and a summary of its result when it finishes. Then you see the merge, any changes that conflicted, and in a folder the result's branch, how the project's tests went, and whether the change was put in your folder. The answer comes last, as usual. Afterward the lanes stay above the answer, folded into one line that opens them again.",
+        "Each agent's chat is kept in the chat's project, or in a new project named after your question. History shows only the chat you started the swarm in; on the project's page, that chat has a line such as 3 agents that opens to the agents' chats. An agent's chat says which agent it is, with a link back to the main chat, and you can read and continue it like any other. Members and Admins can start a swarm, and a swarm in a folder needs an Admin, as a folder does."
       ],
       "steps": [
-        "To ask for one in Chat, end your message with use a swarm, or use 3 agents for three of them.",
-        "Wait for the answer as usual. Choose Stop to stop every agent; what they finished is kept in their chats.",
+        "To ask for one in Chat, open Chat options, set Use a swarm to Split or Race, and send your message. A Swarm chip shows above your message until you send it, and only that message uses a swarm; choose × on the chip to change your mind. You can also end your message with use a swarm, or use 3 agents for three of them.",
+        "To have a profile always use one, open Profiles & Orchestration, edit the profile, open Strategy and computers, and set Strategy to Swarm. Then choose Split or Race, the models in order (a race needs at least two, one agent each), and if you like the most agents (2–8), tokens, and minutes a swarm may use. Quick questions are still answered directly.",
+        "Watch the lanes while the agents work. Stop under a lane stops that agent alone, and the others go on; Open opens its chat. Stop beside the message box stops every agent. What they finished is kept in their chats.",
         "From another app, send swarm with split or race to POST /api/v1/chat, or start one with POST /api/v1/swarms and follow it with GET /api/v1/swarms/{id}. GET /api/v1/conversations?swarm_id= lists the agents' chats, and stopping one agent's chat stops that agent alone.",
-        "An agent's tools ask first, as any chat's do, and the question says which agent asks. In a folder, each agent's changes ask as a task's do, and so does putting the swarm's change in your folder. The API page lists the budgets: how many agents, tokens, and minutes a swarm may use.",
+        "An agent's tools ask first, as any chat's do. Its questions show in the chat you started the swarm in, under the lanes, each with the agent that asks, such as Agent 2: tests. Allow for this agent covers that agent's chat only; the other agents still ask. In a folder, each agent's changes ask as a task's do, and so does putting the swarm's change in your folder. The API page lists the budgets: how many agents, tokens, and minutes a swarm may use.",
         "If the answer says the change wasn't applied, run git merge with the branch it names in your folder. A swarm's branches are kept for a week; deleting the swarm deletes them sooner."
+      ],
+      "images": [
+        {
+          "screen": "swarms-lanes",
+          "alt": "A chat answered by a swarm: above the answer, three agents' lanes, each with its part, its computer and model, Done, a summary of its result, and Open",
+          "caption": "A swarm's lanes, opened above the answer they made."
+        }
       ]
     },
     {

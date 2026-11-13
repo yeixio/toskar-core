@@ -74,6 +74,14 @@ export const KNOWN_EVENT_TYPES = [
   'chat.summarized',
   'notification.created',
   'work.waiting',
+  // A swarm's agents at work (#1135).
+  'swarm.started',
+  'swarm.agent.started',
+  'swarm.agent.progress',
+  'swarm.agent.finished',
+  'swarm.merging',
+  'swarm.finished',
+  'swarm.note',
 ] as const
 
 export function subscribeEvents({

@@ -869,5 +869,54 @@
         "acorns": "Ratatoskr junta bolotas suficientes para um clipe inteiro."
       }
     }
+  },
+  "swarm": {
+    "label": "Enxame",
+    "modes": {
+      "split": "Dividir",
+      "race": "Corrida"
+    },
+    "working_one": "{{mode}} · {{count}} agente trabalhando",
+    "working_many": "{{mode}} · {{count}} agentes trabalhando",
+    "working_other": "{{mode}} · {{count}} agentes trabalhando",
+    "worked_one": "{{mode}} · trabalhou com {{count}} agente",
+    "worked_many": "{{mode}} · trabalhou com {{count}} agentes",
+    "worked_other": "{{mode}} · trabalhou com {{count}} agentes",
+    "agent": "Agente {{n}}",
+    "anAgent": "Um agente",
+    "agentPart": "Agente {{n}}: {{part}}",
+    "status": {
+      "queued": "Na fila",
+      "running": "Trabalhando",
+      "done": "Concluído",
+      "failed": "Falhou",
+      "stopped": "Parado",
+      "out_of_budget": "Sem orçamento"
+    },
+    "winner": "Escolhido",
+    "steps": "Últimos passos",
+    "stop": "Parar",
+    "stopAgent": "Parar {{agent}}",
+    "open": "Abrir",
+    "openAgent": "Abrir o chat de {{agent}}",
+    "merging": "Juntando o trabalho dos agentes…",
+    "mergingAgent": "Juntando as alterações do agente {{n}}…",
+    "conflict": "As alterações do agente {{n}} entram em conflito em {{files}}, então não foram juntadas. Elas ficam em {{branch}}.",
+    "stoppedAll": "O enxame foi parado.",
+    "failedAll": "O enxame não conseguiu terminar.",
+    "branch": "Resultado no branch {{branch}}",
+    "checksPassed": "As verificações do projeto passaram.",
+    "checksFailed": "As verificações do projeto falharam.",
+    "applied": "Aplicado à sua pasta como alterações sem commit.",
+    "notApplied": "Não aplicado à sua pasta. Para usar, faça merge de {{branch}} com o Git.",
+    "approvals": "Perguntas dos agentes",
+    "allowAgent": "Permitir para este agente",
+    "allowAgentHint": "Permitir para este agente vale só para {{agent}}. Os outros agentes continuam perguntando.",
+    "use": "Usar um enxame",
+    "off": "Não",
+    "useHint": "Vários agentes trabalham ao mesmo tempo na sua próxima mensagem. Dividir separa em partes; na Corrida, cada modelo faz tudo.",
+    "chip": "Enxame: {{mode}}",
+    "chipRemove": "Não usar um enxame",
+    "agentLine": "Agente {{n}} de um enxame · <go>Abrir o chat principal</go>"
   }
 }

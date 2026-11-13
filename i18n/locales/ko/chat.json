@@ -782,5 +782,50 @@
         "acorns": "라타토스크가 클립 하나 분량의 도토리를 모으는 중이에요."
       }
     }
+  },
+  "swarm": {
+    "label": "스웜",
+    "modes": {
+      "split": "나누기",
+      "race": "경쟁"
+    },
+    "working_other": "{{mode}} · 에이전트 {{count}}개 작업 중",
+    "worked_other": "{{mode}} · 에이전트 {{count}}개와 작업함",
+    "agent": "에이전트 {{n}}",
+    "anAgent": "에이전트",
+    "agentPart": "에이전트 {{n}}: {{part}}",
+    "status": {
+      "queued": "대기 중",
+      "running": "작업 중",
+      "done": "완료",
+      "failed": "실패",
+      "stopped": "중지됨",
+      "out_of_budget": "예산 소진"
+    },
+    "winner": "선택됨",
+    "steps": "최근 단계",
+    "stop": "중지",
+    "stopAgent": "{{agent}} 중지",
+    "open": "열기",
+    "openAgent": "{{agent}} 채팅 열기",
+    "merging": "에이전트의 작업을 합치는 중…",
+    "mergingAgent": "에이전트 {{n}}의 변경 사항을 병합하는 중…",
+    "conflict": "에이전트 {{n}}의 변경 사항이 {{files}}에서 충돌해 병합하지 않았습니다. {{branch}}에 남아 있습니다.",
+    "stoppedAll": "스웜을 중지했습니다.",
+    "failedAll": "스웜을 끝내지 못했습니다.",
+    "branch": "결과 브랜치: {{branch}}",
+    "checksPassed": "프로젝트 검사를 통과했습니다.",
+    "checksFailed": "프로젝트 검사에 실패했습니다.",
+    "applied": "커밋하지 않은 변경 사항으로 폴더에 적용했습니다.",
+    "notApplied": "폴더에 적용하지 않았습니다. 사용하려면 Git으로 {{branch}}을(를) 병합하세요.",
+    "approvals": "에이전트의 질문",
+    "allowAgent": "이 에이전트에 허용",
+    "allowAgentHint": "\"이 에이전트에 허용\"은 {{agent}}에만 적용됩니다. 다른 에이전트는 계속 묻습니다.",
+    "use": "스웜 사용",
+    "off": "끔",
+    "useHint": "여러 에이전트가 다음 메시지를 동시에 처리합니다. 나누기는 부분으로 나누고, 경쟁에서는 각 모델이 전체를 처리합니다.",
+    "chip": "스웜: {{mode}}",
+    "chipRemove": "스웜 사용 안 함",
+    "agentLine": "스웜의 에이전트 {{n}} · <go>메인 채팅 열기</go>"
   }
 }

@@ -22,7 +22,9 @@
     "title": "聊天",
     "loading": "正在載入聊天…",
     "empty": "這個專案還沒有聊天。用「新聊天」開始一個。",
-    "untitled": "未命名"
+    "untitled": "未命名",
+    "agents_other": "{{count}} 個代理",
+    "agentsLoading": "正在載入代理…"
   },
   "instructions": {
     "title": "說明",

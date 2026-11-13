@@ -100,6 +100,10 @@
       "label": "Equipe",
       "detail": "Um planejador divide cada solicitação, executores fazem as partes (em outros computadores, quando possível) e um revisor verifica a resposta. Perguntas rápidas continuam sendo respondidas diretamente."
     },
+    "swarm": {
+      "label": "Enxame",
+      "detail": "Vários agentes trabalham ao mesmo tempo, cada um em um chat próprio e em outros computadores quando possível. Dividir separa um trabalho em partes; na Corrida, vários modelos fazem cada um a solicitação inteira. Perguntas rápidas continuam sendo respondidas diretamente."
+    },
     "teamTitle": "Equipe de IA",
     "automaticTitle": "Automático",
     "withStrategy": "{{title}} · Estratégia: {{strategy}}"
@@ -470,5 +474,34 @@
     },
     "noVerifiedModel": "Nenhum modelo instalado é verificado para checar temas, então Impor checa com o modelo deste perfil, que pode deixar passar mais. O Gemma 3 4B é verificado.",
     "installVerified": "Instalar"
+  },
+  "swarm": {
+    "title": "Enxame",
+    "mode": {
+      "label": "Modo",
+      "help": "Dividir: os agentes fazem partes do trabalho ao mesmo tempo. Corrida: cada modelo faz a solicitação inteira, e a melhor resposta vence.",
+      "split": "Dividir",
+      "race": "Corrida"
+    },
+    "models": {
+      "label": "Modelos",
+      "help": "Em ordem, um agente cada. Uma corrida precisa de pelo menos dois; Dividir os usa em revezamento e, sem nenhum, usa os modelos do perfil.",
+      "add": "Adicionar um modelo",
+      "up": "Subir {{model}}",
+      "remove": "Remover {{model}}",
+      "raceNeedsTwo": "Uma corrida precisa de pelo menos dois modelos."
+    },
+    "agents": {
+      "label": "Agentes",
+      "help": "Máximo de agentes ao mesmo tempo (2–8). Vazio usa Executores, ou 4."
+    },
+    "tokens": {
+      "label": "Tokens",
+      "help": "Máximo de tokens para o enxame inteiro (10.000–4.000.000). Vazio é 400.000."
+    },
+    "minutes": {
+      "label": "Minutos",
+      "help": "Tempo máximo de um enxame (1–240). Vazio é 5 para uma pergunta e 30 para uma tarefa."
+    }
   }
 }

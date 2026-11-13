@@ -100,6 +100,10 @@
       "label": "Équipe",
       "detail": "Un planificateur découpe chaque demande, des exécutants traitent les parties (sur d'autres ordinateurs quand c'est possible) et un relecteur vérifie la réponse. Les questions rapides reçoivent toujours une réponse directe."
     },
+    "swarm": {
+      "label": "Essaim",
+      "detail": "Plusieurs agents travaillent à la fois, chacun dans sa propre discussion et sur d'autres ordinateurs quand c'est possible. Répartir divise une tâche en parties ; en Course, plusieurs modèles traitent chacun toute la demande. Les questions rapides reçoivent toujours une réponse directe."
+    },
     "teamTitle": "Équipe d'IA",
     "automaticTitle": "Automatique",
     "withStrategy": "{{title}} · Stratégie : {{strategy}}"
@@ -470,5 +474,34 @@
     },
     "noVerifiedModel": "Aucun modèle installé n'est vérifié pour contrôler les sujets, donc Imposer contrôle avec le modèle de ce profil, qui peut en laisser passer davantage. Gemma 3 4B est vérifié.",
     "installVerified": "L'installer"
+  },
+  "swarm": {
+    "title": "Essaim",
+    "mode": {
+      "label": "Mode",
+      "help": "Répartir : les agents font des parties de la tâche à la fois. Course : chaque modèle traite toute la demande, et la meilleure réponse gagne.",
+      "split": "Répartir",
+      "race": "Course"
+    },
+    "models": {
+      "label": "Modèles",
+      "help": "Dans l'ordre, un agent chacun. Une course en demande au moins deux ; une répartition les prend à tour de rôle et, sans modèle choisi, utilise ceux du profil.",
+      "add": "Ajouter un modèle",
+      "up": "Monter {{model}}",
+      "remove": "Retirer {{model}}",
+      "raceNeedsTwo": "Une course demande au moins deux modèles."
+    },
+    "agents": {
+      "label": "Agents",
+      "help": "Nombre maximal d'agents à la fois (2–8). Vide utilise Exécutants, sinon 4."
+    },
+    "tokens": {
+      "label": "Jetons",
+      "help": "Nombre maximal de jetons pour tout l'essaim (10 000–4 000 000). Vide vaut 400 000."
+    },
+    "minutes": {
+      "label": "Minutes",
+      "help": "Durée maximale d'un essaim (1–240). Vide vaut 5 pour une question et 30 pour une tâche."
+    }
   }
 }

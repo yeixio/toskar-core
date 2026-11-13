@@ -141,7 +141,7 @@ func TestAutomationParseFixtureHasTheParsedShape(t *testing.T) {
 // Each demo chat's messages have the contract's shape, so a screen that
 // opens one doesn't show "Toskar couldn't load this".
 func TestChatFixturesHaveTheMessageShape(t *testing.T) {
-	for _, path := range []string{"/api/v1/conversations/conv-local/messages", "/api/v1/conversations/conv-budget/messages", "/api/v1/conversations/conv-letter/messages"} {
+	for _, path := range []string{"/api/v1/conversations/conv-local/messages", "/api/v1/conversations/conv-budget/messages", "/api/v1/conversations/conv-letter/messages", "/api/v1/conversations/conv-research/messages"} {
 		body, ok := screenshotGET(path)
 		if !ok {
 			t.Fatalf("no fixture for %s", path)
@@ -180,4 +180,45 @@ func TestProjectFixtures(t *testing.T) {
 			t.Fatalf("chat %s is in %q", c.ID, c.ProjectID)
 		}
 	}
+}
+
+// The demo has a swarm (#1135): its record, read by id and in its project's
+// list, with agents whose chats ?swarm_id= lists.
+func TestSwarmFixtures(t *testing.T) {
+	body, ok := screenshotGET("/api/v1/swarms/swarm-heat")
+	if !ok {
+		t.Fatal("no swarm fixture")
+	}
+	var sw contracts.Swarm
+	if err := json.Unmarshal([]byte(body), &sw); err != nil || len(sw.Agents) == 0 {
+		t.Fatalf("swarm: %v %s", err, body)
+	}
+	listed, _ := screenshotGET("/api/v1/swarms")
+	var list []contracts.Swarm
+	if err := json.Unmarshal([]byte(listed), &list); err != nil || len(list) != 1 || list[0].ID != sw.ID {
+		t.Fatalf("swarms: %v %s", err, listed)
+	}
+	var chats []contracts.Conversation
+	if err := json.Unmarshal([]byte(screenshotSwarmConversations(sw.ID)), &chats); err != nil {
+		t.Fatal(err)
+	}
+	for _, ag := range sw.Agents {
+		found := false
+		for _, c := range chats {
+			found = found || (c.ID == ag.ConversationID && c.SwarmRole == ag.Role && c.SwarmID == sw.ID)
+		}
+		if !found {
+			t.Errorf("agent %d's chat %s isn't listed", ag.Agent, ag.ConversationID)
+		}
+	}
+	var all []contracts.Conversation
+	if err := json.Unmarshal([]byte(screenshotConversations()), &all); err != nil {
+		t.Fatal(err)
+	}
+	for _, c := range all {
+		if c.ID == sw.ConversationID && c.SwarmID == sw.ID {
+			return
+		}
+	}
+	t.Errorf("no coordinator chat %s with swarm_id %s", sw.ConversationID, sw.ID)
 }

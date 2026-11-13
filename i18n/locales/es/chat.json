@@ -869,5 +869,54 @@
         "acorns": "Ratatoskr junta bellotas suficientes para un clip entero."
       }
     }
+  },
+  "swarm": {
+    "label": "Enjambre",
+    "modes": {
+      "split": "Dividir",
+      "race": "Carrera"
+    },
+    "working_one": "{{mode}} · {{count}} agente trabajando",
+    "working_many": "{{mode}} · {{count}} agentes trabajando",
+    "working_other": "{{mode}} · {{count}} agentes trabajando",
+    "worked_one": "{{mode}} · trabajó con {{count}} agente",
+    "worked_many": "{{mode}} · trabajó con {{count}} agentes",
+    "worked_other": "{{mode}} · trabajó con {{count}} agentes",
+    "agent": "Agente {{n}}",
+    "anAgent": "Un agente",
+    "agentPart": "Agente {{n}}: {{part}}",
+    "status": {
+      "queued": "En cola",
+      "running": "Trabajando",
+      "done": "Listo",
+      "failed": "Falló",
+      "stopped": "Detenido",
+      "out_of_budget": "Sin presupuesto"
+    },
+    "winner": "Elegido",
+    "steps": "Últimos pasos",
+    "stop": "Detener",
+    "stopAgent": "Detener {{agent}}",
+    "open": "Abrir",
+    "openAgent": "Abrir el chat de {{agent}}",
+    "merging": "Combinando el trabajo de los agentes…",
+    "mergingAgent": "Combinando los cambios del agente {{n}}…",
+    "conflict": "Los cambios del agente {{n}} chocan en {{files}}, así que no se combinaron. Se guardan en {{branch}}.",
+    "stoppedAll": "Se detuvo el enjambre.",
+    "failedAll": "El enjambre no pudo terminar.",
+    "branch": "Resultado en la rama {{branch}}",
+    "checksPassed": "Las comprobaciones del proyecto pasaron.",
+    "checksFailed": "Las comprobaciones del proyecto fallaron.",
+    "applied": "Aplicado a tu carpeta como cambios sin confirmar.",
+    "notApplied": "No se aplicó a tu carpeta. Para usarlo, combina {{branch}} con Git.",
+    "approvals": "Preguntas de los agentes",
+    "allowAgent": "Permitir para este agente",
+    "allowAgentHint": "Permitir para este agente solo cubre a {{agent}}. Los demás agentes siguen preguntando.",
+    "use": "Usar un enjambre",
+    "off": "No",
+    "useHint": "Varios agentes trabajan a la vez en tu próximo mensaje. Dividir lo separa en partes; en Carrera, cada modelo lo hace entero.",
+    "chip": "Enjambre: {{mode}}",
+    "chipRemove": "No usar un enjambre",
+    "agentLine": "Agente {{n}} de un enjambre · <go>Abrir el chat principal</go>"
   }
 }

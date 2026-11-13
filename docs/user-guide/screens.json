@@ -816,6 +816,20 @@
           "scroll": "The furnace is a 2009 gas model in the basement."
         }
       ]
+    },
+    {
+      "id": "swarms-lanes",
+      "path": "/chat",
+      "query": "c=conv-research",
+      "readyText": "load calculation",
+      "actions": [
+        {
+          "click": "worked with 3 agents"
+        },
+        {
+          "wait": "Cold weather"
+        }
+      ]
     }
   ]
 }

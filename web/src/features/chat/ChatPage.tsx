@@ -17,6 +17,7 @@ import { subscribeEvents } from '@/lib/events'
 import { useDialog } from '@/lib/useDialog'
 import { useUIStore } from '@/stores/uiStore'
 import type {
+  SwarmMode,
   AIProfile,
   ChatTokenPayload,
   Conversation,
@@ -59,6 +60,10 @@ import { parseModelFailure, type ModelFailure } from './modelFailure'
 import { ModelFailureNotice } from './ModelFailureNotice'
 import { toolDisplayName } from './toolNames'
 import { useChatFollow } from './useChatFollow'
+import { SwarmApprovals, SwarmLanes } from './SwarmLanes'
+import { SwarmAgentLine } from './SwarmAgentLine'
+import { swarmsByAnswer, type AgentApproval } from './swarmState'
+import { useAgentChat, useChatSwarms } from './useChatSwarms'
 import { chatToResume, lastContextUsage } from './resume'
 import { RatingDialogHost, RatingPrompt } from '@/features/models/ratings'
 import { Skeleton } from '@/components/ui/Skeleton'
@@ -295,6 +300,8 @@ export function ChatPage() {
   )
   // Files added to the composer for the next message.
   const [pendingFiles, setPendingFiles] = useState<PendingFile[]>([])
+  // A swarm asked for the next message only (#1135).
+  const [swarmMode, setSwarmMode] = useState<SwarmMode | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [draftProfileId, setDraftProfileId] = useState<string | null>(null)
   const [draftModelId, setDraftModelId] = useState<string | null>(null)
@@ -520,8 +527,11 @@ export function ChatPage() {
     const all = conversationsQuery.data ?? []
     return hiddenIds.size === 0 ? all : all.filter((c) => !hiddenIds.has(c.id))
   }, [conversationsQuery.data, hiddenIds])
-  const selectedConversation =
-    conversations.find((c) => c.id === selectedId) ?? null
+  const listedConversation = conversations.find((c) => c.id === selectedId) ?? null
+  // History leaves a swarm's agents' chats out, so one opened is found through its swarm (#1135).
+  const agentChat = useAgentChat(selectedId, conversationsQuery.isSuccess && Boolean(selectedId) && !listedConversation)
+  const selectedConversation = listedConversation ?? agentChat?.conversation ?? null
+  const chatSwarms = useChatSwarms(selectedId, selectedConversation)
   // The project the open chat is in, or the one a new chat will start in.
   const chatProjectId = selectedId ? (selectedConversation?.project_id ?? '') : (draftProjectId ?? '')
   const chatProject = chatProjectId ? projectsQuery.data?.find((p) => p.id === chatProjectId) : undefined
@@ -885,13 +895,15 @@ export function ChatPage() {
   // The event stream is opened once. Its handler reads the current chat,
   // model locations, and completion handler from this ref; depending on
   // them reopened the stream on nearly every render and dropped events.
-  const eventContext = useRef({ selectedId, handleChatComplete, modelLocations })
-  eventContext.current = { selectedId, handleChatComplete, modelLocations }
+  const eventContext = useRef({ selectedId, handleChatComplete, modelLocations, swarmEvent: chatSwarms.onEvent })
+  eventContext.current = { selectedId, handleChatComplete, modelLocations, swarmEvent: chatSwarms.onEvent }
 
   useEffect(() => {
     const unsubscribe = subscribeEvents({
       onEvent: (event) => {
-        const { selectedId, handleChatComplete, modelLocations } = eventContext.current
+        const { selectedId, handleChatComplete, modelLocations, swarmEvent } = eventContext.current
+        // A swarm's lanes, and its agents' questions (#1135).
+        swarmEvent(event)
         const eventChat = event.payload?.conversation_id as string | undefined
         const inView = !eventChat || eventChat === selectedId || eventChat === streamingConvRef.current
         // A chat that's new here, such as one just started in the terminal.
@@ -1403,6 +1415,9 @@ export function ChatPage() {
     }
     // A request sent again after a setup keeps the files it was sent with.
     const attachments = resendFiles ?? readyFiles.map((f) => f.file!)
+    // A swarm is for the message it was chosen for (#1135).
+    const sentSwarm = overrideText == null && swarmMode ? swarmMode : undefined
+    if (sentSwarm) setSwarmMode(null)
     if (overrideText == null) setPendingFiles([])
     setIsSending(true)
     setSendError(null)
@@ -1482,6 +1497,7 @@ export function ChatPage() {
           attachments: attachments.length > 0 ? attachments.map((f) => f.id) : undefined,
           retry_of: branch?.retryOf,
           edit_of: branch?.editOf,
+          swarm: sentSwarm,
         },
         signal: controller.signal,
         onToken: (content) => {
@@ -1623,6 +1639,32 @@ export function ChatPage() {
     }
   }
 
+  // A swarm's lanes (#1135): each agent's computer and model by name, and
+  // its Stop and Open.
+  const nodeName = (id: string) => nodesQuery.data?.find((n) => n.id === id)?.name || id
+  const modelName = (id: string) => (modelsQuery.data ?? []).find((m) => m.id === id)?.display_name || id
+  const stopAgent = (conversationId: string) => void api.stopChat(conversationId).catch(() => undefined)
+  const openChat = (conversationId: string) => setSelectedId(conversationId)
+  const decideAgentTool = async (ask: AgentApproval, allow: boolean, allowSession: boolean) => {
+    try {
+      await api.decideTool({ request_id: ask.request_id, allow, allow_session: allowSession })
+      chatSwarms.markAnswered(ask.request_id)
+    } catch (error) {
+      setSendError(error instanceof Error ? error.message : t('tools.decideFailed'))
+    }
+  }
+  const swarmLanes = (view: (typeof chatSwarms.views)[number], defaultOpen: boolean) => (
+    <SwarmLanes
+      key={view.id}
+      view={view}
+      defaultOpen={defaultOpen}
+      nodeName={nodeName}
+      modelName={modelName}
+      onStop={stopAgent}
+      onOpen={openChat}
+    />
+  )
+
   const handleDelete = (conversation: Conversation, event: MouseEvent) => {
     event.preventDefault()
     event.stopPropagation()
@@ -1710,6 +1752,10 @@ export function ChatPage() {
   }, [chatHistoryPinned, canPinHistory])
 
   const messages = messagesQuery.data ?? []
+  // Each finished swarm folds above its answer; one still at work shows live (#1135).
+  const swarmAnswers = swarmsByAnswer(messages, chatSwarms.views)
+  const attachedSwarms = new Set([...swarmAnswers.values()].flat().map((v) => v.id))
+  const liveSwarms = chatSwarms.views.filter((v) => !attachedSwarms.has(v.id))
 
   // Retry and edit (#447).
   const startEdit = (message: Message) => {
@@ -1847,6 +1893,23 @@ export function ChatPage() {
           event.target.value = ''
         }}
       />
+      {swarmMode ? (
+        <div className="flex flex-wrap gap-1.5 px-3 pt-3">
+          <span className="inline-flex items-center gap-1 rounded-full border border-norn/40 bg-norn/10 py-0.5 pe-1 ps-2.5 text-xs font-medium text-ink">
+            {t('swarm.chip', { mode: t(`swarm.modes.${swarmMode}`) })}
+            <button
+              type="button"
+              className="inline-flex h-5 w-5 items-center justify-center rounded-full text-ink-muted hover:bg-raised hover:text-ink"
+              aria-label={t('swarm.chipRemove')}
+              title={t('swarm.chipRemove')}
+              disabled={isSending}
+              onClick={() => setSwarmMode(null)}
+            >
+              <span aria-hidden>×</span>
+            </button>
+          </span>
+        </div>
+      ) : null}
       {editing ? (
         <div className="flex items-center justify-between gap-2 px-3 pt-2 text-xs text-ink-muted">
           <span>{t('versions.editing')}</span>
@@ -2062,6 +2125,20 @@ export function ChatPage() {
                     </select>
                   </label>
                 ) : null}
+                {member ? (
+                  <label className="composer-select" title={t('swarm.useHint')}>
+                    <span className="composer-select-label">{t('swarm.use')}</span>
+                    <select
+                      value={swarmMode ?? ''}
+                      disabled={isSending}
+                      onChange={(event) => setSwarmMode((event.target.value || null) as SwarmMode | null)}
+                    >
+                      <option value="">{t('swarm.off')}</option>
+                      <option value="split">{t('swarm.modes.split')}</option>
+                      <option value="race">{t('swarm.modes.race')}</option>
+                    </select>
+                  </label>
+                ) : null}
                 {admin ? (
                   <ChatFolder
                     folder={selectedConversation?.project ?? ''}
@@ -2263,6 +2340,9 @@ export function ChatPage() {
             </button>
           </div>
 
+          {agentChat && agentChat.agent > 0 ? (
+            <SwarmAgentLine agent={agentChat.agent} onOpenCoordinator={() => openChat(agentChat.coordinatorId)} />
+          ) : null}
           {chatProjectId ? (
             <ChatProjectLine
               projectId={chatProjectId}
@@ -2311,6 +2391,8 @@ export function ChatPage() {
                   if (message.role === 'assistant' && !text) return null
                   return (
                   <Fragment key={message.id}>
+                  {/* A swarm's lanes, folded, above the answer they made (#1135). */}
+                  {message.role === 'assistant' ? swarmAnswers.get(message.id)?.map((view) => swarmLanes(view, false)) : null}
                   <div
                     key={message.id}
                     className={
@@ -2425,6 +2507,19 @@ export function ChatPage() {
                     ))}
                   </ol>
                 )}
+
+                {liveSwarms.map((view) => swarmLanes(view, true))}
+                {isSending && chatSwarms.note ? (
+                  <p className="chat-aside text-xs text-ink-muted" role="status">
+                    {t(`notices.swarm.${chatSwarms.note.reason}`, { defaultValue: chatSwarms.note.text })}
+                  </p>
+                ) : null}
+                <SwarmApprovals
+                  approvals={chatSwarms.approvals}
+                  toPrompt={promptFor}
+                  showRawArgs={advancedMode}
+                  onDecide={decideAgentTool}
+                />
 
                 {toolFailure && !isSending && !statusMessage && (
                   <p className="chat-aside text-sm text-ink-muted">

@@ -782,5 +782,50 @@
         "acorns": "ラタトスクがクリップ1本分のどんぐりを集めています。"
       }
     }
+  },
+  "swarm": {
+    "label": "スウォーム",
+    "modes": {
+      "split": "分割",
+      "race": "競争"
+    },
+    "working_other": "{{mode}} · {{count}} 個のエージェントが作業中",
+    "worked_other": "{{mode}} · {{count}} 個のエージェントで作業しました",
+    "agent": "エージェント {{n}}",
+    "anAgent": "エージェント",
+    "agentPart": "エージェント {{n}}：{{part}}",
+    "status": {
+      "queued": "待機中",
+      "running": "作業中",
+      "done": "完了",
+      "failed": "失敗",
+      "stopped": "停止",
+      "out_of_budget": "予算切れ"
+    },
+    "winner": "採用",
+    "steps": "最近のステップ",
+    "stop": "停止",
+    "stopAgent": "{{agent}} を停止",
+    "open": "開く",
+    "openAgent": "{{agent}} のチャットを開く",
+    "merging": "エージェントの作業をまとめています…",
+    "mergingAgent": "エージェント {{n}} の変更をマージしています…",
+    "conflict": "エージェント {{n}} の変更は {{files}} で競合したため、マージしませんでした。{{branch}} に残っています。",
+    "stoppedAll": "スウォームを停止しました。",
+    "failedAll": "スウォームを完了できませんでした。",
+    "branch": "結果はブランチ {{branch}} にあります",
+    "checksPassed": "プロジェクトのチェックに合格しました。",
+    "checksFailed": "プロジェクトのチェックに失敗しました。",
+    "applied": "未コミットの変更としてフォルダーに適用しました。",
+    "notApplied": "フォルダーには適用していません。使うには Git で {{branch}} をマージしてください。",
+    "approvals": "エージェントからの確認",
+    "allowAgent": "このエージェントに許可",
+    "allowAgentHint": "「このエージェントに許可」は {{agent}} だけに適用されます。ほかのエージェントは引き続き確認します。",
+    "use": "スウォームを使う",
+    "off": "オフ",
+    "useHint": "次のメッセージに複数のエージェントが同時に取り組みます。分割は部分に分け、競争では各モデルが全体を行います。",
+    "chip": "スウォーム：{{mode}}",
+    "chipRemove": "スウォームを使わない",
+    "agentLine": "スウォームのエージェント {{n}} · <go>メインのチャットを開く</go>"
   }
 }

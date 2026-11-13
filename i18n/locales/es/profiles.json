@@ -100,6 +100,10 @@
       "label": "Equipo",
       "detail": "Un planificador divide cada solicitud, los trabajadores hacen las partes (en otras computadoras cuando pueden) y un revisor comprueba la respuesta. Las preguntas rápidas se siguen respondiendo directamente."
     },
+    "swarm": {
+      "label": "Enjambre",
+      "detail": "Varios agentes trabajan a la vez, cada uno en su propio chat y en otros ordenadores cuando pueden. Dividir separa un trabajo en partes; en Carrera, varios modelos hacen cada uno la solicitud entera. Las preguntas rápidas se siguen respondiendo directamente."
+    },
     "teamTitle": "Equipo de IA",
     "automaticTitle": "Automática",
     "withStrategy": "{{title}} · Estrategia: {{strategy}}"
@@ -470,5 +474,34 @@
     },
     "noVerifiedModel": "Ningún modelo instalado está verificado para revisar temas, así que Imponer revisa con el modelo de este perfil, que puede dejar pasar más. Gemma 3 4B está verificado.",
     "installVerified": "Instalarlo"
+  },
+  "swarm": {
+    "title": "Enjambre",
+    "mode": {
+      "label": "Modo",
+      "help": "Dividir: los agentes hacen partes del trabajo a la vez. Carrera: cada modelo hace la solicitud entera y gana la mejor respuesta.",
+      "split": "Dividir",
+      "race": "Carrera"
+    },
+    "models": {
+      "label": "Modelos",
+      "help": "En orden, un agente cada uno. Una carrera necesita al menos dos; al dividir se usan por turnos y, sin ninguno, se usan los modelos del perfil.",
+      "add": "Añadir un modelo",
+      "up": "Subir {{model}}",
+      "remove": "Quitar {{model}}",
+      "raceNeedsTwo": "Una carrera necesita al menos dos modelos."
+    },
+    "agents": {
+      "label": "Agentes",
+      "help": "Máximo de agentes a la vez (2–8). Vacío usa Trabajadores, o 4."
+    },
+    "tokens": {
+      "label": "Tokens",
+      "help": "Máximo de tokens para todo el enjambre (10.000–4.000.000). Vacío es 400.000."
+    },
+    "minutes": {
+      "label": "Minutos",
+      "help": "Tiempo máximo de un enjambre (1–240). Vacío es 5 para una pregunta y 30 para una tarea."
+    }
   }
 }

@@ -37,6 +37,7 @@ import {
   type ProfileFilter,
 } from './profilePresentation'
 import { OrchestrationControls, cleanOrchestration } from './OrchestrationControls'
+import { SwarmControls } from './SwarmControls'
 import { TopicsEditor } from './TopicsEditor'
 import { TopicsAttempts } from './TopicsAttempts'
 import { TopicsModelNote } from './TopicsModelNote'
@@ -992,6 +993,15 @@ function AdvancedEditor({
               </select>
             </label>
             <p className="text-xs leading-relaxed text-ink-muted">{orchHint}</p>
+            {/* A swarm's mode, models, and budgets (#1135). */}
+            {strategy === 'swarm' && (
+              <SwarmControls
+                value={orchestration.swarm ?? {}}
+                onChange={(swarm) => setOrchestration({ ...orchestration, swarm })}
+                installedModels={installedModels}
+                disabled={saving}
+              />
+            )}
             {/* Team keeps its own workers and reviewer (docs/deliberate.md). */}
             {strategy !== 'team' && (
               <OrchestrationControls value={orchestration} onChange={setOrchestration} disabled={saving} only={['deliberate']} />
