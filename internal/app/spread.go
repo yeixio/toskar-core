@@ -29,7 +29,7 @@ import (
 // each model by fit and load, and a computer and model with a free slot
 // comes first. With every one busy, the request waits for the shortest
 // line. A model on a computer answers as many at once as it has slots
-// (swarm.SlotsFor).
+// (App.swarmSlots).
 
 // spreadTarget is one computer and model a Spread request can run on.
 type spreadTarget struct {
@@ -51,6 +51,17 @@ type spreadLanes struct {
 	waiting map[laneKey]int
 	// changed closes when a request finishes, for those waiting.
 	changed chan struct{}
+	// slots is how many requests a model on a computer answers at once;
+	// nil is one.
+	slots swarm.SlotsFor
+}
+
+// slotsOf is how many requests k answers at once.
+func (l *spreadLanes) slotsOf(k laneKey) int {
+	if l.slots == nil {
+		return 1
+	}
+	return max(1, l.slots(k.node, k.model))
 }
 
 func (l *spreadLanes) init() {
@@ -74,7 +85,7 @@ func (l *spreadLanes) choose(targets []spreadTarget) spreadTarget {
 	for i, t := range targets {
 		k := t.key()
 		ahead := l.running[k] + l.waiting[k]
-		all[i] = ranked{t: t, ahead: ahead, free: max(1, swarm.SlotsFor(t.Node.ID, t.ModelID)) - ahead}
+		all[i] = ranked{t: t, ahead: ahead, free: l.slotsOf(k) - ahead}
 	}
 	sort.SliceStable(all, func(i, j int) bool {
 		a, b := all[i], all[j]
@@ -101,7 +112,7 @@ func (l *spreadLanes) acquire(ctx context.Context, k laneKey) error {
 	for {
 		l.mu.Lock()
 		l.init()
-		if l.running[k] < max(1, swarm.SlotsFor(k.node, k.model)) {
+		if l.running[k] < l.slotsOf(k) {
 			l.running[k]++
 			l.waiting[k]--
 			l.mu.Unlock()
