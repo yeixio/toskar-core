@@ -128,6 +128,11 @@ func (o *Orchestrator) Run(
 		// Work asked for in the terminal goes on until it's done or stuck,
 		// with what it may turn out to need (#1017).
 		isTask := !jsonOnly && len(images) == 0 && huginn.IsTask(kind, task.Prompt, runlog.OriginFrom(ctx).Client, turnopts.ProjectFrom(ctx))
+		// A task swarm's agent does its part as a task in its folder,
+		// whatever its first message looks like (#1135).
+		if ref, ok := swarm.AgentFrom(ctx); ok && ref.Task && turnopts.ProjectFrom(ctx) != "" && !jsonOnly {
+			isTask = true
+		}
 		if isTask {
 			budget = budget.TaskBudget(profile.Orchestration.MaxToolCalls)
 			ctx = turnopts.WithLongCommands(ctx)
@@ -151,16 +156,26 @@ func (o *Orchestrator) Run(
 		// lookedUp records that the web was read for this turn.
 		lookedUp := false
 		// A swarm (#1135): agents in chats of their own do the work at once,
-		// and this turn merges it. Questions only for now: a task runs as
-		// one, and says a swarm for tasks comes later.
+		// and this turn merges it. A task's agents work in its folder, and
+		// what they changed is merged and applied to it.
 		swarmed := false
-		if mode, named := swarmAsked(ctx, profile, task.Prompt, escalate); mode != "" {
+		// swarmFooter is what Toskar did with a task swarm's change, under
+		// the answer.
+		swarmFooter := ""
+		// A task asks for a swarm as a question does ("fix the tests, use a
+		// swarm"), so the swarm's own wording doesn't make a task a question.
+		swarmEscalate := escalate || isTask
+		if mode, named := swarmAsked(ctx, profile, task.Prompt, swarmEscalate); mode != "" {
 			runner, ok := env.(swarm.Runner)
+			folder := ""
+			if isTask {
+				folder = turnopts.ProjectFrom(ctx)
+			}
 			switch {
-			case isTask:
-				env.Emit(swarm.EventNote, map[string]any{"reason": swarm.TaskLater, "note": swarm.Reason(swarm.TaskLater)})
+			case isTask && folder == "":
+				env.Emit(swarm.EventNote, map[string]any{"reason": swarm.NoFolder, "note": swarm.Reason(swarm.NoFolder)})
 			case ok && !jsonOnly && len(images) == 0:
-				turn := runSwarm(ctx, env, runner, ch, profile, role, mode, task.Prompt, instructions, named)
+				turn := runSwarm(ctx, env, runner, ch, profile, role, mode, task.Prompt, instructions, folder, named)
 				if turn.id != "" {
 					defer func() {
 						status := swarm.StatusDone
@@ -184,7 +199,16 @@ func (o *Orchestrator) Run(
 					streamText(ch, role, nodeID, turn.answer, nil, contextusage.Usage{})
 					return
 				}
-				if turn.reference != "" {
+				if turn.task != nil && turn.ran {
+					// The agents did the work: this turn reports it, and
+					// runs nothing itself.
+					reference = joinReference(reference, turn.reference)
+					instructions += "\n" + swarmTaskGuidance
+					swarmFooter = turn.footer
+					swarmed, planned, isTask, lookedUp = true, true, false, true
+					budget.Plan = false
+					profile = offerOnly(profile, nil)
+				} else if turn.reference != "" {
 					reference = joinReference(reference, turn.reference)
 					instructions += "\n" + swarmGuidance
 					// The agents planned and looked things up; the answer is
@@ -690,6 +714,7 @@ func (o *Orchestrator) Run(
 			if isTask {
 				answer += tracker.check.footer(ctx)
 			}
+			answer += swarmFooter
 			live.finish(ch, role, nodeID, answer, metrics, usage)
 			return
 		}

@@ -301,10 +301,15 @@
     ],
     "Swarm": [
       "agents",
+      "applied",
+      "branch",
       "budget",
+      "checks",
+      "conflicts",
       "conversation_id",
       "created_at",
       "finished_at",
+      "folder",
       "id",
       "mode",
       "note",
@@ -318,10 +323,13 @@
     ],
     "SwarmAgent": [
       "agent",
+      "branch",
+      "checks",
       "conversation_id",
       "model_id",
       "node_id",
       "part",
+      "paths",
       "role",
       "seconds",
       "status",
@@ -347,6 +355,11 @@
       "product",
       "source",
       "version"
+    ],
+    "SwarmConflict": [
+      "agent",
+      "branch",
+      "files"
     ]
   }
 }

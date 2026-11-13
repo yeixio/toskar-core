@@ -110,6 +110,20 @@ func (s *swarmService) Stop(ctx context.Context, id string) (bool, error) {
 	return stopped, nil
 }
 
+// Delete deletes a swarm's record and the branches a task swarm kept. Its
+// chats stay.
 func (s *swarmService) Delete(ctx context.Context, id string) error {
-	return s.app.Swarms.Delete(ctx, id)
+	rec, err := s.app.Swarms.Get(ctx, id)
+	if err != nil {
+		return err
+	}
+	if err := s.app.Swarms.Delete(ctx, id); err != nil {
+		return err
+	}
+	if rec.Folder != "" {
+		if _, err := swarm.DeleteBranches(context.WithoutCancel(ctx), rec.Folder, rec.ID); err != nil && s.app.Logger != nil {
+			s.app.Logger.Warn("delete swarm branches", "swarm_id", id, "error", err)
+		}
+	}
+	return nil
 }

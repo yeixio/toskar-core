@@ -2,11 +2,15 @@ package simple
 
 import (
 	"context"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/yeixio/toskar-core/internal/runlog"
 	"github.com/yeixio/toskar-core/internal/swarm"
+	"github.com/yeixio/toskar-core/internal/turnopts"
 	"github.com/yeixio/toskar-core/pkg/contracts"
 )
 
@@ -21,6 +25,14 @@ type swarmEnv struct {
 	statuses []string
 	finished []string
 	winner   int
+	// task is a task swarm's outcome, and ran the tools this turn ran.
+	task *swarm.TaskOutcome
+	ran  []string
+}
+
+func (e *swarmEnv) ExecuteTool(ctx context.Context, toolID string, args map[string]any) (map[string]any, error) {
+	e.ran = append(e.ran, toolID)
+	return map[string]any{"content": "package parser"}, nil
 }
 
 func (e *swarmEnv) RunSwarm(_ context.Context, req swarm.Request) (swarm.Outcome, error) {
@@ -39,6 +51,9 @@ func (e *swarmEnv) RunSwarm(_ context.Context, req swarm.Request) (swarm.Outcome
 			r.Status = e.statuses[i]
 		}
 		out.Results = append(out.Results, r)
+	}
+	if req.Folder != "" {
+		out.Task = e.task
 	}
 	return out, nil
 }
@@ -173,8 +188,8 @@ func TestSwarmSingle(t *testing.T) {
 	}
 }
 
-// A task runs as one task and says a swarm for tasks comes later; an agent's
-// own turn never starts a swarm; and Auto never picks one.
+// A task with no folder runs as one task and says a swarm needs one; an
+// agent's own turn never starts a swarm; and Auto never picks one.
 func TestSwarmNotHere(t *testing.T) {
 	task := &swarmEnv{roleEnv: newRoleEnv(map[string]string{"assistant": "Fixed it."})}
 	ctx := runlog.WithOrigin(swarm.WithMode(context.Background(), swarm.ModeSplit), runlog.Origin{Client: "terminal"})
@@ -182,7 +197,7 @@ func TestSwarmNotHere(t *testing.T) {
 	if len(task.asked) != 0 {
 		t.Fatalf("a task ran a swarm: %+v", task.asked)
 	}
-	if note := task.last(swarm.EventNote); note == nil || note["reason"] != swarm.TaskLater {
+	if note := task.last(swarm.EventNote); note == nil || note["reason"] != swarm.NoFolder {
 		t.Fatalf("no note for the task: %v", note)
 	}
 
@@ -196,5 +211,86 @@ func TestSwarmNotHere(t *testing.T) {
 	runSwarmTurn(t, context.Background(), auto, kayaks, contracts.OrchestrationPolicy{})
 	if len(auto.asked) != 0 {
 		t.Fatalf("Auto picked a swarm: %+v", auto.asked)
+	}
+}
+
+// A task swarm in a folder: the planner looks at the folder, read-only,
+// before it splits the task, and parts that change the same files go to one
+// agent. The agents run as tasks in the folder, and the turn reports what
+// they did with what Toskar did with the change under it, running nothing
+// itself.
+func TestSwarmTask(t *testing.T) {
+	folder := t.TempDir()
+	for _, name := range []string{"parser.go", "parser_test.go", "README.md"} {
+		if err := os.WriteFile(filepath.Join(folder, name), []byte("x"), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	inner := newRoleEnv(map[string]string{
+		"assistant": `<tool_call>{"name":"filesystem.read","arguments":{"path":"parser.go"}}</tool_call>`,
+	})
+	inner.sequence["assistant"] = []string{
+		`{"parts": [{"title": "Parser", "instructions": "Fix the parser.", "paths": ["parser.go"]}, {"title": "Tests", "instructions": "Fix the test.", "paths": ["parser.go", "parser_test.go"]}, {"title": "Docs", "instructions": "Document it.", "paths": ["README.md"]}]}`,
+		"The agents fixed the parser and documented it.",
+	}
+	env := &swarmEnv{roleEnv: inner, answers: []string{"Fixed parser.go and its test; go test passes.", "Updated the README."},
+		task: &swarm.TaskOutcome{Folder: folder, Git: true, Branch: "toskar/swarm/ab/merged", Files: []string{"parser.go", "README.md"},
+			AgentFiles: map[int][]string{1: {"parser.go"}, 2: nil}, Applied: true, Check: "go test ./...", Checks: swarm.ChecksPassed}}
+	ctx := turnopts.WithProject(swarm.WithMode(context.Background(), swarm.ModeSplit), folder)
+	profile := contracts.AIProfile{Roles: []contracts.ModelRole{{Role: "assistant", ModelID: "m"}},
+		Tools:         []contracts.ToolPolicy{{ToolID: "filesystem.read", Policy: "allow"}, {ToolID: "filesystem.write", Policy: "ask"}, {ToolID: "terminal", Policy: "ask"}},
+		Orchestration: contracts.OrchestrationPolicy{Verification: "off"}}
+	events, err := New().Run(ctx, contracts.Task{Prompt: "Fix the failing test in parser_test.go and document the parser."}, profile, env)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var answer string
+	for evt := range events {
+		if evt.Type == "agent.message" {
+			answer += evt.Content
+		}
+	}
+	if len(env.asked) != 1 {
+		t.Fatalf("asked = %+v", env.asked)
+	}
+	req := env.asked[0]
+	if req.Folder != folder || req.Judge == nil || req.Budget.Time != 30*time.Minute {
+		t.Errorf("request = %+v", req)
+	}
+	if len(req.Parts) != 2 || req.Parts[0].Title != "Parser + Tests" || strings.Join(req.Parts[0].Paths, ",") != "parser.go,parser_test.go" || req.Parts[1].Title != "Docs" {
+		t.Fatalf("parts = %+v", req.Parts)
+	}
+	if !strings.Contains(inner.systems["assistant"], "work on one task in a project folder") || !strings.Contains(inner.prompts["assistant"][0], "parser_test.go") {
+		t.Errorf("the planner didn't get the folder: %q / %q", inner.systems["assistant"], inner.prompts["assistant"][0])
+	}
+	// It read one file, and ran nothing else: the agents did the work.
+	if strings.Join(env.ran, ",") != "filesystem.read" {
+		t.Errorf("tools run = %v", env.ran)
+	}
+	if !strings.HasPrefix(answer, "The agents fixed the parser and documented it.") || !strings.Contains(answer, "Toskar noticed:") || !strings.Contains(answer, "applied the change to "+folder) {
+		t.Errorf("answer = %q", answer)
+	}
+	final := inner.prompts["assistant"][len(inner.prompts["assistant"])-1]
+	if !strings.Contains(final, "Reports from each agent") || !strings.Contains(final, "Updated the README.") ||
+		!strings.Contains(final, "Files it really changed, from Git: none") || !strings.Contains(final, "delivered: parser.go, README.md") {
+		t.Errorf("the answer's prompt lacks the reports:\n%s", final)
+	}
+	if len(env.finished) != 1 || env.finished[0] != "s1:done" {
+		t.Errorf("finished = %v", env.finished)
+	}
+}
+
+// The judge's pick of a race's change: a letter or a number, else none.
+func TestPickedChange(t *testing.T) {
+	for text, want := range map[string]int{
+		`{"winner": "B", "why": "it passes"}`: 1,
+		`{"winner": "Change A"}`:              0,
+		`{"winner": 2}`:                       1,
+		`{"winner": "D"}`:                     -1,
+		"I like the second one.":              -1,
+	} {
+		if got := pickedChange(text, 3); got != want {
+			t.Errorf("%s: %d, want %d", text, got, want)
+		}
 	}
 }

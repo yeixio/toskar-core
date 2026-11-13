@@ -141,7 +141,22 @@ func (e *chatExecEnv) RunSwarm(ctx context.Context, req swarm.Request) (swarm.Ou
 		agents[i] = swarm.Agent{N: n, Role: role, Part: part, ModelID: e.modelForRole(role), NodeID: node}
 	}
 	lanes := swarm.Group(agents)
-	if code := swarm.Single(req.Mode, agents, lanes); code != "" {
+	code := swarm.Single(req.Mode, agents, lanes)
+	// A task's folder outside Git has no copies to give the agents: they
+	// take turns in it, which doesn't need them to run at once. A race
+	// can't take turns at the same change.
+	shared := false
+	if req.Folder != "" {
+		if _, isGit := swarm.RepoRoot(ctx, req.Folder); !isGit {
+			switch {
+			case req.Mode == swarm.ModeRace && (code == "" || code == swarm.OneAtATime):
+				code = swarm.RaceNeedsGit
+			case code == "" || code == swarm.OneAtATime:
+				code, shared = "", true
+			}
+		}
+	}
+	if code != "" {
 		e.noteSingle(st, code)
 		a.saveSwarm(ctx, st)
 		out.Single = code
@@ -171,6 +186,31 @@ func (e *chatExecEnv) RunSwarm(ctx context.Context, req swarm.Request) (swarm.Ou
 			return out, err
 		}
 	}
+	// A task's agents work in its folder: each in a worktree of its own in
+	// Git, or all in the folder, one after another.
+	var ws *swarm.Workspace
+	if req.Folder != "" {
+		st.mu.Lock()
+		st.rec.Folder = req.Folder
+		st.mu.Unlock()
+		if shared {
+			lanes = swarm.OneAfterAnother(agents)
+			for i := range agents {
+				agents[i].Folder = req.Folder
+			}
+			e.noteSingle(st, swarm.NotGit)
+		} else {
+			if ws, err = e.taskWorkspace(ctx, st, agents); err != nil {
+				st.mu.Lock()
+				st.rec.Status, st.rec.Note = swarm.StatusFailed, err.Error()
+				st.mu.Unlock()
+				a.saveSwarm(ctx, st)
+				return out, err
+			}
+			// The worktrees go when the swarm ends; the branches stay.
+			defer ws.Remove(context.WithoutCancel(ctx))
+		}
+	}
 	lanesOut := make([]map[string]any, len(agents))
 	st.mu.Lock()
 	st.rec.Agents = make([]contracts.SwarmAgent, len(agents))
@@ -180,9 +220,17 @@ func (e *chatExecEnv) RunSwarm(ctx context.Context, req swarm.Request) (swarm.Ou
 			status = swarm.AgentQueued
 		}
 		st.rec.Agents[i] = contracts.SwarmAgent{Agent: ag.N, ConversationID: ag.ConversationID, Role: ag.Role,
-			Part: ag.Part.Instructions, ModelID: ag.ModelID, NodeID: ag.NodeID, Status: status}
-		lanesOut[i] = map[string]any{"agent": ag.N, "conversation_id": ag.ConversationID, "part": ag.Part.Title,
+			Part: ag.Part.Instructions, ModelID: ag.ModelID, NodeID: ag.NodeID, Status: status,
+			Paths: ag.Part.Paths, Branch: ag.Branch}
+		lane := map[string]any{"agent": ag.N, "conversation_id": ag.ConversationID, "part": ag.Part.Title,
 			"role": ag.Role, "model": ag.ModelID, "node_id": ag.NodeID, "status": status}
+		if ag.Branch != "" {
+			lane["branch"] = ag.Branch
+		}
+		if len(ag.Part.Paths) > 0 {
+			lane["paths"] = ag.Part.Paths
+		}
+		lanesOut[i] = lane
 	}
 	st.mu.Unlock()
 	a.saveSwarm(ctx, st)
@@ -195,8 +243,20 @@ func (e *chatExecEnv) RunSwarm(ctx context.Context, req swarm.Request) (swarm.Ou
 		st.mu.Unlock()
 		a.saveSwarm(ctx, st)
 	}
+	started := time.Now()
 	results := swarm.Run(ctx, agents, lanes, req.Budget, func(runCtx context.Context, ag swarm.Agent, used func(int)) swarm.Result {
-		return e.runAgent(runCtx, st.rec.ID, req, ag, used)
+		message := swarm.FirstMessage(req.Mode, req.Prompt, req.Parts, ag.N)
+		if req.Folder != "" {
+			message = swarm.TaskMessage(req.Mode, req.Prompt, req.Parts, ag.N, shared)
+		}
+		r := e.runAgent(runCtx, st.rec.ID, ag, message, used)
+		if ws != nil {
+			// What it did, finished or not, is kept on its branch.
+			if _, err := ws.Commit(context.WithoutCancel(ctx), ag.Worktree, swarm.Label(ag.N, ag.Part.Title)); err != nil && a.Logger != nil {
+				a.Logger.Warn("commit a swarm agent's work", "swarm_id", st.rec.ID, "agent", ag.N, "error", err)
+			}
+		}
+		return r
 	}, swarm.Hooks{
 		Started: func(i int, ag swarm.Agent) {
 			setAgent(i, func(sa *contracts.SwarmAgent) { sa.Status = swarm.AgentRunning })
@@ -219,6 +279,9 @@ func (e *chatExecEnv) RunSwarm(ctx context.Context, req swarm.Request) (swarm.Ou
 	st.mu.Unlock()
 	a.saveSwarm(ctx, st)
 	out.Agents, out.Results = agents, results
+	if req.Folder != "" {
+		out.Task = e.finishTask(ctx, st, req, ws, agents, results, started)
+	}
 	return out, nil
 }
 
@@ -282,10 +345,11 @@ func (e *chatExecEnv) swarmProject(ctx context.Context, request string) (string,
 	return p.ID, nil
 }
 
-// runAgent runs one agent's turn in its chat, as any chat turn runs, and
-// waits for its answer. Its tool calls show in the coordinator chat's lanes
-// as they start.
-func (e *chatExecEnv) runAgent(ctx context.Context, swarmID string, req swarm.Request, ag swarm.Agent, used func(int)) swarm.Result {
+// runAgent runs one agent's turn in its chat, as any chat turn runs, with
+// message as its first message, and waits for its answer. Its tool calls show
+// in the coordinator chat's lanes as they start. A task's agent works in its
+// folder, as a task.
+func (e *chatExecEnv) runAgent(ctx context.Context, swarmID string, ag swarm.Agent, message string, used func(int)) swarm.Result {
 	a := e.app
 	var mu sync.Mutex
 	stopped, steps := false, 0
@@ -311,11 +375,11 @@ func (e *chatExecEnv) runAgent(ctx context.Context, swarmID string, req swarm.Re
 				"tool": tool, "summary": summary})
 		}
 	}
-	ref := swarm.AgentRef{SwarmID: swarmID, N: ag.N, Label: swarm.Label(ag.N, ag.Part.Title), NodeID: ag.NodeID, ModelID: ag.ModelID}
-	agentCtx, cancel := agentContext(ctx, e.ctx, ref, note)
+	ref := swarm.AgentRef{SwarmID: swarmID, N: ag.N, Label: swarm.Label(ag.N, ag.Part.Title), NodeID: ag.NodeID, ModelID: ag.ModelID, Task: ag.Folder != ""}
+	agentCtx, cancel := agentContext(ctx, e.ctx, ref, ag.Folder, note)
 	defer cancel()
 	started := time.Now()
-	ch, err := a.RunChat(agentCtx, e.profile.ID, ag.ConversationID, swarm.FirstMessage(req.Mode, req.Prompt, req.Parts, ag.N), true, ag.ModelID, "")
+	ch, err := a.RunChat(agentCtx, e.profile.ID, ag.ConversationID, message, true, ag.ModelID, "")
 	if err != nil {
 		return swarm.Result{Status: swarm.AgentFailed, Error: err.Error(), Seconds: time.Since(started).Seconds()}
 	}
@@ -367,8 +431,9 @@ func (e *chatExecEnv) runAgent(ctx context.Context, swarmID string, req swarm.Re
 // agentContext is an agent's turn's context: the coordinator's person, and
 // what the request chose that still applies, such as tools an API key
 // narrowed, without the coordinator's own chat, attachments, folder, or
-// progress. It stops when ctx does: the swarm stopped, or out of budget.
-func agentContext(ctx, turn context.Context, ref swarm.AgentRef, note func(events.Event)) (context.Context, context.CancelFunc) {
+// progress. A task's agent works in folder, its own. It stops when ctx does:
+// the swarm stopped, or out of budget.
+func agentContext(ctx, turn context.Context, ref swarm.AgentRef, folder string, note func(events.Event)) (context.Context, context.CancelFunc) {
 	out := auth.WithPrincipal(context.Background(), auth.PrincipalFrom(turn))
 	origin := runlog.OriginFrom(turn)
 	// An agent of a question has no folder, wherever it was asked from.
@@ -384,6 +449,11 @@ func agentContext(ctx, turn context.Context, ref swarm.AgentRef, note func(event
 			Memory: o.Memory, Knowledge: o.Knowledge, KnowledgeSources: o.KnowledgeSources,
 			Tools: o.Tools, ReadOnlyTools: o.ReadOnlyTools, Language: o.Language, ExactModel: o.ExactModel,
 		})
+	}
+	if folder != "" {
+		// Only a task swarm's agent has one: a folder Core chose for it,
+		// from the coordinator's, which an Admin's client named.
+		out = turnopts.WithProject(out, folder)
 	}
 	out = swarm.WithAgent(out, ref)
 	out = events.WithNote(out, note)

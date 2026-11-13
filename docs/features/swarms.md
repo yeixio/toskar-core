@@ -115,8 +115,8 @@ New package `internal/swarm`, called from the orchestrator. A swarm is a strateg
 ### Folders
 
 - **A task in a Git folder:**
-  - Each agent gets `git worktree add <data-dir>/swarms/<swarm>/<agent> -b toskar/swarm/<swarm>/<agent> HEAD`.
-  - Uncommitted changes in the person's folder are carried into each worktree first, as a stash applied to it, so agents start from what the person sees.
+  - Core first records the person's folder as it is, HEAD plus uncommitted changes and untracked files that aren't ignored, in one snapshot commit made with a separate index, so their index, HEAD, branch and stash are untouched.
+  - Each agent gets `git worktree add <data-dir>/swarms/<swarm>/agent-N -b toskar/swarm/<first 8 of swarm>/agent-N <snapshot>`. Starting from the snapshot keeps each branch's diff to the agent's own work, so applying it doesn't collide with what the person already changed.
   - Worktrees are removed when the swarm finishes. Branches are kept until the person deletes the swarm, or for 7 days.
 - **A task in a folder that isn't a Git repository:**
   - Copying a whole folder can be expensive and isn't safe to merge, so its parts run one after another in the folder itself.

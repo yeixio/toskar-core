@@ -634,8 +634,10 @@
       "oneAtATime": "Um agente: este computador não consegue executar mais de um por vez com este modelo.",
       "onePart": "Um agente: esta solicitação não se divide em partes que possam ser feitas separadamente.",
       "oneModel": "Um agente: uma corrida precisa de pelo menos dois modelos para comparar.",
-      "taskLater": "Um agente: por enquanto, os enxames trabalham com perguntas. Um enxame para tarefas em uma pasta virá em uma versão futura.",
-      "noChat": "Um agente: um enxame mantém seus agentes em conversas, e esta solicitação não está salva em nenhuma."
+      "noChat": "Um agente: um enxame mantém seus agentes em conversas, e esta solicitação não está salva em nenhuma.",
+      "noFolder": "Um agente: um enxame trabalha em uma tarefa dentro de uma pasta, e esta tarefa não tem nenhuma.",
+      "notGit": "Não é uma pasta do Git: os agentes trabalharam nela um depois do outro.",
+      "raceNeedsGit": "Um agente: uma corrida em uma tarefa precisa de uma pasta do Git, para que cada agente tenha sua própria cópia."
     }
   },
   "steps": {

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"path/filepath"
 	"testing"
+	"time"
 
 	"github.com/yeixio/toskar-core/internal/auth"
 	"github.com/yeixio/toskar-core/internal/store"
@@ -92,5 +93,48 @@ func TestStore(t *testing.T) {
 	}
 	if got, _ := st.Get(vee, left.ID); got.Status != StatusStopped {
 		t.Fatalf("left running: %s", got.Status)
+	}
+}
+
+// A task swarm's outcome is kept, and the cleanup finds finished swarms past
+// their week that still have branches, then forgets them.
+func TestStoreKeptBranches(t *testing.T) {
+	db, err := store.Open(filepath.Join(t.TempDir(), "t.db"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = db.Close() })
+	st := NewStore(db.SQL)
+	vee := as("vee")
+	clock := time.Date(2026, 11, 1, 12, 0, 0, 0, time.UTC)
+	st.now = func() time.Time { return clock }
+	old, _ := st.Create(vee, "", "c1", ModeSplit, "Fix it.", contracts.SwarmBudget{})
+	old.Status, old.Folder, old.Branch, old.Checks, old.Applied = StatusDone, "/src/app", "toskar/swarm/x/merged", ChecksPassed, true
+	old.Agents = []contracts.SwarmAgent{{Agent: 1, Branch: "toskar/swarm/x/agent-1", Paths: []string{"a.go"}, Checks: ChecksFailed}}
+	old.Conflicts = []contracts.SwarmConflict{{Agent: 2, Branch: "toskar/swarm/x/agent-2", Files: []string{"a.go"}}}
+	if err := st.Save(vee, old); err != nil {
+		t.Fatal(err)
+	}
+	got, _ := st.Get(vee, old.ID)
+	if got.Folder != "/src/app" || got.Branch != old.Branch || got.Checks != ChecksPassed || !got.Applied || len(got.Conflicts) != 1 ||
+		got.Agents[0].Paths[0] != "a.go" || got.Agents[0].Checks != ChecksFailed {
+		t.Fatalf("saved = %+v", got)
+	}
+	clock = clock.Add(10 * 24 * time.Hour)
+	question, _ := st.Create(vee, "", "c2", ModeSplit, "Which kayak?", contracts.SwarmBudget{})
+	question.Status = StatusDone
+	_ = st.Save(vee, question)
+	kept, err := st.KeptBranches(context.Background(), clock.Add(-7*24*time.Hour))
+	if err != nil || len(kept) != 1 || kept[0].ID != old.ID {
+		t.Fatalf("kept = %+v, %v", kept, err)
+	}
+	if err := st.ForgetBranches(context.Background(), old.ID); err != nil {
+		t.Fatal(err)
+	}
+	if kept, _ := st.KeptBranches(context.Background(), clock); len(kept) != 0 {
+		t.Fatalf("still kept: %+v", kept)
+	}
+	if got, _ := st.Get(vee, old.ID); got.Branch != "" || got.Agents[0].Branch != "" || got.Folder != "/src/app" {
+		t.Errorf("forgotten = %+v", got)
 	}
 }

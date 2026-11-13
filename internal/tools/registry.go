@@ -341,6 +341,52 @@ func (r *Registry) Execute(ctx context.Context, toolID string, args map[string]a
 	return result, nil
 }
 
+// Confirm asks the person to allow something Core does itself, as a tool's
+// call asks: applying a swarm's changes to their folder (#1135), for one.
+// policy decides as a tool's does, "allow for this session" holds for the
+// chat, and with nobody to ask it fails with ErrNeedsApproval. Nothing runs
+// here: on nil the caller goes ahead, and the audit log keeps the answer.
+func (r *Registry) Confirm(ctx context.Context, actionID string, args map[string]any, policy, reason string, meta map[string]any) error {
+	scope := SessionScope(meta)
+	allowed, needsPrompt, err := r.policy.Decide(actionID, policy, scope)
+	if err != nil {
+		r.audit(ctx, actionID, RunDenied, "", activitySummary(args), time.Time{}, err, meta)
+		return err
+	}
+	approval := ApprovedByProfile
+	if allowed && policy != PolicyAllow {
+		approval = ApprovedSession
+	}
+	switch {
+	case needsPrompt && nobodyToAsk(meta):
+		err := fmt.Errorf("%s: %w", actionID, ErrNeedsApproval)
+		r.audit(ctx, actionID, RunDenied, "", activitySummary(args), time.Time{}, err, meta)
+		return err
+	case needsPrompt:
+		decision, err := r.requestApproval(ctx, actionID, args, reason, meta)
+		if err != nil {
+			r.audit(ctx, actionID, RunDenied, "", activitySummary(args), time.Time{}, err, meta)
+			return err
+		}
+		if !decision.Allow {
+			err := fmt.Errorf("%s denied by user", actionID)
+			r.audit(ctx, actionID, RunDenied, ApprovedByYou, activitySummary(args), time.Time{}, err, meta)
+			return err
+		}
+		approval = ApprovedByYou
+		if decision.AllowSession && policy != PolicyAskEachTime {
+			r.policy.AllowSession(scope, actionID)
+			approval = ApprovedSession
+		}
+	case !allowed:
+		err := fmt.Errorf("%s not allowed", actionID)
+		r.audit(ctx, actionID, RunDenied, "", activitySummary(args), time.Time{}, err, meta)
+		return err
+	}
+	r.audit(ctx, actionID, RunCompleted, approval, activitySummary(args), time.Now(), nil, meta)
+	return nil
+}
+
 // changesInTask says a call in a task should ask first: anything that changes
 // things, apart from code run in its sandbox.
 func changesInTask(ctx context.Context, toolID string, args map[string]any) bool {

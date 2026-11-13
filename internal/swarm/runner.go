@@ -18,6 +18,11 @@ type Request struct {
 	// model.
 	Models []string
 	Budget Budget
+	// Folder is a task's folder: its agents work there, as tasks. Empty
+	// for a question.
+	Folder string
+	// Judge picks a race's best change in a task.
+	Judge Judge
 }
 
 // Outcome is how a swarm's agents went.
@@ -29,6 +34,9 @@ type Outcome struct {
 	Single  string
 	Agents  []Agent
 	Results []Result
+	// Task is how a task's merge and delivery went, for a task swarm whose
+	// agents ran.
+	Task *TaskOutcome
 }
 
 // Done are the indexes of the agents that finished with an answer.
