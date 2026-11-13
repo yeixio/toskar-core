@@ -21,6 +21,17 @@ on:
       models:
         description: 'Models for the self-hosted run, as a JSON list, such as ["recommended","qwen2.5-32b-q4"]. Blank for QUALITY_MODELS.'
         default: ""
+      sets:
+        description: 'Which sets the self-hosted run measures: all of them, or only the swarm set (#1135), which then runs for every model in the list.'
+        type: choice
+        options: [all, swarms]
+        default: all
+      swarm_models:
+        description: 'The swarm set''s models, comma-separated, such as qwen3.5-4b,qwen3.5-9b: single on each, split on all, and race with two or more (#1135). Blank for the run''s model.'
+        default: ""
+      swarm_slots:
+        description: 'Agents at once on each of the swarm set''s models (1 to 4), set before it runs (#1135). The weekly run uses 2; 1 measures a swarm on one computer and one model, which runs as one agent.'
+        default: "2"
       deliberate:
         description: The Deliberate mode the reasoning set measures (#459). The weekly run measures single.
         type: choice
@@ -73,7 +84,7 @@ jobs:
   # Gemma 3 4B, which has a sliding window: how much of a chat's later turn
   # comes from the cache, and that a warm answer matches a cold one.
   served-model:
-    if: ${{ !inputs.speculation && !inputs.fit_check }}
+    if: ${{ !inputs.speculation && !inputs.fit_check && inputs.sets != 'swarms' }}
     runs-on: ${{ fromJSON(vars.TRUSTED_RUNS_ON || '"ubuntu-latest"') }}
     timeout-minutes: 150
     steps:
@@ -266,6 +277,7 @@ jobs:
             docker exec "$NAME" vulkaninfo --summary 2>/dev/null | grep -E "deviceName|deviceType" || echo "::warning::No Vulkan device in the container; the run will use the CPU."
           fi
       - name: Quality set
+        if: ${{ inputs.sets != 'swarms' }}
         run: |
           mkdir -p .quality
           docker run --rm --network "$NAME" \
@@ -284,7 +296,7 @@ jobs:
       # model asked to change. The projects are made where the daemon sees
       # them too.
       - name: Long tasks
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() && inputs.sets != 'swarms' }}
         run: |
           mkdir -p .quality
           docker run --rm --network "$NAME" \
@@ -304,7 +316,7 @@ jobs:
       # Topic controls (#345): the share of off-topic cases held and of
       # on-topic ones wrongly refused, with the same models.
       - name: Topic controls
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() && inputs.sets != 'swarms' }}
         run: |
           mkdir -p .quality
           docker run --rm --network "$NAME" \
@@ -322,7 +334,7 @@ jobs:
       # Files (#510): every type Toskar reads, attached and asked about,
       # and every type it makes, asked for and then opened.
       - name: Files
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() && inputs.sets != 'swarms' }}
         run: |
           mkdir -p .quality
           docker run --rm --network "$NAME" \
@@ -343,7 +355,7 @@ jobs:
       # sets up picture and video making first (about 14 GB the first time,
       # kept in the models volume), so the other models don't repeat it.
       - name: Media
-        if: ${{ !cancelled() && matrix.model == 'recommended' }}
+        if: ${{ !cancelled() && inputs.sets != 'swarms' && matrix.model == 'recommended' }}
         # A Hugging Face token whose account accepted a gated model's
         # license, for testing a model that needs one (#551). It reaches the
         # container through the environment, never the command line.
@@ -371,7 +383,7 @@ jobs:
       # answer right, by kind, and the time and tokens it takes. Measured,
       # not gated: the baseline Deliberate is compared against.
       - name: Reasoning
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() && inputs.sets != 'swarms' }}
         run: |
           mkdir -p .quality
           docker run --rm --network "$NAME" \
@@ -388,11 +400,40 @@ jobs:
             -e TOSKAR_QUALITY_REASONING_JSON=/src/.quality/reasoning.json \
             golang:1.26-bookworm \
             go test ./tests/quality -run 'TestReasoning' -count=1 -v -timeout 240m
+      # Swarms (#1135): multi-part questions and tasks in a folder, by one
+      # agent and by a swarm on the same models, counting what's done, the
+      # time, and the tokens. Measured, not gated: the comparison that
+      # decides Auto and the defaults. The weekly run measures the
+      # recommended models with two slots; a run started by hand with sets
+      # set to swarms measures every model in its list. The set answers yes
+      # to writes in its own task folders and to applying its swarms'
+      # changes there, and no to everything else.
+      - name: Swarms
+        if: ${{ !cancelled() && (inputs.sets == 'swarms' || matrix.model == 'recommended') }}
+        run: |
+          mkdir -p .quality
+          docker run --rm --network "$NAME" \
+            --cap-drop ALL --security-opt no-new-privileges \
+            --memory 4g --memory-swap 4g --cpus 2 \
+            -v "$PWD:/src" -w /src \
+            -v toskar-quality-go:/go \
+            -v toskar-quality-projects:/projects \
+            -e TOSKAR_QUALITY_URL="http://$NAME:7331" \
+            -e TOSKAR_QUALITY_KEY="$QUALITY_KEY" \
+            -e TOSKAR_QUALITY_INSTALL=recommended \
+            -e TOSKAR_QUALITY_MODEL="${{ matrix.model }}" \
+            -e TOSKAR_QUALITY_PROJECTS=/projects \
+            -e TOSKAR_QUALITY_SWARM_MODELS="${{ inputs.swarm_models }}" \
+            -e TOSKAR_QUALITY_SWARM_SLOTS="${{ inputs.swarm_slots || '2' }}" \
+            -e TOSKAR_QUALITY_SWARMS_REPORT=/src/.quality/swarms.md \
+            -e TOSKAR_QUALITY_SWARMS_JSON=/src/.quality/swarms.json \
+            golang:1.26-bookworm \
+            go test ./tests/quality -run '^TestSwarmQuality$' -count=1 -v -timeout 300m
       # How the model ran on this computer: reading and writing speed, memory,
       # and how much of it was on the GPU (#1037). Measured, not gated, and skipped for
       # "recommended", which stands for several models.
       - name: Performance
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() && inputs.sets != 'swarms' }}
         run: |
           mkdir -p .quality
           docker run --rm --network "$NAME" \
@@ -410,7 +451,7 @@ jobs:
       # the Triage workflow asks. Measured, not gated: precision, recall,
       # and how often the type was right.
       - name: Triage
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() && inputs.sets != 'swarms' }}
         run: |
           mkdir -p .quality
           docker run --rm --network "$NAME" \
@@ -432,7 +473,7 @@ jobs:
       - name: Report
         if: always()
         run: |
-          for f in .quality/report.md .quality/tasks.md .quality/topics.md .quality/files.md .quality/media.md .quality/reasoning.md .quality/triage.md; do
+          for f in .quality/report.md .quality/tasks.md .quality/topics.md .quality/files.md .quality/media.md .quality/reasoning.md .quality/swarms.md .quality/triage.md; do
             if [ -f "$f" ]; then
               head -c 60000 "$f" >> "$GITHUB_STEP_SUMMARY"
             fi
@@ -449,6 +490,8 @@ jobs:
             .quality/media.md
             .quality/reasoning.md
             .quality/reasoning.json
+            .quality/swarms.md
+            .quality/swarms.json
             .quality/performance.json
             .quality/triage.md
             .quality/triage.json

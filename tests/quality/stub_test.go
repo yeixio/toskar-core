@@ -20,6 +20,7 @@ import (
 	"github.com/yeixio/toskar-core/internal/imagegen"
 	"github.com/yeixio/toskar-core/internal/mimir"
 	"github.com/yeixio/toskar-core/internal/models"
+	"github.com/yeixio/toskar-core/internal/swarm"
 	"github.com/yeixio/toskar-core/internal/turnopts"
 	"github.com/yeixio/toskar-core/internal/webfixtures"
 	"github.com/yeixio/toskar-core/pkg/contracts"
@@ -131,10 +132,19 @@ func (d stubDriver) Run(t *testing.T, c Case) Result {
 	webfixtures.Register(a.Tools, web)
 	webfixtures.RegisterMedia(a.Tools, a.Artifacts)
 	ctx := context.Background()
+	if c.Swarm != "" {
+		// The stub is one model on one computer: two slots, so a swarm's
+		// agents run at once, as a model with two slots runs them.
+		a.SwarmSlots = func(string, string) int { return 2 }
+		ctx = swarm.WithMode(ctx, c.Swarm)
+	}
 	// A folder to work in, named as a terminal on this computer names one.
 	project := ""
 	if len(c.Setup.Project) > 0 {
 		project = projectFolder(t, c.Setup.Project)
+		if c.Setup.Git {
+			gitInit(t, project)
+		}
 		ctx = turnopts.WithProject(ctx, project)
 	}
 	// A picture attached needs a model that sees: the stub, with a
@@ -150,6 +160,32 @@ func (d stubDriver) Run(t *testing.T, c Case) Result {
 	var mu sync.Mutex
 	var prompts [][]pluginapi.ChatMessage
 	script := append([]string(nil), c.Stub...)
+	// Or by what the call is about: each rule's next reply, then its last.
+	used := make([]int, len(c.StubBy))
+	byRule := func(messages []pluginapi.ChatMessage) string {
+		var all strings.Builder
+		for _, m := range messages {
+			all.WriteString(m.Content)
+			all.WriteString("\n")
+		}
+		pick := -1
+		for i, rule := range c.StubBy {
+			if rule.Match != "" && strings.Contains(all.String(), rule.Match) {
+				pick = i
+				break
+			}
+			if rule.Match == "" && pick < 0 {
+				pick = i
+			}
+		}
+		if pick < 0 || len(c.StubBy[pick].Replies) == 0 {
+			return "done"
+		}
+		replies := c.StubBy[pick].Replies
+		next := replies[min(used[pick], len(replies)-1)]
+		used[pick]++
+		return next
+	}
 	a.StubReply = func(_ string, messages []pluginapi.ChatMessage) string {
 		mu.Lock()
 		defer mu.Unlock()
@@ -169,6 +205,9 @@ func (d stubDriver) Run(t *testing.T, c Case) Result {
 			}
 			return c.Message
 		}
+		if len(c.StubBy) > 0 {
+			return byRule(messages)
+		}
 		if len(script) == 0 {
 			return "done"
 		}
@@ -178,6 +217,16 @@ func (d stubDriver) Run(t *testing.T, c Case) Result {
 	}
 
 	profileID := setupProfile(t, ctx, a, c.Setup)
+	if c.Swarm != "" {
+		p, err := a.Profiles.Get(ctx, profileID)
+		if err != nil {
+			t.Fatal(err)
+		}
+		p.Orchestration.Swarm = &contracts.SwarmPolicy{Mode: c.Swarm, Models: c.Setup.SwarmModels}
+		if err := a.Profiles.Update(ctx, p); err != nil {
+			t.Fatal(err)
+		}
+	}
 	conv, err := a.Conversations.Create(ctx, "quality "+c.ID, profileID, "auto")
 	if err != nil {
 		t.Fatal(err)
@@ -188,9 +237,11 @@ func (d stubDriver) Run(t *testing.T, c Case) Result {
 		}
 	}
 
-	// Every approval is answered no, so nothing risky can run.
+	// Every approval is answered no, so nothing risky can run, apart from
+	// what the case allows (approves).
 	var evMu sync.Mutex
 	var got []Event
+	swarms := map[string]bool{}
 	subID, ch := a.Bus.Subscribe()
 	done := make(chan struct{})
 	go func() {
@@ -199,9 +250,13 @@ func (d stubDriver) Run(t *testing.T, c Case) Result {
 			evMu.Lock()
 			got = append(got, Event{Type: evt.Type, Payload: evt.Payload})
 			evMu.Unlock()
+			// Every event here is this case's: its app is its own.
+			if id, _ := evt.Payload["swarm_id"].(string); id != "" {
+				swarms[id] = true
+			}
 			if evt.Type == events.ToolRequested {
 				if id, _ := evt.Payload["request_id"].(string); id != "" {
-					_ = a.Tools.Decide(id, false, false)
+					_ = a.Tools.Decide(id, approves(c, project, swarms, evt.Payload), false)
 				}
 			}
 		}
@@ -306,6 +361,11 @@ func (d stubDriver) Run(t *testing.T, c Case) Result {
 	if r.Meta != nil && r.Meta.RunID != "" {
 		if run, err := a.RunLog.Get(ctx, r.Meta.RunID); err == nil {
 			r.Run = &run
+		}
+	}
+	if id := swarmOf(r.Events); id != "" {
+		if rec, err := a.Swarms.Get(ctx, id); err == nil {
+			r.Swarm = &rec
 		}
 	}
 	return r

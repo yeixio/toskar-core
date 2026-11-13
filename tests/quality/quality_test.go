@@ -64,6 +64,20 @@ type Case struct {
 	Expect   Expect `json:"expect"`
 	// Platforms the case runs on: "core", "phone", or both. Empty is core.
 	Platforms []string `json:"platforms"`
+	// Swarm asks for a swarm on the turn: split or race (#1135), as POST
+	// /chat's swarm does. Empty is no swarm.
+	Swarm string `json:"swarm,omitempty"`
+	// StubBy scripts the stub by what each model call is about, for turns
+	// whose calls can come in any order, such as a swarm's agents at once.
+	StubBy []StubRule `json:"stub_by,omitempty"`
+}
+
+// StubRule is the stub's replies to the model calls whose messages hold
+// Match: the next one each time, then the last again. An empty Match is
+// every call no other rule takes.
+type StubRule struct {
+	Match   string   `json:"match"`
+	Replies []string `json:"replies"`
 }
 
 // On reports whether the case runs on platform.
@@ -94,6 +108,17 @@ type Setup struct {
 	// the stub gets no seeing stand-in, and a daemon with a vision model
 	// installed skips the case.
 	NoVision bool `json:"no_vision"`
+	// AllowWrites answers yes to writing files in the case's own folder, or
+	// in its swarm's agents' copies of it, and to applying its swarm's
+	// change to the folder (the swarm set, #1135). Every other approval is
+	// still answered no.
+	AllowWrites bool `json:"allow_writes,omitempty"`
+	// Git makes Project a Git repository with its files committed, as a
+	// task swarm's agents need to work at once, each in a copy (#1135).
+	Git bool `json:"git,omitempty"`
+	// SwarmModels are the swarm's models (orchestration.swarm.models): a
+	// race's, one agent each, and a split's, which its agents take in turn.
+	SwarmModels []string `json:"swarm_models,omitempty"`
 }
 
 // Expect is the behavior a case checks. Empty fields are not checked.
@@ -177,6 +202,8 @@ type Result struct {
 	// Failed is why a real model's turn failed, such as writing no answer:
 	// a failed case, counted in the pass rate (#834).
 	Failed string `json:",omitempty"`
+	// Swarm is the turn's swarm record, when it asked for one (#1135).
+	Swarm *contracts.Swarm `json:",omitempty"`
 }
 
 // Event is one event during a request.

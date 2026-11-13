@@ -216,6 +216,7 @@ These are on the event stream with `swarm_id`:
 7. **Quality run:** a swarm set with long tasks and multi-part questions, comparing a swarm with a single agent on the same models, on the rig and on two computers.
    - It counts tasks done, time and tokens, and tests `slots` 1 against 2.
    - The results decide Auto and the defaults.
+   - The set is `TestSwarmQuality` in `tests/quality/swarms_test.go`. The quality [README](../../tests/quality/README.md) says how it scores and how to run it.
 8. **User guide page** with screenshots and tested examples, and an integration guide for editor agents.
 
 ## Tests that show it works
