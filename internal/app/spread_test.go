@@ -15,7 +15,6 @@ import (
 	"github.com/yeixio/toskar-core/internal/api/openai"
 	"github.com/yeixio/toskar-core/internal/auth"
 	"github.com/yeixio/toskar-core/internal/profiles"
-	"github.com/yeixio/toskar-core/internal/swarm"
 	"github.com/yeixio/toskar-core/pkg/contracts"
 )
 
@@ -53,9 +52,7 @@ func newFakeComputer(t *testing.T, name string, arrived chan string) *fakeComput
 func spreadSetup(t *testing.T, slots int, computers ...*fakeComputer) (*swarmApp, *openai.Handler, string) {
 	t.Helper()
 	s := newSwarmApp(t)
-	old := swarm.SlotsFor
-	swarm.SlotsFor = func(string, string) int { return slots }
-	t.Cleanup(func() { swarm.SlotsFor = old })
+	s.SwarmSlots = func(string, string) int { return slots }
 	ctx := context.Background()
 	var models []string
 	for _, c := range computers {
@@ -202,10 +199,7 @@ func TestSpreadUsesSlots(t *testing.T) {
 // The lines: a free slot first, then the best score; with all busy, the
 // shortest line; and one who stops waiting leaves it.
 func TestSpreadChoice(t *testing.T) {
-	old := swarm.SlotsFor
-	swarm.SlotsFor = func(string, string) int { return 1 }
-	t.Cleanup(func() { swarm.SlotsFor = old })
-	var l spreadLanes
+	l := spreadLanes{slots: func(string, string) int { return 1 }}
 	a := spreadTarget{Node: contracts.Node{ID: "a"}, ModelID: "m", Score: 300}
 	b := spreadTarget{Node: contracts.Node{ID: "b"}, ModelID: "m", Score: 100}
 	targets := []spreadTarget{b, a}

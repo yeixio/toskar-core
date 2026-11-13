@@ -543,6 +543,8 @@ func New(opts Options) (*App, error) {
 		return a.generateOnNode(ctx, nodeID, modelID, "", "", messages)
 	})
 
+	// Spread's lines count each model's slots as swarms do.
+	a.spread.slots = a.swarmSlots
 	openaiHandler := &openai.Handler{
 		Profiles: profileMgr,
 		Runtimes: rtMgr,
