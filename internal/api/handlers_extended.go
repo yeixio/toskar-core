@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/yeixio/toskar-core/internal/portals"
 	"github.com/yeixio/toskar-core/internal/projects"
+	"github.com/yeixio/toskar-core/internal/swarm"
 	"github.com/yeixio/toskar-core/internal/turnopts"
 	"net"
 	"net/http"
@@ -404,6 +405,9 @@ func (s *Server) handleChat(w http.ResponseWriter, r *http.Request) {
 		Live bool `json:"live"`
 		// ProjectID is the caller's project a new chat starts in (#1136).
 		ProjectID string `json:"project_id"`
+		// Swarm runs this turn as a swarm: split or race (#1135, contract
+		// 1.88). Members and up; a task runs as one for now.
+		Swarm string `json:"swarm"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		writeErr(w, http.StatusBadRequest, "INVALID_JSON", "invalid body", nil)
@@ -477,6 +481,12 @@ func (s *Server) handleChat(w http.ResponseWriter, r *http.Request) {
 		}
 		ctx = projects.WithID(ctx, body.ProjectID)
 	}
+	if body.Swarm != "" {
+		if !checkSwarmMode(w, body.Swarm) || refuseSwarm(w, r) {
+			return
+		}
+		ctx = swarm.WithMode(ctx, body.Swarm)
+	}
 	ctx = turnopts.WithBranch(ctx, turnopts.Branch{ParentID: body.ParentID, RetryOf: body.RetryOf, EditOf: body.EditOf})
 	if body.Live && body.Stream {
 		ctx = turnopts.WithLive(ctx)
@@ -513,7 +523,7 @@ func (s *Server) handleStopChat(w http.ResponseWriter, r *http.Request) {
 	}
 	stopped := false
 	if s.deps.StopChat != nil {
-		stopped = s.deps.StopChat(body.ConversationID)
+		stopped = s.deps.StopChat(r.Context(), body.ConversationID)
 	}
 	writeJSON(w, http.StatusOK, chatStopped{Stopped: stopped})
 }

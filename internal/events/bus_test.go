@@ -75,3 +75,18 @@ func TestPublishForTagsTheContextsPerson(t *testing.T) {
 		t.Fatalf("persons %q %q", a.Person, b.Person)
 	}
 }
+
+// A note already on the context hears what an inner one does: a swarm hears
+// its agent's turn, which keeps its own note (#1135).
+func TestNotesNest(t *testing.T) {
+	var outer, inner []string
+	ctx := WithNote(context.Background(), func(e Event) { outer = append(outer, e.Type) })
+	ctx = WithNote(ctx, func(e Event) { inner = append(inner, e.Type) })
+	NewBus(1).PublishFor(ctx, New("tool.started", nil))
+	if len(outer) != 1 || len(inner) != 1 {
+		t.Fatalf("outer heard %v, inner %v", outer, inner)
+	}
+	if !Personal("swarm.started") {
+		t.Error("a swarm's events are its person's")
+	}
+}

@@ -629,6 +629,13 @@
     "capabilityOff": {
       "make_pictures": "La creazione di immagini è disattivata per il tuo account. Chiedi a {{admin}} o a un altro Admin di attivarla.",
       "make_video": "La creazione di video è disattivata per il tuo account. Chiedi a {{admin}} o a un altro Admin di attivarla."
+    },
+    "swarm": {
+      "oneAtATime": "Un solo agente: questo computer non può eseguirne più di uno alla volta con questo modello.",
+      "onePart": "Un solo agente: questa richiesta non si divide in parti da svolgere separatamente.",
+      "oneModel": "Un solo agente: una gara richiede almeno due modelli da confrontare.",
+      "taskLater": "Un solo agente: per ora gli sciami lavorano sulle domande. Uno sciame per le attività in una cartella arriverà in una versione successiva.",
+      "noChat": "Un solo agente: uno sciame tiene i suoi agenti nelle chat, e questa richiesta non è salvata in nessuna."
     }
   },
   "steps": {

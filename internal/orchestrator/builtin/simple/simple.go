@@ -14,6 +14,7 @@ import (
 	"github.com/yeixio/toskar-core/internal/mimir"
 	"github.com/yeixio/toskar-core/internal/runlog"
 	"github.com/yeixio/toskar-core/internal/structured"
+	"github.com/yeixio/toskar-core/internal/swarm"
 	"github.com/yeixio/toskar-core/internal/tools"
 	"github.com/yeixio/toskar-core/internal/turnopts"
 	"github.com/yeixio/toskar-core/internal/untrusted"
@@ -149,6 +150,54 @@ func (o *Orchestrator) Run(
 		planned := false
 		// lookedUp records that the web was read for this turn.
 		lookedUp := false
+		// A swarm (#1135): agents in chats of their own do the work at once,
+		// and this turn merges it. Questions only for now: a task runs as
+		// one, and says a swarm for tasks comes later.
+		swarmed := false
+		if mode, named := swarmAsked(ctx, profile, task.Prompt, escalate); mode != "" {
+			runner, ok := env.(swarm.Runner)
+			switch {
+			case isTask:
+				env.Emit(swarm.EventNote, map[string]any{"reason": swarm.TaskLater, "note": swarm.Reason(swarm.TaskLater)})
+			case ok && !jsonOnly && len(images) == 0:
+				turn := runSwarm(ctx, env, runner, ch, profile, role, mode, task.Prompt, instructions, named)
+				if turn.id != "" {
+					defer func() {
+						status := swarm.StatusDone
+						switch {
+						case ctx.Err() != nil:
+							status = swarm.StatusStopped
+						case !turn.ran && !turn.single:
+							status = swarm.StatusFailed
+						}
+						runner.FinishSwarm(context.WithoutCancel(ctx), turn.id, status, turn.winner)
+					}()
+				}
+				if ctx.Err() != nil {
+					// Stopped while the agents worked: their chats keep what
+					// they wrote.
+					ch <- pluginapi.OrchestrationEvent{Type: "agent.error", Role: role, Error: ctx.Err().Error(), Done: true}
+					return
+				}
+				if turn.answer != "" {
+					nodeID, _ := env.NodeForRole(role)
+					streamText(ch, role, nodeID, turn.answer, nil, contextusage.Usage{})
+					return
+				}
+				if turn.reference != "" {
+					reference = joinReference(reference, turn.reference)
+					instructions += "\n" + swarmGuidance
+					// The agents planned and looked things up; the answer is
+					// written from what they found.
+					swarmed, planned = true, true
+					budget.Plan = false
+					if webAllowed(profile) {
+						profile = withoutWeb(profile)
+						lookedUp = true
+					}
+				}
+			}
+		}
 		// Planning set to Always, and the Team strategy, ask the planner to
 		// split a request that has no obvious parts (§12). Team keeps a plan
 		// of one part, so a worker drafts and the answer is written from it.
@@ -209,7 +258,7 @@ func (o *Orchestrator) Run(
 		// Deliberate compares drafts by their final answers (#459); small talk
 		// isn't deliberated, and neither is an answer that must be JSON, one
 		// about pictures, or a Team profile's, which has its own reviewer.
-		deliberate := deliberating(profile) && !jsonOnly && len(images) == 0 && !strat.team && !huginn.SmallTalk(task.Prompt)
+		deliberate := deliberating(profile) && !jsonOnly && len(images) == 0 && !strat.team && !swarmed && !huginn.SmallTalk(task.Prompt)
 		if deliberate {
 			instructions += "\n" + draftGuidance
 		}

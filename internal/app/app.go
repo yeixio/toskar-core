@@ -73,6 +73,7 @@ import (
 	"github.com/yeixio/toskar-core/internal/speech"
 	"github.com/yeixio/toskar-core/internal/store"
 	"github.com/yeixio/toskar-core/internal/store/repositories"
+	"github.com/yeixio/toskar-core/internal/swarm"
 	"github.com/yeixio/toskar-core/internal/tasks"
 	"github.com/yeixio/toskar-core/internal/telemetry"
 	"github.com/yeixio/toskar-core/internal/tools"
@@ -122,6 +123,8 @@ type App struct {
 	Muninn           *muninn.Store
 	// Projects keep chats together with what they share (#1136).
 	Projects *projects.Service
+	// Swarms are several agents working at once, each in a chat (#1135).
+	Swarms *swarm.Store
 	// portKeeper keeps the router port access from anywhere uses (#456).
 	portKeeper portmap.Keeper
 	// relay is the relay client while access from anywhere is on (#456).
@@ -766,7 +769,7 @@ func New(opts Options) (*App, error) {
 		Devices:              &auth.DevicePairer{CreateKey: apiKeyMgr.CreateDevice, CreateCompanion: apiKeyMgr.CreateCompanion, Companions: apiKeyMgr.Companions, SetPermissions: apiKeyMgr.SetPermissions},
 		PhoneAddress:         a.phoneAddress,
 		EnableLANForPhone:    a.enableLANForPhone,
-		StopChat:             a.StopChat,
+		StopChat:             a.StopChatFor,
 		ChatTurn:             a.ChatTurn,
 		Chat: func(w http.ResponseWriter, r *http.Request, conversationID, profileID, modelID, message string, stream bool, execution string) error {
 			return a.HandleHTTPChat(w, r, conversationID, profileID, modelID, message, stream, execution)
@@ -995,6 +998,12 @@ func New(opts Options) (*App, error) {
 			return err
 		}}
 	a.API.BindProjects(a.Projects)
+	a.Swarms = swarm.NewStore(db.SQL)
+	// A swarm's agents end with Core: one left running is stopped.
+	if err := a.Swarms.FailRunning(context.Background()); err != nil {
+		a.Logger.Warn("stop swarms left running", "error", err)
+	}
+	a.API.BindSwarms(&swarmService{app: a})
 	// A media.json in the data folder replaces the built-in picture and
 	// clip models (#551); one that isn't fully pinned is refused.
 	if path := filepath.Join(cfg.DataDir, "manifests", "models", "media.json"); fileExists(path) {

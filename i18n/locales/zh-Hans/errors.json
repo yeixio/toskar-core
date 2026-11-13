@@ -278,5 +278,7 @@
   "NEWS_UNAVAILABLE": "无法从 toskar.ai 读取 AI 新闻。请检查网络连接后重试。",
   "PROJECT_FILE_NOT_FOUND": "项目中没有该文件。",
   "PROJECT_NAME_REQUIRED": "请为项目命名。",
-  "PROJECT_NOT_FOUND": "该项目已被删除。"
+  "PROJECT_NOT_FOUND": "该项目已被删除。",
+  "SWARM_NOT_FOUND": "该智能体群已被删除。",
+  "SWARM_RUNNING": "此智能体群仍在运行。请先停止它。"
 }

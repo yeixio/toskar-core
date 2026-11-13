@@ -12,6 +12,9 @@ const (
 	StrategySingle  = "single"
 	StrategyPlanned = "planned"
 	StrategyTeam    = "team"
+	// StrategySwarm has several agents work at once, each in a chat of its
+	// own (#1135, docs/features/swarms.md). Auto never chooses it.
+	StrategySwarm = "swarm"
 )
 
 // Model roles a profile can assign (spec §20). A role left empty uses the
@@ -34,6 +37,9 @@ const (
 	RoleDrafter = "drafter"
 	// RoleJudge reconciles Deliberate's drafts into the answer.
 	RoleJudge = "judge"
+	// RoleAgent is one agent of a swarm (#1135); slots are "agent:1",
+	// "agent:2", and so on.
+	RoleAgent = "agent"
 )
 
 // legacyOrchestrator is the Team orchestrator id from before Team ran on the

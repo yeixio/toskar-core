@@ -629,6 +629,13 @@
     "capabilityOff": {
       "make_pictures": "La création d'images est désactivée pour votre compte. Demandez à {{admin}} ou à un autre Admin de l'activer.",
       "make_video": "La création de vidéos est désactivée pour votre compte. Demandez à {{admin}} ou à un autre Admin de l'activer."
+    },
+    "swarm": {
+      "oneAtATime": "Un seul agent : cet ordinateur ne peut pas en exécuter plus d'un à la fois avec ce modèle.",
+      "onePart": "Un seul agent : cette demande ne se divise pas en parties réalisables séparément.",
+      "oneModel": "Un seul agent : une course a besoin d'au moins deux modèles à comparer.",
+      "taskLater": "Un seul agent : pour l'instant, les essaims traitent les questions. Un essaim pour les tâches dans un dossier arrivera dans une version ultérieure.",
+      "noChat": "Un seul agent : un essaim garde ses agents dans des conversations, et cette demande n'est enregistrée dans aucune."
     }
   },
   "steps": {

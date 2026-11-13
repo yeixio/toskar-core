@@ -30,7 +30,7 @@ type ConversationPatch struct {
 
 func (r *ConversationRepo) List(ctx context.Context) ([]contracts.Conversation, error) {
 	rows, err := r.db.QueryContext(ctx, `
-		SELECT id, COALESCE(title,''), COALESCE(profile_id,''), COALESCE(model_id,''), memory_off, compact_off, project, project_id, created_at, updated_at
+		SELECT id, COALESCE(title,''), COALESCE(profile_id,''), COALESCE(model_id,''), memory_off, compact_off, project, project_id, swarm_id, swarm_role, created_at, updated_at
 		FROM conversations WHERE person_id = ? ORDER BY updated_at DESC`, auth.PersonID(ctx))
 	if err != nil {
 		return nil, err
@@ -52,7 +52,7 @@ func (r *ConversationRepo) List(ctx context.Context) ([]contracts.Conversation, 
 
 func (r *ConversationRepo) Get(ctx context.Context, id string) (contracts.Conversation, error) {
 	row := r.db.QueryRowContext(ctx, `
-		SELECT id, COALESCE(title,''), COALESCE(profile_id,''), COALESCE(model_id,''), memory_off, compact_off, project, project_id, created_at, updated_at
+		SELECT id, COALESCE(title,''), COALESCE(profile_id,''), COALESCE(model_id,''), memory_off, compact_off, project, project_id, swarm_id, swarm_role, created_at, updated_at
 		FROM conversations WHERE id = ? AND person_id = ?`, id, auth.PersonID(ctx))
 	c, err := scanConversation(row)
 	if err == sql.ErrNoRows {
@@ -144,6 +144,19 @@ func (r *ConversationRepo) SetProjectID(ctx context.Context, id, projectID strin
 	return nil
 }
 
+// SetSwarm marks a conversation as a swarm's (#1135): its coordinator's
+// chat with role "", or an agent's with role agent:N.
+func (r *ConversationRepo) SetSwarm(ctx context.Context, id, swarmID, role string) error {
+	res, err := r.db.ExecContext(ctx, `UPDATE conversations SET swarm_id = ?, swarm_role = ? WHERE id = ? AND person_id = ?`, swarmID, role, id, auth.PersonID(ctx))
+	if err != nil {
+		return err
+	}
+	if n, _ := res.RowsAffected(); n == 0 {
+		return fmt.Errorf("conversation %q not found", id)
+	}
+	return nil
+}
+
 // SetCompactOff keeps a conversation verbatim, or lets auto-compact
 // summarize it again (#342).
 func (r *ConversationRepo) SetCompactOff(ctx context.Context, id string, off bool) error {
@@ -216,7 +229,7 @@ func scanConversation(s conversationScanner) (contracts.Conversation, error) {
 	var c contracts.Conversation
 	var created, updated string
 	var memoryOff, compactOff int
-	if err := s.Scan(&c.ID, &c.Title, &c.ProfileID, &c.ModelID, &memoryOff, &compactOff, &c.Project, &c.ProjectID, &created, &updated); err != nil {
+	if err := s.Scan(&c.ID, &c.Title, &c.ProfileID, &c.ModelID, &memoryOff, &compactOff, &c.Project, &c.ProjectID, &c.SwarmID, &c.SwarmRole, &created, &updated); err != nil {
 		return contracts.Conversation{}, err
 	}
 	c.MemoryOff, c.CompactOff = memoryOff != 0, compactOff != 0

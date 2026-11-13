@@ -629,6 +629,13 @@
     "capabilityOff": {
       "make_pictures": "Crear imágenes está desactivado para tu cuenta. Pide a {{admin}} o a otro Admin que lo active.",
       "make_video": "Crear vídeos está desactivado para tu cuenta. Pide a {{admin}} o a otro Admin que lo active."
+    },
+    "swarm": {
+      "oneAtATime": "Un agente: este ordenador no puede ejecutar más de uno a la vez con este modelo.",
+      "onePart": "Un agente: esta solicitud no se divide en partes que se puedan hacer por separado.",
+      "oneModel": "Un agente: una carrera necesita al menos dos modelos para comparar.",
+      "taskLater": "Un agente: por ahora los enjambres trabajan con preguntas. Un enjambre para tareas en una carpeta llegará en una versión posterior.",
+      "noChat": "Un agente: un enjambre guarda a sus agentes en chats, y esta solicitud no está guardada en ninguno."
     }
   },
   "steps": {

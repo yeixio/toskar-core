@@ -643,6 +643,30 @@ type OrchestrationPolicy struct {
 	Retries int `json:"retries,omitempty"`
 	// TimeoutSeconds stops a turn that runs longer (10–3600).
 	TimeoutSeconds int `json:"timeout_seconds,omitempty"`
+	// Swarm is how the swarm strategy works: its mode, a race's models,
+	// and its budgets (contract 1.88, #1135).
+	Swarm *SwarmPolicy `json:"swarm,omitempty"`
+}
+
+// SwarmPolicy is a profile's swarm controls (contract 1.88, #1135). Every
+// field is optional; empty keeps the default.
+type SwarmPolicy struct {
+	// Mode is split (a coordinator splits the job into parts and agents do
+	// them at once) or race (agents on different models each do the whole
+	// request, and the best answer wins or they're merged). Empty is split.
+	Mode string `json:"mode,omitempty"`
+	// Models are a race's models, one agent each, in order. A split's
+	// agents take them in turn.
+	Models []string `json:"models,omitempty"`
+	// Agents caps how many agents a swarm has (2–8). Empty is the profile's
+	// max_workers, or 4.
+	Agents int `json:"agents,omitempty"`
+	// Tokens is the most the whole swarm may use (10,000–4,000,000).
+	// Empty is 400,000.
+	Tokens int `json:"tokens,omitempty"`
+	// Minutes is the most a swarm may run (1–240). Empty is 5 for a
+	// question and 30 for a task.
+	Minutes int `json:"minutes,omitempty"`
 }
 
 // Conversation is a chat thread.
@@ -661,9 +685,82 @@ type Conversation struct {
 	Project string `json:"project,omitempty"`
 	// ProjectID is the project the chat is in, if any: a chat is in one
 	// project at most (contract 1.87, #1136).
-	ProjectID string    `json:"project_id,omitempty"`
+	ProjectID string `json:"project_id,omitempty"`
+	// SwarmID is the swarm the chat belongs to: its coordinator's chat, or
+	// one of its agents' (contract 1.88, #1135).
+	SwarmID string `json:"swarm_id,omitempty"`
+	// SwarmRole is agent:N for an agent's chat, and empty for the
+	// coordinator's or a chat in no swarm.
+	SwarmRole string    `json:"swarm_role,omitempty"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
+}
+
+// Swarm is several agents working at once on one request, each in a chat of
+// its own in the coordinator chat's project (contract 1.88, #1135). It
+// belongs to the person who started it.
+type Swarm struct {
+	ID        string `json:"id"`
+	ProjectID string `json:"project_id"`
+	// ConversationID is the coordinator's chat, where the merged answer goes.
+	ConversationID string `json:"conversation_id"`
+	// Mode is split or race.
+	Mode string `json:"mode"`
+	// Status is running, merging, done, stopped, or failed.
+	Status  string `json:"status"`
+	Request string `json:"request"`
+	// Budget is what the swarm may use.
+	Budget SwarmBudget `json:"budget"`
+	// Agents are the swarm's agents, in order. Empty until the coordinator
+	// has planned the parts.
+	Agents []SwarmAgent `json:"agents"`
+	// Winner is a race's winning agent, 0 when the answers were merged or
+	// it's not a race.
+	Winner int `json:"winner,omitempty"`
+	// Note says why the swarm ran differently than asked, such as running as
+	// one agent.
+	Note string `json:"note,omitempty"`
+	// Tokens and Seconds are the whole swarm's totals so far.
+	Tokens  int     `json:"tokens"`
+	Seconds float64 `json:"seconds"`
+	// Waiting is each tool.requested from its agents still waiting for an
+	// answer, each with its agent, for clients to group them by.
+	Waiting    []map[string]any `json:"waiting,omitempty"`
+	CreatedAt  time.Time        `json:"created_at"`
+	FinishedAt *time.Time       `json:"finished_at,omitempty"`
+}
+
+// SwarmBudget is what a swarm may use (contract 1.88, #1135).
+type SwarmBudget struct {
+	// Agents is the most agents it has.
+	Agents int `json:"agents"`
+	// Tokens is the most the whole swarm may use.
+	Tokens int `json:"tokens"`
+	// Minutes is the most it may run.
+	Minutes int `json:"minutes"`
+}
+
+// SwarmAgent is one agent in a swarm: its part, where it runs, and how it
+// went (contract 1.88, #1135).
+type SwarmAgent struct {
+	// Agent is its number, from 1.
+	Agent int `json:"agent"`
+	// ConversationID is the agent's own chat, which can be opened and
+	// continued.
+	ConversationID string `json:"conversation_id"`
+	// Role is agent:N.
+	Role string `json:"role"`
+	// Part is what it was asked to do: its part, or in a race the whole
+	// request.
+	Part    string `json:"part"`
+	ModelID string `json:"model_id,omitempty"`
+	NodeID  string `json:"node_id,omitempty"`
+	// Status is queued, running, done, failed, stopped, or out_of_budget.
+	Status string `json:"status"`
+	// Summary is the start of its answer.
+	Summary string  `json:"summary,omitempty"`
+	Tokens  int     `json:"tokens"`
+	Seconds float64 `json:"seconds"`
 }
 
 // Project keeps related chats together with what they share: instructions,

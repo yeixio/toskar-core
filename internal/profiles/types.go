@@ -112,7 +112,7 @@ func ValidateOrchestration(o contracts.OrchestrationPolicy) error {
 	}
 	for _, err := range []error{
 		choice("effort", o.Effort, "fast", "balanced", "thorough"),
-		choice("strategy", o.Strategy, StrategySingle, StrategyPlanned, StrategyTeam),
+		choice("strategy", o.Strategy, StrategySingle, StrategyPlanned, StrategyTeam, StrategySwarm),
 		choice("planning", o.Planning, "on", "off", "always"),
 		choice("parallel", o.Parallel, "on", "off"),
 		choice("verification", o.Verification, "off", "check", "correct", "thorough"),
@@ -139,6 +139,54 @@ func ValidateOrchestration(o contracts.OrchestrationPolicy) error {
 	}
 	if o.ContextShare != 0 && (o.ContextShare < 0.1 || o.ContextShare > 0.9) {
 		return ErrInvalidProfile("orchestration.context_share must be from 0.1 to 0.9")
+	}
+	return ValidateSwarm(o.Swarm)
+}
+
+// Swarm limits (#1135, docs/features/swarms.md#budgets).
+const (
+	SwarmMinAgents  = 2
+	SwarmMaxAgents  = 8
+	SwarmMinTokens  = 10_000
+	SwarmMaxTokens  = 4_000_000
+	SwarmMinMinutes = 1
+	SwarmMaxMinutes = 240
+)
+
+// Swarm modes (#1135).
+const (
+	SwarmSplit = "split"
+	SwarmRace  = "race"
+)
+
+// ValidateSwarm checks a profile's or a turn's swarm controls (#1135).
+func ValidateSwarm(s *contracts.SwarmPolicy) error {
+	if s == nil {
+		return nil
+	}
+	if s.Mode != "" && s.Mode != SwarmSplit && s.Mode != SwarmRace {
+		return ErrInvalidProfile(fmt.Sprintf("orchestration.swarm.mode must be one of %v", []string{SwarmSplit, SwarmRace}))
+	}
+	for _, c := range []struct {
+		field  string
+		v      int
+		lo, hi int
+	}{
+		{"agents", s.Agents, SwarmMinAgents, SwarmMaxAgents},
+		{"tokens", s.Tokens, SwarmMinTokens, SwarmMaxTokens},
+		{"minutes", s.Minutes, SwarmMinMinutes, SwarmMaxMinutes},
+	} {
+		if c.v != 0 && (c.v < c.lo || c.v > c.hi) {
+			return ErrInvalidProfile(fmt.Sprintf("orchestration.swarm.%s must be from %d to %d", c.field, c.lo, c.hi))
+		}
+	}
+	if len(s.Models) > SwarmMaxAgents {
+		return ErrInvalidProfile(fmt.Sprintf("orchestration.swarm.models may list up to %d models", SwarmMaxAgents))
+	}
+	for _, id := range s.Models {
+		if strings.TrimSpace(id) == "" {
+			return ErrInvalidProfile("orchestration.swarm.models cannot contain an empty model id")
+		}
 	}
 	return nil
 }

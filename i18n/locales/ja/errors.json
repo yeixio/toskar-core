@@ -278,5 +278,7 @@
   "NEWS_UNAVAILABLE": "toskar.ai から AI ニュースを読み込めませんでした。インターネット接続を確認して、もう一度お試しください。",
   "PROJECT_FILE_NOT_FOUND": "そのファイルはプロジェクトにありません。",
   "PROJECT_NAME_REQUIRED": "プロジェクトに名前を付けてください。",
-  "PROJECT_NOT_FOUND": "このプロジェクトは削除されました。"
+  "PROJECT_NOT_FOUND": "このプロジェクトは削除されました。",
+  "SWARM_NOT_FOUND": "そのスウォームは削除されました。",
+  "SWARM_RUNNING": "このスウォームはまだ実行中です。先に停止してください。"
 }

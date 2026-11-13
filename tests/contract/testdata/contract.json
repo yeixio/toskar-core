@@ -1,5 +1,5 @@
 {
-  "version": "1.87",
+  "version": "1.88",
   "types": {
     "ActivityStep": [
       "kind",
@@ -74,6 +74,8 @@
       "profile_id",
       "project",
       "project_id",
+      "swarm_id",
+      "swarm_role",
       "title",
       "updated_at"
     ],
@@ -296,6 +298,40 @@
       "slow",
       "tight_memory",
       "verdict"
+    ],
+    "Swarm": [
+      "agents",
+      "budget",
+      "conversation_id",
+      "created_at",
+      "finished_at",
+      "id",
+      "mode",
+      "note",
+      "project_id",
+      "request",
+      "seconds",
+      "status",
+      "tokens",
+      "waiting",
+      "winner"
+    ],
+    "SwarmAgent": [
+      "agent",
+      "conversation_id",
+      "model_id",
+      "node_id",
+      "part",
+      "role",
+      "seconds",
+      "status",
+      "summary",
+      "tokens"
+    ],
+    "SwarmBudget": [
+      "agents",
+      "minutes",
+      "tokens"
     ],
     "ToolUse": [
       "calls",
