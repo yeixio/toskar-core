@@ -22,6 +22,11 @@ type Backend struct {
 	// Search finds passages in the person's connected knowledge. Nil when
 	// knowledge is not available.
 	Search func(ctx context.Context, query string, limit int) ([]Passage, error)
+	// RunSwarm runs a question swarm (#1135): agents in chats of their own
+	// work on prompt at once, in mode split or race ("" for the profile's),
+	// with profile ("" for the person's default), and the coordinator
+	// answers. Nil when swarms are not available.
+	RunSwarm func(ctx context.Context, prompt, mode, profile string) (SwarmAnswer, error)
 	// Authorize checks the caller may use the API, as /v1 does, and
 	// returns the context the calls run in, carrying what its key allows.
 	Authorize func(r *http.Request) (context.Context, error)
@@ -33,6 +38,13 @@ type ModelInfo struct {
 	ID          string `json:"id"`
 	Name        string `json:"name"`
 	Description string `json:"description,omitempty"`
+}
+
+// SwarmAnswer is a swarm's answer and the coordinator's chat, where its
+// agents' chats are linked.
+type SwarmAnswer struct {
+	Answer         string
+	ConversationID string
 }
 
 // Passage is one search result from connected knowledge.
@@ -197,7 +209,8 @@ func (s *Server) dispatch(ctx context.Context, m message) (any, *rpcError) {
 			"serverInfo":      implementation{Name: "toskar", Title: "Toskar", Version: s.b.Version},
 			"instructions": "Toskar runs AI models on the user's own computers. Use ask_local_ai to get an answer " +
 				"from a local model, for private data or when the user asks for a local AI. Use search_my_knowledge " +
-				"to find passages in documents the user connected to Toskar.",
+				"to find passages in documents the user connected to Toskar. Use run_swarm for a bigger question that " +
+				"several agents can work on at once.",
 		}, nil
 	case "ping":
 		return struct{}{}, nil
@@ -274,6 +287,27 @@ func (s *Server) tools() []map[string]any {
 			"annotations": readOnly,
 		})
 	}
+	if s.b.RunSwarm != nil {
+		out = append(out, map[string]any{
+			"name":  "run_swarm",
+			"title": "Run a swarm",
+			"description": "Have several AI agents on the user's own computers work on a question at once, through Toskar, " +
+				"and answer with what they found together. split divides the job into parts the agents do at once; race has " +
+				"agents on different models each answer the whole question, and the best answer wins. It takes longer than " +
+				"ask_local_ai, saves the agents' chats in Toskar, and returns the answer and a link to the coordinator's chat. " +
+				"Agents may read the web or the user's connected knowledge, but they don't change anything.",
+			"inputSchema": map[string]any{
+				"type": "object",
+				"properties": map[string]any{
+					"prompt":  map[string]any{"type": "string", "description": "The question or job, with any context it needs."},
+					"mode":    map[string]any{"type": "string", "enum": []string{"split", "race"}, "description": "Optional. split (the default) or race; leave out for the profile's."},
+					"profile": map[string]any{"type": "string", "description": "Optional. The id of the Toskar profile to run it with; leave out for the user's default."},
+				},
+				"required": []string{"prompt"},
+			},
+			"annotations": map[string]any{"readOnlyHint": false, "destructiveHint": false, "openWorldHint": false},
+		})
+	}
 	return out
 }
 
@@ -292,6 +326,27 @@ func (s *Server) call(ctx context.Context, name string, args map[string]any) (st
 			return "", fmt.Errorf("the local AI is not available")
 		}
 		return s.b.Ask(ctx, prompt, str("model"))
+	case "run_swarm":
+		if s.b.RunSwarm == nil {
+			return "", &rpcError{Code: codeInvalidParams, Message: "unknown tool: " + name}
+		}
+		prompt := str("prompt")
+		if prompt == "" {
+			return "", fmt.Errorf("prompt is required")
+		}
+		mode := str("mode")
+		if mode != "" && mode != "split" && mode != "race" {
+			return "", fmt.Errorf(`mode is "split" or "race"`)
+		}
+		out, err := s.b.RunSwarm(ctx, prompt, mode, str("profile"))
+		if err != nil {
+			return "", err
+		}
+		text := strings.TrimSpace(out.Answer)
+		if out.ConversationID != "" {
+			text += fmt.Sprintf("\n\nCoordinator chat: %s (open it in Toskar at /chat?c=%s)", out.ConversationID, url.QueryEscape(out.ConversationID))
+		}
+		return text, nil
 	case "list_local_models":
 		if s.b.Models == nil {
 			return "", fmt.Errorf("the model list is not available")

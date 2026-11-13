@@ -32,6 +32,8 @@ func connectDaemon(t *testing.T) daemonClient {
 			_ = json.NewEncoder(w).Encode(models)
 		case "/api/v1/models/fit":
 			_ = json.NewEncoder(w).Encode([]contracts.ModelsFitResponse{})
+		case "/api/v1/profiles":
+			_ = json.NewEncoder(w).Encode([]contracts.AIProfile{{ID: "general", Name: "General"}, {ID: "p-7f3", Name: "Coding swarm"}})
 		default:
 			http.NotFound(w, r)
 		}
@@ -231,5 +233,55 @@ func TestCodingAgentsGuideMatchesConnect(t *testing.T) {
 		if !strings.Contains(guide, "```\n"+want+"\n   ```") && !strings.Contains(guide, want+"\n   ```") {
 			t.Errorf("the guide doesn't show %s as connect prints them:\n%s", name, want)
 		}
+	}
+}
+
+// --swarm points Claude Code's subagents at swarm:<profile>, by the
+// profile's id or its name as a slug, and leaves its own and its fast model
+// as they are (#1135). An agent without a subagent model can't take it.
+func TestConnectSwarm(t *testing.T) {
+	t.Setenv("TOSKAR_API_KEY", "")
+	client := connectDaemon(t)
+	for _, ref := range []string{"coding-swarm", "p-7f3", "swarm:p-7f3"} {
+		var out bytes.Buffer
+		if err := connectCommand([]string{"claude-code", "--swarm", ref}, client, &out, t.TempDir(), t.TempDir()); err != nil {
+			t.Fatalf("%s: %v", ref, err)
+		}
+		for _, w := range []string{"export CLAUDE_CODE_SUBAGENT_MODEL=swarm:p-7f3\n", "ANTHROPIC_DEFAULT_HAIKU_MODEL=qwen2.5-coder-7b-q4", "ANTHROPIC_MODEL=qwen2.5-coder-7b-q4"} {
+			if !strings.Contains(out.String(), w) {
+				t.Errorf("%s: no %q in\n%s", ref, w, out.String())
+			}
+		}
+	}
+	// Without it, the subagents use the agent's model.
+	var plain bytes.Buffer
+	if err := connectCommand([]string{"claude-code"}, client, &plain, t.TempDir(), t.TempDir()); err != nil || strings.Contains(plain.String(), "SUBAGENT") {
+		t.Fatalf("without --swarm: %v\n%s", err, plain.String())
+	}
+
+	dir := t.TempDir()
+	var out bytes.Buffer
+	if err := connectCommand([]string{"claude-code", "--swarm", "coding-swarm", "--write"}, client, &out, dir, t.TempDir()); err != nil {
+		t.Fatal(err)
+	}
+	raw, err := os.ReadFile(filepath.Join(dir, ".claude", "settings.local.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var settings struct {
+		Env map[string]string `json:"env"`
+	}
+	if err := json.Unmarshal(raw, &settings); err != nil || settings.Env["CLAUDE_CODE_SUBAGENT_MODEL"] != "swarm:p-7f3" || settings.Env["ANTHROPIC_MODEL"] != "qwen2.5-coder-7b-q4" {
+		t.Fatalf("settings: %s, %v", raw, err)
+	}
+	if !strings.Contains(out.String(), "subagents use swarm:p-7f3") {
+		t.Errorf("wrote: %s", out.String())
+	}
+
+	if err := connectCommand([]string{"claude-code", "--swarm", "nope"}, client, &out, t.TempDir(), t.TempDir()); err == nil || !strings.Contains(err.Error(), "general, p-7f3") {
+		t.Errorf("unknown profile: %v", err)
+	}
+	if err := connectCommand([]string{"codex", "--swarm", "p-7f3"}, client, &out, t.TempDir(), t.TempDir()); err == nil || !strings.Contains(err.Error(), "swarm:p-7f3 as its model") {
+		t.Errorf("codex: %v", err)
 	}
 }

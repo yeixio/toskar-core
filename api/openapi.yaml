@@ -2340,9 +2340,11 @@ paths:
           description: Address, command, args, and whether a key is needed
   /mcp:
     post:
-      summary: Toskar's MCP server (Streamable HTTP, JSON-RPC). Tools ask_local_ai, list_local_models, search_my_knowledge.
+      summary: Toskar's MCP server (Streamable HTTP, JSON-RPC). Tools ask_local_ai, list_local_models, search_my_knowledge, run_swarm.
       description: >-
-        Checked like /v1. A request with an Origin header from another site is refused.
+        Checked like /v1. A request with an Origin header from another site is refused. run_swarm
+        ({prompt, mode?, profile?}) runs a question swarm and returns its answer and the coordinator
+        chat's id and link, /chat?c=<id>; it needs the member role (#1135, contract 1.88).
       operationId: mcpServer
       tags: [MCP]
       requestBody:
@@ -2824,7 +2826,7 @@ paths:
   /v1/models:
     get:
       summary: OpenAI-compatible model list
-      description: auto, each profile as profile:<id>, and each deployed specialized AI as sai:<slug>.
+      description: auto, each profile as profile:<id>, each profile whose strategy is swarm as swarm:<id> (#1135, contract 1.88), and each deployed specialized AI as sai:<slug>.
       operationId: openaiListModels
       tags: [OpenAI-compatible]
       responses:
@@ -2846,7 +2848,10 @@ paths:
         Anthropic's events (message_start, content_block_start, content_block_delta with
         text_delta or input_json_delta, content_block_stop, message_delta, message_stop). The key
         may also come as x-api-key, and needs raw access, as raw:<model> does. Errors use
-        Anthropic's shape, {"type":"error","error":{"type","message"}}.
+        Anthropic's shape, {"type":"error","error":{"type","message"}}. model swarm:<profile>
+        (#1135, contract 1.88) spreads a request with tools to the least busy of the profile's
+        swarm models and computers, as raw, and runs a full swarm for one without, answering with
+        the coordinator's answer after a thinking block of its progress.
       operationId: anthropicMessages
       tags: [OpenAI-compatible]
       requestBody:
@@ -2917,7 +2922,10 @@ paths:
         parallel_tool_calls are converted to the model's Chat Completions and back. Toskar keeps no
         responses, so previous_response_id is refused: send the whole conversation, as with store
         set to false. With stream, the answer comes as the response.* events, each with a
-        sequence_number. Needs raw access, as raw:<model> does.
+        sequence_number. Needs raw access, as raw:<model> does. model swarm:<profile> (#1135,
+        contract 1.88) spreads a request with tools to the least busy of the profile's swarm models
+        and computers, as raw, and runs a full swarm for one without, answering with the
+        coordinator's answer after a reasoning item of its progress.
       operationId: openaiResponses
       tags: [OpenAI-compatible]
       requestBody:
@@ -2975,7 +2983,7 @@ paths:
               properties:
                 model:
                   type: string
-                  description: auto, profile:<id>, sai:<slug>, a model id, or raw:<model id> to drive a model on this computer directly, with the request's own tools (#843, contract 1.71)
+                  description: "auto, profile:<id>, sai:<slug>, a model id, raw:<model id> to drive a model on this computer directly, with the request's own tools (#843, contract 1.71), or swarm:<profile> (#1135, contract 1.88): a request with tools is spread to the least busy of the profile's swarm models and computers and forwarded as raw, and one without runs a full swarm, its progress as reasoning_content and its coordinator chat as toskar.conversation_id"
                 messages:
                   type: array
                   items:

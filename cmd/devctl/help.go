@@ -141,9 +141,10 @@ var helpGroups = []helpGroup{
 			usage: []string{"toskarctl connect <agent> [flags]"},
 			flags: []helpFlag{
 				{"--model id", "the model (default the best installed one for coding agents)"},
+				{"--swarm profile", "point the agent's subagents at swarm:<profile>, so those it starts at once run at once across the profile's models and computers (claude-code)"},
 				{"--write", "write the settings instead of printing them; only the agent's Toskar settings change"},
 			},
-			examples: []string{"toskarctl connect aider --model qwen2.5-7b-q4"},
+			examples: []string{"toskarctl connect aider --model qwen2.5-7b-q4", "toskarctl connect claude-code --swarm general-assistant"},
 		},
 		{
 			name: "mcp", summary: "Let an app that starts MCP servers as programs use Toskar",

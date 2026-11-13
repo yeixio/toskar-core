@@ -314,17 +314,22 @@ func (h *Handler) HandleMessages(w http.ResponseWriter, r *http.Request) {
 		anthropicError(w, http.StatusBadRequest, "invalid_request_error", err.Error())
 		return
 	}
+	// swarm:<profile> without the agent's tools is a full swarm (#1135).
+	if strings.HasPrefix(req.Model, SwarmPrefix) && !clientTools(body) {
+		h.messagesSwarm(w, r, perms, req, body)
+		return
+	}
 	need := req.promptEstimate() + min(req.toolEstimate(), rawToolRoom) + min(req.MaxTokens, rawAnswerRoom)
 	if req.Toskar != nil {
 		need = max(need, req.Toskar.ContextWindow)
 	}
-	endpoint, window, done, fail := h.rawReady(r.Context(), perms, strings.TrimPrefix(req.Model, RawPrefix), need)
+	route, fail := h.route(r.Context(), perms, req.Model, need)
 	if fail != nil {
 		anthropicError(w, fail.status, anthropicType(fail.status), fail.message)
 		return
 	}
-	defer done()
-	resp, err := rawSend(r.Context(), endpoint, body, window)
+	defer route.Done()
+	resp, err := route.Send(r.Context(), body)
 	if err != nil {
 		if r.Context().Err() == nil {
 			anthropicError(w, http.StatusBadGateway, "api_error", "the model didn't answer: "+err.Error())

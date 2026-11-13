@@ -2369,6 +2369,7 @@
         "To have a profile always use one, open Profiles & Orchestration, edit the profile, open Strategy and computers, and set Strategy to Swarm. Then choose Split or Race, the models in order (a race needs at least two, one agent each), and if you like the most agents (2–8), tokens, and minutes a swarm may use. Quick questions are still answered directly.",
         "Watch the lanes while the agents work. Stop under a lane stops that agent alone, and the others go on; Open opens its chat. Stop beside the message box stops every agent. What they finished is kept in their chats.",
         "From another app, send swarm with split or race to POST /api/v1/chat, or start one with POST /api/v1/swarms and follow it with GET /api/v1/swarms/{id}. GET /api/v1/conversations?swarm_id= lists the agents' chats, and stopping one agent's chat stops that agent alone.",
+        "From a coding agent, such as Claude Code, use `swarm:` and the profile's id as its subagents' model, or run `toskarctl connect claude-code --swarm` and the profile ([Use Toskar in the terminal](#terminal)). Their requests run at once across the profile's computers and models. From an app that speaks MCP, the run_swarm tool runs a swarm and returns its answer and a link to its chat.",
         "An agent's tools ask first, as any chat's do. Its questions show in the chat you started the swarm in, under the lanes, each with the agent that asks, such as Agent 2: tests. Allow for this agent covers that agent's chat only; the other agents still ask. In a folder, each agent's changes ask as a task's do, and so does putting the swarm's change in your folder. The API page lists the budgets: how many agents, tokens, and minutes a swarm may use.",
         "If the answer says the change wasn't applied, run git merge with the branch it names in your folder. A swarm's branches are kept for a week; deleting the swarm deletes them sooner."
       ],
@@ -2444,6 +2445,17 @@
         {
           "type": "paragraph",
           "text": "The answer comes from Toskar's assistant, as in chat: Auto, web look-ups, connected services, and answer checks. Add `\"stream\": true` to get it as it's written. It's a subset of OpenAI's API, not every feature of a hosted one."
+        },
+        {
+          "type": "paragraph",
+          "text": "`swarm:` and a profile's id has a swarm of agents answer ([Run a swarm](#swarms)). The answer is the swarm's, and its `reasoning_content` says what the agents did. With one model on one computer, it runs as one agent and says why. Coding agents' requests that bring their own tools are spread across the profile's computers and models instead ([Use Toskar in the terminal](#terminal))."
+        },
+        {
+          "type": "code",
+          "language": "sh",
+          "test": "api-swarm",
+          "code": "curl -s http://127.0.0.1:7331/v1/chat/completions \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"model\": \"swarm:general-assistant\", \"messages\": [{\"role\": \"user\", \"content\": \"Plan a three-day trip to Juneau\"}]}'",
+          "output": "{…\"content\":\"…Juneau…\"…\"reasoning_content\":\"…\"…}"
         },
         {
           "type": "heading",
@@ -3170,6 +3182,38 @@
           "type": "note",
           "tone": "tip",
           "text": "For an editor's own AI features, such as Continue, Cline, Zed, or Copilot Chat, `toskarctl connect continue` and the like print what to enter in its settings. For Continue, a [step-by-step guide](https://github.com/yeixio/toskar-core/blob/main/docs/integrations/continue.md) covers it. In VS Code, the Toskar extension sets this up for you ([Use Toskar in VS Code](#vscode))."
+        },
+        {
+          "type": "heading",
+          "text": "Run a coding agent's subagents at once"
+        },
+        {
+          "type": "paragraph",
+          "text": "Claude Code starts subagents for parts of a job, often several at the same time. With one model on one computer, they wait for each other. `--swarm` points the subagents at a profile's swarm instead: each of their requests goes to the least busy of the profile's swarm models and computers, so they run at once ([Run a swarm](#swarms)). The agent's own model stays as it was."
+        },
+        {
+          "type": "code",
+          "language": "sh",
+          "test": "terminal-connect-swarm",
+          "code": "toskarctl connect claude-code --swarm general-assistant",
+          "output": "# Claude Code with … on Toskar, through Anthropic's Messages format.\n# Its subagents use swarm:general-assistant: those it starts at once run at once, across that profile's models and computers.\n…\nexport CLAUDE_CODE_SUBAGENT_MODEL=swarm:general-assistant"
+        },
+        {
+          "type": "steps",
+          "items": [
+            "In Profiles & Orchestration, edit the profile and open Strategy and computers. Set Strategy to Swarm, and choose its models in order. Choose models on different computers, or more than one model, so requests can run at the same time.",
+            "Run `toskarctl connect claude-code --swarm` and the profile's id, or its name with dashes between the words, such as `coding-swarm` for Coding swarm. Add `--write` to save it.",
+            "Start Claude Code and give it a job that needs several subagents. Each subagent's request runs on whichever computer and model is free."
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Any agent that speaks OpenAI's or Anthropic's format can use `swarm:` and a profile's id as its model ([Use the API](#api)). A request that brings the agent's own tools, as subagents' always do, goes as it is to the least busy computer and model, and its answer comes back unchanged. A request without tools runs a whole swarm on its last message, and answers with the swarm's answer, with the agents' progress as its reasoning. So keep `swarm:` for subagents, not for an agent's quick background requests, such as naming a chat."
+        },
+        {
+          "type": "note",
+          "tone": "tip",
+          "text": "Agents' requests with their own tools need a key with raw access, as for the agent's own model. A whole swarm needs a Member or an Admin, and saves its chats in a project named after the job."
         },
         {
           "type": "heading",

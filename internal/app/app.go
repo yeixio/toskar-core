@@ -241,6 +241,12 @@ type App struct {
 	// ran, whose prompt cache has it.
 	workTokens map[string]int
 	speeds     scheduler.Speeds
+	// spread is the Spread requests on each computer and model (#1135);
+	// spreadFind and spreadOpen stand in for finding and readying their
+	// targets in tests.
+	spread     spreadLanes
+	spreadFind func(ctx context.Context, profile profiles.Profile, need int) ([]spreadTarget, error)
+	spreadOpen func(ctx context.Context, t spreadTarget, need int) (openai.RawRoute, error)
 	placesMu   sync.Mutex
 	chatPlaces map[string]chatPlace
 	// Speech transcribes audio and reads text aloud (Gungnir §18–19).
@@ -545,6 +551,10 @@ func New(opts Options) (*App, error) {
 		// raw:<model> drives a model on this computer directly (#843).
 		Raw:       a.rawModel,
 		RawModels: a.rawModels,
+		// swarm:<profile> (#1135): Spread for an editor agent's requests
+		// with their own tools, and a full swarm for the rest.
+		Spread: a.spreadRoute,
+		Swarm:  a.swarmTurn,
 		ErrorCode: func(text string) string {
 			code, _ := chatErrorCode(text)
 			return code
@@ -1047,6 +1057,7 @@ func New(opts Options) (*App, error) {
 		StartModel:      a.startModelLocal,
 		StopModel:       a.stopModelLocal,
 		Chat:            a.internalChat,
+		Raw:             a.internalRaw,
 		ReceiveOffer:    a.Nodes.ReceiveOffer,
 		CompletePairing: a.Nodes.CompletePairing,
 		LookupOutbound:  a.Nodes.LookupOutbound,
