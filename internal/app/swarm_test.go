@@ -24,6 +24,7 @@ type swarmApp struct {
 	final   string
 	hold    map[int]chan struct{}
 	started map[int]chan struct{}
+	once    map[int]*sync.Once
 }
 
 func newSwarmApp(t *testing.T, hold ...int) *swarmApp {
@@ -39,9 +40,9 @@ func newSwarmApp(t *testing.T, hold ...int) *swarmApp {
 	old := swarm.SlotsFor
 	swarm.SlotsFor = func(string, string) int { return 2 }
 	t.Cleanup(func() { swarm.SlotsFor = old })
-	s := &swarmApp{App: a, hold: map[int]chan struct{}{}, started: map[int]chan struct{}{}}
+	s := &swarmApp{App: a, hold: map[int]chan struct{}{}, started: map[int]chan struct{}{}, once: map[int]*sync.Once{}}
 	for _, n := range hold {
-		s.hold[n], s.started[n] = make(chan struct{}), make(chan struct{})
+		s.hold[n], s.started[n], s.once[n] = make(chan struct{}), make(chan struct{}), &sync.Once{}
 	}
 	a.StubReply = func(_ string, messages []pluginapi.ChatMessage) string {
 		system, last := messages[0].Content, messages[len(messages)-1].Content
@@ -63,9 +64,11 @@ func newSwarmApp(t *testing.T, hold ...int) *swarmApp {
 	return s
 }
 
+// wait holds agent n's reply. An agent's text can reach the model more than
+// once in a turn, so only the first call says it started.
 func (s *swarmApp) wait(n int) {
 	if hold, ok := s.hold[n]; ok {
-		close(s.started[n])
+		s.once[n].Do(func() { close(s.started[n]) })
 		select {
 		case <-hold:
 		case <-time.After(10 * time.Second):
