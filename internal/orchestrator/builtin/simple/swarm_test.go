@@ -234,7 +234,8 @@ func TestSwarmTask(t *testing.T) {
 		"The agents fixed the parser and documented it.",
 	}
 	env := &swarmEnv{roleEnv: inner, answers: []string{"Fixed parser.go and its test; go test passes.", "Updated the README."},
-		task: &swarm.TaskOutcome{Folder: folder, Git: true, Branch: "toskar/swarm/ab/merged", Files: []string{"parser.go", "README.md"}, Applied: true, Check: "go test ./...", Checks: swarm.ChecksPassed}}
+		task: &swarm.TaskOutcome{Folder: folder, Git: true, Branch: "toskar/swarm/ab/merged", Files: []string{"parser.go", "README.md"},
+			AgentFiles: map[int][]string{1: {"parser.go"}, 2: nil}, Applied: true, Check: "go test ./...", Checks: swarm.ChecksPassed}}
 	ctx := turnopts.WithProject(swarm.WithMode(context.Background(), swarm.ModeSplit), folder)
 	profile := contracts.AIProfile{Roles: []contracts.ModelRole{{Role: "assistant", ModelID: "m"}},
 		Tools:         []contracts.ToolPolicy{{ToolID: "filesystem.read", Policy: "allow"}, {ToolID: "filesystem.write", Policy: "ask"}, {ToolID: "terminal", Policy: "ask"}},
@@ -270,7 +271,8 @@ func TestSwarmTask(t *testing.T) {
 		t.Errorf("answer = %q", answer)
 	}
 	final := inner.prompts["assistant"][len(inner.prompts["assistant"])-1]
-	if !strings.Contains(final, "Reports from each agent") || !strings.Contains(final, "Updated the README.") {
+	if !strings.Contains(final, "Reports from each agent") || !strings.Contains(final, "Updated the README.") ||
+		!strings.Contains(final, "Files it really changed, from Git: none") || !strings.Contains(final, "delivered: parser.go, README.md") {
 		t.Errorf("the answer's prompt lacks the reports:\n%s", final)
 	}
 	if len(env.finished) != 1 || env.finished[0] != "s1:done" {

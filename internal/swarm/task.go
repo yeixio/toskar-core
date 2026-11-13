@@ -53,8 +53,11 @@ type TaskOutcome struct {
 	Checks string
 	// Winner is a race's winning agent.
 	Winner int
-	// Files are the files the change touches in the folder.
-	Files []string
+	// Files are the files the change touches in the folder, and
+	// AgentFiles each agent's own, by number, as Git saw them: what the
+	// agents really changed, whatever they said.
+	Files      []string
+	AgentFiles map[int][]string
 	// Applied says the change is in the person's folder; NotApplied says
 	// why it isn't, when there was one to apply.
 	Applied    bool

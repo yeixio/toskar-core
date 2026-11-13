@@ -51,6 +51,10 @@ func (e *chatExecEnv) finishTask(ctx context.Context, st *swarmState, req swarm.
 	if ws == nil || ctx.Err() != nil {
 		return t
 	}
+	t.AgentFiles = map[int][]string{}
+	for _, ag := range agents {
+		t.AgentFiles[ag.N] = ws.Files(ctx, ag.Branch)
+	}
 	var done []int
 	for i, r := range results {
 		if r.Status == swarm.AgentDone {
@@ -89,7 +93,7 @@ func (e *chatExecEnv) mergeSplit(ctx context.Context, st *swarmState, req swarm.
 		if ctx.Err() != nil {
 			return
 		}
-		if len(ws.Files(ctx, ag.Branch)) == 0 {
+		if len(t.AgentFiles[ag.N]) == 0 {
 			// It changed nothing in the folder: nothing to merge.
 			continue
 		}

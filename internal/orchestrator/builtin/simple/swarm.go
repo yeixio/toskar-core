@@ -55,7 +55,7 @@ func swarmAsked(ctx context.Context, profile contracts.AIProfile, prompt string,
 
 // swarmTaskGuidance tells the answering model how to report a task swarm.
 const swarmTaskGuidance = "Several agents worked on this task at the same time, and Toskar merged their changes; each agent's report is in the reference material. " +
-	"Tell the person what was done, from the reports: what changed and how it was checked, briefly. Don't claim more than the reports say, and don't mention the agents' parts one by one unless it helps."
+	"Tell the person what was done, from the reports: what changed and how it was checked, briefly. Where a report and the files Git saw disagree, the files are right: say plainly what wasn't done. Don't claim more than that, and don't mention the agents' parts one by one unless it helps."
 
 // swarmBudget is a turn's swarm budget, with the agents a message named. A
 // task gets a task's time.
@@ -290,6 +290,20 @@ func runSwarm(ctx context.Context, env pluginapi.ExecutionEnvironment, runner sw
 				answer = "(no report)"
 			}
 			fmt.Fprintf(&b, "\n\nAgent %d, %s (%s):\n%s", a.N, a.Part.Title, r.Status, clip(answer, swarmAnswerRunes))
+			if files, ok := out.Task.AgentFiles[a.N]; ok {
+				changed := "none"
+				if len(files) > 0 {
+					changed = strings.Join(files, ", ")
+				}
+				fmt.Fprintf(&b, "\nFiles it really changed, from Git: %s", changed)
+			}
+		}
+		if out.Task.Git {
+			changed := "none"
+			if len(out.Task.Files) > 0 {
+				changed = strings.Join(out.Task.Files, ", ")
+			}
+			fmt.Fprintf(&b, "\n\nFiles in the change Toskar delivered: %s", changed)
 		}
 		turn.reference = b.String()
 		return turn
