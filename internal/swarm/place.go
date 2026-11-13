@@ -11,6 +11,12 @@ type Agent struct {
 	NodeID  string
 	// ConversationID is its own chat.
 	ConversationID string
+	// Folder is where a task's agent works: its worktree's copy of the
+	// person's folder, or the folder itself when they take turns. Worktree
+	// is its worktree's top folder, and Branch its branch.
+	Folder   string
+	Worktree string
+	Branch   string
 }
 
 // Lane is the agents that share one computer and model. A model on a
@@ -48,6 +54,19 @@ func Group(agents []Agent) []Lane {
 	return lanes
 }
 
+// OneAfterAnother is a single lane that runs every agent in turn, wherever
+// each was placed: a task's agents sharing a folder that isn't in Git.
+func OneAfterAnother(agents []Agent) []Lane {
+	if len(agents) == 0 {
+		return nil
+	}
+	lane := Lane{NodeID: agents[0].NodeID, ModelID: agents[0].ModelID, Slots: 1}
+	for i := range agents {
+		lane.Agents = append(lane.Agents, i)
+	}
+	return []Lane{lane}
+}
+
 // AtOnce is how many agents can run at the same time across the lanes.
 func AtOnce(lanes []Lane) int {
 	n := 0
@@ -69,7 +88,7 @@ func Queued(lanes []Lane, i int) bool {
 	return false
 }
 
-// Why a swarm runs as one agent, by code. Each has a line in English for
+// Why a swarm runs as one agent, or differently than asked, by code. Each has a line in English for
 // events and the record (Reason), and chat:notices.swarm.<code> for the
 // person's language.
 const (
@@ -81,22 +100,31 @@ const (
 	OnePart = "onePart"
 	// OneModel: a race needs at least two models to compare.
 	OneModel = "oneModel"
-	// TaskLater: a task in a folder, or from the terminal, runs as one task
-	// for now.
-	TaskLater = "taskLater"
+	// NoFolder: a task swarm's agents work in a folder, and the task has
+	// none, such as one from the terminal outside a project.
+	NoFolder = "noFolder"
+	// NotGit: a task's folder isn't in a Git repository, so its agents took
+	// turns in it rather than working at once in copies. They still ran.
+	NotGit = "notGit"
+	// RaceNeedsGit: a race on a task needs a copy of the folder per agent,
+	// which only Git gives.
+	RaceNeedsGit = "raceNeedsGit"
 	// NoChat: a swarm keeps its agents in chats, and the turn has none.
 	NoChat = "noChat"
 )
 
 var reasons = map[string]string{
-	OneAtATime: "One agent: this computer can't run more than one at a time with this model.",
-	OnePart:    "One agent: this request doesn't split into parts that can be done separately.",
-	OneModel:   "One agent: a race needs at least two models to compare.",
-	TaskLater:  "One agent: swarms work on questions for now. A swarm for tasks in a folder comes in a later version.",
-	NoChat:     "One agent: a swarm keeps its agents in chats, and this request isn't saved in one.",
+	OneAtATime:   "One agent: this computer can't run more than one at a time with this model.",
+	OnePart:      "One agent: this request doesn't split into parts that can be done separately.",
+	OneModel:     "One agent: a race needs at least two models to compare.",
+	NoChat:       "One agent: a swarm keeps its agents in chats, and this request isn't saved in one.",
+	NoFolder:     "One agent: a swarm works on a task in a folder, and this task has none.",
+	NotGit:       "Not a Git folder: the agents worked one after another in it.",
+	RaceNeedsGit: "One agent: a race on a task needs a Git folder, so each agent has its own copy.",
 }
 
-// Reason is the one line, in English, that says why a swarm ran as one agent.
+// Reason is the one line, in English, that says why a swarm ran as one agent,
+// or differently than asked.
 func Reason(code string) string { return reasons[code] }
 
 // Single says why a planned and placed swarm should run as one agent instead,

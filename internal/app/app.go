@@ -1396,6 +1396,12 @@ func (a *App) Start(ctx context.Context) error {
 			a.portalRetentionLoop(ctx)
 		}()
 	}
+	// A task swarm's branches are kept for a week (#1135).
+	a.wg.Add(1)
+	go func() {
+		defer a.wg.Done()
+		a.swarmBranchesLoop(ctx)
+	}()
 	if a.Health != nil {
 		a.wg.Add(1)
 		go func() {

@@ -723,6 +723,22 @@ type Swarm struct {
 	// Tokens and Seconds are the whole swarm's totals so far.
 	Tokens  int     `json:"tokens"`
 	Seconds float64 `json:"seconds"`
+	// Folder is the folder a task swarm worked in. In a Git repository each
+	// agent worked on a branch of its own, which is kept for 7 days or
+	// until the swarm is deleted.
+	Folder string `json:"folder,omitempty"`
+	// Branch has a task swarm's result: the agents' work merged, or a race
+	// winner's. Empty for a question, or a folder that isn't in Git.
+	Branch string `json:"branch,omitempty"`
+	// Checks is how the project's checks went on the result: passed or
+	// failed. Empty when none ran.
+	Checks string `json:"checks,omitempty"`
+	// Conflicts are agents' changes that couldn't be merged, each still on
+	// its agent's branch.
+	Conflicts []SwarmConflict `json:"conflicts,omitempty"`
+	// Applied says the result is in the person's folder as uncommitted
+	// changes, after they allowed it.
+	Applied bool `json:"applied,omitempty"`
 	// Waiting is each tool.requested from its agents still waiting for an
 	// answer, each with its agent, for clients to group them by.
 	Waiting    []map[string]any `json:"waiting,omitempty"`
@@ -761,6 +777,24 @@ type SwarmAgent struct {
 	Summary string  `json:"summary,omitempty"`
 	Tokens  int     `json:"tokens"`
 	Seconds float64 `json:"seconds"`
+	// Paths are the files or folders a task's part expects to change.
+	Paths []string `json:"paths,omitempty"`
+	// Branch is a task agent's own branch, with its work committed.
+	Branch string `json:"branch,omitempty"`
+	// Checks is how the project's checks went on its branch in a race:
+	// passed or failed. Empty when none ran.
+	Checks string `json:"checks,omitempty"`
+}
+
+// SwarmConflict is an agent's change that couldn't be merged with the
+// others', even by a fix-up agent (contract 1.88, #1135).
+type SwarmConflict struct {
+	// Agent is the agent whose change wasn't merged.
+	Agent int `json:"agent"`
+	// Branch has its change.
+	Branch string `json:"branch"`
+	// Files are the files that conflicted.
+	Files []string `json:"files"`
 }
 
 // Project keeps related chats together with what they share: instructions,

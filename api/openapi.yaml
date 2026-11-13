@@ -5210,7 +5210,7 @@ paths:
                 $ref: "#/components/schemas/Error"
     delete:
       summary: Delete a swarm
-      description: Deletes the record. Its chats stay, as ordinary chats in its project. A running swarm is stopped first.
+      description: Deletes the record, and the branches a task swarm kept in its folder. Its chats stay, as ordinary chats in its project. A running swarm is refused with SWARM_RUNNING; stop it first.
       operationId: deleteSwarm
       tags: [Swarms]
       parameters:
@@ -8216,6 +8216,14 @@ components:
         note: {type: string, description: '`note` says why the swarm ran differently than asked, such as running as one agent.'}
         tokens: {type: integer, description: Every agent's tokens so far.}
         seconds: {type: number}
+        folder: {type: string, description: 'The folder a task swarm worked in. In a Git repository each agent worked on a branch of its own, kept for 7 days or until the swarm is deleted.'}
+        branch: {type: string, description: 'A task swarm''s result: the agents'' work merged, or a race winner''s. Empty for a question, or a folder that isn''t in Git.'}
+        checks: {type: string, enum: [passed, failed], description: 'How the project''s checks went on the result. Absent when none ran.'}
+        conflicts:
+          type: array
+          description: Agents' changes that couldn't be merged, each still on its agent's branch.
+          items: {$ref: '#/components/schemas/SwarmConflict'}
+        applied: {type: boolean, description: 'The result is in the person''s folder as uncommitted changes, after they allowed it.'}
         waiting:
           type: array
           description: Each tool.requested from its agents still waiting for an answer, each with its agent, for clients to group them by.
@@ -8239,6 +8247,23 @@ components:
         summary: {type: string, description: The start of its answer.}
         tokens: {type: integer}
         seconds: {type: number}
+        paths:
+          type: array
+          description: The files or folders a task's part expects to change.
+          items: {type: string}
+        branch: {type: string, description: 'A task agent''s own branch, with its work committed.'}
+        checks: {type: string, enum: [passed, failed], description: 'How the project''s checks went on its branch in a race. Absent when none ran.'}
+    SwarmConflict:
+      type: object
+      description: 'An agent''s change that couldn''t be merged with the others'', even by a fix-up agent (contract 1.88, #1135).'
+      required: [agent, branch, files]
+      properties:
+        agent: {type: integer, description: The agent whose change wasn't merged.}
+        branch: {type: string, description: Has its change.}
+        files:
+          type: array
+          description: The files that conflicted.
+          items: {type: string}
     SwarmBudget:
       type: object
       description: 'What a swarm may use (contract 1.88, #1135).'
@@ -8258,7 +8283,7 @@ components:
           items: {type: string}
         agents: {type: integer, minimum: 2, maximum: 8, description: The most agents. Empty is the profile's max_workers, or 4.}
         tokens: {type: integer, minimum: 10000, maximum: 4000000, description: The most the whole swarm may use. Empty is 400000.}
-        minutes: {type: integer, minimum: 1, maximum: 240, description: The most a swarm may run. Empty is 5 for a question.}
+        minutes: {type: integer, minimum: 1, maximum: 240, description: The most a swarm may run. Empty is 5 for a question and 30 for a task.}
     Memory:
       type: object
       description: One durable fact or preference.

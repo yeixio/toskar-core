@@ -94,6 +94,7 @@ var specTypes = map[string]any{
 	"Swarm":                contracts.Swarm{},
 	"SwarmAgent":           contracts.SwarmAgent{},
 	"SwarmBudget":          contracts.SwarmBudget{},
+	"SwarmConflict":        contracts.SwarmConflict{},
 	"ConversationsDeleted": contracts.ConversationsDeleted{},
 	"ConversationSkipped":  contracts.ConversationSkipped{},
 	"ModelWarmRequest":     contracts.ModelWarmRequest{},

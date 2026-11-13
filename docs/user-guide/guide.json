@@ -2360,13 +2360,15 @@
       "paragraphs": [
         "A swarm is several agents working on one question at the same time, each in a chat of its own. In a split, Toskar splits your question into parts, each agent answers one part, and the answer is written from all of theirs. In a race, agents on different models each answer the whole question, and the best answer is kept, or the answers are combined.",
         "Agents run at the same time only where they really can: on different computers, or on different models. One computer with one model answers one request at a time, so there a swarm runs as one agent, and the answer says so. A swarm uses more of your computers and takes longer than one answer, so it only runs when you ask for one.",
-        "In this version, swarms answer questions. Work on files in a folder, or in the terminal, runs as one task, and says that a swarm for tasks comes later. Each agent's chat is kept in the chat's project, or in a new project named after your question. The apps don't show the agents' chats yet; the API lists them. Members and Admins can start a swarm."
+        "A swarm also does tasks in a chat's folder, such as fix the failing tests, use a swarm. Toskar looks at the folder first, then gives each agent a part and the files it expects to change. In a Git folder each agent works in a copy of its own, on its own branch, starting from your uncommitted changes, and Toskar merges their work, runs the project's tests, and asks before it puts the change in your folder as uncommitted changes. Your branch and staged changes are never touched. If two agents changed the same lines, a fix-up agent settles it; one it can't is named in the answer with its branch. In a folder that isn't in Git, the agents take turns in it, and the answer says so.",
+        "Each agent's chat is kept in the chat's project, or in a new project named after your question. The apps don't show the agents' chats yet; the API lists them. Members and Admins can start a swarm, and a swarm in a folder needs an Admin, as a folder does."
       ],
       "steps": [
         "To ask for one in Chat, end your message with use a swarm, or use 3 agents for three of them.",
         "Wait for the answer as usual. Choose Stop to stop every agent; what they finished is kept in their chats.",
         "From another app, send swarm with split or race to POST /api/v1/chat, or start one with POST /api/v1/swarms and follow it with GET /api/v1/swarms/{id}. GET /api/v1/conversations?swarm_id= lists the agents' chats, and stopping one agent's chat stops that agent alone.",
-        "An agent's tools ask first, as any chat's do, and the question says which agent asks. The API page lists the budgets: how many agents, tokens, and minutes a swarm may use."
+        "An agent's tools ask first, as any chat's do, and the question says which agent asks. In a folder, each agent's changes ask as a task's do, and so does putting the swarm's change in your folder. The API page lists the budgets: how many agents, tokens, and minutes a swarm may use.",
+        "If the answer says the change wasn't applied, run git merge with the branch it names in your folder. A swarm's branches are kept for a week; deleting the swarm deletes them sooner."
       ]
     },
     {

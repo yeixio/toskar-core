@@ -634,8 +634,10 @@
       "oneAtATime": "Un solo agente: questo computer non può eseguirne più di uno alla volta con questo modello.",
       "onePart": "Un solo agente: questa richiesta non si divide in parti da svolgere separatamente.",
       "oneModel": "Un solo agente: una gara richiede almeno due modelli da confrontare.",
-      "taskLater": "Un solo agente: per ora gli sciami lavorano sulle domande. Uno sciame per le attività in una cartella arriverà in una versione successiva.",
-      "noChat": "Un solo agente: uno sciame tiene i suoi agenti nelle chat, e questa richiesta non è salvata in nessuna."
+      "noChat": "Un solo agente: uno sciame tiene i suoi agenti nelle chat, e questa richiesta non è salvata in nessuna.",
+      "noFolder": "Un solo agente: uno sciame lavora su un'attività in una cartella, e questa attività non ne ha.",
+      "notGit": "Non è una cartella Git: gli agenti ci hanno lavorato uno dopo l'altro.",
+      "raceNeedsGit": "Un solo agente: una gara su un'attività richiede una cartella Git, così ogni agente ha la sua copia."
     }
   },
   "steps": {

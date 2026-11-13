@@ -2,6 +2,7 @@ package tools
 
 import (
 	"context"
+	"errors"
 	"testing"
 	"time"
 
@@ -70,5 +71,52 @@ func TestSwarmApprovals(t *testing.T) {
 	}
 	if asked := run(2, false); asked == nil || asked["agent"] != "Agent 2: reviews" {
 		t.Errorf("agent 1's yes let agent 2's call through: %v", asked)
+	}
+}
+
+// Confirm asks before Core does something itself, such as applying a swarm's
+// changes to the person's folder: a profile that allows it doesn't ask, the
+// person's no stops it, and with nobody to ask it needs approval.
+func TestConfirm(t *testing.T) {
+	bus := events.NewBus(8)
+	r := &Registry{tools: map[string]Tool{}, policy: NewPolicyEngine(), bus: bus, pending: map[string]*PendingCall{}}
+	subID, ch := bus.Subscribe()
+	defer bus.Unsubscribe(subID)
+	meta := map[string]any{"conversation_id": "coord", "swarm_id": "s1"}
+	args := map[string]any{"path": "/src/app", "files": 2}
+	if err := r.Confirm(context.Background(), "swarm.apply", args, PolicyAllow, "apply", meta); err != nil {
+		t.Fatalf("allowed: %v", err)
+	}
+	confirm := func(allow bool) (map[string]any, error) {
+		t.Helper()
+		errCh := make(chan error, 1)
+		go func() {
+			errCh <- r.Confirm(context.Background(), "swarm.apply", args, PolicyAsk, "Apply the swarm's changes to /src/app: 2 files", meta)
+		}()
+		var asked map[string]any
+		for {
+			select {
+			case evt := <-ch:
+				if evt.Type == events.ToolRequested {
+					asked = evt.Payload
+					_ = r.Decide(evt.Payload["request_id"].(string), allow, false)
+				}
+			case err := <-errCh:
+				return asked, err
+			case <-time.After(2 * time.Second):
+				t.Fatal("timed out")
+			}
+		}
+	}
+	asked, err := confirm(false)
+	if err == nil || asked == nil || asked["reason"] != "Apply the swarm's changes to /src/app: 2 files" || asked["swarm_id"] != "s1" || asked["tool_id"] != "swarm.apply" {
+		t.Fatalf("declined: %v, asked %v", err, asked)
+	}
+	if _, err := confirm(true); err != nil {
+		t.Fatalf("allowed by the person: %v", err)
+	}
+	unattended := map[string]any{"automation_id": "a1"}
+	if err := r.Confirm(context.Background(), "swarm.apply", args, PolicyAsk, "apply", unattended); !errors.Is(err, ErrNeedsApproval) {
+		t.Fatalf("nobody to ask: %v", err)
 	}
 }

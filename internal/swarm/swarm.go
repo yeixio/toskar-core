@@ -10,8 +10,11 @@
 // chat environment runs the agents' turns (Runner), and the orchestrator
 // plans and merges.
 //
-// This version runs swarms on questions: turns with no folder. A task's
-// agents, Git worktrees, and merging code come next.
+// A question's agents run at once and the coordinator answers from what they
+// found. A task's agents work in a folder: in a Git repository each in a
+// worktree on a branch of its own, which Toskar merges, checks, and applies
+// to the person's folder once they allow it; elsewhere they take turns in the
+// folder itself.
 package swarm
 
 import (
@@ -62,12 +65,13 @@ const (
 	EventAgentProgress = "swarm.agent.progress"
 	// EventAgentFinished: agent, status, summary, tokens, seconds.
 	EventAgentFinished = "swarm.agent.finished"
-	// EventMerging: what is being merged.
+	// EventMerging: what is being merged; in a task, the agent and branch,
+	// and a conflict when its change couldn't be merged.
 	EventMerging = "swarm.merging"
 	// EventFinished: status, winner (race), totals.
 	EventFinished = "swarm.finished"
 	// EventNote is a swarm asked for that ran differently, with the reason:
-	// as one agent, or a task run as one today.
+	// as one agent, or with its agents taking turns in a folder.
 	EventNote = "swarm.note"
 )
 
@@ -158,6 +162,9 @@ type AgentRef struct {
 	// NodeID and ModelID are where placement put it; its turn runs there.
 	NodeID  string
 	ModelID string
+	// Task says it works on a task in its folder, so its turn is a task's
+	// whatever its first message says.
+	Task bool
 }
 
 type agentKey struct{}

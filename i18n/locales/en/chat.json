@@ -614,8 +614,10 @@
       "oneAtATime": "One agent: this computer can't run more than one at a time with this model.",
       "onePart": "One agent: this request doesn't split into parts that can be done separately.",
       "oneModel": "One agent: a race needs at least two models to compare.",
-      "taskLater": "One agent: swarms work on questions for now. A swarm for tasks in a folder comes in a later version.",
-      "noChat": "One agent: a swarm keeps its agents in chats, and this request isn't saved in one."
+      "noChat": "One agent: a swarm keeps its agents in chats, and this request isn't saved in one.",
+      "noFolder": "One agent: a swarm works on a task in a folder, and this task has none.",
+      "notGit": "Not a Git folder: the agents worked one after another in it.",
+      "raceNeedsGit": "One agent: a race on a task needs a Git folder, so each agent has its own copy."
     }
   },
   "steps": {

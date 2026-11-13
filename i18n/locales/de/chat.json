@@ -614,8 +614,10 @@
       "oneAtATime": "Ein Agent: Dieser Computer kann mit diesem Modell nur eine Anfrage gleichzeitig ausführen.",
       "onePart": "Ein Agent: Diese Anfrage lässt sich nicht in Teile aufteilen, die getrennt erledigt werden können.",
       "oneModel": "Ein Agent: Ein Wettlauf braucht mindestens zwei Modelle zum Vergleichen.",
-      "taskLater": "Ein Agent: Schwärme arbeiten vorerst nur an Fragen. Ein Schwarm für Aufgaben in einem Ordner kommt in einer späteren Version.",
-      "noChat": "Ein Agent: Ein Schwarm hält seine Agenten in Chats, und diese Anfrage ist in keinem gespeichert."
+      "noChat": "Ein Agent: Ein Schwarm hält seine Agenten in Chats, und diese Anfrage ist in keinem gespeichert.",
+      "noFolder": "Ein Agent: Ein Schwarm arbeitet an einer Aufgabe in einem Ordner, und diese Aufgabe hat keinen.",
+      "notGit": "Kein Git-Ordner: Die Agenten haben nacheinander darin gearbeitet.",
+      "raceNeedsGit": "Ein Agent: Ein Wettlauf bei einer Aufgabe braucht einen Git-Ordner, damit jeder Agent eine eigene Kopie hat."
     }
   },
   "steps": {

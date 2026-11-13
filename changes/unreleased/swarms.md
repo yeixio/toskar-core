@@ -14,8 +14,8 @@
   minutes stop agents still running and merge what finished. An agent's
   tool questions say which swarm and agent ask, and allowing a tool for the
   session applies to that agent's chat alone. Stopping an agent's chat
-  stops that agent; stopping the swarm stops them all. Tasks in a folder
-  still run as one task for now (contract 1.88, #1135).
+  stops that agent; stopping the swarm stops them all (contract 1.88,
+  #1135).
 
 ### Fixed
 

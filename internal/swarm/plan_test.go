@@ -80,3 +80,70 @@ func TestNames(t *testing.T) {
 		t.Error("agent roles don't round-trip")
 	}
 }
+
+// A task's parts name the paths they expect to change, cleaned and kept inside
+// the folder; a part without paths still reads as before.
+func TestPartPaths(t *testing.T) {
+	parts := ParseParts(`{"parts": [
+		{"title": "API", "instructions": "Add the endpoint.", "paths": ["./internal/api/", "internal/api/handlers.go", "../outside", "/etc/passwd", "."]},
+		{"title": "Docs", "instructions": "Document it.", "paths": "docs/api.md"},
+		{"title": "Old", "instructions": "No paths."}]}`, 4)
+	if len(parts) != 3 {
+		t.Fatalf("parts = %+v", parts)
+	}
+	if got := strings.Join(parts[0].Paths, ","); got != "internal/api,internal/api/handlers.go" {
+		t.Errorf("paths = %q", got)
+	}
+	if got := strings.Join(parts[1].Paths, ","); got != "docs/api.md" {
+		t.Errorf("one path as a string = %q", got)
+	}
+	if parts[2].Paths != nil {
+		t.Errorf("no paths = %v", parts[2].Paths)
+	}
+}
+
+// Parts whose paths overlap, directly or through others, go to one agent;
+// parts without paths are left alone.
+func TestMergeOverlapping(t *testing.T) {
+	parts := MergeOverlapping([]Part{
+		{Title: "api", Instructions: "a", Paths: []string{"internal/api"}},
+		{Title: "docs", Instructions: "d", Paths: []string{"docs/api.md"}},
+		{Title: "handler", Instructions: "h", Paths: []string{"internal/api/handlers.go", "web/client.ts"}},
+		{Title: "client", Instructions: "c", Paths: []string{"web/client.ts"}},
+		{Title: "loose", Instructions: "l"},
+	})
+	if len(parts) != 3 {
+		t.Fatalf("parts = %+v", parts)
+	}
+	if parts[0].Title != "api + handler + client" || parts[0].Instructions != "a\n\nh\n\nc" ||
+		strings.Join(parts[0].Paths, ",") != "internal/api,internal/api/handlers.go,web/client.ts" {
+		t.Errorf("merged = %+v", parts[0])
+	}
+	if parts[1].Title != "docs" || parts[2].Title != "loose" {
+		t.Errorf("the rest = %+v", parts[1:])
+	}
+}
+
+// A task agent's message gives its part, its paths, and the others', and says
+// whether the agents share the folder.
+func TestTaskMessage(t *testing.T) {
+	parts := []Part{{Title: "api", Instructions: "Add it.", Paths: []string{"api.go"}}, {Title: "docs", Instructions: "Write it.", Paths: []string{"README.md"}}}
+	own := TaskMessage(ModeSplit, "Add search.", parts, 1, false)
+	for _, want := range []string{"agent 1 of 2", "own copy", "Files you expect to change: api.go", "Agent 2: docs (README.md)", "don't commit"} {
+		if !strings.Contains(own, want) {
+			t.Errorf("message lacks %q:\n%s", want, own)
+		}
+	}
+	if shared := TaskMessage(ModeSplit, "Add search.", parts, 2, true); !strings.Contains(shared, "take turns in the same project folder") {
+		t.Errorf("shared:\n%s", shared)
+	}
+	if race := TaskMessage(ModeRace, "Add search.", RaceParts("Add search.", 2), 2, false); !strings.Contains(race, "Do the whole task") {
+		t.Errorf("race:\n%s", race)
+	}
+	fix := FixupMessage("Add search.", Agent{N: 1, Part: parts[0]}, Agent{N: 2, Part: parts[1]}, []string{"api.go"})
+	for _, want := range []string{"merging agent 2's change", "Agent 1's part (api)", "- api.go", "conflict marker"} {
+		if !strings.Contains(fix, want) {
+			t.Errorf("fix-up lacks %q:\n%s", want, fix)
+		}
+	}
+}

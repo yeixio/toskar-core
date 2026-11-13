@@ -54,7 +54,7 @@ func TestSingle(t *testing.T) {
 	if code := Single(ModeRace, two, Group(two)); code != "" {
 		t.Errorf("two models: %q", code)
 	}
-	for _, code := range []string{OneAtATime, OnePart, OneModel, TaskLater, NoChat} {
+	for _, code := range []string{OneAtATime, OnePart, OneModel, NoChat, NoFolder, NotGit, RaceNeedsGit} {
 		if Reason(code) == "" {
 			t.Errorf("no reason for %q", code)
 		}

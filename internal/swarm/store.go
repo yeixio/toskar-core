@@ -32,11 +32,21 @@ func NewStore(db *sql.DB) *Store { return &Store{db: db, now: time.Now} }
 // result is what result_json keeps: the agents, the merge's outcome, and the
 // totals.
 type result struct {
-	Agents  []contracts.SwarmAgent `json:"agents"`
-	Winner  int                    `json:"winner,omitempty"`
-	Note    string                 `json:"note,omitempty"`
-	Tokens  int                    `json:"tokens"`
-	Seconds float64                `json:"seconds"`
+	Agents    []contracts.SwarmAgent    `json:"agents"`
+	Winner    int                       `json:"winner,omitempty"`
+	Note      string                    `json:"note,omitempty"`
+	Tokens    int                       `json:"tokens"`
+	Seconds   float64                   `json:"seconds"`
+	Folder    string                    `json:"folder,omitempty"`
+	Branch    string                    `json:"branch,omitempty"`
+	Checks    string                    `json:"checks,omitempty"`
+	Conflicts []contracts.SwarmConflict `json:"conflicts,omitempty"`
+	Applied   bool                      `json:"applied,omitempty"`
+}
+
+func resultOf(s contracts.Swarm) result {
+	return result{Agents: s.Agents, Winner: s.Winner, Note: s.Note, Tokens: s.Tokens, Seconds: s.Seconds,
+		Folder: s.Folder, Branch: s.Branch, Checks: s.Checks, Conflicts: s.Conflicts, Applied: s.Applied}
 }
 
 const columns = `id, project_id, conversation_id, mode, status, request, budget_json, result_json, created_at, finished_at`
@@ -51,6 +61,7 @@ func scan(row interface{ Scan(...any) error }) (contracts.Swarm, error) {
 	var r result
 	_ = json.Unmarshal([]byte(res), &r)
 	s.Agents, s.Winner, s.Note, s.Tokens, s.Seconds = r.Agents, r.Winner, r.Note, r.Tokens, r.Seconds
+	s.Folder, s.Branch, s.Checks, s.Conflicts, s.Applied = r.Folder, r.Branch, r.Checks, r.Conflicts, r.Applied
 	if s.Agents == nil {
 		s.Agents = []contracts.SwarmAgent{}
 	}
@@ -118,7 +129,7 @@ func (st *Store) List(ctx context.Context, projectID string) ([]contracts.Swarm,
 // Save writes a swarm's state: its project, status, mode, agents, outcome,
 // and totals. A swarm that's done, stopped, or failed is finished now.
 func (st *Store) Save(ctx context.Context, s contracts.Swarm) error {
-	r, _ := json.Marshal(result{Agents: s.Agents, Winner: s.Winner, Note: s.Note, Tokens: s.Tokens, Seconds: s.Seconds})
+	r, _ := json.Marshal(resultOf(s))
 	finished := ""
 	switch s.Status {
 	case StatusDone, StatusStopped, StatusFailed:
@@ -164,6 +175,64 @@ func (st *Store) Delete(ctx context.Context, id string) error {
 		return err
 	}
 	return tx.Commit()
+}
+
+// KeptBranches are swarms, anyone's, that finished before a time and still
+// have branches in a folder, for the cleanup that deletes them.
+func (st *Store) KeptBranches(ctx context.Context, before time.Time) ([]contracts.Swarm, error) {
+	rows, err := st.db.QueryContext(ctx, `SELECT `+columns+` FROM swarms
+		WHERE created_at < ? AND status NOT IN (?, ?) AND result_json LIKE '%"folder":%'`, ts(before), StatusRunning, StatusMerging)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var out []contracts.Swarm
+	for rows.Next() {
+		s, err := scan(rows)
+		if err != nil {
+			return nil, err
+		}
+		if s.Folder != "" && hasBranches(s) {
+			out = append(out, s)
+		}
+	}
+	return out, rows.Err()
+}
+
+func hasBranches(s contracts.Swarm) bool {
+	if s.Branch != "" {
+		return true
+	}
+	for _, a := range s.Agents {
+		if a.Branch != "" {
+			return true
+		}
+	}
+	return false
+}
+
+// ForgetBranches records that a swarm's branches were deleted: the record no
+// longer names them. It's the cleanup's, so it isn't any one person's.
+func (st *Store) ForgetBranches(ctx context.Context, id string) error {
+	var raw string
+	if err := st.db.QueryRowContext(ctx, `SELECT result_json FROM swarms WHERE id = ?`, id).Scan(&raw); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return ErrNotFound
+		}
+		return err
+	}
+	var r result
+	_ = json.Unmarshal([]byte(raw), &r)
+	r.Branch = ""
+	for i := range r.Agents {
+		r.Agents[i].Branch = ""
+	}
+	for i := range r.Conflicts {
+		r.Conflicts[i].Branch = ""
+	}
+	b, _ := json.Marshal(r)
+	_, err := st.db.ExecContext(ctx, `UPDATE swarms SET result_json = ? WHERE id = ?`, string(b), id)
+	return err
 }
 
 // FailRunning marks swarms left running when Core stopped as stopped: their
