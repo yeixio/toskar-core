@@ -20,6 +20,7 @@ Each set is a fixed list of requests, each with what it must do. The model answe
 | **Reasoning** | Math, logic, and trick questions with one right answer | The final answer matches, and isn't the tempting mistake | [`reasoning.json`](../tests/quality/reasoning.json) |
 | **Triage** | Real issues from this project | The labels suggested against the ones maintainers gave | [`triage.json`](../tests/quality/triage.json) |
 | **Media** | Making pictures, clips, and speech, and reading pictures | File checks, then another model judges, as below | [`media.json`](../tests/quality/media.json) |
+| **Swarms** | Questions in several parts and tasks in a folder, by one agent and by a swarm on the same models | Each part's fact is in the answer; a task's tests pass afterwards. Counted with the time and tokens each took | [`swarms_test.go`](../tests/quality/swarms_test.go) |
 
 A results row can show fewer cases than the file holds, since some don't apply to every model. A model that sees pictures skips the case about having no model that sees them, for example.
 
@@ -28,11 +29,11 @@ Web pages are fixed copies, so an answer that has the right facts got them from 
 ## How it's scored
 
 - **Each set's score is cases passed, out of cases run.** There's no weighting.
-- **Only complete results are published.** A row has all of Quality, Topics, Files, and Reasoning, or says the model doesn't run on that computer. Other sets, such as Media and Triage, are measured for our own checks and stay out of the results.
+- **Only complete results are published.** A row has all of Quality, Topics, Files, and Reasoning, or says the model doesn't run on that computer. Other sets, such as Media, Triage, and Swarms, are measured for our own checks and stay out of the results.
 - **A row's Score is the plain average of the pass rates of those four,** from 0 to 100, shown with the method's version, such as 95 (v1). Speed stays beside it and not in it, since a fast wrong answer shouldn't beat a slow right one. It's a score for these sets and not a verdict on the best model: they're easy enough that good models bunch near the top, and a small model can pass a large one.
 - **A model's answers vary from run to run.** Run more than once, a set reports its pass rate with a 95% interval (Wilson) and which cases were flaky.
 - **A set only fails when the numbers say so.** Below the bar, but with the interval reaching it, passes with a note saying more runs would tell. These bars decide whether a release or a change passes, not how a model looks in the results.
-- **Measured without a bar:** reasoning and triage. Their numbers are only reported.
+- **Measured without a bar:** reasoning, triage, and swarms. Their numbers are only reported.
 - **A case whose turn fails,** such as a model writing no answer, counts as failed.
 
 | Set | The bar for a real model |

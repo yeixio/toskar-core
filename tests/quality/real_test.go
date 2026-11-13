@@ -151,8 +151,10 @@ func unreached(err error) bool {
 	return errors.Is(err, syscall.ECONNREFUSED)
 }
 
-// watch collects events for one chat and answers every approval no.
-func (d realDriver) watch(t *testing.T, ctx context.Context, conversationID string) func() []Event {
+// watch collects events for one chat, and for the agents of a swarm it
+// starts (#1135), and answers every approval no, apart from what the case
+// allows (approves).
+func (d realDriver) watch(t *testing.T, ctx context.Context, c Case, conversationID, project string) func() []Event {
 	t.Helper()
 	req, _ := http.NewRequestWithContext(ctx, http.MethodGet, d.base+"/api/v1/events", nil)
 	if key := config.Env("QUALITY_KEY"); key != "" {
@@ -164,6 +166,8 @@ func (d realDriver) watch(t *testing.T, ctx context.Context, conversationID stri
 	}
 	var mu sync.Mutex
 	var got []Event
+	// The chat's swarms: their agents' events are in chats of their own.
+	swarms := map[string]bool{}
 	done := make(chan struct{})
 	go func() {
 		defer close(done)
@@ -182,7 +186,12 @@ func (d realDriver) watch(t *testing.T, ctx context.Context, conversationID stri
 			if json.Unmarshal([]byte(strings.TrimPrefix(line, "data: ")), &evt) != nil {
 				continue
 			}
-			if conv, _ := evt.Payload["conversation_id"].(string); conv != conversationID {
+			conv, _ := evt.Payload["conversation_id"].(string)
+			swarmID, _ := evt.Payload["swarm_id"].(string)
+			if conv == conversationID && swarmID != "" {
+				swarms[swarmID] = true
+			}
+			if conv != conversationID && (swarmID == "" || !swarms[swarmID]) {
 				continue
 			}
 			mu.Lock()
@@ -190,7 +199,8 @@ func (d realDriver) watch(t *testing.T, ctx context.Context, conversationID stri
 			mu.Unlock()
 			if evt.Type == "tool.requested" {
 				if id, _ := evt.Payload["request_id"].(string); id != "" {
-					d.do(t, http.MethodPost, "/api/v1/tools/decide", map[string]any{"request_id": id, "allow": false}, nil)
+					allow := approves(c, project, swarms, evt.Payload)
+					d.do(t, http.MethodPost, "/api/v1/tools/decide", map[string]any{"request_id": id, "allow": allow}, nil)
 				}
 			}
 		}
@@ -237,12 +247,17 @@ func (d realDriver) Run(t *testing.T, c Case) Result {
 	if c.Setup.Topics != nil {
 		profile["topics"] = c.Setup.Topics
 	}
-	if c.Setup.Deliberate != "" {
+	if c.Setup.Deliberate != "" || c.Swarm != "" {
 		orch, _ := profile["orchestration"].(map[string]any)
 		if orch == nil {
 			orch = map[string]any{}
 		}
-		orch["deliberate"] = c.Setup.Deliberate
+		if c.Setup.Deliberate != "" {
+			orch["deliberate"] = c.Setup.Deliberate
+		}
+		if c.Swarm != "" {
+			orch["swarm"] = contracts.SwarmPolicy{Mode: c.Swarm, Models: c.Setup.SwarmModels}
+		}
 		profile["orchestration"] = orch
 	}
 	var created struct {
@@ -260,6 +275,9 @@ func (d realDriver) Run(t *testing.T, c Case) Result {
 	client, project := "", ""
 	if len(c.Setup.Project) > 0 {
 		project = projectFolder(t, c.Setup.Project)
+		if c.Setup.Git {
+			gitInit(t, project)
+		}
 		d.do(t, http.MethodPatch, "/api/v1/conversations/"+conv.ID, map[string]any{"project": project}, nil)
 		client = "web"
 	}
@@ -270,6 +288,9 @@ func (d realDriver) Run(t *testing.T, c Case) Result {
 		}
 		if client != "" {
 			body["client"] = client
+		}
+		if c.Swarm != "" {
+			body["swarm"] = c.Swarm
 		}
 		d.do(t, http.MethodPost, "/api/v1/chat", body, nil)
 	}
@@ -296,7 +317,7 @@ func (d realDriver) Run(t *testing.T, c Case) Result {
 	}
 
 	ctx, cancel := context.WithCancel(context.Background())
-	events := d.watch(t, ctx, conv.ID)
+	events := d.watch(t, ctx, c, conv.ID, project)
 	chat(c.Message, attached...)
 	// A follow-up in the same chat, with nothing attached (#449).
 	if c.FollowUp != "" {
@@ -337,6 +358,14 @@ func (d realDriver) Run(t *testing.T, c Case) Result {
 		var run runlog.Run
 		d.do(t, http.MethodGet, "/api/v1/runs/"+r.Meta.RunID, nil, &run)
 		r.Run = &run
+	}
+	if id := swarmOf(r.Events); id != "" {
+		var rec contracts.Swarm
+		if _, err := d.request(http.MethodGet, "/api/v1/swarms/"+id, nil, &rec, t.Logf); err == nil {
+			r.Swarm = &rec
+		} else {
+			t.Logf("swarm %s: %v", id, err)
+		}
 	}
 	t.Logf("answer: %.200s", r.Answer)
 	return r
