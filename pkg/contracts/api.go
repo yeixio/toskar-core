@@ -655,7 +655,8 @@ type SwarmPolicy struct {
 	// them at once) or race (agents on different models each do the whole
 	// request, and the best answer wins or they're merged). Empty is split.
 	Mode string `json:"mode,omitempty"`
-	// Models are a race's models, one agent each, in order.
+	// Models are a race's models, one agent each, in order. A split's
+	// agents take them in turn.
 	Models []string `json:"models,omitempty"`
 	// Agents caps how many agents a swarm has (2–8). Empty is the profile's
 	// max_workers, or 4.

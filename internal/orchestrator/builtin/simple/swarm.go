@@ -109,6 +109,13 @@ func runSwarm(ctx context.Context, env pluginapi.ExecutionEnvironment, runner sw
 		req.Parts = swarm.RaceParts(prompt, len(req.Models))
 	} else {
 		req.Parts = askSwarmPlanner(ctx, env, ch, plannerRole(profile, role), prompt, b.Agents)
+		// Named models take the parts in turn, so a split on one computer
+		// with two models loaded still runs its agents at once.
+		if models := swarm.RaceModels(profile.Orchestration.Swarm, swarm.PolicyFrom(ctx), b.Agents); len(models) > 0 {
+			for i := range req.Parts {
+				req.Models = append(req.Models, models[i%len(models)])
+			}
+		}
 	}
 	if ctx.Err() != nil {
 		return swarmTurn{}

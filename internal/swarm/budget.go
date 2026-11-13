@@ -73,7 +73,7 @@ func ModeFor(asked string, profile, turn *contracts.SwarmPolicy) string {
 	return ModeSplit
 }
 
-// RaceModels are a race's models, one agent each: the turn's list, else the
+// RaceModels are the named models, a race's one agent each: the turn's list, else the
 // profile's, capped at the budget's agents.
 func RaceModels(profile, turn *contracts.SwarmPolicy, agents int) []string {
 	var models []string

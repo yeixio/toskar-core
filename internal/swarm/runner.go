@@ -13,8 +13,9 @@ type Request struct {
 	// Parts are the agents' parts, one agent each: a split's plan, or in a
 	// race the whole request once per model.
 	Parts []Part
-	// Models are a race's models, one per part. Empty gives each agent its
-	// role's model.
+	// Models are the agents' models, one per part: a race's, or the named
+	// models a split's agents take in turn. Empty gives each agent its role's
+	// model.
 	Models []string
 	Budget Budget
 }

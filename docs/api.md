@@ -757,7 +757,7 @@ A profile's `orchestration` object holds its advanced controls. Every field is o
 | `fallback_models` | up to 8 model ids | Tried in order when the answering model fails, before Toskar picks another installed model |
 | `retries` | 1–3 | Tries after a model fails before showing anything (default 1). Each try first runs the same model on another online computer that has it, then another model |
 | `timeout_seconds` | 10–3600 | Stops a turn that runs longer; the answer so far is kept and says it reached the time limit |
-| `swarm` | `{mode, models, agents, tokens, minutes}` | A swarm's controls ([Swarms](#swarms), contract 1.88): `mode` `split` or `race` (empty is `split`), `models` a race's models in order (up to 8), `agents` 2–8, `tokens` 10,000–4,000,000, `minutes` 1–240 |
+| `swarm` | `{mode, models, agents, tokens, minutes}` | A swarm's controls ([Swarms](#swarms), contract 1.88): `mode` `split` or `race` (empty is `split`), `models` a race's models in order, which a split's agents take in turn (up to 8), `agents` 2–8, `tokens` 10,000–4,000,000, `minutes` 1–240 |
 
 Invalid values are refused with 400. In advanced mode, the profile editor has an Orchestration section, alongside model roles, tools, knowledge, and placement.
 

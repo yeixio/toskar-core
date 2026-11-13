@@ -105,6 +105,17 @@ func TestSwarmSplit(t *testing.T) {
 	if len(env2.asked) != 1 || env2.asked[0].Budget.Agents != 3 || len(env2.asked[0].Parts) != 3 {
 		t.Fatalf("use 3 agents: %+v", env2.asked)
 	}
+	if len(env2.asked[0].Models) != 0 {
+		t.Errorf("no models were named, but the agents got %v", env2.asked[0].Models)
+	}
+	// Named models take a split's parts in turn.
+	inner3 := newRoleEnv(map[string]string{"assistant": `{"parts": ["a", "b", "c"]}`})
+	env3 := &swarmEnv{roleEnv: inner3, answers: []string{"A", "B", "C"}}
+	named := contracts.OrchestrationPolicy{Swarm: &contracts.SwarmPolicy{Models: []string{"qwen", "gemma"}}}
+	runSwarmTurn(t, swarm.WithMode(context.Background(), swarm.ModeSplit), env3, kayaks, named)
+	if len(env3.asked) != 1 || strings.Join(env3.asked[0].Models, ",") != "qwen,gemma,qwen" {
+		t.Fatalf("split models: %+v", env3.asked)
+	}
 }
 
 // A race whose answers disagree is cross-examined by the agents' models and

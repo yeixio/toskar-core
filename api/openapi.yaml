@@ -8254,7 +8254,7 @@ components:
         mode: {type: string, enum: [split, race], description: 'split: a coordinator splits the job into parts that agents do at once. race: agents on different models each do the whole request, and the best answer wins or they''re merged. Empty is split.'}
         models:
           type: array
-          description: A race's models, one agent each, in order.
+          description: A race's models, one agent each, in order. A split's agents take them in turn.
           items: {type: string}
         agents: {type: integer, minimum: 2, maximum: 8, description: The most agents. Empty is the profile's max_workers, or 4.}
         tokens: {type: integer, minimum: 10000, maximum: 4000000, description: The most the whole swarm may use. Empty is 400000.}
