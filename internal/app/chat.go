@@ -1971,6 +1971,10 @@ func (e *chatExecEnv) knowledgeBlock(ctx context.Context, prompt string) string 
 	if len(ids) == 0 || e.app == nil || e.app.Mimir == nil {
 		return ""
 	}
+	if ref, ok := swarm.AgentFrom(ctx); ok && ref.Search != "" {
+		// A swarm agent looks up its part, not its instructions (#1182).
+		prompt = ref.Search
+	}
 	hits, err := e.app.Mimir.Search(ctx, mimir.SearchInput{Query: prompt, SourceIDs: ids})
 	if err != nil {
 		e.Emit("knowledge.failed", map[string]any{"error": err.Error()})

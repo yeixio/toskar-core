@@ -87,6 +87,13 @@ func (o *Orchestrator) Run(
 		// The effort the user chose, or Auto's pick for this kind of request,
 		// sets how much planning, reading, and checking the turn gets (§15).
 		plan, hasParts := huginn.MakePlan(task.Prompt)
+		// A swarm agent's message is already one part of a split: it names
+		// the whole request and the other agents' parts, which aren't its
+		// own to work through (#1182).
+		_, isAgent := swarm.AgentFrom(ctx)
+		if isAgent {
+			plan, hasParts = huginn.Plan{}, false
+		}
 		kind := huginn.Classify(task.Prompt)
 		if (hasParts || reference != "") && kind == huginn.Chat {
 			// A request with several parts, or one answered from the user's
@@ -225,7 +232,7 @@ func (o *Orchestrator) Run(
 		// Planning set to Always, and the Team strategy, ask the planner to
 		// split a request that has no obvious parts (§12). Team keeps a plan
 		// of one part, so a worker drafts and the answer is written from it.
-		if !hasParts && budget.Plan && strat.alwaysPlan && escalate {
+		if !hasParts && budget.Plan && strat.alwaysPlan && escalate && !isAgent {
 			limit := budget.MaxWorkers
 			if limit == 0 {
 				limit = defaultTeamParts
@@ -358,7 +365,6 @@ func (o *Orchestrator) Run(
 		// A task, a swarm's report and a swarm agent's part change files in
 		// the folder with the task's tools: a file they name is the work, not
 		// an attachment (#1135).
-		_, isAgent := swarm.AgentFrom(ctx)
 		if !isTask && !swarmed && !isAgent {
 			if reply, m, made := makeFileFirst(ctx, env, profile, role, messages, task.Prompt); made {
 				promptTokens := 0

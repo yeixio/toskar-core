@@ -165,6 +165,9 @@ type AgentRef struct {
 	// Task says it works on a task in its folder, so its turn is a task's
 	// whatever its first message says.
 	Task bool
+	// Search is what its turn looks up in the profile's knowledge, from
+	// SearchQuery, instead of its first message (#1182).
+	Search string
 }
 
 type agentKey struct{}

@@ -231,6 +231,22 @@ func FirstMessage(mode, request string, parts []Part, n int) string {
 	return strings.TrimRight(b.String(), "\n")
 }
 
+// SearchQuery is what agent n looks up in the profile's knowledge: its part.
+// Not its first message, whose first words are the instructions every agent
+// gets, and not the whole request, whose other parts outscore its own: in
+// both, another part's file came back and its own was left out (#1182). A
+// race's agents each answer the whole request.
+func SearchQuery(mode, request string, parts []Part, n int) string {
+	if mode == ModeRace || n < 1 || n > len(parts) {
+		return request
+	}
+	p := parts[n-1]
+	if q := strings.TrimSpace(p.Title + "\n" + p.Instructions); q != "" {
+		return q
+	}
+	return request
+}
+
 // TaskMessage is a task agent n's first message: the whole task, its part,
 // and what the other agents are doing. shared says the agents take turns in
 // the person's folder, rather than each working in a copy of its own.

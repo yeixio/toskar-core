@@ -249,7 +249,7 @@ func (e *chatExecEnv) RunSwarm(ctx context.Context, req swarm.Request) (swarm.Ou
 		if req.Folder != "" {
 			message = swarm.TaskMessage(req.Mode, req.Prompt, req.Parts, ag.N, shared)
 		}
-		r := e.runAgent(runCtx, st.rec.ID, ag, message, used)
+		r := e.runAgent(runCtx, st.rec.ID, ag, message, swarm.SearchQuery(req.Mode, req.Prompt, req.Parts, ag.N), used)
 		if ws != nil {
 			// What it did, finished or not, is kept on its branch.
 			if _, err := ws.Commit(context.WithoutCancel(ctx), ag.Worktree, swarm.Label(ag.N, ag.Part.Title)); err != nil && a.Logger != nil {
@@ -349,7 +349,7 @@ func (e *chatExecEnv) swarmProject(ctx context.Context, request string) (string,
 // message as its first message, and waits for its answer. Its tool calls show
 // in the coordinator chat's lanes as they start. A task's agent works in its
 // folder, as a task.
-func (e *chatExecEnv) runAgent(ctx context.Context, swarmID string, ag swarm.Agent, message string, used func(int)) swarm.Result {
+func (e *chatExecEnv) runAgent(ctx context.Context, swarmID string, ag swarm.Agent, message, search string, used func(int)) swarm.Result {
 	a := e.app
 	var mu sync.Mutex
 	stopped, steps := false, 0
@@ -375,7 +375,7 @@ func (e *chatExecEnv) runAgent(ctx context.Context, swarmID string, ag swarm.Age
 				"tool": tool, "summary": summary})
 		}
 	}
-	ref := swarm.AgentRef{SwarmID: swarmID, N: ag.N, Label: swarm.Label(ag.N, ag.Part.Title), NodeID: ag.NodeID, ModelID: ag.ModelID, Task: ag.Folder != ""}
+	ref := swarm.AgentRef{SwarmID: swarmID, N: ag.N, Label: swarm.Label(ag.N, ag.Part.Title), NodeID: ag.NodeID, ModelID: ag.ModelID, Task: ag.Folder != "", Search: search}
 	agentCtx, cancel := agentContext(ctx, e.ctx, ref, ag.Folder, note)
 	defer cancel()
 	started := time.Now()
