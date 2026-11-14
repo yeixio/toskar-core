@@ -2,6 +2,7 @@ package tools
 
 import (
 	"encoding/json"
+	"strings"
 	"testing"
 
 	"github.com/yeixio/toskar-core/pkg/contracts"
@@ -79,5 +80,68 @@ func TestCallTextParses(t *testing.T) {
 	// the call's own checks then say what's missing.
 	if got := CallText("filesystem.read", "not json"); got != `{"tool_call":{"args":{},"id":"filesystem.read"}}` {
 		t.Fatalf("bad arguments: %s", got)
+	}
+}
+
+// Every array gets the items it holds, any value when it doesn't say, in a
+// short schema and at any depth of a full one, with every key where it was
+// (#1140): gpt-oss's chat template stopped llama-server on an array
+// without them.
+func TestNativeArraysHaveItems(t *testing.T) {
+	for _, tc := range []struct{ in, want string }{
+		{`{"rows":"array","path":"string"}`, `{"type":"object","properties":{"rows":{"items":{},"type":"array"},"path":{"type":"string"}}}`},
+		{`{"type":"object","properties":{"z":{"type":"array"},"a":{"type":"object","properties":{"tags":{"description":"<b> & more","type":"array"}}}}}`,
+			`{"type":"object","properties":{"z":{"type":"array","items":{}},"a":{"type":"object","properties":{"tags":{"description":"<b> & more","type":"array","items":{}}}}}}`},
+		{`{"type":"object","properties":{"ids":{"type":"array","items":{"type":"integer"},"maxItems":3}}}`,
+			`{"type":"object","properties":{"ids":{"type":"array","items":{"type":"integer"},"maxItems":3}}}`},
+	} {
+		got := string(nativeParameters(json.RawMessage(tc.in)))
+		if got != tc.want {
+			// The short form's keys come from a map, so compare it as JSON.
+			var g, w any
+			_ = json.Unmarshal([]byte(got), &g)
+			_ = json.Unmarshal([]byte(tc.want), &w)
+			gj, _ := json.Marshal(g)
+			wj, _ := json.Marshal(w)
+			if strings.HasPrefix(tc.in, `{"type"`) || string(gj) != string(wj) {
+				t.Errorf("%s:\n got %s\nwant %s", tc.in, got, tc.want)
+			}
+		}
+	}
+}
+
+// Every built-in tool's parameters, as gpt-oss is offered them, have items
+// on every array.
+func TestBuiltinToolsArraysHaveItems(t *testing.T) {
+	for _, d := range Catalog() {
+		schema := d.InputSchema
+		if schema == "" {
+			schema = d.Schema
+		}
+		if schema == "" {
+			continue
+		}
+		var v any
+		if err := json.Unmarshal(nativeParameters(json.RawMessage(schema)), &v); err != nil {
+			t.Errorf("%s: %v", d.ID, err)
+			continue
+		}
+		var check func(any, string)
+		check = func(v any, at string) {
+			switch v := v.(type) {
+			case map[string]any:
+				if _, ok := v["items"]; v["type"] == "array" && !ok {
+					t.Errorf("%s: an array without items at %s", d.ID, at)
+				}
+				for k, c := range v {
+					check(c, at+"."+k)
+				}
+			case []any:
+				for _, c := range v {
+					check(c, at+"[]")
+				}
+			}
+		}
+		check(v, "")
 	}
 }

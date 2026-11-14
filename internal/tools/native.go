@@ -56,6 +56,9 @@ func nativeParameters(schema json.RawMessage) json.RawMessage {
 		Properties json.RawMessage `json:"properties"`
 	}
 	if json.Unmarshal(schema, &full) == nil && full.Properties != nil {
+		if out, ok := withItems(schema); ok {
+			return out
+		}
 		return json.RawMessage(bytes.TrimSpace(schema))
 	}
 	var out bytes.Buffer
@@ -74,8 +77,10 @@ func nativeParameters(schema json.RawMessage) json.RawMessage {
 			kind, _ := v.(string)
 			property := map[string]any{"type": "string", "description": kind}
 			switch kind {
-			case "string", "integer", "number", "boolean", "array", "object":
+			case "string", "integer", "number", "boolean", "object":
 				property = map[string]any{"type": kind}
+			case "array":
+				property = map[string]any{"type": kind, "items": map[string]any{}}
 			}
 			name, _ := json.Marshal(key)
 			value, _ := json.Marshal(property)
@@ -101,4 +106,94 @@ func CallText(name, arguments string) string {
 	}
 	b, _ := json.Marshal(map[string]any{"tool_call": map[string]any{"id": name, "args": args}})
 	return string(b)
+}
+
+// withItems gives every array in a schema the items it holds, any value
+// when it doesn't say, keeping every key where it was (#1160). gpt-oss's
+// chat template reads an array's items, and one without them stopped
+// llama-server with "Function is not a bool value", the template having
+// found the map's own items method (#1140).
+func withItems(schema json.RawMessage) (json.RawMessage, bool) {
+	var out bytes.Buffer
+	dec := json.NewDecoder(bytes.NewReader(schema))
+	dec.UseNumber()
+	if err := copyWithItems(dec, &out); err != nil {
+		return nil, false
+	}
+	return out.Bytes(), true
+}
+
+// copyWithItems copies one JSON value from dec to out, adding "items" to an
+// object whose type is "array" and has none.
+func copyWithItems(dec *json.Decoder, out *bytes.Buffer) error {
+	tok, err := dec.Token()
+	if err != nil {
+		return err
+	}
+	switch tok {
+	case json.Delim('{'):
+		out.WriteByte('{')
+		array, items := false, false
+		for n := 0; dec.More(); n++ {
+			key, err := dec.Token()
+			if err != nil {
+				return err
+			}
+			name, _ := key.(string)
+			if n > 0 {
+				out.WriteByte(',')
+			}
+			if err := writeJSON(out, name); err != nil {
+				return err
+			}
+			out.WriteByte(':')
+			start := out.Len()
+			if err := copyWithItems(dec, out); err != nil {
+				return err
+			}
+			switch name {
+			case "type":
+				array = string(out.Bytes()[start:]) == `"array"`
+			case "items":
+				items = true
+			}
+		}
+		if _, err := dec.Token(); err != nil {
+			return err
+		}
+		if array && !items {
+			out.WriteString(`,"items":{}`)
+		}
+		out.WriteByte('}')
+	case json.Delim('['):
+		out.WriteByte('[')
+		for n := 0; dec.More(); n++ {
+			if n > 0 {
+				out.WriteByte(',')
+			}
+			if err := copyWithItems(dec, out); err != nil {
+				return err
+			}
+		}
+		if _, err := dec.Token(); err != nil {
+			return err
+		}
+		out.WriteByte(']')
+	default:
+		return writeJSON(out, tok)
+	}
+	return nil
+}
+
+// writeJSON writes v as JSON, leaving <, >, and & as they are in a
+// description.
+func writeJSON(out *bytes.Buffer, v any) error {
+	var b bytes.Buffer
+	enc := json.NewEncoder(&b)
+	enc.SetEscapeHTML(false)
+	if err := enc.Encode(v); err != nil {
+		return err
+	}
+	out.Write(bytes.TrimRight(b.Bytes(), "\n"))
+	return nil
 }
