@@ -331,9 +331,18 @@ func (o *Orchestrator) Run(
 		toolsOn := len(tools.Enabled(profile, nil)) > 0 && !profile.ModelCallsNoTools
 		nodeID, _ := env.NodeForRole(role)
 		// The calls that write the answer take the caller's temperature
-		// and token cap, when it sent them (#70).
+		// and token cap, when it sent them (#70), and think as long as the
+		// turn's effort: a quick question briefly, a thorough one at length
+		// (#1140).
 		answerCtx := ctx
-		if o := pluginapi.AnswerOptionsFrom(ctx); o != (pluginapi.GenerateOptions{}) {
+		o := pluginapi.AnswerOptionsFrom(ctx)
+		if o == (pluginapi.GenerateOptions{}) {
+			o = pluginapi.GenerateOptionsFrom(ctx)
+		}
+		if o.ReasoningEffort == "" {
+			o.ReasoningEffort = budget.Effort.Reasoning()
+		}
+		if o != pluginapi.GenerateOptionsFrom(ctx) {
 			answerCtx = pluginapi.WithGenerateOptions(ctx, o)
 		}
 

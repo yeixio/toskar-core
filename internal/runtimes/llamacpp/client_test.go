@@ -344,3 +344,41 @@ func TestListReleasesSendsTheTokenOnlyToGitHub(t *testing.T) {
 		t.Errorf("sent %q to another host", got)
 	}
 }
+
+// A reasoning effort goes to the chat template, as gpt-oss's takes it
+// (#1140), in any case; one it doesn't name, or thinking off, sends none.
+func TestReasoningEffort(t *testing.T) {
+	for _, tc := range []struct {
+		effort string
+		off    bool
+		want   any
+	}{
+		{"high", false, "high"},
+		{" Low ", false, "low"},
+		{"medium", false, "medium"},
+		{"extreme", false, nil},
+		{"", false, nil},
+		{"high", true, nil},
+	} {
+		var sent map[string]any
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			_ = json.NewDecoder(r.Body).Decode(&sent)
+			fmt.Fprint(w, `{"choices":[{"message":{"content":"42"},"finish_reason":"stop"}]}`)
+		}))
+		ch, err := NewClient().Chat(context.Background(), pluginapi.ChatRequest{ModelEndpoint: srv.URL, ReasoningEffort: tc.effort, NoThinking: tc.off,
+			Messages: []pluginapi.ChatMessage{{Role: "user", Content: "17 + 25?"}}})
+		if err != nil {
+			t.Fatal(err)
+		}
+		for range ch {
+		}
+		srv.Close()
+		kwargs, _ := sent["chat_template_kwargs"].(map[string]any)
+		if got := kwargs["reasoning_effort"]; got != tc.want {
+			t.Errorf("%q, off %v: reasoning_effort %v, want %v", tc.effort, tc.off, got, tc.want)
+		}
+		if tc.want == nil && !tc.off && kwargs != nil {
+			t.Errorf("%q: sent chat_template_kwargs %v", tc.effort, kwargs)
+		}
+	}
+}

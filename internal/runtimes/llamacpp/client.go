@@ -56,12 +56,20 @@ func (c *Client) chat(ctx context.Context, req pluginapi.ChatRequest, again func
 		// valid JSON of that shape (§27).
 		body["response_format"] = map[string]any{"type": "json_object", "schema": req.ResponseSchema}
 	}
+	kwargs := map[string]any{}
 	if req.NoThinking {
 		// Thinking off (#840): the chat template's own switch where it has
 		// one (Qwen 3), and a thinking budget of none for the rest, such as
 		// DeepSeek R1's distills, whose templates always open a <think>.
-		body["chat_template_kwargs"] = map[string]any{"enable_thinking": false}
+		kwargs["enable_thinking"] = false
 		body["thinking_budget_tokens"] = 0
+	} else if effort := reasoningEffort(req.ReasoningEffort); effort != "" {
+		// How long gpt-oss thinks (#1140). A template that doesn't take it,
+		// as every other family's, ignores it.
+		kwargs["reasoning_effort"] = effort
+	}
+	if len(kwargs) > 0 {
+		body["chat_template_kwargs"] = kwargs
 	}
 	lora, err := loraScales(req.ModelEndpoint, req.Adapter)
 	if err != nil {
@@ -542,4 +550,13 @@ func (l *closedThink) flush() string {
 	}
 	l.done = true
 	return dropClosedThink(l.pending)
+}
+
+// reasoningEffort is one of gpt-oss's efforts, or "" for anything else.
+func reasoningEffort(e string) string {
+	switch e = strings.ToLower(strings.TrimSpace(e)); e {
+	case "low", "medium", "high":
+		return e
+	}
+	return ""
 }

@@ -185,7 +185,8 @@ func TestDeliberateDrafts(t *testing.T) {
 	if env.calls["drafter:2"] != 1 || env.calls["drafter:3"] != 1 {
 		t.Fatalf("calls: %v", env.calls)
 	}
-	if o := env.opts["assistant"]; o != (pluginapi.GenerateOptions{}) {
+	// It thinks as long as the turn's effort, which isn't sampling (#1140).
+	if o := env.opts["assistant"]; o.Temperature != 0 || o.MaxTokens != 0 || o.NoThinking || o.Thinking {
 		t.Fatalf("the turn's own answer changed options: %+v", o)
 	}
 	if o := env.opts["drafter:2"]; o.Temperature != 0.6 || o.MaxTokens != draftTokens {

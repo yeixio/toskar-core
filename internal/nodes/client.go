@@ -239,6 +239,10 @@ type RemoteChatRequest struct {
 	// NoThinking asks a reasoning model to answer without thinking first
 	// (#840); a computer from before it ignores it.
 	NoThinking bool `json:"no_thinking,omitempty"`
+	// ReasoningEffort is pluginapi.ChatRequest.ReasoningEffort (#1140). A
+	// computer on an older Toskar ignores it, and the model thinks as long
+	// as its own default.
+	ReasoningEffort string `json:"reasoning_effort,omitempty"`
 }
 
 func (c *Client) Chat(ctx context.Context, req RemoteChatRequest) (<-chan pluginapi.ChatChunk, error) {
