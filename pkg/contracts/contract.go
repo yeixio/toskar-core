@@ -19,7 +19,7 @@ import (
 // tests/contract checks that no field in the contract is removed or renamed.
 // api/openapi.yaml's info.version is this version too, so the SDKs
 // generated from it say which contract they were built for (#666).
-const ContractVersion = "1.88"
+const ContractVersion = "1.89"
 
 // ProjectHeader names the folder a client on this computer is working in, on a
 // chat request, path-escaped. Ignored from anywhere else (1.78, #1017).

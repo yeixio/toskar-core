@@ -85,6 +85,15 @@ type Performance struct {
 	GPUMemoryBytes           uint64  `json:"gpu_memory_bytes,omitempty"`
 	ContextWindow            int     `json:"context_window,omitempty"`
 	Quantization             string  `json:"quantization,omitempty"`
+	// LlamaCpp is the llama.cpp release it ran on, such as b12361 (#1066).
+	LlamaCpp string `json:"llama_cpp,omitempty"`
+	// Speculation is on when a draft guessed ahead during the runs, off
+	// when nothing was guessed; DraftAccepted is the share of the guesses
+	// the model kept (#835, #1066).
+	Speculation   string  `json:"speculation,omitempty"`
+	DraftAccepted float64 `json:"draft_accepted,omitempty"`
+	// Devices are the GPUs it ran on, every one when there are several.
+	Devices []string `json:"devices,omitempty"`
 }
 
 // ReadPerformance reads a report, and says why when it can't be used: one for

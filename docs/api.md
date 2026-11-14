@@ -471,7 +471,7 @@ If the model fails before it shows or changes anything, the turn runs once more:
 
 ### Effort, plans, checks, and Stop
 
-**Quality results (#593, contract 1.80, `performance` 1.81, `runs` 1.82).** `GET /api/v1/models/results` returns what Toskar's test runs measured, per model, computer, and date, from the public dataset. There's no ranking, and scores are comparable within one `method_version`. Without the dataset, `live` is false and `results` is empty.
+**Quality results (#593, contract 1.80, `performance` 1.81, `runs` 1.82, where it ran 1.89).** `GET /api/v1/models/results` returns what Toskar's test runs measured, per model, computer, and date, from the public dataset. There's no ranking, and scores are comparable within one `method_version`. A row's `performance` also says where it ran, when the run recorded it: `llama_cpp`, the release, such as b12361; `speculation`, on when a draft guessed ahead, with `draft_accepted`, the share of its guesses kept; and `devices`, every GPU (#1066). Without the dataset, `live` is false and `results` is empty.
 
 **The model store (#593, contract 1.79).** `GET /api/v1/models/store` returns shelves of models for this computer: `picks` (a tested model, then the most popular that run well here), `popular`, `top_rated`, `new`, `everyday`, `code`, `sees`, `small`, and `tested`. Rankings come from Hugging Face and are kept for an hour, so opening the store asks Hugging Face for them. A model that won't run here is left out, and so are gated models and re-uploads with their safeguards removed. `catalog_id` is set for a model tested with Toskar, which installs by that ID; others install through `POST /api/v1/models/install-from-url`. Without Hugging Face, `live` is false and only tested models are there.
 

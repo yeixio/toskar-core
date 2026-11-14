@@ -1312,6 +1312,11 @@ type BenchmarkSample struct {
 	// Backend and Device ran the sample (#317).
 	Backend string `json:"backend,omitempty"`
 	Device  string `json:"device,omitempty"`
+	// DraftTokens are tokens a draft guessed ahead, and DraftAccepted the
+	// ones the model kept (contract 1.89, #1066); zero when nothing was
+	// guessed.
+	DraftTokens   int `json:"draft_tokens,omitempty"`
+	DraftAccepted int `json:"draft_accepted,omitempty"`
 }
 
 // BenchmarkModelSummary aggregates measured samples for one model × workload.

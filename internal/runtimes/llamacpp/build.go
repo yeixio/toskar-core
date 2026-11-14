@@ -111,7 +111,7 @@ func pickAsset(rels []ghRelease, builds []string) (assetInfo, error) {
 		found := map[string]assetInfo{}
 		for _, a := range rel.Assets {
 			if b, ok := assetBuild(a.Name); ok {
-				found[b] = assetInfo{Name: a.Name, URL: a.BrowserDownloadURL, Build: b}
+				found[b] = assetInfo{Name: a.Name, URL: a.BrowserDownloadURL, Build: b, Tag: rel.Tag}
 			}
 		}
 		for _, b := range builds {
