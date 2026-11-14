@@ -295,6 +295,7 @@ type swarmResult struct {
 
 // scoreQuestion counts the facts an answer holds; it's done with all of them.
 func scoreQuestion(it swarmItem, answer string) (int, string) {
+	answer = seenSpaces.Replace(answer)
 	got := 0
 	var missing []string
 	for _, f := range it.Facts {
