@@ -84,6 +84,20 @@ var fenceRe = regexp.MustCompile("(?s)^\\s*```[\\w-]*\\s*\\n(.*?)\\n?```\\s*$")
 
 // fileBody removes a code fence or a leading sentence a model may add around
 // the contents.
+// fileContent is what a reply asked for a file's contents holds: the
+// contents, or, when the model wrote the file itself, as gpt-oss does when
+// it's offered tools (#1140), its files.create or filesystem.write call's.
+// Any other call is no file's contents.
+func fileContent(reply string) string {
+	out := tools.ParseModelOutput(reply)
+	if out.Call != nil && (out.Call.ID == "files.create" || out.Call.ID == "filesystem.write") {
+		if c, ok := out.Call.Args["content"].(string); ok {
+			return c
+		}
+	}
+	return out.Text
+}
+
 func fileBody(content string, table bool) string {
 	content = strings.TrimSpace(content)
 	if m := fenceRe.FindStringSubmatch(content); m != nil {
@@ -144,7 +158,7 @@ func makeFileFirst(ctx context.Context, env pluginapi.ExecutionEnvironment, prof
 	if err != nil {
 		return "", nil, false
 	}
-	body := fileBody(content, req.Table)
+	body := fileBody(fileContent(content), req.Table)
 	if body == "" {
 		return "", nil, false
 	}
