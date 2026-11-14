@@ -50,6 +50,11 @@ type performance struct {
 	DraftAccepted float64 `json:"draft_accepted,omitempty"`
 	// Devices are the GPUs it ran on, every one when there are several.
 	Devices []string `json:"devices,omitempty"`
+	// SystemMemoryBytes is the system memory the model's process held
+	// after the runs, measured, beside GPUMemoryBytes (#1066). Where the
+	// graphics share the computer's memory, as on a Mac, it includes what
+	// GPUMemoryBytes counts: the two aren't added.
+	SystemMemoryBytes uint64 `json:"system_memory_bytes,omitempty"`
 }
 
 // TestPerformance measures TOSKAR_QUALITY_MODEL with the long prompt benchmark,
@@ -136,6 +141,7 @@ func TestPerformance(t *testing.T) {
 			got.GPUMemoryBytes, got.Backend = r.Acceleration.GPUMemoryBytes, r.Acceleration.Backend
 			got.Devices = r.Acceleration.Devices
 		}
+		got.SystemMemoryBytes = r.ResidentBytes
 	}
 	var models []contracts.Model
 	d.do(t, http.MethodGet, "/api/v1/models", nil, &models)

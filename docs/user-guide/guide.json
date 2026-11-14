@@ -4327,7 +4327,7 @@
         },
         {
           "type": "paragraph",
-          "text": "Each running model shows a status on Models › Running and on the Performance overview. Select it to see the device, how many of the model's layers are on the GPU, and the GPU memory it uses. Diagnostics has a GPU acceleration row with the same states."
+          "text": "Each running model shows a status on Models › Running and on the Performance overview. Select it to see the device, how many of the model's layers are on the GPU, and the GPU memory it uses. Diagnostics has a GPU acceleration row with the same states. Models › Running also shows the memory each model holds, measured from its process every few seconds, against the computer's memory. Until Toskar can measure it, it shows the catalog's estimate, against the graphics card's memory where the computer has one."
         },
         {
           "type": "image",

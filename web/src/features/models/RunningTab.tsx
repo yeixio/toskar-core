@@ -28,12 +28,16 @@ export function RunningTab({
     )
   }
 
-  const totalMem = running.reduce((s, r) => s + (r.memory_bytes ?? 0), 0)
+  const totalMem = running.reduce((s, r) => s + (modelMemory(r) ?? 0), 0)
   const hostMem =
     localHardware?.accelerators?.[0]?.unified_memory_bytes ||
     localHardware?.accelerators?.[0]?.dedicated_vram_bytes ||
     localHardware?.memory?.total_bytes ||
     0
+  // A measured figure is the computer's memory the model holds (#1066), so
+  // its bar is against that, where a graphics card has memory of its own.
+  const systemMem =
+    localHardware?.accelerators?.[0]?.unified_memory_bytes || localHardware?.memory?.total_bytes || 0
 
   return (
     <div className="space-y-4">
@@ -44,6 +48,8 @@ export function RunningTab({
       </p>
       <ul className="grid gap-4 lg:grid-cols-2">
         {running.map((item) => {
+          const memory = modelMemory(item)
+          const of = item.resident_bytes ? systemMem : hostMem
           const usedBy =
             item.used_by_profiles && item.used_by_profiles.length > 0
               ? item.used_by_profiles
@@ -81,17 +87,17 @@ export function RunningTab({
                 <div>
                   <dt className="label-caps">{t('runningTab.memory')}</dt>
                   <dd className="mt-0.5 tabular-nums text-ink">
-                    {item.memory_bytes
-                      ? hostMem > 0
-                        ? `${formatBytes(item.memory_bytes)} / ${formatBytes(hostMem)}`
-                        : formatBytes(item.memory_bytes)
+                    {memory
+                      ? of > 0
+                        ? `${formatBytes(memory)} / ${formatBytes(of)}`
+                        : formatBytes(memory)
                       : t('runningTab.memoryUnavailable')}
                     {/* How much of the computer's memory the model holds. */}
-                    {item.memory_bytes && hostMem > 0 ? (
+                    {memory && of > 0 ? (
                       <span className="mt-1.5 block h-1.5 max-w-[12rem] overflow-hidden rounded-full bg-raised" aria-hidden>
                         <span
                           className="block h-full rounded-full bg-primary"
-                          style={{ width: `${Math.min(100, Math.max(2, (item.memory_bytes / hostMem) * 100))}%` }}
+                          style={{ width: `${Math.min(100, Math.max(2, (memory / of) * 100))}%` }}
                         />
                       </span>
                     ) : null}
@@ -130,4 +136,10 @@ export function RunningTab({
       </ul>
     </div>
   )
+}
+
+/** The memory a running model holds: measured from its process when the
+ * daemon could (#1066), else the catalog's estimate. */
+function modelMemory(item: RunningModelView): number | undefined {
+  return item.resident_bytes || item.memory_bytes || undefined
 }

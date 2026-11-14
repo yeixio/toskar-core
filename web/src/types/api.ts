@@ -182,7 +182,10 @@ export interface RunningModelView {
   node_id: string
   node_name: string
   status: string
+  /** The catalog's estimate of the memory it needs. */
   memory_bytes?: number
+  /** The system memory its process holds, measured (contract 1.90). */
+  resident_bytes?: number
   endpoint?: string
   speed_tok_per_sec?: number
   used_by_profiles?: string[]
@@ -328,6 +331,8 @@ export interface QualityPerformance {
   draft_accepted?: number
   /** The GPUs it ran on, every one when there are several (contract 1.89). */
   devices?: string[]
+  /** The system memory the model's process held after the runs, measured (contract 1.90). */
+  system_memory_bytes?: number
 }
 
 export interface QualityResults {
