@@ -19,7 +19,10 @@ func ScoreFits(catalog *Catalog, hw contracts.HardwareInventory, nodeID, nodeNam
 	return out
 }
 
-func estimateTokPerSec(e CatalogEntry, hw contracts.HardwareInventory, runtimeBytes, capacity uint64) float64 {
+// estimateTokPerSec guesses a model's speed from runtimeBytes, what it
+// needs, and read, what each token reads of that: less than all of it for a
+// mixture-of-experts model (#1140).
+func estimateTokPerSec(e CatalogEntry, hw contracts.HardwareInventory, runtimeBytes, read, capacity uint64) float64 {
 	// Rough heuristic: smaller models + discrete/Metal GPU are faster.
 	// This is not a measurement. The UI labels it as estimated unless a benchmark overrode it.
 	base := 80.0
@@ -27,8 +30,11 @@ func estimateTokPerSec(e CatalogEntry, hw contracts.HardwareInventory, runtimeBy
 	if need == 0 {
 		need = e.MemoryNeededBytes
 	}
-	if need > 0 {
-		gb := float64(need) / (1024 * 1024 * 1024)
+	if read == 0 || read > need {
+		read = need
+	}
+	if read > 0 {
+		gb := float64(read) / (1024 * 1024 * 1024)
 		base = 120.0 / (1 + gb/4)
 	}
 	accelBoost := 1.0

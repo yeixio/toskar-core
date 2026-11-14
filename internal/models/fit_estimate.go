@@ -136,6 +136,11 @@ func ClassifyFit(e CatalogEntry, hw contracts.HardwareInventory, nodeID, nodeNam
 		billions = float64(weights) / (bpp * 1e9)
 		fit.Approximate = true
 	}
+	// A mixture-of-experts model's cache is its attention's, which is the
+	// size of its active parameters' model, not of all its experts' (#1140).
+	if active := parameterBillions(e.ActiveParameters); active > 0 && active < billions {
+		billions = active
+	}
 	// Each slot has a window of its own (#1135), and the cache type follows
 	// one slot's window, as llamacpp sets it.
 	slots := max(1, opts.Slots[e.ID])
@@ -169,7 +174,7 @@ func ClassifyFit(e CatalogEntry, hw contracts.HardwareInventory, nodeID, nodeNam
 	fit.Headroom = float64(usable) / float64(low)
 	fit.Label = labelForHeadroom(fit.Headroom)
 	fit.Reason = reasonForLabel(fit.Label)
-	fit.EstTokPerSec = estimateTokPerSec(e, hw, low, capacity)
+	fit.EstTokPerSec = estimateTokPerSec(e, hw, low, readPerToken(e, weights, low), capacity)
 	fit.GPUNote = gpuNote(hw, low)
 	if kind == "unified" && !opts.Proven[e.ID] && !hasMeasured {
 		graphicsFit(&fit, low, SharedGraphics(capacity))
@@ -317,6 +322,17 @@ func cacheShare(window int) float64 {
 		return 17.0 / 32
 	}
 	return 1
+}
+
+// readPerToken is how much of a model's memory each token reads: all of
+// it, or for a mixture-of-experts model, its active parameters' share of
+// the weights and all the rest (#1140).
+func readPerToken(e CatalogEntry, weights, need uint64) uint64 {
+	total, active := parameterBillions(e.Parameters), parameterBillions(e.ActiveParameters)
+	if total <= 0 || active <= 0 || active >= total || weights > need {
+		return need
+	}
+	return need - weights + uint64(float64(weights)*active/total)
 }
 
 // attentionShare is how many layers there are for each one that keeps a

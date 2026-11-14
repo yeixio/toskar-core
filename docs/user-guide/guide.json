@@ -56,19 +56,28 @@
             ],
             [
               "24 to 32 GB",
-              "Up to about 10 GB, the 14B models",
-              "Qwen 2.5 14B"
+              "Up to about 12 GB, the 14B models and gpt-oss 20B",
+              "Qwen 2.5 14B, gpt-oss 20B"
             ],
             [
               "64 GB or more",
               "The 30B models, about 21 GB",
               "Qwen 3.8 27B, Qwen 2.5 32B"
+            ],
+            [
+              "96 GB or more",
+              "gpt-oss 120B, about 63 GB",
+              "gpt-oss 120B"
             ]
           ]
         },
         {
           "type": "paragraph",
           "text": "On a Mac, the graphics use part of the computer's memory, and the table counts that part. A graphics card on a Windows or Linux computer brings its own memory, so larger models run there too. You don't need to work this out yourself: Toskar checks this computer and labels every model by how well it fits."
+        },
+        {
+          "type": "paragraph",
+          "text": "OpenAI's gpt-oss models are a mixture of experts: each word they write uses only a small part of the model, 3.6 billion of the 20B's 21 billion parameters. So they answer much faster than their size suggests, and leave more room for a long conversation. They still need memory for the whole file. Both think before they answer, and use tools."
         },
         {
           "type": "heading",
