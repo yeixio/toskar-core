@@ -1,10 +1,11 @@
 import { useQuery } from '@tanstack/react-query'
-import { useMemo, useState } from 'react'
+import { Fragment, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { formatDate, formatDecimal, formatPercent } from '@/i18n/format'
 import { api } from '@/lib/api'
+import { formatBytes } from '@/lib/format'
 import { compareAlphabetical, overallScore } from './resultsSort'
-import type { QualityResult } from '@/types/api'
+import type { QualityPerformance, QualityResult } from '@/types/api'
 
 /** A set's name, when this build has one; a new set still shows, by its key. */
 const KNOWN_SUITES = ['quality', 'topics', 'files', 'reasoning', 'triage', 'fix_test']
@@ -31,6 +32,7 @@ function valueOf(row: QualityResult, key: SortKey): string | number | null {
 export function ResultsTab() {
   const { t } = useTranslation('models')
   const [sort, setSort] = useState<{ key: SortKey; descending: boolean }>({ key: 'date', descending: true })
+  const [open, setOpen] = useState<Set<string>>(new Set())
   const [computer, setComputer] = useState('')
   const query = useQuery({
     queryKey: ['quality-results'],
@@ -134,46 +136,148 @@ export function ResultsTab() {
             </tr>
           </thead>
           <tbody>
-            {rows.map((r) => (
-              <tr key={`${r.model}-${r.hardware}-${r.date}`} className="border-b border-line last:border-0">
-                <th scope="row" className="whitespace-nowrap px-3 py-2 text-start font-medium text-ink">
-                  {r.name}
-                  {r.submitted ? (
-                    <span className="ms-2 text-xs font-normal text-ink-muted">{r.submitted_by || t('results.community')}</span>
-                  ) : null}
-                </th>
-                <td className="whitespace-nowrap px-3 py-2">{r.runs ? t(`results.runsValue.${r.runs}`) : none}</td>
-                <td className="whitespace-nowrap px-3 py-2 font-medium tabular-nums">
-                  {overallScore(r.scores) === null ? none : t('results.overallValue', { score: overallScore(r.scores), version: r.method_version })}
-                </td>
-                {suites.map((s) => {
-                  const score = r.scores[s]
-                  return (
-                    <td key={s} className="whitespace-nowrap px-3 py-2 tabular-nums" title={score ? formatPercent(score.passed / score.of) : undefined}>
-                      {score ? t('results.score', { passed: score.passed, of: score.of }) : <span className="text-ink-faint">–</span>}
+            {rows.map((r) => {
+              const key = `${r.model}-${r.hardware}-${r.date}`
+              const details = hasDetails(r.performance)
+              const shown = details && open.has(key)
+              return (
+                <Fragment key={key}>
+                  <tr className={shown ? '' : 'border-b border-line last:border-0'}>
+                    <th scope="row" className="whitespace-nowrap px-3 py-2 text-start font-medium text-ink">
+                      {r.name}
+                      {r.submitted ? (
+                        <span className="ms-2 text-xs font-normal text-ink-muted">{r.submitted_by || t('results.community')}</span>
+                      ) : null}
+                      {details ? (
+                        <button
+                          type="button"
+                          className="ms-2 text-xs font-normal text-primary underline-offset-2 hover:underline"
+                          aria-expanded={shown}
+                          aria-label={t('results.detailsFor', { model: r.name })}
+                          onClick={() =>
+                            setOpen((was) => {
+                              const next = new Set(was)
+                              if (next.has(key)) next.delete(key)
+                              else next.add(key)
+                              return next
+                            })
+                          }
+                        >
+                          {t('results.details')}
+                        </button>
+                      ) : null}
+                    </th>
+                    <td className="whitespace-nowrap px-3 py-2">{r.runs ? t(`results.runsValue.${r.runs}`) : none}</td>
+                    <td className="whitespace-nowrap px-3 py-2 font-medium tabular-nums">
+                      {overallScore(r.scores) === null ? none : t('results.overallValue', { score: overallScore(r.scores), version: r.method_version })}
                     </td>
-                  )
-                })}
-                <td className="whitespace-nowrap px-3 py-2 tabular-nums">{speed(r.performance?.tokens_per_second)}</td>
-                <td className="whitespace-nowrap px-3 py-2 tabular-nums">{speed(r.performance?.prompt_tokens_per_second)}</td>
-                <td className="whitespace-nowrap px-3 py-2 tabular-nums">
-                  {r.performance ? t('results.seconds', { seconds: formatDecimal(r.performance.first_token_ms / 1000, 1) }) : none}
-                </td>
-                <td className="whitespace-nowrap px-3 py-2">{r.hardware}</td>
-                <td className="whitespace-nowrap px-3 py-2">{formatDate(`${r.date}T12:00:00`)}</td>
-                <td className="whitespace-nowrap px-3 py-2 tabular-nums">{r.method_version}</td>
-                <td className="whitespace-nowrap px-3 py-2">
-                  {r.source ? (
-                    <a className="text-primary underline-offset-2 hover:underline" href={r.source} target="_blank" rel="noreferrer noopener">
-                      {t('results.sourceLink')}
-                    </a>
+                    {suites.map((s) => {
+                      const score = r.scores[s]
+                      return (
+                        <td key={s} className="whitespace-nowrap px-3 py-2 tabular-nums" title={score ? formatPercent(score.passed / score.of) : undefined}>
+                          {score ? t('results.score', { passed: score.passed, of: score.of }) : <span className="text-ink-faint">–</span>}
+                        </td>
+                      )
+                    })}
+                    <td className="whitespace-nowrap px-3 py-2 tabular-nums">{speed(r.performance?.tokens_per_second)}</td>
+                    <td className="whitespace-nowrap px-3 py-2 tabular-nums">{speed(r.performance?.prompt_tokens_per_second)}</td>
+                    <td className="whitespace-nowrap px-3 py-2 tabular-nums">
+                      {r.performance ? t('results.seconds', { seconds: formatDecimal(r.performance.first_token_ms / 1000, 1) }) : none}
+                    </td>
+                    <td className="whitespace-nowrap px-3 py-2">{r.hardware}</td>
+                    <td className="whitespace-nowrap px-3 py-2">{formatDate(`${r.date}T12:00:00`)}</td>
+                    <td className="whitespace-nowrap px-3 py-2 tabular-nums">{r.method_version}</td>
+                    <td className="whitespace-nowrap px-3 py-2">
+                      {r.source ? (
+                        <a className="text-primary underline-offset-2 hover:underline" href={r.source} target="_blank" rel="noreferrer noopener">
+                          {t('results.sourceLink')}
+                        </a>
+                      ) : null}
+                    </td>
+                  </tr>
+                  {shown && r.performance ? (
+                    <tr className="border-b border-line last:border-0">
+                      <td colSpan={10 + suites.length} className="px-3 pb-3">
+                        <RunDetails performance={r.performance} />
+                      </td>
+                    </tr>
                   ) : null}
-                </td>
+                </Fragment>
+              )
+            })}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  )
+}
+
+/** Whether a result says more about how it ran than its row shows (#1066). */
+function hasDetails(p?: QualityPerformance): boolean {
+  return Boolean(
+    p && (p.llama_cpp || p.speculation || p.devices?.length || p.system_memory_bytes || p.gpu_memory_bytes || p.contexts?.length),
+  )
+}
+
+/** Where a result ran, and the same model at longer windows (#1066). */
+function RunDetails({ performance: p }: { performance: QualityPerformance }) {
+  const { t } = useTranslation('models')
+  const facts = [
+    p.devices?.length ? t('results.ranOn', { devices: p.devices.join(', ') }) : '',
+    p.llama_cpp ? `llama.cpp ${p.llama_cpp}` : '',
+    p.speculation === 'on'
+      ? t('results.guessAheadOn', { share: formatPercent(p.draft_accepted ?? 0) })
+      : p.speculation === 'off'
+        ? t('results.guessAheadOff')
+        : '',
+    p.system_memory_bytes ? t('results.memorySystem', { size: formatBytes(p.system_memory_bytes) }) : '',
+    p.gpu_memory_bytes ? t('results.memoryGraphics', { size: formatBytes(p.gpu_memory_bytes) }) : '',
+  ].filter(Boolean)
+  const none = <span className="text-ink-muted">–</span>
+  const speed = (tokens?: number) => (tokens ? formatDecimal(tokens, tokens >= 100 ? 0 : 1) : none)
+  return (
+    <div className="space-y-2 text-sm text-ink-muted">
+      {facts.length ? <p>{facts.join(' · ')}</p> : null}
+      {p.contexts?.length ? (
+        <table className="text-sm">
+          <caption className="pb-1 text-start font-medium text-ink">{t('results.contexts')}</caption>
+          <thead>
+            <tr>
+              {[t('results.window'), t('results.prompt'), t('results.reads'), t('results.writes'), t('results.firstToken'), t('results.memory')].map(
+                (label) => (
+                  <th key={label} scope="col" className="whitespace-nowrap pe-4 text-start font-medium">
+                    {label}
+                  </th>
+                ),
+              )}
+            </tr>
+          </thead>
+          <tbody>
+            {p.contexts.map((c) => (
+              <tr key={c.context}>
+                <th scope="row" className="whitespace-nowrap pe-4 text-start font-medium tabular-nums text-ink">
+                  {t('results.windowSize', { size: Math.round(c.context / 1024) })}
+                </th>
+                {c.runs === 'no' ? (
+                  <td colSpan={5} className="pe-4">
+                    {t(`results.whyNo.${c.why === 'window' ? 'window' : 'out_of_memory'}`)}
+                  </td>
+                ) : (
+                  <>
+                    <td className="whitespace-nowrap pe-4 tabular-nums">{c.prompt_tokens ? formatDecimal(c.prompt_tokens, 0) : none}</td>
+                    <td className="whitespace-nowrap pe-4 tabular-nums">{speed(c.prompt_tokens_per_second)}</td>
+                    <td className="whitespace-nowrap pe-4 tabular-nums">{speed(c.tokens_per_second)}</td>
+                    <td className="whitespace-nowrap pe-4 tabular-nums">
+                      {c.first_token_ms ? t('results.seconds', { seconds: formatDecimal(c.first_token_ms / 1000, 1) }) : none}
+                    </td>
+                    <td className="whitespace-nowrap pe-4 tabular-nums">{c.system_memory_bytes ? formatBytes(c.system_memory_bytes) : none}</td>
+                  </>
+                )}
               </tr>
             ))}
           </tbody>
         </table>
-      </div>
+      ) : null}
     </div>
   )
 }

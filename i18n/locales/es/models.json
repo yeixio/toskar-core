@@ -520,6 +520,22 @@
       "partial": "En parte",
       "cpu": "En el procesador",
       "no": "No funciona"
+    },
+    "details": "Detalles",
+    "detailsFor": "Detalles de {{model}}",
+    "ranOn": "Funcionó en {{devices}}",
+    "guessAheadOn": "Adivinar por adelantado: activado, se conservó el {{share}} de las suposiciones",
+    "guessAheadOff": "Adivinar por adelantado: desactivado",
+    "memorySystem": "Memoria: {{size}}",
+    "memoryGraphics": "Memoria gráfica: {{size}}",
+    "contexts": "Ventanas de contexto más largas",
+    "window": "Ventana",
+    "prompt": "Prompt (tokens)",
+    "memory": "Memoria",
+    "windowSize": "{{size}}K",
+    "whyNo": {
+      "window": "Supera su ventana",
+      "out_of_memory": "No cabe"
     }
   }
 }

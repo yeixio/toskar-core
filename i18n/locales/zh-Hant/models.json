@@ -504,6 +504,22 @@
       "partial": "部分",
       "cpu": "僅處理器",
       "no": "無法執行"
+    },
+    "details": "詳細資料",
+    "detailsFor": "{{model}} 的詳細資料",
+    "ranOn": "執行裝置：{{devices}}",
+    "guessAheadOn": "提前猜測：開啟，保留了 {{share}} 的猜測",
+    "guessAheadOff": "提前猜測：關閉",
+    "memorySystem": "記憶體：{{size}}",
+    "memoryGraphics": "顯示記憶體：{{size}}",
+    "contexts": "更長的上下文視窗",
+    "window": "視窗",
+    "prompt": "提示 (詞元)",
+    "memory": "記憶體",
+    "windowSize": "{{size}}K",
+    "whyNo": {
+      "window": "超出其視窗",
+      "out_of_memory": "放不下"
     }
   }
 }
