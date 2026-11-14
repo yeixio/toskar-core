@@ -366,6 +366,7 @@ func (r *Runner) runOnce(
 		sample.EvalTokPerSec = metrics.EvalTokPerSec
 		sample.PromptTokens = metrics.PromptTokens
 		sample.CompletionTokens = metrics.CompletionTokens
+		sample.DraftTokens, sample.DraftAccepted = metrics.DraftTokens, metrics.DraftAccepted
 	}
 	return sample, nil
 }

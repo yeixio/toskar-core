@@ -248,6 +248,18 @@ func TestReadPerformance(t *testing.T) {
 	if _, err := ReadPerformance(path+".missing", "m"); err == nil {
 		t.Error("a missing report was read")
 	}
+
+	// Where it ran goes in the row too: llama.cpp's release, guessing ahead,
+	// and every GPU (#1066).
+	body := `{"model":"m","runs":"full","prompt_tokens_per_second":1,"tokens_per_second":1,"first_token_ms":1,"effective_tokens_per_second":1,` +
+		`"llama_cpp":"b12361","speculation":"on","draft_accepted":0.72,"devices":["RTX 3090","RTX 3090"]}`
+	if err := os.WriteFile(path, []byte(body), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	p, err := ReadPerformance(path, "m")
+	if err != nil || p.LlamaCpp != "b12361" || p.Speculation != "on" || p.DraftAccepted != 0.72 || len(p.Devices) != 2 {
+		t.Errorf("read %+v, %v", p, err)
+	}
 }
 
 func TestNextModels(t *testing.T) {

@@ -301,6 +301,10 @@ func (r *Runtime) install(ctx context.Context, idleOnly bool) (bool, error) {
 	if err := os.Chmod(r.binaryPath(), 0o755); err != nil {
 		return false, err
 	}
+	if asset.Tag != "" {
+		// Its release, for the Runtimes page and the quality results (#1066).
+		_ = os.WriteFile(filepath.Join(destDir, versionFile), []byte(asset.Tag+"\n"), 0o644)
+	}
 	return true, nil
 }
 
@@ -345,6 +349,8 @@ type assetInfo struct {
 	URL  string
 	// Build is what follows "-bin-" in the name, such as ubuntu-vulkan-x64.
 	Build string
+	// Tag is its release, such as b12361.
+	Tag string
 }
 
 // releasesURL lists llama.cpp's newest releases; tests point it elsewhere.
@@ -541,8 +547,19 @@ func flattenRuntimeDir(srcDir, destDir string) error {
 	return nil
 }
 
+// versionFile, beside llama-server, holds the release Toskar installed.
+const versionFile = "VERSION"
+
+// readVersion is the llama.cpp release at path, such as b12361 (#1066), as
+// Toskar wrote it when it installed it; the binary's date for one installed
+// before, or placed by hand. Detect runs before every model start, so it
+// reads a file and doesn't run llama-server to ask.
 func readVersion(path string) string {
-	// Best-effort; full version probing would exec --version.
+	if raw, err := os.ReadFile(filepath.Join(filepath.Dir(path), versionFile)); err == nil {
+		if tag := strings.TrimSpace(string(raw)); tag != "" {
+			return tag
+		}
+	}
 	if st, err := os.Stat(path); err == nil {
 		return st.ModTime().Format("2006-01-02")
 	}

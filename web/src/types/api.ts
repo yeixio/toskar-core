@@ -320,6 +320,14 @@ export interface QualityPerformance {
   gpu_memory_bytes?: number
   context_window?: number
   quantization?: string
+  /** The llama.cpp release it ran on, such as b12361 (contract 1.89). */
+  llama_cpp?: string
+  /** Whether a draft guessed ahead during the runs (contract 1.89). */
+  speculation?: 'on' | 'off'
+  /** The share of the draft's guesses the model kept, 0 to 1 (contract 1.89). */
+  draft_accepted?: number
+  /** The GPUs it ran on, every one when there are several (contract 1.89). */
+  devices?: string[]
 }
 
 export interface QualityResults {

@@ -1,5 +1,5 @@
 {
-  "version": "1.88",
+  "version": "1.89",
   "types": {
     "ActivityStep": [
       "kind",
@@ -341,6 +341,11 @@
       "minutes",
       "tokens"
     ],
+    "SwarmConflict": [
+      "agent",
+      "branch",
+      "files"
+    ],
     "ToolUse": [
       "calls",
       "failures",
@@ -355,11 +360,6 @@
       "product",
       "source",
       "version"
-    ],
-    "SwarmConflict": [
-      "agent",
-      "branch",
-      "files"
     ]
   }
 }
