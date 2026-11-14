@@ -170,6 +170,7 @@ func madeFileFailures(wants map[string][]string, made map[string][]byte) []strin
 			continue
 		}
 		text, err := fileText(name, data)
+		text = seenSpaces.Replace(text)
 		if err != nil {
 			out = append(out, fmt.Sprintf("%s doesn't open: %v", name, err))
 			continue

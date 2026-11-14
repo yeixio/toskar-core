@@ -481,7 +481,14 @@ func (r Result) toolIDs(eventType string) []string {
 	return out
 }
 
+// seenSpaces is what an answer reads as, for matching: the spaces a person
+// sees as spaces are spaces. gpt-oss writes a narrow no-break space between
+// a number and its unit and in names, as in "March 9" and "9 AM", which
+// Go's \s and a pattern's plain space don't match (#1140).
+var seenSpaces = strings.NewReplacer("\u00a0", " ", "\u2007", " ", "\u2009", " ", "\u202f", " ", "\u2011", "-")
+
 func check(driver string, c Case, r Result, deflection *regexp.Regexp) []string {
+	r.Answer = seenSpaces.Replace(r.Answer)
 	x := c.Expect
 	var failures []string
 	fail := func(format string, args ...any) {
