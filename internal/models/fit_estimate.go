@@ -175,6 +175,14 @@ func ClassifyFit(e CatalogEntry, hw contracts.HardwareInventory, nodeID, nodeNam
 	fit.Label = labelForHeadroom(fit.Headroom)
 	fit.Reason = reasonForLabel(fit.Label)
 	fit.EstTokPerSec = estimateTokPerSec(e, hw, low, readPerToken(e, weights, low), capacity)
+	if card := cardMemory(hw); card > 0 && low > card {
+		// A model split between the card and system memory runs at the
+		// processor's pace, which the estimate doesn't know (#984): on a
+		// 16 GB laptop card it said about 62 tokens a second for Qwen 3.6
+		// 35B-A3B, which answered at 6.3, and 19 for Qwen 2.5 32B, which
+		// answered at 3.8. No number until a run here measures one.
+		fit.EstTokPerSec = 0
+	}
 	fit.GPUNote = gpuNote(hw, low)
 	if kind == "unified" && !opts.Proven[e.ID] && !hasMeasured {
 		graphicsFit(&fit, low, SharedGraphics(capacity))
