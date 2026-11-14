@@ -1,5 +1,6 @@
 ### Added
 
-- A running model's measured memory: `GET /api/v1/models/running` gives
-  `resident_bytes`, the system memory its process holds, beside the
-  catalog's estimate, and quality results record it (contract 1.90).
+- Models › Running shows the memory each model really holds, measured
+  from its process, against the computer's memory, where it showed the
+  catalog's estimate. `GET /api/v1/models/running` gives it as
+  `resident_bytes`, and quality results record it (contract 1.90).
