@@ -260,6 +260,17 @@ func TestReadPerformance(t *testing.T) {
 	if err != nil || p.LlamaCpp != "b12361" || p.Speculation != "on" || p.DraftAccepted != 0.72 || len(p.Devices) != 2 {
 		t.Errorf("read %+v, %v", p, err)
 	}
+
+	// And the same model at longer windows, one it doesn't take included.
+	body = `{"model":"m","runs":"full","prompt_tokens_per_second":1,"tokens_per_second":1,"first_token_ms":1,"effective_tokens_per_second":1,` +
+		`"contexts":[{"context":32768,"runs":"full","prompt_tokens":24500,"tokens_per_second":61.2,"system_memory_bytes":5000000000},{"context":524288,"runs":"no","why":"window"}]}`
+	if err := os.WriteFile(path, []byte(body), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	p, err = ReadPerformance(path, "m")
+	if err != nil || len(p.Contexts) != 2 || p.Contexts[0].TokensPerSecond != 61.2 || p.Contexts[1].Why != "window" {
+		t.Errorf("read %+v, %v", p, err)
+	}
 }
 
 func TestNextModels(t *testing.T) {

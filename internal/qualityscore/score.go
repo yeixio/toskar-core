@@ -99,6 +99,28 @@ type Performance struct {
 	// graphics share the computer's memory, as on a Mac, it includes what
 	// GPUMemoryBytes counts: the two aren't added.
 	SystemMemoryBytes uint64 `json:"system_memory_bytes,omitempty"`
+	// Contexts are the same model at longer windows, when the run measured
+	// them (#1066).
+	Contexts []ContextPerformance `json:"contexts,omitempty"`
+}
+
+// ContextPerformance is how the model ran with its window set to Context
+// tokens and a prompt filling about three quarters of it (#1066): reading
+// and writing speed, the wait, and the memory it took, which grows with the
+// window. Runs is no, with Why, at a size it doesn't take or doesn't fit.
+type ContextPerformance struct {
+	Context                  int     `json:"context"`
+	Runs                     string  `json:"runs"`
+	Why                      string  `json:"why,omitempty"`
+	PromptTokens             int     `json:"prompt_tokens,omitempty"`
+	PromptTokensPerSecond    float64 `json:"prompt_tokens_per_second,omitempty"`
+	TokensPerSecond          float64 `json:"tokens_per_second,omitempty"`
+	FirstTokenMs             float64 `json:"first_token_ms,omitempty"`
+	EffectiveTokensPerSecond float64 `json:"effective_tokens_per_second,omitempty"`
+	GPULayers                int     `json:"gpu_layers,omitempty"`
+	GPULayersTotal           int     `json:"gpu_layers_total,omitempty"`
+	GPUMemoryBytes           uint64  `json:"gpu_memory_bytes,omitempty"`
+	SystemMemoryBytes        uint64  `json:"system_memory_bytes,omitempty"`
 }
 
 // ReadPerformance reads a report, and says why when it can't be used: one for

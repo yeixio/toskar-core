@@ -5,6 +5,8 @@ import (
 	"math"
 	"net/http"
 	"os"
+	"slices"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -55,6 +57,28 @@ type performance struct {
 	// graphics share the computer's memory, as on a Mac, it includes what
 	// GPUMemoryBytes counts: the two aren't added.
 	SystemMemoryBytes uint64 `json:"system_memory_bytes,omitempty"`
+	// Contexts are the same model at longer windows, when the run measured
+	// them (#1066).
+	Contexts []ContextPerformance `json:"contexts,omitempty"`
+}
+
+// ContextPerformance is how the model ran with its window set to Context
+// tokens and a prompt filling about three quarters of it (#1066): reading
+// and writing speed, the wait, and the memory it took, which grows with the
+// window. Runs is no, with Why, at a size it doesn't take or doesn't fit.
+type ContextPerformance struct {
+	Context                  int     `json:"context"`
+	Runs                     string  `json:"runs"`
+	Why                      string  `json:"why,omitempty"`
+	PromptTokens             int     `json:"prompt_tokens,omitempty"`
+	PromptTokensPerSecond    float64 `json:"prompt_tokens_per_second,omitempty"`
+	TokensPerSecond          float64 `json:"tokens_per_second,omitempty"`
+	FirstTokenMs             float64 `json:"first_token_ms,omitempty"`
+	EffectiveTokensPerSecond float64 `json:"effective_tokens_per_second,omitempty"`
+	GPULayers                int     `json:"gpu_layers,omitempty"`
+	GPULayersTotal           int     `json:"gpu_layers_total,omitempty"`
+	GPUMemoryBytes           uint64  `json:"gpu_memory_bytes,omitempty"`
+	SystemMemoryBytes        uint64  `json:"system_memory_bytes,omitempty"`
 }
 
 // TestPerformance measures TOSKAR_QUALITY_MODEL with the long prompt benchmark,
@@ -71,20 +95,7 @@ func TestPerformance(t *testing.T) {
 	var inventory contracts.HardwareInventory
 	d.do(t, http.MethodGet, "/api/v1/hardware", nil, &inventory)
 
-	var job contracts.BenchmarkJob
-	req := contracts.BenchmarkRequest{ModelIDs: []string{model}, WorkloadIDs: []string{benchmark.LongPromptWorkload}, Runs: 3}
-	if status := d.do(t, http.MethodPost, "/api/v1/benchmarks", req, &job); status >= 300 {
-		t.Fatalf("starting the benchmark: status %d", status)
-	}
-	for deadline := time.Now().Add(60 * time.Minute); ; time.Sleep(2 * time.Second) {
-		if time.Now().After(deadline) {
-			t.Fatalf("the benchmark didn't finish: %+v", job.Progress)
-		}
-		d.do(t, http.MethodGet, "/api/v1/benchmarks/"+job.ID, nil, &job)
-		if job.Status != contracts.BenchmarkPending && job.Status != contracts.BenchmarkRunning {
-			break
-		}
-	}
+	job := runBenchmark(t, d, model, benchmark.LongPromptWorkload, 3)
 	// Running out of memory is this model's result on this computer. Anything
 	// else that stops it is a failed run, which says nothing about the model.
 	if failure := benchmarkFailure(job); failure != "" && health.OutOfMemory(failure) {
@@ -151,7 +162,128 @@ func TestPerformance(t *testing.T) {
 		}
 	}
 	got.LlamaCpp = llamaRelease(d, t)
+	got.Contexts = measureContexts(t, d, model)
 	writePerformance(t, path, got)
+}
+
+// runBenchmark runs a workload on model and waits for it to end.
+func runBenchmark(t *testing.T, d realDriver, model, workload string, runs int) contracts.BenchmarkJob {
+	t.Helper()
+	var job contracts.BenchmarkJob
+	req := contracts.BenchmarkRequest{ModelIDs: []string{model}, WorkloadIDs: []string{workload}, Runs: runs}
+	if status := d.do(t, http.MethodPost, "/api/v1/benchmarks", req, &job); status >= 300 {
+		t.Fatalf("starting the benchmark: status %d", status)
+	}
+	for deadline := time.Now().Add(60 * time.Minute); ; time.Sleep(2 * time.Second) {
+		if time.Now().After(deadline) {
+			t.Fatalf("the benchmark didn't finish: %+v", job.Progress)
+		}
+		d.do(t, http.MethodGet, "/api/v1/benchmarks/"+job.ID, nil, &job)
+		if job.Status != contracts.BenchmarkPending && job.Status != contracts.BenchmarkRunning {
+			return job
+		}
+	}
+}
+
+// measureContexts measures model at each window TOSKAR_QUALITY_CONTEXTS
+// names, such as 32768,65536,131072 (#1066): the window set to that size,
+// a prompt filling about three quarters of it, one run. The model's own
+// window choice is put back after.
+func measureContexts(t *testing.T, d realDriver, model string) []ContextPerformance {
+	t.Helper()
+	sizes := contextSizes(config.Env("QUALITY_CONTEXTS"))
+	if len(sizes) == 0 {
+		return nil
+	}
+	options, choice := contextOptions(t, d, model)
+	defer d.do(t, http.MethodPut, "/api/v1/models/"+model+"/context", map[string]any{"context_window": choice}, nil)
+	var out []ContextPerformance
+	for _, n := range sizes {
+		row := ContextPerformance{Context: n}
+		if !slices.Contains(options, n) {
+			// Past the model's own window.
+			row.Runs, row.Why = "no", "window"
+			out = append(out, row)
+			continue
+		}
+		if status := d.do(t, http.MethodPut, "/api/v1/models/"+model+"/context", map[string]any{"context_window": n}, nil); status >= 300 {
+			t.Fatalf("setting a %d-token window: status %d", n, status)
+		}
+		job := runBenchmark(t, d, model, benchmark.LongContextWorkload(n), 1)
+		if failure := benchmarkFailure(job); failure != "" {
+			if !health.OutOfMemory(failure) {
+				t.Fatalf("the %d-token window failed: %s", n, failure)
+			}
+			row.Runs, row.Why = "no", "out_of_memory"
+			out = append(out, row)
+			continue
+		}
+		if job.Status != contracts.BenchmarkCompleted || len(job.Summaries) == 0 {
+			t.Fatalf("the %d-token window ended %s: %s", n, job.Status, job.Error)
+		}
+		s := job.Summaries[0]
+		row.PromptTokensPerSecond, row.TokensPerSecond, row.FirstTokenMs = round1(s.AvgPromptTokPerSec), round1(s.AvgEvalTokPerSec), math.Round(s.AvgTTFTMs)
+		completion, total := 0, 0.0
+		for _, sample := range job.Samples {
+			if !sample.Warmup {
+				row.PromptTokens = sample.PromptTokens
+				completion += sample.CompletionTokens
+				total += sample.TotalMs
+			}
+		}
+		if total > 0 {
+			row.EffectiveTokensPerSecond = round1(float64(completion) / (total / 1000))
+		}
+		var running []contracts.RunningModelView
+		d.do(t, http.MethodGet, "/api/v1/models/running", nil, &running)
+		for _, r := range running {
+			if r.ModelID != model || r.Mode != "" {
+				continue
+			}
+			if r.Acceleration != nil {
+				row.Runs, _ = runsFrom(r.Acceleration)
+				row.GPULayers, row.GPULayersTotal, row.GPUMemoryBytes = r.Acceleration.LayersOffloaded, r.Acceleration.LayersTotal, r.Acceleration.GPUMemoryBytes
+			}
+			row.SystemMemoryBytes = r.ResidentBytes
+		}
+		if row.Runs == "" {
+			row.Runs = "full"
+		}
+		t.Logf("%d-token window: %+v", n, row)
+		out = append(out, row)
+	}
+	return out
+}
+
+// contextSizes reads a list of windows, such as "32768,65536", in order.
+func contextSizes(s string) []int {
+	var out []int
+	for _, f := range strings.FieldsFunc(s, func(r rune) bool { return r == ',' || r == ' ' }) {
+		if n, err := strconv.Atoi(f); err == nil && n > 0 {
+			out = append(out, n)
+		}
+	}
+	return out
+}
+
+// contextOptions are the windows model takes on this computer, and the
+// one chosen for it now, 0 for Auto.
+func contextOptions(t *testing.T, d realDriver, model string) ([]int, int) {
+	t.Helper()
+	var models []contracts.Model
+	d.do(t, http.MethodGet, "/api/v1/models", nil, &models)
+	for _, m := range models {
+		if m.ID != model {
+			continue
+		}
+		var sizes []int
+		for _, o := range m.ContextOptions {
+			sizes = append(sizes, o.Tokens)
+		}
+		return sizes, m.ContextChoice
+	}
+	t.Fatalf("%s isn't installed", model)
+	return nil, 0
 }
 
 // speculation is whether a draft guessed ahead during the runs, and the
@@ -219,6 +351,20 @@ func writePerformance(t *testing.T, path string, got performance) {
 }
 
 func round1(v float64) float64 { return math.Round(v*10) / 10 }
+
+// The windows a run measures are read in order, and anything else is left
+// out (#1066).
+func TestContextSizes(t *testing.T) {
+	if got := contextSizes("32768, 65536,131072"); !slices.Equal(got, []int{32768, 65536, 131072}) {
+		t.Errorf("got %v", got)
+	}
+	if got := contextSizes(""); got != nil {
+		t.Errorf("blank: %v", got)
+	}
+	if got := contextSizes("32k,-1,0,8192"); !slices.Equal(got, []int{8192}) {
+		t.Errorf("junk: %v", got)
+	}
+}
 
 // Guessing ahead is on when a draft guessed during the runs, with the share
 // of its guesses kept, and off when nothing was guessed (#1066).
