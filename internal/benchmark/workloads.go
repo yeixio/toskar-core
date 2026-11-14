@@ -161,11 +161,53 @@ const LongPromptWorkload = "long_prompt"
 // longDocument is the same text every time, and long enough to take real work
 // to read: about 4,000 tokens.
 func longDocument() string {
+	return shippingLog(160)
+}
+
+// LongContexts are the windows a long-context workload fills (#1066), as
+// LongContextWorkload names them. They aren't in Workloads(): each needs the
+// model started with a window at least its size.
+var LongContexts = []int{16384, 32768, 65536, 131072}
+
+// LongContextWorkload is the workload that fills about three quarters of a
+// window of tokens, such as long_prompt_32k for 32768.
+func LongContextWorkload(tokens int) string {
+	return fmt.Sprintf("%s_%dk", LongPromptWorkload, tokens/1024)
+}
+
+// IsLongPrompt reports a workload that measures reading a long prompt, which
+// each run must read anew.
+func IsLongPrompt(id string) bool {
+	return id == LongPromptWorkload || strings.HasPrefix(id, LongPromptWorkload+"_")
+}
+
+// tokensPerLine is about what a line of the shipping log takes: its 160
+// lines were 4,412 tokens to Qwen 3.5.
+const tokensPerLine = 27.5
+
+// longContext is the workload that fills three quarters of a window of
+// tokens, leaving room for the answer and for tokenizers that count more.
+func longContext(tokens int) contracts.BenchmarkWorkload {
+	lines := int(float64(tokens) * 0.75 / tokensPerLine)
+	return contracts.BenchmarkWorkload{
+		ID:          LongContextWorkload(tokens),
+		Name:        fmt.Sprintf("Long prompt, %dK window", tokens/1024),
+		Description: fmt.Sprintf("A document filling about three quarters of a %d-token window, new each run.", tokens),
+		Prompts: []contracts.BenchmarkPrompt{{
+			ID:    "long-document",
+			Label: "Answer from a long document",
+			Text:  shippingLog(lines),
+		}},
+	}
+}
+
+// shippingLog is a log of lines shipments, then a question about it.
+func shippingLog(lines int) string {
 	var b strings.Builder
 	places := []string{"Juneau", "Sitka", "Ketchikan", "Haines", "Skagway", "Petersburg", "Wrangell"}
 	goods := []string{"salmon", "cedar", "copper wire", "rope", "diesel", "flour", "tools"}
 	b.WriteString("Below is a shipping log. Read it, then answer the question after it.\n\n")
-	for i := 1; i <= 160; i++ {
+	for i := 1; i <= lines; i++ {
 		fmt.Fprintf(&b, "Shipment %d left %s with %d crates of %s, and reached %s after %d days.\n",
 			i, places[i%len(places)], i*7%90+10, goods[i*3%len(goods)], places[(i+3)%len(places)], i%6+1)
 	}
@@ -178,6 +220,11 @@ func WorkloadByID(id string) (contracts.BenchmarkWorkload, bool) {
 	for _, w := range Workloads() {
 		if w.ID == id {
 			return w, true
+		}
+	}
+	for _, n := range LongContexts {
+		if id == LongContextWorkload(n) {
+			return longContext(n), true
 		}
 	}
 	return contracts.BenchmarkWorkload{}, false

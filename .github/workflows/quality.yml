@@ -32,6 +32,9 @@ on:
       swarm_slots:
         description: 'Agents at once on each of the swarm set''s models (1 to 4), set before it runs (#1135). The weekly run uses 2; 1 measures a swarm on one computer and one model, which runs as one agent.'
         default: "2"
+      contexts:
+        description: 'Windows the performance step also measures each model at, in tokens, comma-separated, such as 32768,65536,131072 (#1066): a prompt filling about three quarters of each. Blank for the 4,000-token prompt only.'
+        default: ""
       deliberate:
         description: The Deliberate mode the reasoning set measures (#459). The weekly run measures single.
         type: choice
@@ -445,8 +448,9 @@ jobs:
             -e TOSKAR_QUALITY_KEY="$QUALITY_KEY" \
             -e TOSKAR_QUALITY_MODEL="${{ matrix.model }}" \
             -e TOSKAR_QUALITY_PERFORMANCE_REPORT=/src/.quality/performance.json \
+            -e TOSKAR_QUALITY_CONTEXTS="${{ inputs.contexts }}" \
             golang:1.26-bookworm \
-            go test ./tests/quality -run '^TestPerformance$' -count=1 -v -timeout 70m
+            go test ./tests/quality -run '^TestPerformance$' -count=1 -v -timeout 150m
       # The triage set (#455): issues of this repository labeled the way
       # the Triage workflow asks. Measured, not gated: precision, recall,
       # and how often the type was right.

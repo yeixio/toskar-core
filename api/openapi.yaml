@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Toskar Control Plane API
-  version: "1.90"
+  version: "1.91"
   description: >-
     Local AI control plane API for Toskar, its OpenAI-compatible routes, and its MCP server.
     On the default loopback bind no key is needed. When the daemon listens on any other address,
@@ -9559,6 +9559,25 @@ components:
               items: {type: string}
               description: "The GPUs it ran on, every one when there are several (contract 1.89)"
             system_memory_bytes: {type: integer, format: int64, description: "The system memory the model's process held after the runs, measured (contract 1.90). Where the graphics share the computer's memory, as on a Mac, it includes what gpu_memory_bytes counts."}
+            contexts:
+              type: array
+              description: "The same model at longer windows, when the run measured them (contract 1.91): its window set to that size and a prompt filling about three quarters of it"
+              items:
+                type: object
+                required: [context, runs]
+                properties:
+                  context: {type: integer, description: "The window, in tokens"}
+                  runs: {type: string, enum: [full, partial, cpu, "no"]}
+                  why: {type: string, description: "Why it's short of full: window, a size past the model's own, or out_of_memory"}
+                  prompt_tokens: {type: integer}
+                  prompt_tokens_per_second: {type: number}
+                  tokens_per_second: {type: number}
+                  first_token_ms: {type: number}
+                  effective_tokens_per_second: {type: number}
+                  gpu_layers: {type: integer}
+                  gpu_layers_total: {type: integer}
+                  gpu_memory_bytes: {type: integer, format: int64}
+                  system_memory_bytes: {type: integer, format: int64}
     ModelStore:
       type: object
       required: [shelves, live]

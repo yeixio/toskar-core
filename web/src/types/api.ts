@@ -333,6 +333,25 @@ export interface QualityPerformance {
   devices?: string[]
   /** The system memory the model's process held after the runs, measured (contract 1.90). */
   system_memory_bytes?: number
+  /** The same model at longer windows, when the run measured them (contract 1.91). */
+  contexts?: QualityContextPerformance[]
+}
+
+/** A model with its window set to `context` tokens, and a prompt filling about three quarters of it (#1066). */
+export interface QualityContextPerformance {
+  context: number
+  runs: 'full' | 'partial' | 'cpu' | 'no'
+  /** `window` for a size past the model's own, or `out_of_memory`. */
+  why?: string
+  prompt_tokens?: number
+  prompt_tokens_per_second?: number
+  tokens_per_second?: number
+  first_token_ms?: number
+  effective_tokens_per_second?: number
+  gpu_layers?: number
+  gpu_layers_total?: number
+  gpu_memory_bytes?: number
+  system_memory_bytes?: number
 }
 
 export interface QualityResults {
