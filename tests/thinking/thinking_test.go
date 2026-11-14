@@ -89,15 +89,25 @@ type reply struct {
 // thinkingTags are what thinking left in an answer would look like.
 var thinkingTags = []string{"<think>", "</think>", "<|channel|>", "<|message|>"}
 
+// room is each answer's budget. Qwen 3's 0.6B thinks about the sum for
+// 400 to 1,300 tokens on most days, and past 2,048 on some (#1048).
+const room = 4096
+
+// tries is how many times a thinking-on answer is asked again when its
+// thinking used all of its room and never reached an answer. The check is
+// how llama.cpp parts thinking from the answer, not how well a small model
+// reasons, and a model that loops on every try still fails.
+const tries = 3
+
 func ask(ctx context.Context, endpoint, question string, stream, off bool) reply {
 	ch, err := llamacpp.NewClient().Chat(ctx, pluginapi.ChatRequest{
 		ModelEndpoint: endpoint,
 		Messages:      []pluginapi.ChatMessage{{Role: "user", Content: question}},
 		Stream:        stream,
 		NoThinking:    off,
-		// Room for a small model's thinking about a sum. The temperature is
-		// the model's own: thinking models loop when it's 0.
-		MaxTokens: 2048,
+		// The temperature is the model's own: thinking models loop when
+		// it's 0.
+		MaxTokens: room,
 	})
 	if err != nil {
 		return reply{err: err.Error()}
@@ -116,6 +126,11 @@ func ask(ctx context.Context, endpoint, question string, stream, off bool) reply
 	}
 	r.content, r.reasoning = strings.TrimSpace(content.String()), strings.TrimSpace(reasoning.String())
 	return r
+}
+
+// outOfRoom is an answer whose thinking used all of its room.
+func (r reply) outOfRoom() bool {
+	return r.err == "" && r.content == "" && r.tokens >= room
 }
 
 // problems are what's wrong with an answer: thinking where it shouldn't be
@@ -140,6 +155,24 @@ func (r reply) problems(answer string, thinking bool) []string {
 		}
 	}
 	return out
+}
+
+// TestOutOfRoom checks which answers are asked again: only thinking that
+// used all of its room with no answer, never an error or a short answer.
+func TestOutOfRoom(t *testing.T) {
+	for _, c := range []struct {
+		r    reply
+		want bool
+	}{
+		{reply{tokens: room, reasoned: room - 2}, true},
+		{reply{tokens: room, content: "42"}, false},
+		{reply{tokens: 400}, false},
+		{reply{tokens: room, err: "context canceled"}, false},
+	} {
+		if got := c.r.outOfRoom(); got != c.want {
+			t.Errorf("%+v: outOfRoom = %v, want %v", c.r, got, c.want)
+		}
+	}
 }
 
 func TestThinkingFamilies(t *testing.T) {
@@ -196,6 +229,11 @@ func TestThinkingFamilies(t *testing.T) {
 			defer func() { _ = rt.StopModel(context.Background(), m.ID) }()
 
 			on := ask(ctx, m.Endpoint, f.Question, true, false)
+			asked := 1
+			for ; on.outOfRoom() && asked < tries; asked++ {
+				t.Logf("%s: thinking on used all %d tokens without answering; asking again", fam.Family, room)
+				on = ask(ctx, m.Endpoint, f.Question, true, false)
+			}
 			offStream := ask(ctx, m.Endpoint, f.Question, true, true)
 			off := ask(ctx, m.Endpoint, f.Question, false, true)
 			for _, c := range []struct {
@@ -215,8 +253,15 @@ func TestThinkingFamilies(t *testing.T) {
 					problems = append(problems, fmt.Sprintf("thinking off took %d tokens, not fewer than thinking on's %d", r.tokens, on.tokens))
 				}
 			}
-			t.Logf("%s on %s: thinks %v; on %d tokens (%d thinking), off streamed %d, off %d", fam.Family, tag, d.Thinks, on.tokens, on.reasoned, offStream.tokens, off.tokens)
-			fmt.Fprintf(&report, "| %s | %v | %d tokens (%d thinking) | %d tokens | %d tokens | %s |\n", fam.Family, d.Thinks, on.tokens, on.reasoned, offStream.tokens, off.tokens, strings.Join(problems, "; "))
+			if on.outOfRoom() {
+				problems = append(problems, fmt.Sprintf("thinking on: used all %d tokens without answering, %d times", room, asked))
+			}
+			onCell := fmt.Sprintf("%d tokens (%d thinking)", on.tokens, on.reasoned)
+			if asked > 1 {
+				onCell += fmt.Sprintf(", try %d", asked)
+			}
+			t.Logf("%s on %s: thinks %v; on %d tokens (%d thinking), try %d; off streamed %d, off %d", fam.Family, tag, d.Thinks, on.tokens, on.reasoned, asked, offStream.tokens, off.tokens)
+			fmt.Fprintf(&report, "| %s | %v | %s | %d tokens | %d tokens | %s |\n", fam.Family, d.Thinks, onCell, offStream.tokens, off.tokens, strings.Join(problems, "; "))
 		})
 	}
 	if path := os.Getenv("TOSKAR_THINKING_REPORT"); path != "" {
