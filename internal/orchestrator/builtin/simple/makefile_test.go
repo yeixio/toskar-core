@@ -96,6 +96,44 @@ func TestFileRequestsAreMadeByYggdrasil(t *testing.T) {
 	_ = pluginapi.ChatMessage{}
 }
 
+// A model that makes the file itself, as gpt-oss does when it's offered
+// tools (#1140), had its call saved as the file: its contents are the
+// call's. Another call is no file's contents, and the turn goes on as usual.
+func TestFileMadeByTheModelsOwnCall(t *testing.T) {
+	call := `{"tool_call":{"args":{"name":"data.csv","content":"Planet,Order\nMercury,1\nVenus,2\nEarth,3\nMars,4"},"id":"files.create"}}`
+	env := &fileEnv{scriptedEnv: scriptedEnv{replies: []string{call}}}
+	events, err := New().Run(context.Background(), contracts.Task{Prompt: "Make a CSV of the first four planets in order from the sun."}, contracts.AIProfile{
+		Roles: []contracts.ModelRole{{Role: "assistant", ModelID: "m"}},
+		Tools: []contracts.ToolPolicy{{ToolID: "files.create", Policy: "allow"}},
+	}, env)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var text string
+	for evt := range events {
+		if evt.Type == "agent.message" {
+			text += evt.Content
+		}
+	}
+	if env.tools != 1 || env.created["name"] != "data.csv" || env.created["content"] != "Planet,Order\nMercury,1\nVenus,2\nEarth,3\nMars,4" {
+		t.Fatalf("created %+v", env.created)
+	}
+	if text != "Here is **data.csv**, with 4 rows. It's attached below." {
+		t.Fatalf("reply = %q", text)
+	}
+
+	for reply, want := range map[string]string{
+		call: "Planet,Order\nMercury,1\nVenus,2\nEarth,3\nMars,4",
+		`{"tool_call":{"args":{"query":"planets"},"id":"internet.search"}}`:                                          "",
+		`<tool_call>{"name":"filesystem.write","arguments":{"path":"sort.go","content":"package main"}}</tool_call>`: "package main",
+		"Planet\nMercury": "Planet\nMercury",
+	} {
+		if got := fileContent(reply); got != want {
+			t.Errorf("fileContent(%q) = %q, want %q", reply, got, want)
+		}
+	}
+}
+
 func TestFileRequestNeedsPermission(t *testing.T) {
 	env := &fileEnv{scriptedEnv: scriptedEnv{replies: []string{"ok"}}}
 	events, _ := New().Run(context.Background(), contracts.Task{Prompt: "Create a spreadsheet of the prices"}, contracts.AIProfile{
