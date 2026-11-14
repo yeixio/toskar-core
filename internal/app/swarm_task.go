@@ -224,7 +224,7 @@ func (e *chatExecEnv) fixup(ctx context.Context, st *swarmState, req swarm.Reque
 		fixCtx, stop = context.WithDeadline(fixCtx, budget.deadline)
 		defer stop()
 	}
-	r := e.runAgent(fixCtx, st.rec.ID, fix, swarm.FixupMessage(req.Prompt, ours, theirs, conflicted), func(n int) {
+	r := e.runAgent(fixCtx, st.rec.ID, fix, swarm.FixupMessage(req.Prompt, ours, theirs, conflicted), req.Prompt, func(n int) {
 		if budget.use(n) {
 			cancel()
 		}
