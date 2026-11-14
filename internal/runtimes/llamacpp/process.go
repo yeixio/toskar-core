@@ -17,6 +17,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/yeixio/toskar-core/internal/config"
+	"github.com/yeixio/toskar-core/internal/procmem"
 	"github.com/yeixio/toskar-core/pkg/contracts"
 	"github.com/yeixio/toskar-core/pkg/pluginapi"
 )
@@ -27,7 +28,21 @@ type ProcessSupervisor struct {
 	mu      sync.Mutex
 	procs   map[string]*managedProcess
 	onExit  func(instanceID, modelID string, exitCode int, stderrTail string)
+	// resident is each process's measured memory, by pid, kept for
+	// residentFor: the running list is asked for often, and on a Mac or
+	// Windows measuring runs a program.
+	residentMu sync.Mutex
+	resident   map[int]residentReading
 }
+
+// residentReading is a process's memory and when it was measured.
+type residentReading struct {
+	bytes uint64
+	at    time.Time
+}
+
+// residentFor is how long a measured memory stands.
+const residentFor = 10 * time.Second
 
 type managedProcess struct {
 	cmd       *exec.Cmd
@@ -330,8 +345,8 @@ func (r *Runtime) StopModel(ctx context.Context, id string) error {
 func (r *Runtime) ListRunning(ctx context.Context) ([]pluginapi.RunningModel, error) {
 	r.ensureSupervisor()
 	r.sup.mu.Lock()
-	defer r.sup.mu.Unlock()
 	out := make([]pluginapi.RunningModel, 0, len(r.sup.procs))
+	pids := make([]int, 0, len(r.sup.procs))
 	for id, p := range r.sup.procs {
 		// The watch's Wait sets the process state; exited says it ended
 		// without reading the state as Wait writes it.
@@ -355,8 +370,48 @@ func (r *Runtime) ListRunning(ctx context.Context) ([]pluginapi.RunningModel, er
 			Slots:        p.slots,
 			Acceleration: p.acceleration,
 		})
+		pid := 0
+		if p.cmd != nil && p.cmd.Process != nil && status == "running" {
+			pid = p.cmd.Process.Pid
+		}
+		pids = append(pids, pid)
+	}
+	r.sup.mu.Unlock()
+	// Measured without the lock: on a Mac or Windows it runs a program.
+	for i, pid := range pids {
+		out[i].ResidentBytes = r.sup.residentOf(pid)
 	}
 	return out, nil
+}
+
+// residentOf is the memory process pid holds (#1066), measured at most
+// every residentFor; 0 for no process, or one that couldn't be measured.
+func (s *ProcessSupervisor) residentOf(pid int) uint64 {
+	if pid <= 0 {
+		return 0
+	}
+	s.residentMu.Lock()
+	if r, ok := s.resident[pid]; ok && time.Since(r.at) < residentFor {
+		s.residentMu.Unlock()
+		return r.bytes
+	}
+	s.residentMu.Unlock()
+	n, err := procmem.Resident(pid)
+	if err != nil {
+		n = 0
+	}
+	s.residentMu.Lock()
+	defer s.residentMu.Unlock()
+	if s.resident == nil {
+		s.resident = map[int]residentReading{}
+	}
+	for old, r := range s.resident {
+		if time.Since(r.at) > time.Minute {
+			delete(s.resident, old)
+		}
+	}
+	s.resident[pid] = residentReading{bytes: n, at: time.Now()}
+	return n
 }
 
 func (r *Runtime) Health(ctx context.Context) error {

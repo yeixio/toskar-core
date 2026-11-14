@@ -341,6 +341,11 @@ type RunningModelView struct {
 	// Acceleration is where the model runs, from the runtime's own report;
 	// absent when that is not known.
 	Acceleration *Acceleration `json:"acceleration,omitempty"`
+	// ResidentBytes is the system memory the model's process holds,
+	// measured a few seconds ago at most (contract 1.90, #1066), beside
+	// MemoryBytes, the catalog's estimate. Absent when it couldn't be
+	// measured.
+	ResidentBytes uint64 `json:"resident_bytes,omitempty"`
 }
 
 // Acceleration states.
