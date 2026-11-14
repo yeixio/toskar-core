@@ -4,12 +4,17 @@ import "github.com/yeixio/toskar-core/pkg/contracts"
 
 // CatalogEntry is a model in the curated manifest.
 type CatalogEntry struct {
-	ID                string                      `json:"id"`
-	DisplayName       string                      `json:"display_name"`
-	Summary           string                      `json:"summary,omitempty"`
-	Family            string                      `json:"family,omitempty"`
-	Variant           string                      `json:"variant,omitempty"`
-	Parameters        string                      `json:"parameters,omitempty"`
+	ID          string `json:"id"`
+	DisplayName string `json:"display_name"`
+	Summary     string `json:"summary,omitempty"`
+	Family      string `json:"family,omitempty"`
+	Variant     string `json:"variant,omitempty"`
+	Parameters  string `json:"parameters,omitempty"`
+	// ActiveParameters is a mixture-of-experts model's parameters used for
+	// each token, such as 3.6B of gpt-oss-20b's 21B (#1140). Its cache and
+	// its speed follow these: each token reads only the experts it picks.
+	// Empty is a dense model, which uses all of Parameters.
+	ActiveParameters  string                      `json:"active_parameters,omitempty"`
 	SizeBytes         uint64                      `json:"size_bytes,omitempty"`
 	MemoryNeededBytes uint64                      `json:"memory_needed_bytes,omitempty"`
 	Context           int                         `json:"context,omitempty"`
