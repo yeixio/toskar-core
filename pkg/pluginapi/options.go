@@ -19,6 +19,10 @@ type GenerateOptions struct {
 	// it answers (#593), as thinking "on" or a reasoning_effort other than
 	// none does.
 	Thinking bool
+	// ReasoningEffort is how long a model that sets its own thinking's
+	// length should think: low, medium, or high, as gpt-oss's chat template
+	// takes it (#1140). Empty leaves the model's own, medium for gpt-oss.
+	ReasoningEffort string
 }
 
 // GreedyTemperature is GenerateOptions.Temperature for temperature 0,

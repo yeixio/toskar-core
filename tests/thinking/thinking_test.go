@@ -86,6 +86,10 @@ type reply struct {
 	err                string
 }
 
+// effortQuestion is one a little longer to think about than the sum, so
+// reasoning efforts tell apart.
+const effortQuestion = "A train leaves at 9:40 and arrives at 13:15. How long is the trip? Reply with the duration only."
+
 // thinkingTags are what thinking left in an answer would look like.
 var thinkingTags = []string{"<think>", "</think>", "<|channel|>", "<|message|>"}
 
@@ -100,11 +104,17 @@ const room = 4096
 const tries = 3
 
 func ask(ctx context.Context, endpoint, question string, stream, off bool) reply {
+	return askWith(ctx, endpoint, question, stream, off, "")
+}
+
+// askWith is ask with a reasoning effort (#1140).
+func askWith(ctx context.Context, endpoint, question string, stream, off bool, effort string) reply {
 	ch, err := llamacpp.NewClient().Chat(ctx, pluginapi.ChatRequest{
-		ModelEndpoint: endpoint,
-		Messages:      []pluginapi.ChatMessage{{Role: "user", Content: question}},
-		Stream:        stream,
-		NoThinking:    off,
+		ModelEndpoint:   endpoint,
+		Messages:        []pluginapi.ChatMessage{{Role: "user", Content: question}},
+		Stream:          stream,
+		NoThinking:      off,
+		ReasoningEffort: effort,
 		// The temperature is the model's own: thinking models loop when
 		// it's 0.
 		MaxTokens: room,
@@ -247,6 +257,18 @@ func TestThinkingFamilies(t *testing.T) {
 			}
 			if on.err == "" && on.reasoned == 0 {
 				problems = append(problems, "thinking on: no reasoning tokens counted")
+			}
+			if d.Harmony {
+				// gpt-oss thinks as long as its reasoning effort says, which
+				// its chat template takes (#1140): high, at length, and low,
+				// briefly. On this Mac, a train's trip took 30 to 93 tokens
+				// low and 193 to 743 high.
+				low := askWith(ctx, m.Endpoint, effortQuestion, true, false, "low")
+				high := askWith(ctx, m.Endpoint, effortQuestion, true, false, "high")
+				if low.err == "" && high.err == "" && high.reasoned <= low.reasoned {
+					problems = append(problems, fmt.Sprintf("reasoning effort: high thought %d tokens, not more than low's %d", high.reasoned, low.reasoned))
+				}
+				t.Logf("%s on %s: reasoning effort low %d thinking tokens, high %d", fam.Family, tag, low.reasoned, high.reasoned)
 			}
 			for _, r := range []reply{offStream, off} {
 				if r.err == "" && on.err == "" && r.tokens >= on.tokens {

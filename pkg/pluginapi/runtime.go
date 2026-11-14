@@ -169,6 +169,9 @@ type ChatRequest struct {
 	// NoThinking asks a reasoning model to answer without thinking first
 	// (#840). A model that doesn't think is unaffected.
 	NoThinking bool `json:"no_thinking,omitempty"`
+	// ReasoningEffort is GenerateOptions.ReasoningEffort: low, medium, or
+	// high, for a model whose chat template takes it (gpt-oss, #1140).
+	ReasoningEffort string `json:"reasoning_effort,omitempty"`
 	// ToolCallText, with Tools, turns the first tool call the model makes
 	// into the answer's text, as the caller's own protocol writes a call
 	// (#1099). Without it, calls in the reply are ignored.

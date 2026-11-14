@@ -19,6 +19,21 @@ const (
 	EffortThorough Effort = "thorough"
 )
 
+// Reasoning is how long a model that sets its own thinking's length should
+// think for this effort: gpt-oss's low, medium, or high (#1140). Auto, not
+// yet resolved to a level, leaves the model's own.
+func (e Effort) Reasoning() string {
+	switch e {
+	case EffortFast:
+		return "low"
+	case EffortBalanced:
+		return "medium"
+	case EffortThorough:
+		return "high"
+	}
+	return ""
+}
+
 // ParseEffort reads an effort from a request, defaulting to Auto.
 func ParseEffort(s string) Effort {
 	switch Effort(strings.ToLower(strings.TrimSpace(s))) {
