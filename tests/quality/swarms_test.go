@@ -46,8 +46,14 @@ import (
 type swarmItem struct {
 	ID, What, Message string
 	// Facts are what a question's answer must hold, one pattern for each
-	// fact, from the set's fixed web pages.
+	// fact, from Knowledge.
 	Facts []string
+	// Knowledge is a question's reference: a file for each of its parts,
+	// which the profile searches in both arms. The facts are made up, so a
+	// model can't know them otherwise, and a set run without them measures
+	// nothing (#1135: the first real run's questions were all not done, in
+	// both arms, the model saying the reference had nothing).
+	Knowledge [][2]string
 	// Project is a task's folder; Tests are its test files, which must stay
 	// as they are.
 	Project map[string]string
@@ -104,7 +110,11 @@ func question(id, what, message string, facts []string, parts [][2]string) swarm
 		rules = append(rules, agentRule(i+1, a))
 	}
 	rules = append(rules, StubRule{Replies: []string{whole}})
-	return swarmItem{ID: id, What: what, Message: message, Facts: facts,
+	var knowledge [][2]string
+	for _, p := range parts {
+		knowledge = append(knowledge, [2]string{strings.ToLower(strings.ReplaceAll(p[0], " ", "-")) + ".txt", p[1]})
+	}
+	return swarmItem{ID: id, What: what, Message: message, Facts: facts, Knowledge: knowledge,
 		Single: []string{whole, whole, whole}, Split: rules}
 }
 
@@ -555,6 +565,14 @@ func TestSwarmCases(t *testing.T) {
 			if got, why := scoreQuestion(it, it.Single[0]); why != "" {
 				t.Errorf("%s: its stub answer has %d of %d facts: %s", it.ID, got, len(it.Facts), why)
 			}
+			// A real model only has the facts from the knowledge files.
+			var reference []string
+			for _, k := range it.Knowledge {
+				reference = append(reference, k[1])
+			}
+			if got, why := scoreQuestion(it, strings.Join(reference, " ")); why != "" {
+				t.Errorf("%s: its knowledge has %d of %d facts: %s", it.ID, got, len(it.Facts), why)
+			}
 			continue
 		}
 		tasks++
@@ -832,6 +850,12 @@ func TestSwarmQuality(t *testing.T) {
 	for _, it := range items {
 		for _, arm := range arms {
 			c := Case{ID: it.ID + "/" + arm.Name, What: it.What, Message: it.Message}
+			for _, k := range it.Knowledge {
+				c.Setup.Knowledge = append(c.Setup.Knowledge, struct {
+					Filename string `json:"filename"`
+					Text     string `json:"text"`
+				}{k[0], k[1]})
+			}
 			if it.task() {
 				c.Setup = Setup{Project: it.Project, Git: true, AllowWrites: true,
 					Tools: map[string]string{"filesystem.write": "ask"}}
