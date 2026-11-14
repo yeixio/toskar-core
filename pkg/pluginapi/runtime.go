@@ -117,6 +117,9 @@ type RunningModel struct {
 	// Acceleration is where the instance runs, from the runtime's own
 	// report when it loaded the model; nil when it is not known.
 	Acceleration *Acceleration `json:"acceleration,omitempty"`
+	// ResidentBytes is the system memory its process holds, measured, a
+	// few seconds old at most (#1066); 0 when it couldn't be measured.
+	ResidentBytes uint64 `json:"resident_bytes,omitempty"`
 }
 
 // Acceleration is where a loaded model runs: the backend and devices the

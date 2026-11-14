@@ -76,6 +76,7 @@ func (a *App) localRunningViews(ctx context.Context) ([]contracts.RunningModelVi
 			Status:         r.Status,
 			MemoryBytes:    mem,
 			Endpoint:       r.Endpoint,
+			ResidentBytes:  r.ResidentBytes,
 			UsedByProfiles: profileNames[r.ModelID],
 			Mode:           r.Mode,
 			SpeedTokPerSec: speeds[r.ModelID],

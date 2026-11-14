@@ -94,6 +94,11 @@ type Performance struct {
 	DraftAccepted float64 `json:"draft_accepted,omitempty"`
 	// Devices are the GPUs it ran on, every one when there are several.
 	Devices []string `json:"devices,omitempty"`
+	// SystemMemoryBytes is the system memory the model's process held
+	// after the runs, measured, beside GPUMemoryBytes (#1066). Where the
+	// graphics share the computer's memory, as on a Mac, it includes what
+	// GPUMemoryBytes counts: the two aren't added.
+	SystemMemoryBytes uint64 `json:"system_memory_bytes,omitempty"`
 }
 
 // ReadPerformance reads a report, and says why when it can't be used: one for
