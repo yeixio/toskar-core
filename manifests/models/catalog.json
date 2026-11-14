@@ -1394,6 +1394,172 @@
         }
       ],
       "generation": "1"
+    },
+    {
+      "id": "qwen3.6-35b-a3b-q4",
+      "display_name": "Qwen 3.6 35B-A3B",
+      "summary": "A large mixture of experts that runs fast for its size: each word uses 3B of its 35B parameters. Sees pictures too.",
+      "family": "qwen",
+      "variant": "Q4_K_M",
+      "parameters": "35B",
+      "active_parameters": "3B",
+      "size_bytes": 20542732576,
+      "memory_needed_bytes": 24000000000,
+      "context": 262144,
+      "thinking": "when_asked",
+      "full_attention_interval": 4,
+      "capabilities": {
+        "tool_calling": true,
+        "vision": true,
+        "coding": true
+      },
+      "source": {
+        "url": "https://huggingface.co/ggml-org/Qwen3.6-35B-A3B-GGUF/resolve/52f9f9b8052fb9c8b69bba4a95eda0f319ac3d2a/Qwen3.6-35B-A3B-Q4_K_M.gguf",
+        "sha256": "f4ffe03c9139e6a905a5d346f77d9fabdd179367c3280dfd005d1e75ca5ed8c8",
+        "format": "gguf"
+      },
+      "projector": {
+        "url": "https://huggingface.co/ggml-org/Qwen3.6-35B-A3B-GGUF/resolve/52f9f9b8052fb9c8b69bba4a95eda0f319ac3d2a/mmproj-Qwen3.6-35B-A3B-Q8_0.gguf",
+        "sha256": "904cbf8c8e876220066ab3bf676c7efa40f3da372276fdaf8b01d2fb2a37a51d",
+        "size_bytes": 614194304
+      },
+      "purpose": [
+        "coding",
+        "assistant",
+        "general",
+        "research"
+      ],
+      "tags": [
+        "general",
+        "vision",
+        "coding"
+      ],
+      "runtime": [
+        "llamacpp"
+      ],
+      "recommended_roles": [
+        "assistant",
+        "coordinator",
+        "reviewer"
+      ],
+      "languages": [
+        {
+          "language": "en",
+          "level": "excellent",
+          "confidence": "high",
+          "sources": [
+            "model_card"
+          ]
+        },
+        {
+          "language": "zh-Hans",
+          "level": "excellent",
+          "confidence": "high",
+          "sources": [
+            "model_card"
+          ]
+        },
+        {
+          "language": "fr",
+          "level": "good",
+          "confidence": "medium",
+          "sources": [
+            "model_card",
+            "maintainer"
+          ]
+        },
+        {
+          "language": "es",
+          "level": "good",
+          "confidence": "medium",
+          "sources": [
+            "model_card",
+            "maintainer"
+          ]
+        },
+        {
+          "language": "pt",
+          "level": "good",
+          "confidence": "medium",
+          "sources": [
+            "model_card",
+            "maintainer"
+          ]
+        },
+        {
+          "language": "de",
+          "level": "good",
+          "confidence": "medium",
+          "sources": [
+            "model_card",
+            "maintainer"
+          ]
+        },
+        {
+          "language": "it",
+          "level": "good",
+          "confidence": "medium",
+          "sources": [
+            "model_card",
+            "maintainer"
+          ]
+        },
+        {
+          "language": "ru",
+          "level": "good",
+          "confidence": "medium",
+          "sources": [
+            "model_card",
+            "maintainer"
+          ]
+        },
+        {
+          "language": "ja",
+          "level": "good",
+          "confidence": "medium",
+          "sources": [
+            "model_card",
+            "maintainer"
+          ]
+        },
+        {
+          "language": "ko",
+          "level": "good",
+          "confidence": "medium",
+          "sources": [
+            "model_card",
+            "maintainer"
+          ]
+        },
+        {
+          "language": "vi",
+          "level": "good",
+          "confidence": "medium",
+          "sources": [
+            "model_card",
+            "maintainer"
+          ]
+        },
+        {
+          "language": "th",
+          "level": "good",
+          "confidence": "medium",
+          "sources": [
+            "model_card",
+            "maintainer"
+          ]
+        },
+        {
+          "language": "ar",
+          "level": "good",
+          "confidence": "medium",
+          "sources": [
+            "model_card",
+            "maintainer"
+          ]
+        }
+      ],
+      "generation": "3.6"
     }
   ]
 }
