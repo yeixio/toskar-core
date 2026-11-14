@@ -21,6 +21,8 @@ import (
 	"github.com/go-sql-driver/mysql"
 	_ "github.com/jackc/pgx/v5/stdlib"
 	_ "modernc.org/sqlite"
+
+	"github.com/yeixio/toskar-core/internal/store"
 )
 
 // Database and API sources read current data from a database query or a web
@@ -293,7 +295,7 @@ func queryDatabase(ctx context.Context, name string, r Remote, sec remoteSecret)
 	case DriverSQLite:
 		// Opened read-only, so even a query that slipped past the check
 		// cannot change the file.
-		driver, dsn, readOnlyTx = "sqlite", "file:"+filepath.ToSlash(r.Database)+"?mode=ro", false
+		driver, dsn, readOnlyTx = "sqlite", "file:"+store.FileURIPath(filepath.ToSlash(r.Database))+"?mode=ro", false
 	case DriverPostgres:
 		driver, dsn = "pgx", sec.ConnectionString
 	case DriverMySQL:

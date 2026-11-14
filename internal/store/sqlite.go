@@ -26,7 +26,7 @@ func Open(path string) (*DB, error) {
 		return nil, fmt.Errorf("create db dir: %w", err)
 	}
 
-	dsn := fmt.Sprintf("file:%s?_pragma=foreign_keys(1)&_pragma=busy_timeout(5000)&_pragma=journal_mode(WAL)", path)
+	dsn := fmt.Sprintf("file:%s?_pragma=foreign_keys(1)&_pragma=busy_timeout(5000)&_pragma=journal_mode(WAL)", FileURIPath(path))
 	sqlDB, err := sql.Open("sqlite", dsn)
 	if err != nil {
 		return nil, fmt.Errorf("open sqlite: %w", err)
@@ -40,6 +40,16 @@ func Open(path string) (*DB, error) {
 	}
 	return db, nil
 }
+
+// FileURIPath is path as a SQLite file: URI's path. A #, ?, or % in it
+// would end the path or start an escape: a folder with # in its name, such
+// as a test's for a repeat ("case#2"), opened a database outside it, which
+// every repeat and every later run shared.
+func FileURIPath(path string) string {
+	return uriPath.Replace(path)
+}
+
+var uriPath = strings.NewReplacer("%", "%25", "?", "%3F", "#", "%23")
 
 // Close closes the database.
 func (db *DB) Close() error {
