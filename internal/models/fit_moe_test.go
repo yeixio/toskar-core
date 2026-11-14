@@ -114,3 +114,39 @@ func TestMixtureOfExpertsOnACard(t *testing.T) {
 		t.Errorf("on a 24 GB card: %s short=%q", big.Label, big.Short)
 	}
 }
+
+// A model split between the graphics card and system memory gets no speed
+// until it's measured here (#984): the estimate said about 62 tokens a
+// second for Qwen 3.6 35B-A3B on a 16 GB laptop card, which answered at
+// 6.3, and 19 for Qwen 2.5 32B, which answered at 3.8. One that fits the
+// card keeps its estimate, and a measured run fills one in.
+func TestSplitModelsHaveNoGuessedSpeed(t *testing.T) {
+	c, err := NewCatalogEmbedded()
+	if err != nil {
+		t.Fatal(err)
+	}
+	laptop := func(vram float64) contracts.HardwareInventory {
+		return contracts.HardwareInventory{
+			Memory:       contracts.MemoryInfo{TotalBytes: gib(32), AvailableBytes: gib(26)},
+			Accelerators: []contracts.Accelerator{{Kind: "gpu", Vendor: "NVIDIA", DedicatedVRAM: gib(vram), Backends: []string{"vulkan", "cpu"}}},
+		}
+	}
+	for _, id := range []string{"qwen3.6-35b-a3b-q4", "qwen2.5-32b-q4"} {
+		e, _ := c.Get(id)
+		if fit := ClassifyFit(e, laptop(16), "n", "Laptop", FitOptions{}); fit.EstTokPerSec != 0 {
+			t.Errorf("%s on a 16 GB card: %.1f tokens a second, want none", id, fit.EstTokPerSec)
+		}
+		if fit := ClassifyFit(e, laptop(24), "n", "Rig", FitOptions{}); fit.EstTokPerSec <= 0 {
+			t.Errorf("%s on a 24 GB card: no estimate", id)
+		}
+		measured := FitOptions{Measured: map[string]MeasuredRun{id: {TokPerSec: 6.3}}}
+		if fit := ClassifyFit(e, laptop(16), "n", "Laptop", measured); fit.EstTokPerSec != 6.3 || !fit.TokPerSecMeasured {
+			t.Errorf("%s measured on a 16 GB card: %.1f, measured %v", id, fit.EstTokPerSec, fit.TokPerSecMeasured)
+		}
+	}
+	// Without a card, on the processor alone, the estimate stays as it was.
+	e, _ := c.Get("qwen2.5-7b-q4")
+	if fit := ClassifyFit(e, contracts.HardwareInventory{Memory: contracts.MemoryInfo{TotalBytes: gib(32), AvailableBytes: gib(26)}}, "n", "PC", FitOptions{}); fit.EstTokPerSec <= 0 {
+		t.Errorf("7B without a card: no estimate")
+	}
+}
