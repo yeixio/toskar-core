@@ -62,7 +62,7 @@
             [
               "64 GB or more",
               "The 30B models, about 21 GB",
-              "Qwen 3.8 27B, Qwen 2.5 32B"
+              "Qwen 3.8 27B, Qwen 3.6 35B-A3B, Qwen 2.5 32B"
             ],
             [
               "96 GB or more",
@@ -77,7 +77,7 @@
         },
         {
           "type": "paragraph",
-          "text": "OpenAI's gpt-oss models are a mixture of experts: each word they write uses only a small part of the model, 3.6 billion of the 20B's 21 billion parameters. So they answer much faster than their size suggests, and leave more room for a long conversation. They still need memory for the whole file. Both think before they answer, and use tools."
+          "text": "OpenAI's gpt-oss models and Qwen 3.6 35B-A3B are a mixture of experts: each word they write uses only a small part of the model, 3.6 billion of gpt-oss 20B's 21 billion parameters, and 3 billion of Qwen's 35 billion. So they answer much faster than their size suggests, and leave more room for a long conversation. They still need memory for the whole file. On a graphics card too small for one, its experts run from the computer's memory and the rest on the card, and Toskar labels it by the computer's memory instead of the card's. The gpt-oss models think before they answer, and all of them use tools."
         },
         {
           "type": "heading",

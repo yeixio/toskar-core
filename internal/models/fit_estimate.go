@@ -179,7 +179,7 @@ func ClassifyFit(e CatalogEntry, hw contracts.HardwareInventory, nodeID, nodeNam
 	if kind == "unified" && !opts.Proven[e.ID] && !hasMeasured {
 		graphicsFit(&fit, low, SharedGraphics(capacity))
 	} else if card := cardMemory(hw); card > 0 && !opts.Proven[e.ID] && !hasMeasured {
-		cardFit(&fit, low, card)
+		cardFit(&fit, low, card, readPerToken(e, weights, low))
 	}
 	fit.InstallAllowed = fit.Label != contracts.FitUnsupported
 	fit.Recommendations = recommendationsFor(fit.Label, kind)
@@ -245,8 +245,21 @@ func graphicsFit(fit *contracts.ModelFit, need, share uint64) {
 // cardFit holds a model to a graphics card's own memory (#932): one that
 // needs more runs partly on the processor, far slower than a good fit
 // promises, so it's tight at best, and short says so.
-func cardFit(fit *contracts.ModelFit, need, card uint64) {
+func cardFit(fit *contracts.ModelFit, need, card, read uint64) {
 	if need <= card {
+		return
+	}
+	if read < need && read <= card {
+		// A mixture-of-experts model whose experts don't fit the card runs
+		// with them in system memory, llama.cpp's --fit putting them there
+		// first, and the rest on the card (#984): each token reads a few
+		// experts, so it isn't held to the card as a dense model is.
+		if fitRank(fit.Label) > fitRank(contracts.FitGood) {
+			fit.Label = contracts.FitGood
+		}
+		if fitRank(fit.Label) >= fitRank(contracts.FitGood) {
+			fit.Reason = fmt.Sprintf("Needs about %s; this computer's graphics card has %s, so its experts run from system memory and the rest on the card.", formatGiB(need), formatGiB(card))
+		}
 		return
 	}
 	if fitRank(fit.Label) > fitRank(contracts.FitTight) {

@@ -1,6 +1,7 @@
 package models
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/yeixio/toskar-core/pkg/contracts"
@@ -74,5 +75,42 @@ func TestGptOssFits(t *testing.T) {
 		if !e.Capabilities.Thinks || !e.Capabilities.ToolCalling {
 			t.Errorf("%s: thinks %v, tools %v", tc.id, e.Capabilities.Thinks, e.Capabilities.ToolCalling)
 		}
+	}
+}
+
+// A mixture-of-experts model bigger than the graphics card runs with its
+// experts in system memory and the rest on the card (#984), so it isn't held
+// to the card as a dense model of its size is. A card too small for even
+// what each token reads holds it as before.
+func TestMixtureOfExpertsOnACard(t *testing.T) {
+	c, err := NewCatalogEmbedded()
+	if err != nil {
+		t.Fatal(err)
+	}
+	moe, ok := c.Get("qwen3.6-35b-a3b-q4")
+	if !ok {
+		t.Fatal("qwen3.6-35b-a3b-q4 isn't in the catalog")
+	}
+	dense := moe
+	dense.ActiveParameters = ""
+	card := func(vram float64) contracts.HardwareInventory {
+		return contracts.HardwareInventory{
+			Memory:       contracts.MemoryInfo{TotalBytes: gib(32), AvailableBytes: gib(26)},
+			Accelerators: []contracts.Accelerator{{Kind: "gpu", Vendor: "NVIDIA", DedicatedVRAM: gib(vram), Backends: []string{"cuda", "cpu"}}},
+		}
+	}
+	fit := ClassifyFit(moe, card(16), "n", "Laptop", FitOptions{})
+	if fit.Label != contracts.FitGood || fit.Short != "" || !strings.Contains(fit.Reason, "experts run from system memory") {
+		t.Errorf("on a 16 GB card: %s short=%q %q", fit.Label, fit.Short, fit.Reason)
+	}
+	if d := ClassifyFit(dense, card(16), "n", "Laptop", FitOptions{}); fitRank(d.Label) > fitRank(contracts.FitTight) || d.Short != "graphics" {
+		t.Errorf("dense on a 16 GB card: %s short=%q", d.Label, d.Short)
+	}
+	if small := ClassifyFit(moe, card(2), "n", "PC", FitOptions{}); fitRank(small.Label) > fitRank(contracts.FitTight) || small.Short != "graphics" {
+		t.Errorf("on a 2 GB card: %s short=%q", small.Label, small.Short)
+	}
+	// On a card it fits, it's as any model is.
+	if big := ClassifyFit(moe, card(24), "n", "Rig", FitOptions{}); fitRank(big.Label) < fitRank(contracts.FitGood) || big.Short != "" || strings.Contains(big.Reason, "experts") {
+		t.Errorf("on a 24 GB card: %s short=%q", big.Label, big.Short)
 	}
 }
