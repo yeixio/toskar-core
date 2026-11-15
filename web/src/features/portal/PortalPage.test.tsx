@@ -1,9 +1,9 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { api, ApiError, setPortal, setPortalSession, streamChat } from '@/lib/api'
 import type { PortalPageView } from '@/types/api'
-import { PortalPage } from './PortalPage'
+import { LINK_CHECK_WAIT_MS, PortalPage } from './PortalPage'
 
 vi.mock('@/lib/api', async () => {
   const actual = await vi.importActual<typeof import('@/lib/api')>('@/lib/api')
@@ -76,6 +76,52 @@ describe('PortalPage (#205)', () => {
     expect(await screen.findByText('It ships tomorrow.')).toBeInTheDocument()
     expect(streamChat).toHaveBeenCalledWith(expect.objectContaining({ body: { conversation_id: 'c1', message: 'Where is my order?' } }))
     expect(localStorage.getItem('toskar.portal.support.conversation')).toBe('c1')
+  })
+
+  describe('link marks (#209)', () => {
+    afterEach(() => {
+      vi.useRealTimers()
+    })
+
+    it('marks a link that didn’t open, read again once the check is done', async () => {
+      vi.useFakeTimers({ shouldAdvanceTime: true })
+      vi.mocked(api.getPortalPage).mockResolvedValue(page({ access: 'open' }))
+      vi.mocked(api.enterPortal).mockResolvedValue(guest)
+      vi.mocked(api.createConversation).mockResolvedValue({ id: 'c1' } as never)
+      const answer = 'Track it at [the tracker](https://ship.example/track).'
+      vi.mocked(api.getMessages).mockReset().mockResolvedValue([
+        { id: 'm1', conversation_id: 'c1', role: 'user', content: 'Where is my order?', created_at: '' },
+        { id: 'm2', conversation_id: 'c1', role: 'assistant', content: answer, created_at: '', meta: { link_check: { dead: ['https://ship.example/track'] } } },
+      ] as never)
+      vi.mocked(streamChat).mockImplementation(async ({ onToken }) => {
+        onToken(answer)
+      })
+      renderIt()
+      fireEvent.click(await screen.findByRole('button', { name: 'Where is my order?' }))
+      expect(await screen.findByRole('link', { name: 'the tracker' })).toBeInTheDocument()
+      expect(screen.queryByRole('img', { name: "This link didn't open when checked" })).not.toBeInTheDocument()
+      expect(api.getMessages).not.toHaveBeenCalled()
+
+      await vi.advanceTimersByTimeAsync(LINK_CHECK_WAIT_MS)
+      expect(await screen.findByRole('img', { name: "This link didn't open when checked" })).toHaveAttribute('data-link-status', 'dead')
+      expect(api.getMessages).toHaveBeenCalledTimes(1)
+    })
+
+    it('doesn’t read the chat again for an answer without links', async () => {
+      vi.useFakeTimers({ shouldAdvanceTime: true })
+      vi.mocked(api.getPortalPage).mockResolvedValue(page({ access: 'open' }))
+      vi.mocked(api.enterPortal).mockResolvedValue(guest)
+      vi.mocked(api.createConversation).mockResolvedValue({ id: 'c1' } as never)
+      vi.mocked(api.getMessages).mockReset().mockResolvedValue([])
+      vi.mocked(streamChat).mockImplementation(async ({ onToken }) => {
+        onToken('It ships tomorrow.')
+      })
+      renderIt()
+      fireEvent.click(await screen.findByRole('button', { name: 'Where is my order?' }))
+      expect(await screen.findByText('It ships tomorrow.')).toBeInTheDocument()
+      await vi.advanceTimersByTimeAsync(LINK_CHECK_WAIT_MS)
+      expect(api.getMessages).not.toHaveBeenCalled()
+    })
   })
 
   it('lets anyone into an open portal at once', async () => {
