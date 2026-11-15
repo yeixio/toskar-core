@@ -7807,7 +7807,7 @@ components:
         node_name: {type: string}
         status: {type: string}
         memory_bytes: {type: integer, format: int64, description: "The catalog's estimate of the memory it needs"}
-        resident_bytes: {type: integer, format: int64, description: "The system memory its process holds, measured a few seconds ago at most (contract 1.90)"}
+        resident_bytes: {type: integer, format: int64, description: "The system memory its process holds, measured a few seconds ago at most (contract 1.90). On Linux, the memory it allocated, without the model file it maps."}
         endpoint: {type: string}
         speed_tok_per_sec: {type: number, description: Generation speed in the model's latest replies}
         used_by_profiles:
