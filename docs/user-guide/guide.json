@@ -2477,7 +2477,8 @@
           "items": [
             "Choose Create profile.",
             "Start from General Assistant, Programming, Research, or Blank, and choose Create.",
-            "The new profile opens in the editor. Give it a name of its own: a name that's taken, in any capitals, is refused.",
+            "It's named after where it started, such as General Assistant (2), or New profile. With Advanced mode on, it opens in the editor; without it, its details open instead.",
+            "Give it a name of its own. A name that's taken, in any capitals, is refused, and the editor says so beside Save profile.",
             "Change what it needs, below, and choose Save profile."
           ]
         },

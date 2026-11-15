@@ -84,4 +84,17 @@ describe('ProfilesPage editor', () => {
     await waitFor(() => expect(api.updateProfile).toHaveBeenCalled())
     expect(vi.mocked(api.updateProfile).mock.calls[0][1].topics).toEqual({ stays_on: 'Tires and bookings', never_discuss: ['politics'] })
   })
+
+  it('says why a save was refused, and keeps the editor open (#897)', async () => {
+    const taken = Object.assign(new Error('a profile is already called "General Assistant"; choose another name'), {
+      code: 'PROFILE_NAME_TAKEN',
+      details: { name: 'General Assistant' },
+    })
+    vi.mocked(api.updateProfile).mockRejectedValue(taken)
+    renderPage()
+    fireEvent.click(await screen.findByRole('button', { name: 'Edit' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Save profile' }))
+    expect(await screen.findByRole('alert')).toHaveTextContent('A profile is already called General Assistant. Choose another name.')
+    expect(screen.getByRole('button', { name: 'Save profile' })).toBeInTheDocument()
+  })
 })

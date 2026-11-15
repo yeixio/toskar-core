@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, type MouseEvent, type ReactNode } from 're
 import { Trans, useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { EmptyState } from '@/components/ui/EmptyState'
+import { ShownError, shownError } from '@/components/ui/ShownError'
 import { Toggle } from '@/components/ui/Toggle'
 import { api } from '@/lib/api'
 import { blankProfileTemplate, profileTemplateFromPurpose } from '@/lib/profilePresets'
@@ -225,6 +226,18 @@ export function ProfilesPage() {
     },
   })
 
+  // What a refused action says (#897): a taken name, a missing model, or
+  // a role that can't change profiles. Before, every one failed silently.
+  // A save from the editor shows its own beside Save profile.
+  const savedFromEditor = updateMutation.isError && updateMutation.variables?.id === editingId
+  const actionError =
+    createMutation.error ??
+    duplicateMutation.error ??
+    resetMutation.error ??
+    deleteMutation.error ??
+    setDefaultMutation.error ??
+    (savedFromEditor ? null : updateMutation.error)
+
   const allProfiles = sortProfilesForDisplay(profilesQuery.data ?? [])
   const defaultId = defaultProfileIdOf(settingsQuery.data?.default_profile_id, profilesQuery.data ?? [])
   const profiles = filterProfiles(allProfiles, filter)
@@ -345,6 +358,8 @@ export function ProfilesPage() {
           ))}
         </div>
       )}
+
+      {actionError ? <ShownError {...shownError(actionError)} role="alert" className="rounded-lg bg-danger/10 px-4 py-3 text-sm text-danger" /> : null}
 
       {profilesQuery.isLoading && <Skeleton label={t('page.loading')} shape="cards" />}
 
@@ -649,6 +664,7 @@ export function ProfilesPage() {
                       name: n.is_local ? t('card.thisMachine', { name: n.name }) : n.name,
                     }))}
                     saving={updateMutation.isPending}
+                    error={savedFromEditor ? updateMutation.error : null}
                     onSave={(next) => updateMutation.mutate(next)}
                     onCancel={() => setEditingId(null)}
                   />
@@ -713,6 +729,7 @@ function AdvancedEditor({
   installedModels,
   nodes,
   saving,
+  error,
   onSave,
   onCancel,
 }: {
@@ -720,6 +737,8 @@ function AdvancedEditor({
   installedModels: { id: string; name: string }[]
   nodes: { id: string; name: string }[]
   saving: boolean
+  /** Why the last save was refused, shown beside Save profile. */
+  error?: unknown
   onSave: (profile: AIProfile) => void
   onCancel: () => void
 }) {
@@ -1084,6 +1103,7 @@ function AdvancedEditor({
           {t('editor.cancel')}
         </button>
       </div>
+      {error ? <ShownError {...shownError(error)} role="alert" /> : null}
     </div>
   )
 }
