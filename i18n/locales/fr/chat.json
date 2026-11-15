@@ -920,5 +920,9 @@
     "chip": "Essaim : {{mode}}",
     "chipRemove": "Ne pas utiliser d’essaim",
     "agentLine": "Agent {{n}} d’un essaim · <go>Ouvrir la discussion principale</go>"
+  },
+  "linkCheck": {
+    "dead": "Ce lien ne s'est pas ouvert lors de la vérification",
+    "unknown": "Ce lien n'a pas pu être vérifié"
   }
 }

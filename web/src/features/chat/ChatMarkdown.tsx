@@ -1,17 +1,33 @@
+import { useMemo } from 'react'
 import type { Components } from 'react-markdown'
 import ReactMarkdown from 'react-markdown'
+import { useTranslation } from 'react-i18next'
 import remarkGfm from 'remark-gfm'
 import { prepareChatMarkdown } from './displayChatText'
 
-const components: Components = {
-  a: ({ href, children }) => {
-    if (!href || !/^https?:\/\//i.test(href)) return <span>{children}</span>
-    return (
-      <a href={href} target="_blank" rel="noopener noreferrer" className="text-primary underline-offset-2 hover:underline">
-        {children}
-      </a>
-    )
-  },
+/** What asking each linked site found (#209, contract 1.97). */
+export type LinkCheck = { dead?: string[]; unknown?: string[] }
+
+/** A link as compared: decoded, without a trailing slash. */
+function sameLink(href: string): string {
+  let s = href.trim()
+  try {
+    s = decodeURI(s)
+  } catch {
+    // An address that won't decode is compared as written.
+  }
+  return s.replace(/\/+$/, '')
+}
+
+function statusOf(href: string, check?: LinkCheck): 'dead' | 'unknown' | null {
+  if (!check) return null
+  const key = sameLink(href)
+  if (check.dead?.some((l) => sameLink(l) === key)) return 'dead'
+  if (check.unknown?.some((l) => sameLink(l) === key)) return 'unknown'
+  return null
+}
+
+const baseComponents: Components = {
   p: ({ children }) => <p dir="auto" className="mb-2 last:mb-0">{children}</p>,
   ul: ({ children }) => <ul className="my-2 list-disc space-y-1 ps-5 last:mb-0">{children}</ul>,
   ol: ({ children }) => <ol className="my-2 list-decimal space-y-1 ps-5 last:mb-0">{children}</ol>,
@@ -42,7 +58,45 @@ const components: Components = {
 
 // dir="auto" on each block: a paragraph in Arabic reads right to left even in
 // an English UI, and English in an Arabic one left to right (spec §9).
-export function ChatMarkdown({ text }: { text: string }) {
+//
+// linkCheck marks the links that didn't open, or couldn't be checked, in
+// the answer itself, not only in the notice under it (#209).
+export function ChatMarkdown({ text, linkCheck }: { text: string; linkCheck?: LinkCheck }) {
+  const { t } = useTranslation('chat')
+  const components = useMemo<Components>(
+    () => ({
+      ...baseComponents,
+      a: ({ href, children }) => {
+        if (!href || !/^https?:\/\//i.test(href)) return <span>{children}</span>
+        const status = statusOf(href, linkCheck)
+        const label = status === 'dead' ? t('linkCheck.dead') : status === 'unknown' ? t('linkCheck.unknown') : ''
+        return (
+          <>
+            <a
+              href={href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`underline-offset-2 hover:underline ${status === 'dead' ? 'text-ink-muted line-through decoration-danger/60' : 'text-primary'}`}
+            >
+              {children}
+            </a>
+            {status ? (
+              <span
+                role="img"
+                aria-label={label}
+                title={label}
+                data-link-status={status}
+                className={`ms-0.5 inline-block align-super text-[0.7em] ${status === 'dead' ? 'text-danger' : 'text-ink-faint'}`}
+              >
+                {status === 'dead' ? '⚠' : '?'}
+              </span>
+            ) : null}
+          </>
+        )
+      },
+    }),
+    [linkCheck, t],
+  )
   return (
     <div className="chat-markdown">
       <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>

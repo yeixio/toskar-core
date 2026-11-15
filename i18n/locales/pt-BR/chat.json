@@ -920,5 +920,9 @@
     "chip": "Enxame: {{mode}}",
     "chipRemove": "Não usar um enxame",
     "agentLine": "Agente {{n}} de um enxame · <go>Abrir o chat principal</go>"
+  },
+  "linkCheck": {
+    "dead": "Este link não abriu na verificação",
+    "unknown": "Não foi possível verificar este link"
   }
 }

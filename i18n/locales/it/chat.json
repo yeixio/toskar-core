@@ -920,5 +920,9 @@
     "chip": "Sciame: {{mode}}",
     "chipRemove": "Non usare uno sciame",
     "agentLine": "Agente {{n}} di uno sciame · <go>Apri la chat principale</go>"
+  },
+  "linkCheck": {
+    "dead": "Questo link non si è aperto durante il controllo",
+    "unknown": "Non è stato possibile controllare questo link"
   }
 }

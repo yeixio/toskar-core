@@ -874,5 +874,9 @@
     "chip": "Schwarm: {{mode}}",
     "chipRemove": "Keinen Schwarm verwenden",
     "agentLine": "Agent {{n}} eines Schwarms · <go>Hauptchat öffnen</go>"
+  },
+  "linkCheck": {
+    "dead": "Dieser Link ließ sich bei der Prüfung nicht öffnen",
+    "unknown": "Dieser Link konnte nicht geprüft werden"
   }
 }
