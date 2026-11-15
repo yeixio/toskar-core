@@ -66,16 +66,16 @@ func qualityRuns(t *testing.T, d Driver) runPlan {
 	if n, err := strconv.Atoi(config.Env("QUALITY_REPEATS")); err == nil && n > 1 {
 		repeats = n
 	}
-	temperature := 0.0
+	temperature, chosen := 0.0, repeats > 1
 	if repeats > 1 {
 		temperature = 0.7
 	}
 	if v, err := strconv.ParseFloat(config.Env("QUALITY_TEMPERATURE"), 64); err == nil && v >= 0 {
-		temperature = v
+		temperature, chosen = v, true
 	}
 	plan := runPlan{driver: d.Name(), savePath: config.Env("QUALITY_SAVE")}
 	for r := range repeats {
-		s := sampling{Seed: r + 1, Temperature: temperature}
+		s := sampling{Seed: r + 1, Temperature: temperature, Chosen: chosen}
 		run := qualityRun{driver: d, repeat: r, repeats: repeats}
 		if sd, ok := d.(interface{ withSampling(sampling) Driver }); ok {
 			run.driver = sd.withSampling(s)
@@ -342,7 +342,7 @@ func TestSummarize(t *testing.T) {
 // on answers already written.
 func TestSaveAndRescore(t *testing.T) {
 	path := t.TempDir() + "/runs.jsonl"
-	plan := runPlan{driver: "served", savePath: path, sampling: []sampling{{1, 0.7}, {2, 0.7}}}
+	plan := runPlan{driver: "served", savePath: path, sampling: []sampling{{Seed: 1, Temperature: 0.7}, {Seed: 2, Temperature: 0.7}}}
 	plan.save(t, []reportRow{
 		{Case: Case{ID: "a"}, Repeat: 0, Result: Result{Answer: "Sitka"}},
 		{Case: Case{ID: "a"}, Repeat: 1, Result: Result{Failed: "turn failed: no answer"}},
@@ -425,4 +425,28 @@ func baselineSummary(t *testing.T, cases []Case, planned []string, deflection *r
 	}
 	sum := summarizeRuns(rows, planned)
 	return &sum
+}
+
+// Each run of the set asks Toskar with its own seed, so the set runs the
+// same again; a temperature goes only when the run chose one (#839).
+func TestRealRunsAreSeeded(t *testing.T) {
+	t.Setenv("TOSKAR_QUALITY_REPEATS", "")
+	t.Setenv("TOSKAR_QUALITY_TEMPERATURE", "")
+	t.Setenv("TOSKAR_QUALITY_RESCORE", "")
+	body := func(p runPlan, i int) map[string]any {
+		b := map[string]any{}
+		p.runs[i].driver.(realDriver).sampled(b)
+		return b
+	}
+	one := qualityRuns(t, newRealDriver("http://127.0.0.1:1"))
+	if b := body(one, 0); b["seed"] != 1 || b["temperature"] != nil {
+		t.Errorf("one run sends %v, want seed 1 and the model's own temperature", b)
+	}
+	t.Setenv("TOSKAR_QUALITY_REPEATS", "3")
+	three := qualityRuns(t, newRealDriver("http://127.0.0.1:1"))
+	for i := range 3 {
+		if b := body(three, i); b["seed"] != i+1 || b["temperature"] != 0.7 {
+			t.Errorf("run %d sends %v", i+1, b)
+		}
+	}
 }

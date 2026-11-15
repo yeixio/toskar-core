@@ -48,6 +48,10 @@ type stubDriver struct {
 type sampling struct {
 	Seed        int
 	Temperature float64
+	// Chosen is a temperature the run asked for, by repeating or with
+	// TOSKAR_QUALITY_TEMPERATURE. The real driver sends only a chosen one,
+	// so one run of the set measures the model as it's set up (#839).
+	Chosen bool `json:"-"`
 }
 
 // withSampling is the driver for one repeat of a case.
