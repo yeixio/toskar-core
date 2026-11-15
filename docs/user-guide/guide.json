@@ -2427,8 +2427,12 @@
       "id": "profiles",
       "title": "Profiles & Orchestration",
       "paragraphs": [
-        "A profile is a saved assistant: its models, its tools, what it knows and remembers, how it works through requests, and the computers it runs on. Toskar has four built in. General Assistant is for everyday questions, Programming answers code questions with a team of models, Research is for long reading and careful reasoning, and Custom is set up to work without the internet.",
-        "New chats use the default profile, marked Default for new chats: General Assistant, unless you choose another. Profiles & Orchestration in the sidebar lists them, and Create profile starts one from a built-in or from Blank. With Advanced mode on in Settings, Edit opens a profile's editor, with five tabs: Models, Tools, Knowledge and memory, Topics, and Strategy and computers. Only Admins can change profiles."
+        "A profile is a saved assistant: how it works through requests, its models, tools, memory, and the computers it runs on. General Assistant decides everything for you. Programming uses the Team strategy. Research focuses on looking things up, and Custom is set up to work without the internet. Profiles & Orchestration in the sidebar lists them and lets you create one. With Advanced mode on, Edit opens a profile's editor across the page, with five tabs: Models, Tools, Knowledge and memory, Topics, and Strategy and computers. Models shows the roles in use, with Show all roles for the rest; Tools has a switch for each kind of tool, with Per-tool permissions below. A tool a profile doesn't list stays off. Built-in profiles cannot be deleted; More actions → Reset to defaults puts one back to how Toskar ships it.",
+        "New chats start with the default profile, marked Default for new chats: General Assistant, unless you choose another. More actions → Use for new chats makes a profile the default, and so does Default profile in Settings. Use in Chat opens one chat with a profile and leaves the default as it is. Chats started from your phone, another app, or the API without naming a profile use the default too. Deleting the default goes back to General Assistant. Each profile has a name of its own: a name that's taken, in any capitals, is refused, and profiles that shared a name before get one, such as General Assistant (2).",
+        "Strategy is how the profile works. Auto gives quick questions one model, and plans and checks bigger requests. Single model answers every request without a plan. Planner + workers always works through requests with several parts in parts. Team has a planner split each request, workers do the parts, and a reviewer check the answer; quick questions are still answered directly. Swarm has several agents work at once.",
+        "Models assigns a model, and optionally a computer, to each role: Primary writes the answer, Fast and Coding answer quick and coding requests when the chat is on Auto, and Planner, Worker, and Reviewer do their part of a plan. Automatic uses the model chosen in the chat. Fallback order lists the models to try, in order, when the answering model fails.",
+        "Capabilities turn tool groups on and off, and each tool has its own permission. A profile can list knowledge sources that every chat with it searches. Computer selection can be Automatic or Prefer this computer; Only this computer keeps every turn here, and each paired computer can be Preferred or Never use.",
+        "Orchestration tunes how the profile works, and empty fields keep the defaults. Reasoning level is its effort when a chat leaves effort on Auto. Planning is when a request is worked through in parts: when it has parts, always, or never. Workers and Parallelism set how many parts, and side by side or one at a time. Verification checks and reports, or checks and corrects once or twice. Tool calls caps the calls in one turn, and Memory can be off for this profile. Context budget is how much of the model's window earlier messages may use. Fallback shows the failure instead of answering on another model. Retries is how many times a failed turn is tried again, first on another computer with the same model. Time limit stops a long turn."
       ],
       "kind": "task",
       "summary": "Make an assistant for a kind of work, such as a shop's front desk or code help, by choosing its models, tools, knowledge, topics, and computers.",
@@ -2766,8 +2770,9 @@
       "id": "deliberate",
       "title": "Compare independent drafts",
       "paragraphs": [
-        "A profile can have each answer drafted three times, independently, and compared before you see one. Small models make reasoning slips, such as a wrong step in a word problem, and drafts that don't see each other often catch them. It's off by default: it makes answers slower and uses more of your computers.",
-        "When the drafts' final answers are short, such as a number, a date, or a name, they're compared, and when most agree, that answer is kept. When they disagree, or are too long to compare, each draft is checked against the others, and a judge writes the answer from them. If anything fails along the way, the answer you'd have had without drafts stands."
+        "A profile can have its answers drafted three times, independently, and compared before you see one. Small models make reasoning slips, such as a wrong step in a word problem, and a second and third draft that don't see the first often catch them. The extra drafts run on paired computers when there are any, at different settings, so they don't simply repeat each other.",
+        "When the drafts' final answers are short, such as a number, a date, or a name, they are compared: when most agree, that answer is kept and nothing more runs. When they disagree, or the answers are too long to compare, each draft is checked against the others, and a judge writes the answer from the drafts and the checks, saying where they still disagree. If anything fails along the way, the answer you would have had without drafts stands.",
+        "It's off by default. It makes answers slower and uses more of your computers, and it helps most with math, logic, and questions that take several steps. Team profiles have their own reviewer and don't compare drafts. Small talk, pictures, and answers that must be in a fixed format are answered once."
       ],
       "kind": "concept",
       "summary": "Have a profile draft each answer three times on its own and compare them, to catch slips in math and reasoning.",
@@ -2880,6 +2885,12 @@
             "computers"
           ]
         }
+      ],
+      "steps": [
+        "Open Profiles & Orchestration, edit a profile, and open Strategy and computers.",
+        "Set Compare independent drafts to Always, and save.",
+        "To choose the models, open Models, choose Show all roles, and set Drafter and Judge. Without them, the drafts use the profile's model and the judge uses its Reviewer, or its model.",
+        "Under an answer, the drafts line, such as 3 drafts · they agreed, opens to each draft's model, computer, and final answer, the checks, and the judge. The steps say how it went. The phone app shows the same."
       ]
     },
     {
