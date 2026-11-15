@@ -34,6 +34,26 @@ type realDriver struct {
 	// model is the model every chat asks for, such as qwen2.5-32b-q4, or
 	// "" for the daemon's own pick ("auto").
 	model string
+	// sampling is this run's seed, and its temperature when one was
+	// chosen, sent with every chat so a run repeats (#839).
+	sampling sampling
+}
+
+// withSampling is the driver for one repeat of a case.
+func (d realDriver) withSampling(s sampling) Driver {
+	d.sampling = s
+	return d
+}
+
+// sampled adds the run's seed to a chat request, and its temperature when
+// one was chosen.
+func (d realDriver) sampled(body map[string]any) {
+	if d.sampling.Seed > 0 {
+		body["seed"] = d.sampling.Seed
+	}
+	if d.sampling.Chosen {
+		body["temperature"] = d.sampling.Temperature
+	}
 }
 
 func newRealDriver(base string) realDriver {
@@ -292,6 +312,7 @@ func (d realDriver) Run(t *testing.T, c Case) Result {
 		if c.Swarm != "" {
 			body["swarm"] = c.Swarm
 		}
+		d.sampled(body)
 		d.do(t, http.MethodPost, "/api/v1/chat", body, nil)
 	}
 	// Attachments are uploaded as the apps upload them (#510).
