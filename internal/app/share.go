@@ -88,6 +88,15 @@ func minutesLeft(w *share.Work) (int, bool) {
 // when to retry, and a generic one is translated. Other errors are left as
 // they are; clients show them by their code.
 func (a *App) explainFailure(lang, errText string) string {
+	// A model kept running holds memory a new one needed (#966).
+	if _, training := a.training(); !training && modelhealth.OutOfMemory(errText) {
+		if message, kept := a.keptRunningMemory(lang); kept {
+			if _, isHealth := modelhealth.Parse(errText); isHealth {
+				return modelhealth.WithMessage(errText, message)
+			}
+			return modelhealth.Encode(modelhealth.Failure{Reason: modelhealth.ReasonOOM, LikelyMemoryPressure: true, Message: message})
+		}
+	}
 	w, ok := a.training()
 	if !ok || !modelhealth.OutOfMemory(errText) {
 		if f, isHealth := modelhealth.Parse(errText); isHealth && f.Message == modelhealth.UserMessage(f.LikelyMemoryPressure) {

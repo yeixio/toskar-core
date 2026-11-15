@@ -85,7 +85,7 @@ type Dependencies struct {
 	SetModelSpeculation func(ctx context.Context, id, choice string) error
 	// SetModelAlwaysRunning keeps a chat model on this computer loaded, or
 	// lets it unload again (#966).
-	SetModelAlwaysRunning func(ctx context.Context, id string, on bool) error
+	SetModelAlwaysRunning func(ctx context.Context, id string, on bool) (int64, error)
 	// SetModelContext sets a model's context window on this computer, 0
 	// for Auto (#962).
 	SetModelContext func(ctx context.Context, id string, tokens int) error

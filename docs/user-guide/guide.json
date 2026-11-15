@@ -1685,7 +1685,28 @@
         },
         {
           "type": "paragraph",
-          "text": "A loaded model is unloaded after 15 minutes without use, unless Settings sets the model lifecycle to manual or another time. Settings also sets the most disk space models may use."
+          "text": "A loaded model is unloaded after 15 minutes without use, unless Settings sets the model lifecycle to manual or another time, or the model is kept running (below). Settings also sets the most disk space models may use."
+        },
+        {
+          "type": "heading",
+          "text": "Keep a model running"
+        },
+        {
+          "type": "paragraph",
+          "text": "A model you rely on, such as the one a doorbell, an automation, or another app uses, can stay loaded, so it never has to start before it answers. It loads when Toskar starts and again within a minute if it stops, and it isn't unloaded when idle or to make room for a picture or clip."
+        },
+        {
+          "type": "steps",
+          "items": [
+            "Turn on Advanced mode in Settings.",
+            "Open Models, then Installed, and choose More actions on the model.",
+            "Choose Always running. The model loads, its card says Always running, and a line under it says how much memory it leaves for other models.",
+            "To let it unload again, choose Always running once more."
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "A model kept running holds its memory all the time. When little is left, the line under it says so, and a larger model may not fit beside it: the answer then names the model kept running and how much it holds. Training still frees the memory it needs, and the model comes back after. If you stop it with Stop, it stays stopped until you start it again or Toskar starts."
         },
         {
           "type": "heading",
@@ -1775,6 +1796,15 @@
         {
           "type": "paragraph",
           "text": "It prints a line such as Downloading Llama 3.2 3B: 40% (840 MB of 2.1 GB) every tenth of the way, then Installed Llama 3.2 3B."
+        },
+        {
+          "type": "paragraph",
+          "text": "`toskarctl models pin` keeps a model installed on the computer it talks to running, and says how much memory that leaves for other models; `toskarctl models unpin` lets it unload again. It needs an installed model, so CI doesn't run it."
+        },
+        {
+          "type": "code",
+          "language": "sh",
+          "code": "toskarctl models pin llama-3.2-3b-q4"
         },
         {
           "type": "paragraph",

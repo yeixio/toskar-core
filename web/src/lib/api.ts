@@ -890,6 +890,13 @@ export const api = {
       body: JSON.stringify({ speculation }),
     }),
 
+  /** Keeps a chat model on this computer loaded, or lets it unload again (#966); memory_left_bytes is what the models kept running leave (contract 1.95). */
+  setModelAlwaysRunning: (id: string, on: boolean) =>
+    request<{ model_id: string; always_running: boolean; memory_left_bytes?: number }>(
+      `/api/v1/models/${encodeURIComponent(id)}/always-running`,
+      { method: 'PUT', body: JSON.stringify({ always_running: on }) },
+    ),
+
   /** A model's context window on this computer, in tokens, or 0 for Auto; a loaded model reloads with it on its next request (#962). */
   setModelContext: (id: string, contextWindow: number) =>
     request<{ model_id: string; context_window: number }>(`/api/v1/models/${encodeURIComponent(id)}/context`, {

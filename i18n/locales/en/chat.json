@@ -416,7 +416,8 @@
       "busy": "Training is using this computer, so there was not enough memory for this model.",
       "busyNamed": "Training “{{name}}” is using this computer, so there was not enough memory for this model.",
       "advice": "Try again when training finishes, choose a smaller model, or cancel training on the Train page."
-    }
+    },
+    "keptRunningMemory": "{{name}} is kept running and holds about {{gb}} GB, so there was not enough memory for this model. Choose a smaller model, or turn off Always running for {{name}} on the Models page."
   },
   "modelFailure": {
     "retry": "Retry",

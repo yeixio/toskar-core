@@ -427,7 +427,8 @@
       "busy": "Un addestramento sta usando questo computer, quindi non c'era abbastanza memoria per questo modello.",
       "busyNamed": "L'addestramento “{{name}}” sta usando questo computer, quindi non c'era abbastanza memoria per questo modello.",
       "advice": "Riprova quando l'addestramento è finito, scegli un modello più piccolo o annulla l'addestramento nella pagina Addestra."
-    }
+    },
+    "keptRunningMemory": "{{name}} resta sempre attivo e occupa circa {{gb}} GB, quindi non c'era memoria sufficiente per questo modello. Scegli un modello più piccolo o disattiva Sempre attivo per {{name}} nella pagina Modelli."
   },
   "modelFailure": {
     "retry": "Riprova",

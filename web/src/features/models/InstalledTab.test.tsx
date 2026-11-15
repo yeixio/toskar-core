@@ -150,3 +150,28 @@ describe('InstalledTab agents at once', () => {
     expect(screen.queryByRole('group', { name: 'Agents at once' })).not.toBeInTheDocument()
   })
 })
+
+// A chat model can be kept running, in Advanced mode, and says so (#966).
+describe('InstalledTab always running', () => {
+  it('keeps a model running from its menu, and shows that it is', () => {
+    useUIStore.setState({ advancedMode: true })
+    const onAlwaysRunning = vi.fn()
+    renderTab({ models: [{ ...qwen, speculation: 'auto' }], onAlwaysRunning })
+    expect(screen.queryByText('Always running')).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'More actions for Qwen3.5 35B' }))
+    const item = screen.getByRole('menuitemcheckbox', { name: 'Always running' })
+    expect(item).toHaveAttribute('aria-checked', 'false')
+    fireEvent.click(item)
+    expect(onAlwaysRunning).toHaveBeenCalledWith('qwen3.5-35b', true)
+    useUIStore.setState({ advancedMode: false })
+  })
+
+  it('labels a model kept running, and says what it leaves for others', () => {
+    renderTab({
+      models: [{ ...qwen, speculation: 'auto', always_running: true }],
+      alwaysRunningNote: { id: 'qwen3.5-35b', text: 'Kept running. It leaves only about 5 GB of memory for other models, so larger ones may not fit beside it.', warn: true },
+    })
+    expect(screen.getByText('Always running')).toBeInTheDocument()
+    expect(screen.getByRole('status')).toHaveTextContent('only about 5 GB')
+  })
+})

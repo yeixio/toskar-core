@@ -416,7 +416,8 @@
       "busy": "Ein Training nutzt diesen Computer, deshalb war nicht genug Speicher für dieses Modell frei.",
       "busyNamed": "Das Training „{{name}}“ nutzt diesen Computer, deshalb war nicht genug Speicher für dieses Modell frei.",
       "advice": "Versuche es erneut, wenn das Training fertig ist, wähle ein kleineres Modell oder brich das Training auf der Seite „Trainieren“ ab."
-    }
+    },
+    "keptRunningMemory": "{{name}} läuft dauerhaft und belegt etwa {{gb}} GB, daher reichte der Speicher für dieses Modell nicht. Wähle ein kleineres Modell oder schalte „Immer aktiv“ für {{name}} auf der Seite „Modelle“ aus."
   },
   "modelFailure": {
     "retry": "Wiederholen",
