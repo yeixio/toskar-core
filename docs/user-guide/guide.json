@@ -1698,9 +1698,9 @@
         {
           "type": "steps",
           "items": [
-            "Turn on Advanced mode in Settings.",
+            "Turn on Advanced mode in Settings. Only Admins can keep a model running.",
             "Open Models, then Installed, and choose More actions on the model.",
-            "Choose Always running. The model loads, its card says Always running, and a line under it says how much memory it leaves for other models.",
+            "Choose Always running. The model loads, its card says Always running, and a line under it says how much memory it leaves for other models. The Running tab and Performance say Always running beside it too.",
             "To let it unload again, choose Always running once more."
           ]
         },
