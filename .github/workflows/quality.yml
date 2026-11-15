@@ -852,11 +852,24 @@ jobs:
         run: |
           mkdir -p .quality
           "$RUNNER_TEMP/specbench.exe" -toskar http://127.0.0.1:7471 -install "$MODEL" -fit -out .quality/fit.md
+      # The fit check times one answer, its question and a fresh build's
+      # first start included. The long-prompt benchmark, three runs after a
+      # warm-up, is what compares builds and computers (#1066), as the rig
+      # measures it.
+      - name: Measure it, warm
+        env:
+          TOSKAR_QUALITY_URL: http://127.0.0.1:7471
+          TOSKAR_QUALITY_MODEL: ${{ matrix.model }}
+          TOSKAR_QUALITY_PERFORMANCE_REPORT: ${{ github.workspace }}/.quality/performance.json
+        run: go test ./tests/quality -run '^TestPerformance$' -count=1 -v -timeout 60m
       - name: Report
         if: always()
         run: |
           if [ -f .quality/fit.md ]; then
             { echo "Runner: $(nvidia-smi --query-gpu=name,memory.total --format=csv,noheader 2>/dev/null || echo windows)"; cat .quality/fit.md; } >> "$GITHUB_STEP_SUMMARY"
+          fi
+          if [ -f .quality/performance.json ]; then
+            { echo; echo "Warm, the long-prompt benchmark:"; echo; echo '```json'; cat .quality/performance.json; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
           fi
       - name: Daemon log
         if: failure()
