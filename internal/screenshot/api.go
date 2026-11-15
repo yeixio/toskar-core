@@ -3,6 +3,8 @@ package screenshot
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/yeixio/toskar-core/internal/profiles"
+	"github.com/yeixio/toskar-core/pkg/contracts"
 	"net/http"
 	"strings"
 	"time"
@@ -119,7 +121,7 @@ func screenshotGET(path string) (string, bool) {
 	case strings.HasPrefix(path, "/api/v1/models/recommend"):
 		return `{"purpose":"general","roles":[],"models":[],"reason":"","estimated_storage_bytes":0,"estimated_vram_bytes":0}`, true
 	case path == "/api/v1/profiles":
-		return screenshotProfiles, true
+		return screenshotProfiles(), true
 	case path == "/api/v1/nodes":
 		return screenshotNodes, true
 	case path == "/api/v1/nodes/pairing/pending":
@@ -144,6 +146,9 @@ func screenshotGET(path string) (string, bool) {
 		return screenshotShopProject(), true
 	case path == "/api/v1/conversations/conv-budget/messages":
 		return screenshotBudgetMessages, true
+	// An answer whose three drafts were compared (#897).
+	case path == "/api/v1/conversations/conv-bakesale/messages":
+		return screenshotBakeSaleMessages, true
 	case path == "/api/v1/conversations/conv-letter/messages":
 		return screenshotLetterMessages, true
 	// A swarm that compared heat pumps, with its agents' lanes (#1135).
@@ -332,45 +337,51 @@ const screenshotRunning = `[{
   "acceleration": {"state": "gpu", "backend": "metal", "devices": ["Apple M4 Pro"], "layers_offloaded": 35, "layers_total": 35, "gpu_memory_bytes": 4800000000}
 }]`
 
-const screenshotProfiles = `[{
-  "id": "general-assistant",
-  "name": "General",
-  "purpose": "general",
-  "orchestrator_id": "simple",
-  "roles": [{"role": "assistant", "model_id": "gemma-4-e4b", "node_id": "local", "required": true}],
-  "node_policy": {"mode": "prefer_local"},
-  "tools": [],
-  "knowledge_sources": ["ks-trails", "ks-returns", "ks-budget"]
-}, {
-  "id": "programming",
-  "name": "Programming",
-  "purpose": "coding",
-  "orchestrator_id": "simple",
-  "roles": [
-    {"role": "planner", "model_id": "gemma-4-e4b", "node_id": "local", "required": true},
-    {"role": "worker", "model_id": "qwen-coder-7b", "node_id": "studio", "required": true},
-    {"role": "reviewer", "model_id": "gemma-4-e4b", "node_id": "local", "required": false}
-  ],
-  "node_policy": {"mode": "automatic", "preferred_nodes": ["studio"]},
-  "orchestration": {"strategy": "team", "parallel": "on", "verification": "check"},
-  "tools": [
-    {"tool_id": "filesystem.read", "policy": "allow"},
-    {"tool_id": "git.status", "policy": "allow"},
-    {"tool_id": "git.commit", "policy": "ask"},
-    {"tool_id": "terminal", "policy": "ask"}
-  ]
-}, {
-  "id": "research",
-  "topics": {"stays_on": "Tires, wheels, alignment, and bookings at Dana's", "strictness": "enforce"},
-  "name": "Research",
-  "purpose": "research",
-  "orchestrator_id": "simple",
-  "roles": [{"role": "assistant", "model_id": "gemma-4-e4b", "node_id": "local", "required": true}],
-  "node_policy": {"mode": "prefer_local"},
-  "orchestration": {"strategy": "planned", "verification": "correct"},
-  "tools": [{"tool_id": "internet.search", "policy": "allow"}, {"tool_id": "internet.open", "policy": "allow"}],
-  "knowledge_sources": ["ks-trails"]
-}]`
+// screenshotProfiles is the built-in profiles as a new install has them,
+// with their tools and strategies (#897), and the demo's models, computers,
+// knowledge, and topics laid over them. Written out by hand, the demo had
+// drifted to a General with no tools.
+func screenshotProfiles() string {
+	local := func(role, model string) contracts.ModelRole {
+		return contracts.ModelRole{Role: role, ModelID: model, NodeID: "local", Required: true}
+	}
+	demo := map[string]func(*profiles.Profile){
+		profiles.PresetGeneral: func(p *profiles.Profile) {
+			p.Roles = []contracts.ModelRole{local("assistant", "gemma-4-e4b")}
+			p.NodePolicy = contracts.NodePolicy{Mode: "prefer_local"}
+			p.KnowledgeSources = []string{"ks-trails", "ks-returns", "ks-budget"}
+		},
+		profiles.PresetProgramming: func(p *profiles.Profile) {
+			p.Roles = []contracts.ModelRole{
+				local(profiles.RolePlanner, "gemma-4-e4b"),
+				{Role: profiles.RoleWorker, ModelID: "qwen-coder-7b", NodeID: "studio", Required: true},
+				{Role: profiles.RoleReviewer, ModelID: "gemma-4-e4b", NodeID: "local"},
+			}
+			p.NodePolicy = contracts.NodePolicy{Mode: "automatic", PreferredNodes: []string{"studio"}}
+		},
+		profiles.PresetResearch: func(p *profiles.Profile) {
+			p.Roles = []contracts.ModelRole{local("assistant", "gemma-4-e4b")}
+			p.NodePolicy = contracts.NodePolicy{Mode: "prefer_local"}
+			p.KnowledgeSources = []string{"ks-trails"}
+			p.Topics = &contracts.TopicPolicy{StaysOn: "Tires, wheels, alignment, and bookings at Dana's", Strictness: "enforce"}
+		},
+		profiles.PresetCustom: func(p *profiles.Profile) {
+			p.Roles = []contracts.ModelRole{local("assistant", "gemma-4-e4b")}
+		},
+	}
+	var out []profiles.Profile
+	for _, p := range profiles.BuiltInPresets() {
+		if set, ok := demo[p.ID]; ok {
+			set(&p)
+			out = append(out, p)
+		}
+	}
+	raw, err := json.Marshal(out)
+	if err != nil {
+		return "[]"
+	}
+	return string(raw)
+}
 
 const screenshotNodes = `[
   {
@@ -699,6 +710,38 @@ const screenshotBudgetMessages = `[
       ]
     },
     "created_at": "2026-09-24T12:01:40Z"
+  }
+]`
+
+// screenshotBakeSaleMessages is a word problem answered by comparing three
+// independent drafts, two of which agreed, for the user guide's Deliberate
+// screenshot (#897).
+const screenshotBakeSaleMessages = `[
+  {
+    "id": "d1",
+    "conversation_id": "conv-bakesale",
+    "role": "user",
+    "content": "We baked 250 cookies for the bake sale. Each box holds 6. How many boxes do we need?",
+    "created_at": "2026-09-24T15:10:00Z"
+  },
+  {
+    "id": "d2",
+    "conversation_id": "conv-bakesale",
+    "role": "assistant",
+    "content": "You need **42 boxes**.\n\n250 ÷ 6 is 41 with 4 left over, so 41 boxes are full and one more holds the last 4 cookies.",
+    "meta": {
+      "deliberation": {
+        "outcome": "majority",
+        "final": "42",
+        "drafts": [
+          {"role": "assistant", "model_id": "gemma-4-e4b", "node_id": "local", "node_name": "This Mac", "final": "42", "chosen": true},
+          {"role": "drafter", "model_id": "gemma-4-e4b", "node_id": "studio", "node_name": "Studio", "final": "42"},
+          {"role": "drafter", "model_id": "qwen-coder-7b", "node_id": "studio", "node_name": "Studio", "final": "41"}
+        ]
+      },
+      "steps": [{"kind": "deliberate", "key": "deliberateMajority", "params": {"count": 3, "agreeing": 2}, "text": "Compared 3 independent drafts: 2 agreed, and that answer is kept"}]
+    },
+    "created_at": "2026-09-24T15:10:20Z"
   }
 ]`
 

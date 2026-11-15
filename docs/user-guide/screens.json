@@ -1112,6 +1112,45 @@
           "wait": "Agent 2: Cold weather"
         }
       ]
+    },
+    {
+      "id": "profiles",
+      "path": "/profiles",
+      "readyText": "General Assistant"
+    },
+    {
+      "id": "profile-edit",
+      "path": "/profiles",
+      "readyText": "General Assistant",
+      "actions": [
+        {
+          "click": "Edit",
+          "exact": true
+        },
+        {
+          "wait": "Show all roles"
+        },
+        {
+          "click": "Strategy and computers"
+        },
+        {
+          "wait": "Compare independent drafts"
+        }
+      ]
+    },
+    {
+      "id": "deliberate-drafts",
+      "path": "/chat",
+      "query": "c=conv-bakesale",
+      "readyText": "42 boxes",
+      "actions": [
+        {
+          "click": "3 drafts · most agreed"
+        },
+        {
+          "wait": "Final answer"
+        }
+      ]
     }
   ]
 }
