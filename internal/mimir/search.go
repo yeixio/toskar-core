@@ -58,6 +58,15 @@ var stopwords = map[string]bool{
 // matchQuery turns free text into an FTS5 query. Each term is quoted so
 // punctuation in sizes and SKUs (225/45R17, AB-1002) is matched literally.
 func matchQuery(q string) string {
+	terms := queryTerms(q)
+	for i, t := range terms {
+		terms[i] = `"` + strings.ReplaceAll(t, `"`, `""`) + `"`
+	}
+	return strings.Join(terms, " OR ")
+}
+
+// queryTerms are the words of q that a keyword search matches on.
+func queryTerms(q string) []string {
 	seen := map[string]bool{}
 	var terms []string
 	for _, t := range termRe.FindAllString(strings.ToLower(q), -1) {
@@ -69,12 +78,41 @@ func matchQuery(q string) string {
 			continue
 		}
 		seen[t] = true
-		terms = append(terms, `"`+strings.ReplaceAll(t, `"`, `""`)+`"`)
+		terms = append(terms, t)
 		if len(terms) == 24 {
 			break
 		}
 	}
-	return strings.Join(terms, " OR ")
+	return terms
+}
+
+// sharesMoreThanAWord drops passages that share one plain word with a
+// question of four words or more (#1217): "coffee shops near the harbor in
+// Juneau" brought in Harbor Supply's refund policy, and a small model,
+// told to answer from it, said it had no information instead of looking
+// it up. A word with a digit, such as a SKU or size, is enough alone.
+func sharesMoreThanAWord(hits []Hit, terms []string) []Hit {
+	if len(terms) < 4 {
+		return hits
+	}
+	out := hits[:0:0]
+	for _, h := range hits {
+		words := map[string]bool{}
+		for _, w := range termRe.FindAllString(strings.ToLower(h.Title+" "+h.Body), -1) {
+			words[strings.Trim(w, "/-")] = true
+		}
+		shared, coded := 0, false
+		for _, t := range terms {
+			if words[t] {
+				shared++
+				coded = coded || strings.ContainsAny(t, "0123456789")
+			}
+		}
+		if shared > 1 || coded {
+			out = append(out, h)
+		}
+	}
+	return out
 }
 
 // Search returns the passages that best match the query. Sources whose files
@@ -118,7 +156,7 @@ func (s *Store) Search(ctx context.Context, in SearchInput) ([]Hit, error) {
 		if keyword, err = s.keywordSearch(ctx, match, ids, pool); err != nil {
 			return nil, err
 		}
-		keyword = relevant(keyword)
+		keyword = sharesMoreThanAWord(relevant(keyword), queryTerms(query))
 	}
 	hits := keyword
 	if sem, ok := s.semanticSearch(ctx, models, query, ids, pool); ok {
@@ -222,7 +260,10 @@ func ContextBlock(hits []Hit, budget int) string {
 	var b strings.Builder
 	b.WriteString("Connected knowledge. These passages are current and authoritative. ")
 	b.WriteString("Prefer them over what you remember for facts such as prices, stock, specifications, and policies. ")
-	b.WriteString("If they do not answer the question, say so instead of guessing.\n")
+	b.WriteString("If they are about the question but do not answer it, say so instead of guessing. ")
+	// Found by words, a passage can be about something else; it mustn't
+	// stop the answer (#1217).
+	b.WriteString("If they are about something else, leave them out and answer as you would without them.\n")
 	used := 0
 	for i, h := range hits {
 		entry := fmt.Sprintf("\n[%d] %s\n%s\n", i+1, h.Title, strings.TrimSpace(h.Body))
