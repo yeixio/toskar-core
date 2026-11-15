@@ -41,6 +41,9 @@ func serveScreenshotAPI(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, http.StatusOK, `{}`)
 		return
 	}
+	if serveMedia(w, r) {
+		return
+	}
 	// A swarm's chats: its coordinator's and its agents' (#1135).
 	if path == "/api/v1/conversations" && r.URL.Query().Has("swarm_id") {
 		writeJSON(w, http.StatusOK, screenshotSwarmConversations(r.URL.Query().Get("swarm_id")))
@@ -66,6 +69,7 @@ func serveScreenshotEvents(w http.ResponseWriter, r *http.Request) {
 	if flusher, ok := w.(http.Flusher); ok {
 		flusher.Flush()
 	}
+	sendScreenEvents(w, r)
 	<-r.Context().Done()
 }
 

@@ -19,6 +19,10 @@ func Handler(web fs.FS) http.Handler {
 func spa(web fs.FS) http.Handler {
 	files := http.FileServer(http.FS(web))
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// The page names its screen once, before it rewrites its own address.
+		if r.URL.Query().Has("screen") {
+			currentScreen.Store(r.URL.Query().Get("screen"))
+		}
 		if r.URL.Path != "/" {
 			cleaned := strings.TrimPrefix(path.Clean(r.URL.Path), "/")
 			if cleaned != "" && cleaned != "." {
