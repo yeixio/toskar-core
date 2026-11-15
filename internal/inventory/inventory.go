@@ -230,7 +230,7 @@ var rules = []rule{
 			v := toolsWhere(s, toolID("git."))
 			return len(v) > 0, v, ""
 		}},
-	{"image_generation", "Generate images", regexp.MustCompile(`(?i)\b(generat|creat|draw|make|render|paint)\w*\b.*\b(images?|pictures?|photos?|drawings?|illustrations?|art)\b|\b(draw|paint|sketch|illustrate)\s+(me\s+)?(a|an|the|my|our|some)\b`),
+	{"image_generation", "Generate images", regexp.MustCompile(`(?i)\b(generat|creat|draw|make|render|paint)\w*\b.*\b(images?|pictures?|photos?|drawings?|paintings?|watercolou?rs?|sketch(es)?|cartoons?|illustrations?|art)\b|\b(draw|paint|sketch|illustrate)\s+(me\s+)?(a|an|the|my|our|some)\b`),
 		func(s Snapshot) (bool, []string, string) {
 			v := toolsWhere(s, toolAbout(imageRe, makeRe))
 			if len(v) > 0 {

@@ -154,7 +154,7 @@ func TestNeeds(t *testing.T) {
 	s := snapshot()
 	s.Setups = []Setup{{Ability: "image_generation", Option: "flux2-klein-4b", Name: "FLUX.2 [klein] 4B", SizeBytes: 5_207_178_964, Tools: []string{"image.generate"}}}
 	// A request asked as a question, or to draw something, needs it too.
-	for _, msg := range []string{"Make me an image of a Viking tree", "Are you able to make a picture of a dog for me?", "Can you draw a dog?", "Draw me a fox"} {
+	for _, msg := range []string{"Make me an image of a Viking tree", "Are you able to make a picture of a dog for me?", "Can you draw a dog?", "Draw me a fox", "Make a watercolor of a lighthouse at dusk."} {
 		a, ok := Needs(s, msg)
 		if !ok || a.ID != "image_generation" || a.Setup == nil || a.Setup.Option != "flux2-klein-4b" {
 			t.Fatalf("%q needs = %+v %v", msg, a, ok)

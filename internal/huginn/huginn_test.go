@@ -224,11 +224,12 @@ func TestToolsFor(t *testing.T) {
 	}
 	images := []string{"image.generate", "image.edit", "files.create"}
 	for msg, want := range map[string]string{
-		"Draw a fox in the snow":                  "image.generate",
-		"Can you make a picture of a lighthouse?": "image.generate",
-		"Generate a logo for my bakery":           "image.generate",
-		"Remove the background from photo.png":    "image.edit",
-		"Change the sky in this image to sunset":  "image.edit",
+		"Draw a fox in the snow":                     "image.generate",
+		"Can you make a picture of a lighthouse?":    "image.generate",
+		"Make a watercolor of a lighthouse at dusk.": "image.generate",
+		"Generate a logo for my bakery":              "image.generate",
+		"Remove the background from photo.png":       "image.edit",
+		"Change the sky in this image to sunset":     "image.edit",
 	} {
 		if got := ToolsFor(Chat, msg, images); !has(got, want) {
 			t.Errorf("%q offered %v, want %s", msg, got, want)
