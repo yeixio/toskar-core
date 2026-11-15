@@ -148,9 +148,15 @@ func main() {
 	configs := []config{{"off", nil}, {"ngram-mod", []string{"--spec-type", "ngram-mod"}}}
 	if *draft != "" {
 		d := []string{"-md", *draft, "-ngld", *gpuLayers}
+		// An EAGLE3 draft, as ggml-org publishes beside gpt-oss, reads the
+		// model's own hidden states and runs as draft-eagle3 (#1140).
+		kind := "draft-simple"
+		if info, err := gguf.Inspect(*draft); err == nil && info.Architecture == "eagle3" {
+			kind = "draft-eagle3"
+		}
 		configs = append(configs,
-			config{"draft", append(d, "--spec-type", "draft-simple")},
-			config{"draft+ngram-mod", append(append([]string{}, d...), "--spec-type", "draft-simple,ngram-mod")})
+			config{"draft", append(d, "--spec-type", kind)},
+			config{"draft+ngram-mod", append(append([]string{}, d...), "--spec-type", kind+",ngram-mod")})
 	}
 	// A model with its own multi-token prediction head guesses with it, no
 	// draft needed (#956): Qwen 3.8's -mtp files.
