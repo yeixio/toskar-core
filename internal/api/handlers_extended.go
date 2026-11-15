@@ -408,6 +408,10 @@ func (s *Server) handleChat(w http.ResponseWriter, r *http.Request) {
 		// Swarm runs this turn as a swarm: split or race (#1135, contract
 		// 1.88). Members and up; a task runs as one for now.
 		Swarm string `json:"swarm"`
+		// Temperature and the sampler and seed for the answer (#839,
+		// contract 1.93); left out, the model's own.
+		Temperature *float64 `json:"temperature"`
+		pluginapi.Sampling
 	}
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		writeErr(w, http.StatusBadRequest, "INVALID_JSON", "invalid body", nil)
@@ -469,11 +473,29 @@ func (s *Server) handleChat(w http.ResponseWriter, r *http.Request) {
 		writeErr(w, http.StatusBadRequest, "BAD_REQUEST", `thinking is "on" or "off"`, map[string]any{"detail": `thinking is "on" or "off"`})
 		return
 	}
+	if err := body.Sampling.Check(); err != nil {
+		writeErr(w, http.StatusBadRequest, "BAD_REQUEST", err.Error(), map[string]any{"detail": err.Error()})
+		return
+	}
+	answer := pluginapi.GenerateOptions{Sampling: body.Sampling}
+	if t := body.Temperature; t != nil {
+		if *t < 0 || *t > 2 {
+			writeErr(w, http.StatusBadRequest, "BAD_REQUEST", "temperature must be between 0 and 2", map[string]any{"detail": "temperature must be between 0 and 2"})
+			return
+		}
+		answer.Temperature = *t
+		if *t == 0 {
+			answer.Temperature = pluginapi.GreedyTemperature
+		}
+	}
 	switch body.Thinking {
 	case "off":
-		ctx = pluginapi.WithAnswerOptions(ctx, pluginapi.GenerateOptions{NoThinking: true})
+		answer.NoThinking = true
 	case "on":
-		ctx = pluginapi.WithAnswerOptions(ctx, pluginapi.GenerateOptions{Thinking: true})
+		answer.Thinking = true
+	}
+	if answer != (pluginapi.GenerateOptions{}) {
+		ctx = pluginapi.WithAnswerOptions(ctx, answer)
 	}
 	if body.ProjectID != "" {
 		if !s.checkProjectID(w, r, body.ProjectID) {

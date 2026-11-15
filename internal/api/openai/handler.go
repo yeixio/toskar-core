@@ -87,6 +87,9 @@ type chatCompletionRequest struct {
 	Temperature         *float64 `json:"temperature"`
 	MaxTokens           int      `json:"max_tokens"`
 	MaxCompletionTokens int      `json:"max_completion_tokens"`
+	// The sampler and seed (#839): the same seed and settings repeat an
+	// answer from one model, as far as llama.cpp can (docs/api.md).
+	pluginapi.Sampling
 	// StreamOptions.IncludeUsage ends a stream with a chunk of the tokens
 	// it took (#832).
 	StreamOptions *struct {
@@ -222,6 +225,10 @@ func (req chatCompletionRequest) sampling() (pluginapi.GenerateOptions, error) {
 	if o.MaxTokens < 0 || req.MaxCompletionTokens < 0 {
 		return o, errors.New("max_tokens must be positive")
 	}
+	if err := req.Sampling.Check(); err != nil {
+		return o, err
+	}
+	o.Sampling = req.Sampling
 	// reasoning_effort "none": a reasoning model answers without thinking
 	// first (#840), as OpenAI's reasoning models do.
 	o.NoThinking = strings.EqualFold(req.ReasoningEffort, "none")

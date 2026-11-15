@@ -243,6 +243,9 @@ type RemoteChatRequest struct {
 	// computer on an older Toskar ignores it, and the model thinks as long
 	// as its own default.
 	ReasoningEffort string `json:"reasoning_effort,omitempty"`
+	// Sampling is pluginapi.ChatRequest.Sampling (#839); a computer on an
+	// older Toskar ignores it.
+	Sampling pluginapi.Sampling `json:"sampling"`
 }
 
 func (c *Client) Chat(ctx context.Context, req RemoteChatRequest) (<-chan pluginapi.ChatChunk, error) {

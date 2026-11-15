@@ -146,6 +146,7 @@ func (r *Runtime) Chat(ctx context.Context, model string, req pluginapi.ChatRequ
 	if req.MaxTokens > 0 {
 		body["max_tokens"] = req.MaxTokens
 	}
+	req.Sampling.Apply(body)
 	// Ask for the token counts at the end of the stream, so the context
 	// gauge shows the real prompt size (#230).
 	body["stream_options"] = map[string]any{"include_usage": true}

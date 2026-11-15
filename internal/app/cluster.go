@@ -278,6 +278,7 @@ func (a *App) generateOnNode(ctx context.Context, nodeID, modelID, role, adapter
 			MaxTokens:       opts.MaxTokens,
 			NoThinking:      opts.NoThinking,
 			ReasoningEffort: opts.ReasoningEffort,
+			Sampling:        opts.Sampling,
 		}))
 		if err != nil {
 			return nil, err
@@ -316,6 +317,7 @@ func (a *App) generateOnNode(ctx context.Context, nodeID, modelID, role, adapter
 		ResponseSchema:    structured.SchemaFrom(ctx),
 		NoThinking:        opts.NoThinking,
 		ReasoningEffort:   opts.ReasoningEffort,
+		Sampling:          opts.Sampling,
 	})
 	if err != nil {
 		return nil, remoteUnreachableErr(n, err)
@@ -584,6 +586,7 @@ func (a *App) internalChatStream(ctx context.Context, req nodes.RemoteChatReques
 			ResponseSchema:  req.ResponseSchema,
 			NoThinking:      req.NoThinking,
 			ReasoningEffort: req.ReasoningEffort,
+			Sampling:        req.Sampling,
 		}))
 		if err != nil {
 			return nil, err
