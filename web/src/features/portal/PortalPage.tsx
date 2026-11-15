@@ -4,10 +4,23 @@ import { useTranslation } from 'react-i18next'
 import { ChatMarkdown } from '@/features/chat/ChatMarkdown'
 import i18n, { resolveLanguage, systemLanguages } from '@/i18n'
 import { api, ApiError, errorText, setPortal, setPortalSession, streamChat } from '@/lib/api'
-import type { PortalPageView } from '@/types/api'
+import type { Message, MessageMeta, PortalPageView } from '@/types/api'
 import { prompts, safeLogo, text, theme, themeVars } from './branding'
 
-type Turn = { role: 'user' | 'assistant'; content: string }
+type Turn = { role: 'user' | 'assistant'; content: string; linkCheck?: MessageMeta['link_check'] }
+
+// The computer checks an answer's links after it's saved, within 6 seconds
+// (#209). The page can't hear that in another website's frame, where the
+// event stream lacks the guest's cookie, so it reads the chat again once.
+export const LINK_CHECK_WAIT_MS = 7000
+
+const hasLink = (answer: string) => /https?:\/\//.test(answer)
+
+function turnsFrom(messages: Message[]): Turn[] {
+  return messages
+    .filter((m) => m.role === 'user' || m.role === 'assistant')
+    .map((m) => ({ role: m.role as Turn['role'], content: m.content, linkCheck: m.meta?.link_check }))
+}
 
 function conversationKey(slug: string) {
   return `toskar.portal.${slug}.conversation`
@@ -238,6 +251,9 @@ function PortalChat({ slug, view, onLeft }: { slug: string; view: PortalPageView
   const [sending, setSending] = useState(false)
   const [error, setError] = useState('')
   const abort = useRef<AbortController | null>(null)
+  const sendingRef = useRef(false)
+  const linkWait = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+  useEffect(() => () => clearTimeout(linkWait.current), [])
   const bottom = useRef<HTMLDivElement | null>(null)
   const branding = view.branding ?? {}
   const suggestions = prompts(branding)
@@ -267,11 +283,7 @@ function PortalChat({ slug, view, onLeft }: { slug: string; view: PortalPageView
   })
   useEffect(() => {
     if (history.data) {
-      setTurns(
-        history.data
-          .filter((m) => m.role === 'user' || m.role === 'assistant')
-          .map((m) => ({ role: m.role as Turn['role'], content: m.content })),
-      )
+      setTurns(turnsFrom(history.data))
     } else if (history.isError) {
       if (history.error instanceof ApiError && history.error.status === 401) onLeft()
       setConversationId('')
@@ -290,9 +302,13 @@ function PortalChat({ slug, view, onLeft }: { slug: string; view: PortalPageView
     setError('')
     setDraft('')
     setSending(true)
+    sendingRef.current = true
+    clearTimeout(linkWait.current)
     setTurns((cur) => [...cur, { role: 'user', content: words }, { role: 'assistant', content: '' }])
+    let id = conversationId
+    let answer = ''
+    let failed = false
     try {
-      let id = conversationId
       if (!id) {
         const created = await api.createConversation({ title: words.length > 48 ? `${words.slice(0, 48)}…` : words, profile_id: '', model_id: '' })
         id = created?.id ?? ''
@@ -304,27 +320,44 @@ function PortalChat({ slug, view, onLeft }: { slug: string; view: PortalPageView
       await streamChat({
         body: { conversation_id: id, message: words },
         signal: controller.signal,
-        onToken: (piece) =>
+        onToken: (piece) => {
+          answer += piece
           setTurns((cur) => {
             const last = cur[cur.length - 1]
             if (last?.role !== 'assistant') return [...cur, { role: 'assistant', content: piece }]
             return [...cur.slice(0, -1), { ...last, content: last.content + piece }]
-          }),
+          })
+        },
         // A limit says which, in the visitor's language (#205).
-        onError: (message, code) => setError(code?.startsWith('PORTAL_') ? errorText(code, message, { max: view.max_message }) : t('error')),
+        onError: (message, code) => {
+          failed = true
+          setError(code?.startsWith('PORTAL_') ? errorText(code, message, { max: view.max_message }) : t('error'))
+        },
       })
     } catch (err) {
+      failed = true
       if (err instanceof ApiError && err.code?.startsWith('PORTAL_')) setError(errorText(err.code, err.message, { max: view.max_message, ...err.details }))
       else if (!(err instanceof DOMException && err.name === 'AbortError')) setError(t('error'))
     } finally {
       abort.current = null
       setSending(false)
+      sendingRef.current = false
       // A reply that never came, such as one a limit stopped, leaves no
       // empty bubble behind.
       setTurns((cur) => {
         const last = cur[cur.length - 1]
         return last?.role === 'assistant' && last.content === '' ? cur.slice(0, -1) : cur
       })
+    }
+    if (!failed && id && hasLink(answer)) {
+      linkWait.current = setTimeout(() => {
+        void api
+          .getMessages(id)
+          .then((messages) => {
+            if (messages && !sendingRef.current) setTurns(turnsFrom(messages))
+          })
+          .catch(() => undefined)
+      }, LINK_CHECK_WAIT_MS)
     }
   }
 
@@ -362,7 +395,7 @@ function PortalChat({ slug, view, onLeft }: { slug: string; view: PortalPageView
                 </div>
               ) : (
                 <div key={i} className="text-sm" aria-live={i === turns.length - 1 ? 'polite' : undefined}>
-                  {turn.content ? <ChatMarkdown text={turn.content} /> : <span className="text-ink-faint">{t('thinking')}</span>}
+                  {turn.content ? <ChatMarkdown text={turn.content} linkCheck={turn.linkCheck} /> : <span className="text-ink-faint">{t('thinking')}</span>}
                 </div>
               ),
             )

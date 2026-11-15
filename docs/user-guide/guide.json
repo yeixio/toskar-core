@@ -600,7 +600,7 @@
         },
         {
           "type": "paragraph",
-          "text": "Answers link only to pages their sources gave. To also know whether a linked page still opens, turn on Check links in answers in Settings. After an answer is written, Toskar asks each site it links to, up to six. A link that didn't open is crossed out with a warning mark, a link that couldn't be checked gets a question mark, and the ones that didn't open are named under the answer. It's off by default because it contacts every linked site, and each check is listed in What left this computer. It never checks addresses on your own network, or answers from a profile that can't use the internet."
+          "text": "Answers link only to pages their sources gave. To also know whether a linked page still opens, turn on Check links in answers in Settings. After an answer is written, Toskar asks each site it links to, up to six. A link that didn't open is crossed out with a warning mark, a link that couldn't be checked gets a question mark, and the ones that didn't open are named under the answer. The same marks show in the Toskar apps and in chat portals. It's off by default because it contacts every linked site, and each check is listed in What left this computer. It never checks addresses on your own network, or answers from a profile that can't use the internet."
         },
         {
           "type": "heading",
