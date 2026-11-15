@@ -221,6 +221,28 @@ func (s *Server) handleSetModelSpeculation(w http.ResponseWriter, r *http.Reques
 	writeJSON(w, http.StatusOK, map[string]string{"model_id": id, "speculation": body.Speculation})
 }
 
+// handleSetModelAlwaysRunning keeps a chat model on this computer loaded,
+// or lets the idle sweep unload it again (#966). Turning it on loads it.
+func (s *Server) handleSetModelAlwaysRunning(w http.ResponseWriter, r *http.Request) {
+	if s.deps.SetModelAlwaysRunning == nil {
+		writeErr(w, http.StatusNotImplemented, "NOT_IMPLEMENTED", "Keeping a model running is not available.", nil)
+		return
+	}
+	var body struct {
+		AlwaysRunning *bool `json:"always_running"`
+	}
+	if err := json.NewDecoder(http.MaxBytesReader(w, r.Body, 16<<10)).Decode(&body); err != nil || body.AlwaysRunning == nil {
+		writeErr(w, http.StatusBadRequest, "INVALID_JSON", "Send {\"always_running\": true} or false.", nil)
+		return
+	}
+	id := mux.Vars(r)["id"]
+	if err := s.deps.SetModelAlwaysRunning(r.Context(), id, *body.AlwaysRunning); err != nil {
+		writeErrFrom(w, http.StatusBadRequest, "MODEL_UPDATE_FAILED", err)
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]any{"model_id": id, "always_running": *body.AlwaysRunning})
+}
+
 // handleSetModelContext sets the context window for a chat model on this
 // computer (#962): one of the sizes it can take, or 0 for Auto. A loaded
 // model starts again with it on its next request.

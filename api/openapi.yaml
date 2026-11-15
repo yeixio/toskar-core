@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Toskar Control Plane API
-  version: "1.93"
+  version: "1.94"
   description: >-
     Local AI control plane API for Toskar, its OpenAI-compatible routes, and its MCP server.
     On the default loopback bind no key is needed. When the daemon listens on any other address,
@@ -3856,6 +3856,36 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ModelSpeculation"
+        "400":
+          description: MODEL_UPDATE_FAILED, such as for a model that isn't installed here or doesn't chat
+  /api/v1/models/{id}/always-running:
+    put:
+      summary: Keep a model running
+      description: 'Keep a chat model installed on this computer loaded, or let the idle sweep unload it again. Turning it on loads it. It loads when Toskar starts and again if it stops, and is not unloaded when idle or to make room for a picture or clip (#966, contract 1.94).'
+      operationId: setModelAlwaysRunning
+      tags: [Models]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [always_running]
+              properties:
+                always_running: {type: boolean}
+      responses:
+        "200":
+          description: The choice is kept
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ModelAlwaysRunning"
         "400":
           description: MODEL_UPDATE_FAILED, such as for a model that isn't installed here or doesn't chat
   /api/v1/models/{id}/context:
@@ -8016,6 +8046,7 @@ components:
         dynamic: {type: boolean, description: installed from browse-all / URL}
         support_role: {type: string, description: '`support_role` marks a model that serves Yggdrasil instead of chatting: SupportEmbedding, SupportReranker, or SupportClassifier. Empty for chat models.'}
         speculation: {type: string, enum: [auto, off], description: 'Whether a chat model installed on this computer guesses the next words ahead and checks several at once (#835, contract 1.67). Empty for other models.'}
+        always_running: {type: boolean, description: 'A chat model installed on this computer that is kept loaded (#966, contract 1.94).'}
         context_window: {type: integer, description: 'The context window, in tokens, a chat model installed on this computer starts with (#962, contract 1.69).'}
         context_choice: {type: integer, description: 'The context window the person chose for the model; 0 or absent for Auto (#962, contract 1.69).'}
         context_options:
@@ -9753,6 +9784,13 @@ components:
       properties:
         model_id: {type: string}
         slots: {type: integer, minimum: 1, maximum: 4}
+    ModelAlwaysRunning:
+      type: object
+      description: Whether a model is kept running (#966).
+      required: [model_id, always_running]
+      properties:
+        model_id: {type: string}
+        always_running: {type: boolean}
     ModelSpeculation:
       type: object
       description: A model's guess-ahead choice (#835).
