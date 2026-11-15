@@ -102,7 +102,9 @@
     "retry": "다시 시도",
     "retrying": "다시 시도하는 중…",
     "diagnostics": "진단 열기",
-    "details": "자세히"
+    "details": "자세히",
+    "offlineTitle": "오프라인 상태입니다",
+    "offlineBody": "인터넷이 필요한데 이 컴퓨터가 연결되어 있지 않습니다. 이 컴퓨터에서 실행되는 기능은 모두 계속 작동합니다."
   },
   "acceleration": {
     "state": {

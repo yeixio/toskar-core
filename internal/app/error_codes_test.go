@@ -2,6 +2,7 @@ package app
 
 import (
 	"encoding/json"
+	"github.com/yeixio/toskar-core/internal/offline"
 	"go/ast"
 	"go/parser"
 	"go/token"
@@ -86,6 +87,7 @@ func sentErrorCodes(t *testing.T, root string) map[string]string {
 		codes[rule.code] = "chatErrorRules"
 	}
 	codes["MODEL_UNHEALTHY"] = "chatErrorCode"
+	codes[offline.Code] = "offline.Code"
 	return codes
 }
 

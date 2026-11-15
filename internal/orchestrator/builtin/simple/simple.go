@@ -80,6 +80,7 @@ func (o *Orchestrator) Run(
 	go func() {
 		defer close(ch)
 		ch <- pluginapi.OrchestrationEvent{Type: "agent.started", Role: role}
+		ctx = withLookups(ctx)
 
 		instructions := "Format answers in Markdown with short paragraphs and lists. Do not wrap the whole answer in a code fence. " +
 			"Link only to addresses from the reference material, tool results, or the conversation; otherwise name the site instead of guessing a page's address, since remembered addresses are often wrong."
@@ -282,6 +283,15 @@ func (o *Orchestrator) Run(
 				profile = withoutWeb(profile)
 				lookedUp = true
 			}
+		}
+		// Looked up first and found the internet out of reach: say so, rather
+		// than answer from memory as if it had been looked up (#965). A task
+		// goes on without it.
+		if !isTask && lookupsFrom(ctx).cutOff() {
+			reply, m := answerOffline(ctx, env, role, task.Prompt)
+			nodeID, _ := env.NodeForRole(role)
+			streamText(ch, role, nodeID, reply, m, contextusage.Usage{})
+			return
 		}
 		if climateQuestion(task.Prompt) {
 			instructions += "\n" + climateGuidance
@@ -501,11 +511,18 @@ func (o *Orchestrator) Run(
 				// Text written before the call ("Let me find that for you") is
 				// not part of the answer; the tool's own step says what's
 				// happening (#280).
-				result, err := env.ExecuteTool(ctx, parsed.Call.ID, parsed.Call.Args)
+				result, err := runTool(ctx, env, parsed.Call.ID, parsed.Call.Args)
 				if err == nil {
 					if def, ok := tools.Lookup(parsed.Call.ID); ok && def.Risk != tools.RiskRead {
 						changed = true
 					}
+				}
+				// A look-up that found the internet out of reach, with nothing
+				// found before it, ends the turn with saying so (#965).
+				if err != nil && !isTask && lookupsFrom(ctx).cutOff() {
+					reply, m := answerOffline(ctx, env, role, task.Prompt)
+					live.finish(ch, role, nodeID, reply, m, contextusage.Usage{})
+					return
 				}
 				var resultNote string
 				if err != nil {

@@ -103,7 +103,9 @@
     "retry": "Try again",
     "retrying": "Trying again…",
     "diagnostics": "Open Diagnostics",
-    "details": "Details"
+    "details": "Details",
+    "offlineTitle": "You're offline",
+    "offlineBody": "This needs the internet, and this computer isn't connected. Everything that runs on this computer still works."
   },
   "acceleration": {
     "state": {

@@ -104,7 +104,9 @@
     "retry": "Réessayer",
     "retrying": "Nouvel essai…",
     "diagnostics": "Ouvrir les Diagnostics",
-    "details": "Détails"
+    "details": "Détails",
+    "offlineTitle": "Vous êtes hors ligne",
+    "offlineBody": "Cela nécessite Internet, et cet ordinateur n'est pas connecté. Tout ce qui s'exécute sur cet ordinateur fonctionne toujours."
   },
   "acceleration": {
     "state": {

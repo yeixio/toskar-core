@@ -157,7 +157,7 @@ func lookUp(ctx context.Context, env pluginapi.ExecutionEnvironment, profile con
 	}
 	env.Emit(EventLookup, map[string]any{"query": query})
 	args := map[string]any{"query": query}
-	result, err := env.ExecuteTool(ctx, "internet.search", args)
+	result, err := runTool(ctx, env, "internet.search", args)
 	if err != nil {
 		return "", false
 	}
@@ -252,7 +252,7 @@ func serviceFirst(ctx context.Context, env pluginapi.ExecutionEnvironment, profi
 		if !def.Prefetch || !strings.EqualFold(tools.PolicyForProfile(profile, def.ID), tools.PolicyAllow) {
 			continue
 		}
-		result, err := env.ExecuteTool(ctx, def.ID, map[string]any{})
+		result, err := runTool(ctx, env, def.ID, map[string]any{})
 		if err != nil {
 			continue
 		}

@@ -18,29 +18,36 @@ interface LoadErrorProps {
 export function LoadError({ error, onRetry, retrying, compact }: LoadErrorProps) {
   const { t } = useTranslation()
   const detail = error instanceof Error ? error.message : typeof error === 'string' ? error : ''
+  // Not reaching the internet isn't a fault to diagnose or report (#965).
+  const offline = errorCode(error) === 'OFFLINE'
+  const title = offline ? t('loadError.offlineTitle') : t('loadError.title')
   if (compact) {
     return (
       <p role="alert" className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-danger">
-        <span title={detail || undefined}>{t('loadError.title')}</span>
+        <span title={detail || undefined}>{title}</span>
         <button type="button" className="font-medium text-primary hover:underline disabled:opacity-60" disabled={retrying} onClick={onRetry}>
           {retrying ? t('loadError.retrying') : t('loadError.retry')}
         </button>
-        <ReportProblem error={detail} code={errorCode(error)} />
+        {offline ? null : <ReportProblem error={detail} code={errorCode(error)} />}
       </p>
     )
   }
   return (
     <div role="alert" className="empty-hero max-w-lg">
-      <h2 className="font-display text-xl font-semibold text-ink">{t('loadError.title')}</h2>
-      <p className="text-[15px] leading-relaxed text-ink-muted">{t('loadError.body')}</p>
+      <h2 className="font-display text-xl font-semibold text-ink">{title}</h2>
+      <p className="text-[15px] leading-relaxed text-ink-muted">{offline ? t('loadError.offlineBody') : t('loadError.body')}</p>
       <div className="flex flex-wrap items-center gap-3 pt-2">
         <button type="button" className="btn-primary" disabled={retrying} onClick={onRetry}>
           {retrying ? t('loadError.retrying') : t('loadError.retry')}
         </button>
-        <Link to="/diagnostics" className="text-sm font-medium text-primary hover:underline">
-          {t('loadError.diagnostics')}
-        </Link>
-        <ReportProblem error={detail} code={errorCode(error)} className="text-sm font-medium text-primary hover:underline" />
+        {offline ? null : (
+          <>
+            <Link to="/diagnostics" className="text-sm font-medium text-primary hover:underline">
+              {t('loadError.diagnostics')}
+            </Link>
+            <ReportProblem error={detail} code={errorCode(error)} className="text-sm font-medium text-primary hover:underline" />
+          </>
+        )}
       </div>
       {detail ? (
         <details className="pt-2 text-xs text-ink-faint">

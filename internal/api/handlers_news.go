@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"github.com/yeixio/toskar-core/internal/offline"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -31,6 +32,10 @@ func (s *Server) handleGetNews(w http.ResponseWriter, r *http.Request) {
 	}
 	v, err := s.news.Get(r.Context())
 	if err != nil {
+		if offline.Is(err) {
+			writeErr(w, http.StatusBadGateway, offline.Code, offline.Message(err), nil)
+			return
+		}
 		writeErr(w, http.StatusBadGateway, "NEWS_UNAVAILABLE", "the AI news couldn't be read from toskar.ai: "+err.Error(), nil)
 		return
 	}

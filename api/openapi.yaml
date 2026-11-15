@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Toskar Control Plane API
-  version: "1.91"
+  version: "1.92"
   description: >-
     Local AI control plane API for Toskar, its OpenAI-compatible routes, and its MCP server.
     On the default loopback bind no key is needed. When the daemon listens on any other address,
@@ -2611,7 +2611,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/News"
         "502":
-          description: NEWS_UNAVAILABLE, toskar.ai couldn't be reached and no copy is kept
+          description: NEWS_UNAVAILABLE, toskar.ai couldn't be reached and no copy is kept; OFFLINE when this computer isn't connected to the internet (contract 1.92)
   /api/v1/privacy:
     get:
       summary: Run record retention and a 30-day summary of what left this computer

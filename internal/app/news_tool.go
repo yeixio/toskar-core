@@ -51,7 +51,9 @@ func (t *newsTool) Execute(ctx context.Context, args map[string]any) (map[string
 	}
 	view, err := t.news.Get(ctx)
 	if err != nil {
-		return nil, errors.New("the AI news couldn't be read from toskar.ai, and no copy is kept here yet; try again later")
+		// Joined, so the model reads the first line and offline.Is still
+		// sees why (#965).
+		return nil, errors.Join(errors.New("the AI news couldn't be read from toskar.ai, and no copy is kept here yet; try again later"), err)
 	}
 	if !view.Enabled {
 		return map[string]any{
