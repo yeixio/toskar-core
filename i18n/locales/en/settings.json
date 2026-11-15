@@ -148,7 +148,7 @@
   },
   "toolPermissions": {
     "title": "Tool permissions",
-    "description": "Default rules for what the AI may do on this computer.",
+    "description": "Limits for every profile on this computer: a profile can be stricter, never looser. Git push always asks.",
     "terminal": "Terminal commands",
     "fileWrites": "File writes",
     "git": "Git operations",

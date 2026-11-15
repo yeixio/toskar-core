@@ -225,6 +225,12 @@ func (r *Registry) Execute(ctx context.Context, toolID string, args map[string]a
 	if policy == PolicyAllow && turnopts.LongCommandsFrom(ctx) && changesInTask(ctx, toolID, args) {
 		policy = PolicyAsk
 	}
+	// The other way too: with the terminal on Ask, the default since #1206,
+	// a task's reading and testing still run, so a fix-and-test loop can.
+	// Ask each time asks for every command.
+	if toolID == "terminal" && policy == PolicyAsk && turnopts.LongCommandsFrom(ctx) && !changesInTask(ctx, toolID, args) {
+		policy = PolicyAllow
+	}
 	scope := SessionScope(meta)
 	allowed, needsPrompt, err := r.policy.Decide(toolID, policy, scope)
 	if err != nil {

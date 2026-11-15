@@ -303,6 +303,7 @@ func (a *App) RunChat(ctx context.Context, profileID, conversationID, message st
 		profile = narrowTools(profile, opts)
 	}
 	profile = withCapabilities(profile, caps)
+	profile = a.withComputerToolRules(ctx, profile)
 	if special != nil {
 		// A specialized AI answers in the style it was trained on, without the
 		// tool protocol, on the computer that holds its adapter.

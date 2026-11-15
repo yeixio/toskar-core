@@ -118,12 +118,13 @@ func generalStockSnapshots() [][]contracts.ToolPolicy {
 		previous,
 		tools.MergeMissingTools(shipped, previous),
 		withApproval,
+		writesAllowed(generalToolPolicies()),
 		generalToolPolicies(),
 	}
 }
 
 func programmingStockSnapshots() [][]contracts.ToolPolicy {
-	return generalStockSnapshots()
+	return append(generalStockSnapshots(), writesAllowed(codingToolPolicies()), codingToolPolicies())
 }
 
 func researchStockSnapshots() [][]contracts.ToolPolicy {
@@ -139,5 +140,22 @@ func researchStockSnapshots() [][]contracts.ToolPolicy {
 		{ToolID: "git.add", Policy: "deny"},
 		{ToolID: "git.commit", Policy: "deny"},
 		{ToolID: "git.push", Policy: "deny"},
-	}, researchToolPolicies()}
+	}, writesAllowed(researchToolPolicies()), researchToolPolicies()}
+}
+
+// writesAllowed is a preset as it shipped before #1206, when file writes,
+// the terminal, and git ran without asking. An untouched profile from then
+// moves to asking first.
+func writesAllowed(policies []contracts.ToolPolicy) []contracts.ToolPolicy {
+	out := make([]contracts.ToolPolicy, len(policies))
+	for i, p := range policies {
+		switch p.ToolID {
+		case "filesystem.write", "terminal", "git.add", "git.commit", "git.push":
+			if p.Policy != tools.PolicyDeny {
+				p.Policy = tools.PolicyAllow
+			}
+		}
+		out[i] = p
+	}
+	return out
 }

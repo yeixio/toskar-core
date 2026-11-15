@@ -98,7 +98,7 @@ func generalToolPolicies() []contracts.ToolPolicy {
 		{ToolID: "internet.open", Policy: "allow"},
 		{ToolID: "filesystem.search", Policy: "allow"},
 		{ToolID: "filesystem.read", Policy: "allow"},
-		{ToolID: "filesystem.write", Policy: "allow"},
+		{ToolID: "filesystem.write", Policy: "ask"},
 		{ToolID: "files.create", Policy: "allow"},
 		{ToolID: "spreadsheet.analyze", Policy: "allow"},
 		{ToolID: "code.execute", Policy: "ask"},
@@ -110,14 +110,14 @@ func generalToolPolicies() []contracts.ToolPolicy {
 		{ToolID: "automations.schedule", Policy: "allow"},
 		{ToolID: "automations.results", Policy: "allow"},
 		{ToolID: "news.read", Policy: "allow"},
-		{ToolID: "terminal", Policy: "allow"},
+		{ToolID: "terminal", Policy: "ask"},
 		{ToolID: "git.status", Policy: "allow"},
 		{ToolID: "git.diff", Policy: "allow"},
 		{ToolID: "git.log", Policy: "allow"},
 		{ToolID: "git.show", Policy: "allow"},
-		{ToolID: "git.add", Policy: "allow"},
-		{ToolID: "git.commit", Policy: "allow"},
-		{ToolID: "git.push", Policy: "allow"},
+		{ToolID: "git.add", Policy: "ask"},
+		{ToolID: "git.commit", Policy: "ask"},
+		{ToolID: "git.push", Policy: "ask-each-time"},
 	}
 }
 
@@ -138,7 +138,7 @@ func codingToolPolicies() []contracts.ToolPolicy {
 		{ToolID: "internet.open", Policy: "allow"},
 		{ToolID: "filesystem.search", Policy: "allow"},
 		{ToolID: "filesystem.read", Policy: "allow"},
-		{ToolID: "filesystem.write", Policy: "allow"},
+		{ToolID: "filesystem.write", Policy: "ask"},
 		{ToolID: "files.create", Policy: "allow"},
 		{ToolID: "spreadsheet.analyze", Policy: "allow"},
 		{ToolID: "code.execute", Policy: "ask"},
@@ -150,14 +150,14 @@ func codingToolPolicies() []contracts.ToolPolicy {
 		{ToolID: "automations.schedule", Policy: "allow"},
 		{ToolID: "automations.results", Policy: "allow"},
 		{ToolID: "news.read", Policy: "allow"},
-		{ToolID: "terminal", Policy: "allow"},
+		{ToolID: "terminal", Policy: "ask"},
 		{ToolID: "git.status", Policy: "allow"},
 		{ToolID: "git.diff", Policy: "allow"},
 		{ToolID: "git.log", Policy: "allow"},
 		{ToolID: "git.show", Policy: "allow"},
-		{ToolID: "git.add", Policy: "allow"},
-		{ToolID: "git.commit", Policy: "allow"},
-		{ToolID: "git.push", Policy: "allow"},
+		{ToolID: "git.add", Policy: "ask"},
+		{ToolID: "git.commit", Policy: "ask"},
+		{ToolID: "git.push", Policy: "ask-each-time"},
 	}
 }
 
@@ -178,7 +178,7 @@ func researchToolPolicies() []contracts.ToolPolicy {
 		{ToolID: "internet.open", Policy: "allow"},
 		{ToolID: "filesystem.search", Policy: "allow"},
 		{ToolID: "filesystem.read", Policy: "allow"},
-		{ToolID: "filesystem.write", Policy: "allow"},
+		{ToolID: "filesystem.write", Policy: "ask"},
 		{ToolID: "files.create", Policy: "allow"},
 		{ToolID: "spreadsheet.analyze", Policy: "allow"},
 		{ToolID: "code.execute", Policy: "ask"},
@@ -202,6 +202,10 @@ func researchToolPolicies() []contracts.ToolPolicy {
 func offlineToolPolicies() []contracts.ToolPolicy {
 	policies := generalToolPolicies()
 	for i := range policies {
+		// Writing a file asks first, as in the other presets (#1206).
+		if policies[i].ToolID == "filesystem.write" {
+			continue
+		}
 		// Files stay on this computer, so they work offline.
 		if strings.HasPrefix(policies[i].ToolID, "filesystem.") || policies[i].ToolID == "files.create" || policies[i].ToolID == "spreadsheet.analyze" || policies[i].ToolID == "automations.schedule" || policies[i].ToolID == "automations.results" ||
 			strings.HasPrefix(policies[i].ToolID, "speech.") || strings.HasPrefix(policies[i].ToolID, "image.") || strings.HasPrefix(policies[i].ToolID, "video.") {

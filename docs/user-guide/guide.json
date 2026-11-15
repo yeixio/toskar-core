@@ -2078,7 +2078,10 @@
         },
         {
           "type": "paragraph",
-          "text": "Tools that only read, such as web search, usually run without asking. Tools that change something, such as writing a file or making a Git commit, ask first. Settings sets the defaults for the terminal, file writes, and Git."
+          "text": "Tools that only read, such as web search, usually run without asking. Tools that change something, such as writing a file or making a Git commit, ask first, and you can choose Allow for session. Git push asks every time, since it sends your code off this computer."},
+        {
+          "type": "paragraph",
+          "text": "Settings → Tool permissions sets a limit for the terminal, file writes, and Git on this computer. A profile can be stricter than Settings, never looser, so a profile set to Always allow still asks while Settings says Ask."
         },
         {
           "type": "heading",

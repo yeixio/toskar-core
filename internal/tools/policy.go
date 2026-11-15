@@ -105,3 +105,26 @@ type ToolPolicy struct {
 	ToolID string `json:"tool_id"`
 	Policy string `json:"policy"`
 }
+
+// Stricter is the stricter of two policies (#1206): deny, then
+// ask-each-time, then ask or allow-for-session, then allow. An empty or
+// unknown policy counts as ask, as Decide reads it.
+func Stricter(a, b string) string {
+	if policyRank(b) > policyRank(a) {
+		return b
+	}
+	return a
+}
+
+func policyRank(p string) int {
+	switch strings.ToLower(strings.TrimSpace(p)) {
+	case PolicyAllow:
+		return 0
+	case PolicyAskEachTime:
+		return 2
+	case PolicyDeny:
+		return 3
+	default:
+		return 1
+	}
+}
