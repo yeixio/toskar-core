@@ -520,6 +520,22 @@
       "partial": "In parte",
       "cpu": "Sul processore",
       "no": "Non funziona"
+    },
+    "details": "Dettagli",
+    "detailsFor": "Dettagli di {{model}}",
+    "ranOn": "Eseguito su {{devices}}",
+    "guessAheadOn": "Indovina in anticipo: attivo, mantenuto il {{share}} delle ipotesi",
+    "guessAheadOff": "Indovina in anticipo: disattivato",
+    "memorySystem": "Memoria: {{size}}",
+    "memoryGraphics": "Memoria grafica: {{size}}",
+    "contexts": "Finestre di contesto più lunghe",
+    "window": "Finestra",
+    "prompt": "Prompt (token)",
+    "memory": "Memoria",
+    "windowSize": "{{size}}K",
+    "whyNo": {
+      "window": "Oltre la sua finestra",
+      "out_of_memory": "Non entra"
     }
   }
 }

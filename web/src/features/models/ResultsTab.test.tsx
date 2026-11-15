@@ -109,4 +109,57 @@ describe('ResultsTab', () => {
     const echo = within(screen.getByRole('rowheader', { name: 'Echo' }).closest('tr')!)
     expect(echo.queryByText(/\(v1\)/)).not.toBeInTheDocument()
   })
+
+  // Where a result ran, and the same model at longer windows (#1066), open
+  // under its row; a row with nothing more has no Details.
+  it('opens where a result ran and its longer windows', async () => {
+    vi.mocked(api.getQualityResults).mockResolvedValue({
+      live: true,
+      results: [
+        {
+          model: 'q',
+          name: 'Qwen',
+          date: '2026-11-14',
+          hardware: 'Rig',
+          method_version: 1,
+          scores: { quality: { passed: 60, of: 64 } },
+          performance: {
+            prompt_tokens: 4412,
+            prompt_tokens_per_second: 2000,
+            tokens_per_second: 90,
+            first_token_ms: 2200,
+            effective_tokens_per_second: 40,
+            gpu_layers: 33,
+            gpu_layers_total: 33,
+            llama_cpp: 'b12383',
+            speculation: 'on',
+            draft_accepted: 0.24,
+            devices: ['RX 7900 XTX'],
+            contexts: [
+              { context: 32768, runs: 'full', prompt_tokens: 24727, prompt_tokens_per_second: 1660.8, tokens_per_second: 56.1, first_token_ms: 15060 },
+              { context: 524288, runs: 'no', why: 'window' },
+            ],
+          },
+        },
+        { model: 'p', name: 'Plain', date: '2026-11-13', hardware: 'Rig', method_version: 1, scores: { quality: { passed: 1, of: 2 } } },
+      ],
+    })
+    show()
+    const toggle = await screen.findByRole('button', { name: 'Details for Qwen' })
+    expect(screen.queryByRole('button', { name: 'Details for Plain' })).not.toBeInTheDocument()
+    expect(toggle).toHaveAttribute('aria-expanded', 'false')
+    expect(screen.queryByText(/llama\.cpp b12383/)).not.toBeInTheDocument()
+
+    fireEvent.click(toggle)
+    expect(toggle).toHaveAttribute('aria-expanded', 'true')
+    expect(screen.getByText(/Ran on RX 7900 XTX · llama\.cpp b12383 · Guess ahead: on, 24% of guesses kept/)).toBeInTheDocument()
+    const windows = screen.getByRole('table', { name: 'Longer context windows' })
+    expect(within(windows).getByRole('rowheader', { name: '32K' }).closest('tr')).toHaveTextContent('24,727')
+    expect(within(windows).getByText('56.1')).toBeInTheDocument()
+    expect(within(windows).getByText('15.1 s')).toBeInTheDocument()
+    expect(within(windows).getByRole('rowheader', { name: '512K' }).closest('tr')).toHaveTextContent('Past its window')
+
+    fireEvent.click(toggle)
+    expect(screen.queryByRole('table', { name: 'Longer context windows' })).not.toBeInTheDocument()
+  })
 })

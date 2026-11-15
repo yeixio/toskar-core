@@ -504,6 +504,22 @@
       "partial": "일부",
       "cpu": "프로세서에서",
       "no": "실행 안 됨"
+    },
+    "details": "세부 정보",
+    "detailsFor": "{{model}} 세부 정보",
+    "ranOn": "실행 장치: {{devices}}",
+    "guessAheadOn": "미리 추측: 켜짐, 추측의 {{share}} 유지",
+    "guessAheadOff": "미리 추측: 꺼짐",
+    "memorySystem": "메모리: {{size}}",
+    "memoryGraphics": "그래픽 메모리: {{size}}",
+    "contexts": "더 긴 컨텍스트 창",
+    "window": "창",
+    "prompt": "프롬프트 (토큰)",
+    "memory": "메모리",
+    "windowSize": "{{size}}K",
+    "whyNo": {
+      "window": "창 크기 초과",
+      "out_of_memory": "맞지 않음"
     }
   }
 }

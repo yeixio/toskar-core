@@ -512,6 +512,22 @@
       "partial": "Teilweise",
       "cpu": "Auf dem Prozessor",
       "no": "Läuft nicht"
+    },
+    "details": "Details",
+    "detailsFor": "Details zu {{model}}",
+    "ranOn": "Lief auf {{devices}}",
+    "guessAheadOn": "Vorausraten: an, {{share}} der Vermutungen behalten",
+    "guessAheadOff": "Vorausraten: aus",
+    "memorySystem": "Arbeitsspeicher: {{size}}",
+    "memoryGraphics": "Grafikspeicher: {{size}}",
+    "contexts": "Längere Kontextfenster",
+    "window": "Fenster",
+    "prompt": "Prompt (Tokens)",
+    "memory": "Speicher",
+    "windowSize": "{{size}}K",
+    "whyNo": {
+      "window": "Über sein Fenster hinaus",
+      "out_of_memory": "Passt nicht"
     }
   }
 }

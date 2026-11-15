@@ -520,6 +520,22 @@
       "partial": "Em parte",
       "cpu": "No processador",
       "no": "Não funciona"
+    },
+    "details": "Detalhes",
+    "detailsFor": "Detalhes de {{model}}",
+    "ranOn": "Rodou em {{devices}}",
+    "guessAheadOn": "Adivinhar adiante: ligado, {{share}} dos palpites mantidos",
+    "guessAheadOff": "Adivinhar adiante: desligado",
+    "memorySystem": "Memória: {{size}}",
+    "memoryGraphics": "Memória gráfica: {{size}}",
+    "contexts": "Janelas de contexto maiores",
+    "window": "Janela",
+    "prompt": "Prompt (tokens)",
+    "memory": "Memória",
+    "windowSize": "{{size}}K",
+    "whyNo": {
+      "window": "Além da sua janela",
+      "out_of_memory": "Não cabe"
     }
   }
 }

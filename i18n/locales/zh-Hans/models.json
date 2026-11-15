@@ -504,6 +504,22 @@
       "partial": "部分",
       "cpu": "仅处理器",
       "no": "无法运行"
+    },
+    "details": "详情",
+    "detailsFor": "{{model}} 的详情",
+    "ranOn": "运行设备：{{devices}}",
+    "guessAheadOn": "提前猜测：开启，保留了 {{share}} 的猜测",
+    "guessAheadOff": "提前猜测：关闭",
+    "memorySystem": "内存：{{size}}",
+    "memoryGraphics": "显存：{{size}}",
+    "contexts": "更长的上下文窗口",
+    "window": "窗口",
+    "prompt": "提示 (词元)",
+    "memory": "内存",
+    "windowSize": "{{size}}K",
+    "whyNo": {
+      "window": "超出其窗口",
+      "out_of_memory": "放不下"
     }
   }
 }

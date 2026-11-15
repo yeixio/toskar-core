@@ -512,6 +512,22 @@
       "partial": "Partly",
       "cpu": "On the processor",
       "no": "Doesn't run"
+    },
+    "details": "Details",
+    "detailsFor": "Details for {{model}}",
+    "ranOn": "Ran on {{devices}}",
+    "guessAheadOn": "Guess ahead: on, {{share}} of guesses kept",
+    "guessAheadOff": "Guess ahead: off",
+    "memorySystem": "Memory: {{size}}",
+    "memoryGraphics": "Graphics memory: {{size}}",
+    "contexts": "Longer context windows",
+    "window": "Window",
+    "prompt": "Prompt (tokens)",
+    "memory": "Memory",
+    "windowSize": "{{size}}K",
+    "whyNo": {
+      "window": "Past its window",
+      "out_of_memory": "Doesn't fit"
     }
   }
 }

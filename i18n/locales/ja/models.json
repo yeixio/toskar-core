@@ -504,6 +504,22 @@
       "partial": "一部",
       "cpu": "プロセッサのみ",
       "no": "動作しない"
+    },
+    "details": "詳細",
+    "detailsFor": "{{model}} の詳細",
+    "ranOn": "実行デバイス: {{devices}}",
+    "guessAheadOn": "先読み: オン、予測の {{share}} を採用",
+    "guessAheadOff": "先読み: オフ",
+    "memorySystem": "メモリ: {{size}}",
+    "memoryGraphics": "グラフィックスメモリ: {{size}}",
+    "contexts": "より長いコンテキストウィンドウ",
+    "window": "ウィンドウ",
+    "prompt": "プロンプト (トークン)",
+    "memory": "メモリ",
+    "windowSize": "{{size}}K",
+    "whyNo": {
+      "window": "ウィンドウの上限を超える",
+      "out_of_memory": "収まらない"
     }
   }
 }
