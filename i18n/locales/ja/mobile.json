@@ -457,6 +457,8 @@
     "sources": "ソース",
     "source": "ソース",
     "opensInSafari": "Safariで開きます",
+    "linkDead": "確認したところ、このリンクは開けませんでした",
+    "linkUnknown": "このリンクは確認できませんでした",
     "steps_other": "実行した内容 · {{count}}ステップ"
   },
   "tools": {

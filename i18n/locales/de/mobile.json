@@ -460,6 +460,8 @@
     "sources": "Quellen",
     "source": "Quelle",
     "opensInSafari": "Öffnet in Safari",
+    "linkDead": "Dieser Link ließ sich bei der Prüfung nicht öffnen",
+    "linkUnknown": "Dieser Link konnte nicht geprüft werden",
     "steps_one": "Was ich getan habe · {{count}} Schritt",
     "steps_other": "Was ich getan habe · {{count}} Schritte"
   },

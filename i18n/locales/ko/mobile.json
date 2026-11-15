@@ -457,6 +457,8 @@
     "sources": "소스",
     "source": "소스",
     "opensInSafari": "Safari에서 열림",
+    "linkDead": "확인해 보니 이 링크가 열리지 않았습니다",
+    "linkUnknown": "이 링크는 확인할 수 없었습니다",
     "steps_other": "수행한 작업 · {{count}}단계"
   },
   "tools": {
