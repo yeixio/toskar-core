@@ -33,7 +33,13 @@ func TestAskedForFile(t *testing.T) {
 			t.Errorf("askedForFile(%q) = %+v %v, want %+v", msg, got, ok, want)
 		}
 	}
-	for _, msg := range []string{"What is a CSV file?", "How do I open a spreadsheet?", "Summarize this file.", "How do I save this as a PDF?", "What's in the PDF?"} {
+	for _, msg := range []string{"What is a CSV file?", "How do I open a spreadsheet?", "Summarize this file.", "How do I save this as a PDF?", "What's in the PDF?",
+		// #965: code that works on a file is code, not the file.
+		"Write a Python script that reads a CSV of orders, totals them per customer, and prints the top three.",
+		"Write a Python script that converts a CSV to JSON",
+		"Write a function that parses a spreadsheet",
+		"Make a small tool that exports my notes as a PDF",
+		"Give me a SQL query that turns this table into a CSV"} {
 		if _, ok := askedForFile(msg); ok {
 			t.Errorf("%q is not a request for a file", msg)
 		}
