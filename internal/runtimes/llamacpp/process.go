@@ -151,7 +151,7 @@ func (r *Runtime) StartModel(ctx context.Context, cfg pluginapi.ModelStartConfig
 
 	args := startArgs(cfg, port)
 	args = append(args, gpuLayerArgs(cfg.GPULayers, supportsFit(ctx, det.Path))...)
-	args = append(args, speculativeArgs(cfg, supported)...)
+	args = append(args, speculativeArgs(cfg, supported, usesMTP(ctx, cfg, supported, det.Path))...)
 	for _, a := range cfg.Adapters {
 		args = append(args, "--lora", a.Path)
 	}
