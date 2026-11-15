@@ -28,14 +28,63 @@ type indexed struct {
 	n     int
 }
 
-var (
-	loadOnce sync.Once
+// corpus is passages with the word weights BM25 ranks them by.
+type corpus struct {
 	passages []indexed
 	idf      map[string]float64
 	avgLen   float64
 	// maxIDF is the rarest word's weight (see coverage).
 	maxIDF float64
+}
+
+var (
+	loadOnce sync.Once
+	// overview is each section's paragraphs and steps, which every version
+	// of the guide has. details is a detailed page's body (#1222): its
+	// prose, steps, lists, tables, and notes, asked only when the overview
+	// has no answer, so a page's detail never outranks a section's own
+	// overview.
+	overview, details corpus
 )
+
+func (c *corpus) add(section, text string) {
+	// The section title counts toward every passage in it.
+	terms := map[string]int{}
+	n := 0
+	for _, t := range tokens(section + " " + section + " " + text) {
+		terms[t]++
+		n++
+	}
+	c.passages = append(c.passages, indexed{Passage: Passage{Section: section, Text: text}, terms: terms, n: n})
+}
+
+// weigh sets the word weights once the passages are in.
+func (c *corpus) weigh() {
+	df := map[string]int{}
+	total := 0
+	for _, p := range c.passages {
+		total += p.n
+		for t := range p.terms {
+			df[t]++
+		}
+	}
+	c.idf = map[string]float64{}
+	for t, d := range df {
+		c.idf[t] = math.Log(1 + (float64(len(c.passages))-float64(d)+0.5)/(float64(d)+0.5))
+		c.maxIDF = max(c.maxIDF, c.idf[t])
+	}
+	if len(c.passages) > 0 {
+		c.avgLen = float64(total) / float64(len(c.passages))
+	}
+}
+
+func numbered(items []string) string {
+	var b strings.Builder
+	for i, st := range items {
+		b.WriteString(strconv.Itoa(i+1) + ". " + st + "\n")
+	}
+	return strings.TrimSpace(b.String())
+}
 
 func load() {
 	var g struct {
@@ -43,49 +92,48 @@ func load() {
 			Title      string   `json:"title"`
 			Paragraphs []string `json:"paragraphs"`
 			Steps      []string `json:"steps"`
+			Blocks     []struct {
+				Type  string     `json:"type"`
+				Text  string     `json:"text"`
+				Title string     `json:"title"`
+				Items []string   `json:"items"`
+				Rows  [][]string `json:"rows"`
+			} `json:"blocks"`
 		} `json:"sections"`
 	}
 	if json.Unmarshal(userguide.GuideJSON, &g) != nil {
 		return
 	}
-	add := func(section, text string) {
-		// The section title counts toward every passage in it.
-		terms := map[string]int{}
-		n := 0
-		for _, t := range tokens(section + " " + section + " " + text) {
-			terms[t]++
-			n++
-		}
-		passages = append(passages, indexed{Passage: Passage{Section: section, Text: text}, terms: terms, n: n})
-	}
 	for _, s := range g.Sections {
 		for _, p := range s.Paragraphs {
-			add(s.Title, p)
+			overview.add(s.Title, p)
 		}
 		if len(s.Steps) > 0 {
-			var b strings.Builder
-			for i, st := range s.Steps {
-				b.WriteString(strconv.Itoa(i+1) + ". " + st + "\n")
+			overview.add(s.Title, numbered(s.Steps))
+		}
+		for _, b := range s.Blocks {
+			switch b.Type {
+			case "paragraph", "note":
+				details.add(s.Title, b.Text)
+			case "steps":
+				details.add(s.Title, numbered(b.Items))
+			case "list":
+				text := "- " + strings.Join(b.Items, "\n- ")
+				if b.Title != "" {
+					text = b.Title + ":\n" + text
+				}
+				details.add(s.Title, text)
+			case "table":
+				rows := make([]string, len(b.Rows))
+				for i, r := range b.Rows {
+					rows[i] = strings.Join(r, ": ")
+				}
+				details.add(s.Title, strings.Join(rows, "\n"))
 			}
-			add(s.Title, strings.TrimSpace(b.String()))
 		}
 	}
-	df := map[string]int{}
-	total := 0
-	for _, p := range passages {
-		total += p.n
-		for t := range p.terms {
-			df[t]++
-		}
-	}
-	idf = map[string]float64{}
-	for t, d := range df {
-		idf[t] = math.Log(1 + (float64(len(passages))-float64(d)+0.5)/(float64(d)+0.5))
-		maxIDF = max(maxIDF, idf[t])
-	}
-	if len(passages) > 0 {
-		avgLen = float64(total) / float64(len(passages))
-	}
+	overview.weigh()
+	details.weigh()
 }
 
 var stop = map[string]bool{}
@@ -133,18 +181,18 @@ type scored struct {
 
 // rank scores every passage for a question's words (BM25), best first,
 // keeping those that score at least min.
-func rank(q map[string]bool, min float64) []scored {
+func (c *corpus) rank(q map[string]bool, min float64) []scored {
 	loadOnce.Do(load)
 	var all []scored
 	const k1, b = 1.2, 0.75
-	for _, p := range passages {
+	for _, p := range c.passages {
 		s := 0.0
 		for t := range q {
 			f := float64(p.terms[t])
 			if f == 0 {
 				continue
 			}
-			s += idf[t] * f * (k1 + 1) / (f + k1*(1-b+b*float64(p.n)/avgLen))
+			s += c.idf[t] * f * (k1 + 1) / (f + k1*(1-b+b*float64(p.n)/c.avgLen))
 		}
 		if s >= min {
 			all = append(all, scored{p, s})
@@ -165,7 +213,7 @@ func termSet(question string) map[string]bool {
 // Search returns up to max passages for a question, best first, that score
 // at least min (see About).
 func Search(question string, max int, min float64) []Passage {
-	all := rank(termSet(question), min)
+	all := overview.rank(termSet(question), min)
 	out := make([]Passage, 0, max)
 	for i := 0; i < len(all) && i < max; i++ {
 		out = append(out, all[i].p.Passage)
@@ -177,13 +225,13 @@ func Search(question string, max int, min float64) []Passage {
 // are, that a passage has. A word the guide never uses counts as the rarest:
 // "17 sheep", "Maya", and "muffins" say a question isn't about Toskar,
 // however many common words it shares with a passage.
-func coverage(q map[string]bool, p indexed) float64 {
+func (c *corpus) coverage(q map[string]bool, p indexed) float64 {
 	loadOnce.Do(load)
 	total, matched := 0.0, 0.0
 	for t := range q {
-		w, ok := idf[t]
+		w, ok := c.idf[t]
 		if !ok {
-			w = maxIDF
+			w = c.maxIDF
 		}
 		total += w
 		if p.terms[t] > 0 {
@@ -234,13 +282,24 @@ func About(message string) []Passage {
 	if named {
 		min = minNamed
 	}
-	ranked := rank(q, min)
-	if len(ranked) == 0 || (!named && coverage(q, ranked[0].p) < minCoverage) {
+	ranked := overview.found(q, min, named)
+	if len(ranked) == 0 {
+		// A detailed page's body answers what no overview does, such as
+		// what a role in the profile editor is for (#1222).
+		ranked = details.found(q, min, named)
+	}
+	if len(ranked) == 0 {
 		return nil
 	}
 	var found []Passage
 	for i := 0; i < len(ranked) && i < 4; i++ {
 		found = append(found, ranked[i].p.Passage)
+		if i == 0 {
+			// The best section's detailed page, if it has one, goes on
+			// from its overview: "what does Never discusses do?" finds
+			// Profiles, then the Topics table on its page (#1222).
+			found = append(found, details.within(q, ranked[0].p.Section, ranked[0].p.Text, 2)...)
+		}
 	}
 	var out []Passage
 	size := 0
@@ -252,6 +311,32 @@ func About(message string) []Passage {
 		size += len(p.Text)
 	}
 	return out
+}
+
+// within is up to max of a section's passages that share a word with the
+// question, best first, other than skip.
+func (c *corpus) within(q map[string]bool, section, skip string, max int) []Passage {
+	var out []Passage
+	for _, r := range c.rank(q, 0) {
+		if len(out) == max {
+			break
+		}
+		if r.p.Section == section && r.p.Text != skip && r.score > 0 {
+			out = append(out, r.p.Passage)
+		}
+	}
+	return out
+}
+
+// found is the passages that answer the question, best first, or none:
+// the best must score min and, unless the question names Toskar, have
+// most of its words.
+func (c *corpus) found(q map[string]bool, min float64, named bool) []scored {
+	ranked := c.rank(q, min)
+	if len(ranked) == 0 || (!named && c.coverage(q, ranked[0].p) < minCoverage) {
+		return nil
+	}
+	return ranked
 }
 
 // Block is passages as instructions for the model.
