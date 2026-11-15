@@ -160,8 +160,9 @@ jobs:
   # from the checkout runs in containers under the runner's rootless Docker:
   # the daemon with a throwaway data folder and the web answered from
   # tests/quality/web.json (TOSKAR_WEB_FIXTURES), and the tests beside it, so a
-  # branch dispatched here can't touch the machine. Models and runtimes are
-  # kept in Docker volumes, so only the first run downloads them. It runs
+  # branch dispatched here can't touch the machine. Models are kept in a
+  # Docker volume, so only the first run downloads them; llama.cpp is
+  # downloaded each run, so a run measures the release people get. It runs
   # when the repository variable QUALITY_RUNNER is "docker".
   #
   # The runner is someone's computer, so the daemon is held to part of it:
@@ -254,6 +255,10 @@ jobs:
           key="ygg_$(openssl rand -hex 24)"
           echo "::add-mask::$key"
           echo "QUALITY_KEY=$key" >> "$GITHUB_ENV"
+          # llama.cpp is installed anew each run, the release a new
+          # install gets, which the canary holds back from (#1066): kept
+          # in the volume, it was the one first installed, for every run.
+          docker volume rm toskar-quality-runtimes >/dev/null 2>&1 || true
           docker network create "$NAME"
           cpus="${CPUS:-$(( $(nproc) * 3 / 4 ))}"
           echo "Daemon limited to $MEMORY of memory and $cpus CPUs"
@@ -607,6 +612,10 @@ jobs:
           docker build --pull --target "$target" --build-arg COMMIT="$(git rev-parse --short HEAD)" -t "$NAME" .
       - name: Start the daemon
         run: |
+          # llama.cpp is installed anew each run, the release a new
+          # install gets, which the canary holds back from (#1066): kept
+          # in the volume, it was the one first installed, for every run.
+          docker volume rm toskar-quality-runtimes >/dev/null 2>&1 || true
           docker network create "$NAME"
           cpus="${CPUS:-$(( $(nproc) * 3 / 4 ))}"
           gpu=()
