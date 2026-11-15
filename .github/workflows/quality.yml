@@ -719,6 +719,11 @@ jobs:
         run: |
           rt="$RUNNER_TOOL_CACHE/toskar-speculation/runtimes"
           if [ -d "$rt/llamacpp-toskar" ]; then
+            # Windows holds a stopped llama-server's files for a moment.
+            for i in $(seq 1 30); do
+              rm -rf "$rt/llamacpp" 2>/dev/null && break
+              sleep 2
+            done
             rm -rf "$rt/llamacpp"
             mv "$rt/llamacpp-toskar" "$rt/llamacpp"
           fi
@@ -810,6 +815,11 @@ jobs:
         run: |
           rt="$RUNNER_TOOL_CACHE/toskar-speculation/runtimes"
           if [ -d "$rt/llamacpp-toskar" ]; then
+            # Windows holds a stopped llama-server's files for a moment.
+            for i in $(seq 1 30); do
+              rm -rf "$rt/llamacpp" 2>/dev/null && break
+              sleep 2
+            done
             rm -rf "$rt/llamacpp"
             mv "$rt/llamacpp-toskar" "$rt/llamacpp"
           fi
@@ -887,6 +897,11 @@ jobs:
         run: |
           rt="$RUNNER_TOOL_CACHE/toskar-speculation/runtimes"
           if [ -d "$rt/llamacpp-toskar" ]; then
+            # Windows holds a stopped llama-server's files for a moment.
+            for i in $(seq 1 30); do
+              rm -rf "$rt/llamacpp" 2>/dev/null && break
+              sleep 2
+            done
             rm -rf "$rt/llamacpp"
             mv "$rt/llamacpp-toskar" "$rt/llamacpp"
           fi
