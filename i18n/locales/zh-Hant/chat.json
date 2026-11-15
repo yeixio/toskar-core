@@ -829,5 +829,9 @@
     "chip": "代理群：{{mode}}",
     "chipRemove": "不使用代理群",
     "agentLine": "代理群的代理 {{n}} · <go>開啟主聊天</go>"
+  },
+  "linkCheck": {
+    "dead": "檢查時此連結無法開啟",
+    "unknown": "無法檢查此連結"
   }
 }

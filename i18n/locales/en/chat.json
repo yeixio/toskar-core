@@ -874,5 +874,9 @@
     "chip": "Swarm: {{mode}}",
     "chipRemove": "Don't use a swarm",
     "agentLine": "Agent {{n}} of a swarm · <go>Open the main chat</go>"
+  },
+  "linkCheck": {
+    "dead": "This link didn't open when checked",
+    "unknown": "This link couldn't be checked"
   }
 }

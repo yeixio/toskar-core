@@ -32,3 +32,27 @@ describe('ChatMarkdown', () => {
     expect(screen.queryByRole('link')).toBeNull()
   })
 })
+// Links that didn't open, or couldn't be checked, are marked in the answer
+// itself (#209); the rest look as before.
+describe('ChatMarkdown link check', () => {
+  const text = 'See [the guide](https://example.com/guide/), [the old page](https://example.com/old%20page), and [the account](https://example.com/account).'
+
+  it('marks dead and unknown links, matching a trailing slash and encoding', () => {
+    render(
+      <ChatMarkdown
+        text={text}
+        linkCheck={{ dead: ['https://example.com/old page'], unknown: ['https://example.com/account/'] }}
+      />,
+    )
+    expect(screen.getByRole('img', { name: "This link didn't open when checked" })).toHaveAttribute('data-link-status', 'dead')
+    expect(screen.getByRole('img', { name: "This link couldn't be checked" })).toHaveAttribute('data-link-status', 'unknown')
+    expect(screen.getAllByRole('img')).toHaveLength(2)
+    expect(screen.getByRole('link', { name: 'the old page' })).toHaveClass('line-through')
+    expect(screen.getByRole('link', { name: 'the guide' })).not.toHaveClass('line-through')
+  })
+
+  it('marks nothing without a check', () => {
+    render(<ChatMarkdown text={text} />)
+    expect(screen.queryByRole('img')).not.toBeInTheDocument()
+  })
+})

@@ -920,5 +920,9 @@
     "chip": "Enjambre: {{mode}}",
     "chipRemove": "No usar un enjambre",
     "agentLine": "Agente {{n}} de un enjambre · <go>Abrir el chat principal</go>"
+  },
+  "linkCheck": {
+    "dead": "Este enlace no se abrió al comprobarlo",
+    "unknown": "No se pudo comprobar este enlace"
   }
 }

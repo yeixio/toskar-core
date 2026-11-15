@@ -2411,7 +2411,7 @@ export function ChatPage() {
                       <>
                         <ReplyMark />
                         {message.meta?.automation_run ? <AutomationRunNote run={message.meta.automation_run} /> : null}
-                        <ChatMarkdown text={text} />
+                        <ChatMarkdown text={text} linkCheck={message.meta?.link_check} />
                         <AnswerDetails meta={message.meta} runs={admin} />
 
                         {message.meta?.setup && admin ? (

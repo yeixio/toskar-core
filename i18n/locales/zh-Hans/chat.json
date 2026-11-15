@@ -829,5 +829,9 @@
     "chip": "智能体群：{{mode}}",
     "chipRemove": "不使用智能体群",
     "agentLine": "智能体群的智能体 {{n}} · <go>打开主聊天</go>"
+  },
+  "linkCheck": {
+    "dead": "检查时此链接无法打开",
+    "unknown": "无法检查此链接"
   }
 }
