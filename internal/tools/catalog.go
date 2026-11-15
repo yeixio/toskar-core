@@ -231,13 +231,16 @@ func PromptFor(profile contracts.AIProfile) string {
 		return ""
 	}
 	var lines []string
-	internet, changes := false, false
+	internet, changes, unasked := false, false, false
 	for _, def := range enabled {
 		if def.Capability == CapInternet {
 			internet = true
 		}
 		if def.Risk == RiskWrite {
 			changes = true
+			if strings.EqualFold(strings.TrimSpace(PolicyForProfile(profile, def.ID)), PolicyAllow) {
+				unasked = true
+			}
 		}
 		lines = append(lines, "- "+def.ID+" "+def.Schema+" — "+def.Description)
 	}
@@ -252,8 +255,13 @@ func PromptFor(profile contracts.AIProfile) string {
 	}
 	if changes {
 		// A small model told it may delete files often says it can't, then
-		// hands the person the command to run (rm -rf) instead.
-		prompt += "\nYou can change things on this computer with the tools above. Tools that change things ask the person to approve first, so when asked to make a change, call the tool and let them decide. Do not say you are unable to, and never give the person a command that deletes or overwrites files to run themselves."
+		// hands the person the command to run (rm -rf) instead. Whether the
+		// tools ask is said as the profile has it (#1206).
+		if unasked {
+			prompt += "\nYou can change things on this computer with the tools above. Some of them run without asking the person, so change only what they asked for, and say what you changed. Do not say you are unable to, and never give the person a command that deletes or overwrites files to run themselves."
+		} else {
+			prompt += "\nYou can change things on this computer with the tools above. Tools that change things ask the person to approve first, so when asked to make a change, call the tool and let them decide. Do not say you are unable to, and never give the person a command that deletes or overwrites files to run themselves."
+		}
 	}
 	return prompt
 }

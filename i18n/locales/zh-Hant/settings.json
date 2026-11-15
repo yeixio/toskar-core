@@ -146,7 +146,7 @@
   },
   "toolPermissions": {
     "title": "工具權限",
-    "description": "AI 在這台電腦上可以做什麼的預設規則。",
+    "description": "適用於這台電腦上所有設定檔的上限：設定檔可以更嚴格，但不能更寬鬆。Git push 一律會詢問。",
     "terminal": "終端機指令",
     "fileWrites": "寫入檔案",
     "git": "Git 操作",

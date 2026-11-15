@@ -20,12 +20,15 @@ func TestStockGeneralGainsInternet(t *testing.T) {
 	if policy(got, "internet.search") != "allow" || policy(got, "internet.open") != "allow" {
 		t.Fatalf("internet was not enabled: %#v", got)
 	}
-	if policy(got, "terminal") != "allow" || policy(got, "git.commit") != "allow" || policy(got, "filesystem.write") != "allow" {
-		t.Fatalf("enabled tools should run without a prompt: %#v", got)
+	if policy(got, "terminal") != "ask" || policy(got, "git.commit") != "ask" || policy(got, "filesystem.write") != "ask" {
+		t.Fatalf("tools that change things should ask first: %#v", got)
+	}
+	if policy(got, "git.push") != "ask-each-time" {
+		t.Fatalf("git.push should ask each time: %#v", got)
 	}
 }
 
-func TestStockApprovalDefaultsBecomeAllow(t *testing.T) {
+func TestStockApprovalDefaultsAskFirst(t *testing.T) {
 	stock := []contracts.ToolPolicy{
 		{ToolID: "internet.search", Policy: "allow"},
 		{ToolID: "filesystem.write", Policy: "ask"},
@@ -33,8 +36,30 @@ func TestStockApprovalDefaultsBecomeAllow(t *testing.T) {
 		{ToolID: "git.commit", Policy: "ask"},
 	}
 	got := UpgradeGeneralTools(stock)
-	if policy(got, "terminal") != "allow" || policy(got, "filesystem.write") != "allow" || policy(got, "git.commit") != "allow" {
-		t.Fatalf("stock ask policies were kept: %#v", got)
+	if policy(got, "terminal") != "ask" || policy(got, "filesystem.write") != "ask" || policy(got, "git.commit") != "ask" {
+		t.Fatalf("stock ask policies changed: %#v", got)
+	}
+}
+
+// Before #1206 the presets let writes, the terminal, and git run unasked. An
+// untouched profile from then asks first now; a changed one keeps its choice.
+func TestUnaskedPresetMovesToAsking(t *testing.T) {
+	old := writesAllowed(generalToolPolicies())
+	if policy(old, "git.push") != "allow" {
+		t.Fatalf("snapshot is not the old preset: %#v", old)
+	}
+	got := UpgradeGeneralTools(old)
+	if policy(got, "filesystem.write") != "ask" || policy(got, "git.push") != "ask-each-time" {
+		t.Fatalf("untouched old preset kept allow: %#v", got)
+	}
+	changed := writesAllowed(generalToolPolicies())
+	for i := range changed {
+		if changed[i].ToolID == "internet.search" {
+			changed[i].Policy = "deny"
+		}
+	}
+	if got := UpgradeGeneralTools(changed); policy(got, "filesystem.write") != "allow" {
+		t.Fatalf("a changed profile lost its choice: %#v", got)
 	}
 }
 

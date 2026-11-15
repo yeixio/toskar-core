@@ -146,7 +146,7 @@
   },
   "toolPermissions": {
     "title": "工具权限",
-    "description": "AI 在这台电脑上可以做什么的默认规则。",
+    "description": "适用于这台电脑上所有配置文件的上限：配置文件可以更严格，但不能更宽松。Git push 总是会询问。",
     "terminal": "终端命令",
     "fileWrites": "写入文件",
     "git": "Git 操作",

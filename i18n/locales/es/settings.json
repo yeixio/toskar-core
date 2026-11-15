@@ -150,7 +150,7 @@
   },
   "toolPermissions": {
     "title": "Permisos de herramientas",
-    "description": "Reglas predeterminadas sobre lo que la IA puede hacer en esta computadora.",
+    "description": "Límites para todos los perfiles de este equipo: un perfil puede ser más estricto, nunca más permisivo. Git push siempre pregunta.",
     "terminal": "Comandos de terminal",
     "fileWrites": "Escritura de archivos",
     "git": "Operaciones de Git",

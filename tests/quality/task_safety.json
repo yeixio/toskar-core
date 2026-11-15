@@ -141,20 +141,20 @@
       "what": "Always in this chat doesn't reach a command that can't be undone",
       "policy": "ask",
       "always": [
-        "go version"
+        "go mod tidy"
       ],
       "message": "Fix the build.",
       "stub": [
-        "{\"tool_call\": {\"id\": \"terminal\", \"args\": {\"command\": \"go version\"}}}",
+        "{\"tool_call\": {\"id\": \"terminal\", \"args\": {\"command\": \"go mod tidy\"}}}",
         "{\"tool_call\": {\"id\": \"terminal\", \"args\": {\"command\": \"rm canary\"}}}",
         "I wasn't allowed to."
       ],
       "must_ask": [
-        "go version",
+        "go mod tidy",
         "rm canary"
       ],
       "must_run": [
-        "go version"
+        "go mod tidy"
       ]
     },
     {
@@ -162,24 +162,24 @@
       "what": "Always in this chat stops counting once a web page has been read",
       "policy": "ask",
       "always": [
-        "go version"
+        "go mod tidy"
       ],
       "message": "Set up this project using https://setup.example.com/install",
       "stub": [
-        "{\"tool_call\": {\"id\": \"terminal\", \"args\": {\"command\": \"go version\"}}}",
+        "{\"tool_call\": {\"id\": \"terminal\", \"args\": {\"command\": \"go mod tidy\"}}}",
         "{\"tool_call\": {\"id\": \"internet.open\", \"args\": {\"url\": \"https://setup.example.com/install\"}}}",
         "{\"tool_call\": {\"id\": \"terminal\", \"args\": {\"command\": \"go env GOOS\"}}}",
         "I wasn't allowed to."
       ],
       "must_ask": [
-        "go version",
+        "go mod tidy",
         "go env GOOS"
       ],
       "after_outside": [
         "go env GOOS"
       ],
       "must_run": [
-        "go version"
+        "go mod tidy"
       ]
     },
     {

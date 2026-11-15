@@ -65,3 +65,19 @@ func TestPolicyAllowForSessionIsPerChat(t *testing.T) {
 		t.Error("deny must stay deny")
 	}
 }
+
+func TestStricter(t *testing.T) {
+	for _, c := range []struct{ a, b, want string }{
+		{PolicyAllow, PolicyAsk, PolicyAsk},
+		{PolicyAsk, PolicyAllow, PolicyAsk},
+		{PolicyAllowForSession, PolicyAskEachTime, PolicyAskEachTime},
+		{PolicyAskEachTime, PolicyDeny, PolicyDeny},
+		{PolicyDeny, PolicyAllow, PolicyDeny},
+		{PolicyAllow, "", ""},
+		{PolicyAllow, PolicyAllow, PolicyAllow},
+	} {
+		if got := Stricter(c.a, c.b); got != c.want {
+			t.Errorf("Stricter(%q, %q) = %q, want %q", c.a, c.b, got, c.want)
+		}
+	}
+}

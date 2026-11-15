@@ -75,3 +75,15 @@ func TestPromptSaysChangesAskFirst(t *testing.T) {
 		t.Fatalf("guidance without a tool that changes things: %s", without)
 	}
 }
+
+// The sentence says tools ask first only when they do (#1206).
+func TestPromptSaysWhenChangesRunUnasked(t *testing.T) {
+	asks := PromptFor(contracts.AIProfile{Tools: []contracts.ToolPolicy{{ToolID: "filesystem.write", Policy: "ask"}, {ToolID: "git.push", Policy: "ask-each-time"}}})
+	if !strings.Contains(asks, "ask the person to approve first") {
+		t.Fatalf("asking tools not described: %s", asks)
+	}
+	unasked := PromptFor(contracts.AIProfile{Tools: []contracts.ToolPolicy{{ToolID: "filesystem.write", Policy: "allow"}}})
+	if strings.Contains(unasked, "ask the person to approve first") || !strings.Contains(unasked, "run without asking") {
+		t.Fatalf("an allowed write was described as asking: %s", unasked)
+	}
+}

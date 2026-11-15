@@ -148,7 +148,7 @@
   },
   "toolPermissions": {
     "title": "Werkzeugberechtigungen",
-    "description": "Standardregeln dafür, was die KI auf diesem Computer tun darf.",
+    "description": "Grenzen für jedes Profil auf diesem Computer: Ein Profil kann strenger sein, nie lockerer. Git-Push fragt immer.",
     "terminal": "Terminalbefehle",
     "fileWrites": "Dateien schreiben",
     "git": "Git-Vorgänge",

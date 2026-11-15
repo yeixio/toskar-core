@@ -110,6 +110,9 @@ func (e automationExecutor) execute(ctx context.Context, automation automations.
 		}
 	}
 	profile = tools.WithConnected(withChatModel(profile, modelID))
+	// A Settings deny holds here too; ask still runs a tool the person
+	// granted the automation (#1206).
+	profile = e.app.withComputerToolRules(ctx, profile)
 	if len(pictures) > 0 {
 		profile = applyExecutionPolicy(profile, "local")
 	}
