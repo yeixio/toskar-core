@@ -69,3 +69,37 @@ func TestChatSendsTemperature(t *testing.T) {
 		}
 	}
 }
+
+// The sampler and seed go to llama-server as it names them, and only when
+// set (#839).
+func TestChatSendsSampling(t *testing.T) {
+	var got map[string]any
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		got = nil
+		_ = json.NewDecoder(r.Body).Decode(&got)
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(`{"choices":[{"message":{"content":"ok"}}]}`))
+	}))
+	defer srv.Close()
+	send := func(s pluginapi.Sampling) {
+		ch, err := NewClient().Chat(context.Background(), pluginapi.ChatRequest{
+			ModelEndpoint: srv.URL, Messages: []pluginapi.ChatMessage{{Role: "user", Content: "hi"}}, Sampling: s,
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+		for range ch {
+		}
+	}
+	seed := int64(0)
+	send(pluginapi.Sampling{TopP: 0.9, TopK: 40, MinP: 0.05, Seed: &seed})
+	if got["top_p"] != 0.9 || got["top_k"] != 40.0 || got["min_p"] != 0.05 || got["seed"] != 0.0 {
+		t.Fatalf("sent %v", got)
+	}
+	send(pluginapi.Sampling{})
+	for _, k := range []string{"top_p", "top_k", "min_p", "seed"} {
+		if _, ok := got[k]; ok {
+			t.Errorf("unset %s was sent: %v", k, got[k])
+		}
+	}
+}

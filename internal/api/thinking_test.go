@@ -48,4 +48,16 @@ func TestChatThinkingOff(t *testing.T) {
 	if code := call(`{"message":"hi","thinking":"maybe"}`); code != http.StatusBadRequest || ran {
 		t.Errorf("an unknown value: %d, ran %v", code, ran)
 	}
+	// Temperature, the sampler, and a seed (#839).
+	if code := call(`{"message":"hi","temperature":0,"seed":7,"top_p":0.9,"thinking":"off"}`); code != http.StatusOK || !ran {
+		t.Fatalf("sampler: %d", code)
+	}
+	if got.Temperature != pluginapi.GreedyTemperature || !got.NoThinking || got.Sampling.Seed == nil || *got.Sampling.Seed != 7 || got.Sampling.TopP != 0.9 {
+		t.Errorf("sampler options %+v", got)
+	}
+	for _, bad := range []string{`{"message":"hi","top_p":3}`, `{"message":"hi","temperature":5}`} {
+		if code := call(bad); code != http.StatusBadRequest || ran {
+			t.Errorf("%s: %d, ran %v", bad, code, ran)
+		}
+	}
 }

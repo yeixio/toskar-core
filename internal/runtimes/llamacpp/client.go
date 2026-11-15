@@ -48,6 +48,7 @@ func (c *Client) chat(ctx context.Context, req pluginapi.ChatRequest, again func
 	if req.MaxTokens > 0 {
 		body["max_tokens"] = req.MaxTokens
 	}
+	req.Sampling.Apply(body)
 	if len(req.Tools) > 0 {
 		body["tools"] = req.Tools
 	}

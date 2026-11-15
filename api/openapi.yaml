@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Toskar Control Plane API
-  version: "1.92"
+  version: "1.93"
   description: >-
     Local AI control plane API for Toskar, its OpenAI-compatible routes, and its MCP server.
     On the default loopback bind no key is needed. When the daemon listens on any other address,
@@ -3000,6 +3000,24 @@ paths:
                   minimum: 0
                   maximum: 2
                   description: For the answer; 0 gives the same most likely answer every time. Left out, the model's default.
+                seed:
+                  type: integer
+                  minimum: 0
+                  description: "Repeats an answer from one model with the same settings, as far as llama.cpp can; not promised under load (#839, contract 1.93)"
+                top_p:
+                  type: number
+                  minimum: 0
+                  maximum: 1
+                  description: "Nucleus sampling for the answer; 0 or left out, the model's own (#839, contract 1.93)"
+                top_k:
+                  type: integer
+                  minimum: 0
+                  description: "Picks from the k most likely tokens; 0 or left out, the model's own (#839, contract 1.93)"
+                min_p:
+                  type: number
+                  minimum: 0
+                  maximum: 1
+                  description: "Drops tokens below this share of the most likely one's chance; 0 or left out, the model's own (#839, contract 1.93)"
                 max_tokens:
                   type: integer
                   minimum: 1
@@ -4136,6 +4154,26 @@ paths:
                 effort:
                   type: string
                   enum: [auto, fast, balanced, thorough]
+                temperature:
+                  type: number
+                  minimum: 0
+                  maximum: 2
+                  description: "For the answer; 0 gives the same most likely answer every time (#839, contract 1.93)"
+                seed:
+                  type: integer
+                  minimum: 0
+                  description: "As on /v1/chat/completions (#839, contract 1.93)"
+                top_p:
+                  type: number
+                  minimum: 0
+                  maximum: 1
+                top_k:
+                  type: integer
+                  minimum: 0
+                min_p:
+                  type: number
+                  minimum: 0
+                  maximum: 1
                 thinking:
                   type: string
                   enum: ["on", "off"]

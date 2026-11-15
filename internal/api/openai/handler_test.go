@@ -210,10 +210,17 @@ func TestChatCompletionsSampling(t *testing.T) {
 			t.Errorf("%q: %d, options %+v, want %+v", extra, code, chat.sampling, want)
 		}
 	}
-	for _, bad := range []string{`,"temperature":2.5`, `,"temperature":-1`, `,"max_tokens":-5`} {
+	for _, bad := range []string{`,"temperature":2.5`, `,"temperature":-1`, `,"max_tokens":-5`, `,"top_p":1.5`, `,"top_k":-1`, `,"min_p":2`, `,"seed":-3`} {
 		if code := call(bad); code != http.StatusBadRequest {
 			t.Errorf("%q: %d, want 400", bad, code)
 		}
+	}
+	// The sampler and seed reach the answer's calls (#839).
+	if code := call(`,"seed":0,"top_p":0.9,"top_k":40,"min_p":0.05`); code != http.StatusOK {
+		t.Fatalf("sampler: %d", code)
+	}
+	if s := chat.sampling.Sampling; s.Seed == nil || *s.Seed != 0 || s.TopP != 0.9 || s.TopK != 40 || s.MinP != 0.05 {
+		t.Fatalf("sampler options %+v", s)
 	}
 }
 

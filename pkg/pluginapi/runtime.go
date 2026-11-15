@@ -175,6 +175,8 @@ type ChatRequest struct {
 	// ReasoningEffort is GenerateOptions.ReasoningEffort: low, medium, or
 	// high, for a model whose chat template takes it (gpt-oss, #1140).
 	ReasoningEffort string `json:"reasoning_effort,omitempty"`
+	// Sampling is GenerateOptions.Sampling (#839).
+	Sampling Sampling `json:"sampling"`
 	// ToolCallText, with Tools, turns the first tool call the model makes
 	// into the answer's text, as the caller's own protocol writes a call
 	// (#1099). Without it, calls in the reply are ignored.
