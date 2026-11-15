@@ -47,6 +47,20 @@ func TestInspect(t *testing.T) {
 	}
 }
 
+// A model with its own multi-token prediction head is known by its
+// blk.N.nextn.* tensors (#956), as Qwen 3.8's -mtp files have; its header
+// says only one block more.
+func TestInspectMTP(t *testing.T) {
+	dir := t.TempDir()
+	d, err := gguf.Inspect(gguftest.Write(t, dir, "Qwen3.8-27B-IQ3_XXS-mtp.gguf", gguftest.Options{TensorName: "blk.64.nextn.eh_proj.weight"}))
+	if err != nil || !d.MTP {
+		t.Errorf("an -mtp file: %+v, %v", d, err)
+	}
+	if d, err := gguf.Inspect(gguftest.Write(t, dir, "Qwen3.8-27B-IQ3_XXS.gguf", gguftest.Options{TensorName: "blk.63.attn_q.weight"})); err != nil || d.MTP {
+		t.Errorf("a file without: %+v, %v", d, err)
+	}
+}
+
 // A model that thinks before it answers is known by its chat template, or,
 // for DeepSeek R1's distills, whose templates don't say, by its name (#840).
 // tests/thinking checks the real files of each family.

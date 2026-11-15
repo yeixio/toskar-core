@@ -46,6 +46,10 @@ type Details struct {
 	License string
 	// Tensors is how many tensors it has.
 	Tensors uint64
+	// MTP is set for a model with its own multi-token prediction head, an
+	// extra block of blk.N.nextn.* tensors, as Qwen 3.8's -mtp files have:
+	// it can guess ahead for itself with no draft model (#956).
+	MTP bool
 }
 
 // Projector reports a vision projector (llama.cpp's mmproj), which
@@ -200,7 +204,9 @@ func inspect(d *decoder, size uint64, offset func() uint64) (Details, error) {
 		known         bool
 	}
 	for n := uint64(0); n < tensors && d.err == nil; n++ {
-		_ = d.str()
+		if name := d.str(); strings.Contains(name, ".nextn.") {
+			out.MTP = true
+		}
 		dims := d.u32()
 		if d.err == nil && (dims == 0 || dims > maxDims) {
 			return out, fmt.Errorf("a tensor has %d dimensions", dims)

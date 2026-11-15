@@ -34,6 +34,8 @@ import (
 	"runtime"
 	"strings"
 	"time"
+
+	"github.com/yeixio/toskar-core/internal/gguf"
 )
 
 // tieNats is how close, in log-probability, two words are to count as a
@@ -149,6 +151,13 @@ func main() {
 		configs = append(configs,
 			config{"draft", append(d, "--spec-type", "draft-simple")},
 			config{"draft+ngram-mod", append(append([]string{}, d...), "--spec-type", "draft-simple,ngram-mod")})
+	}
+	// A model with its own multi-token prediction head guesses with it, no
+	// draft needed (#956): Qwen 3.8's -mtp files.
+	if d, err := gguf.Inspect(*model); err == nil && d.MTP {
+		configs = append(configs,
+			config{"mtp", []string{"--spec-type", "draft-mtp"}},
+			config{"mtp+ngram-mod", []string{"--spec-type", "draft-mtp,ngram-mod"}})
 	}
 
 	results := map[string]map[string]answer{}

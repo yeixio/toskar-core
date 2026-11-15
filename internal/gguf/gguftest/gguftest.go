@@ -21,6 +21,8 @@ type Options struct {
 	Context uint32
 	// Elements is the tensor's F32 element count (default 64).
 	Elements uint64
+	// TensorName is the tensor's name (default token_embd.weight).
+	TensorName string
 	// Cut drops this many bytes from the end, as an interrupted copy would.
 	Cut int
 	// Vocab is tokenizer.ggml.tokens, and Control which of them are control
@@ -38,6 +40,9 @@ func Bytes(o Options) []byte {
 	}
 	if o.Elements == 0 {
 		o.Elements = 64
+	}
+	if o.TensorName == "" {
+		o.TensorName = "token_embd.weight"
 	}
 	var b bytes.Buffer
 	u32 := func(v uint32) { _ = binary.Write(&b, binary.LittleEndian, v) }
@@ -99,7 +104,7 @@ func Bytes(o Options) []byte {
 	u64(1) // one tensor
 	u64(uint64(n))
 	b.Write(kv.Bytes())
-	str("token_embd.weight")
+	str(o.TensorName)
 	u32(1)
 	u64(o.Elements)
 	u32(0) // F32

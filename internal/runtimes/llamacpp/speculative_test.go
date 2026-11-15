@@ -9,6 +9,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/yeixio/toskar-core/internal/gguf/gguftest"
 	"github.com/yeixio/toskar-core/pkg/pluginapi"
 )
 
@@ -16,7 +17,7 @@ import (
 // model with a projector, and TOSKAR_SPECULATIVE=off don't (#835).
 func TestSpeculativeArgs(t *testing.T) {
 	chat := pluginapi.ModelStartConfig{ModelPath: "m.gguf"}
-	if got := speculativeArgs(chat, true); !slices.Equal(got, []string{"--spec-type", "ngram-mod"}) {
+	if got := speculativeArgs(chat, true, false); !slices.Equal(got, []string{"--spec-type", "ngram-mod"}) {
 		t.Errorf("chat: %v", got)
 	}
 	for name, c := range map[string]struct {
@@ -29,12 +30,12 @@ func TestSpeculativeArgs(t *testing.T) {
 		"projector":   {pluginapi.ModelStartConfig{ModelPath: "v.gguf", Projector: "v.mmproj.gguf"}, true},
 		"turned off":  {pluginapi.ModelStartConfig{ModelPath: "m.gguf", NoSpeculation: true}, true},
 	} {
-		if got := speculativeArgs(c.cfg, c.supported); got != nil {
+		if got := speculativeArgs(c.cfg, c.supported, false); got != nil {
 			t.Errorf("%s: %v", name, got)
 		}
 	}
 	t.Setenv("TOSKAR_SPECULATIVE", "off")
-	if got := speculativeArgs(chat, true); got != nil {
+	if got := speculativeArgs(chat, true, false); got != nil {
 		t.Errorf("off: %v", got)
 	}
 }
@@ -43,13 +44,13 @@ func TestSpeculativeArgs(t *testing.T) {
 // starts without the draft too.
 func TestSpeculativeArgsWithDraft(t *testing.T) {
 	cfg := pluginapi.ModelStartConfig{ModelPath: "m.gguf", Draft: "m.draft.gguf"}
-	got := speculativeArgs(cfg, true)
+	got := speculativeArgs(cfg, true, false)
 	want := []string{"-md", "m.draft.gguf", "-ngld", "99", "--spec-type", "draft-simple,ngram-mod"}
 	if !slices.Equal(got, want) || draftFor(cfg, true) != "m.draft.gguf" {
 		t.Errorf("draft: %v", got)
 	}
 	cfg.NoSpeculation = true
-	if got := speculativeArgs(cfg, true); got != nil || draftFor(cfg, true) != "" {
+	if got := speculativeArgs(cfg, true, false); got != nil || draftFor(cfg, true) != "" {
 		t.Errorf("turned off: %v", got)
 	}
 	if draftFor(pluginapi.ModelStartConfig{ModelPath: "m.gguf", Draft: "d.gguf"}, false) != "" {
@@ -132,5 +133,63 @@ func TestSupportsFit(t *testing.T) {
 	}
 	if supportsFit(context.Background(), filepath.Join(t.TempDir(), "missing")) {
 		t.Error("a missing binary fits nothing")
+	}
+}
+
+// A model with its own MTP head guesses with it, and with n-grams (#956),
+// when TOSKAR_MTP is on and this llama-server has draft-mtp. A draft model
+// comes first, and a file without the head, an older build, or speculation
+// off guess as before.
+func TestMTPSpeculation(t *testing.T) {
+	dir := t.TempDir()
+	bin := filepath.Join(dir, "llama-server")
+	if err := os.WriteFile(bin, []byte("server"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	help := "--spec-type none,draft-simple,draft-mtp,ngram-mod"
+	saved := runHelp
+	runHelp = func(context.Context, string) ([]byte, error) { return []byte(help), nil }
+	t.Cleanup(func() { runHelp = saved })
+	ctx := context.Background()
+	withHead := gguftest.Write(t, dir, "Qwen3.8-27B-IQ3_XXS-mtp.gguf", gguftest.Options{TensorName: "blk.64.nextn.eh_proj.weight"})
+	without := gguftest.Write(t, dir, "Qwen3.8-27B-IQ3_XXS.gguf", gguftest.Options{TensorName: "blk.63.attn_q.weight"})
+
+	cfg := pluginapi.ModelStartConfig{ModelPath: withHead}
+	// Off unless TOSKAR_MTP asks for it: it changed answers when measured.
+	if usesMTP(ctx, cfg, true, bin) {
+		t.Fatal("MTP is on without TOSKAR_MTP")
+	}
+	t.Setenv("TOSKAR_MTP", "on")
+	if !usesMTP(ctx, cfg, true, bin) {
+		t.Fatal("an -mtp file doesn't use its head")
+	}
+	if got := speculativeArgs(cfg, true, true); !slices.Equal(got, []string{"--spec-type", "draft-mtp,ngram-mod"}) {
+		t.Errorf("args = %v", got)
+	}
+	for name, c := range map[string]struct {
+		cfg       pluginapi.ModelStartConfig
+		supported bool
+	}{
+		"no head":    {pluginapi.ModelStartConfig{ModelPath: without}, true},
+		"with draft": {pluginapi.ModelStartConfig{ModelPath: withHead, Draft: "draft.gguf"}, true},
+		"off":        {pluginapi.ModelStartConfig{ModelPath: withHead, NoSpeculation: true}, true},
+		"no support": {pluginapi.ModelStartConfig{ModelPath: withHead}, false},
+	} {
+		if usesMTP(ctx, c.cfg, c.supported, bin) {
+			t.Errorf("%s: uses MTP", name)
+		}
+	}
+
+	// A build without draft-mtp, which would refuse it.
+	older := filepath.Join(dir, "older", "llama-server")
+	if err := os.MkdirAll(filepath.Dir(older), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(older, []byte("older"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	help = "--spec-type none,draft-simple,ngram-mod"
+	if usesMTP(ctx, cfg, true, older) {
+		t.Error("a build without draft-mtp uses it")
 	}
 }
