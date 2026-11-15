@@ -456,6 +456,10 @@ func (o *Orchestrator) Run(
 				// sending it; take it when it names an offered tool.
 				if call, ok := looseToolCall(parsed.Text, profile); ok {
 					parsed.Call, parsed.Text = call, ""
+				} else if call, ok := repairedCall(content, profile); ok {
+					// The call numbered, not named, and only one offered
+					// tool fits it (#1213).
+					parsed.Call, parsed.Text, parsed.Malformed = call, "", false
 				}
 			}
 			if parsed.Call != nil {
@@ -573,9 +577,26 @@ func (o *Orchestrator) Run(
 				malformed++
 				env.Emit(events.ToolParsed, map[string]any{"accepted": false, "format": "rejected", "error": "invalid tool call"})
 				env.Emit(events.ToolFailed, map[string]any{"malformed": true, "error": "invalid tool call"})
+				note := invalidCallNote(offered)
+				if numbered, ok := numberedCallNote(content, profile); ok {
+					note = numbered
+				}
 				messages = append(messages,
 					pluginapi.ChatMessage{Role: "assistant", Content: content},
-					pluginapi.ChatMessage{Role: "user", Content: invalidCallNote(offered)},
+					pluginapi.ChatMessage{Role: "user", Content: note},
+				)
+				continue
+			}
+			// Still only a call once its tries are used up: ask once for a
+			// plain answer, rather than end the turn with nothing (#1213).
+			if toolsOn && !retriedPlain && strings.TrimSpace(parsed.Text) == "" && (parsed.Malformed || parsed.Call != nil) {
+				retriedPlain = true
+				toolsOn = false
+				env.Emit(events.ToolFailed, map[string]any{"malformed": true, "error": "no valid tool call; answering without tools"})
+				messages[0] = pluginapi.ChatMessage{Role: "system", Content: plainSys}
+				messages = append(messages,
+					pluginapi.ChatMessage{Role: "assistant", Content: content},
+					pluginapi.ChatMessage{Role: "user", Content: answerWithoutTools},
 				)
 				continue
 			}
@@ -996,6 +1017,9 @@ func declinedByPerson(err error) bool {
 // invalidCallNote asks again for a call that wasn't valid, naming the tools
 // by id: models such as Qwen 3.5 put their own label for the call there
 // otherwise, and repeat it (#1124).
+// answerWithoutTools asks for the answer when no tool call could run.
+const answerWithoutTools = "No tool can run for this now. Answer the question in plain text from what you know and the reference material, and say plainly if you can't be sure without looking it up."
+
 func invalidCallNote(offered []string) string {
 	note := "That tool call was not valid and was not run. Reply with one JSON object {\"tool_call\":{\"id\":\"...\",\"args\":{}}}, where id is the tool's id exactly"
 	if len(offered) > 0 {
