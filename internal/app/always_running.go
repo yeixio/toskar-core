@@ -86,6 +86,46 @@ func (a *App) memoryLeftBesidePinned(ctx context.Context, pinned []string) int64
 	return max(total, 0)
 }
 
+// noRoomBesidePinned reports that the models kept running on this computer
+// leave too little memory for modelID, which isn't loaded, so placement
+// sends it to another computer that has it when there is one (#966).
+func (a *App) noRoomBesidePinned(ctx context.Context, modelID string) bool {
+	pinned := a.alwaysRunningList(ctx)
+	if len(pinned) == 0 || a.Models == nil {
+		return false
+	}
+	m, err := a.Models.Get(ctx, modelID)
+	if err != nil || !m.Installed || m.MemoryNeeded == 0 {
+		return false
+	}
+	views, _ := a.localRunningViews(ctx)
+	running := make([]string, len(views))
+	for i, v := range views {
+		running[i] = v.ModelID
+	}
+	loaded := pinnedBeside(modelID, pinned, running)
+	if len(loaded) == 0 {
+		return false
+	}
+	left := a.memoryLeftBesidePinned(ctx, loaded)
+	return left >= 0 && uint64(left) < m.MemoryNeeded
+}
+
+// pinnedBeside is the models kept running that are loaded beside modelID,
+// or none when modelID is loaded or kept running itself.
+func pinnedBeside(modelID string, pinned, running []string) []string {
+	if slices.Contains(pinned, modelID) || slices.Contains(running, modelID) {
+		return nil
+	}
+	var out []string
+	for _, id := range pinned {
+		if slices.Contains(running, id) {
+			out = append(out, id)
+		}
+	}
+	return out
+}
+
 // keptRunningMemory is what to say when a model didn't fit because a
 // model kept running holds the memory, and whether one does.
 func (a *App) keptRunningMemory(lang string) (string, bool) {

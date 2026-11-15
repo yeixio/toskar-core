@@ -167,16 +167,20 @@ func firstNonLoopbackIPv4() string {
 	return ""
 }
 
-func (a *App) buildInstalledMap(ctx context.Context, nodeList []contracts.Node, modelID string) map[string][]string {
+// buildInstalledMap finds the computers that have modelID, and those that
+// keep it running (#966), from the lists placement reads anyway.
+func (a *App) buildInstalledMap(ctx context.Context, nodeList []contracts.Node, modelID string) (map[string][]string, map[string]bool) {
 	installed := map[string][]string{}
+	kept := map[string]bool{}
 	if modelID == "" {
-		return installed
+		return installed, kept
 	}
 	for _, n := range nodeList {
 		if n.IsLocal {
 			if a.Models != nil {
 				if m, err := a.Models.Get(ctx, modelID); err == nil && m.Installed {
 					installed[n.ID] = []string{modelID}
+					kept[n.ID] = a.alwaysRunning(ctx, modelID)
 				}
 			}
 			continue
@@ -193,11 +197,12 @@ func (a *App) buildInstalledMap(ctx context.Context, nodeList []contracts.Node, 
 		for _, m := range models {
 			if m.ID == modelID && m.Installed {
 				installed[n.ID] = []string{modelID}
+				kept[n.ID] = m.AlwaysRunning
 				break
 			}
 		}
 	}
-	return installed
+	return installed, kept
 }
 
 func (a *App) placeRole(ctx context.Context, profile profiles.Profile, role, modelID string) (string, error) {
@@ -219,7 +224,11 @@ func (a *App) placeRoleWith(ctx context.Context, profile profiles.Profile, role,
 	if err != nil {
 		return "", err
 	}
-	installed := a.buildInstalledMap(ctx, nodeList, modelID)
+	installed, kept := a.buildInstalledMap(ctx, nodeList, modelID)
+	var noRoom map[string]bool
+	if a.noRoomBesidePinned(ctx, modelID) {
+		noRoom = map[string]bool{a.Config.Get().NodeID: true}
+	}
 	candidates := scheduler.BuildCandidates(nodeList, installed, nil)
 	req := placementRequestFrom(ctx)
 	decision, err := a.Scheduler.PlaceRole(ctx, scheduler.ScoreInput{
@@ -229,6 +238,8 @@ func (a *App) placeRoleWith(ctx context.Context, profile profiles.Profile, role,
 		RequireModel:   requireModel,
 		ActiveTasks:    a.activeWork(),
 		Training:       a.Nodes.TrainingNodes(),
+		KeptRunning:    kept,
+		NoRoom:         noRoom,
 		Speeds:         &a.speeds,
 		PromptTokens:   req.promptTokens,
 		InFlightTokens: a.inFlightTokens(),

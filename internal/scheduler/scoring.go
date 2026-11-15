@@ -26,6 +26,13 @@ type ScoreInput struct {
 	// Training are the computers training an AI now, by node ID. Work goes
 	// to another computer that has the model when there is one (#111).
 	Training map[string]bool
+	// KeptRunning are the computers keeping the model loaded, by node ID
+	// (#966): it's ready there, so its requests go there.
+	KeptRunning map[string]bool
+	// NoRoom are the computers whose always-running models leave too little
+	// memory for this model (#966). Another computer with the model answers
+	// when there is one; none is unloaded to make room.
+	NoRoom map[string]bool
 
 	// Speeds, when set, predicts each computer's time to answer from what
 	// it measured before (#836). PromptTokens is the request's estimated
@@ -50,6 +57,11 @@ type PreviousTurn struct {
 // running, yet a training computer that is the only one with the model
 // stays above Place's floor and still answers.
 const trainingPenalty = 250
+
+// noRoomPenalty sends work away from a computer whose always-running models
+// hold the memory, as trainingPenalty does, so the only computer with the
+// model still answers, or says why it can't.
+const noRoomPenalty = 250
 
 // baseRole strips a worker slot's number, so "worker:2" follows the
 // worker role's pin.
@@ -130,6 +142,10 @@ func Score(input ScoreInput) []ScoredNode {
 				s.Reasons = append(s.Reasons, "model already running")
 			}
 		}
+		if _, ok := input.RunningModels[n.Node.ID][input.ModelID]; !ok && input.KeptRunning[n.Node.ID] {
+			s.Score += 150
+			s.Reasons = append(s.Reasons, "model kept running there")
+		}
 
 		if n.FreeMemory > 0 {
 			s.Score += 50
@@ -161,6 +177,11 @@ func Score(input ScoreInput) []ScoredNode {
 		if input.Training[n.Node.ID] && input.Profile.NodePolicy.Mode != "prefer_local" {
 			s.Score -= trainingPenalty
 			s.Reasons = append(s.Reasons, "training on this computer")
+		}
+
+		if input.NoRoom[n.Node.ID] && input.Profile.NodePolicy.Mode != "prefer_local" {
+			s.Score -= noRoomPenalty
+			s.Reasons = append(s.Reasons, "always-running models hold the memory")
 		}
 
 		taskCount := input.ActiveTasks[n.Node.ID]
