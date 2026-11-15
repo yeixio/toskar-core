@@ -64,6 +64,11 @@ export function RunningTab({
                   <h2 className="font-display text-lg font-semibold text-ink">
                     {item.display_name}
                   </h2>
+                  {item.always_running ? (
+                    <p className="mt-1 text-xs font-medium text-primary" title={t('installedTab.alwaysRunningHint')}>
+                      {t('installedTab.alwaysRunning')}
+                    </p>
+                  ) : null}
                   {tightModelIds?.has(item.model_id) ? (
                     <p
                       className="mt-1 text-xs text-ink-muted"

@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Toskar Control Plane API
-  version: "1.95"
+  version: "1.96"
   description: >-
     Local AI control plane API for Toskar, its OpenAI-compatible routes, and its MCP server.
     On the default loopback bind no key is needed. When the daemon listens on any other address,
@@ -7883,6 +7883,7 @@ components:
           items: {type: string}
         accelerator: {type: string, description: 'The devices the model is on, or CPU'}
         last_used_at: {type: string, format: date-time}
+        always_running: {type: boolean, description: 'A model kept loaded on its computer (#966, contract 1.96)'}
         mode: {type: string, description: '"embedding" or "reranking" for a supporting model serving knowledge search, and empty for a chat model.', enum: [embedding, reranking]}
         acceleration:
           type: object

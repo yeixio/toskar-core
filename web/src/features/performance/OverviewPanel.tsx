@@ -87,6 +87,11 @@ function NodeLiveCard({
                     <span className="text-ink-muted">{t('overview.model')}</span>
                     <span className="flex min-w-0 items-center gap-2">
                       <span className="truncate font-medium text-ink">{r.display_name}</span>
+                      {r.always_running ? (
+                        <span className="shrink-0 text-xs font-medium text-primary" title={t('models:installedTab.alwaysRunningHint')}>
+                          {t('models:installedTab.alwaysRunning')}
+                        </span>
+                      ) : null}
                       <AccelerationPill acceleration={r.acceleration} model={r.display_name} align="end" />
                     </span>
                   </div>

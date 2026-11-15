@@ -49,3 +49,20 @@ describe('RunningTab memory', () => {
     expect(screen.getByText(`${formatBytes(8 * GB)} / ${formatBytes(24 * GB)}`)).toBeInTheDocument()
   })
 })
+
+// A model kept running says so where it runs (#966).
+describe('RunningTab always running', () => {
+  beforeEach(async () => {
+    await applyLanguage('en')
+  })
+
+  it('labels a model kept running', () => {
+    show(model({ always_running: true }))
+    expect(screen.getByText('Always running')).toBeInTheDocument()
+  })
+
+  it('leaves other models unlabeled', () => {
+    show(model({}))
+    expect(screen.queryByText('Always running')).not.toBeInTheDocument()
+  })
+})

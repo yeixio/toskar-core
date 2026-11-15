@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"fmt"
+	"slices"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -61,6 +62,7 @@ func (a *App) localRunningViews(ctx context.Context) ([]contracts.RunningModelVi
 	gpu, cpuBuild := a.accelerationFacts(ctx)
 	speeds := a.recentSpeeds(ctx)
 	profileNames := a.profilesUsingModels(ctx)
+	pinned := a.alwaysRunningList(ctx)
 	out := make([]contracts.RunningModelView, 0, len(running))
 	for _, r := range running {
 		display := r.ModelID
@@ -73,6 +75,7 @@ func (a *App) localRunningViews(ctx context.Context) ([]contracts.RunningModelVi
 		}
 		view := contracts.RunningModelView{
 			ModelID:        r.ModelID,
+			AlwaysRunning:  slices.Contains(pinned, r.ModelID),
 			DisplayName:    display,
 			InstanceID:     r.ID,
 			NodeID:         cfg.NodeID,

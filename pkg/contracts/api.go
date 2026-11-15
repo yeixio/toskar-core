@@ -339,6 +339,9 @@ type RunningModelView struct {
 	UsedByProfiles []string   `json:"used_by_profiles,omitempty"`
 	Accelerator    string     `json:"accelerator,omitempty"`
 	LastUsedAt     *time.Time `json:"last_used_at,omitempty"`
+	// AlwaysRunning is a model kept loaded on its computer (#966, contract
+	// 1.96).
+	AlwaysRunning bool `json:"always_running,omitempty"`
 	// Mode is "embedding" or "reranking" for a supporting model serving
 	// knowledge search, and empty for a chat model.
 	Mode string `json:"mode,omitempty"`

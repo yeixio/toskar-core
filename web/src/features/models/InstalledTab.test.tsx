@@ -175,3 +175,36 @@ describe('InstalledTab always running', () => {
     expect(screen.getByRole('status')).toHaveTextContent('only about 5 GB')
   })
 })
+
+// Only Admins keep a model running, as the service checks (#966).
+describe('InstalledTab always running for Members', () => {
+  it("doesn't offer it to a Member", () => {
+    useUIStore.setState({ advancedMode: true })
+    const client = new QueryClient()
+    client.setQueryData(['me'], { person: { id: 'p-dana', name: 'Dana', role: 'member' } })
+    render(
+      <QueryClientProvider client={client}>
+        <MemoryRouter>
+          <InstalledTab
+            models={[{ ...qwen, speculation: 'auto' }]}
+            running={[]}
+            profiles={[]}
+            progress={{}}
+            nodes={[]}
+            showManualControls
+            search=""
+            onStart={vi.fn()}
+            onStop={vi.fn()}
+            onDelete={vi.fn()}
+            onSpeculation={vi.fn()}
+            onAlwaysRunning={vi.fn()}
+          />
+        </MemoryRouter>
+      </QueryClientProvider>,
+    )
+    fireEvent.click(screen.getByRole('button', { name: 'More actions for Qwen3.5 35B' }))
+    expect(screen.getByRole('menu')).toHaveTextContent('Guess ahead')
+    expect(screen.queryByRole('menuitemcheckbox', { name: 'Always running' })).not.toBeInTheDocument()
+    useUIStore.setState({ advancedMode: false })
+  })
+})

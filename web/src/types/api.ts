@@ -180,6 +180,8 @@ export interface ModelsFitResponse {
 export interface RunningModelView {
   model_id: string
   display_name: string
+  /** A model kept loaded on its computer (#966, contract 1.96). */
+  always_running?: boolean
   instance_id: string
   node_id: string
   node_name: string
