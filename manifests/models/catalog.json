@@ -1319,7 +1319,8 @@
         "general",
         "reasoning",
         "coding",
-        "tools"
+        "tools",
+        "topic-check"
       ],
       "runtime": [
         "llamacpp"
