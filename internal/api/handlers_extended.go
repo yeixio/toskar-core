@@ -473,7 +473,7 @@ func (s *Server) handleChat(w http.ResponseWriter, r *http.Request) {
 		writeErr(w, http.StatusBadRequest, "BAD_REQUEST", `thinking is "on" or "off"`, map[string]any{"detail": `thinking is "on" or "off"`})
 		return
 	}
-	if err := body.Sampling.Check(); err != nil {
+	if err := body.Check(); err != nil {
 		writeErr(w, http.StatusBadRequest, "BAD_REQUEST", err.Error(), map[string]any{"detail": err.Error()})
 		return
 	}

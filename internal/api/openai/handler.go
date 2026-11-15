@@ -225,7 +225,7 @@ func (req chatCompletionRequest) sampling() (pluginapi.GenerateOptions, error) {
 	if o.MaxTokens < 0 || req.MaxCompletionTokens < 0 {
 		return o, errors.New("max_tokens must be positive")
 	}
-	if err := req.Sampling.Check(); err != nil {
+	if err := req.Check(); err != nil {
 		return o, err
 	}
 	o.Sampling = req.Sampling
