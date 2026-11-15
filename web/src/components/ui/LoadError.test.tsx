@@ -28,3 +28,15 @@ describe('LoadError compact (#217)', () => {
     expect(screen.getByRole('button', { name: 'Trying again…' })).toBeDisabled()
   })
 })
+
+describe('LoadError offline (#965)', () => {
+  it('says the computer is offline, with no Diagnostics or report', () => {
+    const offline = Object.assign(new Error('This computer isn’t connected to the internet.'), { code: 'OFFLINE' })
+    show(<LoadError error={offline} onRetry={() => {}} />)
+    expect(screen.getByRole('heading')).toHaveTextContent("You're offline")
+    expect(screen.getByRole('alert')).toHaveTextContent('Everything that runs on this computer still works')
+    expect(screen.getByRole('button', { name: 'Try again' })).toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: 'Open Diagnostics' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Report this' })).not.toBeInTheDocument()
+  })
+})

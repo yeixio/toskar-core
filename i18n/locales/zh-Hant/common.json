@@ -102,7 +102,9 @@
     "retry": "重試",
     "retrying": "正在重試…",
     "diagnostics": "開啟診斷",
-    "details": "詳細資訊"
+    "details": "詳細資訊",
+    "offlineTitle": "你已離線",
+    "offlineBody": "這需要網際網路，但這台電腦未連線。這台電腦上執行的一切仍可正常使用。"
   },
   "acceleration": {
     "state": {

@@ -104,7 +104,9 @@
     "retry": "Riprova",
     "retrying": "Nuovo tentativo…",
     "diagnostics": "Apri la Diagnostica",
-    "details": "Dettagli"
+    "details": "Dettagli",
+    "offlineTitle": "Sei offline",
+    "offlineBody": "Serve Internet e questo computer non è connesso. Tutto ciò che funziona su questo computer continua a funzionare."
   },
   "acceleration": {
     "state": {

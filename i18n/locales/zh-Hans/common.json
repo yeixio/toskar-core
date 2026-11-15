@@ -102,7 +102,9 @@
     "retry": "重试",
     "retrying": "正在重试…",
     "diagnostics": "打开诊断",
-    "details": "详细信息"
+    "details": "详细信息",
+    "offlineTitle": "你已离线",
+    "offlineBody": "这需要互联网，但这台电脑未连接。这台电脑上运行的一切仍可正常使用。"
   },
   "acceleration": {
     "state": {

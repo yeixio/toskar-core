@@ -279,6 +279,7 @@
   "UNLOCK_REQUIRED": "Seu teste do Toskar Pro terminou. Desbloqueie o Toskar Pro para adicionar modelos, automações ou pessoas.",
   "TRIAL_NOT_STARTED": "Comece o teste grátis de 14 dias do Toskar Pro para adicionar modelos, automações ou pessoas.",
   "NEWS_UNAVAILABLE": "Não foi possível ler as notícias de IA do toskar.ai. Verifique a conexão com a internet e tente de novo.",
+  "OFFLINE": "Este computador não está conectado à internet. Verifique a conexão e tente novamente.",
   "PROJECT_FILE_NOT_FOUND": "Esse arquivo não está no projeto.",
   "PROJECT_NAME_REQUIRED": "Dê um nome ao projeto.",
   "PROJECT_NOT_FOUND": "Esse projeto foi removido.",

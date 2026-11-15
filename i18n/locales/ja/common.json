@@ -102,7 +102,9 @@
     "retry": "もう一度試す",
     "retrying": "再試行中…",
     "diagnostics": "診断を開く",
-    "details": "詳細"
+    "details": "詳細",
+    "offlineTitle": "オフラインです",
+    "offlineBody": "これにはインターネットが必要ですが、このコンピューターは接続されていません。このコンピューター上で動くものはすべて引き続き使えます。"
   },
   "acceleration": {
     "state": {

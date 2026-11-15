@@ -103,7 +103,9 @@
     "retry": "Erneut versuchen",
     "retrying": "Wird erneut versucht…",
     "diagnostics": "Diagnose öffnen",
-    "details": "Details"
+    "details": "Details",
+    "offlineTitle": "Du bist offline",
+    "offlineBody": "Dafür braucht es das Internet, und dieser Computer ist nicht verbunden. Alles, was auf diesem Computer läuft, funktioniert weiterhin."
   },
   "acceleration": {
     "state": {

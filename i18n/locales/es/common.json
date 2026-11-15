@@ -104,7 +104,9 @@
     "retry": "Reintentar",
     "retrying": "Reintentando…",
     "diagnostics": "Abrir Diagnóstico",
-    "details": "Detalles"
+    "details": "Detalles",
+    "offlineTitle": "Sin conexión",
+    "offlineBody": "Esto necesita internet y este equipo no está conectado. Todo lo que se ejecuta en este equipo sigue funcionando."
   },
   "acceleration": {
     "state": {

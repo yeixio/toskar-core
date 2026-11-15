@@ -3,6 +3,7 @@ package tools
 import (
 	"context"
 	"errors"
+	"github.com/yeixio/toskar-core/internal/offline"
 	"strings"
 	"time"
 
@@ -110,6 +111,9 @@ const (
 	ErrKindNotOffered = "not_offered"
 	ErrKindInvalid    = "invalid"
 	ErrKindFailed     = "failed"
+	// ErrKindOffline is a tool that needed the internet while this
+	// computer couldn't reach it (#965).
+	ErrKindOffline = "offline"
 )
 
 // ErrNotOffered is returned for a call to a tool that was not offered for
@@ -127,6 +131,8 @@ func ErrorKind(err error) string {
 		return ErrKindCancelled
 	case errors.Is(err, ErrNotOffered):
 		return ErrKindNotOffered
+	case offline.Is(err):
+		return ErrKindOffline
 	}
 	msg := strings.ToLower(err.Error())
 	switch {

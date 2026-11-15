@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/yeixio/toskar-core/internal/offline"
 	"io/fs"
 	"log/slog"
 	"net"
@@ -1512,6 +1513,11 @@ func writeErr(w http.ResponseWriter, status int, code, message string, details m
 // them (contracts.CodedError), and with code otherwise. The message is the
 // error's English text, for logs and for clients that do not know the code.
 func writeErrFrom(w http.ResponseWriter, status int, code string, err error) {
+	// Not reaching the internet is said plainly, whatever was asked (#965).
+	if offline.Is(err) {
+		writeErr(w, status, offline.Code, offline.Message(err), nil)
+		return
+	}
 	if own, params := contracts.ErrorCode(err); own != "" {
 		writeErr(w, status, own, err.Error(), params)
 		return
