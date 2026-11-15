@@ -463,6 +463,8 @@
     "sources": "Sources",
     "source": "Source",
     "opensInSafari": "S'ouvre dans Safari",
+    "linkDead": "Ce lien ne s'est pas ouvert lors de la vérification",
+    "linkUnknown": "Ce lien n'a pas pu être vérifié",
     "steps_one": "Ce que j'ai fait · {{count}} étape",
     "steps_many": "Ce que j'ai fait · {{count}} étapes",
     "steps_other": "Ce que j'ai fait · {{count}} étapes"

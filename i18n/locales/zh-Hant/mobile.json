@@ -457,6 +457,8 @@
     "sources": "來源",
     "source": "來源",
     "opensInSafari": "在 Safari 中打開",
+    "linkDead": "檢查時此連結無法開啟",
+    "linkUnknown": "無法檢查此連結",
     "steps_other": "我做了什麼 · {{count}} 個步驟"
   },
   "tools": {

@@ -463,6 +463,8 @@
     "sources": "Fontes",
     "source": "Fonte",
     "opensInSafari": "Abre no Safari",
+    "linkDead": "Este link não abriu na verificação",
+    "linkUnknown": "Não foi possível verificar este link",
     "steps_one": "O que eu fiz · {{count}} etapa",
     "steps_many": "O que eu fiz · {{count}} etapas",
     "steps_other": "O que eu fiz · {{count}} etapas"
