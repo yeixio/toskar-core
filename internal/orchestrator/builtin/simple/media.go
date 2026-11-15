@@ -3,6 +3,7 @@ package simple
 import (
 	"context"
 	"fmt"
+	"github.com/yeixio/toskar-core/internal/inventory"
 	"regexp"
 	"strings"
 
@@ -20,7 +21,7 @@ import (
 var (
 	// imageAskRe asks for a picture: a verb that draws, or one that makes
 	// with a kind of picture close after it.
-	imageAskRe = regexp.MustCompile(`(?i)(\b(draw|paint|sketch|illustrate)\b|\b(make|create|generate|design|produce|render|give me|show me|do)\b[^.?!\n]{0,40}?\b(images?|pictures?|photos?|illustrations?|drawings?|paintings?|watercolou?rs?|sketch(es)?|cartoons?|logos?|icons?|wallpapers?|artwork|portraits?|posters?|pics?)\b)`)
+	imageAskRe = regexp.MustCompile(`(?i)(\b(draw|paint|sketch|illustrate)\b|\b(make|create|generate|design|produce|render|give me|show me|do)\b[^.?!\n]{0,40}?\b` + inventory.PictureNouns + `\b)`)
 	// videoAskRe asks for a clip, or for a picture to move.
 	videoAskRe = regexp.MustCompile(`(?i)(\b(make|create|generate|produce|render|give me|do)\b[^.?!\n]{0,40}?\b(videos?|clips?|animations?|movies?|gifs?)\b|\banimate\b|\bbring (it|this|that|the|my)( \w+)? to life\b|\bmake (it|this|that) move\b)`)
 	// editAskRe asks to change something.

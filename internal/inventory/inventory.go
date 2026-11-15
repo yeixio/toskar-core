@@ -12,6 +12,13 @@ import (
 	"time"
 )
 
+// PictureNouns are the kinds of picture a request to make one names, as a
+// regular expression group. The setup offer here, the tools Huginn offers,
+// and the request to make one all read this list, so a word added for one
+// reaches all three; three copies had drifted, and "make a watercolor"
+// made nothing (#1225).
+const PictureNouns = `(images?|pictures?|photos?|illustrations?|drawings?|paintings?|watercolou?rs?|sketch(es)?|cartoons?|logos?|icons?|wallpapers?|artwork|portraits?|posters?|pics?)`
+
 // Model is an installed model.
 type Model struct {
 	ID          string `json:"id"`
@@ -230,7 +237,9 @@ var rules = []rule{
 			v := toolsWhere(s, toolID("git."))
 			return len(v) > 0, v, ""
 		}},
-	{"image_generation", "Generate images", regexp.MustCompile(`(?i)\b(generat|creat|draw|make|render|paint)\w*\b.*\b(images?|pictures?|photos?|drawings?|paintings?|watercolou?rs?|sketch(es)?|cartoons?|illustrations?|art)\b|\b(draw|paint|sketch|illustrate)\s+(me\s+)?(a|an|the|my|our|some)\b`),
+	// "Art" offers setup too ("create art of a fox"), though it doesn't ask
+	// for a picture elsewhere: "create an art project plan" isn't one.
+	{"image_generation", "Generate images", regexp.MustCompile(`(?i)\b(generat|creat|draw|make|render|paint)\w*\b.*\b(` + PictureNouns + `|art)\b|\b(draw|paint|sketch|illustrate)\s+(me\s+)?(a|an|the|my|our|some)\b`),
 		func(s Snapshot) (bool, []string, string) {
 			v := toolsWhere(s, toolAbout(imageRe, makeRe))
 			if len(v) > 0 {
