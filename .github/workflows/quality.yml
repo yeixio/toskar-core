@@ -65,6 +65,11 @@ on:
       fit_check:
         description: 'Instead of the quality sets, start each of these catalog models through Toskar on the home Windows runner with an NVIDIA card, and report where it runs and how fast (#955): a JSON list, such as ["qwen2.5-32b-q4"]. Blank for the quality sets.'
         default: ""
+      fit_backend:
+        description: 'The llama.cpp build a fit check runs on (#1066): the one Toskar installs, or the newest release''s Vulkan or CUDA 12.4 build, both of the same release, to compare.'
+        type: choice
+        options: [toskar, vulkan, cuda]
+        default: toskar
 
 # One run at a time: the rig takes its models one after another, and the
 # home box it shares runs CI too, so runs started together slowed CI past
@@ -708,6 +713,15 @@ jobs:
         run: |
           go build -o "$RUNNER_TEMP/toskard.exe" ./cmd/daemon
           go build -o "$RUNNER_TEMP/specbench.exe" ./cmd/specbench
+      # A fit check with fit_backend that was stopped before it could put
+      # Toskar's llama.cpp back, in the data folder this job shares (#1066).
+      - name: Put Toskar's llama.cpp back
+        run: |
+          rt="$RUNNER_TOOL_CACHE/toskar-speculation/runtimes"
+          if [ -d "$rt/llamacpp-toskar" ]; then
+            rm -rf "$rt/llamacpp"
+            mv "$rt/llamacpp-toskar" "$rt/llamacpp"
+          fi
       - name: Start the daemon
         run: |
           data="$RUNNER_TOOL_CACHE/toskar-speculation"
@@ -788,6 +802,44 @@ jobs:
         run: |
           go build -o "$RUNNER_TEMP/toskard.exe" ./cmd/daemon
           go build -o "$RUNNER_TEMP/specbench.exe" ./cmd/specbench
+      # Toskar installs llama.cpp's Vulkan build. fit_backend runs the newest
+      # release's Vulkan or CUDA build instead, set beside Toskar's own, to
+      # see which is faster on this card (#1066). A run stopped before it
+      # could put Toskar's back is put right here first.
+      - name: Put Toskar's llama.cpp back
+        run: |
+          rt="$RUNNER_TOOL_CACHE/toskar-speculation/runtimes"
+          if [ -d "$rt/llamacpp-toskar" ]; then
+            rm -rf "$rt/llamacpp"
+            mv "$rt/llamacpp-toskar" "$rt/llamacpp"
+          fi
+      - name: Use llama.cpp's ${{ inputs.fit_backend }} build
+        if: inputs.fit_backend == 'vulkan' || inputs.fit_backend == 'cuda'
+        env:
+          BACKEND: ${{ inputs.fit_backend }}
+        run: |
+          rt="$RUNNER_TOOL_CACHE/toskar-speculation/runtimes"
+          mkdir -p "$rt"
+          if [ -d "$rt/llamacpp" ]; then mv "$rt/llamacpp" "$rt/llamacpp-toskar"; fi
+          mkdir -p "$rt/llamacpp"
+          tag="$(curl -fsSL 'https://api.github.com/repos/ggml-org/llama.cpp/releases?per_page=10' | grep -oE '"tag_name": *"b[0-9]+"' | head -n 1 | grep -oE 'b[0-9]+')"
+          if [ -z "$tag" ]; then echo "::error::No llama.cpp release found."; exit 1; fi
+          build=vulkan-x64
+          files=("llama-$tag-bin-win-$build.zip")
+          if [ "$BACKEND" = cuda ]; then
+            build=cuda-12.4-x64
+            files=("llama-$tag-bin-win-$build.zip" "cudart-llama-bin-win-$build.zip")
+          fi
+          for f in "${files[@]}"; do
+            curl -fsSL -o "$RUNNER_TEMP/$f" "https://github.com/ggml-org/llama.cpp/releases/download/$tag/$f"
+            powershell -NoProfile -Command "Expand-Archive -Force -Path '$(cygpath -w "$RUNNER_TEMP/$f")' -DestinationPath '$(cygpath -w "$rt/llamacpp")'"
+          done
+          # An archive with a folder inside is laid flat, as Toskar's install is.
+          bin="$(find "$rt/llamacpp" -name llama-server.exe | head -n 1)"
+          if [ -z "$bin" ]; then echo "::error::No llama-server.exe in the $build build."; exit 1; fi
+          if [ "$(dirname "$bin")" != "$rt/llamacpp" ]; then cp -r "$(dirname "$bin")"/. "$rt/llamacpp"/; fi
+          echo "$tag" > "$rt/llamacpp/VERSION"
+          echo "llama.cpp $tag, the $build build" | tee -a "$GITHUB_STEP_SUMMARY"
       - name: Start the daemon
         run: |
           # The speculation runs' folder, so models they downloaded are reused.
@@ -817,3 +869,11 @@ jobs:
           pid="$(cat "$RUNNER_TEMP/daemon.pid" 2>/dev/null)" || exit 0
           winpid="$(cat "/proc/$pid/winpid" 2>/dev/null)" || exit 0
           taskkill //F //T //PID "$winpid" || true
+      - name: Put Toskar's llama.cpp back after
+        if: always() && (inputs.fit_backend == 'vulkan' || inputs.fit_backend == 'cuda')
+        run: |
+          rt="$RUNNER_TOOL_CACHE/toskar-speculation/runtimes"
+          if [ -d "$rt/llamacpp-toskar" ]; then
+            rm -rf "$rt/llamacpp"
+            mv "$rt/llamacpp-toskar" "$rt/llamacpp"
+          fi
