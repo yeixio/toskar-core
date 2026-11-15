@@ -29,6 +29,7 @@ import { rovingKeyDown } from '@/lib/roving'
 import { LoadError } from '@/components/ui/LoadError'
 import { Skeleton } from '@/components/ui/Skeleton'
 import { shownError, type Shown } from '@/components/ui/ShownError'
+import { formatBytes } from '@/lib/format'
 
 type Tab = 'discover' | 'installed' | 'running' | 'results'
 
@@ -180,6 +181,30 @@ export function ModelsPage() {
   const speculationMutation = useMutation({
     mutationFn: ({ id, speculation }: { id: string; speculation: 'auto' | 'off' }) => api.setModelSpeculation(id, speculation),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['models'] }),
+  })
+  // Keeping a model running says what it leaves for the others, and warns
+  // when that's little (#966).
+  const [alwaysRunningNote, setAlwaysRunningNote] = useState<{ id: string; text: string; warn: boolean } | null>(null)
+  const alwaysRunningMutation = useMutation({
+    mutationFn: ({ id, on }: { id: string; on: boolean }) => api.setModelAlwaysRunning(id, on),
+    onMutate: () => {
+      setStartError(null)
+      setAlwaysRunningNote(null)
+    },
+    onSuccess: (res, { id, on }) => {
+      queryClient.invalidateQueries({ queryKey: ['models'] })
+      queryClient.invalidateQueries({ queryKey: ['models', 'running'] })
+      const left = res?.memory_left_bytes
+      if (on && typeof left === 'number') {
+        const warn = left < 8e9
+        setAlwaysRunningNote({
+          id,
+          warn,
+          text: t(warn ? 'installedTab.alwaysRunningTight' : 'installedTab.alwaysRunningLeft', { left: formatBytes(left) }),
+        })
+      }
+    },
+    onError: (err, { id }) => setStartError({ id, ...shownError(err) }),
   })
   const contextMutation = useMutation({
     mutationFn: ({ id, contextWindow }: { id: string; contextWindow: number }) => api.setModelContext(id, contextWindow),
@@ -446,6 +471,8 @@ export function ModelsPage() {
           }}
           onDelete={(id) => deleteMutation.mutate(id)}
           onSpeculation={(id, speculation) => speculationMutation.mutate({ id, speculation })}
+          onAlwaysRunning={(id, on) => alwaysRunningMutation.mutate({ id, on })}
+          alwaysRunningNote={alwaysRunningNote}
           onContextWindow={(id, contextWindow) => contextMutation.mutate({ id, contextWindow })}
           onSlots={(id, slots) => slotsMutation.mutate({ id, slots })}
           onDiscover={() => setTab('discover')}

@@ -21,9 +21,9 @@ func TestSetModelAlwaysRunning(t *testing.T) {
 	var gotOn *bool
 	srv := NewServer(Dependencies{
 		Config: mgr,
-		SetModelAlwaysRunning: func(_ context.Context, id string, on bool) error {
+		SetModelAlwaysRunning: func(_ context.Context, id string, on bool) (int64, error) {
 			gotID, gotOn = id, &on
-			return nil
+			return 9_000_000_000, nil
 		},
 	})
 	call := func(body string) (int, string) {
@@ -33,7 +33,7 @@ func TestSetModelAlwaysRunning(t *testing.T) {
 		srv.Handler().ServeHTTP(rec, r)
 		return rec.Code, rec.Body.String()
 	}
-	if code, body := call(`{"always_running": true}`); code != http.StatusOK || gotID != "qwen3.5-4b-q4" || gotOn == nil || !*gotOn || !strings.Contains(body, `"always_running":true`) {
+	if code, body := call(`{"always_running": true}`); code != http.StatusOK || gotID != "qwen3.5-4b-q4" || gotOn == nil || !*gotOn || !strings.Contains(body, `"always_running":true`) || !strings.Contains(body, `"memory_left_bytes":9000000000`) {
 		t.Fatalf("on: %d %s, id %q", code, body, gotID)
 	}
 	if code, _ := call(`{"always_running": false}`); code != http.StatusOK || *gotOn {

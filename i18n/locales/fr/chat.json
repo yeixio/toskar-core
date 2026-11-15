@@ -427,7 +427,8 @@
       "busy": "Un entraînement utilise cet ordinateur, il n'y avait donc pas assez de mémoire pour ce modèle.",
       "busyNamed": "L'entraînement « {{name}} » utilise cet ordinateur, il n'y avait donc pas assez de mémoire pour ce modèle.",
       "advice": "Réessayez quand l'entraînement sera terminé, choisissez un modèle plus petit ou annulez l'entraînement sur la page Entraîner."
-    }
+    },
+    "keptRunningMemory": "{{name}} reste en marche et occupe environ {{gb}} Go, il n'y avait donc pas assez de mémoire pour ce modèle. Choisissez un modèle plus petit, ou désactivez Toujours en marche pour {{name}} sur la page Modèles."
   },
   "modelFailure": {
     "retry": "Réessayer",

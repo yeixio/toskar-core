@@ -160,3 +160,41 @@ func TestModelsInstallWaitsForTheDownload(t *testing.T) {
 		t.Fatalf("%s", out.String())
 	}
 }
+
+// pin keeps a model running and says what that leaves; unpin lets it go
+// (#966).
+func TestModelsPin(t *testing.T) {
+	var got []string
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPut || r.URL.Path != "/api/v1/models/llama-3.2-3b-q4/always-running" {
+			http.NotFound(w, r)
+			return
+		}
+		var body struct {
+			On bool `json:"always_running"`
+		}
+		_ = json.NewDecoder(r.Body).Decode(&body)
+		got = append(got, fmt.Sprint(body.On))
+		_ = json.NewEncoder(w).Encode(map[string]any{"model_id": "llama-3.2-3b-q4", "always_running": body.On, "memory_left_bytes": 5_000_000_000})
+	}))
+	defer srv.Close()
+	client := daemonClient{base: srv.URL, client: srv.Client()}
+	var out bytes.Buffer
+	if err := modelsCommand([]string{"pin", "llama-3.2-3b-q4"}, client, &out); err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(out.String(), "is kept running") || !strings.Contains(out.String(), "only about 5.0 GB") {
+		t.Errorf("pin said:\n%s", out.String())
+	}
+	out.Reset()
+	if err := modelsCommand([]string{"unpin", "llama-3.2-3b-q4"}, client, &out); err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(out.String(), "no longer kept running") || strings.Join(got, ",") != "true,false" {
+		t.Errorf("unpin said %s, sent %v", out.String(), got)
+	}
+	var exit *exitError
+	if err := modelsCommand([]string{"pin"}, client, &out); !errors.As(err, &exit) || exit.code != 2 {
+		t.Errorf("pin without a model: %v", err)
+	}
+}

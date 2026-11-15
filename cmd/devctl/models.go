@@ -16,9 +16,11 @@ import (
 	"github.com/yeixio/toskar-core/pkg/contracts"
 )
 
-const modelsUsage = `usage: toskarctl models <list|install>
+const modelsUsage = `usage: toskarctl models <list|install|pin|unpin>
   list [--installed] [--json]   the models Toskar offers, with their size and how well each fits this computer
   install <id> [--node <id>]    download a model and wait until it's installed, showing its progress
+  pin <id>                      keep a model loaded: at start, after a crash, and when idle
+  unpin <id>                    let a model kept running unload again when idle
 The daemon address is TOSKAR_URL, or 127.0.0.1:7331. A remote daemon uses TOSKAR_API_KEY.`
 
 func modelsCommand(args []string, client daemonClient, out io.Writer) error {
@@ -63,6 +65,11 @@ func modelsCommand(args []string, client daemonClient, out io.Writer) error {
 			return &exitError{code: 2, msg: modelsUsage}
 		}
 		return installModel(client, id, *node, out)
+	case "pin", "unpin":
+		if len(args) != 2 || strings.HasPrefix(args[1], "-") {
+			return &exitError{code: 2, msg: modelsUsage}
+		}
+		return pinModel(client, args[1], args[0] == "pin", out)
 	}
 	return &exitError{code: 2, msg: modelsUsage}
 }
@@ -108,9 +115,40 @@ func writeModels(out io.Writer, models []contracts.Model) error {
 		if m.Installed {
 			installed = "yes"
 		}
+		if m.AlwaysRunning {
+			installed = "yes, always running"
+		}
 		fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\n", m.ID, m.DisplayName, sizeText(m.SizeBytes), fit, installed)
 	}
 	return w.Flush()
+}
+
+// pinModel keeps a model on the computer toskarctl talks to loaded, or
+// lets it unload again (#966), and says what that leaves for the others.
+func pinModel(client daemonClient, id string, on bool, out io.Writer) error {
+	var res struct {
+		MemoryLeft *int64 `json:"memory_left_bytes"`
+	}
+	if err := client.call(http.MethodPut, "/models/"+id+"/always-running", map[string]bool{"always_running": on}, &res); err != nil {
+		return err
+	}
+	if !on {
+		_, err := fmt.Fprintf(out, "%s is no longer kept running; it unloads when idle.\n", id)
+		return err
+	}
+	if _, err := fmt.Fprintf(out, "%s is kept running: it loads now, when Toskar starts, and again if it stops.\n", id); err != nil {
+		return err
+	}
+	if res.MemoryLeft != nil && *res.MemoryLeft >= 0 {
+		left := sizeText(uint64(*res.MemoryLeft))
+		if *res.MemoryLeft < 8e9 {
+			_, err := fmt.Fprintf(out, "That leaves only about %s of memory for other models, so larger ones may not fit beside it.\n", left)
+			return err
+		}
+		_, err := fmt.Fprintf(out, "That leaves about %s of memory for other models.\n", left)
+		return err
+	}
+	return nil
 }
 
 // sizeText is a size as a person reads it: 4.7 GB, or 84 MB under a gigabyte.

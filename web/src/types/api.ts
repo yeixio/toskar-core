@@ -117,6 +117,8 @@ export interface Model {
   support_role?: 'embedding' | 'reranker' | 'classifier'
   /** auto or off for a chat model installed on this computer: whether it guesses ahead (#835, contract 1.67). */
   speculation?: 'auto' | 'off'
+  /** A chat model installed here that is kept loaded (#966, contract 1.94). */
+  always_running?: boolean
   /** The context window, in tokens, a chat model installed here starts with (#962, contract 1.69). */
   context_window?: number
   /** The size the person chose for it; 0 or absent is Auto. */

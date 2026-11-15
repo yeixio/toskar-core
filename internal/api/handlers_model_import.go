@@ -236,11 +236,18 @@ func (s *Server) handleSetModelAlwaysRunning(w http.ResponseWriter, r *http.Requ
 		return
 	}
 	id := mux.Vars(r)["id"]
-	if err := s.deps.SetModelAlwaysRunning(r.Context(), id, *body.AlwaysRunning); err != nil {
+	left, err := s.deps.SetModelAlwaysRunning(r.Context(), id, *body.AlwaysRunning)
+	if err != nil {
 		writeErrFrom(w, http.StatusBadRequest, "MODEL_UPDATE_FAILED", err)
 		return
 	}
-	writeJSON(w, http.StatusOK, map[string]any{"model_id": id, "always_running": *body.AlwaysRunning})
+	out := map[string]any{"model_id": id, "always_running": *body.AlwaysRunning}
+	// What the models kept running leave for others, when it's known
+	// (contract 1.95).
+	if left >= 0 {
+		out["memory_left_bytes"] = left
+	}
+	writeJSON(w, http.StatusOK, out)
 }
 
 // handleSetModelContext sets the context window for a chat model on this

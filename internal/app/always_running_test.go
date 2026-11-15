@@ -27,7 +27,7 @@ func TestAlwaysRunningChoice(t *testing.T) {
 	if listed("text-model") || a.keepLoaded("text-model") {
 		t.Fatal("kept running before it was asked")
 	}
-	if err := a.setAlwaysRunning(ctx, "text-model", true); err != nil {
+	if _, err := a.setAlwaysRunning(ctx, "text-model", true); err != nil {
 		t.Fatal(err)
 	}
 	if !listed("text-model") || !a.keepLoaded("text-model") {
@@ -36,13 +36,13 @@ func TestAlwaysRunningChoice(t *testing.T) {
 	if listed("see-model") || a.keepLoaded("see-model") {
 		t.Fatal("another model kept running too")
 	}
-	if err := a.setAlwaysRunning(ctx, "text-model", false); err != nil {
+	if _, err := a.setAlwaysRunning(ctx, "text-model", false); err != nil {
 		t.Fatal(err)
 	}
 	if listed("text-model") || a.keepLoaded("text-model") {
 		t.Fatal("still kept running after turning it off")
 	}
-	if err := a.setAlwaysRunning(ctx, "no-such-model", true); err == nil {
+	if _, err := a.setAlwaysRunning(ctx, "no-such-model", true); err == nil {
 		t.Fatal("a model that isn't installed was kept running")
 	}
 }

@@ -34,6 +34,8 @@ export function InstalledTab({
   onStop,
   onDelete,
   onSpeculation,
+  onAlwaysRunning,
+  alwaysRunningNote,
   onContextWindow,
   onSlots,
   onInstallElsewhere,
@@ -58,6 +60,10 @@ export function InstalledTab({
   onDelete: (id: string) => void
   /** Turns guessing ahead (speculative decoding) Auto or Off for a model (#835). */
   onSpeculation?: (id: string, speculation: 'auto' | 'off') => void
+  /** Keeps a model loaded, or lets it unload again (#966). */
+  onAlwaysRunning?: (id: string, on: boolean) => void
+  /** What keeping a model running leaves for the others, under that model. */
+  alwaysRunningNote?: { id: string; text: string; warn: boolean } | null
   /** Sets a model's context window in tokens, or 0 for Auto (#962). */
   onContextWindow?: (id: string, contextWindow: number) => void
   /** Sets how many of a swarm's agents a model runs at once, 1 to 4 (#1135). */
@@ -130,6 +136,11 @@ export function InstalledTab({
                 <h2 className="font-display text-lg font-semibold text-ink">
                   {model.display_name}
                 </h2>
+                {model.always_running ? (
+                  <p className="mt-1 text-xs font-medium text-primary" title={t('installedTab.alwaysRunningHint')}>
+                    {t('installedTab.alwaysRunning')}
+                  </p>
+                ) : null}
                 {tightModelIds?.has(model.id) ? (
                   <p
                     className="mt-1 text-xs text-ink-muted"
@@ -157,6 +168,11 @@ export function InstalledTab({
                 </p>
                 <CommunityScore modelId={model.id} />
                 <SmallModelNote model={model} alternative={alternative} onInstallAlternative={onInstall} />
+                {alwaysRunningNote?.id === model.id ? (
+                  <p role="status" className={`mt-1 text-xs ${alwaysRunningNote.warn ? 'text-danger' : 'text-ink-muted'}`}>
+                    {alwaysRunningNote.text}
+                  </p>
+                ) : null}
               </div>
 
               <div className="flex flex-wrap items-center gap-1.5">
@@ -243,6 +259,24 @@ export function InstalledTab({
                           </span>
                           {t('installedTab.guessAhead')}
                           {live ? <span className="block text-xs text-ink-muted">{t('installedTab.guessAheadNextStart')}</span> : null}
+                        </button>
+                      )}
+                      {advancedMode && model.speculation && onAlwaysRunning && (
+                        <button
+                          type="button"
+                          role="menuitemcheckbox"
+                          aria-checked={!!model.always_running}
+                          className="menu-item"
+                          title={t('installedTab.alwaysRunningHint')}
+                          onClick={() => {
+                            setMenuOpenId(null)
+                            onAlwaysRunning(model.id, !model.always_running)
+                          }}
+                        >
+                          <span aria-hidden className="inline-block w-4">
+                            {model.always_running ? '✓' : ''}
+                          </span>
+                          {t('installedTab.alwaysRunning')}
                         </button>
                       )}
                       {advancedMode && model.context_options && model.context_options.length > 0 && onContextWindow && (

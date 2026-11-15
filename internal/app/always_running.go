@@ -7,6 +7,7 @@ import (
 	"slices"
 	"time"
 
+	"github.com/yeixio/toskar-core/internal/locale"
 	"github.com/yeixio/toskar-core/internal/share"
 	"github.com/yeixio/toskar-core/pkg/contracts"
 )
@@ -41,14 +42,16 @@ func (a *App) alwaysRunning(ctx context.Context, modelID string) bool {
 }
 
 // setAlwaysRunning keeps a chat model installed on this computer loaded, or
-// lets the idle sweep unload it again. Turning it on loads it now.
-func (a *App) setAlwaysRunning(ctx context.Context, modelID string, on bool) error {
+// lets the idle sweep unload it again. Turning it on loads it now. It
+// returns the memory the models kept running leave for others, when this
+// computer's memory is known, so the person sees what it costs.
+func (a *App) setAlwaysRunning(ctx context.Context, modelID string, on bool) (left int64, err error) {
 	m, err := a.Models.Get(ctx, modelID)
 	if err != nil || !m.Installed {
-		return fmt.Errorf("model %s isn't installed on this computer", modelID)
+		return 0, fmt.Errorf("model %s isn't installed on this computer", modelID)
 	}
 	if contracts.SupportRoleOf(m) != "" {
-		return fmt.Errorf("model %s doesn't chat, so it isn't kept running", modelID)
+		return 0, fmt.Errorf("model %s doesn't chat, so it isn't kept running", modelID)
 	}
 	ids := slices.DeleteFunc(a.alwaysRunningList(ctx), func(id string) bool { return id == modelID })
 	if on {
@@ -56,16 +59,50 @@ func (a *App) setAlwaysRunning(ctx context.Context, modelID string, on bool) err
 	}
 	raw, err := json.Marshal(ids)
 	if err != nil {
-		return err
+		return 0, err
 	}
 	if err := a.Settings.Set(ctx, alwaysRunningKey, string(raw)); err != nil {
-		return err
+		return 0, err
 	}
 	a.pinStopped.Delete(modelID)
 	if on {
 		go a.keepPinnedLoaded(context.WithoutCancel(ctx))
 	}
-	return nil
+	return a.memoryLeftBesidePinned(ctx, ids), nil
+}
+
+// memoryLeftBesidePinned is this computer's memory less what the models
+// kept running need, or -1 when this computer's memory isn't known.
+func (a *App) memoryLeftBesidePinned(ctx context.Context, pinned []string) int64 {
+	total := int64(a.memoryTotal(ctx))
+	if total <= 0 {
+		return -1
+	}
+	for _, id := range pinned {
+		if m, err := a.Models.Get(ctx, id); err == nil {
+			total -= int64(m.MemoryNeeded)
+		}
+	}
+	return max(total, 0)
+}
+
+// keptRunningMemory is what to say when a model didn't fit because a
+// model kept running holds the memory, and whether one does.
+func (a *App) keptRunningMemory(lang string) (string, bool) {
+	ctx := context.Background()
+	views, _ := a.localRunningViews(ctx)
+	for _, v := range views {
+		if !a.alwaysRunning(ctx, v.ModelID) {
+			continue
+		}
+		name := v.DisplayName
+		if name == "" {
+			name = v.ModelID
+		}
+		gb := fmt.Sprintf("%.1f", float64(v.MemoryBytes)/1e9)
+		return locale.T(lang, "chat:errors.keptRunningMemory", map[string]any{"name": name, "gb": gb}), true
+	}
+	return "", false
 }
 
 // withAlwaysRunning marks the models kept loaded on this computer.
