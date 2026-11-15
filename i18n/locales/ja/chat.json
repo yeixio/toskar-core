@@ -571,6 +571,7 @@
     "unconfirmedFigures": "Toskarはソースで{{figures}}を確認できませんでした。頼る前に確認してください。",
     "codeErrors": "コードの一部が構文エラーです: {{errors}}。実行する前に修正してください。",
     "unsourcedLinks": "次のリンクは情報源から得たものではなく、開けない可能性があります: {{links}}。開けない場合は、そのサイト内で検索してください。",
+    "deadLinks": "確認したところ、次のリンクは開けませんでした: {{links}}。ページが移動した可能性があります。サイト内で探してください。",
     "contradictions_other": "回答またはその情報源との間に{{count}}か所の矛盾があるかもしれません。頼る前に確認してください。",
     "listSeparator": "、",
     "listAnd": "{{first}}と{{last}}",

@@ -227,7 +227,8 @@
       "community_ratings": "Community ratings",
       "update_check": "Update check",
       "problem_report": "Problem report",
-      "news": "AI news"
+      "news": "AI news",
+      "link_check": "Link check"
     },
     "kindsLower": {
       "web_search": "web search",
@@ -240,7 +241,8 @@
       "community_ratings": "community ratings",
       "update_check": "update check",
       "problem_report": "problem report",
-      "news": "AI news"
+      "news": "AI news",
+      "link_check": "link check"
     },
     "sources": {
       "chat": "Chat",
@@ -340,5 +342,11 @@
     "description": "The News page shows new open models, runtime releases, and AI labs' announcements from toskar.ai.",
     "show": "Show AI news",
     "showHint": "Read from toskar.ai when News is opened, at most every six hours. Nothing is sent but the request."
+  },
+  "links": {
+    "title": "Links in answers",
+    "description": "Answers link only to pages their sources gave. Toskar can also ask each linked site whether the page still opens.",
+    "check": "Check links in answers",
+    "checkHint": "After an answer is written, Toskar contacts each site it links to and names the links that don't open under the answer. Each check is listed in What left this computer."
   }
 }

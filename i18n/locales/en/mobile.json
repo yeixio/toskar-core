@@ -953,7 +953,8 @@
       "notification": "Notification",
       "community_ratings": "Community ratings",
       "update_check": "Update check",
-      "problem_report": "Problem report"
+      "problem_report": "Problem report",
+      "link_check": "Link check"
     },
     "kindsLower": {
       "web_search": "web search",
@@ -965,7 +966,8 @@
       "notification": "notification",
       "community_ratings": "community ratings",
       "update_check": "update check",
-      "problem_report": "problem report"
+      "problem_report": "problem report",
+      "link_check": "link check"
     },
     "sources": {
       "chat": "Chat",

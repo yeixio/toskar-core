@@ -609,6 +609,7 @@
     "unconfirmedFigures": "Toskar non è riuscito a confermare {{figures}} nelle fonti. Controlla prima di farci affidamento.",
     "codeErrors": "Una parte del codice non si analizza: {{errors}}. Correggila prima di eseguirla.",
     "unsourcedLinks": "Questi link non provengono da nessuna fonte e potrebbero non funzionare: {{links}}. Se uno non si apre, cerca direttamente sul sito.",
+    "deadLinks": "Questi link non si sono aperti durante il controllo: {{links}}. La pagina potrebbe essere stata spostata; cercala sul sito.",
     "contradictions_one": "La risposta potrebbe contraddire se stessa o le sue fonti in {{count}} punto. Verifica prima di fidarti.",
     "contradictions_many": "La risposta potrebbe contraddire se stessa o le sue fonti in {{count}} punti. Verifica prima di fidarti.",
     "contradictions_other": "La risposta potrebbe contraddire se stessa o le sue fonti in {{count}} punti. Verifica prima di fidarti.",

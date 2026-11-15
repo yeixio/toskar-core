@@ -220,7 +220,8 @@
       "community_ratings": "社群評分",
       "update_check": "檢查更新",
       "problem_report": "問題回報",
-      "news": "AI 新聞"
+      "news": "AI 新聞",
+      "link_check": "連結檢查"
     },
     "kindsLower": {
       "web_search": "網路搜尋",
@@ -233,7 +234,8 @@
       "community_ratings": "社群評分",
       "update_check": "檢查更新",
       "problem_report": "問題回報",
-      "news": "AI 新聞"
+      "news": "AI 新聞",
+      "link_check": "連結檢查"
     },
     "sources": {
       "chat": "聊天",
@@ -331,5 +333,11 @@
     "description": "「新聞」頁面顯示來自 toskar.ai 的新開放模型、執行環境版本和 AI 實驗室公告。",
     "show": "顯示 AI 新聞",
     "showHint": "打開「新聞」時從 toskar.ai 讀取，最多每六小時一次。除了請求本身，不會傳送任何內容。"
+  },
+  "links": {
+    "title": "回答中的連結",
+    "description": "回答只連結來源提供的頁面。Toskar 還可以詢問每個被連結的網站，頁面是否仍能開啟。",
+    "check": "檢查回答中的連結",
+    "checkHint": "回答寫完後，Toskar 會聯絡每個被連結的網站，並在回答下方列出無法開啟的連結。每次檢查都會記錄在「離開這台電腦的內容」中。"
   }
 }

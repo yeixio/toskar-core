@@ -220,7 +220,8 @@
       "community_ratings": "커뮤니티 평가",
       "update_check": "업데이트 확인",
       "problem_report": "문제 보고",
-      "news": "AI 뉴스"
+      "news": "AI 뉴스",
+      "link_check": "링크 확인"
     },
     "kindsLower": {
       "web_search": "웹 검색",
@@ -233,7 +234,8 @@
       "community_ratings": "커뮤니티 평가",
       "update_check": "업데이트 확인",
       "problem_report": "문제 보고",
-      "news": "AI 뉴스"
+      "news": "AI 뉴스",
+      "link_check": "링크 확인"
     },
     "sources": {
       "chat": "채팅",
@@ -331,5 +333,11 @@
     "description": "뉴스 페이지에서 toskar.ai의 새 오픈 모델, 런타임 릴리스, AI 연구소의 발표를 보여 줍니다.",
     "show": "AI 뉴스 표시",
     "showHint": "뉴스를 열 때 toskar.ai에서 읽어 오며, 최대 6시간마다 한 번입니다. 요청 외에는 아무것도 보내지 않습니다."
+  },
+  "links": {
+    "title": "답변 속 링크",
+    "description": "답변은 출처가 제공한 페이지에만 링크합니다. Toskar는 링크된 각 사이트에 페이지가 아직 열리는지도 확인할 수 있습니다.",
+    "check": "답변 속 링크 확인",
+    "checkHint": "답변이 작성된 뒤 Toskar가 링크된 각 사이트에 연락하고, 열리지 않는 링크를 답변 아래에 알려 줍니다. 각 확인은 '이 컴퓨터를 떠난 것'에 기록됩니다."
   }
 }

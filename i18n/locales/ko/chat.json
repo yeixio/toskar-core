@@ -571,6 +571,7 @@
     "unconfirmedFigures": "Toskar가 소스에서 {{figures}}을(를) 확인하지 못했어요. 믿기 전에 확인하세요.",
     "codeErrors": "코드 일부에 구문 오류가 있습니다: {{errors}}. 실행하기 전에 고치세요.",
     "unsourcedLinks": "다음 링크는 출처에서 나온 것이 아니어서 열리지 않을 수 있어요: {{links}}. 열리지 않으면 해당 사이트에서 검색하세요.",
+    "deadLinks": "확인해 보니 다음 링크가 열리지 않았습니다: {{links}}. 페이지가 옮겨졌을 수 있으니 사이트에서 찾아보세요.",
     "contradictions_other": "답변이 스스로 또는 출처와 {{count}}곳에서 모순될 수 있습니다. 믿기 전에 확인하세요.",
     "listSeparator": ", ",
     "listAnd": "{{first}} 및 {{last}}",

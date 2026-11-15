@@ -599,6 +599,10 @@
           "text": "Figures are checked against the sources before you see the answer. A figure that couldn't be confirmed is called out below it. A request with several parts, such as comparing three products, shows a checklist while its parts run."
         },
         {
+          "type": "paragraph",
+          "text": "Answers link only to pages their sources gave. To also know whether a linked page still opens, turn on Check links in answers in Settings. After an answer is written, Toskar asks each site it links to, up to six, and names any link that didn't open under the answer. It's off by default because it contacts every linked site, and each check is listed in What left this computer. It never checks addresses on your own network, or answers from a profile that can't use the internet."
+        },
+        {
           "type": "heading",
           "text": "Try again, or edit your question"
         },

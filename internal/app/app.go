@@ -41,6 +41,7 @@ import (
 	"github.com/yeixio/toskar-core/internal/inventory"
 	"github.com/yeixio/toskar-core/internal/join"
 	"github.com/yeixio/toskar-core/internal/license"
+	"github.com/yeixio/toskar-core/internal/linkcheck"
 	"github.com/yeixio/toskar-core/internal/logs"
 	"github.com/yeixio/toskar-core/internal/mcp"
 	"github.com/yeixio/toskar-core/internal/mimir"
@@ -231,7 +232,9 @@ type App struct {
 	// pinStopped holds the models kept running that the person stopped,
 	// and pinLoading those the keeper is loading now (#966).
 	pinStopped sync.Map
-	pinLoading sync.Map
+	// linkChecker asks linked sites whether their pages open (#209).
+	linkChecker linkcheck.Checker
+	pinLoading  sync.Map
 	// instances is where Toskars on this machine announce themselves
 	// (#602); nil announces nothing.
 	instances *instances.Registry
@@ -1551,6 +1554,7 @@ func (a *App) settingsView(ctx context.Context) (contracts.SettingsView, error) 
 	ratingsPrompts, _ := a.Settings.GetBool(ctx, ratings.SettingAsk, true)
 	updateCheck, _ := a.Settings.GetBool(ctx, updates.Setting, true)
 	aiNews, _ := a.Settings.GetBool(ctx, news.Setting, true)
+	checkLinks, _ := a.Settings.GetBool(ctx, settingCheckLinks, false)
 	problemReports, _ := a.Settings.GetBool(ctx, settingProblemReports, true)
 	toolTerminal, _ := a.Settings.GetString(ctx, "tool_terminal", "ask")
 	toolFiles, _ := a.Settings.GetString(ctx, "tool_file_writes", "ask")
@@ -1606,6 +1610,7 @@ func (a *App) settingsView(ctx context.Context) (contracts.SettingsView, error) 
 		RatingsPrompts:          ratingsPrompts,
 		UpdateCheck:             updateCheck,
 		AINews:                  aiNews,
+		CheckLinks:              checkLinks,
 		ProblemReports:          problemReports,
 		ToolTerminal:            toolTerminal,
 		ToolFileWrites:          toolFiles,
@@ -1711,7 +1716,7 @@ func (a *App) applySettingsPatch(ctx context.Context, patch map[string]any) erro
 			return err
 		}
 	}
-	for _, key := range []string{"save_chat_history", "save_task_history", "notify_task_finish", "notify_peer_offline", "launch_at_login", ratings.SettingShow, ratings.SettingAsk, updates.Setting, news.Setting, settingProblemReports} {
+	for _, key := range []string{"save_chat_history", "save_task_history", "notify_task_finish", "notify_peer_offline", "launch_at_login", ratings.SettingShow, ratings.SettingAsk, updates.Setting, news.Setting, settingProblemReports, settingCheckLinks} {
 		if v, ok := patch[key].(bool); ok {
 			if err := a.Settings.SetBool(ctx, key, v); err != nil {
 				return err

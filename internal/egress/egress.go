@@ -32,6 +32,9 @@ const (
 	UpdateCheck = "update_check"
 	// News is reading the AI news on toskar.ai (#750).
 	News = "news"
+	// LinkCheck is asking a site linked in an answer whether its page
+	// opens (#209).
+	LinkCheck = "link_check"
 	// ProblemReport is a problem report sent with Report this (#588).
 	ProblemReport = "problem_report"
 )

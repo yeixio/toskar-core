@@ -814,6 +814,10 @@ func (a *App) RunChat(ctx context.Context, profileID, conversationID, message st
 				msg, _ := env.saveAnswer(ctx, conversationID, full, answerMeta)
 				msgID = msg.ID
 			}
+			// Asking each linked site waits on none of them (#209).
+			if msgID != "" && a.mayCheckLinks(ctx, profile, env.keepsLocal()) {
+				go a.checkAnswerLinks(context.WithoutCancel(ctx), appLang, conversationID, msgID, full)
+			}
 			a.recordGeneration(ctx, profile, conversationID, convTitle, msgID, env.modelID(), metrics, roleSteps)
 		} else if metrics != nil || len(roleSteps) > 0 {
 			a.recordGeneration(ctx, profile, conversationID, convTitle, "", env.modelID(), metrics, roleSteps)

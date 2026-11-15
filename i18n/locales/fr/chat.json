@@ -609,6 +609,7 @@
     "unconfirmedFigures": "Toskar n'a pas pu confirmer {{figures}} dans les sources. Vérifiez avant de vous y fier.",
     "codeErrors": "Une partie du code ne s'analyse pas : {{errors}}. Corrigez-la avant de l'exécuter.",
     "unsourcedLinks": "Ces liens ne viennent d'aucune source et peuvent ne pas fonctionner : {{links}}. Si l'un ne s'ouvre pas, cherchez plutôt sur le site.",
+    "deadLinks": "Ces liens ne se sont pas ouverts lors de la vérification : {{links}}. La page a peut-être été déplacée ; cherchez-la sur le site.",
     "contradictions_one": "La réponse contredit peut-être elle-même ou ses sources à {{count}} endroit. Vérifiez avant de vous y fier.",
     "contradictions_many": "La réponse contredit peut-être elle-même ou ses sources à {{count}} endroits. Vérifiez avant de vous y fier.",
     "contradictions_other": "La réponse contredit peut-être elle-même ou ses sources à {{count}} endroits. Vérifiez avant de vous y fier.",

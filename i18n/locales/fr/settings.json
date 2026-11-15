@@ -234,7 +234,8 @@
       "community_ratings": "Notes de la communauté",
       "update_check": "Recherche de mises à jour",
       "problem_report": "Signalement",
-      "news": "Actualités de l’IA"
+      "news": "Actualités de l’IA",
+      "link_check": "Vérification de lien"
     },
     "kindsLower": {
       "web_search": "recherche web",
@@ -247,7 +248,8 @@
       "community_ratings": "notes de la communauté",
       "update_check": "recherche de mises à jour",
       "problem_report": "signalement",
-      "news": "actualités de l’IA"
+      "news": "actualités de l’IA",
+      "link_check": "vérification de lien"
     },
     "sources": {
       "chat": "Discussion",
@@ -349,5 +351,11 @@
     "description": "La page Actualités présente les nouveaux modèles ouverts, les versions des runtimes et les annonces des laboratoires d’IA depuis toskar.ai.",
     "show": "Afficher les actualités de l’IA",
     "showHint": "Lues sur toskar.ai à l’ouverture d’Actualités, au plus toutes les six heures. Seule la requête est envoyée."
+  },
+  "links": {
+    "title": "Liens dans les réponses",
+    "description": "Les réponses ne renvoient qu'aux pages données par leurs sources. Toskar peut aussi demander à chaque site lié si la page s'ouvre encore.",
+    "check": "Vérifier les liens des réponses",
+    "checkHint": "Après une réponse, Toskar contacte chaque site lié et indique sous la réponse les liens qui ne s'ouvrent pas. Chaque vérification figure dans Ce qui a quitté cet ordinateur."
   }
 }

@@ -19,6 +19,7 @@ function parseEventData(raw: string): YggdrasilEvent | null {
 export const KNOWN_EVENT_TYPES = [
   'chat.token',
   'chat.complete',
+  'chat.links_checked',
   'chat.error',
   'model.download.started',
   'model.download.progress',

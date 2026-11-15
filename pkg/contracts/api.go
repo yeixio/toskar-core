@@ -919,6 +919,15 @@ type ActivityStep struct {
 	Text string `json:"text"`
 }
 
+// LinkCheck is what asking each linked site found (#209).
+type LinkCheck struct {
+	// Dead links are pages that are gone, or sites that don't exist.
+	Dead []string `json:"dead,omitempty"`
+	// Unknown links couldn't be judged, such as a page asking for a
+	// sign-in or a site that took too long.
+	Unknown []string `json:"unknown,omitempty"`
+}
+
 // MessageMeta is what an assistant answer used and did.
 type MessageMeta struct {
 	Sources []Citation     `json:"sources,omitempty"`
@@ -926,6 +935,10 @@ type MessageMeta struct {
 	// Notice tells the user something changed that may affect the answer,
 	// such as a smaller model answering after the chosen one failed.
 	Notice string `json:"notice,omitempty"`
+	// LinkCheck is the answer's links that didn't open, or couldn't be
+	// judged, when Check links in answers is on (#209, contract 1.97). It's
+	// added after the answer is saved, and chat.links_checked says so.
+	LinkCheck *LinkCheck `json:"link_check,omitempty"`
 	// Files are attached to a question or produced with an answer.
 	Files []FileRef `json:"files,omitempty"`
 	// RunID names the run trace behind the answer (§35), at
@@ -1479,6 +1492,10 @@ type SettingsView struct {
 	// AINews reads the AI news toskar.ai publishes when News is opened,
 	// at most every six hours (#750).
 	AINews bool `json:"ai_news"`
+	// CheckLinks asks each site linked in an answer whether the page opens,
+	// after the answer is written (#209, contract 1.97). Off by default:
+	// it contacts every linked site.
+	CheckLinks bool `json:"check_links"`
 	// ProblemReports lets Report this send to Toskar's report service
 	// (#588); off, reports aren't sent, and the sheet says so.
 	ProblemReports bool `json:"problem_reports"`

@@ -258,3 +258,25 @@ func (r *ConversationRepo) AddReply(ctx context.Context, conversationID, parentI
 	_, _ = r.db.ExecContext(ctx, `UPDATE conversations SET updated_at = ? WHERE id = ?`, now.Format(time.RFC3339Nano), conversationID)
 	return m, nil
 }
+
+// UpdateMessageMeta changes a saved message's metadata, such as an
+// answer's links checked after it was saved (#209).
+func (r *ConversationRepo) UpdateMessageMeta(ctx context.Context, conversationID, messageID string, change func(*contracts.MessageMeta)) error {
+	var raw sql.NullString
+	if err := r.db.QueryRowContext(ctx, `SELECT meta_json FROM messages WHERE id = ? AND conversation_id = ?`, messageID, conversationID).Scan(&raw); err != nil {
+		return err
+	}
+	meta := &contracts.MessageMeta{}
+	if raw.Valid && raw.String != "" {
+		if err := json.Unmarshal([]byte(raw.String), meta); err != nil {
+			return err
+		}
+	}
+	change(meta)
+	b, err := json.Marshal(meta)
+	if err != nil {
+		return err
+	}
+	_, err = r.db.ExecContext(ctx, `UPDATE messages SET meta_json = ? WHERE id = ? AND conversation_id = ?`, string(b), messageID, conversationID)
+	return err
+}
