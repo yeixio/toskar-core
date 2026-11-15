@@ -1,6 +1,7 @@
 package huginn
 
 import (
+	"github.com/yeixio/toskar-core/internal/inventory"
 	"regexp"
 	"slices"
 	"strings"
@@ -60,7 +61,7 @@ var (
 	cueCode    = regexp.MustCompile(`(?i)\b(calculat\w*|comput\w*|analy[sz]\w*|plot\w*|charts?|graphs?|python|statistic\w*|regression|correlat\w*|simulat\w*|forecast\w*|average|median|percentiles?|run (this|the|my) code)\b`)
 	cueListen  = regexp.MustCompile(`(?i)\b(transcri\w*|recordings?|voice (notes?|memos?|messages?)|audio|podcasts?|what (does|did) (it|she|he|they) say)\b`)
 	cueSpeak   = regexp.MustCompile(`(?i)(\b(read (it|this|that|them)?\s*(aloud|out loud)|out loud|aloud|text to speech|narrat\w*|voice ?over|audio version|say it)\b)`)
-	cueDraw    = regexp.MustCompile(`(?i)(\b(draw|paint|sketch|illustrat\w*|render)\b|\b(make|create|generate|design|produce|give me)\b.{0,40}\b(images?|pictures?|photos?|illustrations?|drawings?|paintings?|watercolou?rs?|sketch(es)?|cartoons?|logos?|icons?|wallpapers?|artwork|portraits?|posters?)\b)`)
+	cueDraw    = regexp.MustCompile(`(?i)(\b(draw|paint|sketch|illustrat\w*|render)\b|\b(make|create|generate|design|produce|give me)\b.{0,40}\b` + inventory.PictureNouns + `\b)`)
 	cueRetouch = regexp.MustCompile(`(?i)\b(edit|change|retouch|recolou?r|remove|replace|turn|make|add)\b.{0,40}\b(images?|pictures?|photos?|backgrounds?|\w+\.(png|jpe?g))\b`)
 	cuePlaces  = regexp.MustCompile(`(?i)(\b(near (me|here|by)|nearby|nearest|closest|directions?|route (from|between)|how (far|long does it take)|distance (from|to|between)|drive (from|to)|walk (from|to)|get (from|to)|address (of|for)|open now|opening hours|restaurants?|caf[eé]s?|pharmac(y|ies)|gas stations?)\b)`)
 	cueFilm    = regexp.MustCompile(`(?i)\b(videos?|clips?|animat\w*|movies?|footage|gifs?|bring (it|this|that|the|my)( \w+)? to life|make (it|this) move)\b`)
