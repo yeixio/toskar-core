@@ -90,6 +90,13 @@ func TestRemoteListener(t *testing.T) {
 	if code, _ := call(http.MethodGet, "/", "phone-key"); code != http.StatusNotFound {
 		t.Fatalf("pages: %d", code)
 	}
+	// Raw model access (#843) is never reachable from outside, even with a
+	// device's key: those routes aren't under /api/v1 (#965).
+	for _, route := range []string{"/v1/chat/completions", "/v1/messages", "/v1/responses"} {
+		if code, _ := call(http.MethodPost, route, "phone-key"); code != http.StatusNotFound {
+			t.Fatalf("%s from outside: %d", route, code)
+		}
+	}
 	// Wrong keys: twenty, then the address waits, even with a good key.
 	remoteFailures.Forget("127.0.0.1")
 	for i := 0; i < 20; i++ {
