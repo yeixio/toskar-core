@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next'
+import { useRole } from '@/lib/role'
 import { useEffect, useState, type MouseEvent } from 'react'
 import { Link } from 'react-router-dom'
 import type {
@@ -79,6 +80,10 @@ export function InstalledTab({
 }) {
   const { t } = useTranslation('models')
   const advancedMode = useUIStore((s) => s.advancedMode)
+  // Only Admins keep a model running, as the service checks (#966); until
+  // the role is known, the Owner's view, as the sidebar shows it.
+  const { role, atLeast } = useRole()
+  const mayKeepRunning = role === undefined || atLeast('admin')
   const [menuOpenId, setMenuOpenId] = useState<string | null>(null)
   const menuRef = useMenu(menuOpenId, () => setMenuOpenId(null))
   // Typos forgiven (#451); exact matches first.
@@ -261,7 +266,7 @@ export function InstalledTab({
                           {live ? <span className="block text-xs text-ink-muted">{t('installedTab.guessAheadNextStart')}</span> : null}
                         </button>
                       )}
-                      {advancedMode && model.speculation && onAlwaysRunning && (
+                      {advancedMode && mayKeepRunning && model.speculation && onAlwaysRunning && (
                         <button
                           type="button"
                           role="menuitemcheckbox"
