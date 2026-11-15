@@ -128,6 +128,11 @@ func (a *App) freeForMedia(ctx context.Context, need int64) {
 	}
 	loaded := make([]loadedModel, 0, len(views))
 	for _, v := range views {
+		// A model kept running stays; the job makes do with the rest
+		// (#966).
+		if a.alwaysRunning(ctx, v.ModelID) {
+			continue
+		}
 		m := loadedModel{InstanceID: v.InstanceID, ModelID: v.ModelID, Memory: int64(v.MemoryBytes), OnGPU: v.Accelerator != "" && v.Accelerator != "CPU"}
 		if v.LastUsedAt != nil {
 			m.LastUsed = *v.LastUsedAt

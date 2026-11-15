@@ -83,6 +83,9 @@ type Dependencies struct {
 	// SetModelSpeculation turns speculative decoding Auto or Off for a
 	// model on this computer (#835).
 	SetModelSpeculation func(ctx context.Context, id, choice string) error
+	// SetModelAlwaysRunning keeps a chat model on this computer loaded, or
+	// lets it unload again (#966).
+	SetModelAlwaysRunning func(ctx context.Context, id string, on bool) error
 	// SetModelContext sets a model's context window on this computer, 0
 	// for Auto (#962).
 	SetModelContext func(ctx context.Context, id string, tokens int) error
@@ -361,6 +364,7 @@ func (s *Server) routes() {
 	api.HandleFunc("/models/{id}", s.handleUpdateAddedModel).Methods(http.MethodPatch)
 	api.HandleFunc("/models/{id}/projector", s.handleSetModelProjector).Methods(http.MethodPut)
 	api.HandleFunc("/models/{id}/speculation", s.handleSetModelSpeculation).Methods(http.MethodPut)
+	api.HandleFunc("/models/{id}/always-running", s.handleSetModelAlwaysRunning).Methods(http.MethodPut)
 	api.HandleFunc("/models/{id}/context", s.handleSetModelContext).Methods(http.MethodPut)
 	api.HandleFunc("/models/{id}/slots", s.handleSetModelSlots).Methods(http.MethodPut)
 	api.HandleFunc("/runtimes", s.handleListRuntimes).Methods(http.MethodGet, http.MethodOptions)

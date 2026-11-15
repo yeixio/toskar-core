@@ -228,6 +228,10 @@ type App struct {
 	// modelLoads counts the loads in progress by model id: a model being
 	// loaded for a request is in use, though it hasn't answered yet.
 	modelLoads sync.Map // model id -> *atomic.Int32
+	// pinStopped holds the models kept running that the person stopped,
+	// and pinLoading those the keeper is loading now (#966).
+	pinStopped sync.Map
+	pinLoading sync.Map
 	// instances is where Toskars on this machine announce themselves
 	// (#602); nil announces nothing.
 	instances *instances.Registry
@@ -712,14 +716,19 @@ func New(opts Options) (*App, error) {
 		UpdateAddedModel:      a.Models.UpdateAdded,
 		SetModelProjector:     a.Models.SetProjector,
 		SetModelSpeculation:   a.setModelSpeculation,
+		SetModelAlwaysRunning: a.setAlwaysRunning,
 		SetModelContext:       a.setModelContext,
 		SetModelSlots:         a.setModelSlots,
 		ListRunningModels:     a.listRunningAll,
 		Acceleration:          a.healthAcceleration,
 		StartModel: func(ctx context.Context, id, nodeID string) (contracts.RunningModelView, error) {
+			a.pinStopped.Delete(id)
 			return a.startModel(ctx, id, nodeID)
 		},
 		StopModel: func(ctx context.Context, instanceID, nodeID string) error {
+			if nodeID == "" || nodeID == a.Config.Get().NodeID || nodeID == "local" {
+				a.stoppedByPerson(ctx, instanceID)
+			}
 			return a.stopModel(ctx, instanceID, nodeID)
 		},
 		WarmModel:    a.warmChat,
@@ -1381,6 +1390,12 @@ func (a *App) Start(ctx context.Context) error {
 	if a.Lifecycle != nil {
 		a.Lifecycle.Start(ctx)
 	}
+	// Models kept running load now, and again if one stops (#966).
+	a.wg.Add(1)
+	go func() {
+		defer a.wg.Done()
+		a.runPinnedKeeper(ctx)
+	}()
 	if a.MCP != nil {
 		a.wg.Add(1)
 		go func() {

@@ -196,6 +196,10 @@ type Model struct {
 	// computer: whether it guesses the next words ahead and checks several
 	// at once (#835, contract 1.67). Empty for other models.
 	Speculation string `json:"speculation,omitempty"`
+	// AlwaysRunning is a chat model installed on this computer that is kept
+	// loaded: loaded when Toskar starts and again if it stops, and never
+	// unloaded when idle or for a picture (#966, contract 1.94).
+	AlwaysRunning bool `json:"always_running,omitempty"`
 	// ContextWindow is the window a chat model installed on this computer
 	// starts with, in tokens; ContextChoice the size the person chose for
 	// it, 0 for Auto; ContextOptions the sizes it can take, up to its own

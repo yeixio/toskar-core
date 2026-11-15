@@ -29,9 +29,13 @@ func (a *App) loadingModel(modelID string) func() {
 }
 
 // keepLoaded reports a model the idle sweep must leave loaded: one being
-// loaded for a request, or one another device is using (#498).
+// loaded for a request, one another device is using (#498), or one kept
+// running (#966).
 func (a *App) keepLoaded(modelID string) bool {
 	if v, ok := a.modelLoads.Load(modelID); ok && v.(*atomic.Int32).Load() > 0 {
+		return true
+	}
+	if a.alwaysRunning(context.Background(), modelID) {
 		return true
 	}
 	return a.keptForDevices(modelID)
@@ -383,6 +387,7 @@ func (a *App) listModelsCluster(ctx context.Context) ([]contracts.Model, error) 
 		return nil, err
 	}
 	a.withSpeculation(ctx, local)
+	a.withAlwaysRunning(ctx, local)
 	a.withContextWindows(ctx, local)
 	a.withSlots(ctx, local)
 	cfg := a.Config.Get()
