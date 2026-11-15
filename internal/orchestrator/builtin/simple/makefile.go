@@ -24,6 +24,9 @@ var (
 	fileNamedRe = regexp.MustCompile(`(?i)\b(create|make|generate|export|build|produce|write|save|put|give me|turn)\b[^.?!\n]{0,60}?\b[\w][\w-]*\.(pdf|docx|xlsx|csv|tsv|md|txt|json|html|py|js|ts|go|sql|yaml|yml)\b`)
 	// howToRe matches a question about how to do it, which isn't a request.
 	howToRe = regexp.MustCompile(`(?i)^\s*(how|what|why|where|when)\b`)
+	// codeAskRe is a request for code: "write a Python script that reads a
+	// CSV" asks for the script, and the CSV is only what it reads (#965).
+	codeAskRe = regexp.MustCompile(`(?i)\b(create|make|generate|build|write|give me)\b[^.?!\n]{0,40}?\b(script|program|function|code|class|module|app|tool|query|regex|snippet|parser|cli|macro)\b`)
 	// fileNameRe finds a file name the user gave.
 	fileNameRe = regexp.MustCompile(`(?i)\b([\w][\w .-]{0,60}?\.(xlsx|csv|tsv|md|txt|json|html|py|js|ts|go|sql|yaml|yml|pdf|docx))\b`)
 )
@@ -39,6 +42,11 @@ type fileRequest struct {
 // in the message wins; otherwise the kind of file decides the extension.
 func askedForFile(prompt string) (fileRequest, bool) {
 	if howToRe.MatchString(prompt) {
+		return fileRequest{}, false
+	}
+	// Code that works on a file isn't that file, unless the code's own file
+	// is named, as in "saved as convert.py".
+	if codeAskRe.MatchString(prompt) && !fileNamedRe.MatchString(prompt) {
 		return fileRequest{}, false
 	}
 	m := fileAskRe.FindStringSubmatch(prompt)
