@@ -220,7 +220,8 @@
       "community_ratings": "コミュニティ評価",
       "update_check": "アップデートの確認",
       "problem_report": "問題の報告",
-      "news": "AI ニュース"
+      "news": "AI ニュース",
+      "link_check": "リンク確認"
     },
     "kindsLower": {
       "web_search": "Web検索",
@@ -233,7 +234,8 @@
       "community_ratings": "コミュニティ評価",
       "update_check": "アップデートの確認",
       "problem_report": "問題の報告",
-      "news": "AI ニュース"
+      "news": "AI ニュース",
+      "link_check": "リンク確認"
     },
     "sources": {
       "chat": "チャット",
@@ -331,5 +333,11 @@
     "description": "ニュースのページでは、新しいオープンモデル、ランタイムのリリース、AI 研究機関の発表を toskar.ai から表示します。",
     "show": "AI ニュースを表示",
     "showHint": "ニュースを開いたときに toskar.ai から読み込みます（最大 6 時間ごと）。送信されるのはリクエストだけです。"
+  },
+  "links": {
+    "title": "回答内のリンク",
+    "description": "回答は情報源が示したページにだけリンクします。Toskar はさらに、リンク先の各サイトにページがまだ開けるかを確認できます。",
+    "check": "回答内のリンクを確認する",
+    "checkHint": "回答のあと、Toskar はリンク先の各サイトに問い合わせ、開けないリンクを回答の下に示します。各確認は「このコンピューターから送信されたもの」に記録されます。"
   }
 }

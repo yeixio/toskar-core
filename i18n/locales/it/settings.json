@@ -234,7 +234,8 @@
       "community_ratings": "Valutazioni della community",
       "update_check": "Controllo aggiornamenti",
       "problem_report": "Segnalazione",
-      "news": "Notizie sull’IA"
+      "news": "Notizie sull’IA",
+      "link_check": "Controllo link"
     },
     "kindsLower": {
       "web_search": "ricerca web",
@@ -247,7 +248,8 @@
       "community_ratings": "valutazioni della community",
       "update_check": "controllo aggiornamenti",
       "problem_report": "segnalazione",
-      "news": "notizie sull’IA"
+      "news": "notizie sull’IA",
+      "link_check": "controllo link"
     },
     "sources": {
       "chat": "Chat",
@@ -349,5 +351,11 @@
     "description": "La pagina Notizie mostra nuovi modelli aperti, versioni dei runtime e annunci dei laboratori di IA da toskar.ai.",
     "show": "Mostra le notizie sull’IA",
     "showHint": "Lette da toskar.ai quando apri Notizie, al massimo ogni sei ore. Viene inviata solo la richiesta."
+  },
+  "links": {
+    "title": "Link nelle risposte",
+    "description": "Le risposte collegano solo pagine indicate dalle loro fonti. Toskar può anche chiedere a ogni sito collegato se la pagina si apre ancora.",
+    "check": "Controlla i link nelle risposte",
+    "checkHint": "Dopo una risposta, Toskar contatta ogni sito collegato e indica sotto la risposta i link che non si aprono. Ogni controllo è elencato in Cosa ha lasciato questo computer."
   }
 }

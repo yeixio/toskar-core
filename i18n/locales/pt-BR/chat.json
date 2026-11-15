@@ -609,6 +609,7 @@
     "unconfirmedFigures": "O Toskar não conseguiu confirmar {{figures}} nas fontes. Confira antes de confiar nisso.",
     "codeErrors": "Parte do código não pode ser analisada: {{errors}}. Corrija antes de executar.",
     "unsourcedLinks": "Estes links não vieram de nenhuma fonte e podem não funcionar: {{links}}. Se algum não abrir, pesquise no site.",
+    "deadLinks": "Estes links não abriram na verificação: {{links}}. A página pode ter mudado; procure-a no site.",
     "contradictions_one": "A resposta pode contradizer a si mesma ou às fontes em {{count}} ponto. Verifique antes de confiar nela.",
     "contradictions_many": "A resposta pode contradizer a si mesma ou às fontes em {{count}} pontos. Verifique antes de confiar nela.",
     "contradictions_other": "A resposta pode contradizer a si mesma ou às fontes em {{count}} pontos. Verifique antes de confiar nela.",

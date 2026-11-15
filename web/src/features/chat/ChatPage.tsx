@@ -1190,6 +1190,12 @@ export function ChatPage() {
             void queryClient.invalidateQueries({ queryKey: ['conversations'] })
           }
         }
+        // An answer's links were checked after it was saved (#209): read
+        // it again for what didn't open.
+        if (event.type === 'chat.links_checked') {
+          const conversationId = event.payload?.conversation_id as string | undefined
+          if (conversationId) void queryClient.invalidateQueries({ queryKey: ['messages', conversationId] })
+        }
         if (event.type === 'chat.complete') {
           const conversationId = event.payload?.conversation_id as string | undefined
           const nextUsage = parseContextUsage(event.payload?.context)

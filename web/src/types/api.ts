@@ -792,6 +792,8 @@ export interface MessageMeta {
   steps?: ActivityStep[]
   /** Something changed that may affect the answer, such as a smaller model answering. */
   notice?: string
+  /** The links that didn't open, or couldn't be judged, when Check links in answers is on (#209, contract 1.97). */
+  link_check?: { dead?: string[]; unknown?: string[] }
   /** Files attached to a question or produced with an answer. */
   files?: FileRef[]
   /** The run trace behind the answer (spec §35), at /api/v1/runs/{id}. */
@@ -1104,6 +1106,8 @@ export interface SettingsView {
   update_check?: boolean
   /** Reads the AI news from toskar.ai when News is opened (#750). */
   ai_news?: boolean
+  /** Asks each linked site whether an answer's links open (#209). */
+  check_links?: boolean
   /** Report this may send reports to Toskar (#588); off, it only copies or emails them. */
   problem_reports?: boolean
   tool_terminal?: string
@@ -1456,6 +1460,7 @@ export interface SettingsPatch {
   update_check?: boolean
   /** Reads the AI news from toskar.ai when News is opened (#750). */
   ai_news?: boolean
+  check_links?: boolean
   problem_reports?: boolean
   ratings_prompts?: boolean
   assistant_language_mode?: AssistantLanguageMode
@@ -2331,7 +2336,7 @@ export interface PersonalStyle {
   instructions?: string
 }
 
-export type EgressKind = 'web_search' | 'web_page' | 'places' | 'paired_computer' | 'external_server' | 'connector' | 'notification' | 'community_ratings' | 'update_check' | 'news' | 'problem_report'
+export type EgressKind = 'web_search' | 'web_page' | 'places' | 'paired_computer' | 'external_server' | 'connector' | 'notification' | 'community_ratings' | 'update_check' | 'news' | 'problem_report' | 'link_check'
 
 /** The OpenAI-compatible server whose models can be chosen for a chat (#111). */
 export interface ExternalServerInfo {

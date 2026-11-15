@@ -1,5 +1,5 @@
 {
-  "version": "1.96",
+  "version": "1.97",
   "types": {
     "ActivityStep": [
       "kind",
@@ -168,6 +168,7 @@
       "deliberation",
       "device",
       "files",
+      "link_check",
       "notice",
       "reasoning",
       "run_id",

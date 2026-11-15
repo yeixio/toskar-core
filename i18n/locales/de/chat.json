@@ -590,6 +590,7 @@
     "unconfirmedFigures": "Toskar konnte {{figures}} in den Quellen nicht bestätigen. Prüfe das, bevor du dich darauf verlässt.",
     "codeErrors": "Ein Teil des Codes lässt sich nicht parsen: {{errors}}. Behebe das, bevor du ihn ausführst.",
     "unsourcedLinks": "Diese Links stammen aus keiner Quelle und funktionieren vielleicht nicht: {{links}}. Wenn einer sich nicht öffnet, suche stattdessen auf der Website.",
+    "deadLinks": "Diese Links ließen sich bei der Prüfung nicht öffnen: {{links}}. Die Seite ist vielleicht umgezogen; suche sie auf der Website.",
     "contradictions_one": "Die Antwort widerspricht sich oder ihren Quellen vielleicht an {{count}} Stelle. Prüfe sie, bevor du dich darauf verlässt.",
     "contradictions_other": "Die Antwort widerspricht sich oder ihren Quellen vielleicht an {{count}} Stellen. Prüfe sie, bevor du dich darauf verlässt.",
     "listSeparator": ", ",

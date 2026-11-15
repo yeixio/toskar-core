@@ -867,7 +867,8 @@
       "notification": "Notifica",
       "community_ratings": "Valutazioni della community",
       "update_check": "Controllo aggiornamenti",
-      "problem_report": "Segnalazione"
+      "problem_report": "Segnalazione",
+      "link_check": "Controllo link"
     },
     "kindsLower": {
       "web_search": "ricerca web",
@@ -879,7 +880,8 @@
       "notification": "notifica",
       "community_ratings": "valutazioni della community",
       "update_check": "controllo aggiornamenti",
-      "problem_report": "segnalazione"
+      "problem_report": "segnalazione",
+      "link_check": "controllo link"
     },
     "sources": {
       "chat": "Chat",

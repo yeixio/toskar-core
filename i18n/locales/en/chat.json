@@ -590,6 +590,7 @@
     "unconfirmedFigures": "Toskar could not confirm {{figures}} in the sources. Check before relying on it.",
     "codeErrors": "Some of the code doesn't parse: {{errors}}. Fix it before running it.",
     "unsourcedLinks": "These links didn't come from a source and may not work: {{links}}. Search the site instead if one doesn't open.",
+    "deadLinks": "These links didn't open when checked: {{links}}. The page may have moved; look for it on the site.",
     "contradictions_one": "The answer may contradict itself or its sources in {{count}} place. Check before relying on it.",
     "contradictions_other": "The answer may contradict itself or its sources in {{count}} places. Check before relying on it.",
     "listSeparator": ", ",

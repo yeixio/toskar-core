@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Toskar Control Plane API
-  version: "1.96"
+  version: "1.97"
   description: >-
     Local AI control plane API for Toskar, its OpenAI-compatible routes, and its MCP server.
     On the default loopback bind no key is needed. When the daemon listens on any other address,
@@ -9262,6 +9262,12 @@ components:
           type: array
           items: {$ref: '#/components/schemas/ActivityStep'}
         notice: {type: string, description: '`notice` tells the user something changed that may affect the answer, such as a smaller model answering after the chosen one failed.'}
+        link_check:
+          type: object
+          description: 'With check_links on, the answer''s links that did not open, or could not be judged, added after the answer is saved; chat.links_checked follows (#209, contract 1.97)'
+          properties:
+            dead: {type: array, items: {type: string}}
+            unknown: {type: array, items: {type: string}}
         files:
           type: array
           description: Attached to a question or produced with an answer.

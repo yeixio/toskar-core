@@ -571,6 +571,7 @@
     "unconfirmedFigures": "Toskar 無法在來源中確認 {{figures}}。請先檢查再依賴它。",
     "codeErrors": "部分程式碼無法解析：{{errors}}。執行前請先修正。",
     "unsourcedLinks": "這些連結並非來自任何來源，可能無法開啟：{{links}}。如果打不開，請在該網站內搜尋。",
+    "deadLinks": "檢查時這些連結無法開啟：{{links}}。頁面可能已移動，請在網站上尋找。",
     "contradictions_other": "回答可能在 {{count}} 處與自身或來源矛盾。依賴前請先查證。",
     "listSeparator": "、",
     "listAnd": "{{first}}和{{last}}",

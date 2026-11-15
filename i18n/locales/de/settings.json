@@ -227,7 +227,8 @@
       "community_ratings": "Community-Bewertungen",
       "update_check": "Update-Prüfung",
       "problem_report": "Problembericht",
-      "news": "KI-Neuigkeiten"
+      "news": "KI-Neuigkeiten",
+      "link_check": "Linkprüfung"
     },
     "kindsLower": {
       "web_search": "Websuche",
@@ -240,7 +241,8 @@
       "community_ratings": "Community-Bewertungen",
       "update_check": "Update-Prüfung",
       "problem_report": "Problembericht",
-      "news": "KI-Neuigkeiten"
+      "news": "KI-Neuigkeiten",
+      "link_check": "Linkprüfung"
     },
     "sources": {
       "chat": "Chat",
@@ -340,5 +342,11 @@
     "description": "Die Seite „Neuigkeiten“ zeigt neue offene Modelle, Runtime-Versionen und Ankündigungen von KI-Laboren von toskar.ai.",
     "show": "KI-Neuigkeiten anzeigen",
     "showHint": "Von toskar.ai gelesen, wenn „Neuigkeiten“ geöffnet wird, höchstens alle sechs Stunden. Gesendet wird nur die Anfrage."
+  },
+  "links": {
+    "title": "Links in Antworten",
+    "description": "Antworten verlinken nur Seiten, die ihre Quellen genannt haben. Toskar kann außerdem jede verlinkte Website fragen, ob die Seite noch erreichbar ist.",
+    "check": "Links in Antworten prüfen",
+    "checkHint": "Nach einer Antwort kontaktiert Toskar jede verlinkte Website und nennt unter der Antwort die Links, die sich nicht öffnen lassen. Jede Prüfung steht unter „Was diesen Computer verlassen hat“."
   }
 }

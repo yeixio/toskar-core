@@ -843,7 +843,8 @@
       "notification": "알림",
       "community_ratings": "커뮤니티 평가",
       "update_check": "업데이트 확인",
-      "problem_report": "문제 보고"
+      "problem_report": "문제 보고",
+      "link_check": "링크 확인"
     },
     "kindsLower": {
       "web_search": "웹 검색",
@@ -855,7 +856,8 @@
       "notification": "알림",
       "community_ratings": "커뮤니티 평가",
       "update_check": "업데이트 확인",
-      "problem_report": "문제 보고"
+      "problem_report": "문제 보고",
+      "link_check": "링크 확인"
     },
     "sources": {
       "chat": "채팅",

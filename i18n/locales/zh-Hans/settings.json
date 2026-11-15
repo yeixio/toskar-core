@@ -220,7 +220,8 @@
       "community_ratings": "社区评分",
       "update_check": "检查更新",
       "problem_report": "问题报告",
-      "news": "AI 新闻"
+      "news": "AI 新闻",
+      "link_check": "链接检查"
     },
     "kindsLower": {
       "web_search": "网络搜索",
@@ -233,7 +234,8 @@
       "community_ratings": "社区评分",
       "update_check": "检查更新",
       "problem_report": "问题报告",
-      "news": "AI 新闻"
+      "news": "AI 新闻",
+      "link_check": "链接检查"
     },
     "sources": {
       "chat": "聊天",
@@ -331,5 +333,11 @@
     "description": "“新闻”页面显示来自 toskar.ai 的新开放模型、运行时版本和 AI 实验室公告。",
     "show": "显示 AI 新闻",
     "showHint": "打开“新闻”时从 toskar.ai 读取，最多每六小时一次。除了请求本身，不会发送任何内容。"
+  },
+  "links": {
+    "title": "回答中的链接",
+    "description": "回答只链接来源提供的页面。Toskar 还可以询问每个被链接的网站，页面是否仍能打开。",
+    "check": "检查回答中的链接",
+    "checkHint": "回答写完后，Toskar 会联系每个被链接的网站，并在回答下方列出无法打开的链接。每次检查都会记录在“离开这台电脑的内容”中。"
   }
 }

@@ -843,7 +843,8 @@
       "notification": "通知",
       "community_ratings": "コミュニティ評価",
       "update_check": "アップデートの確認",
-      "problem_report": "問題の報告"
+      "problem_report": "問題の報告",
+      "link_check": "リンク確認"
     },
     "kindsLower": {
       "web_search": "Web検索",
@@ -855,7 +856,8 @@
       "notification": "通知",
       "community_ratings": "コミュニティ評価",
       "update_check": "アップデートの確認",
-      "problem_report": "問題の報告"
+      "problem_report": "問題の報告",
+      "link_check": "リンク確認"
     },
     "sources": {
       "chat": "チャット",

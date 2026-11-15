@@ -843,7 +843,8 @@
       "notification": "通知",
       "community_ratings": "社群評分",
       "update_check": "檢查更新",
-      "problem_report": "問題回報"
+      "problem_report": "問題回報",
+      "link_check": "連結檢查"
     },
     "kindsLower": {
       "web_search": "網路搜尋",
@@ -855,7 +856,8 @@
       "notification": "通知",
       "community_ratings": "社群評分",
       "update_check": "檢查更新",
-      "problem_report": "問題回報"
+      "problem_report": "問題回報",
+      "link_check": "連結檢查"
     },
     "sources": {
       "chat": "聊天",

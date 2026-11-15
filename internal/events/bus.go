@@ -125,6 +125,9 @@ const (
 
 	ChatToken    = "chat.token"
 	ChatComplete = "chat.complete"
+	// ChatLinksChecked says an answer's links were checked after it was
+	// saved, with the dead and unknown ones (#209).
+	ChatLinksChecked = "chat.links_checked"
 	// ChatModelRouted reports the model chosen for a turn, by Auto or after a
 	// failure, with the reason in plain language.
 	ChatModelRouted = "chat.model_routed"
