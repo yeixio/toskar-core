@@ -17,13 +17,17 @@ func TestAskedForMedia(t *testing.T) {
 		"Are you able to make a picture of a dog for me?":                    {"", "image.generate", ""},
 		"Paint a lighthouse at dusk":                                         {"", "image.generate", ""},
 		"Make a logo for my tire shop":                                       {"", "image.generate", ""},
-		"Make a short video of waves on a beach":                             {"", "video.generate", ""},
-		"Do a video of waves on a beach":                                     {"", "video.generate", ""},
-		"Make the clip longer":                                               {"", "video.generate", ""},
-		"Bring this photo to life":                                           {edit, "video.generate", "dog.png"},
-		"Make it night":                                                      {edit, "image.edit", "dog.png"},
-		"Remove the background":                                              {edit, "image.edit", "dog.png"},
-		"Draw a cat instead":                                                 {edit, "image.generate", ""},
+		// A kind of art names a picture too, as the user guide's example
+		// does (#893).
+		"Make a watercolor of a lighthouse at dusk.": {"", "image.generate", ""},
+		"Create a cartoon of my cat":                 {"", "image.generate", ""},
+		"Make a short video of waves on a beach":     {"", "video.generate", ""},
+		"Do a video of waves on a beach":             {"", "video.generate", ""},
+		"Make the clip longer":                       {"", "video.generate", ""},
+		"Bring this photo to life":                   {edit, "video.generate", "dog.png"},
+		"Make it night":                              {edit, "image.edit", "dog.png"},
+		"Remove the background":                      {edit, "image.edit", "dog.png"},
+		"Draw a cat instead":                         {edit, "image.generate", ""},
 	} {
 		got, ok := askedForMedia(msg, want.ref)
 		if !ok || got.Tool != want.tool || got.File != want.file {
@@ -36,6 +40,7 @@ func TestAskedForMedia(t *testing.T) {
 		"Find pictures of golden retrievers online",
 		"Where can I download stock photos of dogs?",
 		"How do I draw a dog?",
+		"How do I make a watercolor of a lighthouse?",
 		"What's in this picture?",
 		"Describe this image",
 		"Write a poem about a dog",
