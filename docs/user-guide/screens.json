@@ -1151,6 +1151,24 @@
           "wait": "Final answer"
         }
       ]
+    },
+    {
+      "id": "media-making",
+      "path": "/chat",
+      "query": "c=conv-lighthouse",
+      "readyText": "Step 5 of 8"
+    },
+    {
+      "id": "media-setup",
+      "path": "/tools",
+      "query": "tab=media",
+      "readyText": "Image generation"
+    },
+    {
+      "id": "media-vision",
+      "path": "/chat",
+      "query": "c=conv-vision",
+      "readyText": "Ornith 1.5 9B"
     }
   ]
 }
