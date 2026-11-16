@@ -1,36 +1,36 @@
 {
   "schemaVersion": 1,
-  "version": "1.13",
+  "version": "1.14",
   "items": [
     {
       "realm": "Ratatoskr",
-      "title": "Chats that finish the job",
-      "text": "Give a chat a folder on your computer, and work you ask for goes on until it's done: it runs commands, shows their output as it's written, and asks before it changes anything. A task started in the terminal, web, or desktop shows in the others, and any of them can stop it."
+      "title": "Swarms: several agents on one job",
+      "text": "Ask for \"a swarm\" or \"3 agents\" and several agents work at once, each in a chat of its own, across your computers and models. In a split each takes a part of the job; in a race, models answer the same question and the best answer wins."
+    },
+    {
+      "realm": "Muninn",
+      "title": "Projects keep related chats together",
+      "text": "A project holds instructions, files, a folder, a default profile and model, and a memory of its own. Its chats follow its instructions, search its files, and remember what they learn for the project's other chats, not your others."
     },
     {
       "realm": "Ymir",
-      "title": "Qwen 3.5 is the new everyday pick",
-      "text": "Toskar recommends Qwen 3.5 9B on most computers with 16 GB or more. On our long tasks it finished all three, where Qwen 2.5 7B finished at most one. Qwen 3.5 and gpt-oss now call tools reliably, so they can search, read files, and do tasks."
+      "title": "gpt-oss and Qwen 3.6 in the catalog",
+      "text": "OpenAI's gpt-oss 20B and 120B and Qwen 3.6 35B-A3B are in the model catalog. They're mixtures of experts, so how well they fit and how fast they run is estimated from the part each word uses. Effort sets how long gpt-oss thinks."
     },
     {
-      "realm": "Valgrind",
-      "title": "Toskar in your terminal and in VS Code",
-      "text": "toskarctl chat chats in any terminal, and starts Toskar if it isn't running. The VS Code extension is on the Marketplace and Open VSX. Step-by-step guides cover Claude Code, Codex, and Continue on your own models."
-    },
-    {
-      "realm": "Gungnir",
-      "title": "The AI news and your briefing, on request",
-      "text": "Ask any chat to read today's AI news or what your automations found, such as \"what's in my briefing\", in any of ten languages. It works in the car too. Each person hears only their own automations."
+      "realm": "Norn",
+      "title": "Keep a model running",
+      "text": "Pin a chat model as Always running and it loads when Toskar starts, comes back if it stops, and isn't unloaded when idle. With paired computers, a model that doesn't fit beside it runs on another computer; otherwise an Admin can stop the pinned one for that answer."
     },
     {
       "realm": "Huginn",
-      "title": "Places are looked up, not made up",
-      "text": "A request such as \"Find a cafe in downtown Juneau\" is looked up on the web before the model answers, so the names and addresses are real ones."
+      "title": "Honest answers offline, and links that open",
+      "text": "Offline, a question that needs the internet says this computer isn't connected instead of making up an answer. Turn on Check links in answers, and Toskar asks each linked site whether its page opens and crosses out the links that don't."
     },
     {
-      "realm": "Ratatoskr",
-      "title": "New chats start with your default profile",
-      "text": "New chats use General Assistant unless you pick another default on the Profiles page. A profile used once no longer carries over to every new chat, and profiles can't share a name."
+      "realm": "Heimdall",
+      "title": "Changes ask first again",
+      "text": "In the built-in profiles, writing files, running terminal commands, and Git add and commit ask first, and Allow for session still covers the rest of a chat. Git push asks every time, since it sends your code off the computer."
     }
   ]
 }
