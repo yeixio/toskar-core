@@ -433,6 +433,7 @@
   "modelFailure": {
     "retry": "Riprova",
     "chooseOther": "Usa un altro assistente/modello",
+    "makeRoom": "Ferma {{name}} per questa risposta",
     "details": "Dettagli",
     "hideDetails": "Nascondi dettagli",
     "reason": "Motivo: {{value}}",

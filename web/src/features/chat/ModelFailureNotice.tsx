@@ -8,12 +8,15 @@ export function ModelFailureNotice({
   advanced,
   onRetry,
   onChooseModel,
+  onMakeRoom,
   mascot = true,
 }: {
   failure: ModelFailure
   advanced: boolean
   onRetry: () => void
   onChooseModel: () => void
+  /** Retries after stopping the model kept running that holds the memory; set for Admins (#966). */
+  onMakeRoom?: () => void
   /** Show Ratatoskr with the acorn dropped. Off when another mascot is already in view. */
   mascot?: boolean
 }) {
@@ -25,6 +28,11 @@ export function ModelFailureNotice({
       <div className="min-w-0 flex-1">
         <p>{failure.message}</p>
         <div className="mt-3 flex flex-wrap gap-2">
+          {onMakeRoom && failure.kept_running_model_id ? (
+            <button type="button" className="btn-primary px-3 py-1.5 text-xs" onClick={onMakeRoom}>
+              {t('modelFailure.makeRoom', { name: failure.kept_running_name || failure.kept_running_model_id })}
+            </button>
+          ) : null}
           <button type="button" className="btn-secondary px-3 py-1.5 text-xs" onClick={onRetry}>
             {t('modelFailure.retry')}
           </button>

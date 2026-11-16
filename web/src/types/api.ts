@@ -1167,6 +1167,8 @@ export interface ChatRequest {
   client?: 'phone' | 'tablet' | 'watch' | 'car' | 'tv' | 'desktop' | 'web' | 'terminal' | 'editor'
   /** Run this turn as a swarm (#1135); Members and up. */
   swarm?: SwarmMode
+  /** Stop the models kept running here if this answer's model doesn't fit beside them (#966, contract 1.98); Admins. */
+  make_room?: boolean
 }
 
 export interface StopChatResponse {

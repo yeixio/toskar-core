@@ -38,4 +38,25 @@ describe('ModelFailureNotice', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Retry' }))
     expect(onRetry).toHaveBeenCalledOnce()
   })
+
+  // A model kept running that holds the memory can be stopped for the
+  // answer, by an Admin; others only see what holds it (#966).
+  it('offers an Admin to stop the model kept running for this answer', () => {
+    const failure = {
+      kind: 'model_health' as const,
+      reason: 'oom',
+      message: 'Voice is kept running and holds about 9.0 GB, so there was not enough memory for this model.',
+      likely_memory_pressure: true,
+      kept_running_model_id: 'voice-model',
+      kept_running_name: 'Voice',
+    }
+    const onMakeRoom = vi.fn()
+    const { rerender } = render(<ModelFailureNotice failure={failure} advanced={false} onRetry={() => {}} onChooseModel={() => {}} onMakeRoom={onMakeRoom} />)
+    fireEvent.click(screen.getByRole('button', { name: 'Stop Voice for this answer' }))
+    expect(onMakeRoom).toHaveBeenCalledOnce()
+    rerender(<ModelFailureNotice failure={failure} advanced={false} onRetry={() => {}} onChooseModel={() => {}} />)
+    expect(screen.queryByRole('button', { name: /Stop Voice/ })).not.toBeInTheDocument()
+    rerender(<ModelFailureNotice failure={{ ...failure, kept_running_model_id: undefined }} advanced={false} onRetry={() => {}} onChooseModel={() => {}} onMakeRoom={onMakeRoom} />)
+    expect(screen.queryByRole('button', { name: /Stop Voice/ })).not.toBeInTheDocument()
+  })
 })

@@ -411,6 +411,7 @@
   "modelFailure": {
     "retry": "再試行",
     "chooseOther": "別のアシスタント／モデルを使う",
+    "makeRoom": "この回答のために{{name}}を停止",
     "details": "詳細",
     "hideDetails": "詳細を隠す",
     "reason": "理由：{{value}}",

@@ -411,6 +411,7 @@
   "modelFailure": {
     "retry": "다시 시도",
     "chooseOther": "다른 어시스턴트/모델 사용",
+    "makeRoom": "이 답변을 위해 {{name}} 중지",
     "details": "세부 정보",
     "hideDetails": "세부 정보 숨기기",
     "reason": "이유: {{value}}",

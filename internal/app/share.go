@@ -90,11 +90,14 @@ func minutesLeft(w *share.Work) (int, bool) {
 func (a *App) explainFailure(lang, errText string) string {
 	// A model kept running holds memory a new one needed (#966).
 	if _, training := a.training(); !training && modelhealth.OutOfMemory(errText) {
-		if message, kept := a.keptRunningMemory(lang); kept {
-			if _, isHealth := modelhealth.Parse(errText); isHealth {
-				return modelhealth.WithMessage(errText, message)
+		if message, id, name := a.keptRunningMemory(lang); id != "" {
+			f, isHealth := modelhealth.Parse(errText)
+			if !isHealth {
+				f = modelhealth.Failure{Reason: modelhealth.ReasonOOM, LikelyMemoryPressure: true}
 			}
-			return modelhealth.Encode(modelhealth.Failure{Reason: modelhealth.ReasonOOM, LikelyMemoryPressure: true, Message: message})
+			// Admins are offered to stop it for this answer (make_room).
+			f.Message, f.KeptRunningModelID, f.KeptRunningName = message, id, name
+			return modelhealth.Encode(f)
 		}
 	}
 	w, ok := a.training()

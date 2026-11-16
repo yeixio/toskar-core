@@ -4,6 +4,7 @@ import (
 	"context"
 	"slices"
 	"testing"
+	"time"
 )
 
 // A model kept running is listed as one, the idle sweep leaves it loaded,
@@ -89,5 +90,21 @@ func TestNoRoomBesidePinned(t *testing.T) {
 	a.memTotal.Store(1)
 	if left := a.memoryLeftBesidePinned(ctx, []string{"text-model"}); left != 0 {
 		t.Fatalf("memory left beside a model using it all: %d", left)
+	}
+}
+
+// A model kept running that made room stays stopped while the model it
+// made room for is loaded or still loading, then comes back (#966).
+func TestYieldHolds(t *testing.T) {
+	now := time.Now()
+	y := yield{forModel: "big", at: now.Add(-10 * time.Minute)}
+	if !yieldHolds(y, []string{"big"}, now) {
+		t.Fatal("came back while the model it made room for is loaded")
+	}
+	if yieldHolds(y, []string{"other"}, now) {
+		t.Fatal("still stopped after the model it made room for was unloaded")
+	}
+	if !yieldHolds(yield{forModel: "big", at: now.Add(-time.Second)}, nil, now) {
+		t.Fatal("came back before the model it made room for could load")
 	}
 }
