@@ -8,6 +8,283 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Thi
 
 Changes waiting for the next release are in [changes/unreleased/](changes/unreleased/), one file per pull request. `scripts/changelog.py preview` shows them together, and `scripts/changelog.py release <version>` writes them here when the release is cut.
 
+## [1.14.0] - 2026-11-15
+
+### Added
+
+- A chat model can be kept running on a computer (#966, contract 1.94): `PUT /api/v1/models/{id}/always-running`. It loads when Toskar starts and again within a minute if it stops, such as after a crash, and isn't unloaded when idle or to make room for a picture or clip. A training run still frees the memory, and the model comes back after it. Stopping it yourself keeps it stopped until you start it again or Toskar starts. Turn it on in Models, under a model's More actions → Always running, or with `toskarctl models pin`. The model's card says Always running and how much memory it leaves for other models (`memory_left_bytes`, contract 1.95), and a model that then doesn't fit says which model kept running holds the memory. The Running tab and Performance mark a model kept running too (`always_running` on `GET /models/running`, contract 1.96), and only Admins see the menu item, as only they can change it. With paired computers, placement sends a model's requests to the computer keeping it running, and passes over a computer whose models kept running leave too little memory for it when another has the model. When nothing else can run a model that doesn't fit beside one kept running, an Admin can stop that one for the answer (`make_room` on `POST /chat`, contract 1.98); it comes back once the larger model is unloaded.
+- OpenAI's gpt-oss 20B and 120B in the model catalog. They think before
+  they answer and use tools. Being a mixture of experts, each word uses
+  only part of the model, so how well they fit and how fast they run is
+  estimated from that part.
+- Qwen 3.6 35B-A3B in the model catalog: a mixture of experts that uses
+  3B of its 35B parameters for each word, and sees pictures.
+- Effort sets how long gpt-oss thinks, as the model's own low, medium,
+  and high reasoning effort: briefly on Fast, at length on Thorough. From
+  the API, `reasoning_effort` does the same.
+- The user guide's Pictures, clips, speech, and vision page is a full how-to: making and changing pictures, making clips and their settings, setting them up, asking about a picture or a video, and speech in and out, with screenshots of a picture being made, the Images and video tab, and a question about a screenshot, and an example CI runs (#893).
+- The user guide's Profiles page is a full how-to: seeing and making profiles, each of the editor's five tabs, Topics for keeping an assistant on one subject, strategies, and where chats run. Compare independent drafts and Get more careful answers say when each is worth the time, and screenshots show the Profiles page, the editor, and an answer whose drafts were compared (#897).
+- Check links in answers, in Settings (off by default): after an answer is written, Toskar asks each site it links to, up to six, whether the page opens, and names the links that didn't under the answer. A page that's gone, or a site that doesn't exist, counts as dead; a sign-in, a limit, or a slow site doesn't, and nothing counts as dead when no site answered, as when this computer is offline. Each check is listed in What left this computer as Link check. It never checks addresses on this computer or its network, answers from a profile that can't use the internet, or chats using anything marked this computer only. The saved answer has `meta.link_check`, and `chat.links_checked` says when it's added (#209, contract 1.97). In the answer itself, a link that didn't open is crossed out with a warning mark, and one that couldn't be checked gets a question mark, each with a tooltip. The Toskar apps and chat portals mark the same links; a portal reads the chat again once the check is done.
+- Quality results can measure a model at longer windows, such as 32K,
+  64K, and 128K tokens, with a prompt filling about three quarters of
+  each: reading and writing speed, the wait for the first token, and the
+  memory it took (contract 1.91).
+- Models › Running shows the memory each model really holds, measured
+  from its process, against the computer's memory, where it showed the
+  catalog's estimate. `GET /api/v1/models/running` gives it as
+  `resident_bytes`, and quality results record it (contract 1.90).
+- Agents at once, per model: with Advanced mode on, a model's More actions
+  menu on Models sets how many of a swarm's agents run on it at the same
+  time, 1 to 4 (1 by default). llama-server starts with `--parallel` set to
+  it and a context of the model's window times that number, so each agent
+  keeps the whole window; the model uses more memory, and its fit and Auto's
+  window count it. A number that leaves an agent less than 8K of context
+  (`MODEL_SLOTS_CONTEXT`), or that doesn't fit the computer
+  (`MODEL_SLOTS_MEMORY`), is refused. A loaded model reloads with it on its
+  next request. Swarms run that many agents on the model at once, and the
+  rest wait; a paired computer's models count as it's set there.
+  `PUT /api/v1/models/{id}/slots` sets it, and each chat model installed on
+  the computer says `slots` (contract 1.88, #1135).
+- `TOSKAR_MTP=on` lets a model with its own multi-token prediction head,
+  such as Qwen 3.5 and 3.8's `-mtp` files, guess ahead with it, with no
+  draft model. It's off by default: on Qwen 3.5 4B it was 38% faster on
+  average, but changed 2 of 9 answers and cut one short.
+- Projects keep related chats together with what they share: instructions,
+  files, a folder on the Toskar computer, a default profile and model, and a
+  memory of their own. A project's chats follow its instructions, search its
+  files, and remember what they learn for the project's other chats, not
+  your others. In the web and desktop apps, Chat's history lists your
+  projects above your chats, each opening to its chats, and New project
+  makes one. A project's page has its chats with New chat, its
+  instructions, files and linked knowledge, a folder (Admins), its default
+  profile and model, and its memory switch. A chat says which project it's
+  in, under its title, with Move to project and Remove from project. The
+  API has them too (`/api/v1/projects`, and `project_id` on chats), so the
+  apps can list projects and start chats in them (contract 1.87, #1136).
+- The phone and tablet apps list your projects above Computer in the chat
+  list, with New chat in this project, and the TV and the car continue a
+  project's chats; projects are still made and changed on the computer
+  (toskar-apps#432, #1136).
+- The Memory page lists what a project's chats learned under the project's
+  name, after your own memories, and Move to personal memory in a memory's
+  menu makes it yours in every chat. The API does the same with
+  `PATCH /api/v1/memory/{id}` and an empty `project_id`, and a memory says
+  which project it belongs to with `project_id` (contract 1.87, #1136).
+- In the terminal, `toskarctl projects` lists your projects with how many
+  chats are in each, and `toskarctl chat --project <name or id>` starts a
+  chat in one, or with `--resume` continues one of its chats. The chat still
+  works in the folder you're in, before the project's. While chatting,
+  `/project` says which project the chat is in, `/project <name>` moves it
+  into one, and `/project none` takes it out (#1136).
+- The user guide's Projects page is a full how-to: making a project, its
+  page, moving chats in and out, what it remembers, and projects in the
+  terminal and the API, with screenshots of History, a project's page, a
+  chat in a project, and the Memory page, and examples CI runs (#1136).
+- Details on Models › Results shows where a result ran (its graphics card,
+  llama.cpp release, guessing ahead, and memory) and, when the run measured
+  them, the same model at longer context windows: how fast it read and
+  wrote, how long it took to start answering, and its memory.
+- `seed`, `top_p`, `top_k`, and `min_p` on `/v1/chat/completions` and
+  `POST /chat`, which also takes `temperature` now. They reach the
+  calls that write the answer, here or on a paired computer. The same
+  seed and settings usually repeat an answer from one model; see
+  docs/api.md for what is and isn't promised (#839, contract 1.93).
+- Swarms for coding agents: `swarm:<profile>` as the model on
+  `/v1/chat/completions`, `/v1/messages`, and `/v1/responses`. A request
+  that brings the agent's own tools, as a subagent's does, goes as it is to
+  the least busy of the profile's swarm models and computers, on this
+  computer or a paired one, and its answer comes back unchanged, so
+  subagents started at once run at once instead of waiting on one model. A
+  request without tools runs a whole swarm and answers with its answer,
+  with the agents' progress as reasoning. `/v1/models` lists `swarm:<id>`
+  for profiles whose strategy is swarm (contract 1.88, #1135).
+- `toskarctl connect claude-code --swarm <profile>` points Claude Code's
+  subagents at a profile's swarm, and leaves its own model as it was.
+- MCP's `run_swarm` tool runs a swarm from another app and returns its
+  answer and a link to its chat.
+- Swarms for tasks in a folder: when a task in a chat's folder asks for a
+  swarm, the coordinator looks at the folder, read-only, and splits the task
+  into parts with the files each expects to change; parts that change the
+  same files go to one agent. In a Git repository each agent works as a task
+  in a worktree of its own, on a branch of its own, starting from what you
+  see, uncommitted changes and new files included, and its work is
+  committed there as Toskar. The branches are merged one at a time; a
+  conflict goes to a fix-up agent, and one it can't settle is reported with
+  the agent's branch. The project's checks run on the merge, and the result
+  is applied to your folder as uncommitted changes once you allow it. A
+  folder that changed since the swarm started, so the change no longer
+  applies, isn't forced: the answer names the branch to merge. In a race,
+  an agent whose checks fail can't win over one whose checks pass, and the
+  judge picks among the rest. Your branch, HEAD, index, and stash are never
+  touched. Worktrees are removed when the swarm ends; branches are kept for
+  7 days, or until `DELETE /api/v1/swarms/{id}` deletes them. In a folder
+  that isn't in Git, the agents take turns in the folder itself, and the
+  answer says so. Swarms gain `folder`, `branch`, `checks`, `conflicts`, and
+  `applied`, and their agents `paths`, `branch`, and `checks` (contract
+  1.88, #1135).
+- Swarms in the terminal: `toskarctl chat --swarm` sends each message to a
+  swarm (`split`, the default, or `race`), and `/swarm` sends the next one,
+  with `/swarm off` to stop. While the agents work, each has one line,
+  updated in place: its part, computer, model, how it's doing, and its
+  latest step; then the merge, any change that couldn't be merged, and for
+  a task the branch, the checks, and whether the change is in your folder,
+  then the answer. Piped, each change is a plain line on standard error.
+  An agent's tool questions show and are answered in the terminal, labeled
+  with the agent, and "always" applies to that agent alone. `/agents` lists
+  the last swarm's agents, `/open N` continues an agent's chat, and `/back`
+  returns. Ctrl-C stops the whole swarm (#1135).
+- Swarms on the web and desktop: Chat options has Use a swarm, Split or
+  Race, for the next message, shown as a chip you can remove. While a swarm
+  works, the chat shows a lane for each agent with its part, computer,
+  model, status, latest steps, and result, and Stop and Open for that
+  agent; then the merge, any conflicts, and in a folder the result's
+  branch, checks, and whether it was applied. After the answer, the lanes
+  stay above it, folded. Agents' tool questions show in the chat that
+  started the swarm, each named by its agent, and Allow for this agent
+  covers that agent alone. Profiles gain the Swarm strategy, with its mode,
+  models in order, and agent, token, and minute budgets. A project's page
+  folds a swarm's agents' chats under the chat that started it, and an
+  agent's chat links back to it (#1135).
+- Swarms: several agents answer one question at the same time, each in a
+  chat of its own. In a split, the question is split into parts and the
+  answer is written from every agent's; in a race, agents on different
+  models each answer the whole question, and the best answer wins or they
+  are combined. Agents run at once on different computers or different
+  models; one computer with one model runs one agent and says why. Ask for
+  one with "use a swarm" or "use 3 agents" in a message, `swarm` on
+  `POST /api/v1/chat`, `POST /api/v1/swarms`, or a profile's new `swarm`
+  strategy, which Auto never picks. Agents' chats go in the chat's project,
+  or a new one named after the question; `GET /api/v1/conversations` leaves
+  them out unless `swarm_id` is given. Budgets for agents, tokens, and
+  minutes stop agents still running and merge what finished. An agent's
+  tool questions say which swarm and agent ask, and allowing a tool for the
+  session applies to that agent's chat alone. Stopping an agent's chat
+  stops that agent; stopping the swarm stops them all (contract 1.88,
+  #1135).
+- The user guide's Swarms page is a full how-to: split and race and when
+  each helps, starting one from Chat, a profile, a message, the terminal,
+  VS Code, coding agents, MCP, and the API, the lanes, tasks in a folder
+  with their branches, checks, and applying, agents' approvals, budgets,
+  Agents at once, which keys and roles each way needs, and what the phone,
+  tablet, TV, car, and watch show. It has screenshots of Use a swarm, a
+  profile's swarm, the lanes, a task's result, an agent's approval, Agents
+  at once, and a project's agents, and examples CI runs (#1135).
+
+### Changed
+
+- A mixture-of-experts model too big for the graphics card is labelled by
+  the computer's memory, with its experts running from it and the rest on
+  the card, instead of Tight like a dense model of its size.
+- gpt-oss 20B can check a profile's topics for other models: it held every
+  topic case in the quality set, against 20 of 22 for the smallest
+  checker before it. Toskar still uses the smallest checker that fits.
+- The quality run measures swarms against a single agent (#1135): six
+  questions in several parts, answered from the set's fixed web pages, and
+  four tasks in a Git folder whose parts are in files of their own, scored
+  by the folder's tests. Each is asked of one agent on each model and of a
+  swarm on the same models (split, and race with two or more), and the
+  report counts what was done, the time, the tokens, how many agents ran at
+  once and on how many computers, and why a swarm ran as one agent, with
+  the swarm against one agent side by side. The set answers yes to writes
+  in its own folders and to applying its swarms' changes there, and no to
+  everything else. The weekly run measures the recommended models with two
+  slots, and the Quality workflow's `sets`, `swarm_models`, and
+  `swarm_slots` inputs run it by hand.
+- The Runtimes page names llama.cpp's release, such as b12361, for a
+  llama.cpp Toskar installs from now on, where it showed the date of the
+  file.
+- Quality results say which llama.cpp release a model ran on, whether a
+  draft guessed ahead and how many of its guesses were kept, and every GPU
+  it ran on (contract 1.89).
+
+### Fixed
+
+- Asking for code that works on a file, such as "write a Python script that
+  reads a CSV of orders", gets the code. Toskar made the CSV file instead.
+- Toskar keeps its database in its data folder when the folder's path has
+  a # or ? in it. It opened one beside the folder instead, and folders whose
+  names began the same shared it.
+- gpt-oss answers when a tool it's offered takes a list, such as making a
+  spreadsheet's rows. Its chat template stopped with "Function is not a bool
+  value" on a list that didn't say what it holds.
+- A file asked for in chat holds what the model wrote, when the model
+  made the file with its own tool call, as gpt-oss does. The file held the
+  call's text instead, or nothing at all.
+- gpt-oss writes files again. Toskar sent its tools' settings in alphabetical order, and the model's file writes came back with the file's contents cut off, so tasks ended with the fix described but not made. They now keep their own order.
+- Questions about Toskar itself are answered from the user guide's detailed pages, not only their overviews. Asked what a profile's Never discusses field does, chat said there was no such option, since only the Profiles page's body describes it (#1222).
+- The user guide said Profiles & Orchestration needs advanced mode and its editor has four tabs. Anyone can open it; editing needs Advanced mode, and the editor has five tabs, Topics included (#897).
+- Knowledge no longer brings a passage into a chat because it shares one
+  everyday word with a longer question. Asked about coffee shops near
+  the harbor, a refund policy for "Harbor Supply" came along, and a
+  small model said it had no information instead of looking it up. A
+  shared code or size, such as a SKU, is still enough on its own, and
+  passages that turn out to be about something else are set aside in
+  the answer (#1217).
+- On Linux, a running model's measured memory is what its process
+  allocated. It counted the model's file too, which stays mapped after the
+  weights go to the graphics card, so the same model read anywhere from
+  2.8 GB to 9.3 GB.
+- A small model that numbers its tool calls, such as
+  `{"tool_call":{"id":"1",…}}`, gets its call run when only one tool
+  fits it, or is shown the call with each tool that fits so it picks
+  one. A turn that still ends on a call is answered without tools.
+  Before, Qwen 3.5 4B asked about coffee shops repeated the numbered
+  call until the turn ended with "The model didn't write an answer"
+  (#1213).
+- Offline, a question that needs the internet, such as today's AI news
+  or a web search, is answered with saying this computer isn't
+  connected. Before, the model wrote an answer from memory as if it had
+  looked: asked for the news, it made up the day's stories (#965).
+- Pages and setup steps that need the internet say this computer is
+  offline, and which site couldn't be reached, instead of showing
+  `dial tcp: lookup huggingface.co: no such host` or sending you to
+  Diagnostics. API errors for it have the code `OFFLINE` (contract
+  1.92).
+- Asking for a kind of picture, such as "make a watercolor of a lighthouse at dusk", a sketch, or a cartoon, makes a picture, or offers to set up picture making. Before, it was taken as a question about painting and answered from the web (#893).
+- The user guide's Pictures page says what the Tools page shows about each model, Recommended for this computer or how much memory it needs, and the real download sizes (#893).
+- Asking for a logo, icon, portrait, poster, wallpaper, or pic before picture making is set up offers to set it up, as asking for an image does. The three places that read a request for a picture now share one list of kinds of picture, so they can't drift apart again (#1225).
+- Profiles & Orchestration says why an action was refused, such as a
+  name another profile has. Before, saving, renaming, creating,
+  duplicating, resetting, deleting, and choosing the default failed
+  without a word, and a refused name just stayed as it was (#897).
+- A computer stays reachable away from home when its subscription renews,
+  without opening the app on the phone that bought it. Before, it dropped
+  off when its old access ran out, or after a restart.
+- A model bigger than the computer's graphics card shows no speed on the
+  Models page until it has run there. Its estimate was up to ten times too
+  fast: such a model runs partly on the processor.
+- A swarm's agents find their own part in the profile's knowledge, and
+  each works on its part alone. An agent got another part's files, and
+  said the knowledge didn't have its facts.
+- A task, or a swarm agent's part, that names a file, such as "Write
+  Reverse in strs/strs.go", changes that file in its folder instead of
+  attaching a new file to the chat. Ordinary chats with no folder still make
+  the file (#1135).
+- A task swarm's change whose project checks failed, or ran out of time,
+  always asks before it's applied to your folder, whatever your profile
+  allows. The question says the checks failed, and the answer says whether
+  the change was applied because you chose to or wasn't, with its branch
+  (#1135).
+- In the terminal or a chat with a folder, a request to fix or change code
+  later in the message, such as "The test in sum_test.go fails. Fix Sum so
+  it passes.", is done as a task instead of answered as a question. "Why
+  does my test fail?" is still a question (#1135).
+- `POST /api/v1/chat/stop` stops only the caller's own chats; another
+  person's chat reads as not running.
+- Writing files, running terminal commands, and Git add and commit ask
+  first again in the built-in profiles, and Allow for session still lets
+  them run for the rest of a chat. Git push asks every time, since it
+  sends your code off the computer. Before, General Assistant and
+  Programming let all of them run without asking (#1206).
+  In a task, commands that only read or test, such as `go test`, still
+  run without asking, so a fix-and-test loop can.
+- Settings → Tool permissions now takes effect. Each switch is a limit
+  for every profile on this computer: a profile can be stricter, never
+  looser, and Deny holds in automations too. Before, nothing read them
+  (#1206).
+- The AI is told that tools ask first only when they do, and is told to
+  change only what was asked when some run without asking (#1206).
+
 ## [1.13.1] - 2026-11-11
 
 ### Fixed
