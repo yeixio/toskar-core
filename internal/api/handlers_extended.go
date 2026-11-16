@@ -411,6 +411,10 @@ func (s *Server) handleChat(w http.ResponseWriter, r *http.Request) {
 		// Temperature and the sampler and seed for the answer (#839,
 		// contract 1.93); left out, the model's own.
 		Temperature *float64 `json:"temperature"`
+		// MakeRoom stops the models kept running on this computer when
+		// this answer's model doesn't fit beside them (#966, contract
+		// 1.98). Admins only, as only they choose what's kept running.
+		MakeRoom bool `json:"make_room"`
 		pluginapi.Sampling
 	}
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
@@ -508,6 +512,13 @@ func (s *Server) handleChat(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		ctx = swarm.WithMode(ctx, body.Swarm)
+	}
+	if body.MakeRoom {
+		if !auth.PrincipalFrom(r.Context()).Person.Role.AtLeast(auth.RoleAdmin) {
+			writeErr(w, http.StatusForbidden, "ROLE_REQUIRED", "stopping a model kept running needs the admin role", map[string]any{"role": string(auth.RoleAdmin)})
+			return
+		}
+		ctx = turnopts.WithMakeRoom(ctx)
 	}
 	ctx = turnopts.WithBranch(ctx, turnopts.Branch{ParentID: body.ParentID, RetryOf: body.RetryOf, EditOf: body.EditOf})
 	if body.Live && body.Stream {

@@ -11,6 +11,9 @@ export type ModelFailure = {
   exit_code?: number
   last_probe?: string
   stderr_tail?: string
+  /** The model kept running that holds the memory this one needed (#966). */
+  kept_running_model_id?: string
+  kept_running_name?: string
 }
 
 export function parseModelFailure(raw: string): ModelFailure | null {

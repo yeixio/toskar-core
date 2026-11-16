@@ -422,6 +422,7 @@
   "modelFailure": {
     "retry": "Retry",
     "chooseOther": "Use another assistant/model",
+    "makeRoom": "Stop {{name}} for this answer",
     "details": "Details",
     "hideDetails": "Hide details",
     "reason": "Reason: {{value}}",

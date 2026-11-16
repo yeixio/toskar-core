@@ -102,6 +102,21 @@ func LiveFrom(ctx context.Context) bool {
 	return live
 }
 
+type makeRoomKey struct{}
+
+// WithMakeRoom lets the turn stop the models kept running on this computer
+// when the model it needs doesn't fit beside them (#966). They come back
+// once that model is unloaded.
+func WithMakeRoom(ctx context.Context) context.Context {
+	return context.WithValue(ctx, makeRoomKey{}, true)
+}
+
+// MakeRoomFrom says the turn may stop models kept running for room.
+func MakeRoomFrom(ctx context.Context) bool {
+	on, _ := ctx.Value(makeRoomKey{}).(bool)
+	return on
+}
+
 type projectKey struct{}
 
 // WithProject sets the folder a turn works in: where its commands run, and

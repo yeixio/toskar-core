@@ -88,6 +88,11 @@ type Failure struct {
 	ExitCode             *int   `json:"exit_code,omitempty"`
 	LastProbe            string `json:"last_probe,omitempty"`
 	StderrTail           string `json:"stderr_tail,omitempty"`
+	// KeptRunningModelID and KeptRunningName are the model kept running
+	// that holds the memory this one needed (#966): an Admin can retry
+	// with make_room to stop it for the answer.
+	KeptRunningModelID string `json:"kept_running_model_id,omitempty"`
+	KeptRunningName    string `json:"kept_running_name,omitempty"`
 }
 
 func (f Failure) Error() string { return f.Message }

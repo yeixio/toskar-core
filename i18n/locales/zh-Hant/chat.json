@@ -411,6 +411,7 @@
   "modelFailure": {
     "retry": "重試",
     "chooseOther": "使用其他助理或模型",
+    "makeRoom": "為此回答停止{{name}}",
     "details": "詳細資訊",
     "hideDetails": "隱藏詳細資訊",
     "reason": "原因：{{value}}",

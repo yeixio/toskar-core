@@ -235,6 +235,9 @@ type App struct {
 	// linkChecker asks linked sites whether their pages open (#209).
 	linkChecker linkcheck.Checker
 	pinLoading  sync.Map
+	// pinYielded holds the models kept running that were stopped to make
+	// room for another, until it's unloaded (#966).
+	pinYielded sync.Map // model id -> yield
 	// instances is where Toskars on this machine announce themselves
 	// (#602); nil announces nothing.
 	instances *instances.Registry

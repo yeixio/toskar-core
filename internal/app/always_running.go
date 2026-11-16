@@ -9,6 +9,7 @@ import (
 
 	"github.com/yeixio/toskar-core/internal/locale"
 	"github.com/yeixio/toskar-core/internal/share"
+	"github.com/yeixio/toskar-core/internal/turnopts"
 	"github.com/yeixio/toskar-core/pkg/contracts"
 )
 
@@ -20,6 +21,48 @@ const alwaysRunningKey = "always_running_models"
 // keepPinnedEvery is how often the keeper checks that each model kept
 // running is loaded, such as after one crashed.
 const keepPinnedEvery = time.Minute
+
+// yieldAtLeast is how long a model kept running that made room stays
+// stopped even before the model it made room for is loaded.
+const yieldAtLeast = 2 * time.Minute
+
+// yield is a model kept running that was stopped to make room for another.
+type yield struct {
+	forModel string
+	at       time.Time
+}
+
+// yieldHolds says a model kept running that made room stays stopped: the
+// model it made room for is still loaded, or is still loading.
+func yieldHolds(y yield, running []string, now time.Time) bool {
+	return slices.Contains(running, y.forModel) || now.Sub(y.at) < yieldAtLeast
+}
+
+// makeRoomFor stops the models kept running on this computer, other than
+// modelID, when the turn may (turnopts.WithMakeRoom) and modelID isn't
+// loaded: an Admin asked for it after the model didn't fit beside them.
+// The keeper loads them again once modelID is unloaded.
+func (a *App) makeRoomFor(ctx context.Context, modelID string) {
+	if !turnopts.MakeRoomFrom(ctx) {
+		return
+	}
+	pinned := a.alwaysRunningList(ctx)
+	views, _ := a.localRunningViews(ctx)
+	for _, v := range views {
+		if v.ModelID == modelID {
+			return
+		}
+	}
+	for _, v := range views {
+		if v.ModelID == modelID || !slices.Contains(pinned, v.ModelID) {
+			continue
+		}
+		a.pinYielded.Store(v.ModelID, yield{forModel: modelID, at: time.Now()})
+		if err := a.stopModelLocal(ctx, v.InstanceID); err != nil && a.Logger != nil {
+			a.Logger.Warn("always running model didn't stop to make room", "model", v.ModelID, "for", modelID, "error", err)
+		}
+	}
+}
 
 func (a *App) alwaysRunningList(ctx context.Context) []string {
 	if a.Settings == nil {
@@ -65,6 +108,7 @@ func (a *App) setAlwaysRunning(ctx context.Context, modelID string, on bool) (le
 		return 0, err
 	}
 	a.pinStopped.Delete(modelID)
+	a.pinYielded.Delete(modelID)
 	if on {
 		go a.keepPinnedLoaded(context.WithoutCancel(ctx))
 	}
@@ -127,8 +171,8 @@ func pinnedBeside(modelID string, pinned, running []string) []string {
 }
 
 // keptRunningMemory is what to say when a model didn't fit because a
-// model kept running holds the memory, and whether one does.
-func (a *App) keptRunningMemory(lang string) (string, bool) {
+// model kept running holds the memory, and which model that is, or "".
+func (a *App) keptRunningMemory(lang string) (message, modelID, name string) {
 	ctx := context.Background()
 	views, _ := a.localRunningViews(ctx)
 	for _, v := range views {
@@ -140,9 +184,9 @@ func (a *App) keptRunningMemory(lang string) (string, bool) {
 			name = v.ModelID
 		}
 		gb := fmt.Sprintf("%.1f", float64(v.MemoryBytes)/1e9)
-		return locale.T(lang, "chat:errors.keptRunningMemory", map[string]any{"name": name, "gb": gb}), true
+		return locale.T(lang, "chat:errors.keptRunningMemory", map[string]any{"name": name, "gb": gb}), v.ModelID, name
 	}
-	return "", false
+	return "", "", ""
 }
 
 // withAlwaysRunning marks the models kept loaded on this computer.
@@ -177,7 +221,18 @@ func (a *App) keepPinnedLoaded(ctx context.Context) {
 	for i, v := range views {
 		running[i] = v.ModelID
 	}
-	stopped := func(id string) bool { _, ok := a.pinStopped.Load(id); return ok }
+	stopped := func(id string) bool {
+		if _, ok := a.pinStopped.Load(id); ok {
+			return true
+		}
+		if y, ok := a.pinYielded.Load(id); ok {
+			if yieldHolds(y.(yield), running, time.Now()) {
+				return true
+			}
+			a.pinYielded.Delete(id)
+		}
+		return false
+	}
 	for _, id := range pinnedToLoad(pinned, running, stopped) {
 		if _, loading := a.pinLoading.LoadOrStore(id, struct{}{}); loading {
 			continue

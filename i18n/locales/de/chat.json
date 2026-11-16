@@ -422,6 +422,7 @@
   "modelFailure": {
     "retry": "Wiederholen",
     "chooseOther": "Anderen Assistenten/anderes Modell nutzen",
+    "makeRoom": "{{name}} für diese Antwort anhalten",
     "details": "Details",
     "hideDetails": "Details ausblenden",
     "reason": "Grund: {{value}}",

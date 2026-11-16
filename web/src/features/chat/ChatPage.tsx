@@ -1367,7 +1367,7 @@ export function ChatPage() {
    */
   const sendMessage = async (
     overrideText?: string,
-    branch?: { retryOf?: string; editOf?: string; modelId?: string },
+    branch?: { retryOf?: string; editOf?: string; modelId?: string; makeRoom?: boolean },
     resendFiles?: FileRef[],
   ) => {
     if (!branch && editing && overrideText == null) branch = { editOf: editing }
@@ -1503,6 +1503,7 @@ export function ChatPage() {
           attachments: attachments.length > 0 ? attachments.map((f) => f.id) : undefined,
           retry_of: branch?.retryOf,
           edit_of: branch?.editOf,
+          make_room: branch?.makeRoom || undefined,
           swarm: sentSwarm,
         },
         signal: controller.signal,
@@ -2598,6 +2599,15 @@ export function ChatPage() {
                     onChooseModel={() => {
                       ;(profileSelectRef.current ?? modelSelectRef.current)?.focus()
                     }}
+                    onMakeRoom={
+                      atLeast('admin')
+                        ? () => {
+                            setModelFailure(null)
+                            setResponseInterrupted(false)
+                            void sendMessage(lastUserMessageRef.current, { makeRoom: true })
+                          }
+                        : undefined
+                    }
                   />
                 ) : null}
                 {sendError && (
@@ -2696,6 +2706,15 @@ export function ChatPage() {
                     onChooseModel={() => {
                       ;(profileSelectRef.current ?? modelSelectRef.current)?.focus()
                     }}
+                    onMakeRoom={
+                      atLeast('admin')
+                        ? () => {
+                            setModelFailure(null)
+                            setResponseInterrupted(false)
+                            void sendMessage(lastUserMessageRef.current, { makeRoom: true })
+                          }
+                        : undefined
+                    }
                   />
                 </div>
               ) : null}

@@ -1710,7 +1710,7 @@
         },
         {
           "type": "paragraph",
-          "text": "A model kept running holds its memory all the time. When little is left, the line under it says so, and a larger model may not fit beside it: the answer then names the model kept running and how much it holds. With paired computers, Toskar asks one that has the larger model instead, and a model kept running on a paired computer answers there. Training still frees the memory it needs, and the model comes back after. If you stop it with Stop, it stays stopped until you start it again or Toskar starts."
+          "text": "A model kept running holds its memory all the time. When little is left, the line under it says so, and a larger model may not fit beside it: the answer then names the model kept running and how much it holds. With paired computers, Toskar asks one that has the larger model instead, and a model kept running on a paired computer answers there. Otherwise an Admin can choose Stop, with the model's name, for this answer: Toskar stops the model kept running, answers, and loads it again once the larger model is unloaded. Training still frees the memory it needs, and the model comes back after. If you stop it with Stop, it stays stopped until you start it again or Toskar starts."
         },
         {
           "type": "heading",
