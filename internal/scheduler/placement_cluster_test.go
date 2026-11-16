@@ -223,3 +223,43 @@ func TestPlaceAvoidsAComputerThatIsTraining(t *testing.T) {
 		t.Fatalf("prefer_local while training -> %s, %v", got.NodeID, err)
 	}
 }
+
+// A model's requests go to the computer keeping it running, and away from
+// one whose always-running models leave it no room, unless that's the only
+// computer with the model (#966).
+func TestPlaceFollowsAlwaysRunningModels(t *testing.T) {
+	s := New(nil)
+	profile := contracts.AIProfile{ID: "general", Roles: []contracts.ModelRole{{Role: "assistant", ModelID: "m"}}}
+	here := NodeCandidate{Node: contracts.Node{ID: "here", IsLocal: true, Paired: true, Status: contracts.NodeStatusOnline}, InstalledModels: map[string]struct{}{"m": {}}}
+	gpu := NodeCandidate{Node: contracts.Node{ID: "gpu-box", Paired: true, Status: contracts.NodeStatusOnline, Address: "10.0.0.2:7332"}, InstalledModels: map[string]struct{}{"m": {}}}
+	place := func(in ScoreInput) string {
+		t.Helper()
+		in.Role, in.ModelID = "assistant", "m"
+		if in.Profile.ID == "" {
+			in.Profile = profile
+		}
+		got, err := s.PlaceRole(context.Background(), in)
+		if err != nil {
+			t.Fatal(err)
+		}
+		return got.NodeID
+	}
+	if got := place(ScoreInput{Nodes: []NodeCandidate{here, gpu}}); got != "here" {
+		t.Fatalf("no pins -> %s", got)
+	}
+	if got := place(ScoreInput{Nodes: []NodeCandidate{here, gpu}, KeptRunning: map[string]bool{"gpu-box": true}}); got != "gpu-box" {
+		t.Fatalf("kept running on the other computer -> %s", got)
+	}
+	noRoom := map[string]bool{"here": true}
+	if got := place(ScoreInput{Nodes: []NodeCandidate{here, gpu}, NoRoom: noRoom}); got != "gpu-box" {
+		t.Fatalf("no room here -> %s", got)
+	}
+	if got := place(ScoreInput{Nodes: []NodeCandidate{here}, NoRoom: noRoom}); got != "here" {
+		t.Fatalf("only computer, no room -> %s", got)
+	}
+	local := profile
+	local.NodePolicy.Mode = "prefer_local"
+	if got := place(ScoreInput{Profile: local, Nodes: []NodeCandidate{here, gpu}, NoRoom: noRoom}); got != "here" {
+		t.Fatalf("prefer_local, no room here -> %s", got)
+	}
+}

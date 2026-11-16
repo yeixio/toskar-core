@@ -59,3 +59,35 @@ func TestPinnedToLoad(t *testing.T) {
 		t.Fatalf("nothing kept running, yet load %v", got)
 	}
 }
+
+// Only loaded models kept running count against a model that needs
+// loading; a model loaded or kept running itself has its room (#966).
+func TestPinnedBeside(t *testing.T) {
+	if got := pinnedBeside("big", []string{"voice", "stopped"}, []string{"voice", "other"}); !slices.Equal(got, []string{"voice"}) {
+		t.Fatalf("beside big: %v", got)
+	}
+	if got := pinnedBeside("voice", []string{"voice", "doorbell"}, []string{"voice", "doorbell"}); got != nil {
+		t.Fatalf("a model kept running itself: %v", got)
+	}
+	if got := pinnedBeside("other", []string{"voice"}, []string{"voice", "other"}); got != nil {
+		t.Fatalf("a model already loaded: %v", got)
+	}
+}
+
+// Memory left beside the models kept running is this computer's memory
+// less theirs, and unknown when this computer's memory is (#966).
+func TestNoRoomBesidePinned(t *testing.T) {
+	a, _, _ := pictureApp(t, false)
+	ctx := context.Background()
+	if a.noRoomBesidePinned(ctx, "see-model") {
+		t.Fatal("no room with nothing kept running")
+	}
+	a.memTotal.Store(64 << 30)
+	if left := a.memoryLeftBesidePinned(ctx, []string{"text-model"}); left != 64<<30-1 {
+		t.Fatalf("memory left %d", left)
+	}
+	a.memTotal.Store(1)
+	if left := a.memoryLeftBesidePinned(ctx, []string{"text-model"}); left != 0 {
+		t.Fatalf("memory left beside a model using it all: %d", left)
+	}
+}
