@@ -18,10 +18,15 @@ type Detector struct {
 	// times, and each look runs system tools that take a few hundred
 	// milliseconds on macOS (#795). Zero looks every time.
 	MaxAge time.Duration
+	// StaleAge, when longer than MaxAge, answers with an inventory older
+	// than MaxAge but younger than this while a fresh look runs in the
+	// background, so a turn after a pause doesn't wait on it (#795).
+	StaleAge time.Duration
 
-	mu     sync.Mutex
-	last   contracts.HardwareInventory
-	lastAt time.Time
+	mu         sync.Mutex
+	last       contracts.HardwareInventory
+	lastAt     time.Time
+	refreshing bool
 }
 
 // Detect returns the best-effort hardware inventory for this host.
@@ -33,19 +38,42 @@ func (d *Detector) Detect(ctx context.Context) (contracts.HardwareInventory, err
 	// Callers at the same time share one look.
 	d.mu.Lock()
 	defer d.mu.Unlock()
-	if d.lastAt.IsZero() || time.Since(d.lastAt) >= d.MaxAge {
+	age := time.Since(d.lastAt)
+	switch {
+	case d.lastAt.IsZero() || age >= max(d.MaxAge, d.StaleAge):
 		inv, err := d.detect(ctx)
 		if err != nil {
 			return inv, err
 		}
 		d.last, d.lastAt = inv, time.Now()
+	case age >= d.MaxAge && !d.refreshing:
+		d.refreshing = true
+		go d.refresh(context.WithoutCancel(ctx))
 	}
+	return d.copyLast(), nil
+}
+
+// refresh looks again in the background.
+func (d *Detector) refresh(ctx context.Context) {
+	ctx, cancel := context.WithTimeout(ctx, time.Minute)
+	defer cancel()
+	inv, err := d.detect(ctx)
+	d.mu.Lock()
+	defer d.mu.Unlock()
+	d.refreshing = false
+	if err == nil {
+		d.last, d.lastAt = inv, time.Now()
+	}
+}
+
+// copyLast is the kept inventory, for a caller to change as it likes.
+func (d *Detector) copyLast() contracts.HardwareInventory {
 	inv := d.last
 	inv.Accelerators = slices.Clone(d.last.Accelerators)
 	for i := range inv.Accelerators {
 		inv.Accelerators[i].Backends = slices.Clone(inv.Accelerators[i].Backends)
 	}
-	return inv, nil
+	return inv
 }
 
 func (d *Detector) detect(ctx context.Context) (contracts.HardwareInventory, error) {

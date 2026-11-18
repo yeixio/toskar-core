@@ -66,3 +66,48 @@ func TestDetectKeepsInventoryForMaxAge(t *testing.T) {
 		t.Fatal("didn't look again after MaxAge")
 	}
 }
+
+// After a pause longer than MaxAge but within StaleAge, the kept inventory
+// answers at once and a fresh look runs behind it (#795).
+func TestDetectRefreshesInBackground(t *testing.T) {
+	d := &Detector{DataPath: t.TempDir(), MaxAge: time.Minute, StaleAge: time.Hour}
+	first, err := d.Detect(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
+	d.mu.Lock()
+	d.lastAt = time.Now().Add(-2 * time.Minute)
+	d.mu.Unlock()
+	stale, err := d.Detect(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !stale.DetectedAt.Equal(first.DetectedAt) {
+		t.Fatal("waited for a fresh look within StaleAge")
+	}
+	deadline := time.Now().Add(10 * time.Second)
+	for {
+		d.mu.Lock()
+		done := !d.refreshing && d.last.DetectedAt.After(first.DetectedAt)
+		d.mu.Unlock()
+		if done {
+			break
+		}
+		if time.Now().After(deadline) {
+			t.Fatal("no fresh look in the background")
+		}
+		time.Sleep(10 * time.Millisecond)
+	}
+	d.mu.Lock()
+	d.lastAt = time.Now().Add(-2 * time.Hour)
+	d.mu.Unlock()
+	fresh, err := d.Detect(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
+	d.mu.Lock()
+	defer d.mu.Unlock()
+	if d.refreshing || !fresh.DetectedAt.Equal(d.last.DetectedAt) {
+		t.Fatal("past StaleAge, didn't look before answering")
+	}
+}
