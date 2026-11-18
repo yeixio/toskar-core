@@ -3,11 +3,14 @@ export function Toggle({
   label,
   checked,
   disabled,
+  busy,
   onChange,
 }: {
   label: string
   checked: boolean
   disabled?: boolean
+  /** Saving: the switch shows where it's going, and says it's busy. */
+  busy?: boolean
   onChange: () => void
 }) {
   return (
@@ -16,10 +19,12 @@ export function Toggle({
       role="switch"
       aria-checked={checked}
       aria-label={label}
+      aria-busy={busy || undefined}
       disabled={disabled}
       onClick={onChange}
       className={[
         'relative inline-flex h-7 w-12 shrink-0 rounded-full transition disabled:opacity-50',
+        busy ? 'animate-pulse' : '',
         checked ? 'bg-primary' : 'bg-raised',
       ].join(' ')}
     >

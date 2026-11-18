@@ -320,6 +320,6 @@
       "TOKEN_EXPIRED": "El acceso de este ordenador a través de {{relay}} ha caducado. Suscríbete de nuevo para seguir usándolo.",
       "TOKEN_INVALID": "{{relay}} no aceptó el token de este ordenador. Suscríbete de nuevo o vuelve a conectarlo desde la app Toskar."
     },
-    "offHint": "Actívalo para elegir cómo llegan los dispositivos a este ordenador desde fuera: el router, un puerto reenviado o un relay. No hace falta tener activado el acceso desde la red local."
+    "offHint": "Cuando está activado, Toskar pide a tu router que abra el puerto {{port}}, que solo responde a los dispositivos vinculados con este ordenador. En su lugar puedes elegir un puerto reenviado o un relay. No hace falta tener activado el acceso desde la red local."
   }
 }

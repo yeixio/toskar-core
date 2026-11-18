@@ -478,6 +478,24 @@ describe('RemoteAccessCard QA regressions', () => {
   })
 
   // Regression: toskar-core#1266
+  it('the switch moves at once and warns which port opens before it is on', async () => {
+    let finish: (v: unknown) => void = () => {}
+    vi.mocked(api.updateSettings).mockReturnValue(new Promise((resolve) => (finish = resolve)) as never)
+    renderWith({ remote_access_enabled: false }, { enabled: false })
+    expect(await screen.findByText(/open port 7333, which answers only devices paired/)).toBeInTheDocument()
+    const toggle = screen.getByRole('switch', { name: 'Access from anywhere' })
+    await waitFor(() => expect(toggle).toBeEnabled())
+    fireEvent.click(toggle)
+    await waitFor(() => expect(toggle).toHaveAttribute('aria-busy', 'true'))
+    expect(toggle).toHaveAttribute('aria-checked', 'true')
+    // The server has it on from here.
+    vi.mocked(api.getSettings).mockResolvedValue({ remote_access_enabled: true, remote_access_port: 7333, remote_access_relay: '' } as never)
+    finish({ remote_access_enabled: true, remote_access_port: 7333, remote_access_relay: '' })
+    await waitFor(() => expect(toggle).not.toHaveAttribute('aria-busy'))
+    expect(toggle).toHaveAttribute('aria-checked', 'true')
+  })
+
+  // Regression: toskar-core#1266
   it('a relay refusal is a sentence with a next step, not a raw code', async () => {
     renderWith(
       { remote_access_enabled: true },

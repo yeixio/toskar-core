@@ -39,14 +39,19 @@ export function RemoteAccessCard() {
   }, [settings.data])
   const save = useMutation({
     mutationFn: (patch: Parameters<typeof api.updateSettings>[0]) => api.updateSettings(patch),
-    onSuccess: () => {
+    onSuccess: (saved) => {
       setError(null)
+      // The switch shows what was saved now, not after the next fetch (#1266).
+      if (saved && 'remote_access_enabled' in saved) queryClient.setQueryData(['settings'], saved)
       void queryClient.invalidateQueries({ queryKey: ['settings'] })
       void queryClient.invalidateQueries({ queryKey: ['remote-access'] })
     },
     onError: (err) => setError(shownError(err)),
   })
   const st = status.data
+  // While turning it on or off, the switch already shows where it's going.
+  const switching = save.isPending && save.variables?.remote_access_enabled !== undefined
+  const shownOn = switching ? Boolean(save.variables?.remote_access_enabled) : enabled
   const current = String(settings.data?.remote_access_port ?? 7333)
   const changed = port !== current || address.trim() !== (settings.data?.remote_access_address ?? '')
   return (
@@ -60,7 +65,8 @@ export function RemoteAccessCard() {
         </div>
         <Toggle
           label={t('remote.title')}
-          checked={enabled}
+          checked={shownOn}
+          busy={switching}
           disabled={save.isPending || !settings.data}
           onChange={() => save.mutate({ remote_access_enabled: !enabled })}
         />
@@ -80,7 +86,7 @@ export function RemoteAccessCard() {
       {st?.subscription && !settings.data?.remote_access_relay ? <ToskarSubscription subscription={st.subscription} off={!enabled} /> : null}
       {enabled && st ? <OutsideCheck status={st} saving={save.isPending} onSave={(patch) => save.mutate(patch)} /> : null}
       {/* While it's off, the router settings stay out of the way (#1253). */}
-      {!enabled && settings.data ? <p className="text-sm text-ink-muted">{t('remote.offHint')}</p> : null}
+      {!enabled && settings.data ? <p className="text-sm text-ink-muted">{t('remote.offHint', { port: current })}</p> : null}
       {enabled ? (
         <>
           <label className="flex items-center gap-2 text-sm">
