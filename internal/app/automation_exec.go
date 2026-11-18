@@ -142,6 +142,7 @@ func (e automationExecutor) execute(ctx context.Context, automation automations.
 			pictures:         pictures,
 		},
 		granted: automation.Tools,
+		actions: automation.Actions,
 	}
 	// What a trigger delivered, a page, posts, files, or a webhook's body,
 	// was written by someone else, so the run treats it as data, as chat
@@ -166,9 +167,9 @@ func (e automationExecutor) execute(ctx context.Context, automation automations.
 		ProfileID: profile.ID,
 		// The task with its condition's instruction, which the server adds
 		// rather than the saved prompt carrying it (#204).
-		Prompt: withChangeNote(withChangeNote(automations.RunPrompt(automation), runNote(ctx, automation)), camerasNote(automation.Cameras)),
+		Prompt: withChangeNote(withChangeNote(withChangeNote(automations.RunPrompt(automation), runNote(ctx, automation)), camerasNote(automation.Cameras)), actionsNote(automation.Actions)),
 		Status: contracts.TaskRunning,
-	}, tools.ForUnattended(profile, automation.Tools, disabled), env)
+	}, tools.ForUnattended(profile, withActionTools(automation.Tools, automation.Actions), disabled), env)
 	if err != nil {
 		return env.execution(""), err
 	}
@@ -188,6 +189,7 @@ func (e automationExecutor) execute(ctx context.Context, automation automations.
 		out.Change = e.judgeChange(ctx, env, automation, prev.Text, out.Text)
 	}
 	out.Skipped = env.skippedTools()
+	out.Acted = env.actedCalls()
 	e.reportSkipped(ctx, automation, out.Skipped)
 	return out, runErr
 }
@@ -226,6 +228,9 @@ func (e automationExecutor) reportSkipped(ctx context.Context, automation automa
 type automationEnv struct {
 	base    *chatExecEnv
 	granted []string
+	// actions are the calls the automation may make on its own, even from
+	// what a trigger delivered (#586).
+	actions []automations.Action
 	// fromTrigger is a run started by what a trigger delivered: a page,
 	// posts, files, or a webhook's body, written by someone else (#204).
 	fromTrigger bool
@@ -234,6 +239,8 @@ type automationEnv struct {
 
 	mu      sync.Mutex
 	skipped []string
+	// acted are the allowed actions the run took, in words.
+	acted []string
 }
 
 // ReferenceMaterial and TurnInstructions give a scheduled run the same
@@ -265,10 +272,17 @@ func (e *automationEnv) ExecuteTool(ctx context.Context, toolID string, args map
 	if e.base.app != nil && e.base.app.Tools != nil && e.base.app.Tools.IsDisabled(toolID) {
 		return nil, fmt.Errorf("tool %q is disabled", toolID)
 	}
-	policy, err := tools.UnattendedPolicy(e.base.profile, e.granted, toolID)
+	allowed := automations.Allows(e.actions, toolID, args)
+	policy, err := tools.UnattendedPolicy(e.base.profile, withActionTools(e.granted, e.actions), toolID)
+	// A tool the automation has only for its actions runs only as one of
+	// them (#586).
+	if err == nil && !allowed && !slices.Contains(e.granted, toolID) && slices.Contains(automations.ActionTools(e.actions), toolID) {
+		err = tools.ErrNeedsApproval
+	}
 	// Someone else's words can't steer a tool that changes things outside
-	// Toskar, even one approved for this automation (#204).
-	if err == nil && e.fromTrigger {
+	// Toskar, even one approved for this automation (#204), unless the call
+	// is one of the automation's actions, which the person chose (#586).
+	if err == nil && e.fromTrigger && !allowed {
 		if def, ok := tools.Lookup(toolID); !ok || !tools.Contained(def.Risk) {
 			err = tools.ErrNeedsApproval
 		}
@@ -299,8 +313,58 @@ func (e *automationEnv) ExecuteTool(ctx context.Context, toolID string, args map
 	}
 	if err == nil {
 		e.sources.add(toolID, args, result)
+		if allowed {
+			if def, ok := tools.Lookup(toolID); ok && !tools.Contained(def.Risk) {
+				e.mu.Lock()
+				e.acted = append(e.acted, automations.Action{Tool: toolID, Args: actionArgs(args)}.Describe())
+				e.mu.Unlock()
+			}
+		}
 	}
 	return result, err
+}
+
+func (e *automationEnv) actedCalls() []string {
+	e.mu.Lock()
+	defer e.mu.Unlock()
+	return append([]string(nil), e.acted...)
+}
+
+// actionsNote tells the run which calls it may make on its own (#586), so
+// it takes them when the task calls for them and doesn't try others.
+func actionsNote(actions []automations.Action) string {
+	if len(actions) == 0 {
+		return ""
+	}
+	lines := make([]string, len(actions))
+	for i, a := range actions {
+		lines[i] = "- " + a.Describe()
+	}
+	return "The person allowed this automation to make these calls on its own, when the task calls for them:\n" + strings.Join(lines, "\n") +
+		"\nOther calls that change things are skipped. Say in the result which of these you made."
+}
+
+// withActionTools is the tools granted to an automation and those its
+// actions name, which the model needs to see to take them (#586).
+func withActionTools(granted []string, actions []automations.Action) []string {
+	out := append([]string(nil), granted...)
+	for _, id := range automations.ActionTools(actions) {
+		if !slices.Contains(out, id) {
+			out = append(out, id)
+		}
+	}
+	return out
+}
+
+// actionArgs are a call's arguments as text, for the run's record.
+func actionArgs(args map[string]any) map[string]string {
+	out := map[string]string{}
+	for k, v := range args {
+		if v != nil {
+			out[k] = strings.TrimSpace(fmt.Sprint(v))
+		}
+	}
+	return out
 }
 
 func (e *automationEnv) Emit(eventType string, payload map[string]any) {

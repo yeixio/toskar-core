@@ -618,6 +618,9 @@ func (r *Runner) publish(eventType string, automation Automation, run Run, resul
 	if len(result.Skipped) > 0 {
 		payload["skipped"] = result.Skipped
 	}
+	if len(result.Acted) > 0 {
+		payload["acted"] = result.Acted
+	}
 	// Only its person hears about it (#206).
 	r.Bus.Publish(events.New(eventType, payload).For(automation.PersonID))
 }

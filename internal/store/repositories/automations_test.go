@@ -336,3 +336,35 @@ func TestAutomationLocalZoneReadsAsIANA(t *testing.T) {
 		t.Fatalf("zone %q", got.Schedule.TimeZone)
 	}
 }
+
+func TestAutomationActions(t *testing.T) {
+	db, err := store.Open(filepath.Join(t.TempDir(), "test.db"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer db.Close()
+	ctx := context.Background()
+	repo := repositories.NewAutomationRepo(db.SQL)
+	porch := automations.Action{Tool: " homeassistant.call ", Args: map[string]string{"service": " light.turn_on", "entity_id": "light.porch "}}
+	in := automations.CreateInput{
+		ModelID: "model-a", Name: "Porch light", Prompt: "If it's dark, turn on the porch light.",
+		Schedule: automations.Schedule{Kind: automations.KindManual, TimeZone: "UTC"},
+		Actions:  []automations.Action{porch},
+	}
+	created, err := repo.Create(ctx, in, time.Now())
+	if err != nil {
+		t.Fatal(err)
+	}
+	got, _ := repo.Get(ctx, created.ID)
+	if len(got.Actions) != 1 || got.Actions[0].Tool != "homeassistant.call" || got.Actions[0].Args["service"] != "light.turn_on" || got.Actions[0].Args["entity_id"] != "light.porch" {
+		t.Fatalf("actions = %+v", got.Actions)
+	}
+	none := []automations.Action{}
+	if got, err = repo.Update(ctx, created.ID, automations.Patch{Actions: &none}, time.Now()); err != nil || len(got.Actions) != 0 {
+		t.Fatalf("cleared = %+v, %v", got.Actions, err)
+	}
+	in.Actions = []automations.Action{{Tool: "homeassistant.call", Args: map[string]string{"service": "light.turn_on"}}}
+	if _, err := repo.Create(ctx, in, time.Now()); err == nil {
+		t.Fatal("an action without a device was accepted")
+	}
+}

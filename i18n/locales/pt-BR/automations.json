@@ -402,7 +402,24 @@
       "other": "Outros"
     },
     "needsToolModel": "O modelo escolhido não usa ferramentas, então não vai abrir páginas nem usar as ferramentas escolhidas aqui: ele responde com o que já sabe. Escolha um modelo que use ferramentas ou instale um.",
-    "openModels": "Abrir Modelos"
+    "openModels": "Abrir Modelos",
+    "actions": "Ações que pode fazer sozinha",
+    "actionsHint": "Cada execução pode fazer essas chamadas sem perguntar, mesmo quando um gatilho a iniciou. Qualquer outra chamada que mude algo é pulada. Escolha só o que você deixaria fazer sem ninguém olhando.",
+    "actionLabel": "{{action}}: {{device}}",
+    "actionDevice": "Dispositivo",
+    "actionDevicePick": "Escolha um dispositivo…",
+    "actionService": "Ação",
+    "actionAdd": "Permitir",
+    "actionRemoveButton": "Remover",
+    "actionRemove": "Remover {{action}}",
+    "actionServices": {
+      "turn_on": "Ligar",
+      "turn_off": "Desligar",
+      "lock": "Trancar",
+      "unlock": "Destrancar",
+      "open_cover": "Abrir",
+      "close_cover": "Fechar"
+    }
   },
   "draft": {
     "label": "Automação para confirmar",

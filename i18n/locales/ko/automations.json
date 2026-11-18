@@ -402,7 +402,24 @@
       "other": "기타"
     },
     "needsToolModel": "선택한 모델은 도구를 사용할 수 없어서 페이지를 열거나 여기서 고른 도구를 쓰지 않고, 이미 아는 내용으로만 답해요. 도구를 쓸 수 있는 모델을 고르거나 설치하세요.",
-    "openModels": "모델 열기"
+    "openModels": "모델 열기",
+    "actions": "스스로 실행할 수 있는 작업",
+    "actionsHint": "각 실행은 트리거로 시작되었더라도 묻지 않고 이 호출을 할 수 있습니다. 무언가를 바꾸는 다른 호출은 건너뜁니다. 아무도 보지 않을 때 맡길 수 있는 것만 고르세요.",
+    "actionLabel": "{{action}}: {{device}}",
+    "actionDevice": "기기",
+    "actionDevicePick": "기기 선택…",
+    "actionService": "작업",
+    "actionAdd": "허용",
+    "actionRemoveButton": "삭제",
+    "actionRemove": "{{action}} 삭제",
+    "actionServices": {
+      "turn_on": "켜기",
+      "turn_off": "끄기",
+      "lock": "잠그기",
+      "unlock": "잠금 해제",
+      "open_cover": "열기",
+      "close_cover": "닫기"
+    }
   },
   "draft": {
     "label": "확인할 자동화",

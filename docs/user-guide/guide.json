@@ -2025,6 +2025,10 @@
           "text": "With no tools chosen, a run can use the read-only tools the profile allows. Tools you choose are approved when you save, and ones that change things are listed apart. A run that reaches a tool you didn't approve skips it, finishes, and sends a notification naming the tool."
         },
         {
+          "type": "paragraph",
+          "text": "When a webhook, a device, a page, or a camera starts a run, what it delivered was written by someone else, so the run skips every tool that changes things, even ones you approved. Actions it may take on its own lifts that for exact calls you pick: under Advanced, choose a Home Assistant device and what to do, such as Turn on with the porch light, then Allow. A call that matches runs without asking, and any other is still skipped, so a sign held up to the doorbell camera can't unlock the door. The run's history says which actions it took. Choose only what you'd let it do with nobody watching."
+        },
+        {
           "type": "heading",
           "text": "Hear the latest result in chat"
         },

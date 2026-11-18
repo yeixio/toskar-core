@@ -402,7 +402,24 @@
       "other": "其他"
     },
     "needsToolModel": "所選模型無法使用工具，因此不會開啟網頁或使用這裡選的工具，只會憑已知內容回答。請選擇能使用工具的模型，或安裝一個。",
-    "openModels": "開啟模型"
+    "openModels": "開啟模型",
+    "actions": "可自行執行的操作",
+    "actionsHint": "每次執行都可以不經詢問進行這些呼叫，即使由觸發條件啟動。其他會改變內容的呼叫將被略過。只選擇在無人看管時也放心讓它做的事。",
+    "actionLabel": "{{action}}：{{device}}",
+    "actionDevice": "裝置",
+    "actionDevicePick": "選擇裝置…",
+    "actionService": "操作",
+    "actionAdd": "允許",
+    "actionRemoveButton": "移除",
+    "actionRemove": "移除{{action}}",
+    "actionServices": {
+      "turn_on": "開啟",
+      "turn_off": "關閉",
+      "lock": "上鎖",
+      "unlock": "解鎖",
+      "open_cover": "打開",
+      "close_cover": "關上"
+    }
   },
   "draft": {
     "label": "待確認的自動化",

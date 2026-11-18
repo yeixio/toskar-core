@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import type { AIProfile, Automation, AutomationClockTime, AutomationInput, AutomationSchedule, AutomationTrigger, Device, Model, ParsedAutomation, ToolRecord } from '@/types/api'
+import type { AIProfile, Automation, AutomationAction, AutomationClockTime, AutomationInput, AutomationSchedule, AutomationTrigger, Device, Model, ParsedAutomation, ToolRecord } from '@/types/api'
 import i18n from '@/i18n'
 import { api } from '@/lib/api'
 import { canChat, modelUsesTools } from '@/features/models/modelPresentation'
@@ -10,6 +10,7 @@ import { useUIStore } from '@/stores/uiStore'
 import { answerLanguages, nameInItself } from '@/i18n/answerLanguages'
 import { currencyName, formatDate } from '@/i18n/format'
 import { readNumber } from './number'
+import { AutomationActions } from './AutomationActions'
 import {
   civilInputValue,
   civilToISO,
@@ -89,6 +90,8 @@ export function AutomationForm({ profiles, models, tools, others = [], initial, 
   const [cooldown, setCooldown] = useState(initial?.trigger?.cooldown_seconds || 60)
   // Cameras each run looks at (#667).
   const [cameraIDs, setCameraIDs] = useState<string[]>(initial?.cameras?.map((c) => c.device) ?? [])
+  // Calls it may make on its own, even from a trigger (#586).
+  const [actions, setActions] = useState<AutomationAction[]>(initial?.actions ?? [])
   // The connected services' devices to pick from; none for someone who can't list them.
   const [devices, setDevices] = useState<Device[]>([])
   useEffect(() => {
@@ -224,6 +227,8 @@ export function AutomationForm({ profiles, models, tools, others = [], initial, 
       trigger: triggerKind ? currentTrigger() : initial?.trigger ? { kind: '' } : undefined,
       // An edit that stops looking sends no cameras.
       cameras: cameraIDs.length > 0 || initial?.cameras?.length ? cameraIDs.map((device) => ({ connector: connectorOf(device), device })) : undefined,
+      // An edit that removes them all sends an empty list.
+      actions: actions.length > 0 || initial?.actions?.length ? actions : undefined,
     }
   }
 
@@ -516,6 +521,7 @@ export function AutomationForm({ profiles, models, tools, others = [], initial, 
           <p className="text-xs text-ink-faint">{t('form.camerasHint', { count: MAX_CAMERAS })}</p>
         </fieldset>
       ) : null}
+      <AutomationActions devices={devices} value={actions} onChange={setActions} />
       {triggerKind === 'webhook' || triggerKind === 'after' || triggerKind === 'device' ? null : (
         <>
       <p className="text-sm text-ink-muted">{triggerKind ? t('form.checkSchedule') : t('form.schedule')}</p>
