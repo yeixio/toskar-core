@@ -186,3 +186,29 @@ func TestClaimsAction(t *testing.T) {
 		}
 	}
 }
+
+// A flight question is offered the flight look-up (#710), and an ordinary
+// message with a number isn't.
+func TestToolsForFlights(t *testing.T) {
+	available := []string{"internet.search", "flights.status"}
+	tools.SetConnected("flights", []tools.Definition{{ID: "flights.status", Risk: tools.RiskRead}})
+	t.Cleanup(func() { tools.SetConnected("flights", nil) })
+	offered := func(msg string) bool {
+		for _, id := range ToolsFor(Current, msg, available) {
+			if id == "flights.status" {
+				return true
+			}
+		}
+		return false
+	}
+	for _, msg := range []string{"American Airlines flight 3595 what gate in Chicago this morning?", "Is AA3595 on time?", "When does UA 912 land?", "what's the boarding time for my DL1"} {
+		if !offered(msg) {
+			t.Errorf("%q wasn't offered the flight look-up", msg)
+		}
+	}
+	for _, msg := range []string{"Count to 100", "What happened in 2024?", "Turn the volume up to 40"} {
+		if offered(msg) {
+			t.Errorf("%q was offered the flight look-up", msg)
+		}
+	}
+}
