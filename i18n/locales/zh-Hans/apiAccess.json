@@ -32,16 +32,18 @@
     "endpoint": "端点",
     "localAddress": "本地地址：<mono>{{address}}</mono>",
     "lanEndpoint": "局域网端点",
-    "lanHint": "使用这台电脑的局域网 IP 和端口 <mono>{{port}}</mono>（例如 <mono>https://192.168.x.x:{{port}}/v1</mono>）。",
+    "lanHint": "使用这台电脑的局域网 IP 和端口 <mono>{{port}}</mono>（例如 <mono>{{scheme}}://192.168.x.x:{{port}}/v1</mono>）。",
     "https": "已用 HTTPS 加密。证书 <mono>{{short}}</mono>。",
     "httpsCustom": "已用你的证书 <mono>{{short}}</mono> 进行 HTTPS 加密。",
     "httpsTrust": "浏览器或应用第一次会询问是否信任此证书。请确认它的 SHA-256 指纹以 {{short}} 开头。",
     "httpsError": "无法使用你的证书，因此改用 Toskar 自己的证书：{{error}}",
     "hideDocs": "隐藏 API 文档",
     "docs": "API 文档",
-    "docsBody": "Toskar 在 <mono>/v1</mono> 提供兼容 OpenAI 的 API。将客户端指向上面的端点；当其他电脑可以访问 Toskar 时，请发送 <header/>。`/api/v1` 和 `/v1` 都需要这个请求头。局域网端点使用 HTTPS 加密传输内容；仅有密钥并不会加密普通 HTTP。",
+    "docsBody": "Toskar 在 <mono>/v1</mono> 提供兼容 OpenAI 的 API。将客户端指向上面的端点；当其他电脑可以访问 Toskar 时，请发送 <header/>。`/api/v1` 和 `/v1` 都需要这个请求头。",
     "copied": "已复制",
-    "copyUrl": "复制 URL"
+    "copyUrl": "复制 URL",
+    "docsHttps": "局域网端点使用 HTTPS 加密传输内容。",
+    "docsHttp": "局域网端点使用普通 HTTP，传输内容不会加密：密钥只决定谁能访问，并不加密任何内容。"
   },
   "lan": {
     "title": "局域网访问",
@@ -101,9 +103,7 @@
   },
   "advanced": {
     "title": "高级",
-    "bind": "绑定地址",
-    "port": "端口",
-    "host": "已配置的主机"
+    "bind": "绑定地址"
   },
   "permissions": {
     "summary": "此密钥可以使用的内容",

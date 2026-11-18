@@ -32,16 +32,18 @@
     "endpoint": "Endpoint",
     "localAddress": "Local address: <mono>{{address}}</mono>",
     "lanEndpoint": "LAN endpoint",
-    "lanHint": "Use this computer's LAN IP with port <mono>{{port}}</mono> (for example <mono>https://192.168.x.x:{{port}}/v1</mono>).",
+    "lanHint": "Use this computer's LAN IP with port <mono>{{port}}</mono> (for example <mono>{{scheme}}://192.168.x.x:{{port}}/v1</mono>).",
     "https": "Encrypted with HTTPS. Certificate <mono>{{short}}</mono>.",
     "httpsCustom": "Encrypted with HTTPS, with your certificate <mono>{{short}}</mono>.",
     "httpsTrust": "A browser or app asks you to trust this certificate the first time. Check that its SHA-256 fingerprint starts with {{short}}.",
     "httpsError": "Your certificate couldn't be used, so Toskar's own is: {{error}}",
     "hideDocs": "Hide API documentation",
     "docs": "API documentation",
-    "docsBody": "Toskar exposes an OpenAI-compatible API at <mono>/v1</mono>. Point clients at the endpoint above and send <header/> when Toskar is reachable from other computers. `/api/v1` and `/v1` both require that header. The LAN endpoint uses HTTPS, which encrypts traffic; a key alone does not encrypt plain HTTP.",
+    "docsBody": "Toskar exposes an OpenAI-compatible API at <mono>/v1</mono>. Point clients at the endpoint above and send <header/> when Toskar is reachable from other computers. `/api/v1` and `/v1` both require that header.",
     "copied": "Copied",
-    "copyUrl": "Copy URL"
+    "copyUrl": "Copy URL",
+    "docsHttps": "The LAN endpoint uses HTTPS, which encrypts traffic.",
+    "docsHttp": "The LAN endpoint uses plain HTTP, so traffic isn't encrypted: a key controls who gets in, but doesn't encrypt anything."
   },
   "lan": {
     "title": "Local network access",
@@ -104,9 +106,7 @@
   },
   "advanced": {
     "title": "Advanced",
-    "bind": "Bind address",
-    "port": "Port",
-    "host": "Configured host"
+    "bind": "Bind address"
   },
   "permissions": {
     "summary": "What this key may use",

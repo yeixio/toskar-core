@@ -32,16 +32,18 @@
     "endpoint": "엔드포인트",
     "localAddress": "로컬 주소: <mono>{{address}}</mono>",
     "lanEndpoint": "LAN 엔드포인트",
-    "lanHint": "이 컴퓨터의 LAN IP와 포트 <mono>{{port}}</mono>을(를) 사용하세요(예: <mono>https://192.168.x.x:{{port}}/v1</mono>).",
+    "lanHint": "이 컴퓨터의 LAN IP와 포트 <mono>{{port}}</mono>을(를) 사용하세요(예: <mono>{{scheme}}://192.168.x.x:{{port}}/v1</mono>).",
     "https": "HTTPS로 암호화되어 있어요. 인증서 <mono>{{short}}</mono>.",
     "httpsCustom": "내 인증서 <mono>{{short}}</mono>로 HTTPS 암호화되어 있어요.",
     "httpsTrust": "처음에는 브라우저나 앱이 이 인증서를 신뢰할지 물어봐요. SHA-256 지문이 {{short}}(으)로 시작하는지 확인하세요.",
     "httpsError": "내 인증서를 쓸 수 없어서 Toskar의 인증서를 사용해요: {{error}}",
     "hideDocs": "API 문서 숨기기",
     "docs": "API 문서",
-    "docsBody": "Toskar는 <mono>/v1</mono>에서 OpenAI 호환 API를 제공해요. 클라이언트가 위의 엔드포인트를 사용하도록 설정하고, 다른 컴퓨터에서 Toskar에 접속할 수 있을 때는 <header/>을(를) 보내세요. `/api/v1`과 `/v1` 모두 이 헤더가 필요해요. LAN 엔드포인트는 통신을 암호화하는 HTTPS를 사용해요. 키만으로는 일반 HTTP가 암호화되지 않아요.",
+    "docsBody": "Toskar는 <mono>/v1</mono>에서 OpenAI 호환 API를 제공해요. 클라이언트가 위의 엔드포인트를 사용하도록 설정하고, 다른 컴퓨터에서 Toskar에 접속할 수 있을 때는 <header/>을(를) 보내세요. `/api/v1`과 `/v1` 모두 이 헤더가 필요해요.",
     "copied": "복사됨",
-    "copyUrl": "URL 복사"
+    "copyUrl": "URL 복사",
+    "docsHttps": "LAN 엔드포인트는 통신을 암호화하는 HTTPS를 사용해요.",
+    "docsHttp": "LAN 엔드포인트는 일반 HTTP를 사용하므로 통신이 암호화되지 않아요. 키는 누가 들어올 수 있는지만 정하고 암호화하지는 않아요."
   },
   "lan": {
     "title": "로컬 네트워크 액세스",
@@ -101,9 +103,7 @@
   },
   "advanced": {
     "title": "고급",
-    "bind": "바인드 주소",
-    "port": "포트",
-    "host": "설정된 호스트"
+    "bind": "바인드 주소"
   },
   "permissions": {
     "summary": "이 키가 사용할 수 있는 항목",

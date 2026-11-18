@@ -32,16 +32,18 @@
     "endpoint": "端點",
     "localAddress": "本機位址：<mono>{{address}}</mono>",
     "lanEndpoint": "LAN 端點",
-    "lanHint": "使用這台電腦的 LAN IP 加上連接埠 <mono>{{port}}</mono>（例如 <mono>https://192.168.x.x:{{port}}/v1</mono>）。",
+    "lanHint": "使用這台電腦的 LAN IP 加上連接埠 <mono>{{port}}</mono>（例如 <mono>{{scheme}}://192.168.x.x:{{port}}/v1</mono>）。",
     "https": "已用 HTTPS 加密。憑證 <mono>{{short}}</mono>。",
     "httpsCustom": "已用你的憑證 <mono>{{short}}</mono> 進行 HTTPS 加密。",
     "httpsTrust": "瀏覽器或應用程式第一次會詢問是否信任此憑證。請確認它的 SHA-256 指紋以 {{short}} 開頭。",
     "httpsError": "無法使用你的憑證，因此改用 Toskar 自己的憑證：{{error}}",
     "hideDocs": "隱藏 API 說明文件",
     "docs": "API 說明文件",
-    "docsBody": "Toskar 在 <mono>/v1</mono> 提供與 OpenAI 相容的 API。請將用戶端指向上方的端點；當其他電腦可以連線到 Toskar 時，請傳送 <header/>。`/api/v1` 和 `/v1` 都需要這個標頭。LAN 端點使用 HTTPS 加密傳輸內容；僅有金鑰並不會將一般 HTTP 加密。",
+    "docsBody": "Toskar 在 <mono>/v1</mono> 提供與 OpenAI 相容的 API。請將用戶端指向上方的端點；當其他電腦可以連線到 Toskar 時，請傳送 <header/>。`/api/v1` 和 `/v1` 都需要這個標頭。",
     "copied": "已拷貝",
-    "copyUrl": "拷貝 URL"
+    "copyUrl": "拷貝 URL",
+    "docsHttps": "LAN 端點使用 HTTPS 加密傳輸內容。",
+    "docsHttp": "LAN 端點使用一般 HTTP，傳輸內容不會加密：金鑰只決定誰能存取，並不會加密任何內容。"
   },
   "lan": {
     "title": "區域網路存取",
@@ -101,9 +103,7 @@
   },
   "advanced": {
     "title": "進階",
-    "bind": "綁定位址",
-    "port": "連接埠",
-    "host": "設定的主機"
+    "bind": "綁定位址"
   },
   "permissions": {
     "summary": "這把金鑰可以使用的項目",

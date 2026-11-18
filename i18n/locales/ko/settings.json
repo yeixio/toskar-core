@@ -114,7 +114,7 @@
   },
   "advanced": {
     "title": "고급 모드",
-    "description": "모델 ID, API 세부 정보, 프로필, 로그 및 기타 고급 사용자용 제어 항목을 표시해요."
+    "description": "모델 ID, API 세부 정보, 로그 및 기타 고급 사용자용 제어 항목을 표시해요."
   },
   "discovery": {
     "title": "다른 컴퓨터 찾기",

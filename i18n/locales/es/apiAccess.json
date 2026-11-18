@@ -32,16 +32,18 @@
     "endpoint": "Endpoint",
     "localAddress": "Dirección local: <mono>{{address}}</mono>",
     "lanEndpoint": "Endpoint en la LAN",
-    "lanHint": "Usa la IP de LAN de esta computadora con el puerto <mono>{{port}}</mono> (por ejemplo, <mono>https://192.168.x.x:{{port}}/v1</mono>).",
+    "lanHint": "Usa la IP de LAN de esta computadora con el puerto <mono>{{port}}</mono> (por ejemplo, <mono>{{scheme}}://192.168.x.x:{{port}}/v1</mono>).",
     "https": "Cifrado con HTTPS. Certificado <mono>{{short}}</mono>.",
     "httpsCustom": "Cifrado con HTTPS, con tu certificado <mono>{{short}}</mono>.",
     "httpsTrust": "Un navegador o una app te pedirá confiar en este certificado la primera vez. Comprueba que su huella SHA-256 empieza por {{short}}.",
     "httpsError": "No se pudo usar tu certificado, así que se usa el de Toskar: {{error}}",
     "hideDocs": "Ocultar la documentación de la API",
     "docs": "Documentación de la API",
-    "docsBody": "Toskar ofrece una API compatible con OpenAI en <mono>/v1</mono>. Configura los clientes con el endpoint de arriba y envía <header/> cuando Toskar sea accesible desde otras computadoras. Tanto `/api/v1` como `/v1` requieren ese encabezado. El endpoint de LAN usa HTTPS, que cifra el tráfico; una clave por sí sola no cifra el HTTP sin cifrar.",
+    "docsBody": "Toskar ofrece una API compatible con OpenAI en <mono>/v1</mono>. Configura los clientes con el endpoint de arriba y envía <header/> cuando Toskar sea accesible desde otras computadoras. Tanto `/api/v1` como `/v1` requieren ese encabezado.",
     "copied": "Copiado",
-    "copyUrl": "Copiar URL"
+    "copyUrl": "Copiar URL",
+    "docsHttps": "El endpoint de LAN usa HTTPS, que cifra el tráfico.",
+    "docsHttp": "El endpoint de LAN usa HTTP sin cifrar, así que el tráfico no va cifrado: una clave controla quién entra, pero no cifra nada."
   },
   "lan": {
     "title": "Acceso desde la red local",
@@ -107,9 +109,7 @@
   },
   "advanced": {
     "title": "Avanzado",
-    "bind": "Dirección de enlace",
-    "port": "Puerto",
-    "host": "Host configurado"
+    "bind": "Dirección de enlace"
   },
   "permissions": {
     "summary": "Qué puede usar esta clave",

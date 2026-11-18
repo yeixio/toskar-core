@@ -32,16 +32,18 @@
     "endpoint": "Endpunkt",
     "localAddress": "Lokale Adresse: <mono>{{address}}</mono>",
     "lanEndpoint": "LAN-Endpunkt",
-    "lanHint": "Verwende die LAN-IP dieses Computers mit Port <mono>{{port}}</mono> (zum Beispiel <mono>https://192.168.x.x:{{port}}/v1</mono>).",
+    "lanHint": "Verwende die LAN-IP dieses Computers mit Port <mono>{{port}}</mono> (zum Beispiel <mono>{{scheme}}://192.168.x.x:{{port}}/v1</mono>).",
     "https": "Mit HTTPS verschlüsselt. Zertifikat <mono>{{short}}</mono>.",
     "httpsCustom": "Mit HTTPS verschlüsselt, mit deinem Zertifikat <mono>{{short}}</mono>.",
     "httpsTrust": "Ein Browser oder eine App fragt beim ersten Mal, ob du diesem Zertifikat vertraust. Prüfe, dass sein SHA-256-Fingerabdruck mit {{short}} beginnt.",
     "httpsError": "Dein Zertifikat konnte nicht verwendet werden, daher wird das von Toskar genutzt: {{error}}",
     "hideDocs": "API-Dokumentation ausblenden",
     "docs": "API-Dokumentation",
-    "docsBody": "Toskar stellt unter <mono>/v1</mono> eine OpenAI-kompatible API bereit. Richte Clients auf den Endpunkt oben aus und sende <header/>, wenn Toskar von anderen Computern aus erreichbar ist. `/api/v1` und `/v1` verlangen beide diesen Header. Der LAN-Endpunkt nutzt HTTPS, das den Datenverkehr verschlüsselt; ein Schlüssel allein verschlüsselt einfaches HTTP nicht.",
+    "docsBody": "Toskar stellt unter <mono>/v1</mono> eine OpenAI-kompatible API bereit. Richte Clients auf den Endpunkt oben aus und sende <header/>, wenn Toskar von anderen Computern aus erreichbar ist. `/api/v1` und `/v1` verlangen beide diesen Header.",
     "copied": "Kopiert",
-    "copyUrl": "URL kopieren"
+    "copyUrl": "URL kopieren",
+    "docsHttps": "Der LAN-Endpunkt nutzt HTTPS, das den Datenverkehr verschlüsselt.",
+    "docsHttp": "Der LAN-Endpunkt nutzt einfaches HTTP, der Datenverkehr ist also nicht verschlüsselt: Ein Schlüssel regelt, wer Zugriff hat, verschlüsselt aber nichts."
   },
   "lan": {
     "title": "Zugriff im lokalen Netzwerk",
@@ -104,9 +106,7 @@
   },
   "advanced": {
     "title": "Erweitert",
-    "bind": "Bind-Adresse",
-    "port": "Port",
-    "host": "Konfigurierter Host"
+    "bind": "Bind-Adresse"
   },
   "permissions": {
     "summary": "Was dieser Schlüssel nutzen darf",

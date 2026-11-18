@@ -116,7 +116,7 @@
   },
   "advanced": {
     "title": "Advanced mode",
-    "description": "Show model IDs, API details, Profiles, logs, and other power-user controls."
+    "description": "Show model IDs, API details, logs, and other power-user controls."
   },
   "discovery": {
     "title": "Find other computers",

@@ -260,26 +260,37 @@ export function ApiAccessPage() {
     updateSettingsMutation.mutate(false)
   }
 
+  const header = (
+    <header className="page-header">
+      <RealmKicker />
+      <h1 className="page-title">{t('page.title')}</h1>
+      <p className="page-subtitle">{t('page.subtitle')}</p>
+    </header>
+  )
+  // Nothing below renders with made-up defaults while it can't load (#1254).
+  if (settingsQuery.isError || keysQuery.isError || settingsQuery.isLoading || keysQuery.isLoading) {
+    return (
+      <div className="mx-auto w-full max-w-2xl min-w-0 space-y-6">
+        {header}
+        {settingsQuery.isError || keysQuery.isError ? (
+          <LoadError
+            error={settingsQuery.error ?? keysQuery.error}
+            onRetry={() => {
+              void settingsQuery.refetch()
+              void keysQuery.refetch()
+            }}
+            retrying={settingsQuery.isFetching || keysQuery.isFetching}
+          />
+        ) : (
+          <LoadingSpinner label={t('page.loading')} />
+        )}
+      </div>
+    )
+  }
+
   return (
     <div className="mx-auto w-full max-w-2xl min-w-0 space-y-6">
-      <header className="page-header">
-        <RealmKicker />
-        <h1 className="page-title">{t('page.title')}</h1>
-        <p className="page-subtitle">{t('page.subtitle')}</p>
-      </header>
-
-      {settingsQuery.isError || keysQuery.isError ? (
-        <LoadError
-          error={settingsQuery.error ?? keysQuery.error}
-          onRetry={() => {
-            void settingsQuery.refetch()
-            void keysQuery.refetch()
-          }}
-          retrying={settingsQuery.isFetching || keysQuery.isFetching}
-        />
-      ) : (settingsQuery.isLoading || keysQuery.isLoading) ? (
-        <LoadingSpinner label={t('page.loading')} />
-      ) : null}
+      {header}
 
       <section className="card space-y-4">
         <div className="flex flex-wrap items-start justify-between gap-3">
@@ -361,7 +372,7 @@ export function ApiAccessPage() {
                   <Trans
                     t={t}
                     i18nKey="service.lanHint"
-                    values={{ port }}
+                    values={{ port, scheme: tls?.enabled ? 'https' : 'http' }}
                     components={{ mono: <span className="font-mono text-ink" /> }}
                   />
                 </p>
@@ -403,6 +414,8 @@ export function ApiAccessPage() {
                   header: <span className="font-mono text-ink">Authorization: Bearer &lt;api-key&gt;</span>,
                 }}
               />
+              {/* Only what's true of this computer's LAN endpoint (#1254). */}
+              {lanEnabled ? <> {tls?.enabled ? t('service.docsHttps') : t('service.docsHttp')}</> : null}
             </p>
             <pre className="mt-3 overflow-x-auto rounded-md bg-canvas px-3 py-2 font-mono text-[11px] text-ink">
               {`curl ${localEndpoint}/models \\
@@ -655,14 +668,6 @@ export function ApiAccessPage() {
               <dd className="font-mono text-ink">
                 {bindHost}:{port}
               </dd>
-            </div>
-            <div className="flex justify-between gap-3">
-              <dt className="text-ink-muted">{t('advanced.port')}</dt>
-              <dd className="font-mono text-ink">{port}</dd>
-            </div>
-            <div className="flex justify-between gap-3">
-              <dt className="text-ink-muted">{t('advanced.host')}</dt>
-              <dd className="font-mono text-ink">{settings.api_host}</dd>
             </div>
           </dl>
         </section>

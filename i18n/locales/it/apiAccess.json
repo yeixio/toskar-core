@@ -32,16 +32,18 @@
     "endpoint": "Endpoint",
     "localAddress": "Indirizzo locale: <mono>{{address}}</mono>",
     "lanEndpoint": "Endpoint LAN",
-    "lanHint": "Usa l'IP LAN di questo computer con la porta <mono>{{port}}</mono> (per esempio <mono>https://192.168.x.x:{{port}}/v1</mono>).",
+    "lanHint": "Usa l'IP LAN di questo computer con la porta <mono>{{port}}</mono> (per esempio <mono>{{scheme}}://192.168.x.x:{{port}}/v1</mono>).",
     "https": "Cifrato con HTTPS. Certificato <mono>{{short}}</mono>.",
     "httpsCustom": "Cifrato con HTTPS, con il tuo certificato <mono>{{short}}</mono>.",
     "httpsTrust": "Un browser o un’app ti chiede di fidarti di questo certificato la prima volta. Controlla che la sua impronta SHA-256 inizi con {{short}}.",
     "httpsError": "Non è stato possibile usare il tuo certificato, quindi si usa quello di Toskar: {{error}}",
     "hideDocs": "Nascondi la documentazione API",
     "docs": "Documentazione API",
-    "docsBody": "Toskar espone un'API compatibile con OpenAI su <mono>/v1</mono>. Indirizza i client all'endpoint qui sopra e invia <header/> quando Toskar è raggiungibile da altri computer. Sia `/api/v1` sia `/v1` richiedono questa intestazione. L'endpoint LAN usa HTTPS, che cifra il traffico; una chiave da sola non cifra l'HTTP semplice.",
+    "docsBody": "Toskar espone un'API compatibile con OpenAI su <mono>/v1</mono>. Indirizza i client all'endpoint qui sopra e invia <header/> quando Toskar è raggiungibile da altri computer. Sia `/api/v1` sia `/v1` richiedono questa intestazione.",
     "copied": "Copiato",
-    "copyUrl": "Copia URL"
+    "copyUrl": "Copia URL",
+    "docsHttps": "L'endpoint LAN usa HTTPS, che cifra il traffico.",
+    "docsHttp": "L'endpoint LAN usa HTTP semplice, quindi il traffico non è cifrato: una chiave decide chi entra, ma non cifra nulla."
   },
   "lan": {
     "title": "Accesso dalla rete locale",
@@ -107,9 +109,7 @@
   },
   "advanced": {
     "title": "Avanzate",
-    "bind": "Indirizzo di ascolto",
-    "port": "Porta",
-    "host": "Host configurato"
+    "bind": "Indirizzo di ascolto"
   },
   "permissions": {
     "summary": "Cosa può usare questa chiave",
