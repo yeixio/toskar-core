@@ -6,6 +6,7 @@ import (
 	"os"
 	"sync"
 
+	"github.com/yeixio/toskar-core/internal/taxonomy"
 	rootmanifests "github.com/yeixio/toskar-core/manifests"
 	"github.com/yeixio/toskar-core/pkg/contracts"
 )
@@ -28,12 +29,14 @@ type manifestModel struct {
 	Name string `json:"name"`
 	// Note says why the model is set up as it is, for whoever edits the
 	// manifest; it isn't shown.
-	Note           string  `json:"note,omitempty"`
-	Kind           string  `json:"kind"`
-	Tier           string  `json:"tier,omitempty"`
-	Description    string  `json:"description"`
-	License        string  `json:"license"`
-	Commercial     string  `json:"commercial"`
+	Note        string `json:"note,omitempty"`
+	Kind        string `json:"kind"`
+	Tier        string `json:"tier,omitempty"`
+	Description string `json:"description"`
+	License     string `json:"license"`
+	Commercial  string `json:"commercial"`
+	// Profile is what the model does, for browsing the store (#593).
+	taxonomy.Profile
 	MemoryBytes    int64   `json:"memory_bytes"`
 	GraphicsBytes  int64   `json:"graphics_bytes,omitempty"`
 	Edits          bool    `json:"edits,omitempty"`
@@ -57,7 +60,7 @@ type manifestModel struct {
 }
 
 func (m manifestModel) model() Model {
-	out := Model{ID: m.ID, Name: m.Name, Kind: m.Kind, Tier: m.Tier, Description: m.Description, License: m.License, Commercial: m.Commercial,
+	out := Model{ID: m.ID, Name: m.Name, Kind: m.Kind, Tier: m.Tier, Description: m.Description, License: m.License, Commercial: m.Commercial, Profile: m.Profile,
 		MemoryBytes: m.MemoryBytes, GraphicsBytes: m.GraphicsBytes, Edits: m.Edits, EditOnly: m.EditOnly, Untested: m.Untested,
 		Steps: m.Steps, CFG: m.CFG, FlowShift: m.FlowShift, Sampler: m.Sampler, Frames: m.Frames, FPS: m.FPS,
 		HighNoiseSteps: m.HighNoiseSteps, HighNoiseCFG: m.HighNoiseCFG, ModelArgs: m.ModelArgs,
@@ -93,6 +96,13 @@ func parseManifest(raw []byte) (*mediaManifest, error) {
 			case contracts.CommercialYes, contracts.CommercialLimited, contracts.CommercialNo:
 			default:
 				return nil, fmt.Errorf("media.json: %s doesn't say whether its license allows business use", model.ID)
+			}
+			// A media.json of your own may leave categories out; the
+			// built-in one can't (TestManifestCategories).
+			if model.PrimaryCategory != "" {
+				if err := taxonomy.Builtin().Check(model.Profile); err != nil {
+					return nil, fmt.Errorf("media.json: %s %w", model.ID, err)
+				}
 			}
 			if model.NeedsLicense && (model.LicenseURL == "" || model.LicenseAllows == "") {
 				return nil, fmt.Errorf("media.json: %s needs a license but doesn't link or describe it", model.ID)

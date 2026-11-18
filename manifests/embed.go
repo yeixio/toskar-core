@@ -12,3 +12,9 @@ var PresetsJSON []byte
 //
 //go:embed models/media.json
 var MediaJSON []byte
+
+// CategoriesJSON is the store's taxonomy: what models do, as categories
+// and tasks, and the kinds of input and output they take (#593).
+//
+//go:embed models/categories.json
+var CategoriesJSON []byte

@@ -266,6 +266,18 @@ type Model struct {
 	// (#593, contract 1.102). Nil is unknown, as for a model added from
 	// a link.
 	License *ModelLicense `json:"license,omitempty"`
+	// PrimaryCategory is what the model does first, for browsing the store,
+	// such as chat_coding, retrieval, or creative; uncategorized for a model
+	// nobody has checked. Categories are all of them, and Tasks what it
+	// does in them, such as code_generation or text_embedding. Input and
+	// output modalities are what it takes and gives, such as text and
+	// image. None of these says Toskar can run it; Runtime does (#593,
+	// contract 1.104).
+	PrimaryCategory  string   `json:"primary_category,omitempty"`
+	Categories       []string `json:"categories,omitempty"`
+	Tasks            []string `json:"tasks,omitempty"`
+	InputModalities  []string `json:"input_modalities,omitempty"`
+	OutputModalities []string `json:"output_modalities,omitempty"`
 	// Speculation is auto or off for a chat model installed on this
 	// computer: whether it guesses the next words ahead and checks several
 	// at once (#835, contract 1.67). Empty for other models.

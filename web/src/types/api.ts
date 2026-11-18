@@ -105,6 +105,12 @@ export interface Model {
   languages?: LanguageCapability[]
   /** What its license allows, for a catalog model (#593). */
   license?: ModelLicense
+  /** What the model does, for browsing the store (#593, contract 1.104); uncategorized when nobody has checked. */
+  primary_category?: string
+  categories?: string[]
+  tasks?: string[]
+  input_modalities?: string[]
+  output_modalities?: string[]
   purpose?: string[]
   tags?: string[]
   runtime?: string[]
@@ -999,6 +1005,12 @@ export interface ImageModel {
   license: string
   /** Whether a business may use it under its license (#593). */
   commercial?: Commercial
+  /** What the model does, for browsing the store (#593, contract 1.104). */
+  primary_category?: string
+  categories?: string[]
+  tasks?: string[]
+  input_modalities?: string[]
+  output_modalities?: string[]
   memory_bytes: number
   size_bytes: number
   /** It can change an image from an instruction, or, for a video model, animate one. */
