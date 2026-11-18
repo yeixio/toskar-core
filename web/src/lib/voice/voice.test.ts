@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import { VOICE_RATE, fromBase64, fromPCM16, resample, toBase64, toPCM16 } from './pcm'
-import { VoiceConnection, voiceProtocols, voiceSocketUrl, type SocketLike, type VoiceStatus } from './realtime'
+import { VoiceConnection, resolveVoiceSocketUrl, voiceProtocols, voiceSocketUrl, type SocketLike, type VoiceStatus } from './realtime'
 
 describe('pcm', () => {
   it('round-trips 16-bit PCM and base64', () => {
@@ -67,6 +67,26 @@ describe('VoiceConnection', () => {
     const { socket } = connect()
     expect(socket.url).toMatch(/^wss?:\/\/.+\/api\/v1\/voice\/realtime$/)
     expect(socket.protocols[0]).toBe('realtime')
+  })
+
+  it("uses the daemon's own address in the desktop app, where the proxy can't carry a WebSocket", async () => {
+    const w = window as unknown as { go?: unknown }
+    w.go = { main: { App: { VoiceSocketURL: () => Promise.resolve('ws://127.0.0.1:7331/api/v1/voice/realtime') } } }
+    try {
+      expect(await resolveVoiceSocketUrl()).toBe('ws://127.0.0.1:7331/api/v1/voice/realtime')
+      // An older shell without it: this page's address.
+      w.go = { main: { App: {} } }
+      expect(await resolveVoiceSocketUrl()).toBe(voiceSocketUrl())
+    } finally {
+      delete w.go
+    }
+    expect(await resolveVoiceSocketUrl()).toBe(voiceSocketUrl())
+    let opened = ''
+    new VoiceConnection({}, (url) => {
+      opened = url
+      return new FakeSocket(url, [])
+    }, 'ws://127.0.0.1:7331/api/v1/voice/realtime')
+    expect(opened).toBe('ws://127.0.0.1:7331/api/v1/voice/realtime')
   })
 
   it('sends audio in 100 ms pieces once connected', () => {

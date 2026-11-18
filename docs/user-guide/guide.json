@@ -2539,7 +2539,7 @@
             "Toskar 1.14 or later, from outside the Mac App Store. Voice mode runs speech on this computer, which that build can't install.",
             "A chat model, as [Choose and manage models](#models) explains.",
             "A microphone and speakers or headphones. Headphones keep the answer from sounding like you talking over it.",
-            "A web address the browser trusts with a microphone: Toskar on this computer, at localhost, or at its https:// address from another device.",
+            "The Toskar app, or a web address the browser trusts with a microphone: Toskar on this computer, at localhost, or at its https:// address from another device.",
             "Your role allowed to use voice, which an Admin sets in [People](#people).",
             "A download the first time: speech for hearing you, and about 120 MB for the natural voice. After that it works offline."
           ]
@@ -2552,7 +2552,7 @@
           "type": "steps",
           "items": [
             "In a chat, choose Talk, the button with sound bars beside Send.",
-            "When your browser asks, allow Toskar to use the microphone.",
+            "When your browser asks, allow Toskar to use the microphone. In the Toskar app on a Mac, macOS asks the first time.",
             "Wait for Listening, then speak as you would to a person.",
             "Pause when you're done. Toskar answers out loud, and the words appear as it speaks.",
             "To stop an answer, just start talking. Toskar stops and listens.",
