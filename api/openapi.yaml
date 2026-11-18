@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Toskar Control Plane API
-  version: "1.103"
+  version: "1.104"
   description: >-
     Local AI control plane API for Toskar, its OpenAI-compatible routes, and its MCP server.
     On the default loopback bind no key is needed. When the daemon listens on any other address,
@@ -8188,6 +8188,11 @@ components:
               fit: {type: string, enum: [excellent, good, tight, heavy, unsupported]}
               tokens: {type: integer}
         slots: {type: integer, minimum: 1, maximum: 4, description: 'How many requests a chat model installed on this computer answers at once, so a swarm can run that many agents on it together; each keeps the whole context window (#1135, contract 1.88). Absent for other models.'}
+        primary_category: {type: string, description: 'What the model does first, for browsing the store, from the categories in manifests/models/categories.json, such as chat_coding, retrieval, or creative; uncategorized for a model nobody has checked (#593, contract 1.104). It never says Toskar can run the model; runtime does.'}
+        categories: {type: array, items: {type: string}, description: Every category the model belongs to, the primary one too}
+        tasks: {type: array, items: {type: string}, description: 'What the model does in its categories, such as code_generation or text_embedding'}
+        input_modalities: {type: array, items: {type: string}, description: 'What the model takes, such as text, code, or image'}
+        output_modalities: {type: array, items: {type: string}, description: 'What the model gives, such as text, image, or embedding'}
         license:
           type: object
           description: "A catalog model's license and what it allows, checked by hand (#593, contract 1.102). Absent where it's unknown, as for a model added from a link."

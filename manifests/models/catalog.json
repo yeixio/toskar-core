@@ -20,6 +20,11 @@
       },
       "purpose": ["coding", "assistant", "general"],
       "tags": ["coding", "fast"],
+      "primary_category": "chat_coding",
+      "categories": ["chat_coding"],
+      "tasks": ["conversation", "code_generation", "code_editing", "tool_use"],
+      "input_modalities": ["text", "code"],
+      "output_modalities": ["text", "code"],
       "runtime": ["llamacpp"],
       "recommended_roles": ["worker", "coordinator", "reviewer"],
       "training": {
@@ -57,6 +62,11 @@
       },
       "purpose": ["coding"],
       "tags": ["coding"],
+      "primary_category": "chat_coding",
+      "categories": ["chat_coding"],
+      "tasks": ["conversation", "code_generation", "code_editing", "tool_use"],
+      "input_modalities": ["text", "code"],
+      "output_modalities": ["text", "code"],
       "runtime": ["llamacpp"],
       "recommended_roles": ["worker", "reviewer"],
       "training": {
@@ -94,6 +104,11 @@
       },
       "purpose": ["coding"],
       "tags": ["coding", "large"],
+      "primary_category": "chat_coding",
+      "categories": ["chat_coding"],
+      "tasks": ["conversation", "code_generation", "code_editing", "tool_use"],
+      "input_modalities": ["text", "code"],
+      "output_modalities": ["text", "code"],
       "runtime": ["llamacpp"],
       "recommended_roles": ["worker", "reviewer"],
       "training": {
@@ -131,6 +146,11 @@
       },
       "purpose": ["assistant", "general"],
       "tags": ["general", "fast"],
+      "primary_category": "chat_coding",
+      "categories": ["chat_coding"],
+      "tasks": ["conversation", "tool_use"],
+      "input_modalities": ["text"],
+      "output_modalities": ["text"],
       "runtime": ["llamacpp"],
       "recommended_roles": ["assistant"],
       "training": {
@@ -175,6 +195,11 @@
       },
       "purpose": ["assistant", "general", "research"],
       "tags": ["general"],
+      "primary_category": "chat_coding",
+      "categories": ["chat_coding"],
+      "tasks": ["conversation", "tool_use"],
+      "input_modalities": ["text"],
+      "output_modalities": ["text"],
       "runtime": ["llamacpp"],
       "recommended_roles": ["coordinator", "worker", "reviewer"],
       "training": {
@@ -219,6 +244,11 @@
       },
       "purpose": ["assistant", "research", "general"],
       "tags": ["general", "reasoning"],
+      "primary_category": "chat_coding",
+      "categories": ["chat_coding"],
+      "tasks": ["conversation", "reasoning", "code_generation", "code_editing", "tool_use"],
+      "input_modalities": ["text", "code"],
+      "output_modalities": ["text", "code"],
       "runtime": ["llamacpp"],
       "recommended_roles": ["coordinator", "worker", "researcher"],
       "languages": [
@@ -267,6 +297,11 @@
       },
       "purpose": ["assistant", "general"],
       "tags": ["general", "fast"],
+      "primary_category": "chat_coding",
+      "categories": ["chat_coding"],
+      "tasks": ["conversation"],
+      "input_modalities": ["text"],
+      "output_modalities": ["text"],
       "runtime": ["llamacpp"],
       "recommended_roles": ["assistant"],
       "languages": [
@@ -293,6 +328,11 @@
       },
       "purpose": ["assistant", "general"],
       "tags": ["general", "large", "topic-check"],
+      "primary_category": "chat_coding",
+      "categories": ["chat_coding"],
+      "tasks": ["conversation"],
+      "input_modalities": ["text"],
+      "output_modalities": ["text"],
       "runtime": ["llamacpp"],
       "recommended_roles": ["assistant"],
       "languages": [
@@ -318,6 +358,11 @@
       },
       "purpose": ["assistant", "general"],
       "tags": ["general"],
+      "primary_category": "chat_coding",
+      "categories": ["chat_coding"],
+      "tasks": ["conversation", "tool_use"],
+      "input_modalities": ["text"],
+      "output_modalities": ["text"],
       "runtime": ["llamacpp"],
       "recommended_roles": ["assistant"],
       "training": {
@@ -367,6 +412,11 @@
       },
       "purpose": ["assistant", "general"],
       "tags": ["general"],
+      "primary_category": "chat_coding",
+      "categories": ["chat_coding"],
+      "tasks": ["conversation", "tool_use"],
+      "input_modalities": ["text"],
+      "output_modalities": ["text"],
       "runtime": ["llamacpp"],
       "recommended_roles": ["assistant", "coordinator"],
       "training": {
@@ -420,6 +470,11 @@
       },
       "purpose": ["assistant", "general", "research"],
       "tags": ["general", "large", "reasoning", "topic-check"],
+      "primary_category": "chat_coding",
+      "categories": ["chat_coding"],
+      "tasks": ["conversation", "reasoning", "tool_use"],
+      "input_modalities": ["text"],
+      "output_modalities": ["text"],
       "runtime": ["llamacpp"],
       "recommended_roles": ["assistant", "coordinator"],
       "training": {
@@ -468,6 +523,11 @@
       },
       "purpose": ["research", "general"],
       "tags": ["reasoning", "fast"],
+      "primary_category": "chat_coding",
+      "categories": ["chat_coding"],
+      "tasks": ["conversation", "reasoning"],
+      "input_modalities": ["text"],
+      "output_modalities": ["text"],
       "runtime": ["llamacpp"],
       "recommended_roles": ["researcher"],
       "training": {
@@ -505,6 +565,11 @@
       },
       "purpose": ["research"],
       "tags": ["reasoning"],
+      "primary_category": "chat_coding",
+      "categories": ["chat_coding"],
+      "tasks": ["conversation", "reasoning"],
+      "input_modalities": ["text"],
+      "output_modalities": ["text"],
       "runtime": ["llamacpp"],
       "recommended_roles": ["researcher"],
       "training": {
@@ -542,6 +607,11 @@
       },
       "purpose": ["assistant", "general"],
       "tags": ["general"],
+      "primary_category": "chat_coding",
+      "categories": ["chat_coding"],
+      "tasks": ["conversation", "tool_use"],
+      "input_modalities": ["text"],
+      "output_modalities": ["text"],
       "runtime": ["llamacpp"],
       "recommended_roles": ["assistant"],
       "training": {
@@ -585,6 +655,11 @@
       },
       "purpose": ["assistant", "general"],
       "tags": ["vision", "topic-check"],
+      "primary_category": "chat_coding",
+      "categories": ["chat_coding", "vision"],
+      "tasks": ["conversation", "tool_use", "image_understanding"],
+      "input_modalities": ["text", "image"],
+      "output_modalities": ["text"],
       "runtime": ["llamacpp"],
       "recommended_roles": ["assistant"],
       "languages": [
@@ -624,6 +699,11 @@
       },
       "purpose": ["assistant", "general"],
       "tags": ["vision"],
+      "primary_category": "chat_coding",
+      "categories": ["chat_coding", "vision"],
+      "tasks": ["conversation", "tool_use", "image_understanding"],
+      "input_modalities": ["text", "image"],
+      "output_modalities": ["text"],
       "runtime": ["llamacpp"],
       "recommended_roles": ["assistant"],
       "languages": [
@@ -662,6 +742,11 @@
       },
       "purpose": ["assistant", "general", "research"],
       "tags": ["general", "large", "reasoning", "topic-check"],
+      "primary_category": "chat_coding",
+      "categories": ["chat_coding"],
+      "tasks": ["conversation", "reasoning", "tool_use"],
+      "input_modalities": ["text"],
+      "output_modalities": ["text"],
       "runtime": ["llamacpp"],
       "recommended_roles": ["assistant"],
       "training": {
@@ -716,6 +801,11 @@
       },
       "purpose": ["assistant", "general", "research", "coding"],
       "tags": ["general", "large", "reasoning", "vision"],
+      "primary_category": "chat_coding",
+      "categories": ["chat_coding", "vision"],
+      "tasks": ["conversation", "reasoning", "code_generation", "code_editing", "tool_use", "image_understanding"],
+      "input_modalities": ["text", "code", "image"],
+      "output_modalities": ["text", "code"],
       "runtime": ["llamacpp"],
       "recommended_roles": ["assistant"],
       "languages": [
@@ -750,6 +840,11 @@
       },
       "purpose": ["knowledge"],
       "tags": ["embedding", "fast"],
+      "primary_category": "retrieval",
+      "categories": ["retrieval"],
+      "tasks": ["text_embedding", "semantic_search"],
+      "input_modalities": ["text"],
+      "output_modalities": ["embedding"],
       "runtime": ["llamacpp"],
       "support_role": "embedding",
       "languages": [
@@ -785,6 +880,11 @@
         "embedding",
         "multilingual"
       ],
+      "primary_category": "retrieval",
+      "categories": ["retrieval"],
+      "tasks": ["text_embedding", "semantic_search"],
+      "input_modalities": ["text"],
+      "output_modalities": ["embedding"],
       "runtime": [
         "llamacpp"
       ],
@@ -854,6 +954,11 @@
         "vision",
         "fast"
       ],
+      "primary_category": "chat_coding",
+      "categories": ["chat_coding", "vision"],
+      "tasks": ["conversation", "tool_use", "image_understanding"],
+      "input_modalities": ["text", "image"],
+      "output_modalities": ["text"],
       "runtime": [
         "llamacpp"
       ],
@@ -1019,6 +1124,11 @@
         "general",
         "vision"
       ],
+      "primary_category": "chat_coding",
+      "categories": ["chat_coding", "vision"],
+      "tasks": ["conversation", "tool_use", "image_understanding"],
+      "input_modalities": ["text", "image"],
+      "output_modalities": ["text"],
       "runtime": [
         "llamacpp"
       ],
@@ -1185,6 +1295,11 @@
       "runtime": [
         "llamacpp"
       ],
+      "primary_category": "chat_coding",
+      "categories": ["chat_coding", "vision"],
+      "tasks": ["conversation", "code_generation", "code_editing", "tool_use", "image_understanding"],
+      "input_modalities": ["text", "code", "image"],
+      "output_modalities": ["text", "code"],
       "recommended_roles": [
         "assistant",
         "coordinator",
@@ -1345,6 +1460,11 @@
         "tools",
         "topic-check"
       ],
+      "primary_category": "chat_coding",
+      "categories": ["chat_coding"],
+      "tasks": ["conversation", "reasoning", "code_generation", "code_editing", "tool_use"],
+      "input_modalities": ["text", "code"],
+      "output_modalities": ["text", "code"],
       "runtime": [
         "llamacpp"
       ],
@@ -1400,6 +1520,11 @@
         "coding",
         "tools"
       ],
+      "primary_category": "chat_coding",
+      "categories": ["chat_coding"],
+      "tasks": ["conversation", "reasoning", "code_generation", "code_editing", "tool_use"],
+      "input_modalities": ["text", "code"],
+      "output_modalities": ["text", "code"],
       "runtime": [
         "llamacpp"
       ],
@@ -1460,6 +1585,11 @@
         "vision",
         "coding"
       ],
+      "primary_category": "chat_coding",
+      "categories": ["chat_coding", "vision"],
+      "tasks": ["conversation", "code_generation", "code_editing", "tool_use", "image_understanding"],
+      "input_modalities": ["text", "code", "image"],
+      "output_modalities": ["text", "code"],
       "runtime": [
         "llamacpp"
       ],
