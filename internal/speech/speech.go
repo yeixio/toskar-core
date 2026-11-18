@@ -35,8 +35,9 @@ var synthesizeScript []byte
 var framesScript []byte
 
 // Requirements are the speech environment's packages. PyAV is pinned
-// because 19 removed an argument faster-whisper 1.2.1 passes.
-var Requirements = []string{"faster-whisper==1.2.1", "av==18.0.0", "piper-tts==1.8.0"}
+// because 19 removed an argument faster-whisper 1.2.1 passes. kokoro-onnx
+// is live voice mode's natural voice (kokoro.go).
+var Requirements = []string{"faster-whisper==1.2.1", "av==18.0.0", "piper-tts==1.8.0", "kokoro-onnx==0.6.1"}
 
 // Spec is the managed Python environment speech runs in.
 func Spec() pyenv.Spec { return pyenv.Spec{Name: "speech", Requirements: Requirements} }
@@ -119,16 +120,25 @@ type Transcript struct {
 	Segments []Segment `json:"segments"`
 }
 
-// run runs a script with a JSON config in a job folder and decodes its output.
-func (e *Engine) run(ctx context.Context, script []byte, cfg map[string]any, files map[string][]byte, out any) error {
+// ensure is the speech environment's Python, installed the first time.
+func (e *Engine) ensure(ctx context.Context) (string, error) {
 	py, err := e.Python.Ensure(ctx, Spec(), nil)
 	if errors.Is(err, pyenv.ErrSandboxed) {
-		return fmt.Errorf("speech is not included in this copy of Toskar: %w", err)
+		return "", fmt.Errorf("speech is not included in this copy of Toskar: %w", err)
 	}
 	if err != nil {
 		// The app shows its own plain message for the code; the detail stays
 		// in the API's message, not in the chat (#279).
-		return contracts.Errorf("SPEECH_SETUP_FAILED", nil, "speech could not be installed: %w", err)
+		return "", contracts.Errorf("SPEECH_SETUP_FAILED", nil, "speech could not be installed: %w", err)
+	}
+	return py, nil
+}
+
+// run runs a script with a JSON config in a job folder and decodes its output.
+func (e *Engine) run(ctx context.Context, script []byte, cfg map[string]any, files map[string][]byte, out any) error {
+	py, err := e.ensure(ctx)
+	if err != nil {
+		return err
 	}
 	if err := os.MkdirAll(filepath.Join(e.Dir, "jobs"), 0o700); err != nil {
 		return err
