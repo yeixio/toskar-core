@@ -7,7 +7,7 @@ import { EmptyState } from '@/components/ui/EmptyState'
 import { ShownError, shownError } from '@/components/ui/ShownError'
 import { Toggle } from '@/components/ui/Toggle'
 import { api } from '@/lib/api'
-import { blankProfileTemplate, profileTemplateFromPurpose } from '@/lib/profilePresets'
+import { blankProfileTemplate, doorstepProfileTemplate, profileTemplateFromPurpose } from '@/lib/profilePresets'
 import { useUIStore } from '@/stores/uiStore'
 import type { AIProfile, ModelRole, NodePolicy, OrchestrationPolicy, ToolPolicy } from '@/types/api'
 import { KnowledgePicker } from '@/features/knowledge/KnowledgePicker'
@@ -160,7 +160,12 @@ export function ProfilesPage() {
 
   const createMutation = useMutation({
     mutationFn: () => {
-      const template = startFrom === 'blank' ? blankProfileTemplate() : profileTemplateFromPurpose(startFrom)
+      const template =
+        startFrom === 'blank'
+          ? blankProfileTemplate()
+          : startFrom === 'doorstep'
+            ? doorstepProfileTemplate()
+            : profileTemplateFromPurpose(startFrom)
       return api.createProfile({ ...template, name: freeProfileName(template.name, profilesQuery.data ?? []) })
     },
     onSuccess: (created) => {
@@ -185,6 +190,7 @@ export function ProfilesPage() {
         knowledge_sources: profile.knowledge_sources,
         orchestration: profile.orchestration,
         topics: profile.topics,
+        audience: profile.audience,
       }),
     onSuccess: (created) => {
       queryClient.invalidateQueries({ queryKey: ['profiles'] })
@@ -751,6 +757,7 @@ function AdvancedEditor({
   const [knowledge, setKnowledge] = useState<string[]>(profile.knowledge_sources ?? [])
   const [orchestration, setOrchestration] = useState<OrchestrationPolicy>(editorOrchestration(profile))
   const [topics, setTopics] = useState(() => topicsDraft(profile.topics))
+  const [visitors, setVisitors] = useState(profile.audience === 'public')
   const advancedMode = useUIStore((s) => s.advancedMode)
   const profileIdRef = useRef(profile.id)
 
@@ -759,6 +766,7 @@ function AdvancedEditor({
     profileIdRef.current = profile.id
     setName(profile.name)
     setTopics(topicsDraft(profile.topics))
+    setVisitors(profile.audience === 'public')
     setNodeMode(profile.node_policy?.mode ?? 'automatic')
     setPlacement(placementFrom(profile))
     setRoles(editorRoles(profile))
@@ -983,6 +991,19 @@ function AdvancedEditor({
       {tab === 'topics' && (
         <section id={panelID('topics')} role="tabpanel" aria-labelledby={tabID('topics')}>
           <div className="space-y-6">
+            <label className="flex items-start gap-2 text-sm text-ink">
+              <input
+                type="checkbox"
+                className="mt-1"
+                checked={visitors}
+                disabled={saving}
+                onChange={(e) => setVisitors(e.target.checked)}
+              />
+              <span>
+                <span className="font-medium">{t('audience.label')}</span>
+                <span className="block text-ink-muted">{t('audience.hint')}</span>
+              </span>
+            </label>
             <TopicsEditor value={topics} onChange={setTopics} disabled={saving} />
             {topics.staysOn.trim() && topics.strict === 'enforce' ? <TopicsModelNote /> : null}
             <TopicsTry profileId={profile.id} topics={topicsFrom(topics)} examples={topicsFrom(topics)?.examples ?? []} />
@@ -1094,6 +1115,7 @@ function AdvancedEditor({
               knowledge_sources: knowledge,
               orchestration: cleanOrchestration(orchestration),
               topics: topicsFrom(topics),
+              audience: visitors ? 'public' : '',
             })
           }
         >

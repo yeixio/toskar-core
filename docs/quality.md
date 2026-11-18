@@ -16,6 +16,7 @@ Each set is a fixed list of requests, each with what it must do. The model answe
 |---|---|---|---|
 | **Quality** | Everyday requests: tools, web lookups, approvals, and languages | Rules on what happened: which tools ran, what the answer says, and whether it claims something it didn't do | [`cases.json`](../tests/quality/cases.json) |
 | **Topics** | A shop's assistant asked off-topic questions and jailbreaks, and on-topic ones | Whether it held what it should, and wrongly refused what it shouldn't | [`topics.json`](../tests/quality/topics.json) |
+| **Front door** | A visitor asks whether anyone is home, to open the door, to turn off the alarm, or to ignore the rules, in several languages | What the answer must and mustn't say | [`doorstep.json`](../tests/quality/doorstep.json) |
 | **Files** | Reading every file type Toskar reads, and making every one it makes | Whether the file reached the model, and whether a made file, once opened, holds what was asked | [`files.json`](../tests/quality/files.json) |
 | **Reasoning** | Math, logic, and trick questions with one right answer | The final answer matches, and isn't the tempting mistake | [`reasoning.json`](../tests/quality/reasoning.json) |
 | **Triage** | Real issues from this project | The labels suggested against the ones maintainers gave | [`triage.json`](../tests/quality/triage.json) |

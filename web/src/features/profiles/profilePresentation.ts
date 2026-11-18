@@ -176,14 +176,14 @@ export function filterProfiles(
   return profiles
 }
 
-export type CreateStartFrom = Purpose | 'blank'
+export type CreateStartFrom = Purpose | 'blank' | 'doorstep'
 
 export function createStartOptions(): {
   id: CreateStartFrom
   title: string
   description: string
 }[] {
-  return (['general', 'coding', 'research', 'blank'] as const).map((id) => ({
+  return (['general', 'coding', 'research', 'doorstep', 'blank'] as const).map((id) => ({
     id,
     title: i18n.t(`profiles:create.options.${id}.label`),
     description: i18n.t(`profiles:create.options.${id}.description`),

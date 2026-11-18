@@ -661,12 +661,24 @@ type AIProfile struct {
 	// an administrator's rules that a person's messages, style, memories,
 	// and an API caller's instructions can't change.
 	Topics *TopicPolicy `json:"topics,omitempty"`
+	// Audience is public when the people talking to it are strangers, such
+	// as visitors at a front door, a shop counter, or a reception kiosk
+	// (#667). Nothing about the owner reaches the model then: not their
+	// style, location, or memories, and not what Toskar knows about its
+	// computers. Built-in rules keep it from saying whether anyone is home
+	// or acting on a stranger's word, and only tools that change nothing
+	// outside Toskar run. Empty is the owner and the people they share
+	// Toskar with.
+	Audience string `json:"audience,omitempty"`
 	// ModelCallsNoTools is set for a turn whose model cannot call tools,
 	// such as Gemma 2: it is not shown the tool protocol, but the look-ups
 	// Toskar runs itself (web, places, connected services) still run and
 	// reach it as reference material. Never stored or sent.
 	ModelCallsNoTools bool `json:"-"`
 }
+
+// AudiencePublic is a profile that talks with strangers (#667).
+const AudiencePublic = "public"
 
 // TopicPolicy is a profile's topic controls (#345).
 type TopicPolicy struct {

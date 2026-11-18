@@ -2922,6 +2922,18 @@
         },
         {
           "type": "heading",
+          "text": "Talking with visitors"
+        },
+        {
+          "type": "paragraph",
+          "text": "Talks with visitors, on the Topics tab, is for an assistant that strangers talk to, such as one at your front door, a shop counter, or a kiosk. Its chats get nothing about you: not your style, location, or memories, and not what Toskar knows about your computers. It says it's an automated assistant. It never says whether anyone is home, who lives there, or anything about locks, alarms, or cameras. It can't use tools that change things, and it won't open a door for anyone, even someone who says they're the owner."
+        },
+        {
+          "type": "paragraph",
+          "text": "To make one, choose Create profile and start from Front door. It starts with Talks with visitors on, no tools, memory off, and Enforce topics for greeting visitors, deliveries, and taking a message. Change the topics to suit your door."
+        },
+        {
+          "type": "heading",
           "text": "Strategy and computers"
         },
         {

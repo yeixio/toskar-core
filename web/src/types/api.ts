@@ -496,6 +496,11 @@ export interface AIProfile {
   orchestration?: OrchestrationPolicy
   /** Topic controls that keep the assistant on its subject (#345). */
   topics?: TopicPolicy
+  /**
+   * public: it talks with strangers, such as visitors at a front door, and
+   * gets nothing about the owner (#667, contract 1.108).
+   */
+  audience?: '' | 'public'
 }
 
 /** What a profile's topic controls do with one message: the Try it panel (#345). */
