@@ -45,8 +45,17 @@
     "nornHint": "Qué computadora ejecuta cada modelo",
     "nornAutomatic": "Automático",
     "mimirHint": "Archivos y fuentes con los que responde Toskar",
-    "mimirReady": "Listo",
-    "justThis": "Solo esta computadora"
+    "justThis": "Solo esta computadora",
+    "placementLocal": "Este ordenador",
+    "placementAsk": "Preguntar cada vez",
+    "knowledgeNone": "Aún no hay fuentes",
+    "knowledgeFailed_one": "{{count}} con error",
+    "knowledgeFailed_other": "{{count}} con error",
+    "knowledgeFailed_many": "{{count}} con error",
+    "knowledgeReady_one": "{{count}} fuente",
+    "knowledgeReady_other": "{{count}} fuentes",
+    "knowledgeReady_many": "{{count}} fuentes",
+    "knowledgeIndexing": "Indexando…"
   },
   "boot": {
     "starting": "Iniciando Toskar",

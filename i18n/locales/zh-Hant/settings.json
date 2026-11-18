@@ -114,7 +114,7 @@
   },
   "advanced": {
     "title": "進階模式",
-    "description": "顯示模型 ID、API 詳細資訊、設定檔、記錄檔，以及其他進階使用者控制項。"
+    "description": "顯示模型 ID、API 詳細資訊、記錄檔，以及其他進階使用者控制項。"
   },
   "discovery": {
     "title": "尋找其他電腦",

@@ -81,7 +81,7 @@ function ComputerCard({
   onApproveCode,
   onRevoke,
   onRemoveModel,
-  removingModelId,
+  isRemoving,
   pairingBusy,
   claimBusy,
   revokeBusy,
@@ -97,7 +97,7 @@ function ComputerCard({
   onApproveCode: () => void
   onRevoke: () => void
   onRemoveModel: (modelId: string) => void
-  removingModelId: string | null
+  isRemoving: (modelId: string) => boolean
   pairingBusy: boolean
   claimBusy: boolean
   revokeBusy: boolean
@@ -271,13 +271,13 @@ function ComputerCard({
                       type="button"
                       // Plain red text: the tinted danger button is too low-contrast on this tinted row.
                       className="inline-flex h-8 shrink-0 items-center rounded-lg px-2.5 text-xs font-semibold text-danger transition hover:bg-danger/10 disabled:opacity-50"
-                      disabled={removingModelId === m.id}
+                      disabled={isRemoving(m.id)}
                       onClick={() => {
                         // Deleting a model from a computer can't be undone without downloading it again (#1247).
                         if (window.confirm(t('card.confirmRemoveModel', { model: m.display_name || m.id, name: node.name }))) onRemoveModel(m.id)
                       }}
                     >
-                      {removingModelId === m.id ? t('card.removing') : t('card.remove')}
+                      {isRemoving(m.id) ? t('card.removing') : t('card.remove')}
                     </button>
                   </li>
                 ))}
@@ -383,13 +383,24 @@ function ComputerCard({
   )
 }
 
+/** How long Add to team waits for the other computer before saying so. */
+const pairingTimeoutMs = 5 * 60 * 1000
+
 export function NodesPage() {
   const { t } = useTranslation('computers')
   const queryClient = useQueryClient()
   const advancedMode = useUIStore((s) => s.advancedMode)
   const [pairingSession, setPairingSession] = useState<PairingSession | null>(null)
   const [claimCodes, setClaimCodes] = useState<Record<string, string>>({})
-  const [removingKey, setRemovingKey] = useState<string | null>(null)
+  // Every removal still running, by node:model, so a second one doesn't
+  // hide the first one's progress (#1247).
+  const [removing, setRemoving] = useState<ReadonlySet<string>>(() => new Set())
+  // The latest failed action, until it's dismissed or the next one starts
+  // (#1245): an older error never hides a newer one.
+  const [actionError, setActionError] = useState<{ error: unknown; network: boolean } | null>(null)
+  const actionStarted = () => setActionError(null)
+  const actionFailed = (network: boolean) => (error: unknown) => setActionError({ error, network })
+  const [pairingTimedOut, setPairingTimedOut] = useState(false)
   // The header's Add by command and Connect a device pick one panel at a
   // time; ?connect=phone opens Connect a device, as API Access links it.
   const [searchParams] = useSearchParams()
@@ -428,7 +439,10 @@ export function NodesPage() {
 
   const pairMutation = useMutation({
     mutationFn: (nodeId: string) => api.pairNode(nodeId),
+    onMutate: actionStarted,
+    onError: actionFailed(true),
     onSuccess: (session) => {
+      setPairingTimedOut(false)
       if (session) setPairingSession(session)
       queryClient.invalidateQueries({ queryKey: ['nodes'] })
     },
@@ -436,6 +450,8 @@ export function NodesPage() {
 
   const approveMutation = useMutation({
     mutationFn: (sessionId: string) => api.approvePairing(sessionId),
+    onMutate: actionStarted,
+    onError: actionFailed(true),
     onSuccess: () => {
       setPairingSession(null)
       queryClient.invalidateQueries({ queryKey: ['nodes'] })
@@ -451,6 +467,8 @@ export function NodesPage() {
       }
       return api.approvePairing(session.id)
     },
+    onMutate: actionStarted,
+    onError: actionFailed(true),
     onSuccess: () => {
       setClaimCodes({})
       setPairingSession(null)
@@ -461,6 +479,8 @@ export function NodesPage() {
 
   const revokeMutation = useMutation({
     mutationFn: (nodeId: string) => api.revokeNode(nodeId),
+    onMutate: actionStarted,
+    onError: actionFailed(true),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['nodes'] })
     },
@@ -468,6 +488,8 @@ export function NodesPage() {
 
   const refreshMutation = useMutation({
     mutationFn: () => api.refreshNodes(),
+    onMutate: actionStarted,
+    onError: actionFailed(true),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['nodes'] })
     },
@@ -483,15 +505,23 @@ export function NodesPage() {
   const headerMascot = delivering ? 'deliver' : eventMascot === 'success' ? 'success' : null
 
   const deployMutation = useMutation({
-    onMutate: () => setDelivering(true),
-    onError: () => setDelivering(false),
+    onMutate: () => {
+      actionStarted()
+      setDelivering(true)
+    },
+    onError: (error) => {
+      setDelivering(false)
+      actionFailed(false)(error)
+    },
     mutationFn: async ({ modelId, nodeIds }: { modelId: string; nodeIds: string[] }) => {
       const errors: string[] = []
       for (const nodeId of nodeIds) {
         try {
           await api.installModel(modelId, { node_id: nodeId })
         } catch (err) {
-          errors.push(`${nodeId}: ${errorMessage(err)}`)
+          // The computer's name, not its id (#1245).
+          const name = nodes.find((n) => n.id === nodeId)?.name || nodeId
+          errors.push(`${name}: ${errorMessage(err)}`)
         }
       }
       if (errors.length > 0) {
@@ -505,12 +535,19 @@ export function NodesPage() {
   })
 
   const removeMutation = useMutation({
+    onMutate: actionStarted,
+    onError: actionFailed(false),
     mutationFn: async ({ modelId, nodeId }: { modelId: string; nodeId: string }) => {
-      setRemovingKey(`${nodeId}:${modelId}`)
+      const key = `${nodeId}:${modelId}`
+      setRemoving((prev) => new Set(prev).add(key))
       try {
         await api.deleteModel(modelId, { node_id: nodeId })
       } finally {
-        setRemovingKey(null)
+        setRemoving((prev) => {
+          const next = new Set(prev)
+          next.delete(key)
+          return next
+        })
       }
     },
     onSuccess: () => {
@@ -552,14 +589,25 @@ export function NodesPage() {
 
   const sectionTitle = advancedMode ? t('fleet.titleAdvanced') : t('fleet.title')
 
-  const actionError =
-    pairMutation.error ??
-    approveMutation.error ??
-    claimMutation.error ??
-    revokeMutation.error ??
-    refreshMutation.error ??
-    deployMutation.error ??
-    removeMutation.error
+  // The waiting card goes once the other computer approves, and says so
+  // when it never answers (#1245).
+  const pairedNow = pairingSession
+    ? nodes.some((n) => n.paired && n.id === pairingSession.remote_node_id)
+    : false
+  useEffect(() => {
+    if (pairedNow) setPairingSession(null)
+  }, [pairedNow])
+  useEffect(() => {
+    if (!pairingSession) return
+    const expires = Date.parse(pairingSession.expires_at)
+    const wait = Number.isFinite(expires) ? Math.max(0, expires - Date.now()) : pairingTimeoutMs
+    const timer = setTimeout(() => setPairingTimedOut(true), Math.min(wait, pairingTimeoutMs))
+    return () => clearTimeout(timer)
+  }, [pairingSession])
+  const stopWaiting = () => {
+    setPairingSession(null)
+    setPairingTimedOut(false)
+  }
 
   return (
     <div className="w-full min-w-0 space-y-8">
@@ -661,43 +709,63 @@ export function NodesPage() {
       ) : null}
 
       {actionError && (
-        <div className="rounded-lg bg-danger/10 px-4 py-3 text-sm text-danger">
-          <p className="font-medium">{t('errors.action')}</p>
+        <div className="rounded-lg bg-danger/10 px-4 py-3 text-sm text-danger" role="alert">
+          <div className="flex items-start justify-between gap-3">
+            <p className="font-medium">{t('errors.action')}</p>
+            <button
+              type="button"
+              className="shrink-0 text-xs text-ink-faint underline hover:text-ink"
+              onClick={() => setActionError(null)}
+            >
+              {t('errors.dismiss')}
+            </button>
+          </div>
           <p className="mt-1">
-            {errorMessage(actionError)}
-            <ReportProblem {...shownError(actionError)} className="ms-2 text-xs text-ink-faint underline hover:text-ink" />
+            {errorMessage(actionError.error)}
+            <ReportProblem {...shownError(actionError.error)} className="ms-2 text-xs text-ink-faint underline hover:text-ink" />
           </p>
-          {(pairMutation.error ||
-            approveMutation.error ||
-            claimMutation.error ||
-            revokeMutation.error ||
-            refreshMutation.error) && (
-            <p className="mt-2 text-xs opacity-90">{t('errors.network')}</p>
-          )}
+          {actionError.network && <p className="mt-2 text-xs opacity-90">{t('errors.network')}</p>}
         </div>
       )}
 
       {pairingSession && (
         <section className="card space-y-2 ring-1 ring-accent/40 animate-fade">
-          <h2 className="font-display text-lg font-semibold text-ink">{t('pairing.waiting')}</h2>
-          <p className="text-sm text-ink">
-            <Trans
-              t={t}
-              i18nKey="pairing.pairingWith"
-              values={{
+          <div className="flex items-start justify-between gap-3">
+            <h2 className="font-display text-lg font-semibold text-ink">
+              {pairingTimedOut ? t('pairing.noAnswer') : t('pairing.waiting')}
+            </h2>
+            <button type="button" className="btn-secondary btn-sm" onClick={stopWaiting}>
+              {pairingTimedOut ? t('pairing.close') : t('pairing.cancel')}
+            </button>
+          </div>
+          {pairingTimedOut ? (
+            <p className="text-sm text-ink">
+              {t('pairing.noAnswerHint', {
                 name: pairingSession.remote_name || pairingSession.remote_node_id || t('pairing.otherComputer'),
-              }}
-              components={{ name: <span className="font-medium" /> }}
-            />
-          </p>
-          <p className="text-sm text-ink-muted">
-            <Trans
-              t={t}
-              i18nKey="pairing.code"
-              values={{ code: pairingSession.code || '—' }}
-              components={{ code: <span className="font-mono text-lg font-semibold text-ink" /> }}
-            />
-          </p>
+              })}
+            </p>
+          ) : (
+            <>
+              <p className="text-sm text-ink">
+                <Trans
+                  t={t}
+                  i18nKey="pairing.pairingWith"
+                  values={{
+                    name: pairingSession.remote_name || pairingSession.remote_node_id || t('pairing.otherComputer'),
+                  }}
+                  components={{ name: <span className="font-medium" /> }}
+                />
+              </p>
+              <p className="text-sm text-ink-muted">
+                <Trans
+                  t={t}
+                  i18nKey="pairing.code"
+                  values={{ code: pairingSession.code || '—' }}
+                  components={{ code: <span className="font-mono text-lg font-semibold text-ink" /> }}
+                />
+              </p>
+            </>
+          )}
         </section>
       )}
 
@@ -783,7 +851,7 @@ export function NodesPage() {
                   }
                   onRevoke={() => revokeMutation.mutate(node.id)}
                   onRemoveModel={() => {}}
-                  removingModelId={null}
+                  isRemoving={() => false}
                   pairingBusy={pairMutation.isPending && pairMutation.variables === node.id}
                   claimBusy={claimMutation.isPending && claimMutation.variables?.nodeId === node.id}
                   revokeBusy={revokeMutation.isPending && revokeMutation.variables === node.id}
@@ -839,11 +907,7 @@ export function NodesPage() {
                   onRemoveModel={(modelId) =>
                     removeMutation.mutate({ modelId, nodeId: node.id })
                   }
-                  removingModelId={
-                    removingKey?.startsWith(`${node.id}:`)
-                      ? removingKey.slice(node.id.length + 1)
-                      : null
-                  }
+                  isRemoving={(modelId) => removing.has(`${node.id}:${modelId}`)}
                   pairingBusy={pairMutation.isPending && pairMutation.variables === node.id}
                   claimBusy={claimMutation.isPending && claimMutation.variables?.nodeId === node.id}
                   revokeBusy={revokeMutation.isPending && revokeMutation.variables === node.id}

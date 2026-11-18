@@ -3,7 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { RequireRole } from '@/components/auth/RequireRole'
 import { PortalPage } from '@/features/portal/PortalPage'
 import { PortalsPage } from '@/features/portals/PortalsPage'
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { LifecycleHost } from '@/components/LifecycleHost'
 import { NotificationHost } from '@/components/NotificationHost'
 import { ServiceBootGate } from '@/components/ServiceBootGate'
@@ -46,10 +46,14 @@ const queryClient = new QueryClient({
 
 function OnboardingGate({ children }: { children: ReactNode }) {
   const onboardingComplete = useUIStore((s) => s.onboardingComplete)
+  const location = useLocation()
   if (readScreenshotLaunch()?.enabled || onboardingComplete) {
     return <>{children}</>
   }
-  return <Navigate to="/onboarding" replace />
+  // The page asked for is where Skip goes, not always Chat (#1266).
+  const next = location.pathname + location.search
+  const ask = location.pathname === '/' || location.pathname === '/chat' ? '' : `?next=${encodeURIComponent(next)}`
+  return <Navigate to={`/onboarding${ask}`} replace />
 }
 
 /**

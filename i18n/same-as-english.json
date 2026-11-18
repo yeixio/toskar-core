@@ -37,7 +37,6 @@
     "settings:whatLeft.sources.api"
   ],
   "de": [
-    "apiAccess:advanced.port",
     "apiAccess:share.otherHeader",
     "automations:form.name",
     "automations:names.fallback",
@@ -216,7 +215,6 @@
     "train:train.tokensPerSec"
   ],
   "fr": [
-    "apiAccess:advanced.port",
     "apiAccess:service.title",
     "automations:detail.notification",
     "automations:form.condition",

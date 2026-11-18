@@ -32,16 +32,18 @@
     "endpoint": "Point de terminaison",
     "localAddress": "Adresse locale : <mono>{{address}}</mono>",
     "lanEndpoint": "Point de terminaison LAN",
-    "lanHint": "Utilisez l'adresse IP LAN de cet ordinateur avec le port <mono>{{port}}</mono> (par exemple <mono>https://192.168.x.x:{{port}}/v1</mono>).",
+    "lanHint": "Utilisez l'adresse IP LAN de cet ordinateur avec le port <mono>{{port}}</mono> (par exemple <mono>{{scheme}}://192.168.x.x:{{port}}/v1</mono>).",
     "https": "Chiffré avec HTTPS. Certificat <mono>{{short}}</mono>.",
     "httpsCustom": "Chiffré avec HTTPS, avec votre certificat <mono>{{short}}</mono>.",
     "httpsTrust": "Un navigateur ou une app vous demande de faire confiance à ce certificat la première fois. Vérifiez que son empreinte SHA-256 commence par {{short}}.",
     "httpsError": "Votre certificat n’a pas pu être utilisé, celui de Toskar l’est donc : {{error}}",
     "hideDocs": "Masquer la documentation de l'API",
     "docs": "Documentation de l'API",
-    "docsBody": "Toskar expose une API compatible OpenAI à <mono>/v1</mono>. Pointez vos clients vers le point de terminaison ci-dessus et envoyez <header/> lorsque Toskar est accessible depuis d'autres ordinateurs. `/api/v1` et `/v1` exigent tous deux cet en-tête. Le point de terminaison LAN utilise HTTPS, qui chiffre le trafic ; une clé seule ne chiffre pas le HTTP simple.",
+    "docsBody": "Toskar expose une API compatible OpenAI à <mono>/v1</mono>. Pointez vos clients vers le point de terminaison ci-dessus et envoyez <header/> lorsque Toskar est accessible depuis d'autres ordinateurs. `/api/v1` et `/v1` exigent tous deux cet en-tête.",
     "copied": "Copié",
-    "copyUrl": "Copier l'URL"
+    "copyUrl": "Copier l'URL",
+    "docsHttps": "Le point de terminaison LAN utilise HTTPS, qui chiffre le trafic.",
+    "docsHttp": "Le point de terminaison LAN utilise du HTTP simple, le trafic n'est donc pas chiffré : une clé contrôle qui entre, mais ne chiffre rien."
   },
   "lan": {
     "title": "Accès au réseau local",
@@ -107,9 +109,7 @@
   },
   "advanced": {
     "title": "Avancé",
-    "bind": "Adresse d'écoute",
-    "port": "Port",
-    "host": "Hôte configuré"
+    "bind": "Adresse d'écoute"
   },
   "permissions": {
     "summary": "Ce que cette clé peut utiliser",
@@ -165,7 +165,9 @@
     "none": "Aucun appareil pour l'instant.",
     "meta": "Connecté {{connected}} · Dernière utilisation {{lastUsed}}",
     "confirmDisconnect": "Déconnecter {{name}} ? Il lui faudra un nouveau code pour se reconnecter.",
-    "disconnect": "Déconnecter"
+    "disconnect": "Déconnecter",
+    "neverUsed": "Jamais utilisé",
+    "unused": "Inutilisé depuis 90 jours"
   },
   "remote": {
     "title": "Accès de partout",
@@ -309,13 +311,17 @@
       "endedRevoked": "Le relais de Toskar n'accepte plus l'abonnement de cet ordinateur : il a été déplacé sur un autre ordinateur ou remboursé. Abonnez-vous de nouveau pour continuer à utiliser le relais de Toskar.",
       "endedBlocked": "Le relais de Toskar a bloqué cet ordinateur. Contactez l'assistance pour savoir pourquoi.",
       "grant": "Accès accordé jusqu'au {{date}}.",
-      "grantOpen": "Accès accordé."
+      "grantOpen": "Accès accordé.",
+      "moveStripe": "Le déplacer sur cet ordinateur",
+      "moving": "Déplacement…",
+      "inUseStripe": "Cet abonnement est lié à un autre ordinateur, comme celui d'où viennent les données de celui-ci. Déplacez-le ici, et cet ordinateur cessera d'utiliser le relais de Toskar."
     },
     "relayErrors": {
       "TOKEN_REVOKED": "{{relay}} n'accepte plus l'abonnement de cet ordinateur. Abonnez-vous de nouveau, ou déplacez votre abonnement ici depuis l'app Toskar.",
       "ROUTE_BLOCKED": "{{relay}} a bloqué cet ordinateur. Contactez l'assistance pour savoir pourquoi.",
       "TOKEN_EXPIRED": "L'accès de cet ordinateur via {{relay}} a expiré. Abonnez-vous de nouveau pour continuer à l'utiliser.",
       "TOKEN_INVALID": "{{relay}} n'a pas accepté le jeton de cet ordinateur. Abonnez-vous de nouveau, ou reconnectez-le depuis l'app Toskar."
-    }
+    },
+    "offHint": "Quand il est activé, Toskar demande à votre routeur d'ouvrir le port {{port}}, qui ne répond qu'aux appareils associés à cet ordinateur. Vous pouvez choisir à la place un port redirigé ou un relais. L'accès depuis le réseau local n'a pas besoin d'être activé."
   }
 }

@@ -76,5 +76,6 @@
     "title": "Tout est prêt",
     "description": "Votre configuration recommandée est installée. Commencez à discuter avec votre IA locale.",
     "start": "Commencer à discuter"
-  }
+  },
+  "setupLater": "Configurer plus tard"
 }

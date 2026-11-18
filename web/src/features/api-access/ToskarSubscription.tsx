@@ -97,7 +97,18 @@ function StripeSubscription({ subscription, off }: { subscription: AnywhereSubsc
     },
     onError: (err) => setError(shownError(err)),
   })
-  const busy = checkout.isPending || manage.isPending || cancel.isPending
+  const move = useMutation({
+    mutationFn: () => api.moveSubscriptionHere(),
+    onSuccess: () => {
+      setError(null)
+      void queryClient.invalidateQueries({ queryKey: ['remote-access'] })
+      void queryClient.invalidateQueries({ queryKey: ['settings'] })
+    },
+    onError: (err) => setError(shownError(err)),
+  })
+  const busy = checkout.isPending || manage.isPending || cancel.isPending || move.isPending
+  // Tied to another computer, as after restoring this one's data on a new one (#1257).
+  const inUse = subscription.error === 'SUBSCRIPTION_IN_USE'
   // When the last token ran out, as a lapsed subscription's does (#692).
   const endedOn = subscription.state === 'ended' && subscription.expires ? formatDate(subscription.expires) : ''
   // Why the relay stopped taking it, when it did (#1266).
@@ -190,7 +201,16 @@ function StripeSubscription({ subscription, off }: { subscription: AnywhereSubsc
           <p className="text-xs text-ink-faint">{t('remote.subscription.billing')}</p>
         </>
       )}
-      {subscription.error ? <p className="text-xs text-warning">{t('remote.subscription.error', { code: subscription.error })}</p> : null}
+      {inUse ? (
+        <div className="space-y-2">
+          <p className="text-sm text-warning">{t('remote.subscription.inUseStripe')}</p>
+          <button type="button" className="btn-secondary btn-sm" disabled={busy} onClick={() => move.mutate()}>
+            {move.isPending ? t('remote.subscription.moving') : t('remote.subscription.moveStripe')}
+          </button>
+        </div>
+      ) : subscription.error ? (
+        <p className="text-xs text-warning">{t('remote.subscription.error', { code: subscription.error })}</p>
+      ) : null}
       {error ? <ShownError {...error} className="text-sm text-danger" /> : null}
     </div>
   )

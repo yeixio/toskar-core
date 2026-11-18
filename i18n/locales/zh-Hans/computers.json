@@ -38,7 +38,8 @@
     "action": "无法完成该操作",
     "network": "请在两台电脑上都允许 Toskar 访问本地网络/通过防火墙，并在下方“网络与访问”中保持“查找其他电脑”为开启状态。",
     "generic": "出了点问题",
-    "claimFailed": "无法加载该代码对应的配对请求"
+    "claimFailed": "无法加载该代码对应的配对请求",
+    "dismiss": "关闭"
   },
   "pairing": {
     "waiting": "等待批准",
@@ -47,7 +48,11 @@
     "code": "代码：<code>{{code}}</code>",
     "incoming": "传入的请求",
     "offerCode": "代码 <code>{{code}}</code>",
-    "approve": "批准"
+    "approve": "批准",
+    "noAnswer": "尚无回应",
+    "noAnswerHint": "{{name}} 尚未批准请求。请确认那台电脑上的 Toskar 已打开，然后重试“加入团队”。",
+    "cancel": "停止等待",
+    "close": "关闭"
   },
   "nearby": {
     "title": "可添加",
@@ -110,7 +115,7 @@
     "approving": "正在批准…",
     "approveCode": "使用代码批准",
     "hideDetails": "隐藏详情",
-    "manage": "管理",
+    "manage": "详情",
     "moreActions": "{{name}} 的更多操作",
     "removeFromTeam": "从团队中移除",
     "training": "训练中",
@@ -140,7 +145,8 @@
     "deployTo_other": "部署到 {{count}} 台电脑",
     "deployToName": "部署到 {{name}}",
     "deploy": "部署",
-    "downloadSize": "下载大小约 {{size}}"
+    "downloadSize": "下载大小约 {{size}}",
+    "modelFit": "{{model}} · {{fit}}"
   },
   "join": {
     "open": "通过命令添加",

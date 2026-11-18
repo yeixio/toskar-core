@@ -289,5 +289,8 @@
   "RELAY_UNREACHABLE": "Toskar's relay couldn't be reached. Try again in a minute.",
   "COMPANION_LIMIT": "A device connected through another can't connect more. Connect it from the phone.",
   "SUBSCRIPTION_COVERED": "Another device's subscription already covers this computer, so there's nothing to buy here.",
-  "CHECKOUT_NONE": "There's no checkout open to cancel."
+  "CHECKOUT_NONE": "There's no checkout open to cancel.",
+  "MOVE_TOO_SOON": "The subscription moved less than a day ago. It can move again tomorrow.",
+  "MOVE_NEEDS_COMPUTER": "To move it, Toskar's relay needs to hear from the computer it's on now: turn that computer on once, or wait until it has been off for 3 days.",
+  "MOVE_FAILED": "Toskar's relay didn't move the subscription ({{relay_code}})."
 }

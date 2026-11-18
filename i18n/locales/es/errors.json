@@ -289,5 +289,8 @@
   "RELAY_UNREACHABLE": "No se pudo contactar con el relé de Toskar. Vuelve a intentarlo en un minuto.",
   "COMPANION_LIMIT": "Un dispositivo conectado a través de otro no puede conectar más. Conéctalo desde el teléfono.",
   "SUBSCRIPTION_COVERED": "La suscripción de otro dispositivo ya cubre esta computadora, así que no hay nada que comprar aquí.",
-  "CHECKOUT_NONE": "No hay ningún pago abierto que cancelar."
+  "CHECKOUT_NONE": "No hay ningún pago abierto que cancelar.",
+  "MOVE_TOO_SOON": "La suscripción se movió hace menos de un día. Podrá moverse de nuevo mañana.",
+  "MOVE_NEEDS_COMPUTER": "Para moverla, el relé de Toskar necesita saber del ordenador donde está ahora: enciéndelo una vez, o espera a que lleve 3 días apagado.",
+  "MOVE_FAILED": "El relé de Toskar no movió la suscripción ({{relay_code}})."
 }

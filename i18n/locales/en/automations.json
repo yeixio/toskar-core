@@ -400,7 +400,9 @@
       "cover": "Covers",
       "climate": "Climate",
       "other": "Other"
-    }
+    },
+    "needsToolModel": "The model chosen can't use tools, so it won't open pages or run the tools picked here: it answers from what it already knows. Choose a model that can use tools, or install one.",
+    "openModels": "Open Models"
   },
   "draft": {
     "label": "Automation to confirm",

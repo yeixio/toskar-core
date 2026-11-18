@@ -116,3 +116,24 @@ func TestToolCallsAreAudited(t *testing.T) {
 		t.Fatalf("filter by tool (alias) = %d runs", len(only))
 	}
 }
+
+// Regression: toskar-core#1254
+// The Tools page shows people a short summary, not the model's instructions.
+func TestLongDescriptionsHaveASummaryForPeople(t *testing.T) {
+	ids := map[string]bool{}
+	for _, def := range Catalog() {
+		ids[def.ID] = true
+		d := Describe(def)
+		if len(def.Description) > 150 && d.Summary == "" {
+			t.Errorf("%s has only the model's description (%d bytes)", def.ID, len(def.Description))
+		}
+		if len(d.Summary) > 100 {
+			t.Errorf("%s's summary is long: %q", def.ID, d.Summary)
+		}
+	}
+	for id := range summaries {
+		if !ids[id] {
+			t.Errorf("summary for %s, which isn't a built-in tool", id)
+		}
+	}
+}

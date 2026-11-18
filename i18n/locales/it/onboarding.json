@@ -76,5 +76,6 @@
     "title": "È tutto pronto",
     "description": "La configurazione consigliata è installata. Inizia a chattare con la tua IA locale.",
     "start": "Inizia a chattare"
-  }
+  },
+  "setupLater": "Configura più tardi"
 }

@@ -2,7 +2,7 @@ import { useMutation, useQuery } from '@tanstack/react-query'
 import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { TFunction } from 'i18next'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 import { Ratatoskr } from '@/components/ui/Ratatoskr'
 import { useMascotState } from '@/lib/ratatoskr/useMascotState'
@@ -32,6 +32,10 @@ type InstallPhase =
 export function OnboardingPage() {
   const { t } = useTranslation('onboarding')
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  // The page someone opened before setup took over, if it's one of ours.
+  const nextParam = searchParams.get('next')
+  const next = nextParam && nextParam.startsWith('/') && !nextParam.startsWith('//') && !nextParam.startsWith('/onboarding') ? nextParam : null
   const setOnboardingComplete = useUIStore((s) => s.setOnboardingComplete)
 
   const [step, setStep] = useState<OnboardingStep>('setup')
@@ -159,7 +163,7 @@ export function OnboardingPage() {
 
   const handleSkipInstall = () => {
     setOnboardingComplete(true)
-    navigate('/chat')
+    navigate(next ?? '/chat')
   }
 
   const handleStartChatting = () => {
@@ -323,6 +327,12 @@ export function OnboardingPage() {
             >
               {recommendMutation.isPending ? t('finding') : t('continue')}
             </button>
+            {/* Someone who opened another page can go there first (#1266). */}
+            {next ? (
+              <button type="button" className="btn-secondary px-6" onClick={handleSkipInstall}>
+                {t('setupLater')}
+              </button>
+            ) : null}
           </div>
         </>
       )}

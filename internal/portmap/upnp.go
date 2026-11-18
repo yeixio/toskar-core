@@ -41,6 +41,14 @@ type igd struct {
 // already forwarded to another device.
 const upnpConflict = "718"
 
+// upnpOnlyPermanent is UPnP's OnlyPermanentLeasesSupported: an older
+// router that takes a mapping only with no lease (#1262).
+const upnpOnlyPermanent = "725"
+
+// errOnlyPermanent is a router refusing a lease, which a permanent mapping
+// answers.
+var errOnlyPermanent = fmt.Errorf("%w: it takes only permanent mappings", ErrRefused)
+
 // discoverIGD finds a router's WAN connection service.
 func discoverIGD(ctx context.Context) (*igd, error) {
 	conn, err := net.ListenUDP("udp4", nil)
@@ -190,8 +198,11 @@ func (g *igd) soap(ctx context.Context, action string, args [][2]string) ([]byte
 		code := between(string(out), "<errorCode>", "</errorCode>")
 		desc := between(string(out), "<errorDescription>", "</errorDescription>")
 		why := ErrRefused
-		if code == upnpConflict {
+		switch code {
+		case upnpConflict:
 			why = ErrPortTaken
+		case upnpOnlyPermanent:
+			why = errOnlyPermanent
 		}
 		return nil, fmt.Errorf("upnp: %s %w (%s %s)", action, why, code, desc)
 	}
@@ -213,16 +224,26 @@ func upnpMap(ctx context.Context, g *igd, internal, external uint16, lifetime ti
 	if external == 0 {
 		external = internal
 	}
-	_, err := g.soap(ctx, "AddPortMapping", [][2]string{
-		{"NewRemoteHost", ""},
-		{"NewExternalPort", strconv.Itoa(int(external))},
-		{"NewProtocol", "TCP"},
-		{"NewInternalPort", strconv.Itoa(int(internal))},
-		{"NewInternalClient", g.local.String()},
-		{"NewEnabled", "1"},
-		{"NewPortMappingDescription", "Toskar"},
-		{"NewLeaseDuration", strconv.Itoa(int(lifetime / time.Second))},
-	})
+	add := func(lease time.Duration) error {
+		_, err := g.soap(ctx, "AddPortMapping", [][2]string{
+			{"NewRemoteHost", ""},
+			{"NewExternalPort", strconv.Itoa(int(external))},
+			{"NewProtocol", "TCP"},
+			{"NewInternalPort", strconv.Itoa(int(internal))},
+			{"NewInternalClient", g.local.String()},
+			{"NewEnabled", "1"},
+			{"NewPortMappingDescription", "Toskar"},
+			{"NewLeaseDuration", strconv.Itoa(int(lease / time.Second))},
+		})
+		return err
+	}
+	err := add(lifetime)
+	if errors.Is(err, errOnlyPermanent) {
+		// An older router takes only a mapping with no lease. It's still
+		// renewed on the same schedule, which checks it's there, and
+		// removed when access is turned off or Toskar stops (#1262).
+		err = add(0)
+	}
 	if err != nil {
 		// A refusal from a router with no public address: it says so by
 		// giving none when asked.

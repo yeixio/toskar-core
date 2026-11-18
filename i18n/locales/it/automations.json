@@ -400,7 +400,9 @@
       "cover": "Tapparelle",
       "climate": "Clima",
       "other": "Altro"
-    }
+    },
+    "needsToolModel": "Il modello scelto non può usare strumenti, quindi non aprirà pagine né userà gli strumenti scelti qui: risponde con ciò che sa già. Scegli un modello che sappia usare strumenti o installane uno.",
+    "openModels": "Apri Modelli"
   },
   "draft": {
     "label": "Automazione da confermare",

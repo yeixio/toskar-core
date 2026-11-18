@@ -42,7 +42,8 @@
     "action": "Impossible d'effectuer cette action",
     "network": "Autorisez Réseau local / Pare-feu pour Toskar sur les deux ordinateurs, et laissez Rechercher d'autres ordinateurs activé, dans Réseau et accès ci-dessous.",
     "generic": "Un problème est survenu",
-    "claimFailed": "Impossible de charger l'offre de jumelage pour ce code"
+    "claimFailed": "Impossible de charger l'offre de jumelage pour ce code",
+    "dismiss": "Ignorer"
   },
   "pairing": {
     "waiting": "En attente d'approbation",
@@ -51,7 +52,11 @@
     "code": "Code : <code>{{code}}</code>",
     "incoming": "Demandes entrantes",
     "offerCode": "Code <code>{{code}}</code>",
-    "approve": "Approuver"
+    "approve": "Approuver",
+    "noAnswer": "Pas encore de réponse",
+    "noAnswerHint": "{{name}} n'a pas approuvé la demande. Vérifiez que Toskar y est ouvert, puis réessayez Ajouter à l'équipe.",
+    "cancel": "Arrêter d'attendre",
+    "close": "Fermer"
   },
   "nearby": {
     "title": "Disponibles à l'ajout",
@@ -116,7 +121,7 @@
     "approving": "Approbation…",
     "approveCode": "Approuver avec le code",
     "hideDetails": "Masquer les détails",
-    "manage": "Gérer",
+    "manage": "Détails",
     "moreActions": "Autres actions pour {{name}}",
     "removeFromTeam": "Retirer de l'équipe",
     "training": "Entraînement",
@@ -148,7 +153,8 @@
     "deployTo_other": "Déployer sur {{count}} ordinateurs",
     "deployToName": "Déployer sur {{name}}",
     "deploy": "Déployer",
-    "downloadSize": "Taille du téléchargement ~{{size}}"
+    "downloadSize": "Taille du téléchargement ~{{size}}",
+    "modelFit": "{{model}} · {{fit}}"
   },
   "join": {
     "open": "Ajouter par commande",

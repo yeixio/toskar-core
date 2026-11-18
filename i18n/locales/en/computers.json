@@ -40,7 +40,8 @@
     "action": "Could not complete that action",
     "network": "Allow Local Network / Firewall for Toskar on both computers, and keep Find other computers on, under Network & access below.",
     "generic": "Something went wrong",
-    "claimFailed": "Could not load pairing offer for that code"
+    "claimFailed": "Could not load pairing offer for that code",
+    "dismiss": "Dismiss"
   },
   "pairing": {
     "waiting": "Waiting for approval",
@@ -49,7 +50,11 @@
     "code": "Code: <code>{{code}}</code>",
     "incoming": "Incoming requests",
     "offerCode": "Code <code>{{code}}</code>",
-    "approve": "Approve"
+    "approve": "Approve",
+    "noAnswer": "No answer yet",
+    "noAnswerHint": "{{name}} hasn't approved the request. Check that Toskar is open there, then try Add to team again.",
+    "cancel": "Stop waiting",
+    "close": "Close"
   },
   "nearby": {
     "title": "Available to add",
@@ -113,7 +118,7 @@
     "approving": "Approving…",
     "approveCode": "Approve with code",
     "hideDetails": "Hide details",
-    "manage": "Manage",
+    "manage": "Details",
     "moreActions": "More actions for {{name}}",
     "removeFromTeam": "Remove from team",
     "training": "Training",
@@ -144,7 +149,8 @@
     "deployTo_other": "Deploy to {{count}} computers",
     "deployToName": "Deploy to {{name}}",
     "deploy": "Deploy",
-    "downloadSize": "Download size ~{{size}}"
+    "downloadSize": "Download size ~{{size}}",
+    "modelFit": "{{model}} · {{fit}}"
   },
   "join": {
     "open": "Add by command",

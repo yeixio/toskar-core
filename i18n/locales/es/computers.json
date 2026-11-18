@@ -42,7 +42,8 @@
     "action": "No se pudo completar esa acción",
     "network": "Permite Red local / Firewall para Toskar en ambas computadoras y mantén activada la opción Buscar otras computadoras, en Red y acceso más abajo.",
     "generic": "Algo salió mal",
-    "claimFailed": "No se pudo cargar la oferta de vinculación para ese código"
+    "claimFailed": "No se pudo cargar la oferta de vinculación para ese código",
+    "dismiss": "Descartar"
   },
   "pairing": {
     "waiting": "Esperando la aprobación",
@@ -51,7 +52,11 @@
     "code": "Código: <code>{{code}}</code>",
     "incoming": "Solicitudes entrantes",
     "offerCode": "Código <code>{{code}}</code>",
-    "approve": "Aprobar"
+    "approve": "Aprobar",
+    "noAnswer": "Aún sin respuesta",
+    "noAnswerHint": "{{name}} no ha aprobado la solicitud. Comprueba que Toskar esté abierto allí y vuelve a probar Añadir al equipo.",
+    "cancel": "Dejar de esperar",
+    "close": "Cerrar"
   },
   "nearby": {
     "title": "Disponibles para agregar",
@@ -116,7 +121,7 @@
     "approving": "Aprobando…",
     "approveCode": "Aprobar con código",
     "hideDetails": "Ocultar detalles",
-    "manage": "Administrar",
+    "manage": "Detalles",
     "moreActions": "Más acciones para {{name}}",
     "removeFromTeam": "Quitar del equipo",
     "training": "Entrenando",
@@ -148,7 +153,8 @@
     "deployTo_other": "Implementar en {{count}} computadoras",
     "deployToName": "Implementar en {{name}}",
     "deploy": "Implementar",
-    "downloadSize": "Tamaño de descarga ~{{size}}"
+    "downloadSize": "Tamaño de descarga ~{{size}}",
+    "modelFit": "{{model}} · {{fit}}"
   },
   "join": {
     "open": "Añadir con un comando",

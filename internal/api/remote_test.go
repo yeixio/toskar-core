@@ -456,7 +456,7 @@ func TestSubscriptionRoutes(t *testing.T) {
 	if status, got := call(srv.handleSubscriptionCheckout, `nope`); status != http.StatusBadRequest || got != "INVALID_JSON" {
 		t.Fatalf("bad JSON: %d %s", status, got)
 	}
-	for _, route := range []string{"/api/v1/remote-access/subscription/checkout", "/api/v1/remote-access/subscription/manage"} {
+	for _, route := range []string{"/api/v1/remote-access/subscription/checkout", "/api/v1/remote-access/subscription/manage", "/api/v1/remote-access/subscription/move"} {
 		if auth.RoleNeeded(http.MethodPost, route) != auth.RoleAdmin || auth.DeviceMayReach(http.MethodPost, route) {
 			t.Errorf("%s isn't an Admin's alone", route)
 		}

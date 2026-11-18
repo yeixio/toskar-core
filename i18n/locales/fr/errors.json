@@ -289,5 +289,8 @@
   "RELAY_UNREACHABLE": "Impossible de joindre le relais de Toskar. Réessayez dans une minute.",
   "COMPANION_LIMIT": "Un appareil connecté via un autre ne peut pas en connecter d'autres. Connectez-le depuis le téléphone.",
   "SUBSCRIPTION_COVERED": "L'abonnement d'un autre appareil couvre déjà cet ordinateur : rien à acheter ici.",
-  "CHECKOUT_NONE": "Aucun paiement en cours à annuler."
+  "CHECKOUT_NONE": "Aucun paiement en cours à annuler.",
+  "MOVE_TOO_SOON": "L'abonnement a été déplacé il y a moins d'un jour. Il pourra l'être de nouveau demain.",
+  "MOVE_NEEDS_COMPUTER": "Pour le déplacer, le relais de Toskar doit avoir des nouvelles de l'ordinateur qui l'utilise : allumez-le une fois, ou attendez qu'il soit éteint depuis 3 jours.",
+  "MOVE_FAILED": "Le relais de Toskar n'a pas déplacé l'abonnement ({{relay_code}})."
 }

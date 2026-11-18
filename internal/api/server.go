@@ -175,8 +175,11 @@ type Dependencies struct {
 	ManageSubscription func(ctx context.Context) (url string, err error)
 	// CancelCheckout forgets a checkout opened here and not paid (#1257).
 	CancelCheckout func(ctx context.Context) error
-	ShowVersion    func(ctx context.Context, conversationID, messageID string) ([]contracts.Message, error)
-	Chat           func(w http.ResponseWriter, r *http.Request, conversationID, profileID, modelID, message string, stream bool, execution string) error
+	// MoveSubscription moves the subscription bought here onto this
+	// computer when the relay says it's tied to another (#1257).
+	MoveSubscription func(ctx context.Context) error
+	ShowVersion      func(ctx context.Context, conversationID, messageID string) ([]contracts.Message, error)
+	Chat             func(w http.ResponseWriter, r *http.Request, conversationID, profileID, modelID, message string, stream bool, execution string) error
 	// StopChat stops the caller's conversation's running turn and reports
 	// whether one was running. Another person's reads as not running.
 	StopChat func(ctx context.Context, conversationID string) bool
@@ -464,6 +467,7 @@ func (s *Server) routes() {
 	api.HandleFunc("/remote-access/subscription/checkout", s.handleSubscriptionCheckout).Methods(http.MethodPost)
 	api.HandleFunc("/remote-access/subscription/manage", s.handleSubscriptionManage).Methods(http.MethodPost)
 	api.HandleFunc("/remote-access/subscription/checkout", s.handleSubscriptionCancel).Methods(http.MethodDelete)
+	api.HandleFunc("/remote-access/subscription/move", s.handleSubscriptionMove).Methods(http.MethodPost)
 	s.notificationRoutes(api)
 	s.connectorRoutes(api)
 	s.mcpRoutes(api)
