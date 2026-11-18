@@ -402,7 +402,24 @@
       "other": "Autres"
     },
     "needsToolModel": "Le modèle choisi ne peut pas utiliser d'outils : il n'ouvrira pas de pages et n'utilisera pas les outils choisis ici, il répond avec ce qu'il sait déjà. Choisissez un modèle qui sait utiliser des outils, ou installez-en un.",
-    "openModels": "Ouvrir Modèles"
+    "openModels": "Ouvrir Modèles",
+    "actions": "Actions qu'elle peut faire seule",
+    "actionsHint": "Chaque exécution peut faire ces appels sans demander, même lancée par un déclencheur. Tout autre appel qui modifie quelque chose est ignoré. Ne choisissez que ce que vous la laisseriez faire sans personne pour surveiller.",
+    "actionLabel": "{{action}} : {{device}}",
+    "actionDevice": "Appareil",
+    "actionDevicePick": "Choisir un appareil…",
+    "actionService": "Action",
+    "actionAdd": "Autoriser",
+    "actionRemoveButton": "Retirer",
+    "actionRemove": "Retirer {{action}}",
+    "actionServices": {
+      "turn_on": "Allumer",
+      "turn_off": "Éteindre",
+      "lock": "Verrouiller",
+      "unlock": "Déverrouiller",
+      "open_cover": "Ouvrir",
+      "close_cover": "Fermer"
+    }
   },
   "draft": {
     "label": "Automatisation à confirmer",

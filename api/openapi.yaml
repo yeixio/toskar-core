@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Toskar Control Plane API
-  version: "1.104"
+  version: "1.106"
   description: >-
     Local AI control plane API for Toskar, its OpenAI-compatible routes, and its MCP server.
     On the default loopback bind no key is needed. When the daemon listens on any other address,
@@ -8768,6 +8768,15 @@ components:
             properties:
               connector: {type: string, enum: [homeassistant]}
               device: {type: string, description: 'The camera as that service names it, such as Home Assistant''s camera.driveway'}
+        actions:
+          type: array
+          description: 'Calls the automation may make on its own (#586), such as Home Assistant''s light.turn_on on light.porch. A call that matches one runs without asking, even in a run a trigger started; other calls that change things are skipped. Each argument listed must equal the call''s, ignoring case; a Home Assistant action names its service and entity_id. At most 20. On update, an empty list removes them.'
+          items:
+            type: object
+            required: [tool]
+            properties:
+              tool: {type: string, description: A tool ID, such as homeassistant.call}
+              args: {type: object, additionalProperties: {type: string}, description: 'The arguments that must match, such as {"service": "light.turn_on", "entity_id": "light.porch"}'}
     Automation:
       type: object
       description: A scheduled prompt owned by the daemon.
@@ -8812,6 +8821,15 @@ components:
             properties:
               connector: {type: string}
               device: {type: string}
+        actions:
+          type: array
+          description: 'Calls the automation may make on its own (#586), such as Home Assistant''s light.turn_on on light.porch. A call that matches one runs without asking, even in a run a trigger started; other calls that change things are skipped. Each argument listed must equal the call''s, ignoring case; a Home Assistant action names its service and entity_id. At most 20. On update, an empty list removes them.'
+          items:
+            type: object
+            required: [tool]
+            properties:
+              tool: {type: string, description: A tool ID, such as homeassistant.call}
+              args: {type: object, additionalProperties: {type: string}, description: 'The arguments that must match, such as {"service": "light.turn_on", "entity_id": "light.porch"}'}
         last_checked_at: {type: string, format: date-time, description: When the trigger last checked and found nothing new}
         hook_set: {type: boolean, description: 'A webhook trigger has a link; POST /api/v1/automations/{id}/hook makes a new one'}
         created_at: {type: string, format: date-time}
@@ -10109,6 +10127,15 @@ components:
             properties:
               connector: {type: string}
               device: {type: string}
+        actions:
+          type: array
+          description: 'Calls the automation may make on its own (#586), such as Home Assistant''s light.turn_on on light.porch. A call that matches one runs without asking, even in a run a trigger started; other calls that change things are skipped. Each argument listed must equal the call''s, ignoring case; a Home Assistant action names its service and entity_id. At most 20. On update, an empty list removes them.'
+          items:
+            type: object
+            required: [tool]
+            properties:
+              tool: {type: string, description: A tool ID, such as homeassistant.call}
+              args: {type: object, additionalProperties: {type: string}, description: 'The arguments that must match, such as {"service": "light.turn_on", "entity_id": "light.porch"}'}
         last_checked_at: {type: string, format: date-time}
         hook_set: {type: boolean}
         created_at: {type: string, format: date-time}

@@ -77,6 +77,8 @@ type Execution struct {
 	NodeID  string
 	// Skipped lists tools the run reached that nobody approved for it.
 	Skipped []string
+	// Acted lists the automation's actions the run took, in words (#586).
+	Acted []string
 	// SourceHash fingerprints what the run's tools read, so a run that read
 	// the same pages as the last one hasn't changed (#204). Empty when it
 	// read nothing.

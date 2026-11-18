@@ -402,7 +402,24 @@
       "other": "Sonstiges"
     },
     "needsToolModel": "Das gewählte Modell kann keine Werkzeuge nutzen. Es öffnet keine Seiten und nutzt die hier gewählten Werkzeuge nicht, sondern antwortet aus dem, was es schon weiß. Wähle ein Modell, das Werkzeuge nutzen kann, oder installiere eins.",
-    "openModels": "Modelle öffnen"
+    "openModels": "Modelle öffnen",
+    "actions": "Aktionen, die sie selbst ausführen darf",
+    "actionsHint": "Jeder Lauf darf diese Aufrufe ohne Nachfrage ausführen, auch wenn ein Auslöser ihn gestartet hat. Jeder andere Aufruf, der etwas ändert, wird übersprungen. Wähle nur, was sie tun darf, wenn niemand zusieht.",
+    "actionLabel": "{{action}}: {{device}}",
+    "actionDevice": "Gerät",
+    "actionDevicePick": "Gerät wählen…",
+    "actionService": "Aktion",
+    "actionAdd": "Erlauben",
+    "actionRemoveButton": "Entfernen",
+    "actionRemove": "{{action}} entfernen",
+    "actionServices": {
+      "turn_on": "Einschalten",
+      "turn_off": "Ausschalten",
+      "lock": "Verriegeln",
+      "unlock": "Entriegeln",
+      "open_cover": "Öffnen",
+      "close_cover": "Schließen"
+    }
   },
   "draft": {
     "label": "Automation zum Bestätigen",

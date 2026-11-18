@@ -135,6 +135,8 @@ type Automation struct {
 	Trigger *Trigger `json:"trigger,omitempty"`
 	// Cameras are looked at as each run starts (#667).
 	Cameras []Camera `json:"cameras,omitempty"`
+	// Actions are the calls the automation may make on its own (#586).
+	Actions []Action `json:"actions,omitempty"`
 	// WatchState is what the trigger's last check found, and
 	// LastCheckedAt when it was.
 	WatchState    []byte     `json:"-"`
@@ -207,6 +209,8 @@ type CreateInput struct {
 	Trigger *Trigger `json:"trigger,omitempty"`
 	// Cameras: see Automation.
 	Cameras []Camera `json:"cameras,omitempty"`
+	// Actions: see Automation.
+	Actions []Action `json:"actions,omitempty"`
 }
 
 // Patch updates the fields that are non-nil.
@@ -227,6 +231,8 @@ type Patch struct {
 	Trigger *Trigger `json:"trigger,omitempty"`
 	// Cameras: see Automation; an empty list stops looking.
 	Cameras *[]Camera `json:"cameras,omitempty"`
+	// Actions: see Automation; an empty list removes them.
+	Actions *[]Action `json:"actions,omitempty"`
 }
 
 // Response languages an automation can have besides a language tag.

@@ -1768,6 +1768,8 @@ export interface Automation {
   trigger?: AutomationTrigger
   /** Cameras looked at as each run starts; their pictures are shown to a model that can see (#667, contract 1.49). */
   cameras?: AutomationCamera[]
+  /** Calls it may make on its own, even from a trigger (#586, contract 1.106). */
+  actions?: AutomationAction[]
   /** When the trigger last checked and found nothing new. */
   last_checked_at?: string
   /** A webhook trigger has a link; making a new one shows it once. */
@@ -1866,6 +1868,8 @@ export interface AutomationInput {
   trigger?: AutomationTrigger
   /** Cameras to look at as each run starts, up to 4; an empty list stops looking. */
   cameras?: AutomationCamera[]
+  /** Calls it may make on its own, up to 20; an empty list removes them. */
+  actions?: AutomationAction[]
 }
 
 /** A connected service's camera (#667): device is the camera as that service names it, such as Home Assistant's camera.driveway. */
@@ -2344,6 +2348,15 @@ export interface ConnectorField {
 }
 
 /** A connected service (spec §32). Secret values are never returned; a stored token shows only its last four characters. */
+/**
+ * A call an automation may make on its own (#586), such as Home Assistant's
+ * light.turn_on on light.porch. Each argument listed must equal the call's.
+ */
+export interface AutomationAction {
+  tool: string
+  args?: Record<string, string>
+}
+
 /** A connected service's device, by a kind that doesn't depend on the service (#586, contract 1.51). */
 export interface Device {
   connector: string

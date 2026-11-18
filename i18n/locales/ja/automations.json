@@ -402,7 +402,24 @@
       "other": "その他"
     },
     "needsToolModel": "選んだモデルはツールを使えないため、ページを開いたりここで選んだツールを使ったりせず、知っていることだけで答えます。ツールを使えるモデルを選ぶか、インストールしてください。",
-    "openModels": "モデルを開く"
+    "openModels": "モデルを開く",
+    "actions": "自分で実行してよい操作",
+    "actionsHint": "各実行は、トリガーで始まった場合でも、確認なしでこれらの呼び出しを行えます。何かを変える他の呼び出しはスキップされます。誰も見ていなくても任せられるものだけを選んでください。",
+    "actionLabel": "{{action}}: {{device}}",
+    "actionDevice": "デバイス",
+    "actionDevicePick": "デバイスを選択…",
+    "actionService": "操作",
+    "actionAdd": "許可",
+    "actionRemoveButton": "削除",
+    "actionRemove": "{{action}} を削除",
+    "actionServices": {
+      "turn_on": "オン",
+      "turn_off": "オフ",
+      "lock": "施錠",
+      "unlock": "解錠",
+      "open_cover": "開く",
+      "close_cover": "閉じる"
+    }
   },
   "draft": {
     "label": "確認待ちのオートメーション",

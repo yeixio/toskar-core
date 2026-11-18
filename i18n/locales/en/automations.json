@@ -402,7 +402,24 @@
       "other": "Other"
     },
     "needsToolModel": "The model chosen can't use tools, so it won't open pages or run the tools picked here: it answers from what it already knows. Choose a model that can use tools, or install one.",
-    "openModels": "Open Models"
+    "openModels": "Open Models",
+    "actions": "Actions it may take on its own",
+    "actionsHint": "Each run may make these calls without asking, even when a trigger started it. Any other call that changes something is skipped. Choose only what you'd let it do with nobody watching.",
+    "actionLabel": "{{action}}: {{device}}",
+    "actionDevice": "Device",
+    "actionDevicePick": "Choose a device…",
+    "actionService": "Action",
+    "actionAdd": "Allow",
+    "actionRemoveButton": "Remove",
+    "actionRemove": "Remove {{action}}",
+    "actionServices": {
+      "turn_on": "Turn on",
+      "turn_off": "Turn off",
+      "lock": "Lock",
+      "unlock": "Unlock",
+      "open_cover": "Open",
+      "close_cover": "Close"
+    }
   },
   "draft": {
     "label": "Automation to confirm",
