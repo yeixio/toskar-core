@@ -37,6 +37,7 @@ var routeCapability = map[string]auth.Capability{
 	"POST /api/v1/knowledge/sources/{id}/refresh": auth.CapKnowledgeAdd,
 	"POST /api/v1/knowledge/search":               auth.CapKnowledge,
 	"GET /api/v1/remote-access/route":             auth.CapRemoteAccess,
+	"GET /api/v1/remote-access/device-token":      auth.CapRemoteAccess,
 }
 
 // capabilitiesOf is what person may use; everything when people aren't
