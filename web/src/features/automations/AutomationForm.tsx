@@ -91,6 +91,11 @@ export function AutomationForm({ profiles, models, tools, others = [], initial, 
   const [cooldown, setCooldown] = useState(initial?.trigger?.cooldown_seconds || 60)
   // Cameras each run looks at (#667).
   const [cameraIDs, setCameraIDs] = useState<string[]>(initial?.cameras?.map((c) => c.device) ?? [])
+  // Says each run's answer at the door, with quiet hours (#667).
+  const [saying, setSaying] = useState(Boolean(initial?.say))
+  const [quiet, setQuiet] = useState(Boolean(initial?.say?.quiet_from))
+  const [quietFrom, setQuietFrom] = useState(initial?.say?.quiet_from || '22:00')
+  const [quietTo, setQuietTo] = useState(initial?.say?.quiet_to || '07:00')
   // Calls it may make on its own, even from a trigger (#586).
   const [actions, setActions] = useState<AutomationAction[]>(initial?.actions ?? [])
   // The connected services' devices to pick from; none for someone who can't list them.
@@ -104,6 +109,7 @@ export function AutomationForm({ profiles, models, tools, others = [], initial, 
   }, [])
   const cameras = devices.filter((d) => d.kind === 'camera')
   const watchable = devices.filter((d) => d.kind !== 'camera')
+  const speaker = devices.some((d) => d.connector === 'reolink' && d.kind === 'camera')
   // Also save each result as a file in a folder (#204).
   const [saving, setSaving] = useState(Boolean(initial?.save_folder))
   const [saveFolder, setSaveFolder] = useState(initial?.save_folder || '~/Documents/Toskar')
@@ -230,6 +236,12 @@ export function AutomationForm({ profiles, models, tools, others = [], initial, 
       cameras: cameraIDs.length > 0 || initial?.cameras?.length ? cameraIDs.map((device) => ({ connector: connectorOf(device), device })) : undefined,
       // An edit that removes them all sends an empty list.
       actions: actions.length > 0 || initial?.actions?.length ? actions : undefined,
+      // An edit that stops speaking sends one with no connector.
+      say: saying
+        ? { connector: 'reolink', device: 'camera', ...(quiet ? { quiet_from: quietFrom, quiet_to: quietTo } : {}) }
+        : initial?.say
+          ? { connector: '' }
+          : undefined,
     }
   }
 
@@ -520,6 +532,35 @@ export function AutomationForm({ profiles, models, tools, others = [], initial, 
             })}
           </div>
           <p className="text-xs text-ink-faint">{t('form.camerasHint', { count: MAX_CAMERAS })}</p>
+        </fieldset>
+      ) : null}
+      {speaker || saying ? (
+        <fieldset className="space-y-2 text-sm">
+          <label className="inline-flex items-center gap-2">
+            <input type="checkbox" checked={saying} onChange={(e) => setSaying(e.target.checked)} />
+            <span>{t('form.say')}</span>
+          </label>
+          {saying ? (
+            <div className="space-y-2 ps-6">
+              <label className="inline-flex items-center gap-2">
+                <input type="checkbox" checked={quiet} onChange={(e) => setQuiet(e.target.checked)} />
+                <span>{t('form.sayQuiet')}</span>
+              </label>
+              {quiet ? (
+                <div className="flex flex-wrap gap-3">
+                  <label className="inline-flex items-center gap-2">
+                    <span className="text-ink-muted">{t('form.sayQuietFrom')}</span>
+                    <input type="time" className="field" value={quietFrom} onChange={(e) => setQuietFrom(e.target.value)} />
+                  </label>
+                  <label className="inline-flex items-center gap-2">
+                    <span className="text-ink-muted">{t('form.sayQuietTo')}</span>
+                    <input type="time" className="field" value={quietTo} onChange={(e) => setQuietTo(e.target.value)} />
+                  </label>
+                </div>
+              ) : null}
+            </div>
+          ) : null}
+          <p className="text-xs text-ink-faint">{t('form.sayHint')}</p>
         </fieldset>
       ) : null}
       <AutomationActions devices={devices} value={actions} onChange={setActions} />

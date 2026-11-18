@@ -1,0 +1,104 @@
+package connectors
+
+import (
+	"context"
+	"os"
+	"path/filepath"
+	"runtime"
+	"strings"
+	"testing"
+
+	"github.com/yeixio/toskar-core/internal/connectors/reolinktest"
+)
+
+// fakeReolinkCLI stands in for reolink-cli: it writes its arguments and the
+// audio it was given to dir, and prints answer.
+func fakeReolinkCLI(t *testing.T, answer string, code int) (dir string) {
+	t.Helper()
+	if runtime.GOOS == "windows" {
+		t.Skip("the fake reolink-cli is a shell script")
+	}
+	dir = t.TempDir()
+	script := "#!/bin/sh\nprintf '%s\\n' \"$@\" > \"" + dir + "/args\"\ncat > \"" + dir + "/audio\"\necho '" + answer + "'\nexit " + string(rune('0'+code)) + "\n"
+	bin := filepath.Join(dir, "reolink-cli")
+	if err := os.WriteFile(bin, []byte(script), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	old := reolinkCLI
+	reolinkCLI = func() (string, error) { return bin, nil }
+	t.Cleanup(func() { reolinkCLI = old })
+	return dir
+}
+
+// Toskar speaks through a Reolink doorbell with reolink-cli, and adds
+// silence after the words, since the doorbell cuts off the last moment
+// of what it's sent (#667).
+func TestReolinkTalksThroughReolinkCLI(t *testing.T) {
+	door := reolinktest.New(false)
+	defer door.Close()
+	m := reolinkManager(t)
+	ctx := context.Background()
+	if _, err := m.Connect(ctx, "reolink", map[string]string{"url": door.URL, "username": "admin", "password": door.Password}); err != nil {
+		t.Fatal(err)
+	}
+	words := make([]int16, ReolinkTalkRate) // one second
+	for i := range words {
+		words[i] = 1000
+	}
+	if m.CanTalk("reolink") {
+		t.Fatal("a connection with no speaker named can talk")
+	}
+	if err := m.Talk(ctx, "reolink", words, ReolinkTalkRate); err == nil || !strings.Contains(err.Error(), "Speaker") {
+		t.Fatalf("no speaker named: %v", err)
+	}
+
+	if _, err := m.Connect(ctx, "reolink", map[string]string{"url": door.URL, "username": "admin", "password": door.Password, "talk_camera": "hub-ch0", "talk_gateway": "127.0.0.1:9000"}); err != nil {
+		t.Fatal(err)
+	}
+	if !m.CanTalk("reolink") {
+		t.Fatal("a connection with a speaker can't talk")
+	}
+	dir := fakeReolinkCLI(t, `{"ok":true,"command":"audio","data":{"durationMs":1800}}`, 0)
+	if err := m.Talk(ctx, "reolink", words, ReolinkTalkRate); err != nil {
+		t.Fatal(err)
+	}
+	args, _ := os.ReadFile(filepath.Join(dir, "args"))
+	if got := strings.Fields(string(args)); strings.Join(got, " ") != "--gateway-addr 127.0.0.1:9000 --camera hub-ch0 audio talk --stdin --sample-rate 16000" {
+		t.Fatalf("args = %v", got)
+	}
+	audio, _ := os.ReadFile(filepath.Join(dir, "audio"))
+	tail := ReolinkTalkRate * 8 / 10
+	if len(audio) != 2*(len(words)+tail) {
+		t.Fatalf("sent %d bytes, want the words and 0.8 s of silence, %d", len(audio), 2*(len(words)+tail))
+	}
+	for i := 2 * len(words); i < len(audio); i++ {
+		if audio[i] != 0 {
+			t.Fatalf("byte %d after the words isn't silence", i)
+		}
+	}
+	if audio[0] != 0xe8 || audio[1] != 0x03 { // 1000, little-endian
+		t.Fatalf("words start % x", audio[:2])
+	}
+
+	fakeReolinkCLI(t, `{"ok":false,"error":{"code":"CAMERA_OFFLINE","message":"camera is offline"}}`, 1)
+	if err := m.Talk(ctx, "reolink", words, ReolinkTalkRate); err == nil || !strings.Contains(err.Error(), "camera is offline") {
+		t.Fatalf("a failed talk: %v", err)
+	}
+	if err := m.Talk(ctx, "homeassistant", words, ReolinkTalkRate); err == nil {
+		t.Fatal("Home Assistant has no speaker here")
+	}
+}
+
+// A speaker name or gateway that isn't one never reaches the command line.
+func TestReolinkTalkRefusesOddNames(t *testing.T) {
+	fakeReolinkCLI(t, `{"ok":true}`, 0)
+	for _, cred := range []Credential{
+		{"talk_camera": "--help"},
+		{"talk_camera": "a b"},
+		{"talk_camera": "door", "talk_gateway": "x; rm -rf"},
+	} {
+		if err := reolinkTalk(context.Background(), cred, []int16{1}, ReolinkTalkRate); err == nil {
+			t.Errorf("%v: no error", cred)
+		}
+	}
+}

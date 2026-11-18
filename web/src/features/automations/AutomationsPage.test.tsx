@@ -373,6 +373,32 @@ describe('AutomationsPage', () => {
     expect(body.cameras).toEqual([{ connector: 'homeassistant', device: 'camera.porch' }])
   })
 
+  it('greets a person at the door through a Reolink doorbell, with quiet hours (#667)', async () => {
+    vi.mocked(api.listDevices).mockResolvedValue([
+      { connector: 'reolink', device: 'camera', name: 'Front Door', kind: 'camera', state: 'on' },
+      { connector: 'reolink', device: 'person', name: 'Front Door person', kind: 'sensor', state: 'off' },
+    ])
+    renderPage()
+    fireEvent.click(await screen.findByRole('button', { name: 'New automation' }))
+    fireEvent.change(screen.getByPlaceholderText(/Every morning at 8:00 AM/), {
+      target: { value: 'Every morning at 8:00 AM, check this product and tell me if the price is below $500.' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'Fill in the details' }))
+    expect(await screen.findByDisplayValue('Price below $500')).toBeInTheDocument()
+    fireEvent.change(screen.getByRole('combobox', { name: 'Runs' }), { target: { value: 'device' } })
+    fireEvent.change(screen.getByRole('combobox', { name: 'Changes to' }), { target: { value: 'on' } })
+    fireEvent.click(screen.getByRole('checkbox', { name: 'Front Door' }))
+    expect(screen.queryByRole('checkbox', { name: /quiet hours/i })).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('checkbox', { name: 'Say the answer at the door' }))
+    fireEvent.click(screen.getByRole('checkbox', { name: /quiet hours/i }))
+    fireEvent.click(screen.getByRole('button', { name: 'Create automation' }))
+    await waitFor(() => expect(api.createAutomation).toHaveBeenCalled())
+    const body = vi.mocked(api.createAutomation).mock.calls[0][0]
+    expect(body.trigger).toMatchObject({ kind: 'device', connector: 'reolink', device: 'person', to: 'on' })
+    expect(body.cameras).toEqual([{ connector: 'reolink', device: 'camera' }])
+    expect(body.say).toEqual({ connector: 'reolink', device: 'camera', quiet_from: '22:00', quiet_to: '07:00' })
+  })
+
   it('lists tools that change things apart, offers Auto, and saves approvals', async () => {
     vi.mocked(api.listTools).mockResolvedValue([
       ...((await api.listTools()) ?? []),

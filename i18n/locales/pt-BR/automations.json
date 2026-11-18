@@ -390,6 +390,11 @@
     "deviceHint": "Ela roda assim que o dispositivo muda, sabendo o que mudou. Mudanças durante a espera depois de uma execução não iniciam outra, então um sensor que oscila a roda uma vez só.",
     "cameras": "Olhar câmeras",
     "camerasHint": "Cada execução começa com uma imagem destas câmeras, mostrada a um modelo que vê imagens. Até {{count}}.",
+    "say": "Dizer a resposta na porta",
+    "sayHint": "O Toskar lê em voz alta a resposta de cada execução pelo alto-falante da campainha, e não diz nada quando não há ninguém para conversar.",
+    "sayQuiet": "Horário de silêncio, em que só notifica",
+    "sayQuietFrom": "De",
+    "sayQuietTo": "Até",
     "deviceKinds": {
       "camera": "Câmeras",
       "sensor": "Sensores",

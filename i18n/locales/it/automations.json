@@ -390,6 +390,11 @@
     "deviceHint": "Si avvia appena il dispositivo cambia, sapendo cosa è cambiato. I cambiamenti durante l'attesa dopo un'esecuzione non ne avviano un'altra, così un sensore che sfarfalla la avvia una volta sola.",
     "cameras": "Guarda le telecamere",
     "camerasHint": "Ogni esecuzione inizia con un'immagine di queste telecamere, mostrata a un modello che vede le immagini. Fino a {{count}}.",
+    "say": "Di' la risposta alla porta",
+    "sayHint": "Toskar legge ad alta voce la risposta di ogni esecuzione dall'altoparlante del campanello, e non dice nulla se non c'è nessuno.",
+    "sayQuiet": "Ore di silenzio, in cui avvisa soltanto",
+    "sayQuietFrom": "Dalle",
+    "sayQuietTo": "Alle",
     "deviceKinds": {
       "camera": "Telecamere",
       "sensor": "Sensori",

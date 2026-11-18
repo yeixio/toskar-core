@@ -1788,6 +1788,8 @@ export interface Automation {
   cameras?: AutomationCamera[]
   /** Calls it may make on its own, even from a trigger (#586, contract 1.106). */
   actions?: AutomationAction[]
+  /** Speaks each run's answer through a camera's speaker (#667, contract 1.110). */
+  say?: AutomationSay
   /** When the trigger last checked and found nothing new. */
   last_checked_at?: string
   /** A webhook trigger has a link; making a new one shows it once. */
@@ -1888,6 +1890,8 @@ export interface AutomationInput {
   cameras?: AutomationCamera[]
   /** Calls it may make on its own, up to 20; an empty list removes them. */
   actions?: AutomationAction[]
+  /** Where to speak each run's answer; one with no connector stops speaking. Admin only. */
+  say?: AutomationSay | { connector: '' }
 }
 
 /** A service with devices: Home Assistant, or a Reolink camera reached directly (#667), whose devices are camera, person, vehicle, animal, motion, and doorbell. */
@@ -1898,6 +1902,19 @@ export interface AutomationCamera {
   /** reolink is a Reolink camera reached directly, whose device is always camera (#667, contract 1.109). */
   connector: DeviceConnector
   device: string
+}
+
+/**
+ * A camera's speaker each run's answer is said through (#667, contract 1.110): a
+ * Reolink camera's, through reolink-cli. The run answers NOTHING when nobody is
+ * there, and nothing is said; nor in the quiet hours, such as 22:00 to 07:00 in
+ * the automation's time zone.
+ */
+export interface AutomationSay {
+  connector: 'reolink'
+  device: 'camera'
+  quiet_from?: string
+  quiet_to?: string
 }
 
 export interface AutomationTrigger {

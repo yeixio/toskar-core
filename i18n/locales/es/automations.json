@@ -390,6 +390,11 @@
     "deviceHint": "Se ejecuta en cuanto cambia el dispositivo y se le dice qué cambió. Los cambios durante la espera tras una ejecución no inician otra, así que un sensor que parpadea la ejecuta una sola vez.",
     "cameras": "Mirar cámaras",
     "camerasHint": "Cada ejecución empieza con una imagen de estas cámaras, que ve un modelo capaz de ver imágenes. Hasta {{count}}.",
+    "say": "Decir la respuesta en la puerta",
+    "sayHint": "Toskar lee en voz alta la respuesta de cada ejecución por el altavoz del timbre, y no dice nada si no hay nadie con quien hablar.",
+    "sayQuiet": "Horas de silencio, en las que solo avisa",
+    "sayQuietFrom": "Desde",
+    "sayQuietTo": "Hasta",
     "deviceKinds": {
       "camera": "Cámaras",
       "sensor": "Sensores",

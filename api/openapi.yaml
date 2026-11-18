@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Toskar Control Plane API
-  version: "1.109"
+  version: "1.110"
   description: >-
     Local AI control plane API for Toskar, its OpenAI-compatible routes, and its MCP server.
     On the default loopback bind no key is needed. When the daemon listens on any other address,
@@ -8943,8 +8943,17 @@ components:
             description: 'One an automation looks at as each run starts (#667): a connected service''s camera, whose picture is then shown to a model that can see, like a photo attached in chat. Device is the camera as that service names it; Home Assistant''s are the first, such as camera.driveway.'
             required: [connector, device]
             properties:
-              connector: {type: string, enum: [homeassistant]}
+              connector: {type: string, enum: [homeassistant, reolink]}
               device: {type: string, description: 'The camera as that service names it, such as Home Assistant''s camera.driveway'}
+        say:
+          type: object
+          description: 'Speaks each run''s answer through a camera''s speaker (#667, contract 1.110), such as a Reolink doorbell''s, read by this computer''s voice. The run is told its answer is spoken and answers NOTHING when nobody is there, and then nothing is said. Only an Admin or the Owner sets it. On update, one with no connector stops speaking.'
+          required: [connector, device]
+          properties:
+            connector: {type: string, enum: [reolink]}
+            device: {type: string, description: 'Always camera: one Reolink connection is one camera'}
+            quiet_from: {type: string, description: 'With quiet_to, such as 22:00 and 07:00: the hours, in the automation''s time zone, when nothing is said. The run still notifies.'}
+            quiet_to: {type: string}
         actions:
           type: array
           description: 'Calls the automation may make on its own (#586), such as Home Assistant''s light.turn_on on light.porch. A call that matches one runs without asking, even in a run a trigger started; other calls that change things are skipped. Each argument listed must equal the call''s, ignoring case; a Home Assistant action names its service and entity_id. At most 20. On update, an empty list removes them.'
@@ -8998,6 +9007,15 @@ components:
             properties:
               connector: {type: string}
               device: {type: string}
+        say:
+          type: object
+          description: 'Speaks each run''s answer through a camera''s speaker (#667, contract 1.110), such as a Reolink doorbell''s, read by this computer''s voice. The run is told its answer is spoken and answers NOTHING when nobody is there, and then nothing is said. Only an Admin or the Owner sets it. On update, one with no connector stops speaking.'
+          required: [connector, device]
+          properties:
+            connector: {type: string, enum: [reolink]}
+            device: {type: string, description: 'Always camera: one Reolink connection is one camera'}
+            quiet_from: {type: string, description: 'With quiet_to, such as 22:00 and 07:00: the hours, in the automation''s time zone, when nothing is said. The run still notifies.'}
+            quiet_to: {type: string}
         actions:
           type: array
           description: 'Calls the automation may make on its own (#586), such as Home Assistant''s light.turn_on on light.porch. A call that matches one runs without asking, even in a run a trigger started; other calls that change things are skipped. Each argument listed must equal the call''s, ignoring case; a Home Assistant action names its service and entity_id. At most 20. On update, an empty list removes them.'
@@ -10306,6 +10324,15 @@ components:
             properties:
               connector: {type: string}
               device: {type: string}
+        say:
+          type: object
+          description: 'Speaks each run''s answer through a camera''s speaker (#667, contract 1.110), such as a Reolink doorbell''s, read by this computer''s voice. The run is told its answer is spoken and answers NOTHING when nobody is there, and then nothing is said. Only an Admin or the Owner sets it. On update, one with no connector stops speaking.'
+          required: [connector, device]
+          properties:
+            connector: {type: string, enum: [reolink]}
+            device: {type: string, description: 'Always camera: one Reolink connection is one camera'}
+            quiet_from: {type: string, description: 'With quiet_to, such as 22:00 and 07:00: the hours, in the automation''s time zone, when nothing is said. The run still notifies.'}
+            quiet_to: {type: string}
         actions:
           type: array
           description: 'Calls the automation may make on its own (#586), such as Home Assistant''s light.turn_on on light.porch. A call that matches one runs without asking, even in a run a trigger started; other calls that change things are skipped. Each argument listed must equal the call''s, ignoring case; a Home Assistant action names its service and entity_id. At most 20. On update, an empty list removes them.'
