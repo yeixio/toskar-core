@@ -22,6 +22,8 @@ vi.mock('@/lib/api', async () => {
       listJoinTokens: vi.fn(),
       pairNode: vi.fn(),
       deleteModel: vi.fn(),
+      refreshNodes: vi.fn(),
+      installModel: vi.fn(),
     },
   }
 })
@@ -158,10 +160,66 @@ describe('NodesPage QA regressions', () => {
     ] as never)
     vi.mocked(api.deleteModel).mockResolvedValue(undefined as never)
     renderPage()
-    fireEvent.click(await screen.findByRole('button', { name: 'Manage' }))
+    fireEvent.click(await screen.findByRole('button', { name: 'Details' }))
     fireEvent.click(await screen.findByRole('button', { name: 'Remove' }))
     await new Promise((resolve) => setTimeout(resolve, 50))
     expect(api.deleteModel).not.toHaveBeenCalled()
     confirm.mockRestore()
+  })
+
+  // Regression: toskar-core#1245
+  it('the waiting card goes once the other computer joins, and can be stopped', async () => {
+    vi.mocked(api.refreshNodes).mockResolvedValue(undefined as never)
+    vi.mocked(api.pairNode).mockResolvedValue({
+      id: 's1', local_node_id: 'local', remote_node_id: 'a', remote_name: 'Attic PC', code: '123456',
+      state: 'pending', created_at: '', expires_at: '',
+    })
+    renderPage()
+    fireEvent.click((await screen.findAllByRole('button', { name: 'Add to team' }))[0])
+    await screen.findByText('Waiting for approval')
+    vi.mocked(api.getNodes).mockResolvedValue([local, { ...nearbyA, paired: true }, nearbyB])
+    fireEvent.click(screen.getByRole('button', { name: 'Find computers' }))
+    await waitFor(() => expect(screen.queryByText('Waiting for approval')).not.toBeInTheDocument())
+
+    vi.mocked(api.getNodes).mockResolvedValue([local, nearbyA, nearbyB])
+    fireEvent.click(screen.getByRole('button', { name: 'Find computers' }))
+    fireEvent.click((await screen.findAllByRole('button', { name: 'Add to team' }))[0])
+    await screen.findByText('Waiting for approval')
+    fireEvent.click(screen.getByRole('button', { name: 'Stop waiting' }))
+    expect(screen.queryByText('Waiting for approval')).not.toBeInTheDocument()
+  })
+
+  // Regression: toskar-core#1245
+  it('shows the latest error, by computer name, until it is dismissed', async () => {
+    vi.mocked(api.pairNode).mockRejectedValue(new Error('pair failed'))
+    vi.mocked(api.installModel).mockRejectedValue(new Error('disk full'))
+    vi.mocked(api.getModels).mockResolvedValue([
+      { id: 'm1', display_name: 'Small', source: { url: 'x' }, installed_on: [], capabilities: {} },
+    ] as never)
+    vi.mocked(api.getNodes).mockResolvedValue([local, { ...studio }, nearbyA])
+    renderPage()
+    fireEvent.click(await screen.findByRole('button', { name: 'Add to team' }))
+    await screen.findByText('pair failed')
+    fireEvent.change(screen.getByRole('combobox'), { target: { value: 'm1' } })
+    fireEvent.click(screen.getByRole('checkbox', { name: /Studio/ }))
+    fireEvent.click(screen.getByRole('button', { name: /Deploy to/ }))
+    await screen.findByText('Studio: disk full')
+    expect(screen.queryByText('pair failed')).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Dismiss' }))
+    expect(screen.queryByText('Studio: disk full')).not.toBeInTheDocument()
+  })
+
+  // Regression: toskar-core#1247
+  it('the deploy list puts what fits first and leaves out the test model', async () => {
+    vi.mocked(api.getNodes).mockResolvedValue([local])
+    vi.mocked(api.getModels).mockResolvedValue([
+      { id: 'big', display_name: 'Big', source: { url: 'x' }, capabilities: {}, fit: { label: 'too_large' } },
+      { id: 'stub-team', display_name: 'Stub Team Model', family: 'stub', installed: true, capabilities: {} },
+      { id: 'small', display_name: 'Small', source: { url: 'x' }, capabilities: {}, fit: { label: 'excellent' } },
+    ] as never)
+    renderPage()
+    await screen.findByRole('option', { name: /Small/ })
+    const names = screen.getAllByRole('option').map((o) => o.textContent)
+    expect(names).toEqual(['Choose a model…', 'Small · Excellent fit', 'Big · May run slowly'])
   })
 })

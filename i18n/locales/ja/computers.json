@@ -38,7 +38,8 @@
     "action": "その操作を完了できませんでした",
     "network": "両方のコンピュータでToskarのローカルネットワーク／ファイアウォールのアクセスを許可し、下の「ネットワークとアクセス」で「他のコンピュータを探す」をオンのままにしてください。",
     "generic": "問題が発生しました",
-    "claimFailed": "そのコードのペアリング情報を読み込めませんでした"
+    "claimFailed": "そのコードのペアリング情報を読み込めませんでした",
+    "dismiss": "閉じる"
   },
   "pairing": {
     "waiting": "承認を待っています",
@@ -47,7 +48,11 @@
     "code": "コード：<code>{{code}}</code>",
     "incoming": "受信したリクエスト",
     "offerCode": "コード <code>{{code}}</code>",
-    "approve": "承認"
+    "approve": "承認",
+    "noAnswer": "まだ応答がありません",
+    "noAnswerHint": "{{name}} がリクエストを承認していません。そちらで Toskar が開いているか確認してから、もう一度「チームに追加」をお試しください。",
+    "cancel": "待機をやめる",
+    "close": "閉じる"
   },
   "nearby": {
     "title": "追加できるコンピュータ",
@@ -110,7 +115,7 @@
     "approving": "承認中…",
     "approveCode": "コードで承認",
     "hideDetails": "詳細を隠す",
-    "manage": "管理",
+    "manage": "詳細",
     "moreActions": "{{name}}のその他の操作",
     "removeFromTeam": "チームから削除",
     "training": "学習中",
@@ -140,7 +145,8 @@
     "deployTo_other": "{{count}}台のコンピュータにデプロイ",
     "deployToName": "{{name}}にデプロイ",
     "deploy": "デプロイ",
-    "downloadSize": "ダウンロードサイズ 約{{size}}"
+    "downloadSize": "ダウンロードサイズ 約{{size}}",
+    "modelFit": "{{model}} · {{fit}}"
   },
   "join": {
     "open": "コマンドで追加",
