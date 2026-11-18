@@ -42,7 +42,7 @@ func (s *Server) compactReady(w http.ResponseWriter) bool {
 // compactStatus is the HTTP status for an auto-compact error's code.
 func compactStatus(err error) int {
 	switch code, _ := contracts.ErrorCode(err); code {
-	case "SUMMARY_NOT_FOUND":
+	case "SUMMARY_NOT_FOUND", "NOT_FOUND":
 		return http.StatusNotFound
 	case "NOTHING_TO_COMPACT", "SUMMARY_EMPTY":
 		return http.StatusBadRequest

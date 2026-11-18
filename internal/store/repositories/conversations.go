@@ -56,7 +56,8 @@ func (r *ConversationRepo) Get(ctx context.Context, id string) (contracts.Conver
 		FROM conversations WHERE id = ? AND person_id = ?`, id, auth.PersonID(ctx))
 	c, err := scanConversation(row)
 	if err == sql.ErrNoRows {
-		return contracts.Conversation{}, fmt.Errorf("conversation %q not found", id)
+		// Coded, so the API answers 404 rather than 500 (#1264).
+		return contracts.Conversation{}, contracts.NewError("NOT_FOUND", map[string]any{"detail": "conversation not found"}, fmt.Errorf("conversation %q not found", id))
 	}
 	return c, err
 }

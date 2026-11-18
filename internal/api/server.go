@@ -1082,6 +1082,21 @@ func (s *Server) handleRefreshNodes(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, items)
 }
 
+// settingsFor is the settings as a caller may read them. Someone below Admin
+// using a key, such as a Member's phone, doesn't get where this computer
+// keeps its files, the address it listens on, its node ID, or its address
+// from outside (#1264): their apps read the language, the default profile,
+// and the chat settings.
+func settingsFor(p auth.Principal, view contracts.SettingsView) contracts.SettingsView {
+	if p.Via != auth.ViaAPIKey || p.Person.Role.AtLeast(auth.RoleAdmin) {
+		return view
+	}
+	view.DataDir, view.ModelsDir, view.RuntimesDir, view.LogsDir = "", "", "", ""
+	view.APIHost, view.NodeID = "", ""
+	view.RemoteAccessAddress, view.RemoteAccessRelay = "", ""
+	return view
+}
+
 func (s *Server) handleGetSettings(w http.ResponseWriter, r *http.Request) {
 	if s.deps.GetSettings != nil {
 		view, err := s.deps.GetSettings(r.Context())
@@ -1089,7 +1104,7 @@ func (s *Server) handleGetSettings(w http.ResponseWriter, r *http.Request) {
 			writeErr(w, http.StatusInternalServerError, "SETTINGS_READ_FAILED", "Could not read settings.", map[string]any{"cause": err.Error()})
 			return
 		}
-		writeJSON(w, http.StatusOK, view)
+		writeJSON(w, http.StatusOK, settingsFor(auth.PrincipalFrom(r.Context()), view))
 		return
 	}
 	cfg := s.deps.Config.Get()
