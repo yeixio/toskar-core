@@ -171,10 +171,13 @@ func (s *Server) ServeRelayed(conn net.Conn) bool {
 func (s *Server) TLSCertificate() (tls.Certificate, bool) {
 	s.listenMu.Lock()
 	defer s.listenMu.Unlock()
-	if s.tlsConfig == nil || len(s.tlsConfig.Certificates) == 0 {
+	if s.tlsConfig == nil {
 		return tls.Certificate{}, false
 	}
-	return s.tlsConfig.Certificates[0], true
+	if len(s.tlsConfig.Certificates) > 0 {
+		return s.tlsConfig.Certificates[0], true
+	}
+	return s.tlsCert, len(s.tlsCert.Certificate) > 0
 }
 
 // mergedListener accepts from a TCP listener and from connections pushed

@@ -10,7 +10,7 @@ The phone, tablet, TV, and watch apps reach a person's own Toskar from anywhere,
 
 - **Pairing** (Connect a device, #216) gives the app a device key that reaches only the routes a phone uses (`auth.DeviceMayReach`), and the API certificate's fingerprint, `sha256:<hex>` of the certificate (`auth.CertFingerprint`).
 - **The pin** (#213, #405): the app keeps that fingerprint per `host:port` (`mobile/modules/tls-pins`, keychain key `toskar.tlsFingerprint`). For a pinned host and port, the certificate must match the pin; the system's name and CA checks don't apply. A changed certificate stops the app and asks the person, never falls back to plain HTTP.
-- **The certificate** is persistent (`secrets/api-tls.*`, or one the person supplies), so the pin holds across restarts.
+- **The certificate** is persistent (`secrets/api-tls.*`, or one the person supplies), so the pin holds across restarts. It carries no computer name: subject `CN=Toskar`, names `localhost` and the computer's addresses (#1263). One made before then, with the name in it, is replaced once the phones have learned the next one's fingerprint from `GET /api/v1/tls/next` (or after 30 days), so they take the switch as the same computer.
 - **Who a request is from:** a request from another machine always needs a key; one through a proxy is never "this computer" or "the local network" (`auth.FromThisComputer`, `auth.FromLocalNetwork`).
 - **Do it yourself:** Tailscale, a port forward, or Cloudflare Tunnel already work, because pairing accepts their addresses. These stay free and documented.
 

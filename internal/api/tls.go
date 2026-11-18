@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/yeixio/toskar-core/internal/auth"
 	"github.com/yeixio/toskar-core/internal/mixtls"
 )
 
@@ -29,11 +30,55 @@ type APITLS struct {
 	Error string `json:"error,omitempty"`
 }
 
-// SetTLS has the API answer HTTPS with config too, before it starts.
+// SetTLS has the API answer HTTPS with config too, before it starts. Its
+// one certificate can be replaced later with ReplaceTLSCertificate.
 func (s *Server) SetTLS(config *tls.Config, info APITLS) {
 	s.listenMu.Lock()
 	defer s.listenMu.Unlock()
+	if config != nil && config.GetCertificate == nil && len(config.Certificates) == 1 {
+		s.tlsCert = config.Certificates[0]
+		config.Certificates = nil
+		config.GetCertificate = func(*tls.ClientHelloInfo) (*tls.Certificate, error) {
+			s.listenMu.Lock()
+			defer s.listenMu.Unlock()
+			cert := s.tlsCert
+			return &cert, nil
+		}
+	}
 	s.tlsConfig, s.tlsInfo = config, info
+}
+
+// ReplaceTLSCertificate has every listener answer with cert from the next
+// connection on, as when a certificate that names the computer is
+// replaced (#1263).
+func (s *Server) ReplaceTLSCertificate(cert tls.Certificate, info APITLS) {
+	s.listenMu.Lock()
+	defer s.listenMu.Unlock()
+	s.tlsCert, s.tlsInfo = cert, info
+}
+
+// SetNextTLS says which certificate replaces the API's (#1263), and what to
+// do when a device's key asks for it; "" when none will.
+func (s *Server) SetNextTLS(fingerprint string, asked func(keyID string)) {
+	s.listenMu.Lock()
+	defer s.listenMu.Unlock()
+	s.tlsNext, s.tlsNextAsked = fingerprint, asked
+}
+
+// nextTLSView is the certificate the API will switch to: paired devices
+// save its fingerprint, so the switch doesn't look like another computer.
+type nextTLSView struct {
+	Fingerprint string `json:"fingerprint,omitempty"`
+}
+
+func (s *Server) handleNextTLS(w http.ResponseWriter, r *http.Request) {
+	s.listenMu.Lock()
+	next, asked := s.tlsNext, s.tlsNextAsked
+	s.listenMu.Unlock()
+	if p := auth.PrincipalFrom(r.Context()); next != "" && asked != nil && p.Via == auth.ViaAPIKey && p.KeyID != "" {
+		asked(p.KeyID)
+	}
+	writeJSON(w, http.StatusOK, nextTLSView{Fingerprint: next})
 }
 
 // TLS is how the API speaks HTTPS.

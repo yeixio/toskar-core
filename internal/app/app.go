@@ -131,6 +131,8 @@ type App struct {
 	portKeeper portmap.Keeper
 	// relay is the relay client while access from anywhere is on (#456).
 	relayMu sync.Mutex
+	// tlsSwitch replaces an API certificate that names the computer (#1263).
+	tlsSwitch *tlsSwitch
 	// reach is the outside check's last result (#546).
 	reach reachChecker
 	// anywhere is access from anywhere bought in Settings (#639).
@@ -1527,7 +1529,7 @@ func (a *App) Start(ctx context.Context) error {
 	a.wg.Add(1)
 	go func() {
 		defer a.wg.Done()
-		a.setAPITLS()
+		a.setAPITLS(ctx)
 		// Access from anywhere listens beside the API when it's on (#456);
 		// a port in use is reported in Settings, not fatal.
 		// A permanent router mapping a crash left is noted here (#1262).

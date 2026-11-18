@@ -167,6 +167,7 @@ var specTypes = map[string]any{
 	"JoinTokenCreated":   JoinTokenCreated{},
 	"PairingSession":     auth.PairingSession{},
 	"TLSInfo":            APITLS{},
+	"NextTLSInfo":        nextTLSView{},
 	"Portal":             portals.Portal{},
 	"PortalConversation": portals.Conversation{},
 	"PortalMessage":      portals.Message{},
