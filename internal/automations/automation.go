@@ -137,6 +137,9 @@ type Automation struct {
 	Cameras []Camera `json:"cameras,omitempty"`
 	// Actions are the calls the automation may make on its own (#586).
 	Actions []Action `json:"actions,omitempty"`
+	// Say, when set, speaks each run's answer through a camera's speaker
+	// (#667).
+	Say *Say `json:"say,omitempty"`
 	// WatchState is what the trigger's last check found, and
 	// LastCheckedAt when it was.
 	WatchState    []byte     `json:"-"`
@@ -211,6 +214,8 @@ type CreateInput struct {
 	Cameras []Camera `json:"cameras,omitempty"`
 	// Actions: see Automation.
 	Actions []Action `json:"actions,omitempty"`
+	// Say: see Automation.
+	Say *Say `json:"say,omitempty"`
 }
 
 // Patch updates the fields that are non-nil.
@@ -233,6 +238,8 @@ type Patch struct {
 	Cameras *[]Camera `json:"cameras,omitempty"`
 	// Actions: see Automation; an empty list removes them.
 	Actions *[]Action `json:"actions,omitempty"`
+	// Say: see Automation; one with no connector stops speaking.
+	Say *Say `json:"say,omitempty"`
 }
 
 // Response languages an automation can have besides a language tag.

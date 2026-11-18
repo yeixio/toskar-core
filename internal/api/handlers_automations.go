@@ -45,7 +45,7 @@ func (s *Server) handleCreateAutomation(w http.ResponseWriter, r *http.Request) 
 		writeErr(w, http.StatusBadRequest, "BAD_REQUEST", "invalid automation", nil)
 		return
 	}
-	if len(in.Cameras) > 0 && !camerasAllowed(w, r) {
+	if (len(in.Cameras) > 0 || in.Say != nil) && !camerasAllowed(w, r) {
 		return
 	}
 	created, err := s.deps.CreateAutomation(r.Context(), in)
@@ -170,7 +170,7 @@ func (s *Server) handleUpdateAutomation(w http.ResponseWriter, r *http.Request) 
 		writeErr(w, http.StatusBadRequest, "BAD_REQUEST", "invalid automation", nil)
 		return
 	}
-	if patch.Cameras != nil && len(*patch.Cameras) > 0 && !camerasAllowed(w, r) {
+	if ((patch.Cameras != nil && len(*patch.Cameras) > 0) || (patch.Say != nil && patch.Say.Connector != "")) && !camerasAllowed(w, r) {
 		return
 	}
 	updated, err := s.deps.UpdateAutomation(r.Context(), mux.Vars(r)["id"], patch)
@@ -289,8 +289,9 @@ func writeAutomationErr(w http.ResponseWriter, err error) {
 }
 
 // camerasAllowed reports an Admin or the Owner, who may have an automation
-// look at cameras (#667): a camera is a live view of the home, through a
-// connection an Admin made. Anyone else gets ROLE_REQUIRED.
+// look at cameras or speak through one (#667): a camera is a live view of
+// the home, through a connection an Admin made. Anyone else gets
+// ROLE_REQUIRED.
 func camerasAllowed(w http.ResponseWriter, r *http.Request) bool {
 	if auth.PrincipalFrom(r.Context()).Person.Role.AtLeast(auth.RoleAdmin) {
 		return true

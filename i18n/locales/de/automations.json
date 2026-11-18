@@ -390,6 +390,11 @@
     "deviceHint": "Sie läuft, sobald sich das Gerät ändert, und erfährt, was sich geändert hat. Änderungen während der Wartezeit nach einem Lauf starten keinen weiteren, sodass ein flackernder Sensor sie nur einmal startet.",
     "cameras": "Kameras ansehen",
     "camerasHint": "Jeder Lauf beginnt mit einem Bild dieser Kameras, das ein Modell bekommt, das Bilder sehen kann. Bis zu {{count}}.",
+    "say": "Antwort an der Tür sagen",
+    "sayHint": "Toskar liest die Antwort jedes Laufs über den Lautsprecher der Türklingel vor und sagt nichts, wenn niemand da ist.",
+    "sayQuiet": "Ruhezeiten, in denen nur benachrichtigt wird",
+    "sayQuietFrom": "Von",
+    "sayQuietTo": "Bis",
     "deviceKinds": {
       "camera": "Kameras",
       "sensor": "Sensoren",

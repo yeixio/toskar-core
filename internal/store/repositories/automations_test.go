@@ -314,6 +314,42 @@ func TestAutomationCameras(t *testing.T) {
 	}
 }
 
+// An automation keeps where it speaks and its quiet hours, one with no
+// connector stops speaking, and only a Reolink camera is taken (#667).
+func TestAutomationSay(t *testing.T) {
+	db, err := store.Open(filepath.Join(t.TempDir(), "test.db"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer db.Close()
+	ctx := context.Background()
+	repo := repositories.NewAutomationRepo(db.SQL)
+	in := automations.CreateInput{
+		ModelID: "model-a", Name: "Greet visitors", Prompt: "Greet whoever is at the door.",
+		Schedule: automations.Schedule{Kind: automations.KindManual, TimeZone: "UTC"},
+		Say:      &automations.Say{Connector: " reolink ", Device: "camera", QuietFrom: "22:00", QuietTo: "07:00"},
+	}
+	created, err := repo.Create(ctx, in, time.Now())
+	if err != nil {
+		t.Fatal(err)
+	}
+	got, _ := repo.Get(ctx, created.ID)
+	if got.Say == nil || *got.Say != (automations.Say{Connector: "reolink", Device: "camera", QuietFrom: "22:00", QuietTo: "07:00"}) {
+		t.Fatalf("say = %+v", got.Say)
+	}
+	name := "Greet"
+	if got, err = repo.Update(ctx, created.ID, automations.Patch{Name: &name}, time.Now()); err != nil || got.Say == nil {
+		t.Fatalf("an unrelated update lost the speaker: %+v, %v", got.Say, err)
+	}
+	if got, err = repo.Update(ctx, created.ID, automations.Patch{Say: &automations.Say{}}, time.Now()); err != nil || got.Say != nil {
+		t.Fatalf("stopped = %+v, %v", got.Say, err)
+	}
+	in.Say = &automations.Say{Connector: "homeassistant", Device: "camera"}
+	if _, err := repo.Create(ctx, in, time.Now()); err == nil {
+		t.Fatal("a Home Assistant speaker was accepted")
+	}
+}
+
 // An automation saved with Go's "Local" zone reads back with this
 // computer's IANA name, which clients can show (#768).
 func TestAutomationLocalZoneReadsAsIANA(t *testing.T) {

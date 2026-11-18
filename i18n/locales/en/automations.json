@@ -390,6 +390,11 @@
     "deviceHint": "It runs the moment the device changes, told what changed. Changes during the wait after a run start no other run, so a sensor that flickers runs it once.",
     "cameras": "Look at cameras",
     "camerasHint": "Each run starts with a picture from these cameras, shown to a model that can see. Up to {{count}}.",
+    "say": "Say the answer at the door",
+    "sayHint": "Toskar reads each run's answer aloud through the doorbell's speaker, and says nothing when nobody is there to talk to.",
+    "sayQuiet": "Quiet hours, when it only notifies",
+    "sayQuietFrom": "From",
+    "sayQuietTo": "To",
     "deviceKinds": {
       "camera": "Cameras",
       "sensor": "Sensors",

@@ -44,6 +44,10 @@ func (Reolink) Fields() []Field {
 		{Key: "password", Label: "Password", Secret: true},
 		{Key: "channel", Label: "Channel", Optional: true, Placeholder: "0",
 			Help: "Leave empty for a camera on its own. A doorbell or battery camera paired to a Home Hub or NVR has no address of its own: use the hub's address and the camera's channel there, counted from 0."},
+		{Key: "talk_camera", Label: "Speaker (reolink-cli camera)", Optional: true, Placeholder: "front-door",
+			Help: "To have Toskar speak through the camera, install Reolink's reolink-cli on this computer, add the camera there with reolink-cli device add, and give the name you gave it. Toskar runs reolink-cli audio talk with it."},
+		{Key: "talk_gateway", Label: "reolink-cli gateway", Optional: true, Placeholder: "127.0.0.1:9000",
+			Help: "The address reolink-cli's gateway listens on, when it isn't reolink-cli's own default."},
 	}
 }
 

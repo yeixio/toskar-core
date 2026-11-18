@@ -170,7 +170,7 @@ func (e automationExecutor) execute(ctx context.Context, automation automations.
 		ProfileID: profile.ID,
 		// The task with its condition's instruction, which the server adds
 		// rather than the saved prompt carrying it (#204).
-		Prompt: withChangeNote(withChangeNote(withChangeNote(automations.RunPrompt(automation), runNote(ctx, automation)), camerasNote(automation.Cameras)), actionsNote(automation.Actions)),
+		Prompt: withChangeNote(withChangeNote(withChangeNote(automations.RunPrompt(automation), runNote(ctx, automation)), camerasNote(automation.Cameras)), withChangeNote(actionsNote(automation.Actions), automations.SayNote(automation.Say))),
 		Status: contracts.TaskRunning,
 	}, tools.ForUnattended(profile, withActionTools(automation.Tools, automation.Actions), disabled), env)
 	if err != nil {
@@ -193,6 +193,15 @@ func (e automationExecutor) execute(ctx context.Context, automation automations.
 	}
 	out.Skipped = env.skippedTools()
 	out.Acted = env.actedCalls()
+	// The answer is said at the door, for an automation that speaks (#667).
+	if automation.Say != nil && runErr == nil && ctx.Err() == nil {
+		said, err := e.app.sayAtDoor(ctx, automation, out.Text)
+		if err != nil {
+			runErr = fmt.Errorf("couldn't say the answer at the door: %w", err)
+		} else if said != "" {
+			out.Acted = append(out.Acted, automations.Action{Tool: automation.Say.Connector + ".say", Args: map[string]string{"text": said}}.Describe())
+		}
+	}
 	e.reportSkipped(ctx, automation, out.Skipped)
 	if runErr == nil && ctx.Err() == nil && automations.ChangeNote(ctx) == "" {
 		if page := unopenedPage(automation, env.sources.firstPage()); page != "" {
