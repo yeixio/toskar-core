@@ -1,9 +1,13 @@
 package app
 
 import (
+	"context"
 	"testing"
+	"time"
 
 	"github.com/yeixio/toskar-core/internal/cache"
+	"github.com/yeixio/toskar-core/internal/events"
+	"github.com/yeixio/toskar-core/internal/inventory"
 )
 
 func TestWebCacheKeysAndPrivacy(t *testing.T) {
@@ -40,5 +44,32 @@ func TestWebCacheKeysAndPrivacy(t *testing.T) {
 	}
 	if !a.ClearCache("web_search") || a.ClearCache("nope") {
 		t.Fatal("clear")
+	}
+}
+
+// A chat turn says which model answered it, every turn; that keeps the
+// capability inventory, which only a model that really loads drops (#795).
+func TestAnsweredTurnKeepsCapabilities(t *testing.T) {
+	a := &App{Bus: events.NewBus(16)}
+	a.setupCaches()
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	a.watchCapabilities(ctx)
+	a.capCache.Put("snapshot", inventory.Snapshot{})
+	a.Bus.Publish(events.New(events.ModelLoadCompleted, map[string]any{"model_id": "m", "node_id": "", "role": "chat"}))
+	time.Sleep(50 * time.Millisecond)
+	if _, ok := a.capCache.Get("snapshot"); !ok {
+		t.Fatal("a turn's answer dropped the inventory")
+	}
+	a.Bus.Publish(events.New(events.ModelLoadCompleted, map[string]any{"model_id": "m", "runtime_id": "llamacpp"}))
+	deadline := time.Now().Add(2 * time.Second)
+	for {
+		if _, ok := a.capCache.Get("snapshot"); !ok {
+			break
+		}
+		if time.Now().After(deadline) {
+			t.Fatal("a model that loaded kept the old inventory")
+		}
+		time.Sleep(10 * time.Millisecond)
 	}
 }

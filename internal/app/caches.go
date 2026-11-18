@@ -113,6 +113,19 @@ var capabilityEvents = map[string]bool{
 	events.ModelUnloaded: true, events.NodePaired: true, events.NodeOnline: true, events.NodeOffline: true,
 }
 
+// answeredWith is a chat turn's note that a model answered it, sent each
+// turn whether or not the model had to load: it changes nothing the
+// inventory says, and dropping it every turn made each turn build it again,
+// about 1.4 seconds on a Mac (#795). A model that loads says so from the
+// runtime, without a role.
+func answeredWith(evt events.Event) bool {
+	if evt.Type != events.ModelLoadCompleted {
+		return false
+	}
+	_, ok := evt.Payload["role"]
+	return ok
+}
+
 // invalidateCapabilities drops the cached inventory.
 func (a *App) invalidateCapabilities() {
 	if a.capCache != nil {
@@ -137,7 +150,7 @@ func (a *App) watchCapabilities(ctx context.Context) {
 				if !ok {
 					return
 				}
-				if capabilityEvents[evt.Type] {
+				if capabilityEvents[evt.Type] && !answeredWith(evt) {
 					a.invalidateCapabilities()
 				}
 			}
