@@ -16,8 +16,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yeixio/toskar-core/internal/auth"
 	"github.com/yeixio/toskar-core/internal/api"
+	"github.com/yeixio/toskar-core/internal/auth"
 	"github.com/yeixio/toskar-core/internal/relayclient"
 )
 
