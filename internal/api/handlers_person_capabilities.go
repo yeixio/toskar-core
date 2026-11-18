@@ -28,6 +28,7 @@ func (s *Server) personCapabilityRoutes(api *mux.Router) {
 var routeCapability = map[string]auth.Capability{
 	"POST /api/v1/speech/transcribe":              auth.CapVoice,
 	"POST /api/v1/speech":                         auth.CapVoice,
+	"POST /api/v1/speech/say":                     auth.CapVoice,
 	"GET /api/v1/voice/realtime":                  auth.CapVoice,
 	"POST /api/v1/automations":                    auth.CapAutomations,
 	"POST /api/v1/automations/preview":            auth.CapAutomations,

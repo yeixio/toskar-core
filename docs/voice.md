@@ -27,6 +27,12 @@ The desktop's origin is allowed, and a request from this computer needs no
 key. On a Mac, the shell lets its own pages use the microphone and macOS
 asks the person once.
 
+A client that hears the person itself, as the phone, the car and the TV
+do with the device's own speech recognition, can still answer in this
+voice: `POST /api/v1/speech/say` with `{text, voice, language}` answers a
+WAV file of a sentence or a few (at most 1000 characters), read by the same
+worker, and keeps nothing. It's plain HTTPS, so it works through the relay.
+
 Audio both ways is `pcm16`: 16-bit little-endian PCM, mono, 24 kHz, base64.
 
 ## Events

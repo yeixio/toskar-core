@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Toskar Control Plane API
-  version: "1.100"
+  version: "1.101"
   description: >-
     Local AI control plane API for Toskar, its OpenAI-compatible routes, and its MCP server.
     On the default loopback bind no key is needed. When the daemon listens on any other address,
@@ -4540,6 +4540,46 @@ paths:
           description: Switching to the WebSocket
         "426":
           description: WEBSOCKET_REQUIRED
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "503":
+          description: SPEECH_UNAVAILABLE
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/v1/speech/say:
+    post:
+      summary: Read a little text aloud in the computer's voice (#795)
+      description: "Answers a WAV file (16-bit PCM, mono, 24 kHz) of the text, read in live voice mode's voice: Kokoro where it speaks the language (English, Spanish, French, Italian, Portuguese), Piper elsewhere. Nothing is kept. Meant for a client that speaks an answer as it arrives, a sentence or a few at a time (at most 1000 characters). voice is a Kokoro voice such as af_heart or a Piper voice; empty is the language's own. language is the text's, such as en or pt-BR; empty detects it. Visitors and paired devices may use it, with the voice capability (contract 1.101)."
+      operationId: speechSay
+      tags: [Chat]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [text]
+              properties:
+                text:
+                  type: string
+                voice:
+                  type: string
+                language:
+                  type: string
+      responses:
+        "200":
+          description: The text read aloud
+          content:
+            audio/wav:
+              schema:
+                type: string
+                format: binary
+        "400":
+          description: BAD_REQUEST for no text or too much, or SPEECH_FAILED
           content:
             application/json:
               schema:
