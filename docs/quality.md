@@ -81,6 +81,7 @@ Quality runs every week on our own computers, and each run adds its scores to th
 
 Some changes are tried on the quality set before they're on for everyone. Run the set again with the setting, on the same computer and models, and compare the rows.
 
+- The long tasks with Codex (#1116): the same three tasks done by OpenAI's Codex CLI against the same model through Toskar, reported beside Toskar's own as "Long tasks with Codex". It shows whether a task Toskar misses is the model's limit or Toskar's.
 - `TOSKAR_KEEP_REASONING=field` or `inline` (#841): a reasoning model keeps its thinking between tool calls in one answer. Compare the tool and task cases for reasoning models, and the prompt tokens they used, against a run without it.
 
 ## What we know is weak

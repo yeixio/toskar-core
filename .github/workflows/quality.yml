@@ -345,6 +345,34 @@ jobs:
             -e TOSKAR_QUALITY_TASKS_REPORT=/src/.quality/tasks.md \
             golang:1.26-bookworm \
             go test ./tests/quality -run TestLongTasks -count=1 -v -timeout 60m
+      # The long tasks with Codex (#1116): the same tasks done by OpenAI's
+      # Codex CLI against the same model through Toskar's raw endpoint, for
+      # the report beside Toskar's own. It runs once QUALITY_CODEX_VERSION
+      # names a Codex release, such as 0.140.0, and only for one model.
+      - name: Long tasks with Codex
+        if: ${{ !cancelled() && inputs.sets != 'swarms' && vars.QUALITY_CODEX_VERSION != '' && matrix.model != 'recommended' }}
+        env:
+          CODEX_VERSION: ${{ vars.QUALITY_CODEX_VERSION }}
+        run: |
+          mkdir -p .quality
+          docker run --rm --network "$NAME" \
+            --cap-drop ALL --security-opt no-new-privileges \
+            --memory 4g --memory-swap 4g --cpus 2 \
+            -v "$PWD:/src:ro" -w /src \
+            -v "$PWD/.quality:/out" \
+            -v toskar-quality-go:/go \
+            -e CODEX_VERSION \
+            -e TOSKAR_QUALITY_URL="http://$NAME:7331" \
+            -e TOSKAR_QUALITY_KEY="$QUALITY_KEY" \
+            -e TOSKAR_QUALITY_MODEL="${{ matrix.model }}" \
+            -e TOSKAR_QUALITY_CODEX=/usr/local/bin/codex \
+            -e TOSKAR_QUALITY_CODEX_REPORT=/out/codex.md \
+            golang:1.26-bookworm \
+            sh -c 'set -e
+              curl -fsSL "https://github.com/openai/codex/releases/download/rust-v${CODEX_VERSION}/codex-x86_64-unknown-linux-musl.tar.gz" | tar -xz -C /tmp
+              install -m 755 /tmp/codex-x86_64-unknown-linux-musl /usr/local/bin/codex
+              codex --version
+              go test ./tests/quality -run TestLongTasksCodex -count=1 -v -timeout 60m'
       # Topic controls (#345): the share of off-topic cases held and of
       # on-topic ones wrongly refused, with the same models.
       - name: Topic controls
@@ -522,7 +550,7 @@ jobs:
       - name: Report
         if: always()
         run: |
-          for f in .quality/report.md .quality/tasks.md .quality/topics.md .quality/files.md .quality/media.md .quality/reasoning.md .quality/swarms.md .quality/triage.md; do
+          for f in .quality/report.md .quality/tasks.md .quality/codex.md .quality/topics.md .quality/files.md .quality/media.md .quality/reasoning.md .quality/swarms.md .quality/triage.md; do
             if [ -f "$f" ]; then
               head -c 60000 "$f" >> "$GITHUB_STEP_SUMMARY"
             fi
@@ -534,6 +562,7 @@ jobs:
           path: |
             .quality/report.md
             .quality/tasks.md
+            .quality/codex.md
             .quality/topics.md
             .quality/files.md
             .quality/media.md
