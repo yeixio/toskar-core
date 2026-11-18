@@ -498,6 +498,35 @@
     "stop": "Arrêter",
     "systemHint": "Lire cette réponse à voix haute avec les voix de cet appareil"
   },
+  "voiceMode": {
+    "start": "Parler",
+    "startHint": "Parlez à Toskar à voix haute : il répond avec une voix, et vous pouvez l’interrompre en parlant",
+    "title": "Mode vocal",
+    "noMicrophone": "Cette page ne peut pas utiliser de micro. Ouvrez Toskar en https:// ou sur cet ordinateur via localhost.",
+    "connectFailed": "Impossible de se connecter au mode vocal. Réessayez dans un instant.",
+    "failed": "Un problème est survenu dans le mode vocal.",
+    "micDenied": "Toskar n’a pas le droit d’utiliser le micro. Autorisez-le dans les réglages du navigateur pour cette page.",
+    "micFailed": "Le micro n’a pas pu démarrer.",
+    "muted": "Micro coupé",
+    "you": "Vous :",
+    "waited": "Réponse {{seconds}} s après la fin de votre phrase",
+    "mute": "Couper le micro",
+    "unmute": "Réactiver le micro",
+    "end": "Terminer",
+    "hint": "Parlez quand vous voulez. Parlez par-dessus une réponse pour l’arrêter.",
+    "status": {
+      "connecting": "Connexion…",
+      "listening": "À l’écoute",
+      "hearing": "Vous entend",
+      "thinking": "Réfléchit…",
+      "speaking": "Parle",
+      "closed": "Mode vocal terminé"
+    },
+    "demo": {
+      "you": "Quelle randonnée près de Juneau ce week-end ?",
+      "answer": "Le mont Roberts est un bon choix. Montez en téléphérique, puis suivez le sentier de crête aussi loin que vous voulez."
+    }
+  },
   "context": {
     "usage": "Utilisation du contexte",
     "full": "Contexte rempli à {{percent}}",

@@ -717,7 +717,7 @@
       "readyText": "Notes app",
       "actions": [
         {
-          "scroll": "Credentials for apps and devices that talk to Toskar."
+          "scroll": "Credentials for apps and scripts that talk to Toskar. Phones and tablets are under Devices."
         }
       ]
     },
@@ -1169,6 +1169,53 @@
       "path": "/chat",
       "query": "c=conv-vision",
       "readyText": "Ornith 1.5 9B"
+    },
+    {
+      "id": "voice-mode",
+      "path": "/chat",
+      "query": "c=conv-local",
+      "readyText": "ridge above the reservoir",
+      "api": {
+        "/api/v1/tools": [
+          {
+            "id": "speech.transcribe",
+            "name": "Transcribe audio",
+            "description": "Turn speech in an audio file into text, on this computer.",
+            "capability": "voice",
+            "source": "builtin",
+            "schema": "{}",
+            "default_policy": "allow",
+            "risk": "read",
+            "enabled": true,
+            "profiles": [
+              "general-assistant"
+            ]
+          },
+          {
+            "id": "speech.synthesize",
+            "name": "Read aloud",
+            "description": "Read text aloud as an audio file, on this computer.",
+            "capability": "voice",
+            "source": "builtin",
+            "schema": "{}",
+            "default_policy": "allow",
+            "risk": "read",
+            "enabled": true,
+            "profiles": [
+              "general-assistant"
+            ]
+          }
+        ]
+      },
+      "actions": [
+        {
+          "click": "Talk",
+          "exact": true
+        },
+        {
+          "wait": "Mount Roberts"
+        }
+      ]
     }
   ]
 }

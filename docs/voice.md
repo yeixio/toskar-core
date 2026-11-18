@@ -10,7 +10,14 @@ has the research behind it.
 Each message is one JSON event, as in OpenAI's Realtime API, so a client
 written for that API needs only the URL changed. Sign in as for the rest of
 the API: a key in `Authorization`, the web app's session, or a paired
-device's key. The caller needs the voice capability.
+device's key. A browser can't set headers on a WebSocket, so it may send
+the key as a second subprotocol, `openai-insecure-api-key.<key>`, as
+OpenAI's browser clients do. The caller needs the voice capability.
+
+The web app's Talk button, beside Send in a chat, opens voice mode
+(`web/src/features/chat/VoiceMode.tsx`): the microphone through the
+browser's echo cancellation, resampled to 24 kHz in an AudioWorklet, and
+the answer played as it arrives and stopped when the person talks over it.
 
 Audio both ways is `pcm16`: 16-bit little-endian PCM, mono, 24 kHz, base64.
 
@@ -87,5 +94,5 @@ Errors are `error` events with `error.code`, such as `invalid_audio`,
 - A model that judges whether a turn sounds finished (Smart Turn), and
   Qwen3-TTS for computers with a strong graphics card.
 - The chat keeps the whole answer even when it was cut off.
-- `/v1/realtime` and the key in the WebSocket subprotocol, for OpenAI's
-  SDKs; the web app, the phone, the TV, and the doorbell (#667).
+- `/v1/realtime`, for OpenAI's SDKs; the desktop app, the phone, the TV,
+  and the doorbell (#667).

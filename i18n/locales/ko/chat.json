@@ -476,6 +476,35 @@
     "stop": "중지",
     "systemHint": "이 기기의 음성으로 이 답변을 소리 내어 읽기"
   },
+  "voiceMode": {
+    "start": "말하기",
+    "startHint": "Toskar와 소리 내어 대화하세요. 음성으로 답하며, 말을 걸면 답을 멈춥니다",
+    "title": "음성 모드",
+    "noMicrophone": "이 페이지에서는 마이크를 쓸 수 없습니다. https:// 또는 이 컴퓨터의 localhost로 Toskar를 여세요.",
+    "connectFailed": "음성 모드에 연결하지 못했습니다. 잠시 후 다시 시도하세요.",
+    "failed": "음성 모드에 문제가 생겼습니다.",
+    "micDenied": "Toskar가 마이크를 사용할 권한이 없습니다. 브라우저 설정에서 이 페이지에 허용하세요.",
+    "micFailed": "마이크를 시작하지 못했습니다.",
+    "muted": "마이크 꺼짐",
+    "you": "나:",
+    "waited": "말을 마친 뒤 {{seconds}}초 만에 응답",
+    "mute": "음소거",
+    "unmute": "음소거 해제",
+    "end": "끝내기",
+    "hint": "언제든 말하세요. 답하는 중에 말하면 멈춥니다.",
+    "status": {
+      "connecting": "연결 중…",
+      "listening": "듣는 중",
+      "hearing": "듣고 있어요",
+      "thinking": "생각 중…",
+      "speaking": "말하는 중",
+      "closed": "음성 모드가 끝났습니다"
+    },
+    "demo": {
+      "you": "이번 주말 주노 근처에 좋은 등산로가 있을까?",
+      "answer": "마운트 로버츠가 좋아요. 트램을 타고 올라가서 능선길을 원하는 만큼 걸으세요."
+    }
+  },
   "context": {
     "usage": "컨텍스트 사용량",
     "full": "컨텍스트 {{percent}} 사용",

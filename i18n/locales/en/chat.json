@@ -487,6 +487,35 @@
     "stop": "Stop",
     "systemHint": "Read this answer aloud with this device's voices"
   },
+  "voiceMode": {
+    "start": "Talk",
+    "startHint": "Talk with Toskar out loud: it answers in a voice, and you can talk over it to stop it",
+    "title": "Voice mode",
+    "noMicrophone": "This page can't use a microphone. Open Toskar at https:// or on this computer at localhost.",
+    "connectFailed": "Couldn't connect to voice mode. Try again in a moment.",
+    "failed": "Something went wrong with voice mode.",
+    "micDenied": "Toskar isn't allowed to use the microphone. Allow it in your browser's settings for this page.",
+    "micFailed": "The microphone couldn't be started.",
+    "muted": "Microphone off",
+    "you": "You:",
+    "waited": "Answered {{seconds}} s after you stopped",
+    "mute": "Mute",
+    "unmute": "Unmute",
+    "end": "End",
+    "hint": "Speak whenever you like. Talk over an answer to stop it.",
+    "status": {
+      "connecting": "Connecting…",
+      "listening": "Listening",
+      "hearing": "Hearing you",
+      "thinking": "Thinking…",
+      "speaking": "Speaking",
+      "closed": "Voice mode ended"
+    },
+    "demo": {
+      "you": "What's a good hike near Juneau this weekend?",
+      "answer": "Mount Roberts is a good one. Take the tram up, then follow the ridge trail as far as you like."
+    }
+  },
   "context": {
     "usage": "Context usage",
     "full": "Context {{percent}} full",

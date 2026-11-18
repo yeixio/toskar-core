@@ -16,7 +16,10 @@ var ErrAPIKeyRequired = contracts.NewError("API_KEY_REQUIRED", nil, errors.New("
 var ErrAPIKeyInURL = contracts.NewError("API_KEY_IN_URL", nil, errors.New("send the API key as Authorization: Bearer, not in the URL"))
 
 // BearerToken reads an API key from the Authorization header, or, without
-// one, from x-api-key, as Anthropic's clients send it (#843).
+// one, from x-api-key, as Anthropic's clients send it (#843), or, on a
+// WebSocket, from an openai-insecure-api-key.<key> subprotocol: a browser
+// can't set headers on a WebSocket, so OpenAI's Realtime clients send it
+// there (#795).
 // Keys in the query string are rejected and are not accepted as credentials.
 func BearerToken(r *http.Request) (string, error) {
 	q := r.URL.Query()
@@ -32,6 +35,9 @@ func BearerToken(r *http.Request) (string, error) {
 		if key := strings.TrimSpace(r.Header.Get("X-Api-Key")); key != "" {
 			return key, nil
 		}
+		if key := subprotocolKey(r); key != "" {
+			return key, nil
+		}
 	}
 	if !strings.HasPrefix(header, prefix) {
 		return "", fmt.Errorf("authorization required")
@@ -41,4 +47,21 @@ func BearerToken(r *http.Request) (string, error) {
 		return "", fmt.Errorf("authorization required")
 	}
 	return token, nil
+}
+
+// keyProtocol is the subprotocol prefix a browser's WebSocket sends its key in.
+const keyProtocol = "openai-insecure-api-key."
+
+func subprotocolKey(r *http.Request) string {
+	if !strings.EqualFold(r.Header.Get("Upgrade"), "websocket") {
+		return ""
+	}
+	for _, h := range r.Header.Values("Sec-WebSocket-Protocol") {
+		for _, p := range strings.Split(h, ",") {
+			if key, ok := strings.CutPrefix(strings.TrimSpace(p), keyProtocol); ok && key != "" {
+				return key
+			}
+		}
+	}
+	return ""
 }
