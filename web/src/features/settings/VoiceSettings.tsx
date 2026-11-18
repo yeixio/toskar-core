@@ -30,7 +30,7 @@ export function VoiceSettings() {
     queryFn: () => api.getVoiceSettings(),
     retry: false,
     // While Kitten installs, check how it's going.
-    refetchInterval: (q) => ((q.state.data as Settings | null | undefined)?.kitten.state === 'installing' ? 2000 : false),
+    refetchInterval: (q) => ((q.state.data as Settings | null | undefined)?.kitten?.state === 'installing' ? 2000 : false),
   })
   const update = (data: Settings | null) => {
     if (data) queryClient.setQueryData(queryKey, data)
@@ -44,7 +44,8 @@ export function VoiceSettings() {
   const [confirmRemove, setConfirmRemove] = useState(false)
 
   const data = voices.data
-  if (!data) {
+  // An older computer answers no Voice settings: there's nothing to show.
+  if (!data?.kitten || !Array.isArray(data.languages)) {
     return voices.isError ? (
       <section className="card space-y-2">
         <h2 className="section-title">{t('voice.title')}</h2>

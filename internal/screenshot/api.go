@@ -249,6 +249,9 @@ func screenshotGET(path string) (string, bool) {
 		return screenshotConnectors, true
 	case path == "/api/v1/mcp/servers":
 		return screenshotMCPServers, true
+	// The Voice settings, with Kitten installed (#1304).
+	case path == "/api/v1/speech/voices":
+		return screenshotVoices, true
 	case path == "/v1/models":
 		return `{"object":"list","data":[{"id":"gemma-4-e4b","object":"model"}]}`, true
 	default:
@@ -1054,3 +1057,20 @@ const screenshotModelStore = `{"live":true,"shelves":[
 {"id":"qwen3.8-27b-q4","display_name":"Qwen 3.8 27B","repo_id":"ggml-org/Qwen3.8-27B-GGUF","filename":"","source_url":"https://huggingface.co/ggml-org/Qwen3.8-27B-GGUF/resolve/main/Qwen3.8-27B-Q4_K_M.gguf","size_bytes":19603117536,"variant":"Q4_K_M","details_url":"https://huggingface.co/ggml-org/Qwen3.8-27B-GGUF","catalog_id":"qwen3.8-27b-q4","tags":["general","coding","tasks"],"fit":{"model_id":"qwen3.8-27b-q4","label":"good"}}
 ]}
 ]}`
+
+const screenshotVoices = `{
+  "kitten": {"state": "installed", "credit": "Powered by KittenML", "url": "https://huggingface.co/KittenML/kitten-tts-2-mini", "license": "Apache-2.0",
+    "languages": ["da","de","en","es","fi","fr","hi","it","ja","ko","nl","pt","ru","sv","sw","tr"]},
+  "languages": [
+    {"language": "de", "voice": "", "automatic": "kitten:de:lena", "voices": [
+      {"id": "kitten:de:lena", "name": "Lena", "description": "Calm (female)", "engine": "kitten"},
+      {"id": "kitten:de:jonas", "name": "Jonas", "description": "Warm (male)", "engine": "kitten"},
+      {"id": "de_DE-thorsten-medium", "name": "Thorsten", "engine": "piper"}]},
+    {"language": "en", "voice": "kitten:en:eleanor", "automatic": "af_heart", "voices": [
+      {"id": "kitten:en:eleanor", "name": "Eleanor", "description": "Somber historian (female)", "engine": "kitten"},
+      {"id": "af_heart", "name": "Heart", "engine": "kokoro"},
+      {"id": "en_US-lessac-medium", "name": "Lessac", "engine": "piper"}]},
+    {"language": "ja", "voice": "", "automatic": "kitten:ja:hana", "voices": [
+      {"id": "kitten:ja:hana", "name": "Hana", "engine": "kitten"}]}
+  ]
+}`

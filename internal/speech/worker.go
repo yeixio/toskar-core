@@ -349,7 +349,7 @@ func (w *Worker) running(ctx context.Context, env int) (*workerProc, error) {
 		// Kitten's environment is installed by InstallKitten, never here.
 		st, ok := e.Python.(interface{ Status(pyenv.Spec) pyenv.Status })
 		if !ok || !st.Status(KittenSpec()).Installed {
-			return nil, errors.New("Kitten isn't installed")
+			return nil, errors.New("kitten isn't installed")
 		}
 		py = st.Status(KittenSpec()).Python
 	} else {

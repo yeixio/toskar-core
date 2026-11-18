@@ -106,7 +106,7 @@ export function AutomationForm({ profiles, models, tools, others = [], initial, 
     api
       .getVoiceSettings()
       .then((v) => {
-        if (live && v) setDoorVoices(v.languages.filter((l) => l.voices.length > 0))
+        if (live && Array.isArray(v?.languages)) setDoorVoices(v.languages.filter((l) => l.voices?.length > 0))
       })
       .catch(() => undefined)
     return () => {

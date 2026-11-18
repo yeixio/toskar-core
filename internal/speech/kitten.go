@@ -228,7 +228,7 @@ func (w *Worker) InstallKitten() error {
 
 func (w *Worker) installKitten(ctx context.Context, stage func(string)) error {
 	if _, err := w.Engine.Python.Ensure(ctx, KittenSpec(), nil); err != nil {
-		return fmt.Errorf("Kitten's program couldn't be installed: %w", err)
+		return fmt.Errorf("couldn't install Kitten's program: %w", err)
 	}
 	stage("voices")
 	dir := w.Engine.kittenDir()
@@ -237,7 +237,7 @@ func (w *Worker) installKitten(ctx context.Context, stage func(string)) error {
 	}
 	if _, err := w.ask(ctx, envKitten, map[string]any{"op": "fetch", "repo": KittenRepo, "revision": kittenRevision,
 		"dir": dir, "patterns": kittenFiles}); err != nil {
-		return fmt.Errorf("Kitten's voices couldn't be downloaded: %w", err)
+		return fmt.Errorf("couldn't download Kitten's voices: %w", err)
 	}
 	return os.WriteFile(w.Engine.kittenReadyFile(), []byte(kittenRevision+"\n"), 0o600)
 }
