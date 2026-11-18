@@ -114,7 +114,7 @@
   },
   "advanced": {
     "title": "高级模式",
-    "description": "显示模型 ID、API 详情、配置、日志及其他高级用户控制项。"
+    "description": "显示模型 ID、API 详情、日志及其他高级用户控制项。"
   },
   "discovery": {
     "title": "查找其他电脑",

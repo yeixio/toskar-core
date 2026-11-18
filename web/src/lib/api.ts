@@ -704,6 +704,9 @@ export const api = {
   /** Closes the checkout opened here before it's paid (#1257). */
   cancelSubscriptionCheckout: () => request<void>('/api/v1/remote-access/subscription/checkout', { method: 'DELETE' }),
 
+  /** Moves the subscription bought here onto this computer when it's tied to another (#1257). */
+  moveSubscriptionHere: () => request<void>('/api/v1/remote-access/subscription/move', { method: 'POST' }),
+
   /** Stripe's billing page for the subscription bought here (#639). */
   manageSubscription: () => request<{ url: string }>('/api/v1/remote-access/subscription/manage', { method: 'POST' }),
 

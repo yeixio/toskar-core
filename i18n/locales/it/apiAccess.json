@@ -32,16 +32,18 @@
     "endpoint": "Endpoint",
     "localAddress": "Indirizzo locale: <mono>{{address}}</mono>",
     "lanEndpoint": "Endpoint LAN",
-    "lanHint": "Usa l'IP LAN di questo computer con la porta <mono>{{port}}</mono> (per esempio <mono>https://192.168.x.x:{{port}}/v1</mono>).",
+    "lanHint": "Usa l'IP LAN di questo computer con la porta <mono>{{port}}</mono> (per esempio <mono>{{scheme}}://192.168.x.x:{{port}}/v1</mono>).",
     "https": "Cifrato con HTTPS. Certificato <mono>{{short}}</mono>.",
     "httpsCustom": "Cifrato con HTTPS, con il tuo certificato <mono>{{short}}</mono>.",
     "httpsTrust": "Un browser o un’app ti chiede di fidarti di questo certificato la prima volta. Controlla che la sua impronta SHA-256 inizi con {{short}}.",
     "httpsError": "Non è stato possibile usare il tuo certificato, quindi si usa quello di Toskar: {{error}}",
     "hideDocs": "Nascondi la documentazione API",
     "docs": "Documentazione API",
-    "docsBody": "Toskar espone un'API compatibile con OpenAI su <mono>/v1</mono>. Indirizza i client all'endpoint qui sopra e invia <header/> quando Toskar è raggiungibile da altri computer. Sia `/api/v1` sia `/v1` richiedono questa intestazione. L'endpoint LAN usa HTTPS, che cifra il traffico; una chiave da sola non cifra l'HTTP semplice.",
+    "docsBody": "Toskar espone un'API compatibile con OpenAI su <mono>/v1</mono>. Indirizza i client all'endpoint qui sopra e invia <header/> quando Toskar è raggiungibile da altri computer. Sia `/api/v1` sia `/v1` richiedono questa intestazione.",
     "copied": "Copiato",
-    "copyUrl": "Copia URL"
+    "copyUrl": "Copia URL",
+    "docsHttps": "L'endpoint LAN usa HTTPS, che cifra il traffico.",
+    "docsHttp": "L'endpoint LAN usa HTTP semplice, quindi il traffico non è cifrato: una chiave decide chi entra, ma non cifra nulla."
   },
   "lan": {
     "title": "Accesso dalla rete locale",
@@ -107,9 +109,7 @@
   },
   "advanced": {
     "title": "Avanzate",
-    "bind": "Indirizzo di ascolto",
-    "port": "Porta",
-    "host": "Host configurato"
+    "bind": "Indirizzo di ascolto"
   },
   "permissions": {
     "summary": "Cosa può usare questa chiave",
@@ -165,7 +165,9 @@
     "none": "Ancora nessun dispositivo.",
     "meta": "Collegato {{connected}} · Ultimo uso {{lastUsed}}",
     "confirmDisconnect": "Scollegare {{name}}? Servirà un nuovo codice per ricollegarlo.",
-    "disconnect": "Scollega"
+    "disconnect": "Scollega",
+    "neverUsed": "Mai usato",
+    "unused": "Non usato da 90 giorni"
   },
   "remote": {
     "title": "Accesso ovunque",
@@ -309,13 +311,17 @@
       "endedRevoked": "Il relay di Toskar non accetta più l'abbonamento di questo computer: è stato spostato su un altro computer o rimborsato. Abbonati di nuovo per continuare a usare il relay di Toskar.",
       "endedBlocked": "Il relay di Toskar ha bloccato questo computer. Contatta l'assistenza per sapere perché.",
       "grant": "Accesso concesso fino al {{date}}.",
-      "grantOpen": "Accesso concesso."
+      "grantOpen": "Accesso concesso.",
+      "moveStripe": "Spostalo su questo computer",
+      "moving": "Spostamento…",
+      "inUseStripe": "Questo abbonamento è legato a un altro computer, come quello da cui vengono i dati di questo. Spostalo qui, e quel computer smetterà di usare il relay di Toskar."
     },
     "relayErrors": {
       "TOKEN_REVOKED": "{{relay}} non accetta più l'abbonamento di questo computer. Abbonati di nuovo, o sposta qui il tuo abbonamento dall'app Toskar.",
       "ROUTE_BLOCKED": "{{relay}} ha bloccato questo computer. Contatta l'assistenza per sapere perché.",
       "TOKEN_EXPIRED": "L'accesso di questo computer tramite {{relay}} è scaduto. Abbonati di nuovo per continuare a usarlo.",
       "TOKEN_INVALID": "{{relay}} non ha accettato il token di questo computer. Abbonati di nuovo, o ricollegalo dall'app Toskar."
-    }
+    },
+    "offHint": "Quando è attivo, Toskar chiede al router di aprire la porta {{port}}, che risponde solo ai dispositivi associati a questo computer. In alternativa puoi scegliere una porta inoltrata o un relay. Non serve che l'accesso dalla rete locale sia attivo."
   }
 }

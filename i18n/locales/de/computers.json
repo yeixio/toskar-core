@@ -40,7 +40,8 @@
     "action": "Aktion konnte nicht ausgeführt werden",
     "network": "Erlaube Toskar auf beiden Computern den Zugriff auf das lokale Netzwerk bzw. die Firewall und lass „Andere Computer finden“ unten unter „Netzwerk & Zugriff“ eingeschaltet.",
     "generic": "Etwas ist schiefgelaufen",
-    "claimFailed": "Kopplungsangebot für diesen Code konnte nicht geladen werden"
+    "claimFailed": "Kopplungsangebot für diesen Code konnte nicht geladen werden",
+    "dismiss": "Schließen"
   },
   "pairing": {
     "waiting": "Warten auf Bestätigung",
@@ -49,7 +50,11 @@
     "code": "Code: <code>{{code}}</code>",
     "incoming": "Eingehende Anfragen",
     "offerCode": "Code <code>{{code}}</code>",
-    "approve": "Bestätigen"
+    "approve": "Bestätigen",
+    "noAnswer": "Noch keine Antwort",
+    "noAnswerHint": "{{name}} hat die Anfrage nicht bestätigt. Prüfe, ob Toskar dort geöffnet ist, und versuche „Zum Team hinzufügen“ erneut.",
+    "cancel": "Nicht mehr warten",
+    "close": "Schließen"
   },
   "nearby": {
     "title": "Zum Hinzufügen verfügbar",
@@ -113,7 +118,7 @@
     "approving": "Wird bestätigt …",
     "approveCode": "Mit Code bestätigen",
     "hideDetails": "Details ausblenden",
-    "manage": "Verwalten",
+    "manage": "Details",
     "moreActions": "Weitere Aktionen für {{name}}",
     "removeFromTeam": "Aus Team entfernen",
     "training": "Training",
@@ -144,7 +149,8 @@
     "deployTo_other": "Auf {{count}} Computern bereitstellen",
     "deployToName": "Auf {{name}} bereitstellen",
     "deploy": "Bereitstellen",
-    "downloadSize": "Downloadgröße ca. {{size}}"
+    "downloadSize": "Downloadgröße ca. {{size}}",
+    "modelFit": "{{model}} · {{fit}}"
   },
   "join": {
     "open": "Per Befehl hinzufügen",

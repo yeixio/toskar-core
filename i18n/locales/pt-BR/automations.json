@@ -400,7 +400,9 @@
       "cover": "Persianas",
       "climate": "Clima",
       "other": "Outros"
-    }
+    },
+    "needsToolModel": "O modelo escolhido não usa ferramentas, então não vai abrir páginas nem usar as ferramentas escolhidas aqui: ele responde com o que já sabe. Escolha um modelo que use ferramentas ou instale um.",
+    "openModels": "Abrir Modelos"
   },
   "draft": {
     "label": "Automação para confirmar",

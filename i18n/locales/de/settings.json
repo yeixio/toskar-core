@@ -116,7 +116,7 @@
   },
   "advanced": {
     "title": "Expertenmodus",
-    "description": "Zeigt Modell-IDs, API-Details, Profile, Protokolle und weitere Optionen für Fortgeschrittene."
+    "description": "Zeigt Modell-IDs, API-Details, Protokolle und weitere Optionen für Fortgeschrittene."
   },
   "discovery": {
     "title": "Andere Computer finden",

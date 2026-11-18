@@ -75,6 +75,20 @@ func (s *Server) handleSubscriptionManage(w http.ResponseWriter, r *http.Request
 	writeJSON(w, http.StatusOK, map[string]any{"url": url})
 }
 
+// handleSubscriptionMove moves the subscription bought here onto this
+// computer, when the relay says it's tied to another (#1257).
+func (s *Server) handleSubscriptionMove(w http.ResponseWriter, r *http.Request) {
+	if s.deps.MoveSubscription == nil {
+		writeErr(w, http.StatusNotImplemented, "NOT_IMPLEMENTED", "Access from anywhere isn't available.", nil)
+		return
+	}
+	if err := s.deps.MoveSubscription(r.Context()); err != nil {
+		writeSubscriptionErr(w, err)
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
+}
+
 // handleSubscriptionCancel forgets the checkout opened here, unpaid, so
 // another plan can be chosen (#1257).
 func (s *Server) handleSubscriptionCancel(w http.ResponseWriter, r *http.Request) {
@@ -93,6 +107,10 @@ func (s *Server) handleSubscriptionCancel(w http.ResponseWriter, r *http.Request
 var subscriptionStatus = map[string]int{
 	"SUBSCRIPTION_COVERED":      http.StatusConflict,
 	"CHECKOUT_NONE":             http.StatusNotFound,
+	"MOVE_TOO_SOON":             http.StatusTooManyRequests,
+	"MOVE_NEEDS_COMPUTER":       http.StatusForbidden,
+	"MOVE_FAILED":               http.StatusBadGateway,
+	"RELAY_UNREACHABLE":         http.StatusBadGateway,
 	"SUBSCRIPTION_PLAN_INVALID": http.StatusBadRequest,
 	"SUBSCRIPTION_OWN_RELAY":    http.StatusConflict,
 	"SUBSCRIPTION_ACTIVE":       http.StatusConflict,

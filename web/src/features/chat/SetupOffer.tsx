@@ -145,7 +145,7 @@ function MediaOfferCard({ offer, onContinue }: { offer: SetupOffer; onContinue: 
         </div>
       ) : (
         <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-          <span className="min-w-0 flex-1 text-xs text-ink-muted">{details}</span>
+          <span className="min-w-[min(100%,14rem)] flex-1 text-xs text-ink-muted">{details}</span>
           <button
             type="button"
             className="btn-primary px-3 py-1.5 text-xs"
@@ -242,7 +242,7 @@ function VisionOfferCard({ offer, onContinue }: { offer: SetupOffer; onContinue:
         </div>
       ) : (
         <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-          <span className="min-w-0 flex-1 text-xs text-ink-muted">
+          <span className="min-w-[min(100%,14rem)] flex-1 text-xs text-ink-muted">
             {t('setup.details', { name: offer.name, size: gb(offer.size_bytes), node: t('setup.thisComputer') })}
           </span>
           <button
@@ -332,8 +332,10 @@ function ModelOfferCard({ offer, onRetry }: { offer: SetupOffer; onRetry: (model
           </div>
         )
       ) : (
+        // The details keep a readable width and the buttons wrap below
+        // them on a phone, instead of a one-word column (#1270).
         <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-          <span className="min-w-0 flex-1 text-xs text-ink-muted">
+          <span className="min-w-[min(100%,14rem)] flex-1 text-xs text-ink-muted">
             {t('setup.model.details', { size: gb(offer.size_bytes), fit: offer.fit === 'excellent' ? t('setup.model.fitExcellent') : t('setup.model.fitGood') })}
           </span>
           <button type="button" className="btn-secondary px-3 py-1.5 text-xs" onClick={() => setDismissed(true)}>

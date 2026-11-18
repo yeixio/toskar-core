@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Toskar Control Plane API
-  version: "1.98"
+  version: "1.99"
   description: >-
     Local AI control plane API for Toskar, its OpenAI-compatible routes, and its MCP server.
     On the default loopback bind no key is needed. When the daemon listens on any other address,
@@ -1276,6 +1276,19 @@ paths:
                 $ref: "#/components/schemas/DeviceRoute"
         "403":
           description: ROUTE_NOT_LOCAL
+  /api/v1/remote-access/device-token:
+    get:
+      summary: This computer's device token for Toskar's relay, from anywhere (yeixio/toskar-apps#451)
+      description: "Answers {token}: the device token GET /remote-access/route also gives, so a paired device away from home gets the newer one after the computer renews, without coming home (contract 1.99). A paired device's key may ask through the remote listener too; the route secret stays home-only. The device token only looks the route's record up and can't open the computer's tunnel. Empty with an organization's relay, or before the relay has made one."
+      operationId: getDeviceToken
+      tags: [Devices]
+      responses:
+        "200":
+          description: token, possibly empty
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeviceToken"
   /api/v1/remote-access/relay-token:
     put:
       summary: Hand over a subscription's relay token (#456)
@@ -1316,6 +1329,23 @@ paths:
           description: The checkout is closed
         "404":
           description: CHECKOUT_NONE
+  /api/v1/remote-access/subscription/move:
+    post:
+      summary: Move the subscription bought here onto this computer (#1257)
+      description: "When the relay says the Stripe subscription bought here is tied to another route (subscription.error SUBSCRIPTION_IN_USE), as after restoring this computer's data on a new one, this moves it here. Toskar sends the relay the token it kept, which may be the old route's; without one, the relay moves it only once the old route has been quiet for 3 days. Turns access from anywhere on. Admins only. 404 SUBSCRIPTION_NONE; 409 SUBSCRIPTION_OWN_RELAY; 403 MOVE_NEEDS_COMPUTER; 429 MOVE_TOO_SOON; 502 MOVE_FAILED or RELAY_UNREACHABLE."
+      operationId: moveSubscription
+      tags: [Devices]
+      responses:
+        "204":
+          description: Moved; the token is kept
+        "403":
+          description: MOVE_NEEDS_COMPUTER
+        "404":
+          description: SUBSCRIPTION_NONE
+        "429":
+          description: MOVE_TOO_SOON
+        "502":
+          description: MOVE_FAILED or RELAY_UNREACHABLE
   /api/v1/remote-access/subscription/manage:
     post:
       summary: The billing page for the subscription bought here (#639)
@@ -8914,7 +8944,8 @@ components:
       properties:
         id: {type: string}
         name: {type: string}
-        description: {type: string}
+        description: {type: string, description: Written for the model}
+        summary: {type: string, description: 'A short description for people (#1254); empty is description'}
         capability: {type: string}
         source: {type: string}
         risk: {type: string, enum: [read, create, write]}
@@ -9102,6 +9133,13 @@ components:
         route_id: {type: string}
         relay: {type: string, description: "The relay it's reached through, such as relay.toskar.ai"}
         token: {type: string, description: "This computer's token for the relay, for every paired device on the home network"}
+    DeviceToken:
+      type: object
+      required: [token]
+      properties:
+        token:
+          type: string
+          description: This computer's device token for Toskar's relay, or "" when it has none.
     DeviceRoute:
       type: object
       description: "How a paired device finds this computer away from home (#456)."
@@ -10101,6 +10139,7 @@ components:
               id: {type: string}
               name: {type: string}
               description: {type: string}
+              summary: {type: string, description: 'Summary is a short description for people, where Description is written for the model (#1254). Empty is Description.'}
               capability: {type: string}
               source: {type: string}
               schema: {type: string}

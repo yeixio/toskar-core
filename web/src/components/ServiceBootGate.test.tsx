@@ -50,6 +50,22 @@ describe('ServiceBootGate sign-in (#206)', () => {
     renderAt('/invite/abc')
     expect(screen.getByText('the app')).toBeInTheDocument()
   })
+
+  // Regression: toskar-core#1270
+  it("doesn't flash the startup screen when the service is already up", async () => {
+    vi.mocked(api.getHealth).mockResolvedValue({ status: 'ok', product: 'toskar', version: 'test' } as never)
+    api.getMe = vi.fn(async () => ({ person: { id: 'p', name: 'Grace', role: 'admin', created_at: '', sign_in: true }, via: 'session' })) as never
+    renderAt('/api-access')
+    expect(screen.queryByText('Starting Toskar')).not.toBeInTheDocument()
+    expect(await screen.findByText('the app')).toBeInTheDocument()
+  })
+
+  // Regression: toskar-core#1270
+  it('shows the startup screen while the service is really starting', async () => {
+    vi.mocked(api.getHealth).mockReturnValue(new Promise(() => {}))
+    renderAt('/chat')
+    expect(await screen.findByText('Starting Toskar', {}, { timeout: 2000 })).toBeInTheDocument()
+  })
 })
 
 describe('ServiceBootGate health check (yeixio/toskar-apps#461)', () => {

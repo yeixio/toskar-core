@@ -289,5 +289,8 @@
   "RELAY_UNREACHABLE": "Toskar 릴레이에 연결할 수 없어요. 1분 후에 다시 시도하세요.",
   "COMPANION_LIMIT": "다른 기기를 통해 연결된 기기는 더 연결할 수 없어요. 휴대폰에서 연결하세요.",
   "SUBSCRIPTION_COVERED": "다른 기기의 구독이 이미 이 컴퓨터를 포함하고 있어서 여기서 구매할 것이 없어요.",
-  "CHECKOUT_NONE": "취소할 결제가 없어요."
+  "CHECKOUT_NONE": "취소할 결제가 없어요.",
+  "MOVE_TOO_SOON": "구독을 옮긴 지 하루가 지나지 않았어요. 내일 다시 옮길 수 있어요.",
+  "MOVE_NEEDS_COMPUTER": "옮기려면 Toskar 릴레이가 지금 구독을 쓰는 컴퓨터와 연결돼야 해요. 그 컴퓨터를 한 번 켜거나, 3일 동안 꺼져 있을 때까지 기다리세요.",
+  "MOVE_FAILED": "Toskar 릴레이가 구독을 옮기지 않았어요({{relay_code}})."
 }

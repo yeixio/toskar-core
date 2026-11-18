@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"net"
 	"net/http"
 	"net/http/httptest"
@@ -188,6 +189,70 @@ func TestRouteSecret(t *testing.T) {
 	res.Body.Close()
 	if res.StatusCode != http.StatusForbidden {
 		t.Fatalf("remote: %d", res.StatusCode)
+	}
+}
+
+// A paired device away from home gets the computer's current device token
+// through the remote listener, though not the route secret, so it keeps
+// finding the computer after a renewal (yeixio/toskar-apps#451).
+func TestDeviceTokenFromAnywhere(t *testing.T) {
+	dir := t.TempDir()
+	mgr, err := config.NewManager(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	cert, err := auth.APICertificate(auth.NewSecretStore(dir))
+	if err != nil {
+		t.Fatal(err)
+	}
+	token := "rt1.old"
+	srv := NewServer(Dependencies{
+		Config: mgr,
+		VerifyAPIKey: func(_ context.Context, secret string) (auth.APIKeyRecord, error) {
+			if secret == "phone-key" {
+				return auth.APIKeyRecord{ID: "d1", PersonID: auth.OwnerID, Kind: auth.KindDevice}, nil
+			}
+			return auth.APIKeyRecord{}, errors.New("invalid")
+		},
+		RouteSecret:      func() (string, string, error) { return "c2VjcmV0", "routeid", nil },
+		DeviceRelayToken: func() string { return token },
+	})
+	srv.SetTLS(&tls.Config{Certificates: []tls.Certificate{cert}, MinVersion: tls.VersionTLS12}, APITLS{Enabled: true})
+	if err := srv.ServeRemote("127.0.0.1:0"); err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(srv.StopRemote)
+	client := &http.Client{Timeout: 5 * time.Second, Transport: &http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: true}}}
+	get := func(path, key string) (int, string) {
+		t.Helper()
+		req, _ := http.NewRequest(http.MethodGet, "https://"+srv.RemoteListening().Listening+path, nil)
+		if key != "" {
+			req.Header.Set("Authorization", "Bearer "+key)
+		}
+		res, err := client.Do(req)
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer res.Body.Close()
+		b, _ := io.ReadAll(res.Body)
+		return res.StatusCode, string(b)
+	}
+
+	// The computer renewed while the phone was away.
+	token = "rt1.renewed"
+	if code, body := get("/api/v1/remote-access/device-token", "phone-key"); code != http.StatusOK || !strings.Contains(body, `"token":"rt1.renewed"`) {
+		t.Fatalf("device token from away: %d %s", code, body)
+	}
+	if strings.Contains(fmt.Sprint(get("/api/v1/remote-access/device-token", "phone-key")), "c2VjcmV0") {
+		t.Fatal("the route secret left home")
+	}
+	// The route secret itself still doesn't.
+	if code, _ := get("/api/v1/remote-access/route", "phone-key"); code != http.StatusForbidden {
+		t.Fatalf("route secret from away: %d", code)
+	}
+	// Nor does the token go to someone without a paired device's key.
+	if code, _ := get("/api/v1/remote-access/device-token", ""); code != http.StatusUnauthorized {
+		t.Fatalf("no key: %d", code)
 	}
 }
 
@@ -456,7 +521,7 @@ func TestSubscriptionRoutes(t *testing.T) {
 	if status, got := call(srv.handleSubscriptionCheckout, `nope`); status != http.StatusBadRequest || got != "INVALID_JSON" {
 		t.Fatalf("bad JSON: %d %s", status, got)
 	}
-	for _, route := range []string{"/api/v1/remote-access/subscription/checkout", "/api/v1/remote-access/subscription/manage"} {
+	for _, route := range []string{"/api/v1/remote-access/subscription/checkout", "/api/v1/remote-access/subscription/manage", "/api/v1/remote-access/subscription/move"} {
 		if auth.RoleNeeded(http.MethodPost, route) != auth.RoleAdmin || auth.DeviceMayReach(http.MethodPost, route) {
 			t.Errorf("%s isn't an Admin's alone", route)
 		}

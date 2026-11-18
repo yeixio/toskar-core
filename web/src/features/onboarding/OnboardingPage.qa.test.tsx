@@ -1,6 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { render, screen } from '@testing-library/react'
-import { MemoryRouter } from 'react-router-dom'
+import { fireEvent, render, screen } from '@testing-library/react'
+import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { describe, expect, it, vi } from 'vitest'
 import { OnboardingPage } from './OnboardingPage'
 
@@ -22,5 +22,21 @@ describe('Onboarding QA regressions', () => {
     // out of reach; safe centering (or margin auto inside) doesn't.
     const main = screen.getByRole('main')
     expect(main.className.split(/\s+/)).not.toContain('justify-center')
+  })
+
+  // Regression: toskar-core#1266
+  it('someone who opened another page can set up later and land there', () => {
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <MemoryRouter initialEntries={['/onboarding?next=%2Fapi-access']}>
+          <Routes>
+            <Route path="/onboarding" element={<OnboardingPage />} />
+            <Route path="/api-access" element={<p>API Access page</p>} />
+          </Routes>
+        </MemoryRouter>
+      </QueryClientProvider>,
+    )
+    fireEvent.click(screen.getByRole('button', { name: 'Set up later' }))
+    expect(screen.getByText('API Access page')).toBeInTheDocument()
   })
 })

@@ -106,6 +106,22 @@ function maskPrefix(prefix: string): string {
   return `••••••••••${tip}`
 }
 
+/**
+ * A device key that's likely left over, so a duplicate name can be told
+ * apart and removed (#1266): never used a day after it was made, as after
+ * an unfinished pairing, or not used for 90 days.
+ */
+function staleKey(key: { created_at: string; last_used_at?: string | null }): 'neverUsed' | 'unused' | null {
+  const day = 24 * 60 * 60 * 1000
+  const now = Date.now()
+  if (!key.last_used_at) {
+    const made = Date.parse(key.created_at)
+    return Number.isFinite(made) && now - made > day ? 'neverUsed' : null
+  }
+  const used = Date.parse(key.last_used_at)
+  return Number.isFinite(used) && now - used > 90 * day ? 'unused' : null
+}
+
 export function ApiAccessPage() {
   const { t } = useTranslation('apiAccess')
   const queryClient = useQueryClient()
@@ -260,26 +276,37 @@ export function ApiAccessPage() {
     updateSettingsMutation.mutate(false)
   }
 
+  const header = (
+    <header className="page-header">
+      <RealmKicker />
+      <h1 className="page-title">{t('page.title')}</h1>
+      <p className="page-subtitle">{t('page.subtitle')}</p>
+    </header>
+  )
+  // Nothing below renders with made-up defaults while it can't load (#1254).
+  if (settingsQuery.isError || keysQuery.isError || settingsQuery.isLoading || keysQuery.isLoading) {
+    return (
+      <div className="mx-auto w-full max-w-2xl min-w-0 space-y-6">
+        {header}
+        {settingsQuery.isError || keysQuery.isError ? (
+          <LoadError
+            error={settingsQuery.error ?? keysQuery.error}
+            onRetry={() => {
+              void settingsQuery.refetch()
+              void keysQuery.refetch()
+            }}
+            retrying={settingsQuery.isFetching || keysQuery.isFetching}
+          />
+        ) : (
+          <LoadingSpinner label={t('page.loading')} />
+        )}
+      </div>
+    )
+  }
+
   return (
     <div className="mx-auto w-full max-w-2xl min-w-0 space-y-6">
-      <header className="page-header">
-        <RealmKicker />
-        <h1 className="page-title">{t('page.title')}</h1>
-        <p className="page-subtitle">{t('page.subtitle')}</p>
-      </header>
-
-      {settingsQuery.isError || keysQuery.isError ? (
-        <LoadError
-          error={settingsQuery.error ?? keysQuery.error}
-          onRetry={() => {
-            void settingsQuery.refetch()
-            void keysQuery.refetch()
-          }}
-          retrying={settingsQuery.isFetching || keysQuery.isFetching}
-        />
-      ) : (settingsQuery.isLoading || keysQuery.isLoading) ? (
-        <LoadingSpinner label={t('page.loading')} />
-      ) : null}
+      {header}
 
       <section className="card space-y-4">
         <div className="flex flex-wrap items-start justify-between gap-3">
@@ -361,7 +388,7 @@ export function ApiAccessPage() {
                   <Trans
                     t={t}
                     i18nKey="service.lanHint"
-                    values={{ port }}
+                    values={{ port, scheme: tls?.enabled ? 'https' : 'http' }}
                     components={{ mono: <span className="font-mono text-ink" /> }}
                   />
                 </p>
@@ -403,6 +430,8 @@ export function ApiAccessPage() {
                   header: <span className="font-mono text-ink">Authorization: Bearer &lt;api-key&gt;</span>,
                 }}
               />
+              {/* Only what's true of this computer's LAN endpoint (#1254). */}
+              {lanEnabled ? <> {tls?.enabled ? t('service.docsHttps') : t('service.docsHttp')}</> : null}
             </p>
             <pre className="mt-3 overflow-x-auto rounded-md bg-canvas px-3 py-2 font-mono text-[11px] text-ink">
               {`curl ${localEndpoint}/models \\
@@ -466,7 +495,12 @@ export function ApiAccessPage() {
             {phones.map((phone) => (
               <li key={phone.id} className="flex flex-wrap items-center justify-between gap-3 py-3">
                 <div className="min-w-0">
-                  <p className="font-medium text-ink">{phone.name}</p>
+                  <p className="flex flex-wrap items-center gap-2 font-medium text-ink">
+                    {phone.name}
+                    {staleKey(phone) ? (
+                      <span className="status-chip bg-warning/15 text-warning">{t(`phones.${staleKey(phone)}`)}</span>
+                    ) : null}
+                  </p>
                   <p className="mt-0.5 text-xs text-ink-muted">
                     {t('phones.meta', {
                       connected: formatDate(phone.created_at, { month: 'short', day: 'numeric' }),
@@ -655,14 +689,6 @@ export function ApiAccessPage() {
               <dd className="font-mono text-ink">
                 {bindHost}:{port}
               </dd>
-            </div>
-            <div className="flex justify-between gap-3">
-              <dt className="text-ink-muted">{t('advanced.port')}</dt>
-              <dd className="font-mono text-ink">{port}</dd>
-            </div>
-            <div className="flex justify-between gap-3">
-              <dt className="text-ink-muted">{t('advanced.host')}</dt>
-              <dd className="font-mono text-ink">{settings.api_host}</dd>
             </div>
           </dl>
         </section>

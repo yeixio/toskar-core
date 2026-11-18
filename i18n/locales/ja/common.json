@@ -43,8 +43,13 @@
     "nornHint": "各モデルをどのコンピュータで実行するか",
     "nornAutomatic": "自動",
     "mimirHint": "Toskar が回答に使うファイルとソース",
-    "mimirReady": "準備完了",
-    "justThis": "このコンピュータのみ"
+    "justThis": "このコンピュータのみ",
+    "placementLocal": "このコンピュータ",
+    "placementAsk": "毎回確認",
+    "knowledgeNone": "ソースはまだありません",
+    "knowledgeFailed_other": "{{count}}件失敗",
+    "knowledgeReady_other": "{{count}}件のソース",
+    "knowledgeIndexing": "インデックス作成中…"
   },
   "boot": {
     "starting": "Toskarを起動しています",

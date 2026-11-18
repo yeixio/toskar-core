@@ -3,7 +3,8 @@ import { useTranslation } from 'react-i18next'
 import type { AIProfile, Automation, AutomationClockTime, AutomationInput, AutomationSchedule, AutomationTrigger, Device, Model, ParsedAutomation, ToolRecord } from '@/types/api'
 import i18n from '@/i18n'
 import { api } from '@/lib/api'
-import { canChat } from '@/features/models/modelPresentation'
+import { canChat, modelUsesTools } from '@/features/models/modelPresentation'
+import { Link } from 'react-router-dom'
 import type { AutomationPreview } from '@/types/api'
 import { useUIStore } from '@/stores/uiStore'
 import { answerLanguages, nameInItself } from '@/i18n/answerLanguages'
@@ -187,6 +188,12 @@ export function AutomationForm({ profiles, models, tools, others = [], initial, 
   // Tools a scheduled run may use are approved here, because nobody is
   // watching to answer later (spec §59). Tools that change things are listed
   // apart, so approving one is a deliberate choice.
+  // Tools need a model that can call them; one that can't reads nothing
+  // and answers from memory (#1269).
+  const toolModels = installed.filter(modelUsesTools)
+  const chosenModel = installed.find((model) => model.id === modelID)
+  const needsToolModel =
+    selectedTools.length > 0 && installed.length > 0 && (modelID === 'auto' ? toolModels.length === 0 : chosenModel ? !modelUsesTools(chosenModel) : false)
   const lookTools = tools.filter((tool) => tool.enabled && tool.risk !== 'write')
   const changeTools = tools.filter((tool) => tool.enabled && tool.risk === 'write')
 
@@ -633,6 +640,14 @@ export function AutomationForm({ profiles, models, tools, others = [], initial, 
             ))}
           </select>
         </label>
+        {needsToolModel ? (
+          <p className="rounded-lg bg-warning/10 px-3 py-2 text-xs text-ink" role="status">
+            {t('form.needsToolModel')}{' '}
+            <Link to="/models" className="font-medium text-primary underline-offset-2 hover:underline">
+              {t('form.openModels')}
+            </Link>
+          </p>
+        ) : null}
         <label className="block space-y-1 text-sm">
           <span className="text-ink-muted">{t('form.responseLanguage')}</span>
           <select className="field w-full" value={responseLanguage} onChange={(event) => setResponseLanguage(event.target.value)}>

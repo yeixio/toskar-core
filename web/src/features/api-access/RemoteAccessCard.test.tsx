@@ -13,6 +13,8 @@ vi.mock('@/lib/api', () => ({
     getVersion: vi.fn(),
     startSubscriptionCheckout: vi.fn(),
     manageSubscription: vi.fn(),
+    cancelSubscriptionCheckout: vi.fn(),
+    moveSubscriptionHere: vi.fn(),
   },
 }))
 
@@ -470,8 +472,27 @@ describe('RemoteAccessCard QA regressions', () => {
     await waitFor(() => expect(api.getRemoteAccess).toHaveBeenCalled())
     await new Promise((resolve) => setTimeout(resolve, 50))
     for (const button of screen.queryAllByRole('button', { name: /Subscribe for/ })) expect(button).toBeDisabled()
-    const mapping = screen.queryByLabelText('Open a port on the router automatically')
-    if (mapping) expect(mapping).toBeDisabled()
+    expect(screen.queryByLabelText('Open a port on the router automatically')).not.toBeInTheDocument()
+    expect(screen.queryByLabelText('Port')).not.toBeInTheDocument()
+    expect(screen.getByText(/doesn't need Local network access/)).toBeInTheDocument()
+  })
+
+  // Regression: toskar-core#1266
+  it('the switch moves at once and warns which port opens before it is on', async () => {
+    let finish: (v: unknown) => void = () => {}
+    vi.mocked(api.updateSettings).mockReturnValue(new Promise((resolve) => (finish = resolve)) as never)
+    renderWith({ remote_access_enabled: false }, { enabled: false })
+    expect(await screen.findByText(/open port 7333, which answers only devices paired/)).toBeInTheDocument()
+    const toggle = screen.getByRole('switch', { name: 'Access from anywhere' })
+    await waitFor(() => expect(toggle).toBeEnabled())
+    fireEvent.click(toggle)
+    await waitFor(() => expect(toggle).toHaveAttribute('aria-busy', 'true'))
+    expect(toggle).toHaveAttribute('aria-checked', 'true')
+    // The server has it on from here.
+    vi.mocked(api.getSettings).mockResolvedValue({ remote_access_enabled: true, remote_access_port: 7333, remote_access_relay: '' } as never)
+    finish({ remote_access_enabled: true, remote_access_port: 7333, remote_access_relay: '' })
+    await waitFor(() => expect(toggle).not.toHaveAttribute('aria-busy'))
+    expect(toggle).toHaveAttribute('aria-checked', 'true')
   })
 
   // Regression: toskar-core#1266
@@ -482,6 +503,15 @@ describe('RemoteAccessCard QA regressions', () => {
     )
     expect(await screen.findByText(/Subscribed in the Toskar app/)).toBeInTheDocument()
     expect(document.body.textContent).not.toMatch(/TOKEN_REVOKED/)
+  })
+
+  // Regression: toskar-core#1257
+  it('a subscription tied to another computer can be moved here', async () => {
+    vi.mocked(api.moveSubscriptionHere).mockResolvedValue(undefined)
+    renderWith({ remote_access_enabled: true }, { enabled: true, subscription: { state: 'active', store: 'stripe', error: 'SUBSCRIPTION_IN_USE' } })
+    fireEvent.click(await screen.findByRole('button', { name: 'Move it to this computer' }))
+    await waitFor(() => expect(api.moveSubscriptionHere).toHaveBeenCalled())
+    expect(document.body.textContent).not.toMatch(/SUBSCRIPTION_IN_USE/)
   })
 
   // Regression: toskar-core#1257

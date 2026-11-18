@@ -65,11 +65,13 @@ function ChoiceGroup<T extends string>({
           <button
             key={option.id}
             type="button"
+            aria-pressed={active}
             onClick={() => onChange(option.id)}
             className={[
               'rounded-lg px-4 py-2 text-sm font-medium transition',
+              // A ring as well as the fill, which is faint in light mode (#1270).
               active
-                ? 'bg-primary-soft text-primary-active'
+                ? 'bg-primary-soft text-primary-active ring-2 ring-primary/70'
                 : 'bg-raised/70 text-ink-muted hover:text-ink',
             ].join(' ')}
           >

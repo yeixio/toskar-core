@@ -43,8 +43,13 @@
     "nornHint": "어느 컴퓨터가 각 모델을 실행하는지",
     "nornAutomatic": "자동",
     "mimirHint": "Toskar가 답할 때 쓰는 파일과 소스",
-    "mimirReady": "준비됨",
-    "justThis": "이 컴퓨터만"
+    "justThis": "이 컴퓨터만",
+    "placementLocal": "이 컴퓨터",
+    "placementAsk": "매번 묻기",
+    "knowledgeNone": "아직 소스 없음",
+    "knowledgeFailed_other": "{{count}}개 실패",
+    "knowledgeReady_other": "소스 {{count}}개",
+    "knowledgeIndexing": "색인 중…"
   },
   "boot": {
     "starting": "Toskar 시작하는 중",

@@ -29,6 +29,22 @@ const customizeNav = [
   { to: '/profiles', label: 'nav.profiles' },
 ] as const
 
+/** The Run chats on choice, as the sidebar says it. */
+function placementLabel(choice?: string): string {
+  if (choice === 'local') return 'subsystems.placementLocal'
+  if (choice === 'ask') return 'subsystems.placementAsk'
+  return 'subsystems.nornAutomatic'
+}
+
+/** What Knowledge is doing: nothing added, failing, indexing, or ready. */
+function knowledgeStatus(sources: { status: string }[]): { key: string; count: number } {
+  const failed = sources.filter((s) => s.status === 'failed').length
+  if (sources.length === 0) return { key: 'subsystems.knowledgeNone', count: 0 }
+  if (failed > 0) return { key: 'subsystems.knowledgeFailed', count: failed }
+  if (sources.some((s) => s.status === 'indexing')) return { key: 'subsystems.knowledgeIndexing', count: 0 }
+  return { key: 'subsystems.knowledgeReady', count: sources.length }
+}
+
 const administerNav = [
   { to: '/train', label: 'nav.train' },
   { to: '/nodes', label: 'nav.computers' },
@@ -123,6 +139,17 @@ export function Sidebar({ open = false, ref }: { open?: boolean; ref?: Ref<HTMLD
     (healthQuery.isPending || healthQuery.isFetching || healthQuery.isLoading)
   // Other computers only: this one on its own is "Just this computer", not
   // "1 connected" (#1249).
+  // Real values for Placement and Knowledge, or no row (#1249).
+  const settingsQuery = useQuery({ queryKey: ['settings'], queryFn: () => api.getSettings(), retry: false, staleTime: 30_000 })
+  const knowledgeQuery = useQuery({
+    queryKey: ['knowledge'],
+    queryFn: () => api.listKnowledge(),
+    retry: false,
+    enabled: admin,
+    refetchInterval: 30_000,
+  })
+  const placement = settingsQuery.isSuccess ? placementLabel(settingsQuery.data?.default_execution) : null
+  const knowledge = knowledgeQuery.isSuccess ? knowledgeStatus(knowledgeQuery.data ?? []) : null
   const nodeList = nodesQuery.data ?? []
   const nodeCount = nodeList.filter((n) => !n.is_local).length
   // "No model" only when the model list loaded and has none installed; a list
@@ -268,6 +295,7 @@ export function Sidebar({ open = false, ref }: { open?: boolean; ref?: Ref<HTMLD
                   : t('subsystems.connected', { count: nodeCount })}
           </span>
         </div>
+        {placement ? (
         <div
           className="flex items-center justify-between gap-2 text-[11px] text-ink-faint"
           title={t('subsystems.nornHint')}
@@ -276,10 +304,11 @@ export function Sidebar({ open = false, ref }: { open?: boolean; ref?: Ref<HTMLD
             <span className="h-1 w-1 rounded-full bg-norn" aria-hidden />
             {t('subsystems.placement')}
           </span>
-          <span>{t('subsystems.nornAutomatic')}</span>
+          <span>{t(placement)}</span>
         </div>
+        ) : null}
         {/* Knowledge is an admin page, so only admins see its status. */}
-        {admin ? (
+        {admin && knowledge ? (
           <div
             className="flex items-center justify-between gap-2 text-[11px] text-ink-faint"
             title={t('subsystems.mimirHint')}
@@ -288,7 +317,7 @@ export function Sidebar({ open = false, ref }: { open?: boolean; ref?: Ref<HTMLD
               <span className="h-1 w-1 rounded-full bg-mimir" aria-hidden />
               {t('nav.knowledge')}
             </span>
-            <span>{t('subsystems.mimirReady')}</span>
+            <span>{t(knowledge.key, { count: knowledge.count })}</span>
           </div>
         ) : null}
       </footer>

@@ -227,7 +227,7 @@ export function ToolsPage() {
                     {tool.enabled ? t('page.enabled') : t('page.disabled')}
                   </span>
                 </span>
-                <span className="mt-1 line-clamp-2 text-xs text-ink-muted">{tool.description}</span>
+                <span className="mt-1 line-clamp-2 text-xs text-ink-muted">{tool.summary || tool.description}</span>
                 <span className="mt-auto pt-2 text-[11px] text-ink-faint">
                   {tool.capability} · {sourceLabel(tool.source)}
                 </span>
@@ -238,7 +238,7 @@ export function ToolsPage() {
         {selected && (
           <aside className="card h-fit space-y-3 lg:sticky lg:top-0">
             <h2 className="font-display text-lg font-semibold text-ink">{selected.name}</h2>
-            <p className="text-sm text-ink-muted">{selected.description}</p>
+            <p className="text-sm text-ink-muted">{selected.summary || selected.description}</p>
             <dl className="space-y-1 text-xs text-ink-muted">
               <Row label={t('details.source')} value={sourceLabel(selected.source)} />
               <Row label={t('details.capability')} value={selected.capability} />

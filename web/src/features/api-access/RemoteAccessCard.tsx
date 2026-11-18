@@ -39,14 +39,19 @@ export function RemoteAccessCard() {
   }, [settings.data])
   const save = useMutation({
     mutationFn: (patch: Parameters<typeof api.updateSettings>[0]) => api.updateSettings(patch),
-    onSuccess: () => {
+    onSuccess: (saved) => {
       setError(null)
+      // The switch shows what was saved now, not after the next fetch (#1266).
+      if (saved && 'remote_access_enabled' in saved) queryClient.setQueryData(['settings'], saved)
       void queryClient.invalidateQueries({ queryKey: ['settings'] })
       void queryClient.invalidateQueries({ queryKey: ['remote-access'] })
     },
     onError: (err) => setError(shownError(err)),
   })
   const st = status.data
+  // While turning it on or off, the switch already shows where it's going.
+  const switching = save.isPending && save.variables?.remote_access_enabled !== undefined
+  const shownOn = switching ? Boolean(save.variables?.remote_access_enabled) : enabled
   const current = String(settings.data?.remote_access_port ?? 7333)
   const changed = port !== current || address.trim() !== (settings.data?.remote_access_address ?? '')
   return (
@@ -60,7 +65,8 @@ export function RemoteAccessCard() {
         </div>
         <Toggle
           label={t('remote.title')}
-          checked={enabled}
+          checked={shownOn}
+          busy={switching}
           disabled={save.isPending || !settings.data}
           onChange={() => save.mutate({ remote_access_enabled: !enabled })}
         />
@@ -79,41 +85,47 @@ export function RemoteAccessCard() {
       {st?.others?.length ? <OtherToskars others={st.others} /> : null}
       {st?.subscription && !settings.data?.remote_access_relay ? <ToskarSubscription subscription={st.subscription} off={!enabled} /> : null}
       {enabled && st ? <OutsideCheck status={st} saving={save.isPending} onSave={(patch) => save.mutate(patch)} /> : null}
-      <label className="flex items-center gap-2 text-sm">
-        <input
-          type="checkbox"
-          checked={settings.data?.remote_access_port_mapping ?? true}
-          disabled={save.isPending || !settings.data || !enabled}
-          onChange={(e) => save.mutate({ remote_access_port_mapping: e.target.checked })}
-        />
-        <span>{t('remote.portMapping')}</span>
-      </label>
-      <form
-        className="grid gap-3 sm:grid-cols-[8rem_1fr_auto] sm:items-end"
-        onSubmit={(e) => {
-          e.preventDefault()
-          save.mutate({ remote_access_port: Number(port) || 0, remote_access_address: address.trim() })
-        }}
-      >
-        <label className="block space-y-1 text-sm">
-          <span className="text-ink-muted">{t('remote.port')}</span>
-          <input className="field w-full" inputMode="numeric" value={port} onChange={(e) => setPort(e.target.value.replace(/\D/g, ''))} />
-        </label>
-        <label className="block space-y-1 text-sm">
-          <span className="text-ink-muted">{t('remote.address')}</span>
-          <input
-            className="field w-full"
-            placeholder={t('remote.addressExample')}
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
-          />
-        </label>
-        <button type="submit" className="btn-secondary" disabled={!changed || save.isPending}>
-          {t('remote.save')}
-        </button>
-      </form>
+      {/* While it's off, the router settings stay out of the way (#1253). */}
+      {!enabled && settings.data ? <p className="text-sm text-ink-muted">{t('remote.offHint', { port: current })}</p> : null}
+      {enabled ? (
+        <>
+          <label className="flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              checked={settings.data?.remote_access_port_mapping ?? true}
+              disabled={save.isPending || !settings.data}
+              onChange={(e) => save.mutate({ remote_access_port_mapping: e.target.checked })}
+            />
+            <span>{t('remote.portMapping')}</span>
+          </label>
+          <form
+            className="grid gap-3 sm:grid-cols-[8rem_1fr_auto] sm:items-end"
+            onSubmit={(e) => {
+              e.preventDefault()
+              save.mutate({ remote_access_port: Number(port) || 0, remote_access_address: address.trim() })
+            }}
+          >
+            <label className="block space-y-1 text-sm">
+              <span className="text-ink-muted">{t('remote.port')}</span>
+              <input className="field w-full" inputMode="numeric" value={port} onChange={(e) => setPort(e.target.value.replace(/\D/g, ''))} />
+            </label>
+            <label className="block space-y-1 text-sm">
+              <span className="text-ink-muted">{t('remote.address')}</span>
+              <input
+                className="field w-full"
+                placeholder={t('remote.addressExample')}
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+              />
+            </label>
+            <button type="submit" className="btn-secondary" disabled={!changed || save.isPending}>
+              {t('remote.save')}
+            </button>
+          </form>
+          <p className="text-xs text-ink-faint">{t('remote.notes', { port: current })}</p>
+        </>
+      ) : null}
       {error ? <ShownError {...error} className="text-sm text-danger" /> : null}
-      <p className="text-xs text-ink-faint">{t('remote.notes', { port: current })}</p>
       <RelaySettings
         relay={settings.data?.remote_access_relay ?? ''}
         enrolled={settings.data?.remote_access_relay_enrolled ?? false}

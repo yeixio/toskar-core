@@ -66,4 +66,36 @@ describe('API Access QA regressions', () => {
     await screen.findByRole('switch', { name: 'Local network access' })
     expect(screen.queryByText(/Credentials for apps and devices/)).not.toBeInTheDocument()
   })
+
+  // Regression: toskar-core#1254
+  it("a load error isn't followed by cards full of made-up defaults", async () => {
+    vi.mocked(api.getSettings).mockRejectedValue(new Error('offline'))
+    renderPage()
+    await screen.findByRole('button', { name: /Try again|Retry/ })
+    expect(screen.queryByRole('switch', { name: 'Local network access' })).not.toBeInTheDocument()
+    expect(screen.queryByText(/0 keys/)).not.toBeInTheDocument()
+  })
+
+  // Regression: toskar-core#1254
+  it('the LAN copy says HTTPS only when it is on', async () => {
+    vi.mocked(api.getSettings).mockResolvedValue({ ...fresh, lan_api_enabled: true } as never)
+    renderPage()
+    fireEvent.click(await screen.findByRole('button', { name: 'API documentation' }))
+    expect(await screen.findByText(/uses plain HTTP/)).toBeInTheDocument()
+    expect(screen.queryByText(/uses HTTPS/)).not.toBeInTheDocument()
+    expect(document.body.textContent).not.toMatch(/https:\/\/192\.168/)
+  })
+
+  // Regression: toskar-core#1266
+  it('a device key left over from an unfinished pairing is marked, so duplicates differ', async () => {
+    vi.mocked(api.getSettings).mockResolvedValue(fresh as never)
+    const old = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
+    vi.mocked(api.listApiKeys).mockResolvedValue([
+      { id: 'd1', name: 'QA iPhone', kind: 'device', prefix: 'tsk_1', created_at: old, last_used_at: new Date().toISOString() },
+      { id: 'd2', name: 'QA iPhone', kind: 'device', prefix: 'tsk_2', created_at: old },
+    ] as never)
+    renderPage()
+    expect(await screen.findByText('Never used')).toBeInTheDocument()
+    expect(screen.getAllByText('Never used')).toHaveLength(1)
+  })
 })

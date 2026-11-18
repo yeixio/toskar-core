@@ -447,6 +447,22 @@ func (s *Server) handleRouteSecret(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, route)
 }
 
+// handleDeviceToken gives a paired device this computer's current device
+// token for Toskar's relay, from anywhere, the remote listener too
+// (yeixio/toskar-apps#451). A device's copy ends with the paid period, and
+// GET /remote-access/route, the only other way to a newer one, answers at
+// home only, so a device away when the computer renewed lost the record
+// lookup until it came home. The device token only looks the route up; it
+// can't open the computer's tunnel (#1258), and the route secret stays
+// home-only. An organization's relay has none: token is "".
+func (s *Server) handleDeviceToken(w http.ResponseWriter, r *http.Request) {
+	if s.deps.DeviceRelayToken == nil {
+		writeErr(w, http.StatusNotImplemented, "NOT_IMPLEMENTED", "Access from anywhere isn't available.", nil)
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]string{"token": s.deps.DeviceRelayToken()})
+}
+
 // routeView is how a paired device finds this computer away from home
 // (#456): the route secret and id, the relay it's reached through, and
 // this computer's token for that relay.

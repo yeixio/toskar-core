@@ -400,7 +400,9 @@
       "cover": "Rollläden",
       "climate": "Klima",
       "other": "Sonstiges"
-    }
+    },
+    "needsToolModel": "Das gewählte Modell kann keine Werkzeuge nutzen. Es öffnet keine Seiten und nutzt die hier gewählten Werkzeuge nicht, sondern antwortet aus dem, was es schon weiß. Wähle ein Modell, das Werkzeuge nutzen kann, oder installiere eins.",
+    "openModels": "Modelle öffnen"
   },
   "draft": {
     "label": "Automation zum Bestätigen",

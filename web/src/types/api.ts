@@ -394,6 +394,8 @@ export interface ToolRecord {
   id: string
   name: string
   description: string
+  /** A short description for people; description is written for the model (#1254). */
+  summary?: string
   capability: string
   source: string
   schema: string

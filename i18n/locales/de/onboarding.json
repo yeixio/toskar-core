@@ -75,5 +75,6 @@
     "title": "Alles bereit",
     "description": "Deine empfohlene Einrichtung ist installiert. Chatte jetzt mit deiner lokalen KI.",
     "start": "Chat starten"
-  }
+  },
+  "setupLater": "Später einrichten"
 }

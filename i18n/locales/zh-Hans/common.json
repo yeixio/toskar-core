@@ -43,8 +43,13 @@
     "nornHint": "由哪台电脑运行每个模型",
     "nornAutomatic": "自动",
     "mimirHint": "Toskar 用来回答的文件和来源",
-    "mimirReady": "就绪",
-    "justThis": "仅这台电脑"
+    "justThis": "仅这台电脑",
+    "placementLocal": "这台电脑",
+    "placementAsk": "每次询问",
+    "knowledgeNone": "尚无来源",
+    "knowledgeFailed_other": "{{count}} 个失败",
+    "knowledgeReady_other": "{{count}} 个来源",
+    "knowledgeIndexing": "正在索引…"
   },
   "boot": {
     "starting": "正在启动 Toskar",

@@ -114,7 +114,7 @@
   },
   "advanced": {
     "title": "詳細モード",
-    "description": "モデルID、APIの詳細、プロファイル、ログなど、上級者向けの項目を表示します。"
+    "description": "モデルID、APIの詳細、ログなど、上級者向けの項目を表示します。"
   },
   "discovery": {
     "title": "他のコンピュータを探す",

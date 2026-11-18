@@ -118,7 +118,7 @@
   },
   "advanced": {
     "title": "Mode avancé",
-    "description": "Afficher les ID des modèles, les détails de l'API, les profils, les journaux et d'autres réglages pour utilisateurs avancés."
+    "description": "Afficher les ID des modèles, les détails de l'API, les journaux et d'autres réglages pour utilisateurs avancés."
   },
   "discovery": {
     "title": "Rechercher d'autres ordinateurs",
