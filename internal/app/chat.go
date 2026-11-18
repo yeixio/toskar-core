@@ -1904,6 +1904,7 @@ func nowLine(now time.Time, loc *time.Location) string {
 
 func (e *chatExecEnv) TurnInstructions(ctx context.Context, prompt string) string {
 	var parts []string
+	var location string
 	// The administrator's topic rules come first, and nothing after them
 	// changes them (#345).
 	if block := topicBlock(e.profile.Topics); block != "" {
@@ -1930,19 +1931,15 @@ func (e *chatExecEnv) TurnInstructions(ctx context.Context, prompt string) strin
 			message = prompt
 		}
 		// Where they are, only for a question about nearby places, the
-		// weather, or directions (#210).
-		if block := e.app.locationBlock(ctx, message); block != "" {
-			parts = append(parts, block)
-		}
+		// weather, or directions (#210). It changes from message to
+		// message, so it goes near the end, with the time.
+		location = e.app.locationBlock(ctx, message)
 		parts = append(parts, e.app.replyLanguage(ctx, e.conversationID, message, e.responseLanguage).Instruction())
 	}
-	// The model has no clock: "this Friday" or "in 3 hours" needs the date
-	// and time where the person is.
 	tctx := e.ctx
 	if tctx == nil {
 		tctx = ctx
 	}
-	parts = append(parts, nowLine(e.startedAt, locale.TimeZone(tctx)))
 	// What Yggdrasil can do comes from its own inventory (§37).
 	if e.capabilities != "" {
 		parts = append(parts, e.capabilities)
@@ -1964,6 +1961,15 @@ func (e *chatExecEnv) TurnInstructions(ctx context.Context, prompt string) strin
 	if e.opts != nil && strings.TrimSpace(e.opts.System) != "" {
 		parts = append(parts, "Instructions from the application using the API:\n"+strings.TrimSpace(e.opts.System))
 	}
+	if location != "" {
+		parts = append(parts, location)
+	}
+	// The model has no clock: "this Friday" or "in 3 hours" needs the date
+	// and time where the person is. It goes last because it changes every
+	// minute: what comes before it stays the same from turn to turn, so the
+	// model server reuses its work on it instead of reading it all again,
+	// which a live voice turn feels (#795).
+	parts = append(parts, nowLine(e.startedAt, locale.TimeZone(tctx)))
 	return strings.Join(parts, "\n\n")
 }
 
