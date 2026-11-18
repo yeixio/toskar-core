@@ -51,8 +51,10 @@
     "knowledgeNone": "Nenhuma fonte ainda",
     "knowledgeFailed_one": "{{count}} com falha",
     "knowledgeFailed_other": "{{count}} com falha",
+    "knowledgeFailed_many": "{{count}} com falha",
     "knowledgeReady_one": "{{count}} fonte",
     "knowledgeReady_other": "{{count}} fontes",
+    "knowledgeReady_many": "{{count}} fontes",
     "knowledgeIndexing": "Indexando…"
   },
   "boot": {

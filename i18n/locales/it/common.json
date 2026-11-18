@@ -51,8 +51,10 @@
     "knowledgeNone": "Ancora nessuna fonte",
     "knowledgeFailed_one": "{{count}} non riuscita",
     "knowledgeFailed_other": "{{count}} non riuscite",
+    "knowledgeFailed_many": "{{count}} non riuscite",
     "knowledgeReady_one": "{{count}} fonte",
     "knowledgeReady_other": "{{count}} fonti",
+    "knowledgeReady_many": "{{count}} fonti",
     "knowledgeIndexing": "Indicizzazione…"
   },
   "boot": {
