@@ -7866,6 +7866,10 @@ components:
         instructions:
           type: string
           maxLength: 1500
+        location:
+          type: string
+          maxLength: 120
+          description: Where the person is, such as a town. Used only for questions about nearby places, weather, and directions, and as the start of the places tools when no place is named.
     ExternalServer:
       type: object
       properties:

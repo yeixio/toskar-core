@@ -2366,6 +2366,8 @@ export interface PersonalStyle {
   units?: '' | 'metric' | 'imperial'
   about_me?: string
   instructions?: string
+  /** Where the person is, such as a town, for nearby, weather, and directions questions (#210). */
+  location?: string
 }
 
 export type EgressKind = 'web_search' | 'web_page' | 'places' | 'paired_computer' | 'external_server' | 'connector' | 'notification' | 'community_ratings' | 'update_check' | 'news' | 'problem_report' | 'link_check'

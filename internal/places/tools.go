@@ -45,7 +45,15 @@ func (t *SearchTool) Execute(ctx context.Context, args map[string]any) (map[stri
 		return nil, fmt.Errorf("query required: what or where to find, such as \"coffee\" or \"Juneau public library\"")
 	}
 	limit := num(args, "limit", defaultLimit, 1, maxLimit)
-	if tag, ok := kindOf(query); ok && near != "" {
+	tag, isKind := kindOf(query)
+	fromHome := false
+	if isKind && near == "" {
+		// "Coffee near me": where they said they are (#210).
+		if near = t.Client.home(ctx); near != "" {
+			fromHome = true
+		}
+	}
+	if isKind && near != "" {
 		center, err := t.Client.Locate(ctx, near)
 		if err != nil {
 			return nil, err
@@ -55,7 +63,11 @@ func (t *SearchTool) Execute(ctx context.Context, args map[string]any) (map[stri
 		if err != nil {
 			// The public Overpass service is often busy; the geocoder knows
 			// "cafe in Juneau" too, if less completely.
-			return t.byName(ctx, tag.Label+" in "+near, limit, &center)
+			out, err := t.byName(ctx, tag.Label+" in "+near, limit, &center)
+			if err == nil && fromHome {
+				out["near_from"] = homeNote
+			}
+			return out, err
 		}
 		// Nothing close: look farther once.
 		if len(found) == 0 && radius < maxRadius {
@@ -64,7 +76,11 @@ func (t *SearchTool) Execute(ctx context.Context, args map[string]any) (map[stri
 				return nil, err
 			}
 		}
-		return map[string]any{"places": found, "near": center.Address, "kind": tag.Label, "radius_m": radius, "attribution": Attribution}, nil
+		out := map[string]any{"places": found, "near": center.Address, "kind": tag.Label, "radius_m": radius, "attribution": Attribution}
+		if fromHome {
+			out["near_from"] = homeNote
+		}
+		return out, nil
 	}
 	q := query
 	if near != "" {
@@ -118,16 +134,26 @@ func mode(args map[string]any) string {
 	return m
 }
 
-func endpoints(ctx context.Context, c *Client, args map[string]any) (Place, Place, error) {
-	from, err := c.Locate(ctx, str(args, "from"))
-	if err != nil {
-		return Place{}, Place{}, fmt.Errorf("from: %w", err)
+// homeNote says a place came from the person's Personal settings, so the
+// answer can say so.
+const homeNote = "the user's location in Personal settings"
+
+// endpoints are a route's start and end. fromHome says the start is the
+// person's location, as they left from out.
+func endpoints(ctx context.Context, c *Client, args map[string]any) (from, to Place, fromHome bool, err error) {
+	start := str(args, "from")
+	if start == "" {
+		// "How far is the airport?": from where they said they are (#210).
+		start = c.home(ctx)
+		fromHome = start != ""
 	}
-	to, err := c.Locate(ctx, str(args, "to"))
-	if err != nil {
-		return Place{}, Place{}, fmt.Errorf("to: %w", err)
+	if from, err = c.Locate(ctx, start); err != nil {
+		return Place{}, Place{}, false, fmt.Errorf("from: %w", err)
 	}
-	return from, to, nil
+	if to, err = c.Locate(ctx, str(args, "to")); err != nil {
+		return Place{}, Place{}, false, fmt.Errorf("to: %w", err)
+	}
+	return from, to, fromHome, nil
 }
 
 // maxSteps keeps directions short enough to read.
@@ -141,7 +167,7 @@ func (t *RouteTool) DisplayName() string { return "Directions" }
 func (t *RouteTool) Description() string { return "Directions between two places" }
 
 func (t *RouteTool) Execute(ctx context.Context, args map[string]any) (map[string]any, error) {
-	from, to, err := endpoints(ctx, t.Client, args)
+	from, to, fromHome, err := endpoints(ctx, t.Client, args)
 	if err != nil {
 		return nil, err
 	}
@@ -151,6 +177,9 @@ func (t *RouteTool) Execute(ctx context.Context, args map[string]any) (map[strin
 		return nil, err
 	}
 	out := map[string]any{"from": label(from), "to": label(to), "mode": m, "distance": r.Distance, "minutes": r.Minutes, "steps": r.Steps, "attribution": Attribution}
+	if fromHome {
+		out["from_note"] = homeNote
+	}
 	if len(r.Steps) > maxSteps {
 		out["steps"], out["steps_omitted"] = r.Steps[:maxSteps], len(r.Steps)-maxSteps
 	}
@@ -167,13 +196,16 @@ func (t *DistanceTool) Description() string {
 }
 
 func (t *DistanceTool) Execute(ctx context.Context, args map[string]any) (map[string]any, error) {
-	from, to, err := endpoints(ctx, t.Client, args)
+	from, to, fromHome, err := endpoints(ctx, t.Client, args)
 	if err != nil {
 		return nil, err
 	}
 	m := mode(args)
 	out := map[string]any{"from": label(from), "to": label(to), "mode": m,
 		"straight_line": dist(haversine(from.Lat, from.Lon, to.Lat, to.Lon)), "attribution": Attribution}
+	if fromHome {
+		out["from_note"] = homeNote
+	}
 	r, err := t.Client.RouteBetween(ctx, from, to, m, false)
 	if err != nil {
 		// Across water, say, there may be no route; the straight line still answers.

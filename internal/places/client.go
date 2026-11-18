@@ -48,11 +48,23 @@ type Client struct {
 	// Record is called for each request that leaves this computer.
 	Record func(ctx context.Context, destination, detail string)
 	Cache  *cache.Cache[[]byte]
+	// Home is where the person asking said they are, in Personal settings,
+	// or "" (#210). A search for a kind of place without near, and a route
+	// without from, start there.
+	Home func(ctx context.Context) string
 
 	mu          sync.Mutex
 	lastGeocode time.Time
 	// geocodeGap spaces Nominatim requests; tests shorten it.
 	geocodeGap time.Duration
+}
+
+// home is the person's location, or "".
+func (c *Client) home(ctx context.Context) string {
+	if c.Home == nil {
+		return ""
+	}
+	return strings.TrimSpace(c.Home(ctx))
 }
 
 func (c *Client) base(v, def string) string {

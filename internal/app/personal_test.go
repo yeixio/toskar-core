@@ -107,3 +107,23 @@ func TestPreferencesArePerPerson(t *testing.T) {
 		t.Fatalf("sam's style: %+v", s)
 	}
 }
+
+// The location in Personal settings reaches the model only for a question
+// that needs it, and the places tools start from it (#210).
+func TestPersonalLocation(t *testing.T) {
+	a, _ := memoryApp(t)
+	ctx := context.Background()
+	if _, err := a.SetPersonalStyle(ctx, personal.Style{Location: "  Juneau,   AK "}); err != nil {
+		t.Fatal(err)
+	}
+	env := &chatExecEnv{app: a}
+	if instr := env.TurnInstructions(ctx, "Any coffee near me?"); !strings.Contains(instr, "Personal settings: Juneau, AK.") {
+		t.Errorf("a nearby question lacks the location:\n%s", instr)
+	}
+	if instr := env.TurnInstructions(ctx, "Write a haiku about otters."); strings.Contains(instr, "Juneau") {
+		t.Errorf("a haiku got the location:\n%s", instr)
+	}
+	if got := a.personalLocation(ctx); got != "Juneau, AK" {
+		t.Errorf("places start from %q", got)
+	}
+}
