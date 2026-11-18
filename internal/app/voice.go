@@ -14,13 +14,14 @@ import (
 )
 
 // Live voice mode (#795): its stages on this computer. Speech to text is
-// Whisper and text to speech Piper, as dictation and Read aloud use; the
+// Whisper and text to speech Kokoro, or Piper for the languages Kokoro
+// doesn't speak, kept loaded between turns by the speech worker; the
 // answer goes through the person's normal chat, so profiles, memory, and
 // tools work as they do in writing, and the conversation is kept in their
 // chats like any other.
 
 func (a *App) voiceParts(ctx context.Context) (voice.Parts, error) {
-	if a.Speech == nil {
+	if a.Speech == nil || a.voiceWorker == nil {
 		return voice.Parts{}, errors.New("speech isn't set up on this computer")
 	}
 	if ok, why := a.Speech.Available(); !ok {
@@ -30,31 +31,37 @@ func (a *App) voiceParts(ctx context.Context) (voice.Parts, error) {
 		return voice.Parts{}, contracts.NewError("SPEECH_UNAVAILABLE", map[string]any{"detail": why}, errors.New(why))
 	}
 	return voice.Parts{
-		Transcriber: whisperTurns{a.Speech},
+		Transcriber: workerTurns{a.voiceWorker},
 		Responder:   &voiceChat{app: a, ctx: ctx},
-		Speaker:     piperVoice{a.Speech},
+		Speaker:     workerVoice{a.voiceWorker},
 	}, nil
 }
 
-type whisperTurns struct{ engine *speech.Engine }
+// whisperRate is the rate Whisper listens at.
+const whisperRate = 16000
 
-func (w whisperTurns) Transcribe(ctx context.Context, wav []byte, language string) (string, error) {
-	t, err := w.engine.Transcribe(ctx, "turn.wav", wav, "fast", language)
-	return t.Text, err
+type workerTurns struct{ w *speech.Worker }
+
+func (t workerTurns) Transcribe(ctx context.Context, wav []byte, language string) (string, error) {
+	samples, rate, err := voice.ParseWAV(wav)
+	if err != nil {
+		return "", err
+	}
+	pcm := voice.EncodePCM16(voice.Resample(samples, rate, whisperRate))
+	return t.w.Transcribe(ctx, pcm, "fast", language)
 }
 
-type piperVoice struct{ engine *speech.Engine }
+type workerVoice struct{ w *speech.Worker }
 
-func (p piperVoice) Speak(ctx context.Context, text, voiceName, language string) ([]int16, error) {
-	wav, _, err := p.engine.SynthesizeIn(ctx, text, voiceName, language)
+func (v workerVoice) Speak(ctx context.Context, text, voiceName, language string) ([]int16, error) {
+	pcm, rate, err := v.w.Speak(ctx, text, voiceName, language)
 	if err != nil {
 		return nil, err
 	}
-	samples, rate, err := voice.ParseWAV(wav)
-	if err != nil {
-		return nil, fmt.Errorf("reading Piper's audio: %w", err)
+	if rate <= 0 {
+		return nil, fmt.Errorf("speech returned audio with no rate")
 	}
-	return voice.Resample(samples, rate, voice.SampleRate), nil
+	return voice.Resample(voice.DecodePCM16(pcm), rate, voice.SampleRate), nil
 }
 
 // voiceChat answers a session's turns in one chat of the person's, made
