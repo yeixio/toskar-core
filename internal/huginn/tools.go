@@ -204,9 +204,11 @@ func ToolsFor(k Kind, message string, available []string) []string {
 // serviceCues are what a message says when it is about a connected service
 // without naming it (§32).
 var serviceCues = map[string]*regexp.Regexp{
-	"github":        regexp.MustCompile(`(?i)\b(git ?hub|issues?|pull requests?|PRs?)\b`),
-	"email":         regexp.MustCompile(`(?i)\b(e-?mails?|inbox|mail|messages? from|unread|newsletters?|replies|reply to)\b`),
-	"calendar":      regexp.MustCompile(`(?i)\b(calendar|schedule|meetings?|appointments?|events?|agenda|free (time|on|at|this|next|tomorrow)|busy|available|availability|book (a|an|time)|reschedule|tomorrow|this week|next week)\b`),
+	"github":   regexp.MustCompile(`(?i)\b(git ?hub|issues?|pull requests?|PRs?)\b`),
+	"email":    regexp.MustCompile(`(?i)\b(e-?mails?|inbox|mail|messages? from|unread|newsletters?|replies|reply to)\b`),
+	"calendar": regexp.MustCompile(`(?i)\b(calendar|schedule|meetings?|appointments?|events?|agenda|free (time|on|at|this|next|tomorrow)|busy|available|availability|book (a|an|time)|reschedule|tomorrow|this week|next week)\b`),
+	// A flight's number, or a question about one's gate or times (#710).
+	"flights":       regexp.MustCompile(`(?i:\b(flights?|gates?|boarding|departures?|arrivals?|layover|delayed)\b)|\b([A-Z]{2}|[A-Z][0-9]|[0-9][A-Z])[0-9]{1,4}\b|\b[A-Z]{2} [0-9]{2,4}\b`),
 	"homeassistant": regexp.MustCompile(`(?i)(\bhome ?assistant\b|\b(lights?|lamps?|thermostat|heating|switch(es)?|sensors?|garage door|front door|locks?|fans?|blinds)\b)`),
 }
 

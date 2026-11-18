@@ -232,6 +232,16 @@ Tool support is one of native, compatible, limited, or unsupported. Catalog mode
 
 GitHub (`github.search`, `github.issue`, `github.comment`), Home Assistant (`homeassistant.states`, `homeassistant.call`), Email, and Calendar are connected in Settings → Connected services. Their tools join the registry with `source` `connector:<id>`. The stored credential is added only when a tool runs, so it is never part of model context, events, or tool arguments, and results are scrubbed of it before the model sees them. See [API](api.md#connected-services).
 
+### Flight status
+
+**Flight status (AeroDataBox)** (#710) looks up a flight by its number with the person's own [AeroDataBox](https://aerodatabox.com) key, from API.market (the default address, `https://prod.api.market/api/v1/aedbx/aerodatabox`, key in `x-api-market-key`) or RapidAPI (address `https://aerodatabox.p.rapidapi.com`, key in `X-RapidAPI-Key`). Connecting makes one look-up to check the key.
+
+| Tool | What it does | Default |
+| --- | --- | --- |
+| `flights.status` | A flight on a local date (default today): status, airline, aircraft, and for its departure and arrival the airport, terminal, gate, check-in desk, baggage belt, scheduled and expected local times, and minutes late. `flight` takes AA3595, `aa 3595`, or UA12. A flight that doesn't fly that day comes back empty with a note. | Allow |
+
+A message that names a flight number, or asks about a flight, gate, boarding, departures, or arrivals, is offered the tool. Each look-up is listed in What left this computer.
+
 ### Email and calendar
 
 Email and Calendar connect to your own accounts with an app password, not your account password, over standard protocols. No Google or Microsoft sign-in app is involved.
