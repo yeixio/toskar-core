@@ -2579,6 +2579,23 @@ export function ChatPage() {
                   </div>
                 )}
 
+                {/* Waiting for the answer shows under the question, not down by the
+                    composer with an empty gap between (#1270). */}
+                {replyInProgress ? (
+                  <div className="px-1" data-testid="chat-waiting">
+                    {media ? (
+                      <MediaProgress
+                        kind={media.kind}
+                        progress={media.progress}
+                        label={mediaLabel(media.kind, media.progress, statusMessage)}
+                        mascot={replyMascot}
+                      />
+                    ) : (
+                      <ChatActivity label={statusMessage} mascot={replyMascot} />
+                    )}
+                  </div>
+                ) : null}
+
                 {streamingText ? (
                   <div className="chat-reply">
                     <ReplyMark />
@@ -2649,7 +2666,7 @@ export function ChatPage() {
                 {showJump ? (
                   <button
                     type="button"
-                    className="chat-jump absolute bottom-3 left-1/2 z-10 -translate-x-1/2 rounded-full border border-line/80 bg-surface/95 px-3 py-1.5 text-xs font-medium text-ink-muted shadow-panel backdrop-blur transition hover:text-ink"
+                    className="chat-jump absolute bottom-3 left-1/2 z-10 -translate-x-1/2 sm:left-auto sm:end-4 sm:translate-x-0 rounded-full border border-line/80 bg-surface/95 px-3 py-1.5 text-xs font-medium text-ink-muted shadow-panel backdrop-blur transition hover:text-ink"
                     onClick={jumpToLatest}
                   >
                     <span aria-hidden>↓ </span>
@@ -2667,7 +2684,7 @@ export function ChatPage() {
                 showLanding ? 'mb-1 mt-10 pb-2' : 'mt-auto pb-1 pt-2',
               ].join(' ')}
             >
-              {replyInProgress ? (
+              {replyInProgress && !selectedId ? (
                 <div className="mb-3 px-1">
                   {media ? (
                     <MediaProgress
