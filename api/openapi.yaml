@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Toskar Control Plane API
-  version: "1.98"
+  version: "1.99"
   description: >-
     Local AI control plane API for Toskar, its OpenAI-compatible routes, and its MCP server.
     On the default loopback bind no key is needed. When the daemon listens on any other address,
@@ -1276,6 +1276,19 @@ paths:
                 $ref: "#/components/schemas/DeviceRoute"
         "403":
           description: ROUTE_NOT_LOCAL
+  /api/v1/remote-access/device-token:
+    get:
+      summary: This computer's device token for Toskar's relay, from anywhere (yeixio/toskar-apps#451)
+      description: "Answers {token}: the device token GET /remote-access/route also gives, so a paired device away from home gets the newer one after the computer renews, without coming home (contract 1.99). A paired device's key may ask through the remote listener too; the route secret stays home-only. The device token only looks the route's record up and can't open the computer's tunnel. Empty with an organization's relay, or before the relay has made one."
+      operationId: getDeviceToken
+      tags: [Devices]
+      responses:
+        "200":
+          description: token, possibly empty
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeviceToken"
   /api/v1/remote-access/relay-token:
     put:
       summary: Hand over a subscription's relay token (#456)
@@ -9102,6 +9115,13 @@ components:
         route_id: {type: string}
         relay: {type: string, description: "The relay it's reached through, such as relay.toskar.ai"}
         token: {type: string, description: "This computer's token for the relay, for every paired device on the home network"}
+    DeviceToken:
+      type: object
+      required: [token]
+      properties:
+        token:
+          type: string
+          description: This computer's device token for Toskar's relay, or "" when it has none.
     DeviceRoute:
       type: object
       description: "How a paired device finds this computer away from home (#456)."

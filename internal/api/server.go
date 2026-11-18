@@ -460,6 +460,7 @@ func (s *Server) routes() {
 	api.HandleFunc("/remote-access", s.handleRemoteAccess).Methods(http.MethodGet)
 	api.HandleFunc("/remote-access/check", s.handleRemoteCheck).Methods(http.MethodPost)
 	api.HandleFunc("/remote-access/route", s.handleRouteSecret).Methods(http.MethodGet)
+	api.HandleFunc("/remote-access/device-token", s.handleDeviceToken).Methods(http.MethodGet)
 	api.HandleFunc("/remote-access/relay-token", s.handleRelayToken).Methods(http.MethodPut)
 	api.HandleFunc("/remote-access/subscription/checkout", s.handleSubscriptionCheckout).Methods(http.MethodPost)
 	api.HandleFunc("/remote-access/subscription/manage", s.handleSubscriptionManage).Methods(http.MethodPost)
