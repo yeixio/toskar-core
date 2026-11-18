@@ -266,5 +266,42 @@
     "clientId": "ID client de connexion",
     "clientIdHint": " (uniquement si le service vous en a fourni un)",
     "keptHere": "Les clés, jetons, mots de passe et en-têtes sont conservés sur cet ordinateur, hors de la vue de l'IA."
+  },
+  "comfyui": {
+    "title": "ComfyUI",
+    "description": "Connectez un ComfyUI que vous faites tourner, ici ou sur un autre ordinateur, et enregistrez ses workflows. Les discussions les lancent avec l'outil Workflow ComfyUI, à côté des images et clips intégrés.",
+    "url": "Adresse de ComfyUI",
+    "token": "Jeton",
+    "tokenStored": "Un jeton est enregistré ; saisissez-en un nouveau pour le changer",
+    "tokenOptional": "Facultatif, si votre ComfyUI en demande un",
+    "save": "Enregistrer et vérifier",
+    "checking": "Vérification…",
+    "forgetToken": "Oublier le jeton",
+    "connected": "Connecté à ComfyUI {{version}}, avec {{nodes}} types de nœuds.",
+    "device": "{{name}}, {{gb}} Go",
+    "models": "{{checkpoints}} modèles et {{loras}} LoRA.",
+    "safety": "Les nœuds personnalisés exécutent leur propre code sur cet ordinateur. Toskar n'appelle que le ComfyUI que vous ajoutez ici, n'y installe jamais rien et traite ce qu'il produit comme n'importe quel fichier.",
+    "workflows": "Workflows",
+    "noWorkflows": "Aucun workflow pour l'instant. Ajoutez-en un exporté depuis ComfyUI.",
+    "remove": "Retirer",
+    "removeNamed": "Retirer {{name}}",
+    "file": "Fichier du workflow",
+    "fileHint": "Dans ComfyUI, utilisez Workflow › Export (API) et choisissez le fichier ici.",
+    "found": "Entrées trouvées : {{inputs}}.",
+    "name": "Nom",
+    "what": "Ce qu'il fait",
+    "whatPlaceholder": "Agrandit une image 4×",
+    "add": "Ajouter le workflow",
+    "notJSON": "Ce fichier n'est pas du JSON. Exportez le workflow avec Workflow › Export (API).",
+    "input": "{{name}} (nœud {{node}})",
+    "noInputs": "aucune entrée trouvée",
+    "inputs": {
+      "prompt": "prompt",
+      "negative": "prompt négatif",
+      "seed": "graine",
+      "image": "image",
+      "width": "largeur",
+      "height": "hauteur"
+    }
   }
 }

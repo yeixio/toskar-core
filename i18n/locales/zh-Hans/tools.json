@@ -260,5 +260,42 @@
     "clientId": "登录客户端 ID",
     "clientIdHint": "（仅当服务向你提供了一个时）",
     "keptHere": "密钥、令牌、密码和请求头都保存在这台电脑上，AI 看不到。"
+  },
+  "comfyui": {
+    "title": "ComfyUI",
+    "description": "连接你在本机或其他电脑上运行的 ComfyUI，并保存它的工作流。聊天会通过 ComfyUI 工作流工具运行它们，与内置的图片和视频功能并列。",
+    "url": "ComfyUI 地址",
+    "token": "令牌",
+    "tokenStored": "已保存令牌；输入新令牌即可更换",
+    "tokenOptional": "可选，如果你的 ComfyUI 需要",
+    "save": "保存并检查",
+    "checking": "正在检查…",
+    "forgetToken": "删除令牌",
+    "connected": "已连接到 ComfyUI {{version}}，共 {{nodes}} 种节点。",
+    "device": "{{name}}，{{gb}} GB",
+    "models": "{{checkpoints}} 个模型，{{loras}} 个 LoRA。",
+    "safety": "自定义节点会在那台电脑上运行自己的代码。Toskar 只调用你在这里添加的 ComfyUI，从不向其中安装任何东西，并像对待其他文件一样对待它生成的内容。",
+    "workflows": "工作流",
+    "noWorkflows": "还没有工作流。添加一个从 ComfyUI 导出的工作流。",
+    "remove": "移除",
+    "removeNamed": "移除 {{name}}",
+    "file": "工作流文件",
+    "fileHint": "在 ComfyUI 中使用 Workflow › Export (API)，然后在这里选择文件。",
+    "found": "找到的输入：{{inputs}}。",
+    "name": "名称",
+    "what": "用途",
+    "whatPlaceholder": "将图片放大 4 倍",
+    "add": "添加工作流",
+    "notJSON": "该文件不是 JSON。请用 Workflow › Export (API) 导出工作流。",
+    "input": "{{name}}（节点 {{node}}）",
+    "noInputs": "未找到输入",
+    "inputs": {
+      "prompt": "提示词",
+      "negative": "反向提示词",
+      "seed": "种子",
+      "image": "图片",
+      "width": "宽度",
+      "height": "高度"
+    }
   }
 }

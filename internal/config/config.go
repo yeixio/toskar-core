@@ -51,6 +51,9 @@ type Config struct {
 	// ExternalOpenAIURL is an OpenAI-compatible server whose models can be
 	// chosen for a chat (#111); its API key is in the secrets folder.
 	ExternalOpenAIURL string `json:"external_openai_url,omitempty"`
+	// ComfyUIURL is a ComfyUI an Admin connected, whose saved workflows
+	// run as a tool (#958); its token is in the secrets folder.
+	ComfyUIURL        string `json:"comfyui_url,omitempty"`
 	RatingsSummaryURL string `json:"ratings_summary_url,omitempty"`
 	// TrustedProxies are the addresses (IPs or CIDRs) of reverse proxies
 	// that sign people in and name them in headers (#206). Their headers

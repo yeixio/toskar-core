@@ -955,6 +955,7 @@
       "notification": "Notification",
       "community_ratings": "Community ratings",
       "update_check": "Update check",
+      "comfyui": "ComfyUI",
       "problem_report": "Problem report",
       "link_check": "Link check"
     },
@@ -968,6 +969,7 @@
       "notification": "notification",
       "community_ratings": "community ratings",
       "update_check": "update check",
+      "comfyui": "ComfyUI",
       "problem_report": "problem report",
       "link_check": "link check"
     },
