@@ -368,11 +368,12 @@
     "failed": "That didn't work. Try again.",
     "kitten": {
       "name": "Kitten TTS 2 mini",
-      "description": "More natural voices in {{languages}}. Installs about 1 GB on this computer, including the voices, and runs on the processor.",
+      "description": "More natural voices in {{languages}}. Installs about 1.5 GB on this computer, including the voices, runs on the processor, and uses about 1 GB of memory while it speaks.",
       "install": "Install",
       "retry": "Try again",
       "installing": "Installing the program…",
       "downloading": "Downloading the voices…",
+      "warming": "Getting the voices ready…",
       "remove": "Remove",
       "removeConfirm": "Remove Kitten",
       "keep": "Keep it"

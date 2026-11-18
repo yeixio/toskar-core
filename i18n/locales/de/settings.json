@@ -368,11 +368,12 @@
     "failed": "Das hat nicht geklappt. Versuche es noch einmal.",
     "kitten": {
       "name": "Kitten TTS 2 mini",
-      "description": "Natürlichere Stimmen auf {{languages}}. Belegt mit den Stimmen etwa 1 GB auf diesem Computer und läuft auf dem Prozessor.",
+      "description": "Natürlichere Stimmen auf {{languages}}. Belegt mit den Stimmen etwa 1,5 GB auf diesem Computer, läuft auf dem Prozessor und braucht beim Sprechen etwa 1 GB Arbeitsspeicher.",
       "install": "Installieren",
       "retry": "Erneut versuchen",
       "installing": "Programm wird installiert …",
       "downloading": "Stimmen werden heruntergeladen …",
+      "warming": "Stimmen werden vorbereitet …",
       "remove": "Entfernen",
       "removeConfirm": "Kitten entfernen",
       "keep": "Behalten"

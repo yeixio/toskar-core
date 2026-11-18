@@ -103,7 +103,7 @@ export function VoiceSettings() {
             )
           ) : kitten.state === 'installing' ? (
             <span className="shrink-0 text-sm text-ink-muted" role="status">
-              {kitten.stage === 'voices' ? t('voice.kitten.downloading') : t('voice.kitten.installing')}
+              {kitten.stage === 'voices' ? t('voice.kitten.downloading') : kitten.stage === 'warming' ? t('voice.kitten.warming') : t('voice.kitten.installing')}
             </span>
           ) : (
             <button

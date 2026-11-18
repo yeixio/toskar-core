@@ -359,11 +359,12 @@
     "failed": "操作未成功，請再試一次。",
     "kitten": {
       "name": "Kitten TTS 2 mini",
-      "description": "更自然的{{languages}}語音。連同語音在這台電腦上佔用約 1 GB，在處理器上執行。",
+      "description": "更自然的{{languages}}語音。連同語音在這台電腦上佔用約 1.5 GB，在處理器上執行，朗讀時約佔用 1 GB 記憶體。",
       "install": "安裝",
       "retry": "重試",
       "installing": "正在安裝程式…",
       "downloading": "正在下載語音…",
+      "warming": "正在準備語音…",
       "remove": "移除",
       "removeConfirm": "移除 Kitten",
       "keep": "保留"

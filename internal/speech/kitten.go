@@ -16,7 +16,7 @@ import (
 )
 
 // Kitten TTS 2 mini (#1304) is a voice engine an Admin chooses to install:
-// 16 languages and 118 voices, many in languages where Piper sounds flat.
+// 15 languages here and over 100 voices, many in languages where Piper sounds flat.
 // The model, its voices, and the kittenml package are Apache-2.0; the
 // larger Kitten TTS 2 is under another license and isn't offered (#1319).
 // It runs in its own Python environment, since kittenml needs PyTorch for
@@ -26,7 +26,7 @@ import (
 // commit it's downloaded at, so what's installed is what was tested.
 const (
 	KittenRepo     = "KittenML/kitten-tts-2-mini"
-	kittenRevision = "main"
+	kittenRevision = "8e89ae2a718ee4bb893c67d67657e520e6112faf"
 )
 
 // KittenCredit is the credit shown wherever a Kitten voice is used.
@@ -49,9 +49,10 @@ func KittenSpec() pyenv.Spec {
 	return pyenv.Spec{Name: "speech-kitten", Requirements: KittenRequirements, InstallArgs: []string{"--torch-backend=cpu"}}
 }
 
-// kittenFiles are the files downloaded: the 8-bit model, the voices, and
-// the pronunciation files, not the 327 MB PyTorch weights.
-var kittenFiles = []string{"config.json", "vocab.json", "*.onnx", "voices_*.npz", "g2p/*", "g2p/**", "LICENSE*", "README.md"}
+// kittenFiles are the files downloaded, about 140 MB: the 8-bit model, the
+// voices, and the pronunciation files, not the 4-bit model or the 327 MB
+// PyTorch weights.
+var kittenFiles = []string{"config.json", "vocab.json", "kitten_tts_2_mini.onnx", "voices_*.npz", "g2p/*", "g2p/**", "README.md"}
 
 // KittenVoiceRe is a Kitten voice, such as kitten:en:eleanor: its language
 // and its key in the model's voices.
@@ -99,6 +100,9 @@ func (e *Engine) kittenVoices() map[string][]KittenVoice {
 	}
 	out := map[string][]KittenVoice{}
 	for lang := range c.Languages {
+		if !kittenSpeaksLanguage(lang) {
+			continue
+		}
 		for _, v := range c.Voices[lang] {
 			if !KittenVoiceRe.MatchString(KittenVoiceID(lang, v.Key)) {
 				continue
@@ -143,7 +147,7 @@ const (
 // KittenStatus is Kitten's install, for the Voice settings.
 type KittenStatus struct {
 	State KittenState `json:"state"`
-	// Stage is what an install is doing: program or voices.
+	// Stage is what an install is doing: program, voices, or warming.
 	Stage string `json:"stage,omitempty"`
 	Error string `json:"error,omitempty"`
 	// Unavailable is why it can't be installed here.
@@ -155,8 +159,19 @@ type KittenStatus struct {
 	Languages []string `json:"languages"`
 }
 
-// kittenLanguages are the languages Kitten TTS 2 mini speaks.
-var kittenLanguages = strings.Fields("da de en es fi fr hi it ja ko nl pt ru sv sw tr")
+// kittenLanguages are the languages Kitten TTS 2 mini speaks here. Its
+// Japanese needs pyopenjtalk, which has no wheel for macOS and is built
+// with a C++ compiler most computers don't have, so it's left out (#1319).
+var kittenLanguages = strings.Fields("da de en es fi fr hi it ko nl pt ru sv sw tr")
+
+func kittenSpeaksLanguage(lang string) bool {
+	for _, l := range kittenLanguages {
+		if l == lang {
+			return true
+		}
+	}
+	return false
+}
 
 // kittenJob is an install in progress, or the last one's failure.
 type kittenJob struct {
@@ -239,7 +254,24 @@ func (w *Worker) installKitten(ctx context.Context, stage func(string)) error {
 		"dir": dir, "patterns": kittenFiles}); err != nil {
 		return fmt.Errorf("couldn't download Kitten's voices: %w", err)
 	}
-	return os.WriteFile(w.Engine.kittenReadyFile(), []byte(kittenRevision+"\n"), 0o600)
+	if err := os.WriteFile(w.Engine.kittenReadyFile(), []byte(kittenRevision+"\n"), 0o600); err != nil {
+		return err
+	}
+	// The first English sentence loads the pronunciation models and
+	// compiles the program, about 20 seconds once: done here, so the first
+	// visitor at the door isn't kept waiting. A failure here isn't the
+	// install's; speaking says so later.
+	stage("warming")
+	_, _, _ = w.speakKitten(ctx, "Hello.", KittenVoiceID("en", w.firstKittenKey("en")))
+	return nil
+}
+
+// firstKittenKey is lang's first Kitten voice's key.
+func (w *Worker) firstKittenKey(lang string) string {
+	if vs := w.Engine.kittenVoices()[lang]; len(vs) > 0 {
+		return KittenVoiceRe.FindStringSubmatch(vs[0].ID)[2]
+	}
+	return ""
 }
 
 // RemoveKitten stops Kitten and deletes its model and environment.

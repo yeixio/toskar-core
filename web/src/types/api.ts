@@ -1922,7 +1922,7 @@ export interface AutomationSay {
 /** Kitten TTS 2 mini's install, for the Voice settings (#1304). */
 export interface KittenStatus {
   state: 'not_installed' | 'installing' | 'installed' | 'failed'
-  /** While installing: program or voices. */
+  /** While installing: program, voices, or warming. */
   stage?: string
   error?: string
   /** Why it can't be installed on this computer. */

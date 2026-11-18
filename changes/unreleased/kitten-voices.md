@@ -1,8 +1,8 @@
 ### Added
 
-- More natural voices in 16 languages: an Admin can install Kitten TTS 2
+- More natural voices in 15 languages: an Admin can install Kitten TTS 2
   mini from Settings, under Voice, and it then reads the languages Kokoro
-  doesn't speak, such as German, Japanese, Korean, Russian, and Dutch,
+  doesn't speak, such as German, Korean, Russian, Dutch, and Hindi,
   instead of Piper. Voice also lets an Admin choose the voice for each
   language, with a preview, for voice mode, answers read aloud on the phone
   and in the car, and the doorbell. An automation that speaks at the door

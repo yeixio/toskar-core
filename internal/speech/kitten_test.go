@@ -20,9 +20,9 @@ const fakeKitten = `import base64, json, os, sys
 for line in sys.stdin:
     req = json.loads(line)
     if req["op"] == "fetch":
-        cfg = {"languages": {"de": {}, "en": {}},
+        cfg = {"languages": {"de": {}, "en": {}, "ja": {}},
                "voices": {"de": [{"key": "lena", "name": "Lena", "description": "Calm (female)"}, {"key": "jonas", "name": "Jonas"}],
-                          "en": [{"key": "eleanor", "name": "Eleanor"}]}}
+                          "en": [{"key": "eleanor", "name": "Eleanor"}], "ja": [{"key": "yuki", "name": "Yuki"}]}}
         with open(os.path.join(req["dir"], "config.json"), "w") as f:
             json.dump(cfg, f)
         out = {}
@@ -137,6 +137,10 @@ func TestKittenInstallsAndReads(t *testing.T) {
 	}
 	if de.Automatic != "kitten:de:lena" || len(de.Voices) != 3 || de.Voices[0].Engine != "kitten" || de.Voices[2].Engine != "piper" {
 		t.Fatalf("German's voices: %+v", de)
+	}
+	// Kitten's Japanese needs a compiler to install, so it's left out.
+	if w.ValidVoice("ja", "kitten:ja:yuki") {
+		t.Fatal("Japanese was offered in a Kitten voice")
 	}
 	if !w.ValidVoice("de", "kitten:de:jonas") || w.ValidVoice("de", "kitten:en:eleanor") {
 		t.Fatal("ValidVoice")

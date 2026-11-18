@@ -359,11 +359,12 @@
     "failed": "うまくいきませんでした。もう一度お試しください。",
     "kitten": {
       "name": "Kitten TTS 2 mini",
-      "description": "{{languages}}でより自然な音声。音声を含めてこのコンピューターに約 1 GB をインストールし、プロセッサーで動作します。",
+      "description": "{{languages}}でより自然な音声。音声を含めてこのコンピューターに約 1.5 GB をインストールし、プロセッサーで動作します。話している間は約 1 GB のメモリを使います。",
       "install": "インストール",
       "retry": "再試行",
       "installing": "プログラムをインストール中…",
       "downloading": "音声をダウンロード中…",
+      "warming": "音声を準備中…",
       "remove": "削除",
       "removeConfirm": "Kitten を削除",
       "keep": "残す"

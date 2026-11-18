@@ -52,6 +52,15 @@ are named `kitten:<language>:<key>`, such as `kitten:en:eleanor`, and read at
 larger Kitten TTS 2, under the Stellon Labs Community License, isn't offered
 (#1319).
 
+Measured on an M5 Pro (#1304): the environment is 1.3 GB and the model
+189 MB (140 MB without the 4-bit model, which isn't downloaded). A warm
+sentence takes 0.36 s for about 3 s of English and 0.6 to 0.75 s in other
+languages; the first English sentence after the worker starts takes 2 to
+3 s while it loads spaCy and the pronunciation model, 20 s the very first
+time, which the install does once. The worker peaks near 1 GB. Japanese
+needs kittenml's `ja` extra, whose pyopenjtalk has no macOS wheel and builds
+with a C++ compiler, so it's left out for now (#1319).
+
 Audio both ways is `pcm16`: 16-bit little-endian PCM, mono, 24 kHz, base64.
 
 ## Events
@@ -117,7 +126,8 @@ Errors are `error` events with `error.code`, such as `invalid_audio`,
   | Portuguese | `pf_dora` |
 
   Every other language, such as German, Japanese, Korean, and Chinese,
-  is Piper's voice for it. When Kokoro fails, Piper reads for the next 10
+  is Kitten's voice for it when Kitten TTS 2 mini is installed (except
+  Japanese, below), and Piper's otherwise. When Kokoro fails, Piper reads for the next 10
   minutes. Like Piper, Kokoro turns text into sounds with espeak-ng
   (GPL-3.0, installed on the person's computer with the speech packages).
 

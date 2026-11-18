@@ -8010,7 +8010,7 @@ components:
           required: [state, credit, url, license, languages]
           properties:
             state: {type: string, enum: [not_installed, installing, installed, failed]}
-            stage: {type: string, description: 'While installing: program or voices'}
+            stage: {type: string, description: 'While installing: program, voices, or warming'}
             error: {type: string}
             unavailable: {type: string, description: Why it can't be installed on this computer}
             credit: {type: string, description: 'Shown wherever a Kitten voice is used: Powered by KittenML'}
