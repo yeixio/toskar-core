@@ -38,7 +38,8 @@ concurrency:
 jobs:
   # Reads the issue, with no permission to write anything.
   suggest:
-    if: vars.TOSKAR_URL != '' && vars.TOSKAR_RUNS_ON != ''
+    # Issues filed with the QA label already carry their labels.
+    if: vars.TOSKAR_URL != '' && vars.TOSKAR_RUNS_ON != '' && !contains(github.event.issue.labels.*.name, 'QA')
     runs-on: ${{ fromJSON(vars.TOSKAR_RUNS_ON || '"ubuntu-latest"') }}
     timeout-minutes: 15
     # Reading the issue needs issues: read in a private repository.

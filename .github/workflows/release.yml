@@ -8,13 +8,30 @@ on:
 permissions:
   contents: write
   pull-requests: write
+  actions: read
 
 jobs:
+  # The tagged commit passed CI, Examples, and every other check that ran on
+  # main for it. The checks a pull request skips for its paths all run on
+  # main, so this is where they hold a release.
+  checks:
+    runs-on: ${{ fromJSON(vars.TRUSTED_RUNS_ON || '"ubuntu-latest"') }}
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          sparse-checkout: .github/scripts
+      - name: The tagged commit is green
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: .github/scripts/require-green.sh
+
   # Chat quality gates the release: the quality set against a real model
   # (tests/quality, scripts/quality-model.sh) must not be clearly under its
   # 90% bar, the whole 95% interval below it (#834), before anything is
   # published.
   quality:
+    needs: checks
     runs-on: ${{ fromJSON(vars.TRUSTED_RUNS_ON || '"ubuntu-latest"') }}
     timeout-minutes: 150
     steps:

@@ -33,6 +33,49 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
+  # Which parts a pull request touches, so the slow checks that can't be
+  # affected skip it. Pushes to main run everything, and a release needs
+  # main's CI to have passed (Release workflow), so a check skipped on a pull
+  # request still runs before anything ships.
+  changes:
+    runs-on: ${{ fromJSON(vars.CI_RUNS_ON || '"ubuntu-latest"') }}
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      web: ${{ steps.match.outputs.web }}
+      installer: ${{ steps.match.outputs.installer }}
+      terminal: ${{ steps.match.outputs.terminal }}
+    steps:
+      - name: Match the changed files
+        id: match
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          set -euo pipefail
+          if [ -z "$PR" ]; then
+            for area in web installer terminal; do echo "$area=true" >> "$GITHUB_OUTPUT"; done
+            exit 0
+          fi
+          gh api --paginate "repos/$GITHUB_REPOSITORY/pulls/$PR/files?per_page=100" --jq '.[].filename' > "$RUNNER_TEMP/changed.txt"
+          python3 - "$RUNNER_TEMP/changed.txt" <<'PY' >> "$GITHUB_OUTPUT"
+          import fnmatch, sys
+          files = open(sys.argv[1]).read().split()
+          # A change to this workflow runs every check.
+          areas = {
+              "web": ["web/*", "i18n/*", "scripts/screenshots/*", "internal/screenshot/*", "cmd/screenshot/*"],
+              "installer": ["scripts/install.sh", "scripts/test-install.sh", "scripts/build/*", "packaging/*",
+                            "cmd/daemon/*", "cmd/devctl/*", "internal/join/*", "internal/config/*", "internal/updates/*"],
+              "terminal": ["internal/tools/terminal/*", "go.mod", "go.sum"],
+          }
+          for area, globs in areas.items():
+              hit = any(f == ".github/workflows/ci.yml" or any(fnmatch.fnmatch(f, g) for g in globs) for f in files)
+              print(f"{area}={'true' if hit else 'false'}")
+          PY
+          cat "$GITHUB_OUTPUT"
+
   # Go checks and the user guide share one runner: the module and build
   # caches are already warm, and each extra job would repeat checkout and Go
   # setup. The cross-compile runs beside it, one job per platform, so it does
@@ -45,9 +88,6 @@ jobs:
       - uses: actions/setup-go@v7
         with:
           go-version: "1.26.x"
-          # The newest patch release, not one a runner has cached: patches
-          # fix security problems in the standard library that builds ship.
-          check-latest: true
           # Self-hosted runners keep Go's caches on disk; uploading them
           # to GitHub's cache only held jobs up for many minutes.
           cache: ${{ !vars.CI_RUNS_ON }}
@@ -126,16 +166,15 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        target: [linux/amd64, linux/arm64, darwin/amd64, darwin/arm64, windows/amd64]
+        # Pull requests build Linux and Windows on amd64, where a platform
+        # mistake usually shows; main builds every target a release ships.
+        target: ${{ fromJSON(github.event_name == 'pull_request' && '["linux/amd64", "windows/amd64"]' || '["linux/amd64", "linux/arm64", "darwin/amd64", "darwin/arm64", "windows/amd64"]') }}
     name: cross-compile (${{ matrix.target }})
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-go@v7
         with:
           go-version: "1.26.x"
-          # The newest patch release, not one a runner has cached: patches
-          # fix security problems in the standard library that builds ship.
-          check-latest: true
           # Self-hosted runners keep Go's caches on disk; uploading them
           # to GitHub's cache only held jobs up for many minutes.
           cache: ${{ !vars.CI_RUNS_ON }}
@@ -168,6 +207,8 @@ jobs:
   # can say a command gets there whole. On GitHub's runners, with no variable to
   # move it, since the home runners have no spare Windows.
   windows-terminal:
+    needs: changes
+    if: needs.changes.outputs.terminal == 'true'
     runs-on: windows-latest
     timeout-minutes: 15
     steps:
@@ -175,7 +216,6 @@ jobs:
       - uses: actions/setup-go@v7
         with:
           go-version: "1.26.x"
-          check-latest: true
       - run: go test ./internal/tools/terminal -count=1 -v
 
   installer:
@@ -183,15 +223,14 @@ jobs:
     # release, the service, and install-and-join with a join token (#40).
     # It installs system-wide with sudo, so it stays on a throwaway GitHub
     # runner, never a self-hosted one.
+    needs: changes
+    if: needs.changes.outputs.installer == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-go@v7
         with:
           go-version: "1.26.x"
-          # The newest patch release, not one a runner has cached: patches
-          # fix security problems in the standard library that builds ship.
-          check-latest: true
       # Each job gets its own pnpm: self-hosted runners share a home folder,
       # and two jobs installing into ~/setup-pnpm at once break each other.
       - uses: pnpm/action-setup@v6
@@ -235,9 +274,6 @@ jobs:
       - uses: actions/setup-go@v7
         with:
           go-version: "1.26.x"
-          # The newest patch release, not one a runner has cached: patches
-          # fix security problems in the standard library that builds ship.
-          check-latest: true
           # Self-hosted runners keep Go's caches on disk; uploading them
           # to GitHub's cache only held jobs up for many minutes.
           cache: ${{ !vars.CI_RUNS_ON }}
@@ -282,6 +318,8 @@ jobs:
   # axe-core over every page of the built UI with demo data, in both themes
   # at desktop and phone widths (#217). Contrast needs a real browser.
   accessibility:
+    needs: changes
+    if: needs.changes.outputs.web == 'true'
     runs-on: ${{ fromJSON(vars.CI_RUNS_ON || '"ubuntu-latest"') }}
     # It takes about 6 minutes. A hung browser install once held a PR for
     # over two hours; this fails it instead.
@@ -291,9 +329,6 @@ jobs:
       - uses: actions/setup-go@v7
         with:
           go-version: "1.26.x"
-          # The newest patch release, not one a runner has cached: patches
-          # fix security problems in the standard library that builds ship.
-          check-latest: true
           # Self-hosted runners keep Go's caches on disk; uploading them
           # to GitHub's cache only held jobs up for many minutes.
           cache: ${{ !vars.CI_RUNS_ON }}
@@ -325,3 +360,20 @@ jobs:
       # nodes, or listeners keep growing, or a page throws (#231).
       - name: Check for memory leaks
         run: node scripts/screenshots/leaks.mjs
+
+  # The one check branch protection needs: it passes when every job above
+  # passed or was skipped for a pull request that can't affect it.
+  ci-ok:
+    if: always()
+    needs: [changes, go, cross-compile, windows-terminal, installer, frontend, accessibility]
+    runs-on: ${{ fromJSON(vars.CI_RUNS_ON || '"ubuntu-latest"') }}
+    timeout-minutes: 5
+    steps:
+      - name: Every job passed or was skipped
+        env:
+          RESULTS: ${{ join(needs.*.result, ' ') }}
+        run: |
+          echo "Results: $RESULTS"
+          for r in $RESULTS; do
+            case "$r" in success|skipped) ;; *) echo "::error::A CI job ended $r."; exit 1 ;; esac
+          done

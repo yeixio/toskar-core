@@ -8,10 +8,11 @@ name: User guide screenshots
 # shows that release's interface. It commits only images, which aren't in
 # the paths below, so it doesn't start itself again.
 on:
+  # Pull requests that change what the guide shows or how it's captured. A
+  # pull request that changes only the web UI or its strings isn't captured:
+  # its merge to main is, so the guide still follows every release.
   pull_request:
     paths:
-      - "web/**"
-      - "i18n/**"
       - "internal/screenshot/**"
       - "cmd/screenshot/**"
       - "docs/user-guide/guide.json"
