@@ -592,7 +592,7 @@
         },
         {
           "type": "paragraph",
-          "text": "Under each answer, Sources lists the web pages, knowledge passages, files, and memories it used. What I did lists the model that answered and why, the searches and pages it read, and anything that went wrong."
+          "text": "Under each answer, Sources lists the web pages, knowledge passages, files, and memories it used. What I did lists the model that answered and why, the searches and pages it read, and anything that went wrong. In the Toskar app on a phone, each answer from your computer says which model wrote it and on which computer, such as Llama 3.2 1B on Studio."
         },
         {
           "type": "paragraph",

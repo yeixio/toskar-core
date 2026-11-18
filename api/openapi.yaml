@@ -9551,8 +9551,6 @@ components:
         tok_per_sec: {type: number}
         backend: {type: string, description: '`backend` and Device ran the model, such as vulkan and "AMD Radeon RX 7900 XTX" (#317); empty when not known, such as on a paired computer.'}
         device: {type: string}
-        model: {type: string, description: 'The model that wrote the answer, as shown to the user, such as "Llama 3.2 1B" (toskar-apps#447, contract 1.109).'}
-        computer: {type: string, description: 'The computer the answer ran on, such as "Studio". Empty when the turn''s steps ran on more than one computer.'}
     ToolUse:
       type: object
       description: One tool's part in a run.
@@ -9630,6 +9628,8 @@ components:
         context: {$ref: '#/components/schemas/ContextUsage'}
         backend: {type: string, description: '`backend` and Device ran the answer, such as vulkan and "AMD Radeon RX 7900 XTX", or cpu and "" (#317, contract 1.8), so a client such as the iPhone app can say whether it came from the GPU. Empty when not known, such as when a step ran on a paired computer.'}
         device: {type: string}
+        model: {type: string, description: 'The model that wrote the answer, as shown to the user, such as "Llama 3.2 1B" (toskar-apps#447, contract 1.109).'}
+        computer: {type: string, description: 'The computer the answer ran on, such as "Studio". Empty when the turn''s steps ran on more than one computer.'}
         automation: {$ref: '#/components/schemas/AutomationDraft'}
         automation_run: {$ref: '#/components/schemas/AutomationRun'}
         deliberation:
