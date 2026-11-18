@@ -38,3 +38,19 @@ func TestBearerToken(t *testing.T) {
 }
 
 const httpMethod = "GET"
+
+func TestBearerTokenFromAWebSocketSubprotocol(t *testing.T) {
+	req := httptest.NewRequest(httpMethod, "/api/v1/voice/realtime", nil)
+	req.Header.Set("Sec-WebSocket-Protocol", "realtime, openai-insecure-api-key.ygg_browser")
+	if _, err := BearerToken(req); err == nil {
+		t.Fatal("took the subprotocol's key on a request that isn't a WebSocket")
+	}
+	req.Header.Set("Upgrade", "websocket")
+	if got, err := BearerToken(req); err != nil || got != "ygg_browser" {
+		t.Fatalf("subprotocol: %q %v", got, err)
+	}
+	req.Header.Set("Authorization", "Bearer ygg_test")
+	if got, _ := BearerToken(req); got != "ygg_test" {
+		t.Fatalf("Authorization wins: %q", got)
+	}
+}

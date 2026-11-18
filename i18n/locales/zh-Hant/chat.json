@@ -476,6 +476,35 @@
     "stop": "停止",
     "systemHint": "用此裝置的語音朗讀這則回答"
   },
+  "voiceMode": {
+    "start": "說話",
+    "startHint": "和 Toskar 出聲對話：它用語音回答，你開口說話就能打斷它",
+    "title": "語音模式",
+    "noMicrophone": "這個頁面無法使用麥克風。請透過 https:// 或在這台電腦上透過 localhost 開啟 Toskar。",
+    "connectFailed": "無法連線到語音模式。請稍後再試。",
+    "failed": "語音模式出了問題。",
+    "micDenied": "Toskar 沒有使用麥克風的權限。請在瀏覽器設定中為此頁面允許。",
+    "micFailed": "無法啟動麥克風。",
+    "muted": "麥克風已關閉",
+    "you": "你：",
+    "waited": "你說完後 {{seconds}} 秒回答",
+    "mute": "靜音",
+    "unmute": "取消靜音",
+    "end": "結束",
+    "hint": "隨時可以說話。在回答時開口即可打斷。",
+    "status": {
+      "connecting": "正在連線…",
+      "listening": "正在聽",
+      "hearing": "聽到你了",
+      "thinking": "正在思考…",
+      "speaking": "正在說",
+      "closed": "語音模式已結束"
+    },
+    "demo": {
+      "you": "這個週末朱諾附近有什麼好走的健行路線？",
+      "answer": "羅伯茨山不錯。搭纜車上去，然後沿山脊步道想走多遠走多遠。"
+    }
+  },
   "context": {
     "usage": "上下文用量",
     "full": "上下文已使用 {{percent}}",

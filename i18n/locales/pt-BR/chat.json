@@ -498,6 +498,35 @@
     "stop": "Parar",
     "systemHint": "Ler esta resposta em voz alta com as vozes deste dispositivo"
   },
+  "voiceMode": {
+    "start": "Falar",
+    "startHint": "Converse com o Toskar em voz alta: ele responde com uma voz, e você pode interrompê-lo falando",
+    "title": "Modo de voz",
+    "noMicrophone": "Esta página não pode usar um microfone. Abra o Toskar com https:// ou neste computador com localhost.",
+    "connectFailed": "Não foi possível conectar ao modo de voz. Tente de novo em instantes.",
+    "failed": "Algo deu errado no modo de voz.",
+    "micDenied": "O Toskar não tem permissão para usar o microfone. Permita nas configurações do navegador para esta página.",
+    "micFailed": "Não foi possível iniciar o microfone.",
+    "muted": "Microfone desligado",
+    "you": "Você:",
+    "waited": "Respondeu {{seconds}} s depois que você parou",
+    "mute": "Silenciar",
+    "unmute": "Ativar som",
+    "end": "Encerrar",
+    "hint": "Fale quando quiser. Fale por cima de uma resposta para pará-la.",
+    "status": {
+      "connecting": "Conectando…",
+      "listening": "Ouvindo",
+      "hearing": "Ouvindo você",
+      "thinking": "Pensando…",
+      "speaking": "Falando",
+      "closed": "Modo de voz encerrado"
+    },
+    "demo": {
+      "you": "Qual é uma boa trilha perto de Juneau neste fim de semana?",
+      "answer": "O monte Roberts é uma boa. Suba de bondinho e siga a trilha da crista até onde quiser."
+    }
+  },
   "context": {
     "usage": "Uso do contexto",
     "full": "Contexto {{percent}} cheio",

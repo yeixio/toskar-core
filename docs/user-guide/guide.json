@@ -2523,6 +2523,85 @@
       ]
     },
     {
+      "id": "voice",
+      "title": "Talk with Toskar out loud",
+      "kind": "task",
+      "summary": "Have a spoken conversation with Toskar: you talk, it answers in a natural voice, and you can talk over it to stop it.",
+      "paragraphs": [
+        "Voice mode is a conversation out loud, like a phone call. You speak, Toskar hears when you've stopped, and it answers in a voice a sentence at a time, so the first words play while the rest is still being written.",
+        "Everything runs on your own computers: hearing what you said, the answer, and the voice. Nothing is sent to an outside service. The conversation is kept in your chats as Voice chat."
+      ],
+      "blocks": [
+        {
+          "type": "list",
+          "title": "What you need",
+          "items": [
+            "Toskar 1.14 or later, from outside the Mac App Store. Voice mode runs speech on this computer, which that build can't install.",
+            "A chat model, as [Choose and manage models](#models) explains.",
+            "A microphone and speakers or headphones. Headphones keep the answer from sounding like you talking over it.",
+            "A web address the browser trusts with a microphone: Toskar on this computer, at localhost, or at its https:// address from another device.",
+            "Your role allowed to use voice, which an Admin sets in [People](#people).",
+            "A download the first time: speech for hearing you, and about 120 MB for the natural voice. After that it works offline."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Start a conversation"
+        },
+        {
+          "type": "steps",
+          "items": [
+            "In a chat, choose Talk, the button with sound bars beside Send.",
+            "When your browser asks, allow Toskar to use the microphone.",
+            "Wait for Listening, then speak as you would to a person.",
+            "Pause when you're done. Toskar answers out loud, and the words appear as it speaks.",
+            "To stop an answer, just start talking. Toskar stops and listens.",
+            "Choose Mute to turn the microphone off for a moment, and End when you're done."
+          ]
+        },
+        {
+          "type": "image",
+          "screen": "voice-mode",
+          "alt": "Voice mode over a chat, speaking. It shows the question about a hike near Juneau, the start of the answer, and Answered 1.1 s after you stopped",
+          "caption": "Voice mode shows what it heard and what it's saying. The line at the bottom is how long you waited for the first word."
+        },
+        {
+          "type": "heading",
+          "text": "The voice"
+        },
+        {
+          "type": "paragraph",
+          "text": "Toskar answers in Kokoro, a natural-sounding voice, in English, Spanish, French, Italian, and Portuguese. Other languages, such as German, Japanese, Korean, and Chinese, use Piper, the voice Read aloud uses. The first time, Kokoro downloads in the background, and Piper speaks until it's ready."
+        },
+        {
+          "type": "paragraph",
+          "text": "Answers in voice mode are short and spoken: a sentence or two, with no lists, tables, or links. Ask for more and Toskar goes on."
+        },
+        {
+          "type": "heading",
+          "text": "From your own app"
+        },
+        {
+          "type": "paragraph",
+          "text": "Voice mode speaks OpenAI's Realtime protocol over a WebSocket at `/api/v1/voice/realtime`, so an app built for it needs only the address changed. A browser sends the API key as the subprotocol `openai-insecure-api-key.<key>`. The protocol's details are in `docs/voice.md` in Toskar's source."
+        },
+        {
+          "type": "heading",
+          "text": "Troubleshooting"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Talk isn't there: speech isn't set up on this computer yet, or your role doesn't allow voice. Attach a voice memo once to install speech, or ask an Admin.",
+            "This page can't use a microphone: open Toskar at localhost on this computer, or at its https:// address from another device.",
+            "Toskar isn't allowed to use the microphone: allow it in your browser's settings for this page, then start voice mode again.",
+            "It stops answering by itself: the speakers' sound reached the microphone. Use headphones, or turn the volume down.",
+            "The first answer is slow: speech and the voice are loading. Later answers start much sooner."
+          ]
+        }
+      ]
+    },
+    {
       "id": "notifications",
       "title": "Notifications",
       "kind": "task",

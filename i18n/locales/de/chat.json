@@ -487,6 +487,35 @@
     "stop": "Stopp",
     "systemHint": "Diese Antwort mit den Stimmen dieses Geräts vorlesen"
   },
+  "voiceMode": {
+    "start": "Sprechen",
+    "startHint": "Sprich laut mit Toskar: Es antwortet mit einer Stimme, und du kannst dazwischenreden, um es zu stoppen",
+    "title": "Sprachmodus",
+    "noMicrophone": "Diese Seite kann kein Mikrofon nutzen. Öffne Toskar über https:// oder auf diesem Computer über localhost.",
+    "connectFailed": "Der Sprachmodus konnte sich nicht verbinden. Versuch es gleich noch einmal.",
+    "failed": "Im Sprachmodus ist etwas schiefgegangen.",
+    "micDenied": "Toskar darf das Mikrofon nicht nutzen. Erlaube es in den Einstellungen deines Browsers für diese Seite.",
+    "micFailed": "Das Mikrofon konnte nicht gestartet werden.",
+    "muted": "Mikrofon aus",
+    "you": "Du:",
+    "waited": "Antwort {{seconds}} s, nachdem du aufgehört hast",
+    "mute": "Stumm",
+    "unmute": "Ton an",
+    "end": "Beenden",
+    "hint": "Sprich, wann du willst. Rede dazwischen, um eine Antwort zu stoppen.",
+    "status": {
+      "connecting": "Verbinden…",
+      "listening": "Hört zu",
+      "hearing": "Hört dich",
+      "thinking": "Denkt nach…",
+      "speaking": "Spricht",
+      "closed": "Sprachmodus beendet"
+    },
+    "demo": {
+      "you": "Welche Wanderung bei Juneau lohnt sich dieses Wochenende?",
+      "answer": "Der Mount Roberts ist gut. Fahr mit der Seilbahn hoch und folge dem Gratweg, so weit du magst."
+    }
+  },
   "context": {
     "usage": "Kontextnutzung",
     "full": "Kontext zu {{percent}} voll",

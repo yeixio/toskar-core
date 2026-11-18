@@ -47,6 +47,7 @@ import { CommandOutput } from './CommandOutput'
 import { addOutput, folderName } from './outputText'
 import { AnswerActions, EditAction, VersionSwitch } from './MessageActions'
 import { ReadAloudButton, SystemReadAloudButton } from './ReadAloud'
+import { VoiceMode, VoiceModeButton } from './VoiceMode'
 import { hasSystemSpeech } from './speakableText'
 import { SetupOfferCard } from './SetupOffer'
 import { AutomationDraftCard, AutomationRunNote } from './AutomationDraftCard'
@@ -467,6 +468,9 @@ export function ChatPage() {
   const canReadAloud = allows('voice') && !!speechTool && speechTool.health !== 'unavailable'
   // Where it can't, such as the Mac App Store app, the device's own voices read instead.
   const systemReadAloud = allows('voice') && !!toolsQuery.data && !canReadAloud && hasSystemSpeech()
+  // Live voice mode (#795) needs both halves of speech on this computer.
+  const canTalk = canReadAloud && !!toolsQuery.data?.some((tool) => tool.id === 'speech.transcribe' && tool.health !== 'unavailable')
+  const [voiceOpen, setVoiceOpen] = useState(false)
 
   const messagesQuery = useQuery({
     queryKey: ['messages', selectedId],
@@ -2189,6 +2193,8 @@ export function ChatPage() {
           }
         />
         {summaryOpen && summaryQuery.data ? <SummaryDialog summary={summaryQuery.data} onClose={() => setSummaryOpen(false)} /> : null}
+        {canTalk && !isSending ? <VoiceModeButton onStart={() => setVoiceOpen(true)} /> : null}
+        {voiceOpen ? <VoiceMode onClose={() => setVoiceOpen(false)} /> : null}
         {isSending ? (
           <button type="button" className="composer-stop" onClick={handleStop}>
             <span className="h-2.5 w-2.5 rounded-[3px] bg-current" aria-hidden />
