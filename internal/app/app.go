@@ -286,6 +286,9 @@ type App struct {
 	Images *imagegen.Setup
 	// Video makes short clips on this computer (Gungnir §27).
 	Video *imagegen.Setup
+	// videoEngine makes them, and knows how long a clip takes here, for
+	// estimating a longer video before it starts (#790).
+	videoEngine *imagegen.Engine
 	// media is the picture or clip being made here, which holds memory
 	// and model starts until it ends (#541).
 	media mediaHold
@@ -1073,6 +1076,8 @@ func New(opts Options) (*App, error) {
 	videos := &imagegen.Engine{Setup: a.Video, WorkDir: filepath.Join(cfg.DataDir, "video-jobs"), What: "video generation", Room: a.mediaRoom, Logger: logger}
 	a.registerPortable(&imagegen.VideoTool{Engine: videos, Store: a.Artifacts})
 	a.registerPortable(&imagegen.ExtendTool{Engine: videos, Store: a.Artifacts})
+	a.registerPortable(&imagegen.ShotsTool{Engine: videos, Store: a.Artifacts})
+	a.videoEngine = videos
 	a.Tools.Register(&comfyTool{app: a})
 	a.API.BindVideo(a.Video)
 	a.API.BindRemoteMediaSetup(a.RemoteMediaSetup)

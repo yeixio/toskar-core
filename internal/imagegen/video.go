@@ -195,8 +195,12 @@ func (e *Engine) GenerateVideo(ctx context.Context, req VideoRequest) (VideoResu
 	if err != nil {
 		return VideoResult{}, err
 	}
-	return VideoResult{WebM: data, Width: w, Height: h, Frames: n, Length: math.Round(float64(n-1)/float64(model.FPS)*10) / 10,
-		Seed: seed, Seconds: time.Since(start).Seconds(), Model: model.Name, Tier: model.Tier, Missing: missing}, nil
+	length := math.Round(float64(n-1)/float64(model.FPS)*10) / 10
+	took := time.Since(start).Seconds()
+	// How long it took, for estimating a longer video before it starts (#790).
+	e.noteRate(model.Name, took, length)
+	return VideoResult{WebM: data, Width: w, Height: h, Frames: n, Length: length,
+		Seed: seed, Seconds: took, Model: model.Name, Tier: model.Tier, Missing: missing}, nil
 }
 
 // webmMagic starts a WebM (EBML) file.

@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState, type MouseEvent } from 'react'
 import { ToolPermissionPrompt, type PendingToolPrompt } from './ToolPermissionPrompt'
+import { shotsFrom } from './videoShots'
 import { thinkingToSend, type Thinking } from './thinking'
 import { Trans, useTranslation } from 'react-i18next'
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
@@ -189,6 +190,14 @@ function promptFor(payload: ToolRequestedPayload): PendingToolPrompt {
     alwaysAsks: payload.always_asks,
     cantUndo: payload.cant_undo,
     afterOutside: payload.after_outside,
+    ...(payload.tool_id === 'video.shots'
+      ? {
+          shots: shotsFrom(payload.args),
+          style: typeof payload.args?.style === 'string' && payload.args.style.trim() ? payload.args.style.trim() : undefined,
+          videoSeconds: payload.video_seconds,
+          estimateMinutes: payload.estimate_minutes,
+        }
+      : {}),
   }
 }
 
@@ -223,7 +232,7 @@ function toolProgress(toolId?: string, summary?: string, slow = false): string {
   if (toolId === 'code.execute') return t('status.runningCode')
   if (toolId === 'image.generate') return slow ? t('status.makingImageSlow') : t('status.makingImage')
   if (toolId === 'image.edit') return slow ? t('status.changingImageSlow') : t('status.changingImage')
-  if (toolId === 'video.generate') return slow ? t('status.makingVideoSlow') : t('status.makingVideo')
+  if (toolId === 'video.generate' || toolId === 'video.extend' || toolId === 'video.shots') return slow ? t('status.makingVideoSlow') : t('status.makingVideo')
   if (toolId === 'terminal') return t('status.runningCommand')
   if (toolId === 'git.status' || toolId === 'git.diff' || toolId === 'git.log' || toolId === 'git.show') {
     return t('status.checkingGit')

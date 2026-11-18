@@ -1492,6 +1492,9 @@ export interface ToolRequestedPayload {
   swarm_id?: string
   agent?: string
   agent_number?: number
+  /** A longer video's length, and about how long it takes to make here, when known (#790). */
+  video_seconds?: number
+  estimate_minutes?: number
 }
 
 export interface SettingsPatch {

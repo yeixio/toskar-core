@@ -33,7 +33,7 @@ func (a *App) setupOptions(ctx context.Context, s inventory.Snapshot, wait bool)
 		tools         []string
 	}{
 		{"image_generation", "images", []string{"image.generate", "image.edit"}},
-		{"video_generation", "video", []string{"video.generate", "video.extend"}},
+		{"video_generation", "video", []string{"video.generate", "video.extend", "video.shots"}},
 	}
 	peers := a.peerMediaSetups(ctx, wait)
 	var out []inventory.Setup

@@ -285,7 +285,18 @@
     "used_other": "使用了 {{count}} 個工具",
     "completed": "已完成",
     "completedIn": "在 {{ms}} ms 內完成",
-    "traceFailed": "失敗"
+    "traceFailed": "失敗",
+    "shots": {
+      "summary_other": "{{count}} 個鏡頭，約 {{seconds}} 秒影片",
+      "estimate": "依這台電腦上次製作的片段估算，大約需要 {{time}}。",
+      "noEstimate": "這台電腦還沒有製作過片段，所以不知道需要多久。每個鏡頭可能需要幾分鐘或更久。",
+      "style": "每個鏡頭都包含：{{style}}",
+      "list": "鏡頭",
+      "seconds": "{{n}} 秒",
+      "minutes": "{{n}} 分鐘",
+      "hours": "{{n}} 小時",
+      "hoursMinutes": "{{hours}} 小時 {{minutes}} 分鐘"
+    }
   },
   "transcript": {
     "plan": "計畫",
@@ -792,6 +803,7 @@
     "finishingImage": "正在完成圖片…",
     "finishingVideo": "正在完成短片…",
     "step": "第 {{step}} 步，共 {{steps}} 步",
+    "shot": "第 {{shot}}/{{shots}} 個鏡頭",
     "leftSeconds": "大約還需 {{seconds}} 秒",
     "leftMinutes": "大約還需 {{minutes}} 分鐘",
     "frameImage": "圖片會顯示在這裡",

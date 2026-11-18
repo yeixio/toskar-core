@@ -1588,6 +1588,12 @@ func (e *chatExecEnv) ExecuteTool(ctx context.Context, toolID string, args map[s
 		meta["agent"] = ref.Label
 		meta["agent_number"] = ref.N
 	}
+	// A longer video's card says how long it will take here (#790).
+	if tools.Canonical(toolID) == "video.shots" {
+		for k, v := range e.app.shotsEstimate(args) {
+			meta[k] = v
+		}
+	}
 	ctx = artifacts.WithConversation(ctx, e.conversationID)
 	ctx = withChatProfile(ctx, e.profile.ID)
 	// A heavy tool may run on another computer, as the profile allows.
@@ -1605,6 +1611,7 @@ func (e *chatExecEnv) ExecuteTool(ctx context.Context, toolID string, args map[s
 	ctx = imagegen.WithProgress(ctx, func(p imagegen.Progress) {
 		e.Emit(events.ToolProgress, map[string]any{
 			"tool_id": toolID, "stage": p.Stage, "step": p.Step, "steps": p.Steps, "seconds_left": p.SecondsLeft,
+			"shot": p.Shot, "shots": p.Shots,
 		})
 	})
 	e.progress(events.ToolStarted, map[string]any{"tool_id": toolID, "args": args})

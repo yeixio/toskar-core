@@ -285,7 +285,18 @@
     "used_other": "ツールを{{count}}個使用",
     "completed": "完了",
     "completedIn": "{{ms}} msで完了",
-    "traceFailed": "失敗"
+    "traceFailed": "失敗",
+    "shots": {
+      "summary_other": "{{count}} ショット、約 {{seconds}} 秒の動画",
+      "estimate": "このコンピューターが最後に作ったクリップから見て、約 {{time}} かかります。",
+      "noEstimate": "このコンピューターはまだクリップを作っていないため、かかる時間はわかりません。1 ショットに数分以上かかることがあります。",
+      "style": "すべてのショットに: {{style}}",
+      "list": "ショット",
+      "seconds": "{{n}} 秒",
+      "minutes": "{{n}} 分",
+      "hours": "{{n}} 時間",
+      "hoursMinutes": "{{hours}} 時間 {{minutes}} 分"
+    }
   },
   "transcript": {
     "plan": "計画",
@@ -792,6 +803,7 @@
     "finishingImage": "画像を仕上げています…",
     "finishingVideo": "クリップを仕上げています…",
     "step": "ステップ {{step}}/{{steps}}",
+    "shot": "ショット {{shot}}/{{shots}}",
     "leftSeconds": "残り約{{seconds}}秒",
     "leftMinutes": "残り約{{minutes}}分",
     "frameImage": "ここに画像が表示されます",

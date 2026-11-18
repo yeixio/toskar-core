@@ -295,7 +295,20 @@
     "used_other": "Usati {{count}} strumenti",
     "completed": "Completato",
     "completedIn": "Completato in {{ms}} ms",
-    "traceFailed": "Non riuscito"
+    "traceFailed": "Non riuscito",
+    "shots": {
+      "summary_one": "{{count}} inquadratura, circa {{seconds}} secondi di video",
+      "summary_many": "{{count}} inquadrature, circa {{seconds}} secondi di video",
+      "summary_other": "{{count}} inquadrature, circa {{seconds}} secondi di video",
+      "estimate": "Circa {{time}} su questo computer, in base all’ultimo clip che ha fatto.",
+      "noEstimate": "Questo computer non ha ancora fatto un clip, quindi non si sa quanto ci vorrà. Ogni inquadratura può richiedere diversi minuti o più.",
+      "style": "In ogni inquadratura: {{style}}",
+      "list": "Inquadrature",
+      "seconds": "{{n}} s",
+      "minutes": "{{n}} min",
+      "hours": "{{n}} h",
+      "hoursMinutes": "{{hours}} h {{minutes}} min"
+    }
   },
   "transcript": {
     "plan": "Piano",
@@ -879,6 +892,7 @@
     "finishingImage": "Rifinitura dell’immagine…",
     "finishingVideo": "Rifinitura della clip…",
     "step": "Passo {{step}} di {{steps}}",
+    "shot": "Inquadratura {{shot}} di {{shots}}",
     "leftSeconds": "mancano circa {{seconds}} s",
     "leftMinutes": "mancano circa {{minutes}} min",
     "frameImage": "La tua immagine apparirà qui",

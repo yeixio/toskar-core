@@ -18,7 +18,7 @@ func mediaLimitNotice(lang, toolID string, result map[string]any) string {
 		return ""
 	}
 	id := tools.Canonical(toolID)
-	clip := id == "video.generate" || id == "video.extend"
+	clip := id == "video.generate" || id == "video.extend" || id == "video.shots"
 	var parts []string
 	if asked, ok := num(limited["asked_seconds"]); ok && clip {
 		made, _ := num(limited["made_seconds"])
@@ -68,7 +68,7 @@ func seconds(s float64) string {
 // request that doesn't ask for one (#549).
 func withMediaQuality(quality, toolID string, args map[string]any) map[string]any {
 	id := tools.Canonical(toolID)
-	if quality == "" || (id != "image.generate" && id != "video.generate" && id != "video.extend") {
+	if quality == "" || (id != "image.generate" && id != "video.generate" && id != "video.extend" && id != "video.shots") {
 		return args
 	}
 	if q, _ := args["quality"].(string); q != "" {

@@ -23,7 +23,9 @@ var toolGroups = map[string][]string{
 	"draw":   {"image.generate"},
 	"film":   {"video.generate"},
 	// extend continues a clip in the chat (#155).
-	"extend":  {"video.extend"},
+	"extend": {"video.extend"},
+	// shots makes a longer video as a series of shots (#790).
+	"shots":   {"video.shots"},
 	"browse":  {"browser.open", "browser.click", "browser.type", "browser.extract", "browser.download", "browser.screenshot", "browser.close"},
 	"places":  {"places.search", "places.details", "maps.route", "maps.distance"},
 	"retouch": {"image.edit"},
@@ -69,6 +71,8 @@ var (
 	cueFilm    = regexp.MustCompile(`(?i)\b(videos?|clips?|animat\w*|movies?|footage|gifs?|bring (it|this|that|the|my)( \w+)? to life|make (it|this) move)\b`)
 	// Continuing a clip: "make the clip longer", "extend this video".
 	cueExtend = regexp.MustCompile(`(?i)\b(continue|extend|lengthen|longer|keep (it )?going|what happens next|next (part|scene|shot))\b`)
+	// A longer video: a minute, scenes, a story, or more than 5 seconds.
+	cueShots = regexp.MustCompile(`(?i)\b(minutes?|mins?|long|longer|scenes?|shots?|story|stories|series|episodes?|trailer|short (film|movie)|([6-9]|[1-9]\d+)[ -]?(s|secs?|seconds?))\b`)
 	// A clip's frames are about a clip that exists, whatever else is said.
 	cueFrames = regexp.MustCompile(`(?i)\bframes? of\b`)
 	// A clip that's already there: this video, the attached clip.
@@ -154,6 +158,9 @@ func ToolsFor(k Kind, message string, available []string) []string {
 	}
 	if cueExtend.MatchString(message) && cueFilm.MatchString(message) {
 		want["extend"] = true
+	}
+	if cueShots.MatchString(message) && AsksForClip(message) {
+		want["shots"] = true
 	}
 	if cueDraw.MatchString(message) {
 		want["draw"] = true

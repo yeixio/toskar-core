@@ -295,7 +295,20 @@
     "used_other": "{{count}} ferramentas usadas",
     "completed": "Concluído",
     "completedIn": "Concluído em {{ms}} ms",
-    "traceFailed": "Falhou"
+    "traceFailed": "Falhou",
+    "shots": {
+      "summary_one": "{{count}} cena, cerca de {{seconds}} segundos de vídeo",
+      "summary_many": "{{count}} cenas, cerca de {{seconds}} segundos de vídeo",
+      "summary_other": "{{count}} cenas, cerca de {{seconds}} segundos de vídeo",
+      "estimate": "Cerca de {{time}} neste computador, pelo último clipe que ele fez.",
+      "noEstimate": "Este computador ainda não fez nenhum clipe, então não se sabe quanto tempo vai levar. Cada cena pode levar vários minutos ou mais.",
+      "style": "Em todas as cenas: {{style}}",
+      "list": "Cenas",
+      "seconds": "{{n}} s",
+      "minutes": "{{n}} min",
+      "hours": "{{n}} h",
+      "hoursMinutes": "{{hours}} h {{minutes}} min"
+    }
   },
   "transcript": {
     "plan": "Plano",
@@ -879,6 +892,7 @@
     "finishingImage": "Finalizando a imagem…",
     "finishingVideo": "Finalizando o clipe…",
     "step": "Etapa {{step}} de {{steps}}",
+    "shot": "Cena {{shot}} de {{shots}}",
     "leftSeconds": "faltam cerca de {{seconds}} s",
     "leftMinutes": "faltam cerca de {{minutes}} min",
     "frameImage": "Sua imagem vai aparecer aqui",
