@@ -130,6 +130,13 @@
     "fitsOther": "{{model}} es adecuado para esta computadora.",
     "installOther": "Instalar {{model}}"
   },
+  "newer": {
+    "title": "{{model}} es más nuevo.",
+    "fit": "Cómo encaja en este ordenador: {{fit}}.",
+    "license": "Su licencia es distinta: {{license}}.",
+    "install": "Instalar {{model}}",
+    "beside": "Se instala junto a este, y los perfiles siguen usando su modelo hasta que los cambies."
+  },
   "capability": {
     "noWeb": "El acceso a la web en vivo no está disponible con la configuración actual.",
     "noTools": "{{model}} no puede usar herramientas, así que no puede buscar eso. Cambia a un modelo compatible con herramientas, como uno de los de abajo.",

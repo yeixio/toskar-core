@@ -298,6 +298,10 @@ type Model struct {
 	// it together (#1135, contract 1.88). Each keeps the whole context
 	// window. Absent for other models.
 	Slots int `json:"slots,omitempty"`
+	// Newer is the catalog model that replaces an installed one, size for
+	// size, such as Qwen 3.5 4B for Qwen 2.5 3B, when it isn't installed
+	// too (#593, contract 1.107).
+	Newer string `json:"newer,omitempty"`
 }
 
 // ContextOption is a context window a model can take, and how well the model
@@ -1569,6 +1573,9 @@ type SettingsView struct {
 	SaveTaskHistory   bool   `json:"save_task_history"`
 	NotifyTaskFinish  bool   `json:"notify_task_finish"`
 	NotifyPeerOffline bool   `json:"notify_peer_offline"`
+	// NotifyNewerModels tells Admins once per new generation that an
+	// installed model has a newer one (#593, contract 1.107).
+	NotifyNewerModels bool `json:"notify_newer_models"`
 	// CommunityRatings shows community model ratings, downloading the
 	// public summary once a day while models are browsed (#37).
 	CommunityRatings bool `json:"community_ratings"`

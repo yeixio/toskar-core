@@ -1443,6 +1443,12 @@ func (a *App) Start(ctx context.Context) error {
 		}()
 	}
 	a.indexKnowledge(ctx)
+	// Admins hear once of a newer generation of an installed model (#593).
+	a.wg.Add(1)
+	go func() {
+		defer a.wg.Done()
+		a.noticeNewerModels(ctx)
+	}()
 	if a.AutomationRunner != nil {
 		a.wg.Add(1)
 		go func() {
@@ -1589,6 +1595,7 @@ func (a *App) settingsView(ctx context.Context) (contracts.SettingsView, error) 
 	saveTask, _ := a.Settings.GetBool(ctx, "save_task_history", true)
 	notifyTask, _ := a.Settings.GetBool(ctx, "notify_task_finish", true)
 	notifyPeer, _ := a.Settings.GetBool(ctx, "notify_peer_offline", true)
+	notifyNewer, _ := a.Settings.GetBool(ctx, settingNotifyNewer, true)
 	communityRatings, _ := a.Settings.GetBool(ctx, ratings.SettingShow, false)
 	ratingsPrompts, _ := a.Settings.GetBool(ctx, ratings.SettingAsk, true)
 	updateCheck, _ := a.Settings.GetBool(ctx, updates.Setting, true)
@@ -1645,6 +1652,7 @@ func (a *App) settingsView(ctx context.Context) (contracts.SettingsView, error) 
 		SaveTaskHistory:         saveTask,
 		NotifyTaskFinish:        notifyTask,
 		NotifyPeerOffline:       notifyPeer,
+		NotifyNewerModels:       notifyNewer,
 		CommunityRatings:        communityRatings,
 		RatingsPrompts:          ratingsPrompts,
 		UpdateCheck:             updateCheck,
@@ -1755,7 +1763,7 @@ func (a *App) applySettingsPatch(ctx context.Context, patch map[string]any) erro
 			return err
 		}
 	}
-	for _, key := range []string{"save_chat_history", "save_task_history", "notify_task_finish", "notify_peer_offline", "launch_at_login", ratings.SettingShow, ratings.SettingAsk, updates.Setting, news.Setting, settingProblemReports, settingCheckLinks} {
+	for _, key := range []string{"save_chat_history", "save_task_history", "notify_task_finish", "notify_peer_offline", settingNotifyNewer, "launch_at_login", ratings.SettingShow, ratings.SettingAsk, updates.Setting, news.Setting, settingProblemReports, settingCheckLinks} {
 		if v, ok := patch[key].(bool); ok {
 			if err := a.Settings.SetBool(ctx, key, v); err != nil {
 				return err
@@ -2072,6 +2080,7 @@ func (a *App) ResetApp(ctx context.Context, deleteModels bool) (contracts.Settin
 	_ = a.Settings.SetBool(ctx, "save_task_history", true)
 	_ = a.Settings.SetBool(ctx, "notify_task_finish", true)
 	_ = a.Settings.SetBool(ctx, "notify_peer_offline", true)
+	_ = a.Settings.SetBool(ctx, settingNotifyNewer, true)
 	_ = a.Settings.SetBool(ctx, "launch_at_login", false)
 	_ = a.Settings.Set(ctx, "tool_terminal", "ask")
 	_ = a.Settings.Set(ctx, "tool_file_writes", "ask")

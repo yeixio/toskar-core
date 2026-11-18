@@ -135,6 +135,8 @@ export interface Model {
   context_options?: { tokens: number; fit: FitLabel }[]
   /** How many requests a chat model installed here answers at once, 1 to 4, so a swarm can run that many agents on it (#1135, contract 1.88). */
   slots?: number
+  /** The catalog model that replaces this installed one, size for size, when it isn't installed too (#593, contract 1.107). */
+  newer?: string
 }
 
 export type FitLabel = 'excellent' | 'good' | 'tight' | 'heavy' | 'unsupported' | 'too_large'
@@ -1136,6 +1138,8 @@ export interface SettingsView {
   save_task_history?: boolean
   notify_task_finish?: boolean
   notify_peer_offline?: boolean
+  /** Tells Admins once per new generation that an installed model has a newer one (#593). */
+  notify_newer_models?: boolean
   /** The time of day one digest of every automation's results goes out, such as 08:00, or "" for none (#204). */
   automation_digest?: string
   /** The IANA time zone automation_digest is in. */
@@ -1537,6 +1541,7 @@ export interface SettingsPatch {
   save_task_history?: boolean
   notify_task_finish?: boolean
   notify_peer_offline?: boolean
+  notify_newer_models?: boolean
   automation_digest?: string
   automation_digest_zone?: string
   tool_terminal?: string

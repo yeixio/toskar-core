@@ -13,6 +13,7 @@ import type {
 import { formatBytes } from '@/lib/format'
 import { formatLastUsed, largerAlternative } from './modelPresentation'
 import { SmallModelNote } from './SmallModelNote'
+import { NewerModelNote } from './NewerModelNote'
 import { CommunityScore, RateButton } from './ratings'
 import { formatNumber, formatPercent } from '@/i18n/format'
 import { rovingKeyDown, useMenu } from '@/lib/roving'
@@ -173,6 +174,7 @@ export function InstalledTab({
                 </p>
                 <CommunityScore modelId={model.id} />
                 <SmallModelNote model={model} alternative={alternative} onInstallAlternative={onInstall} />
+                <NewerModelNote model={model} models={models} fits={fits} onInstall={onInstall} installingId={installingId} />
                 {alwaysRunningNote?.id === model.id ? (
                   <p role="status" className={`mt-1 text-xs ${alwaysRunningNote.warn ? 'text-danger' : 'text-ink-muted'}`}>
                     {alwaysRunningNote.text}

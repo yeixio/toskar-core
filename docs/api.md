@@ -222,7 +222,7 @@ Control-plane routes are under `/api/v1`. The OpenAI-compatible routes are under
 
 | Method | Path | Purpose |
 | --- | --- | --- |
-| GET | `/models` | The catalog and installed models, with `support_role` and fit |
+| GET | `/models` | The catalog and installed models, with `support_role` and fit. An installed model with a newer catalog model in its line that isn't installed too says which in `newer` (#593, contract 1.107). The `notify_newer_models` setting, on by default, tells Admins once per new generation. |
 | GET | `/models/fit` | How well each catalog model fits each computer |
 | GET | `/models/recommend` | A recommended setup. `?purpose=` (`general`, `coding`, `research`) |
 | GET | `/models/browse` | Search Hugging Face GGUF models. `?q=`, `?limit=`. A repository with a vision projector (an `mmproj` file) is tagged `vision` |

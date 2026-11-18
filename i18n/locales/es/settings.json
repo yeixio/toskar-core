@@ -147,6 +147,8 @@
     "description": "Alertas sobre trabajos largos y la conectividad del equipo.",
     "taskFinish": "Avisar cuando terminen las tareas",
     "peerOffline": "Avisar cuando una computadora vinculada se desconecte",
+    "newerModels": "Avisar cuando salga una versión más nueva de un modelo instalado",
+    "newerModelsHint": "Una vez por cada nueva generación, para Admins. No se instala ni se cambia nada hasta que tú lo elijas.",
     "digest": "Resumen diario de automatizaciones",
     "digestHint": "Un resumen de los resultados de todas tus automatizaciones cada día, en un chat al que puedes responder.",
     "digestTime": "Hora"

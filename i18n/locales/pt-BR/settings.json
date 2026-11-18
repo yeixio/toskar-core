@@ -147,6 +147,8 @@
     "description": "Alertas sobre trabalhos demorados e a conectividade da equipe.",
     "taskFinish": "Notificar quando tarefas terminarem",
     "peerOffline": "Notificar quando um computador pareado ficar offline",
+    "newerModels": "Avisar quando sair uma versão mais nova de um modelo instalado",
+    "newerModelsHint": "Uma vez por nova geração, para Admins. Nada é instalado ou trocado até você escolher.",
     "digest": "Resumo diário das automações",
     "digestHint": "Um resumo dos resultados de todas as automações por dia, em um chat que você pode responder.",
     "digestTime": "Horário"

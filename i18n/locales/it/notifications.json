@@ -192,7 +192,9 @@
     "automationDigest": "Riepilogo automazioni",
     "automationDigestBody_one": "È stata eseguita 1 automazione: {{names}}",
     "automationDigestBody_other": "Sono state eseguite {{count}} automazioni: {{names}}",
-    "automationDigestBody_many": "Sono state eseguite {{count}} automazioni: {{names}}"
+    "automationDigestBody_many": "Sono state eseguite {{count}} automazioni: {{names}}",
+    "newerModels": "Sono disponibili modelli {{family}} più recenti",
+    "newerModelsBody": "{{model}} è più recente di {{installed}}. In Modelli › Installati vedi come si adatta e puoi installarlo accanto a quello che hai."
   },
   "sent": {
     "times": "{{title}} ({{count}} volte)",

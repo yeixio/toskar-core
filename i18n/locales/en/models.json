@@ -128,6 +128,13 @@
     "fitsOther": "{{model}} fits this computer.",
     "installOther": "Install {{model}}"
   },
+  "newer": {
+    "title": "{{model}} is newer.",
+    "fit": "It fits this computer: {{fit}}.",
+    "license": "Its license is different: {{license}}.",
+    "install": "Install {{model}}",
+    "beside": "It installs beside this one, and profiles keep the model they use until you change them."
+  },
   "capability": {
     "noWeb": "Live web access isn't available with the current configuration.",
     "noTools": "{{model}} cannot use tools, so it cannot look that up. Switch to a tool-capable model such as one below.",

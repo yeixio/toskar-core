@@ -126,6 +126,13 @@
     "fitsOther": "{{model}} 適合這台電腦。",
     "installOther": "安裝 {{model}}"
   },
+  "newer": {
+    "title": "{{model}} 更新。",
+    "fit": "在這台電腦上：{{fit}}。",
+    "license": "它的授權不同：{{license}}。",
+    "install": "安裝 {{model}}",
+    "beside": "它會安裝在這個模型旁邊，設定檔會繼續使用原來的模型，直到你更改。"
+  },
   "capability": {
     "noWeb": "目前的配置無法即時存取網路。",
     "noTools": "{{model}} 無法使用工具，因此無法查詢這項資料。請改用支援工具的模型，例如下方的模型。",

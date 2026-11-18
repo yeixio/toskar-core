@@ -192,7 +192,9 @@
     "automationDigest": "Resumen de automatizaciones",
     "automationDigestBody_one": "Se ejecutó 1 automatización: {{names}}",
     "automationDigestBody_other": "Se ejecutaron {{count}} automatizaciones: {{names}}",
-    "automationDigestBody_many": "Se ejecutaron {{count}} automatizaciones: {{names}}"
+    "automationDigestBody_many": "Se ejecutaron {{count}} automatizaciones: {{names}}",
+    "newerModels": "Hay modelos {{family}} más nuevos",
+    "newerModelsBody": "{{model}} es más nuevo que {{installed}}. En Modelos › Instalados verás cómo encaja y podrás instalarlo junto al que tienes."
   },
   "sent": {
     "times": "{{title}} ({{count}} veces)",

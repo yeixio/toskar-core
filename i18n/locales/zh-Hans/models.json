@@ -126,6 +126,13 @@
     "fitsOther": "{{model}} 适合这台电脑。",
     "installOther": "安装 {{model}}"
   },
+  "newer": {
+    "title": "{{model}} 更新。",
+    "fit": "在这台电脑上：{{fit}}。",
+    "license": "它的许可证不同：{{license}}。",
+    "install": "安装 {{model}}",
+    "beside": "它会安装在这个模型旁边，配置文件会继续使用原来的模型，直到你更改。"
+  },
   "capability": {
     "noWeb": "当前配置下无法实时访问网络。",
     "noTools": "{{model}} 不能使用工具，因此无法查找该信息。请切换到能使用工具的模型，例如下面的模型。",
