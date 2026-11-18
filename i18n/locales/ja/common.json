@@ -3,6 +3,7 @@
   "nav": {
     "label": "メイン",
     "open": "メニューを開く",
+    "skip": "コンテンツへスキップ",
     "use": "使う",
     "customize": "カスタマイズ",
     "administer": "管理",

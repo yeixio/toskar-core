@@ -117,6 +117,8 @@
     "trainingHint": "AI를 학습 중이라 모델이 있는 다른 컴퓨터로 작업을 보냅니다",
     "plain": "암호화 안 됨",
     "plainHint": "{{name}}의 Toskar가 이전 버전이라 이 통신은 암호화되지 않아요. 암호화하려면 {{name}}의 Toskar를 업데이트하세요.",
+    "useCode": "코드가 있나요? 코드로 승인",
+    "confirmRemoveModel": "{{name}}에서 {{model}}을(를) 삭제할까요? 그 컴퓨터에서 지워지고, 다시 쓰려면 다시 내려받아야 해요.",
     "confirmRemove": "{{name}}을(를) 이 팀에서 뺄까요? 더 이상 작업을 받지 않고, 다시 추가하려면 새로 승인해야 해요."
   },
   "deploy": {
@@ -190,7 +192,6 @@
     "showing": "코드를 받는 중…",
     "getApp": "앱이 없나요? <store>Toskar 받기</store>.",
     "connected": "{{name}}이(가) 연결되었어요.",
-    "manage": "<access>API 액세스</access>에서 언제든지 연결을 해제할 수 있어요.",
     "manageYours": "설정의 내 기기에서 언제든 연결을 해제할 수 있어요.",
     "another": "다른 기기 연결",
     "codeLabel": "코드 {{code}}",

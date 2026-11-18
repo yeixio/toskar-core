@@ -42,10 +42,10 @@ function blankTab(): Window | null {
  * every other copy, the Microsoft Store's too (its policy 10.8.1 lets a
  * non-game app take its own payment), with Stripe.
  */
-export function ToskarSubscription({ subscription }: { subscription: AnywhereSubscription }) {
+export function ToskarSubscription({ subscription, off = false }: { subscription: AnywhereSubscription; off?: boolean }) {
   const store = subscription.in_app_only ? desktopAnywhere() : undefined
   if (store) return <AppStoreSubscription subscription={subscription} store={store} />
-  return <StripeSubscription subscription={subscription} />
+  return <StripeSubscription subscription={subscription} off={off} />
 }
 
 /**
@@ -54,7 +54,7 @@ export function ToskarSubscription({ subscription }: { subscription: AnywhereSub
  * for one bought here. One bought in the Toskar app is managed in the
  * device's store.
  */
-function StripeSubscription({ subscription }: { subscription: AnywhereSubscription }) {
+function StripeSubscription({ subscription, off }: { subscription: AnywhereSubscription; off: boolean }) {
   const { t } = useTranslation('apiAccess')
   const queryClient = useQueryClient()
   const [error, setError] = useState<Shown | null>(null)
@@ -89,9 +89,24 @@ function StripeSubscription({ subscription }: { subscription: AnywhereSubscripti
     onSuccess: () => setError(null),
     onError: (err) => setError(shownError(err)),
   })
-  const busy = checkout.isPending || manage.isPending
+  const cancel = useMutation({
+    mutationFn: () => api.cancelSubscriptionCheckout(),
+    onSuccess: () => {
+      setError(null)
+      void queryClient.invalidateQueries({ queryKey: ['remote-access'] })
+    },
+    onError: (err) => setError(shownError(err)),
+  })
+  const busy = checkout.isPending || manage.isPending || cancel.isPending
   // When the last token ran out, as a lapsed subscription's does (#692).
   const endedOn = subscription.state === 'ended' && subscription.expires ? formatDate(subscription.expires) : ''
+  // Why the relay stopped taking it, when it did (#1266).
+  const endedWhy =
+    subscription.state === 'ended' && subscription.reason === 'blocked'
+      ? t('remote.subscription.endedBlocked')
+      : subscription.state === 'ended' && subscription.reason === 'revoked'
+        ? t('remote.subscription.endedRevoked')
+        : ''
   // The App Store's copy only points to the Toskar app (App Review 3.1.1).
   if (subscription.in_app_only && subscription.state !== 'active') {
     return (
@@ -116,7 +131,11 @@ function StripeSubscription({ subscription }: { subscription: AnywhereSubscripti
       {subscription.state === 'active' ? (
         <>
           <p className="text-sm text-success" role="status">
-            {t(subscription.store === 'app' ? 'remote.subscription.activeApp' : 'remote.subscription.active')}
+            {subscription.store === 'grant'
+              ? subscription.expires
+                ? t('remote.subscription.grant', { date: formatDate(subscription.expires) })
+                : t('remote.subscription.grantOpen')
+              : t(subscription.store === 'app' ? 'remote.subscription.activeApp' : 'remote.subscription.active')}
           </p>
           {subscription.store === 'stripe' && !subscription.in_app_only ? (
             <button type="button" className="btn-secondary" disabled={busy} onClick={() => manage.mutate(blankTab())}>
@@ -129,31 +148,41 @@ function StripeSubscription({ subscription }: { subscription: AnywhereSubscripti
           <p className="text-sm text-ink-muted" role="status">
             {t('remote.subscription.pending')}
           </p>
-          {subscription.checkout ? (
-            <a className="text-sm underline" href={subscription.checkout} target="_blank" rel="noopener noreferrer">
-              {t('remote.subscription.reopen')}
-            </a>
-          ) : null}
+          <div className="flex flex-wrap items-center gap-3">
+            {subscription.checkout ? (
+              <a className="text-sm underline" href={subscription.checkout} target="_blank" rel="noopener noreferrer">
+                {t('remote.subscription.reopen')}
+              </a>
+            ) : null}
+            {/* Changed your mind, or picked the wrong plan (#1257). */}
+            <button type="button" className="btn-secondary btn-sm" disabled={busy} onClick={() => cancel.mutate()}>
+              {cancel.isPending ? t('remote.subscription.cancelling') : t('remote.subscription.cancel')}
+            </button>
+          </div>
         </>
       ) : (
         <>
           <p className="text-sm text-ink-muted">
-            {endedOn
+            {endedWhy
+              ? endedWhy
+              : endedOn
               ? t('remote.subscription.endedOn', { date: endedOn })
               : subscription.state === 'ended'
                 ? t('remote.subscription.ended')
                 : t('remote.subscription.offer')}
           </p>
+          {/* The switch comes first: nothing to buy until it's on (#1253). */}
+          {off ? <p className="text-sm text-ink-muted">{t('remote.subscription.turnOnFirst')}</p> : null}
           {soldOut ? (
             <p className="text-sm text-warning" role="status">
               {t('remote.subscription.soldOut')}
             </p>
           ) : null}
           <div className="flex flex-wrap gap-2">
-            <button type="button" className="btn-primary" disabled={busy || soldOut} onClick={() => subscribe('monthly')}>
+            <button type="button" className="btn-primary" disabled={busy || soldOut || off} onClick={() => subscribe('monthly')}>
               {t('remote.subscription.monthly', { price: formatCurrency(anywherePrices.monthly, 'USD') })}
             </button>
-            <button type="button" className="btn-secondary" disabled={busy || soldOut} onClick={() => subscribe('yearly')}>
+            <button type="button" className="btn-secondary" disabled={busy || soldOut || off} onClick={() => subscribe('yearly')}>
               {t('remote.subscription.yearly', { price: formatCurrency(anywherePrices.yearly, 'USD') })}
             </button>
           </div>

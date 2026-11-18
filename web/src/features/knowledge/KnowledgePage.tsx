@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useState, type ReactNode } from 'react'
+import { useState, type KeyboardEvent, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { HowItWorks, stepIcons } from '@/components/ui/HowItWorks'
 import { api } from '@/lib/api'
@@ -345,6 +345,13 @@ function AddSource({
       onChange={(ids) => setUseWith(ids)}
     />
   )
+  const ready = !add.isPending && (mode === 'path' ? path.trim() !== '' : text.trim() !== '' || binary !== null)
+  // Enter in a one-line field connects, as it would in a form (#1270).
+  const connectOnEnter = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key !== 'Enter' || e.nativeEvent.isComposing) return
+    e.preventDefault()
+    if (ready) add.mutate()
+  }
   return (
     <div id="knowledge-connect" className="card space-y-3">
       <h2 className="section-title">{t('add.title')}</h2>
@@ -362,7 +369,13 @@ function AddSource({
           {mode === 'path' ? (
             <label className="block space-y-1">
               <span className="text-sm text-ink">{t('add.path')}</span>
-              <input className="field w-full font-mono text-xs" value={path} onChange={(e) => setPath(e.target.value)} placeholder="~/Documents/inventory.csv" />
+              <input
+                className="field w-full font-mono text-xs"
+                value={path}
+                onChange={(e) => setPath(e.target.value)}
+                onKeyDown={connectOnEnter}
+                placeholder="~/Documents/inventory.csv"
+              />
               <span className="block text-xs text-ink-faint">{t('add.pathHint')}</span>
             </label>
           ) : (
@@ -389,7 +402,7 @@ function AddSource({
           )}
           <label className="block space-y-1">
             <span className="text-sm text-ink">{t('add.name')}</span>
-            <input className="field w-full" value={name} onChange={(e) => setName(e.target.value)} />
+            <input className="field w-full" value={name} onChange={(e) => setName(e.target.value)} onKeyDown={connectOnEnter} />
           </label>
           {profilePicker}
           {add.error && <ShownError {...shownError(add.error)} className="text-sm text-danger" />}
@@ -399,7 +412,7 @@ function AddSource({
           <button
             type="button"
             className="btn-primary"
-            disabled={add.isPending || (mode === 'path' ? !path.trim() : !text.trim() && !binary)}
+            disabled={!ready}
             onClick={() => add.mutate()}
           >
             {add.isPending ? t('add.indexing') : t('add.connect')}

@@ -123,6 +123,8 @@
     "trainingHint": "Está treinando uma IA, então o trabalho vai para outros computadores que tenham o modelo",
     "plain": "Sem criptografia",
     "plainHint": "O tráfego para {{name}} não está criptografado porque o Toskar dele é mais antigo. Atualize o Toskar em {{name}} para criptografá-lo.",
+    "useCode": "Tem um código? Aprovar com ele",
+    "confirmRemoveModel": "Remover {{model}} de {{name}}? Ele é apagado desse computador, e para usá-lo lá de novo será preciso baixá-lo outra vez.",
     "confirmRemove": "Remover {{name}} desta equipe? Ele deixa de receber trabalho, e adicioná-lo de novo exige uma nova aprovação."
   },
   "deploy": {
@@ -200,7 +202,6 @@
     "showing": "Gerando um código…",
     "getApp": "Não tem o app? <store>Baixe o Toskar</store>.",
     "connected": "{{name}} está conectado.",
-    "manage": "Você pode desconectá-lo quando quiser em <access>Acesso à API</access>.",
     "manageYours": "Você pode desconectá-lo quando quiser em Configurações, em Seus dispositivos.",
     "another": "Conectar outro dispositivo",
     "codeLabel": "Código {{code}}",

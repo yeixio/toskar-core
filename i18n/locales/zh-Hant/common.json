@@ -3,6 +3,7 @@
   "nav": {
     "label": "主要",
     "open": "開啟選單",
+    "skip": "跳至內容",
     "use": "使用",
     "customize": "自訂",
     "administer": "管理",

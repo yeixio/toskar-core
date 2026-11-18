@@ -4,7 +4,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { MemoryRouter } from 'react-router-dom'
 import { api } from '@/lib/api'
 import type { Node } from '@/types/api'
-import { knownBug } from '@/test/knownBug'
 import { NodesPage } from './NodesPage'
 
 vi.mock('@/lib/api', async () => {
@@ -116,8 +115,6 @@ describe('NodesPage', () => {
   })
 })
 
-// QA regressions: knownBug passes while the bug is there and fails once
-// it's fixed (src/test/knownBug.ts).
 describe('NodesPage QA regressions', () => {
   const nearbyA = { id: 'a', name: 'Attic PC', is_local: false, paired: false, status: 'online', address: '192.168.1.30:7331' } as Node
   const nearbyB = { id: 'b', name: 'Basement PC', is_local: false, paired: false, status: 'online', address: '192.168.1.31:7331' } as Node
@@ -133,7 +130,7 @@ describe('NodesPage QA regressions', () => {
   afterEach(() => vi.restoreAllMocks())
 
   // Regression: toskar-core#1245
-  knownBug('toskar-core#1245', 'adding one nearby computer shows busy on that card only', async () => {
+  it('adding one nearby computer shows busy on that card only', async () => {
     vi.mocked(api.pairNode).mockReturnValue(new Promise(() => {}))
     renderPage()
     const buttons = await screen.findAllByRole('button', { name: 'Add to team' })
@@ -145,7 +142,7 @@ describe('NodesPage QA regressions', () => {
   })
 
   // Regression: toskar-core#1246
-  knownBug('toskar-core#1246', 'one way to add a nearby computer, with the code behind a link', async () => {
+  it('one way to add a nearby computer, with the code behind a link', async () => {
     vi.mocked(api.getNodes).mockResolvedValue([local, nearbyA])
     renderPage()
     await screen.findByRole('button', { name: 'Add to team' })
@@ -153,7 +150,7 @@ describe('NodesPage QA regressions', () => {
   })
 
   // Regression: toskar-core#1247
-  knownBug('toskar-core#1247', 'Remove asks before deleting a model from a computer', async () => {
+  it('Remove asks before deleting a model from a computer', async () => {
     const confirm = vi.spyOn(window, 'confirm').mockReturnValue(false)
     vi.mocked(api.getNodes).mockResolvedValue([local])
     vi.mocked(api.getModels).mockResolvedValue([

@@ -97,7 +97,10 @@ export function buildIdea(idea: Idea, values: IdeaValues, timeZone: string, read
       break
     }
     case 'page':
+      // Watched, as its summary says: it runs when the page changes,
+      // checked at the time chosen (#1269).
       notification = { mode: 'change' }
+      trigger = { kind: 'page', url }
       break
     case 'folder':
       // The run can't open files outside Toskar's workspace, so the folder

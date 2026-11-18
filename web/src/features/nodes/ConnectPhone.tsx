@@ -1,7 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useRef, useState } from 'react'
 import { Trans, useTranslation } from 'react-i18next'
-import { Link } from 'react-router-dom'
 import { api } from '@/lib/api'
 import { useRole } from '@/lib/role'
 import type { DevicePairing } from '@/types/api'
@@ -118,11 +117,8 @@ export function ConnectPhone({ onClose }: { onClose: () => void }) {
             {t('phone.connected', { name: status.data?.device?.name ?? '' })}
           </p>
           <p className="mt-1 text-sm text-ink-muted">
-            {admin ? (
-              <Trans t={t} i18nKey="phone.manage" components={{ access: <Link to="/api-access" className="text-primary hover:underline" /> }} />
-            ) : (
-              t('phone.manageYours')
-            )}
+            {/* Everyone's own devices are in Settings; a phone isn't an API concern (#1244). */}
+            {t('phone.manageYours')}
           </p>
           <button type="button" className="btn-secondary mt-3 px-3 py-1.5 text-xs" disabled={start.isPending} onClick={() => start.mutate()}>
             {t('phone.another')}

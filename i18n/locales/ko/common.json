@@ -3,6 +3,7 @@
   "nav": {
     "label": "메인",
     "open": "메뉴 열기",
+    "skip": "본문으로 건너뛰기",
     "use": "사용",
     "customize": "맞춤 설정",
     "administer": "관리",

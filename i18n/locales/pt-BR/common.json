@@ -3,6 +3,7 @@
   "nav": {
     "label": "Principal",
     "open": "Abrir menu",
+    "skip": "Pular para o conteúdo",
     "use": "Usar",
     "customize": "Personalizar",
     "administer": "Administrar",

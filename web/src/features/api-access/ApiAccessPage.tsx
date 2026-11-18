@@ -190,6 +190,8 @@ export function ApiAccessPage() {
       setNewKeyForCI(false)
       setShowCreate(false)
       queryClient.invalidateQueries({ queryKey: ['api-keys'] })
+      // The server now counts the key, so "Allow access" can turn on (#1243).
+      queryClient.invalidateQueries({ queryKey: ['settings'] })
     },
   })
 

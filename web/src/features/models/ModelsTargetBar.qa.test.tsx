@@ -1,15 +1,12 @@
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
-import { describe, expect } from 'vitest'
-import { knownBug } from '@/test/knownBug'
+import { describe, expect, it } from 'vitest'
 import type { HardwareInventory, Node } from '@/types/api'
 import { ModelsTargetBar } from './ModelsTargetBar'
 
-// QA regressions for the Models page. knownBug passes while the bug is
-// there and fails once it's fixed (src/test/knownBug.ts).
 describe('ModelsTargetBar QA regressions', () => {
   // Regression: toskar-core#1248
-  knownBug('toskar-core#1248', "calls this computer by its Toskar name, not the OS hostname", () => {
+  it("calls this computer by its Toskar name, not the OS hostname", () => {
     const nodes = [{ id: 'n1', name: 'qa-box', is_local: true, paired: true, status: 'online' } as Node]
     render(
       <MemoryRouter>

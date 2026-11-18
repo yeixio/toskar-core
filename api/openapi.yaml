@@ -1306,6 +1306,16 @@ paths:
           description: BILLING_UNAVAILABLE
         "503":
           description: RELAY_SOLD_OUT
+    delete:
+      summary: Close the checkout opened here before it's paid (#1257)
+      description: "Forgets the open Stripe checkout, so Toskar stops asking the relay about it and Settings offers the plans again. Admins only. 404 CHECKOUT_NONE when no checkout is open."
+      operationId: cancelSubscriptionCheckout
+      tags: [Devices]
+      responses:
+        "204":
+          description: The checkout is closed
+        "404":
+          description: CHECKOUT_NONE
   /api/v1/remote-access/subscription/manage:
     post:
       summary: The billing page for the subscription bought here (#639)

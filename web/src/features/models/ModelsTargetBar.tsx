@@ -45,7 +45,8 @@ function targetName(
   nodes: Node[],
 ): string {
   if (target === 'all') return i18n.t('models:target.all')
-  if (target === 'local') return localHw?.hostname || i18n.t('models:target.thisComputer')
+  // Its Toskar name, as Computers shows it, not the OS hostname (#1248).
+  if (target === 'local') return nodes.find((n) => n.is_local)?.name || localHw?.hostname || i18n.t('models:target.thisComputer')
   return nodes.find((n) => n.id === target)?.name || i18n.t('models:target.computer')
 }
 
@@ -111,7 +112,7 @@ export function ModelsTargetBar({
             aria-label={t('target.aria')}
           >
             <option value="local">
-              {localHardware?.hostname || localNode?.name || t('target.thisComputer')}
+              {localNode?.name || localHardware?.hostname || t('target.thisComputer')}
             </option>
             {hasCluster && <option value="all">{t('target.all')}</option>}
             {onlinePeers.map((n) => (

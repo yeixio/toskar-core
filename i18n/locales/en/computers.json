@@ -120,6 +120,8 @@
     "trainingHint": "Training an AI, so work goes to other computers when they have the model",
     "plain": "Not encrypted",
     "plainHint": "Traffic to {{name}} isn't encrypted, because its Toskar is older. Update Toskar on {{name}} to encrypt it.",
+    "useCode": "Have a code? Approve with it",
+    "confirmRemoveModel": "Remove {{model}} from {{name}}? It's deleted from that computer, and using it there again means downloading it again.",
     "confirmRemove": "Remove {{name}} from this team? It stops taking work, and adding it again needs a new approval."
   },
   "deploy": {
@@ -195,7 +197,6 @@
     "showing": "Getting a code…",
     "getApp": "Don't have the app? <store>Get Toskar</store>.",
     "connected": "{{name}} is connected.",
-    "manage": "You can disconnect it any time in <access>API Access</access>.",
     "manageYours": "You can disconnect it any time in Settings, under Your devices.",
     "another": "Connect another device",
     "codeLabel": "Code {{code}}",
