@@ -191,6 +191,10 @@ type ChatMessage struct {
 	// ("data:image/png;base64,…"). A message with images is sent in the
 	// OpenAI form, content parts: the text, then each image (#191).
 	Images []string `json:"-"`
+	// Reasoning is an assistant message's thinking, sent as
+	// reasoning_content for a chat template that renders it: a reasoning
+	// model's earlier tool steps in the same turn (#841).
+	Reasoning string `json:"-"`
 }
 
 // FoldSystem moves the system messages into the first user message, marked
@@ -238,9 +242,10 @@ type imageURL struct {
 func (m ChatMessage) MarshalJSON() ([]byte, error) {
 	if len(m.Images) == 0 {
 		return json.Marshal(struct {
-			Role    string `json:"role"`
-			Content string `json:"content"`
-		}{m.Role, m.Content})
+			Role      string `json:"role"`
+			Content   string `json:"content"`
+			Reasoning string `json:"reasoning_content,omitempty"`
+		}{m.Role, m.Content, m.Reasoning})
 	}
 	parts := make([]contentPart, 0, len(m.Images)+1)
 	if m.Content != "" {
@@ -250,22 +255,24 @@ func (m ChatMessage) MarshalJSON() ([]byte, error) {
 		parts = append(parts, contentPart{Type: "image_url", ImageURL: &imageURL{URL: url}})
 	}
 	return json.Marshal(struct {
-		Role    string        `json:"role"`
-		Content []contentPart `json:"content"`
-	}{m.Role, parts})
+		Role      string        `json:"role"`
+		Content   []contentPart `json:"content"`
+		Reasoning string        `json:"reasoning_content,omitempty"`
+	}{m.Role, parts, m.Reasoning})
 }
 
 // UnmarshalJSON reads content as a string or as OpenAI content parts, whose
 // text parts are joined and whose images are kept.
 func (m *ChatMessage) UnmarshalJSON(data []byte) error {
 	var raw struct {
-		Role    string          `json:"role"`
-		Content json.RawMessage `json:"content"`
+		Role      string          `json:"role"`
+		Content   json.RawMessage `json:"content"`
+		Reasoning string          `json:"reasoning_content"`
 	}
 	if err := json.Unmarshal(data, &raw); err != nil {
 		return err
 	}
-	*m = ChatMessage{Role: raw.Role}
+	*m = ChatMessage{Role: raw.Role, Reasoning: raw.Reasoning}
 	if len(raw.Content) == 0 || string(raw.Content) == "null" {
 		return nil
 	}

@@ -58,9 +58,11 @@ func escapeControl(endpoint string, messages []pluginapi.ChatMessage) []pluginap
 	for i, m := range messages {
 		if vocab != nil {
 			m.Content = vocab.Replace(m.Content)
+			m.Reasoning = vocab.Replace(m.Reasoning)
 		}
 		// And the common markers, for what the vocabulary misses.
 		m.Content = pluginapi.EscapeChatMarkers(m.Content)
+		m.Reasoning = pluginapi.EscapeChatMarkers(m.Reasoning)
 		out[i] = m
 	}
 	return out

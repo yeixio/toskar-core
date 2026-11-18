@@ -77,6 +77,12 @@ A Score stays comparable because the same cases run each time. Speed depends on 
 
 Quality runs every week on our own computers, and each run adds its scores to the results on its own. It works through [one public list](https://github.com/yeixio/toskar-model-data/blob/main/quality/models.json), a few at a time, whichever have gone longest without a result. The list is about 15 models, popular on Hugging Face and in Toskar's catalog, with a spread of sizes. We check it by hand about monthly, so popularity alone doesn't send everyone's time to an odd fine-tune. Each row names the computer, its operating system, and the date. **Scores from different computers or dates aren't the same test,** so compare rows with care. Speed depends on the computer. Model scores can move too, as Toskar changes.
 
+### Comparing settings
+
+Some changes are tried on the quality set before they're on for everyone. Run the set again with the setting, on the same computer and models, and compare the rows.
+
+- `TOSKAR_KEEP_REASONING=field` or `inline` (#841): a reasoning model keeps its thinking between tool calls in one answer. Compare the tool and task cases for reasoning models, and the prompt tokens they used, against a run without it.
+
 ## What we know is weak
 
 - **Few runs.** One run per case can swing a score by a case or more, and most results come from one run.
