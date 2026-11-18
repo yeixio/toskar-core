@@ -266,5 +266,42 @@
     "clientId": "ID do cliente de login",
     "clientIdHint": " (só se o serviço tiver fornecido um)",
     "keptHere": "Chaves, tokens, senhas e cabeçalhos ficam neste computador, fora da vista da IA."
+  },
+  "comfyui": {
+    "title": "ComfyUI",
+    "description": "Conecte um ComfyUI que você roda, aqui ou em outro computador, e salve os fluxos dele. As conversas os executam com a ferramenta Fluxo do ComfyUI, ao lado das imagens e clipes integrados.",
+    "url": "Endereço do ComfyUI",
+    "token": "Token",
+    "tokenStored": "Há um token salvo; digite um novo para trocá-lo",
+    "tokenOptional": "Opcional, se o seu ComfyUI pedir um",
+    "save": "Salvar e verificar",
+    "checking": "Verificando…",
+    "forgetToken": "Esquecer token",
+    "connected": "Conectado ao ComfyUI {{version}}, com {{nodes}} tipos de nó.",
+    "device": "{{name}}, {{gb}} GB",
+    "models": "{{checkpoints}} modelos e {{loras}} LoRAs.",
+    "safety": "Nós personalizados rodam o próprio código naquele computador. O Toskar só chama o ComfyUI que você adicionar aqui, nunca instala nada nele e trata o que ele cria como qualquer outro arquivo.",
+    "workflows": "Fluxos",
+    "noWorkflows": "Nenhum fluxo ainda. Adicione um exportado do ComfyUI.",
+    "remove": "Remover",
+    "removeNamed": "Remover {{name}}",
+    "file": "Arquivo do fluxo",
+    "fileHint": "No ComfyUI, use Workflow › Export (API) e escolha o arquivo aqui.",
+    "found": "Entradas encontradas: {{inputs}}.",
+    "name": "Nome",
+    "what": "O que faz",
+    "whatPlaceholder": "Amplia uma imagem 4×",
+    "add": "Adicionar fluxo",
+    "notJSON": "Esse arquivo não é JSON. Exporte o fluxo com Workflow › Export (API).",
+    "input": "{{name}} (nó {{node}})",
+    "noInputs": "nenhuma entrada encontrada",
+    "inputs": {
+      "prompt": "prompt",
+      "negative": "prompt negativo",
+      "seed": "semente",
+      "image": "imagem",
+      "width": "largura",
+      "height": "altura"
+    }
   }
 }

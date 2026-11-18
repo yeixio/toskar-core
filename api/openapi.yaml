@@ -3504,6 +3504,126 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+  /api/v1/comfyui:
+    get:
+      summary: The connected ComfyUI and what a check finds on it (Admin)
+      description: The check reads ComfyUI's /system_stats and /object_info. When it fails, error says why and info is left out.
+      operationId: getComfyUI
+      tags: [Tools]
+      responses:
+        "200":
+          description: Address and check
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ComfyUIStatus"
+        "403":
+          description: Needs the admin role
+    put:
+      summary: Connect a ComfyUI, change its token, or disconnect it (Admin)
+      description: The token is stored in the secrets folder, sent as a Bearer token, and never returned. An empty token keeps the stored one; clear_token removes it; an empty base_url disconnects.
+      operationId: setComfyUI
+      tags: [Tools]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                base_url: {type: string}
+                token: {type: string}
+                clear_token: {type: boolean}
+      responses:
+        "200":
+          description: Saved and checked
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ComfyUIStatus"
+        "400":
+          description: The address isn't http(s)
+        "403":
+          description: Needs the admin role
+  /api/v1/comfyui/workflows:
+    get:
+      summary: Saved ComfyUI workflows, without their graphs (Admin)
+      operationId: listComfyWorkflows
+      tags: [Tools]
+      responses:
+        "200":
+          description: Workflows by name
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ComfyWorkflows"
+        "403":
+          description: Needs the admin role
+    post:
+      summary: Save a ComfyUI workflow, or replace the one with its name (Admin)
+      description: graph is the workflow exported from ComfyUI with Workflow › Export (API). Without inputs, they are detected. The name is made lowercase with dashes. A workflow needs a prompt or an image input.
+      operationId: saveComfyWorkflow
+      tags: [Tools]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, graph]
+              properties:
+                name: {type: string}
+                description: {type: string}
+                graph: {type: object, additionalProperties: true}
+                inputs: {$ref: "#/components/schemas/ComfyWorkflowInputs"}
+      responses:
+        "200":
+          description: Saved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ComfyWorkflow"
+        "400":
+          description: Not in API format, or an input names a node or field the graph doesn't have
+        "403":
+          description: Needs the admin role
+  /api/v1/comfyui/workflows/detect:
+    post:
+      summary: Find a workflow's prompt, negative prompt, seed, picture, and size inputs (Admin)
+      operationId: detectComfyWorkflow
+      tags: [Tools]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [graph]
+              properties:
+                graph: {type: object, additionalProperties: true}
+      responses:
+        "200":
+          description: The inputs found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ComfyWorkflowInputs"
+        "400":
+          description: Not in API format
+        "403":
+          description: Needs the admin role
+  /api/v1/comfyui/workflows/{name}:
+    delete:
+      summary: Remove a saved ComfyUI workflow (Admin)
+      operationId: deleteComfyWorkflow
+      tags: [Tools]
+      parameters:
+        - {name: name, in: path, required: true, schema: {type: string}}
+      responses:
+        "204":
+          description: Removed
+        "403":
+          description: Needs the admin role
   /api/v1/external-server:
     get:
       summary: The OpenAI-compatible server whose models can be chosen for a chat, and the models it offers
@@ -7870,6 +7990,62 @@ components:
           type: string
           maxLength: 120
           description: Where the person is, such as a town. Used only for questions about nearby places, weather, and directions, and as the start of the places tools when no place is named.
+    ComfyUIStatus:
+      type: object
+      required: [base_url, has_token]
+      properties:
+        base_url: {type: string}
+        has_token: {type: boolean}
+        info: {$ref: "#/components/schemas/ComfyUIInfo"}
+        error: {type: string, description: Why the check failed}
+    ComfyUIInfo:
+      type: object
+      required: [devices, models, node_types]
+      properties:
+        version: {type: string}
+        devices:
+          type: array
+          items:
+            type: object
+            required: [name, type, vram_total, vram_free]
+            properties:
+              name: {type: string}
+              type: {type: string}
+              vram_total: {type: integer, format: int64}
+              vram_free: {type: integer, format: int64}
+        models:
+          type: object
+          description: Model files by kind (checkpoints, diffusion, loras, vae, upscalers)
+          additionalProperties: {type: array, items: {type: string}}
+        node_types: {type: integer, description: How many node types ComfyUI offers, custom nodes included}
+    ComfyWorkflowInput:
+      type: object
+      required: [node, field]
+      properties:
+        node: {type: string}
+        field: {type: string}
+    ComfyWorkflowInputs:
+      type: object
+      properties:
+        prompt: {$ref: "#/components/schemas/ComfyWorkflowInput"}
+        negative: {$ref: "#/components/schemas/ComfyWorkflowInput"}
+        seed: {$ref: "#/components/schemas/ComfyWorkflowInput"}
+        image: {$ref: "#/components/schemas/ComfyWorkflowInput"}
+        width: {$ref: "#/components/schemas/ComfyWorkflowInput"}
+        height: {$ref: "#/components/schemas/ComfyWorkflowInput"}
+    ComfyWorkflows:
+      type: object
+      required: [workflows]
+      properties:
+        workflows: {type: array, items: {$ref: "#/components/schemas/ComfyWorkflow"}}
+    ComfyWorkflow:
+      type: object
+      required: [name, inputs, nodes]
+      properties:
+        name: {type: string}
+        description: {type: string}
+        inputs: {$ref: "#/components/schemas/ComfyWorkflowInputs"}
+        nodes: {type: integer}
     ExternalServer:
       type: object
       properties:

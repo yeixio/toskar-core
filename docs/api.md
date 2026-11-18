@@ -246,6 +246,10 @@ Control-plane routes are under `/api/v1`. The OpenAI-compatible routes are under
 | GET | `/ratings/community` | Everyone's ratings of the models here, from hardware like this computer's, overall, and by language |
 | GET | `/runtimes` | Runtimes and their detection |
 | GET, PUT | `/external-server` | The external OpenAI-compatible server: `base_url`, `has_key`, and its `models`; PUT takes `base_url`, `api_key`, and `clear_key` |
+| GET, PUT | `/comfyui` | Admin. The connected ComfyUI: `base_url`, `has_token`, and what a check found (`info`: version, `devices`, `models` by kind, `node_types`) or why it failed (`error`); PUT takes `base_url`, `token`, and `clear_token` |
+| GET, POST | `/comfyui/workflows` | Admin. Saved workflows (`name`, `description`, `inputs`, `nodes`); POST saves `{name, description, graph, inputs}`, where `graph` is the workflow exported in API format and `inputs` (detected when left out) map `prompt`, `negative`, `seed`, `image`, `width`, and `height` to a `node` and `field` |
+| POST | `/comfyui/workflows/detect` | Admin. The inputs found in `{graph}` |
+| DELETE | `/comfyui/workflows/{name}` | Admin. Remove a saved workflow |
 | POST | `/runtimes/{id}/install` | Install a runtime (`llamacpp`) |
 
 ### Profiles and tools
@@ -722,7 +726,7 @@ Personalization shapes how answers look in every chat, automation, and API reque
 ## Privacy and run records
 
 Each run records what left this computer.
-- **Record kinds:** `web_search` (the query), `web_page` (the address), `places` (the map service and the place, kind of place and point, or route asked for), `paired_computer` (the prompt and context, or training examples), `external_server` (a chat sent to a server that is not on this computer), `connector` (the service and what it was asked; long text such as a comment's body is left out), `notification` (an email or webhook delivery: the server or host, and the notification's title), `community_ratings` (a rating shared or withdrawn, with the model, hardware class, and how it runs when that is shared, or the public ratings summary downloaded), `update_check` (the daily look at toskar.ai for a newer version; nothing is sent but the request), `news` (reading the AI news on toskar.ai; nothing is sent but the request), and `problem_report` (a problem report sent with Report this: its error code and screen, and whether it had details or a reply address, never the address itself).
+- **Record kinds:** `web_search` (the query), `web_page` (the address), `places` (the map service and the place, kind of place and point, or route asked for), `paired_computer` (the prompt and context, or training examples), `external_server` (a chat sent to a server that is not on this computer), `connector` (the service and what it was asked; long text such as a comment's body is left out), `notification` (an email or webhook delivery: the server or host, and the notification's title), `community_ratings` (a rating shared or withdrawn, with the model, hardware class, and how it runs when that is shared, or the public ratings summary downloaded), `update_check` (the daily look at toskar.ai for a newer version; nothing is sent but the request), `news` (reading the AI news on toskar.ai; nothing is sent but the request), `comfyui` (a workflow run on a ComfyUI on another computer: the workflow and the picture's name), and `problem_report` (a problem report sent with Report this: its error code and screen, and whether it had details or a reply address, never the address itself).
 - **Record fields:** `source` (`chat`, `api`, `automation`, `training`), plus `conversation_id` and `task_id` when there are any.
 
 Memories and knowledge sources have `local_only`. Set it with `PATCH /memory/{id}` or the knowledge update, `{"local_only": true}`. A turn that uses a local-only memory or a passage from a local-only source runs on this computer, even when placement would have chosen a paired computer, and its steps say so.

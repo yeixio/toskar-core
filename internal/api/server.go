@@ -327,6 +327,7 @@ type Server struct {
 	ratings         Ratings
 	network         Network
 	external        ExternalServers
+	comfyui         ComfyUIs
 	runs            RunStore
 	capabilities    CapabilitySource
 	caches          CacheSource
@@ -490,6 +491,7 @@ func (s *Server) routes() {
 	s.ratingsRoutes(api)
 	s.networkRoutes(api)
 	s.externalRoutes(api)
+	s.comfyuiRoutes(api)
 	s.runRoutes(api)
 	s.capabilityRoutes(api)
 	s.cacheRoutes(api)

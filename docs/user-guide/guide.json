@@ -2523,6 +2523,27 @@
             "chat",
             "gpu"
           ]
+        },
+        {
+          "type": "heading",
+          "text": "Use your own ComfyUI"
+        },
+        {
+          "type": "paragraph",
+          "text": "If you already run ComfyUI, here or on another computer, an Admin can connect it and save its workflows, such as an upscale or pictures in a set style. Chats run them with the ComfyUI Workflow tool, and what they make is attached to the answer like Toskar's own pictures and clips. The built-in models stay the default."
+        },
+        {
+          "type": "steps",
+          "items": [
+            "In ComfyUI, open the workflow and choose Workflow › Export (API). This saves the workflow as a JSON file.",
+            "In Toskar, open Tools › Images and video › ComfyUI. Enter its address, such as http://127.0.0.1:8188, and a token if it asks for one, then choose Save and check. The card shows ComfyUI's version, its graphics, and how many models it has.",
+            "Under Workflows, choose the exported file. Toskar finds its prompt, negative prompt, seed, picture, and size inputs and shows them. Give it a short name, such as upscale, and say what it does, then choose Add workflow.",
+            "In a chat, ask for it by what it does, such as \"Upscale the picture with my ComfyUI\" or \"Use the watercolor workflow: a lighthouse at dusk\"."
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Custom nodes run their own code on the computer that runs ComfyUI, so only an Admin can connect one, and Toskar never installs anything into it. When ComfyUI is on another computer, the prompt and any picture you give it go there, and What left this computer lists each run. A profile that keeps work on this computer doesn't use a ComfyUI elsewhere."
         }
       ]
     },

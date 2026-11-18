@@ -27,6 +27,7 @@ import (
 	"github.com/yeixio/toskar-core/internal/browser"
 	"github.com/yeixio/toskar-core/internal/cache"
 	"github.com/yeixio/toskar-core/internal/codeexec"
+	"github.com/yeixio/toskar-core/internal/comfyui"
 	"github.com/yeixio/toskar-core/internal/config"
 	"github.com/yeixio/toskar-core/internal/connectors"
 	"github.com/yeixio/toskar-core/internal/diagnostics"
@@ -161,11 +162,15 @@ type App struct {
 	// External is the OpenAI-compatible server whose models can be chosen
 	// for a chat (#111).
 	External *external.Runtime
-	secrets  *auth.SecretStore
-	extMu    sync.Mutex
-	extList  []contracts.Model
-	extAt    time.Time
-	extErr   error
+	// Comfy is a ComfyUI an Admin connected, and ComfyFlows the workflows
+	// saved for it (#958).
+	Comfy      *comfyui.Client
+	ComfyFlows *comfyui.Store
+	secrets    *auth.SecretStore
+	extMu      sync.Mutex
+	extList    []contracts.Model
+	extAt      time.Time
+	extErr     error
 	// Ratings is community model ratings (#37).
 	Ratings *ratings.Service
 	// identity is this computer's Bifrost key; joinTokens and networkMu
@@ -455,6 +460,8 @@ func New(opts Options) (*App, error) {
 		instances:     opts.Instances,
 		People:        people,
 		External:      extRuntime,
+		Comfy:         newComfyUI(cfg, secrets),
+		ComfyFlows:    &comfyui.Store{Path: filepath.Join(cfg.DataDir, "comfyui", "workflows.json")},
 		secrets:       secrets,
 		Share:         share.New(0),
 		Config:        cfgMgr,
@@ -935,6 +942,7 @@ func New(opts Options) (*App, error) {
 	a.joinTokens = &join.Tokens{DB: db.SQL}
 	a.API.BindNetwork(a)
 	a.API.BindExternal(a)
+	a.API.BindComfyUI(a)
 	a.API.BindRuns(a.RunLog)
 	a.API.BindCapabilities(a)
 	a.API.BindCaches(a)
@@ -1065,6 +1073,7 @@ func New(opts Options) (*App, error) {
 	videos := &imagegen.Engine{Setup: a.Video, WorkDir: filepath.Join(cfg.DataDir, "video-jobs"), What: "video generation", Room: a.mediaRoom, Logger: logger}
 	a.registerPortable(&imagegen.VideoTool{Engine: videos, Store: a.Artifacts})
 	a.registerPortable(&imagegen.ExtendTool{Engine: videos, Store: a.Artifacts})
+	a.Tools.Register(&comfyTool{app: a})
 	a.API.BindVideo(a.Video)
 	a.API.BindRemoteMediaSetup(a.RemoteMediaSetup)
 	a.API.BindMediaElsewhere(a.mediaElsewhere)
