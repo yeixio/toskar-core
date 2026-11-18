@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Toskar Control Plane API
-  version: "1.110"
+  version: "1.111"
   description: >-
     Local AI control plane API for Toskar, its OpenAI-compatible routes, and its MCP server.
     On the default loopback bind no key is needed. When the daemon listens on any other address,
@@ -1371,6 +1371,25 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/TLSInfo"
+  /api/v1/tls/next:
+    get:
+      summary: The certificate that replaces one naming the computer (#1263)
+      description: >-
+        Certificates made before #1263 carry the computer's name, which the
+        remote listener and the relay show anyone. Toskar replaces such a
+        certificate once every phone used in the last 30 days has asked for
+        this one (or after 30 days). A phone saves the fingerprint and
+        accepts the switch instead of warning that the computer changed.
+        The fingerprint is empty when no switch is coming.
+      operationId: getNextApiTLS
+      tags: [Devices]
+      responses:
+        "200":
+          description: The next certificate's fingerprint, if there is one
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NextTLSInfo"
   /about:
     get:
       summary: AGPL corresponding-source offer
@@ -10854,6 +10873,12 @@ components:
               heap_bytes: {type: integer, format: int64, description: Memory in use by Go objects; SysBytes is all the memory the Go runtime holds from the system.}
               sys_bytes: {type: integer, format: int64}
         interval_seconds: {type: integer, description: 'How often a sample is kept, in seconds.'}
+    NextTLSInfo:
+      type: object
+      properties:
+        fingerprint:
+          type: string
+          description: SHA-256 of the next certificate, as "sha256:<hex>"
     TLSInfo:
       type: object
       description: How the API speaks HTTPS.

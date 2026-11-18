@@ -167,6 +167,18 @@ func (c *Client) Status() Status {
 	return st
 }
 
+// RegisterNow sends the record again soon, as after the API's certificate,
+// which signs it, is replaced.
+func (c *Client) RegisterNow() {
+	if c.registerNow == nil {
+		return
+	}
+	select {
+	case c.registerNow <- struct{}{}:
+	default:
+	}
+}
+
 func (c *Client) setState(state, errText string) {
 	c.mu.Lock()
 	c.status.State, c.status.Error = state, errText

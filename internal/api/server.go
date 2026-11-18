@@ -289,9 +289,14 @@ type Server struct {
 	// tlsConfig and tlsInfo are the API's HTTPS (#213).
 	tlsConfig *tls.Config
 	tlsInfo   APITLS
-	replaced  map[net.Listener]bool
-	conns     map[net.Conn]bool
-	closed    chan struct{}
+	// tlsCert is the certificate tlsConfig answers with, and tlsNext the
+	// fingerprint of the one that will replace it (#1263).
+	tlsCert      tls.Certificate
+	tlsNext      string
+	tlsNextAsked func(keyID string)
+	replaced     map[net.Listener]bool
+	conns        map[net.Conn]bool
+	closed       chan struct{}
 	// remote is the listener for access from anywhere (#456).
 	remote remoteListener
 
@@ -471,6 +476,7 @@ func (s *Server) routes() {
 	s.oidcRoutes(api)
 	s.portalRoutes(api)
 	api.HandleFunc("/tls", s.handleTLS).Methods(http.MethodGet)
+	api.HandleFunc("/tls/next", s.handleNextTLS).Methods(http.MethodGet)
 	api.HandleFunc("/remote-access", s.handleRemoteAccess).Methods(http.MethodGet)
 	api.HandleFunc("/remote-access/check", s.handleRemoteCheck).Methods(http.MethodPost)
 	api.HandleFunc("/remote-access/route", s.handleRouteSecret).Methods(http.MethodGet)

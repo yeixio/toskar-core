@@ -312,7 +312,9 @@ var deviceRoutes = map[string]bool{
 	"GET /api/v1/remote-access":        true,
 	"POST /api/v1/remote-access/check": true,
 	"GET /api/v1/health":               true,
-	"GET /api/v1/version":              true,
+	// The certificate that replaces one naming the computer (#1263).
+	"GET /api/v1/tls/next": true,
+	"GET /api/v1/version":  true,
 	// A watch going along with the phone gets a key of its own
 	// (yeixio/toskar-apps#213).
 	"POST /api/v1/me/devices":                 true,

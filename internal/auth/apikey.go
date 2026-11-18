@@ -102,6 +102,25 @@ func (m *APIKeyManager) Companions(ctx context.Context, parentID string) ([]stri
 	return out, rows.Err()
 }
 
+// CompanionKeys are the live keys of devices connected through another,
+// such as watches, by id.
+func (m *APIKeyManager) CompanionKeys(ctx context.Context) (map[string]bool, error) {
+	rows, err := m.db.QueryContext(ctx, `SELECT id FROM api_keys WHERE COALESCE(parent_key_id, '') != '' AND revoked_at IS NULL`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	out := map[string]bool{}
+	for rows.Next() {
+		var id string
+		if err := rows.Scan(&id); err != nil {
+			return nil, err
+		}
+		out[id] = true
+	}
+	return out, rows.Err()
+}
+
 func (m *APIKeyManager) create(ctx context.Context, name, kind string) (record APIKeyRecord, secret string, err error) {
 	return m.createWith(ctx, name, kind, "")
 }

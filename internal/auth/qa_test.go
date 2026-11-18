@@ -27,4 +27,12 @@ func TestQACertificateHidesTheComputersName(t *testing.T) {
 	if strings.Contains(strings.ToLower(leaf.Subject.String()), strings.ToLower(host)) {
 		t.Errorf("the certificate's subject names the computer: %s", leaf.Subject)
 	}
+	for _, name := range leaf.DNSNames {
+		if strings.Contains(strings.ToLower(name), strings.ToLower(host)) {
+			t.Errorf("the certificate's names include the computer's: %v", leaf.DNSNames)
+		}
+	}
+	if NamesComputer(cert) {
+		t.Error("a new certificate counts as one that names the computer")
+	}
 }
