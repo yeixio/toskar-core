@@ -548,5 +548,13 @@
       "window": "Über sein Fenster hinaus",
       "out_of_memory": "Passt nicht"
     }
+  },
+  "licenseTerms": {
+    "title": "Lizenz von {{model}} akzeptieren",
+    "body": "{{model}} steht unter der {{license}}, deren Bedingungen du zustimmst, bevor du es nutzt.",
+    "read": "{{license}} lesen",
+    "record": "Toskar speichert für deinen Admin, dass und wann du zugestimmt hast.",
+    "cancel": "Abbrechen",
+    "accept": "Akzeptieren und installieren"
   }
 }

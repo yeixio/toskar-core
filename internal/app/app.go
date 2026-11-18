@@ -713,6 +713,8 @@ func New(opts Options) (*App, error) {
 		InstallModel: func(ctx context.Context, id string, wait bool, nodeID string) error {
 			return a.installModelOn(ctx, id, nodeID, wait)
 		},
+		AcceptModelLicense:      a.AcceptModelLicense,
+		ModelLicenseAcceptances: a.ModelLicenseAcceptances,
 		InstallModelFromURL: func(ctx context.Context, req contracts.InstallFromURLRequest, wait bool) (string, error) {
 			return a.installFromURLOn(ctx, req, wait)
 		},

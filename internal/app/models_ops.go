@@ -393,6 +393,7 @@ func (a *App) listModelsCluster(ctx context.Context) ([]contracts.Model, error) 
 	a.withAlwaysRunning(ctx, local)
 	a.withContextWindows(ctx, local)
 	a.withSlots(ctx, local)
+	a.withLicenseAcceptance(ctx, local)
 	cfg := a.Config.Get()
 	presence := map[string][]contracts.ModelOnNode{}
 	for _, m := range local {

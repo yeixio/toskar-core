@@ -859,16 +859,21 @@ export const api = {
 
   listRunningModels: () => request<RunningModelView[]>('/api/v1/models/running'),
 
-  installModel: (id: string, opts?: { wait?: boolean; node_id?: string }) => {
+  /** accept_license: the person accepted the model's license terms, which Core keeps a record of (#593). */
+  installModel: (id: string, opts?: { wait?: boolean; node_id?: string; accept_license?: boolean }) => {
     const params = new URLSearchParams()
     if (opts?.wait) params.set('wait', 'true')
     if (opts?.node_id) params.set('node_id', opts.node_id)
     const qs = params.toString()
+    const body = {
+      ...(opts?.node_id ? { node_id: opts.node_id } : {}),
+      ...(opts?.accept_license ? { accept_license: true } : {}),
+    }
     return request<{ status: string; model_id: string }>(
       `/api/v1/models/${id}/install${qs ? `?${qs}` : ''}`,
       {
         method: 'POST',
-        body: opts?.node_id ? JSON.stringify({ node_id: opts.node_id }) : undefined,
+        body: Object.keys(body).length > 0 ? JSON.stringify(body) : undefined,
       },
     )
   },

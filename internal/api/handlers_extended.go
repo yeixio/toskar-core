@@ -166,6 +166,9 @@ func (s *Server) handleInstallModel(w http.ResponseWriter, r *http.Request) {
 		var body struct {
 			NodeID string `json:"node_id"`
 			Wait   *bool  `json:"wait"`
+			// AcceptLicense is the person accepting the model's license
+			// terms, which Toskar keeps a record of (#593).
+			AcceptLicense bool `json:"accept_license"`
 		}
 		if err := json.NewDecoder(r.Body).Decode(&body); err == nil {
 			if body.NodeID != "" {
@@ -173,6 +176,12 @@ func (s *Server) handleInstallModel(w http.ResponseWriter, r *http.Request) {
 			}
 			if body.Wait != nil {
 				wait = *body.Wait
+			}
+			if body.AcceptLicense && s.deps.AcceptModelLicense != nil {
+				if err := s.deps.AcceptModelLicense(r.Context(), id); err != nil {
+					writeErrFrom(w, http.StatusBadRequest, "INSTALL_FAILED", err)
+					return
+				}
 			}
 		}
 	}
@@ -185,6 +194,21 @@ func (s *Server) handleInstallModel(w http.ResponseWriter, r *http.Request) {
 		status = "installed"
 	}
 	writeJSON(w, http.StatusOK, modelInstall{Status: status, ModelID: id})
+}
+
+// handleLicenseAcceptances lists who accepted which model's license terms,
+// and when (#593). It's for Admins.
+func (s *Server) handleLicenseAcceptances(w http.ResponseWriter, r *http.Request) {
+	if s.deps.ModelLicenseAcceptances == nil {
+		writeErr(w, http.StatusNotImplemented, "NOT_IMPLEMENTED", "License records aren't available.", nil)
+		return
+	}
+	list, err := s.deps.ModelLicenseAcceptances(r.Context())
+	if err != nil {
+		writeErrFrom(w, http.StatusInternalServerError, "INTERNAL_ERROR", err)
+		return
+	}
+	writeJSON(w, http.StatusOK, list)
 }
 
 func (s *Server) handleStartModel(w http.ResponseWriter, r *http.Request) {

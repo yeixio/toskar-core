@@ -540,5 +540,13 @@
       "window": "超出其窗口",
       "out_of_memory": "放不下"
     }
+  },
+  "licenseTerms": {
+    "title": "接受 {{model}} 的许可证",
+    "body": "{{model}} 采用 {{license}}，使用前需要同意其条款。",
+    "read": "阅读 {{license}}",
+    "record": "Toskar 会为你的 Admin 记录你已接受及日期。",
+    "cancel": "取消",
+    "accept": "接受并安装"
   }
 }

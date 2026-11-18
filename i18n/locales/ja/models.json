@@ -540,5 +540,13 @@
       "window": "ウィンドウの上限を超える",
       "out_of_memory": "収まらない"
     }
+  },
+  "licenseTerms": {
+    "title": "{{model}} のライセンスに同意",
+    "body": "{{model}} は {{license}} のもとで提供されており、使う前にその条件に同意する必要があります。",
+    "read": "{{license}} を読む",
+    "record": "同意したことと日付を、Admin のために Toskar が記録します。",
+    "cancel": "キャンセル",
+    "accept": "同意してインストール"
   }
 }
