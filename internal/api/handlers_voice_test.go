@@ -71,7 +71,7 @@ func TestVoiceRealtimeWebSocket(t *testing.T) {
 	defer raw.Close()
 	// The server writes session.created as soon as it upgrades, so it can
 	// arrive with the handshake, in br; read it from there first.
-	var conn net.Conn = raw
+	conn := raw
 	if br != nil {
 		conn = bufferedConn{Conn: raw, r: br}
 	}
