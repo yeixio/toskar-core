@@ -284,5 +284,8 @@
   "PROJECT_NAME_REQUIRED": "Donnez un nom au projet.",
   "PROJECT_NOT_FOUND": "Ce projet a été supprimé.",
   "SWARM_NOT_FOUND": "Cet essaim a été supprimé.",
-  "SWARM_RUNNING": "Cet essaim est toujours en cours. Arrêtez-le d'abord."
+  "SWARM_RUNNING": "Cet essaim est toujours en cours. Arrêtez-le d'abord.",
+  "RELAY_TOKEN_SHORTER": "Cet ordinateur a déjà un jeton de relais valable plus longtemps : il garde celui-là.",
+  "RELAY_UNREACHABLE": "Impossible de joindre le relais de Toskar. Réessayez dans une minute.",
+  "COMPANION_LIMIT": "Un appareil connecté via un autre ne peut pas en connecter d'autres. Connectez-le depuis le téléphone."
 }

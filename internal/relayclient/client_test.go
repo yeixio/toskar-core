@@ -75,6 +75,8 @@ type fakeRelay struct {
 	tokens  map[string]bool
 	record  []byte
 	enrolls int
+	// devices is how many device tokens were made.
+	devices int
 	opens   chan [2]string // stream, client
 	// name and version are what the last tunnel sent.
 	name    string
@@ -123,6 +125,18 @@ func newFakeRelay(t *testing.T) *fakeRelay {
 		f.record = b
 		f.mu.Unlock()
 		_, _ = io.WriteString(w, `{"ttl":1800}`)
+	})
+	mux.HandleFunc("POST /v1/routes/{route}/device-token", func(w http.ResponseWriter, r *http.Request) {
+		if !f.authorized(r) {
+			http.Error(w, `{"error":{"code":"TOKEN_EXPIRED"}}`, http.StatusUnauthorized)
+			return
+		}
+		payload, _ := json.Marshal(map[string]any{"v": 1, "route": r.PathValue("route"), "role": "device", "exp": time.Now().Add(30 * 24 * time.Hour).Unix()})
+		tok := "rt1." + base64.RawURLEncoding.EncodeToString(payload) + ".sig"
+		f.mu.Lock()
+		f.devices++
+		f.mu.Unlock()
+		_ = json.NewEncoder(w).Encode(map[string]string{"token": tok, "role": "device"})
 	})
 	mux.HandleFunc("GET /v1/tunnel", func(w http.ResponseWriter, r *http.Request) {
 		if !f.authorized(r) {

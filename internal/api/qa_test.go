@@ -100,14 +100,12 @@ func TestQACompanionKeysGoWithTheirDevice(t *testing.T) {
 		t.Fatalf("the disconnected phone's key: %d", status)
 	}
 	after, _ := q.call(http.MethodGet, "/api/v1/health", watch.APIKey, "")
-	qa.KnownBug(t, "toskar-core#1260", func(t testing.TB) {
-		if after != http.StatusUnauthorized {
-			t.Errorf("the phone's companion still works after the phone was disconnected: %d", after)
-		}
-		if grandchild == http.StatusCreated {
-			t.Error("a companion made another companion")
-		}
-	})
+	if after != http.StatusUnauthorized {
+		t.Errorf("the phone's companion still works after the phone was disconnected: %d", after)
+	}
+	if grandchild != http.StatusForbidden {
+		t.Errorf("a companion making another companion: %d, want 403", grandchild)
+	}
 }
 
 // A stranger's wrong keys from a shared address don't lock out the paired
@@ -158,35 +156,31 @@ func TestQARemoteLockoutLetsValidDevicesIn(t *testing.T) {
 	}
 	phone := get("phone-key")
 	stranger := get("guess")
-	qa.KnownBug(t, "toskar-core#1261", func(t testing.TB) {
-		if phone != http.StatusOK {
-			t.Errorf("a paired phone behind the same address: %d, want 200", phone)
-		}
-		if stranger != http.StatusTooManyRequests {
-			t.Errorf("the stranger is no longer held back: %d", stranger)
-		}
-	})
+	if phone != http.StatusOK {
+		t.Errorf("a paired phone behind the same address: %d, want 200", phone)
+	}
+	if stranger != http.StatusTooManyRequests {
+		t.Errorf("the stranger is no longer held back: %d", stranger)
+	}
 }
 
 // A paired device gets a token that can only look the computer up, never
 // the computer's own, which could open its tunnel.
 func TestQADevicesDontGetTheComputersRelayToken(t *testing.T) {
 	// Regression: toskar-core#1258
-	payload, _ := json.Marshal(map[string]any{"v": 1, "route": "route-1", "exp": time.Now().Add(30 * 24 * time.Hour).Unix()})
-	computers := "rt1." + base64.RawURLEncoding.EncodeToString(payload) + ".sig"
+	payload, _ := json.Marshal(map[string]any{"v": 1, "route": "route-1", "role": "device", "exp": time.Now().Add(30 * 24 * time.Hour).Unix()})
+	device := "rt1." + base64.RawURLEncoding.EncodeToString(payload) + ".sig"
 	srv := NewServer(Dependencies{
-		RouteSecret: func() (string, string, error) { return "secret", "route-1", nil },
-		RelayToken:  func() string { return computers },
+		RouteSecret:      func() (string, string, error) { return "secret", "route-1", nil },
+		DeviceRelayToken: func() string { return device },
 	})
 	route, err := srv.route()
 	if err != nil {
 		t.Fatal(err)
 	}
-	qa.KnownBug(t, "toskar-core#1258", func(t testing.TB) {
-		if route.Token == computers {
-			t.Error("paired devices are handed the computer's own relay token, which has no device role")
-		}
-	})
+	if route.Token != device {
+		t.Errorf("paired devices are handed %q, want the device token", route.Token)
+	}
 }
 
 // The public health check says the product's name.

@@ -65,6 +65,19 @@ type Store interface {
 // TokenName is the token's name in the store.
 const TokenName = "relay-token"
 
+// DeviceTokenName is the device token's name in the store: the one paired
+// devices are handed for looking this computer up through the relay. The
+// computer's own token can open its tunnel and change its record, so it
+// isn't handed out (#1258).
+const DeviceTokenName = "relay-device-token"
+
+// deviceRetry is how long after a failed device token request it's asked
+// again; a relay without device tokens is asked again after deviceAbsent.
+const (
+	deviceRetry  = 10 * time.Minute
+	deviceAbsent = 6 * time.Hour
+)
+
 // Client is one computer's connection to one relay.
 type Client struct {
 	// Relay is the relay's name, with a port when it isn't 443.
@@ -115,6 +128,9 @@ type Client struct {
 	// nextRenew is when the token may next be renewed from the relay;
 	// under tokenMu.
 	nextRenew time.Time
+	// nextDevice is when a device token may next be asked for; under
+	// tokenMu.
+	nextDevice time.Time
 }
 
 // Status is how the relay connection is doing, for Settings.
@@ -444,7 +460,65 @@ func (c *Client) register(ctx context.Context) error {
 	c.mu.Lock()
 	c.status.Registered = time.Now()
 	c.mu.Unlock()
+	c.refreshDeviceToken(ctx, tok)
 	return nil
+}
+
+// DeviceToken is the token for paired devices, when one is kept for this
+// route and hasn't run out; "" otherwise.
+func DeviceToken(store Store, route string) string {
+	tok, err := store.Read(DeviceTokenName)
+	if err != nil {
+		return ""
+	}
+	tok = strings.TrimSpace(tok)
+	if r, exp, ok := ParseToken(tok); !ok || r != route || !time.Now().Before(exp) {
+		return ""
+	}
+	return tok
+}
+
+// refreshDeviceToken asks the relay for a device token when the one kept
+// is missing, for another route, or ends before tok does, as after the
+// computer's token renewed.
+func (c *Client) refreshDeviceToken(ctx context.Context, tok string) {
+	c.tokenMu.Lock()
+	defer c.tokenMu.Unlock()
+	if time.Now().Before(c.nextDevice) {
+		return
+	}
+	kept := DeviceToken(c.Store, c.Route())
+	if kept != "" && !tokenExpiry(kept).Before(tokenExpiry(tok)) {
+		return
+	}
+	resp, err := c.do(ctx, http.MethodPost, "/v1/routes/"+c.Route()+"/device-token", tok, nil)
+	var ae *apiError
+	if errors.As(err, &ae) && (ae.Status == http.StatusNotFound || ae.Status == http.StatusMethodNotAllowed) {
+		c.nextDevice = time.Now().Add(deviceAbsent)
+		return
+	}
+	if err != nil {
+		c.nextDevice = time.Now().Add(deviceRetry)
+		c.logger().Warn("couldn't get a device token from the relay", "relay", c.Relay, "err", err)
+		return
+	}
+	defer resp.Body.Close()
+	var out struct {
+		Token string `json:"token"`
+	}
+	if err := json.NewDecoder(io.LimitReader(resp.Body, 8<<10)).Decode(&out); err != nil {
+		c.nextDevice = time.Now().Add(deviceRetry)
+		return
+	}
+	if r, _, ok := ParseToken(out.Token); !ok || r != c.Route() {
+		c.nextDevice = time.Now().Add(deviceRetry)
+		return
+	}
+	if err := c.Store.Write(DeviceTokenName, out.Token); err != nil {
+		c.nextDevice = time.Now().Add(deviceRetry)
+		return
+	}
+	c.logger().Info("got a device token from the relay", "relay", c.Relay, "expires", tokenExpiry(out.Token))
 }
 
 func isExpired(err error) bool {

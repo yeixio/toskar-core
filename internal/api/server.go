@@ -152,11 +152,12 @@ type Dependencies struct {
 	// RelayName is the relay this computer uses away from home: Toskar's or
 	// an organization's, given to devices with the route secret.
 	RelayName func() string
-	// RelayToken is this computer's current token for Toskar's relay, or
-	// "". Its paired devices get it at home, so each one, not only the one
-	// that subscribed, can find the computer away from home (#456).
-	RelayToken  func() string
-	RemoteReach func() RemoteReach
+	// DeviceRelayToken is a device token for Toskar's relay, or "". Its
+	// paired devices get it at home, so each one, not only the one that
+	// subscribed, can find the computer away from home (#456). It's never
+	// the computer's own token, which could open its tunnel (#1258).
+	DeviceRelayToken func() string
+	RemoteReach      func() RemoteReach
 	// Transcribe turns an attached recording into text with speech.transcribe,
 	// wherever it runs (yeixio/toskar-apps#155).
 	Transcribe func(ctx context.Context, artifactID, language string) (Transcription, error)

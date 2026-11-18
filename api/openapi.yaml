@@ -1279,14 +1279,14 @@ paths:
   /api/v1/remote-access/relay-token:
     put:
       summary: Hand over a subscription's relay token (#456)
-      description: "Body {token, enable}. token is the route token the app got for this computer by exchanging a store receipt with Toskar's relay; the computer keeps it and registers and keeps its tunnel there. A paired device may send it, from home or through the remote listener. enable also turns access from anywhere on, and needs an Admin (403 ROLE_REQUIRED). Answers state: the relay client's state, or off. 400 RELAY_TOKEN_INVALID for a token that isn't for this computer's route or has expired, RELAY_TOKEN_NOT_NEEDED when an organization's relay is set."
+      description: "Body {token, enable}. token is the route token the app got for this computer by exchanging a store receipt with Toskar's relay; the computer keeps it and registers and keeps its tunnel there. A paired device may send it, from home or through the remote listener. enable also turns access from anywhere on, and needs an Admin (403 ROLE_REQUIRED). Answers state: the relay client's state, or off. 400 RELAY_TOKEN_INVALID for a token that isn't for this computer's route, has expired, or the relay doesn't take (the computer asks it first; RELAY_UNREACHABLE when it can't), RELAY_TOKEN_SHORTER for one that ends before the token in use while that one still works (#1258), RELAY_TOKEN_NOT_NEEDED when an organization's relay is set."
       operationId: putRelayToken
       tags: [Devices]
       responses:
         "200":
           description: The token is kept; state
         "400":
-          description: RELAY_TOKEN_INVALID or RELAY_TOKEN_NOT_NEEDED
+          description: RELAY_TOKEN_INVALID, RELAY_TOKEN_SHORTER, RELAY_UNREACHABLE, or RELAY_TOKEN_NOT_NEEDED
         "403":
           description: ROLE_REQUIRED, turning access from anywhere on without the admin role
   /api/v1/remote-access/subscription/checkout:

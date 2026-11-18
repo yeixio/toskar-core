@@ -97,3 +97,30 @@ func TestQARevokedTokenEndsInsteadOfRetrying(t *testing.T) {
 		}
 	})
 }
+
+// The computer gets a device token for its paired devices, so it never
+// hands them its own, which could open its tunnel.
+func TestQADeviceTokenForPairedDevices(t *testing.T) {
+	// Regression: toskar-core#1258
+	f := newFakeRelay(t)
+	c, _, store := f.client(t, f.secret, func(net.Conn) bool { return false })
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	if err := c.register(ctx); err != nil {
+		t.Fatal(err)
+	}
+	device := DeviceToken(store, c.Route())
+	computers, _ := store.Read(TokenName)
+	if device == "" || device == computers {
+		t.Fatalf("device token %q, computer's %q", device, computers)
+	}
+	// Registering again keeps it while it lasts as long as the computer's.
+	if err := c.register(ctx); err != nil {
+		t.Fatal(err)
+	}
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	if f.devices != 1 {
+		t.Errorf("asked for %d device tokens, want 1", f.devices)
+	}
+}

@@ -284,5 +284,8 @@
   "PROJECT_NAME_REQUIRED": "Dê um nome ao projeto.",
   "PROJECT_NOT_FOUND": "Esse projeto foi removido.",
   "SWARM_NOT_FOUND": "Esse enxame foi removido.",
-  "SWARM_RUNNING": "Este enxame ainda está em execução. Pare-o primeiro."
+  "SWARM_RUNNING": "Este enxame ainda está em execução. Pare-o primeiro.",
+  "RELAY_TOKEN_SHORTER": "Este computador já tem um token do relay que dura mais, então continua com ele.",
+  "RELAY_UNREACHABLE": "Não foi possível falar com o relay do Toskar. Tente de novo em um minuto.",
+  "COMPANION_LIMIT": "Um dispositivo conectado por meio de outro não pode conectar mais. Conecte pelo celular."
 }

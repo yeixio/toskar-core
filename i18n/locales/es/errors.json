@@ -284,5 +284,8 @@
   "PROJECT_NAME_REQUIRED": "Ponle un nombre al proyecto.",
   "PROJECT_NOT_FOUND": "Ese proyecto se eliminó.",
   "SWARM_NOT_FOUND": "Ese enjambre se eliminó.",
-  "SWARM_RUNNING": "Este enjambre sigue en marcha. Detenlo primero."
+  "SWARM_RUNNING": "Este enjambre sigue en marcha. Detenlo primero.",
+  "RELAY_TOKEN_SHORTER": "Esta computadora ya tiene un token del relé que dura más, así que conserva ese.",
+  "RELAY_UNREACHABLE": "No se pudo contactar con el relé de Toskar. Vuelve a intentarlo en un minuto.",
+  "COMPANION_LIMIT": "Un dispositivo conectado a través de otro no puede conectar más. Conéctalo desde el teléfono."
 }

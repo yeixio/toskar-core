@@ -9,18 +9,17 @@ import (
 	"context"
 	"crypto/x509"
 	"encoding/json"
+	"errors"
 	"io"
-	"log/slog"
 	"net"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 	"time"
 
-	"github.com/yeixio/toskar-core/internal/auth"
 	"github.com/yeixio/toskar-core/internal/qa"
 	"github.com/yeixio/toskar-core/internal/relayclient"
-	"github.com/yeixio/toskar-core/internal/rendezvous"
 )
 
 // Typing Toskar's own relay under "Your organization's relay" means
@@ -42,32 +41,58 @@ func TestQAToskarsRelayTypedByHand(t *testing.T) {
 }
 
 // A device's person can't knock the computer off the relay by handing it a
-// worse token for the right route: one that lasts less than the one in use.
+// worse token for the right route: one that lasts less than the one in use,
+// or one the relay doesn't take.
 func TestQARelayTokenIsntReplacedByAWorseOne(t *testing.T) {
 	// Regression: toskar-core#1258
-	t.Setenv("TOSKAR_DISCOVERY_ENABLED", "false")
-	dir := t.TempDir()
-	a, err := New(Options{DataDir: dir, Logger: slog.New(slog.NewTextHandler(io.Discard, nil))})
+	a, _, _ := newAnywhereApp(t)
+	route, err := a.routeID()
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Cleanup(func() { _ = a.DB.Close() })
-	routeSecret, err := rendezvous.RouteSecret(auth.NewSecretStore(dir))
-	if err != nil {
-		t.Fatal(err)
-	}
-	route := rendezvous.RouteID(routeSecret)
 	good := mintToken(route, time.Now().Add(30*24*time.Hour))
-	if _, err := a.setRelayToken(context.Background(), good, false); err != nil {
+	signed := map[string]bool{good: true}
+	relay := http.NewServeMux()
+	relay.HandleFunc("GET /v1/routes/{route}/usage", func(w http.ResponseWriter, r *http.Request) {
+		if !signed[strings.TrimPrefix(r.Header.Get("Authorization"), "Bearer ")] {
+			w.WriteHeader(http.StatusUnauthorized)
+			_, _ = io.WriteString(w, `{"error":{"code":"TOKEN_INVALID"}}`)
+			return
+		}
+		_ = json.NewEncoder(w).Encode(map[string]any{"used": 0})
+	})
+	srv := httptest.NewUnstartedServer(relay)
+	srv.StartTLS()
+	t.Cleanup(srv.Close)
+	pool := x509.NewCertPool()
+	pool.AddCert(srv.Certificate())
+	addr := srv.Listener.Addr().String()
+	a.anywhere.relayForTest = &relayclient.Client{Relay: "example.com", RootCAs: pool, Dial: func(ctx context.Context, network, _ string) (net.Conn, error) {
+		return (&net.Dialer{}).DialContext(ctx, network, addr)
+	}}
+	ctx := context.Background()
+	if _, err := a.setRelayTokenFromDevice(ctx, good, false); err != nil {
 		t.Fatal(err)
 	}
-	_, replaceErr := a.setRelayToken(context.Background(), mintToken(route, time.Now().Add(time.Minute)), false)
-	kept := a.relayToken()
-	qa.KnownBug(t, "toskar-core#1258", func(t testing.TB) {
-		if replaceErr == nil || kept != good {
-			t.Errorf("a token lasting a minute replaced the one lasting 30 days (err %v)", replaceErr)
-		}
-	})
+	// Shorter, though the relay signed it.
+	short := mintToken(route, time.Now().Add(time.Minute))
+	signed[short] = true
+	if _, err := a.setRelayTokenFromDevice(ctx, short, false); !errors.Is(err, errRelayTokenWorse) {
+		t.Errorf("a token lasting a minute replaced the one lasting 30 days: %v", err)
+	}
+	// Longer, but the relay didn't sign it.
+	if _, err := a.setRelayTokenFromDevice(ctx, mintToken(route, time.Now().Add(60*24*time.Hour)), false); !errors.Is(err, errRelayToken) {
+		t.Errorf("a token the relay refuses was taken: %v", err)
+	}
+	if kept := a.relayToken(); kept != good {
+		t.Errorf("the token in use was replaced")
+	}
+	// Once the relay refuses the one in use, as after a move, a shorter
+	// working one takes over.
+	delete(signed, good)
+	if _, err := a.setRelayTokenFromDevice(ctx, short, false); err != nil || a.relayToken() != short {
+		t.Errorf("a working token didn't replace a revoked one: %v", err)
+	}
 }
 
 // Settings asks the relay whether the computer is already covered, as the
