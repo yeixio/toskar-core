@@ -454,9 +454,7 @@
         "hint": "Modelle, die wir mit Toskar geprüft haben."
       },
       "media": {
-        "title": "Bilder und Clips",
-        "hint": "Bilder und Clips werden unter Werkzeuge eingerichtet.",
-        "action": "Werkzeuge öffnen"
+        "title": "Bilder und Clips"
       }
     },
     "purpose": {
@@ -491,6 +489,14 @@
       "label": "Für geschäftliche Nutzung",
       "hint": "Nur Modelle zeigen, deren Lizenz geschäftliche Nutzung erlaubt.",
       "none": "Hier gibt es keine Modelle, deren Lizenz geschäftliche Nutzung erlaubt."
+    },
+    "browse": {
+      "label": "Nach Kategorie durchsuchen",
+      "all": "Alle",
+      "chat_coding": "Chat und Programmieren",
+      "vision": "Sieht Bilder",
+      "creative": "Bilder und Clips",
+      "hint": "Bild- und Clip-Modelle erstellen und bearbeiten Bilder und kurze Videos auf diesem Computer."
     }
   },
   "results": {
