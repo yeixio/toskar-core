@@ -73,22 +73,39 @@ type voiceChat struct {
 
 	mu             sync.Mutex
 	conversationID string
+	// saving closes once the last answer is saved.
+	saving chan struct{}
 }
 
 func (c *voiceChat) Respond(ctx context.Context, text string, delta func(string)) error {
+	// The last answer is saved before this one is asked, so the model hears
+	// it as part of the chat.
+	c.mu.Lock()
+	saving := c.saving
+	c.mu.Unlock()
+	if saving != nil {
+		select {
+		case <-saving:
+		case <-ctx.Done():
+			return ctx.Err()
+		}
+	}
 	c.mu.Lock()
 	id := c.conversationID
 	c.mu.Unlock()
 	// Who's asking, from the session's request; stopped with the answer.
 	turn, cancel := context.WithCancel(context.WithoutCancel(c.ctx))
-	defer cancel()
 	go func() {
-		<-ctx.Done()
-		cancel()
+		select {
+		case <-ctx.Done():
+			cancel()
+		case <-turn.Done():
+		}
 	}()
 	if id == "" {
 		conv, err := c.app.Conversations.Create(turn, "Voice chat", "", "")
 		if err != nil {
+			cancel()
 			return err
 		}
 		id = conv.ID
@@ -100,22 +117,40 @@ func (c *voiceChat) Respond(ctx context.Context, text string, delta func(string)
 	turn = pluginapi.WithAnswerOptions(turn, pluginapi.GenerateOptions{NoThinking: true})
 	chunks, err := c.app.RunChat(turn, "", id, text, true, "", "")
 	if err != nil {
+		cancel()
 		return err
 	}
 	for chunk := range chunks {
 		if chunk.Error != "" {
+			cancel()
+			for range chunks {
+			}
 			return errors.New(chunk.Error)
 		}
 		if chunk.Content != "" {
 			delta(chunk.Content)
 		}
 		if chunk.Done {
-			break
+			// The chat saves the answer after it's done; the voice is
+			// already speaking it, so that finishes here without holding
+			// the turn, unless the person stops it first (#795).
+			saved := make(chan struct{})
+			c.mu.Lock()
+			c.saving = saved
+			c.mu.Unlock()
+			go func() {
+				for range chunks {
+				}
+				cancel()
+				close(saved)
+			}()
+			return ctx.Err()
 		}
 	}
+	cancel()
 	return ctx.Err()
 }
 
 // spokenStyle is how an answer in live voice mode is written: it's heard,
 // not read.
-const spokenStyle = `This conversation is spoken aloud: the person talks, and your answer is read out by a voice. Answer the way a person would in conversation: a sentence or two, then stop, and let them ask for more. No Markdown, lists, tables, headings, code blocks, emoji, or links; say a web address only if they ask for it. Spell out what a voice would stumble on, such as symbols and abbreviations. When you looked something up, say where it's from in a few words.`
+const spokenStyle = `This conversation is spoken aloud: the person talks, and your answer is read out by a voice. Answer the way a person would in conversation: a sentence or two, then stop, and let them ask for more. No Markdown, lists, tables, headings, code blocks, emoji, or links; say a web address only if they ask for it. Spell out what a voice would stumble on, such as symbols and abbreviations. Only when you looked something up, on the web or in their files, say where it's from in a few words; never say where something you already know comes from.`

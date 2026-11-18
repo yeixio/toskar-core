@@ -86,6 +86,10 @@ func (o *Orchestrator) Run(
 
 		instructions := "Format answers in Markdown with short paragraphs and lists. Do not wrap the whole answer in a code fence. " +
 			"Link only to addresses from the reference material, tool results, or the conversation; otherwise name the site instead of guessing a page's address, since remembered addresses are often wrong."
+		if turnopts.SpokenFrom(ctx) {
+			// A spoken answer is heard, and its own style says how (#795).
+			instructions = ""
+		}
 		reference := referenceMaterial(ctx, env, task.Prompt)
 		// The effort the user chose, or Auto's pick for this kind of request,
 		// sets how much planning, reading, and checking the turn gets (§15).

@@ -474,7 +474,7 @@ func New(opts Options) (*App, error) {
 		APIKeys:       apiKeyMgr,
 		Pairing:       pairing,
 		Identity:      identity,
-		hw:            &hardware.Detector{DataPath: cfg.DataDir},
+		hw:            &hardware.Detector{DataPath: cfg.DataDir, MaxAge: hardwareMaxAge, StaleAge: hardwareStaleAge},
 		stubInference: config.EnvTruthy("STUB_INFERENCE"),
 		Health:        healthMonitor,
 	}
@@ -1108,6 +1108,16 @@ func New(opts Options) (*App, error) {
 
 	return a, nil
 }
+
+// hardwareMaxAge is how long a look at this computer's hardware holds: long
+// enough for one turn's several questions, short enough that free memory
+// and disk stay current (#795).
+const hardwareMaxAge = 10 * time.Second
+
+// hardwareStaleAge is how old a look may be and still answer while a fresh
+// one runs behind it: a spoken conversation pauses longer than
+// hardwareMaxAge between turns, and the turn shouldn't wait on the look.
+const hardwareStaleAge = 5 * time.Minute
 
 func (a *App) detectHardware(ctx context.Context) (contracts.HardwareInventory, error) {
 	return a.hw.Detect(ctx)
