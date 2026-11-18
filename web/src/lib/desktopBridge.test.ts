@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import {
+  desktopFreshInstall,
   openExternal,
   preopenSignInWindow,
   routeExternalLinks,
@@ -148,5 +149,25 @@ describe('saving files', () => {
     const sent = shell.SaveData.mock.calls[0][1] as string
     const bytes = Uint8Array.from(atob(sent), (c) => c.charCodeAt(0))
     expect(new TextDecoder().decode(bytes)).toBe('Níðhöggr ✓')
+  })
+})
+
+// A desktop app's new install offers setup again (toskar-apps#455).
+describe('desktopFreshInstall', () => {
+  afterEach(() => {
+    delete (window as unknown as Record<string, unknown>).go
+  })
+
+  it('is false in a browser and with an older shell', async () => {
+    expect(await desktopFreshInstall()).toBe(false)
+    ;(window as unknown as Record<string, unknown>).go = { main: { App: {} } }
+    expect(await desktopFreshInstall()).toBe(false)
+  })
+
+  it("says what the shell says, and false when it can't", async () => {
+    ;(window as unknown as Record<string, unknown>).go = { main: { App: { FreshInstall: vi.fn().mockResolvedValue(true) } } }
+    expect(await desktopFreshInstall()).toBe(true)
+    ;(window as unknown as Record<string, unknown>).go = { main: { App: { FreshInstall: vi.fn().mockRejectedValue(new Error('gone')) } } }
+    expect(await desktopFreshInstall()).toBe(false)
   })
 })

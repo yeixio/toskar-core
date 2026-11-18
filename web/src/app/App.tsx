@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import { useEffect, type ReactNode } from 'react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { RequireRole } from '@/components/auth/RequireRole'
 import { PortalPage } from '@/features/portal/PortalPage'
@@ -11,6 +11,7 @@ import { LanguageSync } from '@/components/LanguageSync'
 import { ThemeSync } from '@/components/ThemeSync'
 import { AppLayout } from '@/components/layout/AppLayout'
 import { ScreenshotMode } from '@/app/ScreenshotMode'
+import { desktopFreshInstall } from '@/lib/desktopBridge'
 import { readScreenshotLaunch } from '@/lib/screenshotMode'
 import { AutomationsPage } from '@/features/automations/AutomationsPage'
 import { ApiAccessPage } from '@/features/api-access/ApiAccessPage'
@@ -43,6 +44,21 @@ const queryClient = new QueryClient({
     },
   },
 })
+
+/**
+ * On a desktop app's new install, offers setup again even when the window
+ * remembers it from an earlier one (toskar-apps#455).
+ */
+function FreshInstallSync() {
+  // The shell answers true only once, so the answer is kept even if this
+  // unmounts first.
+  useEffect(() => {
+    void desktopFreshInstall().then((fresh) => {
+      if (fresh) useUIStore.getState().setOnboardingComplete(false)
+    })
+  }, [])
+  return null
+}
 
 function OnboardingGate({ children }: { children: ReactNode }) {
   const onboardingComplete = useUIStore((s) => s.onboardingComplete)
@@ -84,6 +100,7 @@ export function App() {
         <NotificationHost />
         <BrowserRouter>
           <ScreenshotMode />
+          <FreshInstallSync />
           <ServiceBootGate>
             <Routes>
               {/* A one-time sign-in link answers before sign-in (#206). */}
