@@ -8,7 +8,18 @@ name: Examples
 # toskar-sdks runs both against its own changes, so an SDK change that
 # breaks them fails there first.
 on:
+  # Pull requests that change the API or the examples; every push to main
+  # runs it, and a release needs main green, so nothing ships unchecked.
   pull_request:
+    paths:
+      - "examples/**"
+      - "api/**"
+      - "pkg/**"
+      - "internal/api/**"
+      - "internal/auth/**"
+      - "internal/events/**"
+      - "cmd/daemon/**"
+      - ".github/workflows/examples.yml"
   push:
     branches: [main]
   # The SDKs change too: each night against their main.
@@ -18,6 +29,10 @@ on:
 
 permissions:
   contents: read
+
+concurrency:
+  group: examples-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   examples:

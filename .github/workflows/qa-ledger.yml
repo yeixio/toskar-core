@@ -1,0 +1,30 @@
+name: QA ledger
+
+# Each week, the closed QA issues that no test names, kept in one open issue
+# (.github/scripts/qa-ledger.sh), so a fixed bug without a regression test
+# shows up before a release, not when it comes back.
+on:
+  schedule:
+    - cron: "37 7 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: qa-ledger
+  cancel-in-progress: false
+
+jobs:
+  ledger:
+    runs-on: ${{ fromJSON(vars.CI_RUNS_ON || '"ubuntu-latest"') }}
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Closed QA issues without a test
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: .github/scripts/qa-ledger.sh
