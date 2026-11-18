@@ -58,7 +58,7 @@
       "label": "로컬 데이터베이스"
     },
     "bifrost": {
-      "label": "Bifrost 네트워킹",
+      "label": "컴퓨터 네트워크",
       "offline_other": "컴퓨터 {{count}}대 오프라인",
       "silentFor_other": "{{names}}에서 {{ago}} 동안 응답이 없어요.",
       "silent_other": "{{names}}이(가) 응답하지 않아요.",

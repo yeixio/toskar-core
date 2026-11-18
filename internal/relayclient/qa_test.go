@@ -1,9 +1,7 @@
 package relayclient
 
 // Regression tests for relay client bugs the Nov 2026 QA pass filed
-// (layer 3 of the test plan: relay and core together). While an issue is
-// open, its test is wrapped in qa.KnownBug, which skips while the bug is
-// there and fails once it's fixed.
+// (layer 3 of the test plan: relay and core together).
 
 import (
 	"context"
@@ -15,8 +13,6 @@ import (
 	"sync/atomic"
 	"testing"
 	"time"
-
-	"github.com/yeixio/toskar-core/internal/qa"
 )
 
 // After the relay restarts, which forgets every record, the computer sends
@@ -50,11 +46,9 @@ func TestQARecordResentAfterRelayRestart(t *testing.T) {
 	if !reconnected {
 		t.Fatal("the tunnel never came back")
 	}
-	qa.KnownBug(t, "toskar-core#1255", func(t testing.TB) {
-		if !resent {
-			t.Error("the tunnel is back but the record wasn't sent again, so devices can't find the computer")
-		}
-	})
+	if !resent {
+		t.Error("the tunnel is back but the record wasn't sent again, so devices can't find the computer")
+	}
 }
 
 // A token the relay revoked (a refund, or the subscription moved to another
@@ -87,13 +81,57 @@ func TestQARevokedTokenEndsInsteadOfRetrying(t *testing.T) {
 	time.Sleep(3 * time.Second)
 	st := c.Status()
 	tries := asked.Load()
-	qa.KnownBug(t, "toskar-core#1256", func(t testing.TB) {
-		if st.State != "ended" {
-			t.Errorf("a revoked token leaves the relay %q (%s), want ended", st.State, st.Error)
-		}
-		// The tunnel and the record each ask once; more is retrying.
-		if tries > 2 {
-			t.Errorf("the revoked token was sent %d times in a few seconds", tries)
-		}
-	})
+	if st.State != "ended" {
+		t.Errorf("a revoked token leaves the relay %q (%s), want ended", st.State, st.Error)
+	}
+	// The tunnel and the record each ask once; more is retrying.
+	if tries > 2 {
+		t.Errorf("the revoked token was sent %d times in a few seconds", tries)
+	}
+}
+
+// The computer gets a device token for its paired devices, so it never
+// hands them its own, which could open its tunnel.
+func TestQADeviceTokenForPairedDevices(t *testing.T) {
+	// Regression: toskar-core#1258
+	f := newFakeRelay(t)
+	c, _, store := f.client(t, f.secret, func(net.Conn) bool { return false })
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	if err := c.register(ctx); err != nil {
+		t.Fatal(err)
+	}
+	device := DeviceToken(store, c.Route())
+	computers, _ := store.Read(TokenName)
+	if device == "" || device == computers {
+		t.Fatalf("device token %q, computer's %q", device, computers)
+	}
+	// Registering again keeps it while it lasts as long as the computer's.
+	if err := c.register(ctx); err != nil {
+		t.Fatal(err)
+	}
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	if f.devices != 1 {
+		t.Errorf("asked for %d device tokens, want 1", f.devices)
+	}
+}
+
+// Turning access from anywhere off takes the address record back.
+func TestQAWithdrawTakesTheRecordBack(t *testing.T) {
+	// Regression: toskar-core#1259
+	f := newFakeRelay(t)
+	c, _, _ := f.client(t, f.secret, func(net.Conn) bool { return false })
+	ctx := context.Background()
+	if err := c.register(ctx); err != nil {
+		t.Fatal(err)
+	}
+	if err := c.Withdraw(ctx); err != nil {
+		t.Fatal(err)
+	}
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	if f.record != nil {
+		t.Error("the record is still at the relay")
+	}
 }

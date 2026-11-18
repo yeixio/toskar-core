@@ -2,7 +2,6 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { api } from '@/lib/api'
-import { knownBug } from '@/test/knownBug'
 import { RemoteAccessCard } from './RemoteAccessCard'
 
 vi.mock('@/lib/api', () => ({
@@ -236,8 +235,8 @@ describe('RemoteAccessCard (#456)', () => {
 
   describe("Toskar's relay, bought here (#639)", () => {
     const renderCard = (subscription: object, relay = '') => {
-      vi.mocked(api.getSettings).mockResolvedValue({ remote_access_enabled: false, remote_access_port: 7333, remote_access_relay: relay } as never)
-      vi.mocked(api.getRemoteAccess).mockResolvedValue({ enabled: false, port: 7333, subscription } as never)
+      vi.mocked(api.getSettings).mockResolvedValue({ remote_access_enabled: true, remote_access_port: 7333, remote_access_relay: relay } as never)
+      vi.mocked(api.getRemoteAccess).mockResolvedValue({ enabled: true, port: 7333, subscription } as never)
       return render(
         <QueryClientProvider client={new QueryClient()}>
           <RemoteAccessCard />
@@ -451,8 +450,6 @@ describe('RemoteAccessCard (#456)', () => {
   })
 })
 
-// QA regressions: knownBug passes while the bug is there and fails once
-// it's fixed (src/test/knownBug.ts).
 describe('RemoteAccessCard QA regressions', () => {
   const renderWith = (settings: object, remote: object) => {
     vi.mocked(api.getSettings).mockResolvedValue({ remote_access_port: 7333, remote_access_relay: '', ...settings } as never)
@@ -465,7 +462,7 @@ describe('RemoteAccessCard QA regressions', () => {
   }
 
   // Regression: toskar-core#1253
-  knownBug('toskar-core#1253', 'while it is off, the card leads with the switch, not purchases and router settings', async () => {
+  it('while it is off, the card leads with the switch, not purchases and router settings', async () => {
     renderWith({ remote_access_enabled: false, remote_access_port_mapping: true }, { enabled: false, subscription: { state: 'none', open: true } })
     const toggle = await screen.findByRole('switch', { name: 'Access from anywhere' })
     // Settings and the status have both loaded.
@@ -478,7 +475,7 @@ describe('RemoteAccessCard QA regressions', () => {
   })
 
   // Regression: toskar-core#1266
-  knownBug('toskar-core#1266', 'a relay refusal is a sentence with a next step, not a raw code', async () => {
+  it('a relay refusal is a sentence with a next step, not a raw code', async () => {
     renderWith(
       { remote_access_enabled: true },
       { enabled: true, listening: '[::]:7333', reachable: 'none', relay: { name: 'relay.toskar.ai:4443', state: 'error', error: 'TOKEN_REVOKED' }, subscription: { state: 'active', store: 'app' } },
@@ -488,7 +485,7 @@ describe('RemoteAccessCard QA regressions', () => {
   })
 
   // Regression: toskar-core#1257
-  knownBug('toskar-core#1257', 'a pending checkout can be cancelled', async () => {
+  it('a pending checkout can be cancelled', async () => {
     renderWith({ remote_access_enabled: false }, { enabled: false, subscription: { state: 'pending', store: 'stripe', checkout: 'https://checkout.stripe.test/cs_1' } })
     expect(await screen.findByText(/Finish paying on the checkout page/)).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /Cancel/ })).toBeInTheDocument()

@@ -26,17 +26,32 @@ func DefaultDataDir() string {
 	return chooseDataDir(dataDirNamed("Toskar"), dataDirNamed("Yggdrasil"))
 }
 
-// chooseDataDir picks the new folder once it holds a config.json, then an
-// existing old folder, and otherwise the new folder. A new folder that
-// something created empty does not hide the old one's data.
+// chooseDataDir picks the folder with the data: the new folder once it
+// has a database, or a config.json while the old folder has no database;
+// then an existing old folder; and otherwise the new folder. A new folder
+// that something created, even with a stray config.json, doesn't hide the
+// old one's data (#1265).
 func chooseDataDir(newDir, oldDir string) string {
-	if _, err := os.Stat(filepath.Join(newDir, "config.json")); err == nil {
+	if hasDatabase(newDir) {
+		return newDir
+	}
+	if _, err := os.Stat(filepath.Join(newDir, "config.json")); err == nil && !hasDatabase(oldDir) {
 		return newDir
 	}
 	if info, err := os.Stat(oldDir); err == nil && info.IsDir() {
 		return oldDir
 	}
 	return newDir
+}
+
+// hasDatabase reports whether dir holds a Toskar database, by either name.
+func hasDatabase(dir string) bool {
+	for _, name := range []string{"toskar.db", "yggdrasil.db"} {
+		if info, err := os.Stat(filepath.Join(dir, name)); err == nil && !info.IsDir() {
+			return true
+		}
+	}
+	return false
 }
 
 // dataDirNamed is the OS's data folder for an app called name ("Toskar"),

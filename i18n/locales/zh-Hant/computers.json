@@ -117,6 +117,8 @@
     "trainingHint": "正在訓練 AI，因此工作會交給有該模型的其他電腦",
     "plain": "未加密",
     "plainHint": "{{name}} 上的 Toskar 版本較舊，因此與它之間的通訊未加密。請更新 {{name}} 上的 Toskar 以啟用加密。",
+    "useCode": "有代碼嗎？以代碼核准",
+    "confirmRemoveModel": "要從 {{name}} 移除 {{model}} 嗎？它會從那台電腦刪除，再次在那裡使用需要重新下載。",
     "confirmRemove": "要把 {{name}} 移出這個團隊嗎？它將不再接收工作，再次新增需要重新核准。"
   },
   "deploy": {
@@ -190,7 +192,6 @@
     "showing": "正在取得代碼…",
     "getApp": "還沒有 App？<store>取得 Toskar</store>。",
     "connected": "{{name}} 已連接。",
-    "manage": "你可以隨時在<access>API 存取</access>中中斷連線。",
     "manageYours": "你可以隨時在設定的「你的裝置」中中斷連線。",
     "another": "連接另一台裝置",
     "codeLabel": "代碼 {{code}}",

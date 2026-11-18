@@ -430,7 +430,7 @@ func (m *Manager) ClaimPairing(ctx context.Context, remoteNodeID, code string) (
 		}
 		if err2 != nil {
 			return nil, fmt.Errorf(
-				"could not reach Bifrost on %s (%v). On that Mac: fully quit Toskar (Cmd+Q), reopen it, keep Settings → Find other computers On, and allow Local Network for Toskar",
+				"could not reach that computer on %s (%v). On that Mac: fully quit Toskar (Cmd+Q), reopen it, keep Computers → Network & access → Find other computers On, and allow Local Network for Toskar",
 				ensureHostPort(addr, 7332), err,
 			)
 		}

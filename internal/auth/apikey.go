@@ -6,6 +6,7 @@ import (
 	"crypto/sha256"
 	"database/sql"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -61,8 +62,24 @@ func (m *APIKeyManager) CreateDevice(ctx context.Context, name string) (APIKeyRe
 // such as a watch through its phone (#766); parentID is that device's key,
 // so disconnecting it disconnects this one too.
 func (m *APIKeyManager) CreateCompanion(ctx context.Context, name, parentID string) (APIKeyRecord, string, error) {
+	// A companion doesn't make companions: a leaked one could otherwise
+	// leave a chain of keys behind (#1260).
+	var parent sql.NullString
+	err := m.db.QueryRowContext(ctx, `SELECT parent_key_id FROM api_keys WHERE id = ? AND revoked_at IS NULL`, parentID).Scan(&parent)
+	if errors.Is(err, sql.ErrNoRows) {
+		return APIKeyRecord{}, "", fmt.Errorf("api key %q not found", parentID)
+	}
+	if err != nil {
+		return APIKeyRecord{}, "", err
+	}
+	if parent.Valid && parent.String != "" {
+		return APIKeyRecord{}, "", ErrCompanionOfCompanion
+	}
 	return m.createWith(ctx, name, KindDevice, parentID)
 }
+
+// ErrCompanionOfCompanion is a companion asking to connect another device.
+var ErrCompanionOfCompanion = errors.New("a device connected through another can't connect more")
 
 // Companions are the live keys of devices connected through parentID.
 func (m *APIKeyManager) Companions(ctx context.Context, parentID string) ([]string, error) {
@@ -222,6 +239,28 @@ func (m *APIKeyManager) Revoke(ctx context.Context, id string) error {
 		return fmt.Errorf("api key %q not found", id)
 	}
 	_ = m.secrets.Delete("apikey-" + id)
+	// Its companions go with it, and theirs, from before companions
+	// couldn't make more (#1260).
+	return m.revokeCompanions(ctx, id, now, 0)
+}
+
+func (m *APIKeyManager) revokeCompanions(ctx context.Context, parentID, now string, depth int) error {
+	if depth > 8 {
+		return nil
+	}
+	ids, err := m.Companions(ctx, parentID)
+	if err != nil {
+		return err
+	}
+	for _, id := range ids {
+		if _, err := m.db.ExecContext(ctx, `UPDATE api_keys SET revoked_at = ? WHERE id = ? AND revoked_at IS NULL`, now, id); err != nil {
+			return err
+		}
+		_ = m.secrets.Delete("apikey-" + id)
+		if err := m.revokeCompanions(ctx, id, now, depth+1); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 

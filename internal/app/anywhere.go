@@ -50,11 +50,14 @@ const (
 )
 
 var (
-	errPlanInvalid  = contracts.NewError("SUBSCRIPTION_PLAN_INVALID", nil, errors.New("the plan is monthly or yearly"))
-	errOwnRelay     = contracts.NewError("SUBSCRIPTION_OWN_RELAY", nil, errors.New("this computer uses its organization's relay; a subscription is for Toskar's relay"))
-	errActive       = contracts.NewError("SUBSCRIPTION_ACTIVE", nil, errors.New("this computer already has access from anywhere"))
-	errNoneHere     = contracts.NewError("SUBSCRIPTION_NONE", nil, errors.New("this computer has no subscription bought in its settings; one bought in the Toskar app is managed in the app's store"))
-	errSoldOut      = contracts.NewError("RELAY_SOLD_OUT", nil, errors.New("the relay isn't taking new subscriptions right now"))
+	errPlanInvalid = contracts.NewError("SUBSCRIPTION_PLAN_INVALID", nil, errors.New("the plan is monthly or yearly"))
+	errOwnRelay    = contracts.NewError("SUBSCRIPTION_OWN_RELAY", nil, errors.New("this computer uses its organization's relay; a subscription is for Toskar's relay"))
+	errActive      = contracts.NewError("SUBSCRIPTION_ACTIVE", nil, errors.New("this computer already has access from anywhere"))
+	errNoneHere    = contracts.NewError("SUBSCRIPTION_NONE", nil, errors.New("this computer has no subscription bought in its settings; one bought in the Toskar app is managed in the app's store"))
+	errSoldOut     = contracts.NewError("RELAY_SOLD_OUT", nil, errors.New("the relay isn't taking new subscriptions right now"))
+	// errCovered is a computer another device's subscription already
+	// covers, though its token hasn't reached this computer yet (#1257).
+	errCovered      = contracts.NewError("SUBSCRIPTION_COVERED", nil, errors.New("another device's subscription already covers this computer"))
 	errInAppOnly    = contracts.NewError("SUBSCRIPTION_IN_APP_ONLY", nil, errors.New("this copy of Toskar is from the App Store, so the subscription is sold in the Toskar app on a phone or tablet"))
 	errBillingReach = func(cause error) error {
 		return contracts.NewError("BILLING_UNAVAILABLE", nil, fmt.Errorf("billing couldn't be reached; try again in a minute: %w", cause))
@@ -203,6 +206,17 @@ func (a *App) startCheckout(ctx context.Context, plan string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	// Asked as the phone and the Mac app ask: a phone may have bought one
+	// whose token hasn't reached this computer yet (#1257). When the relay
+	// can't be asked, the checkout goes ahead.
+	covered, cerr := func() (bool, error) {
+		ctx, cancel := context.WithTimeout(ctx, 15*time.Second)
+		defer cancel()
+		return a.relayAPI().Covered(ctx, route)
+	}()
+	if cerr == nil && covered {
+		return "", errCovered
+	}
 	var out struct {
 		URL       string `json:"url"`
 		SessionID string `json:"session_id"`
@@ -230,6 +244,25 @@ func (a *App) startCheckout(ctx context.Context, plan string) (string, error) {
 	a.wakeAnywhere()
 	return out.URL, nil
 }
+
+// cancelCheckout forgets a checkout opened here and not paid, so another
+// plan can be chosen without waiting for Stripe to expire it (#1257).
+func (a *App) cancelCheckout(ctx context.Context) error {
+	if a.stripeCheckout() == "" {
+		return errNoCheckout
+	}
+	if err := auth.NewSecretStore(a.Config.Get().DataDir).Delete(stripeCheckoutName); err != nil {
+		return err
+	}
+	a.anywhere.mu.Lock()
+	a.anywhere.checkout, a.anywhere.expires = "", time.Time{}
+	a.anywhere.mu.Unlock()
+	a.Logger.Info("access from anywhere: checkout cancelled")
+	return nil
+}
+
+// errNoCheckout is cancelling with no checkout open.
+var errNoCheckout = contracts.NewError("CHECKOUT_NONE", nil, errors.New("no checkout is open"))
 
 // manageSubscription answers the billing page for the subscription bought
 // here.
@@ -295,11 +328,19 @@ func (a *App) subscription() *api.Subscription {
 	}
 	out := &api.Subscription{State: "none", InAppOnly: a.inAppOnly()}
 	session := a.stripeSession()
-	if tok := a.relayToken(); tok != "" {
+	// A token the relay revoked (a refund, or the subscription moved to
+	// another computer) or refused for a blocked route is an ended
+	// subscription, though its own expiry is weeks away (#1256).
+	_, st := a.relayStatus()
+	refused := st != nil && st.State == "ended" && (st.Error == "TOKEN_REVOKED" || st.Error == "ROUTE_BLOCKED")
+	if tok := a.relayToken(); tok != "" && !refused {
 		_, exp, _ := relayclient.ParseToken(tok)
 		out.State, out.Expires, out.Store = "active", exp, "app"
-		if session != "" {
+		switch {
+		case session != "":
 			out.Store = "stripe"
+		case relayclient.TokenEnv(tok) == "grant":
+			out.Store = "grant"
 		}
 		return out
 	}
@@ -324,6 +365,16 @@ func (a *App) subscription() *api.Subscription {
 			if session != "" {
 				out.Store = "stripe"
 			}
+		}
+	}
+	if refused {
+		out.State, out.Expires, out.Store = "ended", time.Time{}, "app"
+		if session != "" {
+			out.Store = "stripe"
+		}
+		out.Reason = "revoked"
+		if st.Error == "ROUTE_BLOCKED" {
+			out.Reason = "blocked"
 		}
 	}
 	out.Open, out.Error = a.anywhere.open, a.anywhere.lastError

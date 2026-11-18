@@ -120,6 +120,8 @@
     "trainingHint": "Trainiert eine KI, daher geht Arbeit an andere Computer, wenn sie das Modell haben",
     "plain": "Nicht verschlüsselt",
     "plainHint": "Der Datenverkehr zu {{name}} ist nicht verschlüsselt, weil dort ein älteres Toskar läuft. Aktualisiere Toskar auf {{name}}, um ihn zu verschlüsseln.",
+    "useCode": "Hast du einen Code? Damit bestätigen",
+    "confirmRemoveModel": "{{model}} von {{name}} entfernen? Es wird auf diesem Computer gelöscht und muss für eine erneute Nutzung dort wieder heruntergeladen werden.",
     "confirmRemove": "{{name}} aus diesem Team entfernen? Er übernimmt keine Arbeit mehr, und für ein erneutes Hinzufügen ist eine neue Bestätigung nötig."
   },
   "deploy": {
@@ -195,7 +197,6 @@
     "showing": "Code wird erstellt…",
     "getApp": "Noch keine App? <store>Hol dir Toskar</store>.",
     "connected": "{{name}} ist verbunden.",
-    "manage": "Du kannst es jederzeit im <access>API-Zugriff</access> trennen.",
     "manageYours": "Du kannst es jederzeit in den Einstellungen unter „Deine Geräte“ trennen.",
     "another": "Weiteres Gerät verbinden",
     "codeLabel": "Code {{code}}",

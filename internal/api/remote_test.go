@@ -97,13 +97,17 @@ func TestRemoteListener(t *testing.T) {
 			t.Fatalf("%s from outside: %d", route, code)
 		}
 	}
-	// Wrong keys: twenty, then the address waits, even with a good key.
+	// Wrong keys: twenty, then the address waits for wrong keys; a good
+	// key still gets in (#1261).
 	remoteFailures.Forget("127.0.0.1")
 	for i := 0; i < 20; i++ {
 		call(http.MethodGet, "/api/v1/health", "guess")
 	}
-	if code, body := call(http.MethodGet, "/api/v1/health", "phone-key"); code != http.StatusTooManyRequests || !strings.Contains(body, "REMOTE_THROTTLED") {
+	if code, body := call(http.MethodGet, "/api/v1/health", "guess"); code != http.StatusTooManyRequests || !strings.Contains(body, "REMOTE_THROTTLED") {
 		t.Fatalf("after wrong keys: %d %s", code, body)
+	}
+	if code, body := call(http.MethodGet, "/api/v1/health", "phone-key"); code != http.StatusOK {
+		t.Fatalf("a good key after wrong keys: %d %s", code, body)
 	}
 	remoteFailures.Forget("127.0.0.1")
 
@@ -149,9 +153,9 @@ func TestRouteSecret(t *testing.T) {
 			}
 			return auth.APIKeyRecord{}, errors.New("invalid")
 		},
-		RouteSecret: func() (string, string, error) { return "c2VjcmV0", "routeid", nil },
-		RelayName:   func() string { return "relay.example.com" },
-		RelayToken:  func() string { return "rt1.token" },
+		RouteSecret:      func() (string, string, error) { return "c2VjcmV0", "routeid", nil },
+		RelayName:        func() string { return "relay.example.com" },
+		DeviceRelayToken: func() string { return "rt1.token" },
 	})
 	srv.SetTLS(&tls.Config{Certificates: []tls.Certificate{cert}, MinVersion: tls.VersionTLS12}, APITLS{Enabled: true})
 
@@ -164,7 +168,7 @@ func TestRouteSecret(t *testing.T) {
 	if rec.Code != http.StatusOK || !strings.Contains(rec.Body.String(), `"route_secret":"c2VjcmV0"`) || !strings.Contains(rec.Body.String(), `"relay":"relay.example.com"`) {
 		t.Fatalf("home network: %d %s", rec.Code, rec.Body)
 	}
-	// The computer's relay token, so this device can find it away too.
+	// A device token for the relay, so this device can find it away too.
 	if !strings.Contains(rec.Body.String(), `"token":"rt1.token"`) {
 		t.Fatalf("no relay token for the device: %s", rec.Body)
 	}
@@ -271,8 +275,11 @@ func TestServeRelayed(t *testing.T) {
 	for range 20 {
 		call("wrong")
 	}
-	if status, code := call("phone-key"); status != http.StatusTooManyRequests || code != "REMOTE_THROTTLED" {
+	if status, code := call("wrong"); status != http.StatusTooManyRequests || code != "REMOTE_THROTTLED" {
 		t.Fatalf("after wrong keys from the device's address: %d %s", status, code)
+	}
+	if status, code := call("phone-key"); status != http.StatusOK {
+		t.Fatalf("the device's own key after wrong keys from its address: %d %s", status, code)
 	}
 
 	// Through a relay that hides client addresses, devices have none:

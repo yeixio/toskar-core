@@ -284,5 +284,10 @@
   "PROJECT_NAME_REQUIRED": "Gib dem Projekt einen Namen.",
   "PROJECT_NOT_FOUND": "Dieses Projekt wurde entfernt.",
   "SWARM_NOT_FOUND": "Dieser Schwarm wurde entfernt.",
-  "SWARM_RUNNING": "Dieser Schwarm läuft noch. Halte ihn zuerst an."
+  "SWARM_RUNNING": "Dieser Schwarm läuft noch. Halte ihn zuerst an.",
+  "RELAY_TOKEN_SHORTER": "Dieser Computer hat schon ein Relay-Token, das länger gilt, und behält es.",
+  "RELAY_UNREACHABLE": "Das Relay von Toskar ist nicht erreichbar. Versuch es in einer Minute noch einmal.",
+  "COMPANION_LIMIT": "Ein Gerät, das über ein anderes verbunden ist, kann keine weiteren verbinden. Verbinde es über das Telefon.",
+  "SUBSCRIPTION_COVERED": "Das Abo eines anderen Geräts deckt diesen Computer schon ab, hier gibt es also nichts zu kaufen.",
+  "CHECKOUT_NONE": "Es ist kein Bezahlvorgang offen, den du abbrechen kannst."
 }

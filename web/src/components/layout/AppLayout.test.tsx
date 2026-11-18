@@ -2,7 +2,6 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { describe, expect, it, vi } from 'vitest'
-import { knownBug } from '@/test/knownBug'
 import { AppLayout } from './AppLayout'
 
 vi.mock('@/lib/api', () => ({
@@ -62,11 +61,9 @@ describe('AppLayout', () => {
   })
 })
 
-// QA regressions: knownBug passes while the bug is there and fails once
-// it's fixed (src/test/knownBug.ts).
 describe('AppLayout QA regressions', () => {
   // Regression: toskar-core#1271
-  knownBug('toskar-core#1271', 'a Skip to content link comes before the sidebar, and People names itself in the title', async () => {
+  it('a Skip to content link comes before the sidebar, and People names itself in the title', async () => {
     render(
       <QueryClientProvider client={new QueryClient()}>
         <MemoryRouter initialEntries={['/people']}>

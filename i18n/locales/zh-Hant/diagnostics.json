@@ -58,7 +58,7 @@
       "label": "本機資料庫"
     },
     "bifrost": {
-      "label": "Bifrost 網路",
+      "label": "電腦網路",
       "offline_other": "{{count}} 台電腦離線",
       "silentFor_other": "{{names}} 已經 {{ago}} 沒有回應。",
       "silent_other": "{{names}} 沒有回應。",

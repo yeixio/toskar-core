@@ -152,11 +152,12 @@ type Dependencies struct {
 	// RelayName is the relay this computer uses away from home: Toskar's or
 	// an organization's, given to devices with the route secret.
 	RelayName func() string
-	// RelayToken is this computer's current token for Toskar's relay, or
-	// "". Its paired devices get it at home, so each one, not only the one
-	// that subscribed, can find the computer away from home (#456).
-	RelayToken  func() string
-	RemoteReach func() RemoteReach
+	// DeviceRelayToken is a device token for Toskar's relay, or "". Its
+	// paired devices get it at home, so each one, not only the one that
+	// subscribed, can find the computer away from home (#456). It's never
+	// the computer's own token, which could open its tunnel (#1258).
+	DeviceRelayToken func() string
+	RemoteReach      func() RemoteReach
 	// Transcribe turns an attached recording into text with speech.transcribe,
 	// wherever it runs (yeixio/toskar-apps#155).
 	Transcribe func(ctx context.Context, artifactID, language string) (Transcription, error)
@@ -172,8 +173,10 @@ type Dependencies struct {
 	Subscription       func() *Subscription
 	StartCheckout      func(ctx context.Context, plan string) (url string, err error)
 	ManageSubscription func(ctx context.Context) (url string, err error)
-	ShowVersion        func(ctx context.Context, conversationID, messageID string) ([]contracts.Message, error)
-	Chat               func(w http.ResponseWriter, r *http.Request, conversationID, profileID, modelID, message string, stream bool, execution string) error
+	// CancelCheckout forgets a checkout opened here and not paid (#1257).
+	CancelCheckout func(ctx context.Context) error
+	ShowVersion    func(ctx context.Context, conversationID, messageID string) ([]contracts.Message, error)
+	Chat           func(w http.ResponseWriter, r *http.Request, conversationID, profileID, modelID, message string, stream bool, execution string) error
 	// StopChat stops the caller's conversation's running turn and reports
 	// whether one was running. Another person's reads as not running.
 	StopChat func(ctx context.Context, conversationID string) bool
@@ -460,6 +463,7 @@ func (s *Server) routes() {
 	api.HandleFunc("/remote-access/relay-token", s.handleRelayToken).Methods(http.MethodPut)
 	api.HandleFunc("/remote-access/subscription/checkout", s.handleSubscriptionCheckout).Methods(http.MethodPost)
 	api.HandleFunc("/remote-access/subscription/manage", s.handleSubscriptionManage).Methods(http.MethodPost)
+	api.HandleFunc("/remote-access/subscription/checkout", s.handleSubscriptionCancel).Methods(http.MethodDelete)
 	s.notificationRoutes(api)
 	s.connectorRoutes(api)
 	s.mcpRoutes(api)

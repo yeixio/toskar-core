@@ -134,8 +134,14 @@ func TestSendSignsAndReadsTheRelay(t *testing.T) {
 	if err := c.Send(ctx, Message{Handle: "h1", Title: "x"}); !errors.As(err, &re) || re.Code != "RATE_LIMITED" || re.Permanent() {
 		t.Fatalf("rate limited: %v", err)
 	}
+	// A handle the relay can't open is gone too (#1267); another refusal
+	// is permanent but keeps the registration.
 	status, code = http.StatusBadRequest, "BAD_HANDLE"
-	if err := c.Send(ctx, Message{Handle: "h1", Title: "x"}); !errors.As(err, &re) || !re.Permanent() {
+	if err := c.Send(ctx, Message{Handle: "h1", Title: "x"}); !errors.Is(err, ErrGone) {
 		t.Fatalf("bad handle: %v", err)
+	}
+	status, code = http.StatusBadRequest, "BAD_REQUEST"
+	if err := c.Send(ctx, Message{Handle: "h1", Title: "x"}); !errors.As(err, &re) || !re.Permanent() {
+		t.Fatalf("bad request: %v", err)
 	}
 }

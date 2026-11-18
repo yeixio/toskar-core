@@ -77,13 +77,13 @@ export function RemoteAccessCard() {
         />
       ) : null}
       {st?.others?.length ? <OtherToskars others={st.others} /> : null}
-      {st?.subscription && !settings.data?.remote_access_relay ? <ToskarSubscription subscription={st.subscription} /> : null}
+      {st?.subscription && !settings.data?.remote_access_relay ? <ToskarSubscription subscription={st.subscription} off={!enabled} /> : null}
       {enabled && st ? <OutsideCheck status={st} saving={save.isPending} onSave={(patch) => save.mutate(patch)} /> : null}
       <label className="flex items-center gap-2 text-sm">
         <input
           type="checkbox"
           checked={settings.data?.remote_access_port_mapping ?? true}
-          disabled={save.isPending || !settings.data}
+          disabled={save.isPending || !settings.data || !enabled}
           onChange={(e) => save.mutate({ remote_access_port_mapping: e.target.checked })}
         />
         <span>{t('remote.portMapping')}</span>
@@ -124,6 +124,9 @@ export function RemoteAccessCard() {
     </section>
   )
 }
+
+/** The relay's refusals that have a sentence with a next step, not a code (#1266). */
+const relayErrors = new Set(['TOKEN_REVOKED', 'ROUTE_BLOCKED', 'TOKEN_EXPIRED', 'TOKEN_INVALID'])
 
 type RelayStatus = NonNullable<Awaited<ReturnType<typeof api.getRemoteAccess>>>['relay']
 
@@ -229,7 +232,9 @@ function RelayLine({ status }: { status: NonNullable<RelayStatus> }) {
     case 'error':
       return (
         <p className="text-sm text-danger" role="status">
-          {t('remote.relay.state.error', { relay: status.name, code: status.error ?? '' })}
+          {relayErrors.has(status.error ?? '')
+            ? t(`remote.relayErrors.${status.error}`, { relay: status.name })
+            : t('remote.relay.state.error', { relay: status.name, code: status.error ?? '' })}
         </p>
       )
     default:
@@ -451,7 +456,9 @@ function ToskarRelayLine({ relay }: { relay: NonNullable<Status['relay']> }) {
   const key = relay.state === 'no_token' ? 'noToken' : relay.state === 'error' ? 'error' : 'connecting'
   return (
     <p className={`text-sm ${relay.state === 'connecting' ? 'text-ink-muted' : 'text-warning'}`}>
-      {t(`remote.check.relayState.${key}`, { relay: relay.name, code: relay.error ?? '' })}
+      {key === 'error' && relayErrors.has(relay.error ?? '')
+        ? t(`remote.relayErrors.${relay.error}`, { relay: relay.name })
+        : t(`remote.check.relayState.${key}`, { relay: relay.name, code: relay.error ?? '' })}
     </p>
   )
 }

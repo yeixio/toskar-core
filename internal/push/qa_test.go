@@ -9,8 +9,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
-
-	"github.com/yeixio/toskar-core/internal/qa"
 )
 
 // A handle the relay can no longer open, or one sealed for another
@@ -32,11 +30,9 @@ func TestQAPermanentRefusalsAreGone(t *testing.T) {
 		got[refusal.code] = c.Send(context.Background(), Message{Handle: "h1", Title: "x"})
 		relay.Close()
 	}
-	qa.KnownBug(t, "toskar-core#1267", func(t testing.TB) {
-		for code, err := range got {
-			if !errors.Is(err, ErrGone) {
-				t.Errorf("%s keeps the registration: %v", code, err)
-			}
+	for code, err := range got {
+		if !errors.Is(err, ErrGone) {
+			t.Errorf("%s keeps the registration: %v", code, err)
 		}
-	})
+	}
 }

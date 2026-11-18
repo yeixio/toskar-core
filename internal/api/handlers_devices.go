@@ -218,6 +218,10 @@ func (s *Server) handleAddCompanion(w http.ResponseWriter, r *http.Request) {
 	} else {
 		rec, secret, err = s.deps.Devices.CreateKey(r.Context(), name)
 	}
+	if errors.Is(err, auth.ErrCompanionOfCompanion) {
+		writeErr(w, http.StatusForbidden, "COMPANION_LIMIT", "A device connected through another can't connect more. Connect it from the phone.", nil)
+		return
+	}
 	if err != nil {
 		writeErrFrom(w, http.StatusInternalServerError, "PAIRING_FAILED", err)
 		return

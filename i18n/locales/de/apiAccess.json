@@ -81,7 +81,7 @@
   },
   "keys": {
     "title": "API-Schlüssel",
-    "description": "Zugangsdaten für Apps und Geräte, die mit Toskar sprechen.",
+    "description": "Zugangsdaten für Apps und Skripte, die mit Toskar sprechen. Telefone und Tablets stehen oben unter Geräte.",
     "create": "API-Schlüssel erstellen",
     "createHint": "Gib diesem Schlüssel einen Namen, damit du weißt, was ihn nutzt.",
     "namePlaceholder": "VS Code",
@@ -299,7 +299,20 @@
       "moveHere": "Auf diesen Computer verschieben",
       "moveTooSoon": "Ein Abo kann einmal am Tag auf einen anderen Computer verschoben werden. Versuch es morgen noch einmal.",
       "renewalNotYet": "Der App Store hat deine Verlängerung noch nicht bestätigt. Wähle in ein paar Minuten „Kauf wiederherstellen“.",
-      "storeFailed": "Der Kauf hat nicht geklappt: {{message}}"
+      "storeFailed": "Der Kauf hat nicht geklappt: {{message}}",
+      "cancel": "Bezahlvorgang abbrechen",
+      "cancelling": "Wird abgebrochen…",
+      "turnOnFirst": "Schalte oben „Zugriff von überall“ ein, um ein Abo abzuschließen.",
+      "endedRevoked": "Toskars Relay nimmt das Abo dieses Computers nicht mehr an: Es wurde auf einen anderen Computer übertragen oder erstattet. Schließe es erneut ab, um Toskars Relay weiter zu nutzen.",
+      "endedBlocked": "Toskars Relay hat diesen Computer gesperrt. Wende dich an den Support, um den Grund zu erfahren.",
+      "grant": "Zugriff gewährt bis {{date}}.",
+      "grantOpen": "Zugriff gewährt."
+    },
+    "relayErrors": {
+      "TOKEN_REVOKED": "{{relay}} nimmt das Abo dieses Computers nicht mehr an. Schließe es erneut ab oder übertrage dein Abo in der Toskar-App hierher.",
+      "ROUTE_BLOCKED": "{{relay}} hat diesen Computer gesperrt. Wende dich an den Support, um den Grund zu erfahren.",
+      "TOKEN_EXPIRED": "Der Zugriff dieses Computers über {{relay}} ist abgelaufen. Schließe das Abo erneut ab, um ihn weiter zu nutzen.",
+      "TOKEN_INVALID": "{{relay}} hat das Token dieses Computers nicht angenommen. Schließe das Abo erneut ab oder verbinde ihn erneut über die Toskar-App."
     }
   }
 }

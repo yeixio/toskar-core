@@ -656,8 +656,10 @@ export type ReachCheck = {
 /** Access from anywhere on Toskar's relay, as GET /remote-access says (#639). */
 export type AnywhereSubscription = {
   state: 'none' | 'pending' | 'active' | 'ended'
-  /** stripe when bought here in Settings, app when bought in the Toskar app. */
-  store?: 'stripe' | 'app'
+  /** stripe when bought here in Settings, app when bought in the Toskar app, grant when the relay's operator granted it. */
+  store?: 'stripe' | 'app' | 'grant'
+  /** Why it ended early: revoked (moved or refunded) or blocked by the relay (#1256). */
+  reason?: 'revoked' | 'blocked'
   expires?: string
   /** Whether Toskar's relay takes new subscriptions now; missing until it's been asked. */
   open?: boolean
@@ -698,6 +700,9 @@ export const api = {
   /** Opens a Stripe checkout for access from anywhere on this computer (#639); answers its page. */
   startSubscriptionCheckout: (plan: 'monthly' | 'yearly') =>
     request<{ url: string }>('/api/v1/remote-access/subscription/checkout', { method: 'POST', body: JSON.stringify({ plan }) }),
+
+  /** Closes the checkout opened here before it's paid (#1257). */
+  cancelSubscriptionCheckout: () => request<void>('/api/v1/remote-access/subscription/checkout', { method: 'DELETE' }),
 
   /** Stripe's billing page for the subscription bought here (#639). */
   manageSubscription: () => request<{ url: string }>('/api/v1/remote-access/subscription/manage', { method: 'POST' }),

@@ -78,7 +78,7 @@
   },
   "keys": {
     "title": "API 金鑰",
-    "description": "供與 Toskar 溝通的 App 和裝置使用的憑證。",
+    "description": "供與 Toskar 溝通的 App 和指令碼使用的憑證。手機和平板在「裝置」中。",
     "create": "建立 API 金鑰",
     "createHint": "為這把金鑰取個名稱，方便你知道是誰在使用它。",
     "namePlaceholder": "VS Code",
@@ -296,7 +296,20 @@
       "moveHere": "移到這台電腦",
       "moveTooSoon": "訂閱每天只能移到其他電腦一次。請明天再試。",
       "renewalNotYet": "App Store 尚未確認你的續訂。請過幾分鐘後選擇「回復購買」。",
-      "storeFailed": "購買未完成：{{message}}"
+      "storeFailed": "購買未完成：{{message}}",
+      "cancel": "取消付款",
+      "cancelling": "正在取消…",
+      "turnOnFirst": "請先開啟上方的「隨處存取」再訂閱。",
+      "endedRevoked": "Toskar 的中繼不再接受這台電腦的訂閱：它已移到另一台電腦或已退款。要繼續使用 Toskar 的中繼，請重新訂閱。",
+      "endedBlocked": "Toskar 的中繼已封鎖這台電腦。請聯絡支援了解原因。",
+      "grant": "已授予存取權限，有效期至 {{date}}。",
+      "grantOpen": "已授予存取權限。"
+    },
+    "relayErrors": {
+      "TOKEN_REVOKED": "{{relay}} 不再接受這台電腦的訂閱。請重新訂閱，或在 Toskar App 中把訂閱移到這台電腦。",
+      "ROUTE_BLOCKED": "{{relay}} 已封鎖這台電腦。請聯絡支援了解原因。",
+      "TOKEN_EXPIRED": "這台電腦透過 {{relay}} 的存取已到期。要繼續使用，請重新訂閱。",
+      "TOKEN_INVALID": "{{relay}} 不接受這台電腦的權杖。請重新訂閱，或在 Toskar App 中重新連線。"
     }
   }
 }

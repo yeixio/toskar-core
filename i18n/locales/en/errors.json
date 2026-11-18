@@ -284,5 +284,10 @@
   "PROJECT_NAME_REQUIRED": "Name the project.",
   "PROJECT_NOT_FOUND": "That project was removed.",
   "SWARM_NOT_FOUND": "That swarm was removed.",
-  "SWARM_RUNNING": "This swarm is still running. Stop it first."
+  "SWARM_RUNNING": "This swarm is still running. Stop it first.",
+  "RELAY_TOKEN_SHORTER": "This computer already has a relay token that lasts longer, so it keeps that one.",
+  "RELAY_UNREACHABLE": "Toskar's relay couldn't be reached. Try again in a minute.",
+  "COMPANION_LIMIT": "A device connected through another can't connect more. Connect it from the phone.",
+  "SUBSCRIPTION_COVERED": "Another device's subscription already covers this computer, so there's nothing to buy here.",
+  "CHECKOUT_NONE": "There's no checkout open to cancel."
 }

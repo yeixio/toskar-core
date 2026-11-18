@@ -3,6 +3,7 @@
   "nav": {
     "label": "Principal",
     "open": "Ouvrir le menu",
+    "skip": "Aller au contenu",
     "use": "Utiliser",
     "customize": "Personnaliser",
     "administer": "Administrer",
@@ -41,10 +42,11 @@
     "connected_one": "{{count}} connecté",
     "connected_many": "{{count}} connectés",
     "connected_other": "{{count}} connectés",
-    "nornHint": "Norn répartit le travail entre vos ordinateurs",
+    "nornHint": "Quel ordinateur exécute chaque modèle",
     "nornAutomatic": "Automatique",
-    "mimirHint": "Connaissances et mémoire locales",
-    "mimirReady": "Prêt"
+    "mimirHint": "Fichiers et sources dont Toskar se sert pour répondre",
+    "mimirReady": "Prêt",
+    "justThis": "Cet ordinateur seulement"
   },
   "boot": {
     "starting": "Démarrage de Toskar",

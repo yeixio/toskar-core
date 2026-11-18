@@ -628,11 +628,12 @@ func New(opts Options) (*App, error) {
 		Transcribe:         a.transcribeRecording,
 		RouteSecret:        a.routeSecret,
 		RelayName:          func() string { return relayName(a.Config.Get()) },
-		RelayToken:         a.relayToken,
-		SetRelayToken:      a.setRelayToken,
+		DeviceRelayToken:   a.deviceRelayToken,
+		SetRelayToken:      a.setRelayTokenFromDevice,
 		Subscription:       a.subscription,
 		StartCheckout:      a.startCheckout,
 		ManageSubscription: a.manageSubscription,
+		CancelCheckout:     a.cancelCheckout,
 		GetSettings: func(ctx context.Context) (contracts.SettingsView, error) {
 			return a.settingsView(ctx)
 		},

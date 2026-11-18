@@ -292,7 +292,7 @@ var rules = []rule{
 			if len(v) > 0 {
 				return true, v, "Sending asks first."
 			}
-			return false, nil, "No email is connected. Connecting Email in Settings → Connected services, with your mail server and an app password, would add it."
+			return false, nil, "No email is connected. Connecting Email in Tools → Connected services, with your mail server and an app password, would add it."
 		}},
 	{"calendar", "Use a calendar", regexp.MustCompile(`(?i)\bcalendar\b`),
 		func(s Snapshot) (bool, []string, string) {
@@ -300,21 +300,21 @@ var rules = []rule{
 			if len(v) > 0 {
 				return true, v, ""
 			}
-			return false, nil, "No calendar is connected. Connecting Calendar in Settings → Connected services, with your CalDAV address and an app password, would add it."
+			return false, nil, "No calendar is connected. Connecting Calendar in Tools → Connected services, with your CalDAV address and an app password, would add it."
 		}},
 	{"github", "Use GitHub", regexp.MustCompile(`(?i)\bgit ?hub\b`),
 		func(s Snapshot) (bool, []string, string) {
 			if name, ok := connected(s, "github"); ok {
 				return true, []string{name}, ""
 			}
-			return false, nil, "GitHub is not connected. Connect it in Settings › Connected services."
+			return false, nil, "GitHub is not connected. Connect it in Tools → Connected services."
 		}},
 	{"home", "Control smart-home devices", regexp.MustCompile(`(?i)\b(home assistant|smart home|lights?|thermostat)\b`),
 		func(s Snapshot) (bool, []string, string) {
 			if name, ok := connected(s, "homeassistant"); ok {
 				return true, []string{name}, "Changes ask first."
 			}
-			return false, nil, "Home Assistant is not connected. Connect it in Settings › Connected services."
+			return false, nil, "Home Assistant is not connected. Connect it in Tools → Connected services."
 		}},
 	{"meaning_search", "Search knowledge by meaning", regexp.MustCompile(`(?i)\b(semantic|by meaning|embedding)\b`),
 		func(s Snapshot) (bool, []string, string) {

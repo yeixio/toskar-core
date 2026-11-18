@@ -4,8 +4,6 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
-
-	"github.com/yeixio/toskar-core/internal/qa"
 )
 
 // A stray config.json in the new Toskar folder doesn't switch a
@@ -28,9 +26,14 @@ func TestQAStrayConfigKeepsTheOldData(t *testing.T) {
 		t.Fatal(err)
 	}
 	got := chooseDataDir(newDir, oldDir)
-	qa.KnownBug(t, "toskar-core#1265", func(t testing.TB) {
-		if got != oldDir {
-			t.Errorf("chose %s, an empty folder, over %s, which has the database", got, oldDir)
-		}
-	})
+	if got != oldDir {
+		t.Errorf("chose %s, an empty folder, over %s, which has the database", got, oldDir)
+	}
+	// Once the new folder has its own database, it's the one.
+	if err := os.WriteFile(filepath.Join(newDir, "toskar.db"), []byte("data"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if got := chooseDataDir(newDir, oldDir); got != newDir {
+		t.Errorf("chose %s over the new folder with its own database", got)
+	}
 }

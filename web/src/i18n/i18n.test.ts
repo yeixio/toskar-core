@@ -128,7 +128,7 @@ describe('formatting', () => {
     await applyLanguage('en')
     expect(formatNumber(1234.56)).toBe('1,234.56')
     expect(spaced(formatSize(1.5 * 1024 ** 3))).toBe('1.5 GB')
-    expect(spaced(formatSize(512))).toBe('512 byte')
+    expect(spaced(formatSize(512))).toBe('512 B')
   })
 
   it('formats dates and times', async () => {

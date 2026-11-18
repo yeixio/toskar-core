@@ -3,6 +3,7 @@
   "nav": {
     "label": "메인",
     "open": "메뉴 열기",
+    "skip": "본문으로 건너뛰기",
     "use": "사용",
     "customize": "맞춤 설정",
     "administer": "관리",
@@ -39,10 +40,11 @@
     "bifrostHint": "컴퓨터 검색 및 네트워킹",
     "computersNone": "컴퓨터 없음",
     "connected_other": "{{count}}대 연결됨",
-    "nornHint": "Norn이 여러 컴퓨터에 작업을 배분해요",
+    "nornHint": "어느 컴퓨터가 각 모델을 실행하는지",
     "nornAutomatic": "자동",
-    "mimirHint": "로컬 지식 및 메모리",
-    "mimirReady": "준비됨"
+    "mimirHint": "Toskar가 답할 때 쓰는 파일과 소스",
+    "mimirReady": "준비됨",
+    "justThis": "이 컴퓨터만"
   },
   "boot": {
     "starting": "Toskar 시작하는 중",

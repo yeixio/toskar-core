@@ -117,6 +117,8 @@
     "trainingHint": "AIを学習中のため、モデルがあるほかのコンピュータに作業を回します",
     "plain": "暗号化なし",
     "plainHint": "{{name}}のToskarが古いため、この通信は暗号化されていません。暗号化するには{{name}}のToskarを更新してください。",
+    "useCode": "コードをお持ちですか？コードで承認",
+    "confirmRemoveModel": "{{name}}から{{model}}を削除しますか？そのコンピュータから削除され、そこでもう一度使うには再ダウンロードが必要です。",
     "confirmRemove": "{{name}}をこのチームから外しますか？作業を受けなくなり、もう一度追加するには新たな承認が必要です。"
   },
   "deploy": {
@@ -190,7 +192,6 @@
     "showing": "コードを取得中…",
     "getApp": "アプリをお持ちでない場合は <store>Toskar を入手</store>してください。",
     "connected": "{{name}} が接続されました。",
-    "manage": "<access>APIアクセス</access>でいつでも接続を解除できます。",
     "manageYours": "設定の「あなたのデバイス」でいつでも接続を解除できます。",
     "another": "別のデバイスを接続",
     "codeLabel": "コード {{code}}",

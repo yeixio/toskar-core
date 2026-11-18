@@ -58,7 +58,7 @@
       "label": "ローカルデータベース"
     },
     "bifrost": {
-      "label": "Bifrostネットワーク",
+      "label": "コンピュータのネットワーク",
       "offline_other": "{{count}}台のコンピュータがオフライン",
       "silentFor_other": "{{names}}は{{ago}}応答していません。",
       "silent_other": "{{names}}が応答していません。",

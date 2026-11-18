@@ -58,7 +58,7 @@
       "label": "本地数据库"
     },
     "bifrost": {
-      "label": "Bifrost 网络",
+      "label": "电脑网络",
       "offline_other": "{{count}} 台电脑离线",
       "silentFor_other": "{{names}} 已有 {{ago}} 没有响应。",
       "silent_other": "{{names}} 没有响应。",

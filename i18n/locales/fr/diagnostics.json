@@ -66,7 +66,7 @@
       "label": "Base de données locale"
     },
     "bifrost": {
-      "label": "Réseau Bifrost",
+      "label": "Réseau d'ordinateurs",
       "offline_one": "{{count}} ordinateur hors ligne",
       "offline_many": "{{count}} ordinateurs hors ligne",
       "offline_other": "{{count}} ordinateurs hors ligne",

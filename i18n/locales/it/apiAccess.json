@@ -84,7 +84,7 @@
   },
   "keys": {
     "title": "Chiavi API",
-    "description": "Credenziali per le app e i dispositivi che comunicano con Toskar.",
+    "description": "Credenziali per le app e gli script che comunicano con Toskar. Telefoni e tablet sono in Dispositivi.",
     "create": "Crea chiave API",
     "createHint": "Dai un nome a questa chiave per sapere chi la usa.",
     "namePlaceholder": "VS Code",
@@ -302,7 +302,20 @@
       "moveHere": "Spostalo su questo computer",
       "moveTooSoon": "Un abbonamento può essere spostato su un altro computer una volta al giorno. Riprova domani.",
       "renewalNotYet": "L'App Store non ha ancora confermato il rinnovo. Scegli Ripristina acquisto tra qualche minuto.",
-      "storeFailed": "L'acquisto non è andato a buon fine: {{message}}"
+      "storeFailed": "L'acquisto non è andato a buon fine: {{message}}",
+      "cancel": "Annulla il pagamento",
+      "cancelling": "Annullamento…",
+      "turnOnFirst": "Attiva Accesso ovunque qui sopra per abbonarti.",
+      "endedRevoked": "Il relay di Toskar non accetta più l'abbonamento di questo computer: è stato spostato su un altro computer o rimborsato. Abbonati di nuovo per continuare a usare il relay di Toskar.",
+      "endedBlocked": "Il relay di Toskar ha bloccato questo computer. Contatta l'assistenza per sapere perché.",
+      "grant": "Accesso concesso fino al {{date}}.",
+      "grantOpen": "Accesso concesso."
+    },
+    "relayErrors": {
+      "TOKEN_REVOKED": "{{relay}} non accetta più l'abbonamento di questo computer. Abbonati di nuovo, o sposta qui il tuo abbonamento dall'app Toskar.",
+      "ROUTE_BLOCKED": "{{relay}} ha bloccato questo computer. Contatta l'assistenza per sapere perché.",
+      "TOKEN_EXPIRED": "L'accesso di questo computer tramite {{relay}} è scaduto. Abbonati di nuovo per continuare a usarlo.",
+      "TOKEN_INVALID": "{{relay}} non ha accettato il token di questo computer. Abbonati di nuovo, o ricollegalo dall'app Toskar."
     }
   }
 }

@@ -106,6 +106,8 @@ function ComputerCard({
   const advancedMode = useUIStore((s) => s.advancedMode)
   const [manageOpen, setManageOpen] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
+  // One way to add a nearby computer; the code is behind a link (#1246).
+  const [codeOpen, setCodeOpen] = useState(false)
   const kind = membershipKind(node)
   const hw = describeNodeHardware(node.hardware)
   const capabilities = availableForLabels(installedModels, node.hardware)
@@ -270,7 +272,10 @@ function ComputerCard({
                       // Plain red text: the tinted danger button is too low-contrast on this tinted row.
                       className="inline-flex h-8 shrink-0 items-center rounded-lg px-2.5 text-xs font-semibold text-danger transition hover:bg-danger/10 disabled:opacity-50"
                       disabled={removingModelId === m.id}
-                      onClick={() => onRemoveModel(m.id)}
+                      onClick={() => {
+                        // Deleting a model from a computer can't be undone without downloading it again (#1247).
+                        if (window.confirm(t('card.confirmRemoveModel', { model: m.display_name || m.id, name: node.name }))) onRemoveModel(m.id)
+                      }}
                     >
                       {removingModelId === m.id ? t('card.removing') : t('card.remove')}
                     </button>
@@ -294,26 +299,32 @@ function ComputerCard({
             >
               {pairingBusy ? t('card.connecting') : t('card.addToTeam')}
             </button>
-            <div className="flex flex-wrap items-center gap-2">
-              <input
-                type="text"
-                inputMode="numeric"
-                maxLength={6}
-                placeholder={t('card.codePlaceholder')}
-                aria-label={t('card.codeFor', { name: node.name })}
-                className="field w-24 px-2 py-1.5 text-xs font-mono"
-                value={claimCode}
-                onChange={(e) => onClaimCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-              />
-              <button
-                type="button"
-                className="btn-secondary btn-sm"
-                disabled={claimBusy || !node.address || claimCode.length !== 6}
-                onClick={onApproveCode}
-              >
-                {claimBusy ? t('card.approving') : t('card.approveCode')}
+            {!codeOpen ? (
+              <button type="button" className="text-xs text-primary hover:underline" onClick={() => setCodeOpen(true)}>
+                {t('card.useCode')}
               </button>
-            </div>
+            ) : (
+              <div className="flex flex-wrap items-center gap-2">
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  maxLength={6}
+                  placeholder={t('card.codePlaceholder')}
+                  aria-label={t('card.codeFor', { name: node.name })}
+                  className="field w-24 px-2 py-1.5 text-xs font-mono"
+                  value={claimCode}
+                  onChange={(e) => onClaimCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                />
+                <button
+                  type="button"
+                  className="btn-secondary btn-sm"
+                  disabled={claimBusy || !node.address || claimCode.length !== 6}
+                  onClick={onApproveCode}
+                >
+                  {claimBusy ? t('card.approving') : t('card.approveCode')}
+                </button>
+              </div>
+            )}
           </>
         )}
 
@@ -773,9 +784,9 @@ export function NodesPage() {
                   onRevoke={() => revokeMutation.mutate(node.id)}
                   onRemoveModel={() => {}}
                   removingModelId={null}
-                  pairingBusy={pairMutation.isPending}
-                  claimBusy={claimMutation.isPending}
-                  revokeBusy={revokeMutation.isPending}
+                  pairingBusy={pairMutation.isPending && pairMutation.variables === node.id}
+                  claimBusy={claimMutation.isPending && claimMutation.variables?.nodeId === node.id}
+                  revokeBusy={revokeMutation.isPending && revokeMutation.variables === node.id}
                 />
               </li>
             ))}
@@ -833,9 +844,9 @@ export function NodesPage() {
                       ? removingKey.slice(node.id.length + 1)
                       : null
                   }
-                  pairingBusy={pairMutation.isPending}
-                  claimBusy={claimMutation.isPending}
-                  revokeBusy={revokeMutation.isPending}
+                  pairingBusy={pairMutation.isPending && pairMutation.variables === node.id}
+                  claimBusy={claimMutation.isPending && claimMutation.variables?.nodeId === node.id}
+                  revokeBusy={revokeMutation.isPending && revokeMutation.variables === node.id}
                 />
               </li>
             ))}

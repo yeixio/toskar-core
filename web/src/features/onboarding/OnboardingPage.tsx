@@ -203,7 +203,7 @@ export function OnboardingPage() {
   }, [recommendation, step, phase, downloadProgress])
 
   return (
-    <main className="mx-auto flex h-full min-h-0 w-full max-w-3xl flex-col justify-center overflow-y-auto px-6 py-12">
+    <main className="mx-auto flex h-full min-h-0 w-full max-w-3xl flex-col justify-center-safe overflow-y-auto px-6 py-12">
       <header className="mb-10 text-center">
         <Ratatoskr state={mascot} size={160} className="mx-auto mb-3" />
         <p className="mb-3 text-sm font-medium uppercase tracking-[0.18em] text-accent">

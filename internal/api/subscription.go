@@ -15,8 +15,13 @@ type Subscription struct {
 	// State is none, pending (a checkout opened here isn't paid yet),
 	// active, or ended (the subscription bought here has ended).
 	State string `json:"state"`
-	// Store is where it was bought: stripe here, app in the Toskar app.
-	Store   string    `json:"store,omitempty"`
+	// Store is where it was bought: stripe here, app in the Toskar app,
+	// or grant for access the relay's operator granted by hand.
+	Store string `json:"store,omitempty"`
+	// Reason is why it ended before its time: revoked (moved to another
+	// computer, or refunded) or blocked (the relay's operator blocked this
+	// computer), from the relay refusing its token (#1256).
+	Reason  string    `json:"reason,omitempty"`
 	Expires time.Time `json:"expires,omitzero"`
 	// Open is whether Toskar's relay takes new subscriptions now; nil
 	// before it's been asked.
@@ -70,8 +75,24 @@ func (s *Server) handleSubscriptionManage(w http.ResponseWriter, r *http.Request
 	writeJSON(w, http.StatusOK, map[string]any{"url": url})
 }
 
+// handleSubscriptionCancel forgets the checkout opened here, unpaid, so
+// another plan can be chosen (#1257).
+func (s *Server) handleSubscriptionCancel(w http.ResponseWriter, r *http.Request) {
+	if s.deps.CancelCheckout == nil {
+		writeErr(w, http.StatusNotImplemented, "NOT_IMPLEMENTED", "Access from anywhere isn't available.", nil)
+		return
+	}
+	if err := s.deps.CancelCheckout(r.Context()); err != nil {
+		writeSubscriptionErr(w, err)
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
+}
+
 // subscriptionStatus is each subscription error's HTTP status.
 var subscriptionStatus = map[string]int{
+	"SUBSCRIPTION_COVERED":      http.StatusConflict,
+	"CHECKOUT_NONE":             http.StatusNotFound,
 	"SUBSCRIPTION_PLAN_INVALID": http.StatusBadRequest,
 	"SUBSCRIPTION_OWN_RELAY":    http.StatusConflict,
 	"SUBSCRIPTION_ACTIVE":       http.StatusConflict,

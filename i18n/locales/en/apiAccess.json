@@ -81,7 +81,7 @@
   },
   "keys": {
     "title": "API keys",
-    "description": "Credentials for apps and devices that talk to Toskar.",
+    "description": "Credentials for apps and scripts that talk to Toskar. Phones and tablets are under Devices.",
     "create": "Create API key",
     "createHint": "Give this key a name so you know what uses it.",
     "namePlaceholder": "VS Code",
@@ -299,7 +299,20 @@
       "moveHere": "Move it to this computer",
       "moveTooSoon": "A subscription can move to another computer once a day. Try again tomorrow.",
       "renewalNotYet": "The App Store hasn't confirmed your renewal yet. Choose Restore purchase in a few minutes.",
-      "storeFailed": "The purchase didn't go through: {{message}}"
+      "storeFailed": "The purchase didn't go through: {{message}}",
+      "cancel": "Cancel checkout",
+      "cancelling": "Cancelling…",
+      "turnOnFirst": "Turn on Access from anywhere above to subscribe.",
+      "endedRevoked": "Toskar's relay no longer accepts this computer's subscription: it moved to another computer, or was refunded. Subscribe again to keep using Toskar's relay.",
+      "endedBlocked": "Toskar's relay has blocked this computer. Contact support to find out why.",
+      "grant": "Access granted until {{date}}.",
+      "grantOpen": "Access granted."
+    },
+    "relayErrors": {
+      "TOKEN_REVOKED": "{{relay}} no longer accepts this computer's subscription. Subscribe again, or move your subscription here from the Toskar app.",
+      "ROUTE_BLOCKED": "{{relay}} has blocked this computer. Contact support to find out why.",
+      "TOKEN_EXPIRED": "This computer's access through {{relay}} has run out. Subscribe again to keep using it.",
+      "TOKEN_INVALID": "{{relay}} didn't accept this computer's token. Subscribe again, or connect it again from the Toskar app."
     }
   }
 }

@@ -52,6 +52,41 @@ func (c *Client) Availability(ctx context.Context) (bool, error) {
 	return out.Open, nil
 }
 
+// Covered asks the relay whether a subscription already covers route,
+// bought from any device.
+func (c *Client) Covered(ctx context.Context, route string) (bool, error) {
+	resp, err := c.do(ctx, http.MethodGet, "/v1/routes/"+route+"/coverage", "", nil)
+	if err != nil {
+		return false, err
+	}
+	defer resp.Body.Close()
+	var out struct {
+		Covered bool `json:"covered"`
+	}
+	if err := json.NewDecoder(io.LimitReader(resp.Body, 4<<10)).Decode(&out); err != nil {
+		return false, err
+	}
+	return out.Covered, nil
+}
+
+// CheckToken asks the relay whether it takes tok for route, by reading the
+// route's usage with it, which any current token for the route may.
+func (c *Client) CheckToken(ctx context.Context, route, tok string) error {
+	resp, err := c.do(ctx, http.MethodGet, "/v1/routes/"+route+"/usage", tok, nil)
+	if err != nil {
+		return err
+	}
+	resp.Body.Close()
+	return nil
+}
+
+// Refused reports whether err is the relay refusing a token: expired,
+// revoked, unsigned, or for another route or a blocked one.
+func Refused(err error) bool {
+	var ae *apiError
+	return errors.As(err, &ae) && (ae.Status == http.StatusUnauthorized || ae.Status == http.StatusForbidden)
+}
+
 // ErrorCode is the relay's error code in err, or RELAY_UNREACHABLE when
 // the relay didn't answer with one.
 func ErrorCode(err error) string { return errorCode(err) }

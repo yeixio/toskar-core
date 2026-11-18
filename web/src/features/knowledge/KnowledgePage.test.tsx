@@ -4,7 +4,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { MemoryRouter } from 'react-router-dom'
 import { api } from '@/lib/api'
 import type { AIProfile, KnowledgeSource } from '@/types/api'
-import { knownBug } from '@/test/knownBug'
 import { KnowledgePage } from './KnowledgePage'
 
 vi.mock('@/lib/api', async () => {
@@ -90,8 +89,6 @@ describe('KnowledgePage', () => {
   })
 })
 
-// QA regressions: knownBug passes while the bug is there and fails once
-// it's fixed (src/test/knownBug.ts).
 describe('KnowledgePage QA regressions', () => {
   beforeEach(() => {
     vi.mocked(api.listKnowledge).mockResolvedValue([])
@@ -102,7 +99,7 @@ describe('KnowledgePage QA regressions', () => {
   })
 
   // Regression: toskar-core#1270
-  knownBug('toskar-core#1270', 'Enter in the path field connects the folder', async () => {
+  it('Enter in the path field connects the folder', async () => {
     renderPage()
     const path = await screen.findByPlaceholderText('~/Documents/inventory.csv')
     fireEvent.change(path, { target: { value: '~/Notes' } })

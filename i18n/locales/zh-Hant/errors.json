@@ -284,5 +284,10 @@
   "PROJECT_NAME_REQUIRED": "請為專案命名。",
   "PROJECT_NOT_FOUND": "該專案已被刪除。",
   "SWARM_NOT_FOUND": "該代理群已被移除。",
-  "SWARM_RUNNING": "此代理群仍在執行。請先停止它。"
+  "SWARM_RUNNING": "此代理群仍在執行。請先停止它。",
+  "RELAY_TOKEN_SHORTER": "這台電腦已有一個有效期更長的中繼權杖，會繼續使用它。",
+  "RELAY_UNREACHABLE": "無法連線到 Toskar 的中繼。請過一分鐘再試。",
+  "COMPANION_LIMIT": "透過其他裝置連線的裝置不能再連線更多裝置。請從手機連線。",
+  "SUBSCRIPTION_COVERED": "另一台裝置的訂閱已經涵蓋這台電腦，這裡無需購買。",
+  "CHECKOUT_NONE": "沒有可取消的結帳。"
 }
