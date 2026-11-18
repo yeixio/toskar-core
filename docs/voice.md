@@ -27,7 +27,7 @@ From the client:
 
 | Event | What it does |
 | --- | --- |
-| `session.update` | Sets `voice` (a Piper voice), `turn_detection` (`server_vad` with `threshold` 0 to 1, `prefix_padding_ms`, `silence_duration_ms`, `create_response`, `interrupt_response`; `null` turns it off), `input_audio_transcription.language` (a hint such as `de`), and `modalities` (`["text"]` for text only). Only `pcm16` audio is taken. |
+| `session.update` | Sets `voice` (a Kokoro voice such as `af_heart`, or a Piper voice; empty is the language's own), `turn_detection` (`server_vad` with `threshold` 0 to 1, `prefix_padding_ms`, `silence_duration_ms`, `create_response`, `interrupt_response`; `null` turns it off), `input_audio_transcription.language` (a hint such as `de`), and `modalities` (`["text"]` for text only). Only `pcm16` audio is taken. |
 | `input_audio_buffer.append` | `audio`: the next piece of the microphone's audio. Send about 100 ms at a time. |
 | `input_audio_buffer.commit` | Ends a turn, when turn detection is off. |
 | `input_audio_buffer.clear` | Drops the turn so far. |
@@ -59,22 +59,40 @@ Errors are `error` events with `error.code`, such as `invalid_audio`,
   loudness with the room's own noise. 60 ms of speech starts a turn, so a
   click doesn't, and `silence_duration_ms` of quiet ends it. While Toskar
   answers, speech starts a new turn and stops the answer (barge-in).
-- **Listening** is Whisper (faster-whisper), as dictation uses.
+- **Listening** is Whisper (faster-whisper), as dictation uses. A speech
+  worker (`internal/speech/worker.go`) keeps Whisper and the voices loaded
+  in one Python process between turns, and stops it after 10 minutes
+  without a turn, which frees its memory.
 - **Thinking** goes through the person's normal chat: their default profile,
   memory, and tools. A session is one chat, named Voice chat, in their
   chats. The answer is asked to be short and spoken, with no Markdown, and
   without the model's thinking first.
-- **Speaking** is Piper, a sentence at a time, so the first sentence plays
-  while the rest is written. Markdown marks and links' addresses aren't read
-  out.
+- **Speaking** is a sentence at a time, so the first sentence plays while
+  the rest is written. Markdown marks and links' addresses aren't read out.
+  The voice is Kokoro (Kokoro-82M, Apache 2.0, through kokoro-onnx, MIT),
+  which sounds much closer to a person than Piper and still runs quickly on
+  a processor. Its model (120 MB, checked against pinned checksums)
+  downloads in the background the first time; until then, and for the
+  languages it doesn't speak well, Piper reads. Kokoro's voices by language:
+
+  | Language | Voice |
+  | --- | --- |
+  | English | `af_heart` (`bf_emma` for en-GB) |
+  | Spanish | `ef_dora` |
+  | French | `ff_siwis` |
+  | Italian | `if_sara` |
+  | Portuguese | `pf_dora` |
+
+  Every other language, such as German, Japanese, Korean, and Chinese,
+  is Piper's voice for it. When Kokoro fails, Piper reads for the next 10
+  minutes. Like Piper, Kokoro turns text into sounds with espeak-ng
+  (GPL-3.0, installed on the person's computer with the speech packages).
 
 ## Not yet
 
-- Whisper and Piper start for each turn; a speech worker that keeps them
-  loaded comes next, then the measurements on the Mac, the rig, and a
-  CPU-only computer.
+- The measurements on the Mac, the rig, and a CPU-only computer.
 - A model that judges whether a turn sounds finished (Smart Turn), and
-  more natural voices (Kokoro, Qwen3-TTS).
+  Qwen3-TTS for computers with a strong graphics card.
 - The chat keeps the whole answer even when it was cut off.
 - `/v1/realtime`, for OpenAI's SDKs; the desktop app, the phone, the TV,
   and the doorbell (#667).

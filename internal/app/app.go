@@ -267,6 +267,8 @@ type App struct {
 	chatPlaces map[string]chatPlace
 	// Speech transcribes audio and reads text aloud (Gungnir §18–19).
 	Speech *speech.Engine
+	// voiceWorker keeps live voice mode's speech models loaded (#795).
+	voiceWorker *speech.Worker
 	// frames keeps recent videos' sampled frames (#191).
 	frames frameCache
 	// toolNet places heavy tools on the computer that suits them, and
@@ -1002,6 +1004,7 @@ func New(opts Options) (*App, error) {
 		WorkDir: filepath.Join(cfg.DataDir, "code-runs"), PythonRoot: a.python.Root})
 	// Speech runs on this computer; models are kept with the runtimes.
 	a.Speech = &speech.Engine{Python: a.python, Dir: filepath.Join(cfg.RuntimesDir, "speech")}
+	a.voiceWorker = &speech.Worker{Engine: a.Speech}
 	a.toolNet = a.newToolNetwork(cfg)
 	a.registerPortable(&speech.TranscribeTool{Engine: a.Speech, Store: a.Artifacts})
 	a.registerPortable(&speech.SynthesizeTool{Engine: a.Speech, Store: a.Artifacts})
@@ -1515,6 +1518,9 @@ func (a *App) Shutdown(ctx context.Context) error {
 	}
 	if a.browser != nil {
 		a.browser.CloseAll()
+	}
+	if a.voiceWorker != nil {
+		a.voiceWorker.Close()
 	}
 
 	// Unload models first so llama-server children exit before HTTP shutdown.
