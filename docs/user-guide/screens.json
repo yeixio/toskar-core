@@ -717,7 +717,7 @@
       "readyText": "Notes app",
       "actions": [
         {
-          "scroll": "Credentials for apps and devices that talk to Toskar."
+          "scroll": "Credentials for apps and scripts that talk to Toskar. Phones and tablets are under Devices."
         }
       ]
     },
