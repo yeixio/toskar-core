@@ -70,3 +70,24 @@ func TestRunPageIsTheWatchedPage(t *testing.T) {
 		t.Fatalf("opened page: %q", got)
 	}
 }
+
+// A run that may open the page its prompt names, and didn't, is flagged:
+// its model answered without reading it (#1269).
+func TestUnopenedPage(t *testing.T) {
+	watch := automations.Automation{Prompt: "Read the page at https://example.com/pricing. Tell me if the price changed.", Tools: []string{"internet.open"}}
+	if got := unopenedPage(watch, ""); got != "https://example.com/pricing" {
+		t.Fatalf("not opened: %q", got)
+	}
+	if got := unopenedPage(watch, "https://example.com/pricing"); got != "" {
+		t.Fatalf("opened: %q", got)
+	}
+	noTool := watch
+	noTool.Tools = []string{"internet.search"}
+	if got := unopenedPage(noTool, ""); got != "" {
+		t.Fatalf("may not open pages: %q", got)
+	}
+	noURL := automations.Automation{Prompt: "Summarize the AI news.", Tools: []string{"browser.open"}}
+	if got := unopenedPage(noURL, ""); got != "" {
+		t.Fatalf("names no page: %q", got)
+	}
+}

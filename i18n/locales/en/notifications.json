@@ -185,7 +185,10 @@
     "automationDigestBody_one": "1 automation ran: {{names}}",
     "automationDigestBody_other": "{{count}} automations ran: {{names}}",
     "newerModels": "Newer {{family}} models are available",
-    "newerModelsBody": "{{model}} is newer than {{installed}}. Models › Installed shows how it fits and installs it beside the one you have."
+    "newerModelsBody": "{{model}} is newer than {{installed}}. Models › Installed shows how it fits and installs it beside the one you have.",
+    "pageNotOpened": "{{automation}} didn't open {{page}}",
+    "pageNotOpenedUnnamed": "An automation didn't open {{page}}",
+    "pageNotOpenedBody": "Its model answered without reading the page, so the result may be made up. Choose a model that can use tools for this automation."
   },
   "sent": {
     "times": "{{title}} ({{count}} times)",

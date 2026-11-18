@@ -194,7 +194,10 @@
     "automationDigestBody_other": "{{count}} automatisations se sont exécutées : {{names}}",
     "automationDigestBody_many": "{{count}} automatisations se sont exécutées : {{names}}",
     "newerModels": "De nouveaux modèles {{family}} sont disponibles",
-    "newerModelsBody": "{{model}} est plus récent que {{installed}}. Modèles › Installés indique comment il tient sur cet ordinateur et l’installe à côté de celui que vous avez."
+    "newerModelsBody": "{{model}} est plus récent que {{installed}}. Modèles › Installés indique comment il tient sur cet ordinateur et l’installe à côté de celui que vous avez.",
+    "pageNotOpened": "{{automation}} n'a pas ouvert {{page}}",
+    "pageNotOpenedUnnamed": "Une automatisation n'a pas ouvert {{page}}",
+    "pageNotOpenedBody": "Son modèle a répondu sans lire la page, le résultat est donc peut-être inventé. Choisissez pour cette automatisation un modèle capable d'utiliser des outils."
   },
   "sent": {
     "times": "{{title}} ({{count}} fois)",

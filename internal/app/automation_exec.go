@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/yeixio/toskar-core/internal/artifacts"
+	"regexp"
 	"slices"
 	"strings"
 	"sync"
@@ -193,7 +194,59 @@ func (e automationExecutor) execute(ctx context.Context, automation automations.
 	out.Skipped = env.skippedTools()
 	out.Acted = env.actedCalls()
 	e.reportSkipped(ctx, automation, out.Skipped)
+	if runErr == nil && ctx.Err() == nil && automations.ChangeNote(ctx) == "" {
+		if page := unopenedPage(automation, env.sources.firstPage()); page != "" {
+			e.reportUnopened(ctx, automation, page)
+		}
+	}
 	return out, runErr
+}
+
+// pageTools open a web page for a run to read.
+var pageTools = []string{"internet.open", "browser.open"}
+
+var promptURL = regexp.MustCompile(`https?://[^\s"'<>)\]]+`)
+
+// unopenedPage is the page an automation's prompt names that its run never
+// opened, though it may: its model answered without reading it, as a small
+// model that can't use tools does (#1269). "" when it opened a page, names
+// none, or may not open one.
+func unopenedPage(automation automations.Automation, opened string) string {
+	if opened != "" {
+		return ""
+	}
+	may := false
+	for _, id := range pageTools {
+		if slices.Contains(automation.Tools, id) {
+			may = true
+		}
+	}
+	if !may {
+		return ""
+	}
+	return strings.TrimRight(promptURL.FindString(automation.Prompt), ".,;:!?")
+}
+
+// reportUnopened tells the person a run answered without reading the page
+// it was about, so its result may be made up (#1269).
+func (e automationExecutor) reportUnopened(ctx context.Context, automation automations.Automation, page string) {
+	if e.app.Notifications == nil {
+		return
+	}
+	m := notice("pageNotOpenedUnnamed", map[string]any{"page": page}, "pageNotOpenedBody", nil)
+	if name := strings.TrimSpace(automation.Name); name != "" {
+		m = notice("pageNotOpened", map[string]any{"automation": name, "page": page}, "pageNotOpenedBody", nil)
+	}
+	_, _ = e.app.Notifications.Notify(context.WithoutCancel(ctx), gjallarhorn.Request{
+		SourceType: "automation",
+		SourceID:   automation.ID,
+		Category:   gjallarhorn.CategoryAutomation,
+		Severity:   gjallarhorn.SeverityWarning,
+		Message:    m,
+		Link:       "/automations?id=" + automation.ID,
+		DedupeKey:  "automation.unopened:" + automation.ID,
+		Channels:   []string{"desktop"},
+	})
 }
 
 // reportSkipped tells the person which actions a run skipped because nobody
