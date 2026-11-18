@@ -3,13 +3,13 @@ import { fireEvent, render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { describe, expect, it, vi } from 'vitest'
 import { api, ApiError } from '@/lib/api'
-import { ServiceBootGate } from './ServiceBootGate'
+import { HEALTH_CHECK_TIMEOUT_MS, ServiceBootGate } from './ServiceBootGate'
 
 vi.mock('@/lib/api', async () => {
   const actual = await vi.importActual<typeof import('@/lib/api')>('@/lib/api')
   return {
     ...actual,
-    api: { ...actual.api, getHealth: vi.fn(), signIn: vi.fn() },
+    api: { ...actual.api, getHealth: vi.fn(), signIn: vi.fn(), getMe: vi.fn() },
   }
 })
 vi.mock('./ScheduleBackgroundSync', () => ({ ScheduleBackgroundSync: () => null }))
@@ -65,5 +65,33 @@ describe('ServiceBootGate sign-in (#206)', () => {
     vi.mocked(api.getHealth).mockReturnValue(new Promise(() => {}))
     renderAt('/chat')
     expect(await screen.findByText('Starting Toskar', {}, { timeout: 2000 })).toBeInTheDocument()
+  })
+})
+
+describe('ServiceBootGate health check (yeixio/toskar-apps#461)', () => {
+  it('gives up on a health check that never answers, and tries again', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true })
+    try {
+      const signals: AbortSignal[] = []
+      // The first check hangs until it is aborted; the next one answers.
+      vi.mocked(api.getHealth).mockReset()
+      vi.mocked(api.getHealth).mockImplementationOnce(
+        (init?: RequestInit) =>
+          new Promise((_resolve, reject) => {
+            const signal = init?.signal as AbortSignal
+            signals.push(signal)
+            signal.addEventListener('abort', () => reject(new DOMException('aborted', 'AbortError')))
+          }),
+      )
+      vi.mocked(api.getHealth).mockResolvedValue({ status: 'ok', product: 'toskar', version: 'test' } as never)
+      vi.mocked(api.getMe).mockResolvedValue({ person: { id: 'p', name: 'Grace', role: 'admin', created_at: '', sign_in: false }, via: 'local' } as never)
+      renderAt('/chat')
+      expect(screen.queryByText('the app')).not.toBeInTheDocument()
+      await vi.advanceTimersByTimeAsync(HEALTH_CHECK_TIMEOUT_MS + 3_000)
+      expect(signals[0]?.aborted).toBe(true)
+      expect(await screen.findByText('the app')).toBeInTheDocument()
+    } finally {
+      vi.useRealTimers()
+    }
   })
 })
