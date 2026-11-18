@@ -438,11 +438,11 @@ func (t *turnTrace) tool(toolID string, args, result map[string]any) {
 		// A result may quote the pages its run read (§58).
 		t.untrusted = true
 		t.step("automation", "readAutomationResults", nil)
-	case "image.generate", "image.edit", "video.generate":
+	case "image.generate", "image.edit", "video.generate", "video.extend":
 		// Which model made it, so a picture or clip can be made again the
 		// same way (#549).
 		if model := str(result, "model"); model != "" {
-			key := map[string]string{"image.generate": "madePicture", "image.edit": "editedPicture", "video.generate": "madeClip"}[toolID]
+			key := map[string]string{"image.generate": "madePicture", "image.edit": "editedPicture", "video.generate": "madeClip", "video.extend": "madeClip"}[toolID]
 			t.step("create", key, map[string]any{"model": model})
 		}
 	case "terminal":
@@ -544,7 +544,7 @@ func (t *turnTrace) produced(toolID string, result map[string]any) {
 			size = int64(v)
 		}
 		ref := contracts.FileRef{ID: id, Name: name, Kind: kind, Size: size, Producer: "assistant"}
-		media := toolID == "image.generate" || toolID == "image.edit" || toolID == "video.generate"
+		media := toolID == "image.generate" || toolID == "image.edit" || toolID == "video.generate" || toolID == "video.extend"
 		if media {
 			// How it was made goes with it (#553).
 			if d := imagegen.Details(m); len(d) > 0 {

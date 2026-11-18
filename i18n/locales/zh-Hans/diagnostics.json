@@ -173,6 +173,7 @@
       "image.generate": "生成图片",
       "image.edit": "编辑图片",
       "video.generate": "生成视频",
+      "video.extend": "续写视频",
       "speech.transcribe": "转录",
       "speech.synthesize": "朗读"
     },

@@ -186,6 +186,7 @@
       "image.generate": "Make images",
       "image.edit": "Edit images",
       "video.generate": "Make videos",
+      "video.extend": "Continue videos",
       "speech.transcribe": "Transcribe",
       "speech.synthesize": "Read aloud"
     },

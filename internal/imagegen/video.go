@@ -271,11 +271,16 @@ func (t *VideoTool) Run(ctx context.Context, job remotetools.Job) (remotetools.O
 
 // Finish attaches the clip to the chat.
 func (t *VideoTool) Finish(ctx context.Context, out remotetools.Output) (map[string]any, error) {
+	return finishClip(ctx, t.Store, out)
+}
+
+// finishClip saves a made clip in the chat, where it plays.
+func finishClip(ctx context.Context, store *artifacts.Store, out remotetools.Output) (map[string]any, error) {
 	if len(out.Files) != 1 || !bytes.HasPrefix(out.Files[0].Data, webmMagic) {
 		return nil, fmt.Errorf("no clip came back")
 	}
 	f := out.Files[0]
-	a, err := t.Store.Save(ctx, artifacts.Input{ConversationID: artifacts.ConversationFrom(ctx), Name: artifacts.CleanName(f.Name), Producer: artifacts.ProducerAssistant, Data: f.Data,
+	a, err := store.Save(ctx, artifacts.Input{ConversationID: artifacts.ConversationFrom(ctx), Name: artifacts.CleanName(f.Name), Producer: artifacts.ProducerAssistant, Data: f.Data,
 		Details: details(out.Result)})
 	if err != nil {
 		return nil, err

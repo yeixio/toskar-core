@@ -150,6 +150,8 @@ All of them and their parts are Apache 2.0 and need no account to download. [Ima
 
 `video.generate` makes a short clip on this computer, from a description or from an image in the chat brought to life. It uses the same stable-diffusion.cpp as images, with its own setup. It is allowed by default and level 1, the Video capability turns it on or off in a profile, and offline profiles keep it. It is offered when a message asks for a video, clip, or animation, or to bring an image to life.
 
+`video.extend` continues a clip in the chat (#155). It reads the clip's last frame, makes the next part from it with `prompt` (or the clip's own prompt when that's left out), and joins the two into one WebM with the shared frame shown once. `clip` names the clip; without it, the newest clip in the chat is used. `seconds` is how much to add, as for `video.generate`. Each part is one clip's length, so a longer video is made a part at a time. It needs a model that makes clips from a picture (Wan 2.2 TI2V 5B), and a clip whose last frame stands alone, as Toskar's clips do; a clip from elsewhere whose last frame depends on earlier ones can't be continued, and it says so. It has the same permission, level, and capability as `video.generate`, and it's offered when a message asks to continue, extend, or lengthen a clip.
+
 **Setup:** on the Tools page under Video generation, from a chat when a request needs it, or with `POST /api/v1/video/setup`. Setup installs stable-diffusion.cpp if image generation hasn't, then downloads the model from Hugging Face, pinned to revisions and checked against their SHA-256.
 
 | Model | Download | For | What it does |
