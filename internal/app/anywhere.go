@@ -35,6 +35,9 @@ const (
 	// store, and stripeCheckoutName an open one's.
 	stripeSessionName  = "relay-stripe-session"
 	stripeCheckoutName = "relay-stripe-checkout"
+	// stripeCheckoutPage is the open checkout's page and when it expires,
+	// so it's still offered after a restart (#1257).
+	stripeCheckoutPage = "relay-stripe-checkout-page"
 	// defaultBilling is where checkouts and the billing page come from;
 	// TOSKAR_BILLING_URL replaces it, for a test.
 	defaultBilling = "https://yeix.io"
@@ -228,13 +231,19 @@ func (a *App) startCheckout(ctx context.Context, plan string) (string, error) {
 	if out.URL == "" || !strings.HasPrefix(out.SessionID, "cs_") {
 		return "", errBillingReach(errors.New("the checkout answer had no session"))
 	}
-	if err := auth.NewSecretStore(cfg.DataDir).Write(stripeCheckoutName, out.SessionID); err != nil {
+	secrets := auth.NewSecretStore(cfg.DataDir)
+	if err := secrets.Write(stripeCheckoutName, out.SessionID); err != nil {
 		return "", err
 	}
 	now := a.anywhere.now()
 	expires := time.Unix(out.Expires, 0)
 	if out.Expires == 0 {
 		expires = now.Add(24 * time.Hour)
+	}
+	if page, err := json.Marshal(checkoutPage{URL: out.URL, Opened: now.Unix(), Expires: expires.Unix()}); err == nil {
+		if err := secrets.Write(stripeCheckoutPage, string(page)); err != nil {
+			a.Logger.Warn("access from anywhere: keeping the checkout page", "error", err)
+		}
 	}
 	a.anywhere.mu.Lock()
 	a.anywhere.checkout, a.anywhere.opened, a.anywhere.expires = out.URL, now, expires
@@ -251,15 +260,88 @@ func (a *App) cancelCheckout(ctx context.Context) error {
 	if a.stripeCheckout() == "" {
 		return errNoCheckout
 	}
-	if err := auth.NewSecretStore(a.Config.Get().DataDir).Delete(stripeCheckoutName); err != nil {
+	secrets := auth.NewSecretStore(a.Config.Get().DataDir)
+	if err := secrets.Delete(stripeCheckoutName); err != nil {
 		return err
 	}
+	_ = secrets.Delete(stripeCheckoutPage)
 	a.anywhere.mu.Lock()
 	a.anywhere.checkout, a.anywhere.expires = "", time.Time{}
 	a.anywhere.mu.Unlock()
 	a.Logger.Info("access from anywhere: checkout cancelled")
 	return nil
 }
+
+// checkoutPage is what's kept of an open checkout besides its session.
+type checkoutPage struct {
+	URL     string `json:"url"`
+	Opened  int64  `json:"opened"`
+	Expires int64  `json:"expires"`
+}
+
+// loadCheckoutPage fills in the open checkout's page after a restart, which
+// forgot it (#1257). It's called with a.anywhere.mu held.
+func (a *App) loadCheckoutPage() {
+	if a.anywhere.checkout != "" {
+		return
+	}
+	var page checkoutPage
+	if json.Unmarshal([]byte(a.readSecret(stripeCheckoutPage)), &page) != nil || page.URL == "" {
+		return
+	}
+	a.anywhere.checkout = page.URL
+	a.anywhere.opened, a.anywhere.expires = time.Unix(page.Opened, 0), time.Unix(page.Expires, 0)
+}
+
+// moveSubscription moves the subscription bought here onto this computer,
+// when the relay says it's tied to another (SUBSCRIPTION_IN_USE), as after
+// restoring this computer's data on a new one (#1257). It shows the relay
+// the token this computer kept, which may be the old route's.
+func (a *App) moveSubscription(ctx context.Context) error {
+	if a.Config.Get().RemoteAccess.Relay != "" {
+		return errOwnRelay
+	}
+	session := a.stripeSession()
+	if session == "" {
+		return errNoneHere
+	}
+	route, err := a.routeID()
+	if err != nil {
+		return err
+	}
+	var kept []string
+	if tok := a.readSecret(relayclient.TokenName); tok != "" {
+		kept = append(kept, tok)
+	}
+	ctx, cancel := context.WithTimeout(ctx, 30*time.Second)
+	defer cancel()
+	tok, err := a.relayAPI().MoveStripe(ctx, route, session, kept)
+	if err != nil {
+		switch code := relayclient.ErrorCode(err); code {
+		case "MOVE_TOO_SOON":
+			return errMoveTooSoon
+		case "MOVE_NEEDS_COMPUTER":
+			return errMoveNeedsComputer
+		case "":
+			return contracts.NewError("RELAY_UNREACHABLE", nil, err)
+		default:
+			return contracts.NewError("MOVE_FAILED", map[string]any{"relay_code": code}, err)
+		}
+	}
+	a.anywhere.mu.Lock()
+	a.anywhere.lastError, a.anywhere.ended = "", false
+	a.anywhere.mu.Unlock()
+	if _, err := a.setRelayToken(ctx, tok, true); err != nil {
+		return err
+	}
+	a.Logger.Info("access from anywhere: subscription moved to this computer")
+	return nil
+}
+
+var (
+	errMoveTooSoon       = contracts.NewError("MOVE_TOO_SOON", nil, errors.New("the subscription moved less than a day ago"))
+	errMoveNeedsComputer = contracts.NewError("MOVE_NEEDS_COMPUTER", nil, errors.New("the relay needs the other computer's token, or that computer off for 3 days"))
+)
 
 // errNoCheckout is cancelling with no checkout open.
 var errNoCheckout = contracts.NewError("CHECKOUT_NONE", nil, errors.New("no checkout is open"))
@@ -350,6 +432,7 @@ func (a *App) subscription() *api.Subscription {
 	switch {
 	case pending:
 		out.State, out.Store = "pending", "stripe"
+		a.loadCheckoutPage()
 		if a.anywhere.now().Before(a.anywhere.expires) {
 			out.Checkout = a.anywhere.checkout
 		}
@@ -459,6 +542,7 @@ func (a *App) collectCheckout(ctx context.Context, checkout string) time.Duratio
 	secrets := auth.NewSecretStore(a.Config.Get().DataDir)
 	now := a.anywhere.now()
 	a.anywhere.mu.Lock()
+	a.loadCheckoutPage()
 	quick := now.Sub(a.anywhere.opened) < checkoutQuick
 	a.anywhere.lastError = ""
 	done := false
@@ -484,6 +568,7 @@ func (a *App) collectCheckout(ctx context.Context, checkout string) time.Duratio
 	}
 	if done {
 		_ = secrets.Delete(stripeCheckoutName)
+		_ = secrets.Delete(stripeCheckoutPage)
 		return time.Hour
 	}
 	if quick {

@@ -303,7 +303,10 @@
       "endedRevoked": "Toskar 的中继不再接受这台电脑的订阅：它已移到另一台电脑或已退款。要继续使用 Toskar 的中继，请重新订阅。",
       "endedBlocked": "Toskar 的中继已屏蔽这台电脑。请联系支持了解原因。",
       "grant": "已授予访问权限，有效期至 {{date}}。",
-      "grantOpen": "已授予访问权限。"
+      "grantOpen": "已授予访问权限。",
+      "moveStripe": "移到这台电脑",
+      "moving": "正在移动…",
+      "inUseStripe": "这个订阅绑定在另一台电脑上，例如这台电脑数据的来源电脑。把它移到这里后，那台电脑将不再使用 Toskar 的中继。"
     },
     "relayErrors": {
       "TOKEN_REVOKED": "{{relay}} 不再接受这台电脑的订阅。请重新订阅，或在 Toskar App 中把订阅移到这台电脑。",

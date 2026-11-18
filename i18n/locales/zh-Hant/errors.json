@@ -289,5 +289,8 @@
   "RELAY_UNREACHABLE": "無法連線到 Toskar 的中繼。請過一分鐘再試。",
   "COMPANION_LIMIT": "透過其他裝置連線的裝置不能再連線更多裝置。請從手機連線。",
   "SUBSCRIPTION_COVERED": "另一台裝置的訂閱已經涵蓋這台電腦，這裡無需購買。",
-  "CHECKOUT_NONE": "沒有可取消的結帳。"
+  "CHECKOUT_NONE": "沒有可取消的結帳。",
+  "MOVE_TOO_SOON": "訂閱在一天內剛移動過。明天可以再次移動。",
+  "MOVE_NEEDS_COMPUTER": "要移動它，Toskar 的中繼需要聯絡到目前使用它的電腦：把那台電腦開機一次，或等到它關機滿 3 天。",
+  "MOVE_FAILED": "Toskar 的中繼沒有移動訂閱（{{relay_code}}）。"
 }

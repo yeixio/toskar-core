@@ -11,6 +11,7 @@ import (
 	"net"
 	"net/http"
 	"net/http/httptest"
+	"slices"
 	"sync"
 	"testing"
 	"time"
@@ -34,6 +35,8 @@ type fakeStripeRelay struct {
 	sessions  map[string]string // session → pending, paid, inactive
 	exchanges int
 	expires   time.Duration
+	// oldToken is the token for the route an "inuse" session is tied to.
+	oldToken string
 }
 
 func mintToken(route string, exp time.Time) string {
@@ -83,14 +86,31 @@ func newAnywhereApp(t *testing.T) (*App, *fakeBilling, *fakeStripeRelay) {
 	})
 	relay.HandleFunc("POST /v1/subscriptions/stripe", func(w http.ResponseWriter, r *http.Request) {
 		var body struct {
-			Route           string `json:"route"`
-			CheckoutSession string `json:"checkout_session"`
+			Route           string   `json:"route"`
+			CheckoutSession string   `json:"checkout_session"`
+			Move            bool     `json:"move"`
+			Tokens          []string `json:"tokens"`
 		}
 		_ = json.NewDecoder(r.Body).Decode(&body)
 		f.mu.Lock()
 		defer f.mu.Unlock()
 		f.exchanges++
-		switch f.sessions[body.CheckoutSession] {
+		state := f.sessions[body.CheckoutSession]
+		// Tied to another route: it moves only with a token for that one.
+		if state == "inuse" {
+			switch {
+			case !body.Move:
+				w.WriteHeader(http.StatusConflict)
+				_, _ = io.WriteString(w, `{"error":{"code":"SUBSCRIPTION_IN_USE"}}`)
+				return
+			case !slices.Contains(body.Tokens, f.oldToken):
+				w.WriteHeader(http.StatusForbidden)
+				_, _ = io.WriteString(w, `{"error":{"code":"MOVE_NEEDS_COMPUTER"}}`)
+				return
+			}
+			state = "paid"
+		}
+		switch state {
 		case "paid":
 			_ = json.NewEncoder(w).Encode(map[string]any{"token": mintToken(body.Route, time.Now().Add(f.expires)), "env": "sandbox"})
 		case "pending":
@@ -335,5 +355,60 @@ func TestAnywhereTokenRanOut(t *testing.T) {
 	_ = secrets.Write(relayclient.TokenName, mintToken(route, time.Now().Add(30*24*time.Hour)))
 	if s := a.subscription(); s.State != "active" {
 		t.Fatalf("after a new token: %+v", s)
+	}
+}
+
+// After a restart, a pending checkout still offers its page (#1257).
+func TestCheckoutPageOutlivesARestart(t *testing.T) {
+	// Regression: toskar-core#1257
+	a, _, _ := newAnywhereApp(t)
+	url, err := a.startCheckout(context.Background(), "monthly")
+	if err != nil {
+		t.Fatal(err)
+	}
+	// What a restart forgets.
+	a.anywhere.mu.Lock()
+	a.anywhere.checkout, a.anywhere.expires = "", time.Time{}
+	a.anywhere.mu.Unlock()
+	if s := a.subscription(); s.State != "pending" || s.Checkout != url {
+		t.Fatalf("after a restart: %+v, want pending with %s", s, url)
+	}
+	if err := a.cancelCheckout(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	if page := a.readSecret(stripeCheckoutPage); page != "" {
+		t.Fatalf("a cancelled checkout's page was kept: %s", page)
+	}
+}
+
+// A subscription bought here but tied to another route, as after restoring
+// this computer's data on a new one, can be moved here, with the token this
+// computer kept for the old route (#1257).
+func TestMoveSubscriptionHere(t *testing.T) {
+	// Regression: toskar-core#1257
+	a, _, relay := newAnywhereApp(t)
+	ctx := context.Background()
+	secrets := auth.NewSecretStore(a.Config.Get().DataDir)
+	if err := secrets.Write(stripeSessionName, "cs_test_old"); err != nil {
+		t.Fatal(err)
+	}
+	relay.set("cs_test_old", "inuse")
+	relay.mu.Lock()
+	relay.oldToken = mintToken("oldrouteoldrouteoldrouteoldroute", time.Now().Add(-time.Hour))
+	relay.mu.Unlock()
+
+	// Without the old route's token the relay says how to move it.
+	if err := a.moveSubscription(ctx); !errors.Is(err, errMoveNeedsComputer) {
+		t.Fatalf("without a token: %v", err)
+	}
+	if err := secrets.Write(relayclient.TokenName, relay.oldToken); err != nil {
+		t.Fatal(err)
+	}
+	if err := a.moveSubscription(ctx); err != nil {
+		t.Fatalf("move: %v", err)
+	}
+	route, _ := a.routeID()
+	if r, _, _ := relayclient.ParseToken(a.relayToken()); r != route {
+		t.Fatalf("after the move the token is for %q, want %q", r, route)
 	}
 }

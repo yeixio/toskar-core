@@ -13,6 +13,8 @@ vi.mock('@/lib/api', () => ({
     getVersion: vi.fn(),
     startSubscriptionCheckout: vi.fn(),
     manageSubscription: vi.fn(),
+    cancelSubscriptionCheckout: vi.fn(),
+    moveSubscriptionHere: vi.fn(),
   },
 }))
 
@@ -482,6 +484,15 @@ describe('RemoteAccessCard QA regressions', () => {
     )
     expect(await screen.findByText(/Subscribed in the Toskar app/)).toBeInTheDocument()
     expect(document.body.textContent).not.toMatch(/TOKEN_REVOKED/)
+  })
+
+  // Regression: toskar-core#1257
+  it('a subscription tied to another computer can be moved here', async () => {
+    vi.mocked(api.moveSubscriptionHere).mockResolvedValue(undefined)
+    renderWith({ remote_access_enabled: true }, { enabled: true, subscription: { state: 'active', store: 'stripe', error: 'SUBSCRIPTION_IN_USE' } })
+    fireEvent.click(await screen.findByRole('button', { name: 'Move it to this computer' }))
+    await waitFor(() => expect(api.moveSubscriptionHere).toHaveBeenCalled())
+    expect(document.body.textContent).not.toMatch(/SUBSCRIPTION_IN_USE/)
   })
 
   // Regression: toskar-core#1257

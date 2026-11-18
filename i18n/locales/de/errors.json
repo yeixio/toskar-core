@@ -289,5 +289,8 @@
   "RELAY_UNREACHABLE": "Das Relay von Toskar ist nicht erreichbar. Versuch es in einer Minute noch einmal.",
   "COMPANION_LIMIT": "Ein Gerät, das über ein anderes verbunden ist, kann keine weiteren verbinden. Verbinde es über das Telefon.",
   "SUBSCRIPTION_COVERED": "Das Abo eines anderen Geräts deckt diesen Computer schon ab, hier gibt es also nichts zu kaufen.",
-  "CHECKOUT_NONE": "Es ist kein Bezahlvorgang offen, den du abbrechen kannst."
+  "CHECKOUT_NONE": "Es ist kein Bezahlvorgang offen, den du abbrechen kannst.",
+  "MOVE_TOO_SOON": "Das Abo wurde vor weniger als einem Tag übertragen. Ab morgen geht es wieder.",
+  "MOVE_NEEDS_COMPUTER": "Zum Übertragen muss Toskars Relay vom Computer hören, auf dem es gerade ist: Schalte ihn einmal ein, oder warte, bis er 3 Tage aus war.",
+  "MOVE_FAILED": "Toskars Relay hat das Abo nicht übertragen ({{relay_code}})."
 }

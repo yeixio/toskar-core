@@ -309,7 +309,10 @@
       "endedRevoked": "El relé de Toskar ya no acepta la suscripción de este ordenador: se movió a otro ordenador o se reembolsó. Suscríbete de nuevo para seguir usando el relé de Toskar.",
       "endedBlocked": "El relé de Toskar ha bloqueado este ordenador. Contacta con soporte para saber por qué.",
       "grant": "Acceso concedido hasta el {{date}}.",
-      "grantOpen": "Acceso concedido."
+      "grantOpen": "Acceso concedido.",
+      "moveStripe": "Moverla a este ordenador",
+      "moving": "Moviendo…",
+      "inUseStripe": "Esta suscripción está vinculada a otro ordenador, como aquel del que vienen los datos de este. Muévela aquí y ese ordenador dejará de usar el relé de Toskar."
     },
     "relayErrors": {
       "TOKEN_REVOKED": "{{relay}} ya no acepta la suscripción de este ordenador. Suscríbete de nuevo o mueve tu suscripción aquí desde la app Toskar.",

@@ -1316,6 +1316,23 @@ paths:
           description: The checkout is closed
         "404":
           description: CHECKOUT_NONE
+  /api/v1/remote-access/subscription/move:
+    post:
+      summary: Move the subscription bought here onto this computer (#1257)
+      description: "When the relay says the Stripe subscription bought here is tied to another route (subscription.error SUBSCRIPTION_IN_USE), as after restoring this computer's data on a new one, this moves it here. Toskar sends the relay the token it kept, which may be the old route's; without one, the relay moves it only once the old route has been quiet for 3 days. Turns access from anywhere on. Admins only. 404 SUBSCRIPTION_NONE; 409 SUBSCRIPTION_OWN_RELAY; 403 MOVE_NEEDS_COMPUTER; 429 MOVE_TOO_SOON; 502 MOVE_FAILED or RELAY_UNREACHABLE."
+      operationId: moveSubscription
+      tags: [Devices]
+      responses:
+        "204":
+          description: Moved; the token is kept
+        "403":
+          description: MOVE_NEEDS_COMPUTER
+        "404":
+          description: SUBSCRIPTION_NONE
+        "429":
+          description: MOVE_TOO_SOON
+        "502":
+          description: MOVE_FAILED or RELAY_UNREACHABLE
   /api/v1/remote-access/subscription/manage:
     post:
       summary: The billing page for the subscription bought here (#639)

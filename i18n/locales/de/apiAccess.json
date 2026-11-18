@@ -306,7 +306,10 @@
       "endedRevoked": "Toskars Relay nimmt das Abo dieses Computers nicht mehr an: Es wurde auf einen anderen Computer übertragen oder erstattet. Schließe es erneut ab, um Toskars Relay weiter zu nutzen.",
       "endedBlocked": "Toskars Relay hat diesen Computer gesperrt. Wende dich an den Support, um den Grund zu erfahren.",
       "grant": "Zugriff gewährt bis {{date}}.",
-      "grantOpen": "Zugriff gewährt."
+      "grantOpen": "Zugriff gewährt.",
+      "moveStripe": "Auf diesen Computer übertragen",
+      "moving": "Wird übertragen…",
+      "inUseStripe": "Dieses Abo gehört zu einem anderen Computer, etwa dem, von dem die Daten dieses Computers stammen. Übertrage es hierher, dann nutzt jener Computer Toskars Relay nicht mehr."
     },
     "relayErrors": {
       "TOKEN_REVOKED": "{{relay}} nimmt das Abo dieses Computers nicht mehr an. Schließe es erneut ab oder übertrage dein Abo in der Toskar-App hierher.",

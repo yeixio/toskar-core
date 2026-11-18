@@ -306,7 +306,10 @@
       "endedRevoked": "Toskar's relay no longer accepts this computer's subscription: it moved to another computer, or was refunded. Subscribe again to keep using Toskar's relay.",
       "endedBlocked": "Toskar's relay has blocked this computer. Contact support to find out why.",
       "grant": "Access granted until {{date}}.",
-      "grantOpen": "Access granted."
+      "grantOpen": "Access granted.",
+      "moveStripe": "Move it to this computer",
+      "moving": "Moving…",
+      "inUseStripe": "This subscription is tied to another computer, such as the one this computer's data came from. Move it here, and that computer stops using Toskar's relay."
     },
     "relayErrors": {
       "TOKEN_REVOKED": "{{relay}} no longer accepts this computer's subscription. Subscribe again, or move your subscription here from the Toskar app.",

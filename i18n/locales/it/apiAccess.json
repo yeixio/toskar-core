@@ -309,7 +309,10 @@
       "endedRevoked": "Il relay di Toskar non accetta più l'abbonamento di questo computer: è stato spostato su un altro computer o rimborsato. Abbonati di nuovo per continuare a usare il relay di Toskar.",
       "endedBlocked": "Il relay di Toskar ha bloccato questo computer. Contatta l'assistenza per sapere perché.",
       "grant": "Accesso concesso fino al {{date}}.",
-      "grantOpen": "Accesso concesso."
+      "grantOpen": "Accesso concesso.",
+      "moveStripe": "Spostalo su questo computer",
+      "moving": "Spostamento…",
+      "inUseStripe": "Questo abbonamento è legato a un altro computer, come quello da cui vengono i dati di questo. Spostalo qui, e quel computer smetterà di usare il relay di Toskar."
     },
     "relayErrors": {
       "TOKEN_REVOKED": "{{relay}} non accetta più l'abbonamento di questo computer. Abbonati di nuovo, o sposta qui il tuo abbonamento dall'app Toskar.",
