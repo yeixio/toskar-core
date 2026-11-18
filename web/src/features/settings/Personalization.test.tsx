@@ -41,4 +41,15 @@ describe('Personalization', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Save' }))
     expect(await screen.findByText(/cannot grant permission/)).toBeInTheDocument()
   })
+
+  it('saves a location and says what it is for', async () => {
+    renderIt()
+    const units = await screen.findByLabelText('Units')
+    await waitFor(() => expect(units).toHaveValue('metric'))
+    const location = screen.getByLabelText(/Your location/)
+    expect(screen.getByText(/nearby places, weather, and directions/)).toBeInTheDocument()
+    fireEvent.change(location, { target: { value: 'Juneau, AK' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }))
+    await waitFor(() => expect(api.setPersonalStyle).toHaveBeenCalledWith({ units: 'metric', location: 'Juneau, AK' }))
+  })
 })

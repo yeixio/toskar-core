@@ -21,6 +21,7 @@ func (a *App) registerPlaces(cfg config.Config) {
 		HTTP:      &http.Client{Timeout: 25 * time.Second},
 		UserAgent: "Toskar/" + version.Version + " (+https://github.com/yeixio/toskar-core)",
 		Cache:     cache.New[[]byte](places.CachePolicy),
+		Home:      a.personalLocation,
 		Record: func(ctx context.Context, host, detail string) {
 			if a.Egress != nil {
 				a.Egress.Add(ctx, egress.Places, "OpenStreetMap ("+host+")", detail)

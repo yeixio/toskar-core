@@ -1929,6 +1929,11 @@ func (e *chatExecEnv) TurnInstructions(ctx context.Context, prompt string) strin
 		if strings.TrimSpace(message) == "" {
 			message = prompt
 		}
+		// Where they are, only for a question about nearby places, the
+		// weather, or directions (#210).
+		if block := e.app.locationBlock(ctx, message); block != "" {
+			parts = append(parts, block)
+		}
 		parts = append(parts, e.app.replyLanguage(ctx, e.conversationID, message, e.responseLanguage).Instruction())
 	}
 	// The model has no clock: "this Friday" or "in 3 hours" needs the date
