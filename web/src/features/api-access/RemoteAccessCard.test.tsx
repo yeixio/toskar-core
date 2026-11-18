@@ -472,8 +472,9 @@ describe('RemoteAccessCard QA regressions', () => {
     await waitFor(() => expect(api.getRemoteAccess).toHaveBeenCalled())
     await new Promise((resolve) => setTimeout(resolve, 50))
     for (const button of screen.queryAllByRole('button', { name: /Subscribe for/ })) expect(button).toBeDisabled()
-    const mapping = screen.queryByLabelText('Open a port on the router automatically')
-    if (mapping) expect(mapping).toBeDisabled()
+    expect(screen.queryByLabelText('Open a port on the router automatically')).not.toBeInTheDocument()
+    expect(screen.queryByLabelText('Port')).not.toBeInTheDocument()
+    expect(screen.getByText(/doesn't need Local network access/)).toBeInTheDocument()
   })
 
   // Regression: toskar-core#1266

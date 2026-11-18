@@ -319,6 +319,7 @@
       "ROUTE_BLOCKED": "{{relay}} ha bloccato questo computer. Contatta l'assistenza per sapere perché.",
       "TOKEN_EXPIRED": "L'accesso di questo computer tramite {{relay}} è scaduto. Abbonati di nuovo per continuare a usarlo.",
       "TOKEN_INVALID": "{{relay}} non ha accettato il token di questo computer. Abbonati di nuovo, o ricollegalo dall'app Toskar."
-    }
+    },
+    "offHint": "Attivalo per scegliere come i dispositivi raggiungono questo computer dall'esterno: il router, una porta inoltrata o un relay. Non serve che l'accesso dalla rete locale sia attivo."
   }
 }
