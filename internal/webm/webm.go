@@ -36,10 +36,6 @@ const (
 	idBlock         = 0xA1
 )
 
-// unknownSize marks an element that runs until its parent ends, or until
-// an element that can't be inside it.
-const unknownSize = -1
-
 // Frame is one video frame: when it shows, in the clip's time units, and
 // its VP8 data.
 type Frame struct {
