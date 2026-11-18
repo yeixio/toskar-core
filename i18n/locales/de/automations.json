@@ -424,7 +424,10 @@
       "unlock": "Entriegeln",
       "open_cover": "Öffnen",
       "close_cover": "Schließen"
-    }
+    },
+    "sayVoice": "Stimme",
+    "sayVoiceAutomatic": "Die Stimme der Sprache aus den Einstellungen",
+    "sayVoiceKitten": "Kitten"
   },
   "draft": {
     "label": "Automation zum Bestätigen",

@@ -424,7 +424,10 @@
       "unlock": "Sblocca",
       "open_cover": "Apri",
       "close_cover": "Chiudi"
-    }
+    },
+    "sayVoice": "Voce",
+    "sayVoiceAutomatic": "La voce della lingua nelle Impostazioni",
+    "sayVoiceKitten": "Kitten"
   },
   "draft": {
     "label": "Automazione da confermare",

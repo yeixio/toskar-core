@@ -424,7 +424,10 @@
       "unlock": "解锁",
       "open_cover": "打开",
       "close_cover": "关上"
-    }
+    },
+    "sayVoice": "语音",
+    "sayVoiceAutomatic": "设置中该语言的语音",
+    "sayVoiceKitten": "Kitten"
   },
   "draft": {
     "label": "待确认的自动化",

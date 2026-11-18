@@ -30,6 +30,7 @@ import { YggdrasilMark } from '@/components/ui/YggdrasilMark'
 import { formatGigabytes } from '@/i18n/format'
 import { AutomationDigestSetting } from './AutomationDigest'
 import { ShownError, shownOr, type Shown } from '@/components/ui/ShownError'
+import { VoiceSettings } from './VoiceSettings'
 import { LoadError } from '@/components/ui/LoadError'
 import { defaultProfileIdOf, profileName } from '@/features/profiles/profilePresentation'
 
@@ -416,6 +417,8 @@ export function SettingsPage() {
                 ]}
               />
             </section>
+
+            <VoiceSettings />
 
             <section className="card space-y-4">
               <div className="flex items-start justify-between gap-4">

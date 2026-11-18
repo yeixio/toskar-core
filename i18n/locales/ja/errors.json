@@ -52,6 +52,7 @@
   "INVALID_RATING": "評価は星1〜5で、理由は一覧から選びます。",
   "INVALID_RETENTION": "{{detail}}",
   "INVALID_SETTING": "「{{value}}」は{{setting}}の有効な値ではありません。",
+  "INVALID_VOICE": "その音声では、ここで{{language}}を読み上げられません。",
   "JOIN_BAD_REQUEST": "{{detail}}",
   "JOIN_FAILED": "{{detail}}",
   "JOIN_NOT_REACHABLE": "ほかのコンピュータからこのコンピュータに接続できません。「他のコンピュータを探す」をオンにして、Toskarを再起動してください。",

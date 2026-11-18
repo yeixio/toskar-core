@@ -424,7 +424,10 @@
       "unlock": "解錠",
       "open_cover": "開く",
       "close_cover": "閉じる"
-    }
+    },
+    "sayVoice": "音声",
+    "sayVoiceAutomatic": "設定で選んだ言語の音声",
+    "sayVoiceKitten": "Kitten"
   },
   "draft": {
     "label": "確認待ちのオートメーション",

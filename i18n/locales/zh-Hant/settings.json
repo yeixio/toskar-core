@@ -351,5 +351,33 @@
     "description": "回答只連結來源提供的頁面。Toskar 還可以詢問每個被連結的網站，頁面是否仍能開啟。",
     "check": "檢查回答中的連結",
     "checkHint": "回答寫完後，Toskar 會聯絡每個被連結的網站，並在回答下方列出無法開啟的連結。每次檢查都會記錄在「離開這台電腦的內容」中。"
+  },
+  "voice": {
+    "title": "語音",
+    "description": "Toskar 朗讀時使用的語音：即時語音模式、在手機和車上朗讀的回答，以及門鈴。",
+    "unavailable": "這台電腦無法使用語音設定。",
+    "failed": "操作未成功，請再試一次。",
+    "kitten": {
+      "name": "Kitten TTS 2 mini",
+      "description": "更自然的{{languages}}語音。連同語音在這台電腦上佔用約 1 GB，在處理器上執行。",
+      "install": "安裝",
+      "retry": "重試",
+      "installing": "正在安裝程式…",
+      "downloading": "正在下載語音…",
+      "remove": "移除",
+      "removeConfirm": "移除 Kitten",
+      "keep": "保留"
+    },
+    "languages": "各語言的語音",
+    "automatic": "自動",
+    "automaticNamed": "自動：{{voice}}",
+    "engine": {
+      "kitten": "Kitten",
+      "kokoro": "Kokoro",
+      "piper": "Piper"
+    },
+    "preview": "試聽",
+    "previewIn": "試聽{{language}}語音",
+    "previewFailed": "無法播放試聽。"
   }
 }

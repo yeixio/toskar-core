@@ -14,9 +14,11 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 
+	"github.com/yeixio/toskar-core/internal/pyenv"
 	"github.com/yeixio/toskar-core/internal/replylang"
 )
 
@@ -43,9 +45,14 @@ type Worker struct {
 	script     []byte
 	kokoroBase string
 
-	mu      sync.Mutex
-	proc    *workerProc
-	lastUse time.Time
+	// Choice is the voice an Admin chose for a language, "" for automatic
+	// (#1304); nil is automatic for every language.
+	Choice func(lang string) string
+
+	mu sync.Mutex
+	// procs are the speech environment's worker and Kitten's (#1304).
+	procs   [envCount]*workerProc
+	lastUse [envCount]time.Time
 	closed  bool
 	// fetching is while Kokoro downloads; kokoroFailed is when it last
 	// couldn't download or speak, after which Piper reads for a while.
@@ -53,7 +60,15 @@ type Worker struct {
 	kokoroFailed time.Time
 	stopFetch    context.CancelFunc
 	fetched      chan struct{}
+	kitten       kittenJob
 }
+
+// The worker's environments: the speech environment, and Kitten's own.
+const (
+	envSpeech = iota
+	envKitten
+	envCount
+)
 
 // kokoroRetry is how long Piper reads after Kokoro fails before it's tried
 // again.
@@ -88,7 +103,7 @@ func (w *Worker) Transcribe(ctx context.Context, pcm []byte, quality, language s
 	if model == "" {
 		model = models["fast"]
 	}
-	a, err := w.ask(ctx, map[string]any{"op": "transcribe", "pcm": base64.StdEncoding.EncodeToString(pcm), "model": model,
+	a, err := w.ask(ctx, envSpeech, map[string]any{"op": "transcribe", "pcm": base64.StdEncoding.EncodeToString(pcm), "model": model,
 		"models_dir": filepath.Join(w.Engine.Dir, "whisper"), "language": language})
 	return a.Text, err
 }
@@ -104,6 +119,30 @@ func (w *Worker) Speak(ctx context.Context, text, voice, language string) (pcm [
 	if n := len([]rune(text)); n > maxTextRunes {
 		return nil, 0, fmt.Errorf("the text is longer than %d characters", maxTextRunes)
 	}
+	if voice == "" && w.Choice != nil {
+		lang := language
+		if lang == "" {
+			lang, _ = replylang.Detect(text)
+		}
+		if lang != "" {
+			base, _, _ := strings.Cut(strings.ToLower(lang), "-")
+			if chosen := w.Choice(base); chosen != "" {
+				pcm, rate, err := w.Speak(ctx, text, chosen, language)
+				// A chosen voice that can't read now leaves it to the
+				// automatic one.
+				if err == nil || ctx.Err() != nil {
+					return pcm, rate, err
+				}
+			}
+		}
+	}
+	if KittenVoiceRe.MatchString(voice) {
+		if w.Engine.kittenInstalled() {
+			return w.speakKitten(ctx, text, voice)
+		}
+		// Kitten was removed: the voice's language's automatic voice reads.
+		voice, language = "", KittenVoiceRe.FindStringSubmatch(voice)[1]
+	}
 	if kokoroRe.MatchString(voice) {
 		// A Kokoro voice Kokoro can't read yet: Piper reads its language.
 		if w.kokoroUsable() {
@@ -111,7 +150,7 @@ func (w *Worker) Speak(ctx context.Context, text, voice, language string) (pcm [
 		}
 		voice, language = "", kokoroLangs[voice[0]]
 	}
-	if voice == "" && !w.Plain {
+	if voice == "" {
 		lang := language
 		if lang == "" {
 			lang, _ = replylang.Detect(text)
@@ -119,8 +158,18 @@ func (w *Worker) Speak(ctx context.Context, text, voice, language string) (pcm [
 		if lang == "" {
 			lang = "en"
 		}
-		if v, ok := NaturalVoiceFor(lang); ok && w.kokoroUsable() {
+		_, kokoro := NaturalVoiceFor(lang)
+		kokoro = kokoro && !w.Plain
+		if kokoro && w.kokoroUsable() {
+			v, _ := NaturalVoiceFor(lang)
 			pcm, rate, err := w.speakKokoro(ctx, text, v, false)
+			if err == nil || ctx.Err() != nil {
+				return pcm, rate, err
+			}
+		}
+		// Kitten, when installed, reads the languages Kokoro doesn't.
+		if v := w.Engine.kittenSpeaks(lang); v != "" && !kokoro {
+			pcm, rate, err := w.speakKitten(ctx, text, v)
 			if err == nil || ctx.Err() != nil {
 				return pcm, rate, err
 			}
@@ -133,7 +182,7 @@ func (w *Worker) Speak(ctx context.Context, text, voice, language string) (pcm [
 	if !voiceRe.MatchString(voice) {
 		return nil, 0, fmt.Errorf("%q is not a Piper or Kokoro voice name, such as %s or af_heart", voice, DefaultVoice)
 	}
-	a, err := w.ask(ctx, map[string]any{"op": "speak", "text": text, "voice": voice, "voices_dir": filepath.Join(w.Engine.Dir, "voices")})
+	a, err := w.ask(ctx, envSpeech, map[string]any{"op": "speak", "text": text, "voice": voice, "voices_dir": filepath.Join(w.Engine.Dir, "voices")})
 	if err != nil {
 		return nil, 0, err
 	}
@@ -144,7 +193,7 @@ func (w *Worker) Speak(ctx context.Context, text, voice, language string) (pcm [
 // turns Kokoro off for a while; asked is whether the person chose it.
 func (w *Worker) speakKokoro(ctx context.Context, text, voice string, asked bool) ([]byte, int, error) {
 	dir := w.Engine.kokoroDir()
-	a, err := w.ask(ctx, map[string]any{"op": "speak", "engine": "kokoro", "text": text, "voice": voice,
+	a, err := w.ask(ctx, envSpeech, map[string]any{"op": "speak", "engine": "kokoro", "text": text, "voice": voice,
 		"lang": kokoroLangs[voice[0]], "model": filepath.Join(dir, kokoroFiles[0].Name), "voices": filepath.Join(dir, kokoroFiles[1].Name)})
 	if err == nil {
 		return decodePCM(a)
@@ -204,21 +253,41 @@ func (w *Worker) kokoroUsable() bool {
 // Close stops the worker.
 func (w *Worker) Close() {
 	w.mu.Lock()
-	p := w.proc
-	w.proc, w.closed = nil, true
+	procs := w.procs
+	w.procs, w.closed = [envCount]*workerProc{}, true
 	stopFetch, fetched := w.stopFetch, w.fetched
 	w.mu.Unlock()
 	if stopFetch != nil {
 		stopFetch()
 		<-fetched
 	}
+	w.kitten.mu.Lock()
+	cancel, done := w.kitten.cancel, w.kitten.done
+	w.kitten.mu.Unlock()
+	if cancel != nil {
+		cancel()
+		<-done
+	}
+	for _, p := range procs {
+		if p != nil {
+			p.stop()
+		}
+	}
+}
+
+// stopEnv stops one environment's worker; it starts again when asked.
+func (w *Worker) stopEnv(env int) {
+	w.mu.Lock()
+	p := w.procs[env]
+	w.procs[env] = nil
+	w.mu.Unlock()
 	if p != nil {
 		p.stop()
 	}
 }
 
-func (w *Worker) ask(ctx context.Context, req map[string]any) (workerAnswer, error) {
-	p, err := w.running(ctx)
+func (w *Worker) ask(ctx context.Context, env int, req map[string]any) (workerAnswer, error) {
+	p, err := w.running(ctx, env)
 	if err != nil {
 		return workerAnswer{}, err
 	}
@@ -237,7 +306,7 @@ func (w *Worker) ask(ctx context.Context, req map[string]any) (workerAnswer, err
 	}
 	select {
 	case a := <-answer:
-		w.touch()
+		w.touch(env)
 		if a.Error != "" {
 			return a, fmt.Errorf("speech failed: %s", a.Error)
 		}
@@ -251,30 +320,41 @@ func (w *Worker) ask(ctx context.Context, req map[string]any) (workerAnswer, err
 	}
 }
 
-func (w *Worker) touch() {
+func (w *Worker) touch(env int) {
 	w.mu.Lock()
-	w.lastUse = time.Now()
+	w.lastUse[env] = time.Now()
 	w.mu.Unlock()
 }
 
-// running is the worker's process, started when there's none.
-func (w *Worker) running(ctx context.Context) (*workerProc, error) {
+// running is an environment's worker process, started when there's none.
+func (w *Worker) running(ctx context.Context, env int) (*workerProc, error) {
 	w.mu.Lock()
 	defer w.mu.Unlock()
 	if w.closed {
 		return nil, errors.New("speech is stopping")
 	}
-	if w.proc != nil {
+	if p := w.procs[env]; p != nil {
 		select {
-		case <-w.proc.exited:
-			w.proc = nil
+		case <-p.exited:
+			w.procs[env] = nil
 		default:
-			w.lastUse = time.Now()
-			return w.proc, nil
+			w.lastUse[env] = time.Now()
+			return p, nil
 		}
 	}
 	e := w.Engine
-	py, err := e.ensure(ctx)
+	var py string
+	var err error
+	if env == envKitten {
+		// Kitten's environment is installed by InstallKitten, never here.
+		st, ok := e.Python.(interface{ Status(pyenv.Spec) pyenv.Status })
+		if !ok || !st.Status(KittenSpec()).Installed {
+			return nil, errors.New("Kitten isn't installed")
+		}
+		py = st.Status(KittenSpec()).Python
+	} else {
+		py, err = e.ensure(ctx)
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -306,8 +386,8 @@ func (w *Worker) running(ctx context.Context) (*workerProc, error) {
 		return nil, fmt.Errorf("speech couldn't start: %w", err)
 	}
 	go p.read(stdout)
-	w.proc, w.lastUse = p, time.Now()
-	go w.stopWhenIdle(p)
+	w.procs[env], w.lastUse[env] = p, time.Now()
+	go w.stopWhenIdle(env, p)
 	return p, nil
 }
 
@@ -349,7 +429,7 @@ func (p *workerProc) stop() {
 	}
 }
 
-func (w *Worker) stopWhenIdle(p *workerProc) {
+func (w *Worker) stopWhenIdle(env int, p *workerProc) {
 	idle := w.IdleAfter
 	if idle <= 0 {
 		idle = 10 * time.Minute
@@ -370,8 +450,8 @@ func (w *Worker) stopWhenIdle(p *workerProc) {
 		p.mu.Lock()
 		busy := len(p.pending) > 0
 		p.mu.Unlock()
-		if w.proc == p && !busy && time.Since(w.lastUse) >= idle {
-			w.proc = nil
+		if w.procs[env] == p && !busy && time.Since(w.lastUse[env]) >= idle {
+			w.procs[env] = nil
 			w.mu.Unlock()
 			p.stop()
 			return

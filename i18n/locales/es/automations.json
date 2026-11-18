@@ -424,7 +424,10 @@
       "unlock": "Desbloquear",
       "open_cover": "Abrir",
       "close_cover": "Cerrar"
-    }
+    },
+    "sayVoice": "Voz",
+    "sayVoiceAutomatic": "La voz del idioma en Configuración",
+    "sayVoiceKitten": "Kitten"
   },
   "draft": {
     "label": "Automatización por confirmar",

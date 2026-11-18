@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Toskar Control Plane API
-  version: "1.111"
+  version: "1.112"
   description: >-
     Local AI control plane API for Toskar, its OpenAI-compatible routes, and its MCP server.
     On the default loopback bind no key is needed. When the daemon listens on any other address,
@@ -4748,6 +4748,89 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+  /api/v1/speech/voices:
+    get:
+      summary: The Voice settings (#1304)
+      description: "Kitten TTS 2 mini's install, and each language read-aloud speaks with the voices it can be read in and the one chosen. Admins only (contract 1.112)."
+      operationId: speechVoices
+      tags: [Settings]
+      responses:
+        "200":
+          description: The Voice settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VoiceSettings"
+        "403":
+          description: ROLE_REQUIRED
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/v1/speech/voices/{language}:
+    put:
+      summary: Choose the voice a language is read aloud in (#1304)
+      description: "Used by live voice mode, POST /api/v1/speech/say, and the doorbell. An empty voice goes back to automatic: Kokoro where it speaks the language, then Kitten when it's installed, then Piper. Admins only (contract 1.112)."
+      operationId: setSpeechVoice
+      tags: [Settings]
+      parameters:
+        - name: language
+          in: path
+          required: true
+          schema: {type: string}
+          description: A language code, such as de
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                voice: {type: string, description: 'One of the language''s voices from GET /api/v1/speech/voices, or empty for automatic'}
+      responses:
+        "200":
+          description: The Voice settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VoiceSettings"
+        "400":
+          description: BAD_REQUEST or INVALID_VOICE
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/v1/speech/kitten:
+    post:
+      summary: Install Kitten TTS 2 mini (#1304)
+      description: "Starts installing Kitten TTS 2 mini (Apache-2.0) in the background: its program, then its voices. GET /api/v1/speech/voices shows how it's going. Admins only (contract 1.112)."
+      operationId: installKitten
+      tags: [Settings]
+      responses:
+        "200":
+          description: The Voice settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VoiceSettings"
+        "503":
+          description: SPEECH_UNAVAILABLE
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    delete:
+      summary: Remove Kitten TTS 2 mini (#1304)
+      description: "Deletes its program and voices; the languages it read go back to their automatic voices. Admins only (contract 1.112)."
+      operationId: removeKitten
+      tags: [Settings]
+      responses:
+        "200":
+          description: The Voice settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VoiceSettings"
   /api/v1/speech/transcribe:
     post:
       summary: A recording's text, for speaking a message instead of typing it (yeixio/toskar-apps#155)
@@ -7917,6 +8000,42 @@ components:
       scheme: bearer
       description: An API key from the API Access page, or TOSKAR_API_KEY
   schemas:
+    VoiceSettings:
+      type: object
+      description: The Voice settings (#1304, contract 1.112)
+      required: [kitten, languages]
+      properties:
+        kitten:
+          type: object
+          required: [state, credit, url, license, languages]
+          properties:
+            state: {type: string, enum: [not_installed, installing, installed, failed]}
+            stage: {type: string, description: 'While installing: program or voices'}
+            error: {type: string}
+            unavailable: {type: string, description: Why it can't be installed on this computer}
+            credit: {type: string, description: 'Shown wherever a Kitten voice is used: Powered by KittenML'}
+            url: {type: string}
+            license: {type: string}
+            languages: {type: array, items: {type: string}}
+        languages:
+          type: array
+          items:
+            type: object
+            required: [language, voice, automatic, voices]
+            properties:
+              language: {type: string}
+              voice: {type: string, description: 'The chosen voice; empty is automatic'}
+              automatic: {type: string, description: The voice used when none is chosen}
+              voices:
+                type: array
+                items:
+                  type: object
+                  required: [id, name, engine]
+                  properties:
+                    id: {type: string}
+                    name: {type: string}
+                    description: {type: string}
+                    engine: {type: string, enum: [kitten, kokoro, piper]}
     License:
       type: object
       properties:
@@ -8973,6 +9092,7 @@ components:
             device: {type: string, description: 'Always camera: one Reolink connection is one camera'}
             quiet_from: {type: string, description: 'With quiet_to, such as 22:00 and 07:00: the hours, in the automation''s time zone, when nothing is said. The run still notifies.'}
             quiet_to: {type: string}
+            voice: {type: string, description: 'The voice it speaks in, such as kitten:en:eleanor (#1304, contract 1.112); empty is the one chosen for the language in the Voice settings. One no longer here leaves it to that.'}
         actions:
           type: array
           description: 'Calls the automation may make on its own (#586), such as Home Assistant''s light.turn_on on light.porch. A call that matches one runs without asking, even in a run a trigger started; other calls that change things are skipped. Each argument listed must equal the call''s, ignoring case; a Home Assistant action names its service and entity_id. At most 20. On update, an empty list removes them.'
@@ -9035,6 +9155,7 @@ components:
             device: {type: string, description: 'Always camera: one Reolink connection is one camera'}
             quiet_from: {type: string, description: 'With quiet_to, such as 22:00 and 07:00: the hours, in the automation''s time zone, when nothing is said. The run still notifies.'}
             quiet_to: {type: string}
+            voice: {type: string, description: 'The voice it speaks in, such as kitten:en:eleanor (#1304, contract 1.112); empty is the one chosen for the language in the Voice settings. One no longer here leaves it to that.'}
         actions:
           type: array
           description: 'Calls the automation may make on its own (#586), such as Home Assistant''s light.turn_on on light.porch. A call that matches one runs without asking, even in a run a trigger started; other calls that change things are skipped. Each argument listed must equal the call''s, ignoring case; a Home Assistant action names its service and entity_id. At most 20. On update, an empty list removes them.'
@@ -10352,6 +10473,7 @@ components:
             device: {type: string, description: 'Always camera: one Reolink connection is one camera'}
             quiet_from: {type: string, description: 'With quiet_to, such as 22:00 and 07:00: the hours, in the automation''s time zone, when nothing is said. The run still notifies.'}
             quiet_to: {type: string}
+            voice: {type: string, description: 'The voice it speaks in, such as kitten:en:eleanor (#1304, contract 1.112); empty is the one chosen for the language in the Voice settings. One no longer here leaves it to that.'}
         actions:
           type: array
           description: 'Calls the automation may make on its own (#586), such as Home Assistant''s light.turn_on on light.porch. A call that matches one runs without asking, even in a run a trigger started; other calls that change things are skipped. Each argument listed must equal the call''s, ignoring case; a Home Assistant action names its service and entity_id. At most 20. On update, an empty list removes them.'

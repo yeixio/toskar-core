@@ -424,7 +424,10 @@
       "unlock": "解鎖",
       "open_cover": "打開",
       "close_cover": "關上"
-    }
+    },
+    "sayVoice": "語音",
+    "sayVoiceAutomatic": "設定中該語言的語音",
+    "sayVoiceKitten": "Kitten"
   },
   "draft": {
     "label": "待確認的自動化",

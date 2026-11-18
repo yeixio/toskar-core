@@ -64,7 +64,11 @@ func sayAnswer(ctx context.Context, sp voice.Speaker, talk doorTalker, automatio
 	if automation.Say.Quiet(now, loc) {
 		return "", nil
 	}
-	samples, err := sp.Speak(ctx, text, "", language)
+	samples, err := sp.Speak(ctx, text, automation.Say.Voice, language)
+	if err != nil && automation.Say.Voice != "" && ctx.Err() == nil {
+		// The voice chosen for the door can't read now: the language's own does.
+		samples, err = sp.Speak(ctx, text, "", language)
+	}
 	if err != nil {
 		return "", fmt.Errorf("couldn't read the answer aloud: %w", err)
 	}

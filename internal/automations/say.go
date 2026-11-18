@@ -20,6 +20,10 @@ type Say struct {
 	// happens and notifies as it's set to. Both or neither.
 	QuietFrom string `json:"quiet_from,omitempty"`
 	QuietTo   string `json:"quiet_to,omitempty"`
+	// Voice is the voice it speaks in, such as kitten:en:eleanor (#1304);
+	// "" is the voice chosen for the answer's language in the Voice
+	// settings. A voice that's no longer here leaves it to that one.
+	Voice string `json:"voice,omitempty"`
 }
 
 // SayReolink is a Reolink camera's speaker, reached through reolink-cli.
@@ -30,6 +34,9 @@ const SayNothing = "NOTHING"
 
 // MaxSaid is the most characters said at once: a greeting, not a reading.
 const MaxSaid = 400
+
+// sayVoiceRe is a voice name: Kitten's, Kokoro's or Piper's.
+var sayVoiceRe = regexp.MustCompile(`^[A-Za-z0-9_:-]{1,80}$`)
 
 var clockRe = regexp.MustCompile(`^([01][0-9]|2[0-3]):[0-5][0-9]$`)
 
@@ -42,6 +49,7 @@ func (s *Say) Clean() {
 	s.Device = strings.TrimSpace(s.Device)
 	s.QuietFrom = strings.TrimSpace(s.QuietFrom)
 	s.QuietTo = strings.TrimSpace(s.QuietTo)
+	s.Voice = strings.TrimSpace(s.Voice)
 }
 
 // Validate checks the speaker can be spoken through.
@@ -54,6 +62,9 @@ func (s *Say) Validate() error {
 	}
 	if s.Device != "camera" {
 		return fmt.Errorf("a Reolink camera's device is camera, not %q", s.Device)
+	}
+	if s.Voice != "" && !sayVoiceRe.MatchString(s.Voice) {
+		return fmt.Errorf("%q is not a voice name", s.Voice)
 	}
 	if (s.QuietFrom == "") != (s.QuietTo == "") {
 		return fmt.Errorf("quiet hours need both a start and an end")

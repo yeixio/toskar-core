@@ -351,5 +351,33 @@
     "description": "답변은 출처가 제공한 페이지에만 링크합니다. Toskar는 링크된 각 사이트에 페이지가 아직 열리는지도 확인할 수 있습니다.",
     "check": "답변 속 링크 확인",
     "checkHint": "답변이 작성된 뒤 Toskar가 링크된 각 사이트에 연락하고, 열리지 않는 링크를 답변 아래에 알려 줍니다. 각 확인은 '이 컴퓨터를 떠난 것'에 기록됩니다."
+  },
+  "voice": {
+    "title": "음성",
+    "description": "Toskar가 소리 내어 읽을 때 쓰는 음성입니다. 실시간 음성 모드, 휴대폰과 차에서 읽어 주는 답변, 초인종에 쓰입니다.",
+    "unavailable": "이 컴퓨터에서는 음성 설정을 사용할 수 없습니다.",
+    "failed": "실패했습니다. 다시 시도하세요.",
+    "kitten": {
+      "name": "Kitten TTS 2 mini",
+      "description": "{{languages}}에서 더 자연스러운 음성. 음성을 포함해 이 컴퓨터에 약 1GB를 설치하며 프로세서에서 실행됩니다.",
+      "install": "설치",
+      "retry": "다시 시도",
+      "installing": "프로그램 설치 중…",
+      "downloading": "음성 다운로드 중…",
+      "remove": "제거",
+      "removeConfirm": "Kitten 제거",
+      "keep": "유지"
+    },
+    "languages": "언어별 음성",
+    "automatic": "자동",
+    "automaticNamed": "자동: {{voice}}",
+    "engine": {
+      "kitten": "Kitten",
+      "kokoro": "Kokoro",
+      "piper": "Piper"
+    },
+    "preview": "미리 듣기",
+    "previewIn": "{{language}} 음성 미리 듣기",
+    "previewFailed": "미리 듣기를 재생하지 못했습니다."
   }
 }

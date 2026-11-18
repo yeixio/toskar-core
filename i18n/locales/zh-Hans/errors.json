@@ -52,6 +52,7 @@
   "INVALID_RATING": "评分为 1 到 5 星，原因需从列表中选择。",
   "INVALID_RETENTION": "{{detail}}",
   "INVALID_SETTING": "“{{value}}”不是 {{setting}} 的有效值。",
+  "INVALID_VOICE": "此处无法用该语音朗读{{language}}。",
   "JOIN_BAD_REQUEST": "{{detail}}",
   "JOIN_FAILED": "{{detail}}",
   "JOIN_NOT_REACHABLE": "其他电脑无法连接到这台电脑。请打开“查找其他电脑”，然后重启 Toskar。",

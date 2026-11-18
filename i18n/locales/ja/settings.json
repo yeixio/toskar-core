@@ -351,5 +351,33 @@
     "description": "回答は情報源が示したページにだけリンクします。Toskar はさらに、リンク先の各サイトにページがまだ開けるかを確認できます。",
     "check": "回答内のリンクを確認する",
     "checkHint": "回答のあと、Toskar はリンク先の各サイトに問い合わせ、開けないリンクを回答の下に示します。各確認は「このコンピューターから送信されたもの」に記録されます。"
+  },
+  "voice": {
+    "title": "音声",
+    "description": "Toskar が読み上げに使う音声です。ライブ音声モード、スマートフォンや車での回答の読み上げ、ドアベルで使われます。",
+    "unavailable": "このコンピューターでは音声の設定を使用できません。",
+    "failed": "うまくいきませんでした。もう一度お試しください。",
+    "kitten": {
+      "name": "Kitten TTS 2 mini",
+      "description": "{{languages}}でより自然な音声。音声を含めてこのコンピューターに約 1 GB をインストールし、プロセッサーで動作します。",
+      "install": "インストール",
+      "retry": "再試行",
+      "installing": "プログラムをインストール中…",
+      "downloading": "音声をダウンロード中…",
+      "remove": "削除",
+      "removeConfirm": "Kitten を削除",
+      "keep": "残す"
+    },
+    "languages": "言語ごとの音声",
+    "automatic": "自動",
+    "automaticNamed": "自動: {{voice}}",
+    "engine": {
+      "kitten": "Kitten",
+      "kokoro": "Kokoro",
+      "piper": "Piper"
+    },
+    "preview": "試聴",
+    "previewIn": "{{language}}の音声を試聴",
+    "previewFailed": "試聴を再生できませんでした。"
   }
 }

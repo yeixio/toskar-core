@@ -38,7 +38,7 @@ A phone's key reaches only what the phone uses:
 - the chat's files, and attaching a photo, file, or recording (`POST /artifacts`, and `DELETE /artifacts/{id}` to take it off before sending);
 - a recording's text, for speaking a message (`POST /speech/transcribe` with `{artifact_id, language}`: `{text, language, duration_seconds}` from Whisper on this computer or a paired one, or `503 SPEECH_UNAVAILABLE`);
 - live voice mode (`GET /voice/realtime`, a WebSocket speaking OpenAI's Realtime protocol: the person talks, Toskar answers out loud through their chat a sentence at a time and stops when talked over; #795, contract 1.100, [voice](voice.md));
-- an answer read in the computer's voice, a sentence or a few at a time (`POST /speech/say` with `{text, voice, language}`: a WAV file at 24 kHz, Kokoro or Piper, nothing kept; #795, contract 1.101);
+- an answer read in the computer's voice, a sentence or a few at a time (`POST /speech/say` with `{text, voice, language}`: a WAV file at 24 kHz, Kitten, Kokoro or Piper, nothing kept; #795, contract 1.101; an Admin chooses each language's voice and installs Kitten TTS 2 mini with `GET /speech/voices`, `PUT /speech/voices/{language}`, and `POST`/`DELETE /speech/kitten`, #1304, contract 1.112);
 - read-only lists: health, version, settings, profiles, models, running models, and computers;
 - warming a chat's model;
 - automations: listing them, one with its runs, Run now, Pause, Resume, and opening a run's result in chat (not making, editing, or deleting one);

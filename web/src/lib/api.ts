@@ -118,6 +118,7 @@ import type {
   MemoryItem,
   Artifact,
   SpeechResult,
+  VoiceSettings,
   ImageSetup,
   NodeToolProviders,
   FileRef,
@@ -1359,6 +1360,38 @@ export const api = {
       method: 'POST',
       body: JSON.stringify({ text, conversation_id: conversationId }),
     }),
+
+  /** The Voice settings: Kitten TTS 2 mini's install and each language's voice (#1304). Admins only. */
+  getVoiceSettings: () => request<VoiceSettings>('/api/v1/speech/voices'),
+
+  /** Choose the voice a language is read aloud in; empty goes back to automatic. */
+  setSpeechVoice: (language: string, voice: string) =>
+    request<VoiceSettings>(`/api/v1/speech/voices/${encodeURIComponent(language)}`, {
+      method: 'PUT',
+      body: JSON.stringify({ voice }),
+    }),
+
+  /** Start installing Kitten TTS 2 mini in the background. */
+  installKitten: () => request<VoiceSettings>('/api/v1/speech/kitten', { method: 'POST' }),
+
+  /** Remove Kitten TTS 2 mini. */
+  removeKitten: () => request<VoiceSettings>('/api/v1/speech/kitten', { method: 'DELETE' }),
+
+  /** A little text read aloud in the computer's voice, as a WAV file, to preview a voice (#795). */
+  previewVoice: async (text: string, voice: string, language: string): Promise<Blob> => {
+    let res: Response
+    try {
+      res = await fetch(`${getApiBase()}/api/v1/speech/say`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', [CLIENT_CONTRACT_HEADER]: CLIENT_CONTRACT, ...authHeaders() },
+        body: JSON.stringify({ text, voice, language }),
+      })
+    } catch (err) {
+      throw unreachable(err)
+    }
+    if (!res.ok) throw await responseError(res)
+    return res.blob()
+  },
 
   /** What image (images) or video generation has installed, and any setup in progress; on a paired computer with nodeId (#153). */
   getMediaSetup: (kind: MediaKind, nodeId?: string) => request<ImageSetup>(mediaSetupPath(kind, nodeId)),
