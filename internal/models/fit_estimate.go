@@ -193,10 +193,12 @@ func ClassifyFit(e CatalogEntry, hw contracts.HardwareInventory, nodeID, nodeNam
 	fit.Recommendations = recommendationsFor(fit.Label, kind)
 
 	if avail := hw.Memory.AvailableBytes; avail > 0 && avail < low && fit.InstallAllowed {
-		fit.RuntimeWarning = "Close other applications before running."
+		fit.RuntimeWarning = "Right now other apps are using the memory this needs: close some before running it."
 	}
 	if others := otherLoaded(e, opts.LoadedModelNames); len(others) > 0 && hw.Memory.AvailableBytes > 0 && hw.Memory.AvailableBytes < low {
-		fit.RuntimeWarning = fmt.Sprintf("Insufficient free memory while %s is loaded.", strings.Join(others, ", "))
+		// About now, not the fit: the fit is the machine's, and the loaded
+		// model makes room when this one runs (#1270).
+		fit.RuntimeWarning = fmt.Sprintf("Right now %s is using the memory this needs, so it's unloaded first when this runs.", strings.Join(others, " and "))
 	}
 
 	proven := opts.Proven[e.ID] || (hasMeasured && (measured.TokPerSec > 0 || measured.PeakMemoryBytes > 0))
