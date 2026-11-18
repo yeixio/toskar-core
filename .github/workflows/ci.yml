@@ -85,6 +85,12 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
+      # Downloads go through the LAN cache when CI_LAN_CACHE is set and it
+      # answers (ops/lan-cache); nothing changes otherwise.
+      - name: Use the LAN download cache
+        run: '"$GITHUB_WORKSPACE/.github/scripts/lan-cache.sh"'
+        env:
+          CI_LAN_CACHE: ${{ vars.CI_LAN_CACHE }}
       - uses: actions/setup-go@v7
         with:
           go-version: "1.26.x"
@@ -172,6 +178,12 @@ jobs:
     name: cross-compile (${{ matrix.target }})
     steps:
       - uses: actions/checkout@v7
+      # Downloads go through the LAN cache when CI_LAN_CACHE is set and it
+      # answers (ops/lan-cache); nothing changes otherwise.
+      - name: Use the LAN download cache
+        run: '"$GITHUB_WORKSPACE/.github/scripts/lan-cache.sh"'
+        env:
+          CI_LAN_CACHE: ${{ vars.CI_LAN_CACHE }}
       - uses: actions/setup-go@v7
         with:
           go-version: "1.26.x"
@@ -298,6 +310,12 @@ jobs:
         working-directory: web
     steps:
       - uses: actions/checkout@v7
+      # Downloads go through the LAN cache when CI_LAN_CACHE is set and it
+      # answers (ops/lan-cache); nothing changes otherwise.
+      - name: Use the LAN download cache
+        run: '"$GITHUB_WORKSPACE/.github/scripts/lan-cache.sh"'
+        env:
+          CI_LAN_CACHE: ${{ vars.CI_LAN_CACHE }}
       # Each job gets its own pnpm: self-hosted runners share a home folder,
       # and two jobs installing into ~/setup-pnpm at once break each other.
       - uses: pnpm/action-setup@v6
@@ -326,6 +344,12 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
+      # Downloads go through the LAN cache when CI_LAN_CACHE is set and it
+      # answers (ops/lan-cache); nothing changes otherwise.
+      - name: Use the LAN download cache
+        run: '"$GITHUB_WORKSPACE/.github/scripts/lan-cache.sh"'
+        env:
+          CI_LAN_CACHE: ${{ vars.CI_LAN_CACHE }}
       - uses: actions/setup-go@v7
         with:
           go-version: "1.26.x"

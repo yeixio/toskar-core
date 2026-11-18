@@ -40,6 +40,12 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
+      # Downloads go through the LAN cache when CI_LAN_CACHE is set and it
+      # answers (ops/lan-cache); nothing changes otherwise.
+      - name: Use the LAN download cache
+        run: '"$GITHUB_WORKSPACE/.github/scripts/lan-cache.sh"'
+        env:
+          CI_LAN_CACHE: ${{ vars.CI_LAN_CACHE }}
       - uses: actions/checkout@v7
         with:
           repository: yeixio/toskar-sdks

@@ -1,0 +1,20 @@
+# Verdaccio as a read-through cache of the npm registry: nobody publishes here.
+storage: /verdaccio/storage
+uplinks:
+  npmjs:
+    url: https://registry.npmjs.org/
+    timeout: 60s
+    # How long a package's version list is trusted before it is asked again.
+    maxage: 10m
+    cache: true
+packages:
+  "**":
+    access: $all
+    publish: $nobody
+    unpublish: $nobody
+    proxy: npmjs
+server:
+  keepAliveTimeout: 60
+web:
+  enable: false
+log: { type: stdout, format: pretty, level: warn }

@@ -1,0 +1,113 @@
+# A caching proxy for large downloads (compose.yaml). Each path below is one
+# source; a file is fetched from it once and then served from disk. Files
+# nobody asked for in ${CACHE_DAYS} days are removed, and the least recently
+# used go first when the cache reaches ${MAX_SIZE}.
+
+proxy_cache_path /var/cache/lan levels=1:2 keys_zone=lan:100m
+                 max_size=${MAX_SIZE} inactive=${CACHE_DAYS}d use_temp_path=off;
+
+# Hugging Face and others send downloads on to a CDN with a signed,
+# short-lived address. The cache follows the redirect itself (@follow) and
+# files the result under the address that was asked for, so the next ask is
+# a hit.
+
+server {
+    listen 8380;
+    # Docker's resolver. Every source is looked up when it is asked for, not
+    # at start, so the cache starts even before the internet connection is up.
+    resolver 127.0.0.11 valid=300s ipv6=off;
+
+    proxy_http_version 1.1;
+    proxy_ssl_server_name on;
+    proxy_ssl_verify on;
+    proxy_ssl_trusted_certificate /etc/ssl/certs/ca-certificates.crt;
+    proxy_cache lan;
+    proxy_cache_key $request_uri;
+    proxy_cache_valid 200 ${CACHE_DAYS}d;
+    proxy_cache_revalidate on;
+    proxy_cache_use_stale error timeout updating http_500 http_502 http_503 http_504;
+    proxy_read_timeout 300s;
+    proxy_buffering on;
+    proxy_force_ranges on;
+    # Nothing that signs in is sent on: the cache serves public files only.
+    # (A location that sets a header of its own would drop these, so none do.)
+    proxy_set_header Authorization "";
+    proxy_set_header Cookie "";
+    proxy_hide_header Set-Cookie;
+    proxy_ignore_headers Set-Cookie Cache-Control Expires Vary;
+    add_header X-Lan-Cache $upstream_cache_status always;
+    client_max_body_size 0;
+
+    location = /healthz { access_log off; return 200 "ok\n"; }
+    location / { return 404; }
+
+    # Hugging Face's files, not its API: /hf/<owner>/<repo>/resolve/<rev>/<file>
+    location ~ ^/hf/[^/]+/[^/]+/resolve/ {
+        set $lan_origin https://huggingface.co;
+        rewrite ^/hf/(.*)$ /$1 break;
+        proxy_pass $lan_origin;
+        proxy_intercept_errors on;
+        error_page 301 302 303 307 308 = @follow;
+    }
+
+    # Go modules, for GOPROXY. A module's version list changes; its files never do.
+    location ~ ^/go/.*/@(v/list|latest)$ {
+        set $lan_origin https://proxy.golang.org;
+        rewrite ^/go/(.*)$ /$1 break;
+        proxy_pass $lan_origin;
+        proxy_cache_valid 200 5m;
+    }
+    location /go/ {
+        set $lan_origin https://proxy.golang.org;
+        rewrite ^/go/(.*)$ /$1 break;
+        proxy_pass $lan_origin;
+        proxy_cache_valid 404 410 5m;
+    }
+
+    # Playwright's browsers, for PLAYWRIGHT_DOWNLOAD_HOST.
+    location /playwright/ {
+        set $lan_origin https://cdn.playwright.dev;
+        rewrite ^/playwright/(.*)$ /dbazure/download/playwright/$1 break;
+        proxy_pass $lan_origin;
+        proxy_intercept_errors on;
+        error_page 301 302 303 307 308 = @follow;
+    }
+
+    # Maven Central, Google's Maven and Gradle's own downloads, for the
+    # Android and Kotlin builds.
+    location /maven/ {
+        set $lan_origin https://repo.maven.apache.org;
+        rewrite ^/maven/(.*)$ /maven2/$1 break;
+        proxy_pass $lan_origin;
+        proxy_cache_valid 404 5m;
+    }
+    location /google-maven/ {
+        set $lan_origin https://dl.google.com;
+        rewrite ^/google-maven/(.*)$ /dl/android/maven2/$1 break;
+        proxy_pass $lan_origin;
+        proxy_cache_valid 404 5m;
+    }
+    location /gradle/ {
+        set $lan_origin https://services.gradle.org;
+        rewrite ^/gradle/(.*)$ /$1 break;
+        proxy_pass $lan_origin;
+        proxy_intercept_errors on;
+        error_page 301 302 303 307 308 = @follow;
+    }
+
+    # Follows a redirect from one of the sources above, and keeps the file
+    # under the address first asked for. Up to a few hops, as a CDN may chain.
+    location @follow {
+        recursive_error_pages on;
+        proxy_intercept_errors on;
+        error_page 301 302 303 307 308 = @follow;
+        # One download per file at a time; the rest wait for it.
+        proxy_cache_lock on;
+        proxy_cache_lock_timeout 30m;
+        proxy_cache_lock_age 30m;
+        set $lan_next $upstream_http_location;
+        # A redirect within the same site.
+        if ($lan_next ~ ^/) { set $lan_next $lan_origin$lan_next; }
+        proxy_pass $lan_next;
+    }
+}
