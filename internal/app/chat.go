@@ -812,6 +812,10 @@ func (a *App) RunChat(ctx context.Context, profileID, conversationID, message st
 		if env.ranLocally() {
 			answerMeta = withDevice(answerMeta, a.localAcceleration(ctx, env.modelID()))
 		}
+		// And which model answered on which computer (toskar-apps#447).
+		if full != "" {
+			answerMeta = a.withAnsweredBy(answerMeta, env)
+		}
 		if conversationID != "" && full != "" {
 			saveChat, _ := a.Settings.GetBool(ctx, "save_chat_history", true)
 			msgID := ""
@@ -926,6 +930,25 @@ func withDevice(meta *contracts.MessageMeta, acc *pluginapi.Acceleration) *contr
 		meta = &contracts.MessageMeta{Contract: contracts.ContractVersion}
 	}
 	meta.Backend, meta.Device = backend, device
+	return meta
+}
+
+// withAnsweredBy names the model that wrote an answer and the computer it
+// ran on, so a client can show "Llama 3.2 1B on Studio" under it
+// (toskar-apps#447). The computer is left out when the turn's steps ran on
+// more than one computer.
+func (a *App) withAnsweredBy(meta *contracts.MessageMeta, env *chatExecEnv) *contracts.MessageMeta {
+	modelID := env.modelID()
+	if modelID == "" {
+		return meta
+	}
+	if meta == nil {
+		meta = &contracts.MessageMeta{Contract: contracts.ContractVersion}
+	}
+	meta.Model = a.modelName(modelID)
+	if node, ok := env.answerNode(); ok {
+		meta.Computer = a.nodeDisplayName(node)
+	}
 	return meta
 }
 
@@ -1514,6 +1537,31 @@ func (e *chatExecEnv) ranLocally() bool {
 		}
 	}
 	return true
+}
+
+// answerNode is the one computer every step of this turn ran on, "" for
+// this one; false when steps ran on more than one.
+func (e *chatExecEnv) answerNode() (string, bool) {
+	local := ""
+	if e.app != nil && e.app.Config != nil {
+		local = e.app.Config.Get().NodeID
+	}
+	e.mu.Lock()
+	defer e.mu.Unlock()
+	nodes := map[string]bool{}
+	for _, id := range e.roleNodes {
+		if id == local {
+			id = ""
+		}
+		nodes[id] = true
+	}
+	if len(nodes) > 1 {
+		return "", false
+	}
+	for id := range nodes {
+		return id, true
+	}
+	return "", true
 }
 
 func (e *chatExecEnv) roleNode(role string) (string, bool) {

@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Toskar Control Plane API
-  version: "1.108"
+  version: "1.109"
   description: >-
     Local AI control plane API for Toskar, its OpenAI-compatible routes, and its MCP server.
     On the default loopback bind no key is needed. When the daemon listens on any other address,
@@ -9551,6 +9551,8 @@ components:
         tok_per_sec: {type: number}
         backend: {type: string, description: '`backend` and Device ran the model, such as vulkan and "AMD Radeon RX 7900 XTX" (#317); empty when not known, such as on a paired computer.'}
         device: {type: string}
+        model: {type: string, description: 'The model that wrote the answer, as shown to the user, such as "Llama 3.2 1B" (toskar-apps#447, contract 1.109).'}
+        computer: {type: string, description: 'The computer the answer ran on, such as "Studio". Empty when the turn''s steps ran on more than one computer.'}
     ToolUse:
       type: object
       description: One tool's part in a run.
