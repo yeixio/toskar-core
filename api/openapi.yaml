@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Toskar Control Plane API
-  version: "1.102"
+  version: "1.103"
   description: >-
     Local AI control plane API for Toskar, its OpenAI-compatible routes, and its MCP server.
     On the default loopback bind no key is needed. When the daemon listens on any other address,
@@ -3387,6 +3387,22 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/FoundModels"
+  /api/v1/models/license-acceptances:
+    get:
+      summary: Who accepted which model's license terms, and when
+      description: >-
+        Every time someone accepted a catalog model's license terms in Toskar, newest first, kept after the
+        model is removed (#593, contract 1.103). For Admins.
+      operationId: listModelLicenseAcceptances
+      tags: [Models]
+      responses:
+        "200":
+          description: The records
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {$ref: "#/components/schemas/LicenseAcceptance"}
   /api/v1/models/install-from-url/preview:
     post:
       summary: What a download from a URL would bring, without downloading it
@@ -3472,6 +3488,9 @@ paths:
                   type: string
                 wait:
                   type: boolean
+                accept_license:
+                  type: boolean
+                  description: "The person accepts the model's license terms, for a license with terms to accept; Toskar keeps a record of who and when (#593, contract 1.103). An install without it isn't refused."
       responses:
         "200":
           description: Started, or installed with wait
@@ -8178,6 +8197,7 @@ components:
             accept: {type: boolean, description: "The person agrees to the license's terms before using the model"}
             notes: {type: string}
             kind: {type: string, enum: [free, conditions], description: "free: any use, nothing to accept or credit. conditions: free, with terms."}
+            accepted_at: {type: string, format: date-time, description: "When the person asking accepted its terms in Toskar, for a license with terms to accept (contract 1.103)"}
         languages:
           type: array
           description: How well the model writes each language it has a level for (§13–14, §31), best first.
@@ -9796,6 +9816,18 @@ components:
         models:
           type: array
           items: {$ref: "#/components/schemas/StoreModel"}
+    LicenseAcceptance:
+      type: object
+      description: Someone accepting a model's license terms in Toskar (#593, contract 1.103).
+      required: [accepted_at, license_id, license_name, license_url, model_id, person_id]
+      properties:
+        model_id: {type: string}
+        license_id: {type: string}
+        license_name: {type: string}
+        license_url: {type: string}
+        person_id: {type: string}
+        person_name: {type: string}
+        accepted_at: {type: string, format: date-time}
     StoreModel:
       allOf:
         - $ref: "#/components/schemas/BrowseModel"

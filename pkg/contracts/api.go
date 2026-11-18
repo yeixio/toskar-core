@@ -203,6 +203,21 @@ type ModelLicense struct {
 	Notes  string `json:"notes,omitempty"`
 	// Kind is LicenseFree or LicenseConditions, from the fields above.
 	Kind string `json:"kind,omitempty"`
+	// AcceptedAt is when the person asking accepted its terms in Toskar,
+	// for a license to accept; absent before they have (contract 1.103).
+	AcceptedAt *time.Time `json:"accepted_at,omitempty"`
+}
+
+// LicenseAcceptance is someone accepting a model's license terms in
+// Toskar (#593, contract 1.103).
+type LicenseAcceptance struct {
+	ModelID     string    `json:"model_id"`
+	LicenseID   string    `json:"license_id"`
+	LicenseName string    `json:"license_name"`
+	LicenseURL  string    `json:"license_url"`
+	PersonID    string    `json:"person_id"`
+	PersonName  string    `json:"person_name,omitempty"`
+	AcceptedAt  time.Time `json:"accepted_at"`
 }
 
 // KindOf says whether the license is free or free with conditions.

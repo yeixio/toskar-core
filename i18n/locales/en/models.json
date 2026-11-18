@@ -548,5 +548,13 @@
       "window": "Past its window",
       "out_of_memory": "Doesn't fit"
     }
+  },
+  "licenseTerms": {
+    "title": "Accept {{model}}'s license",
+    "body": "{{model}} comes under the {{license}}, which has terms you agree to before you use it.",
+    "read": "Read the {{license}}",
+    "record": "Toskar keeps a record that you accepted, with the date, for your Admin.",
+    "cancel": "Cancel",
+    "accept": "Accept and install"
   }
 }

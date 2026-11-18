@@ -58,14 +58,19 @@ type Dependencies struct {
 	OpenAI   *openai.Handler
 	Hardware func(ctx context.Context) (contracts.HardwareInventory, error)
 
-	ListModels          func(ctx context.Context) ([]contracts.Model, error)
-	RecommendModels     func(ctx context.Context, purpose string) (contracts.Recommendation, error)
-	ModelsFit           func(ctx context.Context) ([]contracts.ModelsFitResponse, error)
-	BrowseModels        func(ctx context.Context, query string, limit int) ([]contracts.BrowseModel, error)
-	ModelStore          func(ctx context.Context) (contracts.ModelStore, error)
-	QualityResults      func(ctx context.Context) contracts.QualityResults
-	InstallModel        func(ctx context.Context, id string, wait bool, nodeID string) error
-	InstallModelFromURL func(ctx context.Context, req contracts.InstallFromURLRequest, wait bool) (string, error)
+	ListModels      func(ctx context.Context) ([]contracts.Model, error)
+	RecommendModels func(ctx context.Context, purpose string) (contracts.Recommendation, error)
+	ModelsFit       func(ctx context.Context) ([]contracts.ModelsFitResponse, error)
+	BrowseModels    func(ctx context.Context, query string, limit int) ([]contracts.BrowseModel, error)
+	ModelStore      func(ctx context.Context) (contracts.ModelStore, error)
+	QualityResults  func(ctx context.Context) contracts.QualityResults
+	InstallModel    func(ctx context.Context, id string, wait bool, nodeID string) error
+	// AcceptModelLicense records that the person asking accepted a catalog
+	// model's license terms; ModelLicenseAcceptances lists every record
+	// (#593).
+	AcceptModelLicense      func(ctx context.Context, id string) error
+	ModelLicenseAcceptances func(ctx context.Context) ([]contracts.LicenseAcceptance, error)
+	InstallModelFromURL     func(ctx context.Context, req contracts.InstallFromURLRequest, wait bool) (string, error)
 	// ImportModel adds a GGUF file on this computer as a model;
 	// ModelUploadPath and AdoptModelUpload add one sent as the body (#467).
 	ImportModel      func(ctx context.Context, req models.ImportRequest) (models.Imported, error)
@@ -367,6 +372,7 @@ func (s *Server) routes() {
 	api.HandleFunc("/models/install-from-url/preview", s.handlePreviewFromURL).Methods(http.MethodPost)
 	api.HandleFunc("/models/import", s.handleImportModel).Methods(http.MethodPost)
 	api.HandleFunc("/models/import/found", s.handleFoundModels).Methods(http.MethodGet, http.MethodOptions)
+	api.HandleFunc("/models/license-acceptances", s.handleLicenseAcceptances).Methods(http.MethodGet, http.MethodOptions)
 	api.HandleFunc("/models/{id}/install", s.handleInstallModel).Methods(http.MethodPost)
 	api.HandleFunc("/models/{id}/start", s.handleStartModel).Methods(http.MethodPost)
 	api.HandleFunc("/models/{id}/stop", s.handleStopModel).Methods(http.MethodPost)

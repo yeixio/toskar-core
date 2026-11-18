@@ -291,6 +291,8 @@ export interface ModelLicense {
   notes?: string
   /** free: any use, nothing to accept or credit. conditions: free, with terms. */
   kind?: 'free' | 'conditions'
+  /** When the person accepted its terms in Toskar (contract 1.103). */
+  accepted_at?: string
 }
 
 export interface StoreModel extends BrowseModel {

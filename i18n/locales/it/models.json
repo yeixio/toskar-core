@@ -556,5 +556,13 @@
       "window": "Oltre la sua finestra",
       "out_of_memory": "Non entra"
     }
+  },
+  "licenseTerms": {
+    "title": "Accetta la licenza di {{model}}",
+    "body": "{{model}} è distribuito con la {{license}}, i cui termini accetti prima di usarlo.",
+    "read": "Leggi la {{license}}",
+    "record": "Toskar tiene traccia della tua accettazione, con la data, per il tuo Admin.",
+    "cancel": "Annulla",
+    "accept": "Accetta e installa"
   }
 }
