@@ -36,6 +36,9 @@ type Mapping struct {
 	gateway netip.AddrPort
 	nonce   [12]byte
 	upnp    *igd
+	// permanent is a UPnP mapping with no lease, which a router keeps
+	// after a crash until it's removed (#1262).
+	permanent bool
 }
 
 // Errors a router's answer is sorted by.
@@ -223,6 +226,13 @@ func PublicIPv6() []netip.Addr {
 // mapping when stopped.
 type Keeper struct {
 	Router Router
+	// Record, when set, is a file where a permanent mapping is noted while
+	// it's kept, so one left by a crash is removed at the next start
+	// (#1262).
+	Record string
+
+	// sweepMu keeps a sweep and the first mapping from crossing.
+	sweepMu sync.Mutex
 
 	mu      sync.Mutex
 	current Mapping
@@ -244,6 +254,10 @@ func (k *Keeper) Start(internal uint16) {
 
 func (k *Keeper) run(ctx context.Context, internal uint16, done chan struct{}) {
 	defer close(done)
+	defer k.forget()
+	k.sweepMu.Lock()
+	k.sweep(ctx)
+	k.sweepMu.Unlock()
 	var m Mapping
 	for {
 		attempt, cancel := context.WithTimeout(ctx, 20*time.Second)
@@ -265,6 +279,7 @@ func (k *Keeper) run(ctx context.Context, internal uint16, done chan struct{}) {
 		k.mu.Lock()
 		k.current, k.err = m, err
 		k.mu.Unlock()
+		k.note(m, err)
 		// Renew at half the granted lifetime, at most once a minute; after a
 		// failure, try again in five.
 		wait := 5 * time.Minute

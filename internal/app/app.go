@@ -1516,8 +1516,18 @@ func (a *App) Start(ctx context.Context) error {
 		a.setAPITLS()
 		// Access from anywhere listens beside the API when it's on (#456);
 		// a port in use is reported in Settings, not fatal.
+		// A permanent router mapping a crash left is noted here (#1262).
+		a.portKeeper.Record = filepath.Join(cfg.DataDir, "port-mapping.json")
 		if err := a.applyRemoteAccess(); err != nil && a.Logger != nil {
 			a.Logger.Warn("access from anywhere could not listen", "port", cfg.RemotePort(), "error", err)
+		}
+		// Mapping a port sweeps on its own; otherwise remove what's left.
+		if !mapsPort(cfg) {
+			a.wg.Add(1)
+			go func() {
+				defer a.wg.Done()
+				a.portKeeper.Sweep(ctx)
+			}()
 		}
 		if err := a.API.ListenAndServe(cfg.APIAddr()); err != nil && ctx.Err() == nil {
 			errCh <- err
