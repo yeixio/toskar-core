@@ -518,5 +518,11 @@
   "audience": {
     "label": "Spricht mit Besuchern",
     "hint": "Für eine Haustür, eine Ladentheke oder einen Kiosk. Dein Stil, dein Standort, deine Erinnerungen und deine Computer bleiben aus den Chats heraus. Es sagt, dass es ein automatischer Assistent ist, verrät nie, ob jemand zu Hause ist, und kann keine Werkzeuge nutzen, die etwas verändern."
+  },
+  "builtInNames": {
+    "general-assistant": "Allgemeiner Assistent",
+    "programming": "Programmieren",
+    "research": "Recherche",
+    "custom": "Benutzerdefiniert"
   }
 }

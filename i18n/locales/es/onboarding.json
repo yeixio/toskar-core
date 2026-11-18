@@ -37,6 +37,7 @@
   },
   "continue": "Continuar",
   "finding": "Buscando una configuración…",
+  "findingDetail": "Comprobando la memoria y la gráfica de esta computadora, y los modelos que encajan…",
   "recommendFailed": "No se pudo obtener una recomendación.",
   "recommend": {
     "badge": "Recomendado",

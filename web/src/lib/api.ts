@@ -671,6 +671,8 @@ export type AnywhereSubscription = {
   error?: string
   /** This copy is the Mac App Store's, which sells nothing: the Toskar app on a phone or tablet does (#630). */
   in_app_only?: boolean
+  /** The relay it's for when that isn't Toskar's own, such as a developer's (#1266). */
+  relay?: string
 }
 
 export const api = {

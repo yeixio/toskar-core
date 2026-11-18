@@ -19,6 +19,7 @@ import { useUIStore } from '@/stores/uiStore'
 import type { ModelDownloadProgressPayload, Purpose, Recommendation } from '@/types/api'
 import { ShownError, shownError } from '@/components/ui/ShownError'
 import { formatPercent } from '@/i18n/format'
+import { profileName } from '@/features/profiles/profilePresentation'
 
 type OnboardingStep = 'setup' | 'recommend' | 'installing' | 'ready'
 
@@ -134,7 +135,7 @@ export function OnboardingPage() {
       setPhase('conversation')
       setPhaseDetail(t('install.conversation'))
       const conversation = await api.createConversation({
-        title: t('install.chatTitle', { profile: profile.name }),
+        title: t('install.chatTitle', { profile: profileName(profile) }),
         profile_id: profile.id,
       })
 
@@ -334,6 +335,12 @@ export function OnboardingPage() {
               </button>
             ) : null}
           </div>
+          {/* It can take several seconds: say what's happening (#1266). */}
+          {recommendMutation.isPending ? (
+            <div className="mt-4 flex justify-center">
+              <LoadingSpinner label={t('findingDetail')} />
+            </div>
+          ) : null}
         </>
       )}
 
@@ -342,7 +349,6 @@ export function OnboardingPage() {
           <section className="card mb-6">
             <div className="mb-3 flex flex-wrap items-center gap-2">
               <span className="badge-preferred">{t('recommend.badge')}</span>
-              <span className="badge-mimir">Mimir</span>
             </div>
             <h2 className="font-display text-xl font-semibold text-ink">
               {t('recommend.title', { purpose: t(`purposes.${selectedPurpose}.title`) })}

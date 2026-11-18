@@ -1201,6 +1201,17 @@ func (a *App) authorizeControlRequest(r *http.Request) error {
 	return nil
 }
 
+// staleDeviceKey reports a device key that's likely left over (#1266): never
+// used a day after it was made, as after an unfinished pairing, or not used
+// for 90 days. The web's Devices list marks the same keys.
+func staleDeviceKey(k auth.APIKeyRecord, now time.Time) bool {
+	const day = 24 * time.Hour
+	if k.LastUsed == nil {
+		return now.Sub(k.CreatedAt) > day
+	}
+	return now.Sub(*k.LastUsed) > 90*day
+}
+
 // whoCanConnect counts what could use the API from the network: API keys,
 // connected devices, a trusted proxy or OpenID Connect provider that signs
 // people in, and people other than the Owner, who sign in with a password
@@ -1215,6 +1226,9 @@ func (a *App) whoCanConnect(ctx context.Context) (contracts.NetworkAccess, error
 	for _, k := range keys {
 		if k.Kind == auth.KindDevice {
 			n.Devices++
+			if staleDeviceKey(k, time.Now()) {
+				n.StaleDevices++
+			}
 		} else {
 			n.Keys++
 		}

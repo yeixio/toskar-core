@@ -466,7 +466,13 @@
         "notNow": "나중에"
       }
     },
-    "phoneAutoHint": "메시지마다 이 기기에서 가장 좋은 모델을 골라요"
+    "phoneAutoHint": "메시지마다 이 기기에서 가장 좋은 모델을 골라요",
+    "builtInProfiles": {
+      "general-assistant": "일반 어시스턴트",
+      "programming": "프로그래밍",
+      "research": "리서치",
+      "custom": "사용자 지정"
+    }
   },
   "effort": {
     "title": "노력 수준",

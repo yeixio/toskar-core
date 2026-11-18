@@ -36,6 +36,7 @@
   },
   "continue": "Weiter",
   "finding": "Einrichtung wird gesucht …",
+  "findingDetail": "Speicher und Grafik dieses Computers werden geprüft, und welche Modelle dazu passen…",
   "recommendFailed": "Keine Empfehlung erhalten.",
   "recommend": {
     "badge": "Empfohlen",

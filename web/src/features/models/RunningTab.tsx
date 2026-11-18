@@ -4,6 +4,7 @@ import { formatBytes } from '@/lib/format'
 import type { AIProfile, HardwareInventory, RunningModelView } from '@/types/api'
 import { Ratatoskr } from '@/components/ui/Ratatoskr'
 import { AccelerationPill } from '@/components/AccelerationPill'
+import { profileName } from '@/features/profiles/profilePresentation'
 
 export function RunningTab({
   running,
@@ -55,7 +56,7 @@ export function RunningTab({
               ? item.used_by_profiles
               : profiles
                   .filter((p) => p.roles?.some((r) => r.model_id === item.model_id))
-                  .map((p) => p.name)
+                  .map((p) => profileName(p))
 
           return (
             <li key={item.instance_id} className="card min-w-0 space-y-3">

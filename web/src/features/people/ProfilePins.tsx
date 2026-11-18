@@ -5,6 +5,7 @@ import { api } from '@/lib/api'
 import type { AIProfile, Person } from '@/types/api'
 import { ShownError, shownError, type Shown } from '@/components/ui/ShownError'
 import { LoadError } from '@/components/ui/LoadError'
+import { profileName } from '@/features/profiles/profilePresentation'
 
 /**
  * Pinning profiles (#345): Admins keep Members and Visitors, or one
@@ -43,7 +44,7 @@ function Checklist({
             checked={value.includes(p.id)}
             onChange={(e) => onChange(e.target.checked ? [...value, p.id] : value.filter((id) => id !== p.id))}
           />
-          <span className="truncate">{p.name}</span>
+          <span className="truncate">{profileName(p)}</span>
         </label>
       ))}
     </fieldset>

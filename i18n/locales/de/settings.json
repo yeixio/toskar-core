@@ -268,7 +268,12 @@
     "delete": "Durchlaufprotokolle jetzt löschen",
     "confirmDelete": "Durchlaufprotokolle jetzt löschen? Dadurch werden gespeicherte Prompts und Werkzeugergebnisse früherer Durchläufe sowie diese Liste entfernt. Chats werden nicht gelöscht.",
     "deleted": "{{tasks}} Durchlaufprotokolle, {{automations}} Automationsergebnisse und {{entries}} Einträge unten gelöscht.",
-    "footnote": "Durchlaufprotokolle enthalten Prompts und Werkzeugergebnisse früherer Durchläufe. Ob Chats aufbewahrt werden, legst du unten unter „Verlauf“ fest. Jede Automation behält ihr letztes Ergebnis, mit dem „Benachrichtigen, wenn sich das Ergebnis ändert“ vergleicht."
+    "footnote": "Durchlaufprotokolle enthalten Prompts und Werkzeugergebnisse früherer Durchläufe. Ob Chats aufbewahrt werden, legst du unten unter „Verlauf“ fest. Jede Automation behält ihr letztes Ergebnis, mit dem „Benachrichtigen, wenn sich das Ergebnis ändert“ vergleicht.",
+    "details": {
+      "news": "die KI-News",
+      "latestVersion": "die neueste Versionsnummer",
+      "training": "Trainingsbeispiele und Anweisungen für {{repo}}"
+    }
   },
   "storage": {
     "folders": "Datenordner",

@@ -13,6 +13,7 @@ import { formatDateTime } from '@/i18n/format'
 import { LoadError } from '@/components/ui/LoadError'
 import { Skeleton } from '@/components/ui/Skeleton'
 import { ShownError, shownError } from '@/components/ui/ShownError'
+import { profileName } from '@/features/profiles/profilePresentation'
 
 
 type Mode = 'path' | 'text' | 'database' | 'api'
@@ -233,7 +234,7 @@ function SourceRow({
           {usedBy.length > 0 ? (
             <p className="mt-2 flex items-center gap-1.5 text-xs text-ink-muted">
               <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-success" aria-hidden />
-              {t('row.usedBy', { profiles: usedBy.map((p) => p.name).join(', ') })}
+              {t('row.usedBy', { profiles: usedBy.map((p) => profileName(p)).join(', ') })}
             </p>
           ) : chatProfile ? (
             <div className="mt-2 flex flex-wrap items-center gap-2">
@@ -446,7 +447,7 @@ function UseWithPicker({
               checked={chosen.includes(profile.id)}
               onChange={(e) => onChange(e.target.checked ? [...chosen, profile.id] : chosen.filter((id) => id !== profile.id))}
             />
-            {profile.name}
+            {profileName(profile)}
           </label>
         ))}
       </div>

@@ -35,6 +35,7 @@
   },
   "continue": "继续",
   "finding": "正在寻找合适的配置…",
+  "findingDetail": "正在检查这台电脑的内存和显卡，以及适合的模型…",
   "recommendFailed": "无法获取推荐。",
   "recommend": {
     "badge": "推荐",

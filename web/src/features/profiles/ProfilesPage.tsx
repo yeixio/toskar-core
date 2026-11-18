@@ -13,30 +13,7 @@ import type { AIProfile, ModelRole, NodePolicy, OrchestrationPolicy, ToolPolicy 
 import { KnowledgePicker } from '@/features/knowledge/KnowledgePicker'
 import { TOOL_CATALOG, defaultToolsFrom } from './editorTools'
 import { CAPABILITIES, capabilityDescription, capabilityEnabled, capabilityLabel, setCapability } from './capabilities'
-import {
-  computerSelectionLabel,
-  createStartOptions,
-  filterProfiles,
-  isBuiltInProfile,
-  defaultProfileIdOf,
-  freeProfileName,
-  isTeamProfile,
-  MODEL_ROLES,
-  purposeIcon,
-  purposeLabel,
-  roleDisplayName,
-  roleHelp,
-  roleHint,
-  sortProfilesForDisplay,
-  STRATEGY_VALUES,
-  strategyLabel,
-  strategyOption,
-  type StrategyValue,
-  toolChipPreview,
-  toolSummary,
-  type CreateStartFrom,
-  type ProfileFilter,
-} from './profilePresentation'
+import { computerSelectionLabel, createStartOptions, filterProfiles, isBuiltInProfile, defaultProfileIdOf, freeProfileName, isTeamProfile, MODEL_ROLES, purposeIcon, purposeLabel, roleDisplayName, roleHelp, roleHint, sortProfilesForDisplay, STRATEGY_VALUES, strategyLabel, strategyOption, type StrategyValue, toolChipPreview, toolSummary, type CreateStartFrom, type ProfileFilter, profileName } from './profilePresentation'
 import { OrchestrationControls, cleanOrchestration } from './OrchestrationControls'
 import { SwarmControls } from './SwarmControls'
 import { TopicsEditor } from './TopicsEditor'
@@ -181,7 +158,7 @@ export function ProfilesPage() {
   const duplicateMutation = useMutation({
     mutationFn: (profile: AIProfile) =>
       api.createProfile({
-        name: freeProfileName(t('create.copyName', { name: profile.name }), profilesQuery.data ?? []),
+        name: freeProfileName(t('create.copyName', { name: profileName(profile) }), profilesQuery.data ?? []),
         purpose: profile.purpose,
         orchestrator_id: profile.orchestrator_id,
         node_policy: profile.node_policy,
@@ -438,7 +415,7 @@ export function ProfilesPage() {
                           aria-label={t('card.rename')}
                         />
                       ) : (
-                        <h2 className="font-semibold text-ink">{profile.name}</h2>
+                        <h2 className="font-semibold text-ink">{profileName(profile)}</h2>
                       )}
                       <span className="label-caps">
                         {builtIn ? t('card.builtin') : t('card.custom')}
@@ -560,7 +537,7 @@ export function ProfilesPage() {
                     <button
                       type="button"
                       className="icon-button"
-                      aria-label={t('card.moreActions', { name: profile.name })}
+                      aria-label={t('card.moreActions', { name: profileName(profile) })}
                       aria-haspopup="menu"
                       aria-expanded={menuOpenId === profile.id}
                       onClick={(e: MouseEvent) => {
@@ -604,7 +581,7 @@ export function ProfilesPage() {
                           <MenuItem
                             disabled={resetMutation.isPending}
                             onClick={() => {
-                              if (window.confirm(t('menu.confirmReset', { name: profile.name }))) {
+                              if (window.confirm(t('menu.confirmReset', { name: profileName(profile) }))) {
                                 resetMutation.mutate(profile.id)
                               } else {
                                 setMenuOpenId(null)
@@ -619,7 +596,7 @@ export function ProfilesPage() {
                             danger
                             disabled={deleteMutation.isPending}
                             onClick={() => {
-                              if (window.confirm(t('menu.confirmDelete', { name: profile.name }))) {
+                              if (window.confirm(t('menu.confirmDelete', { name: profileName(profile) }))) {
                                 deleteMutation.mutate(profile.id)
                               } else {
                                 setMenuOpenId(null)

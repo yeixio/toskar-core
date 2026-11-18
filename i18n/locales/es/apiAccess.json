@@ -76,6 +76,9 @@
       "devicesCount_one": "{{formatted}} conectado",
       "devicesCount_many": "{{formatted}} conectados",
       "devicesCount_other": "{{formatted}} conectados",
+      "devicesStale_one": "{{formatted}} sin usar últimamente",
+      "devicesStale_many": "{{formatted}} sin usar últimamente",
+      "devicesStale_other": "{{formatted}} sin usar últimamente",
       "devicesAction": "Conectar un dispositivo",
       "apps": "Apps y scripts",
       "appsHow": "Usan una clave de API, creada abajo.",
@@ -274,6 +277,7 @@
     },
     "subscription": {
       "title": "Relé de Toskar",
+      "titleOther": "Suscripción en {{relay}}",
       "offer": "Cuando nada más llega a esta computadora, el relé de Toskar sí llega, para esta computadora y cada dispositivo vinculado a ella.",
       "monthly": "Suscribirse por {{price}} al mes",
       "yearly": "Suscribirse por {{price}} al año",

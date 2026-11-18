@@ -276,7 +276,12 @@
     "delete": "Supprimer l'historique des exécutions",
     "confirmDelete": "Supprimer l'historique des exécutions maintenant ? Cela efface les prompts et résultats d'outils enregistrés des exécutions passées, ainsi que cette liste. Les discussions ne sont pas supprimées.",
     "deleted": "{{tasks}} enregistrements d'exécution, {{automations}} résultats d'automatisation et {{entries}} entrées ci-dessous supprimés.",
-    "footnote": "L'historique des exécutions contient les prompts et les résultats d'outils des exécutions passées. La conservation des discussions dépend du réglage Historique ci-dessous. Chaque automatisation garde son dernier résultat, auquel « notifier quand le résultat change » se compare."
+    "footnote": "L'historique des exécutions contient les prompts et les résultats d'outils des exécutions passées. La conservation des discussions dépend du réglage Historique ci-dessous. Chaque automatisation garde son dernier résultat, auquel « notifier quand le résultat change » se compare.",
+    "details": {
+      "news": "les actualités de l'IA",
+      "latestVersion": "le numéro de la dernière version",
+      "training": "des exemples d'entraînement et des instructions pour {{repo}}"
+    }
   },
   "storage": {
     "folders": "Dossiers de données",

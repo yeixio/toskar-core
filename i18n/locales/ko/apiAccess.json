@@ -72,6 +72,7 @@
       "devices": "휴대폰과 태블릿",
       "devicesHow": "6자리 코드로 연결해요.",
       "devicesCount_other": "{{formatted}}대 연결됨",
+      "devicesStale_other": "{{formatted}}개는 최근 사용 안 함",
       "devicesAction": "기기 연결",
       "apps": "앱과 스크립트",
       "appsHow": "아래에서 만든 API 키를 사용해요.",
@@ -268,6 +269,7 @@
     },
     "subscription": {
       "title": "Toskar 릴레이",
+      "titleOther": "{{relay}} 구독",
       "offer": "다른 방법으로 이 컴퓨터에 닿지 않을 때 Toskar 릴레이가 연결해 줘요. 이 컴퓨터와 페어링된 모든 기기에 적용돼요.",
       "monthly": "월 {{price}}에 구독",
       "yearly": "연 {{price}}에 구독",

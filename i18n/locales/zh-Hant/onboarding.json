@@ -35,6 +35,7 @@
   },
   "continue": "繼續",
   "finding": "正在尋找合適的配置…",
+  "findingDetail": "正在檢查這台電腦的記憶體和顯示卡，以及適合的模型…",
   "recommendFailed": "無法取得建議。",
   "recommend": {
     "badge": "建議",

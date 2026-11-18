@@ -466,7 +466,13 @@
         "notNow": "暂不"
       }
     },
-    "phoneAutoHint": "为每条消息选择这台设备上最合适的模型"
+    "phoneAutoHint": "为每条消息选择这台设备上最合适的模型",
+    "builtInProfiles": {
+      "general-assistant": "通用助手",
+      "programming": "编程",
+      "research": "研究",
+      "custom": "自定义"
+    }
   },
   "effort": {
     "title": "投入程度",

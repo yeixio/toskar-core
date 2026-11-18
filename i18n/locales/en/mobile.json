@@ -471,6 +471,12 @@
         "install": "Install and answer again",
         "notNow": "Not now"
       }
+    },
+    "builtInProfiles": {
+      "general-assistant": "General Assistant",
+      "programming": "Programming",
+      "research": "Research",
+      "custom": "Custom"
     }
   },
   "effort": {

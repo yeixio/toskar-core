@@ -177,7 +177,10 @@
     "automationDigest": "自動化摘要",
     "automationDigestBody_other": "{{count}} 個自動化已執行：{{names}}",
     "newerModels": "有更新的 {{family}} 模型",
-    "newerModelsBody": "{{model}} 比 {{installed}} 更新。在「模型 › 已安裝」中可以查看它在這台電腦上的適配情況，並把它安裝在現有模型旁邊。"
+    "newerModelsBody": "{{model}} 比 {{installed}} 更新。在「模型 › 已安裝」中可以查看它在這台電腦上的適配情況，並把它安裝在現有模型旁邊。",
+    "pageNotOpened": "{{automation}} 沒有開啟 {{page}}",
+    "pageNotOpenedUnnamed": "某個自動化沒有開啟 {{page}}",
+    "pageNotOpenedBody": "它的模型沒有讀取該頁面就作答了，結果可能是編造的。請為此自動化選擇能使用工具的模型。"
   },
   "sent": {
     "times": "{{title}}（{{count}} 次）",

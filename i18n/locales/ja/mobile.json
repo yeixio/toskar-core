@@ -466,7 +466,13 @@
         "notNow": "今はしない"
       }
     },
-    "phoneAutoHint": "メッセージごとに、このデバイスで最適なモデルを選びます"
+    "phoneAutoHint": "メッセージごとに、このデバイスで最適なモデルを選びます",
+    "builtInProfiles": {
+      "general-assistant": "汎用アシスタント",
+      "programming": "プログラミング",
+      "research": "リサーチ",
+      "custom": "カスタム"
+    }
   },
   "effort": {
     "title": "処理の深さ",

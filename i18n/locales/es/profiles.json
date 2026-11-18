@@ -523,5 +523,11 @@
   "audience": {
     "label": "Habla con visitas",
     "hint": "Para una puerta de entrada, un mostrador o un quiosco. Tu estilo, tu ubicación, tus recuerdos y tus computadoras quedan fuera de sus chats. Dice que es un asistente automático, nunca dice si hay alguien en casa y no puede usar herramientas que cambien cosas."
+  },
+  "builtInNames": {
+    "general-assistant": "Asistente general",
+    "programming": "Programación",
+    "research": "Investigación",
+    "custom": "Personalizado"
   }
 }

@@ -34,6 +34,10 @@ type Subscription struct {
 	// InAppOnly is this copy being the Mac App Store's, which doesn't sell
 	// or manage it: the Toskar app on a phone or tablet does (#630).
 	InAppOnly bool `json:"in_app_only,omitempty"`
+	// Relay is the relay the subscription is for when it isn't Toskar's
+	// own, such as a developer's set with TOSKAR_RELAY_URL, so the page
+	// doesn't call it Toskar's relay (#1266).
+	Relay string `json:"relay,omitempty"`
 }
 
 // handleSubscriptionCheckout starts a subscription to access from

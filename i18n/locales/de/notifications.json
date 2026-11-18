@@ -185,7 +185,10 @@
     "automationDigestBody_one": "1 Automation ist gelaufen: {{names}}",
     "automationDigestBody_other": "{{count}} Automationen sind gelaufen: {{names}}",
     "newerModels": "Neuere {{family}}-Modelle sind verfügbar",
-    "newerModelsBody": "{{model}} ist neuer als {{installed}}. Unter Modelle › Installiert siehst du, wie es passt, und kannst es neben dem vorhandenen installieren."
+    "newerModelsBody": "{{model}} ist neuer als {{installed}}. Unter Modelle › Installiert siehst du, wie es passt, und kannst es neben dem vorhandenen installieren.",
+    "pageNotOpened": "{{automation}} hat {{page}} nicht geöffnet",
+    "pageNotOpenedUnnamed": "Eine Automation hat {{page}} nicht geöffnet",
+    "pageNotOpenedBody": "Ihr Modell hat geantwortet, ohne die Seite zu lesen, daher ist das Ergebnis womöglich erfunden. Wähle für diese Automation ein Modell, das Werkzeuge nutzen kann."
   },
   "sent": {
     "times": "{{title}} ({{count}}-mal)",

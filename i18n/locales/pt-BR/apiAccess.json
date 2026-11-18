@@ -76,6 +76,9 @@
       "devicesCount_one": "{{formatted}} conectado",
       "devicesCount_many": "{{formatted}} conectados",
       "devicesCount_other": "{{formatted}} conectados",
+      "devicesStale_one": "{{formatted}} sem uso recente",
+      "devicesStale_many": "{{formatted}} sem uso recente",
+      "devicesStale_other": "{{formatted}} sem uso recente",
       "devicesAction": "Conectar um dispositivo",
       "apps": "Apps e scripts",
       "appsHow": "Usam uma chave de API, criada abaixo.",
@@ -274,6 +277,7 @@
     },
     "subscription": {
       "title": "Relay do Toskar",
+      "titleOther": "Assinatura em {{relay}}",
       "offer": "Quando nada mais chega a este computador, o relay do Toskar chega, para este computador e cada dispositivo pareado com ele.",
       "monthly": "Assinar por {{price}} por mês",
       "yearly": "Assinar por {{price}} por ano",

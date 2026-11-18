@@ -35,6 +35,7 @@
   },
   "continue": "続ける",
   "finding": "構成を探しています…",
+  "findingDetail": "このコンピュータのメモリとグラフィックス、それに合うモデルを確認しています…",
   "recommendFailed": "おすすめを取得できませんでした。",
   "recommend": {
     "badge": "おすすめ",

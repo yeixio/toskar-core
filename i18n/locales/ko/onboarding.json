@@ -35,6 +35,7 @@
   },
   "continue": "계속",
   "finding": "설정을 찾는 중…",
+  "findingDetail": "이 컴퓨터의 메모리와 그래픽, 그리고 맞는 모델을 확인하는 중…",
   "recommendFailed": "추천을 받을 수 없어요.",
   "recommend": {
     "badge": "추천",

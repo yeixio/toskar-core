@@ -1061,6 +1061,12 @@ type MessageMeta struct {
 	// known, such as when a step ran on a paired computer.
 	Backend string `json:"backend,omitempty"`
 	Device  string `json:"device,omitempty"`
+	// Model and Computer name what answered and where, such as "Llama 3.2
+	// 1B" and "Studio", so a client can say so under the answer
+	// (toskar-apps#447, contract 1.109). Computer is empty when the turn's
+	// steps ran on more than one computer.
+	Model    string `json:"model,omitempty"`
+	Computer string `json:"computer,omitempty"`
 	// Automation is an automation the answer drafted, for the person to
 	// confirm (#204, contract 1.10). Nothing is scheduled until they do.
 	Automation *AutomationDraft `json:"automation,omitempty"`
@@ -1512,6 +1518,10 @@ type NetworkAccess struct {
 	People int `json:"people"`
 	// Devices is phones, tablets, watches, and TVs connected with a code.
 	Devices int `json:"devices"`
+	// StaleDevices is how many of Devices are likely left over: never used
+	// a day after pairing, or not used for 90 days (#1266, contract 1.109).
+	// They can still connect until they're removed.
+	StaleDevices int `json:"stale_devices,omitempty"`
 	// Keys is API keys made in API Access, for apps and scripts.
 	Keys int `json:"keys"`
 	// SignInService is a trusted proxy or OpenID Connect provider that

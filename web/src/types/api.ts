@@ -848,6 +848,9 @@ export interface MessageMeta {
   /** The backend and device that ran the answer (#317, contract 1.8). */
   backend?: string
   device?: string
+  /** The model that wrote the answer and the computer it ran on (toskar-apps#447, contract 1.109). */
+  model?: string
+  computer?: string
   /** An automation the answer drafted, for the person to confirm (#204, contract 1.10). */
   automation?: AutomationDraft
   /** A result an automation posted to the chat it was made from (#204, contract 1.11). */
@@ -1106,6 +1109,8 @@ export interface NetworkAccess {
   /** API keys made in API Access, for apps and scripts. */
   keys: number
   /** A trusted proxy or OpenID Connect provider signs people in. */
+  /** Of devices, how many are likely left over: never used a day after pairing, or unused for 90 days (#1266). */
+  stale_devices?: number
   sign_in_service: boolean
 }
 

@@ -36,6 +36,7 @@
   },
   "continue": "Continue",
   "finding": "Finding a setup…",
+  "findingDetail": "Checking this computer's memory and graphics, and the models that fit them…",
   "recommendFailed": "Could not get a recommendation.",
   "recommend": {
     "badge": "Recommended",

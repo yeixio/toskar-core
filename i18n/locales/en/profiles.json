@@ -518,5 +518,11 @@
   "audience": {
     "label": "Talks with visitors",
     "hint": "For a front door, a shop counter, or a kiosk. Your style, location, memories, and computers stay out of its chats. It says it's an automated assistant, never says whether anyone is home, and can't use tools that change things."
+  },
+  "builtInNames": {
+    "general-assistant": "General Assistant",
+    "programming": "Programming",
+    "research": "Research",
+    "custom": "Custom"
   }
 }
