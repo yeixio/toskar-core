@@ -70,6 +70,11 @@ func cleanRelayName(in string) (string, error) {
 	if net.ParseIP(host) != nil || !validHostName(host) || !strings.Contains(host, ".") {
 		return "", errRelayName
 	}
+	// Toskar's own relay typed by hand is Toskar's relay, on its own port,
+	// with renewals and subscriptions, not an organization's (#1259).
+	if defaultHost, _, _ := net.SplitHostPort(relayclient.DefaultRelay); host == defaultHost {
+		return "", nil
+	}
 	return name, nil
 }
 
@@ -87,6 +92,7 @@ func cleanRelaySecret(in string) (string, error) {
 func (a *App) applyRelay() {
 	a.relayMu.Lock()
 	defer a.relayMu.Unlock()
+	old := a.relay
 	if a.relayStop != nil {
 		a.relayStop()
 		a.relayStop, a.relay = nil, nil
@@ -96,6 +102,18 @@ func (a *App) applyRelay() {
 	}
 	cfg := a.Config.Get()
 	if !cfg.RemoteAccess.Enabled || a.API.RemoteListening().Listening == "" {
+		// Turned off: take the address record back, so devices stop
+		// trying the old ways in at once rather than for its 30 minutes
+		// (#1259).
+		if old != nil && !cfg.RemoteAccess.Enabled {
+			go func() {
+				ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+				defer cancel()
+				if err := old.Withdraw(ctx); err != nil {
+					a.Logger.Info("relay: couldn't withdraw the address record", "error", err)
+				}
+			}()
+		}
 		return
 	}
 	secrets := auth.NewSecretStore(cfg.DataDir)

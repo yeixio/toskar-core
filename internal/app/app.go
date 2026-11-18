@@ -633,6 +633,7 @@ func New(opts Options) (*App, error) {
 		Subscription:       a.subscription,
 		StartCheckout:      a.startCheckout,
 		ManageSubscription: a.manageSubscription,
+		CancelCheckout:     a.cancelCheckout,
 		GetSettings: func(ctx context.Context) (contracts.SettingsView, error) {
 			return a.settingsView(ctx)
 		},

@@ -1,13 +1,12 @@
 package app
 
 // Regression tests for Access from anywhere bugs the Nov 2026 QA pass filed
-// (layers 1 and 3 of the test plan). While an issue is open, its test is
-// wrapped in qa.KnownBug, which skips while the bug is there and fails once
-// it's fixed.
+// (layers 1 and 3 of the test plan).
 
 import (
 	"context"
 	"crypto/x509"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"io"
@@ -18,7 +17,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yeixio/toskar-core/internal/qa"
 	"github.com/yeixio/toskar-core/internal/relayclient"
 )
 
@@ -31,13 +29,11 @@ func TestQAToskarsRelayTypedByHand(t *testing.T) {
 	for _, in := range []string{"relay.toskar.ai", "relay.toskar.ai:4443", "https://relay.toskar.ai/"} {
 		got[in], errs[in] = cleanRelayName(in)
 	}
-	qa.KnownBug(t, "toskar-core#1259", func(t testing.TB) {
-		for in, name := range got {
-			if errs[in] == nil && name != "" {
-				t.Errorf("%q is kept as an organization's relay %q", in, name)
-			}
+	for in, name := range got {
+		if errs[in] != nil || name != "" {
+			t.Errorf("%q is kept as an organization's relay %q (%v)", in, name, errs[in])
 		}
-	})
+	}
 }
 
 // A device's person can't knock the computer off the relay by handing it a
@@ -118,9 +114,26 @@ func TestQACheckoutAsksTheRelayForCoverage(t *testing.T) {
 		return (&net.Dialer{}).DialContext(ctx, network, addr)
 	}}
 	url, err := a.startCheckout(context.Background(), "monthly")
-	qa.KnownBug(t, "toskar-core#1257", func(t testing.TB) {
-		if err == nil {
-			t.Errorf("sold a second subscription for a covered computer: %s", url)
-		}
-	})
+	if !errors.Is(err, errCovered) {
+		t.Errorf("sold a second subscription for a covered computer: %s %v", url, err)
+	}
+}
+
+// Access an operator granted by hand isn't shown as a subscription bought
+// in the Toskar app.
+func TestQAGrantIsntAnAppSubscription(t *testing.T) {
+	// Regression: toskar-core#1256
+	a, _, _ := newAnywhereApp(t)
+	route, err := a.routeID()
+	if err != nil {
+		t.Fatal(err)
+	}
+	payload, _ := json.Marshal(map[string]any{"v": 1, "route": route, "env": "grant", "exp": time.Now().Add(10 * 24 * time.Hour).Unix()})
+	grant := "rt1." + base64.RawURLEncoding.EncodeToString(payload) + ".sig"
+	if _, err := a.setRelayToken(context.Background(), grant, false); err != nil {
+		t.Fatal(err)
+	}
+	if sub := a.subscription(); sub.State != "active" || sub.Store != "grant" {
+		t.Errorf("a grant shows as %+v, want active from grant", sub)
+	}
 }

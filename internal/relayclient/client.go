@@ -131,6 +131,13 @@ type Client struct {
 	// nextDevice is when a device token may next be asked for; under
 	// tokenMu.
 	nextDevice time.Time
+	// refused is a token the relay revoked or whose route it blocked, and
+	// why: it isn't sent again, and the state is ended, until another
+	// token takes its place (#1256). Under tokenMu.
+	refused, refusedWhy string
+	// registerNow asks registerLoop to send the record now, as when the
+	// tunnel is back after the relay restarted and forgot it (#1255).
+	registerNow chan struct{}
 }
 
 // Status is how the relay connection is doing, for Settings.
@@ -192,6 +199,7 @@ func (c *Client) logger() *slog.Logger {
 // Run keeps the record and the tunnel going until ctx ends.
 func (c *Client) Run(ctx context.Context) {
 	c.setState("connecting", "")
+	c.registerNow = make(chan struct{}, 1)
 	var wg sync.WaitGroup
 	wg.Add(2)
 	go func() { defer wg.Done(); c.registerLoop(ctx) }()
@@ -232,6 +240,9 @@ func (c *Client) token(ctx context.Context, renew bool) (string, error) {
 	defer c.tokenMu.Unlock()
 	tok, _ := c.Store.Read(TokenName)
 	tok = strings.TrimSpace(tok)
+	if tok != "" && tok == c.refused {
+		return "", errEnded
+	}
 	exp := tokenExpiry(tok)
 	if c.EnrollSecret != "" && (renew || tok == "" || time.Until(exp) < renewBefore) {
 		fresh, err := c.enroll(ctx)
@@ -258,15 +269,39 @@ func (c *Client) token(ctx context.Context, renew bool) (string, error) {
 	return tok, nil
 }
 
-// setEnded says the token ran out, logging it once rather than each look.
+// setEnded says the token ran out, or the relay revoked it, logging it
+// once rather than each look. Error is TOKEN_REVOKED or ROUTE_BLOCKED for
+// one the relay refused, "" for one that ran out.
 func (c *Client) setEnded() {
+	c.tokenMu.Lock()
+	why := c.refusedWhy
+	c.tokenMu.Unlock()
 	c.mu.Lock()
 	was, exp := c.status.State, c.status.Expires
-	c.status.State, c.status.Error = "ended", ""
+	c.status.State, c.status.Error = "ended", why
 	c.mu.Unlock()
 	if was != "ended" {
-		c.logger().Info("the relay token has run out; waiting for a new one", "relay", c.Relay, "expired", exp)
+		c.logger().Info("the relay token has stopped working; waiting for a new one", "relay", c.Relay, "expired", exp, "why", why)
 	}
+}
+
+// refusedFor marks tok as one the relay won't take again, when err says
+// it revoked it or blocked its route, and answers errEnded then; other
+// errors are answered as they are. A token the relay still renews isn't
+// marked: the renewal takes its place first.
+func (c *Client) refusedFor(tok string, err error) error {
+	code := errorCode(err)
+	if code != "TOKEN_REVOKED" && code != "ROUTE_BLOCKED" {
+		return err
+	}
+	c.tokenMu.Lock()
+	defer c.tokenMu.Unlock()
+	if kept, _ := c.Store.Read(TokenName); strings.TrimSpace(kept) != tok {
+		// Another token came meanwhile: try that one.
+		return err
+	}
+	c.refused, c.refusedWhy = tok, code
+	return errEnded
 }
 
 // tokenExpiry reads a token's expiry without checking it; only the relay
@@ -300,6 +335,25 @@ func ParseToken(tok string) (route string, exp time.Time, ok bool) {
 		return "", time.Time{}, false
 	}
 	return c.Route, time.Unix(c.Exp, 0), true
+}
+
+// TokenEnv reads a route token's env, such as prod, sandbox, or grant,
+// without checking its signature; "" for anything else.
+func TokenEnv(tok string) string {
+	rest, found := strings.CutPrefix(strings.TrimSpace(tok), "rt1.")
+	if !found {
+		return ""
+	}
+	payload, _, _ := strings.Cut(rest, ".")
+	raw, err := base64.RawURLEncoding.DecodeString(payload)
+	if err != nil {
+		return ""
+	}
+	var c struct {
+		Env string `json:"env"`
+	}
+	_ = json.Unmarshal(raw, &c)
+	return c.Env
 }
 
 // errRenewUnavailable is a relay without POST /v1/routes/{route}/renew,
@@ -454,13 +508,28 @@ func (c *Client) register(ctx context.Context) error {
 		}
 	}
 	if err != nil {
-		return err
+		return c.refusedFor(tok, err)
 	}
 	resp.Body.Close()
 	c.mu.Lock()
 	c.status.Registered = time.Now()
 	c.mu.Unlock()
 	c.refreshDeviceToken(ctx, tok)
+	return nil
+}
+
+// Withdraw takes the address record back from the relay, as when access
+// from anywhere is turned off (#1259).
+func (c *Client) Withdraw(ctx context.Context) error {
+	tok, err := c.token(ctx, false)
+	if err != nil {
+		return err
+	}
+	resp, err := c.do(ctx, http.MethodDelete, "/v1/routes/"+c.Route()+"/record", tok, nil)
+	if err != nil {
+		return err
+	}
+	resp.Body.Close()
 	return nil
 }
 
@@ -546,6 +615,7 @@ func (c *Client) registerLoop(ctx context.Context) {
 		select {
 		case <-ctx.Done():
 			return
+		case <-c.registerNow:
 		case <-time.After(wait):
 		}
 	}
@@ -634,9 +704,11 @@ func (c *Client) tunnel(ctx context.Context) (string, error) {
 		_ = json.NewDecoder(io.LimitReader(resp.Body, 8<<10)).Decode(&e)
 		err := &apiError{Status: resp.StatusCode, Code: e.Error.Code}
 		if isExpired(err) && (c.EnrollSecret != "" || c.Renew) {
-			_, _ = c.token(ctx, true)
+			if fresh, ferr := c.token(ctx, true); ferr == nil && fresh != tok {
+				return "", err
+			}
 		}
-		return "", err
+		return "", c.refusedFor(tok, err)
 	}
 	// No line for three pings' time means the stream is gone.
 	lines := make(chan []byte)
@@ -672,11 +744,25 @@ func (c *Client) tunnel(ctx context.Context) (string, error) {
 			case "hello":
 				c.setState("connected", "")
 				c.logger().Info("relay tunnel open", "relay", c.Relay)
+				// The relay may have restarted, which forgets every
+				// record: send it again now rather than at the next
+				// registration (#1255).
+				if c.registerNow != nil {
+					select {
+					case c.registerNow <- struct{}{}:
+					default:
+					}
+				}
 			case "open":
 				go c.dialBack(ctx, tok, ev.Stream, ev.Client)
 			case "end":
 				if isExpired(&apiError{Code: ev.Reason}) && (c.EnrollSecret != "" || c.Renew) {
-					_, _ = c.token(ctx, true)
+					if fresh, err := c.token(ctx, true); err == nil && fresh != tok {
+						return ev.Reason, nil
+					}
+				}
+				if err := c.refusedFor(tok, &apiError{Code: ev.Reason}); errors.Is(err, errEnded) {
+					return "", err
 				}
 				return ev.Reason, nil
 			}

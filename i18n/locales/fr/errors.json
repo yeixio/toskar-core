@@ -287,5 +287,7 @@
   "SWARM_RUNNING": "Cet essaim est toujours en cours. Arrêtez-le d'abord.",
   "RELAY_TOKEN_SHORTER": "Cet ordinateur a déjà un jeton de relais valable plus longtemps : il garde celui-là.",
   "RELAY_UNREACHABLE": "Impossible de joindre le relais de Toskar. Réessayez dans une minute.",
-  "COMPANION_LIMIT": "Un appareil connecté via un autre ne peut pas en connecter d'autres. Connectez-le depuis le téléphone."
+  "COMPANION_LIMIT": "Un appareil connecté via un autre ne peut pas en connecter d'autres. Connectez-le depuis le téléphone.",
+  "SUBSCRIPTION_COVERED": "L'abonnement d'un autre appareil couvre déjà cet ordinateur : rien à acheter ici.",
+  "CHECKOUT_NONE": "Aucun paiement en cours à annuler."
 }

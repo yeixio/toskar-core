@@ -287,5 +287,7 @@
   "SWARM_RUNNING": "Este enjambre sigue en marcha. Detenlo primero.",
   "RELAY_TOKEN_SHORTER": "Esta computadora ya tiene un token del relé que dura más, así que conserva ese.",
   "RELAY_UNREACHABLE": "No se pudo contactar con el relé de Toskar. Vuelve a intentarlo en un minuto.",
-  "COMPANION_LIMIT": "Un dispositivo conectado a través de otro no puede conectar más. Conéctalo desde el teléfono."
+  "COMPANION_LIMIT": "Un dispositivo conectado a través de otro no puede conectar más. Conéctalo desde el teléfono.",
+  "SUBSCRIPTION_COVERED": "La suscripción de otro dispositivo ya cubre esta computadora, así que no hay nada que comprar aquí.",
+  "CHECKOUT_NONE": "No hay ningún pago abierto que cancelar."
 }

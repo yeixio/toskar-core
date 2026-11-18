@@ -22,8 +22,8 @@ const (
 )
 
 // Lifetime is what a mapping is asked for; it's renewed at half of what the
-// router grants.
-const Lifetime = 2 * time.Hour
+// router grants. Short, so a mapping left by a crash closes soon (#1262).
+const Lifetime = 20 * time.Minute
 
 // Mapping is a port the router forwards to this computer.
 type Mapping struct {
@@ -255,6 +255,13 @@ func (k *Keeper) run(ctx context.Context, internal uint16, done chan struct{}) {
 			m, err = k.Router.Map(attempt, internal, 0)
 		}
 		cancel()
+		// Stopped meanwhile: the router may have made the mapping as the
+		// request ended, so take it back here rather than leave it
+		// (#1262), and don't leave it behind as the current one.
+		if ctx.Err() != nil {
+			unmap(m)
+			return
+		}
 		k.mu.Lock()
 		k.current, k.err = m, err
 		k.mu.Unlock()
@@ -268,16 +275,29 @@ func (k *Keeper) run(ctx context.Context, internal uint16, done chan struct{}) {
 		}
 		select {
 		case <-ctx.Done():
+			unmap(m)
 			return
 		case <-time.After(wait):
 		}
 	}
 }
 
-// Stop stops renewing and removes the mapping from the router.
+// unmap removes a mapping from the router, when there is one.
+func unmap(m Mapping) {
+	if m.Method == "" {
+		return
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	_ = m.Unmap(ctx)
+}
+
+// Stop stops renewing and removes the mapping from the router: the run
+// loop removes what it holds as it ends, even one a request in flight
+// made.
 func (k *Keeper) Stop() {
 	k.mu.Lock()
-	cancel, done, m := k.cancel, k.done, k.current
+	cancel, done := k.cancel, k.done
 	k.cancel, k.done, k.current, k.err = nil, nil, Mapping{}, nil
 	k.mu.Unlock()
 	if cancel == nil {
@@ -285,11 +305,6 @@ func (k *Keeper) Stop() {
 	}
 	cancel()
 	<-done
-	if m.Method != "" {
-		ctx, cancelUnmap := context.WithTimeout(context.Background(), 5*time.Second)
-		_ = m.Unmap(ctx)
-		cancelUnmap()
-	}
 }
 
 // Status is the mapping kept, or why there's none.

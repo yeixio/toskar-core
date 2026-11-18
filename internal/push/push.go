@@ -229,7 +229,10 @@ func (c *Client) Send(ctx context.Context, m Message) error {
 		} `json:"error"`
 	}
 	_ = json.Unmarshal(raw, &e)
-	if resp.StatusCode == http.StatusGone || e.Error.Code == "HANDLE_GONE" {
+	// A handle the relay can no longer open (its sealing key changed), or
+	// one sealed for another computer's key, won't work again either: the
+	// registration goes, so the app registers again (#1267).
+	if resp.StatusCode == http.StatusGone || e.Error.Code == "HANDLE_GONE" || e.Error.Code == "BAD_HANDLE" || e.Error.Code == "NOT_YOUR_DEVICE" {
 		return ErrGone
 	}
 	return &RelayError{Status: resp.StatusCode, Code: e.Error.Code, Text: e.Error.Message}

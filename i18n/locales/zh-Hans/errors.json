@@ -287,5 +287,7 @@
   "SWARM_RUNNING": "此智能体群仍在运行。请先停止它。",
   "RELAY_TOKEN_SHORTER": "这台电脑已有一个有效期更长的中继令牌，会继续使用它。",
   "RELAY_UNREACHABLE": "无法连接 Toskar 的中继。请过一分钟再试。",
-  "COMPANION_LIMIT": "通过其他设备连接的设备不能再连接更多设备。请从手机连接。"
+  "COMPANION_LIMIT": "通过其他设备连接的设备不能再连接更多设备。请从手机连接。",
+  "SUBSCRIPTION_COVERED": "另一台设备的订阅已经涵盖这台电脑，这里无需购买。",
+  "CHECKOUT_NONE": "没有可取消的结账。"
 }

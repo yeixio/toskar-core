@@ -5,8 +5,6 @@ import (
 	"os"
 	"strings"
 	"testing"
-
-	"github.com/yeixio/toskar-core/internal/qa"
 )
 
 // The certificate the remote listener shows anyone on the internet, before
@@ -26,9 +24,7 @@ func TestQACertificateHidesTheComputersName(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	qa.KnownBug(t, "toskar-core#1263", func(t testing.TB) {
-		if strings.Contains(strings.ToLower(leaf.Subject.String()), strings.ToLower(host)) {
-			t.Errorf("the certificate's subject names the computer: %s", leaf.Subject)
-		}
-	})
+	if strings.Contains(strings.ToLower(leaf.Subject.String()), strings.ToLower(host)) {
+		t.Errorf("the certificate's subject names the computer: %s", leaf.Subject)
+	}
 }

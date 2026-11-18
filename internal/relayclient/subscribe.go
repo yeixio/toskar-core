@@ -52,6 +52,23 @@ func (c *Client) Availability(ctx context.Context) (bool, error) {
 	return out.Open, nil
 }
 
+// Covered asks the relay whether a subscription already covers route,
+// bought from any device.
+func (c *Client) Covered(ctx context.Context, route string) (bool, error) {
+	resp, err := c.do(ctx, http.MethodGet, "/v1/routes/"+route+"/coverage", "", nil)
+	if err != nil {
+		return false, err
+	}
+	defer resp.Body.Close()
+	var out struct {
+		Covered bool `json:"covered"`
+	}
+	if err := json.NewDecoder(io.LimitReader(resp.Body, 4<<10)).Decode(&out); err != nil {
+		return false, err
+	}
+	return out.Covered, nil
+}
+
 // CheckToken asks the relay whether it takes tok for route, by reading the
 // route's usage with it, which any current token for the route may.
 func (c *Client) CheckToken(ctx context.Context, route, tok string) error {

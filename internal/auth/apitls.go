@@ -46,13 +46,16 @@ func APICertificate(secrets *SecretStore) (tls.Certificate, error) {
 	now := time.Now()
 	tmpl := &x509.Certificate{
 		SerialNumber: serial,
-		Subject:      pkix.Name{CommonName: "Toskar on " + firstNonEmptyString(host, "this computer"), Organization: []string{"Toskar"}},
-		NotBefore:    now.Add(-time.Hour),
-		NotAfter:     now.AddDate(10, 0, 0),
-		KeyUsage:     x509.KeyUsageDigitalSignature,
-		ExtKeyUsage:  []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},
-		DNSNames:     []string{"localhost"},
-		IPAddresses:  []net.IP{net.IPv4(127, 0, 0, 1), net.IPv6loopback},
+		// No computer name in the subject: the remote listener shows this
+		// certificate to anyone before a key is checked (#1263). Phones pin
+		// its fingerprint, so nothing reads the name.
+		Subject:     pkix.Name{CommonName: "Toskar", Organization: []string{"Toskar"}},
+		NotBefore:   now.Add(-time.Hour),
+		NotAfter:    now.AddDate(10, 0, 0),
+		KeyUsage:    x509.KeyUsageDigitalSignature,
+		ExtKeyUsage: []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},
+		DNSNames:    []string{"localhost"},
+		IPAddresses: []net.IP{net.IPv4(127, 0, 0, 1), net.IPv6loopback},
 	}
 	if host != "" {
 		tmpl.DNSNames = append(tmpl.DNSNames, host, host+".local")
@@ -134,11 +137,4 @@ func localAddresses() []net.IP {
 		}
 	}
 	return out
-}
-
-func firstNonEmptyString(a, b string) string {
-	if a != "" {
-		return a
-	}
-	return b
 }

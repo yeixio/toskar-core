@@ -7,6 +7,8 @@ import (
 	"slices"
 	"strings"
 	"time"
+	"unicode"
+	"unicode/utf8"
 
 	"github.com/yeixio/toskar-core/internal/contextusage"
 	"github.com/yeixio/toskar-core/internal/events"
@@ -158,6 +160,13 @@ func (o *Orchestrator) Run(
 		// look-up when the answer turns out to send the person off to search.
 		webProfile := profile
 		profile = offerOnly(profile, offered)
+		// A question the person's own files or knowledge answer stays on
+		// this computer: no web search first, no search tool, and no
+		// look-up after (#1268). People connect private notes expecting
+		// that, and a search would send names from them out.
+		if answeredLocally(task.Prompt, reference) {
+			profile, webProfile = withoutWeb(profile), withoutWeb(webProfile)
+		}
 		// A request with several parts is worked through part by part;
 		// otherwise a current question is looked up first.
 		planned := false
@@ -1026,4 +1035,35 @@ func invalidCallNote(offered []string) string {
 		note += ", one of: " + strings.Join(offered, ", ")
 	}
 	return note + "; and args is an object with that tool's arguments. Or answer in plain text."
+}
+
+// answeredLocally reports whether reference material, from the person's
+// files or connected knowledge, covers the question: most of its
+// distinctive words are in it (#1268).
+func answeredLocally(prompt, reference string) bool {
+	if reference == "" {
+		return false
+	}
+	have := strings.ToLower(reference)
+	words, found := 0, 0
+	seen := map[string]bool{}
+	for _, w := range strings.FieldsFunc(strings.ToLower(prompt), func(r rune) bool { return !unicode.IsLetter(r) && !unicode.IsNumber(r) }) {
+		if utf8.RuneCountInString(w) < 4 || localStopWords[w] || seen[w] {
+			continue
+		}
+		seen[w] = true
+		words++
+		if strings.Contains(have, w) {
+			found++
+		}
+	}
+	return words >= 2 && found*5 >= words*3
+}
+
+// localStopWords are question words too common to tell what it's about.
+var localStopWords = map[string]bool{
+	"what": true, "which": true, "when": true, "where": true, "much": true, "many": true, "does": true, "have": true,
+	"there": true, "their": true, "about": true, "with": true, "from": true, "that": true, "this": true, "your": true,
+	"tell": true, "know": true, "please": true, "could": true, "would": true, "should": true, "them": true, "they": true,
+	"into": true, "than": true, "then": true, "also": true, "some": true, "like": true, "just": true,
 }

@@ -1,16 +1,13 @@
 package simple
 
 // Regression tests for chat bugs the Nov 2026 QA pass filed (layer 6 of
-// the test plan: privacy scenarios with a stub model and spy tools). While
-// an issue is open, its test is wrapped in qa.KnownBug, which skips while
-// the bug is there and fails once it's fixed.
+// the test plan: privacy scenarios with a stub model and spy tools).
 
 import (
 	"context"
 	"strings"
 	"testing"
 
-	"github.com/yeixio/toskar-core/internal/qa"
 	"github.com/yeixio/toskar-core/pkg/contracts"
 )
 
@@ -55,9 +52,21 @@ func TestQAKnowledgeAnswerStaysLocal(t *testing.T) {
 			web = append(web, id)
 		}
 	}
-	qa.KnownBug(t, "toskar-core#1268", func(t testing.TB) {
-		if len(web) > 0 {
-			t.Errorf("a question Knowledge answers went to the web too: %v", web)
+	if len(web) > 0 {
+		t.Errorf("a question Knowledge answers went to the web too: %v", web)
+	}
+}
+
+// A question about something the notes don't cover still goes to the web.
+func TestQAKnowledgeElsewhereStillSearches(t *testing.T) {
+	// Regression: toskar-core#1268
+	for prompt, want := range map[string]bool{
+		"How much is a sourdough loaf at the QA Bakery, and which day is it closed?": true,
+		"What's the weather in Juneau today?":                                        false,
+		"What's the latest news about the QA Bakery?":                                false,
+	} {
+		if got := answeredLocally(prompt, "[1] notes/bakery.md\nQA Bakery: sourdough $7.25, closed Tuesdays."); got != want {
+			t.Errorf("%q answered locally: %v, want %v", prompt, got, want)
 		}
-	})
+	}
 }

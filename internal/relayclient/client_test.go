@@ -138,6 +138,16 @@ func newFakeRelay(t *testing.T) *fakeRelay {
 		f.mu.Unlock()
 		_ = json.NewEncoder(w).Encode(map[string]string{"token": tok, "role": "device"})
 	})
+	mux.HandleFunc("DELETE /v1/routes/{route}/record", func(w http.ResponseWriter, r *http.Request) {
+		if !f.authorized(r) {
+			http.Error(w, `{"error":{"code":"TOKEN_EXPIRED"}}`, http.StatusUnauthorized)
+			return
+		}
+		f.mu.Lock()
+		f.record = nil
+		f.mu.Unlock()
+		w.WriteHeader(http.StatusNoContent)
+	})
 	mux.HandleFunc("GET /v1/tunnel", func(w http.ResponseWriter, r *http.Request) {
 		if !f.authorized(r) {
 			http.Error(w, `{"error":{"code":"TOKEN_EXPIRED"}}`, http.StatusUnauthorized)
