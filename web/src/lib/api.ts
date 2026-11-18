@@ -827,7 +827,7 @@ export const api = {
   /** A new one-time link for a person: an invite, or a reset once they have a sign-in. */
   personLink: (id: string) => request<PersonLink>(`/api/v1/people/${encodeURIComponent(id)}/link`, { method: 'POST' }),
 
-  getHealth: () => request<HealthResponse>('/api/v1/health'),
+  getHealth: (init?: RequestInit) => request<HealthResponse>('/api/v1/health', init),
 
   getVersion: () => request<VersionResponse>('/api/v1/version'),
   getUpdates: () => request<UpdatesStatus>('/api/v1/updates'),
