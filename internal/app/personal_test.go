@@ -127,3 +127,31 @@ func TestPersonalLocation(t *testing.T) {
 		t.Errorf("places start from %q", got)
 	}
 }
+
+// What changes from turn to turn, the time and a location for a nearby
+// question, comes last, so the model server reuses the rest (#795).
+func TestTurnInstructionsEndWithWhatChanges(t *testing.T) {
+	a, _ := memoryApp(t)
+	ctx := context.Background()
+	if _, err := a.SetPersonalStyle(ctx, personal.Style{Length: "brief", Location: "Juneau, AK"}); err != nil {
+		t.Fatal(err)
+	}
+	env := &chatExecEnv{app: a, capabilities: "What Toskar can do: chat.", guide: "How to use Toskar: ask."}
+	instr := env.TurnInstructions(ctx, "Any coffee near me?")
+	parts := strings.Split(instr, "\n\n")
+	last, before := parts[len(parts)-1], parts[len(parts)-2]
+	if !strings.Contains(before, "Juneau, AK") || strings.Contains(last, "Juneau") {
+		t.Fatalf("the location isn't next to last:\n%s", instr)
+	}
+	if strings.Index(instr, "How to use Toskar") > strings.Index(instr, "Juneau, AK") {
+		t.Fatalf("the guide comes after the location:\n%s", instr)
+	}
+	// Two turns a minute apart share everything up to the time.
+	later := &chatExecEnv{app: a, capabilities: env.capabilities, guide: env.guide}
+	a2 := later.TurnInstructions(ctx, "Write a haiku.")
+	b2 := env.TurnInstructions(ctx, "Write a haiku.")
+	cut := func(s string) string { return s[:strings.LastIndex(s, "\n\n")] }
+	if cut(a2) != cut(b2) {
+		t.Fatalf("turns differ before the time:\n%s\n---\n%s", a2, b2)
+	}
+}
