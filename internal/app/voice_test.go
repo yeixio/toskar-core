@@ -47,20 +47,20 @@ func TestVoiceChatSavesAnswers(t *testing.T) {
 	var heard atomic.Int32
 	a.StubReply = func(_ string, msgs []pluginapi.ChatMessage) string {
 		for _, m := range msgs {
-			if m.Role == "assistant" && strings.Contains(m.Content, "Heritage Coffee") {
+			if m.Role == "assistant" && strings.Contains(m.Content, "Otters hold hands") {
 				heard.Add(1)
 			}
 		}
-		return "Heritage Coffee, on Front Street."
+		return "Otters hold hands while they sleep."
 	}
 	ctx := context.Background()
 	chat := &voiceChat{app: a, ctx: ctx}
 	for range 2 {
 		var said strings.Builder
-		if err := chat.Respond(ctx, "Where's a good cafe?", func(s string) { said.WriteString(s) }); err != nil {
+		if err := chat.Respond(ctx, "Say that again, please.", func(s string) { said.WriteString(s) }); err != nil {
 			t.Fatal(err)
 		}
-		if !strings.Contains(said.String(), "Heritage Coffee") {
+		if !strings.Contains(said.String(), "Otters hold hands") {
 			t.Fatalf("said %q", said.String())
 		}
 	}
