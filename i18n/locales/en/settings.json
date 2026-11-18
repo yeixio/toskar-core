@@ -268,7 +268,12 @@
     "delete": "Delete run records now",
     "confirmDelete": "Delete run records now? This removes stored prompts and tool results from past runs, and this list. Chats are not deleted.",
     "deleted": "Deleted {{tasks}} run records, {{automations}} automation results, and {{entries}} entries below.",
-    "footnote": "Run records hold prompts and tool results from past runs. Chats are kept or not by History below. Each automation keeps its latest result, which “notify when the result changes” compares against."
+    "footnote": "Run records hold prompts and tool results from past runs. Chats are kept or not by History below. Each automation keeps its latest result, which “notify when the result changes” compares against.",
+    "details": {
+      "news": "the AI news",
+      "latestVersion": "the latest version number",
+      "training": "training examples and instructions for {{repo}}"
+    }
   },
   "storage": {
     "folders": "Data directories",

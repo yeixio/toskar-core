@@ -25,6 +25,7 @@ import {
 } from './parseRequest'
 import { IDEAS, buildIdea, ideaDefaults, ideaReady, type IdeaField, type IdeaId, type IdeaValues } from './ideas'
 import { ShownError, shownOr, type Shown } from '@/components/ui/ShownError'
+import { profileName } from '@/features/profiles/profilePresentation'
 
 // The notify choices, in order; each is automations:form.notifyChoices.<mode> in the catalog.
 const NOTIFY_CHOICES: AutomationInput['notification']['mode'][] = ['condition', 'change', 'always', 'failure', 'none']
@@ -629,7 +630,7 @@ export function AutomationForm({ profiles, models, tools, others = [], initial, 
             {profiles.length === 0 && <option value="">{t('form.noProfiles')}</option>}
             {profiles.map((profile) => (
               <option key={profile.id} value={profile.id}>
-                {profile.name}
+                {profileName(profile)}
               </option>
             ))}
           </select>

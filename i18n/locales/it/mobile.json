@@ -476,7 +476,13 @@
         "notNow": "Non ora"
       }
     },
-    "phoneAutoHint": "Sceglie il modello migliore di questo dispositivo per ogni messaggio"
+    "phoneAutoHint": "Sceglie il modello migliore di questo dispositivo per ogni messaggio",
+    "builtInProfiles": {
+      "general-assistant": "Assistente generale",
+      "programming": "Programmazione",
+      "research": "Ricerca",
+      "custom": "Personalizzato"
+    }
   },
   "effort": {
     "title": "Impegno",

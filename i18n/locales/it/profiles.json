@@ -523,5 +523,11 @@
   "audience": {
     "label": "Parla con i visitatori",
     "hint": "Per una porta d'ingresso, un bancone o un chiosco. Il tuo stile, la tua posizione, i tuoi ricordi e i tuoi computer restano fuori dalle sue chat. Dice di essere un assistente automatico, non dice mai se c'è qualcuno in casa e non può usare strumenti che modificano qualcosa."
+  },
+  "builtInNames": {
+    "general-assistant": "Assistente generale",
+    "programming": "Programmazione",
+    "research": "Ricerca",
+    "custom": "Personalizzato"
   }
 }

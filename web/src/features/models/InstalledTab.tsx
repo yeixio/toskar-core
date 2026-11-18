@@ -20,6 +20,7 @@ import { rovingKeyDown, useMenu } from '@/lib/roving'
 import { searchItems } from '@/lib/search'
 import { ShownError, type Shown } from '@/components/ui/ShownError'
 import { useUIStore } from '@/stores/uiStore'
+import { profileName } from '@/features/profiles/profilePresentation'
 
 export function InstalledTab({
   models,
@@ -123,7 +124,7 @@ export function InstalledTab({
         const live = runningByModel.get(model.id)
         const usedBy = profiles
           .filter((p) => p.roles?.some((r) => r.model_id === model.id))
-          .map((p) => p.name)
+          .map((p) => profileName(p))
         const dl = progress[model.id]
         const onNodes = model.installed_on ?? []
         const missing =

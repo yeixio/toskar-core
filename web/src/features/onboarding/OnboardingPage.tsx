@@ -19,6 +19,7 @@ import { useUIStore } from '@/stores/uiStore'
 import type { ModelDownloadProgressPayload, Purpose, Recommendation } from '@/types/api'
 import { ShownError, shownError } from '@/components/ui/ShownError'
 import { formatPercent } from '@/i18n/format'
+import { profileName } from '@/features/profiles/profilePresentation'
 
 type OnboardingStep = 'setup' | 'recommend' | 'installing' | 'ready'
 
@@ -134,7 +135,7 @@ export function OnboardingPage() {
       setPhase('conversation')
       setPhaseDetail(t('install.conversation'))
       const conversation = await api.createConversation({
-        title: t('install.chatTitle', { profile: profile.name }),
+        title: t('install.chatTitle', { profile: profileName(profile) }),
         profile_id: profile.id,
       })
 

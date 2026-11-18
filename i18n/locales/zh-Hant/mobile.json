@@ -466,7 +466,13 @@
         "notNow": "暫不"
       }
     },
-    "phoneAutoHint": "為每則訊息選擇這台裝置上最合適的模型"
+    "phoneAutoHint": "為每則訊息選擇這台裝置上最合適的模型",
+    "builtInProfiles": {
+      "general-assistant": "通用助理",
+      "programming": "程式設計",
+      "research": "研究",
+      "custom": "自訂"
+    }
   },
   "effort": {
     "title": "投入程度",

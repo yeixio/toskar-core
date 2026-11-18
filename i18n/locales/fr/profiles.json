@@ -523,5 +523,11 @@
   "audience": {
     "label": "Parle avec des visiteurs",
     "hint": "Pour une porte d'entrée, un comptoir ou une borne. Votre style, votre position, vos souvenirs et vos ordinateurs restent hors de ses discussions. Il dit qu'il est un assistant automatique, ne dit jamais si quelqu'un est à la maison et ne peut pas utiliser d'outils qui modifient quoi que ce soit."
+  },
+  "builtInNames": {
+    "general-assistant": "Assistant général",
+    "programming": "Programmation",
+    "research": "Recherche",
+    "custom": "Personnalisé"
   }
 }

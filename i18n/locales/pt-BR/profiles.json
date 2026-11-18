@@ -523,5 +523,11 @@
   "audience": {
     "label": "Fala com visitantes",
     "hint": "Para uma porta da frente, um balcão ou um totem. Seu estilo, sua localização, suas memórias e seus computadores ficam fora das conversas. Ele diz que é um assistente automático, nunca diz se há alguém em casa e não pode usar ferramentas que mudam coisas."
+  },
+  "builtInNames": {
+    "general-assistant": "Assistente geral",
+    "programming": "Programação",
+    "research": "Pesquisa",
+    "custom": "Personalizado"
   }
 }

@@ -276,7 +276,12 @@
     "delete": "Elimina ora i registri delle esecuzioni",
     "confirmDelete": "Eliminare ora i registri delle esecuzioni? Verranno rimossi i prompt e i risultati degli strumenti salvati dalle esecuzioni passate, oltre a questo elenco. Le chat non vengono eliminate.",
     "deleted": "Eliminati {{tasks}} registri di esecuzione, {{automations}} risultati di automazioni e {{entries}} voci qui sotto.",
-    "footnote": "I registri delle esecuzioni contengono i prompt e i risultati degli strumenti delle esecuzioni passate. Le chat vengono conservate o meno in base a Cronologia qui sotto. Ogni automazione conserva il suo ultimo risultato, con cui “avvisa quando il risultato cambia” effettua il confronto."
+    "footnote": "I registri delle esecuzioni contengono i prompt e i risultati degli strumenti delle esecuzioni passate. Le chat vengono conservate o meno in base a Cronologia qui sotto. Ogni automazione conserva il suo ultimo risultato, con cui “avvisa quando il risultato cambia” effettua il confronto.",
+    "details": {
+      "news": "le notizie sull'IA",
+      "latestVersion": "il numero dell'ultima versione",
+      "training": "esempi di addestramento e istruzioni per {{repo}}"
+    }
   },
   "storage": {
     "folders": "Cartelle dei dati",

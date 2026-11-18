@@ -29,7 +29,7 @@ import type {
 } from '@/types/api'
 import { capabilityGap, type CapabilityGap } from '@/features/models/capabilityGap'
 import { activeCapabilities, capabilityLabel, setCapability } from '@/features/profiles/capabilities'
-import { isTeamProfile } from '@/features/profiles/profilePresentation'
+import { isTeamProfile, profileName } from '@/features/profiles/profilePresentation'
 import { canChat, modelToolAssessment } from '@/features/models/modelPresentation'
 import { CapabilityNotice } from './CapabilityNotice'
 import { ChatActivity } from './ChatActivity'
@@ -2097,7 +2097,7 @@ export function ChatPage() {
                     ) : null}
                     {sortedProfiles.map((profile: AIProfile) => (
                       <option key={profile.id} value={profile.id}>
-                        {profile.name}
+                        {profileName(profile)}
                       </option>
                     ))}
                   </select>
@@ -2326,7 +2326,7 @@ export function ChatPage() {
                     {selectedConversation?.title || t('header.untitledChat')}
                   </h1>
                   <p className="hidden truncate text-[11px] leading-tight text-ink-faint sm:block" title={runOnTitle}>
-                    {activeProfile?.name ?? t('header.assistant')}
+                    {activeProfile ? profileName(activeProfile) : t('header.assistant')}
                     <span className="mx-1.5" aria-hidden>·</span>
                     {effectiveRunMode === 'automatic' ? t('composer.automatic') : t('composer.thisComputer')}
                   </p>

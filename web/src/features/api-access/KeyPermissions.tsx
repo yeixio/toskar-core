@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { api } from '@/lib/api'
 import type { APIKeyPermissions, APIKeyRecord } from '@/types/api'
 import { ShownError, shownOr, type Shown } from '@/components/ui/ShownError'
+import { profileName } from '@/features/profiles/profilePresentation'
 
 const DEFAULTS: APIKeyPermissions = { memory: 'on_request', knowledge: 'always', tools: 'profile', placement: true }
 
@@ -51,7 +52,7 @@ export function KeyPermissions({ apiKey }: { apiKey: APIKeyRecord }) {
             ) : null}
             {(profiles.data ?? []).map((p) => (
               <option key={p.id} value={p.id}>
-                {p.name}
+                {profileName(p)}
               </option>
             ))}
           </select>

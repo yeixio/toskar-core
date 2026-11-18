@@ -276,7 +276,12 @@
     "delete": "Apagar registros de execução agora",
     "confirmDelete": "Apagar os registros de execução agora? Isso remove os prompts e resultados de ferramentas armazenados de execuções anteriores, além desta lista. Os chats não são apagados.",
     "deleted": "Foram apagados {{tasks}} registros de execução, {{automations}} resultados de automações e {{entries}} entradas abaixo.",
-    "footnote": "Os registros de execução guardam prompts e resultados de ferramentas de execuções anteriores. Os chats são mantidos ou não conforme o Histórico abaixo. Cada automação guarda seu resultado mais recente, que é usado como comparação em “notificar quando o resultado mudar”."
+    "footnote": "Os registros de execução guardam prompts e resultados de ferramentas de execuções anteriores. Os chats são mantidos ou não conforme o Histórico abaixo. Cada automação guarda seu resultado mais recente, que é usado como comparação em “notificar quando o resultado mudar”.",
+    "details": {
+      "news": "as notícias de IA",
+      "latestVersion": "o número da versão mais recente",
+      "training": "exemplos de treinamento e instruções para {{repo}}"
+    }
   },
   "storage": {
     "folders": "Pastas de dados",
