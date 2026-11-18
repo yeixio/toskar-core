@@ -238,11 +238,13 @@ func upnpMap(ctx context.Context, g *igd, internal, external uint16, lifetime ti
 		return err
 	}
 	err := add(lifetime)
+	permanent := false
 	if errors.Is(err, errOnlyPermanent) {
 		// An older router takes only a mapping with no lease. It's still
 		// renewed on the same schedule, which checks it's there, and
 		// removed when access is turned off or Toskar stops (#1262).
 		err = add(0)
+		permanent = err == nil
 	}
 	if err != nil {
 		// A refusal from a router with no public address: it says so by
@@ -267,7 +269,26 @@ func upnpMap(ctx context.Context, g *igd, internal, external uint16, lifetime ti
 		InternalPort: internal,
 		Lifetime:     lifetime,
 		upnp:         g,
+		permanent:    permanent,
 	}, nil
+}
+
+// upnpOwnEntry reports whether the router forwards external to this
+// computer under Toskar's name, so a sweep never removes another device's
+// forward.
+func upnpOwnEntry(ctx context.Context, g *igd, external uint16) bool {
+	out, err := g.soap(ctx, "GetSpecificPortMappingEntry", [][2]string{
+		{"NewRemoteHost", ""},
+		{"NewExternalPort", strconv.Itoa(int(external))},
+		{"NewProtocol", "TCP"},
+	})
+	if err != nil {
+		return false
+	}
+	client := between(string(out), "<NewInternalClient>", "</NewInternalClient>")
+	desc := between(string(out), "<NewPortMappingDescription>", "</NewPortMappingDescription>")
+	ip, err := netip.ParseAddr(strings.TrimSpace(client))
+	return err == nil && ip.Unmap() == g.local && desc == "Toskar"
 }
 
 // upnpExternal is the router's outside address, as it says it; ok is false
