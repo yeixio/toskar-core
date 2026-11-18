@@ -80,7 +80,12 @@ type anywhere struct {
 	open      *bool
 	openAt    time.Time
 	asking    bool
-	wake      chan struct{}
+	// prices are the plans' prices from billing, asked at most hourly
+	// while Settings offers them (#1257).
+	prices       map[string]api.PlanPrice
+	pricesAt     time.Time
+	askingPrices bool
+	wake         chan struct{}
 	// For tests: whether this is the App Store's copy, yeix.io, its client,
 	// the relay, and the clock.
 	inAppOnly    *bool
@@ -464,6 +469,7 @@ func (a *App) subscription() *api.Subscription {
 		}
 	}
 	out.Open, out.Error = a.anywhere.open, a.anywhere.lastError
+	out.Prices = a.anywhere.prices
 	// Whether the relay takes new subscriptions is asked only when Settings
 	// offers one (none yet, or one ended), never on its own, and answered
 	// on the next look; never by the App Store's copy, which doesn't offer
@@ -476,6 +482,61 @@ func (a *App) subscription() *api.Subscription {
 			a.anywhere.asking = false
 			a.anywhere.mu.Unlock()
 		}()
+	}
+	// And what the plans cost, from billing, as the checkout charges.
+	if (out.State == "none" || out.State == "ended") && !out.InAppOnly && !a.anywhere.askingPrices && (a.anywhere.prices == nil || a.anywhere.now().Sub(a.anywhere.pricesAt) >= pricesFor) {
+		a.anywhere.askingPrices = true
+		go func() {
+			prices := a.billingPrices(context.Background())
+			a.anywhere.mu.Lock()
+			if prices != nil {
+				a.anywhere.prices, a.anywhere.pricesAt = prices, a.anywhere.now()
+			}
+			a.anywhere.askingPrices = false
+			a.anywhere.mu.Unlock()
+		}()
+	}
+	return out
+}
+
+// pricesFor is how long billing's prices are kept before asking again.
+const pricesFor = time.Hour
+
+// billingPrices asks billing what the plans cost; nil when it can't say,
+// as before billing has the endpoint, and the page then shows its own.
+func (a *App) billingPrices(ctx context.Context) map[string]api.PlanPrice {
+	ctx, cancel := context.WithTimeout(ctx, 15*time.Second)
+	defer cancel()
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, a.billingURL()+"/api/toskar/anywhere/prices", nil)
+	if err != nil {
+		return nil
+	}
+	client := a.anywhere.httpClient
+	if client == nil {
+		client = &http.Client{Timeout: 15 * time.Second}
+	}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return nil
+	}
+	var body struct {
+		Prices map[string]api.PlanPrice `json:"prices"`
+	}
+	if json.NewDecoder(io.LimitReader(resp.Body, 16<<10)).Decode(&body) != nil {
+		return nil
+	}
+	out := map[string]api.PlanPrice{}
+	for _, plan := range []string{"monthly", "yearly"} {
+		if p, ok := body.Prices[plan]; ok && p.Amount > 0 && len(p.Currency) == 3 {
+			out[plan] = api.PlanPrice{Amount: p.Amount, Currency: strings.ToUpper(p.Currency)}
+		}
+	}
+	if len(out) == 0 {
+		return nil
 	}
 	return out
 }

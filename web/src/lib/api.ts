@@ -673,6 +673,8 @@ export type AnywhereSubscription = {
   in_app_only?: boolean
   /** The relay it's for when that isn't Toskar's own, such as a developer's (#1266). */
   relay?: string
+  /** What the checkout charges for each plan, from billing; missing until billing answers (#1257). */
+  prices?: Partial<Record<'monthly' | 'yearly', { amount: number; currency: string }>>
 }
 
 export const api = {

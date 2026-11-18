@@ -338,6 +338,13 @@ describe('RemoteAccessCard (#456)', () => {
       expect(screen.queryByRole('button', { name: /Subscribe for/ })).not.toBeInTheDocument()
     })
 
+    // Regression: toskar-core#1257
+    it('shows the prices billing charges once it has said', async () => {
+      renderCard({ state: 'none', open: true, prices: { monthly: { amount: 5.49, currency: 'EUR' }, yearly: { amount: 44.99, currency: 'EUR' } } })
+      expect(await screen.findByRole('button', { name: 'Subscribe for €5.49 a month' })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'Subscribe for €44.99 a year' })).toBeInTheDocument()
+    })
+
     // Regression: toskar-core#1266
     it("names a developer's relay instead of calling it Toskar's", async () => {
       renderCard({ state: 'none', open: true, relay: 'relay.dev.example:4443' })
