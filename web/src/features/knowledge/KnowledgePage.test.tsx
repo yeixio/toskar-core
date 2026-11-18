@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { MemoryRouter } from 'react-router-dom'
 import { api } from '@/lib/api'
 import type { AIProfile, KnowledgeSource } from '@/types/api'
+import { knownBug } from '@/test/knownBug'
 import { KnowledgePage } from './KnowledgePage'
 
 vi.mock('@/lib/api', async () => {
@@ -86,5 +87,29 @@ describe('KnowledgePage', () => {
     expect(screen.getByText(/such as General/)).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: /A database/ }))
     expect(screen.getByRole('button', { name: 'Database' })).toHaveAttribute('aria-pressed', 'true')
+  })
+})
+
+// QA regressions: knownBug passes while the bug is there and fails once
+// it's fixed (src/test/knownBug.ts).
+describe('KnowledgePage QA regressions', () => {
+  beforeEach(() => {
+    vi.mocked(api.listKnowledge).mockResolvedValue([])
+    vi.mocked(api.getProfiles).mockResolvedValue([general])
+    vi.mocked(api.getSettings).mockResolvedValue({} as never)
+    vi.mocked(api.getModels).mockResolvedValue([])
+    vi.mocked(api.createKnowledge).mockClear().mockResolvedValue(source('ks-made', 'Notes'))
+  })
+
+  // Regression: toskar-core#1270
+  knownBug('toskar-core#1270', 'Enter in the path field connects the folder', async () => {
+    renderPage()
+    const path = await screen.findByPlaceholderText('~/Documents/inventory.csv')
+    fireEvent.change(path, { target: { value: '~/Notes' } })
+    // As a browser does: Enter submits the field's form.
+    fireEvent.keyDown(path, { key: 'Enter', code: 'Enter' })
+    const form = (path as HTMLInputElement).form
+    if (form) fireEvent.submit(form)
+    await waitFor(() => expect(api.createKnowledge).toHaveBeenCalled())
   })
 })
