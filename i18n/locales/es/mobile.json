@@ -656,6 +656,14 @@
       "try": "Pruébalo sin computadora",
       "tryMeta": "Una demo con respuestas de ejemplo",
       "other": "Esta demo responde las preguntas sugeridas de la izquierda. Para preguntar cualquier cosa, configura Toskar en una computadora en casa (Toskar Core es gratuito) y luego conecta este televisor en Computadoras → Conectar un dispositivo."
+    },
+    "people": {
+      "title": "¿Quién está viendo?",
+      "add": "Añadir a alguien",
+      "hint": "Cada persona se conecta con un código de su propia cuenta en el ordenador, para que sus chats y su memoria sigan siendo suyos.",
+      "switch": "¿No eres {{name}}?",
+      "unnamed": "Persona {{n}}",
+      "back": "Atrás"
     }
   },
   "setup": {

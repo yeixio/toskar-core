@@ -647,6 +647,14 @@
       "try": "Ohne Computer ausprobieren",
       "tryMeta": "Eine Demo mit Beispielantworten",
       "other": "Diese Demo beantwortet die vorgeschlagenen Fragen links. Um alles zu fragen, richte Toskar auf einem Computer zu Hause ein (Toskar Core ist kostenlos) und verbinde dann diesen Fernseher unter „Computer“ → „Gerät verbinden“."
+    },
+    "people": {
+      "title": "Wer schaut zu?",
+      "add": "Jemanden hinzufügen",
+      "hint": "Jede Person verbindet sich mit einem Code aus ihrem eigenen Konto auf dem Computer, damit ihre Chats und Erinnerungen ihre eigenen bleiben.",
+      "switch": "Nicht {{name}}?",
+      "unnamed": "Person {{n}}",
+      "back": "Zurück"
     }
   },
   "setup": {
