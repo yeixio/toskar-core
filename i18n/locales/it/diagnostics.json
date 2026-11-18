@@ -199,6 +199,7 @@
       "image.generate": "Crea immagini",
       "image.edit": "Modifica immagini",
       "video.generate": "Crea video",
+      "video.extend": "Continuare video",
       "speech.transcribe": "Trascrivi",
       "speech.synthesize": "Leggi ad alta voce"
     },

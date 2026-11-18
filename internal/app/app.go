@@ -1064,6 +1064,7 @@ func New(opts Options) (*App, error) {
 	a.Video = a.newVideoSetup(cfg)
 	videos := &imagegen.Engine{Setup: a.Video, WorkDir: filepath.Join(cfg.DataDir, "video-jobs"), What: "video generation", Room: a.mediaRoom, Logger: logger}
 	a.registerPortable(&imagegen.VideoTool{Engine: videos, Store: a.Artifacts})
+	a.registerPortable(&imagegen.ExtendTool{Engine: videos, Store: a.Artifacts})
 	a.API.BindVideo(a.Video)
 	a.API.BindRemoteMediaSetup(a.RemoteMediaSetup)
 	a.API.BindMediaElsewhere(a.mediaElsewhere)

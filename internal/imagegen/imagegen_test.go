@@ -24,7 +24,8 @@ import (
 )
 
 // fakeCLI stands in for sd-cli: it records its arguments and writes a small
-// PNG where -o says.
+// PNG where -o says, or a clip: sample.webm beside it when a test puts
+// one there.
 const fakeCLI = `#!/bin/sh
 printf '%s\n' "$@" > "$(dirname "$0")/args.txt"
 out=""
@@ -34,7 +35,7 @@ while [ $# -gt 0 ]; do
   shift
 done
 case "$out" in
-  *.webm) printf '\032\105\337\243webm' > "$out" ;;
+  *.webm) if [ -f "$(dirname "$0")/sample.webm" ]; then cp "$(dirname "$0")/sample.webm" "$out"; else printf '\032\105\337\243webm' > "$out"; fi ;;
   *) cp "$(dirname "$0")/sample.png" "$out" ;;
 esac
 `

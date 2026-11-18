@@ -173,6 +173,7 @@
       "image.generate": "画像を作成",
       "image.edit": "画像を編集",
       "video.generate": "動画を作成",
+      "video.extend": "動画の続きを作成",
       "speech.transcribe": "文字起こし",
       "speech.synthesize": "読み上げ"
     },

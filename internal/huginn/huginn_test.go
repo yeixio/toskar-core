@@ -481,3 +481,18 @@ func TestIsTaskAnywhereInTheMessage(t *testing.T) {
 		}
 	}
 }
+
+// Continuing a clip offers video.extend; longer text doesn't (#155).
+func TestExtendCue(t *testing.T) {
+	avail := []string{"video.generate", "video.extend"}
+	for _, msg := range []string{"Make the clip longer", "Extend this video by 3 seconds", "Continue the video: now a surfer paddles out", "What happens next in the clip?"} {
+		if got := ToolsFor(Chat, msg, avail); !slices.Contains(got, "video.extend") {
+			t.Errorf("%q: %v", msg, got)
+		}
+	}
+	for _, msg := range []string{"Make the essay longer", "Continue the story", "Make a video of rain"} {
+		if got := ToolsFor(Chat, msg, avail); slices.Contains(got, "video.extend") {
+			t.Errorf("%q offered video.extend: %v", msg, got)
+		}
+	}
+}

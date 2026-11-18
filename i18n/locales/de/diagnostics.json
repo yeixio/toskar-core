@@ -186,6 +186,7 @@
       "image.generate": "Bilder erstellen",
       "image.edit": "Bilder bearbeiten",
       "video.generate": "Videos erstellen",
+      "video.extend": "Videos fortsetzen",
       "speech.transcribe": "Transkribieren",
       "speech.synthesize": "Vorlesen"
     },

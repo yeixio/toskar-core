@@ -12,16 +12,18 @@ import (
 
 // Tool groups, by capability. A request is offered whole groups.
 var toolGroups = map[string][]string{
-	"web":     {"internet.search", "internet.open"},
-	"read":    {"filesystem.search", "filesystem.read"},
-	"write":   {"filesystem.write"},
-	"create":  {"files.create"},
-	"sheet":   {"spreadsheet.analyze"},
-	"code":    {"code.execute"},
-	"listen":  {"speech.transcribe"},
-	"speak":   {"speech.synthesize"},
-	"draw":    {"image.generate"},
-	"film":    {"video.generate"},
+	"web":    {"internet.search", "internet.open"},
+	"read":   {"filesystem.search", "filesystem.read"},
+	"write":  {"filesystem.write"},
+	"create": {"files.create"},
+	"sheet":  {"spreadsheet.analyze"},
+	"code":   {"code.execute"},
+	"listen": {"speech.transcribe"},
+	"speak":  {"speech.synthesize"},
+	"draw":   {"image.generate"},
+	"film":   {"video.generate"},
+	// extend continues a clip in the chat (#155).
+	"extend":  {"video.extend"},
 	"browse":  {"browser.open", "browser.click", "browser.type", "browser.extract", "browser.download", "browser.screenshot", "browser.close"},
 	"places":  {"places.search", "places.details", "maps.route", "maps.distance"},
 	"retouch": {"image.edit"},
@@ -65,6 +67,8 @@ var (
 	cueRetouch = regexp.MustCompile(`(?i)\b(edit|change|retouch|recolou?r|remove|replace|turn|make|add)\b.{0,40}\b(images?|pictures?|photos?|backgrounds?|\w+\.(png|jpe?g))\b`)
 	cuePlaces  = regexp.MustCompile(`(?i)(\b(near (me|here|by)|nearby|nearest|closest|directions?|route (from|between)|how (far|long does it take)|distance (from|to|between)|drive (from|to)|walk (from|to)|get (from|to)|address (of|for)|open now|opening hours|restaurants?|caf[eé]s?|pharmac(y|ies)|gas stations?)\b)`)
 	cueFilm    = regexp.MustCompile(`(?i)\b(videos?|clips?|animat\w*|movies?|footage|gifs?|bring (it|this|that|the|my)( \w+)? to life|make (it|this) move)\b`)
+	// Continuing a clip: "make the clip longer", "extend this video".
+	cueExtend = regexp.MustCompile(`(?i)\b(continue|extend|lengthen|longer|keep (it )?going|what happens next|next (part|scene|shot))\b`)
 	// A clip's frames are about a clip that exists, whatever else is said.
 	cueFrames = regexp.MustCompile(`(?i)\bframes? of\b`)
 	// A clip that's already there: this video, the attached clip.
@@ -147,6 +151,9 @@ func ToolsFor(k Kind, message string, available []string) []string {
 	}
 	if AsksForClip(message) {
 		want["film"] = true
+	}
+	if cueExtend.MatchString(message) && cueFilm.MatchString(message) {
+		want["extend"] = true
 	}
 	if cueDraw.MatchString(message) {
 		want["draw"] = true

@@ -173,6 +173,7 @@
       "image.generate": "이미지 만들기",
       "image.edit": "이미지 편집",
       "video.generate": "동영상 만들기",
+      "video.extend": "동영상 이어 만들기",
       "speech.transcribe": "받아쓰기",
       "speech.synthesize": "소리 내어 읽기"
     },
