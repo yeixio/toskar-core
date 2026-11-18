@@ -8,7 +8,7 @@ import { formatBytes } from '@/lib/format'
 import { searchItems } from '@/lib/search'
 import { useDialog } from '@/lib/useDialog'
 import type { Model, ModelDownloadProgressPayload, StoreModel } from '@/types/api'
-import { fitLabelText, fitTone } from './modelPresentation'
+import { allowsBusiness, fitLabelText, fitTone } from './modelPresentation'
 
 /** Shelves in the order they're shown; one this build doesn't know is left out. */
 const SHELF_ORDER = ['picks', 'popular', 'top_rated', 'new', 'everyday', 'code', 'sees', 'small', 'tested']
@@ -42,6 +42,8 @@ export function StoreShelves({
 }) {
   const { t } = useTranslation('models')
   const [open, setOpen] = useState<StoreModel | null>(null)
+  // Only models whose license allows business use (#593).
+  const [forBusiness, setForBusiness] = useState(false)
   // The model each row started, since the download goes on after the request.
   const [started, setStarted] = useState<Record<string, string>>({})
   const store = useQuery({
@@ -86,7 +88,8 @@ export function StoreShelves({
   const shelves = SHELF_ORDER.flatMap((id) => {
     const shelf = store.data?.shelves.find((s) => s.id === id)
     if (!shelf) return []
-    const list = search ? searchItems(shelf.models, search, (m) => [m.display_name, m.repo_id, ...(m.tags ?? [])]) : shelf.models
+    const searched = search ? searchItems(shelf.models, search, (m) => [m.display_name, m.repo_id, ...(m.tags ?? [])]) : shelf.models
+    const list = forBusiness ? searched.filter(allowsBusiness) : searched
     return list.length > 0 ? [{ id, models: list }] : []
   })
 
@@ -96,6 +99,19 @@ export function StoreShelves({
     <div className="space-y-8">
       {store.data && !store.data.live ? <p className="text-sm text-ink-muted">{t('store.offline')}</p> : null}
       {store.data?.live ? <p className="text-xs text-ink-faint">{t('store.source')}</p> : null}
+      <label className="flex items-start gap-2 text-sm text-ink">
+        <input
+          type="checkbox"
+          className="mt-0.5"
+          checked={forBusiness}
+          onChange={(event) => setForBusiness(event.target.checked)}
+        />
+        <span>
+          {t('store.business.label')}
+          <span className="block text-xs text-ink-muted">{t('store.business.hint')}</span>
+        </span>
+      </label>
+      {forBusiness && shelves.length === 0 ? <p className="text-sm text-ink-muted">{t('store.business.none')}</p> : null}
       {shelves.map((shelf) => (
         <section key={shelf.id} className="space-y-3" aria-labelledby={`shelf-${shelf.id}`}>
           <div className="flex flex-wrap items-end justify-between gap-3">
@@ -155,6 +171,27 @@ export function StoreShelves({
       ) : null}
     </div>
   )
+}
+
+/** What a license allows a business, in words (#593). */
+const BUSINESS_TEXT = {
+  yes: 'store.details.businessYes',
+  limited: 'store.details.businessLimited',
+  no: 'store.details.businessNo',
+  unknown: 'store.details.businessUnknown',
+} as const
+
+/** Free, free with conditions, or unknown, as a chip (#593). */
+function LicenseChip({ model }: { model: StoreModel }) {
+  const { t } = useTranslation('models')
+  const kind = model.license_kind ?? 'unknown'
+  const tone =
+    kind === 'free'
+      ? 'bg-success/10 text-success'
+      : kind === 'conditions'
+        ? 'bg-warning/15 text-warning'
+        : 'bg-raised/80 text-ink-muted'
+  return <span className={['status-chip', tone].join(' ')}>{t(`store.license.${kind}`)}</span>
 }
 
 function purposes(m: StoreModel): string[] {
@@ -234,6 +271,7 @@ function StoreCard({
           </span>
         ))}
         {model.catalog_id ? <span className="status-chip bg-success/10 text-success">{t('store.tested')}</span> : null}
+        <LicenseChip model={model} />
       </p>
       <Stats model={model} />
       <div className="mt-auto flex items-center justify-between gap-2 pt-1">
@@ -285,7 +323,12 @@ function StoreDetails({
             </>
           ) : null}
           <dt className="text-ink-muted">{t('store.details.license')}</dt>
-          <dd>{model.license || t('store.details.licenseUnknown')}</dd>
+          <dd className="flex flex-wrap items-center gap-2">
+            {model.license || t('store.details.licenseUnknown')}
+            <LicenseChip model={model} />
+          </dd>
+          <dt className="text-ink-muted">{t('store.details.business')}</dt>
+          <dd>{t(BUSINESS_TEXT[model.commercial ?? 'unknown'])}</dd>
           {model.created_at ? (
             <>
               <dt className="text-ink-muted">{t('store.details.added')}</dt>

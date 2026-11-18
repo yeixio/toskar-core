@@ -11,6 +11,14 @@ type StoreModel struct {
 	CreatedAt time.Time `json:"created_at,omitzero"`
 	// License is the license Hugging Face lists, such as apache-2.0, or empty.
 	License string `json:"license,omitempty"`
+	// Commercial is whether a business may use it: CommercialYes,
+	// CommercialLimited, or CommercialNo, from the catalog's checked license
+	// or from a license Hugging Face lists that says. Empty is unknown
+	// (#593, contract 1.102).
+	Commercial string `json:"commercial,omitempty"`
+	// LicenseKind is LicenseFree or LicenseConditions, or empty when the
+	// license is unknown.
+	LicenseKind string `json:"license_kind,omitempty"`
 	// DetailsURL is the model's page.
 	DetailsURL string    `json:"details_url,omitempty"`
 	Fit        *ModelFit `json:"fit,omitempty"`

@@ -118,4 +118,29 @@ describe('StoreShelves', () => {
     await screen.findByRole('heading', { name: 'Popular now' })
     expect(screen.queryByText('Good fit')).not.toBeInTheDocument()
   })
+
+  it('marks each model free, free with conditions, or unknown, and can show only models cleared for business use', async () => {
+    const free = { ...fromHF, commercial: 'yes', license_kind: 'free' }
+    const llama = { ...fromHF, id: 'llama', display_name: 'Llama 3.2 3B', license: 'llama3.2', commercial: 'limited', license_kind: 'conditions' }
+    const research = { ...fromHF, id: 'research', display_name: 'Research 3B', license: 'other' }
+    const nc = { ...fromHF, id: 'nc', display_name: 'NC 7B', license: 'cc-by-nc-4.0', commercial: 'no', license_kind: 'conditions' }
+    vi.mocked(api.getModelStore).mockResolvedValue({
+      live: true,
+      shelves: [{ id: 'popular', models: [free, llama, research, nc] }],
+    } as unknown as ModelStore)
+    show()
+    expect(await screen.findByText('Cool 7B')).toBeInTheDocument()
+    expect(screen.getAllByText('Free')).toHaveLength(1)
+    expect(screen.getAllByText('Free with conditions')).toHaveLength(2)
+    expect(screen.getAllByText('License unknown')).toHaveLength(1)
+
+    fireEvent.click(screen.getByRole('checkbox', { name: /For business use/ }))
+    expect(screen.getByText('Cool 7B')).toBeInTheDocument()
+    expect(screen.getByText('Llama 3.2 3B')).toBeInTheDocument()
+    expect(screen.queryByText('Research 3B')).not.toBeInTheDocument()
+    expect(screen.queryByText('NC 7B')).not.toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Llama 3.2 3B' }))
+    expect(screen.getByText("Allowed, within the license's limits")).toBeInTheDocument()
+  })
 })

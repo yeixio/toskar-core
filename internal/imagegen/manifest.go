@@ -7,6 +7,7 @@ import (
 	"sync"
 
 	rootmanifests "github.com/yeixio/toskar-core/manifests"
+	"github.com/yeixio/toskar-core/pkg/contracts"
 )
 
 // The picture and clip models setup offers are listed in
@@ -32,6 +33,7 @@ type manifestModel struct {
 	Tier           string  `json:"tier,omitempty"`
 	Description    string  `json:"description"`
 	License        string  `json:"license"`
+	Commercial     string  `json:"commercial"`
 	MemoryBytes    int64   `json:"memory_bytes"`
 	GraphicsBytes  int64   `json:"graphics_bytes,omitempty"`
 	Edits          bool    `json:"edits,omitempty"`
@@ -55,7 +57,7 @@ type manifestModel struct {
 }
 
 func (m manifestModel) model() Model {
-	out := Model{ID: m.ID, Name: m.Name, Kind: m.Kind, Tier: m.Tier, Description: m.Description, License: m.License,
+	out := Model{ID: m.ID, Name: m.Name, Kind: m.Kind, Tier: m.Tier, Description: m.Description, License: m.License, Commercial: m.Commercial,
 		MemoryBytes: m.MemoryBytes, GraphicsBytes: m.GraphicsBytes, Edits: m.Edits, EditOnly: m.EditOnly, Untested: m.Untested,
 		Steps: m.Steps, CFG: m.CFG, FlowShift: m.FlowShift, Sampler: m.Sampler, Frames: m.Frames, FPS: m.FPS,
 		HighNoiseSteps: m.HighNoiseSteps, HighNoiseCFG: m.HighNoiseCFG, ModelArgs: m.ModelArgs,
@@ -86,6 +88,11 @@ func parseManifest(raw []byte) (*mediaManifest, error) {
 		for _, model := range list {
 			if model.ID == "" || model.Steps <= 0 || len(model.Files) == 0 {
 				return nil, fmt.Errorf("media.json: model %q is incomplete", model.ID)
+			}
+			switch model.Commercial {
+			case contracts.CommercialYes, contracts.CommercialLimited, contracts.CommercialNo:
+			default:
+				return nil, fmt.Errorf("media.json: %s doesn't say whether its license allows business use", model.ID)
 			}
 			if model.NeedsLicense && (model.LicenseURL == "" || model.LicenseAllows == "") {
 				return nil, fmt.Errorf("media.json: %s needs a license but doesn't link or describe it", model.ID)

@@ -76,3 +76,25 @@ func TestUseManifest(t *testing.T) {
 		t.Fatal("a refused manifest replaced the one in use")
 	}
 }
+
+// Every picture and clip model says whether its license allows business
+// use (#593); one that doesn't is refused.
+func TestManifestNeedsCommercial(t *testing.T) {
+	for _, m := range append(Catalog(), VideoCatalog()...) {
+		if m.Commercial == "" {
+			t.Errorf("%s doesn't say whether a business may use it", m.ID)
+		}
+	}
+	if m, ok := Lookup("flux2-klein-9b"); !ok || m.Commercial != "no" {
+		t.Errorf("FLUX.2 [klein] 9B is non-commercial: %+v", m.Commercial)
+	}
+	var m mediaManifest
+	if err := json.Unmarshal(rootmanifests.MediaJSON, &m); err != nil {
+		t.Fatal(err)
+	}
+	m.Images[0].Commercial = ""
+	raw, _ := json.Marshal(m)
+	if _, err := parseManifest(raw); err == nil || !strings.Contains(err.Error(), "business use") {
+		t.Fatalf("a model without commercial was accepted: %v", err)
+	}
+}

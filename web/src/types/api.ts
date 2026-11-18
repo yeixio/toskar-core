@@ -103,6 +103,8 @@ export interface Model {
   source?: ModelSource
   /** How well the model writes each language it has a level for, best first (multilingual spec §13–14). */
   languages?: LanguageCapability[]
+  /** What its license allows, for a catalog model (#593). */
+  license?: ModelLicense
   purpose?: string[]
   tags?: string[]
   runtime?: string[]
@@ -273,10 +275,32 @@ export interface BrowseModel {
 }
 
 /** A model on a shelf of the store (#593). */
+/** Whether a business may use a model under its license (#593). */
+export type Commercial = 'yes' | 'limited' | 'no'
+
+/** A catalog model's license, checked by hand (#593, contract 1.102). */
+export interface ModelLicense {
+  id: string
+  name: string
+  url: string
+  commercial: Commercial
+  /** Apps or published work built with it credit it. */
+  attribution?: boolean
+  /** The person agrees to its terms before using it. */
+  accept?: boolean
+  notes?: string
+  /** free: any use, nothing to accept or credit. conditions: free, with terms. */
+  kind?: 'free' | 'conditions'
+}
+
 export interface StoreModel extends BrowseModel {
   likes?: number
   created_at?: string
   license?: string
+  /** Whether a business may use it; absent when the license doesn't say (#593). */
+  commercial?: Commercial
+  /** Free, or free with conditions; absent when the license is unknown. */
+  license_kind?: 'free' | 'conditions'
   details_url?: string
   fit?: ModelFit
   /** Tested with Toskar, and installs by this ID. Empty for everything else. */
@@ -971,6 +995,8 @@ export interface ImageModel {
   name: string
   description: string
   license: string
+  /** Whether a business may use it under its license (#593). */
+  commercial?: Commercial
   memory_bytes: number
   size_bytes: number
   /** It can change an image from an instruction, or, for a video model, animate one. */

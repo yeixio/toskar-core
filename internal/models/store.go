@@ -45,8 +45,10 @@ type StoreListings struct {
 // so anything on a shelf can be installed and run. now is for the new shelf.
 func StoreShelves(listings StoreListings, catalog []CatalogEntry, installed map[string]bool, bestOverall string, hw contracts.HardwareInventory, opts FitOptions, now time.Time) []contracts.StoreShelf {
 	source := map[string]string{}
-	for _, e := range catalog {
+	byID := map[string]*CatalogEntry{}
+	for i, e := range catalog {
 		source[entryRepo(e)] = e.ID
+		byID[e.ID] = &catalog[i]
 	}
 	prepare := func(list []contracts.StoreModel) []contracts.StoreModel {
 		out := make([]contracts.StoreModel, 0, len(list))
@@ -55,6 +57,7 @@ func StoreShelves(listings StoreListings, catalog []CatalogEntry, installed map[
 				m.CatalogID = id
 			}
 			m.Installed = installed[m.ID] || installed[m.CatalogID]
+			storeLicense(&m, byID[m.CatalogID])
 			// No size means no saying it fits, and usually a model in parts
 			// that install from a link can't fetch.
 			fit := storeFit(m, hw, opts)
@@ -216,6 +219,7 @@ func testedModels(catalog []CatalogEntry, installed map[string]bool, hw contract
 			},
 			Fit: &fit, CatalogID: e.ID, Installed: installed[e.ID], DetailsURL: "https://huggingface.co/" + repo,
 		})
+		storeLicense(&out[len(out)-1], &e)
 	}
 	return out
 }

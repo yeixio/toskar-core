@@ -51,6 +51,9 @@ type CatalogEntry struct {
 	// replaces, size for size.
 	Generation string   `json:"generation,omitempty"`
 	Supersedes []string `json:"supersedes,omitempty"`
+	// License is what the model's license allows, checked by hand (#593).
+	// Every curated entry has one; a dynamic entry may not.
+	License *contracts.ModelLicense `json:"license,omitempty"`
 	// Thinking "when_asked" is a model that thinks before it answers but
 	// answers first unless the turn asks it to think (#593): a long think
 	// leaves a small model's window no room for the answer. Empty leaves

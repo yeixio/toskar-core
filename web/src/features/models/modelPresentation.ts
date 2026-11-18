@@ -336,3 +336,8 @@ export function languageSummary(model: Pick<Model, 'languages'>, appLanguage: st
   const text = others > 0 ? i18n.t('models:languages.withMore', { first: head, count: others }) : head
   return { text, title }
 }
+
+/** A business may use it: its license allows that, with or without limits. Unknown isn't cleared (#593). */
+export function allowsBusiness(m: { commercial?: string }): boolean {
+  return m.commercial === 'yes' || m.commercial === 'limited'
+}

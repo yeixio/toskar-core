@@ -163,6 +163,61 @@ type ModelSource struct {
 	Format string `json:"format,omitempty"`
 }
 
+// What a business may do with a model under its license (#593).
+const (
+	// CommercialYes is any use, a business's included.
+	CommercialYes = "yes"
+	// CommercialLimited is business use within limits, such as Llama's
+	// above 700 million monthly users.
+	CommercialLimited = "limited"
+	// CommercialNo is personal, research, or other non-commercial use only.
+	CommercialNo = "no"
+)
+
+// The kinds of model in the store, by license (#593).
+const (
+	// LicenseFree is an open license for any use, a business's included,
+	// with nothing to accept or credit.
+	LicenseFree = "free"
+	// LicenseConditions is free, with terms: a license to accept, limits
+	// on business use, credit to give, or non-commercial use only.
+	LicenseConditions = "conditions"
+)
+
+// ModelLicense is a model's license and what it allows (#593). It's
+// checked by hand for every catalog model.
+type ModelLicense struct {
+	// ID is the license's SPDX identifier where it has one, such as
+	// apache-2.0, or its own short name, such as llama3.2.
+	ID   string `json:"id"`
+	Name string `json:"name"`
+	URL  string `json:"url"`
+	// Commercial is CommercialYes, CommercialLimited, or CommercialNo.
+	Commercial string `json:"commercial"`
+	// Attribution is a license that has apps or published work built with
+	// the model credit it, such as "Built with Llama".
+	Attribution bool `json:"attribution,omitempty"`
+	// Accept is a license the person agrees to before they use the model,
+	// such as Gemma's terms or Llama's acceptable use policy.
+	Accept bool   `json:"accept,omitempty"`
+	Notes  string `json:"notes,omitempty"`
+	// Kind is LicenseFree or LicenseConditions, from the fields above.
+	Kind string `json:"kind,omitempty"`
+}
+
+// KindOf says whether the license is free or free with conditions.
+func (l ModelLicense) KindOf() string {
+	if l.Commercial == CommercialYes && !l.Attribution && !l.Accept {
+		return LicenseFree
+	}
+	return LicenseConditions
+}
+
+// ForBusiness says a business may use the model.
+func (l ModelLicense) ForBusiness() bool {
+	return l.Commercial == CommercialYes || l.Commercial == CommercialLimited
+}
+
 // Model is a catalog or installed model.
 type Model struct {
 	ID           string            `json:"id"`
@@ -192,6 +247,10 @@ type Model struct {
 	// Languages are how well the model writes each language it has a level
 	// for (§13–14, §31), best first.
 	Languages []LanguageCapability `json:"languages,omitempty"`
+	// License is what the model's license allows, for a catalog model
+	// (#593, contract 1.102). Nil is unknown, as for a model added from
+	// a link.
+	License *ModelLicense `json:"license,omitempty"`
 	// Speculation is auto or off for a chat model installed on this
 	// computer: whether it guesses the next words ahead and checks several
 	// at once (#835, contract 1.67). Empty for other models.

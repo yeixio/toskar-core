@@ -466,9 +466,24 @@
       "tested": "已用 Toskar 測試。",
       "untested": "來自 Hugging Face。它未經 Toskar 測試,可能效果較差或無法執行。用於工作前請查看其授權。",
       "link": "在 Hugging Face 上查看",
-      "close": "關閉"
+      "close": "關閉",
+      "business": "商業使用",
+      "businessYes": "允許",
+      "businessLimited": "在授權限制內允許",
+      "businessNo": "不允許：僅限個人、研究或其他非商業用途",
+      "businessUnknown": "未知：用於工作前請查看授權"
     },
-    "bestOverall": "綜合最佳"
+    "bestOverall": "綜合最佳",
+    "license": {
+      "free": "免費",
+      "conditions": "有條件免費",
+      "unknown": "授權未知"
+    },
+    "business": {
+      "label": "可商用",
+      "hint": "只顯示授權允許商業使用的模型。",
+      "none": "這裡沒有授權允許商業使用的模型。"
+    }
   },
   "results": {
     "loading": "正在載入結果…",
