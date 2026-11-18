@@ -443,7 +443,7 @@ func (o *Orchestrator) Run(
 		for {
 			// Every way around this loop is a new attempt at the answer.
 			live.takeBack()
-			content, m, err := generateLive(answerCtx, env, role, messages, true, live.feed)
+			content, thinking, m, err := generateStep(answerCtx, env, role, messages, true, live.feed)
 			if err != nil {
 				if content != "" && !live.settle(tools.VisibleText(content)) {
 					ch <- pluginapi.OrchestrationEvent{Type: "agent.message", Role: role, NodeID: nodeID, Content: content}
@@ -578,7 +578,7 @@ func (o *Orchestrator) Run(
 					evidence = joinReference(evidence, resultNote)
 				}
 				messages = append(messages,
-					pluginapi.ChatMessage{Role: "assistant", Content: content},
+					keptReasoning(pluginapi.ChatMessage{Role: "assistant", Content: content}, thinking),
 					pluginapi.ChatMessage{Role: "user", Content: resultNote + followUp},
 				)
 				if isTask {
@@ -833,9 +833,23 @@ func generateLive(
 	answer bool,
 	onText func(string),
 ) (string, *pluginapi.GenerationMetrics, error) {
+	content, _, metrics, err := generateStep(ctx, env, role, messages, answer, onText)
+	return content, metrics, err
+}
+
+// generateStep is generateLive, also returning what a reasoning model
+// thought before it wrote, as far as maxReasoningText*4 bytes (#841).
+func generateStep(
+	ctx context.Context,
+	env pluginapi.ExecutionEnvironment,
+	role string,
+	messages []pluginapi.ChatMessage,
+	answer bool,
+	onText func(string),
+) (string, string, *pluginapi.GenerationMetrics, error) {
 	stream, err := env.Generate(ctx, role, messages)
 	if err != nil {
-		return "", nil, err
+		return "", "", nil, err
 	}
 	var b strings.Builder
 	var metrics *pluginapi.GenerationMetrics
@@ -863,7 +877,7 @@ func generateLive(
 	for chunk := range stream {
 		if chunk.Error != "" {
 			endThinking()
-			return b.String(), metrics, fmt.Errorf("%s", chunk.Error)
+			return b.String(), thinking.String(), metrics, fmt.Errorf("%s", chunk.Error)
 		}
 		if chunk.Metrics != nil {
 			metrics = chunk.Metrics
@@ -889,7 +903,7 @@ func generateLive(
 		}
 	}
 	endThinking()
-	return b.String(), metrics, nil
+	return b.String(), thinking.String(), metrics, nil
 }
 
 func streamText(ch chan<- pluginapi.OrchestrationEvent, role, nodeID, content string, metrics *pluginapi.GenerationMetrics, usage contextusage.Usage) {
