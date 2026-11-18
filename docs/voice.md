@@ -19,6 +19,14 @@ The web app's Talk button, beside Send in a chat, opens voice mode
 browser's echo cancellation, resampled to 24 kHz in an AudioWorklet, and
 the answer played as it arrives and stopped when the person talks over it.
 
+The desktop app shows the same page, from `wails://` (`wails.localhost` on
+Windows), where a WebSocket can't go through the shell's proxy. So the
+shell's `VoiceSocketURL` binding gives the daemon's own address, such as
+`ws://127.0.0.1:7331/api/v1/voice/realtime`, and the page opens it there.
+The desktop's origin is allowed, and a request from this computer needs no
+key. On a Mac, the shell lets its own pages use the microphone and macOS
+asks the person once.
+
 Audio both ways is `pcm16`: 16-bit little-endian PCM, mono, 24 kHz, base64.
 
 ## Events
@@ -94,5 +102,5 @@ Errors are `error` events with `error.code`, such as `invalid_audio`,
 - A model that judges whether a turn sounds finished (Smart Turn), and
   Qwen3-TTS for computers with a strong graphics card.
 - The chat keeps the whole answer even when it was cut off.
-- `/v1/realtime`, for OpenAI's SDKs; the desktop app, the phone, the TV,
-  and the doorbell (#667).
+- `/v1/realtime`, for OpenAI's SDKs; the phone, the TV, and the doorbell
+  (#667).

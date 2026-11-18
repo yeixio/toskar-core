@@ -4,7 +4,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useDialog } from '@/lib/useDialog'
 import { errorText } from '@/lib/api'
 import { VoiceAudio, canUseMicrophone } from '@/lib/voice/audio'
-import { VoiceConnection, type VoiceStatus } from '@/lib/voice/realtime'
+import { VoiceConnection, resolveVoiceSocketUrl, type VoiceStatus } from '@/lib/voice/realtime'
 import { readScreenshotLaunch } from '@/lib/screenshotMode'
 
 /** Starts live voice mode: a conversation spoken aloud, both ways (#795). */
@@ -53,29 +53,37 @@ export function VoiceMode({ onClose }: { onClose: () => void }) {
     }
     const audio = new VoiceAudio()
     audioRef.current = audio
-    const conn = new VoiceConnection({
+    let conn: VoiceConnection | null = null
+    let ended = false
+    const handlers = {
       onStatus: setStatus,
       onYou: setYou,
       onAnswer: setAnswer,
-      onAudio: (samples) => audio.play(samples),
+      onAudio: (samples: Float32Array) => audio.play(samples),
       onInterrupt: () => audio.interrupt(),
-      onDone: (_, ms) => {
+      onDone: (_: string, ms?: number) => {
         if (ms != null) setWaited(ms)
-        if (!audio.isPlaying) conn.played()
+        if (!audio.isPlaying) conn?.played()
       },
-      onError: (code, message) => {
+      onError: (code: string, message: string) => {
         setError(code === 'VOICE_CONNECT_FAILED' ? t('voiceMode.connectFailed') : errorText(code, message || t('voiceMode.failed')))
       },
+    }
+    audio.onDrained = () => conn?.played()
+    // The desktop app says where the daemon is; a page in a browser is on it.
+    void resolveVoiceSocketUrl().then((url) => {
+      if (!ended) conn = new VoiceConnection(handlers, undefined, url)
     })
-    audio.onDrained = () => conn.played()
-    audio.start((samples) => conn.send(samples)).catch((err: unknown) => {
+    audio.start((samples) => conn?.send(samples)).catch((err: unknown) => {
       const denied = err instanceof DOMException && (err.name === 'NotAllowedError' || err.name === 'SecurityError')
       setError(denied ? t('voiceMode.micDenied') : t('voiceMode.micFailed'))
-      conn.close()
+      ended = true
+      conn?.close()
       setStatus('failed')
     })
     return () => {
-      conn.close()
+      ended = true
+      conn?.close()
       audio.close()
       audioRef.current = null
       // The conversation is one of their chats now.

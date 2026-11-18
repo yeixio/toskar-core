@@ -1,4 +1,5 @@
 import { getApiBase, storedApiKey } from '@/lib/api'
+import { desktopVoiceSocketUrl } from '@/lib/desktopBridge'
 import { VOICE_RATE, fromBase64, fromPCM16, toBase64, toPCM16 } from './pcm'
 
 /** Where a live voice conversation is, as the person sees it. */
@@ -36,6 +37,11 @@ export function voiceSocketUrl(): string {
   return base.replace(/^http/, 'ws').replace(/\/$/, '') + '/api/v1/voice/realtime'
 }
 
+/** The live voice address: the daemon's own in the desktop app, else this page's. */
+export async function resolveVoiceSocketUrl(): Promise<string> {
+  return (await desktopVoiceSocketUrl()) || voiceSocketUrl()
+}
+
 /**
  * The subprotocols to ask for: realtime, and the API key when the page has
  * one, since a browser can't set headers on a WebSocket. Without a key, the
@@ -65,8 +71,9 @@ export class VoiceConnection {
   constructor(
     private handlers: VoiceHandlers,
     open: (url: string, protocols: string[]) => SocketLike = (url, protocols) => new WebSocket(url, protocols),
+    url = voiceSocketUrl(),
   ) {
-    this.socket = open(voiceSocketUrl(), voiceProtocols())
+    this.socket = open(url, voiceProtocols())
     this.socket.onmessage = (ev) => this.receive(String(ev.data))
     this.socket.onclose = () => {
       if (this.status === 'failed') return

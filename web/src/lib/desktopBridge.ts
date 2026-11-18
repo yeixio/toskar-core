@@ -12,6 +12,8 @@ type WailsApp = {
   /** Gives the window's title bar the page's theme (yeixio/toskar-apps#26). */
   SetTheme?: (theme: 'light' | 'dark') => Promise<void>
   GetDaemonURL?: () => Promise<string>
+  /** Live voice mode's WebSocket on the daemon itself, which the shell's proxy can't carry (#795). */
+  VoiceSocketURL?: () => Promise<string>
   /** Present when the shell passes the daemon's events on as Wails events. */
   HasEventRelay?: () => Promise<boolean>
   /** Asks where to save, then streams a daemon file there. Resolves to the saved path, or '' if cancelled. */
@@ -197,6 +199,19 @@ export async function signInReturnAddress(): Promise<string> {
     // fall through
   }
   return window.location.origin
+}
+
+/**
+ * Live voice mode's address in the desktop app (#795), or '' elsewhere. The
+ * window's pages come from wails://, and a WebSocket can't go through the
+ * shell's proxy there, so it opens on the daemon itself.
+ */
+export async function desktopVoiceSocketUrl(): Promise<string> {
+  try {
+    return (await wailsGoApp()?.VoiceSocketURL?.()) ?? ''
+  } catch {
+    return ''
+  }
 }
 
 /**
