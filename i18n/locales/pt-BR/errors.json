@@ -292,5 +292,7 @@
   "CHECKOUT_NONE": "Não há nenhum pagamento aberto para cancelar.",
   "MOVE_TOO_SOON": "A assinatura foi movida há menos de um dia. Ela poderá ser movida de novo amanhã.",
   "MOVE_NEEDS_COMPUTER": "Para movê-la, o relay do Toskar precisa ter notícias do computador em que ela está agora: ligue-o uma vez, ou espere ele ficar desligado por 3 dias.",
-  "MOVE_FAILED": "O relay do Toskar não moveu a assinatura ({{relay_code}})."
+  "MOVE_FAILED": "O relay do Toskar não moveu a assinatura ({{relay_code}}).",
+  "VOICE_UNAVAILABLE": "A voz ao vivo não está disponível neste computador.",
+  "WEBSOCKET_REQUIRED": "A voz ao vivo precisa de uma conexão WebSocket."
 }

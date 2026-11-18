@@ -292,5 +292,7 @@
   "CHECKOUT_NONE": "没有可取消的结账。",
   "MOVE_TOO_SOON": "订阅在一天内刚移动过。明天可以再次移动。",
   "MOVE_NEEDS_COMPUTER": "要移动它，Toskar 的中继需要联系到当前使用它的电脑：把那台电脑开机一次，或等到它关机满 3 天。",
-  "MOVE_FAILED": "Toskar 的中继没有移动订阅（{{relay_code}}）。"
+  "MOVE_FAILED": "Toskar 的中继没有移动订阅（{{relay_code}}）。",
+  "VOICE_UNAVAILABLE": "这台电脑上无法使用实时语音。",
+  "WEBSOCKET_REQUIRED": "实时语音需要 WebSocket 连接。"
 }

@@ -292,5 +292,7 @@
   "CHECKOUT_NONE": "沒有可取消的結帳。",
   "MOVE_TOO_SOON": "訂閱在一天內剛移動過。明天可以再次移動。",
   "MOVE_NEEDS_COMPUTER": "要移動它，Toskar 的中繼需要聯絡到目前使用它的電腦：把那台電腦開機一次，或等到它關機滿 3 天。",
-  "MOVE_FAILED": "Toskar 的中繼沒有移動訂閱（{{relay_code}}）。"
+  "MOVE_FAILED": "Toskar 的中繼沒有移動訂閱（{{relay_code}}）。",
+  "VOICE_UNAVAILABLE": "這台電腦上無法使用即時語音。",
+  "WEBSOCKET_REQUIRED": "即時語音需要 WebSocket 連線。"
 }

@@ -292,5 +292,7 @@
   "CHECKOUT_NONE": "Non c'è nessun pagamento aperto da annullare.",
   "MOVE_TOO_SOON": "L'abbonamento è stato spostato meno di un giorno fa. Potrà essere spostato di nuovo domani.",
   "MOVE_NEEDS_COMPUTER": "Per spostarlo, il relay di Toskar deve sentire il computer su cui è ora: accendilo una volta, o aspetta che resti spento per 3 giorni.",
-  "MOVE_FAILED": "Il relay di Toskar non ha spostato l'abbonamento ({{relay_code}})."
+  "MOVE_FAILED": "Il relay di Toskar non ha spostato l'abbonamento ({{relay_code}}).",
+  "VOICE_UNAVAILABLE": "La voce dal vivo non è disponibile su questo computer.",
+  "WEBSOCKET_REQUIRED": "La voce dal vivo ha bisogno di una connessione WebSocket."
 }
