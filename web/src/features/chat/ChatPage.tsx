@@ -2666,7 +2666,7 @@ export function ChatPage() {
                 {showJump ? (
                   <button
                     type="button"
-                    className="chat-jump absolute bottom-3 left-1/2 z-10 -translate-x-1/2 sm:left-auto sm:end-4 sm:translate-x-0 rounded-full border border-line/80 bg-surface/95 px-3 py-1.5 text-xs font-medium text-ink-muted shadow-panel backdrop-blur transition hover:text-ink"
+                    className="chat-jump absolute inset-x-0 bottom-3 z-10 mx-auto w-fit sm:me-4 sm:ms-auto rounded-full border border-line/80 bg-surface/95 px-3 py-1.5 text-xs font-medium text-ink-muted shadow-panel backdrop-blur transition hover:text-ink"
                     onClick={jumpToLatest}
                   >
                     <span aria-hidden>↓ </span>
