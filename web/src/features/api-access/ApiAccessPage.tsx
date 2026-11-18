@@ -106,6 +106,22 @@ function maskPrefix(prefix: string): string {
   return `••••••••••${tip}`
 }
 
+/**
+ * A device key that's likely left over, so a duplicate name can be told
+ * apart and removed (#1266): never used a day after it was made, as after
+ * an unfinished pairing, or not used for 90 days.
+ */
+function staleKey(key: { created_at: string; last_used_at?: string | null }): 'neverUsed' | 'unused' | null {
+  const day = 24 * 60 * 60 * 1000
+  const now = Date.now()
+  if (!key.last_used_at) {
+    const made = Date.parse(key.created_at)
+    return Number.isFinite(made) && now - made > day ? 'neverUsed' : null
+  }
+  const used = Date.parse(key.last_used_at)
+  return Number.isFinite(used) && now - used > 90 * day ? 'unused' : null
+}
+
 export function ApiAccessPage() {
   const { t } = useTranslation('apiAccess')
   const queryClient = useQueryClient()
@@ -479,7 +495,12 @@ export function ApiAccessPage() {
             {phones.map((phone) => (
               <li key={phone.id} className="flex flex-wrap items-center justify-between gap-3 py-3">
                 <div className="min-w-0">
-                  <p className="font-medium text-ink">{phone.name}</p>
+                  <p className="flex flex-wrap items-center gap-2 font-medium text-ink">
+                    {phone.name}
+                    {staleKey(phone) ? (
+                      <span className="status-chip bg-warning/15 text-warning">{t(`phones.${staleKey(phone)}`)}</span>
+                    ) : null}
+                  </p>
                   <p className="mt-0.5 text-xs text-ink-muted">
                     {t('phones.meta', {
                       connected: formatDate(phone.created_at, { month: 'short', day: 'numeric' }),

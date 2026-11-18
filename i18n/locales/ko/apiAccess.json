@@ -159,7 +159,9 @@
     "none": "아직 기기가 없어요.",
     "meta": "연결: {{connected}} · 마지막 사용: {{lastUsed}}",
     "confirmDisconnect": "{{name}}의 연결을 해제할까요? 다시 연결하려면 새 코드가 필요해요.",
-    "disconnect": "연결 해제"
+    "disconnect": "연결 해제",
+    "neverUsed": "사용한 적 없음",
+    "unused": "90일 동안 사용 안 함"
   },
   "remote": {
     "title": "어디서나 접속",

@@ -165,7 +165,9 @@
     "none": "Todavía no hay dispositivos.",
     "meta": "Conectado {{connected}} · Último uso {{lastUsed}}",
     "confirmDisconnect": "¿Desconectar {{name}}? Necesitará un código nuevo para volver a conectarse.",
-    "disconnect": "Desconectar"
+    "disconnect": "Desconectar",
+    "neverUsed": "Nunca usado",
+    "unused": "Sin usar en 90 días"
   },
   "remote": {
     "title": "Acceso desde cualquier lugar",

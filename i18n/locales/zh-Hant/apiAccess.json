@@ -159,7 +159,9 @@
     "none": "還沒有裝置。",
     "meta": "連接於 {{connected}} · 上次使用 {{lastUsed}}",
     "confirmDisconnect": "中斷 {{name}} 的連線？再次連接需要新的代碼。",
-    "disconnect": "中斷連線"
+    "disconnect": "中斷連線",
+    "neverUsed": "從未使用",
+    "unused": "90 天未使用"
   },
   "remote": {
     "title": "隨處存取",

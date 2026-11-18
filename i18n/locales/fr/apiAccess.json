@@ -165,7 +165,9 @@
     "none": "Aucun appareil pour l'instant.",
     "meta": "Connecté {{connected}} · Dernière utilisation {{lastUsed}}",
     "confirmDisconnect": "Déconnecter {{name}} ? Il lui faudra un nouveau code pour se reconnecter.",
-    "disconnect": "Déconnecter"
+    "disconnect": "Déconnecter",
+    "neverUsed": "Jamais utilisé",
+    "unused": "Inutilisé depuis 90 jours"
   },
   "remote": {
     "title": "Accès de partout",

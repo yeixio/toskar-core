@@ -165,7 +165,9 @@
     "none": "Ancora nessun dispositivo.",
     "meta": "Collegato {{connected}} · Ultimo uso {{lastUsed}}",
     "confirmDisconnect": "Scollegare {{name}}? Servirà un nuovo codice per ricollegarlo.",
-    "disconnect": "Scollega"
+    "disconnect": "Scollega",
+    "neverUsed": "Mai usato",
+    "unused": "Non usato da 90 giorni"
   },
   "remote": {
     "title": "Accesso ovunque",

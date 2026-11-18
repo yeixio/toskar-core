@@ -162,7 +162,9 @@
     "none": "No devices yet.",
     "meta": "Connected {{connected}} · Last used {{lastUsed}}",
     "confirmDisconnect": "Disconnect {{name}}? It will need a new code to connect again.",
-    "disconnect": "Disconnect"
+    "disconnect": "Disconnect",
+    "neverUsed": "Never used",
+    "unused": "Not used in 90 days"
   },
   "remote": {
     "title": "Access from anywhere",

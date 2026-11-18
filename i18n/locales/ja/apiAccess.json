@@ -159,7 +159,9 @@
     "none": "まだデバイスはありません。",
     "meta": "接続：{{connected}} · 最終使用：{{lastUsed}}",
     "confirmDisconnect": "{{name}} の接続を解除しますか？もう一度接続するには新しいコードが必要です。",
-    "disconnect": "接続を解除"
+    "disconnect": "接続を解除",
+    "neverUsed": "未使用",
+    "unused": "90日間未使用"
   },
   "remote": {
     "title": "どこからでもアクセス",

@@ -85,4 +85,17 @@ describe('API Access QA regressions', () => {
     expect(screen.queryByText(/uses HTTPS/)).not.toBeInTheDocument()
     expect(document.body.textContent).not.toMatch(/https:\/\/192\.168/)
   })
+
+  // Regression: toskar-core#1266
+  it('a device key left over from an unfinished pairing is marked, so duplicates differ', async () => {
+    vi.mocked(api.getSettings).mockResolvedValue(fresh as never)
+    const old = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
+    vi.mocked(api.listApiKeys).mockResolvedValue([
+      { id: 'd1', name: 'QA iPhone', kind: 'device', prefix: 'tsk_1', created_at: old, last_used_at: new Date().toISOString() },
+      { id: 'd2', name: 'QA iPhone', kind: 'device', prefix: 'tsk_2', created_at: old },
+    ] as never)
+    renderPage()
+    expect(await screen.findByText('Never used')).toBeInTheDocument()
+    expect(screen.getAllByText('Never used')).toHaveLength(1)
+  })
 })
