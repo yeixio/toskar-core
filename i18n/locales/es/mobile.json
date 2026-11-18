@@ -103,6 +103,58 @@
       "reranker": "Modelo de apoyo · ordena los mejores fragmentos",
       "classifier": "Modelo de apoyo · ayuda a Automático a dirigir las solicitudes",
       "other": "Modelo de apoyo"
+    },
+    "ratings": {
+      "rate": "Valorar",
+      "title": "Valorar {{model}}",
+      "intro": "¿Qué tal funciona en este equipo? Tu valoración se guarda aquí.",
+      "starsLabel": "Estrellas",
+      "stars_one": "{{count}} estrella",
+      "stars_many": "{{count}} estrellas",
+      "stars_other": "{{count}} estrellas",
+      "tagsLabel": "¿Por qué? (opcional)",
+      "tags": {
+        "great_responses": "Respuestas excelentes",
+        "fast": "Rápido",
+        "slow": "Lento",
+        "stable": "Estable",
+        "crashed": "Se bloqueó",
+        "too_much_memory": "Usa demasiada memoria",
+        "great_for_coding": "Ideal para programar",
+        "great_for_chat": "Ideal para conversar",
+        "good_tool_use": "Bueno con herramientas",
+        "poor_tool_use": "Flojo con herramientas"
+      },
+      "share": "Compartir esta valoración con la comunidad",
+      "shareHint": "Ayuda a quienes tienen equipos como el tuyo a elegir un modelo. Puedes dejar de compartirla cuando quieras.",
+      "whatIsShared": "Qué se comparte exactamente",
+      "sent": {
+        "destination": "Se envía a",
+        "model": "Modelo",
+        "hardware": "Tipo de equipo",
+        "memory": "memoria {{type}}, {{gb}} GB",
+        "never": "Nunca tus prompts, chats, nombres de archivo, nombre del equipo, nombre de usuario ni dirección de red. El servicio no guarda tu dirección IP."
+      },
+      "notShareable": "Esta valoración se queda en este equipo: {{reason}}",
+      "save": "Guardar",
+      "saveAndShare": "Guardar y compartir",
+      "remove": "Quitar valoración",
+      "cancel": "Cancelar",
+      "count_one": "{{formatted}} valoración",
+      "count_many": "{{formatted}} valoraciones",
+      "count_other": "{{formatted}} valoraciones",
+      "similar": {
+        "family": "en equipos como el tuyo",
+        "class": "en equipos parecidos",
+        "backend": "en equipos con esta memoria"
+      },
+      "overall": "en total",
+      "confidence": {
+        "limited": "Pocos datos",
+        "early": "Primeras valoraciones"
+      },
+      "prompt": "¿Qué tal te funciona {{model}}?",
+      "notNow": "Ahora no"
     }
   },
   "phoneModels": {

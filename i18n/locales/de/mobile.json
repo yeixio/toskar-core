@@ -103,6 +103,56 @@
       "reranker": "Hilfsmodell · ordnet die besten Textstellen",
       "classifier": "Hilfsmodell · hilft „Automatisch“, Anfragen zu verteilen",
       "other": "Hilfsmodell"
+    },
+    "ratings": {
+      "rate": "Bewerten",
+      "title": "{{model}} bewerten",
+      "intro": "Wie gut funktioniert es auf diesem Computer? Deine Bewertung wird hier gespeichert.",
+      "starsLabel": "Sterne",
+      "stars_one": "{{count}} Stern",
+      "stars_other": "{{count}} Sterne",
+      "tagsLabel": "Warum? (optional)",
+      "tags": {
+        "great_responses": "Tolle Antworten",
+        "fast": "Schnell",
+        "slow": "Langsam",
+        "stable": "Stabil",
+        "crashed": "Abgestürzt",
+        "too_much_memory": "Braucht zu viel Speicher",
+        "great_for_coding": "Toll zum Programmieren",
+        "great_for_chat": "Toll zum Chatten",
+        "good_tool_use": "Gut mit Werkzeugen",
+        "poor_tool_use": "Schwach mit Werkzeugen"
+      },
+      "share": "Diese Bewertung mit der Community teilen",
+      "shareHint": "Hilft Leuten mit ähnlichen Computern bei der Modellwahl. Du kannst das Teilen jederzeit beenden.",
+      "whatIsShared": "Was genau geteilt wird",
+      "sent": {
+        "destination": "Gesendet an",
+        "model": "Modell",
+        "hardware": "Computerklasse",
+        "memory": "{{type}}-Speicher, {{gb}} GB",
+        "never": "Niemals deine Prompts, Chats, Dateinamen, Computernamen, Benutzernamen oder Netzwerkadresse. Der Dienst speichert deine IP-Adresse nicht."
+      },
+      "notShareable": "Diese Bewertung bleibt auf diesem Computer: {{reason}}",
+      "save": "Speichern",
+      "saveAndShare": "Speichern und teilen",
+      "remove": "Bewertung entfernen",
+      "cancel": "Abbrechen",
+      "count_one": "{{formatted}} Bewertung",
+      "count_other": "{{formatted}} Bewertungen",
+      "similar": {
+        "family": "auf Computern wie deinem",
+        "class": "auf ähnlichen Computern",
+        "backend": "auf Computern mit so viel Speicher"
+      },
+      "overall": "insgesamt",
+      "confidence": {
+        "limited": "Wenige Daten",
+        "early": "Erste Bewertungen"
+      },
+      "prompt": "Wie funktioniert {{model}} für dich?",
+      "notNow": "Nicht jetzt"
     }
   },
   "phoneModels": {

@@ -103,6 +103,58 @@
       "reranker": "Modello di supporto · ordina i passaggi migliori",
       "classifier": "Modello di supporto · aiuta Automatico a smistare le richieste",
       "other": "Modello di supporto"
+    },
+    "ratings": {
+      "rate": "Valuta",
+      "title": "Valuta {{model}}",
+      "intro": "Quanto funziona bene su questo computer? La tua valutazione viene salvata qui.",
+      "starsLabel": "Stelle",
+      "stars_one": "{{count}} stella",
+      "stars_many": "{{count}} stelle",
+      "stars_other": "{{count}} stelle",
+      "tagsLabel": "Perché? (facoltativo)",
+      "tags": {
+        "great_responses": "Risposte ottime",
+        "fast": "Veloce",
+        "slow": "Lento",
+        "stable": "Stabile",
+        "crashed": "Si è bloccato",
+        "too_much_memory": "Usa troppa memoria",
+        "great_for_coding": "Ottimo per programmare",
+        "great_for_chat": "Ottimo per chattare",
+        "good_tool_use": "Bravo con gli strumenti",
+        "poor_tool_use": "Scarso con gli strumenti"
+      },
+      "share": "Condividi questa valutazione con la community",
+      "shareHint": "Aiuta chi ha un computer come il tuo a scegliere un modello. Puoi smettere di condividerla in qualsiasi momento.",
+      "whatIsShared": "Cosa viene condiviso, esattamente",
+      "sent": {
+        "destination": "Inviato a",
+        "model": "Modello",
+        "hardware": "Classe di computer",
+        "memory": "memoria {{type}}, {{gb}} GB",
+        "never": "Mai i tuoi prompt, chat, nomi di file, nome del computer, nome utente o indirizzo di rete. Il servizio non memorizza il tuo indirizzo IP."
+      },
+      "notShareable": "Questa valutazione resta su questo computer: {{reason}}",
+      "save": "Salva",
+      "saveAndShare": "Salva e condividi",
+      "remove": "Rimuovi valutazione",
+      "cancel": "Annulla",
+      "count_one": "{{formatted}} valutazione",
+      "count_many": "{{formatted}} valutazioni",
+      "count_other": "{{formatted}} valutazioni",
+      "similar": {
+        "family": "su computer come il tuo",
+        "class": "su computer simili",
+        "backend": "su computer con questa memoria"
+      },
+      "overall": "in totale",
+      "confidence": {
+        "limited": "Dati limitati",
+        "early": "Prime valutazioni"
+      },
+      "prompt": "Come ti trovi con {{model}}?",
+      "notNow": "Non ora"
     }
   },
   "phoneModels": {
