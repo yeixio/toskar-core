@@ -349,7 +349,6 @@ export function OnboardingPage() {
           <section className="card mb-6">
             <div className="mb-3 flex flex-wrap items-center gap-2">
               <span className="badge-preferred">{t('recommend.badge')}</span>
-              <span className="badge-mimir">Mimir</span>
             </div>
             <h2 className="font-display text-xl font-semibold text-ink">
               {t('recommend.title', { purpose: t(`purposes.${selectedPurpose}.title`) })}
