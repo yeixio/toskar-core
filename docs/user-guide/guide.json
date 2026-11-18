@@ -1639,6 +1639,10 @@
           "text": "Agents at once, in the same menu, lets a swarm run up to 4 agents on one model at the same time, instead of one after another. It starts at 1. Each agent gets an equal share of the model's context, and the share stays as big as the context window above, so the model uses more memory: about one more context window's worth for each agent. Toskar refuses a number that would leave an agent less than 8K of context, or that wouldn't fit your computer's memory, and says which. A model that's running reloads with the new number on its next message. Agents that share a model each answer a little slower than one alone, but together they usually finish sooner."
         },
         {
+          "type": "paragraph",
+          "text": "When a newer model replaces one you have installed, such as Qwen 3.5 4B for Qwen 2.5 3B, Installed says so under the one you have: which is newer, how it fits this computer, and whether its license differs. Install puts it beside the one you have, and profiles and automations keep the model they use until you change them. Admins also get one notification for each new generation, such as Newer Qwen models are available. Turn it off in Settings › Notifications."
+        },
+        {
           "type": "image",
           "screen": "models-context-window",
           "alt": "The More actions menu for Gemma 3 4B on the Installed tab, with Guess ahead checked and Context window set to Auto, 32K, above sizes from 4K to 128K, where 128K is marked Tight fit",

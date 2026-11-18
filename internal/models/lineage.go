@@ -56,3 +56,28 @@ func supersedesItself(byID map[string]CatalogEntry, id string) bool {
 	}
 	return false
 }
+
+// Newer maps each catalog model that another supersedes to the newest
+// model in that line: when 4B supersedes 3B and a later one supersedes
+// 4B, 3B maps to the later one (#593). The catalog's checks keep the
+// lines free of circles; a circle here stops where it started.
+func Newer(list []CatalogEntry) map[string]string {
+	by := map[string][]string{}
+	for _, e := range list {
+		for _, old := range e.Supersedes {
+			by[old] = append(by[old], e.ID)
+		}
+	}
+	out := map[string]string{}
+	for old, next := range by {
+		cur, seen := next[0], map[string]bool{old: true}
+		for !seen[cur] && len(by[cur]) > 0 {
+			seen[cur] = true
+			cur = by[cur][0]
+		}
+		if cur != old {
+			out[old] = cur
+		}
+	}
+	return out
+}

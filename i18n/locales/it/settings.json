@@ -147,6 +147,8 @@
     "description": "Avvisi per i lavori lunghi e la connettività del team.",
     "taskFinish": "Avvisa quando le attività terminano",
     "peerOffline": "Avvisa quando un computer associato va offline",
+    "newerModels": "Avvisa quando esce una versione più recente di un modello installato",
+    "newerModelsHint": "Una volta per ogni nuova generazione, per gli Admin. Non viene installato né cambiato nulla finché non lo scegli.",
     "digest": "Riepilogo giornaliero delle automazioni",
     "digestHint": "Ogni giorno un riepilogo dei risultati di tutte le automazioni, in una chat a cui puoi rispondere.",
     "digestTime": "Ora"

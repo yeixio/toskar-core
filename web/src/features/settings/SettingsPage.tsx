@@ -470,6 +470,20 @@ export function SettingsPage() {
                   }
                 />
               </div>
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-sm font-medium text-ink">{t('notifications.newerModels')}</p>
+                  <p className="mt-1 text-xs text-ink-muted">{t('notifications.newerModelsHint')}</p>
+                </div>
+                <Toggle
+                  label={t('notifications.newerModels')}
+                  checked={settings?.notify_newer_models ?? true}
+                  disabled={busy}
+                  onChange={() =>
+                    patch({ notify_newer_models: !(settings?.notify_newer_models ?? true) })
+                  }
+                />
+              </div>
               <AutomationDigestSetting value={settings?.automation_digest ?? ''} disabled={busy} onChange={patch} />
             </section>
             <NotificationDestinations />

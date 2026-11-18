@@ -128,6 +128,13 @@
     "fitsOther": "{{model}} passt auf diesen Computer.",
     "installOther": "{{model}} installieren"
   },
+  "newer": {
+    "title": "{{model}} ist neuer.",
+    "fit": "So passt es auf diesen Computer: {{fit}}.",
+    "license": "Seine Lizenz ist eine andere: {{license}}.",
+    "install": "{{model}} installieren",
+    "beside": "Es wird neben diesem installiert, und Profile behalten ihr Modell, bis du sie änderst."
+  },
   "capability": {
     "noWeb": "Mit der aktuellen Konfiguration ist kein Live-Webzugriff verfügbar.",
     "noTools": "{{model}} kann keine Werkzeuge nutzen und das daher nicht nachschlagen. Wechsle zu einem Modell mit Werkzeugen, etwa einem der folgenden.",

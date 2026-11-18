@@ -175,7 +175,9 @@
     "digest_other": "{{count}} 則通知",
     "digestMore_other": "…另有 {{count}} 則",
     "automationDigest": "自動化摘要",
-    "automationDigestBody_other": "{{count}} 個自動化已執行：{{names}}"
+    "automationDigestBody_other": "{{count}} 個自動化已執行：{{names}}",
+    "newerModels": "有更新的 {{family}} 模型",
+    "newerModelsBody": "{{model}} 比 {{installed}} 更新。在「模型 › 已安裝」中可以查看它在這台電腦上的適配情況，並把它安裝在現有模型旁邊。"
   },
   "sent": {
     "times": "{{title}}（{{count}} 次）",

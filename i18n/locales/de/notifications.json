@@ -183,7 +183,9 @@
     "digestMore_other": "… und {{count}} weitere",
     "automationDigest": "Automationsübersicht",
     "automationDigestBody_one": "1 Automation ist gelaufen: {{names}}",
-    "automationDigestBody_other": "{{count}} Automationen sind gelaufen: {{names}}"
+    "automationDigestBody_other": "{{count}} Automationen sind gelaufen: {{names}}",
+    "newerModels": "Neuere {{family}}-Modelle sind verfügbar",
+    "newerModelsBody": "{{model}} ist neuer als {{installed}}. Unter Modelle › Installiert siehst du, wie es passt, und kannst es neben dem vorhandenen installieren."
   },
   "sent": {
     "times": "{{title}} ({{count}}-mal)",

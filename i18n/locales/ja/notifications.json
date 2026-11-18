@@ -175,7 +175,9 @@
     "digest_other": "{{count}}件の通知",
     "digestMore_other": "…ほか{{count}}件",
     "automationDigest": "オートメーションのまとめ",
-    "automationDigestBody_other": "{{count}}件のオートメーションが実行されました: {{names}}"
+    "automationDigestBody_other": "{{count}}件のオートメーションが実行されました: {{names}}",
+    "newerModels": "新しい {{family}} モデルがあります",
+    "newerModelsBody": "{{model}} は {{installed}} より新しいモデルです。モデル › インストール済みで、このコンピューターでの動作の目安を確認し、今のモデルと並べてインストールできます。"
   },
   "sent": {
     "times": "{{title}}（{{count}}回）",

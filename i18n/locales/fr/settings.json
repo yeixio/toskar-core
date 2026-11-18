@@ -147,6 +147,8 @@
     "description": "Alertes pour les travaux de longue durée et la connectivité de l'équipe.",
     "taskFinish": "Notifier à la fin des tâches",
     "peerOffline": "Notifier quand un ordinateur jumelé se déconnecte",
+    "newerModels": "Prévenir quand une version plus récente d’un modèle installé sort",
+    "newerModelsHint": "Une fois par nouvelle génération, pour les Admins. Rien n’est installé ni changé avant que vous le choisissiez.",
     "digest": "Récapitulatif quotidien des automatisations",
     "digestHint": "Chaque jour, un résumé des résultats de toutes vos automatisations, dans un chat auquel vous pouvez répondre.",
     "digestTime": "Heure"

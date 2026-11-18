@@ -88,8 +88,10 @@ func (m *Manager) List(ctx context.Context) ([]contracts.Model, error) {
 		return nil, err
 	}
 	lastUsed, _ := m.storage.ListLastUsed(ctx)
+	entries := m.catalog.List()
+	newer := Newer(entries)
 	var out []contracts.Model
-	for _, e := range m.catalog.List() {
+	for _, e := range entries {
 		path, ok := installed[e.ID]
 		e.Capabilities.Thinks = m.thinks(e, path)
 		e.Capabilities.AnswersFirst = e.Thinking == ThinkingWhenAsked
@@ -100,6 +102,13 @@ func (m *Manager) List(ctx context.Context) ([]contracts.Model, error) {
 			status = "installed"
 		}
 		model := m.storage.ToContract(e, ok, status)
+		// An installed model with a newer one in its line that isn't
+		// installed says which (#593).
+		if next, has := newer[e.ID]; ok && has {
+			if _, got := installed[next]; !got {
+				model.Newer = next
+			}
+		}
 		if t, ok := lastUsed[e.ID]; ok {
 			tt := t
 			model.LastUsedAt = &tt

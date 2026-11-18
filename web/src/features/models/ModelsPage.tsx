@@ -34,6 +34,11 @@ import { formatBytes } from '@/lib/format'
 
 type Tab = 'discover' | 'installed' | 'running' | 'results'
 
+function tabFrom(search: string): Tab {
+  const asked = new URLSearchParams(search).get('tab')
+  return asked === 'installed' || asked === 'running' || asked === 'results' ? asked : 'discover'
+}
+
 function pickFitBundle(
   bundles: ModelsFitResponse[] | undefined,
   target: ModelsTarget,
@@ -53,7 +58,8 @@ export function ModelsPage() {
   const { t } = useTranslation('models')
   const queryClient = useQueryClient()
   const advancedMode = useUIStore((s) => s.advancedMode)
-  const [tab, setTab] = useState<Tab>('discover')
+  // A notice may open a tab, such as Installed for a newer model (#593).
+  const [tab, setTab] = useState<Tab>(() => tabFrom(window.location.search))
   // The model that just finished downloading, for Ratatoskr's "ready" note.
   const [justInstalled, setJustInstalled] = useState<string | null>(null)
   const downloadMascot = useMascotState({
