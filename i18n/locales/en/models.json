@@ -454,9 +454,7 @@
         "hint": "Models we've checked with Toskar."
       },
       "media": {
-        "title": "Pictures and clips",
-        "hint": "Pictures and clips are set up in Tools.",
-        "action": "Open Tools"
+        "title": "Pictures and clips"
       }
     },
     "purpose": {
@@ -491,6 +489,14 @@
       "label": "For business use",
       "hint": "Show only models whose license allows business use.",
       "none": "No models here have a license that allows business use."
+    },
+    "browse": {
+      "label": "Browse by category",
+      "all": "All",
+      "chat_coding": "Chat and coding",
+      "vision": "Sees pictures",
+      "creative": "Pictures and clips",
+      "hint": "Picture and clip models make and change images and short videos on this computer."
     }
   },
   "results": {

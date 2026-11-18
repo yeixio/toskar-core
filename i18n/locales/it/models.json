@@ -462,9 +462,7 @@
         "hint": "Modelli che abbiamo verificato con Toskar."
       },
       "media": {
-        "title": "Immagini e clip",
-        "hint": "Immagini e clip si configurano in Strumenti.",
-        "action": "Apri Strumenti"
+        "title": "Immagini e clip"
       }
     },
     "purpose": {
@@ -499,6 +497,14 @@
       "label": "Per uso commerciale",
       "hint": "Mostra solo i modelli la cui licenza consente l'uso commerciale.",
       "none": "Qui non ci sono modelli con una licenza che consente l'uso commerciale."
+    },
+    "browse": {
+      "label": "Sfoglia per categoria",
+      "all": "Tutti",
+      "chat_coding": "Chat e programmazione",
+      "vision": "Vede le immagini",
+      "creative": "Immagini e clip",
+      "hint": "I modelli per immagini e clip creano e modificano immagini e brevi video su questo computer."
     }
   },
   "results": {

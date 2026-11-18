@@ -10,6 +10,10 @@ import { StoreShelves } from './StoreShelves'
 vi.mock('@/lib/api', () => ({
   api: { getModelStore: vi.fn(), installModelFromURL: vi.fn() },
 }))
+vi.mock('@/features/tools/ImageSetup', () => ({
+  ImageSetupCard: () => <section>Picture setup</section>,
+  VideoSetupCard: () => <section>Clip setup</section>,
+}))
 
 const fromHF = {
   id: 'org-cool-q4',
@@ -142,5 +146,23 @@ describe('StoreShelves', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Llama 3.2 3B' }))
     expect(screen.getByText("Allowed, within the license's limits")).toBeInTheDocument()
+  })
+
+  it('browses by category: models that see pictures, and picture and clip models (#593)', async () => {
+    const sees = { ...fromHF, id: 'sees-q4', display_name: 'Sees 4B', tags: ['vision'] }
+    vi.mocked(api.getModelStore).mockResolvedValue({ live: true, shelves: [{ id: 'popular', models: [fromHF, sees] }] } as unknown as ModelStore)
+    show()
+    expect(await screen.findByText('Cool 7B')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Sees pictures' }))
+    expect(screen.queryByText('Cool 7B')).not.toBeInTheDocument()
+    expect(screen.getByText('Sees 4B')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Sees pictures' })).toHaveAttribute('aria-pressed', 'true')
+
+    fireEvent.click(screen.getByRole('button', { name: 'All' }))
+    // The pictures-and-clips shelf opens their setup right here, not on Tools.
+    fireEvent.click(screen.getAllByRole('button', { name: 'Pictures and clips' }).at(-1)!)
+    expect(screen.getByText('Picture setup')).toBeInTheDocument()
+    expect(screen.getByText('Clip setup')).toBeInTheDocument()
+    expect(screen.queryByText('Sees 4B')).not.toBeInTheDocument()
   })
 })
