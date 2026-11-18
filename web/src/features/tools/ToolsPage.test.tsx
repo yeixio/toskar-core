@@ -74,4 +74,20 @@ describe('ToolsPage', () => {
     expect(screen.getByRole('heading', { name: 'How tools work' })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Profiles & Orchestration' })).toHaveAttribute('href', '/profiles')
   })
+
+  // Regression: toskar-core#1254
+  it("shows people the tool's summary, not the model's instructions", async () => {
+    vi.mocked(api.listTools).mockResolvedValue([
+      {
+        ...search,
+        id: 'places.search',
+        name: 'Find Places',
+        description: 'Find places with OpenStreetMap: ("query": "coffee", "near": "Juneau, AK")',
+        summary: 'Find places, businesses, and addresses.',
+      },
+    ])
+    renderPage()
+    expect(await screen.findByText('Find places, businesses, and addresses.')).toBeInTheDocument()
+    expect(document.body.textContent).not.toMatch(/"near"/)
+  })
 })

@@ -8931,7 +8931,8 @@ components:
       properties:
         id: {type: string}
         name: {type: string}
-        description: {type: string}
+        description: {type: string, description: Written for the model}
+        summary: {type: string, description: 'A short description for people (#1254); empty is description'}
         capability: {type: string}
         source: {type: string}
         risk: {type: string, enum: [read, create, write]}
@@ -10118,6 +10119,7 @@ components:
               id: {type: string}
               name: {type: string}
               description: {type: string}
+              summary: {type: string, description: 'Summary is a short description for people, where Description is written for the model (#1254). Empty is Description.'}
               capability: {type: string}
               source: {type: string}
               schema: {type: string}

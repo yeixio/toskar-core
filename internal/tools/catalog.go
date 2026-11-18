@@ -32,9 +32,12 @@ const (
 // Definition is one registered tool: built in, from a connected service,
 // or from an MCP tool source.
 type Definition struct {
-	ID            string `json:"id"`
-	Name          string `json:"name"`
-	Description   string `json:"description"`
+	ID          string `json:"id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	// Summary is a short description for people, where Description is
+	// written for the model (#1254). Empty is Description.
+	Summary       string `json:"summary,omitempty"`
 	Capability    string `json:"capability"`
 	Source        string `json:"source"`
 	Schema        string `json:"schema"`
@@ -293,4 +296,30 @@ func TerminalDescription(goos string) string {
 		return "Run a PowerShell command on this computer."
 	}
 	return "Run a shell command on this computer."
+}
+
+// summaries are the built-in tools' descriptions for people, for those whose
+// Description tells the model how to call them (#1254).
+var summaries = map[string]string{
+	"places.search":        "Find places, businesses, and addresses, with opening hours and distances.",
+	"places.details":       "Look up a place's address, opening hours, phone, and website.",
+	"maps.route":           "Turn-by-turn directions between two places.",
+	"maps.distance":        "How far apart two places are, and how long it takes to get there.",
+	"browser.open":         "Open a web page in a private browser for this chat.",
+	"browser.click":        "Click a link or button on the open page. You approve each click.",
+	"browser.type":         "Type into a field on the open page. Never passwords or payment details.",
+	"browser.extract":      "Read text, links, or tables from the open page.",
+	"browser.download":     "Download a file the open page links to.",
+	"browser.screenshot":   "Show a picture of the open page.",
+	"files.create":         "Make a Word document, PDF, spreadsheet, or other file to download.",
+	"spreadsheet.analyze":  "Summarize a spreadsheet in this chat, column by column.",
+	"speech.transcribe":    "Turn an audio file in this chat into text, on this computer.",
+	"speech.synthesize":    "Read text aloud as an audio file, on this computer.",
+	"image.generate":       "Make an image from a description, on this computer.",
+	"video.generate":       "Make a short video clip, on this computer.",
+	"image.edit":           "Change an image in this chat from an instruction, on this computer.",
+	"code.execute":         "Run Python in a sandbox for calculations, data analysis, and charts.",
+	"automations.schedule": "Set up a task that runs on a schedule, such as a morning briefing.",
+	"news.read":            "Today's AI news from toskar.ai.",
+	"automations.results":  "The latest result of each of your automations.",
 }
