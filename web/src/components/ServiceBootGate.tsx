@@ -11,6 +11,7 @@ import { Ratatoskr } from '@/components/ui/Ratatoskr'
 import { YggdrasilMark } from '@/components/ui/YggdrasilMark'
 
 const BOOT_GIVE_UP_MS = 25_000
+const SPLASH_DELAY_MS = 800
 
 function BootSplash() {
   const { t } = useTranslation()
@@ -104,6 +105,11 @@ function HealthGate({ children }: { children: ReactNode }) {
   })
 
   const ready = healthQuery.data?.status === 'ok'
+  const [splashDue, setSplashDue] = useState(false)
+  useEffect(() => {
+    const id = window.setTimeout(() => setSplashDue(true), SPLASH_DELAY_MS)
+    return () => window.clearTimeout(id)
+  }, [])
   const askForKey = needsApiKey(healthQuery.error)
   // Who is signed in, before the shell shows what their role may use (#203).
   const meQuery = useQuery({
@@ -200,5 +206,7 @@ function HealthGate({ children }: { children: ReactNode }) {
     )
   }
 
-  return <BootSplash />
+  // A daemon that's already up answers in well under this, so a page load
+  // or a deep link doesn't flash the startup screen (#1270).
+  return splashDue ? <BootSplash /> : null
 }
