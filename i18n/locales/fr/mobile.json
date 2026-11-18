@@ -656,6 +656,14 @@
       "try": "Essayer sans ordinateur",
       "tryMeta": "Une démo avec des réponses d’exemple",
       "other": "Cette démo répond aux questions suggérées à gauche. Pour poser n’importe quelle question, installez Toskar sur un ordinateur à la maison (Toskar Core est gratuit), puis connectez ce téléviseur dans Ordinateurs → Connecter un appareil."
+    },
+    "people": {
+      "title": "Qui regarde ?",
+      "add": "Ajouter quelqu’un",
+      "hint": "Chaque personne se connecte avec un code de son propre compte sur l’ordinateur, pour que ses discussions et sa mémoire restent les siennes.",
+      "switch": "Pas {{name}} ?",
+      "unnamed": "Personne {{n}}",
+      "back": "Retour"
     }
   },
   "setup": {
