@@ -60,7 +60,12 @@ export const CAPABILITIES: {
   },
   {
     id: 'video',
-    tools: [{ id: 'video.generate', on: 'allow' }],
+    tools: [
+      { id: 'video.generate', on: 'allow' },
+      { id: 'video.extend', on: 'allow' },
+      // A longer video takes hours, so the person sees its shots first (#790).
+      { id: 'video.shots', on: 'ask' },
+    ],
   },
   {
     id: 'automations',

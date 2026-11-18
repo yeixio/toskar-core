@@ -31,6 +31,7 @@ export function MediaProgress({
   const fun = useRotatingLine(lines.length)
   const fraction = progress.stage === 'finishing' ? 1 : progress.steps > 0 ? progress.step / progress.steps : 0
   const facts = [label]
+  if (progress.shots && progress.shot) facts.push(t('mediaProgress.shot', { shot: progress.shot, shots: progress.shots }))
   if (progress.stage === 'drawing' && progress.steps > 0) facts.push(t('mediaProgress.step', { step: progress.step, steps: progress.steps }))
   if (progress.stage === 'drawing' && progress.secondsLeft > 0) {
     facts.push(

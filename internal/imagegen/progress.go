@@ -19,6 +19,9 @@ type Progress struct {
 	// SecondsLeft is an estimate from the last step's time, 0 when not
 	// known yet, as during the first step.
 	SecondsLeft int
+	// Shot and Shots are the shot being made and how many there are, for
+	// a longer video made as a series of shots (#790); 0 otherwise.
+	Shot, Shots int
 }
 
 type progressKey struct{}

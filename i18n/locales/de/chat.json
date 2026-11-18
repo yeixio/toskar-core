@@ -290,7 +290,19 @@
     "used_other": "{{count}} Werkzeuge genutzt",
     "completed": "Abgeschlossen",
     "completedIn": "Abgeschlossen in {{ms}} ms",
-    "traceFailed": "Fehlgeschlagen"
+    "traceFailed": "Fehlgeschlagen",
+    "shots": {
+      "summary_one": "{{count}} Einstellung, etwa {{seconds}} Sekunden Video",
+      "summary_other": "{{count}} Einstellungen, etwa {{seconds}} Sekunden Video",
+      "estimate": "Etwa {{time}} auf diesem Computer, nach dem letzten Clip, den er gemacht hat.",
+      "noEstimate": "Dieser Computer hat noch keinen Clip gemacht, daher ist nicht bekannt, wie lange es dauert. Jede Einstellung kann mehrere Minuten oder länger dauern.",
+      "style": "In jeder Einstellung: {{style}}",
+      "list": "Einstellungen",
+      "seconds": "{{n}} s",
+      "minutes": "{{n}} Min.",
+      "hours": "{{n}} Std.",
+      "hoursMinutes": "{{hours}} Std. {{minutes}} Min."
+    }
   },
   "transcript": {
     "plan": "Plan",
@@ -835,6 +847,7 @@
     "finishingImage": "Bild wird fertiggestellt …",
     "finishingVideo": "Clip wird fertiggestellt …",
     "step": "Schritt {{step}} von {{steps}}",
+    "shot": "Einstellung {{shot}} von {{shots}}",
     "leftSeconds": "noch etwa {{seconds}} s",
     "leftMinutes": "noch etwa {{minutes}} min",
     "frameImage": "Hier erscheint dein Bild",

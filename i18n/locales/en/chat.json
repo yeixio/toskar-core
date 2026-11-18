@@ -290,7 +290,19 @@
     "used_other": "Used {{count}} tools",
     "completed": "Completed",
     "completedIn": "Completed in {{ms}} ms",
-    "traceFailed": "Failed"
+    "traceFailed": "Failed",
+    "shots": {
+      "summary_one": "{{count}} shot, about {{seconds}} seconds of video",
+      "summary_other": "{{count}} shots, about {{seconds}} seconds of video",
+      "estimate": "About {{time}} to make on this computer, going by the last clip it made.",
+      "noEstimate": "This computer hasn't made a clip yet, so how long this takes isn't known. Each shot can take several minutes or more.",
+      "style": "In every shot: {{style}}",
+      "list": "Shots",
+      "seconds": "{{n}} s",
+      "minutes": "{{n}} min",
+      "hours": "{{n}} h",
+      "hoursMinutes": "{{hours}} h {{minutes}} min"
+    }
   },
   "transcript": {
     "plan": "Plan",
@@ -835,6 +847,7 @@
     "finishingImage": "Finishing the picture…",
     "finishingVideo": "Finishing the clip…",
     "step": "Step {{step}} of {{steps}}",
+    "shot": "Shot {{shot}} of {{shots}}",
     "leftSeconds": "about {{seconds}} s left",
     "leftMinutes": "about {{minutes}} min left",
     "frameImage": "Your picture will appear here",

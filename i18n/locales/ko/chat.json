@@ -285,7 +285,18 @@
     "used_other": "도구 {{count}}개 사용함",
     "completed": "완료됨",
     "completedIn": "{{ms}}ms 만에 완료됨",
-    "traceFailed": "실패"
+    "traceFailed": "실패",
+    "shots": {
+      "summary_other": "샷 {{count}}개, 약 {{seconds}}초 분량의 동영상",
+      "estimate": "이 컴퓨터가 마지막으로 만든 클립을 기준으로 약 {{time}} 걸립니다.",
+      "noEstimate": "이 컴퓨터는 아직 클립을 만든 적이 없어서 얼마나 걸릴지 알 수 없습니다. 샷 하나에 몇 분 이상 걸릴 수 있습니다.",
+      "style": "모든 샷에: {{style}}",
+      "list": "샷",
+      "seconds": "{{n}}초",
+      "minutes": "{{n}}분",
+      "hours": "{{n}}시간",
+      "hoursMinutes": "{{hours}}시간 {{minutes}}분"
+    }
   },
   "transcript": {
     "plan": "계획",
@@ -792,6 +803,7 @@
     "finishingImage": "그림을 마무리하는 중…",
     "finishingVideo": "클립을 마무리하는 중…",
     "step": "{{steps}}단계 중 {{step}}단계",
+    "shot": "샷 {{shot}}/{{shots}}",
     "leftSeconds": "약 {{seconds}}초 남음",
     "leftMinutes": "약 {{minutes}}분 남음",
     "frameImage": "여기에 그림이 나타나요",

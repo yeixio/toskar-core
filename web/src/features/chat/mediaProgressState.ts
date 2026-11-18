@@ -9,13 +9,16 @@ export type MediaProgressState = {
   step: number
   steps: number
   secondsLeft: number
+  /** The shot being made and how many there are, for a longer video (#790). */
+  shot?: number
+  shots?: number
 }
 
 /** The kind of media a tool makes, or null for any other tool. */
 export function mediaKindOf(toolId?: string): MediaKind | null {
   if (toolId === 'image.generate') return 'image'
   if (toolId === 'image.edit') return 'edit'
-  if (toolId === 'video.generate') return 'video'
+  if (toolId === 'video.generate' || toolId === 'video.extend' || toolId === 'video.shots') return 'video'
   return null
 }
 
@@ -28,6 +31,7 @@ export function mediaProgressFrom(payload: Record<string, unknown> | undefined):
     step: Number(payload?.step) || 0,
     steps: Number(payload?.steps) || 0,
     secondsLeft: Number(payload?.seconds_left) || 0,
+    ...(Number(payload?.shots) > 1 ? { shot: Number(payload?.shot) || 0, shots: Number(payload?.shots) } : {}),
   }
 }
 
