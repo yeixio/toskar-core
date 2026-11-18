@@ -28,7 +28,7 @@
     "backgroundTray": "Toskar Pro 仍在系统托盘中运行"
   },
   "conflict": {
-    "title": "另一个 Toskar Pro 正在运行",
+    "title": "另一个 Toskar 已在运行",
     "message": "{{other}} 已在这台电脑上运行，并占用了本应用所需的地址（{{address}}），因此本应用无法启动自己的服务。另一个有自己的模型、聊天和设置。\n\n请退出它后重新打开本应用，或暂时使用另一个。",
     "quit": "退出",
     "useOther": "使用另一个",
