@@ -400,7 +400,7 @@ func entryToContract(e CatalogEntry, installed bool) contracts.Model {
 		Languages:    e.Languages,
 	}
 	m.SupportRole = contracts.SupportRoleOf(m)
-	tags := e.Profile.OrUncategorized()
+	tags := e.OrUncategorized()
 	m.PrimaryCategory, m.Categories, m.Tasks = tags.PrimaryCategory, tags.Categories, tags.Tasks
 	m.InputModalities, m.OutputModalities = tags.InputModalities, tags.OutputModalities
 	if e.License != nil {
