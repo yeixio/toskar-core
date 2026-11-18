@@ -38,6 +38,16 @@ type Subscription struct {
 	// own, such as a developer's set with TOSKAR_RELAY_URL, so the page
 	// doesn't call it Toskar's relay (#1266).
 	Relay string `json:"relay,omitempty"`
+	// Prices are what the checkout charges for each plan, monthly and
+	// yearly, from billing; empty until billing has answered (#1257).
+	Prices map[string]PlanPrice `json:"prices,omitempty"`
+}
+
+// PlanPrice is a plan's price: the amount in the currency's major unit,
+// such as 4.99, and its ISO currency code.
+type PlanPrice struct {
+	Amount   float64 `json:"amount"`
+	Currency string  `json:"currency"`
 }
 
 // handleSubscriptionCheckout starts a subscription to access from

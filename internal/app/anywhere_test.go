@@ -17,6 +17,7 @@ import (
 	"time"
 
 	"github.com/yeixio/toskar-core/internal/auth"
+	"github.com/yeixio/toskar-core/internal/api"
 	"github.com/yeixio/toskar-core/internal/relayclient"
 )
 
@@ -73,6 +74,9 @@ func newAnywhereApp(t *testing.T) (*App, *fakeBilling, *fakeStripeRelay) {
 		b.portal = append(b.portal, body["checkout_session"])
 		b.mu.Unlock()
 		_ = json.NewEncoder(w).Encode(map[string]string{"url": "https://billing.stripe.test/session"})
+	})
+	billing.HandleFunc("GET /api/toskar/anywhere/prices", func(w http.ResponseWriter, r *http.Request) {
+		_, _ = io.WriteString(w, `{"prices":{"monthly":{"amount":5.49,"currency":"usd"},"yearly":{"amount":44.99,"currency":"USD"}}}`)
 	})
 	bsrv := httptest.NewServer(billing)
 	t.Cleanup(bsrv.Close)
@@ -410,5 +414,28 @@ func TestMoveSubscriptionHere(t *testing.T) {
 	route, _ := a.routeID()
 	if r, _, _ := relayclient.ParseToken(a.relayToken()); r != route {
 		t.Fatalf("after the move the token is for %q, want %q", r, route)
+	}
+}
+
+// Settings shows what the checkout charges, from billing, not a price of
+// its own (#1257); before billing answers, none.
+func TestSubscriptionPricesFromBilling(t *testing.T) {
+	a, _, _ := newAnywhereApp(t)
+	if p := a.subscription().Prices; p != nil {
+		t.Fatalf("prices before billing answered: %+v", p)
+	}
+	deadline := time.Now().Add(5 * time.Second)
+	for {
+		p := a.subscription().Prices
+		if p != nil {
+			if p["monthly"] != (api.PlanPrice{Amount: 5.49, Currency: "USD"}) || p["yearly"].Amount != 44.99 {
+				t.Fatalf("prices: %+v", p)
+			}
+			return
+		}
+		if time.Now().After(deadline) {
+			t.Fatal("billing's prices never arrived")
+		}
+		time.Sleep(20 * time.Millisecond)
 	}
 }

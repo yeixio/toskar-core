@@ -7,8 +7,17 @@ import { desktopAnywhere, isDesktopShell, openExternal } from '@/lib/desktopBrid
 import { ShownError, shownError, type Shown } from '@/components/ui/ShownError'
 import { AppStoreSubscription } from './AppStoreSubscription'
 
-/** What access from anywhere costs, as the stores and Stripe charge it, in US dollars. */
+/**
+ * What access from anywhere costs in US dollars, shown only until billing
+ * says what the checkout charges (#1257).
+ */
 const anywherePrices = { monthly: 4.99, yearly: 39.99 } as const
+
+/** A plan's price as the checkout charges it: billing's, else the one above. */
+function planPrice(subscription: AnywhereSubscription, plan: 'monthly' | 'yearly'): string {
+  const billed = subscription.prices?.[plan]
+  return billed ? formatCurrency(billed.amount, billed.currency) : formatCurrency(anywherePrices[plan], 'USD')
+}
 
 /**
  * Opens a checkout or billing page: in the person's browser from the
@@ -191,10 +200,10 @@ function StripeSubscription({ subscription, off }: { subscription: AnywhereSubsc
           ) : null}
           <div className="flex flex-wrap gap-2">
             <button type="button" className="btn-primary" disabled={busy || soldOut || off} onClick={() => subscribe('monthly')}>
-              {t('remote.subscription.monthly', { price: formatCurrency(anywherePrices.monthly, 'USD') })}
+              {t('remote.subscription.monthly', { price: planPrice(subscription, 'monthly') })}
             </button>
             <button type="button" className="btn-secondary" disabled={busy || soldOut || off} onClick={() => subscribe('yearly')}>
-              {t('remote.subscription.yearly', { price: formatCurrency(anywherePrices.yearly, 'USD') })}
+              {t('remote.subscription.yearly', { price: planPrice(subscription, 'yearly') })}
             </button>
           </div>
           {checkout.isPending ? <p className="text-xs text-ink-muted">{t('remote.subscription.opening')}</p> : null}
