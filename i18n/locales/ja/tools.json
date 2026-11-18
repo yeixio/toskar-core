@@ -260,5 +260,42 @@
     "clientId": "サインイン用クライアントID",
     "clientIdHint": "（サービスから提供された場合のみ）",
     "keptHere": "キー、トークン、パスワード、ヘッダーはこのコンピュータに保存され、AIからは見えません。"
+  },
+  "comfyui": {
+    "title": "ComfyUI",
+    "description": "このコンピューターまたは別のコンピューターで動かしている ComfyUI に接続し、ワークフローを保存します。チャットは内蔵の画像・クリップ作成と並んで、ComfyUI ワークフロー ツールでそれを実行します。",
+    "url": "ComfyUI のアドレス",
+    "token": "トークン",
+    "tokenStored": "トークンは保存済みです。変更するには新しいものを入力してください",
+    "tokenOptional": "ComfyUI が求める場合のみ",
+    "save": "保存して確認",
+    "checking": "確認中…",
+    "forgetToken": "トークンを削除",
+    "connected": "ComfyUI {{version}} に接続しました（ノードの種類 {{nodes}}）。",
+    "device": "{{name}}、{{gb}} GB",
+    "models": "モデル {{checkpoints}} 個、LoRA {{loras}} 個。",
+    "safety": "カスタムノードはそのコンピューター上で独自のコードを実行します。Toskar はここで追加した ComfyUI だけを呼び出し、何もインストールせず、作られたものは他のファイルと同じように扱います。",
+    "workflows": "ワークフロー",
+    "noWorkflows": "ワークフローはまだありません。ComfyUI から書き出したものを追加してください。",
+    "remove": "削除",
+    "removeNamed": "{{name}} を削除",
+    "file": "ワークフローのファイル",
+    "fileHint": "ComfyUI で Workflow › Export (API) を使い、ここでファイルを選んでください。",
+    "found": "見つかった入力: {{inputs}}。",
+    "name": "名前",
+    "what": "内容",
+    "whatPlaceholder": "画像を 4 倍に拡大",
+    "add": "ワークフローを追加",
+    "notJSON": "このファイルは JSON ではありません。Workflow › Export (API) で書き出してください。",
+    "input": "{{name}}（ノード {{node}}）",
+    "noInputs": "入力は見つかりませんでした",
+    "inputs": {
+      "prompt": "プロンプト",
+      "negative": "ネガティブプロンプト",
+      "seed": "シード",
+      "image": "画像",
+      "width": "幅",
+      "height": "高さ"
+    }
   }
 }

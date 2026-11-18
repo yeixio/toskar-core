@@ -7,6 +7,7 @@ import { api } from '@/lib/api'
 import type { ToolRecord } from '@/types/api'
 import { RealmKicker } from '@/components/ui/Realm'
 import { ImageSetupCard, VideoSetupCard } from './ImageSetup'
+import { ComfyUICard } from './ComfyUI'
 import { ConnectedServices } from './ConnectedServices'
 import { ToolSources } from './ToolSources'
 import { formatDateTime } from '@/i18n/format'
@@ -163,6 +164,7 @@ export function ToolsPage() {
         <div id="tools-panel-media" role="tabpanel" aria-labelledby="tools-tab-media" className="space-y-5">
           <ImageSetupCard />
           <VideoSetupCard />
+          <ComfyUICard />
         </div>
       )}
 

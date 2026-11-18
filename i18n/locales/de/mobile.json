@@ -907,6 +907,7 @@
       "notification": "Mitteilung",
       "community_ratings": "Community-Bewertungen",
       "update_check": "Update-Prüfung",
+      "comfyui": "ComfyUI",
       "problem_report": "Problembericht",
       "link_check": "Linkprüfung"
     },
@@ -920,6 +921,7 @@
       "notification": "Mitteilung",
       "community_ratings": "Community-Bewertungen",
       "update_check": "Update-Prüfung",
+      "comfyui": "ComfyUI",
       "problem_report": "Problembericht",
       "link_check": "Linkprüfung"
     },

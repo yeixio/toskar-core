@@ -921,6 +921,7 @@
       "notification": "Notifica",
       "community_ratings": "Valutazioni della community",
       "update_check": "Controllo aggiornamenti",
+      "comfyui": "ComfyUI",
       "problem_report": "Segnalazione",
       "link_check": "Controllo link"
     },
@@ -934,6 +935,7 @@
       "notification": "notifica",
       "community_ratings": "valutazioni della community",
       "update_check": "controllo aggiornamenti",
+      "comfyui": "ComfyUI",
       "problem_report": "segnalazione",
       "link_check": "controllo link"
     },

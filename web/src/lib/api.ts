@@ -44,6 +44,9 @@ import type {
   EgressRecord,
   JoinToken,
   JoinTokenCreated,
+  ComfyUIStatus,
+  ComfyWorkflow,
+  ComfyWorkflowInputs,
   ExternalServerInfo,
   ModelRating,
   RatingTag,
@@ -1419,6 +1422,21 @@ export const api = {
   /** Makes a one-time join token for adding a computer (#40); the token is in the answer only. */
   createJoinToken: (ttlMinutes?: number) =>
     request<JoinTokenCreated>('/api/v1/join-tokens', { method: 'POST', body: JSON.stringify(ttlMinutes ? { ttl_minutes: ttlMinutes } : {}) }),
+
+  getComfyUI: () => request<ComfyUIStatus>('/api/v1/comfyui'),
+
+  setComfyUI: (body: { base_url: string; token?: string; clear_token?: boolean }) =>
+    request<ComfyUIStatus>('/api/v1/comfyui', { method: 'PUT', body: JSON.stringify(body) }),
+
+  listComfyWorkflows: async () => (await request<{ workflows: ComfyWorkflow[] }>('/api/v1/comfyui/workflows'))?.workflows ?? [],
+
+  detectComfyWorkflow: (graph: unknown) =>
+    request<ComfyWorkflowInputs>('/api/v1/comfyui/workflows/detect', { method: 'POST', body: JSON.stringify({ graph }) }),
+
+  saveComfyWorkflow: (body: { name: string; description?: string; graph: unknown; inputs?: ComfyWorkflowInputs }) =>
+    request<ComfyWorkflow>('/api/v1/comfyui/workflows', { method: 'POST', body: JSON.stringify(body) }),
+
+  deleteComfyWorkflow: (name: string) => request<null>(`/api/v1/comfyui/workflows/${encodeURIComponent(name)}`, { method: 'DELETE' }),
 
   getExternalServer: () => request<ExternalServerInfo>('/api/v1/external-server'),
 

@@ -125,6 +125,12 @@ func IsEditable(name string) bool {
 	return false
 }
 
+// FindImage returns a PNG or JPEG by id, or the newest one in this chat
+// with that name.
+func FindImage(ctx context.Context, store *artifacts.Store, ref string) (artifacts.Artifact, []byte, error) {
+	return findImage(ctx, store, ref)
+}
+
 // findImage returns an image by id, or the newest one in this chat with that
 // name.
 func findImage(ctx context.Context, store *artifacts.Store, ref string) (artifacts.Artifact, []byte, error) {

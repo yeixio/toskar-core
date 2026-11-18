@@ -263,5 +263,42 @@
     "clientId": "Sign-in client ID",
     "clientIdHint": " (only if the service gave you one)",
     "keptHere": "Keys, tokens, passwords, and headers are kept on this computer, outside the AI's view."
+  },
+  "comfyui": {
+    "title": "ComfyUI",
+    "description": "Connect a ComfyUI you run, here or on another computer, and save its workflows. Chats run them with the ComfyUI Workflow tool, beside the built-in pictures and clips.",
+    "url": "ComfyUI address",
+    "token": "Token",
+    "tokenStored": "A token is stored; type a new one to change it",
+    "tokenOptional": "Optional, if your ComfyUI asks for one",
+    "save": "Save and check",
+    "checking": "Checking…",
+    "forgetToken": "Forget token",
+    "connected": "Connected to ComfyUI {{version}}, with {{nodes}} node types.",
+    "device": "{{name}}, {{gb}} GB",
+    "models": "{{checkpoints}} models and {{loras}} LoRAs.",
+    "safety": "Custom nodes run their own code on that computer. Toskar only calls the ComfyUI you add here, never installs anything into it, and treats what it makes like any other file.",
+    "workflows": "Workflows",
+    "noWorkflows": "No workflows yet. Add one exported from ComfyUI.",
+    "remove": "Remove",
+    "removeNamed": "Remove {{name}}",
+    "file": "Workflow file",
+    "fileHint": "In ComfyUI, use Workflow › Export (API) and choose the file here.",
+    "found": "Inputs found: {{inputs}}.",
+    "name": "Name",
+    "what": "What it does",
+    "whatPlaceholder": "Upscales a picture 4×",
+    "add": "Add workflow",
+    "notJSON": "That file isn't JSON. Export the workflow with Workflow › Export (API).",
+    "input": "{{name}} (node {{node}})",
+    "noInputs": "no inputs found",
+    "inputs": {
+      "prompt": "prompt",
+      "negative": "negative prompt",
+      "seed": "seed",
+      "image": "picture",
+      "width": "width",
+      "height": "height"
+    }
   }
 }

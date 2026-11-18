@@ -2382,9 +2382,51 @@ export interface PersonalStyle {
   location?: string
 }
 
-export type EgressKind = 'web_search' | 'web_page' | 'places' | 'paired_computer' | 'external_server' | 'connector' | 'notification' | 'community_ratings' | 'update_check' | 'news' | 'problem_report' | 'link_check'
+export type EgressKind = 'web_search' | 'web_page' | 'places' | 'paired_computer' | 'external_server' | 'connector' | 'notification' | 'community_ratings' | 'update_check' | 'news' | 'problem_report' | 'link_check' | 'comfyui'
 
 /** The OpenAI-compatible server whose models can be chosen for a chat (#111). */
+/** A node field a ComfyUI workflow takes from the chat (#958). */
+export interface ComfyWorkflowInput {
+  node: string
+  field: string
+}
+
+export interface ComfyWorkflowInputs {
+  prompt?: ComfyWorkflowInput
+  negative?: ComfyWorkflowInput
+  seed?: ComfyWorkflowInput
+  image?: ComfyWorkflowInput
+  width?: ComfyWorkflowInput
+  height?: ComfyWorkflowInput
+}
+
+/** A saved ComfyUI workflow, without its graph. */
+export interface ComfyWorkflow {
+  name: string
+  description?: string
+  inputs: ComfyWorkflowInputs
+  nodes: number
+}
+
+/** What a check of the connected ComfyUI found. */
+export interface ComfyUIInfo {
+  version?: string
+  devices: { name: string; type: string; vram_total: number; vram_free: number }[]
+  /** Model files by kind: checkpoints, diffusion, loras, vae, upscalers. */
+  models: Record<string, string[]>
+  node_types: number
+}
+
+/** The connected ComfyUI (Admin). */
+export interface ComfyUIStatus {
+  base_url: string
+  /** A stored token, never its value. */
+  has_token: boolean
+  info?: ComfyUIInfo
+  /** Why the check failed. */
+  error?: string
+}
+
 export interface ExternalServerInfo {
   base_url: string
   /** A stored API key, never its value. */

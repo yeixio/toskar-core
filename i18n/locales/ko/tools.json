@@ -260,5 +260,42 @@
     "clientId": "로그인 클라이언트 ID",
     "clientIdHint": " (서비스에서 제공한 경우에만)",
     "keptHere": "키, 토큰, 비밀번호, 헤더는 AI가 볼 수 없는 곳인 이 컴퓨터에 보관돼요."
+  },
+  "comfyui": {
+    "title": "ComfyUI",
+    "description": "이 컴퓨터나 다른 컴퓨터에서 실행 중인 ComfyUI를 연결하고 워크플로를 저장하세요. 채팅은 기본 이미지·클립 기능과 함께 ComfyUI 워크플로 도구로 이를 실행합니다.",
+    "url": "ComfyUI 주소",
+    "token": "토큰",
+    "tokenStored": "토큰이 저장되어 있습니다. 바꾸려면 새 토큰을 입력하세요",
+    "tokenOptional": "ComfyUI가 요구하는 경우에만",
+    "save": "저장하고 확인",
+    "checking": "확인 중…",
+    "forgetToken": "토큰 삭제",
+    "connected": "ComfyUI {{version}}에 연결됨, 노드 유형 {{nodes}}개.",
+    "device": "{{name}}, {{gb}}GB",
+    "models": "모델 {{checkpoints}}개, LoRA {{loras}}개.",
+    "safety": "커스텀 노드는 그 컴퓨터에서 자체 코드를 실행합니다. Toskar는 여기서 추가한 ComfyUI만 호출하고, 아무것도 설치하지 않으며, 만들어진 결과는 다른 파일과 똑같이 다룹니다.",
+    "workflows": "워크플로",
+    "noWorkflows": "아직 워크플로가 없습니다. ComfyUI에서 내보낸 것을 추가하세요.",
+    "remove": "삭제",
+    "removeNamed": "{{name}} 삭제",
+    "file": "워크플로 파일",
+    "fileHint": "ComfyUI에서 Workflow › Export (API)를 사용한 뒤 여기서 파일을 선택하세요.",
+    "found": "찾은 입력: {{inputs}}.",
+    "name": "이름",
+    "what": "하는 일",
+    "whatPlaceholder": "이미지를 4배로 확대",
+    "add": "워크플로 추가",
+    "notJSON": "이 파일은 JSON이 아닙니다. Workflow › Export (API)로 내보내세요.",
+    "input": "{{name}} (노드 {{node}})",
+    "noInputs": "입력을 찾지 못했습니다",
+    "inputs": {
+      "prompt": "프롬프트",
+      "negative": "네거티브 프롬프트",
+      "seed": "시드",
+      "image": "이미지",
+      "width": "너비",
+      "height": "높이"
+    }
   }
 }
