@@ -1,10 +1,12 @@
 package api
 
 import (
+	"bufio"
 	"context"
 	"encoding/base64"
 	"encoding/json"
 	"math"
+	"net"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -62,11 +64,17 @@ func TestVoiceRealtimeWebSocket(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	dialer := ws.Dialer{Protocols: []string{"realtime"}}
-	conn, _, hs, err := dialer.Dial(ctx, "ws"+strings.TrimPrefix(ts.URL, "http")+"/api/v1/voice/realtime")
+	raw, br, hs, err := dialer.Dial(ctx, "ws"+strings.TrimPrefix(ts.URL, "http")+"/api/v1/voice/realtime")
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer conn.Close()
+	defer raw.Close()
+	// The server writes session.created as soon as it upgrades, so it can
+	// arrive with the handshake, in br; read it from there first.
+	var conn net.Conn = raw
+	if br != nil {
+		conn = bufferedConn{Conn: raw, r: br}
+	}
 	if hs.Protocol != "realtime" {
 		t.Errorf("subprotocol %q", hs.Protocol)
 	}
@@ -120,3 +128,11 @@ func TestVoiceRealtimeWebSocket(t *testing.T) {
 		}
 	}
 }
+
+// bufferedConn reads what the dialer already buffered before the connection.
+type bufferedConn struct {
+	net.Conn
+	r *bufio.Reader
+}
+
+func (c bufferedConn) Read(p []byte) (int, error) { return c.r.Read(p) }
