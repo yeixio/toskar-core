@@ -45,8 +45,15 @@
     "nornHint": "Quel ordinateur exécute chaque modèle",
     "nornAutomatic": "Automatique",
     "mimirHint": "Fichiers et sources dont Toskar se sert pour répondre",
-    "mimirReady": "Prêt",
-    "justThis": "Cet ordinateur seulement"
+    "justThis": "Cet ordinateur seulement",
+    "placementLocal": "Cet ordinateur",
+    "placementAsk": "Demander à chaque fois",
+    "knowledgeNone": "Aucune source",
+    "knowledgeFailed_one": "{{count}} en échec",
+    "knowledgeFailed_other": "{{count}} en échec",
+    "knowledgeReady_one": "{{count}} source",
+    "knowledgeReady_other": "{{count}} sources",
+    "knowledgeIndexing": "Indexation…"
   },
   "boot": {
     "starting": "Démarrage de Toskar",

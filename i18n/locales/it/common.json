@@ -45,8 +45,15 @@
     "nornHint": "Quale computer esegue ogni modello",
     "nornAutomatic": "Automatico",
     "mimirHint": "File e fonti da cui Toskar risponde",
-    "mimirReady": "Pronto",
-    "justThis": "Solo questo computer"
+    "justThis": "Solo questo computer",
+    "placementLocal": "Questo computer",
+    "placementAsk": "Chiedi ogni volta",
+    "knowledgeNone": "Ancora nessuna fonte",
+    "knowledgeFailed_one": "{{count}} non riuscita",
+    "knowledgeFailed_other": "{{count}} non riuscite",
+    "knowledgeReady_one": "{{count}} fonte",
+    "knowledgeReady_other": "{{count}} fonti",
+    "knowledgeIndexing": "Indicizzazione…"
   },
   "boot": {
     "starting": "Avvio di Toskar",
