@@ -338,6 +338,13 @@ describe('RemoteAccessCard (#456)', () => {
       expect(screen.queryByRole('button', { name: /Subscribe for/ })).not.toBeInTheDocument()
     })
 
+    // Regression: toskar-core#1266
+    it("names a developer's relay instead of calling it Toskar's", async () => {
+      renderCard({ state: 'none', open: true, relay: 'relay.dev.example:4443' })
+      expect(await screen.findByText('Subscription on relay.dev.example:4443', { selector: 'h3' })).toBeInTheDocument()
+      expect(screen.queryByText("Toskar's relay", { selector: 'h3' })).not.toBeInTheDocument()
+    })
+
     it("isn't shown with an organization's relay", async () => {
       renderCard({ state: 'none' }, 'relay.example.com')
       expect(await screen.findByText('Access from anywhere', { selector: 'h2' })).toBeInTheDocument()

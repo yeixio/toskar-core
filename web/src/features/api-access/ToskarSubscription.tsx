@@ -123,7 +123,7 @@ function StripeSubscription({ subscription, off }: { subscription: AnywhereSubsc
     return (
       <div className="space-y-2 rounded-lg border border-line p-3" aria-labelledby="toskar-relay-subscription">
         <h3 id="toskar-relay-subscription" className="text-sm font-medium">
-          {t('remote.subscription.title')}
+          {subscription.relay ? t('remote.subscription.titleOther', { relay: subscription.relay }) : t('remote.subscription.title')}
         </h3>
         <p className="text-sm text-ink-muted">
           {endedOn ? t('remote.subscription.endedInApp', { date: endedOn }) : t('remote.subscription.inAppOnly')}
@@ -137,7 +137,7 @@ function StripeSubscription({ subscription, off }: { subscription: AnywhereSubsc
   return (
     <div className="space-y-3 rounded-lg border border-line p-3" aria-labelledby="toskar-relay-subscription">
       <h3 id="toskar-relay-subscription" className="text-sm font-medium">
-        {t('remote.subscription.title')}
+        {subscription.relay ? t('remote.subscription.titleOther', { relay: subscription.relay }) : t('remote.subscription.title')}
       </h3>
       {subscription.state === 'active' ? (
         <>

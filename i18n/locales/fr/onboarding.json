@@ -37,6 +37,7 @@
   },
   "continue": "Continuer",
   "finding": "Recherche d'une configuration…",
+  "findingDetail": "Vérification de la mémoire et de la carte graphique de cet ordinateur, et des modèles adaptés…",
   "recommendFailed": "Impossible d'obtenir une recommandation.",
   "recommend": {
     "badge": "Recommandé",

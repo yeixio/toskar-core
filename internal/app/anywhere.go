@@ -409,6 +409,9 @@ func (a *App) subscription() *api.Subscription {
 		return nil
 	}
 	out := &api.Subscription{State: "none", InAppOnly: a.inAppOnly()}
+	if name := relayName(cfg); name != relayclient.DefaultRelay {
+		out.Relay = name
+	}
 	session := a.stripeSession()
 	// A token the relay revoked (a refund, or the subscription moved to
 	// another computer) or refused for a blocked route is an ended

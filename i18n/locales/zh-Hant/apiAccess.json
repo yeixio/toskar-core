@@ -72,6 +72,7 @@
       "devices": "手機和平板",
       "devicesHow": "用 6 位數驗證碼連線。",
       "devicesCount_other": "已連線 {{formatted}} 台",
+      "devicesStale_other": "{{formatted}} 個最近未使用",
       "devicesAction": "連線裝置",
       "apps": "應用程式和指令碼",
       "appsHow": "使用下方建立的 API 金鑰。",
@@ -268,6 +269,7 @@
     },
     "subscription": {
       "title": "Toskar 中繼",
+      "titleOther": "{{relay}} 上的訂閱",
       "offer": "當其他方式都無法連到這台電腦時，Toskar 中繼可以連到它，適用於這台電腦及與其配對的每台裝置。",
       "monthly": "以每月 {{price}} 訂閱",
       "yearly": "以每年 {{price}} 訂閱",

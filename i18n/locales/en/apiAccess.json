@@ -74,6 +74,8 @@
       "devicesHow": "Connect with a 6-digit code.",
       "devicesCount_one": "{{formatted}} connected",
       "devicesCount_other": "{{formatted}} connected",
+      "devicesStale_one": "{{formatted}} not used lately",
+      "devicesStale_other": "{{formatted}} not used lately",
       "devicesAction": "Connect a device",
       "apps": "Apps and scripts",
       "appsHow": "Use an API key, created below.",
@@ -271,6 +273,7 @@
     },
     "subscription": {
       "title": "Toskar's relay",
+      "titleOther": "Subscription on {{relay}}",
       "offer": "When nothing else reaches this computer, Toskar's relay does, for this computer and every device paired with it.",
       "monthly": "Subscribe for {{price}} a month",
       "yearly": "Subscribe for {{price}} a year",

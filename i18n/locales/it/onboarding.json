@@ -37,6 +37,7 @@
   },
   "continue": "Continua",
   "finding": "Ricerca di una configurazione…",
+  "findingDetail": "Controllo della memoria e della grafica di questo computer, e dei modelli adatti…",
   "recommendFailed": "Impossibile ottenere un consiglio.",
   "recommend": {
     "badge": "Consigliato",

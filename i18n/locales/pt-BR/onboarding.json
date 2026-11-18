@@ -37,6 +37,7 @@
   },
   "continue": "Continuar",
   "finding": "Encontrando uma configuração…",
+  "findingDetail": "Verificando a memória e a placa de vídeo deste computador, e os modelos que cabem nelas…",
   "recommendFailed": "Não foi possível obter uma recomendação.",
   "recommend": {
     "badge": "Recomendado",

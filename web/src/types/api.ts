@@ -1109,6 +1109,8 @@ export interface NetworkAccess {
   /** API keys made in API Access, for apps and scripts. */
   keys: number
   /** A trusted proxy or OpenID Connect provider signs people in. */
+  /** Of devices, how many are likely left over: never used a day after pairing, or unused for 90 days (#1266). */
+  stale_devices?: number
   sign_in_service: boolean
 }
 

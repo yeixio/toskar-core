@@ -335,6 +335,12 @@ export function OnboardingPage() {
               </button>
             ) : null}
           </div>
+          {/* It can take several seconds: say what's happening (#1266). */}
+          {recommendMutation.isPending ? (
+            <div className="mt-4 flex justify-center">
+              <LoadingSpinner label={t('findingDetail')} />
+            </div>
+          ) : null}
         </>
       )}
 

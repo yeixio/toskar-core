@@ -69,7 +69,7 @@ export function AppStoreSubscription({ subscription, store }: { subscription: An
   return (
     <div className="space-y-3 rounded-lg border border-line p-3" aria-labelledby="toskar-relay-subscription">
       <h3 id="toskar-relay-subscription" className="text-sm font-medium">
-        {t('remote.subscription.title')}
+        {subscription.relay ? t('remote.subscription.titleOther', { relay: subscription.relay }) : t('remote.subscription.title')}
       </h3>
       {active ? (
         ownedHere.data ? (

@@ -74,6 +74,8 @@
       "devicesHow": "Verbinden sich mit einem 6-stelligen Code.",
       "devicesCount_one": "{{formatted}} verbunden",
       "devicesCount_other": "{{formatted}} verbunden",
+      "devicesStale_one": "{{formatted}} länger nicht genutzt",
+      "devicesStale_other": "{{formatted}} länger nicht genutzt",
       "devicesAction": "Gerät verbinden",
       "apps": "Apps und Skripte",
       "appsHow": "Nutzen einen API-Schlüssel, unten erstellt.",
@@ -271,6 +273,7 @@
     },
     "subscription": {
       "title": "Relay von Toskar",
+      "titleOther": "Abo auf {{relay}}",
       "offer": "Wenn sonst nichts diesen Computer erreicht, erreicht ihn das Relay von Toskar – für diesen Computer und jedes damit gekoppelte Gerät.",
       "monthly": "Für {{price}} im Monat abonnieren",
       "yearly": "Für {{price}} im Jahr abonnieren",

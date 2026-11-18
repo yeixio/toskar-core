@@ -1518,6 +1518,10 @@ type NetworkAccess struct {
 	People int `json:"people"`
 	// Devices is phones, tablets, watches, and TVs connected with a code.
 	Devices int `json:"devices"`
+	// StaleDevices is how many of Devices are likely left over: never used
+	// a day after pairing, or not used for 90 days (#1266, contract 1.109).
+	// They can still connect until they're removed.
+	StaleDevices int `json:"stale_devices,omitempty"`
 	// Keys is API keys made in API Access, for apps and scripts.
 	Keys int `json:"keys"`
 	// SignInService is a trusted proxy or OpenID Connect provider that
