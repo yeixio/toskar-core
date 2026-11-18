@@ -466,9 +466,24 @@
       "tested": "Toskar でテスト済みです。",
       "untested": "Hugging Face のモデルです。Toskar ではテストしていないため、うまく動かない場合や動作しない場合があります。業務で使う前にライセンスを確認してください。",
       "link": "Hugging Face で見る",
-      "close": "閉じる"
+      "close": "閉じる",
+      "business": "業務利用",
+      "businessYes": "可",
+      "businessLimited": "ライセンスの範囲内で可",
+      "businessNo": "不可：個人、研究、その他の非商用利用のみ",
+      "businessUnknown": "不明：仕事で使う前にライセンスを確認してください"
     },
-    "bestOverall": "総合おすすめ"
+    "bestOverall": "総合おすすめ",
+    "license": {
+      "free": "無料",
+      "conditions": "条件付きで無料",
+      "unknown": "ライセンス不明"
+    },
+    "business": {
+      "label": "業務利用",
+      "hint": "ライセンスで業務利用が認められているモデルだけを表示します。",
+      "none": "ここには、ライセンスで業務利用が認められているモデルがありません。"
+    }
   },
   "results": {
     "loading": "結果を読み込んでいます…",

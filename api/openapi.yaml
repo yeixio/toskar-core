@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Toskar Control Plane API
-  version: "1.101"
+  version: "1.102"
   description: >-
     Local AI control plane API for Toskar, its OpenAI-compatible routes, and its MCP server.
     On the default loopback bind no key is needed. When the daemon listens on any other address,
@@ -8165,6 +8165,19 @@ components:
               fit: {type: string, enum: [excellent, good, tight, heavy, unsupported]}
               tokens: {type: integer}
         slots: {type: integer, minimum: 1, maximum: 4, description: 'How many requests a chat model installed on this computer answers at once, so a swarm can run that many agents on it together; each keeps the whole context window (#1135, contract 1.88). Absent for other models.'}
+        license:
+          type: object
+          description: "A catalog model's license and what it allows, checked by hand (#593, contract 1.102). Absent where it's unknown, as for a model added from a link."
+          required: [commercial, id, name, url]
+          properties:
+            id: {type: string, description: "The SPDX identifier where there is one, such as apache-2.0, or the license's short name, such as llama3.2"}
+            name: {type: string}
+            url: {type: string}
+            commercial: {type: string, enum: ["yes", limited, "no"], description: "Whether a business may use the model: yes, limited (such as Llama's above 700 million monthly users), or no"}
+            attribution: {type: boolean, description: "Apps or published work built with the model credit it"}
+            accept: {type: boolean, description: "The person agrees to the license's terms before using the model"}
+            notes: {type: string}
+            kind: {type: string, enum: [free, conditions], description: "free: any use, nothing to accept or credit. conditions: free, with terms."}
         languages:
           type: array
           description: How well the model writes each language it has a level for (§13–14, §31), best first.
@@ -8325,6 +8338,7 @@ components:
               name: {type: string}
               description: {type: string}
               license: {type: string}
+              commercial: {type: string, enum: ["yes", limited, "no"], description: "Whether a business may use it under its license (#593, contract 1.102)"}
               memory_bytes: {type: integer, format: int64}
               size_bytes: {type: integer, format: int64}
               edits: {type: boolean, description: "Edits images, or for a video model, animates them"}
@@ -9789,7 +9803,9 @@ components:
           properties:
             likes: {type: integer}
             created_at: {type: string, format: date-time}
-            license: {type: string, description: "The license Hugging Face lists, such as apache-2.0"}
+            license: {type: string, description: "The license Hugging Face lists, such as apache-2.0, or the catalog's license name for a tested model"}
+            commercial: {type: string, enum: ["yes", limited, "no"], description: "Whether a business may use it, from the catalog's checked license or a license Hugging Face lists that says. Absent when unknown (#593, contract 1.102)."}
+            license_kind: {type: string, enum: [free, conditions], description: "Free, or free with conditions. Absent when the license is unknown."}
             details_url: {type: string, description: "The model's page"}
             fit: {$ref: "#/components/schemas/ModelFit"}
             catalog_id: {type: string, description: "Its entry in Toskar's catalog, tested with Toskar, installed by this ID. Empty for everything else."}

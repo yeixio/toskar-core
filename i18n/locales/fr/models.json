@@ -482,9 +482,24 @@
       "tested": "Testé avec Toskar.",
       "untested": "Vient de Hugging Face. Il n'a pas été testé avec Toskar : il peut moins bien fonctionner, voire pas du tout. Vérifiez sa licence avant de l'utiliser au travail.",
       "link": "Voir sur Hugging Face",
-      "close": "Fermer"
+      "close": "Fermer",
+      "business": "Usage professionnel",
+      "businessYes": "Autorisé",
+      "businessLimited": "Autorisé, dans les limites de la licence",
+      "businessNo": "Non autorisé : usage personnel, de recherche ou autre usage non commercial uniquement",
+      "businessUnknown": "Inconnu : vérifiez la licence avant de l'utiliser pour le travail"
     },
-    "bestOverall": "Meilleur choix"
+    "bestOverall": "Meilleur choix",
+    "license": {
+      "free": "Gratuit",
+      "conditions": "Gratuit sous conditions",
+      "unknown": "Licence inconnue"
+    },
+    "business": {
+      "label": "Pour un usage professionnel",
+      "hint": "N'afficher que les modèles dont la licence autorise l'usage professionnel.",
+      "none": "Aucun modèle ici n'a une licence qui autorise l'usage professionnel."
+    }
   },
   "results": {
     "loading": "Chargement des résultats…",

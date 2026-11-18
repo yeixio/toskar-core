@@ -482,9 +482,24 @@
       "tested": "Testado com o Toskar.",
       "untested": "Do Hugging Face. Não foi testado com o Toskar, então pode funcionar pior ou nem funcionar. Confira a licença antes de usar no trabalho.",
       "link": "Ver no Hugging Face",
-      "close": "Fechar"
+      "close": "Fechar",
+      "business": "Uso comercial",
+      "businessYes": "Permitido",
+      "businessLimited": "Permitido, dentro dos limites da licença",
+      "businessNo": "Não permitido: só uso pessoal, de pesquisa ou outro uso não comercial",
+      "businessUnknown": "Desconhecido: confira a licença antes de usar no trabalho"
     },
-    "bestOverall": "Melhor no geral"
+    "bestOverall": "Melhor no geral",
+    "license": {
+      "free": "Grátis",
+      "conditions": "Grátis com condições",
+      "unknown": "Licença desconhecida"
+    },
+    "business": {
+      "label": "Para uso comercial",
+      "hint": "Mostra só modelos cuja licença permite uso comercial.",
+      "none": "Não há modelos aqui com uma licença que permita uso comercial."
+    }
   },
   "results": {
     "loading": "Carregando resultados…",

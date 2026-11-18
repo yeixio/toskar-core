@@ -400,6 +400,11 @@ func entryToContract(e CatalogEntry, installed bool) contracts.Model {
 		Languages:    e.Languages,
 	}
 	m.SupportRole = contracts.SupportRoleOf(m)
+	if e.License != nil {
+		lic := *e.License
+		lic.Kind = lic.KindOf()
+		m.License = &lic
+	}
 	return m
 }
 
