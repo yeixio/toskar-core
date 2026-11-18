@@ -102,6 +102,20 @@ func LiveFrom(ctx context.Context) bool {
 	return live
 }
 
+type spokenKey struct{}
+
+// WithSpoken says the answer will be spoken, in live voice mode (#795):
+// short and conversational, with nothing that only reads well on a screen.
+func WithSpoken(ctx context.Context) context.Context {
+	return context.WithValue(ctx, spokenKey{}, true)
+}
+
+// SpokenFrom says the turn's answer is spoken.
+func SpokenFrom(ctx context.Context) bool {
+	on, _ := ctx.Value(spokenKey{}).(bool)
+	return on
+}
+
 type makeRoomKey struct{}
 
 // WithMakeRoom lets the turn stop the models kept running on this computer

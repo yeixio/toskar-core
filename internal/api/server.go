@@ -44,6 +44,7 @@ import (
 	"github.com/yeixio/toskar-core/internal/training"
 	"github.com/yeixio/toskar-core/internal/turnopts"
 	"github.com/yeixio/toskar-core/internal/version"
+	"github.com/yeixio/toskar-core/internal/voice"
 	"github.com/yeixio/toskar-core/pkg/contracts"
 )
 
@@ -158,6 +159,9 @@ type Dependencies struct {
 	// the computer's own token, which could open its tunnel (#1258).
 	DeviceRelayToken func() string
 	RemoteReach      func() RemoteReach
+	// Voice is live voice mode's stages for the caller (#795): speech to
+	// text, their chat, and text to speech.
+	Voice func(ctx context.Context) (voice.Parts, error)
 	// Transcribe turns an attached recording into text with speech.transcribe,
 	// wherever it runs (yeixio/toskar-apps#155).
 	Transcribe func(ctx context.Context, artifactID, language string) (Transcription, error)

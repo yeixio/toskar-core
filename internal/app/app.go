@@ -626,6 +626,7 @@ func New(opts Options) (*App, error) {
 		RemoteReach:        a.remoteReach,
 		CheckReach:         a.checkReach,
 		Transcribe:         a.transcribeRecording,
+		Voice:              a.voiceParts,
 		RouteSecret:        a.routeSecret,
 		RelayName:          func() string { return relayName(a.Config.Get()) },
 		DeviceRelayToken:   a.deviceRelayToken,

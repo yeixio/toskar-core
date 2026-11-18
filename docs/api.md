@@ -37,6 +37,7 @@ A phone's key reaches only what the phone uses:
 - answering a tool's question;
 - the chat's files, and attaching a photo, file, or recording (`POST /artifacts`, and `DELETE /artifacts/{id}` to take it off before sending);
 - a recording's text, for speaking a message (`POST /speech/transcribe` with `{artifact_id, language}`: `{text, language, duration_seconds}` from Whisper on this computer or a paired one, or `503 SPEECH_UNAVAILABLE`);
+- live voice mode (`GET /voice/realtime`, a WebSocket speaking OpenAI's Realtime protocol: the person talks, Toskar answers out loud through their chat a sentence at a time and stops when talked over; #795, contract 1.100, [voice](voice.md));
 - read-only lists: health, version, settings, profiles, models, running models, and computers;
 - warming a chat's model;
 - automations: listing them, one with its runs, Run now, Pause, Resume, and opening a run's result in chat (not making, editing, or deleting one);
@@ -82,7 +83,7 @@ Chats and their messages, memories, files, and automations are private to their 
 - **Network access:** turning on `lan_api_enabled` needs someone who could connect: a person other than the Owner who isn't disabled (they sign in with a username and password, or still have a link to choose them), a connected device, an API key, trusted proxies, or an OpenID Connect provider; otherwise it answers `API_KEY_REQUIRED`. People need no API key. For Admins, `GET /api/v1/settings` counts them in `network_access` (`people`, `devices`, `keys`, `sign_in_service`; #711, contract 1.42). The app's People page (`/people`) adds people and shows their links, and `/invite/<token>` is the page a link opens.
 
 **Roles.** Every `/api/v1` request from a key or a signed-in browser is checked against its person's role; one that needs more answers `403 ROLE_REQUIRED` with `details.role`, the least role that may.
-- **Visitors** chat: `/chat`, their conversations and their files, `/tools/decide`, `/speech` and `/speech/transcribe`, and reading settings, profiles, models, tools, specialized AIs, and computers.
+- **Visitors** chat: `/chat`, their conversations and their files, `/tools/decide`, `/speech`, `/speech/transcribe` and `/voice/realtime`, and reading settings, profiles, models, tools, specialized AIs, and computers.
 - **Members** also have their memories, automations, and notifications, and read knowledge sources and search them.
 - **Admins** have everything else: models, runtimes, tools, profiles, knowledge sources, computers, keys, devices, people, settings, notifications, runs, training, performance, and diagnostics.
 - **The Owner** alone erases everything (`POST /settings/reset`).

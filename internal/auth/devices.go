@@ -356,6 +356,8 @@ var deviceRoutes = map[string]bool{
 	"DELETE /api/v1/artifacts/{id}": true,
 	// Speaking a message: the recording, attached above, as text (#155).
 	"POST /api/v1/speech/transcribe": true,
+	// Live voice mode (#795).
+	"GET /api/v1/voice/realtime": true,
 	// A setup offer in a chat (yeixio/toskar-apps#198): set up what the
 	// request needed, follow it, or stop it. Admins only, by role, as on
 	// the computer; a Member's phone gets ROLE_REQUIRED.

@@ -61,3 +61,12 @@ func TestKeysApart(t *testing.T) {
 		t.Fatalf("with both, From = %+v and BranchFrom = %+v", From(both), BranchFrom(both))
 	}
 }
+
+func TestSpoken(t *testing.T) {
+	if SpokenFrom(context.Background()) {
+		t.Fatal("a written turn reads as spoken")
+	}
+	if !SpokenFrom(WithSpoken(context.Background())) {
+		t.Fatal("a spoken turn (#795) reads as written")
+	}
+}

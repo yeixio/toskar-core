@@ -97,7 +97,7 @@ func (f *fakeSTT) Transcribe(_ context.Context, wav []byte, _ string) (string, e
 type fakeLLM struct {
 	deltas []string
 	// hold blocks after the first delta until the answer is cancelled.
-	hold bool
+	hold  bool
 	asked chan string
 }
 

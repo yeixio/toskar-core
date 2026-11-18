@@ -17,6 +17,7 @@ func (s *Server) BindSpeech(engine *speech.Engine, store *artifacts.Store) {
 func (s *Server) speechRoutes(api *mux.Router) {
 	api.HandleFunc("/speech", s.handleSpeech).Methods(http.MethodPost)
 	api.HandleFunc("/speech/transcribe", s.handleTranscribe).Methods(http.MethodPost)
+	api.HandleFunc("/voice/realtime", s.handleRealtime).Methods(http.MethodGet)
 }
 
 // handleTranscribe turns a recording the person attached into text, for
