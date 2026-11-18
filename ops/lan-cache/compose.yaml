@@ -1,0 +1,70 @@
+# The LAN download cache for Toskar's home CI runners (README.md). The
+# "LAN download cache" workflow (.github/workflows/lan-cache.yml) starts it
+# on a home runner; by hand it is:
+#
+#   docker compose up -d --build
+#
+# Three caches, each keeping what one runner downloaded for the others:
+#   :8380  nginx      Hugging Face models, Go modules, Playwright's browsers,
+#                     Maven and Gradle
+#   :4873  Verdaccio  npm and pnpm packages
+#   :5005  registry   Docker Hub images (a pull-through mirror)
+#
+# The configuration is built into the images and the files are kept in
+# Docker volumes, so nothing depends on a folder on the computer. A file
+# nobody has asked for in CACHE_DAYS days is removed, so a model in weekly
+# use stays.
+name: toskar-lan-cache
+
+services:
+  downloads:
+    build:
+      context: .
+      dockerfile_inline: |
+        FROM nginx:1.29-alpine
+        COPY nginx.conf.template /etc/nginx/templates/default.conf.template
+    image: toskar-lan-cache-downloads
+    restart: unless-stopped
+    ports: ["${BIND:-0.0.0.0}:8380:8380"]
+    environment:
+      # Most of the disk nginx may use before it removes the least recently used files.
+      MAX_SIZE: ${MAX_SIZE:-300g}
+      CACHE_DAYS: ${CACHE_DAYS:-45}
+      NGINX_ENVSUBST_FILTER: "^(MAX_SIZE|CACHE_DAYS)$"
+    volumes:
+      - downloads:/var/cache/lan
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8380/healthz"]
+      interval: 30s
+
+  npm:
+    build:
+      context: .
+      dockerfile_inline: |
+        FROM verdaccio/verdaccio:6
+        COPY verdaccio.yaml /verdaccio/conf/config.yaml
+    image: toskar-lan-cache-npm
+    restart: unless-stopped
+    ports: ["${BIND:-0.0.0.0}:4873:4873"]
+    volumes:
+      - npm:/verdaccio/storage
+
+  docker:
+    image: registry:3
+    restart: unless-stopped
+    ports: ["${BIND:-0.0.0.0}:5005:5000"]
+    environment:
+      REGISTRY_PROXY_REMOTEURL: https://registry-1.docker.io
+      # Signing in to Docker Hub raises its pull limit; blank pulls anonymously.
+      REGISTRY_PROXY_USERNAME: ${DOCKERHUB_USERNAME:-}
+      REGISTRY_PROXY_PASSWORD: ${DOCKERHUB_TOKEN:-}
+      REGISTRY_PROXY_TTL: ${DOCKER_TTL:-1080h}
+      REGISTRY_STORAGE_DELETE_ENABLED: "true"
+      OTEL_TRACES_EXPORTER: none
+    volumes:
+      - docker:/var/lib/registry
+
+volumes:
+  downloads:
+  npm:
+  docker:

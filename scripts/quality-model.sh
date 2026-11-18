@@ -75,7 +75,12 @@ model() {
     rm -f "$file" "$file.sha256"
   fi
   if [[ ! -s "$file" ]]; then
-    curl -fL --retry 3 -o "$file.$$.part" "$MODEL_URL" >&2
+    # Through the LAN download cache first when there is one (ops/lan-cache).
+    local mirror="${TOSKAR_DOWNLOAD_MIRROR%/}"
+    if [[ -z "$mirror" || "$MODEL_URL" != https://huggingface.co/* ]] ||
+      ! curl -fL --retry 1 --connect-timeout 5 -o "$file.$$.part" "$mirror/hf/${MODEL_URL#https://huggingface.co/}" >&2; then
+      curl -fL --retry 3 -o "$file.$$.part" "$MODEL_URL" >&2
+    fi
     mv "$file.$$.part" "$file"
     rm -f "$file.sha256"
   fi

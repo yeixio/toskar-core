@@ -7,6 +7,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -14,6 +15,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/yeixio/toskar-core/internal/dlmirror"
 	"github.com/yeixio/toskar-core/internal/events"
 	"github.com/yeixio/toskar-core/pkg/contracts"
 )
@@ -105,7 +107,7 @@ func (d *Downloader) Download(ctx context.Context, entry CatalogEntry) error {
 
 	var done uint64
 	if projector != nil {
-		_, n, err := d.fetch(ctx, dctx, entry.ID, projector.URL, projector.SHA256,
+		_, n, err := d.fetchAny(ctx, dctx, entry.ID, projector.URL, projector.SHA256,
 			d.storage.ProjectorTempPath(entry.ID), d.storage.ProjectorPath(entry.ID), 0, need)
 		if err != nil {
 			return d.fail(ctx, entry.ID, downloadID, err)
@@ -113,7 +115,7 @@ func (d *Downloader) Download(ctx context.Context, entry CatalogEntry) error {
 		done = n
 	}
 	if draft != nil {
-		_, n, err := d.fetch(ctx, dctx, entry.ID, draft.URL, draft.SHA256,
+		_, n, err := d.fetchAny(ctx, dctx, entry.ID, draft.URL, draft.SHA256,
 			d.storage.DraftTempPath(entry.ID), d.storage.DraftPath(entry.ID), done, need)
 		if err != nil {
 			return d.fail(ctx, entry.ID, downloadID, err)
@@ -122,7 +124,7 @@ func (d *Downloader) Download(ctx context.Context, entry CatalogEntry) error {
 	}
 	if !installed {
 		finalPath = d.storage.ModelPath(entry.ID)
-		sum, n, err := d.fetch(ctx, dctx, entry.ID, entry.Source.URL, entry.Source.SHA256,
+		sum, n, err := d.fetchAny(ctx, dctx, entry.ID, entry.Source.URL, entry.Source.SHA256,
 			d.storage.TempPath(entry.ID), finalPath, done, need)
 		if err != nil {
 			return d.fail(ctx, entry.ID, downloadID, err)
@@ -137,6 +139,21 @@ func (d *Downloader) Download(ctx context.Context, entry CatalogEntry) error {
 		"path":     finalPath,
 	}))
 	return nil
+}
+
+// fetchAny fetches url through the download mirror when one is set
+// (TOSKAR_DOWNLOAD_MIRROR), and from url itself when the mirror fails or
+// sends a file whose SHA-256 doesn't match.
+func (d *Downloader) fetchAny(ctx, dctx context.Context, modelID, url, wantSum, tempPath, finalPath string, base, total uint64) (string, uint64, error) {
+	urls := dlmirror.URLs(url)
+	for i, u := range urls {
+		sum, n, err := d.fetch(ctx, dctx, modelID, u, wantSum, tempPath, finalPath, base, total)
+		if err == nil || dctx.Err() != nil || i == len(urls)-1 {
+			return sum, n, err
+		}
+		slog.Warn("the download mirror failed; downloading from the source", "model", modelID, "err", err)
+	}
+	return "", 0, fmt.Errorf("no address to download %s from", modelID)
 }
 
 // fetch downloads url to finalPath, resuming tempPath, and checks its
