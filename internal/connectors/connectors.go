@@ -492,14 +492,20 @@ func (m *Manager) CameraPicture(ctx context.Context, service, device string) ([]
 	if err != nil {
 		return nil, "", err
 	}
-	if service != "homeassistant" {
+	if service != "homeassistant" && service != "reolink" {
 		return nil, "", fmt.Errorf("%s has no cameras", s.Name())
 	}
 	cred, err := m.credential(service)
 	if err != nil {
 		return nil, "", fmt.Errorf("%s is not connected. Connect it in Settings", s.Name())
 	}
-	data, mime, err := haCameraPicture(ctx, m.client, cred, device)
+	var data []byte
+	var mime string
+	if service == "reolink" {
+		data, mime, err = reolinkSnapshot(ctx, m.client, cred)
+	} else {
+		data, mime, err = haCameraPicture(ctx, m.client, cred, device)
+	}
 	if err != nil {
 		return nil, "", sanitizeErr(err, secretsOnly(s, cred))
 	}

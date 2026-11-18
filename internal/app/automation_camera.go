@@ -69,6 +69,10 @@ func camerasNote(cams []automations.Camera) string {
 	names := make([]string, len(cams))
 	for i, c := range cams {
 		names[i] = spokenCamera(c.Device)
+		// A Reolink connection is one camera, named camera (#667).
+		if c.Connector == automations.CameraReolink {
+			names[i] = "Reolink"
+		}
 	}
 	shown := "A picture from the " + names[0] + " camera, taken as this run started, is shown with this message."
 	if len(names) > 1 {

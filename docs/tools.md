@@ -244,6 +244,12 @@ GitHub (`github.search`, `github.issue`, `github.comment`), Home Assistant (`hom
 
 A message that names a flight number, or asks about a flight, gate, boarding, departures, or arrivals, is offered the tool. Each look-up is listed in What left this computer.
 
+### Reolink camera
+
+**Reolink camera** (#667) connects to a Reolink camera or doorbell straight through the camera's own HTTP API on your network, with no Home Assistant, Reolink hub software, or cloud in between. Give the camera's address (`http://` or `https://`; over HTTPS the camera's own certificate is pinned the first time and refused if it changes), a user, and its password. A doorbell or battery camera paired to a Home Hub or NVR has no address of its own: give the hub's address and the camera's **Channel** there, counted from 0.
+
+It adds no chat tools. Automations use it: its `camera` can be one an automation looks at as each run starts, and its detections are device triggers: `person`, `vehicle`, `animal`, `motion`, and `doorbell` (the button), each `on` while the camera sees it, listed only when the camera supports them. Toskar asks the camera what it sees every second (`GetEvents`, or `GetAiState` and `GetMdState` on older cameras) and keeps one sign-in for as long as the camera allows. `internal/connectors/reolinktest` is a simulated doorbell for tests.
+
 ### Email and calendar
 
 Email and Calendar connect to your own accounts with an app password, not your account password, over standard protocols. No Google or Microsoft sign-in app is involved.
