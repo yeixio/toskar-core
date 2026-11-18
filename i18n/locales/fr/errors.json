@@ -292,5 +292,7 @@
   "CHECKOUT_NONE": "Aucun paiement en cours à annuler.",
   "MOVE_TOO_SOON": "L'abonnement a été déplacé il y a moins d'un jour. Il pourra l'être de nouveau demain.",
   "MOVE_NEEDS_COMPUTER": "Pour le déplacer, le relais de Toskar doit avoir des nouvelles de l'ordinateur qui l'utilise : allumez-le une fois, ou attendez qu'il soit éteint depuis 3 jours.",
-  "MOVE_FAILED": "Le relais de Toskar n'a pas déplacé l'abonnement ({{relay_code}})."
+  "MOVE_FAILED": "Le relais de Toskar n'a pas déplacé l'abonnement ({{relay_code}}).",
+  "VOICE_UNAVAILABLE": "La voix en direct n’est pas disponible sur cet ordinateur.",
+  "WEBSOCKET_REQUIRED": "La voix en direct a besoin d’une connexion WebSocket."
 }

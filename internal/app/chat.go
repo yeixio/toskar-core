@@ -1950,6 +1950,10 @@ func (e *chatExecEnv) TurnInstructions(ctx context.Context, prompt string) strin
 	if block := muninn.Block(e.memories); block != "" {
 		parts = append(parts, block)
 	}
+	// An answer spoken aloud, in live voice mode (#795).
+	if turnopts.SpokenFrom(tctx) {
+		parts = append(parts, spokenStyle)
+	}
 	// The app calling the API holds a key to this computer, so its system
 	// messages are trusted too. They cannot change what tools may do.
 	if e.opts != nil && strings.TrimSpace(e.opts.System) != "" {

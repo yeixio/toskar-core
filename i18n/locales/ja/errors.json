@@ -292,5 +292,7 @@
   "CHECKOUT_NONE": "キャンセルできる支払い手続きはありません。",
   "MOVE_TOO_SOON": "サブスクリプションは1日以内に移されています。明日以降にもう一度移せます。",
   "MOVE_NEEDS_COMPUTER": "移すには、Toskarのリレーが今そのサブスクリプションを使っているコンピューターと通信する必要があります。そのコンピューターを一度起動するか、3日間オフになるまでお待ちください。",
-  "MOVE_FAILED": "Toskarのリレーはサブスクリプションを移しませんでした（{{relay_code}}）。"
+  "MOVE_FAILED": "Toskarのリレーはサブスクリプションを移しませんでした（{{relay_code}}）。",
+  "VOICE_UNAVAILABLE": "このコンピューターではライブ音声を使えません。",
+  "WEBSOCKET_REQUIRED": "ライブ音声には WebSocket 接続が必要です。"
 }

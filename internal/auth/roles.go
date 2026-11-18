@@ -82,6 +82,7 @@ var visitorRoutes = map[string]bool{
 	"DELETE /api/v1/artifacts/{id}":                       true,
 	"POST /api/v1/speech":                                 true,
 	"POST /api/v1/speech/transcribe":                      true,
+	"GET /api/v1/voice/realtime":                          true,
 	"GET /api/v1/tools":                                   true,
 	"GET /api/v1/training/deployed":                       true,
 }

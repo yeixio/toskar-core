@@ -292,5 +292,7 @@
   "CHECKOUT_NONE": "No hay ningún pago abierto que cancelar.",
   "MOVE_TOO_SOON": "La suscripción se movió hace menos de un día. Podrá moverse de nuevo mañana.",
   "MOVE_NEEDS_COMPUTER": "Para moverla, el relé de Toskar necesita saber del ordenador donde está ahora: enciéndelo una vez, o espera a que lleve 3 días apagado.",
-  "MOVE_FAILED": "El relé de Toskar no movió la suscripción ({{relay_code}})."
+  "MOVE_FAILED": "El relé de Toskar no movió la suscripción ({{relay_code}}).",
+  "VOICE_UNAVAILABLE": "La voz en directo no está disponible en este ordenador.",
+  "WEBSOCKET_REQUIRED": "La voz en directo necesita una conexión WebSocket."
 }
