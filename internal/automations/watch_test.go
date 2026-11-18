@@ -113,3 +113,24 @@ func TestDeviceTrigger(t *testing.T) {
 		}
 	}
 }
+
+// A Reolink camera reached directly names what it detects, and its camera
+// is just camera (#667).
+func TestReolinkDevices(t *testing.T) {
+	for _, d := range []string{"person", "doorbell", "motion", "vehicle", "animal"} {
+		if err := (&Trigger{Kind: TriggerDevice, Connector: "reolink", Device: d, To: "on"}).Validate(); err != nil {
+			t.Fatalf("%s: %v", d, err)
+		}
+	}
+	for _, d := range []string{"camera", "binary_sensor.person", ""} {
+		if err := (&Trigger{Kind: TriggerDevice, Connector: "reolink", Device: d}).Validate(); err == nil {
+			t.Fatalf("%q accepted", d)
+		}
+	}
+	if err := ValidateCameras([]Camera{{Connector: CameraReolink, Device: "camera"}}); err != nil {
+		t.Fatal(err)
+	}
+	if err := ValidateCameras([]Camera{{Connector: CameraReolink, Device: "camera.front"}}); err == nil {
+		t.Fatal("a Reolink camera named like Home Assistant's was accepted")
+	}
+}

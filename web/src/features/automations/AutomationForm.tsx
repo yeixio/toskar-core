@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import type { AIProfile, Automation, AutomationAction, AutomationClockTime, AutomationInput, AutomationSchedule, AutomationTrigger, Device, Model, ParsedAutomation, ToolRecord } from '@/types/api'
+import type { AIProfile, Automation, AutomationAction, AutomationClockTime, AutomationInput, AutomationSchedule, AutomationTrigger, Device, DeviceConnector, Model, ParsedAutomation, ToolRecord } from '@/types/api'
 import i18n from '@/i18n'
 import { api } from '@/lib/api'
 import { canChat, modelUsesTools } from '@/features/models/modelPresentation'
@@ -237,8 +237,8 @@ export function AutomationForm({ profiles, models, tools, others = [], initial, 
     return watchTrigger(triggerKind, triggerURL, afterWhen)
   }
 
-  function connectorOf(device: string): 'homeassistant' {
-    return (devices.find((d) => d.device === device)?.connector ?? 'homeassistant') as 'homeassistant'
+  function connectorOf(device: string): DeviceConnector {
+    return (devices.find((d) => d.device === device)?.connector ?? 'homeassistant') as DeviceConnector
   }
 
   function currentNotification(): AutomationInput['notification'] {

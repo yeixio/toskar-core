@@ -1885,9 +1885,13 @@ export interface AutomationInput {
   actions?: AutomationAction[]
 }
 
+/** A service with devices: Home Assistant, or a Reolink camera reached directly (#667), whose devices are camera, person, vehicle, animal, motion, and doorbell. */
+export type DeviceConnector = 'homeassistant' | 'reolink'
+
 /** A connected service's camera (#667): device is the camera as that service names it, such as Home Assistant's camera.driveway. */
 export interface AutomationCamera {
-  connector: 'homeassistant'
+  /** reolink is a Reolink camera reached directly, whose device is always camera (#667, contract 1.109). */
+  connector: DeviceConnector
   device: string
 }
 
@@ -1900,7 +1904,7 @@ export interface AutomationTrigger {
   automation_id?: string
   when?: 'succeeded' | 'notified'
   /** A device trigger's connected service and device, such as Home Assistant's binary_sensor.front_door_visitor; to is the state it must change to (empty: any change), and cooldown_seconds the wait after a run (0: 60) (#586, contract 1.50). */
-  connector?: 'homeassistant'
+  connector?: DeviceConnector
   device?: string
   to?: string
   cooldown_seconds?: number

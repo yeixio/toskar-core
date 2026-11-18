@@ -29,9 +29,6 @@ var (
 	deviceBackoffMax = 5 * time.Minute
 )
 
-// homeAssistant is the connector with devices to watch so far.
-const homeAssistant = "homeassistant"
-
 type deviceTriggers struct {
 	app *App
 	mu  sync.Mutex
@@ -81,17 +78,23 @@ func (d *deviceTriggers) loop(ctx context.Context) {
 		if err == nil && !sameDevices(want, watching) && (watching != nil || !time.Now().Before(retryAt)) {
 			cancel()
 			watching, cancel = nil, func() {}
-			if devices := want[homeAssistant]; len(devices) > 0 {
+			if len(want) > 0 {
 				wctx, stop := context.WithCancel(ctx)
 				watching, cancel, started = want, stop, time.Now()
-				go func() {
-					err := d.app.Connectors.WatchDevices(wctx, homeAssistant, devices, func(c connectors.DeviceChange) {
-						d.changed(ctx, homeAssistant, c)
-					})
-					if wctx.Err() == nil {
-						dropped <- err
-					}
-				}()
+				// One watch for each service; a drop of any restarts them all.
+				for connector, devices := range want {
+					go func() {
+						err := d.app.Connectors.WatchDevices(wctx, connector, devices, func(c connectors.DeviceChange) {
+							d.changed(ctx, connector, c)
+						})
+						if wctx.Err() == nil {
+							select {
+							case dropped <- err:
+							default:
+							}
+						}
+					}()
+				}
 			}
 		}
 		select {

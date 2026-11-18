@@ -295,6 +295,10 @@ const MaxCameras = 4
 // CameraHomeAssistant is a Home Assistant camera.
 const CameraHomeAssistant = "homeassistant"
 
+// CameraReolink is a Reolink camera reached directly (#667): its device is
+// always "camera", since one connection is one camera.
+const CameraReolink = "reolink"
+
 // ValidateCameras checks the cameras can be looked at.
 func ValidateCameras(cams []Camera) error {
 	if len(cams) > MaxCameras {
@@ -314,6 +318,10 @@ func (c Camera) Validate() error {
 	case CameraHomeAssistant:
 		if !strings.HasPrefix(c.Device, "camera.") || len(c.Device) <= len("camera.") || strings.ContainsAny(c.Device, "/?# ") {
 			return fmt.Errorf("a Home Assistant camera is an entity such as camera.driveway, not %q", c.Device)
+		}
+	case CameraReolink:
+		if c.Device != "camera" {
+			return fmt.Errorf("a Reolink camera's device is camera, not %q", c.Device)
 		}
 	default:
 		return fmt.Errorf("unsupported camera connector %q", c.Connector)
