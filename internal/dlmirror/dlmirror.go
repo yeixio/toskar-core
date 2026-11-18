@@ -26,7 +26,7 @@ var prefixes = []struct{ source, path string }{
 // when a mirror is set and caches raw's source, then raw itself.
 func URLs(raw string) []string {
 	base := strings.TrimRight(strings.TrimSpace(os.Getenv(Env)), "/")
-	if base == "" || !(strings.HasPrefix(base, "http://") || strings.HasPrefix(base, "https://")) {
+	if base == "" || (!strings.HasPrefix(base, "http://") && !strings.HasPrefix(base, "https://")) {
 		return []string{raw}
 	}
 	for _, p := range prefixes {
