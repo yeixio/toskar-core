@@ -74,5 +74,6 @@
     "title": "一切就绪",
     "description": "推荐配置已安装。开始与你的本地 AI 聊天吧。",
     "start": "开始聊天"
-  }
+  },
+  "setupLater": "稍后设置"
 }

@@ -75,5 +75,6 @@
     "title": "You are ready",
     "description": "Your recommended setup is installed. Start chatting with your local AI.",
     "start": "Start chatting"
-  }
+  },
+  "setupLater": "Set up later"
 }
