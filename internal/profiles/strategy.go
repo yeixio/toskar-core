@@ -57,6 +57,7 @@ var legacyRoles = map[string]string{
 // Other profiles are returned unchanged.
 func Normalize(p Profile) Profile {
 	p.Topics = normalizeTopics(p.Topics)
+	p.Audience = strings.ToLower(strings.TrimSpace(p.Audience))
 	if p.OrchestratorID == legacyOrchestrator {
 		p.OrchestratorID = "simple"
 		if p.Orchestration.Strategy == "" {

@@ -153,7 +153,9 @@ func (e automationExecutor) execute(ctx context.Context, automation automations.
 		env.base.trace.untrusted = true
 		env.fromTrigger = true
 	}
-	if e.app.Muninn != nil && e.app.Settings != nil {
+	// A profile that talks with strangers never gets the owner's memories,
+	// as a doorbell's run doesn't (#667).
+	if e.app.Muninn != nil && e.app.Settings != nil && !publicAudience(profile) && profile.Orchestration.Memory != "off" {
 		if on, _ := e.app.Settings.GetBool(ctx, "memory_enabled", true); on {
 			if mems, err := e.app.Muninn.Relevant(ctx, automation.Prompt, ""); err == nil {
 				env.base.memories = mems

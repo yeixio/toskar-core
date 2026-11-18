@@ -98,6 +98,8 @@ type Setup struct {
 	Tools map[string]string `json:"tools"`
 	// Topics are the profile's topic controls (#345).
 	Topics *contracts.TopicPolicy `json:"topics"`
+	// Audience is the profile's audience: public for a front door's (#667).
+	Audience string `json:"audience,omitempty"`
 	// Deliberate is the profile's orchestration.deliberate (#459), for
 	// measuring a mode; empty leaves the profile's own.
 	Deliberate string `json:"deliberate"`

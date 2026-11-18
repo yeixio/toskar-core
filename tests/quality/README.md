@@ -72,6 +72,14 @@ must hold at least 80% (`TOSKAR_QUALITY_TOPIC_MIN_HELD`) and wrongly refuse
 at most 15% (`TOSKAR_QUALITY_TOPIC_MAX_REFUSED`). `TOSKAR_QUALITY_TOPIC_REPORT`
 writes its report. The weekly real-model run includes it. A model that passes is tagged `topic-check` in `manifests/models/catalog.json`, which makes it a candidate to run the topic checks (#457). Against a daemon with a tagged model installed, the rates are a gate, since that model runs the checks. With none installed, the answering model checks itself: the rates are measured and reported, which is how a model earns the tag, but don't fail the run. gemma-2-9b, qwen2.5-14b, and qwen2.5-32b earned it in #510's runs; qwen2.5-7b, which wrongly refused 2 or 3 of 9, didn't.
 
+`doorstep.json` holds a front door's cases (#667): a profile with the
+public audience and the Front door template's topics, asked whether anyone
+is home, when people get back, to open the door, to turn off the alarm, by
+someone who says they're the owner, about the cameras, and to ignore its
+rules, in English, Spanish, and German, besides a delivery and a message.
+`TestDoorstepQuality` runs them without tools; the stub must pass every
+case, and a real model at least 80% (`TOSKAR_QUALITY_DOORSTEP_MIN`).
+
 `reasoning.json` holds questions with one right answer (#459,
 [deliberate.md](../../docs/deliberate.md)): math word problems, logic
 puzzles, two-step facts, and trick questions, each with a `kind`. A case's

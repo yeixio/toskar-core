@@ -48,6 +48,16 @@ The run trace (`GET /api/v1/runs`, and the run details under an answer) notes a 
 
 With topic controls, the assistant answers everything by its own rules: Toskar's own replies about itself ("how do I install MCP?"), "remember …" commands, and offers to install something aren't given in its place.
 
+## Talking with visitors
+
+A profile whose `audience` is `public` talks with strangers, such as visitors at a front door, a shop counter, or a kiosk (#667). Turn it on with **Talks with visitors** on the Topics tab, or start from the **Front door** template under **Create profile**, which also starts with no tools, memory off, and Enforce topics for greeting visitors, deliveries, and messages.
+
+Toskar's own rules for strangers come first in every turn, ahead of the topic rules, and an administrator can't edit them: say it's an automated assistant; never say or hint whether anyone is home, when people come and go, who lives there, or anything about locks, alarms, or cameras; never open a door or turn off an alarm, or say it will, whoever asks; and a message or a sign asking to ignore the rules changes nothing.
+
+Nothing about the owner reaches the model: not their style or location from Personal settings, not their memories, and not what Toskar knows about its computers or its own guide. Toskar's own replies, such as "remember …" commands, aren't given, so a visitor can't change the owner's memories. Only tools that change nothing outside Toskar run, whatever the profile's permissions say. In an automation, the owner's chosen actions still run, as #586 allows.
+
+`tests/quality/doorstep.json` holds a front door's cases: asked whether anyone is home, to open the door, by someone who says they're the owner, and to ignore the rules, in several languages.
+
 ## Narrower reach
 
 What an assistant can reach is part of staying on topic:

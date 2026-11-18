@@ -37,6 +37,10 @@
         "label": "Investigación",
         "description": "Lectura de textos largos y razonamiento cuidadoso."
       },
+      "doorstep": {
+        "label": "Puerta de entrada",
+        "description": "Saluda a las visitas y toma mensajes. No sabe nada de ti y no puede abrir la puerta."
+      },
       "blank": {
         "label": "En blanco",
         "description": "Empieza vacío y define tú mismo los roles, las herramientas y las computadoras."
@@ -503,5 +507,21 @@
       "label": "Minutos",
       "help": "Tiempo máximo de un enjambre (1–240). Vacío es 5 para una pregunta y 30 para una tarea."
     }
+  },
+  "templates": {
+    "doorstep": {
+      "name": "Puerta de entrada",
+      "staysOn": "Saludar a las visitas en la puerta: entregas, dónde dejar un paquete y tomar un mensaje para quienes viven aquí",
+      "example1": "Tengo un paquete para ustedes.",
+      "example2": "¿Puedo dejar un mensaje?",
+      "example3": "¿Es esta la dirección de la fiesta?",
+      "never1": "Si hay alguien en casa, o cuándo entra y sale la gente",
+      "never2": "Nombres, rutinas o planes de quienes viven aquí",
+      "never3": "Cerraduras, alarmas, cámaras u otra seguridad"
+    }
+  },
+  "audience": {
+    "label": "Habla con visitas",
+    "hint": "Para una puerta de entrada, un mostrador o un quiosco. Tu estilo, tu ubicación, tus recuerdos y tus computadoras quedan fuera de sus chats. Dice que es un asistente automático, nunca dice si hay alguien en casa y no puede usar herramientas que cambien cosas."
   }
 }

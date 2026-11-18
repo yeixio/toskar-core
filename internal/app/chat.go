@@ -155,8 +155,10 @@ func (a *App) RunChat(ctx context.Context, profileID, conversationID, message st
 	// A profile with topic controls answers only by its own rules, so none
 	// of Toskar's own replies below, about itself, its memory, or what to
 	// install, are given in its place (#345).
+	// So does one that talks with strangers, who must not change the
+	// owner's memories or hear about their computers (#667).
 	topical := false
-	if p, err := a.Profiles.Get(ctx, profileID); err == nil && p.Topics != nil {
+	if p, err := a.Profiles.Get(ctx, profileID); err == nil && (p.Topics != nil || publicAudience(p)) {
 		topical = true
 	}
 	// A short question about what Yggdrasil can do is answered from its
@@ -519,12 +521,15 @@ func (a *App) RunChat(ctx context.Context, profileID, conversationID, message st
 			// A portal answers in its own language (#205).
 			env.responseLanguage = opts.Language
 		}
-		if facts := a.capabilityFacts(ctx, message); facts != "" {
+		// Nothing about the owner reaches a profile that talks with
+		// strangers: not their computers, guide, or memories (#667).
+		public := publicAudience(profile)
+		if facts := a.capabilityFacts(ctx, message); facts != "" && !public {
 			env.capabilities = facts
 			env.trace.sharing(locale.T(appLang, "chat:steps.capabilities", nil))
 		}
 		// A question about Yggdrasil itself is answered from its own guide.
-		if ps := guide.About(message); len(ps) > 0 {
+		if ps := guide.About(message); len(ps) > 0 && !public {
 			env.guide = guide.Block(ps)
 			var sections []string
 			for _, p := range ps {
@@ -534,7 +539,7 @@ func (a *App) RunChat(ctx context.Context, profileID, conversationID, message st
 			}
 			env.trace.sharing(locale.T(appLang, "chat:steps.guide", map[string]any{"sections": listIn(appLang, sections)}))
 		}
-		if a.memoryOn(ctx, conversationID) && (opts == nil || opts.Memory) && profile.Orchestration.Memory != "off" {
+		if a.memoryOn(ctx, conversationID) && (opts == nil || opts.Memory) && profile.Orchestration.Memory != "off" && !public {
 			if mems, err := a.Muninn.Relevant(ctx, message, memoryProject); err == nil {
 				env.memories = mems
 				env.trace.memories(mems)
@@ -1573,7 +1578,7 @@ func (e *chatExecEnv) Generate(ctx context.Context, role string, messages []plug
 }
 
 func (e *chatExecEnv) ExecuteTool(ctx context.Context, toolID string, args map[string]any) (map[string]any, error) {
-	policy := effectivePolicy(tools.PolicyForProfile(e.profile, toolID), toolID, e.trace != nil && e.trace.sawUntrusted())
+	policy := publicPolicy(e.profile, toolID, effectivePolicy(tools.PolicyForProfile(e.profile, toolID), toolID, e.trace != nil && e.trace.sawUntrusted()))
 	meta := map[string]any{}
 	if e.conversationID != "" {
 		meta["conversation_id"] = e.conversationID
@@ -1912,6 +1917,12 @@ func nowLine(now time.Time, loc *time.Location) string {
 func (e *chatExecEnv) TurnInstructions(ctx context.Context, prompt string) string {
 	var parts []string
 	var location string
+	public := publicAudience(e.profile)
+	// A profile that talks with strangers starts with Toskar's own rules
+	// for that (#667).
+	if public {
+		parts = append(parts, publicRules)
+	}
 	// The administrator's topic rules come first, and nothing after them
 	// changes them (#345).
 	if block := topicBlock(e.profile.Topics); block != "" {
@@ -1928,7 +1939,8 @@ func (e *chatExecEnv) TurnInstructions(ctx context.Context, prompt string) strin
 	}
 	// How the person likes answers (§38): style only, never permission.
 	if e.app != nil {
-		if block := e.app.personalBlock(ctx); block != "" {
+		// Not for strangers: the owner's style and location are theirs (#667).
+		if block := e.app.personalBlock(ctx); block != "" && !public {
 			parts = append(parts, block)
 		}
 		// The language to answer in (multilingual spec §11), from the
@@ -1940,7 +1952,9 @@ func (e *chatExecEnv) TurnInstructions(ctx context.Context, prompt string) strin
 		// Where they are, only for a question about nearby places, the
 		// weather, or directions (#210). It changes from message to
 		// message, so it goes near the end, with the time.
-		location = e.app.locationBlock(ctx, message)
+		if !public {
+			location = e.app.locationBlock(ctx, message)
+		}
 		parts = append(parts, e.app.replyLanguage(ctx, e.conversationID, message, e.responseLanguage).Instruction())
 	}
 	tctx := e.ctx
@@ -1948,15 +1962,15 @@ func (e *chatExecEnv) TurnInstructions(ctx context.Context, prompt string) strin
 		tctx = ctx
 	}
 	// What Yggdrasil can do comes from its own inventory (§37).
-	if e.capabilities != "" {
+	if e.capabilities != "" && !public {
 		parts = append(parts, e.capabilities)
 	}
 	// So does how to use it: the user guide ships with Yggdrasil.
-	if e.guide != "" {
+	if e.guide != "" && !public {
 		parts = append(parts, e.guide)
 	}
 	// Memories come from the person, so they are trusted instructions.
-	if block := muninn.Block(e.memories); block != "" {
+	if block := muninn.Block(e.memories); block != "" && !public {
 		parts = append(parts, block)
 	}
 	// An answer spoken aloud, in live voice mode (#795).

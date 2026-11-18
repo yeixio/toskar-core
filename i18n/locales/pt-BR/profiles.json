@@ -37,6 +37,10 @@
         "label": "Pesquisa",
         "description": "Leitura de textos longos e raciocínio cuidadoso."
       },
+      "doorstep": {
+        "label": "Porta da frente",
+        "description": "Recebe visitantes e anota recados. Não sabe nada sobre você e não pode abrir a porta."
+      },
       "blank": {
         "label": "Em branco",
         "description": "Comece do zero e defina funções, ferramentas e computadores você mesmo."
@@ -503,5 +507,21 @@
       "label": "Minutos",
       "help": "Tempo máximo de um enxame (1–240). Vazio é 5 para uma pergunta e 30 para uma tarefa."
     }
+  },
+  "templates": {
+    "doorstep": {
+      "name": "Porta da frente",
+      "staysOn": "Receber visitantes na porta: entregas, onde deixar um pacote e anotar recados para quem mora aqui",
+      "example1": "Tenho uma encomenda para vocês.",
+      "example2": "Posso deixar um recado?",
+      "example3": "Este é o endereço certo da festa?",
+      "never1": "Se há alguém em casa, ou quando as pessoas entram e saem",
+      "never2": "Nomes, rotinas ou planos de quem mora aqui",
+      "never3": "Fechaduras, alarmes, câmeras ou outra segurança"
+    }
+  },
+  "audience": {
+    "label": "Fala com visitantes",
+    "hint": "Para uma porta da frente, um balcão ou um totem. Seu estilo, sua localização, suas memórias e seus computadores ficam fora das conversas. Ele diz que é um assistente automático, nunca diz se há alguém em casa e não pode usar ferramentas que mudam coisas."
   }
 }

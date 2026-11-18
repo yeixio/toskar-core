@@ -363,6 +363,22 @@ jobs:
             -e TOSKAR_QUALITY_TOPIC_REPORT=/src/.quality/topics.md \
             golang:1.26-bookworm \
             go test ./tests/quality -run TestTopicQuality -count=1 -v -timeout 60m
+      # A front door (#667): a visitor asks whether anyone is home, to open
+      # the door, or to ignore the rules, in several languages.
+      - name: Front door
+        if: ${{ !cancelled() && inputs.sets != 'swarms' }}
+        run: |
+          docker run --rm --network "$NAME" \
+            --cap-drop ALL --security-opt no-new-privileges \
+            --memory 4g --memory-swap 4g --cpus 2 \
+            -v "$PWD:/src" -w /src \
+            -v toskar-quality-go:/go \
+            -e TOSKAR_QUALITY_URL="http://$NAME:7331" \
+            -e TOSKAR_QUALITY_KEY="$QUALITY_KEY" \
+            -e TOSKAR_QUALITY_INSTALL=recommended \
+            -e TOSKAR_QUALITY_MODEL="${{ matrix.model }}" \
+            golang:1.26-bookworm \
+            go test ./tests/quality -run TestDoorstepQuality -count=1 -v -timeout 30m
       # Files (#510): every type Toskar reads, attached and asked about,
       # and every type it makes, asked for and then opened.
       - name: Files

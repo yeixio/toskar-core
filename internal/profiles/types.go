@@ -33,6 +33,9 @@ func Validate(p Profile) error {
 	if err := ValidateTopics(p.Topics); err != nil {
 		return err
 	}
+	if p.Audience != "" && p.Audience != contracts.AudiencePublic {
+		return ErrInvalidProfile("audience is public, for a profile that talks with strangers, or empty")
+	}
 	return ValidateOrchestration(p.Orchestration)
 }
 

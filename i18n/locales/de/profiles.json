@@ -37,6 +37,10 @@
         "label": "Recherche",
         "description": "Lange Texte lesen und sorgfältig durchdenken."
       },
+      "doorstep": {
+        "label": "Haustür",
+        "description": "Begrüßt Besucher und nimmt Nachrichten an. Sie weiß nichts über dich und kann die Tür nicht öffnen."
+      },
       "blank": {
         "label": "Leer",
         "description": "Leer beginnen und Rollen, Werkzeuge und Computer selbst festlegen."
@@ -498,5 +502,21 @@
       "label": "Minuten",
       "help": "Längste Laufzeit eines Schwarms (1–240). Leer ist 5 für eine Frage und 30 für eine Aufgabe."
     }
+  },
+  "templates": {
+    "doorstep": {
+      "name": "Haustür",
+      "staysOn": "Besucher an der Haustür begrüßen: Lieferungen, wo ein Paket hin soll, und Nachrichten für die Bewohner annehmen",
+      "example1": "Ich habe ein Paket für Sie.",
+      "example2": "Kann ich eine Nachricht hinterlassen?",
+      "example3": "Ist das die richtige Adresse für die Feier?",
+      "never1": "Ob jemand zu Hause ist oder wann Leute kommen und gehen",
+      "never2": "Namen, Gewohnheiten oder Pläne der Bewohner",
+      "never3": "Schlösser, Alarmanlagen, Kameras oder andere Sicherheitstechnik"
+    }
+  },
+  "audience": {
+    "label": "Spricht mit Besuchern",
+    "hint": "Für eine Haustür, eine Ladentheke oder einen Kiosk. Dein Stil, dein Standort, deine Erinnerungen und deine Computer bleiben aus den Chats heraus. Es sagt, dass es ein automatischer Assistent ist, verrät nie, ob jemand zu Hause ist, und kann keine Werkzeuge nutzen, die etwas verändern."
   }
 }

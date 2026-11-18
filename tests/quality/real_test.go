@@ -267,6 +267,9 @@ func (d realDriver) Run(t *testing.T, c Case) Result {
 	if c.Setup.Topics != nil {
 		profile["topics"] = c.Setup.Topics
 	}
+	if c.Setup.Audience != "" {
+		profile["audience"] = c.Setup.Audience
+	}
 	if c.Setup.Deliberate != "" || c.Swarm != "" {
 		orch, _ := profile["orchestration"].(map[string]any)
 		if orch == nil {
