@@ -103,6 +103,54 @@
       "reranker": "輔助模型 · 為段落排序，找出最佳結果",
       "classifier": "輔助模型 · 協助「自動」分派請求",
       "other": "輔助模型"
+    },
+    "ratings": {
+      "rate": "評分",
+      "title": "為{{model}}評分",
+      "intro": "它在這台電腦上表現如何？你的評分會儲存在這裡。",
+      "starsLabel": "星等",
+      "stars_other": "{{count}} 顆星",
+      "tagsLabel": "原因（選填）",
+      "tags": {
+        "great_responses": "回答出色",
+        "fast": "速度快",
+        "slow": "速度慢",
+        "stable": "穩定",
+        "crashed": "曾當機",
+        "too_much_memory": "佔用太多記憶體",
+        "great_for_coding": "適合寫程式",
+        "great_for_chat": "適合聊天",
+        "good_tool_use": "善用工具",
+        "poor_tool_use": "不擅長使用工具"
+      },
+      "share": "與社群分享此評分",
+      "shareHint": "幫助使用類似電腦的人選擇模型。你可以隨時停止分享。",
+      "whatIsShared": "具體分享哪些內容",
+      "sent": {
+        "destination": "傳送至",
+        "model": "模型",
+        "hardware": "電腦類別",
+        "memory": "{{type}}記憶體，{{gb}} GB",
+        "never": "絕不會傳送你的提示、對話、檔案名稱、電腦名稱、使用者名稱或網路位址。這項服務不會儲存你的 IP 位址。"
+      },
+      "notShareable": "此評分只會保存在這台電腦上：{{reason}}",
+      "save": "儲存",
+      "saveAndShare": "儲存並分享",
+      "remove": "移除評分",
+      "cancel": "取消",
+      "count_other": "{{formatted}} 則評分",
+      "similar": {
+        "family": "在與你相同型號的電腦上",
+        "class": "在類似的電腦上",
+        "backend": "在記憶體相近的電腦上"
+      },
+      "overall": "整體",
+      "confidence": {
+        "limited": "資料有限",
+        "early": "初期評分"
+      },
+      "prompt": "{{model}}用起來如何？",
+      "notNow": "稍後再說"
     }
   },
   "phoneModels": {

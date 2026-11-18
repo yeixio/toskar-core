@@ -103,6 +103,58 @@
       "reranker": "Modèle auxiliaire · classe les meilleurs passages",
       "classifier": "Modèle auxiliaire · aide Auto à orienter les demandes",
       "other": "Modèle auxiliaire"
+    },
+    "ratings": {
+      "rate": "Noter",
+      "title": "Noter {{model}}",
+      "intro": "Fonctionne-t-il bien sur cet ordinateur ? Votre note est enregistrée ici.",
+      "starsLabel": "Étoiles",
+      "stars_one": "{{count}} étoile",
+      "stars_many": "{{count}} étoiles",
+      "stars_other": "{{count}} étoiles",
+      "tagsLabel": "Pourquoi ? (facultatif)",
+      "tags": {
+        "great_responses": "Excellentes réponses",
+        "fast": "Rapide",
+        "slow": "Lent",
+        "stable": "Stable",
+        "crashed": "A planté",
+        "too_much_memory": "Trop gourmand en mémoire",
+        "great_for_coding": "Idéal pour coder",
+        "great_for_chat": "Idéal pour discuter",
+        "good_tool_use": "Bon avec les outils",
+        "poor_tool_use": "Faible avec les outils"
+      },
+      "share": "Partager cette note avec la communauté",
+      "shareHint": "Aide les personnes ayant un ordinateur comme le vôtre à choisir un modèle. Vous pouvez arrêter le partage à tout moment.",
+      "whatIsShared": "Ce qui est partagé, précisément",
+      "sent": {
+        "destination": "Envoyé à",
+        "model": "Modèle",
+        "hardware": "Catégorie d'ordinateur",
+        "memory": "mémoire {{type}}, {{gb}} Go",
+        "never": "Jamais vos prompts, conversations, noms de fichiers, nom d'ordinateur, nom d'utilisateur ni adresse réseau. Le service ne conserve pas votre adresse IP."
+      },
+      "notShareable": "Cette note reste sur cet ordinateur : {{reason}}",
+      "save": "Enregistrer",
+      "saveAndShare": "Enregistrer et partager",
+      "remove": "Supprimer la note",
+      "cancel": "Annuler",
+      "count_one": "{{formatted}} note",
+      "count_many": "{{formatted}} notes",
+      "count_other": "{{formatted}} notes",
+      "similar": {
+        "family": "sur des ordinateurs comme le vôtre",
+        "class": "sur des ordinateurs similaires",
+        "backend": "sur des ordinateurs avec autant de mémoire"
+      },
+      "overall": "au total",
+      "confidence": {
+        "limited": "Données limitées",
+        "early": "Premières notes"
+      },
+      "prompt": "Comment {{model}} fonctionne-t-il pour vous ?",
+      "notNow": "Pas maintenant"
     }
   },
   "phoneModels": {

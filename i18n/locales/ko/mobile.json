@@ -103,6 +103,54 @@
       "reranker": "보조 모델 · 가장 적합한 구절 순위 지정",
       "classifier": "보조 모델 · 자동 모드의 요청 분배 지원",
       "other": "보조 모델"
+    },
+    "ratings": {
+      "rate": "평가",
+      "title": "{{model}} 평가",
+      "intro": "이 컴퓨터에서 얼마나 잘 작동하나요? 평가는 이 컴퓨터에 저장됩니다.",
+      "starsLabel": "별점",
+      "stars_other": "별 {{count}}개",
+      "tagsLabel": "이유 (선택)",
+      "tags": {
+        "great_responses": "답변이 훌륭함",
+        "fast": "빠름",
+        "slow": "느림",
+        "stable": "안정적",
+        "crashed": "충돌함",
+        "too_much_memory": "메모리를 너무 많이 사용",
+        "great_for_coding": "코딩에 적합",
+        "great_for_chat": "대화에 적합",
+        "good_tool_use": "도구 사용이 능숙",
+        "poor_tool_use": "도구 사용이 서투름"
+      },
+      "share": "이 평가를 커뮤니티와 공유",
+      "shareHint": "비슷한 컴퓨터를 쓰는 사람들이 모델을 고르는 데 도움이 됩니다. 언제든지 공유를 중단할 수 있습니다.",
+      "whatIsShared": "정확히 무엇이 공유되나요",
+      "sent": {
+        "destination": "보내는 곳",
+        "model": "모델",
+        "hardware": "컴퓨터 종류",
+        "memory": "{{type}} 메모리, {{gb}}GB",
+        "never": "프롬프트, 대화, 파일 이름, 컴퓨터 이름, 사용자 이름, 네트워크 주소는 절대 보내지 않습니다. 서비스는 IP 주소를 저장하지 않습니다."
+      },
+      "notShareable": "이 평가는 이 컴퓨터에만 저장됩니다: {{reason}}",
+      "save": "저장",
+      "saveAndShare": "저장 및 공유",
+      "remove": "평가 삭제",
+      "cancel": "취소",
+      "count_other": "평가 {{formatted}}개",
+      "similar": {
+        "family": "같은 기종의 컴퓨터에서",
+        "class": "비슷한 컴퓨터에서",
+        "backend": "메모리가 비슷한 컴퓨터에서"
+      },
+      "overall": "전체",
+      "confidence": {
+        "limited": "데이터 부족",
+        "early": "초기 평가"
+      },
+      "prompt": "{{model}}은(는) 잘 작동하나요?",
+      "notNow": "나중에"
     }
   },
   "phoneModels": {
