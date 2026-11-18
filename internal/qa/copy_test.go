@@ -71,11 +71,9 @@ func TestQAMessagesNameSettingsThatExist(t *testing.T) {
 	// Regression: toskar-core#1250
 	stale := regexp.MustCompile(`Settings\s*[›→>]\s*(Connected services|Find other computers)|\(discovery_enabled\)`)
 	hits := find(repoText(t), stale)
-	KnownBug(t, "toskar-core#1250", func(t testing.TB) {
-		for _, h := range hits {
-			t.Errorf("points to a setting that moved: %s", h)
-		}
-	})
+	for _, h := range hits {
+		t.Errorf("points to a setting that moved: %s", h)
+	}
 }
 
 // Labels that tell people what something is use plain names; the Norse
@@ -90,9 +88,7 @@ func TestQAPlainNamesInFunctionalLabels(t *testing.T) {
 		}
 	}
 	hits := find(files, norse)
-	KnownBug(t, "toskar-core#1251", func(t testing.TB) {
-		for _, h := range hits {
-			t.Errorf("a Norse name in a functional label: %s", h)
-		}
-	})
+	for _, h := range hits {
+		t.Errorf("a Norse name in a functional label: %s", h)
+	}
 }

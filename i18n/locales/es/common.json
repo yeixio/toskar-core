@@ -41,10 +41,11 @@
     "connected_one": "{{count}} conectada",
     "connected_many": "{{count}} conectadas",
     "connected_other": "{{count}} conectadas",
-    "nornHint": "Norn reparte el trabajo entre tus computadoras",
+    "nornHint": "Qué computadora ejecuta cada modelo",
     "nornAutomatic": "Automático",
-    "mimirHint": "Conocimiento y memoria locales",
-    "mimirReady": "Listo"
+    "mimirHint": "Archivos y fuentes con los que responde Toskar",
+    "mimirReady": "Listo",
+    "justThis": "Solo esta computadora"
   },
   "boot": {
     "starting": "Iniciando Toskar",

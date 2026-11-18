@@ -62,7 +62,7 @@
       "label": "Lokale Datenbank"
     },
     "bifrost": {
-      "label": "Bifrost-Netzwerk",
+      "label": "Computernetzwerk",
       "offline_one": "{{count}} Computer offline",
       "offline_other": "{{count}} Computer offline",
       "silentFor_one": "{{names}} hat seit {{ago}} nicht geantwortet.",

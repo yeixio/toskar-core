@@ -40,10 +40,11 @@
     "computersNone": "No computers",
     "connected_one": "{{count}} connected",
     "connected_other": "{{count}} connected",
-    "nornHint": "Norn schedules work across your computers",
+    "nornHint": "Which computer runs each model",
     "nornAutomatic": "Automatic",
-    "mimirHint": "Local knowledge and memory",
-    "mimirReady": "Ready"
+    "mimirHint": "Files and sources Toskar answers from",
+    "mimirReady": "Ready",
+    "justThis": "Just this computer"
   },
   "boot": {
     "starting": "Starting Toskar",

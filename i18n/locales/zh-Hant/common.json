@@ -39,10 +39,11 @@
     "bifrostHint": "電腦探索與網路連線",
     "computersNone": "沒有電腦",
     "connected_other": "已連接 {{count}} 台",
-    "nornHint": "Norn 會在你的電腦之間排程工作",
+    "nornHint": "由哪台電腦執行每個模型",
     "nornAutomatic": "自動",
-    "mimirHint": "本機知識與記憶",
-    "mimirReady": "就緒"
+    "mimirHint": "Toskar 用來回答的檔案和來源",
+    "mimirReady": "就緒",
+    "justThis": "僅這台電腦"
   },
   "boot": {
     "starting": "正在啟動 Toskar",

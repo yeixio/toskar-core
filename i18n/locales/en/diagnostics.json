@@ -62,7 +62,7 @@
       "label": "Local database"
     },
     "bifrost": {
-      "label": "Bifrost networking",
+      "label": "Computer network",
       "offline_one": "{{count}} computer offline",
       "offline_other": "{{count}} computers offline",
       "silentFor_one": "{{names}} has not responded for {{ago}}.",

@@ -4,7 +4,6 @@ import { MemoryRouter } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { api } from '@/lib/api'
 import { useUIStore } from '@/stores/uiStore'
-import { knownBug } from '@/test/knownBug'
 import { Sidebar } from './Sidebar'
 
 vi.mock('@/lib/api', () => ({
@@ -86,15 +85,13 @@ describe('Sidebar', () => {
   })
 })
 
-// QA regressions: knownBug passes while the bug is there and fails once
-// it's fixed (src/test/knownBug.ts).
 describe('Sidebar QA regressions', () => {
   beforeEach(() => {
     useUIStore.setState({ advancedMode: false, administerOpen: false })
   })
 
   // Regression: toskar-core#1249
-  knownBug('toskar-core#1249', 'a computer on its own is not "1 connected"', async () => {
+  it('a computer on its own is not "1 connected"', async () => {
     vi.mocked(api.getNodes).mockResolvedValueOnce([{ id: 'n1', name: 'qa-box', os: 'linux', is_local: true } as never])
     renderAt('/chat')
     await waitFor(() => expect(screen.queryByText('—')).not.toBeInTheDocument())
@@ -102,7 +99,7 @@ describe('Sidebar QA regressions', () => {
   })
 
   // Regression: toskar-core#1249
-  knownBug('toskar-core#1249', 'Members see no Knowledge status for a page they cannot open', async () => {
+  it('Members see no Knowledge status for a page they cannot open', async () => {
     const person = { id: 'sam', name: 'Sam', created_at: '', sign_in: true }
     vi.mocked(api.getMe).mockResolvedValueOnce({ person: { ...person, role: 'member' }, via: 'session' })
     renderAt('/chat')
@@ -112,7 +109,7 @@ describe('Sidebar QA regressions', () => {
   })
 
   // Regression: toskar-core#1251
-  knownBug('toskar-core#1251', 'status tooltips use plain names, not Bifrost, Norn or Mimir', async () => {
+  it('status tooltips use plain names, not Bifrost, Norn or Mimir', async () => {
     renderAt('/chat')
     const footer = screen.getByText('Status').closest('footer')!
     const titles = Array.from(footer.querySelectorAll('[title]')).map((el) => el.getAttribute('title') ?? '')

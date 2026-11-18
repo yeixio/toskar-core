@@ -40,10 +40,11 @@
     "computersNone": "Keine Computer",
     "connected_one": "{{count}} verbunden",
     "connected_other": "{{count}} verbunden",
-    "nornHint": "Norn verteilt Arbeit auf deine Computer",
+    "nornHint": "Welcher Computer welches Modell ausführt",
     "nornAutomatic": "Automatisch",
-    "mimirHint": "Lokales Wissen und Gedächtnis",
-    "mimirReady": "Bereit"
+    "mimirHint": "Dateien und Quellen, aus denen Toskar antwortet",
+    "mimirReady": "Bereit",
+    "justThis": "Nur dieser Computer"
   },
   "boot": {
     "starting": "Toskar startet",

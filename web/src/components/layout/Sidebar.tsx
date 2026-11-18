@@ -121,7 +121,10 @@ export function Sidebar({ open = false, ref }: { open?: boolean; ref?: Ref<HTMLD
   const healthPending =
     !serviceOk &&
     (healthQuery.isPending || healthQuery.isFetching || healthQuery.isLoading)
-  const nodeCount = nodesQuery.data?.length ?? 0
+  // Other computers only: this one on its own is "Just this computer", not
+  // "1 connected" (#1249).
+  const nodeList = nodesQuery.data ?? []
+  const nodeCount = nodeList.filter((n) => !n.is_local).length
   // "No model" only when the model list loaded and has none installed; a list
   // that is still loading or failed to load says nothing about models.
   const hasModel =
@@ -244,19 +247,25 @@ export function Sidebar({ open = false, ref }: { open?: boolean; ref?: Ref<HTMLD
         </div>
       </nav>
 
-      {/* Plain labels; the realm behind each is in its tooltip. */}
+      {/* Plain labels and plain tooltips (#1251). */}
       <footer className="mt-auto space-y-1.5 border-t border-line/50 px-4 py-3">
         <p className="label-caps mb-2 text-[10px] text-ink-faint">{t('subsystems.title')}</p>
         <div
           className="flex items-center justify-between gap-2 text-[11px] text-ink-faint"
-          title={`Bifrost · ${t('subsystems.bifrostHint')}`}
+          title={t('subsystems.bifrostHint')}
         >
           <span className="flex items-center gap-1.5">
             <span className="h-1 w-1 rounded-full bg-bifrost" aria-hidden />
             {t('nav.computers')}
           </span>
           <span className="tabular-nums">
-            {!nodesQuery.isSuccess ? '—' : nodeCount === 0 ? t('subsystems.computersNone') : t('subsystems.connected', { count: nodeCount })}
+            {!nodesQuery.isSuccess
+              ? '—'
+              : nodeList.length === 0
+                ? t('subsystems.computersNone')
+                : nodeCount === 0
+                  ? t('subsystems.justThis')
+                  : t('subsystems.connected', { count: nodeCount })}
           </span>
         </div>
         <div
@@ -269,16 +278,19 @@ export function Sidebar({ open = false, ref }: { open?: boolean; ref?: Ref<HTMLD
           </span>
           <span>{t('subsystems.nornAutomatic')}</span>
         </div>
-        <div
-          className="flex items-center justify-between gap-2 text-[11px] text-ink-faint"
-          title={`Mimir · ${t('subsystems.mimirHint')}`}
-        >
-          <span className="flex items-center gap-1.5">
-            <span className="h-1 w-1 rounded-full bg-mimir" aria-hidden />
-            {t('nav.knowledge')}
-          </span>
-          <span>{t('subsystems.mimirReady')}</span>
-        </div>
+        {/* Knowledge is an admin page, so only admins see its status. */}
+        {admin ? (
+          <div
+            className="flex items-center justify-between gap-2 text-[11px] text-ink-faint"
+            title={t('subsystems.mimirHint')}
+          >
+            <span className="flex items-center gap-1.5">
+              <span className="h-1 w-1 rounded-full bg-mimir" aria-hidden />
+              {t('nav.knowledge')}
+            </span>
+            <span>{t('subsystems.mimirReady')}</span>
+          </div>
+        ) : null}
       </footer>
     </div>
   )

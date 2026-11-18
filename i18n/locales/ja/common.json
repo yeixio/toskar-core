@@ -39,10 +39,11 @@
     "bifrostHint": "コンピュータの検出とネットワーク",
     "computersNone": "コンピュータなし",
     "connected_other": "{{count}}台接続中",
-    "nornHint": "Nornがコンピュータ間で作業をスケジュールします",
+    "nornHint": "各モデルをどのコンピュータで実行するか",
     "nornAutomatic": "自動",
-    "mimirHint": "ローカルのナレッジとメモリ",
-    "mimirReady": "準備完了"
+    "mimirHint": "Toskar が回答に使うファイルとソース",
+    "mimirReady": "準備完了",
+    "justThis": "このコンピュータのみ"
   },
   "boot": {
     "starting": "Toskarを起動しています",
