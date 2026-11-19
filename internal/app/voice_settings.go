@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 
+	"github.com/yeixio/toskar-core/internal/connectors"
 	"github.com/yeixio/toskar-core/internal/speech"
 	"github.com/yeixio/toskar-core/pkg/contracts"
 )
@@ -49,20 +50,43 @@ func (a *App) modelNeeds(ctx context.Context) []speech.ModelNeed {
 			break
 		}
 	}
+	// Only someone with a camera needs a model that sees for the door (#1343).
+	_, sees := a.seeingModel(ctx)
+	vision := !sees && a.hasCamera(ctx)
+	var offer contracts.Model
 	if !chat {
-		need := speech.ModelNeed{Ability: "chat"}
 		hw, _ := a.detectHardware(ctx)
 		if rec, err := a.Models.Recommend(ctx, "general", hw, a.communitySignals(ctx)); err == nil {
 			for _, m := range rec.Models {
 				if !m.Installed && contracts.SupportRoleOf(m) == "" {
-					need.Model, need.Name, need.SizeBytes = m.ID, m.DisplayName, int64(m.SizeBytes)
+					offer = m
 					break
 				}
 			}
 		}
+	}
+	if !chat && vision {
+		// One model that chats and sees covers both needs (#1343): the
+		// chat model that fits, when it sees, or else the one that sees.
+		both := offer
+		if !a.seesPictures(both) {
+			both = contracts.Model{}
+			if m, _, ok := a.visionOption(ctx); ok && contracts.SupportRoleOf(m) == "" {
+				both = m
+			}
+		}
+		if both.ID != "" {
+			return append(needs, speech.ModelNeed{Ability: "both", Model: both.ID, Name: both.DisplayName, SizeBytes: int64(downloadSize(both))})
+		}
+	}
+	if !chat {
+		need := speech.ModelNeed{Ability: "chat"}
+		if offer.ID != "" {
+			need.Model, need.Name, need.SizeBytes = offer.ID, offer.DisplayName, int64(downloadSize(offer))
+		}
 		needs = append(needs, need)
 	}
-	if _, ok := a.seeingModel(ctx); !ok {
+	if vision {
 		need := speech.ModelNeed{Ability: "vision"}
 		if m, size, ok := a.visionOption(ctx); ok {
 			need.Model, need.Name, need.SizeBytes = m.ID, m.DisplayName, size
@@ -70,6 +94,52 @@ func (a *App) modelNeeds(ctx context.Context) []speech.ModelNeed {
 		needs = append(needs, need)
 	}
 	return needs
+}
+
+// hasCamera is whether a connected service has a camera: a Reolink
+// camera, or one in Home Assistant, which is asked only when it's
+// connected.
+func (a *App) hasCamera(ctx context.Context) bool {
+	if a.Connectors == nil {
+		return false
+	}
+	list, err := a.Connectors.List(ctx)
+	if err != nil {
+		return false
+	}
+	ha := false
+	for _, st := range list {
+		switch {
+		case st.ID == "reolink" && st.Connected:
+			return true
+		case st.ID == "homeassistant" && st.Connected:
+			ha = true
+		}
+	}
+	if !ha {
+		return false
+	}
+	for _, d := range a.connectedDevices(ctx) {
+		if d.Kind == connectors.KindCamera {
+			return true
+		}
+	}
+	return false
+}
+
+// seesPictures is whether m can look at a picture once installed: it says
+// it sees and the catalog has its vision projector.
+func (a *App) seesPictures(m contracts.Model) bool {
+	if m.ID == "" || !m.Capabilities.Vision {
+		return false
+	}
+	entry, ok := a.Models.Catalog().Get(m.ID)
+	return ok && entry.Projector != nil
+}
+
+// downloadSize is everything installing m downloads.
+func downloadSize(m contracts.Model) uint64 {
+	return max(m.DownloadBytes, m.SizeBytes)
 }
 
 // setSpeechVoice chooses lang's voice; "" goes back to automatic.

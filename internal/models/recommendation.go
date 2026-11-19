@@ -123,7 +123,7 @@ func Recommend(catalog *Catalog, input RecommendInput) (contracts.Recommendation
 	reason := buildReason(purpose, primary, availableMem, input.Hardware)
 	var storage uint64
 	for _, m := range modelsOut {
-		storage += m.SizeBytes
+		storage += max(m.DownloadBytes, m.SizeBytes)
 	}
 
 	return contracts.Recommendation{
@@ -360,7 +360,7 @@ func RecommendWithPresets(catalog *Catalog, presets []PurposePreset, input Recom
 	reason := buildReason(purpose, primary, availableMem, input.Hardware)
 	var storage uint64
 	for _, m := range modelsOut {
-		storage += m.SizeBytes
+		storage += max(m.DownloadBytes, m.SizeBytes)
 	}
 
 	return contracts.Recommendation{
@@ -398,6 +398,10 @@ func entryToContract(e CatalogEntry, installed bool) contracts.Model {
 		Dynamic:      e.Dynamic,
 		SupportRole:  e.SupportRole,
 		Languages:    e.Languages,
+	}
+	m.DownloadBytes = e.SizeBytes
+	if e.Projector != nil {
+		m.DownloadBytes += e.Projector.SizeBytes
 	}
 	m.SupportRole = contracts.SupportRoleOf(m)
 	tags := e.OrUncategorized()
