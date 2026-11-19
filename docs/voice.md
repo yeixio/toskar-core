@@ -98,9 +98,12 @@ Errors are `error` events with `error.code`, such as `invalid_audio`,
 ## How a turn is answered
 
 - **Turn detection** (`internal/voice/vad.go`) compares each 20 ms frame's
-  loudness with the room's own noise. 60 ms of speech starts a turn, so a
-  click doesn't, and `silence_duration_ms` of quiet ends it. While Toskar
-  answers, speech starts a new turn and stops the answer (barge-in).
+  loudness with the room's own noise. 160 ms of speech starts a turn, so a
+  click, a cough, or a knock doesn't, and a dip between syllables doesn't
+  start the count over. `silence_duration_ms` of quiet ends it: 900 ms by
+  default, so a pause mid-sentence doesn't end a turn and get answered.
+  While Toskar answers, speech starts a new turn and stops the answer
+  (barge-in).
 - **Listening** is Whisper (faster-whisper), as dictation uses. A speech
   worker (`internal/speech/worker.go`) keeps Whisper and the voices loaded
   in one Python process between turns, and stops it after 10 minutes
@@ -109,7 +112,10 @@ Errors are `error` events with `error.code`, such as `invalid_audio`,
   memory, and tools. A session is one chat, named Voice chat, in their
   chats. The answer is asked to be short and spoken, with no Markdown, and
   without the model's thinking first.
-- **Speaking** is a sentence at a time, so the first sentence plays while
+- **Speaking** reads one answer in one language's voice, chosen at its
+  first sentence when that's long enough to tell, else from what the person
+  said, so a short "Claro." doesn't switch the accent. It is a sentence at
+  a time, so the first sentence plays while
   the rest is written. Markdown marks and links' addresses aren't read out.
   The voice is Kokoro (Kokoro-82M, Apache 2.0, through kokoro-onnx, MIT),
   which sounds much closer to a person than Piper and still runs quickly on

@@ -121,6 +121,22 @@ describe('VoiceConnection', () => {
     expect(handlers.onInterrupt).not.toHaveBeenCalled()
   })
 
+  it('keeps the captions up until the next words replace them', () => {
+    const { socket, handlers } = connect()
+    socket.open()
+    socket.receive({ type: 'conversation.item.input_audio_transcription.completed', transcript: 'Hi there' })
+    socket.receive({ type: 'response.created' })
+    socket.receive({ type: 'response.audio_transcript.delta', delta: 'Hello! ' })
+    socket.receive({ type: 'response.done', response: { status: 'completed' } })
+    // A noise heard as nothing, and the next answer starting.
+    socket.receive({ type: 'conversation.item.input_audio_transcription.completed', transcript: '' })
+    socket.receive({ type: 'response.created' })
+    expect(handlers.onYou).toHaveBeenLastCalledWith('Hi there')
+    expect(handlers.onAnswer).toHaveBeenLastCalledWith('Hello!')
+    socket.receive({ type: 'response.audio_transcript.delta', delta: 'Sure. ' })
+    expect(handlers.onAnswer).toHaveBeenLastCalledWith('Sure.')
+  })
+
   it('stops the answer when the person talks over it', () => {
     const { socket, statuses, handlers } = connect()
     socket.open()

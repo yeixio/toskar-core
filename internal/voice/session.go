@@ -82,6 +82,8 @@ type Session struct {
 	turnItem string
 	// lastText is the last turn's transcript, for response.create.
 	lastText string
+	// lastLang is the language the last answer was read in.
+	lastLang string
 	seq      int
 	// response is the answer being given, if any.
 	response *response

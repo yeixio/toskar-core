@@ -26,7 +26,7 @@ type TurnDetection struct {
 
 func defaultTurnDetection() *TurnDetection {
 	yes := true
-	return &TurnDetection{Type: "server_vad", Threshold: 0.5, PrefixPaddingMs: 300, SilenceDurationMs: 500, CreateResponse: &yes, InterruptResponse: &yes}
+	return &TurnDetection{Type: "server_vad", Threshold: 0.5, PrefixPaddingMs: 300, SilenceDurationMs: 900, CreateResponse: &yes, InterruptResponse: &yes}
 }
 
 func (t *TurnDetection) creates() bool {
@@ -42,20 +42,23 @@ type vad struct {
 	// noise is the room's level while nobody speaks.
 	noise    float64
 	speaking bool
-	loud     int // speech frames in a row
+	loud     int // speech frames lately, less two for each quiet one
+	span     int // frames since they started
 	quiet    int // quiet frames in a row while speaking
 	pending  []int16
 }
 
-// startFrames of speech in a row start a turn: 60 ms, so a click doesn't.
-const startFrames = 3
+// startFrames of speech start a turn: 160 ms, so a click, a cough, or a
+// chair doesn't, and doesn't stop an answer (#795). The prefix padding
+// keeps the start of the first word.
+const startFrames = 8
 
 func newVAD(cfg TurnDetection) *vad {
 	if cfg.Threshold <= 0 || cfg.Threshold > 1 {
 		cfg.Threshold = 0.5
 	}
 	if cfg.SilenceDurationMs <= 0 {
-		cfg.SilenceDurationMs = 500
+		cfg.SilenceDurationMs = 900
 	}
 	if cfg.PrefixPaddingMs < 0 {
 		cfg.PrefixPaddingMs = 0
@@ -95,14 +98,23 @@ func (v *vad) feed(samples []int16, offset int) []vadEvent {
 		if !v.speaking {
 			if loud {
 				v.loud++
+				v.span++
+			} else if v.loud > 0 {
+				// A dip between syllables doesn't start over, but a click
+				// followed by quiet fades out.
+				v.loud = max(0, v.loud-2)
+				v.span++
+				if v.loud == 0 {
+					v.span = 0
+				}
 			} else {
-				v.loud = 0
 				// The room's noise, slowly, while nobody speaks.
 				v.noise = 0.95*v.noise + 0.05*lvl
 			}
 			if v.loud >= startFrames {
 				v.speaking, v.quiet = true, 0
-				out = append(out, vadEvent{started: true, at: at - (startFrames-1)*frameSamples})
+				out = append(out, vadEvent{started: true, at: at - (v.span-1)*frameSamples})
+				v.span = 0
 			}
 			continue
 		}
