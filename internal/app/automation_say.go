@@ -185,7 +185,6 @@ func (a *App) greetAtDoor(ctx context.Context, automation automations.Automation
 	switch {
 	case visit != "" && err != nil:
 		out.Text = visit + "\n\n" + fmt.Sprintf("The conversation stopped: %v", err)
-		err = nil
 	case visit != "":
 		out.Text = visit
 	case err != nil:
