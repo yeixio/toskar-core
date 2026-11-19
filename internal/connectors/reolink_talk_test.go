@@ -19,7 +19,7 @@ func fakeReolinkCLI(t *testing.T, answer string, code int) (dir string) {
 		t.Skip("the fake reolink-cli is a shell script")
 	}
 	dir = t.TempDir()
-	script := "#!/bin/sh\nprintf '%s\\n' \"$@\" > \"" + dir + "/args\"\ncat > \"" + dir + "/audio\"\necho '" + answer + "'\nexit " + string(rune('0'+code)) + "\n"
+	script := "#!/bin/sh\nprintf '%s\\n' \"$@\" > \"" + dir + "/args\"\nprintf '%s' \"$REOLINK_PASSWORD\" > \"" + dir + "/password\"\ncat > \"" + dir + "/audio\"\necho '" + answer + "'\nexit " + string(rune('0'+code)) + "\n"
 	bin := filepath.Join(dir, "reolink-cli")
 	if err := os.WriteFile(bin, []byte(script), 0o755); err != nil {
 		t.Fatal(err)
@@ -46,25 +46,39 @@ func TestReolinkTalksThroughReolinkCLI(t *testing.T) {
 	for i := range words {
 		words[i] = 1000
 	}
-	if m.CanTalk("reolink") {
-		t.Fatal("a connection with no speaker named can talk")
-	}
-	if err := m.Talk(ctx, "reolink", words, ReolinkTalkRate); err == nil || !strings.Contains(err.Error(), "Speaker") {
-		t.Fatalf("no speaker named: %v", err)
-	}
-
-	if _, err := m.Connect(ctx, "reolink", map[string]string{"url": door.URL, "username": "admin", "password": door.Password, "talk_camera": "hub-ch0", "talk_gateway": "127.0.0.1:9000"}); err != nil {
+	// Nothing to set up (#667): it reaches the connection's own camera, at
+	// its address and channel with its login, through the default gateway,
+	// and the password isn't on the command line.
+	if _, err := m.Connect(ctx, "reolink", map[string]string{"url": door.URL, "username": "admin", "password": door.Password, "channel": "0"}); err != nil {
 		t.Fatal(err)
 	}
-	if !m.CanTalk("reolink") {
-		t.Fatal("a connection with a speaker can't talk")
-	}
 	dir := fakeReolinkCLI(t, `{"ok":true,"command":"audio","data":{"durationMs":1800}}`, 0)
+	if !m.CanTalk("reolink") {
+		t.Fatal("a connection with reolink-cli can't talk")
+	}
 	if err := m.Talk(ctx, "reolink", words, ReolinkTalkRate); err != nil {
 		t.Fatal(err)
 	}
 	args, _ := os.ReadFile(filepath.Join(dir, "args"))
-	if got := strings.Fields(string(args)); strings.Join(got, " ") != "--gateway-addr 127.0.0.1:9000 --camera hub-ch0 audio talk --stdin --sample-rate 16000" {
+	if got := strings.Join(strings.Fields(string(args)), " "); got != "--gateway-addr 127.0.0.1:9000 --host=127.0.0.1:9000 --channel=0 --user=admin audio talk --stdin --sample-rate 16000" {
+		t.Fatalf("args = %v", got)
+	}
+	if strings.Contains(string(args), door.Password) {
+		t.Fatal("the password is on the command line")
+	}
+	if pw, _ := os.ReadFile(filepath.Join(dir, "password")); string(pw) != door.Password {
+		t.Fatalf("reolink-cli was given the password %q", pw)
+	}
+
+	// A camera named in reolink-cli is used instead.
+	if _, err := m.Connect(ctx, "reolink", map[string]string{"url": door.URL, "username": "admin", "password": door.Password, "talk_camera": "hub-ch0", "talk_gateway": "127.0.0.1:9100"}); err != nil {
+		t.Fatal(err)
+	}
+	if err := m.Talk(ctx, "reolink", words, ReolinkTalkRate); err != nil {
+		t.Fatal(err)
+	}
+	args, _ = os.ReadFile(filepath.Join(dir, "args"))
+	if got := strings.Join(strings.Fields(string(args)), " "); got != "--gateway-addr 127.0.0.1:9100 --camera hub-ch0 audio talk --stdin --sample-rate 16000" {
 		t.Fatalf("args = %v", got)
 	}
 	audio, _ := os.ReadFile(filepath.Join(dir, "audio"))
@@ -97,6 +111,8 @@ func TestReolinkTalkRefusesOddNames(t *testing.T) {
 		{"talk_camera": "--help"},
 		{"talk_camera": "a b"},
 		{"talk_camera": "door", "talk_gateway": "x; rm -rf"},
+		{"url": "https://cam", "channel": "0; reboot"},
+		{"url": ""},
 	} {
 		if err := reolinkTalk(context.Background(), cred, []int16{1}, ReolinkTalkRate); err == nil {
 			t.Errorf("%v: no error", cred)
