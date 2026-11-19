@@ -82,7 +82,8 @@ func TestDoorVisit(t *testing.T) {
 	speaker := &fakeDoorVoice{}
 	ears := &scriptedEars{heard: []string{"Hi, I'm Sam from the post office.", "I have a parcel that needs a signature."}}
 	var asked [][]doorLine
-	answers := []string{"Hello Sam, what can I help with?", "Thanks, I'll let them know. Please leave a card. [done]"}
+	// The end mark in any case is never said (Regression: toskar-core#1339).
+	answers := []string{"Hello Sam, what can I help with?", "Thanks, I'll let them know. Please leave a card. [Done]"}
 	v := &doorVisit{ear: door, talk: door, parts: voice.Parts{Transcriber: ears, Speaker: speaker}, automation: auto, lang: "en",
 		reply: func(_ context.Context, lines []doorLine) (string, error) {
 			asked = append(asked, append([]doorLine(nil), lines...))
@@ -101,7 +102,7 @@ func TestDoorVisit(t *testing.T) {
 	if len(asked) != 2 || len(asked[1]) != 4 || !asked[1][3].Visitor {
 		t.Fatalf("the model was asked %+v", asked)
 	}
-	if len(speaker.said) != 2 || strings.Contains(speaker.said[1], "done") {
+	if len(speaker.said) != 2 || strings.Contains(strings.ToLower(speaker.said[1]), "done") {
 		t.Fatalf("said %q", speaker.said)
 	}
 

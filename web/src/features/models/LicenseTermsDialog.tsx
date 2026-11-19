@@ -29,7 +29,7 @@ export function LicenseTermsDialog({
         <h2 id="license-terms-title" className="font-display text-lg font-semibold text-ink">
           {t('licenseTerms.title', { model: modelName })}
         </h2>
-        <p className="text-sm text-ink-muted">{t('licenseTerms.body', { license: license.name })}</p>
+        <p className="text-sm text-ink-muted">{t('licenseTerms.body', { model: modelName, license: license.name })}</p>
         {license.notes ? <p className="text-sm text-ink">{license.notes}</p> : null}
         <a className="btn-secondary btn-sm inline-flex" href={license.url} target="_blank" rel="noreferrer noopener">
           {t('licenseTerms.read', { license: license.name })}

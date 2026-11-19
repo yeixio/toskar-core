@@ -179,7 +179,7 @@ func (e automationExecutor) execute(ctx context.Context, automation automations.
 		ProfileID: profile.ID,
 		// The task with its condition's instruction, which the server adds
 		// rather than the saved prompt carrying it (#204).
-		Prompt: withChangeNote(withChangeNote(withChangeNote(automations.RunPrompt(automation), runNote(ctx, automation)), camerasNote(automation.Cameras)), withChangeNote(actionsNote(automation.Actions), automations.SayNote(automation.Say))),
+		Prompt: withChangeNote(withChangeNote(withChangeNote(automations.RunPrompt(automation), runNote(ctx, automation)), camerasNote(automation.Cameras)), withChangeNote(actionsNote(automation.Actions), automations.SayNote(automation.Say, automations.Rang(automation.Trigger)))),
 		Status: contracts.TaskRunning,
 	}, tools.ForUnattended(profile, withActionTools(automation.Tools, automation.Actions), disabled), env)
 	if err != nil {
@@ -207,6 +207,8 @@ func (e automationExecutor) execute(ctx context.Context, automation automations.
 		said, err := e.app.sayAtDoor(ctx, automation, out.Text)
 		if err != nil {
 			runErr = fmt.Errorf("couldn't say the answer at the door: %w", err)
+		} else if said == "" && automations.Spoken(out.Text) == "" {
+			out.Text = silentDoorResult
 		} else if said != "" {
 			out.Acted = append(out.Acted, automations.Action{Tool: automation.Say.Connector + ".say", Args: map[string]string{"text": said}}.Describe())
 			// Then it talks with them, and the visit is the result (#667).
@@ -236,6 +238,11 @@ func (e automationExecutor) execute(ctx context.Context, automation automations.
 var pageTools = []string{"internet.open", "browser.open"}
 
 var promptURL = regexp.MustCompile(`https?://[^\s"'<>)\]]+`)
+
+// silentDoorResult is the result of a run that said nothing at the door
+// because nobody was there: notified instead of the silent answer's word
+// (#1339).
+const silentDoorResult = "Nobody was in the picture, so nothing was said at the door."
 
 // unopenedPage is the page an automation's prompt names that its run never
 // opened, though it may: its model answered without reading it, as a small

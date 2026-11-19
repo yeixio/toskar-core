@@ -126,13 +126,31 @@ func Spoken(answer string) string {
 	return text
 }
 
-// SayNote tells the run its answer is spoken at the door.
-func SayNote(s *Say) string {
+// Rang reports a trigger that is a doorbell's button: someone pressed it,
+// so someone is there even when the picture shows no one (#1339), such as
+// Reolink's doorbell or Home Assistant's binary_sensor.front_door_visitor.
+func Rang(t *Trigger) bool {
+	if t == nil || t.Kind != TriggerDevice {
+		return false
+	}
+	d := strings.ToLower(t.Device)
+	return d == "doorbell" || strings.Contains(d, "doorbell") || strings.Contains(d, "visitor")
+}
+
+// SayNote tells the run its answer is spoken at the door. rang is a run a
+// doorbell's button started, where someone is there to greet even out of
+// the picture, so the silent answer isn't offered (#1339).
+func SayNote(s *Say, rang bool) string {
 	if s == nil {
 		return ""
 	}
 	note := "Your answer is spoken aloud through the door's speaker to whoever is there, so write only the words to say: one or two short sentences, " +
-		"with no formatting, lists, or links. If nobody is there to talk to, such as when the picture shows no one or only someone passing by, answer only " + SayNothing + "."
+		"with no formatting, lists, or links."
+	if rang {
+		note += " Someone pressed the doorbell, so someone is there even if the picture shows no one: greet them."
+	} else {
+		note += " If nobody is there to talk to, such as when the picture shows no one or only someone passing by, answer only " + SayNothing + "."
+	}
 	if s.Listen {
 		note += " They can answer you, and you'll hear them: greet them and ask how you can help."
 	}
