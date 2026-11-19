@@ -13,6 +13,7 @@
   "connect": "Connect",
   "optional": " (optional)",
   "stored": "Stored ({{value}}). Leave blank to keep it.",
+  "example": "e.g. {{value}}",
   "save": "Save",
   "cancel": "Cancel",
   "tools": "Tools: {{tools}}",

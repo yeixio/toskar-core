@@ -13,6 +13,7 @@
   "connect": "Collega",
   "optional": " (facoltativo)",
   "stored": "Salvato ({{value}}). Lascia vuoto per mantenerlo.",
+  "example": "es. {{value}}",
   "save": "Salva",
   "cancel": "Annulla",
   "tools": "Strumenti: {{tools}}",

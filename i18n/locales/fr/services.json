@@ -13,6 +13,7 @@
   "connect": "Connecter",
   "optional": " (facultatif)",
   "stored": "Enregistré ({{value}}). Laissez vide pour le conserver.",
+  "example": "ex. : {{value}}",
   "save": "Enregistrer",
   "cancel": "Annuler",
   "tools": "Outils : {{tools}}",

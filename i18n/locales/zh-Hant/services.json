@@ -13,6 +13,7 @@
   "connect": "連結",
   "optional": "（選填）",
   "stored": "已儲存（{{value}}）。留空即可保留原值。",
+  "example": "例如：{{value}}",
   "save": "儲存",
   "cancel": "取消",
   "tools": "工具：{{tools}}",
