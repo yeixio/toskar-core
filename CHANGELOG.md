@@ -171,6 +171,14 @@ Changes waiting for the next release are in [changes/unreleased/](changes/unrele
 
 ### Fixed
 
+- A doorbell that can't be answered is said plainly: when Toskar can't reach
+  the camera's speaker, you're told so in your language, with no raw
+  reolink-cli output and no retry that would greet an empty porch minutes
+  later. Toskar restarts only the reolink-cli gateway at its own address,
+  the door's notes and transcript are in your language, and the instant
+  greeting covers 20 more languages, such as Dutch, Russian and Swedish
+  (#1340).
+
 - API Access is clearer (#1266):
   - With a developer's relay, the subscription card names that relay
     instead of calling it Toskar's.
