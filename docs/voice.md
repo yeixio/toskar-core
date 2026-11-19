@@ -102,9 +102,14 @@ Errors are `error` events with `error.code`, such as `invalid_audio`,
   click, a cough, or a knock doesn't, and a dip between syllables doesn't
   start the count over. `silence_duration_ms` of quiet ends it: 900 ms by
   default, so a pause mid-sentence doesn't end a turn and get answered.
-  The noise level is learned from the first 300 ms, then follows the room:
-  down quickly, and up over seconds, so a fan or traffic that starts
-  becomes the room rather than a turn that never ends. Whisper's segments
+  Once a turn started, words 40% softer than that keep it going, so a
+  last word that trails off, from a microphone across the room, doesn't
+  end it early. The noise level is learned from the first 300 ms, then
+  follows the room: down quickly, and up over seconds, so a fan or traffic
+  that starts becomes the room rather than a turn that never ends. During
+  a turn it rises only to the quietest moment of the last 2.5 s, since
+  speech pauses at least that often and a fan doesn't. A turn's audio
+  keeps 300 ms before the speech and 500 ms after it. Whisper's segments
   it rates as noise (no-speech probability over 0.6 with a low log
   probability) are left out of the transcript.
   While Toskar answers, speech starts a new turn and stops the answer

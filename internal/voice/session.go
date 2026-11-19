@@ -312,8 +312,10 @@ func (s *Session) append(samples []int16) {
 		case e.stopped:
 			s.mu.Lock()
 			item := s.turnItem
-			// The quiet after the words isn't kept.
-			end := len(s.buffer) - (offset + len(samples) - e.at)
+			// Up to tailMs of the quiet after the words is kept: a word
+			// that trailed off below the floor is still in it, and was cut
+			// off when the turn ended at the last loud frame (#795).
+			end := len(s.buffer) - (offset + len(samples) - e.at) + tailMs*SampleRate/1000
 			if end > 0 && end < len(s.buffer) {
 				s.buffer = s.buffer[:end]
 			}
@@ -340,6 +342,9 @@ func (s *Session) trimBuffer() {
 		s.buffer = s.buffer[len(s.buffer)-maxTurnSamples:]
 	}
 }
+
+// tailMs is how much of the quiet that ended a turn is kept with it.
+const tailMs = 500
 
 func (s *Session) commit(eventID string) {
 	s.mu.Lock()

@@ -114,6 +114,40 @@ func TestVADLearnsSteadyNoise(t *testing.T) {
 	}
 }
 
+func toneAt(seconds, amp float64) []int16 {
+	n := int(seconds * SampleRate)
+	out := make([]int16, n)
+	for i := range out {
+		out[i] = int16(amp * 32767 * math.Sin(2*math.Pi*220*float64(i)/SampleRate))
+	}
+	return out
+}
+
+// A long sentence from a webcam's microphone across the room (#795): the
+// words aren't much louder than the room, and the last one is softer still.
+// The turn lasts until that last word is said, not until the floor, rising
+// with the speech, outgrew the words.
+func TestVADHearsAFarMicrophoneToTheEnd(t *testing.T) {
+	room := func(s float64) []int16 { return noise(s, 0.03) }
+	audio := room(1)
+	for range 6 {
+		audio = append(audio, mix(toneAt(0.9, 0.12), room(0.9))...)
+		audio = append(audio, room(0.15)...)
+	}
+	soft := len(audio)
+	audio = append(audio, mix(toneAt(0.6, 0.07), room(0.6))...)
+	end := len(audio)
+	audio = append(audio, room(1.5)...)
+	v := newVAD(*defaultTurnDetection())
+	got := v.feed(audio, 0)
+	if len(got) != 2 || !got[0].started || !got[1].stopped {
+		t.Fatalf("the sentence was heard as %+v", got)
+	}
+	if got[1].at < end-frameSamples {
+		t.Errorf("the turn ended at %d ms, before the soft last word (%d to %d ms)", ms(got[1].at), ms(soft), ms(end))
+	}
+}
+
 func mix(a, b []int16) []int16 {
 	out := make([]int16, len(a))
 	for i := range a {
@@ -270,9 +304,10 @@ func TestSessionAnswersOutLoud(t *testing.T) {
 	if got := <-llm.asked; got != "What's the weather?" {
 		t.Fatalf("asked %q", got)
 	}
-	// The turn's audio: the speech, with up to 300 ms before it.
+	// The turn's audio: the speech, with up to 300 ms before it and 500 ms
+	// after, where a last word that trailed off would be.
 	samples, _, _ := ParseWAV(stt.got)
-	if d := ms(len(samples)); d < 1000 || d > 1400 {
+	if d := ms(len(samples)); d < 1500 || d > 1900 {
 		t.Errorf("transcribed %d ms of audio, want the 1 s turn and its padding", d)
 	}
 	if strings.Join(tts.said, "|") != "It's sunny in Juneau.|Want the week?" {
