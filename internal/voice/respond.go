@@ -10,6 +10,8 @@ import (
 	"strings"
 	"time"
 	"unicode"
+
+	"github.com/yeixio/toskar-core/internal/replylang"
 )
 
 // respond gives one answer: the chat model's text as it's written, split
@@ -58,7 +60,7 @@ func (s *Session) respond(text string, stoppedAt time.Time, sttMs int64) {
 	spoken := make(chan error, 1)
 	var said strings.Builder
 	go func() {
-		spoken <- s.speakAll(ctx, r, sentences, voice, lang, audio, &firstAudio, &said)
+		spoken <- s.speakAll(ctx, r, sentences, voice, lang, text, audio, &firstAudio, &said)
 	}()
 
 	var split splitter
@@ -134,11 +136,17 @@ func (s *Session) speaks() bool {
 
 // speakAll speaks each sentence as it arrives, sending its words and then
 // its audio in 100 ms pieces.
-func (s *Session) speakAll(ctx context.Context, r *response, sentences <-chan string, voice, lang string, audio bool, firstAudio *time.Time, said *strings.Builder) error {
+func (s *Session) speakAll(ctx context.Context, r *response, sentences <-chan string, voice, lang, asked string, audio bool, firstAudio *time.Time, said *strings.Builder) error {
 	var failed error
 	for sentence := range sentences {
 		if ctx.Err() != nil || failed != nil {
 			continue // drain
+		}
+		// One answer is read in one language's voice: chosen at its first
+		// sentence, not again at each, where a short one such as "Claro."
+		// can pass for another language and change the voice mid-answer.
+		if lang == "" {
+			lang = s.answerLanguage(sentence, asked)
 		}
 		if said.Len() > 0 {
 			said.WriteString(" ")
@@ -296,4 +304,24 @@ func randomID() string {
 	b := make([]byte, 8)
 	_, _ = rand.Read(b)
 	return hex.EncodeToString(b)
+}
+
+// answerLanguage is the language an answer is read in, from its first
+// sentence when that's long enough to tell, else from what the person
+// said, else the language the last answer was read in. It's kept for the
+// next answer.
+func (s *Session) answerLanguage(first, asked string) string {
+	lang := ""
+	if tag, ok := replylang.Detect(first); ok && len([]rune(first)) >= 25 {
+		lang = tag
+	} else if tag, ok := replylang.Detect(asked); ok {
+		lang = tag
+	}
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if lang == "" {
+		lang = s.lastLang
+	}
+	s.lastLang = lang
+	return lang
 }

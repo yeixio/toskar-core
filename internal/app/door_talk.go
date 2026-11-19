@@ -48,6 +48,9 @@ type doorVisit struct {
 	// longest turn heard; echo is how long after speaking the door isn't
 	// heard, while its own words may still be playing.
 	wait, longest, echo time.Duration
+	// turns finds when the visitor talks, learning the street's noise over
+	// the visit.
+	turns *voice.Turns
 }
 
 // doneMark ends the visit: the model adds it to its goodbye.
@@ -112,11 +115,17 @@ func (v *doorVisit) run(ctx context.Context, greeting string) ([]doorLine, error
 // hear waits for the visitor to talk and returns what they said, as 16-bit
 // samples at ReolinkListenRate, once they stop.
 func (v *doorVisit) hear(ctx context.Context, h *connectors.Hearing) ([]int16, error) {
-	turns := voice.NewTurns(voice.TurnDetection{Type: "server_vad", Threshold: 0.5, PrefixPaddingMs: 300, SilenceDurationMs: 800})
+	// A visitor stands close to the doorbell, and its microphone has no
+	// noise suppression: speech has to be clearly above the street.
+	turns := v.turns
+	if turns == nil {
+		turns = voice.NewTurns(voice.TurnDetection{Type: "server_vad", Threshold: 0.8, PrefixPaddingMs: 300, SilenceDurationMs: 800})
+		v.turns = turns
+	}
 	// A third of a second before they start, so the first word is whole.
 	prefix := connectors.ReolinkListenRate * 3 / 10
 	var heard []int16
-	speaking := false
+	speaking := turns.Speaking()
 	start := time.NewTimer(v.wait)
 	defer start.Stop()
 	longest := time.NewTimer(v.wait + v.longest)

@@ -149,7 +149,8 @@ export class VoiceConnection {
         break
       case 'conversation.item.input_audio_transcription.completed': {
         const text = String(e.transcript ?? '').trim()
-        this.handlers.onYou?.(text)
+        // Nothing heard leaves what they said last on screen.
+        if (text) this.handlers.onYou?.(text)
         // Nothing was said, so nothing is answered.
         if (!text && this.status === 'thinking') this.set('listening')
         break
@@ -161,8 +162,8 @@ export class VoiceConnection {
         break
       }
       case 'response.created':
+        // The last answer stays on screen until the next one starts.
         this.answer = ''
-        this.handlers.onAnswer?.('')
         break
       case 'response.audio_transcript.delta':
         this.answer += String(e.delta ?? '')

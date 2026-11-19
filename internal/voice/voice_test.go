@@ -54,6 +54,74 @@ func TestVADIgnoresAClick(t *testing.T) {
 	}
 }
 
+// A conversation's cadence (#795): a cough or a knock doesn't start a turn
+// or stop an answer, and the pause someone takes mid-sentence doesn't end
+// their turn; the quiet after they finish does.
+func TestVADKeepsTheCadence(t *testing.T) {
+	v := newVAD(*defaultTurnDetection())
+	cough := append(append(quiet(0.5), tone(0.12)...), quiet(1)...)
+	if got := v.feed(cough, 0); len(got) != 0 {
+		t.Fatalf("a 120 ms cough started a turn: %+v", got)
+	}
+	v = newVAD(*defaultTurnDetection())
+	// "So I was thinking... maybe tomorrow", then quiet.
+	audio := append(append(append(append(quiet(0.5), tone(0.8)...), quiet(0.7)...), tone(0.6)...), quiet(1.2)...)
+	got := v.feed(audio, 0)
+	if len(got) != 2 || !got[0].started || !got[1].stopped {
+		t.Fatalf("a pause ended the turn: %+v", got)
+	}
+	if at := ms(got[1].at); at < 2550 || at > 2700 {
+		t.Errorf("stopped at %d ms, want about 2600, after the second part", at)
+	}
+}
+
+func noise(seconds, amp float64) []int16 {
+	out := make([]int16, int(seconds*SampleRate))
+	x := uint32(1)
+	for i := range out {
+		x = x*1664525 + 1013904223
+		out[i] = int16(amp * 32767 * (float64(x>>16)/32768 - 1))
+	}
+	return out
+}
+
+// A fan, traffic, or a hiss louder than the floor is learned as the room,
+// not heard as a turn that never ends: there from the start, it's never a
+// turn; starting later, it ends any turn it began within seconds; and
+// speech over it is still heard (#795).
+func TestVADLearnsSteadyNoise(t *testing.T) {
+	v := newVAD(*defaultTurnDetection())
+	hum := noise(4, 0.08)
+	audio := append(append([]int16(nil), hum...), mix(tone(1), noise(1, 0.08))...)
+	audio = append(audio, noise(1.5, 0.08)...)
+	got := v.feed(audio, 0)
+	if len(got) != 2 || !got[0].started || ms(got[0].at) < 3900 || !got[1].stopped {
+		t.Fatalf("noise from the start: %+v", got)
+	}
+
+	v = newVAD(*defaultTurnDetection())
+	audio = append(quiet(1), noise(8, 0.08)...)
+	got = v.feed(audio, 0)
+	if len(got) > 2 || (len(got) == 2 && ms(got[1].at-got[0].at) > 5000) {
+		t.Fatalf("noise that starts later: %+v", got)
+	}
+	if len(got) == 1 {
+		t.Fatalf("noise that starts later never ended its turn: %+v", got)
+	}
+	got = v.feed(append(mix(tone(1), noise(1, 0.08)), noise(1.5, 0.08)...), len(audio))
+	if len(got) != 2 || !got[0].started {
+		t.Fatalf("speech over the noise: %+v", got)
+	}
+}
+
+func mix(a, b []int16) []int16 {
+	out := make([]int16, len(a))
+	for i := range a {
+		out[i] = int16(max(-32768, min(32767, int(a[i])+int(b[i]))))
+	}
+	return out
+}
+
 func TestWAVRoundTripAndResample(t *testing.T) {
 	in := tone(0.1)
 	out, rate, err := ParseWAV(WAV(in, SampleRate))
@@ -115,10 +183,11 @@ func (f *fakeLLM) Respond(ctx context.Context, text string, delta func(string)) 
 	return nil
 }
 
-type fakeTTS struct{ said []string }
+type fakeTTS struct{ said, langs []string }
 
-func (f *fakeTTS) Speak(_ context.Context, text, _, _ string) ([]int16, error) {
+func (f *fakeTTS) Speak(_ context.Context, text, _, lang string) ([]int16, error) {
 	f.said = append(f.said, text)
+	f.langs = append(f.langs, lang)
 	return tone(0.25), nil
 }
 
@@ -195,7 +264,7 @@ func TestSessionAnswersOutLoud(t *testing.T) {
 	defer s.Close()
 	rec.waitFor(t, "session.created")
 
-	speak(s, append(append(quiet(0.5), tone(1)...), quiet(0.8)...))
+	speak(s, append(append(quiet(0.5), tone(1)...), quiet(1.2)...))
 	rec.waitFor(t, "response.done")
 
 	if got := <-llm.asked; got != "What's the weather?" {
@@ -239,12 +308,27 @@ func TestSessionAnswersOutLoud(t *testing.T) {
 	}
 }
 
+// An answer is read in one language's voice: a short first sentence such
+// as "Claro." doesn't pass for another language and change the voice (#795).
+func TestSessionReadsAnAnswerInOneLanguage(t *testing.T) {
+	llm := &fakeLLM{deltas: []string{"Claro. ", "Hoy hace sol en Madrid y unos veinte grados por la tarde. ", "¿Algo más?"}}
+	tts := &fakeTTS{}
+	rec := newRecorder()
+	s := NewSession(Parts{Transcriber: &fakeSTT{text: "¿Qué tiempo hace hoy en Madrid, por favor?"}, Responder: llm, Speaker: tts}, rec.send)
+	defer s.Close()
+	speak(s, append(append(quiet(0.3), tone(0.6)...), quiet(1.1)...))
+	rec.waitFor(t, "response.done")
+	if strings.Join(tts.langs, ",") != "es,es,es" {
+		t.Fatalf("read %q in %q", tts.said, tts.langs)
+	}
+}
+
 func TestSessionStopsWhenInterrupted(t *testing.T) {
 	llm := &fakeLLM{deltas: []string{"Let me tell you a long story. ", "Once upon a time."}, hold: true}
 	rec := newRecorder()
 	s := NewSession(Parts{Transcriber: &fakeSTT{text: "tell me a story"}, Responder: llm, Speaker: &fakeTTS{}}, rec.send)
 	defer s.Close()
-	speak(s, append(append(quiet(0.3), tone(0.6)...), quiet(0.7)...))
+	speak(s, append(append(quiet(0.3), tone(0.6)...), quiet(1.1)...))
 	rec.waitFor(t, "response.audio.delta")
 	// The person talks over it.
 	speak(s, tone(0.3))

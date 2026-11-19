@@ -49,7 +49,11 @@ def transcribe(req):
     # for a sentence or two, and much faster.
     segments, info = model.transcribe(pcm, language=req.get("language") or None, beam_size=1, vad_filter=False,
                                       condition_on_previous_text=False)
-    text = " ".join(s.text.strip() for s in segments).strip()
+    # Whisper writes words even for noise, such as "Thank you." for a fan:
+    # a segment it rates as probably not speech, and isn't sure of, is left
+    # out, by Whisper's own rule (#795).
+    text = " ".join(s.text.strip() for s in segments
+                    if not (s.no_speech_prob > 0.6 and s.avg_logprob < -1.0)).strip()
     return {"text": text, "language": info.language}
 
 
