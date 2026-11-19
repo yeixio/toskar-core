@@ -374,6 +374,7 @@
       "installing": "Programm wird installiert …",
       "downloading": "Stimmen werden heruntergeladen …",
       "warming": "Stimmen werden vorbereitet …",
+      "listening": "Zuhören wird eingerichtet…",
       "remove": "Entfernen",
       "removeConfirm": "Kitten entfernen",
       "keep": "Behalten"
@@ -388,6 +389,16 @@
     },
     "preview": "Anhören",
     "previewIn": "Stimme für {{language}} anhören",
-    "previewFailed": "Die Hörprobe konnte nicht abgespielt werden."
+    "previewFailed": "Die Hörprobe konnte nicht abgespielt werden.",
+    "needs": {
+      "chat": "Um im Sprachmodus zu antworten, braucht Toskar ein Chat-Modell.",
+      "vision": "Um zu sehen, wer an der Tür ist, braucht Toskar ein Modell, das Bilder sehen kann.",
+      "offer": "{{name}} passt zu diesem Computer ({{size}}).",
+      "install": "{{name}} installieren",
+      "downloading": "{{name}} wird heruntergeladen… {{percent}} %",
+      "ready": "{{name}} ist installiert.",
+      "none": "Keins im Katalog passt zu diesem Computer.",
+      "models": "Zu den Modellen"
+    }
   }
 }

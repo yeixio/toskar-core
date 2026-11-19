@@ -365,6 +365,7 @@
       "installing": "プログラムをインストール中…",
       "downloading": "音声をダウンロード中…",
       "warming": "音声を準備中…",
+      "listening": "聞き取りを準備しています…",
       "remove": "削除",
       "removeConfirm": "Kitten を削除",
       "keep": "残す"
@@ -379,6 +380,16 @@
     },
     "preview": "試聴",
     "previewIn": "{{language}}の音声を試聴",
-    "previewFailed": "試聴を再生できませんでした。"
+    "previewFailed": "試聴を再生できませんでした。",
+    "needs": {
+      "chat": "音声モードで答えるには、チャットモデルが必要です。",
+      "vision": "玄関にいる人を見るには、画像を見られるモデルが必要です。",
+      "offer": "{{name}} がこのコンピュータに合います（{{size}}）。",
+      "install": "{{name}} をインストール",
+      "downloading": "{{name}} をダウンロード中… {{percent}}%",
+      "ready": "{{name}} はインストール済みです。",
+      "none": "このコンピュータに合うモデルはカタログにありません。",
+      "models": "モデルを見る"
+    }
   }
 }

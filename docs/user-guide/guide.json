@@ -2618,7 +2618,11 @@
   },
   {
    "type": "paragraph",
-   "text": "Kitten TTS 2 mini adds more natural voices in 15 languages, including German, Korean, Russian, Dutch, and Hindi. To add it, choose Install next to it under Voice. It downloads its program and voices, about 1.5 GB, and takes a minute or two. It runs on the processor and uses about 1 GB of memory while it speaks, which it frees after 10 quiet minutes. Once it's installed, Automatic uses Kitten for the languages Kokoro doesn't speak. Its voices are Powered by KittenML, under the Apache-2.0 license. Choose Remove to delete it, and those languages go back to Piper."
+   "text": "Kitten TTS 2 mini adds more natural voices in 15 languages, including German, Korean, Russian, Dutch, and Hindi. To add it, choose Install next to it under Voice. It downloads its program and voices, about 1.5 GB, and takes a minute or two. It runs on the processor and uses about 1 GB of memory while it speaks, which it frees after 10 quiet minutes. Once it's installed, Automatic uses Kitten for the languages Kokoro doesn't speak. Its voices are Powered by KittenML, under the Apache-2.0 license. Installing it also sets up listening for voice mode, so the first conversation doesn't wait for downloads. Choose Remove to delete it, and those languages go back to Piper."
+  },
+  {
+   "type": "paragraph",
+   "text": "Voice also says what's still missing. Voice mode needs a chat model to answer with, and the doorbell needs a model that can see pictures. When none is installed, Voice names the one that fits this computer, with its size, and Install downloads it. An automation that looks at a camera offers the same when you choose the camera."
         },
         {
           "type": "paragraph",

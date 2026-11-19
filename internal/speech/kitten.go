@@ -155,7 +155,8 @@ const (
 // KittenStatus is Kitten's install, for the Voice settings.
 type KittenStatus struct {
 	State KittenState `json:"state"`
-	// Stage is what an install is doing: program, voices, or warming.
+	// Stage is what an install is doing: program, voices, warming, or
+	// listening.
 	Stage string `json:"stage,omitempty"`
 	Error string `json:"error,omitempty"`
 	// Unavailable is why it can't be installed here.
@@ -271,6 +272,12 @@ func (w *Worker) installKitten(ctx context.Context, stage func(string)) error {
 	// install's; speaking says so later.
 	stage("warming")
 	_, _, _ = w.speakKitten(ctx, "Hello.", KittenVoiceID("en", w.firstKittenKey("en")))
+	// Live voice also listens: a second of silence sets up the speech
+	// program and downloads its listening model now, so installing Kitten
+	// leaves voice mode ready instead of a first turn that waits for
+	// downloads (#667). Like warming, a failure here isn't the install's.
+	stage("listening")
+	_, _ = w.Transcribe(ctx, make([]byte, 2*16000), "fast", "en")
 	return nil
 }
 
@@ -434,9 +441,22 @@ func titleWord(s string) string {
 type VoiceSettings struct {
 	Kitten    KittenStatus  `json:"kitten"`
 	Languages []VoiceChoice `json:"languages"`
+	// Needs are the models voice mode and the doorbell still need on this
+	// computer, each with one to install (#667).
+	Needs []ModelNeed `json:"needs"`
+}
+
+// ModelNeed is a kind of model nothing installed here does: chat, to answer
+// in voice mode, or vision, to look at a camera. Model is the one that fits
+// this computer best to install, or empty when none fits.
+type ModelNeed struct {
+	Ability   string `json:"ability"`
+	Model     string `json:"model,omitempty"`
+	Name      string `json:"name,omitempty"`
+	SizeBytes int64  `json:"size_bytes,omitempty"`
 }
 
 // Settings is the Voice settings, with the voices chosen by chosen.
 func (w *Worker) Settings(chosen func(lang string) string) VoiceSettings {
-	return VoiceSettings{Kitten: w.KittenStatus(), Languages: w.VoiceChoices(chosen)}
+	return VoiceSettings{Kitten: w.KittenStatus(), Languages: w.VoiceChoices(chosen), Needs: []ModelNeed{}}
 }

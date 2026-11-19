@@ -383,6 +383,7 @@
       "installing": "Installation du programme…",
       "downloading": "Téléchargement des voix…",
       "warming": "Préparation des voix…",
+      "listening": "Préparation de l'écoute…",
       "remove": "Supprimer",
       "removeConfirm": "Supprimer Kitten",
       "keep": "Garder"
@@ -397,6 +398,16 @@
     },
     "preview": "Écouter",
     "previewIn": "Écouter la voix en {{language}}",
-    "previewFailed": "Impossible de lire l'extrait."
+    "previewFailed": "Impossible de lire l'extrait.",
+    "needs": {
+      "chat": "Pour répondre en mode vocal, Toskar a besoin d'un modèle de chat.",
+      "vision": "Pour voir qui est à la porte, Toskar a besoin d'un modèle capable de voir les images.",
+      "offer": "{{name}} convient à cet ordinateur ({{size}}).",
+      "install": "Installer {{name}}",
+      "downloading": "Téléchargement de {{name}}… {{percent}} %",
+      "ready": "{{name}} est installé.",
+      "none": "Aucun modèle du catalogue ne convient à cet ordinateur.",
+      "models": "Voir les modèles"
+    }
   }
 }

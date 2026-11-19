@@ -365,6 +365,7 @@
       "installing": "正在安裝程式…",
       "downloading": "正在下載語音…",
       "warming": "正在準備語音…",
+      "listening": "正在準備聆聽…",
       "remove": "移除",
       "removeConfirm": "移除 Kitten",
       "keep": "保留"
@@ -379,6 +380,16 @@
     },
     "preview": "試聽",
     "previewIn": "試聽{{language}}語音",
-    "previewFailed": "無法播放試聽。"
+    "previewFailed": "無法播放試聽。",
+    "needs": {
+      "chat": "要在語音模式中回答，Toskar 需要一個聊天模型。",
+      "vision": "要看清門口是誰，Toskar 需要一個能看圖片的模型。",
+      "offer": "{{name}} 適合這台電腦（{{size}}）。",
+      "install": "安裝 {{name}}",
+      "downloading": "正在下載 {{name}}… {{percent}}%",
+      "ready": "{{name}} 已安裝。",
+      "none": "目錄中沒有適合這台電腦的模型。",
+      "models": "查看模型"
+    }
   }
 }
