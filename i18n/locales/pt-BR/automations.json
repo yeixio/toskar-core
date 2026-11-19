@@ -427,7 +427,9 @@
     },
     "sayVoice": "Voz",
     "sayVoiceAutomatic": "A voz do idioma nas Configurações",
-    "sayVoiceKitten": "Kitten"
+    "sayVoiceKitten": "Kitten",
+    "sayListen": "Conversar com a visita",
+    "sayListenHint": "Depois das primeiras palavras, o Toskar escuta pelo microfone da campainha, responde e descobre quem veio e por quê. Ele nunca diz se há alguém em casa. Você recebe um resumo da visita. Precisa do ffmpeg neste computador."
   },
   "draft": {
     "label": "Automação para confirmar",

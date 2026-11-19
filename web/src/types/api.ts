@@ -1917,6 +1917,8 @@ export interface AutomationSay {
   quiet_to?: string
   /** The voice it speaks in, such as kitten:en:eleanor; empty is the language's voice from the Voice settings (#1304, contract 1.112). */
   voice?: string
+  /** Talks with the visitor after the first words, through the doorbell's microphone, and the run's result is the visit summed up (#667, contract 1.113). */
+  listen?: boolean
 }
 
 /** Kitten TTS 2 mini's install, for the Voice settings (#1304). */

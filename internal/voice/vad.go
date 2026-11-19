@@ -118,3 +118,33 @@ func (v *vad) feed(samples []int16, offset int) []vadEvent {
 	}
 	return out
 }
+
+// Turns finds where someone starts and stops talking in a stream of audio
+// at SampleRate, as a session's turn detection does: the doorbell uses it
+// to hear when a visitor has finished (#667).
+type Turns struct {
+	v  *vad
+	at int
+}
+
+// NewTurns detects turns as cfg says; a zero cfg is the session's default.
+func NewTurns(cfg TurnDetection) *Turns {
+	if cfg.Type == "" {
+		cfg = *defaultTurnDetection()
+	}
+	return &Turns{v: newVAD(cfg)}
+}
+
+// Feed takes the next samples and reports whether speech started, and
+// whether it stopped, in them.
+func (t *Turns) Feed(samples []int16) (started, stopped bool) {
+	for _, e := range t.v.feed(samples, t.at) {
+		started = started || e.started
+		stopped = stopped || e.stopped
+	}
+	t.at += len(samples)
+	return started, stopped
+}
+
+// Speaking reports someone talking now.
+func (t *Turns) Speaking() bool { return t.v.speaking }

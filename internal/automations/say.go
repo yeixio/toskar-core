@@ -24,6 +24,10 @@ type Say struct {
 	// "" is the voice chosen for the answer's language in the Voice
 	// settings. A voice that's no longer here leaves it to that one.
 	Voice string `json:"voice,omitempty"`
+	// Listen talks with the visitor after the first words (#667): it hears
+	// them through the camera's microphone, answers, and sums the visit up
+	// in the run's result, which is what it notifies with.
+	Listen bool `json:"listen,omitempty"`
 }
 
 // SayReolink is a Reolink camera's speaker, reached through reolink-cli.
@@ -127,6 +131,13 @@ func SayNote(s *Say) string {
 	if s == nil {
 		return ""
 	}
-	return "Your answer is spoken aloud through the door's speaker to whoever is there, so write only the words to say: one or two short sentences, " +
+	note := "Your answer is spoken aloud through the door's speaker to whoever is there, so write only the words to say: one or two short sentences, " +
 		"with no formatting, lists, or links. If nobody is there to talk to, such as when the picture shows no one or only someone passing by, answer only " + SayNothing + "."
+	if s.Listen {
+		note += " They can answer you, and you'll hear them: greet them and ask how you can help."
+	}
+	return note
 }
+
+// MaxVisitTurns is the most a visitor is answered in one visit.
+const MaxVisitTurns = 6

@@ -427,7 +427,9 @@
     },
     "sayVoice": "音声",
     "sayVoiceAutomatic": "設定で選んだ言語の音声",
-    "sayVoiceKitten": "Kitten"
+    "sayVoiceKitten": "Kitten",
+    "sayListen": "訪問者と話す",
+    "sayListenHint": "最初の言葉のあと、Toskar はドアホンのマイクで聞き取り、答えて、誰が何の用で来たかを確かめます。在宅かどうかは決して言いません。訪問の要約が通知されます。このコンピュータに ffmpeg が必要です。"
   },
   "draft": {
     "label": "確認待ちのオートメーション",

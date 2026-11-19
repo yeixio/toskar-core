@@ -427,7 +427,9 @@
     },
     "sayVoice": "Voice",
     "sayVoiceAutomatic": "The language's voice from Settings",
-    "sayVoiceKitten": "Kitten"
+    "sayVoiceKitten": "Kitten",
+    "sayListen": "Talk with the visitor",
+    "sayListenHint": "After the first words, Toskar listens through the doorbell's microphone, answers, and finds out who came and why. It never says whether anyone is home. You're notified with a summary of the visit. Needs ffmpeg on this computer."
   },
   "draft": {
     "label": "Automation to confirm",

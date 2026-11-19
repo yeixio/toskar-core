@@ -427,7 +427,9 @@
     },
     "sayVoice": "Voce",
     "sayVoiceAutomatic": "La voce della lingua nelle Impostazioni",
-    "sayVoiceKitten": "Kitten"
+    "sayVoiceKitten": "Kitten",
+    "sayListen": "Parla con chi è alla porta",
+    "sayListenHint": "Dopo le prime parole, Toskar ascolta dal microfono del campanello, risponde e scopre chi è venuto e perché. Non dice mai se c'è qualcuno in casa. Ricevi un riepilogo della visita. Serve ffmpeg su questo computer."
   },
   "draft": {
     "label": "Automazione da confermare",

@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Toskar Control Plane API
-  version: "1.113"
+  version: "1.114"
   description: >-
     Local AI control plane API for Toskar, its OpenAI-compatible routes, and its MCP server.
     On the default loopback bind no key is needed. When the daemon listens on any other address,
@@ -9104,6 +9104,7 @@ components:
             quiet_from: {type: string, description: 'With quiet_to, such as 22:00 and 07:00: the hours, in the automation''s time zone, when nothing is said. The run still notifies.'}
             quiet_to: {type: string}
             voice: {type: string, description: 'The voice it speaks in, such as kitten:en:eleanor (#1304, contract 1.112); empty is the one chosen for the language in the Voice settings. One no longer here leaves it to that.'}
+            listen: {type: boolean, description: "Talks with the visitor after the first words: hears them through the camera's microphone with reolink-cli and ffmpeg, answers up to 6 times, and the run's result is the visit summed up, then what was said (#667, contract 1.114)"}
         actions:
           type: array
           description: 'Calls the automation may make on its own (#586), such as Home Assistant''s light.turn_on on light.porch. A call that matches one runs without asking, even in a run a trigger started; other calls that change things are skipped. Each argument listed must equal the call''s, ignoring case; a Home Assistant action names its service and entity_id. At most 20. On update, an empty list removes them.'
@@ -9167,6 +9168,7 @@ components:
             quiet_from: {type: string, description: 'With quiet_to, such as 22:00 and 07:00: the hours, in the automation''s time zone, when nothing is said. The run still notifies.'}
             quiet_to: {type: string}
             voice: {type: string, description: 'The voice it speaks in, such as kitten:en:eleanor (#1304, contract 1.112); empty is the one chosen for the language in the Voice settings. One no longer here leaves it to that.'}
+            listen: {type: boolean, description: "Talks with the visitor after the first words: hears them through the camera's microphone with reolink-cli and ffmpeg, answers up to 6 times, and the run's result is the visit summed up, then what was said (#667, contract 1.114)"}
         actions:
           type: array
           description: 'Calls the automation may make on its own (#586), such as Home Assistant''s light.turn_on on light.porch. A call that matches one runs without asking, even in a run a trigger started; other calls that change things are skipped. Each argument listed must equal the call''s, ignoring case; a Home Assistant action names its service and entity_id. At most 20. On update, an empty list removes them.'
@@ -10485,6 +10487,7 @@ components:
             quiet_from: {type: string, description: 'With quiet_to, such as 22:00 and 07:00: the hours, in the automation''s time zone, when nothing is said. The run still notifies.'}
             quiet_to: {type: string}
             voice: {type: string, description: 'The voice it speaks in, such as kitten:en:eleanor (#1304, contract 1.112); empty is the one chosen for the language in the Voice settings. One no longer here leaves it to that.'}
+            listen: {type: boolean, description: "Talks with the visitor after the first words: hears them through the camera's microphone with reolink-cli and ffmpeg, answers up to 6 times, and the run's result is the visit summed up, then what was said (#667, contract 1.114)"}
         actions:
           type: array
           description: 'Calls the automation may make on its own (#586), such as Home Assistant''s light.turn_on on light.porch. A call that matches one runs without asking, even in a run a trigger started; other calls that change things are skipped. Each argument listed must equal the call''s, ignoring case; a Home Assistant action names its service and entity_id. At most 20. On update, an empty list removes them.'
