@@ -45,8 +45,13 @@ type vad struct {
 	loud     int // speech frames lately, less two for each quiet one
 	span     int // frames since they started
 	quiet    int // quiet frames in a row while speaking
+	frames   int // frames heard
 	pending  []int16
 }
+
+// warmFrames are the first 300 ms, which learn the room's noise before any
+// turn can start: a fan or a hum that's there from the start isn't speech.
+const warmFrames = 15
 
 // startFrames of speech start a turn: 160 ms, so a click, a cough, or a
 // chair doesn't, and doesn't stop an answer (#795). The prefix padding
@@ -68,11 +73,28 @@ func newVAD(cfg TurnDetection) *vad {
 
 // floor is the least level that counts as speech.
 func (v *vad) floor() float64 {
-	min := 0.04 * v.cfg.Threshold // 0.02, about -34 dBFS, at 0.5
+	min := 0.06 * v.cfg.Threshold // 0.03, about -30 dBFS, at 0.5
 	if n := v.noise * 4; n > min {
 		return n
 	}
 	return min
+}
+
+// learnNoise follows the room's noise (#795): down quickly, when it gets
+// quieter, and up slowly, over about two seconds from what's below the
+// floor and ten from what's above it or while someone speaks, so a fan or traffic that starts becomes the room
+// rather than a turn that never ends, while speech isn't learned as noise.
+// It used to learn only from quiet frames, so a steady noise louder than
+// the floor was never learned, and kept starting turns.
+func (v *vad) learnNoise(lvl float64) {
+	switch {
+	case lvl < v.noise:
+		v.noise += 0.1 * (lvl - v.noise)
+	case v.speaking || lvl >= v.floor():
+		v.noise += 0.002 * (lvl - v.noise)
+	default:
+		v.noise += 0.01 * (lvl - v.noise)
+	}
 }
 
 // vadEvent is what a frame changed: started or stopped speaking, with the
@@ -94,7 +116,13 @@ func (v *vad) feed(samples []int16, offset int) []vadEvent {
 		at := start
 		start += frameSamples
 		lvl := level(frame)
+		v.frames++
+		if v.frames <= warmFrames {
+			v.noise += (lvl - v.noise) / float64(v.frames)
+			continue
+		}
 		loud := lvl >= v.floor()
+		v.learnNoise(lvl)
 		if !v.speaking {
 			if loud {
 				v.loud++
@@ -107,9 +135,6 @@ func (v *vad) feed(samples []int16, offset int) []vadEvent {
 				if v.loud == 0 {
 					v.span = 0
 				}
-			} else {
-				// The room's noise, slowly, while nobody speaks.
-				v.noise = 0.95*v.noise + 0.05*lvl
 			}
 			if v.loud >= startFrames {
 				v.speaking, v.quiet = true, 0
@@ -144,7 +169,11 @@ func NewTurns(cfg TurnDetection) *Turns {
 	if cfg.Type == "" {
 		cfg = *defaultTurnDetection()
 	}
-	return &Turns{v: newVAD(cfg)}
+	t := &Turns{v: newVAD(cfg)}
+	// It's given the audio from where a turn may start, such as just after
+	// the doorbell spoke, so it learns the noise as it goes instead.
+	t.v.frames = warmFrames
+	return t
 }
 
 // Feed takes the next samples and reports whether speech started, and

@@ -31,7 +31,8 @@ func TestReolinkListensThroughReolinkCLI(t *testing.T) {
 		t.Fatal(err)
 	}
 	cli := filepath.Join(dir, "reolink-cli")
-	script := "#!/bin/sh\nprintf '%s\\n' \"$@\" > \"" + dir + "/args\"\nfor a; do last=\"$a\"; done\nif [ \"$FAIL\" = 1 ]; then echo '{\"ok\":false,\"error\":{\"message\":\"camera busy\"}}'; exit 1; fi\ncat \"" + dir + "/stream\" > \"$last\"\nsleep 0.2\n"
+	// Its gateway commands do nothing.
+	script := "#!/bin/sh\ncase \"$1\" in gateway) exit 0;; esac\nprintf '%s\\n' \"$@\" > \"" + dir + "/args\"\nfor a; do last=\"$a\"; done\nif [ \"$FAIL\" = 1 ]; then echo '{\"ok\":false,\"error\":{\"message\":\"camera busy\"}}'; exit 1; fi\ncat \"" + dir + "/stream\" > \"$last\"\nsleep 0.2\n"
 	if err := os.WriteFile(cli, []byte(script), 0o755); err != nil {
 		t.Fatal(err)
 	}
