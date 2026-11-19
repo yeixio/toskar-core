@@ -2,6 +2,7 @@ import { useMutation, useQuery } from '@tanstack/react-query'
 import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { TFunction } from 'i18next'
+import { fitsLine, systemName } from './systemName'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 import { Ratatoskr } from '@/components/ui/Ratatoskr'
@@ -266,7 +267,7 @@ export function OnboardingPage() {
                     <div>
                       <dt className="text-xs uppercase tracking-wide text-ink-muted">{t('hardware.system')}</dt>
                       <dd className="text-sm font-medium text-ink">
-                        {hardware.os} / {hardware.arch}
+                        {systemName(hardware.os, hardware.arch, t)}
                       </dd>
                     </div>
                   )}
@@ -355,7 +356,7 @@ export function OnboardingPage() {
               {t('recommend.title', { purpose: t(`purposes.${selectedPurpose}.title`) })}
             </h2>
             <p className="mt-2 text-sm leading-relaxed text-ink-muted">
-              {recommendation.reason}
+              {fitsLine(recommendation, hardware?.memory?.total_bytes, t)}
             </p>
             {recommendation.community_chosen ? (
               <p className="mt-1 text-xs text-ink-muted">{t('recommend.communityChosen')}</p>
@@ -479,3 +480,4 @@ const ROLES = ['coordinator', 'worker', 'reviewer', 'researcher', 'assistant']
 function friendlyRole(role: string, t: TFunction<'onboarding'>): string {
   return ROLES.includes(role) ? t(`roles.${role}`) : role
 }
+

@@ -299,7 +299,7 @@
     "unlimited": "Ilimitado"
   },
   "about": {
-    "tagline": "Plano de control de IA local",
+    "tagline": "Ejecuta IA en tus propios equipos",
     "versionUnavailable": "Versión no disponible",
     "build": "Compilación {{commit}}",
     "source": "Código fuente correspondiente",
@@ -312,7 +312,8 @@
     "download": "Descargar",
     "upToDate": "Actualizado",
     "checkUpdates": "Buscar actualizaciones",
-    "checkUpdatesHint": "Una vez al día, Toskar pide a toskar.ai el número de la última versión. No se envía nada más."
+    "checkUpdatesHint": "Una vez al día, Toskar pide a toskar.ai el número de la última versión. No se envía nada más.",
+    "running": "En marcha"
   },
   "reset": {
     "title": "Restablecer la aplicación",

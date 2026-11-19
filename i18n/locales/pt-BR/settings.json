@@ -299,7 +299,7 @@
     "unlimited": "Ilimitado"
   },
   "about": {
-    "tagline": "Painel de controle de IA local",
+    "tagline": "Roda IA nos seus próprios computadores",
     "versionUnavailable": "Versão indisponível",
     "build": "Build {{commit}}",
     "source": "Código-fonte correspondente",
@@ -312,7 +312,8 @@
     "download": "Baixar",
     "upToDate": "Atualizado",
     "checkUpdates": "Verificar atualizações",
-    "checkUpdatesHint": "Uma vez por dia, o Toskar pergunta ao toskar.ai o número da versão mais recente. Nada mais é enviado."
+    "checkUpdatesHint": "Uma vez por dia, o Toskar pergunta ao toskar.ai o número da versão mais recente. Nada mais é enviado.",
+    "running": "Em execução"
   },
   "reset": {
     "title": "Redefinir aplicativo",

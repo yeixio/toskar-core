@@ -8,6 +8,7 @@ import (
 	"github.com/yeixio/toskar-core/internal/projects"
 	"github.com/yeixio/toskar-core/internal/swarm"
 	"github.com/yeixio/toskar-core/internal/turnopts"
+	"io"
 	"net"
 	"net/http"
 	"net/url"
@@ -813,7 +814,11 @@ func (s *Server) handleRevokeNode(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err := s.deps.RevokeNode(r.Context(), id); err != nil {
-		writeErrFrom(w, http.StatusBadRequest, "REVOKE_FAILED", err)
+		status := http.StatusBadRequest
+		if code, _ := contracts.ErrorCode(err); code == "NODE_NOT_FOUND" {
+			status = http.StatusNotFound
+		}
+		writeErrFrom(w, status, "REVOKE_FAILED", err)
 		return
 	}
 	w.WriteHeader(http.StatusNoContent)
@@ -844,7 +849,11 @@ func (s *Server) handleCreateAPIKey(w http.ResponseWriter, r *http.Request) {
 		Permissions *auth.APIKeyPermissions `json:"permissions"`
 		Preset      string                  `json:"preset"`
 	}
-	_ = json.NewDecoder(r.Body).Decode(&body)
+	// No body makes a key named default; a body that isn't JSON makes none (#1346).
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil && !errors.Is(err, io.EOF) {
+		writeErr(w, http.StatusBadRequest, "INVALID_BODY", "The request body isn't valid JSON.", nil)
+		return
+	}
 	perms := body.Permissions
 	switch body.Preset {
 	case "":

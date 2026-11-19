@@ -184,7 +184,7 @@
     "services_one": "{{count}} servicio conectado",
     "services_many": "{{count}} servicios conectados",
     "services_other": "{{count}} servicios conectados",
-    "providers": "{{healthy}} de {{total}} proveedores listos",
+    "providers": "{{healthy}} de {{total}} motores de modelos y servidores de herramientas listos",
     "files_one": "{{count}} archivo ({{size}})",
     "files_many": "{{count}} archivos ({{size}})",
     "files_other": "{{count}} archivos ({{size}})"
@@ -218,7 +218,7 @@
     "title": "Memoria de Toskar",
     "description": "Cuánta memoria usa el propio Toskar, y sus tareas en segundo plano. Ambas deberían estabilizarse al rato; un aumento constante durante horas merece un aviso.",
     "heap": "Memoria en uso",
-    "tasks": "Tareas en segundo plano",
+    "tasks": "Tareas en marcha dentro de Toskar",
     "since": "En marcha desde",
     "chartLabel_one": "Memoria en la última hora",
     "chartLabel_many": "Memoria en las últimas {{count}} horas",

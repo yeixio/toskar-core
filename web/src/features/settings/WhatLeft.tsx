@@ -101,7 +101,8 @@ export function WhatLeft() {
                 <li key={r.id} className="flex flex-wrap items-baseline gap-x-2 px-3 py-2 text-xs">
                   <span className="font-medium text-ink">{kindLabel(r.kind)}</span>
                   <span className="text-ink">{r.destination}</span>
-                  {r.detail && <span className="min-w-0 flex-1 truncate text-ink-muted" title={detailLabel(r.detail)}>{detailLabel(r.detail)}</span>}
+                  {/* "AI news · toskar.ai · the AI news" says it twice (#1346). */}
+                  {r.detail && !(r.kind === 'news' && r.detail === 'the AI news') && <span className="min-w-0 flex-1 truncate text-ink-muted" title={detailLabel(r.detail)}>{detailLabel(r.detail)}</span>}
                   <span className="ms-auto shrink-0 text-ink-faint">
                     {r.source ? `${sourceLabel(r.source)} · ` : ''}
                     {when(r.at)}

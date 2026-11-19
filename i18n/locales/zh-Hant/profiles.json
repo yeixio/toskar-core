@@ -132,7 +132,8 @@
     "git": "Git",
     "terminal": "終端機",
     "ok": "{{label}} ✓",
-    "ask": "{{label}} 詢問"
+    "ask": "{{label}} 詢問",
+    "off": "無{{label}}"
   },
   "roles": {
     "role": "角色",

@@ -133,7 +133,8 @@
     "git": "Git",
     "terminal": "Terminal",
     "ok": "{{label}} ✓",
-    "ask": "{{label}} fragen"
+    "ask": "{{label}} fragen",
+    "off": "Kein {{label}}"
   },
   "roles": {
     "role": "Rolle",

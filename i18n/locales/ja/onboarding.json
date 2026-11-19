@@ -12,7 +12,15 @@
     "memory": "メモリ",
     "graphics": "グラフィックス",
     "system": "システム",
-    "unavailable": "Toskar が起動すると、ハードウェアの詳細が表示されます。このままセットアップを続けられます。"
+    "unavailable": "Toskar が起動すると、ハードウェアの詳細が表示されます。このままセットアップを続けられます。",
+    "os": {
+      "macAppleSilicon": "macOS、Appleシリコン",
+      "macIntel": "macOS、Intel",
+      "windows": "Windows",
+      "windowsArm": "Windows（Arm）",
+      "linux": "Linux",
+      "linuxArm": "Linux（Arm）"
+    }
   },
   "question": "AIに何をしてほしいですか？",
   "purposes": {
@@ -48,7 +56,8 @@
     "install": "おすすめの構成をインストール",
     "use": "このセットアップを使う",
     "skip": "今はスキップ",
-    "back": "戻る"
+    "back": "戻る",
+    "fits": "{{name}} はこのコンピュータのメモリ {{memory}} に収まります。"
   },
   "roles": {
     "coordinator": "コーディネーター",

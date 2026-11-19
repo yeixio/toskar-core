@@ -50,12 +50,15 @@ describe('WhatLeft', () => {
 
     it("shows what the computer itself sent in the app's language (#1271)", async () => {
       vi.mocked(api.listEgress).mockResolvedValue([
-        { id: '3', at: '2026-10-01T20:02:00Z', kind: 'news', destination: 'toskar.ai', detail: 'the AI news', source: 'chat' },
+        { id: '3', at: '2026-10-01T20:02:00Z', kind: 'update_check', destination: 'toskar.ai', detail: 'the latest version number', source: 'chat' },
+        { id: '5', at: '2026-10-01T20:04:00Z', kind: 'news', destination: 'toskar.ai', detail: 'the AI news', source: 'chat' },
         { id: '4', at: '2026-10-01T20:03:00Z', kind: 'external_server', destination: 'huggingface.co', detail: 'training examples and instructions for me/trail', source: 'chat' },
       ])
       await applyLanguage('de')
       renderIt()
-      expect(await screen.findByText('die KI-News')).toBeInTheDocument()
+      expect(await screen.findByText('die neueste Versionsnummer')).toBeInTheDocument()
+      // Regression: toskar-core#1346. The news row doesn't say "the AI news" twice.
+      expect(screen.queryByText('die KI-News')).not.toBeInTheDocument()
       expect(screen.getByText('Trainingsbeispiele und Anweisungen für me/trail')).toBeInTheDocument()
     })
 

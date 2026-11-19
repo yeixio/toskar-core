@@ -160,7 +160,7 @@
     "computers": "{{online}}/{{total}} 台电脑在线",
     "tools_other": "{{count}} 个工具",
     "services_other": "{{count}} 个已连接的服务",
-    "providers": "{{healthy}}/{{total}} 个提供方就绪",
+    "providers": "{{total}} 个模型引擎和工具服务器中 {{healthy}} 个就绪",
     "files_other": "{{count}} 个文件（{{size}}）"
   },
   "providers": {
@@ -190,7 +190,7 @@
     "title": "Toskar 的内存",
     "description": "Toskar 自身使用的内存及其后台任务。两者过一段时间后应趋于平稳；若数小时持续增长，值得报告。",
     "heap": "使用中的内存",
-    "tasks": "后台任务",
+    "tasks": "Toskar 内部正在运行的任务",
     "since": "运行始于",
     "chartLabel_other": "过去 {{count}} 小时的内存",
     "growing_other": "内存已持续增长 {{count}} 小时。请导出诊断并将诊断包附加到 Issue。"

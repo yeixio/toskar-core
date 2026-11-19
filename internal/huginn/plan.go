@@ -34,6 +34,10 @@ var (
 
 // MakePlan returns a plan for a request with several parts, or false when it
 // is better answered in one go. Simple requests stay simple.
+// quickLength is the longest one-line question with steps that's still
+// answered at once, without a plan.
+const quickLength = 100
+
 func MakePlan(message string) (Plan, bool) {
 	msg := strings.TrimSpace(message)
 	if utf8.RuneCountInString(msg) < 20 {
@@ -49,7 +53,12 @@ func MakePlan(message string) (Plan, bool) {
 			steps = append(steps, part)
 		}
 	}
-	if len(steps) >= 2 {
+	// Two quick questions on one line are answered together, not as a plan
+	// of steps (#1346): "What is 17 times 23? Then say what model you are."
+	// Work to do in order, such as an outline then a schedule, has no
+	// question in it.
+	quick := !needsWeb && strings.Contains(msg, "?") && !strings.Contains(msg, "\n") && utf8.RuneCountInString(msg) <= quickLength
+	if len(steps) >= 2 && !quick {
 		if len(steps) > maxSteps {
 			steps = steps[:maxSteps]
 		}

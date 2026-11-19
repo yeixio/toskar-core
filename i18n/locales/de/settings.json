@@ -291,7 +291,7 @@
     "unlimited": "Unbegrenzt"
   },
   "about": {
-    "tagline": "Lokale KI-Steuerzentrale",
+    "tagline": "Führt KI auf deinen eigenen Computern aus",
     "versionUnavailable": "Version nicht verfügbar",
     "build": "Build {{commit}}",
     "source": "Zugehöriger Quellcode",
@@ -304,7 +304,8 @@
     "download": "Herunterladen",
     "upToDate": "Auf dem neuesten Stand",
     "checkUpdates": "Nach Updates suchen",
-    "checkUpdatesHint": "Einmal am Tag fragt Toskar bei toskar.ai nach der neuesten Versionsnummer. Sonst wird nichts gesendet."
+    "checkUpdatesHint": "Einmal am Tag fragt Toskar bei toskar.ai nach der neuesten Versionsnummer. Sonst wird nichts gesendet.",
+    "running": "Läuft"
   },
   "reset": {
     "title": "App zurücksetzen",

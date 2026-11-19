@@ -458,7 +458,7 @@ export function ProfilesPage() {
                               ? 'bg-raised text-ink'
                               : chip.tone === 'ask'
                                 ? 'bg-warning/15 text-ink'
-                                : 'bg-raised text-ink-faint line-through',
+                                : 'bg-raised text-ink-faint',
                           ].join(' ')}
                         >
                           {chip.label}
@@ -483,11 +483,7 @@ export function ProfilesPage() {
                       <p className="text-sm font-medium text-ink">
                         {formatSequence(roles.map((r) => roleDisplayName(r.role)))}
                       </p>
-                    ) : (
-                      <p className="text-sm font-medium capitalize text-ink">
-                        {roleDisplayName(roles[0]?.role ?? 'assistant')}
-                      </p>
-                    )}
+                    ) : null /* One model needs no role name; "Primary" alone said nothing (#1346). */}
                     {showDetails && !isEditing && (
                       <ul className="mt-2 space-y-1.5">
                         {roles.map((r) => (

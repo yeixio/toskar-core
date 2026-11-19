@@ -11,6 +11,7 @@ import (
 
 	"github.com/yeixio/toskar-core/internal/auth"
 	"github.com/yeixio/toskar-core/internal/config"
+	"github.com/yeixio/toskar-core/pkg/contracts"
 )
 
 // A key for chat only, as a CI job's (#455), asks and does nothing else:
@@ -111,5 +112,24 @@ func TestCreateKeyWithItsPermissions(t *testing.T) {
 	failSet, set = false, auth.APIKeyPermissions{}
 	if code, _ := create(`{"name":"x"}`); code != http.StatusCreated || set != (auth.APIKeyPermissions{}) {
 		t.Fatalf("plain key: %d, set %+v", code, set)
+	}
+	// Regression: toskar-core#1346. No body is a default key; a broken one is refused.
+	if code, _ := create(``); code != http.StatusCreated {
+		t.Fatalf("no body: %d", code)
+	}
+	if code, body := create(`{"name": `); code != http.StatusBadRequest || !strings.Contains(body, "INVALID_BODY") {
+		t.Fatalf("broken body: %d %s", code, body)
+	}
+}
+
+// Regression: toskar-core#1346. Removing a computer that isn't paired is 404.
+func TestRevokeUnknownNode(t *testing.T) {
+	srv := NewServer(Dependencies{RevokeNode: func(ctx context.Context, id string) error {
+		return contracts.NewError("NODE_NOT_FOUND", nil, errors.New("no paired computer has that ID"))
+	}})
+	rec := httptest.NewRecorder()
+	srv.Handler().ServeHTTP(rec, localRequest(http.MethodPost, "/api/v1/nodes/nobody/revoke", nil))
+	if rec.Code != http.StatusNotFound {
+		t.Fatalf("%d %s", rec.Code, rec.Body.String())
 	}
 }

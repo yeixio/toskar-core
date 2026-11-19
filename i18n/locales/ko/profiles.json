@@ -132,7 +132,8 @@
     "git": "Git",
     "terminal": "터미널",
     "ok": "{{label}} ✓",
-    "ask": "{{label}} 묻기"
+    "ask": "{{label}} 묻기",
+    "off": "{{label}} 없음"
   },
   "roles": {
     "role": "역할",
