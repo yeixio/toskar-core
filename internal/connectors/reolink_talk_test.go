@@ -2,6 +2,7 @@ package connectors
 
 import (
 	"context"
+	"math"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -122,19 +123,103 @@ func TestReolinkTalkRefusesOddNames(t *testing.T) {
 	}
 }
 
-// Words are raised to 90% of full scale, by at most four times, and never
-// lowered or clipped (#667).
+// speech is a voice reading a few syllables, some loud and some quiet,
+// at about a third of full scale, as Toskar's voices read.
+func speech(rate int) []int16 {
+	var out []int16
+	for _, loud := range []float64{1, 0.3, 0.6, 0.2, 0.8, 0.35} {
+		n := rate / 5
+		for i := range n {
+			t := float64(i) / float64(rate)
+			v := 0.0
+			for k := 1.0; k <= 15; k++ {
+				v += math.Sin(2*math.Pi*150*k*t+k*k*0.7) / k // phases as a voice's
+			}
+			out = append(out, int16(10000*loud*math.Sin(math.Pi*float64(i)/float64(n))*v/2.2))
+		}
+		out = append(out, make([]int16, rate/16)...)
+	}
+	return out
+}
+
+// played is what a doorbell's speaker plays of x: little below 400 Hz.
+func played(x []int16) []int16 {
+	f := make([]float64, len(x))
+	for i, v := range x {
+		f[i] = float64(v)
+	}
+	highPass(f, ReolinkTalkRate, 400)
+	highPass(f, ReolinkTalkRate, 400)
+	out := make([]int16, len(x))
+	for i, v := range f {
+		out[i] = int16(v)
+	}
+	return out
+}
+
+func loudest(x []int16) float64 {
+	top := 0.0
+	for _, v := range x {
+		top = max(top, math.Abs(float64(v)))
+	}
+	return top
+}
+
+func rms(x []int16) float64 {
+	sum := 0.0
+	for _, v := range x {
+		sum += float64(v) * float64(v)
+	}
+	return math.Sqrt(sum / float64(len(x)))
+}
+
+// The words reach 90% of full scale and are never clipped; evened out and
+// without the low end a doorbell's speaker can't play, they come out
+// louder than raising them alone would (#667).
 func TestLouderForADoorbell(t *testing.T) {
-	if got := louder([]int16{10000, -5000}); got[0] != 29490 || got[1] != -14745 {
-		t.Errorf("a third of full scale: %v", got)
+	words := speech(ReolinkTalkRate)
+	peak := 0
+	for _, v := range words {
+		peak = max(peak, int(math.Abs(float64(v))))
 	}
-	if got := louder([]int16{100, -50}); got[0] != 400 || got[1] != -200 {
-		t.Errorf("quiet words: %v", got)
+	got := louder(words, ReolinkTalkRate)
+	top := 0
+	for _, v := range got {
+		top = max(top, int(math.Abs(float64(v))))
 	}
-	if got := louder([]int16{32000, -32767}); got[0] != 32000 || got[1] != -32767 {
-		t.Errorf("already loud: %v", got)
+	if top < 29000 || top > 29491 {
+		t.Errorf("the loudest moment is %d of 32767", top)
 	}
-	if got := louder([]int16{0, 0}); got[0] != 0 {
+	// What the speaker plays of each, against the words raised alone.
+	raised := make([]int16, len(words))
+	for i, v := range words {
+		raised[i] = int16(float64(v) * talkPeak * 32767 / float64(peak))
+	}
+	if db := 20 * math.Log10(rms(played(got))/rms(played(raised))); db < 4 {
+		t.Errorf("only %.1f dB louder than raising the words alone", db)
+	}
+
+	// A hum too low for the speaker is left out, and a voice's middle kept.
+	tone := func(hz float64) float64 {
+		x := make([]float64, ReolinkTalkRate)
+		for i := range x {
+			x[i] = math.Sin(2 * math.Pi * hz * float64(i) / ReolinkTalkRate)
+		}
+		highPass(x, ReolinkTalkRate, talkLowCut)
+		return peakOf(x[ReolinkTalkRate/2:])
+	}
+	if hum, voice := tone(60), tone(1000); hum > 0.1 || voice < 0.95 {
+		t.Errorf("60 Hz kept %.2f, 1 kHz kept %.2f", hum, voice)
+	}
+	// Very quiet words: their loudest moment is raised at most four times.
+	quiet := make([]int16, len(words))
+	for i, v := range words {
+		quiet[i] = v / 100
+	}
+	if r := loudest(louder(quiet, ReolinkTalkRate)) / loudest(quiet); r > talkGain*1.01 {
+		t.Errorf("quiet words raised %.1f times", r)
+	}
+	if got := louder([]int16{0, 0}, ReolinkTalkRate); got[0] != 0 {
 		t.Errorf("silence: %v", got)
 	}
 }

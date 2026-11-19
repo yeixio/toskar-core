@@ -6,7 +6,9 @@
   ended the visit as if nobody had answered.
 - What Toskar says through a Reolink doorbell is louder: the voice is
   raised to near full volume before it's sent, since the doorbell's small
-  speaker made it hard to hear.
+  speaker made it hard to hear. It also leaves out the low end the small
+  speaker can't play and evens out quiet and loud syllables, so it sounds
+  about 7 dB louder at the same peak.
 - The doorbell greets a visitor sooner: its voice, and its listening, are
   readied while Toskar looks at the camera and writes the greeting, rather
   than started after.

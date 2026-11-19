@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math"
 	"net"
 	"net/url"
 	"os"
@@ -166,7 +167,7 @@ func reolinkTalk(ctx context.Context, cred Credential, samples []int16, rate int
 	if err != nil {
 		return err
 	}
-	samples = louder(samples)
+	samples = louder(samples, rate)
 	pcm := make([]byte, 0, 2*(len(samples)+int(int64(rate)*int64(reolinkTail)/int64(time.Second))))
 	for _, v := range samples {
 		pcm = binary.LittleEndian.AppendUint16(pcm, uint16(v))
@@ -224,32 +225,76 @@ const (
 	talkGain = 4.0
 )
 
-// louder raises samples so their peak is talkPeak, by at most talkGain,
-// and never lowers them.
-func louder(samples []int16) []int16 {
-	peak := 0
-	for _, v := range samples {
-		peak = max(peak, abs(int(v)))
-	}
-	if peak == 0 {
-		return samples
-	}
-	gain := min(talkPeak*32767/float64(peak), talkGain)
-	if gain <= 1 {
-		return samples
-	}
-	out := make([]int16, len(samples))
+// A doorbell's speaker is a few centimetres across: what's below
+// talkLowCut barely comes out of it, and only takes room the words could
+// use. Above talkKnee of full scale, the words are pressed talkRatio to 1,
+// so the quieter syllables come up nearer the loudest before all are
+// raised to talkPeak. At the hub's own maximum volume, Mike still wished
+// it were louder (#667).
+const (
+	talkLowCut = 250.0 // Hz
+	talkKnee   = 0.25
+	talkRatio  = 4.0
+	talkFall   = 0.08 // s
+)
+
+// louder makes words at rate sound as loud as a small speaker can play
+// them: it leaves out what's too low for it, evens out the syllables, and
+// raises the loudest moment to talkPeak, by at most talkGain overall.
+func louder(samples []int16, rate int) []int16 {
+	x := make([]float64, len(samples))
+	before := 0.0
 	for i, v := range samples {
-		out[i] = int16(max(-32767, min(32767, float64(v)*gain)))
+		x[i] = float64(v) / 32767
+		before = max(before, math.Abs(x[i]))
+	}
+	if before == 0 || rate <= 0 {
+		return samples
+	}
+	highPass(x, float64(rate), talkLowCut)
+	// Even out the syllables, measured as if the words were at full scale.
+	scale := 1 / peakOf(x)
+	fall := math.Exp(-1 / (talkFall * float64(rate)))
+	env := 0.0
+	for i, v := range x {
+		level := math.Abs(v) * scale
+		env = max(level, fall*env)
+		if env > talkKnee {
+			x[i] = v * (talkKnee + (env-talkKnee)/talkRatio) / env
+		}
+	}
+	peak := peakOf(x)
+	gain := min(talkPeak/peak, talkGain*before/peak)
+	out := make([]int16, len(x))
+	for i, v := range x {
+		out[i] = int16(max(-32767, min(32767, math.Round(v*gain*32767))))
 	}
 	return out
 }
 
-func abs(v int) int {
-	if v < 0 {
-		return -v
+// highPass leaves out what's below cut Hz from x, sampled at rate: a
+// second-order Butterworth filter.
+func highPass(x []float64, rate, cut float64) {
+	w := 2 * math.Pi * cut / rate
+	alpha := math.Sin(w) / math.Sqrt2 // sin(w)/2Q, Q = 1/√2
+	cos := math.Cos(w)
+	a0 := 1 + alpha
+	b0, b1, b2 := (1+cos)/2/a0, -(1+cos)/a0, (1+cos)/2/a0
+	a1, a2 := -2*cos/a0, (1-alpha)/a0
+	var x1, x2, y1, y2 float64
+	for i, v := range x {
+		y := b0*v + b1*x1 + b2*x2 - a1*y1 - a2*y2
+		x2, x1, y2, y1 = x1, v, y1, y
+		x[i] = y
 	}
-	return v
+}
+
+func peakOf(x []float64) float64 {
+	peak := 1e-9
+	for _, v := range x {
+		peak = max(peak, math.Abs(v))
+	}
+	return peak
 }
 
 // lastLine is the last non-empty line of a command's output.
