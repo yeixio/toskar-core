@@ -283,7 +283,7 @@
     "unlimited": "無制限"
   },
   "about": {
-    "tagline": "ローカルAIコントロールプレーン",
+    "tagline": "AIを自分のコンピュータで動かします",
     "versionUnavailable": "バージョンを取得できません",
     "build": "ビルド {{commit}}",
     "source": "対応するソースコード",
@@ -296,7 +296,8 @@
     "download": "ダウンロード",
     "upToDate": "最新です",
     "checkUpdates": "アップデートを確認",
-    "checkUpdatesHint": "1日に1回、Toskarはtoskar.aiに最新のバージョン番号を問い合わせます。それ以外は何も送信しません。"
+    "checkUpdatesHint": "1日に1回、Toskarはtoskar.aiに最新のバージョン番号を問い合わせます。それ以外は何も送信しません。",
+    "running": "実行中"
   },
   "reset": {
     "title": "アプリケーションをリセット",

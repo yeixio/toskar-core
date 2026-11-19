@@ -435,8 +435,15 @@ func (p *PairingManager) GetIncoming(sessionID string) (*PairingSession, bool) {
 // RevokeTrust removes trust for a node.
 func (p *PairingManager) RevokeTrust(ctx context.Context, nodeID string) error {
 	now := time.Now().UTC().Format(time.RFC3339Nano)
-	_, err := p.db.ExecContext(ctx, `UPDATE node_trust SET revoked_at = ? WHERE node_id = ?`, now, nodeID)
-	return err
+	res, err := p.db.ExecContext(ctx, `UPDATE node_trust SET revoked_at = ? WHERE node_id = ?`, now, nodeID)
+	if err != nil {
+		return err
+	}
+	// A computer that was never paired isn't quietly "removed" (#1346).
+	if n, err := res.RowsAffected(); err == nil && n == 0 {
+		return contracts.NewError("NODE_NOT_FOUND", nil, fmt.Errorf("no paired computer has the ID %q", nodeID))
+	}
+	return nil
 }
 
 // TrustedCertPEM returns the stored cert for a paired node.

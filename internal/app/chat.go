@@ -2009,6 +2009,11 @@ func (e *chatExecEnv) TurnInstructions(ctx context.Context, prompt string) strin
 	if tctx == nil {
 		tctx = ctx
 	}
+	// Which model is answering, so "which model are you" isn't answered
+	// with another maker's name from the model's training (#1346).
+	if line := e.modelLine(ctx); line != "" && !public {
+		parts = append(parts, line)
+	}
 	// What Yggdrasil can do comes from its own inventory (§37).
 	if e.capabilities != "" && !public {
 		parts = append(parts, e.capabilities)
@@ -2040,6 +2045,22 @@ func (e *chatExecEnv) TurnInstructions(ctx context.Context, prompt string) strin
 	// which a live voice turn feels (#795).
 	parts = append(parts, nowLine(e.startedAt, locale.TimeZone(tctx)))
 	return strings.Join(parts, "\n\n")
+}
+
+// modelLine tells the model its own name, such as Qwen 3.5 4B, and that it
+// runs in Toskar on the person's own computers (#1346). Empty when the
+// model isn't known yet.
+func (e *chatExecEnv) modelLine(ctx context.Context) string {
+	id := e.modelForRole("assistant")
+	if id == "" || e.app == nil || e.app.Models == nil {
+		return ""
+	}
+	name := id
+	if m, err := e.app.Models.Get(ctx, id); err == nil && strings.TrimSpace(m.DisplayName) != "" {
+		name = m.DisplayName
+	}
+	return "You are the model " + name + ", running in Toskar on the person's own computers, not on a cloud service. " +
+		"If asked which model you are or who made you, say you are " + name + ", running on their computer, and don't name another assistant or company as yourself."
 }
 
 // ReferenceMaterial returns connected knowledge for this turn. It is

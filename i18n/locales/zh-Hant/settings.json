@@ -283,7 +283,7 @@
     "unlimited": "無限制"
   },
   "about": {
-    "tagline": "本機 AI 控制中心",
+    "tagline": "在你自己的電腦上執行 AI",
     "versionUnavailable": "無法取得版本",
     "build": "建置版本 {{commit}}",
     "source": "對應原始碼",
@@ -296,7 +296,8 @@
     "download": "下載",
     "upToDate": "已是最新版本",
     "checkUpdates": "檢查更新",
-    "checkUpdatesHint": "Toskar 每天向 toskar.ai 詢問一次最新版本號，不會傳送其他任何內容。"
+    "checkUpdatesHint": "Toskar 每天向 toskar.ai 詢問一次最新版本號，不會傳送其他任何內容。",
+    "running": "正在執行"
   },
   "reset": {
     "title": "重置應用程式",

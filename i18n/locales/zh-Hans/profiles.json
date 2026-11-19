@@ -132,7 +132,8 @@
     "git": "Git",
     "terminal": "终端",
     "ok": "{{label}} ✓",
-    "ask": "{{label}} 询问"
+    "ask": "{{label}} 询问",
+    "off": "无{{label}}"
   },
   "roles": {
     "role": "角色",

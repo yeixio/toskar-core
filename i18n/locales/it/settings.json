@@ -299,7 +299,7 @@
     "unlimited": "Illimitato"
   },
   "about": {
-    "tagline": "Pannello di controllo per l'IA locale",
+    "tagline": "Esegue l'IA sui tuoi computer",
     "versionUnavailable": "Versione non disponibile",
     "build": "Build {{commit}}",
     "source": "Codice sorgente corrispondente",
@@ -312,7 +312,8 @@
     "download": "Scarica",
     "upToDate": "Aggiornato",
     "checkUpdates": "Cerca aggiornamenti",
-    "checkUpdatesHint": "Una volta al giorno, Toskar chiede a toskar.ai il numero dell'ultima versione. Non viene inviato nient'altro."
+    "checkUpdatesHint": "Una volta al giorno, Toskar chiede a toskar.ai il numero dell'ultima versione. Non viene inviato nient'altro.",
+    "running": "In esecuzione"
   },
   "reset": {
     "title": "Ripristina applicazione",

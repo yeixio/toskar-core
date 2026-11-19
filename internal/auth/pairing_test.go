@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/yeixio/toskar-core/internal/store"
+	"github.com/yeixio/toskar-core/pkg/contracts"
 )
 
 type pairingPeer struct {
@@ -87,6 +88,10 @@ func TestPairingStateMachine(t *testing.T) {
 
 	if err := a.pm.RevokeTrust(context.Background(), "remote-1"); err != nil {
 		t.Fatal(err)
+	}
+	// Regression: toskar-core#1346. A computer never paired isn't "removed".
+	if code, _ := contracts.ErrorCode(a.pm.RevokeTrust(context.Background(), "nobody")); code != "NODE_NOT_FOUND" {
+		t.Fatalf("unknown computer: %q", code)
 	}
 }
 

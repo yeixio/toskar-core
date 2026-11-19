@@ -14,7 +14,15 @@
     "memory": "Memoria",
     "graphics": "Grafica",
     "system": "Sistema",
-    "unavailable": "I dettagli dell'hardware compariranno quando Toskar sarà avviato. Puoi continuare la configurazione ora."
+    "unavailable": "I dettagli dell'hardware compariranno quando Toskar sarà avviato. Puoi continuare la configurazione ora.",
+    "os": {
+      "macAppleSilicon": "macOS, Apple silicon",
+      "macIntel": "macOS, Intel",
+      "windows": "Windows",
+      "windowsArm": "Windows su Arm",
+      "linux": "Linux",
+      "linuxArm": "Linux su Arm"
+    }
   },
   "question": "Cosa vorresti che facesse la tua IA?",
   "purposes": {
@@ -50,7 +58,8 @@
     "install": "Installa la configurazione consigliata",
     "use": "Usa questa configurazione",
     "skip": "Salta per ora",
-    "back": "Indietro"
+    "back": "Indietro",
+    "fits": "{{name}} sta nei {{memory}} di memoria di questo computer."
   },
   "roles": {
     "coordinator": "Coordinatore",

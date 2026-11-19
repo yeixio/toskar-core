@@ -12,7 +12,15 @@
     "memory": "内存",
     "graphics": "显卡",
     "system": "系统",
-    "unavailable": "Toskar 启动后会显示硬件详情。你现在可以继续设置。"
+    "unavailable": "Toskar 启动后会显示硬件详情。你现在可以继续设置。",
+    "os": {
+      "macAppleSilicon": "macOS，Apple 芯片",
+      "macIntel": "macOS，Intel",
+      "windows": "Windows",
+      "windowsArm": "Windows（Arm）",
+      "linux": "Linux",
+      "linuxArm": "Linux（Arm）"
+    }
   },
   "question": "你希望你的 AI 做什么？",
   "purposes": {
@@ -48,7 +56,8 @@
     "install": "安装推荐配置",
     "use": "使用此设置",
     "skip": "暂时跳过",
-    "back": "返回"
+    "back": "返回",
+    "fits": "{{name}} 适合这台电脑的 {{memory}} 内存。"
   },
   "roles": {
     "coordinator": "协调者",

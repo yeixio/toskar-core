@@ -117,7 +117,7 @@ export function toolChipPreview(tools: ToolPolicy[] | undefined): {
   for (const row of rows) {
     const policy = byId.get(row.id)
     if (!policy) continue
-    if (policy === 'deny') chips.push({ label: row.label, tone: 'off' })
+    if (policy === 'deny') chips.push({ label: i18n.t('profiles:chips.off', { label: row.label }), tone: 'off' })
     else if (policy === 'allow') chips.push({ label: i18n.t('profiles:chips.ok', { label: row.label }), tone: 'ok' })
     else chips.push({ label: i18n.t('profiles:chips.ask', { label: row.label }), tone: 'ask' })
   }

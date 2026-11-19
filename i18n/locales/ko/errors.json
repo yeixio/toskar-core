@@ -302,5 +302,6 @@
   "CAMERA_ADDRESS": "카메라 주소를 입력하세요. 예: 192.168.1.50",
   "CAMERA_UNREACHABLE": "그 주소에서 카메라에 연결하지 못했어요. 주소와 카메라의 HTTP 또는 HTTPS 서버가 켜져 있는지 확인하세요.",
   "CAMERA_SPEAKER_UNREACHABLE": "Toskar가 카메라 스피커에 연결하지 못해 방문자에게 응답하지 못했습니다. 카메라가 켜져 있고 이 컴퓨터와 같은 네트워크에 있는지 확인하세요.",
-  "DOOR_NOT_ANSWERED": "누군가 현관에 왔지만 Toskar가 응답하지 못했습니다: {{detail}}"
+  "DOOR_NOT_ANSWERED": "누군가 현관에 왔지만 Toskar가 응답하지 못했습니다: {{detail}}",
+  "NODE_NOT_FOUND": "그 ID를 가진 연결된 컴퓨터가 없습니다."
 }

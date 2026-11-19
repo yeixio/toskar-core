@@ -283,7 +283,7 @@
     "unlimited": "무제한"
   },
   "about": {
-    "tagline": "로컬 AI 제어 센터",
+    "tagline": "내 컴퓨터에서 AI를 실행합니다",
     "versionUnavailable": "버전 정보 없음",
     "build": "빌드 {{commit}}",
     "source": "해당 소스 코드",
@@ -296,7 +296,8 @@
     "download": "다운로드",
     "upToDate": "최신 상태",
     "checkUpdates": "업데이트 확인",
-    "checkUpdatesHint": "하루에 한 번 Toskar가 toskar.ai에 최신 버전 번호를 묻습니다. 그 외에는 아무것도 보내지 않습니다."
+    "checkUpdatesHint": "하루에 한 번 Toskar가 toskar.ai에 최신 버전 번호를 묻습니다. 그 외에는 아무것도 보내지 않습니다.",
+    "running": "실행 중"
   },
   "reset": {
     "title": "애플리케이션 재설정",

@@ -302,5 +302,6 @@
   "CAMERA_ADDRESS": "Enter the camera's address, such as 192.168.1.50.",
   "CAMERA_UNREACHABLE": "Toskar couldn't reach a camera at that address. Check the address, and that the camera's HTTP or HTTPS server is on.",
   "CAMERA_SPEAKER_UNREACHABLE": "Toskar couldn't reach the camera's speaker, so the visitor wasn't answered. Check that the camera is on and on the same network as this computer.",
-  "DOOR_NOT_ANSWERED": "Someone came to the door, and Toskar couldn't answer: {{detail}}"
+  "DOOR_NOT_ANSWERED": "Someone came to the door, and Toskar couldn't answer: {{detail}}",
+  "NODE_NOT_FOUND": "No paired computer has that ID."
 }

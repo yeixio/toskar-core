@@ -329,7 +329,8 @@ var rules = []rule{
 			var v []string
 			for _, n := range s.Nodes {
 				if n.Online && n.Trainer != "" {
-					v = append(v, n.Name+" ("+n.Trainer+")")
+					// "Mac Studio with MLX (Apple Silicon)", not nested brackets (#1346).
+					v = append(v, n.Name+" with "+n.Trainer)
 				}
 			}
 			if len(v) > 0 {

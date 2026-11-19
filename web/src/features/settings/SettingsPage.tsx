@@ -762,7 +762,7 @@ export function SettingsPage() {
                 <div>
                   <dt className="text-xs uppercase tracking-wide text-ink-faint">{t('about.service')}</dt>
                   <dd className="font-medium capitalize text-ink">
-                    {healthQuery.data?.status ?? t('about.unavailable')}
+                    {healthQuery.data?.status === 'ok' ? t('about.running') : (healthQuery.data?.status ?? t('about.unavailable'))}
                   </dd>
                 </div>
               </dl>

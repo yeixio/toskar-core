@@ -160,7 +160,7 @@
     "computers": "{{total}} 台電腦中有 {{online}} 台上線",
     "tools_other": "{{count}} 個工具",
     "services_other": "{{count}} 個已連結的服務",
-    "providers": "{{total}} 個提供者中有 {{healthy}} 個就緒",
+    "providers": "{{total}} 個模型引擎和工具伺服器中 {{healthy}} 個就緒",
     "files_other": "{{count}} 個檔案（{{size}}）"
   },
   "providers": {
@@ -190,7 +190,7 @@
     "title": "Toskar 的記憶體",
     "description": "Toskar 本身使用的記憶體及其背景工作。兩者過一段時間後應趨於平穩；若數小時持續增加，值得回報。",
     "heap": "使用中的記憶體",
-    "tasks": "背景工作",
+    "tasks": "Toskar 內部正在執行的工作",
     "since": "執行起始",
     "chartLabel_other": "過去 {{count}} 小時的記憶體",
     "growing_other": "記憶體已持續增加 {{count}} 小時。請匯出診斷並將診斷套件附加到 Issue。"
