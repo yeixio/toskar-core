@@ -70,8 +70,8 @@ func TestSayAnswerAtTheDoor(t *testing.T) {
 
 // The run is told its answer is spoken, and how to say nothing (#667).
 func TestSayNoteTellsTheRun(t *testing.T) {
-	note := automations.SayNote(&automations.Say{Connector: "reolink", Device: "camera"})
-	if note == "" || automations.SayNote(nil) != "" {
+	note := automations.SayNote(&automations.Say{Connector: "reolink", Device: "camera"}, false)
+	if note == "" || automations.SayNote(nil, false) != "" {
 		t.Fatalf("note = %q", note)
 	}
 }

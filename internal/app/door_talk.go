@@ -62,6 +62,8 @@ type doorVisit struct {
 // doneMark ends the visit: the model adds it to its goodbye.
 const doneMark = "[done]"
 
+var doneMarkRe = regexp.MustCompile(`(?i)\[done\]`)
+
 // errNoOneThere is a door that heard nothing: the visitor left or didn't
 // answer, which ends the visit.
 var errNoOneThere = errors.New("nobody answered")
@@ -103,7 +105,8 @@ func (v *doorVisit) run(ctx context.Context, greeting string) ([]doorLine, error
 			return lines, err
 		}
 		done := strings.Contains(strings.ToLower(answer), doneMark)
-		answer = strings.TrimSpace(strings.ReplaceAll(strings.ReplaceAll(answer, doneMark, ""), strings.ToUpper(doneMark), ""))
+		// In any case, such as [Done], so it's never said aloud (#1339).
+		answer = strings.TrimSpace(doneMarkRe.ReplaceAllString(answer, ""))
 		said, err := sayAnswer(ctx, v.parts.Speaker, v.talk, v.automation, answer, v.lang, v.now())
 		if err != nil {
 			return lines, err

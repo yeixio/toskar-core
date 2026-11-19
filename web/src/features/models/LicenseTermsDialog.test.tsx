@@ -27,6 +27,13 @@ describe('LicenseTermsDialog', () => {
     expect(screen.getByText(/keeps a record/)).toBeInTheDocument()
   })
 
+  // Regression: toskar-core#1338
+  it('names the model in the terms, with no placeholder left', () => {
+    render(<LicenseTermsDialog modelName="Gemma 3 4B" license={gemma} onCancel={vi.fn()} onAccept={vi.fn()} />)
+    expect(screen.getByText(/^Gemma 3 4B comes under the Gemma Terms of Use/)).toBeInTheDocument()
+    expect(document.body.textContent).not.toContain('{{')
+  })
+
   it('installs only once the terms are accepted', () => {
     const onAccept = vi.fn()
     const onCancel = vi.fn()

@@ -92,10 +92,29 @@ func TestSpoken(t *testing.T) {
 // A door that listens asks the visitor how it can help, so they answer
 // (#667).
 func TestSayNoteListens(t *testing.T) {
-	if n := SayNote(&Say{Connector: SayReolink, Device: "camera"}); strings.Contains(n, "answer you") {
+	if n := SayNote(&Say{Connector: SayReolink, Device: "camera"}, false); strings.Contains(n, "answer you") {
 		t.Fatalf("a door that doesn't listen: %q", n)
 	}
-	if n := SayNote(&Say{Connector: SayReolink, Device: "camera", Listen: true}); !strings.Contains(n, "ask how you can help") {
+	if n := SayNote(&Say{Connector: SayReolink, Device: "camera", Listen: true}, false); !strings.Contains(n, "ask how you can help") {
 		t.Fatalf("a door that listens: %q", n)
+	}
+}
+
+// A doorbell's button means someone is there, even out of the picture:
+// the run greets them and isn't offered the silent answer.
+func TestSayNoteDoorbellRangGreets(t *testing.T) {
+	// Regression: toskar-core#1339
+	rang := Rang(&Trigger{Kind: TriggerDevice, Connector: "reolink", Device: "doorbell"})
+	if !rang || !Rang(&Trigger{Kind: TriggerDevice, Connector: "homeassistant", Device: "binary_sensor.front_door_visitor"}) {
+		t.Fatal("a doorbell's button isn't counted as a ring")
+	}
+	if Rang(&Trigger{Kind: TriggerDevice, Connector: "reolink", Device: "person"}) || Rang(nil) {
+		t.Fatal("a person seen counts as a ring")
+	}
+	if n := SayNote(&Say{Connector: SayReolink, Device: "camera"}, true); strings.Contains(n, SayNothing) || !strings.Contains(n, "greet them") {
+		t.Fatalf("a ring offers the silent answer: %q", n)
+	}
+	if n := SayNote(&Say{Connector: SayReolink, Device: "camera"}, false); !strings.Contains(n, SayNothing) {
+		t.Fatalf("motion isn't offered the silent answer: %q", n)
 	}
 }
