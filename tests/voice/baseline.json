@@ -1,0 +1,636 @@
+{
+  "about": "Live voice turn-taking scores (tests/voice/README.md). TestTurnTaking fails when a condition gets worse; write better scores with go test ./tests/voice -run TestTurnTaking -update.",
+  "conditions": [
+    {
+      "condition": "headset",
+      "utterances": 12,
+      "whole": 3,
+      "split": 3,
+      "end_cut": 3,
+      "start_cut": 3,
+      "missed": 0,
+      "never_ended": 0,
+      "noise_turns": 0,
+      "unheard_ms": 2520,
+      "wait_ms": 800,
+      "details": [
+        {
+          "id": "weather",
+          "outcome": "start_cut",
+          "turns": 1,
+          "unheard_ms": 240,
+          "lost_start_ms": 160,
+          "lost_end_ms": 80,
+          "wait_ms": 820
+        },
+        {
+          "id": "dentist, 0.5 s pause",
+          "outcome": "whole",
+          "turns": 1,
+          "unheard_ms": 0,
+          "lost_start_ms": 0,
+          "lost_end_ms": 0,
+          "wait_ms": 780
+        },
+        {
+          "id": "lights",
+          "outcome": "end_cut",
+          "turns": 1,
+          "unheard_ms": 140,
+          "lost_start_ms": 0,
+          "lost_end_ms": 140,
+          "wait_ms": 780
+        },
+        {
+          "id": "shopping list, 0.7 s pause",
+          "outcome": "whole",
+          "turns": 1,
+          "unheard_ms": 20,
+          "lost_start_ms": 0,
+          "lost_end_ms": 20,
+          "wait_ms": 780
+        },
+        {
+          "id": "yes",
+          "outcome": "end_cut",
+          "turns": 1,
+          "unheard_ms": 120,
+          "lost_start_ms": 0,
+          "lost_end_ms": 120,
+          "wait_ms": 800
+        },
+        {
+          "id": "pizza, 1.0 s pause",
+          "outcome": "split",
+          "turns": 2,
+          "unheard_ms": 120,
+          "lost_start_ms": 0,
+          "lost_end_ms": 80,
+          "wait_ms": 800
+        },
+        {
+          "id": "Spanish weather",
+          "outcome": "whole",
+          "turns": 1,
+          "unheard_ms": 100,
+          "lost_start_ms": 0,
+          "lost_end_ms": 100,
+          "wait_ms": 820
+        },
+        {
+          "id": "Spanish dinner, 0.8 s pause",
+          "outcome": "split",
+          "turns": 2,
+          "unheard_ms": 120,
+          "lost_start_ms": 0,
+          "lost_end_ms": 0,
+          "wait_ms": 800
+        },
+        {
+          "id": "German time",
+          "outcome": "start_cut",
+          "turns": 1,
+          "unheard_ms": 660,
+          "lost_start_ms": 660,
+          "lost_end_ms": 0,
+          "wait_ms": 920
+        },
+        {
+          "id": "movie, 1.4 s pause",
+          "outcome": "split",
+          "turns": 2,
+          "unheard_ms": 140,
+          "lost_start_ms": 0,
+          "lost_end_ms": 60,
+          "wait_ms": 800
+        },
+        {
+          "id": "French question",
+          "outcome": "start_cut",
+          "turns": 1,
+          "unheard_ms": 660,
+          "lost_start_ms": 560,
+          "lost_end_ms": 100,
+          "wait_ms": 800
+        },
+        {
+          "id": "thanks",
+          "outcome": "end_cut",
+          "turns": 1,
+          "unheard_ms": 200,
+          "lost_start_ms": 0,
+          "lost_end_ms": 200,
+          "wait_ms": 620
+        }
+      ]
+    },
+    {
+      "condition": "webcam",
+      "utterances": 12,
+      "whole": 5,
+      "split": 3,
+      "end_cut": 3,
+      "start_cut": 1,
+      "missed": 0,
+      "never_ended": 0,
+      "noise_turns": 0,
+      "unheard_ms": 3320,
+      "wait_ms": 785,
+      "details": [
+        {
+          "id": "weather",
+          "outcome": "whole",
+          "turns": 1,
+          "unheard_ms": 180,
+          "lost_start_ms": 100,
+          "lost_end_ms": 80,
+          "wait_ms": 825
+        },
+        {
+          "id": "dentist, 0.5 s pause",
+          "outcome": "whole",
+          "turns": 1,
+          "unheard_ms": 20,
+          "lost_start_ms": 0,
+          "lost_end_ms": 20,
+          "wait_ms": 765
+        },
+        {
+          "id": "lights",
+          "outcome": "end_cut",
+          "turns": 1,
+          "unheard_ms": 160,
+          "lost_start_ms": 0,
+          "lost_end_ms": 160,
+          "wait_ms": 765
+        },
+        {
+          "id": "shopping list, 0.7 s pause",
+          "outcome": "whole",
+          "turns": 1,
+          "unheard_ms": 20,
+          "lost_start_ms": 0,
+          "lost_end_ms": 20,
+          "wait_ms": 785
+        },
+        {
+          "id": "yes",
+          "outcome": "whole",
+          "turns": 1,
+          "unheard_ms": 100,
+          "lost_start_ms": 0,
+          "lost_end_ms": 100,
+          "wait_ms": 825
+        },
+        {
+          "id": "pizza, 1.0 s pause",
+          "outcome": "split",
+          "turns": 2,
+          "unheard_ms": 600,
+          "lost_start_ms": 0,
+          "lost_end_ms": 100,
+          "wait_ms": 765
+        },
+        {
+          "id": "Spanish weather",
+          "outcome": "whole",
+          "turns": 1,
+          "unheard_ms": 100,
+          "lost_start_ms": 0,
+          "lost_end_ms": 100,
+          "wait_ms": 805
+        },
+        {
+          "id": "Spanish dinner, 0.8 s pause",
+          "outcome": "split",
+          "turns": 2,
+          "unheard_ms": 140,
+          "lost_start_ms": 0,
+          "lost_end_ms": 0,
+          "wait_ms": 825
+        },
+        {
+          "id": "German time",
+          "outcome": "start_cut",
+          "turns": 1,
+          "unheard_ms": 720,
+          "lost_start_ms": 680,
+          "lost_end_ms": 40,
+          "wait_ms": 865
+        },
+        {
+          "id": "movie, 1.4 s pause",
+          "outcome": "split",
+          "turns": 2,
+          "unheard_ms": 380,
+          "lost_start_ms": 0,
+          "lost_end_ms": 60,
+          "wait_ms": 785
+        },
+        {
+          "id": "French question",
+          "outcome": "end_cut",
+          "turns": 1,
+          "unheard_ms": 700,
+          "lost_start_ms": 580,
+          "lost_end_ms": 120,
+          "wait_ms": 765
+        },
+        {
+          "id": "thanks",
+          "outcome": "end_cut",
+          "turns": 1,
+          "unheard_ms": 200,
+          "lost_start_ms": 0,
+          "lost_end_ms": 200,
+          "wait_ms": 625
+        }
+      ]
+    },
+    {
+      "condition": "hiss",
+      "utterances": 12,
+      "whole": 2,
+      "split": 2,
+      "end_cut": 5,
+      "start_cut": 2,
+      "missed": 1,
+      "never_ended": 0,
+      "noise_turns": 0,
+      "unheard_ms": 7820,
+      "wait_ms": 780,
+      "details": [
+        {
+          "id": "weather",
+          "outcome": "start_cut",
+          "turns": 1,
+          "unheard_ms": 260,
+          "lost_start_ms": 160,
+          "lost_end_ms": 100,
+          "wait_ms": 800
+        },
+        {
+          "id": "dentist, 0.5 s pause",
+          "outcome": "whole",
+          "turns": 1,
+          "unheard_ms": 20,
+          "lost_start_ms": 0,
+          "lost_end_ms": 20,
+          "wait_ms": 760
+        },
+        {
+          "id": "lights",
+          "outcome": "end_cut",
+          "turns": 1,
+          "unheard_ms": 200,
+          "lost_start_ms": 0,
+          "lost_end_ms": 200,
+          "wait_ms": 720
+        },
+        {
+          "id": "shopping list, 0.7 s pause",
+          "outcome": "whole",
+          "turns": 1,
+          "unheard_ms": 80,
+          "lost_start_ms": 0,
+          "lost_end_ms": 80,
+          "wait_ms": 720
+        },
+        {
+          "id": "yes",
+          "outcome": "end_cut",
+          "turns": 1,
+          "unheard_ms": 140,
+          "lost_start_ms": 0,
+          "lost_end_ms": 140,
+          "wait_ms": 780
+        },
+        {
+          "id": "pizza, 1.0 s pause",
+          "outcome": "split",
+          "turns": 2,
+          "unheard_ms": 220,
+          "lost_start_ms": 0,
+          "lost_end_ms": 120,
+          "wait_ms": 760
+        },
+        {
+          "id": "Spanish weather",
+          "outcome": "end_cut",
+          "turns": 1,
+          "unheard_ms": 140,
+          "lost_start_ms": 0,
+          "lost_end_ms": 140,
+          "wait_ms": 780
+        },
+        {
+          "id": "Spanish dinner, 0.8 s pause",
+          "outcome": "split",
+          "turns": 2,
+          "unheard_ms": 160,
+          "lost_start_ms": 0,
+          "lost_end_ms": 20,
+          "wait_ms": 780
+        },
+        {
+          "id": "German time",
+          "outcome": "start_cut",
+          "turns": 1,
+          "unheard_ms": 1460,
+          "lost_start_ms": 1440,
+          "lost_end_ms": 20,
+          "wait_ms": 900
+        },
+        {
+          "id": "movie, 1.4 s pause",
+          "outcome": "end_cut",
+          "turns": 1,
+          "unheard_ms": 2480,
+          "lost_start_ms": 0,
+          "lost_end_ms": 2480,
+          "wait_ms": -3139
+        },
+        {
+          "id": "French question",
+          "outcome": "missed",
+          "turns": 0,
+          "unheard_ms": 2440,
+          "lost_start_ms": 2440,
+          "lost_end_ms": 0,
+          "wait_ms": -1
+        },
+        {
+          "id": "thanks",
+          "outcome": "end_cut",
+          "turns": 1,
+          "unheard_ms": 220,
+          "lost_start_ms": 0,
+          "lost_end_ms": 220,
+          "wait_ms": 600
+        }
+      ]
+    },
+    {
+      "condition": "fan",
+      "utterances": 12,
+      "whole": 2,
+      "split": 2,
+      "end_cut": 5,
+      "start_cut": 2,
+      "missed": 1,
+      "never_ended": 0,
+      "noise_turns": 0,
+      "unheard_ms": 7840,
+      "wait_ms": 780,
+      "details": [
+        {
+          "id": "weather",
+          "outcome": "start_cut",
+          "turns": 1,
+          "unheard_ms": 260,
+          "lost_start_ms": 160,
+          "lost_end_ms": 100,
+          "wait_ms": 800
+        },
+        {
+          "id": "dentist, 0.5 s pause",
+          "outcome": "whole",
+          "turns": 1,
+          "unheard_ms": 20,
+          "lost_start_ms": 0,
+          "lost_end_ms": 20,
+          "wait_ms": 760
+        },
+        {
+          "id": "lights",
+          "outcome": "end_cut",
+          "turns": 1,
+          "unheard_ms": 200,
+          "lost_start_ms": 0,
+          "lost_end_ms": 200,
+          "wait_ms": 720
+        },
+        {
+          "id": "shopping list, 0.7 s pause",
+          "outcome": "whole",
+          "turns": 1,
+          "unheard_ms": 100,
+          "lost_start_ms": 0,
+          "lost_end_ms": 100,
+          "wait_ms": 700
+        },
+        {
+          "id": "yes",
+          "outcome": "end_cut",
+          "turns": 1,
+          "unheard_ms": 140,
+          "lost_start_ms": 0,
+          "lost_end_ms": 140,
+          "wait_ms": 780
+        },
+        {
+          "id": "pizza, 1.0 s pause",
+          "outcome": "split",
+          "turns": 2,
+          "unheard_ms": 220,
+          "lost_start_ms": 0,
+          "lost_end_ms": 120,
+          "wait_ms": 760
+        },
+        {
+          "id": "Spanish weather",
+          "outcome": "end_cut",
+          "turns": 1,
+          "unheard_ms": 140,
+          "lost_start_ms": 0,
+          "lost_end_ms": 140,
+          "wait_ms": 780
+        },
+        {
+          "id": "Spanish dinner, 0.8 s pause",
+          "outcome": "split",
+          "turns": 2,
+          "unheard_ms": 160,
+          "lost_start_ms": 0,
+          "lost_end_ms": 20,
+          "wait_ms": 780
+        },
+        {
+          "id": "German time",
+          "outcome": "start_cut",
+          "turns": 1,
+          "unheard_ms": 1460,
+          "lost_start_ms": 1440,
+          "lost_end_ms": 20,
+          "wait_ms": 900
+        },
+        {
+          "id": "movie, 1.4 s pause",
+          "outcome": "end_cut",
+          "turns": 1,
+          "unheard_ms": 2480,
+          "lost_start_ms": 0,
+          "lost_end_ms": 2480,
+          "wait_ms": -3139
+        },
+        {
+          "id": "French question",
+          "outcome": "missed",
+          "turns": 0,
+          "unheard_ms": 2440,
+          "lost_start_ms": 2440,
+          "lost_end_ms": 0,
+          "wait_ms": -1
+        },
+        {
+          "id": "thanks",
+          "outcome": "end_cut",
+          "turns": 1,
+          "unheard_ms": 220,
+          "lost_start_ms": 0,
+          "lost_end_ms": 220,
+          "wait_ms": 600
+        }
+      ]
+    },
+    {
+      "condition": "tv",
+      "utterances": 12,
+      "whole": 2,
+      "split": 3,
+      "end_cut": 4,
+      "start_cut": 2,
+      "missed": 1,
+      "never_ended": 0,
+      "noise_turns": 0,
+      "unheard_ms": 4780,
+      "wait_ms": 780,
+      "details": [
+        {
+          "id": "weather",
+          "outcome": "start_cut",
+          "turns": 1,
+          "unheard_ms": 260,
+          "lost_start_ms": 160,
+          "lost_end_ms": 100,
+          "wait_ms": 800
+        },
+        {
+          "id": "dentist, 0.5 s pause",
+          "outcome": "whole",
+          "turns": 1,
+          "unheard_ms": 0,
+          "lost_start_ms": 0,
+          "lost_end_ms": 0,
+          "wait_ms": 780
+        },
+        {
+          "id": "lights",
+          "outcome": "end_cut",
+          "turns": 1,
+          "unheard_ms": 200,
+          "lost_start_ms": 0,
+          "lost_end_ms": 200,
+          "wait_ms": 720
+        },
+        {
+          "id": "shopping list, 0.7 s pause",
+          "outcome": "whole",
+          "turns": 1,
+          "unheard_ms": 80,
+          "lost_start_ms": 0,
+          "lost_end_ms": 80,
+          "wait_ms": 720
+        },
+        {
+          "id": "yes",
+          "outcome": "end_cut",
+          "turns": 1,
+          "unheard_ms": 120,
+          "lost_start_ms": 0,
+          "lost_end_ms": 120,
+          "wait_ms": 800
+        },
+        {
+          "id": "pizza, 1.0 s pause",
+          "outcome": "split",
+          "turns": 2,
+          "unheard_ms": 120,
+          "lost_start_ms": 0,
+          "lost_end_ms": 80,
+          "wait_ms": 800
+        },
+        {
+          "id": "Spanish weather",
+          "outcome": "end_cut",
+          "turns": 1,
+          "unheard_ms": 120,
+          "lost_start_ms": 0,
+          "lost_end_ms": 120,
+          "wait_ms": 800
+        },
+        {
+          "id": "Spanish dinner, 0.8 s pause",
+          "outcome": "split",
+          "turns": 2,
+          "unheard_ms": 140,
+          "lost_start_ms": 0,
+          "lost_end_ms": 20,
+          "wait_ms": 780
+        },
+        {
+          "id": "German time",
+          "outcome": "start_cut",
+          "turns": 1,
+          "unheard_ms": 680,
+          "lost_start_ms": 660,
+          "lost_end_ms": 20,
+          "wait_ms": 900
+        },
+        {
+          "id": "movie, 1.4 s pause",
+          "outcome": "split",
+          "turns": 2,
+          "unheard_ms": 420,
+          "lost_start_ms": 0,
+          "lost_end_ms": 80,
+          "wait_ms": 780
+        },
+        {
+          "id": "French question",
+          "outcome": "missed",
+          "turns": 0,
+          "unheard_ms": 2440,
+          "lost_start_ms": 2440,
+          "lost_end_ms": 0,
+          "wait_ms": -1
+        },
+        {
+          "id": "thanks",
+          "outcome": "end_cut",
+          "turns": 1,
+          "unheard_ms": 200,
+          "lost_start_ms": 0,
+          "lost_end_ms": 200,
+          "wait_ms": 620
+        }
+      ]
+    },
+    {
+      "condition": "noise",
+      "utterances": 0,
+      "whole": 0,
+      "split": 0,
+      "end_cut": 0,
+      "start_cut": 0,
+      "missed": 0,
+      "never_ended": 0,
+      "noise_turns": 1,
+      "unheard_ms": 0,
+      "wait_ms": -1,
+      "noise": [
+        "4.7–5.2 s"
+      ]
+    }
+  ]
+}

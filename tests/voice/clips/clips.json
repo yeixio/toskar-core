@@ -1,0 +1,21 @@
+{
+  "clips": [
+    {"id": "en_weather", "lang": "en", "voice": "en-us", "text": "What's the weather going to be like tomorrow morning?"},
+    {"id": "en_dentist_1", "lang": "en", "voice": "en-us+f3", "pitch": 60, "text": "Can you remind me to call the dentist"},
+    {"id": "en_dentist_2", "lang": "en", "voice": "en-us+f3", "pitch": 60, "text": "on Friday afternoon?"},
+    {"id": "en_pizza_1", "lang": "en", "voice": "en-us", "speed": 150, "text": "So I was thinking"},
+    {"id": "en_pizza_2", "lang": "en", "voice": "en-us", "speed": 150, "text": "maybe we could order pizza tonight."},
+    {"id": "en_lights", "lang": "en", "voice": "en-gb", "text": "Turn off the lights in the kitchen and the living room, please."},
+    {"id": "en_movie_1", "lang": "en", "voice": "en-us+f3", "pitch": 60, "speed": 145, "text": "Hmm, let me think"},
+    {"id": "en_movie_2", "lang": "en", "voice": "en-us+f3", "pitch": 60, "speed": 145, "text": "what was the name of that movie with the robot?"},
+    {"id": "en_list_1", "lang": "en", "voice": "en-gb", "text": "I need eggs, milk,"},
+    {"id": "en_list_2", "lang": "en", "voice": "en-gb", "text": "and a loaf of bread from the store."},
+    {"id": "en_yes", "lang": "en", "voice": "en-us", "text": "Yes."},
+    {"id": "en_thanks", "lang": "en", "voice": "en-us+f3", "pitch": 60, "text": "Okay, thanks."},
+    {"id": "es_tiempo", "lang": "es", "voice": "es", "text": "¿Qué tiempo hará mañana en Madrid?"},
+    {"id": "es_cena_1", "lang": "es", "voice": "es-419+f3", "pitch": 60, "text": "Quiero preparar una cena para seis personas"},
+    {"id": "es_cena_2", "lang": "es", "voice": "es-419+f3", "pitch": 60, "text": "con algo vegetariano."},
+    {"id": "de_tokio", "lang": "de", "voice": "de", "text": "Wie spät ist es gerade in Tokio?"},
+    {"id": "fr_photo", "lang": "fr", "voice": "fr", "text": "Peux-tu m'expliquer comment fonctionne la photosynthèse?"}
+  ]
+}
