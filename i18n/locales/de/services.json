@@ -17,5 +17,7 @@
   "save": "Speichern",
   "cancel": "Abbrechen",
   "tools": "Werkzeuge: {{tools}}",
-  "asksFirst": "{{name}} (fragt vorher)"
+  "asksFirst": "{{name}} (fragt vorher)",
+  "connectService": "{{name}} verbinden",
+  "advanced": "Erweitert"
 }

@@ -144,8 +144,9 @@ func SayNote(s *Say, rang bool) string {
 	if s == nil {
 		return ""
 	}
-	note := "Your answer is spoken aloud through the door's speaker to whoever is there, so write only the words to say: one or two short sentences, " +
-		"with no formatting, lists, or links."
+	note := "Your answer is spoken aloud through the door's speaker to whoever is there. First write only the words to say: one or two short sentences, " +
+		"with no formatting, lists, or links. Then, on a new line starting with " + OwnerMark + ", write for the person this automation is for: " +
+		"who is there and what they seem to want, from what you see. That line is never said at the door."
 	if rang {
 		note += " Someone pressed the doorbell, so someone is there even if the picture shows no one: greet them."
 	} else {
@@ -155,6 +156,23 @@ func SayNote(s *Say, rang bool) string {
 		note += " They can answer you, and you'll hear them: greet them and ask how you can help."
 	}
 	return note
+}
+
+// OwnerMark starts the part of a speaking run's answer that is for the
+// automation's owner, not the visitor (#1339).
+const OwnerMark = "FOR YOU:"
+
+var ownerMarkRe = regexp.MustCompile(`(?im)^[\s*_#>-]*for you\s*[*_]*:[*_]*\s*`)
+
+// SplitSay parts a speaking run's answer into the words for the door and
+// the note for its owner (#1339). An answer without the mark is all for
+// the door, with no note.
+func SplitSay(answer string) (door, owner string) {
+	loc := ownerMarkRe.FindStringIndex(answer)
+	if loc == nil {
+		return strings.TrimSpace(answer), ""
+	}
+	return strings.TrimSpace(answer[:loc[0]]), strings.TrimSpace(answer[loc[1]:])
 }
 
 // MaxVisitTurns is the most a visitor is answered in one visit.

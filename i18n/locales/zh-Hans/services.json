@@ -17,5 +17,7 @@
   "save": "保存",
   "cancel": "取消",
   "tools": "工具：{{tools}}",
-  "asksFirst": "{{name}}（先征求同意）"
+  "asksFirst": "{{name}}（先征求同意）",
+  "connectService": "连接 {{name}}",
+  "advanced": "高级"
 }

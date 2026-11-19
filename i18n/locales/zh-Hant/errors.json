@@ -298,5 +298,7 @@
   "MOVE_NEEDS_COMPUTER": "要移動它，Toskar 的中繼需要聯絡到目前使用它的電腦：把那台電腦開機一次，或等到它關機滿 3 天。",
   "MOVE_FAILED": "Toskar 的中繼沒有移動訂閱（{{relay_code}}）。",
   "VOICE_UNAVAILABLE": "這台電腦上無法使用即時語音。",
-  "WEBSOCKET_REQUIRED": "即時語音需要 WebSocket 連線。"
+  "WEBSOCKET_REQUIRED": "即時語音需要 WebSocket 連線。",
+  "CAMERA_ADDRESS": "請輸入攝影機的位址，例如 192.168.1.50。",
+  "CAMERA_UNREACHABLE": "Toskar 無法連線到該位址上的攝影機。請檢查位址，以及攝影機的 HTTP 或 HTTPS 伺服器是否已開啟。"
 }

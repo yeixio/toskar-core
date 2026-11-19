@@ -17,5 +17,7 @@
   "save": "保存",
   "cancel": "キャンセル",
   "tools": "ツール：{{tools}}",
-  "asksFirst": "{{name}}（事前に確認）"
+  "asksFirst": "{{name}}（事前に確認）",
+  "connectService": "{{name}} を接続",
+  "advanced": "詳細設定"
 }

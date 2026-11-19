@@ -18,6 +18,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/yeixio/toskar-core/pkg/contracts"
 )
 
 // Reolink is a Reolink camera or doorbell on this network, reached straight
@@ -38,15 +40,15 @@ func (Reolink) Scopes() string {
 
 func (Reolink) Fields() []Field {
 	return []Field{
-		{Key: "url", Label: "Camera address", Placeholder: "http://192.168.1.50",
+		{Key: "url", Label: "Camera address", Placeholder: "192.168.1.50",
 			Help: "The camera's address on your network, from the Reolink app's Device Info. With HTTPS, Toskar remembers the camera's own certificate the first time it connects."},
 		{Key: "username", Label: "User name"},
 		{Key: "password", Label: "Password", Secret: true},
 		{Key: "channel", Label: "Channel", Optional: true, Placeholder: "0",
 			Help: "Leave empty for a camera on its own. A doorbell or battery camera paired to a Home Hub or NVR has no address of its own: use the hub's address and the camera's channel there, counted from 0."},
-		{Key: "talk_camera", Label: "reolink-cli camera name", Optional: true,
+		{Key: "talk_camera", Label: "reolink-cli camera name", Optional: true, Advanced: true,
 			Help: "Leave empty. To speak and listen through the camera, Toskar runs Reolink's reolink-cli with the address, channel and login above, so all it needs is reolink-cli installed on this computer. Give a name only to use a camera you added to reolink-cli yourself."},
-		{Key: "talk_gateway", Label: "reolink-cli gateway", Optional: true,
+		{Key: "talk_gateway", Label: "reolink-cli gateway", Optional: true, Advanced: true,
 			Help: "Leave empty to use " + DefaultGateway + ", where Toskar starts reolink-cli's gateway when it isn't running. Give an address only for a gateway that runs elsewhere."},
 	}
 }
@@ -83,9 +85,36 @@ func reolinkChannel(cred Credential) int {
 func reolinkBase(cred Credential) (string, error) {
 	u, err := url.Parse(strings.TrimRight(strings.TrimSpace(cred["url"]), "/"))
 	if err != nil || (u.Scheme != "http" && u.Scheme != "https") || u.Host == "" {
-		return "", fmt.Errorf("the camera address must start with http:// or https://, such as http://192.168.1.50")
+		return "", errReolinkAddress
 	}
 	return u.Scheme + "://" + u.Host, nil
+}
+
+// reolinkUnreachable is a camera that didn't answer at its address.
+type reolinkUnreachable struct{ err error }
+
+func (e *reolinkUnreachable) Error() string { return e.err.Error() }
+func (e *reolinkUnreachable) Unwrap() error { return e.err }
+
+// Errors connecting a camera, said at the address field (#1345).
+var (
+	errReolinkAddress = contracts.NewError("CAMERA_ADDRESS", map[string]any{"field": "url"},
+		errors.New("enter the camera's address, such as 192.168.1.50"))
+	errReolinkNotThere = contracts.NewError("CAMERA_UNREACHABLE", map[string]any{"field": "url"},
+		errors.New("couldn't reach a camera at that address. Check the address, and that the camera's HTTP or HTTPS server is on"))
+)
+
+// bareAddress is an address typed without http:// or https://, such as
+// 192.168.1.50 from the Reolink app's Device Info (#1345).
+func bareAddress(raw string) (string, bool) {
+	raw = strings.TrimRight(strings.TrimSpace(raw), "/")
+	if raw == "" || strings.Contains(raw, "://") {
+		return "", false
+	}
+	if u, err := url.Parse("http://" + raw); err != nil || u.Host == "" || u.Path != "" {
+		return "", false
+	}
+	return raw, true
 }
 
 // reolinkHTTP is the client for a camera. Over HTTPS a Reolink camera has
@@ -133,7 +162,7 @@ func reolinkPin(ctx context.Context, base string) (string, error) {
 	d := &tls.Dialer{Config: &tls.Config{InsecureSkipVerify: true, MinVersion: tls.VersionTLS12}} // read, then pinned
 	conn, err := d.DialContext(ctx, "tcp", host)
 	if err != nil {
-		return "", fmt.Errorf("could not reach the camera at %s: %w", u.Host, unwrapURLError(err))
+		return "", &reolinkUnreachable{fmt.Errorf("could not reach the camera at %s: %w", u.Host, unwrapURLError(err))}
 	}
 	defer conn.Close()
 	certs := conn.(*tls.Conn).ConnectionState().PeerCertificates
@@ -143,7 +172,41 @@ func reolinkPin(ctx context.Context, base string) (string, error) {
 	return fingerprint(certs[0].Raw), nil
 }
 
-func (Reolink) Check(ctx context.Context, c *http.Client, cred Credential) (string, error) {
+func (r Reolink) Check(ctx context.Context, c *http.Client, cred Credential) (string, error) {
+	// A bare address is tried over HTTPS, then HTTP, and kept as it answered.
+	if addr, ok := bareAddress(cred["url"]); ok {
+		var first error
+		for _, scheme := range []string{"https://", "http://"} {
+			cred["url"], cred["fingerprint"] = scheme+addr, ""
+			account, err := r.check(ctx, c, cred)
+			if err == nil {
+				return account, nil
+			}
+			if first == nil {
+				first = err
+			}
+			var gone *reolinkUnreachable
+			if !errors.As(err, &gone) {
+				return "", err
+			}
+		}
+		cred["url"] = addr
+		return "", reolinkCheckErr(first)
+	}
+	account, err := r.check(ctx, c, cred)
+	return account, reolinkCheckErr(err)
+}
+
+// reolinkCheckErr says a camera that didn't answer plainly, at the address.
+func reolinkCheckErr(err error) error {
+	var gone *reolinkUnreachable
+	if errors.As(err, &gone) {
+		return errReolinkNotThere
+	}
+	return err
+}
+
+func (Reolink) check(ctx context.Context, c *http.Client, cred Credential) (string, error) {
 	base, err := reolinkBase(cred)
 	if err != nil {
 		return "", err
@@ -238,7 +301,7 @@ func reolinkPost(ctx context.Context, c *http.Client, base, token, cmd string, p
 	req.Header.Set("User-Agent", "Toskar")
 	resp, err := c.Do(req)
 	if err != nil {
-		return reolinkResult{}, fmt.Errorf("could not reach the camera: %w", unwrapURLError(err))
+		return reolinkResult{}, &reolinkUnreachable{fmt.Errorf("could not reach the camera: %w", unwrapURLError(err))}
 	}
 	defer resp.Body.Close()
 	raw, err := io.ReadAll(io.LimitReader(resp.Body, maxBody))

@@ -298,5 +298,7 @@
   "MOVE_NEEDS_COMPUTER": "옮기려면 Toskar 릴레이가 지금 구독을 쓰는 컴퓨터와 연결돼야 해요. 그 컴퓨터를 한 번 켜거나, 3일 동안 꺼져 있을 때까지 기다리세요.",
   "MOVE_FAILED": "Toskar 릴레이가 구독을 옮기지 않았어요({{relay_code}}).",
   "VOICE_UNAVAILABLE": "이 컴퓨터에서는 실시간 음성을 사용할 수 없습니다.",
-  "WEBSOCKET_REQUIRED": "실시간 음성에는 WebSocket 연결이 필요합니다."
+  "WEBSOCKET_REQUIRED": "실시간 음성에는 WebSocket 연결이 필요합니다.",
+  "CAMERA_ADDRESS": "카메라 주소를 입력하세요. 예: 192.168.1.50",
+  "CAMERA_UNREACHABLE": "그 주소에서 카메라에 연결하지 못했어요. 주소와 카메라의 HTTP 또는 HTTPS 서버가 켜져 있는지 확인하세요."
 }

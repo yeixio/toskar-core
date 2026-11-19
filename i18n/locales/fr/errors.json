@@ -298,5 +298,7 @@
   "MOVE_NEEDS_COMPUTER": "Pour le déplacer, le relais de Toskar doit avoir des nouvelles de l'ordinateur qui l'utilise : allumez-le une fois, ou attendez qu'il soit éteint depuis 3 jours.",
   "MOVE_FAILED": "Le relais de Toskar n'a pas déplacé l'abonnement ({{relay_code}}).",
   "VOICE_UNAVAILABLE": "La voix en direct n’est pas disponible sur cet ordinateur.",
-  "WEBSOCKET_REQUIRED": "La voix en direct a besoin d’une connexion WebSocket."
+  "WEBSOCKET_REQUIRED": "La voix en direct a besoin d’une connexion WebSocket.",
+  "CAMERA_ADDRESS": "Saisissez l'adresse de la caméra, par exemple 192.168.1.50.",
+  "CAMERA_UNREACHABLE": "Toskar n'a pas pu joindre de caméra à cette adresse. Vérifiez l'adresse et que le serveur HTTP ou HTTPS de la caméra est activé."
 }

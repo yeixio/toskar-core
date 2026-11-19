@@ -298,5 +298,7 @@
   "MOVE_NEEDS_COMPUTER": "移すには、Toskarのリレーが今そのサブスクリプションを使っているコンピューターと通信する必要があります。そのコンピューターを一度起動するか、3日間オフになるまでお待ちください。",
   "MOVE_FAILED": "Toskarのリレーはサブスクリプションを移しませんでした（{{relay_code}}）。",
   "VOICE_UNAVAILABLE": "このコンピューターではライブ音声を使えません。",
-  "WEBSOCKET_REQUIRED": "ライブ音声には WebSocket 接続が必要です。"
+  "WEBSOCKET_REQUIRED": "ライブ音声には WebSocket 接続が必要です。",
+  "CAMERA_ADDRESS": "カメラのアドレスを入力してください（例: 192.168.1.50）。",
+  "CAMERA_UNREACHABLE": "そのアドレスのカメラに接続できませんでした。アドレスと、カメラの HTTP または HTTPS サーバーがオンになっているかを確認してください。"
 }

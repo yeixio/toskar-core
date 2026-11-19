@@ -17,5 +17,7 @@
   "save": "Salvar",
   "cancel": "Cancelar",
   "tools": "Ferramentas: {{tools}}",
-  "asksFirst": "{{name}} (pergunta antes)"
+  "asksFirst": "{{name}} (pergunta antes)",
+  "connectService": "Conectar {{name}}",
+  "advanced": "Avançado"
 }

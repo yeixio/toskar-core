@@ -56,7 +56,7 @@ describe('ConnectedServices', () => {
 
   it('connects with a token, shows the account, and never shows the token again', async () => {
     renderIt()
-    fireEvent.click(await screen.findByRole('button', { name: 'Connect' }))
+    fireEvent.click(await screen.findByRole('button', { name: 'Connect GitHub' }))
     expect(screen.getByText(/fine-grained personal access token/)).toBeInTheDocument()
     const token = screen.getByLabelText('Personal access token')
     expect(token).toHaveAttribute('type', 'password')
@@ -115,5 +115,45 @@ describe('ConnectedServices', () => {
         talk_camera: 'hub-ch0',
       }),
     )
+  })
+
+  // Regression: toskar-core#1345
+  // A camera's address that didn't answer is said at the address, in the
+  // App language, and reolink-cli's settings are folded under Advanced.
+  it('says an address error at the field and folds advanced settings away', async () => {
+    const reolink: Connector = {
+      id: 'reolink',
+      name: 'Reolink',
+      description: '',
+      scopes: '',
+      fields: [
+        { key: 'url', label: 'Camera address', secret: false, placeholder: '192.168.1.50' },
+        { key: 'password', label: 'Password', secret: true },
+        { key: 'talk_camera', label: 'reolink-cli camera name', secret: false, optional: true, advanced: true },
+      ],
+      connected: false,
+      tools: [],
+    }
+    vi.mocked(api.listConnectors).mockReset().mockResolvedValue([reolink])
+    vi.mocked(api.connectService)
+      .mockReset()
+      .mockRejectedValue(
+        Object.assign(new Error('could not reach'), {
+          serviceMessage: 'could not reach',
+          code: 'CAMERA_UNREACHABLE',
+          details: { field: 'url' },
+        }),
+      )
+    renderIt()
+    fireEvent.click(await screen.findByRole('button', { name: 'Connect Reolink' }))
+    const address = screen.getByLabelText('Camera address')
+    expect(address).toHaveAttribute('placeholder', 'e.g. 192.168.1.50')
+    expect(screen.getByText('reolink-cli camera name').closest('details')).not.toBeNull()
+    fireEvent.change(address, { target: { value: '192.168.1.99' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Connect' }))
+    const alert = await screen.findByRole('alert')
+    expect(alert).toHaveTextContent(/couldn't reach a camera at that address/i)
+    expect(address).toHaveAttribute('aria-invalid', 'true')
+    expect(address).toHaveAttribute('aria-describedby', alert.id)
   })
 })

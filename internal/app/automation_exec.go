@@ -204,21 +204,25 @@ func (e automationExecutor) execute(ctx context.Context, automation automations.
 	out.Acted = env.actedCalls()
 	// The answer is said at the door, for an automation that speaks (#667).
 	if automation.Say != nil && runErr == nil && ctx.Err() == nil {
-		said, err := e.app.sayAtDoor(ctx, automation, out.Text)
+		// The answer's words for the door are said; its note for the owner
+		// is what they're told (#1339).
+		door, owner := automations.SplitSay(out.Text)
+		said, err := e.app.sayAtDoor(ctx, automation, door)
 		if err != nil {
 			runErr = fmt.Errorf("couldn't say the answer at the door: %w", err)
-		} else if said == "" && automations.Spoken(out.Text) == "" {
+		} else if said == "" && automations.Spoken(door) == "" {
 			out.Text = silentDoorResult
 		} else if said != "" {
+			out.Text = doorResult(owner, said)
 			out.Acted = append(out.Acted, automations.Action{Tool: automation.Say.Connector + ".say", Args: map[string]string{"text": said}}.Describe())
 			// Then it talks with them, and the visit is the result (#667).
 			if automation.Say.Listen {
 				visit, err := e.app.talkAtDoor(ctx, automation, modelID, said)
 				switch {
 				case visit != "" && err != nil:
-					out.Text = visit + "\n\n" + fmt.Sprintf("The conversation stopped: %v", err)
+					out.Text = withOwnerNote(owner, visit+"\n\n"+fmt.Sprintf("The conversation stopped: %v", err))
 				case visit != "":
-					out.Text = visit
+					out.Text = withOwnerNote(owner, visit)
 				case err != nil:
 					runErr = fmt.Errorf("couldn't hear the visitor: %w", err)
 				}
@@ -243,6 +247,24 @@ var promptURL = regexp.MustCompile(`https?://[^\s"'<>)\]]+`)
 // because nobody was there: notified instead of the silent answer's word
 // (#1339).
 const silentDoorResult = "Nobody was in the picture, so nothing was said at the door."
+
+// doorResult is a speaking run's result: the note for its owner on who
+// came, then what was said at the door (#1339). Without a note, it's what
+// was said, as before.
+func doorResult(owner, said string) string {
+	if owner == "" {
+		return said
+	}
+	return owner + "\n\nSaid at the door: \"" + said + "\""
+}
+
+// withOwnerNote puts the owner's note above a visit's transcript.
+func withOwnerNote(owner, visit string) string {
+	if owner == "" {
+		return visit
+	}
+	return owner + "\n\n" + visit
+}
 
 // unopenedPage is the page an automation's prompt names that its run never
 // opened, though it may: its model answered without reading it, as a small

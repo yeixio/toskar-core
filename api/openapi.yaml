@@ -10625,6 +10625,7 @@ components:
               secret: {type: boolean, description: '`secret` values are stored in the secrets directory and never shown again.'}
               optional: {type: boolean}
               placeholder: {type: string}
+              advanced: {type: boolean, description: Folded under Advanced in the form; most people leave it.}
         connected: {type: boolean}
         status: {type: string}
         account: {type: string}

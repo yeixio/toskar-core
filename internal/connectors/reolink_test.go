@@ -3,6 +3,7 @@ package connectors
 import (
 	"bytes"
 	"context"
+	"net"
 	"path/filepath"
 	"slices"
 	"strings"
@@ -13,6 +14,7 @@ import (
 	"github.com/yeixio/toskar-core/internal/connectors/reolinktest"
 	"github.com/yeixio/toskar-core/internal/store"
 	"github.com/yeixio/toskar-core/internal/tools"
+	"github.com/yeixio/toskar-core/pkg/contracts"
 )
 
 func reolinkManager(t *testing.T) *Manager {
@@ -162,5 +164,56 @@ func TestReolinkWatchSeesVisitors(t *testing.T) {
 			t.Fatal(err)
 		}
 		door.Close()
+	}
+}
+
+// The camera's address can be typed as the Reolink app shows it, with no
+// http://; one that doesn't answer is said at the address field, in the
+// app's language; the password isn't half shown back (#1345).
+func TestReolinkBareAddressAndPlainErrors(t *testing.T) {
+	// Regression: toskar-core#1345
+	door := reolinktest.New(false)
+	defer door.Close()
+	m := reolinkManager(t)
+	ctx := context.Background()
+	bare := strings.TrimPrefix(door.URL, "http://")
+	if _, err := m.Connect(ctx, "reolink", map[string]string{"url": bare, "username": "admin", "password": door.Password}); err != nil {
+		t.Fatalf("a bare address: %v", err)
+	}
+	cred, _ := m.credential("reolink")
+	if cred["url"] != door.URL {
+		t.Fatalf("kept address %q, want %q", cred["url"], door.URL)
+	}
+	list, err := m.List(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, st := range list {
+		if st.ID == "reolink" && st.Values["password"] != "••••" {
+			t.Fatalf("password shown as %q", st.Values["password"])
+		}
+	}
+	for _, f := range (Reolink{}).Fields() {
+		if strings.HasPrefix(f.Key, "talk_") && !f.Advanced {
+			t.Fatalf("%s isn't folded under Advanced", f.Key)
+		}
+	}
+
+	ln, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	gone := ln.Addr().String()
+	ln.Close()
+	for _, addr := range []string{gone, "http://" + gone} {
+		_, err = m.Connect(ctx, "reolink", map[string]string{"url": addr, "username": "admin", "password": "secret-pw"})
+		code, params := contracts.ErrorCode(err)
+		if code != "CAMERA_UNREACHABLE" || params["field"] != "url" || strings.Contains(err.Error(), "secret-pw") {
+			t.Fatalf("%s: unreachable camera: %q %v %v", addr, code, params, err)
+		}
+	}
+	_, err = m.Connect(ctx, "reolink", map[string]string{"url": "ftp://cam", "username": "admin", "password": "x"})
+	if code, _ := contracts.ErrorCode(err); code != "CAMERA_ADDRESS" {
+		t.Fatalf("a wrong address: %q %v", code, err)
 	}
 }
