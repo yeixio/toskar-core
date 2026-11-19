@@ -3,7 +3,6 @@ package app
 import (
 	"context"
 	"strings"
-	"sync"
 	"testing"
 	"time"
 
@@ -16,8 +15,6 @@ import (
 // spoken, the visitor says the next thing, as audio through its microphone.
 type visitDoor struct {
 	audio   chan []int16
-	mu      sync.Mutex
-	said    []string
 	spoke   chan struct{}
 	visitor int // how many things the visitor says
 }
