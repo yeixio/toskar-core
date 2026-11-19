@@ -351,6 +351,10 @@ type VoiceOption struct {
 	Description string `json:"description,omitempty"`
 	// Engine is kitten, kokoro, or piper.
 	Engine string `json:"engine"`
+	// Standard is a voice named only for the recordings it was made from,
+	// such as Piper's news_tts or mls: Name is then "Standard", which the
+	// apps say in their language (#1342).
+	Standard bool `json:"standard,omitempty"`
 }
 
 // VoiceChoices are the languages read-aloud speaks and their voices, with
@@ -377,7 +381,11 @@ func (w *Worker) VoiceChoices(chosen func(lang string) string) []VoiceChoice {
 			c.Voices = append(c.Voices, VoiceOption{ID: v, Name: kokoroName(v), Engine: "kokoro"})
 		}
 		if v, ok := voices[l]; ok {
-			c.Voices = append(c.Voices, VoiceOption{ID: v, Name: piperName(v), Engine: "piper"})
+			opt := VoiceOption{ID: v, Name: piperName(v), Engine: "piper"}
+			if datasetVoice(v) {
+				opt.Name, opt.Standard = "Standard", true
+			}
+			c.Voices = append(c.Voices, opt)
 		}
 		out = append(out, c)
 	}
@@ -412,6 +420,19 @@ func (w *Worker) automaticVoice(lang string) string {
 	}
 	v, _ := VoiceFor(lang)
 	return v
+}
+
+// datasetSpeakers are Piper voices named for the recordings they were made
+// from, not a speaker: "Mls" or "News tts" mean nothing to people (#1342).
+var datasetSpeakers = map[string]bool{
+	"news_tts": true, "mls": true, "kss": true, "nst": true, "dfki": true, "vais1000": true,
+	"ukrainian_tts": true, "davefx": true, "talesyntese": true,
+}
+
+// datasetVoice reports a Piper voice named for its recordings.
+func datasetVoice(v string) bool {
+	parts := strings.Split(v, "-")
+	return len(parts) >= 2 && datasetSpeakers[parts[1]]
 }
 
 // kokoroName is a Kokoro voice's name: af_heart is Heart.

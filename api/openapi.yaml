@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Toskar Control Plane API
-  version: "1.115"
+  version: "1.116"
   description: >-
     Local AI control plane API for Toskar, its OpenAI-compatible routes, and its MCP server.
     On the default loopback bind no key is needed. When the daemon listens on any other address,
@@ -8036,6 +8036,7 @@ components:
                     name: {type: string}
                     description: {type: string}
                     engine: {type: string, enum: [kitten, kokoro, piper]}
+                    standard: {type: boolean, description: 'A voice named only for the recordings it was made from: name is then Standard, which the apps say in their language (#1342, contract 1.116)'}
         needs:
           type: array
           description: "The models voice mode and the doorbell still need on this computer, each with the one that fits to install with POST /api/v1/models/{id}/install (#667, contract 1.113)"

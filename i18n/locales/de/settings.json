@@ -368,7 +368,7 @@
     "failed": "Das hat nicht geklappt. Versuche es noch einmal.",
     "kitten": {
       "name": "Kitten TTS 2 mini",
-      "description": "Natürlichere Stimmen auf {{languages}}. Belegt mit den Stimmen etwa 1,5 GB auf diesem Computer, läuft auf dem Prozessor und braucht beim Sprechen etwa 1 GB Arbeitsspeicher.",
+      "description": "Fügt natürliche Stimmen zur Auswahl hinzu in {{languages}} und liest mit Kitten die Sprachen vor, die nur eine einfache Stimme hatten. Sprachen mit einer natürlichen Stimme behalten sie, außer du wählst unten eine Kitten-Stimme. Installiert etwa 1,5 GB auf diesem Computer, einschließlich der Stimmen, läuft auf dem Prozessor und braucht beim Sprechen etwa 1 GB Arbeitsspeicher.",
       "install": "Installieren",
       "retry": "Erneut versuchen",
       "installing": "Programm wird installiert …",
@@ -399,6 +399,8 @@
       "ready": "{{name}} ist installiert.",
       "none": "Keins im Katalog passt zu diesem Computer.",
       "models": "Zu den Modellen"
-    }
+    },
+    "standard": "Standard",
+    "noVoice": "{{languages}} kann noch nicht vorgelesen werden: Vorlesen, Sprachmodus und Türklingel sprechen es nicht."
   }
 }

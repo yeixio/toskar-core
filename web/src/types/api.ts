@@ -1947,6 +1947,8 @@ export interface VoiceOption {
   name: string
   description?: string
   engine: 'kitten' | 'kokoro' | 'piper'
+  /** Named only for its recordings, such as Piper's mls: shown as Standard (#1342). */
+  standard?: boolean
 }
 
 /** A language read aloud and its voices; voice is the chosen one, empty for automatic. */

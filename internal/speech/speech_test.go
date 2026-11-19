@@ -196,3 +196,20 @@ func TestFrames(t *testing.T) {
 		t.Fatalf("clip = %+v", clip)
 	}
 }
+
+// Norwegian is listed once, and voices named for their recordings are
+// called Standard (#1342).
+func TestVoiceListPlainNames(t *testing.T) {
+	// Regression: toskar-core#1342
+	for _, l := range voiceLanguages() {
+		if l == "no" {
+			t.Fatal("Norwegian is listed twice")
+		}
+	}
+	if v, ok := VoiceFor("no"); !ok || v != voices["nb"] {
+		t.Fatalf("no reads in %q", v)
+	}
+	if !datasetVoice("id_ID-news_tts-medium") || !datasetVoice("nl_NL-mls-medium") || datasetVoice("de_DE-thorsten-medium") {
+		t.Fatal("dataset voices")
+	}
+}
