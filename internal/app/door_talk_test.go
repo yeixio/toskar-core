@@ -219,3 +219,31 @@ func (c *countingEars) Transcribe(context.Context, []byte, string) (string, erro
 	c.n++
 	return "", nil
 }
+
+// After the door says goodbye it still listens for a while: a visitor who
+// has one more thing to say is answered, and the visit ends once they've
+// been quiet that long (#667).
+func TestDoorVisitGraceAfterGoodbye(t *testing.T) {
+	ctx := context.Background()
+	auto := automations.Automation{Schedule: automations.Schedule{TimeZone: "UTC"},
+		Say: &automations.Say{Connector: automations.SayReolink, Device: "camera", Listen: true}}
+	door := &visitDoor{audio: make(chan []int16, 1000), spoke: make(chan struct{}, 10), visitor: 2}
+	ears := &scriptedEars{heard: []string{"I'm dropping off a package.", "Oh, and it needs to go in the fridge."}}
+	answers := []string{"Thanks, please leave it at the door. [done]", "Got it, I'll pass that on. [done]"}
+	n := 0
+	v := &doorVisit{ear: door, talk: door, parts: voice.Parts{Transcriber: ears, Speaker: &fakeDoorVoice{}}, automation: auto, lang: "en",
+		reply: func(context.Context, []doorLine) (string, error) { n++; return answers[n-1], nil },
+		wait: 2 * time.Second, longest: 5 * time.Second, echo: 30 * time.Millisecond, grace: 500 * time.Millisecond}
+	start := time.Now()
+	lines, err := v.run(ctx, "Hello, can I help you?")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if n != 2 || len(lines) != 5 || lines[3].Text != "Oh, and it needs to go in the fridge." {
+		t.Fatalf("the visit:\n%s", transcript(lines))
+	}
+	// It waited the grace after the last goodbye, not the 2 s for a reply.
+	if d := time.Since(start); d > 4*time.Second {
+		t.Fatalf("the visit took %v", d)
+	}
+}

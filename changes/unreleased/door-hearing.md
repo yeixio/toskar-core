@@ -13,3 +13,5 @@
 - A visit's notification is plain sentences, without headings, lists, or
   notes about Toskar's own settings, and the doorbell no longer calls a
   visitor by a name they only mentioned, such as who sent a package.
+- After the doorbell says goodbye, it keeps listening for a minute in case
+  the visitor has more to say, instead of ending the visit at once.
