@@ -233,7 +233,7 @@ func TestDoorVisitGraceAfterGoodbye(t *testing.T) {
 	n := 0
 	v := &doorVisit{ear: door, talk: door, parts: voice.Parts{Transcriber: ears, Speaker: &fakeDoorVoice{}}, automation: auto, lang: "en",
 		reply: func(context.Context, []doorLine) (string, error) { n++; return answers[n-1], nil },
-		wait: 2 * time.Second, longest: 5 * time.Second, echo: 30 * time.Millisecond, grace: 500 * time.Millisecond}
+		wait:  2 * time.Second, longest: 5 * time.Second, echo: 30 * time.Millisecond, grace: 500 * time.Millisecond}
 	start := time.Now()
 	lines, err := v.run(ctx, "Hello, can I help you?")
 	if err != nil {
