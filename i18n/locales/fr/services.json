@@ -19,5 +19,6 @@
   "tools": "Outils : {{tools}}",
   "asksFirst": "{{name}} (demande d'abord)",
   "connectService": "Connecter {{name}}",
-  "advanced": "Avancé"
+  "advanced": "Avancé",
+  "doorbellAutomation": "Créer une automatisation de sonnette"
 }

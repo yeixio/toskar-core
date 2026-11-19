@@ -19,5 +19,6 @@
   "tools": "Werkzeuge: {{tools}}",
   "asksFirst": "{{name}} (fragt vorher)",
   "connectService": "{{name}} verbinden",
-  "advanced": "Erweitert"
+  "advanced": "Erweitert",
+  "doorbellAutomation": "Türklingel-Automation erstellen"
 }

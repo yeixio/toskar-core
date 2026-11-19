@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
+import { Link } from 'react-router-dom'
 import i18n from '@/i18n'
 import { api } from '@/lib/api'
 import type { Connector, ConnectorField } from '@/types/api'
@@ -196,6 +197,12 @@ function ServiceRow({ service }: { service: Connector }) {
         </form>
       )}
       {error && !fieldError && <ShownError {...error} className="mt-2 text-xs text-danger" />}
+      {/* A connected doorbell leads to answering the door (#1341). */}
+      {service.connected && service.id === 'reolink' && (
+        <Link to="/automations?idea=door" className="mt-2 inline-block text-xs font-medium text-primary underline-offset-2 hover:underline">
+          {t('doorbellAutomation')}
+        </Link>
+      )}
       {service.connected && service.tools.length > 0 && (
         <p className="mt-2 text-xs text-ink-faint">
           {t('tools', {

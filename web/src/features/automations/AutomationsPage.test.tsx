@@ -430,4 +430,70 @@ describe('AutomationsPage', () => {
     await waitFor(() => expect(api.createAutomation).toHaveBeenCalled())
     expect(vi.mocked(api.createAutomation).mock.calls.at(-1)?.[0].tools).toContain('files.write')
   })
+
+  // Regression: toskar-core#1341
+  // With a doorbell connected: the Answer the door idea sets up the button,
+  // camera and talking; a described doorbell automation fills in the same;
+  // its card reads "Never run" and "When someone rings Front Door".
+  it('sets up answering the door from an idea or a description (#1341)', async () => {
+    const reolink = [
+      { connector: 'reolink', device: 'camera', name: 'Front Door', kind: 'camera', state: 'idle' },
+      { connector: 'reolink', device: 'doorbell', name: 'Front Door doorbell button', kind: 'sensor', state: 'off' },
+    ] as const
+    vi.mocked(api.listDevices).mockResolvedValue([...reolink])
+    vi.mocked(api.listAutomations).mockResolvedValue([
+      {
+        ...saved,
+        id: 'door-1',
+        name: 'Answer Front Door',
+        schedule: { kind: 'interval', time_zone: 'UTC', every_seconds: 3600 },
+        trigger: { kind: 'device', connector: 'reolink', device: 'doorbell' },
+        next_run_at: undefined,
+        last_run_at: undefined,
+        last_result: '',
+      },
+    ])
+    renderPage()
+    expect(await screen.findByText('When someone rings Front Door')).toBeInTheDocument()
+    expect(screen.getByText('Never run')).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: 'New automation' }))
+    fireEvent.click(await screen.findByRole('button', { name: 'Answer the door' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Fill in the details' }))
+    expect(await screen.findByDisplayValue('Answer Front Door')).toBeInTheDocument()
+    expect(screen.queryByRole('combobox', { name: 'Changes to' })).toBeNull()
+    fireEvent.click(screen.getByRole('button', { name: 'Create automation' }))
+    await waitFor(() => expect(api.createAutomation).toHaveBeenCalled())
+    const body = vi.mocked(api.createAutomation).mock.calls[0][0]
+    expect(body.trigger).toMatchObject({ kind: 'device', connector: 'reolink', device: 'doorbell' })
+    expect(body.cameras).toEqual([{ connector: 'reolink', device: 'camera' }])
+    expect(body.say).toMatchObject({ connector: 'reolink', device: 'camera', listen: true })
+  })
+
+  it('fills in what starts a described automation (#1341)', async () => {
+    vi.mocked(api.listDevices).mockResolvedValue([
+      { connector: 'reolink', device: 'camera', name: 'Front Door', kind: 'camera', state: 'idle' },
+      { connector: 'reolink', device: 'doorbell', name: 'Front Door doorbell button', kind: 'sensor', state: 'off' },
+    ])
+    vi.mocked(api.parseAutomation).mockResolvedValue({
+      name: 'Answer the door',
+      prompt: 'Greet the visitor and tell me who is there.',
+      schedule: { kind: 'interval', time_zone: 'UTC', every_seconds: 3600 },
+      notification: { mode: 'always' },
+      notes: [],
+      trigger: { kind: 'device', connector: 'reolink', device: 'doorbell' },
+      cameras: [{ connector: 'reolink', device: 'camera' }],
+      say: { connector: 'reolink', device: 'camera' },
+    })
+    renderPage()
+    fireEvent.click(await screen.findByRole('button', { name: 'New automation' }))
+    fireEvent.change(screen.getByPlaceholderText(/Every morning at 8:00 AM/), {
+      target: { value: 'When someone rings the doorbell, greet them and tell me who is there.' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'Fill in the details' }))
+    expect(await screen.findByDisplayValue('Answer the door')).toBeInTheDocument()
+    expect(screen.getByRole('combobox', { name: 'Runs' })).toHaveValue('device')
+    expect(screen.getByRole('checkbox', { name: 'Front Door' })).toBeChecked()
+    expect(screen.getByRole('checkbox', { name: 'Say the answer at the door' })).toBeChecked()
+  })
 })

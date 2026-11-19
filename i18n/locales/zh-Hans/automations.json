@@ -1,7 +1,7 @@
 {
   "page": {
     "title": "自动化",
-    "description": "由 Toskar 的 AI 按计划替你完成的任务，比如早间新闻摘要或价格监控。即使关闭此窗口，它们也会在后台运行。",
+    "description": "Toskar 的 AI 按计划或在发生某件事时替你完成的任务，例如早间新闻简报、价格监控或应门。即使关闭此窗口，它们也会在后台运行。",
     "new": "新建自动化",
     "howItWorks": "工作原理",
     "hideHowItWorks": "隐藏工作原理",
@@ -21,7 +21,9 @@
     "saveFailed": "无法保存该自动化。",
     "confirmDelete": "删除“{{name}}”？它的历史记录也会一并删除。",
     "selectHint": "选择一个自动化查看其历史记录，或新建一个。",
-    "createOff": "你的账户已关闭创建自动化。请让管理员开启。"
+    "createOff": "你的账户已关闭创建自动化。请让管理员开启。",
+    "neverRun": "从未运行",
+    "lastOnly": "上次 {{last}}"
   },
   "intro": {
     "title": "在你离开时让 Toskar 替你干活",
@@ -86,6 +88,13 @@
       "name": "文件夹摘要：{{folderName}}",
       "task": "总结文件夹 {{folder}} 中的文件：哪些是新增或有变化的，以及需要注意的事项。"
     },
+    "door": {
+      "title": "应门",
+      "body": "问候按门铃的人，了解来意并告诉你。",
+      "request": "有人按门铃时，查看摄像头，通过门铃问候访客，并告诉我是谁来了。",
+      "name": "{{door}} 应门",
+      "task": "查看门口的画面。问候访客，了解对方是谁、为什么来，然后告诉我。"
+    },
     "fields": {
       "topics": {
         "label": "主题",
@@ -137,7 +146,11 @@
     "olderRuns": "显示更早的运行",
     "loadingOlder": "正在加载…",
     "lastChecked": "上次检查 {{when}}，没有新内容",
-    "nextCheck": "下次检查 {{when}}"
+    "nextCheck": "下次检查 {{when}}",
+    "door": "门口",
+    "looksAt": "查看 {{cameras}}",
+    "says": "在门口说出回答",
+    "talks": "与访客交谈并了解来意"
   },
   "run": {
     "details": "详情",
@@ -459,7 +472,8 @@
     "deviceTo": "当 {{device}} 变为 {{to}} 时",
     "after": "{{name}} 完成后",
     "afterNotified": "{{name}} 发出通知后",
-    "anotherAutomation": "另一个自动化"
+    "anotherAutomation": "另一个自动化",
+    "ring": "有人按 {{door}} 的门铃时"
   },
   "webhook": {
     "title": "Webhook 链接",

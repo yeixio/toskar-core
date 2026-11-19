@@ -1841,6 +1841,12 @@ export interface ParsedAutomation {
   notification: AutomationNotification
   /** What was assumed, such as a time of day when none was given. */
   notes: string[]
+  /** The device that starts it, for a request that says it runs when something happens (#1341). */
+  trigger?: AutomationTrigger
+  /** The cameras it looks at, read from the request. */
+  cameras?: AutomationCamera[]
+  /** Speaking at the door, for a request to greet or answer the visitor. */
+  say?: AutomationSay
 }
 
 /** One page of an automation's runs, newest first (#204). */

@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/yeixio/toskar-core/internal/automations"
+	"github.com/yeixio/toskar-core/internal/connectors"
 	"github.com/yeixio/toskar-core/internal/locale"
 	"github.com/yeixio/toskar-core/internal/structured"
 	"github.com/yeixio/toskar-core/pkg/pluginapi"
@@ -29,19 +30,35 @@ func (a *App) parseAutomation(ctx context.Context, text, timeZone, language stri
 	if !errors.Is(err, automations.ErrRequestWhen) {
 		return parsed, err
 	}
-	if read, ok := a.parseWithModel(ctx, text, now, timeZone, language); ok {
+	// A request that says it runs when something happens, such as the
+	// doorbell ringing, starts from that device (#1341).
+	devices := a.connectedDevices(ctx)
+	if read, ok := doorRequest(text, devices, eventSchedule(timeZone), language); ok {
+		return read, nil
+	}
+	if read, ok := a.parseWithModel(ctx, text, now, timeZone, language, devices); ok {
 		return read, nil
 	}
 	return parsed, err
 }
 
+// eventSchedule is the schedule of an automation a device starts: the
+// form's own, which nothing checks.
+func eventSchedule(timeZone string) automations.Schedule {
+	return automations.Schedule{Kind: automations.KindInterval, TimeZone: timeZone, EverySeconds: 3600}
+}
+
 // modelRequestSchema is the JSON a model fills in for a request.
 var modelRequestSchema = &structured.Schema{
 	Type:     "object",
-	Required: []string{"schedule", "task"},
+	Required: []string{"task"},
 	Properties: map[string]*structured.Schema{
-		"name": {Type: "string"},
-		"task": {Type: "string"},
+		"name":              {Type: "string"},
+		"task":              {Type: "string"},
+		"starts":            {Type: "string"},
+		"cameras":           {Type: "array", Items: &structured.Schema{Type: "string"}},
+		"speak_at_door":     {Type: "boolean"},
+		"talk_with_visitor": {Type: "boolean"},
 		"schedule": {Type: "object", Required: []string{"kind"}, Properties: map[string]*structured.Schema{
 			"kind":          {Type: "string", Enum: []any{"daily", "weekly", "monthly", "interval", "once", "cron"}},
 			"hour":          {Type: "integer"},
@@ -70,7 +87,7 @@ var modelRequestSchema = &structured.Schema{
 // such as one that says "first thing on weekdays" or names its time in a
 // way the words don't know. ok is false when it can't, or gives something
 // that isn't a usable schedule.
-func (a *App) parseWithModel(ctx context.Context, text string, now time.Time, timeZone, language string) (automations.ParsedRequest, bool) {
+func (a *App) parseWithModel(ctx context.Context, text string, now time.Time, timeZone, language string, devices []connectors.Device) (automations.ParsedRequest, bool) {
 	if a.Profiles == nil || strings.TrimSpace(text) == "" {
 		return automations.ParsedRequest{}, false
 	}
@@ -95,21 +112,24 @@ func (a *App) parseWithModel(ctx context.Context, text string, now time.Time, ti
 	}
 	today := now.In(loc)
 	ask := []pluginapi.ChatMessage{
-		{Role: "system", Content: "You turn a request for a task that runs on a schedule into the JSON a program reads. Use only what the request says."},
+		{Role: "system", Content: "You turn a request for a task that runs on a schedule, or when something happens, into the JSON a program reads. Use only what the request says."},
 		{Role: "user", Content: fmt.Sprintf(`Request: %q
 
-Today is %s, %s, in %s.
+Today is %s, %s, in %s.%s
 
 Reply with only this JSON:
-{"name": "a short name for the task, in %s",
+{"name": "a short name for the task in plain words, such as \"Morning news\", in %s",
  "task": "what to do each time it runs, without when or how to notify, in the request's language",
  "schedule": {"kind": "daily, weekly, monthly, interval, once, or cron", "hour": 0-23, "minute": 0-59,
    "times": ["HH:MM", ...] when it runs several times a day,
    "weekdays": [0-6, ...] for weekly (0 is Sunday; 1-5 for weekdays only), "month_day": 1-31 for monthly,
    "every_minutes": for interval, "date": "YYYY-MM-DD" for once, "cron": "five fields" only when nothing else fits},
  "notify": {"mode": "always, change, none, or condition",
-   "condition": {"kind": "threshold, available, or significant", "op": "below or above", "value": a number, "currency": "an ISO 4217 code such as USD"}}}`,
-			text, today.Weekday(), today.Format("2006-01-02"), timeZone, locale.LanguageName(language, locale.Source))},
+   "condition": {"kind": "threshold, available, or significant", "op": "below or above", "value": a number, "currency": "an ISO 4217 code such as USD"}},
+ "starts": "a device id, only when a device's change starts it",
+ "cameras": ["device ids of cameras to look at"],
+ "speak_at_door": true or false, "talk_with_visitor": true or false}`,
+			text, today.Weekday(), today.Format("2006-01-02"), timeZone, devicesNote(devices), locale.LanguageName(language, locale.Source))},
 	}
 	reply, err := collectText(ctx, env, "assistant", ask)
 	if err != nil {
@@ -120,10 +140,17 @@ Reply with only this JSON:
 		return automations.ParsedRequest{}, false
 	}
 	obj, _ := result.Value.(map[string]any)
+	// One a device starts needs no schedule of its own (#1341).
+	if _, ok := obj["schedule"].(map[string]any); !ok {
+		if id, _ := obj["starts"].(string); id != "" {
+			obj["schedule"] = map[string]any{"kind": "interval", "every_minutes": float64(60)}
+		}
+	}
 	read, ok := requestFromModel(obj, loc, timeZone)
 	if !ok {
 		return automations.ParsedRequest{}, false
 	}
+	read = withDevices(read, obj, devices)
 	read.Notes = append(read.Notes, locale.T(language, "automations:parse.byModel", nil))
 	return read, true
 }
@@ -211,7 +238,7 @@ func requestFromModel(obj map[string]any, loc *time.Location, timeZone string) (
 	}
 	name, _ := obj["name"].(string)
 	read := automations.ParsedRequest{
-		Name:         strings.TrimSpace(name),
+		Name:         readableName(name),
 		Prompt:       task,
 		Schedule:     s,
 		Notification: automations.Notification{Mode: automations.NotifyAlways},

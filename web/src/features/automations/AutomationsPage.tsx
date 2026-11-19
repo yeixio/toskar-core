@@ -76,7 +76,7 @@ export function AutomationsPage() {
   const devicesQuery = useQuery({
     queryKey: ['devices'],
     queryFn: () => api.listDevices(),
-    enabled: (listQuery.data ?? []).some((item) => item.trigger?.kind === 'device'),
+    // Also for the Answer the door idea, offered with a doorbell connected (#1341).
     retry: false,
   })
   const names = Object.fromEntries([
@@ -112,6 +112,18 @@ export function AutomationsPage() {
     }
     if (!selectedID && items[0]) setSelectedID(items[0].id)
   }, [items, selectedID])
+
+  // A connected camera links here with ?idea=door to set up answering the
+  // door (#1341).
+  const linkedIdea = searchParams.get('idea')
+  useEffect(() => {
+    if (linkedIdea !== 'door') return
+    setSeed('door')
+    setCreating(true)
+    setEditing(false)
+    setSelectedID(null)
+    setSearchParams({}, { replace: true })
+  }, [linkedIdea, setSearchParams])
 
   // A notification links here with ?id=…; open that automation.
   const linkedID = searchParams.get('id')
@@ -191,20 +203,20 @@ export function AutomationsPage() {
       {hasAutomations && showIntro ? (
         <div id="automations-intro" className="space-y-5">
           <AutomationsIntro />
-          {mayCreate ? <IdeaGallery onUse={startNew} /> : null}
+          {mayCreate ? <IdeaGallery onUse={startNew} devices={devicesQuery.data ?? []} /> : null}
         </div>
       ) : null}
 
       {empty && !creating ? (
         <div className="space-y-6">
           <AutomationsIntro mascot />
-          {mayCreate ? <IdeaGallery onUse={startNew} /> : <p className="text-sm text-ink-muted">{t('page.createOff')}</p>}
+          {mayCreate ? <IdeaGallery onUse={startNew} devices={devicesQuery.data ?? []} /> : <p className="text-sm text-ink-muted">{t('page.createOff')}</p>}
         </div>
       ) : (
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(22rem,34rem)]">
         <section className="min-w-0 space-y-3">
           {empty ? (
-            mayCreate ? <IdeaGallery onUse={startNew} compact /> : null
+            mayCreate ? <IdeaGallery onUse={startNew} compact devices={devicesQuery.data ?? []} /> : null
           ) : (
           <div className="flex flex-wrap items-center gap-2">
             <label className="search-field min-w-40 flex-1">
@@ -265,12 +277,7 @@ export function AutomationsPage() {
                   {resultProse(item.last_result) && (
                     <p className="mt-2 line-clamp-2 text-sm text-ink">{resultProse(item.last_result)}</p>
                   )}
-                  <p className="mt-2 text-xs text-ink-faint">
-                    {t('page.lastNext', {
-                      last: compactWhen(item.last_run_at, item.schedule.time_zone),
-                      next: compactWhen(item.next_run_at, item.schedule.time_zone),
-                    })}
-                  </p>
+                  <p className="mt-2 text-xs text-ink-faint">{cardTiming(item)}</p>
                 </button>
               </li>
             ))}
@@ -392,6 +399,17 @@ function Detail({
             )}
           </div>
           {detail.trigger?.kind === 'webhook' ? <WebhookLink automationId={detail.id} hookSet={Boolean(detail.hook_set)} /> : null}
+          {/* The camera it looks at and what it does at the door (#1341). */}
+          {detail.cameras?.length || detail.say ? (
+            <div>
+              <p className="label-caps">{t('detail.door')}</p>
+              {detail.cameras?.length ? (
+                <p className="text-ink">{t('detail.looksAt', { cameras: detail.cameras.map((c) => names[c.device] ?? c.device).join(', ') })}</p>
+              ) : null}
+              {detail.say ? <p className="text-ink">{t('detail.says')}</p> : null}
+              {detail.say?.listen ? <p className="text-ink-muted">{t('detail.talks')}</p> : null}
+            </div>
+          ) : null}
           <div>
             <p className="label-caps">{t('detail.task')}</p>
             <p className="whitespace-pre-wrap text-ink">{visibleTask(detail.prompt)}</p>
@@ -551,4 +569,15 @@ function statusLabel(status: string | undefined): string {
     default:
       return i18n.t('automations:run.status.notRun')
   }
+}
+
+/** A card's last and next run: "Never run" before the first, and no next
+ * run for one a device, a webhook, or another automation starts (#1341). */
+function cardTiming(item: Automation): string {
+  const zone = item.schedule.time_zone
+  const event = ['device', 'webhook', 'after'].includes(item.trigger?.kind ?? '') && !item.next_run_at
+  const last = item.last_run_at ? compactWhen(item.last_run_at, zone) : ''
+  if (event) return last ? i18n.t('automations:page.lastOnly', { last }) : i18n.t('automations:page.neverRun')
+  if (!last) return `${i18n.t('automations:page.neverRun')} · ${i18n.t('automations:detail.next', { when: compactWhen(item.next_run_at, zone) })}`
+  return i18n.t('automations:page.lastNext', { last, next: compactWhen(item.next_run_at, zone) })
 }

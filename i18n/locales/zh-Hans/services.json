@@ -19,5 +19,6 @@
   "tools": "工具：{{tools}}",
   "asksFirst": "{{name}}（先征求同意）",
   "connectService": "连接 {{name}}",
-  "advanced": "高级"
+  "advanced": "高级",
+  "doorbellAutomation": "创建门铃自动化"
 }

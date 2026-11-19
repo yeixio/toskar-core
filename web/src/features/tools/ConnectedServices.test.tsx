@@ -1,6 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { MemoryRouter } from 'react-router-dom'
 import { api } from '@/lib/api'
 import type { Connector } from '@/types/api'
 import { ConnectedServices } from './ConnectedServices'
@@ -34,7 +35,9 @@ function renderIt() {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   return render(
     <QueryClientProvider client={client}>
-      <ConnectedServices />
+      <MemoryRouter>
+        <ConnectedServices />
+      </MemoryRouter>
     </QueryClientProvider>,
   )
 }
@@ -102,6 +105,8 @@ describe('ConnectedServices', () => {
     vi.mocked(api.listConnectors).mockReset().mockResolvedValue([reolink])
     vi.mocked(api.connectService).mockReset().mockResolvedValue(reolink)
     renderIt()
+    // Regression: toskar-core#1341
+    expect(await screen.findByRole('link', { name: 'Make a doorbell automation' })).toHaveAttribute('href', '/automations?idea=door')
     fireEvent.click(await screen.findByRole('button', { name: 'Change' }))
     const speaker = screen.getByLabelText(/Speaker/)
     expect(speaker).toHaveValue('')
