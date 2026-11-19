@@ -31,7 +31,6 @@ var voices = map[string]string{
 	"ko": "ko_KR-kss-medium",
 	"nb": "no_NO-talesyntese-medium",
 	"nl": "nl_NL-mls-medium",
-	"no": "no_NO-talesyntese-medium",
 	"pl": "pl_PL-darkman-medium",
 	"pt": "pt_BR-faber-medium",
 	"ru": "ru_RU-irina-medium",
@@ -52,6 +51,11 @@ no oc pa pl ps pt ro ru sa sd si sk sl sn so sq sr su sv sw ta te tg th tk tl tr
 // for de or de-AT.
 func VoiceFor(lang string) (string, bool) {
 	base, _, _ := strings.Cut(strings.ToLower(strings.TrimSpace(lang)), "-")
+	// Norwegian is one language with one voice, listed once as Bokmål
+	// (#1342).
+	if base == "no" || base == "nn" {
+		base = "nb"
+	}
 	v, ok := voices[base]
 	return v, ok
 }

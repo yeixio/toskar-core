@@ -368,7 +368,7 @@
     "failed": "That didn't work. Try again.",
     "kitten": {
       "name": "Kitten TTS 2 mini",
-      "description": "More natural voices in {{languages}}. Installs about 1.5 GB on this computer, including the voices, runs on the processor, and uses about 1 GB of memory while it speaks.",
+      "description": "Adds natural voices to choose from in {{languages}}, and reads aloud in Kitten the languages that had only a basic voice. Languages that already have a natural voice keep it unless you choose a Kitten voice below. Installs about 1.5 GB on this computer, including the voices, runs on the processor, and uses about 1 GB of memory while it speaks.",
       "install": "Install",
       "retry": "Try again",
       "installing": "Installing the program…",
@@ -399,6 +399,8 @@
       "ready": "{{name}} is installed.",
       "none": "None in the catalog fits this computer.",
       "models": "See Models"
-    }
+    },
+    "standard": "Standard",
+    "noVoice": "{{languages}} can't be read aloud yet: read aloud, voice mode and the doorbell don't speak it."
   }
 }

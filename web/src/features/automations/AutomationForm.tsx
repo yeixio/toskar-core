@@ -593,11 +593,12 @@ export function AutomationForm({ profiles, models, tools, others = [], initial, 
                   <select className="field min-w-0 flex-1" value={sayVoice} onChange={(e) => setSayVoice(e.target.value)}>
                     <option value="">{t('form.sayVoiceAutomatic')}</option>
                     {sayVoice && !doorVoices.some((l) => l.voices.some((v) => v.id === sayVoice)) ? <option value={sayVoice}>{sayVoice}</option> : null}
-                    {doorVoices.map((l) => (
+                    {/* By language, in the order of their names (#1342). */}
+                    {[...doorVoices].sort((a, b) => languageLabel(a.language).localeCompare(languageLabel(b.language))).map((l) => (
                       <optgroup key={l.language} label={languageLabel(l.language)}>
                         {l.voices.map((v) => (
                           <option key={v.id} value={v.id}>
-                            {v.name}
+                            {v.standard ? i18n.t('settings:voice.standard') : v.name}
                             {v.engine === 'kitten' ? ` · ${t('form.sayVoiceKitten')}` : ''}
                           </option>
                         ))}

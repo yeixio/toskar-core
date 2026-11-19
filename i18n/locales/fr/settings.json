@@ -377,7 +377,7 @@
     "failed": "Ça n'a pas fonctionné. Réessayez.",
     "kitten": {
       "name": "Kitten TTS 2 mini",
-      "description": "Des voix plus naturelles en {{languages}}. Occupe environ 1,5 Go sur cet ordinateur, voix comprises, fonctionne sur le processeur et utilise environ 1 Go de mémoire quand elle parle.",
+      "description": "Ajoute des voix naturelles au choix en {{languages}}, et lit avec Kitten les langues qui n’avaient qu’une voix simple. Les langues qui ont déjà une voix naturelle la gardent, sauf si vous choisissez une voix Kitten ci-dessous. Installe environ 1,5 Go sur cet ordinateur, voix comprises, tourne sur le processeur et utilise environ 1 Go de mémoire pendant qu’il parle.",
       "install": "Installer",
       "retry": "Réessayer",
       "installing": "Installation du programme…",
@@ -408,6 +408,8 @@
       "ready": "{{name}} est installé.",
       "none": "Aucun modèle du catalogue ne convient à cet ordinateur.",
       "models": "Voir les modèles"
-    }
+    },
+    "standard": "Standard",
+    "noVoice": "{{languages}} ne peut pas encore être lu à voix haute : la lecture à voix haute, le mode vocal et la sonnette ne le parlent pas."
   }
 }

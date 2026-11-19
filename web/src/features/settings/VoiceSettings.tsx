@@ -7,6 +7,7 @@ import { formatLocale } from '@/i18n/format'
 import type { VoiceChoice, VoiceOption, VoiceSettings as Settings } from '@/types/api'
 import { voiceSample } from './voiceSamples'
 import { ModelNeeds } from './ModelNeeds'
+import { answerLanguages } from '@/i18n/answerLanguages'
 
 const queryKey = ['speech-voices']
 
@@ -16,6 +17,23 @@ function languageName(tag: string): string {
   } catch {
     return tag
   }
+}
+
+/** Language tags in the order of their names as shown, not their codes (#1342). */
+export function byLanguageName(tags: string[]): string[] {
+  const collator = new Intl.Collator(formatLocale())
+  return [...tags].sort((a, b) => collator.compare(languageName(a), languageName(b)))
+}
+
+/** The answer languages nothing here reads aloud, such as Japanese (#1342). */
+export function unvoicedLanguages(voiced: string[]): string[] {
+  const has = new Set(voiced.map((l) => l.split('-')[0].toLowerCase()))
+  const alias: Record<string, string> = { no: 'nb', nn: 'nb' }
+  const missing = answerLanguages
+    .map((tag) => tag.split('-')[0].toLowerCase())
+    .map((base) => alias[base] ?? base)
+    .filter((base, i, all) => all.indexOf(base) === i && !has.has(base))
+  return byLanguageName(missing)
 }
 
 /**
@@ -69,7 +87,7 @@ export function VoiceSettings() {
           <div>
             <p className="text-sm font-medium text-ink">{t('voice.kitten.name')}</p>
             <p className="mt-0.5 text-xs text-ink-muted">
-              {t('voice.kitten.description', { languages: kitten.languages.map(languageName).join(', ') })}
+              {t('voice.kitten.description', { languages: byLanguageName(kitten.languages).map(languageName).join(', ') })}
             </p>
             <p className="mt-0.5 text-xs text-ink-faint">
               <a href={kitten.url} target="_blank" rel="noreferrer" className="underline">
@@ -128,7 +146,9 @@ export function VoiceSettings() {
       <div className="space-y-2">
         <p className="text-sm font-medium text-ink">{t('voice.languages')}</p>
         <ul className="divide-y divide-line">
-          {data.languages.map((choice) => (
+          {byLanguageName(data.languages.map((c) => c.language))
+            .map((language) => data.languages.find((c) => c.language === language)!)
+            .map((choice) => (
             <VoiceRow
               key={choice.language}
               choice={choice}
@@ -137,13 +157,18 @@ export function VoiceSettings() {
             />
           ))}
         </ul>
+        {unvoicedLanguages(data.languages.map((c) => c.language)).length > 0 ? (
+          <p className="text-xs text-ink-muted">
+            {t('voice.noVoice', { languages: unvoicedLanguages(data.languages.map((c) => c.language)).map(languageName).join(', ') })}
+          </p>
+        ) : null}
       </div>
     </section>
   )
 }
 
-function optionLabel(v: VoiceOption, engine: (e: VoiceOption['engine']) => string): string {
-  return `${v.name} (${engine(v.engine)})${v.description ? ` · ${v.description}` : ''}`
+function optionLabel(v: VoiceOption, engine: (e: VoiceOption['engine']) => string, standard: string): string {
+  return `${v.standard ? standard : v.name} (${engine(v.engine)})${v.description ? ` · ${v.description}` : ''}`
 }
 
 function VoiceRow({ choice, busy, onChoose }: { choice: VoiceChoice; busy: boolean; onChoose: (voice: string) => void }) {
@@ -183,10 +208,10 @@ function VoiceRow({ choice, busy, onChoose }: { choice: VoiceChoice; busy: boole
         {name}
       </label>
       <select id={selectId} className="field min-w-0 flex-1" value={choice.voice} disabled={busy} onChange={(e) => onChoose(e.target.value)}>
-        <option value="">{automatic ? t('voice.automaticNamed', { voice: optionLabel(automatic, engine) }) : t('voice.automatic')}</option>
+        <option value="">{automatic ? t('voice.automaticNamed', { voice: optionLabel(automatic, engine, t('voice.standard')) }) : t('voice.automatic')}</option>
         {choice.voices.map((v) => (
           <option key={v.id} value={v.id}>
-            {optionLabel(v, engine)}
+            {optionLabel(v, engine, t('voice.standard'))}
           </option>
         ))}
       </select>

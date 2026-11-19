@@ -109,4 +109,25 @@ describe('VoiceSettings (#1304)', () => {
     await waitFor(() => expect(api.installModel).toHaveBeenCalledWith('qwen3.5-4b-q4'))
     expect(await screen.findByText(/Downloading Qwen 3.5 4B/)).toBeInTheDocument()
   })
+
+  // Regression: toskar-core#1342
+  it('lists languages by name, calls dataset voices Standard, and says which languages have no voice', async () => {
+    const piper = (language: string, id: string, name: string, standard = false) => ({
+      language,
+      voice: '',
+      automatic: id,
+      voices: [{ id, name, engine: 'piper' as const, standard }],
+    })
+    vi.mocked(api.getVoiceSettings).mockResolvedValue({
+      kitten: { ...kitten, state: 'not_installed', languages: ['en', 'da', 'de'] },
+      languages: [piper('ar', 'ar_JO-kareem-medium', 'Kareem'), piper('nl', 'nl_NL-mls-medium', 'Standard', true), piper('de', 'de_DE-thorsten-medium', 'Thorsten'), piper('en', 'en_US-lessac-medium', 'Lessac')],
+    })
+    renderIt()
+    expect(await screen.findByText(/Danish, English, German/)).toBeInTheDocument()
+    const rows = screen.getAllByRole('combobox').map((el) => el.getAttribute('id'))
+    expect(rows).toEqual(['voice-ar', 'voice-nl', 'voice-en', 'voice-de'])
+    expect(screen.getByRole('option', { name: 'Automatic: Standard (Piper)' })).toBeInTheDocument()
+    expect(screen.queryByRole('option', { name: /Mls/ })).toBeNull()
+    expect(screen.getByText(/Japanese.*can't be read aloud yet/)).toBeInTheDocument()
+  })
 })
