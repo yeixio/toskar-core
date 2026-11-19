@@ -427,7 +427,9 @@
     },
     "sayVoice": "Stimme",
     "sayVoiceAutomatic": "Die Stimme der Sprache aus den Einstellungen",
-    "sayVoiceKitten": "Kitten"
+    "sayVoiceKitten": "Kitten",
+    "sayListen": "Mit Besuchern sprechen",
+    "sayListenHint": "Nach den ersten Worten hört Toskar über das Mikrofon der Türklingel zu, antwortet und findet heraus, wer gekommen ist und warum. Ob jemand zu Hause ist, sagt es nie. Du bekommst eine Zusammenfassung des Besuchs. Braucht ffmpeg auf diesem Computer."
   },
   "draft": {
     "label": "Automation zum Bestätigen",

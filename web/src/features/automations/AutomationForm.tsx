@@ -97,6 +97,8 @@ export function AutomationForm({ profiles, models, tools, others = [], initial, 
   const [quietFrom, setQuietFrom] = useState(initial?.say?.quiet_from || '22:00')
   const [quietTo, setQuietTo] = useState(initial?.say?.quiet_to || '07:00')
   const [sayVoice, setSayVoice] = useState(initial?.say?.voice || '')
+  // Talks with the visitor after the first words, and notifies with the visit (#667).
+  const [listen, setListen] = useState(Boolean(initial?.say?.listen))
   // The voices the door can speak in, from the Voice settings (#1304).
   const [doorVoices, setDoorVoices] = useState<VoiceChoice[]>([])
   // A camera needs a model that can see its picture: offered here, while
@@ -261,7 +263,7 @@ export function AutomationForm({ profiles, models, tools, others = [], initial, 
       actions: actions.length > 0 || initial?.actions?.length ? actions : undefined,
       // An edit that stops speaking sends one with no connector.
       say: saying
-        ? { connector: 'reolink', device: 'camera', ...(quiet ? { quiet_from: quietFrom, quiet_to: quietTo } : {}), ...(sayVoice ? { voice: sayVoice } : {}) }
+        ? { connector: 'reolink', device: 'camera', ...(quiet ? { quiet_from: quietFrom, quiet_to: quietTo } : {}), ...(sayVoice ? { voice: sayVoice } : {}), ...(listen ? { listen: true } : {}) }
         : initial?.say
           ? { connector: '' }
           : undefined,
@@ -586,6 +588,13 @@ export function AutomationForm({ profiles, models, tools, others = [], initial, 
                 </label>
               ) : null}
               {sayVoice.startsWith('kitten:') ? <p className="text-xs text-ink-faint">{KITTEN_CREDIT}</p> : null}
+              <label className="flex items-start gap-2">
+                <input type="checkbox" className="mt-1" checked={listen} onChange={(e) => setListen(e.target.checked)} />
+                <span>
+                  {t('form.sayListen')}
+                  <span className="block text-xs text-ink-faint">{t('form.sayListenHint')}</span>
+                </span>
+              </label>
               <label className="inline-flex items-center gap-2">
                 <input type="checkbox" checked={quiet} onChange={(e) => setQuiet(e.target.checked)} />
                 <span>{t('form.sayQuiet')}</span>

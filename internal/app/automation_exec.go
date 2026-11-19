@@ -200,6 +200,18 @@ func (e automationExecutor) execute(ctx context.Context, automation automations.
 			runErr = fmt.Errorf("couldn't say the answer at the door: %w", err)
 		} else if said != "" {
 			out.Acted = append(out.Acted, automations.Action{Tool: automation.Say.Connector + ".say", Args: map[string]string{"text": said}}.Describe())
+			// Then it talks with them, and the visit is the result (#667).
+			if automation.Say.Listen {
+				visit, err := e.app.talkAtDoor(ctx, automation, modelID, said)
+				switch {
+				case visit != "" && err != nil:
+					out.Text = visit + "\n\n" + fmt.Sprintf("The conversation stopped: %v", err)
+				case visit != "":
+					out.Text = visit
+				case err != nil:
+					runErr = fmt.Errorf("couldn't hear the visitor: %w", err)
+				}
+			}
 		}
 	}
 	e.reportSkipped(ctx, automation, out.Skipped)

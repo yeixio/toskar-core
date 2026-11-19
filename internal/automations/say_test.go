@@ -88,3 +88,14 @@ func TestSpoken(t *testing.T) {
 		t.Errorf("long answer cut to %d characters: %q", len(got), got[len(got)-20:])
 	}
 }
+
+// A door that listens asks the visitor how it can help, so they answer
+// (#667).
+func TestSayNoteListens(t *testing.T) {
+	if n := SayNote(&Say{Connector: SayReolink, Device: "camera"}); strings.Contains(n, "answer you") {
+		t.Fatalf("a door that doesn't listen: %q", n)
+	}
+	if n := SayNote(&Say{Connector: SayReolink, Device: "camera", Listen: true}); !strings.Contains(n, "ask how you can help") {
+		t.Fatalf("a door that listens: %q", n)
+	}
+}

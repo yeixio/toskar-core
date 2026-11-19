@@ -427,7 +427,9 @@
     },
     "sayVoice": "语音",
     "sayVoiceAutomatic": "设置中该语言的语音",
-    "sayVoiceKitten": "Kitten"
+    "sayVoiceKitten": "Kitten",
+    "sayListen": "与访客交谈",
+    "sayListenHint": "说完第一句后，Toskar 会通过门铃的麦克风聆听、回答，并弄清来的是谁、为什么来。它从不透露家里是否有人。你会收到这次来访的摘要。需要这台电脑上有 ffmpeg。"
   },
   "draft": {
     "label": "待确认的自动化",
