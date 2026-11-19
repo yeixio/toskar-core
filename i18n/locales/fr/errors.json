@@ -300,5 +300,7 @@
   "VOICE_UNAVAILABLE": "La voix en direct n’est pas disponible sur cet ordinateur.",
   "WEBSOCKET_REQUIRED": "La voix en direct a besoin d’une connexion WebSocket.",
   "CAMERA_ADDRESS": "Saisissez l'adresse de la caméra, par exemple 192.168.1.50.",
-  "CAMERA_UNREACHABLE": "Toskar n'a pas pu joindre de caméra à cette adresse. Vérifiez l'adresse et que le serveur HTTP ou HTTPS de la caméra est activé."
+  "CAMERA_UNREACHABLE": "Toskar n'a pas pu joindre de caméra à cette adresse. Vérifiez l'adresse et que le serveur HTTP ou HTTPS de la caméra est activé.",
+  "CAMERA_SPEAKER_UNREACHABLE": "Toskar n’a pas pu joindre le haut-parleur de la caméra, le visiteur n’a donc pas eu de réponse. Vérifiez que la caméra est allumée et sur le même réseau que cet ordinateur.",
+  "DOOR_NOT_ANSWERED": "Quelqu’un est venu à la porte et Toskar n’a pas pu répondre : {{detail}}"
 }

@@ -300,5 +300,7 @@
   "VOICE_UNAVAILABLE": "这台电脑上无法使用实时语音。",
   "WEBSOCKET_REQUIRED": "实时语音需要 WebSocket 连接。",
   "CAMERA_ADDRESS": "请输入摄像头的地址，例如 192.168.1.50。",
-  "CAMERA_UNREACHABLE": "Toskar 无法连接该地址上的摄像头。请检查地址，以及摄像头的 HTTP 或 HTTPS 服务器是否已开启。"
+  "CAMERA_UNREACHABLE": "Toskar 无法连接该地址上的摄像头。请检查地址，以及摄像头的 HTTP 或 HTTPS 服务器是否已开启。",
+  "CAMERA_SPEAKER_UNREACHABLE": "Toskar 无法连接到摄像头的扬声器，因此没有回应访客。请检查摄像头是否已开启，并与这台电脑在同一网络中。",
+  "DOOR_NOT_ANSWERED": "有人来到门口，但 Toskar 无法回应：{{detail}}"
 }

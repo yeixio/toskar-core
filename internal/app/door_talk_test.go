@@ -96,7 +96,7 @@ func TestDoorVisit(t *testing.T) {
 	}
 	want := "Toskar: Hello there, can I help you?\nVisitor: Hi, I'm Sam from the post office.\nToskar: Hello Sam, what can I help with?\n" +
 		"Visitor: I have a parcel that needs a signature.\nToskar: Thanks, I'll let them know. Please leave a card."
-	if got := transcript(lines); got != want {
+	if got := transcript(lines, "en"); got != want {
 		t.Fatalf("the visit:\n%s", got)
 	}
 	if len(asked) != 2 || len(asked[1]) != 4 || !asked[1][3].Visitor {
@@ -147,7 +147,7 @@ func TestDoorAnswer(t *testing.T) {
 		t.Fatalf("the visit as the chat: %q", convo)
 	}
 
-	if _, err := a.doorAnswer(ctx, auto, "text-model", doorSummaryStyle, nil, transcript(lines)); err != nil {
+	if _, err := a.doorAnswer(ctx, auto, "text-model", doorSummaryStyle, nil, transcript(lines, "en")); err != nil {
 		t.Fatal(err)
 	}
 	last := (*sent)[1]
@@ -242,7 +242,7 @@ func TestDoorVisitGraceAfterGoodbye(t *testing.T) {
 		t.Fatal(err)
 	}
 	if n != 2 || len(lines) != 5 || lines[3].Text != "Oh, and it needs to go in the fridge." {
-		t.Fatalf("the visit:\n%s", transcript(lines))
+		t.Fatalf("the visit:\n%s", transcript(lines, "en"))
 	}
 	// It waited the grace after the last goodbye, not the 2 s for a reply.
 	if d := time.Since(start); d > 4*time.Second {
@@ -256,7 +256,7 @@ func TestDoorGreeting(t *testing.T) {
 	if got := doorGreeting("es-MX"); got != doorGreetings["es"] {
 		t.Errorf("Spanish: %q", got)
 	}
-	if got := doorGreeting("sv"); got != doorGreetings["en"] {
+	if got := doorGreeting("sw"); got != doorGreetings["en"] {
 		t.Errorf("a language without one: %q", got)
 	}
 	speaker := &fakeDoorVoice{}

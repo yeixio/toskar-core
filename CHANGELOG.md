@@ -8,6 +8,338 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Thi
 
 Changes waiting for the next release are in [changes/unreleased/](changes/unreleased/), one file per pull request. `scripts/changelog.py preview` shows them together, and `scripts/changelog.py release <version>` writes them here when the release is cut.
 
+## [1.14.1] - 2026-11-19
+
+### Added
+
+- Each answer now records which model wrote it and which computer it ran
+  on, so the phone app can say "Llama 3.2 1B on Studio" under it
+  (contract 1.109, toskar-apps#447).
+- Let an automation act on its own: under Advanced, choose a Home Assistant
+  device and what to do, such as turn on the porch light. A run may make
+  that exact call without asking, even when a webhook, device, or camera
+  started it; any other call that changes things is still skipped.
+- Connect your own ComfyUI: an Admin adds its address on Tools › Images and
+  video › ComfyUI and saves workflows exported in API format, such as an
+  upscale or pictures in a set style. Chats run them with the ComfyUI
+  Workflow tool, and what they make is attached to the answer. Toskar finds
+  each workflow's prompt, seed, picture, and size inputs, and never installs
+  anything into ComfyUI.
+- An automation that speaks at the door can now talk with the visitor.
+  Choose Talk with the visitor and, after its first words, Toskar listens
+  through a Reolink doorbell's microphone, answers, and finds out who came
+  and why, taking turns and never saying whether anyone is home. When the
+  visit ends, you're notified with a short summary and what was said.
+  Hearing the doorbell uses reolink-cli's live preview and ffmpeg.
+- An automation can speak through a Reolink doorbell: choose Say the answer
+  at the door, and each run's answer is read aloud by this computer's voice
+  through the doorbell's speaker. With the doorbell's picture, it says
+  nothing to someone just passing by, and quiet hours, such as 10 PM to
+  7 AM, keep it to a notification. It uses Reolink's reolink-cli, with the
+  doorbell added there and its name given as the connection's Speaker.
+- Model downloads can go through a download cache on your own network:
+  set `TOSKAR_DOWNLOAD_MIRROR` to its address, and Toskar asks it before
+  Hugging Face, falling back to Hugging Face when the cache fails or its
+  copy doesn't match the model's checksum.
+- Look up a flight's status: connect Flight status (AeroDataBox) under
+  Tools › Connected services with your own key, then ask "What gate is
+  AA3595 leaving from?" for the gate, terminal, scheduled and expected
+  times, delay, and baggage belt.
+- Profiles can talk with visitors: turn on Talks with visitors on the
+  Topics tab, or start from the new Front door template. Toskar's rules
+  for strangers come first: it says it's an automated assistant, never
+  says whether anyone is home or who lives there, won't open a door or
+  turn off an alarm for anyone, and only uses tools that change nothing.
+  None of your style, location, memories, or computers reach its chats.
+  A new quality set checks these guardrails in several languages
+  (contract 1.108).
+- More natural voices in 15 languages: an Admin can install Kitten TTS 2
+  mini from Settings, under Voice, and it then reads the languages Kokoro
+  doesn't speak, such as German, Korean, Russian, Dutch, and Hindi,
+  instead of Piper. Voice also lets an Admin choose the voice for each
+  language, with a preview, for voice mode, answers read aloud on the phone
+  and in the car, and the doorbell. An automation that speaks at the door
+  can have a voice of its own. Kitten's voices are Powered by KittenML,
+  under the Apache-2.0 license.
+- Live voice mode's connection (#795, contract 1.100): a WebSocket at
+  `/api/v1/voice/realtime` that speaks OpenAI's Realtime protocol. Toskar
+  hears when you stop talking, answers through your chat, speaks the answer
+  a sentence at a time, and stops when you talk over it. Each answer reports
+  how long you waited. See [docs/voice.md](docs/voice.md).
+- Every model in the catalog says what it does: a category, such as chat
+  and coding, search and retrieval, or creative, the tasks it handles, and
+  what it takes in and gives back. The API lists them, ready for browsing
+  the store by category.
+- A model whose license has terms to accept, such as Gemma or Llama, shows
+  them before it's installed from Models: read them, then Accept and install
+  (#593). Toskar keeps a record of who accepted which license and when, for
+  the Admin (contract 1.103: `accept_license` on install, `license.accepted_at`,
+  and `GET /api/v1/models/license-acceptances`).
+- The model store says what each model's license allows (#593): Free, Free
+  with conditions, or License unknown, and whether a business may use it.
+  For business use shows only models whose license allows that. Every model
+  in Toskar's catalog has its license checked by hand (contract 1.102:
+  `license` on catalog models, `commercial` and `license_kind` on store
+  listings, `commercial` on picture and clip models).
+- Models › Installed says when a newer model replaces one you have, such
+  as Qwen 3.5 4B for Qwen 2.5 3B, with how it fits and whether its license
+  differs, and installs it beside the old one. Admins get one notification
+  per new generation, which Settings › Notifications can turn off.
+- Type your town under Settings → Personalization → Your location, and ask
+  "Coffee near me?", "What's the weather?", or "Directions to the airport"
+  without naming a place. It's used only for questions like these, and the
+  answer says when it used it.
+- A pending Access from anywhere checkout can be cancelled from API Access.
+- A Skip to content link, the first thing on every page for keyboard users.
+- A subscription tied to another computer can be moved to this one from
+  API Access.
+- Automations warn when the chosen model can't use the tools they need.
+- Setup offers "Set up later" when another page was opened, and goes there.
+- Connect a Reolink camera or doorbell straight through the camera on your
+  network, with no Home Assistant or Reolink hub software: under Connected
+  services, give its address, a user, and a password, or for a doorbell
+  paired to a Home Hub, the hub's address and the doorbell's channel. An
+  automation can look at it as it runs, or start when it sees a person,
+  a vehicle, an animal, or motion, or when someone rings the doorbell.
+- `POST /api/v1/speech/say` (#795, contract 1.101) reads a sentence or a
+  few aloud in live voice mode's voice, Kokoro or Piper, and answers the
+  WAV file without keeping it. The phone, the car, and the TV use it to
+  speak answers in the computer's natural voice. Paired devices may use it,
+  with the voice capability.
+- Browse the model store by category: chat and coding, models that see
+  pictures, and picture and clip models, which you can now set up from
+  Models as well as from Tools.
+- Make a clip longer: ask "Continue the clip: now a surfer paddles out" or
+  "Make the clip longer", and Toskar makes the next part from the clip's
+  last frame and joins the two into one clip.
+- Make a longer video: ask for "a 1-minute video of a day at the beach",
+  and Toskar plans it as shots of up to 5 seconds, shows you the shots and
+  about how long they take before anything is made, then makes each shot
+  from the last frame of the one before and joins them into one video.
+- Voice mode in the desktop app (#795). The app's window opens live
+  voice's WebSocket on the daemon itself, since the shell's proxy can't
+  carry one, at the address the shell gives. It needs the Toskar app from
+  1.14 or later.
+- Voice mode in the web app (#795): choose Talk beside Send to talk with
+  Toskar out loud. It hears when you stop, answers in a voice as it writes,
+  and stops when you talk over it. The user guide's Talk with Toskar out
+  loud page explains it.
+- Live voice's WebSocket takes the API key as an
+  `openai-insecure-api-key.<key>` subprotocol, as OpenAI's browser clients
+  send it.
+
+### Changed
+
+- A reasoning model can keep its thinking between tool calls in one answer,
+  instead of working out its plan again after each call. It's off until
+  the quality set shows it helps; `TOSKAR_KEEP_REASONING=field` or `inline`
+  turns it on to compare.
+- Access from anywhere leads with its switch: the plans and the router
+  setting wait until it's on.
+- Adding a nearby computer has one button; approving with a code is behind
+  a link on its card.
+- The sidebar's status counts other computers, says "Just this computer" on
+  its own, and shows Knowledge only to admins.
+- Tools shows a short description for people; the model keeps its own.
+- The sidebar's Placement and Knowledge rows show real status, or stay out.
+- Access from anywhere keeps its router settings out of the way while off,
+  and says which port opens before it's turned on.
+- The deploy list on Computers puts what fits first and leaves out the test
+  model, and "Manage" is now "Details".
+- The context meter beside Send shows its percentage.
+- Speaking and listening through a Reolink doorbell needs nothing more than
+  reolink-cli installed on this computer. Toskar now reaches the camera with
+  the connection's own address, channel and login, and runs reolink-cli's
+  gateway at 127.0.0.1:9000 itself, so there's no camera to add to
+  reolink-cli and no Speaker name to type. A camera you added to reolink-cli
+  yourself, or a gateway elsewhere, can still be named in the connection.
+- Voice settings now say what voice mode and the doorbell still need: a
+  chat model to answer with, and a model that can see a camera's picture.
+  Each names the one that fits this computer, with its size, and installs
+  it with one press. An automation that looks at a camera offers a model
+  that can see when you choose the camera, instead of failing when someone
+  is at the door. Installing Kitten TTS 2 mini now also sets up listening,
+  so voice mode's first conversation doesn't wait for downloads.
+- Answers start sooner when the clock has moved on since the last message:
+  the time now comes at the end of the AI's instructions, so the rest is
+  reused instead of read again. Live voice feels it most.
+- Live voice mode keeps Whisper and the voices loaded between turns, so a
+  turn no longer waits for them to start (#795).
+- Live voice mode speaks in a more natural voice: Kokoro, for English,
+  Spanish, French, Italian, and Portuguese. Its model downloads the first
+  time; Piper reads until then, and reads the other languages.
+
+### Fixed
+
+- A doorbell that can't be answered is said plainly: when Toskar can't reach
+  the camera's speaker, you're told so in your language, with no raw
+  reolink-cli output and no retry that would greet an empty porch minutes
+  later. Toskar restarts only the reolink-cli gateway at its own address,
+  the door's notes and transcript are in your language, and the instant
+  greeting covers 20 more languages, such as Dutch, Russian and Swedish
+  (#1340).
+
+- API Access is clearer (#1266):
+  - With a developer's relay, the subscription card names that relay
+    instead of calling it Toskar's.
+  - Phones and tablets counts only devices in use, and says how many
+    keys haven't been used lately.
+  - A device connected through a phone without a name of its own is
+    listed as "Device via" that phone.
+  - Finding a setup during onboarding says what it's checking while it
+    works.
+- When an automation's run answers without opening the page its
+  instructions name, as a model that can't use tools does, you get a
+  notification saying so and suggesting a model that can (#1269).
+- The boot screen no longer waits for good on a health check that never
+  answers: each check gives up after six seconds and is tried again, and
+  **Try again** starts a new one (yeixio/toskar-apps#461).
+- The built-in profiles (General Assistant, Programming, Research, Custom)
+  and "the AI news" in What left this computer now show in your language
+  on the web and in the phone app, unless you renamed the profile (#1271).
+- The certificate a computer shows anyone who connects, from the internet
+  or through the relay, no longer has its name. Certificates made before
+  carry it, so Toskar makes a new one and switches once the paired phones
+  have learned it, or after 30 days. Phones with an app from before see
+  the usual "certificate changed" check once (#1263).
+- While Toskar starts on an answer, "Starting…" and "Loading the model"
+  show right under your question instead of down by the message box, and
+  the Latest button sits in the corner on wider windows so it doesn't
+  cover the end of an answer (#1270).
+- Changing one setting of a connected service, such as a Reolink camera's
+  Speaker, no longer asks for every other setting again ("Camera address is
+  required"). The form keeps what's stored and saves only what you change.
+- A connection form's example values now read "e.g. front-door" rather than
+  a bare "front-door", so they don't look like values already filled in.
+- The Mac and Windows apps' "already running" dialog no longer calls
+  every other Toskar "Toskar Pro".
+- The Mac and Windows app offers guided setup on a new install, even when
+  the window remembers setup from an earlier one.
+- Phones, tablets and TVs that didn't buy access from anywhere keep finding
+  the computer away from home after its subscription renews: they get the
+  newer device token from `GET /api/v1/remote-access/device-token`, from
+  anywhere, instead of only at home (yeixio/toskar-apps#451, contract 1.99).
+- Talk with the visitor now hears someone speaking at a Reolink doorbell.
+  The doorbell's microphone is quiet, and Toskar listened only for speech
+  about twice as loud as a visitor's voice, so it greeted them and then
+  ended the visit as if nobody had answered.
+- What Toskar says through a Reolink doorbell is louder: the voice is
+  raised to near full volume before it's sent, since the doorbell's small
+  speaker made it hard to hear. It also leaves out the low end the small
+  speaker can't play and evens out quiet and loud syllables, so it sounds
+  about 7 dB louder at the same peak.
+- The doorbell greets a visitor sooner: its voice, and its listening, are
+  readied while Toskar looks at the camera and writes the greeting, rather
+  than started after.
+- A visit's notification is plain sentences, without headings, lists, or
+  notes about Toskar's own settings, and the doorbell no longer calls a
+  visitor by a name they only mentioned, such as who sent a package.
+- After the doorbell says goodbye, it keeps listening for a minute in case
+  the visitor has more to say, instead of ending the visit at once.
+- With Talk with the visitor on, the doorbell greets someone the moment
+  it sees them ("Hello! How can I help you?", in the automation's
+  language), instead of first looking at the picture and writing a
+  greeting, which took about 20 seconds. Someone passing by hears the
+  greeting too.
+- A Member's phone or key no longer reads where the computer keeps its
+  files, the address it listens on, its node ID, or its address from
+  outside in Settings.
+- Asking for the summary of a chat that doesn't exist, or compacting one,
+  answers "not found" instead of a server error.
+- The recommended setup in onboarding no longer carries a "Mimir" badge,
+  which read like a model or vendor name (#1251).
+- A router port that an older router kept open with no time limit is
+  closed at the next start when Toskar crashed or was killed while it was
+  open.
+- A key made in the "Allow access" dialog now lets you allow access.
+- Removing a model from a computer asks first.
+- Adding one nearby computer no longer shows every card as busy.
+- Models calls this computer by its Toskar name, not the system's hostname.
+- Page watch runs when the page changes, as its summary says.
+- Enter in the Knowledge path field connects it.
+- Tall onboarding steps scroll instead of cutting off the top.
+- Sizes read "4 B", not "4 byte".
+- Messages point to where settings are now, such as Tools → Connected
+  services and Computers → Network & access.
+- When the relay refuses this computer, API Access says why and what to do,
+  instead of showing a code, and a subscription moved or refunded elsewhere
+  shows as ended.
+- Toskar re-registers with the relay as soon as it reconnects, and takes its
+  record back when Access from anywhere is turned off.
+- Toskar doesn't sell a subscription to a computer another device's
+  subscription already covers.
+- Ports mapped on the router are released when Toskar stops.
+- A question the local knowledge answers doesn't search the web.
+- A push that reaches some devices retries only the ones that missed it.
+- Routers that take only permanent UPnP mappings get one.
+- A checkout page opened before a restart is still found after it.
+- Computers: the waiting card goes once the other computer joins, can be
+  stopped, and says when there's no answer; the latest error shows, can be
+  dismissed, and names the computer; several removals show at once.
+- API Access says HTTPS only when it's on, and shows no defaults under a
+  load error.
+- The Access from anywhere switch moves at once.
+- Device keys never used, or not for 90 days, are marked.
+- The Models Store's memory note no longer contradicts the fit.
+- No startup screen flash when the service is already up.
+- Settings choices show which one is picked, clearly in light mode too.
+- Setup offers keep their details readable on phones.
+- Connecting a Reolink camera takes its address as the Reolink app shows it, such as 192.168.1.50, and tries HTTPS then HTTP. An address that doesn't answer is said at the address field in the App language, the stored password is shown only as dots, the reolink-cli settings are folded under Advanced, and each Connect button names its service for screen readers (#1345).
+- An automation that says its answer at the door also tells you who came: its notification describes the visitor, then gives what was said at the door, instead of only the greeting (#1339).
+- A model's license dialog names the model instead of showing
+  `{{model}}` (#1338).
+- An automation that a doorbell's button starts greets whoever rang,
+  even when the picture shows no one, instead of saying nothing. A run
+  that finds nobody to talk to notifies "Nobody was in the picture, so
+  nothing was said at the door." instead of "Nothing". A visit's end
+  mark is never said aloud, in any case (#1339).
+- Speaking and listening through a Reolink doorbell no longer stop when
+  reolink-cli's gateway goes stale. For a gateway on this computer, Toskar
+  starts it when it isn't running, and restarts it and tries again when it
+  can no longer reach the doorbell.
+- The Access from anywhere plans in Settings show what the checkout
+  charges, in its currency, as billing reports it, instead of prices
+  written into Toskar. Until billing answers, the usual US prices show
+  (#1257).
+- Live voice mode no longer jumps in while you're still talking. It waits
+  for 0.9 s of quiet, not 0.5 s, before it answers, so a pause
+  mid-sentence doesn't end your turn, and a cough, a knock, or a click no
+  longer starts a turn or stops an answer.
+- An answer in voice mode is read in one voice from start to finish. A
+  short sentence such as "Claro." no longer switches the voice or accent
+  mid-answer in Spanish and other languages.
+- Voice mode's captions stay on screen until the next words replace them,
+  instead of clearing when a noise is heard or the next answer starts.
+- Live voice mode no longer stops listening before you've finished a long
+  sentence, or cuts off your last words, with a microphone across the room
+  such as a webcam's. A turn now lasts through words that are softer than
+  the ones that started it, and the room's noise is learned from your
+  pauses rather than from your voice. The half second after your last word
+  is now also sent to transcription, so a word that trails off is kept.
+- Live voice mode keeps Toskar's answers in the voice chat, so the next
+  turn hears them and the chat shows both sides (#795). The answer was
+  spoken but stopped before it was saved.
+- Live voice answers start well over a second sooner on a Mac, about 0.9
+  seconds from the end of a question to the first word heard, from 2.3
+  (#795). Each chat turn rebuilt what Toskar knows about the computer's
+  models and hardware, looking at the hardware five times; it now keeps
+  that between turns, and refreshes its look at the hardware in the
+  background instead of making a turn wait for it.
+- Spoken answers are no longer asked for Markdown, which contradicted the
+  spoken style (#795).
+
+### Security
+
+- Paired devices get a device token from the relay, which can look the
+  computer up but can't open its tunnel or change its record, instead of
+  the computer's own token.
+- A relay token handed over by a device is checked with the relay first,
+  and can't replace a longer one.
+- Companion keys can't make companions of their own, and revoking a key
+  revokes its companions.
+- The remote listener's lockout no longer turns away valid keys.
+- New API certificates don't carry the computer's name in their subject.
+
 ## [1.14.0] - 2026-11-15
 
 ### Added

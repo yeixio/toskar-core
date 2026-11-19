@@ -12,6 +12,7 @@ import (
 	"github.com/yeixio/toskar-core/internal/automations"
 	"github.com/yeixio/toskar-core/internal/connectors"
 	"github.com/yeixio/toskar-core/internal/egress"
+	"github.com/yeixio/toskar-core/internal/locale"
 	"github.com/yeixio/toskar-core/internal/voice"
 )
 
@@ -136,6 +137,26 @@ var doorGreetings = map[string]string{
 	"ja": "こんにちは。ご用件をお伺いします。",
 	"ko": "안녕하세요. 무엇을 도와드릴까요?",
 	"zh": "您好！请问有什么可以帮您？",
+	"nl": "Hallo! Waarmee kan ik u helpen?",
+	"ru": "Здравствуйте! Чем могу помочь?",
+	"sv": "Hej! Hur kan jag hjälpa dig?",
+	"da": "Hej! Hvordan kan jeg hjælpe dig?",
+	"nb": "Hei! Hvordan kan jeg hjelpe deg?",
+	"no": "Hei! Hvordan kan jeg hjelpe deg?",
+	"fi": "Hei! Miten voin auttaa?",
+	"pl": "Dzień dobry! W czym mogę pomóc?",
+	"cs": "Dobrý den! Jak vám mohu pomoci?",
+	"uk": "Доброго дня! Чим можу допомогти?",
+	"tr": "Merhaba! Size nasıl yardımcı olabilirim?",
+	"el": "Γεια σας! Πώς μπορώ να βοηθήσω;",
+	"hu": "Jó napot! Miben segíthetek?",
+	"ro": "Bună ziua! Cu ce vă pot ajuta?",
+	"hi": "नमस्ते! मैं आपकी क्या मदद कर सकता हूँ?",
+	"ar": "مرحبًا! كيف يمكنني مساعدتك؟",
+	"he": "שלום! איך אפשר לעזור?",
+	"vi": "Xin chào! Tôi có thể giúp gì cho bạn?",
+	"id": "Halo! Ada yang bisa saya bantu?",
+	"th": "สวัสดีครับ มีอะไรให้ช่วยไหมครับ",
 }
 
 // doorGreeting is the greeting in language, or English.
@@ -174,7 +195,7 @@ func (a *App) greetAtDoor(ctx context.Context, automation automations.Automation
 	lang := a.replyLanguage(ctx, "", automation.Prompt, automation.ResponseLanguage).Tag
 	said, err := a.speakAtDoor(ctx, automation, doorGreeting(lang), true)
 	if err != nil {
-		return out, true, fmt.Errorf("couldn't say the answer at the door: %w", err)
+		return out, true, doorFailed("couldn't say the answer at the door", err)
 	}
 	if said == "" {
 		return out, false, nil
@@ -184,13 +205,13 @@ func (a *App) greetAtDoor(ctx context.Context, automation automations.Automation
 	visit, err := a.talkAtDoor(ctx, automation, modelID, said)
 	switch {
 	case visit != "" && err != nil:
-		out.Text = visit + "\n\n" + fmt.Sprintf("The conversation stopped: %v", err)
+		out.Text = visit + "\n\n" + conversationStopped(lang, err)
 	case visit != "":
 		out.Text = visit
 	case err != nil:
-		return out, true, fmt.Errorf("couldn't hear the visitor: %w", err)
+		return out, true, doorFailed("couldn't hear the visitor", err)
 	default:
-		out.Text = "Someone came to the door. Toskar greeted them, and nobody answered."
+		out.Text = locale.T(lang, "automations:door.nobodyAnswered", nil)
 	}
 	return out, true, nil
 }

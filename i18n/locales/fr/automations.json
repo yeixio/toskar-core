@@ -476,5 +476,13 @@
     "make": "Créer un lien",
     "makeNew": "Créer un nouveau lien",
     "replaces": "Un nouveau lien désactive l’ancien."
+  },
+  "door": {
+    "nobodyAnswered": "Quelqu’un est venu à la porte. Toskar l’a salué, et personne n’a répondu.",
+    "stopped": "La conversation s’est arrêtée : {{error}}",
+    "you": "Toskar",
+    "visitor": "Visiteur",
+    "said": "Dit à la porte : « {{words}} »",
+    "nobodyThere": "Personne n’était sur l’image, donc rien n’a été dit à la porte."
   }
 }

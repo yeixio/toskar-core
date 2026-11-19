@@ -17,6 +17,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/yeixio/toskar-core/pkg/contracts"
 )
 
 // Talkback (#667): Reolink's HTTP API has no way to speak through a
@@ -182,6 +184,10 @@ func reolinkTalk(ctx context.Context, cred Credential, samples []int16, rate int
 		ensureGateway(ctx, bin, t.gateway, true)
 		err = talkOnce(ctx, bin, t, pcm, rate, length)
 	}
+	if unreachable(err) {
+		// Said plainly, in the App language, and not retried (#1340).
+		return contracts.NewError("CAMERA_SPEAKER_UNREACHABLE", nil, err)
+	}
 	return err
 }
 
@@ -207,7 +213,7 @@ func talkOnce(ctx context.Context, bin string, t reolinkTarget, pcm []byte, rate
 		}
 	}
 	if runErr != nil {
-		detail := strings.TrimSpace(string(lastLine(stderr.Bytes())))
+		detail := cliMessage(lastLine(stderr.Bytes()))
 		if detail == "" {
 			detail = runErr.Error()
 		}
@@ -304,6 +310,18 @@ func lastLine(b []byte) []byte {
 }
 
 // talkError is reolink-cli's error, which is a message or an object with one.
+// cliMessage is a line reolink-cli wrote: its error's message when it's
+// reolink-cli's JSON, rather than the JSON itself (#1340).
+func cliMessage(line []byte) string {
+	var out struct {
+		Error any `json:"error"`
+	}
+	if json.Unmarshal(line, &out) == nil && out.Error != nil {
+		return talkError(out.Error)
+	}
+	return strings.TrimSpace(string(line))
+}
+
 func talkError(v any) string {
 	switch e := v.(type) {
 	case string:

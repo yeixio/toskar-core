@@ -300,5 +300,7 @@
   "VOICE_UNAVAILABLE": "La voce dal vivo non è disponibile su questo computer.",
   "WEBSOCKET_REQUIRED": "La voce dal vivo ha bisogno di una connessione WebSocket.",
   "CAMERA_ADDRESS": "Inserisci l'indirizzo della telecamera, ad esempio 192.168.1.50.",
-  "CAMERA_UNREACHABLE": "Toskar non è riuscito a raggiungere una telecamera a quell'indirizzo. Controlla l'indirizzo e che il server HTTP o HTTPS della telecamera sia attivo."
+  "CAMERA_UNREACHABLE": "Toskar non è riuscito a raggiungere una telecamera a quell'indirizzo. Controlla l'indirizzo e che il server HTTP o HTTPS della telecamera sia attivo.",
+  "CAMERA_SPEAKER_UNREACHABLE": "Toskar non è riuscito a raggiungere l’altoparlante della telecamera, quindi il visitatore non ha ricevuto risposta. Controlla che la telecamera sia accesa e sulla stessa rete di questo computer.",
+  "DOOR_NOT_ANSWERED": "Qualcuno è venuto alla porta e Toskar non ha potuto rispondere: {{detail}}"
 }

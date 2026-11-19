@@ -207,24 +207,25 @@ func (e automationExecutor) execute(ctx context.Context, automation automations.
 		// The answer's words for the door are said; its note for the owner
 		// is what they're told (#1339).
 		door, owner := automations.SplitSay(out.Text)
+		lang := e.app.replyLanguage(ctx, "", automation.Prompt, automation.ResponseLanguage).Tag
 		said, err := e.app.sayAtDoor(ctx, automation, door)
 		if err != nil {
-			runErr = fmt.Errorf("couldn't say the answer at the door: %w", err)
+			runErr = doorFailed("couldn't say the answer at the door", err)
 		} else if said == "" && automations.Spoken(door) == "" {
-			out.Text = silentDoorResult
+			out.Text = locale.T(lang, "automations:door.nobodyThere", nil)
 		} else if said != "" {
-			out.Text = doorResult(owner, said)
+			out.Text = doorResult(lang, owner, said)
 			out.Acted = append(out.Acted, automations.Action{Tool: automation.Say.Connector + ".say", Args: map[string]string{"text": said}}.Describe())
 			// Then it talks with them, and the visit is the result (#667).
 			if automation.Say.Listen {
 				visit, err := e.app.talkAtDoor(ctx, automation, modelID, said)
 				switch {
 				case visit != "" && err != nil:
-					out.Text = withOwnerNote(owner, visit+"\n\n"+fmt.Sprintf("The conversation stopped: %v", err))
+					out.Text = withOwnerNote(owner, visit+"\n\n"+conversationStopped(lang, err))
 				case visit != "":
 					out.Text = withOwnerNote(owner, visit)
 				case err != nil:
-					runErr = fmt.Errorf("couldn't hear the visitor: %w", err)
+					runErr = doorFailed("couldn't hear the visitor", err)
 				}
 			}
 		}
@@ -243,19 +244,34 @@ var pageTools = []string{"internet.open", "browser.open"}
 
 var promptURL = regexp.MustCompile(`https?://[^\s"'<>)\]]+`)
 
-// silentDoorResult is the result of a run that said nothing at the door
-// because nobody was there: notified instead of the silent answer's word
-// (#1339).
-const silentDoorResult = "Nobody was in the picture, so nothing was said at the door."
+// A run that said nothing at the door because nobody was there is
+// notified as automations:door.nobodyThere, not the silent answer's word
+// (#1339). What the door says to the owner is in their language (#1340).
 
 // doorResult is a speaking run's result: the note for its owner on who
 // came, then what was said at the door (#1339). Without a note, it's what
 // was said, as before.
-func doorResult(owner, said string) string {
+func doorResult(lang, owner, said string) string {
 	if owner == "" {
 		return said
 	}
-	return owner + "\n\nSaid at the door: \"" + said + "\""
+	return owner + "\n\n" + locale.T(lang, "automations:door.said", map[string]any{"words": said})
+}
+
+// conversationStopped says why a visit ended early.
+func conversationStopped(lang string, err error) string {
+	return locale.T(lang, "automations:door.stopped", map[string]any{"error": err.Error()})
+}
+
+// doorFailed is a run that couldn't answer the door. It isn't retried: the
+// visitor won't be there minutes later (#1340). An error with a code of its
+// own, such as a speaker that can't be reached, keeps it.
+func doorFailed(what string, err error) error {
+	wrapped := fmt.Errorf("%s: %w", what, err)
+	if code, _ := contracts.ErrorCode(err); code != "" {
+		return wrapped
+	}
+	return contracts.NewError("DOOR_NOT_ANSWERED", map[string]any{"detail": err.Error()}, wrapped)
 }
 
 // withOwnerNote puts the owner's note above a visit's transcript.

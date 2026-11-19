@@ -10,6 +10,7 @@ import (
 	"github.com/yeixio/toskar-core/internal/automations"
 	"github.com/yeixio/toskar-core/internal/connectors"
 	"github.com/yeixio/toskar-core/internal/voice"
+	"github.com/yeixio/toskar-core/pkg/contracts"
 )
 
 type fakeDoorVoice struct{ said []string }
@@ -108,13 +109,39 @@ func TestSayAnswerInTheDoorsVoice(t *testing.T) {
 // The owner is told who came, then what was said (#1339).
 func TestDoorResultTellsTheOwner(t *testing.T) {
 	// Regression: toskar-core#1339
-	if got := doorResult("A courier with a parcel.", "Hi! Leave it by the door."); got != "A courier with a parcel.\n\nSaid at the door: \"Hi! Leave it by the door.\"" {
+	if got := doorResult("en", "A courier with a parcel.", "Hi! Leave it by the door."); got != "A courier with a parcel.\n\nSaid at the door: “Hi! Leave it by the door.”" {
 		t.Fatalf("result %q", got)
 	}
-	if got := doorResult("", "Hello!"); got != "Hello!" {
+	if got := doorResult("en", "", "Hello!"); got != "Hello!" {
 		t.Fatalf("no note: %q", got)
 	}
 	if got := withOwnerNote("Ana, your neighbour.", "Visitor: hi"); got != "Ana, your neighbour.\n\nVisitor: hi" {
 		t.Fatalf("visit %q", got)
+	}
+}
+
+// What the door tells its owner is in their language, the greeting covers
+// languages with voices beyond the first nine, and a door that couldn't be
+// answered isn't retried (#1340).
+func TestDoorTextInTheOwnersLanguage(t *testing.T) {
+	// Regression: toskar-core#1340
+	if got := doorResult("de", "Ein Bote.", "Hallo!"); !strings.Contains(got, "An der Tür gesagt") {
+		t.Fatalf("German result %q", got)
+	}
+	if got := transcript([]doorLine{{Text: "Hola"}, {Visitor: true, Text: "Hola"}}, "es"); !strings.Contains(got, "Visitante: Hola") {
+		t.Fatalf("Spanish transcript %q", got)
+	}
+	for _, lang := range []string{"nl", "ru", "sv", "pl"} {
+		if doorGreeting(lang) == doorGreeting("en") {
+			t.Errorf("%s greets in English", lang)
+		}
+	}
+	err := doorFailed("couldn't say the answer at the door", errors.New("reolink-cli: boom"))
+	if code, _ := contracts.ErrorCode(err); code != "DOOR_NOT_ANSWERED" || automations.ClassifyFailure(err) != automations.FailurePermanent {
+		t.Fatalf("an unanswered door: %q", code)
+	}
+	speaker := doorFailed("couldn't say the answer at the door", contracts.NewError("CAMERA_SPEAKER_UNREACHABLE", nil, errors.New("device unreachable")))
+	if code, _ := contracts.ErrorCode(speaker); code != "CAMERA_SPEAKER_UNREACHABLE" || automations.ClassifyFailure(speaker) != automations.FailurePermanent {
+		t.Fatalf("an unreachable speaker: %q", code)
 	}
 }

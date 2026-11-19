@@ -11,6 +11,7 @@ import (
 	"github.com/yeixio/toskar-core/internal/automations"
 	"github.com/yeixio/toskar-core/internal/connectors"
 	"github.com/yeixio/toskar-core/internal/egress"
+	"github.com/yeixio/toskar-core/internal/locale"
 	"github.com/yeixio/toskar-core/internal/turnopts"
 	"github.com/yeixio/toskar-core/internal/voice"
 	"github.com/yeixio/toskar-core/pkg/pluginapi"
@@ -248,12 +249,12 @@ func (a *App) talkAtDoor(ctx context.Context, automation automations.Automation,
 		}
 		return "", nil
 	}
-	summary, sumErr := a.doorAnswer(context.WithoutCancel(ctx), automation, modelID, doorSummaryStyle, nil, transcript(lines))
+	summary, sumErr := a.doorAnswer(context.WithoutCancel(ctx), automation, modelID, doorSummaryStyle, nil, transcript(lines, "en"))
 	if sumErr != nil {
 		summary = ""
 	}
 	summary = plainSummary(summary)
-	result := strings.TrimSpace(summary + "\n\n" + transcript(lines))
+	result := strings.TrimSpace(summary + "\n\n" + transcript(lines, lang))
 	return result, err
 }
 
@@ -279,13 +280,14 @@ func plainSummary(summary string) string {
 	return strings.Join(out, " ")
 }
 
-// transcript is the visit, a line each.
-func transcript(lines []doorLine) string {
+// transcript is the visit, a line each, labelled in lang (#1340).
+func transcript(lines []doorLine, lang string) string {
 	var b strings.Builder
+	you, visitor := locale.T(lang, "automations:door.you", nil), locale.T(lang, "automations:door.visitor", nil)
 	for _, l := range lines {
-		who := "Toskar"
+		who := you
 		if l.Visitor {
-			who = "Visitor"
+			who = visitor
 		}
 		fmt.Fprintf(&b, "%s: %s\n", who, l.Text)
 	}

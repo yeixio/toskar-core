@@ -49,7 +49,7 @@ func (Reolink) Fields() []Field {
 		{Key: "talk_camera", Label: "reolink-cli camera name", Optional: true, Advanced: true,
 			Help: "Leave empty. To speak and listen through the camera, Toskar runs Reolink's reolink-cli with the address, channel and login above, so all it needs is reolink-cli installed on this computer. Give a name only to use a camera you added to reolink-cli yourself."},
 		{Key: "talk_gateway", Label: "reolink-cli gateway", Optional: true, Advanced: true,
-			Help: "Leave empty to use " + DefaultGateway + ", where Toskar starts reolink-cli's gateway when it isn't running. Give an address only for a gateway that runs elsewhere."},
+			Help: "Leave empty to use " + DefaultGateway + ". Toskar starts reolink-cli's gateway there when it isn't running, and does the same at another address on this computer, such as 127.0.0.1:9100. A gateway on another computer is left to whoever runs it."},
 	}
 }
 

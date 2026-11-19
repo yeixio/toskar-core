@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/yeixio/toskar-core/internal/connectors/reolinktest"
+	"github.com/yeixio/toskar-core/pkg/contracts"
 )
 
 // A gateway on this computer that has gone stale is restarted, and the
@@ -24,7 +25,7 @@ func TestReolinkRestartsAStaleGateway(t *testing.T) {
 	script := "#!/bin/sh\necho \"$*\" >> \"" + dir + "/calls\"\n" +
 		"case \"$*\" in\n" +
 		"  'gateway start'*) touch \"" + dir + "/fresh\"; exit 0;;\n" +
-		"  'gateway stop') touch \"" + dir + "/stopped\"; exit 0;;\n" +
+		"  *'gateway stop') touch \"" + dir + "/stopped\"; exit 0;;\n" +
 		"esac\n" +
 		"cat > /dev/null\n" +
 		"if [ -f \"" + dir + "/fresh\" ]; then echo '{\"ok\":true}'; else echo '{\"ok\":false,\"error\":{\"code\":\"NETWORK_ERROR\",\"message\":\"device unreachable: No route to host (os error 65)\"}}'; fi\n"
@@ -58,8 +59,10 @@ func TestReolinkRestartsAStaleGateway(t *testing.T) {
 	words := make([]int16, ReolinkTalkRate/10)
 
 	connect("192.168.1.9:9000")
-	if err := m.Talk(ctx, "reolink", words, ReolinkTalkRate); err == nil || !strings.Contains(err.Error(), "No route to host") {
-		t.Fatalf("a gateway elsewhere: %v", err)
+	err := m.Talk(ctx, "reolink", words, ReolinkTalkRate)
+	// Regression: toskar-core#1340
+	if code, _ := contracts.ErrorCode(err); code != "CAMERA_SPEAKER_UNREACHABLE" || !strings.Contains(err.Error(), "No route to host") || strings.Contains(err.Error(), "{") {
+		t.Fatalf("a gateway elsewhere: %q %v", code, err)
 	}
 	if c := calls(); strings.Contains(c, "gateway st") {
 		t.Fatalf("restarted a gateway on another computer: %q", c)
@@ -69,7 +72,7 @@ func TestReolinkRestartsAStaleGateway(t *testing.T) {
 	if err := m.Talk(ctx, "reolink", words, ReolinkTalkRate); err != nil {
 		t.Fatal(err)
 	}
-	want := "--gateway-addr 127.0.0.1:9000 --camera hub-ch0 audio talk --stdin --sample-rate 16000\ngateway stop\ngateway start --addr 127.0.0.1:9000\n" +
+	want := "--gateway-addr 127.0.0.1:9000 --camera hub-ch0 audio talk --stdin --sample-rate 16000\n--gateway-addr 127.0.0.1:9000 gateway stop\ngateway start --addr 127.0.0.1:9000\n" +
 		"--gateway-addr 127.0.0.1:9000 --camera hub-ch0 audio talk --stdin --sample-rate 16000"
 	if c := calls(); c != want {
 		t.Fatalf("calls:\n%s", c)
