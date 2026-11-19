@@ -15,3 +15,8 @@
   visitor by a name they only mentioned, such as who sent a package.
 - After the doorbell says goodbye, it keeps listening for a minute in case
   the visitor has more to say, instead of ending the visit at once.
+- With Talk with the visitor on, the doorbell greets someone the moment
+  it sees them ("Hello! How can I help you?", in the automation's
+  language), instead of first looking at the picture and writing a
+  greeting, which took about 20 seconds. Someone passing by hears the
+  greeting too.

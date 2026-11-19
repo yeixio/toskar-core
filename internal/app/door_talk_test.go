@@ -4,6 +4,7 @@ import (
 	"context"
 	"math"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -245,5 +246,30 @@ func TestDoorVisitGraceAfterGoodbye(t *testing.T) {
 	// It waited the grace after the last goodbye, not the 2 s for a reply.
 	if d := time.Since(start); d > 4*time.Second {
 		t.Fatalf("the visit took %v", d)
+	}
+}
+
+// The door's greeting is in the automation's language, or English, and the
+// voice reads it once: from the second visit on it's ready at once (#667).
+func TestDoorGreeting(t *testing.T) {
+	if got := doorGreeting("es-MX"); got != doorGreetings["es"] {
+		t.Errorf("Spanish: %q", got)
+	}
+	if got := doorGreeting("sv"); got != doorGreetings["en"] {
+		t.Errorf("a language without one: %q", got)
+	}
+	speaker := &fakeDoorVoice{}
+	var kept sync.Map
+	r := rememberedVoice{speaker, &kept}
+	for range 2 {
+		if pcm, err := r.Speak(context.Background(), doorGreetings["en"], "kitten:en:eleanor", "en"); err != nil || len(pcm) == 0 {
+			t.Fatal(pcm, err)
+		}
+	}
+	if len(speaker.said) != 1 {
+		t.Fatalf("the voice read the greeting %d times", len(speaker.said))
+	}
+	if _, _ = r.Speak(context.Background(), doorGreetings["en"], "af_heart", "en"); len(speaker.said) != 2 {
+		t.Fatal("another voice's greeting wasn't read")
 	}
 }
