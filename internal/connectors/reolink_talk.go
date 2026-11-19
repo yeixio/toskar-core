@@ -166,6 +166,7 @@ func reolinkTalk(ctx context.Context, cred Credential, samples []int16, rate int
 	if err != nil {
 		return err
 	}
+	samples = louder(samples)
 	pcm := make([]byte, 0, 2*(len(samples)+int(int64(rate)*int64(reolinkTail)/int64(time.Second))))
 	for _, v := range samples {
 		pcm = binary.LittleEndian.AppendUint16(pcm, uint16(v))
@@ -212,6 +213,43 @@ func talkOnce(ctx context.Context, bin string, t reolinkTarget, pcm []byte, rate
 		return fmt.Errorf("reolink-cli couldn't speak through %s: %s", t.name, detail)
 	}
 	return fmt.Errorf("reolink-cli didn't say it spoke through %s", t.name)
+}
+
+// talkPeak is how loud the words' loudest moment is sent, of full scale,
+// and talkGain the most they're raised. A doorbell's small speaker is
+// quiet, and the voices read at a comfortable level for headphones, about
+// a third of full scale: Mike found it hard to hear at the door (#667).
+const (
+	talkPeak = 0.9
+	talkGain = 4.0
+)
+
+// louder raises samples so their peak is talkPeak, by at most talkGain,
+// and never lowers them.
+func louder(samples []int16) []int16 {
+	peak := 0
+	for _, v := range samples {
+		peak = max(peak, abs(int(v)))
+	}
+	if peak == 0 {
+		return samples
+	}
+	gain := min(talkPeak*32767/float64(peak), talkGain)
+	if gain <= 1 {
+		return samples
+	}
+	out := make([]int16, len(samples))
+	for i, v := range samples {
+		out[i] = int16(max(-32767, min(32767, float64(v)*gain)))
+	}
+	return out
+}
+
+func abs(v int) int {
+	if v < 0 {
+		return -v
+	}
+	return v
 }
 
 // lastLine is the last non-empty line of a command's output.

@@ -111,18 +111,20 @@ type App struct {
 	// People are who use this Toskar, and their roles (#206).
 	People           *auth.People
 	AutomationRunner *automations.Runner
-	Scheduler        *scheduler.Scheduler
-	Tools            *tools.Registry
-	Nodes            *nodes.Manager
-	APIKeys          *auth.APIKeyManager
-	Pairing          *auth.PairingManager
-	Identity         *auth.NodeIdentity
-	Benchmarks       *benchmark.Runner
-	HF               *hfclient.Client
-	Lifecycle        *lifecycle.Sweeper
-	Health           *modelhealth.Monitor
-	Mimir            *mimir.Store
-	Muninn           *muninn.Store
+	// doorGreetings keeps the door's greeting as read, by voice (#667).
+	doorGreetings sync.Map
+	Scheduler     *scheduler.Scheduler
+	Tools         *tools.Registry
+	Nodes         *nodes.Manager
+	APIKeys       *auth.APIKeyManager
+	Pairing       *auth.PairingManager
+	Identity      *auth.NodeIdentity
+	Benchmarks    *benchmark.Runner
+	HF            *hfclient.Client
+	Lifecycle     *lifecycle.Sweeper
+	Health        *modelhealth.Monitor
+	Mimir         *mimir.Store
+	Muninn        *muninn.Store
 	// Projects keep chats together with what they share (#1136).
 	Projects *projects.Service
 	// Swarms are several agents working at once, each in a chat (#1135).

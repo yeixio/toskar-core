@@ -91,7 +91,9 @@ func TestReolinkTalksThroughReolinkCLI(t *testing.T) {
 			t.Fatalf("byte %d after the words isn't silence", i)
 		}
 	}
-	if audio[0] != 0xe8 || audio[1] != 0x03 { // 1000, little-endian
+	// The words are sent louder, for a doorbell's small speaker: 1000 is
+	// raised by the most it's raised, four times.
+	if audio[0] != 0xa0 || audio[1] != 0x0f { // 4000, little-endian
 		t.Fatalf("words start % x", audio[:2])
 	}
 
@@ -117,5 +119,22 @@ func TestReolinkTalkRefusesOddNames(t *testing.T) {
 		if err := reolinkTalk(context.Background(), cred, []int16{1}, ReolinkTalkRate); err == nil {
 			t.Errorf("%v: no error", cred)
 		}
+	}
+}
+
+// Words are raised to 90% of full scale, by at most four times, and never
+// lowered or clipped (#667).
+func TestLouderForADoorbell(t *testing.T) {
+	if got := louder([]int16{10000, -5000}); got[0] != 29490 || got[1] != -14745 {
+		t.Errorf("a third of full scale: %v", got)
+	}
+	if got := louder([]int16{100, -50}); got[0] != 400 || got[1] != -200 {
+		t.Errorf("quiet words: %v", got)
+	}
+	if got := louder([]int16{32000, -32767}); got[0] != 32000 || got[1] != -32767 {
+		t.Errorf("already loud: %v", got)
+	}
+	if got := louder([]int16{0, 0}); got[0] != 0 {
+		t.Errorf("silence: %v", got)
 	}
 }

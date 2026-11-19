@@ -94,6 +94,14 @@ func (e automationExecutor) execute(ctx context.Context, automation automations.
 		}
 		modelID = choice.Model.ID
 	}
+	// A visitor is greeted the moment they're seen, and talked with, when
+	// the automation talks with them: Mike chose that over waiting about
+	// 20 s for the run to look at the picture and write a greeting (#667).
+	if automation.Say != nil && automation.Say.Listen {
+		if out, ok, err := e.app.greetAtDoor(ctx, automation, modelID); ok {
+			return out, err
+		}
+	}
 	// A camera's picture goes to a model that can see it, on this
 	// computer, as a photo attached in chat does (#667, #191).
 	var pictures []artifacts.Artifact
@@ -164,6 +172,7 @@ func (e automationExecutor) execute(ctx context.Context, automation automations.
 		}
 	}
 	defer env.releaseModels()
+	e.app.warmDoor(ctx, automation)
 
 	stream, err := orch.Run(ctx, contracts.Task{
 		ID:        automation.ID,
