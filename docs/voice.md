@@ -147,6 +147,16 @@ Errors are `error` events with `error.code`, such as `invalid_audio`,
   minutes. Like Piper, Kokoro turns text into sounds with espeak-ng
   (GPL-3.0, installed on the person's computer with the speech packages).
 
+## Measuring it
+
+`tests/voice` scores voice mode the way a person hears it: the same
+conversations played with a headset, a webcam across a room, hiss, a fan,
+and a TV, and a scene of noises with nobody talking. In CI it scores turn
+detection (turns heard whole, answered mid-sentence, words cut off, turns
+from noise) and fails when a condition gets worse; against a running test
+copy it adds word errors, words from noise, the wait for the first audio,
+and answers in the wrong language or voice. Its README explains the scores.
+
 ## Not yet
 
 - The measurements on the Mac, the rig, and a CPU-only computer.
