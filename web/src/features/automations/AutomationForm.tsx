@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import type { AIProfile, Automation, AutomationAction, AutomationClockTime, AutomationInput, AutomationSchedule, AutomationTrigger, Device, DeviceConnector, Model, ParsedAutomation, ToolRecord, VoiceChoice } from '@/types/api'
+import type { AIProfile, Automation, AutomationAction, AutomationClockTime, AutomationInput, AutomationSchedule, AutomationTrigger, Device, DeviceConnector, Model, ParsedAutomation, ToolRecord, ModelNeed, VoiceChoice } from '@/types/api'
 import i18n from '@/i18n'
 import { api } from '@/lib/api'
 import { canChat, modelUsesTools } from '@/features/models/modelPresentation'
@@ -12,6 +12,7 @@ import { currencyName, formatDate, formatLocale } from '@/i18n/format'
 import { readNumber } from './number'
 import { AutomationActions } from './AutomationActions'
 import { KITTEN_CREDIT } from '@/features/settings/voiceSamples'
+import { ModelNeeds } from '@/features/settings/ModelNeeds'
 import {
   civilInputValue,
   civilToISO,
@@ -90,8 +91,6 @@ export function AutomationForm({ profiles, models, tools, others = [], initial, 
   // A device trigger's state to wait for, and the wait after a run (#586).
   const [deviceTo, setDeviceTo] = useState(initial?.trigger?.to ?? '')
   const [cooldown, setCooldown] = useState(initial?.trigger?.cooldown_seconds || 60)
-  // Cameras each run looks at (#667).
-  const [cameraIDs, setCameraIDs] = useState<string[]>(initial?.cameras?.map((c) => c.device) ?? [])
   // Says each run's answer at the door, with quiet hours (#667).
   const [saying, setSaying] = useState(Boolean(initial?.say))
   const [quiet, setQuiet] = useState(Boolean(initial?.say?.quiet_from))
@@ -100,19 +99,26 @@ export function AutomationForm({ profiles, models, tools, others = [], initial, 
   const [sayVoice, setSayVoice] = useState(initial?.say?.voice || '')
   // The voices the door can speak in, from the Voice settings (#1304).
   const [doorVoices, setDoorVoices] = useState<VoiceChoice[]>([])
+  // A camera needs a model that can see its picture: offered here, while
+  // setting up, rather than said when someone is at the door (#667).
+  const [visionNeed, setVisionNeed] = useState<ModelNeed | null>(null)
+  const [cameraIDs, setCameraIDs] = useState<string[]>(initial?.cameras?.map((c) => c.device) ?? [])
+  const looking = cameraIDs.length > 0
   useEffect(() => {
-    if (!saying) return
+    if (!saying && !looking) return
     let live = true
     api
       .getVoiceSettings()
       .then((v) => {
-        if (live && Array.isArray(v?.languages)) setDoorVoices(v.languages.filter((l) => l.voices?.length > 0))
+        if (!live) return
+        if (Array.isArray(v?.languages)) setDoorVoices(v.languages.filter((l) => l.voices?.length > 0))
+        setVisionNeed(v?.needs?.find((n) => n.ability === 'vision') ?? null)
       })
       .catch(() => undefined)
     return () => {
       live = false
     }
-  }, [saying])
+  }, [saying, looking])
   // Calls it may make on its own, even from a trigger (#586).
   const [actions, setActions] = useState<AutomationAction[]>(initial?.actions ?? [])
   // The connected services' devices to pick from; none for someone who can't list them.
@@ -549,6 +555,7 @@ export function AutomationForm({ profiles, models, tools, others = [], initial, 
             })}
           </div>
           <p className="text-xs text-ink-faint">{t('form.camerasHint', { count: MAX_CAMERAS })}</p>
+          {looking && visionNeed ? <ModelNeeds needs={[visionNeed]} /> : null}
         </fieldset>
       ) : null}
       {speaker || saying ? (

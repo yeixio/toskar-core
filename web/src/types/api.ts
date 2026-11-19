@@ -1953,6 +1953,16 @@ export interface VoiceChoice {
 export interface VoiceSettings {
   kitten: KittenStatus
   languages: VoiceChoice[]
+  /** Models voice mode and the doorbell still need here, each with one to install (#667, contract 1.113). */
+  needs?: ModelNeed[]
+}
+
+/** A kind of model nothing installed does: chat, to answer in voice mode, or vision, to look at a camera. model is empty when none fits. */
+export interface ModelNeed {
+  ability: 'chat' | 'vision'
+  model?: string
+  name?: string
+  size_bytes?: number
 }
 
 export interface AutomationTrigger {

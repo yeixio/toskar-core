@@ -1,3 +1,4 @@
+import { MemoryRouter } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
@@ -15,9 +16,13 @@ vi.mock('@/lib/api', async () => {
       installKitten: vi.fn(),
       removeKitten: vi.fn(),
       previewVoice: vi.fn(),
+      installModel: vi.fn(),
+      getModels: vi.fn(),
     },
   }
 })
+
+vi.mock('@/lib/events', () => ({ subscribeEvents: () => () => undefined }))
 
 const kitten = { credit: 'Powered by KittenML', url: 'https://huggingface.co/KittenML/kitten-tts-2-mini', license: 'Apache-2.0', languages: ['de', 'en'] }
 
@@ -34,9 +39,11 @@ const piperGerman = {
 
 function renderIt() {
   return render(
-    <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
-      <VoiceSettings />
-    </QueryClientProvider>,
+    <MemoryRouter>
+      <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
+        <VoiceSettings />
+      </QueryClientProvider>
+    </MemoryRouter>,
   )
 }
 
@@ -81,5 +88,25 @@ describe('VoiceSettings (#1304)', () => {
     fireEvent.click(await screen.findByRole('button', { name: 'Preview the German voice' }))
     await waitFor(() => expect(api.previewVoice).toHaveBeenCalledWith(expect.stringContaining('Hallo'), 'de_DE-thorsten-medium', 'de'))
     expect(await screen.findByText("Couldn't play the preview.")).toBeInTheDocument()
+  })
+
+  it('offers the models voice mode and the doorbell still need (#667)', async () => {
+    vi.mocked(api.getVoiceSettings).mockResolvedValue({
+      ...settings('installed', piperGerman),
+      needs: [
+        { ability: 'chat', model: 'qwen3.5-4b-q4', name: 'Qwen 3.5 4B', size_bytes: 3_400_000_000 },
+        { ability: 'vision' },
+      ],
+    })
+    vi.mocked(api.installModel).mockResolvedValue(undefined as never)
+    vi.mocked(api.getModels).mockResolvedValue([])
+    renderIt()
+
+    expect(await screen.findByText('To answer in voice mode, Toskar needs a chat model.')).toBeInTheDocument()
+    expect(screen.getByText("To see who's at the door, Toskar needs a model that can see pictures.")).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'See Models' })).toHaveAttribute('href', '/models')
+    fireEvent.click(screen.getByRole('button', { name: 'Install Qwen 3.5 4B' }))
+    await waitFor(() => expect(api.installModel).toHaveBeenCalledWith('qwen3.5-4b-q4'))
+    expect(await screen.findByText(/Downloading Qwen 3.5 4B/)).toBeInTheDocument()
   })
 })

@@ -383,6 +383,7 @@
       "installing": "Instalando o programa…",
       "downloading": "Baixando as vozes…",
       "warming": "Preparando as vozes…",
+      "listening": "Preparando a escuta…",
       "remove": "Remover",
       "removeConfirm": "Remover Kitten",
       "keep": "Manter"
@@ -397,6 +398,16 @@
     },
     "preview": "Ouvir",
     "previewIn": "Ouvir a voz em {{language}}",
-    "previewFailed": "Não foi possível tocar a amostra."
+    "previewFailed": "Não foi possível tocar a amostra.",
+    "needs": {
+      "chat": "Para responder no modo de voz, o Toskar precisa de um modelo de chat.",
+      "vision": "Para ver quem está na porta, o Toskar precisa de um modelo que veja imagens.",
+      "offer": "{{name}} cabe neste computador ({{size}}).",
+      "install": "Instalar {{name}}",
+      "downloading": "Baixando {{name}}… {{percent}}%",
+      "ready": "{{name}} está instalado.",
+      "none": "Nenhum do catálogo cabe neste computador.",
+      "models": "Ver modelos"
+    }
   }
 }

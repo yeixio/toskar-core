@@ -374,6 +374,7 @@
       "installing": "Installing the program…",
       "downloading": "Downloading the voices…",
       "warming": "Getting the voices ready…",
+      "listening": "Setting up listening…",
       "remove": "Remove",
       "removeConfirm": "Remove Kitten",
       "keep": "Keep it"
@@ -388,6 +389,16 @@
     },
     "preview": "Preview",
     "previewIn": "Preview the {{language}} voice",
-    "previewFailed": "Couldn't play the preview."
+    "previewFailed": "Couldn't play the preview.",
+    "needs": {
+      "chat": "To answer in voice mode, Toskar needs a chat model.",
+      "vision": "To see who's at the door, Toskar needs a model that can see pictures.",
+      "offer": "{{name}} fits this computer ({{size}}).",
+      "install": "Install {{name}}",
+      "downloading": "Downloading {{name}}… {{percent}}%",
+      "ready": "{{name}} is installed.",
+      "none": "None in the catalog fits this computer.",
+      "models": "See Models"
+    }
   }
 }

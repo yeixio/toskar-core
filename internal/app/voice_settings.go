@@ -24,11 +24,52 @@ func (a *App) chosenVoice(lang string) string {
 	return v
 }
 
-func (a *App) speechVoices(context.Context) (speech.VoiceSettings, error) {
+func (a *App) speechVoices(ctx context.Context) (speech.VoiceSettings, error) {
 	if a.voiceWorker == nil {
 		return speech.VoiceSettings{}, errors.New("speech isn't set up on this computer")
 	}
-	return a.voiceWorker.Settings(a.chosenVoice), nil
+	s := a.voiceWorker.Settings(a.chosenVoice)
+	s.Needs = a.modelNeeds(ctx)
+	return s, nil
+}
+
+// modelNeeds are the models voice mode and the doorbell need that nothing
+// installed here covers, each with the one to install (#667): a chat model
+// to answer with, and one that can see a camera's picture. Installing Kitten
+// sets up speaking and listening; these are the rest of "ready".
+func (a *App) modelNeeds(ctx context.Context) []speech.ModelNeed {
+	needs := []speech.ModelNeed{}
+	if a.Models == nil {
+		return needs
+	}
+	chat := false
+	for _, m := range a.installedModels(ctx) {
+		if m.Installed && contracts.SupportRoleOf(m) == "" {
+			chat = true
+			break
+		}
+	}
+	if !chat {
+		need := speech.ModelNeed{Ability: "chat"}
+		hw, _ := a.detectHardware(ctx)
+		if rec, err := a.Models.Recommend(ctx, "general", hw, a.communitySignals(ctx)); err == nil {
+			for _, m := range rec.Models {
+				if !m.Installed && contracts.SupportRoleOf(m) == "" {
+					need.Model, need.Name, need.SizeBytes = m.ID, m.DisplayName, int64(m.SizeBytes)
+					break
+				}
+			}
+		}
+		needs = append(needs, need)
+	}
+	if _, ok := a.seeingModel(ctx); !ok {
+		need := speech.ModelNeed{Ability: "vision"}
+		if m, size, ok := a.visionOption(ctx); ok {
+			need.Model, need.Name, need.SizeBytes = m.ID, m.DisplayName, size
+		}
+		needs = append(needs, need)
+	}
+	return needs
 }
 
 // setSpeechVoice chooses lang's voice; "" goes back to automatic.

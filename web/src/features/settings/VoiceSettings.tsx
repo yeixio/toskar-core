@@ -6,6 +6,7 @@ import { ShownError, shownOr } from '@/components/ui/ShownError'
 import { formatLocale } from '@/i18n/format'
 import type { VoiceChoice, VoiceOption, VoiceSettings as Settings } from '@/types/api'
 import { voiceSample } from './voiceSamples'
+import { ModelNeeds } from './ModelNeeds'
 
 const queryKey = ['speech-voices']
 
@@ -103,7 +104,7 @@ export function VoiceSettings() {
             )
           ) : kitten.state === 'installing' ? (
             <span className="shrink-0 text-sm text-ink-muted" role="status">
-              {kitten.stage === 'voices' ? t('voice.kitten.downloading') : kitten.stage === 'warming' ? t('voice.kitten.warming') : t('voice.kitten.installing')}
+              {kitten.stage === 'voices' ? t('voice.kitten.downloading') : kitten.stage === 'warming' ? t('voice.kitten.warming') : kitten.stage === 'listening' ? t('voice.kitten.listening') : t('voice.kitten.installing')}
             </span>
           ) : (
             <button
@@ -121,6 +122,8 @@ export function VoiceSettings() {
       </div>
 
       {error ? <ShownError {...shownOr(error, t('voice.failed'))} role="alert" /> : null}
+
+      <ModelNeeds needs={data.needs ?? []} />
 
       <div className="space-y-2">
         <p className="text-sm font-medium text-ink">{t('voice.languages')}</p>

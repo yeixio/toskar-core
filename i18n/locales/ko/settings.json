@@ -365,6 +365,7 @@
       "installing": "프로그램 설치 중…",
       "downloading": "음성 다운로드 중…",
       "warming": "음성 준비 중…",
+      "listening": "듣기를 준비하는 중…",
       "remove": "제거",
       "removeConfirm": "Kitten 제거",
       "keep": "유지"
@@ -379,6 +380,16 @@
     },
     "preview": "미리 듣기",
     "previewIn": "{{language}} 음성 미리 듣기",
-    "previewFailed": "미리 듣기를 재생하지 못했습니다."
+    "previewFailed": "미리 듣기를 재생하지 못했습니다.",
+    "needs": {
+      "chat": "음성 모드에서 답하려면 채팅 모델이 필요합니다.",
+      "vision": "문 앞에 누가 있는지 보려면 이미지를 볼 수 있는 모델이 필요합니다.",
+      "offer": "{{name}}이(가) 이 컴퓨터에 맞습니다({{size}}).",
+      "install": "{{name}} 설치",
+      "downloading": "{{name}} 다운로드 중… {{percent}}%",
+      "ready": "{{name}}이(가) 설치되었습니다.",
+      "none": "카탈로그에 이 컴퓨터에 맞는 모델이 없습니다.",
+      "models": "모델 보기"
+    }
   }
 }
