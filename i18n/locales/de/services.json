@@ -13,6 +13,7 @@
   "connect": "Verbinden",
   "optional": " (optional)",
   "stored": "Gespeichert ({{value}}). Leer lassen, um es zu behalten.",
+  "example": "z. B. {{value}}",
   "save": "Speichern",
   "cancel": "Abbrechen",
   "tools": "Werkzeuge: {{tools}}",

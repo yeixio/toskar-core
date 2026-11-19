@@ -79,4 +79,41 @@ describe('ConnectedServices', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Disconnect' }))
     await waitFor(() => expect(screen.getByText('Not connected')).toBeInTheDocument())
   })
+
+  // Mike's doorbell (#667): changing the Speaker alone failed with "Camera
+  // address is required", and the example "front-door" read as a value.
+  it('changes one setting without entering the others again, and shows examples as examples', async () => {
+    const reolink: Connector = {
+      id: 'reolink',
+      name: 'Reolink',
+      description: '',
+      scopes: '',
+      fields: [
+        { key: 'url', label: 'Camera address', secret: false, placeholder: 'http://192.168.1.50' },
+        { key: 'password', label: 'Password', secret: true },
+        { key: 'talk_camera', label: 'Speaker', secret: false, optional: true, placeholder: 'front-door' },
+        { key: 'talk_gateway', label: 'Gateway', secret: false, optional: true },
+      ],
+      connected: true,
+      status: 'connected',
+      values: { url: 'https://192.168.68.56', password: '••••word', talk_gateway: '127.0.0.1:9000' },
+      tools: [],
+    }
+    vi.mocked(api.listConnectors).mockReset().mockResolvedValue([reolink])
+    vi.mocked(api.connectService).mockReset().mockResolvedValue(reolink)
+    renderIt()
+    fireEvent.click(await screen.findByRole('button', { name: 'Change' }))
+    const speaker = screen.getByLabelText(/Speaker/)
+    expect(speaker).toHaveValue('')
+    expect(speaker).toHaveAttribute('placeholder', 'e.g. front-door')
+    fireEvent.change(speaker, { target: { value: 'hub-ch0' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }))
+    await waitFor(() =>
+      expect(api.connectService).toHaveBeenCalledWith('reolink', {
+        url: 'https://192.168.68.56',
+        talk_gateway: '127.0.0.1:9000',
+        talk_camera: 'hub-ch0',
+      }),
+    )
+  })
 })

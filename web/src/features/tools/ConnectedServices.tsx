@@ -16,6 +16,17 @@ const KEY = ['connectors'] as const
  * database. They are never shown again or given to a model; tools use them
  * when they run.
  */
+/** The stored settings a connection's form starts from: not its secrets,
+ * which come back masked and are kept on the server when left blank. */
+function storedSettings(service: Connector): Record<string, string> {
+  const out: Record<string, string> = {}
+  for (const f of service.fields) {
+    const v = service.values?.[f.key]
+    if (!f.secret && v) out[f.key] = v
+  }
+  return out
+}
+
 export function ConnectedServices() {
   const { t } = useTranslation('services')
   const query = useQuery({ queryKey: KEY, queryFn: () => api.listConnectors(), retry: false })
@@ -44,7 +55,10 @@ function ServiceRow({ service }: { service: Connector }) {
   const refresh = () => queryClient.invalidateQueries({ queryKey: KEY })
 
   const connect = useMutation({
-    mutationFn: () => api.connectService(service.id, values),
+    // The form shows what's stored and sends what changed on top of it, so
+    // changing one setting doesn't mean entering the rest again. Secret
+    // fields left blank keep their stored value on the server.
+    mutationFn: () => api.connectService(service.id, { ...storedSettings(service), ...values }),
     onSuccess: () => {
       setEditing(false)
       setValues({})
@@ -132,7 +146,7 @@ function ServiceRow({ service }: { service: Connector }) {
                   type={field.secret ? 'password' : 'text'}
                   autoComplete="off"
                   spellCheck={false}
-                  placeholder={field.secret && stored ? t('stored', { value: stored }) : field.placeholder}
+                  placeholder={field.secret && stored ? t('stored', { value: stored }) : field.placeholder ? t('example', { value: field.placeholder }) : undefined}
                   defaultValue={field.secret ? '' : stored ?? ''}
                   onChange={(e) => setValues((v) => ({ ...v, [field.key]: e.target.value }))}
                 />
