@@ -464,6 +464,10 @@
       },
       "media": {
         "title": "Pictures and clips"
+      },
+      "search": {
+        "title": "From Hugging Face",
+        "hint": "Uploads that match your search, each once."
       }
     },
     "purpose": {

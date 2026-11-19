@@ -472,6 +472,10 @@
       },
       "media": {
         "title": "Imágenes y clips"
+      },
+      "search": {
+        "title": "De Hugging Face",
+        "hint": "Subidas que coinciden con tu búsqueda, cada una una vez."
       }
     },
     "purpose": {

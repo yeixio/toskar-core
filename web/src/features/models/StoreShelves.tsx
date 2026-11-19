@@ -97,14 +97,25 @@ export function StoreShelves({
     else install.mutate(m)
   }
 
-  const shelves = SHELF_ORDER.flatMap((id) => {
-    const shelf = store.data?.shelves.find((s) => s.id === id)
-    if (!shelf) return []
-    const searched = search ? searchItems(shelf.models, search, (m) => [m.display_name, m.repo_id, ...(m.tags ?? [])]) : shelf.models
-    const kept = forBusiness ? searched.filter(allowsBusiness) : searched
-    const list = kept.filter((m) => inCategory(m, category))
-    return list.length > 0 ? [{ id, models: list }] : []
-  })
+  const narrow = (list: StoreModel[]) => (forBusiness ? list.filter(allowsBusiness) : list).filter((m) => inCategory(m, category))
+  // Searching shows one list, each upload once; Toskar's tested models are
+  // listed above it, by the page (#1344).
+  const uploads = new Map<string, StoreModel>()
+  if (search) {
+    for (const shelf of store.data?.shelves ?? []) {
+      for (const m of shelf.models) if (!m.catalog_id && !uploads.has(m.id)) uploads.set(m.id, m)
+    }
+  }
+  const found = narrow(searchItems([...uploads.values()], search, (m) => [m.display_name, m.repo_id, ...(m.tags ?? [])]))
+  const shelves = search
+    ? found.length > 0
+      ? [{ id: 'search', models: found }]
+      : []
+    : SHELF_ORDER.flatMap((id) => {
+        const shelf = store.data?.shelves.find((s) => s.id === id)
+        const list = shelf ? narrow(shelf.models) : []
+        return list.length > 0 ? [{ id, models: list }] : []
+      })
 
   if (store.isLoading) return <p className="text-sm text-ink-muted">{t('store.loading')}</p>
 

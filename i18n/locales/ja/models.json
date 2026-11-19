@@ -456,6 +456,10 @@
       },
       "media": {
         "title": "画像とクリップ"
+      },
+      "search": {
+        "title": "Hugging Face から",
+        "hint": "検索に合うアップロード（重複なし）。"
       }
     },
     "purpose": {

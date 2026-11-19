@@ -464,6 +464,10 @@
       },
       "media": {
         "title": "Bilder und Clips"
+      },
+      "search": {
+        "title": "Von Hugging Face",
+        "hint": "Uploads, die zu deiner Suche passen, jeder einmal."
       }
     },
     "purpose": {

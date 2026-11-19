@@ -70,7 +70,8 @@ func TestStoreShelves(t *testing.T) {
 	// Doesn't fit: gone. Another upload of one model: one kept.
 	// A tested model first, then what's popular and fits well.
 	equal("picks", shelfOf(shelves, "picks"), "task", "org/Fresh", "org/Unnoticed")
-	equal("popular", shelfOf(shelves, "popular"), "org/Fresh", "org/Unnoticed", "org/Old")
+	// Popular now doesn't repeat the picks right above it (#1344).
+	equal("popular", shelfOf(shelves, "popular"), "org/Old")
 	equal("new", shelfOf(shelves, "new"), "org/Fresh")
 	equal("top_rated", shelfOf(shelves, "top_rated"), "org/Sees")
 	// Measured to finish tasks first, then what's named for code.
@@ -124,5 +125,37 @@ func TestTestedEntriesLeaveOutAddedModels(t *testing.T) {
 	got := TestedEntries([]CatalogEntry{real, {ID: "liquidai-lfm3-1-7b-gguf-q4-k-m"}})
 	if len(got) != 1 || got[0].ID != real.ID {
 		t.Fatalf("%+v", got)
+	}
+}
+
+// Regression: toskar-core#1344
+// The tested entry stands for an upload of the same model under another
+// spelling, and a file that can't be the whole model its name says isn't
+// listed.
+func TestStoreDropsLookAlikesAndParts(t *testing.T) {
+	hw := contracts.HardwareInventory{Memory: contracts.MemoryInfo{TotalBytes: 64_000_000_000, AvailableBytes: 48_000_000_000}}
+	now := time.Date(2026, 11, 1, 0, 0, 0, 0, time.UTC)
+	named := func(repo, name string, size uint64) contracts.StoreModel {
+		m := storeItem(repo, size, 100, 24*time.Hour, "general")
+		m.DisplayName = name
+		return m
+	}
+	listings := StoreListings{Trending: []contracts.StoreModel{
+		named("u/gpt-oss-20b-GGUF", "gpt oss 20b", 10_800_000_000),
+		named("u/Qwen2.5-Coder-14B-GGUF", "Qwen2.5 Coder 14B", 9_000_000_000),
+		named("u/Qwen3.8-27B-DSpine", "Qwen3.8 27B DSpine b16", 1_200_000_000),
+		named("u/Supra2.5-Pro", "Supra2.5 Pro", 51_400_000),
+		named("u/Nemotron-E4B", "NVIDIA Nemotron 3.5 Bolt E4B 4GB", 5_800_000_000),
+		named("u/Llama-8B", "Llama 8B", 4_900_000_000),
+	}}
+	catalog := []CatalogEntry{
+		{ID: "gpt-oss-20b", DisplayName: "gpt-oss 20B", SizeBytes: 11_300_000_000, MemoryNeededBytes: 14_000_000_000, Runtime: []string{"llamacpp"}},
+		{ID: "qwen2.5-coder-14b", DisplayName: "Qwen 2.5 Coder 14B", SizeBytes: 9_000_000_000, MemoryNeededBytes: 11_000_000_000, Runtime: []string{"llamacpp"}},
+	}
+	shelves := StoreShelves(listings, catalog, nil, "", hw, FitOptions{}, now)
+	got := shelfOf(shelves, "everyday")
+	want := []string{"u/Nemotron-E4B", "u/Llama-8B"}
+	if strings.Join(got, ",") != strings.Join(want, ",") {
+		t.Fatalf("everyday: got %v, want %v", got, want)
 	}
 }

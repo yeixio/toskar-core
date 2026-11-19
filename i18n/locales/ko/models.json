@@ -456,6 +456,10 @@
       },
       "media": {
         "title": "이미지와 클립"
+      },
+      "search": {
+        "title": "Hugging Face에서",
+        "hint": "검색과 일치하는 업로드, 하나씩만."
       }
     },
     "purpose": {
