@@ -114,12 +114,21 @@ func (v *doorVisit) run(ctx context.Context, greeting string) ([]doorLine, error
 
 // hear waits for the visitor to talk and returns what they said, as 16-bit
 // samples at ReolinkListenRate, once they stop.
+// doorTurns hears when a visitor starts and stops talking. A Reolink
+// doorbell's microphone is quiet: measured on Mike's (#667), someone talking
+// at the door is about -34 dBFS, 20 ms frames mostly 0.02 to 0.05 of full
+// scale, over a background near -65 dBFS. Threshold 0.8, a floor of 0.048,
+// heard almost none of it, and the visit ended before the visitor had been
+// heard; 0.2 is a floor of 0.012, about 20 dB above that background, and
+// a noisier street still raises it, to four times its own level.
+func doorTurns() *voice.Turns {
+	return voice.NewTurns(voice.TurnDetection{Type: "server_vad", Threshold: 0.2, PrefixPaddingMs: 300, SilenceDurationMs: 800})
+}
+
 func (v *doorVisit) hear(ctx context.Context, h *connectors.Hearing) ([]int16, error) {
-	// A visitor stands close to the doorbell, and its microphone has no
-	// noise suppression: speech has to be clearly above the street.
 	turns := v.turns
 	if turns == nil {
-		turns = voice.NewTurns(voice.TurnDetection{Type: "server_vad", Threshold: 0.8, PrefixPaddingMs: 300, SilenceDurationMs: 800})
+		turns = doorTurns()
 		v.turns = turns
 	}
 	// A third of a second before they start, so the first word is whole.

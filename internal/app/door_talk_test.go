@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"math"
 	"strings"
 	"testing"
 	"time"
@@ -150,5 +151,35 @@ func TestDoorAnswer(t *testing.T) {
 	last := (*sent)[1]
 	if u := last[len(last)-1]; u.Role != "user" || !strings.Contains(u.Content, "Visitor: I'm Sam, with a parcel.") {
 		t.Fatalf("summed up from %+v", u)
+	}
+}
+
+// Someone talking at a Reolink doorbell, as loud as Mike was at his (#667):
+// about 0.02 of full scale over a background near 0.0008. The door hears
+// them start and stop; at the old threshold it heard nothing.
+func TestDoorHearsAQuietMicrophone(t *testing.T) {
+	sine := func(seconds, amp float64) []int16 {
+		out := make([]int16, int(seconds*voice.SampleRate))
+		for i := range out {
+			out[i] = int16(amp * 32767 * math.Sin(2*math.Pi*180*float64(i)/voice.SampleRate))
+		}
+		return out
+	}
+	room := func(seconds float64) []int16 { return sine(seconds, 0.001) }
+	audio := append(append(append(room(1), sine(1.5, 0.03)...), room(0.3)...), sine(1, 0.025)...)
+	audio = append(audio, room(1.2)...)
+	turns := doorTurns()
+	var started, stopped bool
+	for i := 0; i < len(audio); i += 320 {
+		s, e := turns.Feed(audio[i:min(i+320, len(audio))])
+		started, stopped = started || s, stopped || e
+	}
+	if !started || !stopped {
+		t.Fatalf("speech at -34 dBFS: started %v, stopped %v", started, stopped)
+	}
+	// The quiet alone isn't a visitor.
+	turns = doorTurns()
+	if s, _ := turns.Feed(room(3)); s {
+		t.Fatal("the background started a turn")
 	}
 }
