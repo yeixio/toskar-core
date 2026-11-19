@@ -165,6 +165,9 @@ type peerMediaEntry struct {
 	at       time.Time
 	kinds    map[string]*MediaSetupStatus
 	fetching bool
+	// fetched closes when the fetch running now ends, so a caller that
+	// waits also waits for one started before it.
+	fetched chan struct{}
 }
 
 const (
@@ -200,6 +203,7 @@ func (a *App) peerMediaSetups(ctx context.Context, wait bool) map[string]map[str
 	}
 	c := &a.peerMedia
 	var wg sync.WaitGroup
+	var inFlight []chan struct{}
 	for _, n := range list {
 		if n.IsLocal || !n.Paired || n.Address == "" || n.Status != contracts.NodeStatusOnline {
 			continue
@@ -217,6 +221,9 @@ func (a *App) peerMediaSetups(ctx context.Context, wait bool) map[string]map[str
 		start := stale && !e.fetching
 		if start {
 			e.fetching = true
+			e.fetched = make(chan struct{})
+		} else if e.fetching {
+			inFlight = append(inFlight, e.fetched)
 		}
 		c.mu.Unlock()
 		if start {
@@ -229,7 +236,13 @@ func (a *App) peerMediaSetups(ctx context.Context, wait bool) map[string]map[str
 	}
 	if wait {
 		done := make(chan struct{})
-		go func() { wg.Wait(); close(done) }()
+		go func() {
+			wg.Wait()
+			for _, ch := range inFlight {
+				<-ch
+			}
+			close(done)
+		}()
 		select {
 		case <-done:
 		case <-time.After(peerMediaTimeout + time.Second):
@@ -274,6 +287,10 @@ func (a *App) fetchPeerMedia(ctx context.Context, n contracts.Node) {
 		return
 	}
 	e.at, e.fetching, e.kinds = time.Now(), false, kinds
+	if e.fetched != nil {
+		close(e.fetched)
+		e.fetched = nil
+	}
 }
 
 // mediaElsewhere lists, for each model of a kind, the online paired
