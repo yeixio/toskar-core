@@ -45,7 +45,7 @@ function NeedRow({ need }: { need: ModelNeed }) {
     return subscribeEvents({
       onEvent: (event) => {
         const p = event.payload as (Partial<ModelDownloadProgressPayload> & { model_id?: string; error?: string; error_code?: string }) | undefined
-        if (p?.model_id !== need.model) return
+        if (!p || p.model_id !== need.model) return
         if (event.type === 'model.download.progress') setProgress(Math.round(p.percent ?? 0))
         if (event.type === 'model.download.failed') {
           setStarted(false)
