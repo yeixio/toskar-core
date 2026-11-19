@@ -101,7 +101,7 @@ var (
 	errReolinkAddress = contracts.NewError("CAMERA_ADDRESS", map[string]any{"field": "url"},
 		errors.New("enter the camera's address, such as 192.168.1.50"))
 	errReolinkNotThere = contracts.NewError("CAMERA_UNREACHABLE", map[string]any{"field": "url"},
-		errors.New("Toskar couldn't reach a camera at that address. Check the address, and that the camera's HTTP or HTTPS server is on"))
+		errors.New("couldn't reach a camera at that address. Check the address, and that the camera's HTTP or HTTPS server is on"))
 )
 
 // bareAddress is an address typed without http:// or https://, such as
