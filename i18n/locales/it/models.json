@@ -472,6 +472,10 @@
       },
       "media": {
         "title": "Immagini e clip"
+      },
+      "search": {
+        "title": "Da Hugging Face",
+        "hint": "I caricamenti che corrispondono alla ricerca, ognuno una volta."
       }
     },
     "purpose": {

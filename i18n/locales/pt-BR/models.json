@@ -472,6 +472,10 @@
       },
       "media": {
         "title": "Imagens e clipes"
+      },
+      "search": {
+        "title": "Do Hugging Face",
+        "hint": "Envios que correspondem à sua busca, cada um uma vez."
       }
     },
     "purpose": {

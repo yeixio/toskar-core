@@ -33,6 +33,18 @@ var (
 	// notNameChars differ too: Qwen2.5 and Qwen 2.5.
 	notNameChars = regexp.MustCompile(`[^\pL\pN.]`)
 	sameModel    = regexp.MustCompile(`(?i)[-_ ](gguf|q\d\w*|imatrix|i1|bf16|f16|instruct|chat)\b`)
+	// paramsInName is a size in billions in a name, such as 27B in "Qwen3.8
+	// 27B"; not E4B or 4GB.
+	paramsInName = regexp.MustCompile(`(?i)(?:^|[^\pL\pN.])(\d+(?:\.\d+)?)\s?b\b`)
+)
+
+const (
+	// leastModelBytes is the smallest file that's a whole chat model; below
+	// it is an adapter or a piece of one (#1344).
+	leastModelBytes = 200_000_000
+	// leastBytesPerParam is the least a whole model's file takes for each
+	// of its parameters, at 1.6 bits; a 27B model's isn't 1.2 GB (#1344).
+	leastBytesPerParam = 0.2
 )
 
 // StoreListings are the store's raw listings from Hugging Face.
@@ -46,15 +58,25 @@ type StoreListings struct {
 func StoreShelves(listings StoreListings, catalog []CatalogEntry, installed map[string]bool, bestOverall string, hw contracts.HardwareInventory, opts FitOptions, now time.Time) []contracts.StoreShelf {
 	source := map[string]string{}
 	byID := map[string]*CatalogEntry{}
+	tested := map[string]bool{}
 	for i, e := range catalog {
 		source[entryRepo(e)] = e.ID
 		byID[e.ID] = &catalog[i]
+		if !e.Dynamic {
+			tested[nameKey(e.DisplayName)] = true
+		}
 	}
 	prepare := func(list []contracts.StoreModel) []contracts.StoreModel {
 		out := make([]contracts.StoreModel, 0, len(list))
 		for _, m := range list {
 			if id, ok := source[m.RepoID]; ok {
 				m.CatalogID = id
+			}
+			// The tested entry stands for an upload of the same model
+			// under another spelling, and a file that isn't a whole model
+			// isn't listed (#1344).
+			if m.CatalogID == "" && (tested[nameKey(m.DisplayName)] || !wholeModel(m)) {
+				continue
 			}
 			m.Installed = installed[m.ID] || installed[m.CatalogID]
 			storeLicense(&m, byID[m.CatalogID])
@@ -72,11 +94,11 @@ func StoreShelves(listings StoreListings, catalog []CatalogEntry, installed map[
 	trending, liked, code := prepare(listings.Trending), prepare(listings.Liked), prepare(listings.Code)
 	everything := append(append(slices.Clone(trending), liked...), code...)
 
-	tested := testedModels(catalog, installed, hw, opts)
+	testedList := testedModels(catalog, installed, hw, opts)
 	// Measured to finish tasks first, then Hugging Face's ranking, then the
 	// rest of what's been tested for code.
 	var finishes, testedCode []contracts.StoreModel
-	for _, m := range tested {
+	for _, m := range testedList {
 		switch {
 		case slices.Contains(m.Tags, "tasks"):
 			finishes = append(finishes, m)
@@ -99,16 +121,21 @@ func StoreShelves(listings StoreListings, catalog []CatalogEntry, installed map[
 	small := filterStore(everything, func(m contracts.StoreModel) bool { return m.SizeBytes > 0 && m.SizeBytes <= smallSize })
 	slices.SortStableFunc(small, byLikes)
 
+	picks := storePicks(testedList, trending, bestOverall)
+	// Popular now doesn't start with the picks right above it (#1344).
+	popular := filterStore(trending, func(m contracts.StoreModel) bool {
+		return !slices.ContainsFunc(picks, func(p contracts.StoreModel) bool { return p.ID == m.ID })
+	})
 	shelves := []contracts.StoreShelf{
-		{ID: "picks", Models: storePicks(tested, trending, bestOverall)},
-		{ID: "popular", Models: trending},
+		{ID: "picks", Models: picks},
+		{ID: "popular", Models: popular},
 		{ID: "top_rated", Models: liked},
 		{ID: "new", Models: fresh},
 		{ID: "everyday", Models: everyday},
 		{ID: "code", Models: slices.Concat(finishes, rankedCode, testedCode)},
 		{ID: "sees", Models: sees},
 		{ID: "small", Models: small},
-		{ID: "tested", Models: tested},
+		{ID: "tested", Models: testedList},
 	}
 	out := shelves[:0]
 	for _, s := range shelves {
@@ -152,13 +179,39 @@ func filterStore(list []contracts.StoreModel, keep func(contracts.StoreModel) bo
 	return out
 }
 
+// nameKey is a model's name without the words and marks that differ
+// between uploads of it: gpt-oss 20B and gpt oss 20b are one model.
+func nameKey(name string) string {
+	return notNameChars.ReplaceAllString(strings.ToLower(sameModel.ReplaceAllString(name, "")), "")
+}
+
+// wholeModel is whether a listing's file can be the whole model its name
+// says: not a few megabytes, and not far too small for its parameters
+// (#1344).
+func wholeModel(m contracts.StoreModel) bool {
+	if m.SizeBytes == 0 {
+		return true
+	}
+	if m.SizeBytes < leastModelBytes {
+		return false
+	}
+	params := m.Parameters
+	if params == "" {
+		if found := paramsInName.FindStringSubmatch(m.DisplayName); found != nil {
+			params = found[1] + "B"
+		}
+	}
+	billions := parameterBillions(params)
+	return billions == 0 || float64(m.SizeBytes) >= billions*1e9*leastBytesPerParam
+}
+
 // firstOfEach keeps one upload of each model, up to a shelf's worth. Many people
 // upload the same model, and a shelf of them shows nothing.
 func firstOfEach(list []contracts.StoreModel) []contracts.StoreModel {
 	seen := map[string]bool{}
 	var out []contracts.StoreModel
 	for _, m := range list {
-		key := notNameChars.ReplaceAllString(strings.ToLower(sameModel.ReplaceAllString(m.DisplayName, "")), "")
+		key := nameKey(m.DisplayName)
 		if seen[key] {
 			continue
 		}

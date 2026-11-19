@@ -105,10 +105,24 @@ describe('StoreShelves', () => {
     expect(await screen.findByText('40%')).toBeInTheDocument()
   })
 
-  it('narrows the shelves by search', async () => {
-    show({ search: 'qwen' })
-    expect(await screen.findByRole('heading', { name: 'Tested by Toskar' })).toBeInTheDocument()
-    expect(screen.queryByRole('heading', { name: 'Popular now' })).not.toBeInTheDocument()
+  // Regression: toskar-core#1344
+  it('searches as one list of uploads, each once, leaving tested models to the page', async () => {
+    const lookAlike = { ...fromHF, id: 'look', display_name: 'Cool 7B Super Coder', repo_id: 'u/Cool-Super' }
+    vi.mocked(api.getModelStore).mockResolvedValue({
+      live: true,
+      shelves: [
+        { id: 'new', models: [lookAlike, fromHF] },
+        { id: 'code', models: [lookAlike, fromHF] },
+        { id: 'small', models: [lookAlike] },
+        { id: 'tested', models: [tested] },
+      ],
+    } as unknown as ModelStore)
+    show({ search: 'cool 7b' })
+    expect(await screen.findByRole('heading', { name: 'From Hugging Face' })).toBeInTheDocument()
+    expect(screen.getAllByRole('heading', { level: 2 })).toHaveLength(1)
+    expect(screen.getAllByText('Cool 7B')).toHaveLength(1)
+    expect(screen.getAllByText('Cool 7B Super Coder')).toHaveLength(1)
+    expect(screen.queryByText('Qwen 3.8 27B')).not.toBeInTheDocument()
   })
 
   it("says so when Hugging Face can't be reached", async () => {

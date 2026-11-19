@@ -10,7 +10,7 @@ import type {
   ModelFit,
 } from '@/types/api'
 import { ModelCard } from './ModelCard'
-import { CATEGORY_SECTIONS, largerAlternative } from './modelPresentation'
+import { largerAlternative } from './modelPresentation'
 import { searchItems } from '@/lib/search'
 
 const TOP_PICKS = 3
@@ -76,7 +76,33 @@ export function DiscoverTab({
 
   return (
     <div className="space-y-8">
-      <section className="space-y-3" hidden={storePicks}>
+      {/* Searching: Toskar's tested models that match, each once and the
+          closest first, then the store's uploads; no empty picks (#1344). */}
+      {search && filtered.length > 0 ? (
+        <section className="space-y-3">
+          <h2 className="section-title">{t('store.shelves.tested.title')}</h2>
+          <ul className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {filtered.map((model) => (
+              <li key={`found-${model.id}`}>
+                <ModelCard
+                  model={model}
+                  fit={fits[model.id]}
+                  peerFits={peerFits?.[model.id]}
+                  winnerLabel={winnerByModel.get(model.id)}
+                  chosenByCommunity={chosenByCommunity.has(model.id)}
+                  progress={progress[model.id]}
+                  installing={installingId === model.id}
+                  onInstall={() => onInstall(model.id)}
+                  alternative={alternative}
+                  onInstallAlternative={onInstall}
+                />
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
+      <section className="space-y-3" hidden={storePicks || Boolean(search)}>
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
             <h2 className="section-title">{t('discover.recommended')}</h2>
@@ -114,39 +140,6 @@ export function DiscoverTab({
       </section>
 
       {store}
-
-      {/* Everything in the catalog, only when looking for something: the shelves are the store. */}
-      {search ? (
-        <>
-      {CATEGORY_SECTIONS.map((section) => {
-          const list = filtered.filter(
-            (m) => section.match(m) && !uniqueRecommended.some((r) => r.id === m.id),
-          )
-          if (list.length === 0) return null
-          return (
-            <section key={section.id} className="space-y-3">
-              <h2 className="section-title">{t(`categories.${section.id}`)}</h2>
-              <ul className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                {list.map((model) => (
-                  <li key={`${section.id}-${model.id}`}>
-                    <ModelCard
-                      model={model}
-                      fit={fits[model.id]}
-                    peerFits={peerFits?.[model.id]}
-                      progress={progress[model.id]}
-                      installing={installingId === model.id}
-                      onInstall={() => onInstall(model.id)}
-                      alternative={alternative}
-                      onInstallAlternative={onInstall}
-                    />
-                  </li>
-                ))}
-              </ul>
-            </section>
-          )
-        })}
-        </>
-      ) : null}
 
     </div>
   )

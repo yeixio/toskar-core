@@ -472,6 +472,10 @@
       },
       "media": {
         "title": "Images et clips"
+      },
+      "search": {
+        "title": "Depuis Hugging Face",
+        "hint": "Les mises en ligne qui correspondent à votre recherche, chacune une fois."
       }
     },
     "purpose": {

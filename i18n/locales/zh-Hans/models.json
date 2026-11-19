@@ -456,6 +456,10 @@
       },
       "media": {
         "title": "图片和短片"
+      },
+      "search": {
+        "title": "来自 Hugging Face",
+        "hint": "与搜索匹配的上传，每个只列一次。"
       }
     },
     "purpose": {
