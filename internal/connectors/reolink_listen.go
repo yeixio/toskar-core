@@ -104,6 +104,7 @@ func reolinkListen(ctx context.Context, cred Credential) (*Hearing, error) {
 	if err != nil {
 		return nil, err
 	}
+	ensureGateway(ctx, bin, gateway, false)
 	dir, err := os.MkdirTemp("", "toskar-door-")
 	if err != nil {
 		return nil, err
@@ -169,7 +170,12 @@ func reolinkListen(ctx context.Context, cred Credential) (*Hearing, error) {
 			if detail == "" && err != nil {
 				detail = err.Error()
 			}
-			h.fail(fmt.Errorf("reolink-cli stopped hearing %s: %s", camera, detail))
+			err := fmt.Errorf("reolink-cli stopped hearing %s: %s", camera, detail)
+			h.fail(err)
+			// A stale gateway is restarted for the next visit.
+			if unreachable(err) && localGateway(gateway) {
+				go ensureGateway(context.WithoutCancel(ctx), bin, gateway, true)
+			}
 		}
 		close(cliDone)
 		if w, err := openFIFOWriter(pipe); err == nil {

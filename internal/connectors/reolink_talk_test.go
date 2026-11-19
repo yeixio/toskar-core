@@ -24,9 +24,10 @@ func fakeReolinkCLI(t *testing.T, answer string, code int) (dir string) {
 	if err := os.WriteFile(bin, []byte(script), 0o755); err != nil {
 		t.Fatal(err)
 	}
-	old := reolinkCLI
+	old, oldUp := reolinkCLI, gatewayUp
 	reolinkCLI = func() (string, error) { return bin, nil }
-	t.Cleanup(func() { reolinkCLI = old })
+	gatewayUp = func(string) bool { return true }
+	t.Cleanup(func() { reolinkCLI, gatewayUp = old, oldUp })
 	return dir
 }
 

@@ -31,7 +31,7 @@ func TestReolinkListensThroughReolinkCLI(t *testing.T) {
 		t.Fatal(err)
 	}
 	cli := filepath.Join(dir, "reolink-cli")
-	script := "#!/bin/sh\nprintf '%s\\n' \"$@\" > \"" + dir + "/args\"\nfor a; do last=\"$a\"; done\nif [ \"$FAIL\" = 1 ]; then echo '{\"ok\":false,\"error\":{\"message\":\"device unreachable\"}}'; exit 1; fi\ncat \"" + dir + "/stream\" > \"$last\"\nsleep 0.2\n"
+	script := "#!/bin/sh\nprintf '%s\\n' \"$@\" > \"" + dir + "/args\"\nfor a; do last=\"$a\"; done\nif [ \"$FAIL\" = 1 ]; then echo '{\"ok\":false,\"error\":{\"message\":\"camera busy\"}}'; exit 1; fi\ncat \"" + dir + "/stream\" > \"$last\"\nsleep 0.2\n"
 	if err := os.WriteFile(cli, []byte(script), 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -39,10 +39,11 @@ func TestReolinkListensThroughReolinkCLI(t *testing.T) {
 	if err := os.WriteFile(ff, []byte("#!/bin/sh\nexec cat\n"), 0o755); err != nil {
 		t.Fatal(err)
 	}
-	oldCLI, oldFF := reolinkCLI, ffmpegBin
+	oldCLI, oldFF, oldUp := reolinkCLI, ffmpegBin, gatewayUp
 	reolinkCLI = func() (string, error) { return cli, nil }
 	ffmpegBin = func() (string, error) { return ff, nil }
-	t.Cleanup(func() { reolinkCLI, ffmpegBin = oldCLI, oldFF })
+	gatewayUp = func(string) bool { return true }
+	t.Cleanup(func() { reolinkCLI, ffmpegBin, gatewayUp = oldCLI, oldFF, oldUp })
 
 	door := reolinktest.New(false)
 	defer door.Close()
@@ -75,7 +76,7 @@ func TestReolinkListensThroughReolinkCLI(t *testing.T) {
 	}
 	for range h.Audio {
 	}
-	if err := h.Err(); err == nil || !strings.Contains(err.Error(), "device unreachable") {
+	if err := h.Err(); err == nil || !strings.Contains(err.Error(), "camera busy") {
 		t.Fatalf("a failing reolink-cli: %v", err)
 	}
 }

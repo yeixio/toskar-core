@@ -99,6 +99,17 @@ func reolinkTalk(ctx context.Context, cred Credential, samples []int16, rate int
 	pcm = append(pcm, make([]byte, 2*int(int64(rate)*int64(reolinkTail)/int64(time.Second)))...)
 	length := time.Duration(len(pcm)/2) * time.Second / time.Duration(rate)
 
+	ensureGateway(ctx, bin, gateway, false)
+	err = talkOnce(ctx, bin, camera, gateway, pcm, rate, length)
+	if unreachable(err) && localGateway(gateway) && ctx.Err() == nil {
+		// A stale gateway: once more, after restarting it.
+		ensureGateway(ctx, bin, gateway, true)
+		err = talkOnce(ctx, bin, camera, gateway, pcm, rate, length)
+	}
+	return err
+}
+
+func talkOnce(ctx context.Context, bin, camera, gateway string, pcm []byte, rate int, length time.Duration) error {
 	args := []string{}
 	if gateway != "" {
 		args = append(args, "--gateway-addr", gateway)
