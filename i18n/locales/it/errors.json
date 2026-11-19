@@ -298,5 +298,7 @@
   "MOVE_NEEDS_COMPUTER": "Per spostarlo, il relay di Toskar deve sentire il computer su cui è ora: accendilo una volta, o aspetta che resti spento per 3 giorni.",
   "MOVE_FAILED": "Il relay di Toskar non ha spostato l'abbonamento ({{relay_code}}).",
   "VOICE_UNAVAILABLE": "La voce dal vivo non è disponibile su questo computer.",
-  "WEBSOCKET_REQUIRED": "La voce dal vivo ha bisogno di una connessione WebSocket."
+  "WEBSOCKET_REQUIRED": "La voce dal vivo ha bisogno di una connessione WebSocket.",
+  "CAMERA_ADDRESS": "Inserisci l'indirizzo della telecamera, ad esempio 192.168.1.50.",
+  "CAMERA_UNREACHABLE": "Toskar non è riuscito a raggiungere una telecamera a quell'indirizzo. Controlla l'indirizzo e che il server HTTP o HTTPS della telecamera sia attivo."
 }

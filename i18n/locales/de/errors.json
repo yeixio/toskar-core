@@ -298,5 +298,7 @@
   "MOVE_NEEDS_COMPUTER": "Zum Übertragen muss Toskars Relay vom Computer hören, auf dem es gerade ist: Schalte ihn einmal ein, oder warte, bis er 3 Tage aus war.",
   "MOVE_FAILED": "Toskars Relay hat das Abo nicht übertragen ({{relay_code}}).",
   "VOICE_UNAVAILABLE": "Live-Sprache ist auf diesem Computer nicht verfügbar.",
-  "WEBSOCKET_REQUIRED": "Live-Sprache braucht eine WebSocket-Verbindung."
+  "WEBSOCKET_REQUIRED": "Live-Sprache braucht eine WebSocket-Verbindung.",
+  "CAMERA_ADDRESS": "Gib die Adresse der Kamera ein, zum Beispiel 192.168.1.50.",
+  "CAMERA_UNREACHABLE": "Toskar hat unter dieser Adresse keine Kamera erreicht. Prüfe die Adresse und ob der HTTP- oder HTTPS-Server der Kamera eingeschaltet ist."
 }

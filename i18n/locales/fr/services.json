@@ -17,5 +17,7 @@
   "save": "Enregistrer",
   "cancel": "Annuler",
   "tools": "Outils : {{tools}}",
-  "asksFirst": "{{name}} (demande d'abord)"
+  "asksFirst": "{{name}} (demande d'abord)",
+  "connectService": "Connecter {{name}}",
+  "advanced": "Avancé"
 }

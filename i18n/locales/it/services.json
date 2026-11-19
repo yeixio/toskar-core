@@ -17,5 +17,7 @@
   "save": "Salva",
   "cancel": "Annulla",
   "tools": "Strumenti: {{tools}}",
-  "asksFirst": "{{name}} (chiede prima)"
+  "asksFirst": "{{name}} (chiede prima)",
+  "connectService": "Collega {{name}}",
+  "advanced": "Avanzate"
 }

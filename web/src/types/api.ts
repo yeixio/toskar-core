@@ -2434,6 +2434,8 @@ export interface ConnectorField {
   secret: boolean
   optional?: boolean
   placeholder?: string
+  /** Folded under Advanced: settings most people leave as they are. */
+  advanced?: boolean
 }
 
 /** A connected service (spec §32). Secret values are never returned; a stored token shows only its last four characters. */

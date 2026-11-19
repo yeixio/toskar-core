@@ -17,5 +17,7 @@
   "save": "儲存",
   "cancel": "取消",
   "tools": "工具：{{tools}}",
-  "asksFirst": "{{name}}（會先詢問）"
+  "asksFirst": "{{name}}（會先詢問）",
+  "connectService": "連接 {{name}}",
+  "advanced": "進階"
 }
