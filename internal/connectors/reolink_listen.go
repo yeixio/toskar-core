@@ -85,16 +85,9 @@ func (m *Manager) Listen(ctx context.Context, service string) (*Hearing, error) 
 }
 
 func reolinkListen(ctx context.Context, cred Credential) (*Hearing, error) {
-	camera := strings.TrimSpace(cred["talk_camera"])
-	if camera == "" {
-		return nil, errors.New("to hear the camera, add it to reolink-cli and give its name as the connection's Speaker")
-	}
-	if !talkNameRe.MatchString(camera) {
-		return nil, fmt.Errorf("%q isn't a reolink-cli camera name", camera)
-	}
-	gateway := strings.TrimSpace(cred["talk_gateway"])
-	if gateway != "" && !talkAddrRe.MatchString(gateway) {
-		return nil, fmt.Errorf("%q isn't an address such as 127.0.0.1:9000", gateway)
+	t, err := targetOf(cred)
+	if err != nil {
+		return nil, err
 	}
 	bin, err := reolinkCLI()
 	if err != nil {
@@ -104,7 +97,7 @@ func reolinkListen(ctx context.Context, cred Credential) (*Hearing, error) {
 	if err != nil {
 		return nil, err
 	}
-	ensureGateway(ctx, bin, gateway, false)
+	ensureGateway(ctx, bin, t.gateway, false)
 	dir, err := os.MkdirTemp("", "toskar-door-")
 	if err != nil {
 		return nil, err
@@ -115,13 +108,8 @@ func reolinkListen(ctx context.Context, cred Credential) (*Hearing, error) {
 		return nil, err
 	}
 	ctx, cancel := context.WithCancel(ctx)
-	args := []string{}
-	if gateway != "" {
-		args = append(args, "--gateway-addr", gateway)
-	}
 	// The sub stream: its audio is the same, its video the smallest.
-	args = append(args, "--camera", camera, "preview", "capture", "--stream", "sub", "--packets", "100000000", "--file", pipe)
-	cli := exec.CommandContext(ctx, bin, args...)
+	cli := t.command(ctx, bin, "preview", "capture", "--stream", "sub", "--packets", "100000000", "--file", pipe)
 	var cliOut strings.Builder
 	cli.Stdout = &cliOut
 	cli.Stderr = &cliOut
@@ -170,11 +158,11 @@ func reolinkListen(ctx context.Context, cred Credential) (*Hearing, error) {
 			if detail == "" && err != nil {
 				detail = err.Error()
 			}
-			err := fmt.Errorf("reolink-cli stopped hearing %s: %s", camera, detail)
+			err := fmt.Errorf("reolink-cli stopped hearing %s: %s", t.name, detail)
 			h.fail(err)
 			// A stale gateway is restarted for the next visit.
-			if unreachable(err) && localGateway(gateway) {
-				go ensureGateway(context.WithoutCancel(ctx), bin, gateway, true)
+			if unreachable(err) && localGateway(t.gateway) {
+				go ensureGateway(context.WithoutCancel(ctx), bin, t.gateway, true)
 			}
 		}
 		close(cliDone)

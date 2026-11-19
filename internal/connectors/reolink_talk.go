@@ -7,6 +7,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net"
+	"net/url"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -18,8 +20,10 @@ import (
 
 // Talkback (#667): Reolink's HTTP API has no way to speak through a
 // camera, so Toskar hands the audio to Reolink's own reolink-cli, which
-// does, with the camera added there under a name the connection gives as
-// talk_camera. The audio is raw 16-bit mono PCM at ReolinkTalkRate.
+// does. It reaches the connection's own camera, at its address and
+// channel with its login, so nobody has to add the camera to reolink-cli
+// or name it; a connection may still name one (talk_camera). The audio is
+// raw 16-bit mono PCM at ReolinkTalkRate.
 
 // ReolinkTalkRate is the rate reolink-cli's audio talk expects by default.
 const ReolinkTalkRate = 16000
@@ -46,7 +50,74 @@ var reolinkCLI = func() (string, error) {
 var (
 	talkNameRe = regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$`)
 	talkAddrRe = regexp.MustCompile(`^[A-Za-z0-9.\-\[\]:]{1,100}$`)
+	channelRe  = regexp.MustCompile(`^[0-9]{1,3}$`)
 )
+
+// DefaultGateway is where reolink-cli's gateway listens when a connection
+// doesn't say: reolink-cli's own default, which Toskar starts when nothing
+// listens there.
+const DefaultGateway = "127.0.0.1:9000"
+
+// reolinkPort is the port reolink-cli reaches a camera or hub on, Reolink's
+// own protocol's, whatever port its HTTP API answers on.
+const reolinkPort = "9000"
+
+// reolinkTarget is how reolink-cli reaches a connection's camera.
+type reolinkTarget struct {
+	args    []string // the camera, before the command
+	env     []string // the password, kept off the command line
+	gateway string
+	name    string // the camera, in messages
+}
+
+func targetOf(cred Credential) (reolinkTarget, error) {
+	t := reolinkTarget{gateway: strings.TrimSpace(cred["talk_gateway"])}
+	if t.gateway == "" {
+		t.gateway = DefaultGateway
+	}
+	if !talkAddrRe.MatchString(t.gateway) {
+		return t, fmt.Errorf("%q isn't an address such as 127.0.0.1:9000", t.gateway)
+	}
+	t.args = []string{"--gateway-addr", t.gateway}
+	if camera := strings.TrimSpace(cred["talk_camera"]); camera != "" {
+		if !talkNameRe.MatchString(camera) {
+			return t, fmt.Errorf("%q isn't a reolink-cli camera name", camera)
+		}
+		t.args = append(t.args, "--camera", camera)
+		t.name = camera
+		return t, nil
+	}
+	u, err := url.Parse(strings.TrimSpace(cred["url"]))
+	host := ""
+	if err == nil {
+		host = u.Hostname()
+	}
+	if host == "" || !talkAddrRe.MatchString(host) {
+		return t, errors.New("the connection's camera address isn't one reolink-cli can reach")
+	}
+	t.args = append(t.args, "--host="+net.JoinHostPort(host, reolinkPort))
+	if ch := strings.TrimSpace(cred["channel"]); ch != "" {
+		if !channelRe.MatchString(ch) {
+			return t, fmt.Errorf("%q isn't a channel number", ch)
+		}
+		t.args = append(t.args, "--channel="+ch)
+	}
+	if user := cred["username"]; user != "" {
+		t.args = append(t.args, "--user="+user)
+	}
+	t.env = []string{"REOLINK_PASSWORD=" + cred["password"]}
+	t.name = "the camera"
+	return t, nil
+}
+
+// command runs reolink-cli's args at the target.
+func (t reolinkTarget) command(ctx context.Context, bin string, args ...string) *exec.Cmd {
+	cmd := exec.CommandContext(ctx, bin, append(append([]string{}, t.args...), args...)...)
+	if len(t.env) > 0 {
+		cmd.Env = append(os.Environ(), t.env...)
+	}
+	return cmd
+}
 
 // Talk says samples, 16-bit mono at rate, through the service's camera.
 func (m *Manager) Talk(ctx context.Context, service string, samples []int16, rate int) error {
@@ -67,23 +138,26 @@ func (m *Manager) Talk(ctx context.Context, service string, samples []int16, rat
 	return nil
 }
 
-// CanTalk reports a connection that names its camera in reolink-cli.
+// CanTalk reports a Reolink connection and reolink-cli to speak through it.
 func (m *Manager) CanTalk(service string) bool {
+	if service != "reolink" {
+		return false
+	}
 	cred, err := m.credential(service)
-	return err == nil && service == "reolink" && strings.TrimSpace(cred["talk_camera"]) != ""
+	if err != nil {
+		return false
+	}
+	if _, err := targetOf(cred); err != nil {
+		return false
+	}
+	_, err = reolinkCLI()
+	return err == nil
 }
 
 func reolinkTalk(ctx context.Context, cred Credential, samples []int16, rate int) error {
-	camera := strings.TrimSpace(cred["talk_camera"])
-	if camera == "" {
-		return errors.New("to speak through the camera, add it to reolink-cli and give its name as the connection's Speaker")
-	}
-	if !talkNameRe.MatchString(camera) {
-		return fmt.Errorf("%q isn't a reolink-cli camera name", camera)
-	}
-	gateway := strings.TrimSpace(cred["talk_gateway"])
-	if gateway != "" && !talkAddrRe.MatchString(gateway) {
-		return fmt.Errorf("%q isn't an address such as 127.0.0.1:9000", gateway)
+	t, err := targetOf(cred)
+	if err != nil {
+		return err
 	}
 	if rate <= 0 || len(samples) == 0 {
 		return errors.New("nothing to say")
@@ -99,25 +173,20 @@ func reolinkTalk(ctx context.Context, cred Credential, samples []int16, rate int
 	pcm = append(pcm, make([]byte, 2*int(int64(rate)*int64(reolinkTail)/int64(time.Second)))...)
 	length := time.Duration(len(pcm)/2) * time.Second / time.Duration(rate)
 
-	ensureGateway(ctx, bin, gateway, false)
-	err = talkOnce(ctx, bin, camera, gateway, pcm, rate, length)
-	if unreachable(err) && localGateway(gateway) && ctx.Err() == nil {
+	ensureGateway(ctx, bin, t.gateway, false)
+	err = talkOnce(ctx, bin, t, pcm, rate, length)
+	if unreachable(err) && localGateway(t.gateway) && ctx.Err() == nil {
 		// A stale gateway: once more, after restarting it.
-		ensureGateway(ctx, bin, gateway, true)
-		err = talkOnce(ctx, bin, camera, gateway, pcm, rate, length)
+		ensureGateway(ctx, bin, t.gateway, true)
+		err = talkOnce(ctx, bin, t, pcm, rate, length)
 	}
 	return err
 }
 
-func talkOnce(ctx context.Context, bin, camera, gateway string, pcm []byte, rate int, length time.Duration) error {
-	args := []string{}
-	if gateway != "" {
-		args = append(args, "--gateway-addr", gateway)
-	}
-	args = append(args, "--camera", camera, "audio", "talk", "--stdin", "--sample-rate", strconv.Itoa(rate))
+func talkOnce(ctx context.Context, bin string, t reolinkTarget, pcm []byte, rate int, length time.Duration) error {
 	ctx, cancel := context.WithTimeout(ctx, length+20*time.Second)
 	defer cancel()
-	cmd := exec.CommandContext(ctx, bin, args...)
+	cmd := t.command(ctx, bin, "audio", "talk", "--stdin", "--sample-rate", strconv.Itoa(rate))
 	cmd.Stdin = bytes.NewReader(pcm)
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
@@ -132,7 +201,7 @@ func talkOnce(ctx context.Context, bin, camera, gateway string, pcm []byte, rate
 			return nil
 		}
 		if out.Error != nil {
-			return fmt.Errorf("reolink-cli couldn't speak through %s: %s", camera, talkError(out.Error))
+			return fmt.Errorf("reolink-cli couldn't speak through %s: %s", t.name, talkError(out.Error))
 		}
 	}
 	if runErr != nil {
@@ -140,9 +209,9 @@ func talkOnce(ctx context.Context, bin, camera, gateway string, pcm []byte, rate
 		if detail == "" {
 			detail = runErr.Error()
 		}
-		return fmt.Errorf("reolink-cli couldn't speak through %s: %s", camera, detail)
+		return fmt.Errorf("reolink-cli couldn't speak through %s: %s", t.name, detail)
 	}
-	return fmt.Errorf("reolink-cli didn't say it spoke through %s", camera)
+	return fmt.Errorf("reolink-cli didn't say it spoke through %s", t.name)
 }
 
 // lastLine is the last non-empty line of a command's output.
