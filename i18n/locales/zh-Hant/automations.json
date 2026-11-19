@@ -472,5 +472,13 @@
     "make": "建立連結",
     "makeNew": "建立新連結",
     "replaces": "新連結會讓舊連結失效。"
+  },
+  "door": {
+    "nobodyAnswered": "有人來到門口。Toskar 打了招呼，但沒有人回應。",
+    "stopped": "對話已中斷：{{error}}",
+    "you": "Toskar",
+    "visitor": "訪客",
+    "said": "在門口說的話：「{{words}}」",
+    "nobodyThere": "畫面中沒有人，所以沒有在門口說話。"
   }
 }

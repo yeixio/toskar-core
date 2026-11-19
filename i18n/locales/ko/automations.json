@@ -472,5 +472,13 @@
     "make": "링크 만들기",
     "makeNew": "새 링크 만들기",
     "replaces": "새 링크를 만들면 이전 링크는 더 이상 작동하지 않습니다."
+  },
+  "door": {
+    "nobodyAnswered": "누군가 현관에 왔습니다. Toskar가 인사했지만 아무도 대답하지 않았습니다.",
+    "stopped": "대화가 중단되었습니다: {{error}}",
+    "you": "Toskar",
+    "visitor": "방문자",
+    "said": "현관에서 한 말: “{{words}}”",
+    "nobodyThere": "화면에 아무도 없어서 현관에서는 아무 말도 하지 않았습니다."
   }
 }

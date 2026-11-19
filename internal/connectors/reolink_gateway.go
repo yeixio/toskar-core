@@ -70,7 +70,9 @@ func ensureGateway(ctx context.Context, bin, addr string, restart bool) {
 	}
 	if restart {
 		stop, cancel := context.WithTimeout(ctx, 5*time.Second)
-		_ = exec.CommandContext(stop, bin, "gateway", "stop").Run()
+		// Only the gateway at addr: another copy of Toskar, or one the
+		// person runs, may use another (#1340).
+		_ = exec.CommandContext(stop, bin, "--gateway-addr", addr, "gateway", "stop").Run()
 		cancel()
 		if gateway.cmd != nil && gateway.cmd.Process != nil {
 			_ = gateway.cmd.Process.Kill()

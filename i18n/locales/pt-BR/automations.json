@@ -476,5 +476,13 @@
     "make": "Criar um link",
     "makeNew": "Criar um link novo",
     "replaces": "Um link novo desativa o antigo."
+  },
+  "door": {
+    "nobodyAnswered": "Alguém veio à porta. O Toskar cumprimentou e ninguém respondeu.",
+    "stopped": "A conversa parou: {{error}}",
+    "you": "Toskar",
+    "visitor": "Visitante",
+    "said": "Dito na porta: “{{words}}”",
+    "nobodyThere": "Não havia ninguém na imagem, então nada foi dito na porta."
   }
 }

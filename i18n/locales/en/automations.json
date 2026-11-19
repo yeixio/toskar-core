@@ -474,5 +474,13 @@
     "make": "Make a link",
     "makeNew": "Make a new link",
     "replaces": "A new link stops the old one."
+  },
+  "door": {
+    "nobodyAnswered": "Someone came to the door. Toskar greeted them, and nobody answered.",
+    "stopped": "The conversation stopped: {{error}}",
+    "you": "Toskar",
+    "visitor": "Visitor",
+    "said": "Said at the door: “{{words}}”",
+    "nobodyThere": "Nobody was in the picture, so nothing was said at the door."
   }
 }

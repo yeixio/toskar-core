@@ -474,5 +474,13 @@
     "make": "Link erstellen",
     "makeNew": "Neuen Link erstellen",
     "replaces": "Ein neuer Link deaktiviert den alten."
+  },
+  "door": {
+    "nobodyAnswered": "Jemand war an der Tür. Toskar hat gegrüßt, aber niemand hat geantwortet.",
+    "stopped": "Das Gespräch wurde abgebrochen: {{error}}",
+    "you": "Toskar",
+    "visitor": "Besucher",
+    "said": "An der Tür gesagt: „{{words}}“",
+    "nobodyThere": "Auf dem Bild war niemand zu sehen, deshalb wurde an der Tür nichts gesagt."
   }
 }
