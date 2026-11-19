@@ -29,6 +29,13 @@ type ParsedRequest struct {
 	Notification Notification `json:"notification"`
 	// Notes say what was assumed, such as a time of day when none was given.
 	Notes []string `json:"notes"`
+	// Trigger, Cameras and Say are an automation that runs when something
+	// happens, such as a doorbell ringing, read from a request that says so
+	// (#1341). The schedule is then only how often a watched page is
+	// checked, and a device starts it at once.
+	Trigger *Trigger `json:"trigger,omitempty"`
+	Cameras []Camera `json:"cameras,omitempty"`
+	Say     *Say     `json:"say,omitempty"`
 }
 
 // Errors reading a request, with codes the apps show in their language.

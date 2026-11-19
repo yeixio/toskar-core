@@ -19,5 +19,6 @@
   "tools": "工具：{{tools}}",
   "asksFirst": "{{name}}（會先詢問）",
   "connectService": "連接 {{name}}",
-  "advanced": "進階"
+  "advanced": "進階",
+  "doorbellAutomation": "建立門鈴自動化"
 }

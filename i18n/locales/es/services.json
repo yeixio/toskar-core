@@ -19,5 +19,6 @@
   "tools": "Herramientas: {{tools}}",
   "asksFirst": "{{name}} (pregunta primero)",
   "connectService": "Conectar {{name}}",
-  "advanced": "Avanzado"
+  "advanced": "Avanzado",
+  "doorbellAutomation": "Crear una automatización del timbre"
 }

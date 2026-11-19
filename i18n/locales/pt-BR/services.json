@@ -19,5 +19,6 @@
   "tools": "Ferramentas: {{tools}}",
   "asksFirst": "{{name}} (pergunta antes)",
   "connectService": "Conectar {{name}}",
-  "advanced": "Avançado"
+  "advanced": "Avançado",
+  "doorbellAutomation": "Criar uma automação da campainha"
 }

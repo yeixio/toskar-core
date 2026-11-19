@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { HowItWorks, stepIcons } from '@/components/ui/HowItWorks'
-import { IDEAS, type IdeaId } from './ideas'
+import type { Device } from '@/types/api'
+import { availableIdeas, type IdeaId } from './ideas'
 
 /**
  * What an automation is, in three steps: when it runs, what Toskar does, and
@@ -24,7 +25,7 @@ export function AutomationsIntro({ mascot = false }: { mascot?: boolean }) {
 }
 
 /** Ready-made automations; choosing one opens the form with its few fields to fill in. */
-export function IdeaGallery({ onUse, compact = false }: { onUse: (idea: IdeaId) => void; compact?: boolean }) {
+export function IdeaGallery({ onUse, compact = false, devices = [] }: { onUse: (idea: IdeaId) => void; compact?: boolean; devices?: Device[] }) {
   const { t } = useTranslation('automations')
   return (
     <section className="space-y-3" aria-labelledby="automations-ideas-title">
@@ -32,7 +33,7 @@ export function IdeaGallery({ onUse, compact = false }: { onUse: (idea: IdeaId) 
         {t('ideas.title')}
       </h2>
       <ul className={compact ? 'grid gap-2' : 'grid gap-3 sm:grid-cols-2 xl:grid-cols-3'}>
-        {IDEAS.map(({ id }) => {
+        {availableIdeas(devices).map(({ id }) => {
           const title = t(`ideas.${id}.title`)
           return (
             <li key={id}>

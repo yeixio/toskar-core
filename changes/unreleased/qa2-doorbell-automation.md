@@ -1,0 +1,3 @@
+### Fixed
+
+- Setting up a doorbell automation is easier (#1341). Describing one, such as "When someone rings the doorbell, greet them and tell me who is there", now fills in what starts it, the camera, and speaking at the door, instead of an hourly schedule that looks at nothing. With a doorbell connected, Automations offers an Answer the door idea, and the connected camera links to it. Names an AI writes are in plain words, the card says "Never run" and "When someone rings Front Door", the doorbell button no longer asks what it changes to, and the details show the camera and what it does at the door.

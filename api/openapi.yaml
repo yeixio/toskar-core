@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Toskar Control Plane API
-  version: "1.114"
+  version: "1.115"
   description: >-
     Local AI control plane API for Toskar, its OpenAI-compatible routes, and its MCP server.
     On the default loopback bind no key is needed. When the daemon listens on any other address,
@@ -10543,6 +10543,40 @@ components:
           type: array
           description: '`notes` say what was assumed, such as a time of day when none was given.'
           items: {type: string}
+        trigger:
+          type: object
+          description: 'For a request that says it runs when something happens, such as the doorbell ringing (#1341, contract 1.115): the device that starts it'
+          required: [kind]
+          properties:
+            kind: {type: string, enum: [device]}
+            url: {type: string}
+            path: {type: string}
+            automation_id: {type: string}
+            when: {type: string}
+            connector: {type: string}
+            device: {type: string}
+            to: {type: string}
+            cooldown_seconds: {type: integer}
+        cameras:
+          type: array
+          description: The cameras it looks at as each run starts, read from the request (#1341)
+          items:
+            type: object
+            required: [connector, device]
+            properties:
+              connector: {type: string}
+              device: {type: string}
+        say:
+          type: object
+          description: 'Speaking at the door, for a request to greet or answer the visitor (#1341): connector reolink and device camera, and listen to talk with them'
+          required: [connector, device]
+          properties:
+            connector: {type: string, enum: [reolink]}
+            device: {type: string}
+            quiet_from: {type: string}
+            quiet_to: {type: string}
+            voice: {type: string}
+            listen: {type: boolean}
     AutomationRunInfo:
       type: object
       description: The durable record for one occurrence of an automation.

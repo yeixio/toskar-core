@@ -19,5 +19,6 @@
   "tools": "Tools: {{tools}}",
   "asksFirst": "{{name}} (asks first)",
   "connectService": "Connect {{name}}",
-  "advanced": "Advanced"
+  "advanced": "Advanced",
+  "doorbellAutomation": "Make a doorbell automation"
 }

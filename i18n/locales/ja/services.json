@@ -19,5 +19,6 @@
   "tools": "ツール：{{tools}}",
   "asksFirst": "{{name}}（事前に確認）",
   "connectService": "{{name}} を接続",
-  "advanced": "詳細設定"
+  "advanced": "詳細設定",
+  "doorbellAutomation": "インターホンのオートメーションを作成"
 }

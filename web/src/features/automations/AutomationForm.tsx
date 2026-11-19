@@ -25,7 +25,7 @@ import {
   visibleTask,
   weekdayName,
 } from './parseRequest'
-import { IDEAS, buildIdea, ideaDefaults, ideaReady, type IdeaField, type IdeaId, type IdeaValues } from './ideas'
+import { IDEAS, availableIdeas, buildIdea, ideaDefaults, ideaReady, isRing, type IdeaField, type IdeaId, type IdeaValues } from './ideas'
 import { ShownError, shownOr, type Shown } from '@/components/ui/ShownError'
 import { profileName } from '@/features/profiles/profilePresentation'
 
@@ -152,6 +152,20 @@ export function AutomationForm({ profiles, models, tools, others = [], initial, 
     if (parsed.notification.condition?.currency) setCurrency(parsed.notification.condition.currency)
     setNotes(parsed.notes ?? [])
     setParseError('')
+    // A request that runs when something happens, such as the doorbell
+    // ringing, fills in what starts it, its camera, and speaking at the
+    // door (#1341).
+    if (parsed.trigger?.kind === 'device' && parsed.trigger.device) {
+      setTriggerKind('device')
+      setTriggerURL(parsed.trigger.device)
+      setDeviceTo(parsed.trigger.to ?? '')
+      if (parsed.trigger.cooldown_seconds) setCooldown(parsed.trigger.cooldown_seconds)
+    }
+    if (parsed.cameras?.length) setCameraIDs(parsed.cameras.map((c) => c.device))
+    if (parsed.say) {
+      setSaying(true)
+      setListen(Boolean(parsed.say.listen))
+    }
   }
 
   function chooseIdea(id: IdeaId) {
@@ -162,10 +176,12 @@ export function AutomationForm({ profiles, models, tools, others = [], initial, 
   // A template's fields fill in the details directly, with no request to read.
   function applyIdea() {
     if (!idea || !ideaReady(idea, ideaValues)) return
-    const built = buildIdea(idea, ideaValues, schedule.time_zone || zone, readNumber)
+    const built = buildIdea(idea, ideaValues, schedule.time_zone || zone, readNumber, devices)
     fillFrom({ ...built, notes: [] })
-    setTriggerKind(built.trigger?.kind ?? '')
-    setTriggerURL(built.trigger?.path ?? built.trigger?.url ?? '')
+    if (built.trigger?.kind !== 'device') {
+      setTriggerKind(built.trigger?.kind ?? '')
+      setTriggerURL(built.trigger?.path ?? built.trigger?.url ?? '')
+    }
   }
 
   // Back to describing it, starting from the template's example.
@@ -383,7 +399,7 @@ export function AutomationForm({ profiles, models, tools, others = [], initial, 
           {initial || !showIdeas ? null : (
             <div className="flex flex-wrap items-center gap-1.5 pt-1">
               <span className="text-xs text-ink-faint">{t('form.ideas')}</span>
-              {IDEAS.map(({ id }) => (
+              {availableIdeas(devices).map(({ id }) => (
                 <button
                   key={id}
                   type="button"
@@ -466,6 +482,8 @@ export function AutomationForm({ profiles, models, tools, others = [], initial, 
                 ))}
               </select>
             </label>
+            {/* A doorbell's button has nothing sensible to type here (#1341). */}
+            {connectorOf(triggerURL) === 'reolink' && isRing(triggerURL) && !deviceTo ? null : (
             <label className="block space-y-1 text-sm">
               <span className="text-ink-muted">{t('form.deviceTo')}</span>
               <input
@@ -482,6 +500,7 @@ export function AutomationForm({ profiles, models, tools, others = [], initial, 
                 ))}
               </datalist>
             </label>
+            )}
             <label className="block space-y-1 text-sm">
               <span className="text-ink-muted">{t('form.cooldown')}</span>
               <select className="field w-full" value={cooldown} onChange={(event) => setCooldown(Number(event.target.value))}>

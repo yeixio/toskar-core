@@ -1,7 +1,7 @@
 {
   "page": {
     "title": "Automations",
-    "description": "Tasks Toskar's AI does for you on a schedule, such as a morning news brief or a price watch. They run in the background, even when this window is closed.",
+    "description": "Tasks Toskar's AI does for you on a schedule or when something happens, such as a morning news brief, a price watch, or answering the door. They run in the background, even when this window is closed.",
     "new": "New automation",
     "howItWorks": "How it works",
     "hideHowItWorks": "Hide how it works",
@@ -21,7 +21,9 @@
     "saveFailed": "Could not save the automation.",
     "confirmDelete": "Delete “{{name}}”? Its history is removed too.",
     "selectHint": "Select an automation to see its history, or create one.",
-    "createOff": "Making automations is turned off for your account. Ask an Admin to turn it on."
+    "createOff": "Making automations is turned off for your account. Ask an Admin to turn it on.",
+    "neverRun": "Never run",
+    "lastOnly": "Last {{last}}"
   },
   "intro": {
     "title": "Put Toskar to work while you're away",
@@ -86,6 +88,13 @@
       "name": "Folder summary: {{folderName}}",
       "task": "Summarize the files in the folder {{folder}}: what's new or changed, and anything that needs attention."
     },
+    "door": {
+      "title": "Answer the door",
+      "body": "Greet whoever rings the doorbell, find out why they came, and tell you.",
+      "request": "When someone rings the doorbell, look at the camera, greet the visitor through the doorbell and tell me who is there.",
+      "name": "Answer {{door}}",
+      "task": "Look at the picture from the door. Greet the visitor, find out who they are and why they came, and tell me."
+    },
     "fields": {
       "topics": {
         "label": "Topics",
@@ -137,7 +146,11 @@
     "olderRuns": "Show older runs",
     "loadingOlder": "Loading…",
     "lastChecked": "Last checked {{when}}, nothing new",
-    "nextCheck": "Next check {{when}}"
+    "nextCheck": "Next check {{when}}",
+    "door": "At the door",
+    "looksAt": "Looks at {{cameras}}",
+    "says": "Says its answer at the door",
+    "talks": "Talks with the visitor and finds out why they came"
   },
   "run": {
     "details": "Details",
@@ -461,7 +474,8 @@
     "deviceTo": "When {{device}} turns {{to}}",
     "after": "After {{name}} finishes",
     "afterNotified": "After {{name}} notifies",
-    "anotherAutomation": "another automation"
+    "anotherAutomation": "another automation",
+    "ring": "When someone rings {{door}}"
   },
   "webhook": {
     "title": "Webhook link",

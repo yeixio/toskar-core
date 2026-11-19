@@ -1,7 +1,7 @@
 {
   "page": {
     "title": "Automações",
-    "description": "Tarefas que a IA do Toskar faz por você em um horário, como um resumo das notícias pela manhã ou o acompanhamento de um preço. Elas rodam em segundo plano, mesmo com esta janela fechada.",
+    "description": "Tarefas que a IA do Toskar faz por você em um horário ou quando algo acontece, como um resumo de notícias pela manhã, acompanhar um preço ou atender a porta. Elas rodam em segundo plano, mesmo com esta janela fechada.",
     "new": "Nova automação",
     "howItWorks": "Como funciona",
     "hideHowItWorks": "Ocultar como funciona",
@@ -21,7 +21,9 @@
     "saveFailed": "Não foi possível salvar a automação.",
     "confirmDelete": "Apagar “{{name}}”? O histórico também será removido.",
     "selectHint": "Selecione uma automação para ver o histórico dela ou crie uma.",
-    "createOff": "Criar automações está desativado para sua conta. Peça a um Admin para ativar."
+    "createOff": "Criar automações está desativado para sua conta. Peça a um Admin para ativar.",
+    "neverRun": "Nunca executada",
+    "lastOnly": "Última {{last}}"
   },
   "intro": {
     "title": "Coloque o Toskar para trabalhar enquanto você está fora",
@@ -86,6 +88,13 @@
       "name": "Resumo da pasta: {{folderName}}",
       "task": "Resuma os arquivos da pasta {{folder}}: o que é novo ou mudou, e o que precisa de atenção."
     },
+    "door": {
+      "title": "Atender a porta",
+      "body": "Cumprimenta quem toca a campainha, descobre por que veio e avisa você.",
+      "request": "Quando alguém tocar a campainha, olhe a câmera, cumprimente o visitante pela campainha e me diga quem está lá.",
+      "name": "Atender {{door}}",
+      "task": "Olhe a imagem da porta. Cumprimente o visitante, descubra quem é e por que veio, e me conte."
+    },
     "fields": {
       "topics": {
         "label": "Assuntos",
@@ -137,7 +146,11 @@
     "olderRuns": "Mostrar execuções anteriores",
     "loadingOlder": "Carregando…",
     "lastChecked": "Última verificação {{when}}, nada novo",
-    "nextCheck": "Próxima verificação {{when}}"
+    "nextCheck": "Próxima verificação {{when}}",
+    "door": "Na porta",
+    "looksAt": "Olha {{cameras}}",
+    "says": "Diz a resposta na porta",
+    "talks": "Conversa com o visitante e descobre por que ele veio"
   },
   "run": {
     "details": "Detalhes",
@@ -463,7 +476,8 @@
     "deviceTo": "Quando {{device}} passa a {{to}}",
     "after": "Depois que {{name}} terminar",
     "afterNotified": "Depois que {{name}} notificar",
-    "anotherAutomation": "outra automação"
+    "anotherAutomation": "outra automação",
+    "ring": "Quando alguém toca a campainha de {{door}}"
   },
   "webhook": {
     "title": "Link de webhook",

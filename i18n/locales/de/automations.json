@@ -1,7 +1,7 @@
 {
   "page": {
     "title": "Automationen",
-    "description": "Aufgaben, die Toskars KI nach Plan für dich erledigt, etwa ein Nachrichtenüberblick am Morgen oder eine Preisbeobachtung. Sie laufen im Hintergrund, auch wenn dieses Fenster geschlossen ist.",
+    "description": "Aufgaben, die Toskars KI nach Plan oder bei einem Ereignis für dich erledigt, etwa ein Nachrichtenüberblick am Morgen, eine Preisbeobachtung oder das Öffnen der Tür. Sie laufen im Hintergrund, auch wenn dieses Fenster geschlossen ist.",
     "new": "Neue Automation",
     "howItWorks": "So funktioniert's",
     "hideHowItWorks": "Erklärung ausblenden",
@@ -21,7 +21,9 @@
     "saveFailed": "Die Automation konnte nicht gespeichert werden.",
     "confirmDelete": "„{{name}}“ löschen? Der Verlauf wird ebenfalls entfernt.",
     "selectHint": "Wähle eine Automation, um ihren Verlauf zu sehen, oder erstelle eine.",
-    "createOff": "Automationen erstellen ist für dein Konto ausgeschaltet. Bitte einen Admin, es einzuschalten."
+    "createOff": "Automationen erstellen ist für dein Konto ausgeschaltet. Bitte einen Admin, es einzuschalten.",
+    "neverRun": "Noch nie ausgeführt",
+    "lastOnly": "Zuletzt {{last}}"
   },
   "intro": {
     "title": "Lass Toskar arbeiten, während du weg bist",
@@ -86,6 +88,13 @@
       "name": "Ordnerübersicht: {{folderName}}",
       "task": "Fasse die Dateien im Ordner {{folder}} zusammen: was neu ist oder sich geändert hat und was Aufmerksamkeit braucht."
     },
+    "door": {
+      "title": "An die Tür gehen",
+      "body": "Begrüßt, wer klingelt, fragt nach dem Anlass und sagt dir Bescheid.",
+      "request": "Wenn jemand an der Tür klingelt, schau auf die Kamera, begrüße den Besucher über die Türklingel und sag mir, wer da ist.",
+      "name": "{{door}}: an die Tür gehen",
+      "task": "Schau dir das Bild von der Tür an. Begrüße den Besucher, finde heraus, wer er ist und warum er kommt, und sag es mir."
+    },
     "fields": {
       "topics": {
         "label": "Themen",
@@ -137,7 +146,11 @@
     "olderRuns": "Ältere Läufe anzeigen",
     "loadingOlder": "Wird geladen…",
     "lastChecked": "Zuletzt geprüft {{when}}, nichts Neues",
-    "nextCheck": "Nächste Prüfung {{when}}"
+    "nextCheck": "Nächste Prüfung {{when}}",
+    "door": "An der Tür",
+    "looksAt": "Schaut auf {{cameras}}",
+    "says": "Sagt die Antwort an der Tür",
+    "talks": "Spricht mit dem Besucher und fragt, warum er kommt"
   },
   "run": {
     "details": "Details",
@@ -461,7 +474,8 @@
     "deviceTo": "Wenn {{device}} zu {{to}} wechselt",
     "after": "Nachdem {{name}} fertig ist",
     "afterNotified": "Nachdem {{name}} benachrichtigt",
-    "anotherAutomation": "einer anderen Automation"
+    "anotherAutomation": "einer anderen Automation",
+    "ring": "Wenn jemand an {{door}} klingelt"
   },
   "webhook": {
     "title": "Webhook-Link",

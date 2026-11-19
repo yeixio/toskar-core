@@ -1,7 +1,7 @@
 {
   "page": {
     "title": "Automatisations",
-    "description": "Des tâches que l'IA de Toskar fait pour vous selon un horaire, comme un point sur l'actualité le matin ou la surveillance d'un prix. Elles s'exécutent en arrière-plan, même quand cette fenêtre est fermée.",
+    "description": "Des tâches que l’IA de Toskar fait pour vous selon un horaire ou quand quelque chose se passe, comme un résumé de l’actualité le matin, une surveillance de prix ou répondre à la porte. Elles s’exécutent en arrière-plan, même quand cette fenêtre est fermée.",
     "new": "Nouvelle automatisation",
     "howItWorks": "Comment ça marche",
     "hideHowItWorks": "Masquer l'explication",
@@ -21,7 +21,9 @@
     "saveFailed": "Impossible d'enregistrer l'automatisation.",
     "confirmDelete": "Supprimer « {{name}} » ? Son historique sera également supprimé.",
     "selectHint": "Sélectionnez une automatisation pour voir son historique, ou créez-en une.",
-    "createOff": "La création d'automatisations est désactivée pour votre compte. Demandez à un Admin de l'activer."
+    "createOff": "La création d'automatisations est désactivée pour votre compte. Demandez à un Admin de l'activer.",
+    "neverRun": "Jamais exécutée",
+    "lastOnly": "Dernière {{last}}"
   },
   "intro": {
     "title": "Faites travailler Toskar pendant votre absence",
@@ -86,6 +88,13 @@
       "name": "Résumé du dossier : {{folderName}}",
       "task": "Résume les fichiers du dossier {{folder}} : ce qui est nouveau ou a changé, et ce qui demande de l’attention."
     },
+    "door": {
+      "title": "Répondre à la porte",
+      "body": "Salue qui sonne, demande pourquoi il est venu, et vous prévient.",
+      "request": "Quand quelqu’un sonne à la porte, regarde la caméra, salue le visiteur par la sonnette et dis-moi qui est là.",
+      "name": "Répondre à {{door}}",
+      "task": "Regarde l’image de la porte. Salue le visiteur, découvre qui il est et pourquoi il est venu, et dis-le-moi."
+    },
     "fields": {
       "topics": {
         "label": "Sujets",
@@ -137,7 +146,11 @@
     "olderRuns": "Afficher les exécutions plus anciennes",
     "loadingOlder": "Chargement…",
     "lastChecked": "Vérifié pour la dernière fois {{when}}, rien de nouveau",
-    "nextCheck": "Prochaine vérification {{when}}"
+    "nextCheck": "Prochaine vérification {{when}}",
+    "door": "À la porte",
+    "looksAt": "Regarde {{cameras}}",
+    "says": "Dit sa réponse à la porte",
+    "talks": "Parle avec le visiteur et demande pourquoi il est venu"
   },
   "run": {
     "details": "Détails",
@@ -463,7 +476,8 @@
     "deviceTo": "Quand {{device}} passe à {{to}}",
     "after": "Après la fin de {{name}}",
     "afterNotified": "Après une notification de {{name}}",
-    "anotherAutomation": "une autre automatisation"
+    "anotherAutomation": "une autre automatisation",
+    "ring": "Quand quelqu’un sonne à {{door}}"
   },
   "webhook": {
     "title": "Lien webhook",
