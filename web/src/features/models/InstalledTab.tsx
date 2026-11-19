@@ -11,7 +11,7 @@ import type {
   RunningModelView,
 } from '@/types/api'
 import { formatBytes } from '@/lib/format'
-import { formatLastUsed, largerAlternative } from './modelPresentation'
+import { downloadBytes, formatLastUsed, largerAlternative } from './modelPresentation'
 import { SmallModelNote } from './SmallModelNote'
 import { NewerModelNote } from './NewerModelNote'
 import { CommunityScore, RateButton } from './ratings'
@@ -164,7 +164,7 @@ export function InstalledTab({
                   ) : (
                     <span>
                       {t('installedTab.installedOn', { where })}
-                      {model.size_bytes ? ` · ${formatBytes(model.size_bytes)}` : ''}
+                      {downloadBytes(model) ? ` · ${formatBytes(downloadBytes(model))}` : ''}
                     </span>
                   )}
                 </p>

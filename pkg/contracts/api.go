@@ -235,27 +235,31 @@ func (l ModelLicense) ForBusiness() bool {
 
 // Model is a catalog or installed model.
 type Model struct {
-	ID           string            `json:"id"`
-	DisplayName  string            `json:"display_name"`
-	Summary      string            `json:"summary,omitempty"`
-	Family       string            `json:"family,omitempty"`
-	Variant      string            `json:"variant,omitempty"`
-	Parameters   string            `json:"parameters,omitempty"` // e.g. "14B"
-	SizeBytes    uint64            `json:"size_bytes,omitempty"`
-	MemoryNeeded uint64            `json:"memory_needed_bytes,omitempty"`
-	Context      int               `json:"context,omitempty"`
-	Capabilities ModelCapabilities `json:"capabilities"`
-	Source       ModelSource       `json:"source,omitempty"`
-	Purpose      []string          `json:"purpose,omitempty"`
-	Tags         []string          `json:"tags,omitempty"` // coding, general, reasoning, vision, fast, large
-	Runtime      []string          `json:"runtime,omitempty"`
-	Roles        []string          `json:"recommended_roles,omitempty"`
-	Installed    bool              `json:"installed"`
-	InstalledOn  []ModelOnNode     `json:"installed_on,omitempty"`
-	Status       string            `json:"status,omitempty"` // available|downloading|installed|loading|running|stopping|error
-	LastUsedAt   *time.Time        `json:"last_used_at,omitempty"`
-	Fit          *ModelFit         `json:"fit,omitempty"`
-	Dynamic      bool              `json:"dynamic,omitempty"` // installed from browse-all / URL
+	ID           string `json:"id"`
+	DisplayName  string `json:"display_name"`
+	Summary      string `json:"summary,omitempty"`
+	Family       string `json:"family,omitempty"`
+	Variant      string `json:"variant,omitempty"`
+	Parameters   string `json:"parameters,omitempty"` // e.g. "14B"
+	SizeBytes    uint64 `json:"size_bytes,omitempty"`
+	MemoryNeeded uint64 `json:"memory_needed_bytes,omitempty"`
+	// DownloadBytes is everything an install downloads: the model file and,
+	// for one that sees pictures, its vision projector. Every screen shows
+	// this one figure as the download (#1343, contract 1.117).
+	DownloadBytes uint64            `json:"download_bytes,omitempty"`
+	Context       int               `json:"context,omitempty"`
+	Capabilities  ModelCapabilities `json:"capabilities"`
+	Source        ModelSource       `json:"source,omitempty"`
+	Purpose       []string          `json:"purpose,omitempty"`
+	Tags          []string          `json:"tags,omitempty"` // coding, general, reasoning, vision, fast, large
+	Runtime       []string          `json:"runtime,omitempty"`
+	Roles         []string          `json:"recommended_roles,omitempty"`
+	Installed     bool              `json:"installed"`
+	InstalledOn   []ModelOnNode     `json:"installed_on,omitempty"`
+	Status        string            `json:"status,omitempty"` // available|downloading|installed|loading|running|stopping|error
+	LastUsedAt    *time.Time        `json:"last_used_at,omitempty"`
+	Fit           *ModelFit         `json:"fit,omitempty"`
+	Dynamic       bool              `json:"dynamic,omitempty"` // installed from browse-all / URL
 	// SupportRole marks a model that serves Yggdrasil instead of chatting:
 	// SupportEmbedding, SupportReranker, or SupportClassifier. Empty for chat models.
 	SupportRole string `json:"support_role,omitempty"`

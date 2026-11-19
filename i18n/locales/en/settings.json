@@ -393,6 +393,7 @@
     "needs": {
       "chat": "To answer in voice mode, Toskar needs a chat model.",
       "vision": "To see who's at the door, Toskar needs a model that can see pictures.",
+      "both": "To answer in voice mode and see who's at the door, Toskar needs a model that chats and sees pictures. One model does both.",
       "offer": "{{name}} fits this computer ({{size}}).",
       "install": "Install {{name}}",
       "downloading": "Downloading {{name}}… {{percent}}%",

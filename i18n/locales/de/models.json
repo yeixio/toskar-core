@@ -160,7 +160,9 @@
     "parameters": "Parameter",
     "format": "Format",
     "runtime": "Laufzeit",
-    "modelId": "Modell-ID"
+    "modelId": "Modell-ID",
+    "download": "Download",
+    "memoryNeeded": "Benötigter Arbeitsspeicher"
   },
   "tightFit": {
     "label": "Passt knapp",
@@ -569,5 +571,9 @@
     "record": "Toskar speichert für deinen Admin, dass und wann du zugestimmt hast.",
     "cancel": "Abbrechen",
     "accept": "Akzeptieren und installieren"
+  },
+  "size": {
+    "download": "{{size}} Download",
+    "downloadMemory": "{{size}} Download · ca. {{memory}} Arbeitsspeicher"
   }
 }
