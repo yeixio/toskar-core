@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"regexp"
 	"strings"
 	"time"
 
@@ -195,10 +196,10 @@ func (v *doorVisit) drain(ctx context.Context, h *connectors.Hearing, d time.Dur
 }
 
 // doorTalkStyle is how Toskar talks with a visitor.
-const doorTalkStyle = `You're talking with a visitor at the front door, through its camera's speaker; they answer through its microphone. You already greeted them. Find out, politely and briefly, who they are and what they need, one question at a time. Never say whether anyone is home, never offer to open the door or let anyone in, and say nothing about the people who live here. If it's a delivery, ask them to leave it at the door. Keep each reply to one or two short sentences, with no formatting. When you know who they are and what they want, or they say goodbye or leave, thank them, say you'll pass the message on, and end that reply with ` + doneMark + `.`
+const doorTalkStyle = `You're talking with a visitor at the front door, through its camera's speaker; they answer through its microphone. You already greeted them. Find out, politely and briefly, who they are and what they need, one question at a time. Never say whether anyone is home, never offer to open the door or let anyone in, and say nothing about the people who live here. If it's a delivery, ask them to leave it at the door. Call them by a name only once they've said it's theirs: a name they mention may be someone else's, such as who sent a package. Keep each reply to one or two short sentences, with no formatting. When you know who they are and what they want, or they say goodbye or leave, thank them, say you'll pass the message on, and end that reply with ` + doneMark + `.`
 
 // doorSummaryStyle is how the visit is told to the people who live there.
-const doorSummaryStyle = `Below is a conversation at the front door between the house's assistant and a visitor. Write a short note for the people who live there: who came, what they wanted, and anything they should do, in at most three short sentences. Say only what the conversation says; if the visitor didn't say who they are or why they came, say so.`
+const doorSummaryStyle = `Below is a conversation at the front door between the house's assistant and a visitor. Write a short note for the people who live there: who came, what they wanted, and anything they should do, in at most three short sentences. Say only what the conversation says; if the visitor didn't say who they are or why they came, say so. A name the visitor mentions may be someone else's, such as who sent a package: say whose it is as they did. It's read as a phone notification: plain sentences, with no headings, lists, bold, or notes about yourself, this conversation, or how you were set up.`
 
 // talkAtDoor talks with the visitor an automation greeted, and returns the
 // run's result: the visit summed up, then what was said.
@@ -234,8 +235,31 @@ func (a *App) talkAtDoor(ctx context.Context, automation automations.Automation,
 	if sumErr != nil {
 		summary = ""
 	}
+	summary = plainSummary(summary)
 	result := strings.TrimSpace(summary + "\n\n" + transcript(lines))
 	return result, err
+}
+
+var (
+	listMarkRe = regexp.MustCompile(`^\s*(?:[-*•]|\d+[.)])\s+`)
+	inlineMark = regexp.MustCompile("[*_`#]+")
+)
+
+// plainSummary is the summary as a phone notification shows it: plain
+// sentences on one line. A small model wrote headings, bold, a list, and a
+// note about its own settings, for Mike's first visit (#667).
+func plainSummary(summary string) string {
+	var out []string
+	for _, line := range strings.Split(summary, "\n") {
+		line = inlineMark.ReplaceAllString(listMarkRe.ReplaceAllString(line, ""), "")
+		line = strings.TrimSpace(line)
+		lower := strings.ToLower(line)
+		if line == "" || strings.HasPrefix(lower, "(note") || strings.HasPrefix(lower, "note:") {
+			continue
+		}
+		out = append(out, line)
+	}
+	return strings.Join(out, " ")
 }
 
 // transcript is the visit, a line each.

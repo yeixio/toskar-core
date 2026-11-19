@@ -78,3 +78,33 @@ func sayAnswer(ctx context.Context, sp voice.Speaker, talk doorTalker, automatio
 	}
 	return text, nil
 }
+
+// warmDoorVoice readies the voice, and for a conversation the listening,
+// while the run looks at the camera and writes its greeting: started cold,
+// they held Mike's greeting back about 20 s after the doorbell saw him
+// (#667). What it says goes nowhere.
+func warmDoorVoice(ctx context.Context, parts voice.Parts, say *automations.Say, language string) {
+	if parts.Speaker != nil {
+		_, _ = parts.Speaker.Speak(ctx, "Hello.", say.Voice, language)
+	}
+	if say.Listen && parts.Transcriber != nil {
+		_, _ = parts.Transcriber.Transcribe(ctx, voice.WAV(make([]int16, voice.SampleRate/2), voice.SampleRate), language)
+	}
+}
+
+// warmDoor starts warmDoorVoice for an automation that speaks.
+func (a *App) warmDoor(ctx context.Context, automation automations.Automation) {
+	if automation.Say == nil {
+		return
+	}
+	parts, err := a.voiceParts(ctx)
+	if err != nil {
+		return
+	}
+	lang := a.replyLanguage(ctx, "", automation.Prompt, automation.ResponseLanguage).Tag
+	go func() {
+		ctx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 2*time.Minute)
+		defer cancel()
+		warmDoorVoice(ctx, parts, automation.Say, lang)
+	}()
+}

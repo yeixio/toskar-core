@@ -164,6 +164,7 @@ func (e automationExecutor) execute(ctx context.Context, automation automations.
 		}
 	}
 	defer env.releaseModels()
+	e.app.warmDoor(ctx, automation)
 
 	stream, err := orch.Run(ctx, contracts.Task{
 		ID:        automation.ID,

@@ -183,3 +183,39 @@ func TestDoorHearsAQuietMicrophone(t *testing.T) {
 		t.Fatal("the background started a turn")
 	}
 }
+
+// The summary of Mike's first visit came back as a list with bold, and a
+// note about the automation's settings; the notification gets plain
+// sentences (#667).
+func TestDoorSummaryIsPlain(t *testing.T) {
+	got := plainSummary("Based on the conversation:\n\n*   **Who came**: A courier with a package from Mike.\n*   **What they wanted**: To leave it.\n\n(Note: The specific Toskar automation settings were not detailed.)")
+	want := "Based on the conversation: Who came: A courier with a package from Mike. What they wanted: To leave it."
+	if got != want {
+		t.Fatalf("got %q", got)
+	}
+	if got := plainSummary("A courier left a package from Mike at the door."); got != "A courier left a package from Mike at the door." {
+		t.Fatalf("a plain summary changed: %q", got)
+	}
+}
+
+// The door's voice, and its listening for a conversation, are readied while
+// the run writes its greeting (#667).
+func TestWarmDoorVoice(t *testing.T) {
+	speaker := &fakeDoorVoice{}
+	ears := &countingEars{}
+	warmDoorVoice(context.Background(), voice.Parts{Speaker: speaker, Transcriber: ears}, &automations.Say{Voice: "kitten:en:eleanor", Listen: true}, "en")
+	if len(speaker.said) != 1 || ears.n != 1 {
+		t.Fatalf("spoke %v, heard %d times", speaker.said, ears.n)
+	}
+	warmDoorVoice(context.Background(), voice.Parts{Speaker: speaker, Transcriber: ears}, &automations.Say{}, "en")
+	if len(speaker.said) != 2 || ears.n != 1 {
+		t.Fatalf("a greeting without listening readied the listening: %d", ears.n)
+	}
+}
+
+type countingEars struct{ n int }
+
+func (c *countingEars) Transcribe(context.Context, []byte, string) (string, error) {
+	c.n++
+	return "", nil
+}
