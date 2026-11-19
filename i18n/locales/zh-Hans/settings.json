@@ -384,6 +384,7 @@
     "needs": {
       "chat": "要在语音模式中回答，Toskar 需要一个聊天模型。",
       "vision": "要看清门口是谁，Toskar 需要一个能看图片的模型。",
+      "both": "要在语音模式中回答并看到门口是谁，Toskar 需要一个能聊天也能看图片的模型。一个模型就能做到两者。",
       "offer": "{{name}} 适合这台电脑（{{size}}）。",
       "install": "安装 {{name}}",
       "downloading": "正在下载 {{name}}… {{percent}}%",

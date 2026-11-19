@@ -9,6 +9,7 @@ import { useMascotState } from '@/lib/ratatoskr/useMascotState'
 import { api } from '@/lib/api'
 import { subscribeEvents } from '@/lib/events'
 import { bytesToGb, formatBytes } from '@/lib/format'
+import { downloadBytes } from '@/features/models/modelPresentation'
 import {
   buildProfileFromRecommendation,
   presetIdForPurpose,
@@ -374,9 +375,9 @@ export function OnboardingPage() {
                     </p>
                     {model?.installed ? (
                       <p className="mt-1 text-xs text-ink-muted">{t('recommend.installed')}</p>
-                    ) : model?.size_bytes ? (
+                    ) : model && downloadBytes(model) ? (
                       <p className="mt-1 text-xs text-ink-muted">
-                        {t('recommend.download', { size: formatBytes(model.size_bytes) })}
+                        {t('recommend.download', { size: formatBytes(downloadBytes(model)) })}
                       </p>
                     ) : null}
                   </li>

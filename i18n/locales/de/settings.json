@@ -393,6 +393,7 @@
     "needs": {
       "chat": "Um im Sprachmodus zu antworten, braucht Toskar ein Chat-Modell.",
       "vision": "Um zu sehen, wer an der Tür ist, braucht Toskar ein Modell, das Bilder sehen kann.",
+      "both": "Um im Sprachmodus zu antworten und zu sehen, wer an der Tür ist, braucht Toskar ein Modell, das chattet und Bilder sieht. Ein Modell kann beides.",
       "offer": "{{name}} passt zu diesem Computer ({{size}}).",
       "install": "{{name}} installieren",
       "downloading": "{{name}} wird heruntergeladen… {{percent}} %",

@@ -162,7 +162,9 @@
     "parameters": "Parâmetros",
     "format": "Formato",
     "runtime": "Ambiente de execução",
-    "modelId": "ID do modelo"
+    "modelId": "ID do modelo",
+    "download": "Download",
+    "memoryNeeded": "Memória necessária"
   },
   "tightFit": {
     "label": "No limite",
@@ -577,5 +579,9 @@
     "record": "O Toskar guarda um registro de que você aceitou, com a data, para o seu Admin.",
     "cancel": "Cancelar",
     "accept": "Aceitar e instalar"
+  },
+  "size": {
+    "download": "{{size}} para baixar",
+    "downloadMemory": "{{size}} para baixar · cerca de {{memory}} de memória"
   }
 }

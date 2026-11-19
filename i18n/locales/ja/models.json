@@ -158,7 +158,9 @@
     "parameters": "パラメータ",
     "format": "フォーマット",
     "runtime": "ランタイム",
-    "modelId": "モデルID"
+    "modelId": "モデルID",
+    "download": "ダウンロード",
+    "memoryNeeded": "必要なメモリ"
   },
   "tightFit": {
     "label": "ぎりぎり",
@@ -561,5 +563,9 @@
     "record": "同意したことと日付を、Admin のために Toskar が記録します。",
     "cancel": "キャンセル",
     "accept": "同意してインストール"
+  },
+  "size": {
+    "download": "ダウンロード {{size}}",
+    "downloadMemory": "ダウンロード {{size}} · メモリ約{{memory}}"
   }
 }

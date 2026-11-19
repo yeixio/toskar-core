@@ -158,7 +158,9 @@
     "parameters": "参数",
     "format": "格式",
     "runtime": "运行时",
-    "modelId": "模型 ID"
+    "modelId": "模型 ID",
+    "download": "下载",
+    "memoryNeeded": "所需内存"
   },
   "tightFit": {
     "label": "勉强适合",
@@ -561,5 +563,9 @@
     "record": "Toskar 会为你的 Admin 记录你已接受及日期。",
     "cancel": "取消",
     "accept": "接受并安装"
+  },
+  "size": {
+    "download": "下载 {{size}}",
+    "downloadMemory": "下载 {{size}} · 约需 {{memory}} 内存"
   }
 }

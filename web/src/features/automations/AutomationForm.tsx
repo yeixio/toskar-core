@@ -114,7 +114,7 @@ export function AutomationForm({ profiles, models, tools, others = [], initial, 
       .then((v) => {
         if (!live) return
         if (Array.isArray(v?.languages)) setDoorVoices(v.languages.filter((l) => l.voices?.length > 0))
-        setVisionNeed(v?.needs?.find((n) => n.ability === 'vision') ?? null)
+        setVisionNeed(v?.needs?.find((n) => n.ability === 'vision' || n.ability === 'both') ?? null)
       })
       .catch(() => undefined)
     return () => {

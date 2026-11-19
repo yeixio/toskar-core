@@ -402,6 +402,7 @@
     "needs": {
       "chat": "Para responder en el modo de voz, Toskar necesita un modelo de chat.",
       "vision": "Para ver quién está en la puerta, Toskar necesita un modelo que pueda ver imágenes.",
+      "both": "Para responder en el modo de voz y ver quién está en la puerta, Toskar necesita un modelo que converse y vea imágenes. Un solo modelo hace ambas cosas.",
       "offer": "{{name}} cabe en este equipo ({{size}}).",
       "install": "Instalar {{name}}",
       "downloading": "Descargando {{name}}… {{percent}} %",

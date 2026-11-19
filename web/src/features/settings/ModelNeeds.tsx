@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { api } from '@/lib/api'
 import { subscribeEvents } from '@/lib/events'
-import { formatSize } from '@/i18n/format'
+import { formatBytes } from '@/lib/format'
 import { ShownError, shownError, type Shown } from '@/components/ui/ShownError'
 import type { ModelDownloadProgressPayload, ModelNeed } from '@/types/api'
 
@@ -62,7 +62,7 @@ function NeedRow({ need }: { need: ModelNeed }) {
 
   return (
     <li className="rounded-lg border border-line p-3 text-sm space-y-2">
-      <p className="text-ink">{need.ability === 'chat' ? t('voice.needs.chat') : t('voice.needs.vision')}</p>
+      <p className="text-ink">{t(`voice.needs.${need.ability}`)}</p>
       {!need.model ? (
         <p className="text-xs text-ink-muted">
           {t('voice.needs.none')}{' '}
@@ -84,7 +84,7 @@ function NeedRow({ need }: { need: ModelNeed }) {
       ) : (
         <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
           <span className="min-w-[min(100%,14rem)] flex-1 text-xs text-ink-muted">
-            {t('voice.needs.offer', { name: need.name, size: formatSize(need.size_bytes ?? 0, { base: 1000 }) })}
+            {t('voice.needs.offer', { name: need.name, size: t('models:size.download', { size: formatBytes(need.size_bytes) }) })}
           </span>
           <button
             type="button"

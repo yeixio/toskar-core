@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { installAction, modelToolAssessment, needsTightFitInstallWarning, speedLabel } from './modelPresentation'
+import { downloadBytes, installAction, modelToolAssessment, needsTightFitInstallWarning, sizeLabel, speedLabel } from './modelPresentation'
 import type { Model, ModelFit } from '@/types/api'
 
 function model(partial: Partial<Model>): Model {
@@ -80,5 +80,15 @@ describe('speedLabel', () => {
     expect(speedLabel(fit({ est_tok_per_sec: 26.4, tok_per_sec_measured: true }))).toBe(
       'Measured 26.4 tok/s',
     )
+  })
+})
+
+// Regression: toskar-core#1343
+describe('model sizes', () => {
+  it('shows one labeled download figure, with the memory it needs', () => {
+    const qwen = { id: 'q', display_name: 'Qwen', installed: false, capabilities: {}, size_bytes: 3 * 1024 ** 3, download_bytes: 3.5 * 1024 ** 3, memory_needed_bytes: 4.7 * 1024 ** 3 } as Model
+    expect(downloadBytes(qwen)).toBe(3.5 * 1024 ** 3)
+    expect(sizeLabel(qwen)).toMatch(/^3\.5 GB download · about 4\.7 GB of memory$/)
+    expect(downloadBytes({ size_bytes: 10 })).toBe(10)
   })
 })

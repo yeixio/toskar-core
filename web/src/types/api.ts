@@ -98,6 +98,8 @@ export interface Model {
   parameters?: string
   size_bytes?: number
   memory_needed_bytes?: number
+  /** Everything an install downloads: the model file and its vision projector (#1343, contract 1.117). */
+  download_bytes?: number
   context?: number
   capabilities: ModelCapabilities
   source?: ModelSource
@@ -1967,9 +1969,9 @@ export interface VoiceSettings {
   needs?: ModelNeed[]
 }
 
-/** A kind of model nothing installed does: chat, to answer in voice mode, or vision, to look at a camera. model is empty when none fits. */
+/** A kind of model nothing installed does: chat, to answer in voice mode, vision, to look at a camera, or both in one model (#1343). model is empty when none fits. */
 export interface ModelNeed {
-  ability: 'chat' | 'vision'
+  ability: 'chat' | 'vision' | 'both'
   model?: string
   name?: string
   size_bytes?: number

@@ -110,6 +110,18 @@ describe('VoiceSettings (#1304)', () => {
     expect(await screen.findByText(/Downloading Qwen 3.5 4B/)).toBeInTheDocument()
   })
 
+  // Regression: toskar-core#1343
+  it('offers one model when one covers voice mode and the door', async () => {
+    vi.mocked(api.getVoiceSettings).mockResolvedValue({
+      ...settings('installed', piperGerman),
+      needs: [{ ability: 'both', model: 'qwen3.5-4b-q4', name: 'Qwen 3.5 4B', size_bytes: 3.5 * 1024 ** 3 }],
+    })
+    renderIt()
+    expect(await screen.findByText(/One model does both/)).toBeInTheDocument()
+    expect(screen.getByText(/Qwen 3.5 4B fits this computer \(3\.5 GB download\)/)).toBeInTheDocument()
+    expect(screen.getAllByRole('button', { name: /^Install Qwen/ })).toHaveLength(1)
+  })
+
   // Regression: toskar-core#1342
   it('lists languages by name, calls dataset voices Standard, and says which languages have no voice', async () => {
     const piper = (language: string, id: string, name: string, standard = false) => ({

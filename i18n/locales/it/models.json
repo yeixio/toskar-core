@@ -162,7 +162,9 @@
     "parameters": "Parametri",
     "format": "Formato",
     "runtime": "Runtime",
-    "modelId": "ID del modello"
+    "modelId": "ID del modello",
+    "download": "Download",
+    "memoryNeeded": "Memoria necessaria"
   },
   "tightFit": {
     "label": "Al limite",
@@ -577,5 +579,9 @@
     "record": "Toskar tiene traccia della tua accettazione, con la data, per il tuo Admin.",
     "cancel": "Annulla",
     "accept": "Accetta e installa"
+  },
+  "size": {
+    "download": "{{size}} da scaricare",
+    "downloadMemory": "{{size}} da scaricare · circa {{memory}} di memoria"
   }
 }

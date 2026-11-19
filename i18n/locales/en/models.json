@@ -160,7 +160,9 @@
     "parameters": "Parameters",
     "format": "Format",
     "runtime": "Runtime",
-    "modelId": "Model ID"
+    "modelId": "Model ID",
+    "download": "Download",
+    "memoryNeeded": "Memory needed"
   },
   "tightFit": {
     "label": "Tight fit",
@@ -569,5 +571,9 @@
     "record": "Toskar keeps a record that you accepted, with the date, for your Admin.",
     "cancel": "Cancel",
     "accept": "Accept and install"
+  },
+  "size": {
+    "download": "{{size}} download",
+    "downloadMemory": "{{size}} download · about {{memory}} of memory"
   }
 }

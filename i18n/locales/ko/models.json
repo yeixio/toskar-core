@@ -158,7 +158,9 @@
     "parameters": "매개변수",
     "format": "형식",
     "runtime": "런타임",
-    "modelId": "모델 ID"
+    "modelId": "모델 ID",
+    "download": "다운로드",
+    "memoryNeeded": "필요한 메모리"
   },
   "tightFit": {
     "label": "빠듯함",
@@ -561,5 +563,9 @@
     "record": "Toskar는 동의한 사실과 날짜를 Admin을 위해 기록합니다.",
     "cancel": "취소",
     "accept": "동의하고 설치"
+  },
+  "size": {
+    "download": "다운로드 {{size}}",
+    "downloadMemory": "다운로드 {{size}} · 메모리 약 {{memory}}"
   }
 }
