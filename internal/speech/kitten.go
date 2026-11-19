@@ -44,15 +44,23 @@ var KittenRequirements = []string{
 }
 
 // KittenSpec is Kitten's Python environment. PyTorch's CPU build is enough
-// for the pronunciation model, and much smaller.
+// for the pronunciation model, and much smaller. Its packages aren't kept
+// in uv's cache, which would hold a second 1.3 GB copy that removing Kitten
+// leaves behind.
 func KittenSpec() pyenv.Spec {
-	return pyenv.Spec{Name: "speech-kitten", Requirements: KittenRequirements, InstallArgs: []string{"--torch-backend=cpu"}}
+	return pyenv.Spec{Name: "speech-kitten", Requirements: KittenRequirements, InstallArgs: []string{"--torch-backend=cpu", "--no-cache"}}
 }
 
-// kittenFiles are the files downloaded, about 140 MB: the 8-bit model, the
-// voices, and the pronunciation files, not the 4-bit model or the 327 MB
-// PyTorch weights.
-var kittenFiles = []string{"config.json", "vocab.json", "kitten_tts_2_mini.onnx", "voices_*.npz", "g2p/*", "g2p/**", "README.md"}
+// kittenFiles are the files downloaded, about 140 MB: the ONNX model, the
+// voices of the languages offered, and the pronunciation files, not the
+// 4-bit model or the 327 MB PyTorch weights.
+func kittenFiles() []string {
+	files := []string{"config.json", "vocab.json", "kitten_tts_2_mini.onnx", "g2p/*", "g2p/**", "README.md"}
+	for _, l := range kittenLanguages {
+		files = append(files, "voices_"+l+".npz")
+	}
+	return files
+}
 
 // KittenVoiceRe is a Kitten voice, such as kitten:en:eleanor: its language
 // and its key in the model's voices.
@@ -251,7 +259,7 @@ func (w *Worker) installKitten(ctx context.Context, stage func(string)) error {
 		return err
 	}
 	if _, err := w.ask(ctx, envKitten, map[string]any{"op": "fetch", "repo": KittenRepo, "revision": kittenRevision,
-		"dir": dir, "patterns": kittenFiles}); err != nil {
+		"dir": dir, "patterns": kittenFiles()}); err != nil {
 		return fmt.Errorf("couldn't download Kitten's voices: %w", err)
 	}
 	if err := os.WriteFile(w.Engine.kittenReadyFile(), []byte(kittenRevision+"\n"), 0o600); err != nil {
