@@ -118,3 +118,24 @@ func TestSayNoteDoorbellRangGreets(t *testing.T) {
 		t.Fatalf("motion isn't offered the silent answer: %q", n)
 	}
 }
+
+// A speaking run writes the words for the door and, after its mark, a note
+// for its owner on who came; only the words are said (#1339).
+func TestSplitSayKeepsTheOwnersNote(t *testing.T) {
+	// Regression: toskar-core#1339
+	cases := []struct{ in, door, owner string }{
+		{"Hi! Mike will be right there.\nFOR YOU: A courier in a brown uniform with a parcel.", "Hi! Mike will be right there.", "A courier in a brown uniform with a parcel."},
+		{"Hello!\n\n**For you:** Your neighbour Ana.", "Hello!", "Your neighbour Ana."},
+		{"Hello there.", "Hello there.", ""},
+		{"NOTHING\nFOR YOU: Only a cat.", "NOTHING", "Only a cat."},
+	}
+	for _, c := range cases {
+		door, owner := SplitSay(c.in)
+		if door != c.door || owner != c.owner {
+			t.Errorf("SplitSay(%q) = %q, %q", c.in, door, owner)
+		}
+	}
+	if n := SayNote(&Say{Connector: SayReolink, Device: "camera"}, true); !strings.Contains(n, OwnerMark) {
+		t.Fatalf("the run isn't asked for a note for its owner: %q", n)
+	}
+}

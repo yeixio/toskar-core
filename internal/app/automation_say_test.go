@@ -104,3 +104,17 @@ func TestSayAnswerInTheDoorsVoice(t *testing.T) {
 		t.Fatalf("voices %q", sp.voices)
 	}
 }
+
+// The owner is told who came, then what was said (#1339).
+func TestDoorResultTellsTheOwner(t *testing.T) {
+	// Regression: toskar-core#1339
+	if got := doorResult("A courier with a parcel.", "Hi! Leave it by the door."); got != "A courier with a parcel.\n\nSaid at the door: \"Hi! Leave it by the door.\"" {
+		t.Fatalf("result %q", got)
+	}
+	if got := doorResult("", "Hello!"); got != "Hello!" {
+		t.Fatalf("no note: %q", got)
+	}
+	if got := withOwnerNote("Ana, your neighbour.", "Visitor: hi"); got != "Ana, your neighbour.\n\nVisitor: hi" {
+		t.Fatalf("visit %q", got)
+	}
+}
