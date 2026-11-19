@@ -127,7 +127,6 @@ func turnsOf(events []event, pad int) []*heardTurn {
 	var answering *heardTurn
 	responses := map[string]*reply{}
 	var last *heardTurn // the last turn with a transcript, which an answer is to
-	var sentence *replySentence
 	for _, e := range events {
 		f := e.fields
 		switch e.Type {
@@ -157,7 +156,6 @@ func turnsOf(events []event, pad int) []*heardTurn {
 		case "response.audio_transcript.delta":
 			if rp := responses[str(f["response_id"])]; rp != nil {
 				rp.sentences = append(rp.sentences, replySentence{text: strings.TrimSpace(str(f["delta"]))})
-				sentence = &rp.sentences[len(rp.sentences)-1]
 			}
 		case "response.audio.delta":
 			if rp := responses[str(f["response_id"])]; rp != nil {
@@ -165,7 +163,7 @@ func turnsOf(events []event, pad int) []*heardTurn {
 					rp.firstAudioAt = e.at
 				}
 				if len(rp.sentences) > 0 {
-					sentence = &rp.sentences[len(rp.sentences)-1]
+					sentence := &rp.sentences[len(rp.sentences)-1]
 					sentence.audio = append(sentence.audio, decodeAudio(str(f["delta"]))...)
 				}
 			}
