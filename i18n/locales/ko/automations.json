@@ -424,7 +424,10 @@
       "unlock": "잠금 해제",
       "open_cover": "열기",
       "close_cover": "닫기"
-    }
+    },
+    "sayVoice": "음성",
+    "sayVoiceAutomatic": "설정에서 고른 언어의 음성",
+    "sayVoiceKitten": "Kitten"
   },
   "draft": {
     "label": "확인할 자동화",

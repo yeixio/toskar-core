@@ -33,6 +33,34 @@ voice: `POST /api/v1/speech/say` with `{text, voice, language}` answers a
 WAV file of a sentence or a few (at most 1000 characters), read by the same
 worker, and keeps nothing. It's plain HTTPS, so it works through the relay.
 
+## Voices
+
+Empty `voice` is the language's voice from the Voice settings (#1304): the
+one an Admin chose (`PUT /api/v1/speech/voices/{language}` with `{voice}`),
+or automatic: Kokoro where it speaks the language, then Kitten TTS 2 mini
+when it's installed, then Piper. A chosen voice that can't read falls back
+to the automatic one. `GET /api/v1/speech/voices` lists each language's
+voices and Kitten's install; `POST /api/v1/speech/kitten` installs Kitten in
+the background and `DELETE` removes it. All three are Admin only.
+
+Kitten TTS 2 mini (`KittenML/kitten-tts-2-mini`, Apache-2.0) runs in its own
+Python environment, `speech-kitten`, because kittenml's English
+pronunciation needs PyTorch (the CPU build), which the speech environment
+doesn't carry; the speech worker starts a second process from it. Its voices
+are named `kitten:<language>:<key>`, such as `kitten:en:eleanor`, and read at
+24 kHz. Wherever a Kitten voice is used, show "Powered by KittenML". The
+larger Kitten TTS 2, under the Stellon Labs Community License, isn't offered
+(#1319).
+
+Measured on an M5 Pro (#1304): the environment is 1.3 GB and the model
+189 MB (140 MB without the 4-bit model, which isn't downloaded). A warm
+sentence takes 0.36 s for about 3 s of English and 0.6 to 0.75 s in other
+languages; the first English sentence after the worker starts takes 2 to
+3 s while it loads spaCy and the pronunciation model, 20 s the very first
+time, which the install does once. The worker peaks near 1 GB. Japanese
+needs kittenml's `ja` extra, whose pyopenjtalk has no macOS wheel and builds
+with a C++ compiler, so it's left out for now (#1319).
+
 Audio both ways is `pcm16`: 16-bit little-endian PCM, mono, 24 kHz, base64.
 
 ## Events
@@ -41,7 +69,7 @@ From the client:
 
 | Event | What it does |
 | --- | --- |
-| `session.update` | Sets `voice` (a Kokoro voice such as `af_heart`, or a Piper voice; empty is the language's own), `turn_detection` (`server_vad` with `threshold` 0 to 1, `prefix_padding_ms`, `silence_duration_ms`, `create_response`, `interrupt_response`; `null` turns it off), `input_audio_transcription.language` (a hint such as `de`), and `modalities` (`["text"]` for text only). Only `pcm16` audio is taken. |
+| `session.update` | Sets `voice` (a Kitten voice such as `kitten:en:eleanor`, a Kokoro voice such as `af_heart`, or a Piper voice; empty is the language's own), `turn_detection` (`server_vad` with `threshold` 0 to 1, `prefix_padding_ms`, `silence_duration_ms`, `create_response`, `interrupt_response`; `null` turns it off), `input_audio_transcription.language` (a hint such as `de`), and `modalities` (`["text"]` for text only). Only `pcm16` audio is taken. |
 | `input_audio_buffer.append` | `audio`: the next piece of the microphone's audio. Send about 100 ms at a time. |
 | `input_audio_buffer.commit` | Ends a turn, when turn detection is off. |
 | `input_audio_buffer.clear` | Drops the turn so far. |
@@ -98,7 +126,8 @@ Errors are `error` events with `error.code`, such as `invalid_audio`,
   | Portuguese | `pf_dora` |
 
   Every other language, such as German, Japanese, Korean, and Chinese,
-  is Piper's voice for it. When Kokoro fails, Piper reads for the next 10
+  is Kitten's voice for it when Kitten TTS 2 mini is installed (except
+  Japanese, below), and Piper's otherwise. When Kokoro fails, Piper reads for the next 10
   minutes. Like Piper, Kokoro turns text into sounds with espeak-ng
   (GPL-3.0, installed on the person's computer with the speech packages).
 

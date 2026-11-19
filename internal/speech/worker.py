@@ -12,6 +12,12 @@ on stdout, with the request's id:
       reads in a Kokoro voice, such as af_heart, from the downloaded model
       and voices files; lang is espeak's, such as en-us. Answers as above,
       at 24 kHz.
+  {"id", "op": "speak", "engine": "kitten", "text", "voice", "lang", "model"}
+      reads in a Kitten TTS 2 mini voice, such as Eleanor, from the model
+      folder (toskar-core#1304); runs in Kitten's own environment. Answers
+      as above, at 24 kHz.
+  {"id", "op": "fetch", "repo", "revision", "dir", "patterns"}
+      downloads a Hugging Face repository's files at a revision into dir.
   {"id", "op": "ping"} answers {"id"}.
 Any failure answers {"id", "error"}; the worker goes on.
 """
@@ -26,6 +32,7 @@ import wave
 whisper = {}
 voices = {}
 kokoro = {}
+kitten = {}
 
 
 def transcribe(req):
@@ -99,9 +106,32 @@ def speak_kokoro(req):
     return {"pcm": base64.b64encode(pcm).decode("ascii"), "rate": rate}
 
 
+def speak_kitten(req):
+    import numpy as np
+    from kittenml.kittentts2_tiny import KittenTTS2Tiny
+
+    m = kitten.get(req["model"])
+    if m is None:
+        m = KittenTTS2Tiny(req["model"])
+        kitten[req["model"]] = m
+    samples = m.generate(req["text"], voice=req["voice"], language=req["lang"])
+    pcm = (np.clip(samples, -1.0, 1.0) * 32767).astype("<i2").tobytes()
+    return {"pcm": base64.b64encode(pcm).decode("ascii"), "rate": m.sample_rate}
+
+
+def fetch(req):
+    from huggingface_hub import snapshot_download
+
+    snapshot_download(repo_id=req["repo"], revision=req["revision"], local_dir=req["dir"],
+                      allow_patterns=req["patterns"])
+    return {}
+
+
 def speak(req):
     if req.get("engine") == "kokoro":
         return speak_kokoro(req)
+    if req.get("engine") == "kitten":
+        return speak_kitten(req)
     v = voice_for(req)
     buf = io.BytesIO()
     with wave.open(buf, "wb") as wav:
@@ -126,6 +156,8 @@ def main():
                 out = transcribe(req)
             elif op == "speak":
                 out = speak(req)
+            elif op == "fetch":
+                out = fetch(req)
             elif op == "ping":
                 out = {}
             else:

@@ -167,6 +167,14 @@ type Dependencies struct {
 	// Voice is live voice mode's stages for the caller (#795): speech to
 	// text, their chat, and text to speech.
 	Voice func(ctx context.Context) (voice.Parts, error)
+	// SpeechVoices are the Voice settings (#1304): Kitten TTS 2 mini's
+	// install and each language's voice. SetSpeechVoice chooses a
+	// language's voice, "" for automatic; InstallKitten starts installing
+	// Kitten in the background, and RemoveKitten deletes it. Admins only.
+	SpeechVoices   func(ctx context.Context) (speech.VoiceSettings, error)
+	SetSpeechVoice func(ctx context.Context, language, voice string) error
+	InstallKitten  func(ctx context.Context) error
+	RemoveKitten   func(ctx context.Context) error
 	// Transcribe turns an attached recording into text with speech.transcribe,
 	// wherever it runs (yeixio/toskar-apps#155).
 	Transcribe func(ctx context.Context, artifactID, language string) (Transcription, error)

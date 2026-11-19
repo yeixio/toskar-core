@@ -360,5 +360,34 @@
     "description": "Antworten verlinken nur Seiten, die ihre Quellen genannt haben. Toskar kann außerdem jede verlinkte Website fragen, ob die Seite noch erreichbar ist.",
     "check": "Links in Antworten prüfen",
     "checkHint": "Nach einer Antwort kontaktiert Toskar jede verlinkte Website und nennt unter der Antwort die Links, die sich nicht öffnen lassen. Jede Prüfung steht unter „Was diesen Computer verlassen hat“."
+  },
+  "voice": {
+    "title": "Stimme",
+    "description": "Die Stimmen, mit denen Toskar vorliest: im Live-Sprachmodus, bei vorgelesenen Antworten auf dem Handy und im Auto, und an der Türklingel.",
+    "unavailable": "Die Stimmeinstellungen sind auf diesem Computer nicht verfügbar.",
+    "failed": "Das hat nicht geklappt. Versuche es noch einmal.",
+    "kitten": {
+      "name": "Kitten TTS 2 mini",
+      "description": "Natürlichere Stimmen auf {{languages}}. Belegt mit den Stimmen etwa 1,5 GB auf diesem Computer, läuft auf dem Prozessor und braucht beim Sprechen etwa 1 GB Arbeitsspeicher.",
+      "install": "Installieren",
+      "retry": "Erneut versuchen",
+      "installing": "Programm wird installiert …",
+      "downloading": "Stimmen werden heruntergeladen …",
+      "warming": "Stimmen werden vorbereitet …",
+      "remove": "Entfernen",
+      "removeConfirm": "Kitten entfernen",
+      "keep": "Behalten"
+    },
+    "languages": "Stimme für jede Sprache",
+    "automatic": "Automatisch",
+    "automaticNamed": "Automatisch: {{voice}}",
+    "engine": {
+      "kitten": "Kitten",
+      "kokoro": "Kokoro",
+      "piper": "Piper"
+    },
+    "preview": "Anhören",
+    "previewIn": "Stimme für {{language}} anhören",
+    "previewFailed": "Die Hörprobe konnte nicht abgespielt werden."
   }
 }

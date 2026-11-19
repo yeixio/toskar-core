@@ -52,6 +52,7 @@
   "INVALID_RATING": "Eine Bewertung hat 1 bis 5 Sterne und Gründe aus der Liste.",
   "INVALID_RETENTION": "{{detail}}",
   "INVALID_SETTING": "„{{value}}“ ist kein gültiger Wert für {{setting}}.",
+  "INVALID_VOICE": "Mit dieser Stimme kann {{language}} hier nicht vorgelesen werden.",
   "JOIN_BAD_REQUEST": "{{detail}}",
   "JOIN_FAILED": "{{detail}}",
   "JOIN_NOT_REACHABLE": "Andere Computer können diesen nicht erreichen. Aktiviere „Andere Computer finden“ und starte Toskar neu.",

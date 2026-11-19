@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import type { AIProfile, Automation, AutomationAction, AutomationClockTime, AutomationInput, AutomationSchedule, AutomationTrigger, Device, DeviceConnector, Model, ParsedAutomation, ToolRecord } from '@/types/api'
+import type { AIProfile, Automation, AutomationAction, AutomationClockTime, AutomationInput, AutomationSchedule, AutomationTrigger, Device, DeviceConnector, Model, ParsedAutomation, ToolRecord, VoiceChoice } from '@/types/api'
 import i18n from '@/i18n'
 import { api } from '@/lib/api'
 import { canChat, modelUsesTools } from '@/features/models/modelPresentation'
@@ -8,9 +8,10 @@ import { Link } from 'react-router-dom'
 import type { AutomationPreview } from '@/types/api'
 import { useUIStore } from '@/stores/uiStore'
 import { answerLanguages, nameInItself } from '@/i18n/answerLanguages'
-import { currencyName, formatDate } from '@/i18n/format'
+import { currencyName, formatDate, formatLocale } from '@/i18n/format'
 import { readNumber } from './number'
 import { AutomationActions } from './AutomationActions'
+import { KITTEN_CREDIT } from '@/features/settings/voiceSamples'
 import {
   civilInputValue,
   civilToISO,
@@ -96,6 +97,22 @@ export function AutomationForm({ profiles, models, tools, others = [], initial, 
   const [quiet, setQuiet] = useState(Boolean(initial?.say?.quiet_from))
   const [quietFrom, setQuietFrom] = useState(initial?.say?.quiet_from || '22:00')
   const [quietTo, setQuietTo] = useState(initial?.say?.quiet_to || '07:00')
+  const [sayVoice, setSayVoice] = useState(initial?.say?.voice || '')
+  // The voices the door can speak in, from the Voice settings (#1304).
+  const [doorVoices, setDoorVoices] = useState<VoiceChoice[]>([])
+  useEffect(() => {
+    if (!saying) return
+    let live = true
+    api
+      .getVoiceSettings()
+      .then((v) => {
+        if (live && Array.isArray(v?.languages)) setDoorVoices(v.languages.filter((l) => l.voices?.length > 0))
+      })
+      .catch(() => undefined)
+    return () => {
+      live = false
+    }
+  }, [saying])
   // Calls it may make on its own, even from a trigger (#586).
   const [actions, setActions] = useState<AutomationAction[]>(initial?.actions ?? [])
   // The connected services' devices to pick from; none for someone who can't list them.
@@ -238,7 +255,7 @@ export function AutomationForm({ profiles, models, tools, others = [], initial, 
       actions: actions.length > 0 || initial?.actions?.length ? actions : undefined,
       // An edit that stops speaking sends one with no connector.
       say: saying
-        ? { connector: 'reolink', device: 'camera', ...(quiet ? { quiet_from: quietFrom, quiet_to: quietTo } : {}) }
+        ? { connector: 'reolink', device: 'camera', ...(quiet ? { quiet_from: quietFrom, quiet_to: quietTo } : {}), ...(sayVoice ? { voice: sayVoice } : {}) }
         : initial?.say
           ? { connector: '' }
           : undefined,
@@ -542,6 +559,26 @@ export function AutomationForm({ profiles, models, tools, others = [], initial, 
           </label>
           {saying ? (
             <div className="space-y-2 ps-6">
+              {doorVoices.length > 0 || sayVoice ? (
+                <label className="flex flex-wrap items-center gap-2">
+                  <span className="text-ink-muted">{t('form.sayVoice')}</span>
+                  <select className="field min-w-0 flex-1" value={sayVoice} onChange={(e) => setSayVoice(e.target.value)}>
+                    <option value="">{t('form.sayVoiceAutomatic')}</option>
+                    {sayVoice && !doorVoices.some((l) => l.voices.some((v) => v.id === sayVoice)) ? <option value={sayVoice}>{sayVoice}</option> : null}
+                    {doorVoices.map((l) => (
+                      <optgroup key={l.language} label={languageLabel(l.language)}>
+                        {l.voices.map((v) => (
+                          <option key={v.id} value={v.id}>
+                            {v.name}
+                            {v.engine === 'kitten' ? ` · ${t('form.sayVoiceKitten')}` : ''}
+                          </option>
+                        ))}
+                      </optgroup>
+                    ))}
+                  </select>
+                </label>
+              ) : null}
+              {sayVoice.startsWith('kitten:') ? <p className="text-xs text-ink-faint">{KITTEN_CREDIT}</p> : null}
               <label className="inline-flex items-center gap-2">
                 <input type="checkbox" checked={quiet} onChange={(e) => setQuiet(e.target.checked)} />
                 <span>{t('form.sayQuiet')}</span>
@@ -1117,4 +1154,13 @@ function previewNotification(
   }
   if (kind === 'available') return { mode, condition: { kind: 'available' } }
   return { mode, condition: { kind: 'significant' } }
+}
+
+/** A language's name in the App language, such as German for de. */
+function languageLabel(tag: string): string {
+  try {
+    return new Intl.DisplayNames([formatLocale()], { type: 'language' }).of(tag) ?? tag
+  } catch {
+    return tag
+  }
 }

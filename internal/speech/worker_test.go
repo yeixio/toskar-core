@@ -135,7 +135,7 @@ func TestWorkerChecksItsInput(t *testing.T) {
 func (w *Worker) current() *workerProc {
 	w.mu.Lock()
 	defer w.mu.Unlock()
-	return w.proc
+	return w.procs[envSpeech]
 }
 
 // fakeKokoro serves stand-ins for Kokoro's files, pinned as the real ones

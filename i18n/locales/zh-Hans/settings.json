@@ -351,5 +351,34 @@
     "description": "回答只链接来源提供的页面。Toskar 还可以询问每个被链接的网站，页面是否仍能打开。",
     "check": "检查回答中的链接",
     "checkHint": "回答写完后，Toskar 会联系每个被链接的网站，并在回答下方列出无法打开的链接。每次检查都会记录在“离开这台电脑的内容”中。"
+  },
+  "voice": {
+    "title": "语音",
+    "description": "Toskar 朗读时使用的语音：实时语音模式、在手机和车上朗读的回答，以及门铃。",
+    "unavailable": "此电脑上无法使用语音设置。",
+    "failed": "操作未成功，请重试。",
+    "kitten": {
+      "name": "Kitten TTS 2 mini",
+      "description": "更自然的{{languages}}语音。连同语音在此电脑上占用约 1.5 GB，在处理器上运行，朗读时约占用 1 GB 内存。",
+      "install": "安装",
+      "retry": "重试",
+      "installing": "正在安装程序…",
+      "downloading": "正在下载语音…",
+      "warming": "正在准备语音…",
+      "remove": "移除",
+      "removeConfirm": "移除 Kitten",
+      "keep": "保留"
+    },
+    "languages": "各语言的语音",
+    "automatic": "自动",
+    "automaticNamed": "自动：{{voice}}",
+    "engine": {
+      "kitten": "Kitten",
+      "kokoro": "Kokoro",
+      "piper": "Piper"
+    },
+    "preview": "试听",
+    "previewIn": "试听{{language}}语音",
+    "previewFailed": "无法播放试听。"
   }
 }

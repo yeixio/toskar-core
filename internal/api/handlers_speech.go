@@ -3,12 +3,14 @@ package api
 import (
 	"encoding/json"
 	"net/http"
+	"regexp"
 	"strconv"
 	"strings"
 	"unicode/utf8"
 
 	"github.com/gorilla/mux"
 	"github.com/yeixio/toskar-core/internal/artifacts"
+	"github.com/yeixio/toskar-core/internal/auth"
 	"github.com/yeixio/toskar-core/internal/speech"
 	"github.com/yeixio/toskar-core/internal/voice"
 )
@@ -22,6 +24,10 @@ func (s *Server) speechRoutes(api *mux.Router) {
 	api.HandleFunc("/speech", s.handleSpeech).Methods(http.MethodPost)
 	api.HandleFunc("/speech/transcribe", s.handleTranscribe).Methods(http.MethodPost)
 	api.HandleFunc("/speech/say", s.handleSay).Methods(http.MethodPost)
+	api.HandleFunc("/speech/voices", s.atLeast(auth.RoleAdmin, s.handleSpeechVoices)).Methods(http.MethodGet)
+	api.HandleFunc("/speech/voices/{language}", s.atLeast(auth.RoleAdmin, s.handleSetSpeechVoice)).Methods(http.MethodPut)
+	api.HandleFunc("/speech/kitten", s.atLeast(auth.RoleAdmin, s.handleInstallKitten)).Methods(http.MethodPost)
+	api.HandleFunc("/speech/kitten", s.atLeast(auth.RoleAdmin, s.handleRemoveKitten)).Methods(http.MethodDelete)
 	api.HandleFunc("/voice/realtime", s.handleRealtime).Methods(http.MethodGet)
 }
 
@@ -149,4 +155,76 @@ func (s *Server) handleSay(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Cache-Control", "no-store")
 	w.WriteHeader(http.StatusOK)
 	_, _ = w.Write(wav)
+}
+
+// handleSpeechVoices answers the Voice settings (#1304): Kitten TTS 2
+// mini's install and the voice each language is read aloud in.
+func (s *Server) handleSpeechVoices(w http.ResponseWriter, r *http.Request) {
+	if s.deps.SpeechVoices == nil {
+		writeErr(w, http.StatusNotImplemented, "NOT_IMPLEMENTED", "Speech isn't available.", nil)
+		return
+	}
+	v, err := s.deps.SpeechVoices(r.Context())
+	if err != nil {
+		writeErrFrom(w, http.StatusServiceUnavailable, "SPEECH_UNAVAILABLE", err)
+		return
+	}
+	writeJSON(w, http.StatusOK, v)
+}
+
+// speechLanguageRe is a language code read-aloud keeps a voice for.
+var speechLanguageRe = regexp.MustCompile(`^[a-z]{2,3}$`)
+
+// handleSetSpeechVoice chooses the voice a language is read aloud in; an
+// empty voice goes back to automatic.
+func (s *Server) handleSetSpeechVoice(w http.ResponseWriter, r *http.Request) {
+	if s.deps.SetSpeechVoice == nil || s.deps.SpeechVoices == nil {
+		writeErr(w, http.StatusNotImplemented, "NOT_IMPLEMENTED", "Speech isn't available.", nil)
+		return
+	}
+	lang := mux.Vars(r)["language"]
+	if !speechLanguageRe.MatchString(lang) {
+		writeErr(w, http.StatusBadRequest, "BAD_REQUEST", "language must be a code such as en or de", nil)
+		return
+	}
+	var body struct {
+		Voice string `json:"voice"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		writeErr(w, http.StatusBadRequest, "INVALID_JSON", "invalid body", nil)
+		return
+	}
+	if err := s.deps.SetSpeechVoice(r.Context(), lang, strings.TrimSpace(body.Voice)); err != nil {
+		writeErrFrom(w, http.StatusBadRequest, "INVALID_VOICE", err)
+		return
+	}
+	s.handleSpeechVoices(w, r)
+}
+
+// handleInstallKitten starts installing Kitten TTS 2 mini in the
+// background; the Voice settings show how it's going.
+func (s *Server) handleInstallKitten(w http.ResponseWriter, r *http.Request) {
+	if s.deps.InstallKitten == nil || s.deps.SpeechVoices == nil {
+		writeErr(w, http.StatusNotImplemented, "NOT_IMPLEMENTED", "Speech isn't available.", nil)
+		return
+	}
+	if err := s.deps.InstallKitten(r.Context()); err != nil {
+		writeErrFrom(w, http.StatusServiceUnavailable, "SPEECH_UNAVAILABLE", err)
+		return
+	}
+	s.handleSpeechVoices(w, r)
+}
+
+// handleRemoveKitten deletes Kitten TTS 2 mini; the languages it read go
+// back to their automatic voices.
+func (s *Server) handleRemoveKitten(w http.ResponseWriter, r *http.Request) {
+	if s.deps.RemoveKitten == nil || s.deps.SpeechVoices == nil {
+		writeErr(w, http.StatusNotImplemented, "NOT_IMPLEMENTED", "Speech isn't available.", nil)
+		return
+	}
+	if err := s.deps.RemoveKitten(r.Context()); err != nil {
+		writeErrFrom(w, http.StatusInternalServerError, "SPEECH_FAILED", err)
+		return
+	}
+	s.handleSpeechVoices(w, r)
 }

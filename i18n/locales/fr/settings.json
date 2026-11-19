@@ -369,5 +369,34 @@
     "description": "Les réponses ne renvoient qu'aux pages données par leurs sources. Toskar peut aussi demander à chaque site lié si la page s'ouvre encore.",
     "check": "Vérifier les liens des réponses",
     "checkHint": "Après une réponse, Toskar contacte chaque site lié et indique sous la réponse les liens qui ne s'ouvrent pas. Chaque vérification figure dans Ce qui a quitté cet ordinateur."
+  },
+  "voice": {
+    "title": "Voix",
+    "description": "Les voix avec lesquelles Toskar lit à voix haute : le mode vocal en direct, les réponses lues sur le téléphone et en voiture, et la sonnette.",
+    "unavailable": "Les réglages de voix ne sont pas disponibles sur cet ordinateur.",
+    "failed": "Ça n'a pas fonctionné. Réessayez.",
+    "kitten": {
+      "name": "Kitten TTS 2 mini",
+      "description": "Des voix plus naturelles en {{languages}}. Occupe environ 1,5 Go sur cet ordinateur, voix comprises, fonctionne sur le processeur et utilise environ 1 Go de mémoire quand elle parle.",
+      "install": "Installer",
+      "retry": "Réessayer",
+      "installing": "Installation du programme…",
+      "downloading": "Téléchargement des voix…",
+      "warming": "Préparation des voix…",
+      "remove": "Supprimer",
+      "removeConfirm": "Supprimer Kitten",
+      "keep": "Garder"
+    },
+    "languages": "Voix pour chaque langue",
+    "automatic": "Automatique",
+    "automaticNamed": "Automatique : {{voice}}",
+    "engine": {
+      "kitten": "Kitten",
+      "kokoro": "Kokoro",
+      "piper": "Piper"
+    },
+    "preview": "Écouter",
+    "previewIn": "Écouter la voix en {{language}}",
+    "previewFailed": "Impossible de lire l'extrait."
   }
 }

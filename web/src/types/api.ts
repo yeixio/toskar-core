@@ -1915,6 +1915,44 @@ export interface AutomationSay {
   device: 'camera'
   quiet_from?: string
   quiet_to?: string
+  /** The voice it speaks in, such as kitten:en:eleanor; empty is the language's voice from the Voice settings (#1304, contract 1.112). */
+  voice?: string
+}
+
+/** Kitten TTS 2 mini's install, for the Voice settings (#1304). */
+export interface KittenStatus {
+  state: 'not_installed' | 'installing' | 'installed' | 'failed'
+  /** While installing: program, voices, or warming. */
+  stage?: string
+  error?: string
+  /** Why it can't be installed on this computer. */
+  unavailable?: string
+  /** Shown wherever a Kitten voice is used. */
+  credit: string
+  url: string
+  license: string
+  languages: string[]
+}
+
+export interface VoiceOption {
+  id: string
+  name: string
+  description?: string
+  engine: 'kitten' | 'kokoro' | 'piper'
+}
+
+/** A language read aloud and its voices; voice is the chosen one, empty for automatic. */
+export interface VoiceChoice {
+  language: string
+  voice: string
+  automatic: string
+  voices: VoiceOption[]
+}
+
+/** The Voice settings (#1304, contract 1.112). Admins only. */
+export interface VoiceSettings {
+  kitten: KittenStatus
+  languages: VoiceChoice[]
 }
 
 export interface AutomationTrigger {

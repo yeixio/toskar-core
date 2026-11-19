@@ -2,6 +2,7 @@
   "about": "Text that is meant to read the same as English, so `scripts/i18n.py status` doesn't count it as untranslated: names, commands, units, and words a language shares with English, such as German Name or French Question. Keys under all stay in every language; the others are per language. CI fails when a listed key is no longer in English, or a language's listed key no longer matches English, so remove it then.",
   "all": [
     "apiAccess:keys.namePlaceholder",
+    "automations:form.sayVoiceKitten",
     "chat:attachments.kinds.pdf",
     "chat:tools.names.git.add",
     "chat:tools.names.git.commit",
@@ -34,6 +35,10 @@
     "profiles:tools.git.push.label",
     "profiles:tools.git.show.label",
     "profiles:tools.git.status.label",
+    "settings:voice.engine.kitten",
+    "settings:voice.engine.kokoro",
+    "settings:voice.engine.piper",
+    "settings:voice.kitten.name",
     "settings:whatLeft.sources.api"
   ],
   "de": [

@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"errors"
+	"strings"
 	"testing"
 	"time"
 
@@ -72,5 +73,34 @@ func TestSayNoteTellsTheRun(t *testing.T) {
 	note := automations.SayNote(&automations.Say{Connector: "reolink", Device: "camera"})
 	if note == "" || automations.SayNote(nil) != "" {
 		t.Fatalf("note = %q", note)
+	}
+}
+
+type voicedDoor struct{ voices []string }
+
+func (v *voicedDoor) Speak(_ context.Context, _, voiceName, _ string) ([]int16, error) {
+	v.voices = append(v.voices, voiceName)
+	if voiceName == "kitten:en:gone" {
+		return nil, errors.New("no such voice")
+	}
+	return make([]int16, voice.SampleRate), nil
+}
+
+// The door speaks in its own voice when one is chosen, and in the
+// language's voice when that one can't read (#1304).
+func TestSayAnswerInTheDoorsVoice(t *testing.T) {
+	ctx := context.Background()
+	afternoon := time.Date(2026, 11, 18, 15, 0, 0, 0, time.UTC)
+	auto := automations.Automation{Say: &automations.Say{Connector: "reolink", Device: "camera", Voice: "kitten:en:eleanor"}}
+	sp := &voicedDoor{}
+	if _, err := sayAnswer(ctx, sp, &fakeDoor{}, auto, "Hello!", "en", afternoon); err != nil {
+		t.Fatal(err)
+	}
+	auto.Say.Voice = "kitten:en:gone"
+	if _, err := sayAnswer(ctx, sp, &fakeDoor{}, auto, "Hello!", "en", afternoon); err != nil {
+		t.Fatal(err)
+	}
+	if strings.Join(sp.voices, ",") != "kitten:en:eleanor,kitten:en:gone," {
+		t.Fatalf("voices %q", sp.voices)
 	}
 }
