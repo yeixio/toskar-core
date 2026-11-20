@@ -340,6 +340,7 @@ The control API and the OpenAI-compatible API require a bearer token from other 
 | [Architecture](docs/architecture.md) | Subsystems and process layout |
 | [Glossary](docs/glossary.md) | Norse subsystem names and code paths |
 | [Design](docs/design.md) | Colors, type, components, states, keyboard patterns, and writing rules for the UI |
+| [Navigation and settings](docs/navigation-and-settings.md) | Where features and settings go in every Toskar UI, and the review checklist for new ones |
 | [API](docs/api.md) | Every route, the event stream, and the OpenAI-compatible API |
 | [Runtimes](docs/runtimes.md) | llama.cpp and external servers |
 | [Clustering](docs/clustering.md) | Discovery, pairing, placement |

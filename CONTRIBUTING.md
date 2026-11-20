@@ -86,6 +86,8 @@ Use the pull request template. Check "I agree to the Toskar Contributor License 
 
 This repository does not include an `AGENTS.md`. Follow the style of the package you are editing. See [docs/development.md](docs/development.md).
 
+UI changes follow [docs/design.md](docs/design.md) for how things look and behave, and [docs/navigation-and-settings.md](docs/navigation-and-settings.md) for where navigation and settings go.
+
 ## Runtime adapter contributions
 
 Read [docs/runtimes.md](docs/runtimes.md). An adapter implements `pkg/pluginapi.Runtime` and needs tests for detection and lifecycle. Open a runtime request first if the backend is new, so scope and licensing can be discussed before a large patch.

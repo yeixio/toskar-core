@@ -1,6 +1,6 @@
 # Design
 
-How the web UI looks and behaves: the tokens it is built from, the components and patterns to reuse, and the rules new UI follows. The desktop app shows this same UI. The source of truth is `web/src/index.css` (tokens and component classes), `web/src/lib/realms.ts` (page realms), and `web/src/lib/designSystem.ts` (accent use). This page explains them; when they disagree, fix this page.
+How the web UI looks and behaves: the tokens it is built from, the components and patterns to reuse, and the rules new UI follows. The desktop app shows this same UI. The source of truth is `web/src/index.css` (tokens and component classes), `web/src/lib/realms.ts` (page realms), and `web/src/lib/designSystem.ts` (accent use). This page explains them; when they disagree, fix this page. Where a feature or setting goes (navigation, settings categories, scope) is in [Navigation and settings](navigation-and-settings.md).
 
 ## Principles
 
@@ -197,3 +197,4 @@ Beyond what axe can see:
 - [ ] Headings in order; every control labeled.
 - [ ] Strings in all 10 languages.
 - [ ] `node scripts/screenshots/a11y.mjs` passes.
+- [ ] New navigation or settings pass the [navigation and settings review checklist](navigation-and-settings.md#11-design-review-checklist).
