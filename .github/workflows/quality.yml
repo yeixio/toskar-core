@@ -243,6 +243,13 @@ jobs:
         with:
           ref: ${{ inputs.ref || github.ref }}
           persist-credentials: false
+      # Models no run has read for QUALITY_MODEL_DAYS days, and old build
+      # cache, so the runner's disk doesn't fill.
+      - name: Remove models no run has used lately
+        # A ref from before the script was added has none: nothing is pruned.
+        run: "[ ! -x .github/scripts/quality-prune.sh ] || .github/scripts/quality-prune.sh"
+        env:
+          QUALITY_MODEL_DAYS: ${{ vars.QUALITY_MODEL_DAYS }}
       - name: Note the network counters
         run: scripts/ci-traffic.sh start
       - name: Build the daemon
@@ -610,6 +617,13 @@ jobs:
         with:
           ref: ${{ inputs.ref || github.ref }}
           persist-credentials: false
+      # Models no run has read for QUALITY_MODEL_DAYS days, and old build
+      # cache, so the runner's disk doesn't fill.
+      - name: Remove models no run has used lately
+        # A ref from before the script was added has none: nothing is pruned.
+        run: "[ ! -x .github/scripts/quality-prune.sh ] || .github/scripts/quality-prune.sh"
+        env:
+          QUALITY_MODEL_DAYS: ${{ vars.QUALITY_MODEL_DAYS }}
       - name: Build the daemon
         run: |
           target=runtime

@@ -277,7 +277,7 @@ the set confirms the license for that run.
   a key made for the run, and runs the tests in a Go container beside it, all
   under the runner's rootless Docker. Models and runtimes stay in the Docker
   volumes `toskar-quality-models` and `toskar-quality-runtimes`, so only the
-  first run downloads them. **Run workflow** takes a `ref` to test a branch
+  first run downloads them. Each run first removes the models no run has read for `QUALITY_MODEL_DAYS` days (default 21; `0` keeps them all) and build cache older than a week (`.github/scripts/quality-prune.sh`), so the volume doesn't grow with every model ever tested. **Run workflow** takes a `ref` to test a branch
   before it merges; the workflow itself always comes from main. Extra
   `docker run` flags for the daemon, such as GPU access, go in the variable
   `QUALITY_DOCKER_FLAGS`. The daemon is held to `QUALITY_MEMORY` (default
