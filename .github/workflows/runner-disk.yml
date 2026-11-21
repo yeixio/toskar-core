@@ -4,7 +4,8 @@ name: Runner disk
 # images and build cache that nothing removed: on linux-rig they reached
 # 123G and 131G (2026-11). Each week this removes images no container uses
 # and build cache that neither is older than BUILD_CACHE_DAYS (default 7).
-# Volumes and running containers are never touched. The quality runner's own
+# Volumes and running containers are never touched. Tool versions no job
+# has used for TOOL_CACHE_DAYS (default 30) go from the shared tool cache. The quality runner's own
 # Docker is pruned by the quality runs (.github/scripts/quality-prune.sh).
 
 on:
@@ -26,6 +27,7 @@ jobs:
     timeout-minutes: 30
     env:
       DAYS: ${{ vars.BUILD_CACHE_DAYS || '7' }}
+      TOOL_DAYS: ${{ vars.TOOL_CACHE_DAYS || '30' }}
     steps:
       - name: Prune Docker
         run: |
@@ -43,3 +45,17 @@ jobs:
             echo
             echo "After: $(df -h / | awk 'NR==2 {print $4 " free of " $2}')"
           } | tee -a "$GITHUB_STEP_SUMMARY"
+      # The runners share one tool cache (RUNNER_TOOL_CACHE in each runner's
+      # .env). A tool version no job has read for TOOL_CACHE_DAYS days goes;
+      # setup-go, setup-node and the rest download it again when asked.
+      - name: Prune the tool cache
+        run: |
+          [[ "$TOOL_DAYS" =~ ^[0-9]+$ ]] || { echo "::error::TOOL_CACHE_DAYS must be a whole number."; exit 1; }
+          [ "$TOOL_DAYS" != 0 ] && [ -d "$RUNNER_TOOL_CACHE" ] || exit 0
+          for v in "$RUNNER_TOOL_CACHE"/*/*/; do
+            [ -d "$v" ] || continue
+            if [ -z "$(find "$v" -type f -atime "-$TOOL_DAYS" -print -quit)" ]; then
+              echo "Removing ${v#"$RUNNER_TOOL_CACHE"/} ($(du -sh "$v" | cut -f1)), unread for $TOOL_DAYS days"
+              rm -rf "$v" "${v%/}.complete"
+            fi
+          done | tee -a "$GITHUB_STEP_SUMMARY"
