@@ -27,6 +27,7 @@ import (
 	"github.com/yeixio/toskar-core/internal/browser"
 	"github.com/yeixio/toskar-core/internal/cache"
 	"github.com/yeixio/toskar-core/internal/codeexec"
+	"github.com/yeixio/toskar-core/internal/comfyui"
 	"github.com/yeixio/toskar-core/internal/config"
 	"github.com/yeixio/toskar-core/internal/connectors"
 	"github.com/yeixio/toskar-core/internal/diagnostics"
@@ -110,18 +111,20 @@ type App struct {
 	// People are who use this Toskar, and their roles (#206).
 	People           *auth.People
 	AutomationRunner *automations.Runner
-	Scheduler        *scheduler.Scheduler
-	Tools            *tools.Registry
-	Nodes            *nodes.Manager
-	APIKeys          *auth.APIKeyManager
-	Pairing          *auth.PairingManager
-	Identity         *auth.NodeIdentity
-	Benchmarks       *benchmark.Runner
-	HF               *hfclient.Client
-	Lifecycle        *lifecycle.Sweeper
-	Health           *modelhealth.Monitor
-	Mimir            *mimir.Store
-	Muninn           *muninn.Store
+	// doorGreetings keeps the door's greeting as read, by voice (#667).
+	doorGreetings sync.Map
+	Scheduler     *scheduler.Scheduler
+	Tools         *tools.Registry
+	Nodes         *nodes.Manager
+	APIKeys       *auth.APIKeyManager
+	Pairing       *auth.PairingManager
+	Identity      *auth.NodeIdentity
+	Benchmarks    *benchmark.Runner
+	HF            *hfclient.Client
+	Lifecycle     *lifecycle.Sweeper
+	Health        *modelhealth.Monitor
+	Mimir         *mimir.Store
+	Muninn        *muninn.Store
 	// Projects keep chats together with what they share (#1136).
 	Projects *projects.Service
 	// Swarms are several agents working at once, each in a chat (#1135).
@@ -130,6 +133,8 @@ type App struct {
 	portKeeper portmap.Keeper
 	// relay is the relay client while access from anywhere is on (#456).
 	relayMu sync.Mutex
+	// tlsSwitch replaces an API certificate that names the computer (#1263).
+	tlsSwitch *tlsSwitch
 	// reach is the outside check's last result (#546).
 	reach reachChecker
 	// anywhere is access from anywhere bought in Settings (#639).
@@ -161,11 +166,15 @@ type App struct {
 	// External is the OpenAI-compatible server whose models can be chosen
 	// for a chat (#111).
 	External *external.Runtime
-	secrets  *auth.SecretStore
-	extMu    sync.Mutex
-	extList  []contracts.Model
-	extAt    time.Time
-	extErr   error
+	// Comfy is a ComfyUI an Admin connected, and ComfyFlows the workflows
+	// saved for it (#958).
+	Comfy      *comfyui.Client
+	ComfyFlows *comfyui.Store
+	secrets    *auth.SecretStore
+	extMu      sync.Mutex
+	extList    []contracts.Model
+	extAt      time.Time
+	extErr     error
 	// Ratings is community model ratings (#37).
 	Ratings *ratings.Service
 	// identity is this computer's Bifrost key; joinTokens and networkMu
@@ -267,6 +276,8 @@ type App struct {
 	chatPlaces map[string]chatPlace
 	// Speech transcribes audio and reads text aloud (Gungnir §18–19).
 	Speech *speech.Engine
+	// voiceWorker keeps live voice mode's speech models loaded (#795).
+	voiceWorker *speech.Worker
 	// frames keeps recent videos' sampled frames (#191).
 	frames frameCache
 	// toolNet places heavy tools on the computer that suits them, and
@@ -279,6 +290,9 @@ type App struct {
 	Images *imagegen.Setup
 	// Video makes short clips on this computer (Gungnir §27).
 	Video *imagegen.Setup
+	// videoEngine makes them, and knows how long a clip takes here, for
+	// estimating a longer video before it starts (#790).
+	videoEngine *imagegen.Engine
 	// media is the picture or clip being made here, which holds memory
 	// and model starts until it ends (#541).
 	media mediaHold
@@ -453,6 +467,8 @@ func New(opts Options) (*App, error) {
 		instances:     opts.Instances,
 		People:        people,
 		External:      extRuntime,
+		Comfy:         newComfyUI(cfg, secrets),
+		ComfyFlows:    &comfyui.Store{Path: filepath.Join(cfg.DataDir, "comfyui", "workflows.json")},
 		secrets:       secrets,
 		Share:         share.New(0),
 		Config:        cfgMgr,
@@ -472,7 +488,7 @@ func New(opts Options) (*App, error) {
 		APIKeys:       apiKeyMgr,
 		Pairing:       pairing,
 		Identity:      identity,
-		hw:            &hardware.Detector{DataPath: cfg.DataDir},
+		hw:            &hardware.Detector{DataPath: cfg.DataDir, MaxAge: hardwareMaxAge, StaleAge: hardwareStaleAge},
 		stubInference: config.EnvTruthy("STUB_INFERENCE"),
 		Health:        healthMonitor,
 	}
@@ -499,7 +515,7 @@ func New(opts Options) (*App, error) {
 	}
 	// Connected services add tools; their credentials stay in the secrets
 	// directory and are added only when a tool runs (§32).
-	a.Connectors = connectors.NewManager(db.SQL, secrets, toolReg, connectors.GitHub{}, connectors.HomeAssistant{}, connectors.Email{}, connectors.Calendar{})
+	a.Connectors = connectors.NewManager(db.SQL, secrets, toolReg, connectors.GitHub{}, connectors.HomeAssistant{}, connectors.Email{}, connectors.Calendar{}, connectors.Flights{}, connectors.Reolink{})
 	if err := a.Connectors.Load(context.Background()); err != nil {
 		logger.Warn("load connected services", "error", err)
 	}
@@ -626,13 +642,20 @@ func New(opts Options) (*App, error) {
 		RemoteReach:        a.remoteReach,
 		CheckReach:         a.checkReach,
 		Transcribe:         a.transcribeRecording,
+		Voice:              a.voiceParts,
+		SpeechVoices:       a.speechVoices,
+		SetSpeechVoice:     a.setSpeechVoice,
+		InstallKitten:      a.installKitten,
+		RemoveKitten:       a.removeKitten,
 		RouteSecret:        a.routeSecret,
 		RelayName:          func() string { return relayName(a.Config.Get()) },
-		RelayToken:         a.relayToken,
-		SetRelayToken:      a.setRelayToken,
+		DeviceRelayToken:   a.deviceRelayToken,
+		SetRelayToken:      a.setRelayTokenFromDevice,
 		Subscription:       a.subscription,
 		StartCheckout:      a.startCheckout,
 		ManageSubscription: a.manageSubscription,
+		CancelCheckout:     a.cancelCheckout,
+		MoveSubscription:   a.moveSubscription,
 		GetSettings: func(ctx context.Context) (contracts.SettingsView, error) {
 			return a.settingsView(ctx)
 		},
@@ -708,6 +731,8 @@ func New(opts Options) (*App, error) {
 		InstallModel: func(ctx context.Context, id string, wait bool, nodeID string) error {
 			return a.installModelOn(ctx, id, nodeID, wait)
 		},
+		AcceptModelLicense:      a.AcceptModelLicense,
+		ModelLicenseAcceptances: a.ModelLicenseAcceptances,
 		InstallModelFromURL: func(ctx context.Context, req contracts.InstallFromURLRequest, wait bool) (string, error) {
 			return a.installFromURLOn(ctx, req, wait)
 		},
@@ -928,6 +953,7 @@ func New(opts Options) (*App, error) {
 	a.joinTokens = &join.Tokens{DB: db.SQL}
 	a.API.BindNetwork(a)
 	a.API.BindExternal(a)
+	a.API.BindComfyUI(a)
 	a.API.BindRuns(a.RunLog)
 	a.API.BindCapabilities(a)
 	a.API.BindCaches(a)
@@ -999,6 +1025,7 @@ func New(opts Options) (*App, error) {
 		WorkDir: filepath.Join(cfg.DataDir, "code-runs"), PythonRoot: a.python.Root})
 	// Speech runs on this computer; models are kept with the runtimes.
 	a.Speech = &speech.Engine{Python: a.python, Dir: filepath.Join(cfg.RuntimesDir, "speech")}
+	a.voiceWorker = &speech.Worker{Engine: a.Speech, Choice: a.chosenVoice}
 	a.toolNet = a.newToolNetwork(cfg)
 	a.registerPortable(&speech.TranscribeTool{Engine: a.Speech, Store: a.Artifacts})
 	a.registerPortable(&speech.SynthesizeTool{Engine: a.Speech, Store: a.Artifacts})
@@ -1056,6 +1083,10 @@ func New(opts Options) (*App, error) {
 	a.Video = a.newVideoSetup(cfg)
 	videos := &imagegen.Engine{Setup: a.Video, WorkDir: filepath.Join(cfg.DataDir, "video-jobs"), What: "video generation", Room: a.mediaRoom, Logger: logger}
 	a.registerPortable(&imagegen.VideoTool{Engine: videos, Store: a.Artifacts})
+	a.registerPortable(&imagegen.ExtendTool{Engine: videos, Store: a.Artifacts})
+	a.registerPortable(&imagegen.ShotsTool{Engine: videos, Store: a.Artifacts})
+	a.videoEngine = videos
+	a.Tools.Register(&comfyTool{app: a})
 	a.API.BindVideo(a.Video)
 	a.API.BindRemoteMediaSetup(a.RemoteMediaSetup)
 	a.API.BindMediaElsewhere(a.mediaElsewhere)
@@ -1102,6 +1133,16 @@ func New(opts Options) (*App, error) {
 
 	return a, nil
 }
+
+// hardwareMaxAge is how long a look at this computer's hardware holds: long
+// enough for one turn's several questions, short enough that free memory
+// and disk stay current (#795).
+const hardwareMaxAge = 10 * time.Second
+
+// hardwareStaleAge is how old a look may be and still answer while a fresh
+// one runs behind it: a spoken conversation pauses longer than
+// hardwareMaxAge between turns, and the turn shouldn't wait on the look.
+const hardwareStaleAge = 5 * time.Minute
 
 func (a *App) detectHardware(ctx context.Context) (contracts.HardwareInventory, error) {
 	return a.hw.Detect(ctx)
@@ -1168,6 +1209,17 @@ func (a *App) authorizeControlRequest(r *http.Request) error {
 	return nil
 }
 
+// staleDeviceKey reports a device key that's likely left over (#1266): never
+// used a day after it was made, as after an unfinished pairing, or not used
+// for 90 days. The web's Devices list marks the same keys.
+func staleDeviceKey(k auth.APIKeyRecord, now time.Time) bool {
+	const day = 24 * time.Hour
+	if k.LastUsed == nil {
+		return now.Sub(k.CreatedAt) > day
+	}
+	return now.Sub(*k.LastUsed) > 90*day
+}
+
 // whoCanConnect counts what could use the API from the network: API keys,
 // connected devices, a trusted proxy or OpenID Connect provider that signs
 // people in, and people other than the Owner, who sign in with a password
@@ -1182,6 +1234,9 @@ func (a *App) whoCanConnect(ctx context.Context) (contracts.NetworkAccess, error
 	for _, k := range keys {
 		if k.Kind == auth.KindDevice {
 			n.Devices++
+			if staleDeviceKey(k, time.Now()) {
+				n.StaleDevices++
+			}
 		} else {
 			n.Keys++
 		}
@@ -1410,6 +1465,12 @@ func (a *App) Start(ctx context.Context) error {
 		}()
 	}
 	a.indexKnowledge(ctx)
+	// Admins hear once of a newer generation of an installed model (#593).
+	a.wg.Add(1)
+	go func() {
+		defer a.wg.Done()
+		a.noticeNewerModels(ctx)
+	}()
 	if a.AutomationRunner != nil {
 		a.wg.Add(1)
 		go func() {
@@ -1474,11 +1535,21 @@ func (a *App) Start(ctx context.Context) error {
 	a.wg.Add(1)
 	go func() {
 		defer a.wg.Done()
-		a.setAPITLS()
+		a.setAPITLS(ctx)
 		// Access from anywhere listens beside the API when it's on (#456);
 		// a port in use is reported in Settings, not fatal.
+		// A permanent router mapping a crash left is noted here (#1262).
+		a.portKeeper.Record = filepath.Join(cfg.DataDir, "port-mapping.json")
 		if err := a.applyRemoteAccess(); err != nil && a.Logger != nil {
 			a.Logger.Warn("access from anywhere could not listen", "port", cfg.RemotePort(), "error", err)
+		}
+		// Mapping a port sweeps on its own; otherwise remove what's left.
+		if !mapsPort(cfg) {
+			a.wg.Add(1)
+			go func() {
+				defer a.wg.Done()
+				a.portKeeper.Sweep(ctx)
+			}()
 		}
 		if err := a.API.ListenAndServe(cfg.APIAddr()); err != nil && ctx.Err() == nil {
 			errCh <- err
@@ -1512,6 +1583,9 @@ func (a *App) Shutdown(ctx context.Context) error {
 	}
 	if a.browser != nil {
 		a.browser.CloseAll()
+	}
+	if a.voiceWorker != nil {
+		a.voiceWorker.Close()
 	}
 
 	// Unload models first so llama-server children exit before HTTP shutdown.
@@ -1553,6 +1627,7 @@ func (a *App) settingsView(ctx context.Context) (contracts.SettingsView, error) 
 	saveTask, _ := a.Settings.GetBool(ctx, "save_task_history", true)
 	notifyTask, _ := a.Settings.GetBool(ctx, "notify_task_finish", true)
 	notifyPeer, _ := a.Settings.GetBool(ctx, "notify_peer_offline", true)
+	notifyNewer, _ := a.Settings.GetBool(ctx, settingNotifyNewer, true)
 	communityRatings, _ := a.Settings.GetBool(ctx, ratings.SettingShow, false)
 	ratingsPrompts, _ := a.Settings.GetBool(ctx, ratings.SettingAsk, true)
 	updateCheck, _ := a.Settings.GetBool(ctx, updates.Setting, true)
@@ -1609,6 +1684,7 @@ func (a *App) settingsView(ctx context.Context) (contracts.SettingsView, error) 
 		SaveTaskHistory:         saveTask,
 		NotifyTaskFinish:        notifyTask,
 		NotifyPeerOffline:       notifyPeer,
+		NotifyNewerModels:       notifyNewer,
 		CommunityRatings:        communityRatings,
 		RatingsPrompts:          ratingsPrompts,
 		UpdateCheck:             updateCheck,
@@ -1719,7 +1795,7 @@ func (a *App) applySettingsPatch(ctx context.Context, patch map[string]any) erro
 			return err
 		}
 	}
-	for _, key := range []string{"save_chat_history", "save_task_history", "notify_task_finish", "notify_peer_offline", "launch_at_login", ratings.SettingShow, ratings.SettingAsk, updates.Setting, news.Setting, settingProblemReports, settingCheckLinks} {
+	for _, key := range []string{"save_chat_history", "save_task_history", "notify_task_finish", "notify_peer_offline", settingNotifyNewer, "launch_at_login", ratings.SettingShow, ratings.SettingAsk, updates.Setting, news.Setting, settingProblemReports, settingCheckLinks} {
 		if v, ok := patch[key].(bool); ok {
 			if err := a.Settings.SetBool(ctx, key, v); err != nil {
 				return err
@@ -2036,6 +2112,7 @@ func (a *App) ResetApp(ctx context.Context, deleteModels bool) (contracts.Settin
 	_ = a.Settings.SetBool(ctx, "save_task_history", true)
 	_ = a.Settings.SetBool(ctx, "notify_task_finish", true)
 	_ = a.Settings.SetBool(ctx, "notify_peer_offline", true)
+	_ = a.Settings.SetBool(ctx, settingNotifyNewer, true)
 	_ = a.Settings.SetBool(ctx, "launch_at_login", false)
 	_ = a.Settings.Set(ctx, "tool_terminal", "ask")
 	_ = a.Settings.Set(ctx, "tool_file_writes", "ask")

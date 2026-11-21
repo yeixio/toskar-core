@@ -295,7 +295,20 @@
     "used_other": "Usati {{count}} strumenti",
     "completed": "Completato",
     "completedIn": "Completato in {{ms}} ms",
-    "traceFailed": "Non riuscito"
+    "traceFailed": "Non riuscito",
+    "shots": {
+      "summary_one": "{{count}} inquadratura, circa {{seconds}} secondi di video",
+      "summary_many": "{{count}} inquadrature, circa {{seconds}} secondi di video",
+      "summary_other": "{{count}} inquadrature, circa {{seconds}} secondi di video",
+      "estimate": "Circa {{time}} su questo computer, in base all’ultimo clip che ha fatto.",
+      "noEstimate": "Questo computer non ha ancora fatto un clip, quindi non si sa quanto ci vorrà. Ogni inquadratura può richiedere diversi minuti o più.",
+      "style": "In ogni inquadratura: {{style}}",
+      "list": "Inquadrature",
+      "seconds": "{{n}} s",
+      "minutes": "{{n}} min",
+      "hours": "{{n}} h",
+      "hoursMinutes": "{{hours}} h {{minutes}} min"
+    }
   },
   "transcript": {
     "plan": "Piano",
@@ -497,6 +510,35 @@
     "failed": "Impossibile leggerla ad alta voce.",
     "stop": "Interrompi",
     "systemHint": "Leggi ad alta voce questa risposta con le voci di questo dispositivo"
+  },
+  "voiceMode": {
+    "start": "Parla",
+    "startHint": "Parla con Toskar a voce: risponde con una voce, e puoi interromperlo parlando",
+    "title": "Modalità vocale",
+    "noMicrophone": "Questa pagina non può usare un microfono. Apri Toskar con https:// o su questo computer con localhost.",
+    "connectFailed": "Impossibile collegarsi alla modalità vocale. Riprova tra poco.",
+    "failed": "Qualcosa è andato storto nella modalità vocale.",
+    "micDenied": "Toskar non ha il permesso di usare il microfono. Consentilo nelle impostazioni del browser per questa pagina.",
+    "micFailed": "Impossibile avviare il microfono.",
+    "muted": "Microfono spento",
+    "you": "Tu:",
+    "waited": "Risposta {{seconds}} s dopo che hai smesso",
+    "mute": "Silenzia",
+    "unmute": "Riattiva",
+    "end": "Termina",
+    "hint": "Parla quando vuoi. Parla sopra una risposta per fermarla.",
+    "status": {
+      "connecting": "Connessione…",
+      "listening": "In ascolto",
+      "hearing": "Ti sente",
+      "thinking": "Sta pensando…",
+      "speaking": "Sta parlando",
+      "closed": "Modalità vocale terminata"
+    },
+    "demo": {
+      "you": "Che escursione mi consigli vicino a Juneau questo fine settimana?",
+      "answer": "Il monte Roberts è una buona scelta. Sali con la funivia, poi segui il sentiero di cresta fin dove vuoi."
+    }
   },
   "context": {
     "usage": "Uso del contesto",
@@ -850,6 +892,7 @@
     "finishingImage": "Rifinitura dell’immagine…",
     "finishingVideo": "Rifinitura della clip…",
     "step": "Passo {{step}} di {{steps}}",
+    "shot": "Inquadratura {{shot}} di {{shots}}",
     "leftSeconds": "mancano circa {{seconds}} s",
     "leftMinutes": "mancano circa {{minutes}} min",
     "frameImage": "La tua immagine apparirà qui",

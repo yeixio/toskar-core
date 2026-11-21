@@ -11,14 +11,16 @@ import type {
   RunningModelView,
 } from '@/types/api'
 import { formatBytes } from '@/lib/format'
-import { formatLastUsed, largerAlternative } from './modelPresentation'
+import { downloadBytes, formatLastUsed, largerAlternative } from './modelPresentation'
 import { SmallModelNote } from './SmallModelNote'
+import { NewerModelNote } from './NewerModelNote'
 import { CommunityScore, RateButton } from './ratings'
 import { formatNumber, formatPercent } from '@/i18n/format'
 import { rovingKeyDown, useMenu } from '@/lib/roving'
 import { searchItems } from '@/lib/search'
 import { ShownError, type Shown } from '@/components/ui/ShownError'
 import { useUIStore } from '@/stores/uiStore'
+import { profileName } from '@/features/profiles/profilePresentation'
 
 export function InstalledTab({
   models,
@@ -122,7 +124,7 @@ export function InstalledTab({
         const live = runningByModel.get(model.id)
         const usedBy = profiles
           .filter((p) => p.roles?.some((r) => r.model_id === model.id))
-          .map((p) => p.name)
+          .map((p) => profileName(p))
         const dl = progress[model.id]
         const onNodes = model.installed_on ?? []
         const missing =
@@ -162,7 +164,7 @@ export function InstalledTab({
                   ) : (
                     <span>
                       {t('installedTab.installedOn', { where })}
-                      {model.size_bytes ? ` · ${formatBytes(model.size_bytes)}` : ''}
+                      {downloadBytes(model) ? ` · ${formatBytes(downloadBytes(model))}` : ''}
                     </span>
                   )}
                 </p>
@@ -173,6 +175,7 @@ export function InstalledTab({
                 </p>
                 <CommunityScore modelId={model.id} />
                 <SmallModelNote model={model} alternative={alternative} onInstallAlternative={onInstall} />
+                <NewerModelNote model={model} models={models} fits={fits} onInstall={onInstall} installingId={installingId} />
                 {alwaysRunningNote?.id === model.id ? (
                   <p role="status" className={`mt-1 text-xs ${alwaysRunningNote.warn ? 'text-danger' : 'text-ink-muted'}`}>
                     {alwaysRunningNote.text}

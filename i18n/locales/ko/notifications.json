@@ -175,7 +175,12 @@
     "digest_other": "알림 {{count}}개",
     "digestMore_other": "…외 {{count}}개",
     "automationDigest": "자동화 요약",
-    "automationDigestBody_other": "자동화 {{count}}개가 실행되었습니다: {{names}}"
+    "automationDigestBody_other": "자동화 {{count}}개가 실행되었습니다: {{names}}",
+    "newerModels": "더 새로운 {{family}} 모델이 있습니다",
+    "newerModelsBody": "{{model}}은(는) {{installed}}보다 새로운 모델입니다. 모델 › 설치됨에서 이 컴퓨터에 얼마나 맞는지 보고 지금 모델 옆에 설치할 수 있습니다.",
+    "pageNotOpened": "{{automation}}에서 {{page}}을(를) 열지 않았어요",
+    "pageNotOpenedUnnamed": "자동화에서 {{page}}을(를) 열지 않았어요",
+    "pageNotOpenedBody": "모델이 페이지를 읽지 않고 답해서 결과가 지어낸 것일 수 있어요. 이 자동화에는 도구를 사용할 수 있는 모델을 선택하세요."
   },
   "sent": {
     "times": "{{title}} ({{count}}회)",

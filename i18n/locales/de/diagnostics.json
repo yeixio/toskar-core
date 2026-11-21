@@ -62,7 +62,7 @@
       "label": "Lokale Datenbank"
     },
     "bifrost": {
-      "label": "Bifrost-Netzwerk",
+      "label": "Computernetzwerk",
       "offline_one": "{{count}} Computer offline",
       "offline_other": "{{count}} Computer offline",
       "silentFor_one": "{{names}} hat seit {{ago}} nicht geantwortet.",
@@ -172,7 +172,7 @@
     "tools_other": "{{count}} Werkzeuge",
     "services_one": "{{count}} verbundener Dienst",
     "services_other": "{{count}} verbundene Dienste",
-    "providers": "{{healthy}} von {{total}} Anbietern bereit",
+    "providers": "{{healthy}} von {{total}} Modell-Engines und Tool-Servern bereit",
     "files_one": "{{count}} Datei ({{size}})",
     "files_other": "{{count}} Dateien ({{size}})"
   },
@@ -186,6 +186,7 @@
       "image.generate": "Bilder erstellen",
       "image.edit": "Bilder bearbeiten",
       "video.generate": "Videos erstellen",
+      "video.extend": "Videos fortsetzen",
       "speech.transcribe": "Transkribieren",
       "speech.synthesize": "Vorlesen"
     },
@@ -203,7 +204,7 @@
     "title": "Speicher von Toskar",
     "description": "Wie viel Arbeitsspeicher Toskar selbst braucht, und seine Hintergrundaufgaben. Beides sollte sich nach einer Weile einpendeln; stetiges Wachstum über Stunden solltest du melden.",
     "heap": "Belegter Speicher",
-    "tasks": "Hintergrundaufgaben",
+    "tasks": "Aufgaben, die in Toskar laufen",
     "since": "Läuft seit",
     "chartLabel_one": "Speicher in der letzten Stunde",
     "chartLabel_other": "Speicher in den letzten {{count}} Stunden",

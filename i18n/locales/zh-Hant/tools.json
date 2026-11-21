@@ -260,5 +260,42 @@
     "clientId": "登入用戶端 ID",
     "clientIdHint": "（只有在服務提供給你時才需要）",
     "keptHere": "金鑰、權杖、密碼和標頭都會保存在這台電腦上，AI 看不到。"
+  },
+  "comfyui": {
+    "title": "ComfyUI",
+    "description": "連接你在本機或其他電腦上執行的 ComfyUI，並儲存它的工作流程。聊天會透過 ComfyUI 工作流程工具執行它們，與內建的圖片和影片功能並列。",
+    "url": "ComfyUI 位址",
+    "token": "權杖",
+    "tokenStored": "已儲存權杖；輸入新權杖即可更換",
+    "tokenOptional": "選填，如果你的 ComfyUI 需要",
+    "save": "儲存並檢查",
+    "checking": "正在檢查…",
+    "forgetToken": "刪除權杖",
+    "connected": "已連線到 ComfyUI {{version}}，共 {{nodes}} 種節點。",
+    "device": "{{name}}，{{gb}} GB",
+    "models": "{{checkpoints}} 個模型，{{loras}} 個 LoRA。",
+    "safety": "自訂節點會在那台電腦上執行自己的程式碼。Toskar 只呼叫你在這裡新增的 ComfyUI，從不在其中安裝任何東西，並像對待其他檔案一樣對待它產生的內容。",
+    "workflows": "工作流程",
+    "noWorkflows": "還沒有工作流程。新增一個從 ComfyUI 匯出的工作流程。",
+    "remove": "移除",
+    "removeNamed": "移除 {{name}}",
+    "file": "工作流程檔案",
+    "fileHint": "在 ComfyUI 中使用 Workflow › Export (API)，然後在這裡選擇檔案。",
+    "found": "找到的輸入：{{inputs}}。",
+    "name": "名稱",
+    "what": "用途",
+    "whatPlaceholder": "將圖片放大 4 倍",
+    "add": "新增工作流程",
+    "notJSON": "此檔案不是 JSON。請用 Workflow › Export (API) 匯出工作流程。",
+    "input": "{{name}}（節點 {{node}}）",
+    "noInputs": "找不到輸入",
+    "inputs": {
+      "prompt": "提示詞",
+      "negative": "反向提示詞",
+      "seed": "種子",
+      "image": "圖片",
+      "width": "寬度",
+      "height": "高度"
+    }
   }
 }

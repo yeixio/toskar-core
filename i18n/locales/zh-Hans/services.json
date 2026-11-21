@@ -13,8 +13,12 @@
   "connect": "连接",
   "optional": "（可选）",
   "stored": "已保存（{{value}}）。留空则保持不变。",
+  "example": "例如：{{value}}",
   "save": "保存",
   "cancel": "取消",
   "tools": "工具：{{tools}}",
-  "asksFirst": "{{name}}（先征求同意）"
+  "asksFirst": "{{name}}（先征求同意）",
+  "connectService": "连接 {{name}}",
+  "advanced": "高级",
+  "doorbellAutomation": "创建门铃自动化"
 }

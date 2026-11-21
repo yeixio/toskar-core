@@ -1,0 +1,90 @@
+# Starts, updates or stops the LAN download cache (ops/lan-cache) on the
+# home Linux computer, from one of its runners, so nobody needs to sign in
+# to that computer. The containers restart with Docker, so it keeps running
+# after this job ends and after a reboot. Run it again to pick up a change
+# to ops/lan-cache or newer images.
+#
+# It prints the address to put in the CI_LAN_CACHE variable, which is what
+# makes CI use the cache (.github/scripts/lan-cache.sh).
+name: LAN download cache
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'start (or update); stop, which keeps the cached files; or clear, which stops it and deletes them.'
+        type: choice
+        options: [start, stop, clear]
+        default: start
+      max_size:
+        description: 'Most disk the downloads cache may use, such as 300g. Its least recently used files go first.'
+        default: 300g
+      cache_days:
+        description: 'Days a file is kept after it was last asked for.'
+        default: '45'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: lan-cache
+  cancel-in-progress: false
+
+jobs:
+  cache:
+    runs-on: [self-hosted, toskar-ci]
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Stop
+        if: inputs.action == 'stop' || inputs.action == 'clear'
+        working-directory: ops/lan-cache
+        run: docker compose down ${{ inputs.action == 'clear' && '--volumes' || '' }}
+      - name: Start or update
+        if: inputs.action == 'start'
+        working-directory: ops/lan-cache
+        env:
+          MAX_SIZE: ${{ inputs.max_size }}
+          CACHE_DAYS: ${{ inputs.cache_days }}
+          DOCKERHUB_USERNAME: ${{ vars.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+        run: |
+          [[ "$MAX_SIZE" =~ ^[0-9]+[kmg]$ ]] || { echo "::error::max_size must be a number and k, m or g, such as 300g."; exit 1; }
+          [[ "$CACHE_DAYS" =~ ^[0-9]+$ ]] || { echo "::error::cache_days must be a whole number."; exit 1; }
+          docker compose build --pull
+          docker compose pull docker
+          docker compose up -d --remove-orphans
+      - name: Check it answers
+        if: inputs.action == 'start'
+        env:
+          CI_LAN_CACHE: ${{ vars.CI_LAN_CACHE }}
+        run: |
+          # This computer's address on the home network: the one it reaches
+          # the internet from.
+          ip="$(ip -4 route get 1.1.1.1 2>/dev/null | awk '{for (i = 1; i < NF; i++) if ($i == "src") print $(i + 1)}')"
+          ip="${ip:-$(hostname -I | awk '{print $1}')}"
+          ok=true
+          for url in "http://$ip:8380/healthz" "http://$ip:4873/-/ping" "http://$ip:5005/v2/"; do
+            # The registry restarts until Docker Hub answers, so give it time.
+            for _ in $(seq 1 24); do curl -fsS -o /dev/null --max-time 3 "$url" && break; sleep 5; done
+            if curl -fsS -o /dev/null --max-time 3 "$url"; then echo "Answers: $url"; else echo "::error::No answer from $url"; ok=false; fi
+          done
+          {
+            echo "## LAN download cache"
+            echo
+            echo "Running on $(hostname) at **$ip**."
+            if [ "$CI_LAN_CACHE" = "$ip" ]; then
+              echo "CI_LAN_CACHE is set to it, so CI uses the cache."
+            else
+              echo "To make CI use it, set the variable CI_LAN_CACHE to \`$ip\` (now: \`${CI_LAN_CACHE:-unset}\`), for example:"
+              echo
+              echo "    gh variable set CI_LAN_CACHE --org yeixio --visibility all --body $ip"
+            fi
+            echo
+            echo '```'
+            docker system df -v 2>/dev/null | grep -E "^VOLUME NAME|toskar-lan-cache_" || true
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          $ok

@@ -285,7 +285,18 @@
     "used_other": "使用了 {{count}} 个工具",
     "completed": "已完成",
     "completedIn": "用时 {{ms}} ms 完成",
-    "traceFailed": "失败"
+    "traceFailed": "失败",
+    "shots": {
+      "summary_other": "{{count}} 个镜头，约 {{seconds}} 秒视频",
+      "estimate": "按这台电脑上次制作的片段估算，大约需要 {{time}}。",
+      "noEstimate": "这台电脑还没有制作过片段，所以不知道需要多长时间。每个镜头可能需要几分钟或更久。",
+      "style": "每个镜头都包含：{{style}}",
+      "list": "镜头",
+      "seconds": "{{n}} 秒",
+      "minutes": "{{n}} 分钟",
+      "hours": "{{n}} 小时",
+      "hoursMinutes": "{{hours}} 小时 {{minutes}} 分钟"
+    }
   },
   "transcript": {
     "plan": "计划",
@@ -475,6 +486,35 @@
     "failed": "无法朗读。",
     "stop": "停止",
     "systemHint": "用此设备的语音朗读这条回答"
+  },
+  "voiceMode": {
+    "start": "说话",
+    "startHint": "和 Toskar 出声对话：它用语音回答，你开口说话就能打断它",
+    "title": "语音模式",
+    "noMicrophone": "这个页面无法使用麦克风。请通过 https:// 或在这台电脑上通过 localhost 打开 Toskar。",
+    "connectFailed": "无法连接到语音模式。请稍后再试。",
+    "failed": "语音模式出了问题。",
+    "micDenied": "Toskar 没有使用麦克风的权限。请在浏览器设置中为此页面允许。",
+    "micFailed": "无法启动麦克风。",
+    "muted": "麦克风已关闭",
+    "you": "你：",
+    "waited": "你说完后 {{seconds}} 秒回答",
+    "mute": "静音",
+    "unmute": "取消静音",
+    "end": "结束",
+    "hint": "随时可以说话。在回答时开口即可打断。",
+    "status": {
+      "connecting": "正在连接…",
+      "listening": "正在听",
+      "hearing": "听到你了",
+      "thinking": "正在思考…",
+      "speaking": "正在说",
+      "closed": "语音模式已结束"
+    },
+    "demo": {
+      "you": "这个周末朱诺附近有什么好走的徒步路线？",
+      "answer": "罗伯茨山不错。坐缆车上去，然后沿山脊步道想走多远走多远。"
+    }
   },
   "context": {
     "usage": "上下文用量",
@@ -763,6 +803,7 @@
     "finishingImage": "正在完成图片…",
     "finishingVideo": "正在完成短片…",
     "step": "第 {{step}} 步，共 {{steps}} 步",
+    "shot": "第 {{shot}}/{{shots}} 个镜头",
     "leftSeconds": "大约还需 {{seconds}} 秒",
     "leftMinutes": "大约还需 {{minutes}} 分钟",
     "frameImage": "图片将显示在这里",

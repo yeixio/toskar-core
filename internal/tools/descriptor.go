@@ -90,6 +90,9 @@ func Describe(def Definition) Descriptor {
 	if d.Version == 0 {
 		d.Version = 1
 	}
+	if d.Summary == "" {
+		d.Summary = summaries[def.ID]
+	}
 	if len(d.Outputs) == 0 {
 		d.Outputs = []string{OutputText}
 		if def.Risk == RiskCreate {

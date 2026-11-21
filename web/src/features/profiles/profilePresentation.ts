@@ -13,6 +13,24 @@ export function isBuiltInProfile(id: string): boolean {
   return BUILT_IN_PROFILE_IDS.has(id)
 }
 
+/** The built-in profiles' names as the server keeps them, in English. */
+const BUILT_IN_NAMES: Record<string, string> = {
+  'general-assistant': 'General Assistant',
+  programming: 'Programming',
+  research: 'Research',
+  custom: 'Custom',
+}
+
+/**
+ * A profile's name as shown: a built-in one in the app's language while it
+ * keeps the name it came with (#1271), and any other as it was named.
+ */
+export function profileName(profile: { id: string; name: string }): string {
+  const english = BUILT_IN_NAMES[profile.id]
+  if (english && profile.name === english) return i18n.t(`profiles:builtInNames.${profile.id}`, { defaultValue: profile.name })
+  return profile.name
+}
+
 const PURPOSES = ['general', 'coding', 'research', 'custom']
 
 /** What a profile is for, in words, or its purpose id for one this app doesn't know. */
@@ -99,7 +117,7 @@ export function toolChipPreview(tools: ToolPolicy[] | undefined): {
   for (const row of rows) {
     const policy = byId.get(row.id)
     if (!policy) continue
-    if (policy === 'deny') chips.push({ label: row.label, tone: 'off' })
+    if (policy === 'deny') chips.push({ label: i18n.t('profiles:chips.off', { label: row.label }), tone: 'off' })
     else if (policy === 'allow') chips.push({ label: i18n.t('profiles:chips.ok', { label: row.label }), tone: 'ok' })
     else chips.push({ label: i18n.t('profiles:chips.ask', { label: row.label }), tone: 'ask' })
   }
@@ -176,14 +194,14 @@ export function filterProfiles(
   return profiles
 }
 
-export type CreateStartFrom = Purpose | 'blank'
+export type CreateStartFrom = Purpose | 'blank' | 'doorstep'
 
 export function createStartOptions(): {
   id: CreateStartFrom
   title: string
   description: string
 }[] {
-  return (['general', 'coding', 'research', 'blank'] as const).map((id) => ({
+  return (['general', 'coding', 'research', 'doorstep', 'blank'] as const).map((id) => ({
     id,
     title: i18n.t(`profiles:create.options.${id}.label`),
     description: i18n.t(`profiles:create.options.${id}.description`),

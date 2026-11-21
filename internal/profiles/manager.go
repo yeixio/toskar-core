@@ -241,7 +241,7 @@ func (m *Manager) mergeBuiltinTools(ctx context.Context) error {
 // on the shared SQLite pool (MaxOpenConns=1), which would deadlock.
 func (m *Manager) List(ctx context.Context) ([]Profile, error) {
 	rows, err := m.db.QueryContext(ctx, `
-		SELECT id, name, purpose, orchestrator_id, node_policy_json, tools_json, COALESCE(knowledge_json, ''), COALESCE(orchestration_json, ''), COALESCE(topics_json, '')
+		SELECT id, name, purpose, orchestrator_id, node_policy_json, tools_json, COALESCE(knowledge_json, ''), COALESCE(orchestration_json, ''), COALESCE(topics_json, ''), COALESCE(audience, '')
 		FROM profiles ORDER BY name`)
 	if err != nil {
 		return nil, err
@@ -277,7 +277,7 @@ func (m *Manager) List(ctx context.Context) ([]Profile, error) {
 // Get returns a profile by ID.
 func (m *Manager) Get(ctx context.Context, id string) (Profile, error) {
 	row := m.db.QueryRowContext(ctx, `
-		SELECT id, name, purpose, orchestrator_id, node_policy_json, tools_json, COALESCE(knowledge_json, ''), COALESCE(orchestration_json, ''), COALESCE(topics_json, '')
+		SELECT id, name, purpose, orchestrator_id, node_policy_json, tools_json, COALESCE(knowledge_json, ''), COALESCE(orchestration_json, ''), COALESCE(topics_json, ''), COALESCE(audience, '')
 		FROM profiles WHERE id = ?`, id)
 	p, err := scanProfile(row)
 	if err == sql.ErrNoRows {
@@ -312,9 +312,9 @@ func (m *Manager) Create(ctx context.Context, p Profile) (Profile, error) {
 	}
 	defer func() { _ = tx.Rollback() }()
 	if _, err := tx.ExecContext(ctx, `
-		INSERT INTO profiles (id, name, purpose, orchestrator_id, node_policy_json, tools_json, knowledge_json, orchestration_json, topics_json)
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-		p.ID, p.Name, p.Purpose, p.OrchestratorID, string(nodePolicy), string(tools), knowledgeJSON(p.KnowledgeSources), orchestrationJSON(p.Orchestration), topicsJSON(p.Topics)); err != nil {
+		INSERT INTO profiles (id, name, purpose, orchestrator_id, node_policy_json, tools_json, knowledge_json, orchestration_json, topics_json, audience)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+		p.ID, p.Name, p.Purpose, p.OrchestratorID, string(nodePolicy), string(tools), knowledgeJSON(p.KnowledgeSources), orchestrationJSON(p.Orchestration), topicsJSON(p.Topics), p.Audience); err != nil {
 		return Profile{}, err
 	}
 	if err := m.saveRolesTx(ctx, tx, p.ID, p.Roles); err != nil {
@@ -343,9 +343,9 @@ func (m *Manager) Update(ctx context.Context, p Profile) error {
 	}
 	defer func() { _ = tx.Rollback() }()
 	res, err := tx.ExecContext(ctx, `
-		UPDATE profiles SET name=?, purpose=?, orchestrator_id=?, node_policy_json=?, tools_json=?, knowledge_json=?, orchestration_json=?, topics_json=?, updated_at=datetime('now')
+		UPDATE profiles SET name=?, purpose=?, orchestrator_id=?, node_policy_json=?, tools_json=?, knowledge_json=?, orchestration_json=?, topics_json=?, audience=?, updated_at=datetime('now')
 		WHERE id=?`,
-		p.Name, p.Purpose, p.OrchestratorID, string(nodePolicy), string(tools), knowledgeJSON(p.KnowledgeSources), orchestrationJSON(p.Orchestration), topicsJSON(p.Topics), p.ID)
+		p.Name, p.Purpose, p.OrchestratorID, string(nodePolicy), string(tools), knowledgeJSON(p.KnowledgeSources), orchestrationJSON(p.Orchestration), topicsJSON(p.Topics), p.Audience, p.ID)
 	if err != nil {
 		return err
 	}
@@ -469,7 +469,7 @@ type scannable interface {
 func scanProfile(row scannable) (Profile, error) {
 	var p Profile
 	var nodePolicyJSON, toolsJSON, knowledge, orchestration, topics string
-	if err := row.Scan(&p.ID, &p.Name, &p.Purpose, &p.OrchestratorID, &nodePolicyJSON, &toolsJSON, &knowledge, &orchestration, &topics); err != nil {
+	if err := row.Scan(&p.ID, &p.Name, &p.Purpose, &p.OrchestratorID, &nodePolicyJSON, &toolsJSON, &knowledge, &orchestration, &topics, &p.Audience); err != nil {
 		return Profile{}, err
 	}
 	decodeProfileMeta(&p, nodePolicyJSON, toolsJSON)

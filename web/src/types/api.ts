@@ -98,11 +98,21 @@ export interface Model {
   parameters?: string
   size_bytes?: number
   memory_needed_bytes?: number
+  /** Everything an install downloads: the model file and its vision projector (#1343, contract 1.117). */
+  download_bytes?: number
   context?: number
   capabilities: ModelCapabilities
   source?: ModelSource
   /** How well the model writes each language it has a level for, best first (multilingual spec §13–14). */
   languages?: LanguageCapability[]
+  /** What its license allows, for a catalog model (#593). */
+  license?: ModelLicense
+  /** What the model does, for browsing the store (#593, contract 1.104); uncategorized when nobody has checked. */
+  primary_category?: string
+  categories?: string[]
+  tasks?: string[]
+  input_modalities?: string[]
+  output_modalities?: string[]
   purpose?: string[]
   tags?: string[]
   runtime?: string[]
@@ -127,6 +137,8 @@ export interface Model {
   context_options?: { tokens: number; fit: FitLabel }[]
   /** How many requests a chat model installed here answers at once, 1 to 4, so a swarm can run that many agents on it (#1135, contract 1.88). */
   slots?: number
+  /** The catalog model that replaces this installed one, size for size, when it isn't installed too (#593, contract 1.107). */
+  newer?: string
 }
 
 export type FitLabel = 'excellent' | 'good' | 'tight' | 'heavy' | 'unsupported' | 'too_large'
@@ -273,10 +285,34 @@ export interface BrowseModel {
 }
 
 /** A model on a shelf of the store (#593). */
+/** Whether a business may use a model under its license (#593). */
+export type Commercial = 'yes' | 'limited' | 'no'
+
+/** A catalog model's license, checked by hand (#593, contract 1.102). */
+export interface ModelLicense {
+  id: string
+  name: string
+  url: string
+  commercial: Commercial
+  /** Apps or published work built with it credit it. */
+  attribution?: boolean
+  /** The person agrees to its terms before using it. */
+  accept?: boolean
+  notes?: string
+  /** free: any use, nothing to accept or credit. conditions: free, with terms. */
+  kind?: 'free' | 'conditions'
+  /** When the person accepted its terms in Toskar (contract 1.103). */
+  accepted_at?: string
+}
+
 export interface StoreModel extends BrowseModel {
   likes?: number
   created_at?: string
   license?: string
+  /** Whether a business may use it; absent when the license doesn't say (#593). */
+  commercial?: Commercial
+  /** Free, or free with conditions; absent when the license is unknown. */
+  license_kind?: 'free' | 'conditions'
   details_url?: string
   fit?: ModelFit
   /** Tested with Toskar, and installs by this ID. Empty for everything else. */
@@ -394,6 +430,8 @@ export interface ToolRecord {
   id: string
   name: string
   description: string
+  /** A short description for people; description is written for the model (#1254). */
+  summary?: string
   capability: string
   source: string
   schema: string
@@ -460,6 +498,11 @@ export interface AIProfile {
   orchestration?: OrchestrationPolicy
   /** Topic controls that keep the assistant on its subject (#345). */
   topics?: TopicPolicy
+  /**
+   * public: it talks with strangers, such as visitors at a front door, and
+   * gets nothing about the owner (#667, contract 1.108).
+   */
+  audience?: '' | 'public'
 }
 
 /** What a profile's topic controls do with one message: the Try it panel (#345). */
@@ -807,6 +850,9 @@ export interface MessageMeta {
   /** The backend and device that ran the answer (#317, contract 1.8). */
   backend?: string
   device?: string
+  /** The model that wrote the answer and the computer it ran on (toskar-apps#447, contract 1.109). */
+  model?: string
+  computer?: string
   /** An automation the answer drafted, for the person to confirm (#204, contract 1.10). */
   automation?: AutomationDraft
   /** A result an automation posted to the chat it was made from (#204, contract 1.11). */
@@ -969,6 +1015,14 @@ export interface ImageModel {
   name: string
   description: string
   license: string
+  /** Whether a business may use it under its license (#593). */
+  commercial?: Commercial
+  /** What the model does, for browsing the store (#593, contract 1.104). */
+  primary_category?: string
+  categories?: string[]
+  tasks?: string[]
+  input_modalities?: string[]
+  output_modalities?: string[]
   memory_bytes: number
   size_bytes: number
   /** It can change an image from an instruction, or, for a video model, animate one. */
@@ -1057,6 +1111,8 @@ export interface NetworkAccess {
   /** API keys made in API Access, for apps and scripts. */
   keys: number
   /** A trusted proxy or OpenID Connect provider signs people in. */
+  /** Of devices, how many are likely left over: never used a day after pairing, or unused for 90 days (#1266). */
+  stale_devices?: number
   sign_in_service: boolean
 }
 
@@ -1094,6 +1150,8 @@ export interface SettingsView {
   save_task_history?: boolean
   notify_task_finish?: boolean
   notify_peer_offline?: boolean
+  /** Tells Admins once per new generation that an installed model has a newer one (#593). */
+  notify_newer_models?: boolean
   /** The time of day one digest of every automation's results goes out, such as 08:00, or "" for none (#204). */
   automation_digest?: string
   /** The IANA time zone automation_digest is in. */
@@ -1450,6 +1508,9 @@ export interface ToolRequestedPayload {
   swarm_id?: string
   agent?: string
   agent_number?: number
+  /** A longer video's length, and about how long it takes to make here, when known (#790). */
+  video_seconds?: number
+  estimate_minutes?: number
 }
 
 export interface SettingsPatch {
@@ -1492,6 +1553,7 @@ export interface SettingsPatch {
   save_task_history?: boolean
   notify_task_finish?: boolean
   notify_peer_offline?: boolean
+  notify_newer_models?: boolean
   automation_digest?: string
   automation_digest_zone?: string
   tool_terminal?: string
@@ -1726,6 +1788,10 @@ export interface Automation {
   trigger?: AutomationTrigger
   /** Cameras looked at as each run starts; their pictures are shown to a model that can see (#667, contract 1.49). */
   cameras?: AutomationCamera[]
+  /** Calls it may make on its own, even from a trigger (#586, contract 1.106). */
+  actions?: AutomationAction[]
+  /** Speaks each run's answer through a camera's speaker (#667, contract 1.110). */
+  say?: AutomationSay
   /** When the trigger last checked and found nothing new. */
   last_checked_at?: string
   /** A webhook trigger has a link; making a new one shows it once. */
@@ -1777,6 +1843,12 @@ export interface ParsedAutomation {
   notification: AutomationNotification
   /** What was assumed, such as a time of day when none was given. */
   notes: string[]
+  /** The device that starts it, for a request that says it runs when something happens (#1341). */
+  trigger?: AutomationTrigger
+  /** The cameras it looks at, read from the request. */
+  cameras?: AutomationCamera[]
+  /** Speaking at the door, for a request to greet or answer the visitor. */
+  say?: AutomationSay
 }
 
 /** One page of an automation's runs, newest first (#204). */
@@ -1824,12 +1896,85 @@ export interface AutomationInput {
   trigger?: AutomationTrigger
   /** Cameras to look at as each run starts, up to 4; an empty list stops looking. */
   cameras?: AutomationCamera[]
+  /** Calls it may make on its own, up to 20; an empty list removes them. */
+  actions?: AutomationAction[]
+  /** Where to speak each run's answer; one with no connector stops speaking. Admin only. */
+  say?: AutomationSay | { connector: '' }
 }
+
+/** A service with devices: Home Assistant, or a Reolink camera reached directly (#667), whose devices are camera, person, vehicle, animal, motion, and doorbell. */
+export type DeviceConnector = 'homeassistant' | 'reolink'
 
 /** A connected service's camera (#667): device is the camera as that service names it, such as Home Assistant's camera.driveway. */
 export interface AutomationCamera {
-  connector: 'homeassistant'
+  /** reolink is a Reolink camera reached directly, whose device is always camera (#667, contract 1.109). */
+  connector: DeviceConnector
   device: string
+}
+
+/**
+ * A camera's speaker each run's answer is said through (#667, contract 1.110): a
+ * Reolink camera's, through reolink-cli. The run answers NOTHING when nobody is
+ * there, and nothing is said; nor in the quiet hours, such as 22:00 to 07:00 in
+ * the automation's time zone.
+ */
+export interface AutomationSay {
+  connector: 'reolink'
+  device: 'camera'
+  quiet_from?: string
+  quiet_to?: string
+  /** The voice it speaks in, such as kitten:en:eleanor; empty is the language's voice from the Voice settings (#1304, contract 1.112). */
+  voice?: string
+  /** Talks with the visitor after the first words, through the doorbell's microphone, and the run's result is the visit summed up (#667, contract 1.113). */
+  listen?: boolean
+}
+
+/** Kitten TTS 2 mini's install, for the Voice settings (#1304). */
+export interface KittenStatus {
+  state: 'not_installed' | 'installing' | 'installed' | 'failed'
+  /** While installing: program, voices, or warming. */
+  stage?: string
+  error?: string
+  /** Why it can't be installed on this computer. */
+  unavailable?: string
+  /** Shown wherever a Kitten voice is used. */
+  credit: string
+  url: string
+  license: string
+  languages: string[]
+}
+
+export interface VoiceOption {
+  id: string
+  name: string
+  description?: string
+  engine: 'kitten' | 'kokoro' | 'piper'
+  /** Named only for its recordings, such as Piper's mls: shown as Standard (#1342). */
+  standard?: boolean
+}
+
+/** A language read aloud and its voices; voice is the chosen one, empty for automatic. */
+export interface VoiceChoice {
+  language: string
+  voice: string
+  automatic: string
+  voices: VoiceOption[]
+}
+
+/** The Voice settings (#1304, contract 1.112). Admins only. */
+export interface VoiceSettings {
+  kitten: KittenStatus
+  languages: VoiceChoice[]
+  /** Models voice mode and the doorbell still need here, each with one to install (#667, contract 1.113). */
+  needs?: ModelNeed[]
+}
+
+/** A kind of model nothing installed does: chat, to answer in voice mode, vision, to look at a camera, or both in one model (#1343). model is empty when none fits. */
+export interface ModelNeed {
+  ability: 'chat' | 'vision' | 'both'
+  model?: string
+  name?: string
+  size_bytes?: number
 }
 
 export interface AutomationTrigger {
@@ -1841,7 +1986,7 @@ export interface AutomationTrigger {
   automation_id?: string
   when?: 'succeeded' | 'notified'
   /** A device trigger's connected service and device, such as Home Assistant's binary_sensor.front_door_visitor; to is the state it must change to (empty: any change), and cooldown_seconds the wait after a run (0: 60) (#586, contract 1.50). */
-  connector?: 'homeassistant'
+  connector?: DeviceConnector
   device?: string
   to?: string
   cooldown_seconds?: number
@@ -2299,9 +2444,20 @@ export interface ConnectorField {
   secret: boolean
   optional?: boolean
   placeholder?: string
+  /** Folded under Advanced: settings most people leave as they are. */
+  advanced?: boolean
 }
 
 /** A connected service (spec §32). Secret values are never returned; a stored token shows only its last four characters. */
+/**
+ * A call an automation may make on its own (#586), such as Home Assistant's
+ * light.turn_on on light.porch. Each argument listed must equal the call's.
+ */
+export interface AutomationAction {
+  tool: string
+  args?: Record<string, string>
+}
+
 /** A connected service's device, by a kind that doesn't depend on the service (#586, contract 1.51). */
 export interface Device {
   connector: string
@@ -2336,11 +2492,55 @@ export interface PersonalStyle {
   units?: '' | 'metric' | 'imperial'
   about_me?: string
   instructions?: string
+  /** Where the person is, such as a town, for nearby, weather, and directions questions (#210). */
+  location?: string
 }
 
-export type EgressKind = 'web_search' | 'web_page' | 'places' | 'paired_computer' | 'external_server' | 'connector' | 'notification' | 'community_ratings' | 'update_check' | 'news' | 'problem_report' | 'link_check'
+export type EgressKind = 'web_search' | 'web_page' | 'places' | 'paired_computer' | 'external_server' | 'connector' | 'notification' | 'community_ratings' | 'update_check' | 'news' | 'problem_report' | 'link_check' | 'comfyui'
 
 /** The OpenAI-compatible server whose models can be chosen for a chat (#111). */
+/** A node field a ComfyUI workflow takes from the chat (#958). */
+export interface ComfyWorkflowInput {
+  node: string
+  field: string
+}
+
+export interface ComfyWorkflowInputs {
+  prompt?: ComfyWorkflowInput
+  negative?: ComfyWorkflowInput
+  seed?: ComfyWorkflowInput
+  image?: ComfyWorkflowInput
+  width?: ComfyWorkflowInput
+  height?: ComfyWorkflowInput
+}
+
+/** A saved ComfyUI workflow, without its graph. */
+export interface ComfyWorkflow {
+  name: string
+  description?: string
+  inputs: ComfyWorkflowInputs
+  nodes: number
+}
+
+/** What a check of the connected ComfyUI found. */
+export interface ComfyUIInfo {
+  version?: string
+  devices: { name: string; type: string; vram_total: number; vram_free: number }[]
+  /** Model files by kind: checkpoints, diffusion, loras, vae, upscalers. */
+  models: Record<string, string[]>
+  node_types: number
+}
+
+/** The connected ComfyUI (Admin). */
+export interface ComfyUIStatus {
+  base_url: string
+  /** A stored token, never its value. */
+  has_token: boolean
+  info?: ComfyUIInfo
+  /** Why the check failed. */
+  error?: string
+}
+
 export interface ExternalServerInfo {
   base_url: string
   /** A stored API key, never its value. */

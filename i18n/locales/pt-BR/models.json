@@ -130,6 +130,13 @@
     "fitsOther": "{{model}} cabe neste computador.",
     "installOther": "Instalar {{model}}"
   },
+  "newer": {
+    "title": "{{model}} é mais novo.",
+    "fit": "Neste computador: {{fit}}.",
+    "license": "A licença dele é diferente: {{license}}.",
+    "install": "Instalar {{model}}",
+    "beside": "Ele é instalado ao lado deste, e os perfis continuam com o modelo deles até você mudá-los."
+  },
   "capability": {
     "noWeb": "O acesso à web em tempo real não está disponível com a configuração atual.",
     "noTools": "{{model}} não pode usar ferramentas, então não consegue consultar isso. Mude para um modelo compatível com ferramentas, como um dos abaixo.",
@@ -155,7 +162,9 @@
     "parameters": "Parâmetros",
     "format": "Formato",
     "runtime": "Ambiente de execução",
-    "modelId": "ID do modelo"
+    "modelId": "ID do modelo",
+    "download": "Download",
+    "memoryNeeded": "Memória necessária"
   },
   "tightFit": {
     "label": "No limite",
@@ -462,9 +471,11 @@
         "hint": "Modelos que verificamos com o Toskar."
       },
       "media": {
-        "title": "Imagens e clipes",
-        "hint": "Imagens e clipes são configurados em Ferramentas.",
-        "action": "Abrir Ferramentas"
+        "title": "Imagens e clipes"
+      },
+      "search": {
+        "title": "Do Hugging Face",
+        "hint": "Envios que correspondem à sua busca, cada um uma vez."
       }
     },
     "purpose": {
@@ -482,9 +493,32 @@
       "tested": "Testado com o Toskar.",
       "untested": "Do Hugging Face. Não foi testado com o Toskar, então pode funcionar pior ou nem funcionar. Confira a licença antes de usar no trabalho.",
       "link": "Ver no Hugging Face",
-      "close": "Fechar"
+      "close": "Fechar",
+      "business": "Uso comercial",
+      "businessYes": "Permitido",
+      "businessLimited": "Permitido, dentro dos limites da licença",
+      "businessNo": "Não permitido: só uso pessoal, de pesquisa ou outro uso não comercial",
+      "businessUnknown": "Desconhecido: confira a licença antes de usar no trabalho"
     },
-    "bestOverall": "Melhor no geral"
+    "bestOverall": "Melhor no geral",
+    "license": {
+      "free": "Grátis",
+      "conditions": "Grátis com condições",
+      "unknown": "Licença desconhecida"
+    },
+    "business": {
+      "label": "Para uso comercial",
+      "hint": "Mostra só modelos cuja licença permite uso comercial.",
+      "none": "Não há modelos aqui com uma licença que permita uso comercial."
+    },
+    "browse": {
+      "label": "Navegar por categoria",
+      "all": "Todos",
+      "chat_coding": "Chat e programação",
+      "vision": "Vê imagens",
+      "creative": "Imagens e clipes",
+      "hint": "Os modelos de imagens e clipes criam e editam imagens e vídeos curtos neste computador."
+    }
   },
   "results": {
     "loading": "Carregando resultados…",
@@ -541,5 +575,17 @@
       "window": "Além da sua janela",
       "out_of_memory": "Não cabe"
     }
+  },
+  "licenseTerms": {
+    "title": "Aceite a licença do {{model}}",
+    "body": "O {{model}} é distribuído sob a {{license}}, cujos termos você aceita antes de usar.",
+    "read": "Ler a {{license}}",
+    "record": "O Toskar guarda um registro de que você aceitou, com a data, para o seu Admin.",
+    "cancel": "Cancelar",
+    "accept": "Aceitar e instalar"
+  },
+  "size": {
+    "download": "{{size}} para baixar",
+    "downloadMemory": "{{size}} para baixar · cerca de {{memory}} de memória"
   }
 }

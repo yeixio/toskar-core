@@ -18,6 +18,7 @@ vi.mock('@/lib/api', async () => {
       getNodes: vi.fn(),
       listKnowledge: vi.fn(),
       updateProfile: vi.fn(),
+      createProfile: vi.fn(),
     },
   }
 })
@@ -83,6 +84,29 @@ describe('ProfilesPage editor', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Save profile' }))
     await waitFor(() => expect(api.updateProfile).toHaveBeenCalled())
     expect(vi.mocked(api.updateProfile).mock.calls[0][1].topics).toEqual({ stays_on: 'Tires and bookings', never_discuss: ['politics'] })
+  })
+
+  it('marks a profile as talking with visitors from the Topics tab (#667)', async () => {
+    renderPage()
+    fireEvent.click(await screen.findByRole('button', { name: 'Edit' }))
+    fireEvent.click(screen.getByRole('tab', { name: 'Topics' }))
+    fireEvent.click(screen.getByRole('checkbox', { name: /Talks with visitors/ }))
+    fireEvent.click(screen.getByRole('button', { name: 'Save profile' }))
+    await waitFor(() => expect(api.updateProfile).toHaveBeenCalled())
+    expect(vi.mocked(api.updateProfile).mock.calls[0][1].audience).toBe('public')
+  })
+
+  it('creates a front door profile from its template (#667)', async () => {
+    vi.mocked(api.createProfile).mockImplementation(async (p) => ({ ...p, id: 'door' }) as AIProfile)
+    renderPage()
+    fireEvent.click(await screen.findByRole('button', { name: 'Create profile' }))
+    fireEvent.click(screen.getByRole('button', { name: /Front door/ }))
+    fireEvent.click(screen.getByRole('button', { name: 'Create' }))
+    await waitFor(() => expect(api.createProfile).toHaveBeenCalled())
+    const made = vi.mocked(api.createProfile).mock.calls[0][0]
+    expect(made.audience).toBe('public')
+    expect(made.tools).toEqual([])
+    expect(made.topics?.strictness).toBe('enforce')
   })
 
   it('says why a save was refused, and keeps the editor open (#897)', async () => {

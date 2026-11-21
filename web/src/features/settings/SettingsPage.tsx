@@ -30,8 +30,9 @@ import { YggdrasilMark } from '@/components/ui/YggdrasilMark'
 import { formatGigabytes } from '@/i18n/format'
 import { AutomationDigestSetting } from './AutomationDigest'
 import { ShownError, shownOr, type Shown } from '@/components/ui/ShownError'
+import { VoiceSettings } from './VoiceSettings'
 import { LoadError } from '@/components/ui/LoadError'
-import { defaultProfileIdOf } from '@/features/profiles/profilePresentation'
+import { defaultProfileIdOf, profileName } from '@/features/profiles/profilePresentation'
 
 /** How long models stay loaded, in minutes; 0 keeps them until stopped (#498). */
 const KEEP_READY = [15, 60, 240, 0]
@@ -65,11 +66,13 @@ function ChoiceGroup<T extends string>({
           <button
             key={option.id}
             type="button"
+            aria-pressed={active}
             onClick={() => onChange(option.id)}
             className={[
               'rounded-lg px-4 py-2 text-sm font-medium transition',
+              // A ring as well as the fill, which is faint in light mode (#1270).
               active
-                ? 'bg-primary-soft text-primary-active'
+                ? 'bg-primary-soft text-primary-active ring-2 ring-primary/70'
                 : 'bg-raised/70 text-ink-muted hover:text-ink',
             ].join(' ')}
           >
@@ -347,7 +350,7 @@ export function SettingsPage() {
               >
                 {profiles.map((p) => (
                   <option key={p.id} value={p.id}>
-                    {p.name}
+                    {profileName(p)}
                   </option>
                 ))}
               </select>
@@ -415,6 +418,8 @@ export function SettingsPage() {
               />
             </section>
 
+            <VoiceSettings />
+
             <section className="card space-y-4">
               <div className="flex items-start justify-between gap-4">
                 <div>
@@ -465,6 +470,20 @@ export function SettingsPage() {
                   disabled={busy}
                   onChange={() =>
                     patch({ notify_peer_offline: !(settings?.notify_peer_offline ?? true) })
+                  }
+                />
+              </div>
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-sm font-medium text-ink">{t('notifications.newerModels')}</p>
+                  <p className="mt-1 text-xs text-ink-muted">{t('notifications.newerModelsHint')}</p>
+                </div>
+                <Toggle
+                  label={t('notifications.newerModels')}
+                  checked={settings?.notify_newer_models ?? true}
+                  disabled={busy}
+                  onChange={() =>
+                    patch({ notify_newer_models: !(settings?.notify_newer_models ?? true) })
                   }
                 />
               </div>
@@ -743,7 +762,7 @@ export function SettingsPage() {
                 <div>
                   <dt className="text-xs uppercase tracking-wide text-ink-faint">{t('about.service')}</dt>
                   <dd className="font-medium capitalize text-ink">
-                    {healthQuery.data?.status ?? t('about.unavailable')}
+                    {healthQuery.data?.status === 'ok' ? t('about.running') : (healthQuery.data?.status ?? t('about.unavailable'))}
                   </dd>
                 </div>
               </dl>

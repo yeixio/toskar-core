@@ -28,7 +28,7 @@
     "backgroundTray": "Toskar Pro 仍在系統匣中執行"
   },
   "conflict": {
-    "title": "另一個 Toskar Pro 正在執行",
+    "title": "另一個 Toskar 已在執行",
     "message": "{{other}} 已在這台電腦上執行，並佔用了本 App 所需的位址（{{address}}），因此本 App 無法啟動自己的服務。另一個有自己的模型、聊天和設定。\n\n請結束它後重新開啟本 App，或暫時使用另一個。",
     "quit": "結束",
     "useOther": "使用另一個",

@@ -256,3 +256,38 @@ func TestKinds(t *testing.T) {
 		}
 	}
 }
+
+// With no place named, the tools start from the location in Personal
+// settings and say so (#210). A named place doesn't use it.
+func TestHomeLocation(t *testing.T) {
+	f := &fakeOSM{}
+	c, sent := newClient(t, f)
+	c.Home = func(context.Context) string { return " Juneau " }
+	res, err := (&SearchTool{Client: c}).Execute(context.Background(), map[string]any{"query": "coffee shops"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	out := asJSON(t, res)
+	if out["near_from"] != homeNote || len(out["places"].([]any)) != 2 || (*sent)[0] != "Juneau" {
+		t.Fatalf("search %v, recorded %v", out, *sent)
+	}
+	res, err = (&SearchTool{Client: c}).Execute(context.Background(), map[string]any{"query": "Juneau International Airport"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if asJSON(t, res)["near_from"] != nil {
+		t.Fatalf("a name search used home: %v", res)
+	}
+	res, err = (&RouteTool{Client: c}).Execute(context.Background(), map[string]any{"to": "Juneau International Airport"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if asJSON(t, res)["from_note"] != homeNote {
+		t.Fatalf("route %v", res)
+	}
+	// Without a location, a route still needs a start.
+	c.Home = nil
+	if _, err := (&RouteTool{Client: c}).Execute(context.Background(), map[string]any{"to": "Juneau"}); err == nil {
+		t.Fatal("a route without a start was accepted")
+	}
+}

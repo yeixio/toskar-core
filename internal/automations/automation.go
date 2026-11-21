@@ -135,6 +135,11 @@ type Automation struct {
 	Trigger *Trigger `json:"trigger,omitempty"`
 	// Cameras are looked at as each run starts (#667).
 	Cameras []Camera `json:"cameras,omitempty"`
+	// Actions are the calls the automation may make on its own (#586).
+	Actions []Action `json:"actions,omitempty"`
+	// Say, when set, speaks each run's answer through a camera's speaker
+	// (#667).
+	Say *Say `json:"say,omitempty"`
 	// WatchState is what the trigger's last check found, and
 	// LastCheckedAt when it was.
 	WatchState    []byte     `json:"-"`
@@ -207,6 +212,10 @@ type CreateInput struct {
 	Trigger *Trigger `json:"trigger,omitempty"`
 	// Cameras: see Automation.
 	Cameras []Camera `json:"cameras,omitempty"`
+	// Actions: see Automation.
+	Actions []Action `json:"actions,omitempty"`
+	// Say: see Automation.
+	Say *Say `json:"say,omitempty"`
 }
 
 // Patch updates the fields that are non-nil.
@@ -227,6 +236,10 @@ type Patch struct {
 	Trigger *Trigger `json:"trigger,omitempty"`
 	// Cameras: see Automation; an empty list stops looking.
 	Cameras *[]Camera `json:"cameras,omitempty"`
+	// Actions: see Automation; an empty list removes them.
+	Actions *[]Action `json:"actions,omitempty"`
+	// Say: see Automation; one with no connector stops speaking.
+	Say *Say `json:"say,omitempty"`
 }
 
 // Response languages an automation can have besides a language tag.
@@ -289,6 +302,10 @@ const MaxCameras = 4
 // CameraHomeAssistant is a Home Assistant camera.
 const CameraHomeAssistant = "homeassistant"
 
+// CameraReolink is a Reolink camera reached directly (#667): its device is
+// always "camera", since one connection is one camera.
+const CameraReolink = "reolink"
+
 // ValidateCameras checks the cameras can be looked at.
 func ValidateCameras(cams []Camera) error {
 	if len(cams) > MaxCameras {
@@ -308,6 +325,10 @@ func (c Camera) Validate() error {
 	case CameraHomeAssistant:
 		if !strings.HasPrefix(c.Device, "camera.") || len(c.Device) <= len("camera.") || strings.ContainsAny(c.Device, "/?# ") {
 			return fmt.Errorf("a Home Assistant camera is an entity such as camera.driveway, not %q", c.Device)
+		}
+	case CameraReolink:
+		if c.Device != "camera" {
+			return fmt.Errorf("a Reolink camera's device is camera, not %q", c.Device)
 		}
 	default:
 		return fmt.Errorf("unsupported camera connector %q", c.Connector)

@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "note": "What models do, for browsing the store (#593). A model has one primary category, may have more, and lists tasks from its categories. Categories say what a model does, never that Toskar can run it: runtime says that. Imported models are uncategorized until checked.",
+  "categories": [
+    {"id": "chat_coding", "tasks": ["conversation", "reasoning", "code_generation", "code_editing", "tool_use"]},
+    {"id": "security", "tasks": ["decompilation", "reverse_engineering", "vulnerability_detection", "malware_analysis", "file_type_identification"]},
+    {"id": "retrieval", "tasks": ["text_embedding", "semantic_search", "reranking", "text_classification"]},
+    {"id": "documents", "tasks": ["ocr", "document_extraction", "document_understanding", "translation"]},
+    {"id": "vision", "tasks": ["image_understanding", "object_detection", "segmentation", "video_understanding"]},
+    {"id": "speech", "tasks": ["transcription", "diarization", "text_to_speech", "voice_cloning", "audio_understanding"]},
+    {"id": "creative", "tasks": ["image_generation", "image_editing", "video_generation", "music_generation", "sound_generation", "3d_generation"]},
+    {"id": "science", "tasks": ["time_series_forecasting", "protein_modeling", "molecular_modeling"]},
+    {"id": "agents", "tasks": ["computer_use", "robotics"]}
+  ],
+  "modalities": ["text", "code", "image", "video", "audio", "embedding", "binary", "3d", "time_series"]
+}

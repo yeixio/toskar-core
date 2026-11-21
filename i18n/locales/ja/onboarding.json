@@ -12,7 +12,15 @@
     "memory": "メモリ",
     "graphics": "グラフィックス",
     "system": "システム",
-    "unavailable": "Toskar が起動すると、ハードウェアの詳細が表示されます。このままセットアップを続けられます。"
+    "unavailable": "Toskar が起動すると、ハードウェアの詳細が表示されます。このままセットアップを続けられます。",
+    "os": {
+      "macAppleSilicon": "macOS、Appleシリコン",
+      "macIntel": "macOS、Intel",
+      "windows": "Windows",
+      "windowsArm": "Windows（Arm）",
+      "linux": "Linux",
+      "linuxArm": "Linux（Arm）"
+    }
   },
   "question": "AIに何をしてほしいですか？",
   "purposes": {
@@ -35,6 +43,7 @@
   },
   "continue": "続ける",
   "finding": "構成を探しています…",
+  "findingDetail": "このコンピュータのメモリとグラフィックス、それに合うモデルを確認しています…",
   "recommendFailed": "おすすめを取得できませんでした。",
   "recommend": {
     "badge": "おすすめ",
@@ -47,7 +56,8 @@
     "install": "おすすめの構成をインストール",
     "use": "このセットアップを使う",
     "skip": "今はスキップ",
-    "back": "戻る"
+    "back": "戻る",
+    "fits": "{{name}} はこのコンピュータのメモリ {{memory}} に収まります。"
   },
   "roles": {
     "coordinator": "コーディネーター",
@@ -74,5 +84,6 @@
     "title": "準備ができました",
     "description": "おすすめの構成がインストールされました。ローカルAIとチャットを始めましょう。",
     "start": "チャットを始める"
-  }
+  },
+  "setupLater": "あとで設定"
 }

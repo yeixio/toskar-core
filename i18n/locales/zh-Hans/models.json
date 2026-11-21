@@ -126,6 +126,13 @@
     "fitsOther": "{{model}} 适合这台电脑。",
     "installOther": "安装 {{model}}"
   },
+  "newer": {
+    "title": "{{model}} 更新。",
+    "fit": "在这台电脑上：{{fit}}。",
+    "license": "它的许可证不同：{{license}}。",
+    "install": "安装 {{model}}",
+    "beside": "它会安装在这个模型旁边，配置文件会继续使用原来的模型，直到你更改。"
+  },
   "capability": {
     "noWeb": "当前配置下无法实时访问网络。",
     "noTools": "{{model}} 不能使用工具，因此无法查找该信息。请切换到能使用工具的模型，例如下面的模型。",
@@ -151,7 +158,9 @@
     "parameters": "参数",
     "format": "格式",
     "runtime": "运行时",
-    "modelId": "模型 ID"
+    "modelId": "模型 ID",
+    "download": "下载",
+    "memoryNeeded": "所需内存"
   },
   "tightFit": {
     "label": "勉强适合",
@@ -446,9 +455,11 @@
         "hint": "我们用 Toskar 检查过的模型。"
       },
       "media": {
-        "title": "图片和短片",
-        "hint": "图片和短片在“工具”中设置。",
-        "action": "打开“工具”"
+        "title": "图片和短片"
+      },
+      "search": {
+        "title": "来自 Hugging Face",
+        "hint": "与搜索匹配的上传，每个只列一次。"
       }
     },
     "purpose": {
@@ -466,9 +477,32 @@
       "tested": "已用 Toskar 测试。",
       "untested": "来自 Hugging Face。它未经 Toskar 测试,可能效果较差或无法运行。用于工作前请查看其许可证。",
       "link": "在 Hugging Face 上查看",
-      "close": "关闭"
+      "close": "关闭",
+      "business": "商业使用",
+      "businessYes": "允许",
+      "businessLimited": "在许可证限制内允许",
+      "businessNo": "不允许：仅限个人、研究或其他非商业用途",
+      "businessUnknown": "未知：用于工作前请查看许可证"
     },
-    "bestOverall": "综合最佳"
+    "bestOverall": "综合最佳",
+    "license": {
+      "free": "免费",
+      "conditions": "有条件免费",
+      "unknown": "许可证未知"
+    },
+    "business": {
+      "label": "可商用",
+      "hint": "只显示许可证允许商业使用的模型。",
+      "none": "这里没有许可证允许商业使用的模型。"
+    },
+    "browse": {
+      "label": "按类别浏览",
+      "all": "全部",
+      "chat_coding": "聊天与编程",
+      "vision": "看懂图片",
+      "creative": "图片与短片",
+      "hint": "图片与短片模型在这台电脑上生成和修改图片及短视频。"
+    }
   },
   "results": {
     "loading": "正在加载结果…",
@@ -525,5 +559,17 @@
       "window": "超出其窗口",
       "out_of_memory": "放不下"
     }
+  },
+  "licenseTerms": {
+    "title": "接受 {{model}} 的许可证",
+    "body": "{{model}} 采用 {{license}}，使用前需要同意其条款。",
+    "read": "阅读 {{license}}",
+    "record": "Toskar 会为你的 Admin 记录你已接受及日期。",
+    "cancel": "取消",
+    "accept": "接受并安装"
+  },
+  "size": {
+    "download": "下载 {{size}}",
+    "downloadMemory": "下载 {{size}} · 约需 {{memory}} 内存"
   }
 }

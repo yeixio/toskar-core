@@ -103,6 +103,58 @@
       "reranker": "Modelo auxiliar · classifica os melhores trechos",
       "classifier": "Modelo auxiliar · ajuda o modo Automático a encaminhar solicitações",
       "other": "Modelo auxiliar"
+    },
+    "ratings": {
+      "rate": "Avaliar",
+      "title": "Avaliar {{model}}",
+      "intro": "Ele funciona bem neste computador? Sua avaliação fica salva aqui.",
+      "starsLabel": "Estrelas",
+      "stars_one": "{{count}} estrela",
+      "stars_many": "{{count}} estrelas",
+      "stars_other": "{{count}} estrelas",
+      "tagsLabel": "Por quê? (opcional)",
+      "tags": {
+        "great_responses": "Ótimas respostas",
+        "fast": "Rápido",
+        "slow": "Lento",
+        "stable": "Estável",
+        "crashed": "Travou",
+        "too_much_memory": "Usa memória demais",
+        "great_for_coding": "Ótimo para programar",
+        "great_for_chat": "Ótimo para conversar",
+        "good_tool_use": "Bom com ferramentas",
+        "poor_tool_use": "Fraco com ferramentas"
+      },
+      "share": "Compartilhar esta avaliação com a comunidade",
+      "shareHint": "Ajuda quem tem um computador como o seu a escolher um modelo. Você pode parar de compartilhar quando quiser.",
+      "whatIsShared": "O que é compartilhado, exatamente",
+      "sent": {
+        "destination": "Enviado para",
+        "model": "Modelo",
+        "hardware": "Classe do computador",
+        "memory": "memória {{type}}, {{gb}} GB",
+        "never": "Nunca seus prompts, conversas, nomes de arquivos, nome do computador, nome de usuário ou endereço de rede. O serviço não guarda seu endereço IP."
+      },
+      "notShareable": "Esta avaliação fica neste computador: {{reason}}",
+      "save": "Salvar",
+      "saveAndShare": "Salvar e compartilhar",
+      "remove": "Remover avaliação",
+      "cancel": "Cancelar",
+      "count_one": "{{formatted}} avaliação",
+      "count_many": "{{formatted}} avaliações",
+      "count_other": "{{formatted}} avaliações",
+      "similar": {
+        "family": "em computadores como o seu",
+        "class": "em computadores parecidos",
+        "backend": "em computadores com essa memória"
+      },
+      "overall": "no total",
+      "confidence": {
+        "limited": "Poucos dados",
+        "early": "Primeiras avaliações"
+      },
+      "prompt": "Como o {{model}} está funcionando para você?",
+      "notNow": "Agora não"
     }
   },
   "phoneModels": {
@@ -424,7 +476,13 @@
         "notNow": "Agora não"
       }
     },
-    "phoneAutoHint": "Escolhe o melhor modelo deste dispositivo para cada mensagem"
+    "phoneAutoHint": "Escolhe o melhor modelo deste dispositivo para cada mensagem",
+    "builtInProfiles": {
+      "general-assistant": "Assistente geral",
+      "programming": "Programação",
+      "research": "Pesquisa",
+      "custom": "Personalizado"
+    }
   },
   "effort": {
     "title": "Esforço",
@@ -604,6 +662,14 @@
       "try": "Experimente sem um computador",
       "tryMeta": "Uma demo com respostas de exemplo",
       "other": "Esta demo responde às perguntas sugeridas à esquerda. Para perguntar qualquer coisa, configure o Toskar em um computador em casa (o Toskar Core é gratuito) e depois conecte esta TV em Computadores → Conectar um dispositivo."
+    },
+    "people": {
+      "title": "Quem está assistindo?",
+      "add": "Adicionar alguém",
+      "hint": "Cada pessoa se conecta com um código da própria conta no computador, para que as conversas e a memória continuem sendo dela.",
+      "switch": "Não é {{name}}?",
+      "unnamed": "Pessoa {{n}}",
+      "back": "Voltar"
     }
   },
   "setup": {
@@ -869,6 +935,7 @@
       "notification": "Notificação",
       "community_ratings": "Avaliações da comunidade",
       "update_check": "Verificação de atualizações",
+      "comfyui": "ComfyUI",
       "problem_report": "Relatório de problema",
       "link_check": "Verificação de link"
     },
@@ -882,6 +949,7 @@
       "notification": "notificação",
       "community_ratings": "avaliações da comunidade",
       "update_check": "verificação de atualizações",
+      "comfyui": "ComfyUI",
       "problem_report": "relatório de problema",
       "link_check": "verificação de link"
     },

@@ -22,8 +22,8 @@ const (
 )
 
 // Lifetime is what a mapping is asked for; it's renewed at half of what the
-// router grants.
-const Lifetime = 2 * time.Hour
+// router grants. Short, so a mapping left by a crash closes soon (#1262).
+const Lifetime = 20 * time.Minute
 
 // Mapping is a port the router forwards to this computer.
 type Mapping struct {
@@ -36,6 +36,9 @@ type Mapping struct {
 	gateway netip.AddrPort
 	nonce   [12]byte
 	upnp    *igd
+	// permanent is a UPnP mapping with no lease, which a router keeps
+	// after a crash until it's removed (#1262).
+	permanent bool
 }
 
 // Errors a router's answer is sorted by.
@@ -223,6 +226,13 @@ func PublicIPv6() []netip.Addr {
 // mapping when stopped.
 type Keeper struct {
 	Router Router
+	// Record, when set, is a file where a permanent mapping is noted while
+	// it's kept, so one left by a crash is removed at the next start
+	// (#1262).
+	Record string
+
+	// sweepMu keeps a sweep and the first mapping from crossing.
+	sweepMu sync.Mutex
 
 	mu      sync.Mutex
 	current Mapping
@@ -244,6 +254,10 @@ func (k *Keeper) Start(internal uint16) {
 
 func (k *Keeper) run(ctx context.Context, internal uint16, done chan struct{}) {
 	defer close(done)
+	defer k.forget()
+	k.sweepMu.Lock()
+	k.sweep(ctx)
+	k.sweepMu.Unlock()
 	var m Mapping
 	for {
 		attempt, cancel := context.WithTimeout(ctx, 20*time.Second)
@@ -255,9 +269,17 @@ func (k *Keeper) run(ctx context.Context, internal uint16, done chan struct{}) {
 			m, err = k.Router.Map(attempt, internal, 0)
 		}
 		cancel()
+		// Stopped meanwhile: the router may have made the mapping as the
+		// request ended, so take it back here rather than leave it
+		// (#1262), and don't leave it behind as the current one.
+		if ctx.Err() != nil {
+			unmap(m)
+			return
+		}
 		k.mu.Lock()
 		k.current, k.err = m, err
 		k.mu.Unlock()
+		k.note(m, err)
 		// Renew at half the granted lifetime, at most once a minute; after a
 		// failure, try again in five.
 		wait := 5 * time.Minute
@@ -268,16 +290,29 @@ func (k *Keeper) run(ctx context.Context, internal uint16, done chan struct{}) {
 		}
 		select {
 		case <-ctx.Done():
+			unmap(m)
 			return
 		case <-time.After(wait):
 		}
 	}
 }
 
-// Stop stops renewing and removes the mapping from the router.
+// unmap removes a mapping from the router, when there is one.
+func unmap(m Mapping) {
+	if m.Method == "" {
+		return
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	_ = m.Unmap(ctx)
+}
+
+// Stop stops renewing and removes the mapping from the router: the run
+// loop removes what it holds as it ends, even one a request in flight
+// made.
 func (k *Keeper) Stop() {
 	k.mu.Lock()
-	cancel, done, m := k.cancel, k.done, k.current
+	cancel, done := k.cancel, k.done
 	k.cancel, k.done, k.current, k.err = nil, nil, Mapping{}, nil
 	k.mu.Unlock()
 	if cancel == nil {
@@ -285,11 +320,6 @@ func (k *Keeper) Stop() {
 	}
 	cancel()
 	<-done
-	if m.Method != "" {
-		ctx, cancelUnmap := context.WithTimeout(context.Background(), 5*time.Second)
-		_ = m.Unmap(ctx)
-		cancelUnmap()
-	}
 }
 
 // Status is the mapping kept, or why there's none.

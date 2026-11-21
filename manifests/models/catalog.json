@@ -7,6 +7,7 @@
       "summary": "Very fast coding assistant for quick edits and small tasks.",
       "family": "qwen-coder",
       "generation": "2.5",
+      "license": { "id": "apache-2.0", "name": "Apache 2.0", "url": "https://www.apache.org/licenses/LICENSE-2.0", "commercial": "yes" },
       "variant": "Q4_K_M",
       "parameters": "1.5B",
       "size_bytes": 1100000000,
@@ -19,6 +20,11 @@
       },
       "purpose": ["coding", "assistant", "general"],
       "tags": ["coding", "fast"],
+      "primary_category": "chat_coding",
+      "categories": ["chat_coding"],
+      "tasks": ["conversation", "code_generation", "code_editing", "tool_use"],
+      "input_modalities": ["text", "code"],
+      "output_modalities": ["text", "code"],
       "runtime": ["llamacpp"],
       "recommended_roles": ["worker", "coordinator", "reviewer"],
       "training": {
@@ -43,6 +49,7 @@
       "summary": "Strong all-round coding model with tool use.",
       "family": "qwen-coder",
       "generation": "2.5",
+      "license": { "id": "apache-2.0", "name": "Apache 2.0", "url": "https://www.apache.org/licenses/LICENSE-2.0", "commercial": "yes" },
       "variant": "Q4_K_M",
       "parameters": "7B",
       "size_bytes": 4700000000,
@@ -55,6 +62,11 @@
       },
       "purpose": ["coding"],
       "tags": ["coding"],
+      "primary_category": "chat_coding",
+      "categories": ["chat_coding"],
+      "tasks": ["conversation", "code_generation", "code_editing", "tool_use"],
+      "input_modalities": ["text", "code"],
+      "output_modalities": ["text", "code"],
       "runtime": ["llamacpp"],
       "recommended_roles": ["worker", "reviewer"],
       "training": {
@@ -79,6 +91,7 @@
       "summary": "Excellent programming model for larger refactors and multi-file work.",
       "family": "qwen-coder",
       "generation": "2.5",
+      "license": { "id": "apache-2.0", "name": "Apache 2.0", "url": "https://www.apache.org/licenses/LICENSE-2.0", "commercial": "yes" },
       "variant": "Q4_K_M",
       "parameters": "14B",
       "size_bytes": 9000000000,
@@ -91,6 +104,11 @@
       },
       "purpose": ["coding"],
       "tags": ["coding", "large"],
+      "primary_category": "chat_coding",
+      "categories": ["chat_coding"],
+      "tasks": ["conversation", "code_generation", "code_editing", "tool_use"],
+      "input_modalities": ["text", "code"],
+      "output_modalities": ["text", "code"],
       "runtime": ["llamacpp"],
       "recommended_roles": ["worker", "reviewer"],
       "training": {
@@ -115,6 +133,7 @@
       "summary": "Tiny general assistant when you want maximum speed and low memory.",
       "family": "llama",
       "generation": "3.2",
+      "license": { "id": "llama3.2", "name": "Llama 3.2 Community License", "url": "https://www.llama.com/llama3_2/license/", "commercial": "limited", "attribution": true, "accept": true, "notes": "Business use is allowed below 700 million monthly users; show \"Built with Llama\" and follow Meta's acceptable use policy." },
       "variant": "Q4_K_M",
       "parameters": "1B",
       "size_bytes": 800000000,
@@ -127,6 +146,11 @@
       },
       "purpose": ["assistant", "general"],
       "tags": ["general", "fast"],
+      "primary_category": "chat_coding",
+      "categories": ["chat_coding"],
+      "tasks": ["conversation", "tool_use"],
+      "input_modalities": ["text"],
+      "output_modalities": ["text"],
       "runtime": ["llamacpp"],
       "recommended_roles": ["assistant"],
       "training": {
@@ -158,6 +182,7 @@
       "summary": "Balanced everyday assistant with long context.",
       "family": "llama",
       "generation": "3.2",
+      "license": { "id": "llama3.2", "name": "Llama 3.2 Community License", "url": "https://www.llama.com/llama3_2/license/", "commercial": "limited", "attribution": true, "accept": true, "notes": "Business use is allowed below 700 million monthly users; show \"Built with Llama\" and follow Meta's acceptable use policy." },
       "variant": "Q4_K_M",
       "parameters": "3B",
       "size_bytes": 2100000000,
@@ -170,6 +195,11 @@
       },
       "purpose": ["assistant", "general", "research"],
       "tags": ["general"],
+      "primary_category": "chat_coding",
+      "categories": ["chat_coding"],
+      "tasks": ["conversation", "tool_use"],
+      "input_modalities": ["text"],
+      "output_modalities": ["text"],
       "runtime": ["llamacpp"],
       "recommended_roles": ["coordinator", "worker", "reviewer"],
       "training": {
@@ -201,6 +231,7 @@
       "summary": "Compact Microsoft model good for reasoning and light coding.",
       "family": "phi",
       "generation": "3.5",
+      "license": { "id": "mit", "name": "MIT", "url": "https://opensource.org/license/mit", "commercial": "yes" },
       "variant": "Q4_K_M",
       "parameters": "3.8B",
       "size_bytes": 2400000000,
@@ -213,6 +244,11 @@
       },
       "purpose": ["assistant", "research", "general"],
       "tags": ["general", "reasoning"],
+      "primary_category": "chat_coding",
+      "categories": ["chat_coding"],
+      "tasks": ["conversation", "reasoning", "code_generation", "code_editing", "tool_use"],
+      "input_modalities": ["text", "code"],
+      "output_modalities": ["text", "code"],
       "runtime": ["llamacpp"],
       "recommended_roles": ["coordinator", "worker", "researcher"],
       "languages": [
@@ -247,6 +283,7 @@
       "summary": "Small Google model for snappy everyday chat.",
       "family": "gemma",
       "generation": "2",
+      "license": { "id": "gemma", "name": "Gemma Terms of Use", "url": "https://ai.google.dev/gemma/terms", "commercial": "yes", "accept": true, "notes": "Business use is allowed; you agree to Google's Gemma terms and their prohibited use policy." },
       "variant": "Q4_K_M",
       "parameters": "2B",
       "size_bytes": 1700000000,
@@ -260,6 +297,11 @@
       },
       "purpose": ["assistant", "general"],
       "tags": ["general", "fast"],
+      "primary_category": "chat_coding",
+      "categories": ["chat_coding"],
+      "tasks": ["conversation"],
+      "input_modalities": ["text"],
+      "output_modalities": ["text"],
       "runtime": ["llamacpp"],
       "recommended_roles": ["assistant"],
       "languages": [
@@ -272,6 +314,7 @@
       "summary": "Higher-quality general assistant when you have more memory.",
       "family": "gemma",
       "generation": "2",
+      "license": { "id": "gemma", "name": "Gemma Terms of Use", "url": "https://ai.google.dev/gemma/terms", "commercial": "yes", "accept": true, "notes": "Business use is allowed; you agree to Google's Gemma terms and their prohibited use policy." },
       "variant": "Q4_K_M",
       "parameters": "9B",
       "size_bytes": 5800000000,
@@ -285,6 +328,11 @@
       },
       "purpose": ["assistant", "general"],
       "tags": ["general", "large", "topic-check"],
+      "primary_category": "chat_coding",
+      "categories": ["chat_coding"],
+      "tasks": ["conversation"],
+      "input_modalities": ["text"],
+      "output_modalities": ["text"],
       "runtime": ["llamacpp"],
       "recommended_roles": ["assistant"],
       "languages": [
@@ -297,6 +345,7 @@
       "summary": "Capable mid-size general model with tool calling.",
       "family": "qwen",
       "generation": "2.5",
+      "license": { "id": "qwen-research", "name": "Qwen Research License", "url": "https://huggingface.co/Qwen/Qwen2.5-3B-Instruct/blob/main/LICENSE", "commercial": "no", "notes": "Research and other non-commercial use only." },
       "variant": "Q4_K_M",
       "parameters": "3B",
       "size_bytes": 2000000000,
@@ -309,6 +358,11 @@
       },
       "purpose": ["assistant", "general"],
       "tags": ["general"],
+      "primary_category": "chat_coding",
+      "categories": ["chat_coding"],
+      "tasks": ["conversation", "tool_use"],
+      "input_modalities": ["text"],
+      "output_modalities": ["text"],
       "runtime": ["llamacpp"],
       "recommended_roles": ["assistant"],
       "training": {
@@ -345,6 +399,7 @@
       "summary": "Strong general assistant for everyday work.",
       "family": "qwen",
       "generation": "2.5",
+      "license": { "id": "apache-2.0", "name": "Apache 2.0", "url": "https://www.apache.org/licenses/LICENSE-2.0", "commercial": "yes" },
       "variant": "Q4_K_M",
       "parameters": "7B",
       "size_bytes": 4700000000,
@@ -357,6 +412,11 @@
       },
       "purpose": ["assistant", "general"],
       "tags": ["general"],
+      "primary_category": "chat_coding",
+      "categories": ["chat_coding"],
+      "tasks": ["conversation", "tool_use"],
+      "input_modalities": ["text"],
+      "output_modalities": ["text"],
       "runtime": ["llamacpp"],
       "recommended_roles": ["assistant", "coordinator"],
       "training": {
@@ -392,6 +452,7 @@
       "summary": "Largest curated quality pick when your machine has headroom.",
       "family": "qwen",
       "generation": "2.5",
+      "license": { "id": "apache-2.0", "name": "Apache 2.0", "url": "https://www.apache.org/licenses/LICENSE-2.0", "commercial": "yes" },
       "variant": "Q4_K_M",
       "parameters": "14B",
       "size_bytes": 9491400032,
@@ -409,6 +470,11 @@
       },
       "purpose": ["assistant", "general", "research"],
       "tags": ["general", "large", "reasoning", "topic-check"],
+      "primary_category": "chat_coding",
+      "categories": ["chat_coding"],
+      "tasks": ["conversation", "reasoning", "tool_use"],
+      "input_modalities": ["text"],
+      "output_modalities": ["text"],
       "runtime": ["llamacpp"],
       "recommended_roles": ["assistant", "coordinator"],
       "training": {
@@ -444,6 +510,7 @@
       "summary": "Lightweight reasoning model distilled from DeepSeek R1.",
       "family": "deepseek",
       "generation": "r1",
+      "license": { "id": "mit", "name": "MIT", "url": "https://opensource.org/license/mit", "commercial": "yes", "notes": "MIT, distilled from Qwen 2.5, which is Apache 2.0." },
       "variant": "Q4_K_M",
       "parameters": "1.5B",
       "size_bytes": 1100000000,
@@ -456,6 +523,11 @@
       },
       "purpose": ["research", "general"],
       "tags": ["reasoning", "fast"],
+      "primary_category": "chat_coding",
+      "categories": ["chat_coding"],
+      "tasks": ["conversation", "reasoning"],
+      "input_modalities": ["text"],
+      "output_modalities": ["text"],
       "runtime": ["llamacpp"],
       "recommended_roles": ["researcher"],
       "training": {
@@ -480,6 +552,7 @@
       "summary": "Stronger reasoning for analysis and multi-step problems.",
       "family": "deepseek",
       "generation": "r1",
+      "license": { "id": "mit", "name": "MIT", "url": "https://opensource.org/license/mit", "commercial": "yes", "notes": "MIT, distilled from Qwen 2.5, which is Apache 2.0." },
       "variant": "Q4_K_M",
       "parameters": "7B",
       "size_bytes": 4700000000,
@@ -492,6 +565,11 @@
       },
       "purpose": ["research"],
       "tags": ["reasoning"],
+      "primary_category": "chat_coding",
+      "categories": ["chat_coding"],
+      "tasks": ["conversation", "reasoning"],
+      "input_modalities": ["text"],
+      "output_modalities": ["text"],
       "runtime": ["llamacpp"],
       "recommended_roles": ["researcher"],
       "training": {
@@ -516,6 +594,7 @@
       "summary": "Classic general-purpose instruct model.",
       "family": "mistral",
       "generation": "0.3",
+      "license": { "id": "apache-2.0", "name": "Apache 2.0", "url": "https://www.apache.org/licenses/LICENSE-2.0", "commercial": "yes" },
       "variant": "Q4_K_M",
       "parameters": "7B",
       "size_bytes": 4400000000,
@@ -528,6 +607,11 @@
       },
       "purpose": ["assistant", "general"],
       "tags": ["general"],
+      "primary_category": "chat_coding",
+      "categories": ["chat_coding"],
+      "tasks": ["conversation", "tool_use"],
+      "input_modalities": ["text"],
+      "output_modalities": ["text"],
       "runtime": ["llamacpp"],
       "recommended_roles": ["assistant"],
       "training": {
@@ -551,6 +635,7 @@
       "summary": "Sees pictures: describes photos and reads screenshots and text in images.",
       "family": "gemma",
       "generation": "3",
+      "license": { "id": "gemma", "name": "Gemma Terms of Use", "url": "https://ai.google.dev/gemma/terms", "commercial": "yes", "accept": true, "notes": "Business use is allowed; you agree to Google's Gemma terms and their prohibited use policy." },
       "variant": "Q4_K_M",
       "parameters": "4B",
       "size_bytes": 3341008960,
@@ -570,6 +655,11 @@
       },
       "purpose": ["assistant", "general"],
       "tags": ["vision", "topic-check"],
+      "primary_category": "chat_coding",
+      "categories": ["chat_coding", "vision"],
+      "tasks": ["conversation", "tool_use", "image_understanding"],
+      "input_modalities": ["text", "image"],
+      "output_modalities": ["text"],
       "runtime": ["llamacpp"],
       "recommended_roles": ["assistant"],
       "languages": [
@@ -590,6 +680,7 @@
       "summary": "Sees pictures in more detail: documents, charts, and small text.",
       "family": "qwen",
       "generation": "2.5",
+      "license": { "id": "apache-2.0", "name": "Apache 2.0", "url": "https://www.apache.org/licenses/LICENSE-2.0", "commercial": "yes" },
       "variant": "Q4_K_M",
       "parameters": "7B",
       "size_bytes": 5536191744,
@@ -608,6 +699,11 @@
       },
       "purpose": ["assistant", "general"],
       "tags": ["vision"],
+      "primary_category": "chat_coding",
+      "categories": ["chat_coding", "vision"],
+      "tasks": ["conversation", "tool_use", "image_understanding"],
+      "input_modalities": ["text", "image"],
+      "output_modalities": ["text"],
       "runtime": ["llamacpp"],
       "recommended_roles": ["assistant"],
       "languages": [
@@ -628,6 +724,7 @@
       "summary": "Large high-quality model for capable machines.",
       "family": "qwen",
       "generation": "2.5",
+      "license": { "id": "apache-2.0", "name": "Apache 2.0", "url": "https://www.apache.org/licenses/LICENSE-2.0", "commercial": "yes" },
       "variant": "Q4_K_M",
       "parameters": "32B",
       "size_bytes": 20491400032,
@@ -645,6 +742,11 @@
       },
       "purpose": ["assistant", "general", "research"],
       "tags": ["general", "large", "reasoning", "topic-check"],
+      "primary_category": "chat_coding",
+      "categories": ["chat_coding"],
+      "tasks": ["conversation", "reasoning", "tool_use"],
+      "input_modalities": ["text"],
+      "output_modalities": ["text"],
       "runtime": ["llamacpp"],
       "recommended_roles": ["assistant"],
       "training": {
@@ -680,6 +782,7 @@
       "summary": "Meta's large model that sees pictures, codes, and reasons well; for 32 GB Macs or 24 GB graphics cards.",
       "family": "muse-glimmer",
       "generation": "1",
+      "license": { "id": "apache-2.0", "name": "Apache 2.0", "url": "https://www.apache.org/licenses/LICENSE-2.0", "commercial": "yes", "accept": true, "notes": "Apache 2.0, with Meta's usage policy for Muse Glimmer: not for people under 18, and a list of uses it doesn't allow." },
       "variant": "UD-Q4_K_XL",
       "parameters": "30B",
       "size_bytes": 15878222368,
@@ -698,6 +801,11 @@
       },
       "purpose": ["assistant", "general", "research", "coding"],
       "tags": ["general", "large", "reasoning", "vision"],
+      "primary_category": "chat_coding",
+      "categories": ["chat_coding", "vision"],
+      "tasks": ["conversation", "reasoning", "code_generation", "code_editing", "tool_use", "image_understanding"],
+      "input_modalities": ["text", "code", "image"],
+      "output_modalities": ["text", "code"],
       "runtime": ["llamacpp"],
       "recommended_roles": ["assistant"],
       "languages": [
@@ -718,6 +826,7 @@
       "summary": "Small embedding model. Lets knowledge search find passages by meaning, not only by matching words. It does not chat.",
       "family": "nomic-embed",
       "generation": "1.5",
+      "license": { "id": "apache-2.0", "name": "Apache 2.0", "url": "https://www.apache.org/licenses/LICENSE-2.0", "commercial": "yes" },
       "variant": "Q8_0",
       "parameters": "137M",
       "size_bytes": 146146432,
@@ -731,6 +840,11 @@
       },
       "purpose": ["knowledge"],
       "tags": ["embedding", "fast"],
+      "primary_category": "retrieval",
+      "categories": ["retrieval"],
+      "tasks": ["text_embedding", "semantic_search"],
+      "input_modalities": ["text"],
+      "output_modalities": ["embedding"],
       "runtime": ["llamacpp"],
       "support_role": "embedding",
       "languages": [
@@ -743,6 +857,7 @@
       "summary": "Multilingual embedding model. Lets knowledge and memory search find passages by meaning in more than 100 languages, such as a Spanish question finding an English document. It does not chat.",
       "family": "bge",
       "generation": "m3",
+      "license": { "id": "mit", "name": "MIT", "url": "https://opensource.org/license/mit", "commercial": "yes" },
       "variant": "Q8_0",
       "parameters": "568M",
       "size_bytes": 634553760,
@@ -765,6 +880,11 @@
         "embedding",
         "multilingual"
       ],
+      "primary_category": "retrieval",
+      "categories": ["retrieval"],
+      "tasks": ["text_embedding", "semantic_search"],
+      "input_modalities": ["text"],
+      "output_modalities": ["embedding"],
       "runtime": [
         "llamacpp"
       ],
@@ -834,6 +954,11 @@
         "vision",
         "fast"
       ],
+      "primary_category": "chat_coding",
+      "categories": ["chat_coding", "vision"],
+      "tasks": ["conversation", "tool_use", "image_understanding"],
+      "input_modalities": ["text", "image"],
+      "output_modalities": ["text"],
       "runtime": [
         "llamacpp"
       ],
@@ -959,6 +1084,7 @@
         }
       ],
       "generation": "3.5",
+      "license": { "id": "apache-2.0", "name": "Apache 2.0", "url": "https://www.apache.org/licenses/LICENSE-2.0", "commercial": "yes" },
       "supersedes": [
         "qwen2.5-3b-q4"
       ]
@@ -998,6 +1124,11 @@
         "general",
         "vision"
       ],
+      "primary_category": "chat_coding",
+      "categories": ["chat_coding", "vision"],
+      "tasks": ["conversation", "tool_use", "image_understanding"],
+      "input_modalities": ["text", "image"],
+      "output_modalities": ["text"],
       "runtime": [
         "llamacpp"
       ],
@@ -1122,7 +1253,8 @@
           ]
         }
       ],
-      "generation": "3.5"
+      "generation": "3.5",
+      "license": { "id": "apache-2.0", "name": "Apache 2.0", "url": "https://www.apache.org/licenses/LICENSE-2.0", "commercial": "yes" }
     },
     {
       "id": "qwen3.8-27b-q4",
@@ -1163,6 +1295,11 @@
       "runtime": [
         "llamacpp"
       ],
+      "primary_category": "chat_coding",
+      "categories": ["chat_coding", "vision"],
+      "tasks": ["conversation", "code_generation", "code_editing", "tool_use", "image_understanding"],
+      "input_modalities": ["text", "code", "image"],
+      "output_modalities": ["text", "code"],
       "recommended_roles": [
         "assistant",
         "coordinator",
@@ -1285,7 +1422,8 @@
           ]
         }
       ],
-      "generation": "3.8"
+      "generation": "3.8",
+      "license": { "id": "apache-2.0", "name": "Apache 2.0", "url": "https://www.apache.org/licenses/LICENSE-2.0", "commercial": "yes" }
     },
     {
       "id": "gpt-oss-20b-mxfp4",
@@ -1322,6 +1460,11 @@
         "tools",
         "topic-check"
       ],
+      "primary_category": "chat_coding",
+      "categories": ["chat_coding"],
+      "tasks": ["conversation", "reasoning", "code_generation", "code_editing", "tool_use"],
+      "input_modalities": ["text", "code"],
+      "output_modalities": ["text", "code"],
       "runtime": [
         "llamacpp"
       ],
@@ -1340,7 +1483,8 @@
           ]
         }
       ],
-      "generation": "1"
+      "generation": "1",
+      "license": { "id": "apache-2.0", "name": "Apache 2.0", "url": "https://www.apache.org/licenses/LICENSE-2.0", "commercial": "yes" }
     },
     {
       "id": "gpt-oss-120b-mxfp4",
@@ -1376,6 +1520,11 @@
         "coding",
         "tools"
       ],
+      "primary_category": "chat_coding",
+      "categories": ["chat_coding"],
+      "tasks": ["conversation", "reasoning", "code_generation", "code_editing", "tool_use"],
+      "input_modalities": ["text", "code"],
+      "output_modalities": ["text", "code"],
       "runtime": [
         "llamacpp"
       ],
@@ -1394,7 +1543,8 @@
           ]
         }
       ],
-      "generation": "1"
+      "generation": "1",
+      "license": { "id": "apache-2.0", "name": "Apache 2.0", "url": "https://www.apache.org/licenses/LICENSE-2.0", "commercial": "yes" }
     },
     {
       "id": "qwen3.6-35b-a3b-q4",
@@ -1435,6 +1585,11 @@
         "vision",
         "coding"
       ],
+      "primary_category": "chat_coding",
+      "categories": ["chat_coding", "vision"],
+      "tasks": ["conversation", "code_generation", "code_editing", "tool_use", "image_understanding"],
+      "input_modalities": ["text", "code", "image"],
+      "output_modalities": ["text", "code"],
       "runtime": [
         "llamacpp"
       ],
@@ -1560,7 +1715,8 @@
           ]
         }
       ],
-      "generation": "3.6"
+      "generation": "3.6",
+      "license": { "id": "apache-2.0", "name": "Apache 2.0", "url": "https://www.apache.org/licenses/LICENSE-2.0", "commercial": "yes" }
     }
   ]
 }

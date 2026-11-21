@@ -13,8 +13,12 @@
   "connect": "接続",
   "optional": "（任意）",
   "stored": "保存済み（{{value}}）。変更しない場合は空欄のままにしてください。",
+  "example": "例: {{value}}",
   "save": "保存",
   "cancel": "キャンセル",
   "tools": "ツール：{{tools}}",
-  "asksFirst": "{{name}}（事前に確認）"
+  "asksFirst": "{{name}}（事前に確認）",
+  "connectService": "{{name}} を接続",
+  "advanced": "詳細設定",
+  "doorbellAutomation": "インターホンのオートメーションを作成"
 }

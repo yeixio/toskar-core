@@ -1,8 +1,9 @@
 {
-  "tagline": "Plan de contrôle d'IA locale",
+  "tagline": "Fait tourner l'IA sur vos propres ordinateurs",
   "nav": {
     "label": "Principal",
     "open": "Ouvrir le menu",
+    "skip": "Aller au contenu",
     "use": "Utiliser",
     "customize": "Personnaliser",
     "administer": "Administrer",
@@ -41,10 +42,20 @@
     "connected_one": "{{count}} connecté",
     "connected_many": "{{count}} connectés",
     "connected_other": "{{count}} connectés",
-    "nornHint": "Norn répartit le travail entre vos ordinateurs",
+    "nornHint": "Quel ordinateur exécute chaque modèle",
     "nornAutomatic": "Automatique",
-    "mimirHint": "Connaissances et mémoire locales",
-    "mimirReady": "Prêt"
+    "mimirHint": "Fichiers et sources dont Toskar se sert pour répondre",
+    "justThis": "Cet ordinateur seulement",
+    "placementLocal": "Cet ordinateur",
+    "placementAsk": "Demander à chaque fois",
+    "knowledgeNone": "Aucune source",
+    "knowledgeFailed_one": "{{count}} en échec",
+    "knowledgeFailed_other": "{{count}} en échec",
+    "knowledgeFailed_many": "{{count}} en échec",
+    "knowledgeReady_one": "{{count}} source",
+    "knowledgeReady_other": "{{count}} sources",
+    "knowledgeReady_many": "{{count}} sources",
+    "knowledgeIndexing": "Indexation…"
   },
   "boot": {
     "starting": "Démarrage de Toskar",

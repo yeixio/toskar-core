@@ -192,7 +192,12 @@
     "automationDigest": "Resumo das automações",
     "automationDigestBody_one": "1 automação rodou: {{names}}",
     "automationDigestBody_other": "{{count}} automações rodaram: {{names}}",
-    "automationDigestBody_many": "{{count}} automações rodaram: {{names}}"
+    "automationDigestBody_many": "{{count}} automações rodaram: {{names}}",
+    "newerModels": "Há modelos {{family}} mais novos",
+    "newerModelsBody": "{{model}} é mais novo que {{installed}}. Em Modelos › Instalados você vê como ele se encaixa e pode instalá-lo ao lado do que você tem.",
+    "pageNotOpened": "{{automation}} não abriu {{page}}",
+    "pageNotOpenedUnnamed": "Uma automação não abriu {{page}}",
+    "pageNotOpenedBody": "O modelo respondeu sem ler a página, então o resultado pode ser inventado. Escolha para esta automação um modelo que saiba usar ferramentas."
   },
   "sent": {
     "times": "{{title}} ({{count}} vezes)",

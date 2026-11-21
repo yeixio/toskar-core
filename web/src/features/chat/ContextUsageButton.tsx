@@ -71,7 +71,7 @@ export function ContextUsageButton({
     <div ref={rootRef} className="relative shrink-0">
       <button
         type="button"
-        className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-muted transition hover:bg-raised hover:text-ink"
+        className="inline-flex h-8 min-w-8 items-center justify-center gap-1 rounded-full px-1.5 text-ink-muted transition hover:bg-raised hover:text-ink"
         aria-label={usage ? t('context.full', { percent: formatPercent(percent / 100) }) : t('context.usage')}
         aria-expanded={open}
         aria-controls={titleId}
@@ -79,6 +79,13 @@ export function ContextUsageButton({
         onClick={() => setOpen((current) => !current)}
       >
         <ContextRing percent={percent} full={full} />
+        {/* The number beside the meter, so a low one can't pass for a
+            spinner after the reply has finished (#1254). */}
+        {usage ? (
+          <span className="text-[11px] tabular-nums" aria-hidden>
+            {formatPercent(Math.min(percent, 100) / 100)}
+          </span>
+        ) : null}
       </button>
       {open ? (
         <div
@@ -194,7 +201,7 @@ function ContextRing({ percent, full }: { percent: number; full: boolean }) {
         cy={c}
         r={radius}
         fill="none"
-        className="stroke-ink-faint/45"
+        className="stroke-ink-faint/70"
         strokeWidth={stroke}
         strokeLinecap="round"
         strokeDasharray={`${sweep} ${circ}`}

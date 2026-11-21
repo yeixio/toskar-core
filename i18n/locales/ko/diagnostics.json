@@ -58,7 +58,7 @@
       "label": "로컬 데이터베이스"
     },
     "bifrost": {
-      "label": "Bifrost 네트워킹",
+      "label": "컴퓨터 네트워크",
       "offline_other": "컴퓨터 {{count}}대 오프라인",
       "silentFor_other": "{{names}}에서 {{ago}} 동안 응답이 없어요.",
       "silent_other": "{{names}}이(가) 응답하지 않아요.",
@@ -160,7 +160,7 @@
     "computers": "컴퓨터 {{total}}대 중 {{online}}대 온라인",
     "tools_other": "도구 {{count}}개",
     "services_other": "연결된 서비스 {{count}}개",
-    "providers": "제공자 {{total}}개 중 {{healthy}}개 준비됨",
+    "providers": "모델 엔진과 도구 서버 {{total}}개 중 {{healthy}}개 준비됨",
     "files_other": "파일 {{count}}개({{size}})"
   },
   "providers": {
@@ -173,6 +173,7 @@
       "image.generate": "이미지 만들기",
       "image.edit": "이미지 편집",
       "video.generate": "동영상 만들기",
+      "video.extend": "동영상 이어 만들기",
       "speech.transcribe": "받아쓰기",
       "speech.synthesize": "소리 내어 읽기"
     },
@@ -189,7 +190,7 @@
     "title": "Toskar의 메모리",
     "description": "Toskar 자체가 사용하는 메모리와 백그라운드 작업이에요. 잠시 후에는 둘 다 안정되어야 해요. 몇 시간 동안 계속 늘어나면 알려 주세요.",
     "heap": "사용 중인 메모리",
-    "tasks": "백그라운드 작업",
+    "tasks": "Toskar 안에서 실행 중인 작업",
     "since": "실행 시작",
     "chartLabel_other": "지난 {{count}}시간 동안의 메모리",
     "growing_other": "메모리가 {{count}}시간 동안 계속 늘었어요. 진단을 내보내고 번들을 이슈에 첨부하세요."

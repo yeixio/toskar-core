@@ -60,3 +60,23 @@ describe('AppLayout', () => {
     expect(sidebar.dataset.open).toBe('false')
   })
 })
+
+describe('AppLayout QA regressions', () => {
+  // Regression: toskar-core#1271
+  it('a Skip to content link comes before the sidebar, and People names itself in the title', async () => {
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <MemoryRouter initialEntries={['/people']}>
+          <Routes>
+            <Route element={<AppLayout />}>
+              <Route path="/people" element={<h1>People page</h1>} />
+            </Route>
+          </Routes>
+        </MemoryRouter>
+      </QueryClientProvider>,
+    )
+    const links = screen.getAllByRole('link')
+    expect(links[0]).toHaveTextContent(/Skip to (main )?content/i)
+    await waitFor(() => expect(document.title).toBe('People · Toskar'))
+  })
+})

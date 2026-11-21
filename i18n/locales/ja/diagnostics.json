@@ -58,7 +58,7 @@
       "label": "ローカルデータベース"
     },
     "bifrost": {
-      "label": "Bifrostネットワーク",
+      "label": "コンピュータのネットワーク",
       "offline_other": "{{count}}台のコンピュータがオフライン",
       "silentFor_other": "{{names}}は{{ago}}応答していません。",
       "silent_other": "{{names}}が応答していません。",
@@ -160,7 +160,7 @@
     "computers": "{{total}}台中{{online}}台のコンピュータがオンライン",
     "tools_other": "ツール{{count}}個",
     "services_other": "連携サービス{{count}}件",
-    "providers": "{{total}}個中{{healthy}}個のプロバイダが準備完了",
+    "providers": "モデルエンジンとツールサーバー {{total}} 個中 {{healthy}} 個が準備完了",
     "files_other": "ファイル{{count}}個（{{size}}）"
   },
   "providers": {
@@ -173,6 +173,7 @@
       "image.generate": "画像を作成",
       "image.edit": "画像を編集",
       "video.generate": "動画を作成",
+      "video.extend": "動画の続きを作成",
       "speech.transcribe": "文字起こし",
       "speech.synthesize": "読み上げ"
     },
@@ -189,7 +190,7 @@
     "title": "Toskar のメモリ",
     "description": "Toskar 自身が使っているメモリとバックグラウンドタスクです。しばらくすると落ち着くはずです。何時間も増え続ける場合は報告してください。",
     "heap": "使用中のメモリ",
-    "tasks": "バックグラウンドタスク",
+    "tasks": "Toskar内で動いている処理",
     "since": "起動日時",
     "chartLabel_other": "過去 {{count}} 時間のメモリ",
     "growing_other": "メモリが {{count}} 時間増え続けています。診断をエクスポートし、バンドルを Issue に添付してください。"

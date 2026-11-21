@@ -42,7 +42,8 @@
     "action": "Impossibile completare l'azione",
     "network": "Consenti Rete locale / Firewall per Toskar su entrambi i computer, e lascia attivo Trova altri computer, in Rete e accesso qui sotto.",
     "generic": "Qualcosa è andato storto",
-    "claimFailed": "Impossibile caricare l'offerta di associazione per quel codice"
+    "claimFailed": "Impossibile caricare l'offerta di associazione per quel codice",
+    "dismiss": "Ignora"
   },
   "pairing": {
     "waiting": "In attesa di approvazione",
@@ -51,7 +52,11 @@
     "code": "Codice: <code>{{code}}</code>",
     "incoming": "Richieste in arrivo",
     "offerCode": "Codice <code>{{code}}</code>",
-    "approve": "Approva"
+    "approve": "Approva",
+    "noAnswer": "Ancora nessuna risposta",
+    "noAnswerHint": "{{name}} non ha approvato la richiesta. Verifica che Toskar sia aperto lì, poi riprova Aggiungi al team.",
+    "cancel": "Smetti di aspettare",
+    "close": "Chiudi"
   },
   "nearby": {
     "title": "Disponibili da aggiungere",
@@ -116,13 +121,15 @@
     "approving": "Approvazione…",
     "approveCode": "Approva con codice",
     "hideDetails": "Nascondi dettagli",
-    "manage": "Gestisci",
+    "manage": "Dettagli",
     "moreActions": "Altre azioni per {{name}}",
     "removeFromTeam": "Rimuovi dal team",
     "training": "In addestramento",
     "trainingHint": "Sta addestrando un'IA, quindi il lavoro va ad altri computer che hanno il modello",
     "plain": "Non cifrato",
     "plainHint": "Il traffico verso {{name}} non è cifrato perché il suo Toskar è più vecchio. Aggiorna Toskar su {{name}} per cifrarlo.",
+    "useCode": "Hai un codice? Approva con quello",
+    "confirmRemoveModel": "Rimuovere {{model}} da {{name}}? Viene eliminato da quel computer e, per usarlo di nuovo lì, andrà scaricato di nuovo.",
     "confirmRemove": "Rimuovere {{name}} da questo team? Smetterà di ricevere lavoro, e per aggiungerlo di nuovo servirà una nuova approvazione."
   },
   "deploy": {
@@ -146,7 +153,8 @@
     "deployTo_other": "Distribuisci su {{count}} computer",
     "deployToName": "Distribuisci su {{name}}",
     "deploy": "Distribuisci",
-    "downloadSize": "Dimensione del download ~{{size}}"
+    "downloadSize": "Dimensione del download ~{{size}}",
+    "modelFit": "{{model}} · {{fit}}"
   },
   "join": {
     "open": "Aggiungi con un comando",
@@ -200,7 +208,6 @@
     "showing": "Creazione del codice…",
     "getApp": "Non hai l'app? <store>Scarica Toskar</store>.",
     "connected": "{{name}} è collegato.",
-    "manage": "Puoi scollegarlo quando vuoi in <access>Accesso API</access>.",
     "manageYours": "Puoi scollegarlo quando vuoi in Impostazioni, sotto I tuoi dispositivi.",
     "another": "Collega un altro dispositivo",
     "codeLabel": "Codice {{code}}",

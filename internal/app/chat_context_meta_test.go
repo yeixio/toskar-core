@@ -3,6 +3,7 @@ package app
 import (
 	"testing"
 
+	"github.com/yeixio/toskar-core/internal/config"
 	"github.com/yeixio/toskar-core/pkg/contracts"
 	"github.com/yeixio/toskar-core/pkg/pluginapi"
 )
@@ -38,5 +39,30 @@ func TestWithDevice(t *testing.T) {
 	kept := &contracts.MessageMeta{Notice: "smaller model"}
 	if got := withDevice(kept, &pluginapi.Acceleration{Backend: "cpu"}); got != kept || got.Backend != "cpu" || got.Device != "" {
 		t.Errorf("cpu: %+v", got)
+	}
+}
+
+// An answer names the model that wrote it and the computer it ran on, and
+// no computer when its steps ran on more than one (toskar-apps#447).
+func TestWithAnsweredBy(t *testing.T) {
+	cfg, err := config.NewManager(t.TempDir())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := cfg.Update(func(c *config.Config) { c.NodeID, c.NodeName = "here", "Studio" }); err != nil {
+		t.Fatal(err)
+	}
+	a := &App{Config: cfg}
+	env := &chatExecEnv{app: a, lastModel: "llama-3.2-1b", roleNodes: map[string]string{"assistant": "here", "router": ""}}
+	meta := a.withAnsweredBy(nil, env)
+	if meta == nil || meta.Model != "llama-3.2-1b" || meta.Computer != "Studio" || meta.Contract == "" {
+		t.Fatalf("here: %+v", meta)
+	}
+	env.roleNodes["drafter:2"] = "laptop"
+	if got := a.withAnsweredBy(nil, env); got.Model != "llama-3.2-1b" || got.Computer != "" {
+		t.Fatalf("two computers: %+v", got)
+	}
+	if a.withAnsweredBy(nil, &chatExecEnv{app: a}) != nil {
+		t.Fatal("no model should make no metadata")
 	}
 }

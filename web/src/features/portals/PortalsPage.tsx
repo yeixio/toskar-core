@@ -14,6 +14,7 @@ import { slugFrom } from './slug'
 import { ShownError, shownError } from '@/components/ui/ShownError'
 import { LoadError } from '@/components/ui/LoadError'
 import { Skeleton } from '@/components/ui/Skeleton'
+import { profileName } from '@/features/profiles/profilePresentation'
 
 function usePrefersDark(): boolean {
   return typeof window !== 'undefined' && window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)').matches : true
@@ -387,7 +388,7 @@ function PortalEditor({ portal, onClose }: { portal: Portal; onClose: () => void
                 {profileId && !(profiles.data ?? []).some((p) => p.id === profileId) ? <option value={profileId}>{profileId}</option> : null}
                 {(profiles.data ?? []).map((p) => (
                   <option key={p.id} value={p.id}>
-                    {p.name}
+                    {profileName(p)}
                   </option>
                 ))}
               </select>

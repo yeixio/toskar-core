@@ -37,6 +37,10 @@
         "label": "Recherche",
         "description": "Lecture de textes longs et raisonnement approfondi."
       },
+      "doorstep": {
+        "label": "Porte d'entrée",
+        "description": "Accueille les visiteurs et prend des messages. Elle ne sait rien de vous et ne peut pas ouvrir la porte."
+      },
       "blank": {
         "label": "Vide",
         "description": "Partez de zéro et définissez vous-même les rôles, les outils et les ordinateurs."
@@ -130,7 +134,8 @@
     "git": "Git",
     "terminal": "Terminal",
     "ok": "{{label}} ✓",
-    "ask": "{{label}} Demander"
+    "ask": "{{label}} Demander",
+    "off": "Pas de {{label}}"
   },
   "roles": {
     "role": "Rôle",
@@ -503,5 +508,27 @@
       "label": "Minutes",
       "help": "Durée maximale d'un essaim (1–240). Vide vaut 5 pour une question et 30 pour une tâche."
     }
+  },
+  "templates": {
+    "doorstep": {
+      "name": "Porte d'entrée",
+      "staysOn": "Accueillir les visiteurs à la porte : livraisons, où laisser un colis, et prendre un message pour les habitants",
+      "example1": "J'ai un colis pour vous.",
+      "example2": "Puis-je laisser un message ?",
+      "example3": "Est-ce la bonne adresse pour la fête ?",
+      "never1": "Si quelqu'un est à la maison, ou quand les gens vont et viennent",
+      "never2": "Les noms, habitudes ou projets des habitants",
+      "never3": "Serrures, alarmes, caméras ou autre sécurité"
+    }
+  },
+  "audience": {
+    "label": "Parle avec des visiteurs",
+    "hint": "Pour une porte d'entrée, un comptoir ou une borne. Votre style, votre position, vos souvenirs et vos ordinateurs restent hors de ses discussions. Il dit qu'il est un assistant automatique, ne dit jamais si quelqu'un est à la maison et ne peut pas utiliser d'outils qui modifient quoi que ce soit."
+  },
+  "builtInNames": {
+    "general-assistant": "Assistant général",
+    "programming": "Programmation",
+    "research": "Recherche",
+    "custom": "Personnalisé"
   }
 }

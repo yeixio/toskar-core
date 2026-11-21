@@ -32,16 +32,18 @@
     "endpoint": "Endpoint",
     "localAddress": "Endereço local: <mono>{{address}}</mono>",
     "lanEndpoint": "Endpoint na LAN",
-    "lanHint": "Use o IP deste computador na LAN com a porta <mono>{{port}}</mono> (por exemplo, <mono>https://192.168.x.x:{{port}}/v1</mono>).",
+    "lanHint": "Use o IP deste computador na LAN com a porta <mono>{{port}}</mono> (por exemplo, <mono>{{scheme}}://192.168.x.x:{{port}}/v1</mono>).",
     "https": "Criptografado com HTTPS. Certificado <mono>{{short}}</mono>.",
     "httpsCustom": "Criptografado com HTTPS, com o seu certificado <mono>{{short}}</mono>.",
     "httpsTrust": "Na primeira vez, um navegador ou app pede que você confie neste certificado. Confira se a impressão digital SHA-256 começa com {{short}}.",
     "httpsError": "Não foi possível usar o seu certificado, então o do Toskar é usado: {{error}}",
     "hideDocs": "Ocultar documentação da API",
     "docs": "Documentação da API",
-    "docsBody": "O Toskar oferece uma API compatível com OpenAI em <mono>/v1</mono>. Aponte os clientes para o endpoint acima e envie <header/> quando o Toskar estiver acessível a partir de outros computadores. `/api/v1` e `/v1` exigem esse cabeçalho. O endpoint da LAN usa HTTPS, que criptografa o tráfego; uma chave sozinha não criptografa HTTP simples.",
+    "docsBody": "O Toskar oferece uma API compatível com OpenAI em <mono>/v1</mono>. Aponte os clientes para o endpoint acima e envie <header/> quando o Toskar estiver acessível a partir de outros computadores. `/api/v1` e `/v1` exigem esse cabeçalho.",
     "copied": "Copiado",
-    "copyUrl": "Copiar URL"
+    "copyUrl": "Copiar URL",
+    "docsHttps": "O endpoint da LAN usa HTTPS, que criptografa o tráfego.",
+    "docsHttp": "O endpoint da LAN usa HTTP simples, então o tráfego não é criptografado: uma chave controla quem entra, mas não criptografa nada."
   },
   "lan": {
     "title": "Acesso pela rede local",
@@ -74,6 +76,9 @@
       "devicesCount_one": "{{formatted}} conectado",
       "devicesCount_many": "{{formatted}} conectados",
       "devicesCount_other": "{{formatted}} conectados",
+      "devicesStale_one": "{{formatted}} sem uso recente",
+      "devicesStale_many": "{{formatted}} sem uso recente",
+      "devicesStale_other": "{{formatted}} sem uso recente",
       "devicesAction": "Conectar um dispositivo",
       "apps": "Apps e scripts",
       "appsHow": "Usam uma chave de API, criada abaixo.",
@@ -84,7 +89,7 @@
   },
   "keys": {
     "title": "Chaves de API",
-    "description": "Credenciais para apps e dispositivos que se comunicam com o Toskar.",
+    "description": "Credenciais para apps e scripts que se comunicam com o Toskar. Celulares e tablets ficam em Dispositivos.",
     "create": "Criar chave de API",
     "createHint": "Dê um nome a esta chave para saber o que a usa.",
     "namePlaceholder": "VS Code",
@@ -107,9 +112,7 @@
   },
   "advanced": {
     "title": "Avançado",
-    "bind": "Endereço de vínculo",
-    "port": "Porta",
-    "host": "Host configurado"
+    "bind": "Endereço de vínculo"
   },
   "permissions": {
     "summary": "O que esta chave pode usar",
@@ -165,7 +168,9 @@
     "none": "Nenhum dispositivo ainda.",
     "meta": "Conectado {{connected}} · Último uso {{lastUsed}}",
     "confirmDisconnect": "Desconectar {{name}}? Ele vai precisar de um novo código para se conectar de novo.",
-    "disconnect": "Desconectar"
+    "disconnect": "Desconectar",
+    "neverUsed": "Nunca usado",
+    "unused": "Sem uso há 90 dias"
   },
   "remote": {
     "title": "Acesso de qualquer lugar",
@@ -272,6 +277,7 @@
     },
     "subscription": {
       "title": "Relay do Toskar",
+      "titleOther": "Assinatura em {{relay}}",
       "offer": "Quando nada mais chega a este computador, o relay do Toskar chega, para este computador e cada dispositivo pareado com ele.",
       "monthly": "Assinar por {{price}} por mês",
       "yearly": "Assinar por {{price}} por ano",
@@ -302,7 +308,24 @@
       "moveHere": "Mover para este computador",
       "moveTooSoon": "Uma assinatura pode mudar de computador uma vez por dia. Tente novamente amanhã.",
       "renewalNotYet": "A App Store ainda não confirmou sua renovação. Escolha Restaurar compra daqui a alguns minutos.",
-      "storeFailed": "A compra não foi concluída: {{message}}"
-    }
+      "storeFailed": "A compra não foi concluída: {{message}}",
+      "cancel": "Cancelar pagamento",
+      "cancelling": "Cancelando…",
+      "turnOnFirst": "Ative Acesso de qualquer lugar acima para assinar.",
+      "endedRevoked": "O relay do Toskar não aceita mais a assinatura deste computador: ela foi movida para outro computador ou reembolsada. Assine de novo para continuar usando o relay do Toskar.",
+      "endedBlocked": "O relay do Toskar bloqueou este computador. Fale com o suporte para saber por quê.",
+      "grant": "Acesso concedido até {{date}}.",
+      "grantOpen": "Acesso concedido.",
+      "moveStripe": "Mover para este computador",
+      "moving": "Movendo…",
+      "inUseStripe": "Esta assinatura está vinculada a outro computador, como aquele de onde vieram os dados deste. Mova-a para cá, e aquele computador deixa de usar o relay do Toskar."
+    },
+    "relayErrors": {
+      "TOKEN_REVOKED": "{{relay}} não aceita mais a assinatura deste computador. Assine de novo ou mova sua assinatura para cá pelo app Toskar.",
+      "ROUTE_BLOCKED": "{{relay}} bloqueou este computador. Fale com o suporte para saber por quê.",
+      "TOKEN_EXPIRED": "O acesso deste computador pelo {{relay}} expirou. Assine de novo para continuar usando.",
+      "TOKEN_INVALID": "{{relay}} não aceitou o token deste computador. Assine de novo ou conecte-o outra vez pelo app Toskar."
+    },
+    "offHint": "Quando ativado, o Toskar pede ao roteador para abrir a porta {{port}}, que só responde a dispositivos pareados com este computador. Em vez disso, você pode escolher uma porta encaminhada ou um relay. Não é preciso ativar o acesso pela rede local."
   }
 }

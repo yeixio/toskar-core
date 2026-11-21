@@ -295,7 +295,20 @@
     "used_other": "Se usaron {{count}} herramientas",
     "completed": "Completado",
     "completedIn": "Completado en {{ms}} ms",
-    "traceFailed": "Falló"
+    "traceFailed": "Falló",
+    "shots": {
+      "summary_one": "{{count}} toma, unos {{seconds}} segundos de vídeo",
+      "summary_many": "{{count}} tomas, unos {{seconds}} segundos de vídeo",
+      "summary_other": "{{count}} tomas, unos {{seconds}} segundos de vídeo",
+      "estimate": "Unos {{time}} en este ordenador, según el último clip que hizo.",
+      "noEstimate": "Este ordenador aún no ha hecho ningún clip, así que no se sabe cuánto tardará. Cada toma puede tardar varios minutos o más.",
+      "style": "En cada toma: {{style}}",
+      "list": "Tomas",
+      "seconds": "{{n}} s",
+      "minutes": "{{n}} min",
+      "hours": "{{n}} h",
+      "hoursMinutes": "{{hours}} h {{minutes}} min"
+    }
   },
   "transcript": {
     "plan": "Plan",
@@ -497,6 +510,35 @@
     "failed": "No se pudo leer en voz alta.",
     "stop": "Detener",
     "systemHint": "Leer esta respuesta en voz alta con las voces de este dispositivo"
+  },
+  "voiceMode": {
+    "start": "Hablar",
+    "startHint": "Habla con Toskar en voz alta: te responde con una voz, y puedes interrumpirlo hablando",
+    "title": "Modo de voz",
+    "noMicrophone": "Esta página no puede usar un micrófono. Abre Toskar con https:// o en este ordenador con localhost.",
+    "connectFailed": "No se pudo conectar al modo de voz. Inténtalo de nuevo en un momento.",
+    "failed": "Algo salió mal en el modo de voz.",
+    "micDenied": "Toskar no tiene permiso para usar el micrófono. Permítelo en los ajustes del navegador para esta página.",
+    "micFailed": "No se pudo iniciar el micrófono.",
+    "muted": "Micrófono apagado",
+    "you": "Tú:",
+    "waited": "Respondió {{seconds}} s después de que pararas",
+    "mute": "Silenciar",
+    "unmute": "Activar sonido",
+    "end": "Terminar",
+    "hint": "Habla cuando quieras. Habla encima de una respuesta para pararla.",
+    "status": {
+      "connecting": "Conectando…",
+      "listening": "Escuchando",
+      "hearing": "Te oye",
+      "thinking": "Pensando…",
+      "speaking": "Hablando",
+      "closed": "Modo de voz terminado"
+    },
+    "demo": {
+      "you": "¿Qué ruta de senderismo cerca de Juneau me recomiendas este fin de semana?",
+      "answer": "El monte Roberts está bien. Sube en el teleférico y sigue el sendero de la cresta hasta donde quieras."
+    }
   },
   "context": {
     "usage": "Uso del contexto",
@@ -850,6 +892,7 @@
     "finishingImage": "Terminando la imagen…",
     "finishingVideo": "Terminando el clip…",
     "step": "Paso {{step}} de {{steps}}",
+    "shot": "Toma {{shot}} de {{shots}}",
     "leftSeconds": "faltan unos {{seconds}} s",
     "leftMinutes": "faltan unos {{minutes}} min",
     "frameImage": "Tu imagen aparecerá aquí",

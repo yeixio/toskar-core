@@ -1,7 +1,7 @@
 {
   "page": {
     "title": "自動化",
-    "description": "由 Toskar 的 AI 依照排程替你完成的工作，例如早晨新聞摘要或價格追蹤。即使關閉這個視窗，也會在背景執行。",
+    "description": "Toskar 的 AI 依排程或在發生某件事時替你完成的工作，例如早晨新聞摘要、價格追蹤或應門。即使關閉此視窗，它們也會在背景執行。",
     "new": "新增自動化",
     "howItWorks": "運作方式",
     "hideHowItWorks": "隱藏運作方式",
@@ -21,7 +21,9 @@
     "saveFailed": "無法儲存自動化。",
     "confirmDelete": "要刪除「{{name}}」嗎？它的歷史紀錄也會一併移除。",
     "selectHint": "選擇一項自動化以查看其歷史紀錄，或建立新的自動化。",
-    "createOff": "你的帳戶已關閉建立自動化。請管理員開啟。"
+    "createOff": "你的帳戶已關閉建立自動化。請管理員開啟。",
+    "neverRun": "從未執行",
+    "lastOnly": "上次 {{last}}"
   },
   "intro": {
     "title": "在你離開時讓 Toskar 替你做事",
@@ -86,6 +88,13 @@
       "name": "資料夾摘要：{{folderName}}",
       "task": "總結資料夾 {{folder}} 中的檔案：哪些是新增或有變化的，以及需要注意的事項。"
     },
+    "door": {
+      "title": "應門",
+      "body": "問候按門鈴的人，了解來意並告訴你。",
+      "request": "有人按門鈴時，查看攝影機，透過門鈴問候訪客，並告訴我是誰來了。",
+      "name": "{{door}} 應門",
+      "task": "查看門口的畫面。問候訪客，了解對方是誰、為什麼來，然後告訴我。"
+    },
     "fields": {
       "topics": {
         "label": "主題",
@@ -137,7 +146,11 @@
     "olderRuns": "顯示更早的執行",
     "loadingOlder": "正在載入…",
     "lastChecked": "上次檢查 {{when}}，沒有新內容",
-    "nextCheck": "下次檢查 {{when}}"
+    "nextCheck": "下次檢查 {{when}}",
+    "door": "門口",
+    "looksAt": "查看 {{cameras}}",
+    "says": "在門口說出回答",
+    "talks": "與訪客交談並了解來意"
   },
   "run": {
     "details": "詳細資訊",
@@ -390,6 +403,11 @@
     "deviceHint": "裝置一變化就立即執行，並告訴它變化了什麼。執行後的等待時間內的變化不會再次觸發，因此閃爍的感測器只會觸發一次。",
     "cameras": "查看攝影機",
     "camerasHint": "每次執行先拍下這些攝影機的畫面，交給能看圖片的模型。最多 {{count}} 台。",
+    "say": "在門口說出回答",
+    "sayHint": "Toskar 每次執行都會透過門鈴的揚聲器讀出回答；門口沒人可交談時什麼也不說。",
+    "sayQuiet": "安靜時段（只發通知）",
+    "sayQuietFrom": "從",
+    "sayQuietTo": "到",
     "deviceKinds": {
       "camera": "攝影機",
       "sensor": "感測器",
@@ -400,7 +418,31 @@
       "cover": "窗簾",
       "climate": "空調",
       "other": "其他"
-    }
+    },
+    "needsToolModel": "所選模型無法使用工具，因此不會開啟網頁或使用這裡選的工具，只會憑已知內容回答。請選擇能使用工具的模型，或安裝一個。",
+    "openModels": "開啟模型",
+    "actions": "可自行執行的操作",
+    "actionsHint": "每次執行都可以不經詢問進行這些呼叫，即使由觸發條件啟動。其他會改變內容的呼叫將被略過。只選擇在無人看管時也放心讓它做的事。",
+    "actionLabel": "{{action}}：{{device}}",
+    "actionDevice": "裝置",
+    "actionDevicePick": "選擇裝置…",
+    "actionService": "操作",
+    "actionAdd": "允許",
+    "actionRemoveButton": "移除",
+    "actionRemove": "移除{{action}}",
+    "actionServices": {
+      "turn_on": "開啟",
+      "turn_off": "關閉",
+      "lock": "上鎖",
+      "unlock": "解鎖",
+      "open_cover": "打開",
+      "close_cover": "關上"
+    },
+    "sayVoice": "語音",
+    "sayVoiceAutomatic": "設定中該語言的語音",
+    "sayVoiceKitten": "Kitten",
+    "sayListen": "與訪客交談",
+    "sayListenHint": "說完第一句後，Toskar 會透過門鈴的麥克風聆聽、回答，並弄清來的是誰、為什麼來。它從不透露家裡是否有人。你會收到這次來訪的摘要。需要這台電腦上有 ffmpeg。"
   },
   "draft": {
     "label": "待確認的自動化",
@@ -430,7 +472,8 @@
     "deviceTo": "當 {{device}} 變為 {{to}} 時",
     "after": "{{name}} 完成後",
     "afterNotified": "{{name}} 發出通知後",
-    "anotherAutomation": "另一個自動化"
+    "anotherAutomation": "另一個自動化",
+    "ring": "有人按 {{door}} 的門鈴時"
   },
   "webhook": {
     "title": "Webhook 連結",
@@ -443,5 +486,13 @@
     "make": "建立連結",
     "makeNew": "建立新連結",
     "replaces": "新連結會讓舊連結失效。"
+  },
+  "door": {
+    "nobodyAnswered": "有人來到門口。Toskar 打了招呼，但沒有人回應。",
+    "stopped": "對話已中斷：{{error}}",
+    "you": "Toskar",
+    "visitor": "訪客",
+    "said": "在門口說的話：「{{words}}」",
+    "nobodyThere": "畫面中沒有人，所以沒有在門口說話。"
   }
 }

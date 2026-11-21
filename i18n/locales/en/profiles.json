@@ -37,6 +37,10 @@
         "label": "Research",
         "description": "Long-form reading and careful reasoning."
       },
+      "doorstep": {
+        "label": "Front door",
+        "description": "Greets visitors and takes messages. It knows nothing about you and can't open the door."
+      },
       "blank": {
         "label": "Blank",
         "description": "Start empty and set roles, tools, and computers yourself."
@@ -129,7 +133,8 @@
     "git": "Git",
     "terminal": "Terminal",
     "ok": "{{label}} ✓",
-    "ask": "{{label}} Ask"
+    "ask": "{{label}} Ask",
+    "off": "No {{label}}"
   },
   "roles": {
     "role": "Role",
@@ -498,5 +503,27 @@
       "label": "Minutes",
       "help": "Longest a swarm may run (1–240). Empty is 5 for a question and 30 for a task."
     }
+  },
+  "templates": {
+    "doorstep": {
+      "name": "Front door",
+      "staysOn": "Greeting visitors at the front door: deliveries, where to leave a package, and taking a message for the people who live here",
+      "example1": "I have a package for you.",
+      "example2": "Can I leave a message?",
+      "example3": "Is this the right address for the party?",
+      "never1": "Whether anyone is home, or when people come and go",
+      "never2": "Names, routines, or plans of the people who live here",
+      "never3": "Locks, alarms, cameras, or other security"
+    }
+  },
+  "audience": {
+    "label": "Talks with visitors",
+    "hint": "For a front door, a shop counter, or a kiosk. Your style, location, memories, and computers stay out of its chats. It says it's an automated assistant, never says whether anyone is home, and can't use tools that change things."
+  },
+  "builtInNames": {
+    "general-assistant": "General Assistant",
+    "programming": "Programming",
+    "research": "Research",
+    "custom": "Custom"
   }
 }

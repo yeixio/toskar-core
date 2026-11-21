@@ -2,13 +2,15 @@ import { useMutation, useQuery } from '@tanstack/react-query'
 import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { TFunction } from 'i18next'
-import { useNavigate } from 'react-router-dom'
+import { fitsLine, systemName } from './systemName'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 import { Ratatoskr } from '@/components/ui/Ratatoskr'
 import { useMascotState } from '@/lib/ratatoskr/useMascotState'
 import { api } from '@/lib/api'
 import { subscribeEvents } from '@/lib/events'
 import { bytesToGb, formatBytes } from '@/lib/format'
+import { downloadBytes } from '@/features/models/modelPresentation'
 import {
   buildProfileFromRecommendation,
   presetIdForPurpose,
@@ -19,6 +21,7 @@ import { useUIStore } from '@/stores/uiStore'
 import type { ModelDownloadProgressPayload, Purpose, Recommendation } from '@/types/api'
 import { ShownError, shownError } from '@/components/ui/ShownError'
 import { formatPercent } from '@/i18n/format'
+import { profileName } from '@/features/profiles/profilePresentation'
 
 type OnboardingStep = 'setup' | 'recommend' | 'installing' | 'ready'
 
@@ -32,6 +35,10 @@ type InstallPhase =
 export function OnboardingPage() {
   const { t } = useTranslation('onboarding')
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  // The page someone opened before setup took over, if it's one of ours.
+  const nextParam = searchParams.get('next')
+  const next = nextParam && nextParam.startsWith('/') && !nextParam.startsWith('//') && !nextParam.startsWith('/onboarding') ? nextParam : null
   const setOnboardingComplete = useUIStore((s) => s.setOnboardingComplete)
 
   const [step, setStep] = useState<OnboardingStep>('setup')
@@ -130,7 +137,7 @@ export function OnboardingPage() {
       setPhase('conversation')
       setPhaseDetail(t('install.conversation'))
       const conversation = await api.createConversation({
-        title: t('install.chatTitle', { profile: profile.name }),
+        title: t('install.chatTitle', { profile: profileName(profile) }),
         profile_id: profile.id,
       })
 
@@ -159,7 +166,7 @@ export function OnboardingPage() {
 
   const handleSkipInstall = () => {
     setOnboardingComplete(true)
-    navigate('/chat')
+    navigate(next ?? '/chat')
   }
 
   const handleStartChatting = () => {
@@ -203,7 +210,7 @@ export function OnboardingPage() {
   }, [recommendation, step, phase, downloadProgress])
 
   return (
-    <main className="mx-auto flex h-full min-h-0 w-full max-w-3xl flex-col justify-center overflow-y-auto px-6 py-12">
+    <main className="mx-auto flex h-full min-h-0 w-full max-w-3xl flex-col justify-center-safe overflow-y-auto px-6 py-12">
       <header className="mb-10 text-center">
         <Ratatoskr state={mascot} size={160} className="mx-auto mb-3" />
         <p className="mb-3 text-sm font-medium uppercase tracking-[0.18em] text-accent">
@@ -260,7 +267,7 @@ export function OnboardingPage() {
                     <div>
                       <dt className="text-xs uppercase tracking-wide text-ink-muted">{t('hardware.system')}</dt>
                       <dd className="text-sm font-medium text-ink">
-                        {hardware.os} / {hardware.arch}
+                        {systemName(hardware.os, hardware.arch, t)}
                       </dd>
                     </div>
                   )}
@@ -323,7 +330,19 @@ export function OnboardingPage() {
             >
               {recommendMutation.isPending ? t('finding') : t('continue')}
             </button>
+            {/* Someone who opened another page can go there first (#1266). */}
+            {next ? (
+              <button type="button" className="btn-secondary px-6" onClick={handleSkipInstall}>
+                {t('setupLater')}
+              </button>
+            ) : null}
           </div>
+          {/* It can take several seconds: say what's happening (#1266). */}
+          {recommendMutation.isPending ? (
+            <div className="mt-4 flex justify-center">
+              <LoadingSpinner label={t('findingDetail')} />
+            </div>
+          ) : null}
         </>
       )}
 
@@ -332,13 +351,12 @@ export function OnboardingPage() {
           <section className="card mb-6">
             <div className="mb-3 flex flex-wrap items-center gap-2">
               <span className="badge-preferred">{t('recommend.badge')}</span>
-              <span className="badge-mimir">Mimir</span>
             </div>
             <h2 className="font-display text-xl font-semibold text-ink">
               {t('recommend.title', { purpose: t(`purposes.${selectedPurpose}.title`) })}
             </h2>
             <p className="mt-2 text-sm leading-relaxed text-ink-muted">
-              {recommendation.reason}
+              {fitsLine(recommendation, hardware?.memory?.total_bytes, t)}
             </p>
             {recommendation.community_chosen ? (
               <p className="mt-1 text-xs text-ink-muted">{t('recommend.communityChosen')}</p>
@@ -358,9 +376,9 @@ export function OnboardingPage() {
                     </p>
                     {model?.installed ? (
                       <p className="mt-1 text-xs text-ink-muted">{t('recommend.installed')}</p>
-                    ) : model?.size_bytes ? (
+                    ) : model && downloadBytes(model) ? (
                       <p className="mt-1 text-xs text-ink-muted">
-                        {t('recommend.download', { size: formatBytes(model.size_bytes) })}
+                        {t('recommend.download', { size: formatBytes(downloadBytes(model)) })}
                       </p>
                     ) : null}
                   </li>
@@ -462,3 +480,4 @@ const ROLES = ['coordinator', 'worker', 'reviewer', 'researcher', 'assistant']
 function friendlyRole(role: string, t: TFunction<'onboarding'>): string {
   return ROLES.includes(role) ? t(`roles.${role}`) : role
 }
+

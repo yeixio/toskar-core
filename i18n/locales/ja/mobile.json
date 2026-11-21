@@ -103,6 +103,54 @@
       "reranker": "補助モデル · 最適な抜粋を順位付け",
       "classifier": "補助モデル · 「自動」のリクエスト振り分けを補助",
       "other": "補助モデル"
+    },
+    "ratings": {
+      "rate": "評価",
+      "title": "{{model}}を評価",
+      "intro": "このコンピュータでの使い心地はどうですか？評価はこのコンピュータに保存されます。",
+      "starsLabel": "星",
+      "stars_other": "星{{count}}つ",
+      "tagsLabel": "理由（任意）",
+      "tags": {
+        "great_responses": "回答がすばらしい",
+        "fast": "速い",
+        "slow": "遅い",
+        "stable": "安定している",
+        "crashed": "クラッシュした",
+        "too_much_memory": "メモリを使いすぎる",
+        "great_for_coding": "コーディングに最適",
+        "great_for_chat": "チャットに最適",
+        "good_tool_use": "ツールの扱いが得意",
+        "poor_tool_use": "ツールの扱いが苦手"
+      },
+      "share": "この評価をコミュニティと共有する",
+      "shareHint": "同じようなコンピュータを使う人のモデル選びに役立ちます。共有はいつでもやめられます。",
+      "whatIsShared": "共有される内容",
+      "sent": {
+        "destination": "送信先",
+        "model": "モデル",
+        "hardware": "コンピュータの種類",
+        "memory": "{{type}}メモリ、{{gb}} GB",
+        "never": "プロンプト、チャット、ファイル名、コンピュータ名、ユーザー名、ネットワークアドレスは送信されません。サービスはIPアドレスを保存しません。"
+      },
+      "notShareable": "この評価はこのコンピュータにのみ保存されます: {{reason}}",
+      "save": "保存",
+      "saveAndShare": "保存して共有",
+      "remove": "評価を削除",
+      "cancel": "キャンセル",
+      "count_other": "{{formatted}}件の評価",
+      "similar": {
+        "family": "同じ機種のコンピュータで",
+        "class": "似たコンピュータで",
+        "backend": "同程度のメモリのコンピュータで"
+      },
+      "overall": "全体",
+      "confidence": {
+        "limited": "データ不足",
+        "early": "初期の評価"
+      },
+      "prompt": "{{model}}の使い心地はいかがですか？",
+      "notNow": "あとで"
     }
   },
   "phoneModels": {
@@ -418,7 +466,13 @@
         "notNow": "今はしない"
       }
     },
-    "phoneAutoHint": "メッセージごとに、このデバイスで最適なモデルを選びます"
+    "phoneAutoHint": "メッセージごとに、このデバイスで最適なモデルを選びます",
+    "builtInProfiles": {
+      "general-assistant": "汎用アシスタント",
+      "programming": "プログラミング",
+      "research": "リサーチ",
+      "custom": "カスタム"
+    }
   },
   "effort": {
     "title": "処理の深さ",
@@ -590,6 +644,14 @@
       "try": "コンピュータなしで試す",
       "tryMeta": "サンプルの回答で動くデモ",
       "other": "このデモは左の提案された質問に答えます。何でも質問するには、自宅のコンピュータに Toskar を設定し（Toskar Core は無料です）、「コンピュータ」→「デバイスを接続」でこのテレビを接続してください。"
+    },
+    "people": {
+      "title": "誰が見ていますか？",
+      "add": "ほかの人を追加",
+      "hint": "各自がコンピューター上の自分のアカウントのコードで接続するので、チャットやメモリーはその人だけのものです。",
+      "switch": "{{name}}さんではありませんか？",
+      "unnamed": "ユーザー {{n}}",
+      "back": "戻る"
     }
   },
   "setup": {
@@ -845,6 +907,7 @@
       "notification": "通知",
       "community_ratings": "コミュニティ評価",
       "update_check": "アップデートの確認",
+      "comfyui": "ComfyUI",
       "problem_report": "問題の報告",
       "link_check": "リンク確認"
     },
@@ -858,6 +921,7 @@
       "notification": "通知",
       "community_ratings": "コミュニティ評価",
       "update_check": "アップデートの確認",
+      "comfyui": "ComfyUI",
       "problem_report": "問題の報告",
       "link_check": "リンク確認"
     },

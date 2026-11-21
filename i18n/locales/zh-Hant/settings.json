@@ -69,6 +69,9 @@
     "noPreference": "沒有偏好",
     "aboutYou": "關於你",
     "aboutYouPlaceholder": "我是住在朱諾的後端工程師，主要專案是一個 Go 服務。",
+    "location": "你的位置",
+    "locationPlaceholder": "朱諾（阿拉斯加州）",
+    "locationHint": "只用於詢問附近地點、天氣和路線的問題。留空則每次自行說明地點。",
     "instructions": "其他關於如何回答的要求",
     "instructionsPlaceholder": "以 Go 顯示程式碼範例。在結尾列出資料來源。",
     "save": "儲存",
@@ -114,7 +117,7 @@
   },
   "advanced": {
     "title": "進階模式",
-    "description": "顯示模型 ID、API 詳細資訊、設定檔、記錄檔，以及其他進階使用者控制項。"
+    "description": "顯示模型 ID、API 詳細資訊、記錄檔，以及其他進階使用者控制項。"
   },
   "discovery": {
     "title": "尋找其他電腦",
@@ -140,6 +143,8 @@
     "description": "針對長時間執行的工作和團隊連線狀態的提醒。",
     "taskFinish": "工作完成時通知",
     "peerOffline": "配對的電腦離線時通知",
+    "newerModels": "已安裝模型有新版本時通知",
+    "newerModelsHint": "每個新世代通知管理員一次。在你選擇之前，不會安裝或切換任何內容。",
     "digest": "每日自動化摘要",
     "digestHint": "每天彙整一次所有自動化的結果，傳到一個可以回覆的聊天中。",
     "digestTime": "時間"
@@ -219,6 +224,7 @@
       "notification": "通知",
       "community_ratings": "社群評分",
       "update_check": "檢查更新",
+      "comfyui": "ComfyUI",
       "problem_report": "問題回報",
       "news": "AI 新聞",
       "link_check": "連結檢查"
@@ -233,6 +239,7 @@
       "notification": "通知",
       "community_ratings": "社群評分",
       "update_check": "檢查更新",
+      "comfyui": "ComfyUI",
       "problem_report": "問題回報",
       "news": "AI 新聞",
       "link_check": "連結檢查"
@@ -253,7 +260,12 @@
     "delete": "立即刪除執行紀錄",
     "confirmDelete": "要立即刪除執行紀錄嗎？這會移除過去執行所儲存的提示和工具結果，以及這份清單。聊天不會被刪除。",
     "deleted": "已刪除 {{tasks}} 筆執行紀錄、{{automations}} 筆自動化結果，以及下方 {{entries}} 筆項目。",
-    "footnote": "執行紀錄包含過去執行的提示和工具結果。是否保留聊天由下方的「歷史紀錄」決定。每項自動化都會保留最新的結果，供「結果有變化時通知」進行比較。"
+    "footnote": "執行紀錄包含過去執行的提示和工具結果。是否保留聊天由下方的「歷史紀錄」決定。每項自動化都會保留最新的結果，供「結果有變化時通知」進行比較。",
+    "details": {
+      "news": "AI 新聞",
+      "latestVersion": "最新版本號",
+      "training": "用於 {{repo}} 的訓練範例和指示"
+    }
   },
   "storage": {
     "folders": "資料目錄",
@@ -271,7 +283,7 @@
     "unlimited": "無限制"
   },
   "about": {
-    "tagline": "本機 AI 控制中心",
+    "tagline": "在你自己的電腦上執行 AI",
     "versionUnavailable": "無法取得版本",
     "build": "建置版本 {{commit}}",
     "source": "對應原始碼",
@@ -284,7 +296,8 @@
     "download": "下載",
     "upToDate": "已是最新版本",
     "checkUpdates": "檢查更新",
-    "checkUpdatesHint": "Toskar 每天向 toskar.ai 詢問一次最新版本號，不會傳送其他任何內容。"
+    "checkUpdatesHint": "Toskar 每天向 toskar.ai 詢問一次最新版本號，不會傳送其他任何內容。",
+    "running": "正在執行"
   },
   "reset": {
     "title": "重置應用程式",
@@ -339,5 +352,48 @@
     "description": "回答只連結來源提供的頁面。Toskar 還可以詢問每個被連結的網站，頁面是否仍能開啟。",
     "check": "檢查回答中的連結",
     "checkHint": "回答寫完後，Toskar 會聯絡每個被連結的網站，並在回答下方列出無法開啟的連結。每次檢查都會記錄在「離開這台電腦的內容」中。"
+  },
+  "voice": {
+    "title": "語音",
+    "description": "Toskar 朗讀時使用的語音：即時語音模式、在手機和車上朗讀的回答，以及門鈴。",
+    "unavailable": "這台電腦無法使用語音設定。",
+    "failed": "操作未成功，請再試一次。",
+    "kitten": {
+      "name": "Kitten TTS 2 mini",
+      "description": "為{{languages}}加入可選的自然語音，並用 Kitten 朗讀原本只有基本語音的語言。已有自然語音的語言會保留原語音，除非你在下方選擇 Kitten 語音。在這台電腦上安裝約 1.5 GB（包括語音），在處理器上執行，說話時約使用 1 GB 記憶體。",
+      "install": "安裝",
+      "retry": "重試",
+      "installing": "正在安裝程式…",
+      "downloading": "正在下載語音…",
+      "warming": "正在準備語音…",
+      "listening": "正在準備聆聽…",
+      "remove": "移除",
+      "removeConfirm": "移除 Kitten",
+      "keep": "保留"
+    },
+    "languages": "各語言的語音",
+    "automatic": "自動",
+    "automaticNamed": "自動：{{voice}}",
+    "engine": {
+      "kitten": "Kitten",
+      "kokoro": "Kokoro",
+      "piper": "Piper"
+    },
+    "preview": "試聽",
+    "previewIn": "試聽{{language}}語音",
+    "previewFailed": "無法播放試聽。",
+    "needs": {
+      "chat": "要在語音模式中回答，Toskar 需要一個聊天模型。",
+      "vision": "要看清門口是誰，Toskar 需要一個能看圖片的模型。",
+      "both": "要在語音模式中回答並看到門口是誰，Toskar 需要一個能聊天也能看圖片的模型。一個模型就能做到兩者。",
+      "offer": "{{name}} 適合這台電腦（{{size}}）。",
+      "install": "安裝 {{name}}",
+      "downloading": "正在下載 {{name}}… {{percent}}%",
+      "ready": "{{name}} 已安裝。",
+      "none": "目錄中沒有適合這台電腦的模型。",
+      "models": "查看模型"
+    },
+    "standard": "標準",
+    "noVoice": "{{languages}}暫時還無法朗讀：朗讀、語音模式和門鈴都無法說這種語言。"
   }
 }

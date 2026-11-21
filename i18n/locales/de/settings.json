@@ -69,6 +69,9 @@
     "noPreference": "Keine Vorliebe",
     "aboutYou": "Über dich",
     "aboutYouPlaceholder": "Ich bin Backend-Entwickler in Hamburg. Mein Hauptprojekt ist ein Go-Dienst.",
+    "location": "Ihr Standort",
+    "locationPlaceholder": "Hamburg-Altona",
+    "locationHint": "Wird nur für Fragen zu Orten in der Nähe, zum Wetter und zu Wegbeschreibungen verwendet. Lassen Sie das Feld leer, um jedes Mal einen Ort zu nennen.",
     "instructions": "Sonstiges zur Art der Antworten",
     "instructionsPlaceholder": "Zeig Codebeispiele in Go. Nenne am Ende die Quellen.",
     "save": "Speichern",
@@ -116,7 +119,7 @@
   },
   "advanced": {
     "title": "Expertenmodus",
-    "description": "Zeigt Modell-IDs, API-Details, Profile, Protokolle und weitere Optionen für Fortgeschrittene."
+    "description": "Zeigt Modell-IDs, API-Details, Protokolle und weitere Optionen für Fortgeschrittene."
   },
   "discovery": {
     "title": "Andere Computer finden",
@@ -142,6 +145,8 @@
     "description": "Hinweise zu lang laufender Arbeit und zur Verbindung im Team.",
     "taskFinish": "Benachrichtigen, wenn Aufgaben fertig sind",
     "peerOffline": "Benachrichtigen, wenn ein gekoppelter Computer offline geht",
+    "newerModels": "Benachrichtigen, wenn eine neuere Version eines installierten Modells erscheint",
+    "newerModelsHint": "Einmal pro neuer Generation, für Admins. Nichts wird installiert oder gewechselt, bevor du es auswählst.",
     "digest": "Tägliche Automationsübersicht",
     "digestHint": "Jeden Tag eine Zusammenfassung aller Automationsergebnisse, in einem Chat, in dem du antworten kannst.",
     "digestTime": "Uhrzeit"
@@ -226,6 +231,7 @@
       "notification": "Mitteilung",
       "community_ratings": "Community-Bewertungen",
       "update_check": "Update-Prüfung",
+      "comfyui": "ComfyUI",
       "problem_report": "Problembericht",
       "news": "KI-Neuigkeiten",
       "link_check": "Linkprüfung"
@@ -240,6 +246,7 @@
       "notification": "Mitteilung",
       "community_ratings": "Community-Bewertungen",
       "update_check": "Update-Prüfung",
+      "comfyui": "ComfyUI",
       "problem_report": "Problembericht",
       "news": "KI-Neuigkeiten",
       "link_check": "Linkprüfung"
@@ -261,7 +268,12 @@
     "delete": "Durchlaufprotokolle jetzt löschen",
     "confirmDelete": "Durchlaufprotokolle jetzt löschen? Dadurch werden gespeicherte Prompts und Werkzeugergebnisse früherer Durchläufe sowie diese Liste entfernt. Chats werden nicht gelöscht.",
     "deleted": "{{tasks}} Durchlaufprotokolle, {{automations}} Automationsergebnisse und {{entries}} Einträge unten gelöscht.",
-    "footnote": "Durchlaufprotokolle enthalten Prompts und Werkzeugergebnisse früherer Durchläufe. Ob Chats aufbewahrt werden, legst du unten unter „Verlauf“ fest. Jede Automation behält ihr letztes Ergebnis, mit dem „Benachrichtigen, wenn sich das Ergebnis ändert“ vergleicht."
+    "footnote": "Durchlaufprotokolle enthalten Prompts und Werkzeugergebnisse früherer Durchläufe. Ob Chats aufbewahrt werden, legst du unten unter „Verlauf“ fest. Jede Automation behält ihr letztes Ergebnis, mit dem „Benachrichtigen, wenn sich das Ergebnis ändert“ vergleicht.",
+    "details": {
+      "news": "die KI-News",
+      "latestVersion": "die neueste Versionsnummer",
+      "training": "Trainingsbeispiele und Anweisungen für {{repo}}"
+    }
   },
   "storage": {
     "folders": "Datenordner",
@@ -279,7 +291,7 @@
     "unlimited": "Unbegrenzt"
   },
   "about": {
-    "tagline": "Lokale KI-Steuerzentrale",
+    "tagline": "Führt KI auf deinen eigenen Computern aus",
     "versionUnavailable": "Version nicht verfügbar",
     "build": "Build {{commit}}",
     "source": "Zugehöriger Quellcode",
@@ -292,7 +304,8 @@
     "download": "Herunterladen",
     "upToDate": "Auf dem neuesten Stand",
     "checkUpdates": "Nach Updates suchen",
-    "checkUpdatesHint": "Einmal am Tag fragt Toskar bei toskar.ai nach der neuesten Versionsnummer. Sonst wird nichts gesendet."
+    "checkUpdatesHint": "Einmal am Tag fragt Toskar bei toskar.ai nach der neuesten Versionsnummer. Sonst wird nichts gesendet.",
+    "running": "Läuft"
   },
   "reset": {
     "title": "App zurücksetzen",
@@ -348,5 +361,48 @@
     "description": "Antworten verlinken nur Seiten, die ihre Quellen genannt haben. Toskar kann außerdem jede verlinkte Website fragen, ob die Seite noch erreichbar ist.",
     "check": "Links in Antworten prüfen",
     "checkHint": "Nach einer Antwort kontaktiert Toskar jede verlinkte Website und nennt unter der Antwort die Links, die sich nicht öffnen lassen. Jede Prüfung steht unter „Was diesen Computer verlassen hat“."
+  },
+  "voice": {
+    "title": "Stimme",
+    "description": "Die Stimmen, mit denen Toskar vorliest: im Live-Sprachmodus, bei vorgelesenen Antworten auf dem Handy und im Auto, und an der Türklingel.",
+    "unavailable": "Die Stimmeinstellungen sind auf diesem Computer nicht verfügbar.",
+    "failed": "Das hat nicht geklappt. Versuche es noch einmal.",
+    "kitten": {
+      "name": "Kitten TTS 2 mini",
+      "description": "Fügt natürliche Stimmen zur Auswahl hinzu in {{languages}} und liest mit Kitten die Sprachen vor, die nur eine einfache Stimme hatten. Sprachen mit einer natürlichen Stimme behalten sie, außer du wählst unten eine Kitten-Stimme. Installiert etwa 1,5 GB auf diesem Computer, einschließlich der Stimmen, läuft auf dem Prozessor und braucht beim Sprechen etwa 1 GB Arbeitsspeicher.",
+      "install": "Installieren",
+      "retry": "Erneut versuchen",
+      "installing": "Programm wird installiert …",
+      "downloading": "Stimmen werden heruntergeladen …",
+      "warming": "Stimmen werden vorbereitet …",
+      "listening": "Zuhören wird eingerichtet…",
+      "remove": "Entfernen",
+      "removeConfirm": "Kitten entfernen",
+      "keep": "Behalten"
+    },
+    "languages": "Stimme für jede Sprache",
+    "automatic": "Automatisch",
+    "automaticNamed": "Automatisch: {{voice}}",
+    "engine": {
+      "kitten": "Kitten",
+      "kokoro": "Kokoro",
+      "piper": "Piper"
+    },
+    "preview": "Anhören",
+    "previewIn": "Stimme für {{language}} anhören",
+    "previewFailed": "Die Hörprobe konnte nicht abgespielt werden.",
+    "needs": {
+      "chat": "Um im Sprachmodus zu antworten, braucht Toskar ein Chat-Modell.",
+      "vision": "Um zu sehen, wer an der Tür ist, braucht Toskar ein Modell, das Bilder sehen kann.",
+      "both": "Um im Sprachmodus zu antworten und zu sehen, wer an der Tür ist, braucht Toskar ein Modell, das chattet und Bilder sieht. Ein Modell kann beides.",
+      "offer": "{{name}} passt zu diesem Computer ({{size}}).",
+      "install": "{{name}} installieren",
+      "downloading": "{{name}} wird heruntergeladen… {{percent}} %",
+      "ready": "{{name}} ist installiert.",
+      "none": "Keins im Katalog passt zu diesem Computer.",
+      "models": "Zu den Modellen"
+    },
+    "standard": "Standard",
+    "noVoice": "{{languages}} kann noch nicht vorgelesen werden: Vorlesen, Sprachmodus und Türklingel sprechen es nicht."
   }
 }

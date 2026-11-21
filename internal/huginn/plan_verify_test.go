@@ -21,6 +21,8 @@ func TestMakePlan(t *testing.T) {
 		{"Plan my week:\n1. Draft the report\n2. Book flights\n3. Email the team about Friday", Plan{
 			Steps: []string{"Plan my week", "Draft the report", "Book flights", "Email the team about Friday"}}, true},
 		{"What is DNS?", Plan{}, false},
+		// Regression: toskar-core#1346. Two quick questions aren't a plan.
+		{"What is 17 times 23? Then say what model you are.", Plan{}, false},
 		{"Tell me a story about a fox who learns to sail across the sea", Plan{}, false},
 		{"Compare this sentence, which has commas, with a longer rambling thought that goes on and on", Plan{}, false},
 	}

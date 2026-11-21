@@ -21,6 +21,8 @@ const pageTitles: Record<string, string> = {
   '/diagnostics': 'nav.diagnostics',
   '/profiles': 'nav.profiles',
   '/tools': 'nav.tools',
+  '/people': 'nav.people',
+  '/portals': 'nav.portals',
   '/api-access': 'nav.apiAccess',
   '/settings': 'nav.settings',
 }
@@ -51,11 +53,18 @@ export function AppLayout() {
 
   return (
     <div className="app-shell">
+      {/* First on the page, so keyboard users can go past the sidebar (#1271). */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:start-2 focus:top-2 focus:z-50 focus:rounded-lg focus:bg-surface focus:px-3 focus:py-2 focus:text-sm focus:text-ink focus:shadow-panel"
+      >
+        {t('nav.skip')}
+      </a>
       <Sidebar ref={drawerRef} open={menuOpen} />
       {menuOpen ? (
         <div className="fixed inset-0 z-30 scrim md:hidden" aria-hidden onClick={() => setMenuOpen(false)} />
       ) : null}
-      <main inert={menuOpen} className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+      <main id="main-content" tabIndex={-1} inert={menuOpen} className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
         <div className="flex items-center gap-2 border-b border-line/60 bg-sidebar px-2 py-1.5 md:hidden">
           <button
             type="button"

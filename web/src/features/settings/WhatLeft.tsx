@@ -9,7 +9,7 @@ import { LoadError } from '@/components/ui/LoadError'
 import { Skeleton } from '@/components/ui/Skeleton'
 
 // What left, in order; the names are settings:whatLeft.kinds.<kind> in the catalog.
-const KINDS: EgressKind[] = ['web_search', 'web_page', 'places', 'paired_computer', 'external_server', 'connector', 'notification', 'community_ratings', 'update_check', 'news', 'problem_report', 'link_check']
+const KINDS: EgressKind[] = ['web_search', 'web_page', 'places', 'paired_computer', 'external_server', 'connector', 'notification', 'community_ratings', 'update_check', 'news', 'problem_report', 'link_check', 'comfyui']
 // What sent it; the names are settings:whatLeft.sources.<source>.
 const SOURCES = ['chat', 'api', 'automation', 'training', 'portal']
 
@@ -27,6 +27,14 @@ function when(iso: string): string {
 export function WhatLeft() {
   const { t } = useTranslation('settings')
   const kindLabel = (kind: EgressKind) => (KINDS.includes(kind) ? t(`whatLeft.kinds.${kind}`) : kind)
+  // What the computer itself sent is written in English on the server; the
+  // known ones are shown in the app's language (#1271).
+  const detailLabel = (detail: string) => {
+    if (detail === 'the AI news') return t('whatLeft.details.news')
+    if (detail === 'the latest version number') return t('whatLeft.details.latestVersion')
+    const training = /^training examples and instructions for (.+)$/.exec(detail)
+    return training ? t('whatLeft.details.training', { repo: training[1] }) : detail
+  }
   const sourceLabel = (source: string) => (SOURCES.includes(source) ? t(`whatLeft.sources.${source}`) : source)
   const retentionLabel = (days: number) =>
     days === 0 ? t('whatLeft.retention.forever') : days === 365 ? t('whatLeft.retention.year') : t('whatLeft.retention.days', { count: days })
@@ -93,7 +101,8 @@ export function WhatLeft() {
                 <li key={r.id} className="flex flex-wrap items-baseline gap-x-2 px-3 py-2 text-xs">
                   <span className="font-medium text-ink">{kindLabel(r.kind)}</span>
                   <span className="text-ink">{r.destination}</span>
-                  {r.detail && <span className="min-w-0 flex-1 truncate text-ink-muted" title={r.detail}>{r.detail}</span>}
+                  {/* "AI news · toskar.ai · the AI news" says it twice (#1346). */}
+                  {r.detail && !(r.kind === 'news' && r.detail === 'the AI news') && <span className="min-w-0 flex-1 truncate text-ink-muted" title={detailLabel(r.detail)}>{detailLabel(r.detail)}</span>}
                   <span className="ms-auto shrink-0 text-ink-faint">
                     {r.source ? `${sourceLabel(r.source)} · ` : ''}
                     {when(r.at)}

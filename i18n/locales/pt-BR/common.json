@@ -1,8 +1,9 @@
 {
-  "tagline": "Painel de controle de IA local",
+  "tagline": "Roda IA nos seus próprios computadores",
   "nav": {
     "label": "Principal",
     "open": "Abrir menu",
+    "skip": "Pular para o conteúdo",
     "use": "Usar",
     "customize": "Personalizar",
     "administer": "Administrar",
@@ -41,10 +42,20 @@
     "connected_one": "{{count}} conectado",
     "connected_many": "{{count}} conectados",
     "connected_other": "{{count}} conectados",
-    "nornHint": "A Norn distribui o trabalho entre seus computadores",
+    "nornHint": "Qual computador executa cada modelo",
     "nornAutomatic": "Automático",
-    "mimirHint": "Conhecimento e memória locais",
-    "mimirReady": "Pronto"
+    "mimirHint": "Arquivos e fontes de onde o Toskar responde",
+    "justThis": "Só este computador",
+    "placementLocal": "Este computador",
+    "placementAsk": "Perguntar sempre",
+    "knowledgeNone": "Nenhuma fonte ainda",
+    "knowledgeFailed_one": "{{count}} com falha",
+    "knowledgeFailed_other": "{{count}} com falha",
+    "knowledgeFailed_many": "{{count}} com falha",
+    "knowledgeReady_one": "{{count}} fonte",
+    "knowledgeReady_other": "{{count}} fontes",
+    "knowledgeReady_many": "{{count}} fontes",
+    "knowledgeIndexing": "Indexando…"
   },
   "boot": {
     "starting": "Iniciando o Toskar",

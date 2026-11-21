@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next'
+import { shotsDuration } from './videoShots'
 
 export type PendingToolPrompt = {
   requestId: string
@@ -11,6 +12,11 @@ export type PendingToolPrompt = {
   alwaysAsks?: boolean
   cantUndo?: boolean
   afterOutside?: boolean
+  /** A longer video's shots, its length, and about how long it takes here (#790). */
+  shots?: { prompt: string; seconds: number }[]
+  style?: string
+  videoSeconds?: number
+  estimateMinutes?: number
 }
 
 /** What a tool wants to do, and the answers to it. */
@@ -47,7 +53,24 @@ export function ToolPermissionPrompt({
           <p className="mt-1 text-sm text-ink-muted">{tool.reason || t('tools.permissionReason')}</p>
         )}
       </div>
-      {tool.alwaysAsks && tool.command ? (
+      {tool.shots ? (
+        <div className="space-y-2 text-sm">
+          <p className="text-ink">
+            {t('tools.shots.summary', { count: tool.shots.length, seconds: Math.round(tool.videoSeconds ?? tool.shots.reduce((sum, s) => sum + s.seconds, 0)) })}
+          </p>
+          <p className="text-ink-muted">
+            {tool.estimateMinutes ? t('tools.shots.estimate', { time: shotsDuration(t, tool.estimateMinutes) }) : t('tools.shots.noEstimate')}
+          </p>
+          {tool.style ? <p className="text-ink-muted">{t('tools.shots.style', { style: tool.style })}</p> : null}
+          <ol className="max-h-56 list-decimal space-y-1 overflow-y-auto ps-5 text-ink" aria-label={t('tools.shots.list')}>
+            {tool.shots.map((shot, i) => (
+              <li key={i}>
+                {shot.prompt} <span className="text-ink-faint">· {t('tools.shots.seconds', { n: shot.seconds })}</span>
+              </li>
+            ))}
+          </ol>
+        </div>
+      ) : tool.alwaysAsks && tool.command ? (
         <pre className="log-panel max-h-40 whitespace-pre-wrap break-words">{tool.command}</pre>
       ) : (
         <p className="break-words text-sm text-ink">{tool.argsSummary}</p>

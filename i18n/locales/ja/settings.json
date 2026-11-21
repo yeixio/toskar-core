@@ -69,6 +69,9 @@
     "noPreference": "指定なし",
     "aboutYou": "あなたについて",
     "aboutYouPlaceholder": "ジュノー在住のバックエンドエンジニアです。メインのプロジェクトはGoのサービスです。",
+    "location": "あなたの場所",
+    "locationPlaceholder": "ジュノー（アラスカ州）",
+    "locationHint": "近くの場所、天気、道順の質問にだけ使います。空欄にすると、毎回場所を指定します。",
     "instructions": "回答の仕方についてのその他の希望",
     "instructionsPlaceholder": "コード例はGoで示してください。最後に出典を挙げてください。",
     "save": "保存",
@@ -114,7 +117,7 @@
   },
   "advanced": {
     "title": "詳細モード",
-    "description": "モデルID、APIの詳細、プロファイル、ログなど、上級者向けの項目を表示します。"
+    "description": "モデルID、APIの詳細、ログなど、上級者向けの項目を表示します。"
   },
   "discovery": {
     "title": "他のコンピュータを探す",
@@ -140,6 +143,8 @@
     "description": "時間のかかる作業やチームの接続状態についての通知です。",
     "taskFinish": "タスクが完了したら通知",
     "peerOffline": "ペアリングしたコンピュータがオフラインになったら通知",
+    "newerModels": "インストール済みモデルの新しいバージョンが出たら通知する",
+    "newerModelsHint": "新しい世代ごとに 1 回、管理者に通知します。選ぶまで何もインストールや切り替えはされません。",
     "digest": "オートメーションの毎日のまとめ",
     "digestHint": "すべてのオートメーションの結果を毎日1回まとめて、返信できるチャットに届けます。",
     "digestTime": "時刻"
@@ -219,6 +224,7 @@
       "notification": "通知",
       "community_ratings": "コミュニティ評価",
       "update_check": "アップデートの確認",
+      "comfyui": "ComfyUI",
       "problem_report": "問題の報告",
       "news": "AI ニュース",
       "link_check": "リンク確認"
@@ -233,6 +239,7 @@
       "notification": "通知",
       "community_ratings": "コミュニティ評価",
       "update_check": "アップデートの確認",
+      "comfyui": "ComfyUI",
       "problem_report": "問題の報告",
       "news": "AI ニュース",
       "link_check": "リンク確認"
@@ -253,7 +260,12 @@
     "delete": "今すぐ実行記録を削除",
     "confirmDelete": "今すぐ実行記録を削除しますか？過去の実行で保存されたプロンプトとツールの結果、およびこのリストが削除されます。チャットは削除されません。",
     "deleted": "実行記録{{tasks}}件、自動化の結果{{automations}}件、下のエントリ{{entries}}件を削除しました。",
-    "footnote": "実行記録には過去の実行のプロンプトとツールの結果が含まれます。チャットを残すかどうかは下の「履歴」で決まります。各自動化は最新の結果を保持し、「結果が変わったら通知」はそれと比較します。"
+    "footnote": "実行記録には過去の実行のプロンプトとツールの結果が含まれます。チャットを残すかどうかは下の「履歴」で決まります。各自動化は最新の結果を保持し、「結果が変わったら通知」はそれと比較します。",
+    "details": {
+      "news": "AI ニュース",
+      "latestVersion": "最新のバージョン番号",
+      "training": "{{repo}} の学習例と指示"
+    }
   },
   "storage": {
     "folders": "データディレクトリ",
@@ -271,7 +283,7 @@
     "unlimited": "無制限"
   },
   "about": {
-    "tagline": "ローカルAIコントロールプレーン",
+    "tagline": "AIを自分のコンピュータで動かします",
     "versionUnavailable": "バージョンを取得できません",
     "build": "ビルド {{commit}}",
     "source": "対応するソースコード",
@@ -284,7 +296,8 @@
     "download": "ダウンロード",
     "upToDate": "最新です",
     "checkUpdates": "アップデートを確認",
-    "checkUpdatesHint": "1日に1回、Toskarはtoskar.aiに最新のバージョン番号を問い合わせます。それ以外は何も送信しません。"
+    "checkUpdatesHint": "1日に1回、Toskarはtoskar.aiに最新のバージョン番号を問い合わせます。それ以外は何も送信しません。",
+    "running": "実行中"
   },
   "reset": {
     "title": "アプリケーションをリセット",
@@ -339,5 +352,48 @@
     "description": "回答は情報源が示したページにだけリンクします。Toskar はさらに、リンク先の各サイトにページがまだ開けるかを確認できます。",
     "check": "回答内のリンクを確認する",
     "checkHint": "回答のあと、Toskar はリンク先の各サイトに問い合わせ、開けないリンクを回答の下に示します。各確認は「このコンピューターから送信されたもの」に記録されます。"
+  },
+  "voice": {
+    "title": "音声",
+    "description": "Toskar が読み上げに使う音声です。ライブ音声モード、スマートフォンや車での回答の読み上げ、ドアベルで使われます。",
+    "unavailable": "このコンピューターでは音声の設定を使用できません。",
+    "failed": "うまくいきませんでした。もう一度お試しください。",
+    "kitten": {
+      "name": "Kitten TTS 2 mini",
+      "description": "{{languages}} で選べる自然な音声を追加し、基本の音声しかなかった言語を Kitten で読み上げます。すでに自然な音声がある言語は、下で Kitten の音声を選ばない限りそのままです。音声を含めて約 1.5 GB をこのコンピュータにインストールし、プロセッサで動作し、話している間は約 1 GB のメモリを使います。",
+      "install": "インストール",
+      "retry": "再試行",
+      "installing": "プログラムをインストール中…",
+      "downloading": "音声をダウンロード中…",
+      "warming": "音声を準備中…",
+      "listening": "聞き取りを準備しています…",
+      "remove": "削除",
+      "removeConfirm": "Kitten を削除",
+      "keep": "残す"
+    },
+    "languages": "言語ごとの音声",
+    "automatic": "自動",
+    "automaticNamed": "自動: {{voice}}",
+    "engine": {
+      "kitten": "Kitten",
+      "kokoro": "Kokoro",
+      "piper": "Piper"
+    },
+    "preview": "試聴",
+    "previewIn": "{{language}}の音声を試聴",
+    "previewFailed": "試聴を再生できませんでした。",
+    "needs": {
+      "chat": "音声モードで答えるには、チャットモデルが必要です。",
+      "vision": "玄関にいる人を見るには、画像を見られるモデルが必要です。",
+      "both": "音声モードで答え、玄関にいる人を見るには、チャットができて画像も見られるモデルが必要です。1つのモデルで両方できます。",
+      "offer": "{{name}} がこのコンピュータに合います（{{size}}）。",
+      "install": "{{name}} をインストール",
+      "downloading": "{{name}} をダウンロード中… {{percent}}%",
+      "ready": "{{name}} はインストール済みです。",
+      "none": "このコンピュータに合うモデルはカタログにありません。",
+      "models": "モデルを見る"
+    },
+    "standard": "標準",
+    "noVoice": "{{languages}} はまだ読み上げられません。読み上げ、音声モード、インターホンはこの言語を話しません。"
   }
 }

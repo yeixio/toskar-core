@@ -481,3 +481,33 @@ func TestIsTaskAnywhereInTheMessage(t *testing.T) {
 		}
 	}
 }
+
+// Continuing a clip offers video.extend; longer text doesn't (#155).
+func TestExtendCue(t *testing.T) {
+	avail := []string{"video.generate", "video.extend"}
+	for _, msg := range []string{"Make the clip longer", "Extend this video by 3 seconds", "Continue the video: now a surfer paddles out", "What happens next in the clip?"} {
+		if got := ToolsFor(Chat, msg, avail); !slices.Contains(got, "video.extend") {
+			t.Errorf("%q: %v", msg, got)
+		}
+	}
+	for _, msg := range []string{"Make the essay longer", "Continue the story", "Make a video of rain"} {
+		if got := ToolsFor(Chat, msg, avail); slices.Contains(got, "video.extend") {
+			t.Errorf("%q offered video.extend: %v", msg, got)
+		}
+	}
+}
+
+// A video longer than one clip offers video.shots; a short clip doesn't (#790).
+func TestShotsCue(t *testing.T) {
+	avail := []string{"video.generate", "video.extend", "video.shots"}
+	for _, msg := range []string{"Make a 1-minute video of a day at the beach", "Make a video in three scenes: sunrise, noon, sunset", "Create a 30 second clip of a city waking up", "Make a short movie about a lost robot"} {
+		if got := ToolsFor(Chat, msg, avail); !slices.Contains(got, "video.shots") {
+			t.Errorf("%q: %v", msg, got)
+		}
+	}
+	for _, msg := range []string{"Make a video of rain", "Make a 3 second clip of a cat", "Tell me a long story", "How long is this video?"} {
+		if got := ToolsFor(Chat, msg, avail); slices.Contains(got, "video.shots") {
+			t.Errorf("%q offered video.shots: %v", msg, got)
+		}
+	}
+}

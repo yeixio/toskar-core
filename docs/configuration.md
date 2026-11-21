@@ -61,6 +61,7 @@ What lives there:
 | `places_overpass_url` | `https://overpass-api.de/api/interpreter` | The Overpass service for kinds of places near somewhere |
 | `places_router_url` | `https://routing.openstreetmap.de` | The OSRM service for routes. Your own OSRM server is used as `/route/v1/{driving,foot,bike}/…`. |
 | `external_openai_url` | none | An OpenAI-compatible server (OpenAI, vLLM, Ollama elsewhere…) whose models can be chosen for a chat. Its API key is `secrets/external-openai.key`. Set both on the Computers page, under Network & access → External server (advanced mode) or with `PUT /api/v1/external-server`. |
+| `comfyui_url` | none | A ComfyUI (here or on another computer) whose saved workflows run as the `comfyui.run` tool. Its token, if it has one, is `secrets/comfyui.token`. Set both in Tools › Images and video › ComfyUI or with `PUT /api/v1/comfyui`. |
 | `ratings_url` | `https://ratings.toskar.ai` | The community ratings service that shared ratings go to and the daily summary comes from |
 | `ratings_summary_url` | the summary in `yeixio/toskar-model-data` | The public ratings summary used when the service cannot be reached |
 | `node_name` | the host name | The name other computers see |
@@ -78,6 +79,7 @@ Restart the daemon after editing the file by hand. A changed `api_host` or `inte
 | `TOSKAR_ADMIN_EMAIL`, `TOSKAR_ADMIN_PASSWORD_FILE` | | Together, add an Admin at startup when there is none yet (#592), so a fresh server can be set up without a browser. The password is read from the file, such as a mounted secret, not from the environment. `TOSKAR_ADMIN_USERNAME` is the name they sign in with (the address before `@` when it's unset) and `TOSKAR_ADMIN_NAME` their name (`Admin`). Once there's an Admin, these do nothing. A server reachable from other computers starts with them in place of `TOSKAR_API_KEY`. |
 | `TOSKAR_INTERNAL_HOST` | `internal_host` | |
 | `TOSKAR_INTERNAL_PORT` | `internal_port` | |
+| `TOSKAR_KEEP_REASONING` | | Off when unset. Within one answer, a reasoning model's thinking before each tool call goes back with that step (#841): `field` sends it as the step's `reasoning_content`, for chat templates that render it; `inline` puts it before the step's call as text, for templates that drop it. Earlier answers never carry it. It's for comparing on the quality set before it's on by default. |
 | `TOSKAR_DISCOVERY_ENABLED` | `discovery_enabled` | `1`, `true`, `yes`, or `on` turn it on; anything else turns it off. |
 | `TOSKAR_STATIC_PEERS` | `static_peers` | Comma-separated `host:port` list |
 | `TOSKAR_RELAY_URL` | | The relay access from anywhere uses when `remote_access.relay` is empty, instead of Toskar's, such as a developer's `relay.localhost:7472`. |

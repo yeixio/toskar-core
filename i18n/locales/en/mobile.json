@@ -103,6 +103,56 @@
       "reranker": "Supporting model · ranks the best passages",
       "classifier": "Supporting model · helps Auto route requests",
       "other": "Supporting model"
+    },
+    "ratings": {
+      "rate": "Rate",
+      "title": "Rate {{model}}",
+      "intro": "How well does it work on this computer? Your rating is saved here.",
+      "starsLabel": "Stars",
+      "stars_one": "{{count}} star",
+      "stars_other": "{{count}} stars",
+      "tagsLabel": "Why? (optional)",
+      "tags": {
+        "great_responses": "Great answers",
+        "fast": "Fast",
+        "slow": "Slow",
+        "stable": "Stable",
+        "crashed": "Crashed",
+        "too_much_memory": "Uses too much memory",
+        "great_for_coding": "Great for coding",
+        "great_for_chat": "Great for chat",
+        "good_tool_use": "Good with tools",
+        "poor_tool_use": "Poor with tools"
+      },
+      "share": "Share this rating with the community",
+      "shareHint": "Helps people with computers like yours choose a model. You can stop sharing at any time.",
+      "whatIsShared": "Exactly what is shared",
+      "sent": {
+        "destination": "Sent to",
+        "model": "Model",
+        "hardware": "Computer class",
+        "memory": "{{type}} memory, {{gb}} GB",
+        "never": "Never your prompts, chats, file names, computer name, user name, or network address. The service doesn’t store your IP address."
+      },
+      "notShareable": "This rating stays on this computer: {{reason}}",
+      "save": "Save",
+      "saveAndShare": "Save and share",
+      "remove": "Remove rating",
+      "cancel": "Cancel",
+      "count_one": "{{formatted}} rating",
+      "count_other": "{{formatted}} ratings",
+      "similar": {
+        "family": "on computers like yours",
+        "class": "on similar computers",
+        "backend": "on computers with this much memory"
+      },
+      "overall": "overall",
+      "confidence": {
+        "limited": "Limited data",
+        "early": "Early ratings"
+      },
+      "prompt": "How is {{model}} working for you?",
+      "notNow": "Not now"
     }
   },
   "phoneModels": {
@@ -421,6 +471,12 @@
         "install": "Install and answer again",
         "notNow": "Not now"
       }
+    },
+    "builtInProfiles": {
+      "general-assistant": "General Assistant",
+      "programming": "Programming",
+      "research": "Research",
+      "custom": "Custom"
     }
   },
   "effort": {
@@ -695,6 +751,14 @@
       "try": "Try it without a computer",
       "tryMeta": "A demo with sample answers",
       "other": "This demo answers the suggested questions on the left. To ask anything, set up Toskar on a computer at home (Toskar Core is free), then connect this TV to it under Computers → Connect a device."
+    },
+    "people": {
+      "title": "Who's watching?",
+      "add": "Add someone",
+      "hint": "Each person connects with a code from their own account on the computer, so their chats and memory stay their own.",
+      "switch": "Not {{name}}?",
+      "unnamed": "Person {{n}}",
+      "back": "Back"
     }
   },
   "setup": {
@@ -955,6 +1019,7 @@
       "notification": "Notification",
       "community_ratings": "Community ratings",
       "update_check": "Update check",
+      "comfyui": "ComfyUI",
       "problem_report": "Problem report",
       "link_check": "Link check"
     },
@@ -968,6 +1033,7 @@
       "notification": "notification",
       "community_ratings": "community ratings",
       "update_check": "update check",
+      "comfyui": "ComfyUI",
       "problem_report": "problem report",
       "link_check": "link check"
     },

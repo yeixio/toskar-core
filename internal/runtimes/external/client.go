@@ -137,6 +137,7 @@ func (r *Runtime) Chat(ctx context.Context, model string, req pluginapi.ChatRequ
 	messages := make([]pluginapi.ChatMessage, len(req.Messages))
 	for i, m := range req.Messages {
 		m.Content = pluginapi.EscapeChatMarkers(m.Content)
+		m.Reasoning = pluginapi.EscapeChatMarkers(m.Reasoning)
 		messages[i] = m
 	}
 	body := map[string]any{"model": model, "messages": messages, "stream": true}

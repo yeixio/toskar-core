@@ -28,7 +28,7 @@
     "backgroundTray": "O Toskar Pro continua em execução na bandeja do sistema"
   },
   "conflict": {
-    "title": "Outra cópia do Toskar Pro já está em execução",
+    "title": "Outro Toskar já está em execução",
     "message": "{{other}} já está em execução neste computador no endereço de que este app precisa ({{address}}), então este app não pode iniciar o próprio serviço. A outra tem seus próprios modelos, conversas e configurações.\n\nFeche-a e abra este app de novo, ou use a outra por enquanto.",
     "quit": "Sair",
     "useOther": "Usar a outra",

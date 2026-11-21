@@ -39,4 +39,13 @@ describe('MediaProgress (#706)', () => {
     expect(mediaProgressFrom({ stage: 'drawing', step: 1, steps: 4, seconds_left: 33 })).toEqual({ stage: 'drawing', step: 1, steps: 4, secondsLeft: 33 })
     expect(mediaProgressFrom({ stage: 'other' })).toBeNull()
   })
+
+  it('says which shot of a longer video is being made (#790)', () => {
+    render(<MediaProgress kind="video" progress={{ stage: 'drawing', step: 3, steps: 30, secondsLeft: 0, shot: 2, shots: 12 }} label="Making the clip…" />)
+    expect(screen.getByRole('status', { name: 'Making the clip… · Shot 2 of 12 · Step 3 of 30' })).toBeInTheDocument()
+    expect(mediaKindOf('video.shots')).toBe('video')
+    expect(mediaKindOf('video.extend')).toBe('video')
+    expect(mediaProgressFrom({ stage: 'drawing', step: 1, steps: 4, shot: 3, shots: 5 })).toEqual({ stage: 'drawing', step: 1, steps: 4, secondsLeft: 0, shot: 3, shots: 5 })
+    expect(mediaProgressFrom({ stage: 'drawing', step: 1, steps: 4, shot: 0, shots: 0 })).toEqual({ stage: 'drawing', step: 1, steps: 4, secondsLeft: 0 })
+  })
 })

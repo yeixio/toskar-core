@@ -27,14 +27,18 @@ func (m *Manager) WatchDevices(ctx context.Context, service string, devices []st
 	if err != nil {
 		return err
 	}
-	if service != "homeassistant" {
+	if service != "homeassistant" && service != "reolink" {
 		return fmt.Errorf("%s has no devices to watch", s.Name())
 	}
 	cred, err := m.credential(service)
 	if err != nil {
 		return fmt.Errorf("%s is not connected. Connect it in Settings", s.Name())
 	}
-	if err := haWatch(ctx, cred, devices, onChange); err != nil && ctx.Err() == nil {
+	watch := func() error { return haWatch(ctx, cred, devices, onChange) }
+	if service == "reolink" {
+		watch = func() error { return reolinkWatch(ctx, m.client, cred, devices, onChange) }
+	}
+	if err := watch(); err != nil && ctx.Err() == nil {
 		return sanitizeErr(err, secretsOnly(s, cred))
 	}
 	return nil

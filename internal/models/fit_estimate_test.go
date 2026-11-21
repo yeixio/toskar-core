@@ -119,7 +119,7 @@ func TestLowFreeMemoryStillAllowsInstall(t *testing.T) {
 	if !fit.InstallAllowed || fit.Label == contracts.FitUnsupported {
 		t.Fatalf("label %s allowed %v", fit.Label, fit.InstallAllowed)
 	}
-	if !strings.Contains(fit.RuntimeWarning, "Close other applications") {
+	if !strings.Contains(fit.RuntimeWarning, "close some before running") {
 		t.Fatalf("warning %q", fit.RuntimeWarning)
 	}
 }
@@ -354,5 +354,18 @@ func TestWinnersFitWell(t *testing.T) {
 				}
 			}
 		}
+	}
+}
+
+// Regression: toskar-core#1270
+// A good fit with another model loaded says what happens now, not that
+// memory is insufficient beside the fit that says there's plenty.
+func TestLoadedModelNoteDoesntContradictTheFit(t *testing.T) {
+	fit := ClassifyFit(qwen32(gib(16)), apple(gib(96), gib(11)), "local", "This Mac", FitOptions{LoadedModelNames: []string{"Llama 3.2 1B"}})
+	if fit.Label != contracts.FitExcellent && fit.Label != contracts.FitGood {
+		t.Fatalf("label %s", fit.Label)
+	}
+	if strings.Contains(fit.RuntimeWarning, "Insufficient") || !strings.Contains(fit.RuntimeWarning, "Llama 3.2 1B") {
+		t.Fatalf("warning %q", fit.RuntimeWarning)
 	}
 }

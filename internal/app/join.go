@@ -93,7 +93,7 @@ const installerBase = "https://github.com/yeixio/toskar-core/releases/latest/dow
 
 // errNotReachable is a computer other computers cannot reach.
 var errNotReachable = contracts.Errorf("JOIN_NOT_REACHABLE", nil,
-	"other computers can't reach this one: turn on Find other computers (discovery_enabled) and restart Toskar")
+	"other computers can't reach this one: turn on Find other computers in Computers → Network & access, and restart Toskar")
 
 // reachable reports whether paired computers can reach this computer's
 // Bifrost.

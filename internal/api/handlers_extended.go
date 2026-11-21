@@ -8,6 +8,7 @@ import (
 	"github.com/yeixio/toskar-core/internal/projects"
 	"github.com/yeixio/toskar-core/internal/swarm"
 	"github.com/yeixio/toskar-core/internal/turnopts"
+	"io"
 	"net"
 	"net/http"
 	"net/url"
@@ -166,6 +167,9 @@ func (s *Server) handleInstallModel(w http.ResponseWriter, r *http.Request) {
 		var body struct {
 			NodeID string `json:"node_id"`
 			Wait   *bool  `json:"wait"`
+			// AcceptLicense is the person accepting the model's license
+			// terms, which Toskar keeps a record of (#593).
+			AcceptLicense bool `json:"accept_license"`
 		}
 		if err := json.NewDecoder(r.Body).Decode(&body); err == nil {
 			if body.NodeID != "" {
@@ -173,6 +177,12 @@ func (s *Server) handleInstallModel(w http.ResponseWriter, r *http.Request) {
 			}
 			if body.Wait != nil {
 				wait = *body.Wait
+			}
+			if body.AcceptLicense && s.deps.AcceptModelLicense != nil {
+				if err := s.deps.AcceptModelLicense(r.Context(), id); err != nil {
+					writeErrFrom(w, http.StatusBadRequest, "INSTALL_FAILED", err)
+					return
+				}
 			}
 		}
 	}
@@ -185,6 +195,21 @@ func (s *Server) handleInstallModel(w http.ResponseWriter, r *http.Request) {
 		status = "installed"
 	}
 	writeJSON(w, http.StatusOK, modelInstall{Status: status, ModelID: id})
+}
+
+// handleLicenseAcceptances lists who accepted which model's license terms,
+// and when (#593). It's for Admins.
+func (s *Server) handleLicenseAcceptances(w http.ResponseWriter, r *http.Request) {
+	if s.deps.ModelLicenseAcceptances == nil {
+		writeErr(w, http.StatusNotImplemented, "NOT_IMPLEMENTED", "License records aren't available.", nil)
+		return
+	}
+	list, err := s.deps.ModelLicenseAcceptances(r.Context())
+	if err != nil {
+		writeErrFrom(w, http.StatusInternalServerError, "INTERNAL_ERROR", err)
+		return
+	}
+	writeJSON(w, http.StatusOK, list)
 }
 
 func (s *Server) handleStartModel(w http.ResponseWriter, r *http.Request) {
@@ -789,7 +814,11 @@ func (s *Server) handleRevokeNode(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err := s.deps.RevokeNode(r.Context(), id); err != nil {
-		writeErrFrom(w, http.StatusBadRequest, "REVOKE_FAILED", err)
+		status := http.StatusBadRequest
+		if code, _ := contracts.ErrorCode(err); code == "NODE_NOT_FOUND" {
+			status = http.StatusNotFound
+		}
+		writeErrFrom(w, status, "REVOKE_FAILED", err)
 		return
 	}
 	w.WriteHeader(http.StatusNoContent)
@@ -820,7 +849,11 @@ func (s *Server) handleCreateAPIKey(w http.ResponseWriter, r *http.Request) {
 		Permissions *auth.APIKeyPermissions `json:"permissions"`
 		Preset      string                  `json:"preset"`
 	}
-	_ = json.NewDecoder(r.Body).Decode(&body)
+	// No body makes a key named default; a body that isn't JSON makes none (#1346).
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil && !errors.Is(err, io.EOF) {
+		writeErr(w, http.StatusBadRequest, "INVALID_BODY", "The request body isn't valid JSON.", nil)
+		return
+	}
 	perms := body.Permissions
 	switch body.Preset {
 	case "":

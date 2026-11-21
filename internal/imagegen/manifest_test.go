@@ -7,6 +7,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/yeixio/toskar-core/internal/taxonomy"
 	rootmanifests "github.com/yeixio/toskar-core/manifests"
 )
 
@@ -74,5 +75,54 @@ func TestUseManifest(t *testing.T) {
 	}
 	if _, ok := Lookup("extra"); !ok {
 		t.Fatal("a refused manifest replaced the one in use")
+	}
+}
+
+// Every picture and clip model says whether its license allows business
+// use (#593); one that doesn't is refused.
+func TestManifestNeedsCommercial(t *testing.T) {
+	for _, m := range append(Catalog(), VideoCatalog()...) {
+		if m.Commercial == "" {
+			t.Errorf("%s doesn't say whether a business may use it", m.ID)
+		}
+	}
+	if m, ok := Lookup("flux2-klein-9b"); !ok || m.Commercial != "no" {
+		t.Errorf("FLUX.2 [klein] 9B is non-commercial: %+v", m.Commercial)
+	}
+	var m mediaManifest
+	if err := json.Unmarshal(rootmanifests.MediaJSON, &m); err != nil {
+		t.Fatal(err)
+	}
+	m.Images[0].Commercial = ""
+	raw, _ := json.Marshal(m)
+	if _, err := parseManifest(raw); err == nil || !strings.Contains(err.Error(), "business use") {
+		t.Fatalf("a model without commercial was accepted: %v", err)
+	}
+}
+
+// Every built-in picture and clip model says what it does (#593). One of
+// your own may leave it out, but not get it wrong.
+func TestManifestCategories(t *testing.T) {
+	for _, m := range append(Catalog(), VideoCatalog()...) {
+		if m.PrimaryCategory != "creative" || len(m.Tasks) == 0 || len(m.OutputModalities) == 0 {
+			t.Errorf("%s: %+v", m.ID, m.Profile)
+		}
+	}
+	if q, _ := Lookup("qwen-image-edit-2511"); strings.Contains(strings.Join(q.Tasks, " "), "image_generation") {
+		t.Errorf("an editor that can't make pictures lists %v", q.Tasks)
+	}
+	var m mediaManifest
+	if err := json.Unmarshal(rootmanifests.MediaJSON, &m); err != nil {
+		t.Fatal(err)
+	}
+	m.Video[0].Tasks = []string{"image_generation", "decompilation"}
+	raw, _ := json.Marshal(m)
+	if _, err := parseManifest(raw); err == nil || !strings.Contains(err.Error(), "decompilation") {
+		t.Fatalf("a wrong task was accepted: %v", err)
+	}
+	m.Video[0].Profile = taxonomy.Profile{}
+	raw, _ = json.Marshal(m)
+	if _, err := parseManifest(raw); err != nil {
+		t.Fatalf("a model without categories was refused: %v", err)
 	}
 }

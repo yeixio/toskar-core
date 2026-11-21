@@ -52,6 +52,9 @@ var (
 		"RUNTIME_NOT_INSTALLED": true,
 		"CONTEXT_TOO_LONG":      true,
 		"AUTOMATION_TIMEOUT":    true,
+		// A visitor won't wait for a retry minutes later (#1340).
+		"CAMERA_SPEAKER_UNREACHABLE": true,
+		"DOOR_NOT_ANSWERED":          true,
 	}
 )
 

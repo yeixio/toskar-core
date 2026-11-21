@@ -13,7 +13,15 @@
     "memory": "Arbeitsspeicher",
     "graphics": "Grafik",
     "system": "System",
-    "unavailable": "Hardwaredetails erscheinen, sobald Toskar gestartet ist. Du kannst die Einrichtung jetzt fortsetzen."
+    "unavailable": "Hardwaredetails erscheinen, sobald Toskar gestartet ist. Du kannst die Einrichtung jetzt fortsetzen.",
+    "os": {
+      "macAppleSilicon": "macOS, Apple Silicon",
+      "macIntel": "macOS, Intel",
+      "windows": "Windows",
+      "windowsArm": "Windows auf Arm",
+      "linux": "Linux",
+      "linuxArm": "Linux auf Arm"
+    }
   },
   "question": "Wobei soll dir deine KI helfen?",
   "purposes": {
@@ -36,6 +44,7 @@
   },
   "continue": "Weiter",
   "finding": "Einrichtung wird gesucht …",
+  "findingDetail": "Speicher und Grafik dieses Computers werden geprüft, und welche Modelle dazu passen…",
   "recommendFailed": "Keine Empfehlung erhalten.",
   "recommend": {
     "badge": "Empfohlen",
@@ -48,7 +57,8 @@
     "install": "Empfehlung installieren",
     "use": "Dieses Setup verwenden",
     "skip": "Später",
-    "back": "Zurück"
+    "back": "Zurück",
+    "fits": "{{name}} passt in den Arbeitsspeicher dieses Computers ({{memory}})."
   },
   "roles": {
     "coordinator": "Koordinator",
@@ -75,5 +85,6 @@
     "title": "Alles bereit",
     "description": "Deine empfohlene Einrichtung ist installiert. Chatte jetzt mit deiner lokalen KI.",
     "start": "Chat starten"
-  }
+  },
+  "setupLater": "Später einrichten"
 }

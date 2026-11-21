@@ -1,11 +1,13 @@
 package api
 
 import (
+	"bufio"
 	"bytes"
 	"encoding/json"
 	"fmt"
 	"math"
 	"mime"
+	"net"
 	"net/http"
 	"os"
 	"sort"
@@ -74,6 +76,9 @@ func watchOpenAPIResponses() error {
 
 // checkOpenAPIDrift reports what didn't match, and returns the exit code.
 func checkOpenAPIDrift() int {
+	// A WebSocket's handler can still be finishing (#795).
+	specResponses.Lock()
+	defer specResponses.Unlock()
 	seen := make([]string, 0, len(specResponses.drift))
 	for d := range specResponses.drift {
 		seen = append(seen, d)
@@ -119,6 +124,12 @@ func (t *teeWriter) Flush() {
 }
 
 func (t *teeWriter) Unwrap() http.ResponseWriter { return t.ResponseWriter }
+
+// Hijack is a WebSocket's upgrade (#795): 101, Switching Protocols.
+func (t *teeWriter) Hijack() (net.Conn, *bufio.ReadWriter, error) {
+	t.status, t.written = http.StatusSwitchingProtocols, true
+	return http.NewResponseController(t.ResponseWriter).Hijack()
+}
 
 // checkResponse returns what doesn't match the spec, one line each, as
 // "get /api/v1/x 200: $.field: what". Error responses (4xx and 5xx) all

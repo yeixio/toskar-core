@@ -119,7 +119,7 @@ func askedSeconds(message string) float64 {
 // words win over the model's. A length past the most a clip can be is
 // still passed, so the clip is made at the most and the answer says so.
 func withAskedLength(message, toolID string, args map[string]any) map[string]any {
-	if tools.Canonical(toolID) != "video.generate" {
+	if id := tools.Canonical(toolID); id != "video.generate" && id != "video.extend" {
 		return args
 	}
 	asked := askedSeconds(message)

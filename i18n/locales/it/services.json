@@ -13,8 +13,12 @@
   "connect": "Collega",
   "optional": " (facoltativo)",
   "stored": "Salvato ({{value}}). Lascia vuoto per mantenerlo.",
+  "example": "es. {{value}}",
   "save": "Salva",
   "cancel": "Annulla",
   "tools": "Strumenti: {{tools}}",
-  "asksFirst": "{{name}} (chiede prima)"
+  "asksFirst": "{{name}} (chiede prima)",
+  "connectService": "Collega {{name}}",
+  "advanced": "Avanzate",
+  "doorbellAutomation": "Crea un’automazione del campanello"
 }

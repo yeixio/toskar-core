@@ -37,6 +37,10 @@
         "label": "Ricerca",
         "description": "Letture lunghe e ragionamenti accurati."
       },
+      "doorstep": {
+        "label": "Porta d'ingresso",
+        "description": "Accoglie i visitatori e prende messaggi. Non sa nulla di te e non può aprire la porta."
+      },
       "blank": {
         "label": "Vuoto",
         "description": "Parti da zero e imposta tu ruoli, strumenti e computer."
@@ -130,7 +134,8 @@
     "git": "Git",
     "terminal": "Terminale",
     "ok": "{{label}} ✓",
-    "ask": "{{label}} Chiedi"
+    "ask": "{{label}} Chiedi",
+    "off": "Niente {{label}}"
   },
   "roles": {
     "role": "Ruolo",
@@ -503,5 +508,27 @@
       "label": "Minuti",
       "help": "Durata massima di uno sciame (1–240). Vuoto è 5 per una domanda e 30 per un'attività."
     }
+  },
+  "templates": {
+    "doorstep": {
+      "name": "Porta d'ingresso",
+      "staysOn": "Accogliere i visitatori alla porta: consegne, dove lasciare un pacco e prendere un messaggio per chi abita qui",
+      "example1": "Ho un pacco per voi.",
+      "example2": "Posso lasciare un messaggio?",
+      "example3": "È questo l'indirizzo giusto per la festa?",
+      "never1": "Se c'è qualcuno in casa, o quando le persone entrano ed escono",
+      "never2": "Nomi, abitudini o programmi di chi abita qui",
+      "never3": "Serrature, allarmi, telecamere o altra sicurezza"
+    }
+  },
+  "audience": {
+    "label": "Parla con i visitatori",
+    "hint": "Per una porta d'ingresso, un bancone o un chiosco. Il tuo stile, la tua posizione, i tuoi ricordi e i tuoi computer restano fuori dalle sue chat. Dice di essere un assistente automatico, non dice mai se c'è qualcuno in casa e non può usare strumenti che modificano qualcosa."
+  },
+  "builtInNames": {
+    "general-assistant": "Assistente generale",
+    "programming": "Programmazione",
+    "research": "Ricerca",
+    "custom": "Personalizzato"
   }
 }

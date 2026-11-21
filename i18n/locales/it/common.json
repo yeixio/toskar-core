@@ -1,8 +1,9 @@
 {
-  "tagline": "Pannello di controllo per l'IA locale",
+  "tagline": "Esegue l'IA sui tuoi computer",
   "nav": {
     "label": "Principale",
     "open": "Apri il menu",
+    "skip": "Vai al contenuto",
     "use": "Usa",
     "customize": "Personalizza",
     "administer": "Amministra",
@@ -41,10 +42,20 @@
     "connected_one": "{{count}} connesso",
     "connected_many": "{{count}} connessi",
     "connected_other": "{{count}} connessi",
-    "nornHint": "Norn distribuisce il lavoro tra i tuoi computer",
+    "nornHint": "Quale computer esegue ogni modello",
     "nornAutomatic": "Automatico",
-    "mimirHint": "Conoscenza e memoria locali",
-    "mimirReady": "Pronto"
+    "mimirHint": "File e fonti da cui Toskar risponde",
+    "justThis": "Solo questo computer",
+    "placementLocal": "Questo computer",
+    "placementAsk": "Chiedi ogni volta",
+    "knowledgeNone": "Ancora nessuna fonte",
+    "knowledgeFailed_one": "{{count}} non riuscita",
+    "knowledgeFailed_other": "{{count}} non riuscite",
+    "knowledgeFailed_many": "{{count}} non riuscite",
+    "knowledgeReady_one": "{{count}} fonte",
+    "knowledgeReady_other": "{{count}} fonti",
+    "knowledgeReady_many": "{{count}} fonti",
+    "knowledgeIndexing": "Indicizzazione…"
   },
   "boot": {
     "starting": "Avvio di Toskar",

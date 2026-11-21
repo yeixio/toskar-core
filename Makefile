@@ -6,7 +6,7 @@ LDFLAGS := -X github.com/yeixio/toskar-core/internal/version.Commit=$(COMMIT)
 # ".exe" for Windows
 EXE := $(shell go env GOEXE)
 
-.PHONY: help start ui frontend daemon run-daemon run-web all tidy test vet fmt lint ci quality quality-real test-cluster package-headless screenshots appstore-screenshots icons
+.PHONY: help start ui frontend daemon run-daemon run-web all tidy test vet fmt lint ci quality quality-real voice voice-real test-cluster package-headless screenshots appstore-screenshots icons
 
 help: ## Show targets
 	@echo "Yggdrasil Core"
@@ -69,6 +69,12 @@ quality: ## Run the quality test set against the stub model
 
 quality-real: ## Run the quality test set against a running daemon (TOSKAR_QUALITY_URL, default http://127.0.0.1:7331)
 	TOSKAR_QUALITY_URL=$${TOSKAR_QUALITY_URL:-http://127.0.0.1:7331} go test ./tests/quality -count=1 -v -timeout 60m
+
+voice: ## Score live voice's turn-taking in each condition (tests/voice)
+	go test ./tests/voice -run TestTurnTaking -count=1 -v
+
+voice-real: ## Score live voice against a running test copy (TOSKAR_VOICE_URL, TOSKAR_VOICE_KEY)
+	go test ./tests/voice -run TestLive -count=1 -v -timeout 30m
 
 test-cluster: ## Run the Docker cluster check
 	chmod +x scripts/cluster-e2e.sh

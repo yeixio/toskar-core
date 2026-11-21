@@ -163,35 +163,125 @@ type ModelSource struct {
 	Format string `json:"format,omitempty"`
 }
 
+// What a business may do with a model under its license (#593).
+const (
+	// CommercialYes is any use, a business's included.
+	CommercialYes = "yes"
+	// CommercialLimited is business use within limits, such as Llama's
+	// above 700 million monthly users.
+	CommercialLimited = "limited"
+	// CommercialNo is personal, research, or other non-commercial use only.
+	CommercialNo = "no"
+)
+
+// The kinds of model in the store, by license (#593).
+const (
+	// LicenseFree is an open license for any use, a business's included,
+	// with nothing to accept or credit.
+	LicenseFree = "free"
+	// LicenseConditions is free, with terms: a license to accept, limits
+	// on business use, credit to give, or non-commercial use only.
+	LicenseConditions = "conditions"
+)
+
+// ModelLicense is a model's license and what it allows (#593). It's
+// checked by hand for every catalog model.
+type ModelLicense struct {
+	// ID is the license's SPDX identifier where it has one, such as
+	// apache-2.0, or its own short name, such as llama3.2.
+	ID   string `json:"id"`
+	Name string `json:"name"`
+	URL  string `json:"url"`
+	// Commercial is CommercialYes, CommercialLimited, or CommercialNo.
+	Commercial string `json:"commercial"`
+	// Attribution is a license that has apps or published work built with
+	// the model credit it, such as "Built with Llama".
+	Attribution bool `json:"attribution,omitempty"`
+	// Accept is a license the person agrees to before they use the model,
+	// such as Gemma's terms or Llama's acceptable use policy.
+	Accept bool   `json:"accept,omitempty"`
+	Notes  string `json:"notes,omitempty"`
+	// Kind is LicenseFree or LicenseConditions, from the fields above.
+	Kind string `json:"kind,omitempty"`
+	// AcceptedAt is when the person asking accepted its terms in Toskar,
+	// for a license to accept; absent before they have (contract 1.103).
+	AcceptedAt *time.Time `json:"accepted_at,omitempty"`
+}
+
+// LicenseAcceptance is someone accepting a model's license terms in
+// Toskar (#593, contract 1.103).
+type LicenseAcceptance struct {
+	ModelID     string    `json:"model_id"`
+	LicenseID   string    `json:"license_id"`
+	LicenseName string    `json:"license_name"`
+	LicenseURL  string    `json:"license_url"`
+	PersonID    string    `json:"person_id"`
+	PersonName  string    `json:"person_name,omitempty"`
+	AcceptedAt  time.Time `json:"accepted_at"`
+}
+
+// KindOf says whether the license is free or free with conditions.
+func (l ModelLicense) KindOf() string {
+	if l.Commercial == CommercialYes && !l.Attribution && !l.Accept {
+		return LicenseFree
+	}
+	return LicenseConditions
+}
+
+// ForBusiness says a business may use the model.
+func (l ModelLicense) ForBusiness() bool {
+	return l.Commercial == CommercialYes || l.Commercial == CommercialLimited
+}
+
 // Model is a catalog or installed model.
 type Model struct {
-	ID           string            `json:"id"`
-	DisplayName  string            `json:"display_name"`
-	Summary      string            `json:"summary,omitempty"`
-	Family       string            `json:"family,omitempty"`
-	Variant      string            `json:"variant,omitempty"`
-	Parameters   string            `json:"parameters,omitempty"` // e.g. "14B"
-	SizeBytes    uint64            `json:"size_bytes,omitempty"`
-	MemoryNeeded uint64            `json:"memory_needed_bytes,omitempty"`
-	Context      int               `json:"context,omitempty"`
-	Capabilities ModelCapabilities `json:"capabilities"`
-	Source       ModelSource       `json:"source,omitempty"`
-	Purpose      []string          `json:"purpose,omitempty"`
-	Tags         []string          `json:"tags,omitempty"` // coding, general, reasoning, vision, fast, large
-	Runtime      []string          `json:"runtime,omitempty"`
-	Roles        []string          `json:"recommended_roles,omitempty"`
-	Installed    bool              `json:"installed"`
-	InstalledOn  []ModelOnNode     `json:"installed_on,omitempty"`
-	Status       string            `json:"status,omitempty"` // available|downloading|installed|loading|running|stopping|error
-	LastUsedAt   *time.Time        `json:"last_used_at,omitempty"`
-	Fit          *ModelFit         `json:"fit,omitempty"`
-	Dynamic      bool              `json:"dynamic,omitempty"` // installed from browse-all / URL
+	ID           string `json:"id"`
+	DisplayName  string `json:"display_name"`
+	Summary      string `json:"summary,omitempty"`
+	Family       string `json:"family,omitempty"`
+	Variant      string `json:"variant,omitempty"`
+	Parameters   string `json:"parameters,omitempty"` // e.g. "14B"
+	SizeBytes    uint64 `json:"size_bytes,omitempty"`
+	MemoryNeeded uint64 `json:"memory_needed_bytes,omitempty"`
+	// DownloadBytes is everything an install downloads: the model file and,
+	// for one that sees pictures, its vision projector. Every screen shows
+	// this one figure as the download (#1343, contract 1.117).
+	DownloadBytes uint64            `json:"download_bytes,omitempty"`
+	Context       int               `json:"context,omitempty"`
+	Capabilities  ModelCapabilities `json:"capabilities"`
+	Source        ModelSource       `json:"source,omitempty"`
+	Purpose       []string          `json:"purpose,omitempty"`
+	Tags          []string          `json:"tags,omitempty"` // coding, general, reasoning, vision, fast, large
+	Runtime       []string          `json:"runtime,omitempty"`
+	Roles         []string          `json:"recommended_roles,omitempty"`
+	Installed     bool              `json:"installed"`
+	InstalledOn   []ModelOnNode     `json:"installed_on,omitempty"`
+	Status        string            `json:"status,omitempty"` // available|downloading|installed|loading|running|stopping|error
+	LastUsedAt    *time.Time        `json:"last_used_at,omitempty"`
+	Fit           *ModelFit         `json:"fit,omitempty"`
+	Dynamic       bool              `json:"dynamic,omitempty"` // installed from browse-all / URL
 	// SupportRole marks a model that serves Yggdrasil instead of chatting:
 	// SupportEmbedding, SupportReranker, or SupportClassifier. Empty for chat models.
 	SupportRole string `json:"support_role,omitempty"`
 	// Languages are how well the model writes each language it has a level
 	// for (§13–14, §31), best first.
 	Languages []LanguageCapability `json:"languages,omitempty"`
+	// License is what the model's license allows, for a catalog model
+	// (#593, contract 1.102). Nil is unknown, as for a model added from
+	// a link.
+	License *ModelLicense `json:"license,omitempty"`
+	// PrimaryCategory is what the model does first, for browsing the store,
+	// such as chat_coding, retrieval, or creative; uncategorized for a model
+	// nobody has checked. Categories are all of them, and Tasks what it
+	// does in them, such as code_generation or text_embedding. Input and
+	// output modalities are what it takes and gives, such as text and
+	// image. None of these says Toskar can run it; Runtime does (#593,
+	// contract 1.104).
+	PrimaryCategory  string   `json:"primary_category,omitempty"`
+	Categories       []string `json:"categories,omitempty"`
+	Tasks            []string `json:"tasks,omitempty"`
+	InputModalities  []string `json:"input_modalities,omitempty"`
+	OutputModalities []string `json:"output_modalities,omitempty"`
 	// Speculation is auto or off for a chat model installed on this
 	// computer: whether it guesses the next words ahead and checks several
 	// at once (#835, contract 1.67). Empty for other models.
@@ -212,6 +302,10 @@ type Model struct {
 	// it together (#1135, contract 1.88). Each keeps the whole context
 	// window. Absent for other models.
 	Slots int `json:"slots,omitempty"`
+	// Newer is the catalog model that replaces an installed one, size for
+	// size, such as Qwen 3.5 4B for Qwen 2.5 3B, when it isn't installed
+	// too (#593, contract 1.107).
+	Newer string `json:"newer,omitempty"`
 }
 
 // ContextOption is a context window a model can take, and how well the model
@@ -571,12 +665,24 @@ type AIProfile struct {
 	// an administrator's rules that a person's messages, style, memories,
 	// and an API caller's instructions can't change.
 	Topics *TopicPolicy `json:"topics,omitempty"`
+	// Audience is public when the people talking to it are strangers, such
+	// as visitors at a front door, a shop counter, or a reception kiosk
+	// (#667). Nothing about the owner reaches the model then: not their
+	// style, location, or memories, and not what Toskar knows about its
+	// computers. Built-in rules keep it from saying whether anyone is home
+	// or acting on a stranger's word, and only tools that change nothing
+	// outside Toskar run. Empty is the owner and the people they share
+	// Toskar with.
+	Audience string `json:"audience,omitempty"`
 	// ModelCallsNoTools is set for a turn whose model cannot call tools,
 	// such as Gemma 2: it is not shown the tool protocol, but the look-ups
 	// Toskar runs itself (web, places, connected services) still run and
 	// reach it as reference material. Never stored or sent.
 	ModelCallsNoTools bool `json:"-"`
 }
+
+// AudiencePublic is a profile that talks with strangers (#667).
+const AudiencePublic = "public"
 
 // TopicPolicy is a profile's topic controls (#345).
 type TopicPolicy struct {
@@ -959,6 +1065,12 @@ type MessageMeta struct {
 	// known, such as when a step ran on a paired computer.
 	Backend string `json:"backend,omitempty"`
 	Device  string `json:"device,omitempty"`
+	// Model and Computer name what answered and where, such as "Llama 3.2
+	// 1B" and "Studio", so a client can say so under the answer
+	// (toskar-apps#447, contract 1.109). Computer is empty when the turn's
+	// steps ran on more than one computer.
+	Model    string `json:"model,omitempty"`
+	Computer string `json:"computer,omitempty"`
 	// Automation is an automation the answer drafted, for the person to
 	// confirm (#204, contract 1.10). Nothing is scheduled until they do.
 	Automation *AutomationDraft `json:"automation,omitempty"`
@@ -1410,6 +1522,10 @@ type NetworkAccess struct {
 	People int `json:"people"`
 	// Devices is phones, tablets, watches, and TVs connected with a code.
 	Devices int `json:"devices"`
+	// StaleDevices is how many of Devices are likely left over: never used
+	// a day after pairing, or not used for 90 days (#1266, contract 1.109).
+	// They can still connect until they're removed.
+	StaleDevices int `json:"stale_devices,omitempty"`
 	// Keys is API keys made in API Access, for apps and scripts.
 	Keys int `json:"keys"`
 	// SignInService is a trusted proxy or OpenID Connect provider that
@@ -1483,6 +1599,9 @@ type SettingsView struct {
 	SaveTaskHistory   bool   `json:"save_task_history"`
 	NotifyTaskFinish  bool   `json:"notify_task_finish"`
 	NotifyPeerOffline bool   `json:"notify_peer_offline"`
+	// NotifyNewerModels tells Admins once per new generation that an
+	// installed model has a newer one (#593, contract 1.107).
+	NotifyNewerModels bool `json:"notify_newer_models"`
 	// CommunityRatings shows community model ratings, downloading the
 	// public summary once a day while models are browsed (#37).
 	CommunityRatings bool `json:"community_ratings"`

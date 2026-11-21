@@ -13,8 +13,12 @@
   "connect": "Verbinden",
   "optional": " (optional)",
   "stored": "Gespeichert ({{value}}). Leer lassen, um es zu behalten.",
+  "example": "z. B. {{value}}",
   "save": "Speichern",
   "cancel": "Abbrechen",
   "tools": "Werkzeuge: {{tools}}",
-  "asksFirst": "{{name}} (fragt vorher)"
+  "asksFirst": "{{name}} (fragt vorher)",
+  "connectService": "{{name}} verbinden",
+  "advanced": "Erweitert",
+  "doorbellAutomation": "Türklingel-Automation erstellen"
 }

@@ -62,7 +62,7 @@
       "label": "Local database"
     },
     "bifrost": {
-      "label": "Bifrost networking",
+      "label": "Computer network",
       "offline_one": "{{count}} computer offline",
       "offline_other": "{{count}} computers offline",
       "silentFor_one": "{{names}} has not responded for {{ago}}.",
@@ -172,7 +172,7 @@
     "tools_other": "{{count}} tools",
     "services_one": "{{count}} connected service",
     "services_other": "{{count}} connected services",
-    "providers": "{{healthy}} of {{total}} providers ready",
+    "providers": "{{healthy}} of {{total}} model engines and tool servers ready",
     "files_one": "{{count}} file ({{size}})",
     "files_other": "{{count}} files ({{size}})"
   },
@@ -186,6 +186,7 @@
       "image.generate": "Make images",
       "image.edit": "Edit images",
       "video.generate": "Make videos",
+      "video.extend": "Continue videos",
       "speech.transcribe": "Transcribe",
       "speech.synthesize": "Read aloud"
     },
@@ -203,7 +204,7 @@
     "title": "Toskar's memory",
     "description": "How much memory Toskar itself uses, and its background tasks. Both should level off after a while; steady growth over hours is worth reporting.",
     "heap": "Memory in use",
-    "tasks": "Background tasks",
+    "tasks": "Tasks running inside Toskar",
     "since": "Running since",
     "chartLabel_one": "Memory over the last hour",
     "chartLabel_other": "Memory over the last {{count}} hours",

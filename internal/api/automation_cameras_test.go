@@ -57,3 +57,39 @@ func TestAutomationCamerasNeedAnAdmin(t *testing.T) {
 		t.Fatalf("created %d", created)
 	}
 }
+
+// Speaking through a camera is an Admin's too (#667).
+func TestAutomationSayNeedsAnAdmin(t *testing.T) {
+	srv := NewServer(Dependencies{
+		CreateAutomation: func(_ context.Context, in automations.CreateInput) (automations.Automation, error) {
+			return automations.Automation{ID: "a", Say: in.Say}, nil
+		},
+		UpdateAutomation: func(_ context.Context, id string, _ automations.Patch) (automations.Automation, error) {
+			return automations.Automation{ID: id}, nil
+		},
+	})
+	call := func(role auth.Role, method, body string) int {
+		r := httptest.NewRequest(method, "/api/v1/automations/a", strings.NewReader(body))
+		r = r.WithContext(auth.WithPrincipal(r.Context(), auth.Principal{Person: auth.Person{ID: "p", Role: role}}))
+		w := httptest.NewRecorder()
+		if method == http.MethodPost {
+			srv.handleCreateAutomation(w, r)
+		} else {
+			srv.handleUpdateAutomation(w, r)
+		}
+		return w.Code
+	}
+	say := `"say":{"connector":"reolink","device":"camera"}`
+	if code := call(auth.RoleMember, http.MethodPost, `{"name":"n","prompt":"p",`+say+`}`); code != http.StatusForbidden {
+		t.Fatalf("a Member's speaker: %d", code)
+	}
+	if code := call(auth.RoleMember, http.MethodPatch, `{`+say+`}`); code != http.StatusForbidden {
+		t.Fatalf("a Member adding a speaker: %d", code)
+	}
+	if code := call(auth.RoleMember, http.MethodPatch, `{"say":{"connector":""}}`); code != http.StatusOK {
+		t.Fatalf("a Member stopping the speaker: %d", code)
+	}
+	if code := call(auth.RoleAdmin, http.MethodPost, `{"name":"n","prompt":"p",`+say+`}`); code != http.StatusCreated {
+		t.Fatalf("an Admin's speaker: %d", code)
+	}
+}

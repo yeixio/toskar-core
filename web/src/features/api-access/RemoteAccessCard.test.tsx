@@ -13,6 +13,8 @@ vi.mock('@/lib/api', () => ({
     getVersion: vi.fn(),
     startSubscriptionCheckout: vi.fn(),
     manageSubscription: vi.fn(),
+    cancelSubscriptionCheckout: vi.fn(),
+    moveSubscriptionHere: vi.fn(),
   },
 }))
 
@@ -235,8 +237,8 @@ describe('RemoteAccessCard (#456)', () => {
 
   describe("Toskar's relay, bought here (#639)", () => {
     const renderCard = (subscription: object, relay = '') => {
-      vi.mocked(api.getSettings).mockResolvedValue({ remote_access_enabled: false, remote_access_port: 7333, remote_access_relay: relay } as never)
-      vi.mocked(api.getRemoteAccess).mockResolvedValue({ enabled: false, port: 7333, subscription } as never)
+      vi.mocked(api.getSettings).mockResolvedValue({ remote_access_enabled: true, remote_access_port: 7333, remote_access_relay: relay } as never)
+      vi.mocked(api.getRemoteAccess).mockResolvedValue({ enabled: true, port: 7333, subscription } as never)
       return render(
         <QueryClientProvider client={new QueryClient()}>
           <RemoteAccessCard />
@@ -334,6 +336,20 @@ describe('RemoteAccessCard (#456)', () => {
       renderCard({ state: 'none', in_app_only: true })
       expect(await screen.findByText(/This copy of Toskar is from the App Store, so subscribe in the Toskar app/)).toBeInTheDocument()
       expect(screen.queryByRole('button', { name: /Subscribe for/ })).not.toBeInTheDocument()
+    })
+
+    // Regression: toskar-core#1257
+    it('shows the prices billing charges once it has said', async () => {
+      renderCard({ state: 'none', open: true, prices: { monthly: { amount: 5.49, currency: 'EUR' }, yearly: { amount: 44.99, currency: 'EUR' } } })
+      expect(await screen.findByRole('button', { name: 'Subscribe for €5.49 a month' })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'Subscribe for €44.99 a year' })).toBeInTheDocument()
+    })
+
+    // Regression: toskar-core#1266
+    it("names a developer's relay instead of calling it Toskar's", async () => {
+      renderCard({ state: 'none', open: true, relay: 'relay.dev.example:4443' })
+      expect(await screen.findByText('Subscription on relay.dev.example:4443', { selector: 'h3' })).toBeInTheDocument()
+      expect(screen.queryByText("Toskar's relay", { selector: 'h3' })).not.toBeInTheDocument()
     })
 
     it("isn't shown with an organization's relay", async () => {
@@ -447,5 +463,75 @@ describe('RemoteAccessCard (#456)', () => {
       expect(screen.getByText('Billed by Yeix.io LLC. Cancel any time.')).toBeInTheDocument()
       expect(app.AnywherePlans).not.toHaveBeenCalled()
     })
+  })
+})
+
+describe('RemoteAccessCard QA regressions', () => {
+  const renderWith = (settings: object, remote: object) => {
+    vi.mocked(api.getSettings).mockResolvedValue({ remote_access_port: 7333, remote_access_relay: '', ...settings } as never)
+    vi.mocked(api.getRemoteAccess).mockResolvedValue({ port: 7333, ...remote } as never)
+    return render(
+      <QueryClientProvider client={new QueryClient()}>
+        <RemoteAccessCard />
+      </QueryClientProvider>,
+    )
+  }
+
+  // Regression: toskar-core#1253
+  it('while it is off, the card leads with the switch, not purchases and router settings', async () => {
+    renderWith({ remote_access_enabled: false, remote_access_port_mapping: true }, { enabled: false, subscription: { state: 'none', open: true } })
+    const toggle = await screen.findByRole('switch', { name: 'Access from anywhere' })
+    // Settings and the status have both loaded.
+    await waitFor(() => expect(toggle).toBeEnabled())
+    await waitFor(() => expect(api.getRemoteAccess).toHaveBeenCalled())
+    await new Promise((resolve) => setTimeout(resolve, 50))
+    for (const button of screen.queryAllByRole('button', { name: /Subscribe for/ })) expect(button).toBeDisabled()
+    expect(screen.queryByLabelText('Open a port on the router automatically')).not.toBeInTheDocument()
+    expect(screen.queryByLabelText('Port')).not.toBeInTheDocument()
+    expect(screen.getByText(/doesn't need Local network access/)).toBeInTheDocument()
+  })
+
+  // Regression: toskar-core#1266
+  it('the switch moves at once and warns which port opens before it is on', async () => {
+    let finish: (v: unknown) => void = () => {}
+    vi.mocked(api.updateSettings).mockReturnValue(new Promise((resolve) => (finish = resolve)) as never)
+    renderWith({ remote_access_enabled: false }, { enabled: false })
+    expect(await screen.findByText(/open port 7333, which answers only devices paired/)).toBeInTheDocument()
+    const toggle = screen.getByRole('switch', { name: 'Access from anywhere' })
+    await waitFor(() => expect(toggle).toBeEnabled())
+    fireEvent.click(toggle)
+    await waitFor(() => expect(toggle).toHaveAttribute('aria-busy', 'true'))
+    expect(toggle).toHaveAttribute('aria-checked', 'true')
+    // The server has it on from here.
+    vi.mocked(api.getSettings).mockResolvedValue({ remote_access_enabled: true, remote_access_port: 7333, remote_access_relay: '' } as never)
+    finish({ remote_access_enabled: true, remote_access_port: 7333, remote_access_relay: '' })
+    await waitFor(() => expect(toggle).not.toHaveAttribute('aria-busy'))
+    expect(toggle).toHaveAttribute('aria-checked', 'true')
+  })
+
+  // Regression: toskar-core#1266
+  it('a relay refusal is a sentence with a next step, not a raw code', async () => {
+    renderWith(
+      { remote_access_enabled: true },
+      { enabled: true, listening: '[::]:7333', reachable: 'none', relay: { name: 'relay.toskar.ai:4443', state: 'error', error: 'TOKEN_REVOKED' }, subscription: { state: 'active', store: 'app' } },
+    )
+    expect(await screen.findByText(/Subscribed in the Toskar app/)).toBeInTheDocument()
+    expect(document.body.textContent).not.toMatch(/TOKEN_REVOKED/)
+  })
+
+  // Regression: toskar-core#1257
+  it('a subscription tied to another computer can be moved here', async () => {
+    vi.mocked(api.moveSubscriptionHere).mockResolvedValue(undefined)
+    renderWith({ remote_access_enabled: true }, { enabled: true, subscription: { state: 'active', store: 'stripe', error: 'SUBSCRIPTION_IN_USE' } })
+    fireEvent.click(await screen.findByRole('button', { name: 'Move it to this computer' }))
+    await waitFor(() => expect(api.moveSubscriptionHere).toHaveBeenCalled())
+    expect(document.body.textContent).not.toMatch(/SUBSCRIPTION_IN_USE/)
+  })
+
+  // Regression: toskar-core#1257
+  it('a pending checkout can be cancelled', async () => {
+    renderWith({ remote_access_enabled: false }, { enabled: false, subscription: { state: 'pending', store: 'stripe', checkout: 'https://checkout.stripe.test/cs_1' } })
+    expect(await screen.findByText(/Finish paying on the checkout page/)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Cancel/ })).toBeInTheDocument()
   })
 })

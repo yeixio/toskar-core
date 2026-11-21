@@ -11,6 +11,37 @@ import { Ratatoskr } from '@/components/ui/Ratatoskr'
 import { YggdrasilMark } from '@/components/ui/YggdrasilMark'
 
 const BOOT_GIVE_UP_MS = 25_000
+/**
+ * How long one health check may take. A check that never answered kept the
+ * boot screen waiting for good, since the next check waits for it
+ * (yeixio/toskar-apps#461).
+ */
+export const HEALTH_CHECK_TIMEOUT_MS = 6_000
+
+/** The health check, given up after HEALTH_CHECK_TIMEOUT_MS so it's tried again. */
+async function checkHealth(signal?: AbortSignal) {
+  const controller = new AbortController()
+  const abort = () => controller.abort()
+  signal?.addEventListener('abort', abort, { once: true })
+  let timedOut = false
+  const timer = window.setTimeout(() => {
+    timedOut = true
+    controller.abort()
+  }, HEALTH_CHECK_TIMEOUT_MS)
+  try {
+    return await api.getHealth({ signal: controller.signal })
+  } catch (err) {
+    if (timedOut) {
+      throw new Error('Service did not answer in time', { cause: err })
+    }
+    throw err
+  } finally {
+    window.clearTimeout(timer)
+    signal?.removeEventListener('abort', abort)
+  }
+}
+
+const SPLASH_DELAY_MS = 800
 
 function BootSplash() {
   const { t } = useTranslation()
@@ -89,8 +120,8 @@ function HealthGate({ children }: { children: ReactNode }) {
 
   const healthQuery = useQuery({
     queryKey: ['health'],
-    queryFn: async () => {
-      const health = await api.getHealth()
+    queryFn: async ({ signal }) => {
+      const health = await checkHealth(signal)
       if (!health || health.status !== 'ok') {
         throw new Error('Service not ready')
       }
@@ -104,6 +135,11 @@ function HealthGate({ children }: { children: ReactNode }) {
   })
 
   const ready = healthQuery.data?.status === 'ok'
+  const [splashDue, setSplashDue] = useState(false)
+  useEffect(() => {
+    const id = window.setTimeout(() => setSplashDue(true), SPLASH_DELAY_MS)
+    return () => window.clearTimeout(id)
+  }, [])
   const askForKey = needsApiKey(healthQuery.error)
   // Who is signed in, before the shell shows what their role may use (#203).
   const meQuery = useQuery({
@@ -194,11 +230,13 @@ function HealthGate({ children }: { children: ReactNode }) {
         onRetry={() => {
           setTimedOut(false)
           setDeadline(Date.now() + BOOT_GIVE_UP_MS)
-          void healthQuery.refetch()
+          void healthQuery.refetch({ cancelRefetch: true })
         }}
       />
     )
   }
 
-  return <BootSplash />
+  // A daemon that's already up answers in well under this, so a page load
+  // or a deep link doesn't flash the startup screen (#1270).
+  return splashDue ? <BootSplash /> : null
 }

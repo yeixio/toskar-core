@@ -195,8 +195,12 @@ func (e *Engine) GenerateVideo(ctx context.Context, req VideoRequest) (VideoResu
 	if err != nil {
 		return VideoResult{}, err
 	}
-	return VideoResult{WebM: data, Width: w, Height: h, Frames: n, Length: math.Round(float64(n-1)/float64(model.FPS)*10) / 10,
-		Seed: seed, Seconds: time.Since(start).Seconds(), Model: model.Name, Tier: model.Tier, Missing: missing}, nil
+	length := math.Round(float64(n-1)/float64(model.FPS)*10) / 10
+	took := time.Since(start).Seconds()
+	// How long it took, for estimating a longer video before it starts (#790).
+	e.noteRate(model.Name, took, length)
+	return VideoResult{WebM: data, Width: w, Height: h, Frames: n, Length: length,
+		Seed: seed, Seconds: took, Model: model.Name, Tier: model.Tier, Missing: missing}, nil
 }
 
 // webmMagic starts a WebM (EBML) file.
@@ -271,11 +275,16 @@ func (t *VideoTool) Run(ctx context.Context, job remotetools.Job) (remotetools.O
 
 // Finish attaches the clip to the chat.
 func (t *VideoTool) Finish(ctx context.Context, out remotetools.Output) (map[string]any, error) {
+	return finishClip(ctx, t.Store, out)
+}
+
+// finishClip saves a made clip in the chat, where it plays.
+func finishClip(ctx context.Context, store *artifacts.Store, out remotetools.Output) (map[string]any, error) {
 	if len(out.Files) != 1 || !bytes.HasPrefix(out.Files[0].Data, webmMagic) {
 		return nil, fmt.Errorf("no clip came back")
 	}
 	f := out.Files[0]
-	a, err := t.Store.Save(ctx, artifacts.Input{ConversationID: artifacts.ConversationFrom(ctx), Name: artifacts.CleanName(f.Name), Producer: artifacts.ProducerAssistant, Data: f.Data,
+	a, err := store.Save(ctx, artifacts.Input{ConversationID: artifacts.ConversationFrom(ctx), Name: artifacts.CleanName(f.Name), Producer: artifacts.ProducerAssistant, Data: f.Data,
 		Details: details(out.Result)})
 	if err != nil {
 		return nil, err

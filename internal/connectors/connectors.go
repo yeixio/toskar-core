@@ -30,6 +30,8 @@ type Field struct {
 	Secret      bool   `json:"secret"`
 	Optional    bool   `json:"optional,omitempty"`
 	Placeholder string `json:"placeholder,omitempty"`
+	// Advanced fields are folded away in the form: most people leave them.
+	Advanced bool `json:"advanced,omitempty"`
 }
 
 // Credential is the stored values for one service, keyed by Field.Key.
@@ -321,13 +323,23 @@ func (m *Manager) statusLocked(ctx context.Context, s Service) (Status, error) {
 		for _, f := range s.Fields() {
 			if v := cred[f.Key]; v != "" {
 				if f.Secret {
-					v = mask(v)
+					v = maskField(f.Key, v)
 				}
 				st.Values[f.Key] = v
 			}
 		}
 	}
 	return st, nil
+}
+
+// maskField is a stored secret as the form shows it: a password only as
+// dots, since its last four characters can be half of it (#1345), and a
+// long token with its last four, to tell it apart.
+func maskField(key, v string) string {
+	if strings.Contains(strings.ToLower(key), "password") {
+		return "••••"
+	}
+	return mask(v)
 }
 
 // mask shows only the last four characters of a secret.
@@ -474,7 +486,13 @@ func sanitizeErr(err error, cred Credential) error {
 	if err == nil {
 		return nil
 	}
-	return errors.New(redact(err.Error(), secretValues(cred)))
+	clean := errors.New(redact(err.Error(), secretValues(cred)))
+	// An error with a code of its own keeps it, so the apps say it in
+	// their language and at its field (#1345).
+	if code, params := contracts.ErrorCode(err); code != "" {
+		return contracts.NewError(code, params, clean)
+	}
+	return clean
 }
 
 // ServiceName is how a service is shown, such as "GitHub".
@@ -492,14 +510,20 @@ func (m *Manager) CameraPicture(ctx context.Context, service, device string) ([]
 	if err != nil {
 		return nil, "", err
 	}
-	if service != "homeassistant" {
+	if service != "homeassistant" && service != "reolink" {
 		return nil, "", fmt.Errorf("%s has no cameras", s.Name())
 	}
 	cred, err := m.credential(service)
 	if err != nil {
 		return nil, "", fmt.Errorf("%s is not connected. Connect it in Settings", s.Name())
 	}
-	data, mime, err := haCameraPicture(ctx, m.client, cred, device)
+	var data []byte
+	var mime string
+	if service == "reolink" {
+		data, mime, err = reolinkSnapshot(ctx, m.client, cred)
+	} else {
+		data, mime, err = haCameraPicture(ctx, m.client, cred, device)
+	}
 	if err != nil {
 		return nil, "", sanitizeErr(err, secretsOnly(s, cred))
 	}

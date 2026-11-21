@@ -6,7 +6,7 @@ import { api } from '@/lib/api'
 import { subscribeEvents } from '@/lib/events'
 import { useUIStore } from '@/stores/uiStore'
 import { useRole } from '@/lib/role'
-import type { ModelDownloadProgressPayload, ModelFit, ModelsFitResponse, FitLabel } from '@/types/api'
+import type { ModelDownloadProgressPayload, ModelFit, ModelLicense, ModelsFitResponse, FitLabel } from '@/types/api'
 import { AddModelPanel } from './AddModelPanel'
 import { BrowseAllPanel } from './BrowseAllPanel'
 import { DiscoverTab } from './DiscoverTab'
@@ -20,6 +20,7 @@ import { needsTightFitInstallWarning } from './modelPresentation'
 import { ResultsTab } from './ResultsTab'
 import { RunningTab } from './RunningTab'
 import { StoreShelves } from './StoreShelves'
+import { LicenseTermsDialog } from './LicenseTermsDialog'
 import { TightFitDialog } from './TightFitDialog'
 import { RatingDialogHost } from './ratings'
 import { RealmKicker } from '@/components/ui/Realm'
@@ -32,6 +33,11 @@ import { shownError, type Shown } from '@/components/ui/ShownError'
 import { formatBytes } from '@/lib/format'
 
 type Tab = 'discover' | 'installed' | 'running' | 'results'
+
+function tabFrom(search: string): Tab {
+  const asked = new URLSearchParams(search).get('tab')
+  return asked === 'installed' || asked === 'running' || asked === 'results' ? asked : 'discover'
+}
 
 function pickFitBundle(
   bundles: ModelsFitResponse[] | undefined,
@@ -52,7 +58,8 @@ export function ModelsPage() {
   const { t } = useTranslation('models')
   const queryClient = useQueryClient()
   const advancedMode = useUIStore((s) => s.advancedMode)
-  const [tab, setTab] = useState<Tab>('discover')
+  // A notice may open a tab, such as Installed for a newer model (#593).
+  const [tab, setTab] = useState<Tab>(() => tabFrom(window.location.search))
   // The model that just finished downloading, for Ratatoskr's "ready" note.
   const [justInstalled, setJustInstalled] = useState<string | null>(null)
   const downloadMascot = useMascotState({
@@ -71,7 +78,9 @@ export function ModelsPage() {
   const [installingId, setInstallingId] = useState<string | null>(null)
   // Why a download failed, by model ID, until it's tried again.
   const [failedDownloads, setFailedDownloads] = useState<Record<string, string>>({})
-  const [tightConfirm, setTightConfirm] = useState<{ id: string; name: string } | null>(null)
+  const [tightConfirm, setTightConfirm] = useState<{ id: string; name: string; acceptLicense?: boolean } | null>(null)
+  // A model whose license has terms to accept, shown before it's installed (#593).
+  const [termsConfirm, setTermsConfirm] = useState<{ id: string; name: string; license: ModelLicense } | null>(null)
 
   // A model file put in Toskar's models folder by hand isn't a model until
   // it's added (#763); the page says so, and Add model opens on it.
@@ -171,8 +180,8 @@ export function ModelsPage() {
   }, [queryClient])
 
   const installMutation = useMutation({
-    mutationFn: ({ id, nodeId }: { id: string; nodeId?: string }) =>
-      api.installModel(id, { node_id: nodeId }),
+    mutationFn: ({ id, nodeId, acceptLicense }: { id: string; nodeId?: string; acceptLicense?: boolean }) =>
+      api.installModel(id, { node_id: nodeId, accept_license: acceptLicense }),
     onMutate: ({ id }) => setInstallingId(id),
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['models'] })
@@ -283,14 +292,19 @@ export function ModelsPage() {
   const lifecycle = settingsQuery.data?.model_lifecycle ?? 'automatic'
   const showManualControls = advancedMode || lifecycle === 'manual'
 
-  const installForPageTarget = (id: string) => {
+  const installForPageTarget = (id: string, acceptLicense = false) => {
     const model = models.find((item) => item.id === id)
     const fit = fits[id]
-    if (model && needsTightFitInstallWarning(model, fit)) {
-      setTightConfirm({ id, name: model.display_name })
+    const license = model?.license
+    if (model && license?.accept && !license.accepted_at && !acceptLicense) {
+      setTermsConfirm({ id, name: model.display_name, license })
       return
     }
-    installMutation.mutate({ id, nodeId: resolveInstallNodeId(target) })
+    if (model && needsTightFitInstallWarning(model, fit)) {
+      setTightConfirm({ id, name: model.display_name, acceptLicense })
+      return
+    }
+    installMutation.mutate({ id, nodeId: resolveInstallNodeId(target), acceptLicense })
   }
 
   return (
@@ -429,7 +443,7 @@ export function ModelsPage() {
           search={search}
           installingId={installingId}
           onBrowseAll={() => setBrowseOpen(true)}
-          onInstall={installForPageTarget}
+          onInstall={(id) => installForPageTarget(id)}
           store={
             <StoreShelves
               models={models}
@@ -438,7 +452,7 @@ export function ModelsPage() {
               installTarget={resolveInstallNodeId(target)}
               isOtherComputer={target !== 'local'}
               onBrowseAll={() => setBrowseOpen(true)}
-              onInstallTested={installForPageTarget}
+              onInstallTested={(id) => installForPageTarget(id)}
               onInstalled={() => {
                 queryClient.invalidateQueries({ queryKey: ['models'] })
               }}
@@ -460,7 +474,7 @@ export function ModelsPage() {
           installingId={installingId}
           tightModelIds={tightModelIds}
           fits={fits}
-          onInstall={installForPageTarget}
+          onInstall={(id) => installForPageTarget(id)}
           onInstallElsewhere={(id) => installMutation.mutate({ id, nodeId: 'all' })}
           onStart={(id) => startMutation.mutate(id)}
           startingId={startMutation.isPending ? startMutation.variables : null}
@@ -508,9 +522,21 @@ export function ModelsPage() {
           modelName={tightConfirm.name}
           onCancel={() => setTightConfirm(null)}
           onInstall={() => {
-            const id = tightConfirm.id
+            const { id, acceptLicense } = tightConfirm
             setTightConfirm(null)
-            installMutation.mutate({ id, nodeId: resolveInstallNodeId(target) })
+            installMutation.mutate({ id, nodeId: resolveInstallNodeId(target), acceptLicense })
+          }}
+        />
+      ) : null}
+      {termsConfirm ? (
+        <LicenseTermsDialog
+          modelName={termsConfirm.name}
+          license={termsConfirm.license}
+          onCancel={() => setTermsConfirm(null)}
+          onAccept={() => {
+            const { id } = termsConfirm
+            setTermsConfirm(null)
+            installForPageTarget(id, true)
           }}
         />
       ) : null}

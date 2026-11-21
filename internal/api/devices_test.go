@@ -214,6 +214,18 @@ func TestDeviceDisconnectsItself(t *testing.T) {
 	if watch.APIKey == "" {
 		t.Fatal("no watch key")
 	}
+	// One that gives no name says which device connected it (#1266).
+	if got := do(tablet, http.MethodPost, "/api/v1/me/devices", `{}`); got.Code != http.StatusOK && got.Code != http.StatusCreated {
+		t.Fatalf("unnamed companion: %d %s", got.Code, got.Body)
+	}
+	all, _ := keys.List(ctx)
+	named := false
+	for _, k := range all {
+		named = named || k.Name == "Device via Sam's tablet"
+	}
+	if !named {
+		t.Fatalf("unnamed companion's name: %+v", all)
+	}
 	for _, key := range []string{phone, tablet} {
 		if got := do(key, http.MethodPut, "/api/v1/me/push", `{"handle":"h-`+key[:12]+`","platform":"ios"}`); got.Code != http.StatusOK {
 			t.Fatalf("register: %d %s", got.Code, got.Body)

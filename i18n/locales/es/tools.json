@@ -266,5 +266,42 @@
     "clientId": "ID de cliente para iniciar sesión",
     "clientIdHint": " (solo si el servicio te dio uno)",
     "keptHere": "Las claves, los tokens, las contraseñas y los encabezados se guardan en esta computadora, fuera de la vista de la IA."
+  },
+  "comfyui": {
+    "title": "ComfyUI",
+    "description": "Conecta un ComfyUI que ejecutes, aquí o en otro ordenador, y guarda sus flujos de trabajo. Los chats los ejecutan con la herramienta Flujo de ComfyUI, junto a las imágenes y clips integrados.",
+    "url": "Dirección de ComfyUI",
+    "token": "Token",
+    "tokenStored": "Hay un token guardado; escribe uno nuevo para cambiarlo",
+    "tokenOptional": "Opcional, si tu ComfyUI lo pide",
+    "save": "Guardar y comprobar",
+    "checking": "Comprobando…",
+    "forgetToken": "Olvidar token",
+    "connected": "Conectado a ComfyUI {{version}}, con {{nodes}} tipos de nodo.",
+    "device": "{{name}}, {{gb}} GB",
+    "models": "{{checkpoints}} modelos y {{loras}} LoRA.",
+    "safety": "Los nodos personalizados ejecutan su propio código en ese ordenador. Toskar solo llama al ComfyUI que añadas aquí, nunca instala nada en él y trata lo que crea como cualquier otro archivo.",
+    "workflows": "Flujos de trabajo",
+    "noWorkflows": "Aún no hay flujos. Añade uno exportado desde ComfyUI.",
+    "remove": "Quitar",
+    "removeNamed": "Quitar {{name}}",
+    "file": "Archivo del flujo",
+    "fileHint": "En ComfyUI, usa Workflow › Export (API) y elige el archivo aquí.",
+    "found": "Entradas encontradas: {{inputs}}.",
+    "name": "Nombre",
+    "what": "Qué hace",
+    "whatPlaceholder": "Amplía una imagen 4×",
+    "add": "Añadir flujo",
+    "notJSON": "Ese archivo no es JSON. Exporta el flujo con Workflow › Export (API).",
+    "input": "{{name}} (nodo {{node}})",
+    "noInputs": "no se encontraron entradas",
+    "inputs": {
+      "prompt": "prompt",
+      "negative": "prompt negativo",
+      "seed": "semilla",
+      "image": "imagen",
+      "width": "ancho",
+      "height": "alto"
+    }
   }
 }

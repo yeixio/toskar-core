@@ -248,6 +248,20 @@ export function downloadLabel(model: Model): string {
   return '—'
 }
 
+/** Everything installing the model downloads, the one download figure every screen shows (#1343). */
+export function downloadBytes(model: Pick<Model, 'download_bytes' | 'size_bytes'>): number {
+  return Math.max(model.download_bytes ?? 0, model.size_bytes ?? 0)
+}
+
+/** "3.2 GB download · about 4.7 GB of memory", with whichever of the two is known (#1343). */
+export function sizeLabel(model: Model): string {
+  const download = downloadBytes(model)
+  const memory = model.memory_needed_bytes ?? 0
+  if (download && memory) return i18n.t('models:size.downloadMemory', { size: formatBytes(download), memory: formatBytes(memory) })
+  if (download) return i18n.t('models:size.download', { size: formatBytes(download) })
+  return memoryLabel(model)
+}
+
 export function memoryLabel(model: Model): string {
   if (model.memory_needed_bytes) return i18n.t('models:memory.needed', { size: formatBytes(model.memory_needed_bytes) })
   return '—'
@@ -335,4 +349,9 @@ export function languageSummary(model: Pick<Model, 'languages'>, appLanguage: st
     : i18n.t('models:languages.notRated', { language: languageName(tag) })
   const text = others > 0 ? i18n.t('models:languages.withMore', { first: head, count: others }) : head
   return { text, title }
+}
+
+/** A business may use it: its license allows that, with or without limits. Unknown isn't cleared (#593). */
+export function allowsBusiness(m: { commercial?: string }): boolean {
+  return m.commercial === 'yes' || m.commercial === 'limited'
 }

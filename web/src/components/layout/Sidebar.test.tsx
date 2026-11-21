@@ -11,6 +11,8 @@ vi.mock('@/lib/api', () => ({
     getHealth: vi.fn(async () => ({ status: 'ok', product: 'yggdrasil', version: 'test' })),
     getNodes: vi.fn(async () => []),
     getModels: vi.fn(async () => []),
+    getSettings: vi.fn(async () => ({})),
+    listKnowledge: vi.fn(async () => []),
     getMe: vi.fn(async () => {
       throw new Error('no /me')
     }),
@@ -82,5 +84,53 @@ describe('Sidebar', () => {
     vi.mocked(api.getMe).mockResolvedValueOnce({ person: { ...person, role: 'visitor' }, via: 'session' })
     renderAt('/chat')
     await waitFor(() => expect(links()).toEqual(['/chat', '/settings']))
+  })
+})
+
+describe('Sidebar QA regressions', () => {
+  beforeEach(() => {
+    useUIStore.setState({ advancedMode: false, administerOpen: false })
+  })
+
+  // Regression: toskar-core#1249
+  it('a computer on its own is not "1 connected"', async () => {
+    vi.mocked(api.getNodes).mockResolvedValueOnce([{ id: 'n1', name: 'qa-box', os: 'linux', is_local: true } as never])
+    renderAt('/chat')
+    await waitFor(() => expect(screen.queryByText('—')).not.toBeInTheDocument())
+    expect(screen.queryByText('1 connected')).not.toBeInTheDocument()
+  })
+
+  // Regression: toskar-core#1249
+  it('Members see no Knowledge status for a page they cannot open', async () => {
+    const person = { id: 'sam', name: 'Sam', created_at: '', sign_in: true }
+    vi.mocked(api.getMe).mockResolvedValueOnce({ person: { ...person, role: 'member' }, via: 'session' })
+    renderAt('/chat')
+    await waitFor(() => expect(links()).toEqual(['/chat', '/automations', '/memory', '/news', '/settings']))
+    const footer = screen.getByText('Status').closest('footer')!
+    expect(within(footer).queryByText('Knowledge')).not.toBeInTheDocument()
+  })
+
+  // Regression: toskar-core#1251
+  it('status tooltips use plain names, not Bifrost, Norn or Mimir', async () => {
+    renderAt('/chat')
+    const footer = screen.getByText('Status').closest('footer')!
+    await within(footer).findByText('Knowledge')
+    const titles = Array.from(footer.querySelectorAll('[title]')).map((el) => el.getAttribute('title') ?? '')
+    expect(titles.filter((title) => /\b(Bifrost|Norn|Mimir|Muninn)\b/.test(title))).toEqual([])
+  })
+
+  // Regression: toskar-core#1249
+  it('Placement and Knowledge say what is really set and happening', async () => {
+    vi.mocked(api.getSettings).mockResolvedValueOnce({ default_execution: 'local' } as never)
+    vi.mocked(api.listKnowledge).mockResolvedValueOnce([
+      { id: 'k1', status: 'ready' },
+      { id: 'k2', status: 'failed' },
+    ] as never)
+    renderAt('/chat')
+    const footer = screen.getByText('Status').closest('footer')!
+    await within(footer).findByText('This computer')
+    await within(footer).findByText('1 failed')
+    expect(within(footer).queryByText('Automatic')).not.toBeInTheDocument()
+    expect(within(footer).queryByText('Ready')).not.toBeInTheDocument()
   })
 })

@@ -13,7 +13,15 @@
     "memory": "Memory",
     "graphics": "Graphics",
     "system": "System",
-    "unavailable": "Hardware details appear once Toskar has started. You can continue setup now."
+    "unavailable": "Hardware details appear once Toskar has started. You can continue setup now.",
+    "os": {
+      "macAppleSilicon": "macOS, Apple silicon",
+      "macIntel": "macOS, Intel",
+      "windows": "Windows",
+      "windowsArm": "Windows on Arm",
+      "linux": "Linux",
+      "linuxArm": "Linux on Arm"
+    }
   },
   "question": "What would you like your AI to do?",
   "purposes": {
@@ -36,6 +44,7 @@
   },
   "continue": "Continue",
   "finding": "Finding a setup…",
+  "findingDetail": "Checking this computer's memory and graphics, and the models that fit them…",
   "recommendFailed": "Could not get a recommendation.",
   "recommend": {
     "badge": "Recommended",
@@ -48,7 +57,8 @@
     "install": "Install recommended setup",
     "use": "Use this setup",
     "skip": "Skip for now",
-    "back": "Back"
+    "back": "Back",
+    "fits": "{{name}} fits in this computer's {{memory}} of memory."
   },
   "roles": {
     "coordinator": "Coordinator",
@@ -75,5 +85,6 @@
     "title": "You are ready",
     "description": "Your recommended setup is installed. Start chatting with your local AI.",
     "start": "Start chatting"
-  }
+  },
+  "setupLater": "Set up later"
 }

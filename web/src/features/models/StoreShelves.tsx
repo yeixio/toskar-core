@@ -1,14 +1,25 @@
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link } from 'react-router-dom'
 import { formatDate, formatNumber, formatPercent } from '@/i18n/format'
 import { api } from '@/lib/api'
 import { formatBytes } from '@/lib/format'
 import { searchItems } from '@/lib/search'
 import { useDialog } from '@/lib/useDialog'
 import type { Model, ModelDownloadProgressPayload, StoreModel } from '@/types/api'
-import { fitLabelText, fitTone } from './modelPresentation'
+import { ImageSetupCard, VideoSetupCard } from '@/features/tools/ImageSetup'
+import { allowsBusiness, fitLabelText, fitTone } from './modelPresentation'
+
+/** Categories to browse by (#593): what a model does. Picture and clip models are set up here too. */
+const CATEGORIES = ['all', 'chat_coding', 'vision', 'creative'] as const
+type Category = (typeof CATEGORIES)[number]
+
+/** Whether a store listing is in a category: every listing chats, and one that reads pictures sees them too. */
+function inCategory(m: StoreModel, category: Category): boolean {
+  if (category === 'all' || category === 'chat_coding') return true
+  if (category === 'vision') return (m.tags ?? []).includes('vision')
+  return false
+}
 
 /** Shelves in the order they're shown; one this build doesn't know is left out. */
 const SHELF_ORDER = ['picks', 'popular', 'top_rated', 'new', 'everyday', 'code', 'sees', 'small', 'tested']
@@ -42,6 +53,9 @@ export function StoreShelves({
 }) {
   const { t } = useTranslation('models')
   const [open, setOpen] = useState<StoreModel | null>(null)
+  // Only models whose license allows business use (#593).
+  const [forBusiness, setForBusiness] = useState(false)
+  const [category, setCategory] = useState<Category>('all')
   // The model each row started, since the download goes on after the request.
   const [started, setStarted] = useState<Record<string, string>>({})
   const store = useQuery({
@@ -83,12 +97,25 @@ export function StoreShelves({
     else install.mutate(m)
   }
 
-  const shelves = SHELF_ORDER.flatMap((id) => {
-    const shelf = store.data?.shelves.find((s) => s.id === id)
-    if (!shelf) return []
-    const list = search ? searchItems(shelf.models, search, (m) => [m.display_name, m.repo_id, ...(m.tags ?? [])]) : shelf.models
-    return list.length > 0 ? [{ id, models: list }] : []
-  })
+  const narrow = (list: StoreModel[]) => (forBusiness ? list.filter(allowsBusiness) : list).filter((m) => inCategory(m, category))
+  // Searching shows one list, each upload once; Toskar's tested models are
+  // listed above it, by the page (#1344).
+  const uploads = new Map<string, StoreModel>()
+  if (search) {
+    for (const shelf of store.data?.shelves ?? []) {
+      for (const m of shelf.models) if (!m.catalog_id && !uploads.has(m.id)) uploads.set(m.id, m)
+    }
+  }
+  const found = narrow(searchItems([...uploads.values()], search, (m) => [m.display_name, m.repo_id, ...(m.tags ?? [])]))
+  const shelves = search
+    ? found.length > 0
+      ? [{ id: 'search', models: found }]
+      : []
+    : SHELF_ORDER.flatMap((id) => {
+        const shelf = store.data?.shelves.find((s) => s.id === id)
+        const list = shelf ? narrow(shelf.models) : []
+        return list.length > 0 ? [{ id, models: list }] : []
+      })
 
   if (store.isLoading) return <p className="text-sm text-ink-muted">{t('store.loading')}</p>
 
@@ -96,7 +123,43 @@ export function StoreShelves({
     <div className="space-y-8">
       {store.data && !store.data.live ? <p className="text-sm text-ink-muted">{t('store.offline')}</p> : null}
       {store.data?.live ? <p className="text-xs text-ink-faint">{t('store.source')}</p> : null}
-      {shelves.map((shelf) => (
+      <div role="group" aria-label={t('store.browse.label')} className="flex flex-wrap gap-2">
+        {CATEGORIES.map((c) => (
+          <button
+            key={c}
+            type="button"
+            aria-pressed={category === c}
+            className={category === c ? 'btn-primary px-3 py-1.5 text-xs' : 'btn-secondary px-3 py-1.5 text-xs'}
+            onClick={() => setCategory(c)}
+          >
+            {t(`store.browse.${c}`)}
+          </button>
+        ))}
+      </div>
+      {category === 'creative' ? (
+        <div className="space-y-4">
+          <p className="text-sm text-ink-muted">{t('store.browse.hint')}</p>
+          <ImageSetupCard />
+          <VideoSetupCard />
+        </div>
+      ) : (
+        <label className="flex items-start gap-2 text-sm text-ink">
+          <input
+            type="checkbox"
+            className="mt-0.5"
+            checked={forBusiness}
+            onChange={(event) => setForBusiness(event.target.checked)}
+          />
+          <span>
+            {t('store.business.label')}
+            <span className="block text-xs text-ink-muted">{t('store.business.hint')}</span>
+          </span>
+        </label>
+      )}
+      {category !== 'creative' && forBusiness && shelves.length === 0 ? (
+        <p className="text-sm text-ink-muted">{t('store.business.none')}</p>
+      ) : null}
+      {(category === 'creative' ? [] : shelves).map((shelf) => (
         <section key={shelf.id} className="space-y-3" aria-labelledby={`shelf-${shelf.id}`}>
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div>
@@ -130,17 +193,17 @@ export function StoreShelves({
           </ul>
         </section>
       ))}
-      {!search ? (
+      {!search && category === 'all' ? (
         <section className="space-y-3" aria-labelledby="shelf-media">
           <div>
             <h2 id="shelf-media" className="section-title">
               {t('store.shelves.media.title')}
             </h2>
-            <p className="mt-1 text-sm text-ink-muted">{t('store.shelves.media.hint')}</p>
+            <p className="mt-1 text-sm text-ink-muted">{t('store.browse.hint')}</p>
           </div>
-          <Link to="/tools" className="btn-secondary inline-flex">
-            {t('store.shelves.media.action')}
-          </Link>
+          <button type="button" className="btn-secondary inline-flex" onClick={() => setCategory('creative')}>
+            {t('store.browse.creative')}
+          </button>
         </section>
       ) : null}
       {install.isError ? <p className="text-sm text-danger">{t('store.installFailed')}</p> : null}
@@ -155,6 +218,27 @@ export function StoreShelves({
       ) : null}
     </div>
   )
+}
+
+/** What a license allows a business, in words (#593). */
+const BUSINESS_TEXT = {
+  yes: 'store.details.businessYes',
+  limited: 'store.details.businessLimited',
+  no: 'store.details.businessNo',
+  unknown: 'store.details.businessUnknown',
+} as const
+
+/** Free, free with conditions, or unknown, as a chip (#593). */
+function LicenseChip({ model }: { model: StoreModel }) {
+  const { t } = useTranslation('models')
+  const kind = model.license_kind ?? 'unknown'
+  const tone =
+    kind === 'free'
+      ? 'bg-success/10 text-success'
+      : kind === 'conditions'
+        ? 'bg-warning/15 text-warning'
+        : 'bg-raised/80 text-ink-muted'
+  return <span className={['status-chip', tone].join(' ')}>{t(`store.license.${kind}`)}</span>
 }
 
 function purposes(m: StoreModel): string[] {
@@ -234,6 +318,7 @@ function StoreCard({
           </span>
         ))}
         {model.catalog_id ? <span className="status-chip bg-success/10 text-success">{t('store.tested')}</span> : null}
+        <LicenseChip model={model} />
       </p>
       <Stats model={model} />
       <div className="mt-auto flex items-center justify-between gap-2 pt-1">
@@ -285,7 +370,12 @@ function StoreDetails({
             </>
           ) : null}
           <dt className="text-ink-muted">{t('store.details.license')}</dt>
-          <dd>{model.license || t('store.details.licenseUnknown')}</dd>
+          <dd className="flex flex-wrap items-center gap-2">
+            {model.license || t('store.details.licenseUnknown')}
+            <LicenseChip model={model} />
+          </dd>
+          <dt className="text-ink-muted">{t('store.details.business')}</dt>
+          <dd>{t(BUSINESS_TEXT[model.commercial ?? 'unknown'])}</dd>
           {model.created_at ? (
             <>
               <dt className="text-ink-muted">{t('store.details.added')}</dt>

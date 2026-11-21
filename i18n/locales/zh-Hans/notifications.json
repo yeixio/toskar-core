@@ -175,7 +175,12 @@
     "digest_other": "{{count}} 条通知",
     "digestMore_other": "…另有 {{count}} 条",
     "automationDigest": "自动化摘要",
-    "automationDigestBody_other": "{{count}} 个自动化已运行：{{names}}"
+    "automationDigestBody_other": "{{count}} 个自动化已运行：{{names}}",
+    "newerModels": "有更新的 {{family}} 模型",
+    "newerModelsBody": "{{model}} 比 {{installed}} 更新。在“模型 › 已安装”中可以查看它在这台电脑上的适配情况，并把它安装在现有模型旁边。",
+    "pageNotOpened": "{{automation}} 没有打开 {{page}}",
+    "pageNotOpenedUnnamed": "某个自动化没有打开 {{page}}",
+    "pageNotOpenedBody": "它的模型没有读取该页面就作答了，结果可能是编造的。请为此自动化选择能使用工具的模型。"
   },
   "sent": {
     "times": "{{title}}（{{count}} 次）",

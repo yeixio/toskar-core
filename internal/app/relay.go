@@ -29,8 +29,11 @@ const relaySecretName = "relay-enroll-secret"
 var (
 	errRelayToken    = contracts.NewError("RELAY_TOKEN_INVALID", nil, errors.New("that isn't a current relay token for this computer"))
 	errRelayTokenOwn = contracts.NewError("RELAY_TOKEN_NOT_NEEDED", nil, errors.New("this computer uses its organization's relay, which gives it its own token"))
-	errRelayName     = contracts.NewError("RELAY_INVALID", nil, errors.New("the relay is a host name, with a port when it isn't 443, such as relay.example.com"))
-	errRelaySecret   = contracts.NewError("RELAY_SECRET_INVALID", nil, errors.New("that isn't an enrollment secret; copy it from the relay's enroll.secret file"))
+	// errRelayTokenWorse is a token that ends before the one in use, which
+	// still works (#1258).
+	errRelayTokenWorse = contracts.NewError("RELAY_TOKEN_SHORTER", nil, errors.New("the computer already has a relay token that lasts longer"))
+	errRelayName       = contracts.NewError("RELAY_INVALID", nil, errors.New("the relay is a host name, with a port when it isn't 443, such as relay.example.com"))
+	errRelaySecret     = contracts.NewError("RELAY_SECRET_INVALID", nil, errors.New("that isn't an enrollment secret; copy it from the relay's enroll.secret file"))
 )
 
 // relayName is the relay this computer uses: its setting, then
@@ -67,6 +70,11 @@ func cleanRelayName(in string) (string, error) {
 	if net.ParseIP(host) != nil || !validHostName(host) || !strings.Contains(host, ".") {
 		return "", errRelayName
 	}
+	// Toskar's own relay typed by hand is Toskar's relay, on its own port,
+	// with renewals and subscriptions, not an organization's (#1259).
+	if defaultHost, _, _ := net.SplitHostPort(relayclient.DefaultRelay); host == defaultHost {
+		return "", nil
+	}
 	return name, nil
 }
 
@@ -84,6 +92,7 @@ func cleanRelaySecret(in string) (string, error) {
 func (a *App) applyRelay() {
 	a.relayMu.Lock()
 	defer a.relayMu.Unlock()
+	old := a.relay
 	if a.relayStop != nil {
 		a.relayStop()
 		a.relayStop, a.relay = nil, nil
@@ -93,6 +102,18 @@ func (a *App) applyRelay() {
 	}
 	cfg := a.Config.Get()
 	if !cfg.RemoteAccess.Enabled || a.API.RemoteListening().Listening == "" {
+		// Turned off: take the address record back, so devices stop
+		// trying the old ways in at once rather than for its 30 minutes
+		// (#1259).
+		if old != nil && !cfg.RemoteAccess.Enabled {
+			go func() {
+				ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+				defer cancel()
+				if err := old.Withdraw(ctx); err != nil {
+					a.Logger.Info("relay: couldn't withdraw the address record", "error", err)
+				}
+			}()
+		}
 		return
 	}
 	secrets := auth.NewSecretStore(cfg.DataDir)
@@ -223,6 +244,22 @@ func (a *App) relayToken() string {
 	return tok
 }
 
+// deviceRelayToken is the token paired devices get for finding this
+// computer through Toskar's relay: a device token the relay made for them,
+// never the computer's own, which could open its tunnel (#1258). "" with
+// an organization's relay, or until the relay has given one.
+func (a *App) deviceRelayToken() string {
+	cfg := a.Config.Get()
+	if cfg.RemoteAccess.Relay != "" {
+		return ""
+	}
+	route, err := a.routeID()
+	if err != nil {
+		return ""
+	}
+	return relayclient.DeviceToken(auth.NewSecretStore(cfg.DataDir), route)
+}
+
 // expiredRelayToken is when this computer's token for Toskar's relay ran
 // out, when it has one that has; zero otherwise (#692).
 func (a *App) expiredRelayToken() time.Time {
@@ -265,6 +302,17 @@ func (a *App) setRelayToken(ctx context.Context, tok string, enable bool) (strin
 	if !ok || route != rendezvous.RouteID(routeSecret) || !time.Now().Before(exp) {
 		return "", errRelayToken
 	}
+	// A token that ends before the one in use doesn't replace it while
+	// that one still works at the relay: a device's person can't knock the
+	// computer off with an older or shorter token (#1258).
+	if kept := a.relayToken(); kept != "" {
+		keptExp := tokenEnd(kept)
+		switch {
+		case strings.TrimSpace(kept) == strings.TrimSpace(tok):
+		case exp.Before(keptExp) && a.relayTakes(ctx, route, kept):
+			return "", errRelayTokenWorse
+		}
+	}
 	if err := secrets.Write(relayclient.TokenName, strings.TrimSpace(tok)); err != nil {
 		return "", err
 	}
@@ -279,4 +327,39 @@ func (a *App) setRelayToken(ctx context.Context, tok string, enable bool) (strin
 		return st.State, nil
 	}
 	return "off", nil
+}
+
+func tokenEnd(tok string) time.Time {
+	_, exp, _ := relayclient.ParseToken(tok)
+	return exp
+}
+
+// relayTakes reports whether the relay still takes tok for route; false
+// only when the relay refused it, as when it was revoked: when the relay
+// can't be asked, the token is assumed to work.
+func (a *App) relayTakes(ctx context.Context, route, tok string) bool {
+	ctx, cancel := context.WithTimeout(ctx, 15*time.Second)
+	defer cancel()
+	err := a.relayAPI().CheckToken(ctx, route, tok)
+	return err == nil || !relayclient.Refused(err)
+}
+
+// setRelayTokenFromDevice is setRelayToken for a token a paired device
+// hands over: it's kept only once the relay has taken it, so a device
+// can't replace the computer's token with one the relay didn't sign
+// (#1258).
+func (a *App) setRelayTokenFromDevice(ctx context.Context, tok string, enable bool) (string, error) {
+	route, _, ok := relayclient.ParseToken(tok)
+	if !ok {
+		return "", errRelayToken
+	}
+	check, cancel := context.WithTimeout(ctx, 15*time.Second)
+	defer cancel()
+	if err := a.relayAPI().CheckToken(check, route, tok); err != nil {
+		if relayclient.Refused(err) {
+			return "", errRelayToken
+		}
+		return "", contracts.NewError("RELAY_UNREACHABLE", nil, errors.New("the relay couldn't be asked about the token; try again"))
+	}
+	return a.setRelayToken(ctx, tok, enable)
 }

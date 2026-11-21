@@ -42,7 +42,8 @@
     "action": "Impossible d'effectuer cette action",
     "network": "Autorisez Réseau local / Pare-feu pour Toskar sur les deux ordinateurs, et laissez Rechercher d'autres ordinateurs activé, dans Réseau et accès ci-dessous.",
     "generic": "Un problème est survenu",
-    "claimFailed": "Impossible de charger l'offre de jumelage pour ce code"
+    "claimFailed": "Impossible de charger l'offre de jumelage pour ce code",
+    "dismiss": "Ignorer"
   },
   "pairing": {
     "waiting": "En attente d'approbation",
@@ -51,7 +52,11 @@
     "code": "Code : <code>{{code}}</code>",
     "incoming": "Demandes entrantes",
     "offerCode": "Code <code>{{code}}</code>",
-    "approve": "Approuver"
+    "approve": "Approuver",
+    "noAnswer": "Pas encore de réponse",
+    "noAnswerHint": "{{name}} n'a pas approuvé la demande. Vérifiez que Toskar y est ouvert, puis réessayez Ajouter à l'équipe.",
+    "cancel": "Arrêter d'attendre",
+    "close": "Fermer"
   },
   "nearby": {
     "title": "Disponibles à l'ajout",
@@ -116,13 +121,15 @@
     "approving": "Approbation…",
     "approveCode": "Approuver avec le code",
     "hideDetails": "Masquer les détails",
-    "manage": "Gérer",
+    "manage": "Détails",
     "moreActions": "Autres actions pour {{name}}",
     "removeFromTeam": "Retirer de l'équipe",
     "training": "Entraînement",
     "trainingHint": "Entraîne une IA : le travail va à d'autres ordinateurs qui ont le modèle",
     "plain": "Non chiffré",
     "plainHint": "Le trafic vers {{name}} n’est pas chiffré, car son Toskar est plus ancien. Mettez à jour Toskar sur {{name}} pour le chiffrer.",
+    "useCode": "Vous avez un code ? Approuver avec",
+    "confirmRemoveModel": "Retirer {{model}} de {{name}} ? Il est supprimé de cet ordinateur, et pour l'y réutiliser il faudra le retélécharger.",
     "confirmRemove": "Retirer {{name}} de cette équipe ? Il ne recevra plus de travail, et le rajouter demandera une nouvelle approbation."
   },
   "deploy": {
@@ -146,7 +153,8 @@
     "deployTo_other": "Déployer sur {{count}} ordinateurs",
     "deployToName": "Déployer sur {{name}}",
     "deploy": "Déployer",
-    "downloadSize": "Taille du téléchargement ~{{size}}"
+    "downloadSize": "Taille du téléchargement ~{{size}}",
+    "modelFit": "{{model}} · {{fit}}"
   },
   "join": {
     "open": "Ajouter par commande",
@@ -200,7 +208,6 @@
     "showing": "Obtention d'un code…",
     "getApp": "Vous n'avez pas l'app ? <store>Téléchargez Toskar</store>.",
     "connected": "{{name}} est connecté.",
-    "manage": "Vous pouvez le déconnecter à tout moment dans <access>Accès API</access>.",
     "manageYours": "Vous pouvez le déconnecter à tout moment dans Réglages, sous Vos appareils.",
     "another": "Connecter un autre appareil",
     "codeLabel": "Code {{code}}",

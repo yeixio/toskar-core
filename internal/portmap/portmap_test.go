@@ -180,6 +180,49 @@ func TestUPnP(t *testing.T) {
 	}
 }
 
+// An older router takes only permanent mappings (UPnP error 725): the
+// mapping is asked again with no lease, and removed as usual (#1262).
+func TestUPnPOnlyPermanentLeases(t *testing.T) {
+	// Regression: toskar-core#1262
+	var mu sync.Mutex
+	var leases []string
+	mux := http.NewServeMux()
+	mux.HandleFunc("/desc.xml", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprint(w, `<?xml version="1.0"?><root><device><serviceList><service>
+<serviceType>urn:schemas-upnp-org:service:WANIPConnection:1</serviceType><controlURL>/ctl/IPConn</controlURL>
+</service></serviceList></device></root>`)
+	})
+	mux.HandleFunc("/ctl/IPConn", func(w http.ResponseWriter, r *http.Request) {
+		action := strings.Trim(strings.SplitN(r.Header.Get("SOAPAction"), "#", 2)[1], `"`)
+		body, _ := io.ReadAll(r.Body)
+		switch action {
+		case "AddPortMapping":
+			lease := between(string(body), "<NewLeaseDuration>", "</NewLeaseDuration>")
+			mu.Lock()
+			leases = append(leases, lease)
+			mu.Unlock()
+			if lease != "0" {
+				http.Error(w, "<errorCode>725</errorCode><errorDescription>OnlyPermanentLeasesSupported</errorDescription>", http.StatusInternalServerError)
+			}
+		case "GetExternalIPAddress":
+			fmt.Fprint(w, `<NewExternalIPAddress>192.0.2.44</NewExternalIPAddress>`)
+		}
+	})
+	fakeIGD(t, mux)
+	m, err := Router{Gateway: closedPort(t)}.Map(context.Background(), 7333, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if m.Method != MethodUPnP || m.Lifetime != Lifetime {
+		t.Fatalf("mapping: %+v", m)
+	}
+	mu.Lock()
+	defer mu.Unlock()
+	if strings.Join(leases, ",") != "1200,0" {
+		t.Fatalf("leases asked: %v", leases)
+	}
+}
+
 // fakeIGD serves mux as a UPnP gateway's description and control, found
 // by a fake SSDP responder, until the test ends.
 func fakeIGD(t *testing.T, mux *http.ServeMux) {

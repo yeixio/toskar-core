@@ -155,8 +155,10 @@ func (a *App) RunChat(ctx context.Context, profileID, conversationID, message st
 	// A profile with topic controls answers only by its own rules, so none
 	// of Toskar's own replies below, about itself, its memory, or what to
 	// install, are given in its place (#345).
+	// So does one that talks with strangers, who must not change the
+	// owner's memories or hear about their computers (#667).
 	topical := false
-	if p, err := a.Profiles.Get(ctx, profileID); err == nil && p.Topics != nil {
+	if p, err := a.Profiles.Get(ctx, profileID); err == nil && (p.Topics != nil || publicAudience(p)) {
 		topical = true
 	}
 	// A short question about what Yggdrasil can do is answered from its
@@ -519,12 +521,15 @@ func (a *App) RunChat(ctx context.Context, profileID, conversationID, message st
 			// A portal answers in its own language (#205).
 			env.responseLanguage = opts.Language
 		}
-		if facts := a.capabilityFacts(ctx, message); facts != "" {
+		// Nothing about the owner reaches a profile that talks with
+		// strangers: not their computers, guide, or memories (#667).
+		public := publicAudience(profile)
+		if facts := a.capabilityFacts(ctx, message); facts != "" && !public {
 			env.capabilities = facts
 			env.trace.sharing(locale.T(appLang, "chat:steps.capabilities", nil))
 		}
 		// A question about Yggdrasil itself is answered from its own guide.
-		if ps := guide.About(message); len(ps) > 0 {
+		if ps := guide.About(message); len(ps) > 0 && !public {
 			env.guide = guide.Block(ps)
 			var sections []string
 			for _, p := range ps {
@@ -534,7 +539,7 @@ func (a *App) RunChat(ctx context.Context, profileID, conversationID, message st
 			}
 			env.trace.sharing(locale.T(appLang, "chat:steps.guide", map[string]any{"sections": listIn(appLang, sections)}))
 		}
-		if a.memoryOn(ctx, conversationID) && (opts == nil || opts.Memory) && profile.Orchestration.Memory != "off" {
+		if a.memoryOn(ctx, conversationID) && (opts == nil || opts.Memory) && profile.Orchestration.Memory != "off" && !public {
 			if mems, err := a.Muninn.Relevant(ctx, message, memoryProject); err == nil {
 				env.memories = mems
 				env.trace.memories(mems)
@@ -807,6 +812,10 @@ func (a *App) RunChat(ctx context.Context, profileID, conversationID, message st
 		if env.ranLocally() {
 			answerMeta = withDevice(answerMeta, a.localAcceleration(ctx, env.modelID()))
 		}
+		// And which model answered on which computer (toskar-apps#447).
+		if full != "" {
+			answerMeta = a.withAnsweredBy(answerMeta, env)
+		}
 		if conversationID != "" && full != "" {
 			saveChat, _ := a.Settings.GetBool(ctx, "save_chat_history", true)
 			msgID := ""
@@ -921,6 +930,25 @@ func withDevice(meta *contracts.MessageMeta, acc *pluginapi.Acceleration) *contr
 		meta = &contracts.MessageMeta{Contract: contracts.ContractVersion}
 	}
 	meta.Backend, meta.Device = backend, device
+	return meta
+}
+
+// withAnsweredBy names the model that wrote an answer and the computer it
+// ran on, so a client can show "Llama 3.2 1B on Studio" under it
+// (toskar-apps#447). The computer is left out when the turn's steps ran on
+// more than one computer.
+func (a *App) withAnsweredBy(meta *contracts.MessageMeta, env *chatExecEnv) *contracts.MessageMeta {
+	modelID := env.modelID()
+	if modelID == "" {
+		return meta
+	}
+	if meta == nil {
+		meta = &contracts.MessageMeta{Contract: contracts.ContractVersion}
+	}
+	meta.Model = a.modelName(modelID)
+	if node, ok := env.answerNode(); ok {
+		meta.Computer = a.nodeDisplayName(node)
+	}
 	return meta
 }
 
@@ -1511,6 +1539,31 @@ func (e *chatExecEnv) ranLocally() bool {
 	return true
 }
 
+// answerNode is the one computer every step of this turn ran on, "" for
+// this one; false when steps ran on more than one.
+func (e *chatExecEnv) answerNode() (string, bool) {
+	local := ""
+	if e.app != nil && e.app.Config != nil {
+		local = e.app.Config.Get().NodeID
+	}
+	e.mu.Lock()
+	defer e.mu.Unlock()
+	nodes := map[string]bool{}
+	for _, id := range e.roleNodes {
+		if id == local {
+			id = ""
+		}
+		nodes[id] = true
+	}
+	if len(nodes) > 1 {
+		return "", false
+	}
+	for id := range nodes {
+		return id, true
+	}
+	return "", true
+}
+
 func (e *chatExecEnv) roleNode(role string) (string, bool) {
 	e.mu.Lock()
 	defer e.mu.Unlock()
@@ -1573,7 +1626,7 @@ func (e *chatExecEnv) Generate(ctx context.Context, role string, messages []plug
 }
 
 func (e *chatExecEnv) ExecuteTool(ctx context.Context, toolID string, args map[string]any) (map[string]any, error) {
-	policy := effectivePolicy(tools.PolicyForProfile(e.profile, toolID), toolID, e.trace != nil && e.trace.sawUntrusted())
+	policy := publicPolicy(e.profile, toolID, effectivePolicy(tools.PolicyForProfile(e.profile, toolID), toolID, e.trace != nil && e.trace.sawUntrusted()))
 	meta := map[string]any{}
 	if e.conversationID != "" {
 		meta["conversation_id"] = e.conversationID
@@ -1587,6 +1640,12 @@ func (e *chatExecEnv) ExecuteTool(ctx context.Context, toolID string, args map[s
 		meta["swarm_id"] = ref.SwarmID
 		meta["agent"] = ref.Label
 		meta["agent_number"] = ref.N
+	}
+	// A longer video's card says how long it will take here (#790).
+	if tools.Canonical(toolID) == "video.shots" {
+		for k, v := range e.app.shotsEstimate(args) {
+			meta[k] = v
+		}
 	}
 	ctx = artifacts.WithConversation(ctx, e.conversationID)
 	ctx = withChatProfile(ctx, e.profile.ID)
@@ -1605,6 +1664,7 @@ func (e *chatExecEnv) ExecuteTool(ctx context.Context, toolID string, args map[s
 	ctx = imagegen.WithProgress(ctx, func(p imagegen.Progress) {
 		e.Emit(events.ToolProgress, map[string]any{
 			"tool_id": toolID, "stage": p.Stage, "step": p.Step, "steps": p.Steps, "seconds_left": p.SecondsLeft,
+			"shot": p.Shot, "shots": p.Shots,
 		})
 	})
 	e.progress(events.ToolStarted, map[string]any{"tool_id": toolID, "args": args})
@@ -1904,6 +1964,13 @@ func nowLine(now time.Time, loc *time.Location) string {
 
 func (e *chatExecEnv) TurnInstructions(ctx context.Context, prompt string) string {
 	var parts []string
+	var location string
+	public := publicAudience(e.profile)
+	// A profile that talks with strangers starts with Toskar's own rules
+	// for that (#667).
+	if public {
+		parts = append(parts, publicRules)
+	}
 	// The administrator's topic rules come first, and nothing after them
 	// changes them (#345).
 	if block := topicBlock(e.profile.Topics); block != "" {
@@ -1920,7 +1987,8 @@ func (e *chatExecEnv) TurnInstructions(ctx context.Context, prompt string) strin
 	}
 	// How the person likes answers (§38): style only, never permission.
 	if e.app != nil {
-		if block := e.app.personalBlock(ctx); block != "" {
+		// Not for strangers: the owner's style and location are theirs (#667).
+		if block := e.app.personalBlock(ctx); block != "" && !public {
 			parts = append(parts, block)
 		}
 		// The language to answer in (multilingual spec §11), from the
@@ -1929,33 +1997,70 @@ func (e *chatExecEnv) TurnInstructions(ctx context.Context, prompt string) strin
 		if strings.TrimSpace(message) == "" {
 			message = prompt
 		}
+		// Where they are, only for a question about nearby places, the
+		// weather, or directions (#210). It changes from message to
+		// message, so it goes near the end, with the time.
+		if !public {
+			location = e.app.locationBlock(ctx, message)
+		}
 		parts = append(parts, e.app.replyLanguage(ctx, e.conversationID, message, e.responseLanguage).Instruction())
 	}
-	// The model has no clock: "this Friday" or "in 3 hours" needs the date
-	// and time where the person is.
 	tctx := e.ctx
 	if tctx == nil {
 		tctx = ctx
 	}
-	parts = append(parts, nowLine(e.startedAt, locale.TimeZone(tctx)))
+	// Which model is answering, so "which model are you" isn't answered
+	// with another maker's name from the model's training (#1346).
+	if line := e.modelLine(ctx); line != "" && !public {
+		parts = append(parts, line)
+	}
 	// What Yggdrasil can do comes from its own inventory (§37).
-	if e.capabilities != "" {
+	if e.capabilities != "" && !public {
 		parts = append(parts, e.capabilities)
 	}
 	// So does how to use it: the user guide ships with Yggdrasil.
-	if e.guide != "" {
+	if e.guide != "" && !public {
 		parts = append(parts, e.guide)
 	}
 	// Memories come from the person, so they are trusted instructions.
-	if block := muninn.Block(e.memories); block != "" {
+	if block := muninn.Block(e.memories); block != "" && !public {
 		parts = append(parts, block)
+	}
+	// An answer spoken aloud, in live voice mode (#795).
+	if turnopts.SpokenFrom(tctx) {
+		parts = append(parts, spokenStyle)
 	}
 	// The app calling the API holds a key to this computer, so its system
 	// messages are trusted too. They cannot change what tools may do.
 	if e.opts != nil && strings.TrimSpace(e.opts.System) != "" {
 		parts = append(parts, "Instructions from the application using the API:\n"+strings.TrimSpace(e.opts.System))
 	}
+	if location != "" {
+		parts = append(parts, location)
+	}
+	// The model has no clock: "this Friday" or "in 3 hours" needs the date
+	// and time where the person is. It goes last because it changes every
+	// minute: what comes before it stays the same from turn to turn, so the
+	// model server reuses its work on it instead of reading it all again,
+	// which a live voice turn feels (#795).
+	parts = append(parts, nowLine(e.startedAt, locale.TimeZone(tctx)))
 	return strings.Join(parts, "\n\n")
+}
+
+// modelLine tells the model its own name, such as Qwen 3.5 4B, and that it
+// runs in Toskar on the person's own computers (#1346). Empty when the
+// model isn't known yet.
+func (e *chatExecEnv) modelLine(ctx context.Context) string {
+	id := e.modelForRole("assistant")
+	if id == "" || e.app == nil || e.app.Models == nil {
+		return ""
+	}
+	name := id
+	if m, err := e.app.Models.Get(ctx, id); err == nil && strings.TrimSpace(m.DisplayName) != "" {
+		name = m.DisplayName
+	}
+	return "You are the model " + name + ", running in Toskar on the person's own computers, not on a cloud service. " +
+		"If asked which model you are or who made you, say you are " + name + ", running on their computer, and don't name another assistant or company as yourself."
 }
 
 // ReferenceMaterial returns connected knowledge for this turn. It is

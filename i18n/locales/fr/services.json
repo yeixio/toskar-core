@@ -13,8 +13,12 @@
   "connect": "Connecter",
   "optional": " (facultatif)",
   "stored": "Enregistré ({{value}}). Laissez vide pour le conserver.",
+  "example": "ex. : {{value}}",
   "save": "Enregistrer",
   "cancel": "Annuler",
   "tools": "Outils : {{tools}}",
-  "asksFirst": "{{name}} (demande d'abord)"
+  "asksFirst": "{{name}} (demande d'abord)",
+  "connectService": "Connecter {{name}}",
+  "advanced": "Avancé",
+  "doorbellAutomation": "Créer une automatisation de sonnette"
 }

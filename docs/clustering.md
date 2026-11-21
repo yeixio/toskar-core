@@ -125,7 +125,7 @@ Norn also predicts each computer's time to answer (#836): the prompt tokens alre
 
 ### Tools on other computers
 
-Image generation (`image.generate`, `image.edit`), video (`video.generate`), and speech (`speech.transcribe`, `speech.synthesize`) run on whichever paired computer can run them. A tool counts as available when this computer or any online paired one has a ready provider, so asking for an image on a laptop without image generation uses the workstation that has it.
+Image generation (`image.generate`, `image.edit`), video (`video.generate`, `video.extend`, `video.shots`), and speech (`speech.transcribe`, `speech.synthesize`) run on whichever paired computer can run them. A tool counts as available when this computer or any online paired one has a ready provider, so asking for an image on a laptop without image generation uses the workstation that has it.
 
 **Where a call runs:**
 - Placement prefers a computer whose GPU does the work. Today that is the macOS build of stable-diffusion.cpp, which uses Metal; the Linux and Windows builds run on the CPU.

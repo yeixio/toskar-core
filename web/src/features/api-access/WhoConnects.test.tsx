@@ -22,6 +22,17 @@ describe('WhoConnects (#711)', () => {
     expect(connect).toHaveBeenCalled()
   })
 
+  // Regression: toskar-core#1266
+  it("doesn't count left-over device keys as connected, and says how many there are", () => {
+    render(
+      <MemoryRouter>
+        <WhoConnects access={{ people: 1, devices: 4, stale_devices: 2, keys: 0, sign_in_service: false }} onConnectDevice={() => undefined} />
+      </MemoryRouter>,
+    )
+    expect(screen.getByText(/2 connected/)).toBeInTheDocument()
+    expect(screen.getByText(/2 not used lately/)).toBeInTheDocument()
+  })
+
   it('counts anyone who could connect, as the server does', () => {
     expect(anyoneCanConnect({ people: 0, devices: 0, keys: 0, sign_in_service: false })).toBe(false)
     expect(anyoneCanConnect({ people: 1, devices: 0, keys: 0, sign_in_service: false })).toBe(true)

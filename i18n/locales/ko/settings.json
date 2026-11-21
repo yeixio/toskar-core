@@ -69,6 +69,9 @@
     "noPreference": "선호 없음",
     "aboutYou": "나에 관한 정보",
     "aboutYouPlaceholder": "저는 서울에서 일하는 백엔드 엔지니어예요. 주요 프로젝트는 Go 서비스예요.",
+    "location": "내 위치",
+    "locationPlaceholder": "서울 마포구",
+    "locationHint": "근처 장소, 날씨, 길 찾기 질문에만 사용해요. 비워 두면 매번 장소를 말하면 돼요.",
     "instructions": "답변 방식에 관한 기타 요청",
     "instructionsPlaceholder": "코드 예시는 Go로 보여 주세요. 출처는 끝에 밝혀 주세요.",
     "save": "저장",
@@ -114,7 +117,7 @@
   },
   "advanced": {
     "title": "고급 모드",
-    "description": "모델 ID, API 세부 정보, 프로필, 로그 및 기타 고급 사용자용 제어 항목을 표시해요."
+    "description": "모델 ID, API 세부 정보, 로그 및 기타 고급 사용자용 제어 항목을 표시해요."
   },
   "discovery": {
     "title": "다른 컴퓨터 찾기",
@@ -140,6 +143,8 @@
     "description": "오래 걸리는 작업과 팀 연결 상태에 관한 알림이에요.",
     "taskFinish": "작업이 끝나면 알림",
     "peerOffline": "페어링된 컴퓨터가 오프라인이 되면 알림",
+    "newerModels": "설치된 모델의 새 버전이 나오면 알림",
+    "newerModelsHint": "새 세대마다 한 번, 관리자에게 알립니다. 직접 선택하기 전에는 아무것도 설치하거나 바꾸지 않습니다.",
     "digest": "매일 자동화 요약",
     "digestHint": "매일 모든 자동화의 결과를 한 번에 요약해 답장할 수 있는 채팅으로 보내 드립니다.",
     "digestTime": "시간"
@@ -219,6 +224,7 @@
       "notification": "알림",
       "community_ratings": "커뮤니티 평가",
       "update_check": "업데이트 확인",
+      "comfyui": "ComfyUI",
       "problem_report": "문제 보고",
       "news": "AI 뉴스",
       "link_check": "링크 확인"
@@ -233,6 +239,7 @@
       "notification": "알림",
       "community_ratings": "커뮤니티 평가",
       "update_check": "업데이트 확인",
+      "comfyui": "ComfyUI",
       "problem_report": "문제 보고",
       "news": "AI 뉴스",
       "link_check": "링크 확인"
@@ -253,7 +260,12 @@
     "delete": "지금 실행 기록 삭제",
     "confirmDelete": "지금 실행 기록을 삭제할까요? 지난 실행에서 저장된 프롬프트와 도구 결과, 그리고 이 목록이 삭제돼요. 채팅은 삭제되지 않아요.",
     "deleted": "실행 기록 {{tasks}}개, 자동화 결과 {{automations}}개, 아래 항목 {{entries}}개를 삭제했어요.",
-    "footnote": "실행 기록에는 지난 실행의 프롬프트와 도구 결과가 담겨 있어요. 채팅 보관 여부는 아래 기록 설정에 따라요. 각 자동화는 최신 결과를 보관하며, “결과가 바뀌면 알림”은 이 결과와 비교해요."
+    "footnote": "실행 기록에는 지난 실행의 프롬프트와 도구 결과가 담겨 있어요. 채팅 보관 여부는 아래 기록 설정에 따라요. 각 자동화는 최신 결과를 보관하며, “결과가 바뀌면 알림”은 이 결과와 비교해요.",
+    "details": {
+      "news": "AI 뉴스",
+      "latestVersion": "최신 버전 번호",
+      "training": "{{repo}}용 학습 예시와 지침"
+    }
   },
   "storage": {
     "folders": "데이터 디렉터리",
@@ -271,7 +283,7 @@
     "unlimited": "무제한"
   },
   "about": {
-    "tagline": "로컬 AI 제어 센터",
+    "tagline": "내 컴퓨터에서 AI를 실행합니다",
     "versionUnavailable": "버전 정보 없음",
     "build": "빌드 {{commit}}",
     "source": "해당 소스 코드",
@@ -284,7 +296,8 @@
     "download": "다운로드",
     "upToDate": "최신 상태",
     "checkUpdates": "업데이트 확인",
-    "checkUpdatesHint": "하루에 한 번 Toskar가 toskar.ai에 최신 버전 번호를 묻습니다. 그 외에는 아무것도 보내지 않습니다."
+    "checkUpdatesHint": "하루에 한 번 Toskar가 toskar.ai에 최신 버전 번호를 묻습니다. 그 외에는 아무것도 보내지 않습니다.",
+    "running": "실행 중"
   },
   "reset": {
     "title": "애플리케이션 재설정",
@@ -339,5 +352,48 @@
     "description": "답변은 출처가 제공한 페이지에만 링크합니다. Toskar는 링크된 각 사이트에 페이지가 아직 열리는지도 확인할 수 있습니다.",
     "check": "답변 속 링크 확인",
     "checkHint": "답변이 작성된 뒤 Toskar가 링크된 각 사이트에 연락하고, 열리지 않는 링크를 답변 아래에 알려 줍니다. 각 확인은 '이 컴퓨터를 떠난 것'에 기록됩니다."
+  },
+  "voice": {
+    "title": "음성",
+    "description": "Toskar가 소리 내어 읽을 때 쓰는 음성입니다. 실시간 음성 모드, 휴대폰과 차에서 읽어 주는 답변, 초인종에 쓰입니다.",
+    "unavailable": "이 컴퓨터에서는 음성 설정을 사용할 수 없습니다.",
+    "failed": "실패했습니다. 다시 시도하세요.",
+    "kitten": {
+      "name": "Kitten TTS 2 mini",
+      "description": "{{languages}}에서 고를 수 있는 자연스러운 음성을 추가하고, 기본 음성만 있던 언어는 Kitten으로 읽습니다. 이미 자연스러운 음성이 있는 언어는 아래에서 Kitten 음성을 고르지 않는 한 그대로입니다. 음성을 포함해 이 컴퓨터에 약 1.5GB를 설치하고, 프로세서에서 실행되며, 말하는 동안 약 1GB의 메모리를 사용합니다.",
+      "install": "설치",
+      "retry": "다시 시도",
+      "installing": "프로그램 설치 중…",
+      "downloading": "음성 다운로드 중…",
+      "warming": "음성 준비 중…",
+      "listening": "듣기를 준비하는 중…",
+      "remove": "제거",
+      "removeConfirm": "Kitten 제거",
+      "keep": "유지"
+    },
+    "languages": "언어별 음성",
+    "automatic": "자동",
+    "automaticNamed": "자동: {{voice}}",
+    "engine": {
+      "kitten": "Kitten",
+      "kokoro": "Kokoro",
+      "piper": "Piper"
+    },
+    "preview": "미리 듣기",
+    "previewIn": "{{language}} 음성 미리 듣기",
+    "previewFailed": "미리 듣기를 재생하지 못했습니다.",
+    "needs": {
+      "chat": "음성 모드에서 답하려면 채팅 모델이 필요합니다.",
+      "vision": "문 앞에 누가 있는지 보려면 이미지를 볼 수 있는 모델이 필요합니다.",
+      "both": "음성 모드로 답하고 현관에 누가 왔는지 보려면 대화하고 사진도 볼 수 있는 모델이 필요합니다. 모델 하나로 둘 다 됩니다.",
+      "offer": "{{name}}이(가) 이 컴퓨터에 맞습니다({{size}}).",
+      "install": "{{name}} 설치",
+      "downloading": "{{name}} 다운로드 중… {{percent}}%",
+      "ready": "{{name}}이(가) 설치되었습니다.",
+      "none": "카탈로그에 이 컴퓨터에 맞는 모델이 없습니다.",
+      "models": "모델 보기"
+    },
+    "standard": "표준",
+    "noVoice": "{{languages}}는 아직 소리 내어 읽을 수 없습니다. 소리 내어 읽기, 음성 모드, 초인종이 이 언어를 말하지 않습니다."
   }
 }

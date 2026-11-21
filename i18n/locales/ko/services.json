@@ -13,8 +13,12 @@
   "connect": "연결",
   "optional": " (선택 사항)",
   "stored": "저장됨({{value}}). 유지하려면 비워 두세요.",
+  "example": "예: {{value}}",
   "save": "저장",
   "cancel": "취소",
   "tools": "도구: {{tools}}",
-  "asksFirst": "{{name}} (먼저 물어봄)"
+  "asksFirst": "{{name}} (먼저 물어봄)",
+  "connectService": "{{name}} 연결",
+  "advanced": "고급",
+  "doorbellAutomation": "초인종 자동화 만들기"
 }

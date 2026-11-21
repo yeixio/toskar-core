@@ -1,6 +1,9 @@
 package models
 
-import "github.com/yeixio/toskar-core/pkg/contracts"
+import (
+	"github.com/yeixio/toskar-core/internal/taxonomy"
+	"github.com/yeixio/toskar-core/pkg/contracts"
+)
 
 // CatalogEntry is a model in the curated manifest.
 type CatalogEntry struct {
@@ -51,6 +54,12 @@ type CatalogEntry struct {
 	// replaces, size for size.
 	Generation string   `json:"generation,omitempty"`
 	Supersedes []string `json:"supersedes,omitempty"`
+	// License is what the model's license allows, checked by hand (#593).
+	// Every curated entry has one; a dynamic entry may not.
+	License *contracts.ModelLicense `json:"license,omitempty"`
+	// Profile is what the model does, for browsing the store (#593),
+	// checked against categories.json.
+	taxonomy.Profile
 	// Thinking "when_asked" is a model that thinks before it answers but
 	// answers first unless the turn asks it to think (#593): a long think
 	// leaves a small model's window no room for the answer. Empty leaves

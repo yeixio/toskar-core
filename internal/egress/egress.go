@@ -37,6 +37,8 @@ const (
 	LinkCheck = "link_check"
 	// ProblemReport is a problem report sent with Report this (#588).
 	ProblemReport = "problem_report"
+	// ComfyUI is a workflow run on a ComfyUI on another computer (#958).
+	ComfyUI = "comfyui"
 )
 
 // Sources of a run.

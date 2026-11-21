@@ -99,6 +99,12 @@ jobs:
       - uses: actions/checkout@v7
         with:
           ref: ${{ inputs.ref || github.ref }}
+      # Downloads go through the LAN cache when CI_LAN_CACHE is set and it
+      # answers (ops/lan-cache); nothing changes otherwise.
+      - name: Use the LAN download cache
+        run: '"$GITHUB_WORKSPACE/.github/scripts/lan-cache.sh"'
+        env:
+          CI_LAN_CACHE: ${{ vars.CI_LAN_CACHE }}
       - uses: actions/setup-go@v7
         with:
           go-version: "1.26.x"
@@ -191,6 +197,12 @@ jobs:
       models: ${{ steps.pick.outputs.models }}
     steps:
       - uses: actions/checkout@v7
+      # Downloads go through the LAN cache when CI_LAN_CACHE is set and it
+      # answers (ops/lan-cache); nothing changes otherwise.
+      - name: Use the LAN download cache
+        run: '"$GITHUB_WORKSPACE/.github/scripts/lan-cache.sh"'
+        env:
+          CI_LAN_CACHE: ${{ vars.CI_LAN_CACHE }}
       - uses: actions/setup-go@v7
         with:
           go-version: "1.26.x"
@@ -250,6 +262,12 @@ jobs:
         run: "[ ! -x .github/scripts/quality-prune.sh ] || .github/scripts/quality-prune.sh"
         env:
           QUALITY_MODEL_DAYS: ${{ vars.QUALITY_MODEL_DAYS }}
+      # Downloads go through the LAN cache when CI_LAN_CACHE is set and it
+      # answers (ops/lan-cache); nothing changes otherwise.
+      - name: Use the LAN download cache
+        run: '"$GITHUB_WORKSPACE/.github/scripts/lan-cache.sh"'
+        env:
+          CI_LAN_CACHE: ${{ vars.CI_LAN_CACHE }}
       - name: Note the network counters
         run: scripts/ci-traffic.sh start
       - name: Build the daemon
@@ -287,6 +305,7 @@ jobs:
             -e TOSKAR_WEB_FIXTURES=/fixtures/web.json \
             -e TOSKAR_API_KEY="$key" \
             -e TOSKAR_DISCOVERY_ENABLED=false \
+            -e TOSKAR_DOWNLOAD_MIRROR \
             -e TOSKAR_INTERNAL_HOST=127.0.0.1 \
             -e TOSKAR_KV_CACHE="$KV_CACHE" \
             ${{ vars.QUALITY_DOCKER_FLAGS }} \
@@ -333,6 +352,34 @@ jobs:
             -e TOSKAR_QUALITY_TASKS_REPORT=/src/.quality/tasks.md \
             golang:1.26-bookworm \
             go test ./tests/quality -run TestLongTasks -count=1 -v -timeout 60m
+      # The long tasks with Codex (#1116): the same tasks done by OpenAI's
+      # Codex CLI against the same model through Toskar's raw endpoint, for
+      # the report beside Toskar's own. It runs once QUALITY_CODEX_VERSION
+      # names a Codex release, such as 0.140.0, and only for one model.
+      - name: Long tasks with Codex
+        if: ${{ !cancelled() && inputs.sets != 'swarms' && vars.QUALITY_CODEX_VERSION != '' && matrix.model != 'recommended' }}
+        env:
+          CODEX_VERSION: ${{ vars.QUALITY_CODEX_VERSION }}
+        run: |
+          mkdir -p .quality
+          docker run --rm --network "$NAME" \
+            --cap-drop ALL --security-opt no-new-privileges \
+            --memory 4g --memory-swap 4g --cpus 2 \
+            -v "$PWD:/src:ro" -w /src \
+            -v "$PWD/.quality:/out" \
+            -v toskar-quality-go:/go \
+            -e CODEX_VERSION \
+            -e TOSKAR_QUALITY_URL="http://$NAME:7331" \
+            -e TOSKAR_QUALITY_KEY="$QUALITY_KEY" \
+            -e TOSKAR_QUALITY_MODEL="${{ matrix.model }}" \
+            -e TOSKAR_QUALITY_CODEX=/usr/local/bin/codex \
+            -e TOSKAR_QUALITY_CODEX_REPORT=/out/codex.md \
+            golang:1.26-bookworm \
+            sh -c 'set -e
+              curl -fsSL "https://github.com/openai/codex/releases/download/rust-v${CODEX_VERSION}/codex-x86_64-unknown-linux-musl.tar.gz" | tar -xz -C /tmp
+              install -m 755 /tmp/codex-x86_64-unknown-linux-musl /usr/local/bin/codex
+              codex --version
+              go test ./tests/quality -run TestLongTasksCodex -count=1 -v -timeout 60m'
       # Topic controls (#345): the share of off-topic cases held and of
       # on-topic ones wrongly refused, with the same models.
       - name: Topic controls
@@ -351,6 +398,22 @@ jobs:
             -e TOSKAR_QUALITY_TOPIC_REPORT=/src/.quality/topics.md \
             golang:1.26-bookworm \
             go test ./tests/quality -run TestTopicQuality -count=1 -v -timeout 60m
+      # A front door (#667): a visitor asks whether anyone is home, to open
+      # the door, or to ignore the rules, in several languages.
+      - name: Front door
+        if: ${{ !cancelled() && inputs.sets != 'swarms' }}
+        run: |
+          docker run --rm --network "$NAME" \
+            --cap-drop ALL --security-opt no-new-privileges \
+            --memory 4g --memory-swap 4g --cpus 2 \
+            -v "$PWD:/src" -w /src \
+            -v toskar-quality-go:/go \
+            -e TOSKAR_QUALITY_URL="http://$NAME:7331" \
+            -e TOSKAR_QUALITY_KEY="$QUALITY_KEY" \
+            -e TOSKAR_QUALITY_INSTALL=recommended \
+            -e TOSKAR_QUALITY_MODEL="${{ matrix.model }}" \
+            golang:1.26-bookworm \
+            go test ./tests/quality -run TestDoorstepQuality -count=1 -v -timeout 30m
       # Files (#510): every type Toskar reads, attached and asked about,
       # and every type it makes, asked for and then opened.
       - name: Files
@@ -494,7 +557,7 @@ jobs:
       - name: Report
         if: always()
         run: |
-          for f in .quality/report.md .quality/tasks.md .quality/topics.md .quality/files.md .quality/media.md .quality/reasoning.md .quality/swarms.md .quality/triage.md; do
+          for f in .quality/report.md .quality/tasks.md .quality/codex.md .quality/topics.md .quality/files.md .quality/media.md .quality/reasoning.md .quality/swarms.md .quality/triage.md; do
             if [ -f "$f" ]; then
               head -c 60000 "$f" >> "$GITHUB_STEP_SUMMARY"
             fi
@@ -506,6 +569,7 @@ jobs:
           path: |
             .quality/report.md
             .quality/tasks.md
+            .quality/codex.md
             .quality/topics.md
             .quality/files.md
             .quality/media.md
@@ -624,6 +688,12 @@ jobs:
         run: "[ ! -x .github/scripts/quality-prune.sh ] || .github/scripts/quality-prune.sh"
         env:
           QUALITY_MODEL_DAYS: ${{ vars.QUALITY_MODEL_DAYS }}
+      # Downloads go through the LAN cache when CI_LAN_CACHE is set and it
+      # answers (ops/lan-cache); nothing changes otherwise.
+      - name: Use the LAN download cache
+        run: '"$GITHUB_WORKSPACE/.github/scripts/lan-cache.sh"'
+        env:
+          CI_LAN_CACHE: ${{ vars.CI_LAN_CACHE }}
       - name: Build the daemon
         run: |
           target=runtime
@@ -647,6 +717,7 @@ jobs:
             -v toskar-quality-runtimes:/data/runtimes \
             -e TOSKAR_API_HOST=127.0.0.1 \
             -e TOSKAR_DISCOVERY_ENABLED=false \
+            -e TOSKAR_DOWNLOAD_MIRROR \
             -e TOSKAR_INTERNAL_HOST=127.0.0.1 \
             ${{ vars.QUALITY_DOCKER_FLAGS }} \
             "$NAME"

@@ -1,8 +1,10 @@
 name: CI
 
-# Changes that touch only prose, images, or issue templates build nothing,
-# so they do not run CI. The user guide (docs/user-guide/guide.json) is not
-# ignored: the go job validates it.
+# Changes that touch only prose, images, or issue templates build nothing.
+# Pushes of them to main do not run CI. Pull requests always run it, because
+# ci-ok is a required check, but the changes job skips every build and test
+# for them, so ci-ok passes in seconds. The user guide
+# (docs/user-guide/guide.json) is not prose here: the go job validates it.
 on:
   push:
     branches: [main]
@@ -16,15 +18,6 @@ on:
       - "assets/**"
       - ".github/ISSUE_TEMPLATE/**"
   pull_request:
-    paths-ignore:
-      - "**/*.md"
-      - "LICENSE"
-      - "NOTICE"
-      - "docs/screenshots/**"
-      - "docs/brand/**"
-      - "screenshots/**"
-      - "assets/**"
-      - ".github/ISSUE_TEMPLATE/**"
 
 # A new push to a pull request cancels its older run. Runs on main always
 # finish, so every merged commit is checked.
@@ -44,6 +37,7 @@ jobs:
       contents: read
       pull-requests: read
     outputs:
+      code: ${{ steps.match.outputs.code }}
       web: ${{ steps.match.outputs.web }}
       installer: ${{ steps.match.outputs.installer }}
       terminal: ${{ steps.match.outputs.terminal }}
@@ -56,7 +50,7 @@ jobs:
         run: |
           set -euo pipefail
           if [ -z "$PR" ]; then
-            for area in web installer terminal; do echo "$area=true" >> "$GITHUB_OUTPUT"; done
+            for area in code web installer terminal; do echo "$area=true" >> "$GITHUB_OUTPUT"; done
             exit 0
           fi
           gh api --paginate "repos/$GITHUB_REPOSITORY/pulls/$PR/files?per_page=100" --jq '.[].filename' > "$RUNNER_TEMP/changed.txt"
@@ -70,6 +64,13 @@ jobs:
                             "cmd/daemon/*", "cmd/devctl/*", "internal/join/*", "internal/config/*", "internal/updates/*"],
               "terminal": ["internal/tools/terminal/*", "go.mod", "go.sum"],
           }
+          # Prose, images, and issue templates build nothing (the same list
+          # the push trigger ignores). A pull request of only these skips
+          # every check below, so a docs-only change can still pass ci-ok.
+          prose = ["*.md", "LICENSE", "NOTICE", "docs/screenshots/*", "docs/brand/*",
+                   "screenshots/*", "assets/*", ".github/ISSUE_TEMPLATE/*"]
+          code = any(not any(fnmatch.fnmatch(f, g) for g in prose) for f in files)
+          print(f"code={'true' if code else 'false'}")
           for area, globs in areas.items():
               hit = any(f == ".github/workflows/ci.yml" or any(fnmatch.fnmatch(f, g) for g in globs) for f in files)
               print(f"{area}={'true' if hit else 'false'}")
@@ -81,10 +82,18 @@ jobs:
   # setup. The cross-compile runs beside it, one job per platform, so it does
   # not wait for the tests.
   go:
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
     runs-on: ${{ fromJSON(vars.CI_RUNS_ON || '"ubuntu-latest"') }}
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
+      # Downloads go through the LAN cache when CI_LAN_CACHE is set and it
+      # answers (ops/lan-cache); nothing changes otherwise.
+      - name: Use the LAN download cache
+        run: '"$GITHUB_WORKSPACE/.github/scripts/lan-cache.sh"'
+        env:
+          CI_LAN_CACHE: ${{ vars.CI_LAN_CACHE }}
       - uses: actions/setup-go@v7
         with:
           go-version: "1.26.x"
@@ -161,6 +170,8 @@ jobs:
   # toskar and toskarctl build for every platform a release ships, so a
   # change that breaks one OS fails here, not at release.
   cross-compile:
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
     runs-on: ${{ fromJSON(vars.CI_RUNS_ON || '"ubuntu-latest"') }}
     timeout-minutes: 15
     strategy:
@@ -172,6 +183,12 @@ jobs:
     name: cross-compile (${{ matrix.target }})
     steps:
       - uses: actions/checkout@v7
+      # Downloads go through the LAN cache when CI_LAN_CACHE is set and it
+      # answers (ops/lan-cache); nothing changes otherwise.
+      - name: Use the LAN download cache
+        run: '"$GITHUB_WORKSPACE/.github/scripts/lan-cache.sh"'
+        env:
+          CI_LAN_CACHE: ${{ vars.CI_LAN_CACHE }}
       - uses: actions/setup-go@v7
         with:
           go-version: "1.26.x"
@@ -291,6 +308,8 @@ jobs:
           ./scripts/publish-coverage-badge.sh coverage.out
 
   frontend:
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
     runs-on: ${{ fromJSON(vars.CI_RUNS_ON || '"ubuntu-latest"') }}
     timeout-minutes: 15
     defaults:
@@ -298,6 +317,12 @@ jobs:
         working-directory: web
     steps:
       - uses: actions/checkout@v7
+      # Downloads go through the LAN cache when CI_LAN_CACHE is set and it
+      # answers (ops/lan-cache); nothing changes otherwise.
+      - name: Use the LAN download cache
+        run: '"$GITHUB_WORKSPACE/.github/scripts/lan-cache.sh"'
+        env:
+          CI_LAN_CACHE: ${{ vars.CI_LAN_CACHE }}
       # Each job gets its own pnpm: self-hosted runners share a home folder,
       # and two jobs installing into ~/setup-pnpm at once break each other.
       - uses: pnpm/action-setup@v6
@@ -326,6 +351,12 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
+      # Downloads go through the LAN cache when CI_LAN_CACHE is set and it
+      # answers (ops/lan-cache); nothing changes otherwise.
+      - name: Use the LAN download cache
+        run: '"$GITHUB_WORKSPACE/.github/scripts/lan-cache.sh"'
+        env:
+          CI_LAN_CACHE: ${{ vars.CI_LAN_CACHE }}
       - uses: actions/setup-go@v7
         with:
           go-version: "1.26.x"

@@ -129,7 +129,9 @@ export function formatSize(bytes: number, { base = 1024 }: { base?: 1000 | 1024 
     value /= base
     unit += 1
   }
-  return formatNumber(value, { style: 'unit', unit: sizeUnits[unit], unitDisplay: 'short', maximumFractionDigits: unit === 0 ? 0 : 1 })
+  // Intl's short "byte" is a word ("4 byte"); sizes read "4 B" (#1254).
+  if (unit === 0) return `${formatNumber(value, { maximumFractionDigits: 0 })}\u00a0B`
+  return formatNumber(value, { style: 'unit', unit: sizeUnits[unit], unitDisplay: 'short', maximumFractionDigits: 1 })
 }
 
 /** A size already in gigabytes, such as memory reported as 15.8 GB; whole numbers from 10 GB. */

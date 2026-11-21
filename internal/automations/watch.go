@@ -9,6 +9,7 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
+	"slices"
 	"strings"
 	"time"
 )
@@ -101,12 +102,19 @@ func (t *Trigger) Validate() error {
 			return errors.New("an after trigger's when is succeeded or notified")
 		}
 	case TriggerDevice:
-		if t.Connector != "homeassistant" {
+		switch t.Connector {
+		case "homeassistant":
+			domain, name, ok := strings.Cut(t.Device, ".")
+			if !ok || domain == "" || name == "" || strings.ContainsAny(t.Device, "/?# ") {
+				return errors.New("a Home Assistant device is an entity such as binary_sensor.front_door_visitor")
+			}
+		case "reolink":
+			// What a Reolink camera detects (#667).
+			if !slices.Contains([]string{"person", "vehicle", "animal", "motion", "doorbell"}, t.Device) {
+				return errors.New("a Reolink camera's device is person, vehicle, animal, motion, or doorbell")
+			}
+		default:
 			return fmt.Errorf("unsupported device connector %q", t.Connector)
-		}
-		domain, name, ok := strings.Cut(t.Device, ".")
-		if !ok || domain == "" || name == "" || strings.ContainsAny(t.Device, "/?# ") {
-			return errors.New("a Home Assistant device is an entity such as binary_sensor.front_door_visitor")
 		}
 		if t.Cooldown < 0 || t.Cooldown > MaxDeviceCooldown {
 			return fmt.Errorf("a device trigger's cooldown is 0 to %d seconds", MaxDeviceCooldown)

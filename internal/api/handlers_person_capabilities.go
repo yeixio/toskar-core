@@ -28,6 +28,8 @@ func (s *Server) personCapabilityRoutes(api *mux.Router) {
 var routeCapability = map[string]auth.Capability{
 	"POST /api/v1/speech/transcribe":              auth.CapVoice,
 	"POST /api/v1/speech":                         auth.CapVoice,
+	"POST /api/v1/speech/say":                     auth.CapVoice,
+	"GET /api/v1/voice/realtime":                  auth.CapVoice,
 	"POST /api/v1/automations":                    auth.CapAutomations,
 	"POST /api/v1/automations/preview":            auth.CapAutomations,
 	"POST /api/v1/automations/parse":              auth.CapAutomations,
@@ -37,6 +39,7 @@ var routeCapability = map[string]auth.Capability{
 	"POST /api/v1/knowledge/sources/{id}/refresh": auth.CapKnowledgeAdd,
 	"POST /api/v1/knowledge/search":               auth.CapKnowledge,
 	"GET /api/v1/remote-access/route":             auth.CapRemoteAccess,
+	"GET /api/v1/remote-access/device-token":      auth.CapRemoteAccess,
 }
 
 // capabilitiesOf is what person may use; everything when people aren't

@@ -66,7 +66,7 @@
       "label": "Base de données locale"
     },
     "bifrost": {
-      "label": "Réseau Bifrost",
+      "label": "Réseau d'ordinateurs",
       "offline_one": "{{count}} ordinateur hors ligne",
       "offline_many": "{{count}} ordinateurs hors ligne",
       "offline_other": "{{count}} ordinateurs hors ligne",
@@ -184,7 +184,7 @@
     "services_one": "{{count}} service connecté",
     "services_many": "{{count}} services connectés",
     "services_other": "{{count}} services connectés",
-    "providers": "{{healthy}} fournisseurs sur {{total}} prêts",
+    "providers": "{{healthy}} sur {{total}} moteurs de modèles et serveurs d'outils prêts",
     "files_one": "{{count}} fichier ({{size}})",
     "files_many": "{{count}} fichiers ({{size}})",
     "files_other": "{{count}} fichiers ({{size}})"
@@ -199,6 +199,7 @@
       "image.generate": "Créer des images",
       "image.edit": "Modifier des images",
       "video.generate": "Créer des vidéos",
+      "video.extend": "Prolonger des vidéos",
       "speech.transcribe": "Transcrire",
       "speech.synthesize": "Lire à voix haute"
     },
@@ -217,7 +218,7 @@
     "title": "Mémoire de Toskar",
     "description": "La mémoire qu'utilise Toskar lui-même, et ses tâches de fond. Les deux devraient se stabiliser au bout d'un moment ; une hausse régulière pendant des heures mérite d'être signalée.",
     "heap": "Mémoire utilisée",
-    "tasks": "Tâches de fond",
+    "tasks": "Tâches en cours dans Toskar",
     "since": "En marche depuis",
     "chartLabel_one": "Mémoire sur la dernière heure",
     "chartLabel_many": "Mémoire sur les {{count}} dernières heures",

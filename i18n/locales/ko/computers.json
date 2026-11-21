@@ -38,7 +38,8 @@
     "action": "작업을 완료할 수 없어요",
     "network": "두 컴퓨터 모두에서 Toskar의 로컬 네트워크/방화벽 접근을 허용하고, 아래 네트워크 및 액세스에서 다른 컴퓨터 찾기를 켜 두세요.",
     "generic": "문제가 발생했어요",
-    "claimFailed": "해당 코드의 페어링 요청을 불러올 수 없어요"
+    "claimFailed": "해당 코드의 페어링 요청을 불러올 수 없어요",
+    "dismiss": "닫기"
   },
   "pairing": {
     "waiting": "승인 대기 중",
@@ -47,7 +48,11 @@
     "code": "코드: <code>{{code}}</code>",
     "incoming": "들어온 요청",
     "offerCode": "코드 <code>{{code}}</code>",
-    "approve": "승인"
+    "approve": "승인",
+    "noAnswer": "아직 응답이 없습니다",
+    "noAnswerHint": "{{name}}에서 요청을 승인하지 않았습니다. 그 컴퓨터에서 Toskar가 열려 있는지 확인한 다음 팀에 추가를 다시 시도하세요.",
+    "cancel": "기다리지 않기",
+    "close": "닫기"
   },
   "nearby": {
     "title": "추가 가능",
@@ -110,13 +115,15 @@
     "approving": "승인하는 중…",
     "approveCode": "코드로 승인",
     "hideDetails": "세부 정보 숨기기",
-    "manage": "관리",
+    "manage": "세부 정보",
     "moreActions": "{{name}}에 대한 추가 작업",
     "removeFromTeam": "팀에서 제거",
     "training": "학습 중",
     "trainingHint": "AI를 학습 중이라 모델이 있는 다른 컴퓨터로 작업을 보냅니다",
     "plain": "암호화 안 됨",
     "plainHint": "{{name}}의 Toskar가 이전 버전이라 이 통신은 암호화되지 않아요. 암호화하려면 {{name}}의 Toskar를 업데이트하세요.",
+    "useCode": "코드가 있나요? 코드로 승인",
+    "confirmRemoveModel": "{{name}}에서 {{model}}을(를) 삭제할까요? 그 컴퓨터에서 지워지고, 다시 쓰려면 다시 내려받아야 해요.",
     "confirmRemove": "{{name}}을(를) 이 팀에서 뺄까요? 더 이상 작업을 받지 않고, 다시 추가하려면 새로 승인해야 해요."
   },
   "deploy": {
@@ -138,7 +145,8 @@
     "deployTo_other": "컴퓨터 {{count}}대에 배포",
     "deployToName": "{{name}}에 배포",
     "deploy": "배포",
-    "downloadSize": "다운로드 크기 약 {{size}}"
+    "downloadSize": "다운로드 크기 약 {{size}}",
+    "modelFit": "{{model}} · {{fit}}"
   },
   "join": {
     "open": "명령으로 추가",
@@ -190,7 +198,6 @@
     "showing": "코드를 받는 중…",
     "getApp": "앱이 없나요? <store>Toskar 받기</store>.",
     "connected": "{{name}}이(가) 연결되었어요.",
-    "manage": "<access>API 액세스</access>에서 언제든지 연결을 해제할 수 있어요.",
     "manageYours": "설정의 내 기기에서 언제든 연결을 해제할 수 있어요.",
     "another": "다른 기기 연결",
     "codeLabel": "코드 {{code}}",

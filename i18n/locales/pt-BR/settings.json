@@ -69,6 +69,9 @@
     "noPreference": "Sem preferência",
     "aboutYou": "Sobre você",
     "aboutYouPlaceholder": "Sou engenheiro de back-end em Curitiba. Meu projeto principal é um serviço em Go.",
+    "location": "Sua localização",
+    "locationPlaceholder": "Curitiba, PR",
+    "locationHint": "Usada só em perguntas sobre lugares próximos, previsão do tempo e rotas. Deixe em branco para informar um lugar a cada vez.",
     "instructions": "Mais alguma coisa sobre como responder",
     "instructionsPlaceholder": "Mostre exemplos de código em Go. Cite as fontes no final.",
     "save": "Salvar",
@@ -118,7 +121,7 @@
   },
   "advanced": {
     "title": "Modo avançado",
-    "description": "Mostrar IDs de modelos, detalhes da API, Perfis, logs e outros controles para usuários avançados."
+    "description": "Mostrar IDs de modelos, detalhes da API, logs e outros controles para usuários avançados."
   },
   "discovery": {
     "title": "Encontrar outros computadores",
@@ -144,6 +147,8 @@
     "description": "Alertas sobre trabalhos demorados e a conectividade da equipe.",
     "taskFinish": "Notificar quando tarefas terminarem",
     "peerOffline": "Notificar quando um computador pareado ficar offline",
+    "newerModels": "Avisar quando sair uma versão mais nova de um modelo instalado",
+    "newerModelsHint": "Uma vez por nova geração, para Admins. Nada é instalado ou trocado até você escolher.",
     "digest": "Resumo diário das automações",
     "digestHint": "Um resumo dos resultados de todas as automações por dia, em um chat que você pode responder.",
     "digestTime": "Horário"
@@ -233,6 +238,7 @@
       "notification": "Notificação",
       "community_ratings": "Avaliações da comunidade",
       "update_check": "Verificação de atualizações",
+      "comfyui": "ComfyUI",
       "problem_report": "Relatório de problema",
       "news": "Notícias de IA",
       "link_check": "Verificação de link"
@@ -247,6 +253,7 @@
       "notification": "notificação",
       "community_ratings": "avaliações da comunidade",
       "update_check": "verificação de atualizações",
+      "comfyui": "ComfyUI",
       "problem_report": "relatório de problema",
       "news": "notícias de IA",
       "link_check": "verificação de link"
@@ -269,7 +276,12 @@
     "delete": "Apagar registros de execução agora",
     "confirmDelete": "Apagar os registros de execução agora? Isso remove os prompts e resultados de ferramentas armazenados de execuções anteriores, além desta lista. Os chats não são apagados.",
     "deleted": "Foram apagados {{tasks}} registros de execução, {{automations}} resultados de automações e {{entries}} entradas abaixo.",
-    "footnote": "Os registros de execução guardam prompts e resultados de ferramentas de execuções anteriores. Os chats são mantidos ou não conforme o Histórico abaixo. Cada automação guarda seu resultado mais recente, que é usado como comparação em “notificar quando o resultado mudar”."
+    "footnote": "Os registros de execução guardam prompts e resultados de ferramentas de execuções anteriores. Os chats são mantidos ou não conforme o Histórico abaixo. Cada automação guarda seu resultado mais recente, que é usado como comparação em “notificar quando o resultado mudar”.",
+    "details": {
+      "news": "as notícias de IA",
+      "latestVersion": "o número da versão mais recente",
+      "training": "exemplos de treinamento e instruções para {{repo}}"
+    }
   },
   "storage": {
     "folders": "Pastas de dados",
@@ -287,7 +299,7 @@
     "unlimited": "Ilimitado"
   },
   "about": {
-    "tagline": "Painel de controle de IA local",
+    "tagline": "Roda IA nos seus próprios computadores",
     "versionUnavailable": "Versão indisponível",
     "build": "Build {{commit}}",
     "source": "Código-fonte correspondente",
@@ -300,7 +312,8 @@
     "download": "Baixar",
     "upToDate": "Atualizado",
     "checkUpdates": "Verificar atualizações",
-    "checkUpdatesHint": "Uma vez por dia, o Toskar pergunta ao toskar.ai o número da versão mais recente. Nada mais é enviado."
+    "checkUpdatesHint": "Uma vez por dia, o Toskar pergunta ao toskar.ai o número da versão mais recente. Nada mais é enviado.",
+    "running": "Em execução"
   },
   "reset": {
     "title": "Redefinir aplicativo",
@@ -357,5 +370,48 @@
     "description": "As respostas só têm links para páginas que suas fontes deram. O Toskar também pode perguntar a cada site com link se a página ainda abre.",
     "check": "Verificar links nas respostas",
     "checkHint": "Depois de uma resposta, o Toskar contata cada site com link e indica abaixo da resposta os links que não abrem. Cada verificação aparece em O que saiu deste computador."
+  },
+  "voice": {
+    "title": "Voz",
+    "description": "As vozes com que o Toskar lê em voz alta: o modo de voz ao vivo, as respostas lidas no celular e no carro, e a campainha.",
+    "unavailable": "As configurações de voz não estão disponíveis neste computador.",
+    "failed": "Não deu certo. Tente de novo.",
+    "kitten": {
+      "name": "Kitten TTS 2 mini",
+      "description": "Adiciona vozes naturais para escolher em {{languages}} e lê com o Kitten os idiomas que tinham só uma voz básica. Idiomas que já têm uma voz natural a mantêm, a menos que você escolha uma voz Kitten abaixo. Instala cerca de 1,5 GB neste computador, incluindo as vozes, roda no processador e usa cerca de 1 GB de memória enquanto fala.",
+      "install": "Instalar",
+      "retry": "Tentar de novo",
+      "installing": "Instalando o programa…",
+      "downloading": "Baixando as vozes…",
+      "warming": "Preparando as vozes…",
+      "listening": "Preparando a escuta…",
+      "remove": "Remover",
+      "removeConfirm": "Remover Kitten",
+      "keep": "Manter"
+    },
+    "languages": "Voz para cada idioma",
+    "automatic": "Automática",
+    "automaticNamed": "Automática: {{voice}}",
+    "engine": {
+      "kitten": "Kitten",
+      "kokoro": "Kokoro",
+      "piper": "Piper"
+    },
+    "preview": "Ouvir",
+    "previewIn": "Ouvir a voz em {{language}}",
+    "previewFailed": "Não foi possível tocar a amostra.",
+    "needs": {
+      "chat": "Para responder no modo de voz, o Toskar precisa de um modelo de chat.",
+      "vision": "Para ver quem está na porta, o Toskar precisa de um modelo que veja imagens.",
+      "both": "Para responder no modo de voz e ver quem está na porta, o Toskar precisa de um modelo que converse e veja imagens. Um só modelo faz as duas coisas.",
+      "offer": "{{name}} cabe neste computador ({{size}}).",
+      "install": "Instalar {{name}}",
+      "downloading": "Baixando {{name}}… {{percent}}%",
+      "ready": "{{name}} está instalado.",
+      "none": "Nenhum do catálogo cabe neste computador.",
+      "models": "Ver modelos"
+    },
+    "standard": "Padrão",
+    "noVoice": "{{languages}} ainda não pode ser lido em voz alta: a leitura em voz alta, o modo de voz e a campainha não falam esse idioma."
   }
 }

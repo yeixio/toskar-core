@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { describe, expect, it, vi } from 'vitest'
 import { api } from '@/lib/api'
@@ -56,5 +56,26 @@ describe('SettingsPage when its settings can’t be read (#217)', () => {
     expect(screen.getAllByRole('button', { name: 'Try again' }).length).toBeGreaterThan(0)
     expect(screen.queryByRole('heading', { name: 'Default profile' })).not.toBeInTheDocument()
     expect(screen.queryByText(/so they're for Admins and the Owner/)).not.toBeInTheDocument()
+  })
+})
+
+describe('SettingsPage QA regressions', () => {
+  // Regression: toskar-core#1270
+  it('Appearance marks the choice made, at once', async () => {
+    vi.mocked(api.getMe).mockResolvedValue({
+      person: { id: 'sam', name: 'Sam', username: 'sam', role: 'member', created_at: '', sign_in: true },
+      via: 'session',
+    })
+    render(
+      <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
+        <MemoryRouter initialEntries={['/settings']}>
+          <SettingsPage />
+        </MemoryRouter>
+      </QueryClientProvider>,
+    )
+    const light = await screen.findByRole('button', { name: 'Light' })
+    fireEvent.click(light)
+    expect(light).toHaveAttribute('aria-pressed', 'true')
+    expect(screen.getByRole('button', { name: 'Dark' })).toHaveAttribute('aria-pressed', 'false')
   })
 })

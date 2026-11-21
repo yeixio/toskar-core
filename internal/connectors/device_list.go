@@ -41,6 +41,30 @@ var haKinds = map[string]string{
 // Devices are the connected services' devices, sorted by kind and name.
 // A service that isn't connected has none.
 func (m *Manager) Devices(ctx context.Context) ([]Device, error) {
+	out, err := m.haDevices(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if s, err := m.service("reolink"); err == nil {
+		if cred, err := m.credential("reolink"); err == nil {
+			cams, err := reolinkDeviceList(ctx, m.client, cred)
+			if err != nil {
+				return nil, sanitizeErr(err, secretsOnly(s, cred))
+			}
+			out = append(out, cams...)
+		}
+	}
+	sort.Slice(out, func(i, j int) bool {
+		if out[i].Kind != out[j].Kind {
+			return out[i].Kind < out[j].Kind
+		}
+		return strings.ToLower(out[i].Name) < strings.ToLower(out[j].Name)
+	})
+	return out, nil
+}
+
+// haDevices are Home Assistant's devices, when it's connected.
+func (m *Manager) haDevices(ctx context.Context) ([]Device, error) {
 	out := []Device{}
 	s, err := m.service("homeassistant")
 	if err != nil {

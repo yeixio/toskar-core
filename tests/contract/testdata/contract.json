@@ -1,5 +1,5 @@
 {
-  "version": "1.98",
+  "version": "1.117",
   "types": {
     "ActivityStep": [
       "kind",
@@ -163,12 +163,14 @@
       "automation",
       "automation_run",
       "backend",
+      "computer",
       "context",
       "contract",
       "deliberation",
       "device",
       "files",
       "link_check",
+      "model",
       "notice",
       "reasoning",
       "run_id",

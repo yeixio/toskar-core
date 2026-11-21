@@ -21,6 +21,7 @@ import (
 	"github.com/yeixio/toskar-core/internal/auth"
 	"github.com/yeixio/toskar-core/internal/automations"
 	"github.com/yeixio/toskar-core/internal/cache"
+	"github.com/yeixio/toskar-core/internal/comfyui"
 	"github.com/yeixio/toskar-core/internal/connectors"
 	"github.com/yeixio/toskar-core/internal/diagnostics"
 	"github.com/yeixio/toskar-core/internal/egress"
@@ -111,29 +112,34 @@ var specTypes = map[string]any{
 	"GenerationMetrics":    contracts.GenerationMetrics{},
 
 	// Models and runtimes.
-	"Model":              contracts.Model{},
-	"Recommendation":     contracts.Recommendation{},
-	"ModelsFit":          contracts.ModelsFitResponse{},
-	"ModelFit":           contracts.ModelFit{},
-	"CategoryWinner":     contracts.CategoryWinner{},
-	"BrowseModel":        contracts.BrowseModel{},
-	"RunningModelView":   contracts.RunningModelView{},
-	"URLPreview":         models.URLPreview{},
-	"FoundModel":         models.FoundModel{},
-	"FoundModels":        foundModels{},
-	"ImportedModel":      importedModel{},
-	"ModelFileDetails":   modelFileDetails{},
-	"ModelInstall":       modelInstall{},
-	"AddedModel":         addedModelView{},
-	"ModelVision":        modelVision{},
-	"ModelPlacement":     modelPlacement{},
-	"ModelRating":        ratings.View{},
-	"RatingStats":        ratings.Stats{},
-	"RatingObservations": ratings.Observations{},
-	"CommunityRatings":   ratings.Community{},
-	"RuntimeInfo":        runtimes.RuntimeInfo{},
-	"RuntimeInstall":     runtimeInstall{},
-	"OK":                 okView{},
+	"Model":               contracts.Model{},
+	"Recommendation":      contracts.Recommendation{},
+	"ModelsFit":           contracts.ModelsFitResponse{},
+	"ModelFit":            contracts.ModelFit{},
+	"CategoryWinner":      contracts.CategoryWinner{},
+	"BrowseModel":         contracts.BrowseModel{},
+	"RunningModelView":    contracts.RunningModelView{},
+	"URLPreview":          models.URLPreview{},
+	"FoundModel":          models.FoundModel{},
+	"FoundModels":         foundModels{},
+	"ImportedModel":       importedModel{},
+	"ModelFileDetails":    modelFileDetails{},
+	"ModelInstall":        modelInstall{},
+	"AddedModel":          addedModelView{},
+	"ModelVision":         modelVision{},
+	"ModelPlacement":      modelPlacement{},
+	"ModelRating":         ratings.View{},
+	"RatingStats":         ratings.Stats{},
+	"RatingObservations":  ratings.Observations{},
+	"CommunityRatings":    ratings.Community{},
+	"RuntimeInfo":         runtimes.RuntimeInfo{},
+	"RuntimeInstall":      runtimeInstall{},
+	"OK":                  okView{},
+	"ComfyUIStatus":       ComfyUIStatus{},
+	"ComfyUIInfo":         comfyui.Info{},
+	"ComfyWorkflowInput":  comfyui.Input{},
+	"ComfyWorkflowInputs": comfyui.Inputs{},
+	"ComfyWorkflow":       ComfyWorkflow{},
 
 	// Automations, tasks, knowledge, and training.
 	"Automation":             automations.Automation{},
@@ -161,6 +167,7 @@ var specTypes = map[string]any{
 	"JoinTokenCreated":   JoinTokenCreated{},
 	"PairingSession":     auth.PairingSession{},
 	"TLSInfo":            APITLS{},
+	"NextTLSInfo":        nextTLSView{},
 	"Portal":             portals.Portal{},
 	"PortalConversation": portals.Conversation{},
 	"PortalMessage":      portals.Message{},

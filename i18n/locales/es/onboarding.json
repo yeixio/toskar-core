@@ -14,7 +14,15 @@
     "memory": "Memoria",
     "graphics": "Gráficos",
     "system": "Sistema",
-    "unavailable": "Los detalles del hardware aparecerán cuando Toskar haya iniciado. Puedes continuar con la configuración ahora."
+    "unavailable": "Los detalles del hardware aparecerán cuando Toskar haya iniciado. Puedes continuar con la configuración ahora.",
+    "os": {
+      "macAppleSilicon": "macOS, Apple silicon",
+      "macIntel": "macOS, Intel",
+      "windows": "Windows",
+      "windowsArm": "Windows en Arm",
+      "linux": "Linux",
+      "linuxArm": "Linux en Arm"
+    }
   },
   "question": "¿Qué te gustaría que hiciera tu IA?",
   "purposes": {
@@ -37,6 +45,7 @@
   },
   "continue": "Continuar",
   "finding": "Buscando una configuración…",
+  "findingDetail": "Comprobando la memoria y la gráfica de esta computadora, y los modelos que encajan…",
   "recommendFailed": "No se pudo obtener una recomendación.",
   "recommend": {
     "badge": "Recomendado",
@@ -49,7 +58,8 @@
     "install": "Instalar la configuración recomendada",
     "use": "Usar esta configuración",
     "skip": "Omitir por ahora",
-    "back": "Atrás"
+    "back": "Atrás",
+    "fits": "{{name}} cabe en los {{memory}} de memoria de este equipo."
   },
   "roles": {
     "coordinator": "Coordinador",
@@ -76,5 +86,6 @@
     "title": "Todo listo",
     "description": "Tu configuración recomendada está instalada. Empieza a chatear con tu IA local.",
     "start": "Empezar a chatear"
-  }
+  },
+  "setupLater": "Configurar más tarde"
 }

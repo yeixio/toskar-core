@@ -7,36 +7,13 @@ import { EmptyState } from '@/components/ui/EmptyState'
 import { ShownError, shownError } from '@/components/ui/ShownError'
 import { Toggle } from '@/components/ui/Toggle'
 import { api } from '@/lib/api'
-import { blankProfileTemplate, profileTemplateFromPurpose } from '@/lib/profilePresets'
+import { blankProfileTemplate, doorstepProfileTemplate, profileTemplateFromPurpose } from '@/lib/profilePresets'
 import { useUIStore } from '@/stores/uiStore'
 import type { AIProfile, ModelRole, NodePolicy, OrchestrationPolicy, ToolPolicy } from '@/types/api'
 import { KnowledgePicker } from '@/features/knowledge/KnowledgePicker'
 import { TOOL_CATALOG, defaultToolsFrom } from './editorTools'
 import { CAPABILITIES, capabilityDescription, capabilityEnabled, capabilityLabel, setCapability } from './capabilities'
-import {
-  computerSelectionLabel,
-  createStartOptions,
-  filterProfiles,
-  isBuiltInProfile,
-  defaultProfileIdOf,
-  freeProfileName,
-  isTeamProfile,
-  MODEL_ROLES,
-  purposeIcon,
-  purposeLabel,
-  roleDisplayName,
-  roleHelp,
-  roleHint,
-  sortProfilesForDisplay,
-  STRATEGY_VALUES,
-  strategyLabel,
-  strategyOption,
-  type StrategyValue,
-  toolChipPreview,
-  toolSummary,
-  type CreateStartFrom,
-  type ProfileFilter,
-} from './profilePresentation'
+import { computerSelectionLabel, createStartOptions, filterProfiles, isBuiltInProfile, defaultProfileIdOf, freeProfileName, isTeamProfile, MODEL_ROLES, purposeIcon, purposeLabel, roleDisplayName, roleHelp, roleHint, sortProfilesForDisplay, STRATEGY_VALUES, strategyLabel, strategyOption, type StrategyValue, toolChipPreview, toolSummary, type CreateStartFrom, type ProfileFilter, profileName } from './profilePresentation'
 import { OrchestrationControls, cleanOrchestration } from './OrchestrationControls'
 import { SwarmControls } from './SwarmControls'
 import { TopicsEditor } from './TopicsEditor'
@@ -160,7 +137,12 @@ export function ProfilesPage() {
 
   const createMutation = useMutation({
     mutationFn: () => {
-      const template = startFrom === 'blank' ? blankProfileTemplate() : profileTemplateFromPurpose(startFrom)
+      const template =
+        startFrom === 'blank'
+          ? blankProfileTemplate()
+          : startFrom === 'doorstep'
+            ? doorstepProfileTemplate()
+            : profileTemplateFromPurpose(startFrom)
       return api.createProfile({ ...template, name: freeProfileName(template.name, profilesQuery.data ?? []) })
     },
     onSuccess: (created) => {
@@ -176,7 +158,7 @@ export function ProfilesPage() {
   const duplicateMutation = useMutation({
     mutationFn: (profile: AIProfile) =>
       api.createProfile({
-        name: freeProfileName(t('create.copyName', { name: profile.name }), profilesQuery.data ?? []),
+        name: freeProfileName(t('create.copyName', { name: profileName(profile) }), profilesQuery.data ?? []),
         purpose: profile.purpose,
         orchestrator_id: profile.orchestrator_id,
         node_policy: profile.node_policy,
@@ -185,6 +167,7 @@ export function ProfilesPage() {
         knowledge_sources: profile.knowledge_sources,
         orchestration: profile.orchestration,
         topics: profile.topics,
+        audience: profile.audience,
       }),
     onSuccess: (created) => {
       queryClient.invalidateQueries({ queryKey: ['profiles'] })
@@ -432,7 +415,7 @@ export function ProfilesPage() {
                           aria-label={t('card.rename')}
                         />
                       ) : (
-                        <h2 className="font-semibold text-ink">{profile.name}</h2>
+                        <h2 className="font-semibold text-ink">{profileName(profile)}</h2>
                       )}
                       <span className="label-caps">
                         {builtIn ? t('card.builtin') : t('card.custom')}
@@ -475,7 +458,7 @@ export function ProfilesPage() {
                               ? 'bg-raised text-ink'
                               : chip.tone === 'ask'
                                 ? 'bg-warning/15 text-ink'
-                                : 'bg-raised text-ink-faint line-through',
+                                : 'bg-raised text-ink-faint',
                           ].join(' ')}
                         >
                           {chip.label}
@@ -500,11 +483,7 @@ export function ProfilesPage() {
                       <p className="text-sm font-medium text-ink">
                         {formatSequence(roles.map((r) => roleDisplayName(r.role)))}
                       </p>
-                    ) : (
-                      <p className="text-sm font-medium capitalize text-ink">
-                        {roleDisplayName(roles[0]?.role ?? 'assistant')}
-                      </p>
-                    )}
+                    ) : null /* One model needs no role name; "Primary" alone said nothing (#1346). */}
                     {showDetails && !isEditing && (
                       <ul className="mt-2 space-y-1.5">
                         {roles.map((r) => (
@@ -554,7 +533,7 @@ export function ProfilesPage() {
                     <button
                       type="button"
                       className="icon-button"
-                      aria-label={t('card.moreActions', { name: profile.name })}
+                      aria-label={t('card.moreActions', { name: profileName(profile) })}
                       aria-haspopup="menu"
                       aria-expanded={menuOpenId === profile.id}
                       onClick={(e: MouseEvent) => {
@@ -598,7 +577,7 @@ export function ProfilesPage() {
                           <MenuItem
                             disabled={resetMutation.isPending}
                             onClick={() => {
-                              if (window.confirm(t('menu.confirmReset', { name: profile.name }))) {
+                              if (window.confirm(t('menu.confirmReset', { name: profileName(profile) }))) {
                                 resetMutation.mutate(profile.id)
                               } else {
                                 setMenuOpenId(null)
@@ -613,7 +592,7 @@ export function ProfilesPage() {
                             danger
                             disabled={deleteMutation.isPending}
                             onClick={() => {
-                              if (window.confirm(t('menu.confirmDelete', { name: profile.name }))) {
+                              if (window.confirm(t('menu.confirmDelete', { name: profileName(profile) }))) {
                                 deleteMutation.mutate(profile.id)
                               } else {
                                 setMenuOpenId(null)
@@ -751,6 +730,7 @@ function AdvancedEditor({
   const [knowledge, setKnowledge] = useState<string[]>(profile.knowledge_sources ?? [])
   const [orchestration, setOrchestration] = useState<OrchestrationPolicy>(editorOrchestration(profile))
   const [topics, setTopics] = useState(() => topicsDraft(profile.topics))
+  const [visitors, setVisitors] = useState(profile.audience === 'public')
   const advancedMode = useUIStore((s) => s.advancedMode)
   const profileIdRef = useRef(profile.id)
 
@@ -759,6 +739,7 @@ function AdvancedEditor({
     profileIdRef.current = profile.id
     setName(profile.name)
     setTopics(topicsDraft(profile.topics))
+    setVisitors(profile.audience === 'public')
     setNodeMode(profile.node_policy?.mode ?? 'automatic')
     setPlacement(placementFrom(profile))
     setRoles(editorRoles(profile))
@@ -983,6 +964,19 @@ function AdvancedEditor({
       {tab === 'topics' && (
         <section id={panelID('topics')} role="tabpanel" aria-labelledby={tabID('topics')}>
           <div className="space-y-6">
+            <label className="flex items-start gap-2 text-sm text-ink">
+              <input
+                type="checkbox"
+                className="mt-1"
+                checked={visitors}
+                disabled={saving}
+                onChange={(e) => setVisitors(e.target.checked)}
+              />
+              <span>
+                <span className="font-medium">{t('audience.label')}</span>
+                <span className="block text-ink-muted">{t('audience.hint')}</span>
+              </span>
+            </label>
             <TopicsEditor value={topics} onChange={setTopics} disabled={saving} />
             {topics.staysOn.trim() && topics.strict === 'enforce' ? <TopicsModelNote /> : null}
             <TopicsTry profileId={profile.id} topics={topicsFrom(topics)} examples={topicsFrom(topics)?.examples ?? []} />
@@ -1094,6 +1088,7 @@ function AdvancedEditor({
               knowledge_sources: knowledge,
               orchestration: cleanOrchestration(orchestration),
               topics: topicsFrom(topics),
+              audience: visitors ? 'public' : '',
             })
           }
         >

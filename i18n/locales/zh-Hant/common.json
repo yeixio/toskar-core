@@ -1,8 +1,9 @@
 {
-  "tagline": "本機 AI 控制中心",
+  "tagline": "在你自己的電腦上執行 AI",
   "nav": {
     "label": "主要",
     "open": "開啟選單",
+    "skip": "跳至內容",
     "use": "使用",
     "customize": "自訂",
     "administer": "管理",
@@ -39,10 +40,16 @@
     "bifrostHint": "電腦探索與網路連線",
     "computersNone": "沒有電腦",
     "connected_other": "已連接 {{count}} 台",
-    "nornHint": "Norn 會在你的電腦之間排程工作",
+    "nornHint": "由哪台電腦執行每個模型",
     "nornAutomatic": "自動",
-    "mimirHint": "本機知識與記憶",
-    "mimirReady": "就緒"
+    "mimirHint": "Toskar 用來回答的檔案和來源",
+    "justThis": "僅這台電腦",
+    "placementLocal": "這台電腦",
+    "placementAsk": "每次詢問",
+    "knowledgeNone": "尚無來源",
+    "knowledgeFailed_other": "{{count}} 個失敗",
+    "knowledgeReady_other": "{{count}} 個來源",
+    "knowledgeIndexing": "正在建立索引…"
   },
   "boot": {
     "starting": "正在啟動 Toskar",

@@ -1,8 +1,9 @@
 {
-  "tagline": "Lokale KI-Steuerzentrale",
+  "tagline": "Führt KI auf deinen eigenen Computern aus",
   "nav": {
     "label": "Haupt",
     "open": "Menü öffnen",
+    "skip": "Zum Inhalt springen",
     "use": "Nutzen",
     "customize": "Anpassen",
     "administer": "Verwalten",
@@ -40,10 +41,18 @@
     "computersNone": "Keine Computer",
     "connected_one": "{{count}} verbunden",
     "connected_other": "{{count}} verbunden",
-    "nornHint": "Norn verteilt Arbeit auf deine Computer",
+    "nornHint": "Welcher Computer welches Modell ausführt",
     "nornAutomatic": "Automatisch",
-    "mimirHint": "Lokales Wissen und Gedächtnis",
-    "mimirReady": "Bereit"
+    "mimirHint": "Dateien und Quellen, aus denen Toskar antwortet",
+    "justThis": "Nur dieser Computer",
+    "placementLocal": "Dieser Computer",
+    "placementAsk": "Jedes Mal fragen",
+    "knowledgeNone": "Noch keine Quellen",
+    "knowledgeFailed_one": "{{count}} fehlgeschlagen",
+    "knowledgeFailed_other": "{{count}} fehlgeschlagen",
+    "knowledgeReady_one": "{{count}} Quelle",
+    "knowledgeReady_other": "{{count}} Quellen",
+    "knowledgeIndexing": "Wird indexiert…"
   },
   "boot": {
     "starting": "Toskar startet",

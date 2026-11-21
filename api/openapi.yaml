@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Toskar Control Plane API
-  version: "1.98"
+  version: "1.117"
   description: >-
     Local AI control plane API for Toskar, its OpenAI-compatible routes, and its MCP server.
     On the default loopback bind no key is needed. When the daemon listens on any other address,
@@ -1244,7 +1244,7 @@ paths:
   /api/v1/remote-access:
     get:
       summary: Access from anywhere's setting and its listener (#456)
-      description: "enabled, port, address (a forwarded address, when set), listening (the address it listens on) or error, port_mapping, mapped and mapped_by (pcp, nat-pmp, or upnp) for the router port it opened, map_error, ipv6, reachable (direct, ipv6, manual, relay, or none) with reason (off, not_listening, carrier_nat, or no_port), relay (name, state: no_token, ended (contract 1.41: the token ran out with nothing to renew it, so it isn't sent; a new one takes over within a minute), connecting, connected, or error, and error, its code) while the relay client runs, and check, the last outside check (#546, contract 1.28): at, relay and direct (each way in with address, ok, reason, and ms), tried, and error when the last attempt didn't reach the relay (CHECK_UNSUPPORTED, CHECK_TOO_SOON, NO_TOKEN, RELAY_UNREACHABLE). With Toskar's relay, subscription (#639, contract 1.38): state (none, pending, active, or ended; contract 1.41: ended also when the token from the app's store or a subscription ran out, with expires the day it did), store (stripe when bought here in Settings, app when bought in the Toskar app), expires, open (whether Toskar's relay takes new subscriptions now, when known), checkout (the open checkout's page while pending), error (the last exchange's code when it didn't reach the relay), and in_app_only (contract 1.39: this copy is the Mac App Store's, which neither sells nor manages it; the Toskar app on a phone or tablet does). Set it with PATCH /api/v1/settings: remote_access_enabled, remote_access_port, remote_access_address, remote_access_port_mapping, remote_access_relay (an organization's relay, empty for Toskar's), and remote_access_relay_secret (its enrollment secret; write-only, empty clears it)."
+      description: "enabled, port, address (a forwarded address, when set), listening (the address it listens on) or error, port_mapping, mapped and mapped_by (pcp, nat-pmp, or upnp) for the router port it opened, map_error, ipv6, reachable (direct, ipv6, manual, relay, or none) with reason (off, not_listening, carrier_nat, or no_port), relay (name, state: no_token, ended (contract 1.41: the token ran out with nothing to renew it, so it isn't sent; a new one takes over within a minute), connecting, connected, or error, and error, its code) while the relay client runs, and check, the last outside check (#546, contract 1.28): at, relay and direct (each way in with address, ok, reason, and ms), tried, and error when the last attempt didn't reach the relay (CHECK_UNSUPPORTED, CHECK_TOO_SOON, NO_TOKEN, RELAY_UNREACHABLE). With Toskar's relay, subscription (#639, contract 1.38): state (none, pending, active, or ended; contract 1.41: ended also when the token from the app's store or a subscription ran out, with expires the day it did), store (stripe when bought here in Settings, app when bought in the Toskar app), expires, open (whether Toskar's relay takes new subscriptions now, when known), checkout (the open checkout's page while pending), error (the last exchange's code when it didn't reach the relay), and in_app_only (contract 1.39: this copy is the Mac App Store's, which neither sells nor manages it; the Toskar app on a phone or tablet does), relay, the relay it's for when that isn't Toskar's own, such as a developer's (#1266), and prices, what the checkout charges for monthly and yearly (amount in the currency's major unit, and currency), from billing once it has answered (#1257). Set it with PATCH /api/v1/settings: remote_access_enabled, remote_access_port, remote_access_address, remote_access_port_mapping, remote_access_relay (an organization's relay, empty for Toskar's), and remote_access_relay_secret (its enrollment secret; write-only, empty clears it)."
       operationId: getRemoteAccess
       tags: [Devices]
       responses:
@@ -1276,17 +1276,30 @@ paths:
                 $ref: "#/components/schemas/DeviceRoute"
         "403":
           description: ROUTE_NOT_LOCAL
+  /api/v1/remote-access/device-token:
+    get:
+      summary: This computer's device token for Toskar's relay, from anywhere (yeixio/toskar-apps#451)
+      description: "Answers {token}: the device token GET /remote-access/route also gives, so a paired device away from home gets the newer one after the computer renews, without coming home (contract 1.99). A paired device's key may ask through the remote listener too; the route secret stays home-only. The device token only looks the route's record up and can't open the computer's tunnel. Empty with an organization's relay, or before the relay has made one."
+      operationId: getDeviceToken
+      tags: [Devices]
+      responses:
+        "200":
+          description: token, possibly empty
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeviceToken"
   /api/v1/remote-access/relay-token:
     put:
       summary: Hand over a subscription's relay token (#456)
-      description: "Body {token, enable}. token is the route token the app got for this computer by exchanging a store receipt with Toskar's relay; the computer keeps it and registers and keeps its tunnel there. A paired device may send it, from home or through the remote listener. enable also turns access from anywhere on, and needs an Admin (403 ROLE_REQUIRED). Answers state: the relay client's state, or off. 400 RELAY_TOKEN_INVALID for a token that isn't for this computer's route or has expired, RELAY_TOKEN_NOT_NEEDED when an organization's relay is set."
+      description: "Body {token, enable}. token is the route token the app got for this computer by exchanging a store receipt with Toskar's relay; the computer keeps it and registers and keeps its tunnel there. A paired device may send it, from home or through the remote listener. enable also turns access from anywhere on, and needs an Admin (403 ROLE_REQUIRED). Answers state: the relay client's state, or off. 400 RELAY_TOKEN_INVALID for a token that isn't for this computer's route, has expired, or the relay doesn't take (the computer asks it first; RELAY_UNREACHABLE when it can't), RELAY_TOKEN_SHORTER for one that ends before the token in use while that one still works (#1258), RELAY_TOKEN_NOT_NEEDED when an organization's relay is set."
       operationId: putRelayToken
       tags: [Devices]
       responses:
         "200":
           description: The token is kept; state
         "400":
-          description: RELAY_TOKEN_INVALID or RELAY_TOKEN_NOT_NEEDED
+          description: RELAY_TOKEN_INVALID, RELAY_TOKEN_SHORTER, RELAY_UNREACHABLE, or RELAY_TOKEN_NOT_NEEDED
         "403":
           description: ROLE_REQUIRED, turning access from anywhere on without the admin role
   /api/v1/remote-access/subscription/checkout:
@@ -1306,6 +1319,33 @@ paths:
           description: BILLING_UNAVAILABLE
         "503":
           description: RELAY_SOLD_OUT
+    delete:
+      summary: Close the checkout opened here before it's paid (#1257)
+      description: "Forgets the open Stripe checkout, so Toskar stops asking the relay about it and Settings offers the plans again. Admins only. 404 CHECKOUT_NONE when no checkout is open."
+      operationId: cancelSubscriptionCheckout
+      tags: [Devices]
+      responses:
+        "204":
+          description: The checkout is closed
+        "404":
+          description: CHECKOUT_NONE
+  /api/v1/remote-access/subscription/move:
+    post:
+      summary: Move the subscription bought here onto this computer (#1257)
+      description: "When the relay says the Stripe subscription bought here is tied to another route (subscription.error SUBSCRIPTION_IN_USE), as after restoring this computer's data on a new one, this moves it here. Toskar sends the relay the token it kept, which may be the old route's; without one, the relay moves it only once the old route has been quiet for 3 days. Turns access from anywhere on. Admins only. 404 SUBSCRIPTION_NONE; 409 SUBSCRIPTION_OWN_RELAY; 403 MOVE_NEEDS_COMPUTER; 429 MOVE_TOO_SOON; 502 MOVE_FAILED or RELAY_UNREACHABLE."
+      operationId: moveSubscription
+      tags: [Devices]
+      responses:
+        "204":
+          description: Moved; the token is kept
+        "403":
+          description: MOVE_NEEDS_COMPUTER
+        "404":
+          description: SUBSCRIPTION_NONE
+        "429":
+          description: MOVE_TOO_SOON
+        "502":
+          description: MOVE_FAILED or RELAY_UNREACHABLE
   /api/v1/remote-access/subscription/manage:
     post:
       summary: The billing page for the subscription bought here (#639)
@@ -1331,6 +1371,25 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/TLSInfo"
+  /api/v1/tls/next:
+    get:
+      summary: The certificate that replaces one naming the computer (#1263)
+      description: >-
+        Certificates made before #1263 carry the computer's name, which the
+        remote listener and the relay show anyone. Toskar replaces such a
+        certificate once every phone used in the last 30 days has asked for
+        this one (or after 30 days). A phone saves the fingerprint and
+        accepts the switch instead of warning that the computer changed.
+        The fingerprint is empty when no switch is coming.
+      operationId: getNextApiTLS
+      tags: [Devices]
+      responses:
+        "200":
+          description: The next certificate's fingerprint, if there is one
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NextTLSInfo"
   /about:
     get:
       summary: AGPL corresponding-source offer
@@ -1489,7 +1548,7 @@ paths:
       tags: [Settings]
       responses:
         "200":
-          description: "OK. For Admins and the Owner, network_access (#711, contract 1.42) counts who could use Toskar from another computer: people (who sign in with a username and password, or still have a link to choose them), devices (connected with a code), keys (API keys for apps and scripts), and sign_in_service (a trusted proxy or OpenID Connect provider). lan_api_enabled can be turned on when any of them is there."
+          description: "OK. For Admins and the Owner, network_access (#711, contract 1.42) counts who could use Toskar from another computer: people (who sign in with a username and password, or still have a link to choose them), devices (connected with a code), stale_devices (how many of those are likely left over: never used a day after pairing, or unused for 90 days; #1266, contract 1.109), keys (API keys for apps and scripts), and sign_in_service (a trusted proxy or OpenID Connect provider). lan_api_enabled can be turned on when any of them is there. For a key of someone below Admin, such as a Member's phone, data_dir, models_dir, runtimes_dir, logs_dir, api_host, node_id, remote_access_address and remote_access_relay are empty (#1264)."
           content:
             application/json:
               schema:
@@ -3347,6 +3406,22 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/FoundModels"
+  /api/v1/models/license-acceptances:
+    get:
+      summary: Who accepted which model's license terms, and when
+      description: >-
+        Every time someone accepted a catalog model's license terms in Toskar, newest first, kept after the
+        model is removed (#593, contract 1.103). For Admins.
+      operationId: listModelLicenseAcceptances
+      tags: [Models]
+      responses:
+        "200":
+          description: The records
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {$ref: "#/components/schemas/LicenseAcceptance"}
   /api/v1/models/install-from-url/preview:
     post:
       summary: What a download from a URL would bring, without downloading it
@@ -3432,6 +3507,9 @@ paths:
                   type: string
                 wait:
                   type: boolean
+                accept_license:
+                  type: boolean
+                  description: "The person accepts the model's license terms, for a license with terms to accept; Toskar keeps a record of who and when (#593, contract 1.103). An install without it isn't refused."
       responses:
         "200":
           description: Started, or installed with wait
@@ -3445,6 +3523,126 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+  /api/v1/comfyui:
+    get:
+      summary: The connected ComfyUI and what a check finds on it (Admin)
+      description: The check reads ComfyUI's /system_stats and /object_info. When it fails, error says why and info is left out.
+      operationId: getComfyUI
+      tags: [Tools]
+      responses:
+        "200":
+          description: Address and check
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ComfyUIStatus"
+        "403":
+          description: Needs the admin role
+    put:
+      summary: Connect a ComfyUI, change its token, or disconnect it (Admin)
+      description: The token is stored in the secrets folder, sent as a Bearer token, and never returned. An empty token keeps the stored one; clear_token removes it; an empty base_url disconnects.
+      operationId: setComfyUI
+      tags: [Tools]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                base_url: {type: string}
+                token: {type: string}
+                clear_token: {type: boolean}
+      responses:
+        "200":
+          description: Saved and checked
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ComfyUIStatus"
+        "400":
+          description: The address isn't http(s)
+        "403":
+          description: Needs the admin role
+  /api/v1/comfyui/workflows:
+    get:
+      summary: Saved ComfyUI workflows, without their graphs (Admin)
+      operationId: listComfyWorkflows
+      tags: [Tools]
+      responses:
+        "200":
+          description: Workflows by name
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ComfyWorkflows"
+        "403":
+          description: Needs the admin role
+    post:
+      summary: Save a ComfyUI workflow, or replace the one with its name (Admin)
+      description: graph is the workflow exported from ComfyUI with Workflow › Export (API). Without inputs, they are detected. The name is made lowercase with dashes. A workflow needs a prompt or an image input.
+      operationId: saveComfyWorkflow
+      tags: [Tools]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, graph]
+              properties:
+                name: {type: string}
+                description: {type: string}
+                graph: {type: object, additionalProperties: true}
+                inputs: {$ref: "#/components/schemas/ComfyWorkflowInputs"}
+      responses:
+        "200":
+          description: Saved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ComfyWorkflow"
+        "400":
+          description: Not in API format, or an input names a node or field the graph doesn't have
+        "403":
+          description: Needs the admin role
+  /api/v1/comfyui/workflows/detect:
+    post:
+      summary: Find a workflow's prompt, negative prompt, seed, picture, and size inputs (Admin)
+      operationId: detectComfyWorkflow
+      tags: [Tools]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [graph]
+              properties:
+                graph: {type: object, additionalProperties: true}
+      responses:
+        "200":
+          description: The inputs found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ComfyWorkflowInputs"
+        "400":
+          description: Not in API format
+        "403":
+          description: Needs the admin role
+  /api/v1/comfyui/workflows/{name}:
+    delete:
+      summary: Remove a saved ComfyUI workflow (Admin)
+      operationId: deleteComfyWorkflow
+      tags: [Tools]
+      parameters:
+        - {name: name, in: path, required: true, schema: {type: string}}
+      responses:
+        "204":
+          description: Removed
+        "403":
+          description: Needs the admin role
   /api/v1/external-server:
     get:
       summary: The OpenAI-compatible server whose models can be chosen for a chat, and the models it offers
@@ -4489,6 +4687,150 @@ paths:
                 $ref: "#/components/schemas/SpokenText"
         "400":
           description: Invalid text or voice, or reading failed
+  /api/v1/voice/realtime:
+    get:
+      summary: Live voice mode, over a WebSocket (#795)
+      description: "Upgrades to a WebSocket that speaks a subset of OpenAI's Realtime protocol, one JSON event per text message (docs/voice.md; subprotocol realtime). Audio is pcm16, mono, 24 kHz, base64 in input_audio_buffer.append and response.audio.delta. The server finds the end of each turn (server_vad), transcribes it with Whisper, answers it in a chat of the caller's, and speaks the answer with Piper a sentence at a time; talking over an answer stops it. response.done's metadata.toskar_latency has stt_ms, llm_first_token_ms, first_audio_ms, and end_to_end_ms. Visitors and paired devices may use it, with the voice capability (contract 1.100). 426 WEBSOCKET_REQUIRED without an upgrade; 503 SPEECH_UNAVAILABLE when speech isn't set up."
+      operationId: voiceRealtime
+      tags: [Chat]
+      responses:
+        "101":
+          description: Switching to the WebSocket
+        "426":
+          description: WEBSOCKET_REQUIRED
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "503":
+          description: SPEECH_UNAVAILABLE
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/v1/speech/say:
+    post:
+      summary: Read a little text aloud in the computer's voice (#795)
+      description: "Answers a WAV file (16-bit PCM, mono, 24 kHz) of the text, read in live voice mode's voice: Kokoro where it speaks the language (English, Spanish, French, Italian, Portuguese), Piper elsewhere. Nothing is kept. Meant for a client that speaks an answer as it arrives, a sentence or a few at a time (at most 1000 characters). voice is a Kokoro voice such as af_heart or a Piper voice; empty is the language's own. language is the text's, such as en or pt-BR; empty detects it. Visitors and paired devices may use it, with the voice capability (contract 1.101)."
+      operationId: speechSay
+      tags: [Chat]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [text]
+              properties:
+                text:
+                  type: string
+                voice:
+                  type: string
+                language:
+                  type: string
+      responses:
+        "200":
+          description: The text read aloud
+          content:
+            audio/wav:
+              schema:
+                type: string
+                format: binary
+        "400":
+          description: BAD_REQUEST for no text or too much, or SPEECH_FAILED
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "503":
+          description: SPEECH_UNAVAILABLE
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/v1/speech/voices:
+    get:
+      summary: The Voice settings (#1304)
+      description: "Kitten TTS 2 mini's install, and each language read-aloud speaks with the voices it can be read in and the one chosen. Admins only (contract 1.112)."
+      operationId: speechVoices
+      tags: [Settings]
+      responses:
+        "200":
+          description: The Voice settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VoiceSettings"
+        "403":
+          description: ROLE_REQUIRED
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/v1/speech/voices/{language}:
+    put:
+      summary: Choose the voice a language is read aloud in (#1304)
+      description: "Used by live voice mode, POST /api/v1/speech/say, and the doorbell. An empty voice goes back to automatic: Kokoro where it speaks the language, then Kitten when it's installed, then Piper. Admins only (contract 1.112)."
+      operationId: setSpeechVoice
+      tags: [Settings]
+      parameters:
+        - name: language
+          in: path
+          required: true
+          schema: {type: string}
+          description: A language code, such as de
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                voice: {type: string, description: 'One of the language''s voices from GET /api/v1/speech/voices, or empty for automatic'}
+      responses:
+        "200":
+          description: The Voice settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VoiceSettings"
+        "400":
+          description: BAD_REQUEST or INVALID_VOICE
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/v1/speech/kitten:
+    post:
+      summary: Install Kitten TTS 2 mini (#1304)
+      description: "Starts installing Kitten TTS 2 mini (Apache-2.0) in the background: its program, then its voices. GET /api/v1/speech/voices shows how it's going. Admins only (contract 1.112)."
+      operationId: installKitten
+      tags: [Settings]
+      responses:
+        "200":
+          description: The Voice settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VoiceSettings"
+        "503":
+          description: SPEECH_UNAVAILABLE
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    delete:
+      summary: Remove Kitten TTS 2 mini (#1304)
+      description: "Deletes its program and voices; the languages it read go back to their automatic voices. Admins only (contract 1.112)."
+      operationId: removeKitten
+      tags: [Settings]
+      responses:
+        "200":
+          description: The Voice settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VoiceSettings"
   /api/v1/speech/transcribe:
     post:
       summary: A recording's text, for speaking a message instead of typing it (yeixio/toskar-apps#155)
@@ -7658,6 +8000,54 @@ components:
       scheme: bearer
       description: An API key from the API Access page, or TOSKAR_API_KEY
   schemas:
+    VoiceSettings:
+      type: object
+      description: The Voice settings (#1304, contract 1.112)
+      required: [kitten, languages]
+      properties:
+        kitten:
+          type: object
+          required: [state, credit, url, license, languages]
+          properties:
+            state: {type: string, enum: [not_installed, installing, installed, failed]}
+            stage: {type: string, description: 'While installing: program, voices, warming, or listening (contract 1.113)'}
+            error: {type: string}
+            unavailable: {type: string, description: Why it can't be installed on this computer}
+            credit: {type: string, description: 'Shown wherever a Kitten voice is used: Powered by KittenML'}
+            url: {type: string}
+            license: {type: string}
+            languages: {type: array, items: {type: string}}
+        languages:
+          type: array
+          items:
+            type: object
+            required: [language, voice, automatic, voices]
+            properties:
+              language: {type: string}
+              voice: {type: string, description: 'The chosen voice; empty is automatic'}
+              automatic: {type: string, description: The voice used when none is chosen}
+              voices:
+                type: array
+                items:
+                  type: object
+                  required: [id, name, engine]
+                  properties:
+                    id: {type: string}
+                    name: {type: string}
+                    description: {type: string}
+                    engine: {type: string, enum: [kitten, kokoro, piper]}
+                    standard: {type: boolean, description: 'A voice named only for the recordings it was made from: name is then Standard, which the apps say in their language (#1342, contract 1.116)'}
+        needs:
+          type: array
+          description: "The models voice mode and the doorbell still need on this computer, each with the one that fits to install with POST /api/v1/models/{id}/install (#667, contract 1.113)"
+          items:
+            type: object
+            required: [ability]
+            properties:
+              ability: {type: string, enum: [chat, vision, both], description: 'chat answers in voice mode; vision looks at a camera; both is one model that does both (#1343)'}
+              model: {type: string, description: The catalog model to install; absent when none fits this computer}
+              name: {type: string}
+              size_bytes: {type: integer, format: int64}
     License:
       type: object
       properties:
@@ -7746,6 +8136,66 @@ components:
         instructions:
           type: string
           maxLength: 1500
+        location:
+          type: string
+          maxLength: 120
+          description: Where the person is, such as a town. Used only for questions about nearby places, weather, and directions, and as the start of the places tools when no place is named.
+    ComfyUIStatus:
+      type: object
+      required: [base_url, has_token]
+      properties:
+        base_url: {type: string}
+        has_token: {type: boolean}
+        info: {$ref: "#/components/schemas/ComfyUIInfo"}
+        error: {type: string, description: Why the check failed}
+    ComfyUIInfo:
+      type: object
+      required: [devices, models, node_types]
+      properties:
+        version: {type: string}
+        devices:
+          type: array
+          items:
+            type: object
+            required: [name, type, vram_total, vram_free]
+            properties:
+              name: {type: string}
+              type: {type: string}
+              vram_total: {type: integer, format: int64}
+              vram_free: {type: integer, format: int64}
+        models:
+          type: object
+          description: Model files by kind (checkpoints, diffusion, loras, vae, upscalers)
+          additionalProperties: {type: array, items: {type: string}}
+        node_types: {type: integer, description: How many node types ComfyUI offers, custom nodes included}
+    ComfyWorkflowInput:
+      type: object
+      required: [node, field]
+      properties:
+        node: {type: string}
+        field: {type: string}
+    ComfyWorkflowInputs:
+      type: object
+      properties:
+        prompt: {$ref: "#/components/schemas/ComfyWorkflowInput"}
+        negative: {$ref: "#/components/schemas/ComfyWorkflowInput"}
+        seed: {$ref: "#/components/schemas/ComfyWorkflowInput"}
+        image: {$ref: "#/components/schemas/ComfyWorkflowInput"}
+        width: {$ref: "#/components/schemas/ComfyWorkflowInput"}
+        height: {$ref: "#/components/schemas/ComfyWorkflowInput"}
+    ComfyWorkflows:
+      type: object
+      required: [workflows]
+      properties:
+        workflows: {type: array, items: {$ref: "#/components/schemas/ComfyWorkflow"}}
+    ComfyWorkflow:
+      type: object
+      required: [name, inputs, nodes]
+      properties:
+        name: {type: string}
+        description: {type: string}
+        inputs: {$ref: "#/components/schemas/ComfyWorkflowInputs"}
+        nodes: {type: integer}
     ExternalServer:
       type: object
       properties:
@@ -8001,6 +8451,7 @@ components:
         parameters: {type: string, description: e.g. "14B"}
         size_bytes: {type: integer, format: int64}
         memory_needed_bytes: {type: integer, format: int64}
+        download_bytes: {type: integer, format: int64, description: 'Everything an install downloads: the model file and its vision projector (#1343, contract 1.117).'}
         context: {type: integer}
         capabilities:
           type: object
@@ -8064,6 +8515,26 @@ components:
               fit: {type: string, enum: [excellent, good, tight, heavy, unsupported]}
               tokens: {type: integer}
         slots: {type: integer, minimum: 1, maximum: 4, description: 'How many requests a chat model installed on this computer answers at once, so a swarm can run that many agents on it together; each keeps the whole context window (#1135, contract 1.88). Absent for other models.'}
+        newer: {type: string, description: 'The catalog model that replaces an installed one, size for size, such as Qwen 3.5 4B for Qwen 2.5 3B, when it is not installed too (#593, contract 1.107).'}
+        primary_category: {type: string, description: 'What the model does first, for browsing the store, from the categories in manifests/models/categories.json, such as chat_coding, retrieval, or creative; uncategorized for a model nobody has checked (#593, contract 1.104). It never says Toskar can run the model; runtime does.'}
+        categories: {type: array, items: {type: string}, description: Every category the model belongs to, the primary one too}
+        tasks: {type: array, items: {type: string}, description: 'What the model does in its categories, such as code_generation or text_embedding'}
+        input_modalities: {type: array, items: {type: string}, description: 'What the model takes, such as text, code, or image'}
+        output_modalities: {type: array, items: {type: string}, description: 'What the model gives, such as text, image, or embedding'}
+        license:
+          type: object
+          description: "A catalog model's license and what it allows, checked by hand (#593, contract 1.102). Absent where it's unknown, as for a model added from a link."
+          required: [commercial, id, name, url]
+          properties:
+            id: {type: string, description: "The SPDX identifier where there is one, such as apache-2.0, or the license's short name, such as llama3.2"}
+            name: {type: string}
+            url: {type: string}
+            commercial: {type: string, enum: ["yes", limited, "no"], description: "Whether a business may use the model: yes, limited (such as Llama's above 700 million monthly users), or no"}
+            attribution: {type: boolean, description: "Apps or published work built with the model credit it"}
+            accept: {type: boolean, description: "The person agrees to the license's terms before using the model"}
+            notes: {type: string}
+            kind: {type: string, enum: [free, conditions], description: "free: any use, nothing to accept or credit. conditions: free, with terms."}
+            accepted_at: {type: string, format: date-time, description: "When the person asking accepted its terms in Toskar, for a license with terms to accept (contract 1.103)"}
         languages:
           type: array
           description: How well the model writes each language it has a level for (§13–14, §31), best first.
@@ -8224,6 +8695,7 @@ components:
               name: {type: string}
               description: {type: string}
               license: {type: string}
+              commercial: {type: string, enum: ["yes", limited, "no"], description: "Whether a business may use it under its license (#593, contract 1.102)"}
               memory_bytes: {type: integer, format: int64}
               size_bytes: {type: integer, format: int64}
               edits: {type: boolean, description: "Edits images, or for a video model, animates them"}
@@ -8622,8 +9094,28 @@ components:
             description: 'One an automation looks at as each run starts (#667): a connected service''s camera, whose picture is then shown to a model that can see, like a photo attached in chat. Device is the camera as that service names it; Home Assistant''s are the first, such as camera.driveway.'
             required: [connector, device]
             properties:
-              connector: {type: string, enum: [homeassistant]}
+              connector: {type: string, enum: [homeassistant, reolink]}
               device: {type: string, description: 'The camera as that service names it, such as Home Assistant''s camera.driveway'}
+        say:
+          type: object
+          description: 'Speaks each run''s answer through a camera''s speaker (#667, contract 1.110), such as a Reolink doorbell''s, read by this computer''s voice. The run is told its answer is spoken and answers NOTHING when nobody is there, and then nothing is said. Only an Admin or the Owner sets it. On update, one with no connector stops speaking.'
+          required: [connector, device]
+          properties:
+            connector: {type: string, enum: [reolink]}
+            device: {type: string, description: 'Always camera: one Reolink connection is one camera'}
+            quiet_from: {type: string, description: 'With quiet_to, such as 22:00 and 07:00: the hours, in the automation''s time zone, when nothing is said. The run still notifies.'}
+            quiet_to: {type: string}
+            voice: {type: string, description: 'The voice it speaks in, such as kitten:en:eleanor (#1304, contract 1.112); empty is the one chosen for the language in the Voice settings. One no longer here leaves it to that.'}
+            listen: {type: boolean, description: "Talks with the visitor: greets them with a fixed greeting in the automation's language as soon as the run starts, without looking at the picture first, then hears them through the camera's microphone with reolink-cli and ffmpeg, answers up to 6 times, and the run's result is the visit summed up, then what was said (#667, contract 1.114)"}
+        actions:
+          type: array
+          description: 'Calls the automation may make on its own (#586), such as Home Assistant''s light.turn_on on light.porch. A call that matches one runs without asking, even in a run a trigger started; other calls that change things are skipped. Each argument listed must equal the call''s, ignoring case; a Home Assistant action names its service and entity_id. At most 20. On update, an empty list removes them.'
+          items:
+            type: object
+            required: [tool]
+            properties:
+              tool: {type: string, description: A tool ID, such as homeassistant.call}
+              args: {type: object, additionalProperties: {type: string}, description: 'The arguments that must match, such as {"service": "light.turn_on", "entity_id": "light.porch"}'}
     Automation:
       type: object
       description: A scheduled prompt owned by the daemon.
@@ -8668,6 +9160,26 @@ components:
             properties:
               connector: {type: string}
               device: {type: string}
+        say:
+          type: object
+          description: 'Speaks each run''s answer through a camera''s speaker (#667, contract 1.110), such as a Reolink doorbell''s, read by this computer''s voice. The run is told its answer is spoken and answers NOTHING when nobody is there, and then nothing is said. Only an Admin or the Owner sets it. On update, one with no connector stops speaking.'
+          required: [connector, device]
+          properties:
+            connector: {type: string, enum: [reolink]}
+            device: {type: string, description: 'Always camera: one Reolink connection is one camera'}
+            quiet_from: {type: string, description: 'With quiet_to, such as 22:00 and 07:00: the hours, in the automation''s time zone, when nothing is said. The run still notifies.'}
+            quiet_to: {type: string}
+            voice: {type: string, description: 'The voice it speaks in, such as kitten:en:eleanor (#1304, contract 1.112); empty is the one chosen for the language in the Voice settings. One no longer here leaves it to that.'}
+            listen: {type: boolean, description: "Talks with the visitor: greets them with a fixed greeting in the automation's language as soon as the run starts, without looking at the picture first, then hears them through the camera's microphone with reolink-cli and ffmpeg, answers up to 6 times, and the run's result is the visit summed up, then what was said (#667, contract 1.114)"}
+        actions:
+          type: array
+          description: 'Calls the automation may make on its own (#586), such as Home Assistant''s light.turn_on on light.porch. A call that matches one runs without asking, even in a run a trigger started; other calls that change things are skipped. Each argument listed must equal the call''s, ignoring case; a Home Assistant action names its service and entity_id. At most 20. On update, an empty list removes them.'
+          items:
+            type: object
+            required: [tool]
+            properties:
+              tool: {type: string, description: A tool ID, such as homeassistant.call}
+              args: {type: object, additionalProperties: {type: string}, description: 'The arguments that must match, such as {"service": "light.turn_on", "entity_id": "light.porch"}'}
         last_checked_at: {type: string, format: date-time, description: When the trigger last checked and found nothing new}
         hook_set: {type: boolean, description: 'A webhook trigger has a link; POST /api/v1/automations/{id}/hook makes a new one'}
         created_at: {type: string, format: date-time}
@@ -8904,7 +9416,8 @@ components:
       properties:
         id: {type: string}
         name: {type: string}
-        description: {type: string}
+        description: {type: string, description: Written for the model}
+        summary: {type: string, description: 'A short description for people (#1254); empty is description'}
         capability: {type: string}
         source: {type: string}
         risk: {type: string, enum: [read, create, write]}
@@ -9092,6 +9605,13 @@ components:
         route_id: {type: string}
         relay: {type: string, description: "The relay it's reached through, such as relay.toskar.ai"}
         token: {type: string, description: "This computer's token for the relay, for every paired device on the home network"}
+    DeviceToken:
+      type: object
+      required: [token]
+      properties:
+        token:
+          type: string
+          description: This computer's device token for Toskar's relay, or "" when it has none.
     DeviceRoute:
       type: object
       description: "How a paired device finds this computer away from home (#456)."
@@ -9281,6 +9801,8 @@ components:
         context: {$ref: '#/components/schemas/ContextUsage'}
         backend: {type: string, description: '`backend` and Device ran the answer, such as vulkan and "AMD Radeon RX 7900 XTX", or cpu and "" (#317, contract 1.8), so a client such as the iPhone app can say whether it came from the GPU. Empty when not known, such as when a step ran on a paired computer.'}
         device: {type: string}
+        model: {type: string, description: 'The model that wrote the answer, as shown to the user, such as "Llama 3.2 1B" (toskar-apps#447, contract 1.109).'}
+        computer: {type: string, description: 'The computer the answer ran on, such as "Studio". Empty when the turn''s steps ran on more than one computer.'}
         automation: {$ref: '#/components/schemas/AutomationDraft'}
         automation_run: {$ref: '#/components/schemas/AutomationRun'}
         deliberation:
@@ -9673,6 +10195,18 @@ components:
         models:
           type: array
           items: {$ref: "#/components/schemas/StoreModel"}
+    LicenseAcceptance:
+      type: object
+      description: Someone accepting a model's license terms in Toskar (#593, contract 1.103).
+      required: [accepted_at, license_id, license_name, license_url, model_id, person_id]
+      properties:
+        model_id: {type: string}
+        license_id: {type: string}
+        license_name: {type: string}
+        license_url: {type: string}
+        person_id: {type: string}
+        person_name: {type: string}
+        accepted_at: {type: string, format: date-time}
     StoreModel:
       allOf:
         - $ref: "#/components/schemas/BrowseModel"
@@ -9680,7 +10214,9 @@ components:
           properties:
             likes: {type: integer}
             created_at: {type: string, format: date-time}
-            license: {type: string, description: "The license Hugging Face lists, such as apache-2.0"}
+            license: {type: string, description: "The license Hugging Face lists, such as apache-2.0, or the catalog's license name for a tested model"}
+            commercial: {type: string, enum: ["yes", limited, "no"], description: "Whether a business may use it, from the catalog's checked license or a license Hugging Face lists that says. Absent when unknown (#593, contract 1.102)."}
+            license_kind: {type: string, enum: [free, conditions], description: "Free, or free with conditions. Absent when the license is unknown."}
             details_url: {type: string, description: "The model's page"}
             fit: {$ref: "#/components/schemas/ModelFit"}
             catalog_id: {type: string, description: "Its entry in Toskar's catalog, tested with Toskar, installed by this ID. Empty for everything else."}
@@ -9943,6 +10479,26 @@ components:
             properties:
               connector: {type: string}
               device: {type: string}
+        say:
+          type: object
+          description: 'Speaks each run''s answer through a camera''s speaker (#667, contract 1.110), such as a Reolink doorbell''s, read by this computer''s voice. The run is told its answer is spoken and answers NOTHING when nobody is there, and then nothing is said. Only an Admin or the Owner sets it. On update, one with no connector stops speaking.'
+          required: [connector, device]
+          properties:
+            connector: {type: string, enum: [reolink]}
+            device: {type: string, description: 'Always camera: one Reolink connection is one camera'}
+            quiet_from: {type: string, description: 'With quiet_to, such as 22:00 and 07:00: the hours, in the automation''s time zone, when nothing is said. The run still notifies.'}
+            quiet_to: {type: string}
+            voice: {type: string, description: 'The voice it speaks in, such as kitten:en:eleanor (#1304, contract 1.112); empty is the one chosen for the language in the Voice settings. One no longer here leaves it to that.'}
+            listen: {type: boolean, description: "Talks with the visitor: greets them with a fixed greeting in the automation's language as soon as the run starts, without looking at the picture first, then hears them through the camera's microphone with reolink-cli and ffmpeg, answers up to 6 times, and the run's result is the visit summed up, then what was said (#667, contract 1.114)"}
+        actions:
+          type: array
+          description: 'Calls the automation may make on its own (#586), such as Home Assistant''s light.turn_on on light.porch. A call that matches one runs without asking, even in a run a trigger started; other calls that change things are skipped. Each argument listed must equal the call''s, ignoring case; a Home Assistant action names its service and entity_id. At most 20. On update, an empty list removes them.'
+          items:
+            type: object
+            required: [tool]
+            properties:
+              tool: {type: string, description: A tool ID, such as homeassistant.call}
+              args: {type: object, additionalProperties: {type: string}, description: 'The arguments that must match, such as {"service": "light.turn_on", "entity_id": "light.porch"}'}
         last_checked_at: {type: string, format: date-time}
         hook_set: {type: boolean}
         created_at: {type: string, format: date-time}
@@ -9989,6 +10545,40 @@ components:
           type: array
           description: '`notes` say what was assumed, such as a time of day when none was given.'
           items: {type: string}
+        trigger:
+          type: object
+          description: 'For a request that says it runs when something happens, such as the doorbell ringing (#1341, contract 1.115): the device that starts it'
+          required: [kind]
+          properties:
+            kind: {type: string, enum: [device]}
+            url: {type: string}
+            path: {type: string}
+            automation_id: {type: string}
+            when: {type: string}
+            connector: {type: string}
+            device: {type: string}
+            to: {type: string}
+            cooldown_seconds: {type: integer}
+        cameras:
+          type: array
+          description: The cameras it looks at as each run starts, read from the request (#1341)
+          items:
+            type: object
+            required: [connector, device]
+            properties:
+              connector: {type: string}
+              device: {type: string}
+        say:
+          type: object
+          description: 'Speaking at the door, for a request to greet or answer the visitor (#1341): connector reolink and device camera, and listen to talk with them'
+          required: [connector, device]
+          properties:
+            connector: {type: string, enum: [reolink]}
+            device: {type: string}
+            quiet_from: {type: string}
+            quiet_to: {type: string}
+            voice: {type: string}
+            listen: {type: boolean}
     AutomationRunInfo:
       type: object
       description: The durable record for one occurrence of an automation.
@@ -10071,6 +10661,7 @@ components:
               secret: {type: boolean, description: '`secret` values are stored in the secrets directory and never shown again.'}
               optional: {type: boolean}
               placeholder: {type: string}
+              advanced: {type: boolean, description: Folded under Advanced in the form; most people leave it.}
         connected: {type: boolean}
         status: {type: string}
         account: {type: string}
@@ -10091,6 +10682,7 @@ components:
               id: {type: string}
               name: {type: string}
               description: {type: string}
+              summary: {type: string, description: 'Summary is a short description for people, where Description is written for the model (#1254). Empty is Description.'}
               capability: {type: string}
               source: {type: string}
               schema: {type: string}
@@ -10454,6 +11046,12 @@ components:
               heap_bytes: {type: integer, format: int64, description: Memory in use by Go objects; SysBytes is all the memory the Go runtime holds from the system.}
               sys_bytes: {type: integer, format: int64}
         interval_seconds: {type: integer, description: 'How often a sample is kept, in seconds.'}
+    NextTLSInfo:
+      type: object
+      properties:
+        fingerprint:
+          type: string
+          description: SHA-256 of the next certificate, as "sha256:<hex>"
     TLSInfo:
       type: object
       description: How the API speaks HTTPS.

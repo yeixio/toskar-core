@@ -128,6 +128,13 @@
     "fitsOther": "{{model}} passt auf diesen Computer.",
     "installOther": "{{model}} installieren"
   },
+  "newer": {
+    "title": "{{model}} ist neuer.",
+    "fit": "So passt es auf diesen Computer: {{fit}}.",
+    "license": "Seine Lizenz ist eine andere: {{license}}.",
+    "install": "{{model}} installieren",
+    "beside": "Es wird neben diesem installiert, und Profile behalten ihr Modell, bis du sie änderst."
+  },
   "capability": {
     "noWeb": "Mit der aktuellen Konfiguration ist kein Live-Webzugriff verfügbar.",
     "noTools": "{{model}} kann keine Werkzeuge nutzen und das daher nicht nachschlagen. Wechsle zu einem Modell mit Werkzeugen, etwa einem der folgenden.",
@@ -153,7 +160,9 @@
     "parameters": "Parameter",
     "format": "Format",
     "runtime": "Laufzeit",
-    "modelId": "Modell-ID"
+    "modelId": "Modell-ID",
+    "download": "Download",
+    "memoryNeeded": "Benötigter Arbeitsspeicher"
   },
   "tightFit": {
     "label": "Passt knapp",
@@ -454,9 +463,11 @@
         "hint": "Modelle, die wir mit Toskar geprüft haben."
       },
       "media": {
-        "title": "Bilder und Clips",
-        "hint": "Bilder und Clips werden unter Werkzeuge eingerichtet.",
-        "action": "Werkzeuge öffnen"
+        "title": "Bilder und Clips"
+      },
+      "search": {
+        "title": "Von Hugging Face",
+        "hint": "Uploads, die zu deiner Suche passen, jeder einmal."
       }
     },
     "purpose": {
@@ -474,9 +485,32 @@
       "tested": "Mit Toskar getestet.",
       "untested": "Von Hugging Face. Es wurde nicht mit Toskar getestet und funktioniert daher vielleicht weniger gut oder gar nicht. Prüfe vor der beruflichen Nutzung die Lizenz.",
       "link": "Auf Hugging Face ansehen",
-      "close": "Schließen"
+      "close": "Schließen",
+      "business": "Geschäftliche Nutzung",
+      "businessYes": "Erlaubt",
+      "businessLimited": "Erlaubt, in den Grenzen der Lizenz",
+      "businessNo": "Nicht erlaubt: nur private, wissenschaftliche oder andere nicht kommerzielle Nutzung",
+      "businessUnknown": "Unbekannt: Prüfe die Lizenz, bevor du es beruflich nutzt"
     },
-    "bestOverall": "Beste Wahl"
+    "bestOverall": "Beste Wahl",
+    "license": {
+      "free": "Kostenlos",
+      "conditions": "Kostenlos mit Bedingungen",
+      "unknown": "Lizenz unbekannt"
+    },
+    "business": {
+      "label": "Für geschäftliche Nutzung",
+      "hint": "Nur Modelle zeigen, deren Lizenz geschäftliche Nutzung erlaubt.",
+      "none": "Hier gibt es keine Modelle, deren Lizenz geschäftliche Nutzung erlaubt."
+    },
+    "browse": {
+      "label": "Nach Kategorie durchsuchen",
+      "all": "Alle",
+      "chat_coding": "Chat und Programmieren",
+      "vision": "Sieht Bilder",
+      "creative": "Bilder und Clips",
+      "hint": "Bild- und Clip-Modelle erstellen und bearbeiten Bilder und kurze Videos auf diesem Computer."
+    }
   },
   "results": {
     "loading": "Ergebnisse werden geladen…",
@@ -533,5 +567,17 @@
       "window": "Über sein Fenster hinaus",
       "out_of_memory": "Passt nicht"
     }
+  },
+  "licenseTerms": {
+    "title": "Lizenz von {{model}} akzeptieren",
+    "body": "{{model}} steht unter der {{license}}, deren Bedingungen du zustimmst, bevor du es nutzt.",
+    "read": "{{license}} lesen",
+    "record": "Toskar speichert für deinen Admin, dass und wann du zugestimmt hast.",
+    "cancel": "Abbrechen",
+    "accept": "Akzeptieren und installieren"
+  },
+  "size": {
+    "download": "{{size}} Download",
+    "downloadMemory": "{{size}} Download · ca. {{memory}} Arbeitsspeicher"
   }
 }

@@ -32,16 +32,18 @@
     "endpoint": "端点",
     "localAddress": "本地地址：<mono>{{address}}</mono>",
     "lanEndpoint": "局域网端点",
-    "lanHint": "使用这台电脑的局域网 IP 和端口 <mono>{{port}}</mono>（例如 <mono>https://192.168.x.x:{{port}}/v1</mono>）。",
+    "lanHint": "使用这台电脑的局域网 IP 和端口 <mono>{{port}}</mono>（例如 <mono>{{scheme}}://192.168.x.x:{{port}}/v1</mono>）。",
     "https": "已用 HTTPS 加密。证书 <mono>{{short}}</mono>。",
     "httpsCustom": "已用你的证书 <mono>{{short}}</mono> 进行 HTTPS 加密。",
     "httpsTrust": "浏览器或应用第一次会询问是否信任此证书。请确认它的 SHA-256 指纹以 {{short}} 开头。",
     "httpsError": "无法使用你的证书，因此改用 Toskar 自己的证书：{{error}}",
     "hideDocs": "隐藏 API 文档",
     "docs": "API 文档",
-    "docsBody": "Toskar 在 <mono>/v1</mono> 提供兼容 OpenAI 的 API。将客户端指向上面的端点；当其他电脑可以访问 Toskar 时，请发送 <header/>。`/api/v1` 和 `/v1` 都需要这个请求头。局域网端点使用 HTTPS 加密传输内容；仅有密钥并不会加密普通 HTTP。",
+    "docsBody": "Toskar 在 <mono>/v1</mono> 提供兼容 OpenAI 的 API。将客户端指向上面的端点；当其他电脑可以访问 Toskar 时，请发送 <header/>。`/api/v1` 和 `/v1` 都需要这个请求头。",
     "copied": "已复制",
-    "copyUrl": "复制 URL"
+    "copyUrl": "复制 URL",
+    "docsHttps": "局域网端点使用 HTTPS 加密传输内容。",
+    "docsHttp": "局域网端点使用普通 HTTP，传输内容不会加密：密钥只决定谁能访问，并不加密任何内容。"
   },
   "lan": {
     "title": "局域网访问",
@@ -70,6 +72,7 @@
       "devices": "手机和平板",
       "devicesHow": "用 6 位验证码连接。",
       "devicesCount_other": "已连接 {{formatted}} 台",
+      "devicesStale_other": "{{formatted}} 个最近未使用",
       "devicesAction": "连接设备",
       "apps": "应用和脚本",
       "appsHow": "使用下方创建的 API 密钥。",
@@ -78,7 +81,7 @@
   },
   "keys": {
     "title": "API 密钥",
-    "description": "供与 Toskar 通信的应用和设备使用的凭据。",
+    "description": "供与 Toskar 通信的应用和脚本使用的凭据。手机和平板在“设备”中。",
     "create": "创建 API 密钥",
     "createHint": "为这个密钥命名，以便知道是谁在使用它。",
     "namePlaceholder": "VS Code",
@@ -101,9 +104,7 @@
   },
   "advanced": {
     "title": "高级",
-    "bind": "绑定地址",
-    "port": "端口",
-    "host": "已配置的主机"
+    "bind": "绑定地址"
   },
   "permissions": {
     "summary": "此密钥可以使用的内容",
@@ -159,7 +160,9 @@
     "none": "还没有设备。",
     "meta": "连接于 {{connected}} · 上次使用 {{lastUsed}}",
     "confirmDisconnect": "断开 {{name}}？再次连接需要新的代码。",
-    "disconnect": "断开"
+    "disconnect": "断开",
+    "neverUsed": "从未使用",
+    "unused": "90 天未使用"
   },
   "remote": {
     "title": "随处访问",
@@ -266,6 +269,7 @@
     },
     "subscription": {
       "title": "Toskar 中继",
+      "titleOther": "{{relay}} 上的订阅",
       "offer": "当其他方式都无法连到这台电脑时，Toskar 中继可以连到它，适用于这台电脑及与其配对的每台设备。",
       "monthly": "以每月 {{price}} 订阅",
       "yearly": "以每年 {{price}} 订阅",
@@ -296,7 +300,24 @@
       "moveHere": "移到这台电脑",
       "moveTooSoon": "订阅每天只能移到其他电脑一次。请明天再试。",
       "renewalNotYet": "App Store 尚未确认你的续订。请过几分钟后选择“恢复购买”。",
-      "storeFailed": "购买未完成：{{message}}"
-    }
+      "storeFailed": "购买未完成：{{message}}",
+      "cancel": "取消付款",
+      "cancelling": "正在取消…",
+      "turnOnFirst": "请先打开上方的“随处访问”再订阅。",
+      "endedRevoked": "Toskar 的中继不再接受这台电脑的订阅：它已移到另一台电脑或已退款。要继续使用 Toskar 的中继，请重新订阅。",
+      "endedBlocked": "Toskar 的中继已屏蔽这台电脑。请联系支持了解原因。",
+      "grant": "已授予访问权限，有效期至 {{date}}。",
+      "grantOpen": "已授予访问权限。",
+      "moveStripe": "移到这台电脑",
+      "moving": "正在移动…",
+      "inUseStripe": "这个订阅绑定在另一台电脑上，例如这台电脑数据的来源电脑。把它移到这里后，那台电脑将不再使用 Toskar 的中继。"
+    },
+    "relayErrors": {
+      "TOKEN_REVOKED": "{{relay}} 不再接受这台电脑的订阅。请重新订阅，或在 Toskar App 中把订阅移到这台电脑。",
+      "ROUTE_BLOCKED": "{{relay}} 已屏蔽这台电脑。请联系支持了解原因。",
+      "TOKEN_EXPIRED": "这台电脑通过 {{relay}} 的访问已到期。要继续使用，请重新订阅。",
+      "TOKEN_INVALID": "{{relay}} 不接受这台电脑的令牌。请重新订阅，或在 Toskar App 中重新连接。"
+    },
+    "offHint": "打开后，Toskar 会请路由器打开端口 {{port}}，该端口只响应与这台电脑配对的设备。你也可以改用转发的端口或中继。无需打开本地网络访问。"
   }
 }

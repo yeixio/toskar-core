@@ -12,7 +12,15 @@
     "memory": "記憶體",
     "graphics": "顯示卡",
     "system": "系統",
-    "unavailable": "Toskar 啟動後會顯示硬體詳細資訊。你現在可以繼續設定。"
+    "unavailable": "Toskar 啟動後會顯示硬體詳細資訊。你現在可以繼續設定。",
+    "os": {
+      "macAppleSilicon": "macOS，Apple 晶片",
+      "macIntel": "macOS，Intel",
+      "windows": "Windows",
+      "windowsArm": "Windows（Arm）",
+      "linux": "Linux",
+      "linuxArm": "Linux（Arm）"
+    }
   },
   "question": "你希望你的 AI 做些什麼？",
   "purposes": {
@@ -35,6 +43,7 @@
   },
   "continue": "繼續",
   "finding": "正在尋找合適的配置…",
+  "findingDetail": "正在檢查這台電腦的記憶體和顯示卡，以及適合的模型…",
   "recommendFailed": "無法取得建議。",
   "recommend": {
     "badge": "建議",
@@ -47,7 +56,8 @@
     "install": "安裝建議配置",
     "use": "使用此設定",
     "skip": "暫時略過",
-    "back": "返回"
+    "back": "返回",
+    "fits": "{{name}} 適合這台電腦的 {{memory}} 記憶體。"
   },
   "roles": {
     "coordinator": "協調者",
@@ -74,5 +84,6 @@
     "title": "一切就緒",
     "description": "建議配置已安裝完成。開始和你的本機 AI 聊天吧。",
     "start": "開始聊天"
-  }
+  },
+  "setupLater": "稍後設定"
 }

@@ -592,7 +592,7 @@
         },
         {
           "type": "paragraph",
-          "text": "Under each answer, Sources lists the web pages, knowledge passages, files, and memories it used. What I did lists the model that answered and why, the searches and pages it read, and anything that went wrong."
+          "text": "Under each answer, Sources lists the web pages, knowledge passages, files, and memories it used. What I did lists the model that answered and why, the searches and pages it read, and anything that went wrong. In the Toskar app on a phone, each answer from your computer says which model wrote it and on which computer, such as Llama 3.2 1B on Studio."
         },
         {
           "type": "paragraph",
@@ -1589,7 +1589,7 @@
         },
         {
           "type": "paragraph",
-          "text": "Open Models in the sidebar. Choose the computer in Models for, since a model is installed on one computer and fits its memory. Recommended starts with a model we've tested, marked Best overall, then the most popular models on Hugging Face that run well on that computer. Under them, the Store has shelves of models that run on your computer: popular now, top rated, new, everyday, good for code, sees pictures, small and fast, and tested by Toskar. Choose a model's name for its license and a link to its page on Hugging Face."
+          "text": "Open Models in the sidebar. Choose the computer in Models for, since a model is installed on one computer and fits its memory. Recommended starts with a model we've tested, marked Best overall, then the most popular models on Hugging Face that run well on that computer. Under them, the Store has shelves of models that run on your computer: popular now, top rated, new, everyday, good for code, sees pictures, small and fast, and tested by Toskar. Browse by category narrows the Store to Chat and coding or Sees pictures, and Pictures and clips sets up picture and clip models right there, as the Tools page does. Each model says whether it's Free, for any use including a business's, Free with conditions, such as a license to accept, credit to give, limits on business use, or non-commercial use only, or License unknown. Turn on For business use to see only models whose license allows a business to use them; one whose license is unknown isn't shown, so check it yourself first. Choose a model's name for its license, what it allows a business, and a link to its page on Hugging Face. Toskar checks the license of every model it has tested by hand; for the others, it goes by the license Hugging Face lists. This isn't legal advice: read the license before you rely on it. Some models, such as Gemma and Llama, have license terms you agree to before you use them. Installing one from Models shows its terms first, with a link to the whole license: read them, then choose Accept and install. Toskar keeps a record of who accepted which license and when, for the Admin."
         },
         {
           "type": "image",
@@ -1637,6 +1637,10 @@
         {
           "type": "paragraph",
           "text": "Agents at once, in the same menu, lets a swarm run up to 4 agents on one model at the same time, instead of one after another. It starts at 1. Each agent gets an equal share of the model's context, and the share stays as big as the context window above, so the model uses more memory: about one more context window's worth for each agent. Toskar refuses a number that would leave an agent less than 8K of context, or that wouldn't fit your computer's memory, and says which. A model that's running reloads with the new number on its next message. Agents that share a model each answer a little slower than one alone, but together they usually finish sooner."
+        },
+        {
+          "type": "paragraph",
+          "text": "When a newer model replaces one you have installed, such as Qwen 3.5 4B for Qwen 2.5 3B, Installed says so under the one you have: which is newer, how it fits this computer, and whether its license differs. Install puts it beside the one you have, and profiles and automations keep the model they use until you change them. Admins also get one notification for each new generation, such as Newer Qwen models are available. Turn it off in Settings › Notifications."
         },
         {
           "type": "image",
@@ -2025,6 +2029,10 @@
           "text": "With no tools chosen, a run can use the read-only tools the profile allows. Tools you choose are approved when you save, and ones that change things are listed apart. A run that reaches a tool you didn't approve skips it, finishes, and sends a notification naming the tool."
         },
         {
+          "type": "paragraph",
+          "text": "When a webhook, a device, a page, or a camera starts a run, what it delivered was written by someone else, so the run skips every tool that changes things, even ones you approved. Actions it may take on its own lifts that for exact calls you pick: under Advanced, choose a Home Assistant device and what to do, such as Turn on with the porch light, then Allow. A call that matches runs without asking, and any other is still skipped, so a sign held up to the doorbell camera can't unlock the door. The run's history says which actions it took. Choose only what you'd let it do with nobody watching."
+        },
+        {
           "type": "heading",
           "text": "Hear the latest result in chat"
         },
@@ -2141,15 +2149,17 @@
         "Internet searches DuckDuckGo and reads public pages. Files finds, reads, and writes workspace files. Terminal runs commands. Git inspects a repository, commits, and pushes. Files you can download are made with files.create, which writes only to Toskar's own file store. After an answer reads a web page or a file, a tool that changes something asks first even when the profile allows it, because retrieved content is data, not instructions. Text on a page or in a file that gives orders to an AI, such as “ignore your instructions”, is left out before the model reads it.",
         "Each message is offered only the tools it needs: web search for current questions, files for a file or folder, the terminal for “run” or “install”, Git for “commit”. A plain question gets no tools. The model cannot call a tool it was not offered. How many tool calls a message may make depends on effort: 3 on Fast, 10 on Balanced, and 16 on Thorough.",
         "Connected services add tools for GitHub, Home Assistant, email, and your calendar. Connect them on the Tools page, on the Add more tab under Connected services, with a token. For email and calendar, give your mail server, CalDAV address, and an app password from your provider (Fastmail, iCloud, Proton Mail Bridge, Nextcloud, or your own server; Gmail and Outlook if they allow app passwords). Then ask \"Anything from Sam this week?\" or \"Am I free Thursday afternoon?\"; Toskar asks before sending, archiving, or changing an event; Toskar checks it, stores it apart from the database, and adds it only when a tool runs, so it is never shown to the model. Reading is allowed and changes ask first unless a profile says otherwise.",
+        "Flight status answers \"What gate is AA3595 leaving from?\" or \"Is UA 912 on time?\" with the gate, terminal, scheduled and expected times, how late it is, and the baggage belt, from AeroDataBox. It needs your own AeroDataBox key: sign up on API.market or RapidAPI (the free tier covers a few look-ups a day), then connect Flight status under Connected services and paste the key. A RapidAPI key also needs the API address https://aerodatabox.p.rapidapi.com. Each look-up sends the flight's number and date to AeroDataBox, and What left this computer lists it. Without a key, flight questions use web search, which rarely knows the gate.",
+        "Reolink camera connects to a Reolink camera or doorbell on your network, straight through the camera, with no hub software or cloud. Connect it under Connected services with the camera's address, a user, and its password. A doorbell paired to a Home Hub uses the hub's address and its channel there, starting from 0. An automation can then look at the camera as it runs, or start when the camera sees a person or someone rings the doorbell. It can also speak through the doorbell: install Reolink's reolink-cli on this computer, and Toskar uses it with the connection's own address, channel and login, with nothing more to set up. With a doorbell connected, Automations offers Answer the door, and Connected services links to it: it starts when someone rings, looks at the camera, and talks with the visitor. Describing it works too, such as \"When someone rings the doorbell, greet them and tell me who is there.\" Then an Admin's automation can choose Say the answer at the door, the voice it speaks in, and quiet hours when it only notifies. Toskar says nothing when the picture shows nobody to talk to, unless someone rang the doorbell. You're told who came and what was said at the door. Choose Talk with the visitor and Toskar greets them the moment it sees them, without looking at the picture first, so someone passing by hears the greeting too. Then it listens through the doorbell's microphone and takes turns: it finds out who came and why, up to six answers, and never says whether anyone is home or offers to open the door. It doesn't listen while it speaks. After saying goodbye it still listens for a minute, in case the visitor has more to say. When the visit ends, you're notified with a short summary and what was said. Hearing the doorbell needs ffmpeg on this computer as well; on a Mac, brew install ffmpeg. Toskar starts reolink-cli's gateway, at 127.0.0.1:9000, if it isn't running, and restarts it when it stops reaching the doorbell.",
         "MCP servers add more tools. On the Tools page, the Add more tab's Add tools offers a gallery of servers, servers already set up in your other apps, pasted configuration, or a custom server. Tool sources lists each server, its tools, its log, and a Sign in action for servers that sign in with a browser. Other AI apps can use Toskar too: API Access → Use Toskar in other AI apps shows what to paste into Claude Desktop, Claude Code, Cursor, VS Code, and other apps.",
         "Ask for a Word document, a PDF, or a spreadsheet and Toskar makes it, ready to download: documents and PDFs from formatted text with headings, lists, and tables, and spreadsheets with several sheets and formulas. Attach a spreadsheet and ask about it, such as \"What is the total by region?\", and Toskar reads the whole file, not just the part that fits in the prompt.",
         "In advanced mode, the Tools page shows each tool's level (1 is low risk on this computer, 4 runs commands or code), what it returns, its time limit, and whether it is ready. It also lists recent calls: what each was about, how it was allowed, and how it ended.",
         "Ask Toskar to calculate, analyze, or chart something, such as \"Plot monthly sales from sales.xlsx\", and it can write and run Python in a sandbox: it has no internet, sees only the files from the chat it is given, and stops after 90 seconds. Charts and files it makes are attached to the answer. It asks before running unless the profile allows it, and the first run installs Python with numpy, pandas, and matplotlib. On macOS it uses the built-in sandbox; on Linux it needs bubblewrap; on Windows it is not available yet.",
         "For pages that need clicking or typing, Toskar can use a browser: \"Go to the library's site and find this week's events\". It runs the Chrome, Edge, Chromium, or Brave already on your computer in a fresh, separate profile, never your own sign-ins, and it can't reach anything on your own network. It asks before clicking, typing, or downloading, never types passwords or payment details, and can attach a screenshot so you see what it sees.",
-        "Ask about places, such as \"Coffee near the Juneau library\", \"How far is the airport from downtown?\", or \"Walking directions from the ferry terminal to the capitol\", and Toskar looks them up with OpenStreetMap: names, addresses, opening hours, distances in your units, and turn-by-turn directions. Each lookup appears in What left this computer.",
+        "Ask about places, such as \"Coffee near the Juneau library\", \"How far is the airport from downtown?\", or \"Walking directions from the ferry terminal to the capitol\", and Toskar looks them up with OpenStreetMap: names, addresses, opening hours, distances in your units, and turn-by-turn directions. Each lookup appears in What left this computer. To ask \"Coffee near me?\" or \"What's the weather?\" without naming a place, type your town under Settings → Personalization → Your location. It's used only for questions about nearby places, weather, and directions, and the answer says when it used it.",
         "Attach a voice memo or recording and ask what it says, and Toskar transcribes it on this computer. Answers have a Read aloud button, and you can ask for something to be read aloud as an audio file. Audio plays right in the chat. The first time, Toskar installs speech and downloads a voice or speech model; after that it works offline.",
         "Toskar can make images on this computer, and change them: ask for \"a watercolor of a lighthouse at dusk\", or attach a photo and ask to \"make it night\". Set it up once, from the chat when you first ask for an image or from the Tools page's Images and video tab: it recommends a model for your computer (a 5.2 GB download for most) and shows the download as it goes. After that, images are made offline, and nothing is sent anywhere. It works on Macs with Apple silicon; on Linux and Windows it runs on the processor, which is much slower. With a paired computer that has it set up, such as a Mac Studio, a laptop without it can ask for images too: the work runs there, and Diagnostics shows which computer can run what.",
-        "Toskar can make short video clips too: ask for \"a short video of waves rolling onto a beach\", or attach a photo and ask to bring it to life. Set it up once, from the chat or the Tools page's Images and video tab (an 8.5 GB download, for computers with 16 GB of memory or more). A clip of a few seconds takes several minutes, and it plays right in the chat."
+        "Toskar can make short video clips too: ask for \"a short video of waves rolling onto a beach\", or attach a photo and ask to bring it to life. Set it up once, from the chat or the Tools page's Images and video tab (an 8.5 GB download, for computers with 16 GB of memory or more). A clip of a few seconds takes several minutes, and it plays right in the chat. To make it longer, ask \"Continue the clip: now a surfer paddles out\" or \"Make the clip longer\": the next part starts from the clip's last frame, and the two are joined into one clip. Each part adds up to 5 seconds. For a longer video, such as \"a 1-minute video of a day at the beach\", Toskar plans it as shots of up to 5 seconds and shows you the shots and about how long they take before anything is made. Each shot starts from the last frame of the one before, and they're joined into one video. A minute takes hours, so it's best left running."
       ],
       "kind": "task",
       "summary": "Choose what Toskar may do besides answering, such as searching the web, reading and writing files, or running code, and when it asks you first.",
@@ -2414,6 +2424,10 @@
           "text": "Describe a clip, such as \"a short video of waves rolling onto a beach\", or attach a picture and ask to bring it to life. A clip takes several minutes, and it plays in the chat."
         },
         {
+          "type": "paragraph",
+          "text": "Ask for something longer, such as \"a 1-minute video of a day at the beach\", and Toskar plans it as a series of shots of up to 5 seconds, at most 24. Before anything is made, you see each shot and about how long it takes on this computer, going by the last clip it made, and you choose Allow or Deny. Each shot starts from the last frame of the one before, and a line about the look is added to every shot so faces, clothes, and colors stay closer. While it runs, the chat says which shot it's on. Stop ends it. If a shot fails partway, the shots made so far are kept as one video, and you can continue it from there."
+        },
+        {
           "type": "table",
           "columns": [
             "Setting",
@@ -2518,6 +2532,124 @@
             "models",
             "chat",
             "gpu"
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Use your own ComfyUI"
+        },
+        {
+          "type": "paragraph",
+          "text": "If you already run ComfyUI, here or on another computer, an Admin can connect it and save its workflows, such as an upscale or pictures in a set style. Chats run them with the ComfyUI Workflow tool, and what they make is attached to the answer like Toskar's own pictures and clips. The built-in models stay the default."
+        },
+        {
+          "type": "steps",
+          "items": [
+            "In ComfyUI, open the workflow and choose Workflow › Export (API). This saves the workflow as a JSON file.",
+            "In Toskar, open Tools › Images and video › ComfyUI. Enter its address, such as http://127.0.0.1:8188, and a token if it asks for one, then choose Save and check. The card shows ComfyUI's version, its graphics, and how many models it has.",
+            "Under Workflows, choose the exported file. Toskar finds its prompt, negative prompt, seed, picture, and size inputs and shows them. Give it a short name, such as upscale, and say what it does, then choose Add workflow.",
+            "In a chat, ask for it by what it does, such as \"Upscale the picture with my ComfyUI\" or \"Use the watercolor workflow: a lighthouse at dusk\"."
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Custom nodes run their own code on the computer that runs ComfyUI, so only an Admin can connect one, and Toskar never installs anything into it. When ComfyUI is on another computer, the prompt and any picture you give it go there, and What left this computer lists each run. A profile that keeps work on this computer doesn't use a ComfyUI elsewhere."
+        }
+      ]
+    },
+    {
+      "id": "voice",
+      "title": "Talk with Toskar out loud",
+      "kind": "task",
+      "summary": "Have a spoken conversation with Toskar: you talk, it answers in a natural voice, and you can talk over it to stop it.",
+      "paragraphs": [
+        "Voice mode is a conversation out loud, like a phone call. You speak, Toskar hears when you've stopped, and it answers in a voice a sentence at a time, so the first words play while the rest is still being written.",
+        "Everything runs on your own computers: hearing what you said, the answer, and the voice. Nothing is sent to an outside service. The conversation is kept in your chats as Voice chat."
+      ],
+      "blocks": [
+        {
+          "type": "list",
+          "title": "What you need",
+          "items": [
+            "Toskar 1.14 or later, from outside the Mac App Store. Voice mode runs speech on this computer, which that build can't install.",
+            "A chat model, as [Choose and manage models](#models) explains.",
+            "A microphone and speakers or headphones. Headphones keep the answer from sounding like you talking over it.",
+            "The Toskar app, or a web address the browser trusts with a microphone: Toskar on this computer, at localhost, or at its https:// address from another device.",
+            "Your role allowed to use voice, which an Admin sets in [People](#people).",
+            "A download the first time: speech for hearing you, and about 120 MB for the natural voice. After that it works offline."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Start a conversation"
+        },
+        {
+          "type": "steps",
+          "items": [
+            "In a chat, choose Talk, the button with sound bars beside Send.",
+            "When your browser asks, allow Toskar to use the microphone. In the Toskar app on a Mac, macOS asks the first time.",
+            "Wait for Listening, then speak as you would to a person.",
+            "Pause when you're done. Toskar answers out loud, and the words appear as it speaks.",
+            "To stop an answer, just start talking. Toskar stops and listens.",
+            "Choose Mute to turn the microphone off for a moment, and End when you're done."
+          ]
+        },
+        {
+          "type": "image",
+          "screen": "voice-mode",
+          "alt": "Voice mode over a chat, speaking. It shows the question about a hike near Juneau, the start of the answer, and Answered 1.1 s after you stopped",
+          "caption": "Voice mode shows what it heard and what it's saying. The line at the bottom is how long you waited for the first word."
+        },
+        {
+          "type": "heading",
+          "text": "The voice"
+        },
+        {
+          "type": "paragraph",
+          "text": "Toskar answers in Kokoro, a natural-sounding voice, in English, Spanish, French, Italian, and Portuguese. Other languages, such as German, Japanese, Korean, and Chinese, use Piper, the voice Read aloud uses. The first time, Kokoro downloads in the background, and Piper speaks until it's ready."
+  },
+  {
+   "type": "heading",
+   "text": "Choose the voices"
+  },
+  {
+   "type": "paragraph",
+   "text": "An Admin chooses the voice for each language in Settings, under Voice. Pick one from the list, or leave it on Automatic. Preview plays a sentence in that language. The choice applies to voice mode, answers read aloud on your phone and in the car, and the doorbell."
+  },
+  {
+   "type": "paragraph",
+   "text": "Kitten TTS 2 mini adds more natural voices in 15 languages, including German, Korean, Russian, Dutch, and Hindi. To add it, choose Install next to it under Voice. It downloads its program and voices, about 1.5 GB, and takes a minute or two. It runs on the processor and uses about 1 GB of memory while it speaks, which it frees after 10 quiet minutes. Once it's installed, Automatic uses Kitten for the languages Kokoro doesn't speak. Its voices are Powered by KittenML, under the Apache-2.0 license. Installing it also sets up listening for voice mode, so the first conversation doesn't wait for downloads. Choose Remove to delete it, and those languages go back to Piper."
+  },
+  {
+   "type": "paragraph",
+   "text": "Voice also says what's still missing. Voice mode needs a chat model to answer with, and the doorbell needs a model that can see pictures. When none is installed, Voice names the one that fits this computer, with its size, and Install downloads it. An automation that looks at a camera offers the same when you choose the camera."
+        },
+        {
+          "type": "paragraph",
+          "text": "Answers in voice mode are short and spoken: a sentence or two, with no lists, tables, or links. Ask for more and Toskar goes on."
+        },
+        {
+          "type": "heading",
+          "text": "From your own app"
+        },
+        {
+          "type": "paragraph",
+          "text": "Voice mode speaks OpenAI's Realtime protocol over a WebSocket at `/api/v1/voice/realtime`, so an app built for it needs only the address changed. A browser sends the API key as the subprotocol `openai-insecure-api-key.<key>`. The protocol's details are in `docs/voice.md` in Toskar's source."
+        },
+        {
+          "type": "heading",
+          "text": "Troubleshooting"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Talk isn't there: speech isn't set up on this computer yet, or your role doesn't allow voice. Attach a voice memo once to install speech, or ask an Admin.",
+            "This page can't use a microphone: open Toskar at localhost on this computer, or at its https:// address from another device.",
+            "Toskar isn't allowed to use the microphone: allow it in your browser's settings for this page, then start voice mode again.",
+            "It stops answering by itself: the speakers' sound reached the microphone. Use headphones, or turn the volume down.",
+            "The first answer is slow: speech and the voice are loading. Later answers start much sooner.",
+    "Voice isn't in Settings: only an Admin sees it.",
+    "A voice you chose isn't used: it was removed, or it can't read right now. Toskar uses the language's automatic voice instead."
           ]
         }
       ]
@@ -2806,6 +2938,18 @@
           "type": "note",
           "tone": "warning",
           "text": "Topic rules guide the model. No assistant can promise it never strays, so don't rely on them alone to keep private information private."
+        },
+        {
+          "type": "heading",
+          "text": "Talking with visitors"
+        },
+        {
+          "type": "paragraph",
+          "text": "Talks with visitors, on the Topics tab, is for an assistant that strangers talk to, such as one at your front door, a shop counter, or a kiosk. Its chats get nothing about you: not your style, location, or memories, and not what Toskar knows about your computers. It says it's an automated assistant. It never says whether anyone is home, who lives there, or anything about locks, alarms, or cameras. It can't use tools that change things, and it won't open a door for anyone, even someone who says they're the owner."
+        },
+        {
+          "type": "paragraph",
+          "text": "To make one, choose Create profile and start from Front door. It starts with Talks with visitors on, no tools, memory off, and Enforce topics for greeting visitors, deliveries, and taking a message. Change the topics to suit your door."
         },
         {
           "type": "heading",

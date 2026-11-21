@@ -431,6 +431,7 @@ func setupProfile(t *testing.T, ctx context.Context, a *app.App, s Setup) string
 		}
 	}
 	p.Topics = s.Topics
+	p.Audience = s.Audience
 	created, err := a.Profiles.Create(ctx, p)
 	if err != nil {
 		t.Fatal(err)

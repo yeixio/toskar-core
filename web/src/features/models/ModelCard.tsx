@@ -14,6 +14,8 @@ import {
   installAction,
   machineMemoryLabel,
   memoryLabel,
+  downloadBytes,
+  sizeLabel,
   modelToolAssessment,
   languageDetail,
   languageName,
@@ -84,7 +86,7 @@ export function ModelCard({
           <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-current" aria-hidden />
           {fitLabelText(fit?.label) || t('fit.unknown')}
         </span>
-        <span className="tabular-nums">{memoryLabel(model)}</span>
+        <span className="tabular-nums">{sizeLabel(model)}</span>
         {speed ? (
           <>
             <span className="text-ink-faint" aria-hidden>·</span>
@@ -167,7 +169,8 @@ export function ModelCard({
 
       {detailsOpen && (
         <dl className="mt-4 space-y-1 border-t border-line/50 pt-3 text-xs text-ink-muted">
-          <Row label={t('card.modelSize')} value={memoryLabel(model)} />
+          <Row label={t('card.download')} value={formatBytes(downloadBytes(model))} />
+          <Row label={t('card.memoryNeeded')} value={memoryLabel(model)} />
           <Row label={t('card.quantization')} value={fit?.quantization || model.variant || t('card.unknown')} />
           {runtime ? <Row label={t('card.runtimeMemory')} value={runtime} /> : null}
           <Row

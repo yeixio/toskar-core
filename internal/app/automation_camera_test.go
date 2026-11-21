@@ -22,3 +22,11 @@ func TestCamerasNote(t *testing.T) {
 		t.Fatal("a note with no cameras")
 	}
 }
+
+// A Reolink camera, whose device is just camera, is named for its maker
+// (#667).
+func TestCamerasNoteReolink(t *testing.T) {
+	if note := camerasNote([]automations.Camera{{Connector: automations.CameraReolink, Device: "camera"}}); !strings.Contains(note, "the Reolink camera") || strings.Contains(note, "camera camera") {
+		t.Fatalf("note %q", note)
+	}
+}

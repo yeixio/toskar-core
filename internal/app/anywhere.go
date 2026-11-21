@@ -35,6 +35,9 @@ const (
 	// store, and stripeCheckoutName an open one's.
 	stripeSessionName  = "relay-stripe-session"
 	stripeCheckoutName = "relay-stripe-checkout"
+	// stripeCheckoutPage is the open checkout's page and when it expires,
+	// so it's still offered after a restart (#1257).
+	stripeCheckoutPage = "relay-stripe-checkout-page"
 	// defaultBilling is where checkouts and the billing page come from;
 	// TOSKAR_BILLING_URL replaces it, for a test.
 	defaultBilling = "https://yeix.io"
@@ -50,11 +53,14 @@ const (
 )
 
 var (
-	errPlanInvalid  = contracts.NewError("SUBSCRIPTION_PLAN_INVALID", nil, errors.New("the plan is monthly or yearly"))
-	errOwnRelay     = contracts.NewError("SUBSCRIPTION_OWN_RELAY", nil, errors.New("this computer uses its organization's relay; a subscription is for Toskar's relay"))
-	errActive       = contracts.NewError("SUBSCRIPTION_ACTIVE", nil, errors.New("this computer already has access from anywhere"))
-	errNoneHere     = contracts.NewError("SUBSCRIPTION_NONE", nil, errors.New("this computer has no subscription bought in its settings; one bought in the Toskar app is managed in the app's store"))
-	errSoldOut      = contracts.NewError("RELAY_SOLD_OUT", nil, errors.New("the relay isn't taking new subscriptions right now"))
+	errPlanInvalid = contracts.NewError("SUBSCRIPTION_PLAN_INVALID", nil, errors.New("the plan is monthly or yearly"))
+	errOwnRelay    = contracts.NewError("SUBSCRIPTION_OWN_RELAY", nil, errors.New("this computer uses its organization's relay; a subscription is for Toskar's relay"))
+	errActive      = contracts.NewError("SUBSCRIPTION_ACTIVE", nil, errors.New("this computer already has access from anywhere"))
+	errNoneHere    = contracts.NewError("SUBSCRIPTION_NONE", nil, errors.New("this computer has no subscription bought in its settings; one bought in the Toskar app is managed in the app's store"))
+	errSoldOut     = contracts.NewError("RELAY_SOLD_OUT", nil, errors.New("the relay isn't taking new subscriptions right now"))
+	// errCovered is a computer another device's subscription already
+	// covers, though its token hasn't reached this computer yet (#1257).
+	errCovered      = contracts.NewError("SUBSCRIPTION_COVERED", nil, errors.New("another device's subscription already covers this computer"))
 	errInAppOnly    = contracts.NewError("SUBSCRIPTION_IN_APP_ONLY", nil, errors.New("this copy of Toskar is from the App Store, so the subscription is sold in the Toskar app on a phone or tablet"))
 	errBillingReach = func(cause error) error {
 		return contracts.NewError("BILLING_UNAVAILABLE", nil, fmt.Errorf("billing couldn't be reached; try again in a minute: %w", cause))
@@ -74,7 +80,12 @@ type anywhere struct {
 	open      *bool
 	openAt    time.Time
 	asking    bool
-	wake      chan struct{}
+	// prices are the plans' prices from billing, asked at most hourly
+	// while Settings offers them (#1257).
+	prices       map[string]api.PlanPrice
+	pricesAt     time.Time
+	askingPrices bool
+	wake         chan struct{}
 	// For tests: whether this is the App Store's copy, yeix.io, its client,
 	// the relay, and the clock.
 	inAppOnly    *bool
@@ -203,6 +214,17 @@ func (a *App) startCheckout(ctx context.Context, plan string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	// Asked as the phone and the Mac app ask: a phone may have bought one
+	// whose token hasn't reached this computer yet (#1257). When the relay
+	// can't be asked, the checkout goes ahead.
+	covered, cerr := func() (bool, error) {
+		ctx, cancel := context.WithTimeout(ctx, 15*time.Second)
+		defer cancel()
+		return a.relayAPI().Covered(ctx, route)
+	}()
+	if cerr == nil && covered {
+		return "", errCovered
+	}
 	var out struct {
 		URL       string `json:"url"`
 		SessionID string `json:"session_id"`
@@ -214,13 +236,19 @@ func (a *App) startCheckout(ctx context.Context, plan string) (string, error) {
 	if out.URL == "" || !strings.HasPrefix(out.SessionID, "cs_") {
 		return "", errBillingReach(errors.New("the checkout answer had no session"))
 	}
-	if err := auth.NewSecretStore(cfg.DataDir).Write(stripeCheckoutName, out.SessionID); err != nil {
+	secrets := auth.NewSecretStore(cfg.DataDir)
+	if err := secrets.Write(stripeCheckoutName, out.SessionID); err != nil {
 		return "", err
 	}
 	now := a.anywhere.now()
 	expires := time.Unix(out.Expires, 0)
 	if out.Expires == 0 {
 		expires = now.Add(24 * time.Hour)
+	}
+	if page, err := json.Marshal(checkoutPage{URL: out.URL, Opened: now.Unix(), Expires: expires.Unix()}); err == nil {
+		if err := secrets.Write(stripeCheckoutPage, string(page)); err != nil {
+			a.Logger.Warn("access from anywhere: keeping the checkout page", "error", err)
+		}
 	}
 	a.anywhere.mu.Lock()
 	a.anywhere.checkout, a.anywhere.opened, a.anywhere.expires = out.URL, now, expires
@@ -230,6 +258,98 @@ func (a *App) startCheckout(ctx context.Context, plan string) (string, error) {
 	a.wakeAnywhere()
 	return out.URL, nil
 }
+
+// cancelCheckout forgets a checkout opened here and not paid, so another
+// plan can be chosen without waiting for Stripe to expire it (#1257).
+func (a *App) cancelCheckout(ctx context.Context) error {
+	if a.stripeCheckout() == "" {
+		return errNoCheckout
+	}
+	secrets := auth.NewSecretStore(a.Config.Get().DataDir)
+	if err := secrets.Delete(stripeCheckoutName); err != nil {
+		return err
+	}
+	_ = secrets.Delete(stripeCheckoutPage)
+	a.anywhere.mu.Lock()
+	a.anywhere.checkout, a.anywhere.expires = "", time.Time{}
+	a.anywhere.mu.Unlock()
+	a.Logger.Info("access from anywhere: checkout cancelled")
+	return nil
+}
+
+// checkoutPage is what's kept of an open checkout besides its session.
+type checkoutPage struct {
+	URL     string `json:"url"`
+	Opened  int64  `json:"opened"`
+	Expires int64  `json:"expires"`
+}
+
+// loadCheckoutPage fills in the open checkout's page after a restart, which
+// forgot it (#1257). It's called with a.anywhere.mu held.
+func (a *App) loadCheckoutPage() {
+	if a.anywhere.checkout != "" {
+		return
+	}
+	var page checkoutPage
+	if json.Unmarshal([]byte(a.readSecret(stripeCheckoutPage)), &page) != nil || page.URL == "" {
+		return
+	}
+	a.anywhere.checkout = page.URL
+	a.anywhere.opened, a.anywhere.expires = time.Unix(page.Opened, 0), time.Unix(page.Expires, 0)
+}
+
+// moveSubscription moves the subscription bought here onto this computer,
+// when the relay says it's tied to another (SUBSCRIPTION_IN_USE), as after
+// restoring this computer's data on a new one (#1257). It shows the relay
+// the token this computer kept, which may be the old route's.
+func (a *App) moveSubscription(ctx context.Context) error {
+	if a.Config.Get().RemoteAccess.Relay != "" {
+		return errOwnRelay
+	}
+	session := a.stripeSession()
+	if session == "" {
+		return errNoneHere
+	}
+	route, err := a.routeID()
+	if err != nil {
+		return err
+	}
+	var kept []string
+	if tok := a.readSecret(relayclient.TokenName); tok != "" {
+		kept = append(kept, tok)
+	}
+	ctx, cancel := context.WithTimeout(ctx, 30*time.Second)
+	defer cancel()
+	tok, err := a.relayAPI().MoveStripe(ctx, route, session, kept)
+	if err != nil {
+		switch code := relayclient.ErrorCode(err); code {
+		case "MOVE_TOO_SOON":
+			return errMoveTooSoon
+		case "MOVE_NEEDS_COMPUTER":
+			return errMoveNeedsComputer
+		case "":
+			return contracts.NewError("RELAY_UNREACHABLE", nil, err)
+		default:
+			return contracts.NewError("MOVE_FAILED", map[string]any{"relay_code": code}, err)
+		}
+	}
+	a.anywhere.mu.Lock()
+	a.anywhere.lastError, a.anywhere.ended = "", false
+	a.anywhere.mu.Unlock()
+	if _, err := a.setRelayToken(ctx, tok, true); err != nil {
+		return err
+	}
+	a.Logger.Info("access from anywhere: subscription moved to this computer")
+	return nil
+}
+
+var (
+	errMoveTooSoon       = contracts.NewError("MOVE_TOO_SOON", nil, errors.New("the subscription moved less than a day ago"))
+	errMoveNeedsComputer = contracts.NewError("MOVE_NEEDS_COMPUTER", nil, errors.New("the relay needs the other computer's token, or that computer off for 3 days"))
+)
+
+// errNoCheckout is cancelling with no checkout open.
+var errNoCheckout = contracts.NewError("CHECKOUT_NONE", nil, errors.New("no checkout is open"))
 
 // manageSubscription answers the billing page for the subscription bought
 // here.
@@ -294,12 +414,23 @@ func (a *App) subscription() *api.Subscription {
 		return nil
 	}
 	out := &api.Subscription{State: "none", InAppOnly: a.inAppOnly()}
+	if name := relayName(cfg); name != relayclient.DefaultRelay {
+		out.Relay = name
+	}
 	session := a.stripeSession()
-	if tok := a.relayToken(); tok != "" {
+	// A token the relay revoked (a refund, or the subscription moved to
+	// another computer) or refused for a blocked route is an ended
+	// subscription, though its own expiry is weeks away (#1256).
+	_, st := a.relayStatus()
+	refused := st != nil && st.State == "ended" && (st.Error == "TOKEN_REVOKED" || st.Error == "ROUTE_BLOCKED")
+	if tok := a.relayToken(); tok != "" && !refused {
 		_, exp, _ := relayclient.ParseToken(tok)
 		out.State, out.Expires, out.Store = "active", exp, "app"
-		if session != "" {
+		switch {
+		case session != "":
 			out.Store = "stripe"
+		case relayclient.TokenEnv(tok) == "grant":
+			out.Store = "grant"
 		}
 		return out
 	}
@@ -309,6 +440,7 @@ func (a *App) subscription() *api.Subscription {
 	switch {
 	case pending:
 		out.State, out.Store = "pending", "stripe"
+		a.loadCheckoutPage()
 		if a.anywhere.now().Before(a.anywhere.expires) {
 			out.Checkout = a.anywhere.checkout
 		}
@@ -326,7 +458,18 @@ func (a *App) subscription() *api.Subscription {
 			}
 		}
 	}
+	if refused {
+		out.State, out.Expires, out.Store = "ended", time.Time{}, "app"
+		if session != "" {
+			out.Store = "stripe"
+		}
+		out.Reason = "revoked"
+		if st.Error == "ROUTE_BLOCKED" {
+			out.Reason = "blocked"
+		}
+	}
 	out.Open, out.Error = a.anywhere.open, a.anywhere.lastError
+	out.Prices = a.anywhere.prices
 	// Whether the relay takes new subscriptions is asked only when Settings
 	// offers one (none yet, or one ended), never on its own, and answered
 	// on the next look; never by the App Store's copy, which doesn't offer
@@ -339,6 +482,61 @@ func (a *App) subscription() *api.Subscription {
 			a.anywhere.asking = false
 			a.anywhere.mu.Unlock()
 		}()
+	}
+	// And what the plans cost, from billing, as the checkout charges.
+	if (out.State == "none" || out.State == "ended") && !out.InAppOnly && !a.anywhere.askingPrices && (a.anywhere.prices == nil || a.anywhere.now().Sub(a.anywhere.pricesAt) >= pricesFor) {
+		a.anywhere.askingPrices = true
+		go func() {
+			prices := a.billingPrices(context.Background())
+			a.anywhere.mu.Lock()
+			if prices != nil {
+				a.anywhere.prices, a.anywhere.pricesAt = prices, a.anywhere.now()
+			}
+			a.anywhere.askingPrices = false
+			a.anywhere.mu.Unlock()
+		}()
+	}
+	return out
+}
+
+// pricesFor is how long billing's prices are kept before asking again.
+const pricesFor = time.Hour
+
+// billingPrices asks billing what the plans cost; nil when it can't say,
+// as before billing has the endpoint, and the page then shows its own.
+func (a *App) billingPrices(ctx context.Context) map[string]api.PlanPrice {
+	ctx, cancel := context.WithTimeout(ctx, 15*time.Second)
+	defer cancel()
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, a.billingURL()+"/api/toskar/anywhere/prices", nil)
+	if err != nil {
+		return nil
+	}
+	client := a.anywhere.httpClient
+	if client == nil {
+		client = &http.Client{Timeout: 15 * time.Second}
+	}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return nil
+	}
+	var body struct {
+		Prices map[string]api.PlanPrice `json:"prices"`
+	}
+	if json.NewDecoder(io.LimitReader(resp.Body, 16<<10)).Decode(&body) != nil {
+		return nil
+	}
+	out := map[string]api.PlanPrice{}
+	for _, plan := range []string{"monthly", "yearly"} {
+		if p, ok := body.Prices[plan]; ok && p.Amount > 0 && len(p.Currency) == 3 {
+			out[plan] = api.PlanPrice{Amount: p.Amount, Currency: strings.ToUpper(p.Currency)}
+		}
+	}
+	if len(out) == 0 {
+		return nil
 	}
 	return out
 }
@@ -408,6 +606,7 @@ func (a *App) collectCheckout(ctx context.Context, checkout string) time.Duratio
 	secrets := auth.NewSecretStore(a.Config.Get().DataDir)
 	now := a.anywhere.now()
 	a.anywhere.mu.Lock()
+	a.loadCheckoutPage()
 	quick := now.Sub(a.anywhere.opened) < checkoutQuick
 	a.anywhere.lastError = ""
 	done := false
@@ -433,6 +632,7 @@ func (a *App) collectCheckout(ctx context.Context, checkout string) time.Duratio
 	}
 	if done {
 		_ = secrets.Delete(stripeCheckoutName)
+		_ = secrets.Delete(stripeCheckoutPage)
 		return time.Hour
 	}
 	if quick {

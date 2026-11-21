@@ -28,7 +28,8 @@ export function WhoConnects({ access, onConnectDevice }: { access?: NetworkAcces
         <dt className="font-medium text-ink">{t('lan.who.devices')}</dt>
         <dd className="mt-1 text-ink-muted">{t('lan.who.devicesHow')}</dd>
         <dd className="mt-1 text-xs text-ink-faint">
-          {access ? t('lan.who.devicesCount', count(access.devices)) : null}{' '}
+          {access ? t('lan.who.devicesCount', count(access.devices - (access.stale_devices ?? 0))) : null}
+          {access?.stale_devices ? <> · {t('lan.who.devicesStale', count(access.stale_devices))}</> : null}{' '}
           <button type="button" className="text-primary hover:underline" onClick={onConnectDevice}>
             {t('lan.who.devicesAction')}
           </button>

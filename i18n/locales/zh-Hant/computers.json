@@ -38,7 +38,8 @@
     "action": "無法完成該動作",
     "network": "請在兩台電腦上都允許 Toskar 使用區域網路及通過防火牆，並在下方「網路與存取」中保持「尋找其他電腦」為開啟。",
     "generic": "發生錯誤",
-    "claimFailed": "無法載入該代碼的配對邀請"
+    "claimFailed": "無法載入該代碼的配對邀請",
+    "dismiss": "關閉"
   },
   "pairing": {
     "waiting": "正在等待核准",
@@ -47,7 +48,11 @@
     "code": "代碼：<code>{{code}}</code>",
     "incoming": "收到的請求",
     "offerCode": "代碼 <code>{{code}}</code>",
-    "approve": "核准"
+    "approve": "核准",
+    "noAnswer": "尚無回應",
+    "noAnswerHint": "{{name}} 尚未核准請求。請確認那台電腦上的 Toskar 已開啟，然後重試「加入團隊」。",
+    "cancel": "停止等待",
+    "close": "關閉"
   },
   "nearby": {
     "title": "可加入的電腦",
@@ -110,13 +115,15 @@
     "approving": "正在核准…",
     "approveCode": "以代碼核准",
     "hideDetails": "隱藏詳細資訊",
-    "manage": "管理",
+    "manage": "詳細資訊",
     "moreActions": "{{name}} 的更多動作",
     "removeFromTeam": "從團隊中移除",
     "training": "訓練中",
     "trainingHint": "正在訓練 AI，因此工作會交給有該模型的其他電腦",
     "plain": "未加密",
     "plainHint": "{{name}} 上的 Toskar 版本較舊，因此與它之間的通訊未加密。請更新 {{name}} 上的 Toskar 以啟用加密。",
+    "useCode": "有代碼嗎？以代碼核准",
+    "confirmRemoveModel": "要從 {{name}} 移除 {{model}} 嗎？它會從那台電腦刪除，再次在那裡使用需要重新下載。",
     "confirmRemove": "要把 {{name}} 移出這個團隊嗎？它將不再接收工作，再次新增需要重新核准。"
   },
   "deploy": {
@@ -138,7 +145,8 @@
     "deployTo_other": "部署到 {{count}} 台電腦",
     "deployToName": "部署到 {{name}}",
     "deploy": "部署",
-    "downloadSize": "下載大小約 {{size}}"
+    "downloadSize": "下載大小約 {{size}}",
+    "modelFit": "{{model}} · {{fit}}"
   },
   "join": {
     "open": "透過指令新增",
@@ -190,7 +198,6 @@
     "showing": "正在取得代碼…",
     "getApp": "還沒有 App？<store>取得 Toskar</store>。",
     "connected": "{{name}} 已連接。",
-    "manage": "你可以隨時在<access>API 存取</access>中中斷連線。",
     "manageYours": "你可以隨時在設定的「你的裝置」中中斷連線。",
     "another": "連接另一台裝置",
     "codeLabel": "代碼 {{code}}",

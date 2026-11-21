@@ -10,6 +10,10 @@ import { StoreShelves } from './StoreShelves'
 vi.mock('@/lib/api', () => ({
   api: { getModelStore: vi.fn(), installModelFromURL: vi.fn() },
 }))
+vi.mock('@/features/tools/ImageSetup', () => ({
+  ImageSetupCard: () => <section>Picture setup</section>,
+  VideoSetupCard: () => <section>Clip setup</section>,
+}))
 
 const fromHF = {
   id: 'org-cool-q4',
@@ -101,10 +105,24 @@ describe('StoreShelves', () => {
     expect(await screen.findByText('40%')).toBeInTheDocument()
   })
 
-  it('narrows the shelves by search', async () => {
-    show({ search: 'qwen' })
-    expect(await screen.findByRole('heading', { name: 'Tested by Toskar' })).toBeInTheDocument()
-    expect(screen.queryByRole('heading', { name: 'Popular now' })).not.toBeInTheDocument()
+  // Regression: toskar-core#1344
+  it('searches as one list of uploads, each once, leaving tested models to the page', async () => {
+    const lookAlike = { ...fromHF, id: 'look', display_name: 'Cool 7B Super Coder', repo_id: 'u/Cool-Super' }
+    vi.mocked(api.getModelStore).mockResolvedValue({
+      live: true,
+      shelves: [
+        { id: 'new', models: [lookAlike, fromHF] },
+        { id: 'code', models: [lookAlike, fromHF] },
+        { id: 'small', models: [lookAlike] },
+        { id: 'tested', models: [tested] },
+      ],
+    } as unknown as ModelStore)
+    show({ search: 'cool 7b' })
+    expect(await screen.findByRole('heading', { name: 'From Hugging Face' })).toBeInTheDocument()
+    expect(screen.getAllByRole('heading', { level: 2 })).toHaveLength(1)
+    expect(screen.getAllByText('Cool 7B')).toHaveLength(1)
+    expect(screen.getAllByText('Cool 7B Super Coder')).toHaveLength(1)
+    expect(screen.queryByText('Qwen 3.8 27B')).not.toBeInTheDocument()
   })
 
   it("says so when Hugging Face can't be reached", async () => {
@@ -117,5 +135,48 @@ describe('StoreShelves', () => {
     show({ other: true })
     await screen.findByRole('heading', { name: 'Popular now' })
     expect(screen.queryByText('Good fit')).not.toBeInTheDocument()
+  })
+
+  it('marks each model free, free with conditions, or unknown, and can show only models cleared for business use', async () => {
+    const free = { ...fromHF, commercial: 'yes', license_kind: 'free' }
+    const llama = { ...fromHF, id: 'llama', display_name: 'Llama 3.2 3B', license: 'llama3.2', commercial: 'limited', license_kind: 'conditions' }
+    const research = { ...fromHF, id: 'research', display_name: 'Research 3B', license: 'other' }
+    const nc = { ...fromHF, id: 'nc', display_name: 'NC 7B', license: 'cc-by-nc-4.0', commercial: 'no', license_kind: 'conditions' }
+    vi.mocked(api.getModelStore).mockResolvedValue({
+      live: true,
+      shelves: [{ id: 'popular', models: [free, llama, research, nc] }],
+    } as unknown as ModelStore)
+    show()
+    expect(await screen.findByText('Cool 7B')).toBeInTheDocument()
+    expect(screen.getAllByText('Free')).toHaveLength(1)
+    expect(screen.getAllByText('Free with conditions')).toHaveLength(2)
+    expect(screen.getAllByText('License unknown')).toHaveLength(1)
+
+    fireEvent.click(screen.getByRole('checkbox', { name: /For business use/ }))
+    expect(screen.getByText('Cool 7B')).toBeInTheDocument()
+    expect(screen.getByText('Llama 3.2 3B')).toBeInTheDocument()
+    expect(screen.queryByText('Research 3B')).not.toBeInTheDocument()
+    expect(screen.queryByText('NC 7B')).not.toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Llama 3.2 3B' }))
+    expect(screen.getByText("Allowed, within the license's limits")).toBeInTheDocument()
+  })
+
+  it('browses by category: models that see pictures, and picture and clip models (#593)', async () => {
+    const sees = { ...fromHF, id: 'sees-q4', display_name: 'Sees 4B', tags: ['vision'] }
+    vi.mocked(api.getModelStore).mockResolvedValue({ live: true, shelves: [{ id: 'popular', models: [fromHF, sees] }] } as unknown as ModelStore)
+    show()
+    expect(await screen.findByText('Cool 7B')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Sees pictures' }))
+    expect(screen.queryByText('Cool 7B')).not.toBeInTheDocument()
+    expect(screen.getByText('Sees 4B')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Sees pictures' })).toHaveAttribute('aria-pressed', 'true')
+
+    fireEvent.click(screen.getByRole('button', { name: 'All' }))
+    // The pictures-and-clips shelf opens their setup right here, not on Tools.
+    fireEvent.click(screen.getAllByRole('button', { name: 'Pictures and clips' }).at(-1)!)
+    expect(screen.getByText('Picture setup')).toBeInTheDocument()
+    expect(screen.getByText('Clip setup')).toBeInTheDocument()
+    expect(screen.queryByText('Sees 4B')).not.toBeInTheDocument()
   })
 })

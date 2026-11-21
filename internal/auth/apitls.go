@@ -23,13 +23,68 @@ import (
 // accept, unlike the ed25519 key Bifrost uses, and it is kept, so its
 // fingerprint stays the same and a phone that saved it keeps trusting it.
 
+// The API certificate's files, and those of the one that takes its place
+// when it names the computer (#1263).
+const (
+	apiCertFile     = "api-tls.crt"
+	apiKeyFile      = "api-tls.key"
+	nextAPICertFile = "api-tls-next.crt"
+	nextAPIKeyFile  = "api-tls-next.key"
+	oldAPICertFile  = "api-tls-old.crt"
+	oldAPIKeyFile   = "api-tls-old.key"
+)
+
 // APICertificate loads this computer's API certificate, or makes one: for
-// localhost, its host name, and its addresses on the local network.
+// localhost and its addresses on the local network.
 func APICertificate(secrets *SecretStore) (tls.Certificate, error) {
+	return loadOrMakeCertificate(secrets, apiCertFile, apiKeyFile)
+}
+
+// NextAPICertificate loads, or makes, the certificate that replaces one
+// that names the computer (#1263). Phones learn its fingerprint first, so
+// the switch doesn't look like another computer to them.
+func NextAPICertificate(secrets *SecretStore) (tls.Certificate, error) {
+	return loadOrMakeCertificate(secrets, nextAPICertFile, nextAPIKeyFile)
+}
+
+// PromoteNextAPICertificate makes the next certificate the API's own. The
+// old one is kept beside it, as api-tls-old, in case it's wanted back.
+func PromoteNextAPICertificate(secrets *SecretStore) error {
+	if _, err := tls.LoadX509KeyPair(secrets.Path(nextAPICertFile), secrets.Path(nextAPIKeyFile)); err != nil {
+		return fmt.Errorf("the next API certificate: %w", err)
+	}
+	for _, f := range [][2]string{{apiCertFile, oldAPICertFile}, {apiKeyFile, oldAPIKeyFile}, {nextAPIKeyFile, apiKeyFile}, {nextAPICertFile, apiCertFile}} {
+		if err := os.Rename(secrets.Path(f[0]), secrets.Path(f[1])); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// NamesComputer reports a certificate made before #1263, whose subject or
+// names carry the computer's name. Anyone who opens a connection to the
+// remote listener or the relay reads them before a key is checked.
+func NamesComputer(cert tls.Certificate) bool {
+	leaf := cert.Leaf
+	if leaf == nil {
+		return false
+	}
+	if leaf.Subject.CommonName != "Toskar" {
+		return true
+	}
+	for _, name := range leaf.DNSNames {
+		if name != "localhost" {
+			return true
+		}
+	}
+	return false
+}
+
+func loadOrMakeCertificate(secrets *SecretStore, certName, keyName string) (tls.Certificate, error) {
 	if err := secrets.EnsureDir(); err != nil {
 		return tls.Certificate{}, err
 	}
-	certPath, keyPath := secrets.Path("api-tls.crt"), secrets.Path("api-tls.key")
+	certPath, keyPath := secrets.Path(certName), secrets.Path(keyName)
 	if cert, err := tls.LoadX509KeyPair(certPath, keyPath); err == nil {
 		return withLeaf(cert)
 	}
@@ -41,21 +96,19 @@ func APICertificate(secrets *SecretStore) (tls.Certificate, error) {
 	if err != nil {
 		return tls.Certificate{}, err
 	}
-	host, _ := os.Hostname()
-	host = strings.TrimSuffix(host, ".local")
 	now := time.Now()
 	tmpl := &x509.Certificate{
 		SerialNumber: serial,
-		Subject:      pkix.Name{CommonName: "Toskar on " + firstNonEmptyString(host, "this computer"), Organization: []string{"Toskar"}},
-		NotBefore:    now.Add(-time.Hour),
-		NotAfter:     now.AddDate(10, 0, 0),
-		KeyUsage:     x509.KeyUsageDigitalSignature,
-		ExtKeyUsage:  []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},
-		DNSNames:     []string{"localhost"},
-		IPAddresses:  []net.IP{net.IPv4(127, 0, 0, 1), net.IPv6loopback},
-	}
-	if host != "" {
-		tmpl.DNSNames = append(tmpl.DNSNames, host, host+".local")
+		// No computer name in the subject or the names: the remote listener
+		// shows this certificate to anyone before a key is checked (#1263).
+		// Phones pin its fingerprint, so nothing reads the name.
+		Subject:     pkix.Name{CommonName: "Toskar", Organization: []string{"Toskar"}},
+		NotBefore:   now.Add(-time.Hour),
+		NotAfter:    now.AddDate(10, 0, 0),
+		KeyUsage:    x509.KeyUsageDigitalSignature,
+		ExtKeyUsage: []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},
+		DNSNames:    []string{"localhost"},
+		IPAddresses: []net.IP{net.IPv4(127, 0, 0, 1), net.IPv6loopback},
 	}
 	tmpl.IPAddresses = append(tmpl.IPAddresses, localAddresses()...)
 	der, err := x509.CreateCertificate(rand.Reader, tmpl, tmpl, &key.PublicKey, key)
@@ -134,11 +187,4 @@ func localAddresses() []net.IP {
 		}
 	}
 	return out
-}
-
-func firstNonEmptyString(a, b string) string {
-	if a != "" {
-		return a
-	}
-	return b
 }

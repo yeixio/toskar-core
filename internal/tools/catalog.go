@@ -32,9 +32,12 @@ const (
 // Definition is one registered tool: built in, from a connected service,
 // or from an MCP tool source.
 type Definition struct {
-	ID            string `json:"id"`
-	Name          string `json:"name"`
-	Description   string `json:"description"`
+	ID          string `json:"id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	// Summary is a short description for people, where Description is
+	// written for the model (#1254). Empty is Description.
+	Summary       string `json:"summary,omitempty"`
 	Capability    string `json:"capability"`
 	Source        string `json:"source"`
 	Schema        string `json:"schema"`
@@ -86,10 +89,10 @@ func Contained(risk string) bool { return risk == RiskRead || risk == RiskCreate
 func BuiltinCatalog() []Definition {
 	return []Definition{
 		{ID: "internet.search", Name: "Web Search", Description: "Search the public internet and return titles, links, and snippets.", Capability: CapInternet, Source: "builtin", Schema: `{"query":"string"}`, DefaultPolicy: PolicyAllow, Risk: "read"},
-		{ID: "places.search", Name: "Find Places", Description: "Find places with OpenStreetMap: a kind of place near somewhere (\"query\": \"coffee\", \"near\": \"Juneau, AK\" or \"58.30,-134.42\"), or a place or address by name. Returns names, addresses, distances in km and miles, opening hours, and ids for places.details. The user's location is not known: use the place they name, or where their notes say they live.", Capability: CapInternet, Source: "builtin", Schema: `{"query":"string","near":"string","radius_m":"integer","limit":"integer"}`, DefaultPolicy: PolicyAllow, Risk: RiskRead},
+		{ID: "places.search", Name: "Find Places", Description: "Find places with OpenStreetMap: a kind of place near somewhere (\"query\": \"coffee\", \"near\": \"Juneau, AK\" or \"58.30,-134.42\"), or a place or address by name. Returns names, addresses, distances in km and miles, opening hours, and ids for places.details. Leave \"near\" out for a kind of place near the user: it then uses the location they set in Personal settings, when they set one (\"near_from\" says so). Otherwise use the place they name, or where their notes say they live.", Capability: CapInternet, Source: "builtin", Schema: `{"query":"string","near":"string","radius_m":"integer","limit":"integer"}`, DefaultPolicy: PolicyAllow, Risk: RiskRead},
 		{ID: "places.details", Name: "Place Details", Description: "Look up one place from places.search by its id, such as node/3430732134: address, opening hours, phone, and website.", Capability: CapInternet, Source: "builtin", Schema: `{"id":"string"}`, DefaultPolicy: PolicyAllow, Risk: RiskRead},
-		{ID: "maps.route", Name: "Directions", Description: "Turn-by-turn directions between two places (names, addresses, or lat,lon) with OpenStreetMap: distance in km and miles, minutes, and steps. \"mode\" is driving (default), walking, or cycling.", Capability: CapInternet, Source: "builtin", Schema: `{"from":"string","to":"string","mode":"string"}`, DefaultPolicy: PolicyAllow, Risk: RiskRead},
-		{ID: "maps.distance", Name: "Distance", Description: "How far apart two places are, in a straight line and by road or path, and how long it takes. \"mode\" is driving (default), walking, or cycling.", Capability: CapInternet, Source: "builtin", Schema: `{"from":"string","to":"string","mode":"string"}`, DefaultPolicy: PolicyAllow, Risk: RiskRead},
+		{ID: "maps.route", Name: "Directions", Description: "Turn-by-turn directions between two places (names, addresses, or lat,lon) with OpenStreetMap: distance in km and miles, minutes, and steps. \"mode\" is driving (default), walking, or cycling. Leave \"from\" out to start from the location the user set in Personal settings, when they set one.", Capability: CapInternet, Source: "builtin", Schema: `{"from":"string","to":"string","mode":"string"}`, DefaultPolicy: PolicyAllow, Risk: RiskRead},
+		{ID: "maps.distance", Name: "Distance", Description: "How far apart two places are, in a straight line and by road or path, and how long it takes. \"mode\" is driving (default), walking, or cycling. Leave \"from\" out to measure from the location the user set in Personal settings, when they set one.", Capability: CapInternet, Source: "builtin", Schema: `{"from":"string","to":"string","mode":"string"}`, DefaultPolicy: PolicyAllow, Risk: RiskRead},
 		{ID: "browser.open", Name: "Open Page in Browser", Description: "Open a web page in an isolated browser for this chat (a fresh profile, never the user's own), when a page needs JavaScript or interaction; for simply reading a page, internet.open is faster. Returns the page's text and its links, buttons, and fields, each with a ref for browser.click and browser.type.", Capability: CapBrowser, Source: "builtin", Schema: `{"url":"string"}`, DefaultPolicy: PolicyAllow, Risk: RiskRead, Level: LevelReadExternal},
 		{ID: "browser.click", Name: "Click in Browser", Description: "Click a link or button on the open page by its ref, and return the page after. The user approves clicks.", Capability: CapBrowser, Source: "builtin", Schema: `{"ref":"integer"}`, DefaultPolicy: PolicyAsk, Risk: RiskWrite},
 		{ID: "browser.type", Name: "Type in Browser", Description: "Type text into a field on the open page by its ref; \"submit\" presses Enter after. Never passwords, payment details, or codes: those fields are refused, and the user enters them. The user approves typing.", Capability: CapBrowser, Source: "builtin", Schema: `{"ref":"integer","text":"string","submit":"boolean"}`, DefaultPolicy: PolicyAsk, Risk: RiskWrite},
@@ -111,6 +114,12 @@ func BuiltinCatalog() []Definition {
 			Runtime: "sdcpp", Outputs: []string{OutputImage}},
 		{ID: "video.generate", Name: "Generate Video", Description: "Make a short clip, on this computer, attached to the answer as a video that plays: from a description in \"prompt\" (subject, motion, camera, style), or from an image in this chat (\"image\" is its name) brought to life. \"seconds\" is 1 to 5 (default 2); it takes several minutes, so say so. \"width\" and \"height\" default to 832×480 landscape, or the image's shape. \"quality\" is fast, balanced, or best; leave it out unless the person asks for a quick draft or high quality.", Capability: CapVideo, Source: "builtin", Schema: `{"prompt":"string","image":"string","seconds":"number","width":"integer","height":"integer","seed":"integer","quality":"string","name":"string"}`, DefaultPolicy: PolicyAllow, Risk: RiskCreate,
 			Runtime: "sdcpp", Outputs: []string{OutputVideo}},
+		{ID: "video.extend", Name: "Continue Video", Description: "Continue a clip in this chat, on this computer: the next part starts from its last frame, and the two are joined into one longer clip attached to the answer. \"clip\" is the clip's name (leave it out for the newest clip); \"prompt\" says what happens next (leave it out to go on as before); \"seconds\" is how much to add, 1 to 5 (default 2). It takes several minutes, so say so.", Capability: CapVideo, Source: "builtin", Schema: `{"clip":"string","prompt":"string","seconds":"number","seed":"integer","quality":"string","name":"string"}`, DefaultPolicy: PolicyAllow, Risk: RiskCreate,
+			Runtime: "sdcpp", Outputs: []string{OutputVideo}},
+		{ID: "video.shots", Name: "Make a Longer Video", Description: "Make a video longer than one clip, on this computer, as a series of shots joined into one video attached to the answer. Use it for anything over 5 seconds, such as \"a 1-minute video of a day at the beach\". \"shots\" is the scenes in order, each {\"prompt\": what happens, with subject, motion, and camera; \"seconds\": 1 to 5, default 5}, at most 24; plan about one shot per 5 seconds asked for. Each shot starts from the last frame of the one before, so write them as one continuous scene that moves on. \"style\" is a line added to every shot so the look, faces, and clothes stay the same, such as \"golden-hour light, 35mm film, a woman in a red raincoat\". \"image\" is a picture in this chat to start from. The person sees the shots and how long they take and says go before anything is made. Each shot takes several minutes or more, so say so.", Capability: CapVideo, Source: "builtin", Schema: `{"shots":"array","style":"string","image":"string","width":"integer","height":"integer","seed":"integer","quality":"string","name":"string"}`, DefaultPolicy: PolicyAsk, Risk: RiskCreate,
+			Runtime: "sdcpp", Outputs: []string{OutputVideo}},
+		{ID: "comfyui.run", Name: "ComfyUI Workflow", Description: "Run a workflow an Admin saved for their ComfyUI, such as an upscale, a background removal, or pictures in a set style. \"workflow\" is its name (the error lists them; leave it out when there is one); \"prompt\" says what to make, \"negative\" what to avoid; \"file\" is a picture in this chat for workflows that take one; \"width\", \"height\", and \"seed\" are optional. The pictures and clips it saves are attached to the answer. It can take minutes, so say so.", Capability: CapImage, Source: "builtin", Schema: `{"workflow":"string","prompt":"string","negative":"string","file":"string","width":"integer","height":"integer","seed":"integer"}`, DefaultPolicy: PolicyAllow, Risk: RiskCreate,
+			Outputs: []string{OutputImage, OutputVideo}},
 		{ID: "image.edit", Name: "Edit Image", Description: "Change a PNG or JPEG image in this chat from an instruction, on this computer, such as \"make it night\" or \"remove the car\". \"file\" is the image's name; the changed image is attached to the answer as a new file.", Capability: CapImage, Source: "builtin", Schema: `{"file":"string","prompt":"string","seed":"integer","name":"string"}`, DefaultPolicy: PolicyAllow, Risk: RiskCreate,
 			Runtime: "sdcpp", Outputs: []string{OutputImage}},
 		{ID: "code.execute", Name: "Run Code", Description: "Run Python in a sandbox for calculations, data analysis, and charts, with numpy, pandas, and matplotlib. It has no network and sees only files you list from this chat (\"files\": [\"sales.xlsx\"]), read from its working folder. Print results; files it saves there (.png, .csv, .xlsx, .pdf, and so on) are attached to the answer. Use matplotlib's savefig for charts.", Capability: CapCode, Source: "builtin", Schema: `{"code":"string","files":"array"}`, DefaultPolicy: PolicyAsk, Risk: RiskWrite,
@@ -293,4 +302,33 @@ func TerminalDescription(goos string) string {
 		return "Run a PowerShell command on this computer."
 	}
 	return "Run a shell command on this computer."
+}
+
+// summaries are the built-in tools' descriptions for people, for those whose
+// Description tells the model how to call them (#1254).
+var summaries = map[string]string{
+	"places.search":        "Find places, businesses, and addresses, with opening hours and distances.",
+	"places.details":       "Look up a place's address, opening hours, phone, and website.",
+	"maps.route":           "Turn-by-turn directions between two places.",
+	"maps.distance":        "How far apart two places are, and how long it takes to get there.",
+	"browser.open":         "Open a web page in a private browser for this chat.",
+	"browser.click":        "Click a link or button on the open page. You approve each click.",
+	"browser.type":         "Type into a field on the open page. Never passwords or payment details.",
+	"browser.extract":      "Read text, links, or tables from the open page.",
+	"browser.download":     "Download a file the open page links to.",
+	"browser.screenshot":   "Show a picture of the open page.",
+	"files.create":         "Make a Word document, PDF, spreadsheet, or other file to download.",
+	"spreadsheet.analyze":  "Summarize a spreadsheet in this chat, column by column.",
+	"speech.transcribe":    "Turn an audio file in this chat into text, on this computer.",
+	"speech.synthesize":    "Read text aloud as an audio file, on this computer.",
+	"image.generate":       "Make an image from a description, on this computer.",
+	"video.generate":       "Make a short video clip, on this computer.",
+	"video.extend":         "Continue a clip in this chat, making it longer, on this computer.",
+	"video.shots":          "Make a longer video as a series of shots, on this computer.",
+	"image.edit":           "Change an image in this chat from an instruction, on this computer.",
+	"comfyui.run":          "Run a workflow saved for your ComfyUI, such as an upscale.",
+	"code.execute":         "Run Python in a sandbox for calculations, data analysis, and charts.",
+	"automations.schedule": "Set up a task that runs on a schedule, such as a morning briefing.",
+	"news.read":            "Today's AI news from toskar.ai.",
+	"automations.results":  "The latest result of each of your automations.",
 }

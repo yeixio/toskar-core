@@ -22,8 +22,8 @@ var capabilityTools = map[auth.Capability][]string{
 	// news.read reads toskar.ai, so it's web too.
 	auth.CapWeb: {"internet.search", "internet.open", "news.read", "places.search", "places.details", "maps.route", "maps.distance",
 		"browser.open", "browser.extract", "browser.screenshot", "browser.close", "browser.click", "browser.type", "browser.download"},
-	auth.CapMakePictures: {"image.generate", "image.edit"},
-	auth.CapMakeVideo:    {"video.generate"},
+	auth.CapMakePictures: {"image.generate", "image.edit", "comfyui.run"},
+	auth.CapMakeVideo:    {"video.generate", "video.extend", "video.shots"},
 	auth.CapVoice:        {"speech.transcribe", "speech.synthesize"},
 	auth.CapFiles:        {"filesystem.search", "filesystem.read", "filesystem.write", "files.create", "spreadsheet.analyze"},
 	auth.CapAutomations:  {"automations.schedule", "automations.results"},

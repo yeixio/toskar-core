@@ -32,16 +32,18 @@
     "endpoint": "Endpunkt",
     "localAddress": "Lokale Adresse: <mono>{{address}}</mono>",
     "lanEndpoint": "LAN-Endpunkt",
-    "lanHint": "Verwende die LAN-IP dieses Computers mit Port <mono>{{port}}</mono> (zum Beispiel <mono>https://192.168.x.x:{{port}}/v1</mono>).",
+    "lanHint": "Verwende die LAN-IP dieses Computers mit Port <mono>{{port}}</mono> (zum Beispiel <mono>{{scheme}}://192.168.x.x:{{port}}/v1</mono>).",
     "https": "Mit HTTPS verschlüsselt. Zertifikat <mono>{{short}}</mono>.",
     "httpsCustom": "Mit HTTPS verschlüsselt, mit deinem Zertifikat <mono>{{short}}</mono>.",
     "httpsTrust": "Ein Browser oder eine App fragt beim ersten Mal, ob du diesem Zertifikat vertraust. Prüfe, dass sein SHA-256-Fingerabdruck mit {{short}} beginnt.",
     "httpsError": "Dein Zertifikat konnte nicht verwendet werden, daher wird das von Toskar genutzt: {{error}}",
     "hideDocs": "API-Dokumentation ausblenden",
     "docs": "API-Dokumentation",
-    "docsBody": "Toskar stellt unter <mono>/v1</mono> eine OpenAI-kompatible API bereit. Richte Clients auf den Endpunkt oben aus und sende <header/>, wenn Toskar von anderen Computern aus erreichbar ist. `/api/v1` und `/v1` verlangen beide diesen Header. Der LAN-Endpunkt nutzt HTTPS, das den Datenverkehr verschlüsselt; ein Schlüssel allein verschlüsselt einfaches HTTP nicht.",
+    "docsBody": "Toskar stellt unter <mono>/v1</mono> eine OpenAI-kompatible API bereit. Richte Clients auf den Endpunkt oben aus und sende <header/>, wenn Toskar von anderen Computern aus erreichbar ist. `/api/v1` und `/v1` verlangen beide diesen Header.",
     "copied": "Kopiert",
-    "copyUrl": "URL kopieren"
+    "copyUrl": "URL kopieren",
+    "docsHttps": "Der LAN-Endpunkt nutzt HTTPS, das den Datenverkehr verschlüsselt.",
+    "docsHttp": "Der LAN-Endpunkt nutzt einfaches HTTP, der Datenverkehr ist also nicht verschlüsselt: Ein Schlüssel regelt, wer Zugriff hat, verschlüsselt aber nichts."
   },
   "lan": {
     "title": "Zugriff im lokalen Netzwerk",
@@ -72,6 +74,8 @@
       "devicesHow": "Verbinden sich mit einem 6-stelligen Code.",
       "devicesCount_one": "{{formatted}} verbunden",
       "devicesCount_other": "{{formatted}} verbunden",
+      "devicesStale_one": "{{formatted}} länger nicht genutzt",
+      "devicesStale_other": "{{formatted}} länger nicht genutzt",
       "devicesAction": "Gerät verbinden",
       "apps": "Apps und Skripte",
       "appsHow": "Nutzen einen API-Schlüssel, unten erstellt.",
@@ -81,7 +85,7 @@
   },
   "keys": {
     "title": "API-Schlüssel",
-    "description": "Zugangsdaten für Apps und Geräte, die mit Toskar sprechen.",
+    "description": "Zugangsdaten für Apps und Skripte, die mit Toskar sprechen. Telefone und Tablets stehen oben unter Geräte.",
     "create": "API-Schlüssel erstellen",
     "createHint": "Gib diesem Schlüssel einen Namen, damit du weißt, was ihn nutzt.",
     "namePlaceholder": "VS Code",
@@ -104,9 +108,7 @@
   },
   "advanced": {
     "title": "Erweitert",
-    "bind": "Bind-Adresse",
-    "port": "Port",
-    "host": "Konfigurierter Host"
+    "bind": "Bind-Adresse"
   },
   "permissions": {
     "summary": "Was dieser Schlüssel nutzen darf",
@@ -162,7 +164,9 @@
     "none": "Noch keine Geräte.",
     "meta": "Verbunden {{connected}} · Zuletzt genutzt {{lastUsed}}",
     "confirmDisconnect": "{{name}} trennen? Zum erneuten Verbinden braucht es einen neuen Code.",
-    "disconnect": "Trennen"
+    "disconnect": "Trennen",
+    "neverUsed": "Nie benutzt",
+    "unused": "Seit 90 Tagen nicht benutzt"
   },
   "remote": {
     "title": "Zugriff von überall",
@@ -269,6 +273,7 @@
     },
     "subscription": {
       "title": "Relay von Toskar",
+      "titleOther": "Abo auf {{relay}}",
       "offer": "Wenn sonst nichts diesen Computer erreicht, erreicht ihn das Relay von Toskar – für diesen Computer und jedes damit gekoppelte Gerät.",
       "monthly": "Für {{price}} im Monat abonnieren",
       "yearly": "Für {{price}} im Jahr abonnieren",
@@ -299,7 +304,24 @@
       "moveHere": "Auf diesen Computer verschieben",
       "moveTooSoon": "Ein Abo kann einmal am Tag auf einen anderen Computer verschoben werden. Versuch es morgen noch einmal.",
       "renewalNotYet": "Der App Store hat deine Verlängerung noch nicht bestätigt. Wähle in ein paar Minuten „Kauf wiederherstellen“.",
-      "storeFailed": "Der Kauf hat nicht geklappt: {{message}}"
-    }
+      "storeFailed": "Der Kauf hat nicht geklappt: {{message}}",
+      "cancel": "Bezahlvorgang abbrechen",
+      "cancelling": "Wird abgebrochen…",
+      "turnOnFirst": "Schalte oben „Zugriff von überall“ ein, um ein Abo abzuschließen.",
+      "endedRevoked": "Toskars Relay nimmt das Abo dieses Computers nicht mehr an: Es wurde auf einen anderen Computer übertragen oder erstattet. Schließe es erneut ab, um Toskars Relay weiter zu nutzen.",
+      "endedBlocked": "Toskars Relay hat diesen Computer gesperrt. Wende dich an den Support, um den Grund zu erfahren.",
+      "grant": "Zugriff gewährt bis {{date}}.",
+      "grantOpen": "Zugriff gewährt.",
+      "moveStripe": "Auf diesen Computer übertragen",
+      "moving": "Wird übertragen…",
+      "inUseStripe": "Dieses Abo gehört zu einem anderen Computer, etwa dem, von dem die Daten dieses Computers stammen. Übertrage es hierher, dann nutzt jener Computer Toskars Relay nicht mehr."
+    },
+    "relayErrors": {
+      "TOKEN_REVOKED": "{{relay}} nimmt das Abo dieses Computers nicht mehr an. Schließe es erneut ab oder übertrage dein Abo in der Toskar-App hierher.",
+      "ROUTE_BLOCKED": "{{relay}} hat diesen Computer gesperrt. Wende dich an den Support, um den Grund zu erfahren.",
+      "TOKEN_EXPIRED": "Der Zugriff dieses Computers über {{relay}} ist abgelaufen. Schließe das Abo erneut ab, um ihn weiter zu nutzen.",
+      "TOKEN_INVALID": "{{relay}} hat das Token dieses Computers nicht angenommen. Schließe das Abo erneut ab oder verbinde ihn erneut über die Toskar-App."
+    },
+    "offHint": "Wenn es an ist, bittet Toskar deinen Router, Port {{port}} zu öffnen, der nur Geräten antwortet, die mit diesem Computer gekoppelt sind. Stattdessen kannst du einen weitergeleiteten Port oder ein Relay wählen. Lokaler Netzwerkzugriff muss dafür nicht an sein."
   }
 }

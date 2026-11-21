@@ -295,7 +295,20 @@
     "used_other": "{{count}} outils utilisés",
     "completed": "Terminé",
     "completedIn": "Terminé en {{ms}} ms",
-    "traceFailed": "Échec"
+    "traceFailed": "Échec",
+    "shots": {
+      "summary_one": "{{count}} plan, environ {{seconds}} secondes de vidéo",
+      "summary_many": "{{count}} plans, environ {{seconds}} secondes de vidéo",
+      "summary_other": "{{count}} plans, environ {{seconds}} secondes de vidéo",
+      "estimate": "Environ {{time}} sur cet ordinateur, d’après le dernier clip qu’il a fait.",
+      "noEstimate": "Cet ordinateur n’a pas encore fait de clip, donc la durée n’est pas connue. Chaque plan peut prendre plusieurs minutes ou plus.",
+      "style": "Dans chaque plan : {{style}}",
+      "list": "Plans",
+      "seconds": "{{n}} s",
+      "minutes": "{{n}} min",
+      "hours": "{{n}} h",
+      "hoursMinutes": "{{hours}} h {{minutes}} min"
+    }
   },
   "transcript": {
     "plan": "Plan",
@@ -497,6 +510,35 @@
     "failed": "Impossible de lire à voix haute.",
     "stop": "Arrêter",
     "systemHint": "Lire cette réponse à voix haute avec les voix de cet appareil"
+  },
+  "voiceMode": {
+    "start": "Parler",
+    "startHint": "Parlez à Toskar à voix haute : il répond avec une voix, et vous pouvez l’interrompre en parlant",
+    "title": "Mode vocal",
+    "noMicrophone": "Cette page ne peut pas utiliser de micro. Ouvrez Toskar en https:// ou sur cet ordinateur via localhost.",
+    "connectFailed": "Impossible de se connecter au mode vocal. Réessayez dans un instant.",
+    "failed": "Un problème est survenu dans le mode vocal.",
+    "micDenied": "Toskar n’a pas le droit d’utiliser le micro. Autorisez-le dans les réglages du navigateur pour cette page.",
+    "micFailed": "Le micro n’a pas pu démarrer.",
+    "muted": "Micro coupé",
+    "you": "Vous :",
+    "waited": "Réponse {{seconds}} s après la fin de votre phrase",
+    "mute": "Couper le micro",
+    "unmute": "Réactiver le micro",
+    "end": "Terminer",
+    "hint": "Parlez quand vous voulez. Parlez par-dessus une réponse pour l’arrêter.",
+    "status": {
+      "connecting": "Connexion…",
+      "listening": "À l’écoute",
+      "hearing": "Vous entend",
+      "thinking": "Réfléchit…",
+      "speaking": "Parle",
+      "closed": "Mode vocal terminé"
+    },
+    "demo": {
+      "you": "Quelle randonnée près de Juneau ce week-end ?",
+      "answer": "Le mont Roberts est un bon choix. Montez en téléphérique, puis suivez le sentier de crête aussi loin que vous voulez."
+    }
   },
   "context": {
     "usage": "Utilisation du contexte",
@@ -850,6 +892,7 @@
     "finishingImage": "Finition de l’image…",
     "finishingVideo": "Finition du clip…",
     "step": "Étape {{step}} sur {{steps}}",
+    "shot": "Plan {{shot}} sur {{shots}}",
     "leftSeconds": "encore environ {{seconds}} s",
     "leftMinutes": "encore environ {{minutes}} min",
     "frameImage": "Votre image apparaîtra ici",

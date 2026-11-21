@@ -103,6 +103,58 @@
       "reranker": "Modello di supporto · ordina i passaggi migliori",
       "classifier": "Modello di supporto · aiuta Automatico a smistare le richieste",
       "other": "Modello di supporto"
+    },
+    "ratings": {
+      "rate": "Valuta",
+      "title": "Valuta {{model}}",
+      "intro": "Quanto funziona bene su questo computer? La tua valutazione viene salvata qui.",
+      "starsLabel": "Stelle",
+      "stars_one": "{{count}} stella",
+      "stars_many": "{{count}} stelle",
+      "stars_other": "{{count}} stelle",
+      "tagsLabel": "Perché? (facoltativo)",
+      "tags": {
+        "great_responses": "Risposte ottime",
+        "fast": "Veloce",
+        "slow": "Lento",
+        "stable": "Stabile",
+        "crashed": "Si è bloccato",
+        "too_much_memory": "Usa troppa memoria",
+        "great_for_coding": "Ottimo per programmare",
+        "great_for_chat": "Ottimo per chattare",
+        "good_tool_use": "Bravo con gli strumenti",
+        "poor_tool_use": "Scarso con gli strumenti"
+      },
+      "share": "Condividi questa valutazione con la community",
+      "shareHint": "Aiuta chi ha un computer come il tuo a scegliere un modello. Puoi smettere di condividerla in qualsiasi momento.",
+      "whatIsShared": "Cosa viene condiviso, esattamente",
+      "sent": {
+        "destination": "Inviato a",
+        "model": "Modello",
+        "hardware": "Classe di computer",
+        "memory": "memoria {{type}}, {{gb}} GB",
+        "never": "Mai i tuoi prompt, chat, nomi di file, nome del computer, nome utente o indirizzo di rete. Il servizio non memorizza il tuo indirizzo IP."
+      },
+      "notShareable": "Questa valutazione resta su questo computer: {{reason}}",
+      "save": "Salva",
+      "saveAndShare": "Salva e condividi",
+      "remove": "Rimuovi valutazione",
+      "cancel": "Annulla",
+      "count_one": "{{formatted}} valutazione",
+      "count_many": "{{formatted}} valutazioni",
+      "count_other": "{{formatted}} valutazioni",
+      "similar": {
+        "family": "su computer come il tuo",
+        "class": "su computer simili",
+        "backend": "su computer con questa memoria"
+      },
+      "overall": "in totale",
+      "confidence": {
+        "limited": "Dati limitati",
+        "early": "Prime valutazioni"
+      },
+      "prompt": "Come ti trovi con {{model}}?",
+      "notNow": "Non ora"
     }
   },
   "phoneModels": {
@@ -424,7 +476,13 @@
         "notNow": "Non ora"
       }
     },
-    "phoneAutoHint": "Sceglie il modello migliore di questo dispositivo per ogni messaggio"
+    "phoneAutoHint": "Sceglie il modello migliore di questo dispositivo per ogni messaggio",
+    "builtInProfiles": {
+      "general-assistant": "Assistente generale",
+      "programming": "Programmazione",
+      "research": "Ricerca",
+      "custom": "Personalizzato"
+    }
   },
   "effort": {
     "title": "Impegno",
@@ -604,6 +662,14 @@
       "try": "Provalo senza computer",
       "tryMeta": "Una demo con risposte di esempio",
       "other": "Questa demo risponde alle domande suggerite a sinistra. Per chiedere qualsiasi cosa, configura Toskar su un computer di casa (Toskar Core è gratuito), poi collega questa TV in Computer → Collega un dispositivo."
+    },
+    "people": {
+      "title": "Chi sta guardando?",
+      "add": "Aggiungi qualcuno",
+      "hint": "Ogni persona si collega con un codice del proprio account sul computer, così chat e memoria restano sue.",
+      "switch": "Non sei {{name}}?",
+      "unnamed": "Persona {{n}}",
+      "back": "Indietro"
     }
   },
   "setup": {
@@ -869,6 +935,7 @@
       "notification": "Notifica",
       "community_ratings": "Valutazioni della community",
       "update_check": "Controllo aggiornamenti",
+      "comfyui": "ComfyUI",
       "problem_report": "Segnalazione",
       "link_check": "Controllo link"
     },
@@ -882,6 +949,7 @@
       "notification": "notifica",
       "community_ratings": "valutazioni della community",
       "update_check": "controllo aggiornamenti",
+      "comfyui": "ComfyUI",
       "problem_report": "segnalazione",
       "link_check": "controllo link"
     },

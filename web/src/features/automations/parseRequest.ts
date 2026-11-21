@@ -1,6 +1,7 @@
 import i18n from '@/i18n'
 import { formatDate, formatList, formatPrice } from '@/i18n/format'
 import type { AutomationClockTime, AutomationCondition, AutomationNotification, AutomationSchedule, AutomationTrigger } from '@/types/api'
+import { isRing } from './ideas'
 // Labels and prompt helpers for automations. Requests are read on the
 // computer (POST /api/v1/automations/parse, #204), with the words in
 // i18n/requests; what this shows, such as schedules, is in the App language.
@@ -71,6 +72,8 @@ export function whenLabel(item: { schedule: AutomationSchedule; trigger?: Automa
   if (trigger?.kind === 'webhook') return i18n.t('automations:trigger.webhook')
   if (trigger?.kind === 'device') {
     const device = names[trigger.device ?? ''] ?? trigger.device ?? ''
+    // A doorbell's button: "When someone rings Front Door" (#1341).
+    if (isRing(trigger.device) && !trigger.to) return i18n.t('automations:trigger.ring', { door: doorName(device) })
     return trigger.to ? i18n.t('automations:trigger.deviceTo', { device, to: trigger.to }) : i18n.t('automations:trigger.device', { device })
   }
   if (trigger?.kind === 'after') {
@@ -245,4 +248,9 @@ function instantInZone(year: number, month: number, day: number, hour: number, m
   const observed = zonedParts(new Date(utcGuess), timeZone)
   const observedUTC = Date.UTC(observed.year, observed.month - 1, observed.day, observed.hour, observed.minute)
   return new Date(utcGuess - (observedUTC - utcGuess))
+}
+
+/** A doorbell button's name without "doorbell button": the door it's at. */
+function doorName(name: string): string {
+  return name.replace(/[\s_-]*(doorbell(\s+button)?|visitor)\s*$/i, '').trim() || name
 }

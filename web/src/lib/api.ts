@@ -44,6 +44,9 @@ import type {
   EgressRecord,
   JoinToken,
   JoinTokenCreated,
+  ComfyUIStatus,
+  ComfyWorkflow,
+  ComfyWorkflowInputs,
   ExternalServerInfo,
   ModelRating,
   RatingTag,
@@ -115,6 +118,7 @@ import type {
   MemoryItem,
   Artifact,
   SpeechResult,
+  VoiceSettings,
   ImageSetup,
   NodeToolProviders,
   FileRef,
@@ -656,8 +660,10 @@ export type ReachCheck = {
 /** Access from anywhere on Toskar's relay, as GET /remote-access says (#639). */
 export type AnywhereSubscription = {
   state: 'none' | 'pending' | 'active' | 'ended'
-  /** stripe when bought here in Settings, app when bought in the Toskar app. */
-  store?: 'stripe' | 'app'
+  /** stripe when bought here in Settings, app when bought in the Toskar app, grant when the relay's operator granted it. */
+  store?: 'stripe' | 'app' | 'grant'
+  /** Why it ended early: revoked (moved or refunded) or blocked by the relay (#1256). */
+  reason?: 'revoked' | 'blocked'
   expires?: string
   /** Whether Toskar's relay takes new subscriptions now; missing until it's been asked. */
   open?: boolean
@@ -666,6 +672,10 @@ export type AnywhereSubscription = {
   error?: string
   /** This copy is the Mac App Store's, which sells nothing: the Toskar app on a phone or tablet does (#630). */
   in_app_only?: boolean
+  /** The relay it's for when that isn't Toskar's own, such as a developer's (#1266). */
+  relay?: string
+  /** What the checkout charges for each plan, from billing; missing until billing answers (#1257). */
+  prices?: Partial<Record<'monthly' | 'yearly', { amount: number; currency: string }>>
 }
 
 export const api = {
@@ -698,6 +708,12 @@ export const api = {
   /** Opens a Stripe checkout for access from anywhere on this computer (#639); answers its page. */
   startSubscriptionCheckout: (plan: 'monthly' | 'yearly') =>
     request<{ url: string }>('/api/v1/remote-access/subscription/checkout', { method: 'POST', body: JSON.stringify({ plan }) }),
+
+  /** Closes the checkout opened here before it's paid (#1257). */
+  cancelSubscriptionCheckout: () => request<void>('/api/v1/remote-access/subscription/checkout', { method: 'DELETE' }),
+
+  /** Moves the subscription bought here onto this computer when it's tied to another (#1257). */
+  moveSubscriptionHere: () => request<void>('/api/v1/remote-access/subscription/move', { method: 'POST' }),
 
   /** Stripe's billing page for the subscription bought here (#639). */
   manageSubscription: () => request<{ url: string }>('/api/v1/remote-access/subscription/manage', { method: 'POST' }),
@@ -822,7 +838,7 @@ export const api = {
   /** A new one-time link for a person: an invite, or a reset once they have a sign-in. */
   personLink: (id: string) => request<PersonLink>(`/api/v1/people/${encodeURIComponent(id)}/link`, { method: 'POST' }),
 
-  getHealth: () => request<HealthResponse>('/api/v1/health'),
+  getHealth: (init?: RequestInit) => request<HealthResponse>('/api/v1/health', init),
 
   getVersion: () => request<VersionResponse>('/api/v1/version'),
   getUpdates: () => request<UpdatesStatus>('/api/v1/updates'),
@@ -851,16 +867,21 @@ export const api = {
 
   listRunningModels: () => request<RunningModelView[]>('/api/v1/models/running'),
 
-  installModel: (id: string, opts?: { wait?: boolean; node_id?: string }) => {
+  /** accept_license: the person accepted the model's license terms, which Core keeps a record of (#593). */
+  installModel: (id: string, opts?: { wait?: boolean; node_id?: string; accept_license?: boolean }) => {
     const params = new URLSearchParams()
     if (opts?.wait) params.set('wait', 'true')
     if (opts?.node_id) params.set('node_id', opts.node_id)
     const qs = params.toString()
+    const body = {
+      ...(opts?.node_id ? { node_id: opts.node_id } : {}),
+      ...(opts?.accept_license ? { accept_license: true } : {}),
+    }
     return request<{ status: string; model_id: string }>(
       `/api/v1/models/${id}/install${qs ? `?${qs}` : ''}`,
       {
         method: 'POST',
-        body: opts?.node_id ? JSON.stringify({ node_id: opts.node_id }) : undefined,
+        body: Object.keys(body).length > 0 ? JSON.stringify(body) : undefined,
       },
     )
   },
@@ -1340,6 +1361,38 @@ export const api = {
       body: JSON.stringify({ text, conversation_id: conversationId }),
     }),
 
+  /** The Voice settings: Kitten TTS 2 mini's install and each language's voice (#1304). Admins only. */
+  getVoiceSettings: () => request<VoiceSettings>('/api/v1/speech/voices'),
+
+  /** Choose the voice a language is read aloud in; empty goes back to automatic. */
+  setSpeechVoice: (language: string, voice: string) =>
+    request<VoiceSettings>(`/api/v1/speech/voices/${encodeURIComponent(language)}`, {
+      method: 'PUT',
+      body: JSON.stringify({ voice }),
+    }),
+
+  /** Start installing Kitten TTS 2 mini in the background. */
+  installKitten: () => request<VoiceSettings>('/api/v1/speech/kitten', { method: 'POST' }),
+
+  /** Remove Kitten TTS 2 mini. */
+  removeKitten: () => request<VoiceSettings>('/api/v1/speech/kitten', { method: 'DELETE' }),
+
+  /** A little text read aloud in the computer's voice, as a WAV file, to preview a voice (#795). */
+  previewVoice: async (text: string, voice: string, language: string): Promise<Blob> => {
+    let res: Response
+    try {
+      res = await fetch(`${getApiBase()}/api/v1/speech/say`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', [CLIENT_CONTRACT_HEADER]: CLIENT_CONTRACT, ...authHeaders() },
+        body: JSON.stringify({ text, voice, language }),
+      })
+    } catch (err) {
+      throw unreachable(err)
+    }
+    if (!res.ok) throw await responseError(res)
+    return res.blob()
+  },
+
   /** What image (images) or video generation has installed, and any setup in progress; on a paired computer with nodeId (#153). */
   getMediaSetup: (kind: MediaKind, nodeId?: string) => request<ImageSetup>(mediaSetupPath(kind, nodeId)),
 
@@ -1406,6 +1459,21 @@ export const api = {
   /** Makes a one-time join token for adding a computer (#40); the token is in the answer only. */
   createJoinToken: (ttlMinutes?: number) =>
     request<JoinTokenCreated>('/api/v1/join-tokens', { method: 'POST', body: JSON.stringify(ttlMinutes ? { ttl_minutes: ttlMinutes } : {}) }),
+
+  getComfyUI: () => request<ComfyUIStatus>('/api/v1/comfyui'),
+
+  setComfyUI: (body: { base_url: string; token?: string; clear_token?: boolean }) =>
+    request<ComfyUIStatus>('/api/v1/comfyui', { method: 'PUT', body: JSON.stringify(body) }),
+
+  listComfyWorkflows: async () => (await request<{ workflows: ComfyWorkflow[] }>('/api/v1/comfyui/workflows'))?.workflows ?? [],
+
+  detectComfyWorkflow: (graph: unknown) =>
+    request<ComfyWorkflowInputs>('/api/v1/comfyui/workflows/detect', { method: 'POST', body: JSON.stringify({ graph }) }),
+
+  saveComfyWorkflow: (body: { name: string; description?: string; graph: unknown; inputs?: ComfyWorkflowInputs }) =>
+    request<ComfyWorkflow>('/api/v1/comfyui/workflows', { method: 'POST', body: JSON.stringify(body) }),
+
+  deleteComfyWorkflow: (name: string) => request<null>(`/api/v1/comfyui/workflows/${encodeURIComponent(name)}`, { method: 'DELETE' }),
 
   getExternalServer: () => request<ExternalServerInfo>('/api/v1/external-server'),
 

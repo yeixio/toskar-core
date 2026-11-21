@@ -1,8 +1,9 @@
 {
-  "tagline": "本地 AI 控制中心",
+  "tagline": "在你自己的电脑上运行 AI",
   "nav": {
     "label": "主菜单",
     "open": "打开菜单",
+    "skip": "跳到内容",
     "use": "使用",
     "customize": "自定义",
     "administer": "管理",
@@ -39,10 +40,16 @@
     "bifrostHint": "电脑发现与网络",
     "computersNone": "没有电脑",
     "connected_other": "已连接 {{count}} 台",
-    "nornHint": "Norn 在你的各台电脑之间调度工作",
+    "nornHint": "由哪台电脑运行每个模型",
     "nornAutomatic": "自动",
-    "mimirHint": "本地知识库与记忆",
-    "mimirReady": "就绪"
+    "mimirHint": "Toskar 用来回答的文件和来源",
+    "justThis": "仅这台电脑",
+    "placementLocal": "这台电脑",
+    "placementAsk": "每次询问",
+    "knowledgeNone": "尚无来源",
+    "knowledgeFailed_other": "{{count}} 个失败",
+    "knowledgeReady_other": "{{count}} 个来源",
+    "knowledgeIndexing": "正在索引…"
   },
   "boot": {
     "starting": "正在启动 Toskar",

@@ -6,6 +6,7 @@ import (
 	"io"
 	"net"
 	"net/http"
+	"strings"
 
 	"github.com/gorilla/mux"
 	"github.com/yeixio/toskar-core/internal/auth"
@@ -214,9 +215,22 @@ func (s *Server) handleAddCompanion(w http.ResponseWriter, r *http.Request) {
 	var secret string
 	// Tied to the device asking, so it goes when that one disconnects (#766).
 	if p := auth.PrincipalFrom(r.Context()); p.Via == auth.ViaAPIKey && p.KeyID != "" && s.deps.Devices.CreateCompanion != nil {
+		// One that gives no name says which device connected it, so it
+		// isn't a plain "Device" in the list (#1266).
+		if strings.TrimSpace(body.DeviceName) == "" {
+			for _, k := range list {
+				if k.ID == p.KeyID && k.Name != "" {
+					name = auth.CleanDeviceName("Device via " + k.Name)
+				}
+			}
+		}
 		rec, secret, err = s.deps.Devices.CreateCompanion(r.Context(), name, p.KeyID)
 	} else {
 		rec, secret, err = s.deps.Devices.CreateKey(r.Context(), name)
+	}
+	if errors.Is(err, auth.ErrCompanionOfCompanion) {
+		writeErr(w, http.StatusForbidden, "COMPANION_LIMIT", "A device connected through another can't connect more. Connect it from the phone.", nil)
+		return
 	}
 	if err != nil {
 		writeErrFrom(w, http.StatusInternalServerError, "PAIRING_FAILED", err)

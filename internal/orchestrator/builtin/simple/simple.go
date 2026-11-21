@@ -7,6 +7,8 @@ import (
 	"slices"
 	"strings"
 	"time"
+	"unicode"
+	"unicode/utf8"
 
 	"github.com/yeixio/toskar-core/internal/contextusage"
 	"github.com/yeixio/toskar-core/internal/events"
@@ -84,6 +86,10 @@ func (o *Orchestrator) Run(
 
 		instructions := "Format answers in Markdown with short paragraphs and lists. Do not wrap the whole answer in a code fence. " +
 			"Link only to addresses from the reference material, tool results, or the conversation; otherwise name the site instead of guessing a page's address, since remembered addresses are often wrong."
+		if turnopts.SpokenFrom(ctx) {
+			// A spoken answer is heard, and its own style says how (#795).
+			instructions = ""
+		}
 		reference := referenceMaterial(ctx, env, task.Prompt)
 		// The effort the user chose, or Auto's pick for this kind of request,
 		// sets how much planning, reading, and checking the turn gets (§15).
@@ -158,6 +164,13 @@ func (o *Orchestrator) Run(
 		// look-up when the answer turns out to send the person off to search.
 		webProfile := profile
 		profile = offerOnly(profile, offered)
+		// A question the person's own files or knowledge answer stays on
+		// this computer: no web search first, no search tool, and no
+		// look-up after (#1268). People connect private notes expecting
+		// that, and a search would send names from them out.
+		if answeredLocally(task.Prompt, reference) {
+			profile, webProfile = withoutWeb(profile), withoutWeb(webProfile)
+		}
 		// A request with several parts is worked through part by part;
 		// otherwise a current question is looked up first.
 		planned := false
@@ -430,7 +443,7 @@ func (o *Orchestrator) Run(
 		for {
 			// Every way around this loop is a new attempt at the answer.
 			live.takeBack()
-			content, m, err := generateLive(answerCtx, env, role, messages, true, live.feed)
+			content, thinking, m, err := generateStep(answerCtx, env, role, messages, true, live.feed)
 			if err != nil {
 				if content != "" && !live.settle(tools.VisibleText(content)) {
 					ch <- pluginapi.OrchestrationEvent{Type: "agent.message", Role: role, NodeID: nodeID, Content: content}
@@ -565,7 +578,7 @@ func (o *Orchestrator) Run(
 					evidence = joinReference(evidence, resultNote)
 				}
 				messages = append(messages,
-					pluginapi.ChatMessage{Role: "assistant", Content: content},
+					keptReasoning(pluginapi.ChatMessage{Role: "assistant", Content: content}, thinking),
 					pluginapi.ChatMessage{Role: "user", Content: resultNote + followUp},
 				)
 				if isTask {
@@ -820,9 +833,23 @@ func generateLive(
 	answer bool,
 	onText func(string),
 ) (string, *pluginapi.GenerationMetrics, error) {
+	content, _, metrics, err := generateStep(ctx, env, role, messages, answer, onText)
+	return content, metrics, err
+}
+
+// generateStep is generateLive, also returning what a reasoning model
+// thought before it wrote, as far as maxReasoningText*4 bytes (#841).
+func generateStep(
+	ctx context.Context,
+	env pluginapi.ExecutionEnvironment,
+	role string,
+	messages []pluginapi.ChatMessage,
+	answer bool,
+	onText func(string),
+) (string, string, *pluginapi.GenerationMetrics, error) {
 	stream, err := env.Generate(ctx, role, messages)
 	if err != nil {
-		return "", nil, err
+		return "", "", nil, err
 	}
 	var b strings.Builder
 	var metrics *pluginapi.GenerationMetrics
@@ -850,7 +877,7 @@ func generateLive(
 	for chunk := range stream {
 		if chunk.Error != "" {
 			endThinking()
-			return b.String(), metrics, fmt.Errorf("%s", chunk.Error)
+			return b.String(), thinking.String(), metrics, fmt.Errorf("%s", chunk.Error)
 		}
 		if chunk.Metrics != nil {
 			metrics = chunk.Metrics
@@ -876,7 +903,7 @@ func generateLive(
 		}
 	}
 	endThinking()
-	return b.String(), metrics, nil
+	return b.String(), thinking.String(), metrics, nil
 }
 
 func streamText(ch chan<- pluginapi.OrchestrationEvent, role, nodeID, content string, metrics *pluginapi.GenerationMetrics, usage contextusage.Usage) {
@@ -1026,4 +1053,35 @@ func invalidCallNote(offered []string) string {
 		note += ", one of: " + strings.Join(offered, ", ")
 	}
 	return note + "; and args is an object with that tool's arguments. Or answer in plain text."
+}
+
+// answeredLocally reports whether reference material, from the person's
+// files or connected knowledge, covers the question: most of its
+// distinctive words are in it (#1268).
+func answeredLocally(prompt, reference string) bool {
+	if reference == "" {
+		return false
+	}
+	have := strings.ToLower(reference)
+	words, found := 0, 0
+	seen := map[string]bool{}
+	for _, w := range strings.FieldsFunc(strings.ToLower(prompt), func(r rune) bool { return !unicode.IsLetter(r) && !unicode.IsNumber(r) }) {
+		if utf8.RuneCountInString(w) < 4 || localStopWords[w] || seen[w] {
+			continue
+		}
+		seen[w] = true
+		words++
+		if strings.Contains(have, w) {
+			found++
+		}
+	}
+	return words >= 2 && found*5 >= words*3
+}
+
+// localStopWords are question words too common to tell what it's about.
+var localStopWords = map[string]bool{
+	"what": true, "which": true, "when": true, "where": true, "much": true, "many": true, "does": true, "have": true,
+	"there": true, "their": true, "about": true, "with": true, "from": true, "that": true, "this": true, "your": true,
+	"tell": true, "know": true, "please": true, "could": true, "would": true, "should": true, "them": true, "they": true,
+	"into": true, "than": true, "then": true, "also": true, "some": true, "like": true, "just": true,
 }

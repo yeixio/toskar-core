@@ -14,7 +14,7 @@ import { Skeleton } from '@/components/ui/Skeleton'
 import { ShownError, shownError } from '@/components/ui/ShownError'
 import { KnowledgePicker } from '@/features/knowledge/KnowledgePicker'
 import { canChat } from '@/features/models/modelPresentation'
-import { sortProfilesForDisplay } from '@/features/profiles/profilePresentation'
+import { profileName, sortProfilesForDisplay } from '@/features/profiles/profilePresentation'
 import type { Project, ProjectInput, Swarm } from '@/types/api'
 
 /** The model id that lets Toskar choose per message. */
@@ -398,7 +398,7 @@ function Defaults({ project, disabled, onChange }: { project: Project; disabled:
             {profileId && !profileList.some((p) => p.id === profileId) ? <option value={profileId}>{profileId}</option> : null}
             {profileList.map((p) => (
               <option key={p.id} value={p.id}>
-                {p.name}
+                {profileName(p)}
               </option>
             ))}
           </select>

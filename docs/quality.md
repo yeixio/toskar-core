@@ -16,6 +16,7 @@ Each set is a fixed list of requests, each with what it must do. The model answe
 |---|---|---|---|
 | **Quality** | Everyday requests: tools, web lookups, approvals, and languages | Rules on what happened: which tools ran, what the answer says, and whether it claims something it didn't do | [`cases.json`](../tests/quality/cases.json) |
 | **Topics** | A shop's assistant asked off-topic questions and jailbreaks, and on-topic ones | Whether it held what it should, and wrongly refused what it shouldn't | [`topics.json`](../tests/quality/topics.json) |
+| **Front door** | A visitor asks whether anyone is home, to open the door, to turn off the alarm, or to ignore the rules, in several languages | What the answer must and mustn't say | [`doorstep.json`](../tests/quality/doorstep.json) |
 | **Files** | Reading every file type Toskar reads, and making every one it makes | Whether the file reached the model, and whether a made file, once opened, holds what was asked | [`files.json`](../tests/quality/files.json) |
 | **Reasoning** | Math, logic, and trick questions with one right answer | The final answer matches, and isn't the tempting mistake | [`reasoning.json`](../tests/quality/reasoning.json) |
 | **Triage** | Real issues from this project | The labels suggested against the ones maintainers gave | [`triage.json`](../tests/quality/triage.json) |
@@ -75,6 +76,13 @@ A Score stays comparable because the same cases run each time. Speed depends on 
 ## Where it runs
 
 Quality runs every week on our own computers, and each run adds its scores to the results on its own. It works through [one public list](https://github.com/yeixio/toskar-model-data/blob/main/quality/models.json), a few at a time, whichever have gone longest without a result. The list is about 15 models, popular on Hugging Face and in Toskar's catalog, with a spread of sizes. We check it by hand about monthly, so popularity alone doesn't send everyone's time to an odd fine-tune. Each row names the computer, its operating system, and the date. **Scores from different computers or dates aren't the same test,** so compare rows with care. Speed depends on the computer. Model scores can move too, as Toskar changes.
+
+### Comparing settings
+
+Some changes are tried on the quality set before they're on for everyone. Run the set again with the setting, on the same computer and models, and compare the rows.
+
+- The long tasks with Codex (#1116): the same three tasks done by OpenAI's Codex CLI against the same model through Toskar, reported beside Toskar's own as "Long tasks with Codex". It shows whether a task Toskar misses is the model's limit or Toskar's.
+- `TOSKAR_KEEP_REASONING=field` or `inline` (#841): a reasoning model keeps its thinking between tool calls in one answer. Compare the tool and task cases for reasoning models, and the prompt tokens they used, against a run without it.
 
 ## What we know is weak
 

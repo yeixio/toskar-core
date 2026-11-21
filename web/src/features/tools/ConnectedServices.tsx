@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
+import { Link } from 'react-router-dom'
 import i18n from '@/i18n'
 import { api } from '@/lib/api'
-import type { Connector } from '@/types/api'
+import type { Connector, ConnectorField } from '@/types/api'
+import { errorText } from '@/lib/errorText'
 import { ShownError, shownOr, type Shown } from '@/components/ui/ShownError'
 import { LoadError } from '@/components/ui/LoadError'
 import { Skeleton } from '@/components/ui/Skeleton'
@@ -16,6 +18,17 @@ const KEY = ['connectors'] as const
  * database. They are never shown again or given to a model; tools use them
  * when they run.
  */
+/** The stored settings a connection's form starts from: not its secrets,
+ * which come back masked and are kept on the server when left blank. */
+function storedSettings(service: Connector): Record<string, string> {
+  const out: Record<string, string> = {}
+  for (const f of service.fields) {
+    const v = service.values?.[f.key]
+    if (!f.secret && v) out[f.key] = v
+  }
+  return out
+}
+
 export function ConnectedServices() {
   const { t } = useTranslation('services')
   const query = useQuery({ queryKey: KEY, queryFn: () => api.listConnectors(), retry: false })
@@ -44,7 +57,10 @@ function ServiceRow({ service }: { service: Connector }) {
   const refresh = () => queryClient.invalidateQueries({ queryKey: KEY })
 
   const connect = useMutation({
-    mutationFn: () => api.connectService(service.id, values),
+    // The form shows what's stored and sends what changed on top of it, so
+    // changing one setting doesn't mean entering the rest again. Secret
+    // fields left blank keep their stored value on the server.
+    mutationFn: () => api.connectService(service.id, { ...storedSettings(service), ...values }),
     onSuccess: () => {
       setEditing(false)
       setValues({})
@@ -66,6 +82,41 @@ function ServiceRow({ service }: { service: Connector }) {
     },
     onError: (err) => setError(shownOr(err, i18n.t('services:generic'))),
   })
+
+  // An error about one field, such as the address, is said at that field,
+  // as a typing mistake rather than a problem to report (#1345).
+  const errorField = typeof error?.details?.field === 'string' ? error.details.field : undefined
+  const fieldError = errorField && service.fields.some((field) => field.key === errorField) ? errorField : undefined
+
+  const fieldRow = (field: ConnectorField) => {
+    const stored = service.values?.[field.key]
+    const wrong = fieldError === field.key && error
+    return (
+      <label key={field.key} className="block text-sm">
+        <span className="text-ink-muted">
+          {field.label}
+          {field.optional && <span className="text-ink-faint">{t('optional')}</span>}
+        </span>
+        <input
+          className="field mt-1 w-full"
+          type={field.secret ? 'password' : 'text'}
+          autoComplete="off"
+          spellCheck={false}
+          aria-invalid={wrong ? true : undefined}
+          aria-describedby={wrong ? `${service.id}-${field.key}-error` : undefined}
+          placeholder={field.secret && stored ? t('stored', { value: stored }) : field.placeholder ? t('example', { value: field.placeholder }) : undefined}
+          defaultValue={field.secret ? '' : stored ?? ''}
+          onChange={(e) => setValues((v) => ({ ...v, [field.key]: e.target.value }))}
+        />
+        {wrong && (
+          <span id={`${service.id}-${field.key}-error`} role="alert" className="mt-1 block text-xs text-danger">
+            {errorText(wrong.code, wrong.error, wrong.details)}
+          </span>
+        )}
+        {field.help && <span className="mt-1 block text-xs text-ink-faint">{field.help}</span>}
+      </label>
+    )
+  }
 
   const statusLine = service.connected
     ? service.status === 'error'
@@ -103,7 +154,7 @@ function ServiceRow({ service }: { service: Connector }) {
             </>
           )}
           {!service.connected && !editing && (
-            <button type="button" className="btn-primary px-3 py-1.5 text-xs" onClick={() => setEditing(true)}>
+            <button type="button" className="btn-primary px-3 py-1.5 text-xs" aria-label={t('connectService', { name: service.name })} onClick={() => setEditing(true)}>
               {t('connect')}
             </button>
           )}
@@ -119,27 +170,14 @@ function ServiceRow({ service }: { service: Connector }) {
           }}
         >
           <p className="rounded-md bg-info/10 px-2.5 py-2 text-xs leading-relaxed text-ink">{service.scopes}</p>
-          {service.fields.map((field) => {
-            const stored = service.values?.[field.key]
-            return (
-              <label key={field.key} className="block text-sm">
-                <span className="text-ink-muted">
-                  {field.label}
-                  {field.optional && <span className="text-ink-faint">{t('optional')}</span>}
-                </span>
-                <input
-                  className="field mt-1 w-full"
-                  type={field.secret ? 'password' : 'text'}
-                  autoComplete="off"
-                  spellCheck={false}
-                  placeholder={field.secret && stored ? t('stored', { value: stored }) : field.placeholder}
-                  defaultValue={field.secret ? '' : stored ?? ''}
-                  onChange={(e) => setValues((v) => ({ ...v, [field.key]: e.target.value }))}
-                />
-                {field.help && <span className="mt-1 block text-xs text-ink-faint">{field.help}</span>}
-              </label>
-            )
-          })}
+          {service.fields.filter((field) => !field.advanced).map(fieldRow)}
+          {/* Settings most people leave, folded away (#1345). */}
+          {service.fields.some((field) => field.advanced) && (
+            <details className="text-sm">
+              <summary className="cursor-pointer text-ink-muted">{t('advanced')}</summary>
+              <div className="mt-2 space-y-3">{service.fields.filter((field) => field.advanced).map(fieldRow)}</div>
+            </details>
+          )}
           <div className="flex gap-2">
             <button type="submit" className="btn-primary px-3 py-1.5 text-xs" disabled={connect.isPending}>
               {connect.isPending ? t('checking') : service.connected ? t('save') : t('connect')}
@@ -158,7 +196,13 @@ function ServiceRow({ service }: { service: Connector }) {
           </div>
         </form>
       )}
-      {error && <ShownError {...error} className="mt-2 text-xs text-danger" />}
+      {error && !fieldError && <ShownError {...error} className="mt-2 text-xs text-danger" />}
+      {/* A connected doorbell leads to answering the door (#1341). */}
+      {service.connected && service.id === 'reolink' && (
+        <Link to="/automations?idea=door" className="mt-2 inline-block text-xs font-medium text-primary underline-offset-2 hover:underline">
+          {t('doorbellAutomation')}
+        </Link>
+      )}
       {service.connected && service.tools.length > 0 && (
         <p className="mt-2 text-xs text-ink-faint">
           {t('tools', {

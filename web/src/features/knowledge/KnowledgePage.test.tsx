@@ -88,3 +88,25 @@ describe('KnowledgePage', () => {
     expect(screen.getByRole('button', { name: 'Database' })).toHaveAttribute('aria-pressed', 'true')
   })
 })
+
+describe('KnowledgePage QA regressions', () => {
+  beforeEach(() => {
+    vi.mocked(api.listKnowledge).mockResolvedValue([])
+    vi.mocked(api.getProfiles).mockResolvedValue([general])
+    vi.mocked(api.getSettings).mockResolvedValue({} as never)
+    vi.mocked(api.getModels).mockResolvedValue([])
+    vi.mocked(api.createKnowledge).mockClear().mockResolvedValue(source('ks-made', 'Notes'))
+  })
+
+  // Regression: toskar-core#1270
+  it('Enter in the path field connects the folder', async () => {
+    renderPage()
+    const path = await screen.findByPlaceholderText('~/Documents/inventory.csv')
+    fireEvent.change(path, { target: { value: '~/Notes' } })
+    // As a browser does: Enter submits the field's form.
+    fireEvent.keyDown(path, { key: 'Enter', code: 'Enter' })
+    const form = (path as HTMLInputElement).form
+    if (form) fireEvent.submit(form)
+    await waitFor(() => expect(api.createKnowledge).toHaveBeenCalled())
+  })
+})

@@ -103,6 +103,54 @@
       "reranker": "辅助模型 · 挑选最佳段落",
       "classifier": "辅助模型 · 帮助“自动”分配请求",
       "other": "辅助模型"
+    },
+    "ratings": {
+      "rate": "评分",
+      "title": "为{{model}}评分",
+      "intro": "它在这台电脑上表现如何？你的评分会保存在这里。",
+      "starsLabel": "星级",
+      "stars_other": "{{count}} 星",
+      "tagsLabel": "原因（可选）",
+      "tags": {
+        "great_responses": "回答出色",
+        "fast": "速度快",
+        "slow": "速度慢",
+        "stable": "稳定",
+        "crashed": "崩溃过",
+        "too_much_memory": "占用内存过多",
+        "great_for_coding": "适合编程",
+        "great_for_chat": "适合聊天",
+        "good_tool_use": "善用工具",
+        "poor_tool_use": "不擅长用工具"
+      },
+      "share": "与社区分享此评分",
+      "shareHint": "帮助使用类似电脑的人选择模型。你可以随时停止分享。",
+      "whatIsShared": "具体分享哪些内容",
+      "sent": {
+        "destination": "发送到",
+        "model": "模型",
+        "hardware": "电脑类别",
+        "memory": "{{type}}内存，{{gb}} GB",
+        "never": "绝不会发送你的提示、聊天、文件名、电脑名称、用户名或网络地址。该服务不会保存你的 IP 地址。"
+      },
+      "notShareable": "此评分仅保存在这台电脑上：{{reason}}",
+      "save": "保存",
+      "saveAndShare": "保存并分享",
+      "remove": "删除评分",
+      "cancel": "取消",
+      "count_other": "{{formatted}} 条评分",
+      "similar": {
+        "family": "在与你相同型号的电脑上",
+        "class": "在类似的电脑上",
+        "backend": "在内存相近的电脑上"
+      },
+      "overall": "总体",
+      "confidence": {
+        "limited": "数据有限",
+        "early": "早期评分"
+      },
+      "prompt": "{{model}}用起来怎么样？",
+      "notNow": "以后再说"
     }
   },
   "phoneModels": {
@@ -418,7 +466,13 @@
         "notNow": "暂不"
       }
     },
-    "phoneAutoHint": "为每条消息选择这台设备上最合适的模型"
+    "phoneAutoHint": "为每条消息选择这台设备上最合适的模型",
+    "builtInProfiles": {
+      "general-assistant": "通用助手",
+      "programming": "编程",
+      "research": "研究",
+      "custom": "自定义"
+    }
   },
   "effort": {
     "title": "投入程度",
@@ -590,6 +644,14 @@
       "try": "无需电脑试用",
       "tryMeta": "使用示例回答的演示",
       "other": "此演示回答左侧的建议问题。要问任何问题，请在家里的电脑上设置 Toskar（Toskar Core 免费），然后在“电脑”→“连接设备”中连接这台电视。"
+    },
+    "people": {
+      "title": "谁在观看？",
+      "add": "添加其他人",
+      "hint": "每个人都用自己在电脑上的账户中的代码连接，所以聊天和记忆都只属于自己。",
+      "switch": "不是 {{name}}？",
+      "unnamed": "用户 {{n}}",
+      "back": "返回"
     }
   },
   "setup": {
@@ -845,6 +907,7 @@
       "notification": "通知",
       "community_ratings": "社区评分",
       "update_check": "检查更新",
+      "comfyui": "ComfyUI",
       "problem_report": "问题报告",
       "link_check": "链接检查"
     },
@@ -858,6 +921,7 @@
       "notification": "通知",
       "community_ratings": "社区评分",
       "update_check": "检查更新",
+      "comfyui": "ComfyUI",
       "problem_report": "问题报告",
       "link_check": "链接检查"
     },

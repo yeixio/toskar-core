@@ -175,7 +175,12 @@
     "digest_other": "{{count}}件の通知",
     "digestMore_other": "…ほか{{count}}件",
     "automationDigest": "オートメーションのまとめ",
-    "automationDigestBody_other": "{{count}}件のオートメーションが実行されました: {{names}}"
+    "automationDigestBody_other": "{{count}}件のオートメーションが実行されました: {{names}}",
+    "newerModels": "新しい {{family}} モデルがあります",
+    "newerModelsBody": "{{model}} は {{installed}} より新しいモデルです。モデル › インストール済みで、このコンピューターでの動作の目安を確認し、今のモデルと並べてインストールできます。",
+    "pageNotOpened": "{{automation}} は {{page}} を開きませんでした",
+    "pageNotOpenedUnnamed": "自動化が {{page}} を開きませんでした",
+    "pageNotOpenedBody": "モデルがページを読まずに答えたため、結果は作り話かもしれません。この自動化には、ツールを使えるモデルを選んでください。"
   },
   "sent": {
     "times": "{{title}}（{{count}}回）",

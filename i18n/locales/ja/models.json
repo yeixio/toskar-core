@@ -126,6 +126,13 @@
     "fitsOther": "{{model}}はこのコンピュータで動作します。",
     "installOther": "{{model}}をインストール"
   },
+  "newer": {
+    "title": "{{model}} の方が新しいです。",
+    "fit": "このコンピューターでは: {{fit}}。",
+    "license": "ライセンスが異なります: {{license}}。",
+    "install": "{{model}} をインストール",
+    "beside": "このモデルと並べてインストールされます。プロファイルは変更するまで今のモデルを使い続けます。"
+  },
   "capability": {
     "noWeb": "現在の構成ではWebへのリアルタイムアクセスは利用できません。",
     "noTools": "{{model}}はツールを使えないため、それを調べられません。下にあるようなツール対応モデルに切り替えてください。",
@@ -151,7 +158,9 @@
     "parameters": "パラメータ",
     "format": "フォーマット",
     "runtime": "ランタイム",
-    "modelId": "モデルID"
+    "modelId": "モデルID",
+    "download": "ダウンロード",
+    "memoryNeeded": "必要なメモリ"
   },
   "tightFit": {
     "label": "ぎりぎり",
@@ -446,9 +455,11 @@
         "hint": "Toskar で確認したモデル。"
       },
       "media": {
-        "title": "画像とクリップ",
-        "hint": "画像とクリップはツールで設定します。",
-        "action": "ツールを開く"
+        "title": "画像とクリップ"
+      },
+      "search": {
+        "title": "Hugging Face から",
+        "hint": "検索に合うアップロード（重複なし）。"
       }
     },
     "purpose": {
@@ -466,9 +477,32 @@
       "tested": "Toskar でテスト済みです。",
       "untested": "Hugging Face のモデルです。Toskar ではテストしていないため、うまく動かない場合や動作しない場合があります。業務で使う前にライセンスを確認してください。",
       "link": "Hugging Face で見る",
-      "close": "閉じる"
+      "close": "閉じる",
+      "business": "業務利用",
+      "businessYes": "可",
+      "businessLimited": "ライセンスの範囲内で可",
+      "businessNo": "不可：個人、研究、その他の非商用利用のみ",
+      "businessUnknown": "不明：仕事で使う前にライセンスを確認してください"
     },
-    "bestOverall": "総合おすすめ"
+    "bestOverall": "総合おすすめ",
+    "license": {
+      "free": "無料",
+      "conditions": "条件付きで無料",
+      "unknown": "ライセンス不明"
+    },
+    "business": {
+      "label": "業務利用",
+      "hint": "ライセンスで業務利用が認められているモデルだけを表示します。",
+      "none": "ここには、ライセンスで業務利用が認められているモデルがありません。"
+    },
+    "browse": {
+      "label": "カテゴリから探す",
+      "all": "すべて",
+      "chat_coding": "チャットとコーディング",
+      "vision": "画像を理解",
+      "creative": "画像とクリップ",
+      "hint": "画像とクリップのモデルは、このコンピュータで画像や短い動画を作成・編集します。"
+    }
   },
   "results": {
     "loading": "結果を読み込んでいます…",
@@ -525,5 +559,17 @@
       "window": "ウィンドウの上限を超える",
       "out_of_memory": "収まらない"
     }
+  },
+  "licenseTerms": {
+    "title": "{{model}} のライセンスに同意",
+    "body": "{{model}} は {{license}} のもとで提供されており、使う前にその条件に同意する必要があります。",
+    "read": "{{license}} を読む",
+    "record": "同意したことと日付を、Admin のために Toskar が記録します。",
+    "cancel": "キャンセル",
+    "accept": "同意してインストール"
+  },
+  "size": {
+    "download": "ダウンロード {{size}}",
+    "downloadMemory": "ダウンロード {{size}} · メモリ約{{memory}}"
   }
 }

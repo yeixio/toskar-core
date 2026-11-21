@@ -2,6 +2,14 @@ import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { Model, Node } from '@/types/api'
 import { formatBytes } from '@/lib/format'
+import { downloadBytes, fitLabelText } from '@/features/models/modelPresentation'
+
+const fitOrder: Record<string, number> = { excellent: 0, good: 1, tight: 2, heavy: 3, too_large: 3, unsupported: 4 }
+
+/** Where a model sorts by how well it fits this computer; unknown last. */
+function fitRank(m: Model): number {
+  return fitOrder[m.fit?.label ?? ''] ?? 5
+}
 
 export type DiskConflict = {
   node: Node
@@ -26,7 +34,7 @@ export function findDiskConflicts(
   targets: Node[],
 ): DiskConflict[] {
   if (!model) return []
-  const need = neededBytes(model.size_bytes)
+  const need = neededBytes(downloadBytes(model))
   const conflicts: DiskConflict[] = []
   for (const node of targets) {
     const avail = diskAvailable(node)
@@ -81,9 +89,23 @@ export function DeployModelsPanel({
     [model, targets],
   )
 
-  const selectable = models.filter(
-    (m) => m.source?.url || m.installed || (m.installed_on?.length ?? 0) > 0,
+  // What fits this computer first, then by size, and never the test
+  // placeholder (#1247).
+  const selectable = useMemo(
+    () =>
+      models
+        .filter((m) => m.family !== 'stub' && (m.source?.url || m.installed || (m.installed_on?.length ?? 0) > 0))
+        .sort((a, b) => fitRank(a) - fitRank(b) || downloadBytes(a) - downloadBytes(b)),
+    [models],
   )
+
+  function optionLabel(m: Model): string {
+    const name = downloadBytes(m)
+      ? t('deploy.modelSize', { model: m.display_name, size: formatBytes(downloadBytes(m)) })
+      : m.display_name
+    const fit = fitLabelText(m.fit?.label)
+    return fit ? t('deploy.modelFit', { model: name, fit }) : name
+  }
 
   function toggle(nodeId: string) {
     setForceDeploy(false)
@@ -130,7 +152,7 @@ export function DeployModelsPanel({
             <option value="">{t('deploy.chooseModel')}</option>
             {selectable.map((m) => (
               <option key={m.id} value={m.id}>
-                {m.size_bytes ? t('deploy.modelSize', { model: m.display_name, size: formatBytes(m.size_bytes) }) : m.display_name}
+                {optionLabel(m)}
               </option>
             ))}
           </select>
@@ -240,9 +262,9 @@ export function DeployModelsPanel({
                 ? t('deploy.deployToName', { name: targets[0].name })
                 : t('deploy.deploy')}
         </button>
-        {model?.size_bytes ? (
+        {model && downloadBytes(model) ? (
           <span className="text-xs text-ink-faint">
-            {t('deploy.downloadSize', { size: formatBytes(model.size_bytes) })}
+            {t('deploy.downloadSize', { size: formatBytes(downloadBytes(model)) })}
           </span>
         ) : null}
       </div>

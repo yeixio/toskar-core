@@ -4,6 +4,8 @@
 // leaves the computer.
 package imagegen
 
+import "github.com/yeixio/toskar-core/internal/taxonomy"
+
 // File is one download a model needs.
 type File struct {
 	// Role is how sd-cli takes it: diffusion, vae, llm (the text encoder),
@@ -40,6 +42,11 @@ type Model struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
 	License     string `json:"license"`
+	// Commercial is whether a business may use it: contracts.CommercialYes,
+	// CommercialLimited, or CommercialNo (#593).
+	Commercial string `json:"commercial"`
+	// Profile is what the model does, for browsing the store (#593).
+	taxonomy.Profile
 	// MemoryBytes is the memory it is comfortable with; smaller computers
 	// get the smaller model recommended.
 	MemoryBytes int64 `json:"memory_bytes"`

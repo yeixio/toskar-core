@@ -1,14 +1,18 @@
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import type { AIProfile, Automation, AutomationClockTime, AutomationInput, AutomationSchedule, AutomationTrigger, Device, Model, ParsedAutomation, ToolRecord } from '@/types/api'
+import type { AIProfile, Automation, AutomationAction, AutomationClockTime, AutomationInput, AutomationSchedule, AutomationTrigger, Device, DeviceConnector, Model, ParsedAutomation, ToolRecord, ModelNeed, VoiceChoice } from '@/types/api'
 import i18n from '@/i18n'
 import { api } from '@/lib/api'
-import { canChat } from '@/features/models/modelPresentation'
+import { canChat, modelUsesTools } from '@/features/models/modelPresentation'
+import { Link } from 'react-router-dom'
 import type { AutomationPreview } from '@/types/api'
 import { useUIStore } from '@/stores/uiStore'
 import { answerLanguages, nameInItself } from '@/i18n/answerLanguages'
-import { currencyName, formatDate } from '@/i18n/format'
+import { currencyName, formatDate, formatLocale } from '@/i18n/format'
 import { readNumber } from './number'
+import { AutomationActions } from './AutomationActions'
+import { KITTEN_CREDIT } from '@/features/settings/voiceSamples'
+import { ModelNeeds } from '@/features/settings/ModelNeeds'
 import {
   civilInputValue,
   civilToISO,
@@ -21,8 +25,9 @@ import {
   visibleTask,
   weekdayName,
 } from './parseRequest'
-import { IDEAS, buildIdea, ideaDefaults, ideaReady, type IdeaField, type IdeaId, type IdeaValues } from './ideas'
+import { IDEAS, availableIdeas, buildIdea, ideaDefaults, ideaReady, isRing, type IdeaField, type IdeaId, type IdeaValues } from './ideas'
 import { ShownError, shownOr, type Shown } from '@/components/ui/ShownError'
+import { profileName } from '@/features/profiles/profilePresentation'
 
 // The notify choices, in order; each is automations:form.notifyChoices.<mode> in the catalog.
 const NOTIFY_CHOICES: AutomationInput['notification']['mode'][] = ['condition', 'change', 'always', 'failure', 'none']
@@ -86,8 +91,38 @@ export function AutomationForm({ profiles, models, tools, others = [], initial, 
   // A device trigger's state to wait for, and the wait after a run (#586).
   const [deviceTo, setDeviceTo] = useState(initial?.trigger?.to ?? '')
   const [cooldown, setCooldown] = useState(initial?.trigger?.cooldown_seconds || 60)
-  // Cameras each run looks at (#667).
+  // Says each run's answer at the door, with quiet hours (#667).
+  const [saying, setSaying] = useState(Boolean(initial?.say))
+  const [quiet, setQuiet] = useState(Boolean(initial?.say?.quiet_from))
+  const [quietFrom, setQuietFrom] = useState(initial?.say?.quiet_from || '22:00')
+  const [quietTo, setQuietTo] = useState(initial?.say?.quiet_to || '07:00')
+  const [sayVoice, setSayVoice] = useState(initial?.say?.voice || '')
+  // Talks with the visitor after the first words, and notifies with the visit (#667).
+  const [listen, setListen] = useState(Boolean(initial?.say?.listen))
+  // The voices the door can speak in, from the Voice settings (#1304).
+  const [doorVoices, setDoorVoices] = useState<VoiceChoice[]>([])
+  // A camera needs a model that can see its picture: offered here, while
+  // setting up, rather than said when someone is at the door (#667).
+  const [visionNeed, setVisionNeed] = useState<ModelNeed | null>(null)
   const [cameraIDs, setCameraIDs] = useState<string[]>(initial?.cameras?.map((c) => c.device) ?? [])
+  const looking = cameraIDs.length > 0
+  useEffect(() => {
+    if (!saying && !looking) return
+    let live = true
+    api
+      .getVoiceSettings()
+      .then((v) => {
+        if (!live) return
+        if (Array.isArray(v?.languages)) setDoorVoices(v.languages.filter((l) => l.voices?.length > 0))
+        setVisionNeed(v?.needs?.find((n) => n.ability === 'vision' || n.ability === 'both') ?? null)
+      })
+      .catch(() => undefined)
+    return () => {
+      live = false
+    }
+  }, [saying, looking])
+  // Calls it may make on its own, even from a trigger (#586).
+  const [actions, setActions] = useState<AutomationAction[]>(initial?.actions ?? [])
   // The connected services' devices to pick from; none for someone who can't list them.
   const [devices, setDevices] = useState<Device[]>([])
   useEffect(() => {
@@ -99,6 +134,7 @@ export function AutomationForm({ profiles, models, tools, others = [], initial, 
   }, [])
   const cameras = devices.filter((d) => d.kind === 'camera')
   const watchable = devices.filter((d) => d.kind !== 'camera')
+  const speaker = devices.some((d) => d.connector === 'reolink' && d.kind === 'camera')
   // Also save each result as a file in a folder (#204).
   const [saving, setSaving] = useState(Boolean(initial?.save_folder))
   const [saveFolder, setSaveFolder] = useState(initial?.save_folder || '~/Documents/Toskar')
@@ -116,6 +152,20 @@ export function AutomationForm({ profiles, models, tools, others = [], initial, 
     if (parsed.notification.condition?.currency) setCurrency(parsed.notification.condition.currency)
     setNotes(parsed.notes ?? [])
     setParseError('')
+    // A request that runs when something happens, such as the doorbell
+    // ringing, fills in what starts it, its camera, and speaking at the
+    // door (#1341).
+    if (parsed.trigger?.kind === 'device' && parsed.trigger.device) {
+      setTriggerKind('device')
+      setTriggerURL(parsed.trigger.device)
+      setDeviceTo(parsed.trigger.to ?? '')
+      if (parsed.trigger.cooldown_seconds) setCooldown(parsed.trigger.cooldown_seconds)
+    }
+    if (parsed.cameras?.length) setCameraIDs(parsed.cameras.map((c) => c.device))
+    if (parsed.say) {
+      setSaying(true)
+      setListen(Boolean(parsed.say.listen))
+    }
   }
 
   function chooseIdea(id: IdeaId) {
@@ -126,10 +176,12 @@ export function AutomationForm({ profiles, models, tools, others = [], initial, 
   // A template's fields fill in the details directly, with no request to read.
   function applyIdea() {
     if (!idea || !ideaReady(idea, ideaValues)) return
-    const built = buildIdea(idea, ideaValues, schedule.time_zone || zone, readNumber)
+    const built = buildIdea(idea, ideaValues, schedule.time_zone || zone, readNumber, devices)
     fillFrom({ ...built, notes: [] })
-    setTriggerKind(built.trigger?.kind ?? '')
-    setTriggerURL(built.trigger?.path ?? built.trigger?.url ?? '')
+    if (built.trigger?.kind !== 'device') {
+      setTriggerKind(built.trigger?.kind ?? '')
+      setTriggerURL(built.trigger?.path ?? built.trigger?.url ?? '')
+    }
   }
 
   // Back to describing it, starting from the template's example.
@@ -187,6 +239,12 @@ export function AutomationForm({ profiles, models, tools, others = [], initial, 
   // Tools a scheduled run may use are approved here, because nobody is
   // watching to answer later (spec §59). Tools that change things are listed
   // apart, so approving one is a deliberate choice.
+  // Tools need a model that can call them; one that can't reads nothing
+  // and answers from memory (#1269).
+  const toolModels = installed.filter(modelUsesTools)
+  const chosenModel = installed.find((model) => model.id === modelID)
+  const needsToolModel =
+    selectedTools.length > 0 && installed.length > 0 && (modelID === 'auto' ? toolModels.length === 0 : chosenModel ? !modelUsesTools(chosenModel) : false)
   const lookTools = tools.filter((tool) => tool.enabled && tool.risk !== 'write')
   const changeTools = tools.filter((tool) => tool.enabled && tool.risk === 'write')
 
@@ -217,6 +275,14 @@ export function AutomationForm({ profiles, models, tools, others = [], initial, 
       trigger: triggerKind ? currentTrigger() : initial?.trigger ? { kind: '' } : undefined,
       // An edit that stops looking sends no cameras.
       cameras: cameraIDs.length > 0 || initial?.cameras?.length ? cameraIDs.map((device) => ({ connector: connectorOf(device), device })) : undefined,
+      // An edit that removes them all sends an empty list.
+      actions: actions.length > 0 || initial?.actions?.length ? actions : undefined,
+      // An edit that stops speaking sends one with no connector.
+      say: saying
+        ? { connector: 'reolink', device: 'camera', ...(quiet ? { quiet_from: quietFrom, quiet_to: quietTo } : {}), ...(sayVoice ? { voice: sayVoice } : {}), ...(listen ? { listen: true } : {}) }
+        : initial?.say
+          ? { connector: '' }
+          : undefined,
     }
   }
 
@@ -225,8 +291,8 @@ export function AutomationForm({ profiles, models, tools, others = [], initial, 
     return watchTrigger(triggerKind, triggerURL, afterWhen)
   }
 
-  function connectorOf(device: string): 'homeassistant' {
-    return (devices.find((d) => d.device === device)?.connector ?? 'homeassistant') as 'homeassistant'
+  function connectorOf(device: string): DeviceConnector {
+    return (devices.find((d) => d.device === device)?.connector ?? 'homeassistant') as DeviceConnector
   }
 
   function currentNotification(): AutomationInput['notification'] {
@@ -333,7 +399,7 @@ export function AutomationForm({ profiles, models, tools, others = [], initial, 
           {initial || !showIdeas ? null : (
             <div className="flex flex-wrap items-center gap-1.5 pt-1">
               <span className="text-xs text-ink-faint">{t('form.ideas')}</span>
-              {IDEAS.map(({ id }) => (
+              {availableIdeas(devices).map(({ id }) => (
                 <button
                   key={id}
                   type="button"
@@ -416,6 +482,8 @@ export function AutomationForm({ profiles, models, tools, others = [], initial, 
                 ))}
               </select>
             </label>
+            {/* A doorbell's button has nothing sensible to type here (#1341). */}
+            {connectorOf(triggerURL) === 'reolink' && isRing(triggerURL) && !deviceTo ? null : (
             <label className="block space-y-1 text-sm">
               <span className="text-ink-muted">{t('form.deviceTo')}</span>
               <input
@@ -432,6 +500,7 @@ export function AutomationForm({ profiles, models, tools, others = [], initial, 
                 ))}
               </datalist>
             </label>
+            )}
             <label className="block space-y-1 text-sm">
               <span className="text-ink-muted">{t('form.cooldown')}</span>
               <select className="field w-full" value={cooldown} onChange={(event) => setCooldown(Number(event.target.value))}>
@@ -507,8 +576,67 @@ export function AutomationForm({ profiles, models, tools, others = [], initial, 
             })}
           </div>
           <p className="text-xs text-ink-faint">{t('form.camerasHint', { count: MAX_CAMERAS })}</p>
+          {looking && visionNeed ? <ModelNeeds needs={[visionNeed]} /> : null}
         </fieldset>
       ) : null}
+      {speaker || saying ? (
+        <fieldset className="space-y-2 text-sm">
+          <label className="inline-flex items-center gap-2">
+            <input type="checkbox" checked={saying} onChange={(e) => setSaying(e.target.checked)} />
+            <span>{t('form.say')}</span>
+          </label>
+          {saying ? (
+            <div className="space-y-2 ps-6">
+              {doorVoices.length > 0 || sayVoice ? (
+                <label className="flex flex-wrap items-center gap-2">
+                  <span className="text-ink-muted">{t('form.sayVoice')}</span>
+                  <select className="field min-w-0 flex-1" value={sayVoice} onChange={(e) => setSayVoice(e.target.value)}>
+                    <option value="">{t('form.sayVoiceAutomatic')}</option>
+                    {sayVoice && !doorVoices.some((l) => l.voices.some((v) => v.id === sayVoice)) ? <option value={sayVoice}>{sayVoice}</option> : null}
+                    {/* By language, in the order of their names (#1342). */}
+                    {[...doorVoices].sort((a, b) => languageLabel(a.language).localeCompare(languageLabel(b.language))).map((l) => (
+                      <optgroup key={l.language} label={languageLabel(l.language)}>
+                        {l.voices.map((v) => (
+                          <option key={v.id} value={v.id}>
+                            {v.standard ? i18n.t('settings:voice.standard') : v.name}
+                            {v.engine === 'kitten' ? ` · ${t('form.sayVoiceKitten')}` : ''}
+                          </option>
+                        ))}
+                      </optgroup>
+                    ))}
+                  </select>
+                </label>
+              ) : null}
+              {sayVoice.startsWith('kitten:') ? <p className="text-xs text-ink-faint">{KITTEN_CREDIT}</p> : null}
+              <label className="flex items-start gap-2">
+                <input type="checkbox" className="mt-1" checked={listen} onChange={(e) => setListen(e.target.checked)} />
+                <span>
+                  {t('form.sayListen')}
+                  <span className="block text-xs text-ink-faint">{t('form.sayListenHint')}</span>
+                </span>
+              </label>
+              <label className="inline-flex items-center gap-2">
+                <input type="checkbox" checked={quiet} onChange={(e) => setQuiet(e.target.checked)} />
+                <span>{t('form.sayQuiet')}</span>
+              </label>
+              {quiet ? (
+                <div className="flex flex-wrap gap-3">
+                  <label className="inline-flex items-center gap-2">
+                    <span className="text-ink-muted">{t('form.sayQuietFrom')}</span>
+                    <input type="time" className="field" value={quietFrom} onChange={(e) => setQuietFrom(e.target.value)} />
+                  </label>
+                  <label className="inline-flex items-center gap-2">
+                    <span className="text-ink-muted">{t('form.sayQuietTo')}</span>
+                    <input type="time" className="field" value={quietTo} onChange={(e) => setQuietTo(e.target.value)} />
+                  </label>
+                </div>
+              ) : null}
+            </div>
+          ) : null}
+          <p className="text-xs text-ink-faint">{t('form.sayHint')}</p>
+        </fieldset>
+      ) : null}
+      <AutomationActions devices={devices} value={actions} onChange={setActions} />
       {triggerKind === 'webhook' || triggerKind === 'after' || triggerKind === 'device' ? null : (
         <>
       <p className="text-sm text-ink-muted">{triggerKind ? t('form.checkSchedule') : t('form.schedule')}</p>
@@ -616,7 +744,7 @@ export function AutomationForm({ profiles, models, tools, others = [], initial, 
             {profiles.length === 0 && <option value="">{t('form.noProfiles')}</option>}
             {profiles.map((profile) => (
               <option key={profile.id} value={profile.id}>
-                {profile.name}
+                {profileName(profile)}
               </option>
             ))}
           </select>
@@ -633,6 +761,14 @@ export function AutomationForm({ profiles, models, tools, others = [], initial, 
             ))}
           </select>
         </label>
+        {needsToolModel ? (
+          <p className="rounded-lg bg-warning/10 px-3 py-2 text-xs text-ink" role="status">
+            {t('form.needsToolModel')}{' '}
+            <Link to="/models" className="font-medium text-primary underline-offset-2 hover:underline">
+              {t('form.openModels')}
+            </Link>
+          </p>
+        ) : null}
         <label className="block space-y-1 text-sm">
           <span className="text-ink-muted">{t('form.responseLanguage')}</span>
           <select className="field w-full" value={responseLanguage} onChange={(event) => setResponseLanguage(event.target.value)}>
@@ -1054,4 +1190,13 @@ function previewNotification(
   }
   if (kind === 'available') return { mode, condition: { kind: 'available' } }
   return { mode, condition: { kind: 'significant' } }
+}
+
+/** A language's name in the App language, such as German for de. */
+function languageLabel(tag: string): string {
+  try {
+    return new Intl.DisplayNames([formatLocale()], { type: 'language' }).of(tag) ?? tag
+  } catch {
+    return tag
+  }
 }

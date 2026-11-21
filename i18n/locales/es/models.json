@@ -130,6 +130,13 @@
     "fitsOther": "{{model}} es adecuado para esta computadora.",
     "installOther": "Instalar {{model}}"
   },
+  "newer": {
+    "title": "{{model}} es más nuevo.",
+    "fit": "Cómo encaja en este ordenador: {{fit}}.",
+    "license": "Su licencia es distinta: {{license}}.",
+    "install": "Instalar {{model}}",
+    "beside": "Se instala junto a este, y los perfiles siguen usando su modelo hasta que los cambies."
+  },
   "capability": {
     "noWeb": "El acceso a la web en vivo no está disponible con la configuración actual.",
     "noTools": "{{model}} no puede usar herramientas, así que no puede buscar eso. Cambia a un modelo compatible con herramientas, como uno de los de abajo.",
@@ -155,7 +162,9 @@
     "parameters": "Parámetros",
     "format": "Formato",
     "runtime": "Entorno de ejecución",
-    "modelId": "ID del modelo"
+    "modelId": "ID del modelo",
+    "download": "Descarga",
+    "memoryNeeded": "Memoria necesaria"
   },
   "tightFit": {
     "label": "Justo",
@@ -462,9 +471,11 @@
         "hint": "Modelos que hemos comprobado con Toskar."
       },
       "media": {
-        "title": "Imágenes y clips",
-        "hint": "Las imágenes y los clips se configuran en Herramientas.",
-        "action": "Abrir Herramientas"
+        "title": "Imágenes y clips"
+      },
+      "search": {
+        "title": "De Hugging Face",
+        "hint": "Subidas que coinciden con tu búsqueda, cada una una vez."
       }
     },
     "purpose": {
@@ -482,9 +493,32 @@
       "tested": "Probado con Toskar.",
       "untested": "De Hugging Face. No se ha probado con Toskar, así que puede que no funcione tan bien o que no funcione. Comprueba su licencia antes de usarlo para trabajar.",
       "link": "Ver en Hugging Face",
-      "close": "Cerrar"
+      "close": "Cerrar",
+      "business": "Uso comercial",
+      "businessYes": "Permitido",
+      "businessLimited": "Permitido, dentro de los límites de la licencia",
+      "businessNo": "No permitido: solo uso personal, de investigación u otro uso no comercial",
+      "businessUnknown": "Desconocido: revisa la licencia antes de usarlo para trabajar"
     },
-    "bestOverall": "Mejor en general"
+    "bestOverall": "Mejor en general",
+    "license": {
+      "free": "Gratis",
+      "conditions": "Gratis con condiciones",
+      "unknown": "Licencia desconocida"
+    },
+    "business": {
+      "label": "Para uso comercial",
+      "hint": "Muestra solo modelos cuya licencia permite el uso comercial.",
+      "none": "Aquí no hay modelos con una licencia que permita el uso comercial."
+    },
+    "browse": {
+      "label": "Explorar por categoría",
+      "all": "Todos",
+      "chat_coding": "Chat y programación",
+      "vision": "Ve imágenes",
+      "creative": "Imágenes y clips",
+      "hint": "Los modelos de imágenes y clips crean y modifican imágenes y vídeos cortos en este equipo."
+    }
   },
   "results": {
     "loading": "Cargando resultados…",
@@ -541,5 +575,17 @@
       "window": "Supera su ventana",
       "out_of_memory": "No cabe"
     }
+  },
+  "licenseTerms": {
+    "title": "Acepta la licencia de {{model}}",
+    "body": "{{model}} se distribuye con la {{license}}, cuyos términos aceptas antes de usarlo.",
+    "read": "Leer la {{license}}",
+    "record": "Toskar guarda un registro de que la aceptaste, con la fecha, para tu Admin.",
+    "cancel": "Cancelar",
+    "accept": "Aceptar e instalar"
+  },
+  "size": {
+    "download": "{{size}} de descarga",
+    "downloadMemory": "{{size}} de descarga · unos {{memory}} de memoria"
   }
 }

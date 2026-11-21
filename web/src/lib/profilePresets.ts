@@ -1,3 +1,4 @@
+import i18n from '@/i18n'
 import type { AIProfile, Purpose, Recommendation } from '@/types/api'
 
 const defaultTools: AIProfile['tools'] = [
@@ -91,6 +92,31 @@ export function profileTemplateFromPurpose(
   return {
     ...base,
     roles: defaultRolesForPurpose(purpose),
+  }
+}
+
+/**
+ * A front door's profile (#667): it talks with visitors, so it gets nothing
+ * about the owner, uses no tools and no memory, and its topic is enforced.
+ * Toskar adds its own rules for strangers on top.
+ */
+export function doorstepProfileTemplate(): Omit<AIProfile, 'id'> {
+  const tr = (key: string) => i18n.t(`profiles:templates.doorstep.${key}`)
+  return {
+    name: tr('name'),
+    purpose: 'custom',
+    orchestrator_id: 'simple',
+    node_policy: { mode: 'automatic' },
+    roles: [{ role: 'assistant', model_id: '', required: false }],
+    tools: [],
+    orchestration: { memory: 'off' },
+    audience: 'public',
+    topics: {
+      stays_on: tr('staysOn'),
+      examples: [tr('example1'), tr('example2'), tr('example3')],
+      never_discuss: [tr('never1'), tr('never2'), tr('never3')],
+      strictness: 'enforce',
+    },
   }
 }
 

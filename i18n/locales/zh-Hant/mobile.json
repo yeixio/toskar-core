@@ -103,6 +103,54 @@
       "reranker": "輔助模型 · 為段落排序，找出最佳結果",
       "classifier": "輔助模型 · 協助「自動」分派請求",
       "other": "輔助模型"
+    },
+    "ratings": {
+      "rate": "評分",
+      "title": "為{{model}}評分",
+      "intro": "它在這台電腦上表現如何？你的評分會儲存在這裡。",
+      "starsLabel": "星等",
+      "stars_other": "{{count}} 顆星",
+      "tagsLabel": "原因（選填）",
+      "tags": {
+        "great_responses": "回答出色",
+        "fast": "速度快",
+        "slow": "速度慢",
+        "stable": "穩定",
+        "crashed": "曾當機",
+        "too_much_memory": "佔用太多記憶體",
+        "great_for_coding": "適合寫程式",
+        "great_for_chat": "適合聊天",
+        "good_tool_use": "善用工具",
+        "poor_tool_use": "不擅長使用工具"
+      },
+      "share": "與社群分享此評分",
+      "shareHint": "幫助使用類似電腦的人選擇模型。你可以隨時停止分享。",
+      "whatIsShared": "具體分享哪些內容",
+      "sent": {
+        "destination": "傳送至",
+        "model": "模型",
+        "hardware": "電腦類別",
+        "memory": "{{type}}記憶體，{{gb}} GB",
+        "never": "絕不會傳送你的提示、對話、檔案名稱、電腦名稱、使用者名稱或網路位址。這項服務不會儲存你的 IP 位址。"
+      },
+      "notShareable": "此評分只會保存在這台電腦上：{{reason}}",
+      "save": "儲存",
+      "saveAndShare": "儲存並分享",
+      "remove": "移除評分",
+      "cancel": "取消",
+      "count_other": "{{formatted}} 則評分",
+      "similar": {
+        "family": "在與你相同型號的電腦上",
+        "class": "在類似的電腦上",
+        "backend": "在記憶體相近的電腦上"
+      },
+      "overall": "整體",
+      "confidence": {
+        "limited": "資料有限",
+        "early": "初期評分"
+      },
+      "prompt": "{{model}}用起來如何？",
+      "notNow": "稍後再說"
     }
   },
   "phoneModels": {
@@ -418,7 +466,13 @@
         "notNow": "暫不"
       }
     },
-    "phoneAutoHint": "為每則訊息選擇這台裝置上最合適的模型"
+    "phoneAutoHint": "為每則訊息選擇這台裝置上最合適的模型",
+    "builtInProfiles": {
+      "general-assistant": "通用助理",
+      "programming": "程式設計",
+      "research": "研究",
+      "custom": "自訂"
+    }
   },
   "effort": {
     "title": "投入程度",
@@ -590,6 +644,14 @@
       "try": "不用電腦試用",
       "tryMeta": "使用範例回答的示範",
       "other": "此示範回答左側的建議問題。要問任何問題，請在家裡的電腦上設定 Toskar（Toskar Core 免費），然後在「電腦」→「連接裝置」中連接這台電視。"
+    },
+    "people": {
+      "title": "誰在觀看？",
+      "add": "新增其他人",
+      "hint": "每個人都用自己在電腦上的帳號中的代碼連線，所以聊天和記憶都只屬於自己。",
+      "switch": "不是 {{name}}？",
+      "unnamed": "使用者 {{n}}",
+      "back": "返回"
     }
   },
   "setup": {
@@ -845,6 +907,7 @@
       "notification": "通知",
       "community_ratings": "社群評分",
       "update_check": "檢查更新",
+      "comfyui": "ComfyUI",
       "problem_report": "問題回報",
       "link_check": "連結檢查"
     },
@@ -858,6 +921,7 @@
       "notification": "通知",
       "community_ratings": "社群評分",
       "update_check": "檢查更新",
+      "comfyui": "ComfyUI",
       "problem_report": "問題回報",
       "link_check": "連結檢查"
     },

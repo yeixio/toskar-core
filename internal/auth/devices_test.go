@@ -162,6 +162,7 @@ func TestDeviceMayReach(t *testing.T) {
 		"POST /api/v1/artifacts":                  true,
 		"DELETE /api/v1/artifacts/{id}":           true,
 		"POST /api/v1/speech/transcribe":          true,
+		"POST /api/v1/speech/say":                 true,
 		"POST /api/v1/speech":                     false,
 		"get /api/v1/health":                      true,
 		"GET /api/v1/api-keys":                    false,

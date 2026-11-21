@@ -299,17 +299,22 @@ var cgnat = netip.MustParsePrefix("100.64.0.0/10")
 // automations, and files on disk, needs a key made in API Access.
 var deviceRoutes = map[string]bool{
 	// Push to the app (#460): the device's own registration.
-	"GET /api/v1/me/push":                   true,
-	"PUT /api/v1/me/push":                   true,
-	"DELETE /api/v1/me/push":                true,
-	"GET /api/v1/remote-access/route":       true,
-	"PUT /api/v1/remote-access/relay-token": true,
+	"GET /api/v1/me/push":             true,
+	"PUT /api/v1/me/push":             true,
+	"DELETE /api/v1/me/push":          true,
+	"GET /api/v1/remote-access/route": true,
+	// The device token alone, from anywhere, so a device away from home
+	// keeps finding the computer after it renews (yeixio/toskar-apps#451).
+	"GET /api/v1/remote-access/device-token": true,
+	"PUT /api/v1/remote-access/relay-token":  true,
 	// Whether devices away from home reach the computer, and Check now,
 	// for an Admin's phone (#546); a Member's gets ROLE_REQUIRED.
 	"GET /api/v1/remote-access":        true,
 	"POST /api/v1/remote-access/check": true,
 	"GET /api/v1/health":               true,
-	"GET /api/v1/version":              true,
+	// The certificate that replaces one naming the computer (#1263).
+	"GET /api/v1/tls/next": true,
+	"GET /api/v1/version":  true,
 	// A watch going along with the phone gets a key of its own
 	// (yeixio/toskar-apps#213).
 	"POST /api/v1/me/devices":                 true,
@@ -353,6 +358,11 @@ var deviceRoutes = map[string]bool{
 	"DELETE /api/v1/artifacts/{id}": true,
 	// Speaking a message: the recording, attached above, as text (#155).
 	"POST /api/v1/speech/transcribe": true,
+	// An answer read in the computer's voice, a sentence at a time, on the
+	// phone, the car, and the TV (#795).
+	"POST /api/v1/speech/say": true,
+	// Live voice mode (#795).
+	"GET /api/v1/voice/realtime": true,
 	// A setup offer in a chat (yeixio/toskar-apps#198): set up what the
 	// request needed, follow it, or stop it. Admins only, by role, as on
 	// the computer; a Member's phone gets ROLE_REQUIRED.

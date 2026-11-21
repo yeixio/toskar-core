@@ -64,26 +64,32 @@ func (s *Server) remoteHandler() http.Handler {
 		// counting those together would let one stranger lock out every
 		// relayed device, and a device key can't be guessed anyway.
 		counted := ip != "0.0.0.0"
-		if counted && remoteFailures.Blocked(ip) {
-			writeErr(w, http.StatusTooManyRequests, "REMOTE_THROTTLED", "too many wrong keys from this address; try again later", nil)
-			return
+		// A blocked address is turned away only for a wrong or missing
+		// key: a paired device behind the same carrier address, office or
+		// hotel isn't locked out by a stranger's guesses, and its success
+		// doesn't reset their count (#1261). Device keys are 256 bits, so
+		// a blocked address checking one more can't guess its way in.
+		blocked := counted && remoteFailures.Blocked(ip)
+		refuse := func(code, message string) {
+			if counted {
+				remoteFailures.Fail(ip)
+			}
+			if blocked {
+				writeErr(w, http.StatusTooManyRequests, "REMOTE_THROTTLED", "too many wrong keys from this address; try again later", nil)
+				return
+			}
+			writeErr(w, http.StatusUnauthorized, code, message, nil)
 		}
 		// Only a paired device's key gets any further, checked before
 		// anything else reads the request, so every wrong one counts.
 		token, err := auth.BearerToken(r)
 		if err != nil || token == "" || s.deps.VerifyAPIKey == nil {
-			if counted {
-				remoteFailures.Fail(ip)
-			}
-			writeErr(w, http.StatusUnauthorized, "UNAUTHORIZED", "a paired device's key is required", nil)
+			refuse("UNAUTHORIZED", "a paired device's key is required")
 			return
 		}
 		rec, err := s.deps.VerifyAPIKey(r.Context(), token)
 		if err != nil {
-			if counted {
-				remoteFailures.Fail(ip)
-			}
-			writeErr(w, http.StatusUnauthorized, "UNAUTHORIZED", "invalid api key", nil)
+			refuse("UNAUTHORIZED", "invalid api key")
 			return
 		}
 		if rec.Kind != auth.KindDevice {
@@ -165,10 +171,13 @@ func (s *Server) ServeRelayed(conn net.Conn) bool {
 func (s *Server) TLSCertificate() (tls.Certificate, bool) {
 	s.listenMu.Lock()
 	defer s.listenMu.Unlock()
-	if s.tlsConfig == nil || len(s.tlsConfig.Certificates) == 0 {
+	if s.tlsConfig == nil {
 		return tls.Certificate{}, false
 	}
-	return s.tlsConfig.Certificates[0], true
+	if len(s.tlsConfig.Certificates) > 0 {
+		return s.tlsConfig.Certificates[0], true
+	}
+	return s.tlsCert, len(s.tlsCert.Certificate) > 0
 }
 
 // mergedListener accepts from a TCP listener and from connections pushed
@@ -441,6 +450,22 @@ func (s *Server) handleRouteSecret(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, route)
 }
 
+// handleDeviceToken gives a paired device this computer's current device
+// token for Toskar's relay, from anywhere, the remote listener too
+// (yeixio/toskar-apps#451). A device's copy ends with the paid period, and
+// GET /remote-access/route, the only other way to a newer one, answers at
+// home only, so a device away when the computer renewed lost the record
+// lookup until it came home. The device token only looks the route up; it
+// can't open the computer's tunnel (#1258), and the route secret stays
+// home-only. An organization's relay has none: token is "".
+func (s *Server) handleDeviceToken(w http.ResponseWriter, r *http.Request) {
+	if s.deps.DeviceRelayToken == nil {
+		writeErr(w, http.StatusNotImplemented, "NOT_IMPLEMENTED", "Access from anywhere isn't available.", nil)
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]string{"token": s.deps.DeviceRelayToken()})
+}
+
 // routeView is how a paired device finds this computer away from home
 // (#456): the route secret and id, the relay it's reached through, and
 // this computer's token for that relay.
@@ -463,8 +488,8 @@ func (s *Server) route() (*routeView, error) {
 	if s.deps.RelayName != nil {
 		out.Relay = s.deps.RelayName()
 	}
-	if s.deps.RelayToken != nil {
-		out.Token = s.deps.RelayToken()
+	if s.deps.DeviceRelayToken != nil {
+		out.Token = s.deps.DeviceRelayToken()
 	}
 	return out, nil
 }

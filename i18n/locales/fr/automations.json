@@ -1,7 +1,7 @@
 {
   "page": {
     "title": "Automatisations",
-    "description": "Des tâches que l'IA de Toskar fait pour vous selon un horaire, comme un point sur l'actualité le matin ou la surveillance d'un prix. Elles s'exécutent en arrière-plan, même quand cette fenêtre est fermée.",
+    "description": "Des tâches que l’IA de Toskar fait pour vous selon un horaire ou quand quelque chose se passe, comme un résumé de l’actualité le matin, une surveillance de prix ou répondre à la porte. Elles s’exécutent en arrière-plan, même quand cette fenêtre est fermée.",
     "new": "Nouvelle automatisation",
     "howItWorks": "Comment ça marche",
     "hideHowItWorks": "Masquer l'explication",
@@ -21,7 +21,9 @@
     "saveFailed": "Impossible d'enregistrer l'automatisation.",
     "confirmDelete": "Supprimer « {{name}} » ? Son historique sera également supprimé.",
     "selectHint": "Sélectionnez une automatisation pour voir son historique, ou créez-en une.",
-    "createOff": "La création d'automatisations est désactivée pour votre compte. Demandez à un Admin de l'activer."
+    "createOff": "La création d'automatisations est désactivée pour votre compte. Demandez à un Admin de l'activer.",
+    "neverRun": "Jamais exécutée",
+    "lastOnly": "Dernière {{last}}"
   },
   "intro": {
     "title": "Faites travailler Toskar pendant votre absence",
@@ -86,6 +88,13 @@
       "name": "Résumé du dossier : {{folderName}}",
       "task": "Résume les fichiers du dossier {{folder}} : ce qui est nouveau ou a changé, et ce qui demande de l’attention."
     },
+    "door": {
+      "title": "Répondre à la porte",
+      "body": "Salue qui sonne, demande pourquoi il est venu, et vous prévient.",
+      "request": "Quand quelqu’un sonne à la porte, regarde la caméra, salue le visiteur par la sonnette et dis-moi qui est là.",
+      "name": "Répondre à {{door}}",
+      "task": "Regarde l’image de la porte. Salue le visiteur, découvre qui il est et pourquoi il est venu, et dis-le-moi."
+    },
     "fields": {
       "topics": {
         "label": "Sujets",
@@ -137,7 +146,11 @@
     "olderRuns": "Afficher les exécutions plus anciennes",
     "loadingOlder": "Chargement…",
     "lastChecked": "Vérifié pour la dernière fois {{when}}, rien de nouveau",
-    "nextCheck": "Prochaine vérification {{when}}"
+    "nextCheck": "Prochaine vérification {{when}}",
+    "door": "À la porte",
+    "looksAt": "Regarde {{cameras}}",
+    "says": "Dit sa réponse à la porte",
+    "talks": "Parle avec le visiteur et demande pourquoi il est venu"
   },
   "run": {
     "details": "Détails",
@@ -390,6 +403,11 @@
     "deviceHint": "Elle s'exécute dès que l'appareil change, en sachant ce qui a changé. Les changements pendant l'attente après une exécution n'en lancent pas d'autre : un capteur qui clignote ne la lance qu'une fois.",
     "cameras": "Regarder des caméras",
     "camerasHint": "Chaque exécution commence par une image de ces caméras, montrée à un modèle qui voit les images. Jusqu'à {{count}}.",
+    "say": "Dire la réponse à la porte",
+    "sayHint": "Toskar lit la réponse de chaque exécution par le haut-parleur de la sonnette, et ne dit rien quand personne n'est là.",
+    "sayQuiet": "Heures calmes, où il ne fait que notifier",
+    "sayQuietFrom": "De",
+    "sayQuietTo": "À",
     "deviceKinds": {
       "camera": "Caméras",
       "sensor": "Capteurs",
@@ -400,7 +418,31 @@
       "cover": "Volets",
       "climate": "Climat",
       "other": "Autres"
-    }
+    },
+    "needsToolModel": "Le modèle choisi ne peut pas utiliser d'outils : il n'ouvrira pas de pages et n'utilisera pas les outils choisis ici, il répond avec ce qu'il sait déjà. Choisissez un modèle qui sait utiliser des outils, ou installez-en un.",
+    "openModels": "Ouvrir Modèles",
+    "actions": "Actions qu'elle peut faire seule",
+    "actionsHint": "Chaque exécution peut faire ces appels sans demander, même lancée par un déclencheur. Tout autre appel qui modifie quelque chose est ignoré. Ne choisissez que ce que vous la laisseriez faire sans personne pour surveiller.",
+    "actionLabel": "{{action}} : {{device}}",
+    "actionDevice": "Appareil",
+    "actionDevicePick": "Choisir un appareil…",
+    "actionService": "Action",
+    "actionAdd": "Autoriser",
+    "actionRemoveButton": "Retirer",
+    "actionRemove": "Retirer {{action}}",
+    "actionServices": {
+      "turn_on": "Allumer",
+      "turn_off": "Éteindre",
+      "lock": "Verrouiller",
+      "unlock": "Déverrouiller",
+      "open_cover": "Ouvrir",
+      "close_cover": "Fermer"
+    },
+    "sayVoice": "Voix",
+    "sayVoiceAutomatic": "La voix de la langue dans les Réglages",
+    "sayVoiceKitten": "Kitten",
+    "sayListen": "Parler avec le visiteur",
+    "sayListenHint": "Après les premiers mots, Toskar écoute par le micro de la sonnette, répond et découvre qui est venu et pourquoi. Il ne dit jamais si quelqu'un est à la maison. Tu reçois un résumé de la visite. Nécessite ffmpeg sur cet ordinateur."
   },
   "draft": {
     "label": "Automatisation à confirmer",
@@ -434,7 +476,8 @@
     "deviceTo": "Quand {{device}} passe à {{to}}",
     "after": "Après la fin de {{name}}",
     "afterNotified": "Après une notification de {{name}}",
-    "anotherAutomation": "une autre automatisation"
+    "anotherAutomation": "une autre automatisation",
+    "ring": "Quand quelqu’un sonne à {{door}}"
   },
   "webhook": {
     "title": "Lien webhook",
@@ -447,5 +490,13 @@
     "make": "Créer un lien",
     "makeNew": "Créer un nouveau lien",
     "replaces": "Un nouveau lien désactive l’ancien."
+  },
+  "door": {
+    "nobodyAnswered": "Quelqu’un est venu à la porte. Toskar l’a salué, et personne n’a répondu.",
+    "stopped": "La conversation s’est arrêtée : {{error}}",
+    "you": "Toskar",
+    "visitor": "Visiteur",
+    "said": "Dit à la porte : « {{words}} »",
+    "nobodyThere": "Personne n’était sur l’image, donc rien n’a été dit à la porte."
   }
 }

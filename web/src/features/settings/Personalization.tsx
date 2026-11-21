@@ -89,6 +89,18 @@ export function Personalization() {
         />
       </label>
       <label className="block text-sm">
+        <span className="text-ink-muted">{t('personalization.location')}</span>
+        <input
+          className="field mt-1 w-full"
+          maxLength={120}
+          autoComplete="address-level2"
+          placeholder={t('personalization.locationPlaceholder')}
+          value={draft.location ?? ''}
+          onChange={(e) => set({ location: e.target.value })}
+        />
+        <span className="mt-1 block text-xs text-ink-faint">{t('personalization.locationHint')}</span>
+      </label>
+      <label className="block text-sm">
         <span className="text-ink-muted">{t('personalization.instructions')}</span>
         <textarea
           className="field mt-1 min-h-20 w-full"

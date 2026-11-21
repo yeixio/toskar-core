@@ -69,6 +69,9 @@
     "noPreference": "Sin preferencia",
     "aboutYou": "Sobre ti",
     "aboutYouPlaceholder": "Soy ingeniero de backend en Juneau. Mi proyecto principal es un servicio en Go.",
+    "location": "Tu ubicación",
+    "locationPlaceholder": "Juneau, AK",
+    "locationHint": "Solo se usa para preguntas sobre lugares cercanos, el tiempo y cómo llegar. Déjalo vacío para indicar un lugar cada vez.",
     "instructions": "Algo más sobre cómo responder",
     "instructionsPlaceholder": "Muestra ejemplos de código en Go. Menciona las fuentes al final.",
     "save": "Guardar",
@@ -118,7 +121,7 @@
   },
   "advanced": {
     "title": "Modo avanzado",
-    "description": "Muestra los ID de los modelos, detalles de la API, Perfiles, registros y otros controles para usuarios avanzados."
+    "description": "Muestra los ID de los modelos, detalles de la API, registros y otros controles para usuarios avanzados."
   },
   "discovery": {
     "title": "Buscar otras computadoras",
@@ -144,6 +147,8 @@
     "description": "Alertas sobre trabajos largos y la conectividad del equipo.",
     "taskFinish": "Avisar cuando terminen las tareas",
     "peerOffline": "Avisar cuando una computadora vinculada se desconecte",
+    "newerModels": "Avisar cuando salga una versión más nueva de un modelo instalado",
+    "newerModelsHint": "Una vez por cada nueva generación, para Admins. No se instala ni se cambia nada hasta que tú lo elijas.",
     "digest": "Resumen diario de automatizaciones",
     "digestHint": "Un resumen de los resultados de todas tus automatizaciones cada día, en un chat al que puedes responder.",
     "digestTime": "Hora"
@@ -233,6 +238,7 @@
       "notification": "Notificación",
       "community_ratings": "Valoraciones de la comunidad",
       "update_check": "Comprobación de actualizaciones",
+      "comfyui": "ComfyUI",
       "problem_report": "Informe de problema",
       "news": "Noticias de IA",
       "link_check": "Comprobación de enlaces"
@@ -247,6 +253,7 @@
       "notification": "notificación",
       "community_ratings": "valoraciones de la comunidad",
       "update_check": "comprobación de actualizaciones",
+      "comfyui": "ComfyUI",
       "problem_report": "informe de problema",
       "news": "noticias de IA",
       "link_check": "comprobación de enlaces"
@@ -269,7 +276,12 @@
     "delete": "Eliminar los registros de ejecución ahora",
     "confirmDelete": "¿Eliminar los registros de ejecución ahora? Esto quita los prompts guardados y los resultados de herramientas de ejecuciones anteriores, además de esta lista. Los chats no se eliminan.",
     "deleted": "Se eliminaron {{tasks}} registros de ejecución, {{automations}} resultados de automatizaciones y {{entries}} entradas de abajo.",
-    "footnote": "Los registros de ejecución contienen los prompts y los resultados de herramientas de ejecuciones anteriores. Que los chats se conserven o no depende de Historial, más abajo. Cada automatización conserva su último resultado, que es con el que se compara “Avisar cuando cambie el resultado”."
+    "footnote": "Los registros de ejecución contienen los prompts y los resultados de herramientas de ejecuciones anteriores. Que los chats se conserven o no depende de Historial, más abajo. Cada automatización conserva su último resultado, que es con el que se compara “Avisar cuando cambie el resultado”.",
+    "details": {
+      "news": "las noticias de IA",
+      "latestVersion": "el número de la última versión",
+      "training": "ejemplos de entrenamiento e instrucciones para {{repo}}"
+    }
   },
   "storage": {
     "folders": "Directorios de datos",
@@ -287,7 +299,7 @@
     "unlimited": "Ilimitado"
   },
   "about": {
-    "tagline": "Plano de control de IA local",
+    "tagline": "Ejecuta IA en tus propios equipos",
     "versionUnavailable": "Versión no disponible",
     "build": "Compilación {{commit}}",
     "source": "Código fuente correspondiente",
@@ -300,7 +312,8 @@
     "download": "Descargar",
     "upToDate": "Actualizado",
     "checkUpdates": "Buscar actualizaciones",
-    "checkUpdatesHint": "Una vez al día, Toskar pide a toskar.ai el número de la última versión. No se envía nada más."
+    "checkUpdatesHint": "Una vez al día, Toskar pide a toskar.ai el número de la última versión. No se envía nada más.",
+    "running": "En marcha"
   },
   "reset": {
     "title": "Restablecer la aplicación",
@@ -357,5 +370,48 @@
     "description": "Las respuestas solo enlazan páginas que dieron sus fuentes. Toskar también puede preguntar a cada sitio enlazado si la página sigue abriéndose.",
     "check": "Comprobar los enlaces de las respuestas",
     "checkHint": "Después de una respuesta, Toskar contacta con cada sitio enlazado y nombra bajo la respuesta los enlaces que no se abren. Cada comprobación aparece en Lo que salió de este equipo."
+  },
+  "voice": {
+    "title": "Voz",
+    "description": "Las voces con las que Toskar lee en voz alta: el modo de voz en vivo, las respuestas leídas en el teléfono y en el auto, y el timbre.",
+    "unavailable": "La configuración de voz no está disponible en esta computadora.",
+    "failed": "No funcionó. Inténtalo de nuevo.",
+    "kitten": {
+      "name": "Kitten TTS 2 mini",
+      "description": "Añade voces naturales para elegir en {{languages}} y lee con Kitten los idiomas que solo tenían una voz básica. Los idiomas que ya tienen una voz natural la conservan, salvo que elijas abajo una voz de Kitten. Instala unos 1,5 GB en este ordenador, incluidas las voces, funciona en el procesador y usa alrededor de 1 GB de memoria mientras habla.",
+      "install": "Instalar",
+      "retry": "Reintentar",
+      "installing": "Instalando el programa…",
+      "downloading": "Descargando las voces…",
+      "warming": "Preparando las voces…",
+      "listening": "Preparando la escucha…",
+      "remove": "Quitar",
+      "removeConfirm": "Quitar Kitten",
+      "keep": "Conservar"
+    },
+    "languages": "Voz para cada idioma",
+    "automatic": "Automática",
+    "automaticNamed": "Automática: {{voice}}",
+    "engine": {
+      "kitten": "Kitten",
+      "kokoro": "Kokoro",
+      "piper": "Piper"
+    },
+    "preview": "Escuchar",
+    "previewIn": "Escuchar la voz en {{language}}",
+    "previewFailed": "No se pudo reproducir la muestra.",
+    "needs": {
+      "chat": "Para responder en el modo de voz, Toskar necesita un modelo de chat.",
+      "vision": "Para ver quién está en la puerta, Toskar necesita un modelo que pueda ver imágenes.",
+      "both": "Para responder en el modo de voz y ver quién está en la puerta, Toskar necesita un modelo que converse y vea imágenes. Un solo modelo hace ambas cosas.",
+      "offer": "{{name}} cabe en este equipo ({{size}}).",
+      "install": "Instalar {{name}}",
+      "downloading": "Descargando {{name}}… {{percent}} %",
+      "ready": "{{name}} está instalado.",
+      "none": "Ninguno del catálogo cabe en este equipo.",
+      "models": "Ver modelos"
+    },
+    "standard": "Estándar",
+    "noVoice": "{{languages}} todavía no se puede leer en voz alta: la lectura en voz alta, el modo de voz y el timbre no lo hablan."
   }
 }

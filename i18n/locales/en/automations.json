@@ -1,7 +1,7 @@
 {
   "page": {
     "title": "Automations",
-    "description": "Tasks Toskar's AI does for you on a schedule, such as a morning news brief or a price watch. They run in the background, even when this window is closed.",
+    "description": "Tasks Toskar's AI does for you on a schedule or when something happens, such as a morning news brief, a price watch, or answering the door. They run in the background, even when this window is closed.",
     "new": "New automation",
     "howItWorks": "How it works",
     "hideHowItWorks": "Hide how it works",
@@ -21,7 +21,9 @@
     "saveFailed": "Could not save the automation.",
     "confirmDelete": "Delete “{{name}}”? Its history is removed too.",
     "selectHint": "Select an automation to see its history, or create one.",
-    "createOff": "Making automations is turned off for your account. Ask an Admin to turn it on."
+    "createOff": "Making automations is turned off for your account. Ask an Admin to turn it on.",
+    "neverRun": "Never run",
+    "lastOnly": "Last {{last}}"
   },
   "intro": {
     "title": "Put Toskar to work while you're away",
@@ -86,6 +88,13 @@
       "name": "Folder summary: {{folderName}}",
       "task": "Summarize the files in the folder {{folder}}: what's new or changed, and anything that needs attention."
     },
+    "door": {
+      "title": "Answer the door",
+      "body": "Greet whoever rings the doorbell, find out why they came, and tell you.",
+      "request": "When someone rings the doorbell, look at the camera, greet the visitor through the doorbell and tell me who is there.",
+      "name": "Answer {{door}}",
+      "task": "Look at the picture from the door. Greet the visitor, find out who they are and why they came, and tell me."
+    },
     "fields": {
       "topics": {
         "label": "Topics",
@@ -137,7 +146,11 @@
     "olderRuns": "Show older runs",
     "loadingOlder": "Loading…",
     "lastChecked": "Last checked {{when}}, nothing new",
-    "nextCheck": "Next check {{when}}"
+    "nextCheck": "Next check {{when}}",
+    "door": "At the door",
+    "looksAt": "Looks at {{cameras}}",
+    "says": "Says its answer at the door",
+    "talks": "Talks with the visitor and finds out why they came"
   },
   "run": {
     "details": "Details",
@@ -390,6 +403,11 @@
     "deviceHint": "It runs the moment the device changes, told what changed. Changes during the wait after a run start no other run, so a sensor that flickers runs it once.",
     "cameras": "Look at cameras",
     "camerasHint": "Each run starts with a picture from these cameras, shown to a model that can see. Up to {{count}}.",
+    "say": "Say the answer at the door",
+    "sayHint": "Toskar reads each run's answer aloud through the doorbell's speaker, and says nothing when nobody is there to talk to.",
+    "sayQuiet": "Quiet hours, when it only notifies",
+    "sayQuietFrom": "From",
+    "sayQuietTo": "To",
     "deviceKinds": {
       "camera": "Cameras",
       "sensor": "Sensors",
@@ -400,7 +418,31 @@
       "cover": "Covers",
       "climate": "Climate",
       "other": "Other"
-    }
+    },
+    "needsToolModel": "The model chosen can't use tools, so it won't open pages or run the tools picked here: it answers from what it already knows. Choose a model that can use tools, or install one.",
+    "openModels": "Open Models",
+    "actions": "Actions it may take on its own",
+    "actionsHint": "Each run may make these calls without asking, even when a trigger started it. Any other call that changes something is skipped. Choose only what you'd let it do with nobody watching.",
+    "actionLabel": "{{action}}: {{device}}",
+    "actionDevice": "Device",
+    "actionDevicePick": "Choose a device…",
+    "actionService": "Action",
+    "actionAdd": "Allow",
+    "actionRemoveButton": "Remove",
+    "actionRemove": "Remove {{action}}",
+    "actionServices": {
+      "turn_on": "Turn on",
+      "turn_off": "Turn off",
+      "lock": "Lock",
+      "unlock": "Unlock",
+      "open_cover": "Open",
+      "close_cover": "Close"
+    },
+    "sayVoice": "Voice",
+    "sayVoiceAutomatic": "The language's voice from Settings",
+    "sayVoiceKitten": "Kitten",
+    "sayListen": "Talk with the visitor",
+    "sayListenHint": "After the first words, Toskar listens through the doorbell's microphone, answers, and finds out who came and why. It never says whether anyone is home. You're notified with a summary of the visit. Needs ffmpeg on this computer."
   },
   "draft": {
     "label": "Automation to confirm",
@@ -432,7 +474,8 @@
     "deviceTo": "When {{device}} turns {{to}}",
     "after": "After {{name}} finishes",
     "afterNotified": "After {{name}} notifies",
-    "anotherAutomation": "another automation"
+    "anotherAutomation": "another automation",
+    "ring": "When someone rings {{door}}"
   },
   "webhook": {
     "title": "Webhook link",
@@ -445,5 +488,13 @@
     "make": "Make a link",
     "makeNew": "Make a new link",
     "replaces": "A new link stops the old one."
+  },
+  "door": {
+    "nobodyAnswered": "Someone came to the door. Toskar greeted them, and nobody answered.",
+    "stopped": "The conversation stopped: {{error}}",
+    "you": "Toskar",
+    "visitor": "Visitor",
+    "said": "Said at the door: “{{words}}”",
+    "nobodyThere": "Nobody was in the picture, so nothing was said at the door."
   }
 }

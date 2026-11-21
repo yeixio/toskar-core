@@ -263,5 +263,42 @@
     "clientId": "Client-ID für die Anmeldung",
     "clientIdHint": " (nur wenn der Dienst dir eine gegeben hat)",
     "keptHere": "Schlüssel, Tokens, Passwörter und Header bleiben auf diesem Computer, außerhalb der Sicht der KI."
+  },
+  "comfyui": {
+    "title": "ComfyUI",
+    "description": "Verbinde ein ComfyUI, das du betreibst, hier oder auf einem anderen Computer, und speichere seine Workflows. Chats führen sie mit dem Werkzeug ComfyUI-Workflow aus, neben den eingebauten Bildern und Clips.",
+    "url": "ComfyUI-Adresse",
+    "token": "Token",
+    "tokenStored": "Ein Token ist gespeichert; gib ein neues ein, um es zu ändern",
+    "tokenOptional": "Optional, falls dein ComfyUI eines verlangt",
+    "save": "Speichern und prüfen",
+    "checking": "Wird geprüft…",
+    "forgetToken": "Token vergessen",
+    "connected": "Verbunden mit ComfyUI {{version}}, mit {{nodes}} Node-Typen.",
+    "device": "{{name}}, {{gb}} GB",
+    "models": "{{checkpoints}} Modelle und {{loras}} LoRAs.",
+    "safety": "Custom Nodes führen eigenen Code auf diesem Computer aus. Toskar ruft nur das ComfyUI auf, das du hier hinzufügst, installiert nie etwas darin und behandelt, was es erstellt, wie jede andere Datei.",
+    "workflows": "Workflows",
+    "noWorkflows": "Noch keine Workflows. Füge einen aus ComfyUI exportierten hinzu.",
+    "remove": "Entfernen",
+    "removeNamed": "{{name}} entfernen",
+    "file": "Workflow-Datei",
+    "fileHint": "Nutze in ComfyUI Workflow › Export (API) und wähle die Datei hier aus.",
+    "found": "Gefundene Eingaben: {{inputs}}.",
+    "name": "Name",
+    "what": "Was er macht",
+    "whatPlaceholder": "Vergrößert ein Bild 4×",
+    "add": "Workflow hinzufügen",
+    "notJSON": "Diese Datei ist kein JSON. Exportiere den Workflow mit Workflow › Export (API).",
+    "input": "{{name}} (Node {{node}})",
+    "noInputs": "keine Eingaben gefunden",
+    "inputs": {
+      "prompt": "Prompt",
+      "negative": "Negativ-Prompt",
+      "seed": "Seed",
+      "image": "Bild",
+      "width": "Breite",
+      "height": "Höhe"
+    }
   }
 }

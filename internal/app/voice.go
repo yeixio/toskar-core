@@ -1,0 +1,156 @@
+package app
+
+import (
+	"context"
+	"errors"
+	"fmt"
+	"sync"
+
+	"github.com/yeixio/toskar-core/internal/speech"
+	"github.com/yeixio/toskar-core/internal/turnopts"
+	"github.com/yeixio/toskar-core/internal/voice"
+	"github.com/yeixio/toskar-core/pkg/contracts"
+	"github.com/yeixio/toskar-core/pkg/pluginapi"
+)
+
+// Live voice mode (#795): its stages on this computer. Speech to text is
+// Whisper and text to speech Kokoro, or Piper for the languages Kokoro
+// doesn't speak, kept loaded between turns by the speech worker; the
+// answer goes through the person's normal chat, so profiles, memory, and
+// tools work as they do in writing, and the conversation is kept in their
+// chats like any other.
+
+func (a *App) voiceParts(ctx context.Context) (voice.Parts, error) {
+	if a.Speech == nil || a.voiceWorker == nil {
+		return voice.Parts{}, errors.New("speech isn't set up on this computer")
+	}
+	if ok, why := a.Speech.Available(); !ok {
+		if why == "" {
+			why = "speech isn't set up on this computer"
+		}
+		return voice.Parts{}, contracts.NewError("SPEECH_UNAVAILABLE", map[string]any{"detail": why}, errors.New(why))
+	}
+	return voice.Parts{
+		Transcriber: workerTurns{a.voiceWorker},
+		Responder:   &voiceChat{app: a, ctx: ctx},
+		Speaker:     workerVoice{a.voiceWorker},
+	}, nil
+}
+
+// whisperRate is the rate Whisper listens at.
+const whisperRate = 16000
+
+type workerTurns struct{ w *speech.Worker }
+
+func (t workerTurns) Transcribe(ctx context.Context, wav []byte, language string) (string, error) {
+	samples, rate, err := voice.ParseWAV(wav)
+	if err != nil {
+		return "", err
+	}
+	pcm := voice.EncodePCM16(voice.Resample(samples, rate, whisperRate))
+	return t.w.Transcribe(ctx, pcm, "fast", language)
+}
+
+type workerVoice struct{ w *speech.Worker }
+
+func (v workerVoice) Speak(ctx context.Context, text, voiceName, language string) ([]int16, error) {
+	pcm, rate, err := v.w.Speak(ctx, text, voiceName, language)
+	if err != nil {
+		return nil, err
+	}
+	if rate <= 0 {
+		return nil, fmt.Errorf("speech returned audio with no rate")
+	}
+	return voice.Resample(voice.DecodePCM16(pcm), rate, voice.SampleRate), nil
+}
+
+// voiceChat answers a session's turns in one chat of the person's, made
+// at the first turn.
+type voiceChat struct {
+	app *App
+	// ctx is the session's request's, which says who's talking.
+	ctx context.Context
+
+	mu             sync.Mutex
+	conversationID string
+	// saving closes once the last answer is saved.
+	saving chan struct{}
+}
+
+func (c *voiceChat) Respond(ctx context.Context, text string, delta func(string)) error {
+	// The last answer is saved before this one is asked, so the model hears
+	// it as part of the chat.
+	c.mu.Lock()
+	saving := c.saving
+	c.mu.Unlock()
+	if saving != nil {
+		select {
+		case <-saving:
+		case <-ctx.Done():
+			return ctx.Err()
+		}
+	}
+	c.mu.Lock()
+	id := c.conversationID
+	c.mu.Unlock()
+	// Who's asking, from the session's request; stopped with the answer.
+	turn, cancel := context.WithCancel(context.WithoutCancel(c.ctx))
+	go func() {
+		select {
+		case <-ctx.Done():
+			cancel()
+		case <-turn.Done():
+		}
+	}()
+	if id == "" {
+		conv, err := c.app.Conversations.Create(turn, "Voice chat", "", "")
+		if err != nil {
+			cancel()
+			return err
+		}
+		id = conv.ID
+		c.mu.Lock()
+		c.conversationID = id
+		c.mu.Unlock()
+	}
+	turn = turnopts.WithSpoken(turn)
+	turn = pluginapi.WithAnswerOptions(turn, pluginapi.GenerateOptions{NoThinking: true})
+	chunks, err := c.app.RunChat(turn, "", id, text, true, "", "")
+	if err != nil {
+		cancel()
+		return err
+	}
+	for chunk := range chunks {
+		if chunk.Error != "" {
+			cancel()
+			for range chunks {
+			}
+			return errors.New(chunk.Error)
+		}
+		if chunk.Content != "" {
+			delta(chunk.Content)
+		}
+		if chunk.Done {
+			// The chat saves the answer after it's done; the voice is
+			// already speaking it, so that finishes here without holding
+			// the turn, unless the person stops it first (#795).
+			saved := make(chan struct{})
+			c.mu.Lock()
+			c.saving = saved
+			c.mu.Unlock()
+			go func() {
+				for range chunks {
+				}
+				cancel()
+				close(saved)
+			}()
+			return ctx.Err()
+		}
+	}
+	cancel()
+	return ctx.Err()
+}
+
+// spokenStyle is how an answer in live voice mode is written: it's heard,
+// not read.
+const spokenStyle = `This conversation is spoken aloud: the person talks, and your answer is read out by a voice. Answer the way a person would in conversation: a sentence or two, then stop, and let them ask for more. No Markdown, lists, tables, headings, code blocks, emoji, or links; say a web address only if they ask for it. Spell out what a voice would stumble on, such as symbols and abbreviations. Only when you looked something up, on the web or in their files, say where it's from in a few words; never say where something you already know comes from.`

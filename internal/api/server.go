@@ -44,6 +44,7 @@ import (
 	"github.com/yeixio/toskar-core/internal/training"
 	"github.com/yeixio/toskar-core/internal/turnopts"
 	"github.com/yeixio/toskar-core/internal/version"
+	"github.com/yeixio/toskar-core/internal/voice"
 	"github.com/yeixio/toskar-core/pkg/contracts"
 )
 
@@ -57,14 +58,19 @@ type Dependencies struct {
 	OpenAI   *openai.Handler
 	Hardware func(ctx context.Context) (contracts.HardwareInventory, error)
 
-	ListModels          func(ctx context.Context) ([]contracts.Model, error)
-	RecommendModels     func(ctx context.Context, purpose string) (contracts.Recommendation, error)
-	ModelsFit           func(ctx context.Context) ([]contracts.ModelsFitResponse, error)
-	BrowseModels        func(ctx context.Context, query string, limit int) ([]contracts.BrowseModel, error)
-	ModelStore          func(ctx context.Context) (contracts.ModelStore, error)
-	QualityResults      func(ctx context.Context) contracts.QualityResults
-	InstallModel        func(ctx context.Context, id string, wait bool, nodeID string) error
-	InstallModelFromURL func(ctx context.Context, req contracts.InstallFromURLRequest, wait bool) (string, error)
+	ListModels      func(ctx context.Context) ([]contracts.Model, error)
+	RecommendModels func(ctx context.Context, purpose string) (contracts.Recommendation, error)
+	ModelsFit       func(ctx context.Context) ([]contracts.ModelsFitResponse, error)
+	BrowseModels    func(ctx context.Context, query string, limit int) ([]contracts.BrowseModel, error)
+	ModelStore      func(ctx context.Context) (contracts.ModelStore, error)
+	QualityResults  func(ctx context.Context) contracts.QualityResults
+	InstallModel    func(ctx context.Context, id string, wait bool, nodeID string) error
+	// AcceptModelLicense records that the person asking accepted a catalog
+	// model's license terms; ModelLicenseAcceptances lists every record
+	// (#593).
+	AcceptModelLicense      func(ctx context.Context, id string) error
+	ModelLicenseAcceptances func(ctx context.Context) ([]contracts.LicenseAcceptance, error)
+	InstallModelFromURL     func(ctx context.Context, req contracts.InstallFromURLRequest, wait bool) (string, error)
 	// ImportModel adds a GGUF file on this computer as a model;
 	// ModelUploadPath and AdoptModelUpload add one sent as the body (#467).
 	ImportModel      func(ctx context.Context, req models.ImportRequest) (models.Imported, error)
@@ -152,11 +158,23 @@ type Dependencies struct {
 	// RelayName is the relay this computer uses away from home: Toskar's or
 	// an organization's, given to devices with the route secret.
 	RelayName func() string
-	// RelayToken is this computer's current token for Toskar's relay, or
-	// "". Its paired devices get it at home, so each one, not only the one
-	// that subscribed, can find the computer away from home (#456).
-	RelayToken  func() string
-	RemoteReach func() RemoteReach
+	// DeviceRelayToken is a device token for Toskar's relay, or "". Its
+	// paired devices get it at home, so each one, not only the one that
+	// subscribed, can find the computer away from home (#456). It's never
+	// the computer's own token, which could open its tunnel (#1258).
+	DeviceRelayToken func() string
+	RemoteReach      func() RemoteReach
+	// Voice is live voice mode's stages for the caller (#795): speech to
+	// text, their chat, and text to speech.
+	Voice func(ctx context.Context) (voice.Parts, error)
+	// SpeechVoices are the Voice settings (#1304): Kitten TTS 2 mini's
+	// install and each language's voice. SetSpeechVoice chooses a
+	// language's voice, "" for automatic; InstallKitten starts installing
+	// Kitten in the background, and RemoveKitten deletes it. Admins only.
+	SpeechVoices   func(ctx context.Context) (speech.VoiceSettings, error)
+	SetSpeechVoice func(ctx context.Context, language, voice string) error
+	InstallKitten  func(ctx context.Context) error
+	RemoveKitten   func(ctx context.Context) error
 	// Transcribe turns an attached recording into text with speech.transcribe,
 	// wherever it runs (yeixio/toskar-apps#155).
 	Transcribe func(ctx context.Context, artifactID, language string) (Transcription, error)
@@ -172,8 +190,13 @@ type Dependencies struct {
 	Subscription       func() *Subscription
 	StartCheckout      func(ctx context.Context, plan string) (url string, err error)
 	ManageSubscription func(ctx context.Context) (url string, err error)
-	ShowVersion        func(ctx context.Context, conversationID, messageID string) ([]contracts.Message, error)
-	Chat               func(w http.ResponseWriter, r *http.Request, conversationID, profileID, modelID, message string, stream bool, execution string) error
+	// CancelCheckout forgets a checkout opened here and not paid (#1257).
+	CancelCheckout func(ctx context.Context) error
+	// MoveSubscription moves the subscription bought here onto this
+	// computer when the relay says it's tied to another (#1257).
+	MoveSubscription func(ctx context.Context) error
+	ShowVersion      func(ctx context.Context, conversationID, messageID string) ([]contracts.Message, error)
+	Chat             func(w http.ResponseWriter, r *http.Request, conversationID, profileID, modelID, message string, stream bool, execution string) error
 	// StopChat stops the caller's conversation's running turn and reports
 	// whether one was running. Another person's reads as not running.
 	StopChat func(ctx context.Context, conversationID string) bool
@@ -274,9 +297,14 @@ type Server struct {
 	// tlsConfig and tlsInfo are the API's HTTPS (#213).
 	tlsConfig *tls.Config
 	tlsInfo   APITLS
-	replaced  map[net.Listener]bool
-	conns     map[net.Conn]bool
-	closed    chan struct{}
+	// tlsCert is the certificate tlsConfig answers with, and tlsNext the
+	// fingerprint of the one that will replace it (#1263).
+	tlsCert      tls.Certificate
+	tlsNext      string
+	tlsNextAsked func(keyID string)
+	replaced     map[net.Listener]bool
+	conns        map[net.Conn]bool
+	closed       chan struct{}
 	// remote is the listener for access from anywhere (#456).
 	remote remoteListener
 
@@ -312,6 +340,7 @@ type Server struct {
 	ratings         Ratings
 	network         Network
 	external        ExternalServers
+	comfyui         ComfyUIs
 	runs            RunStore
 	capabilities    CapabilitySource
 	caches          CacheSource
@@ -357,6 +386,7 @@ func (s *Server) routes() {
 	api.HandleFunc("/models/install-from-url/preview", s.handlePreviewFromURL).Methods(http.MethodPost)
 	api.HandleFunc("/models/import", s.handleImportModel).Methods(http.MethodPost)
 	api.HandleFunc("/models/import/found", s.handleFoundModels).Methods(http.MethodGet, http.MethodOptions)
+	api.HandleFunc("/models/license-acceptances", s.handleLicenseAcceptances).Methods(http.MethodGet, http.MethodOptions)
 	api.HandleFunc("/models/{id}/install", s.handleInstallModel).Methods(http.MethodPost)
 	api.HandleFunc("/models/{id}/start", s.handleStartModel).Methods(http.MethodPost)
 	api.HandleFunc("/models/{id}/stop", s.handleStopModel).Methods(http.MethodPost)
@@ -454,12 +484,16 @@ func (s *Server) routes() {
 	s.oidcRoutes(api)
 	s.portalRoutes(api)
 	api.HandleFunc("/tls", s.handleTLS).Methods(http.MethodGet)
+	api.HandleFunc("/tls/next", s.handleNextTLS).Methods(http.MethodGet)
 	api.HandleFunc("/remote-access", s.handleRemoteAccess).Methods(http.MethodGet)
 	api.HandleFunc("/remote-access/check", s.handleRemoteCheck).Methods(http.MethodPost)
 	api.HandleFunc("/remote-access/route", s.handleRouteSecret).Methods(http.MethodGet)
+	api.HandleFunc("/remote-access/device-token", s.handleDeviceToken).Methods(http.MethodGet)
 	api.HandleFunc("/remote-access/relay-token", s.handleRelayToken).Methods(http.MethodPut)
 	api.HandleFunc("/remote-access/subscription/checkout", s.handleSubscriptionCheckout).Methods(http.MethodPost)
 	api.HandleFunc("/remote-access/subscription/manage", s.handleSubscriptionManage).Methods(http.MethodPost)
+	api.HandleFunc("/remote-access/subscription/checkout", s.handleSubscriptionCancel).Methods(http.MethodDelete)
+	api.HandleFunc("/remote-access/subscription/move", s.handleSubscriptionMove).Methods(http.MethodPost)
 	s.notificationRoutes(api)
 	s.connectorRoutes(api)
 	s.mcpRoutes(api)
@@ -471,6 +505,7 @@ func (s *Server) routes() {
 	s.ratingsRoutes(api)
 	s.networkRoutes(api)
 	s.externalRoutes(api)
+	s.comfyuiRoutes(api)
 	s.runRoutes(api)
 	s.capabilityRoutes(api)
 	s.cacheRoutes(api)
@@ -1061,6 +1096,21 @@ func (s *Server) handleRefreshNodes(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, items)
 }
 
+// settingsFor is the settings as a caller may read them. Someone below Admin
+// using a key, such as a Member's phone, doesn't get where this computer
+// keeps its files, the address it listens on, its node ID, or its address
+// from outside (#1264): their apps read the language, the default profile,
+// and the chat settings.
+func settingsFor(p auth.Principal, view contracts.SettingsView) contracts.SettingsView {
+	if p.Via != auth.ViaAPIKey || p.Person.Role.AtLeast(auth.RoleAdmin) {
+		return view
+	}
+	view.DataDir, view.ModelsDir, view.RuntimesDir, view.LogsDir = "", "", "", ""
+	view.APIHost, view.NodeID = "", ""
+	view.RemoteAccessAddress, view.RemoteAccessRelay = "", ""
+	return view
+}
+
 func (s *Server) handleGetSettings(w http.ResponseWriter, r *http.Request) {
 	if s.deps.GetSettings != nil {
 		view, err := s.deps.GetSettings(r.Context())
@@ -1068,7 +1118,7 @@ func (s *Server) handleGetSettings(w http.ResponseWriter, r *http.Request) {
 			writeErr(w, http.StatusInternalServerError, "SETTINGS_READ_FAILED", "Could not read settings.", map[string]any{"cause": err.Error()})
 			return
 		}
-		writeJSON(w, http.StatusOK, view)
+		writeJSON(w, http.StatusOK, settingsFor(auth.PrincipalFrom(r.Context()), view))
 		return
 	}
 	cfg := s.deps.Config.Get()

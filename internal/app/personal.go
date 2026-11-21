@@ -91,3 +91,23 @@ func (a *App) personalBlock(ctx context.Context) string {
 	}
 	return s.Block()
 }
+
+// locationBlock is where the person said they are, for a question that
+// needs it, or "" (#210).
+func (a *App) locationBlock(ctx context.Context, message string) string {
+	s, err := a.PersonalStyle(ctx)
+	if err != nil {
+		return ""
+	}
+	return s.LocationBlock(message)
+}
+
+// personalLocation is where the person asking said they are, or "": the
+// places tools start there when no place is named (#210).
+func (a *App) personalLocation(ctx context.Context) string {
+	s, err := a.PersonalStyle(ctx)
+	if err != nil {
+		return ""
+	}
+	return s.Location
+}

@@ -1,8 +1,9 @@
 {
-  "tagline": "Local AI control plane",
+  "tagline": "Runs AI on your own computers",
   "nav": {
     "label": "Main",
     "open": "Open menu",
+    "skip": "Skip to content",
     "use": "Use",
     "customize": "Customize",
     "administer": "Administer",
@@ -40,10 +41,18 @@
     "computersNone": "No computers",
     "connected_one": "{{count}} connected",
     "connected_other": "{{count}} connected",
-    "nornHint": "Norn schedules work across your computers",
+    "nornHint": "Which computer runs each model",
     "nornAutomatic": "Automatic",
-    "mimirHint": "Local knowledge and memory",
-    "mimirReady": "Ready"
+    "mimirHint": "Files and sources Toskar answers from",
+    "justThis": "Just this computer",
+    "placementLocal": "This computer",
+    "placementAsk": "Ask each time",
+    "knowledgeNone": "No sources yet",
+    "knowledgeFailed_one": "{{count}} failed",
+    "knowledgeFailed_other": "{{count}} failed",
+    "knowledgeReady_one": "{{count}} source",
+    "knowledgeReady_other": "{{count}} sources",
+    "knowledgeIndexing": "Indexing…"
   },
   "boot": {
     "starting": "Starting Toskar",

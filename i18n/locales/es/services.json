@@ -13,8 +13,12 @@
   "connect": "Conectar",
   "optional": " (opcional)",
   "stored": "Guardado ({{value}}). Déjalo en blanco para conservarlo.",
+  "example": "p. ej., {{value}}",
   "save": "Guardar",
   "cancel": "Cancelar",
   "tools": "Herramientas: {{tools}}",
-  "asksFirst": "{{name}} (pregunta primero)"
+  "asksFirst": "{{name}} (pregunta primero)",
+  "connectService": "Conectar {{name}}",
+  "advanced": "Avanzado",
+  "doorbellAutomation": "Crear una automatización del timbre"
 }
