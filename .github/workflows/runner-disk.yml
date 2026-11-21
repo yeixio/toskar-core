@@ -1,0 +1,45 @@
+name: Runner disk
+
+# The home Linux runners share one Docker, and every image build leaves
+# images and build cache that nothing removed: on linux-rig they reached
+# 123G and 131G (2026-11). Each week this removes images no container uses
+# and build cache that neither is older than BUILD_CACHE_DAYS (default 7).
+# Volumes and running containers are never touched. The quality runner's own
+# Docker is pruned by the quality runs (.github/scripts/quality-prune.sh).
+
+on:
+  schedule:
+    - cron: '17 11 * * 0'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: runner-disk
+  cancel-in-progress: false
+
+jobs:
+  prune:
+    if: vars.CI_LAN_CACHE != ''
+    runs-on: [self-hosted, toskar-ci]
+    timeout-minutes: 30
+    env:
+      DAYS: ${{ vars.BUILD_CACHE_DAYS || '7' }}
+    steps:
+      - name: Prune Docker
+        run: |
+          [[ "$DAYS" =~ ^[0-9]+$ ]] || { echo "::error::BUILD_CACHE_DAYS must be a whole number."; exit 1; }
+          hours=$(( DAYS * 24 ))
+          {
+            echo "## Runner disk on $(hostname)"
+            echo
+            echo "Before: $(df -h / | awk 'NR==2 {print $4 " free of " $2}')"
+            echo
+            echo '```'
+            docker builder prune -af --filter "until=${hours}h" | tail -1
+            docker image prune -af --filter "until=${hours}h" | tail -1
+            echo '```'
+            echo
+            echo "After: $(df -h / | awk 'NR==2 {print $4 " free of " $2}')"
+          } | tee -a "$GITHUB_STEP_SUMMARY"
