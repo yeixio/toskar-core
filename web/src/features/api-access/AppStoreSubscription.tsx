@@ -3,7 +3,15 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { AnywhereSubscription } from '@/lib/api'
 import { formatDate } from '@/i18n/format'
-import { desktopError, type desktopAnywhere } from '@/lib/desktopBridge'
+import { desktopError, openExternal, type desktopAnywhere } from '@/lib/desktopBridge'
+
+/**
+ * The links App Review asks for beside an auto-renewable subscription
+ * (guideline 3.1.2(c)): Apple's standard EULA, which is the app's Terms of
+ * Use, and the apps' privacy policy. The App Store listing names the same two.
+ */
+export const appStoreTermsUrl = 'https://www.apple.com/legal/internet-services/itunes/dev/stdeula/'
+export const appStorePrivacyUrl = 'https://toskar.ai/privacy/apps'
 
 type Store = NonNullable<ReturnType<typeof desktopAnywhere>>
 
@@ -122,7 +130,32 @@ export function AppStoreSubscription({ subscription, store }: { subscription: An
             </button>
           </div>
           {buy.isPending ? <p className="text-xs text-ink-muted">{t('remote.subscription.buying')}</p> : null}
-          <p className="text-xs text-ink-faint">{t('remote.subscription.appStoreBilling')}</p>
+          <p className="text-xs text-ink-faint">
+            {t('remote.subscription.renews')} {t('remote.subscription.appStoreBilling')}
+          </p>
+          {/* Opened in the person's browser: the desktop app's web view opens no new windows. */}
+          <p className="flex flex-wrap gap-x-4 text-xs">
+            <a
+              href={appStoreTermsUrl}
+              className="text-primary underline"
+              onClick={(event) => {
+                event.preventDefault()
+                openExternal(appStoreTermsUrl)
+              }}
+            >
+              {t('remote.subscription.terms')}
+            </a>
+            <a
+              href={appStorePrivacyUrl}
+              className="text-primary underline"
+              onClick={(event) => {
+                event.preventDefault()
+                openExternal(appStorePrivacyUrl)
+              }}
+            >
+              {t('remote.subscription.privacy')}
+            </a>
+          </p>
         </>
       )}
       {note ? (
