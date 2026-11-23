@@ -390,6 +390,26 @@ describe('RemoteAccessCard (#456)', () => {
       expect(api.startSubscriptionCheckout).not.toHaveBeenCalled()
     })
 
+    it('says it renews and links the Terms of Use (EULA) and the privacy policy, in the browser (App Review 3.1.2(c))', async () => {
+      shell()
+      const open = vi.fn()
+      ;(window as unknown as { runtime?: unknown }).runtime = { BrowserOpenURL: open }
+      try {
+        renderCard({ state: 'none', open: true, in_app_only: true })
+        await screen.findByRole('button', { name: 'Subscribe for €43,99 a year' })
+        expect(screen.getByText(/Auto-renewing subscription/)).toBeInTheDocument()
+        const terms = screen.getByRole('link', { name: 'Terms of Use (EULA)' })
+        const privacy = screen.getByRole('link', { name: 'Privacy Policy' })
+        expect(terms).toHaveAttribute('href', 'https://www.apple.com/legal/internet-services/itunes/dev/stdeula/')
+        expect(privacy).toHaveAttribute('href', 'https://toskar.ai/privacy/apps')
+        fireEvent.click(terms)
+        fireEvent.click(privacy)
+        expect(open.mock.calls).toEqual([['https://www.apple.com/legal/internet-services/itunes/dev/stdeula/'], ['https://toskar.ai/privacy/apps']])
+      } finally {
+        delete (window as unknown as { runtime?: unknown }).runtime
+      }
+    })
+
     it('restores, and says when there is nothing to restore', async () => {
       const app = shell()
       renderCard({ state: 'ended', in_app_only: true })
