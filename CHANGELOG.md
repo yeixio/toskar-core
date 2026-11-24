@@ -8,6 +8,34 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Thi
 
 Changes waiting for the next release are in [changes/unreleased/](changes/unreleased/), one file per pull request. `scripts/changelog.py preview` shows them together, and `scripts/changelog.py release <version>` writes them here when the release is cut.
 
+## [1.14.2] - 2026-11-23
+
+### Fixed
+
+- In Toskar Pro from the Mac App Store, Access from anywhere's subscription
+  card says it renews automatically and links the Terms of Use (EULA) and
+  the privacy policy.
+- Setting up a doorbell automation is easier (#1341). Describing one, such as "When someone rings the doorbell, greet them and tell me who is there", now fills in what starts it, the camera, and speaking at the door, instead of an hourly schedule that looks at nothing. With a doorbell connected, Automations offers an Answer the door idea, and the connected camera links to it. Names an AI writes are in plain words, the card says "Never run" and "When someone rings Front Door", the doorbell button no longer asks what it changes to, and the details show the camera and what it does at the door.
+- Settings → Voice offers one model when one both chats and sees, instead of
+  two, and offers a model that sees only once a camera is connected.
+- A model shows the same download size on every screen, labeled as the
+  download, next to about how much memory it needs.
+- Setup names the system as "macOS, Apple silicon" and says the recommended
+  model fits in the computer's memory, in the same figure as the card above.
+- A chat model knows its own name, so "which model are you" no longer gets
+  another company's assistant.
+- Two quick questions on one line are answered together, not as a plan.
+- Clearer wording in Diagnostics, Settings → About, What left this computer,
+  and on profile cards.
+- Creating an API key with a body that isn't JSON is refused, and removing a
+  computer that was never paired answers 404.
+- Searching the Models store shows Toskar's tested matches first, each once,
+  then one list of Hugging Face uploads, without the empty Recommended block.
+- The store lists a model once when an upload is the same model as a tested
+  one under another spelling, leaves out files too small to be the whole
+  model they name, and Popular now no longer repeats the picks above it.
+- The Voice settings and the doorbell's Voice menu are easier to read (#1342). Languages are listed by name instead of by code, Norwegian is listed once, and voices named only for their recordings, such as "Mls" or "News tts", are called Standard. The Kitten card says it adds voices to choose from, and that languages with a natural voice keep it unless you choose a Kitten voice. The Voice section names the languages that can't be read aloud yet, such as Japanese.
+
 ## [1.14.1] - 2026-11-19
 
 ### Added
