@@ -1635,6 +1635,10 @@ type SettingsView struct {
 	// SuggestModels is this person's choice that answers may offer a
 	// better-fitting model to install (#707, contract 1.45); on by default.
 	SuggestModels bool `json:"suggest_models"`
+	// ThinkingSound is this person's choice that voice chat plays a soft
+	// chime while a spoken answer takes a while (#1334, contract 1.121); on
+	// by default.
+	ThinkingSound bool `json:"thinking_sound"`
 	// AssistantLanguageMode is the language answers are written in (§11,
 	// §30): "auto", the language the person writes in (the default); "app",
 	// the App language; or "language", AssistantLanguage. A language asked

@@ -404,7 +404,9 @@
       "models": "See Models"
     },
     "standard": "Standard",
-    "noVoice": "{{languages}} can't be read aloud yet: read aloud, voice mode and the doorbell don't speak it."
+    "noVoice": "{{languages}} can't be read aloud yet: read aloud, voice mode and the doorbell don't speak it.",
+    "thinkingSound": "Thinking sound",
+    "thinkingSoundHint": "In voice chat, a soft chime plays while an answer takes more than a moment, so you know Toskar heard you. Only for you."
   },
   "sections": {
     "account": "Account",

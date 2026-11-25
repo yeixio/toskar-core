@@ -49,6 +49,8 @@ var personalKeys = map[string]bool{
 	personalKey:               true,
 	// Whether answers may offer a better-fitting model (#707).
 	"suggest_models": true,
+	// Whether voice chat plays the thinking sound (#1334).
+	"thinking_sound": true,
 }
 
 // personalSettingKey is where ctx's person keeps key.

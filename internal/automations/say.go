@@ -28,6 +28,10 @@ type Say struct {
 	// them through the camera's microphone, answers, and sums the visit up
 	// in the run's result, which is what it notifies with.
 	Listen bool `json:"listen,omitempty"`
+	// NoThinkingSound leaves out the soft chime that plays while an answer
+	// to the visitor takes a while (#1334). It's on by default, and quiet
+	// hours mute it too.
+	NoThinkingSound bool `json:"no_thinking_sound,omitempty"`
 }
 
 // SayReolink is a Reolink camera's speaker, reached through reolink-cli.

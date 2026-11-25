@@ -404,7 +404,9 @@
       "models": "Zu den Modellen"
     },
     "standard": "Standard",
-    "noVoice": "{{languages}} kann noch nicht vorgelesen werden: Vorlesen, Sprachmodus und Türklingel sprechen es nicht."
+    "noVoice": "{{languages}} kann noch nicht vorgelesen werden: Vorlesen, Sprachmodus und Türklingel sprechen es nicht.",
+    "thinkingSound": "Denkgeräusch",
+    "thinkingSoundHint": "Im Sprachchat erklingt ein leiser Ton, wenn eine Antwort länger dauert, damit du weißt, dass Toskar dich gehört hat. Nur für dich."
   },
   "sections": {
     "account": "Konto",
