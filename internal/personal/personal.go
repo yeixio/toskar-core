@@ -161,8 +161,9 @@ func GrantsPermission(text string) bool {
 
 // localRe finds a question that depends on where the person is: places
 // near them, the weather, directions, and what's open, in the languages
-// Toskar speaks (#210).
-var localRe = regexp.MustCompile(`(?i)(\b(near|around|close to) (me|here|us)\b|\bnearby\b|\bnearest\b|\bclosest\b|\bin my (area|town|city|neighbou?rhood)\b|\bweather\b|\bforecast\b|\b(is it|will it) (rain|snow)|\btemperature (outside|today|tonight|tomorrow)\b|\bopen (now|today|tonight|late)\b|\bdirections?\b|\bhow far\b|\bsunrise\b|\bsunset\b|\bcerca de (mí|mi\b|aquí)|\bel tiempo\b|\bclima\b|\bpronóstico\b|\bpr[eè]s de (moi|chez moi|d'ici)\b|\bm[ée]t[ée]o\b|\bin der n[äa]he\b|\bwetter\b|\bvicino a me\b|\bmeteo\b|\bperto de mim\b|\bprevis[ãa]o do tempo\b|近く|天気|附近|天气|天氣|근처|날씨)`)
+// Toskar speaks (#210). "In town" and "around here" count too, so a
+// question about restaurants in town is about the person's town (#1381).
+var localRe = regexp.MustCompile(`(?i)(\b(near|around|close to) (me|here|us)\b|\bnearby\b|\bnearest\b|\bclosest\b|\bin my (area|town|city|neighbou?rhood)\b|\bin (the|this|our) (area|neighbou?rhood)\b|\bin town\b|\baround (here|town)\b|\bclose by\b|\bdowntown\b|\blocal (restaurants?|caf[eé]s?|bars?|pubs?|shops?|stores?|businesses|places|spots|food|events?|news)\b|\b(where|somewhere|places?|spots?) (to|should (i|we)|can (i|we)) (eat|go (out )?for (dinner|lunch|breakfast|brunch|drinks|coffee))\b|\bweather\b|\bforecast\b|\b(is it|will it) (rain|snow)|\btemperature (outside|today|tonight|tomorrow)\b|\bopen (now|today|tonight|late)\b|\bdirections?\b|\bhow far\b|\bsunrise\b|\bsunset\b|\bcerca de (mí|mi\b|aquí)|\bel tiempo\b|\bclima\b|\bpronóstico\b|\bpr[eè]s de (moi|chez moi|d'ici)\b|\bm[ée]t[ée]o\b|\bin der n[äa]he\b|\bwetter\b|\bvicino a me\b|\bmeteo\b|\bperto de mim\b|\bprevis[ãa]o do tempo\b|近く|天気|附近|天气|天氣|근처|날씨)`)
 
 // NeedsLocation reports a question that depends on where the person is.
 func NeedsLocation(prompt string) bool {

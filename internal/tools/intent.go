@@ -41,9 +41,30 @@ func MessageAsksToFind(message string) bool {
 // set in a cafe" isn't looked up.
 var askPlacesRe = regexp.MustCompile(`(?i)\b(find|where('s| is| are| can i)|best|recommend\w*|suggest|looking for|is there|are there|list)\b.{0,40}\b(caf[eé]s?|coffee (shops?|houses?)|restaurants?|diners?|pizza( places)?|bars?|pubs?|breweries|brewery|bakeries|bakery|pharmac(y|ies)|gas stations?|hotels?|motels?|grocery( stores?)?|groceries|supermarkets?|museums?|gyms?|hospitals?|clinics?|urgent care|vets?|libraries|library|post offices?|laundromats?|campgrounds?|trailheads?)\b`)
 
-var askPlacesWords = typo.FromPatterns(askPlacesRe.String())
+// placeKinds are kinds of place, plural, as a question about what's in a
+// town names them.
+const placeKinds = `caf[eé]s|coffee (shops|houses)|restaurants|diners|pizza places|pizzerias|bars|pubs|breweries|bakeries|pharmacies|gas stations|hotels|motels|grocery stores|supermarkets|museums|gyms|hospitals|clinics|vets|libraries|post offices|laundromats|campgrounds|trailheads|shops|stores|places to (eat|stay|drink)|spots to (eat|stay)|food trucks|takeout`
+
+// localPlacesRe matches a kind of place with where it is, without an
+// asking word: "What restaurants are in town?", "cafes in Sitka", "local
+// bars", "places to eat downtown". Qwen 3.8 made up restaurants for
+// "restaurants in town", which the rule above missed (#1381). A place
+// named once, as in "a story set in a cafe", is singular and has no
+// locality, so it isn't looked up.
+var localPlacesRe = regexp.MustCompile(`(?i)(\b(` + placeKinds + `)\b.{0,30}?\b(in town|downtown|around (here|town)|in (the|this|my|our) (area|town|city|neighbou?rhood)|nearby|near (me|here|us|the \w+)|close by)|\b(local|nearby)\s+(` + placeKinds + `)\b|\b(where|somewhere|places?|spots?) (to|should (i|we)|can (i|we)) (eat|go (out )?(for|to) (dinner|lunch|breakfast|brunch|drinks|coffee)|get (dinner|lunch|breakfast|brunch|food|coffee|a drink)|grab (a bite|dinner|lunch|food|coffee))\b)`)
+
+// namedPlacesRe matches a kind of place in a place named with a capital,
+// "restaurants in Juneau", but not "the bars in a chart".
+var namedPlacesRe = regexp.MustCompile(`(?i:\b(` + placeKinds + `)\b).{0,30}?\b(?i:in|near|around) [A-Z][a-z][\w'.-]*`)
+
+var (
+	askPlacesWords   = typo.FromPatterns(askPlacesRe.String())
+	localPlacesWords = typo.FromPatterns(localPlacesRe.String())
+)
 
 // MessageAsksForPlaces reports a request for places of a kind, to look up.
 func MessageAsksForPlaces(message string) bool {
-	return askPlacesRe.MatchString(message) || askPlacesRe.MatchString(askPlacesWords.Fix(message))
+	return askPlacesRe.MatchString(message) || askPlacesRe.MatchString(askPlacesWords.Fix(message)) ||
+		localPlacesRe.MatchString(message) || localPlacesRe.MatchString(localPlacesWords.Fix(message)) ||
+		namedPlacesRe.MatchString(message)
 }
