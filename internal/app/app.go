@@ -183,6 +183,8 @@ type App struct {
 	joinTokens *join.Tokens
 	networkMu  sync.Mutex
 	capCache   *cache.Cache[inventory.Snapshot]
+	// knowledgeModels are knowledge's embedding and reranking models.
+	knowledgeModels *knowledgeModels
 	// tokenCounts keeps counts from models' tokenizers (§66).
 	tokenCounts *cache.Cache[int]
 	// tokenize counts with a running model; tests replace it.
@@ -590,6 +592,8 @@ func New(opts Options) (*App, error) {
 		// with their own tools, and a full swarm for the rest.
 		Spread: a.spreadRoute,
 		Swarm:  a.swarmTurn,
+		// Ollama's /api/embed uses the knowledge embedding model (#1356).
+		Embed: a.ollamaEmbed,
 		ErrorCode: func(text string) string {
 			code, _ := chatErrorCode(text)
 			return code
@@ -1033,6 +1037,7 @@ func New(opts Options) (*App, error) {
 	a.registerPortable(&speech.SynthesizeTool{Engine: a.Speech, Store: a.Artifacts})
 	a.API.BindSpeech(a.Speech, a.Artifacts)
 	knowledgeModels := newKnowledgeModels(a)
+	a.knowledgeModels = knowledgeModels
 	a.Mimir.SetModels(knowledgeModels)
 	a.Muninn = muninn.NewStore(db.SQL)
 	a.TopicLog = topiclog.New(db.SQL)
