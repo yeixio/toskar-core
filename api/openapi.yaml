@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Toskar Control Plane API
-  version: "1.119"
+  version: "1.120"
   description: >-
     Local AI control plane API for Toskar, its OpenAI-compatible routes, and its MCP server.
     On the default loopback bind no key is needed. When the daemon listens on any other address,
@@ -4984,6 +4984,52 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+  /api/v1/features:
+    get:
+      summary: Each feature and what it still needs (#1355)
+      description: "One-step setup's check: every feature (voice, the door, pictures, clips, seeing pictures, knowledge by meaning, automations that use tools, training), whether it works here now, and for each thing it needs what would set it up, or why nothing here can. Admins only (contract 1.119)."
+      operationId: listFeatures
+      tags: [Settings]
+      responses:
+        "200":
+          description: The features, in the order Settings lists them
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Feature"
+  /api/v1/features/{id}/setup:
+    post:
+      summary: Set up everything a feature still needs (#1355)
+      description: "Starts installing every missing need that this computer, or a paired one, can install: models, the voice, and picture or clip models. It returns at once; GET /api/v1/features shows how it's going. Admins only (contract 1.119)."
+      operationId: setUpFeature
+      tags: [Settings]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "202":
+          description: The feature, with what started installing
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Feature"
+        "404":
+          description: FEATURE_UNKNOWN
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "409":
+          description: FEATURE_SETUP_FAILED, when a part couldn't start; the rest keeps going
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
   /api/v1/speech/kitten:
     post:
       summary: Install Kitten TTS 2 mini (#1304)
@@ -8248,6 +8294,60 @@ components:
       scheme: bearer
       description: An API key from the API Access page, or TOSKAR_API_KEY
   schemas:
+    Feature:
+      type: object
+      description: A feature and whether it works here now (#1355)
+      required: [id, ready, needs, setup_bytes, installing]
+      properties:
+        id:
+          type: string
+          enum: [voice, door, pictures, clips, see, meaning, automationTools, train]
+        ready:
+          type: boolean
+        needs:
+          type: array
+          items:
+            $ref: "#/components/schemas/FeatureNeed"
+        setup_bytes:
+          type: integer
+          format: int64
+          description: What setting up its missing needs downloads
+        installing:
+          type: boolean
+    FeatureNeed:
+      type: object
+      description: One thing a feature needs, and what would set it up
+      required: [need, ready]
+      properties:
+        need:
+          type: string
+          enum: [chat, tools, vision, embedding, voice, images, video, trainer, camera]
+        ready:
+          type: boolean
+        install:
+          type: string
+          enum: [model, voice, images, video]
+          description: How setup installs it; absent when nothing here can
+        option:
+          type: string
+          description: The model it installs
+        name:
+          type: string
+        size_bytes:
+          type: integer
+          format: int64
+        node_id:
+          type: string
+          description: The paired computer it is set up on
+        node_name:
+          type: string
+        installing:
+          type: boolean
+        percent:
+          type: integer
+        detail:
+          type: string
+          description: Why it can't be set up here, when this computer says
     OllamaAnswer:
       type: object
       description: An Ollama API answer, in the shape Ollama gives for the endpoint (#1356)

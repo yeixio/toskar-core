@@ -304,5 +304,7 @@
   "CAMERA_UNREACHABLE": "Toskar n'a pas pu joindre de caméra à cette adresse. Vérifiez l'adresse et que le serveur HTTP ou HTTPS de la caméra est activé.",
   "CAMERA_SPEAKER_UNREACHABLE": "Toskar n’a pas pu joindre le haut-parleur de la caméra, le visiteur n’a donc pas eu de réponse. Vérifiez que la caméra est allumée et sur le même réseau que cet ordinateur.",
   "DOOR_NOT_ANSWERED": "Quelqu’un est venu à la porte et Toskar n’a pas pu répondre : {{detail}}",
-  "NODE_NOT_FOUND": "Aucun ordinateur associé n'a cet identifiant."
+  "NODE_NOT_FOUND": "Aucun ordinateur associé n'a cet identifiant.",
+  "FEATURE_UNKNOWN": "Toskar ne connaît pas cette fonction.",
+  "FEATURE_SETUP_FAILED": "Une partie de la configuration n'a pas pu démarrer : {{detail}}"
 }

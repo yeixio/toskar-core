@@ -119,6 +119,8 @@ import type {
   Artifact,
   SpeechResult,
   VoiceSettings,
+  Feature,
+  FeatureId,
   ImageSetup,
   NodeToolProviders,
   FileRef,
@@ -1380,6 +1382,12 @@ export const api = {
     }),
 
   /** Start installing Kitten TTS 2 mini in the background. */
+  /** Each feature and what it still needs on this computer (#1355). */
+  listFeatures: () => request<Feature[]>('/api/v1/features'),
+
+  /** Starts installing everything a feature still needs, in one step (#1355). */
+  setUpFeature: (id: FeatureId) => request<Feature>(`/api/v1/features/${id}/setup`, { method: 'POST' }),
+
   installKitten: () => request<VoiceSettings>('/api/v1/speech/kitten', { method: 'POST' }),
 
   /** Remove Kitten TTS 2 mini. */

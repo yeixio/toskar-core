@@ -5,6 +5,7 @@ import { PortalPage } from '@/features/portal/PortalPage'
 import { PortalsPage } from '@/features/portals/PortalsPage'
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { MovedPage } from '@/app/MovedPage'
+import { FeaturesPage } from '@/features/settings/FeaturesPage'
 import { LifecycleHost } from '@/components/LifecycleHost'
 import { NotificationHost } from '@/components/NotificationHost'
 import { ServiceBootGate } from '@/components/ServiceBootGate'
@@ -138,6 +139,7 @@ export function App() {
                   <Route path="memory" element={<RequireRole min="member"><MemoryPage /></RequireRole>} />
                   <Route path="notifications" element={<RequireRole min="admin"><SettingsPage section="notifications" /></RequireRole>} />
                   <Route path="voice" element={<RequireRole min="admin"><SettingsPage section="voice" /></RequireRole>} />
+                  <Route path="features" element={<RequireRole min="admin"><FeaturesPage /></RequireRole>} />
                   <Route path="models" element={<RequireRole min="admin"><SettingsPage section="models" /></RequireRole>} />
                   <Route path="history" element={<RequireRole min="admin"><SettingsPage section="history" /></RequireRole>} />
                   <Route path="computers" element={<RequireRole min="admin"><NodesPage /></RequireRole>} />

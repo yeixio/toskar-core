@@ -53,6 +53,7 @@ describe('SettingsLayout (#1374, #1321)', () => {
       '/settings/memory',
       '/settings/notifications',
       '/settings/voice',
+      '/settings/features',
       '/settings/models',
       '/settings/history',
       '/settings/computers',

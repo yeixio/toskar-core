@@ -304,5 +304,7 @@
   "CAMERA_UNREACHABLE": "Toskar hat unter dieser Adresse keine Kamera erreicht. Prüfe die Adresse und ob der HTTP- oder HTTPS-Server der Kamera eingeschaltet ist.",
   "CAMERA_SPEAKER_UNREACHABLE": "Toskar konnte den Lautsprecher der Kamera nicht erreichen, deshalb bekam der Besucher keine Antwort. Prüfe, ob die Kamera eingeschaltet und im selben Netzwerk wie dieser Computer ist.",
   "DOOR_NOT_ANSWERED": "Jemand war an der Tür, und Toskar konnte nicht antworten: {{detail}}",
-  "NODE_NOT_FOUND": "Kein gekoppelter Computer hat diese ID."
+  "NODE_NOT_FOUND": "Kein gekoppelter Computer hat diese ID.",
+  "FEATURE_UNKNOWN": "Diese Funktion kennt Toskar nicht.",
+  "FEATURE_SETUP_FAILED": "Ein Teil der Einrichtung konnte nicht starten: {{detail}}"
 }

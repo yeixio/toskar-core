@@ -49,6 +49,7 @@ export const settingsNav: SettingsNavGroup[] = [
     label: 'settings:nav.computer',
     min: 'admin',
     categories: [
+      { items: [{ path: 'features', label: 'sections.features', keywords: ['features.items.voice.title', 'features.items.pictures.title', 'features.items.meaning.title'] }] },
       {
         items: [
           {

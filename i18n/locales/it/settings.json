@@ -439,7 +439,8 @@
     "performance": "Prestazioni",
     "diagnostics": "Diagnostica",
     "developer": "Chiavi API",
-    "about": "Informazioni"
+    "about": "Informazioni",
+    "features": "Funzioni"
   },
   "nav": {
     "label": "Impostazioni",
@@ -448,5 +449,83 @@
     "search": "Cerca nelle impostazioni",
     "searchEmpty": "Nessuna impostazione corrisponde.",
     "back": "Impostazioni"
+  },
+  "features": {
+    "intro": "Cosa serve a ogni funzione su questo computer. Configura installa in un solo passaggio tutto ciò che manca a una funzione.",
+    "loading": "Controllo di cosa serve a ogni funzione…",
+    "status": {
+      "ready": "Pronta",
+      "needsSetup": "Da configurare",
+      "installing": "Configurazione"
+    },
+    "settingUp": "Configurazione…",
+    "settingUpPercent": "Configurazione… {{percent}}%",
+    "setUp": "Configura",
+    "setUpSize": "Configura ({{size}})",
+    "partly": "Configura ciò che può da qui. Il resto è elencato sopra.",
+    "willInstall": "{{what}}: installa {{name}}{{where}}",
+    "onComputer": " su {{computer}}",
+    "cannot": "{{what}}: {{why}}",
+    "needs": {
+      "chat": "Un modello di chat",
+      "tools": "Un modello che sa usare gli strumenti",
+      "vision": "Un modello che vede le immagini",
+      "embedding": "Un modello che cerca per significato",
+      "voice": "Una voce per parlare e ascoltare",
+      "images": "Un modello di immagini",
+      "video": "Un modello di clip",
+      "trainer": "Un computer che può addestrare",
+      "camera": "Una telecamera collegata"
+    },
+    "none": {
+      "chat": "Nessun modello di chat del catalogo entra nella memoria di questo computer. Un computer associato con più memoria potrebbe eseguirne uno.",
+      "tools": "Nessun modello che sa usare gli strumenti entra nella memoria di questo computer. Un computer associato con più memoria potrebbe eseguirne uno.",
+      "vision": "Nessun modello che vede le immagini entra nella memoria di questo computer. Un computer associato con più memoria potrebbe eseguirne uno.",
+      "embedding": "Nessun modello di embedding entra nella memoria di questo computer.",
+      "voice": "Parlare e ascoltare non si possono configurare su questo computer.",
+      "images": "Non si possono creare immagini su questo computer né su uno associato.",
+      "video": "Non si possono creare clip su questo computer né su uno associato.",
+      "trainer": "L'addestramento richiede un Mac con Apple Silicon o un computer con scheda grafica NVIDIA. Associane uno per addestrare lì.",
+      "camera": "Collega una telecamera, come una Reolink o una di Home Assistant."
+    },
+    "go": {
+      "camera": "Servizi collegati",
+      "trainer": "Computer",
+      "models": "Modelli"
+    },
+    "items": {
+      "voice": {
+        "title": "Conversazioni vocali",
+        "what": "Parla con Toskar ad alta voce, sul computer e sul telefono."
+      },
+      "door": {
+        "title": "Rispondere alla porta",
+        "what": "Toskar vede chi c'è davanti a una telecamera, ci parla e ti avvisa."
+      },
+      "pictures": {
+        "title": "Creare immagini",
+        "what": "Crea e modifica immagini da una descrizione."
+      },
+      "clips": {
+        "title": "Creare clip",
+        "what": "Crea brevi clip video da una descrizione o da un'immagine."
+      },
+      "see": {
+        "title": "Capire le immagini",
+        "what": "Risponde a domande su immagini e screenshot che invii."
+      },
+      "meaning": {
+        "title": "Cercare nelle conoscenze per significato",
+        "what": "Trova ciò che intendi nei tuoi file, non solo le parole digitate."
+      },
+      "automationTools": {
+        "title": "Automazioni con strumenti",
+        "what": "Automazioni che cercano sul web, leggono pagine o usano i tuoi servizi collegati."
+      },
+      "train": {
+        "title": "Addestrare la tua IA",
+        "what": "Insegna a un'IA il tuo materiale, su questo computer o su uno associato."
+      }
+    }
   }
 }

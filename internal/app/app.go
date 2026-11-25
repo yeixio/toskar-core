@@ -648,6 +648,8 @@ func New(opts Options) (*App, error) {
 		Transcribe:         a.transcribeRecording,
 		Voice:              a.voiceParts,
 		SpeechVoices:       a.speechVoices,
+		Features:           a.Features,
+		SetUpFeature:       a.SetUpFeature,
 		SetSpeechVoice:     a.setSpeechVoice,
 		InstallKitten:      a.installKitten,
 		RemoveKitten:       a.removeKitten,
