@@ -303,5 +303,7 @@
   "CAMERA_UNREACHABLE": "そのアドレスのカメラに接続できませんでした。アドレスと、カメラの HTTP または HTTPS サーバーがオンになっているかを確認してください。",
   "CAMERA_SPEAKER_UNREACHABLE": "Toskar がカメラのスピーカーに接続できなかったため、来訪者に応答できませんでした。カメラの電源が入っていて、このコンピュータと同じネットワークにあるか確認してください。",
   "DOOR_NOT_ANSWERED": "誰かが玄関に来ましたが、Toskar は応答できませんでした: {{detail}}",
-  "NODE_NOT_FOUND": "そのIDのペアリング済みコンピュータはありません。"
+  "NODE_NOT_FOUND": "そのIDのペアリング済みコンピュータはありません。",
+  "FEATURE_UNKNOWN": "Toskar はその機能を知りません。",
+  "FEATURE_SETUP_FAILED": "セットアップの一部を開始できませんでした: {{detail}}"
 }

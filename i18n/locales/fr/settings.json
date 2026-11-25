@@ -439,7 +439,8 @@
     "performance": "Performances",
     "diagnostics": "Diagnostics",
     "developer": "Clés API",
-    "about": "À propos"
+    "about": "À propos",
+    "features": "Fonctions"
   },
   "nav": {
     "label": "Paramètres",
@@ -448,5 +449,83 @@
     "search": "Rechercher dans les paramètres",
     "searchEmpty": "Aucun paramètre ne correspond.",
     "back": "Paramètres"
+  },
+  "features": {
+    "intro": "Ce dont chaque fonction a besoin sur cet ordinateur. Configurer installe en une étape tout ce qui manque encore à une fonction.",
+    "loading": "Vérification de ce dont chaque fonction a besoin…",
+    "status": {
+      "ready": "Prête",
+      "needsSetup": "À configurer",
+      "installing": "Configuration"
+    },
+    "settingUp": "Configuration…",
+    "settingUpPercent": "Configuration… {{percent}} %",
+    "setUp": "Configurer",
+    "setUpSize": "Configurer ({{size}})",
+    "partly": "Configure ce qui peut l'être d'ici. Le reste est indiqué ci-dessus.",
+    "willInstall": "{{what}} : installe {{name}}{{where}}",
+    "onComputer": " sur {{computer}}",
+    "cannot": "{{what}} : {{why}}",
+    "needs": {
+      "chat": "Un modèle de discussion",
+      "tools": "Un modèle capable d'utiliser des outils",
+      "vision": "Un modèle qui voit les images",
+      "embedding": "Un modèle qui cherche par le sens",
+      "voice": "Une voix pour parler et écouter",
+      "images": "Un modèle d'images",
+      "video": "Un modèle de clips",
+      "trainer": "Un ordinateur capable d'entraîner",
+      "camera": "Une caméra connectée"
+    },
+    "none": {
+      "chat": "Aucun modèle de discussion du catalogue ne tient dans la mémoire de cet ordinateur. Un ordinateur associé avec plus de mémoire pourrait en faire tourner un.",
+      "tools": "Aucun modèle capable d'utiliser des outils ne tient dans la mémoire de cet ordinateur. Un ordinateur associé avec plus de mémoire pourrait en faire tourner un.",
+      "vision": "Aucun modèle qui voit les images ne tient dans la mémoire de cet ordinateur. Un ordinateur associé avec plus de mémoire pourrait en faire tourner un.",
+      "embedding": "Aucun modèle d'embeddings ne tient dans la mémoire de cet ordinateur.",
+      "voice": "Parler et écouter ne peuvent pas être configurés sur cet ordinateur.",
+      "images": "Impossible de créer des images sur cet ordinateur ou sur un ordinateur associé.",
+      "video": "Impossible de créer des clips sur cet ordinateur ou sur un ordinateur associé.",
+      "trainer": "L'entraînement demande un Mac avec Apple Silicon ou un ordinateur avec une carte graphique NVIDIA. Associez-en un pour entraîner dessus.",
+      "camera": "Connectez une caméra, par exemple une Reolink ou une caméra de Home Assistant."
+    },
+    "go": {
+      "camera": "Services connectés",
+      "trainer": "Ordinateurs",
+      "models": "Modèles"
+    },
+    "items": {
+      "voice": {
+        "title": "Conversations vocales",
+        "what": "Parlez à Toskar à voix haute, sur l'ordinateur et le téléphone."
+      },
+      "door": {
+        "title": "Répondre à la porte",
+        "what": "Toskar voit qui se présente devant une caméra, lui parle et vous prévient."
+      },
+      "pictures": {
+        "title": "Créer des images",
+        "what": "Créer et modifier des images à partir d'une description."
+      },
+      "clips": {
+        "title": "Créer des clips",
+        "what": "Créer de courts clips vidéo à partir d'une description ou d'une image."
+      },
+      "see": {
+        "title": "Comprendre les images",
+        "what": "Répondre aux questions sur les images et captures d'écran que vous envoyez."
+      },
+      "meaning": {
+        "title": "Chercher dans les connaissances par le sens",
+        "what": "Trouver ce que vous voulez dire dans vos fichiers, pas seulement les mots tapés."
+      },
+      "automationTools": {
+        "title": "Automatisations avec outils",
+        "what": "Des automatisations qui cherchent sur le web, lisent des pages ou utilisent vos services connectés."
+      },
+      "train": {
+        "title": "Entraîner votre propre IA",
+        "what": "Apprenez votre propre contenu à une IA, sur cet ordinateur ou un ordinateur associé."
+      }
+    }
   }
 }

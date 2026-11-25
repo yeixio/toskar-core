@@ -439,7 +439,8 @@
     "performance": "Desempenho",
     "diagnostics": "Diagnóstico",
     "developer": "Chaves de API",
-    "about": "Sobre"
+    "about": "Sobre",
+    "features": "Recursos"
   },
   "nav": {
     "label": "Configurações",
@@ -448,5 +449,83 @@
     "search": "Pesquisar configurações",
     "searchEmpty": "Nenhuma configuração corresponde.",
     "back": "Configurações"
+  },
+  "features": {
+    "intro": "O que cada recurso precisa neste computador. Configurar instala em um passo tudo o que ainda falta a um recurso.",
+    "loading": "Verificando o que cada recurso precisa…",
+    "status": {
+      "ready": "Pronto",
+      "needsSetup": "Precisa de configuração",
+      "installing": "Configurando"
+    },
+    "settingUp": "Configurando…",
+    "settingUpPercent": "Configurando… {{percent}}%",
+    "setUp": "Configurar",
+    "setUpSize": "Configurar ({{size}})",
+    "partly": "Configura o que dá daqui. O restante está listado acima.",
+    "willInstall": "{{what}}: instala {{name}}{{where}}",
+    "onComputer": " em {{computer}}",
+    "cannot": "{{what}}: {{why}}",
+    "needs": {
+      "chat": "Um modelo de chat",
+      "tools": "Um modelo que usa ferramentas",
+      "vision": "Um modelo que vê imagens",
+      "embedding": "Um modelo que busca pelo significado",
+      "voice": "Uma voz para falar e ouvir",
+      "images": "Um modelo de imagens",
+      "video": "Um modelo de clipes",
+      "trainer": "Um computador que possa treinar",
+      "camera": "Uma câmera conectada"
+    },
+    "none": {
+      "chat": "Nenhum modelo de chat do catálogo cabe na memória deste computador. Um computador pareado com mais memória poderia rodar um.",
+      "tools": "Nenhum modelo que usa ferramentas cabe na memória deste computador. Um computador pareado com mais memória poderia rodar um.",
+      "vision": "Nenhum modelo que vê imagens cabe na memória deste computador. Um computador pareado com mais memória poderia rodar um.",
+      "embedding": "Nenhum modelo de embeddings cabe na memória deste computador.",
+      "voice": "Falar e ouvir não podem ser configurados neste computador.",
+      "images": "Não é possível criar imagens neste computador nem em um pareado.",
+      "video": "Não é possível criar clipes neste computador nem em um pareado.",
+      "trainer": "Treinar precisa de um Mac com Apple Silicon ou um computador com placa de vídeo NVIDIA. Pareie um para treinar nele.",
+      "camera": "Conecte uma câmera, como uma Reolink ou uma do Home Assistant."
+    },
+    "go": {
+      "camera": "Serviços conectados",
+      "trainer": "Computadores",
+      "models": "Modelos"
+    },
+    "items": {
+      "voice": {
+        "title": "Conversas por voz",
+        "what": "Converse com o Toskar em voz alta, no computador e no celular."
+      },
+      "door": {
+        "title": "Atender a porta",
+        "what": "O Toskar vê quem está diante de uma câmera, conversa com a pessoa e avisa você."
+      },
+      "pictures": {
+        "title": "Criar imagens",
+        "what": "Crie e edite imagens a partir de uma descrição."
+      },
+      "clips": {
+        "title": "Criar clipes",
+        "what": "Crie clipes de vídeo curtos a partir de uma descrição ou de uma imagem."
+      },
+      "see": {
+        "title": "Entender imagens",
+        "what": "Responde perguntas sobre imagens e capturas de tela que você envia."
+      },
+      "meaning": {
+        "title": "Buscar conhecimento pelo significado",
+        "what": "Encontre o que você quer dizer nos seus arquivos, não só as palavras digitadas."
+      },
+      "automationTools": {
+        "title": "Automações com ferramentas",
+        "what": "Automações que pesquisam na web, leem páginas ou usam seus serviços conectados."
+      },
+      "train": {
+        "title": "Treinar sua própria IA",
+        "what": "Ensine seu próprio material a uma IA, neste computador ou em um pareado."
+      }
+    }
   }
 }

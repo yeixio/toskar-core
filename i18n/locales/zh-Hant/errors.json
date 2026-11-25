@@ -303,5 +303,7 @@
   "CAMERA_UNREACHABLE": "Toskar 無法連線到該位址上的攝影機。請檢查位址，以及攝影機的 HTTP 或 HTTPS 伺服器是否已開啟。",
   "CAMERA_SPEAKER_UNREACHABLE": "Toskar 無法連線到攝影機的喇叭，因此沒有回應訪客。請檢查攝影機是否已開啟，並與這台電腦在同一網路中。",
   "DOOR_NOT_ANSWERED": "有人來到門口，但 Toskar 無法回應：{{detail}}",
-  "NODE_NOT_FOUND": "沒有已配對的電腦使用這個 ID。"
+  "NODE_NOT_FOUND": "沒有已配對的電腦使用這個 ID。",
+  "FEATURE_UNKNOWN": "Toskar 不認識這個功能。",
+  "FEATURE_SETUP_FAILED": "部分設定無法開始：{{detail}}"
 }

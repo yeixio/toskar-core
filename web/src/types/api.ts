@@ -1970,6 +1970,35 @@ export interface VoiceSettings {
 }
 
 /** A kind of model nothing installed does: chat, to answer in voice mode, vision, to look at a camera, or both in one model (#1343). model is empty when none fits. */
+/** What one feature needs, and what would set it up (#1355, contract 1.119). */
+export interface FeatureNeed {
+  need: 'chat' | 'tools' | 'vision' | 'embedding' | 'voice' | 'images' | 'video' | 'trainer' | 'camera'
+  ready: boolean
+  /** How setup installs it; absent when nothing here can. */
+  install?: 'model' | 'voice' | 'images' | 'video'
+  option?: string
+  name?: string
+  size_bytes?: number
+  /** A paired computer it is set up on. */
+  node_id?: string
+  node_name?: string
+  installing?: boolean
+  percent?: number
+  /** Why it can't be set up here, in this computer's words. */
+  detail?: string
+}
+
+export type FeatureId = 'voice' | 'door' | 'pictures' | 'clips' | 'see' | 'meaning' | 'automationTools' | 'train'
+
+/** A feature and whether it works here now (#1355). */
+export interface Feature {
+  id: FeatureId
+  ready: boolean
+  needs: FeatureNeed[]
+  setup_bytes: number
+  installing: boolean
+}
+
 export interface ModelNeed {
   ability: 'chat' | 'vision' | 'both'
   model?: string

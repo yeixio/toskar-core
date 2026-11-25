@@ -158,6 +158,7 @@ A left rail on wide screens and a grouped list at 390px, with a search over sett
 
 | Category | Contents |
 | --- | --- |
+| Features | Each feature, Ready or Needs setup, and one Set up that installs what it still needs (#1355) |
 | Models & AI | Default profile, Download models, Storage limit, model and data folders; Advanced: Run chats on, Model lifecycle |
 | Chats & history | Save chats, save tasks, compact long chats, chat cleanup (destructive, set apart) |
 | Network & devices | Computer name, Computers (pair, deploy, join), Find other computers, Local network access, Access from anywhere, Devices connected with a code. This settles #1244 |

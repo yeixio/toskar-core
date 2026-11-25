@@ -430,7 +430,8 @@
     "performance": "Performance",
     "diagnostics": "Diagnostics",
     "developer": "API keys",
-    "about": "About"
+    "about": "About",
+    "features": "Features"
   },
   "nav": {
     "label": "Settings",
@@ -439,5 +440,83 @@
     "search": "Search settings",
     "searchEmpty": "No setting matches that.",
     "back": "Settings"
+  },
+  "features": {
+    "intro": "What each feature needs on this computer. Set up installs everything a feature still needs in one step.",
+    "loading": "Checking what each feature needs…",
+    "status": {
+      "ready": "Ready",
+      "needsSetup": "Needs setup",
+      "installing": "Setting up"
+    },
+    "settingUp": "Setting up…",
+    "settingUpPercent": "Setting up… {{percent}}%",
+    "setUp": "Set up",
+    "setUpSize": "Set up ({{size}})",
+    "partly": "Sets up what it can from here. The rest is listed above.",
+    "willInstall": "{{what}}: installs {{name}}{{where}}",
+    "onComputer": " on {{computer}}",
+    "cannot": "{{what}}: {{why}}",
+    "needs": {
+      "chat": "A chat model",
+      "tools": "A model that can use tools",
+      "vision": "A model that sees pictures",
+      "embedding": "A model that searches by meaning",
+      "voice": "A voice to speak and listen",
+      "images": "A picture model",
+      "video": "A clip model",
+      "trainer": "A computer that can train",
+      "camera": "A connected camera"
+    },
+    "none": {
+      "chat": "No chat model in the catalog fits this computer's memory. A paired computer with more memory could run one.",
+      "tools": "No model that can use tools fits this computer's memory. A paired computer with more memory could run one.",
+      "vision": "No model that sees pictures fits this computer's memory. A paired computer with more memory could run one.",
+      "embedding": "No embedding model fits this computer's memory.",
+      "voice": "Speaking and listening can't be set up on this computer.",
+      "images": "Pictures can't be made on this computer or a paired one.",
+      "video": "Clips can't be made on this computer or a paired one.",
+      "trainer": "Training needs a Mac with Apple Silicon or a computer with an NVIDIA graphics card. Pair one to train on it.",
+      "camera": "Connect a camera, such as a Reolink camera or one in Home Assistant."
+    },
+    "go": {
+      "camera": "Connected services",
+      "trainer": "Computers",
+      "models": "Models"
+    },
+    "items": {
+      "voice": {
+        "title": "Voice conversations",
+        "what": "Talk with Toskar out loud, on the computer and the phone."
+      },
+      "door": {
+        "title": "Answer the door",
+        "what": "Toskar sees who is at a camera, talks with them, and tells you."
+      },
+      "pictures": {
+        "title": "Make pictures",
+        "what": "Create and edit pictures from a description."
+      },
+      "clips": {
+        "title": "Make clips",
+        "what": "Create short video clips from a description or a picture."
+      },
+      "see": {
+        "title": "Understand pictures",
+        "what": "Answer questions about pictures and screenshots you send."
+      },
+      "meaning": {
+        "title": "Search knowledge by meaning",
+        "what": "Find what you mean in your files, not only the words you typed."
+      },
+      "automationTools": {
+        "title": "Automations that use tools",
+        "what": "Automations that search the web, read pages, or use your connected services."
+      },
+      "train": {
+        "title": "Train your own AI",
+        "what": "Teach an AI your own material, on this computer or a paired one."
+      }
+    }
   }
 }

@@ -29,6 +29,7 @@ import (
 	"github.com/yeixio/toskar-core/internal/connectors"
 	"github.com/yeixio/toskar-core/internal/diagnostics"
 	"github.com/yeixio/toskar-core/internal/events"
+	"github.com/yeixio/toskar-core/internal/features"
 	"github.com/yeixio/toskar-core/internal/gjallarhorn"
 	"github.com/yeixio/toskar-core/internal/imagegen"
 	"github.com/yeixio/toskar-core/internal/logs"
@@ -171,6 +172,10 @@ type Dependencies struct {
 	// install and each language's voice. SetSpeechVoice chooses a
 	// language's voice, "" for automatic; InstallKitten starts installing
 	// Kitten in the background, and RemoveKitten deletes it. Admins only.
+	// Features are one-step setup's check (#1355): each feature and what it
+	// still needs here; SetUpFeature starts installing all of it.
+	Features       func(ctx context.Context) []features.Feature
+	SetUpFeature   func(ctx context.Context, id string) (features.Feature, error)
 	SpeechVoices   func(ctx context.Context) (speech.VoiceSettings, error)
 	SetSpeechVoice func(ctx context.Context, language, voice string) error
 	InstallKitten  func(ctx context.Context) error
@@ -511,6 +516,7 @@ func (s *Server) routes() {
 	s.cacheRoutes(api)
 	s.trainingRoutes(api)
 	s.speechRoutes(api)
+	s.featureRoutes(api)
 	s.imageRoutes(api)
 
 	s.mcpRootRoutes(s.router)
