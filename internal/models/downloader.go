@@ -5,8 +5,10 @@ import (
 	"crypto/sha256"
 	"database/sql"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"io"
+	"io/fs"
 	"log/slog"
 	"net/http"
 	"os"
@@ -249,6 +251,9 @@ func (d *Downloader) fetch(ctx, dctx context.Context, modelID, url, wantSum, tem
 
 	sum := hex.EncodeToString(hasher.Sum(nil))
 	if wantSum != "" && sum != wantSum {
+		if sum, n, ok := finishedElsewhere(finalPath, wantSum); ok {
+			return sum, n, nil
+		}
 		_ = os.Remove(tempPath)
 		return "", 0, fmt.Errorf("sha256 mismatch: expected %s got %s", wantSum, sum)
 	}
@@ -256,9 +261,39 @@ func (d *Downloader) fetch(ctx, dctx context.Context, modelID, url, wantSum, tem
 		return "", 0, err
 	}
 	if err := os.Rename(tempPath, finalPath); err != nil {
+		if errors.Is(err, fs.ErrNotExist) {
+			if sum, n, ok := finishedElsewhere(finalPath, wantSum); ok {
+				return sum, n, nil
+			}
+		}
 		return "", 0, err
 	}
 	return sum, downloaded, nil
+}
+
+// finishedElsewhere is whether another Toskar sharing this models folder
+// has put the same file in place first (#1395). Toskars on one computer,
+// such as CI jobs on a self-hosted runner, can share a models folder, and
+// with it the partial file one of them renames away while the other still
+// writes to it. The file counts when its SHA-256 is the one wanted, or,
+// with none to check, when it's there and not empty.
+func finishedElsewhere(finalPath, wantSum string) (string, uint64, bool) {
+	f, err := os.Open(finalPath)
+	if err != nil {
+		return "", 0, false
+	}
+	defer f.Close()
+	h := sha256.New()
+	n, err := io.Copy(h, f)
+	if err != nil || n == 0 {
+		return "", 0, false
+	}
+	sum := hex.EncodeToString(h.Sum(nil))
+	if wantSum != "" && sum != wantSum {
+		return "", 0, false
+	}
+	slog.Info("another Toskar sharing the models folder installed this file first", "path", finalPath)
+	return sum, uint64(n), true
 }
 
 func (d *Downloader) Cancel(modelID string) {
