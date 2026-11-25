@@ -21,7 +21,8 @@
     "memory": "記憶",
     "personalization": "個人化",
     "automation": "自動化",
-    "privacy": "隱私"
+    "privacy": "隱私",
+    "voice": "語音"
   },
   "units": {
     "megabytes": "{{value}} MB",
@@ -472,7 +473,9 @@
       "programming": "程式設計",
       "research": "研究",
       "custom": "自訂"
-    }
+    },
+    "readAloud": "朗讀",
+    "stopReading": "停止朗讀"
   },
   "effort": {
     "title": "投入程度",
@@ -1005,7 +1008,9 @@
     "memoryIntro": "你的電腦從那裡的聊天中記住的內容。關閉某則記憶即可停止使用，也可以刪除。此裝置為自己的聊天記住的內容在「設定」的「在此裝置上聊天」中。",
     "searchMemories": "搜尋記憶",
     "noMatch": "沒有符合的記憶。",
-    "personalizationIntro": "電腦上的回答應該是什麼樣子，適用於那裡的每個聊天和自動化。"
+    "personalizationIntro": "電腦上的回答應該是什麼樣子，適用於那裡的每個聊天和自動化。",
+    "voice": "語音",
+    "voiceMeta": "朗讀每種語言所用的聲音"
   },
   "privacy": {
     "title": "你的資料保持私密",
@@ -1287,5 +1292,14 @@
     "send": "傳送(無需帳號)",
     "sent": "已傳送。每個結果在加入公開結果前都會經過我們檢查。",
     "sendFailed": "無法傳送。你可以改為透過 GitHub 傳送。"
+  },
+  "voice": {
+    "title": "聲音",
+    "intro": "你的電腦朗讀每種語言所用的聲音：在車上、朗讀回答時、語音模式和門鈴中使用。",
+    "kittenInstalled": "你的電腦已安裝 Kitten TTS 2 mini，所以這裡也有它的聲音。",
+    "kittenOnComputer": "安裝 Kitten TTS 2 mini 可獲得更自然的聲音。請在電腦的 設定 › 語音 中安裝。",
+    "adminOnly": "只有電腦的管理員可以選擇聲音。",
+    "automatic": "自動（{{voice}}）",
+    "standard": "標準"
   }
 }

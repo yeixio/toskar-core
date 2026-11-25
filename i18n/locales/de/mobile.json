@@ -21,7 +21,8 @@
     "memory": "Gedächtnis",
     "personalization": "Personalisierung",
     "automation": "Automation",
-    "privacy": "Datenschutz"
+    "privacy": "Datenschutz",
+    "voice": "Stimme"
   },
   "units": {
     "megabytes": "{{value}} MB",
@@ -477,7 +478,9 @@
       "programming": "Programmieren",
       "research": "Recherche",
       "custom": "Benutzerdefiniert"
-    }
+    },
+    "readAloud": "Vorlesen",
+    "stopReading": "Vorlesen beenden"
   },
   "effort": {
     "title": "Aufwand",
@@ -1019,7 +1022,9 @@
     "memoryIntro": "Was sich dein Computer aus deinen Chats dort merkt. Schalte eine Erinnerung aus, damit sie nicht mehr genutzt wird, oder lösche sie. Was sich dieses Gerät für seine eigenen Chats merkt, findest du in den Einstellungen unter Chat auf diesem Gerät.",
     "searchMemories": "Erinnerungen durchsuchen",
     "noMatch": "Keine Erinnerung passt.",
-    "personalizationIntro": "Wie Antworten deines Computers aussehen sollen, in jedem Chat und jeder Automation dort."
+    "personalizationIntro": "Wie Antworten deines Computers aussehen sollen, in jedem Chat und jeder Automation dort.",
+    "voice": "Stimme",
+    "voiceMeta": "Die Stimme, in der jede Sprache vorgelesen wird"
   },
   "privacy": {
     "title": "Deine Daten bleiben privat",
@@ -1307,5 +1312,14 @@
     "send": "Senden, ohne Konto",
     "sent": "Gesendet. Wir prüfen jedes Ergebnis, bevor es in die öffentlichen Ergebnisse kommt.",
     "sendFailed": "Senden fehlgeschlagen. Du kannst es stattdessen über GitHub senden."
+  },
+  "voice": {
+    "title": "Stimmen",
+    "intro": "Die Stimme, in der dein Computer jede Sprache vorliest: im Auto, wenn du dir eine Antwort vorlesen lässt, im Sprachmodus und an der Türklingel.",
+    "kittenInstalled": "Kitten TTS 2 mini ist auf deinem Computer installiert, deshalb gibt es hier auch seine Stimmen.",
+    "kittenOnComputer": "Natürlichere Stimmen gibt es mit Kitten TTS 2 mini. Installiere es auf deinem Computer unter Einstellungen › Stimme.",
+    "adminOnly": "Nur die Admins deines Computers können Stimmen auswählen.",
+    "automatic": "Automatisch ({{voice}})",
+    "standard": "Standard"
   }
 }
