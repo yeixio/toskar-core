@@ -22,7 +22,8 @@
     "personalization": "個人化",
     "automation": "自動化",
     "privacy": "隱私",
-    "voice": "語音"
+    "voice": "語音",
+    "features": "功能"
   },
   "units": {
     "megabytes": "{{value}} MB",
@@ -1012,7 +1013,9 @@
     "noMatch": "沒有符合的記憶。",
     "personalizationIntro": "電腦上的回答應該是什麼樣子，適用於那裡的每個聊天和自動化。",
     "voice": "語音",
-    "voiceMeta": "朗讀每種語言所用的聲音"
+    "voiceMeta": "朗讀每種語言所用的聲音",
+    "features": "功能",
+    "featuresMeta": "每項功能所需的內容，一步設定好"
   },
   "privacy": {
     "title": "你的資料保持私密",
@@ -1335,5 +1338,85 @@
     },
     "fullAccess": "若要在這裡向 Toskar 提問，請在設定中為 Toskar 鍵盤開啟「允許完整取用」。",
     "noComputer": "若要從鍵盤提問，請在 Toskar App 中連接一台電腦。"
+  },
+  "features": {
+    "intro": "每個功能在這台電腦上需要什麼。「設定」會一步裝好功能還缺的所有東西。",
+    "loading": "正在檢查每個功能需要什麼…",
+    "status": {
+      "ready": "已就緒",
+      "needsSetup": "需要設定",
+      "installing": "正在設定"
+    },
+    "settingUp": "正在設定…",
+    "settingUpPercent": "正在設定… {{percent}}%",
+    "setUp": "設定",
+    "setUpSize": "設定（{{size}}）",
+    "partly": "會設定這裡能裝的部分，其餘的列在上方。",
+    "willInstall": "{{what}}：安裝 {{name}}{{where}}",
+    "onComputer": "（在 {{computer}} 上）",
+    "cannot": "{{what}}：{{why}}",
+    "needs": {
+      "chat": "一個聊天模型",
+      "tools": "一個能使用工具的模型",
+      "vision": "一個能看圖片的模型",
+      "embedding": "一個依含義搜尋的模型",
+      "voice": "一個用來說話和聆聽的語音",
+      "images": "一個圖片模型",
+      "video": "一個短片模型",
+      "trainer": "一台能訓練的電腦",
+      "camera": "一台已連接的攝影機"
+    },
+    "none": {
+      "chat": "目錄中沒有適合這台電腦記憶體的聊天模型。記憶體更大的已配對電腦可以執行。",
+      "tools": "沒有適合這台電腦記憶體、能使用工具的模型。記憶體更大的已配對電腦可以執行。",
+      "vision": "沒有適合這台電腦記憶體、能看圖片的模型。記憶體更大的已配對電腦可以執行。",
+      "embedding": "沒有適合這台電腦記憶體的嵌入模型。",
+      "voice": "這台電腦上無法設定說話和聆聽。",
+      "images": "這台電腦和已配對的電腦都無法產生圖片。",
+      "video": "這台電腦和已配對的電腦都無法產生短片。",
+      "trainer": "訓練需要搭載 Apple Silicon 的 Mac，或有 NVIDIA 顯示卡的電腦。配對一台即可在上面訓練。",
+      "camera": "連接一台攝影機，例如 Reolink 攝影機或 Home Assistant 中的攝影機。"
+    },
+    "go": {
+      "camera": "已連接的服務",
+      "trainer": "電腦",
+      "models": "模型"
+    },
+    "items": {
+      "voice": {
+        "title": "語音對話",
+        "what": "在電腦和手機上與 Toskar 出聲交談。"
+      },
+      "door": {
+        "title": "應門",
+        "what": "Toskar 看到攝影機前是誰，與對方交談並通知你。"
+      },
+      "pictures": {
+        "title": "產生圖片",
+        "what": "依描述產生和編輯圖片。"
+      },
+      "clips": {
+        "title": "產生短片",
+        "what": "依描述或圖片產生短影片。"
+      },
+      "see": {
+        "title": "理解圖片",
+        "what": "回答關於你傳送的圖片和截圖的問題。"
+      },
+      "meaning": {
+        "title": "依含義搜尋知識",
+        "what": "在檔案中找到你想表達的內容，而不只是你輸入的字詞。"
+      },
+      "automationTools": {
+        "title": "使用工具的自動化",
+        "what": "會搜尋網頁、閱讀頁面或使用已連接服務的自動化。"
+      },
+      "train": {
+        "title": "訓練你自己的 AI",
+        "what": "在這台電腦或已配對的電腦上，用你的資料教會 AI。"
+      }
+    },
+    "adminOnly": "只有電腦的管理員才能設定功能。",
+    "failed": "無法設定：{{why}}"
   }
 }

@@ -22,7 +22,8 @@
     "personalization": "Personalisierung",
     "automation": "Automation",
     "privacy": "Datenschutz",
-    "voice": "Stimme"
+    "voice": "Stimme",
+    "features": "Funktionen"
   },
   "units": {
     "megabytes": "{{value}} MB",
@@ -1026,7 +1027,9 @@
     "noMatch": "Keine Erinnerung passt.",
     "personalizationIntro": "Wie Antworten deines Computers aussehen sollen, in jedem Chat und jeder Automation dort.",
     "voice": "Stimme",
-    "voiceMeta": "Die Stimme, in der jede Sprache vorgelesen wird"
+    "voiceMeta": "Die Stimme, in der jede Sprache vorgelesen wird",
+    "features": "Funktionen",
+    "featuresMeta": "Was jede Funktion braucht, in einem Schritt eingerichtet"
   },
   "privacy": {
     "title": "Deine Daten bleiben privat",
@@ -1355,5 +1358,85 @@
     },
     "fullAccess": "Erlaube in den Einstellungen vollen Zugriff für die Toskar-Tastatur, um Toskar von hier aus zu fragen.",
     "noComputer": "Verbinde in der Toskar-App einen Computer, um über die Tastatur zu fragen."
+  },
+  "features": {
+    "intro": "Was jede Funktion auf diesem Computer braucht. „Einrichten“ installiert alles, was einer Funktion noch fehlt, in einem Schritt.",
+    "loading": "Prüfe, was jede Funktion braucht…",
+    "status": {
+      "ready": "Bereit",
+      "needsSetup": "Einrichtung nötig",
+      "installing": "Wird eingerichtet"
+    },
+    "settingUp": "Wird eingerichtet…",
+    "settingUpPercent": "Wird eingerichtet… {{percent}} %",
+    "setUp": "Einrichten",
+    "setUpSize": "Einrichten ({{size}})",
+    "partly": "Richtet ein, was von hier aus geht. Der Rest steht oben.",
+    "willInstall": "{{what}}: installiert {{name}}{{where}}",
+    "onComputer": " auf {{computer}}",
+    "cannot": "{{what}}: {{why}}",
+    "needs": {
+      "chat": "Ein Chat-Modell",
+      "tools": "Ein Modell, das Werkzeuge nutzen kann",
+      "vision": "Ein Modell, das Bilder sieht",
+      "embedding": "Ein Modell für die Suche nach Bedeutung",
+      "voice": "Eine Stimme zum Sprechen und Zuhören",
+      "images": "Ein Bildmodell",
+      "video": "Ein Clip-Modell",
+      "trainer": "Ein Computer, der trainieren kann",
+      "camera": "Eine verbundene Kamera"
+    },
+    "none": {
+      "chat": "Kein Chat-Modell im Katalog passt in den Speicher dieses Computers. Ein gekoppelter Computer mit mehr Speicher könnte eines ausführen.",
+      "tools": "Kein Modell, das Werkzeuge nutzen kann, passt in den Speicher dieses Computers. Ein gekoppelter Computer mit mehr Speicher könnte eines ausführen.",
+      "vision": "Kein Modell, das Bilder sieht, passt in den Speicher dieses Computers. Ein gekoppelter Computer mit mehr Speicher könnte eines ausführen.",
+      "embedding": "Kein Embedding-Modell passt in den Speicher dieses Computers.",
+      "voice": "Sprechen und Zuhören lassen sich auf diesem Computer nicht einrichten.",
+      "images": "Bilder lassen sich weder auf diesem noch auf einem gekoppelten Computer erstellen.",
+      "video": "Clips lassen sich weder auf diesem noch auf einem gekoppelten Computer erstellen.",
+      "trainer": "Training braucht einen Mac mit Apple Silicon oder einen Computer mit NVIDIA-Grafikkarte. Kopple einen, um darauf zu trainieren.",
+      "camera": "Verbinde eine Kamera, etwa eine Reolink-Kamera oder eine aus Home Assistant."
+    },
+    "go": {
+      "camera": "Verbundene Dienste",
+      "trainer": "Computer",
+      "models": "Modelle"
+    },
+    "items": {
+      "voice": {
+        "title": "Sprachgespräche",
+        "what": "Sprich laut mit Toskar, am Computer und am Telefon."
+      },
+      "door": {
+        "title": "An der Tür antworten",
+        "what": "Toskar sieht, wer an einer Kamera ist, spricht mit der Person und sagt dir Bescheid."
+      },
+      "pictures": {
+        "title": "Bilder erstellen",
+        "what": "Bilder aus einer Beschreibung erstellen und bearbeiten."
+      },
+      "clips": {
+        "title": "Clips erstellen",
+        "what": "Kurze Videoclips aus einer Beschreibung oder einem Bild erstellen."
+      },
+      "see": {
+        "title": "Bilder verstehen",
+        "what": "Fragen zu Bildern und Bildschirmfotos beantworten, die du schickst."
+      },
+      "meaning": {
+        "title": "Wissen nach Bedeutung durchsuchen",
+        "what": "Finde, was du meinst, in deinen Dateien, nicht nur die eingegebenen Wörter."
+      },
+      "automationTools": {
+        "title": "Automationen mit Werkzeugen",
+        "what": "Automationen, die im Web suchen, Seiten lesen oder deine verbundenen Dienste nutzen."
+      },
+      "train": {
+        "title": "Eigene KI trainieren",
+        "what": "Bring einer KI dein eigenes Material bei, auf diesem oder einem gekoppelten Computer."
+      }
+    },
+    "adminOnly": "Nur die Admins deines Computers können Funktionen einrichten.",
+    "failed": "Konnte nicht eingerichtet werden: {{why}}"
   }
 }

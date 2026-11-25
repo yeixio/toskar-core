@@ -22,7 +22,8 @@
     "personalization": "Personalización",
     "automation": "Automatización",
     "privacy": "Privacidad",
-    "voice": "Voz"
+    "voice": "Voz",
+    "features": "Funciones"
   },
   "units": {
     "megabytes": "{{value}} MB",
@@ -1040,7 +1041,9 @@
     "noMatch": "Ningún recuerdo coincide.",
     "personalizationIntro": "Cómo deben verse las respuestas de tu computadora, en cada chat y automatización allí.",
     "voice": "Voz",
-    "voiceMeta": "La voz en la que se lee cada idioma"
+    "voiceMeta": "La voz en la que se lee cada idioma",
+    "features": "Funciones",
+    "featuresMeta": "Lo que necesita cada función, configurado en un paso"
   },
   "privacy": {
     "title": "Tus datos siguen siendo privados",
@@ -1376,5 +1379,85 @@
     },
     "fullAccess": "Permite el acceso total al teclado de Toskar en Ajustes para preguntar a Toskar desde aquí.",
     "noComputer": "Conecta una computadora en la app de Toskar para preguntar desde el teclado."
+  },
+  "features": {
+    "intro": "Lo que necesita cada función en este computador. Configurar instala en un paso todo lo que le falta a una función.",
+    "loading": "Comprobando lo que necesita cada función…",
+    "status": {
+      "ready": "Lista",
+      "needsSetup": "Necesita configuración",
+      "installing": "Configurando"
+    },
+    "settingUp": "Configurando…",
+    "settingUpPercent": "Configurando… {{percent}} %",
+    "setUp": "Configurar",
+    "setUpSize": "Configurar ({{size}})",
+    "partly": "Configura lo que puede desde aquí. El resto aparece arriba.",
+    "willInstall": "{{what}}: instala {{name}}{{where}}",
+    "onComputer": " en {{computer}}",
+    "cannot": "{{what}}: {{why}}",
+    "needs": {
+      "chat": "Un modelo de chat",
+      "tools": "Un modelo que pueda usar herramientas",
+      "vision": "Un modelo que vea imágenes",
+      "embedding": "Un modelo que busque por significado",
+      "voice": "Una voz para hablar y escuchar",
+      "images": "Un modelo de imágenes",
+      "video": "Un modelo de clips",
+      "trainer": "Un computador que pueda entrenar",
+      "camera": "Una cámara conectada"
+    },
+    "none": {
+      "chat": "Ningún modelo de chat del catálogo cabe en la memoria de este computador. Un computador emparejado con más memoria podría ejecutar uno.",
+      "tools": "Ningún modelo que use herramientas cabe en la memoria de este computador. Un computador emparejado con más memoria podría ejecutar uno.",
+      "vision": "Ningún modelo que vea imágenes cabe en la memoria de este computador. Un computador emparejado con más memoria podría ejecutar uno.",
+      "embedding": "Ningún modelo de embeddings cabe en la memoria de este computador.",
+      "voice": "Hablar y escuchar no se pueden configurar en este computador.",
+      "images": "No se pueden crear imágenes en este computador ni en uno emparejado.",
+      "video": "No se pueden crear clips en este computador ni en uno emparejado.",
+      "trainer": "Entrenar necesita un Mac con Apple Silicon o un computador con tarjeta gráfica NVIDIA. Empareja uno para entrenar en él.",
+      "camera": "Conecta una cámara, como una Reolink o una de Home Assistant."
+    },
+    "go": {
+      "camera": "Servicios conectados",
+      "trainer": "Computadores",
+      "models": "Modelos"
+    },
+    "items": {
+      "voice": {
+        "title": "Conversaciones por voz",
+        "what": "Habla con Toskar en voz alta, en el computador y en el teléfono."
+      },
+      "door": {
+        "title": "Atender la puerta",
+        "what": "Toskar ve quién está ante una cámara, habla con esa persona y te avisa."
+      },
+      "pictures": {
+        "title": "Crear imágenes",
+        "what": "Crea y edita imágenes a partir de una descripción."
+      },
+      "clips": {
+        "title": "Crear clips",
+        "what": "Crea clips de video cortos a partir de una descripción o una imagen."
+      },
+      "see": {
+        "title": "Entender imágenes",
+        "what": "Responde preguntas sobre las imágenes y capturas que envías."
+      },
+      "meaning": {
+        "title": "Buscar conocimiento por significado",
+        "what": "Encuentra lo que quieres decir en tus archivos, no solo las palabras que escribiste."
+      },
+      "automationTools": {
+        "title": "Automatizaciones con herramientas",
+        "what": "Automatizaciones que buscan en la web, leen páginas o usan tus servicios conectados."
+      },
+      "train": {
+        "title": "Entrenar tu propia IA",
+        "what": "Enseña a una IA tu propio material, en este computador o en uno emparejado."
+      }
+    },
+    "adminOnly": "Solo los administradores de tu computadora pueden configurar funciones.",
+    "failed": "No se pudo configurar: {{why}}"
   }
 }
