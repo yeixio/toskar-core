@@ -377,6 +377,8 @@ var deviceRoutes = map[string]bool{
 	"GET /api/v1/automations":                          true,
 	"GET /api/v1/automations/{id}":                     true,
 	"GET /api/v1/automations/{id}/runs":                true,
+	"DELETE /api/v1/automations/{id}/runs":             true,
+	"DELETE /api/v1/automations/{id}/runs/{run_id}":    true,
 	"POST /api/v1/automations/{id}/run":                true,
 	"POST /api/v1/automations/{id}/pause":              true,
 	"POST /api/v1/automations/{id}/resume":             true,

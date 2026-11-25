@@ -58,7 +58,9 @@
     "use": "Dieses Setup verwenden",
     "skip": "Später",
     "back": "Zurück",
-    "fits": "{{name}} passt in den Arbeitsspeicher dieses Computers ({{memory}})."
+    "fits": "{{name}} passt in den Arbeitsspeicher dieses Computers ({{memory}}).",
+    "onHand": "{{name}} ist schon auf diesem Computer. Du kannst es gleich nutzen, ohne Download.",
+    "useOnHand": "{{name}} verwenden"
   },
   "roles": {
     "coordinator": "Koordinator",

@@ -57,7 +57,9 @@
     "use": "使用此設定",
     "skip": "暫時略過",
     "back": "返回",
-    "fits": "{{name}} 適合這台電腦的 {{memory}} 記憶體。"
+    "fits": "{{name}} 適合這台電腦的 {{memory}} 記憶體。",
+    "onHand": "{{name}} 已在這台電腦上，不必下載即可直接使用。",
+    "useOnHand": "使用 {{name}}"
   },
   "roles": {
     "coordinator": "協調者",

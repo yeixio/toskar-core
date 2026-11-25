@@ -150,7 +150,13 @@
     "door": "門口",
     "looksAt": "查看 {{cameras}}",
     "says": "在門口說出回答",
-    "talks": "與訪客交談並了解來意"
+    "talks": "與訪客交談並了解來意",
+    "clearHistory": "清除記錄",
+    "clearConfirm": "要從這個自動化的記錄中刪除所有已結束的執行嗎？進行中的會保留，自動化也會繼續按排程執行。",
+    "clearPictures": "同時刪除其攝影機拍的照片",
+    "clearAction": "清除記錄",
+    "clearing": "正在清除…",
+    "cancel": "取消"
   },
   "run": {
     "details": "詳細資訊",
@@ -169,7 +175,9 @@
     },
     "continueInChat": "在聊天中繼續",
     "openingChat": "正在開啟聊天…",
-    "savedTo": "已儲存到 {{path}}"
+    "savedTo": "已儲存到 {{path}}",
+    "remove": "刪除這次執行",
+    "removing": "正在刪除…"
   },
   "pill": {
     "paused": "已暫停",

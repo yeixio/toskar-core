@@ -115,6 +115,8 @@ var memberRoutes = map[string]bool{
 	"POST /api/v1/automations/{id}/pause":              true,
 	"POST /api/v1/automations/{id}/resume":             true,
 	"GET /api/v1/automations/{id}/runs":                true,
+	"DELETE /api/v1/automations/{id}/runs":             true,
+	"DELETE /api/v1/automations/{id}/runs/{run_id}":    true,
 	"POST /api/v1/automations/{id}/runs/{run_id}/chat": true,
 	"POST /api/v1/automations/{id}/hook":               true,
 

@@ -58,7 +58,9 @@
     "use": "Use this setup",
     "skip": "Skip for now",
     "back": "Back",
-    "fits": "{{name}} fits in this computer's {{memory}} of memory."
+    "fits": "{{name}} fits in this computer's {{memory}} of memory.",
+    "onHand": "{{name}} is already on this computer. You can use it now, with nothing to download.",
+    "useOnHand": "Use {{name}}"
   },
   "roles": {
     "coordinator": "Coordinator",

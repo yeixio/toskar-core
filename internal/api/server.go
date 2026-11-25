@@ -210,9 +210,13 @@ type Dependencies struct {
 	CreateAutomation   func(ctx context.Context, in automations.CreateInput) (automations.Automation, error)
 	GetAutomation      func(ctx context.Context, id string) (automations.Detail, error)
 	ListAutomationRuns func(ctx context.Context, id, before string, limit int) (automations.RunsPage, error)
-	UpdateAutomation   func(ctx context.Context, id string, patch automations.Patch) (automations.Automation, error)
-	DeleteAutomation   func(ctx context.Context, id string) error
-	RunAutomation      func(ctx context.Context, id string) (automations.Run, error)
+	// ClearAutomationRuns removes an automation's finished runs, and with
+	// files its runs' camera pictures (#1335).
+	ClearAutomationRuns func(ctx context.Context, id string, files bool) (ClearedRuns, error)
+	DeleteAutomationRun func(ctx context.Context, id, runID string) error
+	UpdateAutomation    func(ctx context.Context, id string, patch automations.Patch) (automations.Automation, error)
+	DeleteAutomation    func(ctx context.Context, id string) error
+	RunAutomation       func(ctx context.Context, id string) (automations.Run, error)
 	// ContinueAutomationRun opens a run's result in a chat and returns the
 	// chat (#204).
 	ContinueAutomationRun func(ctx context.Context, id, runID string) (string, error)
@@ -425,6 +429,8 @@ func (s *Server) routes() {
 	api.HandleFunc("/automations/{id}/resume", s.handleResumeAutomation).Methods(http.MethodPost)
 	api.HandleFunc("/automations/{id}", s.handleGetAutomation).Methods(http.MethodGet, http.MethodOptions)
 	api.HandleFunc("/automations/{id}/runs", s.handleListAutomationRuns).Methods(http.MethodGet, http.MethodOptions)
+	api.HandleFunc("/automations/{id}/runs", s.handleClearAutomationRuns).Methods(http.MethodDelete)
+	api.HandleFunc("/automations/{id}/runs/{run_id}", s.handleDeleteAutomationRun).Methods(http.MethodDelete)
 	api.HandleFunc("/automations/{id}/runs/{run_id}/chat", s.handleContinueAutomationRun).Methods(http.MethodPost)
 	api.HandleFunc("/automations/{id}/hook", s.handleMakeHookLink).Methods(http.MethodPost)
 	api.HandleFunc("/automations/{id}", s.handleUpdateAutomation).Methods(http.MethodPatch)
@@ -731,6 +737,8 @@ func (s *Server) BindAutomations(d Dependencies) {
 	s.deps.CreateAutomation = d.CreateAutomation
 	s.deps.GetAutomation = d.GetAutomation
 	s.deps.ListAutomationRuns = d.ListAutomationRuns
+	s.deps.ClearAutomationRuns = d.ClearAutomationRuns
+	s.deps.DeleteAutomationRun = d.DeleteAutomationRun
 	s.deps.UpdateAutomation = d.UpdateAutomation
 	s.deps.DeleteAutomation = d.DeleteAutomation
 	s.deps.RunAutomation = d.RunAutomation

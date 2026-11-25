@@ -150,7 +150,13 @@
     "door": "玄関",
     "looksAt": "{{cameras}} を見る",
     "says": "玄関で答えを話す",
-    "talks": "来訪者と話して用件を聞く"
+    "talks": "来訪者と話して用件を聞く",
+    "clearHistory": "履歴を消去",
+    "clearConfirm": "この自動化の履歴から、終わった実行をすべて削除しますか？実行中のものは残り、自動化はスケジュールどおり動き続けます。",
+    "clearPictures": "カメラが撮った写真も削除する",
+    "clearAction": "履歴を消去",
+    "clearing": "消去中…",
+    "cancel": "キャンセル"
   },
   "run": {
     "details": "詳細",
@@ -169,7 +175,9 @@
     },
     "continueInChat": "チャットで続ける",
     "openingChat": "チャットを開いています…",
-    "savedTo": "{{path}} に保存しました"
+    "savedTo": "{{path}} に保存しました",
+    "remove": "この実行を削除",
+    "removing": "削除中…"
   },
   "pill": {
     "paused": "一時停止中",

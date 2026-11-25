@@ -24,6 +24,8 @@ vi.mock('@/lib/api', async () => {
       deleteAutomation: vi.fn(),
       runAutomation: vi.fn(),
       listAutomationRuns: vi.fn(),
+      clearAutomationRuns: vi.fn(),
+      deleteAutomationRun: vi.fn(),
       parseAutomation: vi.fn(),
       continueAutomationRun: vi.fn(),
       listDevices: vi.fn(),
@@ -154,6 +156,26 @@ describe('AutomationsPage', () => {
     expect(screen.getByText('Notified')).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'Pause' }))
     await waitFor(() => expect(api.pauseAutomation).toHaveBeenCalledWith('auto-1'))
+  })
+
+  // #1335: history clears without deleting the automation; pictures only when asked.
+  it('clears the history, with the camera pictures when asked, and removes one run', async () => {
+    vi.mocked(api.getAutomation).mockResolvedValue({ ...detail, cameras: [{ device: 'cam-1' }] } as AutomationDetail)
+    vi.mocked(api.clearAutomationRuns).mockResolvedValue({ runs: 1, files: 2 })
+    vi.mocked(api.deleteAutomationRun).mockResolvedValue(undefined)
+    renderPage()
+    fireEvent.click(await screen.findByRole('button', { name: /Price below \$500/ }))
+    fireEvent.click(await screen.findByRole('button', { name: 'Clear history' }))
+    const confirm = screen.getByRole('group', { name: 'Clear history' })
+    expect(confirm).toHaveTextContent('Runs still going stay')
+    fireEvent.click(screen.getByRole('checkbox', { name: 'Also delete the pictures its cameras took' }))
+    fireEvent.click(screen.getAllByRole('button', { name: 'Clear history' }).find((b) => confirm.contains(b))!)
+    await waitFor(() => expect(api.clearAutomationRuns).toHaveBeenCalledWith('auto-1', true))
+    await waitFor(() => expect(screen.queryByRole('group', { name: 'Clear history' })).not.toBeInTheDocument())
+    expect(api.deleteAutomation).not.toHaveBeenCalled()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Remove this run' }))
+    await waitFor(() => expect(api.deleteAutomationRun).toHaveBeenCalledWith('auto-1', 'run-1'))
   })
 
   it('loads older runs a page at a time', async () => {

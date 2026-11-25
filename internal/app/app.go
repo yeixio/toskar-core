@@ -996,6 +996,8 @@ func New(opts Options) (*App, error) {
 		},
 		GetAutomation:         a.Automations.History,
 		ListAutomationRuns:    a.Automations.RunsPage,
+		ClearAutomationRuns:   a.clearAutomationRuns,
+		DeleteAutomationRun:   a.Automations.DeleteRun,
 		ContinueAutomationRun: a.continueAutomationRun,
 		MakeHookLink:          a.makeHookLink,
 		RunHook:               a.runHook,

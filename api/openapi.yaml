@@ -7474,6 +7474,70 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+    delete:
+      summary: Clear an automation's history
+      description: >-
+        Removes the automation's finished runs (#1335, contract 1.118). Runs that may still be working stay.
+        With files=true, the camera pictures its runs took go too. Chats a run was continued in stay.
+        The automation's owner, or an Admin, may clear it.
+      operationId: clearAutomationRuns
+      tags: [Automations]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: files
+          in: query
+          description: Also delete the camera pictures the automation's runs took
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: How many runs and files were removed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClearedRuns"
+        "404":
+          description: No such automation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/v1/automations/{id}/runs/{run_id}:
+    delete:
+      summary: Delete one finished run
+      description: A run that may still be working answers 409 AUTOMATION_RUN_IN_PROGRESS (#1335, contract 1.118).
+      operationId: deleteAutomationRun
+      tags: [Automations]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: run_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: No such automation or run
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "409":
+          description: The run hasn't finished
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
   /api/v1/automations/{id}/hook:
     post:
       summary: Make a webhook trigger's link
@@ -8188,6 +8252,17 @@ components:
       type: object
       description: An Ollama API answer, in the shape Ollama gives for the endpoint (#1356)
       additionalProperties: true
+    ClearedRuns:
+      type: object
+      description: What clearing an automation's history removed
+      required: [runs, files]
+      properties:
+        runs:
+          type: integer
+          description: Finished runs removed
+        files:
+          type: integer
+          description: Camera pictures removed with them
     VoiceSettings:
       type: object
       description: The Voice settings (#1304, contract 1.112)
