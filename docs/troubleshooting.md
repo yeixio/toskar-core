@@ -103,12 +103,12 @@ Approve the offer on the second computer. Protected Bifrost routes answer `401` 
 
 ## A device can't reach this computer away from home
 
-See [Access from anywhere: Troubleshooting](remote-access.md#troubleshooting). It goes by what API Access → Access from anywhere says after **Check now**: not listening, reachable through the relay, a relay that isn't connected, another computer or web server answering on the port, or a device that can't connect though the card is green.
+See [Access from anywhere: Troubleshooting](remote-access.md#troubleshooting). It goes by what Settings › Network access → Access from anywhere says after **Check now**: not listening, reachable through the relay, a relay that isn't connected, another computer or web server answering on the port, or a device that can't connect though the card is green.
 
 ## API calls return 401 or 403
 
 - **401:** the daemon is not bound to loopback, and the request has no `Authorization: Bearer YOUR_API_KEY` header. `/api/v1`, `/v1`, and `/mcp` all use that check. On the default loopback bind, none requires a key.
-- **403:** the request asked for something its key does not allow, such as memory, a tool, or a placement. The message says what was refused. API Access shows each key's permissions.
+- **403:** the request asked for something its key does not allow, such as memory, a tool, or a placement. The message says what was refused. Settings › API keys shows each key's permissions.
 
 Do not paste a real key into a bug report, and do not put one in a URL.
 

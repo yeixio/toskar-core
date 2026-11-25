@@ -48,11 +48,15 @@ func (a *App) answerHowTo(ctx context.Context, conversationID, message string) (
 		return nil, false
 	}
 	lang := a.appLanguage(ctx)
-	// The screens and buttons are named with the UI's own labels.
+	// The screens and buttons are named with the UI's own labels; both
+	// pages are in Settings (#1321).
+	inSettings := func(key string) string {
+		return locale.T(lang, "common:nav.settings", nil) + " › " + locale.T(lang, "settings:sections."+key, nil)
+	}
 	reply := locale.T(lang, "chat:help."+topic, map[string]any{
-		"tools":        locale.T(lang, "common:nav.tools", nil),
+		"tools":        inSettings("tools"),
 		"addTools":     locale.T(lang, "tools:sources.add", nil),
-		"apiAccess":    locale.T(lang, "common:nav.apiAccess", nil),
+		"apiAccess":    inSettings("apps"),
 		"useElsewhere": locale.T(lang, "apiAccess:share.title", nil),
 	})
 	meta := &contracts.MessageMeta{Steps: []contracts.ActivityStep{{Kind: "share", Text: locale.T(lang, "chat:steps.helpAnswered", nil)}}}

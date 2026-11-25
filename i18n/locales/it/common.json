@@ -4,10 +4,6 @@
     "label": "Principale",
     "open": "Apri il menu",
     "skip": "Vai al contenuto",
-    "use": "Usa",
-    "customize": "Personalizza",
-    "administer": "Amministra",
-    "administerHint": "Mostra o nascondi Addestra, Computer, Persone, Portali, Accesso API, Prestazioni e Diagnostica",
     "chat": "Chat",
     "automations": "Automazioni",
     "models": "Modelli",
@@ -21,7 +17,6 @@
     "diagnostics": "Diagnostica",
     "profiles": "Profili e orchestrazione",
     "tools": "Strumenti",
-    "apiAccess": "Accesso API",
     "settings": "Impostazioni",
     "news": "Notizie"
   },

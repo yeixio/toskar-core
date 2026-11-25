@@ -115,7 +115,7 @@
     "elsewhereWorks": "在 {{node}} 上运行良好。",
     "elsewhereInstalled": "已在 {{node}} 上设置，它会为这台电脑生成。",
     "elsewhereSetUp": "在那里设置",
-    "elsewhereStarted": "正在 {{node}} 上设置。可在“电脑”页面查看进度。",
+    "elsewhereStarted": "正在 {{node}} 上设置。可在“设置 › 电脑”中查看进度。",
     "graphicsShort": "需要约 {{need}} 显存；这台电脑的显卡有 {{have}}，因此部分在系统内存中运行，速度较慢。",
     "sharedShort": "需要约 {{need}} 显存；这台电脑的图形处理器可使用其内存中的 {{have}}，因此可能较慢或失败。",
     "tightConfirm": "仍然设置：我知道在这里可能会很慢。",

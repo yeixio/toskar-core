@@ -64,7 +64,16 @@ server {
         proxy_cache_valid 404 410 5m;
     }
 
-    # Playwright's browsers, for PLAYWRIGHT_DOWNLOAD_HOST.
+    # Playwright's browsers, for PLAYWRIGHT_DOWNLOAD_HOST. Chrome for
+    # Testing builds (Playwright 1.6x) sit at the CDN's root, not under
+    # dbazure, so they have their own path.
+    location /playwright/builds/ {
+        set $lan_origin https://cdn.playwright.dev;
+        rewrite ^/playwright/(.*)$ /$1 break;
+        proxy_pass $lan_origin;
+        proxy_intercept_errors on;
+        error_page 301 302 303 307 308 = @follow;
+    }
     location /playwright/ {
         set $lan_origin https://cdn.playwright.dev;
         rewrite ^/playwright/(.*)$ /dbazure/download/playwright/$1 break;

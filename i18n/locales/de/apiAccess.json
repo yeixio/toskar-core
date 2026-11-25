@@ -78,7 +78,7 @@
       "devicesStale_other": "{{formatted}} länger nicht genutzt",
       "devicesAction": "Gerät verbinden",
       "apps": "Apps und Skripte",
-      "appsHow": "Nutzen einen API-Schlüssel, unten erstellt.",
+      "appsHow": "Nutzen einen API-Schlüssel aus Einstellungen › API-Schlüssel.",
       "appsCount_one": "{{formatted}} Schlüssel",
       "appsCount_other": "{{formatted}} Schlüssel"
     }
@@ -326,5 +326,9 @@
       "TOKEN_INVALID": "{{relay}} hat das Token dieses Computers nicht angenommen. Schließe das Abo erneut ab oder verbinde ihn erneut über die Toskar-App."
     },
     "offHint": "Wenn es an ist, bittet Toskar deinen Router, Port {{port}} zu öffnen, der nur Geräten antwortet, die mit diesem Computer gekoppelt sind. Stattdessen kannst du einen weitergeleiteten Port oder ein Relay wählen. Lokaler Netzwerkzugriff muss dafür nicht an sein."
+  },
+  "parts": {
+    "network": "Wer diesen Computer von anderen Geräten aus erreicht, und wie.",
+    "developer": "Die API von Toskar auf diesem Computer und die Schlüssel, die Apps und Skripte nutzen."
   }
 }

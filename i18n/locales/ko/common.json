@@ -4,10 +4,6 @@
     "label": "메인",
     "open": "메뉴 열기",
     "skip": "본문으로 건너뛰기",
-    "use": "사용",
-    "customize": "맞춤 설정",
-    "administer": "관리",
-    "administerHint": "학습, 컴퓨터, 사람, 포털, API 접근, 성능, 진단 표시 또는 숨기기",
     "chat": "채팅",
     "automations": "자동화",
     "models": "모델",
@@ -21,7 +17,6 @@
     "diagnostics": "진단",
     "profiles": "프로필 및 오케스트레이션",
     "tools": "도구",
-    "apiAccess": "API 액세스",
     "settings": "설정",
     "news": "뉴스"
   },

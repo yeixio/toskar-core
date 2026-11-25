@@ -271,7 +271,8 @@
   }
 
   .segmented-item[aria-selected='true'],
-  .segmented-item[aria-pressed='true'] {
+  .segmented-item[aria-pressed='true'],
+  .segmented-item[aria-current='page'] {
     @apply bg-surface text-ink;
     box-shadow: var(--shadow-panel), inset 0 0 0 1px rgb(var(--rgb-line) / 0.6);
   }

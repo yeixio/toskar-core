@@ -42,7 +42,7 @@ export function LoadError({ error, onRetry, retrying, compact }: LoadErrorProps)
         </button>
         {offline ? null : (
           <>
-            <Link to="/diagnostics" className="text-sm font-medium text-primary hover:underline">
+            <Link to="/settings/diagnostics" className="text-sm font-medium text-primary hover:underline">
               {t('loadError.diagnostics')}
             </Link>
             <ReportProblem error={detail} code={errorCode(error)} className="text-sm font-medium text-primary hover:underline" />

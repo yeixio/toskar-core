@@ -98,7 +98,7 @@
     "off": "Memoria disattivata",
     "onHint": "Questa chat usa ciò che hai chiesto a Toskar di ricordare. Fai clic per escludere la memoria da questa chat.",
     "offHint": "La memoria è disattivata per questa chat. I ricordi salvati non vengono usati qui e non vengono eliminati.",
-    "disabledHint": "La memoria è disattivata per tutte le chat. Attivala dalla pagina Memoria."
+    "disabledHint": "La memoria è disattivata per tutte le chat. Attivala in Impostazioni › Memoria."
   },
   "folder": {
     "on": "Cartella: {{name}}",
@@ -439,7 +439,7 @@
     "trainingMemory": {
       "busy": "Un addestramento sta usando questo computer, quindi non c'era abbastanza memoria per questo modello.",
       "busyNamed": "L'addestramento “{{name}}” sta usando questo computer, quindi non c'era abbastanza memoria per questo modello.",
-      "advice": "Riprova quando l'addestramento è finito, scegli un modello più piccolo o annulla l'addestramento nella pagina Addestra."
+      "advice": "Riprova quando l'addestramento finisce, scegli un modello più piccolo o annulla l'addestramento in Modelli › Addestra."
     },
     "keptRunningMemory": "{{name}} resta sempre attivo e occupa circa {{gb}} GB, quindi non c'era memoria sufficiente per questo modello. Scegli un modello più piccolo o disattiva Sempre attivo per {{name}} nella pagina Modelli."
   },
@@ -645,7 +645,7 @@
   "notices": {
     "languageWeak": "{{model}} potrebbe scrivere in {{language}} peggio che in inglese, e nessun modello installato adatto lo fa meglio. Nella pagina Modelli trovi i modelli con buona valutazione in {{language}}.",
     "mediaLength": "Per ora i clip durano al massimo {{max}} s, quindi questo dura {{made}} s invece dei {{asked}} s richiesti.",
-    "mediaQuality": "{{model}} offre la qualità richiesta, ma non è configurato qui, quindi questo è stato creato con {{used}}. Puoi configurarlo nella pagina Strumenti.",
+    "mediaQuality": "{{model}} offre la qualità richiesta, ma qui non è configurato, quindi è stato fatto con {{used}}. Puoi configurarlo in Impostazioni › Strumenti.",
     "mediaSizePicture": "{{model}} crea immagini fino a {{made}}, quindi questa è più piccola dei {{asked}} richiesti.",
     "mediaSizeClip": "{{model}} crea clip fino a {{made}}, quindi questo è più piccolo dei {{asked}} richiesti.",
     "noVision": "Nessun modello installato può vedere le immagini, quindi la risposta non le guarda. Installa Gemma 3 4B o un altro modello di visione nella pagina Modelli.",

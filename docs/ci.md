@@ -5,7 +5,7 @@ A CI job can ask Toskar as one of its steps, such as summarizing a bug report, s
 Three pieces fit together:
 
 - **[`toskarctl ask`](cli.md#ask)** sends one prompt and prints the answer. Text piped in is data apart from the prompt, `--json-schema` answers with JSON a later step can parse, and memory, knowledge, and tools are off.
-- **A key for a CI job**, made with **For a CI job** on the API Access page, only asks: no memories, knowledge, or tools, whatever the job sends ([API key permissions](api.md#openai-compatible-api)).
+- **A key for a CI job**, made with **For a CI job** in Settings › API keys, only asks: no memories, knowledge, or tools, whatever the job sends ([API key permissions](api.md#openai-compatible-api)).
 - **`install.sh ci`** runs Toskar on the runner itself, for a runner with no Toskar nearby.
 
 In GitHub Actions, the [Ask Toskar action](https://github.com/yeixio/toskar-action) puts these together in one step, connected to a Toskar or started on the runner. The rest of this page is for other CI systems, and for jobs that want the pieces themselves.

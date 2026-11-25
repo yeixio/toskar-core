@@ -408,6 +408,8 @@ Each setting should document:
 
 This inventory serves as the source of truth for settings organization and helps prevent configuration sprawl.
 
+Toskar's inventory is [Settings inventory](settings-inventory.md). A test fails when a setting has no row there.
+
 ## 11. Design Review Checklist
 
 Before approving new navigation or settings functionality, evaluate it against the following checklist.

@@ -81,7 +81,7 @@
       "devicesStale_other": "{{formatted}} inutilisés récemment",
       "devicesAction": "Connecter un appareil",
       "apps": "Apps et scripts",
-      "appsHow": "Utilisent une clé API, créée ci-dessous.",
+      "appsHow": "Utilisent une clé API, depuis Paramètres › Clés API.",
       "appsCount_one": "{{formatted}} clé",
       "appsCount_many": "{{formatted}} clés",
       "appsCount_other": "{{formatted}} clés"
@@ -330,5 +330,9 @@
       "TOKEN_INVALID": "{{relay}} n'a pas accepté le jeton de cet ordinateur. Abonnez-vous de nouveau, ou reconnectez-le depuis l'app Toskar."
     },
     "offHint": "Quand il est activé, Toskar demande à votre routeur d'ouvrir le port {{port}}, qui ne répond qu'aux appareils associés à cet ordinateur. Vous pouvez choisir à la place un port redirigé ou un relais. L'accès depuis le réseau local n'a pas besoin d'être activé."
+  },
+  "parts": {
+    "network": "Qui peut joindre cet ordinateur depuis d'autres appareils, et comment.",
+    "developer": "L'API de Toskar sur cet ordinateur, et les clés qu'utilisent les apps et les scripts."
   }
 }
