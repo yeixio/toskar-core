@@ -146,11 +146,13 @@ func (c *voiceChat) Respond(ctx context.Context, text string, delta func(string)
 	c.mu.Unlock()
 	// Who's asking, from the session's request; stopped with the answer.
 	turn, cancel := context.WithCancel(voice.WithHeardLanguage(context.WithoutCancel(c.ctx), voice.HeardLanguage(ctx)))
+	// The goroutine keeps turn's own Done: turn is wrapped below.
+	ended := turn.Done()
 	go func() {
 		select {
 		case <-ctx.Done():
 			cancel()
-		case <-turn.Done():
+		case <-ended:
 		}
 	}()
 	if id == "" {

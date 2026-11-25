@@ -831,3 +831,13 @@ func tightReason(m Model, memory, graphics int64, shared bool) string {
 		return fmt.Sprintf("%s needs about %.0f GB of memory to run well, and this computer has %.0f GB, so it may be slow or fail; agree to set it up anyway, or choose a lighter model", m.Name, gb(need), gb(have))
 	}
 }
+
+// DownloadFrom points this setup at a stand-in download server: archive in
+// place of this platform's stable-diffusion.cpp build, and fileURL for each
+// model file. Tests in other packages use it to set a feature up from an
+// empty computer without the internet (#1397).
+func (s *Setup) DownloadFrom(archive Archive, fileURL func(File) string) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.archive, s.fileURL = &archive, fileURL
+}

@@ -40,9 +40,9 @@ type Worker struct {
 	// Client downloads Kokoro's model; nil is http.DefaultClient.
 	Client *http.Client
 
-	// script replaces worker.py, and kokoroBase Kokoro's download address,
-	// for tests.
-	script     []byte
+	// Script replaces worker.py, for tests here and in other packages;
+	// kokoroBase is Kokoro's download address, for tests.
+	Script     []byte
 	kokoroBase string
 
 	// Choice is the voice an Admin chose for a language, "" for automatic
@@ -374,7 +374,7 @@ func (w *Worker) running(ctx context.Context, env int) (*workerProc, error) {
 	if err := os.MkdirAll(e.Dir, 0o700); err != nil {
 		return nil, err
 	}
-	script := w.script
+	script := w.Script
 	if script == nil {
 		script = workerScript
 	}

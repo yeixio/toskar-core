@@ -47,7 +47,7 @@ func testWorker(t *testing.T) *Worker {
 		t.Skip("python3 is not installed")
 	}
 	// Piper only, unless a test gives it a Kokoro to download.
-	w := &Worker{Engine: &Engine{Python: fakeEnv{path: py}, Dir: t.TempDir()}, script: []byte(fakeWorker), Plain: true, kokoroBase: "http://127.0.0.1:1/"}
+	w := &Worker{Engine: &Engine{Python: fakeEnv{path: py}, Dir: t.TempDir()}, Script: []byte(fakeWorker), Plain: true, kokoroBase: "http://127.0.0.1:1/"}
 	t.Cleanup(w.Close)
 	return w
 }

@@ -101,7 +101,7 @@ func TestKittenInstallsAndReads(t *testing.T) {
 	env := &kittenEnv{py: py, have: map[string]bool{}}
 	choice := map[string]string{}
 	var mu sync.Mutex
-	w := &Worker{Engine: &Engine{Python: env, Dir: t.TempDir()}, script: []byte(fakeKitten), Plain: true,
+	w := &Worker{Engine: &Engine{Python: env, Dir: t.TempDir()}, Script: []byte(fakeKitten), Plain: true,
 		Choice: func(lang string) string { mu.Lock(); defer mu.Unlock(); return choice[lang] }}
 	t.Cleanup(w.Close)
 	choose := func(lang, v string) { mu.Lock(); choice[lang] = v; mu.Unlock() }
