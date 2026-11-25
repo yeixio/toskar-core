@@ -59,7 +59,9 @@
     "use": "Utiliser cette configuration",
     "skip": "Passer pour l'instant",
     "back": "Retour",
-    "fits": "{{name}} tient dans les {{memory}} de mémoire de cet ordinateur."
+    "fits": "{{name}} tient dans les {{memory}} de mémoire de cet ordinateur.",
+    "onHand": "{{name}} est déjà sur cet ordinateur. Vous pouvez l'utiliser tout de suite, sans rien télécharger.",
+    "useOnHand": "Utiliser {{name}}"
   },
   "roles": {
     "coordinator": "Coordinateur",
