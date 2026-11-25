@@ -1321,5 +1321,32 @@
     "adminOnly": "Nur die Admins deines Computers können Stimmen auswählen.",
     "automatic": "Automatisch ({{voice}})",
     "standard": "Standard"
+  },
+  "keyboard": {
+    "name": "Toskar-Tastatur",
+    "ask": "Fragen",
+    "rewrite": "Umschreiben",
+    "fix": "Korrigieren",
+    "working": "Schreibt…",
+    "cancel": "Abbrechen",
+    "ok": "OK",
+    "undo": "Rückgängig",
+    "empty": "Gib zuerst Text ein oder wähle Text aus.",
+    "failed": "Toskar konnte nicht antworten. Öffne die App, um die Verbindung zu prüfen.",
+    "shift": "Umschalt",
+    "delete": "Löschen",
+    "space": "Leerzeichen",
+    "enter": "Eingabe",
+    "next": "Nächste Tastatur",
+    "symbols": "Symbole",
+    "letters": "Buchstaben",
+    "settings": {
+      "title": "Toskar-Tastatur",
+      "off": "Tippe überall und tippe dann über den Tasten auf Fragen, Umschreiben oder Korrigieren, damit Toskar antwortet oder deinen Text verbessert. Schalte sie in den Tastatureinstellungen des Systems ein.",
+      "on": "Sie ist eingeschaltet. Wechsle beim Tippen mit der Tastaturtaste zu ihr.",
+      "privacy": "Was du tippst, bleibt auf diesem Telefon, und die Tastatur speichert nichts. Nur Text, den du mit Fragen, Umschreiben oder Korrigieren sendest, geht an deinen Computer oder an die Modelle dieses Telefons. In Passwortfeldern tippt sie nur.",
+      "turnOn": "Tastatur einschalten",
+      "choose": "Tastatur wechseln"
+    }
   }
 }

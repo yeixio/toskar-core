@@ -1342,5 +1342,32 @@
     "adminOnly": "Seuls les administrateurs de ton ordinateur peuvent choisir les voix.",
     "automatic": "Automatique ({{voice}})",
     "standard": "Standard"
+  },
+  "keyboard": {
+    "name": "Clavier Toskar",
+    "ask": "Demander",
+    "rewrite": "Reformuler",
+    "fix": "Corriger",
+    "working": "Rédaction…",
+    "cancel": "Annuler",
+    "ok": "OK",
+    "undo": "Annuler la modification",
+    "empty": "Saisissez ou sélectionnez d'abord du texte.",
+    "failed": "Toskar n'a pas pu répondre. Ouvrez l'app pour vérifier sa connexion.",
+    "shift": "Majuscule",
+    "delete": "Supprimer",
+    "space": "Espace",
+    "enter": "Entrée",
+    "next": "Clavier suivant",
+    "symbols": "Symboles",
+    "letters": "Lettres",
+    "settings": {
+      "title": "Clavier Toskar",
+      "off": "Tapez partout, puis touchez Demander, Reformuler ou Corriger au-dessus des touches pour que Toskar réponde ou améliore ce que vous avez écrit. Activez-le dans les paramètres de clavier du système.",
+      "on": "Il est activé. Passez-y avec le bouton du clavier pendant la saisie.",
+      "privacy": "Ce que vous tapez reste sur ce téléphone, et le clavier ne garde rien. Seul le texte envoyé avec Demander, Reformuler ou Corriger va à votre ordinateur, ou aux modèles de ce téléphone. Dans les champs de mot de passe, il ne fait que taper.",
+      "turnOn": "Activer le clavier",
+      "choose": "Changer de clavier"
+    }
   }
 }
