@@ -23,7 +23,10 @@ func (s *Session) respond(text string, stoppedAt time.Time, sttMs int64) {
 		s.fail("chat_unavailable", "there's no chat model to answer with", "")
 		return
 	}
-	ctx, cancel := context.WithCancel(context.Background())
+	s.mu.Lock()
+	heard := s.lastHeard
+	s.mu.Unlock()
+	ctx, cancel := context.WithCancel(WithHeardLanguage(context.Background(), heard))
 	r := &response{cancel: cancel, finished: make(chan struct{})}
 	s.mu.Lock()
 	r.id, r.item = s.nextID("resp"), s.nextID("item")
