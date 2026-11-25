@@ -5,6 +5,8 @@ import (
 	"archive/zip"
 	"compress/gzip"
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -251,12 +253,17 @@ func (r *Runtime) install(ctx context.Context, idleOnly bool) (bool, error) {
 	if resp.StatusCode != http.StatusOK {
 		return false, fmt.Errorf("download llama.cpp %s: HTTP %d %s. %s", asset.Name, resp.StatusCode, http.StatusText(resp.StatusCode), r.byHand())
 	}
-	if _, err := io.Copy(tmp, resp.Body); err != nil {
+	hasher := sha256.New()
+	if _, err := io.Copy(io.MultiWriter(tmp, hasher), resp.Body); err != nil {
 		_ = tmp.Close()
 		return false, err
 	}
 	if err := tmp.Close(); err != nil {
 		return false, err
+	}
+	// Check the archive against the checksum GitHub publishes for it (#1209).
+	if got := hex.EncodeToString(hasher.Sum(nil)); asset.SHA256 != "" && !strings.EqualFold(got, asset.SHA256) {
+		return false, fmt.Errorf("download llama.cpp %s: the file doesn't match its published checksum (got sha256 %s, want %s); nothing was changed", asset.Name, got, asset.SHA256)
 	}
 
 	// Unpack beside the install, then swap it in, so a reinstall replaces
@@ -337,11 +344,16 @@ func (r *Runtime) Capabilities(ctx context.Context) (pluginapi.RuntimeCapabiliti
 
 type ghRelease struct {
 	// Tag is the release's tag, such as b6500.
-	Tag    string `json:"tag_name"`
-	Assets []struct {
-		Name               string `json:"name"`
-		BrowserDownloadURL string `json:"browser_download_url"`
-	} `json:"assets"`
+	Tag    string    `json:"tag_name"`
+	Assets []ghAsset `json:"assets"`
+}
+
+type ghAsset struct {
+	Name               string `json:"name"`
+	BrowserDownloadURL string `json:"browser_download_url"`
+	// Digest is GitHub's "sha256:<hex>" of the file, on releases made
+	// since mid-2025 (#1209).
+	Digest string `json:"digest"`
 }
 
 type assetInfo struct {
@@ -351,6 +363,8 @@ type assetInfo struct {
 	Build string
 	// Tag is its release, such as b12361.
 	Tag string
+	// SHA256 is the archive's checksum from GitHub, in hex, when it gave one.
+	SHA256 string
 }
 
 // releasesURL lists llama.cpp's newest releases; tests point it elsewhere.

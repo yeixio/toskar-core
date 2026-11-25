@@ -81,7 +81,8 @@
   },
   "background": {
     "title": "Continuar em segundo plano",
-    "description": "Fechar a janela mantém o Chat, a API e seus agendamentos em execução. Isto fica ativado enquanto houver um agendamento."
+    "description": "Fechar a janela mantém o Chat, a API e seus agendamentos em execução. O Toskar ativa isto quando você salva seu primeiro agendamento; depois, fica como você definir.",
+    "schedulesNeedIt": "Automações agendadas não são executadas enquanto o Toskar está fechado. Ative isto para que sejam executadas no horário."
   },
   "launchAtLogin": {
     "title": "Abrir ao iniciar sessão",

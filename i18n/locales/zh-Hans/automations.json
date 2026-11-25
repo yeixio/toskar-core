@@ -23,7 +23,9 @@
     "selectHint": "选择一个自动化查看其历史记录，或新建一个。",
     "createOff": "你的账户已关闭创建自动化。请让管理员开启。",
     "neverRun": "从未运行",
-    "lastOnly": "上次 {{last}}"
+    "lastOnly": "上次 {{last}}",
+    "backgroundOff": "关闭窗口后 Toskar 会停止，定时自动化将不会运行。",
+    "backgroundOffLink": "在后台保持运行"
   },
   "intro": {
     "title": "在你离开时让 Toskar 替你干活",

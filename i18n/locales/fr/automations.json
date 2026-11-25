@@ -23,7 +23,9 @@
     "selectHint": "Sélectionnez une automatisation pour voir son historique, ou créez-en une.",
     "createOff": "La création d'automatisations est désactivée pour votre compte. Demandez à un Admin de l'activer.",
     "neverRun": "Jamais exécutée",
-    "lastOnly": "Dernière {{last}}"
+    "lastOnly": "Dernière {{last}}",
+    "backgroundOff": "Toskar s'arrête quand vous fermez sa fenêtre : les automatisations planifiées ne s'exécuteront pas.",
+    "backgroundOffLink": "Continuer en arrière-plan"
   },
   "intro": {
     "title": "Faites travailler Toskar pendant votre absence",

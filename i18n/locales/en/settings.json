@@ -81,7 +81,8 @@
   },
   "background": {
     "title": "Keep running in background",
-    "description": "Closing the window keeps Chat, the API, and your schedules running. This stays on while a schedule exists."
+    "description": "Closing the window keeps Chat, the API, and your schedules running. Toskar turns this on when you save your first schedule; after that, it stays as you set it.",
+    "schedulesNeedIt": "Scheduled automations don't run while Toskar is closed. Turn this on so they run on time."
   },
   "launchAtLogin": {
     "title": "Launch at login",

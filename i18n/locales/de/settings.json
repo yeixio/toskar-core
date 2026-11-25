@@ -81,7 +81,8 @@
   },
   "background": {
     "title": "Im Hintergrund weiterlaufen",
-    "description": "Wenn du das Fenster schließt, laufen Chat, API und deine Zeitpläne weiter. Das bleibt an, solange ein Zeitplan existiert."
+    "description": "Wenn du das Fenster schließt, laufen Chat, API und deine Zeitpläne weiter. Toskar schaltet das ein, wenn du deinen ersten Zeitplan speicherst; danach bleibt es so, wie du es einstellst.",
+    "schedulesNeedIt": "Geplante Automationen laufen nicht, solange Toskar geschlossen ist. Schalte das ein, damit sie pünktlich laufen."
   },
   "launchAtLogin": {
     "title": "Beim Anmelden starten",

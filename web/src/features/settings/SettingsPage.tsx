@@ -341,11 +341,16 @@ export function SettingsPage({ section }: { section?: SettingsSection } = {}) {
                 <div>
                   <h2 className="section-title">{t('background.title')}</h2>
                   <p className="mt-1 text-sm text-ink-muted">{t('background.description')}</p>
+                  {hasSchedule && !(settings?.keep_running_in_background ?? false) ? (
+                    <p className="mt-2 text-sm text-warning" role="note">
+                      {t('background.schedulesNeedIt')}
+                    </p>
+                  ) : null}
                 </div>
                 <Toggle
                   label={t('background.title')}
-                  checked={(settings?.keep_running_in_background ?? false) || hasSchedule}
-                  disabled={backgroundMutation.isPending || busy || hasSchedule}
+                  checked={settings?.keep_running_in_background ?? false}
+                  disabled={backgroundMutation.isPending || busy}
                   onChange={() =>
                     backgroundMutation.mutate(!(settings?.keep_running_in_background ?? false))
                   }

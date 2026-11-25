@@ -23,7 +23,9 @@
     "selectHint": "Selecione uma automação para ver o histórico dela ou crie uma.",
     "createOff": "Criar automações está desativado para sua conta. Peça a um Admin para ativar.",
     "neverRun": "Nunca executada",
-    "lastOnly": "Última {{last}}"
+    "lastOnly": "Última {{last}}",
+    "backgroundOff": "O Toskar para quando você fecha a janela, então as automações agendadas não serão executadas.",
+    "backgroundOffLink": "Continuar em segundo plano"
   },
   "intro": {
     "title": "Coloque o Toskar para trabalhar enquanto você está fora",

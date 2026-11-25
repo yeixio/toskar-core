@@ -859,6 +859,12 @@ func (m *Manager) definitionsLocked(srv *server) []tools.Definition {
 		seen[id] = true
 		risk := riskOf(t)
 		policy := defaultPolicy(risk)
+		if srv.spec.Remote() && srv.spec.Preset == "" {
+			// A server on the web that isn't from the gallery says itself
+			// which tools only read, and nothing checks it. Ask before each
+			// until the person allows it (#1209); its risk still shows.
+			policy = tools.PolicyAsk
+		}
 		if p := srv.policies[t.Name]; p != "" {
 			policy = p
 		}

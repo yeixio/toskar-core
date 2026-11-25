@@ -81,7 +81,8 @@
   },
   "background": {
     "title": "在背景持續執行",
-    "description": "關閉視窗後，聊天、API 和你的排程仍會繼續執行。只要有排程存在，這個選項就會保持開啟。"
+    "description": "關閉視窗後，聊天、API 和你的排程仍會繼續執行。儲存第一個排程時 Toskar 會開啟此項；之後會保持你的設定。",
+    "schedulesNeedIt": "Toskar 關閉時，排定的自動化不會執行。開啟此項可讓它們準時執行。"
   },
   "launchAtLogin": {
     "title": "登入時啟動",

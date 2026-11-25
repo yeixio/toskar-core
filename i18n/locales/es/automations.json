@@ -23,7 +23,9 @@
     "selectHint": "Selecciona una automatización para ver su historial, o crea una.",
     "createOff": "Crear automatizaciones está desactivado para tu cuenta. Pide a un Admin que lo active.",
     "neverRun": "Nunca se ha ejecutado",
-    "lastOnly": "Última {{last}}"
+    "lastOnly": "Última {{last}}",
+    "backgroundOff": "Toskar se detiene al cerrar su ventana, así que las automatizaciones programadas no se ejecutarán entonces.",
+    "backgroundOffLink": "Seguir ejecutándose en segundo plano"
   },
   "intro": {
     "title": "Pon a Toskar a trabajar mientras no estás",
