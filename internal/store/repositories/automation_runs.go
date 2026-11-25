@@ -640,3 +640,36 @@ func scanRun(s automationScanner) (automations.Run, error) {
 	}
 	return run, nil
 }
+
+// ClearRuns removes an automation's finished runs (#1335), and says how many.
+// Runs that may still be working (claimed, running, or waiting to retry)
+// stay. The automation must be the request's person's, or they an Admin.
+func (r *AutomationRepo) ClearRuns(ctx context.Context, automationID string) (int64, error) {
+	if _, err := r.Get(ctx, automationID); err != nil {
+		return 0, err
+	}
+	res, err := r.db.ExecContext(ctx, `DELETE FROM automation_runs WHERE automation_id = ? AND status IN (?, ?)`,
+		automationID, automations.RunSucceeded, automations.RunFailed)
+	if err != nil {
+		return 0, err
+	}
+	return res.RowsAffected()
+}
+
+// DeleteRun removes one finished run of an automation (#1335). A run that
+// may still be working answers ErrRunInProgress.
+func (r *AutomationRepo) DeleteRun(ctx context.Context, automationID, runID string) error {
+	if _, err := r.Get(ctx, automationID); err != nil {
+		return err
+	}
+	run, err := r.GetRun(ctx, automationID, runID)
+	if err != nil {
+		return err
+	}
+	if run.Status != automations.RunSucceeded && run.Status != automations.RunFailed {
+		return automations.ErrRunInProgress
+	}
+	_, err = r.db.ExecContext(ctx, `DELETE FROM automation_runs WHERE id = ? AND automation_id = ? AND status IN (?, ?)`,
+		runID, automationID, automations.RunSucceeded, automations.RunFailed)
+	return err
+}

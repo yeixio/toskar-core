@@ -59,7 +59,9 @@
     "use": "Usar esta configuración",
     "skip": "Omitir por ahora",
     "back": "Atrás",
-    "fits": "{{name}} cabe en los {{memory}} de memoria de este equipo."
+    "fits": "{{name}} cabe en los {{memory}} de memoria de este equipo.",
+    "onHand": "{{name}} ya está en este computador. Puedes usarlo ahora, sin descargar nada.",
+    "useOnHand": "Usar {{name}}"
   },
   "roles": {
     "coordinator": "Coordinador",

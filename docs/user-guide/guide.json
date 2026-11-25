@@ -2116,6 +2116,14 @@
             "models",
             "knowledge"
           ]
+        },
+        {
+          "type": "heading",
+          "text": "Clear an automation's history"
+        },
+        {
+          "type": "paragraph",
+          "text": "Open the automation and choose Clear history above its runs. The automation stays, with its schedule. Runs still going stay too. Choose Also delete the pictures its cameras took to remove those with it. To remove one run, open its Details and choose Remove this run."
         }
       ]
     },
@@ -2607,22 +2615,22 @@
         {
           "type": "paragraph",
           "text": "Toskar answers in Kokoro, a natural-sounding voice, in English, Spanish, French, Italian, and Portuguese. Other languages, such as German, Japanese, Korean, and Chinese, use Piper, the voice Read aloud uses. The first time, Kokoro downloads in the background, and Piper speaks until it's ready."
-  },
-  {
-   "type": "heading",
-   "text": "Choose the voices"
-  },
-  {
-   "type": "paragraph",
-   "text": "An Admin chooses the voice for each language in Settings, under Voice. Pick one from the list, or leave it on Automatic. Preview plays a sentence in that language. The choice applies to voice mode, answers read aloud on your phone and in the car, and the doorbell."
-  },
-  {
-   "type": "paragraph",
-   "text": "Kitten TTS 2 mini adds more natural voices in 15 languages, including German, Korean, Russian, Dutch, and Hindi. To add it, choose Install next to it under Voice. It downloads its program and voices, about 1.5 GB, and takes a minute or two. It runs on the processor and uses about 1 GB of memory while it speaks, which it frees after 10 quiet minutes. Once it's installed, Automatic uses Kitten for the languages Kokoro doesn't speak. Its voices are Powered by KittenML, under the Apache-2.0 license. Installing it also sets up listening for voice mode, so the first conversation doesn't wait for downloads. Choose Remove to delete it, and those languages go back to Piper."
-  },
-  {
-   "type": "paragraph",
-   "text": "Voice also says what's still missing. Voice mode needs a chat model to answer with, and the doorbell needs a model that can see pictures. When none is installed, Voice names the one that fits this computer, with its size, and Install downloads it. An automation that looks at a camera offers the same when you choose the camera."
+        },
+        {
+          "type": "heading",
+          "text": "Choose the voices"
+        },
+        {
+          "type": "paragraph",
+          "text": "An Admin chooses the voice for each language in Settings, under Voice. Pick one from the list, or leave it on Automatic. Preview plays a sentence in that language. The choice applies to voice mode, answers read aloud on your phone and in the car, and the doorbell."
+        },
+        {
+          "type": "paragraph",
+          "text": "Kitten TTS 2 mini adds more natural voices in 15 languages, including German, Korean, Russian, Dutch, and Hindi. To add it, choose Install next to it under Voice. It downloads its program and voices, about 1.5 GB, and takes a minute or two. It runs on the processor and uses about 1 GB of memory while it speaks, which it frees after 10 quiet minutes. Once it's installed, Automatic uses Kitten for the languages Kokoro doesn't speak. Its voices are Powered by KittenML, under the Apache-2.0 license. Installing it also sets up listening for voice mode, so the first conversation doesn't wait for downloads. Choose Remove to delete it, and those languages go back to Piper."
+        },
+        {
+          "type": "paragraph",
+          "text": "Voice also says what's still missing. Voice mode needs a chat model to answer with, and the doorbell needs a model that can see pictures. When none is installed, Voice names the one that fits this computer, with its size, and Install downloads it. An automation that looks at a camera offers the same when you choose the camera."
         },
         {
           "type": "paragraph",
@@ -2648,8 +2656,8 @@
             "Toskar isn't allowed to use the microphone: allow it in your browser's settings for this page, then start voice mode again.",
             "It stops answering by itself: the speakers' sound reached the microphone. Use headphones, or turn the volume down.",
             "The first answer is slow: speech and the voice are loading. Later answers start much sooner.",
-    "Voice isn't in Settings: only an Admin sees it.",
-    "A voice you chose isn't used: it was removed, or it can't read right now. Toskar uses the language's automatic voice instead."
+            "Voice isn't in Settings: only an Admin sees it.",
+            "A voice you chose isn't used: it was removed, or it can't read right now. Toskar uses the language's automatic voice instead."
           ]
         }
       ]
@@ -3753,6 +3761,7 @@
       "title": "Connect another app through the API",
       "paragraphs": [
         "Open Settings › API keys to copy the endpoint and run Test API. The default base URL is http://127.0.0.1:7331/v1. Use GET /v1/models to find a model ID, such as auto or a profile, then POST /v1/chat/completions. The API gets the same assistant as chat: Auto, web look-ups, connected services, answer checks, personalization, and specialized AIs. It is an OpenAI-compatible subset, not every hosted API feature.",
+        "An app that offers only Ollama, such as Home Assistant's Ollama integration or an Obsidian plugin, can use Toskar too. Give the app Toskar's address, such as http://127.0.0.1:7331, where it asks for the Ollama server, and choose auto or a profile as its model. Keys and permissions work as they do for the OpenAI API. Models stay managed in Toskar: an app can't download or delete them.",
         "With local network access off, the default endpoint on this computer needs no API key. With it on, an app or script on another device needs a key for every request; apps on this computer still need none, and people sign in with their password in a browser instead. Create a named key in Settings › API keys and copy its secret when it is shown; you can rotate or revoke it there. Send it as Authorization: Bearer YOUR_KEY.",
         "Each key has permissions a request can only narrow: whether it may use memories and connected knowledge (never, on request, or always), which tools (the profile's, read-only, or none), and whether it may choose where it runs. API requests use memories only when they ask, unless the key says always. A request can ask for JSON with response_format, and Toskar checks and repairs the result.",
         "Projects keep related chats together with what they share; [Projects](#projects) explains them. Through the API, POST /api/v1/projects makes one with a name, POST /api/v1/projects/ID/files adds a file, and project_id on a new chat starts it in the project.",

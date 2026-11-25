@@ -150,7 +150,13 @@
     "door": "À la porte",
     "looksAt": "Regarde {{cameras}}",
     "says": "Dit sa réponse à la porte",
-    "talks": "Parle avec le visiteur et demande pourquoi il est venu"
+    "talks": "Parle avec le visiteur et demande pourquoi il est venu",
+    "clearHistory": "Effacer l'historique",
+    "clearConfirm": "Retirer toutes les exécutions terminées de l'historique de cette automatisation ? Celles en cours restent, et l'automatisation continue selon son horaire.",
+    "clearPictures": "Supprimer aussi les photos prises par ses caméras",
+    "clearAction": "Effacer l'historique",
+    "clearing": "Effacement…",
+    "cancel": "Annuler"
   },
   "run": {
     "details": "Détails",
@@ -169,7 +175,9 @@
     },
     "continueInChat": "Continuer dans le chat",
     "openingChat": "Ouverture du chat…",
-    "savedTo": "Enregistré dans {{path}}"
+    "savedTo": "Enregistré dans {{path}}",
+    "remove": "Retirer cette exécution",
+    "removing": "Suppression…"
   },
   "pill": {
     "paused": "Suspendue",

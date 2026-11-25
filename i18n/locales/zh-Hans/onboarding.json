@@ -57,7 +57,9 @@
     "use": "使用此设置",
     "skip": "暂时跳过",
     "back": "返回",
-    "fits": "{{name}} 适合这台电脑的 {{memory}} 内存。"
+    "fits": "{{name}} 适合这台电脑的 {{memory}} 内存。",
+    "onHand": "{{name}} 已在这台电脑上，无需下载即可直接使用。",
+    "useOnHand": "使用 {{name}}"
   },
   "roles": {
     "coordinator": "协调者",

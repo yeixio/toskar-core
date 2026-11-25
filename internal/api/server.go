@@ -215,9 +215,13 @@ type Dependencies struct {
 	CreateAutomation   func(ctx context.Context, in automations.CreateInput) (automations.Automation, error)
 	GetAutomation      func(ctx context.Context, id string) (automations.Detail, error)
 	ListAutomationRuns func(ctx context.Context, id, before string, limit int) (automations.RunsPage, error)
-	UpdateAutomation   func(ctx context.Context, id string, patch automations.Patch) (automations.Automation, error)
-	DeleteAutomation   func(ctx context.Context, id string) error
-	RunAutomation      func(ctx context.Context, id string) (automations.Run, error)
+	// ClearAutomationRuns removes an automation's finished runs, and with
+	// files its runs' camera pictures (#1335).
+	ClearAutomationRuns func(ctx context.Context, id string, files bool) (ClearedRuns, error)
+	DeleteAutomationRun func(ctx context.Context, id, runID string) error
+	UpdateAutomation    func(ctx context.Context, id string, patch automations.Patch) (automations.Automation, error)
+	DeleteAutomation    func(ctx context.Context, id string) error
+	RunAutomation       func(ctx context.Context, id string) (automations.Run, error)
 	// ContinueAutomationRun opens a run's result in a chat and returns the
 	// chat (#204).
 	ContinueAutomationRun func(ctx context.Context, id, runID string) (string, error)
@@ -430,6 +434,8 @@ func (s *Server) routes() {
 	api.HandleFunc("/automations/{id}/resume", s.handleResumeAutomation).Methods(http.MethodPost)
 	api.HandleFunc("/automations/{id}", s.handleGetAutomation).Methods(http.MethodGet, http.MethodOptions)
 	api.HandleFunc("/automations/{id}/runs", s.handleListAutomationRuns).Methods(http.MethodGet, http.MethodOptions)
+	api.HandleFunc("/automations/{id}/runs", s.handleClearAutomationRuns).Methods(http.MethodDelete)
+	api.HandleFunc("/automations/{id}/runs/{run_id}", s.handleDeleteAutomationRun).Methods(http.MethodDelete)
 	api.HandleFunc("/automations/{id}/runs/{run_id}/chat", s.handleContinueAutomationRun).Methods(http.MethodPost)
 	api.HandleFunc("/automations/{id}/hook", s.handleMakeHookLink).Methods(http.MethodPost)
 	api.HandleFunc("/automations/{id}", s.handleUpdateAutomation).Methods(http.MethodPatch)
@@ -537,6 +543,8 @@ func (s *Server) routes() {
 		s.router.HandleFunc("/v1/responses", s.handleOpenAIChat).Methods(http.MethodPost, http.MethodOptions)
 	}
 
+	s.ollamaRoutes()
+
 	if s.deps.WebRoot != nil {
 		fileServer := http.FileServer(http.FS(s.deps.WebRoot))
 		s.router.HandleFunc("/embed.js", s.handleEmbedScript).Methods(http.MethodGet)
@@ -544,6 +552,35 @@ func (s *Server) routes() {
 	}
 	s.router.NotFoundHandler = http.HandlerFunc(s.apiRouteMissing)
 	s.router.MethodNotAllowedHandler = http.HandlerFunc(s.apiRouteMissing)
+}
+
+// ollamaRoutes serve Ollama's API, for apps that offer only Ollama (#1356).
+func (s *Server) ollamaRoutes() {
+	routes := []struct {
+		path, method string
+		handle       func(*openai.Handler) http.HandlerFunc
+	}{
+		{"/api/tags", http.MethodGet, func(o *openai.Handler) http.HandlerFunc { return o.HandleOllamaTags }},
+		{"/api/ps", http.MethodGet, func(o *openai.Handler) http.HandlerFunc { return o.HandleOllamaPS }},
+		{"/api/version", http.MethodGet, func(o *openai.Handler) http.HandlerFunc { return o.HandleOllamaVersion }},
+		{"/api/chat", http.MethodPost, func(o *openai.Handler) http.HandlerFunc { return o.HandleOllamaChat }},
+		{"/api/generate", http.MethodPost, func(o *openai.Handler) http.HandlerFunc { return o.HandleOllamaGenerate }},
+		{"/api/show", http.MethodPost, func(o *openai.Handler) http.HandlerFunc { return o.HandleOllamaShow }},
+		{"/api/embed", http.MethodPost, func(o *openai.Handler) http.HandlerFunc { return o.HandleOllamaEmbed }},
+		{"/api/embeddings", http.MethodPost, func(o *openai.Handler) http.HandlerFunc { return o.HandleOllamaEmbed }},
+		{"/api/pull", http.MethodPost, func(o *openai.Handler) http.HandlerFunc { return o.HandleOllamaManage }},
+		{"/api/push", http.MethodPost, func(o *openai.Handler) http.HandlerFunc { return o.HandleOllamaManage }},
+		{"/api/create", http.MethodPost, func(o *openai.Handler) http.HandlerFunc { return o.HandleOllamaManage }},
+		{"/api/copy", http.MethodPost, func(o *openai.Handler) http.HandlerFunc { return o.HandleOllamaManage }},
+		{"/api/delete", http.MethodDelete, func(o *openai.Handler) http.HandlerFunc { return o.HandleOllamaManage }},
+	}
+	for _, r := range routes {
+		h := http.HandlerFunc(s.handleOpenAIChat)
+		if s.deps.OpenAI != nil {
+			h = r.handle(s.deps.OpenAI)
+		}
+		s.router.HandleFunc(r.path, h).Methods(r.method, http.MethodOptions)
+	}
 }
 
 // webRoute names the catch-all that serves the web UI.
@@ -706,6 +743,8 @@ func (s *Server) BindAutomations(d Dependencies) {
 	s.deps.CreateAutomation = d.CreateAutomation
 	s.deps.GetAutomation = d.GetAutomation
 	s.deps.ListAutomationRuns = d.ListAutomationRuns
+	s.deps.ClearAutomationRuns = d.ClearAutomationRuns
+	s.deps.DeleteAutomationRun = d.DeleteAutomationRun
 	s.deps.UpdateAutomation = d.UpdateAutomation
 	s.deps.DeleteAutomation = d.DeleteAutomation
 	s.deps.RunAutomation = d.RunAutomation
