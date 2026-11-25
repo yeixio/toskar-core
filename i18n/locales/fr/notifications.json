@@ -197,7 +197,11 @@
     "newerModelsBody": "{{model}} est plus récent que {{installed}}. Modèles › Installés indique comment il tient sur cet ordinateur et l’installe à côté de celui que vous avez.",
     "pageNotOpened": "{{automation}} n'a pas ouvert {{page}}",
     "pageNotOpenedUnnamed": "Une automatisation n'a pas ouvert {{page}}",
-    "pageNotOpenedBody": "Son modèle a répondu sans lire la page, le résultat est donc peut-être inventé. Choisissez pour cette automatisation un modèle capable d'utiliser des outils."
+    "pageNotOpenedBody": "Son modèle a répondu sans lire la page, le résultat est donc peut-être inventé. Choisissez pour cette automatisation un modèle capable d'utiliser des outils.",
+    "runtimeUpgraded": "{{runtime}} a été mis à jour pour cet ordinateur",
+    "runtimeUpgradedBody": "Toskar a téléchargé une version plus rapide de {{runtime}} qui utilise la carte graphique de cet ordinateur et a remplacé celle installée. Elle figure dans Ce qui a quitté cet ordinateur.",
+    "imagesUpdated": "Moteur d'images mis à jour vers {{release}}",
+    "imagesUpdatedBody": "Toskar a téléchargé stable-diffusion.cpp {{release}} pour cette version et supprimé l'ancienne. C'est indiqué dans Ce qui a quitté cet ordinateur."
   },
   "sent": {
     "times": "{{title}} ({{count}} fois)",

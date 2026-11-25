@@ -33,6 +33,10 @@ type Setup struct {
 	// Changed is called when what is installed changes: a setup ended or a
 	// model was removed.
 	Changed func()
+	// Updated is called when a Toskar update brought a new
+	// stable-diffusion.cpp release and it replaced the earlier one, with
+	// the archive downloaded, so the person can be told (#1209).
+	Updated func(archive string)
 	// Catalog lists the models this setup offers; nil is the image models.
 	Catalog func() []Model
 	// Graphics is the memory this computer's graphics can use: a card's

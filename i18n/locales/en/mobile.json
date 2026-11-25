@@ -1024,7 +1024,8 @@
       "update_check": "Update check",
       "comfyui": "ComfyUI",
       "problem_report": "Problem report",
-      "link_check": "Link check"
+      "link_check": "Link check",
+      "download": "Download"
     },
     "kindsLower": {
       "web_search": "web search",
@@ -1038,7 +1039,8 @@
       "update_check": "update check",
       "comfyui": "ComfyUI",
       "problem_report": "problem report",
-      "link_check": "link check"
+      "link_check": "link check",
+      "download": "download"
     },
     "sources": {
       "chat": "Chat",

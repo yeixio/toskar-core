@@ -1028,6 +1028,7 @@ func New(opts Options) (*App, error) {
 	// Pictures in a chat completion are kept as files while its turn runs (#830).
 	openaiHandler.Pictures = a.Artifacts
 	a.python = pyenv.New(filepath.Join(cfg.RuntimesDir, "python"))
+	a.python.Installed = func(spec pyenv.Spec) { a.pythonInstalled(context.Background(), spec) }
 	a.Mimir.SetRecognizer(&ocr.Recognizer{Python: a.python, WorkDir: filepath.Join(cfg.DataDir, "knowledge", "ocr-jobs")})
 	// Code runs only inside the operating system's sandbox (Gungnir §20).
 	a.Tools.Register(&codeexec.Tool{Python: a.python, Sandbox: codeexec.Detect(), Store: a.Artifacts,
@@ -1084,6 +1085,9 @@ func New(opts Options) (*App, error) {
 		}
 	}
 	a.Images = a.newImageSetup(cfg)
+	if a.Images != nil {
+		a.Images.Updated = func(archive string) { a.imagesUpdated(context.Background(), archive) }
+	}
 	images := &imagegen.Engine{Setup: a.Images, WorkDir: filepath.Join(cfg.DataDir, "image-jobs"), Room: a.mediaRoom, Logger: logger}
 	a.registerPortable(&imagegen.GenerateTool{Engine: images, Store: a.Artifacts})
 	a.registerPortable(&imagegen.EditTool{Engine: images, Store: a.Artifacts})

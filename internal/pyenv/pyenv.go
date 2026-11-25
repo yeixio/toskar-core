@@ -113,6 +113,9 @@ type Manager struct {
 	Bundled string
 	// Sandboxed refuses to download and install environments.
 	Sandboxed bool
+	// Installed is called when an environment was downloaded and set up:
+	// uv, Python, and spec's packages, so it can be recorded (#1209).
+	Installed func(spec Spec)
 	// ReleaseBase is where uv release assets are downloaded. Tests replace it.
 	ReleaseBase string
 	HTTP        *http.Client
@@ -288,6 +291,9 @@ func (m *Manager) Ensure(ctx context.Context, spec Spec, progress Progress) (str
 		return "", err
 	}
 	progress("ready", "Environment ready")
+	if m.Installed != nil {
+		m.Installed(spec)
+	}
 	return m.PythonPath(spec.Name), nil
 }
 

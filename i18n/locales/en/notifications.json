@@ -188,7 +188,11 @@
     "newerModelsBody": "{{model}} is newer than {{installed}}. Models › Installed shows how it fits and installs it beside the one you have.",
     "pageNotOpened": "{{automation}} didn't open {{page}}",
     "pageNotOpenedUnnamed": "An automation didn't open {{page}}",
-    "pageNotOpenedBody": "Its model answered without reading the page, so the result may be made up. Choose a model that can use tools for this automation."
+    "pageNotOpenedBody": "Its model answered without reading the page, so the result may be made up. Choose a model that can use tools for this automation.",
+    "runtimeUpgraded": "{{runtime}} was updated for this computer",
+    "runtimeUpgradedBody": "Toskar downloaded a faster {{runtime}} build that uses this computer's graphics and replaced the one installed. It's listed in What left this computer.",
+    "imagesUpdated": "Picture engine updated to {{release}}",
+    "imagesUpdatedBody": "Toskar downloaded stable-diffusion.cpp {{release}} for this version and removed the earlier release. It's listed in What left this computer."
   },
   "sent": {
     "times": "{{title}} ({{count}} times)",

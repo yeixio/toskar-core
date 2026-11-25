@@ -39,6 +39,10 @@ const (
 	ProblemReport = "problem_report"
 	// ComfyUI is a workflow run on a ComfyUI on another computer (#958).
 	ComfyUI = "comfyui"
+	// Download is a program or package Toskar downloaded by itself: a
+	// faster llama.cpp build, a stable-diffusion.cpp update, or Python and
+	// its packages for a feature's first use (#1209).
+	Download = "download"
 )
 
 // Sources of a run.

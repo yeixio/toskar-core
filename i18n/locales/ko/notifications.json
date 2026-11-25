@@ -180,7 +180,11 @@
     "newerModelsBody": "{{model}}은(는) {{installed}}보다 새로운 모델입니다. 모델 › 설치됨에서 이 컴퓨터에 얼마나 맞는지 보고 지금 모델 옆에 설치할 수 있습니다.",
     "pageNotOpened": "{{automation}}에서 {{page}}을(를) 열지 않았어요",
     "pageNotOpenedUnnamed": "자동화에서 {{page}}을(를) 열지 않았어요",
-    "pageNotOpenedBody": "모델이 페이지를 읽지 않고 답해서 결과가 지어낸 것일 수 있어요. 이 자동화에는 도구를 사용할 수 있는 모델을 선택하세요."
+    "pageNotOpenedBody": "모델이 페이지를 읽지 않고 답해서 결과가 지어낸 것일 수 있어요. 이 자동화에는 도구를 사용할 수 있는 모델을 선택하세요.",
+    "runtimeUpgraded": "이 컴퓨터에 맞게 {{runtime}}을(를) 업데이트했습니다",
+    "runtimeUpgradedBody": "Toskar가 이 컴퓨터의 그래픽을 사용하는 더 빠른 {{runtime}} 빌드를 내려받아 설치된 빌드를 교체했습니다. '이 컴퓨터 밖으로 나간 데이터'에 기록되어 있습니다.",
+    "imagesUpdated": "이미지 엔진을 {{release}}(으)로 업데이트했습니다",
+    "imagesUpdatedBody": "Toskar가 이 버전용 stable-diffusion.cpp {{release}}을(를) 내려받고 이전 릴리스를 삭제했습니다. '이 컴퓨터 밖으로 나간 데이터'에 기록되어 있습니다."
   },
   "sent": {
     "times": "{{title}} ({{count}}회)",

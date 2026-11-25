@@ -242,7 +242,8 @@
       "comfyui": "ComfyUI",
       "problem_report": "Segnalazione",
       "news": "Notizie sull’IA",
-      "link_check": "Controllo link"
+      "link_check": "Controllo link",
+      "download": "Download"
     },
     "kindsLower": {
       "web_search": "ricerca web",
@@ -257,7 +258,8 @@
       "comfyui": "ComfyUI",
       "problem_report": "segnalazione",
       "news": "notizie sull’IA",
-      "link_check": "controllo link"
+      "link_check": "controllo link",
+      "download": "download"
     },
     "sources": {
       "chat": "Chat",

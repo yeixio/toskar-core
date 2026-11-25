@@ -50,6 +50,9 @@ func (s *Setup) update(ctx context.Context) error {
 	for _, dir := range s.earlierReleases() {
 		_ = os.RemoveAll(dir)
 	}
+	if s.Updated != nil {
+		s.Updated(archive.Name)
+	}
 	if s.Changed != nil {
 		s.Changed()
 	}

@@ -197,7 +197,11 @@
     "newerModelsBody": "{{model}} é mais novo que {{installed}}. Em Modelos › Instalados você vê como ele se encaixa e pode instalá-lo ao lado do que você tem.",
     "pageNotOpened": "{{automation}} não abriu {{page}}",
     "pageNotOpenedUnnamed": "Uma automação não abriu {{page}}",
-    "pageNotOpenedBody": "O modelo respondeu sem ler a página, então o resultado pode ser inventado. Escolha para esta automação um modelo que saiba usar ferramentas."
+    "pageNotOpenedBody": "O modelo respondeu sem ler a página, então o resultado pode ser inventado. Escolha para esta automação um modelo que saiba usar ferramentas.",
+    "runtimeUpgraded": "{{runtime}} foi atualizado para este computador",
+    "runtimeUpgradedBody": "O Toskar baixou uma versão mais rápida do {{runtime}} que usa a placa de vídeo deste computador e substituiu a instalada. Ela aparece em O que saiu deste computador.",
+    "imagesUpdated": "Motor de imagens atualizado para {{release}}",
+    "imagesUpdatedBody": "O Toskar baixou o stable-diffusion.cpp {{release}} para esta versão e removeu a anterior. Isso aparece em O que saiu deste computador."
   },
   "sent": {
     "times": "{{title}} ({{count}} vezes)",
