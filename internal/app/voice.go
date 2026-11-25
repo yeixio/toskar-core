@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/yeixio/toskar-core/internal/replylang"
 	"github.com/yeixio/toskar-core/internal/speech"
 	"github.com/yeixio/toskar-core/internal/turnopts"
 	"github.com/yeixio/toskar-core/internal/voice"
@@ -149,6 +150,22 @@ func (c *voiceChat) Respond(ctx context.Context, text string, delta func(string)
 	}
 	cancel()
 	return ctx.Err()
+}
+
+// AnswerLanguage is the language the chat tells the model to answer text
+// in, when the person's words or settings say it: the voice reads the
+// whole answer in it. A guess from nothing (the App or computer language
+// when the person said too little to tell) is left to the answer itself.
+func (c *voiceChat) AnswerLanguage(_ context.Context, text string) string {
+	c.mu.Lock()
+	id := c.conversationID
+	c.mu.Unlock()
+	d := c.app.replyLanguage(c.ctx, id, text, "")
+	switch d.Source {
+	case replylang.FromRequest, replylang.FromMessage, replylang.FromConversation, replylang.FromSetting:
+		return d.Tag
+	}
+	return ""
 }
 
 // spokenStyle is how an answer in live voice mode is written: it's heard,

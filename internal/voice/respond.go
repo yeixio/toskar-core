@@ -34,6 +34,13 @@ func (s *Session) respond(text string, stoppedAt time.Time, sttMs int64) {
 	audio := s.speaks()
 	s.response = r
 	s.mu.Unlock()
+	if l, ok := s.parts.Responder.(AnswerLanguager); ok && lang == "" {
+		if lang = l.AnswerLanguage(ctx, text); lang != "" {
+			s.mu.Lock()
+			s.lastLang = lang
+			s.mu.Unlock()
+		}
+	}
 	defer func() {
 		cancel()
 		s.mu.Lock()
