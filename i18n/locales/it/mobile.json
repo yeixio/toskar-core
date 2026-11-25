@@ -1342,5 +1342,32 @@
     "adminOnly": "Solo gli amministratori del tuo computer possono scegliere le voci.",
     "automatic": "Automatica ({{voice}})",
     "standard": "Standard"
+  },
+  "keyboard": {
+    "name": "Tastiera Toskar",
+    "ask": "Chiedi",
+    "rewrite": "Riscrivi",
+    "fix": "Correggi",
+    "working": "Sto scrivendo…",
+    "cancel": "Annulla",
+    "ok": "OK",
+    "undo": "Annulla modifica",
+    "empty": "Prima scrivi o seleziona del testo.",
+    "failed": "Toskar non è riuscito a rispondere. Apri l'app per controllare la connessione.",
+    "shift": "Maiuscole",
+    "delete": "Elimina",
+    "space": "Spazio",
+    "enter": "Invio",
+    "next": "Tastiera successiva",
+    "symbols": "Simboli",
+    "letters": "Lettere",
+    "settings": {
+      "title": "Tastiera Toskar",
+      "off": "Scrivi ovunque, poi tocca Chiedi, Riscrivi o Correggi sopra i tasti perché Toskar risponda o migliori ciò che hai scritto. Attivala nelle impostazioni della tastiera di Android.",
+      "on": "È attiva. Passa a questa tastiera con il pulsante della tastiera mentre scrivi.",
+      "privacy": "Ciò che scrivi resta su questo telefono e la tastiera non conserva nulla. Solo il testo che invii con Chiedi, Riscrivi o Correggi va al tuo computer o ai modelli di questo telefono. Nei campi password si limita a scrivere.",
+      "turnOn": "Attiva la tastiera",
+      "choose": "Cambia tastiera"
+    }
   }
 }
