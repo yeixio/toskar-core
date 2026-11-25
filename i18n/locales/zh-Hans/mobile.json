@@ -1418,5 +1418,33 @@
     },
     "adminOnly": "只有电脑的管理员才能设置功能。",
     "failed": "无法设置：{{why}}"
+  },
+  "voiceMode": {
+    "start": "说话",
+    "startHint": "和 Toskar 出声对话：它用语音回答，你开口说话就能打断它",
+    "title": "语音模式",
+    "connectFailed": "无法连接到语音模式。请稍后再试。",
+    "failed": "语音模式出了问题。",
+    "micFailed": "无法启动麦克风。",
+    "muted": "麦克风已关闭",
+    "you": "你：",
+    "waited": "你说完后 {{seconds}} 秒回答",
+    "mute": "静音",
+    "unmute": "取消静音",
+    "end": "结束",
+    "hint": "随时可以说话。在回答时开口即可打断。",
+    "micDenied": "Toskar 无法使用麦克风。请在设置中允许后再说话。",
+    "status": {
+      "connecting": "正在连接…",
+      "listening": "正在听",
+      "hearing": "听到你了",
+      "thinking": "正在思考…",
+      "speaking": "正在说",
+      "closed": "语音模式已结束",
+      "failed": "语音模式已停止"
+    },
+    "notice": "语音模式已开启",
+    "using": "声音：{{name}}",
+    "unavailable": "此版本的应用不支持语音模式。请从应用商店更新。"
   }
 }

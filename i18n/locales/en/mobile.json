@@ -1438,5 +1438,33 @@
     },
     "adminOnly": "Only your computer's admins can set up features.",
     "failed": "Couldn't set this up: {{why}}"
+  },
+  "voiceMode": {
+    "start": "Talk",
+    "startHint": "Talk with Toskar out loud: it answers in a voice, and you can talk over it to stop it",
+    "title": "Voice mode",
+    "connectFailed": "Couldn't connect to voice mode. Try again in a moment.",
+    "failed": "Something went wrong with voice mode.",
+    "micFailed": "The microphone couldn't be started.",
+    "muted": "Microphone off",
+    "you": "You:",
+    "waited": "Answered {{seconds}} s after you stopped",
+    "mute": "Mute",
+    "unmute": "Unmute",
+    "end": "End",
+    "hint": "Speak whenever you like. Talk over an answer to stop it.",
+    "micDenied": "Toskar can't use the microphone. Allow it in Settings to talk.",
+    "status": {
+      "connecting": "Connecting…",
+      "listening": "Listening",
+      "hearing": "Hearing you",
+      "thinking": "Thinking…",
+      "speaking": "Speaking",
+      "closed": "Voice mode ended",
+      "failed": "Voice mode stopped"
+    },
+    "notice": "Voice mode is on",
+    "using": "Sound: {{name}}",
+    "unavailable": "This version of the app can't do voice mode. Update it from the store."
   }
 }
