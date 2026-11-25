@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Toskar Control Plane API
-  version: "1.117"
+  version: "1.119"
   description: >-
     Local AI control plane API for Toskar, its OpenAI-compatible routes, and its MCP server.
     On the default loopback bind no key is needed. When the daemon listens on any other address,
@@ -53,6 +53,8 @@ tags:
     description: "Health, versions, logs, diagnostics, the events stream, and news."
   - name: OpenAI-compatible
     description: "Chat completions and models for OpenAI's SDKs and other OpenAI clients."
+  - name: Ollama-compatible
+    description: "Ollama's API, for apps that offer only Ollama (#1356)."
   - name: MCP
     description: "Toskar as an MCP server, for Claude, Cursor, VS Code, and others."
 paths:
@@ -2895,6 +2897,188 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/OpenAIModelList"
+  /api/tags:
+    get:
+      summary: Ollama-compatible model list
+      description: >-
+        Ollama's API, for apps that offer only Ollama (#1356, contract 1.120). Keys and permissions are as on /v1/chat/completions, and errors are Ollama's {"error": message}. Lists auto, each profile, and what else the key may ask for, as /v1/models does.
+      operationId: ollamaTags
+      tags: [Ollama-compatible]
+      responses:
+        "200":
+          description: Ollama's answer
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OllamaAnswer"
+  /api/chat:
+    post:
+      summary: Ollama-compatible chat
+      description: >-
+        Ollama's API, for apps that offer only Ollama (#1356, contract 1.120). Keys and permissions are as on /v1/chat/completions, and errors are Ollama's {"error": message}. Answered through /v1/chat/completions, so Auto and profiles behave the same. Streams a JSON object per line unless stream is false. Images, format (json or a JSON schema), think, and options (temperature, top_p, top_k, min_p, seed, num_predict, stop) are passed on; an app's tools reach the model on raw:<model>. A model name's :latest is ignored.
+      operationId: ollamaChat
+      tags: [Ollama-compatible]
+      responses:
+        "200":
+          description: Ollama's answer
+          content:
+            application/x-ndjson:
+              schema:
+                $ref: "#/components/schemas/OllamaAnswer"
+  /api/generate:
+    post:
+      summary: Ollama-compatible completion
+      description: >-
+        Ollama's API, for apps that offer only Ollama (#1356, contract 1.120). Keys and permissions are as on /v1/chat/completions, and errors are Ollama's {"error": message}. A prompt with an optional system prompt and images, answered as /api/chat answers; an empty prompt answers done_reason load.
+      operationId: ollamaGenerate
+      tags: [Ollama-compatible]
+      responses:
+        "200":
+          description: Ollama's answer
+          content:
+            application/x-ndjson:
+              schema:
+                $ref: "#/components/schemas/OllamaAnswer"
+  /api/show:
+    post:
+      summary: Ollama-compatible model details
+      description: >-
+        Ollama's API, for apps that offer only Ollama (#1356, contract 1.120). Keys and permissions are as on /v1/chat/completions, and errors are Ollama's {"error": message}. Capabilities are completion and vision for auto and profiles, and completion and tools for raw: and swarm: models; an unknown model answers 404.
+      operationId: ollamaShow
+      tags: [Ollama-compatible]
+      responses:
+        "200":
+          description: Ollama's answer
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OllamaAnswer"
+  /api/ps:
+    get:
+      summary: Ollama-compatible running models
+      description: >-
+        Ollama's API, for apps that offer only Ollama (#1356, contract 1.120). Keys and permissions are as on /v1/chat/completions, and errors are Ollama's {"error": message}. Toskar starts and stops models itself, so the list is empty.
+      operationId: ollamaPs
+      tags: [Ollama-compatible]
+      responses:
+        "200":
+          description: Ollama's answer
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OllamaAnswer"
+  /api/version:
+    get:
+      summary: Ollama API version
+      description: >-
+        Ollama's API, for apps that offer only Ollama (#1356, contract 1.120). Keys and permissions are as on /v1/chat/completions, and errors are Ollama's {"error": message}. The Ollama API version these endpoints follow.
+      operationId: ollamaVersion
+      tags: [Ollama-compatible]
+      responses:
+        "200":
+          description: Ollama's answer
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OllamaAnswer"
+  /api/embed:
+    post:
+      summary: Ollama-compatible embeddings
+      description: >-
+        Ollama's API, for apps that offer only Ollama (#1356, contract 1.120). Keys and permissions are as on /v1/chat/completions, and errors are Ollama's {"error": message}. Embeds input (a string or strings) with the embedding model knowledge uses; /api/embeddings takes the older prompt and answers {embedding}. With none installed it answers 400.
+      operationId: ollamaEmbed
+      tags: [Ollama-compatible]
+      responses:
+        "200":
+          description: Ollama's answer
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OllamaAnswer"
+  /api/pull:
+    post:
+      summary: Ollama model management
+      description: >-
+        Ollama's API, for apps that offer only Ollama (#1356, contract 1.120). Keys and permissions are as on /v1/chat/completions, and errors are Ollama's {"error": message}. pull, push, create, copy, and delete answer 403: Toskar manages its models on its Models page.
+      operationId: ollamaPull
+      tags: [Ollama-compatible]
+      responses:
+        "200":
+          description: Ollama's answer
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OllamaAnswer"
+  /api/embeddings:
+    post:
+      summary: Ollama-compatible embeddings, older form
+      description: >-
+        Ollama's API (#1356, contract 1.120). One prompt, answered as {embedding}, with the embedding model /api/embed uses.
+      operationId: ollamaEmbeddings
+      tags: [Ollama-compatible]
+      responses:
+        "200":
+          description: Ollama's answer
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OllamaAnswer"
+  /api/push:
+    post:
+      summary: Ollama model management
+      description: >-
+        Ollama's API (#1356, contract 1.120). Answers 403: Toskar manages its models on its Models page.
+      operationId: ollamaPush
+      tags: [Ollama-compatible]
+      responses:
+        "200":
+          description: Ollama's answer
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OllamaAnswer"
+  /api/create:
+    post:
+      summary: Ollama model management
+      description: >-
+        Ollama's API (#1356, contract 1.120). Answers 403: Toskar manages its models on its Models page.
+      operationId: ollamaCreate
+      tags: [Ollama-compatible]
+      responses:
+        "200":
+          description: Ollama's answer
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OllamaAnswer"
+  /api/copy:
+    post:
+      summary: Ollama model management
+      description: >-
+        Ollama's API (#1356, contract 1.120). Answers 403: Toskar manages its models on its Models page.
+      operationId: ollamaCopy
+      tags: [Ollama-compatible]
+      responses:
+        "200":
+          description: Ollama's answer
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OllamaAnswer"
+  /api/delete:
+    delete:
+      summary: Ollama model management
+      description: >-
+        Ollama's API (#1356, contract 1.120). Answers 403: Toskar manages its models on its Models page.
+      operationId: ollamaDelete
+      tags: [Ollama-compatible]
+      responses:
+        "200":
+          description: Ollama's answer
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OllamaAnswer"
   /v1/messages:
     post:
       summary: Anthropic-compatible messages, for coding agents
@@ -8000,6 +8184,10 @@ components:
       scheme: bearer
       description: An API key from the API Access page, or TOSKAR_API_KEY
   schemas:
+    OllamaAnswer:
+      type: object
+      description: An Ollama API answer, in the shape Ollama gives for the endpoint (#1356)
+      additionalProperties: true
     VoiceSettings:
       type: object
       description: The Voice settings (#1304, contract 1.112)

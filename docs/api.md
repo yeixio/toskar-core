@@ -1093,6 +1093,19 @@ curl -s http://127.0.0.1:7331/v1/chat/completions \
   -d '{"model": "swarm:general-assistant", "messages": [{"role": "user", "content": "Plan a three-day trip to Juneau"}]}'
 ```
 
+### Ollama's API (#1356)
+
+Apps that offer only Ollama, such as Home Assistant's Ollama integration, Obsidian plugins and editor plugins, can use Toskar: give the app Toskar's address, such as `http://127.0.0.1:7331`, as its Ollama server (contract 1.120). Requests go through `/v1/chat/completions`, so Auto, profiles, keys and their permissions are the same, and a chat-only key may use the asking routes below.
+
+- **`GET /api/tags`** lists what `/v1/models` lists for the key: `auto`, each `profile:<id>`, and `raw:<model>` for a key with raw access. A name's `:latest` is ignored.
+- **`POST /api/chat`** and **`POST /api/generate`** answer with Ollama's shapes, a JSON object per line (`application/x-ndjson`) unless `stream` is `false`, ending with `done`, `done_reason`, `prompt_eval_count`, `eval_count` and `total_duration`. `images`, `format` (`"json"` or a JSON schema), `think` (`false` turns thinking off; on, it comes back as `thinking`), and `options` (`temperature`, `top_p`, `top_k`, `min_p`, `seed`, `num_predict`, `stop`) are passed on. An app's own `tools` reach the model on `raw:<model>`, and its calls come back in `message.tool_calls` with object arguments; Auto and profiles use Toskar's own tools. An empty request answers `done_reason: "load"`.
+- **`POST /api/show`** says a model's `capabilities`: `completion` and `vision` for Auto and profiles, `completion` and `tools` for `raw:` and `swarm:` models, or 404.
+- **`GET /api/ps`** is empty, since Toskar starts and stops models itself, and **`GET /api/version`** is the Ollama API version these follow.
+- **`POST /api/embed`** (`input`, a string or strings) and the older **`POST /api/embeddings`** (`prompt`) use the embedding model knowledge uses, or answer 400 when none is installed.
+- **`pull`, `push`, `create`, `copy` and `delete`** answer 403: models are installed and removed on the Models page.
+
+Errors are Ollama's `{"error": "message"}`; one during a stream is its last line.
+
 ## GPU acceleration
 
 When llama-server loads a model, it logs which devices it found, how many of the model's layers it put on a GPU, and the memory it took there. The daemon reads that log, so `GET /models/running` reports each model's `acceleration`:
