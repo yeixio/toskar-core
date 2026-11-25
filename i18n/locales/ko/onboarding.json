@@ -57,7 +57,9 @@
     "use": "이 설정 사용",
     "skip": "나중에 하기",
     "back": "뒤로",
-    "fits": "{{name}}은(는) 이 컴퓨터의 메모리 {{memory}}에 맞습니다."
+    "fits": "{{name}}은(는) 이 컴퓨터의 메모리 {{memory}}에 맞습니다.",
+    "onHand": "{{name}}이(가) 이미 이 컴퓨터에 있어요. 다운로드 없이 바로 쓸 수 있어요.",
+    "useOnHand": "{{name}} 사용"
   },
   "roles": {
     "coordinator": "코디네이터",

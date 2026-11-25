@@ -59,7 +59,9 @@
     "use": "Usar esta configuração",
     "skip": "Pular por enquanto",
     "back": "Voltar",
-    "fits": "{{name}} cabe nos {{memory}} de memória deste computador."
+    "fits": "{{name}} cabe nos {{memory}} de memória deste computador.",
+    "onHand": "{{name}} já está neste computador. Você pode usá-lo agora, sem baixar nada.",
+    "useOnHand": "Usar {{name}}"
   },
   "roles": {
     "coordinator": "Coordenador",

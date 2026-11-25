@@ -18,7 +18,8 @@ import {
   purposeToApiQuery,
 } from '@/lib/profilePresets'
 import { useUIStore } from '@/stores/uiStore'
-import type { ModelDownloadProgressPayload, Purpose, Recommendation } from '@/types/api'
+import type { Model, ModelDownloadProgressPayload, Purpose, Recommendation } from '@/types/api'
+import { modelOnHand, withModelOnHand } from './onHand'
 import { ShownError, shownError } from '@/components/ui/ShownError'
 import { formatPercent } from '@/i18n/format'
 import { profileName } from '@/features/profiles/profilePresentation'
@@ -44,6 +45,8 @@ export function OnboardingPage() {
   const [step, setStep] = useState<OnboardingStep>('setup')
   const [selectedPurpose, setSelectedPurpose] = useState<Purpose>('general')
   const [recommendation, setRecommendation] = useState<Recommendation | null>(null)
+  // A chat model already here, such as one added from a file (#1214).
+  const [onHand, setOnHand] = useState<Model | null>(null)
   const [installError, setInstallError] = useState<ReturnType<typeof shownError> | null>(null)
   const [phase, setPhase] = useState<InstallPhase>('runtime')
   const [phaseDetail, setPhaseDetail] = useState('')
@@ -57,10 +60,17 @@ export function OnboardingPage() {
   })
 
   const recommendMutation = useMutation({
-    mutationFn: () => api.recommendModels(purposeToApiQuery(selectedPurpose)),
-    onSuccess: (rec) => {
+    mutationFn: async () => {
+      const [rec, models] = await Promise.all([
+        api.recommendModels(purposeToApiQuery(selectedPurpose)),
+        api.getModels().catch(() => [] as Model[]),
+      ])
+      return { rec, models: models ?? [] }
+    },
+    onSuccess: ({ rec, models }) => {
       if (rec) {
         setRecommendation(rec)
+        setOnHand(modelOnHand(rec, models))
         setStep('recommend')
       }
     },
@@ -408,10 +418,23 @@ export function OnboardingPage() {
 
           {installError && <ShownError {...installError} className="mb-4 rounded-lg bg-danger/10 px-4 py-3 text-sm text-danger" />}
 
+          {onHand ? (
+            <p className="mb-3 text-center text-sm text-ink-muted">{t('recommend.onHand', { name: onHand.display_name || onHand.id })}</p>
+          ) : null}
           <div className="flex flex-wrap justify-center gap-3">
+            {onHand ? (
+              <button
+                type="button"
+                className="btn-primary px-8"
+                onClick={() => installMutation.mutate(withModelOnHand(recommendation, onHand))}
+                disabled={installMutation.isPending}
+              >
+                {t('recommend.useOnHand', { name: onHand.display_name || onHand.id })}
+              </button>
+            ) : null}
             <button
               type="button"
-              className="btn-primary px-8"
+              className={onHand ? 'btn-secondary px-6' : 'btn-primary px-8'}
               onClick={() => installMutation.mutate(recommendation)}
               disabled={installMutation.isPending}
             >
