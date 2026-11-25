@@ -340,3 +340,67 @@ func TestDoorVisitThinkingSound(t *testing.T) {
 		}
 	}
 }
+
+// hearingEars hears each thing in a language, sure or not, and keeps the
+// language it was asked to listen in.
+type hearingEars struct {
+	heard []voice.Heard
+	n     int
+	asked []string
+}
+
+func (h *hearingEars) Transcribe(ctx context.Context, wav []byte, language string) (string, error) {
+	got, err := h.Hear(ctx, wav, language)
+	return got.Text, err
+}
+
+func (h *hearingEars) Hear(_ context.Context, wav []byte, language string) (voice.Heard, error) {
+	samples, _, err := voice.ParseWAV(wav)
+	if err != nil || len(samples) < connectors.ReolinkListenRate/4 {
+		return voice.Heard{}, err
+	}
+	h.asked = append(h.asked, language)
+	if language == "" {
+		h.n++
+	}
+	return h.heard[h.n-1], nil
+}
+
+// A visitor who speaks Spanish is answered in Spanish, and heard in it when
+// Whisper is unsure of a short reply; the household is told in its own
+// language which one the visitor spoke (#1322).
+func TestDoorVisitFollowsTheVisitorsLanguage(t *testing.T) {
+	ctx := context.Background()
+	auto := automations.Automation{Schedule: automations.Schedule{TimeZone: "UTC"},
+		Say: &automations.Say{Connector: automations.SayReolink, Device: "camera", Listen: true}}
+	door := &visitDoor{audio: make(chan []int16, 1000), spoke: make(chan struct{}, 10), visitor: 2}
+	speaker := &fakeDoorVoice{}
+	ears := &hearingEars{heard: []voice.Heard{
+		{Text: "Hola, traigo un paquete para la familia.", Language: "es", Confidence: 0.95},
+		{Text: "Sí.", Language: "pt", Confidence: 0.3},
+	}}
+	var replied []string
+	answers := []string{"Hola, ¿necesita una firma?", "Gracias, se lo diré. [Done]"}
+	v := &doorVisit{ear: door, talk: door, parts: voice.Parts{Transcriber: ears, Speaker: speaker}, automation: auto, lang: "en",
+		reply: func(ctx context.Context, _ []doorLine) (string, error) {
+			replied = append(replied, voice.HeardLanguage(ctx))
+			return answers[len(replied)-1], nil
+		},
+		wait: 2 * time.Second, longest: 5 * time.Second, echo: 30 * time.Millisecond}
+	if _, err := v.run(ctx, "Hello there, can I help you?"); err != nil {
+		t.Fatal(err)
+	}
+	// Detected the first time; the unsure "Sí." is heard again in Spanish.
+	if strings.Join(ears.asked, ",") != ",,es" {
+		t.Fatalf("listened in %q", ears.asked)
+	}
+	if strings.Join(replied, ",") != "es,es" {
+		t.Fatalf("answered in %q", replied)
+	}
+	if got := summaryLanguage(v.lang, v.spoken); !strings.Contains(got, "in English") || !strings.Contains(got, "The visitor spoke Spanish") {
+		t.Fatalf("summary language: %q", got)
+	}
+	if got := summaryLanguage("de-DE", "de"); strings.Contains(got, "visitor spoke") || !strings.Contains(got, "German") {
+		t.Fatalf("same language: %q", got)
+	}
+}

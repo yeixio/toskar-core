@@ -7,6 +7,7 @@ import (
 
 	"github.com/yeixio/toskar-core/internal/automations"
 	"github.com/yeixio/toskar-core/internal/replylang"
+	"github.com/yeixio/toskar-core/internal/voice"
 )
 
 // replyLanguage is the language a turn's answer is written in (multilingual
@@ -20,7 +21,8 @@ import (
 // the assistant language setting: "" or "account" keeps the setting, "app"
 // the App language, "auto" the request's language, or a language tag.
 func (a *App) replyLanguage(ctx context.Context, conversationID, message, response string) replylang.Decision {
-	in := replylang.Input{Mode: replylang.ModeAuto, Message: message, System: systemLanguage()}
+	// The language the message was spoken in, in voice chat or at the door (#1322).
+	in := replylang.Input{Mode: replylang.ModeAuto, Message: message, System: systemLanguage(), Spoken: voice.HeardLanguage(ctx)}
 	if a.Settings != nil {
 		in.Mode = a.personalString(ctx, "assistant_language_mode", replylang.ModeAuto)
 		in.Setting = a.personalString(ctx, "assistant_language", "")

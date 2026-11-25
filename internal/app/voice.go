@@ -52,6 +52,17 @@ func (t workerTurns) Transcribe(ctx context.Context, wav []byte, language string
 	return t.w.Transcribe(ctx, pcm, "fast", language)
 }
 
+// Hear is Transcribe with the language it heard (#1322).
+func (t workerTurns) Hear(ctx context.Context, wav []byte, language string) (voice.Heard, error) {
+	samples, rate, err := voice.ParseWAV(wav)
+	if err != nil {
+		return voice.Heard{}, err
+	}
+	pcm := voice.EncodePCM16(voice.Resample(samples, rate, whisperRate))
+	text, heard, sure, err := t.w.Hear(ctx, pcm, "fast", language)
+	return voice.Heard{Text: text, Language: heard, Confidence: sure}, err
+}
+
 type workerVoice struct{ w *speech.Worker }
 
 func (v workerVoice) Speak(ctx context.Context, text, voiceName, language string) ([]int16, error) {
@@ -95,7 +106,7 @@ func (c *voiceChat) Respond(ctx context.Context, text string, delta func(string)
 	id := c.conversationID
 	c.mu.Unlock()
 	// Who's asking, from the session's request; stopped with the answer.
-	turn, cancel := context.WithCancel(context.WithoutCancel(c.ctx))
+	turn, cancel := context.WithCancel(voice.WithHeardLanguage(context.WithoutCancel(c.ctx), voice.HeardLanguage(ctx)))
 	go func() {
 		select {
 		case <-ctx.Done():
@@ -156,13 +167,13 @@ func (c *voiceChat) Respond(ctx context.Context, text string, delta func(string)
 // in, when the person's words or settings say it: the voice reads the
 // whole answer in it. A guess from nothing (the App or computer language
 // when the person said too little to tell) is left to the answer itself.
-func (c *voiceChat) AnswerLanguage(_ context.Context, text string) string {
+func (c *voiceChat) AnswerLanguage(ctx context.Context, text string) string {
 	c.mu.Lock()
 	id := c.conversationID
 	c.mu.Unlock()
-	d := c.app.replyLanguage(c.ctx, id, text, "")
+	d := c.app.replyLanguage(voice.WithHeardLanguage(c.ctx, voice.HeardLanguage(ctx)), id, text, "")
 	switch d.Source {
-	case replylang.FromRequest, replylang.FromMessage, replylang.FromConversation, replylang.FromSetting:
+	case replylang.FromRequest, replylang.FromMessage, replylang.FromSpeech, replylang.FromConversation, replylang.FromSetting:
 		return d.Tag
 	}
 	return ""

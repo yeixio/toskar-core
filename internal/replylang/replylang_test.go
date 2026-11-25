@@ -85,6 +85,9 @@ func TestResolve(t *testing.T) {
 		{"same as app with the system language", Input{Mode: ModeApp, System: "it_IT", Message: "hi"}, Decision{"it-IT", FromSystem}},
 		{"pseudo-locales answer in English", Input{Mode: ModeApp, App: "en-XA", Message: "hi"}, Decision{"en", FromDefault}},
 		{"nothing to go on", Input{Message: "👍"}, Decision{"en", FromDefault}},
+		{"auto follows the language a short message was spoken in", Input{App: "en", Message: "¿Hola?", Spoken: "es"}, Decision{"es", FromSpeech}},
+		{"the text wins over the language heard", Input{App: "en", Message: "What is the tallest mountain in Europe?", Spoken: "pt"}, Decision{"en", FromMessage}},
+		{"a chosen language wins over the language heard", Input{Mode: ModeLanguage, Setting: "de", Message: "ok", Spoken: "es"}, Decision{"de", FromSetting}},
 	}
 	for _, c := range cases {
 		if got := Resolve(c.in); got != c.want {

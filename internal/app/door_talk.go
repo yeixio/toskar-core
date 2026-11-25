@@ -13,6 +13,7 @@ import (
 	"github.com/yeixio/toskar-core/internal/connectors"
 	"github.com/yeixio/toskar-core/internal/egress"
 	"github.com/yeixio/toskar-core/internal/locale"
+	"github.com/yeixio/toskar-core/internal/replylang"
 	"github.com/yeixio/toskar-core/internal/turnopts"
 	"github.com/yeixio/toskar-core/internal/voice"
 	"github.com/yeixio/toskar-core/pkg/pluginapi"
@@ -100,7 +101,11 @@ type doorVisit struct {
 	talk       doorTalker
 	parts      voice.Parts
 	automation automations.Automation
-	lang       string
+	// lang is the household's language, which the greeting is in.
+	lang string
+	// spoken is the language the visitor speaks, once heard with
+	// confidence (#1322).
+	spoken string
 	// reply answers what the visitor just said, given the visit so far.
 	reply func(ctx context.Context, lines []doorLine) (string, error)
 	now   func() time.Time
@@ -155,9 +160,13 @@ func (v *doorVisit) run(ctx context.Context, greeting string) ([]doorLine, error
 		if err != nil {
 			return lines, err
 		}
-		heard, err := v.parts.Transcriber.Transcribe(ctx, voice.WAV(samples, connectors.ReolinkListenRate), v.lang)
+		heard, spoken, err := v.listen(ctx, voice.WAV(samples, connectors.ReolinkListenRate))
 		if err != nil {
 			return lines, fmt.Errorf("couldn't make out what the visitor said: %w", err)
+		}
+		if spoken != "" {
+			// Answer the visitor in the language they speak (#1322).
+			v.spoken = spoken
 		}
 		heard = strings.TrimSpace(heard)
 		if heard == "" {
@@ -165,7 +174,7 @@ func (v *doorVisit) run(ctx context.Context, greeting string) ([]doorLine, error
 		}
 		lines = append(lines, doorLine{Visitor: true, Text: heard})
 		stopThinking := v.thinking(ctx)
-		answer, err := v.reply(ctx, lines)
+		answer, err := v.reply(voice.WithHeardLanguage(ctx, v.spoken), lines)
 		if err != nil {
 			stopThinking()
 			return lines, err
@@ -173,7 +182,7 @@ func (v *doorVisit) run(ctx context.Context, greeting string) ([]doorLine, error
 		done := strings.Contains(strings.ToLower(answer), doneMark)
 		// In any case, such as [Done], so it's never said aloud (#1339).
 		answer = strings.TrimSpace(doneMarkRe.ReplaceAllString(answer, ""))
-		said, err := sayAnswer(ctx, v.parts.Speaker, v.talk, v.automation, answer, v.lang, v.now(), stopThinking)
+		said, err := sayAnswer(ctx, v.parts.Speaker, v.talk, v.automation, answer, v.speaking(), v.now(), stopThinking)
 		stopThinking()
 		if err != nil {
 			return lines, err
@@ -316,13 +325,27 @@ func (a *App) talkAtDoor(ctx context.Context, automation automations.Automation,
 		}
 		return "", nil
 	}
-	summary, sumErr := a.doorAnswer(context.WithoutCancel(ctx), automation, modelID, doorSummaryStyle, nil, transcript(lines, "en"))
+	summary, sumErr := a.doorAnswer(context.WithoutCancel(ctx), automation, modelID, doorSummaryStyle+summaryLanguage(lang, v.spoken), nil, transcript(lines, "en"))
 	if sumErr != nil {
 		summary = ""
 	}
 	summary = plainSummary(summary)
 	result := strings.TrimSpace(summary + "\n\n" + transcript(lines, lang))
 	return result, err
+}
+
+// summaryLanguage tells the summary to use the household's language, and to
+// say which one the visitor spoke when it was another (#1322): answer in
+// theirs, notify in mine.
+func summaryLanguage(household, visitor string) string {
+	if household == "" || household == "auto" {
+		household = "en"
+	}
+	line := " Write the note in " + replylang.Name(household) + "."
+	if visitor != "" && base(visitor) != base(household) {
+		line += " The visitor spoke " + replylang.Name(visitor) + "; say so in the note."
+	}
+	return line
 }
 
 var (
@@ -396,4 +419,38 @@ func (a *App) doorAnswer(ctx context.Context, automation automations.Automation,
 		b.WriteString(chunk.Content)
 	}
 	return strings.TrimSpace(b.String()), nil
+}
+
+// listen transcribes what the visitor said, and the language they said it
+// in when that's sure (#1322). When the language
+// isn't sure, it listens again in the visit's language so far, which
+// Whisper hears better than a guess.
+func (v *doorVisit) listen(ctx context.Context, wav []byte) (text, spoken string, err error) {
+	if _, ok := v.parts.Transcriber.(voice.LanguageHearer); !ok {
+		text, err = v.parts.Transcriber.Transcribe(ctx, wav, v.speaking())
+		return text, "", err
+	}
+	text, heard, err := voice.Hear(ctx, v.parts.Transcriber, wav, "")
+	if err != nil {
+		return "", "", err
+	}
+	if heard == "" {
+		text, err = v.parts.Transcriber.Transcribe(ctx, wav, v.speaking())
+		return text, "", err
+	}
+	return text, heard, nil
+}
+
+// speaking is the language the visit is in: the visitor's, once heard, or
+// the household's.
+func (v *doorVisit) speaking() string {
+	if v.spoken != "" {
+		return v.spoken
+	}
+	return v.lang
+}
+
+func base(tag string) string {
+	b, _, _ := strings.Cut(strings.ToLower(tag), "-")
+	return b
 }
