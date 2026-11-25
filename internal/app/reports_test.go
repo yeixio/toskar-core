@@ -44,6 +44,15 @@ func TestSendReport(t *testing.T) {
 	t.Cleanup(func() { _ = a.DB.Close() })
 	ctx := context.Background()
 
+	p0 := api.ProblemReport{Product: "core", Code: "EMPTY_ANSWER"}
+	// Off until an Admin turns it on (#1207): nothing goes.
+	if _, err := a.sendReport(ctx, p0); !errors.Is(err, errReportsOff) || len(got) != 0 {
+		t.Fatalf("default: %v, %d sent", err, len(got))
+	}
+	if err := a.applySettingsPatch(ctx, map[string]any{settingProblemReports: true}); err != nil {
+		t.Fatal(err)
+	}
+
 	p := api.ProblemReport{Product: "core", App: "web 1.9.0", Where: "Chat", Code: "EMPTY_ANSWER", Error: "No answer", Email: "me@example.com",
 		Report: &diagnostics.Report{Version: "1.9.0", Contract: "1.40"}}
 	sent, err := a.sendReport(ctx, p)

@@ -18,6 +18,7 @@ import (
 
 	"github.com/yeixio/toskar-core/internal/api"
 	"github.com/yeixio/toskar-core/internal/auth"
+	"github.com/yeixio/toskar-core/internal/config"
 	"github.com/yeixio/toskar-core/internal/relayclient"
 )
 
@@ -421,6 +422,17 @@ func TestMoveSubscriptionHere(t *testing.T) {
 // its own (#1257); before billing answers, none.
 func TestSubscriptionPricesFromBilling(t *testing.T) {
 	a, _, _ := newAnywhereApp(t)
+	// Nothing is asked until access from anywhere is on (#1207).
+	if p := a.subscription().Prices; p != nil {
+		t.Fatalf("prices with access from anywhere off: %+v", p)
+	}
+	time.Sleep(200 * time.Millisecond)
+	if p := a.subscription().Prices; p != nil {
+		t.Fatalf("billing was asked with access from anywhere off: %+v", p)
+	}
+	if err := a.Config.Update(func(c *config.Config) { c.RemoteAccess.Enabled, c.RemoteAccess.NoPortMapping = true, true }); err != nil {
+		t.Fatal(err)
+	}
 	if p := a.subscription().Prices; p != nil {
 		t.Fatalf("prices before billing answered: %+v", p)
 	}

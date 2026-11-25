@@ -719,9 +719,9 @@ export function SettingsPage({ section }: { section?: SettingsSection } = {}) {
                 </div>
                 <Toggle
                   label={t('news.show')}
-                  checked={settings?.ai_news ?? true}
+                  checked={settings?.ai_news ?? false}
                   disabled={busy}
-                  onChange={() => patch({ ai_news: !(settings?.ai_news ?? true) })}
+                  onChange={() => patch({ ai_news: !(settings?.ai_news ?? false) })}
                 />
               </div>
             </section>
@@ -757,9 +757,9 @@ export function SettingsPage({ section }: { section?: SettingsSection } = {}) {
                 </div>
                 <Toggle
                   label={t('reports.send')}
-                  checked={settings?.problem_reports ?? true}
+                  checked={settings?.problem_reports ?? false}
                   disabled={busy}
-                  onChange={() => patch({ problem_reports: !(settings?.problem_reports ?? true) })}
+                  onChange={() => patch({ problem_reports: !(settings?.problem_reports ?? false) })}
                 />
               </div>
             </section>

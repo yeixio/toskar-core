@@ -936,7 +936,7 @@ func New(opts Options) (*App, error) {
 		URL: config.Env("NEWS_URL"),
 		Dir: filepath.Join(cfg.DataDir, "news"),
 		On: func(ctx context.Context) bool {
-			on, err := settingsRepo.GetBool(ctx, news.Setting, true)
+			on, err := settingsRepo.GetBool(ctx, news.Setting, false)
 			return err == nil && on
 		},
 		Sent: func(ctx context.Context, host, detail string) {
@@ -1642,9 +1642,9 @@ func (a *App) settingsView(ctx context.Context) (contracts.SettingsView, error) 
 	communityRatings, _ := a.Settings.GetBool(ctx, ratings.SettingShow, false)
 	ratingsPrompts, _ := a.Settings.GetBool(ctx, ratings.SettingAsk, true)
 	updateCheck, _ := a.Settings.GetBool(ctx, updates.Setting, true)
-	aiNews, _ := a.Settings.GetBool(ctx, news.Setting, true)
+	aiNews, _ := a.Settings.GetBool(ctx, news.Setting, false)
 	checkLinks, _ := a.Settings.GetBool(ctx, settingCheckLinks, false)
-	problemReports, _ := a.Settings.GetBool(ctx, settingProblemReports, true)
+	problemReports, _ := a.Settings.GetBool(ctx, settingProblemReports, false)
 	toolTerminal, _ := a.Settings.GetString(ctx, "tool_terminal", "ask")
 	toolFiles, _ := a.Settings.GetString(ctx, "tool_file_writes", "ask")
 	toolGit, _ := a.Settings.GetString(ctx, "tool_git", "ask")

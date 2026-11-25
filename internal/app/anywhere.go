@@ -471,10 +471,12 @@ func (a *App) subscription() *api.Subscription {
 	out.Open, out.Error = a.anywhere.open, a.anywhere.lastError
 	out.Prices = a.anywhere.prices
 	// Whether the relay takes new subscriptions is asked only when Settings
-	// offers one (none yet, or one ended), never on its own, and answered
-	// on the next look; never by the App Store's copy, which doesn't offer
-	// it.
-	if (out.State == "none" || out.State == "ended") && !out.InAppOnly && !a.anywhere.asking && (a.anywhere.open == nil || a.anywhere.now().Sub(a.anywhere.openAt) >= availabilityFor) {
+	// offers one (none yet, or one ended) and access from anywhere is on,
+	// never on its own, and answered on the next look (#1207: nothing
+	// leaves until the person turns it on); never by the App Store's copy,
+	// which doesn't offer it.
+	asks := (out.State == "none" || out.State == "ended") && !out.InAppOnly && cfg.RemoteAccess.Enabled
+	if asks && !a.anywhere.asking && (a.anywhere.open == nil || a.anywhere.now().Sub(a.anywhere.openAt) >= availabilityFor) {
 		a.anywhere.asking = true
 		go func() {
 			a.relayOpen(context.Background())
@@ -484,7 +486,7 @@ func (a *App) subscription() *api.Subscription {
 		}()
 	}
 	// And what the plans cost, from billing, as the checkout charges.
-	if (out.State == "none" || out.State == "ended") && !out.InAppOnly && !a.anywhere.askingPrices && (a.anywhere.prices == nil || a.anywhere.now().Sub(a.anywhere.pricesAt) >= pricesFor) {
+	if asks && !a.anywhere.askingPrices && (a.anywhere.prices == nil || a.anywhere.now().Sub(a.anywhere.pricesAt) >= pricesFor) {
 		a.anywhere.askingPrices = true
 		go func() {
 			prices := a.billingPrices(context.Background())

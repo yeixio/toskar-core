@@ -22,7 +22,7 @@ import (
 // DefaultURL is the feed toskar.ai's news job writes.
 const DefaultURL = "https://toskar.ai/news.json"
 
-// Setting turns the news off (on by default).
+// Setting turns the news on: off until a person turns it on (#1207).
 const Setting = "ai_news"
 
 const (

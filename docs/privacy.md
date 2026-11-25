@@ -43,7 +43,23 @@ Use paired computers and local network access on a network you trust. Settings �
 
 ## What can leave the machine
 
-Nothing leaves because the daemon started. Traffic is sent only when a feature that talks to the network is used:
+Toskar sends nothing on its own except the update check. Everything else that reaches the internet is off until a person turns it on, or runs only when a person uses a feature (#1207).
+
+These are the calls Toskar can make without a request in a chat:
+
+| Call | Where to | What's sent | Default | Switch |
+| --- | --- | --- | --- | --- |
+| Update check | `toskar.ai/releases/latest.json` | The request, with Toskar's version in the user agent | On: a minute after start, then daily | Settings › About › Check for updates (`update_check`) |
+| AI news | `toskar.ai/news.json` | The request only, at most every six hours, when News is opened | Off | Settings › Privacy › AI news (`ai_news`) |
+| Problem reports | `toskar.ai/api/report` | What the person saw and chose to send, shown in full first | Off | Settings › Privacy › Problem reports (`problem_reports`) |
+| Relay availability and plan prices | Toskar's relay and its billing service | The requests only, when Settings › API Access offers a subscription | Off until access from anywhere is turned on | Settings › API Access › Access from anywhere |
+| Community ratings | Toskar's ratings service | See the Community ratings row below | Off | Settings › Privacy › Community ratings (`community_ratings`) |
+| Quality results | `raw.githubusercontent.com` (toskar-model-data) | The request only, when Models › Results is opened | Runs when that page is opened | None yet |
+| Push to the Toskar app | Toskar's relay (`relay.toskar.ai`), which passes it to Apple's or Google's push service | A notification's title and the page it opens, for phones paired with this computer | Added when a phone turns notifications on | Settings › Notifications, per destination |
+
+Each of these, apart from quality results, is listed in **What left this computer** (Settings › Privacy) when it's sent. Some downloads aren't logged there yet: Hugging Face, llama.cpp, Python and picture-engine runtimes, and fonts for made PDFs. Relay tunnel traffic isn't logged either. #1207 tracks recording them.
+
+Everything else is sent only when a feature that talks to the network is used:
 
 | Action | Where data goes |
 | --- | --- |
