@@ -98,7 +98,7 @@ func (t workerTurns) Hear(ctx context.Context, wav []byte, language string) (voi
 		return voice.Heard{}, err
 	}
 	pcm := voice.EncodePCM16(voice.Resample(samples, rate, whisperRate))
-	text, heard, sure, err := t.w.Hear(ctx, pcm, "fast", language)
+	text, heard, sure, err := t.w.Hear(ctx, pcm, firstNonEmpty(t.quality, "fast"), language)
 	return voice.Heard{Text: text, Language: heard, Confidence: sure}, err
 }
 
