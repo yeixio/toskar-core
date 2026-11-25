@@ -404,7 +404,11 @@
       "models": "See Models"
     },
     "standard": "Standard",
-    "noVoice": "{{languages}} can't be read aloud yet: read aloud, voice mode and the doorbell don't speak it."
+    "noVoice": "{{languages}} can't be read aloud yet: read aloud, voice mode and the doorbell don't speak it.",
+    "hearing": "How voice hears you",
+    "hearingHint": "Accurate hears noticeably better in a noisy room or with a far microphone, such as a webcam's. It answers a few tenths of a second later, downloads about 480 MB once, and uses about 500 MB more memory. For live voice and the doorbell.",
+    "hearingFast": "Fast",
+    "hearingAccurate": "Accurate"
   },
   "sections": {
     "account": "Account",

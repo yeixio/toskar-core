@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"sync"
+	"time"
 
 	"github.com/yeixio/toskar-core/internal/replylang"
 	"github.com/yeixio/toskar-core/internal/speech"
@@ -32,7 +33,7 @@ func (a *App) voiceParts(ctx context.Context) (voice.Parts, error) {
 		return voice.Parts{}, contracts.NewError("SPEECH_UNAVAILABLE", map[string]any{"detail": why}, errors.New(why))
 	}
 	return voice.Parts{
-		Transcriber: workerTurns{a.voiceWorker},
+		Transcriber: workerTurns{w: a.voiceWorker, quality: a.voiceHearing(ctx)},
 		Responder:   &voiceChat{app: a, ctx: ctx},
 		Speaker:     workerVoice{a.voiceWorker},
 	}, nil
@@ -41,7 +42,45 @@ func (a *App) voiceParts(ctx context.Context) (voice.Parts, error) {
 // whisperRate is the rate Whisper listens at.
 const whisperRate = 16000
 
-type workerTurns struct{ w *speech.Worker }
+// settingVoiceHearing is how voice mode and the door hear (#1330): fast,
+// Whisper base, or accurate, Whisper small, which hears noticeably better
+// in a noisy room or with a far microphone, for a few tenths of a second
+// more per turn and about 480 MB more to download and keep in memory.
+const settingVoiceHearing = "voice_hearing"
+
+// voiceHearing is the quality voice hears with: fast or accurate.
+func (a *App) voiceHearing(ctx context.Context) string {
+	if a.Settings == nil {
+		return "fast"
+	}
+	if v, _ := a.Settings.GetString(ctx, settingVoiceHearing, "fast"); v == "accurate" {
+		return v
+	}
+	return "fast"
+}
+
+// warmHearing loads the model quality hears with, in the background, so
+// the first turn after choosing it doesn't wait for its download.
+func (a *App) warmHearing(quality string) {
+	if a.voiceWorker == nil || a.Speech == nil {
+		return
+	}
+	if ok, _ := a.Speech.Available(); !ok {
+		return
+	}
+	w := a.voiceWorker
+	go func() {
+		ctx, cancel := context.WithTimeout(context.Background(), 15*time.Minute)
+		defer cancel()
+		_, _ = w.Transcribe(ctx, make([]byte, 2*whisperRate/2), quality, "en")
+	}()
+}
+
+type workerTurns struct {
+	w *speech.Worker
+	// quality is fast or accurate (#1330).
+	quality string
+}
 
 func (t workerTurns) Transcribe(ctx context.Context, wav []byte, language string) (string, error) {
 	samples, rate, err := voice.ParseWAV(wav)
@@ -49,7 +88,7 @@ func (t workerTurns) Transcribe(ctx context.Context, wav []byte, language string
 		return "", err
 	}
 	pcm := voice.EncodePCM16(voice.Resample(samples, rate, whisperRate))
-	return t.w.Transcribe(ctx, pcm, "fast", language)
+	return t.w.Transcribe(ctx, pcm, firstNonEmpty(t.quality, "fast"), language)
 }
 
 type workerVoice struct{ w *speech.Worker }

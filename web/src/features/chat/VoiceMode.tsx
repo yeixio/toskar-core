@@ -3,7 +3,14 @@ import { useTranslation } from 'react-i18next'
 import { useQueryClient } from '@tanstack/react-query'
 import { useDialog } from '@/lib/useDialog'
 import { errorText } from '@/lib/api'
-import { VoiceAudio, canUseMicrophone } from '@/lib/voice/audio'
+import {
+  VoiceAudio,
+  canUseMicrophone,
+  listMicrophones,
+  readMicrophoneChoice,
+  saveMicrophoneChoice,
+  type MicrophoneChoice,
+} from '@/lib/voice/audio'
 import { VoiceConnection, resolveVoiceSocketUrl, type VoiceStatus } from '@/lib/voice/realtime'
 import { readScreenshotLaunch } from '@/lib/screenshotMode'
 
@@ -33,6 +40,9 @@ export function VoiceMode({ onClose }: { onClose: () => void }) {
   const [muted, setMuted] = useState(false)
   const [waited, setWaited] = useState<number | null>(null)
   const [error, setError] = useState('')
+  // Which microphone, and whether the browser evens out its level (#1330).
+  const [mic, setMic] = useState<MicrophoneChoice>(() => readMicrophoneChoice())
+  const [mics, setMics] = useState<{ deviceId: string; label: string }[]>([])
   const audioRef = useRef<VoiceAudio | null>(null)
   const ref = useDialog(true, onClose)
 
@@ -74,13 +84,23 @@ export function VoiceMode({ onClose }: { onClose: () => void }) {
     void resolveVoiceSocketUrl().then((url) => {
       if (!ended) conn = new VoiceConnection(handlers, undefined, url)
     })
-    audio.start((samples) => conn?.send(samples)).catch((err: unknown) => {
-      const denied = err instanceof DOMException && (err.name === 'NotAllowedError' || err.name === 'SecurityError')
-      setError(denied ? t('voiceMode.micDenied') : t('voiceMode.micFailed'))
-      ended = true
-      conn?.close()
-      setStatus('failed')
-    })
+    audio
+      .start((samples) => conn?.send(samples), readMicrophoneChoice())
+      .then(async () => {
+        if (ended) return
+        // Labels are known once the microphone is allowed.
+        const list = await listMicrophones()
+        const using = audio.microphone
+        setMics(list.length ? list : using.deviceId ? [using] : [])
+        setMic((m) => ({ ...m, deviceId: using.deviceId || m.deviceId }))
+      })
+      .catch((err: unknown) => {
+        const denied = err instanceof DOMException && (err.name === 'NotAllowedError' || err.name === 'SecurityError')
+        setError(denied ? t('voiceMode.micDenied') : t('voiceMode.micFailed'))
+        ended = true
+        conn?.close()
+        setStatus('failed')
+      })
     return () => {
       ended = true
       conn?.close()
@@ -92,6 +112,12 @@ export function VoiceMode({ onClose }: { onClose: () => void }) {
   }, [t, queryClient])
 
   const live = status !== 'closed' && status !== 'failed'
+
+  const chooseMicrophone = (next: MicrophoneChoice) => {
+    setMic(next)
+    saveMicrophoneChoice(next)
+    audioRef.current?.useMicrophone(next).catch(() => setError(t('voiceMode.micFailed')))
+  }
   const label = live ? t(`voiceMode.status.${status}`) : status === 'closed' && !error ? t('voiceMode.status.closed') : ''
 
   return (
@@ -151,6 +177,27 @@ export function VoiceMode({ onClose }: { onClose: () => void }) {
             {t('voiceMode.end')}
           </button>
         </div>
+        {live && mics.length > 0 ? (
+          <div className="flex w-full flex-col items-center gap-2 text-sm">
+            <label className="flex w-full max-w-xs flex-col gap-1 text-start">
+              <span className="text-xs text-ink-muted">{t('voiceMode.microphone')}</span>
+              <select className="input" value={mic.deviceId} onChange={(e) => chooseMicrophone({ ...mic, deviceId: e.target.value })}>
+                {mics.map((m, i) => (
+                  <option key={m.deviceId} value={m.deviceId}>
+                    {m.label || t('voiceMode.microphoneN', { n: i + 1 })}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="flex max-w-xs items-start gap-2 text-start">
+              <input type="checkbox" className="mt-1" checked={mic.autoGain} onChange={(e) => chooseMicrophone({ ...mic, autoGain: e.target.checked })} />
+              <span>
+                {t('voiceMode.autoGain')}
+                <span className="block text-xs text-ink-faint">{t('voiceMode.autoGainHint')}</span>
+              </span>
+            </label>
+          </div>
+        ) : null}
         <p className="text-xs text-ink-muted">{t('voiceMode.hint')}</p>
       </div>
     </div>

@@ -538,7 +538,11 @@
     "demo": {
       "you": "Qual é uma boa trilha perto de Juneau neste fim de semana?",
       "answer": "O monte Roberts é uma boa. Suba de bondinho e siga a trilha da crista até onde quiser."
-    }
+    },
+    "microphone": "Microfone",
+    "microphoneN": "Microfone {{n}}",
+    "autoGain": "Equilibrar meu volume",
+    "autoGainHint": "Ajuda com uma voz baixa. Desative se um microfone distante captar o chiado da sala entre as palavras."
   },
   "context": {
     "usage": "Uso do contexto",

@@ -395,7 +395,11 @@
       "models": "查看模型"
     },
     "standard": "标准",
-    "noVoice": "{{languages}}暂时还不能朗读：朗读、语音模式和门铃都无法说这种语言。"
+    "noVoice": "{{languages}}暂时还不能朗读：朗读、语音模式和门铃都无法说这种语言。",
+    "hearing": "语音如何听你说话",
+    "hearingHint": "准确模式在嘈杂的房间或使用远处的麦克风（例如摄像头的麦克风）时听得明显更清楚。回答会晚零点几秒，首次下载约 480 MB，并多占用约 500 MB 内存。适用于实时语音和门铃。",
+    "hearingFast": "快速",
+    "hearingAccurate": "准确"
   },
   "sections": {
     "account": "账户",

@@ -472,6 +472,22 @@ export function SettingsPage({ section }: { section?: SettingsSection } = {}) {
             ) : null}
 
             {show('voice') ? <VoiceSettings /> : null}
+            {show('voice') && admin && settings ? (
+              <section className="card space-y-3">
+                <div>
+                  <h2 className="section-title">{t('voice.hearing')}</h2>
+                  <p className="mt-1 text-sm text-ink-muted">{t('voice.hearingHint')}</p>
+                </div>
+                <ChoiceGroup
+                  value={(settings.voice_hearing ?? 'fast') as 'fast' | 'accurate'}
+                  onChange={(id) => patch({ voice_hearing: id })}
+                  options={[
+                    { id: 'fast', label: t('voice.hearingFast') },
+                    { id: 'accurate', label: t('voice.hearingAccurate') },
+                  ]}
+                />
+              </section>
+            ) : null}
 
             {show('advanced') ? (
             <section className="card space-y-4">

@@ -538,7 +538,11 @@
     "demo": {
       "you": "Quelle randonnée près de Juneau ce week-end ?",
       "answer": "Le mont Roberts est un bon choix. Montez en téléphérique, puis suivez le sentier de crête aussi loin que vous voulez."
-    }
+    },
+    "microphone": "Micro",
+    "microphoneN": "Micro {{n}}",
+    "autoGain": "Égaliser mon volume",
+    "autoGainHint": "Aide pour une voix faible. Désactive-le si un micro éloigné capte le souffle de la pièce entre les mots."
   },
   "context": {
     "usage": "Utilisation du contexte",

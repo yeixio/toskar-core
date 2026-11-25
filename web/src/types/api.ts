@@ -1145,6 +1145,8 @@ export interface SettingsView {
   default_profile_id?: string
   default_execution?: 'automatic' | 'local' | 'ask'
   download_behavior?: 'ask' | 'automatic'
+  /** How voice mode and the door hear: fast (Whisper base) or accurate (Whisper small; #1330, contract 1.122). */
+  voice_hearing?: 'fast' | 'accurate'
   model_storage_limit_gb?: number
   save_chat_history?: boolean
   save_task_history?: boolean
@@ -1548,6 +1550,7 @@ export interface SettingsPatch {
   default_profile_id?: string
   default_execution?: 'automatic' | 'local' | 'ask'
   download_behavior?: 'ask' | 'automatic'
+  voice_hearing?: 'fast' | 'accurate'
   model_storage_limit_gb?: number
   save_chat_history?: boolean
   save_task_history?: boolean

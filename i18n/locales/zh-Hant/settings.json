@@ -395,7 +395,11 @@
       "models": "查看模型"
     },
     "standard": "標準",
-    "noVoice": "{{languages}}暫時還無法朗讀：朗讀、語音模式和門鈴都無法說這種語言。"
+    "noVoice": "{{languages}}暫時還無法朗讀：朗讀、語音模式和門鈴都無法說這種語言。",
+    "hearing": "語音如何聽你說話",
+    "hearingHint": "準確模式在吵雜的房間或使用遠處的麥克風（例如網路攝影機的麥克風）時聽得明顯更清楚。回答會晚零點幾秒，首次下載約 480 MB，並多佔用約 500 MB 記憶體。適用於即時語音和門鈴。",
+    "hearingFast": "快速",
+    "hearingAccurate": "準確"
   },
   "sections": {
     "account": "帳號",

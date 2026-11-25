@@ -526,7 +526,11 @@
     "demo": {
       "you": "Welche Wanderung bei Juneau lohnt sich dieses Wochenende?",
       "answer": "Der Mount Roberts ist gut. Fahr mit der Seilbahn hoch und folge dem Gratweg, so weit du magst."
-    }
+    },
+    "microphone": "Mikrofon",
+    "microphoneN": "Mikrofon {{n}}",
+    "autoGain": "Meine Lautstärke ausgleichen",
+    "autoGainHint": "Hilft bei einer leisen Stimme. Schalte es aus, wenn ein entferntes Mikrofon zwischen den Wörtern das Rauschen im Raum aufnimmt."
   },
   "context": {
     "usage": "Kontextnutzung",

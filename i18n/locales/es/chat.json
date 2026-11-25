@@ -538,7 +538,11 @@
     "demo": {
       "you": "¿Qué ruta de senderismo cerca de Juneau me recomiendas este fin de semana?",
       "answer": "El monte Roberts está bien. Sube en el teleférico y sigue el sendero de la cresta hasta donde quieras."
-    }
+    },
+    "microphone": "Micrófono",
+    "microphoneN": "Micrófono {{n}}",
+    "autoGain": "Igualar mi volumen",
+    "autoGainHint": "Ayuda con una voz baja. Desactívalo si un micrófono lejano capta el ruido de la sala entre palabras."
   },
   "context": {
     "usage": "Uso del contexto",
