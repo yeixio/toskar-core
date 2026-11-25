@@ -1367,7 +1367,12 @@
       "on": "È attiva. Passa a questa tastiera con il pulsante della tastiera mentre scrivi.",
       "privacy": "Ciò che scrivi resta su questo telefono e la tastiera non conserva nulla. Solo il testo che invii con Chiedi, Riscrivi o Correggi va al tuo computer o ai modelli di questo telefono. Nei campi password si limita a scrivere.",
       "turnOn": "Attiva la tastiera",
-      "choose": "Cambia tastiera"
-    }
+      "choose": "Cambia tastiera",
+      "ios": "Scrivi ovunque, poi tocca Chiedi, Riscrivi o Correggi sopra i tasti perché Toskar risponda o migliori ciò che hai scritto. In Impostazioni apri Toskar e poi Tastiere: attiva la tastiera Toskar e Consenti accesso completo, che le permette di raggiungere il tuo computer.",
+      "privacyIos": "Ciò che scrivi resta su questo dispositivo e la tastiera non conserva nulla. Solo il testo che invii con Chiedi, Riscrivi o Correggi va al tuo computer. Senza accesso completo la tastiera si limita a scrivere. Nei campi password si usa sempre la tastiera di sistema.",
+      "openSettings": "Apri Impostazioni"
+    },
+    "fullAccess": "Consenti l'accesso completo alla tastiera Toskar in Impostazioni per chiedere a Toskar da qui.",
+    "noComputer": "Collega un computer nell'app Toskar per chiedere dalla tastiera."
   }
 }

@@ -1346,7 +1346,12 @@
       "on": "It's on. Switch to it with the keyboard button while you type.",
       "privacy": "Typing stays on this phone, and the keyboard keeps nothing. Only text you send with Ask, Rewrite or Fix goes to your computer, or to this phone's models. Password fields only type.",
       "turnOn": "Turn on the keyboard",
-      "choose": "Switch keyboard"
-    }
+      "choose": "Switch keyboard",
+      "ios": "Type anywhere, then tap Ask, Rewrite or Fix above the keys to have Toskar answer or improve what you wrote. In Settings, open Toskar, then Keyboards: turn on Toskar keyboard and Allow Full Access, which lets it reach your computer.",
+      "privacyIos": "Typing stays on this device, and the keyboard keeps nothing. Only text you send with Ask, Rewrite or Fix goes to your own computer. Without Full Access the keyboard only types. Password fields always use the system keyboard.",
+      "openSettings": "Open Settings"
+    },
+    "fullAccess": "Allow Full Access for the Toskar keyboard in Settings to ask Toskar from here.",
+    "noComputer": "Connect a computer in the Toskar app to ask from the keyboard."
   }
 }
