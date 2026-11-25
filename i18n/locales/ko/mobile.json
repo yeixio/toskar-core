@@ -22,7 +22,8 @@
     "personalization": "맞춤 설정",
     "automation": "자동화",
     "privacy": "개인정보",
-    "voice": "음성"
+    "voice": "음성",
+    "features": "기능"
   },
   "units": {
     "megabytes": "{{value}}MB",
@@ -1010,7 +1011,9 @@
     "noMatch": "일치하는 메모리가 없습니다.",
     "personalizationIntro": "컴퓨터의 답변이 어떻게 보일지 정합니다. 그곳의 모든 채팅과 자동화에 적용됩니다.",
     "voice": "음성",
-    "voiceMeta": "각 언어를 읽어 주는 목소리"
+    "voiceMeta": "각 언어를 읽어 주는 목소리",
+    "features": "기능",
+    "featuresMeta": "각 기능에 필요한 것을 한 번에 설정"
   },
   "privacy": {
     "title": "데이터는 비공개로 유지됩니다",
@@ -1333,5 +1336,85 @@
     },
     "fullAccess": "여기서 Toskar에게 물어보려면 설정에서 Toskar 키보드의 전체 접근 허용을 켜세요.",
     "noComputer": "키보드에서 물어보려면 Toskar 앱에서 컴퓨터를 연결하세요."
+  },
+  "features": {
+    "intro": "각 기능이 이 컴퓨터에서 필요로 하는 것이에요. 설정을 누르면 기능에 아직 필요한 것을 한 번에 모두 설치해요.",
+    "loading": "각 기능에 필요한 것을 확인하는 중…",
+    "status": {
+      "ready": "준비됨",
+      "needsSetup": "설정 필요",
+      "installing": "설정 중"
+    },
+    "settingUp": "설정 중…",
+    "settingUpPercent": "설정 중… {{percent}}%",
+    "setUp": "설정",
+    "setUpSize": "설정 ({{size}})",
+    "partly": "여기서 할 수 있는 것을 설정해요. 나머지는 위에 있어요.",
+    "willInstall": "{{what}}: {{name}} 설치{{where}}",
+    "onComputer": " ({{computer}})",
+    "cannot": "{{what}}: {{why}}",
+    "needs": {
+      "chat": "채팅 모델",
+      "tools": "도구를 쓸 수 있는 모델",
+      "vision": "사진을 볼 수 있는 모델",
+      "embedding": "의미로 검색하는 모델",
+      "voice": "말하고 듣는 음성",
+      "images": "사진 모델",
+      "video": "클립 모델",
+      "trainer": "학습할 수 있는 컴퓨터",
+      "camera": "연결된 카메라"
+    },
+    "none": {
+      "chat": "카탈로그에 이 컴퓨터 메모리에 맞는 채팅 모델이 없어요. 메모리가 더 큰 페어링된 컴퓨터라면 실행할 수 있어요.",
+      "tools": "도구를 쓸 수 있는 모델 중 이 컴퓨터 메모리에 맞는 것이 없어요. 메모리가 더 큰 페어링된 컴퓨터라면 실행할 수 있어요.",
+      "vision": "사진을 볼 수 있는 모델 중 이 컴퓨터 메모리에 맞는 것이 없어요. 메모리가 더 큰 페어링된 컴퓨터라면 실행할 수 있어요.",
+      "embedding": "이 컴퓨터 메모리에 맞는 임베딩 모델이 없어요.",
+      "voice": "이 컴퓨터에서는 말하기와 듣기를 설정할 수 없어요.",
+      "images": "이 컴퓨터나 페어링된 컴퓨터에서 사진을 만들 수 없어요.",
+      "video": "이 컴퓨터나 페어링된 컴퓨터에서 클립을 만들 수 없어요.",
+      "trainer": "학습에는 Apple Silicon Mac이나 NVIDIA 그래픽 카드가 있는 컴퓨터가 필요해요. 하나를 페어링하면 거기서 학습할 수 있어요.",
+      "camera": "Reolink 카메라나 Home Assistant의 카메라 같은 카메라를 연결하세요."
+    },
+    "go": {
+      "camera": "연결된 서비스",
+      "trainer": "컴퓨터",
+      "models": "모델"
+    },
+    "items": {
+      "voice": {
+        "title": "음성 대화",
+        "what": "컴퓨터와 휴대폰에서 Toskar와 소리 내어 대화해요."
+      },
+      "door": {
+        "title": "현관 응대",
+        "what": "카메라 앞에 누가 있는지 보고, 대화한 뒤 알려 줘요."
+      },
+      "pictures": {
+        "title": "사진 만들기",
+        "what": "설명으로 사진을 만들고 편집해요."
+      },
+      "clips": {
+        "title": "클립 만들기",
+        "what": "설명이나 사진으로 짧은 동영상 클립을 만들어요."
+      },
+      "see": {
+        "title": "사진 이해하기",
+        "what": "보낸 사진과 스크린샷에 대한 질문에 답해요."
+      },
+      "meaning": {
+        "title": "의미로 지식 검색",
+        "what": "입력한 단어만이 아니라 뜻하는 것을 파일에서 찾아요."
+      },
+      "automationTools": {
+        "title": "도구를 쓰는 자동화",
+        "what": "웹을 검색하고, 페이지를 읽고, 연결된 서비스를 쓰는 자동화예요."
+      },
+      "train": {
+        "title": "나만의 AI 학습",
+        "what": "이 컴퓨터나 페어링된 컴퓨터에서 내 자료를 AI에게 가르쳐요."
+      }
+    },
+    "adminOnly": "기능은 컴퓨터 관리자만 설정할 수 있습니다.",
+    "failed": "설정하지 못했습니다: {{why}}"
   }
 }
