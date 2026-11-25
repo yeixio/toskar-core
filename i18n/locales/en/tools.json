@@ -115,7 +115,7 @@
     "elsewhereWorks": "Works well on {{node}}.",
     "elsewhereInstalled": "Set up on {{node}}, which makes them for this computer.",
     "elsewhereSetUp": "Set it up there",
-    "elsewhereStarted": "Setting it up on {{node}}. Follow it on the Computers page.",
+    "elsewhereStarted": "Setting it up on {{node}}. Follow it in Settings › Computers.",
     "graphicsShort": "Needs about {{need}} of graphics memory; this computer's graphics card has {{have}}, so parts of it run from system memory and it's slower.",
     "sharedShort": "Needs about {{need}} of graphics memory; this computer's graphics can use {{have}} of its memory, so it may be slow or fail.",
     "tightConfirm": "Set it up anyway: I understand it may be slow here.",

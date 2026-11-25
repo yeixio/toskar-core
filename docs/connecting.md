@@ -66,7 +66,7 @@ Offer the computers found, or let the person type an address. The API is at `<ad
 | `429 PAIRING_THROTTLED` | Too many tries from this address; wait a few minutes |
 | `403 PAIRING_NOT_LOCAL` | The request didn't come from the computer's local network |
 
-A device key reaches the routes a device needs, and only those (`auth.DeviceMayReach`): chat and conversations, files, the models (and installing one), automations to see and run, notifications, memory and personalization, adding knowledge, and privacy and reports. It doesn't reach Admin routes such as people, settings, or API Access. Scripts and servers that need those use a key from API Access instead.
+A device key reaches the routes a device needs, and only those (`auth.DeviceMayReach`): chat and conversations, files, the models (and installing one), automations to see and run, notifications, memory and personalization, adding knowledge, and privacy and reports. It doesn't reach Admin routes such as people, settings, or API keys. Scripts and servers that need those use a key from Settings › API keys instead.
 
 ## 3. The pin
 

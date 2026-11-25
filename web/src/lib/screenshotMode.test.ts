@@ -5,10 +5,10 @@ describe('screenshotPath', () => {
   it('maps App Store screen ids onto existing routes', () => {
     expect(screenshotPath('chat')).toBe('/chat')
     expect(screenshotPath('models')).toBe('/models')
-    expect(screenshotPath('computers')).toBe('/nodes')
-    expect(screenshotPath('performance')).toBe('/performance')
-    expect(screenshotPath('diagnostics')).toBe('/diagnostics')
-    expect(screenshotPath('api-manager')).toBe('/api-access')
+    expect(screenshotPath('computers')).toBe('/settings/computers')
+    expect(screenshotPath('performance')).toBe('/settings/performance')
+    expect(screenshotPath('diagnostics')).toBe('/settings/diagnostics')
+    expect(screenshotPath('api-manager')).toBe('/settings/network')
     expect(screenshotPath('automations')).toBe('/automations')
     expect(screenshotPath('automations-create')).toBe('/automations')
     expect(screenshotPath('unknown')).toBe('/chat')
@@ -29,7 +29,7 @@ describe('readScreenshotLaunch', () => {
     expect(readScreenshotLaunch()).toEqual({ enabled: true, screen: 'models', path: '/models' })
     delete w.__TOSKAR_SCREENSHOT__
     w.__YGGDRASIL_SCREENSHOT__ = { enabled: true, screen: 'computers' }
-    expect(readScreenshotLaunch()).toEqual({ enabled: true, screen: 'computers', path: '/nodes' })
+    expect(readScreenshotLaunch()).toEqual({ enabled: true, screen: 'computers', path: '/settings/computers' })
   })
 })
 
@@ -42,7 +42,7 @@ describe('readScreenshotLaunch from an address', () => {
     window.history.replaceState(null, '', '/onboarding?screenshot=1&screen=onboarding-recommend')
     expect(readScreenshotLaunch()).toEqual({ enabled: true, screen: 'onboarding-recommend', path: '/onboarding' })
     window.history.replaceState(null, '', '/models?screenshot=1&screen=computers')
-    expect(readScreenshotLaunch()?.path).toBe('/nodes')
+    expect(readScreenshotLaunch()?.path).toBe('/settings/computers')
     window.history.replaceState(null, '', '/?screenshot=1&screen=unknown')
     expect(readScreenshotLaunch()?.path).toBe('/chat')
   })

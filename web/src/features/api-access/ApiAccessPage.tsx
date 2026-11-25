@@ -122,8 +122,17 @@ function staleKey(key: { created_at: string; last_used_at?: string | null }): 'n
   return Number.isFinite(used) && now - used > 90 * day ? 'unused' : null
 }
 
-export function ApiAccessPage() {
+/**
+ * The page, or one part of it as a page of Settings (#1374): network is who
+ * can reach this computer and how, developer is the API and its keys. Use in
+ * other AI apps is its own page there.
+ */
+export type ApiAccessPart = 'network' | 'developer'
+
+export function ApiAccessPage({ part }: { part?: ApiAccessPart } = {}) {
   const { t } = useTranslation('apiAccess')
+  const network_ = part === undefined || part === 'network'
+  const developer = part === undefined || part === 'developer'
   const queryClient = useQueryClient()
   const advancedMode = useUIStore((s) => s.advancedMode)
   const [newKeyName, setNewKeyName] = useState('')
@@ -279,8 +288,8 @@ export function ApiAccessPage() {
   const header = (
     <header className="page-header">
       <RealmKicker />
-      <h1 className="page-title">{t('page.title')}</h1>
-      <p className="page-subtitle">{t('page.subtitle')}</p>
+      <h1 className="page-title">{part ? t(`sections.${part}`, { ns: 'settings' }) : t('page.title')}</h1>
+      <p className="page-subtitle">{part ? t(`parts.${part}`) : t('page.subtitle')}</p>
     </header>
   )
   // Nothing below renders with made-up defaults while it can't load (#1254).
@@ -308,6 +317,7 @@ export function ApiAccessPage() {
     <div className="mx-auto w-full max-w-2xl min-w-0 space-y-6">
       {header}
 
+      {developer ? (
       <section className="card space-y-4">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
@@ -440,9 +450,12 @@ export function ApiAccessPage() {
           </div>
         )}
       </section>
+      ) : null}
 
-      <ShareWithApps />
+      {part === undefined ? <ShareWithApps /> : null}
 
+      {network_ ? (
+      <>
       <section className="card space-y-4">
         <div className="flex items-start justify-between gap-4">
           <div>
@@ -526,6 +539,10 @@ export function ApiAccessPage() {
         )}
       </section>
 
+      </>
+      ) : null}
+
+      {developer ? (
       <section className="card space-y-4">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
@@ -679,8 +696,9 @@ export function ApiAccessPage() {
           </ul>
         )}
       </section>
+      ) : null}
 
-      {advancedMode && settings && (
+      {network_ && advancedMode && settings && (
         <section className="card space-y-3">
           <h2 className="section-title">{t('advanced.title')}</h2>
           <dl className="space-y-2 text-sm">
@@ -713,7 +731,7 @@ export function ApiAccessPage() {
             {nobodyYet && (
               <div className="mt-4 space-y-2">
                 <p className="text-sm text-ink">{t('lan.needSomeone')}</p>
-                <Link to="/people" className="btn-secondary btn-sm inline-flex" onClick={() => setLanConfirmOpen(false)}>
+                <Link to="/settings/people" className="btn-secondary btn-sm inline-flex" onClick={() => setLanConfirmOpen(false)}>
                   {t('lan.addPerson')}
                 </Link>
                 <p className="pt-2 text-sm text-ink-muted">{t('lan.orKey')}</p>

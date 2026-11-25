@@ -384,7 +384,11 @@ jobs:
         working-directory: scripts/screenshots
         # A self-hosted runner has Chromium's system libraries installed
         # already and no sudo to install them.
-        run: pnpm install && pnpm exec playwright install ${{ runner.environment == 'github-hosted' && '--with-deps' || '' }} chromium
+        # The LAN cache may not hold a browser build yet; the internet is the fallback.
+        run: |
+          pnpm install
+          deps="${{ runner.environment == 'github-hosted' && '--with-deps' || '' }}"
+          pnpm exec playwright install $deps chromium || PLAYWRIGHT_DOWNLOAD_HOST= pnpm exec playwright install $deps chromium
       - name: Check every page
         run: node scripts/screenshots/a11y.mjs
       # Moves between every page many times and fails if the heap, DOM

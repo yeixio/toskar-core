@@ -98,7 +98,7 @@
     "off": "Gedächtnis aus",
     "onHint": "Dieser Chat nutzt, was sich Toskar für dich merken sollte. Klicke, um das Gedächtnis aus diesem Chat herauszuhalten.",
     "offHint": "Das Gedächtnis ist für diesen Chat aus. Gespeicherte Erinnerungen werden hier nicht genutzt und nicht gelöscht.",
-    "disabledHint": "Das Gedächtnis ist für alle Chats aus. Schalte es auf der Seite „Gedächtnis“ ein."
+    "disabledHint": "Das Gedächtnis ist für alle Chats aus. Schalte es unter Einstellungen › Gedächtnis ein."
   },
   "folder": {
     "on": "Ordner: {{name}}",
@@ -427,7 +427,7 @@
     "trainingMemory": {
       "busy": "Ein Training nutzt diesen Computer, deshalb war nicht genug Speicher für dieses Modell frei.",
       "busyNamed": "Das Training „{{name}}“ nutzt diesen Computer, deshalb war nicht genug Speicher für dieses Modell frei.",
-      "advice": "Versuche es erneut, wenn das Training fertig ist, wähle ein kleineres Modell oder brich das Training auf der Seite „Trainieren“ ab."
+      "advice": "Versuche es erneut, wenn das Training fertig ist, wähle ein kleineres Modell oder brich das Training unter Modelle › Trainieren ab."
     },
     "keptRunningMemory": "{{name}} läuft dauerhaft und belegt etwa {{gb}} GB, daher reichte der Speicher für dieses Modell nicht. Wähle ein kleineres Modell oder schalte „Immer aktiv“ für {{name}} auf der Seite „Modelle“ aus."
   },
@@ -625,7 +625,7 @@
   "notices": {
     "languageWeak": "{{model}} schreibt {{language}} womöglich weniger gut als Englisch, und kein installiertes Modell, das passt, kann es besser. Modelle mit guter Bewertung für {{language}} findest du unter „Modelle“.",
     "mediaLength": "Clips können vorerst höchstens {{max}} s lang sein, deshalb ist dieser {{made}} s statt der gewünschten {{asked}} s lang.",
-    "mediaQuality": "{{model}} liefert die gewünschte Qualität, ist hier aber nicht eingerichtet, deshalb wurde dies mit {{used}} erstellt. Du kannst es unter „Werkzeuge“ einrichten.",
+    "mediaQuality": "{{model}} liefert die gewünschte Qualität, ist hier aber nicht eingerichtet, deshalb wurde dies mit {{used}} erstellt. Du kannst es unter Einstellungen › Werkzeuge einrichten.",
     "mediaSizePicture": "{{model}} erstellt Bilder bis {{made}}, deshalb ist dieses kleiner als die gewünschten {{asked}}.",
     "mediaSizeClip": "{{model}} erstellt Clips bis {{made}}, deshalb ist dieser kleiner als die gewünschten {{asked}}.",
     "noVision": "Kein installiertes Modell kann Bilder sehen, deshalb geht die Antwort nicht auf sie ein. Installiere Gemma 3 4B oder ein anderes Bildmodell unter „Modelle“.",

@@ -98,7 +98,7 @@
     "off": "Memória desativada",
     "onHint": "Este chat usa o que você pediu ao Toskar para lembrar. Clique para deixar a memória fora deste chat.",
     "offHint": "A memória está desativada neste chat. As memórias salvas não são usadas aqui e não são apagadas.",
-    "disabledHint": "A memória está desativada em todos os chats. Ative-a na página Memória."
+    "disabledHint": "A memória está desativada em todos os chats. Ative-a em Configurações › Memória."
   },
   "folder": {
     "on": "Pasta: {{name}}",
@@ -439,7 +439,7 @@
     "trainingMemory": {
       "busy": "Um treinamento está usando este computador, então não havia memória suficiente para este modelo.",
       "busyNamed": "O treinamento “{{name}}” está usando este computador, então não havia memória suficiente para este modelo.",
-      "advice": "Tente de novo quando o treinamento terminar, escolha um modelo menor ou cancele o treinamento na página Treinar."
+      "advice": "Tente de novo quando o treinamento terminar, escolha um modelo menor ou cancele o treinamento em Modelos › Treinar."
     },
     "keptRunningMemory": "{{name}} fica sempre em execução e ocupa cerca de {{gb}} GB, então não havia memória suficiente para este modelo. Escolha um modelo menor ou desative Sempre em execução para {{name}} na página Modelos."
   },
@@ -645,7 +645,7 @@
   "notices": {
     "languageWeak": "{{model}} pode escrever em {{language}} pior do que em inglês, e nenhum modelo instalado que caiba faz isso melhor. Na página Modelos você encontra modelos bem avaliados em {{language}}.",
     "mediaLength": "Por enquanto os clipes têm no máximo {{max}} s, então este tem {{made}} s em vez dos {{asked}} s pedidos.",
-    "mediaQuality": "{{model}} dá a qualidade pedida, mas não está configurado aqui, então isto foi feito com {{used}}. Você pode configurá-lo na página Ferramentas.",
+    "mediaQuality": "{{model}} dá a qualidade pedida, mas não está configurado aqui, então isto foi feito com {{used}}. Você pode configurá-lo em Configurações › Ferramentas.",
     "mediaSizePicture": "{{model}} cria imagens de até {{made}}, então esta é menor que os {{asked}} pedidos.",
     "mediaSizeClip": "{{model}} cria clipes de até {{made}}, então este é menor que os {{asked}} pedidos.",
     "noVision": "Nenhum modelo instalado consegue ver imagens, então a resposta não olha para elas. Instale o Gemma 3 4B ou outro modelo de visão na página Modelos.",

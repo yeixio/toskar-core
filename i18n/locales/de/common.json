@@ -4,10 +4,6 @@
     "label": "Haupt",
     "open": "Menü öffnen",
     "skip": "Zum Inhalt springen",
-    "use": "Nutzen",
-    "customize": "Anpassen",
-    "administer": "Verwalten",
-    "administerHint": "Training, Computer, Personen, Portale, API-Zugriff, Leistung und Diagnose ein- oder ausblenden",
     "chat": "Chat",
     "automations": "Automationen",
     "models": "Modelle",
@@ -21,7 +17,6 @@
     "diagnostics": "Diagnose",
     "profiles": "Profile & Orchestrierung",
     "tools": "Werkzeuge",
-    "apiAccess": "API-Zugriff",
     "settings": "Einstellungen",
     "news": "Neuigkeiten"
   },

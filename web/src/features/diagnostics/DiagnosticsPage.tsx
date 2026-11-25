@@ -354,7 +354,7 @@ export function DiagnosticsPage() {
             onClick: () => refreshMutation.mutate(),
             busy: refreshMutation.isPending,
           },
-          { kind: 'link', label: t('rows.openComputers'), to: '/nodes' },
+          { kind: 'link', label: t('rows.openComputers'), to: '/settings/computers' },
         ],
       })
     } else {
@@ -367,7 +367,7 @@ export function DiagnosticsPage() {
         actions:
           connected === 0
             ? [
-                { kind: 'link', label: t('rows.openComputers'), to: '/nodes' },
+                { kind: 'link', label: t('rows.openComputers'), to: '/settings/computers' },
                 {
                   kind: 'button',
                   label: t('rows.retry'),
@@ -406,7 +406,7 @@ export function DiagnosticsPage() {
       tone: serviceOk ? 'ok' : 'bad',
       detail: serviceOk ? apiDetail : t('rows.unavailable'),
       message: settings?.lan_api_enabled ? t('rows.api.lanHint') : undefined,
-      actions: serviceOk ? [{ kind: 'link', label: t('rows.apiSettings'), to: '/api-access' }] : undefined,
+      actions: serviceOk ? [{ kind: 'link', label: t('rows.apiSettings'), to: '/settings/network' }] : undefined,
     })
 
     return out

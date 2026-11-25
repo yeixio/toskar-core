@@ -4,10 +4,6 @@
     "label": "Main",
     "open": "Open menu",
     "skip": "Skip to content",
-    "use": "Use",
-    "customize": "Customize",
-    "administer": "Administer",
-    "administerHint": "Show or hide Train, Computers, People, Portals, API Access, Performance, and Diagnostics",
     "chat": "Chat",
     "automations": "Automations",
     "models": "Models",
@@ -21,7 +17,6 @@
     "diagnostics": "Diagnostics",
     "profiles": "Profiles & Orchestration",
     "tools": "Tools",
-    "apiAccess": "API Access",
     "settings": "Settings",
     "news": "News"
   },

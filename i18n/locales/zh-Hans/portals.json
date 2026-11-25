@@ -4,7 +4,7 @@
     "copy": "复制链接",
     "copied": "已复制",
     "lanOff": "在打开本地网络访问之前，只有这台电脑能打开它。",
-    "lanOffAction": "在 API 访问中打开"
+    "lanOffAction": "在“设置 › 网络访问”中开启"
   },
   "add": {
     "title": "添加门户",

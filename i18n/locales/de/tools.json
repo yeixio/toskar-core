@@ -115,7 +115,7 @@
     "elsewhereWorks": "Läuft gut auf {{node}}.",
     "elsewhereInstalled": "Auf {{node}} eingerichtet; dieser Computer lässt dort erstellen.",
     "elsewhereSetUp": "Dort einrichten",
-    "elsewhereStarted": "Wird auf {{node}} eingerichtet. Verfolge es auf der Seite „Computer“.",
+    "elsewhereStarted": "Wird auf {{node}} eingerichtet. Verfolge es unter Einstellungen › Computer.",
     "graphicsShort": "Braucht etwa {{need}} Grafikspeicher; die Grafikkarte dieses Computers hat {{have}}, daher laufen Teile davon im Arbeitsspeicher und langsamer.",
     "sharedShort": "Braucht etwa {{need}} Grafikspeicher; die Grafik dieses Computers kann {{have}} seines Speichers nutzen, daher kann es langsam sein oder fehlschlagen.",
     "tightConfirm": "Trotzdem einrichten: Mir ist klar, dass es hier langsam sein kann.",

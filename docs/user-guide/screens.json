@@ -646,7 +646,7 @@
     },
     {
       "id": "connect-device",
-      "path": "/nodes",
+      "path": "/settings/computers",
       "readyText": "Studio",
       "api": {
         "/api/v1/devices/pairing": {
@@ -703,7 +703,7 @@
     },
     {
       "id": "diagnostics-prompt-cache",
-      "path": "/diagnostics",
+      "path": "/settings/diagnostics",
       "readyText": "Reusing the chat so far",
       "actions": [
         {
@@ -713,7 +713,7 @@
     },
     {
       "id": "api-access",
-      "path": "/api-access",
+      "path": "/settings/developer",
       "readyText": "Notes app",
       "actions": [
         {
@@ -723,7 +723,7 @@
     },
     {
       "id": "tools",
-      "path": "/tools",
+      "path": "/settings/tools",
       "readyText": "Web Search"
     },
     {
@@ -809,7 +809,7 @@
     },
     {
       "id": "projects-memory",
-      "path": "/memory",
+      "path": "/settings/memory",
       "readyText": "The furnace is a 2009 gas model",
       "actions": [
         {
@@ -1160,7 +1160,7 @@
     },
     {
       "id": "media-setup",
-      "path": "/tools",
+      "path": "/settings/tools",
       "query": "tab=media",
       "readyText": "Image generation"
     },

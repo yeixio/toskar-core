@@ -33,7 +33,7 @@
     "couldNotReach": "Toskar ist nicht erreichbar.",
     "unreachable": "Toskar Pro auf diesem Computer ist nicht erreichbar. Nutze dasselbe WLAN und wähle auf diesem Computer „Gerät verbinden“.",
     "unreachableAway": "Dein Computer ist unterwegs nicht erreichbar. Vielleicht ist er aus oder im Ruhezustand, oder der Zugriff von überall ist dort ausgeschaltet.",
-    "keyRejected": "Dieser API-Schlüssel wurde abgelehnt. Verbinde dich stattdessen mit einem Code vom Computer, oder erstelle einen Schlüssel unter „API-Zugriff“.",
+    "keyRejected": "Dieser API-Schlüssel wurde abgelehnt. Verbinde dich stattdessen mit einem Code vom Computer, oder erstelle einen Schlüssel unter Einstellungen › API-Schlüssel.",
     "dropped": "Die Verbindung zu Toskar wurde unterbrochen.",
     "chatFailed": "Chat fehlgeschlagen.",
     "requestFailed": "Anfrage fehlgeschlagen"
@@ -327,7 +327,7 @@
       "memoryOn": "Gedächtnis an",
       "memoryOff": "Gedächtnis aus",
       "memoryOffHint": "Das Gedächtnis ist für diesen Chat aus. Gespeicherte Erinnerungen werden hier nicht genutzt und nicht gelöscht.",
-      "memoryDisabledHint": "Das Gedächtnis ist für alle Chats aus. Schalte es auf der Seite „Gedächtnis“ ein."
+      "memoryDisabledHint": "Das Gedächtnis ist für alle Chats aus. Schalte es unter Einstellungen › Gedächtnis ein."
     },
     "loading": "Chat wird geladen",
     "placeholder": "Nachricht an Toskar",
@@ -785,7 +785,7 @@
     "usageNoCap": "{{used}} über das Relay in diesem Monat",
     "overCap": "Das Relay-Kontingent für diesen Monat ist aufgebraucht. Zu Hause und über direkte Verbindungen funktioniert Toskar weiter; das Relay ist nächsten Monat wieder da.",
     "pending": "Der Kauf wartet auf Freigabe.",
-    "notAdmin": "Abonniert. Bitte einen Admin auf deinem Computer, unter API-Zugriff den Zugriff von überall einzuschalten.",
+    "notAdmin": "Abonniert. Bitte einen Admin auf deinem Computer, unter Einstellungen › Netzwerkzugriff den Zugriff von überall einzuschalten.",
     "inUse": "Dieses Abo wird bereits für einen anderen Computer verwendet.",
     "moveHint": "Verschiebe es hierher, dann funktioniert der andere Computer unterwegs nicht mehr.",
     "move": "Auf diesen Computer verschieben",
@@ -805,7 +805,7 @@
     "manage": "Abo verwalten",
     "throughComputer": "Aktiv über das Abo dieses Computers",
     "throughComputerBody": "Jedes mit diesem Computer gekoppelte Gerät nutzt es. Verwaltet wird es dort, wo es abgeschlossen wurde: auf dem Gerät, das es abonniert hat, oder in den Einstellungen von Toskar auf dem Computer.",
-    "boughtInSettings": "In den Einstellungen von Toskar auf dem Computer abgeschlossen. Karte ändern oder kündigen kannst du dort unter API-Zugriff.",
+    "boughtInSettings": "In den Einstellungen von Toskar auf dem Computer abgeschlossen. Karte ändern oder kündigen kannst du dort unter Einstellungen › Netzwerkzugriff.",
     "coveredTitle": "Über das Abo eines anderen Geräts abgedeckt",
     "coveredBody": "Dieser Computer hat schon ein Abo, abgeschlossen auf einem anderen Gerät. Verbinde dich einmal zu Hause mit deinem Computer, dann übernimmt dieses Gerät es.",
     "extraSubscription": "Dieser Computer hat mehr als ein Abo, braucht aber nur eins. Du kannst deins unter „Abo verwalten“ kündigen, das andere deckt ihn weiter ab."
@@ -1065,12 +1065,12 @@
     "reachableViaRelay": "Von außerhalb deines Netzwerks erreichbar, über das Relay",
     "unreachable": "Von außerhalb deines Netzwerks nicht erreichbar",
     "unchecked": "Noch nicht von außen geprüft",
-    "off": "Zugriff von überall ist auf diesem Computer aus. Schalte ihn in Toskar auf dem Computer unter „API-Zugriff“ ein.",
+    "off": "Zugriff von überall ist auf diesem Computer aus. Schalte ihn in Toskar auf dem Computer unter Einstellungen › Netzwerkzugriff ein.",
     "checkedNow": "Gerade eben geprüft",
     "checkNow": "Jetzt prüfen",
     "checking": "Wird geprüft …",
     "tooSoon": "Vor weniger als einer Minute geprüft, das ist also das neueste Ergebnis.",
-    "details": "Jeder Weg hinein und was zu beheben ist, steht unter „API-Zugriff“ in Toskar auf dem Computer.",
+    "details": "Jeder Weg hinein und was zu beheben ist, steht unter Einstellungen › Netzwerkzugriff in Toskar auf dem Computer.",
     "failed": "Die Prüfung konnte nicht laufen ({{code}}).",
     "ended": "Der Zugriff von überall ist abgelaufen, daher gibt es über das Relay nichts zu prüfen. Schließe das Abo unter „Toskar unterwegs nutzen“ erneut ab.",
     "checkedMinutes_one": "Vor {{count}} Minute geprüft",
@@ -1156,7 +1156,13 @@
     "updateComputer": "Aktualisiere Toskar auf deinem Computer, um hier Benachrichtigungen zu bekommen.",
     "relayFailed": "Benachrichtigungen konnten nicht eingeschaltet werden: {{detail}}",
     "openPage": "Seite öffnen",
-    "openInToskar": "In Toskar öffnen"
+    "openInToskar": "In Toskar öffnen",
+    "notBuilt": "Diese Toskar-Version wurde ohne Benachrichtigungen gebaut. Installiere Toskar aus dem App Store oder von Google Play, um sie zu bekommen.",
+    "noComputer": "Verbinde einen Computer, um hier seine Benachrichtigungen zu bekommen.",
+    "computerUnavailable": "Dein Computer kann der App gerade keine Benachrichtigungen schicken. Starte Toskar auf dem Computer neu und versuche es dann noch einmal.",
+    "unreachable": "Benachrichtigungen konnten nicht mit deinem Computer geprüft werden: {{detail}}",
+    "retry": "Erneut versuchen",
+    "checking": "Wird geprüft…"
   },
   "permissions": {
     "photos": "Toskar öffnet deine Fotos, wenn du eines auswählst, um danach zu fragen. Es bleibt auf diesem Gerät oder geht nur an deinen eigenen Computer.",

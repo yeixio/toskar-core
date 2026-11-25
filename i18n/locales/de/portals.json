@@ -4,7 +4,7 @@
     "copy": "Link kopieren",
     "copied": "Kopiert",
     "lanOff": "Nur dieser Computer kann sie öffnen, bis der Zugriff im lokalen Netzwerk eingeschaltet ist.",
-    "lanOffAction": "Unter API-Zugriff einschalten"
+    "lanOffAction": "Unter Einstellungen › Netzwerkzugriff einschalten"
   },
   "add": {
     "title": "Portal hinzufügen",

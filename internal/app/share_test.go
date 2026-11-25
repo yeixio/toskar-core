@@ -36,7 +36,7 @@ func TestChatExplainsTrainingOnThisComputer(t *testing.T) {
 	// A memory failure keeps its structure but says why and when to retry.
 	got := a.explainFailure("en", oom)
 	f, isHealth := modelhealth.Parse(got)
-	if !isHealth || f.ModelID != "big" || f.Message != `Training “Tire shop” is using this computer, so there was not enough memory for this model. About 12 minutes left. Try again when training finishes, choose a smaller model, or cancel training on the Train page.` {
+	if !isHealth || f.ModelID != "big" || f.Message != `Training “Tire shop” is using this computer, so there was not enough memory for this model. About 12 minutes left. Try again when training finishes, choose a smaller model, or cancel training in Models › Train.` {
 		t.Fatalf("explained = %q", got)
 	}
 	// A plain error becomes a memory failure, so clients show the sentence.
@@ -46,7 +46,7 @@ func TestChatExplainsTrainingOnThisComputer(t *testing.T) {
 	}
 	// In the App language.
 	f, _ = modelhealth.Parse(a.explainFailure("de", oom))
-	if f.Message != `Das Training „Tire shop“ nutzt diesen Computer, deshalb war nicht genug Speicher für dieses Modell frei. Noch etwa 12 Minuten. Versuche es erneut, wenn das Training fertig ist, wähle ein kleineres Modell oder brich das Training auf der Seite „Trainieren“ ab.` {
+	if f.Message != `Das Training „Tire shop“ nutzt diesen Computer, deshalb war nicht genug Speicher für dieses Modell frei. Noch etwa 12 Minuten. Versuche es erneut, wenn das Training fertig ist, wähle ein kleineres Modell oder brich das Training unter Modelle › Trainieren ab.` {
 		t.Fatalf("German = %q", f.Message)
 	}
 	// Other failures are left alone.

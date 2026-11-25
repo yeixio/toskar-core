@@ -121,7 +121,7 @@ describe('MemoryToggle', () => {
         </MemoryRouter>
       </QueryClientProvider>,
     )
-    expect(screen.getByRole('link', { name: 'Memory off' })).toHaveAttribute('href', '/memory')
+    expect(screen.getByRole('link', { name: 'Memory off' })).toHaveAttribute('href', '/settings/memory')
   })
 })
 

@@ -115,7 +115,7 @@
     "elsewhereWorks": "Fonctionne bien sur {{node}}.",
     "elsewhereInstalled": "Installé sur {{node}}, qui les crée pour cet ordinateur.",
     "elsewhereSetUp": "L’installer là-bas",
-    "elsewhereStarted": "Installation sur {{node}}. Suis-la depuis la page Ordinateurs.",
+    "elsewhereStarted": "Configuration sur {{node}}. Suivez-la dans Paramètres › Ordinateurs.",
     "graphicsShort": "Il lui faut environ {{need}} de mémoire graphique ; la carte graphique de cet ordinateur en a {{have}}, une partie tourne donc en mémoire système, plus lentement.",
     "sharedShort": "Il lui faut environ {{need}} de mémoire graphique ; la puce graphique de cet ordinateur peut utiliser {{have}} de sa mémoire, il peut donc être lent ou échouer.",
     "tightConfirm": "L’installer quand même : je comprends qu’il peut être lent ici.",
