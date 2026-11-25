@@ -13,6 +13,43 @@ class Capture extends AudioWorkletProcessor {
 registerProcessor('toskar-capture', Capture)
 `
 
+/** How voice mode uses the microphone, kept on this device (#1330). */
+export interface MicrophoneChoice {
+  /** The input's deviceId, or '' for the system's default. */
+  deviceId: string
+  /** The browser evens out the level: helps a quiet voice, but can raise a room's hiss between words. */
+  autoGain: boolean
+}
+
+const micKey = 'toskar.voice.microphone'
+
+/** The microphone chosen on this device, or the default with auto gain on. */
+export function readMicrophoneChoice(): MicrophoneChoice {
+  try {
+    const saved = JSON.parse(window.localStorage.getItem(micKey) ?? '{}') as Partial<MicrophoneChoice>
+    return { deviceId: typeof saved.deviceId === 'string' ? saved.deviceId : '', autoGain: saved.autoGain !== false }
+  } catch {
+    return { deviceId: '', autoGain: true }
+  }
+}
+
+export function saveMicrophoneChoice(choice: MicrophoneChoice) {
+  try {
+    window.localStorage.setItem(micKey, JSON.stringify(choice))
+  } catch {
+    // storage blocked: the choice lasts this conversation
+  }
+}
+
+/** The microphones this browser can use, once it has been allowed one. */
+export async function listMicrophones(): Promise<{ deviceId: string; label: string }[]> {
+  if (!navigator.mediaDevices?.enumerateDevices) return []
+  const devices = await navigator.mediaDevices.enumerateDevices()
+  return devices
+    .filter((d) => d.kind === 'audioinput' && d.deviceId && d.deviceId !== 'default' && d.deviceId !== 'communications')
+    .map((d) => ({ deviceId: d.deviceId, label: d.label }))
+}
+
 /** Whether this page may use the microphone: it needs a secure page (https or localhost). */
 export function canUseMicrophone(): boolean {
   return typeof navigator !== 'undefined' && !!navigator.mediaDevices?.getUserMedia && typeof AudioContext !== 'undefined'
@@ -41,12 +78,8 @@ export class VoiceAudio {
   }
 
   /** Asks for the microphone and starts sending its audio. */
-  async start(onSamples: (samples: Float32Array) => void) {
-    // The browser's echo cancellation keeps the answer, from the speakers,
-    // from sounding like the person talking over it.
-    this.stream = await navigator.mediaDevices.getUserMedia({
-      audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true, channelCount: 1 },
-    })
+  async start(onSamples: (samples: Float32Array) => void, choice: MicrophoneChoice = { deviceId: '', autoGain: true }) {
+    this.stream = await openMicrophone(choice)
     await this.context.resume()
     const url = URL.createObjectURL(new Blob([captureWorklet], { type: 'application/javascript' }))
     try {
@@ -61,6 +94,24 @@ export class VoiceAudio {
       if (this.muted) return
       onSamples(resample(ev.data, rate, VOICE_RATE))
     }
+    this.source.connect(this.node)
+  }
+
+  /** The microphone in use, as the browser names it. */
+  get microphone(): { deviceId: string; label: string } {
+    const track = this.stream?.getAudioTracks()[0]
+    return { deviceId: track?.getSettings().deviceId ?? '', label: track?.label ?? '' }
+  }
+
+  /** Changes the microphone, or its auto gain, without ending the conversation. */
+  async useMicrophone(choice: MicrophoneChoice) {
+    if (!this.node) return
+    const stream = await openMicrophone(choice)
+    this.source?.disconnect()
+    for (const t of this.stream?.getTracks() ?? []) t.stop()
+    this.stream = stream
+    for (const t of stream.getAudioTracks()) t.enabled = !this.muted
+    this.source = this.context.createMediaStreamSource(stream)
     this.source.connect(this.node)
   }
 
@@ -155,4 +206,21 @@ export class VoiceAudio {
     for (const t of this.stream?.getTracks() ?? []) t.stop()
     void this.context.close()
   }
+}
+
+/**
+ * Opens the microphone. The browser's echo cancellation keeps the answer,
+ * from the speakers, from sounding like the person talking over it. A
+ * chosen microphone that's gone falls back to the default.
+ */
+async function openMicrophone(choice: MicrophoneChoice): Promise<MediaStream> {
+  const audio: MediaTrackConstraints = { echoCancellation: true, noiseSuppression: true, autoGainControl: choice.autoGain, channelCount: 1 }
+  if (choice.deviceId) {
+    try {
+      return await navigator.mediaDevices.getUserMedia({ audio: { ...audio, deviceId: { exact: choice.deviceId } } })
+    } catch (err) {
+      if (!(err instanceof DOMException) || (err.name !== 'OverconstrainedError' && err.name !== 'NotFoundError')) throw err
+    }
+  }
+  return navigator.mediaDevices.getUserMedia({ audio })
 }

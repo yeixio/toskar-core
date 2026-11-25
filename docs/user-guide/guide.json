@@ -2581,7 +2581,7 @@
           "items": [
             "Toskar 1.14 or later, from outside the Mac App Store. Voice mode runs speech on this computer, which that build can't install.",
             "A chat model, as [Choose and manage models](#models) explains.",
-            "A microphone and speakers or headphones. Headphones keep the answer from sounding like you talking over it.",
+            "A microphone and speakers or headphones. Headphones keep the answer from sounding like you talking over it. Voice mode shows which microphone it's using and lets you choose another, and turn off Even out my volume if a far microphone picks up the room's hiss. An Admin can set How voice hears you to Accurate under Settings › Voice, which hears a noisy room or a webcam's microphone noticeably better and downloads about 480 MB once.",
             "The Toskar app, or a web address the browser trusts with a microphone: Toskar on this computer, at localhost, or at its https:// address from another device.",
             "Your role allowed to use voice, which an Admin sets in [People](#people).",
             "A download the first time: speech for hearing you, and about 120 MB for the natural voice. After that it works offline."

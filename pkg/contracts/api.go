@@ -1587,6 +1587,10 @@ type SettingsView struct {
 	DefaultExecution string `json:"default_execution"`
 	// DownloadBehavior: ask | automatic
 	DownloadBehavior string `json:"download_behavior"`
+	// VoiceHearing is how voice mode and the door hear: fast (Whisper base,
+	// the default) or accurate (Whisper small, better in noise and with a
+	// far microphone; #1330, contract 1.122).
+	VoiceHearing string `json:"voice_hearing"`
 	// ModelStorageLimitGB is 0 for unlimited.
 	ModelStorageLimitGB int  `json:"model_storage_limit_gb"`
 	SaveChatHistory     bool `json:"save_chat_history"`

@@ -538,7 +538,11 @@
     "demo": {
       "you": "Che escursione mi consigli vicino a Juneau questo fine settimana?",
       "answer": "Il monte Roberts è una buona scelta. Sali con la funivia, poi segui il sentiero di cresta fin dove vuoi."
-    }
+    },
+    "microphone": "Microfono",
+    "microphoneN": "Microfono {{n}}",
+    "autoGain": "Uniforma il mio volume",
+    "autoGainHint": "Aiuta con una voce bassa. Disattivalo se un microfono lontano capta il fruscio della stanza tra le parole."
   },
   "context": {
     "usage": "Uso del contesto",

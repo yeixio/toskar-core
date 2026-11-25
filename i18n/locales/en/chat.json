@@ -526,7 +526,11 @@
     "demo": {
       "you": "What's a good hike near Juneau this weekend?",
       "answer": "Mount Roberts is a good one. Take the tram up, then follow the ridge trail as far as you like."
-    }
+    },
+    "microphone": "Microphone",
+    "microphoneN": "Microphone {{n}}",
+    "autoGain": "Even out my volume",
+    "autoGainHint": "Helps a quiet voice. Turn it off if a far microphone picks up the room's hiss between words."
   },
   "context": {
     "usage": "Context usage",

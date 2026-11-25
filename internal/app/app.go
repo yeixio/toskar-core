@@ -1630,6 +1630,7 @@ func (a *App) settingsView(ctx context.Context) (contracts.SettingsView, error) 
 	defaultProfile, _ := a.Settings.GetString(ctx, "default_profile_id", "")
 	defaultExec, _ := a.Settings.GetString(ctx, "default_execution", "automatic")
 	downloadBehavior, _ := a.Settings.GetString(ctx, "download_behavior", "ask")
+	voiceHearing := a.voiceHearing(ctx)
 	storageLimit, _ := a.Settings.GetInt(ctx, "model_storage_limit_gb", 0)
 	saveChat, _ := a.Settings.GetBool(ctx, "save_chat_history", true)
 	compactAt, _ := a.Settings.GetString(ctx, "compact_at", "normal")
@@ -1688,6 +1689,7 @@ func (a *App) settingsView(ctx context.Context) (contracts.SettingsView, error) 
 		DefaultProfileID:        defaultProfile,
 		DefaultExecution:        defaultExec,
 		DownloadBehavior:        downloadBehavior,
+		VoiceHearing:            voiceHearing,
 		ModelStorageLimitGB:     storageLimit,
 		SaveChatHistory:         saveChat,
 		MemoryEnabled:           memoryEnabled,
@@ -1793,6 +1795,12 @@ func (a *App) applySettingsPatch(ctx context.Context, patch map[string]any) erro
 		}); err != nil {
 			return err
 		}
+	}
+	if v, ok := patch[settingVoiceHearing].(string); ok && v != "" {
+		if err := setSettingString(ctx, a.Settings, settingVoiceHearing, v, map[string]bool{"fast": true, "accurate": true}); err != nil {
+			return err
+		}
+		a.warmHearing(v)
 	}
 	if v, ok := patch["download_behavior"].(string); ok && v != "" {
 		if err := setSettingString(ctx, a.Settings, "download_behavior", v, map[string]bool{
@@ -2138,6 +2146,7 @@ func (a *App) ResetApp(ctx context.Context, deleteModels bool) (contracts.Settin
 	_ = a.Settings.Set(ctx, "default_profile_id", "")
 	_ = a.Settings.Set(ctx, "default_execution", "automatic")
 	_ = a.Settings.Set(ctx, "download_behavior", "ask")
+	_ = a.Settings.Set(ctx, settingVoiceHearing, "fast")
 	_ = a.Settings.SetInt(ctx, "model_storage_limit_gb", 0)
 	_ = a.Settings.SetBool(ctx, "save_chat_history", true)
 	_ = a.Settings.SetBool(ctx, "save_task_history", true)

@@ -406,7 +406,11 @@
     "standard": "Standard",
     "noVoice": "{{languages}} kann noch nicht vorgelesen werden: Vorlesen, Sprachmodus und Türklingel sprechen es nicht.",
     "thinkingSound": "Denkgeräusch",
-    "thinkingSoundHint": "Im Sprachchat erklingt ein leiser Ton, wenn eine Antwort länger dauert, damit du weißt, dass Toskar dich gehört hat. Nur für dich."
+    "thinkingSoundHint": "Im Sprachchat erklingt ein leiser Ton, wenn eine Antwort länger dauert, damit du weißt, dass Toskar dich gehört hat. Nur für dich.",
+    "hearing": "Wie die Sprachfunktion dich hört",
+    "hearingHint": "Genau hört in einem lauten Raum oder mit einem entfernten Mikrofon, etwa dem einer Webcam, deutlich besser. Es antwortet ein paar Zehntelsekunden später, lädt einmalig etwa 480 MB herunter und braucht etwa 500 MB mehr Speicher. Für Live-Sprache und die Türklingel.",
+    "hearingFast": "Schnell",
+    "hearingAccurate": "Genau"
   },
   "sections": {
     "account": "Konto",

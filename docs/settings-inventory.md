@@ -50,6 +50,7 @@ Columns:
 | Default profile | `default_profile_id` | Settings › AI behavior › Default profile | Models & AI | Application | Basic | General | Profiles | Behavioral |
 | Run chats on | `default_execution` | Settings › AI behavior › Run chats on | Models & AI | Application | Advanced | Automatic | Paired computers | Behavioral |
 | Download models | `download_behavior` | Settings › AI behavior › Download models | Models & AI | Application | Basic | Ask | none | Data, Network |
+| How voice hears you | `voice_hearing` | Settings › Voice | Voice | Application | Basic | Fast | none | Behavioral, Data |
 | Storage limit for models | `model_storage_limit_gb` | Settings › Storage › Storage limit | Models & AI | Application | Advanced | Unlimited | none | Data |
 | Notify when a task finishes | `notify_task_finish` | Settings › Notifications | Notifications | Application | Basic | On | none | Behavioral |
 | Notify when a computer goes offline | `notify_peer_offline` | Settings › Notifications | Notifications | Application | Basic | On | Paired computers | Behavioral |
@@ -68,6 +69,7 @@ Columns:
 | Personalization (tone, length, about you) | Settings › General › Personalization | Personalization | Account | Basic | none | Behavioral |
 | Your account (name, sign-in, PIN) | Settings, top | Account | Account | Basic | none | Security |
 | Your devices (phones signed in as you) | Settings, top | Account | Account | Basic | none | Security |
+| Microphone and auto gain for voice mode | Voice mode dialog (this browser) | Voice | Account (per device) | Basic | System default, auto gain on | Behavioral |
 | Voice (voices, live voice, Kitten) | Settings › AI behavior › Voice | Voice | Application, with a per-person voice | Basic | Kokoro | Behavioral |
 | Notification destinations | Settings › Notifications | Notifications | Application | Basic | none | Network |
 | Your data stays private | Settings › Privacy | Privacy & security | Application | Basic | none | none (information) |
