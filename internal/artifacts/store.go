@@ -348,6 +348,44 @@ func (s *Store) Delete(ctx context.Context, id string) error {
 	return nil
 }
 
+// DeleteBySource removes every file a source made, such as an automation's
+// camera pictures ("automation:<id>", #1335), whoever's they are: the
+// caller has checked the source is the request's to clear. It says how many.
+func (s *Store) DeleteBySource(ctx context.Context, source string) (int, error) {
+	if source == "" {
+		return 0, nil
+	}
+	rows, err := s.db.QueryContext(ctx, `SELECT id, path FROM artifacts WHERE source_task = ?`, source)
+	if err != nil {
+		return 0, err
+	}
+	type file struct{ id, path string }
+	var files []file
+	for rows.Next() {
+		var f file
+		if err := rows.Scan(&f.id, &f.path); err != nil {
+			rows.Close()
+			return 0, err
+		}
+		files = append(files, f)
+	}
+	rows.Close()
+	if err := rows.Err(); err != nil {
+		return 0, err
+	}
+	n := 0
+	for _, f := range files {
+		if _, err := s.db.ExecContext(ctx, `DELETE FROM artifacts WHERE id = ?`, f.id); err != nil {
+			return n, err
+		}
+		if err := os.Remove(filepath.Join(s.dir, f.path)); err != nil && !errors.Is(err, os.ErrNotExist) {
+			return n, err
+		}
+		n++
+	}
+	return n, nil
+}
+
 // DeleteConversation removes a conversation's files. Their rows go with the
 // conversation.
 func (s *Store) DeleteConversation(ctx context.Context, conversationID string) error {

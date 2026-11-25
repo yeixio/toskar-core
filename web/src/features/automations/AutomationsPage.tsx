@@ -377,6 +377,31 @@ function Detail({
     mutationFn: () => api.listAutomationRuns(detail.id, history[history.length - 1].id),
     onSuccess: (page) => setOlder({ id: detail.id, runs: [...pages.runs, ...(page?.runs ?? [])], more: Boolean(page?.more) }),
   })
+  // Clearing history keeps the automation and any run still going (#1335).
+  const queryClient = useQueryClient()
+  const [clearing, setClearing] = useState(false)
+  const [withFiles, setWithFiles] = useState(false)
+  const finished = history.filter((run) => run.status === 'succeeded' || run.status === 'failed')
+  const refresh = () => {
+    setOlder({ id: detail.id, runs: [], more: false })
+    void queryClient.invalidateQueries({ queryKey: ['automation'] })
+    void queryClient.invalidateQueries({ queryKey: ['automations'] })
+  }
+  const clear = useMutation({
+    mutationFn: () => api.clearAutomationRuns(detail.id, withFiles),
+    onSuccess: () => {
+      setClearing(false)
+      setWithFiles(false)
+      refresh()
+    },
+  })
+  const removeRun = useMutation({
+    mutationFn: (runId: string) => api.deleteAutomationRun(detail.id, runId),
+    onSuccess: (_, runId) => {
+      setOlder({ ...pages, runs: pages.runs.filter((run) => run.id !== runId) })
+      void queryClient.invalidateQueries({ queryKey: ['automation'] })
+    },
+  })
   return (
     <div className="card space-y-4">
       <div>
@@ -445,7 +470,34 @@ function Detail({
       </div>
       {runError && <ShownError {...runError} />}
       <div>
-        <h3 className="label-caps">{t('detail.history')}</h3>
+        <div className="flex items-center justify-between gap-3">
+          <h3 className="label-caps">{t('detail.history')}</h3>
+          {finished.length > 0 && !clearing ? (
+            <button type="button" className="text-xs text-ink-muted hover:text-danger" onClick={() => setClearing(true)}>
+              {t('detail.clearHistory')}
+            </button>
+          ) : null}
+        </div>
+        {clearing ? (
+          <div role="group" aria-label={t('detail.clearHistory')} className="mt-2 space-y-2 rounded-lg border border-danger/40 p-3 text-sm">
+            <p className="text-ink">{t('detail.clearConfirm')}</p>
+            {detail.cameras?.length ? (
+              <label className="flex items-center gap-2 text-ink-muted">
+                <input type="checkbox" checked={withFiles} onChange={(e) => setWithFiles(e.target.checked)} />
+                {t('detail.clearPictures')}
+              </label>
+            ) : null}
+            <div className="flex flex-wrap gap-2">
+              <button type="button" className="btn-danger btn-sm" disabled={clear.isPending} onClick={() => clear.mutate()}>
+                {clear.isPending ? t('detail.clearing') : t('detail.clearAction')}
+              </button>
+              <button type="button" className="btn-secondary btn-sm" disabled={clear.isPending} onClick={() => setClearing(false)}>
+                {t('detail.cancel')}
+              </button>
+            </div>
+            {clear.isError ? <ShownError {...shownError(clear.error)} className="text-xs text-danger" /> : null}
+          </div>
+        ) : null}
         {history.length === 0 ? (
           <p className="mt-2 text-sm text-ink-muted">{t('detail.notRunYet')}</p>
         ) : (
@@ -456,10 +508,13 @@ function Detail({
                 run={run}
                 zone={zone}
                 models={models}
+                removing={removeRun.isPending && removeRun.variables === run.id}
+                onRemove={() => removeRun.mutate(run.id)}
               />
             ))}
           </ul>
         )}
+        {removeRun.isError ? <ShownError {...shownError(removeRun.error)} className="mt-2 text-xs text-danger" /> : null}
         {more ? (
           <button type="button" className="btn-secondary btn-sm mt-3" disabled={loadOlder.isPending} onClick={() => loadOlder.mutate()}>
             {loadOlder.isPending ? t('detail.loadingOlder') : t('detail.olderRuns')}
@@ -474,10 +529,14 @@ function HistoryRow({
   run,
   zone,
   models,
+  removing,
+  onRemove,
 }: {
   run: AutomationRun
   zone: string
   models: Model[]
+  removing: boolean
+  onRemove: () => void
 }) {
   const { t } = useTranslation('automations')
   const navigate = useNavigate()
@@ -523,6 +582,11 @@ function HistoryRow({
           {modelName && <p>{t('run.model', { model: modelName })}</p>}
           {run.node_id && <p>{t('run.computer', { computer: run.node_id })}</p>}
           {run.attempt > 1 && <p>{t('run.attempt', { n: run.attempt })}</p>}
+          {run.status === 'succeeded' || run.status === 'failed' ? (
+            <button type="button" className="mt-1 text-ink-muted hover:text-danger" disabled={removing} onClick={onRemove}>
+              {removing ? t('run.removing') : t('run.remove')}
+            </button>
+          ) : null}
         </div>
       </details>
     </li>

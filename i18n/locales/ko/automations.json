@@ -150,7 +150,13 @@
     "door": "현관",
     "looksAt": "{{cameras}} 보기",
     "says": "현관에서 답을 말함",
-    "talks": "방문자와 대화하고 온 이유를 알아봄"
+    "talks": "방문자와 대화하고 온 이유를 알아봄",
+    "clearHistory": "기록 지우기",
+    "clearConfirm": "이 자동화 기록에서 끝난 실행을 모두 지울까요? 실행 중인 것은 남고, 자동화는 일정대로 계속 실행돼요.",
+    "clearPictures": "카메라가 찍은 사진도 삭제",
+    "clearAction": "기록 지우기",
+    "clearing": "지우는 중…",
+    "cancel": "취소"
   },
   "run": {
     "details": "세부 정보",
@@ -169,7 +175,9 @@
     },
     "continueInChat": "채팅에서 이어 가기",
     "openingChat": "채팅을 여는 중…",
-    "savedTo": "{{path}}에 저장함"
+    "savedTo": "{{path}}에 저장함",
+    "remove": "이 실행 삭제",
+    "removing": "삭제 중…"
   },
   "pill": {
     "paused": "일시 정지됨",

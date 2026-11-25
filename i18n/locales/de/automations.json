@@ -150,7 +150,13 @@
     "door": "An der Tür",
     "looksAt": "Schaut auf {{cameras}}",
     "says": "Sagt die Antwort an der Tür",
-    "talks": "Spricht mit dem Besucher und fragt, warum er kommt"
+    "talks": "Spricht mit dem Besucher und fragt, warum er kommt",
+    "clearHistory": "Verlauf löschen",
+    "clearConfirm": "Alle abgeschlossenen Läufe aus dem Verlauf dieser Automation entfernen? Laufende bleiben, und die Automation läuft weiter nach ihrem Zeitplan.",
+    "clearPictures": "Auch die Bilder ihrer Kameras löschen",
+    "clearAction": "Verlauf löschen",
+    "clearing": "Wird gelöscht…",
+    "cancel": "Abbrechen"
   },
   "run": {
     "details": "Details",
@@ -169,7 +175,9 @@
     },
     "continueInChat": "Im Chat fortsetzen",
     "openingChat": "Chat wird geöffnet…",
-    "savedTo": "Gespeichert unter {{path}}"
+    "savedTo": "Gespeichert unter {{path}}",
+    "remove": "Diesen Lauf entfernen",
+    "removing": "Wird entfernt…"
   },
   "pill": {
     "paused": "Pausiert",

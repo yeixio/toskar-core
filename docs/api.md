@@ -350,6 +350,8 @@ Members and up start swarms (contract 1.88, #1135); a Visitor gets `403 ROLE_REQ
 | GET, PATCH, DELETE | `/automations/{id}` | An automation with its history, change it, or delete it |
 | POST | `/automations/{id}/run`, `/pause`, `/resume` | Run now, pause, or resume |
 | GET | `/automations/{id}/runs` | Older runs, a page at a time (`before`, `limit`) |
+| DELETE | `/automations/{id}/runs` | Clear its history: every finished run, and with `files=true` its camera pictures; returns `{runs, files}` (#1335, contract 1.118) |
+| DELETE | `/automations/{id}/runs/{run_id}` | Delete one finished run; one still working answers `409 AUTOMATION_RUN_IN_PROGRESS` (#1335, contract 1.118) |
 | POST | `/automations/{id}/runs/{run_id}/chat` | Open a run's result in a chat to reply to; returns `conversation_id` |
 | POST | `/automations/parse` | Read a request such as "every morning at 8, tell me if the price is below $500" into an automation to review |
 | GET | `/notifications` | The notification center: `{"notifications": [...], "unread": n}`. `?unread=1` lists unread ones; `?category=` lists one category. Each person sees their own: automation results and approval requests are their person's alone, and Admins and the Owner also see notices about the install (models, training, health, system). Desktop notices, email, push, and webhooks carry the install's notices and the Owner's own, never another person's (#206). |

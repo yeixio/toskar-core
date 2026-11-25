@@ -150,7 +150,13 @@
     "door": "Alla porta",
     "looksAt": "Guarda {{cameras}}",
     "says": "Dice la risposta alla porta",
-    "talks": "Parla con il visitatore e scopre perché è venuto"
+    "talks": "Parla con il visitatore e scopre perché è venuto",
+    "clearHistory": "Cancella cronologia",
+    "clearConfirm": "Rimuovere tutte le esecuzioni concluse dalla cronologia di questa automazione? Quelle in corso restano, e l'automazione continua secondo il suo orario.",
+    "clearPictures": "Elimina anche le foto scattate dalle sue telecamere",
+    "clearAction": "Cancella cronologia",
+    "clearing": "Cancellazione…",
+    "cancel": "Annulla"
   },
   "run": {
     "details": "Dettagli",
@@ -169,7 +175,9 @@
     },
     "continueInChat": "Continua in chat",
     "openingChat": "Apertura della chat…",
-    "savedTo": "Salvato in {{path}}"
+    "savedTo": "Salvato in {{path}}",
+    "remove": "Rimuovi questa esecuzione",
+    "removing": "Rimozione…"
   },
   "pill": {
     "paused": "In pausa",
