@@ -1363,7 +1363,7 @@
     "letters": "Lettere",
     "settings": {
       "title": "Tastiera Toskar",
-      "off": "Scrivi ovunque, poi tocca Chiedi, Riscrivi o Correggi sopra i tasti perché Toskar risponda o migliori ciò che hai scritto. Attivala nelle impostazioni della tastiera di Android.",
+      "off": "Scrivi ovunque, poi tocca Chiedi, Riscrivi o Correggi sopra i tasti perché Toskar risponda o migliori ciò che hai scritto. Attivala nelle impostazioni della tastiera di sistema.",
       "on": "È attiva. Passa a questa tastiera con il pulsante della tastiera mentre scrivi.",
       "privacy": "Ciò che scrivi resta su questo telefono e la tastiera non conserva nulla. Solo il testo che invii con Chiedi, Riscrivi o Correggi va al tuo computer o ai modelli di questo telefono. Nei campi password si limita a scrivere.",
       "turnOn": "Attiva la tastiera",

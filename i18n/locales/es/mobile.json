@@ -1363,7 +1363,7 @@
     "letters": "Letras",
     "settings": {
       "title": "Teclado de Toskar",
-      "off": "Escribe en cualquier lugar y toca Preguntar, Reescribir o Corregir sobre las teclas para que Toskar responda o mejore lo que escribiste. Actívalo en los ajustes de teclado de Android.",
+      "off": "Escribe en cualquier lugar y toca Preguntar, Reescribir o Corregir sobre las teclas para que Toskar responda o mejore lo que escribiste. Actívalo en los ajustes de teclado del sistema.",
       "on": "Está activado. Cambia a él con el botón de teclado mientras escribes.",
       "privacy": "Lo que escribes se queda en este teléfono y el teclado no guarda nada. Solo el texto que envías con Preguntar, Reescribir o Corregir va a tu computadora o a los modelos de este teléfono. En los campos de contraseña solo escribe.",
       "turnOn": "Activar el teclado",

@@ -1363,7 +1363,7 @@
     "letters": "Letras",
     "settings": {
       "title": "Teclado do Toskar",
-      "off": "Digite em qualquer lugar e toque em Perguntar, Reescrever ou Corrigir acima das teclas para o Toskar responder ou melhorar o que você escreveu. Ative-o nas configurações de teclado do Android.",
+      "off": "Digite em qualquer lugar e toque em Perguntar, Reescrever ou Corrigir acima das teclas para o Toskar responder ou melhorar o que você escreveu. Ative-o nas configurações de teclado do sistema.",
       "on": "Está ativado. Mude para ele com o botão de teclado enquanto digita.",
       "privacy": "O que você digita fica neste celular, e o teclado não guarda nada. Só o texto que você envia com Perguntar, Reescrever ou Corrigir vai para o seu computador ou para os modelos deste celular. Em campos de senha, ele só digita.",
       "turnOn": "Ativar o teclado",
