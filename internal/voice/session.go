@@ -25,6 +25,60 @@ type Transcriber interface {
 	Transcribe(ctx context.Context, wav []byte, language string) (string, error)
 }
 
+// Heard is a turn's text and the language it was spoken in, with how sure
+// speech to text is of it, from 0 to 1.
+type Heard struct {
+	Text       string
+	Language   string
+	Confidence float64
+}
+
+// LanguageHearer is a Transcriber that also says which language it heard
+// (#1322). With language "", it detects it.
+type LanguageHearer interface {
+	Hear(ctx context.Context, wav []byte, language string) (Heard, error)
+}
+
+// SureOfLanguage is how sure speech to text must be of the language it
+// heard for the answer to follow it. Whisper base is often unsure of a
+// word or two, and then guesses wildly (#1330's bench heard Spanish as
+// Thai), so an unsure guess is left to the text and the settings.
+const SureOfLanguage = 0.7
+
+type heardKey struct{}
+
+// WithHeardLanguage says the turn was spoken in language, such as es.
+func WithHeardLanguage(ctx context.Context, language string) context.Context {
+	if language == "" {
+		return ctx
+	}
+	return context.WithValue(ctx, heardKey{}, language)
+}
+
+// HeardLanguage is the language the turn was spoken in, or "".
+func HeardLanguage(ctx context.Context) string {
+	l, _ := ctx.Value(heardKey{}).(string)
+	return l
+}
+
+// Hear transcribes wav, and says the language heard when the transcriber
+// can and was sure of it, unless language sets one.
+func Hear(ctx context.Context, t Transcriber, wav []byte, language string) (text, heard string, err error) {
+	h, ok := t.(LanguageHearer)
+	if !ok {
+		text, err = t.Transcribe(ctx, wav, language)
+		return text, "", err
+	}
+	got, err := h.Hear(ctx, wav, language)
+	if err != nil {
+		return "", "", err
+	}
+	if language == "" && got.Language != "" && got.Confidence >= SureOfLanguage {
+		heard = got.Language
+	}
+	return got.Text, heard, nil
+}
+
 // Responder answers a turn's text, calling delta with the answer as it's
 // written.
 type Responder interface {
@@ -91,6 +145,8 @@ type Session struct {
 	turnItem string
 	// lastText is the last turn's transcript, for response.create.
 	lastText string
+	// lastHeard is the language it was spoken in, when sure, or "".
+	lastHeard string
 	// lastLang is the language the last answer was read in.
 	lastLang string
 	seq      int
@@ -414,19 +470,24 @@ func (s *Session) turn(item string, audio []int16, lang string, create bool, sto
 		case <-ctx.Done():
 		}
 	}()
-	text, err := s.parts.Transcriber.Transcribe(ctx, WAV(audio, SampleRate), lang)
+	text, heard, err := Hear(ctx, s.parts.Transcriber, WAV(audio, SampleRate), lang)
 	if err != nil {
 		s.emit("conversation.item.input_audio_transcription.failed", map[string]any{"item_id": item, "content_index": 0, "error": map[string]any{"type": "transcription_error", "message": err.Error()}})
 		return
 	}
 	text = strings.TrimSpace(text)
-	s.emit("conversation.item.input_audio_transcription.completed", map[string]any{"item_id": item, "content_index": 0, "transcript": text})
+	done := map[string]any{"item_id": item, "content_index": 0, "transcript": text}
+	if heard != "" {
+		// Which language it heard, so a wrong guess can be seen (#1322).
+		done["language"] = heard
+	}
+	s.emit("conversation.item.input_audio_transcription.completed", done)
 	sttMs := s.now().Sub(stoppedAt).Milliseconds()
 	if text == "" {
 		return
 	}
 	s.mu.Lock()
-	s.lastText = text
+	s.lastText, s.lastHeard = text, heard
 	s.mu.Unlock()
 	if create {
 		s.respond(text, stoppedAt, sttMs)

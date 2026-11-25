@@ -5,7 +5,8 @@ start.
 Reads one JSON request per line on stdin and writes one JSON answer per line
 on stdout, with the request's id:
   {"id", "op": "transcribe", "pcm", "model", "models_dir", "language"}
-      pcm is base64 16-bit mono PCM at 16 kHz; answers {"id", "text", "language"}.
+      pcm is base64 16-bit mono PCM at 16 kHz; answers {"id", "text", "language",
+      "probability"}: how sure Whisper is of the language, from 0 to 1.
   {"id", "op": "speak", "text", "voice", "voices_dir"}
       answers {"id", "pcm", "rate"}: base64 16-bit mono PCM at the voice's rate.
   {"id", "op": "speak", "engine": "kokoro", "text", "voice", "lang", "model", "voices"}
@@ -54,7 +55,7 @@ def transcribe(req):
     # out, by Whisper's own rule (#795).
     text = " ".join(s.text.strip() for s in segments
                     if not (s.no_speech_prob > 0.6 and s.avg_logprob < -1.0)).strip()
-    return {"text": text, "language": info.language}
+    return {"text": text, "language": info.language, "probability": float(info.language_probability or 0)}
 
 
 def voice_for(req):
