@@ -452,7 +452,9 @@
     "sayVoiceAutomatic": "设置中该语言的语音",
     "sayVoiceKitten": "Kitten",
     "sayListen": "与访客交谈",
-    "sayListenHint": "说完第一句后，Toskar 会通过门铃的麦克风聆听、回答，并弄清来的是谁、为什么来。它从不透露家里是否有人。你会收到这次来访的摘要。需要这台电脑上有 ffmpeg。"
+    "sayListenHint": "说完第一句后，Toskar 会通过门铃的麦克风聆听、回答，并弄清来的是谁、为什么来。它从不透露家里是否有人。你会收到这次来访的摘要。需要这台电脑上有 ffmpeg。",
+    "sayThinkingSound": "播放思考提示音",
+    "sayThinkingSoundHint": "回答需要一点时间时播放柔和的提示音，让访客知道已被听到。安静时段不播放。"
   },
   "draft": {
     "label": "待确认的自动化",

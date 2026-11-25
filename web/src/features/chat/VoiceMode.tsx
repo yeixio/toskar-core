@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useQueryClient } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useDialog } from '@/lib/useDialog'
-import { errorText } from '@/lib/api'
+import { api, errorText } from '@/lib/api'
 import { VoiceAudio, canUseMicrophone } from '@/lib/voice/audio'
 import { VoiceConnection, resolveVoiceSocketUrl, type VoiceStatus } from '@/lib/voice/realtime'
 import { readScreenshotLaunch } from '@/lib/screenshotMode'
@@ -35,6 +35,17 @@ export function VoiceMode({ onClose }: { onClose: () => void }) {
   const [error, setError] = useState('')
   const audioRef = useRef<VoiceAudio | null>(null)
   const ref = useDialog(true, onClose)
+  const settings = useQuery({ queryKey: ['settings'], queryFn: () => api.getSettings(), retry: false })
+  const thinkingSound = settings.data?.thinking_sound ?? true
+
+  // A soft chime while an answer takes a while, so the person knows they
+  // were heard (#1334); it stops the moment anything else happens.
+  useEffect(() => {
+    const audio = audioRef.current
+    if (!audio) return
+    if (status === 'thinking' && thinkingSound) audio.startThinking()
+    else audio.stopThinking()
+  }, [status, thinkingSound])
 
   useEffect(() => {
     // The user guide's screenshot shows a turn in progress, without a microphone.
@@ -59,8 +70,14 @@ export function VoiceMode({ onClose }: { onClose: () => void }) {
       onStatus: setStatus,
       onYou: setYou,
       onAnswer: setAnswer,
-      onAudio: (samples: Float32Array) => audio.play(samples),
-      onInterrupt: () => audio.interrupt(),
+      onAudio: (samples: Float32Array) => {
+        audio.stopThinking()
+        audio.play(samples)
+      },
+      onInterrupt: () => {
+        audio.stopThinking()
+        audio.interrupt()
+      },
       onDone: (_: string, ms?: number) => {
         if (ms != null) setWaited(ms)
         if (!audio.isPlaying) conn?.played()

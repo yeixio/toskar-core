@@ -53,7 +53,11 @@ func (s *Server) atLeast(min auth.Role, h http.HandlerFunc) http.HandlerFunc {
 }
 
 // myPreferences are the settings each person keeps for themselves (#206).
-var myPreferences = map[string]bool{"ui_locale": true, "assistant_language_mode": true, "assistant_language": true, "suggest_models": true}
+var myPreferences = map[string]bool{"ui_locale": true, "assistant_language_mode": true, "assistant_language": true, "suggest_models": true, "thinking_sound": true}
+
+// myOnOff are the preferences that are true or false: suggest_models
+// (#707) and thinking_sound (#1334). The rest are strings.
+var myOnOff = map[string]bool{"suggest_models": true, "thinking_sound": true}
 
 // handleMyPreferences saves the request's person's own App language and
 // assistant language, whatever their role, and answers with their
@@ -71,14 +75,13 @@ func (s *Server) handleMyPreferences(w http.ResponseWriter, r *http.Request) {
 	patch := map[string]any{}
 	for k, v := range in {
 		if !myPreferences[k] {
-			writeErr(w, http.StatusBadRequest, "INVALID_SETTING", "Only ui_locale, assistant_language_mode, assistant_language, and suggest_models are your own.", map[string]any{"setting": k})
+			writeErr(w, http.StatusBadRequest, "INVALID_SETTING", "Only ui_locale, assistant_language_mode, assistant_language, suggest_models, and thinking_sound are your own.", map[string]any{"setting": k})
 			return
 		}
-		// suggest_models is on or off (#707); the rest are strings.
-		if _, isBool := v.(bool); k == "suggest_models" && !isBool {
-			writeErr(w, http.StatusBadRequest, "INVALID_SETTING", "suggest_models is true or false.", map[string]any{"setting": k})
+		if _, isBool := v.(bool); myOnOff[k] && !isBool {
+			writeErr(w, http.StatusBadRequest, "INVALID_SETTING", k+" is true or false.", map[string]any{"setting": k})
 			return
-		} else if _, ok := v.(string); !ok && k != "suggest_models" {
+		} else if _, ok := v.(string); !ok && !myOnOff[k] {
 			writeErr(w, http.StatusBadRequest, "INVALID_SETTING", "Each preference is a string.", map[string]any{"setting": k})
 			return
 		}

@@ -413,7 +413,9 @@
       "models": "Ver modelos"
     },
     "standard": "Estándar",
-    "noVoice": "{{languages}} todavía no se puede leer en voz alta: la lectura en voz alta, el modo de voz y el timbre no lo hablan."
+    "noVoice": "{{languages}} todavía no se puede leer en voz alta: la lectura en voz alta, el modo de voz y el timbre no lo hablan.",
+    "thinkingSound": "Sonido de espera",
+    "thinkingSoundHint": "En el chat de voz suena un tono suave cuando una respuesta tarda más de un momento, para que sepas que Toskar te escuchó. Solo para ti."
   },
   "sections": {
     "account": "Cuenta",

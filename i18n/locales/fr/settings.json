@@ -413,7 +413,9 @@
       "models": "Voir les modèles"
     },
     "standard": "Standard",
-    "noVoice": "{{languages}} ne peut pas encore être lu à voix haute : la lecture à voix haute, le mode vocal et la sonnette ne le parlent pas."
+    "noVoice": "{{languages}} ne peut pas encore être lu à voix haute : la lecture à voix haute, le mode vocal et la sonnette ne le parlent pas.",
+    "thinkingSound": "Son de réflexion",
+    "thinkingSoundHint": "En conversation vocale, un carillon doux se fait entendre quand une réponse prend plus d'un instant, pour que tu saches que Toskar t'a entendu. Rien que pour toi."
   },
   "sections": {
     "account": "Compte",

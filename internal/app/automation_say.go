@@ -65,7 +65,7 @@ func (a *App) speakAtDoor(ctx context.Context, automation automations.Automation
 
 // sayAnswer reads answer aloud and sends it to the speaker, unless it's
 // nothing to say or quiet hours at now in the automation's time zone.
-func sayAnswer(ctx context.Context, sp voice.Speaker, talk doorTalker, automation automations.Automation, answer, language string, now time.Time) (string, error) {
+func sayAnswer(ctx context.Context, sp voice.Speaker, talk doorTalker, automation automations.Automation, answer, language string, now time.Time, ready ...func()) (string, error) {
 	text := automations.Spoken(answer)
 	if text == "" {
 		return "", nil
@@ -86,6 +86,11 @@ func sayAnswer(ctx context.Context, sp voice.Speaker, talk doorTalker, automatio
 		return "", fmt.Errorf("couldn't read the answer aloud: %w", err)
 	}
 	samples = voice.Resample(samples, voice.SampleRate, connectors.ReolinkTalkRate)
+	// The words are ready: anything playing meanwhile, such as the thinking
+	// sound, stops first.
+	for _, f := range ready {
+		f()
+	}
 	if err := talk.Talk(ctx, automation.Say.Connector, samples, connectors.ReolinkTalkRate); err != nil {
 		return "", err
 	}

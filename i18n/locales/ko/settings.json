@@ -395,7 +395,9 @@
       "models": "모델 보기"
     },
     "standard": "표준",
-    "noVoice": "{{languages}}는 아직 소리 내어 읽을 수 없습니다. 소리 내어 읽기, 음성 모드, 초인종이 이 언어를 말하지 않습니다."
+    "noVoice": "{{languages}}는 아직 소리 내어 읽을 수 없습니다. 소리 내어 읽기, 음성 모드, 초인종이 이 언어를 말하지 않습니다.",
+    "thinkingSound": "생각 중 소리",
+    "thinkingSoundHint": "음성 채팅에서 답변이 조금 늦어질 때 Toskar가 들었다는 걸 알 수 있도록 부드러운 알림음이 재생됩니다. 나에게만 적용됩니다."
   },
   "sections": {
     "account": "계정",

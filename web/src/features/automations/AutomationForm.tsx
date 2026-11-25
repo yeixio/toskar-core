@@ -99,6 +99,7 @@ export function AutomationForm({ profiles, models, tools, others = [], initial, 
   const [sayVoice, setSayVoice] = useState(initial?.say?.voice || '')
   // Talks with the visitor after the first words, and notifies with the visit (#667).
   const [listen, setListen] = useState(Boolean(initial?.say?.listen))
+  const [thinkingSound, setThinkingSound] = useState(!initial?.say?.no_thinking_sound)
   // The voices the door can speak in, from the Voice settings (#1304).
   const [doorVoices, setDoorVoices] = useState<VoiceChoice[]>([])
   // A camera needs a model that can see its picture: offered here, while
@@ -165,6 +166,7 @@ export function AutomationForm({ profiles, models, tools, others = [], initial, 
     if (parsed.say) {
       setSaying(true)
       setListen(Boolean(parsed.say.listen))
+      setThinkingSound(!parsed.say.no_thinking_sound)
     }
   }
 
@@ -279,7 +281,7 @@ export function AutomationForm({ profiles, models, tools, others = [], initial, 
       actions: actions.length > 0 || initial?.actions?.length ? actions : undefined,
       // An edit that stops speaking sends one with no connector.
       say: saying
-        ? { connector: 'reolink', device: 'camera', ...(quiet ? { quiet_from: quietFrom, quiet_to: quietTo } : {}), ...(sayVoice ? { voice: sayVoice } : {}), ...(listen ? { listen: true } : {}) }
+        ? { connector: 'reolink', device: 'camera', ...(quiet ? { quiet_from: quietFrom, quiet_to: quietTo } : {}), ...(sayVoice ? { voice: sayVoice } : {}), ...(listen ? { listen: true } : {}), ...(listen && !thinkingSound ? { no_thinking_sound: true } : {}) }
         : initial?.say
           ? { connector: '' }
           : undefined,
@@ -615,6 +617,15 @@ export function AutomationForm({ profiles, models, tools, others = [], initial, 
                   <span className="block text-xs text-ink-faint">{t('form.sayListenHint')}</span>
                 </span>
               </label>
+              {listen ? (
+                <label className="ms-6 flex items-start gap-2">
+                  <input type="checkbox" className="mt-1" checked={thinkingSound} onChange={(e) => setThinkingSound(e.target.checked)} />
+                  <span>
+                    {t('form.sayThinkingSound')}
+                    <span className="block text-xs text-ink-faint">{t('form.sayThinkingSoundHint')}</span>
+                  </span>
+                </label>
+              ) : null}
               <label className="inline-flex items-center gap-2">
                 <input type="checkbox" checked={quiet} onChange={(e) => setQuiet(e.target.checked)} />
                 <span>{t('form.sayQuiet')}</span>

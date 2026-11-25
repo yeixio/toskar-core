@@ -452,7 +452,9 @@
     "sayVoiceAutomatic": "La voz del idioma en Configuración",
     "sayVoiceKitten": "Kitten",
     "sayListen": "Hablar con la visita",
-    "sayListenHint": "Tras las primeras palabras, Toskar escucha por el micrófono del timbre, responde y averigua quién vino y por qué. Nunca dice si hay alguien en casa. Recibes un resumen de la visita. Necesita ffmpeg en este equipo."
+    "sayListenHint": "Tras las primeras palabras, Toskar escucha por el micrófono del timbre, responde y averigua quién vino y por qué. Nunca dice si hay alguien en casa. Recibes un resumen de la visita. Necesita ffmpeg en este equipo.",
+    "sayThinkingSound": "Reproducir un sonido de espera",
+    "sayThinkingSoundHint": "Un tono suave mientras la visita espera la respuesta más de un momento, para que sepa que se la escuchó. No en las horas de silencio."
   },
   "draft": {
     "label": "Automatización por confirmar",

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/yeixio/toskar-core/internal/automations"
@@ -23,6 +24,64 @@ import (
 // they leave. It doesn't listen while it speaks, since the microphone hears
 // the speaker. The visit is then summed up for the people who live there,
 // as the run's result, which the app notifies them with.
+
+// thinking plays the thinking sound through the door's speaker while the
+// visitor waits for an answer (#1334): after thinkAfter, then every
+// thinkEvery, until the returned stop, which waits for a chime already
+// playing to end, so the answer never talks over it. The door doesn't
+// listen meanwhile, so the chime is never heard as the visitor. Quiet
+// hours, or a zero thinkAfter, leave it out.
+func (v *doorVisit) thinking(ctx context.Context) (stop func()) {
+	if v.thinkAfter <= 0 || v.automation.Say == nil || v.automation.Say.NoThinkingSound || v.quiet() {
+		return func() {}
+	}
+	every := v.thinkEvery
+	if every <= 0 {
+		every = voice.ThinkingGap
+	}
+	chime := voice.ThinkingSound(connectors.ReolinkTalkRate)
+	quit, done := make(chan struct{}), make(chan struct{})
+	go func() {
+		defer close(done)
+		wait := time.NewTimer(v.thinkAfter)
+		defer wait.Stop()
+		for {
+			select {
+			case <-quit:
+				return
+			case <-ctx.Done():
+				return
+			case <-wait.C:
+			}
+			// Played whole, even when stopped meanwhile: a cut-off chime
+			// sounds like a fault.
+			if err := v.talk.Talk(context.WithoutCancel(ctx), v.automation.Say.Connector, chime, connectors.ReolinkTalkRate); err != nil {
+				return
+			}
+			wait.Reset(every)
+		}
+	}()
+	var once sync.Once
+	return func() {
+		once.Do(func() {
+			close(quit)
+			<-done
+		})
+	}
+}
+
+// quiet reports the automation's quiet hours now.
+func (v *doorVisit) quiet() bool {
+	var loc *time.Location
+	if v.automation.Schedule.TimeZone != "" {
+		loc, _ = time.LoadLocation(v.automation.Schedule.TimeZone)
+	}
+	now := time.Now
+	if v.now != nil {
+		now = v.now
+	}
+	return v.automation.Say.Quiet(now(), loc)
+}
 
 // doorEar hears a camera's microphone: connectors.Manager.
 type doorEar interface {
@@ -50,6 +109,10 @@ type doorVisit struct {
 	// longest turn heard; echo is how long after speaking the door isn't
 	// heard, while its own words may still be playing.
 	wait, longest, echo time.Duration
+	// thinkAfter is how long the visitor waits for an answer before the
+	// thinking sound plays, and thinkEvery how often it plays again; zero
+	// thinkAfter is no thinking sound (#1334).
+	thinkAfter, thinkEvery time.Duration
 	// grace is how long the door still listens after it said goodbye, in
 	// case the visitor has more to say: a visit ended too quickly for Mike
 	// (#667). The hub's person signal is a pulse of a few seconds, not
@@ -101,14 +164,17 @@ func (v *doorVisit) run(ctx context.Context, greeting string) ([]doorLine, error
 			continue
 		}
 		lines = append(lines, doorLine{Visitor: true, Text: heard})
+		stopThinking := v.thinking(ctx)
 		answer, err := v.reply(ctx, lines)
 		if err != nil {
+			stopThinking()
 			return lines, err
 		}
 		done := strings.Contains(strings.ToLower(answer), doneMark)
 		// In any case, such as [Done], so it's never said aloud (#1339).
 		answer = strings.TrimSpace(doneMarkRe.ReplaceAllString(answer, ""))
-		said, err := sayAnswer(ctx, v.parts.Speaker, v.talk, v.automation, answer, v.lang, v.now())
+		said, err := sayAnswer(ctx, v.parts.Speaker, v.talk, v.automation, answer, v.lang, v.now(), stopThinking)
+		stopThinking()
 		if err != nil {
 			return lines, err
 		}
@@ -237,7 +303,8 @@ func (a *App) talkAtDoor(ctx context.Context, automation automations.Automation,
 		reply: func(ctx context.Context, lines []doorLine) (string, error) {
 			return a.doorAnswer(ctx, automation, modelID, doorTalkStyle, lines)
 		},
-		wait: 10 * time.Second, longest: 30 * time.Second, echo: time.Second, grace: doorGrace}
+		wait: 10 * time.Second, longest: 30 * time.Second, echo: time.Second, grace: doorGrace,
+		thinkAfter: voice.ThinkingDelay}
 	lines, err := v.run(ctx, greeting)
 	if a.Egress != nil {
 		a.Egress.Add(ctx, egress.Connector, a.Connectors.ServiceName(automation.Say.Connector), "heard the door")

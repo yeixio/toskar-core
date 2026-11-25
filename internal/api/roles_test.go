@@ -163,6 +163,14 @@ func TestMyPreferences(t *testing.T) {
 	if code := patch(`{"ui_locale":"fr","lan_api_enabled":true}`); code != http.StatusBadRequest || saved != nil {
 		t.Fatalf("another setting: %d %v", code, saved)
 	}
+	// The thinking sound is theirs too, on or off (#1334).
+	if code := patch(`{"thinking_sound":false}`); code != http.StatusOK || saved["thinking_sound"] != false {
+		t.Fatalf("thinking sound: %d %v", code, saved)
+	}
+	saved = nil
+	if code := patch(`{"thinking_sound":"off"}`); code != http.StatusBadRequest || saved != nil {
+		t.Fatalf("thinking sound as a string: %d %v", code, saved)
+	}
 }
 
 // Anyone connects their own devices and sees and disconnects only theirs,

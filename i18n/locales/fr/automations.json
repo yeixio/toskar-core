@@ -452,7 +452,9 @@
     "sayVoiceAutomatic": "La voix de la langue dans les Réglages",
     "sayVoiceKitten": "Kitten",
     "sayListen": "Parler avec le visiteur",
-    "sayListenHint": "Après les premiers mots, Toskar écoute par le micro de la sonnette, répond et découvre qui est venu et pourquoi. Il ne dit jamais si quelqu'un est à la maison. Tu reçois un résumé de la visite. Nécessite ffmpeg sur cet ordinateur."
+    "sayListenHint": "Après les premiers mots, Toskar écoute par le micro de la sonnette, répond et découvre qui est venu et pourquoi. Il ne dit jamais si quelqu'un est à la maison. Tu reçois un résumé de la visite. Nécessite ffmpeg sur cet ordinateur.",
+    "sayThinkingSound": "Jouer un son de réflexion",
+    "sayThinkingSoundHint": "Un carillon doux pendant que le visiteur attend une réponse plus d'un instant, pour qu'il sache qu'il a été entendu. Pas pendant les heures calmes."
   },
   "draft": {
     "label": "Automatisation à confirmer",

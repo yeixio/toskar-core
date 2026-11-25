@@ -472,6 +472,26 @@ export function SettingsPage({ section }: { section?: SettingsSection } = {}) {
             ) : null}
 
             {show('voice') ? <VoiceSettings /> : null}
+            {show('voice') && settings ? (
+              <section className="card space-y-4">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <h2 className="section-title">{t('voice.thinkingSound')}</h2>
+                    <p className="mt-1 text-sm text-ink-muted">{t('voice.thinkingSoundHint')}</p>
+                  </div>
+                  <Toggle
+                    label={t('voice.thinkingSound')}
+                    checked={settings.thinking_sound ?? true}
+                    disabled={busy}
+                    onChange={() =>
+                      void api
+                        .setMyPreferences({ thinking_sound: !(settings.thinking_sound ?? true) })
+                        .then(() => queryClient.invalidateQueries({ queryKey: ['settings'] }))
+                    }
+                  />
+                </div>
+              </section>
+            ) : null}
 
             {show('advanced') ? (
             <section className="card space-y-4">

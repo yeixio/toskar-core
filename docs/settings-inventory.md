@@ -20,6 +20,7 @@ Columns:
 | Language of answers | `assistant_language_mode` | Settings › General › Language | General | Account | Basic | Automatic (the language you write in) | none | Behavioral |
 | Answer language (fixed) | `assistant_language` | Settings › General › Language | General | Account | Basic | none | `assistant_language_mode` = language | Behavioral |
 | Suggest a better model | `suggest_models` | Settings › Privacy › History | Personalization | Account | Basic | On | none | Behavioral |
+| Thinking sound | `thinking_sound` | Settings › Voice | Voice | Account | Basic | On | none | Behavioral |
 | Memory | `memory_enabled` | Memory page | Personalization | Account | Basic | On | none | Data |
 | Hugging Face token | `huggingface_token` | Models › a model behind a license | Models (contextual) | Account | Advanced | none | none | Security |
 | Show community ratings | `community_ratings` | Settings › Privacy › Community ratings | Models (contextual) | Application | Basic | Off | none | Network |

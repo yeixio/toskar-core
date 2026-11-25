@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Toskar Control Plane API
-  version: "1.120"
+  version: "1.121"
   description: >-
     Local AI control plane API for Toskar, its OpenAI-compatible routes, and its MCP server.
     On the default loopback bind no key is needed. When the daemon listens on any other address,
@@ -1216,7 +1216,7 @@ paths:
   /api/v1/me/preferences:
     patch:
       summary: Save your own languages (#206)
-      description: The request's person's App language and assistant language, whatever their role. The Owner's are the install's, which others start from until they choose. Answers with the person's settings.
+      description: The request's person's App language, assistant language, model suggestions, and thinking sound, whatever their role. The Owner's are the install's, which others start from until they choose. Answers with the person's settings.
       operationId: setMyPreferences
       tags: [People]
       requestBody:
@@ -1234,6 +1234,12 @@ paths:
                   enum: [auto, app, language]
                 assistant_language:
                   type: string
+                suggest_models:
+                  type: boolean
+                  description: Answers may offer a better-fitting model to install (#707)
+                thinking_sound:
+                  type: boolean
+                  description: Voice chat plays a soft chime while a spoken answer takes a while (#1334, contract 1.121); on by default
       responses:
         "200":
           description: The person's settings
@@ -9470,6 +9476,7 @@ components:
             quiet_to: {type: string}
             voice: {type: string, description: 'The voice it speaks in, such as kitten:en:eleanor (#1304, contract 1.112); empty is the one chosen for the language in the Voice settings. One no longer here leaves it to that.'}
             listen: {type: boolean, description: "Talks with the visitor: greets them with a fixed greeting in the automation's language as soon as the run starts, without looking at the picture first, then hears them through the camera's microphone with reolink-cli and ffmpeg, answers up to 6 times, and the run's result is the visit summed up, then what was said (#667, contract 1.114)"}
+            no_thinking_sound: {type: boolean, description: 'Leaves out the soft chime the door plays while a visitor waits more than a moment for an answer (#1334, contract 1.121). Off by default, so the chime plays; quiet hours mute it too.'}
         actions:
           type: array
           description: 'Calls the automation may make on its own (#586), such as Home Assistant''s light.turn_on on light.porch. A call that matches one runs without asking, even in a run a trigger started; other calls that change things are skipped. Each argument listed must equal the call''s, ignoring case; a Home Assistant action names its service and entity_id. At most 20. On update, an empty list removes them.'
@@ -9534,6 +9541,7 @@ components:
             quiet_to: {type: string}
             voice: {type: string, description: 'The voice it speaks in, such as kitten:en:eleanor (#1304, contract 1.112); empty is the one chosen for the language in the Voice settings. One no longer here leaves it to that.'}
             listen: {type: boolean, description: "Talks with the visitor: greets them with a fixed greeting in the automation's language as soon as the run starts, without looking at the picture first, then hears them through the camera's microphone with reolink-cli and ffmpeg, answers up to 6 times, and the run's result is the visit summed up, then what was said (#667, contract 1.114)"}
+            no_thinking_sound: {type: boolean, description: 'Leaves out the soft chime the door plays while a visitor waits more than a moment for an answer (#1334, contract 1.121). Off by default, so the chime plays; quiet hours mute it too.'}
         actions:
           type: array
           description: 'Calls the automation may make on its own (#586), such as Home Assistant''s light.turn_on on light.porch. A call that matches one runs without asking, even in a run a trigger started; other calls that change things are skipped. Each argument listed must equal the call''s, ignoring case; a Home Assistant action names its service and entity_id. At most 20. On update, an empty list removes them.'
@@ -10853,6 +10861,7 @@ components:
             quiet_to: {type: string}
             voice: {type: string, description: 'The voice it speaks in, such as kitten:en:eleanor (#1304, contract 1.112); empty is the one chosen for the language in the Voice settings. One no longer here leaves it to that.'}
             listen: {type: boolean, description: "Talks with the visitor: greets them with a fixed greeting in the automation's language as soon as the run starts, without looking at the picture first, then hears them through the camera's microphone with reolink-cli and ffmpeg, answers up to 6 times, and the run's result is the visit summed up, then what was said (#667, contract 1.114)"}
+            no_thinking_sound: {type: boolean, description: 'Leaves out the soft chime the door plays while a visitor waits more than a moment for an answer (#1334, contract 1.121). Off by default, so the chime plays; quiet hours mute it too.'}
         actions:
           type: array
           description: 'Calls the automation may make on its own (#586), such as Home Assistant''s light.turn_on on light.porch. A call that matches one runs without asking, even in a run a trigger started; other calls that change things are skipped. Each argument listed must equal the call''s, ignoring case; a Home Assistant action names its service and entity_id. At most 20. On update, an empty list removes them.'
@@ -10942,6 +10951,7 @@ components:
             quiet_to: {type: string}
             voice: {type: string}
             listen: {type: boolean}
+            no_thinking_sound: {type: boolean, description: 'Leaves out the soft chime the door plays while a visitor waits more than a moment for an answer (#1334, contract 1.121). Off by default, so the chime plays; quiet hours mute it too.'}
     AutomationRunInfo:
       type: object
       description: The durable record for one occurrence of an automation.
