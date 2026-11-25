@@ -188,7 +188,11 @@
     "newerModelsBody": "{{model}} ist neuer als {{installed}}. Unter Modelle › Installiert siehst du, wie es passt, und kannst es neben dem vorhandenen installieren.",
     "pageNotOpened": "{{automation}} hat {{page}} nicht geöffnet",
     "pageNotOpenedUnnamed": "Eine Automation hat {{page}} nicht geöffnet",
-    "pageNotOpenedBody": "Ihr Modell hat geantwortet, ohne die Seite zu lesen, daher ist das Ergebnis womöglich erfunden. Wähle für diese Automation ein Modell, das Werkzeuge nutzen kann."
+    "pageNotOpenedBody": "Ihr Modell hat geantwortet, ohne die Seite zu lesen, daher ist das Ergebnis womöglich erfunden. Wähle für diese Automation ein Modell, das Werkzeuge nutzen kann.",
+    "runtimeUpgraded": "{{runtime}} wurde für diesen Computer aktualisiert",
+    "runtimeUpgradedBody": "Toskar hat einen schnelleren {{runtime}}-Build geladen, der die Grafik dieses Computers nutzt, und den installierten ersetzt. Er steht unter „Was diesen Computer verlassen hat“.",
+    "imagesUpdated": "Bild-Engine auf {{release}} aktualisiert",
+    "imagesUpdatedBody": "Toskar hat stable-diffusion.cpp {{release}} für diese Version geladen und die frühere Version entfernt. Das steht unter „Was diesen Computer verlassen hat“."
   },
   "sent": {
     "times": "{{title}} ({{count}}-mal)",

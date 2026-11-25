@@ -18,6 +18,9 @@ func (a *App) upgradeRuntimeBuilds(ctx context.Context) {
 		if err != nil && ctx.Err() == nil && a.Logger != nil {
 			a.Logger.Warn("runtime build not upgraded", "error", err)
 		}
+		for _, id := range done {
+			a.runtimeUpgraded(ctx, id)
+		}
 		if len(done) > 0 {
 			a.invalidateCapabilities()
 			if a.Logger != nil {

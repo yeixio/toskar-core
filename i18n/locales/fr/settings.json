@@ -242,7 +242,8 @@
       "comfyui": "ComfyUI",
       "problem_report": "Signalement",
       "news": "Actualités de l’IA",
-      "link_check": "Vérification de lien"
+      "link_check": "Vérification de lien",
+      "download": "Téléchargement"
     },
     "kindsLower": {
       "web_search": "recherche web",
@@ -257,7 +258,8 @@
       "comfyui": "ComfyUI",
       "problem_report": "signalement",
       "news": "actualités de l’IA",
-      "link_check": "vérification de lien"
+      "link_check": "vérification de lien",
+      "download": "téléchargement"
     },
     "sources": {
       "chat": "Discussion",

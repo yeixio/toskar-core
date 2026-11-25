@@ -228,7 +228,8 @@
       "comfyui": "ComfyUI",
       "problem_report": "問題の報告",
       "news": "AI ニュース",
-      "link_check": "リンク確認"
+      "link_check": "リンク確認",
+      "download": "ダウンロード"
     },
     "kindsLower": {
       "web_search": "Web検索",
@@ -243,7 +244,8 @@
       "comfyui": "ComfyUI",
       "problem_report": "問題の報告",
       "news": "AI ニュース",
-      "link_check": "リンク確認"
+      "link_check": "リンク確認",
+      "download": "ダウンロード"
     },
     "sources": {
       "chat": "チャット",

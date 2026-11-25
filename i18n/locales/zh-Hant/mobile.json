@@ -912,7 +912,8 @@
       "update_check": "檢查更新",
       "comfyui": "ComfyUI",
       "problem_report": "問題回報",
-      "link_check": "連結檢查"
+      "link_check": "連結檢查",
+      "download": "下載"
     },
     "kindsLower": {
       "web_search": "網路搜尋",
@@ -926,7 +927,8 @@
       "update_check": "檢查更新",
       "comfyui": "ComfyUI",
       "problem_report": "問題回報",
-      "link_check": "連結檢查"
+      "link_check": "連結檢查",
+      "download": "下載"
     },
     "sources": {
       "chat": "聊天",

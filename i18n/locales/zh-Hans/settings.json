@@ -228,7 +228,8 @@
       "comfyui": "ComfyUI",
       "problem_report": "问题报告",
       "news": "AI 新闻",
-      "link_check": "链接检查"
+      "link_check": "链接检查",
+      "download": "下载"
     },
     "kindsLower": {
       "web_search": "网络搜索",
@@ -243,7 +244,8 @@
       "comfyui": "ComfyUI",
       "problem_report": "问题报告",
       "news": "AI 新闻",
-      "link_check": "链接检查"
+      "link_check": "链接检查",
+      "download": "下载"
     },
     "sources": {
       "chat": "聊天",

@@ -180,7 +180,11 @@
     "newerModelsBody": "{{model}} 比 {{installed}} 更新。在「模型 › 已安裝」中可以查看它在這台電腦上的適配情況，並把它安裝在現有模型旁邊。",
     "pageNotOpened": "{{automation}} 沒有開啟 {{page}}",
     "pageNotOpenedUnnamed": "某個自動化沒有開啟 {{page}}",
-    "pageNotOpenedBody": "它的模型沒有讀取該頁面就作答了，結果可能是編造的。請為此自動化選擇能使用工具的模型。"
+    "pageNotOpenedBody": "它的模型沒有讀取該頁面就作答了，結果可能是編造的。請為此自動化選擇能使用工具的模型。",
+    "runtimeUpgraded": "已為這台電腦更新 {{runtime}}",
+    "runtimeUpgradedBody": "Toskar 下載了能使用這台電腦顯示卡的更快 {{runtime}} 版本，並取代了已安裝的版本。可在「離開這台電腦的資料」中查看。",
+    "imagesUpdated": "圖片引擎已更新到 {{release}}",
+    "imagesUpdatedBody": "Toskar 為此版本下載了 stable-diffusion.cpp {{release}}，並刪除了先前的版本。可在「離開這台電腦的資料」中查看。"
   },
   "sent": {
     "times": "{{title}}（{{count}} 次）",

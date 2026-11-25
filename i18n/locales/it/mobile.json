@@ -940,7 +940,8 @@
       "update_check": "Controllo aggiornamenti",
       "comfyui": "ComfyUI",
       "problem_report": "Segnalazione",
-      "link_check": "Controllo link"
+      "link_check": "Controllo link",
+      "download": "Download"
     },
     "kindsLower": {
       "web_search": "ricerca web",
@@ -954,7 +955,8 @@
       "update_check": "controllo aggiornamenti",
       "comfyui": "ComfyUI",
       "problem_report": "segnalazione",
-      "link_check": "controllo link"
+      "link_check": "controllo link",
+      "download": "download"
     },
     "sources": {
       "chat": "Chat",

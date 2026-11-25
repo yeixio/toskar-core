@@ -180,7 +180,11 @@
     "newerModelsBody": "{{model}} は {{installed}} より新しいモデルです。モデル › インストール済みで、このコンピューターでの動作の目安を確認し、今のモデルと並べてインストールできます。",
     "pageNotOpened": "{{automation}} は {{page}} を開きませんでした",
     "pageNotOpenedUnnamed": "自動化が {{page}} を開きませんでした",
-    "pageNotOpenedBody": "モデルがページを読まずに答えたため、結果は作り話かもしれません。この自動化には、ツールを使えるモデルを選んでください。"
+    "pageNotOpenedBody": "モデルがページを読まずに答えたため、結果は作り話かもしれません。この自動化には、ツールを使えるモデルを選んでください。",
+    "runtimeUpgraded": "このコンピュータ向けに {{runtime}} を更新しました",
+    "runtimeUpgradedBody": "Toskar はこのコンピュータのグラフィックスを使う高速な {{runtime}} をダウンロードし、インストール済みのものと置き換えました。「このコンピュータから送信されたもの」に記録されています。",
+    "imagesUpdated": "画像エンジンを {{release}} に更新しました",
+    "imagesUpdatedBody": "Toskar はこのバージョン用に stable-diffusion.cpp {{release}} をダウンロードし、以前のリリースを削除しました。「このコンピュータから送信されたもの」に記録されています。"
   },
   "sent": {
     "times": "{{title}}（{{count}}回）",

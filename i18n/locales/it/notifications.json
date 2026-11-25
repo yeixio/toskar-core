@@ -197,7 +197,11 @@
     "newerModelsBody": "{{model}} è più recente di {{installed}}. In Modelli › Installati vedi come si adatta e puoi installarlo accanto a quello che hai.",
     "pageNotOpened": "{{automation}} non ha aperto {{page}}",
     "pageNotOpenedUnnamed": "Un'automazione non ha aperto {{page}}",
-    "pageNotOpenedBody": "Il suo modello ha risposto senza leggere la pagina, quindi il risultato potrebbe essere inventato. Scegli per questa automazione un modello che sappia usare gli strumenti."
+    "pageNotOpenedBody": "Il suo modello ha risposto senza leggere la pagina, quindi il risultato potrebbe essere inventato. Scegli per questa automazione un modello che sappia usare gli strumenti.",
+    "runtimeUpgraded": "{{runtime}} è stato aggiornato per questo computer",
+    "runtimeUpgradedBody": "Toskar ha scaricato una versione più veloce di {{runtime}} che usa la grafica di questo computer e ha sostituito quella installata. È elencata in Cosa è uscito da questo computer.",
+    "imagesUpdated": "Motore immagini aggiornato a {{release}}",
+    "imagesUpdatedBody": "Toskar ha scaricato stable-diffusion.cpp {{release}} per questa versione e ha rimosso quella precedente. È elencato in Cosa è uscito da questo computer."
   },
   "sent": {
     "times": "{{title}} ({{count}} volte)",
