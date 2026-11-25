@@ -111,3 +111,16 @@ func TestShotsArg(t *testing.T) {
 		t.Fatal("estimate without an engine")
 	}
 }
+
+func TestShotsFor(t *testing.T) {
+	for _, c := range []struct {
+		asked, made float64
+		n           int
+	}{{30, 30, 6}, {7, 7, 2}, {5.5, 6, 2}, {600, MaxShots * MaxClipSeconds, MaxShots}} {
+		shots, made := ShotsFor("Rain", c.asked)
+		parsed, err := ShotsArg(shots)
+		if err != nil || len(parsed) != c.n || made != c.made || ShotsLength(parsed) != made {
+			t.Errorf("ShotsFor(%v) = %d shots, %v s (%v)", c.asked, len(parsed), made, err)
+		}
+	}
+}

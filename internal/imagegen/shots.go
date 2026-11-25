@@ -277,3 +277,21 @@ func (e *Engine) Estimate(seconds float64) time.Duration {
 	}
 	return time.Duration(seconds * r.SecondsPerSecond * float64(time.Second))
 }
+
+// MaxClipSeconds is the most one clip can be; a longer video is made as
+// shots of up to this length.
+const MaxClipSeconds = maxSeconds
+
+// ShotsFor plans a video of seconds as shots of one prompt (#1382): one
+// clip's length each, the last taking what's left, at most MaxShots. Each
+// shot goes on from the one before, so one prompt makes one long scene.
+// made is how long the shots come to, less than seconds past MaxShots.
+func ShotsFor(prompt string, seconds float64) (shots []any, made float64) {
+	seconds = math.Min(seconds, MaxShots*maxSeconds)
+	for left := seconds; left > 0 && len(shots) < MaxShots; left -= maxSeconds {
+		s := math.Max(math.Min(left, maxSeconds), 1)
+		shots = append(shots, map[string]any{"prompt": prompt, "seconds": s})
+		made += s
+	}
+	return shots, made
+}

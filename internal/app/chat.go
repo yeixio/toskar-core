@@ -1626,6 +1626,8 @@ func (e *chatExecEnv) Generate(ctx context.Context, role string, messages []plug
 }
 
 func (e *chatExecEnv) ExecuteTool(ctx context.Context, toolID string, args map[string]any) (map[string]any, error) {
+	// A clip asked for longer than one clip is made as shots (#1382).
+	toolID, args, longer := asLongerVideo(e.profile, e.turnPrompt, toolID, args)
 	policy := publicPolicy(e.profile, toolID, effectivePolicy(tools.PolicyForProfile(e.profile, toolID), toolID, e.trace != nil && e.trace.sawUntrusted()))
 	meta := map[string]any{}
 	if e.conversationID != "" {
@@ -1672,6 +1674,11 @@ func (e *chatExecEnv) ExecuteTool(ctx context.Context, toolID string, args map[s
 	result, err := e.app.Tools.Execute(ctx, toolID, args, policy, "chat requested tool", meta)
 	if err == nil {
 		result, err = limitWebResult(e.profile.Topics, toolID, result)
+	}
+	if err == nil && longer != nil && result != nil {
+		if _, ok := result["limited"]; !ok {
+			result["limited"] = longer
+		}
 	}
 	runlog.From(ctx).ToolCall(tools.Canonical(toolID), time.Since(toolStarted), err != nil)
 	if err == nil && e.trace != nil {
