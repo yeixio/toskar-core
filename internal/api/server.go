@@ -537,6 +537,8 @@ func (s *Server) routes() {
 		s.router.HandleFunc("/v1/responses", s.handleOpenAIChat).Methods(http.MethodPost, http.MethodOptions)
 	}
 
+	s.ollamaRoutes()
+
 	if s.deps.WebRoot != nil {
 		fileServer := http.FileServer(http.FS(s.deps.WebRoot))
 		s.router.HandleFunc("/embed.js", s.handleEmbedScript).Methods(http.MethodGet)
@@ -544,6 +546,35 @@ func (s *Server) routes() {
 	}
 	s.router.NotFoundHandler = http.HandlerFunc(s.apiRouteMissing)
 	s.router.MethodNotAllowedHandler = http.HandlerFunc(s.apiRouteMissing)
+}
+
+// ollamaRoutes serve Ollama's API, for apps that offer only Ollama (#1356).
+func (s *Server) ollamaRoutes() {
+	routes := []struct {
+		path, method string
+		handle       func(*openai.Handler) http.HandlerFunc
+	}{
+		{"/api/tags", http.MethodGet, func(o *openai.Handler) http.HandlerFunc { return o.HandleOllamaTags }},
+		{"/api/ps", http.MethodGet, func(o *openai.Handler) http.HandlerFunc { return o.HandleOllamaPS }},
+		{"/api/version", http.MethodGet, func(o *openai.Handler) http.HandlerFunc { return o.HandleOllamaVersion }},
+		{"/api/chat", http.MethodPost, func(o *openai.Handler) http.HandlerFunc { return o.HandleOllamaChat }},
+		{"/api/generate", http.MethodPost, func(o *openai.Handler) http.HandlerFunc { return o.HandleOllamaGenerate }},
+		{"/api/show", http.MethodPost, func(o *openai.Handler) http.HandlerFunc { return o.HandleOllamaShow }},
+		{"/api/embed", http.MethodPost, func(o *openai.Handler) http.HandlerFunc { return o.HandleOllamaEmbed }},
+		{"/api/embeddings", http.MethodPost, func(o *openai.Handler) http.HandlerFunc { return o.HandleOllamaEmbed }},
+		{"/api/pull", http.MethodPost, func(o *openai.Handler) http.HandlerFunc { return o.HandleOllamaManage }},
+		{"/api/push", http.MethodPost, func(o *openai.Handler) http.HandlerFunc { return o.HandleOllamaManage }},
+		{"/api/create", http.MethodPost, func(o *openai.Handler) http.HandlerFunc { return o.HandleOllamaManage }},
+		{"/api/copy", http.MethodPost, func(o *openai.Handler) http.HandlerFunc { return o.HandleOllamaManage }},
+		{"/api/delete", http.MethodDelete, func(o *openai.Handler) http.HandlerFunc { return o.HandleOllamaManage }},
+	}
+	for _, r := range routes {
+		h := http.HandlerFunc(s.handleOpenAIChat)
+		if s.deps.OpenAI != nil {
+			h = r.handle(s.deps.OpenAI)
+		}
+		s.router.HandleFunc(r.path, h).Methods(r.method, http.MethodOptions)
+	}
 }
 
 // webRoute names the catch-all that serves the web UI.

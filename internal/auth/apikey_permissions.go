@@ -71,8 +71,17 @@ var chatRoutes = map[string]bool{
 	"POST /v1/messages/count_tokens": true,
 	"POST /v1/responses":             true,
 	"GET /v1/models":                 true,
-	"GET /api/v1/health":             true,
-	"GET /api/v1/version":            true,
+	// Ollama's API asks the same way (#1356); managing models isn't asking.
+	"GET /api/tags":        true,
+	"GET /api/ps":          true,
+	"GET /api/version":     true,
+	"POST /api/chat":       true,
+	"POST /api/generate":   true,
+	"POST /api/show":       true,
+	"POST /api/embed":      true,
+	"POST /api/embeddings": true,
+	"GET /api/v1/health":   true,
+	"GET /api/v1/version":  true,
 }
 
 // ChatKeyMayReach reports whether a chat-only key may make a request, by

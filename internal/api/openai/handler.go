@@ -72,6 +72,8 @@ type Handler struct {
 	// progress). It returns the coordinator's answer as it streams and its
 	// chat's id, or ErrSwarmProfile.
 	Swarm func(ctx context.Context, profile, prompt string) (<-chan pluginapi.ChatChunk, string, error)
+	// Embed embeds texts for Ollama's /api/embed (#1356).
+	Embed Embed
 	// ErrorCode is the stable code for a chat error's text, as chat streams
 	// give it (#588), such as CONTEXT_TOO_LONG, or "".
 	ErrorCode func(text string) string
