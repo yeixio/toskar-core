@@ -9,6 +9,7 @@ import (
 	"strings"
 	"unicode/utf8"
 
+	"github.com/yeixio/toskar-core/internal/personal"
 	"github.com/yeixio/toskar-core/internal/tools"
 	"github.com/yeixio/toskar-core/internal/weblink"
 	"github.com/yeixio/toskar-core/pkg/contracts"
@@ -62,7 +63,46 @@ func lookUpFirst(ctx context.Context, env pluginapi.ExecutionEnvironment, profil
 	if !webAllowed(profile) {
 		return "", false
 	}
-	return lookUp(ctx, env, profile, searchQuery(ctx, env, role, prompt), prompt, pages)
+	query := searchQuery(ctx, env, role, prompt)
+	if tools.MessageAsksForPlaces(prompt) && personal.NeedsLocation(prompt) {
+		query = localQuery(query, prompt, userLocation(ctx, env))
+	}
+	return lookUp(ctx, env, profile, query, prompt, pages)
+}
+
+// locationSource is where the person said they are, in Personal settings.
+type locationSource interface {
+	UserLocation(ctx context.Context) string
+}
+
+// userLocation is the person's location from Personal settings, or "".
+func userLocation(ctx context.Context, env pluginapi.ExecutionEnvironment) string {
+	if src, ok := env.(locationSource); ok {
+		return strings.TrimSpace(src.UserLocation(ctx))
+	}
+	return ""
+}
+
+// nearRe matches words in a query that stand for where the person is.
+var nearRe = regexp.MustCompile(`(?i)\b(in (my|our|the|this) (area|town|city|neighbou?rhood)|in town|around (here|town)|near (me|here|us)|close by|nearby)\b`)
+
+// namedPlaceRe matches a place named in the message, "in Juneau".
+var namedPlaceRe = regexp.MustCompile(`\b(?i:in|near|around|at|downtown) [A-Z][a-z]`)
+
+// localQuery puts the person's location in a search for places near them:
+// "restaurants in town" finds nothing useful, and the model made up
+// restaurants instead (#1381). A place the person names is kept.
+func localQuery(query, prompt, location string) string {
+	if location == "" {
+		return query
+	}
+	if nearRe.MatchString(query) {
+		return strings.TrimSpace(nearRe.ReplaceAllLiteralString(query, "in "+location))
+	}
+	if namedPlaceRe.MatchString(prompt) || strings.Contains(strings.ToLower(query), strings.ToLower(location)) {
+		return query
+	}
+	return strings.TrimSpace(query) + " in " + location
 }
 
 // referBackRe matches words that point at something earlier in the chat.
@@ -195,7 +235,13 @@ func lookUp(ctx context.Context, env pluginapi.ExecutionEnvironment, profile con
 }
 
 // lookupGuidance tells the model how to use what was looked up.
-const lookupGuidance = "Toskar already searched the web for this question; the results are in the reference material. Answer from them directly: state the facts and include the most relevant link. Do not mention the search, the results, or reference material. If they do not answer the question, say so."
+const lookupGuidance = "Toskar already searched the web for this question; the results are in the reference material. Answer from them directly: state the facts and include the most relevant link. Do not mention the search, the results, or reference material. " +
+	"Name only places, businesses, people, and figures that appear in them, never ones from memory. If they do not answer the question, say so."
+
+// placesGuidance is for a question about real places that nothing was
+// looked up for: the web is off, needs asking, or found nothing (#1381).
+const placesGuidance = "This question asks about real places or businesses, and Toskar has not looked them up. If a places or web search tool is offered, use it before answering. " +
+	"Otherwise do not list businesses, addresses, phone numbers, or opening hours from memory, since they are often wrong, closed, or made up: say you couldn't look them up and suggest where to check, such as a maps app."
 
 // climateGuidance is for a weather question about a time of year (#280).
 const climateGuidance = "This question is about the usual weather at a time of year, not today's. Answer with typical figures for that time, such as average highs and lows and how often it rains, from the reference material, and say they are typical. Never give today's reading or a current forecast as the answer. If a word could be a month or part of a place name, such as \"June, Alaska\" (Juneau), say which you took it to be."

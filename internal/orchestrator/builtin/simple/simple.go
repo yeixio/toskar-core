@@ -32,6 +32,12 @@ const maxToolCalls = 10
 // EventEffort reports the effort a turn ran at, after Auto is resolved.
 const EventEffort = "chat.effort"
 
+// groundingGuidance is in every answer's instructions: models state made-up
+// specifics as confidently as real ones, such as restaurants in the
+// person's town that don't exist (#1381).
+const groundingGuidance = "Do not make up specific facts: the names, addresses, phone numbers, opening hours, or prices of real businesses and places, quotes, statistics, dates, or citations. " +
+	"State them only from the reference material, tool results, or the conversation, or when you are sure of them. If you don't have them, say you don't know, or use a search tool when one is offered, rather than guess."
+
 // stoppedNotes is the partial answer kept when a plan is stopped.
 func stoppedNotes(notes string) string {
 	body := strings.TrimSpace(strings.TrimPrefix(notes, "Notes from each part of the request:"))
@@ -85,10 +91,12 @@ func (o *Orchestrator) Run(
 		ctx = withLookups(ctx)
 
 		instructions := "Format answers in Markdown with short paragraphs and lists. Do not wrap the whole answer in a code fence. " +
-			"Link only to addresses from the reference material, tool results, or the conversation; otherwise name the site instead of guessing a page's address, since remembered addresses are often wrong."
+			"Link only to addresses from the reference material, tool results, or the conversation; otherwise name the site instead of guessing a page's address, since remembered addresses are often wrong.\n" +
+			groundingGuidance
 		if turnopts.SpokenFrom(ctx) {
 			// A spoken answer is heard, and its own style says how (#795).
-			instructions = ""
+			// It is still true (#1381).
+			instructions = groundingGuidance
 		}
 		reference := referenceMaterial(ctx, env, task.Prompt)
 		// The effort the user chose, or Auto's pick for this kind of request,
@@ -296,6 +304,11 @@ func (o *Orchestrator) Run(
 				profile = withoutWeb(profile)
 				lookedUp = true
 			}
+		}
+		// A question about real places that nothing was looked up for is
+		// where small models make up names and addresses (#1381).
+		if !lookedUp && !planned && !wantsMedia && tools.MessageAsksForPlaces(task.Prompt) {
+			instructions += "\n" + placesGuidance
 		}
 		// Looked up first and found the internet out of reach: say so, rather
 		// than answer from memory as if it had been looked up (#965). A task

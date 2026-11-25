@@ -2047,6 +2047,16 @@ func (e *chatExecEnv) TurnInstructions(ctx context.Context, prompt string) strin
 	return strings.Join(parts, "\n\n")
 }
 
+// UserLocation is where the person said they are, in Personal settings,
+// for a look-up of places near them (#1381). A profile that talks with
+// strangers doesn't get it (#667).
+func (e *chatExecEnv) UserLocation(ctx context.Context) string {
+	if e.app == nil || publicAudience(e.profile) {
+		return ""
+	}
+	return e.app.personalLocation(ctx)
+}
+
 // modelLine tells the model its own name, such as Qwen 3.5 4B, and that it
 // runs in Toskar on the person's own computers (#1346). Empty when the
 // model isn't known yet.
