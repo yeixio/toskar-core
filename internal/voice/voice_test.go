@@ -358,6 +358,30 @@ func TestSessionReadsAnAnswerInOneLanguage(t *testing.T) {
 	}
 }
 
+// langLLM is a chat that says which language it answers in.
+type langLLM struct {
+	fakeLLM
+	lang string
+}
+
+func (l *langLLM) AnswerLanguage(context.Context, string) string { return l.lang }
+
+// An answer is read in the language the chat answers in, even when its
+// first sentence passes for another one: "No tengo acceso a internet" has
+// words Portuguese uses too, and once read in the Portuguese voice.
+func TestSessionReadsAnAnswerInTheChatsLanguage(t *testing.T) {
+	llm := &langLLM{fakeLLM: fakeLLM{deltas: []string{"No tengo acceso a internet ahora mismo. ", "Claro. ", "¿Algo más?"}}, lang: "es"}
+	tts := &fakeTTS{}
+	rec := newRecorder()
+	s := NewSession(Parts{Transcriber: &fakeSTT{text: "Hola"}, Responder: llm, Speaker: tts}, rec.send)
+	defer s.Close()
+	speak(s, append(append(quiet(0.3), tone(0.6)...), quiet(1.1)...))
+	rec.waitFor(t, "response.done")
+	if strings.Join(tts.langs, ",") != "es,es,es" {
+		t.Fatalf("read %q in %q", tts.said, tts.langs)
+	}
+}
+
 func TestSessionStopsWhenInterrupted(t *testing.T) {
 	llm := &fakeLLM{deltas: []string{"Let me tell you a long story. ", "Once upon a time."}, hold: true}
 	rec := newRecorder()

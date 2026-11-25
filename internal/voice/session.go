@@ -31,6 +31,15 @@ type Responder interface {
 	Respond(ctx context.Context, text string, delta func(string)) error
 }
 
+// AnswerLanguager is a Responder that knows the language it will answer
+// text in, such as es, because it tells the model to write in it. An
+// answer is read in that language's voice, not one guessed from its first
+// sentence, which a sentence such as "No tengo acceso a internet." can
+// fool. "" leaves it to the guess.
+type AnswerLanguager interface {
+	AnswerLanguage(ctx context.Context, text string) string
+}
+
 // Speaker is text to speech: one sentence to samples at SampleRate.
 type Speaker interface {
 	Speak(ctx context.Context, text, voice, language string) ([]int16, error)
