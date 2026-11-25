@@ -102,7 +102,7 @@ export function AccelerationPill({
           </dl>
           {reason ? <p className="text-ink-muted">{t(`acceleration.reason.${reason}`)}</p> : null}
           {reason === 'gpu_unavailable' || reason === 'cpu_build' ? (
-            <Link to="/diagnostics" className="inline-block text-primary hover:underline">
+            <Link to="/settings/diagnostics" className="inline-block text-primary hover:underline">
               {t('acceleration.openDiagnostics')}
             </Link>
           ) : null}

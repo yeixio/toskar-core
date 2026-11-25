@@ -4,6 +4,7 @@ import { RequireRole } from '@/components/auth/RequireRole'
 import { PortalPage } from '@/features/portal/PortalPage'
 import { PortalsPage } from '@/features/portals/PortalsPage'
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom'
+import { MovedPage } from '@/app/MovedPage'
 import { LifecycleHost } from '@/components/LifecycleHost'
 import { NotificationHost } from '@/components/NotificationHost'
 import { ServiceBootGate } from '@/components/ServiceBootGate'
@@ -24,6 +25,9 @@ import { OnboardingPage } from '@/features/onboarding/OnboardingPage'
 import { PerformancePage } from '@/features/performance/PerformancePage'
 import { ProfilesPage } from '@/features/profiles/ProfilesPage'
 import { SettingsPage } from '@/features/settings/SettingsPage'
+import { SettingsLayout } from '@/features/settings/SettingsLayout'
+import { movedPages } from '@/features/settings/settingsNav'
+import { ShareWithAppsPage } from '@/features/api-access/ShareWithApps'
 import { ToolsPage } from '@/features/tools/ToolsPage'
 import { KnowledgePage } from '@/features/knowledge/KnowledgePage'
 import { MemoryPage } from '@/features/memory/MemoryPage'
@@ -120,19 +124,40 @@ export function App() {
                 <Route path="projects" element={<Navigate to="/chat" replace />} />
                 <Route path="automations" element={<RequireRole min="member"><AutomationsPage /></RequireRole>} />
                 <Route path="models" element={<RequireRole min="admin"><ModelsPage /></RequireRole>} />
-                <Route path="train" element={<RequireRole min="admin"><TrainPage /></RequireRole>} />
+                <Route path="models/train" element={<RequireRole min="admin"><TrainPage /></RequireRole>} />
                 <Route path="knowledge" element={<RequireRole min="admin"><KnowledgePage /></RequireRole>} />
-                <Route path="memory" element={<RequireRole min="member"><MemoryPage /></RequireRole>} />
                 <Route path="news" element={<RequireRole min="member"><NewsPage /></RequireRole>} />
                 <Route path="profiles" element={<RequireRole min="admin"><ProfilesPage /></RequireRole>} />
-                <Route path="tools" element={<RequireRole min="admin"><ToolsPage /></RequireRole>} />
-                <Route path="nodes" element={<RequireRole min="admin"><NodesPage /></RequireRole>} />
-                <Route path="people" element={<PeoplePage />} />
-                <Route path="portals" element={<RequireRole min="admin"><PortalsPage /></RequireRole>} />
-                <Route path="api-access" element={<RequireRole min="admin"><ApiAccessPage /></RequireRole>} />
-                <Route path="diagnostics" element={<RequireRole min="admin"><DiagnosticsPage /></RequireRole>} />
-                <Route path="performance" element={<RequireRole min="admin"><PerformancePage /></RequireRole>} />
-                <Route path="settings" element={<SettingsPage />} />
+                {/* Settings' categories (#1374, #1321, docs/settings-inventory.md). */}
+                <Route path="settings" element={<SettingsLayout />}>
+                  <Route index element={<SettingsPage section="account" />} />
+                  <Route path="account" element={<SettingsPage section="account" />} />
+                  <Route path="general" element={<SettingsPage section="general" />} />
+                  <Route path="appearance" element={<SettingsPage section="appearance" />} />
+                  <Route path="personalization" element={<SettingsPage section="personalization" />} />
+                  <Route path="memory" element={<RequireRole min="member"><MemoryPage /></RequireRole>} />
+                  <Route path="notifications" element={<RequireRole min="admin"><SettingsPage section="notifications" /></RequireRole>} />
+                  <Route path="voice" element={<RequireRole min="admin"><SettingsPage section="voice" /></RequireRole>} />
+                  <Route path="models" element={<RequireRole min="admin"><SettingsPage section="models" /></RequireRole>} />
+                  <Route path="history" element={<RequireRole min="admin"><SettingsPage section="history" /></RequireRole>} />
+                  <Route path="computers" element={<RequireRole min="admin"><NodesPage /></RequireRole>} />
+                  <Route path="network" element={<RequireRole min="admin"><ApiAccessPage part="network" /></RequireRole>} />
+                  <Route path="people" element={<PeoplePage />} />
+                  <Route path="portals" element={<RequireRole min="admin"><PortalsPage /></RequireRole>} />
+                  <Route path="tools" element={<RequireRole min="admin"><ToolsPage /></RequireRole>} />
+                  <Route path="apps" element={<RequireRole min="admin"><ShareWithAppsPage /></RequireRole>} />
+                  <Route path="privacy" element={<RequireRole min="admin"><SettingsPage section="privacy" /></RequireRole>} />
+                  <Route path="advanced" element={<RequireRole min="admin"><SettingsPage section="advanced" /></RequireRole>} />
+                  <Route path="performance" element={<RequireRole min="admin"><PerformancePage /></RequireRole>} />
+                  <Route path="diagnostics" element={<RequireRole min="admin"><DiagnosticsPage /></RequireRole>} />
+                  <Route path="developer" element={<RequireRole min="admin"><ApiAccessPage part="developer" /></RequireRole>} />
+                  <Route path="about" element={<RequireRole min="admin"><SettingsPage section="about" /></RequireRole>} />
+                  <Route path="*" element={<Navigate to="/settings" replace />} />
+                </Route>
+                {/* Pages that moved into Settings keep their old links (#1374). */}
+                {Object.entries(movedPages).map(([from, to]) => (
+                  <Route key={from} path={from.slice(1)} element={<MovedPage to={to} />} />
+                ))}
                 {/* The old "coming soon" Orchestrators page; orchestration is chosen per profile. */}
                 <Route path="orchestrators" element={<Navigate to="/profiles" replace />} />
               </Route>

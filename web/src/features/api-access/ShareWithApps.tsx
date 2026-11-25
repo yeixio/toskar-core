@@ -134,3 +134,16 @@ export function ShareWithApps() {
     </section>
   )
 }
+
+/** Settings › Connections › Use in other AI apps (#1374): the card as its own page. */
+export function ShareWithAppsPage() {
+  const { t } = useTranslation('settings')
+  return (
+    <div className="mx-auto w-full max-w-2xl min-w-0 space-y-6">
+      <header className="page-header">
+        <h1 className="page-title">{t('sections.apps')}</h1>
+      </header>
+      <ShareWithApps />
+    </div>
+  )
+}

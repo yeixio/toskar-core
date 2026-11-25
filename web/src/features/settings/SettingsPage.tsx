@@ -120,13 +120,32 @@ function PathRow({
   )
 }
 
+/**
+ * The categories of Settings (docs/settings-inventory.md, #1374): each is its
+ * own page under /settings, and without one the page shows them all.
+ */
+export type SettingsSection =
+  | 'account'
+  | 'general'
+  | 'appearance'
+  | 'personalization'
+  | 'notifications'
+  | 'voice'
+  | 'models'
+  | 'history'
+  | 'privacy'
+  | 'advanced'
+  | 'about'
+
 function isMac(): boolean {
   const ua = typeof navigator !== 'undefined' ? navigator.userAgent : ''
   return /Mac/i.test(ua)
 }
 
-export function SettingsPage() {
+export function SettingsPage({ section }: { section?: SettingsSection } = {}) {
   const { t } = useTranslation('settings')
+  const show = (s: SettingsSection) => section === undefined || section === s
+  const groupLabel = (key: string) => (section ? null : <p className="settings-group-label">{t(key)}</p>)
   // Settings beyond the account and appearance run the computer (#203);
   // until the role is known, the Owner's view.
   const { role, atLeast } = useRole()
@@ -252,14 +271,17 @@ export function SettingsPage() {
   return (
     <div className="mx-auto w-full max-w-2xl min-w-0 space-y-6">
       <header className="page-header">
-        <RealmKicker />
-        <h1 className="page-title">{t('page.title')}</h1>
-        <p className="page-subtitle">{t('page.subtitle')}</p>
+        {section ? null : <RealmKicker />}
+        <h1 className="page-title">{section ? t(`sections.${section}`) : t('page.title')}</h1>
+        {section ? null : <p className="page-subtitle">{t('page.subtitle')}</p>}
       </header>
 
-      <YourAccount />
-
-      <YourDevices />
+      {show('account') ? (
+        <>
+          <YourAccount />
+          <YourDevices />
+        </>
+      ) : null}
 
       {admin && settingsQuery.isError ? (
         <LoadError error={settingsQuery.error} onRetry={() => void settingsQuery.refetch()} retrying={settingsQuery.isFetching} />
@@ -268,7 +290,8 @@ export function SettingsPage() {
       ) : null}
 
       <div className="settings-group">
-        <p className="settings-group-label">{t('groups.general')}</p>
+        {groupLabel('groups.general')}
+        {show('appearance') ? (
         <section className="card space-y-4">
           <div>
             <h2 className="section-title">{t('appearance.title')}</h2>
@@ -284,13 +307,33 @@ export function SettingsPage() {
             ]}
           />
         </section>
+        ) : null}
 
         {/* Each person's own (#206). */}
-        <LanguageSettings />
+        {show('general') ? <LanguageSettings /> : null}
+        {show('personalization') ? <Personalization /> : null}
+        {show('personalization') && admin && settings ? (
+          <section className="card space-y-4">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h2 className="section-title">{t('history.suggestModels')}</h2>
+                <p className="mt-1 text-sm text-ink-muted">{t('history.suggestModelsHint')}</p>
+              </div>
+              <Toggle
+                label={t('history.suggestModels')}
+                checked={settings?.suggest_models ?? true}
+                disabled={busy}
+                onChange={() =>
+                  void api
+                    .setMyPreferences({ suggest_models: !(settings?.suggest_models ?? true) })
+                    .then(() => queryClient.invalidateQueries({ queryKey: ['settings'] }))
+                }
+              />
+            </div>
+          </section>
+        ) : null}
 
-        <Personalization />
-
-        {admin && settings ? (
+        {show('general') && admin && settings ? (
           <>
 
             <section className="card space-y-4">
@@ -335,7 +378,9 @@ export function SettingsPage() {
       {admin && settings ? (
         <>
           <div className="settings-group">
-            <p className="settings-group-label">{t('groups.ai')}</p>
+            {groupLabel('groups.ai')}
+            {show('models') ? (
+            <>
             <section className="card space-y-4">
               <div>
                 <h2 id="default-profile-title" className="section-title">{t('defaultProfile.title')}</h2>
@@ -418,8 +463,12 @@ export function SettingsPage() {
               />
             </section>
 
-            <VoiceSettings />
+            </>
+            ) : null}
 
+            {show('voice') ? <VoiceSettings /> : null}
+
+            {show('advanced') ? (
             <section className="card space-y-4">
               <div className="flex items-start justify-between gap-4">
                 <div>
@@ -438,10 +487,12 @@ export function SettingsPage() {
                 />
               </div>
             </section>
+            ) : null}
           </div>
 
+          {show('notifications') ? (
           <div className="settings-group">
-            <p className="settings-group-label">{t('groups.notifications')}</p>
+            {groupLabel('groups.notifications')}
             <section className="card space-y-4">
               <div>
                 <h2 className="section-title">{t('notifications.title')}</h2>
@@ -491,9 +542,12 @@ export function SettingsPage() {
             </section>
             <NotificationDestinations />
           </div>
+          ) : null}
 
           <div className="settings-group">
-            <p className="settings-group-label">{t('groups.privacy')}</p>
+            {groupLabel('groups.privacy')}
+            {show('privacy') ? (
+            <>
             <YourData />
             <WhatLeft />
             <section className="card space-y-4">
@@ -528,6 +582,10 @@ export function SettingsPage() {
               })}
             </section>
 
+            </>
+            ) : null}
+
+            {show('history') ? (
             <section className="card space-y-4">
               <div>
                 <h2 className="section-title">{t('history.title')}</h2>
@@ -569,25 +627,11 @@ export function SettingsPage() {
                   <option value="late">{t('history.compactLate')}</option>
                 </select>
               </label>
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <p className="text-sm font-medium text-ink">{t('history.suggestModels')}</p>
-                  <p className="mt-1 text-xs text-ink-muted">{t('history.suggestModelsHint')}</p>
-                </div>
-                <Toggle
-                  label={t('history.suggestModels')}
-                  checked={settings?.suggest_models ?? true}
-                  disabled={busy}
-                  onChange={() =>
-                    void api
-                      .setMyPreferences({ suggest_models: !(settings?.suggest_models ?? true) })
-                      .then(() => queryClient.invalidateQueries({ queryKey: ['settings'] }))
-                  }
-                />
-              </div>
               <ChatCleanup />
             </section>
+            ) : null}
 
+            {show('models') ? (
             <section className="card space-y-4">
               <div>
                 <h2 className="section-title">{t('ratings.title')}</h2>
@@ -618,7 +662,10 @@ export function SettingsPage() {
                 />
               </div>
             </section>
+            ) : null}
 
+            {show('privacy') ? (
+            <>
             <section className="card space-y-4">
               <div>
                 <h2 className="section-title">{t('news.title')}</h2>
@@ -675,10 +722,13 @@ export function SettingsPage() {
                 />
               </div>
             </section>
+            </>
+            ) : null}
           </div>
 
+          {show('models') ? (
           <div className="settings-group">
-            <p className="settings-group-label">{t('groups.storage')}</p>
+            {groupLabel('groups.storage')}
             <section className="card space-y-4">
               <h2 className="section-title">{t('storage.folders')}</h2>
               <div className="space-y-4">
@@ -714,9 +764,11 @@ export function SettingsPage() {
               />
             </section>
           </div>
+          ) : null}
 
+          {show('about') ? (
           <div className="settings-group">
-            <p className="settings-group-label">{t('groups.about')}</p>
+            {groupLabel('groups.about')}
             <section className="card space-y-4">
               <div className="flex items-center gap-4">
                 <YggdrasilMark size={72} lore />
@@ -772,14 +824,16 @@ export function SettingsPage() {
                 disabled={busy}
                 onToggle={() => patch({ update_check: !(settings?.update_check ?? true) })}
               />
-              <Link to="/diagnostics" className="btn-secondary inline-block">
+              <Link to="/settings/diagnostics" className="btn-secondary inline-block">
                 {t('about.diagnostics')}
               </Link>
             </section>
           </div>
+          ) : null}
 
+          {show('advanced') ? (
           <div className="settings-group">
-            <p className="settings-group-label">{t('groups.danger')}</p>
+            {groupLabel('groups.danger')}
             <section className="card space-y-4">
               <div>
                 <h2 className="section-title text-danger">{t('reset.title')}</h2>
@@ -834,8 +888,9 @@ export function SettingsPage() {
               )}
             </section>
           </div>
+          ) : null}
         </>
-      ) : admin ? null : (
+      ) : admin || section ? null : (
         <p className="text-sm text-ink-muted">{t('page.adminsOnly')}</p>
       )}
     </div>

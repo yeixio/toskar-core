@@ -145,6 +145,8 @@ export const realms: Record<string, Realm> = {
 
 /** The realm for a path such as /knowledge or /knowledge/abc. */
 export function realmFor(pathname: string): Realm | undefined {
+  // Settings' categories carry plain names only (#1251, #1374).
+  if (pathname.startsWith('/settings/')) return undefined
   const base = '/' + (pathname.split('/')[1] ?? '')
   return realms[base]
 }

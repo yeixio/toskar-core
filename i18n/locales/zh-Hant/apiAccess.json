@@ -75,7 +75,7 @@
       "devicesStale_other": "{{formatted}} 個最近未使用",
       "devicesAction": "連線裝置",
       "apps": "應用程式和指令碼",
-      "appsHow": "使用下方建立的 API 金鑰。",
+      "appsHow": "使用「設定 › API 金鑰」中的 API 金鑰。",
       "appsCount_other": "{{formatted}} 把金鑰"
     }
   },
@@ -322,5 +322,9 @@
       "TOKEN_INVALID": "{{relay}} 不接受這台電腦的權杖。請重新訂閱，或在 Toskar App 中重新連線。"
     },
     "offHint": "開啟後，Toskar 會請路由器開啟連接埠 {{port}}，該連接埠只回應與這台電腦配對的裝置。你也可以改用轉送的連接埠或中繼。不需要開啟區域網路存取。"
+  },
+  "parts": {
+    "network": "誰可以從其他裝置連到這台電腦，以及如何連線。",
+    "developer": "這台電腦上的 Toskar API，以及 App 和指令碼使用的金鑰。"
   }
 }

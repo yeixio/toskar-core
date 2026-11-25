@@ -33,7 +33,7 @@
     "couldNotReach": "Could not reach Toskar.",
     "unreachable": "Toskar Pro on that computer is not reachable. Use the same Wi-Fi network, and choose Connect a device on that computer.",
     "unreachableAway": "Can't reach your computer away from home. It may be off or asleep, or access from anywhere may be off on it.",
-    "keyRejected": "That API key was rejected. Connect with a code from the computer instead, or create a key in API Access.",
+    "keyRejected": "That API key was rejected. Connect with a code from the computer instead, or create a key in Settings › API keys.",
     "dropped": "The connection to Toskar dropped.",
     "chatFailed": "Chat failed.",
     "requestFailed": "Request failed"
@@ -327,7 +327,7 @@
       "memoryOn": "Memory on",
       "memoryOff": "Memory off",
       "memoryOffHint": "Memory is off for this chat. Saved memories are not used here and are not deleted.",
-      "memoryDisabledHint": "Memory is off for all chats. Turn it on from the Memory page."
+      "memoryDisabledHint": "Memory is off for all chats. Turn it on in Settings › Memory."
     },
     "loading": "Loading chat",
     "placeholder": "Message Toskar",
@@ -883,7 +883,7 @@
     "usageNoCap": "{{used}} through the relay this month",
     "overCap": "This month's relay allowance is used up. At home and over direct connections Toskar still works; the relay is back next month.",
     "pending": "Waiting for the purchase to be approved.",
-    "notAdmin": "Subscribed. Ask an Admin on your computer to turn on Access from anywhere in API Access.",
+    "notAdmin": "Subscribed. Ask an Admin on your computer to turn on Access from anywhere in Settings › Network access.",
     "inUse": "This subscription is already used for another computer.",
     "moveHint": "Move it here, and the other computer stops working away from home.",
     "move": "Move it to this computer",
@@ -903,7 +903,7 @@
     "manage": "Manage subscription",
     "throughComputer": "Active through this computer's subscription",
     "throughComputerBody": "Every device paired with this computer uses it. It's managed where it was bought: on the device that subscribed, or in Toskar's settings on the computer.",
-    "boughtInSettings": "Bought in Toskar's settings on the computer. Change the card or cancel there, under API Access.",
+    "boughtInSettings": "Bought in Toskar's settings on the computer. Change the card or cancel there, under Settings › Network access.",
     "coveredTitle": "Covered by another device's subscription",
     "coveredBody": "This computer already has a subscription, bought on another device. Connect to your computer at home once, and this device picks it up.",
     "extraSubscription": "This computer has more than one subscription, and it needs only one. You can cancel yours in Manage subscription, and the other keeps it covered."
@@ -1163,12 +1163,12 @@
     "reachableViaRelay": "Reachable from outside your network, through the relay",
     "unreachable": "Not reachable from outside your network",
     "unchecked": "Not checked from outside yet",
-    "off": "Access from anywhere is off on this computer. Turn it on in Toskar on the computer, under API Access.",
+    "off": "Access from anywhere is off on this computer. Turn it on in Toskar on the computer, under Settings › Network access.",
     "checkedNow": "Checked just now",
     "checkNow": "Check now",
     "checking": "Checking…",
     "tooSoon": "Checked less than a minute ago, so this is the latest result.",
-    "details": "Each way in, and what to fix, is under API Access in Toskar on the computer.",
+    "details": "Each way in, and what to fix, is under Settings › Network access in Toskar on the computer.",
     "failed": "The check couldn't run ({{code}}).",
     "ended": "Access from anywhere ended, so there's nothing to check through the relay. Subscribe again under Use Toskar away from home.",
     "checkedMinutes_one": "Checked {{count}} minute ago",
@@ -1191,7 +1191,13 @@
     "updateComputer": "Update Toskar on your computer to get notifications here.",
     "relayFailed": "Notifications couldn't be turned on: {{detail}}",
     "openPage": "Open page",
-    "openInToskar": "Open in Toskar"
+    "openInToskar": "Open in Toskar",
+    "notBuilt": "This copy of Toskar was built without notifications. Install Toskar from the App Store or Google Play to get them.",
+    "noComputer": "Connect a computer to get its notifications here.",
+    "computerUnavailable": "Your computer can't send notifications to the app right now. Restart Toskar on the computer, then try again.",
+    "unreachable": "Couldn't check notifications with your computer: {{detail}}",
+    "retry": "Try again",
+    "checking": "Checking…"
   },
   "permissions": {
     "photos": "Toskar opens your photos when you choose one to ask about. It stays on this device or goes only to your own computer.",

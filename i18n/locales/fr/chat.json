@@ -98,7 +98,7 @@
     "off": "Mémoire désactivée",
     "onHint": "Cette discussion utilise ce que vous avez demandé à Toskar de retenir. Cliquez pour exclure la mémoire de cette discussion.",
     "offHint": "La mémoire est désactivée pour cette discussion. Les souvenirs enregistrés ne sont pas utilisés ici et ne sont pas supprimés.",
-    "disabledHint": "La mémoire est désactivée pour toutes les discussions. Activez-la depuis la page Mémoire."
+    "disabledHint": "La mémoire est désactivée pour toutes les discussions. Activez-la dans Paramètres › Mémoire."
   },
   "folder": {
     "on": "Dossier : {{name}}",
@@ -439,7 +439,7 @@
     "trainingMemory": {
       "busy": "Un entraînement utilise cet ordinateur, il n'y avait donc pas assez de mémoire pour ce modèle.",
       "busyNamed": "L'entraînement « {{name}} » utilise cet ordinateur, il n'y avait donc pas assez de mémoire pour ce modèle.",
-      "advice": "Réessayez quand l'entraînement sera terminé, choisissez un modèle plus petit ou annulez l'entraînement sur la page Entraîner."
+      "advice": "Réessayez à la fin de l'entraînement, choisissez un modèle plus petit ou annulez l'entraînement dans Modèles › Entraîner."
     },
     "keptRunningMemory": "{{name}} reste en marche et occupe environ {{gb}} Go, il n'y avait donc pas assez de mémoire pour ce modèle. Choisissez un modèle plus petit, ou désactivez Toujours en marche pour {{name}} sur la page Modèles."
   },
@@ -645,7 +645,7 @@
   "notices": {
     "languageWeak": "{{model}} écrit peut-être moins bien en {{language}} qu'en anglais, et aucun modèle installé qui convient ne le fait mieux. La page Modèles indique les modèles bien notés en {{language}}.",
     "mediaLength": "Pour l’instant, les clips durent au plus {{max}} s : celui-ci dure donc {{made}} s au lieu des {{asked}} s demandées.",
-    "mediaQuality": "{{model}} donne la qualité demandée, mais il n’est pas installé ici : ceci a donc été fait avec {{used}}. Tu peux l’installer depuis la page Outils.",
+    "mediaQuality": "{{model}} offre la qualité demandée, mais il n'est pas configuré ici, alors ceci a été fait avec {{used}}. Vous pouvez le configurer dans Paramètres › Outils.",
     "mediaSizePicture": "{{model}} crée des images jusqu’à {{made}} : celle-ci est donc plus petite que les {{asked}} demandés.",
     "mediaSizeClip": "{{model}} crée des clips jusqu’à {{made}} : celui-ci est donc plus petit que les {{asked}} demandés.",
     "noVision": "Aucun modèle installé ne peut voir les images, donc la réponse ne les regarde pas. Installez Gemma 3 4B ou un autre modèle de vision sur la page Modèles.",

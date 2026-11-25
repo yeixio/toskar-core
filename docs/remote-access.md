@@ -47,7 +47,7 @@ A relay or rendezvous that lies, or is taken over, can at most drop or delay tra
 
 When the person turns on **Settings → Access from anywhere** (off by default; Admins and the Owner only):
 
-- **A remote listener.** The computer serves the device routes, and only those, on a separate port for traffic from outside: phone keys only (`DeviceMayReach`), never "this computer" or "the local network", with stricter rate limits and the same TLS certificate. The full control API, API Access keys, and settings stay on the LAN. Turning the setting off closes it at once.
+- **A remote listener.** The computer serves the device routes, and only those, on a separate port for traffic from outside: phone keys only (`DeviceMayReach`), never "this computer" or "the local network", with stricter rate limits and the same TLS certificate. The full control API, API keys, and settings stay on the LAN. Turning the setting off closes it at once.
 - **Port mapping:** it asks the router for a mapping to that port with PCP, then NAT-PMP, then UPnP-IGD, renews it before it lapses, and removes it when the setting is turned off or Toskar quits. A port the person forwarded by hand can be entered instead.
 - **Public addresses:** its global IPv6 addresses, and the router's external IPv4 address from the mapping protocol; with neither, it asks the rendezvous what address it saw.
 - **Registration:** every few minutes, and whenever an address changes, it sends the rendezvous an address record (below).
@@ -56,7 +56,7 @@ When the person turns on **Settings → Access from anywhere** (off by default; 
 
 ## Is it working? The outside check
 
-API Access shows whether devices away from home can reach this computer,
+Settings › Network access shows whether devices away from home can reach this computer,
 as the relay finds it from the internet (#546), like Plex's "fully
 accessible outside your network". A router that says it opened a port can
 still be unreachable: a second router in front of it (double NAT), a
@@ -110,7 +110,7 @@ minute per computer, so the check can't be used to look at anything else.
 
 ## Troubleshooting
 
-Start at **API Access → Access from anywhere**. Choose **Check now** for a fresh result: the relay reaches this computer from the internet, as a device away from home does. Then find what the card says below. If you report a problem, attach **Copy details for a report**. It has no tokens or secrets, and your internet addresses are replaced by their kind.
+Start at **Settings › Network access → Access from anywhere**. Choose **Check now** for a fresh result: the relay reaches this computer from the internet, as a device away from home does. Then find what the card says below. If you report a problem, attach **Copy details for a report**. It has no tokens or secrets, and your internet addresses are replaced by their kind.
 
 **"Not listening on port 7333: …"** Access from anywhere couldn't take its port, usually because another program has it. Pick another port in the card and **Save**. On Linux, `ss -ltnp 'sport = :7333'` shows who has it; on macOS, `lsof -nP -iTCP:7333 -sTCP:LISTEN`.
 
@@ -181,7 +181,7 @@ Testers go through the real subscription flow without paying; nothing in the app
 
 Organizations run their own way in instead of the subscription, and it has to work for hundreds of people. A separate guide ([remote-access-enterprise.md](remote-access-enterprise.md)) covers it; this is what it needs and what core and the apps must do for it.
 
-**Or their own relay.** An organization that would rather keep its Toskar servers off the internet entirely runs the relay itself, licensed from Toskar, on its own hardware and name (toskar-relay's `docs/self-hosting.md`). Each Toskar server gets the relay's name and an enrollment secret under API Access → Your organization's relay, enrolls itself for a token, registers, and keeps its tunnel there; paired devices then find and reach it through that relay as they would through Toskar's. The enrollment secret is only ever sent to an organization's relay, never to Toskar's. `TOSKAR_RELAY_CA` adds a private CA for the relay's certificate.
+**Or their own relay.** An organization that would rather keep its Toskar servers off the internet entirely runs the relay itself, licensed from Toskar, on its own hardware and name (toskar-relay's `docs/self-hosting.md`). Each Toskar server gets the relay's name and an enrollment secret under Settings › Network access → Your organization's relay, enrolls itself for a token, registers, and keeps its tunnel there; paired devices then find and reach it through that relay as they would through Toskar's. The enrollment secret is only ever sent to an organization's relay, never to Toskar's. `TOSKAR_RELAY_CA` adds a private CA for the relay's certificate.
 
 **The shape:** Toskar runs on a server; people reach it at a hostname the organization controls, such as `toskar.example.com`, through its own tunnel or reverse proxy, with sign-in through its identity provider.
 

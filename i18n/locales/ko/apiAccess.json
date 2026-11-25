@@ -75,7 +75,7 @@
       "devicesStale_other": "{{formatted}}개는 최근 사용 안 함",
       "devicesAction": "기기 연결",
       "apps": "앱과 스크립트",
-      "appsHow": "아래에서 만든 API 키를 사용해요.",
+      "appsHow": "설정 › API 키의 API 키를 사용합니다.",
       "appsCount_other": "키 {{formatted}}개"
     }
   },
@@ -322,5 +322,9 @@
       "TOKEN_INVALID": "{{relay}}이(가) 이 컴퓨터의 토큰을 받지 않았어요. 다시 구독하거나 Toskar 앱에서 다시 연결하세요."
     },
     "offHint": "켜면 Toskar가 라우터에 포트 {{port}}을(를) 열도록 요청해요. 이 포트는 이 컴퓨터와 페어링한 기기에만 응답해요. 대신 전달한 포트나 릴레이를 고를 수도 있어요. 로컬 네트워크 접근은 켜지 않아도 돼요."
+  },
+  "parts": {
+    "network": "다른 기기에서 누가 어떻게 이 컴퓨터에 연결할 수 있는지.",
+    "developer": "이 컴퓨터의 Toskar API와 앱 및 스크립트가 쓰는 키."
   }
 }

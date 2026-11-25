@@ -6,7 +6,7 @@ A check keeps this file complete: `web/src/features/settings/inventory.test.ts` 
 
 Columns:
 
-- **Where today** is the page and card in the web UI on `main`.
+- **Where today** is the page and card in the web UI before 1.15's reorganization.
 - **Category** is the place in the proposed structure below (section 3.2 and 3.3 of the standard).
 - **Scope**: Account (each person's own), Application (this computer, or the whole team of computers), Resource (one model, profile, chat, automation, portal).
 - **Complexity**: Basic, Advanced, Developer, Administrative (section 4.2).
@@ -122,7 +122,9 @@ Tabs: Chat, Activity, Models, Computers, Settings. Settings is one list: This iP
 | Room to grow | No: every new feature adds a card to one page | Yes |
 | Notifications findable | Yes | No (#498) |
 
-## 6. Proposed structure (waiting for Mike's sign-off, #1374 step 3)
+## 6. Structure (signed off 2026-11-25, built in 1.15)
+
+The web UI follows this since #1374's build: the sidebar in `web/src/components/layout/Sidebar.tsx`, Settings' pages in `web/src/features/settings/settingsNav.ts`, and old links in its `movedPages`. Until the contextual moves below are built, community ratings show in Models & AI and the AI news switch in Privacy & security, and Notifications and Voice are for Admins, as before.
 
 ### 6.1 Primary navigation: 6 destinations
 

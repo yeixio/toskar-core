@@ -42,7 +42,7 @@ function PortalLink({ slug }: { slug: string }) {
         <p className="text-xs text-warning">
           {t('link.lanOff')}{' '}
           {/* Underlined in the warning's own colour: told apart by more than colour (WCAG 1.4.1). */}
-          <Link to="/api-access" className="font-medium underline underline-offset-2 hover:no-underline">
+          <Link to="/settings/network" className="font-medium underline underline-offset-2 hover:no-underline">
             {t('link.lanOffAction')}
           </Link>
         </p>

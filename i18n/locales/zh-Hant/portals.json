@@ -4,7 +4,7 @@
     "copy": "複製連結",
     "copied": "已複製",
     "lanOff": "在開啟本機網路存取之前，只有這台電腦能開啟它。",
-    "lanOffAction": "在 API 存取中開啟"
+    "lanOffAction": "在「設定 › 網路存取」中開啟"
   },
   "add": {
     "title": "新增入口網站",

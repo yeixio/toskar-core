@@ -195,7 +195,7 @@ export function OverviewPanel() {
       ) : fleet.length === 0 ? (
         <p className="text-sm text-ink-muted">
           {t('overview.noComputers')}{' '}
-          <Link to="/nodes" className="text-primary hover:underline">
+          <Link to="/settings/computers" className="text-primary hover:underline">
             {t('overview.addComputer')}
           </Link>
         </p>

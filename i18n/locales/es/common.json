@@ -4,10 +4,6 @@
     "label": "Principal",
     "open": "Abrir el menú",
     "skip": "Saltar al contenido",
-    "use": "Usar",
-    "customize": "Personalizar",
-    "administer": "Administrar",
-    "administerHint": "Mostrar u ocultar Entrenar, Computadoras, Personas, Portales, Acceso a la API, Rendimiento y Diagnóstico",
     "chat": "Chat",
     "automations": "Automatizaciones",
     "models": "Modelos",
@@ -21,7 +17,6 @@
     "diagnostics": "Diagnóstico",
     "profiles": "Perfiles y orquestación",
     "tools": "Herramientas",
-    "apiAccess": "Acceso a la API",
     "settings": "Configuración",
     "news": "Noticias"
   },
