@@ -21,7 +21,8 @@
     "memory": "メモリ",
     "personalization": "パーソナライズ",
     "automation": "自動化",
-    "privacy": "プライバシー"
+    "privacy": "プライバシー",
+    "voice": "音声"
   },
   "units": {
     "megabytes": "{{value}} MB",
@@ -472,7 +473,9 @@
       "programming": "プログラミング",
       "research": "リサーチ",
       "custom": "カスタム"
-    }
+    },
+    "readAloud": "読み上げ",
+    "stopReading": "読み上げを停止"
   },
   "effort": {
     "title": "処理の深さ",
@@ -1005,7 +1008,9 @@
     "memoryIntro": "コンピュータがそこでのチャットから覚えていることです。オフにすると使われなくなり、削除もできます。このデバイスが自身のチャットのために覚えていることは、設定の「このデバイスでのチャット」にあります。",
     "searchMemories": "メモリーを検索",
     "noMatch": "一致するメモリーはありません。",
-    "personalizationIntro": "コンピュータからの回答の見た目です。そこでのすべてのチャットと自動化に適用されます。"
+    "personalizationIntro": "コンピュータからの回答の見た目です。そこでのすべてのチャットと自動化に適用されます。",
+    "voice": "音声",
+    "voiceMeta": "各言語を読み上げる声"
   },
   "privacy": {
     "title": "データはプライベートなまま",
@@ -1287,5 +1292,14 @@
     "send": "送信(アカウント不要)",
     "sent": "送信しました。公開結果に追加する前に、各結果を確認します。",
     "sendFailed": "送信できませんでした。代わりにGitHubから送信できます。"
+  },
+  "voice": {
+    "title": "声",
+    "intro": "コンピュータが各言語を読み上げる声です。車の中、回答の読み上げ、音声モード、ドアホンで使われます。",
+    "kittenInstalled": "コンピュータに Kitten TTS 2 mini がインストールされているので、その声もここにあります。",
+    "kittenOnComputer": "Kitten TTS 2 mini を入れると、より自然な声が使えます。コンピュータの 設定 › 音声 でインストールしてください。",
+    "adminOnly": "声を選べるのはコンピュータの管理者だけです。",
+    "automatic": "自動（{{voice}}）",
+    "standard": "標準"
   }
 }

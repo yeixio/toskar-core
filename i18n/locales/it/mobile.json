@@ -21,7 +21,8 @@
     "memory": "Memoria",
     "personalization": "Personalizzazione",
     "automation": "Automazione",
-    "privacy": "Privacy"
+    "privacy": "Privacy",
+    "voice": "Voce"
   },
   "units": {
     "megabytes": "{{value}} MB",
@@ -482,7 +483,9 @@
       "programming": "Programmazione",
       "research": "Ricerca",
       "custom": "Personalizzato"
-    }
+    },
+    "readAloud": "Leggi ad alta voce",
+    "stopReading": "Interrompi la lettura"
   },
   "effort": {
     "title": "Impegno",
@@ -1033,7 +1036,9 @@
     "memoryIntro": "Cosa ricorda il tuo computer dalle tue chat lì. Disattiva un ricordo per non usarlo più, oppure eliminalo. Cosa ricorda questo dispositivo per le sue chat si trova in Impostazioni, sotto Chat su questo dispositivo.",
     "searchMemories": "Cerca nei ricordi",
     "noMatch": "Nessun ricordo corrisponde.",
-    "personalizationIntro": "Come devono apparire le risposte del tuo computer, in ogni chat e automazione lì."
+    "personalizationIntro": "Come devono apparire le risposte del tuo computer, in ogni chat e automazione lì.",
+    "voice": "Voce",
+    "voiceMeta": "La voce in cui viene letta ogni lingua"
   },
   "privacy": {
     "title": "I tuoi dati restano privati",
@@ -1328,5 +1333,14 @@
     "send": "Invia, senza account",
     "sent": "Inviato. Controlliamo ogni risultato prima di aggiungerlo ai risultati pubblici.",
     "sendFailed": "Invio non riuscito. Puoi inviarlo tramite GitHub."
+  },
+  "voice": {
+    "title": "Voci",
+    "intro": "La voce in cui il tuo computer legge ogni lingua: in auto, quando ti fai leggere una risposta, nella modalità vocale e al campanello.",
+    "kittenInstalled": "Kitten TTS 2 mini è installato sul tuo computer, quindi qui ci sono anche le sue voci.",
+    "kittenOnComputer": "Kitten TTS 2 mini offre voci più naturali. Installalo sul tuo computer, in Impostazioni › Voce.",
+    "adminOnly": "Solo gli amministratori del tuo computer possono scegliere le voci.",
+    "automatic": "Automatica ({{voice}})",
+    "standard": "Standard"
   }
 }

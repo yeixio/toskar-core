@@ -21,7 +21,8 @@
     "memory": "메모리",
     "personalization": "맞춤 설정",
     "automation": "자동화",
-    "privacy": "개인정보"
+    "privacy": "개인정보",
+    "voice": "음성"
   },
   "units": {
     "megabytes": "{{value}}MB",
@@ -472,7 +473,9 @@
       "programming": "프로그래밍",
       "research": "리서치",
       "custom": "사용자 지정"
-    }
+    },
+    "readAloud": "소리 내어 읽기",
+    "stopReading": "읽기 중지"
   },
   "effort": {
     "title": "노력 수준",
@@ -1005,7 +1008,9 @@
     "memoryIntro": "컴퓨터가 그곳의 채팅에서 기억하는 것입니다. 끄면 더 이상 사용하지 않으며, 삭제할 수도 있습니다. 이 기기가 자체 채팅을 위해 기억하는 것은 설정의 '이 기기에서 채팅'에 있습니다.",
     "searchMemories": "메모리 검색",
     "noMatch": "일치하는 메모리가 없습니다.",
-    "personalizationIntro": "컴퓨터의 답변이 어떻게 보일지 정합니다. 그곳의 모든 채팅과 자동화에 적용됩니다."
+    "personalizationIntro": "컴퓨터의 답변이 어떻게 보일지 정합니다. 그곳의 모든 채팅과 자동화에 적용됩니다.",
+    "voice": "음성",
+    "voiceMeta": "각 언어를 읽어 주는 목소리"
   },
   "privacy": {
     "title": "데이터는 비공개로 유지됩니다",
@@ -1287,5 +1292,14 @@
     "send": "보내기(계정 불필요)",
     "sent": "보냈습니다. 공개 결과에 추가하기 전에 각 결과를 확인합니다.",
     "sendFailed": "보내지 못했습니다. 대신 GitHub로 보낼 수 있습니다."
+  },
+  "voice": {
+    "title": "목소리",
+    "intro": "컴퓨터가 각 언어를 읽어 주는 목소리입니다. 차 안, 답변 읽어 주기, 음성 모드, 초인종에서 쓰입니다.",
+    "kittenInstalled": "컴퓨터에 Kitten TTS 2 mini가 설치되어 있어 그 목소리도 여기 있습니다.",
+    "kittenOnComputer": "Kitten TTS 2 mini를 설치하면 더 자연스러운 목소리를 쓸 수 있습니다. 컴퓨터의 설정 › 음성에서 설치하세요.",
+    "adminOnly": "컴퓨터 관리자만 목소리를 선택할 수 있습니다.",
+    "automatic": "자동 ({{voice}})",
+    "standard": "표준"
   }
 }

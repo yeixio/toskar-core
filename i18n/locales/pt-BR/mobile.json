@@ -21,7 +21,8 @@
     "memory": "Memória",
     "personalization": "Personalização",
     "automation": "Automação",
-    "privacy": "Privacidade"
+    "privacy": "Privacidade",
+    "voice": "Voz"
   },
   "units": {
     "megabytes": "{{value}} MB",
@@ -482,7 +483,9 @@
       "programming": "Programação",
       "research": "Pesquisa",
       "custom": "Personalizado"
-    }
+    },
+    "readAloud": "Ler em voz alta",
+    "stopReading": "Parar de ler"
   },
   "effort": {
     "title": "Esforço",
@@ -1033,7 +1036,9 @@
     "memoryIntro": "O que seu computador lembra dos seus chats nele. Desative uma memória para parar de usá-la, ou exclua-a. O que este dispositivo lembra para os próprios chats está em Ajustes, em Chat neste dispositivo.",
     "searchMemories": "Buscar memórias",
     "noMatch": "Nenhuma memória corresponde.",
-    "personalizationIntro": "Como as respostas do seu computador devem ser, em todo chat e automação nele."
+    "personalizationIntro": "Como as respostas do seu computador devem ser, em todo chat e automação nele.",
+    "voice": "Voz",
+    "voiceMeta": "A voz em que cada idioma é lido"
   },
   "privacy": {
     "title": "Seus dados continuam privados",
@@ -1328,5 +1333,14 @@
     "send": "Enviar, sem conta",
     "sent": "Enviado. Conferimos cada resultado antes de incluí-lo nos resultados públicos.",
     "sendFailed": "Não foi possível enviar. Você pode enviar pelo GitHub."
+  },
+  "voice": {
+    "title": "Vozes",
+    "intro": "A voz em que seu computador lê cada idioma: no carro, quando você pede para ler uma resposta, no modo de voz e na campainha.",
+    "kittenInstalled": "O Kitten TTS 2 mini está instalado no seu computador, então as vozes dele também estão aqui.",
+    "kittenOnComputer": "O Kitten TTS 2 mini traz vozes mais naturais. Instale no seu computador, em Configurações › Voz.",
+    "adminOnly": "Só os administradores do seu computador podem escolher as vozes.",
+    "automatic": "Automática ({{voice}})",
+    "standard": "Padrão"
   }
 }

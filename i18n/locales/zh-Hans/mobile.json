@@ -21,7 +21,8 @@
     "memory": "记忆",
     "personalization": "个性化",
     "automation": "自动化",
-    "privacy": "隐私"
+    "privacy": "隐私",
+    "voice": "语音"
   },
   "units": {
     "megabytes": "{{value}} MB",
@@ -472,7 +473,9 @@
       "programming": "编程",
       "research": "研究",
       "custom": "自定义"
-    }
+    },
+    "readAloud": "朗读",
+    "stopReading": "停止朗读"
   },
   "effort": {
     "title": "投入程度",
@@ -1005,7 +1008,9 @@
     "memoryIntro": "你的电脑从那里的聊天中记住的内容。关闭某条记忆即可停止使用，也可以删除。此设备为自己的聊天记住的内容在“设置”的“在此设备上聊天”中。",
     "searchMemories": "搜索记忆",
     "noMatch": "没有匹配的记忆。",
-    "personalizationIntro": "电脑上的回答应该是什么样子，适用于那里的每个聊天和自动化。"
+    "personalizationIntro": "电脑上的回答应该是什么样子，适用于那里的每个聊天和自动化。",
+    "voice": "语音",
+    "voiceMeta": "朗读每种语言所用的声音"
   },
   "privacy": {
     "title": "你的数据保持私密",
@@ -1287,5 +1292,14 @@
     "send": "发送(无需账号)",
     "sent": "已发送。每个结果在加入公开结果前都会经过我们检查。",
     "sendFailed": "无法发送。你可以改为通过 GitHub 发送。"
+  },
+  "voice": {
+    "title": "声音",
+    "intro": "你的电脑朗读每种语言所用的声音：在车里、朗读回答时、语音模式和门铃中使用。",
+    "kittenInstalled": "你的电脑已安装 Kitten TTS 2 mini，所以这里也有它的声音。",
+    "kittenOnComputer": "安装 Kitten TTS 2 mini 可获得更自然的声音。请在电脑的 设置 › 语音 中安装。",
+    "adminOnly": "只有电脑的管理员可以选择声音。",
+    "automatic": "自动（{{voice}}）",
+    "standard": "标准"
   }
 }

@@ -21,7 +21,8 @@
     "memory": "Mémoire",
     "personalization": "Personnalisation",
     "automation": "Automatisation",
-    "privacy": "Confidentialité"
+    "privacy": "Confidentialité",
+    "voice": "Voix"
   },
   "units": {
     "megabytes": "{{value}} Mo",
@@ -482,7 +483,9 @@
       "programming": "Programmation",
       "research": "Recherche",
       "custom": "Personnalisé"
-    }
+    },
+    "readAloud": "Lire à voix haute",
+    "stopReading": "Arrêter la lecture"
   },
   "effort": {
     "title": "Effort",
@@ -1033,7 +1036,9 @@
     "memoryIntro": "Ce que votre ordinateur retient de vos chats sur celui-ci. Désactivez un souvenir pour ne plus l’utiliser, ou supprimez-le. Ce que cet appareil retient pour ses propres chats se trouve dans Réglages, sous Chat sur cet appareil.",
     "searchMemories": "Rechercher dans les souvenirs",
     "noMatch": "Aucun souvenir ne correspond.",
-    "personalizationIntro": "L’apparence des réponses de votre ordinateur, dans chaque chat et chaque automatisation."
+    "personalizationIntro": "L’apparence des réponses de votre ordinateur, dans chaque chat et chaque automatisation.",
+    "voice": "Voix",
+    "voiceMeta": "La voix dans laquelle chaque langue est lue"
   },
   "privacy": {
     "title": "Vos données restent privées",
@@ -1328,5 +1333,14 @@
     "send": "Envoyer, sans compte",
     "sent": "Envoyé. Nous vérifions chaque résultat avant de l’ajouter aux résultats publics.",
     "sendFailed": "Envoi impossible. Vous pouvez l’envoyer via GitHub."
+  },
+  "voice": {
+    "title": "Voix",
+    "intro": "La voix dans laquelle ton ordinateur lit chaque langue : en voiture, quand tu fais lire une réponse, en mode vocal et à la sonnette.",
+    "kittenInstalled": "Kitten TTS 2 mini est installé sur ton ordinateur, ses voix sont donc ici aussi.",
+    "kittenOnComputer": "Kitten TTS 2 mini apporte des voix plus naturelles. Installe-le sur ton ordinateur, dans Paramètres › Voix.",
+    "adminOnly": "Seuls les administrateurs de ton ordinateur peuvent choisir les voix.",
+    "automatic": "Automatique ({{voice}})",
+    "standard": "Standard"
   }
 }
