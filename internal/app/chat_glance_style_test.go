@@ -19,7 +19,7 @@ func TestTurnInstructionsForWatchAndCar(t *testing.T) {
 		got := (&chatExecEnv{app: a, ctx: ctx}).TurnInstructions(ctx, "What are the store's hours?")
 		for _, style := range []string{watchStyle, carStyle} {
 			if strings.Contains(got, style) != (style == want) {
-				t.Errorf("client %q: style %q present %v", client, style[:30], !(style == want))
+				t.Errorf("client %q: style %q present %v", client, style[:30], style != want)
 			}
 		}
 	}
