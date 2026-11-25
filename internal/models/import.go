@@ -81,7 +81,9 @@ func (m *Manager) UploadPath() (string, error) {
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		return "", err
 	}
-	return filepath.Join(dir, "upload-"+uuid.NewString()+".gguf"), nil
+	// No dashes inside the random part: a UUID segment such as "-bf16-"
+	// would read as a quantization in the file's name.
+	return filepath.Join(dir, "upload-"+strings.ReplaceAll(uuid.NewString(), "-", "")+".gguf"), nil
 }
 
 func (m *Manager) importChecked(ctx context.Context, req ImportRequest, path string, uploaded bool) (Imported, error) {
