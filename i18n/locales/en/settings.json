@@ -405,6 +405,8 @@
     },
     "standard": "Standard",
     "noVoice": "{{languages}} can't be read aloud yet: read aloud, voice mode and the doorbell don't speak it.",
+    "thinkingSound": "Thinking sound",
+    "thinkingSoundHint": "In voice chat, a soft chime plays while an answer takes more than a moment, so you know Toskar heard you. Only for you.",
     "hearing": "How voice hears you",
     "hearingHint": "Accurate hears noticeably better in a noisy room or with a far microphone, such as a webcam's. It answers a few tenths of a second later, downloads about 480 MB once, and uses about 500 MB more memory. For live voice and the doorbell.",
     "hearingFast": "Fast",

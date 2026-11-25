@@ -1179,6 +1179,8 @@ export interface SettingsView {
   ui_locale?: string
   /** This person's choice that answers may offer a better-fitting model to install (#707, contract 1.45). */
   suggest_models?: boolean
+  /** This person's choice that voice chat plays a soft chime while a spoken answer takes a while (#1334, contract 1.121); on by default. */
+  thinking_sound?: boolean
   /** auto (the language the person writes in), app (the App language), or language (assistant_language). */
   assistant_language_mode?: AssistantLanguageMode
   /** The language answers are written in with assistant_language_mode language, such as de. */
@@ -1519,6 +1521,8 @@ export interface SettingsPatch {
   ui_locale?: string
   /** This person's own: answers may offer a better-fitting model (#707). */
   suggest_models?: boolean
+  /** This person's own: voice chat's thinking sound (#1334). */
+  thinking_sound?: boolean
   /** The person's Hugging Face token, for models behind a license; '' forgets it. Never read back (#551). */
   huggingface_token?: string
   community_ratings?: boolean
@@ -1930,6 +1934,8 @@ export interface AutomationSay {
   voice?: string
   /** Talks with the visitor after the first words, through the doorbell's microphone, and the run's result is the visit summed up (#667, contract 1.113). */
   listen?: boolean
+  /** Leaves out the soft chime played while a visitor waits for an answer (#1334, contract 1.121). */
+  no_thinking_sound?: boolean
 }
 
 /** Kitten TTS 2 mini's install, for the Voice settings (#1304). */

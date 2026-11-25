@@ -452,7 +452,9 @@
     "sayVoiceAutomatic": "A voz do idioma nas Configurações",
     "sayVoiceKitten": "Kitten",
     "sayListen": "Conversar com a visita",
-    "sayListenHint": "Depois das primeiras palavras, o Toskar escuta pelo microfone da campainha, responde e descobre quem veio e por quê. Ele nunca diz se há alguém em casa. Você recebe um resumo da visita. Precisa do ffmpeg neste computador."
+    "sayListenHint": "Depois das primeiras palavras, o Toskar escuta pelo microfone da campainha, responde e descobre quem veio e por quê. Ele nunca diz se há alguém em casa. Você recebe um resumo da visita. Precisa do ffmpeg neste computador.",
+    "sayThinkingSound": "Tocar um som de espera",
+    "sayThinkingSoundHint": "Um toque suave enquanto a visita espera a resposta por mais de um instante, para saber que foi ouvida. Não nos horários de silêncio."
   },
   "draft": {
     "label": "Automação para confirmar",

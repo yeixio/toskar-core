@@ -452,7 +452,9 @@
     "sayVoiceAutomatic": "La voce della lingua nelle Impostazioni",
     "sayVoiceKitten": "Kitten",
     "sayListen": "Parla con chi è alla porta",
-    "sayListenHint": "Dopo le prime parole, Toskar ascolta dal microfono del campanello, risponde e scopre chi è venuto e perché. Non dice mai se c'è qualcuno in casa. Ricevi un riepilogo della visita. Serve ffmpeg su questo computer."
+    "sayListenHint": "Dopo le prime parole, Toskar ascolta dal microfono del campanello, risponde e scopre chi è venuto e perché. Non dice mai se c'è qualcuno in casa. Ricevi un riepilogo della visita. Serve ffmpeg su questo computer.",
+    "sayThinkingSound": "Riproduci un suono di attesa",
+    "sayThinkingSoundHint": "Un suono leggero mentre chi è alla porta aspetta la risposta più di un attimo, così sa di essere stato sentito. Non nelle ore di silenzio."
   },
   "draft": {
     "label": "Automazione da confermare",

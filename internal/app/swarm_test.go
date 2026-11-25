@@ -205,7 +205,18 @@ func TestSwarmStopAll(t *testing.T) {
 		close(s.hold[1])
 		close(s.hold[2])
 	})
-	list, _ := s.Swarms.List(ctx, "")
+	// The chat ends as soon as it's stopped; the turn records the swarm as
+	// stopped a moment later, as it unwinds. Under load that was after the
+	// first look, which saw it merging.
+	var list []contracts.Swarm
+	deadline := time.Now().Add(5 * time.Second)
+	for {
+		list, _ = s.Swarms.List(ctx, "")
+		if list[0].Status == swarm.StatusStopped || time.Now().After(deadline) {
+			break
+		}
+		time.Sleep(10 * time.Millisecond)
+	}
 	if list[0].Status != swarm.StatusStopped {
 		t.Fatalf("swarm = %+v", list[0])
 	}

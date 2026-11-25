@@ -414,6 +414,8 @@
     },
     "standard": "Estándar",
     "noVoice": "{{languages}} todavía no se puede leer en voz alta: la lectura en voz alta, el modo de voz y el timbre no lo hablan.",
+    "thinkingSound": "Sonido de espera",
+    "thinkingSoundHint": "En el chat de voz suena un tono suave cuando una respuesta tarda más de un momento, para que sepas que Toskar te escuchó. Solo para ti.",
     "hearing": "Cómo te escucha la voz",
     "hearingHint": "Preciso escucha bastante mejor en una sala ruidosa o con un micrófono lejano, como el de una webcam. Responde unas décimas de segundo más tarde, descarga unos 480 MB una vez y usa unos 500 MB más de memoria. Para la voz en directo y el timbre.",
     "hearingFast": "Rápido",

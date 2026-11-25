@@ -1652,6 +1652,7 @@ func (a *App) settingsView(ctx context.Context) (contracts.SettingsView, error) 
 	// The person's own languages (#206).
 	uiLocale := a.personalString(ctx, "ui_locale", "")
 	suggestModels := a.personalString(ctx, "suggest_models", "true") != "false"
+	thinkingSound := a.personalString(ctx, "thinking_sound", "true") != "false"
 	assistantMode := a.personalString(ctx, "assistant_language_mode", replylang.ModeAuto)
 	assistantLanguage := a.personalString(ctx, "assistant_language", "")
 	digest, _ := a.Settings.GetString(ctx, settingDigest, "")
@@ -1710,6 +1711,7 @@ func (a *App) settingsView(ctx context.Context) (contracts.SettingsView, error) 
 		DiscoveryNeedsRestart:   a.discoveryNeedsRestart,
 		UILocale:                uiLocale,
 		SuggestModels:           suggestModels,
+		ThinkingSound:           thinkingSound,
 		AssistantLanguageMode:   assistantMode,
 		AssistantLanguage:       assistantLanguage,
 		AutomationDigest:        digest,
@@ -1835,6 +1837,12 @@ func (a *App) applySettingsPatch(ctx context.Context, patch map[string]any) erro
 	// Each person's own (#707): answers may offer a better-fitting model.
 	if v, ok := patch["suggest_models"].(bool); ok {
 		if err := a.setPersonal(ctx, "suggest_models", strconv.FormatBool(v)); err != nil {
+			return err
+		}
+	}
+	// Each person's own (#1334): the chime while a spoken answer is on its way.
+	if v, ok := patch["thinking_sound"].(bool); ok {
+		if err := a.setPersonal(ctx, "thinking_sound", strconv.FormatBool(v)); err != nil {
 			return err
 		}
 	}

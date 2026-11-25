@@ -275,6 +275,72 @@ func TestDoorGreeting(t *testing.T) {
 	}
 }
 
+// chimeCounter passes the door's words on and counts the thinking chimes
+// played before each, in order.
+type chimeCounter struct {
+	door  doorTalker
+	mu    sync.Mutex
+	order []string
+}
+
+func (c *chimeCounter) Talk(ctx context.Context, service string, samples []int16, rate int) error {
+	c.mu.Lock()
+	if len(samples) == len(voice.ThinkingSound(rate)) {
+		c.order = append(c.order, "chime")
+		c.mu.Unlock()
+		time.Sleep(20 * time.Millisecond) // a chime takes a moment to play
+		return nil
+	}
+	c.order = append(c.order, "words")
+	c.mu.Unlock()
+	return c.door.Talk(ctx, service, samples, rate)
+}
+
+// While the visitor waits for a slow answer, a soft chime plays, and stops
+// before the answer is said; a quick answer has none, and neither does an
+// automation with it off or in quiet hours (#1334).
+func TestDoorVisitThinkingSound(t *testing.T) {
+	visit := func(say automations.Say, think time.Duration, slow time.Duration) []string {
+		t.Helper()
+		say.Connector, say.Device, say.Listen = automations.SayReolink, "camera", true
+		auto := automations.Automation{Schedule: automations.Schedule{TimeZone: "UTC"}, Say: &say}
+		door := &visitDoor{audio: make(chan []int16, 1000), spoke: make(chan struct{}, 10), visitor: 1}
+		talk := &chimeCounter{door: door}
+		v := &doorVisit{ear: door, talk: talk, parts: voice.Parts{Transcriber: &scriptedEars{heard: []string{"Hi, a parcel for you."}}, Speaker: &fakeDoorVoice{}},
+			automation: auto, lang: "en",
+			reply: func(ctx context.Context, _ []doorLine) (string, error) {
+				time.Sleep(slow)
+				return "Thanks, please leave it at the door. [Done]", nil
+			},
+			now:  func() time.Time { return time.Date(2026, 11, 25, 14, 0, 0, 0, time.UTC) },
+			wait: 2 * time.Second, longest: 5 * time.Second, echo: 30 * time.Millisecond,
+			thinkAfter: think, thinkEvery: 50 * time.Millisecond}
+		if _, err := v.run(context.Background(), "Hello there, can I help you?"); err != nil {
+			t.Fatal(err)
+		}
+		return talk.order
+	}
+	got := visit(automations.Say{}, 40*time.Millisecond, 250*time.Millisecond)
+	if len(got) < 3 || got[0] != "chime" || got[len(got)-1] != "words" || strings.Count(strings.Join(got, ","), "words") != 1 {
+		t.Fatalf("a slow answer played %v", got)
+	}
+	for _, c := range []struct {
+		name  string
+		say   automations.Say
+		think time.Duration
+		slow  time.Duration
+	}{
+		{"quick answer", automations.Say{}, 200 * time.Millisecond, 0},
+		{"turned off", automations.Say{NoThinkingSound: true}, 40 * time.Millisecond, 250 * time.Millisecond},
+		{"quiet hours", automations.Say{QuietFrom: "13:00", QuietTo: "15:00"}, 40 * time.Millisecond, 250 * time.Millisecond},
+	} {
+		got := visit(c.say, c.think, c.slow)
+		if strings.Contains(strings.Join(got, ","), "chime") {
+			t.Errorf("%s played %v", c.name, got)
+		}
+	}
+}
+
 // hearingEars hears each thing in a language, sure or not, and keeps the
 // language it was asked to listen in.
 type hearingEars struct {

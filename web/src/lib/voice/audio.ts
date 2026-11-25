@@ -1,4 +1,5 @@
 import { VOICE_RATE, resample } from './pcm'
+import { THINKING_DELAY_MS, THINKING_GAP_MS, thinkingSound } from './thinking'
 
 /** Passes the microphone's samples to the page, 128 at a time. */
 const captureWorklet = `
@@ -67,6 +68,8 @@ export class VoiceAudio {
   private playing = new Set<AudioBufferSourceNode>()
   private playAt = 0
   private muted = false
+  private thinkingTimer: ReturnType<typeof setTimeout> | null = null
+  private chime: AudioBufferSourceNode | null = null
   /** Called when everything queued has played. */
   onDrained?: () => void
 
@@ -138,6 +141,45 @@ export class VoiceAudio {
     }
   }
 
+  /**
+   * Starts the thinking sound (#1334): after a moment without an answer, a
+   * soft chime, again every few seconds, until stopThinking. It isn't the
+   * answer, so it doesn't count as playing.
+   */
+  startThinking() {
+    if (this.thinkingTimer) return
+    const chime = () => {
+      const samples = thinkingSound(this.context.sampleRate)
+      const buffer = this.context.createBuffer(1, samples.length, this.context.sampleRate)
+      buffer.copyToChannel(samples, 0)
+      const node = this.context.createBufferSource()
+      node.buffer = buffer
+      node.connect(this.context.destination)
+      node.start()
+      this.chime = node
+      node.onended = () => {
+        if (this.chime === node) this.chime = null
+      }
+      this.thinkingTimer = setTimeout(chime, THINKING_GAP_MS)
+    }
+    this.thinkingTimer = setTimeout(chime, THINKING_DELAY_MS)
+  }
+
+  /** Stops the thinking sound at once, before the answer plays. */
+  stopThinking() {
+    if (this.thinkingTimer) clearTimeout(this.thinkingTimer)
+    this.thinkingTimer = null
+    if (this.chime) {
+      this.chime.onended = null
+      try {
+        this.chime.stop()
+      } catch {
+        // already ended
+      }
+      this.chime = null
+    }
+  }
+
   /** Stops the answer at once, when the person talks over it. */
   interrupt() {
     for (const node of this.playing) {
@@ -157,6 +199,7 @@ export class VoiceAudio {
   }
 
   close() {
+    this.stopThinking()
     this.interrupt()
     this.node?.disconnect()
     this.source?.disconnect()
