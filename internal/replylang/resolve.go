@@ -20,8 +20,11 @@ const (
 
 // Where a decision came from, for traces and tests.
 const (
-	FromRequest      = "request"
-	FromMessage      = "message"
+	FromRequest = "request"
+	FromMessage = "message"
+	// FromSpeech is the language the person spoke in, as speech to text
+	// heard it with confidence (#1322).
+	FromSpeech       = "speech"
 	FromConversation = "conversation"
 	FromSetting      = "setting"
 	FromApp          = "app"
@@ -42,6 +45,10 @@ type Input struct {
 	Message string
 	// History is the person's earlier messages in the conversation, oldest first.
 	History []string
+	// Spoken is the language the message was spoken in, when speech to text
+	// was confident of it, such as es (#1322). A word or two said aloud,
+	// such as "¿Hola?", is too short to tell from its text.
+	Spoken string
 }
 
 // Decision is the language to answer in, as a BCP 47 tag, and why.
@@ -57,7 +64,7 @@ func ValidMode(mode string) bool {
 
 // Resolve decides the language to answer in (spec §11): a language the
 // message asks for always wins. Then, by mode, the language the person
-// writes in (Auto), the chosen language, or the App language; then this
+// writes or speaks in (Auto), the chosen language, or the App language; then this
 // computer's language; then English.
 func Resolve(in Input) Decision {
 	if tag, ok := Requested(in.Message); ok {
@@ -73,6 +80,9 @@ func Resolve(in Input) Decision {
 	default:
 		if tag, ok := Detect(in.Message); ok {
 			return Decision{tag, FromMessage}
+		}
+		if tag := canonical(in.Spoken); tag != "" {
+			return Decision{tag, FromSpeech}
 		}
 		// The conversation's recent messages, newest first.
 		for i := len(in.History) - 1; i >= 0 && i >= len(in.History)-6; i-- {

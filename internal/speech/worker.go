@@ -87,17 +87,27 @@ type workerProc struct {
 type workerAnswer struct {
 	Text     string `json:"text"`
 	Language string `json:"language"`
-	PCM      string `json:"pcm"`
-	Rate     int    `json:"rate"`
-	Error    string `json:"error"`
-	ID       string `json:"id"`
+	// Probability is how sure Whisper is of Language, from 0 to 1.
+	Probability float64 `json:"probability"`
+	PCM         string  `json:"pcm"`
+	Rate        int     `json:"rate"`
+	Error       string  `json:"error"`
+	ID          string  `json:"id"`
 }
 
 // Transcribe returns what pcm, 16-bit mono at 16 kHz, says. quality is
 // fast or accurate, as for Engine.Transcribe.
 func (w *Worker) Transcribe(ctx context.Context, pcm []byte, quality, language string) (string, error) {
+	text, _, _, err := w.Hear(ctx, pcm, quality, language)
+	return text, err
+}
+
+// Hear is Transcribe, and the language it was spoken in with how sure
+// Whisper is of it, from 0 to 1 (#1322). With a language given, that's
+// the language, at 1.
+func (w *Worker) Hear(ctx context.Context, pcm []byte, quality, language string) (text, heard string, sure float64, err error) {
 	if language != "" && !languageRe.MatchString(language) {
-		return "", fmt.Errorf("language must be a code such as en or de")
+		return "", "", 0, fmt.Errorf("language must be a code such as en or de")
 	}
 	model := models[quality]
 	if model == "" {
@@ -105,7 +115,10 @@ func (w *Worker) Transcribe(ctx context.Context, pcm []byte, quality, language s
 	}
 	a, err := w.ask(ctx, envSpeech, map[string]any{"op": "transcribe", "pcm": base64.StdEncoding.EncodeToString(pcm), "model": model,
 		"models_dir": filepath.Join(w.Engine.Dir, "whisper"), "language": language})
-	return a.Text, err
+	if language != "" {
+		return a.Text, language, 1, err
+	}
+	return a.Text, a.Language, a.Probability, err
 }
 
 // Speak reads text aloud in voice, or the language's voice when it's
