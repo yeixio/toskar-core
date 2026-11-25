@@ -1346,7 +1346,12 @@
       "on": "Sie ist eingeschaltet. Wechsle beim Tippen mit der Tastaturtaste zu ihr.",
       "privacy": "Was du tippst, bleibt auf diesem Telefon, und die Tastatur speichert nichts. Nur Text, den du mit Fragen, Umschreiben oder Korrigieren sendest, geht an deinen Computer oder an die Modelle dieses Telefons. In Passwortfeldern tippt sie nur.",
       "turnOn": "Tastatur einschalten",
-      "choose": "Tastatur wechseln"
-    }
+      "choose": "Tastatur wechseln",
+      "ios": "Tippe überall und tippe dann über den Tasten auf Fragen, Umschreiben oder Korrigieren, damit Toskar antwortet oder deinen Text verbessert. Öffne in den Einstellungen Toskar und dann Tastaturen: Schalte die Toskar-Tastatur und „Vollen Zugriff erlauben“ ein, damit sie deinen Computer erreicht.",
+      "privacyIos": "Was du tippst, bleibt auf diesem Gerät, und die Tastatur speichert nichts. Nur Text, den du mit Fragen, Umschreiben oder Korrigieren sendest, geht an deinen eigenen Computer. Ohne vollen Zugriff tippt die Tastatur nur. In Passwortfeldern wird immer die Systemtastatur verwendet.",
+      "openSettings": "Einstellungen öffnen"
+    },
+    "fullAccess": "Erlaube in den Einstellungen vollen Zugriff für die Toskar-Tastatur, um Toskar von hier aus zu fragen.",
+    "noComputer": "Verbinde in der Toskar-App einen Computer, um über die Tastatur zu fragen."
   }
 }

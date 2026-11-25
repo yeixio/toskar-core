@@ -1367,7 +1367,12 @@
       "on": "Está ativado. Mude para ele com o botão de teclado enquanto digita.",
       "privacy": "O que você digita fica neste celular, e o teclado não guarda nada. Só o texto que você envia com Perguntar, Reescrever ou Corrigir vai para o seu computador ou para os modelos deste celular. Em campos de senha, ele só digita.",
       "turnOn": "Ativar o teclado",
-      "choose": "Trocar de teclado"
-    }
+      "choose": "Trocar de teclado",
+      "ios": "Digite em qualquer lugar e toque em Perguntar, Reescrever ou Corrigir acima das teclas para o Toskar responder ou melhorar o que você escreveu. Nos Ajustes, abra Toskar e depois Teclados: ative o Teclado do Toskar e Permitir Acesso Total, que o deixa alcançar seu computador.",
+      "privacyIos": "O que você digita fica neste dispositivo, e o teclado não guarda nada. Só o texto que você envia com Perguntar, Reescrever ou Corrigir vai para o seu próprio computador. Sem acesso total, o teclado só digita. Campos de senha sempre usam o teclado do sistema.",
+      "openSettings": "Abrir Ajustes"
+    },
+    "fullAccess": "Permita o acesso total ao teclado do Toskar nos Ajustes para perguntar ao Toskar daqui.",
+    "noComputer": "Conecte um computador no app Toskar para perguntar pelo teclado."
   }
 }
