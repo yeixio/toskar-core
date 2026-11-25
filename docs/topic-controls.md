@@ -44,7 +44,7 @@ The run trace (`GET /api/v1/runs`, and the run details under an answer) notes a 
 
 - **Chat portals (#205):** a portal's profile brings its topic controls with it, so its visitors can't turn them off.
 - **Roles and people:** on **People**, **Profiles they use** keeps Members or Visitors to one or more profiles, and each Member or Visitor can have their own: the same as their role, any profile, or only some. A pinned person's chats use one of their profiles, whatever the chat or a request names, and the chat's profile picker shows only those. The Owner and Admins are never pinned, so whoever runs Toskar keeps the whole assistant. If every profile someone is pinned to is deleted, they can't chat until an Admin changes it, rather than getting any profile.
-- **API keys:** on **API Access**, a key's **Answers with** pins it to one profile. Every request with that key, from a website or another app, answers with the profile and its topic controls, and can't name another profile or a model.
+- **API keys:** in **Settings › API keys**, a key's **Answers with** pins it to one profile. Every request with that key, from a website or another app, answers with the profile and its topic controls, and can't name another profile or a model.
 
 With topic controls, the assistant answers everything by its own rules: Toskar's own replies about itself ("how do I install MCP?"), "remember …" commands, and offers to install something aren't given in its place.
 

@@ -4,10 +4,6 @@
     "label": "Principal",
     "open": "Ouvrir le menu",
     "skip": "Aller au contenu",
-    "use": "Utiliser",
-    "customize": "Personnaliser",
-    "administer": "Administrer",
-    "administerHint": "Afficher ou masquer Entraîner, Ordinateurs, Personnes, Portails, Accès API, Performances et Diagnostics",
     "chat": "Discussion",
     "automations": "Automatisations",
     "models": "Modèles",
@@ -21,7 +17,6 @@
     "diagnostics": "Diagnostics",
     "profiles": "Profils et orchestration",
     "tools": "Outils",
-    "apiAccess": "Accès API",
     "settings": "Paramètres",
     "news": "Actualités"
   },

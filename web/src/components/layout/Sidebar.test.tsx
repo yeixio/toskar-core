@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { api } from '@/lib/api'
@@ -36,49 +36,28 @@ const links = () => within(screen.getByRole('navigation')).getAllByRole('link').
 
 describe('Sidebar', () => {
   beforeEach(() => {
-    useUIStore.setState({ advancedMode: false, administerOpen: false })
+    useUIStore.setState({ advancedMode: false })
   })
 
-  it('groups pages into Use, Customize, and Administer, with Settings last, and lists Tools and Profiles without advanced mode', () => {
+  it('lists the six places people work in, with Settings last (#1374)', () => {
     renderAt('/chat')
-    expect(screen.getByText('Use')).toBeInTheDocument()
-    expect(screen.getByText('Customize')).toBeInTheDocument()
-    expect(links()).toEqual(['/chat', '/automations', '/knowledge', '/memory', '/news', '/models', '/tools', '/profiles', '/settings'])
+    expect(links()).toEqual(['/chat', '/automations', '/knowledge', '/profiles', '/models', '/news', '/settings'])
+    expect(screen.queryByRole('link', { name: /Computers|Diagnostics|API Access/ })).not.toBeInTheDocument()
   })
 
-  it('keeps Administer closed until it is opened, and remembers the choice', () => {
-    renderAt('/chat')
-    const toggle = screen.getByRole('button', { name: 'Administer' })
-    expect(toggle).toHaveAttribute('aria-expanded', 'false')
-    expect(screen.queryByRole('link', { name: /Computers/ })).not.toBeInTheDocument()
-
-    fireEvent.click(toggle)
-    expect(toggle).toHaveAttribute('aria-expanded', 'true')
-    expect(links()).toEqual([
-      '/chat', '/automations', '/knowledge', '/memory', '/news', '/models', '/tools', '/profiles',
-      '/train', '/nodes', '/people', '/portals', '/api-access', '/performance', '/diagnostics', '/settings',
-    ])
-    expect(useUIStore.getState().administerOpen).toBe(true)
-
-    fireEvent.click(toggle)
-    expect(useUIStore.getState().administerOpen).toBe(false)
-    expect(screen.queryByRole('link', { name: /Diagnostics/ })).not.toBeInTheDocument()
-  })
-
-  it('shows Administer while one of its pages is open, so the current page is in view', () => {
-    renderAt('/nodes')
-    const toggle = screen.getByRole('button', { name: 'Administer' })
-    expect(toggle).toHaveAttribute('aria-expanded', 'true')
-    expect(screen.getByRole('link', { name: /Computers/ })).toHaveClass('nav-link-active')
+  it('marks Settings while one of its pages is open, and Models while Train is', () => {
+    const { unmount } = renderAt('/settings/computers')
+    expect(screen.getByRole('link', { name: /Settings/ })).toHaveClass('nav-link-active')
+    unmount()
+    renderAt('/models/train')
+    expect(screen.getByRole('link', { name: /Models/ })).toHaveClass('nav-link-active')
   })
 
   it('shows Members what they use and Visitors only Chat (#203)', async () => {
     const person = { id: 'sam', name: 'Sam', created_at: '', sign_in: true }
     vi.mocked(api.getMe).mockResolvedValueOnce({ person: { ...person, role: 'member' }, via: 'session' })
     const { unmount } = renderAt('/chat')
-    await waitFor(() => expect(links()).toEqual(['/chat', '/automations', '/memory', '/news', '/settings']))
-    expect(screen.queryByRole('button', { name: 'Administer' })).not.toBeInTheDocument()
-    expect(screen.queryByText('Customize')).not.toBeInTheDocument()
+    await waitFor(() => expect(links()).toEqual(['/chat', '/automations', '/news', '/settings']))
     unmount()
 
     vi.mocked(api.getMe).mockResolvedValueOnce({ person: { ...person, role: 'visitor' }, via: 'session' })
@@ -89,7 +68,7 @@ describe('Sidebar', () => {
 
 describe('Sidebar QA regressions', () => {
   beforeEach(() => {
-    useUIStore.setState({ advancedMode: false, administerOpen: false })
+    useUIStore.setState({ advancedMode: false })
   })
 
   // Regression: toskar-core#1249
@@ -105,7 +84,7 @@ describe('Sidebar QA regressions', () => {
     const person = { id: 'sam', name: 'Sam', created_at: '', sign_in: true }
     vi.mocked(api.getMe).mockResolvedValueOnce({ person: { ...person, role: 'member' }, via: 'session' })
     renderAt('/chat')
-    await waitFor(() => expect(links()).toEqual(['/chat', '/automations', '/memory', '/news', '/settings']))
+    await waitFor(() => expect(links()).toEqual(['/chat', '/automations', '/news', '/settings']))
     const footer = screen.getByText('Status').closest('footer')!
     expect(within(footer).queryByText('Knowledge')).not.toBeInTheDocument()
   })

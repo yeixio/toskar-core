@@ -79,7 +79,7 @@ Text piped in, or from `--file`, is sent as data to work on, apart from the prom
 | `--memory` | Let the answer use and add to memory. Off unless given, so a CI job never reads or writes a person's memories |
 | `--knowledge` | Let the answer use connected knowledge. Off unless given |
 
-The answer never uses tools. It goes through the OpenAI-compatible API (`/v1/chat/completions`), so it saves no conversation, and an API key's permissions apply: a key that may not use memory can't be given `--memory`. For a CI job, make the key with **For a CI job** on the API Access page: it can only ask, with no memories, knowledge, or tools, whatever the job sends ([API key permissions](api.md#openai-compatible-api)).
+The answer never uses tools. It goes through the OpenAI-compatible API (`/v1/chat/completions`), so it saves no conversation, and an API key's permissions apply: a key that may not use memory can't be given `--memory`. For a CI job, make the key with **For a CI job** in Settings › API keys: it can only ask, with no memories, knowledge, or tools, whatever the job sends ([API key permissions](api.md#openai-compatible-api)).
 
 Exit status: 0 for an answer, 1 for a model or connection error, 2 for a usage error, and 3 for an answer that doesn't fit `--json-schema`.
 
@@ -169,7 +169,7 @@ Editors' agents and AI features take an OpenAI-compatible endpoint, so their mod
 The editors' settings follow their docs as of November 2026. Continue's were checked in VS Code ([guide](integrations/continue.md)); the others weren't checked in a running editor, as Claude Code and Codex were.
 
 - **The model:** `--model`, or the best installed one for an agent: one that calls tools, then one made for code, then one that fits Excellent or Good, then the largest.
-- **The key:** on this computer none is needed, so agents get the stand-in `toskar-local`. For another computer, set `TOSKAR_URL` and `TOSKAR_API_KEY` to a key with raw access ("Drive models directly, for coding agents" in API Access). Printed settings name the variable instead of showing the key.
+- **The key:** on this computer none is needed, so agents get the stand-in `toskar-local`. For another computer, set `TOSKAR_URL` and `TOSKAR_API_KEY` to a key with raw access ("Drive models directly, for coding agents" in Settings › API keys). Printed settings name the variable instead of showing the key.
 - **Window:** agents send long instructions and many tools, so a model gets a bigger window when it needs one and one fits (#962). When the tools take more than a quarter of the window, such as an agent with MCP servers, the model gets the most relevant ones and finds the rest with `tools_search`, which Toskar answers itself ([api.md](api.md), #843).
 - **Subagents in a swarm (#1135):** `--swarm <profile>` points the agent's subagents at `swarm:<profile>`, by the profile's id or its name as a slug, such as `coding-swarm` for "Coding swarm". Subagents always send their tools, so each of their requests is spread to the least busy of the profile's swarm models and computers ([api.md](api.md#swarms-from-editor-agents-1135)), and the ones the agent starts at once run at once instead of waiting on one model. The agent's own model stays as it is. For `claude-code` it sets `CLAUDE_CODE_SUBAGENT_MODEL`; its fast model stays the agent's, since its background requests, such as naming a chat, send no tools and would each run a whole swarm. Agents without a subagent model of their own refuse `--swarm` and say to use `swarm:<profile>` as their model instead. The key needs raw access, as for the agent's own model.
 - **Step by step, tested with Qwen 3.5 9B, on this computer and another:** the [coding agents guide](integrations/coding-agents.md).
@@ -234,7 +234,7 @@ A person is named by their ID, name, or username. When two people share a name, 
 
 ### MCP bridge
 
-Apps such as Claude Desktop start MCP servers as programs. `toskarctl mcp` is that program: it reads MCP messages on standard input, sends each to the daemon's `/mcp` endpoint, and writes the replies to standard output. API Access → **Use Toskar in other AI apps** shows the exact configuration to paste for Claude Desktop, Claude Code, Cursor, VS Code, and other apps. See [MCP](mcp.md).
+Apps such as Claude Desktop start MCP servers as programs. `toskarctl mcp` is that program: it reads MCP messages on standard input, sends each to the daemon's `/mcp` endpoint, and writes the replies to standard output. Settings › **Use Toskar in other AI apps** shows the exact configuration to paste for Claude Desktop, Claude Code, Cursor, VS Code, and other apps. See [MCP](mcp.md).
 
 ### Shell completion
 

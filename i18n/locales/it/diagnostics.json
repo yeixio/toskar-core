@@ -80,7 +80,7 @@
       "connected_many": "{{count}} computer collegati",
       "connected_other": "{{count}} computer collegati",
       "none": "Nessun computer trovato",
-      "noneHint": "Aggiungi un altro computer o controlla Trova altri computer nella pagina Computer."
+      "noneHint": "Aggiungi un altro computer o controlla Trova altri computer in Impostazioni › Computer."
     },
     "storage": {
       "label": "Spazio di archiviazione",

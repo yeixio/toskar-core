@@ -7,16 +7,16 @@ export interface ScreenshotLaunch {
 const routes: Record<string, string> = {
   chat: '/chat',
   models: '/models',
-  computers: '/nodes',
-  performance: '/performance',
-  diagnostics: '/diagnostics',
-  'api-manager': '/api-access',
+  computers: '/settings/computers',
+  performance: '/settings/performance',
+  diagnostics: '/settings/diagnostics',
+  'api-manager': '/settings/network',
   automations: '/automations',
   'automations-create': '/automations',
-  train: '/train',
+  train: '/models/train',
   knowledge: '/knowledge',
-  memory: '/memory',
-  tools: '/tools',
+  memory: '/settings/memory',
+  tools: '/settings/tools',
   profiles: '/profiles',
 }
 

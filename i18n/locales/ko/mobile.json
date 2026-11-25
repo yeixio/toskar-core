@@ -33,7 +33,7 @@
     "couldNotReach": "Toskar에 연결할 수 없어요.",
     "unreachable": "해당 컴퓨터의 Toskar Pro에 연결할 수 없어요. 같은 Wi-Fi 네트워크를 사용하고, 해당 컴퓨터에서 '기기 연결'을 선택하세요.",
     "unreachableAway": "외부에서 컴퓨터에 연결할 수 없어요. 꺼져 있거나 잠자기 상태이거나, 어디서나 접속이 꺼져 있을 수 있어요.",
-    "keyRejected": "API 키가 거부되었어요. 대신 컴퓨터의 코드로 연결하거나, API 액세스에서 키를 만드세요.",
+    "keyRejected": "그 API 키가 거부되었습니다. 대신 컴퓨터의 코드로 연결하거나, 설정 › API 키에서 키를 만드세요.",
     "dropped": "Toskar와의 연결이 끊어졌어요.",
     "chatFailed": "채팅에 실패했어요.",
     "requestFailed": "요청 실패"
@@ -325,7 +325,7 @@
       "memoryOn": "메모리 켬",
       "memoryOff": "메모리 끔",
       "memoryOffHint": "이 채팅에서 메모리가 꺼져 있어요. 저장된 메모리는 여기서 사용되지 않으며 삭제되지 않아요.",
-      "memoryDisabledHint": "모든 채팅에서 메모리가 꺼져 있어요. 메모리 페이지에서 켜세요."
+      "memoryDisabledHint": "모든 채팅에서 메모리가 꺼져 있습니다. 설정 › 메모리에서 켜세요."
     },
     "loading": "채팅을 불러오는 중",
     "placeholder": "Toskar에게 메시지 보내기",
@@ -776,7 +776,7 @@
     "usageNoCap": "이번 달 릴레이 사용량: {{used}}",
     "overCap": "이번 달 릴레이 사용량을 모두 썼어요. 집이나 직접 연결에서는 Toskar를 계속 쓸 수 있고, 릴레이는 다음 달에 다시 쓸 수 있어요.",
     "pending": "구매 승인을 기다리는 중이에요.",
-    "notAdmin": "구독했어요. 컴퓨터의 관리자에게 API 접근에서 어디서나 접속을 켜 달라고 요청하세요.",
+    "notAdmin": "구독했습니다. 컴퓨터의 관리자에게 설정 › 네트워크 액세스에서 어디서나 액세스를 켜 달라고 요청하세요.",
     "inUse": "이 구독은 이미 다른 컴퓨터에 사용 중이에요.",
     "moveHint": "이 컴퓨터로 옮기면 다른 컴퓨터는 외출 중에 사용할 수 없어요.",
     "move": "이 컴퓨터로 옮기기",
@@ -796,7 +796,7 @@
     "manage": "구독 관리",
     "throughComputer": "이 컴퓨터의 구독으로 활성화됨",
     "throughComputerBody": "이 컴퓨터와 페어링된 모든 기기가 이 구독을 사용해요. 구매한 곳에서 관리해요. 구독한 기기나 컴퓨터의 Toskar 설정에서요.",
-    "boughtInSettings": "컴퓨터의 Toskar 설정에서 구매했어요. 카드 변경이나 해지는 그곳의 API 액세스에서 할 수 있어요.",
+    "boughtInSettings": "컴퓨터의 Toskar 설정에서 구매했습니다. 카드 변경이나 해지는 그곳의 설정 › 네트워크 액세스에서 하세요.",
     "coveredTitle": "다른 기기의 구독으로 사용 중",
     "coveredBody": "이 컴퓨터에는 다른 기기에서 구매한 구독이 이미 있습니다. 집에서 컴퓨터에 한 번 연결하면 이 기기에서도 사용할 수 있습니다.",
     "extraSubscription": "이 컴퓨터에는 구독이 두 개 이상 있지만 하나만 있으면 됩니다. 구독 관리에서 내 구독을 취소해도 다른 구독으로 계속 사용할 수 있습니다."
@@ -1051,12 +1051,12 @@
     "reachableViaRelay": "릴레이를 통해 네트워크 밖에서 연결할 수 있습니다",
     "unreachable": "네트워크 밖에서 연결할 수 없습니다",
     "unchecked": "아직 외부에서 확인하지 않았습니다",
-    "off": "이 컴퓨터에서 어디서나 접속이 꺼져 있습니다. 컴퓨터의 Toskar에서 API 접근에서 켜세요.",
+    "off": "이 컴퓨터에서 어디서나 액세스가 꺼져 있습니다. 컴퓨터의 Toskar에서 설정 › 네트워크 액세스로 가서 켜세요.",
     "checkedNow": "방금 확인함",
     "checkNow": "지금 확인",
     "checking": "확인하는 중…",
     "tooSoon": "1분 이내에 확인했으므로 이것이 최신 결과입니다.",
-    "details": "각 연결 경로와 고칠 점은 컴퓨터의 Toskar에서 API 접근에 있습니다.",
+    "details": "들어오는 각 경로와 고칠 점은 컴퓨터의 Toskar에서 설정 › 네트워크 액세스에 있습니다.",
     "failed": "확인을 실행하지 못했습니다({{code}}).",
     "ended": "어디서나 접속이 끝나서 릴레이로 확인할 것이 없습니다. '외부에서 Toskar 사용'에서 다시 구독하세요.",
     "checkedMinutes_other": "{{count}}분 전에 확인함",
@@ -1139,7 +1139,13 @@
     "updateComputer": "여기서 알림을 받으려면 컴퓨터의 Toskar를 업데이트하세요.",
     "relayFailed": "알림을 켜지 못했습니다: {{detail}}",
     "openPage": "페이지 열기",
-    "openInToskar": "Toskar에서 열기"
+    "openInToskar": "Toskar에서 열기",
+    "notBuilt": "이 Toskar는 알림 없이 빌드되었습니다. 알림을 받으려면 App Store 또는 Google Play에서 Toskar를 설치하세요.",
+    "noComputer": "컴퓨터를 연결하면 여기에서 알림을 받을 수 있습니다.",
+    "computerUnavailable": "지금은 컴퓨터가 앱에 알림을 보낼 수 없습니다. 컴퓨터에서 Toskar를 다시 시작한 뒤 다시 시도하세요.",
+    "unreachable": "컴퓨터에서 알림을 확인하지 못했습니다: {{detail}}",
+    "retry": "다시 시도",
+    "checking": "확인 중…"
   },
   "permissions": {
     "photos": "물어볼 사진을 고르면 Toskar가 사진을 열어요. 사진은 이 기기에 남거나 내 컴퓨터로만 가요.",

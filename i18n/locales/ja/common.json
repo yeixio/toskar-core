@@ -4,10 +4,6 @@
     "label": "メイン",
     "open": "メニューを開く",
     "skip": "コンテンツへスキップ",
-    "use": "使う",
-    "customize": "カスタマイズ",
-    "administer": "管理",
-    "administerHint": "トレーニング、コンピュータ、人、ポータル、API アクセス、パフォーマンス、診断の表示を切り替える",
     "chat": "チャット",
     "automations": "自動化",
     "models": "モデル",
@@ -21,7 +17,6 @@
     "diagnostics": "診断",
     "profiles": "プロファイルとオーケストレーション",
     "tools": "ツール",
-    "apiAccess": "APIアクセス",
     "settings": "設定",
     "news": "ニュース"
   },

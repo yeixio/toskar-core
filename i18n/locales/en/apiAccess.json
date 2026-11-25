@@ -78,7 +78,7 @@
       "devicesStale_other": "{{formatted}} not used lately",
       "devicesAction": "Connect a device",
       "apps": "Apps and scripts",
-      "appsHow": "Use an API key, created below.",
+      "appsHow": "Use an API key, from Settings › API keys.",
       "appsCount_one": "{{formatted}} key",
       "appsCount_other": "{{formatted}} keys"
     }
@@ -326,5 +326,9 @@
       "TOKEN_INVALID": "{{relay}} didn't accept this computer's token. Subscribe again, or connect it again from the Toskar app."
     },
     "offHint": "When it's on, Toskar asks your router to open port {{port}}, which answers only devices paired with this computer. You can choose a forwarded port or a relay instead. It doesn't need Local network access to be on."
+  },
+  "parts": {
+    "network": "Who can reach this computer from other devices, and how.",
+    "developer": "Toskar's API on this computer, and the keys apps and scripts use."
   }
 }

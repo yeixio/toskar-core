@@ -4,7 +4,7 @@
     "copy": "링크 복사",
     "copied": "복사됨",
     "lanOff": "로컬 네트워크 접근을 켜기 전까지는 이 컴퓨터에서만 열 수 있어요.",
-    "lanOffAction": "API 접근에서 켜기"
+    "lanOffAction": "설정 › 네트워크 액세스에서 켜기"
   },
   "add": {
     "title": "포털 추가",

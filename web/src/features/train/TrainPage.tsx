@@ -1,3 +1,4 @@
+import { ModelsTabs } from '@/features/models/ModelsTabs'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -70,6 +71,9 @@ export function TrainPage() {
           <RealmKicker />
           <h1 className="page-title">{t('nav.train', { ns: 'common' })}</h1>
           <p className="page-subtitle mt-1">{t('page.description')}</p>
+          <div className="mt-4">
+            <ModelsTabs />
+          </div>
         </div>
         {/* With nothing open, the introduction below offers the same two buttons. */}
         {selectedID && !creating ? (

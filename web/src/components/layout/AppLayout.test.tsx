@@ -22,7 +22,7 @@ function renderAt(path: string) {
         <Routes>
           <Route element={<AppLayout />}>
             <Route path="/models" element={<h1>Models page</h1>} />
-            <Route path="/memory" element={<h1>Memory page</h1>} />
+            <Route path="/news" element={<h1>News page</h1>} />
           </Route>
         </Routes>
       </MemoryRouter>
@@ -55,8 +55,8 @@ describe('AppLayout', () => {
     expect(document.activeElement).toBe(menu)
 
     fireEvent.click(menu)
-    fireEvent.click(screen.getByRole('link', { name: /Memory/ }))
-    expect(await screen.findByText('Memory page')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('link', { name: /News/ }))
+    expect(await screen.findByText('News page')).toBeInTheDocument()
     expect(sidebar.dataset.open).toBe('false')
   })
 })
@@ -66,10 +66,10 @@ describe('AppLayout QA regressions', () => {
   it('a Skip to content link comes before the sidebar, and People names itself in the title', async () => {
     render(
       <QueryClientProvider client={new QueryClient()}>
-        <MemoryRouter initialEntries={['/people']}>
+        <MemoryRouter initialEntries={['/settings/people']}>
           <Routes>
             <Route element={<AppLayout />}>
-              <Route path="/people" element={<h1>People page</h1>} />
+              <Route path="/settings/people" element={<h1>People page</h1>} />
             </Route>
           </Routes>
         </MemoryRouter>

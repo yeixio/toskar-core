@@ -51,7 +51,7 @@ What lives there:
 | `web_ui_enabled` | `true` | Serve the web UI at `/` |
 | `api_host` | `127.0.0.1` | Address of the API and web UI. Any address other than loopback requires an API key (see [API](api.md#authentication)). |
 | `api_port` | `7331` | Port of the API and web UI |
-| `lan_api_enabled` | `false` | Set by **Local network access** on the API Access page. Turning it on sets `api_host` to `0.0.0.0` and needs an existing API key. |
+| `lan_api_enabled` | `false` | Set by **Local network access** in Settings › Network access. Turning it on sets `api_host` to `0.0.0.0` and needs an existing API key. |
 | `internal_host` | `127.0.0.1` | Address of Bifrost, the computer-to-computer server. Discovery sets it to `0.0.0.0`. |
 | `internal_port` | `7332` | Port of Bifrost |
 | `discovery_enabled` | `true` | Advertise and find other computers on the local network over mDNS |
@@ -109,7 +109,7 @@ Settings are stored in `toskar.db`. The app's Settings page shows them, and `GET
 | `ui_locale` | empty | **App language**, as a BCP 47 tag such as `es` or `pt-BR`. Empty follows each device's system language. The web UI, the desktop app, and the iPhone app read it, so they agree. `en-XA` is the pseudo-locale for testing translations. |
 | `assistant_language_mode` | `auto` | **Assistant language**: the language answers are written in. `auto` answers in the language you write in, or the conversation's for a short message; `app` answers in the App language; `language` answers in `assistant_language`. A language asked for in a message, such as "answer in English", always wins. Detection runs on this computer. |
 | `assistant_language` | empty | The language answers are written in with `assistant_language_mode` `language`, as a BCP 47 tag such as `de`. |
-| `advanced_mode` | `false` | Shows Profiles, Tools, and API Access, per-tool permissions, and run details |
+| `advanced_mode` | `false` | Shows model IDs, API details, per-tool permissions, and run details |
 | `model_lifecycle` | `automatic` | `automatic` unloads models that sit idle; `manual` leaves them loaded until you stop them |
 | `idle_unload_minutes` | `15` | Minutes before an idle model is unloaded; `0` never unloads. Settings calls it **Keep models ready** (15 minutes, 1 hour, 4 hours, or Until I stop them). A model the phone, tablet, watch, car, or TV app used or warmed up in the last hour stays loaded regardless, so the next question from that device starts at once (#498). |
 | `keep_running_in_background` | `false` | Keep the daemon running when the desktop window closes. Saving a schedule turns it on. |

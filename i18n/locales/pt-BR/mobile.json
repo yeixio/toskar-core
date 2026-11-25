@@ -33,7 +33,7 @@
     "couldNotReach": "Não foi possível acessar o Toskar.",
     "unreachable": "O Toskar Pro naquele computador não está acessível. Use a mesma rede Wi-Fi e escolha Conectar um dispositivo naquele computador.",
     "unreachableAway": "Não foi possível alcançar seu computador fora de casa. Ele pode estar desligado ou em repouso, ou o acesso de qualquer lugar pode estar desativado nele.",
-    "keyRejected": "Essa chave de API foi recusada. Conecte-se com um código do computador, ou crie uma chave em Acesso à API.",
+    "keyRejected": "Essa chave de API foi recusada. Conecte com um código do computador, ou crie uma chave em Configurações › Chaves de API.",
     "dropped": "A conexão com o Toskar caiu.",
     "chatFailed": "O chat falhou.",
     "requestFailed": "A solicitação falhou"
@@ -329,7 +329,7 @@
       "memoryOn": "Memória ativada",
       "memoryOff": "Memória desativada",
       "memoryOffHint": "A memória está desativada neste chat. As memórias salvas não são usadas aqui e não são apagadas.",
-      "memoryDisabledHint": "A memória está desativada em todos os chats. Ative-a na página Memória."
+      "memoryDisabledHint": "A memória está desativada em todos os chats. Ative-a em Configurações › Memória."
     },
     "loading": "Carregando chat",
     "placeholder": "Mensagem para o Toskar",
@@ -794,7 +794,7 @@
     "usageNoCap": "{{used}} pelo relay este mês",
     "overCap": "O limite do relay deste mês acabou. Em casa e em conexões diretas o Toskar continua funcionando; o relay volta no mês que vem.",
     "pending": "Aguardando a aprovação da compra.",
-    "notAdmin": "Assinatura feita. Peça a um administrador do computador para ativar o acesso de qualquer lugar em Acesso à API.",
+    "notAdmin": "Assinatura feita. Peça a um administrador do seu computador para ativar Acesso de qualquer lugar em Configurações › Acesso pela rede.",
     "inUse": "Esta assinatura já é usada para outro computador.",
     "moveHint": "Mova para cá, e o outro computador deixa de funcionar fora de casa.",
     "move": "Mover para este computador",
@@ -814,7 +814,7 @@
     "manage": "Gerenciar assinatura",
     "throughComputer": "Ativo pela assinatura deste computador",
     "throughComputerBody": "Todos os dispositivos pareados com este computador a usam. Ela é gerenciada onde foi comprada: no dispositivo que assinou ou nas configurações do Toskar no computador.",
-    "boughtInSettings": "Comprada nas configurações do Toskar no computador. Troque o cartão ou cancele lá, em Acesso à API.",
+    "boughtInSettings": "Comprado nas configurações do Toskar no computador. Troque o cartão ou cancele lá, em Configurações › Acesso pela rede.",
     "coveredTitle": "Coberto pela assinatura de outro dispositivo",
     "coveredBody": "Este computador já tem uma assinatura, comprada em outro dispositivo. Conecte-se ao seu computador em casa uma vez, e este dispositivo passa a usá-la.",
     "extraSubscription": "Este computador tem mais de uma assinatura, mas precisa de só uma. Você pode cancelar a sua em Gerenciar assinatura, e a outra continua cobrindo."
@@ -1079,12 +1079,12 @@
     "reachableViaRelay": "Acessível de fora da sua rede, pelo relay",
     "unreachable": "Não acessível de fora da sua rede",
     "unchecked": "Ainda não verificado de fora",
-    "off": "O acesso de qualquer lugar está desativado neste computador. Ative-o no Toskar no computador, em Acesso à API.",
+    "off": "Acesso de qualquer lugar está desativado neste computador. Ative-o no Toskar do computador, em Configurações › Acesso pela rede.",
     "checkedNow": "Verificado agora mesmo",
     "checkNow": "Verificar agora",
     "checking": "Verificando…",
     "tooSoon": "Verificado há menos de um minuto, então este é o resultado mais recente.",
-    "details": "Cada acesso, e o que corrigir, está em Acesso à API no Toskar no computador.",
+    "details": "Cada forma de entrar, e o que corrigir, está em Configurações › Acesso pela rede no Toskar do computador.",
     "failed": "Não foi possível fazer a verificação ({{code}}).",
     "ended": "O acesso de qualquer lugar terminou, então não há nada para verificar pelo relay. Assine de novo em “Use o Toskar fora de casa”.",
     "checkedMinutes_one": "Verificado há {{count}} minuto",
@@ -1174,7 +1174,13 @@
     "updateComputer": "Atualize o Toskar no computador para receber notificações aqui.",
     "relayFailed": "Não foi possível ativar as notificações: {{detail}}",
     "openPage": "Abrir página",
-    "openInToskar": "Abrir no Toskar"
+    "openInToskar": "Abrir no Toskar",
+    "notBuilt": "Esta cópia do Toskar foi gerada sem notificações. Instale o Toskar pela App Store ou pelo Google Play para recebê-las.",
+    "noComputer": "Conecte um computador para receber as notificações dele aqui.",
+    "computerUnavailable": "Seu computador não consegue enviar notificações para o app agora. Reinicie o Toskar no computador e tente de novo.",
+    "unreachable": "Não foi possível verificar as notificações com seu computador: {{detail}}",
+    "retry": "Tentar de novo",
+    "checking": "Verificando…"
   },
   "permissions": {
     "photos": "O Toskar abre suas fotos quando você escolhe uma para perguntar sobre ela. Ela fica neste dispositivo ou vai só para o seu próprio computador.",

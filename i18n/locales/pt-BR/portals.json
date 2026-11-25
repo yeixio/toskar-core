@@ -4,7 +4,7 @@
     "copy": "Copiar link",
     "copied": "Copiado",
     "lanOff": "Só este computador consegue abri-la até o acesso pela rede local ser ativado.",
-    "lanOffAction": "Ativar em Acesso à API"
+    "lanOffAction": "Ativar em Configurações › Acesso pela rede"
   },
   "add": {
     "title": "Adicionar um portal",

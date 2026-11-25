@@ -4,7 +4,7 @@
     "copy": "Copier le lien",
     "copied": "Copié",
     "lanOff": "Seul cet ordinateur peut l'ouvrir tant que l'accès au réseau local est désactivé.",
-    "lanOffAction": "L'activer dans Accès API"
+    "lanOffAction": "L'activer dans Paramètres › Accès réseau"
   },
   "add": {
     "title": "Ajouter un portail",

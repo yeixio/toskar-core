@@ -43,7 +43,7 @@ describe('AccelerationPill', () => {
     const pill = screen.getByRole('button', { name: 'CPU only' })
     expect(pill.className).toContain('text-danger')
     fireEvent.click(pill)
-    expect(screen.getByRole('link', { name: 'Open Diagnostics' })).toHaveAttribute('href', '/diagnostics')
+    expect(screen.getByRole('link', { name: 'Open Diagnostics' })).toHaveAttribute('href', '/settings/diagnostics')
   })
 
   // A computer without a GPU is expected to use the CPU: grey, never red.

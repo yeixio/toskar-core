@@ -72,7 +72,7 @@
       "connected_one": "{{count}} Computer verbunden",
       "connected_other": "{{count}} Computer verbunden",
       "none": "Keine Computer gefunden",
-      "noneHint": "Füge einen weiteren Computer hinzu oder prüfe „Andere Computer finden“ auf der Seite „Computer“."
+      "noneHint": "Füge einen weiteren Computer hinzu oder prüfe „Andere Computer finden“ unter Einstellungen › Computer."
     },
     "storage": {
       "label": "Speicherplatz",

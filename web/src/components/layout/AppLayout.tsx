@@ -7,24 +7,23 @@ import { YggdrasilMark } from '@/components/ui/YggdrasilMark'
 import { useDialog } from '@/lib/useDialog'
 import { ProBanner } from '@/components/layout/ProBanner'
 
-// Each page's name in the window title: common:nav.<key>.
+// Each page's name in the window title: common:nav.<key>, and for a page of
+// Settings, its category (settings:sections.<key>).
 const pageTitles: Record<string, string> = {
   '/chat': 'nav.chat',
   '/automations': 'nav.automations',
   '/models': 'nav.models',
-  '/train': 'nav.train',
+  '/models/train': 'nav.train',
   '/knowledge': 'nav.knowledge',
-  '/memory': 'nav.memory',
   '/news': 'nav.news',
-  '/nodes': 'nav.computers',
-  '/performance': 'nav.performance',
-  '/diagnostics': 'nav.diagnostics',
   '/profiles': 'nav.profiles',
-  '/tools': 'nav.tools',
-  '/people': 'nav.people',
-  '/portals': 'nav.portals',
-  '/api-access': 'nav.apiAccess',
   '/settings': 'nav.settings',
+}
+
+function pageTitle(pathname: string): string | undefined {
+  const settingsPage = /^\/settings\/([a-z-]+)$/.exec(pathname)
+  if (settingsPage) return `settings:sections.${settingsPage[1]}`
+  return pageTitles[pathname]
 }
 
 /**
@@ -35,7 +34,7 @@ const pageTitles: Record<string, string> = {
 export function AppLayout() {
   const { t } = useTranslation()
   const { pathname } = useLocation()
-  const titleKey = pageTitles[pathname]
+  const titleKey = pageTitle(pathname)
   const [menuOpen, setMenuOpen] = useState(false)
   // The open drawer is modal: focus starts on the current page's link and
   // stays in the drawer, Escape closes it, and focus returns to the button.

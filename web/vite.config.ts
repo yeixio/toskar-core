@@ -23,8 +23,13 @@ export default defineConfig({
   },
   server: {
     fs: {
-      // The translation catalog is shared with the iPhone app, outside web/.
-      allow: [searchForWorkspaceRoot(process.cwd()), path.resolve(__dirname, '../i18n')],
+      // The translation catalog is shared with the iPhone app, outside web/;
+      // the settings inventory's test reads its doc (#1374).
+      allow: [
+        searchForWorkspaceRoot(process.cwd()),
+        path.resolve(__dirname, '../i18n'),
+        path.resolve(__dirname, '../docs'),
+      ],
     },
     proxy: {
       '/api': {
