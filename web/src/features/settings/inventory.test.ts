@@ -1,13 +1,10 @@
-import { readFileSync } from 'node:fs'
-import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
+import inventory from '../../../../docs/settings-inventory.md?raw'
+import types from '../../types/api.ts?raw'
 
 // Every setting has a row in docs/settings-inventory.md (#1374, section 10 of
 // docs/navigation-and-settings.md), so a new setting gets a deliberate place.
-const root = resolve(__dirname, '../../../..')
-
 function settingsPatchKeys(): string[] {
-  const types = readFileSync(resolve(root, 'web/src/types/api.ts'), 'utf8')
   const start = types.indexOf('export interface SettingsPatch {')
   const end = types.indexOf('\n}', start)
   const body = types.slice(start, end)
@@ -16,7 +13,6 @@ function settingsPatchKeys(): string[] {
 
 describe('settings inventory', () => {
   it('lists every field of SettingsPatch', () => {
-    const inventory = readFileSync(resolve(root, 'docs/settings-inventory.md'), 'utf8')
     const keys = settingsPatchKeys()
     expect(keys.length).toBeGreaterThan(30)
     const missing = keys.filter((key) => !inventory.includes(`\`${key}\``))
