@@ -4,7 +4,7 @@
     "copy": "Copy link",
     "copied": "Copied",
     "lanOff": "Only this computer can open it until local network access is on.",
-    "lanOffAction": "Turn it on in API Access"
+    "lanOffAction": "Turn it on in Settings › Network access"
   },
   "add": {
     "title": "Add a portal",

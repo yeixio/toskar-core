@@ -16,7 +16,7 @@ describe('WhoConnects (#711)', () => {
     expect(screen.getByText(/2 can sign in/)).toBeInTheDocument()
     expect(screen.getByText('Connect with a 6-digit code.')).toBeInTheDocument()
     expect(screen.getByText(/1 connected/)).toBeInTheDocument()
-    expect(screen.getByText('Use an API key, created below.')).toBeInTheDocument()
+    expect(screen.getByText('Use an API key, from Settings › API keys.')).toBeInTheDocument()
     expect(screen.getByText('0 keys')).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'Connect a device' }))
     expect(connect).toHaveBeenCalled()

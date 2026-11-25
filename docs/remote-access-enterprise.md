@@ -37,7 +37,7 @@ relay's own guide, which comes with your license.
 
 On each Toskar server:
 
-1. Open **API Access** and turn on **Access from anywhere**.
+1. Open **Settings › Network access** and turn on **Access from anywhere**.
 2. Under **Your organization's relay**, enter the relay's name (such as
    `relay.example.com`) and the enrollment secret from the relay, then
    **Connect**.

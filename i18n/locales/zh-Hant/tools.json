@@ -115,7 +115,7 @@
     "elsewhereWorks": "在 {{node}} 上運作良好。",
     "elsewhereInstalled": "已在 {{node}} 上設定，它會為這台電腦產生。",
     "elsewhereSetUp": "在那裡設定",
-    "elsewhereStarted": "正在 {{node}} 上設定。可在「電腦」頁面查看進度。",
+    "elsewhereStarted": "正在 {{node}} 上設定。可在「設定 › 電腦」中查看進度。",
     "graphicsShort": "需要約 {{need}} 顯示記憶體；這台電腦的顯示卡有 {{have}}，因此部分在系統記憶體中執行，速度較慢。",
     "sharedShort": "需要約 {{need}} 顯示記憶體；這台電腦的圖形處理器可使用其記憶體中的 {{have}}，因此可能較慢或失敗。",
     "tightConfirm": "仍然設定：我了解在這裡可能會很慢。",

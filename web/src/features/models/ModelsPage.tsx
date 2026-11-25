@@ -1,3 +1,4 @@
+import { ModelsTabs } from './ModelsTabs'
 import { useTranslation } from 'react-i18next'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useMemo, useState } from 'react'
@@ -313,6 +314,9 @@ export function ModelsPage() {
         <RealmKicker />
         <h1 className="page-title">{t('page.title')}</h1>
         <p className="page-subtitle">{t('page.subtitle')}</p>
+        <div className="mt-4">
+          <ModelsTabs />
+        </div>
       </header>
 
       <ModelsTargetBar

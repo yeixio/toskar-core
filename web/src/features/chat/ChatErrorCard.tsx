@@ -47,7 +47,7 @@ export function ChatErrorCard({
             </Link>
           ) : null}
           {e.actions.includes('computers') ? (
-            <Link to="/nodes" className="btn-secondary px-3 py-1 text-xs">
+            <Link to="/settings/computers" className="btn-secondary px-3 py-1 text-xs">
               {t('errors.openComputers')}
             </Link>
           ) : null}

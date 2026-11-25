@@ -81,7 +81,7 @@
       "devicesStale_other": "{{formatted}} non usati di recente",
       "devicesAction": "Collega un dispositivo",
       "apps": "App e script",
-      "appsHow": "Usano una chiave API, creata qui sotto.",
+      "appsHow": "Usano una chiave API, da Impostazioni › Chiavi API.",
       "appsCount_one": "{{formatted}} chiave",
       "appsCount_many": "{{formatted}} chiavi",
       "appsCount_other": "{{formatted}} chiavi"
@@ -330,5 +330,9 @@
       "TOKEN_INVALID": "{{relay}} non ha accettato il token di questo computer. Abbonati di nuovo, o ricollegalo dall'app Toskar."
     },
     "offHint": "Quando è attivo, Toskar chiede al router di aprire la porta {{port}}, che risponde solo ai dispositivi associati a questo computer. In alternativa puoi scegliere una porta inoltrata o un relay. Non serve che l'accesso dalla rete locale sia attivo."
+  },
+  "parts": {
+    "network": "Chi può raggiungere questo computer da altri dispositivi, e come.",
+    "developer": "L'API di Toskar su questo computer e le chiavi usate da app e script."
   }
 }

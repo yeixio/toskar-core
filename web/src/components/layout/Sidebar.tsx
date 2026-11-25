@@ -7,27 +7,23 @@ import { api } from '@/lib/api'
 import { useRole } from '@/lib/role'
 import { realms } from '@/lib/realms'
 import { displayVersion } from '@/lib/appVersion'
-import { useUIStore } from '@/stores/uiStore'
 import { YggdrasilMark } from '@/components/ui/YggdrasilMark'
 import { NotificationBell } from './NotificationBell'
 
-// The sidebar's groups (#203): what everyone uses, what everyone can set up,
-// and what whoever runs the computers looks after. Every page is listed;
-// advanced mode only shows expert controls inside a page. Labels are keys in
-// the common namespace (i18n/locales/<language>/common.json).
-const useNav = [
+// Primary navigation (#1374, docs/settings-inventory.md section 6.1): the
+// six places people work in, as ChatGPT and Claude have them. What sets up
+// or runs the computer is in Settings, at the foot. Visitors see Chat,
+// Members their automations and the news, Admins and the Owner everything
+// (#203). Labels are keys in the common namespace.
+const primaryNav = [
   { to: '/chat', label: 'nav.chat' },
   { to: '/automations', label: 'nav.automations', member: true },
   { to: '/knowledge', label: 'nav.knowledge', admin: true },
-  { to: '/memory', label: 'nav.memory', member: true },
+  { to: '/profiles', label: 'nav.profiles', admin: true },
+  { to: '/models', label: 'nav.models', admin: true },
   { to: '/news', label: 'nav.news', member: true },
 ] as const
 
-const customizeNav = [
-  { to: '/models', label: 'nav.models' },
-  { to: '/tools', label: 'nav.tools' },
-  { to: '/profiles', label: 'nav.profiles' },
-] as const
 
 /** The Run chats on choice, as the sidebar says it. */
 function placementLabel(choice?: string): string {
@@ -45,15 +41,6 @@ function knowledgeStatus(sources: { status: string }[]): { key: string; count: n
   return { key: 'subsystems.knowledgeReady', count: sources.length }
 }
 
-const administerNav = [
-  { to: '/train', label: 'nav.train' },
-  { to: '/nodes', label: 'nav.computers' },
-  { to: '/people', label: 'nav.people' },
-  { to: '/portals', label: 'nav.portals' },
-  { to: '/api-access', label: 'nav.apiAccess' },
-  { to: '/performance', label: 'nav.performance' },
-  { to: '/diagnostics', label: 'nav.diagnostics' },
-] as const
 
 /** A nav entry: the rune, then the label in the UI language. */
 function NavItem({ to, label }: { to: string; label: string }) {
@@ -75,35 +62,14 @@ function NavItem({ to, label }: { to: string; label: string }) {
   )
 }
 
-/** A group of links under a heading. */
-function NavGroup({ heading, items }: { heading: string; items: readonly { to: string; label: string }[] }) {
-  const { t } = useTranslation()
-  return (
-    <div>
-      <p className="label-caps mb-1 px-2.5">{heading}</p>
-      <div className="flex flex-col gap-0.5">
-        {items.map(({ to, label }) => (
-          <NavItem key={to} to={to} label={t(label)} />
-        ))}
-      </div>
-    </div>
-  )
-}
-
 /** open shows the sidebar as a drawer below the md breakpoint; wider, it is always shown. */
 export function Sidebar({ open = false, ref }: { open?: boolean; ref?: Ref<HTMLDivElement> }) {
   const { t } = useTranslation()
-  const { pathname } = useLocation()
   // Visitors see Chat, Members their automations and memories, and Admins
   // and the Owner everything (#203); until the role is known, the Owner's view.
   const { role, atLeast } = useRole()
   const member = role === undefined || atLeast('member')
   const admin = role === undefined || atLeast('admin')
-  const administerChosen = useUIStore((s) => s.administerOpen)
-  const setAdministerOpen = useUIStore((s) => s.setAdministerOpen)
-  // A page in Administer that is open shows its group, so the current page is always in view.
-  const onAdministerPage = administerNav.some(({ to }) => pathname === to || pathname.startsWith(`${to}/`))
-  const administerOpen = administerChosen || onAdministerPage
   const healthQuery = useQuery({
     queryKey: ['health'],
     queryFn: async () => {
@@ -227,45 +193,13 @@ export function Sidebar({ open = false, ref }: { open?: boolean; ref?: Ref<HTMLD
 
       <nav className="flex min-h-0 flex-1 flex-col px-2.5 pb-3" aria-label={t('nav.label')}>
         <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto">
-          <NavGroup heading={t('nav.use')} items={useNav.filter((item) => ('admin' in item ? admin : 'member' in item ? member : true))} />
-          {admin ? (
-            <>
-              <NavGroup heading={t('nav.customize')} items={customizeNav} />
-
-              <div>
-                <button
-                  type="button"
-                  className="label-caps mb-1 flex w-full items-center justify-between rounded-md px-2.5 py-1 hover:text-ink"
-                  aria-expanded={administerOpen}
-                  aria-controls="nav-administer"
-                  disabled={onAdministerPage}
-                  title={onAdministerPage ? undefined : t('nav.administerHint')}
-                  onClick={() => setAdministerOpen(!administerChosen)}
-                >
-                  <span>{t('nav.administer')}</span>
-                  <svg
-                    viewBox="0 0 16 16"
-                    className={['h-3 w-3 transition-transform', administerOpen ? 'rotate-90' : 'rtl:rotate-180'].join(' ')}
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth={1.75}
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    aria-hidden
-                  >
-                    <path d="m6 3.5 4.5 4.5L6 12.5" />
-                  </svg>
-                </button>
-                {administerOpen ? (
-                  <div id="nav-administer" className="flex flex-col gap-0.5">
-                    {administerNav.map(({ to, label }) => (
-                      <NavItem key={to} to={to} label={t(label)} />
-                    ))}
-                  </div>
-                ) : null}
-              </div>
-            </>
-          ) : null}
+          <div className="flex flex-col gap-0.5">
+            {primaryNav
+              .filter((item) => ('admin' in item ? admin : 'member' in item ? member : true))
+              .map(({ to, label }) => (
+                <NavItem key={to} to={to} label={t(label)} />
+              ))}
+          </div>
         </div>
 
         {/* Settings stays in view below the groups, however far they scroll. */}

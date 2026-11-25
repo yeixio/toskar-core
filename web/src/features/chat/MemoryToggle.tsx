@@ -16,7 +16,7 @@ export function MemoryToggle({
   const { t } = useTranslation('chat')
   if (!memoryEnabled) {
     return (
-      <Link to="/memory" className="composer-select text-xs text-ink-faint" title={t('memory.disabledHint')}>
+      <Link to="/settings/memory" className="composer-select text-xs text-ink-faint" title={t('memory.disabledHint')}>
         {t('memory.off')}
       </Link>
     )

@@ -98,7 +98,7 @@
     "off": "Memory off",
     "onHint": "This chat uses what you asked Toskar to remember. Click to keep memory out of this chat.",
     "offHint": "Memory is off for this chat. Saved memories are not used here and are not deleted.",
-    "disabledHint": "Memory is off for all chats. Turn it on from the Memory page."
+    "disabledHint": "Memory is off for all chats. Turn it on in Settings › Memory."
   },
   "folder": {
     "on": "Folder: {{name}}",
@@ -427,7 +427,7 @@
     "trainingMemory": {
       "busy": "Training is using this computer, so there was not enough memory for this model.",
       "busyNamed": "Training “{{name}}” is using this computer, so there was not enough memory for this model.",
-      "advice": "Try again when training finishes, choose a smaller model, or cancel training on the Train page."
+      "advice": "Try again when training finishes, choose a smaller model, or cancel training in Models › Train."
     },
     "keptRunningMemory": "{{name}} is kept running and holds about {{gb}} GB, so there was not enough memory for this model. Choose a smaller model, or turn off Always running for {{name}} on the Models page."
   },
@@ -625,7 +625,7 @@
   "notices": {
     "languageWeak": "{{model}} may write {{language}} less well than English, and no installed model that fits writes it better. Models rated good in {{language}} are on the Models page.",
     "mediaLength": "Clips can be up to {{max}} s long for now, so this one is {{made}} s instead of the {{asked}} s asked for.",
-    "mediaQuality": "{{model}} gives the quality asked for, but it isn't set up here, so this was made with {{used}}. You can set it up on the Tools page.",
+    "mediaQuality": "{{model}} gives the quality asked for, but it isn't set up here, so this was made with {{used}}. You can set it up in Settings › Tools.",
     "mediaSizePicture": "{{model}} makes pictures up to {{made}}, so this one is smaller than the {{asked}} asked for.",
     "mediaSizeClip": "{{model}} makes clips up to {{made}}, so this one is smaller than the {{asked}} asked for.",
     "noVision": "No installed model can see pictures, so the answer doesn't look at them. Install Gemma 3 4B or another vision model on the Models page.",

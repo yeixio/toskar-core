@@ -137,7 +137,7 @@ export function ModelsTargetBar({
           {target === 'all' ? t('target.allHint') : t('target.basedOn', { name })}
         </p>
       </div>
-      <Link to="/nodes" className="btn-secondary btn-sm shrink-0">
+      <Link to="/settings/computers" className="btn-secondary btn-sm shrink-0">
         {hasCluster ? t('target.manage') : t('target.useAnother')}
       </Link>
     </div>

@@ -19,7 +19,7 @@ export function WhoConnects({ access, onConnectDevice }: { access?: NetworkAcces
         <dd className="mt-1 text-xs text-ink-faint">
           {access ? t('lan.who.peopleCount', count(access.people)) : null}
           {access?.sign_in_service ? ` · ${t('lan.who.signInService')}` : null}{' '}
-          <Link to="/people" className="text-primary hover:underline">
+          <Link to="/settings/people" className="text-primary hover:underline">
             {t('lan.who.peopleAction')}
           </Link>
         </dd>

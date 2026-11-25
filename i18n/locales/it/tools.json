@@ -115,7 +115,7 @@
     "elsewhereWorks": "Funziona bene su {{node}}.",
     "elsewhereInstalled": "Configurato su {{node}}, che li crea per questo computer.",
     "elsewhereSetUp": "Configuralo lì",
-    "elsewhereStarted": "Configurazione su {{node}}. Seguila nella pagina Computer.",
+    "elsewhereStarted": "Configurazione su {{node}}. Seguila in Impostazioni › Computer.",
     "graphicsShort": "Richiede circa {{need}} di memoria grafica; la scheda grafica di questo computer ne ha {{have}}, quindi parti girano nella memoria di sistema, più lentamente.",
     "sharedShort": "Richiede circa {{need}} di memoria grafica; la grafica di questo computer può usare {{have}} della sua memoria, quindi potrebbe essere lento o non riuscire.",
     "tightConfirm": "Configuralo comunque: capisco che qui potrebbe essere lento.",

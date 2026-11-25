@@ -75,7 +75,7 @@
       "devicesStale_other": "{{formatted}} 个最近未使用",
       "devicesAction": "连接设备",
       "apps": "应用和脚本",
-      "appsHow": "使用下方创建的 API 密钥。",
+      "appsHow": "使用“设置 › API 密钥”中的 API 密钥。",
       "appsCount_other": "{{formatted}} 个密钥"
     }
   },
@@ -322,5 +322,9 @@
       "TOKEN_INVALID": "{{relay}} 不接受这台电脑的令牌。请重新订阅，或在 Toskar App 中重新连接。"
     },
     "offHint": "打开后，Toskar 会请路由器打开端口 {{port}}，该端口只响应与这台电脑配对的设备。你也可以改用转发的端口或中继。无需打开本地网络访问。"
+  },
+  "parts": {
+    "network": "谁可以从其他设备访问这台电脑，以及如何访问。",
+    "developer": "这台电脑上的 Toskar API，以及应用和脚本使用的密钥。"
   }
 }

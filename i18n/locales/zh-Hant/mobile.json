@@ -33,7 +33,7 @@
     "couldNotReach": "無法連線到 Toskar。",
     "unreachable": "無法連線到那台電腦上的 Toskar Pro。請使用相同的 Wi-Fi 網路，並在那台電腦上選擇「連接裝置」。",
     "unreachableAway": "在外無法連線你的電腦。它可能已關機或睡眠，或者隨處存取已關閉。",
-    "keyRejected": "這把 API 金鑰被拒絕。請改用那台電腦上的代碼連接，或在「API 存取」中建立金鑰。",
+    "keyRejected": "該 API 金鑰遭拒。請改用電腦上的代碼連線，或在「設定 › API 金鑰」中建立金鑰。",
     "dropped": "與 Toskar 的連線已中斷。",
     "chatFailed": "聊天失敗。",
     "requestFailed": "請求失敗"
@@ -325,7 +325,7 @@
       "memoryOn": "記憶已開啟",
       "memoryOff": "記憶已關閉",
       "memoryOffHint": "這個聊天的記憶已關閉。已儲存的記憶不會在這裡使用，也不會被刪除。",
-      "memoryDisabledHint": "所有聊天的記憶都已關閉。請在「記憶」頁面中開啟。"
+      "memoryDisabledHint": "所有聊天的記憶都已關閉。請在「設定 › 記憶」中開啟。"
     },
     "loading": "正在載入聊天",
     "placeholder": "傳訊息給 Toskar",
@@ -776,7 +776,7 @@
     "usageNoCap": "本月透過中繼：{{used}}",
     "overCap": "本月的中繼額度已用完。在家或直接連線時 Toskar 仍可使用；中繼下個月恢復。",
     "pending": "正在等待購買獲准。",
-    "notAdmin": "已訂閱。請電腦上的管理員在 API 存取中開啟隨處存取。",
+    "notAdmin": "已訂閱。請你電腦上的管理員在「設定 › 網路存取」中開啟「隨處存取」。",
     "inUse": "此訂閱已用於另一台電腦。",
     "moveHint": "移到這裡後，另一台電腦在外出時將無法使用。",
     "move": "移到這台電腦",
@@ -796,7 +796,7 @@
     "manage": "管理訂閱",
     "throughComputer": "透過這台電腦的訂閱啟用",
     "throughComputerBody": "與這台電腦配對的每台裝置都在使用它。在購買的地方管理：訂閱的那台裝置，或電腦上 Toskar 的設定。",
-    "boughtInSettings": "在電腦上 Toskar 的設定中購買。可在那裡的「API 存取」中更換信用卡或取消。",
+    "boughtInSettings": "在電腦上的 Toskar 設定中購買。可在那裡的「設定 › 網路存取」中更換信用卡或取消。",
     "coveredTitle": "由另一台裝置的訂閱涵蓋",
     "coveredBody": "這台電腦已有一個在另一台裝置上購買的訂閱。在家連接一次你的電腦，這台裝置就會取得它。",
     "extraSubscription": "這台電腦有多個訂閱，但只需要一個。你可以在「管理訂閱」中取消你的訂閱，另一個會繼續涵蓋它。"
@@ -1051,12 +1051,12 @@
     "reachableViaRelay": "可透過中繼從你的網路外部存取",
     "unreachable": "無法從你的網路外部存取",
     "unchecked": "尚未從外部檢查",
-    "off": "這台電腦的隨處存取已關閉。請在電腦上的 Toskar 中，於「API 存取」裡開啟。",
+    "off": "這台電腦的「隨處存取」已關閉。請在電腦上的 Toskar 中，於「設定 › 網路存取」開啟。",
     "checkedNow": "剛剛檢查過",
     "checkNow": "立即檢查",
     "checking": "正在檢查…",
     "tooSoon": "不到一分鐘前剛檢查過，這就是最新結果。",
-    "details": "每條存取路徑以及需要修正的地方，都在電腦上 Toskar 的「API 存取」中。",
+    "details": "每種連線方式以及需要修正的內容，都在電腦上 Toskar 的「設定 › 網路存取」中。",
     "failed": "無法執行檢查（{{code}}）。",
     "ended": "隨處存取已結束，因此無法透過中繼檢查。請在「在外使用 Toskar」中重新訂閱。",
     "checkedMinutes_other": "{{count}} 分鐘前檢查過",
@@ -1139,7 +1139,13 @@
     "updateComputer": "請更新電腦上的 Toskar，才能在這裡接收通知。",
     "relayFailed": "無法開啟通知：{{detail}}",
     "openPage": "打開頁面",
-    "openInToskar": "在 Toskar 中打開"
+    "openInToskar": "在 Toskar 中打開",
+    "notBuilt": "此 Toskar 副本在建置時未包含通知。請從 App Store 或 Google Play 安裝 Toskar 以接收通知。",
+    "noComputer": "連接一台電腦，即可在這裡接收它的通知。",
+    "computerUnavailable": "你的電腦現在無法向 App 傳送通知。請在電腦上重新啟動 Toskar，然後再試一次。",
+    "unreachable": "無法與你的電腦核對通知：{{detail}}",
+    "retry": "再試一次",
+    "checking": "正在檢查…"
   },
   "permissions": {
     "photos": "當你選擇一張照片來提問時，Toskar 會開啟你的照片。照片會留在此裝置上，或只傳送到你自己的電腦。",
