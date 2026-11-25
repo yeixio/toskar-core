@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/yeixio/toskar-core/internal/api"
@@ -120,4 +121,17 @@ func (a *App) keepRunRecordsTidy(ctx context.Context) {
 			}
 		}
 	}()
+}
+
+// keepAutomationFiles keeps the files an automation's runs made as long as
+// the runs themselves, rather than the week other unfiled files get (#1209).
+func (a *App) keepAutomationFiles(ctx context.Context, source string) (time.Duration, bool) {
+	if !strings.HasPrefix(source, "automation:") {
+		return 0, false
+	}
+	days := a.runRetentionDays(ctx)
+	if days <= 0 {
+		return 0, true
+	}
+	return time.Duration(days) * 24 * time.Hour, true
 }

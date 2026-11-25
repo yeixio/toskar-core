@@ -76,6 +76,11 @@ type Store struct {
 	db  *sql.DB
 	dir string
 	now func() time.Time
+	// KeepFor, when set, says how long an unfiled file from source is kept
+	// instead of UnfiledTTL, and ok false leaves UnfiledTTL. A zero
+	// duration keeps it. An automation's files are kept as long as its
+	// runs (#1209).
+	KeepFor func(ctx context.Context, source string) (keep time.Duration, ok bool)
 }
 
 // NewStore keeps files under dir.
@@ -192,8 +197,16 @@ func (s *Store) Save(ctx context.Context, in Input) (Artifact, error) {
 		Details:   in.Details,
 	}
 	if in.ConversationID == "" {
-		exp := a.CreatedAt.Add(UnfiledTTL)
-		a.ExpiresAt = &exp
+		ttl := UnfiledTTL
+		if s.KeepFor != nil && in.SourceTask != "" {
+			if keep, ok := s.KeepFor(ctx, in.SourceTask); ok {
+				ttl = keep
+			}
+		}
+		if ttl > 0 {
+			exp := a.CreatedAt.Add(ttl)
+			a.ExpiresAt = &exp
+		}
 	}
 	folder := in.ConversationID
 	if folder == "" {

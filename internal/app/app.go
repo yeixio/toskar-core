@@ -1018,6 +1018,7 @@ func New(opts Options) (*App, error) {
 	a.Mimir.SetSecrets(secrets)
 	// The file store comes first: the tools below read and attach chat files.
 	a.Artifacts = artifacts.NewStore(db.SQL, filepath.Join(cfg.DataDir, "artifacts"))
+	a.Artifacts.KeepFor = a.keepAutomationFiles
 	// Pictures in a chat completion are kept as files while its turn runs (#830).
 	openaiHandler.Pictures = a.Artifacts
 	a.python = pyenv.New(filepath.Join(cfg.RuntimesDir, "python"))
