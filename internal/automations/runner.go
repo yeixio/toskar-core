@@ -29,6 +29,9 @@ const (
 // ErrRunning means the automation already has a run in progress.
 var ErrRunning = contracts.NewError("AUTOMATION_RUNNING", nil, errors.New("this automation is already running"))
 
+// ErrRunInProgress refuses to delete a run that may still be working (#1335).
+var ErrRunInProgress = contracts.NewError("AUTOMATION_RUN_IN_PROGRESS", nil, errors.New("this run hasn't finished, so it can't be deleted yet"))
+
 // timedOut is a run stopped by its time limit. It isn't retried: a run that
 // took the whole limit would most likely take it again.
 func timedOut(limit time.Duration) error {

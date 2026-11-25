@@ -85,6 +85,42 @@ func (s *Server) handleListAutomationRuns(w http.ResponseWriter, r *http.Request
 	writeJSON(w, http.StatusOK, page)
 }
 
+// ClearedRuns is what clearing an automation's history removed (#1335).
+type ClearedRuns struct {
+	Runs  int64 `json:"runs"`
+	Files int   `json:"files"`
+}
+
+// handleClearAutomationRuns removes an automation's finished runs, and with
+// files=true the camera pictures its runs took (#1335).
+func (s *Server) handleClearAutomationRuns(w http.ResponseWriter, r *http.Request) {
+	if s.deps.ClearAutomationRuns == nil {
+		writeErr(w, http.StatusNotImplemented, "NOT_IMPLEMENTED", "Automations are not available.", nil)
+		return
+	}
+	files := r.URL.Query().Get("files") == "true"
+	cleared, err := s.deps.ClearAutomationRuns(r.Context(), mux.Vars(r)["id"], files)
+	if err != nil {
+		writeAutomationErr(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, cleared)
+}
+
+// handleDeleteAutomationRun removes one finished run (#1335).
+func (s *Server) handleDeleteAutomationRun(w http.ResponseWriter, r *http.Request) {
+	if s.deps.DeleteAutomationRun == nil {
+		writeErr(w, http.StatusNotImplemented, "NOT_IMPLEMENTED", "Automations are not available.", nil)
+		return
+	}
+	vars := mux.Vars(r)
+	if err := s.deps.DeleteAutomationRun(r.Context(), vars["id"], vars["run_id"]); err != nil {
+		writeAutomationErr(w, err)
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
+}
+
 // handleContinueAutomationRun opens a run's result in a chat to reply to:
 // the chat it was posted to, or a new one (#204).
 func (s *Server) handleContinueAutomationRun(w http.ResponseWriter, r *http.Request) {
@@ -279,6 +315,8 @@ func writeAutomationErr(w http.ResponseWriter, err error) {
 	switch {
 	case errors.Is(err, automations.ErrRunning):
 		writeErrFrom(w, http.StatusConflict, "AUTOMATION_RUNNING", err)
+	case errors.Is(err, automations.ErrRunInProgress):
+		writeErrFrom(w, http.StatusConflict, "AUTOMATION_RUN_IN_PROGRESS", err)
 	case strings.Contains(msg, "not found"):
 		writeErr(w, http.StatusNotFound, "NOT_FOUND", msg, nil)
 	case strings.Contains(msg, "already has a run"):

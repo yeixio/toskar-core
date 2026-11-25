@@ -1263,6 +1263,14 @@ export const api = {
   listAutomationRuns: (id: string, before: string) =>
     request<AutomationRunsPage>(`/api/v1/automations/${id}/runs?before=${encodeURIComponent(before)}`),
 
+  /** Removes an automation's finished runs, and with files, the pictures they took (#1335). */
+  clearAutomationRuns: (id: string, files: boolean) =>
+    request<{ runs: number; files: number }>(`/api/v1/automations/${id}/runs${files ? '?files=true' : ''}`, { method: 'DELETE' }),
+
+  /** Removes one finished run (#1335). */
+  deleteAutomationRun: (id: string, runId: string) =>
+    request<void>(`/api/v1/automations/${id}/runs/${runId}`, { method: 'DELETE' }),
+
   /** Makes a webhook trigger's new link; its token is shown only now (#204). */
   makeAutomationHook: (id: string) => request<{ token: string; path: string }>(`/api/v1/automations/${id}/hook`, { method: 'POST' }),
 

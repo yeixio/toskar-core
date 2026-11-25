@@ -150,7 +150,13 @@
     "door": "门口",
     "looksAt": "查看 {{cameras}}",
     "says": "在门口说出回答",
-    "talks": "与访客交谈并了解来意"
+    "talks": "与访客交谈并了解来意",
+    "clearHistory": "清除历史",
+    "clearConfirm": "要从此自动化的历史中删除所有已结束的运行吗？正在进行的会保留，自动化也会继续按计划运行。",
+    "clearPictures": "同时删除其摄像头拍的照片",
+    "clearAction": "清除历史",
+    "clearing": "正在清除…",
+    "cancel": "取消"
   },
   "run": {
     "details": "详情",
@@ -169,7 +175,9 @@
     },
     "continueInChat": "在聊天中继续",
     "openingChat": "正在打开聊天…",
-    "savedTo": "已保存到 {{path}}"
+    "savedTo": "已保存到 {{path}}",
+    "remove": "删除这次运行",
+    "removing": "正在删除…"
   },
   "pill": {
     "paused": "已暂停",

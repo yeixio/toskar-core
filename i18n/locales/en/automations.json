@@ -150,7 +150,13 @@
     "door": "At the door",
     "looksAt": "Looks at {{cameras}}",
     "says": "Says its answer at the door",
-    "talks": "Talks with the visitor and finds out why they came"
+    "talks": "Talks with the visitor and finds out why they came",
+    "clearHistory": "Clear history",
+    "clearConfirm": "Remove every finished run from this automation's history? Runs still going stay, and the automation keeps running on its schedule.",
+    "clearPictures": "Also delete the pictures its cameras took",
+    "clearAction": "Clear history",
+    "clearing": "Clearing…",
+    "cancel": "Cancel"
   },
   "run": {
     "details": "Details",
@@ -169,7 +175,9 @@
     },
     "continueInChat": "Continue in chat",
     "openingChat": "Opening the chat…",
-    "savedTo": "Saved to {{path}}"
+    "savedTo": "Saved to {{path}}",
+    "remove": "Remove this run",
+    "removing": "Removing…"
   },
   "pill": {
     "paused": "Paused",
