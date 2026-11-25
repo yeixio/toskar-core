@@ -2036,6 +2036,9 @@ func (e *chatExecEnv) TurnInstructions(ctx context.Context, prompt string) strin
 	// An answer spoken aloud, in live voice mode (#795).
 	if turnopts.SpokenFrom(tctx) {
 		parts = append(parts, spokenStyle)
+	} else if style := glanceStyle(runlog.OriginFrom(tctx).Client); style != "" {
+		// An answer on a watch, or read aloud in a car, is the whole answer.
+		parts = append(parts, style)
 	}
 	// The app calling the API holds a key to this computer, so its system
 	// messages are trusted too. They cannot change what tools may do.

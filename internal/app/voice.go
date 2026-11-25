@@ -218,6 +218,28 @@ func (c *voiceChat) AnswerLanguage(ctx context.Context, text string) string {
 	return ""
 }
 
+// carStyle is how an answer asked in CarPlay is written: the phone reads
+// all of it aloud to someone driving, so it must stand on its own. Without
+// it, the answer came in Markdown with headings and lists, and the car said
+// the rest was in Toskar on the phone.
+const carStyle = `This answer is read aloud in a car, to someone driving. Give the whole answer in a few spoken sentences, and stop: when there is a lot to say, sum up what matters most rather than leave part out. Never say the rest is on their phone, in the app, or on a screen; they can ask a follow-up. No Markdown, lists, tables, headings, code blocks, emoji, or links; say a web address only if they ask for it. Spell out what a voice would stumble on, such as symbols and abbreviations.`
+
+// watchStyle is how an answer asked on a watch is written: a few lines on
+// a small screen, complete in themselves.
+const watchStyle = `This answer is read on a watch's small screen. Give the whole answer in a short paragraph of plain text, a few sentences: when there is a lot to say, sum up what matters most rather than leave part out. Never say the rest is on their phone or in the app; they can ask a follow-up. No headings, tables, or code blocks.`
+
+// glanceStyle is the style for an answer on a watch or in a car, from the
+// app that asked, or "".
+func glanceStyle(client string) string {
+	switch client {
+	case "car":
+		return carStyle
+	case "watch":
+		return watchStyle
+	}
+	return ""
+}
+
 // spokenStyle is how an answer in live voice mode is written: it's heard,
 // not read.
 const spokenStyle = `This conversation is spoken aloud: the person talks, and your answer is read out by a voice. Answer the way a person would in conversation: a sentence or two, then stop, and let them ask for more. No Markdown, lists, tables, headings, code blocks, emoji, or links; say a web address only if they ask for it. Spell out what a voice would stumble on, such as symbols and abbreviations. Only when you looked something up, on the web or in their files, say where it's from in a few words; never say where something you already know comes from.`
