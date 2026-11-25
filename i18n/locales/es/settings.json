@@ -81,7 +81,8 @@
   },
   "background": {
     "title": "Seguir ejecutándose en segundo plano",
-    "description": "Al cerrar la ventana, el chat, la API y tus programaciones siguen funcionando. Esta opción se mantiene activada mientras exista una programación."
+    "description": "Al cerrar la ventana, el chat, la API y tus programaciones siguen funcionando. Toskar lo activa al guardar tu primera programación; después, se queda como lo dejes.",
+    "schedulesNeedIt": "Las automatizaciones programadas no se ejecutan mientras Toskar está cerrado. Actívalo para que se ejecuten a tiempo."
   },
   "launchAtLogin": {
     "title": "Abrir al iniciar sesión",

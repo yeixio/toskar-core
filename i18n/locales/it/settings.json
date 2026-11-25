@@ -81,7 +81,8 @@
   },
   "background": {
     "title": "Continua l'esecuzione in background",
-    "description": "Chiudendo la finestra, Chat, l'API e le tue pianificazioni continuano a funzionare. Resta attivo finché esiste una pianificazione."
+    "description": "Chiudendo la finestra, Chat, l'API e le tue pianificazioni continuano a funzionare. Toskar lo attiva quando salvi la prima pianificazione; poi resta come lo imposti.",
+    "schedulesNeedIt": "Le automazioni pianificate non vengono eseguite mentre Toskar è chiuso. Attivalo perché vengano eseguite in orario."
   },
   "launchAtLogin": {
     "title": "Apri all'accesso",

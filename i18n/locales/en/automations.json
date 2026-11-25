@@ -23,7 +23,9 @@
     "selectHint": "Select an automation to see its history, or create one.",
     "createOff": "Making automations is turned off for your account. Ask an Admin to turn it on.",
     "neverRun": "Never run",
-    "lastOnly": "Last {{last}}"
+    "lastOnly": "Last {{last}}",
+    "backgroundOff": "Toskar stops when you close its window, so scheduled automations won't run then.",
+    "backgroundOffLink": "Keep running in background"
   },
   "intro": {
     "title": "Put Toskar to work while you're away",

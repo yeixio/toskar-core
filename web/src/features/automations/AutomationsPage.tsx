@@ -16,6 +16,7 @@ import { Skeleton } from '@/components/ui/Skeleton'
 import { AutomationsIntro, IdeaGallery } from './Intro'
 import type { IdeaId } from './ideas'
 import { WebhookLink } from './WebhookLink'
+import { BackgroundOffNotice } from './BackgroundOffNotice'
 import { ShownError, shownError, type Shown } from '@/components/ui/ShownError'
 import { useCapabilities } from '@/lib/capabilities'
 import { matchesSearch } from '@/lib/search'
@@ -199,6 +200,8 @@ export function AutomationsPage() {
           ) : null}
         </div>
       </div>
+
+      {hasAutomations ? <BackgroundOffNotice /> : null}
 
       {hasAutomations && showIntro ? (
         <div id="automations-intro" className="space-y-5">

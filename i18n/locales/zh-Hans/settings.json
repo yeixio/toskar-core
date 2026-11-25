@@ -81,7 +81,8 @@
   },
   "background": {
     "title": "在后台保持运行",
-    "description": "关闭窗口后，聊天、API 和你的时间安排仍会继续运行。只要存在时间安排，此项就会保持开启。"
+    "description": "关闭窗口后，聊天、API 和你的时间安排仍会继续运行。保存第一个时间安排时 Toskar 会开启此项；之后会保持你的设置。",
+    "schedulesNeedIt": "Toskar 关闭时，定时自动化不会运行。开启此项可让它们按时运行。"
   },
   "launchAtLogin": {
     "title": "登录时启动",

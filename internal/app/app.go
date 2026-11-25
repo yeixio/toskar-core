@@ -1744,6 +1744,10 @@ func (a *App) applySettingsPatch(ctx context.Context, patch map[string]any) erro
 		if err := a.Settings.SetBool(ctx, "keep_running_in_background", v); err != nil {
 			return err
 		}
+		// The person chose, so schedules no longer turn it back on (#1209).
+		if err := a.Settings.SetBool(ctx, backgroundChosenKey, true); err != nil {
+			return err
+		}
 	}
 	if v, ok := patch["model_lifecycle"].(string); ok && v != "" {
 		if v != "automatic" && v != "manual" {
@@ -2079,11 +2083,19 @@ func (a *App) restartAdvertiser() {
 	a.advertiser = adv
 }
 
+// backgroundChosenKey records that the person set keep_running_in_background
+// themselves, so Toskar leaves it as they set it (#1209).
+const backgroundChosenKey = "keep_running_in_background_chosen"
+
 // enableBackgroundWhenScheduled turns on keep_running_in_background when a schedule
-// exists. The desktop shell quits the daemon on window close unless that flag is set.
+// exists and the person hasn't set it themselves. The desktop shell quits the
+// daemon on window close unless that flag is set.
 func (a *App) enableBackgroundWhenScheduled(ctx context.Context) error {
 	if a.Automations == nil || a.Settings == nil {
 		return nil
+	}
+	if chosen, err := a.Settings.GetBool(ctx, backgroundChosenKey, false); err != nil || chosen {
+		return err
 	}
 	items, err := a.Automations.List(ctx)
 	if err != nil || len(items) == 0 {
@@ -2104,6 +2116,7 @@ func (a *App) ResetApp(ctx context.Context, deleteModels bool) (contracts.Settin
 		return contracts.SettingsView{}, err
 	}
 	_ = a.Settings.SetBool(ctx, "keep_running_in_background", false)
+	_ = a.Settings.SetBool(ctx, backgroundChosenKey, false)
 	_ = a.Settings.Set(ctx, "model_lifecycle", "automatic")
 	_ = a.Settings.SetInt(ctx, "idle_unload_minutes", 15)
 	_ = a.Settings.Set(ctx, "default_profile_id", "")

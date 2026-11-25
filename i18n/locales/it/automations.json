@@ -23,7 +23,9 @@
     "selectHint": "Seleziona un'automazione per vederne la cronologia, oppure creane una.",
     "createOff": "La creazione di automazioni è disattivata per il tuo account. Chiedi a un Admin di attivarla.",
     "neverRun": "Mai eseguita",
-    "lastOnly": "Ultima {{last}}"
+    "lastOnly": "Ultima {{last}}",
+    "backgroundOff": "Toskar si ferma quando chiudi la sua finestra, quindi le automazioni pianificate non verranno eseguite.",
+    "backgroundOffLink": "Continua l'esecuzione in background"
   },
   "intro": {
     "title": "Fai lavorare Toskar mentre sei via",

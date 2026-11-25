@@ -2,6 +2,8 @@ package app
 
 import (
 	"context"
+	"io"
+	"log/slog"
 	"path/filepath"
 	"testing"
 	"time"
@@ -50,5 +52,35 @@ func TestSavedScheduleKeepsTheDaemonRunning(t *testing.T) {
 	}
 	if !on {
 		t.Fatal("background mode stayed off after a schedule was saved")
+	}
+}
+
+// Turning it off sticks, even with schedules saved (#1209).
+func TestBackgroundChoiceSticks(t *testing.T) {
+	ctx := context.Background()
+	t.Setenv("TOSKAR_DISCOVERY_ENABLED", "false")
+	application, err := New(Options{DataDir: t.TempDir(), Logger: slog.New(slog.NewTextHandler(io.Discard, nil))})
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = application.DB.Close() })
+
+	if _, err := application.Automations.Create(ctx, automations.CreateInput{
+		ModelID:  "model-a",
+		Name:     "Morning price",
+		Prompt:   "Check the price",
+		Schedule: automations.Schedule{Kind: automations.KindDaily, TimeZone: "UTC", Hour: 8},
+	}, time.Date(2026, 9, 28, 7, 0, 0, 0, time.UTC)); err != nil {
+		t.Fatal(err)
+	}
+	if err := application.applySettingsPatch(ctx, map[string]any{"keep_running_in_background": false}); err != nil {
+		t.Fatal(err)
+	}
+	// As at every start.
+	if err := application.enableBackgroundWhenScheduled(ctx); err != nil {
+		t.Fatal(err)
+	}
+	if on, _ := application.Settings.GetBool(ctx, "keep_running_in_background", false); on {
+		t.Fatal("background mode was turned back on after the person turned it off")
 	}
 }

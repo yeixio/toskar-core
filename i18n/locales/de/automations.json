@@ -23,7 +23,9 @@
     "selectHint": "Wähle eine Automation, um ihren Verlauf zu sehen, oder erstelle eine.",
     "createOff": "Automationen erstellen ist für dein Konto ausgeschaltet. Bitte einen Admin, es einzuschalten.",
     "neverRun": "Noch nie ausgeführt",
-    "lastOnly": "Zuletzt {{last}}"
+    "lastOnly": "Zuletzt {{last}}",
+    "backgroundOff": "Toskar stoppt, wenn du sein Fenster schließt, und geplante Automationen laufen dann nicht.",
+    "backgroundOffLink": "Im Hintergrund weiterlaufen"
   },
   "intro": {
     "title": "Lass Toskar arbeiten, während du weg bist",

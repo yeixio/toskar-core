@@ -81,7 +81,8 @@
   },
   "background": {
     "title": "Continuer en arrière-plan",
-    "description": "Fermer la fenêtre laisse Discussion, l'API et vos planifications en fonctionnement. Cette option reste activée tant qu'une planification existe."
+    "description": "Fermer la fenêtre laisse Discussion, l'API et vos planifications en fonctionnement. Toskar l'active quand vous enregistrez votre première planification ; ensuite, il reste comme vous l'avez réglé.",
+    "schedulesNeedIt": "Les automatisations planifiées ne s'exécutent pas quand Toskar est fermé. Activez cette option pour qu'elles s'exécutent à l'heure."
   },
   "launchAtLogin": {
     "title": "Ouvrir à la connexion",

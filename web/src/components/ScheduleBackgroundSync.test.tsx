@@ -7,7 +7,6 @@ import { ScheduleBackgroundSync } from './ScheduleBackgroundSync'
 
 vi.mock('@/lib/api', () => ({
   api: {
-    listAutomations: vi.fn(),
     getSettings: vi.fn(),
     updateSettings: vi.fn(),
   },
@@ -28,33 +27,21 @@ function renderSync() {
 
 describe('ScheduleBackgroundSync', () => {
   beforeEach(() => {
-    vi.mocked(api.listAutomations).mockReset()
     vi.mocked(api.getSettings).mockReset()
     vi.mocked(api.updateSettings).mockReset()
     vi.mocked(notifyDesktopBackgroundMode).mockReset()
-    vi.mocked(api.updateSettings).mockResolvedValue({} as never)
   })
 
-  it('enables background mode when a schedule exists', async () => {
-    vi.mocked(api.listAutomations).mockResolvedValue([
-      { id: 'auto-1', name: 'Price', enabled: true } as never,
-    ])
-    vi.mocked(api.getSettings).mockResolvedValue({ keep_running_in_background: false } as never)
-
+  it('tells the desktop app the saved setting', async () => {
+    vi.mocked(api.getSettings).mockResolvedValue({ keep_running_in_background: true } as never)
     renderSync()
-
-    await waitFor(() => expect(api.updateSettings).toHaveBeenCalledWith({ keep_running_in_background: true }))
     await waitFor(() => expect(notifyDesktopBackgroundMode).toHaveBeenCalledWith(true))
   })
 
-  it('leaves background mode alone when there are no schedules', async () => {
-    vi.mocked(api.listAutomations).mockResolvedValue([])
+  it("keeps the person's choice to turn it off (#1209)", async () => {
     vi.mocked(api.getSettings).mockResolvedValue({ keep_running_in_background: false } as never)
-
     renderSync()
-
-    await waitFor(() => expect(api.listAutomations).toHaveBeenCalled())
+    await waitFor(() => expect(notifyDesktopBackgroundMode).toHaveBeenCalledWith(false))
     expect(api.updateSettings).not.toHaveBeenCalled()
-    expect(notifyDesktopBackgroundMode).not.toHaveBeenCalled()
   })
 })

@@ -23,7 +23,9 @@
     "selectHint": "自動化を選択して履歴を表示するか、新しく作成してください。",
     "createOff": "オートメーションの作成はあなたのアカウントでは無効になっています。管理者に有効にしてもらってください。",
     "neverRun": "未実行",
-    "lastOnly": "前回 {{last}}"
+    "lastOnly": "前回 {{last}}",
+    "backgroundOff": "ウインドウを閉じるとToskarは停止するため、スケジュールされた自動化は実行されません。",
+    "backgroundOffLink": "バックグラウンドで実行を続ける"
   },
   "intro": {
     "title": "離れている間もToskarに働いてもらいましょう",
