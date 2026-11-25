@@ -53,10 +53,7 @@ var b11429Assets = []string{
 func release(names ...string) ghRelease {
 	var rel ghRelease
 	for _, n := range names {
-		rel.Assets = append(rel.Assets, struct {
-			Name               string `json:"name"`
-			BrowserDownloadURL string `json:"browser_download_url"`
-		}{Name: n, BrowserDownloadURL: "https://example.test/" + n})
+		rel.Assets = append(rel.Assets, ghAsset{Name: n, BrowserDownloadURL: "https://example.test/" + n})
 	}
 	return rel
 }
