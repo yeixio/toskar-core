@@ -2832,7 +2832,7 @@ paths:
         others for the same error and version. A reply address goes to the Toskar team by email,
         never into the issue. Answers {status: created or added, number}. Each one is listed in
         What left this computer as problem_report. Members and paired devices may send. 400
-        REPORT_INVALID; 403 REPORTS_OFF when an Admin turned problem_reports off; 429
+        REPORT_INVALID; 403 REPORTS_OFF while problem_reports is off (the default); 429
         REPORT_RATE_LIMITED; 502 REPORTS_UNAVAILABLE when the service can't be reached or isn't
         set up, for the client to send by email instead (contract 1.40).
       operationId: sendReport

@@ -62,8 +62,10 @@ function ReportDialog({ error, code, onClose }: { error: string; code?: string; 
         details,
       }),
   })
-  // An Admin turned sending off: copy it, or give it to whoever runs Toskar.
-  const off = settings.data?.problem_reports === false || errorCode(send.error) === 'REPORTS_OFF'
+  // Sending is off until an Admin turns it on (#1207): copy it, or give it
+  // to whoever runs Toskar. Unknown until the settings arrive; the send's
+  // own REPORTS_OFF says so too.
+  const off = (settings.data != null && settings.data.problem_reports !== true) || errorCode(send.error) === 'REPORTS_OFF'
   const invalid = errorCode(send.error) === 'REPORT_INVALID'
   const sent = send.data
   const waiting = report.isPending && details

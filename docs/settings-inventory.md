@@ -26,9 +26,9 @@ Columns:
 | Show community ratings | `community_ratings` | Settings › Privacy › Community ratings | Models (contextual) | Application | Basic | Off | none | Network |
 | Ask me to rate models | `ratings_prompts` | Settings › Privacy › Community ratings | Models (contextual) | Application | Basic | On | none | Behavioral |
 | Check for updates | `update_check` | Settings › About | About | Application | Basic | On | none | Network |
-| AI news | `ai_news` | Settings › Privacy › AI news | News (contextual) | Application | Basic | On | none | Network |
+| AI news | `ai_news` | Settings › Privacy › AI news | News (contextual) | Application | Basic | Off | none | Network |
 | Check links in answers | `check_links` | Settings › Privacy › Links in answers | Privacy & security | Application | Advanced | Off | none | Network |
-| Problem reports | `problem_reports` | Settings › Privacy › Problem reports | Privacy & security | Application | Basic | On | none | Data |
+| Problem reports | `problem_reports` | Settings › Privacy › Problem reports | Privacy & security | Application | Basic | Off | none | Data |
 | Compact long chats | `compact_at` | Settings › Privacy › History | Chats & history | Application | Advanced | Normal | none | Behavioral |
 | Save chat history | `save_chat_history` | Settings › Privacy › History | Chats & history | Application | Basic | On | none | Data |
 | Save task history | `save_task_history` | Settings › Privacy › History | Chats & history | Application | Basic | On | none | Data |

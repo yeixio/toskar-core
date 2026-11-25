@@ -22,7 +22,8 @@ import (
 // Problem reports (#588): Report this sends what went wrong to Toskar's
 // report service on toskar.ai, which files it as an issue, grouped with
 // others for the same error and version. The person sees everything first;
-// an Admin can turn sending off; each one is in What left this computer.
+// sending is off until an Admin turns it on (#1207); each one is in What
+// left this computer.
 
 const (
 	// settingProblemReports is whether Report this may send to Toskar.
@@ -31,7 +32,7 @@ const (
 	defaultReportURL = "https://toskar.ai/api/report"
 )
 
-var errReportsOff = contracts.NewError("REPORTS_OFF", nil, errors.New("an Admin turned off sending problem reports to Toskar"))
+var errReportsOff = contracts.NewError("REPORTS_OFF", nil, errors.New("sending problem reports to Toskar is off; an Admin can turn it on in Settings › Privacy"))
 
 func reportURL() string {
 	if u := strings.TrimSpace(config.Env("REPORT_URL")); u != "" {
@@ -42,7 +43,7 @@ func reportURL() string {
 
 // sendReport sends a problem report on to the report service.
 func (a *App) sendReport(ctx context.Context, p api.ProblemReport) (api.ReportSent, error) {
-	if on, _ := a.Settings.GetBool(ctx, settingProblemReports, true); !on {
+	if on, _ := a.Settings.GetBool(ctx, settingProblemReports, false); !on {
 		return api.ReportSent{}, errReportsOff
 	}
 	body, err := json.Marshal(p)
