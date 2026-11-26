@@ -1228,6 +1228,45 @@
       "readyText": "Your disk is encrypted with FileVault"
     },
     {
+      "id": "people-page",
+      "path": "/settings/people",
+      "readyText": "Dana"
+    },
+    {
+      "id": "people-invite",
+      "path": "/settings/people",
+      "readyText": "Dana",
+      "actions": [
+        {
+          "fill": {
+            "label": "Name",
+            "text": "Ana"
+          }
+        },
+        {
+          "click": "Add",
+          "exact": true
+        },
+        {
+          "wait": "Send Ana this link"
+        }
+      ]
+    },
+    {
+      "id": "portals-edit",
+      "path": "/settings/portals",
+      "readyText": "Yarn shop help",
+      "actions": [
+        {
+          "click": "Edit",
+          "exact": true
+        },
+        {
+          "wait": "Edit Yarn shop help"
+        }
+      ]
+    },
+    {
       "id": "anywhere-settings",
       "path": "/settings/network",
       "readyText": "Access from anywhere",
