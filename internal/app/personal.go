@@ -52,6 +52,8 @@ var personalKeys = map[string]bool{
 	"suggest_models": true,
 	// Whether voice chat plays the thinking sound (#1334).
 	"thinking_sound": true,
+	// Whether a person's finished automations post to the desktop (#1391).
+	"notify_task_finish": true,
 }
 
 // personalSettingKey is where ctx's person keeps key.

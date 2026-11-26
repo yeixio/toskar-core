@@ -390,7 +390,8 @@ export function SettingsPage({ section }: { section?: SettingsSection } = {}) {
         ) : null}
       </div>
 
-      {admin && settings ? (
+      {/* A Member has their own part of Notifications and Voice (#1391). */}
+      {settings && (admin || section === 'notifications' || section === 'voice') ? (
         <>
           <div className="settings-group">
             {groupLabel('groups.ai')}
@@ -481,7 +482,8 @@ export function SettingsPage({ section }: { section?: SettingsSection } = {}) {
             </>
             ) : null}
 
-            {show('voice') ? <VoiceSettings /> : null}
+            {show('voice') && admin ? <VoiceSettings /> : null}
+            {show('voice') && !admin ? <p className="text-sm text-ink-muted">{t('voice.memberNote')}</p> : null}
             {show('voice') && settings ? (
               <section className="card space-y-4">
                 <div className="flex items-start justify-between gap-4">
@@ -569,16 +571,21 @@ export function SettingsPage({ section }: { section?: SettingsSection } = {}) {
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <p className="text-sm font-medium text-ink">{t('notifications.taskFinish')}</p>
+                  <p className="mt-1 text-xs text-ink-muted">{t('notifications.taskFinishHint')}</p>
                 </div>
                 <Toggle
                   label={t('notifications.taskFinish')}
                   checked={settings?.notify_task_finish ?? true}
                   disabled={busy}
                   onChange={() =>
-                    patch({ notify_task_finish: !(settings?.notify_task_finish ?? true) })
+                    void api
+                      .setMyPreferences({ notify_task_finish: !(settings?.notify_task_finish ?? true) })
+                      .then(() => queryClient.invalidateQueries({ queryKey: ['settings'] }))
                   }
                 />
               </div>
+              {admin ? (
+              <>
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <p className="text-sm font-medium text-ink">{t('notifications.peerOffline')}</p>
@@ -607,8 +614,12 @@ export function SettingsPage({ section }: { section?: SettingsSection } = {}) {
                 />
               </div>
               <AutomationDigestSetting value={settings?.automation_digest ?? ''} disabled={busy} onChange={patch} />
+              </>
+              ) : (
+                <p className="text-sm text-ink-muted">{t('notifications.memberNote')}</p>
+              )}
             </section>
-            <NotificationDestinations />
+            {admin ? <NotificationDestinations /> : null}
           </div>
           ) : null}
 

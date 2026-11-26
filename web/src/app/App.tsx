@@ -137,8 +137,8 @@ export function App() {
                   <Route path="appearance" element={<SettingsPage section="appearance" />} />
                   <Route path="personalization" element={<SettingsPage section="personalization" />} />
                   <Route path="memory" element={<RequireRole min="member"><MemoryPage /></RequireRole>} />
-                  <Route path="notifications" element={<RequireRole min="admin"><SettingsPage section="notifications" /></RequireRole>} />
-                  <Route path="voice" element={<RequireRole min="admin"><SettingsPage section="voice" /></RequireRole>} />
+                  <Route path="notifications" element={<RequireRole min="member"><SettingsPage section="notifications" /></RequireRole>} />
+                  <Route path="voice" element={<RequireRole min="member"><SettingsPage section="voice" /></RequireRole>} />
                   <Route path="features" element={<RequireRole min="admin"><FeaturesPage /></RequireRole>} />
                   <Route path="models" element={<RequireRole min="admin"><SettingsPage section="models" /></RequireRole>} />
                   <Route path="history" element={<RequireRole min="admin"><SettingsPage section="history" /></RequireRole>} />

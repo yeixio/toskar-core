@@ -1685,7 +1685,7 @@ func (a *App) settingsView(ctx context.Context) (contracts.SettingsView, error) 
 	compactAt, _ := a.Settings.GetString(ctx, "compact_at", "normal")
 	memoryEnabled, _ := a.Settings.GetBool(ctx, "memory_enabled", true)
 	saveTask, _ := a.Settings.GetBool(ctx, "save_task_history", true)
-	notifyTask, _ := a.Settings.GetBool(ctx, "notify_task_finish", true)
+	notifyTask := a.personalString(ctx, "notify_task_finish", "true") != "false"
 	notifyPeer, _ := a.Settings.GetBool(ctx, "notify_peer_offline", true)
 	notifyNewer, _ := a.Settings.GetBool(ctx, settingNotifyNewer, true)
 	communityRatings, _ := a.Settings.GetBool(ctx, ratings.SettingShow, false)
@@ -1881,7 +1881,7 @@ func (a *App) applySettingsPatch(ctx context.Context, patch map[string]any) erro
 			return err
 		}
 	}
-	for _, key := range []string{"save_chat_history", "save_task_history", "notify_task_finish", "notify_peer_offline", settingNotifyNewer, "launch_at_login", ratings.SettingShow, ratings.SettingAsk, ratings.SettingQuality, updates.Setting, news.Setting, settingProblemReports, settingCheckLinks} {
+	for _, key := range []string{"save_chat_history", "save_task_history", "notify_peer_offline", settingNotifyNewer, "launch_at_login", ratings.SettingShow, ratings.SettingAsk, ratings.SettingQuality, updates.Setting, news.Setting, settingProblemReports, settingCheckLinks} {
 		if v, ok := patch[key].(bool); ok {
 			if err := a.Settings.SetBool(ctx, key, v); err != nil {
 				return err
@@ -1899,6 +1899,12 @@ func (a *App) applySettingsPatch(ctx context.Context, patch map[string]any) erro
 	// Each person's own (#707): answers may offer a better-fitting model.
 	if v, ok := patch["suggest_models"].(bool); ok {
 		if err := a.setPersonal(ctx, "suggest_models", strconv.FormatBool(v)); err != nil {
+			return err
+		}
+	}
+	// Each person's own (#1391): their finished automations on the desktop.
+	if v, ok := patch["notify_task_finish"].(bool); ok {
+		if err := a.setPersonal(ctx, "notify_task_finish", strconv.FormatBool(v)); err != nil {
 			return err
 		}
 	}
