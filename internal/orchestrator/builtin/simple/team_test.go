@@ -239,3 +239,28 @@ func TestReadsAsReview(t *testing.T) {
 		}
 	}
 }
+
+// A review that hands over its rewrite after the critique gives the person
+// the rewrite alone (#1456).
+func TestTeamReviewHandsOverItsRewrite(t *testing.T) {
+	env := &teamEnv{
+		plan:   `{"parts": ["Choosing beans", "Grinding"], "parallel": true}`,
+		review: "The answer is incorrect: the grind is too fine for a French press.\n\nHere is the corrected answer:\n\nA corrected answer about brewing coffee at home: use fresh beans and a coarse grind for a French press, and brew for four minutes.",
+	}
+	answer, _ := runTeam(t, env, coffee, contracts.OrchestrationPolicy{Strategy: profiles.StrategyTeam})
+	if !strings.HasPrefix(answer, "A corrected answer about brewing coffee") {
+		t.Fatalf("answer = %q, want the rewrite alone", answer)
+	}
+}
+
+func TestRewriteIn(t *testing.T) {
+	for review, want := range map[string]string{
+		"The answer is wrong. Here's the corrected answer: Juneau is 41°F today.": "Juneau is 41°F today.",
+		"Issues: units.\nRevised answer:\nIt's 5°C.":                              "It's 5°C.",
+		"The answer is incorrect about the temperature.":                          "",
+	} {
+		if got := rewriteIn(review); got != want {
+			t.Errorf("%q: %q, want %q", review, got, want)
+		}
+	}
+}
