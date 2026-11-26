@@ -71,12 +71,15 @@ Toskar is not a gateway to OpenAI or Anthropic. It speaks the same API formats t
 
 Details and limits are in [docs/api.md](docs/api.md) and [docs/mcp.md](docs/mcp.md).
 
-Step-by-step guides, each run for real against a released Toskar:
+Step-by-step guides, each run for real in the app it covers:
 
 | Tool | Guide |
 | --- | --- |
 | Claude Code and Codex CLI | [docs/integrations/coding-agents.md](docs/integrations/coding-agents.md) |
 | Continue (VS Code) | [docs/integrations/continue.md](docs/integrations/continue.md) |
+| Open WebUI | [docs/integrations/open-webui.md](docs/integrations/open-webui.md) |
+| n8n | [docs/integrations/n8n.md](docs/integrations/n8n.md) |
+| Home Assistant (Assist) | [docs/integrations/home-assistant.md](docs/integrations/home-assistant.md) |
 
 ## Quick start
 
