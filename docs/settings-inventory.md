@@ -131,7 +131,7 @@ Tabs: Chat, Activity, Models, Computers, Settings. Settings is one list: This iP
 
 ## 6. Structure (signed off 2026-11-25, built in 1.15)
 
-The web UI follows this since #1374's build: the sidebar in `web/src/components/layout/Sidebar.tsx`, Settings' pages in `web/src/features/settings/settingsNav.ts`, and old links in its `movedPages`. Until the contextual moves below are built, community ratings show in Models & AI and the AI news switch in Privacy & security, and Notifications and Voice are for Admins, as before.
+The web UI follows this since #1374's build: the sidebar in `web/src/components/layout/Sidebar.tsx`, Settings' pages in `web/src/features/settings/settingsNav.ts`, and old links in its `movedPages`. Community ratings are on the Models page and the AI news switch on the News page since #1391; Settings › Models & AI and Privacy & security link to them, so Settings' search still finds them. Notifications and Voice are for Admins, as before.
 
 ### 6.1 Primary navigation: 6 destinations
 
@@ -175,7 +175,7 @@ A left rail on wide screens and a grouped list at 390px, with a search over sett
 | Advanced | Advanced mode, Performance, Diagnostics, runtime and log folders; Developer: API keys, Web UI on the network; Danger zone: Reset |
 | About | Version, build, source, Check for updates |
 
-Contextual moves (section 3.4): community ratings to the Models page, the AI news switch to the News page, per-automation history to the automation (#1335).
+Contextual moves (section 3.4), built: community ratings to the Models page and the AI news switch to the News page (#1391), per-automation history to the automation (#1335).
 
 ### 6.3 Names (#1251)
 

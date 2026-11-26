@@ -71,6 +71,22 @@ describe('NewsPage (#750)', () => {
     expect(screen.queryByRole('button', { name: 'Install' })).not.toBeInTheDocument()
   })
 
+  it('has the AI news switch on the page, for an Admin only (#1391)', async () => {
+    vi.mocked(api.getNews).mockResolvedValue({ enabled: true, items: [item('a/big')] })
+    vi.mocked(api.updateSettings).mockReset().mockResolvedValue({} as never)
+    renderIt()
+    fireEvent.click(await screen.findByRole('switch', { name: 'Show AI news' }))
+    await waitFor(() => expect(api.updateSettings).toHaveBeenCalledWith({ ai_news: false }))
+  })
+
+  it('shows a Member no AI news switch', async () => {
+    vi.mocked(api.getNews).mockResolvedValue({ enabled: true, items: [item('a/big')] })
+    renderIt('member')
+    expect(await screen.findByText('Title a/big')).toBeInTheDocument()
+    await waitFor(() => expect(api.getMe).toHaveBeenCalled())
+    expect(screen.queryByRole('switch')).not.toBeInTheDocument()
+  })
+
   it('says when the news is off, and an Admin can turn it on', async () => {
     vi.mocked(api.getNews).mockResolvedValue({ enabled: false, items: [] })
     vi.mocked(api.updateSettings).mockResolvedValue({} as never)

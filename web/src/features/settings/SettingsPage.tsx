@@ -224,8 +224,6 @@ export function SettingsPage({ section }: { section?: SettingsSection } = {}) {
       queryClient.invalidateQueries({ queryKey: ['settings'] })
       queryClient.invalidateQueries({ queryKey: ['updates'] })
       queryClient.invalidateQueries({ queryKey: ['nodes'] })
-      queryClient.invalidateQueries({ queryKey: ['ratings-community'] })
-      queryClient.invalidateQueries({ queryKey: ['model-rating'] })
     },
   })
 
@@ -700,70 +698,12 @@ export function SettingsPage({ section }: { section?: SettingsSection } = {}) {
             ) : null}
 
             {show('models') ? (
-            <section className="card space-y-4">
-              <div>
-                <h2 className="section-title">{t('ratings.title')}</h2>
-                <p className="mt-1 text-sm text-ink-muted">{t('ratings.description')}</p>
-              </div>
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <p className="text-sm font-medium text-ink">{t('ratings.show')}</p>
-                  <p className="mt-1 text-xs text-ink-muted">{t('ratings.showHint')}</p>
-                </div>
-                <Toggle
-                  label={t('ratings.show')}
-                  checked={settings?.community_ratings ?? false}
-                  disabled={busy}
-                  onChange={() => patch({ community_ratings: !(settings?.community_ratings ?? false) })}
-                />
-              </div>
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <p className="text-sm font-medium text-ink">{t('ratings.quality')}</p>
-                  <p className="mt-1 text-xs text-ink-muted">{t('ratings.qualityHint')}</p>
-                </div>
-                <Toggle
-                  label={t('ratings.quality')}
-                  checked={settings?.quality_results ?? true}
-                  disabled={busy}
-                  onChange={() => patch({ quality_results: !(settings?.quality_results ?? true) })}
-                />
-              </div>
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <p className="text-sm font-medium text-ink">{t('ratings.ask')}</p>
-                  <p className="mt-1 text-xs text-ink-muted">{t('ratings.askHint')}</p>
-                </div>
-                <Toggle
-                  label={t('ratings.ask')}
-                  checked={settings?.ratings_prompts ?? true}
-                  disabled={busy}
-                  onChange={() => patch({ ratings_prompts: !(settings?.ratings_prompts ?? true) })}
-                />
-              </div>
-            </section>
+            <MovedSetting title={t('ratings.title')} text={t('ratings.moved')} to="/models" link={t('ratings.open')} />
             ) : null}
 
             {show('privacy') ? (
             <>
-            <section className="card space-y-4">
-              <div>
-                <h2 className="section-title">{t('news.title')}</h2>
-                <p className="mt-1 text-sm text-ink-muted">{t('news.description')}</p>
-              </div>
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <p className="text-sm font-medium text-ink">{t('news.show')}</p>
-                  <p className="mt-1 text-xs text-ink-muted">{t('news.showHint')}</p>
-                </div>
-                <Toggle
-                  label={t('news.show')}
-                  checked={settings?.ai_news ?? false}
-                  disabled={busy}
-                  onChange={() => patch({ ai_news: !(settings?.ai_news ?? false) })}
-                />
-              </div>
-            </section>
+            <MovedSetting title={t('news.title')} text={t('news.moved')} to="/news" link={t('news.open')} />
 
             <section className="card space-y-4">
               <div>
@@ -974,5 +914,20 @@ export function SettingsPage({ section }: { section?: SettingsSection } = {}) {
         <p className="text-sm text-ink-muted">{t('page.adminsOnly')}</p>
       )}
     </div>
+  )
+}
+
+/** A setting that lives on the page it changes now (#1391), so Settings' search still finds it. */
+function MovedSetting({ title, text, to, link }: { title: string; text: string; to: string; link: string }) {
+  return (
+    <section className="card flex flex-wrap items-center justify-between gap-3">
+      <div className="min-w-0">
+        <h2 className="section-title">{title}</h2>
+        <p className="mt-1 text-sm text-ink-muted">{text}</p>
+      </div>
+      <Link to={to} className="btn-secondary btn-sm">
+        {link}
+      </Link>
+    </section>
   )
 }

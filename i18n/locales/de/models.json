@@ -567,7 +567,7 @@
       "window": "Über sein Fenster hinaus",
       "out_of_memory": "Passt nicht"
     },
-    "off": "Qualitätsergebnisse sind ausgeschaltet. Schalte sie in Einstellungen › Modelle & KI unter Community-Bewertungen ein, um sie von GitHub zu lesen."
+    "off": "Qualitätsergebnisse sind ausgeschaltet. Schalte sie oben auf dieser Seite unter Community-Bewertungen ein, um sie von GitHub zu lesen."
   },
   "licenseTerms": {
     "title": "Lizenz von {{model}} akzeptieren",

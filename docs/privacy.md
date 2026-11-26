@@ -50,11 +50,11 @@ These are the calls Toskar can make without a request in a chat:
 | Call | Where to | What's sent | Default | Switch |
 | --- | --- | --- | --- | --- |
 | Update check | `toskar.ai/releases/latest.json` | The request, with Toskar's version in the user agent | On: a minute after start, then daily | Settings › About › Check for updates (`update_check`) |
-| AI news | `toskar.ai/news.json` | The request only, at most every six hours, when News is opened | Off | Settings › Privacy › AI news (`ai_news`) |
+| AI news | `toskar.ai/news.json` | The request only, at most every six hours, when News is opened | Off | The switch on the News page (`ai_news`) |
 | Problem reports | `toskar.ai/api/report` | What the person saw and chose to send, shown in full first | Off | Settings › Privacy › Problem reports (`problem_reports`) |
 | Relay availability and plan prices | Toskar's relay and its billing service | The requests only, when Settings › API Access offers a subscription | Off until access from anywhere is turned on | Settings › API Access › Access from anywhere |
-| Community ratings | Toskar's ratings service | See the Community ratings row below | Off | Settings › Privacy › Community ratings (`community_ratings`) |
-| Quality results | `raw.githubusercontent.com` (toskar-model-data) | The request only, when Models › Results is opened, at most once an hour. Each read is recorded as `quality_results`. | On: runs when that page is opened | Settings › Models & AI › Community ratings › Quality results (`quality_results`) |
+| Community ratings | Toskar's ratings service | See the Community ratings row below | Off | Models › Community ratings (`community_ratings`) |
+| Quality results | `raw.githubusercontent.com` (toskar-model-data) | The request only, when Models › Results is opened, at most once an hour. Each read is recorded as `quality_results`. | On: runs when that page is opened | Models › Community ratings › Quality results (`quality_results`) |
 | Push to the Toskar app | Toskar's relay (`relay.toskar.ai`), which passes it to Apple's or Google's push service | A notification's title and the page it opens, for phones paired with this computer | Added when a phone turns notifications on | Settings › Notifications, per destination |
 
 Each of these is listed in **What left this computer** (Settings › Privacy) when it's sent. The relay's own calls are recorded as `relay`: the tunnel opening, the outside check, and each question to the relay or its billing service. What travels through the tunnel once it's open is your own requests from away, and isn't recorded one by one. Setting up a Python environment (uv, Python, and its pinned packages) is recorded as `download` once it's installed. The base model's weights that a first training run fetches from Hugging Face aren't recorded yet.

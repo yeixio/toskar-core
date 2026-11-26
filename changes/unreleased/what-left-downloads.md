@@ -1,6 +1,6 @@
 ### Added
 
-- Settings › Models & AI › Community ratings has a Quality results switch.
+- Community ratings, on the Models page, have a Quality results switch.
   Off, Models › Results reads nothing from GitHub and says how to turn it
   back on. (#1415)
 
