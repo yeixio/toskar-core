@@ -55,7 +55,7 @@ Columns:
 | How voice hears you | `voice_hearing` | Settings › Voice | Voice | Application | Basic | Fast | none | Behavioral, Data |
 | Language voice hears | `voice_language` | Settings › Voice | Voice | Application | Basic | Detect each turn's language | none | Behavioral |
 | Storage limit for models | `model_storage_limit_gb` | Settings › Storage › Storage limit | Models & AI | Application | Advanced | Unlimited | none | Data |
-| Notify when a task finishes | `notify_task_finish` | Settings › Notifications | Notifications | Application | Basic | On | none | Behavioral |
+| Notify when a task finishes | `notify_task_finish` | Settings › Notifications | Notifications | Account (#1391) | Basic | On | none | Behavioral |
 | Notify when a computer goes offline | `notify_peer_offline` | Settings › Notifications | Notifications | Application | Basic | On | Paired computers | Behavioral |
 | Notify about newer models | `notify_newer_models` | Settings › Notifications | Notifications | Application | Basic | On | none | Behavioral |
 | Automation digest | `automation_digest` | Settings › Notifications | Notifications | Application | Basic | Off | Automations | Behavioral |
@@ -131,7 +131,7 @@ Tabs: Chat, Activity, Models, Computers, Settings. Settings is one list: This iP
 
 ## 6. Structure (signed off 2026-11-25, built in 1.15)
 
-The web UI follows this since #1374's build: the sidebar in `web/src/components/layout/Sidebar.tsx`, Settings' pages in `web/src/features/settings/settingsNav.ts`, and old links in its `movedPages`. Community ratings are on the Models page and the AI news switch on the News page since #1391; Settings › Models & AI and Privacy & security link to them, so Settings' search still finds them. Notifications and Voice are for Admins, as before.
+The web UI follows this since #1374's build: the sidebar in `web/src/components/layout/Sidebar.tsx`, Settings' pages in `web/src/features/settings/settingsNav.ts`, and old links in its `movedPages`. Community ratings are on the Models page and the AI news switch on the News page since #1391; Settings › Models & AI and Privacy & security link to them, so Settings' search still finds them. Notifications and Voice are open to Members since #1391: a Member sets their own task notices and thinking sound there, and the rest of each page stays an Admin's.
 
 ### 6.1 Primary navigation: 6 destinations
 

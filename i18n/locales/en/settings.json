@@ -173,7 +173,9 @@
     "newerModelsHint": "Once per new generation, for Admins. Nothing is installed or switched until you choose.",
     "digest": "Daily automation digest",
     "digestHint": "One summary of every automation’s results each day, in a chat you can reply to.",
-    "digestTime": "Time"
+    "digestTime": "Time",
+    "taskFinishHint": "When your own automations finish: a push to your phones signed in as you, and for the Owner, a notice on this computer's desktop. Only for you.",
+    "memberNote": "Notifications about computers, models, and the daily digest, and where notifications are sent, are set by an Admin."
   },
   "toolPermissions": {
     "title": "Tool permissions",
@@ -453,7 +455,8 @@
     "hearingAccurate": "Accurate",
     "language": "Language voice hears",
     "languageHint": "Detects the language of each turn and answers in it. Choose one language if everyone here always speaks it: Toskar hears it more reliably and doesn't mistake a short word for another language.",
-    "languageDetect": "Detect each turn's language"
+    "languageDetect": "Detect each turn's language",
+    "memberNote": "The voices Toskar speaks in and how it hears you are set by an Admin."
   },
   "sections": {
     "account": "Account",

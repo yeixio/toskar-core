@@ -92,6 +92,8 @@ describe('SettingsLayout (#1374, #1321)', () => {
         '/settings/appearance',
         '/settings/personalization',
         '/settings/memory',
+        '/settings/notifications',
+        '/settings/voice',
       ]),
     )
     expect(screen.queryByText('This computer and team')).not.toBeInTheDocument()

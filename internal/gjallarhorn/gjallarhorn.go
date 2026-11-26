@@ -167,6 +167,26 @@ func leaves(n Notification) bool {
 	return n.PersonID == auth.OwnerID || !personalCategories[n.Category]
 }
 
+// personWants reports whether a person who isn't the Owner wants their own
+// notice pushed to their phones: their automations' by their own Notify when
+// tasks finish, or the Owner's choice until they make one (#1391), and
+// approvals always.
+func (h *Hub) personWants(ctx context.Context, n Notification) bool {
+	if n.Category != CategoryAutomation || h.settings == nil {
+		return true
+	}
+	v, ok, err := h.settings.Get(ctx, "notify_task_finish@"+n.PersonID)
+	if err != nil {
+		return true
+	}
+	if !ok {
+		if v, ok, err = h.settings.Get(ctx, "notify_task_finish"); err != nil || !ok {
+			return true
+		}
+	}
+	return v != "false"
+}
+
 // Hub stores notifications and fans them out.
 type Hub struct {
 	db       *sql.DB
@@ -326,12 +346,17 @@ func (h *Hub) Notify(ctx context.Context, req Request) (Notification, error) {
 			"id": n.ID, "category": n.Category, "severity": n.Severity, "title": n.Title, "body": n.Body, "message": n.Message, "link": n.Link, "url": n.URL,
 		}))
 	}
-	if !leaves(n) {
-		// Another person's own notice stays in their notification center.
+	// Another person's own notice stays in their notification center, and
+	// reaches only their own phones (#1391).
+	personal := !leaves(n)
+	if personal && !h.personWants(ctx, n) {
 		return n, nil
 	}
 	heldUntil, held := h.QuietHours(ctx).HeldUntil(n.Severity, now)
 	for _, name := range req.Channels {
+		if personal {
+			break
+		}
 		if held {
 			n.Deliveries = append(n.Deliveries, h.queue(ctx, n, name, "", DeliveryHeld, heldUntil))
 			continue
@@ -341,11 +366,13 @@ func (h *Hub) Notify(ctx context.Context, req Request) (Notification, error) {
 	if dests, err := h.Destinations(ctx); err == nil {
 		queued := false
 		for _, d := range dests {
-			if !d.Accepts(n) {
+			if !d.Accepts(n) || personal && d.Kind != KindApp {
 				continue
 			}
 			// Errors go out at once; anything else waits for the digest.
-			if d.Digest != nil && n.Severity != SeverityError {
+			// A digest goes to the Owner's, so a person's own notice goes
+			// out by itself.
+			if d.Digest != nil && n.Severity != SeverityError && !personal {
 				n.Deliveries = append(n.Deliveries, h.queue(ctx, n, d.channelName(), d.ID, DeliveryDigest, d.Digest.Next(now)))
 				continue
 			}

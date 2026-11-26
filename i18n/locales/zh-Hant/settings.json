@@ -171,7 +171,9 @@
     "newerModelsHint": "每個新世代通知管理員一次。在你選擇之前，不會安裝或切換任何內容。",
     "digest": "每日自動化摘要",
     "digestHint": "每天彙整一次所有自動化的結果，傳到一個可以回覆的聊天中。",
-    "digestTime": "時間"
+    "digestTime": "時間",
+    "taskFinishHint": "你自己的自動化完成時：推送到以你身分登入的手機；對擁有者，還會在這台電腦的桌面上通知。僅對你生效。",
+    "memberNote": "有關電腦、模型和每日摘要的通知，以及通知傳送到哪裡，由管理員設定。"
   },
   "toolPermissions": {
     "title": "工具權限",
@@ -444,7 +446,8 @@
     "hearingAccurate": "準確",
     "language": "語音聽取的語言",
     "languageHint": "辨識每一輪說話的語言，並用該語言回答。如果這裡的每個人都總說同一種語言，請選擇它：Toskar 會聽得更準，也不會把一個短詞誤認成別的語言。",
-    "languageDetect": "辨識每一輪的語言"
+    "languageDetect": "辨識每一輪的語言",
+    "memberNote": "Toskar 說話的聲音以及它如何聽你說話，由管理員設定。"
   },
   "sections": {
     "account": "帳號",

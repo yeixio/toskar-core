@@ -731,7 +731,7 @@ export const api = {
   getMe: () => request<Principal>('/api/v1/me'),
 
   /** Save this person's own App language, assistant language (#206), model suggestions (#707), and thinking sound (#1334). */
-  setMyPreferences: (patch: Pick<SettingsPatch, 'ui_locale' | 'assistant_language_mode' | 'assistant_language' | 'suggest_models' | 'thinking_sound'>) =>
+  setMyPreferences: (patch: Pick<SettingsPatch, 'ui_locale' | 'assistant_language_mode' | 'assistant_language' | 'suggest_models' | 'thinking_sound' | 'notify_task_finish'>) =>
     request<SettingsView>('/api/v1/me/preferences', { method: 'PATCH', body: JSON.stringify(patch) }),
 
   /** Sign this browser in with a username and password. */

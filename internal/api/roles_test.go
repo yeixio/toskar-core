@@ -171,6 +171,11 @@ func TestMyPreferences(t *testing.T) {
 	if code := patch(`{"thinking_sound":"off"}`); code != http.StatusBadRequest || saved != nil {
 		t.Fatalf("thinking sound as a string: %d %v", code, saved)
 	}
+	saved = nil
+	// So are the desktop notices for their own automations (#1391).
+	if code := patch(`{"notify_task_finish":false}`); code != http.StatusOK || saved["notify_task_finish"] != false {
+		t.Fatalf("task notices: %d %v", code, saved)
+	}
 }
 
 // Anyone connects their own devices and sees and disconnects only theirs,

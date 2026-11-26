@@ -41,8 +41,8 @@ export const settingsNav: SettingsNavGroup[] = [
           { path: 'memory', label: 'sections.memory', min: 'member' },
         ],
       },
-      { items: [{ path: 'notifications', label: 'sections.notifications', min: 'admin', keywords: ['notifications.taskFinish', 'notifications.peerOffline', 'notifications.newerModels'] }] },
-      { items: [{ path: 'voice', label: 'sections.voice', min: 'admin' }] },
+      { items: [{ path: 'notifications', label: 'sections.notifications', min: 'member', keywords: ['notifications.taskFinish', 'notifications.peerOffline', 'notifications.newerModels'] }] },
+      { items: [{ path: 'voice', label: 'sections.voice', min: 'member', keywords: ['voice.thinkingSound'] }] },
     ],
   },
   {

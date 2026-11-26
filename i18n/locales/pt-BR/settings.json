@@ -175,7 +175,9 @@
     "newerModelsHint": "Uma vez por nova geração, para Admins. Nada é instalado ou trocado até você escolher.",
     "digest": "Resumo diário das automações",
     "digestHint": "Um resumo dos resultados de todas as automações por dia, em um chat que você pode responder.",
-    "digestTime": "Horário"
+    "digestTime": "Horário",
+    "taskFinishHint": "Quando suas próprias automações terminam: um push nos seus celulares conectados como você e, para o proprietário, um aviso na área de trabalho deste computador. Só para você.",
+    "memberNote": "As notificações sobre computadores, modelos e o resumo diário, e para onde elas vão, são definidas por um administrador."
   },
   "toolPermissions": {
     "title": "Permissões de ferramentas",
@@ -462,7 +464,8 @@
     "hearingAccurate": "Preciso",
     "language": "Idioma que a voz ouve",
     "languageHint": "Detecta o idioma de cada fala e responde nele. Escolha um idioma se todos aqui sempre o falam: o Toskar ouve com mais confiança e não confunde uma palavra curta com outro idioma.",
-    "languageDetect": "Detectar o idioma de cada fala"
+    "languageDetect": "Detectar o idioma de cada fala",
+    "memberNote": "As vozes em que o Toskar fala e como ele ouve você são definidas por um administrador."
   },
   "sections": {
     "account": "Conta",

@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Toskar Control Plane API
-  version: "1.127"
+  version: "1.128"
   description: >-
     Local AI control plane API for Toskar, its OpenAI-compatible routes, and its MCP server.
     On the default loopback bind no key is needed. When the daemon listens on any other address,
@@ -1216,7 +1216,7 @@ paths:
   /api/v1/me/preferences:
     patch:
       summary: Save your own languages (#206)
-      description: The request's person's App language, assistant language, model suggestions, and thinking sound, whatever their role. The Owner's are the install's, which others start from until they choose. Answers with the person's settings.
+      description: The request's person's App language, assistant language, model suggestions, thinking sound, and notices for their finished automations, whatever their role. The Owner's are the install's, which others start from until they choose. Answers with the person's settings.
       operationId: setMyPreferences
       tags: [People]
       requestBody:
@@ -1240,6 +1240,9 @@ paths:
                 thinking_sound:
                   type: boolean
                   description: Voice chat plays a soft chime while a spoken answer takes a while (#1334, contract 1.121); on by default
+                notify_task_finish:
+                  type: boolean
+                  description: Your finished automations notify you, with a push to your own phones and, for the Owner, a desktop notice (#1391, contract 1.128); until you choose, the Owner's choice. On by default
       responses:
         "200":
           description: The person's settings
