@@ -465,7 +465,28 @@
     "language": "Lingua che la voce ascolta",
     "languageHint": "Rileva la lingua di ogni turno e risponde in quella. Scegli una lingua se qui tutti la parlano sempre: Toskar la sente in modo più affidabile e non scambia una parola breve per un’altra lingua.",
     "languageDetect": "Rileva la lingua di ogni turno",
-    "memberNote": "Le voci con cui parla Toskar e come ti sente sono impostate da un amministratore."
+    "memberNote": "Le voci con cui parla Toskar e come ti sente sono impostate da un amministratore.",
+    "personas": {
+      "title": "Personaggi vocali",
+      "description": "Voci create dalle voci di questo computer, ognuna con un nome, una lingua e una velocità. Ognuno sceglie la propria; gli admin le creano.",
+      "yours": "La tua voce",
+      "yoursHint": "Legge le tue risposte nella modalità vocale, in Leggi ad alta voce, sul telefono, in auto e sulla TV. In un'altra lingua legge la voce di quella lingua alla velocità del tuo personaggio.",
+      "none": "La voce propria di ogni lingua",
+      "memberEmpty": "Non ci sono ancora personaggi. Un admin può crearli in Impostazioni › Voce.",
+      "add": "Nuovo personaggio",
+      "edit": "Modifica",
+      "delete": "Elimina",
+      "deleteConfirm": "Elimina {{name}}",
+      "keep": "Tieni",
+      "name": "Nome",
+      "language": "Lingua",
+      "voice": "Voce",
+      "speed": "Velocità",
+      "save": "Salva",
+      "cancel": "Annulla",
+      "summary": "{{voice}} · {{language}} · {{speed}}",
+      "readsWith": "La sua voce ora non è installata qui, quindi legge {{voice}}."
+    }
   },
   "sections": {
     "account": "Account",

@@ -52,6 +52,24 @@ are named `kitten:<language>:<key>`, such as `kitten:en:eleanor`, and read at
 larger Kitten TTS 2, under the Stellon Labs Community License, isn't offered
 (#1319).
 
+### Voice personas
+
+A persona (#1319) is a voice with a name: a language, one of that
+language's voices, and a speed from 0.5 to 2. Admins make, change, and
+delete them (`POST /api/v1/voice/personas`, `PUT` and `DELETE
+/api/v1/voice/personas/{id}`); everyone lists them with `GET
+/api/v1/voice/personas` and picks their own with `PUT /api/v1/voice/persona`
+`{id}`, kept as the personal setting `voice_persona`. When a request leaves
+`voice` empty, the person's persona reads its own language in its voice, and
+every language at its speed: voice mode, `POST /api/v1/speech/say`, and the
+door for an automation of theirs, which runs as them. A voice asked for by
+name reads as asked. Speed reaches Kokoro and Kitten as their `speed`, and
+Piper as a shorter or longer `length_scale`. `POST /api/v1/speech/say` takes
+`speed` too, for a preview. A persona whose voice can't read here now, such
+as a Kitten voice after Kitten was removed, answers `reads: false` with the
+voice that reads instead in `reads_with`. Cloned voices and styles wait for
+the larger Kitten model.
+
 Measured on an M5 Pro (#1304): the environment is 1.3 GB and the model
 189 MB (140 MB without the 4-bit model, which isn't downloaded). A warm
 sentence takes 0.36 s for about 3 s of English and 0.6 to 0.75 s in other

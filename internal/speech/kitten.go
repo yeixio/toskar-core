@@ -326,8 +326,8 @@ func (w *Worker) speakKitten(ctx context.Context, text, voice string) ([]byte, i
 			name = v.Name
 		}
 	}
-	a, err := w.ask(ctx, envKitten, map[string]any{"op": "speak", "engine": "kitten", "text": text, "voice": name,
-		"lang": m[1], "model": w.Engine.kittenDir()})
+	a, err := w.ask(ctx, envKitten, withSpeed(ctx, map[string]any{"op": "speak", "engine": "kitten", "text": text, "voice": name,
+		"lang": m[1], "model": w.Engine.kittenDir()}))
 	if err != nil {
 		return nil, 0, err
 	}

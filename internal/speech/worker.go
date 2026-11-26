@@ -48,6 +48,8 @@ type Worker struct {
 	// Choice is the voice an Admin chose for a language, "" for automatic
 	// (#1304); nil is automatic for every language.
 	Choice func(lang string) string
+	// Persona is the persona the person under ctx picked (#1319), if any.
+	Persona func(ctx context.Context) (Persona, bool)
 
 	mu sync.Mutex
 	// procs are the speech environment's worker and Kitten's (#1304).
@@ -136,6 +138,7 @@ func (w *Worker) Speak(ctx context.Context, text, voice, language string) (pcm [
 	if n := len([]rune(text)); n > maxTextRunes {
 		return nil, 0, fmt.Errorf("the text is longer than %d characters", maxTextRunes)
 	}
+	ctx, voice = w.persona(ctx, text, voice, language)
 	if voice == "" && w.Choice != nil {
 		lang := language
 		if lang == "" {
@@ -200,7 +203,7 @@ func (w *Worker) Speak(ctx context.Context, text, voice, language string) (pcm [
 		return nil, 0, fmt.Errorf("%q is not a Piper or Kokoro voice name, such as %s or af_heart", voice, DefaultVoice)
 	}
 	w.Engine.beforeVoice(ctx, voice)
-	a, err := w.ask(ctx, envSpeech, map[string]any{"op": "speak", "text": text, "voice": voice, "voices_dir": filepath.Join(w.Engine.Dir, "voices")})
+	a, err := w.ask(ctx, envSpeech, withSpeed(ctx, map[string]any{"op": "speak", "text": text, "voice": voice, "voices_dir": filepath.Join(w.Engine.Dir, "voices")}))
 	if err != nil {
 		return nil, 0, err
 	}
@@ -211,8 +214,8 @@ func (w *Worker) Speak(ctx context.Context, text, voice, language string) (pcm [
 // turns Kokoro off for a while; asked is whether the person chose it.
 func (w *Worker) speakKokoro(ctx context.Context, text, voice string, asked bool) ([]byte, int, error) {
 	dir := w.Engine.kokoroDir()
-	a, err := w.ask(ctx, envSpeech, map[string]any{"op": "speak", "engine": "kokoro", "text": text, "voice": voice,
-		"lang": kokoroLangs[voice[0]], "model": filepath.Join(dir, kokoroFiles[0].Name), "voices": filepath.Join(dir, kokoroFiles[1].Name)})
+	a, err := w.ask(ctx, envSpeech, withSpeed(ctx, map[string]any{"op": "speak", "engine": "kokoro", "text": text, "voice": voice,
+		"lang": kokoroLangs[voice[0]], "model": filepath.Join(dir, kokoroFiles[0].Name), "voices": filepath.Join(dir, kokoroFiles[1].Name)}))
 	if err == nil {
 		return decodePCM(a)
 	}

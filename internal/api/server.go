@@ -180,6 +180,8 @@ type Dependencies struct {
 	SetSpeechVoice func(ctx context.Context, language, voice string) error
 	InstallKitten  func(ctx context.Context) error
 	RemoveKitten   func(ctx context.Context) error
+	// VoicePersonas are the voices Admins make for people to pick (#1319).
+	VoicePersonas speech.Personas
 	// Transcribe turns an attached recording into text with speech.transcribe,
 	// wherever it runs (yeixio/toskar-apps#155).
 	Transcribe func(ctx context.Context, artifactID, language string) (Transcription, error)
@@ -525,6 +527,7 @@ func (s *Server) routes() {
 	s.cacheRoutes(api)
 	s.trainingRoutes(api)
 	s.speechRoutes(api)
+	s.voicePersonaRoutes(api)
 	s.featureRoutes(api)
 	s.imageRoutes(api)
 

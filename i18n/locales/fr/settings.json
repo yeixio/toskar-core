@@ -465,7 +465,28 @@
     "language": "Langue entendue par la voix",
     "languageHint": "Détecte la langue de chaque tour de parole et y répond. Choisissez une langue si tout le monde ici la parle toujours : Toskar l’entend plus sûrement et ne prend pas un mot court pour une autre langue.",
     "languageDetect": "Détecter la langue de chaque tour",
-    "memberNote": "Les voix de Toskar et la façon dont il vous entend sont réglées par un administrateur."
+    "memberNote": "Les voix de Toskar et la façon dont il vous entend sont réglées par un administrateur.",
+    "personas": {
+      "title": "Personnages vocaux",
+      "description": "Des voix créées à partir de celles de cet ordinateur, chacune avec un nom, une langue et une vitesse. Chacun choisit la sienne ; les admins les créent.",
+      "yours": "Votre voix",
+      "yoursHint": "Lit vos réponses en mode vocal, avec Lire à voix haute, sur le téléphone, dans la voiture et sur la TV. Dans une autre langue, la voix de cette langue lit à la vitesse de votre personnage.",
+      "none": "La voix propre à chaque langue",
+      "memberEmpty": "Il n'y a pas encore de personnage. Un admin peut en créer dans Réglages › Voix.",
+      "add": "Nouveau personnage",
+      "edit": "Modifier",
+      "delete": "Supprimer",
+      "deleteConfirm": "Supprimer {{name}}",
+      "keep": "Garder",
+      "name": "Nom",
+      "language": "Langue",
+      "voice": "Voix",
+      "speed": "Vitesse",
+      "save": "Enregistrer",
+      "cancel": "Annuler",
+      "summary": "{{voice}} · {{language}} · {{speed}}",
+      "readsWith": "Sa voix n'est pas installée ici pour l'instant, donc {{voice}} lit à sa place."
+    }
   },
   "sections": {
     "account": "Compte",

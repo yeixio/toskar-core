@@ -447,7 +447,28 @@
     "language": "語音聽取的語言",
     "languageHint": "辨識每一輪說話的語言，並用該語言回答。如果這裡的每個人都總說同一種語言，請選擇它：Toskar 會聽得更準，也不會把一個短詞誤認成別的語言。",
     "languageDetect": "辨識每一輪的語言",
-    "memberNote": "Toskar 說話的聲音以及它如何聽你說話，由管理員設定。"
+    "memberNote": "Toskar 說話的聲音以及它如何聽你說話，由管理員設定。",
+    "personas": {
+      "title": "語音角色",
+      "description": "用這台電腦的聲音做成的語音，每個都有名稱、語言和語速。每個人自己選擇，管理員負責建立。",
+      "yours": "你的聲音",
+      "yoursHint": "在語音模式、朗讀、手機、汽車和電視上朗讀你的回答。其他語言由該語言的聲音以你角色的語速朗讀。",
+      "none": "各語言自己的聲音",
+      "memberEmpty": "還沒有語音角色。管理員可以在 設定 › 語音 中建立。",
+      "add": "新增角色",
+      "edit": "編輯",
+      "delete": "刪除",
+      "deleteConfirm": "刪除 {{name}}",
+      "keep": "保留",
+      "name": "名稱",
+      "language": "語言",
+      "voice": "聲音",
+      "speed": "語速",
+      "save": "儲存",
+      "cancel": "取消",
+      "summary": "{{voice}} · {{language}} · {{speed}}",
+      "readsWith": "它的聲音目前未在這裡安裝，所以由 {{voice}} 代為朗讀。"
+    }
   },
   "sections": {
     "account": "帳號",

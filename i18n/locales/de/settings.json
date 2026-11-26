@@ -456,7 +456,28 @@
     "language": "Sprache, die die Sprachfunktion hört",
     "languageHint": "Erkennt die Sprache jedes Beitrags und antwortet darin. Wähle eine Sprache, wenn hier alle immer sie sprechen: Toskar hört sie dann zuverlässiger und hält ein kurzes Wort nicht für eine andere Sprache.",
     "languageDetect": "Sprache jedes Beitrags erkennen",
-    "memberNote": "Die Stimmen, mit denen Toskar spricht, und wie es dich hört, legt ein Admin fest."
+    "memberNote": "Die Stimmen, mit denen Toskar spricht, und wie es dich hört, legt ein Admin fest.",
+    "personas": {
+      "title": "Stimmpersonas",
+      "description": "Stimmen aus den Stimmen dieses Computers, jede mit Name, Sprache und Tempo. Jede Person wählt ihre eigene; Admins legen sie an.",
+      "yours": "Deine Stimme",
+      "yoursHint": "Liest deine Antworten im Sprachmodus, bei Vorlesen, auf dem Handy, im Auto und auf dem Fernseher vor. In einer anderen Sprache liest deren Stimme im Tempo deiner Persona.",
+      "none": "Die eigene Stimme jeder Sprache",
+      "memberEmpty": "Es gibt noch keine Personas. Ein Admin kann sie unter Einstellungen › Stimme anlegen.",
+      "add": "Neue Persona",
+      "edit": "Bearbeiten",
+      "delete": "Löschen",
+      "deleteConfirm": "{{name}} löschen",
+      "keep": "Behalten",
+      "name": "Name",
+      "language": "Sprache",
+      "voice": "Stimme",
+      "speed": "Tempo",
+      "save": "Speichern",
+      "cancel": "Abbrechen",
+      "summary": "{{voice}} · {{language}} · {{speed}}",
+      "readsWith": "Ihre Stimme ist hier gerade nicht installiert, daher liest {{voice}}."
+    }
   },
   "sections": {
     "account": "Konto",
