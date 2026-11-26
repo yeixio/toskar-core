@@ -2739,7 +2739,7 @@
         },
         {
           "type": "paragraph",
-          "text": "You can pause to think. When a pause doesn't sound like the end of what you were saying, such as after \"book a table for\", voice mode keeps listening a moment longer before it answers. This uses Smart Turn, a small model that downloads in the background the first time you use voice mode, about 9 MB. Until it's there, a pause of about a second ends your turn."
+          "text": "You can pause to think. When a pause doesn't sound like the end of what you were saying, such as after \"book a table for\", voice mode keeps listening a moment longer before it answers. This uses Smart Turn, a small model that downloads in the background the first time you use voice mode, about 9 MB. Until it's there, a pause of about a second ends your turn. The doorbell listens to visitors the same way, so one who stops to think isn't answered halfway."
         },
         {
           "type": "heading",

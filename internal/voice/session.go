@@ -123,6 +123,23 @@ const (
 	finishedAt = 0.5
 )
 
+// UnfinishedWait is how much longer a pause that doesn't sound finished
+// keeps listening before the turn ends anyway (#1403).
+const UnfinishedWait = unfinishedWait
+
+// SoundsUnfinished asks j whether samples, at SampleRate, end mid-thought.
+// No judge, no answer in time, or an error is finished: the pause alone
+// ends the turn, as before (#1403).
+func SoundsUnfinished(ctx context.Context, j TurnJudge, samples []int16) bool {
+	if j == nil {
+		return false
+	}
+	ctx, cancel := context.WithTimeout(ctx, judgeTimeout)
+	defer cancel()
+	p, err := j.TurnFinished(ctx, samples)
+	return err == nil && p < finishedAt
+}
+
 // SessionConfig is session.update's session: what the client may set.
 type SessionConfig struct {
 	Voice             string         `json:"voice"`

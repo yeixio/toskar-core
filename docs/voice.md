@@ -107,7 +107,9 @@ Errors are `error` events with `error.code`, such as `invalid_audio`,
   finished: finished, or no answer within 1.5 s, ends the turn at once;
   unfinished waits up to 2 s more, and words in that time are the same
   turn (#1403). `speech_stopped` is sent when the turn really ends. Until
-  its file has downloaded, the pause alone ends a turn.
+  its file has downloaded, the pause alone ends a turn. The front door
+  asks it the same way at the end of each pause a visitor makes
+  (`internal/app/door_talk.go`).
   Once a turn started, words 40% softer than that keep it going, so a
   last word that trails off, from a microphone across the room, doesn't
   end it early. The noise level is learned from the first 300 ms, then
@@ -166,8 +168,7 @@ and answers in the wrong language or voice. Its README explains the scores.
 ## Not yet
 
 - The measurements on the Mac, the rig, and a CPU-only computer.
-- A model that judges whether a turn sounds finished (Smart Turn), and
-  Qwen3-TTS for computers with a strong graphics card.
+- Qwen3-TTS for computers with a strong graphics card.
 - The chat keeps the whole answer even when it was cut off.
 - `/v1/realtime`, for OpenAI's SDKs; the phone, the TV, and the doorbell
   (#667).

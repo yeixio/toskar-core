@@ -404,3 +404,62 @@ func TestDoorVisitFollowsTheVisitorsLanguage(t *testing.T) {
 		t.Fatalf("same language: %q", got)
 	}
 }
+
+// judgeSays answers the turn judge's questions in order.
+type judgeSays struct {
+	mu      sync.Mutex
+	answers []float64
+	asked   int
+}
+
+func (j *judgeSays) TurnFinished(context.Context, []int16) (float64, error) {
+	j.mu.Lock()
+	defer j.mu.Unlock()
+	p := 1.0
+	if j.asked < len(j.answers) {
+		p = j.answers[j.asked]
+	}
+	j.asked++
+	return p, nil
+}
+
+// A pause at the door that Smart Turn says sounds unfinished keeps
+// listening, so "I have a package for... the Johnsons" is one turn; one
+// that sounds finished ends the turn at once (#1403).
+func TestDoorWaitsOutAnUnfinishedPause(t *testing.T) {
+	hearIt := func(judge voice.TurnJudge) (heardSeconds float64, asked int) {
+		d := &visitDoor{audio: make(chan []int16, 512)}
+		go func() {
+			for _, part := range []struct {
+				level int16
+				n     int
+			}{{0, 10}, {6000, 25}, {0, 50}, {6000, 25}, {0, 60}} {
+				for range part.n {
+					d.send(part.level, 1)
+					time.Sleep(2 * time.Millisecond)
+				}
+			}
+		}()
+		h, _ := d.Listen(context.Background(), "")
+		h.Audio = d.audio
+		v := &doorVisit{parts: voice.Parts{Judge: judge}, wait: 10 * time.Second, longest: 30 * time.Second}
+		heard, err := v.hear(context.Background(), h, v.wait)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if j, ok := judge.(*judgeSays); ok {
+			asked = j.asked
+		}
+		return float64(len(heard)) / connectors.ReolinkListenRate, asked
+	}
+	// Unfinished, then finished: both halves are one turn.
+	got, asked := hearIt(&judgeSays{answers: []float64{0.1, 0.9}})
+	if got < 2.2 || asked != 2 {
+		t.Fatalf("heard %.2f s with %d judgments, want both halves", got, asked)
+	}
+	// Finished: the turn ends at the first pause.
+	got, asked = hearIt(&judgeSays{answers: []float64{0.9}})
+	if got > 2.0 || asked != 1 {
+		t.Fatalf("heard %.2f s with %d judgments, want the first half", got, asked)
+	}
+}
