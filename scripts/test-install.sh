@@ -78,8 +78,21 @@ token="$(curl -fsS -X POST http://127.0.0.1:17431/api/v1/join-tokens)"
 install_command="$(python3 -c 'import json,sys; print(json.load(sys.stdin)["install_command"])' <<<"$token")"
 join_args="${install_command#* join }"
 echo "== install-and-join"
-# shellcheck disable=SC2086 # the join command's words
-sh scripts/install.sh join $join_args | tee "$work/join.txt"
+# The user guide's join line (computers-join in docs/user-guide/guide.json,
+# #896), with this test's local release and the issuer's own words in
+# place of the guide's placeholders. It must start as Toskar's command does.
+guide_join="$(python3 scripts/guide-example.py computers-join)"
+if [[ "${guide_join%% join *}" != "${install_command%% join *}" ]]; then
+	echo "The guide's join line no longer matches the command Toskar makes: $install_command" >&2
+	exit 1
+fi
+join_line="${guide_join%% join *}"
+join_line="${join_line//https:\/\/github.com\/yeixio\/toskar-core\/releases\/latest\/download\/install.sh/http://127.0.0.1:18091/install.sh} join $join_args"
+python3 -m http.server 18091 --bind 127.0.0.1 --directory "$work" >"$work/script-http.log" 2>&1 &
+script_pid=$!
+for _ in $(seq 1 20); do curl -fsS -o /dev/null http://127.0.0.1:18091/install.sh && break; sleep 0.5; done
+sh -c "$join_line" | tee "$work/join.txt"
+kill "$script_pid"
 grep -q "Joined the Toskar network" "$work/join.txt"
 
 echo "== the issuer sees it"
