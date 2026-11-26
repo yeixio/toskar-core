@@ -104,6 +104,9 @@ func (h *Handler) readPicture(ctx context.Context, u string) ([]byte, string, er
 		}
 		return data, mediaType, nil
 	case strings.HasPrefix(u, "https://"), strings.HasPrefix(u, "http://"):
+		if h.PictureFetched != nil {
+			h.PictureFetched(ctx, u)
+		}
 		return fetchPicture(ctx, h.pictureClient(), u)
 	}
 	return nil, "", errPicture{"a picture must be a data: URL or an http(s) one"}

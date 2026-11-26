@@ -952,7 +952,9 @@
       "comfyui": "ComfyUI",
       "problem_report": "問題回報",
       "link_check": "連結檢查",
-      "download": "下載"
+      "download": "下載",
+      "models": "模型搜尋",
+      "quality_results": "品質結果"
     },
     "kindsLower": {
       "web_search": "網路搜尋",
@@ -967,7 +969,9 @@
       "comfyui": "ComfyUI",
       "problem_report": "問題回報",
       "link_check": "連結檢查",
-      "download": "下載"
+      "download": "下載",
+      "models": "模型搜尋",
+      "quality_results": "品質結果"
     },
     "sources": {
       "chat": "聊天",

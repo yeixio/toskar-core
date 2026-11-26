@@ -966,7 +966,9 @@
       "comfyui": "ComfyUI",
       "problem_report": "Problembericht",
       "link_check": "Linkprüfung",
-      "download": "Download"
+      "download": "Download",
+      "models": "Modellsuche",
+      "quality_results": "Qualitätsergebnisse"
     },
     "kindsLower": {
       "web_search": "Websuche",
@@ -981,7 +983,9 @@
       "comfyui": "ComfyUI",
       "problem_report": "Problembericht",
       "link_check": "Linkprüfung",
-      "download": "Download"
+      "download": "Download",
+      "models": "Modellsuche",
+      "quality_results": "Qualitätsergebnisse"
     },
     "sources": {
       "chat": "Chat",

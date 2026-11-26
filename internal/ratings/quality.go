@@ -38,7 +38,25 @@ func (c *Client) QualityResults(ctx context.Context) (contracts.QualityResults, 
 	return out, nil
 }
 
-// QualityResults reads the public quality results.
+// SettingQuality reads the public quality results when Models › Results is
+// opened; off, nothing is asked for (#1415).
+const SettingQuality = "quality_results"
+
+// QualityResults reads the public quality results, unless the person
+// turned them off. A read that isn't kept from the last hour is recorded
+// with RecordQuality.
 func (s *Service) QualityResults(ctx context.Context) (contracts.QualityResults, error) {
+	if s.Settings != nil {
+		if on, err := s.Settings.GetBool(ctx, SettingQuality, true); err == nil && !on {
+			return contracts.QualityResults{Off: true, Results: []contracts.QualityResult{}}, nil
+		}
+	}
+	if _, kept := qualityCache.Get("results"); !kept && s.RecordQuality != nil {
+		url := s.Client.QualityURL
+		if url == "" {
+			url = DefaultQualityURL
+		}
+		s.RecordQuality(ctx, url)
+	}
 	return s.Client.QualityResults(ctx)
 }

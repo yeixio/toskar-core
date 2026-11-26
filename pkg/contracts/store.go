@@ -87,7 +87,10 @@ type QualityPerformance struct {
 // QualityResults are Toskar's public quality results (#593). They draw no
 // conclusions. Live says they could be read: when not, Results is empty.
 type QualityResults struct {
-	Live    bool              `json:"live"`
+	Live bool `json:"live"`
+	// Off says the person turned quality results off in Settings, so
+	// nothing was asked for (#1415, contract 1.124).
+	Off     bool              `json:"off,omitempty"`
 	Note    string            `json:"note,omitempty"`
 	Method  string            `json:"method,omitempty"`
 	Suites  map[string]string `json:"suites,omitempty"`

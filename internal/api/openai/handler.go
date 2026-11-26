@@ -46,6 +46,9 @@ type Handler struct {
 	// internet-only client.
 	Pictures      PictureStore
 	PictureClient *http.Client
+	// PictureFetched is told of each http(s) picture fetched, for What
+	// left this computer (#1415).
+	PictureFetched func(ctx context.Context, url string)
 	// Window is a model's context window in tokens, or 0 when unknown, for
 	// checking a request fits before generating (#840).
 	Window func(ctx context.Context, modelID string) int

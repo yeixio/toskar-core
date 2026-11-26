@@ -39,3 +39,36 @@ func TestQualityResultsFailure(t *testing.T) {
 		t.Fatal("no error")
 	}
 }
+
+// Off in Settings, nothing is asked for; on, each read that isn't kept
+// from the last hour is recorded (#1415).
+func TestQualityResultsSwitchAndRecord(t *testing.T) {
+	qualityCache.Clear()
+	t.Cleanup(qualityCache.Clear)
+	calls := 0
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		calls++
+		_, _ = w.Write([]byte(`{"results":[]}`))
+	}))
+	defer srv.Close()
+	s, settings, _ := newService(t, srv)
+	s.Client.QualityURL = srv.URL + "/quality.json"
+	var recorded []string
+	s.RecordQuality = func(_ context.Context, url string) { recorded = append(recorded, url) }
+	ctx := context.Background()
+
+	_ = settings.SetBool(ctx, SettingQuality, false)
+	got, err := s.QualityResults(ctx)
+	if err != nil || !got.Off || got.Live || calls != 0 || len(recorded) != 0 {
+		t.Fatalf("off: %+v %v, %d calls, recorded %v", got, err, calls, recorded)
+	}
+	_ = settings.SetBool(ctx, SettingQuality, true)
+	for range 2 {
+		if got, err := s.QualityResults(ctx); err != nil || got.Off || !got.Live {
+			t.Fatalf("on: %+v %v", got, err)
+		}
+	}
+	if calls != 1 || len(recorded) != 1 || recorded[0] != srv.URL+"/quality.json" {
+		t.Fatalf("%d calls, recorded %v", calls, recorded)
+	}
+}

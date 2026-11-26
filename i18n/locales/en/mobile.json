@@ -1064,7 +1064,9 @@
       "comfyui": "ComfyUI",
       "problem_report": "Problem report",
       "link_check": "Link check",
-      "download": "Download"
+      "download": "Download",
+      "models": "Model search",
+      "quality_results": "Quality results"
     },
     "kindsLower": {
       "web_search": "web search",
@@ -1079,7 +1081,9 @@
       "comfyui": "ComfyUI",
       "problem_report": "problem report",
       "link_check": "link check",
-      "download": "download"
+      "download": "download",
+      "models": "model search",
+      "quality_results": "quality results"
     },
     "sources": {
       "chat": "Chat",

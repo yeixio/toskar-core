@@ -200,7 +200,9 @@
     "show": "Show community ratings",
     "showHint": "Models show how people with similar computers rate them. A public summary is downloaded once a day while you browse models; it sends nothing about you.",
     "ask": "Ask me to rate models",
-    "askHint": "After you’ve used a model for a while, a chat asks how it’s working."
+    "askHint": "After you’ve used a model for a while, a chat asks how it’s working.",
+    "quality": "Quality results",
+    "qualityHint": "When you open Models › Results, the public quality results are read from GitHub, at most once an hour. Nothing about you is sent."
   },
   "yourData": {
     "title": "Your data stays private",
@@ -236,7 +238,9 @@
       "problem_report": "Problem report",
       "news": "AI news",
       "link_check": "Link check",
-      "download": "Download"
+      "download": "Download",
+      "models": "Model search",
+      "quality_results": "Quality results"
     },
     "kindsLower": {
       "web_search": "web search",
@@ -252,7 +256,9 @@
       "problem_report": "problem report",
       "news": "AI news",
       "link_check": "link check",
-      "download": "download"
+      "download": "download",
+      "models": "model search",
+      "quality_results": "quality results"
     },
     "sources": {
       "chat": "Chat",

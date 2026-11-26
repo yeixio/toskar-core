@@ -952,7 +952,9 @@
       "comfyui": "ComfyUI",
       "problem_report": "문제 보고",
       "link_check": "링크 확인",
-      "download": "다운로드"
+      "download": "다운로드",
+      "models": "모델 검색",
+      "quality_results": "품질 결과"
     },
     "kindsLower": {
       "web_search": "웹 검색",
@@ -967,7 +969,9 @@
       "comfyui": "ComfyUI",
       "problem_report": "문제 보고",
       "link_check": "링크 확인",
-      "download": "다운로드"
+      "download": "다운로드",
+      "models": "모델 검색",
+      "quality_results": "품질 결과"
     },
     "sources": {
       "chat": "채팅",

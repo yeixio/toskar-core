@@ -78,6 +78,7 @@ export function ResultsTab() {
   }
 
   if (query.isLoading) return <p className="text-sm text-ink-muted">{t('results.loading')}</p>
+  if (query.data?.off) return <p className="text-sm text-ink-muted">{t('results.off')}</p>
   if (!query.data?.live) return <p className="text-sm text-ink-muted">{t('results.offline')}</p>
 
   const versions = new Set(rows.map((r) => r.method_version))

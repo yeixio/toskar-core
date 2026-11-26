@@ -19,6 +19,7 @@ func (a *App) modelStore(ctx context.Context) (contracts.ModelStore, error) {
 	if a.HF == nil {
 		a.HF = hfclient.New()
 	}
+	a.recordModelSearch(ctx, "the store's listings: trending, most liked, and code")
 	var listings models.StoreListings
 	var wg sync.WaitGroup
 	var mu sync.Mutex

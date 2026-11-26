@@ -574,7 +574,8 @@
     "whyNo": {
       "window": "Além da sua janela",
       "out_of_memory": "Não cabe"
-    }
+    },
+    "off": "Os resultados de qualidade estão desativados. Ative-os em Configurações › Modelos e IA, em Avaliações da comunidade, para lê-los do GitHub."
   },
   "licenseTerms": {
     "title": "Aceite a licença do {{model}}",

@@ -558,7 +558,8 @@
     "whyNo": {
       "window": "超出其窗口",
       "out_of_memory": "放不下"
-    }
+    },
+    "off": "质量结果已关闭。要从 GitHub 读取，请在“设置 › 模型与 AI”的“社区评分”下打开。"
   },
   "licenseTerms": {
     "title": "接受 {{model}} 的许可证",

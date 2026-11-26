@@ -396,6 +396,8 @@ export interface QualityContextPerformance {
 
 export interface QualityResults {
   live: boolean
+  /** The person turned quality results off in Settings, so nothing was read (#1415). */
+  off?: boolean
   note?: string
   method?: string
   suites?: Record<string, string>
@@ -1162,6 +1164,8 @@ export interface SettingsView {
   automation_digest_zone?: string
   /** Show community model ratings; downloads the public summary once a day while models are browsed. */
   community_ratings?: boolean
+  /** Read the public quality results from GitHub when Models › Results is opened (#1415). On by default. */
+  quality_results?: boolean
   /** Ask for a rating after a model has been used a while. */
   ratings_prompts?: boolean
   /** Look at toskar.ai once a day for a newer version. */
@@ -1528,6 +1532,7 @@ export interface SettingsPatch {
   /** The person's Hugging Face token, for models behind a license; '' forgets it. Never read back (#551). */
   huggingface_token?: string
   community_ratings?: boolean
+  quality_results?: boolean
   update_check?: boolean
   /** Reads the AI news from toskar.ai when News is opened (#750). */
   ai_news?: boolean
@@ -2537,7 +2542,7 @@ export interface PersonalStyle {
   location?: string
 }
 
-export type EgressKind = 'web_search' | 'web_page' | 'places' | 'paired_computer' | 'external_server' | 'connector' | 'notification' | 'community_ratings' | 'update_check' | 'news' | 'problem_report' | 'link_check' | 'comfyui' | 'download'
+export type EgressKind = 'web_search' | 'web_page' | 'places' | 'paired_computer' | 'external_server' | 'connector' | 'notification' | 'community_ratings' | 'update_check' | 'news' | 'problem_report' | 'link_check' | 'comfyui' | 'download' | 'models' | 'quality_results'
 
 /** The OpenAI-compatible server whose models can be chosen for a chat (#111). */
 /** A node field a ComfyUI workflow takes from the chat (#958). */

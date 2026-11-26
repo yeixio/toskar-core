@@ -37,6 +37,9 @@ type Setup struct {
 	// stable-diffusion.cpp release and it replaced the earlier one, with
 	// the archive downloaded, so the person can be told (#1209).
 	Updated func(archive string)
+	// Fetched is told of each file setup downloads, with its address, for
+	// What left this computer (#1415).
+	Fetched func(url string)
 	// Catalog lists the models this setup offers; nil is the image models.
 	Catalog func() []Model
 	// Graphics is the memory this computer's graphics can use: a card's
@@ -613,6 +616,9 @@ func (s *Setup) install(ctx context.Context, j *job, m Model, program bool, arch
 			if f.Gated {
 				token = s.token()
 			}
+			if s.Fetched != nil {
+				s.Fetched(url)
+			}
 			if err := downloadAs(ctx, s.client(), url, token, filepath.Join(dir, filepath.Base(f.Path)), f.Size, f.SHA256, add); err != nil {
 				if errors.Is(err, errNoAccess) {
 					return fmt.Errorf("the download of %s was refused by Hugging Face: accept its license at %s with the account your token belongs to, then set it up again", m.Name, m.LicenseURL)
@@ -647,6 +653,9 @@ func (s *Setup) installProgram(ctx context.Context, archive Archive, add func(in
 	url := archive.URL()
 	if (s.archive != nil || s.builds != nil) && s.fileURL != nil {
 		url = s.fileURL(File{Path: archive.Name})
+	}
+	if s.Fetched != nil {
+		s.Fetched(url)
 	}
 	if err := download(ctx, s.client(), url, zipPath, archive.Size, archive.SHA256, add); err != nil {
 		return err

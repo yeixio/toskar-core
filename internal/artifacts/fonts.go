@@ -111,6 +111,9 @@ func cjkNeeds(text string) []string {
 type Fonts struct {
 	Dir    string
 	Client *http.Client
+	// Fetched is told of each font downloaded, with its address, for What
+	// left this computer (#1415).
+	Fetched func(ctx context.Context, url string)
 
 	mu     sync.Mutex
 	loaded map[string]*ttfFont
@@ -169,6 +172,9 @@ func (fs *Fonts) download(ctx context.Context, spec cjkFont, path string) ([]byt
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, spec.url, nil)
 	if err != nil {
 		return nil, err
+	}
+	if fs.Fetched != nil {
+		fs.Fetched(ctx, spec.url)
 	}
 	resp, err := client.Do(req)
 	if err != nil {

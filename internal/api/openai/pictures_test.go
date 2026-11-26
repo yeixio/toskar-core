@@ -92,8 +92,14 @@ func TestCompletionPictures(t *testing.T) {
 	}))
 	defer pics.Close()
 	h.PictureClient = pics.Client()
+	var fetched []string
+	h.PictureFetched = func(_ context.Context, u string) { fetched = append(fetched, u) }
 	if rec := post(h, pictureRequest(pics.URL+"/bike.png")); rec.Code != http.StatusOK || len(chat.attached) != 2 {
 		t.Fatalf("fetched: %d %s", rec.Code, rec.Body)
+	}
+	// Each one fetched is told, for What left this computer (#1415).
+	if len(fetched) != 1 || fetched[0] != pics.URL+"/bike.png" {
+		t.Fatalf("told of %v", fetched)
 	}
 	for name, url := range map[string]string{
 		"a page, not a picture": pics.URL + "/page",

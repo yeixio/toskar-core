@@ -24,6 +24,7 @@ Columns:
 | Memory | `memory_enabled` | Memory page | Personalization | Account | Basic | On | none | Data |
 | Hugging Face token | `huggingface_token` | Models › a model behind a license | Models (contextual) | Account | Advanced | none | none | Security |
 | Show community ratings | `community_ratings` | Settings › Privacy › Community ratings | Models (contextual) | Application | Basic | Off | none | Network |
+| Quality results | `quality_results` | Settings › Privacy › Community ratings | Models › Results (contextual) | Application | Basic | On | none | Network |
 | Ask me to rate models | `ratings_prompts` | Settings › Privacy › Community ratings | Models (contextual) | Application | Basic | On | none | Behavioral |
 | Check for updates | `update_check` | Settings › About | About | Application | Basic | On | none | Network |
 | AI news | `ai_news` | Settings › Privacy › AI news | News (contextual) | Application | Basic | Off | none | Network |

@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"fmt"
+	"net/url"
 	"strings"
 
 	"github.com/yeixio/toskar-core/internal/egress"
@@ -21,10 +22,7 @@ import (
 // runtimeUpgraded records and tells that runtime id's better build, such
 // as llama.cpp's GPU build, replaced the one installed.
 func (a *App) runtimeUpgraded(ctx context.Context, id string) {
-	name := id
-	if id == "llamacpp" {
-		name = "llama.cpp"
-	}
+	name := runtimeName(id)
 	a.recordDownload(ctx, "github.com", name+": a faster build for this computer's graphics, replacing the one installed")
 	a.tellDownloaded(ctx, "runtime-build:"+id, "runtimeUpgraded", "runtimeUpgradedBody", map[string]any{"runtime": name}, "/settings/privacy")
 }
@@ -41,6 +39,38 @@ func (a *App) imagesUpdated(ctx context.Context, archive string) {
 func (a *App) pythonInstalled(ctx context.Context, spec pyenv.Spec) {
 	detail := fmt.Sprintf("Python %s and packages for %s: %s", pyenv.PythonVersion, spec.Name, strings.Join(spec.Requirements, ", "))
 	a.recordDownload(ctx, "github.com, pypi.org", detail)
+}
+
+// runtimeName is how a runtime is named in a record.
+func runtimeName(id string) string {
+	if id == "llamacpp" {
+		return "llama.cpp"
+	}
+	return id
+}
+
+// recordFetch records a file downloaded from url, for what, such as
+// "model qwen3-8b"; the host is where it went (#1415).
+func (a *App) recordFetch(ctx context.Context, raw, what string) {
+	host, detail := raw, raw
+	if u, err := url.Parse(raw); err == nil && u.Host != "" {
+		host = u.Hostname()
+		// The address without its query, which can carry a signature.
+		u.RawQuery, u.Fragment = "", ""
+		detail = u.String()
+	}
+	if what != "" {
+		detail = what + ": " + detail
+	}
+	a.recordDownload(ctx, host, detail)
+}
+
+// recordModelSearch records asking Hugging Face Hub about models: a search
+// or the model store's listings (#1415).
+func (a *App) recordModelSearch(ctx context.Context, detail string) {
+	if a.Egress != nil {
+		a.Egress.Add(context.WithoutCancel(ctx), egress.Models, "Hugging Face Hub", detail)
+	}
 }
 
 func (a *App) recordDownload(ctx context.Context, host, detail string) {

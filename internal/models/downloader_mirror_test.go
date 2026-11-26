@@ -84,6 +84,13 @@ func TestDownloadThroughMirror(t *testing.T) {
 				_, _ = w.Write(payload)
 			})}}
 
+			// Each address asked is told, for What left this computer (#1415).
+			var fetched []string
+			dl.Fetched = func(_ context.Context, modelID, url string) {
+				if modelID == "mirrored" {
+					fetched = append(fetched, url)
+				}
+			}
 			entry := CatalogEntry{
 				ID: "mirrored", DisplayName: "Mirrored", SizeBytes: uint64(len(payload)), MemoryNeededBytes: 1000,
 				Source: contracts.ModelSource{URL: source, SHA256: sha},
@@ -99,6 +106,9 @@ func TestDownloadThroughMirror(t *testing.T) {
 			}
 			if got := fromSource.Load() > 0; got != c.wantSource {
 				t.Errorf("downloaded from the source: %v, want %v", got, c.wantSource)
+			}
+			if len(fetched) == 0 || (fetched[len(fetched)-1] == source) != c.wantSource {
+				t.Errorf("fetched %v, want the source last: %v", fetched, c.wantSource)
 			}
 		})
 	}

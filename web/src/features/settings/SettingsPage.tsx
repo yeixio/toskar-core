@@ -719,6 +719,18 @@ export function SettingsPage({ section }: { section?: SettingsSection } = {}) {
               </div>
               <div className="flex items-start justify-between gap-4">
                 <div>
+                  <p className="text-sm font-medium text-ink">{t('ratings.quality')}</p>
+                  <p className="mt-1 text-xs text-ink-muted">{t('ratings.qualityHint')}</p>
+                </div>
+                <Toggle
+                  label={t('ratings.quality')}
+                  checked={settings?.quality_results ?? true}
+                  disabled={busy}
+                  onChange={() => patch({ quality_results: !(settings?.quality_results ?? true) })}
+                />
+              </div>
+              <div className="flex items-start justify-between gap-4">
+                <div>
                   <p className="text-sm font-medium text-ink">{t('ratings.ask')}</p>
                   <p className="mt-1 text-xs text-ink-muted">{t('ratings.askHint')}</p>
                 </div>

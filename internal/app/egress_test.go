@@ -67,3 +67,30 @@ func TestThisComputerOnlyKeepsTheTurnHere(t *testing.T) {
 		t.Fatal(got)
 	}
 }
+
+// Downloads and model searches are recorded with their host, without a
+// signed address's query (#1415).
+func TestDownloadsAreRecordedAsEgress(t *testing.T) {
+	db, err := store.Open(filepath.Join(t.TempDir(), "test.db"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = db.Close() })
+	a := &App{Egress: egress.New(db.SQL)}
+	ctx := context.Background()
+	a.recordFetch(ctx, "https://cdn-lfs.huggingface.co/repo/model.gguf?X-Amz-Signature=secret", "model qwen")
+	a.recordModelSearch(ctx, "search: coder")
+	got, _ := a.Egress.List(ctx, egress.Filter{})
+	want := map[string]string{
+		egress.Download: "cdn-lfs.huggingface.co|model qwen: https://cdn-lfs.huggingface.co/repo/model.gguf",
+		egress.Models:   "Hugging Face Hub|search: coder",
+	}
+	if len(got) != 2 {
+		t.Fatalf("records = %+v", got)
+	}
+	for _, r := range got {
+		if w := want[r.Kind]; w != r.Destination+"|"+r.Detail {
+			t.Errorf("%s: %s|%s, want %s", r.Kind, r.Destination, r.Detail, w)
+		}
+	}
+}

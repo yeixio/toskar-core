@@ -32,6 +32,10 @@ type Downloader struct {
 	// QuotaLimitBytes returns the soft storage cap for models (0 = unlimited).
 	QuotaLimitBytes func(ctx context.Context) (uint64, error)
 
+	// Fetched is told of each file a download asks for, with the model
+	// and the address, for What left this computer (#1415).
+	Fetched func(ctx context.Context, modelID, url string)
+
 	mu      sync.Mutex
 	cancels map[string]context.CancelFunc
 }
@@ -173,6 +177,9 @@ func (d *Downloader) fetch(ctx, dctx context.Context, modelID, url, wantSum, tem
 	req, err := http.NewRequestWithContext(dctx, http.MethodGet, url, nil)
 	if err != nil {
 		return "", 0, err
+	}
+	if d.Fetched != nil {
+		d.Fetched(ctx, modelID, url)
 	}
 	if offset > 0 {
 		req.Header.Set("Range", fmt.Sprintf("bytes=%d-", offset))

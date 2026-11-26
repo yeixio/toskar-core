@@ -200,7 +200,9 @@
     "show": "Community-Bewertungen anzeigen",
     "showHint": "Modelle zeigen, wie Leute mit ähnlichen Computern sie bewerten. Eine öffentliche Zusammenfassung wird einmal am Tag geladen, während du Modelle ansiehst; dabei wird nichts über dich gesendet.",
     "ask": "Mich bitten, Modelle zu bewerten",
-    "askHint": "Nachdem du ein Modell eine Weile genutzt hast, fragt ein Chat, wie es läuft."
+    "askHint": "Nachdem du ein Modell eine Weile genutzt hast, fragt ein Chat, wie es läuft.",
+    "quality": "Qualitätsergebnisse",
+    "qualityHint": "Wenn du Modelle › Ergebnisse öffnest, werden die öffentlichen Qualitätsergebnisse von GitHub gelesen, höchstens einmal pro Stunde. Über dich wird nichts gesendet."
   },
   "yourData": {
     "title": "Deine Daten bleiben privat",
@@ -236,7 +238,9 @@
       "problem_report": "Problembericht",
       "news": "KI-Neuigkeiten",
       "link_check": "Linkprüfung",
-      "download": "Download"
+      "download": "Download",
+      "models": "Modellsuche",
+      "quality_results": "Qualitätsergebnisse"
     },
     "kindsLower": {
       "web_search": "Websuche",
@@ -252,7 +256,9 @@
       "problem_report": "Problembericht",
       "news": "KI-Neuigkeiten",
       "link_check": "Linkprüfung",
-      "download": "Download"
+      "download": "Download",
+      "models": "Modellsuche",
+      "quality_results": "Qualitätsergebnisse"
     },
     "sources": {
       "chat": "Chat",

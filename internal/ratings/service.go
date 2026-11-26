@@ -58,6 +58,9 @@ type Service struct {
 	Models func(ctx context.Context) ([]contracts.Model, error)
 	// Record notes data leaving this computer.
 	Record func(ctx context.Context, destination, detail string)
+	// RecordQuality records reading the public quality results from url
+	// (#1415).
+	RecordQuality func(ctx context.Context, url string)
 	// OutOfMemory says whether a failed start's error means the model ran
 	// out of memory.
 	OutOfMemory func(text string) bool

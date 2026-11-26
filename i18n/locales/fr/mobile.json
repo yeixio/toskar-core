@@ -980,7 +980,9 @@
       "comfyui": "ComfyUI",
       "problem_report": "Signalement",
       "link_check": "Vérification de lien",
-      "download": "Téléchargement"
+      "download": "Téléchargement",
+      "models": "Recherche de modèles",
+      "quality_results": "Résultats de qualité"
     },
     "kindsLower": {
       "web_search": "recherche web",
@@ -995,7 +997,9 @@
       "comfyui": "ComfyUI",
       "problem_report": "signalement",
       "link_check": "vérification de lien",
-      "download": "téléchargement"
+      "download": "téléchargement",
+      "models": "recherche de modèles",
+      "quality_results": "résultats de qualité"
     },
     "sources": {
       "chat": "Discussion",
