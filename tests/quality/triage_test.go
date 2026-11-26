@@ -16,10 +16,9 @@ import (
 )
 
 // The triage set (#455): issues of this repository, as written, with the
-// labels maintainers gave them, to measure how well a model suggests them
-// the way the Triage workflow (.github/workflows/triage.yml) asks. The
-// workflow's labels, prompt, and limits are in .github/triage.json, which
-// both read. A real model's numbers are measured, not held to a pass rate:
+// labels maintainers gave them, to measure how well a model suggests them.
+// The labels, prompt, and limits are in .github/triage.json. The Triage
+// workflow that once commented them on new issues is gone. A real model's numbers are measured, not held to a pass rate:
 // the labels are sparse, so a suggestion they don't have isn't always
 // wrong.
 
@@ -230,16 +229,6 @@ func TestTriageCases(t *testing.T) {
 		_ = json.Unmarshal([]byte(answer), &a)
 		if got := strings.Join(cfg.labels(a), ","); got != want {
 			t.Errorf("labels(%s) = %q, want %q", answer, got, want)
-		}
-	}
-	// The workflow builds the same from the same fields.
-	workflow, err := os.ReadFile("../../.github/workflows/triage.yml")
-	if err != nil {
-		t.Fatal(err)
-	}
-	for _, field := range []string{fmt.Sprintf("head -c %d", triageMaxBytes), ".prompt, (.groups[] | .ask,", "if .max then", "maxItems: .max", "required: [.groups[].name]", "$cfg[0].groups[]"} {
-		if !strings.Contains(string(workflow), field) {
-			t.Errorf("triage.yml no longer builds its question with %q; keep it and this test in step", field)
 		}
 	}
 }
