@@ -44,13 +44,13 @@ func BuiltInPresets() []Profile {
 			Purpose:        "coding",
 			OrchestratorID: "simple",
 			NodePolicy:     contracts.NodePolicy{Mode: "automatic"},
+			// One model answers, as in the other profiles: on 4B and 9B
+			// models Team passed no more of the quality set and took two to
+			// three times as long (#1208). Team stays a choice.
 			Roles: []contracts.ModelRole{
-				{Role: RolePlanner, Required: false},
-				{Role: RoleWorker, Required: false},
-				{Role: RoleReviewer, Required: false},
+				{Role: RolePrimary, Required: false},
 			},
-			Orchestration: contracts.OrchestrationPolicy{Strategy: StrategyTeam},
-			Tools:         codingToolPolicies(),
+			Tools: codingToolPolicies(),
 		},
 		{
 			ID:             PresetResearch,

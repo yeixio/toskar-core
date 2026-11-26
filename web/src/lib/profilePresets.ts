@@ -134,12 +134,6 @@ export function blankProfileTemplate(): Omit<AIProfile, 'id'> {
 
 function defaultRolesForPurpose(purpose: Purpose): AIProfile['roles'] {
   switch (purpose) {
-    case 'coding':
-      return [
-        { role: 'planner', model_id: '', required: false },
-        { role: 'worker', model_id: '', required: false },
-        { role: 'reviewer', model_id: '', required: false },
-      ]
     case 'research':
       return [{ role: 'assistant', model_id: '', required: false }]
     case 'custom':
@@ -156,7 +150,6 @@ function profileTemplate(purpose: Purpose): Omit<AIProfile, 'id' | 'roles'> {
         name: 'Programming',
         purpose: 'coding',
         orchestrator_id: 'simple',
-        orchestration: { strategy: 'team' },
         node_policy: { mode: 'automatic' },
         tools: codingTools,
       }
@@ -206,7 +199,7 @@ export const presetOptions: {
     description:
       'Code help that can use all your paired computers automatically when models are installed on them.',
     detail:
-      'Uses Team (coordinator → worker → reviewer). Pin a worker to another Mac when you want a visible two-machine demo.',
+      'One assistant with coding tools. Set its strategy to Team to have a planner, workers, and a reviewer share a request across your computers.',
   },
   {
     id: 'research',
