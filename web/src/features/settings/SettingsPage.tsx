@@ -567,6 +567,18 @@ export function SettingsPage({ section }: { section?: SettingsSection } = {}) {
                     ))}
                   </select>
                 </label>
+                <div className="flex items-start justify-between gap-4 border-t border-line pt-3">
+                  <div>
+                    <span className="block text-sm font-medium text-ink">{t('voice.smartTurn')}</span>
+                    <span className="mt-1 block text-sm text-ink-muted">{t('voice.smartTurnHint')}</span>
+                  </div>
+                  <Toggle
+                    label={t('voice.smartTurn')}
+                    checked={settings.voice_smart_turn ?? false}
+                    disabled={busy}
+                    onChange={() => patch({ voice_smart_turn: !(settings.voice_smart_turn ?? false) })}
+                  />
+                </div>
               </section>
             ) : null}
 

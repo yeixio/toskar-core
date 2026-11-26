@@ -1156,6 +1156,8 @@ export interface SettingsView {
   voice_hearing?: 'fast' | 'accurate'
   /** The one language voice mode and the door hear, such as de; "" detects each turn's (#1405, contract 1.123). */
   voice_language?: string
+  /** Smart Turn hears whether a paused turn sounds finished; off by default (#1460, contract 1.131). */
+  voice_smart_turn?: boolean
   model_storage_limit_gb?: number
   save_chat_history?: boolean
   save_task_history?: boolean
@@ -1575,6 +1577,7 @@ export interface SettingsPatch {
   download_behavior?: 'ask' | 'automatic'
   voice_hearing?: 'fast' | 'accurate'
   voice_language?: string
+  voice_smart_turn?: boolean
   model_storage_limit_gb?: number
   save_chat_history?: boolean
   save_task_history?: boolean
