@@ -94,3 +94,21 @@ func TestDownloadsAreRecordedAsEgress(t *testing.T) {
 		}
 	}
 }
+
+// A terminal command that goes online is recorded with its hosts, without
+// its credentials; one that doesn't isn't (#1426).
+func TestTerminalCommandsThatGoOnlineAreRecorded(t *testing.T) {
+	db, err := store.Open(filepath.Join(t.TempDir(), "test.db"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = db.Close() })
+	a := &App{Egress: egress.New(db.SQL)}
+	ctx := egress.WithRun(context.Background(), egress.Run{Source: egress.SourceChat, ConversationID: "c"})
+	a.recordToolEgress(ctx, "terminal", map[string]any{"command": "ls -la && git status"})
+	a.recordToolEgress(ctx, "terminal", map[string]any{"command": "curl -s https://me:pw@api.example.com/v1/items"})
+	got, _ := a.Egress.List(context.Background(), egress.Filter{})
+	if len(got) != 1 || got[0].Kind != egress.Terminal || got[0].Destination != "api.example.com" || got[0].Detail != "curl -s https://api.example.com/v1/items" {
+		t.Fatalf("records = %+v", got)
+	}
+}

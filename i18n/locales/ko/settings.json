@@ -257,7 +257,8 @@
       "download": "다운로드",
       "models": "모델 검색",
       "quality_results": "품질 결과",
-      "relay": "릴레이"
+      "relay": "릴레이",
+      "terminal": "터미널"
     },
     "kindsLower": {
       "web_search": "웹 검색",
@@ -276,7 +277,8 @@
       "download": "다운로드",
       "models": "모델 검색",
       "quality_results": "품질 결과",
-      "relay": "릴레이"
+      "relay": "릴레이",
+      "terminal": "터미널"
     },
     "sources": {
       "chat": "채팅",

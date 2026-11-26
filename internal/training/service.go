@@ -89,6 +89,9 @@ type Deps struct {
 	FreeDisk func(path string) (uint64, error)
 	// Sent, when set, records training data sent to a paired computer (§63).
 	Sent func(ctx context.Context, nodeName, detail string)
+	// Downloaded, when set, records the base weights a run is about to
+	// fetch from Hugging Face, when they aren't in the cache yet (#1426).
+	Downloaded func(ctx context.Context, host, detail string)
 }
 
 // Service builds, trains, evaluates, and deploys specialized AIs.
@@ -1155,6 +1158,9 @@ func (s *Service) execute(ctx context.Context, spec execSpec, setState func(Stat
 		}
 	}
 	setState(StateLoading, "Loading the base model")
+	if s.d.Downloaded != nil && !BaseWeightsCached(s.d.HFHome, spec.repo) {
+		s.d.Downloaded(ctx, "huggingface.co", "training base weights: "+spec.repo)
+	}
 	return spec.trainer.Run(ctx, RunSpec{
 		Python:       python,
 		Env:          append(s.d.Python.Env(), "HF_HOME="+s.d.HFHome, "HF_HUB_DISABLE_TELEMETRY=1", "TOKENIZERS_PARALLELISM=false"),

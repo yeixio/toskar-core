@@ -107,6 +107,17 @@ func (m *Manager) run(ctx context.Context, key string, limit time.Duration, fn f
 	defer stop()
 	err = fn(actx)
 	s.lastUsed = time.Now()
+	// The other sites the page loaded from meanwhile (#1426), by the page's
+	// address without its query, which can carry a token.
+	page, host := current(actx), ""
+	if u, perr := url.Parse(page); perr == nil {
+		host = u.Hostname()
+		u.RawQuery, u.Fragment = "", ""
+		page = u.String()
+	}
+	if hosts := s.takeHosts(host); len(hosts) > 0 && m.Loaded != nil {
+		m.Loaded(context.WithoutCancel(ctx), page, hosts)
+	}
 	if errors.Is(err, context.DeadlineExceeded) {
 		return errors.New("the page took too long")
 	}

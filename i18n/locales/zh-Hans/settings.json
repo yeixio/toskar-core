@@ -257,7 +257,8 @@
       "download": "下载",
       "models": "模型搜索",
       "quality_results": "质量结果",
-      "relay": "中继"
+      "relay": "中继",
+      "terminal": "终端"
     },
     "kindsLower": {
       "web_search": "网络搜索",
@@ -276,7 +277,8 @@
       "download": "下载",
       "models": "模型搜索",
       "quality_results": "质量结果",
-      "relay": "中继"
+      "relay": "中继",
+      "terminal": "终端"
     },
     "sources": {
       "chat": "聊天",

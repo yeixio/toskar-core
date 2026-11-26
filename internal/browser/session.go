@@ -3,10 +3,13 @@ package browser
 import (
 	"context"
 	"errors"
+	"net/url"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"sort"
+	"strings"
 	"sync"
 	"time"
 
@@ -37,6 +40,10 @@ type Manager struct {
 	// Opened is called for each page the browser is sent to, for What
 	// left this computer.
 	Opened func(ctx context.Context, host, url string)
+	// Loaded, when set, is called after each action with the other sites
+	// the page loaded something from meanwhile, such as its images,
+	// scripts, and fonts, for What left this computer (#1426).
+	Loaded func(ctx context.Context, page string, hosts []string)
 	// Sandboxed refuses: the Mac App Store build cannot start another
 	// program.
 	Sandboxed bool
@@ -56,6 +63,38 @@ type session struct {
 	dir      string
 	mu       sync.Mutex // one action at a time
 	lastUsed time.Time
+
+	// hosts are the other sites the page loaded something from since the
+	// last action, for What left this computer (#1426).
+	hostsMu sync.Mutex
+	hosts   map[string]bool
+}
+
+// sawHost notes a site a request went to.
+func (s *session) sawHost(host string) {
+	s.hostsMu.Lock()
+	defer s.hostsMu.Unlock()
+	if s.hosts == nil {
+		s.hosts = map[string]bool{}
+	}
+	s.hosts[strings.ToLower(host)] = true
+}
+
+// takeHosts is the sites seen since the last call, sorted, except page's.
+func (s *session) takeHosts(page string) []string {
+	s.hostsMu.Lock()
+	seen := s.hosts
+	s.hosts = nil
+	s.hostsMu.Unlock()
+	page = strings.ToLower(page)
+	out := make([]string, 0, len(seen))
+	for h := range seen {
+		if h != page {
+			out = append(out, h)
+		}
+	}
+	sort.Strings(out)
+	return out
 }
 
 // candidates are where Chromium-based browsers usually are.
@@ -181,7 +220,7 @@ func (m *Manager) get(key string) (*session, error) {
 			_ = os.RemoveAll(dir)
 		}
 	}
-	m.listen(ctx)
+	m.listen(ctx, s)
 	// The first Run starts the browser and ties it to ctx, so it runs on
 	// ctx itself; a timer stops a browser that does not start.
 	slow := time.AfterFunc(startLimit, s.cancel)
@@ -206,7 +245,7 @@ func (m *Manager) get(key string) (*session, error) {
 
 // listen checks every request the page makes, including redirects and
 // resources, and stops those for this computer or the local network.
-func (m *Manager) listen(ctx context.Context) {
+func (m *Manager) listen(ctx context.Context, s *session) {
 	chromedp.ListenTarget(ctx, func(ev any) {
 		e, ok := ev.(*fetch.EventRequestPaused)
 		if !ok {
@@ -219,6 +258,9 @@ func (m *Manager) listen(ctx context.Context) {
 			}
 			ectx := cdp.WithExecutor(ctx, c.Target)
 			if allowedRequest(ctx, m.Guard, e.Request.URL) {
+				if u, err := url.Parse(e.Request.URL); err == nil && u.Hostname() != "" {
+					s.sawHost(u.Hostname())
+				}
 				_ = fetch.ContinueRequest(e.RequestID).Do(ectx)
 				return
 			}
