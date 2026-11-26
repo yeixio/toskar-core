@@ -1225,6 +1225,8 @@ export interface ChatRequest {
   thinking?: 'on' | 'off'
   /** The person's IANA time zone, for the date and time the answer uses; set by the api client. */
   time_zone?: string
+  /** Where this device is, when Use this device's location is on (#1310); set by the api client. */
+  device_location?: { latitude: number; longitude: number; accuracy_m?: number }
   /** Answer from this message, as a new version of the point after it (#447). */
   parent_id?: string
   /** Ask this answer's question again, as a new version of the answer. */

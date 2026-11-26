@@ -69,6 +69,7 @@ Columns:
 | --- | --- | --- | --- | --- | --- | --- |
 | Theme | Settings › General › Appearance (this browser) | Appearance | Account (per device) | Basic | Dark | Visual |
 | Personalization (tone, length, about you) | Settings › General › Personalization | Personalization | Account | Basic | none | Behavioral |
+| Use this device's location (#1310) | Settings › General › Personalization (this browser) | Personalization | Account (per device) | Basic | Off | Privacy |
 | Your account (name, sign-in, PIN) | Settings, top | Account | Account | Basic | none | Security |
 | Your devices (phones signed in as you) | Settings, top | Account | Account | Basic | none | Security |
 | Microphone and auto gain for voice mode | Voice mode dialog (this browser) | Voice | Account (per device) | Basic | System default, auto gain on | Behavioral |
