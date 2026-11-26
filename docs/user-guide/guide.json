@@ -1794,7 +1794,7 @@
         },
         {
           "type": "paragraph",
-          "text": "A loaded model is unloaded after 15 minutes without use, unless Settings sets the model lifecycle to manual or another time, or the model is kept running (below). Settings also sets the most disk space models may use."
+          "text": "A loaded model is unloaded after 15 minutes without use, unless Settings sets the model lifecycle to manual or another time, or the model is kept running (below). Your main chat model, the one a new chat uses, stays loaded while it needs at most half of the computer's memory, and loads when Toskar starts. Chat also starts loading the model when you open it and when you start typing, so the first reply waits less. Until an Admin chooses, a card at the top of chat asks whether the main chat model should be Always ready, which keeps it loaded, or managed by Toskar, which frees the memory when it's needed. Settings › AI behavior › Model lifecycle › Main chat model changes it later. Settings also sets the most disk space models may use."
         },
         {
           "type": "heading",
