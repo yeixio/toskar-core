@@ -13,7 +13,8 @@
     "computers": "Computer",
     "models": "Modelle",
     "settings": "Einstellungen",
-    "activity": "Aktivität"
+    "activity": "Aktivität",
+    "position": "{{label}}, Tab, {{position}} von {{count}}"
   },
   "screens": {
     "connect": "Verbinden",
@@ -57,7 +58,8 @@
     "notReady": "Toskar hat geantwortet, ist aber nicht bereit.",
     "certificateMismatch": "Das Zertifikat des Computers passte nicht zu dem, das er gemeldet hat, deshalb wurde die Verbindung beendet. Versuche es in deinem eigenen Netzwerk erneut.",
     "pairUnsupported": "Toskar auf diesem Computer ist zu alt für die Verbindung per Code. Aktualisiere es oder verwende einen API-Schlüssel.",
-    "lede": "Dieses Gerät nutzt den Computer, auf dem deine Modelle bereits laufen."
+    "lede": "Dieses Gerät nutzt den Computer, auf dem deine Modelle bereits laufen.",
+    "couldNotFinish": "Der Computer hat den Code angenommen, aber dieses Gerät konnte die Verbindung nicht abschließen. Versuche es mit einem neuen Code erneut."
   },
   "discovery": {
     "onThisNetwork": "In diesem Netzwerk",
@@ -87,7 +89,12 @@
       "degraded": "eingeschränkt"
     },
     "running": "Führt {{models}} aus",
-    "addHint": "Um einen Computer hinzuzufügen, installiere dort Toskar und füge ihn dann unter Computer auf deinem Computer hinzu."
+    "addHint": "Um einen Computer hinzuzufügen, installiere dort Toskar und füge ihn dann unter Computer auf deinem Computer hinzu.",
+    "metaConnected": "{{platform}} · {{status}} · verbunden",
+    "address": "Adresse: {{address}}",
+    "arch": "Architektur: {{arch}}",
+    "switch": "Computer wechseln",
+    "switchHint": "Verbinde dieses Gerät mit einem anderen Computer. Dieser bleibt gekoppelt, und mit einem neuen Code kannst du zurückwechseln."
   },
   "models": {
     "title": "Modelle",
@@ -155,6 +162,11 @@
       },
       "prompt": "Wie funktioniert {{model}} für dich?",
       "notNow": "Nicht jetzt"
+    },
+    "friendly": {
+      "loaded": "Läuft",
+      "installed": "Bereit",
+      "downloading": "Wird geladen"
     }
   },
   "phoneModels": {
@@ -238,7 +250,11 @@
     "keepOpen": "Große Modelle zu laden kann einige Minuten dauern. Lass Toskar geöffnet.",
     "ready": "Alles bereit",
     "installed": "{{model}} ist installiert. Chatte jetzt mit deiner lokalen KI.",
-    "startChatting": "Chat starten"
+    "startChatting": "Chat starten",
+    "computerTitle": "Toskar auf deinem Computer",
+    "computerCopy": "Läuft Toskar schon auf einem Mac oder PC? Verbinde dieses Gerät damit und chatte mit den Modellen dort.",
+    "useComputer": "Mit meinem Computer verbinden",
+    "orThisDevice": "Oder nutze Modelle auf diesem Gerät"
   },
   "settings": {
     "title": "Einstellungen",
@@ -285,7 +301,12 @@
     "memoryEmpty": "Noch nichts gemerkt.",
     "forgetMemory": "Vergessen",
     "forgetMemoryLabel": "„{{memory}}“ vergessen",
-    "resetCopyMemories": "Die Willkommenseinrichtung wiederherstellen. Löscht Chats und Erinnerungen auf diesem Gerät und vergisst den verbundenen Computer."
+    "resetCopyMemories": "Die Willkommenseinrichtung wiederherstellen. Löscht Chats und Erinnerungen auf diesem Gerät und vergisst den verbundenen Computer.",
+    "chatOnPhoneOnly": "Nur für Chats, die auf diesem Gerät laufen, nicht auf {{name}}.",
+    "onComputer": "Auf {{name}}",
+    "forgetConfirmTitle": "{{name}} vergessen?",
+    "forgetConfirmBody": "Für eine erneute Verbindung brauchst du einen neuen Code von diesem Computer.",
+    "forgetConfirm": "Vergessen"
   },
   "language": {
     "title": "Sprache",
@@ -481,7 +502,8 @@
       "custom": "Benutzerdefiniert"
     },
     "readAloud": "Vorlesen",
-    "stopReading": "Vorlesen beenden"
+    "stopReading": "Vorlesen beenden",
+    "ranOnComputer": "{{model}} auf {{computer}}"
   },
   "effort": {
     "title": "Aufwand",
@@ -665,7 +687,11 @@
       "switch": "Nicht {{name}}?",
       "unnamed": "Person {{n}}",
       "back": "Zurück"
-    }
+    },
+    "disconnectTitle": "Verbindung zu diesem Computer trennen?",
+    "disconnectBody": "Für eine erneute Verbindung brauchst du einen neuen Code von diesem Computer.",
+    "disconnectCancel": "Abbrechen",
+    "lockedWhy": "Es ist ein einmaliger Kauf, der dir bleibt, und er schaltet auch mehr auf deinem Smartphone oder Tablet frei. Toskar auf dem Smartphone oder Tablet mit deinem eigenen Computer bleibt kostenlos. Den Preis siehst du in Toskar auf dem Smartphone oder Tablet unter Einstellungen > Toskar Unlock."
   },
   "setup": {
     "title": "Auf deinem Computer einrichten",
@@ -812,7 +838,19 @@
     "boughtInSettings": "In den Einstellungen von Toskar auf dem Computer abgeschlossen. Karte ändern oder kündigen kannst du dort unter Einstellungen › Netzwerkzugriff.",
     "coveredTitle": "Über das Abo eines anderen Geräts abgedeckt",
     "coveredBody": "Dieser Computer hat schon ein Abo, abgeschlossen auf einem anderen Gerät. Verbinde dich einmal zu Hause mit deinem Computer, dann übernimmt dieses Gerät es.",
-    "extraSubscription": "Dieser Computer hat mehr als ein Abo, braucht aber nur eins. Du kannst deins unter „Abo verwalten“ kündigen, das andere deckt ihn weiter ab."
+    "extraSubscription": "Dieser Computer hat mehr als ein Abo, braucht aber nur eins. Du kannst deins unter „Abo verwalten“ kündigen, das andere deckt ihn weiter ab.",
+    "product": "Zugriff von überall",
+    "moveNeedsComputer": "Verbinde dieses Gerät zum Übertragen zuerst mit dem Computer, für den es genutzt wird, oder warte, bis dieser Computer 3 Tage aus war.",
+    "pendingApproval": "Der Kauf wartet auf Genehmigung. Sobald er genehmigt ist, wird er beim nächsten Öffnen von Toskar automatisch aktiviert.",
+    "soldOut": "Das Relay von Toskar nimmt gerade keine neuen Abos an. Versuche es später erneut; „Kauf wiederherstellen“ funktioniert weiterhin.",
+    "relayUnreachable": "Das Relay von Toskar war nicht erreichbar, um Abos zu prüfen. Prüfe deine Verbindung und versuche es erneut.",
+    "handOverLater": "Dein Kauf ist abgeschlossen. Er wird aktiviert, sobald dein Computer erreichbar ist.",
+    "needsAdminFirst": "Nur ein Admin auf diesem Computer kann den Zugriff von überall einschalten. Wenn du abonnierst, bitte danach einen Admin, ihn unter API-Zugriff einzuschalten.",
+    "oneComputer": "Ein Abo gilt für einen Computer.",
+    "extraSubscriptionOthers": "Dieser Computer hat mehr als ein Abonnement. Wer das zusätzliche bezahlt, kann es in den Einstellungen seines Stores kündigen.",
+    "moveConfirmTitle": "Zugriff von überall auf {{name}} verschieben?",
+    "moveConfirmBody": "Der andere Computer, für den dieses Abonnement gilt, funktioniert unterwegs sofort nicht mehr. Ein Abonnement kann einmal am Tag verschoben werden.",
+    "coverEnds": "Das Abonnement für diesen Computer endet am {{date}} und verlängert sich nicht. Abonniere, um ihn danach weiter von überall zu erreichen."
   },
   "unlock": {
     "title": "Toskar Unlock",

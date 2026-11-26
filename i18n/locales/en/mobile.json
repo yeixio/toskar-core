@@ -13,7 +13,8 @@
     "computers": "Computers",
     "models": "Models",
     "settings": "Settings",
-    "activity": "Activity"
+    "activity": "Activity",
+    "position": "{{label}}, tab, {{position}} of {{count}}"
   },
   "screens": {
     "connect": "Connect",
@@ -57,7 +58,8 @@
     "notReady": "Toskar answered, but it is not ready.",
     "certificateMismatch": "The computer's certificate didn't match the one it reported, so the connection was stopped. Try again on your own network.",
     "pairUnsupported": "That computer's Toskar is too old to connect with a code. Update it, or use an API key.",
-    "lede": "This device uses the computer that already runs your models."
+    "lede": "This device uses the computer that already runs your models.",
+    "couldNotFinish": "The computer accepted the code, but this device couldn't finish connecting. Try again with a new code."
   },
   "discovery": {
     "onThisNetwork": "On this network",
@@ -87,7 +89,12 @@
       "degraded": "degraded"
     },
     "running": "Running {{models}}",
-    "addHint": "To add a computer, install Toskar on it, then add it from Computers on your computer."
+    "addHint": "To add a computer, install Toskar on it, then add it from Computers on your computer.",
+    "metaConnected": "{{platform}} · {{status}} · connected",
+    "address": "Address: {{address}}",
+    "arch": "Architecture: {{arch}}",
+    "switch": "Switch computer",
+    "switchHint": "Connect this phone to another computer. This one stays paired, and you can come back to it with a new code."
   },
   "models": {
     "title": "Models",
@@ -155,6 +162,11 @@
       },
       "prompt": "How is {{model}} working for you?",
       "notNow": "Not now"
+    },
+    "friendly": {
+      "loaded": "Running",
+      "installed": "Ready",
+      "downloading": "Downloading"
     }
   },
   "phoneModels": {
@@ -238,7 +250,11 @@
     "keepOpen": "Large model downloads can take several minutes. Keep Toskar open.",
     "ready": "You are ready",
     "installed": "{{model}} is installed. Start chatting with your local AI.",
-    "startChatting": "Start chatting"
+    "startChatting": "Start chatting",
+    "computerTitle": "Toskar on your computer",
+    "computerCopy": "Already running Toskar on a Mac or PC? Connect this device to it and chat with the models there.",
+    "useComputer": "Connect to my computer",
+    "orThisDevice": "Or use models on this device"
   },
   "settings": {
     "title": "Settings",
@@ -285,7 +301,12 @@
     "memoryEmpty": "Nothing remembered yet.",
     "forgetMemory": "Forget",
     "forgetMemoryLabel": "Forget “{{memory}}”",
-    "resetCopyMemories": "Restore the welcome setup. Clears chats and memories on this device and forgets the connected computer."
+    "resetCopyMemories": "Restore the welcome setup. Clears chats and memories on this device and forgets the connected computer.",
+    "chatOnPhoneOnly": "Only for chats that run on this device, not on {{name}}.",
+    "onComputer": "On {{name}}",
+    "forgetConfirmTitle": "Forget {{name}}?",
+    "forgetConfirmBody": "You'll need a new code from it to connect again.",
+    "forgetConfirm": "Forget"
   },
   "language": {
     "title": "Language",
@@ -481,7 +502,8 @@
       "custom": "Custom"
     },
     "readAloud": "Read aloud",
-    "stopReading": "Stop reading"
+    "stopReading": "Stop reading",
+    "ranOnComputer": "{{model}} on {{computer}}"
   },
   "effort": {
     "title": "Effort",
@@ -763,7 +785,11 @@
       "switch": "Not {{name}}?",
       "unnamed": "Person {{n}}",
       "back": "Back"
-    }
+    },
+    "disconnectTitle": "Disconnect from this computer?",
+    "disconnectBody": "You'll need a new code from it to connect again.",
+    "disconnectCancel": "Cancel",
+    "lockedWhy": "It's one purchase, yours to keep, and it also adds more on your phone or tablet. Toskar on your phone or tablet with your own computer stays free. To see the price, open Toskar on your phone or tablet, then Settings, then Toskar Unlock."
   },
   "setup": {
     "title": "Set it up on your computer",
@@ -910,7 +936,19 @@
     "boughtInSettings": "Bought in Toskar's settings on the computer. Change the card or cancel there, under Settings › Network access.",
     "coveredTitle": "Covered by another device's subscription",
     "coveredBody": "This computer already has a subscription, bought on another device. Connect to your computer at home once, and this device picks it up.",
-    "extraSubscription": "This computer has more than one subscription, and it needs only one. You can cancel yours in Manage subscription, and the other keeps it covered."
+    "extraSubscription": "This computer has more than one subscription, and it needs only one. You can cancel yours in Manage subscription, and the other keeps it covered.",
+    "product": "Access from anywhere",
+    "moveNeedsComputer": "To move it, connect this device to the computer it's used for first, or wait until that computer has been off for 3 days.",
+    "pendingApproval": "Waiting for the purchase to be approved. Once it is, it turns on by itself the next time you open Toskar.",
+    "soldOut": "Toskar's relay isn't taking new subscriptions right now. Try again later; Restore purchase still works.",
+    "relayUnreachable": "Couldn't reach Toskar's relay to check for subscriptions. Check your connection and try again.",
+    "handOverLater": "Your purchase went through. It turns on when your computer is reachable.",
+    "needsAdminFirst": "Only an Admin on this computer can turn on access from anywhere. If you subscribe, ask one to turn it on in API Access afterwards.",
+    "oneComputer": "One subscription covers one computer.",
+    "extraSubscriptionOthers": "This computer has more than one subscription. Whoever pays for the extra one can cancel it in their store's settings.",
+    "moveConfirmTitle": "Move access from anywhere to {{name}}?",
+    "moveConfirmBody": "The other computer this subscription is on stops working away from home right away. A subscription can move once a day.",
+    "coverEnds": "The subscription that covers this computer ends on {{date}} and won't renew. Subscribe to keep reaching it from anywhere after that."
   },
   "unlock": {
     "title": "Toskar Unlock",

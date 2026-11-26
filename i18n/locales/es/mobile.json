@@ -13,7 +13,8 @@
     "computers": "Computadoras",
     "models": "Modelos",
     "settings": "Configuración",
-    "activity": "Actividad"
+    "activity": "Actividad",
+    "position": "{{label}}, pestaña, {{position}} de {{count}}"
   },
   "screens": {
     "connect": "Conectar",
@@ -57,7 +58,8 @@
     "notReady": "Toskar respondió, pero no está listo.",
     "certificateMismatch": "El certificado de la computadora no coincidía con el que informó, así que se detuvo la conexión. Vuelve a intentarlo en tu propia red.",
     "pairUnsupported": "El Toskar de esa computadora es demasiado antiguo para conectarse con un código. Actualízalo o usa una clave de API.",
-    "lede": "Este dispositivo usa la computadora que ya ejecuta tus modelos."
+    "lede": "Este dispositivo usa la computadora que ya ejecuta tus modelos.",
+    "couldNotFinish": "El ordenador aceptó el código, pero este dispositivo no pudo terminar de conectarse. Inténtalo de nuevo con un código nuevo."
   },
   "discovery": {
     "onThisNetwork": "En esta red",
@@ -87,7 +89,12 @@
       "degraded": "con problemas"
     },
     "running": "Ejecuta {{models}}",
-    "addHint": "Para agregar una computadora, instala Toskar en ella y luego agrégala desde Computadoras en tu computadora."
+    "addHint": "Para agregar una computadora, instala Toskar en ella y luego agrégala desde Computadoras en tu computadora.",
+    "metaConnected": "{{platform}} · {{status}} · conectado",
+    "address": "Dirección: {{address}}",
+    "arch": "Arquitectura: {{arch}}",
+    "switch": "Cambiar de ordenador",
+    "switchHint": "Conecta este dispositivo a otro ordenador. Este sigue vinculado y puedes volver a él con un código nuevo."
   },
   "models": {
     "title": "Modelos",
@@ -157,6 +164,11 @@
       },
       "prompt": "¿Qué tal te funciona {{model}}?",
       "notNow": "Ahora no"
+    },
+    "friendly": {
+      "loaded": "En ejecución",
+      "installed": "Listo",
+      "downloading": "Descargando"
     }
   },
   "phoneModels": {
@@ -240,7 +252,11 @@
     "keepOpen": "Las descargas de modelos grandes pueden tardar varios minutos. Mantén Toskar abierto.",
     "ready": "Todo listo",
     "installed": "{{model}} está instalado. Empieza a chatear con tu IA local.",
-    "startChatting": "Empezar a chatear"
+    "startChatting": "Empezar a chatear",
+    "computerTitle": "Toskar en tu ordenador",
+    "computerCopy": "¿Ya usas Toskar en un Mac o PC? Conecta este dispositivo y chatea con sus modelos.",
+    "useComputer": "Conectar con mi ordenador",
+    "orThisDevice": "O usa modelos en este dispositivo"
   },
   "settings": {
     "title": "Configuración",
@@ -287,7 +303,12 @@
     "memoryEmpty": "Todavía no recuerdo nada.",
     "forgetMemory": "Olvidar",
     "forgetMemoryLabel": "Olvidar “{{memory}}”",
-    "resetCopyMemories": "Restaura la configuración de bienvenida. Borra los chats y recuerdos de este dispositivo y olvida la computadora conectada."
+    "resetCopyMemories": "Restaura la configuración de bienvenida. Borra los chats y recuerdos de este dispositivo y olvida la computadora conectada.",
+    "chatOnPhoneOnly": "Solo para los chats que se ejecutan en este dispositivo, no en {{name}}.",
+    "onComputer": "En {{name}}",
+    "forgetConfirmTitle": "¿Olvidar {{name}}?",
+    "forgetConfirmBody": "Necesitarás un código nuevo de ese ordenador para volver a conectarte.",
+    "forgetConfirm": "Olvidar"
   },
   "language": {
     "title": "Idioma",
@@ -486,7 +507,8 @@
       "custom": "Personalizado"
     },
     "readAloud": "Leer en voz alta",
-    "stopReading": "Dejar de leer"
+    "stopReading": "Dejar de leer",
+    "ranOnComputer": "{{model}} en {{computer}}"
   },
   "effort": {
     "title": "Esfuerzo",
@@ -674,7 +696,11 @@
       "switch": "¿No eres {{name}}?",
       "unnamed": "Persona {{n}}",
       "back": "Atrás"
-    }
+    },
+    "disconnectTitle": "¿Desconectarte de este ordenador?",
+    "disconnectBody": "Necesitarás un código nuevo de ese ordenador para volver a conectarte.",
+    "disconnectCancel": "Cancelar",
+    "lockedWhy": "Es una sola compra, tuya para siempre, y también añade más en tu teléfono o tableta. Toskar en el teléfono o la tableta con tu propio ordenador sigue siendo gratis. Para ver el precio, abre Toskar en tu teléfono o tableta y ve a Ajustes > Toskar Unlock."
   },
   "setup": {
     "title": "Configúralo en tu computadora",
@@ -821,7 +847,19 @@
     "boughtInSettings": "Se compró en la configuración de Toskar en la computadora. Cambia la tarjeta o cancela allí, en Configuración › Acceso por red.",
     "coveredTitle": "Cubierto por la suscripción de otro dispositivo",
     "coveredBody": "Este ordenador ya tiene una suscripción, comprada en otro dispositivo. Conéctate a tu ordenador en casa una vez y este dispositivo la recogerá.",
-    "extraSubscription": "Este ordenador tiene más de una suscripción y solo necesita una. Puedes cancelar la tuya en Administrar suscripción y la otra lo sigue cubriendo."
+    "extraSubscription": "Este ordenador tiene más de una suscripción y solo necesita una. Puedes cancelar la tuya en Administrar suscripción y la otra lo sigue cubriendo.",
+    "product": "Acceso desde cualquier lugar",
+    "moveNeedsComputer": "Para moverla, conecta primero este dispositivo al ordenador donde se usa, o espera a que ese ordenador lleve 3 días apagado.",
+    "pendingApproval": "La compra está esperando aprobación. Cuando se apruebe, se activará sola la próxima vez que abras Toskar.",
+    "soldOut": "El relé de Toskar no acepta nuevas suscripciones ahora mismo. Inténtalo más tarde; Restaurar compra sigue funcionando.",
+    "relayUnreachable": "No se pudo contactar con el relé de Toskar para consultar las suscripciones. Revisa tu conexión e inténtalo de nuevo.",
+    "handOverLater": "Tu compra se completó. Se activará cuando tu computadora esté disponible.",
+    "needsAdminFirst": "Solo un administrador de esta computadora puede activar el acceso desde cualquier lugar. Si te suscribes, pídele después que lo active en Acceso a la API.",
+    "oneComputer": "Una suscripción cubre una computadora.",
+    "extraSubscriptionOthers": "Esta computadora tiene más de una suscripción. Quien pague la adicional puede cancelarla en los ajustes de su tienda.",
+    "moveConfirmTitle": "¿Mover el Acceso desde cualquier lugar a {{name}}?",
+    "moveConfirmBody": "La otra computadora que usa esta suscripción deja de funcionar fuera de casa de inmediato. Una suscripción puede moverse una vez al día.",
+    "coverEnds": "La suscripción que cubre este ordenador termina el {{date}} y no se renovará. Suscríbete para seguir accediendo a él desde cualquier lugar después."
   },
   "unlock": {
     "title": "Toskar Unlock",

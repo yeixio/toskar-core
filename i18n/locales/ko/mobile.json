@@ -13,7 +13,8 @@
     "computers": "컴퓨터",
     "models": "모델",
     "settings": "설정",
-    "activity": "활동"
+    "activity": "활동",
+    "position": "{{label}}, 탭, {{count}}개 중 {{position}}번째"
   },
   "screens": {
     "connect": "연결",
@@ -57,7 +58,8 @@
     "notReady": "Toskar가 응답했지만 준비되지 않았어요.",
     "certificateMismatch": "컴퓨터의 인증서가 알려 준 인증서와 일치하지 않아 연결을 중단했어요. 내 네트워크에서 다시 시도하세요.",
     "pairUnsupported": "해당 컴퓨터의 Toskar가 오래되어 코드로 연결할 수 없어요. 업데이트하거나 API 키를 사용하세요.",
-    "lede": "이 기기는 이미 모델을 실행 중인 컴퓨터를 사용해요."
+    "lede": "이 기기는 이미 모델을 실행 중인 컴퓨터를 사용해요.",
+    "couldNotFinish": "컴퓨터가 코드를 받아들였지만 이 기기에서 연결을 마치지 못했습니다. 새 코드로 다시 시도하세요."
   },
   "discovery": {
     "onThisNetwork": "이 네트워크에 있음",
@@ -87,7 +89,12 @@
       "degraded": "성능 저하"
     },
     "running": "{{models}} 실행 중",
-    "addHint": "컴퓨터를 추가하려면 그 컴퓨터에 Toskar를 설치한 다음, 내 컴퓨터의 컴퓨터 화면에서 추가하세요."
+    "addHint": "컴퓨터를 추가하려면 그 컴퓨터에 Toskar를 설치한 다음, 내 컴퓨터의 컴퓨터 화면에서 추가하세요.",
+    "metaConnected": "{{platform}} · {{status}} · 연결됨",
+    "address": "주소: {{address}}",
+    "arch": "아키텍처: {{arch}}",
+    "switch": "컴퓨터 전환",
+    "switchHint": "이 기기를 다른 컴퓨터에 연결해요. 지금 컴퓨터와의 페어링은 유지되고, 새 코드로 다시 돌아올 수 있어요."
   },
   "models": {
     "title": "모델",
@@ -153,6 +160,11 @@
       },
       "prompt": "{{model}}은(는) 잘 작동하나요?",
       "notNow": "나중에"
+    },
+    "friendly": {
+      "loaded": "실행 중",
+      "installed": "준비됨",
+      "downloading": "다운로드 중"
     }
   },
   "phoneModels": {
@@ -236,7 +248,11 @@
     "keepOpen": "큰 모델은 다운로드하는 데 몇 분이 걸릴 수 있어요. Toskar를 열어 두세요.",
     "ready": "준비가 끝났어요",
     "installed": "{{model}}이(가) 설치되었어요. 로컬 AI와 채팅을 시작하세요.",
-    "startChatting": "채팅 시작"
+    "startChatting": "채팅 시작",
+    "computerTitle": "컴퓨터의 Toskar",
+    "computerCopy": "Mac이나 PC에서 이미 Toskar를 쓰고 있나요? 이 기기를 연결해 그 모델과 대화하세요.",
+    "useComputer": "내 컴퓨터에 연결",
+    "orThisDevice": "또는 이 기기의 모델 사용"
   },
   "settings": {
     "title": "설정",
@@ -283,7 +299,12 @@
     "memoryEmpty": "아직 기억한 것이 없어요.",
     "forgetMemory": "잊기",
     "forgetMemoryLabel": "“{{memory}}” 잊기",
-    "resetCopyMemories": "처음 설정으로 되돌려요. 이 기기의 채팅과 메모리를 지우고 연결된 컴퓨터를 잊어요."
+    "resetCopyMemories": "처음 설정으로 되돌려요. 이 기기의 채팅과 메모리를 지우고 연결된 컴퓨터를 잊어요.",
+    "chatOnPhoneOnly": "이 기기에서 실행되는 채팅에만 적용되며 {{name}}에는 적용되지 않습니다.",
+    "onComputer": "{{name}}에서",
+    "forgetConfirmTitle": "{{name}}을(를) 삭제할까요?",
+    "forgetConfirmBody": "다시 연결하려면 그 컴퓨터에서 새 코드가 필요해요.",
+    "forgetConfirm": "삭제"
   },
   "language": {
     "title": "언어",
@@ -476,7 +497,8 @@
       "custom": "사용자 지정"
     },
     "readAloud": "소리 내어 읽기",
-    "stopReading": "읽기 중지"
+    "stopReading": "읽기 중지",
+    "ranOnComputer": "{{computer}}의 {{model}}"
   },
   "effort": {
     "title": "노력 수준",
@@ -656,7 +678,11 @@
       "switch": "{{name}}님이 아닌가요?",
       "unnamed": "사용자 {{n}}",
       "back": "뒤로"
-    }
+    },
+    "disconnectTitle": "이 컴퓨터와 연결을 끊을까요?",
+    "disconnectBody": "다시 연결하려면 그 컴퓨터에서 새 코드가 필요해요.",
+    "disconnectCancel": "취소",
+    "lockedWhy": "한 번 구입하면 계속 쓸 수 있고, 휴대폰이나 태블릿에서도 기능이 더해져요. 내 컴퓨터와 연결하는 휴대폰·태블릿의 Toskar는 계속 무료예요. 가격은 휴대폰이나 태블릿의 Toskar에서 설정 > Toskar Unlock을 열면 볼 수 있어요."
   },
   "setup": {
     "title": "컴퓨터에서 설정하기",
@@ -803,7 +829,19 @@
     "boughtInSettings": "컴퓨터의 Toskar 설정에서 구매했습니다. 카드 변경이나 해지는 그곳의 설정 › 네트워크 액세스에서 하세요.",
     "coveredTitle": "다른 기기의 구독으로 사용 중",
     "coveredBody": "이 컴퓨터에는 다른 기기에서 구매한 구독이 이미 있습니다. 집에서 컴퓨터에 한 번 연결하면 이 기기에서도 사용할 수 있습니다.",
-    "extraSubscription": "이 컴퓨터에는 구독이 두 개 이상 있지만 하나만 있으면 됩니다. 구독 관리에서 내 구독을 취소해도 다른 구독으로 계속 사용할 수 있습니다."
+    "extraSubscription": "이 컴퓨터에는 구독이 두 개 이상 있지만 하나만 있으면 됩니다. 구독 관리에서 내 구독을 취소해도 다른 구독으로 계속 사용할 수 있습니다.",
+    "product": "어디서나 접속",
+    "moveNeedsComputer": "옮기려면 먼저 이 기기를 그 구독을 쓰는 컴퓨터에 연결하거나, 그 컴퓨터가 3일 동안 꺼져 있을 때까지 기다리세요.",
+    "pendingApproval": "구매 승인을 기다리는 중입니다. 승인되면 다음에 Toskar를 열 때 자동으로 켜집니다.",
+    "soldOut": "Toskar 릴레이가 지금은 새 구독을 받지 않습니다. 나중에 다시 시도하세요. 구매 복원은 계속 사용할 수 있습니다.",
+    "relayUnreachable": "구독을 확인하기 위해 Toskar 릴레이에 연결할 수 없었습니다. 연결을 확인하고 다시 시도하세요.",
+    "handOverLater": "구매가 완료되었습니다. 컴퓨터에 연결할 수 있게 되면 켜집니다.",
+    "needsAdminFirst": "어디서나 접속은 이 컴퓨터의 관리자만 켤 수 있어요. 구독한 뒤 관리자에게 API 접근에서 켜 달라고 요청하세요.",
+    "oneComputer": "구독 하나로 컴퓨터 한 대를 사용할 수 있습니다.",
+    "extraSubscriptionOthers": "이 컴퓨터에는 구독이 두 개 이상 있어요. 추가 구독을 결제하는 사람이 스토어 설정에서 취소할 수 있어요.",
+    "moveConfirmTitle": "어디서나 접속을 {{name}}(으)로 옮길까요?",
+    "moveConfirmBody": "이 구독을 쓰던 다른 컴퓨터는 바로 밖에서 쓸 수 없게 돼요. 구독은 하루에 한 번 옮길 수 있어요.",
+    "coverEnds": "이 컴퓨터에 적용된 구독은 {{date}}에 끝나며 갱신되지 않아요. 그 후에도 어디서나 연결하려면 구독하세요."
   },
   "unlock": {
     "title": "Toskar Unlock",
