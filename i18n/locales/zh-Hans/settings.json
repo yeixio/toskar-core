@@ -193,7 +193,9 @@
     "show": "显示社区评分",
     "showHint": "模型会显示使用类似电脑的人给出的评分。浏览模型时，每天下载一次公开汇总；不会发送任何关于你的信息。",
     "ask": "请我为模型评分",
-    "askHint": "使用某个模型一段时间后，聊天中会询问你它用起来怎么样。"
+    "askHint": "使用某个模型一段时间后，聊天中会询问你它用起来怎么样。",
+    "quality": "质量结果",
+    "qualityHint": "打开“模型 › 结果”时，会从 GitHub 读取公开的质量结果，每小时最多一次。不会发送任何关于你的信息。"
   },
   "yourData": {
     "title": "你的数据保持私密",
@@ -229,7 +231,9 @@
       "problem_report": "问题报告",
       "news": "AI 新闻",
       "link_check": "链接检查",
-      "download": "下载"
+      "download": "下载",
+      "models": "模型搜索",
+      "quality_results": "质量结果"
     },
     "kindsLower": {
       "web_search": "网络搜索",
@@ -245,7 +249,9 @@
       "problem_report": "问题报告",
       "news": "AI 新闻",
       "link_check": "链接检查",
-      "download": "下载"
+      "download": "下载",
+      "models": "模型搜索",
+      "quality_results": "质量结果"
     },
     "sources": {
       "chat": "聊天",

@@ -193,7 +193,9 @@
     "show": "커뮤니티 평가 표시",
     "showHint": "비슷한 컴퓨터를 쓰는 사람들의 평가를 모델에 표시합니다. 모델을 둘러보는 동안 공개 요약을 하루에 한 번 내려받으며, 나에 대한 정보는 보내지 않습니다.",
     "ask": "모델 평가 요청 받기",
-    "askHint": "모델을 한동안 사용하면 대화에서 사용 경험을 묻습니다."
+    "askHint": "모델을 한동안 사용하면 대화에서 사용 경험을 묻습니다.",
+    "quality": "품질 결과",
+    "qualityHint": "모델 › 결과를 열면 공개된 품질 결과를 GitHub에서 읽어요. 최대 한 시간에 한 번이며, 나에 대한 정보는 보내지 않아요."
   },
   "yourData": {
     "title": "내 데이터는 비공개로 유지돼요",
@@ -229,7 +231,9 @@
       "problem_report": "문제 보고",
       "news": "AI 뉴스",
       "link_check": "링크 확인",
-      "download": "다운로드"
+      "download": "다운로드",
+      "models": "모델 검색",
+      "quality_results": "품질 결과"
     },
     "kindsLower": {
       "web_search": "웹 검색",
@@ -245,7 +249,9 @@
       "problem_report": "문제 보고",
       "news": "AI 뉴스",
       "link_check": "링크 확인",
-      "download": "다운로드"
+      "download": "다운로드",
+      "models": "모델 검색",
+      "quality_results": "품질 결과"
     },
     "sources": {
       "chat": "채팅",

@@ -574,7 +574,8 @@
     "whyNo": {
       "window": "Au-delà de sa fenêtre",
       "out_of_memory": "Ne tient pas"
-    }
+    },
+    "off": "Les résultats de qualité sont désactivés. Activez-les dans Paramètres › Modèles et IA, sous Notes de la communauté, pour les lire sur GitHub."
   },
   "licenseTerms": {
     "title": "Accepter la licence de {{model}}",

@@ -34,6 +34,13 @@ describe('ResultsTab', () => {
     vi.mocked(api.getQualityResults).mockResolvedValue(data)
   })
 
+  it('says how to turn quality results back on when they are off (#1415)', async () => {
+    vi.mocked(api.getQualityResults).mockResolvedValue({ live: false, off: true, results: [] })
+    show()
+    expect(await screen.findByText(/Quality results are off/)).toBeInTheDocument()
+    expect(screen.queryByText(/Couldn't read the results/)).not.toBeInTheDocument()
+  })
+
   it('lists each result with its computer, date, version, and source, newest first', async () => {
     show()
     expect(await screen.findByRole('table')).toBeInTheDocument()

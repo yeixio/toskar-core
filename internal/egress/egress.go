@@ -43,6 +43,12 @@ const (
 	// faster llama.cpp build, a stable-diffusion.cpp update, or Python and
 	// its packages for a feature's first use (#1209).
 	Download = "download"
+	// Models is asking Hugging Face Hub about models: a search, or the
+	// model store's listings (#1415). The files themselves are Download.
+	Models = "models"
+	// QualityResults is the public quality results read from GitHub when
+	// Models › Results is opened (#1415).
+	QualityResults = "quality_results"
 )
 
 // Sources of a run.

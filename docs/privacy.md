@@ -54,7 +54,7 @@ These are the calls Toskar can make without a request in a chat:
 | Problem reports | `toskar.ai/api/report` | What the person saw and chose to send, shown in full first | Off | Settings › Privacy › Problem reports (`problem_reports`) |
 | Relay availability and plan prices | Toskar's relay and its billing service | The requests only, when Settings › API Access offers a subscription | Off until access from anywhere is turned on | Settings › API Access › Access from anywhere |
 | Community ratings | Toskar's ratings service | See the Community ratings row below | Off | Settings › Privacy › Community ratings (`community_ratings`) |
-| Quality results | `raw.githubusercontent.com` (toskar-model-data) | The request only, when Models › Results is opened | Runs when that page is opened | None yet |
+| Quality results | `raw.githubusercontent.com` (toskar-model-data) | The request only, when Models › Results is opened, at most once an hour. Each read is recorded as `quality_results`. | On: runs when that page is opened | Settings › Models & AI › Community ratings › Quality results (`quality_results`) |
 | Push to the Toskar app | Toskar's relay (`relay.toskar.ai`), which passes it to Apple's or Google's push service | A notification's title and the page it opens, for phones paired with this computer | Added when a phone turns notifications on | Settings › Notifications, per destination |
 
 Each of these, apart from quality results, is listed in **What left this computer** (Settings › Privacy) when it's sent. Some downloads aren't logged there yet: Hugging Face, llama.cpp, Python and picture-engine runtimes, and fonts for made PDFs. Relay tunnel traffic isn't logged either. #1207 tracks recording them.
@@ -63,13 +63,14 @@ Everything else is sent only when a feature that talks to the network is used:
 
 | Action | Where data goes |
 | --- | --- |
-| Install or update llama.cpp | `api.github.com` and the GitHub release download for `ggml-org/llama.cpp` |
-| Search or install a Hugging Face model | Hugging Face Hub |
-| Install a model from a URL | The host in that URL |
+| Install or update llama.cpp | `api.github.com` and the GitHub release download for `ggml-org/llama.cpp`. Recorded as `download`, whether you started it or Toskar swapped in a faster build. |
+| Search or install a Hugging Face model | Hugging Face Hub. Each search, and each opening of the model store's listings, is recorded as `models`; each model file downloaded (the model, its vision projector, its draft) is recorded as `download` with its address. |
+| Install a model from a URL | The host in that URL, recorded as `download` |
+| A PDF in Chinese, Japanese or Korean (`artifact.create`) | `fonts.gstatic.com`, once per language, for the Noto font the PDF needs. The PDF's text stays on this computer. Recorded as `download`. |
 | Places and directions (`places.search`, `places.details`, `maps.route`, `maps.distance`) | OpenStreetMap's public services, or your own (see `places_*` in configuration): Nominatim with the place or address asked about, Overpass with the kind of place and the point searched around, and the router with the two points. They run only when the profile allows the Internet capability. Each request is recorded; a repeat within the hour is answered from memory and sends nothing. |
 | Browser (`browser.*`) | The sites you or the assistant open, and the resources their pages load, from an isolated browser with a fresh profile. Nothing on this computer or the local network can be reached. Each page opened and each download is recorded. Clicking, typing, and downloading ask first. |
-| Web search and page reads (`internet.search`, `internet.open`) | DuckDuckGo's public HTML search, then the pages opened. They run only when the profile allows them. Only public addresses are opened: a page on this computer or the local network, such as the daemon's own API or a router's admin page, is refused, even when another page redirects to it. A repeat within 15 minutes (searches) or 30 minutes (pages) is answered from the cache and sends nothing. |
-| Connected services (GitHub, Home Assistant, Email, Calendar) | That service, with the credential you stored, when one of its tools runs. Email and Calendar talk only to the mail and CalDAV servers you entered. |
+| Web search and page reads (`internet.search`, `internet.open`) | DuckDuckGo's public HTML search, then the pages opened. They run only when the profile allows them. Only public addresses are opened: a page on this computer or the local network, such as the daemon's own API or a router's admin page, is refused, even when another page redirects to it. A repeat within 15 minutes (searches) or 30 minutes (pages) is answered from the cache and sends nothing. A weather or sunrise question reads wttr.in for the place asked about, as a page read. |
+| Connected services (GitHub, Home Assistant, Email, Calendar, Flight status) | That service, with the credential you stored, when one of its tools runs. Email and Calendar talk only to the mail and CalDAV servers you entered. Flight status sends the flight's number and date to AeroDataBox, through API.market or RapidAPI. |
 | MCP tool sources | That server, when one of its tools runs |
 | Database and web API knowledge | The database or URL you connected, when it is refreshed |
 | First training run | The `astral-sh/uv` GitHub release, Python builds uv fetches, and pinned packages from PyPI |
@@ -77,7 +78,7 @@ Everything else is sent only when a feature that talks to the network is used:
 | Training on a paired computer | That computer receives the training examples and the AI's instructions over Bifrost, and returns the adapter. It deletes its copy when the job ends. |
 | First code run (`code.execute`) | PyPI, for numpy, pandas, matplotlib, and openpyxl. The code itself has no network. |
 | First use of speech (`speech.transcribe`, `speech.synthesize`, Read aloud) | PyPI, for faster-whisper and Piper, then Hugging Face for each Whisper model and Piper voice the first time it is used. The audio and text stay on this computer. |
-| Image and video generation setup | GitHub, for the pinned stable-diffusion.cpp release (and, for video, the TAEHV decoder), and Hugging Face, for the model's files. Only when you set it up. Prompts, images, and clips stay on this computer. |
+| Image and video generation setup | GitHub, for the pinned stable-diffusion.cpp release (and, for video, the TAEHV decoder), and Hugging Face, for the model's files. Only when you set it up. Each file is recorded as `download`. Prompts, images, and clips stay on this computer. |
 | First scanned PDF in Knowledge | PyPI, for the text-recognition packages (about 110 MB). The PDF itself is read on this computer. |
 | A chat placed on a paired computer | That computer receives the prompt and context over Bifrost |
 | An image or speech tool run on a paired computer | That computer receives the tool's arguments, such as the prompt, and the chat file it needs, such as the image to edit or the audio to transcribe, over Bifrost. It returns the result and keeps nothing. Each job is recorded. |

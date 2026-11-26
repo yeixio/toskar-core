@@ -207,7 +207,9 @@
     "show": "Mostrar avaliações da comunidade",
     "showHint": "Os modelos mostram como pessoas com computadores parecidos os avaliam. Um resumo público é baixado uma vez por dia enquanto você explora modelos; nada sobre você é enviado.",
     "ask": "Pedir que eu avalie modelos",
-    "askHint": "Depois de usar um modelo por um tempo, uma conversa pergunta como ele está funcionando."
+    "askHint": "Depois de usar um modelo por um tempo, uma conversa pergunta como ele está funcionando.",
+    "quality": "Resultados de qualidade",
+    "qualityHint": "Ao abrir Modelos › Resultados, os resultados de qualidade públicos são lidos do GitHub, no máximo uma vez por hora. Nada sobre você é enviado."
   },
   "yourData": {
     "title": "Seus dados continuam privados",
@@ -243,7 +245,9 @@
       "problem_report": "Relatório de problema",
       "news": "Notícias de IA",
       "link_check": "Verificação de link",
-      "download": "Download"
+      "download": "Download",
+      "models": "Busca de modelos",
+      "quality_results": "Resultados de qualidade"
     },
     "kindsLower": {
       "web_search": "pesquisa na web",
@@ -259,7 +263,9 @@
       "problem_report": "relatório de problema",
       "news": "notícias de IA",
       "link_check": "verificação de link",
-      "download": "download"
+      "download": "download",
+      "models": "busca de modelos",
+      "quality_results": "resultados de qualidade"
     },
     "sources": {
       "chat": "Chat",

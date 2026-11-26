@@ -512,6 +512,8 @@ func New(opts Options) (*App, error) {
 	a.Egress = egress.New(db.SQL)
 	a.RunLog = runlog.NewStore(db.SQL)
 	toolReg.SetObserver(a.recordToolEgress)
+	// Model files, as they're asked for (#1415).
+	downloader.Fetched = func(ctx context.Context, modelID, url string) { a.recordFetch(ctx, url, "model "+modelID) }
 	rtMgr.OnRemote = func(ctx context.Context, host string) {
 		a.Egress.Add(ctx, egress.ExternalServer, host, "prompt and conversation")
 	}
@@ -730,6 +732,7 @@ func New(opts Options) (*App, error) {
 			if a.HF == nil {
 				a.HF = hfclient.New()
 			}
+			a.recordModelSearch(ctx, "search: "+query)
 			return a.HF.Search(ctx, query, limit)
 		},
 		ModelStore:     a.modelStore,
@@ -791,6 +794,8 @@ func New(opts Options) (*App, error) {
 		ResetProfile:  profileMgr.ResetPreset,
 		ListRuntimes:  rtMgr.List,
 		InstallRuntime: func(ctx context.Context, id string) error {
+			// The person asked for it, so it's recorded, not told (#1415).
+			a.recordDownload(ctx, "api.github.com, github.com", runtimeName(id)+": installed from Settings")
 			return rtMgr.Install(ctx, id, runtimes.InstallOptions{})
 		},
 		ListNodes: func(ctx context.Context) ([]contracts.Node, error) {
@@ -1056,7 +1061,8 @@ func New(opts Options) (*App, error) {
 	})
 	a.summarizer = &muninn.Summarizer{Store: a.Muninn}
 	a.API.BindMemory(a.Muninn)
-	a.Tools.Register(&artifacts.CreateTool{Store: a.Artifacts, Fonts: &artifacts.Fonts{Dir: filepath.Join(cfg.DataDir, "fonts")}})
+	a.Tools.Register(&artifacts.CreateTool{Store: a.Artifacts, Fonts: &artifacts.Fonts{Dir: filepath.Join(cfg.DataDir, "fonts"),
+		Fetched: func(ctx context.Context, url string) { a.recordFetch(ctx, url, "a font for a PDF in Chinese, Japanese or Korean") }}})
 	a.Tools.Register(&artifacts.AnalyzeTool{Store: a.Artifacts})
 	a.Tools.Register(&scheduleTool{app: a})
 	// The AI news and the person's own automation results, to read out in
@@ -1644,6 +1650,7 @@ func (a *App) settingsView(ctx context.Context) (contracts.SettingsView, error) 
 	notifyPeer, _ := a.Settings.GetBool(ctx, "notify_peer_offline", true)
 	notifyNewer, _ := a.Settings.GetBool(ctx, settingNotifyNewer, true)
 	communityRatings, _ := a.Settings.GetBool(ctx, ratings.SettingShow, false)
+	qualityResults, _ := a.Settings.GetBool(ctx, ratings.SettingQuality, true)
 	ratingsPrompts, _ := a.Settings.GetBool(ctx, ratings.SettingAsk, true)
 	updateCheck, _ := a.Settings.GetBool(ctx, updates.Setting, true)
 	aiNews, _ := a.Settings.GetBool(ctx, news.Setting, false)
@@ -1704,6 +1711,7 @@ func (a *App) settingsView(ctx context.Context) (contracts.SettingsView, error) 
 		NotifyPeerOffline:       notifyPeer,
 		NotifyNewerModels:       notifyNewer,
 		CommunityRatings:        communityRatings,
+		QualityResults:          qualityResults,
 		RatingsPrompts:          ratingsPrompts,
 		UpdateCheck:             updateCheck,
 		AINews:                  aiNews,
@@ -1833,7 +1841,7 @@ func (a *App) applySettingsPatch(ctx context.Context, patch map[string]any) erro
 			return err
 		}
 	}
-	for _, key := range []string{"save_chat_history", "save_task_history", "notify_task_finish", "notify_peer_offline", settingNotifyNewer, "launch_at_login", ratings.SettingShow, ratings.SettingAsk, updates.Setting, news.Setting, settingProblemReports, settingCheckLinks} {
+	for _, key := range []string{"save_chat_history", "save_task_history", "notify_task_finish", "notify_peer_offline", settingNotifyNewer, "launch_at_login", ratings.SettingShow, ratings.SettingAsk, ratings.SettingQuality, updates.Setting, news.Setting, settingProblemReports, settingCheckLinks} {
 		if v, ok := patch[key].(bool); ok {
 			if err := a.Settings.SetBool(ctx, key, v); err != nil {
 				return err

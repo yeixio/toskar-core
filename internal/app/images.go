@@ -86,6 +86,8 @@ func (a *App) newSDSetup(cfg config.Config, folder string, catalog func() []imag
 		GPU: vulkanUsable,
 		// "Can you make images?" and setup offers read the inventory.
 		Changed: a.invalidateCapabilities,
+		// Each file of a setup is recorded (#1415).
+		Fetched: func(url string) { a.recordFetch(context.Background(), url, "") },
 	}
 }
 

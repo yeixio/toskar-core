@@ -574,7 +574,8 @@
     "whyNo": {
       "window": "Oltre la sua finestra",
       "out_of_memory": "Non entra"
-    }
+    },
+    "off": "I risultati di qualità sono disattivati. Attivali in Impostazioni › Modelli e IA, sotto Valutazioni della community, per leggerli da GitHub."
   },
   "licenseTerms": {
     "title": "Accetta la licenza di {{model}}",

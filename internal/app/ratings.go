@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"net/http"
+	"net/url"
 	"sync"
 	"time"
 
@@ -53,6 +54,16 @@ func (a *App) newRatings(cfg config.Config) *ratings.Service {
 			if a.Egress != nil {
 				a.Egress.Add(ctx, egress.CommunityRatings, destination, detail)
 			}
+		},
+		RecordQuality: func(ctx context.Context, raw string) {
+			if a.Egress == nil {
+				return
+			}
+			host := raw
+			if u, err := url.Parse(raw); err == nil && u.Hostname() != "" {
+				host = u.Hostname()
+			}
+			a.Egress.Add(context.WithoutCancel(ctx), egress.QualityResults, host, raw)
 		},
 		OutOfMemory: modelhealth.OutOfMemory,
 		LocalNode:   func() string { return a.Config.Get().NodeID },
