@@ -1694,6 +1694,7 @@ func (a *App) settingsView(ctx context.Context) (contracts.SettingsView, error) 
 		DefaultExecution:        defaultExec,
 		DownloadBehavior:        downloadBehavior,
 		VoiceHearing:            voiceHearing,
+		VoiceLanguage:           a.voiceLanguage(ctx),
 		ModelStorageLimitGB:     storageLimit,
 		SaveChatHistory:         saveChat,
 		MemoryEnabled:           memoryEnabled,
@@ -1805,6 +1806,15 @@ func (a *App) applySettingsPatch(ctx context.Context, patch map[string]any) erro
 			return err
 		}
 		a.warmHearing(v)
+	}
+	if v, ok := patch[settingVoiceLanguage].(string); ok {
+		// "" detects each turn's language again.
+		if v != "" && !speech.Hears(v) {
+			return contracts.Errorf("INVALID_SETTING", map[string]any{"setting": settingVoiceLanguage, "value": v}, "voice can't hear %q", v)
+		}
+		if err := a.Settings.Set(ctx, settingVoiceLanguage, v); err != nil {
+			return err
+		}
 	}
 	if v, ok := patch["download_behavior"].(string); ok && v != "" {
 		if err := setSettingString(ctx, a.Settings, "download_behavior", v, map[string]bool{
@@ -2151,6 +2161,7 @@ func (a *App) ResetApp(ctx context.Context, deleteModels bool) (contracts.Settin
 	_ = a.Settings.Set(ctx, "default_execution", "automatic")
 	_ = a.Settings.Set(ctx, "download_behavior", "ask")
 	_ = a.Settings.Set(ctx, settingVoiceHearing, "fast")
+	_ = a.Settings.Set(ctx, settingVoiceLanguage, "")
 	_ = a.Settings.SetInt(ctx, "model_storage_limit_gb", 0)
 	_ = a.Settings.SetBool(ctx, "save_chat_history", true)
 	_ = a.Settings.SetBool(ctx, "save_task_history", true)

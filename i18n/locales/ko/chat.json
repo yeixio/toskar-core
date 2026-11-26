@@ -498,6 +498,7 @@
     "micFailed": "마이크를 시작하지 못했습니다.",
     "muted": "마이크 꺼짐",
     "you": "나:",
+    "youIn": "나({{language}}):",
     "waited": "말을 마친 뒤 {{seconds}}초 만에 응답",
     "mute": "음소거",
     "unmute": "음소거 해제",

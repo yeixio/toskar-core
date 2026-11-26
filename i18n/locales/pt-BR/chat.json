@@ -522,6 +522,7 @@
     "micFailed": "Não foi possível iniciar o microfone.",
     "muted": "Microfone desligado",
     "you": "Você:",
+    "youIn": "Você ({{language}}):",
     "waited": "Respondeu {{seconds}} s depois que você parou",
     "mute": "Silenciar",
     "unmute": "Ativar som",

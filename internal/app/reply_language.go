@@ -7,6 +7,7 @@ import (
 
 	"github.com/yeixio/toskar-core/internal/automations"
 	"github.com/yeixio/toskar-core/internal/replylang"
+	"github.com/yeixio/toskar-core/internal/turnopts"
 	"github.com/yeixio/toskar-core/internal/voice"
 )
 
@@ -27,6 +28,11 @@ func (a *App) replyLanguage(ctx context.Context, conversationID, message, respon
 		in.Mode = a.personalString(ctx, "assistant_language_mode", replylang.ModeAuto)
 		in.Setting = a.personalString(ctx, "assistant_language", "")
 		in.App = a.personalString(ctx, "ui_locale", "")
+	}
+	// An answer read aloud is in a language this computer has a voice for,
+	// and says so when it can't use the person's (#1405).
+	if turnopts.SpokenFrom(ctx) && a.voiceWorker != nil {
+		in.Speakable, in.Offer = a.voiceWorker.CanSpeak, a.voiceWorker.VoiceOffer
 	}
 	switch response {
 	case "", automations.ResponseAccount:

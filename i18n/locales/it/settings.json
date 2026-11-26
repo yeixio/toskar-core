@@ -421,7 +421,10 @@
     "hearing": "Come la voce ti sente",
     "hearingHint": "Preciso sente molto meglio in una stanza rumorosa o con un microfono lontano, come quello di una webcam. Risponde qualche decimo di secondo dopo, scarica circa 480 MB una volta e usa circa 500 MB di memoria in più. Per la voce dal vivo e il campanello.",
     "hearingFast": "Veloce",
-    "hearingAccurate": "Preciso"
+    "hearingAccurate": "Preciso",
+    "language": "Lingua che la voce ascolta",
+    "languageHint": "Rileva la lingua di ogni turno e risponde in quella. Scegli una lingua se qui tutti la parlano sempre: Toskar la sente in modo più affidabile e non scambia una parola breve per un’altra lingua.",
+    "languageDetect": "Rileva la lingua di ogni turno"
   },
   "sections": {
     "account": "Account",

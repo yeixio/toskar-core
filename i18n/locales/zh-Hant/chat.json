@@ -498,6 +498,7 @@
     "micFailed": "無法啟動麥克風。",
     "muted": "麥克風已關閉",
     "you": "你：",
+    "youIn": "你（{{language}}）：",
     "waited": "你說完後 {{seconds}} 秒回答",
     "mute": "靜音",
     "unmute": "取消靜音",

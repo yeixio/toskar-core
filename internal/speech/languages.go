@@ -47,6 +47,19 @@ var whisperLanguages = strings.Fields(`af am ar as az ba be bg bn bo br bs ca cs
 gl gu ha haw he hi hr ht hu hy id is it ja jw ka kk km kn ko la lb ln lo lt lv mg mi mk ml mn mr ms mt my ne nl nn
 no oc pa pl ps pt ro ru sa sd si sk sl sn so sq sr su sv sw ta te tg th tk tl tr tt uk ur uz vi yi yo yue zh`)
 
+// Hears reports a language speech to text can be told to hear, such as de.
+func Hears(lang string) bool {
+	if lang == "" {
+		return false
+	}
+	for _, l := range whisperLanguages {
+		if l == lang {
+			return true
+		}
+	}
+	return false
+}
+
 // VoiceFor is the voice that reads lang aloud, such as de_DE-thorsten-medium
 // for de or de-AT.
 func VoiceFor(lang string) (string, bool) {
@@ -92,4 +105,31 @@ func voiceFor(text, voice, language string) (string, error) {
 		return v, nil
 	}
 	return "", errNoVoice(language)
+}
+
+// CanSpeak reports whether this computer can read lang aloud in its own
+// language's voice: a Piper voice, Kokoro's natural one (downloaded the
+// first time it's needed), or Kitten's once installed (#1405).
+func (w *Worker) CanSpeak(lang string) bool {
+	if _, ok := VoiceFor(lang); ok {
+		return true
+	}
+	if _, ok := NaturalVoiceFor(lang); ok && !w.Plain {
+		return true
+	}
+	return w.Engine != nil && w.Engine.kittenSpeaks(lang) != ""
+}
+
+// VoiceOffer is what would add a voice for lang it can't read now, for
+// the answer to say: Kitten TTS when it speaks the language and isn't
+// installed, else "".
+func (w *Worker) VoiceOffer(lang string) string {
+	base, _, _ := strings.Cut(strings.ToLower(lang), "-")
+	if !kittenSpeaksLanguage(base) || w.Engine == nil || w.Engine.kittenInstalled() {
+		return ""
+	}
+	if w.Engine.Python != nil && w.Engine.Python.Unavailable(KittenSpec()) != "" {
+		return ""
+	}
+	return "installing Kitten TTS in Settings › Voice"
 }
