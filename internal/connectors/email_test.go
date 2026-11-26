@@ -316,3 +316,14 @@ func TestEmailPolicies(t *testing.T) {
 		t.Error("a URL was accepted as a server")
 	}
 }
+
+// A reply is written in the language of the message it answers (#1445).
+func TestEmailRepliesAreWrittenInTheirLanguage(t *testing.T) {
+	for _, tool := range (Email{}).Tools() {
+		if id := tool.Def.ID; id == "email.draft" || id == "email.send" {
+			if !strings.Contains(tool.Def.Description, "in the language of the message it answers") {
+				t.Errorf("%s doesn't say which language to write in: %q", id, tool.Def.Description)
+			}
+		}
+	}
+}

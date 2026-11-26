@@ -268,6 +268,7 @@ Email and Calendar connect to your own accounts with an app password, not your a
 
 - **Encryption:** port 993 (IMAP) and 465 (SMTP) use TLS from the start, and other ports must offer STARTTLS. A server on this computer, such as Proton Mail Bridge, may use its own certificate or no encryption.
 - **Folders:** Drafts, Sent, and Archive are found by their special-use flags, then by their usual names.
+- **Language:** a reply is written in the language of the message it answers, unless you ask for another, while Toskar tells you about it in your own language.
 - **No deleting:** nothing is deleted. On a server without MOVE, archiving copies the message and marks the original deleted, without expunging the folder.
 
 **Calendar** uses CalDAV: Fastmail (`https://caldav.fastmail.com`), iCloud (`https://caldav.icloud.com`), Nextcloud (`https://your-server/remote.php/dav`), Radicale, and others. The address can be the server, where calendars are found through the account's calendar home, or one calendar.
