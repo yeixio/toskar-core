@@ -468,6 +468,8 @@
     "language": "Idioma que escucha la voz",
     "languageHint": "Detecta el idioma de cada turno y responde en él. Elige un idioma si aquí todos lo hablan siempre: Toskar lo oye con más fiabilidad y no confunde una palabra corta con otro idioma.",
     "languageDetect": "Detectar el idioma de cada turno",
+    "smartTurn": "Esperar si una pausa suena inacabada",
+    "smartTurnHint": "Un modelo pequeño oye si suenas terminado cuando haces una pausa y, si no, espera hasta 2 segundos más, para que puedas pararte a pensar. En una sala ruidosa, las respuestas pueden empezar más tarde. Para la voz en directo y el timbre; descarga unos 9 MB una vez.",
     "memberNote": "Las voces con las que habla Toskar y cómo te oye las configura un administrador.",
     "personas": {
       "title": "Personajes de voz",

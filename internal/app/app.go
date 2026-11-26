@@ -1749,6 +1749,7 @@ func (a *App) settingsView(ctx context.Context) (contracts.SettingsView, error) 
 		DownloadBehavior:        downloadBehavior,
 		VoiceHearing:            voiceHearing,
 		VoiceLanguage:           a.voiceLanguage(ctx),
+		VoiceSmartTurn:          a.smartTurnOn(ctx),
 		ModelStorageLimitGB:     storageLimit,
 		SaveChatHistory:         saveChat,
 		MemoryEnabled:           memoryEnabled,
@@ -1892,7 +1893,7 @@ func (a *App) applySettingsPatch(ctx context.Context, patch map[string]any) erro
 			return err
 		}
 	}
-	for _, key := range []string{"save_chat_history", "save_task_history", "notify_peer_offline", settingNotifyNewer, "launch_at_login", ratings.SettingShow, ratings.SettingAsk, ratings.SettingQuality, updates.Setting, news.Setting, settingProblemReports, settingCheckLinks} {
+	for _, key := range []string{"save_chat_history", "save_task_history", "notify_peer_offline", settingNotifyNewer, "launch_at_login", ratings.SettingShow, ratings.SettingAsk, ratings.SettingQuality, updates.Setting, news.Setting, settingProblemReports, settingCheckLinks, settingSmartTurn} {
 		if v, ok := patch[key].(bool); ok {
 			if err := a.Settings.SetBool(ctx, key, v); err != nil {
 				return err
@@ -2254,6 +2255,7 @@ func (a *App) ResetApp(ctx context.Context, deleteModels bool) (contracts.Settin
 	_ = a.Settings.Set(ctx, "download_behavior", "ask")
 	_ = a.Settings.Set(ctx, settingVoiceHearing, "fast")
 	_ = a.Settings.Set(ctx, settingVoiceLanguage, "")
+	_ = a.Settings.SetBool(ctx, settingSmartTurn, false)
 	_ = a.Settings.SetInt(ctx, "model_storage_limit_gb", 0)
 	_ = a.Settings.SetBool(ctx, "save_chat_history", true)
 	_ = a.Settings.SetBool(ctx, "save_task_history", true)

@@ -468,6 +468,8 @@
     "language": "Lingua che la voce ascolta",
     "languageHint": "Rileva la lingua di ogni turno e risponde in quella. Scegli una lingua se qui tutti la parlano sempre: Toskar la sente in modo più affidabile e non scambia una parola breve per un’altra lingua.",
     "languageDetect": "Rileva la lingua di ogni turno",
+    "smartTurn": "Attendi quando una pausa sembra incompleta",
+    "smartTurnHint": "Un piccolo modello sente se sembri aver finito quando fai una pausa e, se no, aspetta fino a 2 secondi in più, così puoi fermarti a pensare. In una stanza rumorosa le risposte possono iniziare più tardi. Per la voce dal vivo e il campanello; scarica circa 9 MB una volta.",
     "memberNote": "Le voci con cui parla Toskar e come ti sente sono impostate da un amministratore.",
     "personas": {
       "title": "Personaggi vocali",

@@ -468,6 +468,8 @@
     "language": "Langue entendue par la voix",
     "languageHint": "Détecte la langue de chaque tour de parole et y répond. Choisissez une langue si tout le monde ici la parle toujours : Toskar l’entend plus sûrement et ne prend pas un mot court pour une autre langue.",
     "languageDetect": "Détecter la langue de chaque tour",
+    "smartTurn": "Attendre quand une pause semble inachevée",
+    "smartTurnHint": "Un petit modèle entend si vous semblez avoir fini quand vous faites une pause, et attend sinon jusqu'à 2 secondes de plus, pour que vous puissiez réfléchir. Dans une pièce bruyante, les réponses peuvent commencer plus tard. Pour la voix en direct et la sonnette ; télécharge environ 9 Mo une fois.",
     "memberNote": "Les voix de Toskar et la façon dont il vous entend sont réglées par un administrateur.",
     "personas": {
       "title": "Personnages vocaux",

@@ -459,6 +459,8 @@
     "language": "Sprache, die die Sprachfunktion hört",
     "languageHint": "Erkennt die Sprache jedes Beitrags und antwortet darin. Wähle eine Sprache, wenn hier alle immer sie sprechen: Toskar hört sie dann zuverlässiger und hält ein kurzes Wort nicht für eine andere Sprache.",
     "languageDetect": "Sprache jedes Beitrags erkennen",
+    "smartTurn": "Warten, wenn eine Pause unfertig klingt",
+    "smartTurnHint": "Ein kleines Modell hört, ob du bei einer Pause fertig klingst, und wartet sonst bis zu 2 Sekunden länger, damit du nachdenken kannst. In einem lauten Raum können Antworten dadurch später beginnen. Für Live-Sprache und die Türklingel; lädt einmal etwa 9 MB herunter.",
     "memberNote": "Die Stimmen, mit denen Toskar spricht, und wie es dich hört, legt ein Admin fest.",
     "personas": {
       "title": "Stimmpersonas",

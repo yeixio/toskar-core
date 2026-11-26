@@ -459,6 +459,8 @@
     "language": "Language voice hears",
     "languageHint": "Detects the language of each turn and answers in it. Choose one language if everyone here always speaks it: Toskar hears it more reliably and doesn't mistake a short word for another language.",
     "languageDetect": "Detect each turn's language",
+    "smartTurn": "Wait when a pause sounds unfinished",
+    "smartTurnHint": "A small model hears whether you sound finished when you pause, and waits up to 2 seconds more when you don't, so you can stop to think. It can make answers start later in a noisy room. For live voice and the doorbell; downloads about 9 MB once.",
     "memberNote": "The voices Toskar speaks in and how it hears you are set by an Admin.",
     "personas": {
       "title": "Voice personas",

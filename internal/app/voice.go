@@ -33,15 +33,33 @@ func (a *App) voiceParts(ctx context.Context) (voice.Parts, error) {
 		}
 		return voice.Parts{}, contracts.NewError("SPEECH_UNAVAILABLE", map[string]any{"detail": why}, errors.New(why))
 	}
-	// Smart Turn's file comes down the first time, in the background
-	// (#1403); until it's here the pause alone ends a turn.
-	a.voiceWorker.PrepareTurnCheck()
-	return voice.Parts{
-		Judge:       workerJudge{w: a.voiceWorker, log: a.Logger},
+	parts := voice.Parts{
 		Transcriber: workerTurns{w: a.voiceWorker, quality: a.voiceHearing(ctx), language: a.voiceLanguage(ctx)},
 		Responder:   &voiceChat{app: a, ctx: ctx},
 		Speaker:     workerVoice{a.voiceWorker},
-	}, nil
+	}
+	if a.smartTurnOn(ctx) {
+		// Smart Turn's file comes down the first time, in the background
+		// (#1403); until it's here the pause alone ends a turn.
+		a.voiceWorker.PrepareTurnCheck()
+		parts.Judge = workerJudge{w: a.voiceWorker, log: a.Logger}
+	}
+	return parts, nil
+}
+
+// settingSmartTurn turns on Smart Turn for voice mode and the door (#1460).
+// It's off by default: in the voice bench it saved one answer in 60 from
+// starting mid-sentence, and in a room with steady hiss it made answers
+// about 1.8 s slower, since it heard more finished turns as unfinished.
+const settingSmartTurn = "voice_smart_turn"
+
+// smartTurnOn reports whether an Admin turned Smart Turn on.
+func (a *App) smartTurnOn(ctx context.Context) bool {
+	if a.Settings == nil {
+		return false
+	}
+	on, _ := a.Settings.GetBool(ctx, settingSmartTurn, false)
+	return on
 }
 
 // whisperRate is the rate Whisper listens at.

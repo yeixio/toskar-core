@@ -53,6 +53,7 @@ var settingsPatchKeys = map[string]bool{
 	"update_check":               true,
 	"voice_avatar":               true,
 	"voice_hearing":              true,
+	"voice_smart_turn":           true,
 	"voice_language":             true,
 	"web_ui_enabled":             true,
 }

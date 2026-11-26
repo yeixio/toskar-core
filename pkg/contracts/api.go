@@ -1599,6 +1599,10 @@ type SettingsView struct {
 	// the default) or accurate (Whisper small, better in noise and with a
 	// far microphone; #1330, contract 1.122).
 	VoiceHearing string `json:"voice_hearing"`
+	// VoiceSmartTurn: Smart Turn hears whether a paused turn sounds
+	// finished, in voice mode and at the door; off by default (#1460,
+	// contract 1.131).
+	VoiceSmartTurn bool `json:"voice_smart_turn"`
 	// VoiceLanguage is the one language voice mode and the door hear, such
 	// as de, for a household that always speaks it; "" detects each turn's
 	// (#1405, contract 1.123).
