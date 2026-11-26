@@ -71,8 +71,8 @@
       "rune": "창 모양의 룬, Tiwaz"
     },
     "api-access": {
-      "meaning": "Valgrind는 Valhalla의 문이에요. API 키는 누가 들어올 수 있는지 정해요.",
-      "story": "Valgrind는 Valhalla 앞에 서 있는 오래된 문이에요. 신성하고 오래된 문이라, 그 자물쇠가 어떻게 잠기는지 아는 이는 드물어요.",
+      "meaning": "Thrymgjoll은 초대받지 않고 온 이를 붙잡아 두는 문이에요. API 키는 누가 들어올 수 있는지 정해요.",
+      "story": "Thrymgjoll은 Menglod의 궁전 문으로, Solblindi의 세 아들이 만들었어요. 허락 없이 열려는 이는 붙잡혀 꼼짝 못 해요.",
       "rune": "문의 룬, Thurisaz"
     },
     "settings": {

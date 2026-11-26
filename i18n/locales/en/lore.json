@@ -71,8 +71,8 @@
       "rune": "Tiwaz, the spear-shaped rune"
     },
     "api-access": {
-      "meaning": "Valgrind is the gate of Valhalla. API keys decide who may come in.",
-      "story": "Valgrind is the ancient gate that stands before Valhalla. It is holy and old, and few know how its lock is fastened.",
+      "meaning": "Thrymgjoll is a gate that holds fast anyone who comes uninvited. API keys decide who may come in.",
+      "story": "Thrymgjoll is the gate of Menglod's hall, built by the three sons of Solblindi. Anyone who tries to open it without leave is caught and held fast.",
       "rune": "Thurisaz, the rune of the gate"
     },
     "settings": {

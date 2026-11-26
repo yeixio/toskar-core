@@ -80,7 +80,7 @@ func TestQAMessagesNameSettingsThatExist(t *testing.T) {
 // names stay decorative (the lore button, the mascot).
 func TestQAPlainNamesInFunctionalLabels(t *testing.T) {
 	// Regression: toskar-core#1251
-	norse := regexp.MustCompile(`"(label|hint|nornHint|mimirHint|bifrostHint)"\s*:\s*"[^"]*\b(Bifrost|Mimir|Muninn|Norn|Valgrind|Ymir|Heimdall)\b`)
+	norse := regexp.MustCompile(`"(label|hint|nornHint|mimirHint|bifrostHint)"\s*:\s*"[^"]*\b(Bifrost|Mimir|Muninn|Norn|Valgrind|Thrymgjoll|Ymir|Heimdall)\b`)
 	files := repoText(t)
 	for path := range files {
 		if strings.HasSuffix(path, "/lore.json") {

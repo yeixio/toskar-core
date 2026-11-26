@@ -608,8 +608,8 @@
       "runeName": "Raidho, die Rune der Reise"
     },
     "connect": {
-      "meaning": "Valgrind ist das Tor von Valhalla. Ein API-Schlüssel entscheidet, wer hereindarf.",
-      "story": "Valgrind ist das uralte Tor vor Valhalla. Es ist heilig und alt, und nur wenige wissen, wie sein Schloss verriegelt ist.",
+      "meaning": "Thrymgjoll ist ein Tor, das jeden festhält, der ungebeten kommt. Ein API-Schlüssel entscheidet, wer hereindarf.",
+      "story": "Thrymgjoll ist das Tor von Menglods Halle, gebaut von den drei Söhnen Solblindis. Wer es ohne Erlaubnis zu öffnen versucht, wird festgehalten.",
       "runeName": "Thurisaz, die Rune des Tores"
     },
     "settings": {

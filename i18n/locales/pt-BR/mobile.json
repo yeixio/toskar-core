@@ -617,8 +617,8 @@
       "runeName": "Raidho, a runa da jornada"
     },
     "connect": {
-      "meaning": "Valgrind é o portão do Valhalla. Uma chave de API decide quem pode entrar.",
-      "story": "Valgrind é o antigo portão que fica diante do Valhalla. Ele é sagrado e velho, e poucos sabem como sua tranca se fecha.",
+      "meaning": "Thrymgjoll é um portão que prende quem chega sem convite. Uma chave de API decide quem pode entrar.",
+      "story": "Thrymgjoll é o portão do salão de Menglod, construído pelos três filhos de Solblindi. Quem tenta abri-lo sem permissão fica preso.",
       "runeName": "Thurisaz, a runa do portão"
     },
     "settings": {

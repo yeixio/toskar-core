@@ -131,7 +131,7 @@ export const realms: Record<string, Realm> = {
   },
   '/api-access': {
     id: 'api-access',
-    norse: 'Valgrind',
+    norse: 'Thrymgjoll',
     rune: 'thurisaz',
     accent: 'text-bifrost',
   },
