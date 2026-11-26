@@ -267,3 +267,53 @@ func TestWorkerPlainUsesPiperOnly(t *testing.T) {
 		t.Fatal("downloaded Kokoro for a plain worker")
 	}
 }
+
+// fakeTurn answers as worker.py does for Smart Turn: fetch writes the
+// model's file, and turn says how finished the audio sounds by its length.
+const fakeTurn = `import base64, json, os, sys
+for line in sys.stdin:
+    req = json.loads(line)
+    if req["op"] == "fetch":
+        os.makedirs(req["dir"], exist_ok=True)
+        for p in req["patterns"]:
+            open(os.path.join(req["dir"], p), "w").write("onnx")
+        out = {}
+    elif req["op"] == "turn":
+        out = {"finished": 0.9 if len(base64.b64decode(req["pcm"])) > 3200 else 0.1}
+    else:
+        out = {}
+    out["id"] = req["id"]
+    print(json.dumps(out), flush=True)
+`
+
+// Smart Turn's file comes down once, in the background; until then the
+// turn check says it isn't ready, so the pause alone ends a turn (#1403).
+func TestTurnCheck(t *testing.T) {
+	py, err := exec.LookPath("python3")
+	if err != nil {
+		t.Skip("python3 is not installed")
+	}
+	w := &Worker{Engine: &Engine{Python: fakeEnv{path: py}, Dir: t.TempDir()}, Script: []byte(fakeTurn), Plain: true}
+	t.Cleanup(w.Close)
+	ctx := context.Background()
+	if _, err := w.TurnFinished(ctx, make([]byte, 6400)); !errors.Is(err, ErrTurnNotReady) {
+		t.Fatalf("before the download: %v", err)
+	}
+	deadline := time.Now().Add(5 * time.Second)
+	for {
+		p, err := w.TurnFinished(ctx, make([]byte, 6400))
+		if err == nil {
+			if p != 0.9 {
+				t.Fatalf("finished = %v", p)
+			}
+			break
+		}
+		if !errors.Is(err, ErrTurnNotReady) || time.Now().After(deadline) {
+			t.Fatalf("after the download: %v", err)
+		}
+		time.Sleep(20 * time.Millisecond)
+	}
+	if p, err := w.TurnFinished(ctx, make([]byte, 320)); err != nil || p != 0.1 {
+		t.Fatalf("a short turn: %v, %v", p, err)
+	}
+}

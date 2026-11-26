@@ -19,6 +19,10 @@ on stdout, with the request's id:
       as above, at 24 kHz.
   {"id", "op": "fetch", "repo", "revision", "dir", "patterns"}
       downloads a Hugging Face repository's files at a revision into dir.
+  {"id", "op": "turn", "pcm", "model"}
+      whether the person has finished speaking (toskar-core#1403): Smart
+      Turn v3 on the last 8 s of the turn, pcm as for transcribe; model is
+      its ONNX file. Answers {"id", "finished"}: the probability, 0 to 1.
   {"id", "op": "ping"} answers {"id"}.
 Any failure answers {"id", "error"}; the worker goes on.
 """
@@ -31,6 +35,7 @@ import sys
 import wave
 
 whisper = {}
+turns = {}
 voices = {}
 kokoro = {}
 kitten = {}
@@ -124,6 +129,40 @@ def speak_kitten(req):
     return {"pcm": base64.b64encode(pcm).decode("ascii"), "rate": m.sample_rate}
 
 
+def turn(req):
+    """Smart Turn v3 (BSD-2-Clause, pipecat-ai/smart-turn): a Whisper Tiny
+    encoder that hears from the audio whether a sentence sounds finished.
+    Its features are Whisper's log-mel over 8 s, from the end of the turn,
+    padded with silence before it, as its reference inference does."""
+    import numpy as np
+    import onnxruntime as ort
+    from faster_whisper.feature_extractor import FeatureExtractor
+
+    path = req["model"]
+    session = turns.get(path)
+    if session is None:
+        so = ort.SessionOptions()
+        so.execution_mode = ort.ExecutionMode.ORT_SEQUENTIAL
+        so.inter_op_num_threads = 1
+        so.graph_optimization_level = ort.GraphOptimizationLevel.ORT_ENABLE_ALL
+        session = ort.InferenceSession(path, sess_options=so, providers=["CPUExecutionProvider"])
+        turns[path] = (session, FeatureExtractor(feature_size=80, chunk_length=8))
+        session = turns[path]
+    model, features = session
+    n = 8 * 16000
+    pcm = np.frombuffer(base64.b64decode(req["pcm"]), dtype=np.int16).astype(np.float32) / 32768.0
+    pcm = pcm[-n:]
+    if len(pcm) < n:
+        pcm = np.concatenate([np.zeros(n - len(pcm), dtype=np.float32), pcm])
+    # The feature extractor's do_normalize: zero mean and unit variance.
+    pcm = (pcm - pcm.mean()) / np.sqrt(pcm.var() + 1e-7)
+    mel = features(pcm, padding=0)[:, :800].astype(np.float32)
+    if mel.shape[1] < 800:
+        mel = np.pad(mel, ((0, 0), (0, 800 - mel.shape[1])))
+    out = model.run(None, {"input_features": mel[np.newaxis, :, :]})
+    return {"finished": float(np.asarray(out[0]).reshape(-1)[0])}
+
+
 def fetch(req):
     from huggingface_hub import snapshot_download
 
@@ -163,6 +202,8 @@ def main():
                 out = speak(req)
             elif op == "fetch":
                 out = fetch(req)
+            elif op == "turn":
+                out = turn(req)
             elif op == "ping":
                 out = {}
             else:
