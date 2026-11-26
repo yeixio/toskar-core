@@ -151,6 +151,7 @@ import type {
   PortalUsage,
 } from '@/types/api'
 import type { Upload } from '@/lib/upload'
+import { positionForMessage } from '@/lib/deviceLocation'
 
 /** A kind of generated media with its own setup: images or video. */
 export type MediaKind = 'images' | 'video'
@@ -538,7 +539,7 @@ async function readChatStream({
         ...authHeaders(),
       },
       // live: the answer as it's written, and what replaces it if that changes (#1006).
-      body: JSON.stringify({ time_zone: localTimeZone(), client: clientKind(), ...body, stream: true, live: true }),
+      body: JSON.stringify({ time_zone: localTimeZone(), device_location: positionForMessage(), client: clientKind(), ...body, stream: true, live: true }),
       signal,
     })
   } catch (err) {
@@ -1241,7 +1242,7 @@ export const api = {
   sendChat: (body: ChatRequest) =>
     request<ChatResponse>('/api/v1/chat', {
       method: 'POST',
-      body: JSON.stringify({ time_zone: localTimeZone(), client: clientKind(), ...body, stream: false }),
+      body: JSON.stringify({ time_zone: localTimeZone(), device_location: positionForMessage(), client: clientKind(), ...body, stream: false }),
     }),
 
   listLogs: () => request<LogEntry[]>('/api/v1/logs'),

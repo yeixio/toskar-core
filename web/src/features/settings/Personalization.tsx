@@ -5,6 +5,7 @@ import { api } from '@/lib/api'
 import type { PersonalStyle } from '@/types/api'
 import { ShownError, shownOr, type Shown } from '@/components/ui/ShownError'
 import { LoadError } from '@/components/ui/LoadError'
+import { ContextSummary, DeviceLocationSwitch } from './ContextSettings'
 
 const KEY = ['personalization'] as const
 
@@ -100,6 +101,7 @@ export function Personalization() {
         />
         <span className="mt-1 block text-xs text-ink-faint">{t('personalization.locationHint')}</span>
       </label>
+      <DeviceLocationSwitch />
       <label className="block text-sm">
         <span className="text-ink-muted">{t('personalization.instructions')}</span>
         <textarea
@@ -117,6 +119,9 @@ export function Personalization() {
         {saved && <span className="text-xs text-ink-faint">{t('personalization.saved')}</span>}
       </div>
       {error && <ShownError {...error} className="text-xs text-danger" />}
+      <div className="border-t border-line/50 pt-4">
+        <ContextSummary style={query.data} />
+      </div>
     </section>
   )
 }

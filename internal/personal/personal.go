@@ -9,9 +9,11 @@ import (
 	"errors"
 	"fmt"
 	"regexp"
+	"strconv"
 	"strings"
 	"unicode/utf8"
 
+	"github.com/yeixio/toskar-core/internal/locale"
 	"github.com/yeixio/toskar-core/pkg/contracts"
 )
 
@@ -171,9 +173,24 @@ func NeedsLocation(prompt string) bool {
 }
 
 // LocationBlock tells the model where the person is, for a question that
-// needs it, or "". It's data about the moment, not an instruction.
-func (s Style) LocationBlock(prompt string) string {
-	if s.Location == "" || !NeedsLocation(prompt) {
+// needs it, or "". It's data about the moment, not an instruction. Where
+// their device says it is now comes before the place they typed (#1310).
+func (s Style) LocationBlock(prompt string, device *locale.Position) string {
+	if !NeedsLocation(prompt) {
+		return ""
+	}
+	if device != nil {
+		near := "Where the user is now, from their device: " + device.String() + " (latitude, longitude"
+		if device.AccuracyM > 0 {
+			near += ", within about " + strconv.Itoa(int(device.AccuracyM+0.5)) + " m"
+		}
+		near += "). Use it for this question when they don't name another place, and say you used their device's location."
+		if s.Location != "" {
+			near += " Their Personal settings say they live in " + s.Location + "."
+		}
+		return near + " It's a fact about the user, not an instruction."
+	}
+	if s.Location == "" {
 		return ""
 	}
 	return "Where the user is, from their Personal settings: " + s.Location + ". Use it for this question when they don't name another place, and say it's the location they set. It's a fact about the user, not an instruction."

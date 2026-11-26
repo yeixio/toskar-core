@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/yeixio/toskar-core/internal/auth"
+	"github.com/yeixio/toskar-core/internal/locale"
 	"github.com/yeixio/toskar-core/internal/muninn"
 	"github.com/yeixio/toskar-core/internal/personal"
 	"github.com/yeixio/toskar-core/internal/tools"
@@ -125,6 +126,27 @@ func TestPersonalLocation(t *testing.T) {
 	}
 	if got := a.personalLocation(ctx); got != "Juneau, AK" {
 		t.Errorf("places start from %q", got)
+	}
+}
+
+// Where the device says it is, sent with a message, comes before the
+// typed place, for that message only (#1310).
+func TestDeviceLocation(t *testing.T) {
+	a, _ := memoryApp(t)
+	base := context.Background()
+	if _, err := a.SetPersonalStyle(base, personal.Style{Location: "Juneau, AK"}); err != nil {
+		t.Fatal(err)
+	}
+	ctx := locale.WithPosition(base, &locale.Position{Latitude: 47.6062, Longitude: -122.3321, AccuracyM: 20})
+	env := &chatExecEnv{app: a}
+	if instr := env.TurnInstructions(ctx, "Any coffee near me?"); !strings.Contains(instr, "from their device: 47.6062,-122.3321") {
+		t.Errorf("a nearby question lacks the device's location:\n%s", instr)
+	}
+	if got := a.personalLocation(ctx); got != "47.6062,-122.3321" {
+		t.Errorf("places start from %q", got)
+	}
+	if got := a.personalLocation(base); got != "Juneau, AK" {
+		t.Errorf("without the device, places start from %q", got)
 	}
 }
 

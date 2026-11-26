@@ -416,6 +416,11 @@ func (s *Server) handleChat(w http.ResponseWriter, r *http.Request) {
 		Thinking string `json:"thinking"`
 		// TimeZone is the person's IANA time zone, from their browser.
 		TimeZone string `json:"time_zone"`
+		// DeviceLocation is where the person's device is, when they turned
+		// on Use this device's location (#1310, contract 1.126). It's used
+		// for this message only, for a question that needs it, and isn't
+		// stored.
+		DeviceLocation *locale.Position `json:"device_location"`
 		// ParentID answers from that point in the chat; RetryOf asks an
 		// answer's question again; EditOf sends message in place of an
 		// earlier one. Each is a new version of its point (#447).
@@ -557,7 +562,7 @@ func (s *Server) handleChat(w http.ResponseWriter, r *http.Request) {
 			ctx = turnopts.WithProject(ctx, project)
 		}
 	}
-	r = r.WithContext(locale.WithTimeZone(ctx, body.TimeZone))
+	r = r.WithContext(locale.WithPosition(locale.WithTimeZone(ctx, body.TimeZone), body.DeviceLocation))
 	if err := s.deps.Chat(w, r, body.ConversationID, body.ProfileID, body.ModelID, body.Message, body.Stream, body.Execution); err != nil {
 		status := http.StatusInternalServerError
 		// Something turned off for the person, such as attaching files (#589).

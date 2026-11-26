@@ -3,8 +3,9 @@ package app
 import (
 	"context"
 	"encoding/json"
-	"github.com/yeixio/toskar-core/internal/auth"
 
+	"github.com/yeixio/toskar-core/internal/auth"
+	"github.com/yeixio/toskar-core/internal/locale"
 	"github.com/yeixio/toskar-core/internal/personal"
 )
 
@@ -101,12 +102,19 @@ func (a *App) locationBlock(ctx context.Context, message string) string {
 	if err != nil {
 		return ""
 	}
-	return s.LocationBlock(message)
+	if pos, ok := locale.PositionFrom(ctx); ok {
+		return s.LocationBlock(message, &pos)
+	}
+	return s.LocationBlock(message, nil)
 }
 
-// personalLocation is where the person asking said they are, or "": the
-// places tools start there when no place is named (#210).
+// personalLocation is where the person asking is, or "": the places tools
+// start there when no place is named (#210). Their device's position, when
+// it sent one, comes before the place they typed (#1310).
 func (a *App) personalLocation(ctx context.Context) string {
+	if pos, ok := locale.PositionFrom(ctx); ok {
+		return pos.String()
+	}
 	s, err := a.PersonalStyle(ctx)
 	if err != nil {
 		return ""
