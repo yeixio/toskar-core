@@ -250,7 +250,7 @@
   },
   "whatLeft": {
     "title": "O que saiu deste computador",
-    "description": "O Toskar trabalha neste computador. Estas são as vezes em que um chat, uma automação ou um app enviou algo para fora: pesquisas e páginas da web, consultas de mapas, computadores pareados e serviços conectados. Marque memórias ou conhecimento como “Somente este computador” para manter aqui os chats que os usam.",
+    "description": "O Toskar trabalha neste computador. Estas são as vezes em que um chat, uma automação ou um app enviou algo para fora: pesquisas e páginas da web, consultas de mapas, downloads de modelos e vozes, computadores pareados, o relay do Toskar e serviços conectados. Marque memórias ou conhecimento como “Somente este computador” para manter aqui os chats que os usam.",
     "nothing": "Nada saiu deste computador nos últimos 30 dias.",
     "summary": "Nos últimos 30 dias: {{list}}.",
     "summaryItem": "{{kind}} {{count}}",

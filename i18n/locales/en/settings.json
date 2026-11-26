@@ -243,7 +243,7 @@
   },
   "whatLeft": {
     "title": "What left this computer",
-    "description": "Toskar works on this computer. These are the times a chat, automation, or app sent something elsewhere: web searches and pages, map lookups, paired computers, and connected services. Mark memories or knowledge “This computer only” to keep chats that use them here.",
+    "description": "Toskar works on this computer. These are the times a chat, automation, or app sent something elsewhere: web searches and pages, map lookups, model and voice downloads, paired computers, Toskar's relay, and connected services. Mark memories or knowledge “This computer only” to keep chats that use them here.",
     "nothing": "Nothing left this computer in the last 30 days.",
     "summary": "In the last 30 days: {{list}}.",
     "summaryItem": "{{kind}} {{count}}",
