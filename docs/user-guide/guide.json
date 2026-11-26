@@ -5264,7 +5264,7 @@
         "Access from anywhere lets the phones, tablets, and other devices you paired reach Toskar when they're away from home. It's off until you turn it on in Settings › Network access. It answers only paired devices' keys, over HTTPS, and only what those devices use: no sign-in page, no settings, and nothing for other apps' keys.",
         "While it's on, Toskar asks your router to open its port (7333 unless you change it), keeps it open, and closes it when you turn access from anywhere off or quit Toskar. The line under the switch says how Toskar can be reached: at the router's address, over IPv6, at an address you entered, through a relay, or why not, such as an internet provider that shares one address among many homes.",
         "If the router won't open a port, there are free ways around it. Forward the port in your router's settings and enter the address it's reached at under Forwarded address. Or use Tailscale: install it here and on your device, and pair the device while both are on Tailscale. The device then reaches Toskar wherever it is, with no port open at all.",
-        "When none of that works, Toskar's relay does, for $4.99 a month or $39.99 a year. Subscribe under Toskar's relay in Settings › Network access, or in the Toskar app on your phone or tablet. One subscription covers Toskar here and every device paired with it, and it turns on by itself a few seconds after you pay. Where you subscribe in Settings › Network access depends on where Toskar came from. In Toskar Pro from the Mac App Store, it's an App Store subscription, at the App Store's price where you live: Restore purchase brings back one bought on another computer with the same App Store account, and Manage subscription opens the App Store's subscription settings, where you switch plans or cancel. Everywhere else, including Toskar Pro from the Microsoft Store and Toskar Core, it's a checkout billed by Yeix.io LLC with Stripe, and Manage billing changes the card or cancels. One bought in the Toskar app is managed in your device's store.",
+        "When none of that works, Toskar's relay does, for $4.99 a month or $39.99 a year. Subscribe under Toskar's relay in Settings › Network access, or in the Toskar app on your phone or tablet. One subscription covers Toskar here and every device paired with it, and it turns on by itself a few seconds after you pay. Where you subscribe in Settings › Network access depends on where Toskar came from. In Toskar Pro from the Mac App Store, it's an App Store subscription, at the App Store's price where you live. There, Restore purchase brings back one bought on another computer with the same App Store account, and Manage subscription opens the App Store's subscription settings, where you switch plans or cancel. Everywhere else, including Toskar Pro from the Microsoft Store and Toskar Core, it's a checkout billed by Yeix.io LLC with Stripe, and Manage billing changes the card or cancels. One bought in the Toskar app is managed in your device's store.",
         "Another device doesn't sell a second subscription for the same Toskar. One whose own copy has run out, as when it's been away from home a while, says Toskar is already covered by another device's subscription, and picks it up the next time it's home. If Toskar still ends up with two, the device paying for one of them says so, and you can cancel that one in the device's store. Toskar stays reachable on the other.",
         "If your organization runs its own Toskar relay, open Your organization's relay in Settings › Network access and enter the relay's name and the enrollment secret your IT team gave you. Toskar then keeps a line open to the relay, so devices get through even when nothing more direct works.",
         "A device takes the most direct way that works: at home first, then directly, then through the relay. Settings on the device shows which. Traffic is encrypted all the way to Toskar, to the certificate the device saved when it was paired, so a router or relay in between can't read it or answer in Toskar's place.",
@@ -5274,6 +5274,182 @@
         "Open Settings › Network access and turn on Access from anywhere.",
         "Check the line under the switch. If it says Toskar isn't reachable yet, forward the port and enter the address, use Tailscale, subscribe to Toskar's relay, or set up your organization's relay.",
         "Take a paired device off your home Wi-Fi and open Toskar. Its Settings say how it got through."
+      ],
+      "kind": "task",
+      "summary": "Use Toskar from your phone, tablet, or laptop when you're away from home, directly or through a relay.",
+      "blocks": [
+        {
+          "type": "list",
+          "title": "What you need",
+          "items": [
+            "The Owner's or an Admin's account on the computer that runs Toskar.",
+            "A phone, tablet, or other device already paired with it at home. Pairing is on Use Toskar on your phone.",
+            "The computer left on and awake while you're away, with Toskar running."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Turn it on"
+        },
+        {
+          "type": "steps",
+          "items": [
+            "Open Settings › Network access.",
+            "Turn on Access from anywhere.",
+            "Wait a few seconds, then read the line under the switch and the reachability check below it.",
+            "If it says Reachable from outside your network, you're done. If not, follow Troubleshooting below, or subscribe to Toskar's relay.",
+            "To try it, turn off Wi-Fi on a paired phone and open Toskar. Its Settings say how it got through."
+          ]
+        },
+        {
+          "type": "image",
+          "screen": "anywhere-settings",
+          "alt": "Settings › Network access with Access from anywhere on, Toskar's relay subscribed with Manage billing, and the check saying Reachable from outside your network, through the relay",
+          "caption": "A device that can't get in directly comes in through the relay, so nothing needs fixing."
+        },
+        {
+          "type": "heading",
+          "text": "Direct or through a relay"
+        },
+        {
+          "type": "paragraph",
+          "text": "Think of the computer at home as a house. Directly means your device knocks on the front door: your router lets it in on one port. Through a relay means it goes through a building's front desk, which passes it on to your door."
+        },
+        {
+          "type": "table",
+          "columns": [
+            "Way in",
+            "What it needs",
+            "What it costs"
+          ],
+          "rows": [
+            [
+              "At home",
+              "The device on the same network as the computer.",
+              "Free."
+            ],
+            [
+              "Directly",
+              "A router that opens the port for Toskar, or one you forward yourself.",
+              "Free."
+            ],
+            [
+              "Tailscale",
+              "Tailscale on the computer and the device, both on Tailscale when you pair.",
+              "See Tailscale's plans."
+            ],
+            [
+              "Toskar's relay",
+              "Nothing on the router. Works behind any router or internet provider.",
+              "$4.99 a month or $39.99 a year, for the computer and all its devices."
+            ],
+            [
+              "Your organization's relay",
+              "The relay's name and an enrollment secret from your IT team.",
+              "Whatever your organization arranges."
+            ]
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "A device takes the most direct way that works, so the relay carries traffic only when nothing else does. Traffic is encrypted from the device to Toskar itself, so the relay sees only how much passes and when, never your chats, files, or voice."
+        },
+        {
+          "type": "heading",
+          "text": "Subscribe to Toskar's relay"
+        },
+        {
+          "type": "steps",
+          "items": [
+            "On the computer, open Settings › Network access and find Toskar's relay. Or, in the Toskar app on a paired phone or tablet, open Settings › Use Toskar away from home.",
+            "Choose Subscribe for $4.99 a month or Subscribe for $39.99 a year, and finish paying on the checkout page.",
+            "Within a few seconds, the check says Reachable from outside your network, through the relay."
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "The subscription belongs to the computer, not the device you paid on, and every device paired with that computer shares it. A second device won't sell you another one for the same computer. Cancel where you subscribed: Manage billing on the computer, or your device's subscription settings."
+        },
+        {
+          "type": "heading",
+          "text": "Check that it's reachable"
+        },
+        {
+          "type": "paragraph",
+          "text": "The reachability check asks a server on the internet to reach this computer the way a device away from home would, through each way it might use. It runs when you turn access on, when the ways in change, and every 30 minutes; Check now runs it again."
+        },
+        {
+          "type": "image",
+          "screen": "anywhere-check",
+          "alt": "The reachability check: reached through the relay in 84 ms, the router's address 198.51.100.24:7333 not answering because of double NAT or a firewall, and the port settings below it",
+          "caption": "Each way in gets a line: a check mark when it worked, and why not when it didn't."
+        },
+        {
+          "type": "heading",
+          "text": "Data use"
+        },
+        {
+          "type": "list",
+          "items": [
+            "At home, nothing goes over the internet.",
+            "Away from home, chats use very little data. Files, pictures, and voice use more, as on any app.",
+            "Through Toskar's relay, a subscription has a monthly allowance. If it runs out, the app says so: direct ways and home still work, and the relay is back next month.",
+            "On a phone's cellular data, your carrier counts what Toskar uses like any other app."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Troubleshooting"
+        },
+        {
+          "type": "table",
+          "columns": [
+            "What you see",
+            "What to do"
+          ],
+          "rows": [
+            [
+              "Your router didn't answer requests to open a port",
+              "Turn on UPnP or NAT-PMP in the router's settings. Or forward the port to this computer by hand and enter the address under Forwarded address. Or subscribe to the relay."
+            ],
+            [
+              "Nothing answered from the internet",
+              "Another router in front of yours (double NAT) or a firewall is blocking the port. Forward the port on both routers, use Tailscale, or use the relay."
+            ],
+            [
+              "Your internet provider shares one address among many homes",
+              "A router port can't help here. Use Tailscale or the relay."
+            ],
+            [
+              "Port 7333 is already forwarded to another device",
+              "Choose Try another port, or remove the old forward in the router."
+            ],
+            [
+              "Something other than Toskar answered on this port",
+              "The router sends the port to another computer. Forward it to this one."
+            ],
+            [
+              "A device away from home can't connect",
+              "Check the computer is on, awake, and online. Then open Toskar on the device once at home, so it learns the newest way in."
+            ],
+            [
+              "Another Toskar is running on this computer",
+              "Each copy has its own devices. Stop the copy you don't use, or pair the device with the one you do."
+            ]
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "To report a problem, choose Copy details for a report under the check, and paste it into Report a problem."
+        },
+        {
+          "type": "related",
+          "sections": [
+            "phone",
+            "people",
+            "privacy"
+          ]
+        }
       ]
     },
     {
