@@ -63,6 +63,11 @@ type Handler struct {
 	// RawModels are the chat models installed on this computer, which a key
 	// with raw access sees in /v1/models as raw:<id> (#843).
 	RawModels func(ctx context.Context) []string
+	// ToolModel is the model on this computer a request with the client's
+	// own tools goes to (#1450): model when it's one installed here, else
+	// profile's, or the default profile's, assistant model, else the one used
+	// last. profile and model are as asked, either may be empty or auto.
+	ToolModel func(ctx context.Context, profile, model string) (string, error)
 	// Spread readies a swarm:<profile> request that brings its own tools
 	// (#1135): on the least busy of the profile's swarm models and computers
 	// that fits, on this computer or a paired one. It returns ErrSwarmProfile
@@ -297,6 +302,23 @@ func (h *Handler) HandleChatCompletions(w http.ResponseWriter, r *http.Request) 
 		h.handleSwarm(w, r, perms, req, sampling)
 		return
 	}
+	// A request that brings its own tools, such as Home Assistant's Assist
+	// or an agent's, runs them itself: auto, a profile, or a model's id hands
+	// it to the model the turn would use, as raw:<model> does, so the model
+	// answers tool_calls and the answer streams (#1450). A key that can't
+	// drive models directly keeps Toskar's own tools, as before.
+	if h.ToolModel != nil && rawAllowed(perms) == nil {
+		if forward, err := rawBody(body); err == nil && clientTools(forward) {
+			profile, model := "", req.Model
+			if p, ok := strings.CutPrefix(req.Model, "profile:"); ok {
+				profile, model = p, ""
+			}
+			if id, err := h.ToolModel(r.Context(), profile, model); err == nil && id != "" {
+				h.handleRawOn(w, r, perms, req, body, sampling.MaxTokens, RawPrefix+id)
+				return
+			}
+		}
+	}
 	profileID := ""
 	modelID := ""
 	if strings.HasPrefix(req.Model, "profile:") {
@@ -413,7 +435,13 @@ func (h *Handler) HandleChatCompletions(w http.ResponseWriter, r *http.Request) 
 		metaMu.Unlock()
 	}
 	// One id and time for the whole response, its progress chunks too.
-	sw := &streamWriter{w: w, c: newCompletion(profileID)}
+	// The answer is named for its profile, or for what was asked, such as
+	// auto or a model's id, never left empty (#1450).
+	name := profileID
+	if name == "" {
+		name = req.Model
+	}
+	sw := &streamWriter{w: w, c: newCompletion(name)}
 	if req.Stream {
 		if !sw.start() {
 			writeError(w, http.StatusInternalServerError, "STREAM_UNSUPPORTED", "streaming not supported")
@@ -453,10 +481,10 @@ func (h *Handler) HandleChatCompletions(w http.ResponseWriter, r *http.Request) 
 		one <- pluginapi.ChatChunk{Content: content, Done: true, Metrics: metrics}
 		close(one)
 		if !req.Stream {
-			h.writeNonStream(w, one, profileID, func() map[string]any { return nil }, false)
+			h.writeNonStream(w, one, name, func() map[string]any { return nil }, false)
 			return
 		}
-		h.writeStream(sw, r, one, profileID, func() map[string]any { return nil }, false, false, includeUsage)
+		h.writeStream(sw, r, one, name, func() map[string]any { return nil }, false, false, includeUsage)
 		return
 	}
 	stream, err := h.Chat.RunChat(ctx, profileID, "", message, req.Stream, modelID, execution)
@@ -479,10 +507,10 @@ func (h *Handler) HandleChatCompletions(w http.ResponseWriter, r *http.Request) 
 	}
 
 	if !req.Stream {
-		h.writeNonStream(w, stream, profileID, extension, req.IncludeReasoning)
+		h.writeNonStream(w, stream, name, extension, req.IncludeReasoning)
 		return
 	}
-	h.writeStream(sw, r, stream, profileID, extension, req.assistant() != nil && req.assistant().Progress, req.IncludeReasoning, includeUsage)
+	h.writeStream(sw, r, stream, name, extension, req.assistant() != nil && req.assistant().Progress, req.IncludeReasoning, includeUsage)
 }
 
 func (h *Handler) writeNonStream(w http.ResponseWriter, stream <-chan pluginapi.ChatChunk, model string, extension func() map[string]any, includeReasoning bool) {

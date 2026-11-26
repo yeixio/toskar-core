@@ -604,6 +604,8 @@ func New(opts Options) (*App, error) {
 		// raw:<model> drives a model on this computer directly (#843).
 		Raw:       a.rawModel,
 		RawModels: a.rawModels,
+		// A request with its own tools runs on the model the turn would use (#1450).
+		ToolModel: a.toolModel,
 		// swarm:<profile> (#1135): Spread for an editor agent's requests
 		// with their own tools, and a full swarm for the rest.
 		Spread: a.spreadRoute,

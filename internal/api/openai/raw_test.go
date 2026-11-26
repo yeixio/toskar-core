@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"github.com/yeixio/toskar-core/internal/auth"
+	"github.com/yeixio/toskar-core/pkg/pluginapi"
 )
 
 // A raw:<model> request goes to the model's llama-server as it came, tools
@@ -142,5 +143,62 @@ func TestSystemFirst(t *testing.T) {
 		if out := string(systemFirst([]byte(same))); out != same {
 			t.Errorf("%s became %s", same, out)
 		}
+	}
+}
+
+// A request with its own tools that asks for auto, a profile, or a model's
+// id runs on the model the turn would use, as raw does, so the client gets
+// its tool_calls; a key that can't drive models keeps Toskar's own tools
+// (#1450).
+func TestClientToolsGoToTheTurnsModel(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		fmt.Fprint(w, `{"model":"x","choices":[{"message":{"role":"assistant","tool_calls":[{"id":"c1","type":"function","function":{"name":"HassTurnOn","arguments":"{}"}}]},"finish_reason":"tool_calls"}]}`)
+	}))
+	defer server.Close()
+
+	h := testHandler(t)
+	chat := &scriptChat{chunks: []pluginapi.ChatChunk{{Content: "Toskar's own answer", Done: true}}}
+	h.Chat = chat
+	perms := auth.APIKeyPermissions{Raw: true}
+	h.Permissions = func(r *http.Request) (auth.APIKeyPermissions, context.Context, error) { return perms, r.Context(), nil }
+	var ran string
+	h.Raw = func(_ context.Context, model string, _ int) (string, int, func(), error) {
+		ran = model
+		return server.URL, 32768, func() {}, nil
+	}
+	var asked [2]string
+	h.ToolModel = func(_ context.Context, profile, model string) (string, error) {
+		asked = [2]string{profile, model}
+		return "qwen3.5-4b-q4", nil
+	}
+	call := func(model, tools string) *httptest.ResponseRecorder {
+		rec := httptest.NewRecorder()
+		body := `{"model":"` + model + `","messages":[{"role":"user","content":"turn on the kitchen light"}]` + tools + `}`
+		h.HandleChatCompletions(rec, httptest.NewRequest(http.MethodPost, "/v1/chat/completions", strings.NewReader(body)))
+		return rec
+	}
+	tools := `,"tools":[{"type":"function","function":{"name":"HassTurnOn","parameters":{"type":"object"}}}]`
+
+	for model, want := range map[string][2]string{"auto": {"", "auto"}, "profile:general": {"general", ""}, "qwen3.5-4b-q4": {"", "qwen3.5-4b-q4"}} {
+		ran = ""
+		rec := call(model, tools)
+		if rec.Code != http.StatusOK || !strings.Contains(rec.Body.String(), "HassTurnOn") || !strings.Contains(rec.Body.String(), `"model":"`+model+`"`) {
+			t.Fatalf("%s: %d %s", model, rec.Code, rec.Body)
+		}
+		if ran != "qwen3.5-4b-q4" || asked != want {
+			t.Fatalf("%s: ran on %q, asked %v", model, ran, asked)
+		}
+	}
+
+	// Without tools, Toskar answers as its own assistant.
+	ran = ""
+	if rec := call("auto", ""); !strings.Contains(rec.Body.String(), "Toskar's own answer") || ran != "" {
+		t.Fatalf("no tools: ran %q, %s", ran, rec.Body)
+	}
+	// A key that can't drive models keeps Toskar's own tools.
+	perms = auth.APIKeyPermissions{}
+	if rec := call("auto", tools); !strings.Contains(rec.Body.String(), "Toskar's own answer") || ran != "" {
+		t.Fatalf("no raw access: ran %q, %s", ran, rec.Body)
 	}
 }

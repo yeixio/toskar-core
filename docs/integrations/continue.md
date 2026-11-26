@@ -87,7 +87,7 @@ Without the key, Toskar answers `401` "authorization required". With a key that 
 ## Choosing a model
 
 - **Chat, edit, and apply** can be one model, as in the entry above. Agent mode needs one that calls tools: `toskarctl connect` picks one that does.
-- **Use `raw:<model>`.** It hands the model to Continue as it is, with Continue's own tools and instructions. Toskar's profiles and `auto` answer as Toskar's own assistant, with its tools and not Continue's, so agent mode doesn't work with them ([API](../api.md)).
+- **Use `raw:<model>`.** It hands the model to Continue as it is, with Continue's own tools and instructions. With `auto` or a profile, Continue's tools reach the profile's model too, for a key that may drive models directly, but `raw:<model>` says exactly which model answers ([API](../api.md)).
 - **Check what it changes.** With Qwen 2.5 7B, it found the bug in all three tries. Once it guessed a wrong path (`src/tally.go`) until told where the file was, and its Apply once merged a snippet badly, dropping a `return`. Only the 7B was tried here; on a computer with the memory for one, a larger model is worth trying. Always read the change before you accept it.
 - **Autocomplete isn't supported yet.** Continue's tab completion needs `/v1/completions` with fill-in-the-middle, which Toskar doesn't have (#1119). Leave the `autocomplete` role off Toskar's models.
 

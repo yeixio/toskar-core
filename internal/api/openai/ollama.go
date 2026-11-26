@@ -19,7 +19,8 @@ import (
 // answered by HandleChatCompletions, so Auto, profiles, keys, and
 // permissions behave as they do on /v1/chat/completions; the answer is
 // turned back into Ollama's shape, a JSON object per line when streaming.
-// A client's own tools reach the model on raw:<model>, as on Chat
+// A client's own tools reach the model on raw:<model>, and on auto or a
+// profile for a key that may drive models directly, as on Chat
 // Completions.
 
 // OllamaVersion is the Ollama API version Toskar answers as: the one whose
@@ -567,9 +568,13 @@ func (h *Handler) HandleOllamaShow(w http.ResponseWriter, r *http.Request) {
 		ollamaError(w, http.StatusNotFound, "model '"+name+"' not found")
 		return
 	}
-	// Auto and profiles see pictures by choosing a model that does, and
-	// use Toskar's own tools; an app's tools reach a raw model.
+	// Auto and profiles see pictures by choosing a model that does. An
+	// app's tools reach a raw model, and auto or a profile's model too, for
+	// a key that may drive models directly (#1450).
 	caps := []string{"completion", "vision"}
+	if h.ToolModel != nil {
+		caps = append(caps, "tools")
+	}
 	if strings.HasPrefix(name, RawPrefix) || strings.HasPrefix(name, SwarmPrefix) {
 		caps = []string{"completion", "tools"}
 	}
