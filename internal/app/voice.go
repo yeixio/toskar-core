@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 	"sync"
 	"time"
 
@@ -36,7 +37,7 @@ func (a *App) voiceParts(ctx context.Context) (voice.Parts, error) {
 	// (#1403); until it's here the pause alone ends a turn.
 	a.voiceWorker.PrepareTurnCheck()
 	return voice.Parts{
-		Judge:       workerJudge{a.voiceWorker},
+		Judge:       workerJudge{w: a.voiceWorker, log: a.Logger},
 		Transcriber: workerTurns{w: a.voiceWorker, quality: a.voiceHearing(ctx), language: a.voiceLanguage(ctx)},
 		Responder:   &voiceChat{app: a, ctx: ctx},
 		Speaker:     workerVoice{a.voiceWorker},
@@ -131,10 +132,28 @@ func (t workerTurns) Hear(ctx context.Context, wav []byte, language string) (voi
 }
 
 // workerJudge asks Smart Turn whether a paused turn sounds finished (#1403).
-type workerJudge struct{ w *speech.Worker }
+// Each verdict and its time go to the log, so the voice bench can tell a
+// slow check from a wrong one (#1460).
+type workerJudge struct {
+	w   *speech.Worker
+	log *slog.Logger
+}
 
 func (j workerJudge) TurnFinished(ctx context.Context, samples []int16) (float64, error) {
-	return j.w.TurnFinished(ctx, voice.EncodePCM16(voice.Resample(samples, voice.SampleRate, whisperRate)))
+	start := time.Now()
+	p, err := j.w.TurnFinished(ctx, voice.EncodePCM16(voice.Resample(samples, voice.SampleRate, whisperRate)))
+	if j.log != nil && !errors.Is(err, speech.ErrTurnNotReady) {
+		j.log.Info("voice turn check", "finished", p, "ms", time.Since(start).Milliseconds(), "audio_ms", len(samples)*1000/voice.SampleRate, "error", err)
+	}
+	return p, err
+}
+
+// Warm loads Smart Turn when voice mode opens, so the first pause isn't
+// judged while the model loads (#1460).
+func (j workerJudge) Warm() {
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	_, _ = j.w.TurnFinished(ctx, voice.EncodePCM16(make([]int16, whisperRate)))
 }
 
 type workerVoice struct{ w *speech.Worker }

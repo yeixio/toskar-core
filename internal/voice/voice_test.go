@@ -33,7 +33,7 @@ func TestVADFindsATurn(t *testing.T) {
 	audio := append(append(quiet(1), tone(1)...), quiet(1)...)
 	var got []vadEvent
 	for i := 0; i < len(audio); i += 2400 {
-		got = append(got, v.feed(audio[i:min(i+2400, len(audio))], i)...)
+		got = append(got, turnsOnly(v.feed(audio[i:min(i+2400, len(audio))], i))...)
 	}
 	if len(got) != 2 || !got[0].started || !got[1].stopped {
 		t.Fatalf("events: %+v", got)
@@ -49,7 +49,7 @@ func TestVADFindsATurn(t *testing.T) {
 func TestVADIgnoresAClick(t *testing.T) {
 	v := newVAD(*defaultTurnDetection())
 	audio := append(append(quiet(0.5), tone(0.03)...), quiet(1)...)
-	if got := v.feed(audio, 0); len(got) != 0 {
+	if got := turnsOnly(v.feed(audio, 0)); len(got) != 0 {
 		t.Fatalf("a 30 ms click started a turn: %+v", got)
 	}
 }
@@ -60,13 +60,13 @@ func TestVADIgnoresAClick(t *testing.T) {
 func TestVADKeepsTheCadence(t *testing.T) {
 	v := newVAD(*defaultTurnDetection())
 	cough := append(append(quiet(0.5), tone(0.12)...), quiet(1)...)
-	if got := v.feed(cough, 0); len(got) != 0 {
+	if got := turnsOnly(v.feed(cough, 0)); len(got) != 0 {
 		t.Fatalf("a 120 ms cough started a turn: %+v", got)
 	}
 	v = newVAD(*defaultTurnDetection())
 	// "So I was thinking... maybe tomorrow", then quiet.
 	audio := append(append(append(append(quiet(0.5), tone(0.8)...), quiet(0.7)...), tone(0.6)...), quiet(1.2)...)
-	got := v.feed(audio, 0)
+	got := turnsOnly(v.feed(audio, 0))
 	if len(got) != 2 || !got[0].started || !got[1].stopped {
 		t.Fatalf("a pause ended the turn: %+v", got)
 	}
@@ -94,21 +94,21 @@ func TestVADLearnsSteadyNoise(t *testing.T) {
 	hum := noise(4, 0.08)
 	audio := append(append([]int16(nil), hum...), mix(tone(1), noise(1, 0.08))...)
 	audio = append(audio, noise(1.5, 0.08)...)
-	got := v.feed(audio, 0)
+	got := turnsOnly(v.feed(audio, 0))
 	if len(got) != 2 || !got[0].started || ms(got[0].at) < 3900 || !got[1].stopped {
 		t.Fatalf("noise from the start: %+v", got)
 	}
 
 	v = newVAD(*defaultTurnDetection())
 	audio = append(quiet(1), noise(8, 0.08)...)
-	got = v.feed(audio, 0)
+	got = turnsOnly(v.feed(audio, 0))
 	if len(got) > 2 || (len(got) == 2 && ms(got[1].at-got[0].at) > 5000) {
 		t.Fatalf("noise that starts later: %+v", got)
 	}
 	if len(got) == 1 {
 		t.Fatalf("noise that starts later never ended its turn: %+v", got)
 	}
-	got = v.feed(append(mix(tone(1), noise(1, 0.08)), noise(1.5, 0.08)...), len(audio))
+	got = turnsOnly(v.feed(append(mix(tone(1), noise(1, 0.08)), noise(1.5, 0.08)...), len(audio)))
 	if len(got) != 2 || !got[0].started {
 		t.Fatalf("speech over the noise: %+v", got)
 	}
@@ -139,7 +139,7 @@ func TestVADHearsAFarMicrophoneToTheEnd(t *testing.T) {
 	end := len(audio)
 	audio = append(audio, room(1.5)...)
 	v := newVAD(*defaultTurnDetection())
-	got := v.feed(audio, 0)
+	got := turnsOnly(v.feed(audio, 0))
 	if len(got) != 2 || !got[0].started || !got[1].stopped {
 		t.Fatalf("the sentence was heard as %+v", got)
 	}
@@ -495,4 +495,108 @@ type failingJudge struct{}
 
 func (failingJudge) TurnFinished(context.Context, []int16) (float64, error) {
 	return 0, context.DeadlineExceeded
+}
+
+// turnsOnly leaves out the early pauses a judge is asked at (#1460).
+func turnsOnly(events []vadEvent) []vadEvent {
+	var out []vadEvent
+	for _, e := range events {
+		if !e.paused {
+			e.pause = 0
+			out = append(out, e)
+		}
+	}
+	return out
+}
+
+// has reports an event of kind so far.
+func (r *recorder) has(kind string) bool {
+	for _, k := range r.types() {
+		if k == kind {
+			return true
+		}
+	}
+	return false
+}
+
+// A turn that sounds finished is judged while its pause goes on, so it
+// ends when the pause does, with no wait for the judge after it; not
+// before, since a pause after "call the dentist?" can still go on (#1460).
+func TestSessionEndsAFinishedTurnWithThePause(t *testing.T) {
+	rec := newRecorder()
+	judge := &judgeSays{answers: []float64{0.9}}
+	s := NewSession(Parts{Transcriber: &fakeSTT{text: "What time is it?"}, Responder: &fakeLLM{deltas: []string{"Noon."}}, Speaker: &fakeTTS{}, Judge: judge}, rec.send)
+	defer s.Close()
+	rec.waitFor(t, "session.created")
+	speak(s, append(quiet(0.5), tone(1)...))
+	fed := 0.0
+	for fed < 2 && !rec.has("input_audio_buffer.speech_stopped") {
+		speak(s, quiet(0.1))
+		fed += 0.1
+		time.Sleep(40 * time.Millisecond)
+	}
+	if fed < 0.85 || fed > 1.15 {
+		t.Fatalf("the turn ended after %.1f s of quiet, want with the 0.9 s pause", fed)
+	}
+	judge.mu.Lock()
+	asked := len(judge.heard)
+	judge.mu.Unlock()
+	if asked != 1 {
+		t.Fatalf("judged %d times, want once, during the pause", asked)
+	}
+	rec.waitFor(t, "response.done")
+	speak(s, quiet(1.5))
+	committed := 0
+	for _, k := range rec.types() {
+		if k == "input_audio_buffer.committed" {
+			committed++
+		}
+	}
+	if committed != 1 {
+		t.Fatalf("%d turns, want one: %v", committed, rec.types())
+	}
+	if end := rec.last("input_audio_buffer.speech_stopped")["audio_end_ms"].(float64); end < 1400 || end > 1600 {
+		t.Errorf("audio_end_ms %v, want where the words stopped, 1500", end)
+	}
+}
+
+// slowJudge answers finished, but only once let go.
+type slowJudge struct {
+	gate  chan struct{}
+	calls chan struct{}
+}
+
+func (j slowJudge) TurnFinished(ctx context.Context, _ []int16) (float64, error) {
+	j.calls <- struct{}{}
+	select {
+	case <-j.gate:
+	case <-ctx.Done():
+		return 0, ctx.Err()
+	}
+	return 0.9, nil
+}
+
+// A finished verdict that comes after the words went on doesn't end the
+// turn: the pause it was about is over (#1460).
+func TestSessionKeepsATurnThatWentOnWhileJudged(t *testing.T) {
+	stt := &fakeSTT{text: "I'd like a table for two"}
+	rec := newRecorder()
+	judge := slowJudge{gate: make(chan struct{}), calls: make(chan struct{}, 8)}
+	s := NewSession(Parts{Transcriber: stt, Responder: &fakeLLM{deltas: []string{"Sure."}}, Speaker: &fakeTTS{}, Judge: judge}, rec.send)
+	defer s.Close()
+	rec.waitFor(t, "session.created")
+	speak(s, append(append(quiet(0.5), tone(1)...), quiet(0.4)...))
+	<-judge.calls
+	speak(s, tone(0.8))
+	close(judge.gate)
+	time.Sleep(50 * time.Millisecond)
+	if rec.has("input_audio_buffer.speech_stopped") {
+		t.Fatalf("a late verdict ended a turn that went on: %v", rec.types())
+	}
+	speak(s, quiet(1.2))
+	rec.waitFor(t, "response.done")
+	samples, _, _ := ParseWAV(stt.got)
+	if d := ms(len(samples)); d < 2000 {
+		t.Errorf("transcribed %d ms, want both parts of the turn", d)
+	}
 }

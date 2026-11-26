@@ -152,10 +152,13 @@ def turn(req):
     n = 8 * 16000
     pcm = np.frombuffer(base64.b64decode(req["pcm"]), dtype=np.int16).astype(np.float32) / 32768.0
     pcm = pcm[-n:]
+    # The feature extractor's do_normalize: zero mean and unit variance over
+    # the audio itself, before the padding, which stays 0 (#1460). Over the
+    # padded 8 s, a short turn came out louder than the model was trained on.
+    if len(pcm):
+        pcm = (pcm - pcm.mean()) / np.sqrt(pcm.var() + 1e-7)
     if len(pcm) < n:
         pcm = np.concatenate([np.zeros(n - len(pcm), dtype=np.float32), pcm])
-    # The feature extractor's do_normalize: zero mean and unit variance.
-    pcm = (pcm - pcm.mean()) / np.sqrt(pcm.var() + 1e-7)
     mel = features(pcm, padding=0)[:, :800].astype(np.float32)
     if mel.shape[1] < 800:
         mel = np.pad(mel, ((0, 0), (0, 800 - mel.shape[1])))
