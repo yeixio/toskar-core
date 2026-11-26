@@ -41,7 +41,8 @@ func TestSpokenAnswerNeedsAVoice(t *testing.T) {
 		t.Fatalf("written: %+v", d)
 	}
 	d := a.replyLanguage(turnopts.WithSpoken(ctx), "", asked, "")
-	if d.Tag != "en" || d.Unspoken != "ja" || !strings.Contains(d.Instruction(), "can't speak Japanese aloud") {
+	// English, or this computer's own English, such as en-US.
+	if !strings.HasPrefix(d.Tag, "en") || d.Unspoken != "ja" || !strings.Contains(d.Instruction(), "can't speak Japanese aloud") {
 		t.Fatalf("spoken: %+v, %q", d, d.Instruction())
 	}
 	// A language it has a voice for is answered in, as before.
