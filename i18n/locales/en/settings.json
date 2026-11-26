@@ -412,7 +412,10 @@
     "hearing": "How voice hears you",
     "hearingHint": "Accurate hears noticeably better in a noisy room or with a far microphone, such as a webcam's. It answers a few tenths of a second later, downloads about 480 MB once, and uses about 500 MB more memory. For live voice and the doorbell.",
     "hearingFast": "Fast",
-    "hearingAccurate": "Accurate"
+    "hearingAccurate": "Accurate",
+    "language": "Language voice hears",
+    "languageHint": "Detects the language of each turn and answers in it. Choose one language if everyone here always speaks it: Toskar hears it more reliably and doesn't mistake a short word for another language.",
+    "languageDetect": "Detect each turn's language"
   },
   "sections": {
     "account": "Account",

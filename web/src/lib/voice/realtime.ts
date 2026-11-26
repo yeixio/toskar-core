@@ -7,8 +7,8 @@ export type VoiceStatus = 'connecting' | 'listening' | 'hearing' | 'thinking' | 
 
 export interface VoiceHandlers {
   onStatus?: (status: VoiceStatus) => void
-  /** What the person said in a turn. */
-  onYou?: (text: string) => void
+  /** What the person said in a turn, and the language heard, when speech to text was sure of it (#1405). */
+  onYou?: (text: string, language?: string) => void
   /** The answer's words so far, as they're spoken. */
   onAnswer?: (text: string) => void
   /** A piece of the answer's audio, at VOICE_RATE. */
@@ -150,7 +150,9 @@ export class VoiceConnection {
       case 'conversation.item.input_audio_transcription.completed': {
         const text = String(e.transcript ?? '').trim()
         // Nothing heard leaves what they said last on screen.
-        if (text) this.handlers.onYou?.(text)
+        const language = typeof e.language === 'string' ? e.language : ''
+        if (text && language) this.handlers.onYou?.(text, language)
+        else if (text) this.handlers.onYou?.(text)
         // Nothing was said, so nothing is answered.
         if (!text && this.status === 'thinking') this.set('listening')
         break

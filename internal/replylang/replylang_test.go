@@ -76,18 +76,18 @@ func TestResolve(t *testing.T) {
 		in   Input
 		want Decision
 	}{
-		{"an explicit request always wins", Input{Mode: ModeLanguage, Setting: "de", App: "de", Message: "Answer this one in English."}, Decision{"en", FromRequest}},
-		{"auto follows the message", Input{App: "de", Message: "What is the tallest mountain in Europe?"}, Decision{"en", FromMessage}},
-		{"auto uses the conversation for a short message", Input{App: "en", Message: "ok, und dann?", History: []string{"Wie hoch ist die Zugspitze genau?"}}, Decision{"de", FromConversation}},
-		{"auto falls back to the App language", Input{Mode: ModeAuto, App: "fr", Message: "ok"}, Decision{"fr", FromApp}},
-		{"a chosen language wins over the message", Input{Mode: ModeLanguage, Setting: "es", App: "de", Message: "What is the tallest mountain in Europe?"}, Decision{"es", FromSetting}},
-		{"same as app", Input{Mode: ModeApp, App: "ja", Message: "What is the tallest mountain in Europe?"}, Decision{"ja", FromApp}},
-		{"same as app with the system language", Input{Mode: ModeApp, System: "it_IT", Message: "hi"}, Decision{"it-IT", FromSystem}},
-		{"pseudo-locales answer in English", Input{Mode: ModeApp, App: "en-XA", Message: "hi"}, Decision{"en", FromDefault}},
-		{"nothing to go on", Input{Message: "👍"}, Decision{"en", FromDefault}},
-		{"auto follows the language a short message was spoken in", Input{App: "en", Message: "¿Hola?", Spoken: "es"}, Decision{"es", FromSpeech}},
-		{"the text wins over the language heard", Input{App: "en", Message: "What is the tallest mountain in Europe?", Spoken: "pt"}, Decision{"en", FromMessage}},
-		{"a chosen language wins over the language heard", Input{Mode: ModeLanguage, Setting: "de", Message: "ok", Spoken: "es"}, Decision{"de", FromSetting}},
+		{"an explicit request always wins", Input{Mode: ModeLanguage, Setting: "de", App: "de", Message: "Answer this one in English."}, Decision{Tag: "en", Source: FromRequest}},
+		{"auto follows the message", Input{App: "de", Message: "What is the tallest mountain in Europe?"}, Decision{Tag: "en", Source: FromMessage}},
+		{"auto uses the conversation for a short message", Input{App: "en", Message: "ok, und dann?", History: []string{"Wie hoch ist die Zugspitze genau?"}}, Decision{Tag: "de", Source: FromConversation}},
+		{"auto falls back to the App language", Input{Mode: ModeAuto, App: "fr", Message: "ok"}, Decision{Tag: "fr", Source: FromApp}},
+		{"a chosen language wins over the message", Input{Mode: ModeLanguage, Setting: "es", App: "de", Message: "What is the tallest mountain in Europe?"}, Decision{Tag: "es", Source: FromSetting}},
+		{"same as app", Input{Mode: ModeApp, App: "ja", Message: "What is the tallest mountain in Europe?"}, Decision{Tag: "ja", Source: FromApp}},
+		{"same as app with the system language", Input{Mode: ModeApp, System: "it_IT", Message: "hi"}, Decision{Tag: "it-IT", Source: FromSystem}},
+		{"pseudo-locales answer in English", Input{Mode: ModeApp, App: "en-XA", Message: "hi"}, Decision{Tag: "en", Source: FromDefault}},
+		{"nothing to go on", Input{Message: "👍"}, Decision{Tag: "en", Source: FromDefault}},
+		{"auto follows the language a short message was spoken in", Input{App: "en", Message: "¿Hola?", Spoken: "es"}, Decision{Tag: "es", Source: FromSpeech}},
+		{"the text wins over the language heard", Input{App: "en", Message: "What is the tallest mountain in Europe?", Spoken: "pt"}, Decision{Tag: "en", Source: FromMessage}},
+		{"a chosen language wins over the language heard", Input{Mode: ModeLanguage, Setting: "de", Message: "ok", Spoken: "es"}, Decision{Tag: "de", Source: FromSetting}},
 	}
 	for _, c := range cases {
 		if got := Resolve(c.in); got != c.want {
@@ -102,5 +102,43 @@ func TestInstruction(t *testing.T) {
 	}
 	if got := Name("de"); got != "German" {
 		t.Errorf("Name(de) = %q", got)
+	}
+}
+
+// An answer read aloud in a language this computer has no voice for is
+// written in the next language it can read, and says why (#1405).
+func TestResolveSpeakable(t *testing.T) {
+	speaks := func(tags ...string) func(string) bool {
+		return func(tag string) bool {
+			for _, s := range tags {
+				if s == tag {
+					return true
+				}
+			}
+			return false
+		}
+	}
+	// Heard Swahili, with a German App language: German, and why.
+	d := Resolve(Input{App: "de", Message: "Habari, unaweza kunisaidia leo?", Spoken: "sw", Speakable: speaks("de", "en"),
+		Offer: func(tag string) string { return "Kitten TTS in Settings › Voice" }})
+	if d.Tag != "de" || d.Source != FromApp || d.Unspoken == "" || d.Offer == "" {
+		t.Fatalf("decision = %+v", d)
+	}
+	if line := d.Instruction(); !strings.Contains(line, "can't speak") || !strings.Contains(line, "Kitten TTS") {
+		t.Fatalf("instruction = %q", line)
+	}
+	// A language it can read is kept, and says nothing more.
+	d = Resolve(Input{App: "de", Message: "¿Hola?", Spoken: "es", Speakable: speaks("de", "es")})
+	if d.Tag != "es" || d.Unspoken != "" || strings.Contains(d.Instruction(), "aloud") {
+		t.Fatalf("speakable = %+v", d)
+	}
+	// Nothing else it can read: English.
+	d = Resolve(Input{App: "ja", Message: "ok", Speakable: speaks("en")})
+	if d.Tag != "en" || d.Unspoken != "ja" {
+		t.Fatalf("fallback = %+v", d)
+	}
+	// Written answers take any language.
+	if d := Resolve(Input{App: "ja", Message: "ok"}); d.Tag != "ja" || d.Unspoken != "" {
+		t.Fatalf("written = %+v", d)
 	}
 }

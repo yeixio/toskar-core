@@ -421,7 +421,10 @@
     "hearing": "Comment la voix t'entend",
     "hearingHint": "Précis entend nettement mieux dans une pièce bruyante ou avec un micro éloigné, comme celui d'une webcam. Il répond quelques dixièmes de seconde plus tard, télécharge environ 480 Mo une fois et utilise environ 500 Mo de mémoire en plus. Pour la voix en direct et la sonnette.",
     "hearingFast": "Rapide",
-    "hearingAccurate": "Précis"
+    "hearingAccurate": "Précis",
+    "language": "Langue entendue par la voix",
+    "languageHint": "Détecte la langue de chaque tour de parole et y répond. Choisissez une langue si tout le monde ici la parle toujours : Toskar l’entend plus sûrement et ne prend pas un mot court pour une autre langue.",
+    "languageDetect": "Détecter la langue de chaque tour"
   },
   "sections": {
     "account": "Compte",

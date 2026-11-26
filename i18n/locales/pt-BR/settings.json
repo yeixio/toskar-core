@@ -421,7 +421,10 @@
     "hearing": "Como a voz ouve você",
     "hearingHint": "Preciso ouve bem melhor em uma sala barulhenta ou com um microfone distante, como o de uma webcam. Responde alguns décimos de segundo depois, baixa cerca de 480 MB uma vez e usa cerca de 500 MB a mais de memória. Para a voz ao vivo e a campainha.",
     "hearingFast": "Rápido",
-    "hearingAccurate": "Preciso"
+    "hearingAccurate": "Preciso",
+    "language": "Idioma que a voz ouve",
+    "languageHint": "Detecta o idioma de cada fala e responde nele. Escolha um idioma se todos aqui sempre o falam: o Toskar ouve com mais confiança e não confunde uma palavra curta com outro idioma.",
+    "languageDetect": "Detectar o idioma de cada fala"
   },
   "sections": {
     "account": "Conta",

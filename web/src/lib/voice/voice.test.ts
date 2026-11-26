@@ -102,6 +102,14 @@ describe('VoiceConnection', () => {
     expect(fromBase64(String(socket.sent[0].audio)).length).toBe(2400 * 2)
   })
 
+  it('says which language it heard, when speech to text was sure (#1405)', () => {
+    const { socket, handlers } = connect()
+    socket.open()
+    socket.receive({ type: 'input_audio_buffer.committed' })
+    socket.receive({ type: 'conversation.item.input_audio_transcription.completed', transcript: '¿Qué tal?', language: 'es' })
+    expect(handlers.onYou).toHaveBeenCalledWith('¿Qué tal?', 'es')
+  })
+
   it('follows a turn: hearing, thinking, speaking, and listening once played', () => {
     const { conn, socket, statuses, handlers } = connect()
     socket.open()

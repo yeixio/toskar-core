@@ -1147,6 +1147,8 @@ export interface SettingsView {
   download_behavior?: 'ask' | 'automatic'
   /** How voice mode and the door hear: fast (Whisper base) or accurate (Whisper small; #1330, contract 1.122). */
   voice_hearing?: 'fast' | 'accurate'
+  /** The one language voice mode and the door hear, such as de; "" detects each turn's (#1405, contract 1.123). */
+  voice_language?: string
   model_storage_limit_gb?: number
   save_chat_history?: boolean
   save_task_history?: boolean
@@ -1555,6 +1557,7 @@ export interface SettingsPatch {
   default_execution?: 'automatic' | 'local' | 'ask'
   download_behavior?: 'ask' | 'automatic'
   voice_hearing?: 'fast' | 'accurate'
+  voice_language?: string
   model_storage_limit_gb?: number
   save_chat_history?: boolean
   save_task_history?: boolean

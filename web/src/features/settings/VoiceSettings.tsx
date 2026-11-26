@@ -11,7 +11,7 @@ import { answerLanguages } from '@/i18n/answerLanguages'
 
 const queryKey = ['speech-voices']
 
-function languageName(tag: string): string {
+export function languageName(tag: string): string {
   try {
     return new Intl.DisplayNames([formatLocale()], { type: 'language' }).of(tag) ?? tag
   } catch {

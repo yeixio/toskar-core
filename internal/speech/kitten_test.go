@@ -186,3 +186,24 @@ func TestKittenVoiceNames(t *testing.T) {
 		t.Fatal(KittenURL)
 	}
 }
+
+// Whether this computer can read a language aloud (#1405): a Piper or
+// Kokoro voice, or Kitten's once installed; Kitten is offered for a
+// language only it would read.
+func TestCanSpeak(t *testing.T) {
+	env := &kittenEnv{py: "python3", have: map[string]bool{}}
+	w := &Worker{Engine: &Engine{Python: env, Dir: t.TempDir()}, Plain: true}
+	if !w.CanSpeak("de") || !w.CanSpeak("pt-BR") {
+		t.Fatal("Piper's languages can't be read")
+	}
+	if w.CanSpeak("sw") || w.CanSpeak("he") || w.CanSpeak("ja") {
+		t.Fatal("a language without a voice can be read")
+	}
+	if w.VoiceOffer("sw") == "" || w.VoiceOffer("he") != "" {
+		t.Fatalf("offers: sw %q, he %q", w.VoiceOffer("sw"), w.VoiceOffer("he"))
+	}
+	// Japanese has no voice here yet, and Kitten wouldn't add one.
+	if w.CanSpeak("ja") || w.VoiceOffer("ja") != "" {
+		t.Fatal("Japanese can be read aloud")
+	}
+}
