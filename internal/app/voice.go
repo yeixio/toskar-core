@@ -37,7 +37,7 @@ func (a *App) voiceParts(ctx context.Context) (voice.Parts, error) {
 	a.voiceWorker.PrepareTurnCheck()
 	return voice.Parts{
 		Judge:       workerJudge{a.voiceWorker},
-		Transcriber: workerTurns{w: a.voiceWorker, quality: a.voiceHearing(ctx)},
+		Transcriber: workerTurns{w: a.voiceWorker, quality: a.voiceHearing(ctx), language: a.voiceLanguage(ctx)},
 		Responder:   &voiceChat{app: a, ctx: ctx},
 		Speaker:     workerVoice{a.voiceWorker},
 	}, nil
@@ -51,6 +51,23 @@ const whisperRate = 16000
 // in a noisy room or with a far microphone, for a few tenths of a second
 // more per turn and about 480 MB more to download and keep in memory.
 const settingVoiceHearing = "voice_hearing"
+
+// settingVoiceLanguage is the one language voice mode and the door hear,
+// for a household that always speaks it (#1405): speech to text then
+// doesn't guess, and the answer follows it. "" detects each turn's.
+const settingVoiceLanguage = "voice_language"
+
+// voiceLanguage is the language voice hears in, or "" to detect it.
+func (a *App) voiceLanguage(ctx context.Context) string {
+	if a.Settings == nil {
+		return ""
+	}
+	v, _ := a.Settings.GetString(ctx, settingVoiceLanguage, "")
+	if !speech.Hears(v) {
+		return ""
+	}
+	return v
+}
 
 // voiceHearing is the quality voice hears with: fast or accurate.
 func (a *App) voiceHearing(ctx context.Context) string {
@@ -84,6 +101,8 @@ type workerTurns struct {
 	w *speech.Worker
 	// quality is fast or accurate (#1330).
 	quality string
+	// language is the one language to hear, or "" to detect it (#1405).
+	language string
 }
 
 func (t workerTurns) Transcribe(ctx context.Context, wav []byte, language string) (string, error) {
@@ -92,7 +111,7 @@ func (t workerTurns) Transcribe(ctx context.Context, wav []byte, language string
 		return "", err
 	}
 	pcm := voice.EncodePCM16(voice.Resample(samples, rate, whisperRate))
-	return t.w.Transcribe(ctx, pcm, firstNonEmpty(t.quality, "fast"), language)
+	return t.w.Transcribe(ctx, pcm, firstNonEmpty(t.quality, "fast"), firstNonEmpty(language, t.language))
 }
 
 // Hear is Transcribe with the language it heard (#1322).
@@ -102,6 +121,11 @@ func (t workerTurns) Hear(ctx context.Context, wav []byte, language string) (voi
 		return voice.Heard{}, err
 	}
 	pcm := voice.EncodePCM16(voice.Resample(samples, rate, whisperRate))
+	if language == "" && t.language != "" {
+		// The household's one language: heard in it, and answered in it.
+		text, err := t.w.Transcribe(ctx, pcm, firstNonEmpty(t.quality, "fast"), t.language)
+		return voice.Heard{Text: text, Language: t.language, Confidence: 1}, err
+	}
 	text, heard, sure, err := t.w.Hear(ctx, pcm, firstNonEmpty(t.quality, "fast"), language)
 	return voice.Heard{Text: text, Language: heard, Confidence: sure}, err
 }
@@ -223,9 +247,13 @@ func (c *voiceChat) AnswerLanguage(ctx context.Context, text string) string {
 	c.mu.Lock()
 	id := c.conversationID
 	c.mu.Unlock()
-	d := c.app.replyLanguage(voice.WithHeardLanguage(c.ctx, voice.HeardLanguage(ctx)), id, text, "")
+	d := c.app.replyLanguage(turnopts.WithSpoken(voice.WithHeardLanguage(c.ctx, voice.HeardLanguage(ctx))), id, text, "")
 	switch d.Source {
 	case replylang.FromRequest, replylang.FromMessage, replylang.FromSpeech, replylang.FromConversation, replylang.FromSetting:
+		return d.Tag
+	}
+	// The person's language has no voice here: the one the answer is in.
+	if d.Unspoken != "" {
 		return d.Tag
 	}
 	return ""

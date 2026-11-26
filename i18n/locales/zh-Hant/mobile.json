@@ -1418,5 +1418,34 @@
     },
     "adminOnly": "只有電腦的管理員才能設定功能。",
     "failed": "無法設定：{{why}}"
+  },
+  "voiceMode": {
+    "start": "說話",
+    "startHint": "和 Toskar 出聲對話：它用語音回答，你開口說話就能打斷它",
+    "title": "語音模式",
+    "connectFailed": "無法連線到語音模式。請稍後再試。",
+    "failed": "語音模式出了問題。",
+    "micFailed": "無法啟動麥克風。",
+    "muted": "麥克風已關閉",
+    "you": "你：",
+    "youIn": "你（{{language}}）：",
+    "waited": "你說完後 {{seconds}} 秒回答",
+    "mute": "靜音",
+    "unmute": "取消靜音",
+    "end": "結束",
+    "hint": "隨時可以說話。在回答時開口即可打斷。",
+    "micDenied": "Toskar 無法使用麥克風。請在設定中允許後再說話。",
+    "status": {
+      "connecting": "正在連線…",
+      "listening": "正在聽",
+      "hearing": "聽到你了",
+      "thinking": "正在思考…",
+      "speaking": "正在說",
+      "closed": "語音模式已結束",
+      "failed": "語音模式已停止"
+    },
+    "notice": "語音模式已開啟",
+    "using": "聲音：{{name}}",
+    "unavailable": "此版本的 App 不支援語音模式。請從 App Store 更新。"
   }
 }

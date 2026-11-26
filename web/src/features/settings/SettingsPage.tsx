@@ -30,7 +30,8 @@ import { YggdrasilMark } from '@/components/ui/YggdrasilMark'
 import { formatGigabytes } from '@/i18n/format'
 import { AutomationDigestSetting } from './AutomationDigest'
 import { ShownError, shownOr, type Shown } from '@/components/ui/ShownError'
-import { VoiceSettings } from './VoiceSettings'
+import { VoiceSettings, byLanguageName, languageName } from './VoiceSettings'
+import { answerLanguages } from '@/i18n/answerLanguages'
 import { LoadError } from '@/components/ui/LoadError'
 import { defaultProfileIdOf, profileName } from '@/features/profiles/profilePresentation'
 
@@ -141,6 +142,15 @@ function isMac(): boolean {
   const ua = typeof navigator !== 'undefined' ? navigator.userAgent : ''
   return /Mac/i.test(ua)
 }
+
+
+/**
+ * The languages voice can be told to always hear (#1405), as speech to
+ * text names them: Chinese and Portuguese once each, Norwegian as no.
+ */
+const hearingLanguages = [
+  ...new Set(answerLanguages.map((tag) => (tag === 'nb' ? 'no' : tag.split('-')[0].toLowerCase()))),
+]
 
 export function SettingsPage({ section }: { section?: SettingsSection } = {}) {
   const { t } = useTranslation('settings')
@@ -506,6 +516,23 @@ export function SettingsPage({ section }: { section?: SettingsSection } = {}) {
                     { id: 'accurate', label: t('voice.hearingAccurate') },
                   ]}
                 />
+                <label className="block text-sm">
+                  <span className="font-medium text-ink">{t('voice.language')}</span>
+                  <span className="mt-1 block text-ink-muted">{t('voice.languageHint')}</span>
+                  <select
+                    className="field mt-2 w-full"
+                    value={settings.voice_language ?? ''}
+                    disabled={busy}
+                    onChange={(e) => patch({ voice_language: e.target.value })}
+                  >
+                    <option value="">{t('voice.languageDetect')}</option>
+                    {byLanguageName(hearingLanguages).map((code) => (
+                      <option key={code} value={code}>
+                        {languageName(code)}
+                      </option>
+                    ))}
+                  </select>
+                </label>
               </section>
             ) : null}
 

@@ -2642,6 +2642,18 @@
         },
         {
           "type": "heading",
+          "text": "Languages"
+        },
+        {
+          "type": "paragraph",
+          "text": "Voice mode hears which language you speak and answers in it. Next to what you said, it shows the language it heard, such as You (Spanish), so you can tell when it guessed wrong. When nothing on this computer can read your language aloud yet, such as Japanese, Toskar answers in a language it can speak and says so first. When installing Kitten TTS would add a voice for your language, it says that too."
+        },
+        {
+          "type": "paragraph",
+          "text": "If everyone in your household always speaks one language, an Admin can choose it under Settings › Voice, in Language voice hears. Voice mode and the doorbell then hear only that language, which is more reliable and doesn't mistake a short word for another language. Leave it on Detect each turn's language to switch between languages."
+        },
+        {
+          "type": "heading",
           "text": "From your own app"
         },
         {

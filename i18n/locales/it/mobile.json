@@ -1459,5 +1459,34 @@
     },
     "adminOnly": "Solo gli amministratori del tuo computer possono configurare le funzioni.",
     "failed": "Impossibile configurare: {{why}}"
+  },
+  "voiceMode": {
+    "start": "Parla",
+    "startHint": "Parla con Toskar a voce: risponde con una voce, e puoi interromperlo parlando",
+    "title": "Modalità vocale",
+    "connectFailed": "Impossibile collegarsi alla modalità vocale. Riprova tra poco.",
+    "failed": "Qualcosa è andato storto nella modalità vocale.",
+    "micFailed": "Impossibile avviare il microfono.",
+    "muted": "Microfono spento",
+    "you": "Tu:",
+    "youIn": "Tu ({{language}}):",
+    "waited": "Risposta {{seconds}} s dopo che hai smesso",
+    "mute": "Silenzia",
+    "unmute": "Riattiva",
+    "end": "Termina",
+    "hint": "Parla quando vuoi. Parla sopra una risposta per fermarla.",
+    "micDenied": "Toskar non può usare il microfono. Consentilo nelle Impostazioni per parlare.",
+    "status": {
+      "connecting": "Connessione…",
+      "listening": "In ascolto",
+      "hearing": "Ti sente",
+      "thinking": "Sta pensando…",
+      "speaking": "Sta parlando",
+      "closed": "Modalità vocale terminata",
+      "failed": "La modalità vocale si è fermata"
+    },
+    "notice": "La modalità vocale è attiva",
+    "using": "Audio: {{name}}",
+    "unavailable": "Questa versione dell’app non ha la modalità vocale. Aggiornala dallo store."
   }
 }

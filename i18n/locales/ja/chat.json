@@ -498,6 +498,7 @@
     "micFailed": "マイクを開始できませんでした。",
     "muted": "マイクオフ",
     "you": "あなた:",
+    "youIn": "あなた（{{language}}）:",
     "waited": "話し終えてから {{seconds}} 秒で応答",
     "mute": "ミュート",
     "unmute": "ミュート解除",

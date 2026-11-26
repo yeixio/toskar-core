@@ -51,6 +51,7 @@ Columns:
 | Run chats on | `default_execution` | Settings › AI behavior › Run chats on | Models & AI | Application | Advanced | Automatic | Paired computers | Behavioral |
 | Download models | `download_behavior` | Settings › AI behavior › Download models | Models & AI | Application | Basic | Ask | none | Data, Network |
 | How voice hears you | `voice_hearing` | Settings › Voice | Voice | Application | Basic | Fast | none | Behavioral, Data |
+| Language voice hears | `voice_language` | Settings › Voice | Voice | Application | Basic | Detect each turn's language | none | Behavioral |
 | Storage limit for models | `model_storage_limit_gb` | Settings › Storage › Storage limit | Models & AI | Application | Advanced | Unlimited | none | Data |
 | Notify when a task finishes | `notify_task_finish` | Settings › Notifications | Notifications | Application | Basic | On | none | Behavioral |
 | Notify when a computer goes offline | `notify_peer_offline` | Settings › Notifications | Notifications | Application | Basic | On | Paired computers | Behavioral |

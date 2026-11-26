@@ -1438,5 +1438,34 @@
     },
     "adminOnly": "Nur die Admins deines Computers können Funktionen einrichten.",
     "failed": "Konnte nicht eingerichtet werden: {{why}}"
+  },
+  "voiceMode": {
+    "start": "Sprechen",
+    "startHint": "Sprich laut mit Toskar: Es antwortet mit einer Stimme, und du kannst dazwischenreden, um es zu stoppen",
+    "title": "Sprachmodus",
+    "connectFailed": "Der Sprachmodus konnte sich nicht verbinden. Versuch es gleich noch einmal.",
+    "failed": "Im Sprachmodus ist etwas schiefgegangen.",
+    "micFailed": "Das Mikrofon konnte nicht gestartet werden.",
+    "muted": "Mikrofon aus",
+    "you": "Du:",
+    "youIn": "Du ({{language}}):",
+    "waited": "Antwort {{seconds}} s, nachdem du aufgehört hast",
+    "mute": "Stumm",
+    "unmute": "Ton an",
+    "end": "Beenden",
+    "hint": "Sprich, wann du willst. Rede dazwischen, um eine Antwort zu stoppen.",
+    "micDenied": "Toskar darf das Mikrofon nicht verwenden. Erlaube es in den Einstellungen, um zu sprechen.",
+    "status": {
+      "connecting": "Verbinden…",
+      "listening": "Hört zu",
+      "hearing": "Hört dich",
+      "thinking": "Denkt nach…",
+      "speaking": "Spricht",
+      "closed": "Sprachmodus beendet",
+      "failed": "Sprachmodus beendet"
+    },
+    "notice": "Sprachmodus ist an",
+    "using": "Ton: {{name}}",
+    "unavailable": "Diese Version der App kann keinen Sprachmodus. Aktualisiere sie im Store."
   }
 }

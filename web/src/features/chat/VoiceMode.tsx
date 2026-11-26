@@ -13,6 +13,16 @@ import {
 } from '@/lib/voice/audio'
 import { VoiceConnection, resolveVoiceSocketUrl, type VoiceStatus } from '@/lib/voice/realtime'
 import { readScreenshotLaunch } from '@/lib/screenshotMode'
+import { formatLocale } from '@/i18n/format'
+
+/** A heard language's name, such as Spanish for es, in the App language. */
+function heardName(tag: string): string {
+  try {
+    return new Intl.DisplayNames([formatLocale()], { type: 'language' }).of(tag) ?? tag
+  } catch {
+    return tag
+  }
+}
 
 /** Starts live voice mode: a conversation spoken aloud, both ways (#795). */
 export function VoiceModeButton({ onStart }: { onStart: () => void }) {
@@ -36,6 +46,8 @@ export function VoiceMode({ onClose }: { onClose: () => void }) {
   const queryClient = useQueryClient()
   const [status, setStatus] = useState<VoiceStatus>('connecting')
   const [you, setYou] = useState('')
+  // The language heard, so a wrong guess can be seen (#1405).
+  const [heard, setHeard] = useState('')
   const [answer, setAnswer] = useState('')
   const [muted, setMuted] = useState(false)
   const [waited, setWaited] = useState<number | null>(null)
@@ -78,7 +90,10 @@ export function VoiceMode({ onClose }: { onClose: () => void }) {
     let ended = false
     const handlers = {
       onStatus: setStatus,
-      onYou: setYou,
+      onYou: (text: string, language?: string) => {
+        setYou(text)
+        setHeard(language ?? '')
+      },
       onAnswer: setAnswer,
       onAudio: (samples: Float32Array) => {
         audio.stopThinking()
@@ -170,7 +185,7 @@ export function VoiceMode({ onClose }: { onClose: () => void }) {
         </p>
         {you ? (
           <p className="max-w-full break-words text-sm text-ink-muted">
-            <span className="font-medium text-ink">{t('voiceMode.you')}</span> {you}
+            <span className="font-medium text-ink">{heard ? t('voiceMode.youIn', { language: heardName(heard) }) : t('voiceMode.you')}</span> {you}
           </p>
         ) : null}
         {answer ? <p className="max-h-40 max-w-full overflow-y-auto break-words text-sm text-ink">{answer}</p> : null}

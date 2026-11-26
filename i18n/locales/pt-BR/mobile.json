@@ -1459,5 +1459,34 @@
     },
     "adminOnly": "Só os administradores do seu computador podem configurar recursos.",
     "failed": "Não foi possível configurar: {{why}}"
+  },
+  "voiceMode": {
+    "start": "Falar",
+    "startHint": "Converse com o Toskar em voz alta: ele responde com uma voz, e você pode interrompê-lo falando",
+    "title": "Modo de voz",
+    "connectFailed": "Não foi possível conectar ao modo de voz. Tente de novo em instantes.",
+    "failed": "Algo deu errado no modo de voz.",
+    "micFailed": "Não foi possível iniciar o microfone.",
+    "muted": "Microfone desligado",
+    "you": "Você:",
+    "youIn": "Você ({{language}}):",
+    "waited": "Respondeu {{seconds}} s depois que você parou",
+    "mute": "Silenciar",
+    "unmute": "Ativar som",
+    "end": "Encerrar",
+    "hint": "Fale quando quiser. Fale por cima de uma resposta para pará-la.",
+    "micDenied": "O Toskar não pode usar o microfone. Permita nos Ajustes para falar.",
+    "status": {
+      "connecting": "Conectando…",
+      "listening": "Ouvindo",
+      "hearing": "Ouvindo você",
+      "thinking": "Pensando…",
+      "speaking": "Falando",
+      "closed": "Modo de voz encerrado",
+      "failed": "O modo de voz parou"
+    },
+    "notice": "O modo de voz está ativado",
+    "using": "Som: {{name}}",
+    "unavailable": "Esta versão do app não tem modo de voz. Atualize pela loja."
   }
 }

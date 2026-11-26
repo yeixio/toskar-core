@@ -412,7 +412,10 @@
     "hearing": "Wie die Sprachfunktion dich hört",
     "hearingHint": "Genau hört in einem lauten Raum oder mit einem entfernten Mikrofon, etwa dem einer Webcam, deutlich besser. Es antwortet ein paar Zehntelsekunden später, lädt einmalig etwa 480 MB herunter und braucht etwa 500 MB mehr Speicher. Für Live-Sprache und die Türklingel.",
     "hearingFast": "Schnell",
-    "hearingAccurate": "Genau"
+    "hearingAccurate": "Genau",
+    "language": "Sprache, die die Sprachfunktion hört",
+    "languageHint": "Erkennt die Sprache jedes Beitrags und antwortet darin. Wähle eine Sprache, wenn hier alle immer sie sprechen: Toskar hört sie dann zuverlässiger und hält ein kurzes Wort nicht für eine andere Sprache.",
+    "languageDetect": "Sprache jedes Beitrags erkennen"
   },
   "sections": {
     "account": "Konto",

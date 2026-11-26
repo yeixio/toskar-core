@@ -1591,6 +1591,10 @@ type SettingsView struct {
 	// the default) or accurate (Whisper small, better in noise and with a
 	// far microphone; #1330, contract 1.122).
 	VoiceHearing string `json:"voice_hearing"`
+	// VoiceLanguage is the one language voice mode and the door hear, such
+	// as de, for a household that always speaks it; "" detects each turn's
+	// (#1405, contract 1.123).
+	VoiceLanguage string `json:"voice_language"`
 	// ModelStorageLimitGB is 0 for unlimited.
 	ModelStorageLimitGB int  `json:"model_storage_limit_gb"`
 	SaveChatHistory     bool `json:"save_chat_history"`

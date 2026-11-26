@@ -403,7 +403,10 @@
     "hearing": "語音如何聽你說話",
     "hearingHint": "準確模式在吵雜的房間或使用遠處的麥克風（例如網路攝影機的麥克風）時聽得明顯更清楚。回答會晚零點幾秒，首次下載約 480 MB，並多佔用約 500 MB 記憶體。適用於即時語音和門鈴。",
     "hearingFast": "快速",
-    "hearingAccurate": "準確"
+    "hearingAccurate": "準確",
+    "language": "語音聽取的語言",
+    "languageHint": "辨識每一輪說話的語言，並用該語言回答。如果這裡的每個人都總說同一種語言，請選擇它：Toskar 會聽得更準，也不會把一個短詞誤認成別的語言。",
+    "languageDetect": "辨識每一輪的語言"
   },
   "sections": {
     "account": "帳號",
