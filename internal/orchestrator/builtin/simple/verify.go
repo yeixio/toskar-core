@@ -59,7 +59,10 @@ func checkLinks(ctx context.Context, env pluginapi.ExecutionEnvironment, role st
 			break
 		}
 		text := tools.ParseModelOutput(revised).Text
-		if !substantial(text, answer) || readsAsReview(text) {
+		if readsAsReview(text) {
+			text = rewriteIn(text)
+		}
+		if !substantial(text, answer) {
 			break
 		}
 		again := huginn.UngroundedLinks(text, sources...)
@@ -246,6 +249,25 @@ var reviewRe = regexp.MustCompile(`(?i)^\s*(?:(?:the|this|your) (?:original |giv
 // mustn't take the answer's place.
 func readsAsReview(text string) bool {
 	return reviewRe.MatchString(text)
+}
+
+// correctedRe finds where a review hands over its rewrite: "Here is the
+// corrected answer:", "Corrected answer:", "Revised response:".
+var correctedRe = regexp.MustCompile(`(?im)(?:^|[.!:\n]\s*)(?:here(?: is|'s) (?:the |a |my )?(?:corrected|improved|revised|updated|fixed|better)(?: version of the)? (?:answer|response|reply|version)|(?:corrected|improved|revised|updated) (?:answer|response|reply|version))\s*:?\s*\n?`)
+
+// rewriteIn is the rewrite a review hands over after its critique, such as
+// "The answer is incorrect… Here is the corrected answer: …", or "" when
+// it gives none (#1456).
+func rewriteIn(review string) string {
+	locs := correctedRe.FindAllStringIndex(review, -1)
+	if len(locs) == 0 {
+		return ""
+	}
+	rest := strings.TrimSpace(review[locs[len(locs)-1][1]:])
+	if readsAsReview(rest) {
+		return ""
+	}
+	return rest
 }
 
 // toolNameRe matches tool ids, and their capability aliases, written out in
