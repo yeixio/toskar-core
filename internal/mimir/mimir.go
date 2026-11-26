@@ -121,6 +121,10 @@ type Store struct {
 	dir string
 	now func() time.Time
 
+	// Reached, when set, is told each time a database or API source is
+	// fetched from another computer, for What left this computer (#1415).
+	Reached func(ctx context.Context, destination, detail string)
+
 	// refreshMu serializes rebuilds so two chats do not index one folder twice.
 	refreshMu sync.Mutex
 

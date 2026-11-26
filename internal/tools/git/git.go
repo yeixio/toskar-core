@@ -147,6 +147,10 @@ func clipOutput(out string) string {
 
 type pushTool struct{ base }
 
+// Pushed, when set, is told of each push before it runs: the remote's
+// address and the branch, for What left this computer (#1415).
+var Pushed func(ctx context.Context, remoteURL, branch string)
+
 func NewPush(workspace string) *pushTool { return &pushTool{base{workspace}} }
 func (t *pushTool) ID() string           { return "git.push" }
 func (t *pushTool) DisplayName() string  { return "Git Push" }
@@ -160,6 +164,14 @@ func (t *pushTool) Execute(ctx context.Context, args map[string]any) (map[string
 	gitArgs := []string{"push", remote}
 	if strings.TrimSpace(branch) != "" {
 		gitArgs = append(gitArgs, branch)
+	}
+	if Pushed != nil {
+		// A remote given by its address is that address.
+		where := remote
+		if got, err := runGit(ctx, t.dir(ctx), "remote", "get-url", "--push", remote); err == nil && strings.TrimSpace(got) != "" {
+			where = strings.TrimSpace(got)
+		}
+		Pushed(ctx, where, branch)
 	}
 	out, err := runGit(ctx, t.dir(ctx), gitArgs...)
 	if err != nil {

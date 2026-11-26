@@ -233,7 +233,8 @@
       "link_check": "링크 확인",
       "download": "다운로드",
       "models": "모델 검색",
-      "quality_results": "품질 결과"
+      "quality_results": "품질 결과",
+      "relay": "릴레이"
     },
     "kindsLower": {
       "web_search": "웹 검색",
@@ -251,7 +252,8 @@
       "link_check": "링크 확인",
       "download": "다운로드",
       "models": "모델 검색",
-      "quality_results": "품질 결과"
+      "quality_results": "품질 결과",
+      "relay": "릴레이"
     },
     "sources": {
       "chat": "채팅",

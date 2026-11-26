@@ -982,7 +982,8 @@
       "link_check": "Verificação de link",
       "download": "Download",
       "models": "Busca de modelos",
-      "quality_results": "Resultados de qualidade"
+      "quality_results": "Resultados de qualidade",
+      "relay": "Relay"
     },
     "kindsLower": {
       "web_search": "pesquisa na web",
@@ -999,7 +1000,8 @@
       "link_check": "verificação de link",
       "download": "download",
       "models": "busca de modelos",
-      "quality_results": "resultados de qualidade"
+      "quality_results": "resultados de qualidade",
+      "relay": "relay"
     },
     "sources": {
       "chat": "Chat",

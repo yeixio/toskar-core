@@ -1066,7 +1066,8 @@
       "link_check": "Link check",
       "download": "Download",
       "models": "Model search",
-      "quality_results": "Quality results"
+      "quality_results": "Quality results",
+      "relay": "Relay"
     },
     "kindsLower": {
       "web_search": "web search",
@@ -1083,7 +1084,8 @@
       "link_check": "link check",
       "download": "download",
       "models": "model search",
-      "quality_results": "quality results"
+      "quality_results": "quality results",
+      "relay": "relay"
     },
     "sources": {
       "chat": "Chat",

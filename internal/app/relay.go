@@ -138,6 +138,9 @@ func (a *App) applyRelay() {
 		Deliver:      a.API.ServeRelayed,
 		RootCAs:      relayRoots(a),
 		Log:          a.Logger,
+		Opened: func() {
+			a.recordRelay(context.Background(), relayName(cfg), "the tunnel opened: the relay passes paired devices' requests to this computer, and its name and version")
+		},
 	}
 	ctx, cancel := context.WithCancel(context.Background())
 	a.relay, a.relayStop = c, cancel

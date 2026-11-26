@@ -94,6 +94,9 @@ type Client struct {
 	Renew bool
 	// Renewed, when set, hears a renewed token that lasts longer than the
 	// one before, after it's kept in Store.
+	// Opened, when set, is told each time the tunnel to the relay opens,
+	// for What left this computer (#1415).
+	Opened  func()
 	Renewed func(tok string)
 	// Name is this computer's name, such as "linix-rig", sent when the
 	// tunnel opens so the relay's operator can tell computers apart on its
@@ -721,6 +724,9 @@ func (c *Client) tunnel(ctx context.Context) (string, error) {
 			}
 		}
 		return "", c.refusedFor(tok, err)
+	}
+	if c.Opened != nil {
+		c.Opened()
 	}
 	// No line for three pings' time means the stream is gone.
 	lines := make(chan []byte)

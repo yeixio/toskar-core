@@ -80,6 +80,7 @@ import (
 	"github.com/yeixio/toskar-core/internal/tasks"
 	"github.com/yeixio/toskar-core/internal/telemetry"
 	"github.com/yeixio/toskar-core/internal/tools"
+	gittool "github.com/yeixio/toskar-core/internal/tools/git"
 	"github.com/yeixio/toskar-core/internal/topiclog"
 	"github.com/yeixio/toskar-core/internal/training"
 	"github.com/yeixio/toskar-core/internal/updates"
@@ -528,6 +529,16 @@ func New(opts Options) (*App, error) {
 	// so none is started until a tool is needed.
 	a.MCP = mcp.NewManager(db.SQL, secrets, toolReg, version.Version, logger)
 	a.MCP.Sample = a.mcpSample
+	// Each git.push, to where it goes (#1415).
+	gittool.Pushed = a.recordPush
+	// Connecting, signing in, and npx or uvx fetching a source (#1415).
+	a.MCP.Reached = func(ctx context.Context, download bool, to, detail string) {
+		kind := egress.Connector
+		if download {
+			kind = egress.Download
+		}
+		a.Egress.Add(context.WithoutCancel(ctx), kind, to, detail)
+	}
 	if err := a.MCP.Load(context.Background()); err != nil {
 		logger.Warn("load tool sources", "error", err)
 	}
@@ -1037,6 +1048,10 @@ func New(opts Options) (*App, error) {
 	})
 
 	a.Mimir = mimir.NewStore(db.SQL, filepath.Join(cfg.DataDir, "knowledge"))
+	// Database and API knowledge, each time it's fetched (#1415).
+	a.Mimir.Reached = func(ctx context.Context, to, detail string) {
+		a.Egress.Add(context.WithoutCancel(ctx), egress.Connector, to, detail)
+	}
 	a.Mimir.SetSecrets(secrets)
 	// The file store comes first: the tools below read and attach chat files.
 	a.Artifacts = artifacts.NewStore(db.SQL, filepath.Join(cfg.DataDir, "artifacts"))
