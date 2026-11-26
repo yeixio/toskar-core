@@ -16,10 +16,9 @@ import (
 )
 
 // The triage set (#455): issues of this repository, as written, with the
-// labels maintainers gave them, to measure how well a model suggests them
-// the way the Triage workflow (.github/workflows/triage.yml) asks. The
-// workflow's labels, prompt, and limits are in .github/triage.json, which
-// both read. A real model's numbers are measured, not held to a pass rate:
+// labels maintainers gave them, to measure how well a model suggests them.
+// The labels, prompt, and limits are in .github/triage.json. The Triage
+// workflow that once commented them on new issues is gone. A real model's numbers are measured, not held to a pass rate:
 // the labels are sparse, so a suggestion they don't have isn't always
 // wrong.
 
