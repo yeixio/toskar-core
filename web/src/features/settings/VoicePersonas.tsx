@@ -255,7 +255,7 @@ function PersonaEditor({
           value={draft.speed}
           onChange={(e) => setDraft({ ...draft, speed: Number(e.target.value) })}
         />
-        <span className="w-12 text-right text-sm text-ink-muted">{speedText(draft.speed)}</span>
+        <span className="w-12 text-end text-sm text-ink-muted">{speedText(draft.speed)}</span>
       </div>
       <div className="flex flex-wrap items-center gap-2">
         <button type="submit" className="btn-primary px-3 py-1.5 text-sm" disabled={save.isPending || !draft.name.trim() || !draft.voice}>
