@@ -176,6 +176,11 @@ func TestMyPreferences(t *testing.T) {
 	if code := patch(`{"notify_task_finish":false}`); code != http.StatusOK || saved["notify_task_finish"] != false {
 		t.Fatalf("task notices: %d %v", code, saved)
 	}
+	saved = nil
+	// And the character they see in voice chat (#1369).
+	if code := patch(`{"voice_avatar":"pebble"}`); code != http.StatusOK || saved["voice_avatar"] != "pebble" {
+		t.Fatalf("avatar: %d %v", code, saved)
+	}
 }
 
 // Anyone connects their own devices and sees and disconnects only theirs,

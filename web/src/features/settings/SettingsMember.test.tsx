@@ -57,4 +57,12 @@ describe('Notifications and Voice for a Member (#1391)', () => {
     fireEvent.click(sound)
     await waitFor(() => expect(api.setMyPreferences).toHaveBeenCalledWith({ thinking_sound: false }))
   })
+  it('lets them pick a character for voice chat (#1369)', async () => {
+    renderAs('voice')
+    const pick = await screen.findByRole('combobox', { name: 'Avatar' })
+    await waitFor(() => expect(pick).toBeEnabled())
+    expect(pick).toHaveValue('')
+    fireEvent.change(pick, { target: { value: 'lumen' } })
+    await waitFor(() => expect(api.setMyPreferences).toHaveBeenCalledWith({ voice_avatar: 'lumen' }))
+  })
 })

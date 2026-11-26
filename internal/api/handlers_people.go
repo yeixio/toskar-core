@@ -53,7 +53,7 @@ func (s *Server) atLeast(min auth.Role, h http.HandlerFunc) http.HandlerFunc {
 }
 
 // myPreferences are the settings each person keeps for themselves (#206).
-var myPreferences = map[string]bool{"ui_locale": true, "assistant_language_mode": true, "assistant_language": true, "suggest_models": true, "thinking_sound": true, "notify_task_finish": true}
+var myPreferences = map[string]bool{"ui_locale": true, "assistant_language_mode": true, "assistant_language": true, "suggest_models": true, "thinking_sound": true, "notify_task_finish": true, "voice_avatar": true}
 
 // myOnOff are the preferences that are true or false: suggest_models
 // (#707), thinking_sound (#1334), and notify_task_finish (#1391). The rest
@@ -76,7 +76,7 @@ func (s *Server) handleMyPreferences(w http.ResponseWriter, r *http.Request) {
 	patch := map[string]any{}
 	for k, v := range in {
 		if !myPreferences[k] {
-			writeErr(w, http.StatusBadRequest, "INVALID_SETTING", "Only ui_locale, assistant_language_mode, assistant_language, suggest_models, thinking_sound, and notify_task_finish are your own.", map[string]any{"setting": k})
+			writeErr(w, http.StatusBadRequest, "INVALID_SETTING", "Only ui_locale, assistant_language_mode, assistant_language, suggest_models, thinking_sound, notify_task_finish, and voice_avatar are your own.", map[string]any{"setting": k})
 			return
 		}
 		if _, isBool := v.(bool); myOnOff[k] && !isBool {

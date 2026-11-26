@@ -33,6 +33,8 @@ import { ShownError, shownOr, type Shown } from '@/components/ui/ShownError'
 import { VoiceSettings } from './VoiceSettings'
 import { byLanguageName, languageName } from './languageNames'
 import { VoicePersonas } from './VoicePersonas'
+import { VoiceAvatar } from '@/features/chat/VoiceAvatar'
+import { AVATARS, AVATAR_NAMES, isAvatar } from '@/features/chat/avatars'
 import { answerLanguages } from '@/i18n/answerLanguages'
 import { LoadError } from '@/components/ui/LoadError'
 import { defaultProfileIdOf, profileName } from '@/features/profiles/profilePresentation'
@@ -506,6 +508,31 @@ export function SettingsPage({ section }: { section?: SettingsSection } = {}) {
                         .then(() => queryClient.invalidateQueries({ queryKey: ['settings'] }))
                     }
                   />
+                </div>
+                <div className="flex flex-wrap items-center gap-4 border-t border-line pt-4">
+                  <div className="min-w-0 flex-1">
+                    <label htmlFor="voice-avatar" className="section-title">
+                      {t('voice.avatar')}
+                    </label>
+                    <p className="mt-1 text-sm text-ink-muted">{t('voice.avatarHint')}</p>
+                    <select
+                      id="voice-avatar"
+                      className="field mt-2 w-full max-w-xs"
+                      value={isAvatar(settings.voice_avatar) ? settings.voice_avatar : ''}
+                      disabled={busy}
+                      onChange={(e) =>
+                        void api.setMyPreferences({ voice_avatar: e.target.value }).then(() => queryClient.invalidateQueries({ queryKey: ['settings'] }))
+                      }
+                    >
+                      <option value="">{t('voice.avatarOff')}</option>
+                      {AVATARS.map((id) => (
+                        <option key={id} value={id}>
+                          {AVATAR_NAMES[id]}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  {isAvatar(settings.voice_avatar) ? <VoiceAvatar key={settings.voice_avatar} character={settings.voice_avatar} status="listening" size={80} /> : null}
                 </div>
               </section>
             ) : null}
