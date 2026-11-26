@@ -37,6 +37,13 @@ func serveScreenshotAPI(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, http.StatusOK, `{"label":"off_topic","held":true,"replaced":false,"reply":"I can help with tires, wheels, and bookings at Dana's. What do you need?"}`)
 		return
 	}
+	// Adding someone on People answers with their one-time link (#894).
+	if r.Method == http.MethodPost && path == "/api/v1/people" {
+		expires := time.Now().Add(72 * time.Hour).UTC().Format(time.RFC3339)
+		writeJSON(w, http.StatusOK, `{"person":{"id":"p-ana","name":"Ana","role":"member","created_at":"2026-10-02T00:00:00Z","sign_in":false},`+
+			`"link":{"path":"/join/9f2c4e7a1b","kind":"invite","expires_at":"`+expires+`"}}`)
+		return
+	}
 	if r.Method != http.MethodGet {
 		writeJSON(w, http.StatusOK, `{}`)
 		return
