@@ -59,7 +59,7 @@ func checkLinks(ctx context.Context, env pluginapi.ExecutionEnvironment, role st
 			break
 		}
 		text := tools.ParseModelOutput(revised).Text
-		if !substantial(text, answer) {
+		if !substantial(text, answer) || readsAsReview(text) {
 			break
 		}
 		again := huginn.UngroundedLinks(text, sources...)
@@ -236,6 +236,16 @@ func verifyAnswer(ctx context.Context, env pluginapi.ExecutionEnvironment, role 
 func substantial(revised, original string) bool {
 	n := utf8.RuneCountInString(strings.TrimSpace(revised))
 	return n >= 20 && n*10 >= utf8.RuneCountInString(original)*4
+}
+
+// reviewRe matches a reply that talks about the answer rather than being
+// one: "The answer is incorrect…", "Issues:" (#1456).
+var reviewRe = regexp.MustCompile(`(?i)^\s*(?:(?:the|this|your) (?:original |given |provided |draft |above )?(?:answer|response|reply)(?: above)? (?:is (?:not |mostly |partially |largely )?(?:incorrect|wrong|inaccurate|incomplete|correct|accurate|right|good|fine|ok|misleading|outdated)|(?:does not|doesn't|did not|didn't|fails|failed|misses|missed|lacks|contains|needs|should|could|has|claims|states|says|incorrectly|correctly))|(?:issues|problems|mistakes|errors|corrections|feedback|review|critique)\s*:)`)
+
+// readsAsReview says text reviews an answer instead of answering, so it
+// mustn't take the answer's place.
+func readsAsReview(text string) bool {
+	return reviewRe.MatchString(text)
 }
 
 // toolNameRe matches tool ids, and their capability aliases, written out in

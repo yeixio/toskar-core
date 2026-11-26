@@ -163,7 +163,9 @@ func reviewAnswer(ctx context.Context, env pluginapi.ExecutionEnvironment, ch ch
 	}
 	reportRole(ch, env, role, metrics)
 	revised := strings.TrimSpace(tools.ParseModelOutput(content).Text)
-	changed := revised != "" && !strings.EqualFold(strings.Trim(revised, ". \n"), "ok") && substantial(revised, answer)
+	// A small reviewer sometimes writes its review instead of the improved
+	// answer; that's for no one to read, so the answer stays (#1456).
+	changed := revised != "" && !strings.EqualFold(strings.Trim(revised, ". \n"), "ok") && substantial(revised, answer) && !readsAsReview(revised)
 	env.Emit(EventReviewed, map[string]any{"role": role, "changed": changed})
 	if !changed {
 		return answer

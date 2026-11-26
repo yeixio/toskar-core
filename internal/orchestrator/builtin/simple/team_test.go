@@ -211,3 +211,31 @@ func TestParsePlan(t *testing.T) {
 		t.Fatalf("prose = %+v", p)
 	}
 }
+
+// A reviewer that writes its review instead of the improved answer leaves
+// the answer as it was (#1456).
+func TestTeamReviewIsNotTheAnswer(t *testing.T) {
+	env := &teamEnv{
+		plan:   `{"parts": ["Choosing beans", "Grinding"], "parallel": true}`,
+		review: "The answer is incorrect: it doesn't say how long to brew, and the grind size for a French press should be coarse, not fine.",
+	}
+	answer, _ := runTeam(t, env, coffee, contracts.OrchestrationPolicy{Strategy: profiles.StrategyTeam})
+	if !strings.HasPrefix(answer, "A full answer about brewing coffee") {
+		t.Fatalf("answer = %q, want the answer, not the review", answer)
+	}
+}
+
+func TestReadsAsReview(t *testing.T) {
+	for text, want := range map[string]bool{
+		"The answer is incorrect. Juneau's high today is 41°F.":  true,
+		"The response doesn't mention the wind.":                 true,
+		"Issues: the temperature is in Celsius.":                 true,
+		"The answer is 42.":                                      false,
+		"Juneau will be 41°F and rainy today.":                   false,
+		"The original answer had the right idea, so here it is:": false,
+	} {
+		if got := readsAsReview(text); got != want {
+			t.Errorf("%q: %v, want %v", text, got, want)
+		}
+	}
+}
