@@ -11,3 +11,8 @@
   start, each file of an image or video setup, the fonts a Chinese,
   Japanese or Korean PDF needs, and each read of the quality results.
   (#1415)
+- What left this computer also lists MCP sources connecting, listing their
+  tools and signing in, the npm or PyPI fetch of a source started with npx
+  or uvx, knowledge refreshes from a database or web API, git pushes, and
+  the relay: the tunnel opening, the outside check, and subscription and
+  price questions. (#1415)

@@ -240,7 +240,8 @@
       "link_check": "Linkprüfung",
       "download": "Download",
       "models": "Modellsuche",
-      "quality_results": "Qualitätsergebnisse"
+      "quality_results": "Qualitätsergebnisse",
+      "relay": "Relay"
     },
     "kindsLower": {
       "web_search": "Websuche",
@@ -258,7 +259,8 @@
       "link_check": "Linkprüfung",
       "download": "Download",
       "models": "Modellsuche",
-      "quality_results": "Qualitätsergebnisse"
+      "quality_results": "Qualitätsergebnisse",
+      "relay": "Relay"
     },
     "sources": {
       "chat": "Chat",

@@ -131,3 +131,37 @@ func (e *chatExecEnv) keepLocalIfNeeded(role, nodeID string) string {
 	}
 	return local
 }
+
+// recordPush records a git.push before it runs: the remote's host, and the
+// address without any user name or token in it (#1415).
+func (a *App) recordPush(ctx context.Context, remote, branch string) {
+	if a.Egress == nil {
+		return
+	}
+	host, where := gitRemote(remote)
+	detail := "git push to " + where
+	if branch != "" {
+		detail += " (" + branch + ")"
+	}
+	a.Egress.Add(context.WithoutCancel(ctx), egress.Connector, host, detail)
+}
+
+// gitRemote is a git remote's host and its address without credentials:
+// https://user:token@host/o/r, ssh://git@host/o/r, or git@host:o/r.
+func gitRemote(raw string) (host, where string) {
+	raw = strings.TrimSpace(raw)
+	if u, err := url.Parse(raw); err == nil && u.Scheme != "" && u.Host != "" {
+		u.User = nil
+		u.RawQuery, u.Fragment = "", ""
+		return u.Hostname(), u.String()
+	}
+	// scp-like: [user@]host:path
+	if at := strings.LastIndex(raw, "@"); at >= 0 {
+		raw = raw[at+1:]
+	}
+	if h, path, ok := strings.Cut(raw, ":"); ok && h != "" && !strings.Contains(h, "/") {
+		return h, h + ":" + path
+	}
+	// A remote's name whose address git couldn't say, or a local path.
+	return raw, raw
+}

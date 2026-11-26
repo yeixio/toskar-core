@@ -233,7 +233,8 @@
       "link_check": "連結檢查",
       "download": "下載",
       "models": "模型搜尋",
-      "quality_results": "品質結果"
+      "quality_results": "品質結果",
+      "relay": "中繼"
     },
     "kindsLower": {
       "web_search": "網路搜尋",
@@ -251,7 +252,8 @@
       "link_check": "連結檢查",
       "download": "下載",
       "models": "模型搜尋",
-      "quality_results": "品質結果"
+      "quality_results": "品質結果",
+      "relay": "中繼"
     },
     "sources": {
       "chat": "聊天",

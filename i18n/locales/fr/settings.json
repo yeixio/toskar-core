@@ -247,7 +247,8 @@
       "link_check": "Vérification de lien",
       "download": "Téléchargement",
       "models": "Recherche de modèles",
-      "quality_results": "Résultats de qualité"
+      "quality_results": "Résultats de qualité",
+      "relay": "Relais"
     },
     "kindsLower": {
       "web_search": "recherche web",
@@ -265,7 +266,8 @@
       "link_check": "vérification de lien",
       "download": "téléchargement",
       "models": "recherche de modèles",
-      "quality_results": "résultats de qualité"
+      "quality_results": "résultats de qualité",
+      "relay": "relais"
     },
     "sources": {
       "chat": "Discussion",

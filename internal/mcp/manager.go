@@ -67,6 +67,12 @@ type Manager struct {
 	ConnectTimeout time.Duration
 	// Sample, when set, lets sources that are allowed use the AI.
 	Sample Sampler
+	// Reached, when set, is told each time a source reaches the internet
+	// on its own, rather than for a tool call: connecting to one on the
+	// web (which lists its tools), signing in to it, or starting one that
+	// npx, uvx or bunx fetch (#1415). to is the service's name and host, or
+	// the package registry.
+	Reached func(ctx context.Context, download bool, to, detail string)
 
 	mu      sync.Mutex
 	servers map[string]*server
@@ -639,6 +645,7 @@ func (m *Manager) dial(ctx context.Context, srv *server) (*Client, error) {
 		}
 	}
 	m.mu.Unlock()
+	m.reached(ctx, srv.spec, "connected, and listed its tools")
 	if spec.Remote() {
 		opts := HTTPOptions{Client: m.http, Headers: spec.Headers}
 		if sec.OAuth.SignedIn() {
@@ -689,6 +696,7 @@ func (m *Manager) refreshTools(ctx context.Context, srv *server) {
 	if c == nil {
 		return
 	}
+	m.reached(ctx, srv.spec, "listed its tools again, after they changed")
 	list, err := c.ListTools(ctx)
 	if err != nil {
 		return
@@ -1146,4 +1154,37 @@ func (r *logRing) list() []LogLine {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	return append([]LogLine{}, r.lines...)
+}
+
+// fetchers are the commands that download a source's package from a
+// registry when they start it, and where from.
+var fetchers = map[string]string{
+	"npx":  "the npm registry",
+	"bunx": "the npm registry",
+	"uvx":  "PyPI",
+	"pipx": "PyPI",
+}
+
+// reached tells Reached that a source went online by itself: one on the
+// web was reached, or one on this computer was started by a command that
+// fetches its package. A source on this computer run directly sends
+// nothing anywhere by Toskar's doing.
+func (m *Manager) reached(ctx context.Context, spec Spec, what string) {
+	if m.Reached == nil {
+		return
+	}
+	if spec.Remote() {
+		host := spec.URL
+		if u, err := url.Parse(spec.URL); err == nil && u.Hostname() != "" {
+			host = u.Hostname()
+		}
+		m.Reached(ctx, false, spec.Name+" ("+host+")", what)
+		return
+	}
+	if strings.Contains(what, "again") {
+		return
+	}
+	if registry, ok := fetchers[filepath.Base(spec.Command)]; ok {
+		m.Reached(ctx, true, registry, spec.Command+" "+packageOf(spec.Args)+", to start "+spec.Name+"; it downloads the package when it isn't kept from before")
+	}
 }

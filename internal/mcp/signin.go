@@ -39,6 +39,7 @@ func (m *Manager) startSignIn(ctx context.Context, srv *server, redirectBase str
 	if err != nil {
 		return "", err
 	}
+	m.reached(ctx, srv.spec, "sign-in: asked where to sign in")
 	o, registration, err := discover(ctx, m.http, srv.spec.URL, hint)
 	if err != nil {
 		return "", fmt.Errorf("could not find where to sign in: %w", err)

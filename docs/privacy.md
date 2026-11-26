@@ -57,7 +57,7 @@ These are the calls Toskar can make without a request in a chat:
 | Quality results | `raw.githubusercontent.com` (toskar-model-data) | The request only, when Models › Results is opened, at most once an hour. Each read is recorded as `quality_results`. | On: runs when that page is opened | Settings › Models & AI › Community ratings › Quality results (`quality_results`) |
 | Push to the Toskar app | Toskar's relay (`relay.toskar.ai`), which passes it to Apple's or Google's push service | A notification's title and the page it opens, for phones paired with this computer | Added when a phone turns notifications on | Settings › Notifications, per destination |
 
-Each of these, apart from quality results, is listed in **What left this computer** (Settings › Privacy) when it's sent. Some downloads aren't logged there yet: Hugging Face, llama.cpp, Python and picture-engine runtimes, and fonts for made PDFs. Relay tunnel traffic isn't logged either. #1207 tracks recording them.
+Each of these is listed in **What left this computer** (Settings › Privacy) when it's sent. The relay's own calls are recorded as `relay`: the tunnel opening, the outside check, and each question to the relay or its billing service. What travels through the tunnel once it's open is your own requests from away, and isn't recorded one by one. Python packages fetched by uv and pip for training, code runs and speech aren't recorded yet (#1415).
 
 Everything else is sent only when a feature that talks to the network is used:
 
@@ -71,8 +71,9 @@ Everything else is sent only when a feature that talks to the network is used:
 | Browser (`browser.*`) | The sites you or the assistant open, and the resources their pages load, from an isolated browser with a fresh profile. Nothing on this computer or the local network can be reached. Each page opened and each download is recorded. Clicking, typing, and downloading ask first. |
 | Web search and page reads (`internet.search`, `internet.open`) | DuckDuckGo's public HTML search, then the pages opened. They run only when the profile allows them. Only public addresses are opened: a page on this computer or the local network, such as the daemon's own API or a router's admin page, is refused, even when another page redirects to it. A repeat within 15 minutes (searches) or 30 minutes (pages) is answered from the cache and sends nothing. A weather or sunrise question reads wttr.in for the place asked about, as a page read. |
 | Connected services (GitHub, Home Assistant, Email, Calendar, Flight status) | That service, with the credential you stored, when one of its tools runs. Email and Calendar talk only to the mail and CalDAV servers you entered. Flight status sends the flight's number and date to AeroDataBox, through API.market or RapidAPI. |
-| MCP tool sources | That server, when one of its tools runs |
-| Database and web API knowledge | The database or URL you connected, when it is refreshed |
+| MCP tool sources | That server, when one of its tools runs. A source on the web is also reached when it connects and lists its tools, and when you sign in to it; each is recorded as `connector`. A source started with `npx`, `bunx`, `uvx` or `pipx` fetches its package from the npm registry or PyPI when it isn't kept from before, recorded as `download`. |
+| Database and web API knowledge | The database or URL you connected, when it is refreshed. Each refresh is recorded as `connector` with the API's host, or PostgreSQL or MySQL and the source's name (never the connection string). A SQLite file stays on this computer. |
+| Git push (`git.push`) | The remote you push to. Recorded as `connector` with the remote's address, without any user name or token in it. |
 | First training run | The `astral-sh/uv` GitHub release, Python builds uv fetches, and pinned packages from PyPI |
 | Training a base model the first time | Hugging Face Hub, for the base model's training weights. Your examples are not uploaded. |
 | Training on a paired computer | That computer receives the training examples and the AI's instructions over Bifrost, and returns the adapter. It deletes its copy when the job ends. |

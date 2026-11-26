@@ -56,6 +56,7 @@ func (a *App) checkReach(ctx context.Context) error {
 	}
 	ctx, cancel := context.WithTimeout(ctx, 45*time.Second)
 	defer cancel()
+	a.recordRelay(ctx, c.Relay, "outside check: the relay tried reaching this computer through its tunnel and each direct way in")
 	res, err := c.Check(ctx)
 	a.reach.mu.Lock()
 	defer a.reach.mu.Unlock()

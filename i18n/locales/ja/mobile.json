@@ -954,7 +954,8 @@
       "link_check": "リンク確認",
       "download": "ダウンロード",
       "models": "モデル検索",
-      "quality_results": "品質の結果"
+      "quality_results": "品質の結果",
+      "relay": "リレー"
     },
     "kindsLower": {
       "web_search": "Web検索",
@@ -971,7 +972,8 @@
       "link_check": "リンク確認",
       "download": "ダウンロード",
       "models": "モデル検索",
-      "quality_results": "品質の結果"
+      "quality_results": "品質の結果",
+      "relay": "リレー"
     },
     "sources": {
       "chat": "チャット",

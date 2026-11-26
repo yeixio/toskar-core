@@ -7,7 +7,9 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
+	"net/url"
 	"strings"
 	"sync"
 	"time"
@@ -15,6 +17,7 @@ import (
 	"github.com/yeixio/toskar-core/internal/api"
 	"github.com/yeixio/toskar-core/internal/auth"
 	"github.com/yeixio/toskar-core/internal/config"
+	"github.com/yeixio/toskar-core/internal/egress"
 	"github.com/yeixio/toskar-core/internal/pyenv"
 	"github.com/yeixio/toskar-core/internal/relayclient"
 	"github.com/yeixio/toskar-core/internal/rendezvous"
@@ -148,6 +151,7 @@ func (a *App) wakeAnywhere() {
 // billingCall posts to yeix.io's Toskar billing API and decodes its answer.
 func (a *App) billingCall(ctx context.Context, path string, body, out any) error {
 	raw, _ := json.Marshal(body)
+	a.recordBilling(ctx, path)
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, a.billingURL()+path, bytes.NewReader(raw))
 	if err != nil {
 		return err
@@ -220,7 +224,9 @@ func (a *App) startCheckout(ctx context.Context, plan string) (string, error) {
 	covered, cerr := func() (bool, error) {
 		ctx, cancel := context.WithTimeout(ctx, 15*time.Second)
 		defer cancel()
-		return a.relayAPI().Covered(ctx, route)
+		relay := a.relayAPI()
+		a.recordRelay(ctx, relay.Relay, "asked whether a subscription already covers this computer")
+		return relay.Covered(ctx, route)
 	}()
 	if cerr == nil && covered {
 		return "", errCovered
@@ -396,7 +402,9 @@ func (a *App) relayOpen(ctx context.Context) *bool {
 	a.anywhere.mu.Unlock()
 	ctx, cancel := context.WithTimeout(ctx, 15*time.Second)
 	defer cancel()
-	open, err := a.relayAPI().Availability(ctx)
+	relay := a.relayAPI()
+	a.recordRelay(ctx, relay.Relay, "asked whether it takes new subscriptions")
+	open, err := relay.Availability(ctx)
 	if err != nil {
 		return nil
 	}
@@ -509,6 +517,7 @@ const pricesFor = time.Hour
 func (a *App) billingPrices(ctx context.Context) map[string]api.PlanPrice {
 	ctx, cancel := context.WithTimeout(ctx, 15*time.Second)
 	defer cancel()
+	a.recordBilling(ctx, "/api/toskar/anywhere/prices")
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, a.billingURL()+"/api/toskar/anywhere/prices", nil)
 	if err != nil {
 		return nil
@@ -667,4 +676,29 @@ func (a *App) keepToken(ctx context.Context, tok string, enable bool) {
 		return
 	}
 	a.Logger.Info("access from anywhere: token from the subscription", "first", enable)
+}
+
+// recordRelay records reaching Toskar's relay, or an organization's, by
+// this computer's own doing (#1415).
+func (a *App) recordRelay(ctx context.Context, relay, detail string) {
+	if a.Egress == nil || relay == "" {
+		return
+	}
+	host := relay
+	if h, _, err := net.SplitHostPort(relay); err == nil {
+		host = h
+	}
+	a.Egress.Add(context.WithoutCancel(ctx), egress.Relay, host, detail)
+}
+
+// recordBilling records a call to the relay's billing service (#1415).
+func (a *App) recordBilling(ctx context.Context, path string) {
+	if a.Egress == nil {
+		return
+	}
+	host := a.billingURL()
+	if u, err := url.Parse(host); err == nil && u.Hostname() != "" {
+		host = u.Hostname()
+	}
+	a.Egress.Add(context.WithoutCancel(ctx), egress.Relay, host, "billing: "+path)
 }

@@ -49,6 +49,10 @@ const (
 	// QualityResults is the public quality results read from GitHub when
 	// Models › Results is opened (#1415).
 	QualityResults = "quality_results"
+	// Relay is reaching the relay by this computer's own doing: its tunnel
+	// opening, the outside check, whether it takes subscriptions, and its
+	// billing service (#1415).
+	Relay = "relay"
 )
 
 // Sources of a run.

@@ -221,6 +221,11 @@ func (s *Store) fetchRemote(ctx context.Context, src Source) ([]document, error)
 	}
 	ctx, cancel := context.WithTimeout(ctx, remoteTimeout)
 	defer cancel()
+	if s.Reached != nil {
+		if to := remoteDestination(src); to != "" {
+			s.Reached(ctx, to, "refreshed the knowledge source "+src.Name)
+		}
+	}
 	var docs []document
 	switch src.Kind {
 	case KindDatabase:
@@ -496,4 +501,25 @@ func remoteDue(r *Remote, lastFetch string, now time.Time) bool {
 		minutes = defaultRefreshMinutes
 	}
 	return now.Sub(t) >= time.Duration(minutes)*time.Minute
+}
+
+// remoteDestination is where fetching a source goes: an API's host, or a
+// PostgreSQL or MySQL server. A SQLite file is on this computer: "".
+func remoteDestination(src Source) string {
+	if src.Remote == nil {
+		return ""
+	}
+	switch {
+	case src.Kind == KindAPI && src.Remote.URL != "":
+		if u, err := url.Parse(src.Remote.URL); err == nil && u.Hostname() != "" {
+			return u.Hostname()
+		}
+		return src.Remote.URL
+	case src.Kind == KindDatabase && src.Remote.Driver == DriverPostgres:
+		// The address is in the connection string, a secret.
+		return "PostgreSQL (" + src.Name + ")"
+	case src.Kind == KindDatabase && src.Remote.Driver == DriverMySQL:
+		return "MySQL (" + src.Name + ")"
+	}
+	return ""
 }
