@@ -326,5 +326,13 @@
   "parts": {
     "network": "谁可以从其他设备访问这台电脑，以及如何访问。",
     "developer": "这台电脑上的 Toskar API，以及应用和脚本使用的密钥。"
+  },
+  "ollamaPort": {
+    "title": "Ollama 端口",
+    "description": "一些使用 Ollama API 的应用只会在端口 11434 上查找它。开启后，Toskar 也会在那里应答，仅限这台电脑。可以输入地址的应用可以改用 {{address}}。",
+    "label": "在 Ollama 端口上应答",
+    "listening": "正在 http://localhost:11434 应答 Ollama API。",
+    "inUse": "另一个程序（可能是 Ollama）正在使用端口 11434。请退出它，然后重新开启。",
+    "failed": "Toskar 无法监听端口 11434：{{error}}"
   }
 }

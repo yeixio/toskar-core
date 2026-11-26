@@ -334,5 +334,13 @@
   "parts": {
     "network": "Quem pode acessar este computador de outros dispositivos, e como.",
     "developer": "A API do Toskar neste computador e as chaves que apps e scripts usam."
+  },
+  "ollamaPort": {
+    "title": "Porta do Ollama",
+    "description": "Alguns apps que usam a API do Ollama só a procuram na porta 11434. Ative isto e o Toskar também responde lá, só neste computador. Um app que deixa você digitar um endereço pode usar {{address}}.",
+    "label": "Responder na porta do Ollama",
+    "listening": "Respondendo à API do Ollama em http://localhost:11434.",
+    "inUse": "Outro programa, provavelmente o Ollama, está usando a porta 11434. Feche-o e ative isto de novo.",
+    "failed": "O Toskar não conseguiu escutar na porta 11434: {{error}}"
   }
 }

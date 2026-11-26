@@ -326,5 +326,13 @@
   "parts": {
     "network": "他のデバイスからこのコンピュータに誰がどう接続できるか。",
     "developer": "このコンピュータのToskarのAPIと、アプリやスクリプトが使うキー。"
+  },
+  "ollamaPort": {
+    "title": "Ollamaのポート",
+    "description": "OllamaのAPIを使う一部のアプリは、ポート11434しか探しません。オンにすると、Toskarはこのコンピュータ上でのみ、そこでも応答します。アドレスを入力できるアプリでは、代わりに{{address}}を使えます。",
+    "label": "Ollamaのポートで応答",
+    "listening": "http://localhost:11434 でOllamaのAPIに応答しています。",
+    "inUse": "別のプログラム（おそらくOllama）がポート11434を使用しています。終了してから、もう一度オンにしてください。",
+    "failed": "Toskarはポート11434で待ち受けできませんでした：{{error}}"
   }
 }

@@ -43,6 +43,7 @@ Columns:
 | Relay enrollment secret | `remote_access_relay_secret` | API Access › Access from anywhere | Network & devices | Application | Administrative | none | `remote_access_relay` | Security |
 | Find other computers | `discovery_enabled` | Computers › Available to add | Network & devices | Application | Basic | On | none | Network |
 | Web UI on the network | `web_ui_enabled` | API Access › Service | Network & devices | Application | Advanced | On | `lan_api_enabled` | Network |
+| Answer on Ollama's port | `ollama_port_enabled` | API keys › Ollama's port | Advanced › API keys | Application | Developer | Off | none | Network |
 | Advanced mode | `advanced_mode` | Settings › AI behavior › Advanced mode | Advanced | Application | Basic | Off | none | Visual |
 | Model lifecycle | `model_lifecycle` | Settings › AI behavior › Model lifecycle | Models & AI | Application | Advanced | Automatic | none | Behavioral |
 | Keep models ready for | `idle_unload_minutes` | Settings › AI behavior › Model lifecycle | Models & AI | Application | Advanced | 15 minutes | `model_lifecycle` = automatic | Behavioral |

@@ -326,5 +326,13 @@
   "parts": {
     "network": "다른 기기에서 누가 어떻게 이 컴퓨터에 연결할 수 있는지.",
     "developer": "이 컴퓨터의 Toskar API와 앱 및 스크립트가 쓰는 키."
+  },
+  "ollamaPort": {
+    "title": "Ollama 포트",
+    "description": "Ollama API를 쓰는 일부 앱은 포트 11434에서만 찾아요. 켜면 Toskar가 이 컴퓨터에서만 그 포트로도 응답해요. 주소를 입력할 수 있는 앱은 대신 {{address}}를 쓸 수 있어요.",
+    "label": "Ollama 포트로 응답",
+    "listening": "http://localhost:11434에서 Ollama API에 응답하고 있어요.",
+    "inUse": "다른 프로그램(아마 Ollama)이 포트 11434를 쓰고 있어요. 종료한 다음 다시 켜 주세요.",
+    "failed": "Toskar가 포트 11434에서 수신하지 못했어요: {{error}}"
   }
 }

@@ -1117,6 +1117,8 @@ Apps that offer only Ollama, such as Home Assistant's Ollama integration, Obsidi
 
 Errors are Ollama's `{"error": "message"}`; one during a stream is its last line.
 
+**Ollama's port** (#1396, contract 1.127). Some apps look for Ollama only at `http://localhost:11434` and can't be given another address. `PATCH /settings` `{"ollama_port_enabled": true}` (Admins; Settings › API keys › Ollama's port) also serves these routes on port 11434, on this computer only (`127.0.0.1`), through the same handlers and keys. `GET /` there answers `Ollama is running`, as Ollama does, and every other path is Ollama's 404, so nothing else of Toskar's is on that port. It's off by default and never takes the port from another program: when Ollama or anything else has it, the PATCH answers `400 OLLAMA_PORT_IN_USE` (or `OLLAMA_PORT_FAILED` for another reason) with `port`, and the setting stays off. If the port is taken when Toskar starts, the setting stays on and `GET /settings` says why in `ollama_port_error` (`in_use`), with `ollama_port_listening` false; turning it off and on again tries once more.
+
 ## GPU acceleration
 
 When llama-server loads a model, it logs which devices it found, how many of the model's layers it put on a GPU, and the memory it took there. The daemon reads that log, so `GET /models/running` reports each model's `acceleration`:

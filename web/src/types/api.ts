@@ -1136,6 +1136,11 @@ export interface SettingsView {
   /** An organization's own relay, or "" for Toskar's; whether its enrollment secret is set. */
   remote_access_relay?: string
   remote_access_relay_enrolled?: boolean
+  /** Ollama's API on Ollama's port, 11434, on this computer only (#1396, contract 1.127). */
+  ollama_port_enabled?: boolean
+  ollama_port_listening?: boolean
+  /** Why it isn't listening: in_use when another program has the port. */
+  ollama_port_error?: string
   web_ui_enabled: boolean
   discovery_enabled: boolean
   node_name: string
@@ -1554,6 +1559,7 @@ export interface SettingsPatch {
   remote_access_relay?: string
   /** Write-only: the relay's enrollment secret; "" clears it. */
   remote_access_relay_secret?: string
+  ollama_port_enabled?: boolean
   discovery_enabled?: boolean
   web_ui_enabled?: boolean
   advanced_mode?: boolean

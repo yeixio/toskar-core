@@ -326,5 +326,13 @@
   "parts": {
     "network": "誰可以從其他裝置連到這台電腦，以及如何連線。",
     "developer": "這台電腦上的 Toskar API，以及 App 和指令碼使用的金鑰。"
+  },
+  "ollamaPort": {
+    "title": "Ollama 連接埠",
+    "description": "有些使用 Ollama API 的 App 只會在連接埠 11434 尋找它。開啟後，Toskar 也會在那裡回應，僅限這台電腦。可以輸入位址的 App 可以改用 {{address}}。",
+    "label": "在 Ollama 連接埠回應",
+    "listening": "正在 http://localhost:11434 回應 Ollama API。",
+    "inUse": "另一個程式（可能是 Ollama）正在使用連接埠 11434。請結束它，然後重新開啟。",
+    "failed": "Toskar 無法監聽連接埠 11434：{{error}}"
   }
 }

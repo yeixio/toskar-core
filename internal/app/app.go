@@ -92,11 +92,13 @@ import (
 
 // App is the Yggdrasil control-plane application.
 type App struct {
-	Config *config.Manager
-	DB     *store.DB
-	Bus    *events.Bus
-	API    *api.Server
-	Logger *slog.Logger
+	// ollamaPortErr is why the Ollama port isn't listening (#1396).
+	ollamaPortErr atomic.Value
+	Config        *config.Manager
+	DB            *store.DB
+	Bus           *events.Bus
+	API           *api.Server
+	Logger        *slog.Logger
 
 	Conversations *repositories.ConversationRepo
 	Settings      *repositories.SettingsRepo
@@ -1595,6 +1597,10 @@ func (a *App) Start(ctx context.Context) error {
 		if err := a.applyRemoteAccess(); err != nil && a.Logger != nil {
 			a.Logger.Warn("access from anywhere could not listen", "port", cfg.RemotePort(), "error", err)
 		}
+		// Ollama's port, when it's on, unless another program has it (#1396).
+		if err := a.applyOllamaPort(); err != nil && a.Logger != nil {
+			a.Logger.Warn("the ollama port could not listen", "port", api.OllamaPort, "error", err)
+		}
 		// Mapping a port sweeps on its own; otherwise remove what's left.
 		if !mapsPort(cfg) {
 			a.wg.Add(1)
@@ -1653,6 +1659,7 @@ func (a *App) Shutdown(ctx context.Context) error {
 	a.stopRelay()
 	a.portKeeper.Stop()
 	a.API.StopRemote()
+	a.API.StopOllamaPort()
 	_ = a.API.Shutdown(shutdownCtx)
 	_ = a.internal.Shutdown(shutdownCtx)
 	a.wg.Wait()
@@ -1725,6 +1732,7 @@ func (a *App) settingsView(ctx context.Context) (contracts.SettingsView, error) 
 		RemoteAccessEnabled: cfg.RemoteAccess.Enabled, RemoteAccessPort: cfg.RemotePort(), RemoteAccessAddress: cfg.RemoteAccess.Address,
 		RemoteAccessPortMapping: !cfg.RemoteAccess.NoPortMapping,
 		RemoteAccessRelay:       cfg.RemoteAccess.Relay, RemoteAccessRelayEnrolled: a.relayEnrolled(cfg),
+		OllamaPortEnabled: cfg.OllamaPort, OllamaPortListening: a.API != nil && a.API.OllamaPortAddr() != "", OllamaPortError: a.ollamaPortError(),
 		HuggingFaceTokenSet: a.huggingFaceToken() != "",
 		DiscoveryEnabled:    cfg.DiscoveryEnabled, NodeName: cfg.NodeName, NodeID: cfg.NodeID,
 		AdvancedMode: advanced, ModelLifecycle: lifecycle, IdleUnloadMinutes: idleMins,
@@ -2002,6 +2010,8 @@ func (a *App) applySettingsPatch(ctx context.Context, patch map[string]any) erro
 		}
 		remote.Relay, remoteTouched = name, true
 	}
+	ollamaBefore := lanBefore.OllamaPort
+	ollamaOn, ollamaTouched := patch["ollama_port_enabled"].(bool)
 	relaySecret, relaySecretTouched := patch["remote_access_relay_secret"].(string)
 	if relaySecretTouched && strings.TrimSpace(relaySecret) != "" {
 		clean, err := cleanRelaySecret(relaySecret)
@@ -2013,6 +2023,9 @@ func (a *App) applySettingsPatch(ctx context.Context, patch map[string]any) erro
 	err := a.Config.Update(func(c *config.Config) {
 		if remoteTouched {
 			c.RemoteAccess = remote
+		}
+		if ollamaTouched {
+			c.OllamaPort = ollamaOn
 		}
 		if v, ok := patch["node_name"].(string); ok && v != "" {
 			c.NodeName = v
@@ -2085,6 +2098,19 @@ func (a *App) applySettingsPatch(ctx context.Context, patch map[string]any) erro
 		}
 	} else if relayChanged {
 		a.applyRelay()
+	}
+	// The Ollama port follows its setting now; one that can't listen, such
+	// as when Ollama itself is running, puts the setting back (#1396).
+	if ollamaTouched && ollamaOn != ollamaBefore && a.API != nil && a.API.Addr() != "" {
+		if err := a.applyOllamaPort(); err != nil {
+			_ = a.Config.Update(func(c *config.Config) { c.OllamaPort = ollamaBefore })
+			_ = a.applyOllamaPort()
+			details := map[string]any{"port": api.OllamaPort}
+			if errors.Is(err, api.ErrOllamaPortInUse) {
+				return contracts.NewError("OLLAMA_PORT_IN_USE", details, fmt.Errorf("port %d is in use: %w", api.OllamaPort, err))
+			}
+			return contracts.NewError("OLLAMA_PORT_FAILED", details, fmt.Errorf("toskar can't listen on port %d: %w", api.OllamaPort, err))
+		}
 	}
 	if v, ok := patch["node_name"].(string); ok && v != "" {
 		if discoveryTouched && a.Nodes != nil {

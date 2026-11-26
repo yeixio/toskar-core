@@ -334,5 +334,13 @@
   "parts": {
     "network": "Qui peut joindre cet ordinateur depuis d'autres appareils, et comment.",
     "developer": "L'API de Toskar sur cet ordinateur, et les clés qu'utilisent les apps et les scripts."
+  },
+  "ollamaPort": {
+    "title": "Port d'Ollama",
+    "description": "Certaines apps qui utilisent l'API d'Ollama ne la cherchent que sur le port 11434. Activez ceci et Toskar y répond aussi, sur cet ordinateur uniquement. Une app qui permet de saisir une adresse peut utiliser {{address}} à la place.",
+    "label": "Répondre sur le port d'Ollama",
+    "listening": "Toskar répond à l'API d'Ollama sur http://localhost:11434.",
+    "inUse": "Un autre programme, sans doute Ollama, utilise le port 11434. Quittez-le, puis réactivez ceci.",
+    "failed": "Toskar n'a pas pu écouter sur le port 11434 : {{error}}"
   }
 }
