@@ -71,8 +71,8 @@
       "rune": "Tiwaz, la runa a forma di lancia"
     },
     "api-access": {
-      "meaning": "Valgrind è il cancello del Valhalla. Le chiavi API decidono chi può entrare.",
-      "story": "Valgrind è l'antico cancello che si erge davanti al Valhalla. È sacro e vetusto, e pochi sanno come sia chiusa la sua serratura.",
+      "meaning": "Thrymgjoll è un cancello che trattiene chi arriva senza invito. Le chiavi API decidono chi può entrare.",
+      "story": "Thrymgjoll è il cancello della sala di Menglod, costruito dai tre figli di Solblindi. Chi prova ad aprirlo senza permesso resta intrappolato.",
       "rune": "Thurisaz, la runa del cancello"
     },
     "settings": {

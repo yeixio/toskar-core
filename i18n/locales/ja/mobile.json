@@ -599,8 +599,8 @@
       "runeName": "Raidho、旅のルーン"
     },
     "connect": {
-      "meaning": "ValgrindはValhallaの門です。APIキーが、誰が入れるかを決めます。",
-      "story": "ValgrindはValhallaの前に立つ古の門です。神聖で古く、その錠の掛け方を知る者はわずかです。",
+      "meaning": "Thrymgjollは、招かれずに来た者を捕らえて離さない門です。APIキーが、誰が入れるかを決めます。",
+      "story": "ThrymgjollはMenglodの館の門で、Solblindiの三人の息子が造りました。許しなく開けようとする者は捕らえられ、動けなくなります。",
       "runeName": "Thurisaz、門のルーン"
     },
     "settings": {

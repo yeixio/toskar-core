@@ -71,8 +71,8 @@
       "rune": "Tiwaz，形如長矛的符文"
     },
     "api-access": {
-      "meaning": "Valgrind 是 Valhalla 的大門。API 金鑰決定誰可以進入。",
-      "story": "Valgrind 是矗立在 Valhalla 前方的古老大門。它神聖而古老，很少有人知道它的門閂是如何扣上的。",
+      "meaning": "Thrymgjoll 是一扇會困住不請自來者的大門。API 金鑰決定誰可以進入。",
+      "story": "Thrymgjoll 是 Menglod 大廳的大門，由 Solblindi 的三個兒子建造。任何未經允許試圖打開它的人都會被牢牢困住。",
       "rune": "Thurisaz，門的符文"
     },
     "settings": {

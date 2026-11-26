@@ -71,8 +71,8 @@
       "rune": "Tiwaz, la runa con forma de lanza"
     },
     "api-access": {
-      "meaning": "Valgrind es la puerta del Valhalla. Las claves de API deciden quién puede entrar.",
-      "story": "Valgrind es la antigua puerta que se alza ante el Valhalla. Es sagrada y vieja, y pocos saben cómo se cierra su cerrojo.",
+      "meaning": "Thrymgjoll es una puerta que atrapa a quien llega sin ser invitado. Las claves de API deciden quién puede entrar.",
+      "story": "Thrymgjoll es la puerta de la sala de Menglod, construida por los tres hijos de Solblindi. Quien intenta abrirla sin permiso queda atrapado.",
       "rune": "Thurisaz, la runa de la puerta"
     },
     "settings": {

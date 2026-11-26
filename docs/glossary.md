@@ -16,6 +16,6 @@ Toskar names its subsystems after figures from Norse myth. This glossary maps ea
 | **Ymir** | Model catalog, downloads, and fit | `internal/models` | The primordial giant from whom the world was shaped |
 | **Ratatoskr** | Chat | `internal/orchestrator`, `internal/app` | The squirrel that carries messages up and down Yggdrasil |
 
-UI pages also use Norse names for related screens (see `web/src/lib/realms.ts`): for example Sleipnir for performance, Odin for profiles, Valgrind for API access, and Forseti for settings.
+UI pages also use Norse names for related screens (see `web/src/lib/realms.ts`): for example Sleipnir for performance, Odin for profiles, Thrymgjoll for API access, and Forseti for settings.
 
 For package layout and the request path, see [Architecture](architecture.md).

@@ -617,8 +617,8 @@
       "runeName": "Raidho, la runa del viaje"
     },
     "connect": {
-      "meaning": "Valgrind es la puerta del Valhalla. Una clave de API decide quién puede entrar.",
-      "story": "Valgrind es la antigua puerta que se alza ante el Valhalla. Es sagrada y vieja, y pocos saben cómo se cierra su cerrojo.",
+      "meaning": "Thrymgjoll es una puerta que atrapa a quien llega sin ser invitado. Una clave de API decide quién puede entrar.",
+      "story": "Thrymgjoll es la puerta de la sala de Menglod, construida por los tres hijos de Solblindi. Quien intenta abrirla sin permiso queda atrapado.",
       "runeName": "Thurisaz, la runa de la puerta"
     },
     "settings": {

@@ -599,8 +599,8 @@
       "runeName": "Raidho，旅程之符文"
     },
     "connect": {
-      "meaning": "Valgrind 是 Valhalla 的大门。API 密钥决定谁可以进入。",
-      "story": "Valgrind 是矗立在 Valhalla 之前的古老大门。它神圣而古老，很少有人知道它的门锁是如何扣上的。",
+      "meaning": "Thrymgjoll 是一扇会困住不请自来者的大门。API 密钥决定谁可以进入。",
+      "story": "Thrymgjoll 是 Menglod 大厅的大门，由 Solblindi 的三个儿子建造。任何未经允许试图打开它的人都会被牢牢困住。",
       "runeName": "Thurisaz，大门之符文"
     },
     "settings": {
