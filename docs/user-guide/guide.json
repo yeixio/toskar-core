@@ -1061,6 +1061,107 @@
         "Say “Remember that…” in any chat, and Toskar keeps it across chats, restarts, and model changes. “Forget…” removes a memory, and “What do you remember?” lists them. Answers that used a memory list it under Sources.",
         "Settings › Memory lists memories by category. Add a memory there, or start from one of the examples. Edit changes a memory's words and category; its menu pauses it, marks it This computer only, or deletes it. With nothing remembered yet, the page explains memory in three steps; How it works shows the same later. A memory marked This computer only keeps any chat that uses it on this computer.",
         "Memory is on by default. Turn it off for one chat with the Memory switch in the composer, or everywhere with Use memory in chats in Settings › Memory or in Settings. Memory is for short facts; documents and data belong in Knowledge. Passwords, keys, and card numbers are never saved. A memory that tries to grant a permission, such as “you can push without asking”, is refused: what tools may do is set only in profiles and Settings."
+      ],
+      "kind": "task",
+      "summary": "Have Toskar keep short facts about you and your work across chats, and see, change, or forget what it keeps.",
+      "blocks": [
+        {
+          "type": "list",
+          "title": "What you need",
+          "items": [
+            "Toskar with a chat model installed. Memory works with every model.",
+            "A Member or Admin account. Each person's memories are their own: nobody else who signs in sees them, an Admin included."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Tell it something to keep"
+        },
+        {
+          "type": "steps",
+          "items": [
+            "In any chat, write Remember that, then the fact, such as Remember that I prefer metric units.",
+            "Toskar answers that it saved it. Before each later answer, it picks the memories that fit the question.",
+            "An answer that used a memory lists it under Sources, so you can see why it knew."
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "You can also add one yourself: open Settings › Memory, write it under Add a memory, and choose Add. Choose for me picks its category, or pick one, such as Preferences or People. A memory that a project's chat learned belongs to that project, and only that project's chats use it."
+        },
+        {
+          "type": "heading",
+          "text": "See, change, and forget"
+        },
+        {
+          "type": "image",
+          "screen": "memory-page",
+          "alt": "Settings › Memory listing memories by category, such as I prefer metric units for weather, and miles for hikes under Preferences, with Add a memory at the top",
+          "caption": "Each memory shows where it came from: You asked in a chat, or Added here."
+        },
+        {
+          "type": "list",
+          "items": [
+            "Edit changes a memory's words or its category.",
+            "Pause keeps a memory but stops chats using it, and Use again turns it back on.",
+            "This computer only keeps every chat that uses the memory on this computer, never on a paired computer.",
+            "Delete removes it for good. In a chat, Forget, then the fact, does the same, and What do you remember? lists what's kept."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Turn memory off"
+        },
+        {
+          "type": "paragraph",
+          "text": "Turn memory off for one chat with the Memory switch in its Options. Turn it off everywhere with Use memory in chats in Settings › Memory. Off keeps every memory, and chats don't use them until you turn it back on."
+        },
+        {
+          "type": "heading",
+          "text": "Limits"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Memory is for short facts. Documents and data belong in [Knowledge](#knowledge).",
+            "Passwords, keys, and card numbers are never saved, even when you ask.",
+            "A memory can't grant a permission. One such as you can push without asking is refused, because what tools may do is set only in profiles and Settings.",
+            "Memories stay on this computer, in Toskar's data folder. A chat that runs on a paired computer sends that computer the memories it uses, unless they're marked This computer only."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Troubleshooting"
+        },
+        {
+          "type": "table",
+          "columns": [
+            "What you see",
+            "What to do"
+          ],
+          "rows": [
+            [
+              "An answer ignores something you asked it to remember",
+              "Check Settings › Memory: the memory may be paused, or memory may be off for this chat in its Options. A project's memory is used only in that project's chats."
+            ],
+            [
+              "A memory is used where it doesn't fit",
+              "Edit it to say when it applies, such as For hikes, I prefer miles, or pause it."
+            ],
+            [
+              "Remember that didn't save anything",
+              "It was a password, a key, or a card number, or it tried to grant a permission. Those are never kept."
+            ]
+          ]
+        },
+        {
+          "type": "related",
+          "sections": [
+            "privacy",
+            "knowledge",
+            "projects"
+          ]
+        }
       ]
     },
     {
@@ -5459,12 +5560,161 @@
       "title": "Privacy, encryption, and what left this computer",
       "paragraphs": [
         "Are my chats private? Yes. Your chats, memories, knowledge, and files stay on this computer. Only people who can sign in to your account on it, and apps you give an API key, can see them; a chat answered by one of your paired computers is sent to that computer. There is no Toskar account or cloud, and nobody at Toskar can see your chats or data.",
-        "Toskar does not send usage telemetry. Chats, memories, knowledge, files, and specialized AIs are stored in the data directory on this computer. Something leaves only when a feature that goes online is used: a web search or page read, a connected service or MCP server, a database or web API you connected, a model or runtime download, a paired computer that answers a chat or trains, or an external server you configured.",
+        "Toskar does not send usage telemetry. Chats, memories, knowledge, files, and specialized AIs are stored in the data directory on this computer. Something leaves only when a feature that goes online is used. That's a web search or page read, a connected service or MCP server, or a database or web API you connected. It's also a model or runtime download, a paired computer that answers a chat or trains, or an external server you configured.",
         "Settings → What left this computer lists each of those, newest first: the search queries, page addresses, what was sent to a paired computer or an external server, and what a connected service was asked. It also lists model and runtime downloads, the speech models and voices fetched the first time they're needed, MCP sources connecting or signing in, knowledge refreshes from a database or web API, git pushes, and the relay's own calls when access from anywhere is on. It counts them for the last 30 days.",
         "Run records hold the prompts and tool results of past runs, including that list. Keep run records for sets how long they are kept: 7, 30, or 90 days, or Keep them. Delete run records now removes them at once, and clears cached web searches and pages. Chats are not run records; History in Settings decides whether chats are saved.",
         "Memories and knowledge sources marked This computer only keep every chat that uses them on this computer. Text recognition, meaning search, and training on this computer never send your data elsewhere.",
         "Is my data encrypted? Toskar doesn't encrypt its own files, and encryption isn't required to use it. Turn on your computer's disk encryption to keep chats, memories, knowledge, and files encrypted while the computer is off or locked: FileVault on macOS (System Settings → Privacy & Security), BitLocker or Device Encryption on Windows, and LUKS on Linux. Passwords and keys for connected services are kept in the secrets folder, readable only by your user account.",
         "Websites, model downloads, and online services are reached over encrypted HTTPS connections. Addresses you enter yourself, such as an external server, a webhook, or an MCP server, are encrypted when they start with https://. Traffic between your own paired computers is encrypted, and each computer is checked against the key it paired with. Devices on your network reach this computer over HTTPS, to the certificate they saved when they were paired, and a browser can use https:// on the same port. A paired computer still on an older Toskar works over plain HTTP until it's updated, and Settings › Computers marks it Not encrypted. Settings → Your data stays private sums this up."
+      ],
+      "kind": "concept",
+      "summary": "See what stays on this computer, what leaves it and when, and how your data is encrypted.",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Think of Toskar as a filing cabinet in your own office, not a service you rent. Your chats, memories, knowledge, files, and specialized AIs are kept in Toskar's data folder on this computer. There's no Toskar account or cloud, and no usage data is sent to anyone."
+        },
+        {
+          "type": "heading",
+          "text": "What leaves this computer, and when"
+        },
+        {
+          "type": "paragraph",
+          "text": "Something leaves only when a feature that goes online is used. That includes a web search, a connected service, a model download, or a paired computer that answers a chat. Apart from the update check, each one is off until a person turns it on, or runs only when a person uses the feature."
+        },
+        {
+          "type": "image",
+          "screen": "privacy-what-left",
+          "alt": "Settings › Privacy & security, with Your data stays private saying the disk is encrypted with FileVault, then What left this computer listing a web page read, a web search, and a map lookup, each with where it went and when",
+          "caption": "Toskar checks whether the disk holding its data is encrypted. Each row below says what was sent, where it went, and whether a chat or an automation sent it."
+        },
+        {
+          "type": "table",
+          "columns": [
+            "What",
+            "Where it goes",
+            "When"
+          ],
+          "rows": [
+            [
+              "Web searches and page reads",
+              "The search service, then the pages it opens",
+              "When a question needs current information and the profile allows the internet"
+            ],
+            [
+              "Places, weather, and directions",
+              "OpenStreetMap's services",
+              "When you ask about a place"
+            ],
+            [
+              "Model, program, and voice downloads",
+              "Hugging Face and GitHub",
+              "When you install one, or the first time a feature needs it"
+            ],
+            [
+              "Connected services and tool sources",
+              "That service, with the credential you stored",
+              "When one of its tools runs, and when a tool source connects"
+            ],
+            [
+              "A paired computer",
+              "Your own computer",
+              "When it answers a chat or trains, with what that needs"
+            ],
+            [
+              "The update check",
+              "toskar.ai",
+              "A minute after Toskar starts, then daily, unless you turn it off"
+            ]
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Settings › Privacy & security lists each of these under What left this computer, newest first, and counts them for the last 30 days. [Privacy](https://github.com/yeixio/toskar-core/blob/main/docs/privacy.md) has the full table, with every call and its switch."
+        },
+        {
+          "type": "note",
+          "tone": "tip",
+          "text": "Mark a memory or a knowledge source This computer only, and every chat that uses it stays on this computer, even when another computer would answer sooner."
+        },
+        {
+          "type": "heading",
+          "text": "Encryption"
+        },
+        {
+          "type": "table",
+          "columns": [
+            "Where",
+            "How it's protected"
+          ],
+          "rows": [
+            [
+              "On this computer's disk",
+              "Toskar doesn't encrypt its own files. Turn on your computer's disk encryption to keep them encrypted while it's off or locked: FileVault on macOS, BitLocker or Device Encryption on Windows, and LUKS on Linux. Settings › Privacy & security says whether it's on."
+            ],
+            [
+              "Passwords and keys you stored",
+              "Kept in the secrets folder, which only your user account can read. API keys are kept as one-way hashes."
+            ],
+            [
+              "Between your own computers",
+              "Encrypted, and each computer is checked against the key it paired with. A computer on an older Toskar shows Not encrypted in Settings › Computers until it's updated."
+            ],
+            [
+              "Your devices on your network",
+              "Your phone, tablet, and TV reach this computer over HTTPS, to the certificate they saved when they paired."
+            ],
+            [
+              "Away from home, through Toskar's relay",
+              "Encrypted from your device to your computer. The relay passes the bytes along without being able to read them, and never sees or keeps your chats, files, or keys."
+            ],
+            [
+              "Websites and online services",
+              "Over HTTPS. Addresses you enter yourself, such as a webhook, are encrypted when they start with https://."
+            ]
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Run records"
+        },
+        {
+          "type": "paragraph",
+          "text": "Run records hold the prompts and tool results of past runs, including What left this computer. Keep run records for sets how long they stay: 7, 30, or 90 days, or Keep them. Delete run records now removes them at once, and clears cached web searches and pages. Chats aren't run records: History in Settings decides whether chats are saved."
+        },
+        {
+          "type": "heading",
+          "text": "Troubleshooting"
+        },
+        {
+          "type": "table",
+          "columns": [
+            "What you see",
+            "What to do"
+          ],
+          "rows": [
+            [
+              "Your disk isn't encrypted",
+              "Turn on disk encryption as the message says, then open Settings › Privacy & security again."
+            ],
+            [
+              "A computer shows Not encrypted",
+              "Update Toskar on that computer. Until then, traffic to it isn't encrypted."
+            ],
+            [
+              "Something is listed that you didn't expect",
+              "Its row says whether a chat or an automation sent it. Turn the feature off in Settings, or remove the profile's internet capability."
+            ]
+          ]
+        },
+        {
+          "type": "related",
+          "sections": [
+            "memory",
+            "computers",
+            "anywhere"
+          ]
+        }
       ]
     },
     {

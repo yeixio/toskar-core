@@ -1218,6 +1218,16 @@
       ]
     },
     {
+      "id": "memory-page",
+      "path": "/settings/memory",
+      "readyText": "I prefer metric units for weather, and miles for hikes."
+    },
+    {
+      "id": "privacy-what-left",
+      "path": "/settings/privacy",
+      "readyText": "Your disk is encrypted with FileVault"
+    },
+    {
       "id": "people-page",
       "path": "/settings/people",
       "readyText": "Dana"
