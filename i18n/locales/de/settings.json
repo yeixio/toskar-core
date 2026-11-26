@@ -243,7 +243,7 @@
   },
   "whatLeft": {
     "title": "Was diesen Computer verlassen hat",
-    "description": "Toskar arbeitet auf diesem Computer. Hier siehst du, wann ein Chat, eine Automation oder eine App etwas nach außen gesendet hat: Websuchen und Webseiten, Kartenabfragen, gekoppelte Computer und verbundene Dienste. Markiere Erinnerungen oder Wissen als „Nur dieser Computer“, damit Chats, die sie nutzen, hier bleiben.",
+    "description": "Toskar arbeitet auf diesem Computer. Hier siehst du, wann ein Chat, eine Automation oder eine App etwas nach außen gesendet hat: Websuchen und Webseiten, Kartenabfragen, Modell- und Stimmen-Downloads, gekoppelte Computer, Toskars Relay und verbundene Dienste. Markiere Erinnerungen oder Wissen als „Nur dieser Computer“, damit Chats, die sie nutzen, hier bleiben.",
     "nothing": "In den letzten 30 Tagen hat nichts diesen Computer verlassen.",
     "summary": "In den letzten 30 Tagen: {{list}}.",
     "summaryItem": "{{kind}} {{count}}",

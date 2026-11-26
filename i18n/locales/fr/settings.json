@@ -250,7 +250,7 @@
   },
   "whatLeft": {
     "title": "Ce qui a quitté cet ordinateur",
-    "description": "Toskar travaille sur cet ordinateur. Voici les fois où une discussion, une automatisation ou une app a envoyé quelque chose ailleurs : recherches et pages web, recherches de cartes, ordinateurs jumelés et services connectés. Marquez des souvenirs ou des connaissances « Cet ordinateur uniquement » pour que les discussions qui les utilisent restent ici.",
+    "description": "Toskar travaille sur cet ordinateur. Voici les fois où une discussion, une automatisation ou une app a envoyé quelque chose ailleurs : recherches et pages web, recherches de cartes, téléchargements de modèles et de voix, ordinateurs jumelés, relais de Toskar et services connectés. Marquez des souvenirs ou des connaissances « Cet ordinateur uniquement » pour que les discussions qui les utilisent restent ici.",
     "nothing": "Rien n'a quitté cet ordinateur au cours des 30 derniers jours.",
     "summary": "Au cours des 30 derniers jours : {{list}}.",
     "summaryItem": "{{kind}} {{count}}",
