@@ -162,6 +162,6 @@ func addDirFiltered(zw *zip.Writer, dir, prefix string, keep func(string) bool) 
 
 // DefaultBundlePath returns a timestamped path under the logs directory.
 func DefaultBundlePath(cfg config.Config) string {
-	name := fmt.Sprintf("yggdrasil-diagnostics-%s.zip", time.Now().UTC().Format("20060102-150405"))
+	name := fmt.Sprintf("toskar-diagnostics-%s.zip", time.Now().UTC().Format("20060102-150405"))
 	return filepath.Join(cfg.LogsDir, name)
 }
