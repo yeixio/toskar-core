@@ -487,6 +487,10 @@ func (h *Handler) HandleChatCompletions(w http.ResponseWriter, r *http.Request) 
 		h.writeStream(sw, r, one, name, func() map[string]any { return nil }, false, false, includeUsage)
 		return
 	}
+	if req.Stream {
+		// The answer as it's written, as chat in the app shows it (#1450).
+		ctx = turnopts.WithLive(ctx)
+	}
 	stream, err := h.Chat.RunChat(ctx, profileID, "", message, req.Stream, modelID, execution)
 	if err != nil {
 		status, code := h.failure("", err.Error())
@@ -522,6 +526,10 @@ func (h *Handler) writeNonStream(w http.ResponseWriter, stream <-chan pluginapi.
 			writeError(w, status, code, chunk.Error)
 			return
 		}
+		// A whole answer is the last version of it.
+		if chunk.Replace {
+			content.Reset()
+		}
 		content.WriteString(chunk.Content)
 		reasoning.WriteString(chunk.Reasoning)
 		if chunk.Metrics != nil {
@@ -545,6 +553,7 @@ func (h *Handler) writeStream(sw *streamWriter, r *http.Request, stream <-chan p
 		c = newCompletion(model)
 	}
 	var metrics *pluginapi.GenerationMetrics
+	var text growingText
 	for chunk := range stream {
 		if chunk.Error != "" {
 			status, code := h.failure(chunk.Code, chunk.Error)
@@ -557,16 +566,17 @@ func (h *Handler) writeStream(sw *streamWriter, r *http.Request, stream <-chan p
 		if includeReasoning && chunk.Reasoning != "" {
 			sw.data(c.chunk(map[string]any{"reasoning_content": chunk.Reasoning}, nil))
 		}
-		if chunk.Content == "" && !chunk.Done {
+		content := text.next(chunk)
+		if content == "" && !chunk.Done {
 			continue
 		}
 		var reason any
 		if chunk.Done {
 			reason = finish(metrics)
 		}
-		sw.data(c.chunk(map[string]any{"content": chunk.Content}, reason))
-		if h.Bus != nil && chunk.Content != "" {
-			h.Bus.PublishFor(r.Context(), events.New(events.ChatToken, map[string]any{"content": chunk.Content}))
+		sw.data(c.chunk(map[string]any{"content": content}, reason))
+		if h.Bus != nil && content != "" {
+			h.Bus.PublishFor(r.Context(), events.New(events.ChatToken, map[string]any{"content": content}))
 		}
 	}
 	if ext := extension(); progress && ext != nil {
