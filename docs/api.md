@@ -942,6 +942,8 @@ Returns `auto` and profiles, not raw files on disk:
 
 Built-in profile ids include `general-assistant`, `programming`, and `research`. A profile whose strategy is swarm is listed as `swarm:<id>` too ([Swarms from editor agents](#swarms-from-editor-agents-1135)). `owned_by` stays `yggdrasil` for contract 1.x, since clients may match on it.
 
+A key that may drive models directly also sees `raw:<model id>` for each installed model, and so does a request on this computer without a key. A new key doesn't get that until an Admin turns on its `raw` permission in Settings › API keys, and asking for a `raw:` id without it answers `403 RAW_NOT_ALLOWED`. That's on purpose: a raw model skips the profile's tools, checks, and topic limits, so it's given key by key (#1450). The integration guides say when an app needs it.
+
 ### `POST /v1/chat/completions`
 
 ```json
