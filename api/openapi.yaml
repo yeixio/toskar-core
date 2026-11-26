@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Toskar Control Plane API
-  version: "1.132"
+  version: "1.133"
   description: >-
     Local AI control plane API for Toskar, its OpenAI-compatible routes, and its MCP server.
     On the default loopback bind no key is needed. When the daemon listens on any other address,
@@ -9732,14 +9732,14 @@ components:
             required: [connector, device]
             properties:
               connector: {type: string, enum: [homeassistant, reolink]}
-              device: {type: string, description: 'The camera as that service names it, such as Home Assistant''s camera.driveway'}
+              device: {type: string, description: 'The camera as that service names it, such as Home Assistant''s camera.driveway, or Reolink''s camera, and camera@4 for the one on its hub''s channel 4 (#1333)'}
         say:
           type: object
           description: 'Speaks each run''s answer through a camera''s speaker (#667, contract 1.110), such as a Reolink doorbell''s, read by this computer''s voice. The run is told its answer is spoken and answers NOTHING when nobody is there, and then nothing is said. Only an Admin or the Owner sets it. On update, one with no connector stops speaking.'
           required: [connector, device]
           properties:
             connector: {type: string, enum: [reolink]}
-            device: {type: string, description: 'Always camera: one Reolink connection is one camera'}
+            device: {type: string, description: 'camera, the connection''s own camera, or camera@4 for the camera on its hub''s channel 4 (#1333, contract 1.133)'}
             quiet_from: {type: string, description: 'With quiet_to, such as 22:00 and 07:00: the hours, in the automation''s time zone, when nothing is said. The run still notifies.'}
             quiet_to: {type: string}
             voice: {type: string, description: 'The voice it speaks in, such as kitten:en:eleanor (#1304, contract 1.112); empty is the one chosen for the language in the Voice settings. One no longer here leaves it to that.'}
@@ -9804,7 +9804,7 @@ components:
           required: [connector, device]
           properties:
             connector: {type: string, enum: [reolink]}
-            device: {type: string, description: 'Always camera: one Reolink connection is one camera'}
+            device: {type: string, description: 'camera, the connection''s own camera, or camera@4 for the camera on its hub''s channel 4 (#1333, contract 1.133)'}
             quiet_from: {type: string, description: 'With quiet_to, such as 22:00 and 07:00: the hours, in the automation''s time zone, when nothing is said. The run still notifies.'}
             quiet_to: {type: string}
             voice: {type: string, description: 'The voice it speaks in, such as kitten:en:eleanor (#1304, contract 1.112); empty is the one chosen for the language in the Voice settings. One no longer here leaves it to that.'}
@@ -11125,7 +11125,7 @@ components:
           required: [connector, device]
           properties:
             connector: {type: string, enum: [reolink]}
-            device: {type: string, description: 'Always camera: one Reolink connection is one camera'}
+            device: {type: string, description: 'camera, the connection''s own camera, or camera@4 for the camera on its hub''s channel 4 (#1333, contract 1.133)'}
             quiet_from: {type: string, description: 'With quiet_to, such as 22:00 and 07:00: the hours, in the automation''s time zone, when nothing is said. The run still notifies.'}
             quiet_to: {type: string}
             voice: {type: string, description: 'The voice it speaks in, such as kitten:en:eleanor (#1304, contract 1.112); empty is the one chosen for the language in the Voice settings. One no longer here leaves it to that.'}

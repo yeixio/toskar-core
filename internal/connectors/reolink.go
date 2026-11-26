@@ -11,9 +11,11 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"maps"
 	"net"
 	"net/http"
 	"net/url"
+	"slices"
 	"strconv"
 	"strings"
 	"sync"
@@ -25,7 +27,8 @@ import (
 // Reolink is a Reolink camera or doorbell on this network, reached straight
 // through its own HTTP API (#667): its picture now, and its person, vehicle,
 // animal, motion, and doorbell events, with no Home Assistant or Reolink hub
-// in between. One connection is one camera.
+// in between. One connection is one camera, or a Home Hub or NVR with every
+// camera paired to it (#1333).
 type Reolink struct{}
 
 func (Reolink) ID() string   { return "reolink" }
@@ -45,7 +48,7 @@ func (Reolink) Fields() []Field {
 		{Key: "username", Label: "User name"},
 		{Key: "password", Label: "Password", Secret: true},
 		{Key: "channel", Label: "Channel", Optional: true, Placeholder: "0",
-			Help: "Leave empty for a camera on its own. A doorbell or battery camera paired to a Home Hub or NVR has no address of its own: use the hub's address and the camera's channel there, counted from 0."},
+			Help: "Leave empty for a camera on its own. A doorbell or battery camera paired to a Home Hub or NVR has no address of its own: use the hub's address and the camera's channel there, counted from 0. Toskar finds the hub's other cameras too."},
 		{Key: "talk_camera", Label: "reolink-cli camera name", Optional: true, Advanced: true,
 			Help: "Leave empty. To speak and listen through the camera, Toskar runs Reolink's reolink-cli with the address, channel and login above, so all it needs is reolink-cli installed on this computer. Give a name only to use a camera you added to reolink-cli yourself."},
 		{Key: "talk_gateway", Label: "reolink-cli gateway", Optional: true, Advanced: true,
@@ -73,13 +76,60 @@ var ReolinkDevices = []string{ReolinkCamera, ReolinkPerson, ReolinkVehicle, Reol
 // camera's HTTP API has no push, and a second is quick enough for a visitor.
 var reolinkPoll = time.Second
 
-// reolinkChannel is the camera's channel: 0 for a camera on its own.
+// reolinkChannel is the connection's own camera's channel: 0 for a camera
+// on its own.
 func reolinkChannel(cred Credential) int {
 	n, err := strconv.Atoi(strings.TrimSpace(cred["channel"]))
 	if err != nil || n < 0 || n > 255 {
 		return 0
 	}
 	return n
+}
+
+// reolinkDevice reads a device such as person@1: what the camera on the
+// hub's channel 1 detects (#1333). A device with no channel is the
+// connection's own camera's, as before there were more. It returns the
+// connection for that channel and the device without it.
+func reolinkDevice(cred Credential, device string) (Credential, string) {
+	name, ch, ok := strings.Cut(device, "@")
+	if !ok {
+		return cred, device
+	}
+	n, err := strconv.Atoi(ch)
+	if err != nil || n < 0 || n > 255 || n == reolinkChannel(cred) {
+		return cred, name
+	}
+	out := maps.Clone(cred)
+	out["channel"] = strconv.Itoa(n)
+	// A reolink-cli camera name is the connection's own camera.
+	delete(out, "talk_camera")
+	return out, name
+}
+
+// reolinkHub is a connection to a Home Hub or NVR: its cameras have a
+// channel there.
+func reolinkHub(cred Credential) bool { return strings.TrimSpace(cred["channel"]) != "" }
+
+// reolinkCam is one camera on a hub, from its channel status.
+type reolinkCam struct {
+	Channel int    `json:"channel"`
+	Name    string `json:"name"`
+	Online  int    `json:"online"`
+}
+
+// reolinkCams are the cameras paired to a hub, online or not. A camera on
+// its own, or a hub that doesn't say, has none.
+func reolinkCams(ctx context.Context, c *http.Client, cred Credential) []reolinkCam {
+	if !reolinkHub(cred) {
+		return nil
+	}
+	var v struct {
+		Status []reolinkCam `json:"status"`
+	}
+	if err := reolinkCmd(ctx, c, cred, "GetChannelstatus", map[string]any{}, &v); err != nil {
+		return nil
+	}
+	return v.Status
 }
 
 func reolinkBase(cred Credential) (string, error) {
@@ -473,10 +523,49 @@ func reolinkStates(ctx context.Context, c *http.Client, cred Credential) (map[st
 
 // reolinkWatch tells onChange of each change to the devices named, asking
 // the camera every reolinkPoll, until ctx ends or the camera can't be
-// reached; the caller connects again.
+// reached; the caller connects again. Devices on a hub's other channels,
+// such as person@1, are asked about with the same sign-in (#1333). A
+// camera that doesn't answer, such as one asleep, keeps its last states
+// while the others go on; only all of them failing ends the watch.
 func reolinkWatch(ctx context.Context, c *http.Client, cred Credential, devices []string, onChange func(DeviceChange)) error {
-	last, err := reolinkStates(ctx, c, cred)
-	if err != nil {
+	type watched struct{ id, device string }
+	channels := map[int]Credential{}
+	byChannel := map[int][]watched{}
+	for _, id := range devices {
+		cc, device := reolinkDevice(cred, id)
+		n := reolinkChannel(cc)
+		channels[n] = cc
+		byChannel[n] = append(byChannel[n], watched{id, device})
+	}
+	last := map[int]map[string]string{}
+	poll := func() error {
+		var first error
+		ok := false
+		for n, cc := range channels {
+			now, err := reolinkStates(ctx, c, cc)
+			if err != nil {
+				if first == nil {
+					first = err
+				}
+				continue
+			}
+			ok = true
+			if before, seen := last[n]; seen {
+				for _, w := range byChannel[n] {
+					from, to := before[w.device], now[w.device]
+					if to != "" && from != "" && from != to {
+						onChange(DeviceChange{Device: w.id, From: from, To: to, At: time.Now()})
+					}
+				}
+			}
+			last[n] = now
+		}
+		if !ok && first != nil {
+			return first
+		}
+		return nil
+	}
+	if err := poll(); err != nil {
 		return err
 	}
 	tick := time.NewTicker(reolinkPoll)
@@ -487,17 +576,9 @@ func reolinkWatch(ctx context.Context, c *http.Client, cred Credential, devices 
 			return nil
 		case <-tick.C:
 		}
-		now, err := reolinkStates(ctx, c, cred)
-		if err != nil {
+		if err := poll(); err != nil {
 			return err
 		}
-		for _, d := range devices {
-			from, to := last[d], now[d]
-			if to != "" && from != "" && from != to {
-				onChange(DeviceChange{Device: d, From: from, To: to, At: time.Now()})
-			}
-		}
-		last = now
 	}
 }
 
@@ -549,23 +630,50 @@ func reolinkSnapshot(ctx context.Context, c *http.Client, cred Credential) ([]by
 }
 
 // reolinkDeviceList is a camera's devices for automations to pick from: the
-// camera itself, and each detection it supports.
+// camera itself, and each detection it supports. A hub has each camera
+// paired to it, by its name in the Reolink app, and those on other channels
+// than the connection's own have it in their device, such as camera@1
+// (#1333).
 func reolinkDeviceList(ctx context.Context, c *http.Client, cred Credential) ([]Device, error) {
-	states, err := reolinkStates(ctx, c, cred)
-	if err != nil {
-		return nil, err
+	own := reolinkChannel(cred)
+	cams := reolinkCams(ctx, c, cred)
+	if !slices.ContainsFunc(cams, func(cam reolinkCam) bool { return cam.Channel == own }) {
+		name, _, _ := reolinkInfo(ctx, c, cred)
+		cams = append([]reolinkCam{{Channel: own, Name: name, Online: 1}}, cams...)
 	}
-	name, _, _ := reolinkInfo(ctx, c, cred)
+	var out []Device
+	for _, cam := range cams {
+		if cam.Online == 0 && cam.Channel != own {
+			continue
+		}
+		cc, suffix := cred, ""
+		if cam.Channel != own {
+			cc, _ = reolinkDevice(cred, "camera@"+strconv.Itoa(cam.Channel))
+			suffix = "@" + strconv.Itoa(cam.Channel)
+		}
+		states, err := reolinkStates(ctx, c, cc)
+		if err != nil {
+			if cam.Channel == own {
+				return nil, err
+			}
+			continue
+		}
+		out = append(out, reolinkCamDevices(cam.Name, suffix, states)...)
+	}
+	return out, nil
+}
+
+func reolinkCamDevices(name, suffix string, states map[string]string) []Device {
 	if name == "" {
 		name = "Reolink camera"
 	}
 	labels := map[string]string{ReolinkPerson: "person", ReolinkVehicle: "vehicle", ReolinkAnimal: "animal",
 		ReolinkMotion: "motion", ReolinkDoorbell: "doorbell button"}
-	out := []Device{{Connector: "reolink", Device: ReolinkCamera, Name: name, Kind: KindCamera, State: "on"}}
+	out := []Device{{Connector: "reolink", Device: ReolinkCamera + suffix, Name: name, Kind: KindCamera, State: "on"}}
 	for _, d := range ReolinkDevices[1:] {
 		if st, ok := states[d]; ok {
-			out = append(out, Device{Connector: "reolink", Device: d, Name: name + " " + labels[d], Kind: KindSensor, State: st})
+			out = append(out, Device{Connector: "reolink", Device: d + suffix, Name: name + " " + labels[d], Kind: KindSensor, State: st})
 		}
 	}
-	return out, nil
+	return out
 }

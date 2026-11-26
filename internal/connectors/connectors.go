@@ -504,7 +504,8 @@ func (m *Manager) ServiceName(id string) string {
 }
 
 // CameraPicture is a connected service's camera's picture now (#667): its
-// bytes and type. Home Assistant is the only service with cameras so far.
+// bytes and type: a Home Assistant camera, or a Reolink one, such as
+// camera@1 on a hub's channel 1 (#1333).
 func (m *Manager) CameraPicture(ctx context.Context, service, device string) ([]byte, string, error) {
 	s, err := m.service(service)
 	if err != nil {
@@ -520,7 +521,8 @@ func (m *Manager) CameraPicture(ctx context.Context, service, device string) ([]
 	var data []byte
 	var mime string
 	if service == "reolink" {
-		data, mime, err = reolinkSnapshot(ctx, m.client, cred)
+		cam, _ := reolinkDevice(cred, device)
+		data, mime, err = reolinkSnapshot(ctx, m.client, cam)
 	} else {
 		data, mime, err = haCameraPicture(ctx, m.client, cred, device)
 	}

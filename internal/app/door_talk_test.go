@@ -21,7 +21,7 @@ type visitDoor struct {
 	visitor int // how many things the visitor says
 }
 
-func (d *visitDoor) Listen(context.Context, string) (*connectors.Hearing, error) {
+func (d *visitDoor) Listen(context.Context, string, string) (*connectors.Hearing, error) {
 	go func() {
 		for i := 0; i < d.visitor; i++ {
 			if i > 0 {
@@ -51,7 +51,7 @@ func (d *visitDoor) send(level int16, n int) {
 	}
 }
 
-func (d *visitDoor) Talk(_ context.Context, _ string, samples []int16, _ int) error {
+func (d *visitDoor) Talk(_ context.Context, _, _ string, samples []int16, _ int) error {
 	d.spoke <- struct{}{}
 	return nil
 }
@@ -283,7 +283,7 @@ type chimeCounter struct {
 	order []string
 }
 
-func (c *chimeCounter) Talk(ctx context.Context, service string, samples []int16, rate int) error {
+func (c *chimeCounter) Talk(ctx context.Context, service, device string, samples []int16, rate int) error {
 	c.mu.Lock()
 	if len(samples) == len(voice.ThinkingSound(rate)) {
 		c.order = append(c.order, "chime")
@@ -293,7 +293,7 @@ func (c *chimeCounter) Talk(ctx context.Context, service string, samples []int16
 	}
 	c.order = append(c.order, "words")
 	c.mu.Unlock()
-	return c.door.Talk(ctx, service, samples, rate)
+	return c.door.Talk(ctx, service, device, samples, rate)
 }
 
 // While the visitor waits for a slow answer, a soft chime plays, and stops
@@ -440,7 +440,7 @@ func TestDoorWaitsOutAnUnfinishedPause(t *testing.T) {
 				}
 			}
 		}()
-		h, _ := d.Listen(context.Background(), "")
+		h, _ := d.Listen(context.Background(), "", "")
 		h.Audio = d.audio
 		v := &doorVisit{parts: voice.Parts{Judge: judge}, wait: 10 * time.Second, longest: 30 * time.Second}
 		heard, err := v.hear(context.Background(), h, v.wait)

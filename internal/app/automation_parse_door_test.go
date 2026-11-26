@@ -81,3 +81,16 @@ func TestModelRequestDevicesAndName(t *testing.T) {
 		t.Fatalf("note %q", n)
 	}
 }
+
+// On a hub with a second camera, which sorts first by its name, the
+// doorbell still looks and speaks through its own camera (#1333).
+func TestDoorRequestUsesTheDoorbellsOwnCamera(t *testing.T) {
+	hub := append([]connectors.Device{
+		{Connector: "reolink", Device: "camera@4", Name: "Driveway 360", Kind: connectors.KindCamera},
+		{Connector: "reolink", Device: "person@4", Name: "Driveway 360 person", Kind: "sensor"},
+	}, frontDoor...)
+	read, ok := doorRequest("When someone rings the doorbell, greet the visitor through the doorbell and tell me who is there.", hub, eventSchedule("UTC"), "en")
+	if !ok || len(read.Cameras) != 1 || read.Cameras[0].Device != "camera" || read.Say == nil || read.Say.Device != "camera" {
+		t.Fatalf("cameras %+v, say %+v", read.Cameras, read.Say)
+	}
+}

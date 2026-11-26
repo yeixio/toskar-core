@@ -43,3 +43,19 @@ describe('templates', () => {
     expect(price.notification).toEqual({ mode: 'condition', condition: { kind: 'threshold', op: 'below', value: 1299.99, currency: 'EUR' } })
   })
 })
+
+// On a hub with a second camera, Answer the door looks and speaks through
+// the doorbell's own camera, even when the other sorts first (#1333).
+describe('a hub with two cameras', () => {
+  it('answers the door through the doorbell', () => {
+    const devices = [
+      { connector: 'reolink', device: 'camera@4', name: 'Driveway 360', kind: 'camera', state: 'on' },
+      { connector: 'reolink', device: 'camera', name: 'Front Door', kind: 'camera', state: 'on' },
+      { connector: 'reolink', device: 'person@4', name: 'Driveway 360 person', kind: 'sensor', state: 'off' },
+      { connector: 'reolink', device: 'doorbell', name: 'Front Door doorbell button', kind: 'sensor', state: 'off' },
+    ] as const
+    const door = buildIdea(idea('door'), ideaDefaults('door'), zone, readNumber, [...devices])
+    expect(door.cameras).toEqual([{ connector: 'reolink', device: 'camera' }])
+    expect(door.say).toMatchObject({ connector: 'reolink', device: 'camera' })
+  })
+})

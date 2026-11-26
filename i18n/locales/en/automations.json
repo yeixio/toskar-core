@@ -449,6 +449,7 @@
       "close_cover": "Close"
     },
     "sayVoice": "Voice",
+    "sayThrough": "Speak through",
     "sayVoiceAutomatic": "The language's voice from Settings",
     "sayVoiceKitten": "Kitten",
     "sayListen": "Talk with the visitor",

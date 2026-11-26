@@ -56,7 +56,7 @@ func (v *doorVisit) thinking(ctx context.Context) (stop func()) {
 			}
 			// Played whole, even when stopped meanwhile: a cut-off chime
 			// sounds like a fault.
-			if err := v.talk.Talk(context.WithoutCancel(ctx), v.automation.Say.Connector, chime, connectors.ReolinkTalkRate); err != nil {
+			if err := v.talk.Talk(context.WithoutCancel(ctx), v.automation.Say.Connector, v.automation.Say.Device, chime, connectors.ReolinkTalkRate); err != nil {
 				return
 			}
 			wait.Reset(every)
@@ -86,7 +86,7 @@ func (v *doorVisit) quiet() bool {
 
 // doorEar hears a camera's microphone: connectors.Manager.
 type doorEar interface {
-	Listen(ctx context.Context, service string) (*connectors.Hearing, error)
+	Listen(ctx context.Context, service, device string) (*connectors.Hearing, error)
 }
 
 // doorLine is one thing said in a visit.
@@ -144,7 +144,7 @@ func (v *doorVisit) run(ctx context.Context, greeting string) ([]doorLine, error
 	connector := v.automation.Say.Connector
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
-	h, err := v.ear.Listen(ctx, connector)
+	h, err := v.ear.Listen(ctx, connector, v.automation.Say.Device)
 	if err != nil {
 		return []doorLine{{Text: greeting}}, err
 	}

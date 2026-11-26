@@ -27,7 +27,7 @@ type fakeDoor struct {
 	err     error
 }
 
-func (d *fakeDoor) Talk(_ context.Context, service string, samples []int16, rate int) error {
+func (d *fakeDoor) Talk(_ context.Context, service, _ string, samples []int16, rate int) error {
 	d.service, d.samples, d.rate = service, len(samples), rate
 	return d.err
 }

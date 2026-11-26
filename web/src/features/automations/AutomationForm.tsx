@@ -97,6 +97,8 @@ export function AutomationForm({ profiles, models, tools, others = [], initial, 
   const [quietFrom, setQuietFrom] = useState(initial?.say?.quiet_from || '22:00')
   const [quietTo, setQuietTo] = useState(initial?.say?.quiet_to || '07:00')
   const [sayVoice, setSayVoice] = useState(initial?.say?.voice || '')
+  // The camera it speaks through, when a hub has more than one (#1333).
+  const [sayDevice, setSayDevice] = useState(initial?.say?.device || '')
   // Talks with the visitor after the first words, and notifies with the visit (#667).
   const [listen, setListen] = useState(Boolean(initial?.say?.listen))
   const [thinkingSound, setThinkingSound] = useState(!initial?.say?.no_thinking_sound)
@@ -135,7 +137,10 @@ export function AutomationForm({ profiles, models, tools, others = [], initial, 
   }, [])
   const cameras = devices.filter((d) => d.kind === 'camera')
   const watchable = devices.filter((d) => d.kind !== 'camera')
-  const speaker = devices.some((d) => d.connector === 'reolink' && d.kind === 'camera')
+  const speakers = cameras.filter((d) => d.connector === 'reolink')
+  const speaker = speakers.length > 0
+  // Unless chosen, it speaks through the Reolink camera it looks at.
+  const speakingThrough = sayDevice || cameraIDs.find((id) => speakers.some((d) => d.device === id)) || speakers[0]?.device || 'camera'
   // Also save each result as a file in a folder (#204).
   const [saving, setSaving] = useState(Boolean(initial?.save_folder))
   const [saveFolder, setSaveFolder] = useState(initial?.save_folder || '~/Documents/Toskar')
@@ -165,6 +170,7 @@ export function AutomationForm({ profiles, models, tools, others = [], initial, 
     if (parsed.cameras?.length) setCameraIDs(parsed.cameras.map((c) => c.device))
     if (parsed.say) {
       setSaying(true)
+      setSayDevice(parsed.say.device || '')
       setListen(Boolean(parsed.say.listen))
       setThinkingSound(!parsed.say.no_thinking_sound)
     }
@@ -281,7 +287,7 @@ export function AutomationForm({ profiles, models, tools, others = [], initial, 
       actions: actions.length > 0 || initial?.actions?.length ? actions : undefined,
       // An edit that stops speaking sends one with no connector.
       say: saying
-        ? { connector: 'reolink', device: 'camera', ...(quiet ? { quiet_from: quietFrom, quiet_to: quietTo } : {}), ...(sayVoice ? { voice: sayVoice } : {}), ...(listen ? { listen: true } : {}), ...(listen && !thinkingSound ? { no_thinking_sound: true } : {}) }
+        ? { connector: 'reolink', device: speakingThrough, ...(quiet ? { quiet_from: quietFrom, quiet_to: quietTo } : {}), ...(sayVoice ? { voice: sayVoice } : {}), ...(listen ? { listen: true } : {}), ...(listen && !thinkingSound ? { no_thinking_sound: true } : {}) }
         : initial?.say
           ? { connector: '' }
           : undefined,
@@ -589,6 +595,18 @@ export function AutomationForm({ profiles, models, tools, others = [], initial, 
           </label>
           {saying ? (
             <div className="space-y-2 ps-6">
+              {speakers.length > 1 ? (
+                <label className="flex flex-wrap items-center gap-2">
+                  <span className="text-ink-muted">{t('form.sayThrough')}</span>
+                  <select className="field min-w-0 flex-1" value={speakingThrough} onChange={(e) => setSayDevice(e.target.value)}>
+                    {speakers.map((d) => (
+                      <option key={d.device} value={d.device}>
+                        {d.name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              ) : null}
               {doorVoices.length > 0 || sayVoice ? (
                 <label className="flex flex-wrap items-center gap-2">
                   <span className="text-ink-muted">{t('form.sayVoice')}</span>

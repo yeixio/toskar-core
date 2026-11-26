@@ -68,8 +68,8 @@ func (s *Say) Validate() error {
 	if s.Connector != SayReolink {
 		return fmt.Errorf("unsupported speaker connector %q", s.Connector)
 	}
-	if s.Device != "camera" {
-		return fmt.Errorf("a Reolink camera's device is camera, not %q", s.Device)
+	if !ReolinkDevice(s.Device, "camera") {
+		return fmt.Errorf("a Reolink camera's device is camera, or camera@1 for a hub's channel 1, not %q", s.Device)
 	}
 	if s.Voice != "" && !sayVoiceRe.MatchString(s.Voice) {
 		return fmt.Errorf("%q is not a voice name", s.Voice)
