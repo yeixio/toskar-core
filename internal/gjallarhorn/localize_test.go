@@ -97,3 +97,24 @@ func TestTextNoticesStayAsTheyAre(t *testing.T) {
 		t.Fatalf("text notice = %q / %q", got.Title, got.Body)
 	}
 }
+
+// A push reaches one person's phones, so it's written in their own App
+// language, or the install's until they choose one (#1405).
+func TestPushesAreWrittenInTheirPersonsLanguage(t *testing.T) {
+	ctx := context.Background()
+	hub, _ := newHub(t)
+	settings := &memSettings{m: map[string]string{"ui_locale": "de", "ui_locale@sam": "fr"}}
+	hub.SetSettings(settings)
+	n := Notification{Message: modelReady(), PersonID: "sam"}
+	if got := hub.localizedFor(ctx, n); got.lang != "fr" {
+		t.Fatalf("Sam's push is in %q", got.lang)
+	}
+	n.PersonID = "ana"
+	if got := hub.localizedFor(ctx, n); got.lang != "de" {
+		t.Fatalf("Ana's push is in %q, not the install's", got.lang)
+	}
+	n.PersonID = "sam"
+	if got := hub.localized(ctx, n); got.lang != "de" {
+		t.Fatalf("email and webhooks are in %q, not the install's", got.lang)
+	}
+}

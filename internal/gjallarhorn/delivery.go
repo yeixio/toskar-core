@@ -270,6 +270,11 @@ func (h *Hub) send(ctx context.Context, n Notification, channel, destinationID s
 	if !dest.Enabled {
 		return PermanentError{Err: fmt.Errorf("the destination is turned off")}
 	}
+	// A push goes to its person's phones only, so it's in their language;
+	// email, ntfy, and webhooks are the Admin's, in the install's.
+	if dest.Kind == KindApp {
+		return h.sendTo(dctx, dest, h.localizedFor(ctx, n))
+	}
 	return h.sendTo(dctx, dest, h.localized(ctx, n))
 }
 

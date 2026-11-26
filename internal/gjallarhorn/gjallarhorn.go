@@ -209,9 +209,30 @@ func (h *Hub) language(ctx context.Context) string {
 	return locale.Resolve(tag)
 }
 
+// languageOf is person's own App language (#206), or the install's while
+// they haven't chosen one (#1405).
+func (h *Hub) languageOf(ctx context.Context, person string) string {
+	if person != "" && person != auth.OwnerID && h.settings != nil {
+		if tag, ok, err := h.settings.Get(ctx, "ui_locale@"+person); err == nil && ok {
+			return locale.Resolve(tag)
+		}
+	}
+	return h.language(ctx)
+}
+
 // localized is n with its title and body written in the App language.
 func (h *Hub) localized(ctx context.Context, n Notification) Notification {
-	n.lang = h.language(ctx)
+	return h.localizedIn(n, h.language(ctx))
+}
+
+// localizedFor is n written in its person's own App language, for what
+// reaches only them, such as a push to their phones (#1405).
+func (h *Hub) localizedFor(ctx context.Context, n Notification) Notification {
+	return h.localizedIn(n, h.languageOf(ctx, n.PersonID))
+}
+
+func (h *Hub) localizedIn(n Notification, lang string) Notification {
+	n.lang = lang
 	if n.Message != nil {
 		n.Title, n.Body = n.Message.Render(n.lang)
 	}
