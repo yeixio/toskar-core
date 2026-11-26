@@ -680,6 +680,7 @@ func New(opts Options) (*App, error) {
 		Features:           a.Features,
 		SetUpFeature:       a.SetUpFeature,
 		SetSpeechVoice:     a.setSpeechVoice,
+		VoicePersonas:      personaStore{a},
 		InstallKitten:      a.installKitten,
 		RemoveKitten:       a.removeKitten,
 		RouteSecret:        a.routeSecret,
@@ -1072,7 +1073,7 @@ func New(opts Options) (*App, error) {
 	// Speech runs on this computer; models are kept with the runtimes.
 	a.Speech = &speech.Engine{Python: a.python, Dir: filepath.Join(cfg.RuntimesDir, "speech")}
 	a.Speech.Fetching = a.recordDownload
-	a.voiceWorker = &speech.Worker{Engine: a.Speech, Choice: a.chosenVoice}
+	a.voiceWorker = &speech.Worker{Engine: a.Speech, Choice: a.chosenVoice, Persona: a.pickedPersona}
 	a.toolNet = a.newToolNetwork(cfg)
 	a.registerPortable(&speech.TranscribeTool{Engine: a.Speech, Store: a.Artifacts})
 	a.registerPortable(&speech.SynthesizeTool{Engine: a.Speech, Store: a.Artifacts})

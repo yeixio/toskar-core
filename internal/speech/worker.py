@@ -111,7 +111,7 @@ def speak_kokoro(req):
     if k is None:
         k = Kokoro(req["model"], req["voices"], espeak_config=short_espeak())
         kokoro[req["model"]] = k
-    samples, rate = k.create(req["text"], voice=req["voice"], speed=1.0, lang=req["lang"])
+    samples, rate = k.create(req["text"], voice=req["voice"], speed=float(req.get("speed", 1.0)), lang=req["lang"])
     pcm = (np.clip(samples, -1.0, 1.0) * 32767).astype("<i2").tobytes()
     return {"pcm": base64.b64encode(pcm).decode("ascii"), "rate": rate}
 
@@ -124,7 +124,7 @@ def speak_kitten(req):
     if m is None:
         m = KittenTTS2Tiny(req["model"])
         kitten[req["model"]] = m
-    samples = m.generate(req["text"], voice=req["voice"], language=req["lang"])
+    samples = m.generate(req["text"], voice=req["voice"], language=req["lang"], speed=float(req.get("speed", 1.0)))
     pcm = (np.clip(samples, -1.0, 1.0) * 32767).astype("<i2").tobytes()
     return {"pcm": base64.b64encode(pcm).decode("ascii"), "rate": m.sample_rate}
 
@@ -177,9 +177,16 @@ def speak(req):
     if req.get("engine") == "kitten":
         return speak_kitten(req)
     v = voice_for(req)
+    syn = None
+    speed = float(req.get("speed", 1.0))
+    if speed != 1.0:
+        # Piper's length scale is how long each sound lasts: slower is longer.
+        from piper import SynthesisConfig
+
+        syn = SynthesisConfig(length_scale=v.config.length_scale / speed)
     buf = io.BytesIO()
     with wave.open(buf, "wb") as wav:
-        v.synthesize_wav(req["text"], wav)
+        v.synthesize_wav(req["text"], wav, syn_config=syn)
     buf.seek(0)
     with wave.open(buf, "rb") as wav:
         rate = wav.getframerate()

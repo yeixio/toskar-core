@@ -308,5 +308,9 @@
   "DOOR_NOT_ANSWERED": "有人來到門口，但 Toskar 無法回應：{{detail}}",
   "NODE_NOT_FOUND": "沒有已配對的電腦使用這個 ID。",
   "FEATURE_UNKNOWN": "Toskar 不認識這個功能。",
-  "FEATURE_SETUP_FAILED": "部分設定無法開始：{{detail}}"
+  "FEATURE_SETUP_FAILED": "部分設定無法開始：{{detail}}",
+  "PERSONA_NAME_INVALID": "角色名稱為 1 到 40 個字元。",
+  "PERSONA_SPEED_INVALID": "角色的語速為 0.5 倍到 2 倍。",
+  "PERSONA_LIMIT": "最多只能有 {{limit}} 個語音角色。",
+  "PERSONA_NOT_FOUND": "該語音角色已不存在。"
 }

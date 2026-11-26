@@ -54,6 +54,8 @@ Columns:
 | Download models | `download_behavior` | Settings › AI behavior › Download models | Models & AI | Application | Basic | Ask | none | Data, Network |
 | How voice hears you | `voice_hearing` | Settings › Voice | Voice | Application | Basic | Fast | none | Behavioral, Data |
 | Language voice hears | `voice_language` | Settings › Voice | Voice | Application | Basic | Detect each turn's language | none | Behavioral |
+| Voice personas | `voice_personas` | Settings › Voice › Voice personas (Admins) | Voice | Application | Basic | None | Voices installed here | Behavioral |
+| Your voice | `voice_persona` | Settings › Voice › Your voice | Voice | Account (#1319) | Basic | Each language's own voice | Voice personas | Behavioral |
 | Storage limit for models | `model_storage_limit_gb` | Settings › Storage › Storage limit | Models & AI | Application | Advanced | Unlimited | none | Data |
 | Notify when a task finishes | `notify_task_finish` | Settings › Notifications | Notifications | Account (#1391) | Basic | On | none | Behavioral |
 | Notify when a computer goes offline | `notify_peer_offline` | Settings › Notifications | Notifications | Application | Basic | On | Paired computers | Behavioral |

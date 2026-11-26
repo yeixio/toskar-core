@@ -308,5 +308,9 @@
   "DOOR_NOT_ANSWERED": "누군가 현관에 왔지만 Toskar가 응답하지 못했습니다: {{detail}}",
   "NODE_NOT_FOUND": "그 ID를 가진 연결된 컴퓨터가 없습니다.",
   "FEATURE_UNKNOWN": "Toskar가 모르는 기능이에요.",
-  "FEATURE_SETUP_FAILED": "설정 일부를 시작하지 못했어요: {{detail}}"
+  "FEATURE_SETUP_FAILED": "설정 일부를 시작하지 못했어요: {{detail}}",
+  "PERSONA_NAME_INVALID": "페르소나 이름은 1~40자입니다.",
+  "PERSONA_SPEED_INVALID": "페르소나는 0.5배에서 2배 속도로 읽습니다.",
+  "PERSONA_LIMIT": "음성 페르소나는 최대 {{limit}}개까지 만들 수 있습니다.",
+  "PERSONA_NOT_FOUND": "그 음성 페르소나는 더 이상 없습니다."
 }

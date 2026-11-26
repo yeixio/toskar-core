@@ -308,5 +308,9 @@
   "DOOR_NOT_ANSWERED": "Alguém veio à porta e o Toskar não conseguiu responder: {{detail}}",
   "NODE_NOT_FOUND": "Nenhum computador pareado tem esse ID.",
   "FEATURE_UNKNOWN": "O Toskar não conhece esse recurso.",
-  "FEATURE_SETUP_FAILED": "Uma parte da configuração não conseguiu começar: {{detail}}"
+  "FEATURE_SETUP_FAILED": "Uma parte da configuração não conseguiu começar: {{detail}}",
+  "PERSONA_NAME_INVALID": "O nome de uma persona tem de 1 a 40 caracteres.",
+  "PERSONA_SPEED_INVALID": "Uma persona lê de metade a duas vezes mais rápido.",
+  "PERSONA_LIMIT": "Pode haver no máximo {{limit}} personas de voz.",
+  "PERSONA_NOT_FOUND": "Essa persona de voz não existe mais."
 }

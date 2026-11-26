@@ -149,6 +149,8 @@ import type {
   Project,
   ProjectInput,
   PortalUsage,
+  VoicePersonaInput,
+  VoicePersonas,
 } from '@/types/api'
 import type { Upload } from '@/lib/upload'
 import { positionForMessage } from '@/lib/deviceLocation'
@@ -1394,14 +1396,31 @@ export const api = {
   /** Remove Kitten TTS 2 mini. */
   removeKitten: () => request<VoiceSettings>('/api/v1/speech/kitten', { method: 'DELETE' }),
 
+  /** The voice personas, and the one the caller picked (#1319). */
+  getVoicePersonas: () => request<VoicePersonas>('/api/v1/voice/personas'),
+
+  /** Pick the persona the caller is read aloud in; empty is each language's own voice. */
+  pickVoicePersona: (id: string) => request<VoicePersonas>('/api/v1/voice/persona', { method: 'PUT', body: JSON.stringify({ id }) }),
+
+  /** Make a voice persona. Admins only. */
+  createVoicePersona: (p: VoicePersonaInput) => request<VoicePersonas>('/api/v1/voice/personas', { method: 'POST', body: JSON.stringify(p) }),
+
+  /** Change a voice persona. Admins only. */
+  updateVoicePersona: (id: string, p: VoicePersonaInput) =>
+    request<VoicePersonas>(`/api/v1/voice/personas/${encodeURIComponent(id)}`, { method: 'PUT', body: JSON.stringify(p) }),
+
+  /** Delete a voice persona. Admins only. */
+  deleteVoicePersona: (id: string) => request<VoicePersonas>(`/api/v1/voice/personas/${encodeURIComponent(id)}`, { method: 'DELETE' }),
+
   /** A little text read aloud in the computer's voice, as a WAV file, to preview a voice (#795). */
-  previewVoice: async (text: string, voice: string, language: string): Promise<Blob> => {
+  /** speed is how fast to read, 0.5 to 2, such as to preview a voice persona (#1319); omitted is normal. */
+  previewVoice: async (text: string, voice: string, language: string, speed?: number): Promise<Blob> => {
     let res: Response
     try {
       res = await fetch(`${getApiBase()}/api/v1/speech/say`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', [CLIENT_CONTRACT_HEADER]: CLIENT_CONTRACT, ...authHeaders() },
-        body: JSON.stringify({ text, voice, language }),
+        body: JSON.stringify({ text, voice, language, ...(speed ? { speed } : {}) }),
       })
     } catch (err) {
       throw unreachable(err)

@@ -2731,6 +2731,14 @@
         },
         {
           "type": "paragraph",
+          "text": "Voice personas are voices with a name, such as Greta for German at a calm speed. An Admin makes them under Voice, choosing New persona, a name, a language, one of that language's voices, and a speed from half to twice as fast. Preview plays a sentence first."
+        },
+        {
+          "type": "paragraph",
+          "text": "Everyone picks their own persona under Voice, in Your voice. It reads your answers in voice mode, read aloud, on your phone, in the car, and at the door for your automations. In another language, that language's voice reads at your persona's speed. If its voice is removed, the language's own voice reads instead, and Voice says so."
+        },
+        {
+          "type": "paragraph",
           "text": "Voice also says what's still missing. Voice mode needs a chat model to answer with, and the doorbell needs a model that can see pictures. When none is installed, Voice names the one that fits this computer, with its size, and Install downloads it. An automation that looks at a camera offers the same when you choose the camera."
         },
         {

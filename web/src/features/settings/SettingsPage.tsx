@@ -30,7 +30,9 @@ import { YggdrasilMark } from '@/components/ui/YggdrasilMark'
 import { formatGigabytes } from '@/i18n/format'
 import { AutomationDigestSetting } from './AutomationDigest'
 import { ShownError, shownOr, type Shown } from '@/components/ui/ShownError'
-import { VoiceSettings, byLanguageName, languageName } from './VoiceSettings'
+import { VoiceSettings } from './VoiceSettings'
+import { byLanguageName, languageName } from './languageNames'
+import { VoicePersonas } from './VoicePersonas'
 import { answerLanguages } from '@/i18n/answerLanguages'
 import { LoadError } from '@/components/ui/LoadError'
 import { defaultProfileIdOf, profileName } from '@/features/profiles/profilePresentation'
@@ -481,7 +483,12 @@ export function SettingsPage({ section }: { section?: SettingsSection } = {}) {
             ) : null}
 
             {show('voice') && admin ? <VoiceSettings /> : null}
-            {show('voice') && !admin ? <p className="text-sm text-ink-muted">{t('voice.memberNote')}</p> : null}
+            {show('voice') && !admin ? (
+              <section className="card space-y-4">
+                <VoicePersonas />
+                <p className="text-sm text-ink-muted">{t('voice.memberNote')}</p>
+              </section>
+            ) : null}
             {show('voice') && settings ? (
               <section className="card space-y-4">
                 <div className="flex items-start justify-between gap-4">

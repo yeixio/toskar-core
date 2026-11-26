@@ -308,5 +308,9 @@
   "DOOR_NOT_ANSWERED": "誰かが玄関に来ましたが、Toskar は応答できませんでした: {{detail}}",
   "NODE_NOT_FOUND": "そのIDのペアリング済みコンピュータはありません。",
   "FEATURE_UNKNOWN": "Toskar はその機能を知りません。",
-  "FEATURE_SETUP_FAILED": "セットアップの一部を開始できませんでした: {{detail}}"
+  "FEATURE_SETUP_FAILED": "セットアップの一部を開始できませんでした: {{detail}}",
+  "PERSONA_NAME_INVALID": "ペルソナの名前は1〜40文字です。",
+  "PERSONA_SPEED_INVALID": "ペルソナの速さは0.5倍から2倍までです。",
+  "PERSONA_LIMIT": "音声ペルソナは最大 {{limit}} 個までです。",
+  "PERSONA_NOT_FOUND": "その音声ペルソナはもうありません。"
 }

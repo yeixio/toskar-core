@@ -122,9 +122,16 @@ func (s *Server) handleSay(w http.ResponseWriter, r *http.Request) {
 		Voice string `json:"voice"`
 		// Language is the text's, such as en or pt-BR; empty detects it.
 		Language string `json:"language"`
+		// Speed is how fast to read, 0.5 to 2, such as to preview a voice
+		// persona (#1319); 0 is the caller's persona's, or normal.
+		Speed float64 `json:"speed"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		writeErr(w, http.StatusBadRequest, "INVALID_JSON", "invalid body", nil)
+		return
+	}
+	if body.Speed != 0 && !speech.ValidSpeed(body.Speed) {
+		writeErr(w, http.StatusBadRequest, "BAD_REQUEST", "speed is from 0.5 to 2", nil)
 		return
 	}
 	text := strings.TrimSpace(body.Text)
@@ -141,7 +148,7 @@ func (s *Server) handleSay(w http.ResponseWriter, r *http.Request) {
 		writeErrFrom(w, http.StatusServiceUnavailable, "SPEECH_UNAVAILABLE", err)
 		return
 	}
-	samples, err := parts.Speaker.Speak(r.Context(), text, body.Voice, body.Language)
+	samples, err := parts.Speaker.Speak(speech.WithSpeed(r.Context(), body.Speed), text, body.Voice, body.Language)
 	if err != nil {
 		if r.Context().Err() != nil {
 			return

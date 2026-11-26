@@ -308,5 +308,9 @@
   "DOOR_NOT_ANSWERED": "Alguien vino a la puerta y Toskar no pudo responder: {{detail}}",
   "NODE_NOT_FOUND": "Ningún equipo vinculado tiene ese ID.",
   "FEATURE_UNKNOWN": "Toskar no conoce esa función.",
-  "FEATURE_SETUP_FAILED": "Una parte de la configuración no pudo empezar: {{detail}}"
+  "FEATURE_SETUP_FAILED": "Una parte de la configuración no pudo empezar: {{detail}}",
+  "PERSONA_NAME_INVALID": "El nombre de un personaje tiene de 1 a 40 caracteres.",
+  "PERSONA_SPEED_INVALID": "Un personaje lee entre la mitad y el doble de rápido.",
+  "PERSONA_LIMIT": "Puede haber como máximo {{limit}} personajes de voz.",
+  "PERSONA_NOT_FOUND": "Ese personaje de voz ya no está."
 }

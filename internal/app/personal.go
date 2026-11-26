@@ -54,6 +54,8 @@ var personalKeys = map[string]bool{
 	"thinking_sound": true,
 	// Whether a person's finished automations post to the desktop (#1391).
 	"notify_task_finish": true,
+	// The voice persona a person reads aloud in (#1319).
+	settingVoicePersona: true,
 }
 
 // personalSettingKey is where ctx's person keeps key.

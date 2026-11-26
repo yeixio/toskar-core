@@ -456,7 +456,28 @@
     "language": "Language voice hears",
     "languageHint": "Detects the language of each turn and answers in it. Choose one language if everyone here always speaks it: Toskar hears it more reliably and doesn't mistake a short word for another language.",
     "languageDetect": "Detect each turn's language",
-    "memberNote": "The voices Toskar speaks in and how it hears you are set by an Admin."
+    "memberNote": "The voices Toskar speaks in and how it hears you are set by an Admin.",
+    "personas": {
+      "title": "Voice personas",
+      "description": "Voices made from this computer's voices, each with a name, a language and a speed. Everyone picks their own; Admins make them.",
+      "yours": "Your voice",
+      "yoursHint": "Reads your answers aloud in voice mode, Read aloud, the phone, the car and the TV. In another language, that language's voice reads at your persona's speed.",
+      "none": "Each language's own voice",
+      "memberEmpty": "There are no personas yet. An Admin can make them in Settings › Voice.",
+      "add": "New persona",
+      "edit": "Edit",
+      "delete": "Delete",
+      "deleteConfirm": "Delete {{name}}",
+      "keep": "Keep",
+      "name": "Name",
+      "language": "Language",
+      "voice": "Voice",
+      "speed": "Speed",
+      "save": "Save",
+      "cancel": "Cancel",
+      "summary": "{{voice}} · {{language}} · {{speed}}",
+      "readsWith": "Its voice isn't installed here now, so {{voice}} reads instead."
+    }
   },
   "sections": {
     "account": "Account",

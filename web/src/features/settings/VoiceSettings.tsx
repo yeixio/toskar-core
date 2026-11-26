@@ -3,27 +3,15 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { api } from '@/lib/api'
 import { ShownError, shownOr } from '@/components/ui/ShownError'
-import { formatLocale } from '@/i18n/format'
 import type { VoiceChoice, VoiceOption, VoiceSettings as Settings } from '@/types/api'
 import { voiceSample } from './voiceSamples'
 import { ModelNeeds } from './ModelNeeds'
 import { answerLanguages } from '@/i18n/answerLanguages'
+import { byLanguageName, languageName } from './languageNames'
+import { VoicePersonas } from './VoicePersonas'
+
 
 const queryKey = ['speech-voices']
-
-export function languageName(tag: string): string {
-  try {
-    return new Intl.DisplayNames([formatLocale()], { type: 'language' }).of(tag) ?? tag
-  } catch {
-    return tag
-  }
-}
-
-/** Language tags in the order of their names as shown, not their codes (#1342). */
-export function byLanguageName(tags: string[]): string[] {
-  const collator = new Intl.Collator(formatLocale())
-  return [...tags].sort((a, b) => collator.compare(languageName(a), languageName(b)))
-}
 
 /** The answer languages nothing here reads aloud, such as Japanese (#1342). */
 export function unvoicedLanguages(voiced: string[]): string[] {
@@ -142,6 +130,8 @@ export function VoiceSettings() {
       {error ? <ShownError {...shownOr(error, t('voice.failed'))} role="alert" /> : null}
 
       <ModelNeeds needs={data.needs ?? []} />
+
+      <VoicePersonas languages={data.languages} />
 
       <div className="space-y-2">
         <p className="text-sm font-medium text-ink">{t('voice.languages')}</p>

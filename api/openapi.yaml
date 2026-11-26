@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Toskar Control Plane API
-  version: "1.128"
+  version: "1.129"
   description: >-
     Local AI control plane API for Toskar, its OpenAI-compatible routes, and its MCP server.
     On the default loopback bind no key is needed. When the daemon listens on any other address,
@@ -4988,6 +4988,135 @@ paths:
                 $ref: "#/components/schemas/SpokenText"
         "400":
           description: Invalid text or voice, or reading failed
+  /api/v1/voice/personas:
+    get:
+      summary: The voice personas, and the one you picked (#1319)
+      description: "Voices an Admin made from this computer's voices, each with a name, a language and a speed. A persona reads its own language in its voice and every language at its speed, in voice mode, POST /api/v1/speech/say, and at the door for an automation of yours. reads is false when its voice can't read here now, such as a Kitten voice after Kitten was removed; reads_with is then the voice that reads instead (contract 1.129)."
+      operationId: voicePersonas
+      tags: [Settings]
+      responses:
+        "200":
+          description: The personas
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VoicePersonas"
+    post:
+      summary: Make a voice persona (#1319)
+      description: "voice is one of language's voices from GET /api/v1/speech/voices; speed is 0.5 to 2, and 0 or omitted is 1. Admins only (contract 1.129)."
+      operationId: createVoicePersona
+      tags: [Settings]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VoicePersona"
+      responses:
+        "200":
+          description: The personas
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VoicePersonas"
+        "400":
+          description: PERSONA_NAME_INVALID, PERSONA_SPEED_INVALID, PERSONA_LIMIT, or INVALID_VOICE
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: ROLE_REQUIRED
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/v1/voice/personas/{id}:
+    put:
+      summary: Change a voice persona (#1319)
+      description: "Admins only (contract 1.129)."
+      operationId: updateVoicePersona
+      tags: [Settings]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VoicePersona"
+      responses:
+        "200":
+          description: The personas
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VoicePersonas"
+        "400":
+          description: PERSONA_NAME_INVALID, PERSONA_SPEED_INVALID, PERSONA_LIMIT, or INVALID_VOICE
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: PERSONA_NOT_FOUND
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    delete:
+      summary: Delete a voice persona (#1319)
+      description: "Whoever picked it goes back to each language's own voice. Admins only (contract 1.129)."
+      operationId: deleteVoicePersona
+      tags: [Settings]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: {type: string}
+      responses:
+        "200":
+          description: The personas
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VoicePersonas"
+        "404":
+          description: PERSONA_NOT_FOUND
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/v1/voice/persona:
+    put:
+      summary: Pick the voice persona you're read aloud in (#1319)
+      description: "Your own choice, whatever your role; an empty id goes back to each language's own voice (contract 1.129)."
+      operationId: pickVoicePersona
+      tags: [Settings]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id: {type: string}
+      responses:
+        "200":
+          description: The personas
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VoicePersonas"
+        "404":
+          description: PERSONA_NOT_FOUND
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
   /api/v1/voice/realtime:
     get:
       summary: Live voice mode, over a WebSocket (#795)
@@ -5029,6 +5158,11 @@ paths:
                   type: string
                 language:
                   type: string
+                speed:
+                  type: number
+                  minimum: 0.5
+                  maximum: 2
+                  description: How fast to read, such as to preview a voice persona; omitted or 0 is the caller's persona's speed, or normal (#1319, contract 1.129)
       responses:
         "200":
           description: The text read aloud
@@ -8480,6 +8614,25 @@ components:
         files:
           type: integer
           description: Camera pictures removed with them
+    VoicePersona:
+      type: object
+      properties:
+        id: {type: string}
+        name: {type: string, maxLength: 40}
+        language: {type: string, description: A language code, such as de}
+        voice: {type: string}
+        speed: {type: number, minimum: 0.5, maximum: 2}
+        reads: {type: boolean, description: Whether its voice can read here now; only in answers}
+        reads_with: {type: string, description: The voice that reads in its place when reads is false}
+    VoicePersonas:
+      type: object
+      required: [personas, picked]
+      properties:
+        personas:
+          type: array
+          items:
+            $ref: "#/components/schemas/VoicePersona"
+        picked: {type: string, description: The persona you picked, empty for none}
     VoiceSettings:
       type: object
       description: The Voice settings (#1304, contract 1.112)

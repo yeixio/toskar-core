@@ -308,5 +308,9 @@
   "DOOR_NOT_ANSWERED": "Jemand war an der Tür, und Toskar konnte nicht antworten: {{detail}}",
   "NODE_NOT_FOUND": "Kein gekoppelter Computer hat diese ID.",
   "FEATURE_UNKNOWN": "Diese Funktion kennt Toskar nicht.",
-  "FEATURE_SETUP_FAILED": "Ein Teil der Einrichtung konnte nicht starten: {{detail}}"
+  "FEATURE_SETUP_FAILED": "Ein Teil der Einrichtung konnte nicht starten: {{detail}}",
+  "PERSONA_NAME_INVALID": "Der Name einer Persona hat 1 bis 40 Zeichen.",
+  "PERSONA_SPEED_INVALID": "Eine Persona liest halb bis doppelt so schnell.",
+  "PERSONA_LIMIT": "Es kann höchstens {{limit}} Stimmpersonas geben.",
+  "PERSONA_NOT_FOUND": "Diese Stimmpersona gibt es nicht mehr."
 }

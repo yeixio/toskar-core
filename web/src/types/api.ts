@@ -1986,6 +1986,28 @@ export interface VoiceChoice {
   voices: VoiceOption[]
 }
 
+/** A voice persona as it's made or changed (#1319). */
+export interface VoicePersonaInput {
+  name: string
+  language: string
+  voice: string
+  /** 0.5 to 2; 1 is normal. */
+  speed: number
+}
+
+/** A voice persona an Admin made (#1319, contract 1.129). reads is false when its voice can't read here now; reads_with then reads instead. */
+export interface VoicePersona extends VoicePersonaInput {
+  id: string
+  reads: boolean
+  reads_with?: string
+}
+
+/** The voice personas and the one the caller picked, empty for none. */
+export interface VoicePersonas {
+  personas: VoicePersona[]
+  picked: string
+}
+
 /** The Voice settings (#1304, contract 1.112). Admins only. */
 export interface VoiceSettings {
   kitten: KittenStatus
