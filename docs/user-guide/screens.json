@@ -1226,6 +1226,268 @@
       "id": "privacy-what-left",
       "path": "/settings/privacy",
       "readyText": "Your disk is encrypted with FileVault"
+    },
+    {
+      "id": "computers-page",
+      "path": "/settings/computers",
+      "readyText": "Studio"
+    },
+    {
+      "id": "computers-approve",
+      "path": "/settings/computers",
+      "readyText": "Studio",
+      "api": {
+        "/api/v1/nodes/pairing/pending": [
+          {
+            "id": "pair-1",
+            "remote_node_id": "node-den",
+            "remote_name": "Den PC",
+            "remote_address": "192.168.1.31:7332",
+            "code": "318 604",
+            "state": "waiting",
+            "incoming": true,
+            "created_at": "{{in:-20}}",
+            "expires_at": "{{in:280}}"
+          }
+        ]
+      },
+      "actions": [
+        {
+          "wait": "Incoming requests"
+        }
+      ]
+    },
+    {
+      "id": "computers-join",
+      "path": "/settings/computers",
+      "readyText": "Studio",
+      "actions": [
+        {
+          "click": "Add by command"
+        },
+        {
+          "click": "Make a join command"
+        },
+        {
+          "wait": "Expires in"
+        },
+        {
+          "click": "Install and join"
+        }
+      ]
+    },
+    {
+      "id": "team-roles",
+      "path": "/profiles",
+      "readyText": "Programming",
+      "api": {
+        "/api/v1/profiles": [
+          {
+            "id": "programming",
+            "name": "Programming",
+            "purpose": "coding",
+            "orchestrator_id": "simple",
+            "roles": [
+              {
+                "role": "planner",
+                "model_id": "gemma-4-e4b",
+                "node_id": "local",
+                "required": true
+              },
+              {
+                "role": "worker",
+                "model_id": "qwen-coder-7b",
+                "node_id": "studio",
+                "required": true
+              },
+              {
+                "role": "reviewer",
+                "model_id": "gemma-4-e4b",
+                "node_id": "local",
+                "required": false
+              }
+            ],
+            "tools": [
+              {
+                "tool_id": "internet.search",
+                "policy": "allow"
+              },
+              {
+                "tool_id": "browser.open",
+                "policy": "allow"
+              },
+              {
+                "tool_id": "browser.extract",
+                "policy": "allow"
+              },
+              {
+                "tool_id": "browser.screenshot",
+                "policy": "allow"
+              },
+              {
+                "tool_id": "browser.close",
+                "policy": "allow"
+              },
+              {
+                "tool_id": "browser.click",
+                "policy": "ask"
+              },
+              {
+                "tool_id": "browser.type",
+                "policy": "ask"
+              },
+              {
+                "tool_id": "browser.download",
+                "policy": "ask"
+              },
+              {
+                "tool_id": "places.search",
+                "policy": "allow"
+              },
+              {
+                "tool_id": "places.details",
+                "policy": "allow"
+              },
+              {
+                "tool_id": "maps.route",
+                "policy": "allow"
+              },
+              {
+                "tool_id": "maps.distance",
+                "policy": "allow"
+              },
+              {
+                "tool_id": "internet.open",
+                "policy": "allow"
+              },
+              {
+                "tool_id": "filesystem.search",
+                "policy": "allow"
+              },
+              {
+                "tool_id": "filesystem.read",
+                "policy": "allow"
+              },
+              {
+                "tool_id": "filesystem.write",
+                "policy": "ask"
+              },
+              {
+                "tool_id": "files.create",
+                "policy": "allow"
+              },
+              {
+                "tool_id": "spreadsheet.analyze",
+                "policy": "allow"
+              },
+              {
+                "tool_id": "code.execute",
+                "policy": "ask"
+              },
+              {
+                "tool_id": "speech.transcribe",
+                "policy": "allow"
+              },
+              {
+                "tool_id": "speech.synthesize",
+                "policy": "allow"
+              },
+              {
+                "tool_id": "image.generate",
+                "policy": "allow"
+              },
+              {
+                "tool_id": "video.generate",
+                "policy": "allow"
+              },
+              {
+                "tool_id": "video.extend",
+                "policy": "allow"
+              },
+              {
+                "tool_id": "video.shots",
+                "policy": "ask"
+              },
+              {
+                "tool_id": "image.edit",
+                "policy": "allow"
+              },
+              {
+                "tool_id": "comfyui.run",
+                "policy": "allow"
+              },
+              {
+                "tool_id": "automations.schedule",
+                "policy": "allow"
+              },
+              {
+                "tool_id": "automations.results",
+                "policy": "allow"
+              },
+              {
+                "tool_id": "news.read",
+                "policy": "allow"
+              },
+              {
+                "tool_id": "terminal",
+                "policy": "ask"
+              },
+              {
+                "tool_id": "git.status",
+                "policy": "allow"
+              },
+              {
+                "tool_id": "git.diff",
+                "policy": "allow"
+              },
+              {
+                "tool_id": "git.log",
+                "policy": "allow"
+              },
+              {
+                "tool_id": "git.show",
+                "policy": "allow"
+              },
+              {
+                "tool_id": "git.add",
+                "policy": "ask"
+              },
+              {
+                "tool_id": "git.commit",
+                "policy": "ask"
+              },
+              {
+                "tool_id": "git.push",
+                "policy": "ask-each-time"
+              }
+            ],
+            "node_policy": {
+              "mode": "automatic",
+              "preferred_nodes": [
+                "studio"
+              ]
+            },
+            "orchestration": {
+              "strategy": "team"
+            }
+          }
+        ]
+      },
+      "actions": [
+        {
+          "click": "Edit",
+          "exact": true
+        },
+        {
+          "wait": "Show all roles"
+        },
+        {
+          "click": "Strategy and computers"
+        },
+        {
+          "wait": "Studio"
+        }
+      ]
     }
   ]
 }

@@ -3212,13 +3212,175 @@
       "paragraphs": [
         "Computers discovers other Toskar instances on the local network. Pairing establishes trust between computers; it is separate from enabling LAN access to the OpenAI-compatible API.",
         "While this is the only computer, Settings › Computers explains how to add another in three steps; with more, How to add a computer shows the same. A computer on the same network appears under Available to add. For a server, or a computer you reach over SSH, Add by command makes a one-time command to run there. Remove from team, in a computer's menu, asks first: a removed computer needs a new approval to join again.",
-        "Run on in the composer, and Run chats on in Settings, choose where chats run: Automatic lets Toskar pick an online paired computer that has the model: the one it expects to answer soonest, from how fast each has answered before and how much it's working on now. A chat's next message stays on the computer that answered the last one, which already has the chat loaded, unless another would be much faster. This computer keeps them here. A chat that uses a memory or knowledge source marked This computer only always runs here. Each computer gives chat priority over automations, background knowledge indexing, benchmarks, and training."
+        "Run on in the composer, and Run chats on in Settings, choose where chats run. Automatic lets Toskar pick an online paired computer that has the model: the one it expects to answer soonest, from how fast each has answered before and how busy it is now. A chat's next message stays on the computer that answered the last one, which already has the chat loaded, unless another would be much faster. This computer keeps them here. A chat that uses a memory or knowledge source marked This computer only always runs here. Each computer gives chat priority over automations, background knowledge indexing, benchmarks, and training."
       ],
       "steps": [
         "Run Toskar on both computers on the same LAN. Turn on Find other computers in Settings › Computers.",
         "In Computers, find the other machine and choose Add to team. Approve the incoming request on the other computer; use the displayed pairing code when needed.",
         "Confirm both machines appear paired and online. Install the required model on each computer that will run a role.",
         "If discovery fails, check network isolation, discovery settings, and firewalls. An offline or revoked computer cannot accept a pinned role."
+      ],
+      "kind": "task",
+      "summary": "Join two or more computers into one Toskar, so chats and teams use the models and memory of all of them.",
+      "blocks": [
+        {
+          "type": "list",
+          "title": "What you need",
+          "items": [
+            "Toskar on each computer, on the same network or reachable from this one. Installing is on Install Toskar.",
+            "The Owner's or an Admin's account on both.",
+            "For a server or a computer you reach over SSH, a terminal there. Toskar doesn't need to be installed on it yet."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Add a computer on your network"
+        },
+        {
+          "type": "steps",
+          "items": [
+            "On this computer, open Settings › Computers.",
+            "Wait for the other computer to show up under Available to add, then choose Add to team.",
+            "On the other computer, open Settings › Computers and choose Approve under Incoming requests. Check that the code matches the one this computer shows.",
+            "Both computers now list each other as Paired and Online."
+          ]
+        },
+        {
+          "type": "image",
+          "screen": "computers-approve",
+          "alt": "Settings › Computers with an incoming request from Den PC showing code 318 604 and an Approve button, above the two computers already in the team",
+          "caption": "Approve only a request you started yourself, and only when its code matches."
+        },
+        {
+          "type": "heading",
+          "text": "Add a server by command"
+        },
+        {
+          "type": "paragraph",
+          "text": "For a server, or a computer you reach over SSH, a one-time command joins it without pairing codes or discovery."
+        },
+        {
+          "type": "steps",
+          "items": [
+            "In Settings › Computers, choose Add by command, then Make a join command.",
+            "Choose where to run it: Toskar installed, Install and join for Linux or macOS, or Windows for PowerShell.",
+            "Choose Copy, and run the command on the other computer within 15 minutes. It works once.",
+            "Settings › Computers says the computer joined, and it appears in the team."
+          ]
+        },
+        {
+          "type": "image",
+          "screen": "computers-join",
+          "alt": "Add a computer by command with Install and join selected, the command with Copy beside it, Expires in 15:00, works once, and the fingerprint the command checks",
+          "caption": "The command checks the fingerprint, so it joins only this computer's team."
+        },
+        {
+          "type": "paragraph",
+          "text": "Install and join looks like this, with this computer's address, token, and fingerprint in place of the dots:"
+        },
+        {
+          "type": "code",
+          "language": "sh",
+          "test": "computers-join",
+          "runs_in": "scripts/test-install.sh",
+          "code": "curl -fsSL https://github.com/yeixio/toskar-core/releases/latest/download/install.sh | sh -s -- join --server 192.168.1.20:7332 --token ygj_… --fingerprint sha256:…"
+        },
+        {
+          "type": "paragraph",
+          "text": "On a server with no desktop, Run without a desktop covers the service, updates, and signing in."
+        },
+        {
+          "type": "heading",
+          "text": "Where a chat runs"
+        },
+        {
+          "type": "image",
+          "screen": "computers-page",
+          "alt": "Settings › Computers listing This Mac and Studio, both online, with their memory, running models, and what each is good for, and Deploy a model below",
+          "caption": "Each computer shows what it has and what it's running now."
+        },
+        {
+          "type": "paragraph",
+          "text": "Choose where chats run with Run on in the composer, or for every chat with Run chats on in Settings."
+        },
+        {
+          "type": "table",
+          "columns": [
+            "Choice",
+            "What happens"
+          ],
+          "rows": [
+            [
+              "Automatic",
+              "Toskar picks an online computer that has the model: the one it expects to answer soonest, from how fast each answered before and how busy it is now."
+            ],
+            [
+              "This computer",
+              "Chats run here only."
+            ],
+            [
+              "Ask each time",
+              "The composer asks before you send."
+            ]
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "A chat's next message stays on the computer that answered the last one, because that computer already has the chat loaded, unless another would be much faster. A chat that uses a memory or knowledge source marked This computer only always runs here."
+        },
+        {
+          "type": "paragraph",
+          "text": "Each computer runs only the models installed on it. Under Deploy a model, choose a model and the computers to put it on, and Toskar checks each one's free disk first. Chats come before automations, knowledge indexing, benchmarks, and training on every computer."
+        },
+        {
+          "type": "heading",
+          "text": "Remove a computer"
+        },
+        {
+          "type": "paragraph",
+          "text": "In the computer's menu, choose Remove from team. It stops taking work at once, and adding it again needs a new approval."
+        },
+        {
+          "type": "heading",
+          "text": "Troubleshooting"
+        },
+        {
+          "type": "table",
+          "columns": [
+            "What you see",
+            "What to do"
+          ],
+          "rows": [
+            [
+              "The other computer doesn't show up under Available to add",
+              "Check both are on the same network, and that Find other computers is on under Network & access on Settings › Computers. Allow Toskar through the firewall on both, or use Add by command."
+            ],
+            [
+              "Waiting for approval, then nothing",
+              "Open Toskar on the other computer and approve the request there. If it ran out, choose Add to team again."
+            ],
+            [
+              "The join command says it expired or was used",
+              "Make a new one: each works once, for 15 minutes."
+            ],
+            [
+              "A computer shows Offline",
+              "Check it's on, awake, and running Toskar. Meanwhile, Automatic sends new messages to the computers that are online."
+            ],
+            [
+              "A chat never runs on the second computer",
+              "Install the model there with Deploy a model, and check Run on is Automatic."
+            ]
+          ]
+        },
+        {
+          "type": "related",
+          "sections": [
+            "team",
+            "models",
+            "server"
+          ]
+        }
       ]
     },
     {
@@ -3232,6 +3394,91 @@
         "Select Programming in Chat and choose a model, or Auto. Roles without their own model use it.",
         "To choose models or computers per role, enable Advanced mode and edit the profile's Models, such as Worker on your second machine. Set Strategy to Team on any profile to work the same way.",
         "Send a request with some substance, such as a comparison or a plan. The chat timeline shows the planner, each worker, and the reviewer with the computer each ran on. In advanced mode, Run details under the answer shows each role's model, computer, and timing."
+      ],
+      "kind": "task",
+      "summary": "Have a planner, workers, and a reviewer share a bigger request, each on the computer that suits it.",
+      "blocks": [
+        {
+          "type": "list",
+          "title": "What you need",
+          "items": [
+            "A chat model installed. A Team works on one computer, and runs faster with a second one: Connect your computers.",
+            "For roles on different computers, the model on each of those computers, and Advanced mode on to choose them."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "How a Team works"
+        },
+        {
+          "type": "paragraph",
+          "text": "Like a small office: a planner splits your request into parts, a worker takes each part and writes notes, the answer is written from the notes, and a reviewer checks it before you see it. Quick questions skip the team and get a direct answer."
+        },
+        {
+          "type": "heading",
+          "text": "Run one"
+        },
+        {
+          "type": "steps",
+          "items": [
+            "Install the same model on both computers for an easy first run.",
+            "In Chat, select the Programming profile, which uses the Team strategy, and choose a model or Auto. Roles without their own model use it.",
+            "Send a request with some substance, such as a comparison or a plan.",
+            "Watch the chat timeline: it shows the planner, each worker, and the reviewer, with the computer each ran on."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Choose models and computers per role"
+        },
+        {
+          "type": "steps",
+          "items": [
+            "Turn on Advanced mode in Settings › Advanced mode & reset.",
+            "Open the profile in Profiles & Orchestration and edit its Models, such as putting Worker on your second computer.",
+            "To make any profile work as a team, set its Strategy to Team.",
+            "After an answer, Run details under it shows each role's model, computer, and timing."
+          ]
+        },
+        {
+          "type": "image",
+          "screen": "team-roles",
+          "alt": "Editing the Programming profile on Strategy and computers: Strategy set to Team, Computer selection Automatic, This Mac allowed and Studio preferred, with Planner, Worker, Reviewer on the card above",
+          "caption": "Preferred gives a computer a head start when Toskar picks where each part runs; Never use keeps work off it."
+        },
+        {
+          "type": "heading",
+          "text": "Troubleshooting"
+        },
+        {
+          "type": "table",
+          "columns": [
+            "What you see",
+            "What to do"
+          ],
+          "rows": [
+            [
+              "Every part runs on one computer",
+              "Install the model on the other computer too, and check it's Online in Settings › Computers."
+            ],
+            [
+              "The answer comes straight away, with no team",
+              "The request was quick enough to answer directly. Ask for something with more parts."
+            ],
+            [
+              "A role pinned to a computer doesn't run",
+              "That computer is offline or was removed from the team. Bring it back, or choose another computer for the role."
+            ]
+          ]
+        },
+        {
+          "type": "related",
+          "sections": [
+            "computers",
+            "profiles",
+            "deliberate"
+          ]
+        }
       ]
     },
     {

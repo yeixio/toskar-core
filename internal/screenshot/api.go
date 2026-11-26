@@ -37,6 +37,17 @@ func serveScreenshotAPI(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, http.StatusOK, `{"label":"off_topic","held":true,"replaced":false,"reply":"I can help with tires, wheels, and bookings at Dana's. What do you need?"}`)
 		return
 	}
+	// Add by command on Computers makes a join command (#896).
+	if r.Method == http.MethodPost && path == "/api/v1/join-tokens" {
+		now := time.Now().UTC()
+		base := "https://github.com/yeixio/toskar-core/releases/latest/download"
+		args := "--server 192.168.1.20:7332 --token ygj_4mQ8vX2kT9rB --fingerprint sha256:7f3ac21e9b04"
+		writeJSON(w, http.StatusOK, `{"id":"jt-1","created_at":"`+now.Format(time.RFC3339)+`","expires_at":"`+now.Add(15*time.Minute).Format(time.RFC3339)+`","status":"active",`+
+			`"token":"ygj_4mQ8vX2kT9rB","server":"192.168.1.20:7332","fingerprint":"sha256:7f3ac21e9b04",`+
+			`"command":"yggctl join `+args+`","install_command":"curl -fsSL `+base+`/install.sh | sh -s -- join `+args+`",`+
+			`"windows_command":"& ([scriptblock]::Create((irm `+base+`/install.ps1))) join -Server 192.168.1.20:7332 -Token ygj_4mQ8vX2kT9rB -Fingerprint sha256:7f3ac21e9b04"}`)
+		return
+	}
 	if r.Method != http.MethodGet {
 		writeJSON(w, http.StatusOK, `{}`)
 		return
