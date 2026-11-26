@@ -46,6 +46,9 @@ go run ./chat "Plan a three-day trip to Juneau"
 | --- | --- |
 | [curl/models.sh](curl/models.sh) | `GET /v1/models`: auto, profiles as `profile:<id>`, and specialized AIs as `sai:<slug>` |
 | [curl/chat.sh](curl/chat.sh) | `POST /v1/chat/completions`, streamed, ending with `data: [DONE]` (`TOSKAR_MODEL` picks the model; `auto` by default) |
+| [curl/embeddings.sh](curl/embeddings.sh) | `POST /v1/embeddings`: a text's vector, from the embedding model knowledge search uses |
+| [curl/transcribe.sh](curl/transcribe.sh) | `POST /v1/audio/transcriptions`: a recording's text, from Whisper on this computer |
+| [curl/speech.sh](curl/speech.sh) | `POST /v1/audio/speech`: text read aloud, saved as `speech.wav` |
 | [curl/events.sh](curl/events.sh) | `GET /api/v1/events`: chats' tokens, model loads, and the rest as server-sent events, until Ctrl-C. Needs no installed model |
 | [curl/hardware.sh](curl/hardware.sh) | `GET /api/v1/hardware`: this computer's CPU, memory, disk, and accelerators, as JSON |
 

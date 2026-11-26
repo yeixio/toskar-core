@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Toskar Control Plane API
-  version: "1.124"
+  version: "1.125"
   description: >-
     Local AI control plane API for Toskar, its OpenAI-compatible routes, and its MCP server.
     On the default loopback bind no key is needed. When the daemon listens on any other address,
@@ -3212,6 +3212,102 @@ paths:
           description: RAW_NOT_ALLOWED, a key without raw access
         "404":
           description: MODEL_NOT_FOUND, a model not installed on this computer
+  /v1/embeddings:
+    post:
+      summary: OpenAI Embeddings
+      description: >-
+        Embeds input with the installed embedding model, the one knowledge search uses (#1357,
+        contract 1.125), whatever model the request names. input is a string or a list of up to 2048
+        strings; token arrays are refused. encoding_format is float (the default) or base64
+        (little-endian float32s). dimensions, when given, must be the model's own. usage counts
+        about four characters a token.
+      operationId: openaiEmbeddings
+      tags: [OpenAI-compatible]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [input]
+              properties:
+                model: {type: string}
+                input: {description: A string or a list of strings}
+                encoding_format: {type: string, enum: [float, base64]}
+                dimensions: {type: integer}
+      responses:
+        "200":
+          description: 'A list: data of {object: embedding, index, embedding}, model, and usage'
+        "400":
+          description: invalid_request_error, such as token arrays, an empty input, or other dimensions
+        "503":
+          description: EMBEDDINGS_UNAVAILABLE, with how to set up an embedding model when none is installed
+  /v1/audio/transcriptions:
+    post:
+      summary: OpenAI audio transcriptions
+      description: >-
+        Turns a recording into text with Whisper on this computer, at the quality voice mode hears
+        with (#1357, contract 1.125), whatever model the request names. Multipart: file (at most
+        25 MB, any format ffmpeg reads), language (a hint such as en; empty detects it), and
+        response_format, which is json (the default), text, verbose_json (with language, duration,
+        and segments), srt, or vtt.
+      operationId: openaiTranscriptions
+      tags: [OpenAI-compatible]
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file: {type: string, format: binary}
+                model: {type: string}
+                language: {type: string}
+                response_format: {type: string, enum: [json, text, verbose_json, srt, vtt]}
+      responses:
+        "200":
+          description: '{text}, or the text, verbose JSON, or subtitles asked for'
+        "400":
+          description: invalid_request_error, such as no file
+        "413":
+          description: The file is larger than 25 MB
+        "503":
+          description: SPEECH_UNAVAILABLE, with how to set speech up
+  /v1/audio/speech:
+    post:
+      summary: OpenAI audio speech
+      description: >-
+        Reads input (at most 4096 characters) aloud in the voice live voice speaks with (#1357,
+        contract 1.125), a sentence at a time, whatever model the request names. voice is a Kokoro,
+        Piper, or Kitten voice; OpenAI's names, such as alloy, mean the language's own voice.
+        response_format pcm answers raw 24 kHz 16-bit little-endian PCM; every other format,
+        mp3 included, answers WAV, with Content-Type audio/wav.
+      operationId: openaiSpeech
+      tags: [OpenAI-compatible]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [input]
+              properties:
+                model: {type: string}
+                input: {type: string}
+                voice: {type: string}
+                response_format: {type: string, enum: [wav, pcm, mp3, opus, aac, flac]}
+                speed: {type: number}
+      responses:
+        "200":
+          description: The audio, audio/wav or audio/pcm
+          content:
+            audio/wav: {}
+            audio/pcm: {}
+        "400":
+          description: invalid_request_error, such as no input or input that is too long
+        "503":
+          description: SPEECH_UNAVAILABLE, with how to set speech up
   /v1/chat/completions:
     post:
       summary: OpenAI-compatible chat completions

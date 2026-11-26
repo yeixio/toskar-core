@@ -608,6 +608,9 @@ func New(opts Options) (*App, error) {
 		Swarm:  a.swarmTurn,
 		// Ollama's /api/embed uses the knowledge embedding model (#1356).
 		Embed: a.ollamaEmbed,
+		// OpenAI's audio endpoints use Whisper and live voice's voices (#1357).
+		Transcribe: a.openaiTranscribe,
+		Speak:      a.openaiSpeak,
 		// A picture sent by its address is fetched from there (#1415).
 		PictureFetched: func(ctx context.Context, raw string) {
 			host := raw

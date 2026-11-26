@@ -1096,6 +1096,14 @@ curl -s http://127.0.0.1:7331/v1/chat/completions \
   -d '{"model": "swarm:general-assistant", "messages": [{"role": "user", "content": "Plan a three-day trip to Juneau"}]}'
 ```
 
+### Embeddings and audio (#1357)
+
+Apps that use Toskar as their OpenAI server, such as Open WebUI, n8n and note apps, can also embed text for their own search, take dictation and read aloud, with what Toskar already runs (contract 1.125). Each takes any `model` name, such as `text-embedding-3-small`, `whisper-1` or `tts-1`, since this computer has one of each. The routes use the same keys as chat, and a chat-only key may use them, since they save nothing. `GET /v1/models` keeps listing only chat models, so an app's model menu offers only what can chat.
+
+- **`POST /v1/embeddings`** embeds `input`, a string or up to 2048 strings, with the embedding model knowledge search uses. `encoding_format` is `float` or `base64`. When no embedding model is installed, the answer is `503 EMBEDDINGS_UNAVAILABLE`, which says where to set one up. Token arrays are refused, since they mean another model's tokenizer.
+- **`POST /v1/audio/transcriptions`** takes a multipart `file` of at most 25 MB, with an optional `language` and `response_format`. `response_format` is `json`, `text`, `verbose_json` (with `language`, `duration` and `segments`), `srt` or `vtt`. Whisper runs on this computer at the quality voice mode hears with, and the first request sets speech up.
+- **`POST /v1/audio/speech`** reads `input`, at most 4096 characters, a sentence at a time, in the voice live voice speaks with. `voice` is a Kokoro, Piper or Kitten voice, and OpenAI's names, such as `alloy`, mean the language's own voice. `response_format: "pcm"` answers raw 24 kHz 16-bit PCM, as OpenAI's does. Every other format answers WAV (`audio/wav`), since Toskar doesn't encode MP3 or Opus; players take it alike.
+
 ### Ollama's API (#1356)
 
 Apps that offer only Ollama, such as Home Assistant's Ollama integration, Obsidian plugins and editor plugins, can use Toskar: give the app Toskar's address, such as `http://127.0.0.1:7331`, as its Ollama server (contract 1.120). Requests go through `/v1/chat/completions`, so Auto, profiles, keys and their permissions are the same, and a chat-only key may use the asking routes below.
