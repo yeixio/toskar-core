@@ -926,5 +926,17 @@
   "linkCheck": {
     "dead": "This link didn't open when checked",
     "unknown": "This link couldn't be checked"
+  },
+  "modelReady": {
+    "title": "Keep {{model}} ready to answer?",
+    "body": "When a model sits unused, Toskar unloads it to free memory, and the next reply waits while it loads again. Choose how your main chat model works.",
+    "always": "Always ready",
+    "alwaysHint": "Answers start right away. Keeps about {{size}} of memory in use.",
+    "alwaysHintOf": "Answers start right away. Keeps about {{size}} of this computer's {{total}} in use.",
+    "managed": "Let Toskar manage",
+    "managedHintFits": "Toskar keeps it ready while there is room, and frees the memory when a picture or another model needs it.",
+    "managedHintBig": "It uses a lot of memory, so Toskar frees it when idle. The first reply after a break waits while it loads.",
+    "later": "You can change this later in",
+    "settings": "Settings › AI behavior"
   }
 }

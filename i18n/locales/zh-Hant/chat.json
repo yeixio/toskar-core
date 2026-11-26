@@ -880,5 +880,17 @@
   "linkCheck": {
     "dead": "檢查時此連結無法開啟",
     "unknown": "無法檢查此連結"
+  },
+  "modelReady": {
+    "title": "讓 {{model}} 隨時準備回答？",
+    "body": "模型閒置時，Toskar 會卸載它以釋放記憶體，下一次回覆要等它重新載入。請選擇你的主聊天模型如何運作。",
+    "always": "隨時就緒",
+    "alwaysHint": "回答立即開始。持續佔用約 {{size}} 記憶體。",
+    "alwaysHintOf": "回答立即開始。持續佔用這台電腦 {{total}} 中的約 {{size}}。",
+    "managed": "交給 Toskar 管理",
+    "managedHintFits": "有空間時 Toskar 讓它保持就緒，圖片或其他模型需要記憶體時再釋放。",
+    "managedHintBig": "它佔用記憶體較多，所以閒置時 Toskar 會釋放。休息後的第一次回覆要等它載入。",
+    "later": "之後可以在這裡變更：",
+    "settings": "設定 › AI 行為"
   }
 }

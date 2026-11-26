@@ -133,7 +133,12 @@
     "keepMinutes_other": "{{count}} minutes",
     "keepHours_one": "1 hour",
     "keepHours_other": "{{count}} hours",
-    "keepAlways": "Until I stop them"
+    "keepAlways": "Until I stop them",
+    "mainModel": "Main chat model",
+    "mainModelHint": "The model a new chat uses. Always ready keeps it loaded so answers start at once. Let Toskar manage keeps it ready while there is room and frees the memory when needed.",
+    "mainModelHintNamed": "{{model}} needs about {{size}} of memory. Always ready keeps it loaded so answers start at once. Let Toskar manage keeps it ready while there is room and frees the memory when needed.",
+    "mainAlways": "Always ready",
+    "mainManaged": "Let Toskar manage"
   },
   "downloads": {
     "title": "Download models",

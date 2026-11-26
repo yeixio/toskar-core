@@ -131,7 +131,12 @@
     "keepReadyHint": "模型在最后一次回答后保持加载的时间，下一个问题可以立即开始。手机、平板、手表或电视用过的模型至少保持加载一小时。",
     "keepMinutes_other": "{{count}} 分钟",
     "keepHours_other": "{{count}} 小时",
-    "keepAlways": "直到我停止它们"
+    "keepAlways": "直到我停止它们",
+    "mainModel": "主聊天模型",
+    "mainModelHint": "新聊天使用的模型。始终就绪会让它保持加载，回答立即开始。交给 Toskar 管理会在有空间时保持就绪，需要时释放内存。",
+    "mainModelHintNamed": "{{model}} 需要约 {{size}} 内存。始终就绪会让它保持加载，回答立即开始。交给 Toskar 管理会在有空间时保持就绪，需要时释放内存。",
+    "mainAlways": "始终就绪",
+    "mainManaged": "交给 Toskar 管理"
   },
   "downloads": {
     "title": "下载模型",

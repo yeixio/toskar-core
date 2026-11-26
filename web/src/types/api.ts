@@ -1158,6 +1158,10 @@ export interface SettingsView {
   voice_language?: string
   /** Smart Turn hears whether a paused turn sounds finished; off by default (#1460, contract 1.131). */
   voice_smart_turn?: boolean
+  /** How the main chat model stays ready: "" until an Admin chooses (Toskar keeps it ready while it fits), "always" (kept running), or "managed" (#1472, contract 1.132). */
+  main_model_ready?: '' | 'always' | 'managed'
+  /** The main chat model and what keeping it ready costs, for Admins (#1472, contract 1.132). */
+  main_model?: MainModelView
   model_storage_limit_gb?: number
   save_chat_history?: boolean
   save_task_history?: boolean
@@ -1578,6 +1582,7 @@ export interface SettingsPatch {
   voice_hearing?: 'fast' | 'accurate'
   voice_language?: string
   voice_smart_turn?: boolean
+  main_model_ready?: 'always' | 'managed'
   model_storage_limit_gb?: number
   save_chat_history?: boolean
   save_task_history?: boolean
@@ -3248,4 +3253,15 @@ export interface NewsView {
   fetched_at?: string
   /** toskar.ai couldn't be reached; this is the copy kept from before. */
   stale?: boolean
+}
+
+/** The model a new chat on the default profile uses, and what keeping it ready costs (#1472, contract 1.132). */
+export interface MainModelView {
+  model_id: string
+  name: string
+  memory_bytes: number
+  memory_total_bytes: number
+  /** It needs at most half of this computer's memory, so Toskar keeps it ready when it manages it. */
+  fits: boolean
+  always_running: boolean
 }

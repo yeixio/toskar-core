@@ -48,6 +48,7 @@ Columns:
 | Advanced mode | `advanced_mode` | Settings › AI behavior › Advanced mode | Advanced | Application | Basic | Off | none | Visual |
 | Model lifecycle | `model_lifecycle` | Settings › AI behavior › Model lifecycle | Models & AI | Application | Advanced | Automatic | none | Behavioral |
 | Keep models ready for | `idle_unload_minutes` | Settings › AI behavior › Model lifecycle | Models & AI | Application | Advanced | 15 minutes | `model_lifecycle` = automatic | Behavioral |
+| Main chat model | `main_model_ready` | Settings › AI behavior › Model lifecycle, and a card at the top of chat until an Admin chooses | Models & AI | Application | Basic | Let Toskar manage (asked once) | `model_lifecycle` = automatic | Behavioral, Performance |
 | Keep running in background | `keep_running_in_background` | Settings › General | General | Application | Basic | Off (on while a schedule exists) | Automations with a schedule | Behavioral |
 | Launch at login | `launch_at_login` | Settings › General (desktop app only) | General | Application | Basic | Off | Desktop app | Behavioral |
 | Default profile | `default_profile_id` | Settings › AI behavior › Default profile | Models & AI | Application | Basic | General | Profiles | Behavioral |

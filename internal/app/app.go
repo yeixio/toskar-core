@@ -261,8 +261,10 @@ type App struct {
 	startedOnce sync.Once
 	// warming holds the model ids a warm-up is loading now (#498), and
 	// warmWait its loads, so a shutdown or a test can wait for them.
-	warming  sync.Map
-	warmWait sync.WaitGroup
+	warming sync.Map
+	// mainModel holds the main chat model's id for a minute (#1472).
+	mainModel mainModelCache
+	warmWait  sync.WaitGroup
 	// work counts turns streaming on each computer, by node ID.
 	workMu sync.Mutex
 	work   map[string]int
@@ -923,8 +925,8 @@ func New(opts Options) (*App, error) {
 		Stop: func(ctx context.Context, instanceID string) error {
 			return a.stopModelLocal(ctx, instanceID)
 		},
-		Keep: func(_ context.Context, inst lifecycle.Instance) bool {
-			return a.keepLoaded(inst.ModelID)
+		Keep: func(ctx context.Context, inst lifecycle.Instance) bool {
+			return a.keepLoaded(inst.ModelID) || a.keptAsMain(ctx, inst.ModelID)
 		},
 		Settings: func(ctx context.Context) (string, int, error) {
 			mode, _ := a.Settings.GetString(ctx, "model_lifecycle", "automatic")
@@ -1514,6 +1516,12 @@ func (a *App) Start(ctx context.Context) error {
 		defer a.wg.Done()
 		a.runPinnedKeeper(ctx)
 	}()
+	// The main chat model loads now when Toskar keeps it ready (#1472).
+	a.wg.Add(1)
+	go func() {
+		defer a.wg.Done()
+		a.readyMainModel(ctx)
+	}()
 	if a.MCP != nil {
 		a.wg.Add(1)
 		go func() {
@@ -1750,6 +1758,8 @@ func (a *App) settingsView(ctx context.Context) (contracts.SettingsView, error) 
 		VoiceHearing:            voiceHearing,
 		VoiceLanguage:           a.voiceLanguage(ctx),
 		VoiceSmartTurn:          a.smartTurnOn(ctx),
+		MainModelReady:          a.mainReadyChoice(ctx),
+		MainModel:               a.mainModelView(ctx),
 		ModelStorageLimitGB:     storageLimit,
 		SaveChatHistory:         saveChat,
 		MemoryEnabled:           memoryEnabled,
@@ -1823,6 +1833,11 @@ func (a *App) applySettingsPatch(ctx context.Context, patch map[string]any) erro
 		}
 		// The person chose, so schedules no longer turn it back on (#1209).
 		if err := a.Settings.SetBool(ctx, backgroundChosenKey, true); err != nil {
+			return err
+		}
+	}
+	if v, ok := patch[settingMainReady].(string); ok {
+		if err := a.setMainReady(ctx, v); err != nil {
 			return err
 		}
 	}
@@ -2256,6 +2271,8 @@ func (a *App) ResetApp(ctx context.Context, deleteModels bool) (contracts.Settin
 	_ = a.Settings.Set(ctx, settingVoiceHearing, "fast")
 	_ = a.Settings.Set(ctx, settingVoiceLanguage, "")
 	_ = a.Settings.SetBool(ctx, settingSmartTurn, false)
+	_ = a.Settings.Set(ctx, settingMainReady, "")
+	_ = a.Settings.Set(ctx, settingMainReadyPinned, "")
 	_ = a.Settings.SetInt(ctx, "model_storage_limit_gb", 0)
 	_ = a.Settings.SetBool(ctx, "save_chat_history", true)
 	_ = a.Settings.SetBool(ctx, "save_task_history", true)

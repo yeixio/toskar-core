@@ -1126,6 +1126,13 @@ export const api = {
 
   getSettings: () => request<SettingsView>('/api/v1/settings'),
 
+  /** Start loading the model a chat would use, without waiting for it (#498, #1472). */
+  warmModel: (body: { profile_id?: string; model_id?: string }) =>
+    request<{ model_id?: string; status: string }>('/api/v1/models/warm', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }),
+
   updateSettings: (patch: SettingsPatch) =>
     request<SettingsView>('/api/v1/settings', {
       method: 'PATCH',

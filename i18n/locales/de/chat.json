@@ -926,5 +926,17 @@
   "linkCheck": {
     "dead": "Dieser Link ließ sich bei der Prüfung nicht öffnen",
     "unknown": "Dieser Link konnte nicht geprüft werden"
+  },
+  "modelReady": {
+    "title": "{{model}} bereithalten?",
+    "body": "Wird ein Modell nicht genutzt, entlädt Toskar es, um Speicher freizugeben, und die nächste Antwort wartet, bis es wieder geladen ist. Wähle, wie dein Haupt-Chatmodell arbeitet.",
+    "always": "Immer bereit",
+    "alwaysHint": "Antworten beginnen sofort. Belegt etwa {{size}} Speicher.",
+    "alwaysHintOf": "Antworten beginnen sofort. Belegt etwa {{size}} der {{total}} dieses Computers.",
+    "managed": "Toskar entscheiden lassen",
+    "managedHintFits": "Toskar hält es bereit, solange Platz ist, und gibt den Speicher frei, wenn ein Bild oder ein anderes Modell ihn braucht.",
+    "managedHintBig": "Es braucht viel Speicher, daher gibt Toskar ihn im Leerlauf frei. Die erste Antwort nach einer Pause wartet, bis es geladen ist.",
+    "later": "Du kannst das später ändern unter",
+    "settings": "Einstellungen › KI-Verhalten"
   }
 }

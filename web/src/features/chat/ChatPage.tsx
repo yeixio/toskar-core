@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState, type MouseEvent } from 'react'
 import { ToolPermissionPrompt, type PendingToolPrompt } from './ToolPermissionPrompt'
 import { shotsFrom } from './videoShots'
+import { ModelReadyCard } from './ModelReadyCard'
 import { thinkingToSend, type Thinking } from './thinking'
 import { Trans, useTranslation } from 'react-i18next'
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
@@ -598,6 +599,30 @@ export function ChatPage() {
     draftModelId ||
     (installedModels.length > 0 ? AUTO_MODEL_ID : undefined)
   const isAuto = modelIdForChat === AUTO_MODEL_ID
+
+  // Start loading the model when chat opens and when someone starts typing,
+  // so most of a sleeping model's load happens before Send (#498, #1472).
+  const warmedAt = useRef(new Map<string, number>())
+  const typing = draft.trim() !== ''
+  useEffect(() => {
+    if (!member || !modelIdForChat) return
+    const key = `${profileIdForChat ?? ''}|${modelIdForChat}`
+    const now = Date.now()
+    if (now - (warmedAt.current.get(key) ?? 0) < 60_000) return
+    warmedAt.current.set(key, now)
+    api.warmModel({ profile_id: profileIdForChat, model_id: modelIdForChat }).catch(() => undefined)
+  }, [member, profileIdForChat, modelIdForChat, typing])
+
+  // Until an Admin chooses how the main chat model stays ready, chat asks (#1472).
+  const mainModel = settingsQuery.data?.main_model
+  const askModelReady = admin && role !== undefined && !!mainModel && (settingsQuery.data?.main_model_ready ?? '') === ''
+  const chooseModelReady = useMutation({
+    mutationFn: (choice: 'always' | 'managed') => api.updateSettings({ main_model_ready: choice }),
+    onSuccess: (view) => {
+      queryClient.setQueryData(['settings'], view)
+      void queryClient.invalidateQueries({ queryKey: ['models'] })
+    },
+  })
   // With Auto, the model shown is the one the latest turn used.
   const shownModelId = isAuto
     ? routedModel && routedModel.chatId === selectedId
@@ -2374,6 +2399,12 @@ export function ChatPage() {
               onMove={() => selectedConversation && setMovingChat(selectedConversation)}
               onRemove={() => (selectedId ? removeFromProject.mutate(selectedId) : setDraftProjectId(null))}
             />
+          ) : null}
+
+          {askModelReady && mainModel ? (
+            <div className="shrink-0 px-4">
+              <ModelReadyCard model={mainModel} busy={chooseModelReady.isPending} onChoose={(choice) => chooseModelReady.mutate(choice)} />
+            </div>
           ) : null}
 
           {!showPinnedSidebar && historyMode === 'overlay' ? historyDrawer : null}

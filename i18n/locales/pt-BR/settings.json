@@ -135,7 +135,12 @@
     "keepHours_one": "1 hora",
     "keepHours_many": "{{count}} horas",
     "keepHours_other": "{{count}} horas",
-    "keepAlways": "Até eu parar"
+    "keepAlways": "Até eu parar",
+    "mainModel": "Modelo de chat principal",
+    "mainModelHint": "O modelo que um chat novo usa. Sempre pronto o mantém carregado para as respostas começarem na hora. Deixar o Toskar gerenciar o mantém pronto enquanto houver espaço e libera a memória quando preciso.",
+    "mainModelHintNamed": "{{model}} precisa de cerca de {{size}} de memória. Sempre pronto o mantém carregado para as respostas começarem na hora. Deixar o Toskar gerenciar o mantém pronto enquanto houver espaço e libera a memória quando preciso.",
+    "mainAlways": "Sempre pronto",
+    "mainManaged": "Deixar o Toskar gerenciar"
   },
   "downloads": {
     "title": "Baixar modelos",

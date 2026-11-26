@@ -27,7 +27,7 @@ import { Toggle } from '@/components/ui/Toggle'
 import { LanguageSettings } from './LanguageSettings'
 import { Personalization } from './Personalization'
 import { YggdrasilMark } from '@/components/ui/YggdrasilMark'
-import { formatGigabytes } from '@/i18n/format'
+import { formatGigabytes, formatSize } from '@/i18n/format'
 import { AutomationDigestSetting } from './AutomationDigest'
 import { ShownError, shownOr, type Shown } from '@/components/ui/ShownError'
 import { VoiceSettings } from './VoiceSettings'
@@ -435,7 +435,7 @@ export function SettingsPage({ section }: { section?: SettingsSection } = {}) {
               />
             </section>
 
-            <section className="card space-y-4">
+            <section id="model-lifecycle" className="card space-y-4">
               <div>
                 <h2 className="section-title">{t('lifecycle.title')}</h2>
                 <p className="mt-1 text-sm text-ink-muted">{t('lifecycle.description')}</p>
@@ -448,6 +448,26 @@ export function SettingsPage({ section }: { section?: SettingsSection } = {}) {
                   { id: 'manual', label: t('lifecycle.manual') },
                 ]}
               />
+              {(settings?.model_lifecycle ?? 'automatic') === 'automatic' && (
+                <div className="space-y-2">
+                  <div>
+                    <p className="text-sm font-medium text-ink">{t('lifecycle.mainModel')}</p>
+                    <p className="mt-0.5 text-xs text-ink-faint">
+                      {settings?.main_model
+                        ? t('lifecycle.mainModelHintNamed', { model: settings.main_model.name, size: formatSize(settings.main_model.memory_bytes) })
+                        : t('lifecycle.mainModelHint')}
+                    </p>
+                  </div>
+                  <ChoiceGroup
+                    value={(settings?.main_model_ready || 'managed') as 'always' | 'managed'}
+                    onChange={(id) => patch({ main_model_ready: id })}
+                    options={[
+                      { id: 'always', label: t('lifecycle.mainAlways') },
+                      { id: 'managed', label: t('lifecycle.mainManaged') },
+                    ]}
+                  />
+                </div>
+              )}
               {(settings?.model_lifecycle ?? 'automatic') === 'automatic' && (
                 <div className="space-y-2">
                   <div>
