@@ -567,7 +567,7 @@
       "window": "Past its window",
       "out_of_memory": "Doesn't fit"
     },
-    "off": "Quality results are off. Turn them on in Settings › Models & AI, under Community ratings, to read them from GitHub."
+    "off": "Quality results are off. Turn them on with Community ratings, at the top of this page, to read them from GitHub."
   },
   "licenseTerms": {
     "title": "Accept {{model}}'s license",

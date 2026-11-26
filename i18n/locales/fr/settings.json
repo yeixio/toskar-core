@@ -232,7 +232,10 @@
     "ask": "Me proposer de noter les modèles",
     "askHint": "Après quelque temps d'utilisation d'un modèle, une conversation vous demande comment il fonctionne.",
     "quality": "Résultats de qualité",
-    "qualityHint": "Quand vous ouvrez Modèles › Résultats, les résultats de qualité publics sont lus sur GitHub, au plus une fois par heure. Rien sur vous n'est envoyé."
+    "qualityHint": "Quand vous ouvrez Modèles › Résultats, les résultats de qualité publics sont lus sur GitHub, au plus une fois par heure. Rien sur vous n'est envoyé.",
+    "done": "Terminé",
+    "moved": "Les avis de la communauté, les résultats de qualité et la demande d’évaluer les modèles se règlent sur la page Modèles.",
+    "open": "Ouvrir Modèles"
   },
   "yourData": {
     "title": "Vos données restent privées",
@@ -397,7 +400,9 @@
     "title": "Actualités de l’IA",
     "description": "La page Actualités présente les nouveaux modèles ouverts, les versions des runtimes et les annonces des laboratoires d’IA depuis toskar.ai.",
     "show": "Afficher les actualités de l’IA",
-    "showHint": "Lues sur toskar.ai à l’ouverture d’Actualités, au plus toutes les six heures. Seule la requête est envoyée."
+    "showHint": "Lues sur toskar.ai à l’ouverture d’Actualités, au plus toutes les six heures. Seule la requête est envoyée.",
+    "moved": "L’affichage des actualités IA se règle sur la page Actualités.",
+    "open": "Ouvrir Actualités"
   },
   "links": {
     "title": "Liens dans les réponses",
