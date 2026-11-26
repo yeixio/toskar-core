@@ -96,7 +96,11 @@
     "failed": "今はここから送信できませんでした。同じ報告をメールで送ってください。",
     "invalid": "メールアドレスを確認して、もう一度送信してください。",
     "sendEmail": "メールで送信",
-    "orEmail": "メールで送ることもできます"
+    "orEmail": "メールで送ることもできます",
+    "generalOpen": "問題を報告",
+    "generalTitle": "問題を報告",
+    "generalLabel": "何がうまくいきませんでしたか？",
+    "generalPlaceholder": "例：フランス語の回答が1文で止まる"
   },
   "loadError": {
     "title": "Toskar はこれを読み込めませんでした",

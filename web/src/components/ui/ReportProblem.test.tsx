@@ -98,4 +98,26 @@ describe('ReportProblem (#588)', () => {
     await waitFor(() => expect(screen.getByRole('alert')).toHaveTextContent('Check the email address'))
     expect(screen.getByRole('button', { name: 'Send' })).toBeInTheDocument()
   })
+
+  it('reports a problem no error shows, in the person\'s words (#201)', async () => {
+    vi.mocked(api.sendReport).mockResolvedValue({ status: 'created', number: 5 })
+    render(
+      <QueryClientProvider client={new QueryClient({ defaultOptions: { mutations: { retry: false } } })}>
+        <MemoryRouter initialEntries={['/diagnostics']}>
+          <ReportProblem error="" />
+        </MemoryRouter>
+      </QueryClientProvider>,
+    )
+    fireEvent.click(screen.getByRole('button', { name: 'Report a problem' }))
+    await screen.findByText(/Toskar 1\.9\.0/)
+    const send = screen.getByRole('button', { name: 'Send' })
+    expect(send).toBeDisabled()
+    fireEvent.change(screen.getByLabelText('What went wrong?'), { target: { value: 'French answers stop early\nafter one sentence' } })
+    expect(send).toBeEnabled()
+    fireEvent.click(send)
+    expect(await screen.findByText(/Sent\./)).toBeInTheDocument()
+    expect(api.sendReport).toHaveBeenCalledWith(
+      expect.objectContaining({ where: '/diagnostics', error: 'French answers stop early', note: 'French answers stop early\nafter one sentence' }),
+    )
+  })
 })

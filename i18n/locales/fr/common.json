@@ -102,7 +102,11 @@
     "failed": "Il n'a pas pu être envoyé d'ici pour le moment. Envoyez le même signalement par e-mail.",
     "invalid": "Vérifiez l'adresse e-mail, puis renvoyez.",
     "sendEmail": "Envoyer par e-mail",
-    "orEmail": "Ou l'envoyer par e-mail"
+    "orEmail": "Ou l'envoyer par e-mail",
+    "generalOpen": "Signaler un problème",
+    "generalTitle": "Signaler un problème",
+    "generalLabel": "Qu'est-ce qui n'a pas marché ?",
+    "generalPlaceholder": "Par exemple : les réponses en français s'arrêtent après une phrase"
   },
   "loadError": {
     "title": "Toskar n'a pas pu charger ceci",

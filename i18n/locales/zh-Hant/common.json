@@ -96,7 +96,11 @@
     "failed": "現在無法從這裡傳送。請改用電子郵件傳送同一份回報。",
     "invalid": "請檢查電子郵件地址，然後重新傳送。",
     "sendEmail": "透過電子郵件傳送",
-    "orEmail": "也可以透過電子郵件傳送"
+    "orEmail": "也可以透過電子郵件傳送",
+    "generalOpen": "回報問題",
+    "generalTitle": "回報問題",
+    "generalLabel": "發生了什麼問題？",
+    "generalPlaceholder": "例如：法文回答講完一句就停了"
   },
   "loadError": {
     "title": "Toskar 無法載入此內容",

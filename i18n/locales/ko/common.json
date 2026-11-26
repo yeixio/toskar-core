@@ -96,7 +96,11 @@
     "failed": "지금은 여기서 보낼 수 없어요. 같은 보고를 이메일로 보내 주세요.",
     "invalid": "이메일 주소를 확인한 뒤 다시 보내 주세요.",
     "sendEmail": "이메일로 보내기",
-    "orEmail": "이메일로 보낼 수도 있어요"
+    "orEmail": "이메일로 보낼 수도 있어요",
+    "generalOpen": "문제 신고",
+    "generalTitle": "문제 신고",
+    "generalLabel": "무엇이 잘못되었나요?",
+    "generalPlaceholder": "예: 프랑스어 답변이 한 문장 뒤에 멈춰요"
   },
   "loadError": {
     "title": "Toskar가 이 내용을 불러오지 못했어요",

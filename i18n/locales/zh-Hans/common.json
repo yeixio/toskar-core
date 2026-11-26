@@ -96,7 +96,11 @@
     "failed": "现在无法从这里发送。请改用电子邮件发送同一份报告。",
     "invalid": "请检查电子邮件地址，然后重新发送。",
     "sendEmail": "通过电子邮件发送",
-    "orEmail": "也可以通过电子邮件发送"
+    "orEmail": "也可以通过电子邮件发送",
+    "generalOpen": "报告问题",
+    "generalTitle": "报告问题",
+    "generalLabel": "出了什么问题？",
+    "generalPlaceholder": "例如：法语回答说完一句就停了"
   },
   "loadError": {
     "title": "Toskar 无法加载此内容",
