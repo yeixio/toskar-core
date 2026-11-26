@@ -1029,6 +1029,8 @@ Errors have OpenAI's shape, with Toskar's stable code as `code`:
 
 `"stream": true` responds with `Content-Type: text/event-stream`. Each event is `data: {json}` and the stream ends with `data: [DONE]`. The last chunk with a choice carries `finish_reason`. With `"stream_options": {"include_usage": true}`, one more chunk before `[DONE]` has empty `choices` and the `usage`. An error after the stream has started is sent as an `{"error": {...}}` event, then `[DONE]`.
 
+The assistant's answer streams as it's written, as chat in the app shows it (#1450). An OpenAI stream can't take text back, so where the app replaces what it showed, the stream adds to it: a sentence written before a tool call stays and the answer follows after a blank line, and an answer a check corrects is followed by the corrected one. A response that isn't streamed has only the last version. With `response_format`, the JSON still comes as one chunk.
+
 ### Known differences
 
 These are for the assistant. A raw request (below) has none of them.

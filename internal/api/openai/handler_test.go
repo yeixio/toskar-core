@@ -149,6 +149,8 @@ type scriptChat struct {
 	sampling  pluginapi.GenerateOptions
 	// emit runs during the turn, as the orchestrator would.
 	emit func(o *turnopts.Options)
+	// live says the turn was asked for its answer as it's written.
+	live bool
 }
 
 func (s *scriptChat) RunChat(ctx context.Context, profileID, conversationID, message string, stream bool, modelID, execution string) (<-chan pluginapi.ChatChunk, error) {
@@ -160,6 +162,7 @@ func (s *scriptChat) RunChat(ctx context.Context, profileID, conversationID, mes
 	s.effort = huginn.EffortFrom(ctx)
 	s.opts = turnopts.From(ctx)
 	s.sampling = pluginapi.AnswerOptionsFrom(ctx)
+	s.live = turnopts.LiveFrom(ctx)
 	if s.err != nil {
 		return nil, s.err
 	}
