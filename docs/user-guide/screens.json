@@ -1226,6 +1226,26 @@
       "id": "privacy-what-left",
       "path": "/settings/privacy",
       "readyText": "Your disk is encrypted with FileVault"
+    },
+    {
+      "id": "anywhere-settings",
+      "path": "/settings/network",
+      "readyText": "Access from anywhere",
+      "actions": [
+        {
+          "scroll": "Access from anywhere"
+        }
+      ]
+    },
+    {
+      "id": "anywhere-check",
+      "path": "/settings/network",
+      "readyText": "Access from anywhere",
+      "actions": [
+        {
+          "scroll": "Reachable from outside your network, through the relay"
+        }
+      ]
     }
   ]
 }
