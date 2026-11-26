@@ -47,6 +47,12 @@ var rawClient = &http.Client{}
 // raw:<model>. Only a key an Admin allowed it, or a request on this computer
 // without a key, may.
 func (h *Handler) handleRaw(w http.ResponseWriter, r *http.Request, perms auth.APIKeyPermissions, req chatCompletionRequest, body []byte, maxTokens int) {
+	h.handleRawOn(w, r, perms, req, body, maxTokens, req.Model)
+}
+
+// handleRawOn is handleRaw on target, such as raw:<model>, answering under
+// the name the request asked for.
+func (h *Handler) handleRawOn(w http.ResponseWriter, r *http.Request, perms auth.APIKeyPermissions, req chatCompletionRequest, body []byte, maxTokens int, target string) {
 	least := 0
 	if o := req.assistant(); o != nil {
 		least = o.ContextWindow
@@ -57,7 +63,7 @@ func (h *Handler) handleRaw(w http.ResponseWriter, r *http.Request, perms auth.A
 		return
 	}
 	need := neededWindow(req, min(maxTokens, rawAnswerRoom)) + min(toolTokens(forward), rawToolRoom)
-	route, fail := h.route(r.Context(), perms, req.Model, max(need, least))
+	route, fail := h.route(r.Context(), perms, target, max(need, least))
 	if fail != nil {
 		if fail.param != "" {
 			writeErrorParam(w, fail.status, fail.code, fail.message, fail.param)

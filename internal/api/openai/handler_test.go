@@ -439,3 +439,20 @@ func TestContextWindowGrowsForARequest(t *testing.T) {
 		}
 	}
 }
+
+// An answer is named for its profile, or for what was asked, such as auto
+// or a model's id, never left empty (#1450).
+func TestAnswerIsNamed(t *testing.T) {
+	h := testHandler(t)
+	h.Chat = &scriptChat{chunks: []pluginapi.ChatChunk{{Content: "ok", Done: true}}}
+	for model, want := range map[string]string{"auto": "auto", "qwen2.5-14b-q4": "qwen2.5-14b-q4", "profile:general": "general", "general": "general"} {
+		for _, stream := range []string{"false", "true"} {
+			rec := httptest.NewRecorder()
+			body := `{"model":"` + model + `","stream":` + stream + `,"messages":[{"role":"user","content":"hi"}]}`
+			h.HandleChatCompletions(rec, httptest.NewRequest(http.MethodPost, "/v1/chat/completions", strings.NewReader(body)))
+			if !strings.Contains(rec.Body.String(), `"model":"`+want+`"`) {
+				t.Errorf("%s, stream %s: %s", model, stream, rec.Body)
+			}
+		}
+	}
+}
