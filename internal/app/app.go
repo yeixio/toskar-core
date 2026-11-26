@@ -1062,7 +1062,9 @@ func New(opts Options) (*App, error) {
 	a.summarizer = &muninn.Summarizer{Store: a.Muninn}
 	a.API.BindMemory(a.Muninn)
 	a.Tools.Register(&artifacts.CreateTool{Store: a.Artifacts, Fonts: &artifacts.Fonts{Dir: filepath.Join(cfg.DataDir, "fonts"),
-		Fetched: func(ctx context.Context, url string) { a.recordFetch(ctx, url, "a font for a PDF in Chinese, Japanese or Korean") }}})
+		Fetched: func(ctx context.Context, url string) {
+			a.recordFetch(ctx, url, "a font for a PDF in Chinese, Japanese or Korean")
+		}}})
 	a.Tools.Register(&artifacts.AnalyzeTool{Store: a.Artifacts})
 	a.Tools.Register(&scheduleTool{app: a})
 	// The AI news and the person's own automation results, to read out in
