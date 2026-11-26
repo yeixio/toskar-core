@@ -86,6 +86,13 @@ func (s *Server) hostAllowed(r *http.Request) bool {
 	if isLoopbackName(host) {
 		return true
 	}
+	// A container on this computer names it host.docker.internal (Docker
+	// Desktop) or host.containers.internal (Podman), and arrives over
+	// loopback (#1057). Those names are reserved, so no website's DNS can
+	// point one at 127.0.0.1.
+	if containerHostNames[strings.ToLower(host)] && remoteIsLoopback(r) {
+		return true
+	}
 	// A trusted reverse proxy answers for its own name (#206).
 	if s.fromTrustedProxy(r) {
 		return true
@@ -172,6 +179,9 @@ func hostOnly(hostport string) string {
 	}
 	return strings.ToLower(strings.Trim(hostport, "[]"))
 }
+
+// containerHostNames are the names containers give the computer they run on.
+var containerHostNames = map[string]bool{"host.docker.internal": true, "host.containers.internal": true}
 
 func isLoopbackName(host string) bool {
 	host = strings.ToLower(strings.Trim(host, "[]"))

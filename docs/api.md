@@ -136,7 +136,7 @@ The API answers HTTPS and plain HTTP on the same port (#213), told apart by the 
 A website open in a browser on this computer can send requests to `127.0.0.1`, so the daemon checks two headers before anything else, on every route:
 
 - **`Origin`**, when a browser sends one, must be the daemon's own address (its web UI), the desktop app's webview (`wails://wails`, `http://wails.localhost`), or a loopback address on the API port, such as `http://localhost:7331`. The allowed origin is echoed in `Access-Control-Allow-Origin`; `*` is never sent. Other origins get `403 ORIGIN_NOT_ALLOWED`.
-- **`Host`** must name this computer: `localhost`, a `.localhost` name, or a loopback IP. With local network access on, any IP is accepted, and so is a hostname on a request from another device. A hostname on a request over loopback gets `403 HOST_NOT_ALLOWED`, which stops DNS rebinding.
+- **`Host`** must name this computer: `localhost`, a `.localhost` name, or a loopback IP. With local network access on, any IP is accepted, and so is a hostname on a request from another device. A hostname on a request over loopback gets `403 HOST_NOT_ALLOWED`, which stops DNS rebinding. The names a container gives the computer it runs on, `host.docker.internal` (Docker Desktop) and `host.containers.internal` (Podman), are this computer over loopback, since no website's DNS can claim them (#1057).
 
 A request with a valid API key passes both checks, and a preflight that announces an `Authorization` header is answered for any origin. Clients that are not browsers, such as `toskarctl` and `curl`, send no `Origin` and are unaffected. A reverse proxy on this computer must keep a loopback `Host` or send a key.
 
