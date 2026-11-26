@@ -973,5 +973,17 @@
   "linkCheck": {
     "dead": "Questo link non si è aperto durante il controllo",
     "unknown": "Non è stato possibile controllare questo link"
+  },
+  "modelReady": {
+    "title": "Tenere {{model}} pronto a rispondere?",
+    "body": "Quando un modello non viene usato, Toskar lo scarica per liberare memoria e la risposta successiva attende che venga ricaricato. Scegli come funziona il tuo modello di chat principale.",
+    "always": "Sempre pronto",
+    "alwaysHint": "Le risposte iniziano subito. Tiene in uso circa {{size}} di memoria.",
+    "alwaysHintOf": "Le risposte iniziano subito. Tiene in uso circa {{size}} dei {{total}} di questo computer.",
+    "managed": "Lascia gestire a Toskar",
+    "managedHintFits": "Toskar lo tiene pronto finché c'è spazio e libera la memoria quando un'immagine o un altro modello ne ha bisogno.",
+    "managedHintBig": "Usa molta memoria, quindi Toskar la libera quando è inattivo. La prima risposta dopo una pausa attende che venga caricato.",
+    "later": "Puoi cambiarlo in seguito in",
+    "settings": "Impostazioni › Comportamento dell'IA"
   }
 }

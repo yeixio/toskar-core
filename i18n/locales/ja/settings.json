@@ -131,7 +131,12 @@
     "keepReadyHint": "最後の回答のあと、モデルを読み込んだままにしておく時間です。次の質問がすぐに始まります。スマートフォン、タブレット、ウォッチ、テレビが使ったモデルは少なくとも 1 時間読み込んだままになります。",
     "keepMinutes_other": "{{count}} 分",
     "keepHours_other": "{{count}} 時間",
-    "keepAlways": "自分で停止するまで"
+    "keepAlways": "自分で停止するまで",
+    "mainModel": "メインのチャットモデル",
+    "mainModelHint": "新しいチャットが使うモデルです。常に準備は読み込んだままにして、すぐに答え始めます。Toskar に任せるは余裕がある間は準備しておき、必要なときにメモリを空けます。",
+    "mainModelHintNamed": "{{model}} は約 {{size}} のメモリが必要です。常に準備は読み込んだままにして、すぐに答え始めます。Toskar に任せるは余裕がある間は準備しておき、必要なときにメモリを空けます。",
+    "mainAlways": "常に準備",
+    "mainManaged": "Toskar に任せる"
   },
   "downloads": {
     "title": "モデルのダウンロード",

@@ -29,7 +29,8 @@ func (a *App) warmChat(ctx context.Context, req contracts.ModelWarmRequest) (con
 	if modelID == "" {
 		return contracts.ModelWarmResponse{Status: "none"}, nil
 	}
-	// Only the phone, tablet, watch, and TV apps warm up.
+	// A model a chat warmed up stays loaded for an hour, so the question
+	// that follows doesn't wait for it; the web UI warms up too (#1472).
 	a.noteDeviceUse(modelID)
 	running, _ := a.localRunningViews(ctx)
 	_, inflight := a.warming.Load(modelID)

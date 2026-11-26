@@ -133,7 +133,12 @@
     "keepMinutes_other": "{{count}} Minuten",
     "keepHours_one": "1 Stunde",
     "keepHours_other": "{{count}} Stunden",
-    "keepAlways": "Bis ich sie stoppe"
+    "keepAlways": "Bis ich sie stoppe",
+    "mainModel": "Haupt-Chatmodell",
+    "mainModelHint": "Das Modell, das ein neuer Chat verwendet. Immer bereit hält es geladen, damit Antworten sofort beginnen. Toskar entscheiden lassen hält es bereit, solange Platz ist, und gibt den Speicher bei Bedarf frei.",
+    "mainModelHintNamed": "{{model}} braucht etwa {{size}} Speicher. Immer bereit hält es geladen, damit Antworten sofort beginnen. Toskar entscheiden lassen hält es bereit, solange Platz ist, und gibt den Speicher bei Bedarf frei.",
+    "mainAlways": "Immer bereit",
+    "mainManaged": "Toskar entscheiden lassen"
   },
   "downloads": {
     "title": "Modelle laden",

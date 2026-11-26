@@ -616,6 +616,19 @@ type ModelWarmResponse struct {
 	Status  string `json:"status"`
 }
 
+// MainModelView is the main chat model and what keeping it ready costs
+// (#1472, contract 1.132). Fits says Toskar keeps it ready when it manages
+// it: it needs at most half of this computer's memory. AlwaysRunning says
+// it's kept running.
+type MainModelView struct {
+	ModelID          string `json:"model_id"`
+	Name             string `json:"name"`
+	MemoryBytes      uint64 `json:"memory_bytes"`
+	MemoryTotalBytes uint64 `json:"memory_total_bytes"`
+	Fits             bool   `json:"fits"`
+	AlwaysRunning    bool   `json:"always_running"`
+}
+
 // ModelStopRequest stops a loaded instance.
 type ModelStopRequest struct {
 	NodeID     string `json:"node_id,omitempty"`
@@ -1603,6 +1616,14 @@ type SettingsView struct {
 	// finished, in voice mode and at the door; off by default (#1460,
 	// contract 1.131).
 	VoiceSmartTurn bool `json:"voice_smart_turn"`
+	// MainModelReady is how the main chat model stays ready: "" until an
+	// Admin chooses (Toskar keeps it ready while it fits), "always" (kept
+	// running), or "managed" (#1472, contract 1.132).
+	MainModelReady string `json:"main_model_ready"`
+	// MainModel is the main chat model, for Admins choosing MainModelReady:
+	// the model a new chat on the default profile uses, when it's on this
+	// computer.
+	MainModel *MainModelView `json:"main_model,omitempty"`
 	// VoiceLanguage is the one language voice mode and the door hear, such
 	// as de, for a household that always speaks it; "" detects each turn's
 	// (#1405, contract 1.123).

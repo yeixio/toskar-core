@@ -135,7 +135,12 @@
     "keepHours_one": "1 heure",
     "keepHours_many": "{{count}} heures",
     "keepHours_other": "{{count}} heures",
-    "keepAlways": "Jusqu’à ce que je les arrête"
+    "keepAlways": "Jusqu’à ce que je les arrête",
+    "mainModel": "Modèle de chat principal",
+    "mainModelHint": "Le modèle qu'utilise un nouveau chat. Toujours prêt le garde chargé pour que les réponses commencent tout de suite. Laisser Toskar gérer le garde prêt tant qu'il y a de la place et libère la mémoire au besoin.",
+    "mainModelHintNamed": "{{model}} a besoin d'environ {{size}} de mémoire. Toujours prêt le garde chargé pour que les réponses commencent tout de suite. Laisser Toskar gérer le garde prêt tant qu'il y a de la place et libère la mémoire au besoin.",
+    "mainAlways": "Toujours prêt",
+    "mainManaged": "Laisser Toskar gérer"
   },
   "downloads": {
     "title": "Télécharger les modèles",

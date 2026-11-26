@@ -973,5 +973,17 @@
   "linkCheck": {
     "dead": "Ce lien ne s'est pas ouvert lors de la vérification",
     "unknown": "Ce lien n'a pas pu être vérifié"
+  },
+  "modelReady": {
+    "title": "Garder {{model}} prêt à répondre ?",
+    "body": "Quand un modèle n'est pas utilisé, Toskar le décharge pour libérer de la mémoire, et la réponse suivante attend qu'il se recharge. Choisissez le fonctionnement de votre modèle de chat principal.",
+    "always": "Toujours prêt",
+    "alwaysHint": "Les réponses commencent tout de suite. Garde environ {{size}} de mémoire occupés.",
+    "alwaysHintOf": "Les réponses commencent tout de suite. Garde environ {{size}} des {{total}} de cet ordinateur occupés.",
+    "managed": "Laisser Toskar gérer",
+    "managedHintFits": "Toskar le garde prêt tant qu'il y a de la place, et libère la mémoire quand une image ou un autre modèle en a besoin.",
+    "managedHintBig": "Il utilise beaucoup de mémoire, donc Toskar la libère quand il est inactif. La première réponse après une pause attend qu'il se charge.",
+    "later": "Vous pourrez changer cela plus tard dans",
+    "settings": "Réglages › Comportement de l'IA"
   }
 }
