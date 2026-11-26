@@ -34,6 +34,11 @@ type Email struct{}
 
 func (Email) ID() string   { return "email" }
 func (Email) Name() string { return "Email" }
+
+// replyLanguage has a message to someone else written in their language,
+// while what's said to the user stays in the user's (#1445).
+const replyLanguage = "Write a reply in the language of the message it answers, and a new message in the language the user writes to that person in, unless the user asks for another."
+
 func (Email) Description() string {
 	return "Search and read your mail, draft replies, and send or archive messages when you approve."
 }
@@ -757,9 +762,9 @@ func (e Email) Tools() []Tool {
 			Run: run(e.search)},
 		{Def: def("email.read", "Read email", "Read one message by its id from email.search: who sent it, when, and its text. It is not marked read.",
 			`{"id":"string"}`, tools.RiskRead, tools.PolicyAllow), Run: run(e.read)},
-		{Def: def("email.draft", "Draft email", "Save a plain-text message to Drafts for the user to review: \"to\" and \"cc\" are addresses, or set \"reply_to\" to a message id to reply in its thread.",
+		{Def: def("email.draft", "Draft email", "Save a plain-text message to Drafts for the user to review: \"to\" and \"cc\" are addresses, or set \"reply_to\" to a message id to reply in its thread. "+replyLanguage+"",
 			`{"to":"string","cc":"string","subject":"string","body":"string","reply_to":"string"}`, tools.RiskCreate, tools.PolicyAsk), Run: run(e.draft)},
-		{Def: def("email.send", "Send email", "Send a plain-text message from the user's address: \"to\" and \"cc\" are addresses, or set \"reply_to\" to a message id to reply in its thread. The user approves each message.",
+		{Def: def("email.send", "Send email", "Send a plain-text message from the user's address: \"to\" and \"cc\" are addresses, or set \"reply_to\" to a message id to reply in its thread. "+replyLanguage+" The user approves each message.",
 			`{"to":"string","cc":"string","subject":"string","body":"string","reply_to":"string"}`, tools.RiskWrite, tools.PolicyAsk), Run: run(e.send)},
 		{Def: def("email.archive", "Archive email", "Move a message, by its id from email.search, to the Archive folder.",
 			`{"id":"string"}`, tools.RiskWrite, tools.PolicyAsk), Run: run(e.archive)},
