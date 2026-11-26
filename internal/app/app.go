@@ -8,6 +8,7 @@ import (
 	"io/fs"
 	"log/slog"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -596,6 +597,16 @@ func New(opts Options) (*App, error) {
 		Swarm:  a.swarmTurn,
 		// Ollama's /api/embed uses the knowledge embedding model (#1356).
 		Embed: a.ollamaEmbed,
+		// A picture sent by its address is fetched from there (#1415).
+		PictureFetched: func(ctx context.Context, raw string) {
+			host := raw
+			if u, err := url.Parse(raw); err == nil && u.Hostname() != "" {
+				host = u.Hostname()
+				u.RawQuery, u.Fragment = "", ""
+				raw = u.String()
+			}
+			a.Egress.Add(context.WithoutCancel(ctx), egress.WebPage, host, "a picture an API request sent by its address: "+raw)
+		},
 		ErrorCode: func(text string) string {
 			code, _ := chatErrorCode(text)
 			return code

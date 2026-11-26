@@ -89,6 +89,7 @@ Everything else is sent only when a feature that talks to the network is used:
 | Bifrost discovery and pairing | Other computers on the local network, or the static peers you listed |
 | Joining a network (`toskarctl join`) | The computer that made the join command: this computer's name, ID, public key, and Bifrost address. The token itself is never sent; only a proof made from it. Leaving tells each paired computer. Both are recorded. |
 | LAN API | Any client that can reach port 7331 after you turn on local network access |
+| A picture sent to the API by its address (`image_url` with an `https://` URL) | That address, from this computer, over the internet only: addresses on this computer or its network are refused. Each one is recorded as a web page. |
 
 ## What left this computer
 
