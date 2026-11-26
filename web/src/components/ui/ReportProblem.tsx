@@ -10,7 +10,9 @@ import { useDialog } from '@/lib/useDialog'
 /**
  * Report this: a link beside an error that shows everything a report
  * would send, lets the person add what they were doing, and sends it to
- * the Toskar team, by email when that can't be done here (#588).
+ * the Toskar team, by email when that can't be done here (#588). With no
+ * error, it's Report a problem (#201): the person says what went wrong,
+ * for something no error message shows.
  */
 export function ReportProblem({ error, code, className }: { error: string; code?: string; className?: string }) {
   const { t } = useTranslation()
@@ -18,7 +20,7 @@ export function ReportProblem({ error, code, className }: { error: string; code?
   return (
     <>
       <button type="button" className={className ?? 'text-xs text-ink-faint hover:text-ink'} onClick={() => setOpen(true)}>
-        {t('report.open')}
+        {error || code ? t('report.open') : t('report.generalOpen')}
       </button>
       {open ? <ReportDialog error={error} code={code} onClose={() => setOpen(false)} /> : null}
     </>
@@ -44,7 +46,12 @@ function ReportDialog({ error, code, onClose }: { error: string; code?: string; 
   })
   const settings = useQuery({ queryKey: ['settings'], queryFn: () => api.getSettings(), retry: false })
   const app = isDesktopShell() ? 'desktop' : 'web'
-  const problem = { error, code, where: pathname, app }
+  // Report a problem: what the person wrote is the problem, and its first
+  // line is what the Toskar team groups reports by.
+  const general = !error && !code
+  const described = note.trim()
+  const shown = general ? (described.split('\n')[0] ?? '').slice(0, 200) : error
+  const problem = { error: shown, code, where: pathname, app }
   const included = details ? report.data : null
   const full = reportText(problem, note, included)
   const subject = `Toskar problem: ${code || pathname}`
@@ -56,8 +63,8 @@ function ReportDialog({ error, code, onClose }: { error: string; code?: string; 
         app: report.data?.version ? `${app} ${report.data.version}` : app,
         where: pathname,
         code,
-        error,
-        note: note.trim() || undefined,
+        error: shown,
+        note: described || undefined,
         email: email.trim() || undefined,
         details,
       }),
@@ -69,6 +76,7 @@ function ReportDialog({ error, code, onClose }: { error: string; code?: string; 
   const invalid = errorCode(send.error) === 'REPORT_INVALID'
   const sent = send.data
   const waiting = report.isPending && details
+  const empty = general && !described
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center scrim p-4 sm:items-center" role="presentation" onClick={onClose}>
       <div
@@ -80,7 +88,7 @@ function ReportDialog({ error, code, onClose }: { error: string; code?: string; 
         onClick={(event) => event.stopPropagation()}
       >
         <h2 id="report-title" className="font-display text-lg font-semibold text-ink">
-          {t('report.title')}
+          {general ? t('report.generalTitle') : t('report.title')}
         </h2>
         {sent ? (
           <>
@@ -97,11 +105,12 @@ function ReportDialog({ error, code, onClose }: { error: string; code?: string; 
           <>
             <p className="text-sm text-ink-muted">{off ? t('report.off') : t('report.body')}</p>
             <label className="block text-sm font-medium text-ink">
-              {t('report.noteLabel')}
+              {general ? t('report.generalLabel') : t('report.noteLabel')}
               <textarea
                 className="field mt-1 min-h-[4.5rem] w-full font-normal"
                 value={note}
-                placeholder={t('report.notePlaceholder')}
+                required={general}
+                placeholder={general ? t('report.generalPlaceholder') : t('report.notePlaceholder')}
                 data-autofocus
                 onChange={(event) => setNote(event.target.value)}
               />
@@ -157,7 +166,7 @@ function ReportDialog({ error, code, onClose }: { error: string; code?: string; 
                   {t('report.sendEmail')}
                 </a>
               ) : (
-                <button type="button" className="btn-primary" disabled={waiting || send.isPending} onClick={() => send.mutate()}>
+                <button type="button" className="btn-primary" disabled={waiting || empty || send.isPending} onClick={() => send.mutate()}>
                   {send.isPending ? t('report.sending') : t('report.send')}
                 </button>
               )}

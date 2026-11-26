@@ -102,7 +102,11 @@
     "failed": "Al momento non è stato possibile inviarla da qui. Invia la stessa segnalazione per email.",
     "invalid": "Controlla l'indirizzo email, poi invia di nuovo.",
     "sendEmail": "Invia per email",
-    "orEmail": "Oppure inviala per email"
+    "orEmail": "Oppure inviala per email",
+    "generalOpen": "Segnala un problema",
+    "generalTitle": "Segnala un problema",
+    "generalLabel": "Cosa non ha funzionato?",
+    "generalPlaceholder": "Per esempio: le risposte in francese si fermano dopo una frase"
   },
   "loadError": {
     "title": "Toskar non è riuscito a caricare questo",

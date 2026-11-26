@@ -99,7 +99,11 @@
     "failed": "It couldn't be sent from here right now. Send the same report by email instead.",
     "invalid": "Check the email address, then send again.",
     "sendEmail": "Send by email",
-    "orEmail": "Or send it by email"
+    "orEmail": "Or send it by email",
+    "generalOpen": "Report a problem",
+    "generalTitle": "Report a problem",
+    "generalLabel": "What went wrong?",
+    "generalPlaceholder": "For example: answers in French stop after a sentence"
   },
   "loadError": {
     "title": "Toskar couldn't load this",

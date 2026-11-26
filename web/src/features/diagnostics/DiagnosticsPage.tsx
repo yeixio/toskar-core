@@ -500,6 +500,8 @@ export function DiagnosticsPage() {
             {diagnosticsMutation.isPending ? t('page.creating') : t('page.export')}
           </button>
           <p className="mt-1.5 max-w-[14rem] text-start text-[11px] text-ink-faint sm:text-end">{t('page.exportHint')}</p>
+          {/* Something wrong that no error shows (#201). */}
+          <ReportProblem error="" className="mt-1 text-sm font-medium text-primary hover:underline" />
         </div>
       </header>
 

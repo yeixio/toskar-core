@@ -102,7 +102,11 @@
     "failed": "Não foi possível enviar daqui agora. Envie o mesmo relatório por e-mail.",
     "invalid": "Confira o e-mail e envie de novo.",
     "sendEmail": "Enviar por e-mail",
-    "orEmail": "Ou envie por e-mail"
+    "orEmail": "Ou envie por e-mail",
+    "generalOpen": "Relatar um problema",
+    "generalTitle": "Relatar um problema",
+    "generalLabel": "O que deu errado?",
+    "generalPlaceholder": "Por exemplo: as respostas em francês param depois de uma frase"
   },
   "loadError": {
     "title": "O Toskar não conseguiu carregar isto",

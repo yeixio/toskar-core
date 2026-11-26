@@ -99,7 +99,11 @@
     "failed": "Von hier konnte er gerade nicht gesendet werden. Sende denselben Bericht stattdessen per E-Mail.",
     "invalid": "Prüfe die E-Mail-Adresse und sende erneut.",
     "sendEmail": "Per E-Mail senden",
-    "orEmail": "Oder per E-Mail senden"
+    "orEmail": "Oder per E-Mail senden",
+    "generalOpen": "Problem melden",
+    "generalTitle": "Problem melden",
+    "generalLabel": "Was ist schiefgelaufen?",
+    "generalPlaceholder": "Zum Beispiel: Antworten auf Französisch brechen nach einem Satz ab"
   },
   "loadError": {
     "title": "Toskar konnte das nicht laden",

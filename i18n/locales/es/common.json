@@ -102,7 +102,11 @@
     "failed": "No se pudo enviar desde aquí en este momento. Envía el mismo informe por correo electrónico.",
     "invalid": "Revisa el correo electrónico y vuelve a enviar.",
     "sendEmail": "Enviar por correo electrónico",
-    "orEmail": "O envíalo por correo electrónico"
+    "orEmail": "O envíalo por correo electrónico",
+    "generalOpen": "Informar de un problema",
+    "generalTitle": "Informar de un problema",
+    "generalLabel": "¿Qué salió mal?",
+    "generalPlaceholder": "Por ejemplo: las respuestas en francés se cortan tras una frase"
   },
   "loadError": {
     "title": "Toskar no pudo cargar esto",
