@@ -1448,6 +1448,7 @@
     "micFailed": "The microphone couldn't be started.",
     "muted": "Microphone off",
     "you": "You:",
+    "youIn": "You ({{language}}):",
     "waited": "Answered {{seconds}} s after you stopped",
     "mute": "Mute",
     "unmute": "Unmute",

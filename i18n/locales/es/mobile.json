@@ -1469,6 +1469,7 @@
     "micFailed": "No se pudo iniciar el micrófono.",
     "muted": "Micrófono apagado",
     "you": "Tú:",
+    "youIn": "Tú ({{language}}):",
     "waited": "Respondió {{seconds}} s después de que pararas",
     "mute": "Silenciar",
     "unmute": "Activar sonido",

@@ -1469,6 +1469,7 @@
     "micFailed": "Le micro n’a pas pu démarrer.",
     "muted": "Micro coupé",
     "you": "Vous :",
+    "youIn": "Vous ({{language}}) :",
     "waited": "Réponse {{seconds}} s après la fin de votre phrase",
     "mute": "Couper le micro",
     "unmute": "Réactiver le micro",
