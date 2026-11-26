@@ -5293,6 +5293,159 @@
         "Copy the link and send it to them. It works once, for a week.",
         "They open it, choose a username and password, and are signed in. Next time, they sign in at the same address.",
         "Forgot a password? Choose New password link next to their name and send them the new link."
+      ],
+      "kind": "task",
+      "summary": "Share one Toskar with your household or team, each person with their own private chats, and choose what each may do.",
+      "blocks": [
+        {
+          "type": "list",
+          "title": "What you need",
+          "items": [
+            "The Owner's or an Admin's account. The Owner is whoever installed Toskar, and uses it on this computer without signing in.",
+            "For people on other computers and devices, Local network access turned on in Settings › Network access."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Roles"
+        },
+        {
+          "type": "table",
+          "columns": [
+            "Role",
+            "What they can do"
+          ],
+          "rows": [
+            [
+              "Owner",
+              "Everything, including managing Admins. There's one Owner, and nobody can remove them."
+            ],
+            [
+              "Admin",
+              "Manage models, tools, knowledge, computers, settings, and people other than Admins and the Owner."
+            ],
+            [
+              "Member",
+              "Use Toskar: their own chats, memories, files, and automations."
+            ],
+            [
+              "Visitor",
+              "Chat, and nothing more."
+            ]
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Each person's chats, memories, files, and automations are private to them, the Owner's too. Models, tools, knowledge, and profiles are shared. Each person sees only the pages their role can use."
+        },
+        {
+          "type": "image",
+          "screen": "people-page",
+          "alt": "Settings › People with Add a person at the top and What people may use below it, a table of what Admins, Members, and Visitors may use.",
+          "caption": "Turn a use on or off for a whole role here; someone's own Allow or Block on their row comes first."
+        },
+        {
+          "type": "heading",
+          "text": "Add someone"
+        },
+        {
+          "type": "steps",
+          "items": [
+            "Open Settings › People.",
+            "Under Add a person, write their name, choose their role, and choose Add.",
+            "Copy the link it shows and send it to them. It works once, for a limited time.",
+            "They open the link, choose a username and a password of at least 10 characters, and they're signed in."
+          ]
+        },
+        {
+          "type": "image",
+          "screen": "people-invite",
+          "alt": "Settings › People after adding Ana: the link to send her, a Copy link button, when the link stops working, and a note that only this computer can open it until network access is on.",
+          "caption": "The link works once. Until network access is on, only this computer can open it."
+        },
+        {
+          "type": "paragraph",
+          "text": "From a terminal on this computer, `toskarctl people add` does the same and prints the link:"
+        },
+        {
+          "type": "code",
+          "language": "sh",
+          "test": "people-add",
+          "code": "toskarctl people add \"Ana\" --role member",
+          "output": "Added Ana (member, ID …).\nThey set up their sign-in with this link, which works once until …:\n\n  …"
+        },
+        {
+          "type": "heading",
+          "text": "Signing in from other devices"
+        },
+        {
+          "type": "list",
+          "items": [
+            "In a browser on another computer, people open this computer's address and sign in with their username and password.",
+            "A phone, tablet, or TV connects with the 6-digit code under Settings › Your devices, as that person. They can disconnect it there.",
+            "Apps and scripts use an API key from Settings › API keys. People never need one.",
+            "The Owner uses this computer without signing in. To sign in from elsewhere, the Owner makes a sign-in link on People and chooses a password."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Change, disable, or remove someone"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Change someone's role from their row on People. Only the Owner changes an Admin.",
+            "New password link gives them a link to choose a new password. Their other devices are signed out.",
+            "Disable signs them out everywhere and stops their keys and automations. Their chats and memories stay, and Enable brings them back.",
+            "Removing someone deletes their chats, memories, automations, and files, or gives them to another person. It's done from a terminal with `toskarctl people rm`, which asks you to type their name first."
+          ]
+        },
+        {
+          "type": "code",
+          "language": "sh",
+          "code": "toskarctl people rm ana --transfer-to Owner"
+        },
+        {
+          "type": "paragraph",
+          "text": "This example has no test, because it removes someone. Without `--transfer-to`, their data is deleted."
+        },
+        {
+          "type": "heading",
+          "text": "Troubleshooting"
+        },
+        {
+          "type": "table",
+          "columns": [
+            "What you see",
+            "What to do"
+          ],
+          "rows": [
+            [
+              "Only this computer can open it until local network access is on",
+              "Turn on Settings › Network access, then send the link again."
+            ],
+            [
+              "This link doesn't work anymore",
+              "It expired or was already used. Make a new one with Sign-in link or New password link on their row."
+            ],
+            [
+              "Someone forgot their password",
+              "Choose New password link on their row and send it to them."
+            ],
+            [
+              "Someone can't see a page they need",
+              "Their role doesn't include it. Change their role, or turn the feature on for their role under What people may use."
+            ]
+          ]
+        },
+        {
+          "type": "related",
+          "sections": [
+            "portals",
+            "memory",
+            "phone"
+          ]
+        }
       ]
     },
     {
@@ -5311,6 +5464,139 @@
         "Under Add a portal, type a name; the address fills in from it. Choose who can chat: anyone with a passcode you set, anyone on your network, the Members who sign in to this Toskar, or only people you invite. For invited portals, invite each person by name in the portal's editor and send them their link.",
         "Choose the profile, tools, and language, and how it looks: heading, logo, accent colour, theme, welcome message, suggested prompts, and footer. The preview shows the page as visitors will see it.",
         "Copy the link and share it. Local network access has to be on for other devices to open it."
+      ],
+      "kind": "task",
+      "summary": "Give customers, students, or anyone you help a chat page in your own name, without the rest of Toskar.",
+      "blocks": [
+        {
+          "type": "list",
+          "title": "What you need",
+          "items": [
+            "The Owner's or an Admin's account.",
+            "A profile for it to answer with, such as one with topic controls that keep it to your business. See [Profiles](#profiles).",
+            "For visitors on other devices, Local network access turned on. For visitors on the internet, a way to reach this computer, such as [Access from anywhere](#anywhere)."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Make a portal"
+        },
+        {
+          "type": "steps",
+          "items": [
+            "Open Settings › Portals.",
+            "Under Add a portal, give it a name and an address, and choose Add portal.",
+            "Choose Edit. Under How it answers, pick the profile and the tools it may use: none, tools that only read, or the profile's own.",
+            "Under Who can chat, choose anyone on the network, anyone with a passcode, Members who sign in, or only people you invite.",
+            "Under How it looks, set the heading, logo, colours, welcome message, and suggested prompts, then choose Save.",
+            "Choose Copy link and send it to the people you serve."
+          ]
+        },
+        {
+          "type": "image",
+          "screen": "portals-edit",
+          "alt": "Editing the Yarn shop help portal, with How it answers, Who can chat, Limits, and How it looks on the left, and a preview of the visitor's page titled Ask the yarn shop on the right",
+          "caption": "The preview shows the page as a visitor sees it, with your heading, colours, and suggested prompts."
+        },
+        {
+          "type": "heading",
+          "text": "What visitors see, and what you see"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Visitors see only the chat. None of Toskar's other pages show.",
+            "Each visitor's chats are their own. They never see your chats, memories, or knowledge, and their chats never reach your memory or knowledge.",
+            "A portal starts with no tools and no memory. Remember things for each visitor keeps facts for each one, apart from everyone else's.",
+            "Conversations, beside each portal, lists its visitors' chats for you to read. The portal tells visitors that the people who run it can read their chats. A Members only portal's chats stay each Member's own.",
+            "Each portal counts how many visitors wrote and how many messages they sent, and keeps visitors' chats for the time you choose, 30 days to start."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Limits"
+        },
+        {
+          "type": "table",
+          "columns": [
+            "Limit",
+            "What it does"
+          ],
+          "rows": [
+            [
+              "Messages per visitor an hour",
+              "Stops one visitor from using it all. 0 means no limit."
+            ],
+            [
+              "Longest message",
+              "The most characters one message may have."
+            ],
+            [
+              "Chats at once",
+              "How many of its chats answer at the same time. The rest wait their turn."
+            ]
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Portal chats wait for your own chats and for the people who use Toskar, so a busy portal never slows you down. They come before automations."
+        },
+        {
+          "type": "heading",
+          "text": "Put it on your website"
+        },
+        {
+          "type": "steps",
+          "items": [
+            "In the portal's editor, under Embedding, list your website's address, such as https://shop.example.com, and choose Save.",
+            "Copy the chat button or the frame snippet, and paste it into your website's pages."
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Only the websites you list can show it."
+        },
+        {
+          "type": "heading",
+          "text": "Turn it off"
+        },
+        {
+          "type": "paragraph",
+          "text": "Turn a portal off with its switch in Settings › Portals. It stops at once, even for someone in the middle of a chat. Remove deletes it, and its visitors can no longer chat."
+        },
+        {
+          "type": "heading",
+          "text": "Troubleshooting"
+        },
+        {
+          "type": "table",
+          "columns": [
+            "What you see",
+            "What to do"
+          ],
+          "rows": [
+            [
+              "Only this computer can open it until local network access is on",
+              "Turn on Settings › Network access, then send the link again."
+            ],
+            [
+              "Visitors see that this chat is busy",
+              "More chats are running than Chats at once allows. Raise it, or wait a moment."
+            ],
+            [
+              "The portal doesn't show on your website",
+              "List the website's exact address under Embedding, with https:// and no path, then copy the snippet again."
+            ]
+          ]
+        },
+        {
+          "type": "related",
+          "sections": [
+            "people",
+            "profiles",
+            "anywhere"
+          ]
+        }
       ]
     },
     {
