@@ -59,15 +59,8 @@ type vad struct {
 
 // earlyPauseMs is the quiet after which a paused turn is judged, while the
 // pause goes on (#1460). Smart Turn is made for about this much silence
-// after the words, and a finished verdict then ends the turn sooner than
-// the whole pause would have.
+// after the words, and its verdict is then ready when the pause ends.
 const earlyPauseMs = 300
-
-// inPause reports that the turn is still paused at pause.
-func (v *vad) inPause(pause int) bool { return v.speaking && v.quiet > 0 && v.pause == pause }
-
-// end ends the turn now, as the pause would have.
-func (v *vad) end() { v.speaking, v.loud, v.quiet = false, 0, 0 }
 
 // pauseFrames are 2.5 s: speech pauses, if only to breathe, at least that
 // often, and its pauses fall to the room's noise; a fan or traffic that

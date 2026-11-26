@@ -210,7 +210,6 @@ type heldTurn struct {
 	verdict verdict
 	stopped bool
 	endMs   int
-	at      int // the sample the pause began at
 }
 
 // verdict is what the judge said about a pause.
@@ -459,10 +458,10 @@ func (s *Session) append(samples []int16) {
 			if s.parts.Judge == nil {
 				continue
 			}
-			// Ask while the pause goes on: a finished verdict ends the turn
-			// now, sooner than the whole pause would (#1460).
+			// Ask while the pause goes on, so the verdict is ready when the
+			// pause ends (#1460).
 			s.mu.Lock()
-			h := &heldTurn{item: s.turnItem, create: td.creates(), pause: e.pause, endMs: ms(e.at), at: e.at}
+			h := &heldTurn{item: s.turnItem, create: td.creates(), pause: e.pause, endMs: ms(e.at)}
 			s.early = h
 			end := len(s.buffer) - (offset + len(samples) - e.at) + earlyPauseMs*SampleRate/1000
 			if end > len(s.buffer) {
@@ -548,8 +547,11 @@ func (s *Session) judge(h *heldTurn, audio []int16, endMs int) {
 }
 
 // judgeEarly asks whether a turn sounds finished while its pause goes on
-// (#1460). Finished, while the pause still does, ends the turn there. Once
-// the whole pause went by, the verdict decides as judge's does.
+// (#1460), so the verdict is there when the pause ends: finished ends the
+// turn then, with no wait for the judge. It doesn't end the turn sooner:
+// in the voice bench, a turn ended 300 ms into a pause was answered
+// mid-sentence twice as often, since "call the dentist?" sounds finished
+// before "on Friday afternoon".
 func (s *Session) judgeEarly(h *heldTurn, audio []int16) {
 	v := verdictNone
 	if len(audio) > 0 {
@@ -576,19 +578,8 @@ func (s *Session) judgeEarly(h *heldTurn, audio []int16) {
 		}
 		s.mu.Unlock()
 		s.release(h, h.endMs)
-	case s.early == h && v == verdictFinished && s.vad.inPause(h.pause):
-		// Still paused, and it sounds finished: the turn ends here, with
-		// the quiet heard so far.
-		s.early = nil
-		s.vad.end()
-		s.inSpeech = false
-		if end := len(s.buffer) - (s.samples - h.at) + tailMs*SampleRate/1000; end > 0 && end < len(s.buffer) {
-			s.buffer = s.buffer[:end]
-		}
-		s.mu.Unlock()
-		s.emit("input_audio_buffer.speech_stopped", map[string]any{"audio_end_ms": h.endMs, "item_id": h.item})
-		s.commitTurn(h.item, h.create)
 	default:
+		// Still paused, or the words went on: the pause decides.
 		s.mu.Unlock()
 	}
 }

@@ -519,9 +519,10 @@ func (r *recorder) has(kind string) bool {
 	return false
 }
 
-// A turn that sounds finished ends while its pause goes on, before the
-// whole pause would have ended it (#1460).
-func TestSessionEndsAFinishedTurnEarly(t *testing.T) {
+// A turn that sounds finished is judged while its pause goes on, so it
+// ends when the pause does, with no wait for the judge after it; not
+// before, since a pause after "call the dentist?" can still go on (#1460).
+func TestSessionEndsAFinishedTurnWithThePause(t *testing.T) {
 	rec := newRecorder()
 	judge := &judgeSays{answers: []float64{0.9}}
 	s := NewSession(Parts{Transcriber: &fakeSTT{text: "What time is it?"}, Responder: &fakeLLM{deltas: []string{"Noon."}}, Speaker: &fakeTTS{}, Judge: judge}, rec.send)
@@ -534,8 +535,14 @@ func TestSessionEndsAFinishedTurnEarly(t *testing.T) {
 		fed += 0.1
 		time.Sleep(40 * time.Millisecond)
 	}
-	if fed > 0.75 {
-		t.Fatalf("the turn ended after %.1f s of quiet, want well before the 0.9 s pause", fed)
+	if fed < 0.85 || fed > 1.15 {
+		t.Fatalf("the turn ended after %.1f s of quiet, want with the 0.9 s pause", fed)
+	}
+	judge.mu.Lock()
+	asked := len(judge.heard)
+	judge.mu.Unlock()
+	if asked != 1 {
+		t.Fatalf("judged %d times, want once, during the pause", asked)
 	}
 	rec.waitFor(t, "response.done")
 	speak(s, quiet(1.5))

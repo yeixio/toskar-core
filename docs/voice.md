@@ -136,12 +136,14 @@ Errors are `error` events with `error.code`, such as `invalid_audio`,
   default, so a pause mid-sentence doesn't end a turn and get answered.
   Smart Turn v3 (`internal/speech/turn.go`, BSD-2-Clause, 8.7 MB on
   the processor) hears the turn's last 8 s and says whether it sounds
-  finished. It's asked 300 ms into each pause, while the pause goes on
-  (#1460): finished ends the turn there, sooner than the whole pause
-  would; a verdict that comes after more words is dropped. Unfinished, or
-  no answer before the pause ends (within 1.5 s), leaves it to the pause:
-  unfinished then waits up to 2 s more, and words in that time are the
-  same turn (#1403). Its model loads when voice mode opens, and each
+  finished. It's asked 300 ms into each pause, while the pause goes on,
+  so its verdict is ready when the pause ends (#1460): finished, or no
+  answer in time, ends the turn with the pause, with no
+  wait for the check after it; one still coming gets up to 1.5 s. It doesn't end a turn before the pause does: in the
+  voice bench, ending at 300 ms answered twice as many turns
+  mid-sentence, since "call the dentist?" sounds finished before "on
+  Friday afternoon". Unfinished waits up to 2 s more, and words in that
+  time are the same turn (#1403). Its model loads when voice mode opens, and each
   verdict and its time are in the log (`voice turn check`).
   `speech_stopped` is sent when the turn really ends. Until
   its file has downloaded, the pause alone ends a turn. The front door
