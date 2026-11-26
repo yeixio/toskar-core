@@ -1798,6 +1798,9 @@ func setSettingString(ctx context.Context, repo *repositories.SettingsRepo, key,
 }
 
 func (a *App) applySettingsPatch(ctx context.Context, patch map[string]any) error {
+	if err := unknownSetting(patch); err != nil {
+		return err
+	}
 	if v, ok := patch["huggingface_token"].(string); ok {
 		if err := a.setHuggingFaceToken(v); err != nil {
 			return err
