@@ -266,4 +266,3 @@ func TestContinueAutomationRunInChat(t *testing.T) {
 		t.Fatal("continued a run under another automation")
 	}
 }
-
