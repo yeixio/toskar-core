@@ -1062,6 +1062,11 @@
     "results": "Risultati",
     "noResults": "Ancora nessun risultato. Eseguila ora per vederne uno.",
     "askAboutIt": "Chiedi informazioni in una chat",
+    "clearHistory": "Cancella cronologia",
+    "clearHistoryTitle": "Cancellare la cronologia di questa automazione?",
+    "clearHistoryBody": "Le sue esecuzioni concluse vengono rimosse qui e sul tuo computer. Quelle in corso restano, e l'automazione mantiene la sua pianificazione.",
+    "clearWithPictures": "Cancella, anche le immagini",
+    "removeRun": "Rimuovi",
     "status": {
       "claimed": "In avvio",
       "running": "In esecuzione",

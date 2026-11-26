@@ -1034,6 +1034,11 @@
     "results": "结果",
     "noResults": "还没有结果。立即运行即可看到。",
     "askAboutIt": "在聊天中询问这个结果",
+    "clearHistory": "清除历史记录",
+    "clearHistoryTitle": "清除此自动化的历史记录？",
+    "clearHistoryBody": "已完成的运行会从这里和你的电脑上移除。仍在进行的运行会保留，自动化的计划也不变。",
+    "clearWithPictures": "清除并删除图片",
+    "removeRun": "移除",
     "status": {
       "claimed": "正在开始",
       "running": "正在运行",

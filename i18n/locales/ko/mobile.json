@@ -1034,6 +1034,11 @@
     "results": "결과",
     "noResults": "아직 결과가 없습니다. 지금 실행해 보세요.",
     "askAboutIt": "채팅에서 이것에 대해 묻기",
+    "clearHistory": "기록 지우기",
+    "clearHistoryTitle": "이 자동화의 기록을 지울까요?",
+    "clearHistoryBody": "끝난 실행이 여기와 컴퓨터에서 삭제돼요. 진행 중인 실행은 남고, 자동화 일정도 그대로예요.",
+    "clearWithPictures": "사진까지 삭제하고 지우기",
+    "removeRun": "삭제",
     "status": {
       "claimed": "시작 중",
       "running": "실행 중",

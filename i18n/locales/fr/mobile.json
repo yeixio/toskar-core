@@ -1062,6 +1062,11 @@
     "results": "Résultats",
     "noResults": "Aucun résultat pour l’instant. Exécutez-la maintenant pour en voir un.",
     "askAboutIt": "En parler dans un chat",
+    "clearHistory": "Effacer l'historique",
+    "clearHistoryTitle": "Effacer l'historique de cette automatisation ?",
+    "clearHistoryBody": "Ses exécutions terminées sont supprimées ici et sur votre ordinateur. Celles en cours restent, et l'automatisation garde sa planification.",
+    "clearWithPictures": "Effacer, avec les images",
+    "removeRun": "Supprimer",
     "status": {
       "claimed": "Démarrage",
       "running": "En cours",
