@@ -114,6 +114,42 @@ Settings is reached from the sidebar's footer.
 
 Tabs: Chat, Activity, Models, Computers, Settings. Settings is one list: This iPhone (where chats run), Chat on the phone (web look-up, suggest models, memory), Language, Speed test, Computer (connected computer, encryption, version, forget), Computer settings (Memory, Personalization, Privacy), About, Danger zone. There is no Notifications section (toskar-apps #498).
 
+### 4.1 Mac app today (`toskar-apps/desktop`)
+
+The Mac app is the web UI in a window, so its Settings are the web UI's Settings, in the section 6 structure. **Settings…** (⌘,) in the app menu opens them. What the app adds itself (read from the code at toskar-apps `fe7e28d`, #1444):
+
+| Control | Where | Scope | Notes |
+| --- | --- | --- | --- |
+| About Toskar Pro | App menu | Device | Version and credits |
+| Settings… (⌘,) | App menu | Device | Opens Settings in the window; on Windows it's under File |
+| Hide, Hide Others, Show All, Quit Toskar Pro (⌘Q) | App menu | Device | Quit also stops the local AI service |
+| New chat (⌘N) | File | Device | |
+| Undo, Cut, Copy, Paste, Select All | Edit | Device | The standard Edit menu, so text fields take ⌘C and ⌘V |
+| Minimize (⌘M), Zoom, Close Window (⌘W) | Window | Device | Closing the window leaves Toskar running in the menu bar |
+| Open Toskar Pro, Stop background service | Menu bar item | Device | Stop says it stops the local AI service and quits |
+| Launch at login | Settings › General (`launch_at_login`) | Install | A web setting that the app applies as a login item |
+| Menu and menu bar language | Follows the page's App language | Person | The page tells the app when it changes |
+| Unlock (subscription) | Shown before the app opens, when not unlocked | Device | The Mac App Store paywall |
+
+Against the section 11 checklist: it follows the web UI's results, and adds nothing that needs a place of its own. Two notes: there's no Help menu, which Mac apps usually have, and the menu bar item shows the text "Ygg" for a moment before its icon loads.
+
+### 4.2 Apple TV app today (`toskar-apps/tv`)
+
+The TV app has no Settings screen. Everything is in context:
+
+| Control | Where | Scope | Notes |
+| --- | --- | --- | --- |
+| Who's watching? | The first screen, with more than one person | Device | Choose a person, or Add someone with a code from their own account |
+| Not {name}? | Chat | Device | Back to Who's watching, keeping everyone |
+| Disconnect | Chat | Device | Asks first, since connecting again needs a new code; tells the computer to forget the key |
+| Projects | Chat | Person | Continue a chat in one of your projects |
+| Report a problem | Chat | Device | Sends to the Toskar team, or a QR code to email it; an Admin can turn sending off |
+| Try it without a computer, Leave the demo | Connect, Locked | Device | Sample answers only |
+| Unlock, Restore | Locked | Device | Toskar Unlock, or unlock in the phone app |
+| Language | The TV's own language | Device | No in-app choice |
+
+Against the section 11 checklist, with no settings of its own, placement, grouping, labels and room to grow all hold; Disconnect is the one destructive action and asks first. Settings for the computer are changed on the computer or the phone, which fits a TV.
+
 ## 5. Audit against the section 11 checklist
 
 | Checklist item | Web UI today | Phone app today |
