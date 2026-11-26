@@ -102,6 +102,12 @@ Errors are `error` events with `error.code`, such as `invalid_audio`,
   click, a cough, or a knock doesn't, and a dip between syllables doesn't
   start the count over. `silence_duration_ms` of quiet ends it: 900 ms by
   default, so a pause mid-sentence doesn't end a turn and get answered.
+  Then Smart Turn v3 (`internal/speech/turn.go`, BSD-2-Clause, 8.7 MB on
+  the processor) hears the turn's last 8 s and says whether it sounds
+  finished: finished, or no answer within 1.5 s, ends the turn at once;
+  unfinished waits up to 2 s more, and words in that time are the same
+  turn (#1403). `speech_stopped` is sent when the turn really ends. Until
+  its file has downloaded, the pause alone ends a turn.
   Once a turn started, words 40% softer than that keep it going, so a
   last word that trails off, from a microphone across the room, doesn't
   end it early. The noise level is learned from the first 300 ms, then

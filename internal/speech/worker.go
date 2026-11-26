@@ -61,6 +61,7 @@ type Worker struct {
 	stopFetch    context.CancelFunc
 	fetched      chan struct{}
 	kitten       kittenJob
+	turn         turnJob
 }
 
 // The worker's environments: the speech environment, and Kitten's own.
@@ -91,8 +92,10 @@ type workerAnswer struct {
 	Probability float64 `json:"probability"`
 	PCM         string  `json:"pcm"`
 	Rate        int     `json:"rate"`
-	Error       string  `json:"error"`
-	ID          string  `json:"id"`
+	// Finished is Smart Turn's answer: how likely the turn is over.
+	Finished float64 `json:"finished"`
+	Error    string  `json:"error"`
+	ID       string  `json:"id"`
 }
 
 // Transcribe returns what pcm, 16-bit mono at 16 kHz, says. quality is

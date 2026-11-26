@@ -99,12 +99,29 @@ type Speaker interface {
 	Speak(ctx context.Context, text, voice, language string) ([]int16, error)
 }
 
-// Parts are a session's stages.
+// TurnJudge says, from the audio, how likely it is that the person has
+// finished what they were saying: 0 to 1 (#1403). samples are at SampleRate.
+type TurnJudge interface {
+	TurnFinished(ctx context.Context, samples []int16) (float64, error)
+}
+
+// Parts are a session's stages. Judge is optional: without it, or when it
+// fails, the pause alone ends a turn.
 type Parts struct {
 	Transcriber Transcriber
 	Responder   Responder
 	Speaker     Speaker
+	Judge       TurnJudge
 }
+
+// A pause that doesn't sound finished keeps listening this much longer
+// before the turn ends anyway (#1403), and the judge gets this long to say.
+const (
+	unfinishedWait = 2 * time.Second
+	judgeTimeout   = 1500 * time.Millisecond
+	// finishedAt is the judge's answer from which a turn is over.
+	finishedAt = 0.5
+)
 
 // SessionConfig is session.update's session: what the client may set.
 type SessionConfig struct {
@@ -143,6 +160,9 @@ type Session struct {
 	prefix   []int16 // the last moments before speech started
 	inSpeech bool
 	turnItem string
+	// held is a turn whose pause didn't sound finished: it waits a little
+	// for more words before it's committed (#1403).
+	held *heldTurn
 	// lastText is the last turn's transcript, for response.create.
 	lastText string
 	// lastHeard is the language it was spoken in, when sure, or "".
@@ -156,6 +176,14 @@ type Session struct {
 	turns chan func()
 	done  chan struct{}
 	once  sync.Once
+}
+
+// heldTurn is a turn that paused; a judgment or timer for one no longer
+// held does nothing.
+type heldTurn struct {
+	item   string
+	create bool
+	timer  *time.Timer
 }
 
 // response is one answer: its ids, and how to stop it.
@@ -277,6 +305,7 @@ func (s *Session) Handle(raw []byte) {
 		s.commit(in.EventID)
 	case "input_audio_buffer.clear":
 		s.mu.Lock()
+		s.unhold()
 		s.buffer, s.inSpeech = nil, false
 		s.mu.Unlock()
 		s.emit("input_audio_buffer.cleared", nil)
@@ -358,7 +387,6 @@ func (s *Session) append(samples []int16) {
 		case e.started:
 			s.mu.Lock()
 			item := s.nextID("item")
-			s.turnItem, s.inSpeech = item, true
 			// From pad before speech started, out of what came before and
 			// this append.
 			from := e.at - pad
@@ -367,7 +395,17 @@ func (s *Session) append(samples []int16) {
 			if from < allStart {
 				from = allStart
 			}
-			s.buffer = append([]int16(nil), all[from-allStart:]...)
+			if h := s.held; h != nil {
+				// More words after a pause that didn't sound finished:
+				// the same turn goes on (#1403).
+				s.unhold()
+				item = h.item
+				s.buffer = append(s.buffer, all[from-allStart:]...)
+				s.trimBuffer()
+			} else {
+				s.buffer = append([]int16(nil), all[from-allStart:]...)
+			}
+			s.turnItem, s.inSpeech = item, true
 			s.mu.Unlock()
 			s.emit("input_audio_buffer.speech_started", map[string]any{"audio_start_ms": ms(e.at), "item_id": item})
 			// Barge-in: the person talks over the answer.
@@ -385,6 +423,16 @@ func (s *Session) append(samples []int16) {
 				s.buffer = s.buffer[:end]
 			}
 			s.inSpeech = false
+			if s.parts.Judge != nil {
+				// Does it sound finished? The answer decides when the turn ends.
+				h := &heldTurn{item: item, create: td.creates()}
+				s.held = h
+				audio := append([]int16(nil), s.buffer...)
+				end := ms(e.at)
+				s.mu.Unlock()
+				go s.judge(h, audio, end)
+				continue
+			}
 			s.mu.Unlock()
 			s.emit("input_audio_buffer.speech_stopped", map[string]any{"audio_end_ms": ms(e.at), "item_id": item})
 			s.commitTurn(item, td.creates())
@@ -402,6 +450,44 @@ func (s *Session) append(samples []int16) {
 	s.mu.Unlock()
 }
 
+// judge asks whether a paused turn sounds finished: finished, or no answer
+// in time, ends it now; unfinished waits a little for more words (#1403).
+func (s *Session) judge(h *heldTurn, audio []int16, endMs int) {
+	ctx, cancel := context.WithTimeout(context.Background(), judgeTimeout)
+	p, err := s.parts.Judge.TurnFinished(ctx, audio)
+	cancel()
+	if err != nil || p >= finishedAt {
+		s.release(h, endMs)
+		return
+	}
+	s.mu.Lock()
+	if s.held == h {
+		h.timer = time.AfterFunc(unfinishedWait, func() { s.release(h, endMs) })
+	}
+	s.mu.Unlock()
+}
+
+// release commits a held turn, unless more words came first.
+func (s *Session) release(h *heldTurn, endMs int) {
+	s.mu.Lock()
+	if s.held != h {
+		s.mu.Unlock()
+		return
+	}
+	s.unhold()
+	s.mu.Unlock()
+	s.emit("input_audio_buffer.speech_stopped", map[string]any{"audio_end_ms": endMs, "item_id": h.item})
+	s.commitTurn(h.item, h.create)
+}
+
+// unhold drops a held turn and its timer; s.mu is held.
+func (s *Session) unhold() {
+	if s.held != nil && s.held.timer != nil {
+		s.held.timer.Stop()
+	}
+	s.held = nil
+}
+
 func (s *Session) trimBuffer() {
 	if len(s.buffer) > maxTurnSamples {
 		s.buffer = s.buffer[len(s.buffer)-maxTurnSamples:]
@@ -413,6 +499,7 @@ const tailMs = 500
 
 func (s *Session) commit(eventID string) {
 	s.mu.Lock()
+	s.unhold()
 	empty := len(s.buffer) == 0
 	item := s.turnItem
 	if item == "" || !s.inSpeech {

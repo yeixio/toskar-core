@@ -32,7 +32,11 @@ func (a *App) voiceParts(ctx context.Context) (voice.Parts, error) {
 		}
 		return voice.Parts{}, contracts.NewError("SPEECH_UNAVAILABLE", map[string]any{"detail": why}, errors.New(why))
 	}
+	// Smart Turn's file comes down the first time, in the background
+	// (#1403); until it's here the pause alone ends a turn.
+	a.voiceWorker.PrepareTurnCheck()
 	return voice.Parts{
+		Judge:       workerJudge{a.voiceWorker},
 		Transcriber: workerTurns{w: a.voiceWorker, quality: a.voiceHearing(ctx)},
 		Responder:   &voiceChat{app: a, ctx: ctx},
 		Speaker:     workerVoice{a.voiceWorker},
@@ -100,6 +104,13 @@ func (t workerTurns) Hear(ctx context.Context, wav []byte, language string) (voi
 	pcm := voice.EncodePCM16(voice.Resample(samples, rate, whisperRate))
 	text, heard, sure, err := t.w.Hear(ctx, pcm, firstNonEmpty(t.quality, "fast"), language)
 	return voice.Heard{Text: text, Language: heard, Confidence: sure}, err
+}
+
+// workerJudge asks Smart Turn whether a paused turn sounds finished (#1403).
+type workerJudge struct{ w *speech.Worker }
+
+func (j workerJudge) TurnFinished(ctx context.Context, samples []int16) (float64, error) {
+	return j.w.TurnFinished(ctx, voice.EncodePCM16(voice.Resample(samples, voice.SampleRate, whisperRate)))
 }
 
 type workerVoice struct{ w *speech.Worker }

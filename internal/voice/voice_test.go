@@ -426,3 +426,73 @@ func TestSessionManualTurns(t *testing.T) {
 	s.Handle([]byte(`{"type":"session.update","session":{"input_audio_format":"g711_ulaw"}}`))
 	rec.waitFor(t, "error")
 }
+
+// judgeSays answers each paused turn in order: how finished it sounds.
+type judgeSays struct {
+	mu      sync.Mutex
+	answers []float64
+	heard   []int
+}
+
+func (j *judgeSays) TurnFinished(_ context.Context, samples []int16) (float64, error) {
+	j.mu.Lock()
+	defer j.mu.Unlock()
+	j.heard = append(j.heard, len(samples))
+	if len(j.answers) == 0 {
+		return 1, nil
+	}
+	p := j.answers[0]
+	j.answers = j.answers[1:]
+	return p, nil
+}
+
+// A pause that doesn't sound finished keeps the turn open, so the words
+// after it are the same turn; one that does ends it at once (#1403).
+func TestSessionWaitsOutAnUnfinishedPause(t *testing.T) {
+	stt := &fakeSTT{text: "I'd like to book a table for"}
+	llm := &fakeLLM{deltas: []string{"Sure."}, asked: make(chan string, 2)}
+	judge := &judgeSays{answers: []float64{0.1, 0.9}}
+	rec := newRecorder()
+	s := NewSession(Parts{Transcriber: stt, Responder: llm, Speaker: &fakeTTS{}, Judge: judge}, rec.send)
+	defer s.Close()
+	rec.waitFor(t, "session.created")
+
+	speak(s, append(append(append(append(quiet(0.5), tone(1)...), quiet(1.2)...), tone(0.6)...), quiet(1.2)...))
+	rec.waitFor(t, "response.done")
+
+	committed := 0
+	for _, kind := range rec.types() {
+		if kind == "input_audio_buffer.committed" {
+			committed++
+		}
+	}
+	if committed != 1 {
+		t.Fatalf("%d turns, want one: %v", committed, rec.types())
+	}
+	samples, _, _ := ParseWAV(stt.got)
+	if d := ms(len(samples)); d < 2500 {
+		t.Errorf("transcribed %d ms of audio, want both parts of the turn", d)
+	}
+	judge.mu.Lock()
+	defer judge.mu.Unlock()
+	if len(judge.heard) != 2 || judge.heard[1] <= judge.heard[0] {
+		t.Errorf("judged %v, want the first part, then all of it", judge.heard)
+	}
+}
+
+// When the judge can't answer, the pause alone ends the turn, as before.
+func TestSessionEndsATurnWithoutAJudgment(t *testing.T) {
+	rec := newRecorder()
+	s := NewSession(Parts{Transcriber: &fakeSTT{text: "Hi"}, Responder: &fakeLLM{deltas: []string{"Hello."}}, Speaker: &fakeTTS{},
+		Judge: failingJudge{}}, rec.send)
+	defer s.Close()
+	rec.waitFor(t, "session.created")
+	speak(s, append(append(quiet(0.5), tone(1)...), quiet(1.2)...))
+	rec.waitFor(t, "response.done")
+}
+
+type failingJudge struct{}
+
+func (failingJudge) TurnFinished(context.Context, []int16) (float64, error) {
+	return 0, context.DeadlineExceeded
+}
