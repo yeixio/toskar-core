@@ -260,7 +260,8 @@
       "download": "ダウンロード",
       "models": "モデル検索",
       "quality_results": "品質の結果",
-      "relay": "リレー"
+      "relay": "リレー",
+      "terminal": "ターミナル"
     },
     "kindsLower": {
       "web_search": "Web検索",
@@ -279,7 +280,8 @@
       "download": "ダウンロード",
       "models": "モデル検索",
       "quality_results": "品質の結果",
-      "relay": "リレー"
+      "relay": "リレー",
+      "terminal": "ターミナル"
     },
     "sources": {
       "chat": "チャット",

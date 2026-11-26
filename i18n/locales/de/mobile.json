@@ -969,7 +969,8 @@
       "download": "Download",
       "models": "Modellsuche",
       "quality_results": "Qualitätsergebnisse",
-      "relay": "Relay"
+      "relay": "Relay",
+      "terminal": "Terminal"
     },
     "kindsLower": {
       "web_search": "Websuche",
@@ -987,7 +988,8 @@
       "download": "Download",
       "models": "Modellsuche",
       "quality_results": "Qualitätsergebnisse",
-      "relay": "Relay"
+      "relay": "Relay",
+      "terminal": "Terminal"
     },
     "sources": {
       "chat": "Chat",

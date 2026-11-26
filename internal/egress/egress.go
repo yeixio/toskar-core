@@ -53,6 +53,10 @@ const (
 	// opening, the outside check, whether it takes subscriptions, and its
 	// billing service (#1415).
 	Relay = "relay"
+	// Terminal is a terminal command whose words say it goes online, such
+	// as curl, git clone, or npm install, with the hosts in it (#1426). The
+	// shell runs it, so what it sends can't be seen.
+	Terminal = "terminal"
 )
 
 // Sources of a run.

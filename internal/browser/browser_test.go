@@ -191,3 +191,42 @@ func TestBrowseAndAct(t *testing.T) {
 		t.Fatalf("profiles left: %v", left)
 	}
 }
+
+// The other sites a page loads from, such as its pictures, are reported
+// after the action, once each, for What left this computer (#1426).
+func TestLoadedReportsOtherSites(t *testing.T) {
+	m, _, _, _, ctx := shop(t)
+	var pictureHits atomic.Int32
+	pics := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		pictureHits.Add(1)
+		w.Header().Set("Content-Type", "image/gif")
+		_, _ = w.Write([]byte("GIF89a\x01\x00\x01\x00\x00\x00\x00;"))
+	}))
+	t.Cleanup(pics.Close)
+	page := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintf(w, `<html><head><title>Gallery</title></head><body><main><p>Ferns</p><img src="%s/a.gif"><img src="%s/b.gif"><img src="/own.gif"></main></body></html>`, pics.URL, pics.URL)
+	}))
+	t.Cleanup(page.Close)
+	pu, _ := url.Parse(page.URL)
+	// The page is opened as localhost and its pictures come from 127.0.0.1,
+	// so they are another site.
+	m.Guard = &Guard{Allow: func(host string) bool { return host == "127.0.0.1" || host == "localhost" }}
+	var got [][]string
+	var pages []string
+	m.Loaded = func(_ context.Context, page string, hosts []string) {
+		pages = append(pages, page)
+		got = append(got, hosts)
+	}
+	if _, err := m.Open(ctx, key(ctx), "http://localhost:"+pu.Port()+"/?token=secret"); err != nil {
+		t.Fatal(err)
+	}
+	if pictureHits.Load() == 0 {
+		t.Fatal("the pictures weren't loaded")
+	}
+	if len(got) != 1 || len(got[0]) != 1 || got[0][0] != "127.0.0.1" {
+		t.Fatalf("loaded %v", got)
+	}
+	if strings.Contains(pages[0], "secret") || !strings.HasPrefix(pages[0], "http://localhost:") {
+		t.Fatalf("page %q", pages[0])
+	}
+}

@@ -46,6 +46,9 @@ func (a *App) newTrainingService() *training.Service {
 		Sent: func(ctx context.Context, nodeName, detail string) {
 			a.Egress.Add(egress.WithRun(ctx, egress.Run{Source: egress.SourceTraining}), egress.PairedComputer, nodeName, detail)
 		},
+		Downloaded: func(ctx context.Context, host, detail string) {
+			a.Egress.Add(egress.WithRun(ctx, egress.Run{Source: egress.SourceTraining}), egress.Download, host, detail)
+		},
 		Peer: func(ctx context.Context, nodeID string) (training.Peer, error) {
 			n, err := a.findPairedNode(ctx, nodeID)
 			if err != nil {

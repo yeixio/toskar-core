@@ -9,6 +9,7 @@ import (
 	"github.com/yeixio/toskar-core/internal/egress"
 	"github.com/yeixio/toskar-core/internal/mimir"
 	"github.com/yeixio/toskar-core/internal/tools"
+	"github.com/yeixio/toskar-core/internal/tools/terminal"
 )
 
 // recordToolEgress records a tool call that sends data off this computer:
@@ -21,6 +22,11 @@ func (a *App) recordToolEgress(ctx context.Context, toolID string, args map[stri
 	switch toolID {
 	case "internet.search":
 		a.Egress.Add(ctx, egress.WebSearch, "DuckDuckGo", str("query"))
+		return
+	case "terminal":
+		if reach, ok := terminal.Reaches(str("command")); ok {
+			a.Egress.Add(ctx, egress.Terminal, strings.Join(reach.Destinations, ", "), reach.Command)
+		}
 		return
 	case "internet.open":
 		raw := str("url")

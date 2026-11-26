@@ -23,6 +23,16 @@ func (a *App) registerBrowser(cfg config.Config) {
 				a.Egress.Add(ctx, egress.WebPage, host, url)
 			}
 		},
+		// The other sites a page loads from, such as images, scripts,
+		// fonts, and ads, once each per action (#1426).
+		Loaded: func(ctx context.Context, page string, hosts []string) {
+			if a.Egress == nil {
+				return
+			}
+			for _, host := range hosts {
+				a.Egress.Add(ctx, egress.WebPage, host, "loaded by the page "+page)
+			}
+		},
 	}
 	for _, t := range browser.Tools(a.browser, a.Artifacts) {
 		a.Tools.Register(t)

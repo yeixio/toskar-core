@@ -2550,7 +2550,7 @@ export interface PersonalStyle {
   location?: string
 }
 
-export type EgressKind = 'web_search' | 'web_page' | 'places' | 'paired_computer' | 'external_server' | 'connector' | 'notification' | 'community_ratings' | 'update_check' | 'news' | 'problem_report' | 'link_check' | 'comfyui' | 'download' | 'models' | 'quality_results' | 'relay'
+export type EgressKind = 'web_search' | 'web_page' | 'places' | 'paired_computer' | 'external_server' | 'connector' | 'notification' | 'community_ratings' | 'update_check' | 'news' | 'problem_report' | 'link_check' | 'comfyui' | 'download' | 'models' | 'quality_results' | 'relay' | 'terminal'
 
 /** The OpenAI-compatible server whose models can be chosen for a chat (#111). */
 /** A node field a ComfyUI workflow takes from the chat (#958). */

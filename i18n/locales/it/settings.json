@@ -274,7 +274,8 @@
       "download": "Download",
       "models": "Ricerca di modelli",
       "quality_results": "Risultati di qualità",
-      "relay": "Relay"
+      "relay": "Relay",
+      "terminal": "Terminale"
     },
     "kindsLower": {
       "web_search": "ricerca web",
@@ -293,7 +294,8 @@
       "download": "download",
       "models": "ricerca di modelli",
       "quality_results": "risultati di qualità",
-      "relay": "relay"
+      "relay": "relay",
+      "terminal": "terminale"
     },
     "sources": {
       "chat": "Chat",
