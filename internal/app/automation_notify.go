@@ -4,7 +4,6 @@ import (
 	"context"
 	"net/url"
 
-	"github.com/yeixio/toskar-core/internal/auth"
 	"github.com/yeixio/toskar-core/internal/automations"
 	"github.com/yeixio/toskar-core/internal/events"
 	"github.com/yeixio/toskar-core/internal/gjallarhorn"
@@ -37,13 +36,6 @@ func (c desktopChannel) Deliver(ctx context.Context, n gjallarhorn.Notification)
 		ok, err := c.settings.GetBool(ctx, "notify_task_finish", true)
 		if err != nil {
 			return err
-		}
-		// Each person turns their own off (#1391); until they choose, the
-		// Owner's choice is theirs.
-		if n.PersonID != "" && n.PersonID != auth.OwnerID {
-			if ok, err = c.settings.GetBool(ctx, "notify_task_finish@"+n.PersonID, ok); err != nil {
-				return err
-			}
 		}
 		if !ok {
 			return gjallarhorn.ErrSuppressed

@@ -176,7 +176,7 @@
     "digest": "Resumo diário das automações",
     "digestHint": "Um resumo dos resultados de todas as automações por dia, em um chat que você pode responder.",
     "digestTime": "Horário",
-    "taskFinishHint": "Suas próprias automações, como aviso na área de trabalho deste computador. Só para você.",
+    "taskFinishHint": "Quando suas próprias automações terminam: um push nos seus celulares conectados como você e, para o proprietário, um aviso na área de trabalho deste computador. Só para você.",
     "memberNote": "As notificações sobre computadores, modelos e o resumo diário, e para onde elas vão, são definidas por um administrador."
   },
   "toolPermissions": {

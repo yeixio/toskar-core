@@ -174,7 +174,7 @@
     "digest": "Tägliche Automationsübersicht",
     "digestHint": "Jeden Tag eine Zusammenfassung aller Automationsergebnisse, in einem Chat, in dem du antworten kannst.",
     "digestTime": "Uhrzeit",
-    "taskFinishHint": "Deine eigenen Automationen, als Hinweis auf dem Desktop dieses Computers. Nur für dich.",
+    "taskFinishHint": "Wenn deine eigenen Automationen fertig sind: eine Push-Mitteilung an deine Telefone, die mit dir angemeldet sind, und für den Eigentümer ein Hinweis auf dem Desktop dieses Computers. Nur für dich.",
     "memberNote": "Benachrichtigungen zu Computern, Modellen und die tägliche Zusammenfassung sowie wohin Benachrichtigungen gehen, legt ein Admin fest."
   },
   "toolPermissions": {

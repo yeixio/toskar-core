@@ -2,6 +2,8 @@ package gjallarhorn
 
 import (
 	"context"
+	"net/http"
+	"net/http/httptest"
 	"strings"
 	"testing"
 
@@ -123,5 +125,47 @@ func TestAppPushCarriesThePage(t *testing.T) {
 	}
 	if m := pushMessageFor(AppConfig{Content: "private"}, n); m.URL != "" {
 		t.Fatalf("a private push carried the page: %+v", m)
+	}
+}
+
+// A person's own notice reaches only their own phones, through the app
+// destination; never the desktop, a webhook, or a digest. Their Notify when
+// tasks finish turns their automations' pushes off (#1391).
+func TestPersonalNoticesPushOnlyToTheirPerson(t *testing.T) {
+	hub, _, _ := deliveryHub(t)
+	desktop := &recordingChannel{name: "desktop"}
+	hub.channels["desktop"] = desktop
+	push := &fakePush{devices: map[string]int{"sam": 1, auth.OwnerID: 1}}
+	hub.SetPush(push)
+	settings := &memSettings{m: map[string]string{}}
+	hub.SetSettings(settings)
+	ctx := context.Background()
+	if _, _, err := hub.CreateDestination(ctx, DestinationInput{Kind: KindApp, Name: ptr("Phones")}); err != nil {
+		t.Fatal(err)
+	}
+	hook := 0
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { hook++ }))
+	t.Cleanup(srv.Close)
+	if _, _, err := hub.CreateDestination(ctx, DestinationInput{Kind: KindWebhook, Name: ptr("Hook"), Webhook: &WebhookConfig{URL: srv.URL}}); err != nil {
+		t.Fatal(err)
+	}
+	sam := auth.AsPerson(ctx, auth.Person{ID: "sam"})
+	if _, err := hub.Notify(sam, Request{Category: CategoryAutomation, Title: "Sam's report", Channels: []string{"desktop"}}); err != nil {
+		t.Fatal(err)
+	}
+	hub.DeliverDue(ctx)
+	if len(push.to) != 1 || push.to[0] != "sam" || push.got[0].Title != "Sam's report" {
+		t.Fatalf("pushed to %v: %+v", push.to, push.got)
+	}
+	if len(desktop.got) != 0 || hook != 0 {
+		t.Fatalf("Sam's notice left for the desktop (%d) or a webhook (%d)", len(desktop.got), hook)
+	}
+	settings.m["notify_task_finish@sam"] = "false"
+	if _, err := hub.Notify(sam, Request{Category: CategoryAutomation, Title: "Sam's second report"}); err != nil {
+		t.Fatal(err)
+	}
+	hub.DeliverDue(ctx)
+	if len(push.got) != 1 {
+		t.Fatalf("pushed with Sam's notices off: %+v", push.got)
 	}
 }

@@ -174,7 +174,7 @@
     "digest": "Daily automation digest",
     "digestHint": "One summary of every automation’s results each day, in a chat you can reply to.",
     "digestTime": "Time",
-    "taskFinishHint": "Your own automations, as a notice on this computer's desktop. Only for you.",
+    "taskFinishHint": "When your own automations finish: a push to your phones signed in as you, and for the Owner, a notice on this computer's desktop. Only for you.",
     "memberNote": "Notifications about computers, models, and the daily digest, and where notifications are sent, are set by an Admin."
   },
   "toolPermissions": {

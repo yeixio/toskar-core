@@ -176,7 +176,7 @@
     "digest": "Récapitulatif quotidien des automatisations",
     "digestHint": "Chaque jour, un résumé des résultats de toutes vos automatisations, dans un chat auquel vous pouvez répondre.",
     "digestTime": "Heure",
-    "taskFinishHint": "Vos propres automatisations, en notification sur le bureau de cet ordinateur. Pour vous seulement.",
+    "taskFinishHint": "Quand vos propres automatisations se terminent : une notification push sur vos téléphones connectés à votre compte et, pour le propriétaire, une notification sur le bureau de cet ordinateur. Pour vous seulement.",
     "memberNote": "Les notifications sur les ordinateurs, les modèles et le résumé quotidien, ainsi que leurs destinations, sont réglées par un administrateur."
   },
   "toolPermissions": {
