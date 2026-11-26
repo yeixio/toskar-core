@@ -97,8 +97,8 @@ func TestTeamProfilesMigrate(t *testing.T) {
 		t.Fatal("a worker slot does not use the worker model")
 	}
 	prog, _ := m.Get(ctx, PresetProgramming)
-	if prog.OrchestratorID != "simple" || prog.Orchestration.Strategy != StrategyTeam {
-		t.Fatalf("Programming = %q / %q", prog.OrchestratorID, prog.Orchestration.Strategy)
+	if prog.OrchestratorID != "simple" || prog.Orchestration.Strategy != "" {
+		t.Fatalf("Programming = %q / %q, want one model (#1208)", prog.OrchestratorID, prog.Orchestration.Strategy)
 	}
 	// The API still accepts the old id, and stores the new form.
 	created, err := m.Create(ctx, Profile{Name: "Old client", OrchestratorID: "team", Roles: []contracts.ModelRole{{Role: "coordinator"}}})
@@ -148,7 +148,7 @@ func TestResetPreset(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if got.Name != "Programming" || got.Orchestration.Strategy != StrategyTeam {
+	if got.Name != "Programming" || got.Orchestration.Strategy != "" {
 		t.Fatalf("reset = %q / %q", got.Name, got.Orchestration.Strategy)
 	}
 	custom, _ := m.Create(ctx, Profile{Name: "Mine", OrchestratorID: "simple"})
@@ -173,5 +173,43 @@ func TestDeliberateSetting(t *testing.T) {
 		if err := ValidateOrchestration(contracts.OrchestrationPolicy{Deliberate: v}); err != nil {
 			t.Errorf("%q: %v", v, err)
 		}
+	}
+}
+
+// Programming as it shipped with Team moves to one model once (#1208); a
+// Team someone set up with their own models stays.
+func TestProgrammingLeavesShippedTeam(t *testing.T) {
+	for _, c := range []struct {
+		name  string
+		roles []contracts.ModelRole
+		want  string
+	}{
+		{"as shipped", []contracts.ModelRole{{Role: RolePlanner}, {Role: RoleWorker}, {Role: RoleReviewer}}, ""},
+		{"models pinned", []contracts.ModelRole{{Role: RolePlanner, ModelID: "big"}, {Role: RoleWorker}, {Role: RoleReviewer}}, StrategyTeam},
+		{"chosen since", []contracts.ModelRole{{Role: RolePrimary}}, StrategyTeam},
+	} {
+		t.Run(c.name, func(t *testing.T) {
+			db, err := store.Open(filepath.Join(t.TempDir(), "test.db"))
+			if err != nil {
+				t.Fatal(err)
+			}
+			t.Cleanup(func() { _ = db.Close() })
+			ctx := context.Background()
+			m := NewManager(db.SQL)
+			if _, err := m.Create(ctx, Profile{ID: PresetProgramming, Name: "Programming", Purpose: "coding", OrchestratorID: "simple",
+				NodePolicy: contracts.NodePolicy{Mode: "automatic"}, Roles: c.roles,
+				Orchestration: contracts.OrchestrationPolicy{Strategy: StrategyTeam}}); err != nil {
+				t.Fatal(err)
+			}
+			for range 2 {
+				if err := m.EnsurePresets(ctx); err != nil {
+					t.Fatal(err)
+				}
+			}
+			got, _ := m.Get(ctx, PresetProgramming)
+			if got.Orchestration.Strategy != c.want {
+				t.Fatalf("strategy = %q, want %q (roles %+v)", got.Orchestration.Strategy, c.want, got.Roles)
+			}
+		})
 	}
 }

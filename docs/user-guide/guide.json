@@ -2894,7 +2894,7 @@
       "id": "profiles",
       "title": "Profiles & Orchestration",
       "paragraphs": [
-        "A profile is a saved assistant: how it works through requests, its models, tools, memory, and the computers it runs on. General Assistant decides everything for you. Programming uses the Team strategy. Research focuses on looking things up, and Custom is set up to work without the internet. Profiles & Orchestration in the sidebar lists them and lets you create one. With Advanced mode on, Edit opens a profile's editor across the page, with five tabs: Models, Tools, Knowledge and memory, Topics, and Strategy and computers. Models shows the roles in use, with Show all roles for the rest; Tools has a switch for each kind of tool, with Per-tool permissions below. A tool a profile doesn't list stays off. Built-in profiles cannot be deleted; More actions → Reset to defaults puts one back to how Toskar ships it.",
+        "A profile is a saved assistant: how it works through requests, its models, tools, memory, and the computers it runs on. General Assistant decides everything for you. Programming is set up for code, with its tools. Research focuses on looking things up, and Custom is set up to work without the internet. Profiles & Orchestration in the sidebar lists them and lets you create one. With Advanced mode on, Edit opens a profile's editor across the page, with five tabs: Models, Tools, Knowledge and memory, Topics, and Strategy and computers. Models shows the roles in use, with Show all roles for the rest; Tools has a switch for each kind of tool, with Per-tool permissions below. A tool a profile doesn't list stays off. Built-in profiles cannot be deleted; More actions → Reset to defaults puts one back to how Toskar ships it.",
         "New chats start with the default profile, marked Default for new chats: General Assistant, unless you choose another. More actions → Use for new chats makes a profile the default, and so does Default profile in Settings. Use in Chat opens one chat with a profile and leaves the default as it is. Chats started from your phone, another app, or the API without naming a profile use the default too. Deleting the default goes back to General Assistant. Each profile has a name of its own: a name that's taken, in any capitals, is refused, and profiles that shared a name before get one, such as General Assistant (2).",
         "Strategy is how the profile works. Auto gives quick questions one model, and plans and checks bigger requests. Single model answers every request without a plan. Planner + workers always works through requests with several parts in parts. Team has a planner split each request, workers do the parts, and a reviewer check the answer; quick questions are still answered directly. Swarm has several agents work at once.",
         "Models assigns a model, and optionally a computer, to each role: Primary writes the answer, Fast and Coding answer quick and coding requests when the chat is on Auto, and Planner, Worker, and Reviewer do their part of a plan. Automatic uses the model chosen in the chat. Fallback order lists the models to try, in order, when the answering model fails.",
@@ -3399,12 +3399,12 @@
       "id": "team",
       "title": "Run a Team profile",
       "paragraphs": [
-        "Programming uses the Team strategy: a planner splits your request into parts, a worker writes notes for each part, the answer is written from them with the usual tools, memory, and knowledge, and a reviewer checks it before you see it. Each part has its own worker, so with paired computers the parts run on different machines at the same time. Quick questions skip the team and are answered directly."
+        "The Team strategy has a planner split your request into parts and a worker write notes for each part. The answer is written from those notes with the usual tools, memory, and knowledge, and a reviewer checks it before you see it. Each part has its own worker, so with paired computers the parts run on different machines at the same time. Quick questions skip the team and are answered directly. No profile uses it as shipped: on small models it took two to three times as long without better answers. Set Strategy to Team on a profile to use it."
       ],
       "steps": [
         "Install the same model on both paired computers for an easy first run.",
-        "Select Programming in Chat and choose a model, or Auto. Roles without their own model use it.",
-        "To choose models or computers per role, enable Advanced mode and edit the profile's Models, such as Worker on your second machine. Set Strategy to Team on any profile to work the same way.",
+        "Enable Advanced mode, edit a profile such as Programming, and set Strategy to Team under Strategy and computers.",
+        "In Chat, select that profile and choose a model, or Auto. Roles without their own model use it. To choose models or computers per role, edit the profile's Models, such as Worker on your second machine.",
         "Send a request with some substance, such as a comparison or a plan. The chat timeline shows the planner, each worker, and the reviewer with the computer each ran on. In advanced mode, Run details under the answer shows each role's model, computer, and timing."
       ],
       "kind": "task",
@@ -3434,7 +3434,7 @@
           "type": "steps",
           "items": [
             "Install the same model on both computers for an easy first run.",
-            "In Chat, select the Programming profile, which uses the Team strategy, and choose a model or Auto. Roles without their own model use it.",
+            "Set a profile's Strategy to Team, such as Programming's, then select it in Chat and choose a model or Auto. Roles without their own model use it.",
             "Send a request with some substance, such as a comparison or a plan.",
             "Watch the chat timeline: it shows the planner, each worker, and the reviewer, with the computer each ran on."
           ]

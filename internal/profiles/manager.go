@@ -39,6 +39,13 @@ func (m *Manager) EnsurePresets(ctx context.Context) error {
 			if err != nil {
 				return err
 			}
+			if shippedTeam(existing) {
+				existing.Orchestration.Strategy = p.Orchestration.Strategy
+				existing.Roles = p.Roles
+				if err := m.Update(ctx, existing); err != nil {
+					return err
+				}
+			}
 			if existing.NodePolicy.Mode == "prefer_local" {
 				existing.NodePolicy.Mode = "automatic"
 				if err := m.Update(ctx, existing); err != nil {
@@ -156,6 +163,23 @@ func (m *Manager) migrateTeamProfiles(ctx context.Context) error {
 		}
 	}
 	return nil
+}
+
+// shippedTeam says Programming is still Team as it shipped before #1208:
+// the planner, worker, and reviewer, none pinned to a model. It moves to
+// one model once; a Team someone chose since, or pinned models, stay.
+func shippedTeam(p Profile) bool {
+	if p.Orchestration.Strategy != StrategyTeam || len(p.Roles) != 3 {
+		return false
+	}
+	want := map[string]bool{RolePlanner: true, RoleWorker: true, RoleReviewer: true}
+	for _, r := range p.Roles {
+		if !want[r.Role] || r.ModelID != "" || r.NodeID != "" {
+			return false
+		}
+		delete(want, r.Role)
+	}
+	return len(want) == 0
 }
 
 func needsNormalize(p Profile) bool {
