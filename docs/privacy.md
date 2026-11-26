@@ -57,7 +57,7 @@ These are the calls Toskar can make without a request in a chat:
 | Quality results | `raw.githubusercontent.com` (toskar-model-data) | The request only, when Models › Results is opened, at most once an hour. Each read is recorded as `quality_results`. | On: runs when that page is opened | Settings › Models & AI › Community ratings › Quality results (`quality_results`) |
 | Push to the Toskar app | Toskar's relay (`relay.toskar.ai`), which passes it to Apple's or Google's push service | A notification's title and the page it opens, for phones paired with this computer | Added when a phone turns notifications on | Settings › Notifications, per destination |
 
-Each of these is listed in **What left this computer** (Settings › Privacy) when it's sent. The relay's own calls are recorded as `relay`: the tunnel opening, the outside check, and each question to the relay or its billing service. What travels through the tunnel once it's open is your own requests from away, and isn't recorded one by one. Python packages fetched by uv and pip for training, code runs and speech aren't recorded yet (#1415).
+Each of these is listed in **What left this computer** (Settings › Privacy) when it's sent. The relay's own calls are recorded as `relay`: the tunnel opening, the outside check, and each question to the relay or its billing service. What travels through the tunnel once it's open is your own requests from away, and isn't recorded one by one. Setting up a Python environment (uv, Python, and its pinned packages) is recorded as `download` once it's installed. The base model's weights that a first training run fetches from Hugging Face aren't recorded yet.
 
 Everything else is sent only when a feature that talks to the network is used:
 
@@ -78,7 +78,7 @@ Everything else is sent only when a feature that talks to the network is used:
 | Training a base model the first time | Hugging Face Hub, for the base model's training weights. Your examples are not uploaded. |
 | Training on a paired computer | That computer receives the training examples and the AI's instructions over Bifrost, and returns the adapter. It deletes its copy when the job ends. |
 | First code run (`code.execute`) | PyPI, for numpy, pandas, matplotlib, and openpyxl. The code itself has no network. |
-| First use of speech (`speech.transcribe`, `speech.synthesize`, Read aloud) | PyPI, for faster-whisper and Piper, then Hugging Face for each Whisper model and Piper voice the first time it is used. The audio and text stay on this computer. |
+| First use of speech (`speech.transcribe`, `speech.synthesize`, Read aloud) | PyPI, for faster-whisper and Piper, then Hugging Face for each Whisper model and Piper voice the first time it is used. Live voice's natural voice (Kokoro) comes from its GitHub release, and Kitten's voices from Hugging Face. Each is recorded as `download` before it starts. The audio and text stay on this computer. |
 | Image and video generation setup | GitHub, for the pinned stable-diffusion.cpp release (and, for video, the TAEHV decoder), and Hugging Face, for the model's files. Only when you set it up. Each file is recorded as `download`. Prompts, images, and clips stay on this computer. |
 | First scanned PDF in Knowledge | PyPI, for the text-recognition packages (about 110 MB). The PDF itself is read on this computer. |
 | A chat placed on a paired computer | That computer receives the prompt and context over Bifrost |

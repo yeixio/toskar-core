@@ -259,6 +259,7 @@ func (w *Worker) installKitten(ctx context.Context, stage func(string)) error {
 	if err := os.MkdirAll(dir, 0o700); err != nil {
 		return err
 	}
+	w.Engine.fetching(ctx, "Hugging Face Hub", "Kitten voices ("+KittenRepo+")")
 	if _, err := w.ask(ctx, envKitten, map[string]any{"op": "fetch", "repo": KittenRepo, "revision": kittenRevision,
 		"dir": dir, "patterns": kittenFiles()}); err != nil {
 		return fmt.Errorf("couldn't download Kitten's voices: %w", err)

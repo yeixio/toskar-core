@@ -1066,6 +1066,7 @@ func New(opts Options) (*App, error) {
 		WorkDir: filepath.Join(cfg.DataDir, "code-runs"), PythonRoot: a.python.Root})
 	// Speech runs on this computer; models are kept with the runtimes.
 	a.Speech = &speech.Engine{Python: a.python, Dir: filepath.Join(cfg.RuntimesDir, "speech")}
+	a.Speech.Fetching = a.recordDownload
 	a.voiceWorker = &speech.Worker{Engine: a.Speech, Choice: a.chosenVoice}
 	a.toolNet = a.newToolNetwork(cfg)
 	a.registerPortable(&speech.TranscribeTool{Engine: a.Speech, Store: a.Artifacts})

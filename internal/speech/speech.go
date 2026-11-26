@@ -75,6 +75,9 @@ type Engine struct {
 	Python PythonEnv
 	// Dir holds the downloaded models and each job's files.
 	Dir string
+	// Fetching, when set, is told before a model or voice is downloaded
+	// the first time it's needed: where from, and what (#1415).
+	Fetching func(ctx context.Context, to, what string)
 
 	// mu runs one job at a time; both use every core.
 	mu sync.Mutex
@@ -237,6 +240,7 @@ func (e *Engine) Transcribe(ctx context.Context, name string, audio []byte, qual
 	}
 	e.mu.Lock()
 	defer e.mu.Unlock()
+	e.beforeWhisper(ctx, model)
 	var t Transcript
 	err := e.run(ctx, transcribeScript,
 		map[string]any{"model": model, "models_dir": filepath.Join(e.Dir, "whisper"), "language": language},
@@ -315,6 +319,7 @@ func (e *Engine) SynthesizeIn(ctx context.Context, text, voice, language string)
 	}
 	e.mu.Lock()
 	defer e.mu.Unlock()
+	e.beforeVoice(ctx, voice)
 	var r audioResult
 	err = e.run(ctx, synthesizeScript,
 		map[string]any{"text": text, "voice": voice, "voices_dir": filepath.Join(e.Dir, "voices"), "out": "speech.wav"}, nil, &r)

@@ -116,6 +116,7 @@ func (w *Worker) Hear(ctx context.Context, pcm []byte, quality, language string)
 	if model == "" {
 		model = models["fast"]
 	}
+	w.Engine.beforeWhisper(ctx, model)
 	a, err := w.ask(ctx, envSpeech, map[string]any{"op": "transcribe", "pcm": base64.StdEncoding.EncodeToString(pcm), "model": model,
 		"models_dir": filepath.Join(w.Engine.Dir, "whisper"), "language": language})
 	if language != "" {
@@ -198,6 +199,7 @@ func (w *Worker) Speak(ctx context.Context, text, voice, language string) (pcm [
 	if !voiceRe.MatchString(voice) {
 		return nil, 0, fmt.Errorf("%q is not a Piper or Kokoro voice name, such as %s or af_heart", voice, DefaultVoice)
 	}
+	w.Engine.beforeVoice(ctx, voice)
 	a, err := w.ask(ctx, envSpeech, map[string]any{"op": "speak", "text": text, "voice": voice, "voices_dir": filepath.Join(w.Engine.Dir, "voices")})
 	if err != nil {
 		return nil, 0, err
@@ -255,6 +257,7 @@ func (w *Worker) kokoroUsable() bool {
 	go func(done chan struct{}) {
 		defer close(done)
 		defer cancel()
+		w.Engine.fetching(ctx, hostOf(base), "Kokoro, live voice's natural voice: its model and voices")
 		err := fetchKokoro(ctx, client, base, dir)
 		w.mu.Lock()
 		w.fetching = false
