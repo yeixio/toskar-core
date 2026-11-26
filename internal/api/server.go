@@ -316,6 +316,9 @@ type Server struct {
 	closed       chan struct{}
 	// remote is the listener for access from anywhere (#456).
 	remote remoteListener
+	// ollamaPort serves Ollama's API on Ollama's own port, for apps that
+	// can't be given another (#1396).
+	ollamaPort ollamaPortListener
 
 	knowledge   KnowledgeService
 	projects    ProjectService

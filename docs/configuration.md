@@ -49,6 +49,7 @@ What lives there:
 | `logs_dir` | `<data_dir>/logs` | Log files |
 | `web_ui_dir` | empty | A built web UI to serve instead of the bundled one, such as `web/dist` in a clone |
 | `web_ui_enabled` | `true` | Serve the web UI at `/` |
+| `ollama_port` | `false` | Also serve Ollama's API on port 11434, on this computer only (#1396); set with `ollama_port_enabled` in settings |
 | `api_host` | `127.0.0.1` | Address of the API and web UI. Any address other than loopback requires an API key (see [API](api.md#authentication)). |
 | `api_port` | `7331` | Port of the API and web UI |
 | `lan_api_enabled` | `false` | Set by **Local network access** in Settings › Network access. Turning it on sets `api_host` to `0.0.0.0` and needs an existing API key. |

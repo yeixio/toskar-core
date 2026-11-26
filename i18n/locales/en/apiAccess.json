@@ -330,5 +330,13 @@
   "parts": {
     "network": "Who can reach this computer from other devices, and how.",
     "developer": "Toskar's API on this computer, and the keys apps and scripts use."
+  },
+  "ollamaPort": {
+    "title": "Ollama's port",
+    "description": "Some apps that speak Ollama's API only look for it on port 11434. Turn this on and Toskar answers there too, on this computer only. An app that lets you enter an address can use {{address}} instead.",
+    "label": "Answer on Ollama's port",
+    "listening": "Answering Ollama's API at http://localhost:11434.",
+    "inUse": "Another program, probably Ollama, is using port 11434. Quit it, then turn this on again.",
+    "failed": "Toskar couldn't listen on port 11434: {{error}}"
   }
 }

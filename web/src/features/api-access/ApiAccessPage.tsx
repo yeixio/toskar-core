@@ -18,6 +18,7 @@ import { ConnectPhone } from '@/features/nodes/ConnectPhone'
 import { formatDate } from '@/i18n/format'
 import { RemoteAccessCard } from './RemoteAccessCard'
 import { Toggle } from './Toggle'
+import { OllamaPortCard } from './OllamaPort'
 import { LoadError } from '@/components/ui/LoadError'
 
 type ProbeState = 'checking' | 'ok' | 'fail'
@@ -697,6 +698,8 @@ export function ApiAccessPage({ part }: { part?: ApiAccessPart } = {}) {
         )}
       </section>
       ) : null}
+
+      {developer ? <OllamaPortCard /> : null}
 
       {network_ && advancedMode && settings && (
         <section className="card space-y-3">

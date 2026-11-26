@@ -30,9 +30,12 @@ type Config struct {
 	// APITLSCert and APITLSKey are the person's own certificate and key, in
 	// PEM files, for HTTPS on the API (#213). Empty uses the certificate
 	// Toskar makes.
-	APITLSCert       string `json:"api_tls_cert,omitempty"`
-	APITLSKey        string `json:"api_tls_key,omitempty"`
-	WebUIEnabled     bool   `json:"web_ui_enabled"`
+	APITLSCert   string `json:"api_tls_cert,omitempty"`
+	APITLSKey    string `json:"api_tls_key,omitempty"`
+	WebUIEnabled bool   `json:"web_ui_enabled"`
+	// OllamaPort also serves Ollama's API on Ollama's own port, 11434, on
+	// this computer only, for apps that assume it (#1396). Off by default.
+	OllamaPort       bool   `json:"ollama_port,omitempty"`
 	DiscoveryEnabled bool   `json:"discovery_enabled"`
 	NodeName         string `json:"node_name"`
 	NodeID           string `json:"node_id,omitempty"`

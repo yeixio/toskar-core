@@ -1568,7 +1568,15 @@ type SettingsView struct {
 	// HuggingFaceTokenSet is whether the person's Hugging Face token is
 	// set, for picture and clip models behind a license (#551); the token
 	// itself is never shown, and is set with huggingface_token.
-	HuggingFaceTokenSet bool   `json:"huggingface_token_set"`
+	HuggingFaceTokenSet bool `json:"huggingface_token_set"`
+	// OllamaPortEnabled also serves Ollama's API on port 11434, on this
+	// computer only, for apps that assume Ollama's port; off by default.
+	// OllamaPortListening is whether it is, and OllamaPortError why not:
+	// in_use when another program, usually Ollama, has the port (#1396,
+	// contract 1.127).
+	OllamaPortEnabled   bool   `json:"ollama_port_enabled"`
+	OllamaPortListening bool   `json:"ollama_port_listening"`
+	OllamaPortError     string `json:"ollama_port_error,omitempty"`
 	WebUIEnabled        bool   `json:"web_ui_enabled"`
 	DiscoveryEnabled    bool   `json:"discovery_enabled"`
 	NodeName            string `json:"node_name"`
