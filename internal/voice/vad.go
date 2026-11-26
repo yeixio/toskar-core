@@ -52,7 +52,22 @@ type vad struct {
 	recent [pauseFrames]float64
 	next   int
 	heard  int // frames in recent
+	// pause counts the pauses that reached earlyPauseMs, so a judgment
+	// knows whether its pause is still the one going on (#1460).
+	pause int
 }
+
+// earlyPauseMs is the quiet after which a paused turn is judged, while the
+// pause goes on (#1460). Smart Turn is made for about this much silence
+// after the words, and a finished verdict then ends the turn sooner than
+// the whole pause would have.
+const earlyPauseMs = 300
+
+// inPause reports that the turn is still paused at pause.
+func (v *vad) inPause(pause int) bool { return v.speaking && v.quiet > 0 && v.pause == pause }
+
+// end ends the turn now, as the pause would have.
+func (v *vad) end() { v.speaking, v.loud, v.quiet = false, 0, 0 }
 
 // pauseFrames are 2.5 s: speech pauses, if only to breathe, at least that
 // often, and its pauses fall to the room's noise; a fan or traffic that
@@ -143,7 +158,11 @@ func (v *vad) learnNoise(lvl float64) {
 // sample the change happened at, counted from the start of the session.
 type vadEvent struct {
 	started, stopped bool
-	at               int
+	// paused is earlyPauseMs of quiet in a turn, before it stops; pause
+	// names it, and at is where the quiet began.
+	paused bool
+	pause  int
+	at     int
 }
 
 // feed takes samples, given at offset in the session's audio, and reports
@@ -193,9 +212,13 @@ func (v *vad) feed(samples []int16, offset int) []vadEvent {
 			continue
 		}
 		v.quiet++
+		if v.quiet*20 == earlyPauseMs && earlyPauseMs < v.cfg.SilenceDurationMs {
+			v.pause++
+			out = append(out, vadEvent{paused: true, pause: v.pause, at: at + frameSamples - v.quiet*frameSamples})
+		}
 		if v.quiet*20 >= v.cfg.SilenceDurationMs {
 			v.speaking, v.loud = false, 0
-			out = append(out, vadEvent{stopped: true, at: at + frameSamples - v.quiet*frameSamples})
+			out = append(out, vadEvent{stopped: true, pause: v.pause, at: at + frameSamples - v.quiet*frameSamples})
 		}
 	}
 	return out

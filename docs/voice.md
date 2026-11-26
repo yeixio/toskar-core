@@ -134,11 +134,16 @@ Errors are `error` events with `error.code`, such as `invalid_audio`,
   click, a cough, or a knock doesn't, and a dip between syllables doesn't
   start the count over. `silence_duration_ms` of quiet ends it: 900 ms by
   default, so a pause mid-sentence doesn't end a turn and get answered.
-  Then Smart Turn v3 (`internal/speech/turn.go`, BSD-2-Clause, 8.7 MB on
+  Smart Turn v3 (`internal/speech/turn.go`, BSD-2-Clause, 8.7 MB on
   the processor) hears the turn's last 8 s and says whether it sounds
-  finished: finished, or no answer within 1.5 s, ends the turn at once;
-  unfinished waits up to 2 s more, and words in that time are the same
-  turn (#1403). `speech_stopped` is sent when the turn really ends. Until
+  finished. It's asked 300 ms into each pause, while the pause goes on
+  (#1460): finished ends the turn there, sooner than the whole pause
+  would; a verdict that comes after more words is dropped. Unfinished, or
+  no answer before the pause ends (within 1.5 s), leaves it to the pause:
+  unfinished then waits up to 2 s more, and words in that time are the
+  same turn (#1403). Its model loads when voice mode opens, and each
+  verdict and its time are in the log (`voice turn check`).
+  `speech_stopped` is sent when the turn really ends. Until
   its file has downloaded, the pause alone ends a turn. The front door
   asks it the same way at the end of each pause a visitor makes
   (`internal/app/door_talk.go`).

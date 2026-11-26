@@ -180,6 +180,8 @@ type Session struct {
 	// held is a turn whose pause didn't sound finished: it waits a little
 	// for more words before it's committed (#1403).
 	held *heldTurn
+	// early is the turn being judged while its pause goes on (#1460).
+	early *heldTurn
 	// lastText is the last turn's transcript, for response.create.
 	lastText string
 	// lastHeard is the language it was spoken in, when sure, or "".
@@ -201,7 +203,26 @@ type heldTurn struct {
 	item   string
 	create bool
 	timer  *time.Timer
+	// pause is the vad's pause it was judged at, when judged early (#1460).
+	pause int
+	// verdict is the judge's answer so far; stopped is that the whole
+	// pause went by, at endMs.
+	verdict verdict
+	stopped bool
+	endMs   int
+	at      int // the sample the pause began at
 }
+
+// verdict is what the judge said about a pause.
+type verdict int
+
+const (
+	verdictPending verdict = iota
+	verdictFinished
+	verdictUnfinished
+	// verdictNone is no answer in time, or an error: the pause decides.
+	verdictNone
+)
 
 // response is one answer: its ids, and how to stop it.
 type response struct {
@@ -228,6 +249,11 @@ func NewSession(parts Parts, send func(event map[string]any) error) *Session {
 	}
 	s.id = "sess_" + randomID()
 	s.vad = newVAD(*s.cfg.TurnDetection)
+	// A judge that can load ahead does, so the first pause isn't judged
+	// while its model loads (#1460).
+	if w, ok := parts.Judge.(interface{ Warm() }); ok {
+		go w.Warm()
+	}
 	go s.runTurns()
 	s.emit("session.created", map[string]any{"session": s.view()})
 	return s
@@ -429,6 +455,25 @@ func (s *Session) append(samples []int16) {
 			if td.interrupts() {
 				s.interrupt()
 			}
+		case e.paused:
+			if s.parts.Judge == nil {
+				continue
+			}
+			// Ask while the pause goes on: a finished verdict ends the turn
+			// now, sooner than the whole pause would (#1460).
+			s.mu.Lock()
+			h := &heldTurn{item: s.turnItem, create: td.creates(), pause: e.pause, endMs: ms(e.at), at: e.at}
+			s.early = h
+			end := len(s.buffer) - (offset + len(samples) - e.at) + earlyPauseMs*SampleRate/1000
+			if end > len(s.buffer) {
+				end = len(s.buffer)
+			}
+			var audio []int16
+			if end > 0 {
+				audio = append([]int16(nil), s.buffer[:end]...)
+			}
+			s.mu.Unlock()
+			go s.judgeEarly(h, audio)
 		case e.stopped:
 			s.mu.Lock()
 			item := s.turnItem
@@ -440,6 +485,24 @@ func (s *Session) append(samples []int16) {
 				s.buffer = s.buffer[:end]
 			}
 			s.inSpeech = false
+			if h := s.early; h != nil && h.pause == e.pause && h.item == item {
+				// Judged while the pause went on: its verdict decides, or
+				// will when it comes.
+				s.early = nil
+				h.stopped, h.endMs = true, ms(e.at)
+				s.held = h
+				switch h.verdict {
+				case verdictUnfinished:
+					h.timer = time.AfterFunc(unfinishedWait, func() { s.release(h, h.endMs) })
+					s.mu.Unlock()
+				case verdictPending:
+					s.mu.Unlock()
+				default:
+					s.mu.Unlock()
+					s.release(h, h.endMs)
+				}
+				continue
+			}
 			if s.parts.Judge != nil {
 				// Does it sound finished? The answer decides when the turn ends.
 				h := &heldTurn{item: item, create: td.creates()}
@@ -484,6 +547,52 @@ func (s *Session) judge(h *heldTurn, audio []int16, endMs int) {
 	s.mu.Unlock()
 }
 
+// judgeEarly asks whether a turn sounds finished while its pause goes on
+// (#1460). Finished, while the pause still does, ends the turn there. Once
+// the whole pause went by, the verdict decides as judge's does.
+func (s *Session) judgeEarly(h *heldTurn, audio []int16) {
+	v := verdictNone
+	if len(audio) > 0 {
+		ctx, cancel := context.WithTimeout(context.Background(), judgeTimeout)
+		p, err := s.parts.Judge.TurnFinished(ctx, audio)
+		cancel()
+		switch {
+		case err != nil:
+		case p >= finishedAt:
+			v = verdictFinished
+		default:
+			v = verdictUnfinished
+		}
+	}
+	s.mu.Lock()
+	h.verdict = v
+	switch {
+	case s.held == h:
+		// The whole pause went by while it was judged.
+		if v == verdictUnfinished {
+			h.timer = time.AfterFunc(unfinishedWait, func() { s.release(h, h.endMs) })
+			s.mu.Unlock()
+			return
+		}
+		s.mu.Unlock()
+		s.release(h, h.endMs)
+	case s.early == h && v == verdictFinished && s.vad.inPause(h.pause):
+		// Still paused, and it sounds finished: the turn ends here, with
+		// the quiet heard so far.
+		s.early = nil
+		s.vad.end()
+		s.inSpeech = false
+		if end := len(s.buffer) - (s.samples - h.at) + tailMs*SampleRate/1000; end > 0 && end < len(s.buffer) {
+			s.buffer = s.buffer[:end]
+		}
+		s.mu.Unlock()
+		s.emit("input_audio_buffer.speech_stopped", map[string]any{"audio_end_ms": h.endMs, "item_id": h.item})
+		s.commitTurn(h.item, h.create)
+	default:
+		s.mu.Unlock()
+	}
+}
+
 // release commits a held turn, unless more words came first.
 func (s *Session) release(h *heldTurn, endMs int) {
 	s.mu.Lock()
@@ -503,6 +612,7 @@ func (s *Session) unhold() {
 		s.held.timer.Stop()
 	}
 	s.held = nil
+	s.early = nil
 }
 
 func (s *Session) trimBuffer() {
