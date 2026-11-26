@@ -1955,7 +1955,8 @@ export interface AutomationCamera {
  */
 export interface AutomationSay {
   connector: 'reolink'
-  device: 'camera'
+  /** camera, or camera@4 for the camera on its hub's channel 4 (#1333, contract 1.133). */
+  device: string
   quiet_from?: string
   quiet_to?: string
   /** The voice it speaks in, such as kitten:en:eleanor; empty is the language's voice from the Voice settings (#1304, contract 1.112). */
