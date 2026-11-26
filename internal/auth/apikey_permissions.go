@@ -71,6 +71,10 @@ var chatRoutes = map[string]bool{
 	"POST /v1/messages/count_tokens": true,
 	"POST /v1/responses":             true,
 	"GET /v1/models":                 true,
+	// Embeddings and audio, which save nothing (#1357).
+	"POST /v1/embeddings":           true,
+	"POST /v1/audio/transcriptions": true,
+	"POST /v1/audio/speech":         true,
 	// Ollama's API asks the same way (#1356); managing models isn't asking.
 	"GET /api/tags":        true,
 	"GET /api/ps":          true,

@@ -535,12 +535,19 @@ func (s *Server) routes() {
 		s.router.HandleFunc("/v1/messages/count_tokens", s.deps.OpenAI.HandleCountTokens).Methods(http.MethodPost, http.MethodOptions)
 		// OpenAI's Responses format, for coding agents (#843).
 		s.router.HandleFunc("/v1/responses", s.deps.OpenAI.HandleResponses).Methods(http.MethodPost, http.MethodOptions)
+		// Embeddings and audio, from what Toskar already runs (#1357).
+		s.router.HandleFunc("/v1/embeddings", s.deps.OpenAI.HandleEmbeddings).Methods(http.MethodPost, http.MethodOptions)
+		s.router.HandleFunc("/v1/audio/transcriptions", s.deps.OpenAI.HandleTranscriptions).Methods(http.MethodPost, http.MethodOptions)
+		s.router.HandleFunc("/v1/audio/speech", s.deps.OpenAI.HandleSpeech).Methods(http.MethodPost, http.MethodOptions)
 	} else {
 		s.router.HandleFunc("/v1/models", s.handleOpenAIModels).Methods(http.MethodGet, http.MethodOptions)
 		s.router.HandleFunc("/v1/chat/completions", s.handleOpenAIChat).Methods(http.MethodPost, http.MethodOptions)
 		s.router.HandleFunc("/v1/messages", s.handleOpenAIChat).Methods(http.MethodPost, http.MethodOptions)
 		s.router.HandleFunc("/v1/messages/count_tokens", s.handleOpenAIChat).Methods(http.MethodPost, http.MethodOptions)
 		s.router.HandleFunc("/v1/responses", s.handleOpenAIChat).Methods(http.MethodPost, http.MethodOptions)
+		for _, path := range []string{"/v1/embeddings", "/v1/audio/transcriptions", "/v1/audio/speech"} {
+			s.router.HandleFunc(path, s.handleOpenAIChat).Methods(http.MethodPost, http.MethodOptions)
+		}
 	}
 
 	s.ollamaRoutes()

@@ -335,3 +335,14 @@ func (s *Session) answerLanguage(first, asked string) string {
 	s.lastLang = lang
 	return lang
 }
+
+// Sentences cuts text into the pieces a voice speaks one at a time: each
+// sentence, and a long one at a comma or a space, as answers are spoken.
+func Sentences(text string) []string {
+	var p splitter
+	out := p.add(text)
+	if rest := p.flush(); rest != "" {
+		out = append(out, rest)
+	}
+	return out
+}
