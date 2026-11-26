@@ -67,6 +67,10 @@ func TestBrowserOriginsOverLoopback(t *testing.T) {
 		{name: "rebinding same origin", origin: "http://evil.example:7331", host: "evil.example:7331", want: http.StatusForbidden},
 		{name: "rebinding GET without origin", host: "evil.example:7331", want: http.StatusForbidden},
 		{name: "rebinding with key", host: "evil.example:7331", key: true, want: http.StatusOK},
+		// A container on this computer, through Docker Desktop or Podman (#1057).
+		{name: "Docker container", host: "host.docker.internal:7331", want: http.StatusOK},
+		{name: "Podman container", host: "host.containers.internal:7331", want: http.StatusOK},
+		{name: "website through the container name", origin: "https://evil.example", host: "host.docker.internal:7331", want: http.StatusForbidden},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
