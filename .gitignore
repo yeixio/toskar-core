@@ -62,3 +62,7 @@ desktop/node_modules/
 .quality-cache/
 # scripts/quality-score.sh's results
 quality-score-*/
+
+# Python bytecode
+__pycache__/
+*.pyc
