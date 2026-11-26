@@ -1192,6 +1192,8 @@ export interface SettingsView {
   suggest_models?: boolean
   /** This person's choice that voice chat plays a soft chime while a spoken answer takes a while (#1334, contract 1.121); on by default. */
   thinking_sound?: boolean
+  /** The character this person sees in voice chat (#1369, contract 1.130): '' for none, the default. */
+  voice_avatar?: string
   /** auto (the language the person writes in), app (the App language), or language (assistant_language). */
   assistant_language_mode?: AssistantLanguageMode
   /** The language answers are written in with assistant_language_mode language, such as de. */
@@ -1536,6 +1538,8 @@ export interface SettingsPatch {
   suggest_models?: boolean
   /** This person's own: voice chat's thinking sound (#1334). */
   thinking_sound?: boolean
+  /** This person's own: the character they see in voice chat (#1369). */
+  voice_avatar?: string
   /** The person's Hugging Face token, for models behind a license; '' forgets it. Never read back (#551). */
   huggingface_token?: string
   community_ratings?: boolean

@@ -70,6 +70,20 @@ as a Kitten voice after Kitten was removed, answers `reads: false` with the
 voice that reads instead in `reads_with`. Cloned voices and styles wait for
 the larger Kitten model.
 
+### Avatars
+
+Voice mode can show a character in place of its circle (#1369): the
+personal setting `voice_avatar`, `""` for none (the default) or one of
+`ratatoskr`, `pebble`, and `lumen` (`PATCH /api/v1/me/preferences`). The
+characters are vector drawings in the web app, so there is nothing to
+download. The mouth follows the loudness of the answer as it plays, measured
+in the page from the audio it plays, so it works with every voice: Kokoro,
+Kitten, and Piper. The character listens, leans in while it hears you,
+thinks, talks, and sleeps when the conversation ends. With Reduce Motion, or
+in screenshots, it is a still picture. The iPhone, Mac, and TV apps, a
+character for each persona, and mouth shapes from the voice's phonemes come
+later.
+
 Measured on an M5 Pro (#1304): the environment is 1.3 GB and the model
 189 MB (140 MB without the 4-bit model, which isn't downloaded). A warm
 sentence takes 0.36 s for about 3 s of English and 0.6 to 0.75 s in other

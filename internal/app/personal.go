@@ -56,6 +56,8 @@ var personalKeys = map[string]bool{
 	"notify_task_finish": true,
 	// The voice persona a person reads aloud in (#1319).
 	settingVoicePersona: true,
+	// The character a person sees in voice chat (#1369).
+	settingVoiceAvatar: true,
 }
 
 // personalSettingKey is where ctx's person keeps key.

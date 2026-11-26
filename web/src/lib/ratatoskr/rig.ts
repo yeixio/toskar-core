@@ -210,6 +210,8 @@ export class Rig {
   readonly still: boolean
   state: MascotState = 'idle'
   enter = { ax: BASE.ax, ay: BASE.ay }
+  /** How open his mouth is, 0 to 1, while he talks in voice chat (#1369); below 0 the state's pose decides. */
+  talk?: () => number
   private readonly id: string
   private readonly fx: boolean
   private readonly blinks: boolean
@@ -352,6 +354,8 @@ export class Rig {
     for (const key of Object.keys(target) as (keyof Pose)[]) {
       this.p[key] = direct.includes(key) && this.t > 0.08 ? target[key] : this.p[key] + (target[key] - this.p[key]) * k
     }
+    const open = this.talk?.() ?? -1
+    if (open >= 0) this.p.mouth = open
     this.phase += dt * this.p.swayF
     // Blinking and ear twitches.
     if (this.blinks) {

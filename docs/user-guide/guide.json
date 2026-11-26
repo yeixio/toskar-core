@@ -2739,6 +2739,10 @@
         },
         {
           "type": "paragraph",
+          "text": "Voice mode can show a character instead of the circle. Choose one under Settings › Voice › Avatar: Ratatoskr, Pebble, or Lumen. Its mouth moves as Toskar talks, and it listens, thinks, and dozes off when the conversation ends. With Reduce Motion on, it's a still picture. Only you see your choice, and Off brings back the circle."
+        },
+        {
+          "type": "paragraph",
           "text": "Voice also says what's still missing. Voice mode needs a chat model to answer with, and the doorbell needs a model that can see pictures. When none is installed, Voice names the one that fits this computer, with its size, and Install downloads it. An automation that looks at a camera offers the same when you choose the camera."
         },
         {

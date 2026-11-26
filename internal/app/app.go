@@ -1706,6 +1706,10 @@ func (a *App) settingsView(ctx context.Context) (contracts.SettingsView, error) 
 	uiLocale := a.personalString(ctx, "ui_locale", "")
 	suggestModels := a.personalString(ctx, "suggest_models", "true") != "false"
 	thinkingSound := a.personalString(ctx, "thinking_sound", "true") != "false"
+	voiceAvatar := a.personalString(ctx, settingVoiceAvatar, "")
+	if !validAvatar(voiceAvatar) {
+		voiceAvatar = ""
+	}
 	assistantMode := a.personalString(ctx, "assistant_language_mode", replylang.ModeAuto)
 	assistantLanguage := a.personalString(ctx, "assistant_language", "")
 	digest, _ := a.Settings.GetString(ctx, settingDigest, "")
@@ -1768,6 +1772,7 @@ func (a *App) settingsView(ctx context.Context) (contracts.SettingsView, error) 
 		UILocale:                uiLocale,
 		SuggestModels:           suggestModels,
 		ThinkingSound:           thinkingSound,
+		VoiceAvatar:             voiceAvatar,
 		AssistantLanguageMode:   assistantMode,
 		AssistantLanguage:       assistantLanguage,
 		AutomationDigest:        digest,
@@ -1914,6 +1919,15 @@ func (a *App) applySettingsPatch(ctx context.Context, patch map[string]any) erro
 	// Each person's own (#1334): the chime while a spoken answer is on its way.
 	if v, ok := patch["thinking_sound"].(bool); ok {
 		if err := a.setPersonal(ctx, "thinking_sound", strconv.FormatBool(v)); err != nil {
+			return err
+		}
+	}
+	// Each person's own (#1369): the character they see in voice chat.
+	if v, ok := patch[settingVoiceAvatar].(string); ok {
+		if !validAvatar(v) {
+			return contracts.Errorf("INVALID_SETTING", map[string]any{"setting": settingVoiceAvatar, "value": v}, "voice_avatar is \"\" or one of %s", strings.Join(VoiceAvatars, ", "))
+		}
+		if err := a.setPersonal(ctx, settingVoiceAvatar, v); err != nil {
 			return err
 		}
 	}

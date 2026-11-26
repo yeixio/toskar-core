@@ -14,6 +14,8 @@ import {
 import { VoiceConnection, resolveVoiceSocketUrl, type VoiceStatus } from '@/lib/voice/realtime'
 import { readScreenshotLaunch } from '@/lib/screenshotMode'
 import { formatLocale } from '@/i18n/format'
+import { VoiceAvatar } from './VoiceAvatar'
+import { isAvatar } from './avatars'
 
 /** A heard language's name, such as Spanish for es, in the App language. */
 function heardName(tag: string): string {
@@ -59,6 +61,8 @@ export function VoiceMode({ onClose }: { onClose: () => void }) {
   const ref = useDialog(true, onClose)
   const settings = useQuery({ queryKey: ['settings'], queryFn: () => api.getSettings(), retry: false })
   const thinkingSound = settings.data?.thinking_sound ?? true
+  // The character the person chose to see, if any (#1369).
+  const avatar = settings.data?.voice_avatar
 
   // A soft chime while an answer takes a while, so the person knows they
   // were heard (#1334); it stops the moment anything else happens.
@@ -164,22 +168,26 @@ export function VoiceMode({ onClose }: { onClose: () => void }) {
         <h2 id="voice-mode-title" className="sr-only">
           {t('voiceMode.title')}
         </h2>
-        <div
-          aria-hidden
-          className={[
-            'h-28 w-28 rounded-full transition-all duration-300',
-            status === 'speaking'
-              ? 'scale-110 bg-primary motion-safe:animate-pulse'
-              : status === 'hearing'
-                ? 'scale-105 bg-primary/70'
-                : status === 'thinking'
-                  ? 'bg-primary/40 motion-safe:animate-pulse'
-                  : live
-                    ? 'bg-primary/25'
-                    : 'bg-line',
-            muted ? 'opacity-40' : '',
-          ].join(' ')}
-        />
+        {isAvatar(avatar) ? (
+          <VoiceAvatar character={avatar} status={status} level={() => audioRef.current?.level() ?? 0} muted={muted} />
+        ) : (
+          <div
+            aria-hidden
+            className={[
+              'h-28 w-28 rounded-full transition-all duration-300',
+              status === 'speaking'
+                ? 'scale-110 bg-primary motion-safe:animate-pulse'
+                : status === 'hearing'
+                  ? 'scale-105 bg-primary/70'
+                  : status === 'thinking'
+                    ? 'bg-primary/40 motion-safe:animate-pulse'
+                    : live
+                      ? 'bg-primary/25'
+                      : 'bg-line',
+              muted ? 'opacity-40' : '',
+            ].join(' ')}
+          />
+        )}
         <p className="min-h-5 text-sm font-medium text-ink" role="status" aria-live="polite">
           {muted && live ? t('voiceMode.muted') : label}
         </p>

@@ -70,11 +70,31 @@ export class VoiceAudio {
   private muted = false
   private thinkingTimer: ReturnType<typeof setTimeout> | null = null
   private chime: AudioBufferSourceNode | null = null
+  /** The answer passes through here on its way out, so an avatar can follow how loud it is (#1369). */
+  private output: AnalyserNode
+  private samples: Float32Array<ArrayBuffer>
   /** Called when everything queued has played. */
   onDrained?: () => void
 
   constructor() {
     this.context = new AudioContext()
+    this.output = this.context.createAnalyser()
+    this.output.fftSize = 512
+    this.output.connect(this.context.destination)
+    this.samples = new Float32Array(this.output.fftSize)
+  }
+
+  /**
+   * How loud the answer is right now, 0 to 1, for an avatar's mouth: the
+   * level of the last few milliseconds that played. The thinking sound
+   * doesn't count.
+   */
+  level(): number {
+    if (this.playing.size === 0) return 0
+    this.output.getFloatTimeDomainData(this.samples)
+    let sum = 0
+    for (const v of this.samples) sum += v * v
+    return Math.min(1, Math.sqrt(sum / this.samples.length) * 5)
   }
 
   /** Asks for the microphone and starts sending its audio. */
@@ -128,7 +148,7 @@ export class VoiceAudio {
     buffer.copyToChannel(samples, 0)
     const node = this.context.createBufferSource()
     node.buffer = buffer
-    node.connect(this.context.destination)
+    node.connect(this.output)
     const now = this.context.currentTime
     // A little room when starting from silence, so the first piece doesn't clip.
     this.playAt = Math.max(this.playAt, now + 0.05)
