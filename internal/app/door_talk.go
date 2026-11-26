@@ -226,6 +226,11 @@ func (v *doorVisit) hear(ctx context.Context, h *connectors.Hearing, wait time.D
 	prefix := connectors.ReolinkListenRate * 3 / 10
 	var heard []int16
 	speaking := turns.Speaking()
+	// A pause that sounds unfinished keeps listening a little (#1403):
+	// judged is Smart Turn's answer, and hold ends the turn when no more
+	// words come.
+	var judged chan bool
+	var hold <-chan time.Time
 	start := time.NewTimer(wait)
 	defer start.Stop()
 	longest := time.NewTimer(wait + v.longest)
@@ -239,10 +244,18 @@ func (v *doorVisit) hear(ctx context.Context, h *connectors.Hearing, wait time.D
 				return nil, errNoOneThere
 			}
 		case <-longest.C:
-			if speaking {
+			if speaking || judged != nil || hold != nil {
 				return heard, nil
 			}
 			return nil, errNoOneThere
+		case unfinished := <-judged:
+			judged = nil
+			if !unfinished {
+				return heard, nil
+			}
+			hold = time.After(voice.UnfinishedWait)
+		case <-hold:
+			return heard, nil
 		case chunk, ok := <-h.Audio:
 			if !ok {
 				if err := h.Err(); err != nil {
@@ -252,7 +265,10 @@ func (v *doorVisit) hear(ctx context.Context, h *connectors.Hearing, wait time.D
 			}
 			heard = append(heard, chunk...)
 			started, stopped := turns.Feed(voice.Resample(chunk, connectors.ReolinkListenRate, voice.SampleRate))
-			if started && !speaking {
+			if started && (judged != nil || hold != nil) {
+				// More words: the turn goes on.
+				judged, hold = nil, nil
+			} else if started && !speaking {
 				speaking = true
 				longest.Reset(v.longest)
 			}
@@ -260,7 +276,13 @@ func (v *doorVisit) hear(ctx context.Context, h *connectors.Hearing, wait time.D
 				heard = append(heard[:0], heard[len(heard)-prefix:]...)
 			}
 			if speaking && stopped {
-				return heard, nil
+				if v.parts.Judge == nil {
+					return heard, nil
+				}
+				judged = make(chan bool, 1)
+				go func(c chan bool, audio []int16) {
+					c <- voice.SoundsUnfinished(ctx, v.parts.Judge, audio)
+				}(judged, voice.Resample(append([]int16(nil), heard...), connectors.ReolinkListenRate, voice.SampleRate))
 			}
 		}
 	}
