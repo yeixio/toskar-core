@@ -568,20 +568,19 @@ func (s *Session) judgeEarly(h *heldTurn, audio []int16) {
 	}
 	s.mu.Lock()
 	h.verdict = v
-	switch {
-	case s.held == h:
-		// The whole pause went by while it was judged.
-		if v == verdictUnfinished {
-			h.timer = time.AfterFunc(unfinishedWait, func() { s.release(h, h.endMs) })
-			s.mu.Unlock()
-			return
-		}
-		s.mu.Unlock()
-		s.release(h, h.endMs)
-	default:
+	if s.held != h {
 		// Still paused, or the words went on: the pause decides.
 		s.mu.Unlock()
+		return
 	}
+	// The whole pause went by while it was judged.
+	if v == verdictUnfinished {
+		h.timer = time.AfterFunc(unfinishedWait, func() { s.release(h, h.endMs) })
+		s.mu.Unlock()
+		return
+	}
+	s.mu.Unlock()
+	s.release(h, h.endMs)
 }
 
 // release commits a held turn, unless more words came first.
