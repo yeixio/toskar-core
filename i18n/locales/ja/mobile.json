@@ -1034,6 +1034,11 @@
     "results": "結果",
     "noResults": "まだ結果はありません。今すぐ実行すると表示されます。",
     "askAboutIt": "チャットでこれについて質問",
+    "clearHistory": "履歴を消去",
+    "clearHistoryTitle": "この自動化の履歴を消去しますか？",
+    "clearHistoryBody": "完了した実行はこのデバイスとコンピュータから削除されます。実行中のものは残り、自動化のスケジュールも変わりません。",
+    "clearWithPictures": "画像も削除して消去",
+    "removeRun": "削除",
     "status": {
       "claimed": "開始中",
       "running": "実行中",

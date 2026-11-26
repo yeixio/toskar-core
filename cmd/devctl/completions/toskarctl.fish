@@ -56,7 +56,7 @@ complete -c toskarctl -n '__fish_seen_subcommand_from models; and __fish_seen_su
 complete -c toskarctl -n '__fish_seen_subcommand_from models; and __fish_seen_subcommand_from list' -l json -d 'Print JSON'
 complete -c toskarctl -n '__fish_seen_subcommand_from models; and __fish_seen_subcommand_from install' -l node -r -d 'The computer to install it on'
 
-set -l ygg_automation_cmds list get parse create update delete run pause resume hook
+set -l ygg_automation_cmds list get parse create update delete run pause resume hook clear runs
 complete -c toskarctl -n "__fish_seen_subcommand_from automations; and not __fish_seen_subcommand_from $ygg_automation_cmds" -a "$ygg_automation_cmds"
 
 set -l ygg_edit '__fish_seen_subcommand_from automations; and __fish_seen_subcommand_from create update'

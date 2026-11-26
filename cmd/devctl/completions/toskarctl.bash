@@ -86,7 +86,7 @@ _toskarctl() {
       ;;
     automations)
       if [[ ${COMP_CWORD} -eq 2 ]]; then
-        COMPREPLY=($(compgen -W "list get parse create update delete run pause resume hook" -- "$cur"))
+        COMPREPLY=($(compgen -W "list get parse create update delete run pause resume hook clear runs" -- "$cur"))
         return
       fi
       case "${COMP_WORDS[2]}" in

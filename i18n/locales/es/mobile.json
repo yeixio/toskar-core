@@ -1062,6 +1062,11 @@
     "results": "Resultados",
     "noResults": "Aún no hay resultados. Ejecútala ahora para ver uno.",
     "askAboutIt": "Preguntar sobre esto en un chat",
+    "clearHistory": "Borrar historial",
+    "clearHistoryTitle": "¿Borrar el historial de esta automatización?",
+    "clearHistoryBody": "Sus ejecuciones terminadas se quitan aquí y en tu computadora. Las que siguen en curso se quedan, y la automatización mantiene su horario.",
+    "clearWithPictures": "Borrar, también las imágenes",
+    "removeRun": "Quitar",
     "status": {
       "claimed": "Iniciando",
       "running": "En ejecución",

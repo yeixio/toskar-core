@@ -1048,6 +1048,11 @@
     "results": "Ergebnisse",
     "noResults": "Noch keine Ergebnisse. Führe sie jetzt aus, um eines zu sehen.",
     "askAboutIt": "In einem Chat dazu fragen",
+    "clearHistory": "Verlauf löschen",
+    "clearHistoryTitle": "Den Verlauf dieser Automation löschen?",
+    "clearHistoryBody": "Ihre abgeschlossenen Läufe werden hier und auf deinem Computer entfernt. Laufende Läufe bleiben, und die Automation behält ihren Zeitplan.",
+    "clearWithPictures": "Löschen, auch die Bilder",
+    "removeRun": "Entfernen",
     "status": {
       "claimed": "Startet",
       "running": "Läuft",

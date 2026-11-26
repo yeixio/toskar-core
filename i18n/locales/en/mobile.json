@@ -1146,6 +1146,11 @@
     "results": "Results",
     "noResults": "No results yet. Run it now to see one.",
     "askAboutIt": "Ask about this in a chat",
+    "clearHistory": "Clear history",
+    "clearHistoryTitle": "Clear this automation's history?",
+    "clearHistoryBody": "Its finished runs are removed here and on your computer. Runs still going stay, and the automation keeps its schedule.",
+    "clearWithPictures": "Clear, and delete pictures",
+    "removeRun": "Remove",
     "status": {
       "claimed": "Starting",
       "running": "Running",

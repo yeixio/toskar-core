@@ -130,6 +130,8 @@ var helpGroups = []helpGroup{
 				{name: "pause", summary: "Stop an automation running until it's resumed", about: "Stops an automation running until it's resumed.", usage: []string{"toskarctl automations pause <id>"}},
 				{name: "resume", summary: "Start a paused automation again", about: "Starts a paused automation again.", usage: []string{"toskarctl automations resume <id>"}},
 				{name: "hook", summary: "Print a new webhook link", about: "Prints a new webhook link for an automation with --trigger webhook. The old one stops working.", usage: []string{"toskarctl automations hook <id>"}},
+				{name: "clear", summary: "Clear an automation's history", about: "Removes an automation's finished runs. A run still going is kept. With --files, the camera pictures those runs took are deleted too.", usage: []string{"toskarctl automations clear <id> [flags]"}, flags: []helpFlag{{"--files", "also delete the camera pictures the runs took"}}},
+				{name: "runs", summary: "Remove one run from an automation's history", about: "Removes one finished run from an automation's history.", usage: []string{"toskarctl automations runs rm <id> <run_id>"}},
 			},
 			examples: []string{"toskarctl automations list"},
 		},

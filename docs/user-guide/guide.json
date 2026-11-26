@@ -2224,7 +2224,7 @@
         },
         {
           "type": "paragraph",
-          "text": "Open the automation and choose Clear history above its runs. The automation stays, with its schedule. Runs still going stay too. Choose Also delete the pictures its cameras took to remove those with it. To remove one run, open its Details and choose Remove this run."
+          "text": "Open the automation and choose Clear history above its runs. The automation stays, with its schedule. Runs still going stay too. Choose Also delete the pictures its cameras took to remove those with it. To remove one run, open its Details and choose Remove this run. From a terminal, toskarctl automations clear and toskarctl automations runs rm do the same."
         }
       ]
     },
