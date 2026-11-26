@@ -217,3 +217,106 @@ func TestReolinkBareAddressAndPlainErrors(t *testing.T) {
 		t.Fatalf("a wrong address: %q %v", code, err)
 	}
 }
+
+// A doorbell on a Home Hub brings every camera paired to the hub, each by
+// its own name and channel, with one sign-in between them (#1333): a
+// person at the tracking camera starts only its own devices, and its
+// picture and speaker are its own.
+func TestReolinkHubHasEachCamera(t *testing.T) {
+	old := reolinkPoll
+	reolinkPoll = 10 * time.Millisecond
+	defer func() { reolinkPoll = old }()
+	door := reolinktest.New(false)
+	defer door.Close()
+	door.Cams = []reolinktest.Cam{{Channel: 4, Name: "Driveway 360", Online: true}, {Channel: 2, Name: "Garage", Online: false}}
+	m := reolinkManager(t)
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	if _, err := m.Connect(ctx, "reolink", map[string]string{"url": door.URL, "username": "admin", "password": door.Password, "channel": "0"}); err != nil {
+		t.Fatal(err)
+	}
+	devices, err := m.Devices(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var names []string
+	for _, d := range devices {
+		names = append(names, d.Device+"="+d.Name)
+	}
+	for _, want := range []string{"camera=Front Door", "doorbell=Front Door doorbell button", "camera@4=Driveway 360", "person@4=Driveway 360 person", "motion@4=Driveway 360 motion"} {
+		if !slices.Contains(names, want) {
+			t.Fatalf("devices %v lack %s", names, want)
+		}
+	}
+	if slices.ContainsFunc(names, func(s string) bool { return strings.Contains(s, "@2") || strings.Contains(s, "@0") }) {
+		t.Fatalf("an offline camera, or the door twice: %v", names)
+	}
+	pic, _, err := m.CameraPicture(ctx, "reolink", "camera@4")
+	if err != nil || !bytes.Equal(pic, reolinktest.PictureOf(4)) {
+		t.Fatalf("the tracking camera's picture: %v", err)
+	}
+	if pic, _, _ := m.CameraPicture(ctx, "reolink", "camera"); !bytes.Equal(pic, reolinktest.Picture) {
+		t.Fatal("the door's picture isn't its own")
+	}
+
+	var mu sync.Mutex
+	var seen []string
+	done := make(chan error, 1)
+	go func() {
+		done <- m.WatchDevices(ctx, "reolink", []string{ReolinkPerson, ReolinkPerson + "@4"}, func(c DeviceChange) {
+			mu.Lock()
+			seen = append(seen, c.Device+":"+c.From+">"+c.To)
+			mu.Unlock()
+		})
+	}()
+	time.Sleep(40 * time.Millisecond)
+	door.VisitAt(4, true)
+	for range 300 {
+		mu.Lock()
+		ok := slices.Contains(seen, "person@4:off>on")
+		mu.Unlock()
+		if ok {
+			break
+		}
+		time.Sleep(5 * time.Millisecond)
+	}
+	cancel()
+	if err := <-done; err != nil {
+		t.Fatal(err)
+	}
+	mu.Lock()
+	defer mu.Unlock()
+	if !slices.Equal(seen, []string{"person@4:off>on"}) {
+		t.Fatalf("saw %v, want only the tracking camera's person", seen)
+	}
+	if door.Logins() != 1 {
+		t.Fatalf("%d sign-ins for one hub", door.Logins())
+	}
+}
+
+// A device on another channel is that channel's camera, and the
+// connection's own reolink-cli name doesn't follow it there (#1333).
+func TestReolinkDeviceChannel(t *testing.T) {
+	cred := Credential{"url": "https://192.168.68.56", "channel": "0", "talk_camera": "hub-ch0"}
+	for _, tc := range []struct {
+		device, base, channel, camera string
+	}{
+		{"camera", "camera", "0", "hub-ch0"},
+		{"person@0", "person", "0", "hub-ch0"},
+		{"camera@4", "camera", "4", ""},
+		{"camera@x", "camera", "0", "hub-ch0"},
+	} {
+		got, base := reolinkDevice(cred, tc.device)
+		if base != tc.base || got["channel"] != tc.channel || got["talk_camera"] != tc.camera {
+			t.Errorf("%s: %s %v", tc.device, base, got)
+		}
+	}
+	if cred["channel"] != "0" || cred["talk_camera"] != "hub-ch0" {
+		t.Fatalf("the connection itself changed: %v", cred)
+	}
+	got, _ := reolinkDevice(cred, "camera@4")
+	target, err := targetOf(got)
+	if err != nil || !slices.Contains(target.args, "--channel=4") || slices.Contains(target.args, "--camera") {
+		t.Fatalf("talking through channel 4: %v %v", target.args, err)
+	}
+}

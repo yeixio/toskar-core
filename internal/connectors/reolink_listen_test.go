@@ -54,7 +54,7 @@ func TestReolinkListensThroughReolinkCLI(t *testing.T) {
 	if _, err := m.Connect(ctx, "reolink", map[string]string{"url": door.URL, "username": "admin", "password": door.Password, "talk_camera": "hub-ch0", "talk_gateway": "127.0.0.1:9000"}); err != nil {
 		t.Fatal(err)
 	}
-	h, err := m.Listen(ctx, "reolink")
+	h, err := m.Listen(ctx, "reolink", "camera")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -71,7 +71,7 @@ func TestReolinkListensThroughReolinkCLI(t *testing.T) {
 	}
 
 	t.Setenv("FAIL", "1")
-	h, err = m.Listen(ctx, "reolink")
+	h, err = m.Listen(ctx, "reolink", "camera")
 	if err != nil {
 		t.Fatal(err)
 	}

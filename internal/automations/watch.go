@@ -9,7 +9,6 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
-	"slices"
 	"strings"
 	"time"
 )
@@ -109,9 +108,9 @@ func (t *Trigger) Validate() error {
 				return errors.New("a Home Assistant device is an entity such as binary_sensor.front_door_visitor")
 			}
 		case "reolink":
-			// What a Reolink camera detects (#667).
-			if !slices.Contains([]string{"person", "vehicle", "animal", "motion", "doorbell"}, t.Device) {
-				return errors.New("a Reolink camera's device is person, vehicle, animal, motion, or doorbell")
+			// What a Reolink camera detects (#667), on a hub's channel with @, such as person@1 (#1333).
+			if !ReolinkDevice(t.Device, "person", "vehicle", "animal", "motion", "doorbell") {
+				return errors.New("a Reolink camera's device is person, vehicle, animal, motion, or doorbell, with @1 for a hub's channel 1")
 			}
 		default:
 			return fmt.Errorf("unsupported device connector %q", t.Connector)

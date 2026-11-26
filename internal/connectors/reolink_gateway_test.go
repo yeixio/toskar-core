@@ -59,7 +59,7 @@ func TestReolinkRestartsAStaleGateway(t *testing.T) {
 	words := make([]int16, ReolinkTalkRate/10)
 
 	connect("192.168.1.9:9000")
-	err := m.Talk(ctx, "reolink", words, ReolinkTalkRate)
+	err := m.Talk(ctx, "reolink", "camera", words, ReolinkTalkRate)
 	// Regression: toskar-core#1340
 	if code, _ := contracts.ErrorCode(err); code != "CAMERA_SPEAKER_UNREACHABLE" || !strings.Contains(err.Error(), "No route to host") || strings.Contains(err.Error(), "{") {
 		t.Fatalf("a gateway elsewhere: %q %v", code, err)
@@ -69,7 +69,7 @@ func TestReolinkRestartsAStaleGateway(t *testing.T) {
 	}
 
 	connect("127.0.0.1:9000")
-	if err := m.Talk(ctx, "reolink", words, ReolinkTalkRate); err != nil {
+	if err := m.Talk(ctx, "reolink", "camera", words, ReolinkTalkRate); err != nil {
 		t.Fatal(err)
 	}
 	want := "--gateway-addr 127.0.0.1:9000 --camera hub-ch0 audio talk --stdin --sample-rate 16000\n--gateway-addr 127.0.0.1:9000 gateway stop\ngateway start --addr 127.0.0.1:9000\n" +
@@ -85,7 +85,7 @@ func TestReolinkRestartsAStaleGateway(t *testing.T) {
 		}
 		up.Store(true)
 	}()
-	if err := m.Talk(ctx, "reolink", words, ReolinkTalkRate); err != nil {
+	if err := m.Talk(ctx, "reolink", "camera", words, ReolinkTalkRate); err != nil {
 		t.Fatal(err)
 	}
 	if c := calls(); !strings.HasPrefix(c, "gateway start --addr 127.0.0.1:9000\n--gateway-addr") {

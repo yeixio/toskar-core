@@ -43,7 +43,12 @@ export function isRing(device: string | undefined): boolean {
 export function doorbellOf(devices: Device[]): { ring: Device; camera?: Device } | null {
   const ring = devices.find((d) => d.kind !== 'camera' && isRing(d.device))
   if (!ring) return null
-  const camera = devices.find((d) => d.kind === 'camera' && d.connector === ring.connector) ?? devices.find((d) => d.kind === 'camera')
+  // A Reolink doorbell's own camera is on its hub channel, such as camera@4 for doorbell@4 (#1333).
+  const channel = ring.connector === 'reolink' && ring.device.includes('@') ? ring.device.slice(ring.device.indexOf('@')) : ''
+  const camera =
+    devices.find((d) => d.kind === 'camera' && d.connector === 'reolink' && ring.connector === 'reolink' && d.device === `camera${channel}`) ??
+    devices.find((d) => d.kind === 'camera' && d.connector === ring.connector) ??
+    devices.find((d) => d.kind === 'camera')
   return { ring, camera }
 }
 
@@ -146,7 +151,7 @@ export function buildIdea(idea: Idea, values: IdeaValues, timeZone: string, read
       params.door = door.camera?.name ?? door.ring.name
       if (door.camera) {
         cameras = [{ connector: door.camera.connector as DeviceConnector, device: door.camera.device }]
-        if (door.camera.connector === 'reolink') say = { connector: 'reolink', device: 'camera', listen: true }
+        if (door.camera.connector === 'reolink') say = { connector: 'reolink', device: door.camera.device, listen: true }
       }
       break
     }

@@ -449,6 +449,7 @@
       "close_cover": "닫기"
     },
     "sayVoice": "음성",
+    "sayThrough": "말할 카메라",
     "sayVoiceAutomatic": "설정에서 고른 언어의 음성",
     "sayVoiceKitten": "Kitten",
     "sayListen": "방문자와 대화하기",

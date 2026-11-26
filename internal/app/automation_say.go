@@ -23,7 +23,7 @@ import (
 
 // doorTalker speaks audio through a connected camera: connectors.Manager.
 type doorTalker interface {
-	Talk(ctx context.Context, service string, samples []int16, rate int) error
+	Talk(ctx context.Context, service, device string, samples []int16, rate int) error
 }
 
 // sayAtDoor speaks answer through the automation's speaker, and returns
@@ -91,7 +91,7 @@ func sayAnswer(ctx context.Context, sp voice.Speaker, talk doorTalker, automatio
 	for _, f := range ready {
 		f()
 	}
-	if err := talk.Talk(ctx, automation.Say.Connector, samples, connectors.ReolinkTalkRate); err != nil {
+	if err := talk.Talk(ctx, automation.Say.Connector, automation.Say.Device, samples, connectors.ReolinkTalkRate); err != nil {
 		return "", err
 	}
 	return text, nil

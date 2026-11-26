@@ -122,8 +122,9 @@ func (t reolinkTarget) command(ctx context.Context, bin string, args ...string) 
 	return cmd
 }
 
-// Talk says samples, 16-bit mono at rate, through the service's camera.
-func (m *Manager) Talk(ctx context.Context, service string, samples []int16, rate int) error {
+// Talk says samples, 16-bit mono at rate, through the service's camera:
+// device is the camera, such as camera@1 on a hub's channel 1 (#1333).
+func (m *Manager) Talk(ctx context.Context, service, device string, samples []int16, rate int) error {
 	s, err := m.service(service)
 	if err != nil {
 		return err
@@ -135,14 +136,15 @@ func (m *Manager) Talk(ctx context.Context, service string, samples []int16, rat
 	if err != nil {
 		return fmt.Errorf("%s is not connected. Connect it in Settings", s.Name())
 	}
-	if err := reolinkTalk(ctx, cred, samples, rate); err != nil {
+	cam, _ := reolinkDevice(cred, device)
+	if err := reolinkTalk(ctx, cam, samples, rate); err != nil {
 		return sanitizeErr(err, secretsOnly(s, cred))
 	}
 	return nil
 }
 
 // CanTalk reports a Reolink connection and reolink-cli to speak through it.
-func (m *Manager) CanTalk(service string) bool {
+func (m *Manager) CanTalk(service, device string) bool {
 	if service != "reolink" {
 		return false
 	}
@@ -150,7 +152,8 @@ func (m *Manager) CanTalk(service string) bool {
 	if err != nil {
 		return false
 	}
-	if _, err := targetOf(cred); err != nil {
+	cam, _ := reolinkDevice(cred, device)
+	if _, err := targetOf(cam); err != nil {
 		return false
 	}
 	_, err = reolinkCLI()

@@ -449,6 +449,7 @@
       "close_cover": "关上"
     },
     "sayVoice": "语音",
+    "sayThrough": "通过此摄像头说话",
     "sayVoiceAutomatic": "设置中该语言的语音",
     "sayVoiceKitten": "Kitten",
     "sayListen": "与访客交谈",

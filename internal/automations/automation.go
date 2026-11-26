@@ -4,6 +4,7 @@ package automations
 import (
 	"fmt"
 	"regexp"
+	"slices"
 	"strings"
 	"time"
 )
@@ -303,8 +304,19 @@ const MaxCameras = 4
 const CameraHomeAssistant = "homeassistant"
 
 // CameraReolink is a Reolink camera reached directly (#667): its device is
-// always "camera", since one connection is one camera.
+// "camera", or "camera@1" for the camera on a hub's channel 1 (#1333).
 const CameraReolink = "reolink"
+
+// reolinkDeviceRe is a Reolink device: what the connection's own camera
+// has, or, with @ and a channel, a camera on the same hub (#1333).
+var reolinkDeviceRe = regexp.MustCompile(`^(camera|person|vehicle|animal|motion|doorbell)(@[0-9]{1,3})?$`)
+
+// ReolinkDevice reports a Reolink device of kind, such as person or
+// person@1, and its channel's suffix.
+func ReolinkDevice(device string, kinds ...string) bool {
+	m := reolinkDeviceRe.FindStringSubmatch(device)
+	return m != nil && slices.Contains(kinds, m[1])
+}
 
 // ValidateCameras checks the cameras can be looked at.
 func ValidateCameras(cams []Camera) error {
@@ -327,8 +339,8 @@ func (c Camera) Validate() error {
 			return fmt.Errorf("a Home Assistant camera is an entity such as camera.driveway, not %q", c.Device)
 		}
 	case CameraReolink:
-		if c.Device != "camera" {
-			return fmt.Errorf("a Reolink camera's device is camera, not %q", c.Device)
+		if !ReolinkDevice(c.Device, "camera") {
+			return fmt.Errorf("a Reolink camera's device is camera, or camera@1 for a hub's channel 1, not %q", c.Device)
 		}
 	default:
 		return fmt.Errorf("unsupported camera connector %q", c.Connector)

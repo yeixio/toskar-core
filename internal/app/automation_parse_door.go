@@ -50,15 +50,28 @@ func ringDevice(devices []connectors.Device) (connectors.Device, bool) {
 	return connectors.Device{}, false
 }
 
-// cameraFor is the camera beside a doorbell's button: one of the same
-// service, or the first camera.
-func cameraFor(devices []connectors.Device, connector string) (connectors.Device, bool) {
+// cameraFor is the camera beside a doorbell's button: a Reolink doorbell's
+// own, on the same hub channel (#1333), then one of the same service, or
+// the first camera.
+func cameraFor(devices []connectors.Device, ring connectors.Device) (connectors.Device, bool) {
+	if ring.Connector == automations.CameraReolink {
+		_, ch, _ := strings.Cut(ring.Device, "@")
+		own := connectors.ReolinkCamera
+		if ch != "" {
+			own += "@" + ch
+		}
+		for _, d := range devices {
+			if d.Kind == connectors.KindCamera && d.Connector == ring.Connector && d.Device == own {
+				return d, true
+			}
+		}
+	}
 	var first *connectors.Device
 	for i, d := range devices {
 		if d.Kind != connectors.KindCamera {
 			continue
 		}
-		if d.Connector == connector {
+		if d.Connector == ring.Connector {
 			return d, true
 		}
 		if first == nil {
@@ -91,7 +104,7 @@ func doorRequest(text string, devices []connectors.Device, schedule automations.
 		Notes:        []string{},
 		Trigger:      &automations.Trigger{Kind: automations.TriggerDevice, Connector: ring.Connector, Device: ring.Device},
 	}
-	if cam, ok := cameraFor(devices, ring.Connector); ok {
+	if cam, ok := cameraFor(devices, ring); ok {
 		read.Cameras = []automations.Camera{{Connector: cam.Connector, Device: cam.Device}}
 		if cam.Connector == automations.SayReolink && greetWordsRe.MatchString(text) {
 			read.Say = &automations.Say{Connector: cam.Connector, Device: cam.Device, Listen: talkWordsRe.MatchString(text)}

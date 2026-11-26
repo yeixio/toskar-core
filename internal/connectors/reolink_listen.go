@@ -64,8 +64,8 @@ func (h *Hearing) fail(err error) {
 	}
 }
 
-// Listen hears the service's camera until ctx ends.
-func (m *Manager) Listen(ctx context.Context, service string) (*Hearing, error) {
+// Listen hears the service's camera, device, until ctx ends.
+func (m *Manager) Listen(ctx context.Context, service, device string) (*Hearing, error) {
 	s, err := m.service(service)
 	if err != nil {
 		return nil, err
@@ -77,7 +77,8 @@ func (m *Manager) Listen(ctx context.Context, service string) (*Hearing, error) 
 	if err != nil {
 		return nil, fmt.Errorf("%s is not connected. Connect it in Settings", s.Name())
 	}
-	h, err := reolinkListen(ctx, cred)
+	cam, _ := reolinkDevice(cred, device)
+	h, err := reolinkListen(ctx, cam)
 	if err != nil {
 		return nil, sanitizeErr(err, secretsOnly(s, cred))
 	}

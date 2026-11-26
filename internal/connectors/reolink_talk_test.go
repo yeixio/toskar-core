@@ -54,10 +54,10 @@ func TestReolinkTalksThroughReolinkCLI(t *testing.T) {
 		t.Fatal(err)
 	}
 	dir := fakeReolinkCLI(t, `{"ok":true,"command":"audio","data":{"durationMs":1800}}`, 0)
-	if !m.CanTalk("reolink") {
+	if !m.CanTalk("reolink", "camera") {
 		t.Fatal("a connection with reolink-cli can't talk")
 	}
-	if err := m.Talk(ctx, "reolink", words, ReolinkTalkRate); err != nil {
+	if err := m.Talk(ctx, "reolink", "camera", words, ReolinkTalkRate); err != nil {
 		t.Fatal(err)
 	}
 	args, _ := os.ReadFile(filepath.Join(dir, "args"))
@@ -75,7 +75,7 @@ func TestReolinkTalksThroughReolinkCLI(t *testing.T) {
 	if _, err := m.Connect(ctx, "reolink", map[string]string{"url": door.URL, "username": "admin", "password": door.Password, "talk_camera": "hub-ch0", "talk_gateway": "127.0.0.1:9100"}); err != nil {
 		t.Fatal(err)
 	}
-	if err := m.Talk(ctx, "reolink", words, ReolinkTalkRate); err != nil {
+	if err := m.Talk(ctx, "reolink", "camera", words, ReolinkTalkRate); err != nil {
 		t.Fatal(err)
 	}
 	args, _ = os.ReadFile(filepath.Join(dir, "args"))
@@ -99,10 +99,10 @@ func TestReolinkTalksThroughReolinkCLI(t *testing.T) {
 	}
 
 	fakeReolinkCLI(t, `{"ok":false,"error":{"code":"CAMERA_OFFLINE","message":"camera is offline"}}`, 1)
-	if err := m.Talk(ctx, "reolink", words, ReolinkTalkRate); err == nil || !strings.Contains(err.Error(), "camera is offline") {
+	if err := m.Talk(ctx, "reolink", "camera", words, ReolinkTalkRate); err == nil || !strings.Contains(err.Error(), "camera is offline") {
 		t.Fatalf("a failed talk: %v", err)
 	}
-	if err := m.Talk(ctx, "homeassistant", words, ReolinkTalkRate); err == nil {
+	if err := m.Talk(ctx, "homeassistant", "", words, ReolinkTalkRate); err == nil {
 		t.Fatal("Home Assistant has no speaker here")
 	}
 }
