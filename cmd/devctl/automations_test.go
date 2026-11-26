@@ -38,6 +38,11 @@ func TestYggctlAutomations(t *testing.T) {
 		},
 		DeleteAutomation: repo.Delete,
 		RunAutomation:    runner.RunNow,
+		ClearAutomationRuns: func(ctx context.Context, id string, files bool) (api.ClearedRuns, error) {
+			n, err := repo.ClearRuns(ctx, id)
+			return api.ClearedRuns{Runs: n}, err
+		},
+		DeleteAutomationRun: repo.DeleteRun,
 		PauseAutomation: func(ctx context.Context, id string) (automations.Automation, error) {
 			enabled := false
 			return repo.Update(ctx, id, automations.Patch{Enabled: &enabled}, now)
@@ -167,6 +172,26 @@ func TestYggctlAutomations(t *testing.T) {
 		t.Fatalf("get = %s", got.String())
 	}
 
+	// Clearing history (#1393): the run removed by id, then clearing finds
+	// none left.
+	removed, err := runAutomations2(client, "runs", "rm", automation.ID, run.ID)
+	if err != nil || removed != "Removed run "+run.ID+" from "+automation.ID+".\n" {
+		t.Fatalf("runs rm = %q, %v", removed, err)
+	}
+	if _, err := runAutomations2(client, "runs", "rm", automation.ID); err == nil {
+		t.Fatal("runs rm without a run id succeeded")
+	}
+	cleared, err := runAutomations2(client, "clear", automation.ID)
+	if err != nil || cleared != "Removed 0 runs from "+automation.ID+".\n" {
+		t.Fatalf("clear = %q, %v", cleared, err)
+	}
+	if cleared, err = runAutomations2(client, "clear", "--files", automation.ID); err != nil || cleared != "Removed 0 runs and 0 pictures from "+automation.ID+".\n" {
+		t.Fatalf("clear --files = %q, %v", cleared, err)
+	}
+	if _, err := runAutomations2(client, "clear"); err == nil {
+		t.Fatal("clear without an id succeeded")
+	}
+
 	var deleted bytes.Buffer
 	if err := runAutomations([]string{"delete", automation.ID}, client, &deleted); err != nil {
 		t.Fatal(err)
@@ -231,4 +256,11 @@ func TestBuildRicherSchedules(t *testing.T) {
 			t.Errorf("%s was accepted", name)
 		}
 	}
+}
+
+// runAutomations2 runs toskarctl automations with args and answers what it printed.
+func runAutomations2(client daemonClient, args ...string) (string, error) {
+	var out bytes.Buffer
+	err := runAutomations(args, client, &out)
+	return out.String(), err
 }

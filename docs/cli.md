@@ -190,9 +190,11 @@ toskarctl automations run AUTOMATION_ID
 toskarctl automations pause AUTOMATION_ID
 toskarctl automations resume AUTOMATION_ID
 toskarctl automations delete AUTOMATION_ID
+toskarctl automations clear AUTOMATION_ID --files
+toskarctl automations runs rm AUTOMATION_ID RUN_ID
 ```
 
-`parse` reads a request the way the Automations page does and prints what it understood: name, task, schedule, notification, and notes. `create --request` creates the automation from a request, with `--profile general-assistant` and `--model auto` unless you pass others; any other flag you pass changes what the request said. Without `--request`, `create` needs `--name`, `--prompt`, `--profile`, and `--model`. `--model auto` lets Auto pick a model for each run. `update` changes only the flags you pass.
+`parse` reads a request the way the Automations page does and prints what it understood: name, task, schedule, notification, and notes. `create --request` creates the automation from a request, with `--profile general-assistant` and `--model auto` unless you pass others; any other flag you pass changes what the request said. Without `--request`, `create` needs `--name`, `--prompt`, `--profile`, and `--model`. `--model auto` lets Auto pick a model for each run. `update` changes only the flags you pass. `clear` removes an automation's finished runs and keeps the automation; `--files` also deletes the camera pictures they took. `runs rm` removes one run, by the id `get` shows.
 
 | Flag | Values |
 | --- | --- |

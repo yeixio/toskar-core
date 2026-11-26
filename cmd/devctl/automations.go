@@ -15,7 +15,7 @@ import (
 	"github.com/yeixio/toskar-core/internal/config"
 )
 
-const automationsUsage = `usage: toskarctl automations <list|get|parse|create|update|delete|run|pause|resume|hook>
+const automationsUsage = `usage: toskarctl automations <list|get|parse|create|update|delete|run|pause|resume|hook|clear|runs>
   list
   get <id>
   parse <request> [--zone <tz>] [--language <tag>]
@@ -27,6 +27,8 @@ const automationsUsage = `usage: toskarctl automations <list|get|parse|create|up
   pause <id>
   resume <id>
   hook <id>                print a new webhook link for an automation with --trigger webhook; the old one stops working
+  clear <id> [--files]     remove an automation's finished runs; --files also deletes the camera pictures they took
+  runs rm <id> <run_id>    remove one finished run
 Times: daily, weekly, and monthly use HH:MM, or several such as 08:00,17:00. once uses RFC3339.
 interval uses Go durations such as 6h. --weekday takes 0-6 (Sunday is 0) or names, several
 such as 1,3,5 or mon-fri, or "weekdays". monthly runs on --day, or a month's last day when it
@@ -160,6 +162,58 @@ func runAutomations(args []string, client daemonClient, out io.Writer) error {
 		}
 		// Shown once: only its hash is kept (#204).
 		_, err = fmt.Fprintln(out, strings.TrimRight(client.base, "/")+link.Path)
+		return err
+	case "clear":
+		// Clear history (#1335, #1393): finished runs only; a run still
+		// going is kept.
+		fs := flag.NewFlagSet("clear", flag.ContinueOnError)
+		fs.SetOutput(io.Discard)
+		files := fs.Bool("files", false, "also delete the camera pictures the runs took")
+		id, rest := "", args[1:]
+		if len(rest) > 0 && !strings.HasPrefix(rest[0], "-") {
+			id, rest = rest[0], rest[1:]
+		}
+		if err := fs.Parse(rest); err != nil {
+			return err
+		}
+		if id == "" && fs.NArg() == 1 {
+			id = fs.Arg(0)
+		} else if id == "" || fs.NArg() != 0 {
+			return fmt.Errorf("usage: toskarctl automations clear <id> [--files]")
+		}
+		path := "/automations/" + id + "/runs"
+		if *files {
+			path += "?files=true"
+		}
+		var cleared struct {
+			Runs  int64 `json:"runs"`
+			Files int   `json:"files"`
+		}
+		if err := client.call(http.MethodDelete, path, nil, &cleared); err != nil {
+			return err
+		}
+		runs := "runs"
+		if cleared.Runs == 1 {
+			runs = "run"
+		}
+		if *files {
+			pictures := "pictures"
+			if cleared.Files == 1 {
+				pictures = "picture"
+			}
+			_, err := fmt.Fprintf(out, "Removed %d %s and %d %s from %s.\n", cleared.Runs, runs, cleared.Files, pictures, id)
+			return err
+		}
+		_, err := fmt.Fprintf(out, "Removed %d %s from %s.\n", cleared.Runs, runs, id)
+		return err
+	case "runs":
+		if len(args) != 4 || args[1] != "rm" || strings.TrimSpace(args[2]) == "" || strings.TrimSpace(args[3]) == "" {
+			return fmt.Errorf("usage: toskarctl automations runs rm <id> <run_id>")
+		}
+		if err := client.call(http.MethodDelete, "/automations/"+args[2]+"/runs/"+args[3], nil, nil); err != nil {
+			return err
+		}
+		_, err := fmt.Fprintf(out, "Removed run %s from %s.\n", args[3], args[2])
 		return err
 	case "pause", "resume":
 		id, err := oneID(args[1:])
