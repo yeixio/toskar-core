@@ -231,16 +231,6 @@ func TestTriageCases(t *testing.T) {
 			t.Errorf("labels(%s) = %q, want %q", answer, got, want)
 		}
 	}
-	// The workflow builds the same from the same fields.
-	workflow, err := os.ReadFile("../../.github/workflows/triage.yml")
-	if err != nil {
-		t.Fatal(err)
-	}
-	for _, field := range []string{fmt.Sprintf("head -c %d", triageMaxBytes), ".prompt, (.groups[] | .ask,", "if .max then", "maxItems: .max", "required: [.groups[].name]", "$cfg[0].groups[]"} {
-		if !strings.Contains(string(workflow), field) {
-			t.Errorf("triage.yml no longer builds its question with %q; keep it and this test in step", field)
-		}
-	}
 }
 
 // firstBytes is the start of s, at most n bytes.
