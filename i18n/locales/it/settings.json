@@ -234,7 +234,10 @@
     "ask": "Chiedimi di valutare i modelli",
     "askHint": "Dopo che hai usato un modello per un po', una chat ti chiede come funziona.",
     "quality": "Risultati di qualità",
-    "qualityHint": "Quando apri Modelli › Risultati, i risultati di qualità pubblici vengono letti da GitHub, al massimo una volta all'ora. Non viene inviato nulla su di te."
+    "qualityHint": "Quando apri Modelli › Risultati, i risultati di qualità pubblici vengono letti da GitHub, al massimo una volta all'ora. Non viene inviato nulla su di te.",
+    "done": "Fatto",
+    "moved": "Le valutazioni della community, i risultati di qualità e la richiesta di valutare i modelli si impostano nella pagina Modelli.",
+    "open": "Apri Modelli"
   },
   "yourData": {
     "title": "I tuoi dati restano privati",
@@ -399,7 +402,9 @@
     "title": "Notizie sull’IA",
     "description": "La pagina Notizie mostra nuovi modelli aperti, versioni dei runtime e annunci dei laboratori di IA da toskar.ai.",
     "show": "Mostra le notizie sull’IA",
-    "showHint": "Lette da toskar.ai quando apri Notizie, al massimo ogni sei ore. Viene inviata solo la richiesta."
+    "showHint": "Lette da toskar.ai quando apri Notizie, al massimo ogni sei ore. Viene inviata solo la richiesta.",
+    "moved": "Se la pagina Notizie mostra le notizie sull’IA si imposta nella pagina Notizie.",
+    "open": "Apri Notizie"
   },
   "links": {
     "title": "Link nelle risposte",

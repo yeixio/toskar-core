@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom'
 import { RealmKicker } from '@/components/ui/Realm'
 import { LoadError } from '@/components/ui/LoadError'
 import { Skeleton } from '@/components/ui/Skeleton'
+import { Toggle } from '@/components/ui/Toggle'
 import { ShownError, shownError } from '@/components/ui/ShownError'
 import { formatDate, formatDateTime } from '@/i18n/format'
 import { api } from '@/lib/api'
@@ -27,8 +28,9 @@ export function NewsPage() {
   const wantsModels = items.some((i) => i.model_id)
   const models = useQuery({ queryKey: ['models'], queryFn: () => api.getModels(), enabled: wantsModels })
   const fit = useQuery({ queryKey: ['models-fit'], queryFn: () => api.getModelsFit(), enabled: wantsModels && admin, retry: false })
+  // The AI news switch lives here, on the page it changes (#1391).
   const turnOn = useMutation({
-    mutationFn: () => api.updateSettings({ ai_news: true }),
+    mutationFn: (on: boolean) => api.updateSettings({ ai_news: on }),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['settings'] })
       void queryClient.invalidateQueries({ queryKey: ['news'] })
@@ -65,7 +67,7 @@ export function NewsPage() {
           <h2 className="section-title">{t('off.title')}</h2>
           <p className="text-sm text-ink-muted">{admin ? t('off.admin') : t('off.member')}</p>
           {admin ? (
-            <button type="button" className="btn-primary" disabled={turnOn.isPending} onClick={() => turnOn.mutate()}>
+            <button type="button" className="btn-primary" disabled={turnOn.isPending} onClick={() => turnOn.mutate(true)}>
               {t('off.turnOn')}
             </button>
           ) : null}
@@ -99,6 +101,19 @@ export function NewsPage() {
           </ul>
         </section>
       ))}
+
+      {admin && news.data?.enabled ? (
+        <section className="card max-w-2xl">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="text-sm font-medium text-ink">{t('settings:news.show')}</p>
+              <p className="mt-1 text-xs text-ink-muted">{t('settings:news.showHint')}</p>
+            </div>
+            <Toggle label={t('settings:news.show')} checked disabled={turnOn.isPending} onChange={() => turnOn.mutate(false)} />
+          </div>
+          {turnOn.isError ? <ShownError {...shownError(turnOn.error)} className="mt-2 text-sm text-danger" /> : null}
+        </section>
+      ) : null}
     </div>
   )
 }

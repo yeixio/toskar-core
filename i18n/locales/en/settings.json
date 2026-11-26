@@ -227,7 +227,10 @@
     "ask": "Ask me to rate models",
     "askHint": "After you’ve used a model for a while, a chat asks how it’s working.",
     "quality": "Quality results",
-    "qualityHint": "When you open Models › Results, the public quality results are read from GitHub, at most once an hour. Nothing about you is sent."
+    "qualityHint": "When you open Models › Results, the public quality results are read from GitHub, at most once an hour. Nothing about you is sent.",
+    "done": "Done",
+    "moved": "Community ratings, quality results, and the ask to rate models are set on the Models page.",
+    "open": "Open Models"
   },
   "yourData": {
     "title": "Your data stays private",
@@ -390,7 +393,9 @@
     "title": "AI news",
     "description": "The News page shows new open models, runtime releases, and AI labs' announcements from toskar.ai.",
     "show": "Show AI news",
-    "showHint": "Read from toskar.ai when News is opened, at most every six hours. Nothing is sent but the request."
+    "showHint": "Read from toskar.ai when News is opened, at most every six hours. Nothing is sent but the request.",
+    "moved": "AI news is turned on and off on the News page.",
+    "open": "Open News"
   },
   "links": {
     "title": "Links in answers",

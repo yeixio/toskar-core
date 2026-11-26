@@ -227,7 +227,10 @@
     "ask": "Mich bitten, Modelle zu bewerten",
     "askHint": "Nachdem du ein Modell eine Weile genutzt hast, fragt ein Chat, wie es läuft.",
     "quality": "Qualitätsergebnisse",
-    "qualityHint": "Wenn du Modelle › Ergebnisse öffnest, werden die öffentlichen Qualitätsergebnisse von GitHub gelesen, höchstens einmal pro Stunde. Über dich wird nichts gesendet."
+    "qualityHint": "Wenn du Modelle › Ergebnisse öffnest, werden die öffentlichen Qualitätsergebnisse von GitHub gelesen, höchstens einmal pro Stunde. Über dich wird nichts gesendet.",
+    "done": "Fertig",
+    "moved": "Ob Community-Bewertungen, Qualitätsergebnisse und die Bitte um Bewertungen erscheinen, stellst du auf der Seite Modelle ein.",
+    "open": "Modelle öffnen"
   },
   "yourData": {
     "title": "Deine Daten bleiben privat",
@@ -390,7 +393,9 @@
     "title": "KI-Neuigkeiten",
     "description": "Die Seite „Neuigkeiten“ zeigt neue offene Modelle, Runtime-Versionen und Ankündigungen von KI-Laboren von toskar.ai.",
     "show": "KI-Neuigkeiten anzeigen",
-    "showHint": "Von toskar.ai gelesen, wenn „Neuigkeiten“ geöffnet wird, höchstens alle sechs Stunden. Gesendet wird nur die Anfrage."
+    "showHint": "Von toskar.ai gelesen, wenn „Neuigkeiten“ geöffnet wird, höchstens alle sechs Stunden. Gesendet wird nur die Anfrage.",
+    "moved": "Ob die Seite Neuigkeiten KI-Neuigkeiten zeigt, stellst du auf der Seite Neuigkeiten ein.",
+    "open": "Neuigkeiten öffnen"
   },
   "links": {
     "title": "Links in Antworten",
