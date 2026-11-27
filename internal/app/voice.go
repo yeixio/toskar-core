@@ -196,8 +196,9 @@ type voiceChat struct {
 
 	mu             sync.Mutex
 	conversationID string
-	// fillers counts the fillers said, so the next is a different one.
-	fillers int
+	// fillers and waits count the tool and waiting fillers said, so the
+	// next is a different one.
+	fillers, waits int
 	// saving closes once the last answer is saved.
 	saving chan struct{}
 }
@@ -242,24 +243,62 @@ func (c *voiceChat) Respond(ctx context.Context, text string, delta func(string)
 	}
 	turn = turnopts.WithSpoken(turn)
 	turn = pluginapi.WithAnswerOptions(turn, pluginapi.GenerateOptions{NoThinking: true})
-	// The answer and a filler share delta, from two goroutines: the chat's
-	// tools start on its own.
+	// The answer and the fillers share delta, from three goroutines: the
+	// chat's tools start on their own, and the waiting fillers keep time.
 	var deltaMu sync.Mutex
-	var answered, filled bool
+	var answered, toolFilled bool
+	fillers := 0
+	lang := c.fillerLanguage(ctx, text)
+	// say speaks a filler unless the answer has started or the turn has
+	// had its share. Called with deltaMu held.
+	say := func(phrase string) bool {
+		if answered || fillers >= maxFillers {
+			return false
+		}
+		fillers++
+		delta(phrase + " ")
+		return true
+	}
 	// When the answer waits on a tool, such as a web search, a short
 	// spoken filler says Toskar is looking it up, as a person would,
-	// instead of silence (#1487). Once a turn, and only before the answer
+	// instead of silence (#1487): once a turn, and only before the answer
 	// has started.
-	lang := c.fillerLanguage(ctx, text)
 	turn = turnopts.WithToolStart(turn, func(toolID string) {
 		deltaMu.Lock()
 		defer deltaMu.Unlock()
-		if answered || filled {
-			return
+		if !toolFilled && say(c.filler(lang, toolID)) {
+			toolFilled = true
 		}
-		filled = true
-		delta(c.filler(lang, toolID) + " ")
 	})
+	// And while it waits anyway, "Umm, just a sec." now and then, between
+	// the thinking bubbles, as ChatGPT's voice does (#1487).
+	waited := make(chan struct{})
+	defer func() {
+		deltaMu.Lock()
+		answered = true
+		deltaMu.Unlock()
+		close(waited)
+	}()
+	go func() {
+		wait := time.NewTimer(firstWaitFiller)
+		defer wait.Stop()
+		for {
+			select {
+			case <-waited:
+				return
+			case <-ctx.Done():
+				return
+			case <-wait.C:
+			}
+			deltaMu.Lock()
+			ok := say(c.waitFiller(lang))
+			deltaMu.Unlock()
+			if !ok {
+				return
+			}
+			wait.Reset(nextWaitFiller)
+		}
+	}()
 	chunks, err := c.app.RunChat(turn, "", id, text, true, "", "")
 	if err != nil {
 		cancel()
