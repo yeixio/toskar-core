@@ -8,6 +8,55 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Thi
 
 Changes waiting for the next release are in [changes/unreleased/](changes/unreleased/), one file per pull request. `scripts/changelog.py preview` shows them together, and `scripts/changelog.py release <version>` writes them here when the release is cut.
 
+## [1.15.1] - 2026-11-27
+
+### Added
+
+- When an answer in voice mode has to wait on a web search, a look in your
+  files, or another tool, Toskar says so in a few words, such as "Hmm, let
+  me look that up.", in the language it's answering in, instead of going
+  quiet (#1487).
+- While a spoken answer is slow to start, voice mode says "Umm, just a sec."
+  or "Hmm, let me think." now and then between the thinking bubbles, at
+  most three times an answer, in the language it's answering in (#1487).
+
+### Changed
+
+- You can pick the main chat model without Advanced mode. Settings › Models &
+  AI › Model lifecycle has a **Main chat model** list with Auto and every chat
+  model installed on the computer, and the "Keep … ready to answer?" card in
+  chat says who chose the model and has **Change**.
+- Voice mode shows Ratatoskr, Toskar's squirrel, by default, on the web, in
+  the desktop app, on the phone, and in CarPlay. Choose Pebble or Lumen, or
+  Off for the plain circle, under Settings › Voice › Avatar.
+- The thinking sound is four soft rising bubbles instead of a two-note chime,
+  quieter and every 3 seconds instead of 2.5, in voice mode on the web and in
+  the desktop app, and at the front door (#1334).
+
+### Fixed
+
+- Answers no longer slow to a crawl when other models fill the graphics card.
+  Before a model starts, Toskar unloads the idle models holding the card,
+  least recently used first, so the model that answers runs on the card
+  rather than on the processor. Models set to **Always running**, and models
+  writing an answer, stay loaded.
+- Add a model › From another app no longer offers the parts of an
+  image or video model, such as FLUX.2's Qwen3-4B text encoder, as chat
+  models.
+- Voice answers no longer wait for a long think when Toskar checks them.
+  When a spoken answer's figures didn't match what it looked up, the rewrite
+  thought first, and held the answer back for about a minute and a half.
+- Questions about what's going on near you, such as "What events are going
+  on around town today?", are now searched in the town from your Personal
+  settings, not only questions about restaurants and other places. Toskar
+  also reads the best calendar or listing page instead of answering from
+  search snippets. The answer gives what the pages list, rather than telling
+  you to go look at a website yourself.
+- When a model doesn't know an answer, or tells you to look it up yourself,
+  Toskar now searches the web, reads the top pages, and has it answer with
+  the top findings, even when it had already searched once. In voice mode
+  the spoken "let me look that up" covers the wait.
+
 ## [1.15.0] - 2026-11-27
 
 ### Added
