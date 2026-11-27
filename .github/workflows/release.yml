@@ -1,20 +1,68 @@
 name: Release
 
+# Press Run workflow under Actions → Release to release main. It takes the
+# newest version in CHANGELOG.md, which the Release PR wrote, checks main
+# passed its checks and the quality gate, then tags the commit and ships it.
+# Give a version, such as 1.16.0-beta.1, for a pre-release or to choose one.
+# Pushing a v* tag by hand still works too.
 on:
   push:
     tags:
       - "v*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Version to release, such as 1.16.0-beta.1 (leave empty for the newest in CHANGELOG.md)
+        type: string
+        required: false
 
 permissions:
   contents: write
   pull-requests: write
   actions: read
 
+# One release at a time, so two presses can't pick the same version.
+concurrency:
+  group: release
+  cancel-in-progress: false
+
 jobs:
+  # The tag this run releases: the pushed tag, or the next one for main. A
+  # pressed run checks the version here and tags only once the checks and
+  # quality pass, so a failed run leaves no tag behind.
+  version:
+    runs-on: ${{ fromJSON(vars.TRUSTED_RUNS_ON || '"ubuntu-latest"') }}
+    timeout-minutes: 5
+    outputs:
+      tag: ${{ steps.pick.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v7
+        if: github.event_name == 'workflow_dispatch'
+        with:
+          sparse-checkout: |
+            .github/scripts
+            CHANGELOG.md
+          sparse-checkout-cone-mode: false
+      - id: pick
+        env:
+          VERSION: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+          if [ "$GITHUB_EVENT_NAME" = push ]; then
+            echo "tag=$GITHUB_REF_NAME" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if [ "$GITHUB_REF" != refs/heads/main ]; then
+            echo "::error title=Not released::Release from main, not $GITHUB_REF_NAME."
+            exit 1
+          fi
+          SHA="$GITHUB_SHA" .github/scripts/pick-release-tag.sh
+
   # The tagged commit passed CI, Examples, and every other check that ran on
   # main for it. The checks a pull request skips for its paths all run on
   # main, so this is where they hold a release.
   checks:
+    needs: version
     runs-on: ${{ fromJSON(vars.TRUSTED_RUNS_ON || '"ubuntu-latest"') }}
     timeout-minutes: 50
     steps:
@@ -72,10 +120,33 @@ jobs:
           if-no-files-found: ignore
 
   release:
-    needs: quality
+    needs: [version, quality]
     runs-on: ${{ fromJSON(vars.TRUSTED_RUNS_ON || '"ubuntu-latest"') }}
+    env:
+      TAG: ${{ needs.version.outputs.tag }}
     steps:
       - uses: actions/checkout@v7
+      # A pressed run tags the commit now that it passed. The tag is pushed
+      # with the workflow's own token, which doesn't start another Release.
+      - name: Tag the release
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          set -euo pipefail
+          existing="$(git ls-remote origin "refs/tags/$TAG^{}" | cut -f1)"
+          if [ -n "$existing" ]; then
+            # A re-run after the tag went out.
+            if [ "$existing" != "$GITHUB_SHA" ]; then
+              echo "::error title=Not released::$TAG already exists on ${existing:0:7}, not ${GITHUB_SHA:0:7}."
+              exit 1
+            fi
+            echo "$TAG is already on ${GITHUB_SHA:0:7}."
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git tag -a "$TAG" -m "$TAG" "$GITHUB_SHA"
+          git push origin "refs/tags/$TAG"
+          echo "Tagged ${GITHUB_SHA:0:7} as $TAG."
       - name: Save the release guide
         run: cp docs/user-guide/guide.json /tmp/guide.json
       - uses: actions/setup-go@v7
@@ -106,12 +177,12 @@ jobs:
           echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
       - name: Build packages
         env:
-          VERSION: ${{ github.ref_name }}
+          VERSION: ${{ needs.version.outputs.tag }}
           # The apt repository is signed (#599); a stable release, which
           # publishes it, fails without the key rather than going unsigned.
           APT_SIGNING_KEY: ${{ secrets.APT_SIGNING_KEY }}
           APT_SIGNING_PASSPHRASE: ${{ secrets.APT_SIGNING_PASSPHRASE }}
-          APT_REQUIRE_SIGNING: ${{ !contains(github.ref_name, '-') && '1' || '' }}
+          APT_REQUIRE_SIGNING: ${{ !contains(needs.version.outputs.tag, '-') && '1' || '' }}
         run: |
           VERSION="${VERSION#v}"
           chmod +x scripts/build/package-core-release.sh scripts/build/write-brew-formula.sh scripts/build/apt-index.sh scripts/build/test-apt-repo.sh
@@ -121,20 +192,20 @@ jobs:
       # A fresh Ubuntu adds the signed repository the documented way and
       # installs toskar from it, before anything is published (#599).
       - name: Test the apt repository
-        if: ${{ !contains(github.ref_name, '-') }}
+        if: ${{ !contains(needs.version.outputs.tag, '-') }}
         run: ./scripts/build/test-apt-repo.sh dist/apt
       - name: Write the release body
         env:
-          PRERELEASE: ${{ contains(github.ref_name, '-') }}
+          PRERELEASE: ${{ contains(needs.version.outputs.tag, '-') }}
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           # Thank everyone outside MAINTAINERS.md with a commit since the
           # last release. A failed lookup leaves the line out, not the release.
-          THANKS="$(./scripts/release-thanks.sh "$GITHUB_REPOSITORY" "$GITHUB_REF_NAME" || true)"
+          THANKS="$(./scripts/release-thanks.sh "$GITHUB_REPOSITORY" "$TAG" || true)"
           # This version's section of CHANGELOG.md: what changed, and what to
           # know before updating, such as compatibility notes.
-          VERSION="${GITHUB_REF_NAME#v}"
+          VERSION="${TAG#v}"
           SECTION="$(awk -v v="$VERSION" 'index($0, "## [" v "]") == 1 {f=1; next} f && /^## \[/ {exit} f' CHANGELOG.md)"
           if [ -z "$SECTION" ]; then
             echo "::warning::CHANGELOG.md has no section for $VERSION; the release body has install steps only."
@@ -143,7 +214,7 @@ jobs:
             if [ "$PRERELEASE" = "true" ]; then
               # Homebrew and apt are not updated for a pre-release (see below),
               # so their commands install the latest stable release.
-              printf '%s\n\n' "**Pre-release.** Homebrew and apt install the latest stable release, not this one. To try ${GITHUB_REF_NAME}, use the archives or packages attached below."
+              printf '%s\n\n' "**Pre-release.** Homebrew and apt install the latest stable release, not this one. To try ${TAG}, use the archives or packages attached below."
             fi
             if [ -n "$SECTION" ]; then
               printf '## What changed in %s\n%s\n\n' "$VERSION" "$SECTION"
@@ -156,9 +227,10 @@ jobs:
       - name: Publish GitHub release
         uses: softprops/action-gh-release@v3
         with:
-          name: Toskar ${{ github.ref_name }}
+          tag_name: ${{ needs.version.outputs.tag }}
+          name: Toskar ${{ needs.version.outputs.tag }}
           draft: false
-          prerelease: ${{ contains(github.ref_name, '-') }}
+          prerelease: ${{ contains(needs.version.outputs.tag, '-') }}
           body_path: /tmp/release-body.md
           files: |
             dist/*.deb
@@ -172,7 +244,7 @@ jobs:
       # Homebrew and apt serve stable releases. A pre-release (a tag with a
       # suffix such as -beta.1) must not replace what their users install.
       - name: Publish the Homebrew formula
-        if: ${{ !contains(github.ref_name, '-') }}
+        if: ${{ !contains(needs.version.outputs.tag, '-') }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           RELEASE_DEPLOY_KEY: ${{ secrets.RELEASE_DEPLOY_KEY }}
@@ -191,13 +263,13 @@ jobs:
           if git diff --cached --quiet; then
             echo "Homebrew formula matches main"
           else
-            git commit -m "Publish the Homebrew formula for ${GITHUB_REF_NAME#v}."
+            git commit -m "Publish the Homebrew formula for ${TAG#v}."
             scripts/release-publish.sh formula \
-              "Publish the Homebrew formula for ${GITHUB_REF_NAME#v}" \
-              "Updates Formula/toskar.rb from the ${GITHUB_REF_NAME} release."
+              "Publish the Homebrew formula for ${TAG#v}" \
+              "Updates Formula/toskar.rb from the ${TAG} release."
           fi
       - name: Publish the apt repository
-        if: ${{ !contains(github.ref_name, '-') }}
+        if: ${{ !contains(needs.version.outputs.tag, '-') }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -225,7 +297,7 @@ jobs:
           RELEASE_DEPLOY_KEY: ${{ secrets.RELEASE_DEPLOY_KEY }}
         run: |
           set -euo pipefail
-          version="${GITHUB_REF_NAME#v}"
+          version="${TAG#v}"
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git fetch origin main
@@ -243,21 +315,21 @@ jobs:
           git commit -m "docs: publish Toskar ${version}"
           scripts/release-publish.sh documentation \
             "Publish the documentation for ${version}" \
-            "Freezes docs/${version}.json from the ${GITHUB_REF_NAME} release."
+            "Freezes docs/${version}.json from the ${TAG} release."
 
   # Capture the release's screenshots and walkthrough and attach them to it,
   # for toskar.ai. A failure here does not undo the release.
   screenshots:
-    needs: release
+    needs: [version, release]
     if: success()
     permissions:
       contents: write
     uses: ./.github/workflows/screenshots.yml
     with:
-      tag: ${{ github.ref_name }}
+      tag: ${{ needs.version.outputs.tag }}
 
   start-desktop:
-    needs: release
+    needs: [version, release]
     if: success()
     runs-on: ${{ fromJSON(vars.TRUSTED_RUNS_ON || '"ubuntu-latest"') }}
     steps:
@@ -265,7 +337,7 @@ jobs:
         env:
           # TOSKAR_APPS_TOKEN, or an earlier name for the same token (#271).
           APPS_TOKEN: ${{ secrets.TOSKAR_APPS_TOKEN || secrets.TOSKAR_DESKTOP_TOKEN || secrets.YGGDRASIL_DESKTOP_TOKEN }}
-          VERSION: ${{ github.ref_name }}
+          VERSION: ${{ needs.version.outputs.tag }}
         run: |
           set -euo pipefail
           if [ -z "${APPS_TOKEN}" ]; then

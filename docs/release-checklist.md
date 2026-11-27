@@ -1,6 +1,11 @@
 # Release checklist
 
-Use this before tagging `v*`. The tag push runs [`.github/workflows/release.yml`](../.github/workflows/release.yml).
+Use this before releasing. [`.github/workflows/release.yml`](../.github/workflows/release.yml) does the release, started either way:
+
+- **Press Run workflow** under Actions → Release, on `main`, from a browser or the GitHub app. With the version left empty, it releases the newest version in [CHANGELOG.md](../CHANGELOG.md), which the Release PR wrote. Type a version, such as `1.16.0-beta.1`, for a pre-release. The run checks the version is new, comes after the last release, and (for a stable one) has its CHANGELOG section, then waits for the commit's checks and the quality gate. Only then does it create the annotated `vX.Y.Z` tag on that commit and publish. A failed run leaves no tag. From a terminal, `gh workflow run release.yml --ref main [-f version=1.16.0-beta.1]` does the same.
+- **Push a `v*` tag** by hand, as before.
+
+The pressed run pushes its tag with the workflow's own token, so the tag doesn't start a second Release. `.github/scripts/pick-release-tag.sh` picks and checks the version, and runs from a terminal too, where it only reads.
 
 A tag with a pre-release suffix (`-alpha.N`, `-beta.N`, `-rc.N`) is published as a GitHub pre-release. It does not update the Homebrew formula or the apt repository, so their users stay on the latest stable release, and its release body says so. Its documentation snapshot and the desktop release still run.
 
