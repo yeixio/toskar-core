@@ -152,6 +152,11 @@ func (m *Manager) FindOtherApps(ctx context.Context) []FoundModel {
 			if e.IsDir() && strings.HasPrefix(e.Name(), ".") && path != dir.dir {
 				return fs.SkipDir
 			}
+			// The picture and clip models keep their parts here, such as
+			// FLUX.2's Qwen3-4B text encoder, which chat mustn't use.
+			if e.IsDir() && dir.app == "toskar" && filepath.Dir(path) == dir.dir && mediaModelFolders[e.Name()] {
+				return fs.SkipDir
+			}
 			if !e.IsDir() && strings.EqualFold(filepath.Ext(path), ".gguf") && !strings.Contains(strings.ToLower(e.Name()), "mmproj") {
 				// Toskar's own models are already listed on the Models page.
 				if dir.app == "toskar" && byPath[canonical(path)] != "" {
@@ -194,6 +199,10 @@ func (m *Manager) foundPath(ctx context.Context, path string) bool {
 	}
 	return false
 }
+
+// mediaModelFolders are the folders in Toskar's models folder that hold
+// image and video generation models (app.newSDSetup).
+var mediaModelFolders = map[string]bool{"images": true, "video": true}
 
 type ollamaModel struct{ name, path, projector string }
 

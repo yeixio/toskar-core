@@ -8,6 +8,7 @@ import (
 
 	"github.com/yeixio/toskar-core/internal/structured"
 	"github.com/yeixio/toskar-core/pkg/contracts"
+	"github.com/yeixio/toskar-core/pkg/pluginapi"
 )
 
 func runWith(t *testing.T, env *planEnv, prompt string, o contracts.OrchestrationPolicy) string {
@@ -91,5 +92,30 @@ func TestJSONOnlyTurn(t *testing.T) {
 	}
 	if sys := env.seen[0][0].Content; strings.Contains(sys, "tool_call") {
 		t.Fatalf("tools offered: %q", sys)
+	}
+}
+
+// A turn that answers without thinking, such as a spoken one, revises its
+// answer without thinking too: a revision that thought held a voice answer
+// back for a minute and a half.
+func TestNoThinkingRevision(t *testing.T) {
+	const prompt = "How many tires are in stock?"
+	env := &planEnv{reference: "Inventory: 12 tires in stock.", replies: []string{"There are 18 tires in stock.", "There are 12 tires in stock."}}
+	ctx := pluginapi.WithAnswerOptions(context.Background(), pluginapi.GenerateOptions{NoThinking: true})
+	events, err := New().Run(ctx, contracts.Task{Prompt: prompt}, contracts.AIProfile{
+		Roles: []contracts.ModelRole{{Role: "assistant", ModelID: "m"}},
+	}, env)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for range events {
+	}
+	if !slices.Contains(env.events, EventVerifying) || len(env.opts) < 2 {
+		t.Fatalf("no revision: events=%v calls=%d", env.events, len(env.opts))
+	}
+	for i, o := range env.opts {
+		if !o.NoThinking {
+			t.Errorf("call %d thought: %+v", i, o)
+		}
 	}
 }

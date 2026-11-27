@@ -539,6 +539,7 @@ func (a *App) ensureLocalModelWith(ctx context.Context, modelID string, adapters
 		return "", err
 	}
 	a.makeRoomFor(ctx, modelID)
+	a.freeGPUFor(ctx, modelID)
 	loaded := a.loadingModel(modelID)
 	running, err := a.Runtimes.StartModel(ctx, "llamacpp", pluginapi.ModelStartConfig{
 		ModelID: modelID, ModelPath: path, Adapters: adapters, Projector: a.Models.ProjectorPath(modelID),
