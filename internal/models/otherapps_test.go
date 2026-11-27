@@ -91,6 +91,8 @@ func TestFindModelsFolder(t *testing.T) {
 	loose := gguftest.Write(t, filepath.Join(folder, "mine"), "Gemma-3-1B-Q4_K_M.gguf", gguftest.Options{Name: "Gemma 3 1B", FileType: 15})
 	gguftest.Write(t, folder, "Gemma-3-1B.mmproj.gguf", gguftest.Options{Architecture: "clip", Type: "mmproj"})
 	gguftest.Write(t, filepath.Join(folder, ".partial"), "upload-1.gguf", gguftest.Options{})
+	// An image model's text encoder isn't a chat model to add.
+	gguftest.Write(t, filepath.Join(folder, "images", "flux2-klein-4b-q8"), "Qwen3-4B-Q8_0.gguf", gguftest.Options{Name: "Qwen3-4B"})
 
 	found := m.FindOtherApps(ctx)
 	if len(found) != 1 || found[0].App != "toskar" || found[0].Path != loose || found[0].Name != "Gemma 3 1B" {
@@ -105,8 +107,8 @@ func TestFindModelsFolder(t *testing.T) {
 	if ok, at, _ := storage.IsInstalled(ctx, imported.ID); !ok || at != loose {
 		t.Fatalf("installed %v at %s, want %s", ok, at, loose)
 	}
-	if entries, _ := os.ReadDir(folder); len(entries) != 3 {
-		t.Errorf("models folder has %d entries, want the same 3 (no copy)", len(entries))
+	if entries, _ := os.ReadDir(folder); len(entries) != 4 {
+		t.Errorf("models folder has %d entries, want the same 4 (no copy)", len(entries))
 	}
 	// Now a model, it's on the Models page, not offered again.
 	if found := m.FindOtherApps(ctx); len(found) != 0 {
