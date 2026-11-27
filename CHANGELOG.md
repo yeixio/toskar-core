@@ -8,6 +8,14 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Thi
 
 Changes waiting for the next release are in [changes/unreleased/](changes/unreleased/), one file per pull request. `scripts/changelog.py preview` shows them together, and `scripts/changelog.py release <version>` writes them here when the release is cut.
 
+## [1.15.2] - 2026-11-27
+
+### Fixed
+
+- CarPlay answers each question once. The car, watch, and keyboard extensions
+  shared event names, so a question asked in the car was answered a second time
+  as if it came from the watch. (yeixio/toskar-apps#536)
+
 ## [1.15.1] - 2026-11-27
 
 ### Added
