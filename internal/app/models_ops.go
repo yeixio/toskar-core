@@ -29,11 +29,17 @@ func (a *App) loadingModel(modelID string) func() {
 	return func() { n.Add(-1) }
 }
 
+// loadingNow reports a model being loaded for a request.
+func (a *App) loadingNow(modelID string) bool {
+	v, ok := a.modelLoads.Load(modelID)
+	return ok && v.(*atomic.Int32).Load() > 0
+}
+
 // keepLoaded reports a model the idle sweep must leave loaded: one being
 // loaded for a request, one another device is using (#498), or one kept
 // running (#966).
 func (a *App) keepLoaded(modelID string) bool {
-	if v, ok := a.modelLoads.Load(modelID); ok && v.(*atomic.Int32).Load() > 0 {
+	if a.loadingNow(modelID) {
 		return true
 	}
 	if a.alwaysRunning(context.Background(), modelID) {
