@@ -1,32 +1,32 @@
 Package: toskar
-Version: 1.15.1
+Version: 1.15.2
 Architecture: arm64
 Maintainer: YEIXIO LLC <hello@yeix.io>
 Installed-Size: 72263
 Recommends: libvulkan1, mesa-vulkan-drivers, vulkan-tools, pciutils
-Breaks: yggdrasil (<< 1.15.1)
-Replaces: yggdrasil (<< 1.15.1)
-Filename: pool/main/toskar_1.15.1_arm64.deb
-Size: 35067052
-MD5sum: d3a34cdef2a98668430989374f25e3b7
-SHA1: 42f157a0dc816d5e6f14ac4c0c6fc3cd8c3b8b8d
-SHA256: ebfebd3f1cd55d88086536cab965135e00c3495cbaf9dc728f98174eae2852a4
+Breaks: yggdrasil (<< 1.15.2)
+Replaces: yggdrasil (<< 1.15.2)
+Filename: pool/main/toskar_1.15.2_arm64.deb
+Size: 35067042
+MD5sum: 4c95ca2cb4702619dd08900c36a9b8c4
+SHA1: c392babd2fb19a081c535cd9289d60a30edf5554
+SHA256: 7344a7710af9247c65ba620c6d45c09df8e5a3f0524c591db3074a484b534829
 Priority: optional
 Homepage: https://toskar.ai
 Description: Local AI daemon and web UI
 License: AGPL-3.0-or-later
 
 Package: yggdrasil
-Version: 1.15.1
+Version: 1.15.2
 Architecture: all
 Maintainer: YEIXIO LLC <hello@yeix.io>
 Installed-Size: 0
-Depends: toskar (>= 1.15.1)
-Filename: pool/main/yggdrasil_1.15.1_all.deb
-Size: 1284
-MD5sum: d9dd6e688d336a314e562a3a375f677f
-SHA1: a5c4655b3949c24d05fb5635a3b186fe58cccf70
-SHA256: fe3f14d283c3208ebdd8b192037391e07322c53bd7795fa055d0c9203f6a156b
+Depends: toskar (>= 1.15.2)
+Filename: pool/main/yggdrasil_1.15.2_all.deb
+Size: 1286
+MD5sum: a04b1784501bc4e125ee35860014b72c
+SHA1: 876cdb28ca32ecfd1974319593c47e69e21ae057
+SHA256: 29e730b2b097a477ae6e22dc0c7b1cb352cac5f730a3c680c65239e8a6df94ea
 Section: oldlibs
 Priority: optional
 Homepage: https://toskar.ai
