@@ -937,6 +937,6 @@
     "managedHintFits": "Toskar keeps it ready while there is room, and frees the memory when a picture or another model needs it.",
     "managedHintBig": "It uses a lot of memory, so Toskar frees it when idle. The first reply after a break waits while it loads.",
     "later": "You can change this later in",
-    "settings": "Settings › AI behavior"
+    "settings": "Settings › Models & AI"
   }
 }

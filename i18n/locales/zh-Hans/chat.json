@@ -891,6 +891,6 @@
     "managedHintFits": "有空间时 Toskar 让它保持就绪，图片或其他模型需要内存时再释放。",
     "managedHintBig": "它占用内存较多，所以闲置时 Toskar 会释放。休息后的第一次回复要等它加载。",
     "later": "之后可以在这里更改：",
-    "settings": "设置 › AI 行为"
+    "settings": "设置 › 模型与 AI"
   }
 }

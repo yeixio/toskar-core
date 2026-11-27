@@ -984,6 +984,6 @@
     "managedHintFits": "O Toskar o mantém pronto enquanto houver espaço e libera a memória quando uma imagem ou outro modelo precisa dela.",
     "managedHintBig": "Ele usa muita memória, então o Toskar a libera quando fica ocioso. A primeira resposta depois de uma pausa espera ele carregar.",
     "later": "Você pode mudar isso depois em",
-    "settings": "Configurações › Comportamento da IA"
+    "settings": "Configurações › Modelos e IA"
   }
 }
