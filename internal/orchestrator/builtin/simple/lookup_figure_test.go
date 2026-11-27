@@ -22,6 +22,8 @@ func TestLookUpReadsAPageForAFigure(t *testing.T) {
 		{"How much does it cost?", true},
 		{"What's the price of the Zize Forte?", true},
 		{"What are their hours?", true},
+		{"What events are going on around town today?", true},
+		{"Any concerts this weekend?", true},
 		{"Can you recommend a good bike?", false},
 	} {
 		env := &searchPageEnv{}

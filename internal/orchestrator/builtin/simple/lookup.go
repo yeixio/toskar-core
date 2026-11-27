@@ -64,7 +64,10 @@ func lookUpFirst(ctx context.Context, env pluginapi.ExecutionEnvironment, profil
 		return "", false
 	}
 	query := searchQuery(ctx, env, role, prompt)
-	if tools.MessageAsksForPlaces(prompt) && personal.NeedsLocation(prompt) {
+	// Anything near the person is searched for in their town: "events
+	// around town today" found calendar sites from anywhere, and the answer
+	// sent the person to look themselves.
+	if personal.NeedsLocation(prompt) {
 		query = localQuery(query, prompt, userLocation(ctx, env))
 	}
 	return lookUp(ctx, env, profile, query, prompt, pages)
@@ -183,6 +186,11 @@ func webAllowed(profile contracts.AIProfile) bool {
 // lookup reads the best page even at Fast effort.
 var figureRe = regexp.MustCompile(`(?i)\b(how (much|many|long|old|far|big)|costs?|price[sd]?|pricing|rates?|fees?|versions?|hours|open (now|until|till)|scores?|results?|winners?|won)\b`)
 
+// listingRe matches a question asking what's on: events, shows, things to
+// do. The results are calendar and listing pages whose snippets name none,
+// so its lookup reads the best page too.
+var listingRe = regexp.MustCompile(`(?i)\b(events?|happening|going on|what'?s on|things to do|concerts?|shows|performances?|festivals?|markets?|showtimes?|playing|schedule|calendar)\b`)
+
 // lookUp searches the web for query and reads the best pages, up to pages
 // of them (0 uses the search results alone, unless the question asks for a
 // figure: then one). prompt is the question the material is for.
@@ -190,7 +198,7 @@ func lookUp(ctx context.Context, env pluginapi.ExecutionEnvironment, profile con
 	if !webAllowed(profile) {
 		return "", false
 	}
-	if pages == 0 && figureRe.MatchString(prompt) {
+	if pages == 0 && (figureRe.MatchString(prompt) || listingRe.MatchString(prompt)) {
 		// "How much does it cost?" at Fast effort answered from snippets
 		// that had no price, though the page it found had one.
 		pages = 1
@@ -236,7 +244,8 @@ func lookUp(ctx context.Context, env pluginapi.ExecutionEnvironment, profile con
 
 // lookupGuidance tells the model how to use what was looked up.
 const lookupGuidance = "Toskar already searched the web for this question; the results are in the reference material. Answer from them directly: state the facts and include the most relevant link. Do not mention the search, the results, or reference material. " +
-	"Name only places, businesses, people, and figures that appear in them, never ones from memory. If they do not answer the question, say so."
+	"Name only places, businesses, people, and figures that appear in them, never ones from memory. " +
+	"Give what they do say, such as the events a calendar page lists, rather than telling the person to go and look at a site themselves. If they do not answer the question, say so, and say which page is most likely to."
 
 // placesGuidance is for a question about real places that nothing was
 // looked up for: the web is off, needs asking, or found nothing (#1381).
