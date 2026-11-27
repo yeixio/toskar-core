@@ -63,14 +63,19 @@ func lookUpFirst(ctx context.Context, env pluginapi.ExecutionEnvironment, profil
 	if !webAllowed(profile) {
 		return "", false
 	}
+	return lookUp(ctx, env, profile, webQuery(ctx, env, role, prompt), prompt, pages)
+}
+
+// webQuery is what to search the web for to answer prompt. Anything near
+// the person is searched for in their town: "events around town today"
+// found calendar sites from anywhere, and the answer sent the person to
+// look themselves.
+func webQuery(ctx context.Context, env pluginapi.ExecutionEnvironment, role, prompt string) string {
 	query := searchQuery(ctx, env, role, prompt)
-	// Anything near the person is searched for in their town: "events
-	// around town today" found calendar sites from anywhere, and the answer
-	// sent the person to look themselves.
 	if personal.NeedsLocation(prompt) {
 		query = localQuery(query, prompt, userLocation(ctx, env))
 	}
-	return lookUp(ctx, env, profile, query, prompt, pages)
+	return query
 }
 
 // locationSource is where the person said they are, in Personal settings.
@@ -383,6 +388,16 @@ const recallAgain = "Look again: the answer may be earlier in this conversation,
 // unknownRe matches an answer that says it doesn't know or has no
 // information, or asks the person to say.
 var unknownRe = regexp.MustCompile(`(?i)\b(I (don't|do not) (have|know)\b.{0,40}\b(information|details|record|idea|access)|I (don't|do not) know|I'm not sure|I am not sure|(could|can) you (provide|tell me|share|let me know))`)
+
+// notKnownRe matches an answer that says it doesn't know, without one that
+// only asks the person a question back.
+var notKnownRe = regexp.MustCompile(`(?i)\b(I (don't|do not) (have|know)\b.{0,40}\b(information|details|record|idea|access)|I (don't|do not) know|I'm not sure|I am not sure|I'm not aware|I am not aware|I (couldn't|could not|can't|cannot) find)`)
+
+// notKnown reports an answer that says it doesn't know, which a search
+// may answer.
+func notKnown(answer string) bool {
+	return notKnownRe.MatchString(answer)
+}
 
 // saysUnknown reports an answer that says it doesn't know.
 func saysUnknown(answer string) bool {

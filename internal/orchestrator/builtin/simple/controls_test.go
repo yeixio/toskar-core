@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/yeixio/toskar-core/internal/structured"
+	"github.com/yeixio/toskar-core/internal/turnopts"
 	"github.com/yeixio/toskar-core/pkg/contracts"
 	"github.com/yeixio/toskar-core/pkg/pluginapi"
 )
@@ -117,5 +118,55 @@ func TestNoThinkingRevision(t *testing.T) {
 		if !o.NoThinking {
 			t.Errorf("call %d thought: %+v", i, o)
 		}
+	}
+}
+
+// An answer that sends the person to look, though the web was looked up
+// first, is looked up again reading more, and written from what was found.
+func TestDeflectionAfterLookupLooksDeeper(t *testing.T) {
+	env := &planEnv{replies: []string{"You could check the city's events calendar website.", "The Winter Folk Festival is at Centennial Hall tonight."}}
+	text := runWith(t, env, "What events are going on around town today?", contracts.OrchestrationPolicy{})
+	if len(env.searches) != 2 || !strings.Contains(text, "Folk Festival") {
+		t.Fatalf("searches=%q text=%q", env.searches, text)
+	}
+}
+
+// An answer that doesn't know is looked up, and written from what the web
+// says; one that only asks the person back isn't.
+func TestNotKnowingIsLookedUp(t *testing.T) {
+	env := &planEnv{replies: []string{"I don't know who wrote that book.", "It was written by Jane Doe."}}
+	text := runWith(t, env, "Who wrote the book Sea Ice Dreams?", contracts.OrchestrationPolicy{})
+	if len(env.searches) != 1 || !strings.Contains(text, "Jane Doe") {
+		t.Fatalf("searches=%q text=%q", env.searches, text)
+	}
+	// It reads the top pages, and says it looked it up.
+	last := env.seen[len(env.seen)-1]
+	if !strings.Contains(last[0].Content, lookedAgainGuidance) || strings.Contains(last[0].Content, "Do not mention the search") || !strings.Contains(last[len(last)-1].Content, "Page read:") {
+		t.Fatalf("rewrite: system=%q user=%q", last[0].Content, last[len(last)-1].Content)
+	}
+	env = &planEnv{replies: []string{"Which book do you mean? Could you tell me the author?"}}
+	runWith(t, env, "Who wrote that book I mentioned?", contracts.OrchestrationPolicy{})
+	if len(env.searches) != 0 {
+		t.Fatalf("looked up a question back: %q", env.searches)
+	}
+}
+
+// Spoken, the rewrite doesn't say it looked it up: voice mode already did
+// as the search started (#1487).
+func TestNotKnowingSpokenLeavesTheFillerToVoice(t *testing.T) {
+	env := &planEnv{replies: []string{"I don't know who wrote that book.", "It was written by Jane Doe."}}
+	ctx := turnopts.WithSpoken(context.Background())
+	events, err := New().Run(ctx, contracts.Task{Prompt: "Who wrote the book Sea Ice Dreams?"}, contracts.AIProfile{
+		Roles: []contracts.ModelRole{{Role: "assistant", ModelID: "m"}},
+		Tools: []contracts.ToolPolicy{{ToolID: "internet.search", Policy: "allow"}, {ToolID: "internet.open", Policy: "allow"}},
+	}, env)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for range events {
+	}
+	sys := env.seen[len(env.seen)-1][0].Content
+	if !strings.Contains(sys, lookedAgainSpoken) || strings.Contains(sys, lookedAgainGuidance) {
+		t.Fatalf("spoken rewrite: %q", sys)
 	}
 }
