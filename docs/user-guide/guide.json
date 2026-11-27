@@ -1802,7 +1802,7 @@
         },
         {
           "type": "paragraph",
-          "text": "A model you rely on, such as the one a doorbell, an automation, or another app uses, can stay loaded, so it never has to start before it answers. It loads when Toskar starts and again within a minute if it stops, and it isn't unloaded when idle or to make room for a picture or clip."
+          "text": "A model you rely on, such as the one a doorbell, an automation, or another app uses, can stay loaded, so it never has to start before it answers. It loads when Toskar starts and again within a minute if it stops, and it isn't unloaded when idle or to make room for a picture, a clip, or another model. Other models that sit idle on the graphics card are unloaded when a model about to answer needs the room, so it runs on the card rather than, much more slowly, on the processor."
         },
         {
           "type": "steps",
