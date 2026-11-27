@@ -73,8 +73,9 @@ the larger Kitten model.
 ### Avatars
 
 Voice mode can show a character in place of its circle (#1369): the
-personal setting `voice_avatar`, `""` for none (the default) or one of
-`ratatoskr`, `pebble`, and `lumen` (`PATCH /api/v1/me/preferences`). The
+personal setting `voice_avatar`: `ratatoskr`, Toskar's own mascot, until
+the person chooses, or `pebble`, `lumen`, or `none` for the plain circle
+(`PATCH /api/v1/me/preferences`; `""` from an older app means `none`). The
 characters are vector drawings in the web app, so there is nothing to
 download. The mouth follows the loudness of the answer as it plays, measured
 in the page from the audio it plays, so it works with every voice: Kokoro,

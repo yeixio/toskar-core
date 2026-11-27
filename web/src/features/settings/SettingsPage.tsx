@@ -540,13 +540,13 @@ export function SettingsPage({ section }: { section?: SettingsSection } = {}) {
                     <select
                       id="voice-avatar"
                       className="field mt-2 w-full max-w-xs"
-                      value={isAvatar(settings.voice_avatar) ? settings.voice_avatar : ''}
+                      value={isAvatar(settings.voice_avatar) ? settings.voice_avatar : 'none'}
                       disabled={busy}
                       onChange={(e) =>
                         void api.setMyPreferences({ voice_avatar: e.target.value }).then(() => queryClient.invalidateQueries({ queryKey: ['settings'] }))
                       }
                     >
-                      <option value="">{t('voice.avatarOff')}</option>
+                      <option value="none">{t('voice.avatarOff')}</option>
                       {AVATARS.map((id) => (
                         <option key={id} value={id}>
                           {AVATAR_NAMES[id]}

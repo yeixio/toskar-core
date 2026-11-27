@@ -61,7 +61,7 @@ describe('Notifications and Voice for a Member (#1391)', () => {
     renderAs('voice')
     const pick = await screen.findByRole('combobox', { name: 'Avatar' })
     await waitFor(() => expect(pick).toBeEnabled())
-    expect(pick).toHaveValue('')
+    expect(pick).toHaveValue('none')
     fireEvent.change(pick, { target: { value: 'lumen' } })
     await waitFor(() => expect(api.setMyPreferences).toHaveBeenCalledWith({ voice_avatar: 'lumen' }))
   })
