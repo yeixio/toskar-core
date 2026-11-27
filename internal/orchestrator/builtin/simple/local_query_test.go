@@ -84,3 +84,17 @@ func TestRestaurantsWithoutLookupAreNotMadeUp(t *testing.T) {
 		t.Fatalf("system prompt lacks places guidance: %s", sys)
 	}
 }
+
+// "What events are going on around town today?" is searched in the
+// person's town too, not only questions about places.
+func TestEventsAroundTownAreLookedUpLocally(t *testing.T) {
+	env := &placesEnv{location: "Juneau, AK", scriptedEnv: scriptedEnv{replies: []string{"The Real Diner has music tonight."}}}
+	runPlaces(t, env, "allow", "What events are going on around town today?")
+	if len(env.queries) != 1 || !strings.Contains(env.queries[0], "in Juneau, AK") || strings.Contains(env.queries[0], "around town") {
+		t.Fatalf("queries = %q", env.queries)
+	}
+	sys := env.seen[len(env.seen)-1][0].Content
+	if !strings.Contains(sys, "rather than telling the person to go and look") {
+		t.Fatalf("system prompt doesn't ask for what the pages say: %s", sys)
+	}
+}

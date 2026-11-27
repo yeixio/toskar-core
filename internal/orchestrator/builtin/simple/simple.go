@@ -38,6 +38,23 @@ const EventEffort = "chat.effort"
 const groundingGuidance = "Do not make up specific facts: the names, addresses, phone numbers, opening hours, or prices of real businesses and places, quotes, statistics, dates, or citations. " +
 	"State them only from the reference material, tool results, or the conversation, or when you are sure of them. If you don't have them, say you don't know, or use a search tool when one is offered, rather than guess."
 
+// lookedAgainGuidance is for the answer written again after Toskar looked
+// up a question the model didn't know: say so in a few words, then the top
+// findings, as Mike asked: "I'm not sure, let me look that up", search,
+// read the top pages, and sum them up.
+const lookedAgainGuidance = "You didn't know this, so Toskar looked it up for you. Start with a few words saying you looked it up, in the language of your answer, then give the top findings from the pages read, briefly, with the most relevant link."
+
+// lookedAgainSpoken is for a spoken answer, which voice mode has already
+// said it's looking up (#1487).
+const lookedAgainSpoken = "You didn't know this, so Toskar looked it up. Give the top findings from the pages read, briefly."
+
+// lookedAgain is lookupGuidance for that answer, which may say it looked
+// the question up.
+var lookedAgain = strings.Replace(lookupGuidance, "Do not mention the search, the results, or reference material. ", "Do not mention the results or reference material. ", 1) + "\n" + lookedAgainGuidance
+
+// lookedAgainForVoice is lookedAgain for a spoken answer.
+var lookedAgainForVoice = lookupGuidance + "\n" + lookedAgainSpoken
+
 // stoppedNotes is the partial answer kept when a plan is stopped.
 func stoppedNotes(notes string) string {
 	body := strings.TrimSpace(strings.TrimPrefix(notes, "Notes from each part of the request:"))
@@ -184,8 +201,10 @@ func (o *Orchestrator) Run(
 		// A request with several parts is worked through part by part;
 		// otherwise a current question is looked up first.
 		planned := false
-		// lookedUp records that the web was read for this turn.
+		// lookedUp records that the web was read for this turn, and
+		// webFound is what the look-up before the answer found.
 		lookedUp := false
+		webFound := ""
 		// A swarm (#1135): agents in chats of their own do the work at once,
 		// and this turn merges it. A task's agents work in its folder, and
 		// what they changed is merged and applied to it.
@@ -301,6 +320,7 @@ func (o *Orchestrator) Run(
 				instructions += "\n" + serviceGuidance
 				profile = withoutFetched(profile)
 			} else if found, ok := lookUpFirst(ctx, env, profile, role, task.Prompt, budget.Pages); ok {
+				webFound = found
 				reference = joinReference(reference, found)
 				instructions += "\n" + lookupGuidance
 				profile = withoutWeb(profile)
@@ -685,19 +705,39 @@ func (o *Orchestrator) Run(
 					)
 					continue
 				}
-			} else if !lookedUp && !retriedLookup && !jsonOnly && !huginn.SmallTalk(task.Prompt) && huginn.Deflects(parsed.Text) && webAllowed(webProfile) {
-				// An answer that sends the person off to search, or pretends
-				// to, is looked up and written again from what the web says
-				// (§21). Core tells the model not to; a small model still does.
-				// Small talk ("as an AI, I don't have feelings") is not looked
-				// up.
+			} else if !retriedLookup && !jsonOnly && !huginn.SmallTalk(task.Prompt) && webAllowed(webProfile) &&
+				(huginn.Deflects(parsed.Text) || (!lookedUp && notKnown(parsed.Text))) {
+				// An answer that doesn't know, sends the person off to
+				// search, or pretends to, is looked up and written again
+				// from what the web says (§21). Core tells the model not to;
+				// a small model still does. One that deflected though the
+				// web was already looked up reads one more page than before,
+				// since what it read didn't hold the answer: "events around
+				// town today" read a calendar site's snippet and told the
+				// person to check calendar sites. Small talk ("as an AI, I
+				// don't have feelings") is not looked up.
+				// It reads the top pages, at least two, and one more than
+				// a look-up before the answer read.
 				retriedLookup = true
-				if found, ok := lookUp(ctx, env, webProfile, searchQuery(ctx, env, role, task.Prompt), task.Prompt, budget.Pages); ok {
+				pages := max(budget.Pages, 1) + 1
+				if found, ok := lookUp(ctx, env, webProfile, webQuery(ctx, env, role, task.Prompt), task.Prompt, pages); ok {
 					lookedUp = true
-					reference = joinReference(reference, found)
-					evidence = joinReference(evidence, found)
+					if webFound != "" && strings.Contains(reference, webFound) {
+						reference = strings.Replace(reference, webFound, found, 1)
+						evidence = strings.Replace(evidence, webFound, found, 1)
+					} else {
+						reference = joinReference(reference, found)
+						evidence = joinReference(evidence, found)
+					}
+					webFound = found
 					toolsOn = false
-					rewrite := []pluginapi.ChatMessage{{Role: "system", Content: plainSys + "\n" + lookupGuidance}}
+					// Voice mode already said it's looking, as the search
+					// started (#1487), so a spoken answer doesn't say it again.
+					again := lookedAgain
+					if turnopts.SpokenFrom(ctx) {
+						again = lookedAgainForVoice
+					}
+					rewrite := []pluginapi.ChatMessage{{Role: "system", Content: plainSys + "\n" + again}}
 					rewrite = append(rewrite, prior...)
 					messages = append(rewrite, pluginapi.ChatMessage{Role: "user", Content: withReference(task.Prompt, reference), Images: images})
 					continue
