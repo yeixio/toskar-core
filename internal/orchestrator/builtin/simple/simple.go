@@ -773,20 +773,30 @@ func (o *Orchestrator) Run(
 				}
 			}
 			answer := parsed.Text
+			// A turn that answers without thinking, such as a spoken one,
+			// checks and revises its answer without thinking too: a
+			// revision that thought first held a voice answer back for a
+			// minute and a half (3,600 tokens at 40 a second).
+			checkCtx := ctx
+			if pluginapi.AnswerOptionsFrom(ctx).NoThinking {
+				co := pluginapi.GenerateOptionsFrom(ctx)
+				co.NoThinking = true
+				checkCtx = pluginapi.WithGenerateOptions(ctx, co)
+			}
 			if deliberate {
-				answer = deliberateAnswer(ctx, env, ch, profile, task.Prompt, messages, plainSys, answer, role, nodeID)
+				answer = deliberateAnswer(checkCtx, env, ch, profile, task.Prompt, messages, plainSys, answer, role, nodeID)
 			}
 			if budget.Verify {
-				answer = verifyAnswer(ctx, env, reviewerRole(profile, role), messages, answer, evidence, task.Prompt, budget.Corrections)
-				answer = checkCode(ctx, env, reviewerRole(profile, role), messages, answer, budget.Corrections)
-				answer = checkLinks(ctx, env, reviewerRole(profile, role), messages, answer, evidence, budget.Corrections)
+				answer = verifyAnswer(checkCtx, env, reviewerRole(profile, role), messages, answer, evidence, task.Prompt, budget.Corrections)
+				answer = checkCode(checkCtx, env, reviewerRole(profile, role), messages, answer, budget.Corrections)
+				answer = checkLinks(checkCtx, env, reviewerRole(profile, role), messages, answer, evidence, budget.Corrections)
 				if budget.Effort == huginn.EffortThorough && budget.Corrections > 0 {
-					answer = checkConsistency(ctx, env, reviewerRole(profile, role), messages, answer, evidence)
+					answer = checkConsistency(checkCtx, env, reviewerRole(profile, role), messages, answer, evidence)
 				}
 			}
 			// The Team strategy's reviewer reads every answer it escalated.
 			if strat.team && escalate {
-				answer = reviewAnswer(ctx, env, ch, reviewerRole(profile, role), task.Prompt, answer, evidence)
+				answer = reviewAnswer(checkCtx, env, ch, reviewerRole(profile, role), task.Prompt, answer, evidence)
 			}
 			// The environment's own check comes last, so nothing rewrites
 			// what it allowed (#345).

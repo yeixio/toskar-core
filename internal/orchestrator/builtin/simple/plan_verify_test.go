@@ -22,6 +22,8 @@ type planEnv struct {
 	events    []string
 	payloads  []map[string]any
 	reference string
+	// opts are each call's generation options, in order.
+	opts []pluginapi.GenerateOptions
 }
 
 func (e *planEnv) Generate(ctx context.Context, role string, messages []pluginapi.ChatMessage) (<-chan pluginapi.ChatChunk, error) {
@@ -33,6 +35,7 @@ func (e *planEnv) Generate(ctx context.Context, role string, messages []pluginap
 		e.n++
 	}
 	e.seen = append(e.seen, append([]pluginapi.ChatMessage(nil), messages...))
+	e.opts = append(e.opts, pluginapi.GenerateOptionsFrom(ctx))
 	ch := make(chan pluginapi.ChatChunk, 1)
 	ch <- pluginapi.ChatChunk{Content: content, Done: true}
 	close(ch)
