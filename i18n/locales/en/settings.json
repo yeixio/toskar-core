@@ -138,7 +138,11 @@
     "mainModelHint": "The model a new chat uses. Always ready keeps it loaded so answers start at once. Let Toskar manage keeps it ready while there is room and frees the memory when needed.",
     "mainModelHintNamed": "{{model}} needs about {{size}} of memory. Always ready keeps it loaded so answers start at once. Let Toskar manage keeps it ready while there is room and frees the memory when needed.",
     "mainAlways": "Always ready",
-    "mainManaged": "Let Toskar manage"
+    "mainManaged": "Let Toskar manage",
+    "mainModelPick": "Main chat model",
+    "mainModelAuto": "Auto",
+    "mainModelAutoNamed": "Auto ({{model}})",
+    "mainModelOption": "{{model}} · {{size}}"
   },
   "downloads": {
     "title": "Download models",

@@ -136,7 +136,11 @@
     "mainModelHint": "新聊天使用的模型。隨時就緒會讓它保持載入，回答立即開始。交給 Toskar 管理會在有空間時保持就緒，需要時釋放記憶體。",
     "mainModelHintNamed": "{{model}} 需要約 {{size}} 記憶體。隨時就緒會讓它保持載入，回答立即開始。交給 Toskar 管理會在有空間時保持就緒，需要時釋放記憶體。",
     "mainAlways": "隨時就緒",
-    "mainManaged": "交給 Toskar 管理"
+    "mainManaged": "交給 Toskar 管理",
+    "mainModelPick": "主聊天模型",
+    "mainModelAuto": "Auto",
+    "mainModelAutoNamed": "Auto（{{model}}）",
+    "mainModelOption": "{{model}} · {{size}}"
   },
   "downloads": {
     "title": "下載模型",

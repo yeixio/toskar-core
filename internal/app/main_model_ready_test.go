@@ -4,6 +4,8 @@ import (
 	"context"
 	"testing"
 	"time"
+
+	"github.com/yeixio/toskar-core/internal/profiles"
 )
 
 func TestMainFits(t *testing.T) {
@@ -71,5 +73,34 @@ func TestMainModelReadyChoice(t *testing.T) {
 	}
 	if !a.alwaysRunning(ctx, "see-model") {
 		t.Fatal("managed let go of a model the person kept running")
+	}
+}
+
+// Choosing the main chat model sets the Fast model of the profile new chats
+// use, and "" gives the choice back to Auto (#1481).
+func TestMainChatModelChoice(t *testing.T) {
+	a, _, _ := pictureApp(t, false)
+	ctx := context.Background()
+	fast := func() string {
+		p, err := a.Profiles.Get(ctx, a.defaultProfileID(ctx))
+		if err != nil {
+			t.Fatal(err)
+		}
+		return profiles.RoleModel(p, profiles.RoleFast)
+	}
+	if err := a.applySettingsPatch(ctx, map[string]any{"main_chat_model": "text-model"}); err != nil {
+		t.Fatal(err)
+	}
+	if fast() != "text-model" || a.mainChatModelID(ctx) != "text-model" {
+		t.Fatalf("fast = %q, main = %q", fast(), a.mainChatModelID(ctx))
+	}
+	if err := a.applySettingsPatch(ctx, map[string]any{"main_chat_model": "no-such-model"}); err == nil {
+		t.Fatal("a model that isn't installed was chosen")
+	}
+	if err := a.applySettingsPatch(ctx, map[string]any{"main_chat_model": ""}); err != nil {
+		t.Fatal(err)
+	}
+	if fast() != "" {
+		t.Fatalf("Auto didn't clear the Fast model: %q", fast())
 	}
 }

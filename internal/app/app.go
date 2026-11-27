@@ -1836,6 +1836,12 @@ func (a *App) applySettingsPatch(ctx context.Context, patch map[string]any) erro
 			return err
 		}
 	}
+	// The model first, so "always" in the same patch keeps the new one running.
+	if v, ok := patch["main_chat_model"].(string); ok {
+		if err := a.setMainChatModel(ctx, v); err != nil {
+			return err
+		}
+	}
 	if v, ok := patch[settingMainReady].(string); ok {
 		if err := a.setMainReady(ctx, v); err != nil {
 			return err

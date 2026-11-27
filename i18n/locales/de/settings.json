@@ -138,7 +138,11 @@
     "mainModelHint": "Das Modell, das ein neuer Chat verwendet. Immer bereit hält es geladen, damit Antworten sofort beginnen. Toskar entscheiden lassen hält es bereit, solange Platz ist, und gibt den Speicher bei Bedarf frei.",
     "mainModelHintNamed": "{{model}} braucht etwa {{size}} Speicher. Immer bereit hält es geladen, damit Antworten sofort beginnen. Toskar entscheiden lassen hält es bereit, solange Platz ist, und gibt den Speicher bei Bedarf frei.",
     "mainAlways": "Immer bereit",
-    "mainManaged": "Toskar entscheiden lassen"
+    "mainManaged": "Toskar entscheiden lassen",
+    "mainModelPick": "Haupt-Chatmodell",
+    "mainModelAuto": "Auto",
+    "mainModelAutoNamed": "Auto ({{model}})",
+    "mainModelOption": "{{model}} · {{size}}"
   },
   "downloads": {
     "title": "Modelle laden",

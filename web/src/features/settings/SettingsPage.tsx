@@ -28,6 +28,7 @@ import { LanguageSettings } from './LanguageSettings'
 import { Personalization } from './Personalization'
 import { YggdrasilMark } from '@/components/ui/YggdrasilMark'
 import { formatGigabytes, formatSize } from '@/i18n/format'
+import { MainModelSelect } from './MainModelSelect'
 import { AutomationDigestSetting } from './AutomationDigest'
 import { ShownError, shownOr, type Shown } from '@/components/ui/ShownError'
 import { VoiceSettings } from './VoiceSettings'
@@ -458,6 +459,7 @@ export function SettingsPage({ section }: { section?: SettingsSection } = {}) {
                         : t('lifecycle.mainModelHint')}
                     </p>
                   </div>
+                  <MainModelSelect main={settings?.main_model} disabled={busy} onChange={(id) => patch({ main_chat_model: id })} />
                   <ChoiceGroup
                     value={(settings?.main_model_ready || 'managed') as 'always' | 'managed'}
                     onChange={(id) => patch({ main_model_ready: id })}

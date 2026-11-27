@@ -140,7 +140,11 @@
     "mainModelHint": "El modelo que usa un chat nuevo. Siempre listo lo mantiene cargado para que las respuestas empiecen al instante. Que Toskar lo gestione lo mantiene listo mientras haya espacio y libera la memoria cuando hace falta.",
     "mainModelHintNamed": "{{model}} necesita unos {{size}} de memoria. Siempre listo lo mantiene cargado para que las respuestas empiecen al instante. Que Toskar lo gestione lo mantiene listo mientras haya espacio y libera la memoria cuando hace falta.",
     "mainAlways": "Siempre listo",
-    "mainManaged": "Que Toskar lo gestione"
+    "mainManaged": "Que Toskar lo gestione",
+    "mainModelPick": "Modelo de chat principal",
+    "mainModelAuto": "Auto",
+    "mainModelAutoNamed": "Auto ({{model}})",
+    "mainModelOption": "{{model}} · {{size}}"
   },
   "downloads": {
     "title": "Descargar modelos",
