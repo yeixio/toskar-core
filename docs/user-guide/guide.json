@@ -2672,7 +2672,7 @@
       "kind": "task",
       "summary": "Have a spoken conversation with Toskar: you talk, it answers in a natural voice, and you can talk over it to stop it.",
       "paragraphs": [
-        "Voice mode is a conversation out loud, like a phone call. You speak, Toskar hears when you've stopped, and it answers in a voice a sentence at a time, so the first words play while the rest is still being written. When an answer takes more than a moment, soft bubbles play until it starts, so you know you were heard; turn it off under Settings › Voice › Thinking sound. When it has to look something up first, on the web or in your files, it says so in a few words, such as \"Hmm, let me look that up.\"",
+        "Voice mode is a conversation out loud, like a phone call. You speak, Toskar hears when you've stopped, and it answers in a voice a sentence at a time, so the first words play while the rest is still being written. When an answer takes more than a moment, soft bubbles play until it starts, so you know you were heard; turn it off under Settings › Voice › Thinking sound. When it has to look something up first, on the web or in your files, it says so in a few words, such as \"Hmm, let me look that up.\" While a slow answer starts, it may say \"Umm, just a sec.\" between the bubbles.",
         "Everything runs on your own computers: hearing what you said, the answer, and the voice. Nothing is sent to an outside service. The conversation is kept in your chats as Voice chat."
       ],
       "blocks": [

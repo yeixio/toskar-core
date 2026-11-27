@@ -80,6 +80,11 @@ French, Italian, Portuguese, Japanese, Korean, or Chinese; English for the
 rest), and a different one each time (`internal/app/voice_filler.go`). The
 chat calls `turnopts.WithToolStart` as each tool starts.
 
+A slow answer that needs no tool has waiting fillers too, such as "Umm, just
+a sec.": the first 3.2 s after the turn starts, then every 6 s, between the
+thinking bubbles. A turn says at most three fillers in all, and none once the
+answer has started.
+
 ### Avatars
 
 Voice mode can show a character in place of its circle (#1369): the
