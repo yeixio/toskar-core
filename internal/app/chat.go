@@ -1670,6 +1670,9 @@ func (e *chatExecEnv) ExecuteTool(ctx context.Context, toolID string, args map[s
 		})
 	})
 	e.progress(events.ToolStarted, map[string]any{"tool_id": toolID, "args": args})
+	if started := turnopts.ToolStartFrom(ctx); started != nil {
+		started(tools.Canonical(toolID))
+	}
 	toolStarted := time.Now()
 	result, err := e.app.Tools.Execute(ctx, toolID, args, policy, "chat requested tool", meta)
 	if err == nil {

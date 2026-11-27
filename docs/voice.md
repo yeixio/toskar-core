@@ -70,6 +70,16 @@ as a Kitten voice after Kitten was removed, answers `reads: false` with the
 voice that reads instead in `reads_with`. Cloned voices and styles wait for
 the larger Kitten model.
 
+### Saying it's looking
+
+When an answer has to wait on a tool, such as a web search, places, the
+person's files, or a connected service, voice mode says a short filler first
+(#1487), such as "Hmm, let me look that up.", once a turn and only before the
+answer has started. It's in the answer's language (English, German, Spanish,
+French, Italian, Portuguese, Japanese, Korean, or Chinese; English for the
+rest), and a different one each time (`internal/app/voice_filler.go`). The
+chat calls `turnopts.WithToolStart` as each tool starts.
+
 ### Avatars
 
 Voice mode can show a character in place of its circle (#1369): the

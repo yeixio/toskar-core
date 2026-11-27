@@ -116,6 +116,21 @@ func SpokenFrom(ctx context.Context) bool {
 	return on
 }
 
+type toolStartKey struct{}
+
+// WithToolStart calls started with each tool's id as the turn starts it,
+// such as internet.search, so voice mode can say it's looking something
+// up instead of going quiet while it does.
+func WithToolStart(ctx context.Context, started func(toolID string)) context.Context {
+	return context.WithValue(ctx, toolStartKey{}, started)
+}
+
+// ToolStartFrom is the turn's WithToolStart, or nil.
+func ToolStartFrom(ctx context.Context) func(toolID string) {
+	f, _ := ctx.Value(toolStartKey{}).(func(string))
+	return f
+}
+
 type makeRoomKey struct{}
 
 // WithMakeRoom lets the turn stop the models kept running on this computer
