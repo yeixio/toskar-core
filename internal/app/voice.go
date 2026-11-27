@@ -196,6 +196,8 @@ type voiceChat struct {
 
 	mu             sync.Mutex
 	conversationID string
+	// fillers counts the fillers said, so the next is a different one.
+	fillers int
 	// saving closes once the last answer is saved.
 	saving chan struct{}
 }
@@ -240,6 +242,24 @@ func (c *voiceChat) Respond(ctx context.Context, text string, delta func(string)
 	}
 	turn = turnopts.WithSpoken(turn)
 	turn = pluginapi.WithAnswerOptions(turn, pluginapi.GenerateOptions{NoThinking: true})
+	// The answer and a filler share delta, from two goroutines: the chat's
+	// tools start on its own.
+	var deltaMu sync.Mutex
+	var answered, filled bool
+	// When the answer waits on a tool, such as a web search, a short
+	// spoken filler says Toskar is looking it up, as a person would,
+	// instead of silence (#1487). Once a turn, and only before the answer
+	// has started.
+	lang := c.fillerLanguage(ctx, text)
+	turn = turnopts.WithToolStart(turn, func(toolID string) {
+		deltaMu.Lock()
+		defer deltaMu.Unlock()
+		if answered || filled {
+			return
+		}
+		filled = true
+		delta(c.filler(lang, toolID) + " ")
+	})
 	chunks, err := c.app.RunChat(turn, "", id, text, true, "", "")
 	if err != nil {
 		cancel()
@@ -253,7 +273,10 @@ func (c *voiceChat) Respond(ctx context.Context, text string, delta func(string)
 			return errors.New(chunk.Error)
 		}
 		if chunk.Content != "" {
+			deltaMu.Lock()
+			answered = true
 			delta(chunk.Content)
+			deltaMu.Unlock()
 		}
 		if chunk.Done {
 			// The chat saves the answer after it's done; the voice is
