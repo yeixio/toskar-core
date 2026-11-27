@@ -1,36 +1,36 @@
 {
   "schemaVersion": 1,
-  "version": "1.14",
+  "version": "1.15",
   "items": [
     {
       "realm": "Ratatoskr",
-      "title": "Swarms: several agents on one job",
-      "text": "Ask for \"a swarm\" or \"3 agents\" and several agents work at once, each in a chat of its own, across your computers and models. In a split each takes a part of the job; in a race, models answer the same question and the best answer wins."
+      "title": "Voice mode that understands you, and a face for it",
+      "text": "Voice mode answers in the language you speak, hears better in a noisy room, and plays a soft sound while it thinks. Choose an avatar, Ratatoskr, Pebble or Lumen, whose mouth moves as Toskar talks, and make voice personas everyone can pick from."
     },
     {
-      "realm": "Muninn",
-      "title": "Projects keep related chats together",
-      "text": "A project holds instructions, files, a folder, a default profile and model, and a memory of its own. Its chats follow its instructions, search its files, and remember what they learn for the project's other chats, not your others."
+      "realm": "Forseti",
+      "title": "Features that set themselves up",
+      "text": "Settings › Features lists what Toskar can do on this computer, with Ready or Needs setup beside each. Set up installs everything a feature still needs in one step. Settings has a list of its pages and a search over setting names."
+    },
+    {
+      "realm": "Thrymgjoll",
+      "title": "Works with apps made for Ollama and OpenAI",
+      "text": "Toskar speaks Ollama's API too, so apps that only offer Ollama can use it. The OpenAI-compatible API adds embeddings, speech to text and read aloud, and apps that bring their own tools, such as Home Assistant's Assist or n8n, can use auto and profiles."
     },
     {
       "realm": "Ymir",
-      "title": "gpt-oss and Qwen 3.6 in the catalog",
-      "text": "OpenAI's gpt-oss 20B and 120B and Qwen 3.6 35B-A3B are in the model catalog. They're mixtures of experts, so how well they fit and how fast they run is estimated from the part each word uses. Effort sets how long gpt-oss thinks."
-    },
-    {
-      "realm": "Norn",
-      "title": "Keep a model running",
-      "text": "Pin a chat model as Always running and it loads when Toskar starts, comes back if it stops, and isn't unloaded when idle. With paired computers, a model that doesn't fit beside it runs on another computer; otherwise an Admin can stop the pinned one for that answer."
-    },
-    {
-      "realm": "Huginn",
-      "title": "Honest answers offline, and links that open",
-      "text": "Offline, a question that needs the internet says this computer isn't connected instead of making up an answer. Turn on Check links in answers, and Toskar asks each linked site whether its page opens and crosses out the links that don't."
+      "title": "A faster first reply",
+      "text": "Toskar keeps your main chat model ready when there's room for it, and the apps start loading it as soon as you open a chat or start typing. An Admin chooses once whether it stays loaded or frees its memory when needed."
     },
     {
       "realm": "Heimdall",
-      "title": "Changes ask first again",
-      "text": "In the built-in profiles, writing files, running terminal commands, and Git add and commit ask first, and Allow for session still covers the rest of a chat. Git push asks every time, since it sends your code off the computer."
+      "title": "See everything that left this computer",
+      "text": "What left this computer now lists every model download and search, setup file, speech model, MCP connection and the other sites a page loaded, so you can check that your conversations stay on your own computer."
+    },
+    {
+      "realm": "Norn",
+      "title": "The front door, in the visitor's language",
+      "text": "The doorbell answers a visitor in the language they speak and sends you a note in yours. A Reolink Home Hub brings its other cameras with it, and an automation's history can be cleared without deleting the automation."
     }
   ]
 }

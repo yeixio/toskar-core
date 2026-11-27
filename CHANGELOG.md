@@ -8,6 +8,216 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Thi
 
 Changes waiting for the next release are in [changes/unreleased/](changes/unreleased/), one file per pull request. `scripts/changelog.py preview` shows them together, and `scripts/changelog.py release <version>` writes them here when the release is cut.
 
+## [1.15.0] - 2026-11-27
+
+### Added
+
+- An automation's history can be cleared from its page, or one run at a time,
+  without deleting the automation. Runs still going stay, and the pictures its
+  cameras took can be deleted with it (#1335). `toskarctl automations clear`
+  and `toskarctl automations runs rm` do the same from a terminal (#1393).
+- Settings › Personalization has Use this device's location, off until
+  you turn it on on each device: a question about nearby places, the
+  weather or directions then starts from where the device is now, after
+  the browser asks. The position goes only to your own computer, with
+  each message, and isn't kept. (#1310)
+- Under it, What Toskar knows about where and when you are lists your time
+  zone, the date and time, language, units and location, and where each
+  comes from. (#1310)
+- Toskar speaks Ollama's API as well, so apps that offer only Ollama, such
+  as Home Assistant's Ollama integration, Obsidian plugins, and editor
+  plugins, can use it: give the app Toskar's address as its Ollama server.
+  Chat, completions, model lists, and embeddings work, with the same keys
+  and permissions as the OpenAI API (#1356).
+- Answer on Ollama's port, in Settings › API keys: Toskar also answers
+  Ollama's API at `http://localhost:11434`, for apps on this computer that
+  only look for Ollama there. It's off by default, and it never takes the
+  port from Ollama itself (#1396).
+- Settings › Features lists what Toskar can do on this computer, such as
+  voice conversations, answering the door, making pictures and clips, and
+  searching knowledge by meaning, with Ready or Needs setup beside each.
+  Set up installs everything a feature still needs in one step, with one
+  progress line, and says what would make it work when nothing that fits
+  this computer exists (#1355).
+- The OpenAI-compatible API answers /v1/embeddings,
+  /v1/audio/transcriptions and /v1/audio/speech, with the installed
+  embedding model, Whisper and live voice's voices. Apps such as Open WebUI
+  and n8n can take dictation, read aloud and search their own documents
+  without a second server beside Toskar. (#1357)
+- A Reolink doorbell on a Home Hub brings the hub's other cameras with it,
+  such as a driveway tracking camera, each by its own name. Automations can
+  look at either camera, start when either one sees a person, and choose
+  which camera to speak through.
+- Diagnostics has Report a problem, for something wrong that no error
+  shows: say what went wrong, check everything the report sends, and send
+  it to the Toskar team, as Report this does beside an error. (#201)
+- A soft thinking sound while a spoken answer takes more than a moment, so
+  you know Toskar heard you. It plays in voice mode, where you can turn it
+  off under Settings › Voice, and at the front door, where each automation
+  can turn it off and quiet hours mute it. (#1334)
+- Voice mode avatars: choose a character under Settings › Voice › Avatar,
+  Ratatoskr, Pebble, or Lumen, and it takes the circle's place in voice
+  mode. Its mouth moves as Toskar talks, with every voice, and it stays
+  still with Reduce Motion. Off by default, and only for you. (#1369)
+- When you speak a language Toskar has no voice for yet, such as Japanese,
+  voice mode and the doorbell answer in a language they can speak, and say
+  why, instead of going quiet. When installing Kitten TTS would add a voice
+  for it, the answer says so. (#1405)
+- An Admin can set Language voice hears under Settings › Voice to one
+  language, for a household that always speaks it: voice hears it more
+  reliably and answers in it. (#1405)
+- Voice mode shows which language it heard you in, so a wrong guess can be
+  seen. (#1405)
+- Voice mode hears better in a noisy room or with a far microphone, such as
+  a webcam's. Choose the microphone in voice mode, and turn off Even out my
+  volume if it picks up the room's hiss between words. An Admin can set How
+  voice hears you to Accurate under Settings › Voice, for live voice and the
+  doorbell. (#1330)
+- Voice personas: an Admin makes voices with a name, a language, one of
+  that language's voices, and a speed, under Settings › Voice, and
+  everyone picks their own in Your voice. It reads their answers in voice
+  mode, read aloud, on the phone, in the car, and at the door. (#1319)
+- Voice mode can tell a pause mid-thought from the end of what you were
+  saying. Turn on "Wait when a pause sounds unfinished" in Settings ›
+  Voice: when a pause doesn't sound finished, it keeps listening a little
+  longer instead of answering half a question. It's off by default, since
+  it can make answers start later in a noisy room. It uses Smart Turn v3,
+  an 8.7 MB model that downloads in the background the first time and
+  runs on the processor. The front door does the same when a visitor
+  pauses. (#1403, #1460)
+- Community ratings, on the Models page, have a Quality results switch.
+  Off, Models › Results reads nothing from GitHub and says how to turn it
+  back on. (#1415)
+
+### Changed
+
+- Voice mode answers in the language you speak, even for a word or two such
+  as "¿Hola?", when speech to text is sure which language it heard. A
+  language you chose in Settings still wins. (#1322)
+- The front door answers a visitor in the language they speak, and listens
+  in it for short replies. The note you get stays in your language and says
+  which language the visitor spoke. (#1322)
+- The API Access page's Norse name is now Thrymgjoll, the gate that holds uninvited guests, instead of Valgrind, which developers know as a memory-debugging tool (#1251).
+- An app that brings its own tools, such as Home Assistant's Assist, n8n's
+  AI Agent, or Open WebUI's tools, can ask for auto or a profile: its tools
+  reach the model that turn would use, so it can turn on a light or run its
+  calculator, and the answer streams. Before, only `raw:<model>` did. It
+  needs a key that may drive models directly, which requests from this
+  computer without a key have. Answers to auto or a model's id also carry
+  the name asked for instead of an empty one. (#1450)
+- The first reply no longer waits for a sleeping model as often. Toskar keeps
+  your main chat model loaded while it needs at most half of the computer's
+  memory, and loads it when Toskar starts. The web app and the desktop app
+  also start loading the model when a chat opens and when you start typing.
+- Chat asks an Admin once whether the main chat model should be **Always
+  ready** (kept loaded, with the memory it uses) or **managed by Toskar**
+  (memory is freed when needed). The same choice is in Settings › AI behavior
+  › Model lifecycle as **Main chat model**.
+- The OpenAI-compatible API streams `auto` and profile answers as they're
+  written, as chat in the app does, instead of in one piece at the end, so
+  Open WebUI and other apps show the answer as it comes. (#1450)
+- Programming answers with one model, as the other built-in profiles do,
+  instead of the Team strategy. On 4B and 9B models Team passed no more of
+  the quality set and took two to three times as long. A Programming
+  profile still set up as it shipped moves over; one with its own role
+  models keeps Team, and any profile can still choose it. (#1208)
+- A push to the Toskar app is written in its person's own App language,
+  not the install's, so someone who uses Toskar in French gets French
+  notices on their phone. Email, ntfy, and webhooks stay in the install's
+  language. (#1405)
+- An email reply Toskar drafts or sends is written in the language of the
+  message it answers, unless you ask for another, while Toskar still tells
+  you about it in your own language. (#1445)
+- Members see Settings › Notifications and Voice. There they set the
+  thinking sound, and whether their own automations notify them, for
+  themselves only; the rest of each page is still an Admin's. (#1391)
+- A Member's own automation results and approval requests now reach their
+  own phones signed in as them, through the Toskar app destination. Before,
+  they stayed in the notification center. (#1391)
+- The sidebar lists the six places you work in: Chat, Automations, Knowledge,
+  Profiles, Models, and News. Train is a tab of Models, and Memory, Tools,
+  Computers, People, Portals, API Access, Performance, and Diagnostics moved
+  into Settings.
+- Settings has a list of its pages beside the open one, and a search over
+  setting names: your own settings under You, and the Admin's under This
+  computer and team. Network & devices are together: Computers and Network
+  access. Old links to pages that moved still open them.
+- Community ratings, quality results, and Ask me to rate models are set on
+  the Models page, with its Community ratings button, and the AI news switch
+  is on the News page. Settings links to both. (#1391)
+- What left this computer now lists each model file downloaded, each
+  Hugging Face search and model store listing, llama.cpp installs you
+  start, each file of an image or video setup, the fonts a Chinese,
+  Japanese or Korean PDF needs, and each read of the quality results.
+  (#1415)
+- What left this computer also lists MCP sources connecting, listing their
+  tools and signing in, the npm or PyPI fetch of a source started with npx
+  or uvx, knowledge refreshes from a database or web API, git pushes, and
+  the relay: the tunnel opening, the outside check, and subscription and
+  price questions. (#1415)
+- What left this computer also lists the speech models and voices
+  downloaded the first time they're needed: Whisper models, Piper voices,
+  Kokoro and Kitten. (#1415)
+- What left this computer also lists the other sites a page in the
+  browser loads its pictures, scripts, and fonts from, the base model a
+  first training run downloads from Hugging Face, and terminal commands
+  that go online, such as curl, git clone, or npm install, with the sites
+  in them. (#1426)
+
+### Fixed
+
+- Turning off Keep running in background now sticks. Toskar turns it on
+  when you save your first schedule, and after that leaves it as you set
+  it; the Automations page says when schedules won't run with the window
+  closed (#1209).
+- The files an automation makes are kept as long as its runs, 30 days by
+  default, instead of a week (#1209).
+- An app in Docker Desktop or Podman on the same computer, such as Open
+  WebUI, n8n, or Home Assistant, reaches Toskar at host.docker.internal
+  without an API key. Before, Toskar turned that name away as if a website
+  were using it, and Open WebUI showed an empty model list. (#1057)
+- Chat no longer makes up restaurants and other businesses for questions
+  such as "What restaurants are in town?". Toskar now looks these up first,
+  searching in the location from Personal settings, tells the model to name
+  only places the search found, and says it couldn't look them up when web
+  search is off rather than list places from memory. Every answer is also
+  told not to invent names, addresses, phone numbers, hours, prices, quotes,
+  statistics, or citations.
+- First-run setup offers a chat model that's already on this computer, such
+  as one added from a file, with the recommended download as the other
+  choice, so setup works offline (#1214).
+- With the Team strategy, a reviewer that wrote its review ("The answer is
+  incorrect…") instead of an improved answer no longer replaces the answer
+  with it. The same holds for a fact check's rewrite. (#1456)
+- With the Team strategy, a reviewer that writes its critique and then
+  "Here is the corrected answer:" gives you the corrected answer alone,
+  without the critique. (#1456)
+- Changing settings through the API with a field that isn't a setting,
+  such as a misspelled name, now says which field is wrong. Before, Toskar
+  answered as if it had worked and changed nothing. (#1464)
+- A video asked for longer than 5 seconds is made the length asked for, up
+  to 2 minutes, as clips joined into one, instead of one 5-second clip.
+  You see how long it will take before it starts.
+- Voice mode reads a whole answer in the language it is written in. A Spanish
+  answer no longer switches to the Portuguese or English voice partway, such
+  as for "No tengo acceso a internet" or a short "Claro." (#1383)
+- Voice mode answers as soon as before when you've finished speaking. The
+  check for whether you've finished now runs while you pause, loads when
+  voice mode opens, and reads the audio the way its model was trained to.
+  Before, it ran after the pause and often heard a finished question as
+  unfinished, which made answers start up to 2 seconds later. (#1460)
+- Answers asked on a watch or in CarPlay are complete in themselves: a few
+  sentences, summed up when there's a lot to say, in plain text, instead of
+  long Markdown that the watch and the car cut to its first paragraph,
+  saying the rest was in Toskar on the phone. (yeixio/toskar-apps#514)
+
+### Security
+
+- The llama.cpp download is checked against the checksum GitHub publishes
+  for it before it replaces anything (#1209).
+- Tools from an MCP server added by web address ask before they run until
+  you allow them, even ones the server says only read (#1209).
+
 ## [1.14.2] - 2026-11-23
 
 ### Fixed
