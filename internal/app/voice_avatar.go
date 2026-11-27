@@ -11,7 +11,25 @@ const settingVoiceAvatar = "voice_avatar"
 // Keep this list in step with web/src/features/chat/avatars.ts.
 var VoiceAvatars = []string{"ratatoskr", "pebble", "lumen"}
 
-// validAvatar reports whether id is no character ("") or a built-in one.
+// DefaultVoiceAvatar is the character everyone sees until they choose:
+// Ratatoskr, Toskar's own mascot. NoVoiceAvatar is the choice of none, the
+// plain circle; "" from a client means the same.
+const (
+	DefaultVoiceAvatar = "ratatoskr"
+	NoVoiceAvatar      = "none"
+)
+
+// validAvatar reports whether id is no character ("" or "none") or a
+// built-in one.
 func validAvatar(id string) bool {
-	return id == "" || slices.Contains(VoiceAvatars, id)
+	return id == "" || id == NoVoiceAvatar || slices.Contains(VoiceAvatars, id)
+}
+
+// voiceAvatarOf is what a saved choice shows: the default until the person
+// chooses, and none once they turn it off.
+func voiceAvatarOf(saved string) string {
+	if saved == "" || !validAvatar(saved) {
+		return DefaultVoiceAvatar
+	}
+	return saved
 }

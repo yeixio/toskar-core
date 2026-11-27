@@ -1714,10 +1714,7 @@ func (a *App) settingsView(ctx context.Context) (contracts.SettingsView, error) 
 	uiLocale := a.personalString(ctx, "ui_locale", "")
 	suggestModels := a.personalString(ctx, "suggest_models", "true") != "false"
 	thinkingSound := a.personalString(ctx, "thinking_sound", "true") != "false"
-	voiceAvatar := a.personalString(ctx, settingVoiceAvatar, "")
-	if !validAvatar(voiceAvatar) {
-		voiceAvatar = ""
-	}
+	voiceAvatar := voiceAvatarOf(a.personalString(ctx, settingVoiceAvatar, ""))
 	assistantMode := a.personalString(ctx, "assistant_language_mode", replylang.ModeAuto)
 	assistantLanguage := a.personalString(ctx, "assistant_language", "")
 	digest, _ := a.Settings.GetString(ctx, settingDigest, "")
@@ -1950,7 +1947,12 @@ func (a *App) applySettingsPatch(ctx context.Context, patch map[string]any) erro
 	// Each person's own (#1369): the character they see in voice chat.
 	if v, ok := patch[settingVoiceAvatar].(string); ok {
 		if !validAvatar(v) {
-			return contracts.Errorf("INVALID_SETTING", map[string]any{"setting": settingVoiceAvatar, "value": v}, "voice_avatar is \"\" or one of %s", strings.Join(VoiceAvatars, ", "))
+			return contracts.Errorf("INVALID_SETTING", map[string]any{"setting": settingVoiceAvatar, "value": v}, "voice_avatar is \"none\" or one of %s", strings.Join(VoiceAvatars, ", "))
+		}
+		// "" turned it off before Ratatoskr was the default; saved as is,
+		// it would read as not chosen and bring him back.
+		if v == "" {
+			v = NoVoiceAvatar
 		}
 		if err := a.setPersonal(ctx, settingVoiceAvatar, v); err != nil {
 			return err

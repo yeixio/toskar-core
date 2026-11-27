@@ -1690,8 +1690,8 @@ type SettingsView struct {
 	// by default.
 	ThinkingSound bool `json:"thinking_sound"`
 	// VoiceAvatar is the character this person sees in voice chat (#1369,
-	// contract 1.130): "" for none (the default), or a built-in
-	// character's id, such as "ratatoskr".
+	// contract 1.130): a built-in character's id, "ratatoskr" until the
+	// person chooses (contract 1.135), or "none" for the plain circle.
 	VoiceAvatar string `json:"voice_avatar"`
 	// AssistantLanguageMode is the language answers are written in (§11,
 	// §30): "auto", the language the person writes in (the default); "app",
