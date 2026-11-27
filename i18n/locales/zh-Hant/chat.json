@@ -891,6 +891,9 @@
     "managedHintFits": "有空間時 Toskar 讓它保持就緒，圖片或其他模型需要記憶體時再釋放。",
     "managedHintBig": "它佔用記憶體較多，所以閒置時 Toskar 會釋放。休息後的第一次回覆要等它載入。",
     "later": "之後可以在這裡變更：",
-    "settings": "設定 › 模型與 AI"
+    "settings": "設定 › 模型與 AI",
+    "chosenAuto": "由 Auto 選擇",
+    "chosenProfile": "為 {{profile}} 設定檔選擇",
+    "change": "變更"
   }
 }

@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/yeixio/toskar-core/internal/auth"
+	"github.com/yeixio/toskar-core/internal/profiles"
 	"github.com/yeixio/toskar-core/pkg/contracts"
 )
 
@@ -107,10 +108,66 @@ func (a *App) mainModelView(ctx context.Context) *contracts.MainModelView {
 	if name == "" {
 		name = m.ID
 	}
-	return &contracts.MainModelView{
+	view := &contracts.MainModelView{
 		ModelID: m.ID, Name: name, MemoryBytes: m.MemoryNeeded, MemoryTotalBytes: total,
 		Fits: mainFits(m.MemoryNeeded, total), AlwaysRunning: a.alwaysRunning(ctx, m.ID),
 	}
+	if a.Profiles != nil {
+		if p, err := a.Profiles.Get(ctx, a.defaultProfileID(ctx)); err == nil {
+			view.ProfileID, view.ProfileName = p.ID, p.Name
+			view.Chosen = profiles.RoleModel(p, profiles.RoleFast) == m.ID
+		}
+	}
+	return view
+}
+
+// setMainChatModel makes modelID the main chat model: the Fast model of the
+// profile new chats use, which answers quick questions on Auto (#1481).
+// "" gives the choice back to Auto. When the main chat model is kept
+// running, the new one is kept running instead.
+func (a *App) setMainChatModel(ctx context.Context, modelID string) error {
+	if a.Profiles == nil || a.Models == nil {
+		return nil
+	}
+	if modelID != "" {
+		m, err := a.Models.Get(ctx, modelID)
+		if err != nil || !m.Installed || contracts.SupportRoleOf(m) != "" {
+			return contracts.Errorf("INVALID_SETTING", map[string]any{"setting": "main_chat_model", "value": modelID}, "%s isn't a chat model installed on this computer", modelID)
+		}
+	}
+	p, err := a.Profiles.Get(ctx, a.defaultProfileID(ctx))
+	if err != nil {
+		return err
+	}
+	roles := make([]contracts.ModelRole, 0, len(p.Roles)+1)
+	found := false
+	for _, r := range p.Roles {
+		if r.Role == profiles.RoleFast {
+			found = true
+			if modelID == "" && r.NodeID == "" && !r.Required {
+				continue
+			}
+			r.ModelID = modelID
+		}
+		roles = append(roles, r)
+	}
+	if !found && modelID != "" {
+		roles = append(roles, contracts.ModelRole{Role: profiles.RoleFast, ModelID: modelID})
+	}
+	p.Roles = roles
+	if err := a.Profiles.Update(ctx, p); err != nil {
+		return err
+	}
+	a.mainModel.mu.Lock()
+	a.mainModel.at = time.Time{}
+	a.mainModel.mu.Unlock()
+	switch a.mainReadyChoice(ctx) {
+	case "always":
+		return a.setMainReady(ctx, "always")
+	default:
+		go a.readyMainModel(context.WithoutCancel(ctx))
+	}
+	return nil
 }
 
 // setMainReady saves a choice. "always" keeps the main chat model running,

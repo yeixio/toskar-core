@@ -1583,6 +1583,8 @@ export interface SettingsPatch {
   voice_language?: string
   voice_smart_turn?: boolean
   main_model_ready?: 'always' | 'managed'
+  /** Makes a model the main chat model, the Fast model of the profile new chats use; "" gives the choice back to Auto (#1481, contract 1.134). */
+  main_chat_model?: string
   model_storage_limit_gb?: number
   save_chat_history?: boolean
   save_task_history?: boolean
@@ -3265,4 +3267,8 @@ export interface MainModelView {
   /** It needs at most half of this computer's memory, so Toskar keeps it ready when it manages it. */
   fits: boolean
   always_running: boolean
+  /** Someone chose it: it's the Fast model of profile_id, the profile new chats use. Otherwise Auto picked it (#1481, contract 1.134). */
+  chosen?: boolean
+  profile_id?: string
+  profile_name?: string
 }

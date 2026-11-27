@@ -891,6 +891,9 @@
     "managedHintFits": "余裕がある間は準備しておき、画像や別のモデルが必要とするときはメモリを空けます。",
     "managedHintBig": "メモリを多く使うため、使われていないときは Toskar が解放します。しばらくぶりの最初の返答は読み込みを待ちます。",
     "later": "あとで変更できます：",
-    "settings": "設定 › モデルとAI"
+    "settings": "設定 › モデルとAI",
+    "chosenAuto": "Auto が選択",
+    "chosenProfile": "{{profile}} プロファイル用に選択",
+    "change": "変更"
   }
 }

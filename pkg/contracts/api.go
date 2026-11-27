@@ -627,6 +627,12 @@ type MainModelView struct {
 	MemoryTotalBytes uint64 `json:"memory_total_bytes"`
 	Fits             bool   `json:"fits"`
 	AlwaysRunning    bool   `json:"always_running"`
+	// Chosen says someone chose it (the Fast model of ProfileID, the
+	// profile new chats use); otherwise Auto picked it. Set it with
+	// main_chat_model (#1481, contract 1.134).
+	Chosen      bool   `json:"chosen"`
+	ProfileID   string `json:"profile_id,omitempty"`
+	ProfileName string `json:"profile_name,omitempty"`
 }
 
 // ModelStopRequest stops a loaded instance.

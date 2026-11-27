@@ -616,6 +616,13 @@ export function ChatPage() {
   // Until an Admin chooses how the main chat model stays ready, chat asks (#1472).
   const mainModel = settingsQuery.data?.main_model
   const askModelReady = admin && role !== undefined && !!mainModel && (settingsQuery.data?.main_model_ready ?? '') === ''
+  const pickMainModel = useMutation({
+    mutationFn: (modelId: string) => api.updateSettings({ main_chat_model: modelId }),
+    onSuccess: (view) => {
+      queryClient.setQueryData(['settings'], view)
+      void queryClient.invalidateQueries({ queryKey: ['profiles'] })
+    },
+  })
   const chooseModelReady = useMutation({
     mutationFn: (choice: 'always' | 'managed') => api.updateSettings({ main_model_ready: choice }),
     onSuccess: (view) => {
@@ -2403,7 +2410,12 @@ export function ChatPage() {
 
           {askModelReady && mainModel ? (
             <div className="shrink-0 px-4">
-              <ModelReadyCard model={mainModel} busy={chooseModelReady.isPending} onChoose={(choice) => chooseModelReady.mutate(choice)} />
+              <ModelReadyCard
+                model={mainModel}
+                busy={chooseModelReady.isPending || pickMainModel.isPending}
+                onChoose={(choice) => chooseModelReady.mutate(choice)}
+                onPick={(modelId) => pickMainModel.mutate(modelId)}
+              />
             </div>
           ) : null}
 

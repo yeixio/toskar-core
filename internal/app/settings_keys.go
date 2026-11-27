@@ -25,6 +25,7 @@ var settingsPatchKeys = map[string]bool{
 	"keep_running_in_background": true,
 	"lan_api_enabled":            true,
 	"launch_at_login":            true,
+	"main_chat_model":            true,
 	"main_model_ready":           true,
 	"memory_enabled":             true,
 	"model_lifecycle":            true,

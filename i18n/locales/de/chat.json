@@ -937,6 +937,9 @@
     "managedHintFits": "Toskar hält es bereit, solange Platz ist, und gibt den Speicher frei, wenn ein Bild oder ein anderes Modell ihn braucht.",
     "managedHintBig": "Es braucht viel Speicher, daher gibt Toskar ihn im Leerlauf frei. Die erste Antwort nach einer Pause wartet, bis es geladen ist.",
     "later": "Du kannst das später ändern unter",
-    "settings": "Einstellungen › Modelle & KI"
+    "settings": "Einstellungen › Modelle & KI",
+    "chosenAuto": "Von Auto gewählt",
+    "chosenProfile": "Für das Profil {{profile}} gewählt",
+    "change": "Ändern"
   }
 }
