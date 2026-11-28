@@ -83,8 +83,18 @@ func WriteBundle(destPath string, opts Options) error {
 		}
 	}
 
+	// The bundle is written into the logs folder, so it and earlier
+	// bundles are left out: reading the zip being written grew it without
+	// end, 749 GB on one server (#1505).
+	dest, _ := filepath.Abs(destPath)
 	_ = addDirFiltered(zw, opts.Config.LogsDir, "logs", func(name string) bool {
 		lower := strings.ToLower(name)
+		if p, err := filepath.Abs(filepath.Join(opts.Config.LogsDir, name)); err == nil && p == dest {
+			return false
+		}
+		if strings.HasPrefix(lower, "toskar-diagnostics-") && strings.HasSuffix(lower, ".zip") {
+			return false
+		}
 		return !strings.Contains(lower, "secret") && !strings.Contains(lower, "key") && !strings.HasSuffix(lower, ".pem")
 	})
 
@@ -141,6 +151,23 @@ func addFile(zw *zip.Writer, src, name string) error {
 	return err
 }
 
+// addFileUpTo adds at most n bytes of src, the size it had when listed,
+// so a file that grows while it's read (a log being written) can't make
+// the bundle grow with it.
+func addFileUpTo(zw *zip.Writer, src, name string, n int64) error {
+	in, err := os.Open(src)
+	if err != nil {
+		return err
+	}
+	defer in.Close()
+	w, err := zw.Create(name)
+	if err != nil {
+		return err
+	}
+	_, err = io.Copy(w, io.LimitReader(in, n))
+	return err
+}
+
 func addDirFiltered(zw *zip.Writer, dir, prefix string, keep func(string) bool) error {
 	entries, err := os.ReadDir(dir)
 	if err != nil {
@@ -152,10 +179,10 @@ func addDirFiltered(zw *zip.Writer, dir, prefix string, keep func(string) bool) 
 		}
 		path := filepath.Join(dir, e.Name())
 		st, err := os.Stat(path)
-		if err != nil || st.Size() > 5<<20 {
+		if err != nil || !st.Mode().IsRegular() || st.Size() > 5<<20 {
 			continue
 		}
-		_ = addFile(zw, path, filepath.Join(prefix, e.Name()))
+		_ = addFileUpTo(zw, path, filepath.Join(prefix, e.Name()), st.Size())
 	}
 	return nil
 }
