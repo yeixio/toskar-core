@@ -648,12 +648,24 @@ func (r *AutomationRepo) ClearRuns(ctx context.Context, automationID string) (in
 	if _, err := r.Get(ctx, automationID); err != nil {
 		return 0, err
 	}
-	res, err := r.db.ExecContext(ctx, `DELETE FROM automation_runs WHERE automation_id = ? AND status IN (?, ?)`,
+	tx, err := r.db.BeginTx(ctx, nil)
+	if err != nil {
+		return 0, err
+	}
+	defer func() { _ = tx.Rollback() }()
+	res, err := tx.ExecContext(ctx, `DELETE FROM automation_runs WHERE automation_id = ? AND status IN (?, ?)`,
 		automationID, automations.RunSucceeded, automations.RunFailed)
 	if err != nil {
 		return 0, err
 	}
-	return res.RowsAffected()
+	n, err := res.RowsAffected()
+	if err != nil {
+		return 0, err
+	}
+	if err := refreshFailureState(ctx, tx, automationID); err != nil {
+		return 0, err
+	}
+	return n, tx.Commit()
 }
 
 // DeleteRun removes one finished run of an automation (#1335). A run that
@@ -669,7 +681,49 @@ func (r *AutomationRepo) DeleteRun(ctx context.Context, automationID, runID stri
 	if run.Status != automations.RunSucceeded && run.Status != automations.RunFailed {
 		return automations.ErrRunInProgress
 	}
-	_, err = r.db.ExecContext(ctx, `DELETE FROM automation_runs WHERE id = ? AND automation_id = ? AND status IN (?, ?)`,
-		runID, automationID, automations.RunSucceeded, automations.RunFailed)
-	return err
+	tx, err := r.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = tx.Rollback() }()
+	if _, err := tx.ExecContext(ctx, `DELETE FROM automation_runs WHERE id = ? AND automation_id = ? AND status IN (?, ?)`,
+		runID, automationID, automations.RunSucceeded, automations.RunFailed); err != nil {
+		return err
+	}
+	if err := refreshFailureState(ctx, tx, automationID); err != nil {
+		return err
+	}
+	return tx.Commit()
+}
+
+// refreshFailureState makes an automation's failure summary (its last error,
+// and the failures-in-a-row count that marks it as needing attention) match
+// the runs it still has, so cleared failed runs stop showing as failures.
+func refreshFailureState(ctx context.Context, tx *sql.Tx, automationID string) error {
+	automation, err := getAutomation(ctx, tx, automationID)
+	if err != nil {
+		return err
+	}
+	rows, err := tx.QueryContext(ctx, runSelect+` WHERE automation_id = ? AND status IN (?, ?) ORDER BY occurrence_at DESC`,
+		automationID, automations.RunSucceeded, automations.RunFailed)
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+	finished, err := scanRuns(rows)
+	if err != nil {
+		return err
+	}
+	failures := 0
+	for failures < len(finished) && finished[failures].Status == automations.RunFailed {
+		failures++
+	}
+	automation.ConsecutiveFailures = failures
+	if failures == 0 {
+		automation.LastError, automation.LastErrorCode, automation.LastErrorDetails = "", "", nil
+	} else {
+		latest := finished[0]
+		automation.LastError, automation.LastErrorCode, automation.LastErrorDetails = latest.Error, latest.ErrorCode, latest.ErrorDetails
+	}
+	return updateAutomation(ctx, tx, automation)
 }

@@ -402,7 +402,7 @@ function Detail({
     mutationFn: (runId: string) => api.deleteAutomationRun(detail.id, runId),
     onSuccess: (_, runId) => {
       setOlder({ ...pages, runs: pages.runs.filter((run) => run.id !== runId) })
-      void queryClient.invalidateQueries({ queryKey: ['automation'] })
+      refresh()
     },
   })
   return (
