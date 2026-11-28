@@ -87,3 +87,69 @@ func TestClearAutomationRuns(t *testing.T) {
 		t.Fatal("cleared a missing automation")
 	}
 }
+
+// Clearing failed runs also clears the automation's error and its failures
+// in a row, so it stops showing as failed or needing attention.
+func TestClearAutomationRunsClearsFailures(t *testing.T) {
+	db, err := store.Open(filepath.Join(t.TempDir(), "test.db"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer db.Close()
+	repo := repositories.NewAutomationRepo(db.SQL)
+	ctx := context.Background()
+	start := time.Date(2026, 11, 20, 8, 0, 0, 0, time.UTC)
+	a, err := repo.Create(ctx, automations.CreateInput{
+		ModelID: "model-a", Name: "Doorbell", Prompt: "Look at the door",
+		Schedule: automations.Schedule{Kind: automations.KindDaily, TimeZone: "UTC", Hour: 8},
+	}, start)
+	if err != nil {
+		t.Fatal(err)
+	}
+	run := func(at time.Time, ok bool, text string) automations.Run {
+		t.Helper()
+		r, claimed, err := repo.Claim(ctx, a.ID, at, at, time.Hour)
+		if err != nil || !claimed {
+			t.Fatalf("claim ok=%v err=%v", claimed, err)
+		}
+		if err := repo.MarkRunning(ctx, r.ID, at, time.Hour); err != nil {
+			t.Fatal(err)
+		}
+		if ok {
+			err = repo.CompleteRun(ctx, r.ID, automations.Execution{Text: "someone's there"}, at.Add(time.Minute))
+		} else {
+			err = repo.FailRun(ctx, r.ID, contracts.Failure{Text: text, Code: "AUTOMATION_FAILED"}, automations.Execution{}, at.Add(time.Minute))
+		}
+		if err != nil {
+			t.Fatal(err)
+		}
+		return r
+	}
+	check := func(when string, failures int, lastError string) {
+		t.Helper()
+		got, err := repo.Get(ctx, a.ID)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if got.ConsecutiveFailures != failures || got.LastError != lastError {
+			t.Fatalf("%s: failures=%d error=%q; want %d %q", when, got.ConsecutiveFailures, got.LastError, failures, lastError)
+		}
+	}
+	run(start.Add(1*time.Hour), true, "")
+	run(start.Add(2*time.Hour), false, "no gateway")
+	newest := run(start.Add(3*time.Hour), false, "still no gateway")
+	check("before", 2, "still no gateway")
+
+	if err := repo.DeleteRun(ctx, a.ID, newest.ID); err != nil {
+		t.Fatal(err)
+	}
+	check("after deleting the newest failure", 1, "no gateway")
+
+	if _, err := repo.ClearRuns(ctx, a.ID); err != nil {
+		t.Fatal(err)
+	}
+	check("after clearing", 0, "")
+	if got, _ := repo.Get(ctx, a.ID); got.LastErrorCode != "" || got.LastErrorDetails != nil {
+		t.Fatalf("error code %q details %v left after clearing", got.LastErrorCode, got.LastErrorDetails)
+	}
+}
