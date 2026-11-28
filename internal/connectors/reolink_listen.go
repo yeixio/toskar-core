@@ -159,7 +159,7 @@ func reolinkListen(ctx context.Context, cred Credential) (*Hearing, error) {
 			if detail == "" && err != nil {
 				detail = err.Error()
 			}
-			err := fmt.Errorf("reolink-cli stopped hearing %s: %s", t.name, detail)
+			err := withGatewayFailure(fmt.Errorf("reolink-cli stopped hearing %s: %s", t.name, detail), t.gateway)
 			h.fail(err)
 			// A stale gateway is restarted for the next visit.
 			if unreachable(err) && localGateway(t.gateway) {

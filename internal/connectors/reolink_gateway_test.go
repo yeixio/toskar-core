@@ -94,3 +94,49 @@ func TestReolinkRestartsAStaleGateway(t *testing.T) {
 }
 
 func must(b []byte, _ error) []byte { return b }
+
+// A service's PATH has neither reolink-cli's folder nor reolink-gateway in
+// it, so Toskar runs the reolink-gateway beside reolink-cli itself, and a
+// gateway that can't run says why with the visit's error instead of
+// reolink-cli's advice to start it by hand (#1498).
+func TestReolinkStartsTheGatewayBesideReolinkCLI(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("the fake reolink-cli is a shell script")
+	}
+	dir := t.TempDir()
+	cli := "#!/bin/sh\ncat > /dev/null\necho '{\"ok\":false,\"error\":\"gateway connect failed: Connection refused (os error 111). The gateway daemon isn'\"'\"'t running.\"}'\n"
+	if err := os.WriteFile(filepath.Join(dir, "reolink-cli"), []byte(cli), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	// The gateway records how it was run, then fails as one that can't run.
+	gw := "#!/bin/sh\necho \"$*|$PATH\" > \"" + dir + "/gateway\"\necho 'Error: Permission denied (os error 13)' >&2\nexit 1\n"
+	if err := os.WriteFile(filepath.Join(dir, "reolink-gateway"), []byte(gw), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	oldCLI, oldUp := reolinkCLI, gatewayUp
+	reolinkCLI = func() (string, error) { return filepath.Join(dir, "reolink-cli"), nil }
+	gatewayUp = func(string) bool { return false }
+	t.Cleanup(func() {
+		reolinkCLI, gatewayUp = oldCLI, oldUp
+		gateway.mu.Lock()
+		gateway.failed = nil
+		gateway.mu.Unlock()
+	})
+	t.Setenv("PATH", "/usr/bin:/bin")
+
+	door := reolinktest.New(false)
+	defer door.Close()
+	m := reolinkManager(t)
+	ctx := context.Background()
+	if _, err := m.Connect(ctx, "reolink", map[string]string{"url": door.URL, "username": "admin", "password": door.Password}); err != nil {
+		t.Fatal(err)
+	}
+	err := m.Talk(ctx, "reolink", ReolinkCamera, make([]int16, ReolinkTalkRate/10), ReolinkTalkRate)
+	if err == nil || !strings.Contains(err.Error(), "Permission denied") || strings.Contains(err.Error(), "Start it with") {
+		t.Fatalf("talk error: %v", err)
+	}
+	ran := strings.TrimSpace(string(must(os.ReadFile(filepath.Join(dir, "gateway")))))
+	if ran != "127.0.0.1:9000|"+dir+":/usr/bin:/bin" {
+		t.Fatalf("gateway ran as %q", ran)
+	}
+}
