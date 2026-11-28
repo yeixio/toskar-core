@@ -186,7 +186,7 @@ func gatewayExited(path string, err error, output string) error {
 	if err != nil {
 		why = "it stopped (" + err.Error() + ")"
 	}
-	return fmt.Errorf("Toskar started reolink-cli's gateway (%s) but %s%s", path, why, outputNote(output))
+	return fmt.Errorf("started reolink-cli's gateway (%s) but %s%s", path, why, outputNote(output))
 }
 
 func outputNote(output string) string {
