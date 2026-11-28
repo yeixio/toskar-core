@@ -895,6 +895,8 @@
     "notHeard": "I didn't catch that. Ask again, or tap End.",
     "more": "The answer stopped there. Ask again to hear the rest.",
     "keepGoing": "Want me to keep going?",
+    "waitFillers": "Umm, just a sec.|Hmm, let me think.|Still on it.",
+    "lookFillers": "Hmm, let me look that up.|Not sure, let me check on that.|One sec, I'll look that up.",
     "yesWords": "yes, yeah, yep, yup, sure, okay, ok, go on, go ahead, keep going, continue, more",
     "noWords": "no, nope, stop, enough, that's enough, that's all, I'm good",
     "askBetter": "For a better answer, ask again on your phone once you're parked.",

@@ -806,6 +806,8 @@
     "notHeard": "Non ho capito. Chiedi di nuovo o tocca Termina.",
     "more": "La risposta si è fermata qui. Chiedi di nuovo per sentire il resto.",
     "keepGoing": "Vuoi che continui?",
+    "waitFillers": "Ehm, un secondo.|Mmm, fammi pensare.|Ci sto ancora lavorando.",
+    "lookFillers": "Mmm, lo cerco subito.|Un attimo, controllo.",
     "yesWords": "sì, si, certo, ok, va bene, continua, vai avanti",
     "noWords": "no, basta, stop, fermati",
     "askBetter": "Per una risposta migliore, chiedi di nuovo sul telefono quando hai parcheggiato.",

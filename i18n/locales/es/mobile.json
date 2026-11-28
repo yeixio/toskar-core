@@ -806,6 +806,8 @@
     "notHeard": "No te he entendido. Pregunta de nuevo o toca Terminar.",
     "more": "La respuesta se detuvo ahí. Vuelve a preguntar para oír el resto.",
     "keepGoing": "¿Quieres que siga?",
+    "waitFillers": "Eh, un segundo.|Mmm, déjame pensar.|Sigo en ello.",
+    "lookFillers": "Mmm, déjame buscarlo.|Un momento, lo busco.",
     "yesWords": "sí, si, claro, vale, ok, sigue, continúa, adelante",
     "noWords": "no, para, basta, suficiente, ya está",
     "askBetter": "Para una respuesta mejor, vuelve a preguntar en tu teléfono cuando hayas aparcado.",

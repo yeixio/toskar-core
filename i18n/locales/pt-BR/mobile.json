@@ -806,6 +806,8 @@
     "notHeard": "Não entendi. Pergunte de novo ou toque em Encerrar.",
     "more": "A resposta parou aí. Pergunte de novo para ouvir o resto.",
     "keepGoing": "Quer que eu continue?",
+    "waitFillers": "Hum, só um segundo.|Hum, deixa eu pensar.|Ainda estou nisso.",
+    "lookFillers": "Hum, deixa eu procurar.|Um momento, vou ver isso.",
     "yesWords": "sim, claro, ok, pode, continua, continue, pode continuar",
     "noWords": "não, nao, para, pare, chega, basta",
     "askBetter": "Para uma resposta melhor, pergunte de novo no seu telefone quando estiver estacionado.",
