@@ -21,9 +21,6 @@ Changes waiting for the next release are in [changes/unreleased/](changes/unrele
   itself even when reolink-cli's folder isn't on the service's PATH, and when
   the gateway can't start, the visit says why instead of asking you to start
   it by hand (#1498).
-- A diagnostics bundle no longer packs itself or earlier bundles. Saved in
-  the logs folder it zips, one grew without end and filled a server's disk
-  (#1505).
 
 ## [1.15.2] - 2026-11-27
 
