@@ -806,6 +806,8 @@
     "notHeard": "Je n’ai pas compris. Redemandez ou touchez Terminer.",
     "more": "La réponse s'est arrêtée là. Redemandez pour entendre la suite.",
     "keepGoing": "Je continue ?",
+    "waitFillers": "Euh, une seconde.|Hum, laisse-moi réfléchir.|Je suis toujours dessus.",
+    "lookFillers": "Hum, je regarde ça.|Un instant, je cherche.",
     "yesWords": "oui, ouais, d'accord, ok, continue, continuez, vas-y, allez-y",
     "noWords": "non, stop, arrête, arrêtez, ça suffit",
     "askBetter": "Pour une meilleure réponse, redemandez sur votre téléphone une fois garé.",

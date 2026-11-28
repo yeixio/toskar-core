@@ -797,6 +797,8 @@
     "notHeard": "Das habe ich nicht verstanden. Frag noch einmal oder tippe auf Beenden.",
     "more": "Die Antwort hat dort aufgehört. Frag noch einmal, um den Rest zu hören.",
     "keepGoing": "Soll ich weitermachen?",
+    "waitFillers": "Ähm, einen Moment.|Hm, lass mich überlegen.|Ich bin noch dran.",
+    "lookFillers": "Hm, ich schau mal nach.|Moment, ich suche das kurz.",
     "yesWords": "ja, klar, okay, ok, weiter, mach weiter, gerne",
     "noWords": "nein, stopp, stop, genug, das reicht",
     "askBetter": "Für eine bessere Antwort frag noch einmal auf deinem Telefon, sobald du parkst.",
