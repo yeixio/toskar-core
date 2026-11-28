@@ -191,6 +191,19 @@ func reolinkTalk(ctx context.Context, cred Credential, samples []int16, rate int
 		// Said plainly, in the App language, and not retried (#1340).
 		return contracts.NewError("CAMERA_SPEAKER_UNREACHABLE", nil, err)
 	}
+	return withGatewayFailure(err, t.gateway)
+}
+
+// withGatewayFailure says, with reolink-cli finding no gateway, why Toskar
+// couldn't start it, instead of reolink-cli's advice to start it by hand,
+// which a person reading the visit can't act on (#1498).
+func withGatewayFailure(err error, addr string) error {
+	if !notRunning(err) || !localGateway(addr) {
+		return err
+	}
+	if why := gatewayFailure(); why != nil {
+		return why
+	}
 	return err
 }
 

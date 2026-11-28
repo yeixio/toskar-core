@@ -2,8 +2,13 @@ package connectors
 
 import (
 	"context"
+	"fmt"
+	"log/slog"
 	"net"
+	"os"
 	"os/exec"
+	"path/filepath"
+	"runtime"
 	"strings"
 	"sync"
 	"time"
@@ -18,8 +23,9 @@ import (
 // reached, then tries again.
 
 var gateway struct {
-	mu  sync.Mutex
-	cmd *exec.Cmd
+	mu     sync.Mutex
+	cmd    *exec.Cmd
+	failed error // why it last didn't start, said with the visit's error
 }
 
 // gatewayUp reports something listening at addr. Tests replace it.
@@ -81,17 +87,154 @@ func ensureGateway(ctx context.Context, bin, addr string, restart bool) {
 	}
 	// It outlives the request that needed it, and runs until Toskar stops
 	// or it's restarted.
-	cmd := exec.Command(bin, "gateway", "start", "--addr", addr)
+	cmd := gatewayCommand(bin, addr)
+	out := &tailBuffer{max: 2048}
+	cmd.Stdout, cmd.Stderr = out, out
 	if err := cmd.Start(); err != nil {
+		gateway.failed = fmt.Errorf("couldn't start reolink-cli's gateway: %w", err)
+		slog.Warn("reolink gateway didn't start", "addr", addr, "command", cmd.Path, "error", err)
 		return
 	}
 	gateway.cmd = cmd
-	go func() { _ = cmd.Wait() }()
+	exited := make(chan error, 1)
+	go func() { exited <- cmd.Wait() }()
 	deadline := time.Now().Add(5 * time.Second)
 	for time.Now().Before(deadline) && ctx.Err() == nil {
 		if gatewayUp(addr) {
+			gateway.failed = nil
 			return
 		}
-		time.Sleep(100 * time.Millisecond)
+		select {
+		case err := <-exited:
+			// It stopped at once, as it does when it can't run: say why,
+			// in the log and in what the visit reports (#1498).
+			gateway.cmd = nil
+			gateway.failed = gatewayExited(cmd.Path, err, out.String())
+			slog.Warn("reolink gateway stopped as it started", "addr", addr, "command", cmd.Path, "error", err, "output", out.String())
+			return
+		case <-time.After(100 * time.Millisecond):
+		}
 	}
+	if ctx.Err() == nil {
+		gateway.failed = fmt.Errorf("reolink-cli's gateway didn't start listening at %s within 5 seconds%s", addr, outputNote(out.String()))
+		slog.Warn("reolink gateway isn't listening", "addr", addr, "command", cmd.Path, "output", out.String())
+	}
+}
+
+// gatewayCommand starts the gateway at addr. reolink-cli's `gateway start`
+// runs reolink-gateway, which its installer puts beside it; a service such
+// as Toskar's on Linux runs with a PATH that has neither in it (#1498). So
+// Toskar runs reolink-gateway itself when it's beside reolink-cli or on the
+// PATH, and otherwise asks reolink-cli, with reolink-cli's folder on the
+// PATH either way.
+func gatewayCommand(bin, addr string) *exec.Cmd {
+	dir := filepath.Dir(bin)
+	var cmd *exec.Cmd
+	if gw := gatewayBinary(dir); gw != "" {
+		cmd = exec.Command(gw, addr)
+	} else {
+		cmd = exec.Command(bin, "gateway", "start", "--addr", addr)
+	}
+	cmd.Env = withPath(os.Environ(), dir)
+	return cmd
+}
+
+// gatewayBinary finds reolink-gateway beside reolink-cli, then on the PATH.
+func gatewayBinary(dir string) string {
+	name := "reolink-gateway"
+	if runtime.GOOS == "windows" {
+		name += ".exe"
+	}
+	if p := filepath.Join(dir, name); isFile(p) {
+		return p
+	}
+	if p, err := exec.LookPath("reolink-gateway"); err == nil {
+		return p
+	}
+	return ""
+}
+
+func isFile(p string) bool {
+	st, err := os.Stat(p)
+	return err == nil && !st.IsDir()
+}
+
+// withPath puts dir first on env's PATH.
+func withPath(env []string, dir string) []string {
+	out := make([]string, 0, len(env)+1)
+	found := false
+	for _, kv := range env {
+		if k, v, ok := strings.Cut(kv, "="); ok && strings.EqualFold(k, "PATH") && !found {
+			found = true
+			if v == "" {
+				kv = k + "=" + dir
+			} else {
+				kv = k + "=" + dir + string(os.PathListSeparator) + v
+			}
+		}
+		out = append(out, kv)
+	}
+	if !found {
+		out = append(out, "PATH="+dir)
+	}
+	return out
+}
+
+// gatewayExited says why the gateway stopped as it started.
+func gatewayExited(path string, err error, output string) error {
+	why := "it stopped"
+	if err != nil {
+		why = "it stopped (" + err.Error() + ")"
+	}
+	return fmt.Errorf("Toskar started reolink-cli's gateway (%s) but %s%s", path, why, outputNote(output))
+}
+
+func outputNote(output string) string {
+	output = strings.TrimSpace(output)
+	if output == "" {
+		return ""
+	}
+	if i := strings.LastIndexByte(output, '\n'); i >= 0 && len(output)-i > 8 {
+		output = output[i+1:]
+	}
+	return ": " + output
+}
+
+// gatewayFailure is why Toskar last couldn't start the gateway, or nil.
+func gatewayFailure() error {
+	gateway.mu.Lock()
+	defer gateway.mu.Unlock()
+	return gateway.failed
+}
+
+// notRunning reports reolink-cli finding no gateway listening.
+func notRunning(err error) bool {
+	if err == nil {
+		return false
+	}
+	s := strings.ToLower(err.Error())
+	return strings.Contains(s, "gateway connect failed") || strings.Contains(s, "gateway daemon isn't running")
+}
+
+// tailBuffer keeps the last max bytes written to it.
+type tailBuffer struct {
+	mu  sync.Mutex
+	max int
+	b   []byte
+}
+
+func (t *tailBuffer) Write(p []byte) (int, error) {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	t.b = append(t.b, p...)
+	if len(t.b) > t.max {
+		t.b = append([]byte(nil), t.b[len(t.b)-t.max:]...)
+	}
+	return len(p), nil
+}
+
+func (t *tailBuffer) String() string {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	return string(t.b)
 }
