@@ -8,6 +8,20 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Thi
 
 Changes waiting for the next release are in [changes/unreleased/](changes/unreleased/), one file per pull request. `scripts/changelog.py preview` shows them together, and `scripts/changelog.py release <version>` writes them here when the release is cut.
 
+## [1.15.3] - 2026-11-28
+
+### Fixed
+
+- CarPlay keeps one voice through a whole answer, keeps answering while the
+  phone is locked, waits longer before deciding a long question is finished,
+  and plays voice mode's thinking bubbles and waiting phrases instead of
+  saying "Thinking…". (yeixio/toskar-apps#537, #1503)
+- Talking with visitors through a Reolink doorbell or camera works again when
+  Toskar runs as a service on Linux. Toskar now starts reolink-cli's gateway
+  itself even when reolink-cli's folder isn't on the service's PATH, and when
+  the gateway can't start, the visit says why instead of asking you to start
+  it by hand (#1498).
+
 ## [1.15.2] - 2026-11-27
 
 ### Fixed
